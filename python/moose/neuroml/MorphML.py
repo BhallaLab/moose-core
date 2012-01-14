@@ -1,11 +1,11 @@
 from xml.etree import ElementTree as ET
 import string
-import moose
-import sys, math
+import sys
+import math
 from os import path
-
-from ChannelML import *
-from moose.neuroml import utils
+import moose
+from moose import utils
+from ChannelML import ChannelML
 
 class MorphML():
 
@@ -104,7 +104,7 @@ class MorphML():
             moosesegment.z = float(distal.attrib["z"])*self.length_factor
             ## proximal tag may not be present, so take only distal diameter
             moosesegment.diameter = float(distal.attrib["diameter"]) * self.length_factor
-            moosesegment.length = sqrt((moosesegment.x-moosesegment.x0)**2+\
+            moosesegment.length = math.sqrt((moosesegment.x-moosesegment.x0)**2+\
                 (moosesegment.y-moosesegment.y0)**2+(moosesegment.z-moosesegment.z0)**2)
             if moosesegment.length == 0.0:          # neuroconstruct seems to set length=0 for round soma!
                 moosesegment.length = moosesegment.diameter
@@ -261,22 +261,25 @@ class MorphML():
                     model_path = path.join(self.model_dir, model_filename)
                     cmlR.readChannelMLFromFile(model_path)
                 neutralObj = moose.Neutral("/library/"+mechanismname)
-                if 'Conc' in neutralObj.className: # Ion concentration pool
+                if 'Conc' == neutralObj.className: # Ion concentration pool
                     libcaconc = moose.CaConc("/library/"+mechanismname)
                     ## deep copies the library caconc under the compartment
-                    caconc = moose.CaConc(libcaconc,mechanismname,compartment)
+                    channel = moose.copy(libcaconc.id_,compartment.id_,mechanismname)
+                    channel = moose.CaConc(channel)
                     ## CaConc connections are made later using connect_CaConc()
                     ## Later, when calling connect_CaConc,
                     ## B is set for caconc based on thickness of Ca shell and compartment l and dia.
-                elif 'HHChannel2D' in neutralObj.className : ## HHChannel2D
+                elif 'HHChannel2D' == neutralObj.className : ## HHChannel2D
                     libchannel = moose.HHChannel2D("/library/"+mechanismname)
                     ## deep copies the library channel under the compartment
-                    channel = moose.HHChannel2D(libchannel,mechanismname,compartment)
+                    channel = moose.copy(libchannel.id_,compartment.id_,mechanismname)
+                    channel = moose.HHChannel2D(channel)
                     channel.connect('channel',compartment,'channel')
-                elif 'HHChannel' in neutralObj.className : ## HHChannel
+                elif 'HHChannel' == neutralObj.className : ## HHChannel
                     libchannel = moose.HHChannel("/library/"+mechanismname)
                     ## deep copies the library channel under the compartment
-                    channel = moose.HHChannel(libchannel,mechanismname,compartment)
+                    channel = moose.copy(libchannel.id_,compartment.id_,mechanismname)
+                    channel = moose.HHChannel(channel)
                     channel.connect('channel',compartment,'channel')
             ## if mechanism is present in compartment, just wrap it
             else:

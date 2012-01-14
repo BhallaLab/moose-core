@@ -1,9 +1,10 @@
 from xml.etree import ElementTree as ET
-from ChannelML import *
-from MorphML import *
-from NetworkML import *
+from ChannelML import ChannelML
+from MorphML import MorphML
+from NetworkML import NetworkML
 import string
 import moose
+from moose.neuroml.utils import *
 import sys
 from os import path
 
