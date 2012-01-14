@@ -12,6 +12,7 @@ class NetworkML():
         self.cellDictBySegmentId={}
         self.cellDictByCableId={}
         self.nml_params = nml_params
+        self.model_dir = nml_params['model_dir']
 
     def readNetworkMLFromFile(self,filename,cellSegmentDict,params={}):
         """ 
@@ -70,6 +71,7 @@ class NetworkML():
                 Vfactor = 1.0
                 Tfactor = 1.0
                 Ifactor = 1.0
+            '''
             for inputelem in inputs.findall(".//{"+nml_ns+"}input"):
                 inputname = inputelem.attrib['name']
                 pulseinput = inputelem.find(".//{"+nml_ns+"}pulse_input")
@@ -106,6 +108,7 @@ class NetworkML():
                             self.cellSegmentDict[cell_name][segment_id][0]
                         compartment = moose.Compartment(segment_path)
                         iclamp.connect('outputSrc',compartment,'injectMsg')
+            '''
 
     def createPopulations(self):
         self.populationDict = {}
@@ -116,9 +119,23 @@ class NetworkML():
             ## if channel does not exist in library load it from xml file
             if not moose.exists('/library/'+cellname):
                 mmlR = MorphML(self.nml_params)
-                cellDict = mmlR.readMorphMLFromFile(cellname+'.morph.xml')
+                model_filenames = (cellname+'.xml', cellname+'.morph.xml')
+                success = False
+                for model_filename in model_filenames:
+                    model_path = path.join(self.model_dir, model_filename)
+                    try:
+                        cellDict = mmlR.readMorphMLFromFile(model_path)
+                        success = True
+                    except IOError:
+                        pass
+                if not success:
+                    raise IOError(
+                        'For cell {0}: files {1} not found in {2}.'.format(
+                            cellname, model_filenames, self.model_dir
+                        )
+                    )
                 self.cellSegmentDict.update(cellDict)
-            libcell = moose.Cell('/library/'+cellname)
+            libcell = moose.Neutral('/library/'+cellname)
             self.populationDict[populationname] = (cellname,{})
             for instance in population.findall(".//{"+nml_ns+"}instance"):
                 instanceid = instance.attrib['id']
@@ -130,7 +147,7 @@ class NetworkML():
                 else:
                     zrotation = 0
                 ## deep copies the library cell to an instance
-                cell = moose.Cell(libcell,"/"+populationname+"_"+instanceid)
+                cell = moose.Neutral(libcell,"/"+populationname+"_"+instanceid)
                 self.populationDict[populationname][1][int(instanceid)]=cell
                 x = float(location.attrib['x'])*self.length_factor
                 y = float(location.attrib['y'])*self.length_factor
@@ -138,7 +155,7 @@ class NetworkML():
                 self.translate_rotate(cell,x,y,z,zrotation)
                 
     def translate_rotate(self,obj,x,y,z,ztheta): # recursively translate all compartments under obj
-        for childId in obj.children():
+        for childId in obj.children:
             childobj = moose.Neutral(childId)
             if childobj.className in ['Compartment','SymCompartment']: # if childobj is a compartment or symcompartment translate, else skip it
                 child = moose.Compartment(childId) # SymCompartment inherits from Compartment, so this is fine for both Compartment and SymCompartment
@@ -156,7 +173,7 @@ class NetworkML():
                 child.x = x1new + x
                 child.y = y1new + y
                 child.z += z
-            if len(childobj.children())>0:
+            if len(childobj.children)>0:
                 self.translate_rotate(childobj,x,y,z,ztheta) # recursive translation+rotation
 
     def createProjections(self):
