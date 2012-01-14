@@ -2,6 +2,7 @@ from xml.etree import ElementTree as ET
 import string
 import moose
 import sys, math
+from os import path
 
 from ChannelML import *
 from moose.neuroml import utils
@@ -16,6 +17,7 @@ class MorphML():
         self.cellDictBySegmentId={}
         self.cellDictByCableId={}
         self.nml_params = nml_params
+        self.model_dir = nml_params['model_dir']
 
     def readMorphMLFromFile(self,filename,params={}):
         """
@@ -255,7 +257,9 @@ class MorphML():
                 ## if channel does not exist in library load it from xml file
                 if not moose.exists("/library/"+mechanismname):
                     cmlR = ChannelML(self.nml_params)
-                    cmlR.readChannelMLFromFile(mechanismname+'.xml')
+                    model_filename = mechanismname+'.xml'
+                    model_path = path.join(self.model_dir, model_filename)
+                    cmlR.readChannelMLFromFile(model_path)
                 neutralObj = moose.Neutral("/library/"+mechanismname)
                 if 'Conc' in neutralObj.className: # Ion concentration pool
                     libcaconc = moose.CaConc("/library/"+mechanismname)
