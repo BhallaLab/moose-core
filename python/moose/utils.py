@@ -26,6 +26,7 @@ import string
 import os
 import math
 import moose as moose__
+
 ## for Ca Pool
 #FARADAY = 96154.0 # Coulombs # from cadecay.mod : 1/(2*96154.0) = 5.2e-6 which is the Book of Genesis / readcell value
 FARADAY = 96485.3415 # Coulombs/mol # from Wikipedia
@@ -531,10 +532,9 @@ def connect_CaConc(compartment_list):
      Ca channels should have an extra field called 'ion' defined and set in MOOSE.
      Ca dependent channels like KCa should have an extra field called 'ionDependency' defined and set in MOOSE.
      Call this only after instantiating cell so that all channels and pools have been created. """
-    context = moose__.PyMooseBase.getContext()
     for compartment in compartment_list:
         caconc = None
-        for child in compartment.getChildren(compartment.id):
+        for child in compartment.children:
             neutralwrap = moose__.Neutral(child)
             if neutralwrap.className == 'CaConc':
                 caconc = moose__.CaConc(child)
