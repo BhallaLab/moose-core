@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Jan 12 14:09:31 2012 (+0530)
+// Last-Updated: Mon Jan 16 01:15:52 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 4530
+//     Update #: 4569
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -400,21 +400,27 @@ extern "C" {
         // If object does not exist, create new
         if ((self->id_ == Id()) && (trimmed_path != "/") && (trimmed_path != "/root")){
             string parent_path;
-            if (trimmed_path[0] != '/'){
-                parent_path = getShell().getCwe().path();
-            }
-            size_t pos = trimmed_path.rfind("/");
             string name;
+            size_t pos = trimmed_path.rfind("/");
             if (pos != string::npos){
                 name = trimmed_path.substr(pos+1);
-                if (parent_path.length() > 0 && parent_path.at(parent_path.length() - 1) != '/'){
-                    parent_path += "/";
-                }
-                parent_path += trimmed_path.substr(0, pos);
+                parent_path = trimmed_path.substr(0, pos);
             } else {
                 name = trimmed_path;
             }
+            if (trimmed_path[0] != '/'){
+                parent_path = getShell().getCwe().path() + parent_path;
+            } else if (parent_path.empty()){
+                parent_path = "/";
+            }
+                
             Id parent_id(parent_path);
+            if (parent_id == Id() && parent_path != "/" && parent_path != "/root") {
+                string message = "Parent element does not exist: ";
+                message += parent_path;
+                PyErr_SetString(PyExc_ValueError, message.c_str());
+                return -1;
+            }
             self->id_ = getShell().doCreate(string(type), parent_id, string(name), vector<int>(vec_dims));
         } 
         return 0;            
@@ -1528,7 +1534,7 @@ extern "C" {
         if (!PyArg_ParseTuple(args, "s", &path)){
             return NULL;
         }
-        return Py_BuildValue("i", Id(path) != Id());
+        return Py_BuildValue("i", Id(path) != Id() || string(path) == "/" || string(path) == "/root");
     }
     
     static PyObject * _pymoose_loadModel(PyObject * dummy, PyObject * args)
