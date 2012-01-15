@@ -261,7 +261,7 @@ class MorphML():
                     model_path = path.join(self.model_dir, model_filename)
                     cmlR.readChannelMLFromFile(model_path)
                 neutralObj = moose.Neutral("/library/"+mechanismname)
-                if 'Conc' == neutralObj.className: # Ion concentration pool
+                if 'CaConc' == neutralObj.className: # Ion concentration pool
                     libcaconc = moose.CaConc("/library/"+mechanismname)
                     ## deep copies the library caconc under the compartment
                     channel = moose.copy(libcaconc.id_,compartment.id_,mechanismname)
@@ -284,11 +284,11 @@ class MorphML():
             ## if mechanism is present in compartment, just wrap it
             else:
                 neutralObj = moose.Neutral(compartment.path+'/'+mechanismname)
-                if 'Conc' in neutralObj.className: # Ion concentration pool
+                if 'CaConc' == neutralObj.className: # Ion concentration pool
                     caconc = moose.CaConc(compartment.path+'/'+mechanismname) # wraps existing channel
-                elif 'HHChannel2D' in neutralObj.className : ## HHChannel2D
+                elif 'HHChannel2D' == neutralObj.className : ## HHChannel2D
                     channel = moose.HHChannel2D(compartment.path+'/'+mechanismname) # wraps existing channel
-                elif 'HHChannel' in neutralObj.className : ## HHChannel
+                elif 'HHChannel' == neutralObj.className : ## HHChannel
                     channel = moose.HHChannel(compartment.path+'/'+mechanismname) # wraps existing channel
             if name == 'Gbar':
                 channel.Gbar = value*math.pi*compartment.diameter*compartment.length
