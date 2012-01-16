@@ -1480,7 +1480,7 @@ extern "C" {
     {
         char * path, * field;
         unsigned int tick;
-        if(!PyArg_ParseTuple(args, "ssI:_pymoose_useClock", &path, &field, &tick)){
+        if(!PyArg_ParseTuple(args, "Iss:_pymoose_useClock", &tick, &path, &field)){
             return NULL;
         }
         getShell().doUseClock(string(path), string(field), tick);
