@@ -168,12 +168,20 @@ class Qinfo
 		/**
 		 * Adds an existing queue entry into the structuralQ, for later
 		 * execution when it is safe to do so.
-		 * This is now thread-safe, has a mutex in it.
 		 * Returns true if it added the entry.
 		 * Returns false if it was in the Qinfo::clearStructuralQ function
 		 * and wants the calling function to actually operate on the queue.
 		 */
 		bool addToStructuralQ() const;
+
+		/**
+		 * Same as Qinfo::addToStructuralQ(), with the addition of a 
+		 * mutex check
+		 * so that this call can be made from any worker thread.
+		 * Designed to be used by SimManager and other objects that
+		 * manipulate the structure of the simulation.
+		 */
+		bool protectedAddToStructuralQ() const;
 
 		/**
 		 * Locks Qmutex if multithreaded and on thread 0
@@ -475,6 +483,9 @@ class Qinfo
 		 */
 		static pthread_mutex_t* qMutex_;
 		static pthread_cond_t* qCond_;
+
+		// Another mutex for the structural queue
+		static pthread_mutex_t* sqMutex_;
 
 		static bool waiting_;
 

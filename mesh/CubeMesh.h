@@ -98,7 +98,23 @@ class CubeMesh: public ChemMesh
 		unsigned int innerGetNumEntries() const;
 		/// Inherited virtual func.
 		void innerSetNumEntries( unsigned int n );
-		
+			
+		void innerHandleRequestMeshStats(
+			const Eref& e, const Qinfo* q,
+			const SrcFinfo2< unsigned int, vector< double > >*
+				meshStatsFinfo
+		);
+
+		void innerHandleNodeInfo(
+			const Eref& e, const Qinfo* q, 
+			const SrcFinfo4< 
+				vector< unsigned int >, 
+				vector< unsigned int >, 
+				vector< unsigned int >, 
+				vector< unsigned int > 
+			>* meshSplitFinfo,
+			unsigned int numNodes, unsigned int numThreads );
+
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////

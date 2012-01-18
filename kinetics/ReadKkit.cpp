@@ -129,7 +129,9 @@ Id ReadKkit::read(
 	convertParametersToConcUnits();
 
 	s->setCwe( base );
-	sm->build( base.eref(), 0, method );
+	Qinfo q;
+	q.setThreadNum( ScriptThreadNum );
+	sm->build( base.eref(), &q, method );
 	// SetGet1< string >::set( baseId_, "build", method );
 	/*
 	if ( solverClass == "gsl" || solverClass == "Stoich" )

@@ -28,6 +28,7 @@ class Stoich
 		string getPath( const Eref& e, const Qinfo* q ) const;
 
 		unsigned int getNumMeshEntries() const;
+		double getEstimatedDt() const;
 
 		Port* getPort( unsigned int i );
 		unsigned int getNumPorts() const;

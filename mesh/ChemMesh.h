@@ -45,7 +45,28 @@ class ChemMesh
 		 * This function is specialized in each derived class.
 		 */
 		void buildDefaultMesh( double size, unsigned int numEntries );
-		virtual void innerBuildDefaultMesh( double size, unsigned int numEntries ) = 0;
+		virtual void innerBuildDefaultMesh( 
+			double size, unsigned int numEntries ) = 0;
+
+		void handleRequestMeshStats( const Eref& e, const Qinfo* q );
+		virtual void innerHandleRequestMeshStats(
+			const Eref& e, const Qinfo* q,
+			const SrcFinfo2< unsigned int, vector< double > >*
+				meshStatsFinfo
+		) = 0;
+
+		void handleNodeInfo( const Eref& e, const Qinfo* q, 
+			unsigned int numNodes, unsigned int numThreads );
+		virtual void innerHandleNodeInfo(
+			const Eref& e, const Qinfo* q, 
+			const SrcFinfo4< 
+				vector< unsigned int >, 
+				vector< unsigned int >, 
+				vector< unsigned int >, 
+				vector< unsigned int > 
+			>* meshSplitFinfo,
+			unsigned int numNodes, unsigned int numThreads ) = 0;
+
 
 		//////////////////////////////////////////////////////////////////
 		// FieldElementFinfo stuff for MeshEntry lookup
