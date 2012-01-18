@@ -16690,6 +16690,86 @@ This is now working for the original model, but I've run into problems due to
 the earlier hack
 for changing volumes. The correct way to do this is to have the stoich and the
 Mesh/meshEntries talk to each other much as the chemical system does.
+Or perhaps the SimManager needs to talk to the Mesh.
 
 For now, patch up the regression test and move on.
 
+Checkin 3252.
+
+
+============================================================================
+15 Jan 2012
+Designing a message from ChemMesh to the SimManager. This needs to
+indicate 
+	- # of voxels
+	- Size(s) of voxels
+	- Proposed node partitioning? Or is the the job of SimManager?
+		Seems that SimManager should do this. It knows more about
+		the rest of the model, and the required solvers.
+		Problem is that the connectivity of voxels is known only to
+		the ChemMesh. Is there a way to abstract this so that the
+		SimManager can deal with the node balancing itself?
+
+Sequence of steps in voxel partitioning:
+1. SimManager gets # of nodes and # of threads per node from Shell.
+2. SimManager gets model size and likely dt from Stoich. Uses to estimate load.
+3. SimManager gets # of voxels from ChemMesh.
+4. SimManager also gets load info for other calculations. Puts all this together
+	to decide on partitioning.
+5. SimManager sends # of available nodes to ChemMesh. Mesh partitions voxels.
+6. Mesh sends back partitioning info and the tables of which blocks of data
+	need to be messaged between which nodes.
+7. SimManager across nodes sets up messaging between Stoichs
+
+============================================================================
+16 Jan 2012
+How to define node partitioning: 
+	- Simple brute force would just be a listing of nodes and mesh entries.
+	This is bad because it will need to be screened anyway to establish
+	transfer lists.
+	- Next would be through a list of boundaries for each node pair:
+		left node, right node, left mesh entries, right mesh entries.
+	This seems pretty general even if possibly tedious.
+	Could ask the ChemMesh to send back only those node pairs where current
+	node is present.
+	In practice, left (current) node is known. Need a vector for other node,
+	a vector for # of entries per boundary, and a catenated vector
+	of mesh entries for each node pair.
+	These data transfers are exemplars of when specific node-to-node
+	transmission is desirable. For now SimManager just grabs the Id and 
+	accesses directly.
+
+Now running into a number of setup ideas:
+	- Redo fastGet to take string field specifier, and not need existing Msg
+	- Implement a fastSet.
+	Point is to have a node-local, fast and general function that is
+	thread-local. Would be useful for things like model managers and
+	setup, where we want to do stuff locally.
+
+Current status: trying to compile. Need to get the various ChemMesh 
+subclasses to handle requestMeshStats and HandleNodeFinfo.
+============================================================================
+18 Jan 2012
+A few issues come up.
+1. Broad one: need clearer demarcation between messages meant to go 
+	locally, and those meant to go across nodes. Local 'set' messages
+	still need to go into a queue because of threading issues, unless
+	I can guarantee that it is on shell setup thread. Alternative is to
+	do hard pointer lookups on objects to do operations, which is both
+	ugly and thread-unsafe.
+2. What to do about meshing for un-solved molecules. Currently some ugly
+	shell functions deal with things, but I would like to move all this 
+	out of shell. 
+3. Execution of structural commands off-shell. To do this we need to have a 
+	safe way to execute ops on objects other than the shell. 
+	The Qinfo::addToStructuralQ will work on any object, but has to be 
+	called when the system is on a single thread.
+	- Could simply use a mutex to protect the structural Q.
+
+Tried setting it up with a mutex. It now clears unit tests but stalls
+(due to small dt, but it still runs) in the rtRunKkit regression test.
+This is likely due to not setting dts somewhere in the SimManager. Checkin
+so we can keep moving on.
+
+
+============================================================================
