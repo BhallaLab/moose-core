@@ -86,6 +86,14 @@ const Cinfo* Stoich::initCinfo()
 			&Stoich::getNumMeshEntries
 		);
 
+		static ReadOnlyValueFinfo< Stoich, double > estimatedDt(
+			"estimatedDt",
+			"Estimate of fastest (smallest) timescale in system."
+			"This is fallible because it depends on instantaneous concs,"
+			"which of course change over the course of the simulation.",
+			&Stoich::getEstimatedDt
+		);
+
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
@@ -127,6 +135,7 @@ const Cinfo* Stoich::initCinfo()
 		&useOneWay,		// Value
 		&nVarPools,		// Value
 		&numMeshEntries,		// Value
+		&estimatedDt,		// ReadOnlyValue
 		&compartmentVolume,	//Value
 		&path,			// Value
 		plugin(),		// SrcFinfo
@@ -284,6 +293,11 @@ string Stoich::getPath( const Eref& e, const Qinfo* q ) const
 unsigned int Stoich::getNumMeshEntries() const
 {
 	return numMeshEntries_;
+}
+
+double Stoich::getEstimatedDt() const
+{
+	return 1; // Dummy
 }
 
 unsigned int Stoich::getNumVarPools() const

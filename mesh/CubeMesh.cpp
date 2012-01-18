@@ -524,6 +524,34 @@ void CubeMesh::innerBuildDefaultMesh( double size, unsigned int numEntries )
 	setCoords( coords );
 }
 
+/// More inherited virtual funcs: request comes in for mesh stats
+void CubeMesh::innerHandleRequestMeshStats( const Eref& e, const Qinfo* q, 
+		const SrcFinfo2< unsigned int, vector< double > >* meshStatsFinfo )
+{
+	vector< double > meshSizes( dx_ * dy_ * dz_, 1 );
+	meshStatsFinfo->send( e, q->threadNum(), nx_ * ny_ * nz_, meshSizes );
+}
+
+/// Generate node decomposition of mesh, send it out along 
+/// meshSplitFinfo msg
+void CubeMesh::innerHandleNodeInfo(
+			const Eref& e, const Qinfo* q, 
+			const SrcFinfo4< 
+				vector< unsigned int >, 
+				vector< unsigned int >, 
+				vector< unsigned int >, 
+				vector< unsigned int > 
+			>* meshSplitFinfo,
+			unsigned int numNodes, unsigned int numThreads )
+{
+	vector< unsigned int > nodeList( 0, 1 );
+	vector< unsigned int > numEntriesPerNode( nx_*ny_*nz_, 1 );
+	vector< unsigned int > outgoingEntries;
+	vector< unsigned int > incomingEntries;
+	meshSplitFinfo->send( e, q->threadNum(), 
+		nodeList, numEntriesPerNode, outgoingEntries, incomingEntries );
+}
+
 //////////////////////////////////////////////////////////////////
 // FieldElement assignment stuff for MeshEntries
 //////////////////////////////////////////////////////////////////

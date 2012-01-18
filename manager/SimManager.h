@@ -25,9 +25,18 @@ class SimManager
 		/// Destination function
 		void build( const Eref& e, const Qinfo* q, string method );
 		void makeStandardElements( const Eref& e, const Qinfo*q, string meshClass );
+		void meshSplit( const Eref& e, const Qinfo* q, 
+			vector< unsigned int > nodeList,
+			vector< unsigned int > numEntriesPerNode,
+			vector< unsigned int > outgoingEntries,
+			vector< unsigned int > incomingEntries
+		);
+		void meshStats( const Eref& e, const Qinfo* q, 
+			unsigned int numMeshEntries, vector< double > voxelVols );
 
 		// Utility functions
-		TreeType findTreeType( const Eref& e );
+		//TreeType findTreeType( const Eref& e );
+		Id findChemMesh() const;
 		void buildFromBareKineticTree( const string& method );
 		void buildFromKkitTree( const string& method );
 
@@ -43,6 +52,10 @@ class SimManager
 		bool autoPlot_;
 
 		Id baseId_;
+		Id stoich_;
 
 		double plotdt_;
+
+		/// Used while partitioning meshed model over many nodes.
+		unsigned int numChemNodes_;
 };

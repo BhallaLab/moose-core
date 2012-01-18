@@ -20,6 +20,41 @@ static SrcFinfo0 groupSurfaces(
 		"Goes to all surfaces that define this ChemMesh"
 );
 
+static SrcFinfo4< 
+	vector< unsigned int >, 
+	vector< unsigned int>, 
+	vector< unsigned int >, 
+	vector< unsigned int > 
+	>* meshSplit()
+{
+	static SrcFinfo4< 
+			vector< unsigned int >, 
+			vector< unsigned int >, 
+			vector< unsigned int >, 
+			vector< unsigned int >
+		>
+	meshSplit(
+		"meshSplit",
+		"Defines how meshEntries communicate between nodes."
+		"First arg is list of other nodes, second arg is list number of"
+		"meshEntries to be transferred for each of these nodes, "
+		"third arg is catenated list of meshEntries indices on"
+		"my node going to each of the other connected nodes, and"
+		"fourth arg is matching list of meshEntries on other nodes"
+	);
+	return &meshSplit;
+}
+
+static SrcFinfo2< unsigned int, vector< double > >* meshStats()
+{
+	static SrcFinfo2< unsigned int, vector< double > > meshStats(
+		"meshStats",
+		"Basic statistics for mesh: Total # of entries, and a vector of"
+		"unique volumes of voxels"
+	);
+	return &meshStats;
+}
+
 const Cinfo* ChemMesh::initCinfo()
 {
 		//////////////////////////////////////////////////////////////
@@ -60,9 +95,34 @@ const Cinfo* ChemMesh::initCinfo()
 				&ChemMesh::buildDefaultMesh )
 		);
 
+		static DestFinfo handleRequestMeshStats( "handleRequestMeshStats",
+			"Handles request from SimManager for mesh stats",
+			new EpFunc0< ChemMesh >(
+				&ChemMesh::handleRequestMeshStats
+			)
+		);
+
+		static DestFinfo handleNodeInfo( "handleNodeInfo",
+			"Tells ChemMesh how many nodes and threads per node it is "
+			"allowed to use. Triggers a return meshSplit message.",
+			new EpFunc2< ChemMesh, unsigned int, unsigned int >(
+				&ChemMesh::handleNodeInfo )
+		);
+
 		//////////////////////////////////////////////////////////////
 		// SharedMsg Definitions
 		//////////////////////////////////////////////////////////////
+
+		static Finfo* nodeMeshingShared[] = {
+			meshSplit(), meshStats(), 
+			&handleRequestMeshStats, &handleNodeInfo
+		};
+
+		static SharedFinfo nodeMeshing( "nodeMeshing",
+			"Connects to SimManager to coordinate meshing with parallel"
+			"decomposition and with the Stoich",
+			nodeMeshingShared, sizeof( nodeMeshingShared ) / sizeof( const Finfo* )
+		);
 
 		/*
 		static Finfo* geomShared[] = {
@@ -85,7 +145,7 @@ const Cinfo* ChemMesh::initCinfo()
 			&ChemMesh::lookupBoundary,
 			&ChemMesh::setNumBoundary,
 			&ChemMesh::getNumBoundary,
-			16
+			4
 		);
 
 		static FieldElementFinfo< ChemMesh, MeshEntry > entryFinfo( 
@@ -95,7 +155,7 @@ const Cinfo* ChemMesh::initCinfo()
 			&ChemMesh::lookupEntry,
 			&ChemMesh::setNumEntries,
 			&ChemMesh::getNumEntries,
-			1048576
+			64
 		);
 
 	static Finfo* chemMeshFinfos[] = {
@@ -103,8 +163,9 @@ const Cinfo* ChemMesh::initCinfo()
 		&dimensions,	// ReadOnlyValue
 		&stoich,		// DestFinfo
 		&buildDefaultMesh,	// DestFinfo
+		&nodeMeshing,	// SharedFinfo
 		&entryFinfo,	// FieldElementFinfo
-		&boundaryFinfo,	// Boundaries
+		&boundaryFinfo,	// FieldElementFinfo
 	};
 
 	static Cinfo chemMeshCinfo (
@@ -153,6 +214,18 @@ void ChemMesh::buildDefaultMesh( double size, unsigned int numEntries )
 	this->innerBuildDefaultMesh( size, numEntries );
 }
 
+void ChemMesh::handleRequestMeshStats( const Eref& e, const Qinfo* q )
+{
+	// Pass it down to derived classes along with the SrcFinfo
+	innerHandleRequestMeshStats( e, q, meshStats() );
+}
+
+void ChemMesh::handleNodeInfo( const Eref& e, const Qinfo* q,
+	unsigned int numNodes, unsigned int numThreads )
+{
+	// Pass it down to derived classes along with the SrcFinfo
+	innerHandleNodeInfo( e, q, meshSplit(), numNodes, numThreads );
+}
 
 //////////////////////////////////////////////////////////////
 // Field Definitions

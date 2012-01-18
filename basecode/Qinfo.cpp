@@ -36,6 +36,7 @@ vector< Qinfo > Qinfo::structuralQinfo_( 0 );
 vector< double > Qinfo::structuralQdata_( 0 );
 
 pthread_mutex_t* Qinfo::qMutex_;
+pthread_mutex_t* Qinfo::sqMutex_;
 pthread_cond_t* Qinfo::qCond_;
 
 bool Qinfo::waiting_ = 0;
@@ -642,6 +643,19 @@ bool Qinfo::addToStructuralQ() const
 	return ret;
 }
 
+/**
+ * Same as above, except that this call can happen from any thread and
+ * is therefore protected by mutexes.
+ */
+bool Qinfo::protectedAddToStructuralQ() const
+{
+	bool ret = 0;
+	pthread_mutex_lock( sqMutex_ );
+		ret = addToStructuralQ();
+	pthread_mutex_unlock( sqMutex_ );
+	return ret;
+}
+
 void Qinfo::lockQmutex( ThreadId threadNum )
 {
 	if ( !Shell::isSingleThreaded() && threadNum == ScriptThreadNum )
@@ -658,7 +672,10 @@ void Qinfo::unlockQmutex( ThreadId threadNum )
 void Qinfo::initMutex()
 {
 	qMutex_ = new pthread_mutex_t;
+	sqMutex_ = new pthread_mutex_t;
 	int ret = pthread_mutex_init( qMutex_, NULL );
+	assert( ret == 0 );
+	ret = pthread_mutex_init( sqMutex_, NULL );
 	assert( ret == 0 );
 	qCond_ = new pthread_cond_t;
 	ret = pthread_cond_init( qCond_, NULL );
@@ -670,9 +687,12 @@ void Qinfo::freeMutex()
 {
 	int ret = pthread_mutex_destroy( qMutex_ );
 	assert( ret == 0 );
+	ret = pthread_mutex_destroy( sqMutex_ );
+	assert( ret == 0 );
 	ret = pthread_cond_destroy( qCond_ );
 	assert( ret == 0 );
 	delete qMutex_;
+	delete sqMutex_;
 	delete qCond_;
 }
 

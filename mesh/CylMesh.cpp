@@ -526,6 +526,36 @@ vector< double > CylMesh::getDiffusionScaling( unsigned int fid ) const
 }
 
 //////////////////////////////////////////////////////////////////
+// Dest funcsl
+//////////////////////////////////////////////////////////////////
+
+/// More inherited virtual funcs: request comes in for mesh stats
+void CylMesh::innerHandleRequestMeshStats( const Eref& e, const Qinfo* q, 
+		const SrcFinfo2< unsigned int, vector< double > >* meshStatsFinfo
+	)
+{
+	vector< double > ret( size_ / numEntries_ ,1 );
+	meshStatsFinfo->send( e, q->threadNum(), 1, ret );
+}
+
+void CylMesh::innerHandleNodeInfo(
+			const Eref& e, const Qinfo* q, 
+			const SrcFinfo4< 
+				vector< unsigned int >, 
+				vector< unsigned int >, 
+				vector< unsigned int >, 
+				vector< unsigned int > 
+			>* meshSplitFinfo,
+			unsigned int numNodes, unsigned int numThreads )
+{
+	vector< unsigned int > nodeList( 0, 1 );
+	vector< unsigned int > numEntriesPerNode( numEntries_, 1 );
+	vector< unsigned int > outgoingEntries;
+	vector< unsigned int > incomingEntries;
+	meshSplitFinfo->send( e, q->threadNum(), 
+		nodeList, numEntriesPerNode, outgoingEntries, incomingEntries );
+}
+//////////////////////////////////////////////////////////////////
 
 /**
  * Inherited virtual func. Returns number of MeshEntry in array
