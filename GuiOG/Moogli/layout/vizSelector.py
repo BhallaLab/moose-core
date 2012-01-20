@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'vizSelector.ui'
 #
-# Created: Wed Jan  4 17:41:10 2012
+# Created: Fri Jan 13 17:00:50 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,7 +17,7 @@ except AttributeError:
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName(_fromUtf8("Dialog"))
-        Dialog.resize(661, 462)
+        Dialog.resize(660, 462)
         Dialog.setAccessibleName(_fromUtf8(""))
         self.filterLineEdit = QtGui.QLineEdit(Dialog)
         self.filterLineEdit.setGeometry(QtCore.QRect(20, 50, 171, 27))
@@ -60,14 +60,22 @@ class Ui_Dialog(object):
         self.newColorMapPushButton = QtGui.QPushButton(Dialog)
         self.newColorMapPushButton.setGeometry(QtCore.QRect(120, 370, 81, 27))
         self.newColorMapPushButton.setObjectName(_fromUtf8("newColorMapPushButton"))
-        self.displayPropertyLabel = QtGui.QLabel(Dialog)
-        self.displayPropertyLabel.setGeometry(QtCore.QRect(20, 410, 361, 31))
-        self.displayPropertyLabel.setText(_fromUtf8(""))
-        self.displayPropertyLabel.setWordWrap(True)
-        self.displayPropertyLabel.setObjectName(_fromUtf8("displayPropertyLabel"))
+        self.minDisplayPropertyLabel = QtGui.QLabel(Dialog)
+        self.minDisplayPropertyLabel.setGeometry(QtCore.QRect(30, 410, 51, 31))
+        self.minDisplayPropertyLabel.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.minDisplayPropertyLabel.setWordWrap(False)
+        self.minDisplayPropertyLabel.setObjectName(_fromUtf8("minDisplayPropertyLabel"))
         self.editColorMapPushButton = QtGui.QPushButton(Dialog)
         self.editColorMapPushButton.setGeometry(QtCore.QRect(220, 370, 81, 27))
         self.editColorMapPushButton.setObjectName(_fromUtf8("editColorMapPushButton"))
+        self.colorMapToolButton = QtGui.QToolButton(Dialog)
+        self.colorMapToolButton.setGeometry(QtCore.QRect(90, 410, 141, 25))
+        self.colorMapToolButton.setIconSize(QtCore.QSize(128, 24))
+        self.colorMapToolButton.setAutoRaise(True)
+        self.colorMapToolButton.setObjectName(_fromUtf8("colorMapToolButton"))
+        self.maxDisplayPropertyLabel = QtGui.QLabel(Dialog)
+        self.maxDisplayPropertyLabel.setGeometry(QtCore.QRect(240, 410, 51, 31))
+        self.maxDisplayPropertyLabel.setObjectName(_fromUtf8("maxDisplayPropertyLabel"))
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
@@ -83,5 +91,8 @@ class Ui_Dialog(object):
         self.label_4.setText(QtGui.QApplication.translate("Dialog", "Visualization Contents", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("Dialog", "Color Map", None, QtGui.QApplication.UnicodeUTF8))
         self.newColorMapPushButton.setText(QtGui.QApplication.translate("Dialog", "New", None, QtGui.QApplication.UnicodeUTF8))
+        self.minDisplayPropertyLabel.setText(QtGui.QApplication.translate("Dialog", "test", None, QtGui.QApplication.UnicodeUTF8))
         self.editColorMapPushButton.setText(QtGui.QApplication.translate("Dialog", "Edit", None, QtGui.QApplication.UnicodeUTF8))
+        self.colorMapToolButton.setText(QtGui.QApplication.translate("Dialog", "...", None, QtGui.QApplication.UnicodeUTF8))
+        self.maxDisplayPropertyLabel.setText(QtGui.QApplication.translate("Dialog", "test", None, QtGui.QApplication.UnicodeUTF8))
 
