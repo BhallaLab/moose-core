@@ -118,7 +118,7 @@ class canvas(PyGLWidget):
 
     #     self.updateGL()
     
-    def drawNewCompartment(self,name,cellName,coords,style=3,cellCentre=[0.0,0.0,0.0],cellAngle=[0.0,0.0,0.0,0.0]):
+    def drawNewCompartment(self,cellName,name,coords,style=3,cellCentre=[0.0,0.0,0.0],cellAngle=[0.0,0.0,0.0,0.0]):
         ''' name = 'segmentName',cellName= 'mitral', coords = [x0,y0,z0,x,y,z,d] , style = 1/2/3/4'''
         if (coords[0]!=coords[3] or coords[1]!=coords[4] or coords[2]!=coords[5]): #not a soma
             if style == 1 : #disk

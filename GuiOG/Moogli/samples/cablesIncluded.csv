@@ -1,0 +1,6 @@
+"CellWithCables"	"SomaSeg"	0	0	0	10	0	0	10
+"CellWithCables"	"DendSeg1"	5	0	0	5	10	0	5
+"CellWithCables"	"DendSeg2"	5	10	0	5	20	0	5
+"CellWithCables"	"DendSeg3"	5	20	0	5	30	0	5
+"CellWithCables"	"DendSeg4"	10	0	0	10	0	10	3
+"CellWithCables"	"DendSeg5"	10	0	10	10	0	20	3
