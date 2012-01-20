@@ -36,19 +36,87 @@
         <property name="text">
          <string>&gt;</string>
         </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QToolButton" name="pauseButton">
-        <property name="text">
-         <string>||</string>
+        <property name="toolButtonStyle">
+         <enum>Qt::ToolButtonIconOnly</enum>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="saveButton">
+       <widget class="QToolButton" name="stopButton">
+        <property name="text">
+         <string>||</string>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="dummytoolButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>|</string>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="openToolButton">
+        <property name="text">
+         <string>O</string>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="saveSnapButton">
         <property name="text">
          <string>S</string>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="saveMovieButton">
+        <property name="text">
+         <string>sm</string>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="dummy2ToolButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>|</string>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="plotToolButton">
+        <property name="text">
+         <string>P</string>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -96,9 +164,11 @@
      <addaction name="actionBlenderScript"/>
     </widget>
     <addaction name="actionOpen"/>
-    <addaction name="actionSave"/>
+    <addaction name="actionSaveAsMovie"/>
+    <addaction name="actionSaveAsSnapshot"/>
     <addaction name="actionPlay"/>
-    <addaction name="actionRedrawAll"/>
+    <addaction name="actionStop"/>
+    <addaction name="actionClearAll"/>
     <addaction name="menu_Export"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -128,12 +198,12 @@
     <string>Ctrl+O</string>
    </property>
   </action>
-  <action name="actionSave">
+  <action name="actionSaveAsSnapshot">
    <property name="text">
-    <string>&amp;Save As</string>
+    <string>Save As Sna&amp;pshot </string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+S</string>
+    <string>Ctrl+P</string>
    </property>
   </action>
   <action name="actionQuit">
@@ -175,12 +245,28 @@
     <string>Blender Script</string>
    </property>
   </action>
-  <action name="actionRedrawAll">
+  <action name="actionClearAll">
    <property name="text">
-    <string>&amp;Redraw All</string>
+    <string>Clea&amp;r All</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionSaveAsMovie">
+   <property name="text">
+    <string>&amp;Save As Movie</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionStop">
+   <property name="text">
+    <string>S&amp;top</string>
+   </property>
+   <property name="shortcut">
+    <string>Return</string>
    </property>
   </action>
  </widget>
