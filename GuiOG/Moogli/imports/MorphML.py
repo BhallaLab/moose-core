@@ -24,7 +24,10 @@ class MorphML():
 
         cellsList = [] #chk name space of root element = neuroml
         for cell in neuroml_element.findall('.//{'+cellTag+'}cell'):
-            cellList = self.readMorphML(cell,params,neuroml_element.attrib['length_units'])
+            try:
+                cellList = self.readMorphML(cell,params,neuroml_element.attrib['length_units'])
+            except KeyError:
+                cellList = self.readMorphML(cell,params,neuroml_element.attrib['lengthUnits'])
             cellsList.extend(cellList)
         return cellsList
 
@@ -39,7 +42,10 @@ class MorphML():
 
         cellsList = [] #chk name space of root element = neuroml
         for cell in neuroml_element.findall('.//{'+cellTag+'}cell'):
-            cellList = self.readMorphML(cell,params,neuroml_element.attrib['length_units'])
+            try:
+                cellList = self.readMorphML(cell,params,neuroml_element.attrib['length_units'])
+            except KeyError:
+                cellList = self.readMorphML(cell,params,neuroml_element.attrib['lengthUnits'])
             cellsList.extend(cellList)
         return cellsList
 
@@ -57,7 +63,7 @@ class MorphML():
             segmentname = segment.attrib['name']
             segmentid = segment.attrib['id']
 
-            compartmentList.append([segmentname,cellname])
+            compartmentList.append([cellname,segmentname])
             if segment.attrib.has_key('parent'):
                 parentid = segment.attrib['parent']
             proximal = segment.find('./{'+self.mml+'}proximal')
