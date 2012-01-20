@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'colorMap.ui'
 #
-# Created: Wed Jan  4 18:24:30 2012
+# Created: Fri Jan 13 17:07:27 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,7 +17,7 @@ except AttributeError:
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName(_fromUtf8("Dialog"))
-        Dialog.resize(270, 300)
+        Dialog.resize(262, 300)
         self.verticalLayout = QtGui.QVBoxLayout(Dialog)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
         self.gridLayout = QtGui.QGridLayout()
@@ -48,6 +48,19 @@ class Ui_Dialog(object):
         self.colorMapComboBox.setObjectName(_fromUtf8("colorMapComboBox"))
         self.gridLayout.addWidget(self.colorMapComboBox, 3, 1, 1, 1)
         self.verticalLayout.addLayout(self.gridLayout)
+        self.horizontalLayout_2 = QtGui.QHBoxLayout()
+        self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
+        self.colorMapToolButton = QtGui.QToolButton(Dialog)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.colorMapToolButton.sizePolicy().hasHeightForWidth())
+        self.colorMapToolButton.setSizePolicy(sizePolicy)
+        self.colorMapToolButton.setIconSize(QtCore.QSize(128, 24))
+        self.colorMapToolButton.setAutoRaise(True)
+        self.colorMapToolButton.setObjectName(_fromUtf8("colorMapToolButton"))
+        self.horizontalLayout_2.addWidget(self.colorMapToolButton)
+        self.verticalLayout.addLayout(self.horizontalLayout_2)
         self.okayPushButton = QtGui.QPushButton(Dialog)
         self.okayPushButton.setObjectName(_fromUtf8("okayPushButton"))
         self.verticalLayout.addWidget(self.okayPushButton)
@@ -61,5 +74,6 @@ class Ui_Dialog(object):
         self.label_2.setText(QtGui.QApplication.translate("Dialog", "Min Value", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("Dialog", "Max Value", None, QtGui.QApplication.UnicodeUTF8))
         self.label_4.setText(QtGui.QApplication.translate("Dialog", "ColorMap", None, QtGui.QApplication.UnicodeUTF8))
+        self.colorMapToolButton.setText(QtGui.QApplication.translate("Dialog", "...", None, QtGui.QApplication.UnicodeUTF8))
         self.okayPushButton.setText(QtGui.QApplication.translate("Dialog", "OK", None, QtGui.QApplication.UnicodeUTF8))
 
