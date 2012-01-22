@@ -131,6 +131,7 @@ Id ReadKkit::read(
 	s->setCwe( base );
 	Qinfo q;
 	q.setThreadNum( ScriptThreadNum );
+	sm->setPlotDt( plotdt_ );
 	sm->build( base.eref(), &q, method );
 	// SetGet1< string >::set( baseId_, "build", method );
 	/*

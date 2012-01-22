@@ -360,8 +360,9 @@ void GssaStoich::reinit( const Eref& e, ProcPtr p )
 	Stoich::innerReinit();
 	// Here we round off up or down with prob depending on fractional
 	// part of the init value.
-	for ( unsigned int j = 0; j < numMeshEntries_; ++j ) {
-		for ( vector< double >::iterator i = S_[j].begin(); i != S_[j].end(); ++i ) {
+	for ( vector< unsigned int >::iterator j = localMeshEntries_.begin(); 
+		j != localMeshEntries_.end(); ++j ) {
+		for ( vector< double >::iterator i = S_[*j].begin(); i != S_[*j].end(); ++i ) {
 			double base = floor( *i );
 			double frac = *i - base;
 			if ( mtrand() > frac )

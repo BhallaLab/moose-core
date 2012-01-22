@@ -46,6 +46,20 @@ static SrcFinfo1< Id >* plugin()
 	return &ret;
 }
 
+static SrcFinfo3< unsigned int, vector< unsigned int >, vector< double > >* nodeDiffBoundary()
+{
+	static SrcFinfo3< unsigned int, vector< unsigned int >, vector< double > > nodeDiffBoundary(
+		"nodeDiffBoundary", 
+		"Sends mol #s across boundary between nodes, to calculate diffusion"
+		"terms. arg1 is originating node, arg2 is list of meshIndices for"
+		"which data is being transferred, and arg3 are the 'n' values for"
+		"all the pools on the specified meshIndices, to be plugged into"
+		"the appropriate place on the recipient node's S_ matrix"
+	);
+	return &nodeDiffBoundary;
+}
+
+
 const Cinfo* Stoich::initCinfo()
 {
 		//////////////////////////////////////////////////////////////
@@ -66,12 +80,14 @@ const Cinfo* Stoich::initCinfo()
 			&Stoich::getNumVarPools
 		);
 
+		/*
 		static LookupValueFinfo< Stoich, short, double > compartmentVolume(
 			"compartmentVolume",
 			"Size of specified compartment",
 			&Stoich::setCompartmentVolume,
 			&Stoich::getCompartmentVolume
 		);
+		*/
 
 		static ElementValueFinfo< Stoich, string > path(
 			"path",
@@ -136,9 +152,10 @@ const Cinfo* Stoich::initCinfo()
 		&nVarPools,		// Value
 		&numMeshEntries,		// Value
 		&estimatedDt,		// ReadOnlyValue
-		&compartmentVolume,	//Value
+		// &compartmentVolume,	//Value
 		&path,			// Value
 		plugin(),		// SrcFinfo
+		nodeDiffBoundary(),		// SrcFinfo
 		&portFinfo,		// FieldElementFinfo
 	};
 
@@ -165,7 +182,7 @@ Stoich::Stoich()
 		S_(1),
 		Sinit_(1),
 		y_(1),
-		numMeshEntries_( 1 ),
+		// numMeshEntries_( 1 ),
 		totPortSize_( 0 ),
 		objMapStart_( 0 ),
 		numVarPools_( 0 ),
@@ -292,7 +309,7 @@ string Stoich::getPath( const Eref& e, const Qinfo* q ) const
 
 unsigned int Stoich::getNumMeshEntries() const
 {
-	return numMeshEntries_;
+	return localMeshEntries_.size();
 }
 
 double Stoich::getEstimatedDt() const
@@ -322,11 +339,14 @@ void Stoich::setNumPorts( unsigned int num )
 	ports_.resize( num );
 }
 
+/*/
 unsigned int Stoich::numCompartments() const
 {
 	return compartment_.size();
 }
+*/
 
+/*
 void Stoich::setCompartmentVolume( short comptIndex, double v )
 {
 	if ( v <= 0 ) {
@@ -364,7 +384,9 @@ void Stoich::setCompartmentVolume( short comptIndex, double v )
 		(*i)->rescaleVolume(  comptIndex , compartment_, ratio );
 	}
 }
+*/
 
+/*
 double Stoich::getCompartmentVolume( short i ) const
 {
 	unsigned int temp = i;
@@ -372,6 +394,7 @@ double Stoich::getCompartmentVolume( short i ) const
 		return compartmentSize_[i];
 	return 0.0;
 }
+*/
 
 //////////////////////////////////////////////////////////////
 // Model zombification functions
@@ -407,7 +430,7 @@ void Stoich::allocateModel( const vector< Id >& elist )
 	static const Cinfo* enzCinfo = Enz::initCinfo();
 	static const Cinfo* mmEnzCinfo = MMenz::initCinfo();
 	static const Cinfo* sumFuncCinfo = SumFunc::initCinfo();
-	static const Cinfo* meshEntryCinfo = MeshEntry::initCinfo();
+	// static const Cinfo* meshEntryCinfo = MeshEntry::initCinfo();
 	numVarPools_ = 0;
 	numReac_ = 0;
 	vector< Id > bufPools;
@@ -444,7 +467,9 @@ void Stoich::allocateModel( const vector< Id >& elist )
 		} else if ( ei->cinfo() == sumFuncCinfo ){
 			objMap_[ i->value() - objMapStart_ ] = numFunc;
 			++numFunc;
-		} else if ( ei->cinfo() == meshEntryCinfo ){
+		} 
+		/*
+		else if ( ei->cinfo() == meshEntryCinfo ){
 			unsigned int ne = ei->dataHandler()->localEntries();
 			if ( numMeshEntries_ == 1 ) {
 				numMeshEntries_ = ne;
@@ -452,10 +477,12 @@ void Stoich::allocateModel( const vector< Id >& elist )
 				cout << "Error: Stoich::allocateModel: two different numMeshEntries: " << ne << ", " << numMeshEntries_ << endl;
 			}
 		}
+		*/
 	}
+	/*
 	if ( numMeshEntries_ == 0 )
 		return;
-	// numVarPools_ += numEfflux_;
+		*/
 
 	numBufPools_ = 0;
 	for ( vector< Id >::const_iterator i = bufPools.begin(); i != bufPools.end(); ++i ){
@@ -472,7 +499,9 @@ void Stoich::allocateModel( const vector< Id >& elist )
 	assert( numFunc == numFuncPools_ );
 
 	numVarPoolsBytes_ = numVarPools_ * sizeof( double );
+	concInit_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0 );
 
+	/*
 	S_.resize( numMeshEntries_ );
 	Sinit_.resize( numMeshEntries_ );
 	y_.resize( numMeshEntries_ );
@@ -483,9 +512,10 @@ void Stoich::allocateModel( const vector< Id >& elist )
 		y_[i].resize( numVarPools_, 0.0 );
 		flux_[i].resize( numVarPools_, 0.0 );
 	}
+	*/
 
 	diffConst_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0 );
-	compartment_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0 );
+	// compartment_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0 );
 	species_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0 );
 	rates_.resize( numReac_ );
 	// v_.resize( numReac_, 0.0 ); // v is now allocated dynamically
@@ -504,6 +534,7 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 	// static const Cinfo* chemComptCinfo = ChemMesh::initCinfo();
 	// static const Cinfo* sumFuncCinfo = SumFunc::initCinfo();
 	// The FuncPool handles zombification of stuff coming in to it.
+	vector< Id > meshEntries;
 
 	for ( vector< Id >::const_iterator i = elist.begin(); i != elist.end(); ++i ){
 		Element* ei = (*i)();
@@ -525,13 +556,31 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 		else if ( ei->cinfo() == enzCinfo ) {
 			ZombieEnz::zombify( e.element(), (*i)() );
 		}
+		/*
 		else if ( ei->cinfo()->isA( "MeshEntry" ) ) {
+			meshEntries.push_back( *i ); // Accumulate for later use. The
+			// function needs all the pools to have been assimilated first.
+		}
+		*/
+	}
+	/*
+	for ( vector< Id >::const_iterator i = meshEntries.begin(); i != meshEntries.end(); ++i ){
 			zombifyChemMesh( *i ); // It retains its identity.
 			// ZombieChemMesh::zombify( e.element(), (*i)() );
-		}
 	}
+	*/
 }
 
+void Stoich::handleRemesh( unsigned int numLocalMeshEntries, 
+	vector< unsigned int > computedEntries, 
+	vector< unsigned int > allocatedEntries, 
+	vector< vector< unsigned int > > outgoingDiffusion, 
+	vector< vector< unsigned int > > incomingDiffusion ) 
+{
+	;
+}
+
+/*
 void Stoich::zombifyChemMesh( Id meshEntry )
 {
 	static const Cinfo* meshEntryCinfo = MeshEntry::initCinfo();
@@ -554,6 +603,7 @@ void Stoich::zombifyChemMesh( Id meshEntry )
 	objMap_[ meshEntry.value() - objMapStart_ ] = compartmentSize_.size();
 	compartmentSize_.push_back( c->getSize( meshEntry.eref(), 0 ) );
 }
+*/
 
 unsigned int Stoich::convertIdToPoolIndex( Id id ) const
 {
@@ -582,6 +632,7 @@ unsigned int Stoich::convertIdToFuncIndex( Id id ) const
 	return i;
 }
 
+/*
 unsigned int Stoich::convertIdToComptIndex( Id id ) const
 {
 	unsigned int i = id.value() - objMapStart_;
@@ -590,6 +641,7 @@ unsigned int Stoich::convertIdToComptIndex( Id id ) const
 	assert( i < compartmentSize_.size() );
 	return i;
 }
+*/
 
 
 void Stoich::installReaction( ZeroOrder* forward, ZeroOrder* reverse, Id reacId )
@@ -792,18 +844,55 @@ void Stoich::updateDiffusion(
 }
 */
 
-void Stoich::clearFlux( unsigned int meshIndex )
+// void Stoich::clearFlux( unsigned int meshIndex )
+// This variant also sends out the data for the current node.
+// Problem here: I need to restrict myself to this thread's meshindices.
+// Or pick the meshIndex == 0 and on that thread alone send out all the
+// stuff. At this phase it should be safe as all the calculations are done,
+// so none of the S_ vectors is changing.
+void Stoich::clearFlux( unsigned int meshIndex, unsigned int threadNum )
 {
+	if ( meshIndex == 0 ) {
+		for( vector< unsigned int >::iterator i = diffNodes_.begin(); 
+			i != diffNodes_.end(); ++i )
+		{
+			vector< double > buf;
+			for ( unsigned int j = 0; j < outgoing_.size(); ++j ) {
+				buf.insert( buf.end(), S_[ outgoing_[*i][j] ].begin(),
+					S_[ outgoing_[*i][j] ].end() );
+			}
+			nodeDiffBoundary()->send( stoichId_.eref(), threadNum, 
+				*i, outgoing_[*i], buf );
+		}
+	}
+
 	vector< double >& f = flux_[meshIndex];
 
 	for ( vector< double >::iterator j = f.begin(); j != f.end(); ++j)
 		*j = 0.0;
 }
 
+//// This belongs up in the destMsgs, but I'll put it here to help coding.
+// It is the recipient function for the message sent at the node boundary.
+// It can handle messages even if they are not destined for this node, it
+// just ignores them.
+
+void Stoich::handleNodeDiffBoundary( unsigned int nodeNum, 
+	vector< unsigned int > meshEntries, vector< double > remoteS )
+{
+	vector< double >::iterator begin = remoteS.begin();
+	for ( unsigned int i = 0; i < incoming_[ nodeNum ].size(); ++i ) {
+		unsigned int meshIndex = incoming_[nodeNum][i];
+		/// Check the syntax of assign.
+		S_[meshIndex].assign( begin, begin + numVarPools_ );
+		begin += numVarPools_;
+	}
+}
+
 void Stoich::clearFlux()
 {
 	for ( unsigned int i = 0; i < flux_.size(); ++i )
-		clearFlux( i );
+		clearFlux( i, ScriptThreadNum );
 }
 
 // Put in a similar updateVals() function to handle Math expressions.

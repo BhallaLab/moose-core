@@ -1696,6 +1696,48 @@ void testConvVector()
 	cout << "." << flush;
 }
 
+void testConvVectorOfVectors()
+{
+	short *row0 = 0;
+	short row1[] = { 1 };
+	short row2[] = { 2, 3 };
+	short row3[] = { 4, 5, 6 };
+	short row4[] = { 7, 8, 9, 10 };
+	short row5[] = { 11, 12, 13, 14, 15 };
+
+	vector< vector < short > > vec( 6 );
+	vec[0].insert( vec[0].end(), row0, row0 + 0 );
+	vec[1].insert( vec[1].end(), row1, row1 + 1 );
+	vec[2].insert( vec[2].end(), row2, row2 + 2 );
+	vec[3].insert( vec[3].end(), row3, row3 + 3 );
+	vec[4].insert( vec[4].end(), row4, row4 + 4 );
+	vec[5].insert( vec[5].end(), row5, row5 + 5 );
+
+	double expected[] = { 6, 
+		0, 1, 2, 3, 4, 5 };
+
+	double buf[500];
+
+	Conv< vector< vector< short > > > conv( vec );
+
+	assert( conv.size() == 1 + 6 + 0 + 1 + 1 + 1 + 1 + 2 );
+	unsigned int ret = conv.val2buf( buf );
+	assert( ret == 13 );
+	for ( unsigned int i = 0; i < 7; ++i )
+		assert( doubleEq( buf[i], expected[i] ) );
+	
+	Conv< vector< vector< short > >  > returnConv( buf );
+	vector< vector< short > > rc = *returnConv;
+	assert( rc.size() == 6 );
+	for ( unsigned int i = 0; i < 6; ++i ) {
+		assert( rc[i].size() == i );
+		for ( unsigned int j = 0; j < i; ++j )
+			assert( rc[i][j] = vec[i][j] );
+	}
+
+	cout << "." << flush;
+}
+
 void testMsgField()
 {
 	const Cinfo* ac = Arith::initCinfo();
@@ -2901,6 +2943,7 @@ void testAsync( )
 	testUpValue();
 	testSharedMsg();
 	testConvVector();
+	testConvVectorOfVectors();
 	testMsgField();
 	testSetGetExtField();
 	testIsA();
