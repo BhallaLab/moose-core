@@ -500,6 +500,14 @@ void Stoich::allocateModel( const vector< Id >& elist )
 
 	numVarPoolsBytes_ = numVarPools_ * sizeof( double );
 	concInit_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0 );
+	S_.resize( 1 );
+	Sinit_.resize( 1 );
+	y_.resize( 1 );
+	flux_.resize( 1 );
+	S_[0].resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0 );
+	Sinit_[0].resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0);
+	y_[0].resize( numVarPools_, 0.0 );
+	flux_[0].resize( numVarPools_, 0.0 );
 
 	/*
 	S_.resize( numMeshEntries_ );
@@ -610,7 +618,7 @@ unsigned int Stoich::convertIdToPoolIndex( Id id ) const
 	unsigned int i = id.value() - objMapStart_;
 	assert( i < objMap_.size() );
 	i = objMap_[i];
-	assert( i < S_[0].size() );
+	assert( i < concInit_.size() );
 	return i;
 }
 
