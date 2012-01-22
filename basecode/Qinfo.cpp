@@ -256,6 +256,7 @@ void Qinfo::swapQ()
 /**
  * Waits the specified number of Process cycles before returning.
  * Should only be called on the master thread (thread 0).
+ * Must not be called recursively.
  * Static func.
  */
 void Qinfo::waitProcCycles( unsigned int numCycles )

@@ -743,6 +743,130 @@ template<> class Conv< PrepackedBuffer >
 };
 
 /**
+ * Still more specialized partial specialization.
+ * This works with any field that has a uniform size.
+ * Assume strings are the only exception.
+ * The first double in the vector vec_ holds the # of data entries that
+ * follow it. This excludes the space for the size entry itself.
+ * This can be a ragged array: the number of entries in each vector need
+ * not be the same.
+ * The order of entries is:
+ * 0		:  Dimension of left index, can be zero. As double.
+ * 1:numDim	:  Dimensions of right index. Any and all can be zero. Double.
+ * numDim+1 to total: Data, in condensed format.
+ */
+template< class T > class Conv< vector< vector< T > > >
+{
+	public:
+		Conv( const double* buf )
+		{
+			unsigned int numEntries = *buf;
+			unsigned int numDoubles = 1 + numEntries;
+			for ( unsigned int i = 0; i < numEntries; ++i )
+				numDoubles += 1 + ( sizeof( T ) * buf[i + 1] - 1 )/sizeof( double );
+
+			vec_.insert( vec_.end(), buf, buf + numDoubles );
+		}
+
+		Conv( const vector< vector< T > >& arg )
+		{
+			if ( arg.size() == 0 ) {
+				vec_.resize( 1 );
+				vec_[0] = 0;
+				return;
+			}
+			vector< double > dims( arg.size(), 0.0 );
+			vector< unsigned int > start( arg.size(), 0 );
+			// cumulativeIndex refers to the index in the vector< double >
+			// buffer at which each of the interior vector< T > start.
+			// I ensure that each starts at a double boundary, so that
+			// subsequent memcpys are safe.
+			unsigned int cumulativeIndex = 1 + arg.size();
+			unsigned int entrySize = sizeof( T );
+
+			for ( unsigned int i = 0; i < arg.size(); ++i ) {
+				dims[i] = arg[i].size();
+				start[i] = cumulativeIndex;
+				cumulativeIndex += 1 + ( entrySize * arg[i].size() -1 ) / sizeof( double ); 
+			}
+
+			vec_.resize( cumulativeIndex );
+			vec_[0] = arg.size();
+			for ( unsigned int i = 0; i < dims.size(); ++i )
+				vec_[ i + 1 ] = dims[i];
+			for ( unsigned int i = 0; i < dims.size(); ++i ) {
+				if ( arg[i].size() > 0 ) {
+					memcpy( &vec_[ start[i] ], &arg[i][0], 
+						arg.size() * entrySize );
+				}
+			}
+		}
+
+		/** 
+		 * Returns ptr to entire array
+		 * We rely on the constructors to ensure size is at least 1.
+		 */
+		const double* ptr() const
+		{
+			return &vec_[0];
+		}
+
+		/** 
+		 * Size of returned array in doubles.
+		 */
+		unsigned int size() const
+		{
+			return vec_.size();
+		}
+
+		const vector< vector< T > > operator*() const {
+			vector< vector< T > > ret;
+			if ( vec_.size() > 0 ) {
+				unsigned int numEntries = vec_[0];
+				assert( vec_.size() > numEntries + 1 );
+				vector< unsigned int > start( numEntries, 0 );
+				unsigned int cumulativeIndex = 1 + numEntries;
+				unsigned int entrySize = sizeof( T );
+				ret.resize( numEntries );
+				for ( unsigned int i = 0; i < numEntries; ++i ) {
+					unsigned int dimSize = vec_[i + 1];
+					start[i] = cumulativeIndex;
+					if ( dimSize > 0 ) {
+						ret[i].resize( dimSize );
+						cumulativeIndex += 1 + ( entrySize * dimSize -1 ) / sizeof( double ); 
+					}
+				}
+
+				for ( unsigned int i = 0; i < numEntries; ++i ) {
+					unsigned int num = vec_[i+1];
+					if ( num > 0 )
+						memcpy( &ret[i][0], &vec_[ start[i] ], num * entrySize );
+				}
+			}
+			return ret;
+		}
+
+		unsigned int val2buf( double* buf ) const {
+			memcpy( buf, &vec_[0], vec_.size() * sizeof( double ) );
+			return vec_.size();
+		}
+
+		static void str2val( vector< vector< T > >& val, const string& s ) {
+			cout << "Specialized Conv< vector< vector< T > > >::str2val not done\n";
+		}
+
+		static void val2str( string& s, const vector< vector< T > >& val ) {
+			cout << "Specialized Conv< vector< vector< T > > >::val2str not done\n";
+		}
+		static string rttiType() {
+			string ret = "vector< vector<" + Conv< T >::rttiType() + "> >";
+			return ret;
+		}
+	private:
+		vector< double > vec_;
+};
+
+/**
  * Trying to do a partial specialization.
  * This works with anything that has a uniform size.
  * Assume strings are the only exception.
@@ -915,5 +1039,6 @@ template<> class Conv< vector< string > >
 	private:
 		vector< double > vec_;
 };
+
 
 #endif // _CONV_H
