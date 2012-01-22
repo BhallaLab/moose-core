@@ -408,17 +408,17 @@ void SimManager::buildFromKkitTree( const string& method )
 	string basePath = baseId_.path();
 	if ( method == "Gillespie" || method == "gillespie" || 
 		method == "GSSA" || method == "gssa" || method == "Gssa" ) {
-		Id stoich = shell->doCreate( "Stoich", baseId_, "stoich", dims );
-		Field< string >::set( stoich, "path", basePath + "/##" );
+		// Id stoich = shell->doCreate( "Stoich", baseId_, "stoich", dims );
+		// Field< string >::set( stoich, "path", basePath + "/##" );
 		cout << "SimManager::buildFromKkitTree: Not yet got GSSA working here.\n";
 	} else if ( method == "Neutral" || method == "ee" || method == "EE" ) {
 		// cout << "SimManager::buildFromKkitTree: No solvers built\n";
 		; // Don't make any solvers.
 	} else {
-		Id stoich = shell->doCreate( "Stoich", baseId_, "stoich", dims );
-		Field< string >::set( stoich, "path", basePath + "/##" );
-		Id gsl = shell->doCreate( "GslIntegrator", stoich, "gsl", dims );
-		bool ret = SetGet1< Id >::set( gsl, "stoich", stoich );
+		// Id stoich = shell->doCreate( "Stoich", baseId_, "stoich", dims );
+		// Field< string >::set( stoich, "path", basePath + "/##" );
+		Id gsl = shell->doCreate( "GslIntegrator", stoich_, "gsl", dims );
+		bool ret = SetGet1< Id >::set( gsl, "stoich", stoich_ );
 		assert( ret );
 		ret = Field< bool >::get( gsl, "isInitialized" );
 		assert( ret );

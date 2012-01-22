@@ -16872,5 +16872,13 @@ I'll have to provide each with its associated meshIndex.
 ============================================================================
 22 Jan 2012
 Working on the mesh. Realized I need to transmit vector< vector< T > >.
-Implemented converter and unit test for it.
+Implemented converter and unit test for it. Checkin 3263.
+
+Current effort is to have things set up so that they can again run simple
+simulations, and slowly build up to meshed models, and finally to the 
+multinode case.
+
+Gone through it. Now it clears the first test where it does a calculation,
+and hangs later when it tries to change the system volume using the
+compartmentVolume function which no longer exists.
 ============================================================================
