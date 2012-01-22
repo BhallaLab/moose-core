@@ -16770,6 +16770,107 @@ Tried setting it up with a mutex. It now clears unit tests but stalls
 (due to small dt, but it still runs) in the rtRunKkit regression test.
 This is likely due to not setting dts somewhere in the SimManager. Checkin
 so we can keep moving on.
+Checkin 3261.
+
+Still tracking down why the plotdt isn't set up correctly.
+============================================================================
+20 Jan 2012
+
+Need to have a clear demarcation between setup operations (doLoadModel etc)
+and messaged operations.
+
+- Setup ops cannot be messaged at least in the present manner. There will be
+	race conditions as the inner setup ops like doCreate are blocking.
+- Setup ops cannot go in parallel. They have to run on the master node and
+	may refer to lower-level Shell setup ops like doCreate.
+
+- A fastSend would be nice. 
+	- This would be an alternative to extracting the pointer to the obj
+		to manipulate it.
+	- This would encode all lookup relationships in msgs
+	- Sets up a common API for multi-obj ops.
+	- Big concern that it should _not_ be called by regular msgs.
+
+Perhaps a cleaner alternative is to make the various doCreate and other
+functions messaging compatible. 
+	- All these funcs do point into a DestFinfo, such as handleCreate.
+	I haven't tested this for multithread, multinode safety when called
+	from a non-shell object. But I think a 'Set' call will go to all nodes.
+	- In many cases we do need to block till a sequence of messages is done.	- 
+
+I have a clash of cultures here. 
+	- direct call of object functions in ReadKkit. Not thread safe, assumed
+		called only from parser thread.
+	- Ack-protected thread-safe messaging.
+		- Shell::doCreate etc which uses messaging wrapped in acks.
+		Likely to hang if called within messaging.
+	- Set/Get calls, which insert stuff into messaging and use 
+		Qinfo::waitProcCycles.
+		Likely to hang if called within messaging.
+	- Regular messaging.
+	- Structural messages, which achieve safety by putting things on a
+		single thread, but thus make locks likely.
+	
+============================================================================
+21 Jan 2012
+Tracked down a problem: Calling Stoich::set_path twice. The first
+time seems OK, the second time round all pools are now zombies and are
+not recognized even though the ChemMesh still has messages to them. So
+it all gets confused. 
+
+I do need to set up the Stoich in the first pass just to get it to estimate
+the chem load. So the part of the stoich where it messes with the chem mesh
+needs to be removed and put out with the SimManager.
+
+There is quite a bit of compartment related code in the Stoich. Most of it
+looks like stubs, but there is a substantial chunk in 
+Stoich::setCompartmentVolume(). All should go away. Not clear if I need to 
+have any kind of zombification or other internal digenstion of compartments
+or meshes.  For now leave out of zombie structure and aim to have the regular
+messaging take care of it.
+
+Here's a chicken-and-egg problem: I want the model structure sorted out in
+Stoich to decide how to do the node decomposition of the mesh. However, the
+Stoich wants to know the pool meshing to load in (and zombify) the pool,
+since this is when it brings in the Ninits for each mesh entry.
+
+Analyze use cases. In almost all situations I start with a single-compartment
+reaction definition and want the solver to spread it out. There is a problem
+with this only when I have an a-priori spatial distribution. Here too the
+SimManager has to figure out how to reallocate the model among nodes.
+Conceptually though it is cleaner to have the whole model already split up.
+OK, this boils down to deciding whether the pool array resizes into voxels
+as a direct operation when he ChemMesh does so, or whether this operation is
+mediated only through the SimManager. Earlier too the operation was actually
+handled through the Shell. 
+	Again, the voxelization is easy but the node partitioning is not, and
+should be done through SimManager.
+Let's go through SimManager. This means that:
+- Need a pool Sinit vector sans voxels in the Stoich. Could take over the concs
+	so we are not stuck with the volume conversion issues.
+- Need to be able to do first pass set up using the Sinit vector.
+- Need to be able to revoxelize any time, and this function is just what is 
+	used to build it the first time too.
+
+Once this is done I need to go back to the chem systems and redo them all 
+to use conc units. At this point only the Reacs do.
 
 
+Next step: Write out the calculation and messaging stuff on
+Stoich to figure out how to set up the messaging. I think that
+there will have to be a message from the ChemMesh to it,
+rather than to the SimManager, to define internode diffusive messaging.
+This is happening around Stoich.cpp:826.
+
+Also now need to tell the GslIntegrator only to operate on meshIndices
+that exist on current node.
+This is a little tricky. I need to create GslIntegrators only for the 
+meshEntries on the local node. Instead of creating a bunch of dummy ones,
+I'll have to provide each with its associated meshIndex.
+
+
+============================================================================
+22 Jan 2012
+Working on the mesh. Realized I need to transmit vector< vector< T > >.
+Implemented converter and unit test for it.
 ============================================================================

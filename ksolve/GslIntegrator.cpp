@@ -295,7 +295,7 @@ void GslIntegrator::process( const Eref& e, ProcPtr info )
 	}
 #endif // USE_GSL
 	Stoich* s = reinterpret_cast< Stoich* >( stoichId_.eref().data() );
-	s->clearFlux( e.index().value() );
+	s->clearFlux( e.index().value(), info->threadIndexInGroup );
 }
 
 void GslIntegrator::reinit( const Eref& e, ProcPtr info )

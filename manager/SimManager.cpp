@@ -50,7 +50,7 @@ const Cinfo* SimManager::initCinfo()
 		//////////////////////////////////////////////////////////////
 		static ValueFinfo< SimManager, double > syncTime(
 			"syncTime",
-			"SyncTime is the interval between synchornozing solvers"
+			"SyncTime is the interval between synchornizing solvers"
 			"5 msec is a typical value",
 			&SimManager::setSyncTime,
 			&SimManager::getSyncTime
@@ -62,6 +62,14 @@ const Cinfo* SimManager::initCinfo()
 			"plots are of interest, and builds them.",
 			&SimManager::setAutoPlot,
 			&SimManager::getAutoPlot
+		);
+
+		static ValueFinfo< SimManager, double > plotDt(
+			"plotDt",
+			"plotDt is the timestep for plotting variables. As most will be"
+			"chemical, a default of 1 sec is reasonable",
+			&SimManager::setPlotDt,
+			&SimManager::getPlotDt
 		);
 
 		//////////////////////////////////////////////////////////////
@@ -116,6 +124,7 @@ const Cinfo* SimManager::initCinfo()
 	static Finfo* simManagerFinfos[] = {
 		&syncTime,		// Value
 		&autoPlot,		// Value
+		&plotDt,		// Value
 		&build,			// DestFinfo
 		&makeStandardElements,			// DestFinfo
 		&nodeMeshing,	// SharedFinfo
@@ -140,7 +149,8 @@ static const Cinfo* simManagerCinfo = SimManager::initCinfo();
 SimManager::SimManager()
 	: 
 		syncTime_( 0.005 ),
-		autoPlot_( 1 )
+		autoPlot_( 1 ),
+		plotdt_( 1 )
 {;}
 
 SimManager::~SimManager()
@@ -168,6 +178,16 @@ void SimManager::setSyncTime( double v )
 double SimManager::getSyncTime() const
 {
 	return syncTime_;
+}
+
+void SimManager::setPlotDt( double v )
+{
+	plotdt_ = v;
+}
+
+double SimManager::getPlotDt() const
+{
+	return plotdt_;
 }
 //////////////////////////////////////////////////////////////
 // MsgDest Definitions
@@ -228,7 +248,8 @@ void SimManager::build( const Eref& e, const Qinfo* q, string method )
 	// Get # of voxels from ChemMesh
 	// Get list of local node voxels.
 	/* This shared message should allow the mesh to force an update, and
-	 * the SimManager to request an update
+	 * the SimManager to request an update. 
+	 * Unfortunately messages do not (yet) work well with setup calls.
 	 */
 	MsgId mid = shell->doAddMsg( "OneToOne", mesh, "nodeMeshing", 
 		baseId_, "nodeMeshing" );
@@ -249,8 +270,14 @@ void SimManager::build( const Eref& e, const Qinfo* q, string method )
 
 	numChemNodes_ = Shell::numNodes() * chemLoad / ( chemLoad + hsolveLoad);
 	
+	/*
+		*/
 	nodeInfo()->send( e, q->threadNum(), numChemNodes_,
 		Shell::numProcessThreads() ); 
+	Qinfo::waitProcCycles( 2 );
+
+	cout << "Waited 2 cycles\n";
+	buildFromKkitTree( "gsl" );
 	// send numChemNodes off to the ChemMesh to come back with the 
 	// partitioning rules. This in due course leads to the return message
 	// with the mesh partitioning info. The return message in turn triggers
@@ -336,13 +363,14 @@ void SimManager::meshSplit( const Eref& e, const Qinfo* q,
 	vector< unsigned int > incomingEntries
 	)
 {
-	;
+	cout << "in SimManager::meshSplit"	;
+	// buildFromKkitTree( "gsl" );
 }
 
 void SimManager::meshStats( const Eref& e, const Qinfo* q,
 	unsigned int numMeshEntries, vector< double > voxelVols )
 {
-	;
+	cout << "in SimManager::meshStats"	;
 }
 
 //////////////////////////////////////////////////////////////

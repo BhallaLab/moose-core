@@ -34,9 +34,11 @@ class Stoich
 		unsigned int getNumPorts() const;
 		void setNumPorts( unsigned int num );
 
+		/*
 		unsigned int numCompartments() const;
 		double getCompartmentVolume( short i ) const;
 		void setCompartmentVolume( short comptIndex, double v );
+		*/
 
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
@@ -60,6 +62,16 @@ class Stoich
 		 */
 		void handleMatchedMolsAtPort( unsigned int port, vector< SpeciesId > mols );
 
+
+		void handleRemesh( unsigned int numLocalMeshEntries, 
+			vector< unsigned int > computedEntries, 
+			vector< unsigned int > allocatedEntries, 
+			vector< vector< unsigned int > > outgoingDiffusion, 
+			vector< vector< unsigned int > > incomingDiffusion );
+
+		void handleNodeDiffBoundary( unsigned int nodeNum, 
+			vector< unsigned int > meshEntries, vector< double > remoteS );
+
 		//////////////////////////////////////////////////////////////////
 		// Model traversal and building functions
 		//////////////////////////////////////////////////////////////////
@@ -71,7 +83,7 @@ class Stoich
 		unsigned int convertIdToReacIndex( Id id ) const;
 		unsigned int convertIdToPoolIndex( Id id ) const;
 		unsigned int convertIdToFuncIndex( Id id ) const;
-		unsigned int convertIdToComptIndex( Id id ) const;
+		// unsigned int convertIdToComptIndex( Id id ) const;
 
 		/**
 		 * This takes the specified forward and reverse half-reacs belonging
@@ -168,7 +180,7 @@ class Stoich
 		 * (such as updateDiffusion).
 		 */
 		void clearFlux();
-		void clearFlux( unsigned int meshIndex );
+		void clearFlux( unsigned int meshIndex, unsigned int threadNum );
 
 #ifdef USE_GSL
 		static int gslFunc( double t, const double* y, double* yprime, void* s );
@@ -182,6 +194,16 @@ class Stoich
 	protected:
 		bool useOneWay_;
 		string path_;
+		Id stoichId_;
+
+		/**
+		 * concInit is the reference array of initial concs of molecules,
+		 * in millimolar (SI units). This is non-spatial, like most of
+		 * the prototype reaction systems. If the reaction is spatial
+		 * these init
+		 * concs will subsequently be overridden
+		 */
+		vector< double > concInit_;
 
 		/**
 		 * 
@@ -193,6 +215,11 @@ class Stoich
 		 * We choose the poolIndex as the right-hand index because we need
 		 * to be able to pass the entire block of pools around for 
 		 * integration.
+		 *
+		 * The entire S_ vector is allocated, but the pools are only 
+		 * allocated for local meshEntries and for pools on
+		 * diffusive boundaries with other nodes.
+		 *
 		 * The first numVarPools_ in the poolIndex are state variables and
 		 * are integrated using the ODE solver. 
 		 * The last numEfflux_ molecules within numVarPools are those that
@@ -214,6 +241,9 @@ class Stoich
 		 * Also used for buffered molecules as the fixed values of these
 		 * molecules.
 		 * The array looks like Sinit_[meshIndex][poolIndex]
+		 * The entire Sinit_ vector is allocated, but the pools are only 
+		 * allocated for local meshEntries and for pools on
+		 * diffusive boundaries with other nodes.
 		 */
 		vector< vector< double > > Sinit_;
 
@@ -223,6 +253,9 @@ class Stoich
 		 * Has to be distinct from S because GSL uses this and swaps it
 		 * back and forth with a distinct buffer.
 		 * The array looks like y_[meshIndex][poolIndex]
+		 * The entire y_ vector is allocated, but the pools are only 
+		 * allocated for local meshEntries and for pools on
+		 * diffusive boundaries with other nodes.
 		 */
 		vector< vector< double > > y_;
 
@@ -237,6 +270,34 @@ class Stoich
 		vector< vector< double > > flux_;
 
 		/**
+		 * vector of indices of meshEntries to be computed locally.
+		 * This may not necessarily be a contiguous set, depending on
+		 * how boundaries and voxelization is done.
+		 */
+		vector< unsigned int > localMeshEntries_;
+
+		/**
+		 * List of target nodes
+		 */
+		vector< unsigned int > diffNodes_;
+
+		/**
+		 * outgoing_[targetNode][meshEntries]
+		 * For each target node, this provides a list of meshEntries to
+		 * transmit. Note that for each meshEntry the entire list of 
+		 * diffusive molecules is sent across.
+		 */
+		vector< vector< unsigned int > > outgoing_;
+
+		/**
+		 * incoming_[targetNode][meshEntries]
+		 * For each target node, this provides a list of meshEntries that
+		 * are received and put into the appropriate locations on the 
+		 * S_ vector.
+		 */
+		vector< vector< unsigned int > > incoming_;
+
+		/**
 		 * Vector of diffusion constants, one per VarPool.
 		 */
 		vector< double > diffConst_;
@@ -249,8 +310,8 @@ class Stoich
 		/**
 		 * Lookup from each molecule to its parent compartment index
 		 * compartment_.size() == number of distinct pools == max poolIndex
-		 */
 		vector< short > compartment_;
+		 */
 
 		/**
 		 * Lookup from each molecule to its Species identifer
@@ -261,13 +322,13 @@ class Stoich
 		/**
 		 * Size of each compartment. Only need as many of these as there
 		 * are distinct compartments, usually 1 or 2.
-		 */
 		vector< double > compartmentSize_;
+		 */
 
 		/**
 		 * Number of meshEntries on this solver. Equal to first index of S_.
-		 */
 		unsigned int numMeshEntries_;
+		 */
 
 		/**
 		* v_ holds the rates of each reaction. This is working memory and

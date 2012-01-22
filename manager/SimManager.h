@@ -22,6 +22,9 @@ class SimManager
 		void setSyncTime( double v );
 		double getSyncTime() const;
 
+		void setPlotDt( double v );
+		double getPlotDt() const;
+
 		/// Destination function
 		void build( const Eref& e, const Qinfo* q, string method );
 		void makeStandardElements( const Eref& e, const Qinfo*q, string meshClass );
