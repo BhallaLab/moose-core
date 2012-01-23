@@ -148,9 +148,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				UseLibraryDependencyInputs="false"
-				AdditionalDependencies="gsl_d.lib cblas_d.lib Ws2_32.lib libneuroml.lib libsbml.lib"
-				AdditionalLibraryDirectories="..\..\external\lib\GnuWin32\lib;..\..\external\lib\gsl\lib;..\..\external\lib;&quot;..\..\external\lib\OpenSceneGraph-2.8.2\lib&quot;;..\..\external\lib\boost_1_40\lib;&quot;..\..\external\lib\libsbml-3.3.2\lib&quot;"
+				UseLibraryDependencyInputs="true"
+				AdditionalDependencies="gsl.lib cblas.lib Ws2_32.lib iconv.lib libxml2.lib bzip2.lib zlib.lib libsbml.lib"
+				ShowProgress="2"
+				LinkIncremental="2"
+				AdditionalLibraryDirectories="..\..\external\lib\GnuWin32\lib;..\..\external\lib\gsl\lib;..\..\external\lib;&quot;..\..\external\lib\iconv-1.9.2.win32&quot;;&quot;..\..\external\lib\libxml2-2.7.6.win32\lib&quot;;&quot;..\..\external\lib\libsbml-3.4.1\lib&quot;"
 				SubSystem="0"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
