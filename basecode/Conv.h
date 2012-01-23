@@ -787,7 +787,8 @@ template< class T > class Conv< vector< vector< T > > >
 			for ( unsigned int i = 0; i < arg.size(); ++i ) {
 				dims[i] = arg[i].size();
 				start[i] = cumulativeIndex;
-				cumulativeIndex += 1 + ( entrySize * arg[i].size() -1 ) / sizeof( double ); 
+				if ( arg[i].size() > 0 )
+					cumulativeIndex += 1 + ( entrySize * arg[i].size() -1 ) / sizeof( double ); 
 			}
 
 			vec_.resize( cumulativeIndex );

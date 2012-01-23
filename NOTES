@@ -16880,5 +16880,5 @@ multinode case.
 
 Gone through it. Now it clears the first test where it does a calculation,
 and hangs later when it tries to change the system volume using the
-compartmentVolume function which no longer exists.
+compartmentVolume function which no longer exists. Checkin 3264.
 ============================================================================
