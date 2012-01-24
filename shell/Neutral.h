@@ -66,21 +66,12 @@ class Neutral
 			const Eref& e, const Qinfo* q ) const;
 
 		/**
-		 * Readonly field access function for getting source Ids
-		 * that sent a Msg to the current Id.
+		 * Readonly field access function for getting Ids connected to
+		 * current Id via specified Field.
 		 * Field is specified by its name.
 		 * Returns an empty vector if it fails.
 		 */
-		vector< Id > getMsgTargetIds( 
-			const Eref& e, const Qinfo* q, string field ) const;
-
-		/**
-		 * Readonly field access function for getting destination Ids
-		 * that receive Msgs from the current Id.
-		 * Field is specified by its name.
-		 * Returns an empty vector if it fails.
-		 */
-		vector< Id > getMsgSourceIds(
+		vector< Id > getNeighbours(
 			const Eref& e, const Qinfo* q, string field ) const;
 
 

@@ -979,7 +979,7 @@ void testShellAddMsg()
 	const SrcFinfo* sf = dynamic_cast< const SrcFinfo* >(
 		Tick::initCinfo()->findFinfo( "process0" ) );
 	assert( sf );
-	unsigned int numTgts = tick.eref().element()->getOutputs( tgts, 
+	unsigned int numTgts = tick.eref().element()->getNeighbours( tgts, 
 		sf );
 	assert( numTgts == 0 );
 	ret = setupSched( shell, tick, a1 ); assert( ret );
@@ -997,7 +997,7 @@ void testShellAddMsg()
 	ret = setupSched( shell, tick, g1 ); assert( ret );
 	ret = setupSched( shell, tick, g2 ); assert( ret );
 
-	numTgts = tick.eref().element()->getOutputs( tgts, sf );
+	numTgts = tick.eref().element()->getNeighbours( tgts, sf );
 	assert( numTgts == 14 );
 
 	///////////////////////////////////////////////////////////
@@ -1690,15 +1690,15 @@ void testGetMsgs()
 	// Check that the MsgSrcs are OK. 
 	////////////////////////////////////////////////////////////////
 	vector< Id > srcIds;
-	srcIds = LookupField< string, vector< Id > >::get( a2, "msgSrc", "arg3" );
+	srcIds = LookupField< string, vector< Id > >::get( a2, "neighbours", "arg3" );
 	assert( srcIds.size() == 1 );
 	assert( srcIds[0] == a1 );
 	srcIds.resize( 0 );
-	srcIds = LookupField< string, vector< Id > >::get( b2, "msgSrc", "arg3" );
+	srcIds = LookupField< string, vector< Id > >::get( b2, "neighbours", "arg3" );
 	assert( srcIds.size() == 1 );
 	assert( srcIds[0] == a1 );
 	srcIds.resize( 0 );
-	srcIds = LookupField< string, vector< Id > >::get( c2, "msgSrc", "arg3" );
+	srcIds = LookupField< string, vector< Id > >::get( c2, "neighbours", "arg3" );
 	assert( srcIds.size() == 1 );
 	assert( srcIds[0] == a1 );
 
@@ -1706,7 +1706,7 @@ void testGetMsgs()
 		ObjId( b1, 3 ), "output", ObjId( b2, 1 ), "arg3" );
 	assert( m6 != Msg::bad );
 	srcIds.resize( 0 );
-	srcIds = LookupField< string, vector< Id > >::get( b2, "msgSrc", "arg3" );
+	srcIds = LookupField< string, vector< Id > >::get( b2, "neighbours", "arg3" );
 	assert( srcIds.size() == 2 );
 	assert( srcIds[0] == a1 );
 	assert( srcIds[1] == b1 );
@@ -1716,7 +1716,7 @@ void testGetMsgs()
 	// Check that the MsgDests are OK. 
 	////////////////////////////////////////////////////////////////
 	vector< Id > destIds;
-	destIds = LookupField< string, vector< Id > >::get( a1, "msgDest", "output" );
+	destIds = LookupField< string, vector< Id > >::get( a1, "neighbours", "output" );
 	assert( destIds.size() == 5 );
 	assert( destIds[0] == a2 );
 	assert( destIds[1] == b2 );
@@ -1724,7 +1724,7 @@ void testGetMsgs()
 	assert( destIds[3] == d2 );
 	assert( destIds[4] == e2 );
 	destIds.resize( 0 );
-	destIds = LookupField< string, vector< Id > >::get( b1, "msgDest", "output" );
+	destIds = LookupField< string, vector< Id > >::get( b1, "neighbours", "output" );
 	assert( destIds.size() == 1 );
 	assert( destIds[0] == b2 );
 	cout << "." << flush;

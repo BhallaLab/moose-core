@@ -498,9 +498,10 @@ unsigned int Element::getOutputs( vector< Id >& ret, const SrcFinfo* finfo )
 	const
 {
 	assert( finfo ); // would like to check that finfo is on this.
+	unsigned int oldSize = ret.size();
+	
 	const vector< MsgFuncBinding >* msgVec =
 		getMsgAndFunc( finfo->getBindIndex() );
-	ret.resize( 0 );
 	for ( unsigned int i = 0; i < msgVec->size(); ++i ) {
 		const Msg* m = Msg::getMsg( (*msgVec)[i].mid );
 		assert( m );
@@ -509,13 +510,16 @@ unsigned int Element::getOutputs( vector< Id >& ret, const SrcFinfo* finfo )
 			id = m->e1()->id();
 		ret.push_back( id );
 	}
-	return ret.size();
+	
+	return ret.size() - oldSize;
 }
 
 unsigned int Element::getInputs( vector< Id >& ret, const DestFinfo* finfo )
 	const
 {
 	assert( finfo ); // would like to check that finfo is on src.
+	unsigned int oldSize = ret.size();
+	
 	FuncId fid = finfo->getFid();
 	vector< MsgId > caller;
 	getInputMsgs( caller, fid );
@@ -529,7 +533,35 @@ unsigned int Element::getInputs( vector< Id >& ret, const DestFinfo* finfo )
 			id = m->e2()->id();
 		ret.push_back( id );
 	}
-	return ret.size();
+	return ret.size() - oldSize;
+}
+
+unsigned int Element::getNeighbours( vector< Id >& ret, const Finfo* finfo )
+	const
+{
+	assert( finfo );
+	
+	const SrcFinfo* srcF = dynamic_cast< const SrcFinfo* >( finfo );
+	const DestFinfo* destF = dynamic_cast< const DestFinfo* >( finfo );
+	const SharedFinfo* sharedF = dynamic_cast< const SharedFinfo* >( finfo );
+	assert( srcF || destF || sharedF );
+	
+	if ( srcF )
+		return getOutputs( ret, srcF );
+	else if ( destF )
+		return getInputs( ret, destF );
+	else
+		if ( ! sharedF->src().empty() )
+			return getOutputs( ret, sharedF->src().front() );
+		else if ( ! sharedF->dest().empty() ) {
+			Finfo* subFinfo = sharedF->dest().front();
+			const DestFinfo* subDestFinfo =
+				dynamic_cast< const DestFinfo* >( subFinfo );
+			assert( subDestFinfo );
+			return getInputs( ret, subDestFinfo );
+		} else {
+			assert( 0 );
+		}
 }
 
 // May return multiple Msgs.

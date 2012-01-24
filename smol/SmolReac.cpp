@@ -230,8 +230,8 @@ void SmolReac::zombify( Element* solver, Element* orig )
 	vector< Id > subs;
 	vector< Id > prds;
 
-	orig->getOutputs( subs, dynamic_cast< const SrcFinfo* >( toSub ) );
-	orig->getOutputs( prds, dynamic_cast< const SrcFinfo* >( toPrd ) );
+	orig->getNeighbours( subs, dynamic_cast< const SrcFinfo* >( toSub ) );
+	orig->getNeighbours( prds, dynamic_cast< const SrcFinfo* >( toPrd ) );
 
 	string halfName = orig->getName() + "_f";
 	buildHalfReac( z->sim_, halfName.c_str(), subs, prds, r->getKf() );

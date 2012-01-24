@@ -186,10 +186,10 @@ void SmolMMenz::zombify( Element* solver, Element* orig )
 	MMenz* mmEnz = reinterpret_cast< MMenz* >( oer.data() );
 
 	unsigned int rateIndex = z->convertIdToReacIndex( orig->id() );
-	unsigned int num = orig->getInputs( mols, enz );
+	unsigned int num = orig->getNeighbours( mols, enz );
 	unsigned int enzIndex = z->convertIdToMolIndex( mols[0] );
 
-	num = orig->getOutputs( mols, sub );
+	num = orig->getNeighbours( mols, sub );
 	if ( num == 1 ) {
 		unsigned int subIndex = z->convertIdToMolIndex( mols[0] );
 		assert( num == 1 );
@@ -214,7 +214,7 @@ void SmolMMenz::zombify( Element* solver, Element* orig )
 		int temp = z->N_.get( molIndex, rateIndex );
 		z->N_.set( molIndex, rateIndex, temp - 1 );
 	}
-	num = orig->getOutputs( mols, prd );
+	num = orig->getNeighbours( mols, prd );
 	for ( unsigned int i = 0; i < num; ++i ) {
 		unsigned int molIndex = z->convertIdToMolIndex( mols[i] );
 		int temp = z->N_.get( molIndex, rateIndex );
