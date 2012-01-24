@@ -324,7 +324,7 @@ ZeroOrder* ZombieEnz::makeHalfReaction(
 	Element* orig, double rate, const SrcFinfo* finfo, Id enz ) const
 {
 	vector< Id > pools;
-	unsigned int numReactants = orig->getOutputs( pools, finfo ); 
+	unsigned int numReactants = orig->getNeighbours( pools, finfo ); 
 	if ( enz != Id() ) // Used to add the enz to the reactants.
 		pools.push_back( enz );
 	numReactants = pools.size();
@@ -369,7 +369,7 @@ void ZombieEnz::zombify( Element* solver, Element* orig )
 	Enz* enz = reinterpret_cast< Enz* >( oer.data() );
 
 	vector< Id > pools;
-	unsigned int numReactants = orig->getOutputs( pools, enzFinfo ); 
+	unsigned int numReactants = orig->getNeighbours( pools, enzFinfo ); 
 	assert( numReactants == 1 );
 	Id enzId = pools[0];
 
@@ -422,7 +422,7 @@ void ZombieEnz::zombify( Element* solver, Element* orig )
 	int temp = z->N_.get( cplxPool, reac3index );
 	z->N_.set( cplxPool, reac3index, temp - 1 );
 	// For the products, we go to the prd list directly.
-	numReactants = orig->getOutputs( pools, prd ); 
+	numReactants = orig->getNeighbours( pools, prd ); 
 	for ( unsigned int i = 0; i < numReactants; ++i ) {
 		unsigned int j = z->convertIdToPoolIndex( pools[i] );
 		int temp = z->N_.get( j, reac3index );

@@ -126,7 +126,7 @@ void ZombieSumFunc::zombify( Element* solver, Element* orig, Id molId )
 
 	vector< Id > srcPools;
 	unsigned int funcIndex = z->convertIdToFuncIndex( orig->id() );
-	unsigned int numSrc = orig->getInputs( srcPools, finfo );
+	unsigned int numSrc = orig->getNeighbours( srcPools, finfo );
 	assert( numSrc > 0 );
 	vector< unsigned int > poolIndex( numSrc );
 	for ( unsigned int i = 0; i < numSrc; ++i )

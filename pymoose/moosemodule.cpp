@@ -126,10 +126,8 @@ extern "C" {
          "If one of 'valueFinfo', 'lookupFinfo', 'srcFinfo', 'destFinfo' or"
          "'sharedFinfo' is specified, then only fields of that type are"
          "returned. If no argument is passed, all fields are returned."},
-        {"getMsgSrc", (PyCFunction)_pymoose_ObjId_getMsgSrc, METH_VARARGS,
-         "Retrieve a list of ObjIds sending messages to this field."},
-        {"getMsgDest", (PyCFunction)_pymoose_ObjId_getMsgDest, METH_VARARGS,
-         "Retrieve a list of Ids receiving messages from this field."},
+        {"getNeighbours", (PyCFunction)_pymoose_ObjId_getNeighbours, METH_VARARGS,
+         "Retrieve a list of Ids connected via this field."},
         {"connect", (PyCFunction)_pymoose_ObjId_connect, METH_VARARGS,
          "Connect another object via a message."},
         {"getDataIndex", (PyCFunction)_pymoose_ObjId_getDataIndex, METH_VARARGS,
@@ -1312,13 +1310,13 @@ extern "C" {
         return pyret;             
     }
 
-    static PyObject * _pymoose_ObjId_getMsgSrc(_ObjId * self, PyObject * args)
+    static PyObject * _pymoose_ObjId_getNeighbours(_ObjId * self, PyObject * args)
     {
         char * field = NULL;
-        if (!PyArg_ParseTuple(args, "s:_pymoose_ObjId_getMsgSrc", &field)){
+        if (!PyArg_ParseTuple(args, "s:_pymoose_ObjId_getNeighbours", &field)){
             return NULL;
         }
-        vector< Id > val = LookupField< string, vector< Id > >::get(self->oid_, "msgSrc", string(field));
+        vector< Id > val = LookupField< string, vector< Id > >::get(self->oid_, "neighbours", string(field));
     
         PyObject * ret = PyTuple_New((Py_ssize_t)val.size());
         for (unsigned int ii = 0; ii < val.size(); ++ ii ){            
@@ -1333,27 +1331,6 @@ extern "C" {
         return ret;
     }
 
-    static PyObject * _pymoose_ObjId_getMsgDest(_ObjId * self, PyObject * args)
-    {
-        char * field = NULL;
-        if (!PyArg_ParseTuple(args, "s:_pymoose_ObjId_getMsgDest", &field)){
-            return NULL;
-        }
-        vector< Id > val = LookupField< string, vector< Id > >::get(self->oid_, "msgDest", string(field));
-    
-        PyObject * ret = PyTuple_New((Py_ssize_t)val.size());
-        for (unsigned int ii = 0; ii < val.size(); ++ ii ){            
-            _Id * entry = PyObject_New(_Id, &IdType);
-            if (!entry || PyTuple_SetItem(ret, (Py_ssize_t)ii, (PyObject*)entry)){ 
-                Py_XDECREF(ret);                                  
-                ret = NULL;                                 
-                break;                                      
-            }
-            entry->id_ = val[ii];
-        }
-        return ret;
-        
-    }
     // 2011-03-28 10:10:19 (+0530)
     // 2011-03-23 15:13:29 (+0530)
     // getChildren is not required as it can be accessed as getField("children")

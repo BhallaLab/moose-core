@@ -103,15 +103,10 @@ const Cinfo* Neutral::initCinfo()
 		"Messages coming in to this Element", 
 			&Neutral::getIncomingMsgs );
 
-	static ReadOnlyLookupElementValueFinfo< Neutral, string, vector< Id > > msgSrc( 
-		"msgSrc",
-		"Source Ids of Messages coming into this Element on specified field", 
-			&Neutral::getMsgSourceIds );
-
-	static ReadOnlyLookupElementValueFinfo< Neutral, string, vector< Id > > msgDest( 
-		"msgDest",
-		"Destination Ids of Messages from this Element on specified field", 
-			&Neutral::getMsgTargetIds );
+	static ReadOnlyLookupElementValueFinfo< Neutral, string, vector< Id > > neighbours( 
+		"neighbours",
+		"Ids of Elements connected this Element on specified field.", 
+			&Neutral::getNeighbours );
 
 	/////////////////////////////////////////////////////////////////
 	// Value Finfos
@@ -154,8 +149,7 @@ const Cinfo* Neutral::initCinfo()
 		&localNumField,
 		&msgOut,
 		&msgIn,
-		&msgSrc,
-		&msgDest,
+		&neighbours,
 	};
 
 	/////////////////////////////////////////////////////////////////
@@ -390,28 +384,12 @@ vector< ObjId > Neutral::getIncomingMsgs(
 	return ret;
 }
 
-vector< Id > Neutral::getMsgTargetIds( 
+vector< Id > Neutral::getNeighbours( 
 	const Eref& e, const Qinfo* q, string field ) const
 {
 	vector< Id > ret;
-	const Finfo* f = e.element()->cinfo()->findFinfo( field );
-	const SrcFinfo* srcFinfo = dynamic_cast< const SrcFinfo* >( f );
-	if ( srcFinfo ) {
-		e.element()->getOutputs( ret, srcFinfo );
-	}
-	return ret;
-}
-
-
-vector< Id > Neutral::getMsgSourceIds( 
-	const Eref& e, const Qinfo* q, string field ) const
-{
-	vector< Id > ret;
-	const Finfo* f = e.element()->cinfo()->findFinfo( field );
-	const DestFinfo* destFinfo = dynamic_cast< const DestFinfo* >( f );
-	if ( destFinfo ) {
-		e.element()->getInputs( ret, destFinfo );
-	}
+	const Finfo* finfo = e.element()->cinfo()->findFinfo( field );
+	e.element()->getNeighbours( ret, finfo );
 	return ret;
 }
 

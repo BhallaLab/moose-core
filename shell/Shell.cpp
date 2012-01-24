@@ -895,7 +895,7 @@ void Shell::handleReMesh( Id baseMesh )
 	static const DestFinfo* df = dynamic_cast< const DestFinfo* >( finfo );
 	assert( df );
 	vector< Id > tgts;
-	unsigned int numTgts = baseMesh()->getInputs( tgts, df );
+	unsigned int numTgts = baseMesh()->getNeighbours( tgts, df );
 	assert( tgts.size() == numTgts );
 	unsigned int numMeshEntries = 
 		baseMesh()->dataHandler()->localEntries() ;

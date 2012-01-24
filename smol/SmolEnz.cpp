@@ -230,7 +230,7 @@ void SmolEnz::zombify( Element* solver, Element* orig )
 	Enz* enz = reinterpret_cast< Enz* >( oer.data() );
 
 	vector< Id > mols;
-	unsigned int numReactants = orig->getOutputs( mols, enzFinfo ); 
+	unsigned int numReactants = orig->getNeighbours( mols, enzFinfo ); 
 	assert( numReactants == 1 );
 	Id enzId = mols[0];
 
@@ -256,7 +256,7 @@ void SmolEnz::zombify( Element* solver, Element* orig )
 	// Now assign reaction 3. The complex is the only substrate here.
 	z->N_.set( cplxMol, rateIndex + 1, -1 );
 	// For the products, we go to the prd list directly.
-	numReactants = orig->getOutputs( mols, prd ); 
+	numReactants = orig->getNeighbours( mols, prd ); 
 	for ( unsigned int i = 0; i < numReactants; ++i ) {
 		unsigned int j = z->convertIdToMolIndex( mols[i] );
 		int temp = z->N_.get( j, rateIndex + 1 );

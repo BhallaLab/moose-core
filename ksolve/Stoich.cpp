@@ -598,9 +598,7 @@ void Stoich::zombifyChemMesh( Id meshEntry )
 
 	Element* e = meshEntry();
 	vector< Id > pools;
-	const DestFinfo* df = dynamic_cast< const DestFinfo* >( finfo );
-	assert( df );
-	unsigned int numTgts = e->getInputs( pools, df );
+	unsigned int numTgts = e->getNeighbours( pools, finfo );
 	assert( numTgts > 0 );
 
 	for ( vector< Id >::iterator i = pools.begin(); i != pools.end(); ++i ){

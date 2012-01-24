@@ -169,7 +169,7 @@ void ZombieMMenz::reinit( const Eref& e, ProcPtr p )
 double getEnzVol( const Eref& e )
 {
 	vector< Id > enzMol;
-	e.element()->getInputs( enzMol, enzDest() );
+	e.element()->getNeighbours( enzMol, enzDest() );
 	assert( enzMol.size() == 1 );
 	const Finfo* f1 = enzMol[0].element()->cinfo()->findFinfo( "requestSize" );
 	const SrcFinfo* sf = dynamic_cast< const SrcFinfo* >( f1 );
@@ -255,10 +255,10 @@ void ZombieMMenz::zombify( Element* solver, Element* orig )
 	MMenz* mmEnz = reinterpret_cast< MMenz* >( oer.data() );
 
 	unsigned int rateIndex = z->convertIdToReacIndex( orig->id() );
-	unsigned int num = orig->getInputs( pools, enz );
+	unsigned int num = orig->getNeighbours( pools, enz );
 	unsigned int enzIndex = z->convertIdToPoolIndex( pools[0] );
 
-	num = orig->getOutputs( pools, sub );
+	num = orig->getNeighbours( pools, sub );
 	if ( num == 1 ) {
 		unsigned int subIndex = z->convertIdToPoolIndex( pools[0] );
 		assert( num == 1 );
@@ -283,7 +283,7 @@ void ZombieMMenz::zombify( Element* solver, Element* orig )
 		int temp = z->N_.get( poolIndex, rateIndex );
 		z->N_.set( poolIndex, rateIndex, temp - 1 );
 	}
-	num = orig->getOutputs( pools, prd );
+	num = orig->getNeighbours( pools, prd );
 	for ( unsigned int i = 0; i < num; ++i ) {
 		unsigned int poolIndex = z->convertIdToPoolIndex( pools[i] );
 		int temp = z->N_.get( poolIndex, rateIndex );
