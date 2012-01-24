@@ -95,8 +95,7 @@ extern "C" {
     static PyObject * _pymoose_ObjId_getFieldType(_ObjId * self, PyObject * args);
     static PyObject * _pymoose_ObjId_getDataIndex(_ObjId * self, PyObject * args);
     static PyObject * _pymoose_ObjId_getFieldIndex(_ObjId * self, PyObject * args);
-    static PyObject * _pymoose_ObjId_getMsgSrc(_ObjId * self, PyObject * args);
-    static PyObject * _pymoose_ObjId_getMsgDest(_ObjId * self, PyObject * args);
+    static PyObject * _pymoose_ObjId_getNeighbours(_ObjId * self, PyObject * args);
     static PyObject * _pymoose_ObjId_getId(_ObjId * self, PyObject * args);
     static PyObject * _pymoose_ObjId_connect(_ObjId * self, PyObject * args);
     static PyObject * _pymoose_ObjId_richCompare(_ObjId * self, PyObject * args, int op);

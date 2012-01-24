@@ -2723,9 +2723,9 @@ void testCinfoFields()
 	assert( cinfo->getSrcFinfo( 0 + nsf ) == cinfo->findFinfo( "spike" ) );
 
 	unsigned int ndf = neutralCinfo->getNumDestFinfo();
-	assert( ndf == 19 );
+	assert( ndf == 18 );
 	unsigned int sdf = SynBase::initCinfo()->getNumDestFinfo();
-	assert( sdf == 23 );
+	assert( sdf == 22 );
 	assert( cinfo->getNumDestFinfo() == 10 + sdf );
 	assert( cinfo->getDestFinfo( 0+sdf ) == cinfo->findFinfo( "set_Vm" ) );
 	assert( cinfo->getDestFinfo( 1+sdf ) == cinfo->findFinfo( "get_Vm" ) );

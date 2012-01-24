@@ -52,10 +52,9 @@ void testTicks()
 	assert( m1 != Msg::bad );
 
 	vector< Id > msgDests;
-	const SrcFinfo* sf = dynamic_cast< const SrcFinfo* >( 
-		Tick::initCinfo()->findFinfo( "process0" ) );
+	const Finfo* sf = Tick::initCinfo()->findFinfo( "process0" );
 	assert( sf );
-	tickId()->getOutputs( msgDests, sf );
+	tickId()->getNeighbours( msgDests, sf );
 	assert( msgDests.size() == 1 );
 	assert( msgDests[0] == arithId );
 

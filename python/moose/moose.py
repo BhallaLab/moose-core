@@ -456,11 +456,8 @@ class Neutral(object):
         else:
             return self.oid_.getFieldNames(fieldType)
 
-    def getMsgSrc(self, fieldName):
-        return self.oid_.getMsgSrc(fieldName)
-    
-    def getMsgDest(self, fieldName):
-        return self.oid_.getMsgDest(fieldName)
+    def getNeighbours(self, fieldName):
+        return self.oid_.getNeighbours(fieldName)
 
     def connect(self, srcField, dest, destField, msgType='Single'):
         return self.oid_.connect(srcField, dest.oid_, destField, msgType)

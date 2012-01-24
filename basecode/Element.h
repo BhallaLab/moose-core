@@ -240,17 +240,10 @@ class Element
 		 	const;
 
 		/**
-		 * Fills in vector of Ids receiving messages from this SrcFinfo. 
-		 * Returns # found
-		 */
-		unsigned int getOutputs( vector< Id >& ret, const SrcFinfo* finfo )
-			const;
-
-		/**
-		 * Fills in vector of Ids sending messeges to this DestFinfo on
+		 * Fills in vector of Ids connected to this Finfo on
 		 * this Element. Returns # found
 		 */
-		unsigned int getInputs( vector< Id >& ret, const DestFinfo* finfo )
+		unsigned int getNeighbours( vector< Id >& ret, const Finfo* finfo )
 			const;
 
 		/**
@@ -269,6 +262,20 @@ class Element
 		void zombieSwap( const Cinfo* newCinfo, DataHandler* newDataHandler     );
 
 	private:
+		/**
+		 * Fills in vector of Ids receiving messages from this SrcFinfo. 
+		 * Returns # found
+		 */
+		unsigned int getOutputs( vector< Id >& ret, const SrcFinfo* finfo )
+			const;
+
+		/**
+		 * Fills in vector of Ids sending messeges to this DestFinfo on
+		 * this Element. Returns # found
+		 */
+		unsigned int getInputs( vector< Id >& ret, const DestFinfo* finfo )
+			const;
+
 		string name_;
 
 		Id id_; /// Stores the unique identifier for Element.

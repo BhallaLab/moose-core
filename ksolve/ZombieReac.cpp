@@ -316,7 +316,7 @@ ZeroOrder* ZombieReac::makeHalfReaction(
 	Element* orig, double rate, const SrcFinfo* finfo ) const
 {
 	vector< Id > mols;
-	unsigned int numReactants = orig->getOutputs( mols, finfo ); 
+	unsigned int numReactants = orig->getNeighbours( mols, finfo ); 
 	ZeroOrder* rateTerm = 0;
 	if ( numReactants == 1 ) {
 		rateTerm = 
