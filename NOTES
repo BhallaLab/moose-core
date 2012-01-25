@@ -16846,9 +16846,9 @@ handled through the Shell.
 	Again, the voxelization is easy but the node partitioning is not, and
 should be done through SimManager.
 Let's go through SimManager. This means that:
-- Need a pool Sinit vector sans voxels in the Stoich. Could take over the concs
+* Need a pool Sinit vector sans voxels in the Stoich. Could take over the concs
 	so we are not stuck with the volume conversion issues.
-- Need to be able to do first pass set up using the Sinit vector.
+* Need to be able to do first pass set up using the Sinit vector.
 - Need to be able to revoxelize any time, and this function is just what is 
 	used to build it the first time too.
 
@@ -16881,4 +16881,61 @@ multinode case.
 Gone through it. Now it clears the first test where it does a calculation,
 and hangs later when it tries to change the system volume using the
 compartmentVolume function which no longer exists. Checkin 3264.
+============================================================================
+23 Jan 2012
+Fix to converter for vector< vector< T > >, pointed out by Niraj. I'm surprised
+the original worked. Checkin 3268.
+
+Continuing from 15 Jan. The Re-meshing operations sequence.
+
+Geom changes 
+	-> send Msg to Chem Mesh
+	OR direct remesh assignment on a ChemMesh 
+	-> Send msg to Pools to remesh:
+		Presumably a Neutral call to reconfigure DataHandler.
+		This will have to go to the Shell, somehow, to propagate to all
+			affected nodes. Some nasty node balancing may ensue.
+	Send Msg to SimManager to remesh. 
+		-> Send Msg to Stoich to remesh
+		This too has to undertake nasty load balancing, not of
+		DataHandler, but of contents.
+		-> Send Msg to GslIntegrator to reconfigure DataHandler too.
+		Again, has to go to Shell to orchestrate balancing.
+		
+// This one lets the DataHandler figure out its own node balancing.
+// Works fine for all symmetrical cases where there is no relative organization
+// required for local nodes. They come in a block as defined by a linearized
+// version of the n-dimensional Handler.
+DataHandler::innerNodeBalance( numData, myNode, numNodes )
+
+// This one imposes load balancing. Usually also imposes change of the 
+// DataHandler to a different class. Arbitrary node arrangements possible.
+// Note that the form of command means it can be applied on all nodes.
+DataHandler::innerNodeBalance( myNode, vector< short > nodeAssignment );
+
+Both these functions need a handler through Neutral. The role of this handler
+is to transfer data out to other nodes, and coordinate harvesting of external
+node data to fill in local node portion. Frequently these functions change the
+size of the DataHandler.
+
+The Neutral function must also tell the messages that their targets have moved.
+Most messages are already globalized, but some sparse messages may need
+also to be reorganized. Perhaps defer this? The sparse message should have a
+higher-order definition, which can be reactivated.
+
+============================================================================
+25 Jan 2012
+Currently a bit stuck because the pool compartment resize is not propagating
+through to the DataHandler as it should. 
+This is in testBuiltins.cpp:470.
+
+The ofid->fid is zero. This is wrong.
+
+Tracked it down. Turns out that the addToStructuralQ did not know about
+direct Q insertion cases, and was therefore missing out the ObjFid data
+required to execute such calls. With this fixed the code now clears unit
+tests. The code point is now back in the regression tests where I need to 
+reformulate the remeshing calls to be called from the Mesh object. Key
+advance is that these structural calls can now be invoked from regular objects.
+
 ============================================================================

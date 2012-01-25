@@ -209,6 +209,7 @@ bool BlockHandler::execThread( ThreadId thread, DataId di ) const
 	assert( thread < threadStart_.size() );
 	assert( thread < threadEnd_.size() );
 	return ( 
+		( thread == ScriptThreadNum ) || 
 		( di == DataId::globalField && thread <= 1 ) ||
 		( threadStart_[ thread ] <= di.value() && 
 		di.value() < threadEnd_[ thread ] )
