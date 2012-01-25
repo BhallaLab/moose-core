@@ -849,10 +849,12 @@ void Shell::clearRestructuringQ()
 }
 
 /**
- * This function synchronizes fieldDimension on the DataHandler across 
+ * This function synchronizes lastDimension (i.e., field Dimension)
+ * on the DataHandler across 
  * nodes. Used after function calls that might alter the number of
  * Field entries in the table.
- * The tgt is the FieldElement whose fieldDimension needs updating.
+ * The tgt is the FieldElement whose lastDimension needs updating.
+ * Deprecated
  */
 void Shell::doSyncDataHandler( Id tgt )
 {
@@ -878,7 +880,7 @@ void Shell::doSyncDataHandler( Id tgt )
 	// So we have to do the ugly but reliable 'set' function.
 	// fv->setFieldDimension( maxIndex_ );
 	Field< unsigned int >::set( ObjId( tgt, 0 ), 
-		"fieldDimension", maxIndex_ );
+		"lastDimension", maxIndex_ );
 	/*
 	*/
 }

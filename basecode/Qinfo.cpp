@@ -616,6 +616,9 @@ void Qinfo::enableStructuralOps()
  */
 bool Qinfo::addToStructuralQ() const
 {
+	static const unsigned int ObjFidSizeInDoubles =
+		1 + ( sizeof( ObjFid ) - 1 ) / sizeof( double );
+
 	bool ret = 0;
 		if ( !isSafeForStructuralOps_ ) {
 			if ( isDummy() )
@@ -637,8 +640,15 @@ bool Qinfo::addToStructuralQ() const
 			structuralQinfo_.back().dataIndex_ = structuralQdata_.size();
 			*/
 			structuralQinfo_.back().dataIndex_ = structuralQdata_.size();
-			structuralQdata_.insert( structuralQdata_.end(), 
-				inQ_ + dataIndex_, inQ_ + dataIndex_ + dataSize_ );
+			structuralQinfo_.back().threadNum_ = ScriptThreadNum;
+			if ( isDirect() ) {
+				structuralQdata_.insert( structuralQdata_.end(), 
+					inQ_ + dataIndex_, inQ_ + dataIndex_ + 
+					ObjFidSizeInDoubles + dataSize_ );
+			} else {
+				structuralQdata_.insert( structuralQdata_.end(), 
+					inQ_ + dataIndex_, inQ_ + dataIndex_ + dataSize_ );
+			}
 			ret = 1;
 		}
 	return ret;

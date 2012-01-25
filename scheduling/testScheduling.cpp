@@ -691,7 +691,7 @@ void testMultiNodeIntFireNetwork()
 	// shell->doSyncDataHandler( e2.id(), "get_numSynapses", synId );
 
 	unsigned int fieldSize = 
-		Field< unsigned int >::get( synId, "fieldDimension" );
+		Field< unsigned int >::get( synId, "lastDimension" );
 	assert( fieldSize == 134 );
 
 	// cout << Shell::myNode() << ": fieldSize = " << fieldSize << endl;

@@ -66,25 +66,32 @@ const Cinfo* Neutral::initCinfo()
 		"Note that on a FieldElement this includes field entries."
 		"If field entries form a ragged array, then the linearSize may be"
 		"greater than the actual number of allocated entries, since the"
-		"fieldDimension is at least as big as the largest ragged array.",
+		"lastDimension is at least as big as the largest ragged array.",
 			&Neutral::getLinearSize );
 
 	static ReadOnlyElementValueFinfo< Neutral, vector< unsigned int > > dimensions( 
 		"dimensions",
 		"Dimensions of data on the Element." 
-		"This includes the fieldDimension if present.",
+		"This includes the lastDimension (field dimension) if present.",
 			&Neutral::getDimensions );
 
-	static ElementValueFinfo< Neutral, unsigned int > fieldDimension( 
-		"fieldDimension",
-		"Max size of the dimension of the array of fields."
-		"Applicable specially for ragged arrays of fields, "
-		"where each object may have a different number of fields. "
-		"Must be larger than the size of any of the ragged arrays."
+	static ElementValueFinfo< Neutral, unsigned int > lastDimension( 
+		"lastDimension",
+		"Max size of the last dimension of the object."
+		"In the case of regular objects, resizing this value resizes"
+		"the last dimension"
+		"In the case of ragged arrays (such as synapses), resizing this"
+		"value resizes the upper limit of the last dimension,"
+		"but cannot make it smaller than the biggest ragged array size."
 		"Normally is only assigned from Shell::doSyncDataHandler.",
-			&Neutral::setFieldDimension,
-			&Neutral::getFieldDimension
+			&Neutral::setLastDimension,
+			&Neutral::getLastDimension
 		);
+
+	static ReadOnlyElementValueFinfo< Neutral, vector< vector< unsigned int > > > pathIndices( 
+		"pathIndices",
+		"Indices of the entire path hierarchy leading up to this Object.", 
+			&Neutral::getPathIndices );
 
 	static ReadOnlyElementValueFinfo< Neutral, unsigned int > 
 		localNumField( 
@@ -129,27 +136,51 @@ const Cinfo* Neutral::initCinfo()
 	static DestFinfo parentMsg( "parentMsg", 
 		"Message from Parent Element(s)", 
 		new EpFunc1< Neutral, int >( &Neutral::destroy ) );
+
+	static DestFinfo blockNodeBalance( "blockNodeBalance",
+		"Request conversion of data into a blockDataHandler subclass,"
+		"and to carry out node balancing of data."
+		"The amount of data is not altered, and if the data is already a"
+		"blockDataHandler subclass it retains its original dimensions"
+		"If converting from a generalDataHandler to blockHandler it treats"
+		"it as a linear array"
+		"The function preserves the old data and shuffles info around"
+		"between nodes to complete the balancing."
+		"Arguments are: myNode, startNode, endNode",
+		new EpFunc3< Neutral, unsigned int, unsigned int, unsigned int >(
+			&Neutral::blockNodeBalance ) );
+
+	static DestFinfo generalNodeBalance( "generalNodeBalance",
+		"Request conversion of data into a generalDataHandler subclass,"
+		"and to carry out node balancing of data as per specified args."
+		"The amount of data is not altered. The generalDataHandler loses"
+		"any dimensional information that may have been present in an "
+		"earlier blockDataHandler incarnation."
+		"Arguments are: myNode, nodeAssignment",
+		new EpFunc2< Neutral, unsigned int, vector< unsigned int > >(
+			&Neutral::generalNodeBalance ) );
 			
 	/////////////////////////////////////////////////////////////////
 	// Setting up the Finfo list.
 	/////////////////////////////////////////////////////////////////
 	static Finfo* neutralFinfos[] = {
-		&childMsg,
-		&parentMsg,
-		&thisFinfo,
-		&name,
-		&me,
-		&parent,
-		&children,
-		&path,
-		&className,
-		&linearSize,
-		&dimensions,
-		&fieldDimension,
-		&localNumField,
-		&msgOut,
-		&msgIn,
-		&neighbours,
+		&childMsg,				// SrcFinfo
+		&parentMsg,				// DestFinfo
+		&thisFinfo,				// Value
+		&name,					// Value
+		&me,					// ReadOnlyValue
+		&parent,				// ReadOnlyValue
+		&children,				// ReadOnlyValue
+		&path,					// ReadOnlyValue
+		&className,				// ReadOnlyValue
+		&linearSize,			// ReadOnlyValue
+		&dimensions,			// ReadOnlyValue
+		&lastDimension,			// Value
+		&localNumField,			// ReadOnlyValue
+		&pathIndices,			// ReadOnlyValue
+		&msgOut,				// ReadOnlyValue
+		&msgIn,					// ReadOnlyValue
+		&neighbours,			// ReadOnlyLookupValue
 	};
 
 	/////////////////////////////////////////////////////////////////
@@ -317,24 +348,43 @@ vector< unsigned int > Neutral::getDimensions(
 	return ret;
 }
 
-void Neutral::setFieldDimension( const Eref& e, const Qinfo* q, 
+void Neutral::setLastDimension( const Eref& e, const Qinfo* q, 
 	unsigned int size )
 {
+	if ( q->protectedAddToStructuralQ() )
+		return;
 	// if ( Shell::isSingleThreaded() || q->threadNum() == 1 )
 	// e.element()->dataHandler()->setFieldDimension( size );
 	DataHandler* dh = e.element()->dataHandler();
-	if ( dh->numDimensions() > 0 )
-		dh->resize( dh->numDimensions() - 1, size );
+	FieldDataHandlerBase* fdh = 
+		dynamic_cast< FieldDataHandlerBase* >( dh );
+	if ( fdh ) {
+		fdh->setMaxFieldEntries( size );	
+	} else if ( dh->pathDepth() > 0 ) {
+		e.element()->resize( dh->pathDepth(), size );
+	}
 }
 
-unsigned int Neutral::getFieldDimension( 
+unsigned int Neutral::getLastDimension( 
 	const Eref& e, const Qinfo* q ) const
 {
 	// return e.element()->dataHandler()->getFieldDimension();
 	const DataHandler* dh = e.element()->dataHandler();
-	if ( dh->numDimensions() == 0 )
-		return 0;
-	return dh->sizeOfDim( dh->numDimensions() - 1 );
+	const FieldDataHandlerBase* fdh = 
+		dynamic_cast< const FieldDataHandlerBase* >( dh );
+	if ( fdh ) {
+		return fdh->getMaxFieldEntries();
+	} else if ( dh->numDimensions() > 0 ) {
+		// vector< vector< unsigned int > > indices = dh->pathIndices( e.index() );
+		return dh->sizeOfDim( dh->numDimensions() - 1 );
+	}
+	return 0;
+}
+
+vector< vector< unsigned int > > Neutral::getPathIndices(
+	const Eref& e, const Qinfo* q ) const
+{
+	return e.element()->dataHandler()->pathIndices( e.index() );
 }
 
 unsigned int Neutral::getLocalNumField( 
@@ -405,6 +455,9 @@ unsigned int Neutral::buildTree( const Eref& e, const Qinfo* q, vector< Id >& tr
 		ret += buildTree( i->eref(), q, tree );
 	return ret;
 }
+//////////////////////////////////////////////////////////////////////////
+// Dest Functions
+//////////////////////////////////////////////////////////////////////////
 
 //
 // Stage 1: mark for deletion. This is done by setting cinfo = 0
@@ -422,6 +475,25 @@ void Neutral::destroy( const Eref& e, const Qinfo* q, int stage )
 	assert( numDescendants == tree.size() );
 	Element::destroyElementTree( tree );
 }
+
+/**
+ * Request conversion of data into a blockDataHandler subclass,
+ * and to carry out node balancing of data as per args.
+ */
+void Neutral::blockNodeBalance( const Eref& e, const Qinfo* q, 
+	unsigned int, unsigned int, unsigned int )
+{
+}
+
+/**
+ * Request conversion of data into a generalDataHandler subclass,
+ * and to carry out node balancing of data as per args.
+ */
+void Neutral::generalNodeBalance( const Eref& e, const Qinfo* q, 
+	unsigned int myNode, vector< unsigned int > nodeAssignment )
+{
+}
+
 
 /////////////////////////////////////////////////////////////////////////
 // Static utility functions.
@@ -579,7 +651,7 @@ bool Neutral::isGlobalField( const string& field )
 	if ( fieldnames.size() == 0 ) {
 		fieldnames.insert( "set_name" );
 		fieldnames.insert( "set_group" );
-		fieldnames.insert( "set_fieldDimension" );
+		fieldnames.insert( "set_lastDimension" );
 	}
 	*/
 	if ( field.length() < 8 )
@@ -589,7 +661,7 @@ bool Neutral::isGlobalField( const string& field )
 			return 1;
 		if ( field == "set_group" )
 			return 1;
-		if ( field == "set_fieldDimension" ) // This is the critical one!
+		if ( field == "set_lastDimension" ) // This is the critical one!
 			return 1;
 	}
 	return 0;

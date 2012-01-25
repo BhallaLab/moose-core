@@ -466,7 +466,7 @@ void testMpiStatsReduce()
 	// This calculation only works for node 0, with the present (implicit)
 	// decomposition scheme.
 	// assert( fd->biggestFieldArraySize() == size/Shell::numNodes() - 1 );
-	Field< unsigned int >::set( synId, "fieldDimension", size );
+	Field< unsigned int >::set( synId, "lastDimension", size );
 	assert ( fd->totalEntries() == size * size );
 	// Here we test setting a 2-D array with different dims on each axis.
 	vector< double > delay( size * size, 0.0 );
