@@ -2723,9 +2723,9 @@ void testCinfoFields()
 	assert( cinfo->getSrcFinfo( 0 + nsf ) == cinfo->findFinfo( "spike" ) );
 
 	unsigned int ndf = neutralCinfo->getNumDestFinfo();
-	assert( ndf == 18 );
+	assert( ndf == 19 );
 	unsigned int sdf = SynBase::initCinfo()->getNumDestFinfo();
-	assert( sdf == 22 );
+	assert( sdf == 23 );
 	assert( cinfo->getNumDestFinfo() == 10 + sdf );
 	assert( cinfo->getDestFinfo( 0+sdf ) == cinfo->findFinfo( "set_Vm" ) );
 	assert( cinfo->getDestFinfo( 1+sdf ) == cinfo->findFinfo( "get_Vm" ) );
@@ -2742,7 +2742,7 @@ void testCinfoFields()
 	assert( cinfo->getDestFinfo( 10+sdf )->name() == "dummy" );
 
 	unsigned int nvf = neutralCinfo->getNumValueFinfo();
-	assert( nvf == 13 );
+	assert( nvf == 14 );
 	assert( cinfo->getNumValueFinfo() == 5 + nvf );
 	assert( cinfo->getValueFinfo( 0 + nvf ) == cinfo->findFinfo( "numSynapses" ) );
 	assert( cinfo->getValueFinfo( 1 + nvf ) == cinfo->findFinfo( "Vm" ) );

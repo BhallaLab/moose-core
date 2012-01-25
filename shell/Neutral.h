@@ -123,22 +123,67 @@ class Neutral
 		vector< unsigned int > getDimensions( const Eref& e, const Qinfo* q ) const;
 
 		/**
-		 * Access function for the fieldDimension of the data handler
-		 * for the Element. Ignored for objects that are not Fields.
+		 * Access function for the last (fastest varying) Dimension of the 
+		 * data handler for the Element. For FieldDataHandlers this sets
+		 * the max size of the ragged array for fields, such as synapses.
+		 * For regular data handlers this sets the last dimension. It does
+		 * permit you to scale from zero to N on the last dimension, and
+		 * vice versa. A feeble attempt is made to retain existing data, but
+		 * should not be counted on. Node balancing is done in accordance
+		 * with whatever the last policy was.
+		 * Note that this operation invalidates all DataIds and ObjIds
+		 * that were set up for this Element. In the dubious event of your
+		 * using iterators on the Element or its contents, those will be
+		 * invalidated too.  
+		 * Messages should remain intact.
 		 */
-		void setFieldDimension( const Eref& e, const Qinfo* q, unsigned int val );
-		unsigned int getFieldDimension( const Eref& e, const Qinfo* q ) const;
+		void setLastDimension( const Eref& e, const Qinfo* q, unsigned int val );
+		/**
+		 * Access function for the last (fastest varying) Dimension of the 
+		 * data handler for the Element. For FieldDataHandlers this gets
+		 * the max size of the ragged array for fields, such as synapses.
+		 * For regular data handlers this gets the last dimension.
+		 */
+		unsigned int getLastDimension( const Eref& e, const Qinfo* q ) const;
+
+		/** 
+		 * Returns the vector of path index vectors for each dimension of
+		 * the current object. Note that this is not the dimensions of these
+		 * vectors, but the actual indices used to look up the object.
+		 */
+		vector< vector< unsigned int > > getPathIndices( 
+			const Eref& e, const Qinfo* q ) const;
+
 		/**
 		 * Gets the number of entries of a FieldElement on current node.
 		 * If it is a regular Element, returns zero.
 		 */
 		unsigned int getLocalNumField( const Eref& e, const Qinfo* q) const;
 
+		////////////////////////////////////////////////////////////
+		// DestFinfo functions
+		////////////////////////////////////////////////////////////
+
 		/**
 		 * Destroys Element and all children
 		 */
 		void destroy( const Eref& e, const Qinfo* q, int stage );
+
+		/**
+		 * Request conversion of data into a blockDataHandler subclass,
+		 * and to carry out node balancing of data as per args.
+		 */
+		void blockNodeBalance( const Eref& e, const Qinfo* q, 
+			unsigned int, unsigned int, unsigned int );
+
+		/**
+		 * Request conversion of data into a generalDataHandler subclass,
+		 * and to carry out node balancing of data as per args.
+		 */
+		void generalNodeBalance( const Eref& e, const Qinfo* q, 
+			unsigned int myNode, vector< unsigned int > nodeAssignment );
 		
+
 		////////////////////////////////////////////////////////////
 		// Static utility functions
 		////////////////////////////////////////////////////////////

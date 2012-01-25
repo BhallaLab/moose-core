@@ -453,11 +453,12 @@ class Qinfo
 		static vector< double > mpiQ1_;
 
 		/**
-		 * This contains pointers to Queue entries requesting functions that
+		 * This copies over Queue entries requesting functions that
 		 * change the model structure.
-		 * We only need to point to the original Queue entry, because it
-		 * sits safely in the InQ. Likewise, its data is unchanged sitting
-		 * in the InQ. 
+		 * We have to copy over the original Queue entry, because 
+		 * the InQ may change. Likewise, we have to copy over the data
+		 * that was sitting in the inQ, and save it in the 
+		 * sructuralQdata. 
 		 * Operations using the structuralQ include creation, deletion,
 		 * resizing, and movement of Elements and Msgs. These functions
 		 * must be carried out at a time when nothing else is being
