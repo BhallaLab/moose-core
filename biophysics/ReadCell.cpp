@@ -11,6 +11,7 @@
 #include "../shell/Shell.h"
 #include "ReadCell.h"
 #include "../utility/utility.h"
+#include "../utility/numutil.h"
 #include <fstream>
 
 double calcSurf( double, double );

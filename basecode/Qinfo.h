@@ -9,6 +9,7 @@
 
 #ifndef QINFO_H
 #define QINFO_H
+#include <pthread.h>
 
 /// Forward declarations
 class ReduceFinfoBase;
@@ -482,8 +483,8 @@ class Qinfo
 		/**
 		 * Used to protect the queues from the timing of parser calls
 		 */
-		static pthread_mutex_t* qMutex_;
-		static pthread_cond_t* qCond_;
+		static pthread_mutex_t *qMutex_;
+		static pthread_cond_t *qCond_;
 
 		// Another mutex for the structural queue
 		static pthread_mutex_t* sqMutex_;

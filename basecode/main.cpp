@@ -8,10 +8,19 @@
 **********************************************************************/
 
 #include "header.h"
-#include <sys/time.h>
+#ifndef WIN32
+	#include <sys/time.h>
+#else
+	#include <time.h>
+#endif
 #include <math.h>
 #include <queue>
+//#ifdef WIN32
+//#include <process.h>
+//#include <windows.h>
+//#else
 #include <unistd.h> // for getopt
+//#endif
 #include "../scheduling/Tick.h"
 #include "../scheduling/TickMgr.h"
 #include "../scheduling/TickPtr.h"

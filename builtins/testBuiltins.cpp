@@ -269,7 +269,7 @@ void testTable()
 	Id tabentry( tabid.value() + 1 );
 	Table* t = reinterpret_cast< Table* >( tabid.eref().data() );
 	for ( unsigned int i = 0; i < 100; ++i ) {
-		t->input( sqrt( i ) );
+		t->input( sqrt((double) i ) );
 	}
 	unsigned int numEntries = Field< unsigned int >::get( 
 		tabid, "num_table" );
@@ -282,7 +282,7 @@ void testTable()
 	for ( unsigned int i = 0; i < 100; ++i ) {
 		ObjId temp( tabentry, DataId( i ) );
 		double ret = Field< double >::get( temp, "value" );
-		assert( fabs( ret - sqrt( i ) ) < 1e-6 );
+		assert( fabs( ret - sqrt((double) i ) ) < 1e-6 );
 	}
 	/*
 	SetGet2< string, string >::set( 

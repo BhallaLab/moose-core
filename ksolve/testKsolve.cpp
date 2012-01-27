@@ -7,7 +7,11 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#include <sys/time.h>
+#ifndef WIN32
+	#include <sys/time.h>
+#else
+	#include <time.h>
+#endif
 #include "StoichHeaders.h"
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_matrix.h>
@@ -127,6 +131,7 @@ void testKsolveZombify( string modelFile )
 	double uret = tv1.tv_usec;
 	uret -= tv0.tv_usec;
 	return sret + 1e-6 * uret;
+	
 }
 
 void testGsolver(string modelName, string plotName, double plotDt, double simTime )

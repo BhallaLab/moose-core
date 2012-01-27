@@ -31,15 +31,15 @@
 
 #ifndef _UTILITY_H
 
-char shortType(string type);
-char shortFinfo(string ftype);
+char shortType(std::string type);
+char shortFinfo(std::string ftype);
 
 void tokenize(
-	const string& str,	
-	const string& delimiters,
-        vector< string >& tokens );
-string trim(const std::string myString);
-const map<string, string>& getArgMap();
+	const std::string& str,	
+	const std::string& delimiters,
+	std::vector< std::string >& tokens );
+std::string trim(const std::string myString);
+const map<std::string, std::string>& getArgMap();
 
 #endif // !_UTILITY_H
 

@@ -14,7 +14,7 @@ double assignRates( RateCalculation& r )
 	return r();
 }
 */
-
+#include "../utility/numutil.h"
 class RateTerm
 {
 	public:
