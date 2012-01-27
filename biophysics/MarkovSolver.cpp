@@ -256,7 +256,7 @@ Matrix* MarkovSolver::computeMatrixExponential()
 	//In case none of the candidates were satisfactory, we scale down the norm
 	//by dividing A by 2^s until ||A|| < 1. We then use a 13th degree
 	//Pade approximant.
-	double sf = ceil( log( norm / thetaM[4] ) / log( 2 ) );
+	double sf = ceil( log( norm / thetaM[4] ) / log( (double)2 ) );
 	unsigned int s = 0;
 
 	if ( sf > 0 ) 

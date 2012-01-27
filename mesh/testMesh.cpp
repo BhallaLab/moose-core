@@ -52,7 +52,7 @@ void testCylMesh()
 	assert( doubleEq( cm.getZ1(), 7 ) );
 	assert( doubleEq( cm.getR1(), 2 ) );
 
-	assert( doubleEq( cm.getLambda(), sqrt( 29 ) / 5.0 ) );
+	assert( doubleEq( cm.getLambda(), sqrt( 29.0 ) / 5.0 ) );
 
 	cm.setX0( 2 );
 	cm.setY0( 3 );

@@ -13,7 +13,7 @@
 #include "Stencil.h"
 #include "ChemMesh.h"
 #include "CylMesh.h"
-
+#include "../utility/numutil.h"
 const Cinfo* CylMesh::initCinfo()
 {
 		//////////////////////////////////////////////////////////////
