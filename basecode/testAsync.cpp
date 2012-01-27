@@ -306,7 +306,7 @@ void testInnerSet()
 
 	for ( unsigned int i = 0; i < size; ++i ) {
 		// double args[100];
-		double x = sqrt( i );
+		double x = sqrt((double)i );
 		Conv< double > conv( x );
 		Eref dest( e2.element(), i );
 		Qinfo::enableStructuralOps();
@@ -317,7 +317,7 @@ void testInnerSet()
 	}
 
 	for ( unsigned int i = 0; i < size; ++i ) {
-		double temp = sqrt( i );
+		double temp = sqrt((double) i );
 		double val = reinterpret_cast< Arith* >(e2.element()->dataHandler()->data( i ))->getOutput();
 		assert( doubleEq( val, temp ) );
 	}
@@ -450,7 +450,7 @@ void testStrSet()
 	assert( ret->getName() == "NewImprovedTest" );
 	
 	for ( unsigned int i = 0; i < size; ++i ) {
-		double x = sqrt( i );
+		double x = sqrt((double) i );
 		// Eref dest( e2.element(), i );
 		ObjId dest( i2, i );
 		stringstream ss;
@@ -461,7 +461,7 @@ void testStrSet()
 	}
 
 	for ( unsigned int i = 0; i < size; ++i ) {
-		double temp = sqrt( i );
+		double temp = sqrt((double) i );
 		double val = reinterpret_cast< Arith* >( Eref( i2(), i ).data() )->getOutput();
 		assert( fabs( val - temp ) < 1e-5 );
 		// DoubleEq won't work here because string is truncated.

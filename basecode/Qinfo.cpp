@@ -11,6 +11,10 @@
 // #include "ReduceFinfo.h"
 #include "../shell/Shell.h"
 #include <time.h>
+#ifdef WIN32	      // True for Visual C++ compilers
+	#include <Windows.h>  // for Win32 Sleep function
+#endif
+
 /*
 #ifdef USE_MPI
 #include <mpi.h>
@@ -248,9 +252,15 @@ void Qinfo::swapQ()
 
 	// Used to avoid pounding on the CPU when nothing is happening.
 	if ( Shell::isParserIdle() && numQinfo == 0 ) {
-		struct timespec req = { 0, 1000000 };
-		nanosleep( &req, 0 );
+		#ifdef WIN32 // If this is an MS VC++ compiler..
+			unsigned int milliseconds = 1;
+			Sleep( milliseconds );
+		#else           // else assume POSIX compliant..
+			struct timespec req = { 0, 1000000 };
+			nanosleep( &req, 0 );
+		#endif // _MSC_VER
 	}
+
 }
 
 /**
