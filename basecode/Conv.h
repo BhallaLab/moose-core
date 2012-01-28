@@ -798,7 +798,7 @@ template< class T > class Conv< vector< vector< T > > >
 			for ( unsigned int i = 0; i < dims.size(); ++i ) {
 				if ( arg[i].size() > 0 ) {
 					memcpy( &vec_[ start[i] ], &arg[i][0], 
-						arg.size() * entrySize );
+						arg[i].size() * entrySize );
 				}
 			}
 		}

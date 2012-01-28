@@ -16937,5 +16937,14 @@ required to execute such calls. With this fixed the code now clears unit
 tests. The code point is now back in the regression tests where I need to 
 reformulate the remeshing calls to be called from the Mesh object. Key
 advance is that these structural calls can now be invoked from regular objects.
+Checkin 3270.
 
+Now it isn't computing the original, single mesh-entry kinetic model.
+I looked at the trace and though it is calling the Stoich::innerGslFunc the
+values in the S_ vector don't change.
+
+The v vector does obtain nonzero rates of change. 
+yprime is all zeros though. Why would SparseMatrix::computeRowRate fail?
+
+Doing a valgrind. Clues there in zug.
 ============================================================================
