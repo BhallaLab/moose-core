@@ -10,6 +10,41 @@
 #ifndef _SETGET_H
 #define _SETGET_H
 
+// Forward declaration needed for localGet()
+template< class T, class A > class GetOpFunc;
+
+/**
+ * Similar to Field< A >::fastGet(), except that an existing Msg is not needed.
+ * 
+ * Instant-return call for a single value. Bypasses all the queueing stuff.
+ * It is hardcoded so type safety will have to be coded in too:
+ * the dynamic_cast will catch it only at runtime.
+ * 
+ * Perhaps analogous localSet(), localLookupGet(), localGetVec(), etc. should
+ * also be added.
+ * 
+ * Also, will be nice to change this to Field< A >::localGet() to make things
+ * more uniform.
+ */
+template< class T, class A >
+A localGet( const Eref& er, string field )
+{
+	const Finfo* finfo = er.element()->cinfo()->findFinfo( "get_" + field );
+	assert( finfo );
+	
+	const DestFinfo* dest = dynamic_cast< const DestFinfo* >( finfo );
+	assert( dest );
+	
+	const OpFunc* op = dest->getOpFunc();
+	assert( op );
+	
+	const GetOpFunc< T, A >* gop =
+		dynamic_cast< const GetOpFunc< T, A >* >( op );
+	assert( gop );
+	
+	return gop->reduceOp( er );
+}
+
 class SetGet
 {
 	public:
