@@ -23,6 +23,7 @@
 #include "SingleMsg.h"
 #include "../builtins/Arith.h"
 #include "../randnum/randnum.h"
+#include "../kinetics/Pool.h"
 
 #include "../shell/Shell.h"
 
@@ -417,7 +418,20 @@ void testQueueAndStart()
 
 	unsigned int num = 12;
 	vector< int > d2( 1, num );
+	Id checkForOldPool( "/pool" );
+	if ( checkForOldPool != Id() )
+		cout << "TestQueueAndStart: Error: Old pool already exists\n";
+	// Note that we create 12 pools here, only the first has had n_ and
+	// nInit_ set explicitly. The others should have been initialized by 
+	// the constructor.
 	Id pool = s->doCreate( "Pool", Id(), "pool", d2, false );
+	const Pool* p = reinterpret_cast< const Pool* >( pool.eref().data() );
+	for ( unsigned int i = 0; i < num; ++i ) {
+		if ( !doubleEq( p->getN(), 0.0 ) ) 
+			cout << "ugh" << i << "\n";
+		if ( !doubleEq( p->getNinit(), 0.0 ) ) 
+			cout << "ugh" << i << "\n";
+	}
 	Id reac = s->doCreate( "Reac", Id(), "reac", d2, false );
 	bool ret = Field< double >::set( pool, "nInit", 123 );
 	assert( ret );
@@ -432,6 +446,8 @@ void testQueueAndStart()
 	assert( mid != Msg::bad );
 	s->doUseClock( "/pool,/reac", "process", 0 );
 	s->doReinit();
+	x = Field< double >::get( pool, "conc" );
+	assert ( doubleEq( x, 123.0/NA ) );
 	TestSched* tsData = reinterpret_cast< TestSched* >( ts.data() );
 	tsData->zeroIndex();
 

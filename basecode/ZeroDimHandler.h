@@ -124,7 +124,6 @@ class ZeroDimHandler: public DataHandler
 
 
 	private:
-		bool isGlobal_;
 		char* data_;
 		/// Specifies which thread is allowed to call it
 		ThreadId myThread_;
