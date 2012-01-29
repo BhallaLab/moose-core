@@ -212,6 +212,13 @@ void Pool::process( const Eref& e, ProcPtr p )
 {
 	// double A = e.sumBuf( aSlot );
 	// double B = e.sumBuf( bSlot );
+	if ( n_ < 0 )
+		cout << "nugh" << e.index() << endl;
+	if ( B_ < 0 )
+		cout << "bugh" << e.index() << endl;
+	if ( p->dt < 0 )
+		cout << "tugh" << e.index() << endl;
+
 	if ( n_ > EPSILON && B_ > EPSILON ) {
 		double C = exp( -B_ * p->dt / n_ );
 		n_ *= C + (A_ / B_ ) * ( 1.0 - C );
