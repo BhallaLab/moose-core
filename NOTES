@@ -16948,3 +16948,8 @@ yprime is all zeros though. Why would SparseMatrix::computeRowRate fail?
 
 Doing a valgrind. Clues there in zug.
 ============================================================================
+29 Jan 2012
+A long struggle to clean out an uninitialized value reported by valgrind. 
+After some days tracked it to the change in Reac.h where I introduced 
+concKf_ and concKb_ as the authoritative values, but I hadn't initialized them.
+

@@ -271,12 +271,21 @@ unsigned int ZombiePool::getSpecies( const Eref& e, const Qinfo* q ) const
 // static func
 void ZombiePool::zombify( Element* solver, Element* orig )
 {
+	static const Finfo* procDest = Pool::initCinfo()->findFinfo( "process");
+	assert( procDest );
 	Element temp( orig->id(), zombiePoolCinfo, solver->dataHandler() );
 	Eref zombier( &temp, 0 );
 
 	unsigned int numEntries = orig->dataHandler()->localEntries();
 	ZombiePool* z = reinterpret_cast< ZombiePool* >( zombier.data() );
 	Eref oer( orig, 0 );
+
+	const DestFinfo* df = dynamic_cast< const DestFinfo* >( procDest );
+	assert( df );
+	MsgId mid = orig->findCaller( df->getFid() );
+	if ( mid != Msg::bad )
+		Msg::deleteMsg( mid );
+
 	Pool* m = reinterpret_cast< Pool* >( oer.data() );
 	z->setSpecies( zombier, 0, m->getSpecies() );
 	unsigned int poolIndex = z->convertIdToPoolIndex( orig->id() );
