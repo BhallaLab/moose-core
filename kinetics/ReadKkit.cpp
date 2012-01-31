@@ -955,7 +955,7 @@ void ReadKkit::addmsg( const vector< string >& args)
 	}
 	else if ( args[3] == "ENZYME" ) { // Msg from enz pool to enz site
 		if ( mmEnzIds_.find( dest ) == mmEnzIds_.end() )
-			innerAddMsg( dest, enzIds_, "ens", src, poolIds_, "reac" );
+			innerAddMsg( dest, enzIds_, "enz", src, poolIds_, "reac" );
 		else
 			innerAddMsg( src, poolIds_, "nOut", dest, mmEnzIds_, "enz", 1);
 			// innerAddMsg( dest, mmEnzIds_, "enz", src, poolIds_, "nOut", 1);

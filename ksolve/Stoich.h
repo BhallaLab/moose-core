@@ -182,6 +182,11 @@ class Stoich
 		void clearFlux();
 		void clearFlux( unsigned int meshIndex, unsigned int threadNum );
 
+		/**
+		 * Utility func for debugging: Prints N_ matrix
+		 */
+		void print() const;
+
 #ifdef USE_GSL
 		static int gslFunc( double t, const double* y, double* yprime, void* s );
 		int innerGslFunc( double t, const double* y, double* yprime,
