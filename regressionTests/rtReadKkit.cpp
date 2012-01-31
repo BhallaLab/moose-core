@@ -267,6 +267,11 @@ void rtRunKkit()
 	shell->doStart( 5001.0 );
 
 	Id plotId( "/rkktest/graphs/conc1/MAPK-PP.Co" );
+	vector< Id > ret = LookupField< string, vector< Id > >::get( 
+		plotId, "neighbours", "requestData" );
+	assert( ret.size() == 1 );
+	assert( ret[0] == Id( "/rkktest/kinetics/MAPK/MAPK-PP" ) );
+
 	assert( plotId != Id() );
 	unsigned int size = Field< unsigned int >::get( plotId, "size" );
 	// cout << "size = " << size << endl;

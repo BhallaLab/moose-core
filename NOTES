@@ -16952,4 +16952,23 @@ Doing a valgrind. Clues there in zug.
 A long struggle to clean out an uninitialized value reported by valgrind. 
 After some days tracked it to the change in Reac.h where I introduced 
 concKf_ and concKb_ as the authoritative values, but I hadn't initialized them.
+Still doesn't clear regression tests.
+Checkin 3274.
+Ran valgrind through to point of assertion fail in regression tests. No
+memory problem nor use of uninitialized value.
+============================================================================
+30 Jan 2012
+Finally figured out why the reactions were not advancing. Printed out stoich
+matrix, looks like none of the MMEnz terms are in it. There is something
+odd happening in the MMenz::zombify.
+============================================================================
+31 Jan 2012
+Tracked down bug. Somewhere along the way, the functions 
+getOutputs and getInputs were set up to catenate new targets onto the vector,
+rather than to clean it out and start anew. I had been assuming the latter.
+Need to check with Niraj if this was intentional. If not, remove. Anyway,
+with this known it was easy to fix. At this point it successfully loads in
+a single compt model, runs it correctly. Now to move on to volume and mesh 
+handling.
+
 

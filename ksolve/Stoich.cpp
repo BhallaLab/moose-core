@@ -939,6 +939,11 @@ double* Stoich::getY( unsigned int meshIndex )
 	return &y_[meshIndex][0];
 }
 
+void Stoich::print() const
+{
+	N_.print();
+}
+
 #ifdef USE_GSL
 ///////////////////////////////////////////////////
 // GSL interface stuff

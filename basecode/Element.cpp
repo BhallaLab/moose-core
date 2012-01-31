@@ -545,6 +545,8 @@ unsigned int Element::getNeighbours( vector< Id >& ret, const Finfo* finfo )
 	const DestFinfo* destF = dynamic_cast< const DestFinfo* >( finfo );
 	const SharedFinfo* sharedF = dynamic_cast< const SharedFinfo* >( finfo );
 	assert( srcF || destF || sharedF );
+
+	ret.resize( 0 );
 	
 	if ( srcF )
 		return getOutputs( ret, srcF );
