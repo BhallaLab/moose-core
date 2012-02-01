@@ -301,10 +301,47 @@ void testCubeMesh()
 	cout << "." << flush;
 }
 
+/**
+ * Tests scaling of volume and # of entries upon mesh resize
+ */
+void testReMesh()
+{
+	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< int > dims( 1, 1 );
+	Id base = s->doCreate( "Neutral", Id(), "base", dims );
+
+	Id pool = s->doCreate( "Pool", base, "pool", dims );
+	Id cube = s->doCreate( "CubeMesh", base, "cube", dims );
+	bool ret = SetGet2< double, unsigned int >::set( 
+		cube, "buildDefaultMesh", 1.0, 1 );
+	assert( ret );
+	Id mesh( "/base/cube/mesh" );
+	assert( mesh != Id() );
+
+	MsgId mid = s->doAddMsg( "OneToOne", pool, "mesh", mesh, "mesh" );
+	assert( mid != Msg::bad );
+
+	// 1 millimolar in 1 m^3 is 1 mole per liter.
+	ret = Field< double >::set( pool, "conc", 1 );
+	assert( ret );
+	double n = Field< double >::get( pool, "n" );
+	assert( doubleEq( n, NA ) );
+
+	ret = SetGet2< double, unsigned int >::set( 
+		cube, "buildDefaultMesh", 1.0e-3, 1 );
+	Field< double >::set( pool, "conc", 1 );
+	n = Field< double >::get( pool, "n" );
+	assert( doubleEq( n, NA / 1000.0 ) );
+
+	// Next we do the remeshing.
+
+	cout << "." << flush;
+}
 
 void testMesh()
 {
 	testCylMesh();
 	testMidLevelCylMesh();
 	testCubeMesh();
+	testReMesh();
 }

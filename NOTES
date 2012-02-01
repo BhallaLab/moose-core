@@ -17011,4 +17011,8 @@ Did the remeshing code. It breaks the little volume-handling that there
 already is in the regression tests. Anyway, checkin 3276.
 
 Fixed the volume handling test. There was a field mismatch between zombie
-and regular Pool.
+and regular Pool. Checkin 3277.
+
+Working in mesh/testMesh.cpp:testReMesh().
+Skeleton set up to create a pool and tie it to a mesh. Does OK so far.
+Next to remesh.
