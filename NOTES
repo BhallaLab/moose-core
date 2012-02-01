@@ -17008,4 +17008,7 @@ data transfer, could be used for node-local messaging on all nodes.
 For now, work out the remeshing code on a single-node basis.
 
 Did the remeshing code. It breaks the little volume-handling that there
-already is in the regression tests. Anyway, checkin.
+already is in the regression tests. Anyway, checkin 3276.
+
+Fixed the volume handling test. There was a field mismatch between zombie
+and regular Pool.
