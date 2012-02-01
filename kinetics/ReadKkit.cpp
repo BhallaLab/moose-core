@@ -113,18 +113,12 @@ Id ReadKkit::read(
 	Id moregraphs = s->doCreate( "Neutral", base, "moregraphs", dims, true );
 	assert( moregraphs != Id() );
 
-	/*
-	Id base = s->doCreate( solverClass, pa, modelname, dims, true );
-	assert( base != Id() );
-	*/
 	baseId_ = base;
 	basePath_ = base.path();
 
 	innerRead( fin );
 
 	assignPoolCompartments();
-	// assignReacCompartments();
-	// assignEnzCompartments();
 
 	convertParametersToConcUnits();
 
@@ -133,39 +127,9 @@ Id ReadKkit::read(
 	q.setThreadNum( ScriptThreadNum );
 	sm->setPlotDt( plotdt_ );
 	sm->build( base.eref(), &q, method );
-	// SetGet1< string >::set( baseId_, "build", method );
-	/*
-	if ( solverClass == "gsl" || solverClass == "Stoich" )
-		Field< string >::set( base, "path", "##" );
-		*/
 	s->doReinit();
 	return base;
 }
-
-/**
- * Assume GSL solver, take graphs from kkit file, and set up plot dt from
- * same file as clock 2.
-void ReadKkit::setupGslRun()
-{
-	vector< int > dims( 1, 1 );
-	Id gsl = shell_->doCreate( "GslIntegrator", baseId_, "gsl", dims );
-	bool ret = SetGet1< Id >::set( gsl, "stoich", baseId_ );
-	assert( ret );
-	ret = Field< bool >::get( gsl, "isInitialized" );
-	assert( ret );
-
-	shell_->doSetClock( 0, plotdt_ );
-	shell_->doSetClock( 1, plotdt_ );
-	shell_->doSetClock( 2, plotdt_ );
-	shell_->doSetClock( 3, 0 );
-
-	string plotpath = basePath_ + "/graphs/##[TYPE=Table]," + 
-		basePath_ + "/moregraphs/##[TYPE=Table]";
-	shell_->doUseClock( basePath_ + "/gsl", "process", 0);
-	shell_->doUseClock( plotpath, "process", 2 );
-	shell_->doReinit();
-}
- */
 
 void ReadKkit::run()
 {
@@ -284,61 +248,6 @@ void ReadKkit::innerRead( ifstream& fin )
 			*/
 }
 
-/*
-void ReadKkit::makeStandardElements()
-{
-	vector< int > dims( 1, 1 );
-	Id kinetics = Neutral::child( baseId_.eref(), "kinetics" );
-	if ( kinetics == Id() ) {
-		kinetics = 
-		shell_->doCreate( "CubeMesh", baseId_, "kinetics", dims, true );
-		vector< double > coords( 9, 10.0e-6 );
-		coords[0] = coords[1] = coords[2] = 0;
-		Field< vector< double > >::set( kinetics, "coords", coords );
-	}
-	assert( kinetics != Id() );
-	assert( kinetics.eref().element()->getName() == "kinetics" );
-
-	Id graphs = Neutral::child( baseId_.eref(), "graphs" );
-	if ( graphs == Id() ) {
-		graphs = 
-		shell_->doCreate( "Neutral", baseId_, "graphs", dims, true );
-	}
-	assert( graphs != Id() );
-
-	Id moregraphs = Neutral::child( baseId_.eref(), "moregraphs" );
-	if ( moregraphs == Id() ) {
-		moregraphs = 
-		shell_->doCreate( "Neutral", baseId_, "moregraphs", dims, true );
-	}
-	assert( moregraphs != Id() );
-
-	Id compartments = Neutral::child( baseId_.eref(), "compartments" );
-	if ( compartments == Id() ) {
-		compartments = 
-		shell_->doCreate( "Neutral", baseId_, "compartments", dims, true );
-	}
-	assert( compartments != Id() );
-
-	Id geometry = Neutral::child( baseId_.eref(), "geometry" );
-	if ( geometry == Id() ) {
-
-		geometry = 
-		shell_->doCreate( "Geometry", baseId_, "geometry", dims, true );
-		// MsgId ret = shell_->doAddMsg( "Single", geometry, "compt", kinetics, "reac" );
-		// assert( ret != Msg::bad );
-	}
-	assert( geometry != Id() );
-
-	Id groups = Neutral::child( baseId_.eref(), "groups" );
-	if ( groups == Id() ) {
-		groups = 
-		shell_->doCreate( "Neutral", baseId_, "groups", dims, true );
-	}
-	assert( groups != Id() );
-}
-*/
-
 ReadKkit::ParseMode ReadKkit::readInit( const string& line )
 {
 	vector< string > argv;
@@ -385,11 +294,6 @@ ReadKkit::ParseMode ReadKkit::readInit( const string& line )
 
 	if ( argv[0] == "initdump" ) {
 		initdumpVersion_ = atoi( argv[2].c_str() );
-		/*
-		SetGet1< string >::set( baseId_, "makeStandardElements", 
-			"CubeMesh" );
-			*/
-		// makeStandardElements();
 		return DATA;
 	}
 
@@ -424,13 +328,6 @@ string ReadKkit::pathTail( const string& path, string& head ) const
 	head = basePath_ + path.substr( 0, pos ); 
 	return path.substr( pos + 1 );
 }
-
-/*
-Id ReadKkit::findParent( const string& path ) const
-{
-	return 1;
-}
-*/
 
 void assignArgs( map< string, int >& argConv, const vector< string >& args )
 {
@@ -605,25 +502,6 @@ void ReadKkit::assignPoolCompartments()
 		}
 	}
 }
-
-/*
-static Id getMeshEntryForPool( Id pool )
-{
-	static const SrcFinfo* meshFinfo = 
-		dynamic_cast< const SrcFinfo* >( 
-		pool()->cinfo()->findFinfo( "requestSize" ) );
-	assert( meshFinfo );
-
-	const vector< MsgFuncBinding >* mfb = 
-		pool()->getMsgAndFunc( meshFinfo->getBindIndex() );
-	assert( mfb );
-	assert( mfb->size() > 0 );
-	const Msg* m = Msg::getMsg( (*mfb)[0].mid );
-	assert( m );
-
-	return m->e2()->id();
-}
-*/
 
 Id ReadKkit::buildEnz( const vector< string >& args )
 {

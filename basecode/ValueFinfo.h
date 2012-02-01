@@ -21,6 +21,8 @@ class ValueFinfoBase: public Finfo
 
 		ValueFinfoBase( const string& name, const string& doc );
 
+		DestFinfo* getFinfo() const;
+
 		///////////////////////////////////////////////////////////////
 		// Override the default virtual function for the set/get destfinfos
 		///////////////////////////////////////////////////////////////

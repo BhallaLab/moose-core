@@ -116,6 +116,12 @@ const Cinfo* Pool::initCinfo()
 			new OpFunc1< Pool, double >( &Pool::handleMolWt )
 		);
 
+		static DestFinfo remesh( "remesh",
+			"Handle commands to remesh the pool. This may involve changing "
+			"the number of pool entries, as well as changing their volumes",
+			new EpFunc4< Pool, unsigned int, unsigned int, vector< unsigned int >, vector< double > >( &Pool::remesh )
+		);
+
 		//////////////////////////////////////////////////////////////
 		// SrcFinfo Definitions
 		//////////////////////////////////////////////////////////////
@@ -157,6 +163,15 @@ const Cinfo* Pool::initCinfo()
 			speciesShared, sizeof( speciesShared ) / sizeof ( const Finfo* )
 		);
 
+		static Finfo* meshShared[] = {
+			&remesh, requestSize()
+		};
+
+		static SharedFinfo mesh( "mesh",
+			"Shared message for dealing with mesh operations",
+			meshShared, sizeof( meshShared ) / sizeof ( const Finfo* )
+		);
+
 	static Finfo* poolFinfos[] = {
 		&n,			// Value
 		&nInit,		// Value
@@ -168,10 +183,11 @@ const Cinfo* Pool::initCinfo()
 		&group,			// DestFinfo
 		&increment,			// DestFinfo
 		&decrement,			// DestFinfo
-		requestSize(),		// SrcFinfo
+//		requestSize(),		// SrcFinfo, but defined in SharedFinfo
 		&reac,				// SharedFinfo
 		&proc,				// SharedFinfo
 		&species,			// SharedFinfo
+		&mesh,				// SharedFinfo
 	};
 
 	static Cinfo poolCinfo (
@@ -261,6 +277,13 @@ void Pool::decrement( double val )
 		A_ -= val;
 	else
 		B_ += val;
+}
+
+void Pool::remesh( const Eref& e, const Qinfo* q, 
+	unsigned int numTotalEntries, unsigned int startEntry, 
+	vector< unsigned int > localIndices, vector< double > vols )
+{
+	cout << "In Pool::remesh for " << e << endl;
 }
 
 //////////////////////////////////////////////////////////////

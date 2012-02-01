@@ -15,6 +15,10 @@ ValueFinfoBase::ValueFinfoBase( const string& name, const string& doc )
 		get_( 0 )
 {;}
 
+DestFinfo* ValueFinfoBase::getFinfo() const {
+	return get_;
+}
+
 vector< string > ValueFinfoBase::innerDest() const
 {
 	vector< string > ret;

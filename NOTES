@@ -16970,5 +16970,42 @@ Need to check with Niraj if this was intentional. If not, remove. Anyway,
 with this known it was easy to fix. At this point it successfully loads in
 a single compt model, runs it correctly. Now to move on to volume and mesh 
 handling.
+Checkin 3275.
+
+============================================================================
+1 Feb 2012
+Working on remeshing. Now a simpler message from the MeshEntry to the Pool,
+to tell it to resize, renode, and rescale volumes.
+This should really be a node-local message.
+
+This brings up a general point about node-local and global messages, perhaps
+even subset target messages.
+
+At this time the entire contents of the queue are broadcast. SwapQ generates
+a single queue for local processing and transmission. Transmission always
+means broadcast.
+
+We could do this indiscriminately, binary or graded. 
+Indiscriminate: All messages go to all nodes including self.
+	Wasteful
+	Problematic when we want to send node-local requests around
+Binary: Messages either go to local node only, or to all nodes including self.
+	Wasteful if there are subsets of target nodes: only on big clusters
+	SwapQ costs a little more as it has to fill distinct buffers
+	Fixes problem with node-local requests
+Graded:	Messages go to whatever subset of nodes is specified.
+	Possibly efficient if there are large groups of nodes.
+	SwapQ costs a lot more as it has to fill multiple buffers, and contents
+	may overlap.
+	Fixes problem with node-local requests as a special subset.
 
 
+Let's try out binary. It will involve rethinking the multinode data transfer
+protocol a bit, as we may have local ops to do in addition to what has come
+in from other nodes. Additionally the 'idle' cycle at the time of node0 
+data transfer, could be used for node-local messaging on all nodes.
+
+For now, work out the remeshing code on a single-node basis.
+
+Did the remeshing code. It breaks the little volume-handling that there
+already is in the regression tests. Anyway, checkin.

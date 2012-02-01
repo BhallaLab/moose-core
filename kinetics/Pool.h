@@ -72,6 +72,9 @@ class Pool
 		void reac( double A, double B );
 		void increment( double val );
 		void decrement( double val );
+		void remesh( const Eref& e, const Qinfo* q, 
+			unsigned int numTotalEntries, unsigned int startEntry, 
+			vector< unsigned int > localIndices, vector< double > vols );
 
 		static const Cinfo* initCinfo();
 	private:
