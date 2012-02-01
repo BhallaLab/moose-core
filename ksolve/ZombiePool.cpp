@@ -108,6 +108,13 @@ const Cinfo* ZombiePool::initCinfo()
 			new EpFunc1< ZombiePool, double >( &ZombiePool::setSize )
 		);
 
+		static DestFinfo remesh( "remesh",
+			"Handle commands to remesh the pool. This may involve changing "
+			"the number of pool entries, as well as changing their volumes",
+			new EpFunc4< ZombiePool, unsigned int, unsigned int, vector< unsigned int >, vector< double > >( &ZombiePool::remesh )
+		);
+
+
 		//////////////////////////////////////////////////////////////
 		// SrcFinfo Definitions
 		//////////////////////////////////////////////////////////////
@@ -135,6 +142,14 @@ const Cinfo* ZombiePool::initCinfo()
 			procShared, sizeof( procShared ) / sizeof( const Finfo* )
 		);
 
+		static Finfo* meshShared[] = {
+			&remesh, requestSize()
+		};
+		static SharedFinfo mesh( "mesh",
+			"Shared message for dealing with mesh operations",
+			meshShared, sizeof( meshShared ) / sizeof( const Finfo* )
+		);
+
 	static Finfo* zombiePoolFinfos[] = {
 		&n,				// Value
 		&nInit,			// Value
@@ -144,9 +159,10 @@ const Cinfo* ZombiePool::initCinfo()
 		&size,			// Value
 		&species,		// Value
 		&group,			// DestFinfo
-		requestSize(),	// SrcFinfo
+		// requestSize(),	// SrcFinfo defined below in SharedFinfo
 		&reac,				// SharedFinfo
 		&proc,				// SharedFinfo
+		&mesh,				// SharedFinfo
 	};
 
 	static Cinfo zombiePoolCinfo (
@@ -185,6 +201,13 @@ void ZombiePool::reinit( const Eref& e, ProcPtr p )
 
 void ZombiePool::reac( double A, double B )
 {;}
+
+void ZombiePool::remesh( const Eref& e, const Qinfo* q, 
+	unsigned int numTotalEntries, unsigned int startEntry, 
+	vector< unsigned int > localIndices, vector< double > vols )
+{
+	cout << "In ZombiePool::remesh for " << e << endl;
+}
 
 //////////////////////////////////////////////////////////////
 // Field Definitions

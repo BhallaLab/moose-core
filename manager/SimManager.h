@@ -27,6 +27,33 @@ class SimManager
 
 		/// Destination function
 		void build( const Eref& e, const Qinfo* q, string method );
+
+
+		/**
+		 * Builds standard kinetic model tree. It looks like:
+		 *
+		 * /base   :                   		Manager
+    	 * 		/<solver_name>              Solver
+    	 * 		/<compartment_name>         Mesh
+         * 			/mesh               		MeshEntry
+         * 			/boundary           		Boundary
+         * 			/<poolname>         		Pool
+         * 				/<enzname>      		MMEnz
+         * 				/<enzname>      		Enz
+         * 					/<enzname_cplx> 	Pool
+         * 			/<reacname>         		Reac
+         * 			/<sumtotname>           	SumTot
+         * 			/<group, pool, reac: recursively>
+         * 			/<compartment_name>
+         * 				/mesh           		MeshEntry
+         * 				/boundary       		Boundary
+         * 				/<poolname>         	Pool
+         * 				etc, recursively.
+    	 * 		/geometry:              		Neutral
+    	 * 		/groups:                		Neutral
+    	 * 		/graphs:                		Neutral
+	 	 * 
+		 */
 		void makeStandardElements( const Eref& e, const Qinfo*q, string meshClass );
 		void meshSplit( const Eref& e, const Qinfo* q, 
 			vector< unsigned int > nodeList,

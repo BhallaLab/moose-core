@@ -376,18 +376,6 @@ void SimManager::meshStats( const Eref& e, const Qinfo* q,
 //////////////////////////////////////////////////////////////
 // Utility functions
 //////////////////////////////////////////////////////////////
-/*
-SimManager::TreeType SimManager::findTreeType( const Eref& e )
-{
-	if ( isKkit_ )
-		return KKIT; // dummy for now.
-}
-
-void SimManager::setKkitFlag()
-{
-	isKkit_ = 1;
-}
-*/
 
 void SimManager::buildFromBareKineticTree( const string& method )
 {
