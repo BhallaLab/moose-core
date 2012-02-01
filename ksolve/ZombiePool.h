@@ -38,6 +38,10 @@ class ZombiePool: public Stoich
 		void setSpecies( const Eref& e, const Qinfo* q, unsigned int v );
 		unsigned int getSpecies( const Eref& e, const Qinfo* q ) const;
 
+		void remesh( const Eref& e, const Qinfo* q, 
+			unsigned int numTotalEntries, unsigned int startEntry, 
+			vector< unsigned int > localIndices, vector< double > vols );
+
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////

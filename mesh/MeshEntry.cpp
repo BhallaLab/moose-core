@@ -14,6 +14,25 @@
 #include "Stencil.h"
 #include "ChemMesh.h"
 
+static SrcFinfo4< unsigned int, unsigned int, vector< unsigned int>, vector< double > >  *remesh()
+{
+	static SrcFinfo4< unsigned int, unsigned int, vector< unsigned int>, vector< double > >  remesh(
+	"remesh",
+	"Tells the target pool or other entity that the compartment subdivision"
+	"(meshing) has changed, and that it has to redo its volume and "
+	"memory allocation accordingly."
+	"Arguments are: numTotalEntries, startEntry, localIndices, vols"
+	"The vols specifies volumes of each local mesh entry. It also specifies"
+	"how many meshEntries are present on the local node." 
+	"The localIndices vector is used for general load balancing only."
+	"It has a list of the all meshEntries on current node."
+	"If it is empty, we assume block load balancing. In this second"
+	"case the contents of the current node go from "
+	"startEntry to startEntry + vols.size()."
+	);
+	return &remesh;
+}
+
 const Cinfo* MeshEntry::initCinfo()
 {
 		//////////////////////////////////////////////////////////////
@@ -100,6 +119,17 @@ const Cinfo* MeshEntry::initCinfo()
 			procShared, sizeof( procShared ) / sizeof( const Finfo* )
 		);
 
+		static Finfo* meshShared[] = {
+			remesh(), size.getFinfo()
+		};
+
+		static SharedFinfo mesh( "mesh",
+			"Shared message for updating mesh volumes and subdivisions,"
+			"typically controls pool sizes",
+			meshShared, sizeof( meshShared ) / sizeof( const Finfo* )
+		);
+
+
 		//////////////////////////////////////////////////////////////
 		// SrcFinfo Definitions
 		//////////////////////////////////////////////////////////////
@@ -114,6 +144,7 @@ const Cinfo* MeshEntry::initCinfo()
 		&diffusionScaling,	// Readonly Value
 		&group,			// DestFinfo
 		&proc,			// SharedFinfo
+		&mesh,			// SharedFinfo
 	};
 
 	static Cinfo meshEntryCinfo (
