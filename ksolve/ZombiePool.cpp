@@ -75,8 +75,8 @@ const Cinfo* ZombiePool::initCinfo()
 			&ZombiePool::getSize
 		);
 
-		static ElementValueFinfo< ZombiePool, unsigned int > species(
-			"species",
+		static ElementValueFinfo< ZombiePool, unsigned int > speciesId(
+			"speciesId",
 			"Species identifer for this mol pool",
 			&ZombiePool::setSpecies,
 			&ZombiePool::getSpecies
@@ -108,6 +108,12 @@ const Cinfo* ZombiePool::initCinfo()
 			new EpFunc1< ZombiePool, double >( &ZombiePool::setSize )
 		);
 
+		static DestFinfo handleMolWt( "handleMolWt",
+			"Separate finfo to assign molWt, and also diff const."
+			"Should only be used in SharedMsg with species.",
+			new EpFunc1< ZombiePool, double >( &ZombiePool::handleMolWt )
+		);
+
 		static DestFinfo remesh( "remesh",
 			"Handle commands to remesh the pool. This may involve changing "
 			"the number of pool entries, as well as changing their volumes",
@@ -121,6 +127,11 @@ const Cinfo* ZombiePool::initCinfo()
 		static SrcFinfo1< double > nOut( 
 				"nOut", 
 				"Sends out # of molecules in pool on each timestep"
+		);
+
+		static SrcFinfo0 requestMolWt(
+			"requestMolWt",
+			"Requests Species object for mol wt"
 		);
 
 		//////////////////////////////////////////////////////////////
@@ -142,6 +153,14 @@ const Cinfo* ZombiePool::initCinfo()
 			procShared, sizeof( procShared ) / sizeof( const Finfo* )
 		);
 
+		static Finfo* speciesShared[] = {
+			&requestMolWt, &handleMolWt
+		};
+		static SharedFinfo species( "species",
+			"Shared message for connecting to species objects",
+			speciesShared, sizeof( speciesShared ) / sizeof( const Finfo* )
+		);
+
 		static Finfo* meshShared[] = {
 			&remesh, requestSize()
 		};
@@ -157,11 +176,12 @@ const Cinfo* ZombiePool::initCinfo()
 		&conc,			// Value
 		&concInit,		// Value
 		&size,			// Value
-		&species,		// Value
+		&speciesId,		// Value
 		&group,			// DestFinfo
 		// requestSize(),	// SrcFinfo defined below in SharedFinfo
 		&reac,				// SharedFinfo
 		&proc,				// SharedFinfo
+		&species,			// SharedFinfo
 		&mesh,				// SharedFinfo
 	};
 
@@ -287,6 +307,10 @@ unsigned int ZombiePool::getSpecies( const Eref& e, const Qinfo* q ) const
 	return species_[ convertIdToPoolIndex( e.id() ) ];
 }
 
+void ZombiePool::handleMolWt( const Eref& e, const Qinfo* q, double v )
+{
+	;
+}
 //////////////////////////////////////////////////////////////
 // Zombie conversion functions.
 //////////////////////////////////////////////////////////////
