@@ -49,6 +49,7 @@ class ZombiePool: public Stoich
 		void process( const Eref& e, ProcPtr p );
 		void reinit( const Eref& e, ProcPtr p );
 		void reac( double A, double B );
+		void handleMolWt( const Eref& e, const Qinfo* q, double v );
 
 		//////////////////////////////////////////////////////////////////
 		// utility funcs
