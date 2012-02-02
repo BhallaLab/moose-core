@@ -44,8 +44,10 @@ class ChemMesh
 		 * a CubeMesh of size 8 and subdivisions 8 would make a 2x2x2 mesh.
 		 * This function is specialized in each derived class.
 		 */
-		void buildDefaultMesh( double size, unsigned int numEntries );
-		virtual void innerBuildDefaultMesh( 
+		void buildDefaultMesh( const Eref& e, const Qinfo* q,
+			double size, unsigned int numEntries );
+		virtual void innerBuildDefaultMesh(
+			const Eref& e, const Qinfo* q,
 			double size, unsigned int numEntries ) = 0;
 
 		void handleRequestMeshStats( const Eref& e, const Qinfo* q );

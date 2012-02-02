@@ -242,8 +242,8 @@ void testPoolVolumeScaling()
 	assert( doubleEq( n, 500 ) );
 
 	Field< double >::set( poolId, "nInit", 650 );
-	conc = Field< double >::get( poolId, "conc" );
-	assert( doubleEq( conc, 650 * volscale ) );
+	double concInit = Field< double >::get( poolId, "concInit" );
+	assert( doubleEq( concInit, 650 * volscale ) );
 	Field< double >::set( poolId, "concInit", 10 * volscale );
 	n = Field< double >::get( poolId, "nInit" );
 	assert( doubleEq( n, 10 ) );

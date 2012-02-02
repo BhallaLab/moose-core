@@ -36,7 +36,7 @@ const Cinfo* Pool::initCinfo()
 			&Pool::getN
 		);
 
-		static ValueFinfo< Pool, double > nInit(
+		static ElementValueFinfo< Pool, double > nInit(
 			"nInit",
 			"Initial value of number of molecules in pool",
 			&Pool::setNinit,
@@ -57,7 +57,7 @@ const Cinfo* Pool::initCinfo()
 			&Pool::getConc
 		);
 
-		static ElementValueFinfo< Pool, double > concInit(
+		static ValueFinfo< Pool, double > concInit(
 			"concInit",
 			"Initial value of molecular concentration in pool",
 			&Pool::setConcInit,
@@ -211,12 +211,12 @@ const SrcFinfo1< double >& nOut =
 
 
 Pool::Pool()
-	: n_( 0.0 ), nInit_( 0.0 ), diffConst_( 0.0 ),
+	: n_( 0.0 ), concInit_( 0.0 ), diffConst_( 0.0 ),
 		A_( 0.0 ), B_( 0.0 ), species_( 0 )
 {;}
 
-Pool::Pool( double nInit)
-	: n_( 0.0 ), nInit_( nInit ), diffConst_( 0.0 ),
+Pool::Pool( double concInit)
+	: n_( 0.0 ), concInit_( concInit ), diffConst_( 0.0 ),
 		A_( 0.0 ), B_( 0.0 ), species_( 0 )
 {;}
 
@@ -252,7 +252,7 @@ void Pool::process( const Eref& e, ProcPtr p )
 void Pool::reinit( const Eref& e, ProcPtr p )
 {
 	A_ = B_ = 0.0;
-	n_ = nInit_;
+	n_ = getNinit( e, 0 );
 
 	nOut.send( e, p->threadIndexInGroup, n_ );
 }
@@ -283,7 +283,21 @@ void Pool::remesh( const Eref& e, const Qinfo* q,
 	unsigned int numTotalEntries, unsigned int startEntry, 
 	vector< unsigned int > localIndices, vector< double > vols )
 {
-	cout << "In Pool::remesh for " << e << endl;
+	if ( q->protectedAddToStructuralQ() )
+		return;
+	Neutral* n = reinterpret_cast< Neutral* >( e.data() );
+	assert( vols.size() > 0 );
+	double concInit = concInit_; // replace when we fix the conc access
+	if ( vols.size() != e.element()->dataHandler()->localEntries() )
+		n->setLastDimension( e, q, vols.size() );
+	// Note that at this point the Pool pointer may be invalid!
+	// But we need to update the concs anyway.
+	assert( e.element()->dataHandler()->localEntries() == vols.size() );
+	Pool* pooldata = reinterpret_cast< Pool* >( e.data() );
+	for ( unsigned int i = 0; i < vols.size(); ++i ) {
+		pooldata[i].n_ = concInit * vols[i] * NA;
+		pooldata[i].concInit_ = concInit;
+	}
 }
 
 //////////////////////////////////////////////////////////////
@@ -292,22 +306,24 @@ void Pool::remesh( const Eref& e, const Qinfo* q,
 
 void Pool::setN( double v )
 {
+//	conc_ =  v /  ( NA * lookupSizeFromMesh( e, requestSize() ) );
 	n_ = v;
 }
 
 double Pool::getN() const
 {
 	return n_;
+// 	return NA * conc_ * lookupSizeFromMesh( e, requestSize() );
 }
 
-void Pool::setNinit( double v )
+void Pool::setNinit( const Eref& e, const Qinfo* q, double v )
 {
-	n_ = nInit_ = v;
+	concInit_ =  v /  ( NA * lookupSizeFromMesh( e, requestSize() ) );
 }
 
-double Pool::getNinit() const
+double Pool::getNinit( const Eref& e, const Qinfo* q ) const
 {
-	return nInit_;
+	return NA * concInit_ * lookupSizeFromMesh( e, requestSize() );
 }
 
 /// Utility function
@@ -331,7 +347,6 @@ static double lookupSize( const Eref& e )
 // Conc is given in millimolar. Size is in m^3
 void Pool::setConc( const Eref& e, const Qinfo* q, double c ) 
 {
-	
 	n_ = NA * c * lookupSizeFromMesh( e, requestSize() );
 }
 
@@ -341,14 +356,16 @@ double Pool::getConc( const Eref& e, const Qinfo* q ) const
 	return (n_ / NA) / lookupSizeFromMesh( e, requestSize() );
 }
 
-void Pool::setConcInit( const Eref& e, const Qinfo* q, double c )
+void Pool::setConcInit( double c )
 {
-	nInit_ = NA * c * lookupSizeFromMesh( e, requestSize() );
+	// nInit_ = NA * c * lookupSizeFromMesh( e, requestSize() );
+	concInit_ = c;
 }
 
-double Pool::getConcInit( const Eref& e, const Qinfo* q ) const
+double Pool::getConcInit( ) const
 {
-	return ( nInit_ / NA ) / lookupSizeFromMesh( e, requestSize() );
+	return concInit_;
+	// return ( nInit_ / NA ) / lookupSizeFromMesh( e, requestSize() );
 }
 
 void Pool::setDiffConst( double v )

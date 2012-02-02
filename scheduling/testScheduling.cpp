@@ -429,7 +429,7 @@ void testQueueAndStart()
 	for ( unsigned int i = 0; i < num; ++i ) {
 		if ( !doubleEq( p->getN(), 0.0 ) ) 
 			cout << "ugh" << i << "\n";
-		if ( !doubleEq( p->getNinit(), 0.0 ) ) 
+		if ( !doubleEq( p->getConcInit(), 0.0 ) ) 
 			cout << "ugh" << i << "\n";
 	}
 	Id reac = s->doCreate( "Reac", Id(), "reac", d2, false );
