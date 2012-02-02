@@ -65,7 +65,7 @@ void ZombieFuncPool::zombify( Element* solver, Element* orig )
 	FuncPool* m = reinterpret_cast< FuncPool* >( oer.data() );
 
 	z->setN( zer, 0, m->getN() );
-	z->setNinit( zer, 0, m->getNinit() );
+	z->setNinit( zer, 0, m->getNinit( oer, 0 ) );
 	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler(),
 		orig->dataHandler() );
 	orig->zombieSwap( zombieFuncPoolCinfo, dh );
@@ -104,5 +104,5 @@ void ZombieFuncPool::unzombify( Element* zombie )
 	FuncPool* m = reinterpret_cast< FuncPool* >( oer.data() );
 
 	m->setN( z->getN( zer, 0 ) );
-	m->setNinit( z->getNinit( zer, 0 ) );
+	m->setNinit( oer, 0, z->getNinit( zer, 0 ) );
 }

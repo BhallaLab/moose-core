@@ -161,7 +161,7 @@ const Cinfo* MeshEntry::initCinfo()
 //////////////////////////////////////////////////////////////
 // Class definitions
 //////////////////////////////////////////////////////////////
-static const Cinfo* poolCinfo = MeshEntry::initCinfo();
+static const Cinfo* meshEntryCinfo = MeshEntry::initCinfo();
 
 MeshEntry::MeshEntry()
 	: parent_( 0 )
@@ -235,5 +235,16 @@ vector< double >MeshEntry::getDiffusionArea( const Eref& e, const Qinfo* q ) con
 vector< double >MeshEntry::getDiffusionScaling( const Eref& e, const Qinfo* q ) const
 {
 	return parent_->getDiffusionScaling( e.fieldIndex() );
+}
+
+//////////////////////////////////////////////////////////////
+// Utility function to pass on mesh changes
+//////////////////////////////////////////////////////////////
+void MeshEntry::triggerRemesh( const Eref& e, unsigned int threadNum,
+	unsigned int startEntry, const vector< unsigned int >& localIndices,
+	const vector< double >& vols )
+{
+	remesh()->send( e, threadNum, parent_->getNumEntries(), 
+		startEntry, localIndices, vols );
 }
 

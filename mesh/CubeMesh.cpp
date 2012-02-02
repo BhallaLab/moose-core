@@ -499,7 +499,8 @@ void CubeMesh::buildMesh( Id geom, double x, double y, double z )
  * smarter boundary handling code than I have here. For now, goes for
  * the nearest cube
  */
-void CubeMesh::innerBuildDefaultMesh( double size, unsigned int numEntries )
+void CubeMesh::innerBuildDefaultMesh( const Eref& e, const Qinfo* q,
+	double size, unsigned int numEntries )
 {
 	double approxN = numEntries;
 	approxN = pow( approxN, 1.0 / 3.0 );
@@ -516,12 +517,20 @@ void CubeMesh::innerBuildDefaultMesh( double size, unsigned int numEntries )
 		else
 			numSide = bigger;
 	}
-	// To do this right, we need to have 
 	double side = pow( size, 1.0 / 3.0 );
 	vector< double > coords( 9, side );
 	coords[0] = coords[1] = coords[2] = 0;
 	coords[6] = coords[7] = coords[8] = side / numSide;
+	nx_ = ny_ = nz_ = numSide;
 	setCoords( coords );
+	Id meshEntry( e.id().value() + 1 );
+	assert( 
+		meshEntry.eref().data() == reinterpret_cast< char* >( lookupEntry( 0 ) )
+	);
+	vector< unsigned int > localIndices; // empty
+	vector< double > vols( nx_ * ny_ * nz_, dx_ * dy_ * dz_ );
+	lookupEntry( 0 )->triggerRemesh( meshEntry.eref(), q->threadNum(), 
+		0, localIndices, vols );
 }
 
 /// More inherited virtual funcs: request comes in for mesh stats

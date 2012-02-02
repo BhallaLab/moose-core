@@ -321,7 +321,11 @@ void testReMesh()
 	MsgId mid = s->doAddMsg( "OneToOne", pool, "mesh", mesh, "mesh" );
 	assert( mid != Msg::bad );
 
+/////////////////////////////////////////////////////////////////
 	// 1 millimolar in 1 m^3 is 1 mole per liter.
+	unsigned int linsize = Field< unsigned int >::get( pool, "linearSize" );
+	assert( linsize == 1 );
+
 	ret = Field< double >::set( pool, "conc", 1 );
 	assert( ret );
 	double n = Field< double >::get( pool, "n" );
@@ -329,12 +333,37 @@ void testReMesh()
 
 	ret = SetGet2< double, unsigned int >::set( 
 		cube, "buildDefaultMesh", 1.0e-3, 1 );
+	Qinfo::waitProcCycles( 2 );
 	Field< double >::set( pool, "conc", 1 );
 	n = Field< double >::get( pool, "n" );
 	assert( doubleEq( n, NA / 1000.0 ) );
 
+/////////////////////////////////////////////////////////////////
 	// Next we do the remeshing.
+	double x = 1.234;
+	Field< double >::set( pool, "concInit", x );
+	ret = SetGet2< double, unsigned int >::set( 
+		cube, "buildDefaultMesh", 1, 8 );
+	linsize = Field< unsigned int >::get( pool, "linearSize" );
+	Qinfo::waitProcCycles( 2 );
+	linsize = Field< unsigned int >::get( pool, "linearSize" );
+	assert( linsize == 8 );
 
+	n = Field< double >::get( ObjId( pool, 0 ), "concInit" );
+	assert( doubleEq( n, x ) );
+	n = Field< double >::get( ObjId( pool, 7 ), "concInit" );
+	assert( doubleEq( n, x ) );
+	n = Field< double >::get( ObjId( pool, 0 ), "nInit" );
+	assert( doubleEq( n, x * NA / 8.0 ) );
+	n = Field< double >::get( ObjId( pool, 7 ), "nInit" );
+	assert( doubleEq( n, x * NA / 8.0 ) );
+	n = Field< double >::get( ObjId( pool, 0 ), "conc" );
+	assert( doubleEq( n, x ) );
+	n = Field< double >::get( ObjId( pool, 7 ), "conc" );
+	assert( doubleEq( n, x ) );
+
+/////////////////////////////////////////////////////////////////
+	s->doDelete( base );
 	cout << "." << flush;
 }
 

@@ -41,15 +41,15 @@ class Pool
 
 		void setN( double v );
 		double getN() const;
-		void setNinit( double v );
-		double getNinit() const;
+		void setNinit( const Eref& e, const Qinfo* q, double v );
+		double getNinit( const Eref& e, const Qinfo* q ) const;
 		void setDiffConst( double v );
 		double getDiffConst() const;
 
 		void setConc( const Eref& e, const Qinfo* q, double v );
 		double getConc( const Eref& e, const Qinfo* q ) const;
-		void setConcInit( const Eref& e, const Qinfo* q, double v );
-		double getConcInit( const Eref& e, const Qinfo* q ) const;
+		void setConcInit( double v );
+		double getConcInit() const;
 
 		/**
 		 * Size is usually volume, but we also permit areal density
@@ -79,7 +79,8 @@ class Pool
 		static const Cinfo* initCinfo();
 	private:
 		double n_; /// Number of molecules in pool
-		double nInit_; /// initial condition 
+		/// double nInit_; /// initial condition 
+		double concInit_; /// initial concentration. 
 		double diffConst_;	/// Diffusion constant
 		double A_; /// Internal state variables, used only in explict mode
 		double B_;

@@ -582,7 +582,8 @@ void CylMesh::innerSetNumEntries( unsigned int n )
 }
 
 
-void CylMesh::innerBuildDefaultMesh( double size, unsigned int numEntries )
+void CylMesh::innerBuildDefaultMesh( const Eref& e, const Qinfo* q,
+	double size, unsigned int numEntries )
 {
 	/// Cylinder with diameter = length.
 	/// vol = size = pi.r^2.len. 
@@ -594,4 +595,13 @@ void CylMesh::innerBuildDefaultMesh( double size, unsigned int numEntries )
 	coords[7] = r;
 	coords[8] = 2 * r / numEntries;
 	setCoords( coords );
+
+	Id meshEntry( e.id().value() + 1 );
+	assert( 
+		meshEntry.eref().data() == reinterpret_cast< char* >( lookupEntry( 0 ) )
+	);
+	vector< unsigned int > localIndices; // empty
+	vector< double > vols( numEntries_, size_/numEntries_ );
+	lookupEntry( 0 )->triggerRemesh( meshEntry.eref(), q->threadNum(), 
+		0, localIndices, vols );
 }

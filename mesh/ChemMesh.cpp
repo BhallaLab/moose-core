@@ -91,7 +91,7 @@ const Cinfo* ChemMesh::initCinfo()
 		static DestFinfo buildDefaultMesh( "buildDefaultMesh",
 			"Tells ChemMesh derived class to build a default mesh with the"
 			"specified size and number of meshEntries.",
-			new OpFunc2< ChemMesh, double, unsigned int >( 
+			new EpFunc2< ChemMesh, double, unsigned int >( 
 				&ChemMesh::buildDefaultMesh )
 		);
 
@@ -209,9 +209,10 @@ void ChemMesh::stoich( const Eref& e, const Qinfo* q, Id stoichId )
 	stoich_ = stoichId;
 }
 
-void ChemMesh::buildDefaultMesh( double size, unsigned int numEntries )
+void ChemMesh::buildDefaultMesh( const Eref& e, const Qinfo* q,
+	double size, unsigned int numEntries )
 {
-	this->innerBuildDefaultMesh( size, numEntries );
+	this->innerBuildDefaultMesh( e, q, size, numEntries );
 }
 
 void ChemMesh::handleRequestMeshStats( const Eref& e, const Qinfo* q )
