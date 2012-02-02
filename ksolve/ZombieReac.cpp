@@ -101,6 +101,10 @@ const Cinfo* ZombieReac::initCinfo()
 			"Handle for grouping. Doesn't do anything.",
 			new OpFuncDummy() );
 
+		static DestFinfo remesh( "remesh",
+			"Tells the reac to recompute its numRates, as remeshing has happ    ened",
+			new EpFunc0< ZombieReac >( &ZombieReac::remesh ) );
+
 		//////////////////////////////////////////////////////////////
 		// SharedMsg Definitions
 		//////////////////////////////////////////////////////////////
@@ -143,6 +147,7 @@ const Cinfo* ZombieReac::initCinfo()
 		&sub,		// SharedFinfo
 		&prd,		// SharedFinfo
 		&proc,		// SharedFinfo
+		&remesh,	// Destfinfo
 	};
 
 	static Cinfo zombieReacCinfo (
@@ -186,6 +191,12 @@ void ZombieReac::sub( double v )
 
 void ZombieReac::prd( double v )
 {
+}
+
+void ZombieReac::remesh( const Eref& e, const Qinfo* q )
+{
+	stoich_->setReacKf( e, concKf_ );
+	stoich_->setReacKb( e, concKb_ );
 }
 
 //////////////////////////////////////////////////////////////

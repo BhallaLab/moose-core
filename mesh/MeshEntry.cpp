@@ -33,6 +33,17 @@ static SrcFinfo4< unsigned int, unsigned int, vector< unsigned int>, vector< dou
 	return &remesh;
 }
 
+static SrcFinfo0 *remeshReacs()
+{
+	static SrcFinfo0 remeshReacs(
+		"remeshReacs",
+		"Tells connected enz or reac that the compartment subdivision"
+		"(meshing) has changed, and that it has to redo its volume-"
+		"dependent rate terms like numKf_ accordingly."
+	);
+	return &remeshReacs;
+}
+
 const Cinfo* MeshEntry::initCinfo()
 {
 		//////////////////////////////////////////////////////////////
@@ -145,6 +156,7 @@ const Cinfo* MeshEntry::initCinfo()
 		&group,			// DestFinfo
 		&proc,			// SharedFinfo
 		&mesh,			// SharedFinfo
+		remeshReacs(),	// SrcFinfo
 	};
 
 	static Cinfo meshEntryCinfo (
@@ -246,5 +258,6 @@ void MeshEntry::triggerRemesh( const Eref& e, unsigned int threadNum,
 {
 	remesh()->send( e, threadNum, parent_->getNumEntries(), 
 		startEntry, localIndices, vols );
+	remeshReacs()->send( e, threadNum );
 }
 

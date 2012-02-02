@@ -181,13 +181,13 @@ const Cinfo* Pool::initCinfo()
 		&size,		// Readonly Value
 		&speciesId,	// Value
 		&group,			// DestFinfo
-		&increment,			// DestFinfo
-		&decrement,			// DestFinfo
 //		requestSize(),		// SrcFinfo, but defined in SharedFinfo
 		&reac,				// SharedFinfo
 		&proc,				// SharedFinfo
 		&species,			// SharedFinfo
 		&mesh,				// SharedFinfo
+		&increment,			// DestFinfo
+		&decrement,			// DestFinfo
 	};
 
 	static Cinfo poolCinfo (

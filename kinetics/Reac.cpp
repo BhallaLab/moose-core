@@ -89,6 +89,10 @@ const Cinfo* Reac::initCinfo()
 			"Handle for group msgs. Doesn't do anything",
 			new OpFuncDummy() );
 
+		static DestFinfo remesh( "remesh",
+			"Tells the reac to recompute its numRates, as remeshing has happened",
+			new EpFunc0< Reac >( & Reac::remesh ) );
+
 		//////////////////////////////////////////////////////////////
 		// Shared Msg Definitions
 		//////////////////////////////////////////////////////////////
@@ -132,6 +136,7 @@ const Cinfo* Reac::initCinfo()
 		&sub,				// SharedFinfo
 		&prd,				// SharedFinfo
 		&proc,				// SharedFinfo
+		&remesh,	// DestFinfo
 	};
 
 	static Cinfo reacCinfo (
@@ -195,6 +200,12 @@ void Reac::reinit( const Eref& e, ProcPtr p )
 		convertConcToNumRateUsingMesh( e, toSub(), 0 );
 	prd_ = kb_ = concKb_ * 
 		convertConcToNumRateUsingMesh( e, toPrd(), 0 );
+}
+
+void Reac::remesh( const Eref& e, const Qinfo* q )
+{
+	kf_ = concKf_ / convertConcToNumRateUsingMesh( e, toSub(), 0 );
+	kb_ = concKb_ / convertConcToNumRateUsingMesh( e, toPrd(), 0 );
 }
 
 //////////////////////////////////////////////////////////////

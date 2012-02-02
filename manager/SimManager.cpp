@@ -295,28 +295,6 @@ void SimManager::build( const Eref& e, const Qinfo* q, string method )
 	// Set up internode messages to and from stoichs
 	// Set up and assign the clocks
 	// Create the plots.
-
-	/*
-	
-	TreeType tt = findTreeType( e );
-
-	switch ( tt ) {
-		case CHEM_ONLY :
-			buildFromBareKineticTree( method );
-			break;
-		case KKIT :
-			buildFromKkitTree( method );
-			break;
-		case CHEM_SPACE :
-			break;
-		case CHEM_SPACE_MULTISOLVER :
-			break;
-		case SIGNEUR :
-			break;
-		default:
-			break;
-	}
-	*/
 }
 
 void SimManager::makeStandardElements( const Eref& e, const Qinfo* q, 
@@ -394,6 +372,8 @@ void SimManager::buildFromKkitTree( const string& method )
 	shell->doSetClock( 3, 0 );
 
 	string basePath = baseId_.path();
+	Id mesh( basePath + "/kinetics/mesh" );
+	assert( mesh != Id() );
 	if ( method == "Gillespie" || method == "gillespie" || 
 		method == "GSSA" || method == "gssa" || method == "Gssa" ) {
 		// Id stoich = shell->doCreate( "Stoich", baseId_, "stoich", dims );
