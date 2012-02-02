@@ -671,9 +671,14 @@ bool Qinfo::addToStructuralQ() const
 bool Qinfo::protectedAddToStructuralQ() const
 {
 	bool ret = 0;
-	pthread_mutex_lock( sqMutex_ );
+	// This function may be called in single-thread mode, so check for mutex
+	if ( sqMutex_ ) {
+		pthread_mutex_lock( sqMutex_ );
+			ret = addToStructuralQ();
+		pthread_mutex_unlock( sqMutex_ );
+	} else {
 		ret = addToStructuralQ();
-	pthread_mutex_unlock( sqMutex_ );
+	}
 	return ret;
 }
 

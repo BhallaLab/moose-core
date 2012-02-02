@@ -96,7 +96,9 @@ class CylMesh: public ChemMesh
 		//////////////////////////////////////////////////////////////////
 
 		/// Virtual func to make a mesh with specified size and numEntries
-		void innerBuildDefaultMesh( double size, unsigned int numEntries );
+		void innerBuildDefaultMesh( const Eref& e, const Qinfo* q,
+			double size, unsigned int numEntries );
+
 		void innerHandleRequestMeshStats(
 			const Eref& e, const Qinfo* q,
 			const SrcFinfo2< unsigned int, vector< double > >*

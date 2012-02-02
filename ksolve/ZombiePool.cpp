@@ -336,11 +336,11 @@ void ZombiePool::zombify( Element* solver, Element* orig )
 	Pool* m = reinterpret_cast< Pool* >( oer.data() );
 	z->setSpecies( zombier, 0, m->getSpecies() );
 	unsigned int poolIndex = z->convertIdToPoolIndex( orig->id() );
-	z->concInit_[ poolIndex ] = m->getConcInit( oer, 0 );
+	z->concInit_[ poolIndex ] = m->getConcInit();
 
 	Eref zer( &temp, 0 );
 	z->setN( zer, 0, m->getN() );
-	z->setNinit( zer, 0, m->getNinit() );
+	z->setNinit( zer, 0, m->getNinit( oer, 0 ) );
 	z->setDiffConst( zer, 0, m->getDiffConst() );
 	/*
 	for ( unsigned int i = 0; i < numEntries; ++i ) {
@@ -377,6 +377,6 @@ void ZombiePool::unzombify( Element* zombie )
 	Pool* m = reinterpret_cast< Pool* >( oer.data() );
 
 	m->setN( z->getN( zer, 0 ) );
-	m->setNinit( z->getNinit( zer, 0 ) );
+	m->setNinit( oer, 0, z->getNinit( zer, 0 ) );
 	m->setSpecies( z->getSpecies( zer, 0 ) );
 }

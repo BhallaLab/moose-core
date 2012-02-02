@@ -108,9 +108,16 @@ class MeshEntry
 		void process( const Eref& e, ProcPtr info );
 		void reinit( const Eref& e, ProcPtr info );
 		//////////////////////////////////////////////////////////////////
+		// Utility func
+		//////////////////////////////////////////////////////////////////
+		void triggerRemesh( const Eref& e, unsigned int threadNum,
+			unsigned int startEntry, 
+			const vector< unsigned int >& localIndices,
+			const vector< double >& vols );
+
+		//////////////////////////////////////////////////////////////////
 		// Lookup funcs for Boundary
 		//////////////////////////////////////////////////////////////////
-
 
 		static const Cinfo* initCinfo();
 	private:

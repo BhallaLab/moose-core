@@ -81,7 +81,7 @@ void FuncPool::reinit( const Eref& e, ProcPtr p )
 
 void FuncPool::input( double v )
 {
-	setNinit( v );
+	setConcInit( v );
 }
 
 //////////////////////////////////////////////////////////////

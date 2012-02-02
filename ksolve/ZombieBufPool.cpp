@@ -53,7 +53,7 @@ void ZombieBufPool::zombify( Element* solver, Element* orig )
 	BufPool* m = reinterpret_cast< BufPool* >( oer.data() );
 
 	z->setN( zer, 0, m->getN() );
-	z->setNinit( zer, 0, m->getNinit() );
+	z->setNinit( zer, 0, m->getNinit( oer, 0 ) );
 	z->setDiffConst( zer, 0, m->getDiffConst() );
 	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler(),
 		orig->dataHandler() );
@@ -78,5 +78,5 @@ void ZombieBufPool::unzombify( Element* zombie )
 	BufPool* m = reinterpret_cast< BufPool* >( oer.data() );
 
 	m->setN( z->getN( zer, 0 ) );
-	m->setNinit( z->getNinit( zer, 0 ) );
+	m->setNinit( oer, 0, z->getNinit( zer, 0 ) );
 }
