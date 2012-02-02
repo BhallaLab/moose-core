@@ -17015,4 +17015,18 @@ and regular Pool. Checkin 3277.
 
 Working in mesh/testMesh.cpp:testReMesh().
 Skeleton set up to create a pool and tie it to a mesh. Does OK so far.
-Next to remesh.
+Next to remesh. 
+============================================================================
+2 Feb 2012
+Got the remesh working in a unit test, without the full scheduling going. 
+Checkin 3279.
+A continuing issue here is that the structuralQ calls end up being executed
+out of order unless one explicitly tells Qinfo to wait a couple of cycles.
+Not sure how to deal with this.
+
+Next step is the regression tests.
+
+Some fixes to get back to the point of interest, where I want to set volumes
+of the hsolved system. I had to fix ReadKkit and some of the zombie
+conversion routines.
+============================================================================

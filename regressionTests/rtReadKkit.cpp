@@ -40,6 +40,7 @@ void rtFindModelType()
 void rtReadKkit()
 {
 	const double NA_RATIO = 6e23 / NA;
+	const double VOL = 1.666666666666e-21;
 
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	vector< unsigned int > dims( 1, 1 );
@@ -50,6 +51,8 @@ void rtReadKkit()
 
 	double n;
 	assert( Id( "/rkktest/kinetics/MAPK/MKKK" ) != Id() );
+	double vol = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MKKK" ), "size" );
+	assert( doubleEq( vol, VOL ) );
 	n = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MKKK" ), "n" );
 	assert( doubleEq( n, 0.1 / NA_RATIO ) );
 
