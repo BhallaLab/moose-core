@@ -119,6 +119,7 @@ Id ReadKkit::read(
 	innerRead( fin );
 
 	assignPoolCompartments();
+	assignReacCompartments();
 
 	convertParametersToConcUnits();
 
@@ -491,15 +492,39 @@ void ReadKkit::assignPoolCompartments()
 			j != volCategories_[i].end(); ++j ) {
 			// get the group Ids that have a different vol in them
 			MsgId ret = shell_->doAddMsg( "OneToOne", 
-				ObjId( *j, 0 ), "requestSize",
-				ObjId( meshId, 0 ), "get_size" );
+				ObjId( *j, 0 ), "mesh",
+				ObjId( meshId, 0 ), "mesh" );
 			/*
 			MsgId ret = shell_->doAddMsg( "OneToOne", 
-				ObjId( compt, 0 ), "sizeOut",
-				ObjId( *j, 0 ), "setSize" ); 
+				ObjId( compt, 0 ), "requestSize",
+				ObjId( *j, 0 ), "get_size" ); 
 				*/
 			assert( ret != Msg::bad );
 		}
+	}
+}
+
+
+/**
+ * Goes through all Reacs and connects them up to each of the compartments
+ * in which one or more of their reactants resides.
+ * Thus, if any of these compartments changes volume, the Reac will
+ * be informed.
+ */
+void ReadKkit::assignReacCompartments()
+{
+	// Temporarily just assign them to the base compartment.
+	// Possibly use compartments_ vector later.
+	Id kinId = Neutral::child( baseId_.eref(), "kinetics" );
+	assert( kinId != Id() );
+	Id meshId = Neutral::child( kinId.eref(), "mesh" );
+	assert( meshId != Id() );
+	for ( map< string, Id >::iterator i = reacIds_.begin(); 
+		i != reacIds_.end(); ++i ) {
+		MsgId ret = shell_->doAddMsg( "Single", 
+			ObjId( meshId, 0 ), "remeshReacs",
+			ObjId( i->second, 0 ), "remesh" );
+		assert( ret != Msg::bad );
 	}
 }
 

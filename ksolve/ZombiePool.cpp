@@ -227,6 +227,15 @@ void ZombiePool::remesh( const Eref& e, const Qinfo* q,
 	vector< unsigned int > localIndices, vector< double > vols )
 {
 	cout << "In ZombiePool::remesh for " << e << endl;
+	if ( S_.size() != vols.size() ) {
+		// Resize the vectors here.
+	}
+
+	unsigned int poolIndex = convertIdToPoolIndex( e.id() );
+	for ( unsigned int i = 0; i < vols.size(); ++i ) {
+		S_[i][poolIndex] = Sinit_[i][poolIndex] = 
+			concInit_[poolIndex] * vols[i] * NA;
+	}
 }
 
 //////////////////////////////////////////////////////////////

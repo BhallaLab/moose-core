@@ -17028,5 +17028,32 @@ Next step is the regression tests.
 
 Some fixes to get back to the point of interest, where I want to set volumes
 of the hsolved system. I had to fix ReadKkit and some of the zombie
-conversion routines.
+conversion routines. Checkin 3280.
+
+Now onto the core conversion steps.
+1. Changing the volume. I have it propagating into the ZombiePools, need to
+put in a test just for changed numbers and stable concs.
+2. Changing the volume. Still need to connect to the Stoich itself, so that the
+	reaction rates also scale.
+3. Changing mesh size. This too will involve connecting to Stoich itself,
+	and will also mean remeshing the GslIntegrator.
+4. Linking Geoms in
+5. Providing suitable time buffers.
+
+
+Now trying to change reac volumes
+	From Stoich: Need to go through all RateTerms, use getReactants,
+	query volumes. But it doesn't tell us what the reference rate was.
+	From individual Reacs: Need to implement updateRates function to
+	query substrates and products, and do scaling. In the Zombies this
+	has to then update own entry in RateTerm table.
+	Advantage here is for cases with multiple compartments, each compt will
+	manage its own reacs.
+	Very minor advantage also that numKf can be updated as soon as 
+	rescaling happens.
+	Issue is that I now have to rebuild the messaging to the reacs.
+
+Done all this, now it clears the checkReacRates section with the rescaled
+volume. Next to do the enzymes.
+
 ============================================================================
