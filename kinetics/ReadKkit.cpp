@@ -662,7 +662,7 @@ Id ReadKkit::buildPool( const vector< string >& args )
 	// skip the 10 chars of "/kinetics/"
 	poolIds_[ args[2].substr( 10 ) ] = pool; 
 
-	Field< double >::set( pool, "nInit", nInit );
+	Field< double >::set( pool, "concInit", nInit / ( NA * vol) );
 	Field< double >::set( pool, "diffConst", diffConst );
 	// SetGet1< double >::set( pool, "setSize", vol );
 	separateVols( pool, vol );
