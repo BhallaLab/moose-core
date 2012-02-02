@@ -86,7 +86,14 @@ class ReadKkit
 		void loadtab( const vector< string >& args );
 		void separateVols( Id pool, double vol );
 		void assignPoolCompartments();
-		// void assignReacCompartments();
+
+		/**
+		 * Goes through all Reacs and connects them up to each of the
+		 * compartments in which one or more of their reactants resides.
+		 * Thus, if any of these compartments changes volume, the Reac will
+		 * be informed.
+		 */     
+		void assignReacCompartments();
 		// void assignEnzCompartments();
 
 		/**

@@ -48,6 +48,7 @@ class Reac
 		void reinit( const Eref& e, ProcPtr p );
 		void sub( double v );
 		void prd( double v );
+		void remesh( const Eref& e, const Qinfo* q );
 
 		static const Cinfo* initCinfo();
 	private:
