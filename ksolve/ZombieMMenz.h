@@ -39,6 +39,7 @@ class ZombieMMenz: public Stoich
 		void process( const Eref& e, ProcPtr p );
 		void reinit( const Eref& e, ProcPtr p );
 		void dummy( double n );
+		void remesh( const Eref& e, const Qinfo* q );
 
 		//////////////////////////////////////////////////////////////////
 		// Utility  funcs
@@ -52,6 +53,8 @@ class ZombieMMenz: public Stoich
 
 		static const Cinfo* initCinfo();
 	private:
+		Stoich* stoich_;
+		double Km_; /// Km in conc units: millimolar
 };
 
 #endif // _ZOMBIE_MM_ENZ_H

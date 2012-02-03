@@ -41,6 +41,7 @@ class MMenz
 		void sub( double n );
 		void enz( double n );
 		void prd( double n );
+		void remesh( const Eref& e, const Qinfo* q );
 
 		static const Cinfo* initCinfo();
 	private:

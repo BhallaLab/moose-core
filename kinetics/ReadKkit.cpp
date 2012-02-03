@@ -120,6 +120,8 @@ Id ReadKkit::read(
 
 	assignPoolCompartments();
 	assignReacCompartments();
+	// assignEnzCompartments();
+	assignMMenzCompartments();
 
 	convertParametersToConcUnits();
 
@@ -504,7 +506,6 @@ void ReadKkit::assignPoolCompartments()
 	}
 }
 
-
 /**
  * Goes through all Reacs and connects them up to each of the compartments
  * in which one or more of their reactants resides.
@@ -521,6 +522,52 @@ void ReadKkit::assignReacCompartments()
 	assert( meshId != Id() );
 	for ( map< string, Id >::iterator i = reacIds_.begin(); 
 		i != reacIds_.end(); ++i ) {
+		MsgId ret = shell_->doAddMsg( "Single", 
+			ObjId( meshId, 0 ), "remeshReacs",
+			ObjId( i->second, 0 ), "remesh" );
+		assert( ret != Msg::bad );
+	}
+}
+
+/**
+ * Goes through all Enzs and connects them up to each of the compartments
+ * in which one or more of their reactants resides.
+ * Thus, if any of these compartments changes volume, the Enz will
+ * be informed.
+ */
+void ReadKkit::assignEnzCompartments()
+{
+	// Temporarily just assign them to the base compartment.
+	// Possibly use compartments_ vector later.
+	Id kinId = Neutral::child( baseId_.eref(), "kinetics" );
+	assert( kinId != Id() );
+	Id meshId = Neutral::child( kinId.eref(), "mesh" );
+	assert( meshId != Id() );
+	for ( map< string, Id >::iterator i = enzIds_.begin(); 
+		i != enzIds_.end(); ++i ) {
+		MsgId ret = shell_->doAddMsg( "Single", 
+			ObjId( meshId, 0 ), "remeshReacs",
+			ObjId( i->second, 0 ), "remesh" );
+		assert( ret != Msg::bad );
+	}
+}
+
+/**
+ * Goes through all MMenzs and connects them up to each of the compartments
+ * in which one or more of their reactants resides.
+ * Thus, if any of these compartments changes volume, the MMenz will
+ * be informed.
+ */
+void ReadKkit::assignMMenzCompartments()
+{
+	// Temporarily just assign them to the base compartment.
+	// Possibly use compartments_ vector later.
+	Id kinId = Neutral::child( baseId_.eref(), "kinetics" );
+	assert( kinId != Id() );
+	Id meshId = Neutral::child( kinId.eref(), "mesh" );
+	assert( meshId != Id() );
+	for ( map< string, Id >::iterator i = mmEnzIds_.begin(); 
+		i != mmEnzIds_.end(); ++i ) {
 		MsgId ret = shell_->doAddMsg( "Single", 
 			ObjId( meshId, 0 ), "remeshReacs",
 			ObjId( i->second, 0 ), "remesh" );

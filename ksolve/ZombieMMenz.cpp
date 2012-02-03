@@ -85,6 +85,10 @@ const Cinfo* ZombieMMenz::initCinfo()
 			"Handle for group msgs. Doesn't do anything",
 			new OpFuncDummy() );
 
+		static DestFinfo remesh( "remesh",
+		"Tells the ZombieMMEnz to recompute its numKm after remeshing",
+		new EpFunc0< ZombieMMenz >( &ZombieMMenz::remesh ) );
+
 		//////////////////////////////////////////////////////////////
 		// Shared Msg Definitions
 		//////////////////////////////////////////////////////////////
@@ -125,6 +129,7 @@ const Cinfo* ZombieMMenz::initCinfo()
 		&sub,				// SharedFinfo
 		&prd,				// SharedFinfo
 		&proc,				// SharedFinfo
+		&remesh,			// DestFinfo
 	};
 
 	static Cinfo zombieMMenzCinfo (
@@ -160,6 +165,11 @@ void ZombieMMenz::process( const Eref& e, ProcPtr p )
 
 void ZombieMMenz::reinit( const Eref& e, ProcPtr p )
 {;}
+
+void ZombieMMenz::remesh( const Eref& e, const Qinfo* q )
+{
+	cout << "ZombieMMenz::remesh for " << e << endl;
+}
 
 //////////////////////////////////////////////////////////////
 // Field Definitions

@@ -94,7 +94,8 @@ class ReadKkit
 		 * be informed.
 		 */     
 		void assignReacCompartments();
-		// void assignEnzCompartments();
+		void assignEnzCompartments();
+		void assignMMenzCompartments();
 
 		/**
 		 * We have a slight problem because MOOSE has a more precise value
