@@ -79,6 +79,10 @@ const Cinfo* MMenz::initCinfo()
 			"Handle for group msgs. Doesn't do anything",
 			new OpFuncDummy() );
 
+		static DestFinfo remesh( "remesh",
+			"Tells the MMEnz to recompute its numKm after remeshing",
+			new EpFunc0< MMenz >( &MMenz::remesh ) );
+
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
@@ -123,6 +127,7 @@ const Cinfo* MMenz::initCinfo()
 		&sub,				// SharedFinfo
 		&prd,				// SharedFinfo
 		&proc,				// SharedFinfo
+		&remesh,			// Destfinfo
 	};
 
 	static Cinfo mmEnzCinfo (
@@ -181,6 +186,11 @@ void MMenz::reinit( const Eref& e, ProcPtr p )
 {
 	sub_ = 1.0;
 	enz_ = 0.0;
+}
+
+void MMenz::remesh( const Eref& e, const Qinfo* q )
+{
+	cout << "MMenz::remesh for " << e << endl;
 }
 
 //////////////////////////////////////////////////////////////
