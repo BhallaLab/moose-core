@@ -37,6 +37,10 @@ class GslIntegrator
 
 		void stoich( const Eref& e, const Qinfo* q, Id stoichId );
 
+		void remesh( const Eref& e, const Qinfo* q,
+			unsigned int numTotalEntries, unsigned int startEntry, 
+			vector< unsigned int > localIndices, vector< double > vols );
+
 		static const Cinfo* initCinfo();
 	private:
 		bool isInitialized_;
