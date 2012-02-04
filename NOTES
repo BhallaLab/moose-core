@@ -17060,4 +17060,9 @@ Next to do the enzymes.
 ============================================================================
 3 Feb 2012
 Put in skeleton messaging code for the ChemMesh to call "remesh" on MMenzs.
+Checkin 3282.
 
+Put in the MMEnz::remesh code. Still to get it to clear regression test.
+
+Now clears the test in rtReadKkit.cpp:rtRunKkit()
+for resizing the compartment, without changing the number of voxels.

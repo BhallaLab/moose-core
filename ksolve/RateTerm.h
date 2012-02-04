@@ -69,8 +69,8 @@ class RateTerm
 class MMEnzymeBase: public RateTerm
 {
 	public:
-		MMEnzymeBase( double Km, double kcat )
-			: Km_( Km ), kcat_( kcat )
+		MMEnzymeBase( double Km, double kcat, unsigned int enz )
+			: Km_( Km ), kcat_( kcat ), enz_( enz )
 		{
 			assert( Km_ > 0.0 );
 		}
@@ -111,10 +111,15 @@ class MMEnzymeBase: public RateTerm
 		{
 			Km_ *= ratio;
 		}
+		unsigned int getEnzIndex() const
+		{
+			return enz_;
+		}
 
 	protected:
 		double Km_;
 		double kcat_;
+		unsigned int enz_;
 };
 
 // Single substrate MMEnzyme: by far the most common.
@@ -123,7 +128,7 @@ class MMEnzyme1: public MMEnzymeBase
 	public:
 		MMEnzyme1( double Km, double kcat, 
 			unsigned int enz, unsigned int sub )
-			: MMEnzymeBase( Km, kcat ), enz_( enz ), sub_( sub )
+			: MMEnzymeBase( Km, kcat, enz ), sub_( sub )
 		{
 			;
 		}
@@ -141,7 +146,6 @@ class MMEnzyme1: public MMEnzymeBase
 		}
 
 	private:
-		unsigned int enz_;
 		unsigned int sub_;
 };
 
@@ -150,7 +154,7 @@ class MMEnzyme: public MMEnzymeBase
 	public:
 		MMEnzyme( double Km, double kcat, 
 			unsigned int enz, RateTerm* sub )
-			: MMEnzymeBase( Km, kcat ), enz_( enz ), substrates_( sub )
+			: MMEnzymeBase( Km, kcat, enz ), substrates_( sub )
 		{
 			;
 		}
@@ -168,7 +172,6 @@ class MMEnzyme: public MMEnzymeBase
 			return molIndex.size();
 		}
 	private:
-		unsigned int enz_;
 		RateTerm* substrates_;
 };
 
