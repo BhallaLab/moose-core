@@ -354,63 +354,6 @@ void Stoich::setNumPorts( unsigned int num )
 	ports_.resize( num );
 }
 
-/*/
-unsigned int Stoich::numCompartments() const
-{
-	return compartment_.size();
-}
-*/
-
-/*
-void Stoich::setCompartmentVolume( short comptIndex, double v )
-{
-	if ( v <= 0 ) {
-		cout << "Error: Stoich::setCompartmentVolume: volume v must be > 0\n";
-		return;
-	}
-	unsigned int ci = comptIndex;
-	if ( ci >= compartmentSize_.size() ) {
-		cout << "Error: Stoich::setCompartmentVolume: Index " <<
-			comptIndex << " out of range, only " << 
-				compartmentSize_.size() <<
-			" compartments present\n";
-		return;
-	}
-
-	double origVol = compartmentSize_[ comptIndex ];
-	double ratio = v/origVol;
-
-	assert( compartment_.size() == S_[0].size() );
-	assert( compartment_.size() == Sinit_[0].size() );
-	for ( unsigned int i = 0; i < numMeshEntries_; ++i ) {
-		for ( unsigned int j = 0; j < S_[i].size(); ++j ) {
-			S_[i][j] *= ratio;
-			Sinit_[i][j] *= ratio;
-		}
-	}
-	for ( vector< vector< double > >::iterator i = y_.begin(); 
-		i != y_.end(); ++i ) {
-		for ( unsigned int j = 0; j < i->size(); ++j ) {
-			(*i)[j] *= ratio;
-		}
-	}
-
-	for ( vector< RateTerm* >::iterator i = rates_.begin(); i != rates_.end(); ++i ) {
-		(*i)->rescaleVolume(  comptIndex , compartment_, ratio );
-	}
-}
-*/
-
-/*
-double Stoich::getCompartmentVolume( short i ) const
-{
-	unsigned int temp = i;
-	if ( temp < compartmentSize_.size() )
-		return compartmentSize_[i];
-	return 0.0;
-}
-*/
-
 //////////////////////////////////////////////////////////////
 // Model zombification functions
 //////////////////////////////////////////////////////////////
@@ -427,13 +370,6 @@ void Stoich::allocateObjMap( const vector< Id >& elist )
 	objMap_.resize(0);
 	objMap_.resize( 1 + maxId - objMapStart_, 0 );
 	assert( objMap_.size() >= elist.size() );
-
-	/*
-	for ( unsigned int i = 0; i < elist.size(); ++i ) {
-		unsigned int index = elist[i].value() - objMapStart_;
-		objMap_[ index ] = i;
-	}
-	*/
 }
 
 void Stoich::allocateModel( const vector< Id >& elist )
@@ -524,19 +460,6 @@ void Stoich::allocateModel( const vector< Id >& elist )
 	y_[0].resize( numVarPools_, 0.0 );
 	flux_[0].resize( numVarPools_, 0.0 );
 
-	/*
-	S_.resize( numMeshEntries_ );
-	Sinit_.resize( numMeshEntries_ );
-	y_.resize( numMeshEntries_ );
-	flux_.resize( numMeshEntries_ );
-	for ( unsigned int i = 0; i < numMeshEntries_; ++i ) {
-		S_[i].resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0 );
-		Sinit_[i].resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0);
-		y_[i].resize( numVarPools_, 0.0 );
-		flux_[i].resize( numVarPools_, 0.0 );
-	}
-	*/
-
 	diffConst_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0 );
 	// compartment_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0 );
 	species_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0 );
@@ -610,29 +533,20 @@ void Stoich::meshSplit( unsigned int totalNumMeshEntries,
 	)
 {
 	cout << "Stoich::handleMeshSplit\n";
-}
-/*
-void Stoich::zombifyChemMesh( Id meshEntry )
-{
-	static const Cinfo* meshEntryCinfo = MeshEntry::initCinfo();
-	static const Finfo* finfo = meshEntryCinfo->findFinfo( "get_size" );
-
-	MeshEntry* c = reinterpret_cast< MeshEntry* >( meshEntry.eref().data());
-
-	Element* e = meshEntry();
-	vector< Id > pools;
-	unsigned int numTgts = e->getNeighbours( pools, finfo );
-	assert( numTgts > 0 );
-
-	for ( vector< Id >::iterator i = pools.begin(); i != pools.end(); ++i ){
-		unsigned int m = convertIdToPoolIndex( *i );
-		compartment_[ m ] = compartmentSize_.size();
+	unsigned int numLocal = localEntryList.size();
+	S_.resize( totalNumMeshEntries );
+	Sinit_.resize( totalNumMeshEntries );
+	y_.resize( numLocal );
+	for ( unsigned int i = 0; i < numLocal; ++i ) {
+		// Assume that these values will later be initialized
+		S_[ localEntryList[i] ].resize( concInit_.size(), 0 );
+		Sinit_[ localEntryList[i] ].resize( concInit_.size(), 0 );
+		y_[i].resize( numVarPools_, 0 );
 	}
-
-	objMap_[ meshEntry.value() - objMapStart_ ] = compartmentSize_.size();
-	compartmentSize_.push_back( c->getSize( meshEntry.eref(), 0 ) );
+	localMeshEntries_ = localEntryList;
+	outgoing_ = outgoingDiffusion;
+	incoming_ = incomingDiffusion;
 }
-*/
 
 unsigned int Stoich::convertIdToPoolIndex( Id id ) const
 {
@@ -660,18 +574,6 @@ unsigned int Stoich::convertIdToFuncIndex( Id id ) const
 	assert( i < funcs_.size() );
 	return i;
 }
-
-/*
-unsigned int Stoich::convertIdToComptIndex( Id id ) const
-{
-	unsigned int i = id.value() - objMapStart_;
-	assert( i < objMap_.size() );
-	i = objMap_[i];
-	assert( i < compartmentSize_.size() );
-	return i;
-}
-*/
-
 
 void Stoich::installReaction( ZeroOrder* forward, ZeroOrder* reverse, Id reacId )
 {
@@ -897,31 +799,6 @@ void Stoich::updateDiffusion(
 		stencil[i]->addFlux( meshIndex, flux_[meshIndex], S_, diffConst_ );
 	}
 }
-
-/*
-void Stoich::updateDiffusion( 
-	unsigned int meshIndex, const vector< pair< int, double > >& stencil)
-{
-	for ( unsigned int i = 0; i < stencil.size(); ++i ) {
-		int offset = stencil[i].first;
-		int index = meshIndex - offset;
-		if ( index < 0 ) { // use mirror entry.
-			index = meshIndex + offset;
-		} else if ( index >= static_cast< int >( numMeshEntries_ ) ) { 
-			// use mirror entry.
-			index = meshIndex - offset;
-		}
-		vector< double >& f = flux_[meshIndex];
-		if ( index >= 0 && index < static_cast< int >( numMeshEntries_  )) {
-			assert( f.size() <= S_[0].size() );
-			double scale = stencil[i].second;
-			for ( unsigned int j = 0; j < f.size(); ++j ) {
-				f[j] += diffConst_[j] * S_[ index ][j] * scale;
-			}
-		}
-	}
-}
-*/
 
 // void Stoich::clearFlux( unsigned int meshIndex )
 // This variant also sends out the data for the current node.
