@@ -15,7 +15,7 @@
  * equation
  * V = kcat.[Etot].[S]/( Km + [S] )
  */
-class ZombieMMenz: public Stoich
+class ZombieMMenz
 {
 	public: 
 		ZombieMMenz();
