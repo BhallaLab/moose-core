@@ -72,6 +72,12 @@ class Stoich
 		void handleNodeDiffBoundary( unsigned int nodeNum, 
 			vector< unsigned int > meshEntries, vector< double > remoteS );
 
+		void meshSplit( unsigned int totalNumMeshEntries, 
+			vector< unsigned int > localEntryList,
+			vector< vector< unsigned int > > outgoingDiffusion,
+			vector< vector< unsigned int > > incomingDiffusion
+		);
+
 		//////////////////////////////////////////////////////////////////
 		// Model traversal and building functions
 		//////////////////////////////////////////////////////////////////

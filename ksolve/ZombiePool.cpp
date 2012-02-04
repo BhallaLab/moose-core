@@ -226,7 +226,7 @@ void ZombiePool::remesh( const Eref& e, const Qinfo* q,
 	unsigned int numTotalEntries, unsigned int startEntry, 
 	vector< unsigned int > localIndices, vector< double > vols )
 {
-	cout << "In ZombiePool::remesh for " << e << endl;
+	// cout << "In ZombiePool::remesh for " << e << endl;
 	if ( S_.size() != vols.size() ) {
 		// Resize the vectors here.
 	}

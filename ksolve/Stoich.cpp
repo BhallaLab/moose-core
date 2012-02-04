@@ -122,6 +122,20 @@ const Cinfo* Stoich::initCinfo()
 			new ProcOpFunc< Stoich >( &Stoich::reinit ) );
 			*/
 
+		static DestFinfo meshSplit( "meshSplit",
+			"Handles message from ChemMesh that defines how "
+			"meshEntries are decomposed on this node, and how they "
+			"communicate between nodes."
+			"Args: (totalNumEntries, localEntryList, "
+			"outgoingDiffusion[node#][entry#], "
+			"incomingDiffusion[node#][entry#])",
+			new OpFunc4< Stoich, 
+				unsigned int, vector< unsigned int >,
+				vector< vector< unsigned int > >,
+				vector< vector< unsigned int > >
+			>( &Stoich::meshSplit )
+		);
+
 		//////////////////////////////////////////////////////////////
 		// FieldElementFinfo defintion for Ports. Assume up to 16.
 		//////////////////////////////////////////////////////////////
@@ -156,6 +170,7 @@ const Cinfo* Stoich::initCinfo()
 		&path,			// Value
 		plugin(),		// SrcFinfo
 		nodeDiffBoundary(),		// SrcFinfo
+		&meshSplit,		// DestFinfo
 		&portFinfo,		// FieldElementFinfo
 	};
 
@@ -585,9 +600,17 @@ void Stoich::handleRemesh( unsigned int numLocalMeshEntries,
 	vector< vector< unsigned int > > outgoingDiffusion, 
 	vector< vector< unsigned int > > incomingDiffusion ) 
 {
-	;
+	cout << "Stoich::handleRemesh\n";
 }
 
+void Stoich::meshSplit( unsigned int totalNumMeshEntries, 
+	vector< unsigned int > localEntryList,
+	vector< vector< unsigned int > > outgoingDiffusion,
+	vector< vector< unsigned int > > incomingDiffusion
+	)
+{
+	cout << "Stoich::handleMeshSplit\n";
+}
 /*
 void Stoich::zombifyChemMesh( Id meshEntry )
 {
@@ -769,7 +792,7 @@ void Stoich::setMMenzKm( const Eref& e, double v ) const
 
 	// This function can be replicated to handle multiple different voxels.
 	vector< double > vols;
-	unsigned int num = getReactantVols( e, toSub, vols );
+	getReactantVols( e, toSub, vols );
 	if ( vols.size() == 0 ) {
 		cerr << "Error: Stoich::setMMenzKm: no substrates for enzyme " <<
 			e << endl;

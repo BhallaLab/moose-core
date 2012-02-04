@@ -17066,3 +17066,10 @@ Put in the MMEnz::remesh code. Still to get it to clear regression test.
 
 Now clears the test in rtReadKkit.cpp:rtRunKkit()
 for resizing the compartment, without changing the number of voxels.
+Checkin 3283.
+
+Working on handling remesh requests in the Stoich. Skeleton messaging
+set up.
+
+Next need to clean up the ZombieEnz code.
+

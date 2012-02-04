@@ -250,16 +250,21 @@ void SimManager::build( const Eref& e, const Qinfo* q, string method )
 	/* This shared message should allow the mesh to force an update, and
 	 * the SimManager to request an update. 
 	 * Unfortunately messages do not (yet) work well with setup calls.
-	 */
 	MsgId mid = shell->doAddMsg( "OneToOne", mesh, "nodeMeshing", 
 		baseId_, "nodeMeshing" );
 	assert( mid != Msg::bad );
+	 */
 
 	vector< int > dims( 1, 1 );
 	 // This is a placeholder for more sophisticated node-balancing info
 	 // May also need to put in volscales here.
 	stoich_ = shell->doCreate( "Stoich", baseId_, "stoich", dims );
 	Field< string >::set( stoich_, "path", baseId_.path() + "/kinetics/##");
+
+	MsgId mid = shell->doAddMsg( "Single", mesh, "meshSplit", 
+		stoich_, "meshSplit" );
+	assert( mid != Msg::bad );
+
 	double chemLoad = estimateChemLoad( mesh, stoich_ );
 	// Here we would also estimate cell load
 	/*

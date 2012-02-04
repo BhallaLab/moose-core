@@ -61,12 +61,6 @@ class ChemMesh
 			unsigned int numNodes, unsigned int numThreads );
 		virtual void innerHandleNodeInfo(
 			const Eref& e, const Qinfo* q, 
-			const SrcFinfo4< 
-				vector< unsigned int >, 
-				vector< unsigned int >, 
-				vector< unsigned int >, 
-				vector< unsigned int > 
-			>* meshSplitFinfo,
 			unsigned int numNodes, unsigned int numThreads ) = 0;
 
 
@@ -168,5 +162,12 @@ class ChemMesh
 		 */
 		vector< Boundary > boundaries_;
 };
+
+extern SrcFinfo4< 
+	unsigned int, 
+	vector< unsigned int>, 
+	vector< vector< unsigned int > >, 
+	vector< vector< unsigned int > >
+	>* meshSplit();
 
 #endif	// _CHEM_MESH_H
