@@ -107,12 +107,6 @@ class CubeMesh: public ChemMesh
 
 		void innerHandleNodeInfo(
 			const Eref& e, const Qinfo* q, 
-			const SrcFinfo4< 
-				vector< unsigned int >, 
-				vector< unsigned int >, 
-				vector< unsigned int >, 
-				vector< unsigned int > 
-			>* meshSplitFinfo,
 			unsigned int numNodes, unsigned int numThreads );
 
 		//////////////////////////////////////////////////////////////////

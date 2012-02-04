@@ -822,7 +822,7 @@ template< class T > class Conv< vector< vector< T > > >
 
 		const vector< vector< T > > operator*() const {
 			vector< vector< T > > ret;
-			if ( vec_.size() > 0 ) {
+			if ( vec_.size() > 0 && vec_[0] > 0 ) {
 				unsigned int numEntries = vec_[0];
 				assert( vec_.size() > numEntries + 1 );
 				vector< unsigned int > start( numEntries, 0 );

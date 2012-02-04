@@ -527,10 +527,26 @@ void CubeMesh::innerBuildDefaultMesh( const Eref& e, const Qinfo* q,
 	assert( 
 		meshEntry.eref().data() == reinterpret_cast< char* >( lookupEntry( 0 ) )
 	);
-	vector< unsigned int > localIndices; // empty
-	vector< double > vols( nx_ * ny_ * nz_, dx_ * dy_ * dz_ );
+	unsigned int totalNumEntries = nx_ * ny_ * nz_;
+	unsigned int localNumEntries = totalNumEntries;
+	unsigned int startEntry = 0;
+	vector< unsigned int > localIndices( localNumEntries ); // empty
+	for ( unsigned int i = 0; i < localNumEntries; ++i )
+		localIndices[i] = i;
+	vector< double > vols( localNumEntries, dx_ * dy_ * dz_ );
+	vector< vector< unsigned int > > outgoingEntries; // [node#][Entry#]
+	vector< vector< unsigned int > > incomingEntries; // [node#][Entry#]
+
+	// This message tells the Stoich about the new mesh, and also about
+	// how it communicates with other nodes.
+	meshSplit()->send( e, q->threadNum(), 
+		totalNumEntries, localIndices, 
+		outgoingEntries, incomingEntries );
+
+	// This func goes down to the MeshEntry to tell all the pools and
+	// Reacs to deal with the new mesh. They then update the stoich.
 	lookupEntry( 0 )->triggerRemesh( meshEntry.eref(), q->threadNum(), 
-		0, localIndices, vols );
+		startEntry, localIndices, vols );
 }
 
 /// More inherited virtual funcs: request comes in for mesh stats
@@ -545,20 +561,15 @@ void CubeMesh::innerHandleRequestMeshStats( const Eref& e, const Qinfo* q,
 /// meshSplitFinfo msg
 void CubeMesh::innerHandleNodeInfo(
 			const Eref& e, const Qinfo* q, 
-			const SrcFinfo4< 
-				vector< unsigned int >, 
-				vector< unsigned int >, 
-				vector< unsigned int >, 
-				vector< unsigned int > 
-			>* meshSplitFinfo,
 			unsigned int numNodes, unsigned int numThreads )
 {
-	vector< unsigned int > nodeList( 0, 1 );
-	vector< unsigned int > numEntriesPerNode( nx_*ny_*nz_, 1 );
-	vector< unsigned int > outgoingEntries;
-	vector< unsigned int > incomingEntries;
-	meshSplitFinfo->send( e, q->threadNum(), 
-		nodeList, numEntriesPerNode, outgoingEntries, incomingEntries );
+	unsigned int numEntries = nx_ * ny_ * nz_ ;
+	vector< unsigned int > localEntries( numEntries );
+	vector< vector< unsigned int > > outgoingEntries;
+	vector< vector< unsigned int > > incomingEntries;
+	meshSplit()->send( e, q->threadNum(), 
+		numEntries, localEntries,
+		outgoingEntries, incomingEntries );
 }
 
 //////////////////////////////////////////////////////////////////

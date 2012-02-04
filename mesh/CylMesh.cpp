@@ -540,20 +540,15 @@ void CylMesh::innerHandleRequestMeshStats( const Eref& e, const Qinfo* q,
 
 void CylMesh::innerHandleNodeInfo(
 			const Eref& e, const Qinfo* q, 
-			const SrcFinfo4< 
-				vector< unsigned int >, 
-				vector< unsigned int >, 
-				vector< unsigned int >, 
-				vector< unsigned int > 
-			>* meshSplitFinfo,
 			unsigned int numNodes, unsigned int numThreads )
 {
-	vector< unsigned int > nodeList( 0, 1 );
-	vector< unsigned int > numEntriesPerNode( numEntries_, 1 );
-	vector< unsigned int > outgoingEntries;
-	vector< unsigned int > incomingEntries;
-	meshSplitFinfo->send( e, q->threadNum(), 
-		nodeList, numEntriesPerNode, outgoingEntries, incomingEntries );
+	unsigned int numEntries = numEntries_;
+	vector< unsigned int > localEntries( numEntries );
+	vector< vector< unsigned int > > outgoingEntries;
+	vector< vector< unsigned int > > incomingEntries;
+	meshSplit()->send( e, q->threadNum(), 
+		numEntries, localEntries,
+		outgoingEntries, incomingEntries );
 }
 //////////////////////////////////////////////////////////////////
 
