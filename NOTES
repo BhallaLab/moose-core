@@ -17069,7 +17069,9 @@ for resizing the compartment, without changing the number of voxels.
 Checkin 3283.
 
 Working on handling remesh requests in the Stoich. Skeleton messaging
-set up.
-
-Next need to clean up the ZombieEnz code.
+set up. Had to fix conversion of vector< vector< T > > again.  Checkin 3283.
+Added messaging and remeshing operations to the GSL.
+Next to actually use these in a test, and deprecate the existing ReacDiff tests.
+Then need to clean up the ZombieEnz code.
+Then need to go multinode.
 

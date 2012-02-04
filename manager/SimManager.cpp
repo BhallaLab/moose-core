@@ -291,6 +291,14 @@ void SimManager::build( const Eref& e, const Qinfo* q, string method )
 	// subsequent steps as the outgoing 'send' call is non-blocking.
 
 
+	Id meshEntry = Neutral::child( mesh.eref(), "mesh" );
+	assert( meshEntry != Id() );
+	Id gsl = Neutral::child( stoich_.eref(), "gsl" );
+	assert( gsl != Id() );
+	mid = shell->doAddMsg( "OneToOne", meshEntry, "remesh", 
+		gsl, "remesh" );
+	assert( mid != Msg::bad );
+
 	// Apply heuristic for threads and nodes
 	// Replicate pools as per node decomp. Shell::handleReMesh
 	// Make the stoich, set up its path

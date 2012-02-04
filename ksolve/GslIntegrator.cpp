@@ -63,6 +63,12 @@ const Cinfo* GslIntegrator::initCinfo()
 			"Handles reinit call",
 			new ProcOpFunc< GslIntegrator >( &GslIntegrator::reinit ) );
 
+		static DestFinfo remesh( "remesh",
+			"Handle commands to remesh the pool. This may involve changing "
+			"the number of pool entries, as well as changing their volumes",
+			new EpFunc4< GslIntegrator, unsigned int, unsigned int, vector< unsigned int >, vector< double > >( &GslIntegrator::remesh )
+		);
+		
 		///////////////////////////////////////////////////////
 		// Shared definitions
 		///////////////////////////////////////////////////////
@@ -81,6 +87,7 @@ const Cinfo* GslIntegrator::initCinfo()
 		&relativeAccuracy,	// Value
 		&absoluteAccuracy,	// Value
 		&stoich,			// DestFinfo
+		&remesh,			// DestFinfo
 		&proc,				// SharedFinfo
 	};
 	
@@ -339,4 +346,29 @@ void GslIntegrator::reinit( const Eref& e, ProcPtr info )
 	
 	}
 #endif // USE_GSL
+}
+
+void GslIntegrator::remesh( const Eref& e, const Qinfo* q,
+	unsigned int numTotalEntries, unsigned int startEntry, 
+	vector< unsigned int > localIndices, vector< double > vols )
+{
+	if ( q->protectedAddToStructuralQ() )
+		return;
+	cout << "GslIntegrator::remesh for " << e << endl;
+	assert( vols.size() > 0 );
+	if ( vols.size() != e.element()->dataHandler()->localEntries() ) {
+		Neutral* n = reinterpret_cast< Neutral* >( e.data() );
+		Id stoichId = stoichId_;
+		n->setLastDimension( e, q, vols.size() );
+	// instead of setLastDimension we should use a function that sets up
+	// an arbitrary mapping of indices.
+
+	// Note that at this point the data pointer may be invalid!
+	// Now we reassign everything.
+		assert( e.element()->dataHandler()->localEntries() == vols.size() );
+		GslIntegrator* gsldata = reinterpret_cast< GslIntegrator* >( e.data() );
+		for ( unsigned int i = 0; i < vols.size(); ++i ) {
+			gsldata[i].stoich( e, q, stoichId );
+		}
+	}
 }
