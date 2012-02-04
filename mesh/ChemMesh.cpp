@@ -20,27 +20,25 @@ static SrcFinfo0 groupSurfaces(
 		"Goes to all surfaces that define this ChemMesh"
 );
 
-static SrcFinfo4< 
-	vector< unsigned int >, 
+SrcFinfo4< 
+	unsigned int, 
 	vector< unsigned int>, 
-	vector< unsigned int >, 
-	vector< unsigned int > 
+	vector< vector< unsigned int > >, 
+	vector< vector< unsigned int > >
 	>* meshSplit()
 {
 	static SrcFinfo4< 
+			unsigned int, 
 			vector< unsigned int >, 
-			vector< unsigned int >, 
-			vector< unsigned int >, 
-			vector< unsigned int >
+			vector< vector< unsigned int > >, 
+			vector< vector< unsigned int > >
 		>
 	meshSplit(
 		"meshSplit",
 		"Defines how meshEntries communicate between nodes."
-		"First arg is list of other nodes, second arg is list number of"
-		"meshEntries to be transferred for each of these nodes, "
-		"third arg is catenated list of meshEntries indices on"
-		"my node going to each of the other connected nodes, and"
-		"fourth arg is matching list of meshEntries on other nodes"
+		"Args: totalNumEntries, localEntryList, "
+		"outgoingDiffusion[node#][entry#], incomingDiffusion[node#][entry#]"
+		"This message is meant to go to the SimManager and Stoich."
 	);
 	return &meshSplit;
 }
@@ -225,7 +223,7 @@ void ChemMesh::handleNodeInfo( const Eref& e, const Qinfo* q,
 	unsigned int numNodes, unsigned int numThreads )
 {
 	// Pass it down to derived classes along with the SrcFinfo
-	innerHandleNodeInfo( e, q, meshSplit(), numNodes, numThreads );
+	innerHandleNodeInfo( e, q, numNodes, numThreads );
 }
 
 //////////////////////////////////////////////////////////////
