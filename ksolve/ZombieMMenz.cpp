@@ -151,6 +151,7 @@ const Cinfo* ZombieMMenz::initCinfo()
 
 
 ZombieMMenz::ZombieMMenz( )
+	: Km_( 0.005 )
 {;}
 
 //////////////////////////////////////////////////////////////
@@ -168,7 +169,8 @@ void ZombieMMenz::reinit( const Eref& e, ProcPtr p )
 
 void ZombieMMenz::remesh( const Eref& e, const Qinfo* q )
 {
-	cout << "ZombieMMenz::remesh for " << e << endl;
+	// cout << "ZombieMMenz::remesh for " << e << endl;
+	stoich_->setMMenzKm( e, Km_ );
 }
 
 //////////////////////////////////////////////////////////////
@@ -192,43 +194,47 @@ double getEnzVol( const Eref& e )
 
 void ZombieMMenz::setKm( const Eref& e, const Qinfo* q, double v )
 {
+	Km_ = v;
+	stoich_->setMMenzKm( e, v );
+	/*
 	double volScale = convertConcToNumRateUsingMesh( e, toSub(), 1 );
 	// double numKm = v * NA * CONC_UNIT_CONV * getEnzVol( e );
 
 	// First rate is Km
 	rates_[ convertIdToPoolIndex( e.id() ) ]->setR1( v * volScale ); 
+	*/
 }
 
 double ZombieMMenz::getKm( const Eref& e, const Qinfo* q ) const
 {
-	double numKm = 
-		rates_[ convertIdToPoolIndex( e.id() ) ]->getR1();
-	double volScale = convertConcToNumRateUsingMesh( e, toSub(), 1 );
-	
-	return numKm / volScale;
+	return Km_;
 }
 
 void ZombieMMenz::setNumKm( const Eref& e, const Qinfo* q, double v )
 {
-	rates_[ convertIdToPoolIndex( e.id() ) ]->setR1( v ); 
+	double volScale = convertConcToNumRateUsingMesh( e, toSub(), 1 );
+	Km_ = v / volScale;
+	setKm( e, q, Km_ );
+	// rates_[ convertIdToPoolIndex( e.id() ) ]->setR1( v ); 
 }
 
 double ZombieMMenz::getNumKm( const Eref& e, const Qinfo* q ) const
 {
-	double numKm = 
-		rates_[ convertIdToPoolIndex( e.id() ) ]->getR1();
+	double numKm = stoich_->getR1( stoich_->convertIdToPoolIndex( e.id() ), 0 );
 	
 	return numKm;
 }
 
 void ZombieMMenz::setKcat( const Eref& e, const Qinfo* q, double v )
 {
-	rates_[ convertIdToPoolIndex( e.id() ) ]->setR2( v ); // Second rate is kcat
+	stoich_->setMMenzKcat( e, v );
 }
 
 double ZombieMMenz::getKcat( const Eref& e, const Qinfo* q ) const
 {
-	return rates_[ convertIdToPoolIndex( e.id() ) ]->getR2(); // Second rate is kcat
+	// Second rate is kcat
+	double kcat = stoich_->getR2( stoich_->convertIdToPoolIndex( e.id() ), 0 );
+	return kcat;
 }
 
 unsigned int ZombieMMenz::getNumSub( const Eref& e, const Qinfo* q ) const
@@ -243,6 +249,66 @@ unsigned int ZombieMMenz::getNumSub( const Eref& e, const Qinfo* q ) const
 // Utility function
 //////////////////////////////////////////////////////////////
 
+void ZombieMMenz::zombify( Element* solver, Element* orig )
+{
+	static const DestFinfo* enz = dynamic_cast< const DestFinfo* >(
+		MMenz::initCinfo()->findFinfo( "enz" ) );
+	static const SrcFinfo* sub = dynamic_cast< const SrcFinfo* >(
+		MMenz::initCinfo()->findFinfo( "toSub" ) );
+	static const SrcFinfo* prd = dynamic_cast< const SrcFinfo* >(
+		MMenz::initCinfo()->findFinfo( "toPrd" ) );
+	assert( enz );
+	assert( sub );
+	assert( prd );
+
+	DataHandler* dh = orig->dataHandler()->copyUsingNewDinfo( 
+		ZombieMMenz::initCinfo()->dinfo() );
+	MMenz* mmEnz = reinterpret_cast< MMenz* >( 
+		orig->dataHandler()->data( 0 ) );
+
+	Eref oer( orig, 0 );
+	double Km = mmEnz->getKm( oer, 0 );
+
+	ZombieMMenz* z = reinterpret_cast< ZombieMMenz* >( dh->data( 0 ) );
+	z->Km_ = Km;
+	z->stoich_ = reinterpret_cast< Stoich* >( 	
+		solver->dataHandler()->data( 0 ) );
+
+
+	/// Now set up the RateTerm
+	vector< Id > subvec;
+	vector< Id > prdvec;
+	unsigned int rateIndex = z->stoich_->convertIdToReacIndex( orig->id() );
+	unsigned int num = orig->getNeighbours( subvec, enz );
+	unsigned int enzIndex = z->stoich_->convertIdToPoolIndex( subvec[0] );
+	MMEnzymeBase* meb;
+
+	num = orig->getNeighbours( subvec, sub );
+	if ( num == 1 ) {
+		unsigned int subIndex = z->stoich_->convertIdToPoolIndex( subvec[0] );
+		meb = new MMEnzyme1( mmEnz->getNumKm( oer, 0 ), mmEnz->getKcat(),
+			enzIndex, subIndex );
+	} else if ( num > 1 ) {
+		vector< unsigned int > v;
+		for ( unsigned int i = 0; i < num; ++i )
+			v.push_back( z->stoich_->convertIdToPoolIndex( subvec[i] ) );
+		ZeroOrder* rateTerm = new NOrder( 1.0, v );
+		meb = new MMEnzyme( mmEnz->getNumKm( oer, 0 ), mmEnz->getKcat(),
+			enzIndex, rateTerm );
+	} else {
+		cout << "Error: ZombieMMenz::zombify: No substrates\n";
+		exit( 0 );
+	}
+
+	num = orig->getNeighbours( prdvec, prd );
+
+	z->stoich_->installMMenz( meb, rateIndex, subvec, prdvec );
+
+	orig->zombieSwap( ZombieMMenz::initCinfo(), dh );
+	z->stoich_->setMMenzKm( Eref( orig, 0 ), Km );
+}
+
+/*
 // static func
 void ZombieMMenz::zombify( Element* solver, Element* orig )
 {
@@ -304,6 +370,7 @@ void ZombieMMenz::zombify( Element* solver, Element* orig )
 		orig->dataHandler() );
 	orig->zombieSwap( zombieMMenzCinfo, dh );
 }
+*/
 
 // Static func
 void ZombieMMenz::unzombify( Element* zombie )

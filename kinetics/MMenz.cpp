@@ -149,7 +149,7 @@ const Cinfo* MMenz::initCinfo()
 
 
 MMenz::MMenz( )
-	: Km_( 5 ), kcat_( 0.1 ), sub_( 0.0 ), enz_( 0.0 )
+	: Km_( 0.005 ), kcat_( 0.1 ), sub_( 0.0 ), enz_( 0.0 )
 {
 	;
 }

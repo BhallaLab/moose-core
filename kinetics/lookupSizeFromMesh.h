@@ -19,6 +19,14 @@ extern const double CONC_UNIT_CONV;
 double lookupSizeFromMesh( const Eref& e, const SrcFinfo* sf );
 
 /**
+ * Utility function to get volumes for all reactants (substrates or
+ * products) of Reacs or Enzymes. Does NOT get volumes for the Enzyme
+ * itself.
+ */
+unsigned int getReactantVols( const Eref& reac, const SrcFinfo* pools, 
+	vector< double >& vols );
+
+/**
  * Generates conversion factor for rates from concentration to mol# units.
  * Assumes that all reactant pools (substrate and product) are within the
  * same mesh entry and therefore have the same volume.

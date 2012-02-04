@@ -90,6 +90,12 @@ class Stoich
 		 * to the specified Reac, and builds them into the Stoich.
 		 */
 		void installReaction( ZeroOrder* forward, ZeroOrder* reverse, Id reacId );
+		/**
+		 * This takes the baseclass for an MMEnzyme and builds the
+		 * MMenz into the Stoich.
+		 */
+		void installMMenz( MMEnzymeBase* meb, unsigned int rateIndex,
+			const vector< Id >& subs, const vector< Id >& prds );
 
 		const double* S( unsigned int meshIndex ) const;
 		double* varS( unsigned int meshIndex );
@@ -113,6 +119,19 @@ class Stoich
 		 * voxel, and scaling accordingly.
 		 */
 		void setReacKb( const Eref& e, double v ) const;
+
+		/**
+		 * Sets the Km for MMenz, using appropriate volume conversion to
+		 * go from the argument (in millimolar) to #/voxel.
+		 * This may do the assignment among many voxels containing the enz
+		 * in case there are different volumes.
+		 */
+		void setMMenzKm( const Eref& e, double v ) const;
+
+		/**
+		 * Sets the kcat for MMenz. No conversions needed.
+		 */
+		void setMMenzKcat( const Eref& e, double v ) const;
 
 		/**
 		 * Returns the internal rate in #/voxel, for R1, for the specified

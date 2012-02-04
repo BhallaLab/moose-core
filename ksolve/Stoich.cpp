@@ -696,6 +696,23 @@ void Stoich::installReaction( ZeroOrder* forward, ZeroOrder* reverse, Id reacId 
 	}
 }
 
+void Stoich::installMMenz( MMEnzymeBase* meb, unsigned int rateIndex,
+	const vector< Id >& subs, const vector< Id >& prds )
+{
+	rates_[rateIndex] = meb;
+
+	for ( unsigned int i = 0; i < subs.size(); ++i ) {
+		unsigned int poolIndex = convertIdToPoolIndex( subs[i] );
+		int temp = N_.get( poolIndex, rateIndex );
+		N_.set( poolIndex, rateIndex, temp - 1 );
+	}
+	for ( unsigned int i = 0; i < prds.size(); ++i ) {
+		unsigned int poolIndex = convertIdToPoolIndex( prds[i] );
+		int temp = N_.get( poolIndex, rateIndex );
+		N_.set( poolIndex, rateIndex, temp + 1 );
+	}
+}
+
 //////////////////////////////////////////////////////////////
 // Field interface functionsl
 //////////////////////////////////////////////////////////////
@@ -736,6 +753,39 @@ void Stoich::setReacKb( const Eref& e, double v ) const
 		 rates_[ convertIdToReacIndex( e.id() ) + 1 ]->setR1( v / volScale);
 	else
 		 rates_[ convertIdToReacIndex( e.id() ) ]->setR2( v / volScale );
+}
+
+void Stoich::setMMenzKm( const Eref& e, double v ) const
+{
+	static const SrcFinfo* toSub = dynamic_cast< const SrcFinfo* > (
+		ZombieMMenz::initCinfo()->findFinfo( "toSub" ) );
+	// Identify MMenz rate term
+	RateTerm* rt = rates_[ convertIdToReacIndex( e.id() ) ];
+	MMEnzymeBase* enz = dynamic_cast< MMEnzymeBase* >( rt );
+	assert( enz );
+	// Identify MMenz Enzyme substrate. I would have preferred the parent,
+	// but that gets messy.
+	// unsigned int enzMolIndex = enz->getEnzIndex();
+
+	// This function can be replicated to handle multiple different voxels.
+	vector< double > vols;
+	unsigned int num = getReactantVols( e, toSub, vols );
+	if ( vols.size() == 0 ) {
+		cerr << "Error: Stoich::setMMenzKm: no substrates for enzyme " <<
+			e << endl;
+		return;
+	}
+	// Do scaling and assignment.
+	enz->setR1( v * vols[0] * NA );
+}
+
+void Stoich::setMMenzKcat( const Eref& e, double v ) const
+{
+	RateTerm* rt = rates_[ convertIdToReacIndex( e.id() ) ];
+	MMEnzymeBase* enz = dynamic_cast< MMEnzymeBase* >( rt );
+	assert( enz );
+
+	enz->setR2( v );
 }
 
 /**
