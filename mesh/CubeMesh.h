@@ -54,8 +54,9 @@ class CubeMesh: public ChemMesh
 		void setNz( unsigned int v );
 		unsigned int getNz() const;
 
-		void setCoords( vector< double > v );
-		vector< double > getCoords() const;
+		void innerSetCoords( const vector< double >& v );
+		void setCoords( const Eref& e, const Qinfo* q, vector< double > v );
+		vector< double > getCoords( const Eref& e, const Qinfo* q ) const;
 
 		void setMeshToSpace( vector< unsigned int > v );
 		vector< unsigned int > getMeshToSpace() const;
@@ -133,6 +134,7 @@ class CubeMesh: public ChemMesh
 		unsigned int neighbor( unsigned int spaceIndex, 
 			int dx, int dy, int dz ) const;
 
+		void transmitChange( const Eref& e, const Qinfo* q );
 		//////////////////////////////////////////////////////////////////
 		//  Stuff for diffusion
 		//////////////////////////////////////////////////////////////////
