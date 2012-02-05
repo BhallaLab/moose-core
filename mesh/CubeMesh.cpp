@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "ElementValueFinfo.h"
 #include "Boundary.h"
 #include "MeshEntry.h"
 #include "Stencil.h"
@@ -120,7 +121,7 @@ const Cinfo* CubeMesh::initCinfo()
 			&CubeMesh::getPreserveNumEntries
 		);
 
-		static ValueFinfo< CubeMesh, vector< double > > coords(
+		static ElementValueFinfo< CubeMesh, vector< double > > coords(
 			"coords",
 			"Set all the coords of the cuboid at once. Order is:"
 			"x0 y0 z0   x1 y1 z1   dx dy dz",
@@ -172,6 +173,9 @@ const Cinfo* CubeMesh::initCinfo()
 		&dx,			// Value
 		&dy,			// Value
 		&dz,			// Value
+		&nx,			// Value
+		&ny,			// Value
+		&nz,			// Value
 		&coords,		// Value
 		&meshToSpace,	// Value
 		&spaceToMesh,	// Value
@@ -241,9 +245,9 @@ void CubeMesh::updateCoords()
 		dy_ = ( y1_ - y0_ ) / ny_;
 		dz_ = ( z1_ - z0_ ) / nz_;
 	} else {
-		nx_ = ceil( (x1_ - x0_) / dx_ );
-		ny_ = ceil( (y1_ - y0_) / dy_ );
-		nz_ = ceil( (z1_ - z0_) / dz_ );
+		nx_ = round( (x1_ - x0_) / dx_ );
+		ny_ = round( (y1_ - y0_) / dy_ );
+		nz_ = round( (z1_ - z0_) / dz_ );
 	
 		if ( nx_ == 0 ) nx_ = 1;
 		if ( ny_ == 0 ) ny_ = 1;
@@ -420,11 +424,8 @@ bool CubeMesh::getPreserveNumEntries() const
 	return preserveNumEntries_;
 }
 
-void CubeMesh::setCoords( vector< double > v )
+void CubeMesh::innerSetCoords( const vector< double >& v)
 {
-	if ( v.size() < 9 ) {
-		cout << "CubeMesh::setCoords: Warning: size of argument vec should be >= 9, was " << v.size() << endl;
-	}
 	x0_ = v[0];
 	y0_ = v[1];
 	z0_ = v[2];
@@ -439,8 +440,16 @@ void CubeMesh::setCoords( vector< double > v )
 
 	updateCoords();
 }
+void CubeMesh::setCoords( const Eref& e, const Qinfo* q, vector< double > v)
+{
+	if ( v.size() < 9 ) {
+		cout << "CubeMesh::setCoords: Warning: size of argument vec should be >= 9, was " << v.size() << endl;
+	}
+	innerSetCoords( v );
+	transmitChange( e, q );
+}
 
-vector< double > CubeMesh::getCoords() const
+vector< double > CubeMesh::getCoords( const Eref& e, const Qinfo* q ) const
 {
 	vector< double > ret( 9 );
 
@@ -522,31 +531,7 @@ void CubeMesh::innerBuildDefaultMesh( const Eref& e, const Qinfo* q,
 	coords[0] = coords[1] = coords[2] = 0;
 	coords[6] = coords[7] = coords[8] = side / numSide;
 	nx_ = ny_ = nz_ = numSide;
-	setCoords( coords );
-	Id meshEntry( e.id().value() + 1 );
-	assert( 
-		meshEntry.eref().data() == reinterpret_cast< char* >( lookupEntry( 0 ) )
-	);
-	unsigned int totalNumEntries = nx_ * ny_ * nz_;
-	unsigned int localNumEntries = totalNumEntries;
-	unsigned int startEntry = 0;
-	vector< unsigned int > localIndices( localNumEntries ); // empty
-	for ( unsigned int i = 0; i < localNumEntries; ++i )
-		localIndices[i] = i;
-	vector< double > vols( localNumEntries, dx_ * dy_ * dz_ );
-	vector< vector< unsigned int > > outgoingEntries; // [node#][Entry#]
-	vector< vector< unsigned int > > incomingEntries; // [node#][Entry#]
-
-	// This message tells the Stoich about the new mesh, and also about
-	// how it communicates with other nodes.
-	meshSplit()->send( e, q->threadNum(), 
-		totalNumEntries, localIndices, 
-		outgoingEntries, incomingEntries );
-
-	// This func goes down to the MeshEntry to tell all the pools and
-	// Reacs to deal with the new mesh. They then update the stoich.
-	lookupEntry( 0 )->triggerRemesh( meshEntry.eref(), q->threadNum(), 
-		startEntry, localIndices, vols );
+	setCoords( e, q, coords );
 }
 
 /// More inherited virtual funcs: request comes in for mesh stats
@@ -570,6 +555,46 @@ void CubeMesh::innerHandleNodeInfo(
 	meshSplit()->send( e, q->threadNum(), 
 		numEntries, localEntries,
 		outgoingEntries, incomingEntries );
+}
+
+/////////////////////////////////////////////////////////////////////////
+// Utility function to tell target nodes that something has happened.
+/////////////////////////////////////////////////////////////////////////
+void CubeMesh::transmitChange( const Eref& e, const Qinfo* q )
+{
+	Id meshEntry( e.id().value() + 1 );
+	assert( 
+		meshEntry.eref().data() == reinterpret_cast< char* >( lookupEntry( 0 ) )
+	);
+	unsigned int totalNumEntries = nx_ * ny_ * nz_;
+	unsigned int localNumEntries = totalNumEntries;
+	unsigned int startEntry = 0;
+	vector< unsigned int > localIndices( localNumEntries ); // empty
+	for ( unsigned int i = 0; i < localNumEntries; ++i )
+		localIndices[i] = i;
+	vector< double > vols( localNumEntries, dx_ * dy_ * dz_ );
+	vector< vector< unsigned int > > outgoingEntries; // [node#][Entry#]
+	vector< vector< unsigned int > > incomingEntries; // [node#][Entry#]
+
+	// This function updates the size of the FieldDataHandler for the 
+	// MeshEntries.
+	DataHandler* dh = meshEntry.element()->dataHandler();
+	FieldDataHandlerBase* fdh = dynamic_cast< FieldDataHandlerBase* >( dh );
+	assert( fdh );
+	if ( totalNumEntries > fdh->getMaxFieldEntries() ) {
+		fdh->setMaxFieldEntries( localNumEntries );
+	}
+
+	// This message tells the Stoich about the new mesh, and also about
+	// how it communicates with other nodes.
+	meshSplit()->send( e, q->threadNum(), 
+		totalNumEntries, localIndices, 
+		outgoingEntries, incomingEntries );
+
+	// This func goes down to the MeshEntry to tell all the pools and
+	// Reacs to deal with the new mesh. They then update the stoich.
+	lookupEntry( 0 )->triggerRemesh( meshEntry.eref(), q->threadNum(), 
+		startEntry, localIndices, vols );
 }
 
 //////////////////////////////////////////////////////////////////
@@ -756,6 +781,8 @@ void CubeMesh::buildStencil()
 		s = new RectangleStencil( dy_, dz_, ny_ );
 	else if ( nx_ > 1 && ny_ > 1 && nz_ > 1 )
 		s = new CuboidStencil( dx_, dy_, dz_, nx_, ny_ );
+	else
+		s = new DummyStencil();
 
 	stencil_.push_back( s );
 }

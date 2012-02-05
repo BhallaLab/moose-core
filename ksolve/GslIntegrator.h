@@ -14,6 +14,7 @@ class GslIntegrator
 	public:
 		GslIntegrator();
 		~GslIntegrator();
+		GslIntegrator& operator=( const GslIntegrator& other );
 
 ///////////////////////////////////////////////////
 // Field function definitions

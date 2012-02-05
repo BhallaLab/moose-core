@@ -283,6 +283,8 @@ void Pool::remesh( const Eref& e, const Qinfo* q,
 	unsigned int numTotalEntries, unsigned int startEntry, 
 	vector< unsigned int > localIndices, vector< double > vols )
 {
+	if ( e.index().value() != 0 )
+		return;
 	if ( q->protectedAddToStructuralQ() )
 		return;
 	Neutral* n = reinterpret_cast< Neutral* >( e.data() );

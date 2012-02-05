@@ -197,7 +197,7 @@ Stoich::Stoich()
 		S_(1),
 		Sinit_(1),
 		y_(1),
-		// numMeshEntries_( 1 ),
+		localMeshEntries_( 1 ),
 		totPortSize_( 0 ),
 		objMapStart_( 0 ),
 		numVarPools_( 0 ),
@@ -226,7 +226,11 @@ Stoich::~Stoich()
 // and its values must propagate serially to the calling object.
 void Stoich::innerReinit()
 {
-	assert( y_.size() == S_.size() );
+	// This might not be true, since S_ maintains extra info for the 
+	// off-node pools to which it connects.
+	// assert( y_.size() == S_.size() );
+
+	assert( y_.size() == localMeshEntries_.size() );
 	assert( Sinit_.size() == S_.size() );
 
 	for ( unsigned int i = 0; i < y_.size(); ++i )
@@ -419,21 +423,7 @@ void Stoich::allocateModel( const vector< Id >& elist )
 			objMap_[ i->value() - objMapStart_ ] = numFunc;
 			++numFunc;
 		} 
-		/*
-		else if ( ei->cinfo() == meshEntryCinfo ){
-			unsigned int ne = ei->dataHandler()->localEntries();
-			if ( numMeshEntries_ == 1 ) {
-				numMeshEntries_ = ne;
-			} else if ( numMeshEntries_ != ne ) {
-				cout << "Error: Stoich::allocateModel: two different numMeshEntries: " << ne << ", " << numMeshEntries_ << endl;
-			}
-		}
-		*/
 	}
-	/*
-	if ( numMeshEntries_ == 0 )
-		return;
-		*/
 
 	numBufPools_ = 0;
 	for ( vector< Id >::const_iterator i = bufPools.begin(); i != bufPools.end(); ++i ){
@@ -532,16 +522,18 @@ void Stoich::meshSplit( unsigned int totalNumMeshEntries,
 	vector< vector< unsigned int > > incomingDiffusion
 	)
 {
-	cout << "Stoich::handleMeshSplit\n";
+	// cout << "Stoich::handleMeshSplit\n";
 	unsigned int numLocal = localEntryList.size();
 	S_.resize( totalNumMeshEntries );
 	Sinit_.resize( totalNumMeshEntries );
 	y_.resize( numLocal );
+	flux_.resize( numLocal );
 	for ( unsigned int i = 0; i < numLocal; ++i ) {
 		// Assume that these values will later be initialized
 		S_[ localEntryList[i] ].resize( concInit_.size(), 0 );
 		Sinit_[ localEntryList[i] ].resize( concInit_.size(), 0 );
 		y_[i].resize( numVarPools_, 0 );
+		flux_[i].resize( numVarPools_, 0 );
 	}
 	localMeshEntries_ = localEntryList;
 	outgoing_ = outgoingDiffusion;

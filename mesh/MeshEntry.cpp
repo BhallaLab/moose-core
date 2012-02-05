@@ -198,12 +198,19 @@ MeshEntry::MeshEntry( const ChemMesh* parent )
  */
 void MeshEntry::process( const Eref& e, ProcPtr info )
 {
+	// cout << "updateDiffusion for " << e.fieldIndex() << ", at t = " << info->currTime << ", on thr = " << info->threadIndexInGroup << endl << flush;
 	parent_->updateDiffusion( e.fieldIndex() );
 }
 
+/**
+ * Assigns the Stoich Id to the parent.
+ */
 void MeshEntry::reinit( const Eref& e, ProcPtr info )
 {
-	;
+	if ( e.index().value() == 0 ) {
+		ObjId pa = Neutral::parent( e );
+		parent_->lookupStoich( pa );
+	}
 }
 
 

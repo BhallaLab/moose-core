@@ -226,9 +226,21 @@ void ZombiePool::remesh( const Eref& e, const Qinfo* q,
 	unsigned int numTotalEntries, unsigned int startEntry, 
 	vector< unsigned int > localIndices, vector< double > vols )
 {
+	if ( e.index().value() != 0 )
+		return;
+	/*
+	if ( q->protectedAddToStruturalQ() )
+		return;
+	Neutral* n = reinterpret_cast< Neutral* >( e.data() );
+	if ( vols.size() != e.element()->dataHandler()->localEntries() )
+		n->setLastDimension( e, q, vols.size() );
+		*/
+
 	// cout << "In ZombiePool::remesh for " << e << endl;
 	if ( S_.size() != vols.size() ) {
-		// Resize the vectors here.
+		cout << "Warning: ZombiePool::remesh on " << e << 
+		": Stoich mesh size does not match: (" << S_.size() << "," <<
+			vols.size() << ")\n";
 	}
 
 	unsigned int poolIndex = convertIdToPoolIndex( e.id() );

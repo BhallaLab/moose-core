@@ -35,7 +35,6 @@ class ChemMesh
 		//////////////////////////////////////////////////////////////////
 		// Dest Finfo
 		//////////////////////////////////////////////////////////////////
-		void stoich( const Eref& e, const Qinfo* q, Id stoichId );
 
 		/**
 		 * buildDefaultMesh tells the ChemMesh to make a standard mesh 
@@ -98,6 +97,12 @@ class ChemMesh
 		 * we can have this handled by any ChemMesh class.
 		 */
 		virtual void updateDiffusion( unsigned int meshIndex ) const;
+
+		/**
+		 * Looks up Id of the Stoich object to which this mesh should be
+		 * connected. Is called at reinit by the child MeshEntry.
+		 */
+		void lookupStoich( ObjId me ) const;
 
 		//////////////////////////////////////////////////////////////////
 		// Lookup funcs for Boundary

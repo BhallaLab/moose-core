@@ -78,6 +78,7 @@ const Cinfo* ChemMesh::initCinfo()
 			"Handle for grouping. Doesn't do anything.",
 			new OpFuncDummy() );
 
+		/*
 		static DestFinfo stoich( "stoich",
 			"Handle Id of stoich. Used to set up connection from mesh to"
 			"stoich for diffusion "
@@ -85,6 +86,7 @@ const Cinfo* ChemMesh::initCinfo()
 			"use messaging.",
 			new EpFunc1< ChemMesh, Id >( &ChemMesh::stoich )
 		);
+		*/
 
 		static DestFinfo buildDefaultMesh( "buildDefaultMesh",
 			"Tells ChemMesh derived class to build a default mesh with the"
@@ -159,7 +161,6 @@ const Cinfo* ChemMesh::initCinfo()
 	static Finfo* chemMeshFinfos[] = {
 		&size,			// ReadOnlyValue
 		&dimensions,	// ReadOnlyValue
-		&stoich,		// DestFinfo
 		&buildDefaultMesh,	// DestFinfo
 		&nodeMeshing,	// SharedFinfo
 		&entryFinfo,	// FieldElementFinfo
@@ -202,10 +203,6 @@ ChemMesh::~ChemMesh()
 //////////////////////////////////////////////////////////////
 // MsgDest Definitions
 //////////////////////////////////////////////////////////////
-void ChemMesh::stoich( const Eref& e, const Qinfo* q, Id stoichId )
-{
-	stoich_ = stoichId;
-}
 
 void ChemMesh::buildDefaultMesh( const Eref& e, const Qinfo* q,
 	double size, unsigned int numEntries )
@@ -291,9 +288,20 @@ unsigned int ChemMesh::getNumBoundary() const
 // Called from the MeshEntry.
 //////////////////////////////////////////////////////////////
 
+void ChemMesh::lookupStoich( ObjId me ) const
+{
+	ChemMesh* cm = reinterpret_cast< ChemMesh* >( me.data() );
+	assert( cm == this );
+	vector< Id > stoichVec;
+	unsigned int num = me.element()->getNeighbours( stoichVec, meshSplit());
+	assert( num == 1 );
+	cm->stoich_ = stoichVec[0];
+}
+
 void ChemMesh::updateDiffusion( unsigned int meshIndex ) const
 {
 	// Later we'll have provision for multiple stoich targets.
+	assert( stoich_ != Id() );
 	Stoich* s = reinterpret_cast< Stoich* >( stoich_.eref().data() );
 	s->updateDiffusion( meshIndex, stencil_ );
 }

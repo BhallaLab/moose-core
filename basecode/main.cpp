@@ -295,6 +295,7 @@ void processTests( Shell* s )
 	testBuiltinsProcess();
 	testKineticsProcess();
 	testBiophysicsProcess();
+	testSimManager();
 #endif
 }
 
