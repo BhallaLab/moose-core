@@ -402,10 +402,8 @@ void GslIntegrator::remesh( const Eref& e, const Qinfo* q,
 	// Now we reassign everything.
 		assert( e.element()->dataHandler()->localEntries() == vols.size() );
 		GslIntegrator* gsldata = reinterpret_cast< GslIntegrator* >( e.data() );
-		/*
-			for ( unsigned int i = 0; i < vols.size(); ++i ) {
-				gsldata[i].stoich( e, q, stoichId );
-			}
-		*/
+		for ( unsigned int i = 0; i < vols.size(); ++i ) {
+			gsldata[i].stoich( e, q, stoichId );
+		}
 	}
 }
