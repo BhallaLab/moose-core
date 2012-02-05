@@ -17081,14 +17081,20 @@ Put it in. Much cleanup ensued. Final bug was a good one: The max field size
 for the FieldDataHandlerBase of the MeshEntry was not getting updated when
 the CubeMesh was resized. So the bitmask was rolling over at 63, and this
 meant that the mesh entries above 63 were being done as 0-36.
+Which mean that those indices were executed twice.
 Which gave a numerical error.
+Checkin 3286.
+
 Some cleanup pending, specially to see if I can now avoid explicitly calling
-the setRepeat to assign the Stoich to the gsl.
+the setRepeat to assign the Stoich to the gsl. Yes, this works.
+Also added another rescaling of the same system. Does it seamlessly, but
+the numerical error is now a bit more, about 1.1e-8.
 
 Also a fix required for numEntries of zombified pools when they are resized.
 Should behave like regular pools there, which means that things like SetVec
 should work too.
 
 Then need to clean up the ZombieEnz code.
+Then need to clear all regression tests.
 Then need to go multinode.
 
