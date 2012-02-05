@@ -45,18 +45,6 @@ static SrcFinfo2< double, double > *toCplx() {
 	return &toCplx;
 }
 
-// Deprecated. Enzymes should refer to volumes of associated pools, and
-// do not have a volume of their own.
-static SrcFinfo1< double > *requestSize() {
-	static SrcFinfo1< double > requestSize(
-			"requestSize",
-			"Requests size (volume) in which reaction is embedded. Used for"
-			"conversion to concentration units from molecule # units,"
-			"and for calculations when resized."
-			);
-	return &requestSize;
-}
-
 const Cinfo* ZombieEnz::initCinfo()
 {
 		//////////////////////////////////////////////////////////////
@@ -103,6 +91,13 @@ const Cinfo* ZombieEnz::initCinfo()
 			&ZombieEnz::setRatio,
 			&ZombieEnz::getRatio
 		);
+		
+		static ElementValueFinfo< ZombieEnz, double > concK1(
+			"concK1",
+			"K1 in conc units (1/millimolar.sec)",
+			&ZombieEnz::setConcK1,
+			&ZombieEnz::getConcK1
+		);
 
 
 		//////////////////////////////////////////////////////////////
@@ -119,6 +114,10 @@ const Cinfo* ZombieEnz::initCinfo()
 		static DestFinfo group( "group",
 			"Handle for group msgs. Doesn't do anything",
 			new OpFuncDummy() );
+
+		static DestFinfo remesh( "remesh",
+			"Compartment volume or meshing has changed, recompute rates",
+			new EpFunc0< ZombieEnz >( &ZombieEnz::remesh ) );
 
 		//////////////////////////////////////////////////////////////
 		// Shared Msg Definitions
@@ -179,12 +178,13 @@ const Cinfo* ZombieEnz::initCinfo()
 		&Km,	// Value
 		&kcat,	// Value
 		&ratio,	// Value
-		requestSize(),		// SrcFinfo
+		&concK1,	// Value
 		&sub,				// SharedFinfo
 		&prd,				// SharedFinfo
 		&enz,				// SharedFinfo
 		&cplx,				// SharedFinfo
 		&proc,				// SharedFinfo
+		&remesh,			// DestFinfo
 	};
 
 	static Cinfo zombieEnzCinfo (
@@ -219,6 +219,13 @@ void ZombieEnz::process( const Eref& e, ProcPtr p )
 
 void ZombieEnz::reinit( const Eref& e, ProcPtr p )
 {;}
+
+
+void ZombieEnz::remesh( const Eref& e, const Qinfo* q )
+{   
+	// setKm( e, q, Km_ );
+}   
+
 
 //////////////////////////////////////////////////////////////
 // Field Definitions
@@ -275,11 +282,6 @@ void ZombieEnz::setKm( const Eref& e, const Qinfo* q, double v )
 	double volScale = 
 		convertConcToNumRateUsingMesh( e, toSub(), 1 );
 
-	/*
-	double volScale = Reac::volScale( e, requestSize(), toSub() ) * 
-		Reac::volScale( e, requestSize(), toZombieEnz() );
-		*/
-
 	double k1 = ( k2 + k3 ) / ( v * volScale );
 	setK1( e, q, k1 );
 }
@@ -314,6 +316,25 @@ double ZombieEnz::getRatio( const Eref& e, const Qinfo* q ) const
 	double k2 = getK2( e, q );
 	double k3 = getK3( e, q );
 	return k2 / k3;
+}
+
+void ZombieEnz::setConcK1( const Eref& e, const Qinfo* q, double v )
+{
+	double volScale = 
+		convertConcToNumRateUsingMesh( e, toSub(), 1 );
+
+	double k1 = v * volScale;
+	setK1( e, q, k1 );
+}
+
+double ZombieEnz::getConcK1( const Eref& e, const Qinfo* q ) const
+{
+	double k1 = getK1( e, q );
+
+	double volScale = 	
+		convertConcToNumRateUsingMesh( e, toSub(), 1 );
+	
+	return k1 * volScale;
 }
 
 //////////////////////////////////////////////////////////////
@@ -373,7 +394,7 @@ void ZombieEnz::zombify( Element* solver, Element* orig )
 	assert( numReactants == 1 );
 	Id enzId = pools[0];
 
-	ZeroOrder* r1 = z->makeHalfReaction( orig, enz->getK1(), sub, enzId );
+	ZeroOrder* r1 = z->makeHalfReaction( orig, enz->getK1( oer, 0 ), sub, enzId );
 	ZeroOrder* r2 = z->makeHalfReaction( orig, enz->getK2(), cplx, Id() );
 	ZeroOrder* r3 = z->makeHalfReaction( orig, enz->getK3(), cplx, Id() );
 
@@ -455,7 +476,7 @@ void ZombieEnz::unzombify( Element* zombie )
 
 	Enz* m = reinterpret_cast< Enz* >( oer.data() );
 
-	m->setK1( z->getK1( zer, 0 ) );
+	m->setK1( oer, 0, z->getK1( zer, 0 ) );
 	m->setK2( z->getK2( zer, 0 ) );
 	m->setK3( z->getK3( zer, 0 ) );
 }

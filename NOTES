@@ -17097,9 +17097,11 @@ Should behave like regular pools there, which means that things like SetVec
 should work too.
 Did this. Basic fix worked, but there was a complication with how 
 ZombieHandler::copy was implemented. Fixed that too. 
-Clears unit tests again.
+Clears unit tests again. Checkin 3289.
 
 Then need to clean up the ZombieEnz code.
+	Skeleton of this done. But not yet integrated into ksolve, nor tested.
+
 Then need to clear all regression tests.
 Then need to go multinode.
 
