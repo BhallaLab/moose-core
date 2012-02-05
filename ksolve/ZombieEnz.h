@@ -30,6 +30,8 @@ class ZombieEnz: public Stoich
 		double getKm( const Eref& e, const Qinfo* q ) const;
 		void setRatio( const Eref& e, const Qinfo* q, double v );
 		double getRatio( const Eref& e, const Qinfo* q ) const;
+		void setConcK1( const Eref& e, const Qinfo* q, double v );
+		double getConcK1( const Eref& e, const Qinfo* q ) const;
 
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
@@ -38,6 +40,7 @@ class ZombieEnz: public Stoich
 		void process( const Eref& e, ProcPtr p );
 		void reinit( const Eref& e, ProcPtr p );
 		void dummy( double n );
+		void remesh( const Eref& e, const Qinfo* q );
 
 		//////////////////////////////////////////////////////////////////
 		// Utility  funcs

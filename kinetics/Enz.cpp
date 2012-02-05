@@ -51,7 +51,7 @@ const Cinfo* Enz::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// Field Definitions
 		//////////////////////////////////////////////////////////////
-		static ValueFinfo< Enz, double > k1(
+		static ElementValueFinfo< Enz, double > k1(
 			"k1",
 			"Forward reaction from enz + sub to complex",
 			&Enz::setK1,
@@ -93,6 +93,13 @@ const Cinfo* Enz::initCinfo()
 			&Enz::getRatio
 		);
 
+		static ElementValueFinfo< Enz, double > concK1(
+			"concK1",
+			"K1 expressed in concentration (1/millimolar.sec) units",
+			&Enz::setConcK1,
+			&Enz::getConcK1
+		);
+
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
@@ -106,6 +113,10 @@ const Cinfo* Enz::initCinfo()
 		static DestFinfo group( "group",
 			"Handle for group msgs. Doesn't do anything",
 			new OpFuncDummy() );
+
+		static DestFinfo remesh( "remesh",
+			"Compartment volume or meshing has changed, recompute rates",
+			new EpFunc0< Enz >( &Enz::remesh ) );
 
 		//////////////////////////////////////////////////////////////
 		// Shared Msg Definitions
@@ -166,11 +177,13 @@ const Cinfo* Enz::initCinfo()
 		&Km,	// Value
 		&kcat,	// Value
 		&ratio,	// Value
+		&concK1,	// Value
 		&sub,				// SharedFinfo
 		&prd,				// SharedFinfo
 		&enz,				// SharedFinfo
 		&cplx,				// SharedFinfo
 		&proc,				// SharedFinfo
+		&remesh,			// DestFinfo
 	};
 
 	static Cinfo enzCinfo (
@@ -239,16 +252,24 @@ void Enz::reinit( const Eref& e, ProcPtr p )
 	r1_ = k1_;
 }
 
+void Enz::remesh( const Eref& e, const Qinfo* q )
+{
+	setKm( e, q, Km_ );
+}
+
 //////////////////////////////////////////////////////////////
 // Field Definitions
 //////////////////////////////////////////////////////////////
 
-void Enz::setK1( double v )
+void Enz::setK1( const Eref& e, const Qinfo* q, double v )
 {
 	r1_ = k1_ = v;
+	double volScale = 
+		convertConcToNumRateUsingMesh( e, toSub(), 1 );
+	Km_ = ( k2_ + k3_ ) / ( k1_ * volScale );
 }
 
-double Enz::getK1() const
+double Enz::getK1( const Eref& e, const Qinfo* q ) const
 {
 	return k1_;
 }
@@ -282,6 +303,7 @@ double Enz::getK3() const
 
 void Enz::setKm( const Eref& e, const Qinfo* q, double v )
 {
+	Km_ = v;
 	double volScale = 
 		convertConcToNumRateUsingMesh( e, toSub(), 1 );
 	k1_ = ( k2_ + k3_ ) / ( v * volScale );
@@ -289,21 +311,32 @@ void Enz::setKm( const Eref& e, const Qinfo* q, double v )
 
 double Enz::getKm( const Eref& e, const Qinfo* q ) const
 {
-	double volScale = 
-		convertConcToNumRateUsingMesh( e, toSub(), 1 );
-	return (k2_ + k3_) / ( k1_ * volScale );
+	return Km_;
 }
 
 void Enz::setRatio( const Eref& e, const Qinfo* q, double v )
 {
-	double Km = getKm( e, q );
-
 	k2_ = v * k3_;
+	double volScale = 
+		convertConcToNumRateUsingMesh( e, toSub(), 1 );
 
-	k1_ = ( k2_ + k3_ ) / Km;
+	k1_ = ( k2_ + k3_ ) / ( Km_ * volScale );
 }
 
 double Enz::getRatio( const Eref& e, const Qinfo* q ) const
 {
 	return k2_ / k3_;
+}
+
+void Enz::setConcK1( const Eref& e, const Qinfo* q, double v )
+{
+	double volScale = convertConcToNumRateUsingMesh( e, toSub(), 1 );
+	r1_ = k1_ = v * volScale;
+	Km_ = ( k2_ + k3_ ) / ( k1_ * volScale );
+}
+
+double Enz::getConcK1( const Eref& e, const Qinfo* q ) const
+{
+	double volScale = convertConcToNumRateUsingMesh( e, toSub(), 1 );
+	return k1_ * volScale;
 }

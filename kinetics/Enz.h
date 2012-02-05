@@ -19,8 +19,8 @@ class Enz
 		// Field assignment stuff
 		//////////////////////////////////////////////////////////////////
 
-		void setK1( double v );
-		double getK1() const;
+		void setK1( const Eref& e, const Qinfo* q, double v );
+		double getK1( const Eref& e, const Qinfo* q ) const;
 		void setK2( double v );
 		double getK2() const;
 		void setK3( double v );
@@ -30,6 +30,8 @@ class Enz
 		double getKm( const Eref& e, const Qinfo* q ) const;
 		void setRatio( const Eref& e, const Qinfo* q, double v );
 		double getRatio( const Eref& e, const Qinfo* q ) const;
+		void setConcK1( const Eref& e, const Qinfo* q, double v );
+		double getConcK1( const Eref& e, const Qinfo* q ) const;
 
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
@@ -41,12 +43,14 @@ class Enz
 		void enz( double n );
 		void prd( double n );
 		void cplx( double n );
+		void remesh( const Eref& e, const Qinfo* q );
 
 		static const Cinfo* initCinfo();
 	private:
-		double k1_;
-		double k2_;
-		double k3_;
+		double Km_;	/// Km in concentration units: millimolar.
+		double k1_;	/// in # and time units
+		double k2_;	/// in time
+		double k3_;	/// in time
 		double r1_;
 		double r2_;
 		double r3_;
