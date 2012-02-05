@@ -162,7 +162,19 @@ DataHandler* ZombieHandler::copy(
 	unsigned short newParentDepth, unsigned short copyRootDepth,
 	bool toGlobal, unsigned int n ) const
 {
-	return ( new ZombieHandler( parent_, orig_, start_ * n, end_ * n ) );
+	if ( n > 1 ) {
+		vector< DimInfo > di( 1 );
+		di[0].size = n;
+		di[0].depth = newParentDepth + 1;
+		di[0].isRagged = 0;
+		ZombieHandler* ret = new ZombieHandler( parent_, orig_, 
+			start_ * n, end_ * n );
+		ret->dims_ = di;
+		return ret;
+	} else if ( n == 1 ) {
+		return ( new ZombieHandler( parent_, orig_, start_, end_ ) );
+	}
+	return 0;
 }
 
 DataHandler* ZombieHandler::copyUsingNewDinfo(
@@ -171,9 +183,12 @@ DataHandler* ZombieHandler::copyUsingNewDinfo(
 	return 0;
 }
 
-// Unsure what to do here.
+/// Assume parent deals with node stuff. Here we just claim the new
+// size as our own.
 bool ZombieHandler::resize( unsigned int dimension, unsigned int size )
 {
+	start_ = 0;
+	end_ = size;
 	return 1;
 }
 

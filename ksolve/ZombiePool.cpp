@@ -228,13 +228,9 @@ void ZombiePool::remesh( const Eref& e, const Qinfo* q,
 {
 	if ( e.index().value() != 0 )
 		return;
-	/*
-	if ( q->protectedAddToStruturalQ() )
-		return;
 	Neutral* n = reinterpret_cast< Neutral* >( e.data() );
 	if ( vols.size() != e.element()->dataHandler()->localEntries() )
 		n->setLastDimension( e, q, vols.size() );
-		*/
 
 	// cout << "In ZombiePool::remesh for " << e << endl;
 	if ( S_.size() != vols.size() ) {
