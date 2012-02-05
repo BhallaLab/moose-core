@@ -281,7 +281,7 @@ void SimManager::build( const Eref& e, const Qinfo* q, string method )
 		Shell::numProcessThreads() ); 
 	Qinfo::waitProcCycles( 2 );
 
-	cout << "Waited 2 cycles\n";
+	// cout << "Waited 2 cycles\n";
 	buildFromKkitTree( "gsl" );
 	// send numChemNodes off to the ChemMesh to come back with the 
 	// partitioning rules. This in due course leads to the return message

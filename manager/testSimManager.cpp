@@ -81,11 +81,8 @@ void testRemeshing()
 	assert( n == numVox );
 
 	n = pool()->dataHandler()->localEntries();
-	// This assertion would be true for  regular pool, but the ksolved
-	// pools don't form a vector. Perhaps it should change.
-	// assert( n == numVox );
-	for ( unsigned int i = 0; i < numVox; ++i )
-		Field< double >::set( ObjId( pool, 0 ), "concInit", 0 );
+	assert( n == numVox );
+	Field< double >::setRepeat( pool, "concInit", 0 );
 	Field< double >::set( ObjId( pool, 0 ), "concInit", 1 );
 
 	Id stoich( "/meshTest/stoich" );
@@ -96,22 +93,21 @@ void testRemeshing()
 	assert( n == numVox );
 	shell->doReinit();
 	shell->doStart( runtime );
-	// vector< double > conc;
-	// Field< double >::getVec( pool, "conc", conc );
-	// assert( conc.size() == numVox );
+	vector< double > conc;
+	Field< double >::getVec( pool, "conc", conc );
+	assert( conc.size() == numVox );
 	double dx = coords[6];
 	double err = 0;
 	for ( unsigned int i = 0; i < numVox; ++i ) {
-		double c = Field< double >::get( ObjId( pool, i ), "conc" );
 		double x = i * dx;
 		double y = dx *  // This part represents the init conc of 1 in dx
 		( 0.5 / sqrt( PI * DiffConst * runtime ) ) * exp( -x * x / ( 4 * DiffConst * runtime ) ); // This part is the solution as a func of x,t.
-		err += ( y - c ) * ( y - c );
+		err += ( y - conc[i] ) * ( y - conc[i] );
 	}
 	assert( doubleApprox( err, 0 ) );
 
 
-	// Make another long, thin, cuboid: 200um x 1um x 1um, in 1 um segments.
+	// Another long, thin, cuboid: 100um x 1um x 1um, in 0.5 um segments.
 	runtime = 50;
 	coords[6] = 5.000000001e-7;
 	numVox = coords[3] / coords[6];
@@ -119,8 +115,9 @@ void testRemeshing()
 	Qinfo::waitProcCycles( 2 );
 	n = Field< unsigned int >::get( kinetics, "nx" );
 	assert( n == numVox );
-	for ( unsigned int i = 0; i < numVox; ++i )
-		Field< double >::set( ObjId( pool, 0 ), "concInit", 0 );
+	n = pool()->dataHandler()->localEntries();
+	assert( n == numVox );
+	Field< double >::setRepeat( pool, "concInit", 0 );
 	Field< double >::set( ObjId( pool, 0 ), "concInit", 2 );
 	n = gsl()->dataHandler()->localEntries();
 	assert( n == numVox );
@@ -128,12 +125,13 @@ void testRemeshing()
 	shell->doStart( runtime );
 	dx = coords[6];
 	err = 0;
+	Field< double >::getVec( pool, "conc", conc );
+	assert( conc.size() == numVox );
 	for ( unsigned int i = 0; i < numVox; ++i ) {
-		double c = Field< double >::get( ObjId( pool, i ), "conc" );
 		double x = i * dx;
 		double y = 2 * dx * // This part represents the init conc of 2 in dx
 		( 0.5 / sqrt( PI * DiffConst * runtime ) ) * exp( -x * x / ( 4 * DiffConst * runtime ) ); // This part is the solution as a func of x,t.
-		err += ( y - c ) * ( y - c );
+		err += ( y - conc[i] ) * ( y - conc[i] );
 	}
 	assert( doubleApprox( err/5, 0 ) );
 

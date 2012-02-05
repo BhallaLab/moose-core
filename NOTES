@@ -17090,11 +17090,14 @@ the setRepeat to assign the Stoich to the gsl. Yes, this works.
 Also added another rescaling of the same system. Does it seamlessly, but
 the numerical error is now a bit more, about 1.1e-8.
 Did another variant of this, same total length, halved the spacing. It
-works too.
+works too. Checkin 3288.
 
 Also a fix required for numEntries of zombified pools when they are resized.
 Should behave like regular pools there, which means that things like SetVec
 should work too.
+Did this. Basic fix worked, but there was a complication with how 
+ZombieHandler::copy was implemented. Fixed that too. 
+Clears unit tests again.
 
 Then need to clean up the ZombieEnz code.
 Then need to clear all regression tests.

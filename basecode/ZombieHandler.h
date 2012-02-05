@@ -40,7 +40,7 @@ class ZombieHandler: public DataHandler
 
 		bool isDataHere( DataId index ) const;
 
-		virtual bool isAllocated() const;
+		bool isAllocated() const;
 
 		unsigned int linearIndex( DataId di ) const;
 
