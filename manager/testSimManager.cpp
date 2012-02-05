@@ -113,7 +113,7 @@ void testRemeshing()
 
 	// Make another long, thin, cuboid: 200um x 1um x 1um, in 1 um segments.
 	runtime = 50;
-	coords[3] = 2.000000001e-4;
+	coords[6] = 5.000000001e-7;
 	numVox = coords[3] / coords[6];
 	Field< vector< double > >::set( kinetics, "coords", coords );
 	Qinfo::waitProcCycles( 2 );
@@ -135,7 +135,7 @@ void testRemeshing()
 		( 0.5 / sqrt( PI * DiffConst * runtime ) ) * exp( -x * x / ( 4 * DiffConst * runtime ) ); // This part is the solution as a func of x,t.
 		err += ( y - c ) * ( y - c );
 	}
-	assert( doubleApprox( err/20, 0 ) );
+	assert( doubleApprox( err/5, 0 ) );
 
 	shell->doDelete( mgr );
 	cout << "." << flush;
