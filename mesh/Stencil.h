@@ -30,6 +30,20 @@ class Stencil
 };
 
 /**
+ * Dummy stencil, used when there is no diffusion.
+ */
+class DummyStencil: public Stencil
+{
+	public:
+		DummyStencil();
+		~DummyStencil();
+		void addFlux( unsigned int meshIndex, vector< double >& f, 
+			const vector< vector< double > >& S, 
+			const vector< double >& diffConst ) const;
+	private:
+};
+
+/**
  * Assumes a one-D uniform cartesian array, so the index offset for
  * neighboring mesh points is always 1.
  */

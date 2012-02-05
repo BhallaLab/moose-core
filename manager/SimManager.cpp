@@ -405,7 +405,8 @@ void SimManager::buildFromKkitTree( const string& method )
 		assert( ret );
 		ret = Field< string >::set( gsl, "method", method );
 		assert( ret );
-		shell->doUseClock( basePath + "/stoich/gsl", "process", 0);
+		shell->doUseClock( basePath + "/kinetics/mesh", "process", 0);
+		shell->doUseClock( basePath + "/stoich/gsl", "process", 1);
 	}
 
 	string plotpath = basePath + "/graphs/##[TYPE=Table]," + 

@@ -208,7 +208,7 @@ void testCubeMesh()
 	coords[7] = 1; // DY
 	coords[8] = 1; // DZ
 
-	cm.setCoords( coords );
+	cm.innerSetCoords( coords );
 
 	assert( doubleEq( cm.getX0(), 0 ) );
 	assert( doubleEq( cm.getY0(), 0 ) );
@@ -230,7 +230,7 @@ void testCubeMesh()
 	cm.setY1( 6 );
 	cm.setZ1( 8 );
 
-	vector< double > temp = cm.getCoords();
+	vector< double > temp = cm.getCoords( Id().eref(), 0 );
 	assert( temp.size() == 9 );
 	assert( doubleEq( temp[0], 1 ) );
 	assert( doubleEq( temp[1], 2 ) );

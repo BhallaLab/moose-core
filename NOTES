@@ -17072,6 +17072,23 @@ Working on handling remesh requests in the Stoich. Skeleton messaging
 set up. Had to fix conversion of vector< vector< T > > again.  Checkin 3283.
 Added messaging and remeshing operations to the GSL.
 Next to actually use these in a test, and deprecate the existing ReacDiff tests.
+Setting up unit test in testSimManager.cpp.
+
+Compiles and runs without crashing, but I now need to put in some verification
+that the diffusion and multiple voxels are happening.
+
+Put it in. Much cleanup ensued. Final bug was a good one: The max field size 
+for the FieldDataHandlerBase of the MeshEntry was not getting updated when
+the CubeMesh was resized. So the bitmask was rolling over at 63, and this
+meant that the mesh entries above 63 were being done as 0-36.
+Which gave a numerical error.
+Some cleanup pending, specially to see if I can now avoid explicitly calling
+the setRepeat to assign the Stoich to the gsl.
+
+Also a fix required for numEntries of zombified pools when they are resized.
+Should behave like regular pools there, which means that things like SetVec
+should work too.
+
 Then need to clean up the ZombieEnz code.
 Then need to go multinode.
 

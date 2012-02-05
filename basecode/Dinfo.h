@@ -93,12 +93,19 @@ template< class D > class Dinfo: public DinfoBase
 				orig == 0 || data == 0 ) {
 				return;
 			}
+			const D* origData = reinterpret_cast< const D* >( orig );
+			D* tgt = reinterpret_cast< D* >( data );
 			for ( unsigned int i = 0; i < copyEntries; i+= origEntries ) {
 				unsigned int numCopies = origEntries;
 				if ( copyEntries - i < origEntries )
 					numCopies = copyEntries - i;
-
-				memcpy( data + i * sizeof( D ), orig, sizeof( D ) * numCopies );
+				for ( unsigned int j = 0; j < numCopies; ++j ) {
+					tgt[i +j] = origData[j];
+				}
+				// memcpy( data + i * sizeof( D ), orig, sizeof( D ) * numCopies );
+				// Memcpy is fast but it does not permit for C++ to do 
+				// various constructor and assignment operations that are
+				// important if D has pointers in it.
 			}
 		}
 

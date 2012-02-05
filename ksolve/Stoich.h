@@ -349,24 +349,6 @@ class Stoich
 		 */
 		vector< SpeciesId > species_;
 
-		/**
-		 * Size of each compartment. Only need as many of these as there
-		 * are distinct compartments, usually 1 or 2.
-		vector< double > compartmentSize_;
-		 */
-
-		/**
-		 * Number of meshEntries on this solver. Equal to first index of S_.
-		unsigned int numMeshEntries_;
-		 */
-
-		/**
-		* v_ holds the rates of each reaction. This is working memory and
-		* is reused for the calculations for each meshEntry. But we need
-		* a separate one for each thread, so let's make it temporary.
-		vector< double > v_;
-		*/
-
 		/// The RateTerms handle the update operations for reaction rate v_
 		vector< RateTerm* > rates_;
 

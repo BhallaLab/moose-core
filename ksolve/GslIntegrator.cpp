@@ -109,20 +109,47 @@ static const Cinfo* gslIntegratorCinfo = GslIntegrator::initCinfo();
 ///////////////////////////////////////////////////
 
 GslIntegrator::GslIntegrator()
+	: 
+	isInitialized_( 0 ),
+	method_( "rk5" ),
+	absAccuracy_( 1.0e-9 ),
+	relAccuracy_( 1.0e-6 ),
+	internalStepSize_( 1.0 ),
+	y_( 0 ),
+	nVarPools_( 0 ),
+	gslStepType_( 0 ), 
+	gslStep_( 0 ), 
+	gslControl_( 0 ), 
+	gslEvolve_( 0 )
 {
-	isInitialized_ = 0;
-	method_ = "rk5";
 #ifdef USE_GSL
 	gslStepType_ = gsl_odeiv_step_rkf45;
 	gslStep_ = 0;
 #endif // USE_GSL
-	nVarPools_ = 0;
+}
+
+/**
+ * Needed for the Dinfo::assign function, to ensure we initialize the 
+ * gsl pointers correctly. Instead of trying to guess the Element indices,
+ * we zero out the pointers (not free them) so that the system has to
+ * do the initialization in a separate call to GslIntegrator::stoich().
+ */
+GslIntegrator& GslIntegrator::operator=( const GslIntegrator& other )
+{
+	isInitialized_ = 0;
+	method_ = "rk5";
 	absAccuracy_ = 1.0e-9;
 	relAccuracy_ = 1.0e-6;
-	internalStepSize_ = 1.0e-4;
-	// y_ = 0;
-        gslEvolve_ = NULL;
-        gslControl_ = NULL;
+	internalStepSize_ = 1.0;
+	y_ = 0;
+	nVarPools_ = 0;
+	gslStepType_ = gsl_odeiv_step_rkf45;
+	gslStep_ = 0;
+	gslControl_ = 0;
+	gslEvolve_ = 0;
+	stoichId_ = Id();
+
+	return *this;
 }
 
 GslIntegrator::~GslIntegrator()
@@ -224,8 +251,10 @@ void GslIntegrator::stoich( const Eref& e, const Qinfo* q, Id stoichId )
 	stoichId_ = stoichId;
 	Stoich* s = reinterpret_cast< Stoich* >( stoichId.eref().data() );
 	nVarPools_ = s->getNumVarPools();
-	y_ = s->getY( e.index().value() );
-	s->clearFlux();
+	unsigned int meshIndex = e.index().value();
+	y_ = s->getY( meshIndex );
+	if ( meshIndex == 0 )
+		s->clearFlux();
 
 	isInitialized_ = 1;
         // Allocate GSL functions if not already allocated,
@@ -266,7 +295,7 @@ void GslIntegrator::stoich( const Eref& e, const Qinfo* q, Id stoichId )
 
 	// Use a good guess at the correct ProcInfo to set up.
 	// Should be reassigned at Reinit, just to be sure.
-	stoichThread_.set( s, Shell::procInfo(), e.index().value() );
+	stoichThread_.set( s, Shell::procInfo(), meshIndex );
 	gslSys_.params = static_cast< void* >( &stoichThread_ );
 	// gslSys_.params = static_cast< void* >( s );
 #endif // USE_GSL
@@ -308,11 +337,14 @@ void GslIntegrator::process( const Eref& e, ProcPtr info )
 void GslIntegrator::reinit( const Eref& e, ProcPtr info )
 {
 	Stoich* s = reinterpret_cast< Stoich* >( stoichId_.eref().data() );
-	stoichThread_.set( s, info, e.index().value() );
-	s->clearFlux();
-	s->innerReinit();
+	unsigned int meshIndex = e.index().value();
+	stoichThread_.set( s, info, meshIndex );
+	if ( meshIndex == 0 ) {
+		s->clearFlux();
+		s->innerReinit();
+	}
 	nVarPools_ = s->getNumVarPools();
-	y_ = s->getY( e.index().value() );
+	y_ = s->getY( meshIndex );
 #ifdef USE_GSL
 	if ( isInitialized_ ) {
         assert( gslStepType_ != 0 );
@@ -352,9 +384,12 @@ void GslIntegrator::remesh( const Eref& e, const Qinfo* q,
 	unsigned int numTotalEntries, unsigned int startEntry, 
 	vector< unsigned int > localIndices, vector< double > vols )
 {
+	if ( e.index().value() != 0 ) {
+		return;
+	}
 	if ( q->protectedAddToStructuralQ() )
 		return;
-	cout << "GslIntegrator::remesh for " << e << endl;
+	// cout << "GslIntegrator::remesh for " << e << endl;
 	assert( vols.size() > 0 );
 	if ( vols.size() != e.element()->dataHandler()->localEntries() ) {
 		Neutral* n = reinterpret_cast< Neutral* >( e.data() );
@@ -367,8 +402,10 @@ void GslIntegrator::remesh( const Eref& e, const Qinfo* q,
 	// Now we reassign everything.
 		assert( e.element()->dataHandler()->localEntries() == vols.size() );
 		GslIntegrator* gsldata = reinterpret_cast< GslIntegrator* >( e.data() );
-		for ( unsigned int i = 0; i < vols.size(); ++i ) {
-			gsldata[i].stoich( e, q, stoichId );
-		}
+		/*
+			for ( unsigned int i = 0; i < vols.size(); ++i ) {
+				gsldata[i].stoich( e, q, stoichId );
+			}
+		*/
 	}
 }
