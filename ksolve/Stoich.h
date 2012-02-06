@@ -103,9 +103,37 @@ class Stoich
 		void installMMenz( MMEnzymeBase* meb, unsigned int rateIndex,
 			const vector< Id >& subs, const vector< Id >& prds );
 
+		/**
+		 * This takes the forward, backward and product formation half-reacs
+		 * belonging to the specified Enzyme, and builds them into the
+		 * Stoich
+		 */
+		void installEnzyme( ZeroOrder* r1, ZeroOrder* r2, ZeroOrder* r3,
+			Id enzId, const vector< Id >& prds );
+
+
+		/**
+		 * Returns the vector of doubles of current mol #s at the specified
+		 * mesh index
+		 */
 		const double* S( unsigned int meshIndex ) const;
+
+		/**
+		 * Returns the vector of doubles of current mol #s at the specified
+		 * mesh index. Dangerous, allows one to modify the values.
+		 */
 		double* varS( unsigned int meshIndex );
+
+		/**
+		 * Returns the vector of doubles of initial mol #s at the specified
+		 * mesh index
+		 */
 		const double* Sinit( unsigned int meshIndex ) const;
+
+		/**
+		 * Returns working memory for the calculations at the specified
+		 * mesh index
+		 */
 		double* getY( unsigned int meshIndex );
 
 		/**
@@ -138,6 +166,17 @@ class Stoich
 		 * Sets the kcat for MMenz. No conversions needed.
 		 */
 		void setMMenzKcat( const Eref& e, double v ) const;
+
+		/**
+		 * Sets the rate v (given in millimoloar concentration units)
+		 * for the forward enzyme reaction of binding substrate to enzyme.
+		 * Does this throughout the compartment in which the
+		 * enzyme lives. Internally the stoich uses #/voxel units so this 
+		 * involves querying the volume subsystem about volumes for each
+		 * voxel, and scaling accordingly.
+		 */
+		void setEnzK1( const Eref& e, double v ) const;
+
 
 		/**
 		 * Returns the internal rate in #/voxel, for R1, for the specified
