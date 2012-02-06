@@ -11,6 +11,7 @@
 	#include <sys/time.h>
 #else
 	#include <time.h>
+	#include <winsock2.h>
 #endif
 #include "StoichHeaders.h"
 #include <gsl/gsl_errno.h>

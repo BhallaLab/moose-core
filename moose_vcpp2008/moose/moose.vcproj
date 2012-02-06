@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..;..\..\basecode;..\..\biophysics;..\..\builtins;..\..\geom;..\..\kinetics;..\..\ksolve;..\..\manager;..\..\mesh;..\..\msg;..\..\randnum;..\..\scheduling;..\..\shell;..\..\utility;D:\MOOSE\moose_Beta_1.4\external\include\gsl\include;&quot;D:\MOOSE\pthread\Pre-built.2\include&quot;"
+				AdditionalIncludeDirectories="..\..;..\..\basecode;..\..\biophysics;..\..\builtins;..\..\geom;..\..\kinetics;..\..\ksolve;..\..\manager;..\..\mesh;..\..\msg;..\..\randnum;..\..\scheduling;..\..\shell;..\..\utility;..\..\external\xgetopt;D:\MOOSE\moose_Beta_1.4\external\include\gsl\include;&quot;D:\MOOSE\pthread\Pre-built.2\include&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;DO_UNIT_TESTS;_WIN32;USE_GSL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -806,6 +806,18 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="external"
+				>
+				<Filter
+					Name="xgetopt"
+					>
+					<File
+						RelativePath="..\..\external\xgetopt\XGetopt.cpp"
+						>
+					</File>
+				</Filter>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -1467,6 +1479,18 @@
 					RelativePath="..\..\utility\utility.h"
 					>
 				</File>
+			</Filter>
+			<Filter
+				Name="external"
+				>
+				<Filter
+					Name="xgetopt"
+					>
+					<File
+						RelativePath="..\..\external\xgetopt\XGetopt.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 		</Filter>
 		<Filter

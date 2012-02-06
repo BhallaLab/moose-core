@@ -144,6 +144,8 @@ template < class T, class F > class FieldElementFinfo: public FieldElementFinfoB
 		/// Virtual function to look up type of FieldElementFinfo
 		string rttiType() const {
 			return Conv<F>::rttiType();
+		//	return "";
+
 		}
 
 	private:

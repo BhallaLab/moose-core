@@ -78,6 +78,7 @@ void* processEventLoop( void* info )
 		p->barrier3->wait();
 	}
 	pthread_exit( NULL );
+	return 0; //To keep compiler happy.
 }
 
 /**
@@ -136,6 +137,7 @@ void* mpiEventLoop( void* info )
 		p->barrier3->wait();
 	}
 	pthread_exit( NULL );
+	return 0; //To keep compiler happy.
 }
 
 //////////////////////////////////////////////////////////////////////////
