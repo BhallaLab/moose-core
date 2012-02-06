@@ -53,6 +53,8 @@ class ZombieEnz: public Stoich
 
 		static const Cinfo* initCinfo();
 	private:
+		Stoich* stoich_;
+		double concK1_;
 };
 
 #endif // _ZOMBIE_ENZ_H
