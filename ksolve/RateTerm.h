@@ -117,7 +117,7 @@ class MMEnzymeBase: public RateTerm
 		}
 
 	protected:
-		double Km_;
+		double Km_; // In # units, not conc units.
 		double kcat_;
 		unsigned int enz_;
 };

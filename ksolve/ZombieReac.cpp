@@ -203,16 +203,12 @@ void ZombieReac::remesh( const Eref& e, const Qinfo* q )
 // Field Definitions
 //////////////////////////////////////////////////////////////
 
+// This conversion is deprecated, used mostly for kkit conversions.
 void ZombieReac::setNumKf( const Eref& e, const Qinfo* q, double v )
 {
-	cout << "Warning: numKf undefined for spatial reaction systems.\n";
-	cout << "Use concKf if you want to change rates in this volume.\n";
-	/*
-	double volScale = 
-		convertConcToNumRateUsingMesh( e, toSub(), 0 );
+	double volScale = convertConcToNumRateUsingMesh( e, toSub(), 0 );
 	concKf_ = v * volScale;
-	rates_[ convertIdToReacIndex( e.id() ) ]->setR1( v );
-	*/
+	stoich_->setReacKf( e, concKf_ );
 }
 
 double ZombieReac::getNumKf( const Eref& e, const Qinfo* q ) const
@@ -225,16 +221,12 @@ double ZombieReac::getNumKf( const Eref& e, const Qinfo* q ) const
 	// return rates_[ convertIdToReacIndex( e.id() ) ]->getR1();
 }
 
+// Deprecated, used for kkit conversion backward compatibility
 void ZombieReac::setNumKb( const Eref& e, const Qinfo* q, double v )
 {
-	cout << "Warning: numKb undefined for spatial reaction systems.\n";
-	cout << "Use concKb if you want to change rates in this volume.\n";
-	/*
-	if ( useOneWay_ )
-		rates_[ convertIdToReacIndex( e.id() ) + 1 ]->setR1( v );
-	else
-		rates_[ convertIdToReacIndex( e.id() ) ]->setR2( v );
-		*/
+	double volScale = convertConcToNumRateUsingMesh( e, toPrd(), 0 );
+	concKb_ = v * volScale;
+	stoich_->setReacKb( e, concKb_ );
 }
 
 double ZombieReac::getNumKb( const Eref& e, const Qinfo* q ) const
@@ -244,61 +236,28 @@ double ZombieReac::getNumKb( const Eref& e, const Qinfo* q ) const
 	} else {
 		return stoich_->getR2( stoich_->convertIdToReacIndex( e.id() ), 0 );
 	}
-	/*
-	if ( useOneWay_ )
-		return rates_[ convertIdToReacIndex( e.id() ) + 1 ]->getR1();
-	else
-		return rates_[ convertIdToReacIndex( e.id() ) ]->getR2();
-	*/
 }
 
 void ZombieReac::setConcKf( const Eref& e, const Qinfo* q, double v )
 {
 	concKf_ = v;
 	stoich_->setReacKf( e, v );
-	/*
-	double volScale = 
-		convertConcToNumRateUsingMesh( e, toSub(), 0 );
-	rates_[ convertIdToReacIndex( e.id() ) ]->setR1( v / volScale );
-	*/
-	// setNumKf( e, q, v / volScale );
 }
 
 double ZombieReac::getConcKf( const Eref& e, const Qinfo* q ) const
 {
 	return concKf_;
-	/*
-	double volScale = 
-		convertConcToNumRateUsingMesh( e, toSub(), 0 );
-	return getNumKf( e, q ) * volScale;
-	*/
 }
 
 void ZombieReac::setConcKb( const Eref& e, const Qinfo* q, double v )
 {
 	concKb_ = v;
 	stoich_->setReacKb( e, v );
-	/*
-	double volScale = 
-		convertConcToNumRateUsingMesh( e, toPrd(), 0 );
-	// setNumKb( e, q, v / volScale );
-	v /= volScale
-
-	if ( useOneWay_ )
-		rates_[ convertIdToReacIndex( e.id() ) + 1 ]->setR1( v );
-	else
-		rates_[ convertIdToReacIndex( e.id() ) ]->setR2( v );
-		*/
 }
 
 double ZombieReac::getConcKb( const Eref& e, const Qinfo* q ) const
 {
 	return concKb_;
-	/*
-	double volScale = 
-		convertConcToNumRateUsingMesh( e, toPrd(), 0 );
-	return getNumKb( e, q ) * volScale;
-	*/
 }
 
 unsigned int ZombieReac::getNumSub( const Eref& e, const Qinfo* q ) const
@@ -351,6 +310,14 @@ ZeroOrder* ZombieReac::makeHalfReaction(
 // static func
 void ZombieReac::zombify( Element* solver, Element* orig )
 {
+	static const SrcFinfo* sub = dynamic_cast< const SrcFinfo* >(
+		Reac::initCinfo()->findFinfo( "toSub" ) );
+	static const SrcFinfo* prd = dynamic_cast< const SrcFinfo* >(
+		Reac::initCinfo()->findFinfo( "toPrd" ) );
+	
+	assert( sub );
+	assert( prd );
+
 	DataHandler* dh = orig->dataHandler()->copyUsingNewDinfo( ZombieReac::initCinfo()->dinfo() );
 
 	Reac* reac = reinterpret_cast< Reac* >( orig->dataHandler()->data( 0 ));
@@ -362,13 +329,6 @@ void ZombieReac::zombify( Element* solver, Element* orig )
 	zr->concKb_ = concKb;
 	zr->stoich_ = reinterpret_cast< Stoich* >( solver->dataHandler()->data( 0 ) );
 
-	static const SrcFinfo* sub = dynamic_cast< const SrcFinfo* >(
-		Reac::initCinfo()->findFinfo( "toSub" ) );
-	static const SrcFinfo* prd = dynamic_cast< const SrcFinfo* >(
-		Reac::initCinfo()->findFinfo( "toPrd" ) );
-	
-	assert( sub );
-	assert( prd );
 
 	ZeroOrder* forward = zr->makeHalfReaction( orig, concKf, sub );
 	ZeroOrder* reverse = zr->makeHalfReaction( orig, concKb, prd );
