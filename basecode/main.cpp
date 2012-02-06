@@ -15,12 +15,11 @@
 #endif
 #include <math.h>
 #include <queue>
-//#ifdef WIN32
-//#include <process.h>
-//#include <windows.h>
-//#else
+#ifdef WIN32
+#include "../external/xgetopt/XGetopt.h"
+#else
 #include <unistd.h> // for getopt
-//#endif
+#endif
 #include "../scheduling/Tick.h"
 #include "../scheduling/TickMgr.h"
 #include "../scheduling/TickPtr.h"
