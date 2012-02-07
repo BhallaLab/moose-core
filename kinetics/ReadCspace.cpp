@@ -106,7 +106,7 @@ Id ReadCspace::readModelString( const string& model,
 	SimManager* sm = reinterpret_cast< SimManager* >( 
 		base_.eref().data() );
 	sm->makeStandardElements( base_.eref(), 0, "CubeMesh" );
-	compt_ = Id( modelname + "/kinetics" );
+	compt_ = Id( "/" + modelname + "/kinetics" );
 	assert( compt_ != Id() );
 	SetGet2< double, unsigned int >::set( compt_, "buildDefaultMesh",     1e-18, 1 );
 	mesh_ = Neutral::child( compt_.eref(), "mesh" );
@@ -159,6 +159,37 @@ Id ReadCspace::readModelString( const string& model,
 	sm->build( base_.eref(), &q, solverClass );
 
 	return base_;
+}
+
+void ReadCspace::makePlots( double plotdt )
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+    vector< int > dims( 1, 1 ); 
+	vector< Id > children;
+	Neutral::children( compt_.eref(), children );
+	string basepath = base_.path();
+	Id graphs( basepath + "/graphs" );
+	assert( graphs != Id () );
+	for ( unsigned int i = 0; i < children.size(); ++i ) {
+		const Cinfo* kidCinfo = children[i].element()->cinfo();
+		if ( kidCinfo->isA( "ZombiePool" ) || kidCinfo->isA( "Pool" ) ) {
+			string plotname = "plot" + children[i].element()->getName();
+    		Id tab = shell->doCreate( "Table", graphs, plotname, dims );
+			assert( tab != Id() );
+			// cout << "ReadCspace made plot " << plotname << endl;
+			MsgId mid = shell->doAddMsg( "Single", 
+				tab, "requestData", children[i], "get_conc" );
+			assert( mid != Msg::bad );
+		}
+	}
+
+    shell->doSetClock( 0, plotdt );
+    shell->doSetClock( 1, plotdt );
+    shell->doSetClock( 2, plotdt );
+    shell->doSetClock( 3, 0 ); 
+
+    string plotpath = basepath + "/graphs/##[TYPE=Table]";
+    shell->doUseClock( plotpath, "process", 2 ); 
 }
 
 /*
