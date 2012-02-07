@@ -10,7 +10,7 @@
 #ifndef _ZOMBIE_ENZ_H
 #define _ZOMBIE_ENZ_H
 
-class ZombieEnz: public Stoich
+class ZombieEnz
 {
 	public: 
 		ZombieEnz();

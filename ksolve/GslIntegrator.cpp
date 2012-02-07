@@ -185,7 +185,7 @@ void GslIntegrator::setMethod( string method )
 		gslStepType_ = gsl_odeiv_step_rk2;
 	} else if ( method == "rk4" ) {
 		gslStepType_ = gsl_odeiv_step_rk4;
-	} else if ( method == "rk5" ) {
+	} else if ( method == "rk5" || method == "gsl" ) {
 		gslStepType_ = gsl_odeiv_step_rkf45;
 	} else if ( method == "rkck" ) {
 		gslStepType_ = gsl_odeiv_step_rkck;
