@@ -243,18 +243,11 @@ void SimManager::build( const Eref& e, const Qinfo* q, string method )
 		 return;
 	}
 
-	// Then, do the setup. The setup function is capable of doing the
-	// multi-voxel simulation but is fine if there is just a single voxel.
-	// Get # of voxels from ChemMesh
-	// Get list of local node voxels.
-	/* This shared message should allow the mesh to force an update, and
-	 * the SimManager to request an update. 
-	 * Unfortunately messages do not (yet) work well with setup calls.
-	MsgId mid = shell->doAddMsg( "OneToOne", mesh, "nodeMeshing", 
-		baseId_, "nodeMeshing" );
-	assert( mid != Msg::bad );
-	 */
-
+	bool isEE = ( method == "neutral" || method == "Neutral" || method == "ee" || method == "EE" );
+	if ( isEE ) {
+		buildFromKkitTree( method );
+		return;
+	}
 	vector< int > dims( 1, 1 );
 	 // This is a placeholder for more sophisticated node-balancing info
 	 // May also need to put in volscales here.
@@ -267,22 +260,15 @@ void SimManager::build( const Eref& e, const Qinfo* q, string method )
 
 	double chemLoad = estimateChemLoad( mesh, stoich_ );
 	// Here we would also estimate cell load
-	/*
-	Id hsolver = Neutral::child( e, "solve" );
-	*/
 	Id hsolver;
 	double hsolveLoad = estimateHsolveLoad( hsolver );
 
 	numChemNodes_ = Shell::numNodes() * chemLoad / ( chemLoad + hsolveLoad);
 	
-	/*
-		*/
 	nodeInfo()->send( e, q->threadNum(), numChemNodes_,
 		Shell::numProcessThreads() ); 
 	Qinfo::waitProcCycles( 2 );
 
-	// cout << "Waited 2 cycles\n";
-	buildFromKkitTree( "gsl" );
 	// send numChemNodes off to the ChemMesh to come back with the 
 	// partitioning rules. This in due course leads to the return message
 	// with the mesh partitioning info. The return message in turn triggers
@@ -290,14 +276,16 @@ void SimManager::build( const Eref& e, const Qinfo* q, string method )
 	// GSL or GSSA integrators. The current function does not do these
 	// subsequent steps as the outgoing 'send' call is non-blocking.
 
+	buildFromKkitTree( method );
 
 	Id meshEntry = Neutral::child( mesh.eref(), "mesh" );
 	assert( meshEntry != Id() );
 	Id gsl = Neutral::child( stoich_.eref(), "gsl" );
-	assert( gsl != Id() );
-	mid = shell->doAddMsg( "OneToOne", meshEntry, "remesh", 
-		gsl, "remesh" );
-	assert( mid != Msg::bad );
+	if ( gsl != Id() ) {
+		mid = shell->doAddMsg( "OneToOne", meshEntry, "remesh", 
+			gsl, "remesh" );
+		assert( mid != Msg::bad );
+	}
 
 	// Apply heuristic for threads and nodes
 	// Replicate pools as per node decomp. Shell::handleReMesh
@@ -394,7 +382,9 @@ void SimManager::buildFromKkitTree( const string& method )
 		cout << "SimManager::buildFromKkitTree: Not yet got GSSA working here.\n";
 	} else if ( method == "Neutral" || method == "ee" || method == "EE" ) {
 		// cout << "SimManager::buildFromKkitTree: No solvers built\n";
-		; // Don't make any solvers.
+		 // Don't make any solvers.
+		shell->doUseClock( basePath + "/kinetics/##[TYPE=Pool]", "process", 0);
+		shell->doUseClock( basePath + "/kinetics/##[TYPE=Reac],/kinetics/##[TYPE=Enz", "process", 1);
 	} else {
 		// Id stoich = shell->doCreate( "Stoich", baseId_, "stoich", dims );
 		// Field< string >::set( stoich, "path", basePath + "/##" );
@@ -411,7 +401,9 @@ void SimManager::buildFromKkitTree( const string& method )
 
 	string plotpath = basePath + "/graphs/##[TYPE=Table]," + 
 		basePath + "/moregraphs/##[TYPE=Table]";
-	shell->doUseClock( plotpath, "process", 2 );
-	shell->doReinit();
+	vector< Id > list;
+	if ( wildcardFind( plotpath, list ) > 0 )
+		shell->doUseClock( plotpath, "process", 2 );
+	// shell->doReinit(); // Cannot use unless process is running.
 }
 

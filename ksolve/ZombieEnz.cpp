@@ -73,7 +73,7 @@ const Cinfo* ZombieEnz::initCinfo()
 
 		static ElementValueFinfo< ZombieEnz, double > Km(
 			"Km",
-			"Michaelis-Menten constant",
+			"Michaelis-Menten constant, in conc (millimolar) units",
 			&ZombieEnz::setKm,
 			&ZombieEnz::getKm
 		);
@@ -233,44 +233,45 @@ void ZombieEnz::remesh( const Eref& e, const Qinfo* q )
 
 void ZombieEnz::setK1( const Eref& e, const Qinfo* q, double v )
 {
-	rates_[ convertIdToReacIndex( e.id() ) ]->setR1( v );
+	double volScale = 
+		convertConcToNumRateUsingMesh( e, toSub(), 1 );
+
+	concK1_ = v / volScale;
+	stoich_->setEnzK1( e, concK1_ );
 }
 
 double ZombieEnz::getK1( const Eref& e, const Qinfo* q ) const
 {
-	return rates_[ convertIdToReacIndex( e.id() ) ]->getR1();
+	return stoich_->getR1( stoich_->convertIdToReacIndex( e.id() ), 0 );
 }
 
 void ZombieEnz::setK2( const Eref& e, const Qinfo* q, double v )
 {
-	if ( useOneWay_ )
-		rates_[ convertIdToReacIndex( e.id() ) + 1 ]->setR1( v );
-	else
-		rates_[ convertIdToReacIndex( e.id() ) ]->setR2( v );
+	stoich_->setEnzK2( e, v );
 }
 
 double ZombieEnz::getK2( const Eref& e, const Qinfo* q ) const
 {
-	if ( useOneWay_ )
-		return rates_[ convertIdToReacIndex( e.id() ) + 1 ]->getR1();
+	if ( stoich_->getOneWay() )
+		return stoich_->getR1( 
+			stoich_->convertIdToReacIndex( e.id() ) + 1, 0 );
 	else
-		return rates_[ convertIdToReacIndex( e.id() ) ]->getR2();
+		return stoich_->getR2( stoich_->convertIdToReacIndex( e.id() ), 0 );
 }
 
 void ZombieEnz::setK3( const Eref& e, const Qinfo* q, double v )
 {
-	if ( useOneWay_ )
-		rates_[ convertIdToReacIndex( e.id() ) + 2 ]->setR1( v );
-	else
-		rates_[ convertIdToReacIndex( e.id() ) + 1 ]->setR1( v );
+	stoich_->setEnzK3( e, v );
 }
 
 double ZombieEnz::getK3( const Eref& e, const Qinfo* q ) const
 {
-	if ( useOneWay_ )
-		return rates_[ convertIdToReacIndex( e.id() ) + 2 ]->getR1();
+	if ( stoich_->getOneWay() )
+		return stoich_->getR1(
+			stoich_->convertIdToReacIndex( e.id() ) + 2, 0 );
 	else
-		return rates_[ convertIdToReacIndex( e.id() ) + 1 ]->getR1();
+		return stoich_->getR1(
+			stoich_->convertIdToReacIndex( e.id() ) + 1, 0 );
 }
 
 
@@ -278,24 +279,15 @@ void ZombieEnz::setKm( const Eref& e, const Qinfo* q, double v )
 {
 	double k2 = getK2( e, q );
 	double k3 = getK3( e, q );
-
-	double volScale = 
-		convertConcToNumRateUsingMesh( e, toSub(), 1 );
-
-	double k1 = ( k2 + k3 ) / ( v * volScale );
-	setK1( e, q, k1 );
+	stoich_->setEnzK1( e, ( k2 + k3 ) / concK1_ );
 }
 
 double ZombieEnz::getKm( const Eref& e, const Qinfo* q ) const
 {
-	double k1 = getK1( e, q );
 	double k2 = getK2( e, q );
 	double k3 = getK3( e, q );
 
-	double volScale = 	
-		convertConcToNumRateUsingMesh( e, toSub(), 1 );
-	
-	return (k2 + k3) / ( k1 * volScale );
+	return ( k2 + k3 ) / concK1_;
 }
 
 void ZombieEnz::setRatio( const Eref& e, const Qinfo* q, double v )
@@ -306,9 +298,10 @@ void ZombieEnz::setRatio( const Eref& e, const Qinfo* q, double v )
 
 	k2 = v * k3;
 
+	stoich_->setEnzK2( e, k2 );
 	double k1 = ( k2 + k3 ) / Km;
 
-	setK1( e, q, k1 );
+	setConcK1( e, q, k1 );
 }
 
 double ZombieEnz::getRatio( const Eref& e, const Qinfo* q ) const
@@ -390,6 +383,7 @@ void ZombieEnz::zombify( Element* solver, Element* orig )
 		ZombieEnz::initCinfo()->dinfo() );
 	
 	ZombieEnz* z = reinterpret_cast< ZombieEnz* >( dh->data( 0 ) );
+	z->stoich_ = reinterpret_cast< Stoich* >( solver->dataHandler()->data( 0 ) );
 	Enz* enz = reinterpret_cast< Enz* >( orig->dataHandler()->data( 0 ) );
 	Eref oer( orig, 0 );
 
@@ -407,6 +401,7 @@ void ZombieEnz::zombify( Element* solver, Element* orig )
 	z->stoich_->installEnzyme( r1, r2, r3, orig->id(), pools );
 
 	orig->zombieSwap( ZombieEnz::initCinfo(), dh );
+	z->concK1_ = concK1;
 	z->stoich_->setEnzK1( Eref( orig, 0 ), concK1 );
 }
 

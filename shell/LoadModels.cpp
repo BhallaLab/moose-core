@@ -135,13 +135,8 @@ Id Shell::doLoadModel( const string& fileName, const string& modelPath, const st
 		case CSPACE:
 			{
 				string sc = solverClass;
-				if ( solverClass == "" || solverClass == "gsl" )
-					sc = "Stoich";
 				ReadCspace rc;
 				Id ret = rc.readModelString( line, modelName, parentId, sc);
-				if ( solverClass == "gsl" ) { // set up kkit run
-					rc.setupGslRun( 1.0 );
-				}
 				return ret;
 			}
 		case UNKNOWN:

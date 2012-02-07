@@ -14,6 +14,7 @@
 #define DO_CSPACE_DEBUG 0
 
 #include "ReadCspace.h"
+#include "../manager/SimManager.h"
 
 const double ReadCspace::SCALE = 1.0;
 const double ReadCspace::DEFAULT_CONC = 1.0;
@@ -24,6 +25,8 @@ const bool ReadCspace::USE_PIPE = 1;
 ReadCspace::ReadCspace()
 	:
 		base_(),
+		compt_(),
+		mesh_(),
 		fout_( &cout )
 {;}
 
@@ -98,6 +101,19 @@ Id ReadCspace::readModelString( const string& model,
 	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
 	vector< int > dims( 1,1 );
 
+	base_ = s->doCreate( "SimManager", pa, modelname, dims, true );
+	assert( base_ != Id() );
+	SimManager* sm = reinterpret_cast< SimManager* >( 
+		base_.eref().data() );
+	sm->makeStandardElements( base_.eref(), 0, "CubeMesh" );
+	compt_ = Id( modelname + "/kinetics" );
+	assert( compt_ != Id() );
+	SetGet2< double, unsigned int >::set( compt_, "buildDefaultMesh",     1e-18, 1 );
+	mesh_ = Neutral::child( compt_.eref(), "mesh" );
+	assert( mesh_ != Id() );
+
+	
+/*
 	base_ = s->doCreate( solverClass, pa, modelname, dims, false );
 	assert( base_ != Id() );
 
@@ -110,6 +126,7 @@ Id ReadCspace::readModelString( const string& model,
 	coords[0] = coords[1] = coords[2] = 0;
 	bool ret = Field< vector< double > >::set( comptId, "coords", coords );
 	assert( ret );
+	*/
 
 	string temp = model.substr( pos + 1 );
 	pos = temp.find_first_of( " 	\n" );
@@ -135,9 +152,16 @@ Id ReadCspace::readModelString( const string& model,
 	}
 
 	deployParameters();
+
+	Qinfo q;
+	q.setThreadNum( ScriptThreadNum );
+	sm->setPlotDt( 1 );
+	sm->build( base_.eref(), &q, solverClass );
+
 	return base_;
 }
 
+/*
 void ReadCspace::setupGslRun( double plotdt )
 {
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
@@ -178,6 +202,7 @@ void ReadCspace::setupGslRun( double plotdt )
     shell->doUseClock( plotpath, "process", 2 ); 
     shell->doReinit();
 }
+*/
 
 
 /////////////////////////////////////////////////////////////////////
@@ -240,7 +265,7 @@ void ReadCspace::expandReaction( const char* name, int nm1 )
 		return;
 	int i;
 
-	Id reacId = s->doCreate( "Reac", base_, name, dims, false );
+	Id reacId = s->doCreate( "Reac", compt_, name, dims, false );
 	
 	// A is always a substrate
 	for (i = 0; i < nm1; i++ ) {
@@ -336,7 +361,7 @@ void ReadCspace::makeMolecule( char name )
 		ss << i ;
 		string molname = ss.str();
 		*/
-		Id temp = s->doCreate( "Pool", base_, molname, dims, false );
+		Id temp = s->doCreate( "Pool", compt_, molname, dims, false );
 		mol_.push_back( temp );
 		molparms_.push_back( DEFAULT_CONC );
 	}
@@ -351,8 +376,8 @@ void ReadCspace::deployParameters( )
 		return;
 	}
 	for ( i = 0; i < mol_.size(); i++ ) {
-		MsgId ret = shell->doAddMsg( "OneToOne", mol_[i], "requestSize",
-			mesh_, "get_size" );
+		// MsgId ret = shell->doAddMsg( "OneToOne", mol_[i], "requestSize", mesh_, "get_size" );
+		MsgId ret = shell->doAddMsg( "OneToOne", mol_[i], "mesh", mesh_, "mesh" );
 		assert( ret != Msg::bad );
 		// SetField(mol_[ i ], "volscale", volscale );
 		// SetField(mol_[ molseq_[i] ], "ninit", parms_[ i ] );
@@ -371,6 +396,10 @@ void ReadCspace::deployParameters( )
 			// need to convert from the CSPACE micromolar units.
 			Field< double >::set( reac_[j], "Km", parms_[i++] * 1e-3 );
 		}
+		MsgId ret = shell->doAddMsg( "Single", 
+			ObjId( mesh_, 0 ), "remeshReacs",
+			ObjId( reac_[j], 0 ), "remesh" );
+		assert( ret != Msg::bad );
 	}
 }
 
@@ -386,14 +415,14 @@ void ReadCspace::testReadModel( )
 	shell->doDelete( modelId );
 
 	modelId = readModelString( "|AabX|BbcX|CcdX|DdeX|Eefg|Ffgh|Gghi|Hhij|Iijk|Jjkl|Kklm|Llmn| 1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0 11.0 12.0 13.0 14.0 101 102 201 202 301 302 401 402 501 502 601 602 701 702 801 802 901 902 1001 1002 1101 1102 1201 1202",
-		"kinetics", Id(), "Neutral" );
+		"model", Id(), "Neutral" );
 	assert( mol_.size() == 14 );
 	assert( reac_.size() == 12 );
 	double concInit;
 	int i;
 	// cout << "\nTesting ReadCspace:: conc assignment\n";
 	for ( i = 0; i < 14; i++ ) {
-		string path( "/kinetics/" );
+		string path( base_.path() + "/kinetics/" );
 		path += 'a' + i;
 		/*
 		stringstream ss( "/kinetics/" );
@@ -410,36 +439,36 @@ void ReadCspace::testReadModel( )
 	}
 
 	// cout << "\nTesting ReadCspace:: reac construction\n";
-	assert( reac_[ 0 ].path() == "/kinetics/AabX" );
-	assert( reac_[ 1 ].path() == "/kinetics/BbcX" );
-	assert( reac_[ 2 ].path() == "/kinetics/c/CcdX" );
-	assert( reac_[ 3 ].path() == "/kinetics/e/DdeX" );
-	assert( reac_[ 4 ].path() == "/kinetics/Eefg" );
-	assert( reac_[ 5 ].path() == "/kinetics/Ffgh" );
-	assert( reac_[ 6 ].path() == "/kinetics/Gghi" );
-	assert( reac_[ 7 ].path() == "/kinetics/Hhij" );
-	assert( reac_[ 8 ].path() == "/kinetics/Iijk" );
-	assert( reac_[ 9 ].path() == "/kinetics/k/Jjkl" );
-	assert( reac_[ 10 ].path() == "/kinetics/k/Kklm" );
-	assert( reac_[ 11 ].path() == "/kinetics/m/Llmn" );
+	assert( reac_[ 0 ].path() == "/model/kinetics/AabX" );
+	assert( reac_[ 1 ].path() == "/model/kinetics/BbcX" );
+	assert( reac_[ 2 ].path() == "/model/kinetics/c/CcdX" );
+	assert( reac_[ 3 ].path() == "/model/kinetics/e/DdeX" );
+	assert( reac_[ 4 ].path() == "/model/kinetics/Eefg" );
+	assert( reac_[ 5 ].path() == "/model/kinetics/Ffgh" );
+	assert( reac_[ 6 ].path() == "/model/kinetics/Gghi" );
+	assert( reac_[ 7 ].path() == "/model/kinetics/Hhij" );
+	assert( reac_[ 8 ].path() == "/model/kinetics/Iijk" );
+	assert( reac_[ 9 ].path() == "/model/kinetics/k/Jjkl" );
+	assert( reac_[ 10 ].path() == "/model/kinetics/k/Kklm" );
+	assert( reac_[ 11 ].path() == "/model/kinetics/m/Llmn" );
 
 	// cout << "\nTesting ReadCspace:: reac rate assignment\n";
-	Id tempA( "/kinetics/AabX" );
+	Id tempA( "/model/kinetics/AabX" );
 	double r1 = Field< double >::get( tempA, "Kf");
 	double r2 = Field< double >::get( tempA, "Kb");
 	assert( doubleEq( r1, 101 ) && doubleEq( r2, 102 ) );
 
-	Id tempB( "/kinetics/BbcX" );
+	Id tempB( "/model/kinetics/BbcX" );
 	r1 = Field< double >::get( tempB, "Kf");
 	r2 = Field< double >::get( tempB, "Kb");
 	assert( doubleEq( r1, 201 ) && doubleEq( r2, 202 ) );
 
-	Id tempC( "/kinetics/c/CcdX" );
+	Id tempC( "/model/kinetics/c/CcdX" );
 	r1 = Field< double >::get( tempC, "k3");
 	r2 = Field< double >::get( tempC, "Km");
 	assert( doubleEq( r1, 301 ) && doubleEq( r2, 302 * CONCSCALE ) );
 
-	Id tempD( "/kinetics/e/DdeX" );
+	Id tempD( "/model/kinetics/e/DdeX" );
 	r1 = Field< double >::get( tempD, "k3");
 	r2 = Field< double >::get( tempD, "Km");
 	assert( doubleEq( r1, 401 ) && doubleEq( r2, 402 * CONCSCALE ) );
@@ -452,7 +481,7 @@ void ReadCspace::testReadModel( )
 		Id temp( ss.str() );
 		*/
 
-		string path( "/kinetics/" );
+		string path( "/model/kinetics/" );
 		path += 'A' + i;
 		path += 'a' + i;
 		path += 'b' + i;
@@ -464,17 +493,17 @@ void ReadCspace::testReadModel( )
 			doubleEq( r2, i * 100 + 102 ) );
 	}
 
-	Id tempJ( "/kinetics/k/Jjkl" );
+	Id tempJ( "/model/kinetics/k/Jjkl" );
 	r1 = Field< double >::get( tempJ, "k3");
 	r2 = Field< double >::get( tempJ, "Km");
 	assert( doubleEq( r1, 1001 ) && doubleEq( r2, 1002 * CONCSCALE ) );
 
-	Id tempK( "/kinetics/k/Kklm" );
+	Id tempK( "/model/kinetics/k/Kklm" );
 	r1 = Field< double >::get( tempK, "k3");
 	r2 = Field< double >::get( tempK, "Km");
 	assert( doubleEq( r1, 1101 ) && doubleEq( r2, 1102 * CONCSCALE ) );
 
-	Id tempL( "/kinetics/m/Llmn" );
+	Id tempL( "/model/kinetics/m/Llmn" );
 	r1 = Field< double >::get( tempL, "k3");
 	r2 = Field< double >::get( tempL, "Km");
 	assert( doubleEq( r1, 1201 ) && doubleEq( r2, 1202 * CONCSCALE ) );
