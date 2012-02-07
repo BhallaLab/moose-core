@@ -223,7 +223,7 @@ void ZombieEnz::reinit( const Eref& e, ProcPtr p )
 
 void ZombieEnz::remesh( const Eref& e, const Qinfo* q )
 {   
-	// setKm( e, q, Km_ );
+	stoich_->setEnzK1( e, concK1_ );
 }   
 
 
@@ -279,7 +279,7 @@ void ZombieEnz::setKm( const Eref& e, const Qinfo* q, double v )
 {
 	double k2 = getK2( e, q );
 	double k3 = getK3( e, q );
-	stoich_->setEnzK1( e, ( k2 + k3 ) / concK1_ );
+	stoich_->setEnzK1( e, ( k2 + k3 ) / v );
 }
 
 double ZombieEnz::getKm( const Eref& e, const Qinfo* q ) const
@@ -392,13 +392,13 @@ void ZombieEnz::zombify( Element* solver, Element* orig )
 	vector< Id > pools;
 	unsigned int numReactants = orig->getNeighbours( pools, enzFinfo ); 
 	assert( numReactants == 1 );
-	Id enzId = pools[0];
-	ZeroOrder* r1 = z->makeHalfReaction( orig, enz->getK1( oer, 0 ), sub, enzId );
+	Id enzMolId = pools[0];
+	ZeroOrder* r1 = z->makeHalfReaction( orig, enz->getK1( oer, 0 ), sub, enzMolId );
 	ZeroOrder* r2 = z->makeHalfReaction( orig, enz->getK2(), cplx, Id() );
 	ZeroOrder* r3 = z->makeHalfReaction( orig, enz->getK3(), cplx, Id() );
 
 	numReactants = orig->getNeighbours( pools, prd ); 
-	z->stoich_->installEnzyme( r1, r2, r3, orig->id(), pools );
+	z->stoich_->installEnzyme( r1, r2, r3, orig->id(), enzMolId, pools );
 
 	orig->zombieSwap( ZombieEnz::initCinfo(), dh );
 	z->concK1_ = concK1;

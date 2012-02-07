@@ -426,6 +426,11 @@ void ReadCspace::deployParameters( )
 			// Again, note that conc units in MOOSE are millimolar, so we
 			// need to convert from the CSPACE micromolar units.
 			Field< double >::set( reac_[j], "Km", parms_[i++] * 1e-3 );
+			vector< Id > cplx( 0 );
+			Neutral::children( reac_[j].eref(), cplx );
+			assert( cplx.size() == 1 );
+			MsgId ret = shell->doAddMsg( "OneToOne", cplx[0], "mesh", mesh_, "mesh" );
+			assert( ret != Msg::bad );
 		}
 		MsgId ret = shell->doAddMsg( "Single", 
 			ObjId( mesh_, 0 ), "remeshReacs",

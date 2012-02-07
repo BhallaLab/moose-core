@@ -109,7 +109,7 @@ class Stoich
 		 * Stoich
 		 */
 		void installEnzyme( ZeroOrder* r1, ZeroOrder* r2, ZeroOrder* r3,
-			Id enzId, const vector< Id >& prds );
+			Id enzId, Id enzMolId, const vector< Id >& prds );
 
 
 		/**
