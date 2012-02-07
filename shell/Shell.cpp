@@ -625,6 +625,10 @@ void Shell::doNonBlockingStart( double runtime )
 
 void Shell::doReinit()
 {
+	if ( !keepLooping() ) {
+		cout << "Error: Shell::doReinit: Should not be called unless ProcessLoop is running\n";
+		return;
+	}
 	Eref sheller( shelle_, 0 );
 	initAck();
 		requestReinit()->send( sheller, ScriptThreadNum );
@@ -633,6 +637,10 @@ void Shell::doReinit()
 
 void Shell::doStop()
 {
+	if ( !keepLooping() ) {
+		cout << "Error: Shell::doStop: Should not be called unless ProcessLoop is running\n";
+		return;
+	}
 	Eref sheller( shelle_, 0 );
 	initAck();
 		requestStop()->send( sheller, ScriptThreadNum );

@@ -778,6 +778,22 @@ void Stoich::setEnzK1( const Eref& e, double v ) const
 	rates_[ convertIdToReacIndex( e.id() ) ]->setR1( v / volScale );
 }
 
+void Stoich::setEnzK2( const Eref& e, double v ) const
+{
+	if ( useOneWay_ )
+		rates_[ convertIdToReacIndex( e.id() ) + 1 ]->setR1( v );
+	else
+		rates_[ convertIdToReacIndex( e.id() ) ]->setR2( v );
+}
+
+void Stoich::setEnzK3( const Eref& e, double v ) const
+{
+	if ( useOneWay_ )
+		rates_[ convertIdToReacIndex( e.id() ) + 2 ]->setR1( v );
+	else
+		rates_[ convertIdToReacIndex( e.id() ) + 1 ]->setR1( v );
+}
+
 /**
  * Looks up the matching rate for R1. Later we may have additional 
  * scaling terms for the specified voxel.

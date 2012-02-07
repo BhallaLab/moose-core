@@ -120,7 +120,7 @@ Id ReadKkit::read(
 
 	assignPoolCompartments();
 	assignReacCompartments();
-	// assignEnzCompartments();
+	assignEnzCompartments();
 	assignMMenzCompartments();
 
 	convertParametersToConcUnits();

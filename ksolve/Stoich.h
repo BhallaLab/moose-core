@@ -177,6 +177,10 @@ class Stoich
 		 */
 		void setEnzK1( const Eref& e, double v ) const;
 
+		/// Set rate k2 (1/sec) for enzyme
+		void setEnzK2( const Eref& e, double v ) const;
+		/// Set rate k3 (1/sec) for enzyme
+		void setEnzK3( const Eref& e, double v ) const;
 
 		/**
 		 * Returns the internal rate in #/voxel, for R1, for the specified

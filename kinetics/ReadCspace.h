@@ -88,7 +88,7 @@ class ReadCspace
 
 		Id readModelString( const string& model,
 			const string& modelname, Id pa, const string& solverClass );
-		void setupGslRun( double plotdt );
+		// void setupGslRun( double plotdt );
 
 		void build( const char* name );
 		void expandEnzyme( 
@@ -107,9 +107,9 @@ class ReadCspace
 		static const double DEFAULT_KM;
 		static const bool USE_PIPE;
 
-		// Id of base element for model tree. Typically a solver.
-		Id base_; 
-		Id mesh_;
+		Id base_; // manager of model tree. A SimManager
+		Id compt_; // compartment holding model tree.
+		Id mesh_; // mesh entry below compartment
 		ostream* fout_;
 
 		// All the molecules, in alphabetical order.
