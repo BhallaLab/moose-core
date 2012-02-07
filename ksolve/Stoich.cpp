@@ -631,7 +631,7 @@ void Stoich::installMMenz( MMEnzymeBase* meb, unsigned int rateIndex,
 }
 
 void Stoich::installEnzyme( ZeroOrder* r1, ZeroOrder* r2, ZeroOrder* r3,
-	Id enzId, const vector< Id >& prds ) 
+	Id enzId, Id enzMolId, const vector< Id >& prds ) 
 {
 	unsigned int rateIndex = convertIdToReacIndex( enzId );
 
@@ -686,7 +686,7 @@ void Stoich::installEnzyme( ZeroOrder* r1, ZeroOrder* r2, ZeroOrder* r3,
 		N_.set( j, reac3index, temp + 1 );
 	}
 	// Enz is also a product here.
-	unsigned int enzPool = convertIdToPoolIndex( enzId );
+	unsigned int enzPool = convertIdToPoolIndex( enzMolId );
 	temp = N_.get( enzPool, reac3index );
 	N_.set( enzPool, reac3index, temp + 1 );
 }

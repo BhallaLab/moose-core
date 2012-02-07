@@ -17115,6 +17115,22 @@ Led to fix in a bug in Shell::doReinit.
 Now clears unit tests. Checkin 3294.
 
 Further cleanup to get the changes in ReadCspace through regression tests 
-till it is back at rtReplicateModels.
+till it is back at rtReplicateModels. Checkin 3295.
+
+Now I'm stuck with a small numerical discrepancy in the calculations for
+rtReacDiff.cpp:rtReplicateModels. Tried many things:
+	- Keep all voxels init conditions identical
+	- Check if stoich and gsl are called.
+	- Zero out diffusion consts
+	- Check enzyme parameters
+	- Meshing of enz cplx (was bad, fixed).
+	- different # of threads
+	- Change voxel vols.
+	- Ran single-compt version in genesis, saved, reran in moose-g3.
+	- Ran the thing as a single-compt model.
+Possibly an error with the enzyme zombification setup.
+Yes. Confusion between Id of enzyme site and enzyme molecule. Fixed. Now
+goes one step further in regression tests.
+
 
 ============================================================================
