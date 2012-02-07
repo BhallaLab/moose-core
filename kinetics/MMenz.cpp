@@ -190,7 +190,9 @@ void MMenz::reinit( const Eref& e, ProcPtr p )
 
 void MMenz::remesh( const Eref& e, const Qinfo* q )
 {
-	cout << "MMenz::remesh for " << e << endl;
+//	cout << "MMenz::remesh for " << e << endl;
+	double volScale = convertConcToNumRateUsingMesh( e, toSub(), 1 );
+	numKm_ = Km_ * volScale;
 }
 
 //////////////////////////////////////////////////////////////

@@ -1131,8 +1131,9 @@ void Shell::destroy( const Eref& e, const Qinfo* q, Id eid)
 	Neutral *n = reinterpret_cast< Neutral* >( e.data() );
 	assert( n );
 	n->destroy( eid.eref(), 0, 0 );
-	// eid.destroy();
 	// cout << myNode_ << ": Shell::destroy done for element id " << eid << endl;
+	if ( cwe_ == eid )
+		cwe_ = Id();
 
 	ack()->send( e, q->threadNum(), Shell::myNode(), OkStatus );
 }
