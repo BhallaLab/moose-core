@@ -137,6 +137,7 @@ Id Shell::doLoadModel( const string& fileName, const string& modelPath, const st
 				string sc = solverClass;
 				ReadCspace rc;
 				Id ret = rc.readModelString( line, modelName, parentId, sc);
+				rc.makePlots( 1.0 );
 				return ret;
 			}
 		case UNKNOWN:

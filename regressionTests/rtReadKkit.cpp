@@ -399,80 +399,80 @@ void checkCspaceParms()
 	const double CONCSCALE = 1e-3; // Convert from uM to mM.
 	const double VOLSCALE = VOL * NA; // Convert from conc in mM to #.
 
-	Id temp( "/osc/a" );
+	Id temp( "/osc/kinetics/a" );
 	assert( temp != Id() );
-	double conc = Field< double >::get( Id( "/osc/a" ), "concInit" );
+	double conc = Field< double >::get( Id( "/osc/kinetics/a" ), "concInit" );
 	assert( doubleEq( conc, 3.5 * CONCSCALE ) );
-	conc = Field< double >::get( Id( "/osc/b" ), "concInit" );
+	conc = Field< double >::get( Id( "/osc/kinetics/b" ), "concInit" );
 	assert( doubleEq( conc, 0 * CONCSCALE ) );
-	conc = Field< double >::get( Id( "/osc/c" ), "concInit" );
+	conc = Field< double >::get( Id( "/osc/kinetics/c" ), "concInit" );
 	assert( doubleEq( conc, 0.1 * CONCSCALE ) );
-	conc = Field< double >::get( Id( "/osc/d" ), "concInit" );
+	conc = Field< double >::get( Id( "/osc/kinetics/d" ), "concInit" );
 	assert( doubleEq( conc, 0 * CONCSCALE ) );
-	conc = Field< double >::get( Id( "/osc/e" ), "concInit" );
+	conc = Field< double >::get( Id( "/osc/kinetics/e" ), "concInit" );
 	assert( doubleEq( conc, 0 * CONCSCALE ) );
-	conc = Field< double >::get( Id( "/osc/f" ), "concInit" );
+	conc = Field< double >::get( Id( "/osc/kinetics/f" ), "concInit" );
 	assert( doubleEq( conc, 0.1 * CONCSCALE ) );
 
-	double n = Field< double >::get( Id( "/osc/a" ), "nInit" );
+	double n = Field< double >::get( Id( "/osc/kinetics/a" ), "nInit" );
 	assert( doubleEq( n, 3.5 * VOLSCALE * CONCSCALE ) );
-	n = Field< double >::get( Id( "/osc/b" ), "nInit" );
+	n = Field< double >::get( Id( "/osc/kinetics/b" ), "nInit" );
 	assert( doubleEq( n, 0 * VOLSCALE * CONCSCALE ) );
-	n = Field< double >::get( Id( "/osc/c" ), "nInit" );
+	n = Field< double >::get( Id( "/osc/kinetics/c" ), "nInit" );
 	assert( doubleEq( n, 0.1 * VOLSCALE * CONCSCALE ) );
-	n = Field< double >::get( Id( "/osc/d" ), "nInit" );
+	n = Field< double >::get( Id( "/osc/kinetics/d" ), "nInit" );
 	assert( doubleEq( n, 0 * VOLSCALE * CONCSCALE ) );
-	n = Field< double >::get( Id( "/osc/e" ), "nInit" );
+	n = Field< double >::get( Id( "/osc/kinetics/e" ), "nInit" );
 	assert( doubleEq( n, 0 * VOLSCALE * CONCSCALE ) );
-	n = Field< double >::get( Id( "/osc/f" ), "nInit" );
+	n = Field< double >::get( Id( "/osc/kinetics/f" ), "nInit" );
 	assert( doubleEq( n, 0.1 * VOLSCALE * CONCSCALE ) );
 
-	double rate = Field< double >::get( Id( "/osc/AabX" ), "Kf" );
+	double rate = Field< double >::get( Id( "/osc/kinetics/AabX" ), "Kf" );
 	assert( doubleEq( rate, 0.01 ) );
-	rate = Field< double >::get( Id( "/osc/AabX" ), "Kb" );
+	rate = Field< double >::get( Id( "/osc/kinetics/AabX" ), "Kb" );
 	assert( doubleEq( rate, 0.0 ) );
 
-	rate = Field< double >::get( Id( "/osc/b/DabX" ), "k3" );
+	rate = Field< double >::get( Id( "/osc/kinetics/b/DabX" ), "k3" );
 	assert( doubleEq( rate, 0.5 ) );
-	rate = Field< double >::get( Id( "/osc/b/DabX" ), "k2" );
+	rate = Field< double >::get( Id( "/osc/kinetics/b/DabX" ), "k2" );
 	assert( doubleEq( rate, 2 ) );
-	rate = Field< double >::get( Id( "/osc/b/DabX" ), "k1" );
+	rate = Field< double >::get( Id( "/osc/kinetics/b/DabX" ), "k1" );
 	assert( doubleEq( rate, 2.5 / ( VOLSCALE * CONCSCALE ) ) );
-	rate = Field< double >::get( Id( "/osc/b/DabX" ), "Km" );
+	rate = Field< double >::get( Id( "/osc/kinetics/b/DabX" ), "Km" );
 	assert( doubleEq( rate, 1 * CONCSCALE ) );
 
-	rate = Field< double >::get( Id( "/osc/c/Jbca" ), "k3" );
+	rate = Field< double >::get( Id( "/osc/kinetics/c/Jbca" ), "k3" );
 	assert( doubleEq( rate, 1 ) );
-	rate = Field< double >::get( Id( "/osc/c/Jbca" ), "k2" );
+	rate = Field< double >::get( Id( "/osc/kinetics/c/Jbca" ), "k2" );
 	assert( doubleEq( rate, 4 ) );
-	rate = Field< double >::get( Id( "/osc/c/Jbca" ), "k1" );
+	rate = Field< double >::get( Id( "/osc/kinetics/c/Jbca" ), "k1" );
 	assert( doubleEq( rate, 100 / ( VOLSCALE * CONCSCALE ) ) );
-	rate = Field< double >::get( Id( "/osc/c/Jbca" ), "Km" );
+	rate = Field< double >::get( Id( "/osc/kinetics/c/Jbca" ), "Km" );
 	assert( doubleEq( rate, 0.05 * CONCSCALE ) );
 
-	rate = Field< double >::get( Id( "/osc/AdeX" ), "Kf" );
+	rate = Field< double >::get( Id( "/osc/kinetics/AdeX" ), "Kf" );
 	assert( doubleEq( rate, 0.01 ) );
-	rate = Field< double >::get( Id( "/osc/AdeX" ), "Kb" );
+	rate = Field< double >::get( Id( "/osc/kinetics/AdeX" ), "Kb" );
 	assert( doubleEq( rate, 0.0 ) );
 
-	rate = Field< double >::get( Id( "/osc/e/DdeX" ), "k3" );
+	rate = Field< double >::get( Id( "/osc/kinetics/e/DdeX" ), "k3" );
 	assert( doubleEq( rate, 0.5 ) );
-	rate = Field< double >::get( Id( "/osc/e/DdeX" ), "Km" );
+	rate = Field< double >::get( Id( "/osc/kinetics/e/DdeX" ), "Km" );
 	assert( doubleEq( rate, 1 * CONCSCALE ) );
 
-	rate = Field< double >::get( Id( "/osc/f/Jefd" ), "k3" );
+	rate = Field< double >::get( Id( "/osc/kinetics/f/Jefd" ), "k3" );
 	assert( doubleEq( rate, 1 ) );
-	rate = Field< double >::get( Id( "/osc/f/Jefd" ), "Km" );
+	rate = Field< double >::get( Id( "/osc/kinetics/f/Jefd" ), "Km" );
 	assert( doubleEq( rate, 0.05 * CONCSCALE ) );
 
-	rate = Field< double >::get( Id( "/osc/AadX" ), "Kf" );
+	rate = Field< double >::get( Id( "/osc/kinetics/AadX" ), "Kf" );
 	assert( doubleEq( rate, 0.01 ) );
-	rate = Field< double >::get( Id( "/osc/AadX" ), "Kb" );
+	rate = Field< double >::get( Id( "/osc/kinetics/AadX" ), "Kb" );
 	assert( doubleEq( rate, 0.0 ) );
 
-	rate = Field< double >::get( Id( "/osc/AbeX" ), "Kf" );
+	rate = Field< double >::get( Id( "/osc/kinetics/AbeX" ), "Kf" );
 	assert( doubleEq( rate, 0.0 ) );
-	rate = Field< double >::get( Id( "/osc/AbeX" ), "Kb" );
+	rate = Field< double >::get( Id( "/osc/kinetics/AbeX" ), "Kb" );
 	assert( doubleEq( rate, 0.005 ) );
 }
 
@@ -499,10 +499,11 @@ void rtRunCspace()
 	vector< unsigned int > dims( 1, 1 );
 	// Shell::cleanSimulation();
 
-	Id kineticId = shell->doLoadModel( "Osc.cspace", "/osc", "gsl" );
-	assert( kineticId != Id() );
+	Id base = shell->doLoadModel( "Osc.cspace", "/osc", "gsl" );
+	assert( base != Id() );
+	Id stoich( "/osc/stoich" );
 	unsigned int numVarMols = Field< unsigned int >::get( 
-		kineticId, "nVarPools" );
+		stoich, "nVarPools" );
 	assert ( numVarMols == 10 ); // 6 mols + 4 enz
 
 	shell->doSetClock( 0, 10 );
@@ -517,7 +518,7 @@ void rtRunCspace()
 	// cout << "After Reinit\n"; Qinfo::reportQ();
 	shell->doStart( 2501.0 );
 
-	Id plotId( "/osc/plotd" );
+	Id plotId( "/osc/graphs/plotd" );
 	assert( plotId != Id() );
 	unsigned int size = Field< unsigned int >::get( plotId, "size" );
 	// cout << "size = " << size << endl;
@@ -555,6 +556,6 @@ void rtRunCspace()
 	assert( val >= 0 && val < TOLERANCE );
 
 	/////////////////////////////////////////////////////////////////////
-	shell->doDelete( kineticId );
+	shell->doDelete( base );
 	cout << "." << flush;
 }

@@ -17112,6 +17112,9 @@ Then need to go multinode.
 7 Feb 2012
 General cleanup of ReadCspace to use SimManager correctly. 
 Led to fix in a bug in Shell::doReinit.
-Now clears unit tests.
+Now clears unit tests. Checkin 3294.
+
+Further cleanup to get the changes in ReadCspace through regression tests 
+till it is back at rtReplicateModels.
 
 ============================================================================
