@@ -17136,7 +17136,7 @@ Now working on testDiff1D. Here I test the CylMesh. Still stuck.
 Fixed. The CylMesh wasn't defining a stencil for diffusion, so diffusion wasn't
 happening.
 
-Now clears testDiffNd for 1 to 3 dimensions.
+Now clears testDiffNd for 1 to 3 dimensions. Checkin 3298.
 
 
 ============================================================================

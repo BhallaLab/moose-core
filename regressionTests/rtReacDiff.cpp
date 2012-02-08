@@ -404,6 +404,7 @@ static void testDiffNd( unsigned int n )
 	cout << "." << flush;
 }
 
+// Still to complete. The idea is to simply test for conservation.
 static void testReacDiffNd( unsigned int n )
 {
 	static const bool doPrint = 0;
@@ -427,16 +428,16 @@ static void testReacDiffNd( unsigned int n )
 	vector< int > dims( 1, 1 );
 
 	ReadCspace rc;
-	Id kinetics = rc.readModelString( "|AabX|Jacb| 1 1 1 0.01 0.1 1 1",
-		"kinetics", Id(), "Neutral" );
+	Id mgr = rc.readModelString( "|AabX|Jacb| 1 1 1 0.01 0.1 1 1",
+		"diff", Id(), "gsl" );
 
 	// Id kinetics = shell->doCreate( "Neutral", Id(), "kinetics", dims );
 	// Id a = shell->doCreate( "Pool", kinetics, "a", dims );
-	Id a( "/kinetics/a" );
+	Id a( "/diff/kinetics/a" );
 	assert( a != Id() );
-	Id b( "/kinetics/b" );
+	Id b( "/diff/kinetics/b" );
 	assert( b != Id() );
-	Id c( "/kinetics/c" );
+	Id c( "/diff/kinetics/c" );
 	assert( c != Id() );
 	bool ret = Field< double >::set( a, "diffConst", D1 );
 	assert( ret );
@@ -445,8 +446,7 @@ static void testReacDiffNd( unsigned int n )
 	ret = Field< double >::set( c, "diffConst", D3 );
 	assert( ret );
 
-	// Id compt = shell->doCreate( "CubeMesh", kinetics, "compartment", dims );
-	Id compt( "/kinetics/compartment" );
+	Id compt( "/diff/kinetics" );
 	// Set it to cubeSide mesh divisions in each dimension, dx in each.
 	vector< double > coords( 9, dx );
 	coords[0] = coords[1] = coords[2] = 0;
@@ -460,31 +460,14 @@ static void testReacDiffNd( unsigned int n )
 	assert( ret );
 	ret = Field< vector< double > >::set( compt, "coords", coords );
 	assert( ret );
-	Id mesh( "/kinetics/compartment/mesh" );
+	Qinfo::waitProcCycles( 2 );
+
+	Id mesh( "/diff/kinetics/mesh" );
 	assert( mesh != Id() );
 	assert( mesh.element()->dataHandler()->localEntries() == vol );
-	MsgId mid = shell->doAddMsg( "OneToOne", a, "requestSize",
-		mesh, "get_size" );
-	assert( mid != Msg::bad );
-
-	shell->handleReMesh( mesh );
 	// This should assign the same init conc to the new pool objects.
 	assert( a.element()->dataHandler()->localEntries() == vol );
 
-	Id stoich = shell->doCreate( "Stoich", kinetics, "stoich", dims );
-
-	Field< string >::set( stoich, "path", "/kinetics/##" );
-
-	dims[0] = vol;
-	Id gsl = shell->doCreate( "GslIntegrator", stoich, "gsl", dims );
-	ret = SetGet1< Id >::setRepeat( gsl, "stoich", stoich );
-	assert( ret );
-	ret = Field< bool >::get( gsl, "isInitialized" );
-	assert( ret );
-
-	ret = SetGet1< Id >::set( compt, "stoich", stoich );
-	assert( ret );
-	
 	Field< double >::setRepeat( a, "concInit", 0 );
 	Field< double >::setRepeat( b, "concInit", 0 );
 	Field< double >::setRepeat( c, "concInit", 0 );
@@ -500,9 +483,6 @@ static void testReacDiffNd( unsigned int n )
     shell->doSetClock( 2, dt );
     shell->doSetClock( 3, 0 ); 
 
-    shell->doUseClock( "/kinetics/compartment/mesh", "process", 0 ); 
-    shell->doUseClock( "/kinetics/stoich/gsl", "process", 1 ); 
-    // shell->doUseClock( plotpath, "process", 2 ); 
     shell->doReinit();
 
 	if ( doPrint )
@@ -524,7 +504,7 @@ static void testReacDiffNd( unsigned int n )
 	if ( doPrint )
 		cout << setprecision( 6 );
 
-	shell->doDelete( kinetics );
+	shell->doDelete( mgr );
 
 	cout << "." << flush;
 }
