@@ -17130,7 +17130,12 @@ rtReacDiff.cpp:rtReplicateModels. Tried many things:
 	- Ran the thing as a single-compt model.
 Possibly an error with the enzyme zombification setup.
 Yes. Confusion between Id of enzyme site and enzyme molecule. Fixed. Now
-goes one step further in regression tests.
+goes one step further in regression tests. Checkin 3296.
+
+Now working on testDiff1D. Here I test the CylMesh. Still stuck.
+Fixed. The CylMesh wasn't defining a stencil for diffusion, so diffusion wasn't
+happening.
+
 
 
 ============================================================================

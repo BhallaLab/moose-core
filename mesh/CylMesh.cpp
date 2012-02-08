@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "ElementValueFinfo.h"
 #include "Boundary.h"
 #include "MeshEntry.h"
 #include "Stencil.h"
@@ -67,7 +68,7 @@ const Cinfo* CylMesh::initCinfo()
 			&CylMesh::setR1,
 			&CylMesh::getR1
 		);
-		static ValueFinfo< CylMesh, vector< double > > coords(
+		static ElementValueFinfo< CylMesh, vector< double > > coords(
 			"coords",
 			"All the coords as a single vector: x0 y0 z0  x1 y1 z1  r0 r1 lambda",
 			&CylMesh::setCoords,
@@ -196,6 +197,8 @@ void CylMesh::updateCoords()
 	}
 	rSlope_ = ( r1_ - r0_ ) / numEntries_;
 	lenSlope_ = lambda_ * rSlope_ * 2 / ( r0_ + r1_ );
+
+	buildStencil();
 }
 
 void CylMesh::setX0( double v )
@@ -287,12 +290,8 @@ double CylMesh::getR1() const
 	return r1_;
 }
 
-
-void CylMesh::setCoords( vector< double > v )
+void CylMesh::innerSetCoords( const vector< double >& v )
 {
-	if ( v.size() < 9 ) {
-		cout << "CylMesh::setCoords: Warning: size of argument vec should be >= 9, was " << v.size() << endl;
-	}
 	x0_ = v[0];
 	y0_ = v[1];
 	z0_ = v[2];
@@ -309,7 +308,16 @@ void CylMesh::setCoords( vector< double > v )
 	updateCoords();
 }
 
-vector< double > CylMesh::getCoords() const
+void CylMesh::setCoords( const Eref& e, const Qinfo* q, vector< double > v )
+{
+	if ( v.size() < 9 ) {
+		cout << "CylMesh::setCoords: Warning: size of argument vec should be >= 9, was " << v.size() << endl;
+	}
+	innerSetCoords( v );
+	transmitChange( e, q );
+}
+
+vector< double > CylMesh::getCoords( const Eref& e, const Qinfo* q ) const
 {
 	vector< double > ret( 9 );
 
@@ -589,8 +597,9 @@ void CylMesh::innerBuildDefaultMesh( const Eref& e, const Qinfo* q,
 	coords[6] = r;
 	coords[7] = r;
 	coords[8] = 2 * r / numEntries;
-	setCoords( coords );
+	setCoords( e, q, coords );
 
+	/*
 	Id meshEntry( e.id().value() + 1 );
 	assert( 
 		meshEntry.eref().data() == reinterpret_cast< char* >( lookupEntry( 0 ) )
@@ -599,4 +608,57 @@ void CylMesh::innerBuildDefaultMesh( const Eref& e, const Qinfo* q,
 	vector< double > vols( numEntries_, size_/numEntries_ );
 	lookupEntry( 0 )->triggerRemesh( meshEntry.eref(), q->threadNum(), 
 		0, localIndices, vols );
+	*/
+}
+
+//////////////////////////////////////////////////////////////////
+// Utility function to transmit any changes to target nodes.
+//////////////////////////////////////////////////////////////////
+
+void CylMesh::transmitChange( const Eref& e, const Qinfo* q )
+{
+	Id meshEntry( e.id().value() + 1 );
+	assert( 
+		meshEntry.eref().data() == reinterpret_cast< char* >( lookupEntry( 0 ) )
+	);
+	unsigned int totalNumEntries = numEntries_;
+	unsigned int localNumEntries = totalNumEntries;
+	unsigned int startEntry = 0;
+	vector< unsigned int > localIndices( localNumEntries ); // empty
+	for ( unsigned int i = 0; i < localNumEntries; ++i )
+		localIndices[i] = i;
+	vector< double > vols( localNumEntries, size_ / numEntries_ );
+	vector< vector< unsigned int > > outgoingEntries; // [node#][Entry#]
+	vector< vector< unsigned int > > incomingEntries; // [node#][Entry#]
+
+	// This function updates the size of the FieldDataHandler for the 
+	// MeshEntries.
+	DataHandler* dh = meshEntry.element()->dataHandler();
+	FieldDataHandlerBase* fdh = dynamic_cast< FieldDataHandlerBase* >( dh );
+	assert( fdh );
+	if ( totalNumEntries > fdh->getMaxFieldEntries() ) {
+		fdh->setMaxFieldEntries( localNumEntries );
+	}
+
+	// This message tells the Stoich about the new mesh, and also about
+	// how it communicates with other nodes.
+	meshSplit()->send( e, q->threadNum(), 
+		totalNumEntries, localIndices, 
+		outgoingEntries, incomingEntries );
+
+	// This func goes down to the MeshEntry to tell all the pools and
+	// Reacs to deal with the new mesh. They then update the stoich.
+	lookupEntry( 0 )->triggerRemesh( meshEntry.eref(), q->threadNum(), 
+		startEntry, localIndices, vols );
+}
+
+//////////////////////////////////////////////////////////////////
+// Utility function to set up Stencil for diffusion
+//////////////////////////////////////////////////////////////////
+void CylMesh::buildStencil()
+{
+	for ( unsigned int i = 0; i < stencil_.size(); ++i )
+		delete stencil_[i];
+	stencil_.resize( 1 );
+	stencil_[0] = new LineStencil( lambda_ );
 }
