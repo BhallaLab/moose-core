@@ -214,6 +214,7 @@ double checkDiff( const vector< double >& conc,
 
 /**
  * Very similar to the testSimManager.cpp::testRemeshing()
+ * But it uses CylMesh.
  */
 static void testDiff1D()
 {
@@ -338,14 +339,29 @@ static void testDiffNd( unsigned int n )
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	vector< int > dims( 1, 1 );
 
-	Id kinetics = shell->doCreate( "Neutral", Id(), "kinetics", dims );
+	Id mgr = shell->doCreate( "SimManager", Id(), "diff", dims );
+	assert( mgr != Id() );
+	SimManager* sm = reinterpret_cast< SimManager* >( mgr.eref().data() );
+	sm->setPlotDt( dt );
+	sm->makeStandardElements( mgr.eref(), 0, "CubeMesh" );
+	Id kinetics( "/diff/kinetics" );
+	assert( kinetics != Id() );
 	Id a = shell->doCreate( "Pool", kinetics, "a", dims );
 	assert( a != Id() );
 	bool ret = Field< double >::set( a, "diffConst", D );
 	assert( ret );
 
-	Id compt = shell->doCreate( "CubeMesh", kinetics, "compartment", dims );
-	// Set it to cubeSide mesh divisions in each dimension, dx in each.
+	Id meshEntry( "/diff/kinetics/mesh" );
+	assert( meshEntry != Id() );
+	assert( meshEntry.element()->dataHandler()->localEntries() == 1 );
+	MsgId mid = shell->doAddMsg( "OneToOne", a, "mesh", meshEntry, "mesh" );
+	assert( mid != Msg::bad );
+
+	Qinfo q;
+	q.setThreadNum( ScriptThreadNum );
+	sm->build( mgr.eref(), &q, "gsl" );
+
+	ret = Field< bool >::set( kinetics, "preserveNumEntries", false );
 	vector< double > coords( 9, dx );
 	coords[0] = coords[1] = coords[2] = 0;
 	coords[3] = cubeSide * dx;
@@ -354,36 +370,16 @@ static void testDiffNd( unsigned int n )
 	if ( n == 3 )
 		coords[5] = cubeSide * dx;
 
-	ret = Field< bool >::set( compt, "preserveNumEntries", false );
+	ret = Field< vector< double > >::set( kinetics, "coords", coords );
 	assert( ret );
-	ret = Field< vector< double > >::set( compt, "coords", coords );
-	assert( ret );
-	Id mesh( "/kinetics/compartment/mesh" );
-	assert( mesh != Id() );
-	assert( mesh.element()->dataHandler()->localEntries() == vol );
-	MsgId mid = shell->doAddMsg( "OneToOne", a, "requestSize",
-		mesh, "get_size" );
-	assert( mid != Msg::bad );
+	Qinfo::waitProcCycles( 2 );
 
-	shell->handleReMesh( mesh );
 	// This should assign the same init conc to the new pool objects.
 	assert( a.element()->dataHandler()->localEntries() == vol );
-
-	Id stoich = shell->doCreate( "Stoich", kinetics, "stoich", dims );
-
-	Field< string >::set( stoich, "path", "/kinetics/##" );
-
+	assert( meshEntry.element()->dataHandler()->localEntries() == vol );
 	dims[0] = vol;
-	Id gsl = shell->doCreate( "GslIntegrator", stoich, "gsl", dims );
-	ret = SetGet1< Id >::setRepeat( gsl, "stoich", stoich );
-	assert( ret );
-	ret = Field< bool >::get( gsl, "isInitialized" );
-	assert( ret );
 
-	ret = SetGet1< Id >::set( compt, "stoich", stoich );
-	assert( ret );
-	
-
+	Field< double >::setRepeat( a, "concInit", 0 );
 	Field< double >::set( ObjId( a, 0 ), "concInit", 1 );
 
     shell->doSetClock( 0, dt );
@@ -391,9 +387,6 @@ static void testDiffNd( unsigned int n )
     shell->doSetClock( 2, dt );
     shell->doSetClock( 3, 0 ); 
 
-    shell->doUseClock( "/kinetics/compartment/mesh", "process", 0 ); 
-    shell->doUseClock( "/kinetics/stoich/gsl", "process", 1 ); 
-    // shell->doUseClock( plotpath, "process", 2 ); 
     shell->doReinit();
 
 	for ( unsigned int i = 0; i < 4; ++i ) {
@@ -406,7 +399,7 @@ static void testDiffNd( unsigned int n )
 		assert ( ret < 0.005 );
 	}
 
-	shell->doDelete( kinetics );
+	shell->doDelete( mgr );
 
 	cout << "." << flush;
 }
