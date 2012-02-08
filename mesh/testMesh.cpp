@@ -40,7 +40,7 @@ void testCylMesh()
 
 	coords[8] = 1; // lambda
 
-	cm.setCoords( coords );
+	cm.innerSetCoords( coords );
 
 	assert( doubleEq( cm.getX0(), 1 ) );
 	assert( doubleEq( cm.getY0(), 2 ) );
@@ -66,7 +66,7 @@ void testCylMesh()
 
 	cm.setLambda( 2.0 );
 
-	vector< double > temp = cm.getCoords();
+	vector< double > temp = cm.getCoords( Id().eref(), 0 );
 	assert( temp.size() == 9 );
 	// Can't check on the last coord as it is lambda, it changes.
 	for ( unsigned int i = 0; i < temp.size() - 1; ++i )
