@@ -53,8 +53,9 @@ class CylMesh: public ChemMesh
 		void setR1( double v );
 		double getR1() const;
 
-		void setCoords( vector< double > v );
-		vector< double > getCoords() const;
+		void innerSetCoords( const vector< double >& v);
+		void setCoords( const Eref& e, const Qinfo* q, vector< double > v );
+		vector< double > getCoords( const Eref& e, const Qinfo* q ) const;
 
 		void setLambda( double v );
 		double getLambda() const;
@@ -109,6 +110,9 @@ class CylMesh: public ChemMesh
 			const Eref& e, const Qinfo* q, 
 			unsigned int numNodes, unsigned int numThreads );
 
+		void transmitChange( const Eref& e, const Qinfo* q );
+
+		void buildStencil();
 
 		static const Cinfo* initCinfo();
 
