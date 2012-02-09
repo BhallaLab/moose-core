@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Thu Jan 12 14:48:05 2012 (+0530)
+# Last-Updated: Thu Feb  9 12:53:40 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1072
+#     Update #: 1073
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -231,7 +231,7 @@ elements under current working element
 
 
 import _moose
-from _moose import __version__, VERSION, SVN_REVISION, useClock, setClock, start, reinit, stop, isRunning, loadModel, getFieldDict, Id, ObjId, exists, seed
+from _moose import __version__, VERSION, SVN_REVISION, useClock, setClock, start, reinit, stop, isRunning, loadModel, getFieldDict, Id, ObjId, exists, seed, wildcardFind
 
 
 class _MooseDescriptor(object):

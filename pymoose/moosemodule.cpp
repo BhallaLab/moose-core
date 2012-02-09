@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Mon Jan 16 01:15:52 2012 (+0530)
+// Last-Updated: Thu Feb  9 12:53:15 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 4569
+//     Update #: 4585
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -180,6 +180,7 @@ extern "C" {
          " number of Field entries in the table."
          " The target is the FieldElement whose fieldDimension needs updating."},
         {"seed", (PyCFunction)_pymoose_seed, METH_VARARGS, "Seed the random number generator of MOOSE."},
+        {"wildcardFind", (PyCFunction)_pymoose_wildcardFind, METH_VARARGS, "Return a list of Ids by a wildcard query."},
 
         {NULL, NULL, 0, NULL}        /* Sentinel */
     };
@@ -1663,6 +1664,30 @@ extern "C" {
         }
         mtseed(seed);
         Py_RETURN_NONE;
+    }
+
+    PyObject * _pymoose_wildcardFind(PyObject * dummy, PyObject * args)
+    {
+        vector <Id> objects;
+        char * wildcard_path = NULL;
+        if (!PyArg_ParseTuple(args, "s", &wildcard_path)){
+            return NULL;
+        }
+        getShell().wildcard(string(wildcard_path), objects);
+        PyObject * ret = PyTuple_New(objects.size());
+        for (unsigned int ii = 0; ii < objects.size(); ++ii){
+            _Id * entry = PyObject_New(_Id, &IdType);                       
+            if (!entry){
+                Py_XDECREF(ret);
+                return NULL;
+            }
+            entry->id_ = objects[ii];
+            if (PyTuple_SetItem(ret, (Py_ssize_t)ii, (PyObject*)entry)){
+                Py_XDECREF(ret);
+                return NULL;
+            }
+        }
+        return ret;
     }
 
 } // end extern "C"
