@@ -388,6 +388,8 @@ void ReadKkit::undump( const vector< string >& args)
 		;
 	else if ( args[1] == "xtext" )
 		;
+	else if ( args[1] == "doqcsinfo" )
+		;
 	else
 		cout << "ReadKkit::undump: Do not know how to build '" << args[1] <<
 		"'\n";
@@ -623,7 +625,7 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 		string cplxPath = enzPath + "/" + cplxName;
 		Id cplx = shell_->doCreate( "Pool", enz, cplxName, dim, true );
 		assert( cplx != Id () );
-		poolIds_[ cplxPath ] = enz; 
+		poolIds_[ cplxPath ] = cplx; 
 		Field< double >::set( cplx, "nInit", nComplexInit );
 		// SetGet1< double >::set( cplx, "setSize", parentVol );
 
@@ -1038,12 +1040,24 @@ void ReadKkit::convertMMenzRatesToConcUnits()
 	}
 }
 
+// we take k2 and k3 as correct, since those are just time^-1.
+// Here we just need to convert k1. Originally values were set as
+// k1, k2, k3 from the kkit file. k1 will need to change a bit because
+// of the NA and KKIT_NA discrepancy.
 void ReadKkit::convertEnzRatesToConcUnits()
 {
-	// const double NA_RATIO = KKIT_NA / NA;
+	const double NA_RATIO = KKIT_NA / NA;
 	for ( map< string, Id >::iterator i = enzIds_.begin(); 
 		i != enzIds_.end(); ++i ) {
 		Id enz = i->second;
-		cout << enz.path() << ": enz rate conv pending\n";
+		double k1 = Field< double >::get( enz, "k1" );
+		// At this point the k1 is inaaccurate because the
+		// NA for kkit is not accurate. So we correct for this.
+		double numSub = 
+			Field< unsigned int >::get( enz, "numSubstrates" );
+		// Note that we always have the enz itself as a substrate term.
+		if ( numSub > 0 ) 
+			k1 *= pow( NA_RATIO, numSub );
+		Field< double >::set( enz, "k1", k1 );
 	}
 }

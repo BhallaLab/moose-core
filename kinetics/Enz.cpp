@@ -74,7 +74,7 @@ const Cinfo* Enz::initCinfo()
 
 		static ElementValueFinfo< Enz, double > Km(
 			"Km",
-			"Michaelis-Menten constant",
+			"Michaelis-Menten constant in concentration (millimolar) units",
 			&Enz::setKm,
 			&Enz::getKm
 		);
@@ -98,6 +98,13 @@ const Cinfo* Enz::initCinfo()
 			"K1 expressed in concentration (1/millimolar.sec) units",
 			&Enz::setConcK1,
 			&Enz::getConcK1
+		);
+
+		static ReadOnlyElementValueFinfo< Enz, unsigned int > numSub(
+			"numSubstrates",
+			"Number of substrates in this enzyme reaction. Usually 1."
+			"Does not include the enzyme itself",
+			&Enz::getNumSub
 		);
 
 		//////////////////////////////////////////////////////////////
@@ -178,6 +185,7 @@ const Cinfo* Enz::initCinfo()
 		&kcat,	// Value
 		&ratio,	// Value
 		&concK1,	// Value
+		&numSub,	// ReadOnlyValue
 		&sub,				// SharedFinfo
 		&prd,				// SharedFinfo
 		&enz,				// SharedFinfo
@@ -339,4 +347,13 @@ double Enz::getConcK1( const Eref& e, const Qinfo* q ) const
 {
 	double volScale = convertConcToNumRateUsingMesh( e, toSub(), 1 );
 	return k1_ * volScale;
+}
+
+
+unsigned int Enz::getNumSub( const Eref& e, const Qinfo* q ) const
+{
+	const vector< MsgFuncBinding >* mfb = 
+		e.element()->getMsgAndFunc( toSub()->getBindIndex() );
+	assert( mfb );
+	return ( mfb->size() );
 }

@@ -201,6 +201,27 @@ void rtReadKkit()
 	cout << "." << flush;
 }
 
+/// Reads specified model and does a superficial check that the
+/// specified fields on the specified paths have the right values.
+void rtReadKkitModels( const string& modelname, const char** path, 
+	const char** field, const double* value, unsigned int num )
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< unsigned int > dims( 1, 1 );
+	Shell::cleanSimulation();
+
+	Id mgr = shell->doLoadModel( modelname, "/kkit", "Neutral" );
+	assert( mgr != Id() );
+	for ( unsigned int i = 0; i < num; ++i ) {
+		Id obj( path[i] );
+		assert( obj != Id() );
+		double y = Field< double >::get( obj, field[i] );
+		assert( doubleEq( y, value[i] ) );
+	}
+	shell->doDelete( mgr );
+	cout << "." << flush;
+}
+
 void rtRunKkit()
 {
 	const double TOLERANCE = 2e-3;

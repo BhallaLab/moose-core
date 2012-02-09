@@ -99,6 +99,13 @@ const Cinfo* ZombieEnz::initCinfo()
 			&ZombieEnz::getConcK1
 		);
 
+		static ReadOnlyElementValueFinfo< ZombieEnz, unsigned int > numSub(
+			"numSubstrates",
+			"Number of substrates in this enzyme reaction. Usually 1."
+			"Does not include the enzyme itself",
+			&ZombieEnz::getNumSub
+		);
+
 
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
@@ -179,6 +186,7 @@ const Cinfo* ZombieEnz::initCinfo()
 		&kcat,	// Value
 		&ratio,	// Value
 		&concK1,	// Value
+		&numSub,	// ReadOnlyValue
 		&sub,				// SharedFinfo
 		&prd,				// SharedFinfo
 		&enz,				// SharedFinfo
@@ -327,6 +335,14 @@ void ZombieEnz::setConcK1( const Eref& e, const Qinfo* q, double v )
 double ZombieEnz::getConcK1( const Eref& e, const Qinfo* q ) const
 {
 	return concK1_;
+}
+
+unsigned int ZombieEnz::getNumSub( const Eref& e, const Qinfo* q ) const
+{
+	const vector< MsgFuncBinding >* mfb = 
+		e.element()->getMsgAndFunc( toSub()->getBindIndex() );
+	assert( mfb );
+	return ( mfb->size() );
 }
 
 //////////////////////////////////////////////////////////////

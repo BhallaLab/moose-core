@@ -26,6 +26,13 @@ ModelType findModelType( string filename, ifstream& fin, string& line )
 		if ( line.substr( 0, 7 ) == "// kkit" )
 			return KKIT;
 	}
+	if ( line.substr( 0, 9 ) == "//  DOQCS" ) {
+		while ( getline( fin, line ) )
+		{
+			if ( line.substr( 0, 7 ) == "// kkit" )
+				return KKIT;
+		}
+	}
 
 	if ( line.length() >= 6 && line[0] == '|' && line[5] == '|' )
 		return CSPACE;
