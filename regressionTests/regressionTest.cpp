@@ -18,6 +18,8 @@ void rtRunKkit();
 void rtReadCspace();
 void rtRunCspace();
 void rtReacDiff();
+void rtReadKkitModels( const string& modelname, const char** path,
+	const char** field, const double* value, unsigned int num );
 void rtHHnetwork( unsigned int numCopies );
 
 extern void testGsolver( string modelName, string plotName,
@@ -39,6 +41,15 @@ void regressionTests()
 	rtTable();
 	rtFindModelType();
 	rtReadKkit();
+
+	static const char* acc8path[] = { 
+		"/kkit/kinetics/Ca", 
+		"/kkit/kinetics/PLA2/PIP2-PLA2*/kenz"
+	};
+	static const char* field[] = { "concInit", "Km" };
+	static const double value[] = { 0.08e-3, 20e-3 };
+	rtReadKkitModels( "acc8.g", acc8path, field, value, 2 );
+	rtReadKkitModels( "Anno_acc8.g", acc8path, field, value, 2 );
 	rtRunKkit();
 	rtReadCspace();
 	rtRunCspace();

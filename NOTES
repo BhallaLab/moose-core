@@ -17138,5 +17138,10 @@ happening.
 
 Now clears testDiffNd for 1 to 3 dimensions. Checkin 3298.
 
+Now clears testReacDiffNd, but that doesn't do a quantitative check.
+Anyway, with this all regression tests clear and it is checkin 3299.
 
 ============================================================================
+9 Feb 2012
+Some minor fixes to ReadKkit to get the system to correctly handle more .g
+files from Doqcs. Added a couple of regression tests for this.

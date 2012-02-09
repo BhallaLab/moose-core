@@ -33,6 +33,8 @@ class Enz
 		void setConcK1( const Eref& e, const Qinfo* q, double v );
 		double getConcK1( const Eref& e, const Qinfo* q ) const;
 
+		unsigned int getNumSub( const Eref& e, const Qinfo* q ) const;
+
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
