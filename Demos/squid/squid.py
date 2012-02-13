@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Feb 13 11:35:11 2012 (+0530)
 # Version: 
-# Last-Updated: Mon Feb 13 20:24:12 2012 (+0530)
+# Last-Updated: Tue Feb 14 01:22:48 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 347
+#     Update #: 384
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -82,6 +82,37 @@ class SquidModel(moose.Neutral):
     VMIN = -30.0
     VMAX = 120.0
     VDIVS = 150
+    Na_m_params = {'A_A':0.1 * (25.0 + EREST_ACT),
+                   'A_B': -0.1,
+                   'A_C': -1.0+1e-6,
+                   'A_D': -25.0 - EREST_ACT,
+                   'A_F':-10.0,
+                   'B_A': 4.0,
+                   'B_B': 0.0,
+                   'B_C': 0.0,
+                   'B_D': 0.0 - EREST_ACT,
+                   'B_F': 18.0}
+    Na_h_params = {'A_A': 0.07,
+                   'A_B': 0.0,
+                   'A_C': 0.0,
+                   'A_D': 0.0 - EREST_ACT,
+                   'A_F': 20.0,
+                   'B_A': 1.0,
+                   'B_B': 0.0,
+                   'B_C': 1.0,
+                   'B_D': -30.0 - EREST_ACT,
+                   'B_F': -10.0}
+    K_n_params = {'A_A': 0.01*(10.0 + EREST_ACT),
+                  'A_B': -0.01,
+                  'A_C': -1.0+1e-6,
+                  'A_D': -10.0 - EREST_ACT,
+                  'A_F': -10.0,
+                  'B_A': 0.125,
+                  'B_B': 0.0,
+                  'B_C': 0.0,
+                  'B_D': 0.0 - EREST_ACT,
+                  'B_F': 80.0}
+    
     def __init__(self, path):
         moose.Neutral.__init__(self, path)
         self.temperature = SquidModel.ABSOLUTE_ZERO + 6.3        
@@ -107,56 +138,29 @@ class SquidModel(moose.Neutral):
         self.squid_axon.specific_gl =  0.3 # mmho/cm^2
         self.squid_axon.specific_ra = 0.030 # kohm-cm
         
-        self.Na_channel = self._create_HH_chan('%s/Na' % (self.path),
+        self.Na_channel = self._create_HH_chan('%s/Na' % (self.squid_axon.path),
                                                self.VNa,
                                                self.specific_gNa,
                                                SquidModel.VDIVS,
                                                SquidModel.VMIN,
                                                SquidModel.VMAX,
                                                xpower=3,
-                                               xparams = {'A_A':0.1 * (25.0 + SquidModel.EREST_ACT),
-                                                          'A_B': -0.1,
-                                                          'A_C': -1.0,
-                                                          'A_D': -25.0 - SquidModel.EREST_ACT,
-                                                          'A_F':-10.0,
-                                                          'B_A': 4.0,
-                                                          'B_B': 0.0,
-                                                          'B_C': 0.0,
-                                                          'B_D': 0.0 - SquidModel.EREST_ACT,
-                                                          'B_F': 18.0},
+                                               xparams = SquidModel.Na_m_params,
                                                ypower=1,
-                                               yparams={ 'A_A': 0.07,
-                                                         'A_B': 0.0,
-                                                         'A_C': 0.0,
-                                                         'A_D': 0.0 - SquidModel.EREST_ACT,
-                                                         'A_F': 20.0,
-                                                         'B_A': 1.0,
-                                                         'B_B': 0.0,
-                                                         'B_C': 1.0,
-                                                         'B_D': -30.0 - SquidModel.EREST_ACT,
-                                                         'B_F': -10.0})
+                                               yparams=SquidModel.Na_h_params)
                                                
                                                
-        moose.connect(self.Na_channel, 'channel', self.squid_axon, 'channel')
+        print 'Connected Na_channel:', moose.connect(self.Na_channel, 'channel', self.squid_axon, 'channel')
                                                 
-        self.K_channel = self._create_HH_chan('%s/K' % (self.path),
+        self.K_channel = self._create_HH_chan('%s/K' % (self.squid_axon.path),
                                               self.VK,
                                               self.specific_gK,
                                               SquidModel.VDIVS,
                                               SquidModel.VMIN,
                                               SquidModel.VMAX,
                                               xpower=4,
-                                              xparams={'A_A': 0.01*(10.0 + SquidModel.EREST_ACT),
-                                                       'A_B': -0.01,
-                                                       'A_C': -1.0,
-                                                       'A_D': -10.0 - SquidModel.EREST_ACT,
-                                                       'A_F': -10.0,
-                                                       'B_A': 0.125,
-                                                       'B_B': 0.0,
-                                                       'B_C': 0.0,
-                                                       'B_D': 0.0 - SquidModel.EREST_ACT,
-                                                       'B_F': 80.0})
-        moose.connect(self.K_channel, 'channel', self.squid_axon, 'channel')
+                                              xparams=SquidModel.K_n_params)
+        print 'Connected K channel:', moose.connect(self.K_channel, 'channel', self.squid_axon, 'channel')
 
         self.inject_delay = 50e-3
         self.inject_dur = 20e-3
@@ -181,10 +185,10 @@ class SquidModel(moose.Neutral):
 
     def _create_HH_chan(self, path, Ek, specific_gbar, vdivs, vmin, vmax, xpower, xparams, ypower=0, yparams=None):
         """Create a HH Channel with gates specified by alphas and
-        betas (list of A..D params)."""
+        betas (list of A, B, C, D and F params)."""
         chan = moose.HHChannel('%s' % (path))
         chan.Gbar = specific_gbar * self.squid_axon.area
-        chan.Xpower = xpower        
+        chan.Xpower = xpower
         chan.Ek = Ek
         # chan.createGate('X')
         xgate = moose.HHGate('%s/gateX' % (chan.path))
@@ -199,6 +203,7 @@ class SquidModel(moose.Neutral):
                          xparams['B_D'],
                          xparams['B_F'],
                          vdivs, vmin, vmax])
+        xgate.useInterpolation = True
         if ypower > 0:
             chan.Ypower = ypower
             # chan.createGate('Y')
@@ -214,28 +219,27 @@ class SquidModel(moose.Neutral):
                              yparams['B_D'],
                              yparams['B_F'],
                              vdivs, vmin, vmax])
-            
+            ygate.useInterpolation = True
         return chan
             
-    # def create_Na_chan(self, name, specific_gbar):
-    #     self.Na_channel = moose.HHChannel('%s/%s' % (self.squid_axon.path))
-    #     self.Na_channel.Gk = self.squid_axon.area * self.specific_gNa
-    #     self.Na_channel.Ek = self.VNa
-    #     moose.connect(self.Na_channel, 'channel', self.squid_axon, 'channel')
-        
-    # def create_K_chan(self, specific_gbar):
         
     
     def run(self, runtime, simdt=1e-6):
         moose.setClock(0, simdt)
         moose.setClock(1, simdt)
         moose.setClock(2, simdt)
-        moose.setClock(3, 10*simdt)
-        moose.useClock(0, '%s/##[TYPE=Compartment]' % (self.path), 'init')
+        moose.setClock(3, simdt)
+        moose.useClock(0, '%s/#[TYPE=Compartment]' % (self.path), 'init')
         moose.useClock(1, '%s/#[TYPE=Compartment]' % (self.path), 'process')
         moose.useClock(2, '%s/##[TYPE=HHChannel]' % (self.path), 'process')
         moose.useClock(3, '%s/#[TYPE=Table]' % (self.path), 'process')
-        moose.reinit()        
+        moose.reinit()
+        print 'IN', self.Na_channel.path
+        for msg in self.Na_channel.inMessages():
+            print msg
+        print 'OUT', self.Na_channel.path
+        for msg in self.Na_channel.outMessages():
+            print msg
         moose.start(self.inject_delay)
         self.squid_axon.inject = self.inject_amp
         moose.start(self.inject_dur)
@@ -258,6 +262,7 @@ if __name__ == '__main__':
     model.run(runtime, simdt)
     model.save_data()
     pylab.plot(model.Vm_table.vec)
+    # pylab.plot(model.gK_table.vec)
     pylab.show()
     
                                                                              
