@@ -1,0 +1,19 @@
+ENVIRONMENT: 
+----------------------------------------
+   SINGLETHREADED = 0
+   INFINITE = 0
+   NUMNODES = 1
+   NUMCORES = 2
+   NUMPTHREADS = 0
+========================================
+================================================
+Final system parameters:
+ SINGLETHREADED: 0
+ NUMNODES: 1
+ NUMCORES: 2
+ NUMPTHREADS: 2
+ INFINITE: 0
+================================================
+.............................................................................................................................
+Not in regression test directory, so skipping them
+Connected Vm_table to compartment: 1
