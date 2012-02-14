@@ -48,15 +48,22 @@ void ZombieBufPool::zombify( Element* solver, Element* orig )
 	Element temp( orig->id(), zombieBufPoolCinfo, solver->dataHandler() );
 	Eref zer( &temp, 0 );
 	Eref oer( orig, 0 );
+	unsigned int numEntries = orig->dataHandler()->localEntries();
 
 	ZombieBufPool* z = reinterpret_cast< ZombieBufPool* >( zer.data() );
 	BufPool* m = reinterpret_cast< BufPool* >( oer.data() );
 
+	unsigned int poolIndex = z->convertIdToPoolIndex( orig->id() );
+	z->concInit_[ poolIndex ] = m->getConcInit();
 	z->setN( zer, 0, m->getN() );
 	z->setNinit( zer, 0, m->getNinit( oer, 0 ) );
 	z->setDiffConst( zer, 0, m->getDiffConst() );
+	/*
 	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler(),
 		orig->dataHandler() );
+	*/
+	DataHandler* dh = new ZombieHandler( solver->dataHandler(),
+		orig->dataHandler(), 0, numEntries );
 	orig->zombieSwap( zombieBufPoolCinfo, dh );
 }
 
