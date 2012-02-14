@@ -17144,4 +17144,35 @@ Anyway, with this all regression tests clear and it is checkin 3299.
 ============================================================================
 9 Feb 2012
 Some minor fixes to ReadKkit to get the system to correctly handle more .g
-files from Doqcs. Added a couple of regression tests for this.
+files from Doqcs. Added a couple of regression tests for this. Checkin 3302.
+
+Trying to catch a bug with zombification of BufPool. The function 
+zombieBufPool::zombify doesn't get called.
+
+============================================================================
+11 Feb 2012.
+Tracked it down, I was testing for the wrong molecule. Now clears regression
+tests.
+From 9 Jan: Wish list of things to implement:
+- New Synapse code with lookup rather than queue
+- Batched messaging for axonal transmission: club a lot of events.
+- Implement proximity activity synaptic capture learning rule
+- Implement standard STDP learning rule
+- New IntFire with dendritic domains
+- MPI
+* Conc units for reactions
+- ReacDiff solver to permit compartment-specific reacs.
+- SteadyState solver
+	- Automated dose-response generation
+	- Estimates of all possible steady states of system
+- SBML I/O
+- NeuroML I/O
+- kkit13
+- Branching 1-D diffusion: a neuronal morphology geometry and mesh
+- Different volume meshes
+- Arbitrary boundary 2-D square meshes
+-> MPI and thread partitioning of diffusive calculations
+- Stochastic spatial calculations.
+-> Interfaces between sections handling different reac systems
+-> Transport and conc gradient calculations
+
