@@ -50,6 +50,15 @@ void regressionTests()
 	static const double value[] = { 0.08e-3, 20e-3 };
 	rtReadKkitModels( "acc8.g", acc8path, field, value, 2 );
 	rtReadKkitModels( "Anno_acc8.g", acc8path, field, value, 2 );
+	static const char* acc20path[] = { 
+		"/kkit/kinetics/CaM-Ca4", 
+		"/kkit/kinetics/NOSphos/nNOS",
+		"/kkit/kinetics/CaMKIIalpha/kenz"
+	};
+	static const char* field20[] = { "concInit", "concInit", "Km" };
+	static const double value20[] = { 20e-3, 0.5e-3, 5e-3 };
+	rtReadKkitModels( "acc20.g", acc20path, field20, value20, 2 );
+
 	rtRunKkit();
 	rtReadCspace();
 	rtRunCspace();
