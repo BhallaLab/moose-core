@@ -217,6 +217,9 @@ void rtReadKkitModels( const string& modelname, const char** path,
 		assert( obj != Id() );
 		double y = Field< double >::get( obj, field[i] );
 		assert( doubleEq( y, value[i] ) );
+
+		string id2path = Field< string >::get( obj, "path" );
+		assert( id2path == path[i] );
 	}
 	shell->doDelete( mgr );
 	cout << "." << flush;
