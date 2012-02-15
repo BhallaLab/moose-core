@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Fri Mar 11 09:49:33 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Dec 22 14:29:04 2011 (+0530)
+// Last-Updated: Wed Feb 15 14:06:37 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 197
+//     Update #: 200
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -54,7 +54,9 @@ class PyMooseBase
 void setup_runtime_env(bool verbose=true);
 Shell& getShell(int argc=0, char ** argv=0);
 void finalize();
-pair<string, string> getFieldType(ObjId id, string fieldName, string finfoType="");
+string getFieldType(ObjId id, string fieldName, string finfoType);
+pair<string, string> getFieldFinfoTypePair(ObjId id, string fieldName);
+
 vector<string> getFieldNames(ObjId id, string finfoType);
 
 } // ! namespace pymoose

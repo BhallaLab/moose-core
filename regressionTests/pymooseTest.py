@@ -109,6 +109,7 @@ class TestNeutralArray(unittest.TestCase):
         self.assertEqual(len(c), c_len)
         self.assertEqual(d.shape, (c_len, d_len))
         self.assertRaises(ValueError, moose.NeutralArray, 'test/')
+        self.assertRaises(ValueError, moose.NeutralArray, '/nonexistent_parent/invalid_child')
         print 'OK'
         
 class TestPyMooseGlobals(unittest.TestCase):
