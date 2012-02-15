@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Sat Mar 26 22:41:37 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Jan 12 14:54:03 2012 (+0530)
+// Last-Updated: Wed Feb 15 18:46:30 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 249
+//     Update #: 280
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -90,6 +90,15 @@ static Element* shellE = NULL; // This is in order to keep a handle on
                                // the original shell element - I don't
                                // know how to get back the Id of
                                // stupid shell from the Shell&.
+
+    /// Available Finfo types
+const char * FINFOTYPES[] = {"valueFinfo",
+                             "srcFinfo",
+                             "destFinfo",
+                             "lookupFinfo",
+                             "sharedFinfo",
+                             "fieldElementFinfo",
+                             0};
 
 void pymoose::setup_runtime_env(bool verbose){
     const map<string, string>& argmap = getArgMap();
@@ -277,60 +286,41 @@ void pymoose::finalize()
 #endif
 }
 
-/**
-   Return the data type of the field. If finfoType is specified try to
-look up a field of that finfoType. Otherwise, go through all finfo
-types and return the data type for whichever field name matches.
-
-Return empty string on failure (either there is no field of name
-{fieldName} or {finfoType} is not a correct type of finfo, or no field
-of {finfoType} with name {fieldName} exists.
-
-*/
-pair<string, string> pymoose::getFieldType(ObjId id, string fieldName, string finfoType)
+pair < string, string > pymoose::getFieldFinfoTypePair(ObjId id, string fieldName)
 {
-    static vector<string> finfoTypes;
-    if (finfoTypes.empty()){
-        finfoTypes.push_back("srcFinfo");
-        finfoTypes.push_back("destFinfo");
-        finfoTypes.push_back("valueFinfo");
-        finfoTypes.push_back("lookupFinfo");
-        finfoTypes.push_back("sharedFinfo");
-        finfoTypes.push_back("fieldElementFinfo");
+    for (const char ** finfoType = &FINFOTYPES[0]; *finfoType; ++finfoType){
+        string ftype = pymoose::getFieldType(id, fieldName, string(*finfoType));
+        if (!ftype.empty()) {
+            return pair < string, string > (ftype, string(*finfoType));
+        }
     }
+    return pair <string, string>("", "");
+}
+/**
+   Return the data type of the field. Look up a field of specified
+   finfoType with given fieldName.  Return empty string on failure
+   (either there is no field of name {fieldName} or {finfoType} is not a
+   correct type of finfo, or no field of {finfoType} with name
+   {fieldName} exists.
+*/
+string pymoose::getFieldType(ObjId id, string fieldName, string finfoType)
+{
     string fieldType = "";
     string className = Field<string>::get(id, "class");
     string classInfoPath("/classes/" + className);
     Id classId(classInfoPath);
-    if (classId == Id()){
-        return pair<string, string>(fieldType, "");
-    }
-    size_t count = 1;
-    size_t jj = 0;
-    // I have a dillemma between simple code and clever code here.
-    // This is to follow D.R.Y. principle - I had a loop inside if
-    // (finfoType.empty()) and then the same code as in the loop for
-    // the else clause.
-    if (finfoType.empty()){
-        finfoType = finfoTypes[jj];
-        count = finfoTypes.size();
-    }
-    do {
-        unsigned int numFinfos = Field<unsigned int>::get(ObjId(classId, 0), "num_" + finfoType);
-        Id fieldId(classId.path() + "/" + finfoType);
-        for (unsigned int ii = 0; ii < numFinfos; ++ii){
-            string _fieldName = Field<string>::get(ObjId(fieldId, DataId(0, ii, 0)), "name");
-            if (fieldName == _fieldName){                
-                fieldType = Field<string>::get(ObjId(fieldId, DataId(0, ii, 0)), "type");
-                return pair<string, string>(fieldType, finfoType);
-            }
+    assert (classId != Id());
+    unsigned int numFinfos = Field<unsigned int>::get(ObjId(classId, 0), "num_" + finfoType);
+    Id fieldId(classId.path() + "/" + finfoType);
+    for (unsigned int ii = 0; ii < numFinfos; ++ii){
+        string _fieldName = Field<string>::get(ObjId(fieldId, DataId(0, ii, 0)), "name");
+        if (fieldName == _fieldName){                
+            fieldType = Field<string>::get(ObjId(fieldId, DataId(0, ii, 0)), "type");
+            return fieldType;
         }
-        jj ++;
-        finfoType = finfoTypes[jj];
-    } while ( jj < count );
+    }
     cerr << "Error: No field named '" << fieldName << "' of type '" << finfoType << "'" << endl;
-    finfoType = "";
-    return pair<string, string>(fieldType, finfoType);
+    return fieldType;
 }
 
 /**
