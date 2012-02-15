@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Thu Feb 16 02:19:00 2012 (+0530)
+# Last-Updated: Thu Feb 16 02:27:08 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1198
+#     Update #: 1205
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -254,6 +254,8 @@ class _MooseDescriptor(object):
     
     
 class _MooseMeta(type):
+    """Simple metaclass to create class definitions with attributes
+    created from that in the MOOSE underlying classes."""
     def __init__(cls, name, bases, classdict):        
         super(_MooseMeta, cls).__init__(name, bases, classdict)
         try:
@@ -265,7 +267,42 @@ class _MooseMeta(type):
         
 
 class NeutralArray(object):
+    """
+    The base class. Each NeutralArray object has an unique Id (field
+    id_) and that is the only data directly visible under Python. All
+    operation are done on the objects by calling functions on the Id.
+    
+    A NeutralArray object is actually an array. The individual
+    elements in a NeutralArray are of class Neutral. To access these
+    individual elements, you can index the NeutralArray object.
+
+    """
     def __init__(self, *args, **kwargs):
+        """
+        A NeutralArray object can be constructed in many ways. The
+        most basic one being:
+
+        neutral = moose.NeutralArray('my_neutral_object', [3])
+
+        This will create a NeutralArray object with name
+        'my_neutral_object' containing 3 elements. The object will be
+        created as a child of the current working entity. Any class
+        derived from NeutralArray can also be created using the same
+        constructor. Actually it takes keyword parameters to do that:
+
+        intfire = moose.NeutralArray(path='/my_neutral_object', dims=[3], type='IntFire')
+
+        will create an IntFire object of size 3 as a child of the root entity.
+
+        If the above code is already executed,
+
+        duplicate = moose.NeutralArray(intfire)
+
+        will create a duplicate reference to the existing intfire
+        object. They will share the same Id and any changes made via
+        the MOOSE API to one will be effective on the other.
+        
+        """
         path = None
         dims = None
         self.id_ = None
