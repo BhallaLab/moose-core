@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Feb 15 19:06:52 2012 (+0530)
+// Last-Updated: Wed Feb 15 23:55:33 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 4625
+//     Update #: 4627
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -1209,6 +1209,8 @@ extern "C" {
                         argstream << string(param) << ",";
                     }
                     break;
+                    // We do handle multiple vectors. Use the argument
+                    // list as a single vector argument.
                 case 'v': 
                     {
                         return _set_vector_destFinfo<int>(self, string(fieldName), ii, arg);
@@ -1287,9 +1289,6 @@ extern "C" {
     {
         char * ftype = NULL;
         if (!PyArg_ParseTuple(args, "|s:_pymoose_ObjId_getFieldNames", &ftype)){
-            return NULL;
-        }else if ( ftype && (strlen(ftype) == 0)){
-            PyErr_SetString(PyExc_ValueError, "Field type must be a non-empty string");
             return NULL;
         }
         string ftype_str = (ftype != NULL)? string(ftype): "";
