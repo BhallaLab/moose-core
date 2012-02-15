@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Feb  9 12:53:15 2012 (+0530)
+// Last-Updated: Wed Feb 15 18:45:16 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 4585
+//     Update #: 4624
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -77,7 +77,7 @@ extern int isInfinite;
 extern int numNodes;
 extern int numCores;
 extern int myNode;
-
+extern const char ** FINFOTYPES;
 
 // 
 // C wrappers for C++ classes
@@ -674,8 +674,10 @@ extern "C" {
         string finfoTypeStr = "";
         if (finfoType != NULL){
             finfoTypeStr = finfoType;
+        } else {
+            finfoTypeStr = "valueFinfo";
         }
-        string typeStr = getFieldType(self->oid_, string(fieldName), finfoTypeStr).first;
+        string typeStr = getFieldType(self->oid_, string(fieldName), finfoTypeStr);
         if (typeStr.length() <= 0){
             PyErr_SetString(PyExc_ValueError, "Empty string for field type. Field name may be incorrect.");
             return NULL;
@@ -727,32 +729,32 @@ extern "C" {
         }                                                               \
 
         
-        pair<string, string> type = getFieldType(self->oid_, string(field));
-        if (type.first.empty()){
+        string type = getFieldType(self->oid_, string(field), "valueFinfo");
+        if (type.empty()){
             string msg = "No such field on object ";
             msg += self->oid_.id.path() + ": ";
             msg += field;
-            msg += " of type";
-            msg += type.first;
             PyErr_SetString(PyExc_AttributeError, msg.c_str());
             return NULL;
         }
-        ftype = shortType(type.first);
+        ftype = shortType(type);
         if (!ftype){
-            if ( type.second != "fieldElementFinfo" ){
-                string msg = "Type ";
-                msg += type.second + " is not handled yet.";
-                PyErr_SetString(PyExc_NotImplementedError, msg.c_str());
-                return NULL;
-            } else {
-                Id fieldElementId = Id(self->oid_.id.path() + "/" +  field);
-                _Id * ret = PyObject_New(_Id, &IdType);
-                ret->id_ = fieldElementId;
-                return (PyObject*)ret;                
-            }
+            string msg = "No short type for field ";
+            msg += field;
+            msg += " of type ";
+            msg += type;
+            PyErr_SetString(PyExc_NotImplementedError, msg.c_str());
+            return NULL;
         }
         switch(ftype){
-            case 'b': GET_FIELD(int, i)
+            case 'b': {
+                bool value = Field<bool>::get(self->oid_, string(field));
+                if (value){
+                    Py_RETURN_TRUE;
+                } else {
+                    Py_RETURN_FALSE;
+                }
+            }
             case 'c': GET_FIELD(char, c)
             case 'i': GET_FIELD(int, i)
             case 'h': GET_FIELD(short, h)
@@ -862,7 +864,7 @@ extern "C" {
         if (!PyArg_ParseTuple(args, "sO:_pymoose_ObjId_setField", &field,  &value)){
             return NULL;
         }
-        char ftype = shortType(getFieldType(self->oid_, string(field)).first);
+        char ftype = shortType(getFieldType(self->oid_, string(field), "valueFinfo"));
         
         if (!ftype){
             PyErr_SetString(PyExc_AttributeError, "Field not valid.");
@@ -1131,7 +1133,7 @@ extern "C" {
         if (!fieldName){ // not a string, raises TypeError
             return NULL;
         }
-        string type = getFieldType(self->oid_, string(fieldName), "destFinfo").first;
+        string type = getFieldType(self->oid_, string(fieldName), "destFinfo");
         if (type.empty()){
             error << "No such function field available";
             PyErr_SetString(PyExc_ValueError, error.str().c_str());
@@ -1247,6 +1249,15 @@ extern "C" {
                         return _set_vector_destFinfo<string>(self, string(fieldName), ii, arg);
                         break;
                     }
+                case 'X':
+                    {
+                        return _set_vector_destFinfo<Id>(self, string(fieldName), ii, arg);
+                        break;
+                    }
+                case 'Y':
+                    {
+                        return _set_vector_destFinfo<ObjId>(self, string(fieldName), ii, arg);
+                    }
                 default:
                     {
                         error << "Cannot handle argument type: " << argType[ii];
@@ -1284,9 +1295,7 @@ extern "C" {
         string ftype_str = (ftype != NULL)? string(ftype): "";
         vector<string> ret;
         if (ftype_str == ""){
-            static const char * fieldTypes[] = {"valueFinfo", "srcFinfo", "destFinfo", "lookupFinfo", "sharedFinfo", 0};
-            const char ** a;
-            for (a = &fieldTypes[0]; *a; ++a){
+            for (const char **a = &FINFOTYPES[0]; *a; ++a){
                 vector<string> fields = getFieldNames(self->oid_, string(*a));
                 ret.insert(ret.end(), fields.begin(), fields.end());
             }            
