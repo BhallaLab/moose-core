@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Feb 13 11:35:11 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Feb 14 01:22:48 2012 (+0530)
+# Last-Updated: Tue Feb 14 14:14:47 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 384
+#     Update #: 413
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -32,8 +32,14 @@ import numpy
 
 import moose
 
+GAS_CONSTANT = 8.314
+FARADAY = 9.65e4
+ABSOLUTE_ZERO = 273.15
+
 def reversal_potential(temp, c_out, c_in):
-    return (SquidModel.GAS_CONSTANT * temp / SquidModel.FARADAY) * 1000.0 * numpy.log(c_out/c_in) + 70.0 + SquidModel.EREST_ACT
+    """Compute the reversal potential based on Nernst equation."""
+    # NOTE the 70 mV added for compatibility with original HH
+    return (GAS_CONSTANT * temp / FARADAY) * 1000.0 * numpy.log(c_out/c_in) + 70.0 + SquidModel.EREST_ACT
 
 class SquidComp(moose.Compartment):
     """Compartment class enhanced with specific values set and
@@ -75,28 +81,25 @@ class SquidComp(moose.Compartment):
     
     
 class SquidModel(moose.Neutral):
-    GAS_CONSTANT = 8.314
-    FARADAY = 9.65e4
-    ABSOLUTE_ZERO = 273.15
     EREST_ACT = 0.0 # can be -70 mV if not following original HH convention
     VMIN = -30.0
     VMAX = 120.0
     VDIVS = 150
     Na_m_params = {'A_A':0.1 * (25.0 + EREST_ACT),
                    'A_B': -0.1,
-                   'A_C': -1.0+1e-6,
+                   'A_C': -1.0,
                    'A_D': -25.0 - EREST_ACT,
                    'A_F':-10.0,
                    'B_A': 4.0,
                    'B_B': 0.0,
                    'B_C': 0.0,
                    'B_D': 0.0 - EREST_ACT,
-                   'B_F': 18.0}
+                   'B_F': -18.0}
     Na_h_params = {'A_A': 0.07,
                    'A_B': 0.0,
                    'A_C': 0.0,
                    'A_D': 0.0 - EREST_ACT,
-                   'A_F': 20.0,
+                   'A_F': -20.0,
                    'B_A': 1.0,
                    'B_B': 0.0,
                    'B_C': 1.0,
@@ -104,18 +107,18 @@ class SquidModel(moose.Neutral):
                    'B_F': -10.0}
     K_n_params = {'A_A': 0.01*(10.0 + EREST_ACT),
                   'A_B': -0.01,
-                  'A_C': -1.0+1e-6,
+                  'A_C': -1.0,
                   'A_D': -10.0 - EREST_ACT,
                   'A_F': -10.0,
                   'B_A': 0.125,
                   'B_B': 0.0,
                   'B_C': 0.0,
                   'B_D': 0.0 - EREST_ACT,
-                  'B_F': 80.0}
+                  'B_F': -80.0}
     
     def __init__(self, path):
         moose.Neutral.__init__(self, path)
-        self.temperature = SquidModel.ABSOLUTE_ZERO + 6.3        
+        self.temperature = ABSOLUTE_ZERO + 6.3        
         self.K_out = 10.0
         self.Na_out = 460.0
         # Modified internal concentrations used to give HH values of
@@ -144,9 +147,9 @@ class SquidModel(moose.Neutral):
                                                SquidModel.VDIVS,
                                                SquidModel.VMIN,
                                                SquidModel.VMAX,
-                                               xpower=3,
+                                               xpower=3.0,
                                                xparams = SquidModel.Na_m_params,
-                                               ypower=1,
+                                               ypower=1.0,
                                                yparams=SquidModel.Na_h_params)
                                                
                                                
@@ -158,13 +161,13 @@ class SquidModel(moose.Neutral):
                                               SquidModel.VDIVS,
                                               SquidModel.VMIN,
                                               SquidModel.VMAX,
-                                              xpower=4,
+                                              xpower=4.0,
                                               xparams=SquidModel.K_n_params)
         print 'Connected K channel:', moose.connect(self.K_channel, 'channel', self.squid_axon, 'channel')
 
         self.inject_delay = 50e-3
         self.inject_dur = 20e-3
-        self.inject_amp = 1e-3
+        self.inject_amp = 0.1
 
         self.Vm_table = moose.Table('%s/Vm' % (self.path))
         print 'Connected Vm_table to compartment:', moose.connect(self.Vm_table, 'requestData', self.squid_axon, 'get_Vm')
@@ -231,9 +234,16 @@ class SquidModel(moose.Neutral):
         moose.setClock(3, simdt)
         moose.useClock(0, '%s/#[TYPE=Compartment]' % (self.path), 'init')
         moose.useClock(1, '%s/#[TYPE=Compartment]' % (self.path), 'process')
-        moose.useClock(2, '%s/##[TYPE=HHChannel]' % (self.path), 'process')
+        moose.useClock(2, '%s/Na,%s/K' % (self.squid_axon.path, self.squid_axon.path), 'process')
         moose.useClock(3, '%s/#[TYPE=Table]' % (self.path), 'process')
         moose.reinit()
+        print 'IN', self.squid_axon.path
+        for msg in self.squid_axon.inMessages():
+            print msg
+        print 'OUT', self.squid_axon.path
+        for msg in self.squid_axon.outMessages():
+            print msg
+        
         print 'IN', self.Na_channel.path
         for msg in self.Na_channel.inMessages():
             print msg
@@ -259,6 +269,7 @@ if __name__ == '__main__':
     runtime = 100e-3
     simdt = 1e-6
     model = SquidModel('squid_demo')
+    print model.VK, model.VNa
     model.run(runtime, simdt)
     model.save_data()
     pylab.plot(model.Vm_table.vec)

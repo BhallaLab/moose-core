@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 17:11:06 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Feb 15 18:30:08 2012 (+0530)
+// Last-Updated: Wed Feb 15 19:18:30 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 352
+//     Update #: 363
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -199,22 +199,22 @@ template <> inline PyObject * get_item<unsigned long>(vector<unsigned long>& sto
 
 template <> inline PyObject * get_item<Id>(vector<Id>& store, PyObject * item, int index)
 {
-    if (!Id_Check(item)){
-        Py_RETURN_FALSE;
+    _Id * value = (_Id*)item;
+    if (value != NULL){
+        store.push_back(value->id_);
+        Py_RETURN_TRUE;
     }
-    _Id * v = (_Id*)item;
-    store.push_back(item->id_);
-    Py_RETURN_TRUE;
+    Py_RETURN_FALSE;
 }
 
 template <> inline PyObject * get_item<ObjId>(vector<ObjId>& store, PyObject * item, int index)
 {
-    if (!ObjId_Check(item)){
-        Py_RETURN_FALSE;
+    _ObjId * value = (_ObjId*)item;
+    if (value != NULL){
+        store.push_back(value->oid_);
+        Py_RETURN_TRUE;
     }
-    _ObjId * v = (_ObjId*)item;
-    store.push_back(item->oid_);
-    Py_RETURN_TRUE;
+    Py_RETURN_FALSE;
 }
 template <class A> inline PyObject* _set_vector_destFinfo(_ObjId* obj, string fieldName, int argIndex, PyObject * value)
 {
