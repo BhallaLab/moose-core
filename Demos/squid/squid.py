@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Feb 13 11:35:11 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Feb 14 14:14:47 2012 (+0530)
+# Last-Updated: Sat Feb 18 01:24:21 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 413
+#     Update #: 640
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -29,12 +29,12 @@
 # Code:
 
 import numpy
-
+import pylab
 import moose
 
 GAS_CONSTANT = 8.314
 FARADAY = 9.65e4
-ABSOLUTE_ZERO = 273.15
+CELSIUS_TO_KELVIN = 273.15
 
 def reversal_potential(temp, c_out, c_in):
     """Compute the reversal potential based on Nernst equation."""
@@ -66,20 +66,77 @@ class SquidComp(moose.Compartment):
         
     @property
     def specific_cm(self):
-        return self.Cm * self.area
+        return self.Cm / self.area
     @specific_cm.setter
     def specific_cm(self, value):
-        self.Cm = value / self.area
+        self.Cm = value * self.area
+
     @property
     def specific_gl(self):
         return 1.0/(self.Rm * self.area)
-
     @specific_gl.setter
     def specific_gl(self, value):
         self.Rm = 1.0/(value * self.area)
 
+    @property
+    def specific_rm(self):
+        return self.Rm * self.area
+    @specific_rm.setter
+    def specific_rm(self, value):
+        self.Rm = value / self.area
+
+class IonChannel(moose.HHChannel):
+    def __init__(self, name, compartment, specific_gbar, e_rev, Xpower, Ypower=0.0, Zpower=0.0):
+        moose.HHChannel.__init__(self, '%s/%s' % (compartment.path, name))
+        self.Gbar = specific_gbar * compartment.area
+        self.Ek = e_rev
+        self.Xpower = Xpower
+        self.Ypower = Ypower
+        self.Zpower = Zpower
+        moose.connect(self, 'channel', compartment, 'channel')
+        
+    def setupAlpha(self, gate, params, vdivs, vmin, vmax):
+        if gate == 'X' and self.Xpower > 0:
+            gate = moose.HHGate(self.path + '/gateX')
+        elif gate == 'Y' and self.Ypower > 0:
+            gate = moose.HHGate(self.path + '/gateY')
+        else:
+            return False
+        gate.setupAlpha([params['A_A'],
+                         params['A_B'],
+                         params['A_C'],
+                         params['A_D'],
+                         params['A_F'],
+                         params['B_A'],
+                         params['B_B'],
+                         params['B_C'],
+                         params['B_D'],
+                         params['B_F'],
+                         vdivs, vmin, vmax])        
+        return True
     
+    @property
+    def alpha_m(self):
+        if self.Xpower == 0:
+            return numpy.array([])        
+        return numpy.array(moose.HHGate('%s/gateX' % (self.path)).tableA)
+    @property
+    def beta_m(self):
+        if self.Xpower == 0:
+            return numpy.array([])        
+        return numpy.array(moose.HHGate('%s/gateX' % (self.path)).tableB) - numpy.array(moose.HHGate('%s/gateX' % (self.path)).tableA)
+    @property
+    def alpha_h(self):
+        if self.Ypower == 0:
+            return numpy.array([])        
+        return numpy.array(moose.HHGate('%s/gateY' % (self.path)).tableA)
+    @property
+    def beta_h(self):
+        if self.Ypower == 0:
+            return numpy.array([])        
+        return numpy.array(moose.HHGate('%s/gateY' % (self.path)).tableB) - numpy.array(moose.HHGate('%s/gateY' % (self.path)).tableA)
     
+        
 class SquidModel(moose.Neutral):
     EREST_ACT = 0.0 # can be -70 mV if not following original HH convention
     VMIN = -30.0
@@ -118,7 +175,7 @@ class SquidModel(moose.Neutral):
     
     def __init__(self, path):
         moose.Neutral.__init__(self, path)
-        self.temperature = ABSOLUTE_ZERO + 6.3        
+        self.temperature = CELSIUS_TO_KELVIN + 6.3        
         self.K_out = 10.0
         self.Na_out = 460.0
         # Modified internal concentrations used to give HH values of
@@ -141,40 +198,50 @@ class SquidModel(moose.Neutral):
         self.squid_axon.specific_gl =  0.3 # mmho/cm^2
         self.squid_axon.specific_ra = 0.030 # kohm-cm
         
-        self.Na_channel = self._create_HH_chan('%s/Na' % (self.squid_axon.path),
-                                               self.VNa,
-                                               self.specific_gNa,
-                                               SquidModel.VDIVS,
-                                               SquidModel.VMIN,
-                                               SquidModel.VMAX,
-                                               xpower=3.0,
-                                               xparams = SquidModel.Na_m_params,
-                                               ypower=1.0,
-                                               yparams=SquidModel.Na_h_params)
-                                               
-                                               
-        print 'Connected Na_channel:', moose.connect(self.Na_channel, 'channel', self.squid_axon, 'channel')
-                                                
-        self.K_channel = self._create_HH_chan('%s/K' % (self.squid_axon.path),
-                                              self.VK,
+        self.Na_channel = IonChannel('Na', self.squid_axon,
+                                     self.specific_gNa,
+                                     self.VNa,
+                                     Xpower=3.0,
+                                     Ypower=1.0)
+        self.Na_channel.setupAlpha('X', SquidModel.Na_m_params,
+                                   SquidModel.VDIVS,
+                                   SquidModel.VMIN,
+                                   SquidModel.VMAX)
+        self.Na_channel.setupAlpha('Y', SquidModel.Na_h_params,
+                                   SquidModel.VDIVS,
+                                   SquidModel.VMIN,
+                                   SquidModel.VMAX)
+        # pylab.plot(self.Na_channel.alpha_m, label='alpha_m')
+        # pylab.plot(self.Na_channel.beta_m, label='beta_m')
+        # print self.Na_channel.alpha_h
+        # pylab.plot(self.Na_channel.alpha_h, label='alpha_h')
+        # pylab.plot(self.Na_channel.beta_h, label='beta_h')
+        # pylab.legend()
+        # pylab.show()
+        self.K_channel = IonChannel('K', self.squid_axon,
                                               self.specific_gK,
-                                              SquidModel.VDIVS,
-                                              SquidModel.VMIN,
-                                              SquidModel.VMAX,
-                                              xpower=4.0,
-                                              xparams=SquidModel.K_n_params)
-        print 'Connected K channel:', moose.connect(self.K_channel, 'channel', self.squid_axon, 'channel')
+                                              self.VK,
+                                              Xpower=4.0)
+        self.K_channel.setupAlpha('X', SquidModel.K_n_params,
+                                  SquidModel.VDIVS,
+                                  SquidModel.VMIN,
+                                  SquidModel.VMAX)
+        # pylab.plot(self.K_channel.alpha_m, label='alpha_m')
+        # pylab.plot(self.K_channel.beta_m, label='beta_m')
+        # pylab.legend()
+        # pylab.show()
 
-        self.inject_delay = 50e-3
-        self.inject_dur = 20e-3
-        self.inject_amp = 0.1
+        self.inject_delay = 0.0 # ms
+        self.inject_dur = 20 # ms
+        self.inject_amp = 0.1 # uA
 
         self.Vm_table = moose.Table('%s/Vm' % (self.path))
-        print 'Connected Vm_table to compartment:', moose.connect(self.Vm_table, 'requestData', self.squid_axon, 'get_Vm')
-        self.gK_table = moose.Table('%s/gK' % (self.path))
-        moose.connect(self.gK_table, 'requestData', self.K_channel, 'get_Gk')
-
-        
+        if hasattr(self, 'K_channel'):
+            self.gK_table = moose.Table('%s/gK' % (self.path))
+            moose.connect(self.gK_table, 'requestData', self.K_channel, 'get_Gk')
+        if hasattr(self, 'Na_channel'):
+            self.gNa_table = moose.Table('%s/gNa' % (self.path))
+            moose.connect(self.gNa_table, 'requestData', self.Na_channel, 'get_Gk')
         
     @property
     def VK(self):
@@ -193,7 +260,6 @@ class SquidModel(moose.Neutral):
         chan.Gbar = specific_gbar * self.squid_axon.area
         chan.Xpower = xpower
         chan.Ek = Ek
-        # chan.createGate('X')
         xgate = moose.HHGate('%s/gateX' % (chan.path))
         xgate.setupAlpha([xparams['A_A'],
                          xparams['A_B'],
@@ -206,10 +272,11 @@ class SquidModel(moose.Neutral):
                          xparams['B_D'],
                          xparams['B_F'],
                          vdivs, vmin, vmax])
+        pylab.plot(xgate.tableA, label='alpha_m')
+        pylab.plot(numpy.array(xgate.tableB) - numpy.array(xgate.tableA), label='beta_m')
         xgate.useInterpolation = True
         if ypower > 0:
             chan.Ypower = ypower
-            # chan.createGate('Y')
             ygate = moose.HHGate('%s/gateY' % (chan.path))
             ygate.setupAlpha([yparams['A_A'],
                              yparams['A_B'],
@@ -223,6 +290,12 @@ class SquidModel(moose.Neutral):
                              yparams['B_F'],
                              vdivs, vmin, vmax])
             ygate.useInterpolation = True
+            pylab.plot(ygate.tableA, label='alpha_h')
+            pylab.plot(numpy.array(ygate.tableB) - numpy.array(ygate.tableA), label='beta_h')
+        print '&&&', chan.path, chan.Gbar, chan.Xpower, chan.Ypower, chan.Gk
+        pylab.legend()
+        pylab.show()
+        moose.connect(self.squid_axon, 'channel', chan, 'channel')
         return chan
             
         
@@ -234,47 +307,128 @@ class SquidModel(moose.Neutral):
         moose.setClock(3, simdt)
         moose.useClock(0, '%s/#[TYPE=Compartment]' % (self.path), 'init')
         moose.useClock(1, '%s/#[TYPE=Compartment]' % (self.path), 'process')
-        moose.useClock(2, '%s/Na,%s/K' % (self.squid_axon.path, self.squid_axon.path), 'process')
+        moose.useClock(2, '%s/#[TYPE=HHChannel]' % (self.squid_axon.path), 'process')
         moose.useClock(3, '%s/#[TYPE=Table]' % (self.path), 'process')
         moose.reinit()
-        print 'IN', self.squid_axon.path
-        for msg in self.squid_axon.inMessages():
-            print msg
-        print 'OUT', self.squid_axon.path
-        for msg in self.squid_axon.outMessages():
-            print msg
-        
-        print 'IN', self.Na_channel.path
-        for msg in self.Na_channel.inMessages():
-            print msg
-        print 'OUT', self.Na_channel.path
-        for msg in self.Na_channel.outMessages():
-            print msg
-        moose.start(self.inject_delay)
+        if (self.inject_delay > 0):
+            moose.start(self.inject_delay)
         self.squid_axon.inject = self.inject_amp
-        moose.start(self.inject_dur)
+        if (self.inject_dur > 0):
+            moose.start(self.inject_dur)
         rest = runtime - self.inject_delay - self.inject_dur
+        self.squid_axon.inject = 0.0
         if rest > 0:
-            self.squid_axon.inject = 0.0
             moose.start(rest)
 
     def save_data(self):
         self.Vm_table.xplot('Vm.dat', 'Vm')
-        self.gK_table.xplot('gK.dat', 'gK')
+        if hasattr(self, 'gK_table'):
+            self.gK_table.xplot('conductance.dat', 'gK')
+        if hasattr(self, 'gNa_table'):
+            self.gNa_table.xplot('conductance.dat', 'gNa')
 
+import unittest
 
-import pylab
+class SquidAxonTest(unittest.TestCase):
+    def setUp(self):
+        self.vrange = numpy.linspace(SquidModel.VMIN, SquidModel.VMAX, SquidModel.VDIVS+1)        
+        self.model = SquidModel('testSquidAxon')
+        
+    def calc_alpha_beta(self, params, table='A'):        
+        denominator = params[table+'_C'] + numpy.exp((self.vrange+params[table+'_D'])/params[table+'_F'])
+        numerator = params[table+'_A'] + params[table+'_B'] * self.vrange
+        y = numpy.zeros(len(self.vrange))
+        singularities = numpy.nonzero(denominator == 0.0)[0]
+        self.assertLessEqual(len(singularities), 1)
+        if len(singularities) == 1:
+            y[:singularities[0]] = numerator[:singularities[0]]/denominator[:singularities[0]]
+            y[singularities[0]] = params[table+'_B'] * params[table+'_F']
+            y[singularities[0]+1:] = numerator[singularities[0]+1:]/denominator[singularities[0]+1:]
+        elif len(singularities) == 0:
+            y[:] = numerator[:]/denominator[:]
+        return y
+        
+    def test_Na_alpha_m(self):
+        alpha_m = self.calc_alpha_beta(SquidModel.Na_m_params, 'A')
+        difference = numpy.sqrt(numpy.mean((alpha_m - self.model.Na_channel.alpha_m)**2))
+        pylab.title('Na_alpha_m')        
+        pylab.plot(alpha_m, label='python')
+        pylab.plot(self.model.Na_channel.alpha_m, label='moose')
+        pylab.legend()
+        pylab.show()
+        self.assertLessEqual(difference, numpy.mean(alpha_m)*1e-6)
+        
+    def test_Na_beta_m(self):
+        beta_m = self.calc_alpha_beta(SquidModel.Na_m_params, 'B')
+        difference = numpy.sqrt(numpy.mean((beta_m - self.model.Na_channel.beta_m)**2))
+        pylab.title('Na_beta_m')
+        pylab.plot(beta_m, label='python')
+        pylab.plot(self.model.Na_channel.beta_m, label='moose')
+        pylab.legend()
+        pylab.show()
+        self.assertLessEqual(difference, numpy.mean(beta_m)*1e-6)
 
-if __name__ == '__main__':
-    runtime = 100e-3
-    simdt = 1e-6
-    model = SquidModel('squid_demo')
-    print model.VK, model.VNa
+    def test_Na_alpha_h(self):
+        alpha_h = self.calc_alpha_beta(SquidModel.Na_h_params, 'A')
+        difference = numpy.sqrt(numpy.mean((alpha_h - self.model.Na_channel.alpha_h)**2))
+        pylab.title('Na_alpha_h')
+        pylab.plot(alpha_h, label='python')
+        pylab.plot(self.model.Na_channel.alpha_h, label='moose')
+        pylab.legend()
+        pylab.show()
+        self.assertLessEqual(difference, numpy.mean(alpha_h)*1e-6)
+
+    def test_Na_beta_h(self):
+        beta_h = self.calc_alpha_beta(SquidModel.Na_h_params, 'B')
+        difference = numpy.sqrt(numpy.mean((beta_h - self.model.Na_channel.beta_h)**2))
+        pylab.title('Na_beta_h')
+        pylab.plot(beta_h, label='python')
+        pylab.plot(self.model.Na_channel.beta_h, label='moose')
+        pylab.legend()
+        pylab.show()
+        self.assertLessEqual(difference, numpy.mean(beta_h)*1e-6)
+
+    def test_K_alpha_m(self):
+        alpha_m = self.calc_alpha_beta(SquidModel.K_n_params, 'A')
+        difference = numpy.sqrt(numpy.mean((alpha_m - self.model.K_channel.alpha_m)**2))
+        pylab.title('K_alpha_n')
+        pylab.plot(alpha_m, label='python')
+        pylab.plot(self.model.K_channel.alpha_m, label='moose')
+        pylab.legend()
+        pylab.show()
+        self.assertLessEqual(difference, numpy.mean(alpha_m)*1e-6)
+
+    def test_K_beta_m(self):
+        beta_m = self.calc_alpha_beta(SquidModel.K_n_params, 'B')
+        difference = numpy.sqrt(numpy.mean((beta_m - self.model.K_channel.beta_m)**2))
+        pylab.title('K_beta_n')
+        pylab.plot(beta_m, label='python')
+        pylab.plot(self.model.K_channel.beta_m, label='moose')
+        pylab.legend()
+        pylab.show()
+        self.assertLessEqual(difference, numpy.mean(beta_m)*1e-6)
+        
+def test(runtime=100, simdt=1e-2):
+    model = SquidModel('model')
+    model.inject_delay = 50.0
+    model.inject_dur = 20.0
     model.run(runtime, simdt)
     model.save_data()
-    pylab.plot(model.Vm_table.vec)
-    # pylab.plot(model.gK_table.vec)
-    pylab.show()
+
+if __name__ == '__main__':
+    unittest.main()
+# import pylab
+
+# if __name__ == '__main__':
+#     runtime = 100e-3
+#     simdt = 1e-6
+#     model = SquidModel('squid_demo')
+#     print model.VK, model.VNa
+#     model.run(runtime, simdt)
+#     model.save_data()
+#     pylab.plot(model.Vm_table.vec)
+#     # pylab.plot(model.gK_table.vec)
+#     pylab.show()
     
                                                                              
     
