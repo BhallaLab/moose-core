@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Feb 13 11:35:11 2012 (+0530)
 # Version: 
-# Last-Updated: Sat Feb 18 17:45:17 2012 (+0530)
+# Last-Updated: Sat Feb 18 17:53:15 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 659
+#     Update #: 666
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -212,17 +212,16 @@ class SquidModel(moose.Neutral):
                                    SquidModel.VMIN,
                                    SquidModel.VMAX)
         self.K_channel = IonChannel('K', self.squid_axon,
-                                              self.specific_gK,
-                                              self.VK,
-                                              Xpower=4.0)
+                                    self.specific_gK,
+                                    self.VK,
+                                    Xpower=4.0)
         self.K_channel.setupAlpha('X', SquidModel.K_n_params,
                                   SquidModel.VDIVS,
                                   SquidModel.VMIN,
                                   SquidModel.VMAX)
-        self.inject_delay = 0.0 # ms
-        self.inject_dur = 20 # ms
+        self.inject_delay = 5.0 # ms
+        self.inject_dur = 40 # ms
         self.inject_amp = 0.1 # uA
-
         self.Vm_table = moose.Table('%s/Vm' % (self.path))
         moose.connect(self.Vm_table, 'requestData', self.squid_axon, 'get_Vm')
         if hasattr(self, 'K_channel'):
@@ -241,53 +240,6 @@ class SquidModel(moose.Neutral):
     def VNa(self):
         """Reversal potential of Na+ channels"""
         return reversal_potential(self.temperature, self.Na_out, self.Na_in)
-
-    def _create_HH_chan(self, path, Ek, specific_gbar, vdivs, vmin, vmax, xpower, xparams, ypower=0, yparams=None):
-        """Create a HH Channel with gates specified by alphas and
-        betas (list of A, B, C, D and F params)."""
-        chan = moose.HHChannel('%s' % (path))
-        chan.Gbar = specific_gbar * self.squid_axon.area
-        chan.Xpower = xpower
-        chan.Ek = Ek
-        xgate = moose.HHGate('%s/gateX' % (chan.path))
-        xgate.setupAlpha([xparams['A_A'],
-                         xparams['A_B'],
-                         xparams['A_C'],
-                         xparams['A_D'],
-                         xparams['A_F'],
-                         xparams['B_A'],
-                         xparams['B_B'],
-                         xparams['B_C'],
-                         xparams['B_D'],
-                         xparams['B_F'],
-                         vdivs, vmin, vmax])
-        pylab.plot(xgate.tableA, label='alpha_m')
-        pylab.plot(numpy.array(xgate.tableB) - numpy.array(xgate.tableA), label='beta_m')
-        xgate.useInterpolation = True
-        if ypower > 0:
-            chan.Ypower = ypower
-            ygate = moose.HHGate('%s/gateY' % (chan.path))
-            ygate.setupAlpha([yparams['A_A'],
-                             yparams['A_B'],
-                             yparams['A_C'],
-                             yparams['A_D'],
-                             yparams['A_F'],
-                             yparams['B_A'],
-                             yparams['B_B'],
-                             yparams['B_C'],
-                             yparams['B_D'],
-                             yparams['B_F'],
-                             vdivs, vmin, vmax])
-            ygate.useInterpolation = True
-            pylab.plot(ygate.tableA, label='alpha_h')
-            pylab.plot(numpy.array(ygate.tableB) - numpy.array(ygate.tableA), label='beta_h')
-        print '&&&', chan.path, chan.Gbar, chan.Xpower, chan.Ypower, chan.Gk
-        pylab.legend()
-        pylab.show()
-        moose.connect(self.squid_axon, 'channel', chan, 'channel')
-        return chan
-            
-        
     
     def run(self, runtime, simdt=1e-6):
         moose.setClock(0, simdt)
@@ -408,8 +360,6 @@ class SquidAxonTest(unittest.TestCase):
         
 def test(runtime=100.0, simdt=1e-2):
     model = SquidModel('model')
-    model.inject_delay = 50.0
-    model.inject_dur = 20.0
     model.run(runtime, simdt)
     model.save_data()
 
