@@ -66,8 +66,9 @@ void ZombieFuncPool::zombify( Element* solver, Element* orig )
 
 	z->setN( zer, 0, m->getN() );
 	z->setNinit( zer, 0, m->getNinit( oer, 0 ) );
-	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler(),
-		orig->dataHandler() );
+	unsigned int numEntries = orig->dataHandler()->localEntries();
+	DataHandler* dh = new ZombieHandler( solver->dataHandler(),
+		orig->dataHandler(), 0, numEntries );
 	orig->zombieSwap( zombieFuncPoolCinfo, dh );
 
 	// Later change name just to 'func'

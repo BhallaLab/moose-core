@@ -17176,3 +17176,9 @@ From 9 Jan: Wish list of things to implement:
 -> Interfaces between sections handling different reac systems
 -> Transport and conc gradient calculations
 
+============================================================================
+14 Feb
+Minor updates to regression test for reading kkit models, minor fix to
+ZombieBufPool creation. Checkin 3306.
+
+============================================================================
