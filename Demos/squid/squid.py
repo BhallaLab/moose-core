@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Feb 13 11:35:11 2012 (+0530)
 # Version: 
-# Last-Updated: Sat Feb 18 01:24:21 2012 (+0530)
+# Last-Updated: Sat Feb 18 17:45:17 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 640
+#     Update #: 659
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -151,12 +151,12 @@ class SquidModel(moose.Neutral):
                    'B_B': 0.0,
                    'B_C': 0.0,
                    'B_D': 0.0 - EREST_ACT,
-                   'B_F': -18.0}
+                   'B_F': 18.0}
     Na_h_params = {'A_A': 0.07,
                    'A_B': 0.0,
                    'A_C': 0.0,
                    'A_D': 0.0 - EREST_ACT,
-                   'A_F': -20.0,
+                   'A_F': 20.0,
                    'B_A': 1.0,
                    'B_B': 0.0,
                    'B_C': 1.0,
@@ -171,7 +171,7 @@ class SquidModel(moose.Neutral):
                   'B_B': 0.0,
                   'B_C': 0.0,
                   'B_D': 0.0 - EREST_ACT,
-                  'B_F': -80.0}
+                  'B_F': 80.0}
     
     def __init__(self, path):
         moose.Neutral.__init__(self, path)
@@ -211,13 +211,6 @@ class SquidModel(moose.Neutral):
                                    SquidModel.VDIVS,
                                    SquidModel.VMIN,
                                    SquidModel.VMAX)
-        # pylab.plot(self.Na_channel.alpha_m, label='alpha_m')
-        # pylab.plot(self.Na_channel.beta_m, label='beta_m')
-        # print self.Na_channel.alpha_h
-        # pylab.plot(self.Na_channel.alpha_h, label='alpha_h')
-        # pylab.plot(self.Na_channel.beta_h, label='beta_h')
-        # pylab.legend()
-        # pylab.show()
         self.K_channel = IonChannel('K', self.squid_axon,
                                               self.specific_gK,
                                               self.VK,
@@ -226,16 +219,12 @@ class SquidModel(moose.Neutral):
                                   SquidModel.VDIVS,
                                   SquidModel.VMIN,
                                   SquidModel.VMAX)
-        # pylab.plot(self.K_channel.alpha_m, label='alpha_m')
-        # pylab.plot(self.K_channel.beta_m, label='beta_m')
-        # pylab.legend()
-        # pylab.show()
-
         self.inject_delay = 0.0 # ms
         self.inject_dur = 20 # ms
         self.inject_amp = 0.1 # uA
 
         self.Vm_table = moose.Table('%s/Vm' % (self.path))
+        moose.connect(self.Vm_table, 'requestData', self.squid_axon, 'get_Vm')
         if hasattr(self, 'K_channel'):
             self.gK_table = moose.Table('%s/gK' % (self.path))
             moose.connect(self.gK_table, 'requestData', self.K_channel, 'get_Gk')
@@ -322,10 +311,19 @@ class SquidModel(moose.Neutral):
 
     def save_data(self):
         self.Vm_table.xplot('Vm.dat', 'Vm')
+        print 'Vm saved to Vm.dat'
         if hasattr(self, 'gK_table'):
-            self.gK_table.xplot('conductance.dat', 'gK')
+            self.gK_table.xplot('gK.dat', 'gK')
+            numpy.savetxt('K_alpha_n.dat', self.K_channel.alpha_m)
+            numpy.savetxt('K_beta_n.dat', self.K_channel.beta_m)
+            print 'K conductance saved to gK.dat'
         if hasattr(self, 'gNa_table'):
-            self.gNa_table.xplot('conductance.dat', 'gNa')
+            self.gNa_table.xplot('gNa.dat', 'gNa')
+            numpy.savetxt('Na_alpha_m.dat', self.Na_channel.alpha_m)
+            numpy.savetxt('Na_beta_m.dat', self.Na_channel.beta_m)
+            numpy.savetxt('Na_alpha_h.dat', self.Na_channel.alpha_h)
+            numpy.savetxt('Na_beta_h.dat', self.Na_channel.beta_h)
+            print 'Na conductance saved to gNa.dat'
 
 import unittest
 
@@ -408,7 +406,7 @@ class SquidAxonTest(unittest.TestCase):
         pylab.show()
         self.assertLessEqual(difference, numpy.mean(beta_m)*1e-6)
         
-def test(runtime=100, simdt=1e-2):
+def test(runtime=100.0, simdt=1e-2):
     model = SquidModel('model')
     model.inject_delay = 50.0
     model.inject_dur = 20.0
@@ -416,19 +414,8 @@ def test(runtime=100, simdt=1e-2):
     model.save_data()
 
 if __name__ == '__main__':
-    unittest.main()
-# import pylab
-
-# if __name__ == '__main__':
-#     runtime = 100e-3
-#     simdt = 1e-6
-#     model = SquidModel('squid_demo')
-#     print model.VK, model.VNa
-#     model.run(runtime, simdt)
-#     model.save_data()
-#     pylab.plot(model.Vm_table.vec)
-#     # pylab.plot(model.gK_table.vec)
-#     pylab.show()
+    # unittest.main()
+    test()
     
                                                                              
     
