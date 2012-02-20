@@ -320,7 +320,7 @@ void ReadKkit::readData( const string& line )
 	else if ( argv[0] == "xtextload" )
 		textload( argv );
 	else if ( argv[0] == "loadtab" )
-		loadtab( argv );
+		loadTab( argv );
 }
 
 string ReadKkit::pathTail( const string& path, string& head ) const
@@ -348,7 +348,7 @@ void ReadKkit::objdump( const vector< string >& args)
 		assignArgs( enzMap_, args );
 	else if ( args[1] == "group" )
 		assignArgs( groupMap_, args );
-	else if ( args[1] == "table" )
+	else if ( args[1] == "xtab" )
 		assignArgs( tableMap_, args );
 }
 
@@ -357,10 +357,6 @@ void ReadKkit::call( const vector< string >& args)
 }
 
 void ReadKkit::textload( const vector< string >& args)
-{
-}
-
-void ReadKkit::loadtab( const vector< string >& args)
 {
 }
 
@@ -390,6 +386,8 @@ void ReadKkit::undump( const vector< string >& args)
 		;
 	else if ( args[1] == "doqcsinfo" )
 		;
+	else if ( args[1] == "xtab" )
+		buildTable( args );
 	else
 		cout << "ReadKkit::undump: Do not know how to build '" << args[1] <<
 		"'\n";
@@ -844,15 +842,33 @@ Id ReadKkit::buildPlot( const vector< string >& args )
 	return plot;
 }
 
-Id ReadKkit::buildTab( const vector< string >& args )
+Id ReadKkit::buildTable( const vector< string >& args )
 {
-	Id tab;
-	numOthers_++;
+	static vector< int > dim( 1, 1 );
+
+	string head;
+	string tail = pathTail( args[2], head ); // Name of xtab
+
+	Id pa = shell_->doFind( head ).id;
+	assert( pa != Id() );
+
+	Id tab = shell_->doCreate( "Table", pa, tail, dim );
+	assert( tab != Id() );
+
+	int mode = atoi( args[ tableMap_[ "step_mode" ] ].c_str() );
+	double stepsize = atof( args[ tableMap_[ "stepsize" ] ].c_str() );
+	double baselevel = atof( args[ tableMap_[ "baselevel" ] ].c_str() );
+
+	string temp = args[2].substr( 10 );
+	tabIds_[ temp ] = tab; 
+
 	return tab;
 }
 
 unsigned int ReadKkit::loadTab( const vector< string >& args )
 {
+	cout << "Loading table for " << args[0] << "," << args[1] << "," <<
+		args[2] << endl;
 	return 0;
 }
 

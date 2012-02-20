@@ -60,7 +60,7 @@ class ReadKkit
 		Id buildReac( const vector< string >& args );
 		Id buildEnz( const vector< string >& args );
 		Id buildPlot( const vector< string >& args );
-		Id buildTab( const vector< string >& args );
+		Id buildTable( const vector< string >& args );
 		unsigned int loadTab(  const vector< string >& args );
 		Id buildGroup( const vector< string >& args );
 		Id buildText( const vector< string >& args );
@@ -83,7 +83,6 @@ class ReadKkit
 		void call( const vector< string >& args );
 		void objdump( const vector< string >& args );
 		void textload( const vector< string >& args );
-		void loadtab( const vector< string >& args );
 		void separateVols( Id pool, double vol );
 		void assignPoolCompartments();
 
@@ -179,6 +178,7 @@ class ReadKkit
 		map< string, Id > enzIds_;
 		map< string, Id > mmEnzIds_;
 		map< string, Id > plotIds_;
+		map< string, Id > tabIds_;
 
 		/*
 		vector< Id > pools_;
