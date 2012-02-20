@@ -17183,5 +17183,12 @@ ZombieBufPool creation. Checkin 3306.
 
 ============================================================================
 18 Feb 2012
-Minor updates to the documentation for zombies.
+Minor updates to the documentation for zombies. Checkin 3315.
+============================================================================
+20 Feb 2012
+Added another regression test to read tabsumtot.g. This tests tables as
+well as sumtots. So far the skeleton of the test is there, and reads the
+model only. Clears regression test but complains that it doesn't know how to
+handle the xtab.
+
 ============================================================================

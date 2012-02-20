@@ -15,6 +15,7 @@ void rtTable();
 void rtFindModelType();
 void rtReadKkit();
 void rtRunKkit();
+void rtRunTabSumtot();
 void rtReadCspace();
 void rtRunCspace();
 void rtReacDiff();
@@ -62,6 +63,7 @@ void regressionTests()
 	rtRunKkit();
 	rtReadCspace();
 	rtRunCspace();
+	rtRunTabSumtot();
 	rtReacDiff();
 	rtHHnetwork( 10 );
 
