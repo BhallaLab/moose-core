@@ -17182,3 +17182,6 @@ Minor updates to regression test for reading kkit models, minor fix to
 ZombieBufPool creation. Checkin 3306.
 
 ============================================================================
+18 Feb 2012
+Minor updates to the documentation for zombies.
+============================================================================
