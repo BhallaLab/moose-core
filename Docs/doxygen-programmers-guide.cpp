@@ -158,6 +158,41 @@ ensues:
 	</ol>
 </ul>
 
+\section Solvers_zombies	Solvers and Zombies
+\subsection SolversOverview	Overview
+\subsection WritingZombies	Writing Zombies
+Zombies are superficially identical classes to regular MOOSE classes, only
+they are now controlled by some kind of numerically optimized solver. The
+role of the Zombie is to give the illusion that the original object is there
+and behaving normally (except perhaps computing much faster). All the original
+messages and fields are preserved. It is important that there be a one-to-one
+match between the original and zombie list of Finfos in the Cinfo static
+intialization.\n
+Zombies provide an interface between the original fields and the solver. They
+usually do so by maintaining a pointer to the solver, and using its access
+functions.\n
+Zombie classes typically also provide two special functions: \n
+zombify( Element* solver, Element* orig)
+and unzombify( Element* zombie). These do what you might expect from the name.
+The solver calls these operations during setup.\n
+
+There are two main kinds of zombies:
+<ul>
+	<li> Soulless zombies: These lack any data whatsoever, and are 
+		derived classes from the solver. The Zombie data is nothing
+		but a pointer to the managing solver, and is never duplicated.
+		These are managed by a ZombieHandler. During the zombify
+		routine, all the relevant data goes over to the solver,
+		and the original data and dataHandler is deleted.
+	<li> Transformed Zombies: These carry some data of their own, as well as
+		a pointer to the managing solver. If they are converted to an
+		array, or resized they have to have their own data resized too.
+		These are managed by a regular DataHandler. During the 
+		zombify routine, some parts of the data are copied over to
+		the new Zombie data structure, some go to the solver, and the
+		rest is discarded. The original data is deleted.
+</ul>
+
 \section NewClasses Writing new MOOSE classes
 \subsection NewClassesOverview	Overview
 
