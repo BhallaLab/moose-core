@@ -583,3 +583,57 @@ void rtRunCspace()
 	shell->doDelete( base );
 	cout << "." << flush;
 }
+
+void rtRunTabSumtot()
+{
+	const double TOLERANCE = 2e-3;
+	const double NA_RATIO = 6e23 / NA;
+	const double CONCSCALE = 1e-3; // Convert from uM to mM.
+
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< unsigned int > dims( 1, 1 );
+	Shell::cleanSimulation();
+
+	Id modelId = shell->doLoadModel( "tabsumtot.g", "/ts", "rk5" );
+	assert( modelId != Id() );
+	Id stoichId( "/ts/stoich" );
+	assert( stoichId != Id() );
+	Id comptId( "/ts/kinetics" );
+	assert( comptId != Id() );
+	unsigned int numVarMols = Field< unsigned int >::get( 
+		stoichId, "nVarPools" );
+	assert ( numVarMols == 4 );
+
+	double n;
+	assert( Id( "/ts/kinetics/A" ) != Id() );
+	n = Field< double >::get( Id( "/ts/kinetics/A" ), "concInit" );
+	assert( doubleEq( n, 1 * CONCSCALE ) );
+	n = Field< double >::get( Id( "/ts/kinetics/B" ), "concInit" );
+	assert( doubleEq( n, 0 ) );
+	n = Field< double >::get( Id( "/ts/kinetics/C" ), "concInit" );
+	assert( doubleEq( n, 0 ) );
+
+	///////////////////////////////////////////////////////////////////////
+	// Now run it.
+	///////////////////////////////////////////////////////////////////////
+
+	shell->doSetClock( 0, 0.1 );
+	shell->doSetClock( 1, 0.1 );
+	shell->doSetClock( 2, 0.1 );
+	shell->doReinit();
+	shell->doStart( 20.0 );
+
+	Id plotTot1( "/ts/graphs/conc2/tot1.Co" );
+	assert( plotTot1 != Id() );
+	unsigned int size = Field< unsigned int >::get( plotTot1, "size" );
+	assert( size == 201 ); // Note that dt was 0.1.
+	vector< Id > ret = LookupField< string, vector< Id > >::get( 
+		plotTot1, "neighbours", "requestData" );
+	assert( ret.size() == 1 );
+	assert( ret[0] == Id( "/ts/kinetics/tot1" ) );
+	// We'll analyze the results analytically.
+
+	/////////////////////////////////////////////////////////////////////
+	shell->doDelete( modelId );
+	cout << "." << flush;
+}
