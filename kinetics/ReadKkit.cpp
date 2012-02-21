@@ -796,6 +796,44 @@ void ReadKkit::buildSumTotal( const string& src, const string& dest )
 
 	assert( ret );
 }
+
+/*
+void ReadKkit::buildTableFollower( const string& src, const string& dest )
+{
+	map< string, Id >::iterator i = poolIds_.find( dest );
+	assert( i != poolIds_.end() );
+	Id destId = i->second;
+	
+	// Don't bother on buffered pool.
+	if ( destId()->cinfo()->isA( "BufPool" ) ) 
+		return;
+
+	// Check if the pool has not yet been converted to handle SumTots.
+	if ( destId()->cinfo()->name() == "Pool" ) {
+		vector< int > dim( 1, 1 );
+		const DataHandler* orig = destId()->dataHandler();
+		DataHandler* dup = orig->copy( orig->pathDepth() - 1, orig->pathDepth(), false, 1 );
+	
+		// Turn dest into a FuncPool.
+		destId()->zombieSwap( FuncPool::initCinfo(), dup );
+	} 
+	
+	// Connect up messages
+	i = poolIds_.find( src );
+	assert( i != poolIds_.end() );
+	Id srcId = i->second;
+
+	bool ret = shell_->doAddMsg( "single", 
+		ObjId( srcId, 0 ), "nOut",
+		ObjId( sumId, 0 ), "input" ); 
+
+	ret = shell_->doAddMsg( "single", 
+		ObjId( sumId, 0 ), "output",
+		ObjId( destId, 0 ), "input" ); 
+
+	assert( ret );
+}
+*/
 	
 
 Id ReadKkit::buildGeometry( const vector< string >& args )
@@ -855,9 +893,9 @@ Id ReadKkit::buildTable( const vector< string >& args )
 	Id tab = shell_->doCreate( "Table", pa, tail, dim );
 	assert( tab != Id() );
 
-	int mode = atoi( args[ tableMap_[ "step_mode" ] ].c_str() );
-	double stepsize = atof( args[ tableMap_[ "stepsize" ] ].c_str() );
-	double baselevel = atof( args[ tableMap_[ "baselevel" ] ].c_str() );
+	// int mode = atoi( args[ tableMap_[ "step_mode" ] ].c_str() );
+	// double stepsize = atof( args[ tableMap_[ "stepsize" ] ].c_str() );
+	// double baselevel = atof( args[ tableMap_[ "baselevel" ] ].c_str() );
 
 	string temp = args[2].substr( 10 );
 	tabIds_[ temp ] = tab; 
@@ -867,8 +905,34 @@ Id ReadKkit::buildTable( const vector< string >& args )
 
 unsigned int ReadKkit::loadTab( const vector< string >& args )
 {
-	cout << "Loading table for " << args[0] << "," << args[1] << "," <<
-		args[2] << endl;
+	Id tab;
+	unsigned int start = 0;
+	if ( args[1] == "-cont" || args[1] == "-end" ) {
+		start = 2;
+		tab = lastTab_;
+	} else {
+		tabEntries_.resize( 0 );
+		start = 7;
+		assert( args.size() >= start );
+		tab = Id( basePath_ + args[1] );
+		// int calc_mode = atoi( args[3].c_str() );
+		// int xdivs = atoi( args[4].c_str() );
+		// double xmin = atof( args[5].c_str() );
+		// double xmax = atof( args[6].c_str() );
+	}
+	assert( tab != Id () );
+
+	for ( unsigned int i = start; i < args.size(); ++i ) {
+		tabEntries_.push_back( atof( args[i].c_str() ) );
+	}
+	bool ok = Field< vector< double > >::set( tab, "vec", tabEntries_ );
+	assert( ok );
+
+	// cout << "Loading table for " << args[0] << "," << args[1] << "," << args[2] << endl;
+	
+	if ( args[1] == "-end" )
+		lastTab_ = Id();
+
 	return 0;
 }
 
@@ -968,6 +1032,14 @@ void ReadKkit::addmsg( const vector< string >& args)
 	}
 	else if ( args[3] == "SUMTOTAL" ) { // Summation function.
 		buildSumTotal( src, dest );
+	}
+	else if ( args[3] == "SLAVE" ) { // Summation function.
+		if ( args[4] == "output" ) {
+			/*
+			innerAddMsg( src, tabIds_, "output", dest, poolIds_, "set_concInit" );
+			cout << "Added slave msg from " << src << " to " << dest << endl;
+			*/
+		}
 	}
 }
 
