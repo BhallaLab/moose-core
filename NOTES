@@ -17199,5 +17199,20 @@ Next: fix Readkkit to
 
 
 ReadTable stuff in progress, still skeletal.
+Working on Table::process. Lots of stuff pending.
+I think the clean thing to do is to have 4 classes:
+TableBase: Handles the basic stuff for field access and file I/O. Base class
+for the others.
+	Table: Receive and record inputs. Used in lieu of plots.
+	StimulusTable: Generate output waveforms and events
+	Interpol: Lookup values using interpolation, send results out. Can also
+		be set up for FastGet.
+
+
 
 ============================================================================
+21 Feb 2012
+Implemented TableBase.
+Redid Table.
+Some temporary patches to ReadKkit so it clears unit and regression tests for
+now.

@@ -13,8 +13,9 @@ OBJ = \
 	Arith.o	\
 	Group.o	\
 	Mdouble.o	\
-	Table.o	\
+	TableBase.o	\
 	TableEntry.o	\
+	Table.o	\
 	Stats.o	\
 	Interpol2D.o \
 	testBuiltins.o	\
@@ -29,8 +30,9 @@ $(OBJ)	: $(HEADERS)
 Arith.o:	Arith.h
 Group.o:	Group.h
 Mdouble.o:		Mdouble.h
-Table.o:		Table.h TableEntry.h
 TableEntry.o:		TableEntry.h
+TableBase.o:		TableBase.h TableEntry.h
+Table.o:		Table.h TableEntry.h
 Stats.o:	Stats.h
 Interpol2D.o:	Interpol2D.h
 testBuiltins.o:	Group.h Arith.h Stats.h ../msg/DiagonalMsg.h ../basecode/SetGet.h

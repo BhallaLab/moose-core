@@ -189,6 +189,11 @@ class ReadKkit
 		/// This keeps track of unique volumes
 		vector< double > vols_;
 
+		/// This keeps track of the last Table used in loadtab
+		Id lastTab_;
+		/// This holds the vector of array entries for loadtab
+		vector< double > tabEntries_;
+
 		/// List of Ids in each unique volume.
 		vector< vector< Id > > volCategories_;
 		vector< Id > compartments_;
