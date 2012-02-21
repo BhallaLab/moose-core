@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Thu Feb 16 02:27:08 2012 (+0530)
+# Last-Updated: Tue Feb 21 20:22:19 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1205
+#     Update #: 1250
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -246,12 +246,24 @@ class _MooseDescriptor(object):
 
     def __set__(self, obj, value):
         obj.oid_.setField(self.name, value)
-
+        
     def __delete__(self, obj):
         raise AttributeError('ValueFinfos cannot be deleted.')
 
-
+class _LFDescriptor(object):
+    def __init__(self, name):
+        self.name = name
+    def __get__(self, obj, objtype=None):
+        return _LookupField(obj.oid_, self.name)
     
+class _LookupField(object):
+    def __init__(self, oid, name):
+        self.name = name
+        self.oid = oid
+    def __getitem__(self, key):
+        return self.oid.getLookupField(self.name, key)
+    def __setitem__(self, key, value):
+        self.oid.setLookupField(self.name, key, value)
     
 class _MooseMeta(type):
     """Simple metaclass to create class definitions with attributes
@@ -262,6 +274,12 @@ class _MooseMeta(type):
             field_dict = getFieldDict(name, 'valueFinfo')
             for field in field_dict.keys():
                 setattr(cls, field, _MooseDescriptor(field))
+        except NameError:
+            pass
+        try:
+            field_dict = getFieldDict(name, 'lookupFinfo')
+            for field in field_dict.keys():
+                setattr(cls, field, _LFDescriptor(field))
         except NameError:
             pass
         

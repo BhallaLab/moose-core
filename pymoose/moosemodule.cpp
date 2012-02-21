@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Feb 15 23:55:33 2012 (+0530)
+// Last-Updated: Tue Feb 21 20:21:34 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 4627
+//     Update #: 4921
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -117,6 +117,10 @@ extern "C" {
          "Get specified attribute of the element."},
         {"setField", (PyCFunction)_pymoose_ObjId_setField, METH_VARARGS,
          "Set specified attribute of the element."},
+        {"getLookupField", (PyCFunction)_pymoose_ObjId_getLookupField, METH_VARARGS,
+         "Lookup a field based on key."},
+        {"setLookupField", (PyCFunction)_pymoose_ObjId_setLookupField, METH_VARARGS,
+         "Set a lookup field value based on key."},
         {"getId", (PyCFunction)_pymoose_ObjId_getId, METH_VARARGS,
          "Return integer representation of the id of the element. This will be"
          "an ObjId represented as a 3-tuple"},
@@ -1112,6 +1116,181 @@ extern "C" {
         }
     } // _pymoose_Id_setField
 
+    static PyObject * _pymoose_ObjId_getLookupField(_ObjId * self, PyObject * args)
+    {
+        PyObject * key;
+        char * field;
+        PyObject * ret;
+        if (!PyArg_ParseTuple(args, "sO:_pymoose_ObjId_getLookupField", &field,  &key)){
+            return NULL;
+        }
+        string type = getFieldType(self->oid_, string(field), "lookupFinfo");
+        if (type.empty()){
+            PyErr_SetString(PyExc_AttributeError, "Field not valid.");
+            return NULL;
+        }
+        vector< string > argType;
+        tokenize(type, ",", argType);
+        if (argType.size() != 2){
+            PyErr_SetString(PyExc_NotImplementedError, "Can handle only single level lookup fields.");
+            return NULL;
+        }
+        char key_type_code = shortType(argType[0]);
+        char value_type_code = shortType(argType[1]);
+        void * value_ptr = NULL;
+        if (value_type_code == 'x'){
+            value_ptr = PyObject_New(_Id, &IdType);
+        } else if (value_type_code == 'y'){
+            value_ptr = PyObject_New(_ObjId, &ObjIdType);
+        }
+        switch(key_type_code){
+            case 'b': {
+                ret = lookup_value <bool> (self->oid_, string(field), value_type_code, key_type_code, key, value_ptr);
+                break;
+            }
+            case 'c': {
+                ret = lookup_value <char> (self->oid_, string(field), value_type_code, key_type_code, key, value_ptr);
+                break;
+            }
+            case 'h': {
+                ret = lookup_value <short> (self->oid_, string(field), value_type_code, key_type_code, key, value_ptr);
+                break;
+            }            
+            case 'H': {
+                ret = lookup_value <unsigned short> (self->oid_, string(field), value_type_code, key_type_code, key, value_ptr);
+                break;
+            }            
+            case 'i': {
+                ret = lookup_value <int> (self->oid_, string(field), value_type_code, key_type_code, key, value_ptr);
+                break;
+            }            
+            case 'I': {
+                ret = lookup_value <unsigned int> (self->oid_, string(field), value_type_code, key_type_code, key, value_ptr);
+                break;
+            }            
+            case 'l': {
+                ret = lookup_value <long> (self->oid_, string(field), value_type_code, key_type_code, key, value_ptr);
+                break;
+            }                        
+            case 'k': {
+                ret = lookup_value <unsigned long> (self->oid_, string(field), value_type_code, key_type_code, key, value_ptr);
+                break;
+            }                        
+            case 'L': {
+                ret = lookup_value <long long> (self->oid_, string(field), value_type_code, key_type_code, key, value_ptr);
+                break;
+            }                        
+            case 'K': {
+                ret = lookup_value <unsigned long long> (self->oid_, string(field), value_type_code, key_type_code, key, value_ptr);
+                break;
+            }                        
+            case 'd': {
+                ret = lookup_value <double> (self->oid_, string(field), value_type_code, key_type_code, key, value_ptr);
+                break;
+            }                        
+            case 'f': {
+                ret = lookup_value <float> (self->oid_, string(field), value_type_code, key_type_code, key, value_ptr);
+                break;
+            }
+            case 'x': {
+                ret = lookup_value <Id> (self->oid_, string(field), value_type_code, key_type_code, key, value_ptr);
+                break;
+            }
+            case 'y': {
+                ret = lookup_value <ObjId> (self->oid_, string(field), value_type_code, key_type_code, key, value_ptr);
+                break;
+            }
+            default:
+                PyErr_SetString(PyExc_TypeError, "invalid key type");
+        }                
+        return ret;
+    } // _pymoose_ObjId_getLookupField
+
+    static PyObject * _pymoose_ObjId_setLookupField(_ObjId * self, PyObject * args)
+    {
+        PyObject * key;
+        PyObject * value;
+        char * field;
+        PyObject * ret = NULL;
+        if (!PyArg_ParseTuple(args, "sOO:_pymoose_ObjId_getLookupField", &field,  &key, &value)){
+            return NULL;
+        }
+        string type = getFieldType(self->oid_, string(field), "lookupFinfo");
+        if (type.empty()){
+            PyErr_SetString(PyExc_AttributeError, "Field not valid.");
+            return NULL;
+        }
+        vector< string > argType;
+        tokenize(type, ",", argType);
+        if (argType.size() != 2){
+            PyErr_SetString(PyExc_NotImplementedError, "Can handle only single level lookup fields.");
+            return NULL;
+        }
+        char key_type_code = shortType(argType[0]);
+        char value_type_code = shortType(argType[1]);
+        switch(key_type_code){
+            case 'b': {
+                ret = set_lookup_value <bool> (self->oid_, string(field), value_type_code, key_type_code, key, value);
+                break;
+            }
+            case 'c': {
+                ret = set_lookup_value <char> (self->oid_, string(field), value_type_code, key_type_code, key, value);
+                break;
+            }
+            case 'h': {
+                ret = set_lookup_value <short> (self->oid_, string(field), value_type_code, key_type_code, key, value);
+                break;
+            }            
+            case 'H': {
+                ret = set_lookup_value <unsigned short> (self->oid_, string(field), value_type_code, key_type_code, key, value);
+                break;
+            }            
+            case 'i': {
+                ret = set_lookup_value <int> (self->oid_, string(field), value_type_code, key_type_code, key, value);
+                break;
+            }            
+            case 'I': {
+                ret = set_lookup_value <unsigned int> (self->oid_, string(field), value_type_code, key_type_code, key, value);
+                break;
+            }            
+            case 'l': {
+                ret = set_lookup_value <long> (self->oid_, string(field), value_type_code, key_type_code, key, value);
+                break;
+            }                        
+            case 'k': {
+                ret = set_lookup_value <unsigned long> (self->oid_, string(field), value_type_code, key_type_code, key, value);
+                break;
+            }                        
+            case 'L': {
+                ret = set_lookup_value <long long> (self->oid_, string(field), value_type_code, key_type_code, key, value);
+                break;
+            }                        
+            case 'K': {
+                ret = set_lookup_value <unsigned long long> (self->oid_, string(field), value_type_code, key_type_code, key, value);
+                break;
+            }                        
+            case 'd': {
+                ret = set_lookup_value <double> (self->oid_, string(field), value_type_code, key_type_code, key, value);
+                break;
+            }                        
+            case 'f': {
+                ret = set_lookup_value <float> (self->oid_, string(field), value_type_code, key_type_code, key, value);
+                break;
+            }
+            case 'x': {
+                ret = set_lookup_value <Id> (self->oid_, string(field), value_type_code, key_type_code, key, value);
+                break;
+            }
+            case 'y': {
+                ret = set_lookup_value <ObjId> (self->oid_, string(field), value_type_code, key_type_code, key, value);
+                break;
+            }
+            default:
+                PyErr_SetString(PyExc_TypeError, "invalid key type");
+        }
+        return ret;        
+    }// _pymoose_ObjId_setLookupField
+    
     static PyObject * _pymoose_ObjId_setDestField(_ObjId * self, PyObject * args)
     {
                 
