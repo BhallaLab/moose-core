@@ -880,6 +880,9 @@ Id ReadKkit::buildPlot( const vector< string >& args )
 	return plot;
 }
 
+enum GenesisTableModes {TAB_IO, TAB_LOOP, TAB_ONCE, TAB_BUF, TAB_SPIKE,
+	TAB_FIELDS, TAB_DELAY };
+
 Id ReadKkit::buildTable( const vector< string >& args )
 {
 	static vector< int > dim( 1, 1 );
@@ -889,13 +892,22 @@ Id ReadKkit::buildTable( const vector< string >& args )
 
 	Id pa = shell_->doFind( head ).id;
 	assert( pa != Id() );
+	Id tab;
 
-	Id tab = shell_->doCreate( "Table", pa, tail, dim );
-	assert( tab != Id() );
-
-	// int mode = atoi( args[ tableMap_[ "step_mode" ] ].c_str() );
-	// double stepsize = atof( args[ tableMap_[ "stepsize" ] ].c_str() );
-	// double baselevel = atof( args[ tableMap_[ "baselevel" ] ].c_str() );
+	int mode = atoi( args[ tableMap_[ "step_mode" ] ].c_str() );
+	if ( mode == TAB_IO ) {
+	} else if ( mode == TAB_LOOP || mode == TAB_ONCE ) {
+		tab = shell_->doCreate( "StimulusTable", pa, tail, dim );
+		assert( tab != Id() );
+		double stepSize = atof( args[ tableMap_[ "stepsize" ] ].c_str() );
+		Field< double >::set( tab, "stepSize", stepSize );
+		if ( mode == TAB_LOOP )
+			Field< bool >::set( tab, "doLoop", 1 );
+		double input = atof( args[ tableMap_[ "input" ] ].c_str() );
+		Field< double >::set( tab, "startTime", -input );
+		// The other StimulusTable parameters will have to wait till the
+		// loadTab is invoked.
+	}
 
 	string temp = args[2].substr( 10 );
 	tabIds_[ temp ] = tab; 
@@ -910,17 +922,24 @@ unsigned int ReadKkit::loadTab( const vector< string >& args )
 	if ( args[1] == "-cont" || args[1] == "-end" ) {
 		start = 2;
 		tab = lastTab_;
+		assert( tab != Id() );
 	} else {
 		tabEntries_.resize( 0 );
 		start = 7;
 		assert( args.size() >= start );
-		tab = Id( basePath_ + args[1] );
+		lastTab_ = tab = Id( basePath_ + args[1] );
+		assert( tab != Id() );
 		// int calc_mode = atoi( args[3].c_str() );
 		// int xdivs = atoi( args[4].c_str() );
-		// double xmin = atof( args[5].c_str() );
-		// double xmax = atof( args[6].c_str() );
+		if ( tab.element()->cinfo()->isA( "StimulusTable" ) ) {
+			double xmin = atof( args[5].c_str() );
+			double xmax = atof( args[6].c_str() );
+			double start = Field< double >::get( tab, "startTime" );
+			start += xmin;
+			Field< double >::set( tab, "startTime", start );
+			Field< double >::set( tab, "stopTime", xmax );
+		}
 	}
-	assert( tab != Id () );
 
 	for ( unsigned int i = start; i < args.size(); ++i ) {
 		tabEntries_.push_back( atof( args[i].c_str() ) );
@@ -1035,10 +1054,8 @@ void ReadKkit::addmsg( const vector< string >& args)
 	}
 	else if ( args[3] == "SLAVE" ) { // Summation function.
 		if ( args[4] == "output" ) {
-			/*
 			innerAddMsg( src, tabIds_, "output", dest, poolIds_, "set_concInit" );
 			cout << "Added slave msg from " << src << " to " << dest << endl;
-			*/
 		}
 	}
 }

@@ -16,6 +16,7 @@ OBJ = \
 	TableBase.o	\
 	TableEntry.o	\
 	Table.o	\
+	StimulusTable.o	\
 	Stats.o	\
 	Interpol2D.o \
 	testBuiltins.o	\
@@ -32,7 +33,8 @@ Group.o:	Group.h
 Mdouble.o:		Mdouble.h
 TableEntry.o:		TableEntry.h
 TableBase.o:		TableBase.h TableEntry.h
-Table.o:		Table.h TableEntry.h
+Table.o:		TableBase.h Table.h TableEntry.h
+StimlusTable.o:		TableBase.h StimlusTable.h TableEntry.h
 Stats.o:	Stats.h
 Interpol2D.o:	Interpol2D.h
 testBuiltins.o:	Group.h Arith.h Stats.h ../msg/DiagonalMsg.h ../basecode/SetGet.h

@@ -17215,4 +17215,8 @@ for the others.
 Implemented TableBase.
 Redid Table.
 Some temporary patches to ReadKkit so it clears unit and regression tests for
-now.
+now. Checkin 3319.
+Created StimlusTable, derived from TableBase. Incorporated into ReadKkit.
+Clears regression tests for setup, yet to test for its running.
+
+============================================================================
