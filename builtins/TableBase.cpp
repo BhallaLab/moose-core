@@ -401,15 +401,17 @@ double TableBase::interpolate( double xmin, double xmax, double input )
 	if ( input > xmax )
 		return ( vec_.back() );
 	
+	unsigned int xdivs = vec_.size() - 1;
+
 	double fraction = ( input - xmin ) / ( xmax - xmin );
 	if ( fraction < 0 )
 		return vec_[0];
 
-	unsigned int j = vec_.size() * fraction;
+	unsigned int j = xdivs * fraction;
 	if ( j >= ( vec_.size() - 1 ) )
 		return vec_.back();
 	
-	double dx = (xmax - xmin ) / vec_.size();
+	double dx = (xmax - xmin ) / xdivs;
 	double lowerBound = xmin + j * dx;
 	double subFraction = ( input - lowerBound ) / dx;
 

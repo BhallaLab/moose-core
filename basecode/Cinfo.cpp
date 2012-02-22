@@ -72,6 +72,12 @@ FuncId Cinfo::registerOpFunc( const OpFunc* f )
 	return ret;
 }
 
+void Cinfo::overrideFunc( FuncId fid, const OpFunc* f )
+{
+	assert ( funcs_.size() > fid );
+	funcs_[ fid ] = f;
+}
+
 BindIndex Cinfo::registerBindIndex()
 {
 	return numBindIndex_++;
@@ -142,6 +148,11 @@ const Cinfo* Cinfo::find( const string& name )
 	if ( i != cinfoMap().end() )
 		return i->second;
 	return 0;
+}
+
+const Cinfo* Cinfo::baseCinfo() const
+{
+	return baseCinfo_;
 }
 
 /**

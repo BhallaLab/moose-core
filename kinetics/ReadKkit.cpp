@@ -13,6 +13,7 @@
 #include "header.h"
 #include "Pool.h"
 #include "FuncPool.h"
+#include "BufPool.h"
 
 #include "../shell/Shell.h"
 #include "../manager/SimManager.h"
@@ -1054,8 +1055,20 @@ void ReadKkit::addmsg( const vector< string >& args)
 	}
 	else if ( args[3] == "SLAVE" ) { // Summation function.
 		if ( args[4] == "output" ) {
+			// Convert the pool to a BufPool, if it isn't one already
+			Id destId( basePath_ + "/kinetics/" + dest );
+			assert( destId != Id() );
+
+			if( !destId.element()->cinfo()->isA( "BufPool" )) {
+				const DataHandler* orig = destId()->dataHandler();
+				DataHandler* dup = 
+					orig->copy( orig->pathDepth() - 1, orig->pathDepth(),
+					false, 1 );
+				destId.element()->zombieSwap( BufPool::initCinfo(), dup );
+			}
+
 			innerAddMsg( src, tabIds_, "output", dest, poolIds_, "set_concInit" );
-			cout << "Added slave msg from " << src << " to " << dest << endl;
+			// cout << "Added slave msg from " << src << " to " << dest << endl;
 		}
 	}
 }

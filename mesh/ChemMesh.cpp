@@ -294,14 +294,15 @@ void ChemMesh::lookupStoich( ObjId me ) const
 	assert( cm == this );
 	vector< Id > stoichVec;
 	unsigned int num = me.element()->getNeighbours( stoichVec, meshSplit());
-	assert( num == 1 );
-	cm->stoich_ = stoichVec[0];
+	if ( num == 1 ) // The solver has been created
+		cm->stoich_ = stoichVec[0];
 }
 
 void ChemMesh::updateDiffusion( unsigned int meshIndex ) const
 {
 	// Later we'll have provision for multiple stoich targets.
-	assert( stoich_ != Id() );
-	Stoich* s = reinterpret_cast< Stoich* >( stoich_.eref().data() );
-	s->updateDiffusion( meshIndex, stencil_ );
+	if ( stoich_ != Id() ) {
+		Stoich* s = reinterpret_cast< Stoich* >( stoich_.eref().data() );
+		s->updateDiffusion( meshIndex, stencil_ );
+	}
 }

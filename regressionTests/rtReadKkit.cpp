@@ -586,8 +586,6 @@ void rtRunCspace()
 
 void rtRunTabSumtot()
 {
-	const double TOLERANCE = 2e-3;
-	const double NA_RATIO = 6e23 / NA;
 	const double CONCSCALE = 1e-3; // Convert from uM to mM.
 
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
@@ -602,16 +600,34 @@ void rtRunTabSumtot()
 	assert( comptId != Id() );
 	unsigned int numVarMols = Field< unsigned int >::get( 
 		stoichId, "nVarPools" );
-	assert ( numVarMols == 4 );
+	assert ( numVarMols == 3 );
 
 	double n;
-	assert( Id( "/ts/kinetics/A" ) != Id() );
+	Id a( "/ts/kinetics/A" );
+	assert( a != Id() );
 	n = Field< double >::get( Id( "/ts/kinetics/A" ), "concInit" );
+	assert( doubleEq( n, 1 * CONCSCALE ) );
+	n = Field< double >::get( Id( "/ts/kinetics/A" ), "conc" );
 	assert( doubleEq( n, 1 * CONCSCALE ) );
 	n = Field< double >::get( Id( "/ts/kinetics/B" ), "concInit" );
 	assert( doubleEq( n, 0 ) );
 	n = Field< double >::get( Id( "/ts/kinetics/C" ), "concInit" );
 	assert( doubleEq( n, 0 ) );
+
+	Id d( "/ts/kinetics/D" );
+	assert( d != Id() );
+	assert( d.element()->cinfo()->name() == "ZombieBufPool" );
+	const Finfo* dsf = d.element()->cinfo()->findFinfo( "set_concInit" );
+	assert( dsf );
+	const Finfo* asf = a.element()->cinfo()->findFinfo( "set_concInit" );
+	assert( asf );
+	assert( dsf != asf );
+	/*
+	n = Field< double >::get( Id( "/ts/kinetics/tot1" ), "conc" );
+	assert( doubleEq( n, 1 * CONCSCALE ) );
+	n = Field< double >::get( Id( "/ts/kinetics/tot2" ), "conc" );
+	assert( doubleEq( n, 0 ) );
+	*/
 
 	///////////////////////////////////////////////////////////////////////
 	// Now run it.
@@ -623,6 +639,24 @@ void rtRunTabSumtot()
 	shell->doReinit();
 	shell->doStart( 20.0 );
 
+	Id tab( "/ts/kinetics/xtab" );
+	vector< double > vec = Field< vector< double > >::get( tab, "vec" );
+	assert( vec.size() == 101 );
+	for ( unsigned int i = 0; i < vec.size(); ++i )
+		assert( doubleApprox( vec[i], 1.0 + sin( 2.0 * PI * i / 100.0 ) ) );
+
+
+	Id plotD( "/ts/graphs/conc2/D.Co" );
+	assert( plotD != Id() );
+	vector< double > vec2 = Field< vector< double > >::get( plotD, "vec" );
+	assert( vec2.size() == 201 );
+	// cout << "\n" << "i" << ": " << "vec[i]" << ",	" << "vec2[i]" << ",	" << "y" << endl;
+	for ( unsigned int i = 0; i < vec2.size(); ++i ) {
+		double y = 1.0 + sin( ( 2.0 * PI * i ) / 100.0 );
+		// cout << "\n" << i << ": " << vec[i] << ",	" << vec2[i] << ",	" << y << endl;
+		assert( doubleApprox( vec2[i], y ) );
+	}
+
 	Id plotTot1( "/ts/graphs/conc2/tot1.Co" );
 	assert( plotTot1 != Id() );
 	unsigned int size = Field< unsigned int >::get( plotTot1, "size" );
@@ -632,6 +666,11 @@ void rtRunTabSumtot()
 	assert( ret.size() == 1 );
 	assert( ret[0] == Id( "/ts/kinetics/tot1" ) );
 	// We'll analyze the results analytically.
+	vec = Field< vector< double > >::get( plotTot1, "vec");
+	assert( vec.size() == 201 );
+	for ( unsigned int i = 1; i < vec.size(); ++i )
+		assert( doubleEq( vec[i], 1 * CONCSCALE ) );
+
 
 	/////////////////////////////////////////////////////////////////////
 	shell->doDelete( modelId );
