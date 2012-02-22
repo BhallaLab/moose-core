@@ -3,6 +3,7 @@ TARGET = _device.o
 OBJ = PulseGen.o	\
 	DiffAmp.o	\
 	PIDController.o	\
+	RC.o	
 
 HEADERS = \
 	../basecode/header.h 	\
@@ -13,6 +14,7 @@ $(OBJ): $(HEADERS)
 PulseGen.o: PulseGen.h
 DiffAmp.o: DiffAmp.h
 PIDController.o: PIDController.h
+RC.o: RC.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I. -I../basecode -I../msg $< -c
