@@ -23,6 +23,16 @@ DestFinfo::DestFinfo( const string& name, const string& doc,
 
 void DestFinfo::registerFinfo( Cinfo* c )
 {
+	if ( c->baseCinfo() ) {
+		const Finfo* bf = c->baseCinfo()->findFinfo( name() );
+		if ( bf ) {
+			const DestFinfo* df = dynamic_cast< const DestFinfo* >( bf );
+			assert( df );
+			fid_ = df->fid_;
+			c->overrideFunc( fid_, func_ );
+			return;
+		}
+	}
 	fid_ = c->registerOpFunc( func_ );
 //	cout << c->name() << "." << name() << ": " << fid_ << endl;
 }

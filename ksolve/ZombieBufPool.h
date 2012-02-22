@@ -15,6 +15,16 @@ class ZombieBufPool: public ZombiePool
 	public: 
 		ZombieBufPool();
 
+		void setN( const Eref& e, const Qinfo* q, double v );
+		double getN( const Eref& e, const Qinfo* q ) const;
+		void setNinit( const Eref& e, const Qinfo* q, double v );
+		double getNinit( const Eref& e, const Qinfo* q ) const;
+
+		void setConc( const Eref& e, const Qinfo* q, double v );
+		double getConc( const Eref& e, const Qinfo* q ) const;
+		void setConcInit( const Eref& e, const Qinfo* q, double v );
+		double getConcInit( const Eref& e, const Qinfo* q ) const;
+
 		static void zombify( Element* solver, Element* orig );
 		static void unzombify( Element* zombie );
 

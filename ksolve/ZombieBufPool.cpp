@@ -18,11 +18,49 @@
 // Entirely derived from ZombiePool. Only the zombification routines differ.
 const Cinfo* ZombieBufPool::initCinfo()
 {
+		//////////////////////////////////////////////////////////////
+		// Field Definitions
+		//////////////////////////////////////////////////////////////
+		static ElementValueFinfo< ZombieBufPool, double > n(
+			"n",
+			"Number of molecules in pool",
+			&ZombieBufPool::setN,
+			&ZombieBufPool::getN
+		);
+
+		static ElementValueFinfo< ZombieBufPool, double > nInit(
+			"nInit",
+			"Initial value of number of molecules in pool",
+			&ZombieBufPool::setNinit,
+			&ZombieBufPool::getNinit
+		);
+
+		static ElementValueFinfo< ZombieBufPool, double > conc(
+			"conc",
+			"Concentration of molecules in pool",
+			&ZombieBufPool::setConc,
+			&ZombieBufPool::getConc
+		);
+
+		static ElementValueFinfo< ZombieBufPool, double > concInit(
+			"concInit",
+			"Initial value of molecular concentration in pool",
+			&ZombieBufPool::setConcInit,
+			&ZombieBufPool::getConcInit
+		);
+
+	static Finfo* zombieBufPoolFinfos[] = {
+		&n,				// Value
+		&nInit,			// Value
+		&conc,			// Value
+		&concInit,		// Value
+	};
+
 	static Cinfo zombieBufPoolCinfo (
 		"ZombieBufPool",
 		ZombiePool::initCinfo(),
-		0,
-		0,
+		zombieBufPoolFinfos,
+		sizeof( zombieBufPoolFinfos ) / sizeof ( Finfo* ),
 		new Dinfo< ZombieBufPool >()
 	);
 
@@ -36,6 +74,76 @@ static const Cinfo* zombieBufPoolCinfo = ZombieBufPool::initCinfo();
 
 ZombieBufPool::ZombieBufPool()
 {;}
+
+
+//////////////////////////////////////////////////////////////
+// Field functions
+//////////////////////////////////////////////////////////////
+
+void ZombieBufPool::setN( const Eref& e, const Qinfo* q, double v )
+{
+	unsigned int i = convertIdToPoolIndex( e.id() );
+	S_[ e.index().value() ][ i ] = v;
+	Sinit_[ e.index().value() ][ i ] = v;
+}
+
+double ZombieBufPool::getN( const Eref& e, const Qinfo* q ) const
+{
+	return S_[ e.index().value() ][ convertIdToPoolIndex( e.id() ) ];
+}
+
+void ZombieBufPool::setNinit( const Eref& e, const Qinfo* q, double v )
+{
+	setN( e, q, v );
+}
+
+double ZombieBufPool::getNinit( const Eref& e, const Qinfo* q ) const
+{
+	return Sinit_[ e.index().value() ][ convertIdToPoolIndex( e.id() ) ];
+}
+
+void ZombieBufPool::setConc( const Eref& e, const Qinfo* q, double conc )
+{
+	static const Finfo* req = 
+		ZombiePool::initCinfo()->findFinfo( "requestSize" );
+	static const SrcFinfo1< double >* requestSize = dynamic_cast< 
+		const SrcFinfo1< double >* >( req );
+	assert( requestSize );
+
+	unsigned int pool = convertIdToPoolIndex( e.id() );
+	double n = NA * conc * lookupSizeFromMesh( e, requestSize );
+	S_[ e.index().value() ][ pool ] = n;
+	Sinit_[ e.index().value() ][ pool ] = n;
+}
+
+double ZombieBufPool::getConc( const Eref& e, const Qinfo* q ) const
+{
+	static const Finfo* req = 
+		ZombiePool::initCinfo()->findFinfo( "requestSize" );
+	static const SrcFinfo1< double >* requestSize = dynamic_cast< 
+		const SrcFinfo1< double >* >( req );
+	assert( requestSize );
+
+	unsigned int pool = convertIdToPoolIndex( e.id() );
+	return S_[ e.index().value() ][ pool ] / ( NA * lookupSizeFromMesh( e, requestSize ) );
+}
+
+void ZombieBufPool::setConcInit( const Eref& e, const Qinfo* q, double conc )
+{
+	setConc( e, q, conc );
+}
+
+double ZombieBufPool::getConcInit( const Eref& e, const Qinfo* q ) const
+{
+	static const Finfo* req = 
+		ZombiePool::initCinfo()->findFinfo( "requestSize" );
+	static const SrcFinfo1< double >* requestSize = dynamic_cast< 
+		const SrcFinfo1< double >* >( req );
+	assert( requestSize );
+
+	unsigned int pool = convertIdToPoolIndex( e.id() );
+	return Sinit_[ e.index().value() ][ pool ] / ( NA * lookupSizeFromMesh( e, requestSize ) );
+}
 
 
 //////////////////////////////////////////////////////////////
