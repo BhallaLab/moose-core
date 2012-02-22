@@ -233,11 +233,14 @@ void Stoich::innerReinit()
 	assert( y_.size() == localMeshEntries_.size() );
 	assert( Sinit_.size() == S_.size() );
 
-	for ( unsigned int i = 0; i < y_.size(); ++i )
+	for ( unsigned int i = 0; i < y_.size(); ++i ) {
 		y_[i].assign( Sinit_[i].begin(), Sinit_[i].begin() + numVarPools_ );
+	}
 	S_ = Sinit_;
 
-	// updateFuncs( 0, 0 );
+	for ( unsigned int i = 0; i < y_.size(); ++i ) {
+		updateFuncs( i, 0 );
+	}
 	// updateV( 0 );
 }
 
