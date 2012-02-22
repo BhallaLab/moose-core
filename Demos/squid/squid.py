@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Feb 13 11:35:11 2012 (+0530)
 # Version: 
-# Last-Updated: Wed Feb 22 02:27:11 2012 (+0530)
+# Last-Updated: Wed Feb 22 22:44:59 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 731
+#     Update #: 732
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -283,15 +283,6 @@ class SquidModel(moose.Neutral):
         moose.useClock(3, '%s/#[TYPE=Table]' % (self.path), 'process')
         moose.reinit()
         moose.start(runtime)
-        # if (self.inject_delay > 0):
-        #     moose.start(self.inject_delay)
-        # self.squid_axon.inject = self.inject_amp
-        # if (self.inject_dur > 0):
-        #     moose.start(self.inject_dur)
-        # rest = runtime - self.inject_delay - self.inject_dur
-        # self.squid_axon.inject = 0.0
-        # if rest > 0:
-        #     moose.start(rest)
 
     def save_data(self):
         self.Vm_table.xplot('Vm.dat', 'Vm')
