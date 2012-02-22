@@ -17232,4 +17232,9 @@ result don't.
 Some fixes to the interpolation routine. It now correctly deals with 
 StimulusTable input to Pools. It almost seems to handle sumtotals correctly,
 but the t=0 value is wrong. I've hacked this out for the purposes of clearing
-the rest of the regression tests.
+the rest of the regression tests. Checkin 3324.
+
+Fixed the initialization at t=0. Now the quantitative values still come
+out wrong.
+I think this is the millimolar conc issue. Furthermore, I really need to check
+whether the StimulusTable is connecting to conc or n for controlling values.
