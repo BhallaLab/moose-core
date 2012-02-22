@@ -198,6 +198,8 @@ class ReadKkit
 		vector< vector< Id > > volCategories_;
 		vector< Id > compartments_;
 
+		map< Id, int > poolFlags_;
+
 		Shell* shell_;
 
 		static const double EPSILON;
