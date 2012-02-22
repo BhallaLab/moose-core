@@ -643,7 +643,7 @@ void rtRunTabSumtot()
 	vector< double > vec = Field< vector< double > >::get( tab, "vec" );
 	assert( vec.size() == 101 );
 	for ( unsigned int i = 0; i < vec.size(); ++i )
-		assert( doubleApprox( vec[i], 1.0 + sin( 2.0 * PI * i / 100.0 ) ) );
+		assert( doubleApprox( vec[i] / CONCSCALE, 1.0 + sin( 2.0 * PI * i / 100.0 ) ) );
 
 
 	Id plotD( "/ts/graphs/conc2/D.Co" );
@@ -654,7 +654,7 @@ void rtRunTabSumtot()
 	for ( unsigned int i = 0; i < vec2.size(); ++i ) {
 		double y = 1.0 + sin( ( 2.0 * PI * i ) / 100.0 );
 		// cout << "\n" << i << ": " << vec[i] << ",	" << vec2[i] << ",	" << y << endl;
-		assert( doubleApprox( vec2[i], y ) );
+		assert( doubleApprox( vec2[i], y * CONCSCALE ) );
 	}
 
 	Id plotTot1( "/ts/graphs/conc2/tot1.Co" );
@@ -674,6 +674,9 @@ void rtRunTabSumtot()
 		Id( "/ts/graphs/conc1/B.Co" ), "xplot", "check.plot", "B.plot" );
 	assert( ok );
 	ok = SetGet2< string, string >::set(
+		Id( "/ts/graphs/conc2/C.Co" ), "xplot", "check.plot", "C.plot" );
+	assert( ok );
+	ok = SetGet2< string, string >::set(
 		Id( "/ts/graphs/conc2/D.Co" ), "xplot", "check.plot", "D.plot" );
 	assert( ok );
 	ok = SetGet2< string, string >::set(
@@ -685,6 +688,17 @@ void rtRunTabSumtot()
 	assert( vec.size() == 201 );
 	for ( unsigned int i = 0; i < vec.size(); ++i )
 		assert( doubleEq( vec[i], 1 * CONCSCALE ) );
+
+	vec = Field< vector< double > >::get( Id( "/ts/graphs/conc2/tot2.Co" ),
+		"vec");
+	assert( vec.size() == 201 );
+	vec2 = Field< vector< double > >::get(  Id( "/ts/graphs/conc1/B.Co" ),
+		"vec");
+	assert( vec2.size() == 201 );
+	for ( unsigned int i = 0; i < vec.size(); ++i )
+		assert( doubleEq( vec[i], vec2[i] ) );
+	
+	// dA/dt = -0.2 * ( 1 + sin( 2 * PI * t / 10 ) ) * A + 0.1 * (1-A)
 
 	/////////////////////////////////////////////////////////////////////
 	shell->doDelete( modelId );

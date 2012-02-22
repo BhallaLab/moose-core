@@ -17238,3 +17238,6 @@ Fixed the initialization at t=0. Now the quantitative values still come
 out wrong.
 I think this is the millimolar conc issue. Furthermore, I really need to check
 whether the StimulusTable is connecting to conc or n for controlling values.
+
+Fixed ReadKkit conc scaling for tables and deciding whether to connect
+n or conc.
