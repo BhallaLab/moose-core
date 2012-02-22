@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Mon Feb 20 01:41:12 2012 (+0530)
 // Version: 
-// Last-Updated: Wed Feb 22 02:56:44 2012 (+0530)
+// Last-Updated: Wed Feb 22 18:45:55 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 154
+//     Update #: 161
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -98,15 +98,15 @@ const Cinfo* PulseGen::initCinfo()
     ///////////////////////////////////////////////////////////////
     // Dest messages
     ///////////////////////////////////////////////////////////////
-    // static DestFinfo("levelDest",
-    //                  "Handle level value coming from other objects",
-    //                  new OpFunc2< PulseGen, unsigned int, double >(&PulseGen::setLevel));
-    // static DestFinfo("widthDest",
-    //                  "Handle width value coming from other objects",
-    //                  new OpFunc2< PulseGen, unsigned int, double >(&PulseGen::setWidth));
-    // static DestFinfo("delayDest",
-    //                  "Handle delay value coming from other objects",
-    //                  new OpFunc2< PulseGen, unsigned int, double >(&PulseGen::setDelay));
+    static DestFinfo levelIn("levelIn",
+                             "Handle level value coming from other objects",
+                             new OpFunc2< PulseGen, unsigned int, double >(&PulseGen::setLevel));
+    static DestFinfo widthIn("widthIn",
+                             "Handle width value coming from other objects",
+                             new OpFunc2< PulseGen, unsigned int, double >(&PulseGen::setWidth));
+    static DestFinfo delayIn("delayIn",
+                             "Handle delay value coming from other objects",
+                             new OpFunc2< PulseGen, unsigned int, double >(&PulseGen::setDelay));
     
     static DestFinfo input("input",
                            "Handle incoming input that determines gating/triggering onset.",
@@ -149,6 +149,9 @@ const Cinfo* PulseGen::initCinfo()
         &delay,
         &input,
         outputOut(),
+        &levelIn,
+        &widthIn,
+        &delayIn,
         &proc,
     };
     static string doc[] =
