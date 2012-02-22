@@ -249,6 +249,7 @@ SUBDIR = \
 	randnum\
 	scheduling\
 	builtins\
+	device\
 	kinetics \
 	ksolve \
 	regressionTests \
@@ -270,6 +271,7 @@ OBJLIBS =	\
 	randnum/_randnum.o \
 	scheduling/_scheduling.o \
 	builtins/_builtins.o \
+	device/_device.o \
 	kinetics/_kinetics.o \
 	ksolve/_ksolve.o \
 	regressionTests/_rt.o \

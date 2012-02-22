@@ -666,11 +666,25 @@ void rtRunTabSumtot()
 	assert( ret.size() == 1 );
 	assert( ret[0] == Id( "/ts/kinetics/tot1" ) );
 	// We'll analyze the results analytically.
+
+	bool ok = SetGet2< string, string >::set(
+		Id( "/ts/graphs/conc1/A.Co" ), "xplot", "check.plot", "A.plot" );
+	assert( ok );
+	ok = SetGet2< string, string >::set(
+		Id( "/ts/graphs/conc1/B.Co" ), "xplot", "check.plot", "B.plot" );
+	assert( ok );
+	ok = SetGet2< string, string >::set(
+		Id( "/ts/graphs/conc2/D.Co" ), "xplot", "check.plot", "D.plot" );
+	assert( ok );
+	ok = SetGet2< string, string >::set(
+		Id( "/ts/graphs/conc2/tot2.Co" ), "xplot", "check.plot", 
+			"tot2.plot" );
+	assert( ok );
+
 	vec = Field< vector< double > >::get( plotTot1, "vec");
 	assert( vec.size() == 201 );
-	for ( unsigned int i = 1; i < vec.size(); ++i )
+	for ( unsigned int i = 0; i < vec.size(); ++i )
 		assert( doubleEq( vec[i], 1 * CONCSCALE ) );
-
 
 	/////////////////////////////////////////////////////////////////////
 	shell->doDelete( modelId );
