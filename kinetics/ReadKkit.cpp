@@ -730,6 +730,7 @@ Id ReadKkit::buildPool( const vector< string >& args )
 		cout << "ReadKkit::buildPool: Unknown slave_enable flag '" << 
 			slaveEnable << "' on " << args[2] << "\n";
 			*/
+		poolFlags_[pool] = slaveEnable;
 	}
 	assert( pool != Id() );
 	// skip the 10 chars of "/kinetics/"
@@ -1066,8 +1067,20 @@ void ReadKkit::addmsg( const vector< string >& args)
 					false, 1 );
 				destId.element()->zombieSwap( BufPool::initCinfo(), dup );
 			}
-
-			innerAddMsg( src, tabIds_, "output", dest, poolIds_, "set_concInit" );
+			// NSLAVE is 1, CONCSLAVE is 2.
+			map< Id, int >::iterator i = poolFlags_.find( destId );
+			if ( i == poolFlags_.end() || !( i->second & 2 ) ) {
+				innerAddMsg( src, tabIds_, "output", dest, poolIds_, 
+					"set_nInit" );
+			} else {
+				innerAddMsg( src, tabIds_, "output", dest, poolIds_,
+					"set_concInit" );
+				Id tabId( basePath_ + "/kinetics/" + src );
+				assert( tabId != Id() );
+				// Rescale from uM to millimolar.
+				SetGet2< double, double >::set( tabId, "linearTransform",
+					0.001, 0 );
+			}
 			// cout << "Added slave msg from " << src << " to " << dest << endl;
 		}
 	}
