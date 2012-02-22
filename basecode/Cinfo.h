@@ -70,6 +70,12 @@ class Cinfo
 			FuncId registerOpFunc( const OpFunc* f );
 
 			/**
+			 * Used in derived classes, to replace the original OpFunc with
+			 * the new one. 
+			 */
+			void overrideFunc( FuncId fid, const OpFunc* f );
+
+			/**
 			 * Returns the next free value for BindIndex, and keeps track
 			 * of the total number set up.
 			 */
@@ -101,6 +107,11 @@ class Cinfo
 			 * Finds the Cinfo with the specified name.
 			 */
 			static const Cinfo* find( const std::string& name );
+
+			/*
+			 * Returns base Cinfo class. The Neutral returns 0.
+			 */
+			const Cinfo* baseCinfo() const;
 
 			/**
 			 * Finds Finfo by name in the list for this class, 

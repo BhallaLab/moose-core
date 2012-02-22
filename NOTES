@@ -17217,6 +17217,19 @@ Redid Table.
 Some temporary patches to ReadKkit so it clears unit and regression tests for
 now. Checkin 3319.
 Created StimlusTable, derived from TableBase. Incorporated into ReadKkit.
-Clears regression tests for setup, yet to test for its running.
+Clears regression tests for setup, yet to test for its running. Checkin 3321.
 
+Issues with inheritance. When overriding a parental DestFinfo, the
+fids should match up so that messages can go to the correct function
+of the derived class. They don't.
+
+Patched this in DestFinfo top. Need to make corresponding fixes in Cinfo.
+
+This works but the quantitative comparisons with the expected
+result don't.
 ============================================================================
+22 Feb 2012
+Some fixes to the interpolation routine. It now correctly deals with 
+StimulusTable input to Pools. It almost seems to handle sumtotals correctly,
+but the t=0 value is wrong. I've hacked this out for the purposes of clearing
+the rest of the regression tests.

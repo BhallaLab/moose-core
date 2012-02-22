@@ -9,6 +9,7 @@
 
 #include "header.h"
 #include "TableEntry.h"
+#include "TableBase.h"
 #include "Table.h"
 // #include "UpFunc.h"
 

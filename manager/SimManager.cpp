@@ -384,7 +384,10 @@ void SimManager::buildFromKkitTree( const string& method )
 		// cout << "SimManager::buildFromKkitTree: No solvers built\n";
 		 // Don't make any solvers.
 		shell->doUseClock( basePath + "/kinetics/##[TYPE=Pool]", "process", 0);
-		shell->doUseClock( basePath + "/kinetics/##[TYPE=Reac],/kinetics/##[TYPE=Enz", "process", 1);
+		// Normally we would simply say [ISA!=Pool] here. But that puts
+		// a Process operation on the mesh, which should not be done in
+		// this mode as diffusion isn't supported.
+		shell->doUseClock( basePath + "/kinetics/##[ISA!=Pool]", "process", 1);
 	} else {
 		// Id stoich = shell->doCreate( "Stoich", baseId_, "stoich", dims );
 		// Field< string >::set( stoich, "path", basePath + "/##" );
@@ -395,7 +398,9 @@ void SimManager::buildFromKkitTree( const string& method )
 		assert( ret );
 		ret = Field< string >::set( gsl, "method", method );
 		assert( ret );
-		shell->doUseClock( basePath + "/kinetics/mesh", "process", 0);
+		string path0 = basePath + "/kinetics/mesh," + 
+			basePath + "/kinetics/##[ISA=StimulusTable]";
+		shell->doUseClock( path0, "process", 0);
 		shell->doUseClock( basePath + "/stoich/gsl", "process", 1);
 	}
 

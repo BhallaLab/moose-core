@@ -15,6 +15,7 @@
 #include "../scheduling/TickPtr.h"
 #include "../scheduling/Clock.h"
 #include "Arith.h"
+#include "TableBase.h"
 #include "Table.h"
 #include "../biophysics/Synapse.h"
 #include "../biophysics/SynBase.h"
