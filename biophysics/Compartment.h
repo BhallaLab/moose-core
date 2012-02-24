@@ -156,6 +156,7 @@ class Compartment
 			double Ra_;
 			double Vm_;
 			double Im_;
+			double lastIm_;
 			double A_;
 			double B_;
 
@@ -164,7 +165,6 @@ class Compartment
 			double Cm_;
 			double Rm_;
 			// double Ra_;
-			// double Im_;
 			double initVm_;
 			double Inject_;
 			double diameter_;
