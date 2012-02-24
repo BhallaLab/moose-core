@@ -355,6 +355,37 @@ void ReadKkit::objdump( const vector< string >& args)
 
 void ReadKkit::call( const vector< string >& args)
 {
+	/// call /kinetics/foo/notes LOAD notes_string_here
+	if ( args.size() > 3 ) {
+		unsigned int len = args[1].length();
+		if ( ( args[1].substr( len - 5 ) ==  "notes" ) &&
+			args[2] == "LOAD" ) {
+			if ( args[3].length() == 0 )
+				return;
+			string objName = args[1].substr( 0, len - 5 );
+			Id obj( basePath_ + objName + "info" );
+			if ( obj != Id() ) {
+				string notes = "";
+				string space = "";
+				for ( unsigned int i = 3; i < args.size(); ++i ) {
+					unsigned int innerLength = args[i].length();
+					if ( innerLength == 0 )
+						continue;
+					unsigned int start = 0;
+					unsigned int end = innerLength;
+					if ( args[i][0] == '\"' )
+						start = 1;
+					if ( args[i][innerLength - 1] == '\"' )
+						end = innerLength - 1 - start;
+
+					notes += space + args[i].substr( start, end );
+					space = " ";
+				}
+				bool OK = Field< string >::set( obj, "notes", notes );
+				assert( OK );
+			}
+		}
+	}
 }
 
 void ReadKkit::textload( const vector< string >& args)
@@ -655,19 +686,17 @@ Id ReadKkit::buildInfo( Id parent,
 	map< string, int >& m, const vector< string >& args )
 {
 	static vector< int > dim( 1, 1 );
-	Id info = shell_->doCreate( "Neutral", parent, "info", dim, true );
+	Id info = shell_->doCreate( "Annotator", parent, "info", dim, true );
 	assert( info != Id() );
 
-	/*
-	Id info = shell_->doCreate( "KkitInfo", parent, "info", dim );
 	double x = atof( args[ m[ "x" ] ].c_str() );
 	double y = atof( args[ m[ "y" ] ].c_str() );
-	int color = atoi( args[ m[ "color" ] ].c_str() );
 
-	Field< double >::set( info.eref(), "x", x );
-	Field< double >::set( info.eref(), "y", y );
-	Field< int >::set( info.eref(), "color", color );
-	*/
+	Field< double >::set( info, "x", x );
+	Field< double >::set( info, "y", y );
+	Field< string >::set( info, "color", args[ m[ "xtree_fg_req" ] ] );
+	Field< string >::set( info, "textColor", 
+		args[ m[ "xtree_textfg_req" ] ] );
 
 	return info;
 }
@@ -741,7 +770,7 @@ Id ReadKkit::buildPool( const vector< string >& args )
 	// SetGet1< double >::set( pool, "setSize", vol );
 	separateVols( pool, vol );
 
-	// Id info = buildInfo( pool, poolMap_, args );
+	Id info = buildInfo( pool, poolMap_, args );
 
 	/*
 	cout << setw( 20 ) << head << setw( 15 ) << tail << "	" << 
