@@ -342,6 +342,7 @@ Compartment::Compartment()
 	invRm_ = 1.0;
 	Ra_ = 1.0;
 	Im_ = 0.0;
+        lastIm_ = 0.0;
 	Inject_ = 0.0;
 	sumInject_ = 0.0;
 	initVm_ = -0.06;
@@ -436,7 +437,7 @@ void Compartment::setIm( double Im )
 
 double Compartment::getIm() const
 {
-	return Im_;
+	return lastIm_;
 }
 
 void Compartment::setInject( double Inject )
@@ -553,7 +554,8 @@ void Compartment::process( const Eref& e, ProcPtr p )
 		Vm_ += ( A_ - Vm_ * B_ ) * p->dt / Cm_;
 	}
 	A_ = 0.0;
-	B_ = invRm_; 
+	B_ = invRm_;
+        lastIm_ = Im_;
 	Im_ = 0.0;
 	sumInject_ = 0.0;
 	// Send out Vm to channels, SpikeGens, etc.
@@ -573,6 +575,7 @@ void Compartment::innerReinit(  const Eref& e, ProcPtr p )
 	A_ = 0.0;
 	B_ = invRm_;
 	Im_ = 0.0;
+        lastIm_ = 0.0;
 	sumInject_ = 0.0;
 	dt_ = p->dt;
 	
