@@ -17192,8 +17192,8 @@ model only. Clears regression test but complains that it doesn't know how to
 handle the xtab. Checkin 3317.
 
 Next: fix Readkkit to
-	- read table
-	- Handle sumtotals
+	* read table
+	* Handle sumtotals
 	- Read coords
 	- Read annotations
 
@@ -17240,4 +17240,55 @@ I think this is the millimolar conc issue. Furthermore, I really need to check
 whether the StimulusTable is connecting to conc or n for controlling values.
 
 Fixed ReadKkit conc scaling for tables and deciding whether to connect
-n or conc.
+n or conc. Checkin 3327.
+============================================================================
+23 Feb 2012
+Another wishlist, directed towards what it would take to write up:
+
+Spatial sims:
+	- Neuronal geometry		2
+	- Irregular boundary mesh	2
+Numerical engines			
+	- GSSA				1
+	- Smoldyn			2
+	- SigNeur			2
+	- Hsolve			Niraj
+I/O
+	- SBML				Harsha
+	- NeuroML			Aditya/Niraj
+	- NineML			Subha
+	- Data I/O			?
+	- SigNeurML			2
+GUI
+	- Demos				All
+	- Kinetics			Harsha
+	- Neural			Chaitanya
+	- Network			?
+	- MOOGL				Chaitanya
+Platforms
+	- Multithread			OK
+	- Multinode			4
+	- Compile on 3 OSs		Harsha
+
+Total time				15 weeks
+
+
+
+Immediate next step: How to set up annotations and display coords on chemical
+entities, and to use this for kkit reader.
+Options:
+	- Give every object a string and xyz coords. GENESIS does it.
+		- Easy, wasteful, but won't matter much. A bit ugly.
+	- Use individual ext fields. 
+		- Very wasteful, won't matter much.
+	- Make a general annotator class with xyz and a text string. Dangle
+		this off whatever you wish to annotate.
+		- General, wasteful, won't matter much. Can add fields like
+		colour and shape/icon and it would be general.
+
+Implemented option 3. Seems to work. Need to do a regression test based on
+one of the existing models.
+
+Implemented the regression test. Much cleaning up, works now.
+
+============================================================================

@@ -163,6 +163,35 @@ void checkEnzRates( double v )
 	assert( doubleEq( rate, 0.025 ) );
 }
 
+void checkDisplayInfo()
+{
+	Id info( "/rkktest/kinetics/MAPK/MAPK/info" );
+	assert( info != Id() );
+	double x = Field< double >::get( info, "x" );
+	assert( doubleEq( x, -8 ) );
+	double y = Field< double >::get( info, "y" );
+	assert( doubleEq( y, -7 ) );
+	string color = Field< string >::get( info, "color" );
+	assert( color == "35" );
+	string textColor = Field< string >::get( info, "textColor" );
+	assert( textColor == "yellow" );
+	string notes = Field< string >::get( info, "notes" );
+	assert( notes == "The total concn. of MAPK is 300nM  from Kholodenko, 2000." );
+
+	Id enzInfo( "/rkktest/kinetics/MAPK/int1/2/info" );
+	assert( enzInfo != Id() );
+	x = Field< double >::get( enzInfo, "x" );
+	assert( doubleEq( x, -4 ) );
+	y = Field< double >::get( enzInfo, "y" );
+	assert( doubleEq( y, 5 ) );
+	color = Field< string >::get( enzInfo, "color" );
+	assert( color == "red" );
+	textColor = Field< string >::get( enzInfo, "textColor" );
+	assert( textColor == "30" );
+	notes = Field< string >::get( enzInfo, "notes" );
+	assert( notes == "Km is 8nM and Vmax is 0.25nM.s-1  from Kholodenko, 2000." );
+}
+
 void rtReadKkit()
 {
 	const double VOL = 1.666666666666e-21;
@@ -178,6 +207,7 @@ void rtReadKkit()
 	checkConc();
 	checkReacRates( VOL );
 	checkEnzRates( VOL );
+	checkDisplayInfo();
 	
 	/////////////////////////////////////////////////////////////////////
 	// Now change the volume and do it again.
