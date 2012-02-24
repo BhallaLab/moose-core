@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Feb 22 23:24:21 2012 (+0530)
 # Version: 
-# Last-Updated: Wed Feb 22 23:45:40 2012 (+0530)
+# Last-Updated: Thu Feb 23 23:54:52 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 43
+#     Update #: 83
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -35,10 +35,10 @@ from electronics import ClampCircuit
 
 class SquidDemo(object):
     def __init__(self):
-        self.model_container = moose.Neutral('model')
-        self.data_container = moose.Neutral('data')
-        self.squid_axon = SquidAxon('model/squid_axon')
-        self.clamp_ckt = ClampCircuit('model/electronics', self.squid_axon)
+        self.model_container = moose.Neutral('/model')
+        self.data_container = moose.Neutral('/data')
+        self.squid_axon = SquidAxon('/model/squid_axon')
+        self.clamp_ckt = ClampCircuit('/model/electronics', self.squid_axon)
         self.simdt = 0.0
 
         self.vm_table = moose.Table('/data/vm')
@@ -57,9 +57,10 @@ class SquidDemo(object):
         moose.useClock(1, '%s/#[TYPE=Compartment]' % (self.model_container.path), 'process')
         moose.useClock(2, '%s/#[TYPE=HHChannel]' % (self.squid_axon.path), 'process')
         moose.useClock(3, '%s/#[TYPE=Table]' % (self.data_container.path), 'process')
+        moose.useClock(0, '/data/Im', 'process')
         moose.reinit()
         
-    def run(self, clamp_mode, runtime):
+    def run(self, runtime, clamp_mode=1):
         if clamp_mode == 0:
             self.clamp_ckt.do_voltage_clamp(self.simdt)
         else:
@@ -71,10 +72,19 @@ class SquidDemo(object):
             tab = moose.Table(child)
             tab.xplot('%s.dat' % (tab.name), tab.name)
 
+import sys            
+clamp_mode = 'vclamp'
 if __name__ == '__main__':
     demo = SquidDemo()
+    if len(sys.argv) > 1:
+        clamp_mode = sys.argv[1]
+    if clamp_mode == 'iclamp':
+        demo.clamp_ckt.configure_pulses()
+    else:
+        demo.clamp_ckt.configure_pulses(baselevel=0.0, firstdelay=10.0, firstlevel=0.0, firstwidth=0.0, seconddelay=0.0, secondlevel=50.0, secondwidth=20.0)
+
     demo.schedule(1e-2, 0.1)
-    demo.run(1, 50.0)
+    demo.run(50.0, clamp_mode)
     demo.save_data()
 
 # 
