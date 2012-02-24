@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Feb 22 00:53:38 2012 (+0530)
 # Version: 
-# Last-Updated: Wed Feb 22 23:38:14 2012 (+0530)
+# Last-Updated: Thu Feb 23 23:57:49 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 136
+#     Update #: 150
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -40,11 +40,13 @@ class ClampCircuit(moose.Neutral):
         self.vclamp = moose.DiffAmp(path+'/vclamp')
         self.iclamp = moose.DiffAmp(path+'/iclamp')
         self.pid = moose.PIDController(path+'/pid')
+        self.pulsegen.count = 3
         self.pulsegen.firstLevel = 25.0
         self.pulsegen.firstWidth = 50.0
         self.pulsegen.firstDelay = 2.0
         self.pulsegen.secondDelay = 1e6
         self.pulsegen.trigMode = 0
+        self.pulsegen.delay[2] = 1e9
         self.lowpass.R = 1.0
         self.lowpass.C = 0.03
         self.iclamp.gain = 0.0
@@ -64,9 +66,12 @@ class ClampCircuit(moose.Neutral):
         moose.connect(self.pid, "outputOut", compartment, "injectMsg")
         # TODO: setup tables for recording current and voltage clamp current.
         # injections We have to maintain two tables as MOOSE does not
-        # report the correct Compartment injection current.
+        # report the correct Compartment injection current.        
+        current_table = moose.Table('/data/Im')
+        moose.connect(current_table, 'requestData', compartment, 'get_Im')
 
-    def configure_pulses(self, firstlevel=0.1, firstdelay=5.0, firstwidth=40.0, secondlevel=0.0, seconddelay=1e6, secondwidth=0.0):
+    def configure_pulses(self, baselevel=0.0, firstlevel=0.1, firstdelay=5.0, firstwidth=40.0, secondlevel=0.0, seconddelay=1e6, secondwidth=0.0):
+        self.pulsegen.baseLevel = baselevel
         self.pulsegen.firstLevel = firstlevel
         self.pulsegen.firstWidth = firstwidth
         self.pulsegen.firstDelay = firstdelay
@@ -79,7 +84,7 @@ class ClampCircuit(moose.Neutral):
         self.lowpass.C = 0.003 # uF
         self.vclamp.gain = 1.0
         self.iclamp.gain = 0.0
-        self.pid.gain = 0.7e-6
+        self.pid.gain = 0.5
         self.pid.tauD = simdt
         self.pid.tauI = 2 * simdt
             
