@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Sat Feb 25 16:03:59 2012 (+0530)
 // Version: 
-// Last-Updated: Sun Feb 26 01:59:22 2012 (+0530)
+// Last-Updated: Sun Feb 26 02:01:55 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 294
+//     Update #: 295
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -93,7 +93,7 @@ HDF5DataWriter::HDF5DataWriter()
 
 HDF5DataWriter::~HDF5DataWriter()
 {
-    ;
+    flush();
 }
 
 /**
