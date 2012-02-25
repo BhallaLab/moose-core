@@ -239,6 +239,11 @@ else
 #	CXX = CC	# Choose between Solaris CC and g++ on a Solaris machine
 endif
 
+ifdef USE_HDF5
+	CXXFLAGS+= -DUSE_HDF5 -I/usr/local/hdf5/include
+	LIBS+= -lhdf5
+endif
+
 LD = ld
 
 SUBDIR = \
