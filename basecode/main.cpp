@@ -197,25 +197,31 @@ Id init( int argc, char** argv )
 	// Shell::initCinfo()->create( shellId, "root", 1 );
 
 	Id clockId = Id::nextId();
+	assert( clockId.value() == 1 );
+	Id tickId = Id::nextId();
+	Id classMasterId = Id::nextId();
 
 	Shell* s = reinterpret_cast< Shell* >( shellId.eref().data() );
 	s->setShellElement( shelle );
 	s->setHardware( numThreads, numCores, numNodes, myNode );
 	s->loadBalance();
 
+	/// Sets up the Elements that represent each class of Msg.
+	Msg::initMsgManagers();
+
 	// Element* clocke = 
 	new Element( clockId, Clock::initCinfo(), "clock", dims, 1, 1 );
 
-	// Clock::initCinfo()->postCreationFunc( clockId, clocke );
-	// Should put this initialization stuff within the Clock creation
-	// step. This means I need to add an optional init func into the Cinfo
-	// constructor, or to add the init func as a virtual func in Data.
-	Id tickId( 2 );
+	// Some ugly hacks here to shift the Tick object to be Id(2).
+	Id::elements()[2] = Id::elements().back();
+	tickId.element()->id_ = 2;
+	Id::elements().pop_back();
+
+	// Id tickId( 2 );
 	assert( tickId() != 0 );
 	assert( tickId.value() == 2 );
 	assert( tickId()->getName() == "tick" ) ;
 
-	Id classMasterId( 3 );
 	new Element( classMasterId, Neutral::initCinfo(), "classes", dims, 1, 1 );
 
 	assert ( shellId == Id() );
@@ -224,8 +230,6 @@ Id init( int argc, char** argv )
 	assert( classMasterId == Id( 3 ) );
 
 
-	/// Sets up the Elements that represent each class of Msg.
-	Msg::initMsgManagers();
 
 	s->connectMasterMsg();
 

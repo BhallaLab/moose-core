@@ -29,7 +29,7 @@ const MsgId Msg::setMsg = 1;
 Id Msg::msgManagerId_;
 vector< Id > msgMgrs;
 
-Msg::Msg( MsgId mid, Element* e1, Element* e2, Id managerId )
+Msg::Msg( MsgId mid, Element* e1, Element* e2, Id mgrId )
 	: mid_( mid), e1_( e1 ), e2_( e2 )
 {
 	// assert( mid_ < msg_.size() );
@@ -39,10 +39,24 @@ Msg::Msg( MsgId mid, Element* e1, Element* e2, Id managerId )
 	msg_[mid_] = this;
 	e1->addMsg( mid_ );
 	e2->addMsg( mid_ );
+	MsgDataHandler * mdh = dynamic_cast< MsgDataHandler* >( 
+		mgrId.element()->dataHandler() );
+	assert( mdh );
+	mdh->addMid( mid_ );
 }
 
 Msg::~Msg()
 {
+	/*
+	 * I have to do this in the derived classes: the virtual funcs don't
+	 * work here.
+	Id mgrId = managerId();
+	MsgDataHandler * mdh = dynamic_cast< MsgDataHandler* >( 
+		mgrId.element()->dataHandler() );
+	assert( mdh );
+	mdh->dropMid( mid_ );
+	*/
+
 	msg_[ mid_ ] = 0;
 	e1_->dropMsg( mid_ );
 	e2_->dropMsg( mid_ );
@@ -317,55 +331,44 @@ void Msg::initMsgManagers()
 	new Element( SingleMsg::managerId_, SingleMsg::initCinfo(), 
 		"singleMsg", new MsgDataHandler( &dummyDinfo, dims, 2, true ) );
 
-	Shell::adopt( Id(), msgManagerId_ );
-	Shell::adopt( msgManagerId_, SingleMsg::managerId_ );
 	msgMgrs.push_back( SingleMsg::managerId_ );
 
 	OneToOneMsg::managerId_ = Id::nextId();
 	new Element( OneToOneMsg::managerId_, OneToOneMsg::initCinfo(),
 		"oneToOneMsg", new MsgDataHandler( &dummyDinfo, dims, 2, true ) );
-	Shell::adopt( msgManagerId_, OneToOneMsg::managerId_ );
 	msgMgrs.push_back( OneToOneMsg::managerId_ );
 
 	OneToAllMsg::managerId_ = Id::nextId();
 	new Element( OneToAllMsg::managerId_, OneToAllMsg::initCinfo(), 
 		"oneToAllMsg", new MsgDataHandler( &dummyDinfo, dims, 2, true ) );
-	Shell::adopt( msgManagerId_, OneToAllMsg::managerId_ );
 	msgMgrs.push_back( OneToAllMsg::managerId_ );
 
 	DiagonalMsg::managerId_ = Id::nextId();
 	new Element( DiagonalMsg::managerId_, DiagonalMsg::initCinfo(), 
 		"diagonalMsg", new MsgDataHandler( &dummyDinfo, dims, 2, true ) );
-	Shell::adopt( msgManagerId_, DiagonalMsg::managerId_ );
 	msgMgrs.push_back( DiagonalMsg::managerId_ );
 
 	SparseMsg::managerId_ = Id::nextId();
 	new Element( SparseMsg::managerId_, SparseMsg::initCinfo(), 
 		"sparseMsg", new MsgDataHandler( &dummyDinfo, dims, 2, true ) );
-	Shell::adopt( msgManagerId_, SparseMsg::managerId_ );
 	msgMgrs.push_back( SparseMsg::managerId_ );
-
-	/*
-	AssignmentMsg::managerId_ = Id::nextId();
-	new Element( AssignmentMsg::managerId_, AssignmentMsg::initCinfo(),
-		"assignmentMsg", new MsgDataHandler( &dummyDinfo ) );
-	Shell::adopt( msgManagerId_, AssignmentMsg::managerId_ );
-	msgMgrs.push_back( AssignmentMsg::managerId_ );
-
-	AssignVecMsg::managerId_ = Id::nextId();
-	new Element( AssignVecMsg::managerId_, AssignVecMsg::initCinfo(),
-		"assignVecMsg", new MsgDataHandler( &dummyDinfo ) );
-	Shell::adopt( msgManagerId_, AssignVecMsg::managerId_ );
-	msgMgrs.push_back( AssignVecMsg::managerId_ );
-	*/
 
 	ReduceMsg::managerId_ = Id::nextId();
 	new Element( ReduceMsg::managerId_, ReduceMsg::initCinfo(),
 		"ReduceMsg", new MsgDataHandler( &dummyDinfo, dims, 2, true ) );
-	Shell::adopt( msgManagerId_, ReduceMsg::managerId_ );
 	msgMgrs.push_back( ReduceMsg::managerId_ );
 
 	msgMgrs.push_back( msgManagerId_ );
+
+	// Do the 'adopt' only after all the message managers exist - we need
+	// the OneToAll manager for the adoption messages themselves.
+	Shell::adopt( Id(), msgManagerId_ );
+	Shell::adopt( msgManagerId_, SingleMsg::managerId_ );
+	Shell::adopt( msgManagerId_, OneToOneMsg::managerId_ );
+	Shell::adopt( msgManagerId_, OneToAllMsg::managerId_ );
+	Shell::adopt( msgManagerId_, DiagonalMsg::managerId_ );
+	Shell::adopt( msgManagerId_, SparseMsg::managerId_ );
+	Shell::adopt( msgManagerId_, ReduceMsg::managerId_ );
 }
 
 void destroyMsgManagers()

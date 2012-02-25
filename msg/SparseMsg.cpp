@@ -10,6 +10,7 @@
 #include "header.h"
 #include "SparseMatrix.h"
 #include "SparseMsg.h"
+#include "MsgDataHandler.h"
 #include "../randnum/randnum.h"
 #include "../biophysics/Synapse.h"
 #include "../shell/Shell.h"
@@ -205,7 +206,10 @@ SparseMsg::SparseMsg( MsgId mid, Element* e1, Element* e2 )
 
 SparseMsg::~SparseMsg()
 {
-	;
+	MsgDataHandler * mdh = dynamic_cast< MsgDataHandler* >( 
+		managerId_.element()->dataHandler() );
+	assert( mdh );
+	mdh->dropMid( mid_ );
 }
 
 unsigned int rowIndex( const Element* e, const DataId& d )
