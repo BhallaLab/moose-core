@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Tue Dec 30 23:36:01 2008 (+0530)
 // Version: 
-// Last-Updated: Wed Feb 22 18:34:50 2012 (+0530)
+// Last-Updated: Wed Feb 22 23:39:31 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 332
+//     Update #: 334
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -118,6 +118,7 @@ const Cinfo* PIDController::initCinfo()
         new ReadOnlyValueFinfo<PIDController, double>( "e_previous",
                                                        "The error term for previous step.",
                                                        &PIDController::getEPrevious),
+        outputOut(),
         new DestFinfo( "commandIn",
                        "Command (desired value) input. This is known as setpoint (SP) in"
                        " control theory." ,
@@ -270,7 +271,6 @@ double PIDController::getEPrevious(  ) const
 
 void PIDController::process(const Eref& e,  ProcPtr proc )
 {
-    double currTime = proc->currTime;
     double dt = proc->dt;
     e_previous_ = error_;
     error_ = command_ - sensed_;
