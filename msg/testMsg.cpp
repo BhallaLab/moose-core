@@ -225,11 +225,104 @@ void testAssortedMsg()
 	cout << "." << flush;
 }
 
+// Reported as a bug by Subha 22 Feb 2012.
+void testMsgElementListing()
+{
+	Eref sheller = Id().eref();
+	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+	vector< int > dimensions;
+	Id pa = shell->doCreate( "Neutral", Id(), "pa", dimensions );
+	dimensions.push_back( 5 );
 
+
+	///////////////////////////////////////////////////////////
+	// Set up the objects.
+	///////////////////////////////////////////////////////////
+	Id a1 = shell->doCreate( "Arith", pa, "a1", dimensions );
+	Id a2 = shell->doCreate( "Arith", pa, "a2", dimensions );
+
+	Id b1 = shell->doCreate( "Arith", pa, "b1", dimensions );
+	Id b2 = shell->doCreate( "Arith", pa, "b2", dimensions );
+
+	Id c1 = shell->doCreate( "Arith", pa, "c1", dimensions );
+	Id c2 = shell->doCreate( "Arith", pa, "c2", dimensions );
+
+	Id d1 = shell->doCreate( "Arith", pa, "d1", dimensions );
+	Id d2 = shell->doCreate( "Arith", pa, "d2", dimensions );
+
+	Id e1 = shell->doCreate( "Arith", pa, "e1", dimensions );
+	Id e2 = shell->doCreate( "Arith", pa, "e2", dimensions );
+
+	///////////////////////////////////////////////////////////
+	// Set up messaging
+	///////////////////////////////////////////////////////////
+	MsgId m1 = shell->doAddMsg( "Single", 
+		ObjId( a1, 3 ), "output", ObjId( a2, 1 ), "arg1" );
+	assert( m1 != Msg::bad );
+	MsgId m2 = shell->doAddMsg( "OneToAll", 
+		ObjId( b1, 2 ), "output", ObjId( b2, 0 ), "arg1" );
+	assert( m2 != Msg::bad );
+	MsgId m3 = shell->doAddMsg( "OneToOne", 
+		ObjId( c1, 0 ), "output", ObjId( c2, 0 ), "arg1" );
+	assert( m3 != Msg::bad );
+	MsgId m4 = shell->doAddMsg( "Diagonal", 
+		ObjId( d1, 0 ), "output", ObjId( d2, 0 ), "arg1" );
+	assert( m4 != Msg::bad );
+	MsgId m5 = shell->doAddMsg( "Sparse", 
+		ObjId( e1, 0 ), "output", ObjId( e2, 0 ), "arg1" );
+	assert( m5 != Msg::bad );
+
+	///////////////////////////////////////////////////////////
+	// List messages
+	///////////////////////////////////////////////////////////
+	Id manager( "/Msgs" );
+	assert( manager != Id() );
+	vector< Id > children = 
+		Field< vector< Id > >::get( manager, "children" );
+	assert( children.size() == 6 );
+	assert( children[0].element()->getName() == "singleMsg" );
+	assert( children[1].element()->getName() == "oneToOneMsg" );
+	assert( children[2].element()->getName() == "oneToAllMsg" );
+	assert( children[3].element()->getName() == "diagonalMsg" );
+	assert( children[4].element()->getName() == "sparseMsg" );
+	assert( children[5].element()->getName() == "ReduceMsg" );
+
+	/*
+	// A remarkably large number of some message classes, including 645
+	// OneToAll which are used by parent-child messages. I thought they
+	// were cleaned out as the tests proceed.
+	for ( unsigned int i = 0; i < children.size(); ++i ) {
+		cout << "\nlocalEntries[" << i << "] = " << 
+			children[i].element()->dataHandler()->localEntries() << endl;
+	}
+	*/
+	/*
+	string path = children[0].path();
+	cout << "\nlocalEntries = " << 
+		children[0].element()->dataHandler()->localEntries() << endl;
+	assert( path == "/Msgs/singleMsg[0]" );
+	*/
+	assert( children[0].path() == "/Msgs/singleMsg[0]" );
+	assert( children[1].path() == "/Msgs/oneToOneMsg[0]" );
+	assert( children[2].path() == "/Msgs/oneToAllMsg[0]" );
+	assert( children[3].path() == "/Msgs/diagonalMsg[0]" );
+	assert( children[4].path() == "/Msgs/sparseMsg[0]" );
+	assert( children[5].path() == "/Msgs/ReduceMsg[0]" );
+
+
+	///////////////////////////////////////////////////////////
+	// Next: check that the child messages have the appropriate number
+	// and indices of entries.
+	///////////////////////////////////////////////////////////
+
+	shell->doDelete( pa );
+	cout << "." << flush;
+}
 
 void testMsg()
 {
 	testAssortedMsg();
+	testMsgElementListing();
 }
 
 void testMpiMsg( )

@@ -11,6 +11,7 @@
 #include "ReduceBase.h"
 #include "ReduceFinfo.h"
 #include "ReduceMsg.h"
+#include "MsgDataHandler.h"
 #include "../shell/Shell.h"
 
 Id ReduceMsg::managerId_;
@@ -25,7 +26,10 @@ ReduceMsg::ReduceMsg( MsgId mid, Eref e1, Element* e2, const ReduceFinfoBase* rf
 
 ReduceMsg::~ReduceMsg()
 {
-	;
+	MsgDataHandler * mdh = dynamic_cast< MsgDataHandler* >( 
+		managerId_.element()->dataHandler() );
+	assert( mdh );
+	mdh->dropMid( mid_ );
 }
 
 void ReduceMsg::exec( const Qinfo* q, const double* arg, FuncId fid ) const

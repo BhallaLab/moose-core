@@ -25,6 +25,19 @@ class MsgDataHandler: public DataHandler
 		~MsgDataHandler();
 
 		////////////////////////////////////////////////////////////
+		// Class-specific functions for managing the mids.
+		////////////////////////////////////////////////////////////
+		/// Add a MsgId to the list of them stored on this MsgDataHandler
+		void addMid( MsgId mid );
+
+		/**
+		 * Remove specified MsgId from the list of them stored on 
+		 * this MsgDataHandler. Returns true if it was found and removed,
+		 * false if not found.
+		 */
+		bool dropMid( MsgId mid );
+
+		////////////////////////////////////////////////////////////
 		// Information functions
 		////////////////////////////////////////////////////////////
 
@@ -91,6 +104,7 @@ class MsgDataHandler: public DataHandler
 	protected:
 		char* data_;
 	private:
+		vector< MsgId > mids_;
 };
 
 #endif // _MSG_DATA_HANDLER_H

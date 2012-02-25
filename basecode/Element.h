@@ -23,6 +23,7 @@ class Element
 	friend void testSynapse();
 	friend void testSyncArray( unsigned int, unsigned int, unsigned int );
 	friend void testSparseMsg();
+	friend Id init( int argc, char** argv ); // Accesses id_ field
 	public:
 		/**
 		 * This constructor is used when making zombies. It is used when

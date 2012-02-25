@@ -17290,5 +17290,21 @@ Implemented option 3. Seems to work. Need to do a regression test based on
 one of the existing models.
 
 Implemented the regression test. Much cleaning up, works now.
+Checkin 3333.
 
 ============================================================================
+24 Feb 2012.
+Dealing with a bug in getting Msg Element paths, reported by Subha. The
+immediate bug was fixed, but there are issues still with the   
+localEntries function which always returns 1.
+
+============================================================================
+25 Feb 2012.
+Worked on keeping track of localEntries. This turned out to have multiple
+cascading effects including some nasty initialization sequencing issues and
+a redoing of the various Msg class destructors. Good thing of this effort is
+that the structure for MsgManager data is now sensible, and one could iterate
+through or other wise examine all Msgs of each class. Need to work out API for
+that.
+There is a pending valgrind (memory) problem in a unit test, handle later.
+For now it clears both unit and regression tests.
