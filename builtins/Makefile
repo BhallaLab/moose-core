@@ -19,6 +19,8 @@ OBJ = \
 	StimulusTable.o	\
 	Stats.o	\
 	Interpol2D.o \
+	HDF5WriterBase.o	\
+	HDF5DataWriter.o	\
 	testBuiltins.o	\
 
 HEADERS = \
@@ -37,6 +39,8 @@ Table.o:		TableBase.h Table.h TableEntry.h
 StimlusTable.o:		TableBase.h StimlusTable.h TableEntry.h
 Stats.o:	Stats.h
 Interpol2D.o:	Interpol2D.h
+HDF5WriterBase.o: HDF5WriterBase.h
+HDF5DataWriter.o: HDF5WriterBase.h HDF5DataWriter.h
 testBuiltins.o:	Group.h Arith.h Stats.h ../msg/DiagonalMsg.h ../basecode/SetGet.h
 
 .cpp.o:
