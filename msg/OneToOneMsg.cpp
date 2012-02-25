@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "MsgDataHandler.h"
 #include "OneToOneMsg.h"
 
 Id OneToOneMsg::managerId_;
@@ -20,7 +21,12 @@ OneToOneMsg::OneToOneMsg( MsgId mid, Element* e1, Element* e2 )
 
 OneToOneMsg::~OneToOneMsg()
 {
-	;
+	// I cannot do this in the Msg::~Msg destructor because the virtual
+	// functions  for managerId() don't work there.
+	MsgDataHandler * mdh = dynamic_cast< MsgDataHandler* >( 
+		managerId_.element()->dataHandler() );
+	assert( mdh );
+	mdh->dropMid( mid_ );
 }
 
 void OneToOneMsg::exec( const Qinfo* q, const double* arg, FuncId fid) const

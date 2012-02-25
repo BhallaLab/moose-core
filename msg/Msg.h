@@ -19,7 +19,7 @@ class Msg
 {
 	public:
 		/// Constructor
-		Msg( MsgId mid, Element* e1, Element* e2, Id managerId );
+		Msg( MsgId mid, Element* e1, Element* e2, Id mgrId );
 
 		/// Destructor
 		virtual ~Msg();

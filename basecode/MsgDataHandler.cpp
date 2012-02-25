@@ -29,6 +29,26 @@ MsgDataHandler::~MsgDataHandler()
 {;} // No data to destroy.
 
 /////////////////////////////////////////////////////////////////////////
+// Class specific functions
+/////////////////////////////////////////////////////////////////////////
+void MsgDataHandler::addMid( MsgId mid )
+{
+	mids_.push_back( mid );
+}
+
+/// Returns true if the mid was indeed removed. False if not found.
+bool MsgDataHandler::dropMid( MsgId mid )
+{
+	// Oh, no, not the STL monstrosity again
+	vector< MsgId >::iterator end = 
+		remove( mids_.begin(), mids_.end(), mid );
+	bool ret = ( end == mids_.end() );
+	mids_.erase( end, mids_.end() );
+	return !ret;
+}
+
+
+/////////////////////////////////////////////////////////////////////////
 // Information functions
 /////////////////////////////////////////////////////////////////////////
 
@@ -44,13 +64,16 @@ char* MsgDataHandler::data( DataId index ) const
 /// Later do something intelligent based on # of Msgs of current type.
 // unsigned int MsgDataHandler::totalEntries() const
 
-/// Later do something intelligent based on # of Msgs of current type.
+/// How many mids have been declared?
 unsigned int MsgDataHandler::localEntries() const {
-	return 1;
+	return mids_.size();
 }
 
+/// Converts index into a mid, returns true if it is present here.
 bool MsgDataHandler::isDataHere( DataId index ) const {
-	return 1;
+	MsgId mid = index.value();
+	vector< MsgId >::const_iterator i = find( mids_.begin(), mids_.end(), mid );
+	return ( i != mids_.end() );
 }
 
 bool MsgDataHandler::isAllocated() const {
@@ -64,8 +87,8 @@ unsigned int MsgDataHandler::linearIndex( DataId di ) const {
 vector< vector< unsigned int > > 
 	MsgDataHandler::pathIndices( DataId di ) const
 {
-	vector< vector< unsigned int > > ret( pathDepth_ );
-	assert( pathDepth_ >= 3 );
+	vector< vector< unsigned int > > ret( pathDepth_ + 1 );
+	assert( pathDepth_ >= 2 );
 	vector < unsigned int > temp( 1, di.value() );
 	ret[2] = temp;
 	return ret;
@@ -117,22 +140,20 @@ void MsgDataHandler::process( const ProcInfo* p, Element* e,
 	;
 }
 
-/// Another unlikely function for MsgDataHandler
+/**
+ * forall: Implementation pending.
+ */
 void MsgDataHandler::forall( const OpFunc* f, Element* e, const Qinfo* q,
 	const double* arg, unsigned int argSize, unsigned int numArgs ) const
 {
 	;
 }
 
+/// Perhaps can return the mids_.
 unsigned int MsgDataHandler::getAllData( vector< char* >& dataVec ) const
 {
 	dataVec.resize( 0 );
-	char* temp = data_;
-	for ( unsigned int i = 0; i < localEntries(); ++i ) {
-		dataVec.push_back( temp );
-		temp += dinfo()->size();
-	}
-	return dataVec.size();
+	return 0;
 }
 
 /////////////////////////////////////////////////////////////////////////

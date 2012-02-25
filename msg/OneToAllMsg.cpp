@@ -9,6 +9,7 @@
 
 #include "header.h"
 #include "OneToAllMsg.h"
+#include "MsgDataHandler.h"
 
 Id OneToAllMsg::managerId_;
 
@@ -26,7 +27,19 @@ OneToAllMsg::~OneToAllMsg()
 	cout << "Deleting OneToAllMsg from " << e1_->getName() << " to " <<
 		e2_->getName() << endl;
 		*/
-	;
+	// I cannot do this in the Msg::~Msg destructor because the virtual
+	// functions  for managerId() don't work there.
+	// Here we have a special case: The parent-child messages are
+	// OneToAll. So when cleaning up the whole simulation, it removes the
+	// managerId_.element() while there are still some parent-child
+	// messages present. For protection, don't do the deletion if the
+	// element has gone.
+	if ( managerId_.element() ) {
+		MsgDataHandler * mdh = dynamic_cast< MsgDataHandler* >( 
+			managerId_.element()->dataHandler() );
+		assert( mdh );
+		mdh->dropMid( mid_ );
+	}
 }
 
 /**

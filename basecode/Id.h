@@ -16,6 +16,7 @@
  */
 class Id
 {
+	friend Id init( int argc, char** argv ); // accesses Id::elements().
 	public:
 		//////////////////////////////////////////////////////////////
 		//	Id creation

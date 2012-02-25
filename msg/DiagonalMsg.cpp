@@ -9,6 +9,7 @@
 
 #include "header.h"
 #include "DiagonalMsg.h"
+#include "MsgDataHandler.h"
 
 // Static field declaration
 Id DiagonalMsg::managerId_;
@@ -22,7 +23,10 @@ DiagonalMsg::DiagonalMsg( MsgId mid, Element* e1, Element* e2 )
 
 DiagonalMsg::~DiagonalMsg()
 {
-	;
+	MsgDataHandler * mdh = dynamic_cast< MsgDataHandler* >( 
+		managerId_.element()->dataHandler() );
+	assert( mdh );
+	mdh->dropMid( mid_ );
 }
 
 /**
