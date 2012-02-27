@@ -95,6 +95,11 @@ const Cinfo* TableBase::initCinfo()
 			"dotp (Dot product, not yet implemented).",
 			new OpFunc2< TableBase, vector< double >, string >(
 				&TableBase::compareVec ) );
+                
+                static DestFinfo clearVec(
+                        "clearVec",
+                        "Handles request to clear the data vector",
+                        new OpFunc0< TableBase > (&TableBase::clearVec));
 
 		//////////////////////////////////////////////////////////////
 		// SharedMsg Definitions
@@ -126,6 +131,7 @@ const Cinfo* TableBase::initCinfo()
 		&loadXplot,			// DestFinfo
 		&compareXplot,		// DestFinfo
 		&compareVec,		// DestFinfo
+                &clearVec,
 		&tableEntryFinfo,	// FieldElementFinfo
 	};
 
@@ -368,6 +374,11 @@ void TableBase::compareVec( vector< double > temp, string op )
 
 	if ( hop == "dotp" )
 		cout << "TableBase::compareVec: DotProduct not yet done\n";
+}
+
+void TableBase::clearVec()
+{
+    vec_.resize( 0 );
 }
 
 //////////////////////////////////////////////////////////////
