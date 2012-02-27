@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Sat Feb 25 14:39:19 2012 (+0530)
 // Version: 
-// Last-Updated: Sun Feb 26 01:16:28 2012 (+0530)
+// Last-Updated: Mon Feb 27 23:05:31 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 35
+//     Update #: 48
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -39,14 +39,19 @@ class HDF5WriterBase
     void setFilename(string filename);
     string getFilename() const;
     bool isOpen() const;
-    virtual void addObject(string path);
+    void setMode(unsigned int mode);
+    unsigned int getMode() const;
+    virtual void flush();
+    
     static const Cinfo* initCinfo();
     
   protected:
-    map <string, hid_t> object_node_map_;
+    herr_t openFile();
+    
+    map <string, hid_t> nodemap_;
     hid_t filehandle_;
-    unsigned int openmode_;
     string filename_;
+    unsigned int openmode_;
 };
 
 #endif // _HDF5IO_H

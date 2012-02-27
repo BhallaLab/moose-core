@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Sat Feb 25 15:47:23 2012 (+0530)
 // Version: 
-// Last-Updated: Sun Feb 26 01:54:17 2012 (+0530)
+// Last-Updated: Mon Feb 27 09:58:21 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 33
+//     Update #: 44
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -41,14 +41,20 @@ class HDF5DataWriter: public HDF5WriterBase
     static const hssize_t CHUNK_SIZE;
     HDF5DataWriter();
     virtual ~HDF5DataWriter();
-    void flush();
+    void setFlushLimit(unsigned int limit);
+    unsigned int getFlushLimit() const;
+    // void flush();
     void process(const Eref &e, ProcPtr p);
     void reinit(const Eref &e, ProcPtr p);
-    virtual void addObject(string path);
+    void recvData(const Eref& e, const Qinfo* q, PrepackedBuffer pb);
+    virtual void flush();
     static const Cinfo* initCinfo();
   protected:
+    unsigned int flushLimit_;
+    map <string, vector <double> > datamap_;
     hid_t get_dataset(string path);
     hid_t create_dataset(hid_t parent, string name);
+    herr_t appendToDataset(hid_t dataset, const vector<double>& data);
 };
 #endif // _HDF5DATAWRITER_H
 #endif // USE_HDF5
