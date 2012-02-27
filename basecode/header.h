@@ -90,6 +90,7 @@ class FuncBarrier;
 #include "DataHandler.h"
 #include "BlockHandler.h"
 #include "ZeroDimHandler.h"
+#include "ZeroDimParallelHandler.h"
 #include "OneDimHandler.h"
 #include "TwoDimHandler.h"
 #include "DataDimensions.h"
