@@ -17270,6 +17270,8 @@ Platforms
 	- Multinode			4
 	- Compile on 3 OSs		Harsha
 
+DOCS
+
 Total time				15 weeks
 
 
@@ -17307,4 +17309,23 @@ that the structure for MsgManager data is now sensible, and one could iterate
 through or other wise examine all Msgs of each class. Need to work out API for
 that.
 There is a pending valgrind (memory) problem in a unit test, handle later.
-For now it clears both unit and regression tests.
+For now it clears both unit and regression tests. Checkin 3336.
+
+============================================================================
+26 Feb 2012
+Look at GSSA. Easy enough to extend to many mesh entries, as we did with
+Stoich. Hard thing is to sort out diffusion at junctions: perhaps borrow
+from tau-leap and/or Avrama's MesoRD. Either way, approximations. Also will
+have to do the stochastic calculation of diffusive mol transfer just once, and
+then inform both voxels about what happened. Good thing is that each mol is
+independent at this stage.
+
+Got GssaStoich.cpp to compile with changes to handle arrays of mols.
+Still to come:
+- set up a data handler to let it spoof being in an array.
+- Deal with diff.
+
+============================================================================
+27 Feb 2012
+Added a bit of documentation about OpFuncs, EpFuncs, and UpFuncs. Some more
+yet to come.

@@ -39,11 +39,12 @@ class GssaStoich: public Stoich
 		// Functions used by the GillespieIntegrator
 		///////////////////////////////////////////////////
 		void rebuildMatrix();
-		void updateDependentRates( const vector< unsigned int >& deps );
-		void updateDependentMathExpn( 
+		void updateDependentRates( unsigned int meshIndex,
 			const vector< unsigned int >& deps );
-		void updateAllRates();
-		unsigned int pickReac();
+		void updateDependentMathExpn( unsigned int meshIndex,
+			const vector< unsigned int >& deps );
+		void updateAllRates( unsigned int meshIndex );
+		unsigned int pickReac( unsigned int meshIndex );
 
 		static const Cinfo* initCinfo();
 	private:
@@ -79,11 +80,11 @@ class GssaStoich: public Stoich
 		// These functions control the updates of state
 		// variables by calling the functions in the StoichMatrix.
 		///////////////////////////////////////////////////
-		void updateV( );
-		void updateRates( vector< double>* yprime, double dt  );
+		// void updateV( );
+		// void updateRates( vector< double>* yprime, double dt  );
 
 		// virtual func to handle externally imposed changes in mol N
-		void innerSetMolN( double y, unsigned int i );
+		// void innerSetMolN( double y, unsigned int i );
 		
 		///////////////////////////////////////////////////
 		// Internal fields.
@@ -93,8 +94,9 @@ class GssaStoich: public Stoich
 		 * Vector of rates of reactions. This is a state vector because
 		 * we don't recalculate it each time, only the subset that are
 		 * changed by the last reaction.
+		 * One vector of v per mesh entry.
 		 */
-		vector< double > v_;
+		vector< vector< double > > v_;
 
 		/**
 		 * Specifies method to use for calculation. Currently
@@ -123,8 +125,9 @@ class GssaStoich: public Stoich
 
 		/**
 		 * atot is the total propensity of all the reacns in the system
+		 * One per mesh entry.
 		 */
-		double atot_;
+		vector< double > atot_;
 
 		/**
 		 * Here we make a nested structure to handle quick lookup
@@ -137,7 +140,7 @@ class GssaStoich: public Stoich
 		 * when the current calculation has been interrupted by a 
 		 * checkpoint before time t is reached.
 		 */
-		double t_;
+		vector< double > t_;
 
 		/**
 		 * Whenever an external input has invalidated the
