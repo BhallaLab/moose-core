@@ -17328,4 +17328,8 @@ Still to come:
 ============================================================================
 27 Feb 2012
 Added a bit of documentation about OpFuncs, EpFuncs, and UpFuncs. Some more
-yet to come.
+yet to come. Checkin 3340.
+
+Added a data handler that will get all threads to converge on to a single
+object, in this case the GssaStoich.
+============================================================================
