@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Tue Feb 21 20:22:19 2012 (+0530)
+# Last-Updated: Mon Feb 27 18:47:27 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1250
+#     Update #: 1251
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -234,7 +234,7 @@ import _moose
 from _moose import __version__, VERSION, SVN_REVISION, useClock, setClock, start, reinit, stop, isRunning, loadModel, getFieldDict, Id, ObjId, exists, seed, wildcardFind
 
 # Dict of available MOOSE class names. This is faster for look-up
-_moose_classes = {child.getPath().rpartition('/')[-1]: True for child in Id('/classes')[0].getField('children')}
+_moose_classes = dict([(child.getPath().rpartition('/')[-1], True) for child in Id('/classes')[0].getField('children')])
 
 class _MooseDescriptor(object):
     """Descriptor to give access to MOOSE class' ValueFinfo attributes"""
