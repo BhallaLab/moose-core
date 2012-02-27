@@ -203,6 +203,83 @@ a class. The functions and fields of this class are exposed to the MOOSE
 system through a stereotyped ClassInfo structure. With this, all of the
 MOOSE functionality becomes available to the new class.
 
+\subsection FunctionsOnObjects	Functions on MOOSE objects
+
+MOOSE provides a general way for objects to call each other's functions through
+messaging, and for the script to also call these functions. To do this
+functions are exposed to the API in two layers. The top layer associates
+names with each function, using Finfos. A DestFinfo is the most straightforward
+way to do this, as it handles just a single function. ValueFinfos
+and their kin are associated with two functions: a set function and a get
+function. 
+
+The second layer wraps each function in a consistent form so that the message
+queuing system can access it. This is done by the OpFunc and its
+derived classes, EpFunc, UpFunc, GetOpFunc, ProcOpFunc, and FieldOpFunc.
+The form of the wrapping in all cases is: 
+
+\verbatim
+void op( const Eref& e, const Qinfo* q, const double* buf ) const
+\endverbatim
+
+The job of each of these classes is to then map the arguments in the buffer
+to the arguments used by the object function. Here are some of the key features:
+<ul>
+	<li> OpFunc: These contain just the arguments to the function. 
+		For example:
+	\verbatim
+		OpFunc1< Foo, double >( &Foo::sum );
+		...
+		void Foo::sum( double v ) {
+			tot_ += v;
+		}
+	\endverbatim
+	These are useful when the function only operates on the internal fields
+	of the destination object.
+		
+	<li> EpFunc: These pass the Eref and the Qinfo in ahead of the other
+	function arguments. This is essential when you want to know about the
+	MOOSE context of the function. For example, if you need to send a 
+	message out you need to know the originating object and thread. If you
+	want to manipulate a field on the Element (as opposed to the individual
+	object), again you need a pointer to the Eref. If your function needs
+	to know what the originating Object was, it can get this from the
+	Qinfo. For example:
+	\verbatim
+		EpFunc1< Bar, double >( &Bar::sum );
+		...
+		void Bar::sum( const Eref& e, const Qinfo* q, double v ) {
+			tot_ += v;
+			Id src = q->src();
+			msg->send( e, q->threadNum(), tot_, src );
+		}
+	\endverbatim
+
+	<li> UpFunc: These are used in FieldElements, where the actual data
+	and operations have to be carried out one level up, on the parent.
+	For example, Synapses may be FieldElements sitting as array entries
+	on a Receptor object. Any functions coming to the Synapse have to be 
+	referred to the parent Receptor, with an index to identify which
+	entry was called. UpFuncs do this.
+	\verbatim
+		static DestFinfo addSpike( "addSpike",
+		"Handles arriving spike messages. Argument is timestamp",
+		new UpFunc1< Receptor, double >( &Receptor::addSpike ) 
+		);
+		// Note that the DestFinfo on the Synapse refers to a function
+		// defined on the Receptor.
+		...
+		void Receptor::addSpike( unsigned int index, double time ) {
+			Synapse& s = synTable[index];
+			s.addEvent( time );
+		}
+	\endverbatim
+
+	<li> ProcOpFunc:
+	<li> GetOpFunc:
+	<li> FieldOpFunc:
+</ul>
+
 */
 
 /**

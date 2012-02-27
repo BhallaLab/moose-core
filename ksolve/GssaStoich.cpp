@@ -165,8 +165,13 @@ void GssaStoich::rebuildMatrix()
 	// Stuff here to set up the dependencies.
 	unsigned int numRates = N_.nColumns();
 	assert ( numRates == rates_.size() );
+	unsigned int numMeshEntries = S_.size();
 
-	v_.resize( numReac_, 0 );
+	t_.resize( numMeshEntries, 0 );
+	atot_.resize( numMeshEntries, 0 );
+	v_.resize( numMeshEntries );
+	for ( unsigned int i = 0; i < numMeshEntries; ++i )
+		v_[i].resize( numReac_, 0 );
 
 	// Here we fix the issue of having a single substrate at
 	// more than first order. Its rate must be computed differently
@@ -371,14 +376,19 @@ void GssaStoich::reinit( const Eref& e, ProcPtr p )
 				*i = base + 1.0;
 		}
 	}
-	t_ = 0.0;
-	updateAllRates();
+	unsigned int numLocalMeshEntries = localMeshEntries_.size();
+	// Should figure out how ot use the assign function
+	// t_.assign( t_.size(), 0.0 );
+	for ( unsigned int i = 0; i < numLocalMeshEntries; ++i ) {
+		t_[i] = 0.0;
+		updateAllRates( i );
+	}
 }
 
 
-unsigned int GssaStoich::pickReac()
+unsigned int GssaStoich::pickReac( unsigned int meshIndex )
 {
-	double r = mtrand() * atot_;
+	double r = mtrand() * atot_[meshIndex];
 	double sum = 0.0;
 	// This is an inefficient way to do it. Can easily get to 
 	// log time or thereabouts by doing one or two levels of 
@@ -386,56 +396,68 @@ unsigned int GssaStoich::pickReac()
 	// of overhead in managing the tree. 
 	// Slepoy, Thompson and Plimpton 2008
 	// report a linear time version.
-	for ( vector< double >::iterator i = v_.begin(); i != v_.end(); ++i )
+	vector< double >::iterator begin = v_[meshIndex].begin();
+	vector< double >::iterator end = v_[meshIndex].end();
+	for ( vector< double >::iterator i = begin; i != end; ++i )
 		if ( r < ( sum += *i ) )
-			return static_cast< unsigned int >( i - v_.begin() );
-	return v_.size();
+			return static_cast< unsigned int >( i - begin );
+	return v_[meshIndex].size();
 }
 
 void GssaStoich::process( const Eref& e, ProcPtr info )
 {
+	unsigned int meshIndex = e.index().value();
+
 	double nextt = info->currTime + info->dt;
-	while ( t_ < nextt ) {
+	double t = t_[meshIndex];
+	double atot = atot_[meshIndex];
+	while ( t < nextt ) {
 		// Figure out when the reaction will occur. The atot_
 		// calculation actually estimates time for which reaction will
 		// NOT occur, as atot_ sums all propensities.
-		if ( atot_ <= 0.0 ) { // Nothing is going to happen.
+		if ( atot <= 0.0 ) { // Nothing is going to happen.
 			// We have to advance t_ because we may resume calculations
 			// with a different atot at a later time.
-			t_ = nextt;
+			t = nextt;
 			break;
 		}
-		unsigned int rindex = pickReac(); // Does a randnum call
+		unsigned int rindex = pickReac( meshIndex ); // Does a randnum call
 		if ( rindex >= rates_.size() ) {
 			// Probably cumulative roundoff error here. Simply
 			// recalculate atot to avoid, and redo.
-			updateAllRates();
+			updateAllRates( meshIndex );
 			continue;
 		}
-		transN_.fireReac( rindex, S_[0] );
+		transN_.fireReac( rindex, S_[meshIndex] );
 
 		// Math expns must be first, because they may alter 
 		// substrate mol #.
-		updateDependentMathExpn( dependentMathExpn_[ rindex ] );
+		updateDependentMathExpn( meshIndex, dependentMathExpn_[ rindex ] );
 		// The rates list includes rates dependent on mols changed
 		// by the MathExpns.
-		updateDependentRates( dependency_[ rindex ] );
+		updateDependentRates( meshIndex, dependency_[ rindex ] );
 
 		double r = mtrand();
 		while ( r <= 0.0 )
 			r = mtrand();
-		t_ -= ( 1.0 / atot_ ) * log( r );
+		t -= ( 1.0 / atot ) * log( r );
 		// double dt = ( 1.0 / atot_ ) * log( 1.0 / mtrand() );
 	}
+	t_[meshIndex] = t;
+	atot_[meshIndex] = atot;
 }
 
-void GssaStoich::updateDependentRates( const vector< unsigned int >& deps )
+void GssaStoich::updateDependentRates( 
+	unsigned int meshIndex, const vector< unsigned int >& deps )
 {
+	vector< double >& v = v_[meshIndex];
+	double atot = atot_[meshIndex];
 	for( vector< unsigned int >::const_iterator i = deps.begin(); 
 		i != deps.end(); ++i ) {
-		atot_ -= v_[ *i ];
-		atot_ += ( v_[ *i ] = ( *rates_[ *i ] )( &S_[0][0] ) );
+		atot -= v[ *i ];
+		atot += ( v[ *i ] = ( *rates_[ *i ] )( &S_[meshIndex][0] ) );
 	}
+	atot_[meshIndex] = atot;
 }
 
 /**
@@ -443,7 +465,8 @@ void GssaStoich::updateDependentRates( const vector< unsigned int >& deps )
  * will extend to general math expressions.
  * Will need to cascade to dependent rates
  */
-void GssaStoich::updateDependentMathExpn( const vector< unsigned int >& deps )
+void GssaStoich::updateDependentMathExpn( 
+	unsigned int meshIndex, const vector< unsigned int >& deps )
 {
 	/*
 	for( vector< unsigned int >::const_iterator i = deps.begin(); 
@@ -453,7 +476,7 @@ void GssaStoich::updateDependentMathExpn( const vector< unsigned int >& deps )
 	*/
 }
 
-void GssaStoich::updateAllRates()
+void GssaStoich::updateAllRates( unsigned int meshIndex )
 {
 	// SumTots must go first because rates depend on them.
 	/*
@@ -462,9 +485,10 @@ void GssaStoich::updateAllRates()
 		k->sum();
 		*/
 
-	atot_ = 0.0;
+	double atot = 0.0;
+	vector< double >& v = v_[meshIndex];
 	for( unsigned int i = 0; i < rates_.size(); ++i ) {
-		atot_ += ( v_[ i ] = ( *rates_[ i ] )( &S_[0][0] ) );
+		atot += ( v[ i ] = ( *rates_[ i ] )( &S_[meshIndex][0] ) );
 	}
 	// Here we put in a safety factor into atot to ensure that
 	// cumulative roundoff errors from the dependency 
@@ -472,5 +496,6 @@ void GssaStoich::updateAllRates()
 	// steps do not make it smaller than the actual total of 
 	// all the reactions. If that were to occur, we would begin
 	// to lose calls to the last reaction.
-	atot_ *= SAFETY_FACTOR;
+	atot *= SAFETY_FACTOR;
+	atot_[meshIndex] = atot;
 }
