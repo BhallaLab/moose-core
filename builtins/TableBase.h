@@ -42,6 +42,7 @@ class TableBase
 			string fname, int startLine, int colNum, char separator );
 		void compareXplot( string fname, string plotname, string op );
 		void compareVec( vector< double > other, string op );
+                void clearVec();
 
 		//////////////////////////////////////////////////////////////////
 		// Lookup funcs for table
