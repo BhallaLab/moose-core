@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Sat Mar 26 22:41:37 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Feb 15 18:46:30 2012 (+0530)
+// Last-Updated: Tue Feb 28 13:02:34 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 280
+//     Update #: 365
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -69,6 +69,8 @@ extern void testKinetics();
 extern void nonMpiTests(Shell *);
 extern void mpiTests();
 extern void processTests( Shell* );
+extern Id init(int argc, char ** argv);
+
 extern void initMsgManagers();
 extern void destroyMsgManagers();
 extern void speedTestMultiNodeIntFireNetwork( 
@@ -142,132 +144,90 @@ void pymoose::setup_runtime_env(bool verbose){
 Shell& pymoose::getShell(int argc, char ** argv)
 {
     static Shell * shell_ = NULL;
-    if (shell_ == NULL)
-    {
-     
-        // Set up the system parameters
-        int _isSingleThreaded = 0;
-        int _numCores = 1;
-        int _numNodes = 1;
-        int _isInfinite = 0;
-        int _myNode = 0;
-        int _numProcessThreads = 0;
-        string arg;
-
-        map<string, string>::const_iterator it = getArgMap().find("SINGLETHREADED");    
-        if (it != getArgMap().end()){
-            istringstream(it->second) >> _isSingleThreaded;
-        }
-        it = getArgMap().find("NUMCORES");
-        if ((it == getArgMap().end()) || it->second.empty()){
-            _numCores = getNumCores();
-        } else {
-            istringstream(it->second) >> _numCores;
-        }
-        it = getArgMap().find("NUMNODES");
-        if (it != getArgMap().end()){
-            istringstream(it->second) >> _numNodes;
-        }
-        it = getArgMap().find("INFINITE");
-        if (it != getArgMap().end()){
-            istringstream(it->second) >> _isInfinite;
-        }
-        it = getArgMap().find("NUMPTHREADS");
-        if (it != getArgMap().end()){
-            istringstream(it->second) >> _numProcessThreads;
-        } else {
-            _numProcessThreads = _numCores;
-        }
-        if (_numProcessThreads == 0){
-            _isSingleThreaded = 1;
-        }
-        cout << "================================================" << endl
-             << "Final system parameters:" << endl
-             << " SINGLETHREADED: " << _isSingleThreaded << endl
-             << " NUMNODES: " << _numNodes << endl
-             << " NUMCORES: " << _numCores << endl
-             << " NUMPTHREADS: " << _numProcessThreads << endl
-             << " INFINITE: " << _isInfinite << endl
-             << "================================================" << endl;
-        // Do MPI Initialization
-        // Not yet sure what should be passed on in argv
-#ifdef USE_MPI
-        MPI_Init_thread( &argc, &argv, MPI_THREAD_SERIALIZED, &provided );
-        MPI_Comm_size( MPI_COMM_WORLD, &_numNodes );
-        MPI_Comm_rank( MPI_COMM_WORLD, &_myNode );
-        if ( provided < MPI_THREAD_SERIALIZED && _myNode == 0 ) {
-            cout << "Warning: This MPI implementation does not like multithreading: " << provided << "\n";
-        }    
-#endif
-        Msg::initNull();
-        // Initialize the shell
-        Id shellId;
-        vector <DimInfo> dims; // TODO: DimInfo is new in dh_branch .. confirm this is correct
-        // dims.push_back(DimInfo(1));
-        shellE = new Element(shellId, Shell::initCinfo(), "root", dims, 0, 1);
-        Id clockId = Id::nextId();
-        shell_ = reinterpret_cast<Shell*>(shellId.eref().data());
-        shell_->setShellElement(shellE);
-        shell_->setHardware(_numProcessThreads, _numCores, _numNodes, _myNode);
-        shell_->loadBalance();
-    
-        // Initialize the system objects
-
-        new Element(clockId, Clock::initCinfo(), "clock", dims, 1, 1);
-        Id tickId( 2 );
-        assert(tickId() != 0);
-        assert( tickId.value() == 2 );
-        assert( tickId()->getName() == "tick" ) ;
-    
-        Id classMasterId( 3 );
-    
-        new Element( classMasterId, Neutral::initCinfo(), "classes", dims, 1 , 1);
-    
-        assert ( shellId == Id() );
-        assert( clockId == Id( 1 ) );
-        assert( tickId == Id( 2 ) );
-        assert( classMasterId == Id( 3 ) );
-
-
-        /// Sets up the Elements that represent each class of Msg.
-        Msg::initMsgManagers();
-    
-        shell_->connectMasterMsg();
-    
-        Shell::adopt( shellId, clockId );
-        Shell::adopt( shellId, classMasterId );
-    
-        Cinfo::makeCinfoElements( classMasterId );
-    
-        while ( isInfinite ) // busy loop for debugging under gdb and MPI.
-            ;
-        // The following are copied from main.cpp: main()
+    if (shell_ != NULL){
+        return *shell_;
+    }
+        
+    // Set up the system parameters
+    int _isSingleThreaded = 0;
+    int _numCores = 1;
+    int _numNodes = 1;
+    int _isInfinite = 0;
+    int _myNode = 0;
+    int _numProcessThreads = 0;
+    vector<string> args;
+    map<string, string>::const_iterator it = getArgMap().find("SINGLETHREADED");    
+    if (it != getArgMap().end()){
+        args.push_back("s");
+        istringstream(it->second) >> _isSingleThreaded;
+    }
+    it = getArgMap().find("NUMCORES");
+    if ((it == getArgMap().end()) || it->second.empty()){
+        _numCores = getNumCores();
+    } else {
+        istringstream(it->second) >> _numCores;
+    }
+    it = getArgMap().find("NUMNODES");
+    if (it != getArgMap().end()){
+        istringstream(it->second) >> _numNodes;
+        args.push_back("n");
+        args.push_back(it->second);
+    }
+    it = getArgMap().find("INFINITE");
+    if (it != getArgMap().end()){
+        args.push_back("i");
+        istringstream(it->second) >> _isInfinite;
+    }
+    it = getArgMap().find("NUMPTHREADS");
+    if (it != getArgMap().end()){
+        args.push_back("t");
+        args.push_back(it->second);
+        istringstream(it->second) >> _numProcessThreads;
+    } else {
+        _numProcessThreads = _numCores;
+    }
+    if (_numProcessThreads == 0){
+        _isSingleThreaded = 1;
+    }
+    cout << "================================================" << endl
+         << "Final system parameters:" << endl
+         << " SINGLETHREADED: " << _isSingleThreaded << endl
+         << " NUMNODES: " << _numNodes << endl
+         << " NUMCORES: " << _numCores << endl
+         << " NUMPTHREADS: " << _numProcessThreads << endl
+         << " INFINITE: " << _isInfinite << endl
+         << "================================================" << endl;
+        
+    char ** argv_new = new char*[args.size()];
+    for (unsigned ii = 0; ii < args.size(); ++ii){
+        argv_new[ii] = new char[args[ii].length() + 1];
+        strncpy(argv_new[ii], args[ii].c_str(), args[ii].length()+1);
+    }
+    // Utilize the main::init function which has friend access to Id
+    Id shellId = init(argc, argv_new);
+    shell_ = reinterpret_cast<Shell*>(shellId.eref().data());
+    shellE = shellId();
+    for (unsigned ii = 0; ii < args.size(); ++ii){
+        delete [] argv_new[ii];
+    }
+    delete [] argv_new;
 #ifdef DO_UNIT_TESTS        
-        nonMpiTests( shell_ ); // These tests do not need the process loop.
-#endif    
-        if (!shell_->isSingleThreaded())
-            Qinfo::initMutex(); // Mutex used to align Parser and MOOSE threads.
-            shell_->launchThreads();
-        if ( shell_->myNode() == 0 ) {
+    nonMpiTests( shell_ ); // These tests do not need the process loop.
+#endif // DO_UNIT_TESTS
+    if (!shell_->isSingleThreaded()){
+        Qinfo::initMutex(); // Mutex used to align Parser and MOOSE threads.
+    }
+    shell_->launchThreads();
+    if ( shell_->myNode() == 0 ) {
 #ifdef DO_UNIT_TESTS
-            mpiTests();
-            processTests( shell_ );
-            regressionTests();
+        mpiTests();
+        processTests( shell_ );
+        regressionTests();
 #endif
-            // The following commented out for pymoose
-            //--------------------------------------------------
-            // These are outside unit tests because they happen in optimized
-            // mode, using a command-line argument. As soon as they are done
-            // the system quits, in order to estimate timing.
-            // if ( benchmarkTests( argc, argv ) || quitFlag )
-            if ( benchmarkTests( argc, argv ) || quitFlag ){
-                shell_->doQuit();
-            }
-            // else 
-            //     shell_->launchParser(); // Here we set off a little event loop to poll user input. It deals with the doQuit call too.
+        if ( benchmarkTests( argc, argv ) || quitFlag ){
+            shell_->doQuit();
         }
-        shell_->setCwe(0);
-    } // ! if (shell_ == NULL)
+    }
     return *shell_;
 }
 
@@ -284,6 +244,7 @@ void pymoose::finalize()
 #ifdef USE_MPI
     MPI_Finalize();
 #endif
+
 }
 
 pair < string, string > pymoose::getFieldFinfoTypePair(ObjId id, string fieldName)
