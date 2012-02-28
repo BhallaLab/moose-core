@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Sat Feb 25 14:42:03 2012 (+0530)
 // Version: 
-// Last-Updated: Tue Feb 28 00:25:44 2012 (+0530)
+// Last-Updated: Wed Feb 29 01:01:24 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 246
+//     Update #: 264
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -85,6 +85,9 @@ HDF5WriterBase::HDF5WriterBase():
 HDF5WriterBase::~HDF5WriterBase()
 {
     // derived classes should flush data in their own destructors
+    if (filehandle_ < 0){
+        return;
+    }
     herr_t err = H5Fclose(filehandle_);
     if (err < 0){
         cerr << "Error: Error occurred when closing file. Error code: " << err << endl;
@@ -98,10 +101,8 @@ void HDF5WriterBase::setFilename(string filename)
         return;
     }
      
-    // TODO check if file is open. If not check if it exists. If it
-    // exists, open R/W else create a new one. If file is open, close
-    // it and open one with the new name.
-    if (filehandle_ > 0){
+    // If file is open, close it before changing filename
+    if (filehandle_ >= 0){
         status = H5Fclose(filehandle_);
         if (status < 0){
             cerr << "Error: failed to close HDF5 file handle for " << filename_ << ". Error code: " << status << endl;
@@ -128,6 +129,7 @@ herr_t HDF5WriterBase::openFile()
     if (filehandle_ >= 0){
         cout << "Warning: closing already open file and opening " << filename_ <<  endl;
         status = H5Fclose(filehandle_);
+        filehandle_ = -1;
         if (status < 0){
             cerr << "Error: failed to close currently open HDF5 file. Error code: " << status << endl;
             return status;
@@ -137,14 +139,12 @@ herr_t HDF5WriterBase::openFile()
     // Ensure that all open objects are closed before the file is closed    
     H5Pset_fclose_degree(fapl_id, H5F_CLOSE_STRONG);
     if (openmode_ == H5F_ACC_EXCL || openmode_ == H5F_ACC_TRUNC){
-        cout << "Excl mode? " << (openmode_ == H5F_ACC_EXCL) << endl;
         filehandle_ = H5Fcreate(filename_.c_str(), openmode_, H5P_DEFAULT, fapl_id);
-        printf("File id: %d\n", filehandle_);
     } else {
         filehandle_ = H5Fopen(filename_.c_str(), openmode_, fapl_id);
     }
     if (filehandle_ < 0){
-        cerr << "Error: Could not open file for writing: " << filename_ << ". Error code: " << status << endl;
+        cerr << "Error: Could not open file for writing: " << filename_ << endl;
         status = -1;
     }
     return status;
@@ -165,7 +165,7 @@ unsigned HDF5WriterBase::getMode() const
 // file.
 void HDF5WriterBase::flush()
 {
-    cout << "HDF5WriterBase:: flush() " << endl;// do nothing
+    cout << "Warning: HDF5WriterBase:: flush() should never be called. Subclasses should reimplement this." << endl;// do nothing
 }
 
 #endif // USE_HDF5
