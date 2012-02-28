@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Sat Feb 25 16:03:59 2012 (+0530)
 // Version: 
-// Last-Updated: Tue Feb 28 00:13:01 2012 (+0530)
+// Last-Updated: Wed Feb 29 01:00:14 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 643
+//     Update #: 660
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -75,13 +75,6 @@ const Cinfo * HDF5DataWriter::initCinfo()
                 new ProcOpFunc<HDF5DataWriter>(&HDF5DataWriter::reinit)),
     };
     static Finfo * finfos[] = {
-        new ValueFinfo<HDF5DataWriter, unsigned int>(
-                "flushLimit",
-                "Limit on the size of the data vectors. When the vector size is equal"
-                " or greater than this value, data is written to file and the vectors"
-                " are cleared.",
-                &HDF5DataWriter::setFlushLimit,
-                &HDF5DataWriter::getFlushLimit),
         requestData(),
         clear(),
         recvDataBuf(),        
@@ -115,26 +108,22 @@ const Cinfo * HDF5DataWriter::initCinfo()
 
 static const Cinfo * hdf5dataWriterCinfo = HDF5DataWriter::initCinfo();
 
-HDF5DataWriter::HDF5DataWriter():flushLimit_(CHUNK_SIZE)
+HDF5DataWriter::HDF5DataWriter()
 {
-    cout << "Open mode: " << openmode_ << endl;
 }
 
 HDF5DataWriter::~HDF5DataWriter()
 {
     flush();
+    for (map < string, hid_t >::iterator ii = nodemap_.begin(); ii != nodemap_.end(); ++ii){
+        if (ii->second >= 0){
+            herr_t status = H5Dclose(ii->second);
+            if (status < 0){
+                cerr << "Warning: closing dataset for " << ii->first << ", returned status = " << status << endl;
+            }
+        }
+    }
 }
-
-void HDF5DataWriter::setFlushLimit(unsigned int limit)
-{
-    flushLimit_ = limit;
-}
-
-unsigned int HDF5DataWriter::getFlushLimit() const
-{
-    return flushLimit_;
-}
-
 void HDF5DataWriter::flush()
 {
     if (filehandle_ < 0){
