@@ -53,13 +53,14 @@ static SrcFinfo1< double > * outputOut()
 
 const Cinfo* PIDController::initCinfo()
 {
-    static Finfo* processShared[] = {
-        new DestFinfo( "process",
+       static DestFinfo process( "process",
                        "Handle process calls.",
-                       new ProcOpFunc<PIDController>( &PIDController::process)),
-	new DestFinfo( "reinit",
+                       new ProcOpFunc<PIDController>( &PIDController::process));
+	   static DestFinfo reinit( "reinit",
                        "Reinitialize the object.",
-                       new ProcOpFunc<PIDController>( &PIDController::reinit )),
+                       new ProcOpFunc<PIDController>( &PIDController::reinit ));
+    static Finfo* processShared[] = {
+		&process, &reinit
     };
     
         static ValueFinfo<PIDController, double> gain( "gain",

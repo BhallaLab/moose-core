@@ -23,10 +23,7 @@ DiagonalMsg::DiagonalMsg( MsgId mid, Element* e1, Element* e2 )
 
 DiagonalMsg::~DiagonalMsg()
 {
-	MsgDataHandler * mdh = dynamic_cast< MsgDataHandler* >( 
-		managerId_.element()->dataHandler() );
-	assert( mdh );
-	mdh->dropMid( mid_ );
+	destroyDerivedMsg( managerId_, mid_ );
 }
 
 /**

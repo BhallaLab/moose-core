@@ -49,15 +49,16 @@ static SrcFinfo1< double >* outputOut()
 
 const Cinfo* RC::initCinfo()
 {
-    static Finfo* processShared[] = {
-        new DestFinfo("process",
+        static DestFinfo process("process",
                       "Handles process call.",
-                      new ProcOpFunc<RC>(&RC::process)),
-        new DestFinfo( "reinit",
+                      new ProcOpFunc<RC>(&RC::process));
+        static DestFinfo reinit( "reinit",
                        "Handle reinitialization",
-                       new ProcOpFunc<RC>( &RC::reinit )),
+                       new ProcOpFunc<RC>( &RC::reinit ));
+    static Finfo* processShared[] = {
+		&process, &reinit
     };
-    static Finfo* proc = new SharedFinfo("proc",
+    static SharedFinfo proc("proc",
                                          "This is a shared message to receive Process messages "
                                          "from the scheduler objects."
                                          "The first entry in the shared msg is a MsgDest "
@@ -93,14 +94,14 @@ const Cinfo* RC::initCinfo()
                        " to give the total input current." ,
                        new OpFunc1<RC, double>(&RC::setInjectMsg));
     static Finfo* rcFinfos[] = {
-    	&V0,
-	&R,
-	&C,
-	&state,
-	&inject,
-	outputOut(),
-	&injectIn,
-        proc,
+        &V0,
+        &R,
+        &C,
+        &state,
+        &inject,
+        outputOut(),
+        &injectIn,
+        &proc,
     };
     static string doc[] = {
         "Name", "RC",

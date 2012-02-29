@@ -376,3 +376,20 @@ void destroyMsgManagers()
 	for ( vector< Id >::iterator i = msgMgrs.begin(); i != msgMgrs.end(); ++i)
 		i->destroy();
 }
+
+// Static utility func used by derived classes to clean up their msgs
+// Although all use this function we can't put it in the parent ~Msg
+// function because C++ doesn't allow virtual class functions to be 
+// called during the destructor.
+void Msg::destroyDerivedMsg( Id managerId, MsgId mid )
+{
+	// This test is used because it is possible for the deletion order
+	// when cleaning out the simulation to get rid of the msg Manager
+	// before other things, which may have messages still to remove.
+	if ( managerId.element() ) {
+		MsgDataHandler* mdh = dynamic_cast< MsgDataHandler* >(
+			managerId.element()->dataHandler() );
+		assert( mdh );
+		mdh->dropMid( mid );
+	}
+}
