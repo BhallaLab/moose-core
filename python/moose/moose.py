@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Mon Feb 27 18:47:27 2012 (+0530)
+# Last-Updated: Wed Feb 29 15:48:22 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1251
+#     Update #: 1299
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -229,7 +229,7 @@ elements under current working element
 
 """
 
-
+from collections import defaultdict
 import _moose
 from _moose import __version__, VERSION, SVN_REVISION, useClock, setClock, start, reinit, stop, isRunning, loadModel, getFieldDict, Id, ObjId, exists, seed, wildcardFind
 
@@ -602,8 +602,10 @@ class Neutral(object):
         return self.oid_.getFieldNames(ftype)
 
     def getNeighbours(self, fieldName):
-        return self.oid_.getNeighbours(fieldName)
-
+        if fieldName in self.oid_.getFieldDict().values():
+            return [eval('%s("%s")' % (id_[0].getField('class'), id_.getPath())) for id_ in self.oid_.getNeighbours(fieldName)]
+        raise ValueError('%s: no such field on %s' % (fieldName, self.path))
+        
     def connect(self, srcField, dest, destField, msgType='Single'):
         return self.oid_.connect(srcField, dest.oid_, destField, msgType)
 
@@ -636,6 +638,19 @@ class Neutral(object):
     id_ = property(lambda self: self.oid_.getId())
     fieldIndex = property(lambda self: self.oid_.getFieldIndex())
     dataIndex = property(lambda self: self.oid_.getDataIndex())
+    # We have a lookup field called neighbours already, this should override that
+    @property
+    def neighbours(self):
+        neighbours = defaultdict(list)
+        for field in self.oid_.getFieldNames('srcFinfo'):
+            tmp = self.oid_.getNeighbours(field)
+            neighbours[field] += [eval('%s("%s")' % (nid[0].getField('class'), nid.getPath())) for nid in tmp]
+        for field in self.oid_.getFieldNames('destFinfo'):
+            tmp = self.oid_.getNeighbours(field)
+            neighbours[field] += [eval('%s("%s")' % (nid[0].getField('class'), nid.getPath())) for nid in tmp]
+        return neighbours
+        
+        
 
 
 ################################################################
