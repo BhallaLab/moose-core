@@ -27,10 +27,7 @@ SingleMsg::SingleMsg( MsgId mid, Eref e1, Eref e2 )
 
 SingleMsg::~SingleMsg()
 {
-	MsgDataHandler * mdh = dynamic_cast< MsgDataHandler* >( 
-		managerId_.element()->dataHandler() );
-	assert( mdh );
-	mdh->dropMid( mid_ );
+	destroyDerivedMsg( managerId_, mid_ );
 }
 
 void SingleMsg::exec( const Qinfo* q, const double* arg, FuncId fid ) const

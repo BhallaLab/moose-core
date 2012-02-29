@@ -206,10 +206,7 @@ SparseMsg::SparseMsg( MsgId mid, Element* e1, Element* e2 )
 
 SparseMsg::~SparseMsg()
 {
-	MsgDataHandler * mdh = dynamic_cast< MsgDataHandler* >( 
-		managerId_.element()->dataHandler() );
-	assert( mdh );
-	mdh->dropMid( mid_ );
+	destroyDerivedMsg( managerId_, mid_ );
 }
 
 unsigned int rowIndex( const Element* e, const DataId& d )
