@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Wed Feb 29 15:48:22 2012 (+0530)
+# Last-Updated: Wed Feb 29 16:08:39 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1299
+#     Update #: 1312
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -231,7 +231,8 @@ elements under current working element
 
 from collections import defaultdict
 import _moose
-from _moose import __version__, VERSION, SVN_REVISION, useClock, setClock, start, reinit, stop, isRunning, loadModel, getFieldDict, Id, ObjId, exists, seed, wildcardFind
+from _moose import __version__, VERSION, SVN_REVISION, useClock, setClock, start, reinit, stop, isRunning, loadModel, getFieldDict, Id, ObjId, exists, seed
+from _moose import wildcardFind as _wildcardFind # We override the original
 
 # Dict of available MOOSE class names. This is faster for look-up
 _moose_classes = dict([(child.getPath().rpartition('/')[-1], True) for child in Id('/classes')[0].getField('children')])
@@ -640,7 +641,9 @@ class Neutral(object):
     dataIndex = property(lambda self: self.oid_.getDataIndex())
     # We have a lookup field called neighbours already, this should override that
     @property
-    def neighbours(self):
+    def neighbourDict(self):
+        """defaultdict whose keys are field names and values are list
+        of objects that are connected to that field"""
         neighbours = defaultdict(list)
         for field in self.oid_.getFieldNames('srcFinfo'):
             tmp = self.oid_.getNeighbours(field)
@@ -650,8 +653,8 @@ class Neutral(object):
             neighbours[field] += [eval('%s("%s")' % (nid[0].getField('class'), nid.getPath())) for nid in tmp]
         return neighbours
         
-        
-
+    
+    childList = property(lambda self: [eval('%s("%s")' % (ch[0].getField('class'), ch.getPath())) for ch in self.oid_.getField('children')])
 
 ################################################################
 # Wrappers for global functions
@@ -755,7 +758,8 @@ def showfields(element):
         value = element.oid_.getField(key)        
         print dtype, key, ' = ', value
         
-        
+def wildcardFind(path):
+    return [eval('%s("%s")' % (id_[0].getField('class'), id_.getPath())) for id_ in _wildcardFind(path)]
     
 #######################################################
 # This is to generate class definitions automatically
