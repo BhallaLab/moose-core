@@ -23,12 +23,12 @@ OneToAllMsg::OneToAllMsg( MsgId mid, Eref e1, Element* e2 )
 
 OneToAllMsg::~OneToAllMsg()
 {
+	// I cannot do this in the Msg::~Msg destructor because the virtual
+	// functions  for managerId() don't work there.
+	destroyDerivedMsg( managerId_, mid_ );
 	/*
 	cout << "Deleting OneToAllMsg from " << e1_->getName() << " to " <<
 		e2_->getName() << endl;
-		*/
-	// I cannot do this in the Msg::~Msg destructor because the virtual
-	// functions  for managerId() don't work there.
 	// Here we have a special case: The parent-child messages are
 	// OneToAll. So when cleaning up the whole simulation, it removes the
 	// managerId_.element() while there are still some parent-child
@@ -40,6 +40,7 @@ OneToAllMsg::~OneToAllMsg()
 		assert( mdh );
 		mdh->dropMid( mid_ );
 	}
+		*/
 }
 
 /**

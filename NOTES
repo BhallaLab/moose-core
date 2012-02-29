@@ -17334,5 +17334,18 @@ Added a data handler that will get all threads to converge on to a single
 object, in this case the GssaStoich. Checkin 3342.
 ============================================================================
 29 Feb 2012
-Some fixes to class definition Cinfo for RC and PIDcontroller classes, to
-fix up memory leaks. Still stuff remains.
+Some fixes to class definition Cinfo for RC and PIDController classes, to
+fix up memory leaks. Still stuff remains. Checkin 3350.
+Some more fixes to RC and PIDController. now most memory leaks gone except
+for one whose origin is hard to find, no source line. Perhaps if I run it
+single-thread. For now moving on to the pymoose segv bug.
+
+I think this comes up because the messages get deleted before some of the 
+other parts of the simulation. Fixed. Put the Msg deletion code back into
+the Msg class as a static func that all the derived functions call, so we
+work around the limitation on accessing virtual functions in the base
+class destructor.
+This now clears the squid demo python test, but not the kkit test. But the
+kkit test reports a different kind of error than the earlier segv.
+
+============================================================================

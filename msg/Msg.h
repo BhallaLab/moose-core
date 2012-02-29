@@ -212,6 +212,12 @@ class Msg
 		 * Sets up the Element managers for each of the Msg classes
 		 */
 		static void initMsgManagers();
+
+		/**
+		 * Destroys the reference to specified mid, in its msg manager
+		 * object. Used by destructors of all derived Msg classes.
+		 */
+		static void destroyDerivedMsg( Id managerId, MsgId mid );
 	protected:
 		MsgId mid_; /// Index of this Msg on the msg_ vector.
 
