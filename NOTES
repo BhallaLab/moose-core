@@ -17331,5 +17331,8 @@ Added a bit of documentation about OpFuncs, EpFuncs, and UpFuncs. Some more
 yet to come. Checkin 3340.
 
 Added a data handler that will get all threads to converge on to a single
-object, in this case the GssaStoich.
+object, in this case the GssaStoich. Checkin 3342.
 ============================================================================
+29 Feb 2012
+Some fixes to class definition Cinfo for RC and PIDcontroller classes, to
+fix up memory leaks. Still stuff remains.

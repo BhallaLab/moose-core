@@ -31,8 +31,8 @@ double KinSparseMatrix::computeRowRate(
 {
 	assert( row < nRows() );
 	assert( v.size() == nColumns() );
-	const int* entry;
-	const unsigned int* colIndex;
+	const int* entry = 0;
+	const unsigned int* colIndex = 0;
 	unsigned int numEntries = getRow( row, &entry, &colIndex );
 	const int* end = entry + numEntries;
 
