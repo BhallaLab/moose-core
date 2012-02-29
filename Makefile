@@ -240,7 +240,7 @@ else
 endif
 
 ifdef USE_HDF5
-	CXXFLAGS+= -DUSE_HDF5 -I/usr/local/hdf5/include
+	CXXFLAGS+= -DUSE_HDF5  -DH5_NO_DEPRECATED_SYMBOLS -I/usr/local/hdf5/include
 	LIBS+= -lhdf5
 endif
 
