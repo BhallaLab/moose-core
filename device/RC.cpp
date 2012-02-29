@@ -67,35 +67,40 @@ const Cinfo* RC::initCinfo()
                                          "for the Reinit operation. It also uses ProcInfo. ",
                                          processShared,
                                          sizeof( processShared ) / sizeof( Finfo* ));
-    static Finfo* rcFinfos[] = {
-        new ValueFinfo<RC, double>( "V0", 
+        static ValueFinfo<RC, double> V0( "V0", 
                                     "Initial value of 'state'",
                                     &RC::setV0,
-                                    &RC::getV0 ),
-        new ValueFinfo<RC, double>( "R", 
+                                    &RC::getV0 );
+        static ValueFinfo<RC, double> R( "R", 
                                     "Series resistance of the RC circuit.",
                                     &RC::setResistance,
-                                    &RC::getResistance),
-        new ValueFinfo<RC, double>( "C", 
+                                    &RC::getResistance);
+        static ValueFinfo<RC, double> C( "C", 
                                     "Parallel capacitance of the RC circuit.",
                                     &RC::setCapacitance,
-                                    &RC::getCapacitance),
-        new ReadOnlyValueFinfo<RC, double>("state", 
+                                    &RC::getCapacitance);
+        static ReadOnlyValueFinfo<RC, double> state("state", 
                                "Output value of the RC circuit. This is the voltage across the"
                                " capacitor.",
-                               &RC::getState),
-        new ValueFinfo<RC, double>( "inject",
+                               &RC::getState);
+        static ValueFinfo<RC, double> inject( "inject",
                         "Input value to the RC circuit.This is handled as an input current to"
                         " the circuit.",
                         &RC::setInject,
-                        &RC::getInject ),
-        outputOut(),
-        new DestFinfo( "injectIn",
+                        &RC::getInject );
+        static DestFinfo injectIn( "injectIn",
                        "Receives input to the RC circuit. All incoming messages are summed up"
                        " to give the total input current." ,
-                       new OpFunc1<RC, double>(&RC::setInjectMsg)),
+                       new OpFunc1<RC, double>(&RC::setInjectMsg));
+    static Finfo* rcFinfos[] = {
+    	&V0,
+	&R,
+	&C,
+	&state,
+	&inject,
+	outputOut(),
+	&injectIn,
         proc,
-                
     };
     static string doc[] = {
         "Name", "RC",
