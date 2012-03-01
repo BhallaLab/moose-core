@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Feb 18 16:56:21 2012 (+0530)
 # Version: 
-# Last-Updated: Sat Feb 18 17:10:27 2012 (+0530)
+# Last-Updated: Wed Feb 29 13:34:19 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 17
+#     Update #: 19
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -37,7 +37,7 @@ class TestKkit(unittest.TestCase):
         filename = 'acc8.g'
         target = '/acc8'
         loaded_id = moose.loadModel(filename, target)
-        self.assertEqual(target, loaded_id.path)
+        self.assertEqual(target, loaded_id.getPath())
         kinetics_path = target + '/kinetics'
         self.assertTrue(moose.exists(kinetics_path))
         # Check BUG: Assertion failure in Neutral::path on Zombie
