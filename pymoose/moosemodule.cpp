@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Mar  1 15:38:36 2012 (+0530)
+// Last-Updated: Fri Mar  2 01:03:01 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 4922
+//     Update #: 4923
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -1504,7 +1504,7 @@ extern "C" {
         if (!PyArg_ParseTuple(args, "s:_pymoose_ObjId_getNeighbors", &field)){
             return NULL;
         }
-        vector< Id > val = LookupField< string, vector< Id > >::get(self->oid_, "neighbors", string(field));
+        vector< Id > val = LookupField< string, vector< Id > >::get(self->oid_, "neighbours", string(field));
     
         PyObject * ret = PyTuple_New((Py_ssize_t)val.size());
         for (unsigned int ii = 0; ii < val.size(); ++ ii ){            
