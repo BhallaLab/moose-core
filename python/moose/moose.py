@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Wed Feb 29 16:08:39 2012 (+0530)
+# Last-Updated: Thu Mar  1 15:38:10 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1312
+#     Update #: 1313
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -602,9 +602,9 @@ class Neutral(object):
         """Return a list of the fields of specified fieldType."""
         return self.oid_.getFieldNames(ftype)
 
-    def getNeighbours(self, fieldName):
+    def getNeighbors(self, fieldName):
         if fieldName in self.oid_.getFieldDict().values():
-            return [eval('%s("%s")' % (id_[0].getField('class'), id_.getPath())) for id_ in self.oid_.getNeighbours(fieldName)]
+            return [eval('%s("%s")' % (id_[0].getField('class'), id_.getPath())) for id_ in self.oid_.getNeighbors(fieldName)]
         raise ValueError('%s: no such field on %s' % (fieldName, self.path))
         
     def connect(self, srcField, dest, destField, msgType='Single'):
@@ -639,19 +639,19 @@ class Neutral(object):
     id_ = property(lambda self: self.oid_.getId())
     fieldIndex = property(lambda self: self.oid_.getFieldIndex())
     dataIndex = property(lambda self: self.oid_.getDataIndex())
-    # We have a lookup field called neighbours already, this should override that
+    # We have a lookup field called neighbors already, this should override that
     @property
-    def neighbourDict(self):
+    def neighborDict(self):
         """defaultdict whose keys are field names and values are list
         of objects that are connected to that field"""
-        neighbours = defaultdict(list)
+        neighbors = defaultdict(list)
         for field in self.oid_.getFieldNames('srcFinfo'):
-            tmp = self.oid_.getNeighbours(field)
-            neighbours[field] += [eval('%s("%s")' % (nid[0].getField('class'), nid.getPath())) for nid in tmp]
+            tmp = self.oid_.getNeighbors(field)
+            neighbors[field] += [eval('%s("%s")' % (nid[0].getField('class'), nid.getPath())) for nid in tmp]
         for field in self.oid_.getFieldNames('destFinfo'):
-            tmp = self.oid_.getNeighbours(field)
-            neighbours[field] += [eval('%s("%s")' % (nid[0].getField('class'), nid.getPath())) for nid in tmp]
-        return neighbours
+            tmp = self.oid_.getNeighbors(field)
+            neighbors[field] += [eval('%s("%s")' % (nid[0].getField('class'), nid.getPath())) for nid in tmp]
+        return neighbors
         
     
     childList = property(lambda self: [eval('%s("%s")' % (ch[0].getField('class'), ch.getPath())) for ch in self.oid_.getField('children')])
