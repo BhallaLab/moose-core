@@ -1,3 +1,5 @@
+import os
+import subprocess
 import sys
 import unittest
 import uuid
@@ -151,7 +153,26 @@ class TestMessages(unittest.TestCase):
             self.assertEqual(srcFieldsOnE1[0], 'raxialOut')
             destFieldsOnE2 = outmsgs_src[ii].getField('destFieldsOnE2')
             self.assertEqual(destFieldsOnE2[0], 'handleRaxial')
-        print 'OK'        
+        print 'OK'
+
+class TestNeighbors(unittest.TestCase):
+    def setUp(self):
+        self.pulsegen = moose.PulseGen('pulsegen')
+        self.compartment = moose.Compartment('compartment')
+        self.table = moose.Table('table')
+        moose.connect(self.table, 'requestData', self.compartment, 'get_Im')
+        moose.connect(self.pulsegen, 'outputOut', self.compartment, 'injectMsg')
+        
+    def testNeighborDict(self):
+        print 'Testing neighbour dict ...'
+        neighbors = self.compartment.neighborDict
+        self.assertIn(self.pulsegen.oid_, [ n.oid_ for n in neighbors['injectMsg']])
+        self.assertIn(self.table.oid_, [n.oid_ for n in neighbors['get_Im']])
+        self.assertIn(self.compartment.oid_, [n.oid_ for n in self.pulsegen.neighborDict['outputOut']])
+        self.assertIn(self.compartment.oid_, [n.oid_ for n in self.table.neighborDict['requestData']])
+        print 'OK'
+                      
+            
         
 if __name__ == '__main__':
     print 'PyMOOSE Regression Tests:'
