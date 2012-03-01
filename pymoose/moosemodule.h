@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 17:11:06 2011 (+0530)
 // Version: 
-// Last-Updated: Tue Feb 21 20:23:32 2012 (+0530)
+// Last-Updated: Thu Mar  1 15:39:35 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 594
+//     Update #: 595
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -97,7 +97,7 @@ extern "C" {
     static PyObject * _pymoose_ObjId_getFieldType(_ObjId * self, PyObject * args);
     static PyObject * _pymoose_ObjId_getDataIndex(_ObjId * self, PyObject * args);
     static PyObject * _pymoose_ObjId_getFieldIndex(_ObjId * self, PyObject * args);
-    static PyObject * _pymoose_ObjId_getNeighbours(_ObjId * self, PyObject * args);
+    static PyObject * _pymoose_ObjId_getNeighbors(_ObjId * self, PyObject * args);
     static PyObject * _pymoose_ObjId_getId(_ObjId * self, PyObject * args);
     static PyObject * _pymoose_ObjId_connect(_ObjId * self, PyObject * args);
     static PyObject * _pymoose_ObjId_richCompare(_ObjId * self, PyObject * args, int op);

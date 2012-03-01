@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Tue Feb 21 20:21:34 2012 (+0530)
+// Last-Updated: Thu Mar  1 15:38:36 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 4921
+//     Update #: 4922
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -130,7 +130,7 @@ extern "C" {
          "If one of 'valueFinfo', 'lookupFinfo', 'srcFinfo', 'destFinfo' or"
          "'sharedFinfo' is specified, then only fields of that type are"
          "returned. If no argument is passed, all fields are returned."},
-        {"getNeighbours", (PyCFunction)_pymoose_ObjId_getNeighbours, METH_VARARGS,
+        {"getNeighbors", (PyCFunction)_pymoose_ObjId_getNeighbors, METH_VARARGS,
          "Retrieve a list of Ids connected via this field."},
         {"connect", (PyCFunction)_pymoose_ObjId_connect, METH_VARARGS,
          "Connect another object via a message."},
@@ -1498,13 +1498,13 @@ extern "C" {
         return pyret;             
     }
 
-    static PyObject * _pymoose_ObjId_getNeighbours(_ObjId * self, PyObject * args)
+    static PyObject * _pymoose_ObjId_getNeighbors(_ObjId * self, PyObject * args)
     {
         char * field = NULL;
-        if (!PyArg_ParseTuple(args, "s:_pymoose_ObjId_getNeighbours", &field)){
+        if (!PyArg_ParseTuple(args, "s:_pymoose_ObjId_getNeighbors", &field)){
             return NULL;
         }
-        vector< Id > val = LookupField< string, vector< Id > >::get(self->oid_, "neighbours", string(field));
+        vector< Id > val = LookupField< string, vector< Id > >::get(self->oid_, "neighbors", string(field));
     
         PyObject * ret = PyTuple_New((Py_ssize_t)val.size());
         for (unsigned int ii = 0; ii < val.size(); ++ ii ){            
