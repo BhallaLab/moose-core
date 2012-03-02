@@ -232,7 +232,6 @@ double estimateHsolveLoad( Id hsolver )
  */
 void SimManager::build( const Eref& e, const Qinfo* q, string method )
 {
-	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	// First, check if the tree has a compartment/ChemMesh as the base
 	// of the chemical system. If not, put in a single-voxel ChemMesh.
 	baseId_ = e.id();
@@ -242,50 +241,7 @@ void SimManager::build( const Eref& e, const Qinfo* q, string method )
 		 cout << "SimManager::build: No chem mesh found, still need to sort this out\n";
 		 return;
 	}
-
-	bool isEE = ( method == "neutral" || method == "Neutral" || method == "ee" || method == "EE" );
-	if ( isEE ) {
-		buildFromKkitTree( method );
-		return;
-	}
-	vector< int > dims( 1, 1 );
-	 // This is a placeholder for more sophisticated node-balancing info
-	 // May also need to put in volscales here.
-	stoich_ = shell->doCreate( "Stoich", baseId_, "stoich", dims );
-	Field< string >::set( stoich_, "path", baseId_.path() + "/kinetics/##");
-
-	MsgId mid = shell->doAddMsg( "Single", mesh, "meshSplit", 
-		stoich_, "meshSplit" );
-	assert( mid != Msg::bad );
-
-	double chemLoad = estimateChemLoad( mesh, stoich_ );
-	// Here we would also estimate cell load
-	Id hsolver;
-	double hsolveLoad = estimateHsolveLoad( hsolver );
-
-	numChemNodes_ = Shell::numNodes() * chemLoad / ( chemLoad + hsolveLoad);
-	
-	nodeInfo()->send( e, q->threadNum(), numChemNodes_,
-		Shell::numProcessThreads() ); 
-	Qinfo::waitProcCycles( 2 );
-
-	// send numChemNodes off to the ChemMesh to come back with the 
-	// partitioning rules. This in due course leads to the return message
-	// with the mesh partitioning info. The return message in turn triggers
-	// the requests for node allocation and the construction of the 
-	// GSL or GSSA integrators. The current function does not do these
-	// subsequent steps as the outgoing 'send' call is non-blocking.
-
-	buildFromKkitTree( method );
-
-	Id meshEntry = Neutral::child( mesh.eref(), "mesh" );
-	assert( meshEntry != Id() );
-	Id gsl = Neutral::child( stoich_.eref(), "gsl" );
-	if ( gsl != Id() ) {
-		mid = shell->doAddMsg( "OneToOne", meshEntry, "remesh", 
-			gsl, "remesh" );
-		assert( mid != Msg::bad );
-	}
+	buildFromKkitTree( e, q, method );
 
 	// Apply heuristic for threads and nodes
 	// Replicate pools as per node decomp. Shell::handleReMesh
@@ -361,7 +317,107 @@ void SimManager::buildFromBareKineticTree( const string& method )
 	;
 }
 
-void SimManager::buildFromKkitTree( const string& method )
+ // Don't make any solvers.
+void SimManager::buildEE( Shell* shell )
+{
+	string basePath = baseId_.path();
+	shell->doUseClock( basePath + "/kinetics/##[TYPE=Pool]", "process", 0);
+		// Normally we would simply say [ISA!=Pool] here. But that puts
+		// a Process operation on the mesh, which should not be done in
+		// this mode as diffusion isn't supported.
+	shell->doUseClock( basePath + "/kinetics/##[ISA!=Pool]", "process", 1);
+}
+
+void SimManager::buildGssa( const Eref& e, const Qinfo* q, Shell* shell )
+{
+	vector< int > dims( 1, 1 );
+	 // This is a placeholder for more sophisticated node-balancing info
+	 // May also need to put in volscales here.
+	stoich_ = shell->doCreate( "GssaStoich", baseId_, "stoich", dims );
+
+	string basePath = baseId_.path();
+	Id compt( basePath + "/kinetics" );
+	assert( compt != Id() );
+
+	Field< string >::set( stoich_, "path", basePath + "/kinetics/##");
+
+	MsgId mid = shell->doAddMsg( "Single", compt, "meshSplit", 
+		stoich_, "meshSplit" );
+	assert( mid != Msg::bad );
+
+	double chemLoad = estimateChemLoad( compt, stoich_ );
+	// Here we would also estimate cell load
+	Id hsolver;
+	double hsolveLoad = estimateHsolveLoad( hsolver );
+
+	numChemNodes_ = Shell::numNodes() * chemLoad / ( chemLoad + hsolveLoad);
+	
+	nodeInfo()->send( e, q->threadNum(), numChemNodes_,
+		Shell::numProcessThreads() ); 
+	Qinfo::waitProcCycles( 2 );
+
+	string path0 = basePath + "/kinetics/mesh," + 
+		basePath + "/kinetics/##[ISA=StimulusTable]";
+	shell->doUseClock( path0, "process", 0);
+	/*
+	Id meshEntry = Neutral::child( mesh.eref(), "mesh" );
+	assert( meshEntry != Id() );
+	*/
+}
+
+void SimManager::buildSmoldyn( Shell* shell )
+{
+}
+
+void SimManager::buildGsl( const Eref& e, const Qinfo* q, 
+	Shell* shell, const string& method )
+{
+	vector< int > dims( 1, 1 );
+	 // This is a placeholder for more sophisticated node-balancing info
+	 // May also need to put in volscales here.
+	stoich_ = shell->doCreate( "Stoich", baseId_, "stoich", dims );
+	Field< string >::set( stoich_, "path", baseId_.path() + "/kinetics/##");
+
+	string basePath = baseId_.path();
+	Id compt( basePath + "/kinetics" );
+	assert( compt != Id() );
+
+	MsgId mid = shell->doAddMsg( "Single", compt, "meshSplit", 
+		stoich_, "meshSplit" );
+	assert( mid != Msg::bad );
+
+	double chemLoad = estimateChemLoad( compt, stoich_ );
+	// Here we would also estimate cell load
+	Id hsolver;
+	double hsolveLoad = estimateHsolveLoad( hsolver );
+
+	numChemNodes_ = Shell::numNodes() * chemLoad / ( chemLoad + hsolveLoad);
+	
+	nodeInfo()->send( e, q->threadNum(), numChemNodes_,
+		Shell::numProcessThreads() ); 
+	Qinfo::waitProcCycles( 2 );
+
+	Id gsl = shell->doCreate( "GslIntegrator", stoich_, "gsl", dims );
+	assert( gsl != Id() );
+	bool ret = SetGet1< Id >::set( gsl, "stoich", stoich_ );
+	assert( ret );
+	ret = Field< bool >::get( gsl, "isInitialized" );
+	assert( ret );
+	ret = Field< string >::set( gsl, "method", method );
+	assert( ret );
+	string path0 = basePath + "/kinetics/mesh," + 
+		basePath + "/kinetics/##[ISA=StimulusTable]";
+	shell->doUseClock( path0, "process", 0);
+	shell->doUseClock( basePath + "/stoich/gsl", "process", 1);
+
+	Id meshEntry = Neutral::child( compt.eref(), "mesh" );
+	assert( meshEntry != Id() );
+	mid = shell->doAddMsg( "OneToOne", meshEntry, "remesh", gsl, "remesh" );
+	assert( mid != Msg::bad );
+}
+
+void SimManager::buildFromKkitTree( const Eref& e, const Qinfo* q,
+	const string& method )
 {
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	autoPlot_ = 0;
@@ -373,35 +429,15 @@ void SimManager::buildFromKkitTree( const string& method )
 	shell->doSetClock( 3, 0 );
 
 	string basePath = baseId_.path();
-	Id mesh( basePath + "/kinetics/mesh" );
-	assert( mesh != Id() );
 	if ( method == "Gillespie" || method == "gillespie" || 
 		method == "GSSA" || method == "gssa" || method == "Gssa" ) {
-		// Id stoich = shell->doCreate( "Stoich", baseId_, "stoich", dims );
-		// Field< string >::set( stoich, "path", basePath + "/##" );
-		cout << "SimManager::buildFromKkitTree: Not yet got GSSA working here.\n";
+		buildGssa( e, q, shell );
 	} else if ( method == "Neutral" || method == "ee" || method == "EE" ) {
-		// cout << "SimManager::buildFromKkitTree: No solvers built\n";
-		 // Don't make any solvers.
-		shell->doUseClock( basePath + "/kinetics/##[TYPE=Pool]", "process", 0);
-		// Normally we would simply say [ISA!=Pool] here. But that puts
-		// a Process operation on the mesh, which should not be done in
-		// this mode as diffusion isn't supported.
-		shell->doUseClock( basePath + "/kinetics/##[ISA!=Pool]", "process", 1);
+		buildEE( shell );
+	} else if ( method == "Smoldyn" || method == "smoldyn" ) {
+		buildSmoldyn( shell );
 	} else {
-		// Id stoich = shell->doCreate( "Stoich", baseId_, "stoich", dims );
-		// Field< string >::set( stoich, "path", basePath + "/##" );
-		Id gsl = shell->doCreate( "GslIntegrator", stoich_, "gsl", dims );
-		bool ret = SetGet1< Id >::set( gsl, "stoich", stoich_ );
-		assert( ret );
-		ret = Field< bool >::get( gsl, "isInitialized" );
-		assert( ret );
-		ret = Field< string >::set( gsl, "method", method );
-		assert( ret );
-		string path0 = basePath + "/kinetics/mesh," + 
-			basePath + "/kinetics/##[ISA=StimulusTable]";
-		shell->doUseClock( path0, "process", 0);
-		shell->doUseClock( basePath + "/stoich/gsl", "process", 1);
+		buildGsl( e, q, shell, method );
 	}
 
 	string plotpath = basePath + "/graphs/##[TYPE=Table]," + 

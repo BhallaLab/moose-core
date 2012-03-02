@@ -68,7 +68,12 @@ class SimManager
 		//TreeType findTreeType( const Eref& e );
 		Id findChemMesh() const;
 		void buildFromBareKineticTree( const string& method );
-		void buildFromKkitTree( const string& method );
+		void buildFromKkitTree( const Eref& e, const Qinfo* q, const string& method );
+
+		void buildEE( Shell* shell );
+		void buildGsl( const Eref& e, const Qinfo* q, Shell* shell, const string& method );
+		void buildGssa( const Eref& e, const Qinfo* q, Shell* shell );
+		void buildSmoldyn( Shell* shell );
 
 		static const Cinfo* initCinfo();
 	private:
