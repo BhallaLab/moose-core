@@ -17324,6 +17324,7 @@ Got GssaStoich.cpp to compile with changes to handle arrays of mols.
 Still to come:
 - set up a data handler to let it spoof being in an array.
 - Deal with diff.
+- Threaded mtrand?
 
 ============================================================================
 27 Feb 2012
@@ -17347,5 +17348,16 @@ work around the limitation on accessing virtual functions in the base
 class destructor.
 This now clears the squid demo python test, but not the kkit test. But the
 kkit test reports a different kind of error than the earlier segv.
+Checkin 3351.
+
+============================================================================
+2 March 2012
+GSL provides nicely wrapped RNGs suitable for multithread use. Their
+default RNG is our good friend mt19937, so this should be OK to use. I'll
+have the GssaStoich use the GSL RNG interface.
+
+Working again on GssaStoich. Dealt with issue of multithreaded random numbers:
+used the GSL RNG, which is the Mersenne Twister by default. But I need to 
+have a good way to seed all the rngs differently.
 
 ============================================================================
