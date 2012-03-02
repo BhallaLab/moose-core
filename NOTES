@@ -17359,5 +17359,22 @@ have the GssaStoich use the GSL RNG interface.
 Working again on GssaStoich. Dealt with issue of multithreaded random numbers:
 used the GSL RNG, which is the Mersenne Twister by default. But I need to 
 have a good way to seed all the rngs differently. Checkin 3354.
+Did seeding at reinit. I check that we're on thread 0, and then I use mtseed
+once, and then I use mtrand for each of the gsl seeds.
+
+Diffusion: As I do this periodically, I can't use the GSSA to compute it.
+Instead I go through each species and compute the probability of n molecules 
+diffusing, over the entire timestep. Similar to my old adaptive stochastic
+method. Any changes have to reflect back to the GSSA to clean up dependencies.
+Depending on diffusion rates, that could be expensive.
+
+What would be nice would be to provide 'portals' as Steven Andrews and I had
+considered for Smoldyn to MOOSE connections. That would let me model a bunch
+of spines on a dendrite, using GSSA and RK5 respectively.
+
+For now, getting the GssaStoich object tests going. Reorgainzed the
+SimManager model building sequence to work on this. Now it clears the
+regression tests. This means it also successfully loads a model into GssaStoich,
+but no info yet on whether it computes it correctly.
 
 ============================================================================
