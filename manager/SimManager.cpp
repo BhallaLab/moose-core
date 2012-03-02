@@ -359,6 +359,7 @@ void SimManager::buildGssa( const Eref& e, const Qinfo* q, Shell* shell )
 	string path0 = basePath + "/kinetics/mesh," + 
 		basePath + "/kinetics/##[ISA=StimulusTable]";
 	shell->doUseClock( path0, "process", 0);
+	shell->doUseClock( basePath + "/stoich", "process", 1);
 	/*
 	Id meshEntry = Neutral::child( mesh.eref(), "mesh" );
 	assert( meshEntry != Id() );

@@ -17375,6 +17375,10 @@ of spines on a dendrite, using GSSA and RK5 respectively.
 For now, getting the GssaStoich object tests going. Reorgainzed the
 SimManager model building sequence to work on this. Now it clears the
 regression tests. This means it also successfully loads a model into GssaStoich,
-but no info yet on whether it computes it correctly.
+but no info yet on whether it computes it correctly. Checkin 3356.
+
+Next trying to run it. Crashes.
+Some cleanup later, it generates reasonable looking output. Still need to
+validate statistically.
 
 ============================================================================
