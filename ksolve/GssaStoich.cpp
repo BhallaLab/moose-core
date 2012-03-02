@@ -390,11 +390,20 @@ void GssaStoich::reinit( const Eref& e, ProcPtr p )
 		}
 	}
 	unsigned int numLocalMeshEntries = localMeshEntries_.size();
-	// Should figure out how ot use the assign function
+	// Should figure out how to use the assign function
 	// t_.assign( t_.size(), 0.0 );
 	for ( unsigned int i = 0; i < numLocalMeshEntries; ++i ) {
 		t_[i] = 0.0;
 		updateAllRates( i );
+	}
+	if ( p->threadIndexInGroup == 0 ) {
+		mtseed( 0 );
+		for ( unsigned int i = 0; i < Shell::numProcessThreads(); ++i )
+		{
+			unsigned long j = 0;
+			unsigned long seed = mtrand() * ( j - 1 );
+			gsl_rng_set( randNumGenerators_[i], seed );
+		}
 	}
 }
 

@@ -17358,6 +17358,6 @@ have the GssaStoich use the GSL RNG interface.
 
 Working again on GssaStoich. Dealt with issue of multithreaded random numbers:
 used the GSL RNG, which is the Mersenne Twister by default. But I need to 
-have a good way to seed all the rngs differently.
+have a good way to seed all the rngs differently. Checkin 3354.
 
 ============================================================================
