@@ -142,7 +142,6 @@ void testGsolver(string modelName, string plotName, double plotDt, double simTim
 	assert( base != Id() );
 	// Id kinetics = s->doFind( "/kinetics" );
 
-	/*
 	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
 	vector< unsigned int > dims( 1, 1 );
 	Id stoich = base;
@@ -152,13 +151,13 @@ void testGsolver(string modelName, string plotName, double plotDt, double simTim
 	s->doSetClock( 2, plotDt );
 	s->doSetClock( 3, plotDt );
 
-	string  plotpath = rk.getBasePath() + "/graphs/##[TYPE=Table]," +
-		rk.getBasePath() + "/moregraphs/##[TYPE=Table]";
-	s->doUseClock( base.path(), "process", 0 );
-	s->doUseClock( plotpath, "process", 2 );
+	// string  plotpath = rk.getBasePath() + "/graphs/##[TYPE=Table]," +
+		// rk.getBasePath() + "/moregraphs/##[TYPE=Table]";
+	// s->doUseClock( base.path(), "process", 0 );
+	// s->doUseClock( plotpath, "process", 2 );
 	s->doReinit();
 	s->doStart( simTime );
-	*/
+
 
 	string plotfile = modelName + ".out";
 	Id tempId( "/model/graphs/conc1" );
@@ -181,7 +180,6 @@ void testGsolver(string modelName, string plotName, double plotDt, double simTim
 		assert( rmsr < TOLERANCE );
 	}
 	*/
-	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
 	s->doDelete( base );
 	cout << "." << flush;
 }

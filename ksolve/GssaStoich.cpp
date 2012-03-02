@@ -131,6 +131,7 @@ GssaStoich::GssaStoich()
 {
 	useOneWay_ = 1;
 	randNumGenerators_.resize( Shell::numProcessThreads() );
+	meshIndex_.resize( Shell::numProcessThreads() );
 	gsl_rng_env_setup();
 	for ( unsigned int i = 0; i < Shell::numProcessThreads(); ++i )
 		randNumGenerators_[i] = gsl_rng_alloc( gsl_rng_default );
@@ -374,7 +375,8 @@ void GssaStoich::makeReacDepsUnique()
 void GssaStoich::reinit( const Eref& e, ProcPtr p )
 {
 	Stoich::innerReinit();
-	gsl_rng* rng = randNumGenerators_[ p->threadIndexInGroup ];
+	ThreadId thread = p->threadIndexInGroup % Shell::numProcessThreads();
+	gsl_rng* rng = randNumGenerators_[ thread ];
 	// Here we round off up or down with prob depending on fractional
 	// part of the init value.
 	for ( vector< unsigned int >::iterator j = localMeshEntries_.begin(); 
@@ -396,13 +398,22 @@ void GssaStoich::reinit( const Eref& e, ProcPtr p )
 		t_[i] = 0.0;
 		updateAllRates( i );
 	}
-	if ( p->threadIndexInGroup == 0 ) {
+	if ( thread == 0 ) {
 		mtseed( 0 );
+		unsigned int start = 0;
 		for ( unsigned int i = 0; i < Shell::numProcessThreads(); ++i )
 		{
 			unsigned long j = 0;
 			unsigned long seed = mtrand() * ( j - 1 );
 			gsl_rng_set( randNumGenerators_[i], seed );
+			vector< unsigned int >& mi = meshIndex_[ i ];
+			unsigned int end =
+				( numLocalMeshEntries * ( i + 1 ) + 
+				Shell::numProcessThreads() - 1 ) / 
+				Shell::numProcessThreads();
+			for ( unsigned int k = start; k != end; ++k )
+				mi.push_back( k );
+			start = end;
 		}
 	}
 }
@@ -433,7 +444,7 @@ unsigned int GssaStoich::pickReac( unsigned int meshIndex, gsl_rng* rng )
 void GssaStoich::process( const Eref& e, ProcPtr info )
 {
 	double nextt = info->currTime + info->dt;
-	ThreadId thread = info->threadIndexInGroup;
+	ThreadId thread = info->threadIndexInGroup % Shell::numProcessThreads();
 	gsl_rng* rng = randNumGenerators_[thread];
 
 	const vector< unsigned int >& mi = meshIndex_[ thread ];
