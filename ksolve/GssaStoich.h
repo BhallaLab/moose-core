@@ -19,6 +19,7 @@ class GssaStoich: public Stoich
 {
 	public:
 		GssaStoich();
+		~GssaStoich();
 
 		///////////////////////////////////////////////////
 		// Msg Dest function definitions
@@ -44,7 +45,7 @@ class GssaStoich: public Stoich
 		void updateDependentMathExpn( unsigned int meshIndex,
 			const vector< unsigned int >& deps );
 		void updateAllRates( unsigned int meshIndex );
-		unsigned int pickReac( unsigned int meshIndex );
+		unsigned int pickReac( unsigned int meshIndex, gsl_rng* r );
 
 		static const Cinfo* initCinfo();
 	private:
@@ -159,5 +160,11 @@ class GssaStoich: public Stoich
 		 */
 		KinSparseMatrix transN_; 
 
+		/**
+		 * meshIndex_[thread][i] has a vector of meshIndices allocated to
+		 * each thread.
+		 */
+		vector< vector< unsigned int > > meshIndex_;
+		vector< gsl_rng* > randNumGenerators_;
 };
 #endif // _GssaStoich_h

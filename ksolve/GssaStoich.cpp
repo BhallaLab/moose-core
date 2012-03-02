@@ -6,6 +6,7 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
+#include <gsl/gsl_rng.h>
 #include "StoichHeaders.h"
 #include "ElementValueFinfo.h"
 #include "Pool.h"
@@ -129,6 +130,16 @@ GssaStoich::GssaStoich()
 	: Stoich(), atot_( 0.0 ), t_( 0.0 )
 {
 	useOneWay_ = 1;
+	randNumGenerators_.resize( Shell::numProcessThreads() );
+	gsl_rng_env_setup();
+	for ( unsigned int i = 0; i < Shell::numProcessThreads(); ++i )
+		randNumGenerators_[i] = gsl_rng_alloc( gsl_rng_default );
+}
+
+GssaStoich::~GssaStoich()
+{
+	for ( unsigned int i = 0; i < Shell::numProcessThreads(); ++i )
+		gsl_rng_free( randNumGenerators_[i] );
 }
 		
 ///////////////////////////////////////////////////
@@ -363,6 +374,7 @@ void GssaStoich::makeReacDepsUnique()
 void GssaStoich::reinit( const Eref& e, ProcPtr p )
 {
 	Stoich::innerReinit();
+	gsl_rng* rng = randNumGenerators_[ p->threadIndexInGroup ];
 	// Here we round off up or down with prob depending on fractional
 	// part of the init value.
 	for ( vector< unsigned int >::iterator j = localMeshEntries_.begin(); 
@@ -370,7 +382,8 @@ void GssaStoich::reinit( const Eref& e, ProcPtr p )
 		for ( vector< double >::iterator i = S_[*j].begin(); i != S_[*j].end(); ++i ) {
 			double base = floor( *i );
 			double frac = *i - base;
-			if ( mtrand() > frac )
+			// if ( mtrand() > frac )
+			if ( gsl_rng_uniform( rng ) > frac )
 				*i = base;
 			else
 				*i = base + 1.0;
@@ -386,9 +399,10 @@ void GssaStoich::reinit( const Eref& e, ProcPtr p )
 }
 
 
-unsigned int GssaStoich::pickReac( unsigned int meshIndex )
+unsigned int GssaStoich::pickReac( unsigned int meshIndex, gsl_rng* rng )
 {
-	double r = mtrand() * atot_[meshIndex];
+	double r = gsl_rng_uniform( rng ) * atot_[meshIndex];
+	// double r = mtrand() * atot_[meshIndex];
 	double sum = 0.0;
 	// This is an inefficient way to do it. Can easily get to 
 	// log time or thereabouts by doing one or two levels of 
@@ -404,47 +418,57 @@ unsigned int GssaStoich::pickReac( unsigned int meshIndex )
 	return v_[meshIndex].size();
 }
 
+// This is meant to run on a ZeroDimParallelHandler, which delegates all
+// decisions about thread and node to the GssaStoich object. This function
+// will be called on all threads and all nodes, but only for a single Eref.
 void GssaStoich::process( const Eref& e, ProcPtr info )
 {
-	unsigned int meshIndex = e.index().value();
-
 	double nextt = info->currTime + info->dt;
-	double t = t_[meshIndex];
-	double atot = atot_[meshIndex];
-	while ( t < nextt ) {
-		// Figure out when the reaction will occur. The atot_
-		// calculation actually estimates time for which reaction will
-		// NOT occur, as atot_ sums all propensities.
-		if ( atot <= 0.0 ) { // Nothing is going to happen.
-			// We have to advance t_ because we may resume calculations
-			// with a different atot at a later time.
-			t = nextt;
-			break;
-		}
-		unsigned int rindex = pickReac( meshIndex ); // Does a randnum call
-		if ( rindex >= rates_.size() ) {
-			// Probably cumulative roundoff error here. Simply
-			// recalculate atot to avoid, and redo.
-			updateAllRates( meshIndex );
-			continue;
-		}
-		transN_.fireReac( rindex, S_[meshIndex] );
+	ThreadId thread = info->threadIndexInGroup;
+	gsl_rng* rng = randNumGenerators_[thread];
 
-		// Math expns must be first, because they may alter 
-		// substrate mol #.
-		updateDependentMathExpn( meshIndex, dependentMathExpn_[ rindex ] );
-		// The rates list includes rates dependent on mols changed
-		// by the MathExpns.
-		updateDependentRates( meshIndex, dependency_[ rindex ] );
-
-		double r = mtrand();
-		while ( r <= 0.0 )
-			r = mtrand();
-		t -= ( 1.0 / atot ) * log( r );
-		// double dt = ( 1.0 / atot_ ) * log( 1.0 / mtrand() );
+	const vector< unsigned int >& mi = meshIndex_[ thread ];
+	for ( unsigned int i = 0; i < mi.size(); ++i ) {
+		unsigned int meshIndex = mi[i];
+		double t = t_[meshIndex];
+		double atot = atot_[meshIndex];
+	
+		while ( t < nextt ) {
+			// Figure out when the reaction will occur. The atot_
+			// calculation actually estimates time for which reaction will
+			// NOT occur, as atot_ sums all propensities.
+			if ( atot <= 0.0 ) { // Nothing is going to happen.
+				// We have to advance t_ because we may resume calculations
+				// with a different atot at a later time.
+				t = nextt;
+				break;
+			}
+			// Does a randnum call
+			unsigned int rindex = pickReac( meshIndex, rng ); 
+			if ( rindex >= rates_.size() ) {
+				// Probably cumulative roundoff error here. Simply
+				// recalculate atot to avoid, and redo.
+				updateAllRates( meshIndex );
+				continue;
+			}
+			transN_.fireReac( rindex, S_[meshIndex] );
+	
+			// Math expns must be first, because they may alter 
+			// substrate mol #.
+			updateDependentMathExpn( meshIndex, dependentMathExpn_[ rindex ] );
+			// The rates list includes rates dependent on mols changed
+			// by the MathExpns.
+			updateDependentRates( meshIndex, dependency_[ rindex ] );
+	
+			double r = gsl_rng_uniform( rng );
+			while ( r <= 0.0 )
+				r = gsl_rng_uniform( rng );
+			t -= ( 1.0 / atot ) * log( r );
+			// double dt = ( 1.0 / atot_ ) * log( 1.0 / mtrand() );
+		}
+		t_[meshIndex] = t;
+		atot_[meshIndex] = atot;
 	}
-	t_[meshIndex] = t;
-	atot_[meshIndex] = atot;
 }
 
 void GssaStoich::updateDependentRates( 
