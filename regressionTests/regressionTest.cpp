@@ -67,6 +67,7 @@ void regressionTests()
 	rtReacDiff();
 	rtHHnetwork( 10 );
 
-	testGsolver( "reac", "A.Co", 0.1, 100 );
+	for ( unsigned int i = 0; i < 10; ++i )
+		testGsolver( "reac", "A.Co", 0.1, 100 );
 	cout << endl;
 }
