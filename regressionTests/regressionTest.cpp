@@ -24,7 +24,7 @@ void rtReadKkitModels( const string& modelname, const char** path,
 void rtHHnetwork( unsigned int numCopies );
 
 extern void testGsolver( string modelName, string plotName,
-	double plotDt, double simtime );
+	double plotDt, double simtime, double volume );
 
 void regressionTests()
 {
@@ -67,7 +67,10 @@ void regressionTests()
 	rtReacDiff();
 	rtHHnetwork( 10 );
 
-	for ( unsigned int i = 0; i < 10; ++i )
-		testGsolver( "reac", "A.Co", 0.1, 100 );
+	testGsolver( "reac", "A.Co", 0.1, 100, 1e-21 );
+	testGsolver( "reac", "A.Co", 0.1, 100, 1e-20 );
+	testGsolver( "reac", "A.Co", 0.1, 100, 1e-19 );
+	testGsolver( "reac", "A.Co", 0.1, 100, 1e-18 );
+	testGsolver( "reac", "A.Co", 0.1, 100, 1e-17 );
 	cout << endl;
 }
