@@ -403,8 +403,8 @@ void GssaStoich::reinit( const Eref& e, ProcPtr p )
 		unsigned int start = 0;
 		for ( unsigned int i = 0; i < Shell::numProcessThreads(); ++i )
 		{
-			unsigned long j = 0;
-			unsigned long seed = mtrand() * ( j - 1 );
+			unsigned int j = 0;
+			unsigned int seed = mtrand() * ( j - 1 );
 			gsl_rng_set( randNumGenerators_[i], seed );
 			vector< unsigned int >& mi = meshIndex_[ i ];
 			unsigned int end =
