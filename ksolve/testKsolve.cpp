@@ -135,14 +135,17 @@ void testKsolveZombify( string modelFile )
 	
 }
 
-void testGsolver(string modelName, string plotName, double plotDt, double simTime )
+void testGsolver(string modelName, string plotName, double plotDt, double simTime, double volume )
 {
 	ReadKkit rk;
 	Id base = rk.read( modelName + ".g" , "model", Id(), "Gssa" );
 	assert( base != Id() );
-	// Id kinetics = s->doFind( "/kinetics" );
-
 	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	Id kinetics( "/model/kinetics" );
+	assert( kinetics != Id() );
+	SetGet2< double, unsigned int >::set( kinetics, "buildDefaultMesh",
+		volume, 1 );
+
 	vector< unsigned int > dims( 1, 1 );
 	Id stoich = base;
 
