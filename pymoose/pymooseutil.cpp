@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Sat Mar 26 22:41:37 2011 (+0530)
 // Version: 
-// Last-Updated: Tue Feb 28 13:02:34 2012 (+0530)
+// Last-Updated: Mon Mar  5 23:22:52 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 365
+//     Update #: 367
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -216,8 +216,8 @@ Shell& pymoose::getShell(int argc, char ** argv)
 #endif // DO_UNIT_TESTS
     if (!shell_->isSingleThreaded()){
         Qinfo::initMutex(); // Mutex used to align Parser and MOOSE threads.
+        shell_->launchThreads();
     }
-    shell_->launchThreads();
     if ( shell_->myNode() == 0 ) {
 #ifdef DO_UNIT_TESTS
         mpiTests();
@@ -233,8 +233,8 @@ Shell& pymoose::getShell(int argc, char ** argv)
 
 void pymoose::finalize()
 {
+    getShell().doQuit();
     if (!getShell().isSingleThreaded()){
-        getShell().doQuit();
         getShell().joinThreads();
         Qinfo::freeMutex();
     }
