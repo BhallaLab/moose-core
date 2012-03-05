@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Fri Mar  2 01:03:01 2012 (+0530)
+// Last-Updated: Mon Mar  5 14:27:48 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 4923
+//     Update #: 4937
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -747,8 +747,8 @@ extern "C" {
             msg += field;
             msg += " of type ";
             msg += type;
-            PyErr_SetString(PyExc_NotImplementedError, msg.c_str());
-            return NULL;
+            cout << msg << endl;
+            Py_RETURN_NONE;
         }
         switch(ftype){
             case 'b': {
@@ -788,8 +788,8 @@ extern "C" {
                 }
             case 'z':
                 {
-                    PyErr_SetString(PyExc_NotImplementedError, "DataId handling not implemented in PyMoose yet.");
-                    return NULL;
+                    cout << "DataId handling not implemented in PyMoose yet." << endl;
+                    Py_RETURN_NONE;
                 }
             case 'v': GET_VECFIELD(int, i)
             case 'w': GET_VECFIELD(short, h)
@@ -979,8 +979,8 @@ extern "C" {
                 }
             case 'z': // DataId
                 {
-                    PyErr_SetString(PyExc_NotImplementedError, "DataId handling not implemented in PyMoose yet.");
-                    return NULL;
+                    cout << "DataId handling not implemented in PyMoose yet." << endl;
+                    Py_RETURN_NONE;
                 }
             case 'v': 
                 {
@@ -1132,8 +1132,8 @@ extern "C" {
         vector< string > argType;
         tokenize(type, ",", argType);
         if (argType.size() != 2){
-            PyErr_SetString(PyExc_NotImplementedError, "Can handle only single level lookup fields.");
-            return NULL;
+            cout << "Error: _pymoose_ObjId_getLookupField can handle only single level lookup fields." << endl;
+            Py_RETURN_NONE;
         }
         char key_type_code = shortType(argType[0]);
         char value_type_code = shortType(argType[1]);
@@ -1223,8 +1223,8 @@ extern "C" {
         vector< string > argType;
         tokenize(type, ",", argType);
         if (argType.size() != 2){
-            PyErr_SetString(PyExc_NotImplementedError, "Can handle only single level lookup fields.");
-            return NULL;
+            cout << "Error: _pymoose_ObjId_setLookupField can  handle only single level lookup fields." << endl;
+            Py_RETURN_NONE;
         }
         char key_type_code = shortType(argType[0]);
         char value_type_code = shortType(argType[1]);
@@ -1328,8 +1328,8 @@ extern "C" {
         } else if (argType.size() >= maxArgs) {
             error << "_pymoose_ObjId_setDestField: number of arguments to this function exceeds the implemented maximum=" << (maxArgs - 1)
                   << ".\nExpected arguments: " << type;
-            PyErr_SetString(PyExc_NotImplementedError, error.str().c_str());
-            return NULL;
+            cout << "Error: " << error << endl;
+            Py_RETURN_NONE;
         }
         ostringstream argstream;
         for (size_t ii = 0; ii < argType.size(); ++ii){
