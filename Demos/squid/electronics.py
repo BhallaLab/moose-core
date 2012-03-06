@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Feb 22 00:53:38 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Mar  6 16:16:11 2012 (+0530)
+# Last-Updated: Wed Mar  7 00:46:50 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 185
+#     Update #: 197
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -69,15 +69,19 @@ class ClampCircuit(moose.Neutral):
         current_table = moose.Table("/data/Im")
         moose.connect(current_table, "requestData", compartment, "get_Im")
 
-    def configure_pulses(self, baselevel=0.0, firstlevel=0.1, firstdelay=5.0, firstwidth=40.0, secondlevel=0.0, seconddelay=1e6, secondwidth=0.0):
+    def configure_pulses(self, baseLevel=0.0, firstLevel=0.1, firstDelay=5.0, firstWidth=40.0, secondLevel=0.0, secondDelay=1e6, secondWidth=0.0, singlePulse=True):
         """Set up the pulse generator."""        
-        self.pulsegen.baseLevel = baselevel
-        self.pulsegen.firstLevel = firstlevel
-        self.pulsegen.firstWidth = firstwidth
-        self.pulsegen.firstDelay = firstdelay
-        self.pulsegen.secondLevel = secondlevel
-        self.pulsegen.secondDelay = seconddelay
-        self.pulsegen.secondWidth = secondwidth
+        self.pulsegen.baseLevel = baseLevel
+        self.pulsegen.firstLevel = firstLevel
+        self.pulsegen.firstWidth = firstWidth
+        self.pulsegen.firstDelay = firstDelay
+        self.pulsegen.secondLevel = secondLevel
+        self.pulsegen.secondDelay = secondDelay
+        self.pulsegen.secondWidth = secondWidth
+        if singlePulse:
+            self.pulsegen.delay[2] = 1e10
+        else:
+            self.pulsegen.delay[2] = 0.0
         
         
     def do_voltage_clamp(self):
@@ -91,7 +95,7 @@ class ClampCircuit(moose.Neutral):
             
     def do_current_clamp(self):
         """Switch to current clamp circuitry. After this the simdt may
-        need to be changed for correct performance."""        
+        need to be changed for correct performance."""
         self.iclamp.gain = 1.0
         self.vclamp.gain = 0.0
         self.pid.gain = 0.0
