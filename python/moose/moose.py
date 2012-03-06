@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Tue Mar  6 11:15:15 2012 (+0530)
+# Last-Updated: Tue Mar  6 12:22:11 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1339
+#     Update #: 1361
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -170,9 +170,46 @@ c = IntFire(c/b') # Raises NameError.
 d = NeutralArray('c', 10)
 e = Neutral('c[9]') # Last element in d
 
+Fields:
+
+childList - a list containing the children of this object.
+
+className - class of the underlying MOOSE object. The corresponding
+field in MOOSE is 'class', but in Python that is a keyword, so we use
+className instead. This is same as Neutral.getField('class')
+
+
+dataIndex - data index of this object. This should not be needed for
+normal use.
+
+dimensions - a tuple representation dimensions of the object. If it is
+empty, this is a singleton object.
+
+fieldIndex - fieldIndex for this object. Should not be needed for
+ordinary use.
+
+fieldNames - list fields available in the underlying MOOSE object.
+
+
+
 Methods:
 
-Neutral and all its derivatives will have a bunch of methods that are
+children() - return the list of Ids of the children
+
+connect(srcField, destObj, destField) - a short hand and backward
+compatibility function for moose.connect(). It creates a message
+connecting the srcField on the calling object to destField on the dest
+object.
+
+getField(fieldName) - return the value of the specified field.
+
+getFieldNames() - return a list of the available field names on this object
+
+getFieldType(fieldName) - return the data type of the specified field.
+
+
+
+More generally, Neutral and all its derivatives will have a bunch of methods that are
 for calling functions via destFinfos. help() for these functions
 should show something like:
 
@@ -610,7 +647,7 @@ class Neutral(object):
         return self.oid_.getFieldNames(ftype)
 
     def getNeighbors(self, fieldName):
-        if fieldName in self.oid_.getFieldDict().values():
+        if fieldName in getFieldDict(self.className).keys():
             return [eval('%s("%s")' % (id_[0].getField('class'), id_.getPath())) for id_ in self.oid_.getNeighbors(fieldName)]
         raise ValueError('%s: no such field on %s' % (fieldName, self.path))
         
