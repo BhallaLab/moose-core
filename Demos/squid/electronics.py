@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Feb 22 00:53:38 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Feb 23 23:57:49 2012 (+0530)
+# Last-Updated: Tue Mar  6 16:16:11 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 150
+#     Update #: 185
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -35,11 +35,7 @@ class ClampCircuit(moose.Neutral):
     """Container for a Voltage-Clamp/Current clamp circuit."""
     def __init__(self, path, compartment):
         moose.Neutral.__init__(self, path)
-        self.pulsegen = moose.PulseGen(path+'/pulse') # holding voltage/current generator
-        self.lowpass = moose.RC(path+'/lowpass') # lowpass filter
-        self.vclamp = moose.DiffAmp(path+'/vclamp')
-        self.iclamp = moose.DiffAmp(path+'/iclamp')
-        self.pid = moose.PIDController(path+'/pid')
+        self.pulsegen = moose.PulseGen(path+"/pulse") # holding voltage/current generator
         self.pulsegen.count = 3
         self.pulsegen.firstLevel = 25.0
         self.pulsegen.firstWidth = 50.0
@@ -47,48 +43,55 @@ class ClampCircuit(moose.Neutral):
         self.pulsegen.secondDelay = 1e6
         self.pulsegen.trigMode = 0
         self.pulsegen.delay[2] = 1e9
+        self.lowpass = moose.RC(path+"/lowpass") # lowpass filter
         self.lowpass.R = 1.0
         self.lowpass.C = 0.03
-        self.iclamp.gain = 0.0
+        self.vclamp = moose.DiffAmp(path+"/vclamp")
         self.vclamp.gain = 0.0
+        self.vclamp.saturation = 1e10
+        self.iclamp = moose.DiffAmp(path+"/iclamp")
+        self.iclamp.gain = 0.0
+        self.iclamp.saturation = 1e10
+        self.pid = moose.PIDController(path+"/pid")
         self.pid.gain = 0.5
         self.pid.tauI = 0.02
         self.pid.tauD = 0.005
         self.pid.saturation = 1e10
         # Connect current clamp circuitry
-        self.pulsegen.connect("outputOut", self.iclamp, "plusIn")
-        self.iclamp.connect("outputOut", compartment, "injectMsg")
+        moose.connect(self.pulsegen, "outputOut", self.iclamp, "plusIn")
+        moose.connect(self.iclamp, "outputOut", compartment, "injectMsg")
         # Connect voltage clamp circuitry
-        self.pulsegen.connect("outputOut", self.lowpass, "injectIn")
-        self.lowpass.connect("outputOut", self.vclamp, "plusIn")
-        self.vclamp.connect("outputOut", self.pid, "commandIn")
-        compartment.connect("VmOut", self.pid, "sensedIn")
+        moose.connect(self.pulsegen, "outputOut", self.lowpass, "injectIn")
+        moose.connect(self.lowpass, "outputOut", self.vclamp, "plusIn")
+        moose.connect(self.vclamp, "outputOut", self.pid, "commandIn")
+        moose.connect(compartment, "VmOut", self.pid, "sensedIn")
         moose.connect(self.pid, "outputOut", compartment, "injectMsg")
-        # TODO: setup tables for recording current and voltage clamp current.
-        # injections We have to maintain two tables as MOOSE does not
-        # report the correct Compartment injection current.        
-        current_table = moose.Table('/data/Im')
-        moose.connect(current_table, 'requestData', compartment, 'get_Im')
+        current_table = moose.Table("/data/Im")
+        moose.connect(current_table, "requestData", compartment, "get_Im")
 
     def configure_pulses(self, baselevel=0.0, firstlevel=0.1, firstdelay=5.0, firstwidth=40.0, secondlevel=0.0, seconddelay=1e6, secondwidth=0.0):
+        """Set up the pulse generator."""        
         self.pulsegen.baseLevel = baselevel
         self.pulsegen.firstLevel = firstlevel
         self.pulsegen.firstWidth = firstwidth
         self.pulsegen.firstDelay = firstdelay
         self.pulsegen.secondLevel = secondlevel
         self.pulsegen.secondDelay = seconddelay
-        self.pulsegen.secondWidth = secondwidth        
+        self.pulsegen.secondWidth = secondwidth
         
-    def do_voltage_clamp(self, simdt):
-        self.lowpass.R = 1.0 # KOhm
-        self.lowpass.C = 0.003 # uF
+        
+    def do_voltage_clamp(self):
+        """Switch to voltage clamp circuitry. After this the simdt may
+        need to be changed for correct performance."""
         self.vclamp.gain = 1.0
         self.iclamp.gain = 0.0
         self.pid.gain = 0.5
-        self.pid.tauD = simdt
-        self.pid.tauI = 2 * simdt
+        self.pid.tauD = 0.005
+        self.pid.tauI = 0.02
             
     def do_current_clamp(self):
+        """Switch to current clamp circuitry. After this the simdt may
+        need to be changed for correct performance."""        
         self.iclamp.gain = 1.0
         self.vclamp.gain = 0.0
         self.pid.gain = 0.0

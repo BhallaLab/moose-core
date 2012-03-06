@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Mon Feb 20 01:41:12 2012 (+0530)
 // Version: 
-// Last-Updated: Wed Feb 22 18:45:55 2012 (+0530)
+// Last-Updated: Tue Mar  6 16:13:13 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 161
+//     Update #: 163
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -243,7 +243,7 @@ double PulseGen::getSecondLevel() const
 void PulseGen::setSecondWidth(double width)
 {
     if (width_.size() >= 2){
-        width_[width_.size()-1] = width;
+        width_[1] = width;
     }
 }
 
@@ -258,7 +258,7 @@ double PulseGen::getSecondWidth() const
 void PulseGen::setSecondDelay( double delay)
 {
     if (delay_.size() >= 2){
-        delay_[delay_.size() - 1] = delay;
+        delay_[1] = delay;
     }
 }
 double PulseGen::getSecondDelay() const
