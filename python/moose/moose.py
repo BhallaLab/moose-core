@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Thu Mar  1 15:38:10 2012 (+0530)
+# Last-Updated: Tue Mar  6 11:15:15 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1313
+#     Update #: 1339
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -188,6 +188,13 @@ implementation itself. Hopefully I'll have the documentation
 dynamically dragged out of Finfo documentation in future.]
 
 module functions:
+
+element(path) - returns a reference to an existing object converted to
+the right class. Raises NameError if path does not exist.
+
+arrayelement(path) - returns a reference to an existing object
+converted to the corresponding Array class. Raises NameError if path
+does not exist.
 
 copy(src=<src>, dest=<dest>, name=<name_of_the_copy>, n=<num_copies>,
 copyMsg=<whether_to_copy_messages) -- make a copy of source object as
@@ -655,6 +662,32 @@ class Neutral(object):
         
     
     childList = property(lambda self: [eval('%s("%s")' % (ch[0].getField('class'), ch.getPath())) for ch in self.oid_.getField('children')])
+
+################################################################
+# Special function to generate objects of the right class from
+# a given path.
+################################################################
+
+def element(path):
+    """Return a reference to an existing object as an instance of the
+    right class. If path does not exist, className is used for
+    creating an instance of that class with the given path"""
+    if not _moose.exists(path):
+        raise NameError('Object %s not defined' % (path))
+    oid = _moose.ObjId(path)
+    className = oid.getField('class')
+    return eval('%s("%s")' % (className, path))
+
+def arrayelement(path, className='Neutral'):
+    """Return a reference to an existing object as an instance of the
+    right class. If path does not exist, className is used for
+    creating an instance of that class with the given path"""
+    if not _moose.exists(path):
+        raise NameError('Object %s not defined' % (path))
+    oid = _moose.ObjId(path)
+    className = oid.getField('class')
+    return eval('%sArray("%s")' % (className, path))
+    
 
 ################################################################
 # Wrappers for global functions
