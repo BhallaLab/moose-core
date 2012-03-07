@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Mon Mar  5 14:27:48 2012 (+0530)
+// Last-Updated: Wed Mar  7 17:36:35 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 4937
+//     Update #: 4939
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -495,7 +495,7 @@ extern "C" {
     /** Subset of sequence protocol functions */
     static Py_ssize_t _pymoose_Id_getLength(_Id * self)
     {
-        vector< unsigned int> dims = Field< vector <unsigned int> >::get(ObjId(self->id_), "dimensions");
+        vector< unsigned int> dims = Field< vector <unsigned int> >::get(ObjId(self->id_), "objectDimensions");
         if (dims.empty()){
             return (Py_ssize_t)1; // this is a bug in basecode - dimension 1 is returned as an empty vector
         } else {
@@ -507,7 +507,7 @@ extern "C" {
         if (!PyArg_ParseTuple(args, ":_pymoose_Id_getShape")){
             return NULL;
         }
-        vector< unsigned int> dims = Field< vector <unsigned int> >::get(self->id_, "dimensions");
+        vector< unsigned int> dims = Field< vector <unsigned int> >::get(self->id_, "objectDimensions");
         if (dims.empty()){
             dims.push_back(1);
         }
