@@ -64,9 +64,9 @@ const Cinfo* ChemMesh::initCinfo()
 			&ChemMesh::getEntireSize
 		);
 
-		static ReadOnlyValueFinfo< ChemMesh, unsigned int > dimensions(
-			"dimensions",
-			"Number of dimensions of this compartment. Usually 3 or 2",
+		static ReadOnlyValueFinfo< ChemMesh, unsigned int > numDimensions(
+			"numDimensions",
+			"Number of spatial dimensions of this compartment. Usually 3 or 2",
 			&ChemMesh::getDimensions
 		);
 
@@ -160,7 +160,7 @@ const Cinfo* ChemMesh::initCinfo()
 
 	static Finfo* chemMeshFinfos[] = {
 		&size,			// ReadOnlyValue
-		&dimensions,	// ReadOnlyValue
+		&numDimensions,	// ReadOnlyValue
 		&buildDefaultMesh,	// DestFinfo
 		&nodeMeshing,	// SharedFinfo
 		&entryFinfo,	// FieldElementFinfo

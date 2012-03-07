@@ -17389,6 +17389,6 @@ that the value is only in the upper 32 bits, and the seeding function
 only uses the lower 32 bits. Which were always zero.
 
 Added a volume term to the tests. This seems to work, except at the 
-smallest volume where it has rounded up a molecule.
+smallest volume where it has rounded up a molecule. Checkin 3359.
 
 ============================================================================
