@@ -69,9 +69,9 @@ const Cinfo* Neutral::initCinfo()
 		"lastDimension is at least as big as the largest ragged array.",
 			&Neutral::getLinearSize );
 
-	static ReadOnlyElementValueFinfo< Neutral, vector< unsigned int > > dimensions( 
-		"dimensions",
-		"Dimensions of data on the Element." 
+	static ReadOnlyElementValueFinfo< Neutral, vector< unsigned int > > objectDimensions( 
+		"objectDimensions",
+		"Array Dimensions of object on the Element." 
 		"This includes the lastDimension (field dimension) if present.",
 			&Neutral::getDimensions );
 
@@ -174,7 +174,7 @@ const Cinfo* Neutral::initCinfo()
 		&path,					// ReadOnlyValue
 		&className,				// ReadOnlyValue
 		&linearSize,			// ReadOnlyValue
-		&dimensions,			// ReadOnlyValue
+		&objectDimensions,			// ReadOnlyValue
 		&lastDimension,			// Value
 		&localNumField,			// ReadOnlyValue
 		&pathIndices,			// ReadOnlyValue

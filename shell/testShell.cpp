@@ -1542,10 +1542,10 @@ void testSyncSynapseSize()
 	assert( Field< unsigned int >::get( synId, "linearSize" ) == size * (size - 1 ) );
 
 	vector< unsigned int > udims =
-		Field< vector< unsigned int > >::get( neuronId, "dimensions" );
+		Field< vector< unsigned int > >::get( neuronId, "objectDimensions" );
 	assert( udims.size() == 1 );
 	assert( udims[0] == size );
-	udims = Field< vector< unsigned int > >::get( synId, "dimensions" );
+	udims = Field< vector< unsigned int > >::get( synId, "objectDimensions" );
 	assert( udims.size() == 2 );
 	assert( udims[0] == size );
 	assert( udims[1] == size - 1 );
