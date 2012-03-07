@@ -228,9 +228,10 @@ void SparseMsg::exec( const Qinfo* q, const double* arg, FuncId fid ) const
 		unsigned int row = rowIndex( e1_, q->src().dataId.value() );
 		// unsigned int oldRow = row;
 
-		const unsigned int* fieldIndex;
-		const unsigned int* colIndex;
+		const unsigned int* fieldIndex = 0;
+		const unsigned int* colIndex = 0;
 		unsigned int n = matrix_.getRow( row, &fieldIndex, &colIndex );
+		assert( fieldIndex != 0 && colIndex != 0 );
 
 		FieldDataHandlerBase* fdh = 
 			dynamic_cast< FieldDataHandlerBase* >( e2_->dataHandler() );

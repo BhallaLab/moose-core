@@ -564,6 +564,7 @@ unsigned int Element::getNeighbours( vector< Id >& ret, const Finfo* finfo )
 		} else {
 			assert( 0 );
 		}
+	return 0;
 }
 
 // May return multiple Msgs.
