@@ -125,10 +125,10 @@ void Qinfo::clearStructuralQ()
 
 void readBuf(const double* buf, ThreadId threadNum )
 {
-	unsigned int bufsize = static_cast< unsigned int >( buf[0] );
+	// unsigned int bufsize = static_cast< unsigned int >( buf[0] );
 	unsigned int numQinfo = static_cast< unsigned int >( buf[1] );
-	assert( bufsize > 0 );
-	assert( bufsize > numQinfo * QinfoSizeInDoubles );
+	assert( static_cast< unsigned int >( buf[0] ) > 0 );
+	assert( static_cast< unsigned int >( buf[0] ) > numQinfo * QinfoSizeInDoubles );
 
 	const double* qptr = buf + 2;
 

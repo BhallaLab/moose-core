@@ -17392,3 +17392,13 @@ Added a volume term to the tests. This seems to work, except at the
 smallest volume where it has rounded up a molecule. Checkin 3359.
 
 ============================================================================
+7 March
+Minor bugfix reported by Subha: the ChemMesh::dimensions field shadows the
+existing Neutral::dimensions field. Replaced 
+ChemMesh::dimensions with numDimensions. Checkin 3366.
+
+Minor cleanups of compile warnings in basecode.
+There is still a clash of the Neutral::dimensions field. Since were in the
+business of cleaning up naming, I will now call it objectDimensions since that
+specifies the quantity better. Made change, clears unit and regression tests.
+
