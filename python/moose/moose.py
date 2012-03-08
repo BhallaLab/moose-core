@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Tue Mar  6 12:22:11 2012 (+0530)
+# Last-Updated: Thu Mar  8 16:10:57 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1361
+#     Update #: 1370
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -689,12 +689,10 @@ class Neutral(object):
         """defaultdict whose keys are field names and values are list
         of objects that are connected to that field"""
         neighbors = defaultdict(list)
-        for field in self.oid_.getFieldNames('srcFinfo'):
-            tmp = self.oid_.getNeighbors(field)
-            neighbors[field] += [eval('%s("%s")' % (nid[0].getField('class'), nid.getPath())) for nid in tmp]
-        for field in self.oid_.getFieldNames('destFinfo'):
-            tmp = self.oid_.getNeighbors(field)
-            neighbors[field] += [eval('%s("%s")' % (nid[0].getField('class'), nid.getPath())) for nid in tmp]
+        for finfotype in ['srcFinfo', 'destFinfo', 'sharedFinfo']:
+            for field in self.oid_.getFieldNames(finfotype):
+                tmp = self.oid_.getNeighbors(field)
+                neighbors[field] += [eval('%s("%s")' % (nid[0].getField('class'), nid.getPath())) for nid in tmp]
         return neighbors
         
     
