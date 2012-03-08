@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Mar  8 09:38:02 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Mar  8 15:08:11 2012 (+0530)
+# Last-Updated: Thu Mar  8 15:16:03 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 152
+#     Update #: 162
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -18,7 +18,8 @@
 # Commentary: 
 # 
 # Example of using multithreading to run a MOOSE simulation in
-# parallel with querying MOOSE objects involved.
+# parallel with querying MOOSE objects involved. See the documentatin
+# of the classes to get an idea of this demo's function.
 # 
 
 # Change log:
@@ -40,10 +41,16 @@ worker_queue = Queue.Queue()
 status_queue = Queue.Queue()
 
 class WorkerThread(threading.Thread):
+    """This thread initializes the simulation (reinit) and then runs
+    the simulation in its run method. It keeps querying moose for
+    running status every second and returns when the simulation is
+    over. It puts its name in the global worker_queue at the end to
+    signal successful completion."""
     def __init__(self, runtime):
         threading.Thread.__init__(self)
         self.runtime = runtime
         print 'Created WorkerThread of name', self.name
+        
     def run(self):
         print self.name, 'Starting run for', self.runtime, ' seconds'        
         moose.reinit()
@@ -54,7 +61,13 @@ class WorkerThread(threading.Thread):
         print self.name, 'Finishing simulation'
         worker_queue.put(self.name)
 
-class StatusThread(threading.Thread):        
+class StatusThread(threading.Thread):
+    """This thread checks the status of the moose worker thread by
+    checking the worker_queue for available entry. If there is
+    nothing, it goes to sleep for a second and then prints current
+    length of the table. If there is an entry, it puts its name in the
+    status queue, which is used by the main thread to recognize
+    successful completion."""
     def __init__(self, tab):
         threading.Thread.__init__(self)
         self.table = tab
