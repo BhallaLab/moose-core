@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Mar  7 17:36:35 2012 (+0530)
+// Last-Updated: Thu Mar  8 11:56:35 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 4939
+//     Update #: 4941
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -1675,7 +1675,9 @@ extern "C" {
             PyErr_SetString(PyExc_ValueError, "simulation runtime must be positive.");
             return NULL;
         }
+        Py_BEGIN_ALLOW_THREADS
         getShell().doStart(runtime);
+        Py_END_ALLOW_THREADS
         Py_RETURN_NONE;
     }
     static PyObject * _pymoose_reinit(PyObject * dummy, PyObject * args)
