@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Mar  8 09:38:02 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Mar  8 12:32:07 2012 (+0530)
+# Last-Updated: Thu Mar  8 15:08:11 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 121
+#     Update #: 152
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -32,6 +32,8 @@ import sys
 from datetime import datetime
 import threading
 import Queue
+import time
+
 import moose
 
 worker_queue = Queue.Queue()
@@ -43,29 +45,31 @@ class WorkerThread(threading.Thread):
         self.runtime = runtime
         print 'Created WorkerThread of name', self.name
     def run(self):
-        print self.name, 'Starting run for', self.runtime, ' seconds'
+        print self.name, 'Starting run for', self.runtime, ' seconds'        
         moose.reinit()
         moose.start(self.runtime)
-        print self.name, 'Finishing'
+        while moose.isRunning():
+            time.sleep(1.0)
+            print self.name, 'Table length', len(moose.Table('/tab').vec)
+        print self.name, 'Finishing simulation'
         worker_queue.put(self.name)
 
 class StatusThread(threading.Thread):        
     def __init__(self, tab):
         threading.Thread.__init__(self)
         self.table = tab
-        print 'Created status thread of name', self.name
+        print 'Created StatusThread of name', self.name
         
     def run(self):
         while True:
             try:
-                worker_queue.get(False)
-                print self.name, 'Finishing'
+                value = worker_queue.get(False)
+                print self.name, 'Received queue entry: ', value, '. Final table length:', len(self.table.vec), ' ... now Finishing'
                 status_queue.put(self.name)
                 return
             except Queue.Empty:
-                print self.name, 'Queue is empty'
-                print self.name, 'table length', len(tab.vec)
-                pass
+                time.sleep(1.0)
+                print self.name, 'Queue is empty. Current table length:', len(self.table.vec)
         
 if __name__ == '__main__':
     pg = moose.PulseGen('pg')
@@ -74,12 +78,13 @@ if __name__ == '__main__':
     pg.firstWidth = 5.0
     tab = moose.Table('tab')
     moose.connect(tab, 'requestData', pg, 'get_output')
+    moose.setClock(0, 1.0)
     moose.useClock(0, 'pg,tab', 'process')
-    t1 = WorkerThread(100000)
+    t1 = WorkerThread(10000)
     t2 = StatusThread(tab)
     t2.start()
     t1.start()
-    status_queue.get()
+    status_queue.get(True)
     tab.xplot('threading_demo.dat', 'pulsegen_output')
     print 'Ending threading_demo: final length of table', len(tab.vec) 
 
