@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Feb 22 23:24:21 2012 (+0530)
 # Version: 
-# Last-Updated: Wed Mar  7 00:46:28 2012 (+0530)
+# Last-Updated: Thu Mar  8 20:23:00 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 640
+#     Update #: 849
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -28,6 +28,9 @@
 
 # Code:
 import sys
+from threading import Thread, Timer
+from Queue import Queue, Empty
+import time
 
 from PyQt4 import QtGui
 from PyQt4 import QtCore
@@ -42,6 +45,66 @@ from squid import SquidAxon
 from squid_setup import SquidSetup
 from electronics import ClampCircuit
 
+class SimulationThread(QtCore.QThread):
+    def __init__(self, parent=None):
+        QtCore.QThread.__init__(self, parent)
+        self.exiting = False
+        self.runtime = 0
+        self.mutex = QtCore.QMutex()
+        
+    def exit(self):
+        try:
+            self.mutex.lock()
+            self.exiting = True
+        finally:
+            self.mutex.unlock()
+
+    def set_runtime(self, runtime):
+        try:
+            self.mutex.lock()
+            self.runtime = runtime
+        finally:
+            self.mutex.unlock()
+            
+    def run(self):
+        while not self.exiting:
+            if not moose.isRunning() and self.runtime > 0:
+                try:
+                    self.mutex.lock()
+                    print 'SimulationThread::Starting simulation'
+                    moose.start(self.runtime)
+                    self.runtime = 0
+                finally:
+                    self.mutex.unlock()
+            self.msleep(300)
+            
+    def __del__(self):
+        self.wait()
+
+# class SimulationThread(Thread):
+#     """This thread runs the simulation and controls data exchange
+#     between Qt/matplotlib and MOOSE."""
+#     def __init__(self, runtime_queue):
+#         """runtime_queue is a queue which can be filled by a client
+#         with runtime for the next simulation run. If runtime is zero
+#         or negative, the thread's run method returns."""
+#         Thread.__init__(self)
+#         self.runtime_queue = runtime_queue
+        
+#     def run(self):
+#         while True:
+#             if not moose.isRunning():
+#                 try:
+#                     runtime = self.runtime_queue.get(block=True)
+#                     if runtime <= 0:
+#                         return
+#                     print 'SimulationThread: starting for', runtime
+#                     moose.start(runtime)
+#                 except Empty:
+#                     print 'SimulationThread: queue empty'
+#                     pass
+#             time.sleep(3.0) # humans take offence at delays beyond 3 seconds
+    
 class SquidDemo(QtGui.QMainWindow):
     def __init__(self, *args):
         QtGui.QMainWindow.__init__(self, *args)
@@ -52,6 +115,12 @@ class SquidDemo(QtGui.QMainWindow):
         self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self._getElectronicsCtrl())
         self._initActions()
         self._getToolBar()
+        # self._runtime_queue = Queue()
+        self._timer = None
+        self._simthread = SimulationThread()
+        self._simthread.start()
+        # self._simthread = SimulationThread(self._runtime_queue)
+        # self._simthread.start()
         
     def _getMdiArea(self):
         if hasattr(self, '_mdiArea'):
@@ -187,7 +256,17 @@ class SquidDemo(QtGui.QMainWindow):
         self._showStatePlotAction.setChecked(False)
         self.connect(self._showStatePlotAction, QtCore.SIGNAL('toggled(bool)'), self._statePlotSubWindow.setVisible)
         self._quitAction = QtGui.QAction(self.tr('&Quit'), self)
-        self.connect(self._quitAction, QtCore.SIGNAL('triggered()'), QtGui.qApp, QtCore.SLOT('quit()'))
+        self.connect(self._quitAction, QtCore.SIGNAL('triggered()'), self._quitSlot)
+
+    def _quitSlot(self):
+        print 'Quitting'
+        self._simthread.exit()
+        if self._timer:
+            self.killTimer(self._timer)
+        # self._runtime_queue.put(-1.0)
+        # self._runtime_queue.join()
+        QtGui.qApp.quit()
+        print 'Finished'
         
     def _getToolBar(self):
         if hasattr(self, '_simToolBar'):
@@ -296,7 +375,7 @@ class SquidDemo(QtGui.QMainWindow):
             data = self.squid_setup.n_table.vec
         else:
             raise ValueError('Unrecognized selection: %s' % (name))
-        return data
+        return numpy.asarray(data)
     
     def _statePlotYSlot(self, selectedItem):
         ydata = self.__get_stateplot_data(str(selectedItem))
@@ -317,9 +396,6 @@ class SquidDemo(QtGui.QMainWindow):
         else:
             self._statePlotAxes.set_xlim(0, 1)
         self._statePlotCanvas.draw()
-
-                
-            
         
     def _runSlot(self):
         self._simdt = float(str(self._simTimeStepEdit.text()))
@@ -356,34 +432,69 @@ class SquidDemo(QtGui.QMainWindow):
                                                     secondLevel=secondLevel,
                                                     singlePulse=singlePulse)
         self.squid_setup.schedule(self._simdt, self._plotdt, clampMode)
-        # self._timer = self.startTimer(100)
         self._runtime = float(str(self._runTimeEdit.text()))
-        self.squid_setup.run(self._runtime)
+        # The following line is for use with Qthread
+        print 'Starting simulation'
+        self._simthread.set_runtime(self._runtime)
+        self._timer = self.startTimer(300)
+        # self._runtime_queue.put(self._runtime)
+        # self._timer = Timer(3.0, self._updateAllPlots)
+        # self._timer.start()
+        # time.sleep(3.0)
+
+    def _updateAllPlots(self):
+        print '_updateAllPlots'
         self._updatePlots()
         self._updateStatePlot()
-
+        # if hasattr(self, '_timer'):
+        #     self._timer.cancel()
+        # self._timer = Timer(3.0, self._updateAllPlots)        
+        # self._timer.start()
+        # time.sleep(3.0)
+        
     def _updatePlots(self):
+        if len(self.squid_setup.vm_table.vec) <= 0:
+            return        
         self._vm_axes.set_xlim(0.0, self._runtime)
         self._g_axes.set_xlim(0.0, self._runtime)
         self._im_axes.set_xlim(0.0, self._runtime)
         self._i_axes.set_xlim(0.0, self._runtime)
-        time_series = numpy.linspace(0, self._plotdt * len(self.squid_setup.vm_table.vec), len(self.squid_setup.vm_table.vec))
-        self._vm_plot.set_data(time_series, self.squid_setup.vm_table.vec)
-        self._command_plot.set_data(time_series, self.squid_setup.cmd_table.vec)
-        self._ik_plot.set_data(time_series, self.squid_setup.ik_table.vec)
-        self._ina_plot.set_data(time_series, self.squid_setup.ina_table.vec)
-        self._iclamp_plot.set_data(time_series, self.squid_setup.iclamp_table.vec)
-        self._vclamp_plot.set_data(time_series, self.squid_setup.vclamp_table.vec)
-        self._gk_plot.set_data(time_series, self.squid_setup.gk_table.vec)
-        self._gna_plot.set_data(time_series, self.squid_setup.gna_table.vec)
+        vm = numpy.asarray(self.squid_setup.vm_table.vec)
+        print 'Size of vm', len(vm)
+        cmd = numpy.asarray(self.squid_setup.cmd_table.vec)
+        ik = numpy.asarray(self.squid_setup.ik_table.vec)
+        ina = numpy.asarray(self.squid_setup.ina_table.vec)
+        iclamp = numpy.asarray(self.squid_setup.iclamp_table.vec)
+        vclamp = numpy.asarray(self.squid_setup.vclamp_table.vec)
+        gk = numpy.asarray(self.squid_setup.gk_table.vec)
+        gna = numpy.asarray(self.squid_setup.gna_table.vec)
+        time_series = numpy.linspace(0, self._plotdt * len(vm), len(vm))        
+        self._vm_plot.set_data(time_series, vm)
+        time_series = numpy.linspace(0, self._plotdt * len(cmd), len(cmd))        
+        self._command_plot.set_data(time_series, cmd)
+        time_series = numpy.linspace(0, self._plotdt * len(ik), len(ik))
+        self._ik_plot.set_data(time_series, ik)
+        time_series = numpy.linspace(0, self._plotdt * len(ina), len(ina))
+        self._ina_plot.set_data(time_series, ina)
+        time_series = numpy.linspace(0, self._plotdt * len(iclamp), len(iclamp))
+        self._iclamp_plot.set_data(time_series, iclamp)
+        time_series = numpy.linspace(0, self._plotdt * len(vclamp), len(vclamp))
+        self._vclamp_plot.set_data(time_series, vclamp)
+        time_series = numpy.linspace(0, self._plotdt * len(gk), len(gk))
+        self._gk_plot.set_data(time_series, gk)
+        time_series = numpy.linspace(0, self._plotdt * len(gna), len(gna))
+        self._gna_plot.set_data(time_series, gna)
         self._plotCanvas.draw()
 
     def _updateStatePlot(self):
+        if len(self.squid_setup.vm_table.vec) <= 0:
+            return
         sx = str(self._stateplot_xvar_combo.currentText())
         sy = str(self._stateplot_yvar_combo.currentText())
         xdata = self.__get_stateplot_data(sx)
         ydata = self.__get_stateplot_data(sy)
-        self._state_plot.set_data(xdata, ydata)
+        minlen = min(len(xdata), len(ydata))
+        self._state_plot.set_data(xdata[:minlen], ydata[:minlen])
         self._statePlotAxes.set_xlabel(sx)
         self._statePlotAxes.set_ylabel(sy)
         if sx == 'V':
@@ -395,21 +506,28 @@ class SquidDemo(QtGui.QMainWindow):
         else:
             self._statePlotAxes.set_ylim(0, 1)
         self._activationParamAxes.set_xlim(0, self._runtime)
-        self._m_plot.set_data(numpy.linspace(0, self._runtime, len(self.squid_setup.m_table.vec)), self.squid_setup.m_table.vec)
-        self._h_plot.set_data(numpy.linspace(0, self._runtime, len(self.squid_setup.h_table.vec)), self.squid_setup.h_table.vec)
-        self._n_plot.set_data(numpy.linspace(0, self._runtime, len(self.squid_setup.n_table.vec)), self.squid_setup.n_table.vec)        
+        m = self.__get_stateplot_data('m')
+        n = self.__get_stateplot_data('n')
+        h = self.__get_stateplot_data('h')
+        time_series = numpy.linspace(0, self._plotdt*len(m), len(m))
+        self._m_plot.set_data(time_series, m)
+        time_series = numpy.linspace(0, self._plotdt*len(h), len(h))
+        self._h_plot.set_data(time_series, h)
+        time_series = numpy.linspace(0, self._plotdt*len(n), len(n))
+        self._n_plot.set_data(time_series, n)
         self._statePlotCanvas.draw()
                 
     def timerEvent(self, event):
-        self._vm_plot.set_data(numpy.linspace(0, self._simdt * len(self.squid_setup.vm_table.vec), len(self.squid_setup.vm_table.vec)), self.squid_setup.vm_table.vec)
-        self._plotCanvas.draw()
-                                        
+        print 'timerEvent '
+        self._updateAllPlots()
+        if not moose.isRunning():
+            self.killTimer(event.timerId())
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     QtGui.qApp = app
-    app.connect(app, QtCore.SIGNAL('lastWindowClosed()'), app, QtCore.SLOT('quit()'))
     squid_gui = SquidDemo()
+    app.connect(app, QtCore.SIGNAL('lastWindowClosed()'), squid_gui._quitSlot)
     squid_gui.show()
     sys.exit(app.exec_())
     
