@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Apr 22 22:21:11 2009 (+0530)
 # Version: 
-# Last-Updated: Tue Jan  3 17:41:42 2012 (+0530)
+# Last-Updated: Fri Mar  9 23:57:44 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 143
+#     Update #: 149
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -54,7 +54,9 @@ class CaPool(moose.CaConc):
     def __init__(self, name, parent=None):
         if parent is None:
             path = name
-        else:
+        elif isinstance(parent, str):
+            path = parent + '/' + name
+        elif issubclass(parent, moose.Neutral):
             path = parent.path + '/' + name
         if moose.exists(path):
             moose.CaConc.__init__(self, path)
@@ -62,11 +64,11 @@ class CaPool(moose.CaConc):
             return
         moose.CaConc.__init__(self, path)
         config.LOGGER.debug('Creating %s' % (path))
-        self.CaBasal = 0.0        
-        moose.runG('setfield ' + self.path + ' ceiling 1e6')
-        moose.runG('setfield ' + self.path + ' floor 0.0')
-        self.addField('addmsg1')
-        self.setField('addmsg1', '../CaL . I_Ca Ik')
+        self.CaBasal = 0.0
+        self.ceiling = 1e6
+        self.floor = 0.0
+        # self.addField('addmsg1')
+        # self.setField('addmsg1', '../CaL . I_Ca Ik')
         
     def connectCaChannels(self, channel_list):
         """Connects the Ca2+ channels in channel_list as a source of
