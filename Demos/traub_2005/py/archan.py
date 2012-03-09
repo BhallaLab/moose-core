@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Apr 27 15:34:07 2009 (+0530)
 # Version: 
-# Last-Updated: Wed May  5 18:13:41 2010 (+0530)
+# Last-Updated: Fri Mar  9 23:54:51 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 9
+#     Update #: 13
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -45,9 +45,8 @@ class AR(ChannelBase):
 
     def __init__(self, name, parent, Ek=-35e-3):
 	ChannelBase.__init__(self, name, parent, 1, 0)
-	for i in range(len(self.xGate.A)):
-	    self.xGate.A[i] = AR.tau_m[i]
-	    self.xGate.B[i] = AR.m_inf[i]
+        self.xGate.tableA = AR.tau_m
+        self.xGate.tableB = AR.m_inf
 	self.xGate.tweakTau()
 	self.X = 0.25
 	self.Ek = Ek
