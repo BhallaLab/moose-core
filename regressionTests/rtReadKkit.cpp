@@ -12,6 +12,8 @@
 #include "Shell.h"
 #include "LoadModels.h"
 
+extern void testGsolver( string modelName, string plotName,
+	double plotDt, double simtime, double volume );
 extern ModelType findModelType( string filename, ifstream& fin, 
 	string& line );
 
@@ -733,4 +735,125 @@ void rtRunTabSumtot()
 	/////////////////////////////////////////////////////////////////////
 	shell->doDelete( modelId );
 	cout << "." << flush;
+}
+
+void checkAabXrates( double scale )
+{
+	const double NA_RATIO = 6e23 / NA;
+	const double origVol = 1.6666666666666667e-21;
+	Id a( "/vol/kinetics/a" );
+	assert( a != Id() );
+	Id b( "/vol/kinetics/b" );
+	assert( b != Id() );
+	Id c( "/vol/kinetics/c" );
+	assert( c != Id() );
+	Id cplx( "/vol/kinetics/c/kenz/kenz_cplx" );
+	assert( cplx != Id() );
+	Id reac( "/vol/kinetics/kreac" );
+	assert( reac != Id() );
+	Id enz( "/vol/kinetics/c/kenz" );
+	assert( enz != Id() );
+
+	double v = Field< double >::get( a, "size" );
+	assert( doubleEq( v, origVol * scale ) );
+	v = Field< double >::get( b, "size" );
+	assert( doubleEq( v, origVol * scale ) );
+	v = Field< double >::get( c, "size" );
+	assert( doubleEq( v, origVol * scale ) );
+	v = Field< double >::get( cplx, "size" );
+	assert( doubleEq( v, origVol * scale ) );
+
+	v = Field< double >::get( reac, "Kf" );
+	assert( doubleEq( 0.01, v ) );
+	v = Field< double >::get( reac, "kf" );
+	assert( doubleEq( 0.01, v ) );
+	v = Field< double >::get( reac, "Kb" );
+	assert( doubleEq( 0.1, v ) );
+	v = Field< double >::get( reac, "kb" );
+	assert( doubleEq( 0.1, v ) );
+
+	v = Field< double >::get( enz, "Km" );
+	assert( doubleEq( 1.0e-3, v ) );
+	v = Field< double >::get( enz, "kcat" );
+	assert( doubleEq( 0.1, v ) );
+	v = Field< double >::get( enz, "ratio" );
+	assert( doubleEq( 4, v ) );
+	v = Field< double >::get( enz, "k1" );
+	assert( doubleEq( 0.5 * NA_RATIO / scale, v ) );
+	v = Field< double >::get( enz, "k2" );
+	assert( doubleEq( 0.4, v ) );
+	v = Field< double >::get( enz, "k3" );
+	assert( doubleEq( 0.1, v ) );
+}
+
+void testKkitVolScaling()
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< unsigned int > dims( 1, 1 );
+
+	Id modelId = shell->doLoadModel( "AabXJacb.g", "/vol", "gsl" );
+	assert( modelId != Id() );
+	Id comptId( "/vol/kinetics" );
+	assert( comptId != Id() );
+
+	// If there is a mess-up in vol assignment, a new compartment_0 is made.
+	Id mesh0( "/vol/compartment_0/mesh" );
+	assert( mesh0 == Id() ); 
+
+	// This should be formed every time.
+	Id mesh1( "/vol/kinetics/mesh" );
+	assert( mesh1 != Id() );
+
+	double v1 = Field< double >::get( Id( "/vol/kinetics" ), "size" );
+	vector< Id > n1 = LookupField< string, vector< Id > >::get(
+		mesh1, "neighbours", "remesh" );
+
+	assert( n1.size() == 5 ); // Has a,b,c, kenz_cplx and gsl
+
+	assert( doubleEq( v1, 1.6666666666666666667e-21 ) );
+
+	checkAabXrates( 1.0 );
+	/////////////////////////////////////////////////////////////////////
+	SetGet2< double, unsigned int>::set( comptId, "buildDefaultMesh", v1 * 10.0, 1 );
+	checkAabXrates( 10.0 );
+	SetGet2< double, unsigned int>::set( comptId, "buildDefaultMesh", v1 * 100.0, 1 );
+	checkAabXrates( 100.0 );
+
+	shell->doDelete( modelId );
+	cout << "." << flush;
+}
+
+void rtTestChem()
+{
+	rtFindModelType();
+	rtReadKkit();
+
+	static const char* acc8path[] = { 
+		"/kkit/kinetics/Ca", 
+		"/kkit/kinetics/PLA2/PIP2-PLA2*/kenz"
+	};
+	static const char* field[] = { "concInit", "Km" };
+	static const double value[] = { 0.08e-3, 20e-3 };
+	rtReadKkitModels( "acc8.g", acc8path, field, value, 2 );
+	rtReadKkitModels( "Anno_acc8.g", acc8path, field, value, 2 );
+	static const char* acc20path[] = { 
+		"/kkit/kinetics/CaM-Ca4", 
+		"/kkit/kinetics/NOSphos/nNOS",
+		"/kkit/kinetics/CaMKIIalpha/kenz"
+	};
+	static const char* field20[] = { "concInit", "concInit", "Km" };
+	static const double value20[] = { 20e-3, 0.5e-3, 5e-3 };
+	rtReadKkitModels( "acc20.g", acc20path, field20, value20, 2 );
+
+	rtRunKkit();
+	rtReadCspace();
+	rtRunCspace();
+	rtRunTabSumtot();
+	testKkitVolScaling();
+
+	testGsolver( "reac", "A.Co", 0.1, 100, 1e-21 );
+	testGsolver( "reac", "A.Co", 0.1, 100, 1e-20 );
+	testGsolver( "reac", "A.Co", 0.1, 100, 1e-19 );
+	testGsolver( "reac", "A.Co", 0.1, 100, 1e-18 );
+	testGsolver( "reac", "A.Co", 0.1, 100, 1e-17 );
 }
