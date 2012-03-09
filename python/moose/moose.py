@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Fri Mar  9 11:03:30 2012 (+0530)
-#           By: subha
-#     Update #: 1378
+# Last-Updated: Fri Mar  9 12:42:47 2012 (+0530)
+#           By: Subhasis Ray
+#     Update #: 1381
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -738,11 +738,11 @@ def element(path):
     creating an instance of that class with the given path.
 
     Id or ObjId can be provided in stead of path"""
-    if isinstance(Id, path):
+    if isinstance(path, Id):
         oid = path[0]
-    elif isinstance(ObjId, path):
+    elif isinstance(path, ObjId):
         oid = path
-    elif isinstance(str, path):
+    elif isinstance(path, str):
         if not _moose.exists(path):
             raise NameError('Object %s not defined' % (path))
         oid = _moose.ObjId(path)
