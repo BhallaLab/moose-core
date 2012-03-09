@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Fri Mar  9 10:54:05 2012 (+0530)
+# Last-Updated: Fri Mar  9 11:03:30 2012 (+0530)
 #           By: subha
-#     Update #: 1377
+#     Update #: 1378
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -659,7 +659,7 @@ class Neutral(object):
     def connect(self, srcField, dest, destField, msgType='Single'):
         return self.oid_.connect(srcField, dest.oid_, destField, msgType)
 
-     def getInMessageDict(self):
+    def getInMessageDict(self):
         """Returns a dictionary mapping fields with incoming messages
         to lists containing (source_element, source_field)
         pairs."""
