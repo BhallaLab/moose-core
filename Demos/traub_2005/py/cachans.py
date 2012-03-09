@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Apr 18 00:18:24 2009 (+0530)
 # Version: 
-# Last-Updated: Tue Jan  3 17:41:43 2012 (+0530)
+# Last-Updated: Sat Mar 10 00:01:55 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 192
+#     Update #: 197
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -45,15 +45,17 @@
 
 # Code:
 
+import moose
+
 from channel import ChannelBase
 from numpy import where, linspace, exp, array
-import config
 class CaChannel(ChannelBase):
     """This is just a place holder to maintain type information"""
     def __init__(self, name, parent, xpower=1.0, ypower=0.0, Ek=125e-3):
-        if moose.exists(parent.path + '/' + name):
-            ChannelBase.__init__(self, name, parent, xpower, ypower)
-            return
+        if isinstance(parent, str):
+            if moose.exists(parent + '/' + name):
+                ChannelBase.__init__(self, name, parent, xpower, ypower)
+                return
 	ChannelBase.__init__(self, name, parent, xpower, ypower)
         self.Ek = Ek
         self.connected_to_pool = False
@@ -68,9 +70,10 @@ class CaL(CaChannel):
                   1e3 * 0.02 * v * 1e3 / (exp(v / 5e-3) - 1))
 
     def __init__(self, name, parent):
-        if moose.exists(parent.path + '/' + name):
-            CaChannel.__init__(self, name, parent, xpower=2.0, Ek=125e-3)
-            return
+        if isinstance(parent, str):
+            if moose.exists(parent + '/' + name):
+                CaChannel.__init__(self, name, parent, xpower=2.0, Ek=125e-3)
+                return
         CaChannel.__init__(self, name, parent, xpower=2.0, Ek=125e-3)
 	for i in range(config.ndivs + 1):
 	    self.xGate.A[i] = CaL.alpha[i]
