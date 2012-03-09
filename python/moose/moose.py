@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Fri Mar  9 12:57:00 2012 (+0530)
+# Last-Updated: Fri Mar  9 17:28:43 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1385
+#     Update #: 1386
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -747,6 +747,8 @@ def element(path):
         if not _moose.exists(path):
             raise NameError('Object %s not defined' % (path))
         oid = _moose.ObjId(path)
+    else:
+        raise TypeError('expected argument: Id/ObjId/str')
     className = oid.getField('class')
     return eval('%s("%s")' % (className, path))
 
