@@ -10,17 +10,10 @@
 #include "header.h"
 #include <unistd.h> // need Windows-specific stuff too.
 
+void rtTestChem();
 
 void rtTable();
-void rtFindModelType();
-void rtReadKkit();
-void rtRunKkit();
-void rtRunTabSumtot();
-void rtReadCspace();
-void rtRunCspace();
 void rtReacDiff();
-void rtReadKkitModels( const string& modelname, const char** path,
-	const char** field, const double* value, unsigned int num );
 void rtHHnetwork( unsigned int numCopies );
 
 extern void testGsolver( string modelName, string plotName,
@@ -40,37 +33,9 @@ void regressionTests()
 	}
 	cout << "\nRegression Tests:";
 	rtTable();
-	rtFindModelType();
-	rtReadKkit();
+	rtTestChem();
 
-	static const char* acc8path[] = { 
-		"/kkit/kinetics/Ca", 
-		"/kkit/kinetics/PLA2/PIP2-PLA2*/kenz"
-	};
-	static const char* field[] = { "concInit", "Km" };
-	static const double value[] = { 0.08e-3, 20e-3 };
-	rtReadKkitModels( "acc8.g", acc8path, field, value, 2 );
-	rtReadKkitModels( "Anno_acc8.g", acc8path, field, value, 2 );
-	static const char* acc20path[] = { 
-		"/kkit/kinetics/CaM-Ca4", 
-		"/kkit/kinetics/NOSphos/nNOS",
-		"/kkit/kinetics/CaMKIIalpha/kenz"
-	};
-	static const char* field20[] = { "concInit", "concInit", "Km" };
-	static const double value20[] = { 20e-3, 0.5e-3, 5e-3 };
-	rtReadKkitModels( "acc20.g", acc20path, field20, value20, 2 );
-
-	rtRunKkit();
-	rtReadCspace();
-	rtRunCspace();
-	rtRunTabSumtot();
 	rtReacDiff();
 	rtHHnetwork( 10 );
-
-	testGsolver( "reac", "A.Co", 0.1, 100, 1e-21 );
-	testGsolver( "reac", "A.Co", 0.1, 100, 1e-20 );
-	testGsolver( "reac", "A.Co", 0.1, 100, 1e-19 );
-	testGsolver( "reac", "A.Co", 0.1, 100, 1e-18 );
-	testGsolver( "reac", "A.Co", 0.1, 100, 1e-17 );
 	cout << endl;
 }

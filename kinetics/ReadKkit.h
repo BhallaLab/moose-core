@@ -197,6 +197,7 @@ class ReadKkit
 		/// List of Ids in each unique volume.
 		vector< vector< Id > > volCategories_;
 		vector< Id > compartments_;
+		vector< pair< Id, Id > > enzCplxMols_;
 
 		map< Id, int > poolFlags_;
 

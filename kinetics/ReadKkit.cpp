@@ -116,6 +116,7 @@ Id ReadKkit::read(
 
 	baseId_ = base;
 	basePath_ = base.path();
+	enzCplxMols_.resize( 0 );
 
 	innerRead( fin );
 
@@ -465,14 +466,9 @@ Id ReadKkit::buildReac( const vector< string >& args )
 void ReadKkit::separateVols( Id pool, double vol )
 {
 	static const double TINY = 1e-3;
-	/*
-	cout << pool << " vol = " << 
-		( reinterpret_cast< const Pool* >( pool.eref().data() ) )->getSize() <<
-		", v2 = " << vol << endl;
-		*/
 
 	for ( unsigned int i = 0 ; i < vols_.size(); ++i ) {
-		if ( fabs( vols_[i] - vol ) / ( vols_[i] + vol ) < TINY ) {
+		if ( fabs( vols_[i] - vol ) / ( fabs( vols_[i] ) + fabs( vol ) ) < TINY ) {
 			volCategories_[i].push_back( pool );
 			return;
 		}
@@ -501,6 +497,8 @@ void ReadKkit::assignPoolCompartments()
 	vector< int > dims( 1, 1 );
 
 	for ( unsigned int i = 0 ; i < volCategories_.size(); ++i ) {
+		if ( vols_[i] < 0 ) // Special case for enz complexes: vol == -1.
+			continue;
 		string name;
 		Id kinId = Neutral::child( baseId_.eref(), "kinetics" );
 		assert( kinId != Id() );
@@ -528,13 +526,24 @@ void ReadKkit::assignPoolCompartments()
 			MsgId ret = shell_->doAddMsg( "OneToOne", 
 				ObjId( *j, 0 ), "mesh",
 				ObjId( meshId, 0 ), "mesh" );
-			/*
-			MsgId ret = shell_->doAddMsg( "OneToOne", 
-				ObjId( compt, 0 ), "requestSize",
-				ObjId( *j, 0 ), "get_size" ); 
-				*/
 			assert( ret != Msg::bad );
 		}
+	}
+
+	// Patch up mesh entries for enz cplx molecules.
+	for ( unsigned int i = 0 ; i < enzCplxMols_.size(); ++i ) {
+		Id pa = enzCplxMols_[i].first;
+		const Finfo* meshMsgFinfo = 
+			pa.element()->cinfo()->findFinfo( "requestSize" );
+		vector< Id > meshVec;
+		unsigned int numMesh = pa.element()->getNeighbours( meshVec,
+			meshMsgFinfo );
+		assert( numMesh == 1 );
+		Id meshId = meshVec[0];
+		MsgId ret = shell_->doAddMsg( "OneToOne", 
+			ObjId( enzCplxMols_[i].second, 0 ), "mesh",
+			ObjId( meshId, 0 ), "mesh" );
+		assert( ret != Msg::bad );
 	}
 }
 
@@ -640,7 +649,7 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 		return enz;
 	} else {
 		Id enz = shell_->doCreate( "Enz", pa, tail, dim, true );
-		double parentVol = Field< double >::get( pa, "size" );
+		// double parentVol = Field< double >::get( pa, "size" );
 		assert( enz != Id () );
 		string enzPath = args[2].substr( 10 );
 		enzIds_[ enzPath ] = enz; 
@@ -657,9 +666,10 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 		assert( cplx != Id () );
 		poolIds_[ cplxPath ] = cplx; 
 		Field< double >::set( cplx, "nInit", nComplexInit );
-		// SetGet1< double >::set( cplx, "setSize", parentVol );
 
-		separateVols( cplx, parentVol );
+		// Use this later to assign mesh entries to enz cplx.
+		enzCplxMols_.push_back( pair< Id, Id >(  pa, cplx ) );
+		separateVols( cplx, -1 ); // -1 vol is a flag to defer mesh assignment for the cplx pool.
 
 		bool ret = shell_->doAddMsg( "OneToAll", 
 			ObjId( enz, 0 ), "cplx",
