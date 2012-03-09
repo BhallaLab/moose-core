@@ -134,6 +134,21 @@ class TestPyMooseGlobals(unittest.TestCase):
         self.assertEqual(new_obj.path, self.dest1.path + "/" + newname + '[0]')
         print 'OK'
 
+    def testElement(self):
+        print 'Testing element() ...'
+        x = moose.element(self.src1.path)
+        self.assertTrue(isinstance(x, moose.Neutral))
+        self.assertEqual(x.path, self.src1.path)
+        x = moose.element(self.src1.id_)
+        self.assertTrue(isinstance(x, moose.Neutral))
+        self.assertEqual(x.path, self.src1.path)
+        x = moose.element(self.src1[0].oid_)
+        self.assertTrue(isinstance(x, moose.Neutral))
+        self.assertEqual(x.path, self.src1.path)
+        with self.assertRaises(NameError):
+             moose.element('abracadabra')
+        
+
 class TestMessages(unittest.TestCase):
     def setUp(self):
         path1 = '/comp%d' % (uuid.uuid4().int)

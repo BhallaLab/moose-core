@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Fri Mar  9 12:42:47 2012 (+0530)
+# Last-Updated: Fri Mar  9 12:57:00 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1381
+#     Update #: 1385
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -734,14 +734,15 @@ class Neutral(object):
 
 def element(path):
     """Return a reference to an existing object as an instance of the
-    right class. If path does not exist, className is used for
-    creating an instance of that class with the given path.
+    right class. If path does not exist, raises NameError.
 
     Id or ObjId can be provided in stead of path"""
     if isinstance(path, Id):
         oid = path[0]
+        path = path.getPath()
     elif isinstance(path, ObjId):
         oid = path
+        path = oid.getField('path')
     elif isinstance(path, str):
         if not _moose.exists(path):
             raise NameError('Object %s not defined' % (path))
