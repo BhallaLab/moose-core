@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Thu Mar  8 16:10:57 2012 (+0530)
-#           By: Subhasis Ray
-#     Update #: 1370
+# Last-Updated: Fri Mar  9 10:54:05 2012 (+0530)
+#           By: subha
+#     Update #: 1377
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -207,6 +207,11 @@ getFieldNames() - return a list of the available field names on this object
 
 getFieldType(fieldName) - return the data type of the specified field.
 
+getSources(fieldName) - return a list of (source_element, source_field) for all 
+messages coming in to fieldName of this object.
+
+getDestinations(fieldName) - return a list of (destination_elemnt, destination_field)
+for all messages going out of fieldName.
 
 
 More generally, Neutral and all its derivatives will have a bunch of methods that are
@@ -654,7 +659,30 @@ class Neutral(object):
     def connect(self, srcField, dest, destField, msgType='Single'):
         return self.oid_.connect(srcField, dest.oid_, destField, msgType)
 
-    
+     def getInMessageDict(self):
+        """Returns a dictionary mapping fields with incoming messages
+        to lists containing (source_element, source_field)
+        pairs."""
+        msg_dict = defaultdict(list)
+        for msg in self.msgIn:
+            e1 = msg.getField('e1')
+            e2 = msg.getField('e2')
+            for (f1, f2) in zip(msg.getField('srcFieldsOnE2'), msg.getField('destFieldsOnE1')):
+                msg_dict[f1].append((element(e2), f2))
+        return msg_dict
+
+    def getOutMessageDict(self):
+        """Returns a dictionary mapping fields with outgoing messages
+        to lists containing (destination_element, destination_field)
+        pairs."""
+        msg_dict = defaultdict(list)
+        for msg in self.msgOut:
+            e1 = msg.getField('e1')
+            e2 = msg.getField('e2')
+            for (f1, f2) in zip(msg.getField('srcFieldsOnE1'), msg.getField('destFieldsOnE2')):
+                msg_dict.append((element(e2), f2))
+        return msg_dict
+   
     def inMessages(self):
         msg_list = []
         for msg in self.msgIn:
@@ -674,6 +702,7 @@ class Neutral(object):
                 msg_str = '[%s].%s -> [%s].%s' % (e1.getPath(), f1, e2.getPath(), f2)
                 msg_list.append(msg_str)
         return msg_list
+
     
     
     className = property(lambda self: self.oid_.getField('class'))
@@ -706,10 +735,17 @@ class Neutral(object):
 def element(path):
     """Return a reference to an existing object as an instance of the
     right class. If path does not exist, className is used for
-    creating an instance of that class with the given path"""
-    if not _moose.exists(path):
-        raise NameError('Object %s not defined' % (path))
-    oid = _moose.ObjId(path)
+    creating an instance of that class with the given path.
+
+    Id or ObjId can be provided in stead of path"""
+    if isinstance(Id, path):
+        oid = path[0]
+    elif isinstance(ObjId, path):
+        oid = path
+    elif isinstance(str, path):
+        if not _moose.exists(path):
+            raise NameError('Object %s not defined' % (path))
+        oid = _moose.ObjId(path)
     className = oid.getField('class')
     return eval('%s("%s")' % (className, path))
 
