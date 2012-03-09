@@ -17401,4 +17401,18 @@ Minor cleanups of compile warnings in basecode.
 There is still a clash of the Neutral::dimensions field. Since were in the
 business of cleaning up naming, I will now call it objectDimensions since that
 specifies the quantity better. Made change, clears unit and regression tests.
+Checkin 3367.
 
+============================================================================
+8 March
+Tracked down nasty bug with assigning compartments to enz cplxs.
+Requires us to set up parent pools and then go back and use the same dest
+mesh for the child enz cplxs.
+Currently a little stuck in regressionTests/rtReadKkit.cpp:764, revealing that
+n1 has a repeated entry.
+============================================================================
+9 March
+Fixed repeated entry in the meshEntry messages, fixed the misallocation of
+volumes for enz complex pools. Implemented a regression test for the AabX
+reaction, so that I can map to the specifics of the python test as well.
+Clears regression tests.
