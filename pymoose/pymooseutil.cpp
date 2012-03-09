@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Sat Mar 26 22:41:37 2011 (+0530)
 // Version: 
-// Last-Updated: Mon Mar  5 23:22:52 2012 (+0530)
+// Last-Updated: Fri Mar  9 15:25:43 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 367
+//     Update #: 371
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -94,13 +94,17 @@ static Element* shellE = NULL; // This is in order to keep a handle on
                                // stupid shell from the Shell&.
 
     /// Available Finfo types
-const char * FINFOTYPES[] = {"valueFinfo",
-                             "srcFinfo",
-                             "destFinfo",
-                             "lookupFinfo",
-                             "sharedFinfo",
-                             "fieldElementFinfo",
-                             0};
+const char ** getFinfoTypes()
+{
+    static const char * finfoTypes[] = {"valueFinfo",
+                                        "srcFinfo",
+                                        "destFinfo",
+                                        "lookupFinfo",
+                                        "sharedFinfo",
+                                        "fieldElementFinfo",
+                                        0};
+    return finfoTypes;
+}
 
 void pymoose::setup_runtime_env(bool verbose){
     const map<string, string>& argmap = getArgMap();
@@ -249,7 +253,7 @@ void pymoose::finalize()
 
 pair < string, string > pymoose::getFieldFinfoTypePair(ObjId id, string fieldName)
 {
-    for (const char ** finfoType = &FINFOTYPES[0]; *finfoType; ++finfoType){
+    for (const char ** finfoType = getFinfoTypes(); *finfoType; ++finfoType){
         string ftype = pymoose::getFieldType(id, fieldName, string(*finfoType));
         if (!ftype.empty()) {
             return pair < string, string > (ftype, string(*finfoType));

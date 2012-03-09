@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Mar  8 11:56:35 2012 (+0530)
+// Last-Updated: Fri Mar  9 15:27:24 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 4941
+//     Update #: 4951
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -77,7 +77,7 @@ extern int isInfinite;
 extern int numNodes;
 extern int numCores;
 extern int myNode;
-extern const char ** FINFOTYPES;
+extern const char ** getFinfoTypes();
 
 // 
 // C wrappers for C++ classes
@@ -1473,7 +1473,7 @@ extern "C" {
         string ftype_str = (ftype != NULL)? string(ftype): "";
         vector<string> ret;
         if (ftype_str == ""){
-            for (const char **a = &FINFOTYPES[0]; *a; ++a){
+            for (const char **a = getFinfoTypes(); *a; ++a){
                 vector<string> fields = getFieldNames(self->oid_, string(*a));
                 ret.insert(ret.end(), fields.begin(), fields.end());
             }            
