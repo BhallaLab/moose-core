@@ -34,8 +34,9 @@ class Cinfo
 					Finfo** finfoArray,	// Field information array
 					unsigned int nFinfos,
 					DinfoBase* d,	// A handle to lots of utility functions for the Data class.
-					struct SchedInfo* schedInfo = 0,
-					unsigned int nSched = 0
+					const string* doc = 0,
+					unsigned int numDoc = 0,
+					bool hasInternalThreading = 0
 			);
 
 			/**
@@ -153,6 +154,12 @@ class Cinfo
 			 */
 			void reportFids() const;
 
+			/**
+			 * True in the rare cases where the class does its own 
+			 * threading. The default is false, in which case the
+			 * DataHandlers manage the threading.
+			 */
+			bool hasInternalThreading() const;
 		/////////////////////////////////////////////////////////////////
 		// Functions here for the MOOSE Cinfo inspection class
 		/////////////////////////////////////////////////////////////////
@@ -262,13 +269,14 @@ class Cinfo
 		private:
 			string name_;
 
-			std::map< std::string, std::string > doc_;
 			// const std::string author_;
 			// const std::string description_;
 			const Cinfo* baseCinfo_;
 			const DinfoBase* dinfo_;
 
 			BindIndex numBindIndex_;
+			bool hasInternalThreading_;
+			std::map< std::string, std::string > doc_;
 
 			/**
 			 * This looks up Finfos by name.

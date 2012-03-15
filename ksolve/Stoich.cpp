@@ -224,6 +224,8 @@ Stoich::~Stoich()
 // handling the processing: GssaStoich or GslIntegrator at this
 // time. That is because this function may reallocate memory
 // and its values must propagate serially to the calling object.
+// Somewhat inefficient: Must be called on thread 0 but would ideally
+// like to split among threads.
 void Stoich::innerReinit()
 {
 	// This might not be true, since S_ maintains extra info for the 
@@ -238,8 +240,8 @@ void Stoich::innerReinit()
 	}
 	S_ = Sinit_;
 
-	for ( unsigned int i = 0; i < y_.size(); ++i ) {
-		updateFuncs( i, 0 );
+	for ( unsigned int i = 0; i < localMeshEntries_.size(); ++i ) {
+		updateFuncs( 0, localMeshEntries_[i] );
 	}
 	// updateV( 0 );
 }
