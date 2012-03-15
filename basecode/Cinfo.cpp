@@ -16,17 +16,23 @@ Cinfo::Cinfo( const string& name,
 				Finfo** finfoArray,
 				unsigned int nFinfos,
 				DinfoBase* d,
-				struct SchedInfo* schedInfo,
-				unsigned int nSched
+				const string* doc,
+				unsigned int numDoc,
+				bool hasInternalThreading
 )
 		: name_( name ), baseCinfo_( baseCinfo ), dinfo_( d ),
-			numBindIndex_( 0 )
+			numBindIndex_( 0 ),
+			hasInternalThreading_( hasInternalThreading )
 {
 	if ( cinfoMap().find( name ) != cinfoMap().end() ) {
 		cout << "Warning: Duplicate Cinfo name " << name << endl;
 	}
 	init( finfoArray, nFinfos );
 	cinfoMap()[ name ] = this;
+	if ( doc && numDoc ) {
+		for ( unsigned int i = 0; i < numDoc - 1; i += 2 )
+			doc_[ doc[i] ] = doc[i+i];
+	}
 }
 
 Cinfo::Cinfo()
@@ -231,6 +237,11 @@ void Cinfo::reportFids() const
 			cout << df->getFid() << "	" << df->name() << endl;
 		}
 	}
+}
+
+bool Cinfo::hasInternalThreading() const
+{
+	return hasInternalThreading_;
 }
 
 ////////////////////////////////////////////////////////////////////////

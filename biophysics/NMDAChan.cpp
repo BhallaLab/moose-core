@@ -160,7 +160,8 @@ const Cinfo* NMDAChan::initCinfo()
 		"NMDAChan",
 		SynChan::initCinfo(),
 		NMDAChanFinfos, sizeof( NMDAChanFinfos )/sizeof(Finfo *),
-		new Dinfo< NMDAChan >()
+		new Dinfo< NMDAChan >(),
+		doc, 6
 	);
 
     return &NMDAChanCinfo;
