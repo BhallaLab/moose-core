@@ -17415,4 +17415,30 @@ n1 has a repeated entry.
 Fixed repeated entry in the meshEntry messages, fixed the misallocation of
 volumes for enz complex pools. Implemented a regression test for the AabX
 reaction, so that I can map to the specifics of the python test as well.
-Clears regression tests.
+Clears regression tests. Checkin 3377.
+============================================================================
+13 March
+The GssaStoich has stopped working. Seems its 'process' doesn't get called,
+due to threading partitioning. Unclear why, and why it worked earlier.
+
+Seems I need to get the ZeroDimParallelHandler to manage the GssaStoich,
+rather than the ZeroDimHandler. 
+
+Implemented a setup chain for this. The Cinfo for GssaStoich has to set up
+a flag, the useInternalThreading flag. When the Element constructor runs across
+this flag it uses the ZeroDimParallelHandler.
+============================================================================
+14 March
+Getting segvs and assertion errors at random places when I run it. 
+Tried valgrind, nothing bad till the assertion/segv.
+Tried running with 1 thread: runs fine.
+Seems like the thread separation within the GssaStoich is bad.
+
+Fixed the crashes, but now it doesn't generate any responses.
+============================================================================
+15 March 2012
+Finally got regression tests for multiple threads apparently working with the
+GssaStoich. Still need to do
+- multicompartment calculations on multiple threads
+- stats of output.
+

@@ -114,7 +114,9 @@ const Cinfo* GssaStoich::initCinfo()
 		Stoich::initCinfo(),
 		gssaStoichFinfos,
 		sizeof( gssaStoichFinfos )/sizeof(Finfo *),
-		new Dinfo< GssaStoich >()
+		new Dinfo< GssaStoich >(),
+		doc, 6,
+		true // Flag for useInternalThreading.
 	);
 
 	return &gssaStoichCinfo;
@@ -127,7 +129,7 @@ static const Cinfo* gssaStoichCinfo = GssaStoich::initCinfo();
 ///////////////////////////////////////////////////
 
 GssaStoich::GssaStoich()
-	: Stoich(), atot_( 0.0 ), t_( 0.0 )
+	: Stoich(), atot_( 1, 0.0 ), t_( 1, 0.0 )
 {
 	useOneWay_ = 1;
 	randNumGenerators_.resize( Shell::numProcessThreads() );
@@ -159,8 +161,28 @@ void GssaStoich::setMethod( string method )
 
 void GssaStoich::setPath( const Eref& e, const Qinfo* q, string path )
 {
-	Stoich::setPath( e, q, path );
-	rebuildMatrix();
+	if ( q->threadNum() % Shell::numProcessThreads() == 0 ) {
+		Stoich::setPath( e, q, path );
+		rebuildMatrix();
+		unsigned int numLocalMeshEntries = localMeshEntries_.size();
+		mtseed( 0 );
+		unsigned int start = 0;
+		for ( unsigned int i = 0; i < Shell::numProcessThreads(); ++i )
+		{
+			unsigned int j = 0;
+			unsigned int seed = mtrand() * ( j - 1 );
+			gsl_rng_set( randNumGenerators_[i], seed );
+			vector< unsigned int >& mi = meshIndex_[ i ];
+			mi.resize( 0 );
+			unsigned int end =
+				( numLocalMeshEntries * ( i + 1 ) + 
+				Shell::numProcessThreads() - 1 ) / 
+				Shell::numProcessThreads();
+			for ( unsigned int k = start; k != end; ++k )
+				mi.push_back( k );
+			start = end;
+		}
+	}
 }
 
 ///////////////////////////////////////////////////
@@ -374,13 +396,24 @@ void GssaStoich::makeReacDepsUnique()
 
 void GssaStoich::reinit( const Eref& e, ProcPtr p )
 {
-	Stoich::innerReinit();
+	// Stoich::innerReinit(); // Cannot do this: thread unsafe.
+	assert( y_.size() == localMeshEntries_.size() );
+	assert( Sinit_.size() == S_.size() );
 	ThreadId thread = p->threadIndexInGroup % Shell::numProcessThreads();
-	gsl_rng* rng = randNumGenerators_[ thread ];
 	// Here we round off up or down with prob depending on fractional
 	// part of the init value.
-	for ( vector< unsigned int >::iterator j = localMeshEntries_.begin(); 
-		j != localMeshEntries_.end(); ++j ) {
+	assert( meshIndex_.size() > thread );
+	vector< unsigned int >& mi = meshIndex_[ thread ];
+	gsl_rng* rng = randNumGenerators_[ thread ];
+
+	for ( vector< unsigned int >::iterator j = mi.begin(); 
+		j != mi.end(); ++j ) {
+		// Here we redo stuff similar to Stoich::innerReinit, only split
+		// among the threads.
+		y_[ *j ].assign( Sinit_[ *j ].begin(), Sinit_[ *j ].begin() + numVarPools_ );
+		S_[ *j ] = Sinit_[ *j ];
+		updateFuncs( 0, *j );
+
 		for ( vector< double >::iterator i = S_[*j].begin(); i != S_[*j].end(); ++i ) {
 			double base = floor( *i );
 			double frac = *i - base;
@@ -390,23 +423,30 @@ void GssaStoich::reinit( const Eref& e, ProcPtr p )
 			else
 				*i = base + 1.0;
 		}
+		t_[ *j ] = 0.0;
+		updateAllRates( *j );
 	}
-	unsigned int numLocalMeshEntries = localMeshEntries_.size();
+	// unsigned int numLocalMeshEntries = localMeshEntries_.size();
 	// Should figure out how to use the assign function
 	// t_.assign( t_.size(), 0.0 );
+	/*
 	for ( unsigned int i = 0; i < numLocalMeshEntries; ++i ) {
 		t_[i] = 0.0;
 		updateAllRates( i );
 	}
+	*/
 	if ( thread == 0 ) {
 		mtseed( 0 );
-		unsigned int start = 0;
+		// unsigned int start = 0;
 		for ( unsigned int i = 0; i < Shell::numProcessThreads(); ++i )
 		{
 			unsigned int j = 0;
 			unsigned int seed = mtrand() * ( j - 1 );
 			gsl_rng_set( randNumGenerators_[i], seed );
+			/*
+			* This has been moved to setPath because it isn't thread-safe.
 			vector< unsigned int >& mi = meshIndex_[ i ];
+			mi.resize( 0 );
 			unsigned int end =
 				( numLocalMeshEntries * ( i + 1 ) + 
 				Shell::numProcessThreads() - 1 ) / 
@@ -414,6 +454,7 @@ void GssaStoich::reinit( const Eref& e, ProcPtr p )
 			for ( unsigned int k = start; k != end; ++k )
 				mi.push_back( k );
 			start = end;
+			*/
 		}
 	}
 }
@@ -487,7 +528,6 @@ void GssaStoich::process( const Eref& e, ProcPtr info )
 			// double dt = ( 1.0 / atot_ ) * log( 1.0 / mtrand() );
 		}
 		t_[meshIndex] = t;
-		atot_[meshIndex] = atot;
 	}
 }
 
