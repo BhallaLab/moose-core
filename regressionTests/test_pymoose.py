@@ -145,8 +145,7 @@ class TestPyMooseGlobals(unittest.TestCase):
         x = moose.element(self.src1[0].oid_)
         self.assertTrue(isinstance(x, moose.Neutral))
         self.assertEqual(x.path, self.src1.path)
-        with self.assertRaises(NameError):
-             moose.element('abracadabra')
+        self.assertRaises(NameError, moose.element, 'abracadabra')
         
 
 class TestMessages(unittest.TestCase):
@@ -170,6 +169,12 @@ class TestMessages(unittest.TestCase):
             self.assertEqual(destFieldsOnE2[0], 'handleRaxial')
         print 'OK'
 
+    def test_getInMessageDict(self):
+        print 'Testing getInMessageDict ...',
+        indict = self.src1[0].getInMessageDict()
+        self.assertTrue('parentMsg' in indict)
+        
+
 class TestNeighbors(unittest.TestCase):
     def setUp(self):
         self.pulsegen = moose.PulseGen('pulsegen')
@@ -181,10 +186,10 @@ class TestNeighbors(unittest.TestCase):
     def testNeighborDict(self):
         print 'Testing neighbour dict ...'
         neighbors = self.compartment.neighborDict
-        self.assertIn(self.pulsegen.oid_, [ n.oid_ for n in neighbors['injectMsg']])
-        self.assertIn(self.table.oid_, [n.oid_ for n in neighbors['get_Im']])
-        self.assertIn(self.compartment.oid_, [n.oid_ for n in self.pulsegen.neighborDict['outputOut']])
-        self.assertIn(self.compartment.oid_, [n.oid_ for n in self.table.neighborDict['requestData']])
+        self.assertTrue(self.pulsegen.oid_ in [ n.oid_ for n in neighbors['injectMsg']])
+        self.assertTrue(self.table.oid_ in [n.oid_ for n in neighbors['get_Im']])
+        self.assertTrue(self.compartment.oid_ in [n.oid_ for n in self.pulsegen.neighborDict['outputOut']])
+        self.assertTrue(self.compartment.oid_ in [n.oid_ for n in self.table.neighborDict['requestData']])
         print 'OK'
                       
             
