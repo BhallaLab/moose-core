@@ -40,8 +40,20 @@ class GssaStoich: public Stoich
 		// Functions used by the GillespieIntegrator
 		///////////////////////////////////////////////////
 		void rebuildMatrix();
+		/**
+		 * Used to update rate terms and atot whenever a reaction has
+		 * fired. We precompute a set of dependencies from each reaction
+		 * to all affected downstream reactions.
+		 */
 		void updateDependentRates( unsigned int meshIndex,
 			const vector< unsigned int >& deps );
+		/**
+		 * Used to update rate terms and atot whenever the 'n' of a pool
+		 * has changed. This may be due to field assignment, alteration
+		 * of concInit of a buffered molecule, or through a FuncTerm.
+		 */
+		void updateDependentRates( unsigned int meshIndex, 
+			unsigned int molIndex );
 		void updateDependentMathExpn( double t, unsigned int meshIndex,
 			const vector< unsigned int >& deps );
 		void updateAllRates( unsigned int meshIndex );
@@ -123,6 +135,16 @@ class GssaStoich: public Stoich
 		 * Math Expression. For now just SumTot.
 		 */
 		vector< vector< unsigned int > > dependentMathExpn_; 
+
+		/**
+		 * Yet another dependency graph. Here every pool indicates
+		 * which reac is dependent on it. Used whenever there is a
+		 * forcible change in 'n' or 'conc' of regular or buffered
+		 * or function molecules. The case for function molecules also lets
+		 * us update whenever a function calculation gives a new
+		 * value.
+		 */
+		vector< vector< unsigned int > > ratesDependentOnPool_; 
 
 		/**
 		 * atot is the total propensity of all the reacns in the system
