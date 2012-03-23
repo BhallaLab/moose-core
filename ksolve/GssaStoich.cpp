@@ -516,7 +516,8 @@ void GssaStoich::process( const Eref& e, ProcPtr info )
 	
 			// Math expns must be first, because they may alter 
 			// substrate mol #.
-			updateDependentMathExpn( meshIndex, dependentMathExpn_[ rindex ] );
+			updateDependentMathExpn( 
+				t, meshIndex, dependentMathExpn_[ rindex ] );
 			// The rates list includes rates dependent on mols changed
 			// by the MathExpns.
 			updateDependentRates( meshIndex, dependency_[ rindex ] );
@@ -549,15 +550,13 @@ void GssaStoich::updateDependentRates(
  * will extend to general math expressions.
  * Will need to cascade to dependent rates
  */
-void GssaStoich::updateDependentMathExpn( 
+void GssaStoich::updateDependentMathExpn( double t,
 	unsigned int meshIndex, const vector< unsigned int >& deps )
 {
-	/*
-	for( vector< unsigned int >::const_iterator i = deps.begin(); 
-		i != deps.end(); ++i ) {
-		sumTotals_[ *i ].sum();
-	}
-	*/
+
+	// In principle this could also be reduced to only use the
+	// dependent values.
+	updateFuncs( t, meshIndex );
 }
 
 void GssaStoich::updateAllRates( unsigned int meshIndex )
