@@ -17442,3 +17442,9 @@ GssaStoich. Still need to do
 - multicompartment calculations on multiple threads
 - stats of output.
 
+============================================================================
+23 March 2012.
+Tracked down an obscure bug in the optimized compile that caused segvs at
+initialization. The Cinfo initializer for setting up classes was dying when
+loading in the 'docs' array of strings. Fix is equally obscure, I just set
+up temporary const strings rather than refer directly to the array.

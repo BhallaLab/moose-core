@@ -186,12 +186,22 @@ const Cinfo* Neutral::initCinfo()
 	/////////////////////////////////////////////////////////////////
 	// Setting up the Cinfo.
 	/////////////////////////////////////////////////////////////////
+
+	static string doc[] =
+	{
+		"Name", "Neutral",
+		"Author", "Upinder S. Bhalla, 2007, NCBS",
+		"Description", "Neutral: Base class for all MOOSE classes. Provides"
+		"access functions for housekeeping fields and operations, message"
+		"traversal, and so on."
+	};
 	static Cinfo neutralCinfo (
 		"Neutral",
 		0, // No base class.
 		neutralFinfos,
 		sizeof( neutralFinfos ) / sizeof( Finfo* ),
-		new Dinfo< Neutral >()
+		new Dinfo< Neutral >(),
+		doc, 6
 	);
 
 	return &neutralCinfo;
