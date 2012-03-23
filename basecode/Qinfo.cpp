@@ -200,8 +200,13 @@ void Qinfo::swapQ()
 		}
 	
 		bufsize = numQinfo * QinfoSizeInDoubles + datasize + 2;
-		if ( bufsize > q0_.capacity() )
+		if ( bufsize > q0_.capacity() ) {
+			cout << "Qinfo::swapQ: Raising bufsize from " << 
+				q0_.capacity() << " to " << bufsize << 
+				", numQinfo = " << numQinfo << 
+				", datasize = " << datasize << endl;
 			q0_.reserve( bufsize + bufsize / 2 );
+		}
 		q0_.resize( bufsize, 0 );
 		inQ_ = &q0_[0];
 		q0_[0] = bufsize;
