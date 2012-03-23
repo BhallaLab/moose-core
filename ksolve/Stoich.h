@@ -195,6 +195,18 @@ class Stoich
 		 */
 		double getR2( unsigned int reacIndex, unsigned int voxel ) const;
 
+		/**
+		 * Virtual function to assign N. Derived classes (GssaStoich) will
+		 * need to do additional stuff to update dependent reacs
+		 */
+		virtual void innerSetN( unsigned int meshIndex, Id id, double v );
+
+		/**
+		 * Virtual function to assign Ninit. Derived classes (GssaStoich)
+		 * will
+		 * need to do additional stuff to update dependent reacs
+		 */
+		virtual void innerSetNinit( unsigned int meshIndex, Id id, double v );
 		//////////////////////////////////////////////////////////////////
 		// Compute functions
 		//////////////////////////////////////////////////////////////////
