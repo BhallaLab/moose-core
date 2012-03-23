@@ -546,6 +546,30 @@ void GssaStoich::updateDependentRates(
 }
 
 /**
+ * This version is used to update reactions when a given molecule
+ * has changed n: either through direct field assignment, or through a
+ * FuncTerm.
+ */
+void GssaStoich::updateDependentRates( 
+	unsigned int meshIndex, unsigned int molIndex )
+{
+	vector< double >& v = v_[meshIndex];
+	double atot = atot_[meshIndex];
+
+	// unsigned int getRow( unsigned int row, const T** entry, const unsigned int** colIndex ) const
+
+	const int* entry;
+	const unsigned int* colIndex;
+	unsigned int num = N_.getRow( molIndex, &entry, &colIndex );
+	for ( unsigned int i = 0; i < num; ++i ) {
+		unsigned int reacIndex = colIndex[i];
+		atot -= v[ reacIndex ];
+		atot += ( v[ reacIndex ] = ( *rates_[ reacIndex ] )( &S_[meshIndex][0] ) );
+	}
+	atot_[meshIndex] = atot;
+}
+
+/**
  * For now this just handles SumTots, but I think the formalism
  * will extend to general math expressions.
  * Will need to cascade to dependent rates
@@ -556,7 +580,24 @@ void GssaStoich::updateDependentMathExpn( double t,
 
 	// In principle this could also be reduced to only use the
 	// dependent values.
-	updateFuncs( t, meshIndex );
+	// updateFuncs( t, meshIndex );
+
+	// Need to generate a list of mathExpn pools whose values change.
+	vector< FuncTerm* >::const_iterator i;
+	vector< double >::iterator j = S_[meshIndex].begin() + numVarPools_ + numBufPools_; 
+	unsigned int k = numVarPools_ + numBufPools_;
+	for ( i = funcs_.begin(); i != funcs_.end(); ++i ) {
+		double lastj = *j;
+		// Here put in a dependency test for the funcs.
+		double newj = (**i)( &( S_[meshIndex][0] ), t );
+		if ( lastj != newj ) { // Trigger dependency update if changed
+			*j = newj;
+			updateDependentRates( meshIndex, k );
+		}
+		assert( !isnan( newj ) );
+		j++;
+		k++;
+	}
 }
 
 void GssaStoich::updateAllRates( unsigned int meshIndex )
