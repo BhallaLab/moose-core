@@ -36,6 +36,12 @@ class GssaStoich: public Stoich
 		// Overrides the Stoich version.
 		void setPath( const Eref& e, const Qinfo* q, string path );
 
+		// Overrides the Stoich version, which is virtual
+		void innerSetN( unsigned int meshIndex, Id id, double v );
+
+		// Overrides the Stoich version, which is virtual
+		void innerSetNinit( unsigned int meshIndex, Id id, double v );
+
 		///////////////////////////////////////////////////
 		// Functions used by the GillespieIntegrator
 		///////////////////////////////////////////////////

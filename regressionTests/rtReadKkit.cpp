@@ -862,4 +862,6 @@ void rtTestChem()
 	testGsolver( "AabXJacb", "a.Co", 1, 100, 1e-19 );
 	testGsolver( "AabXJacb", "a.Co", 1, 100, 1e-18 );
 	testGsolver( "AabXJacb", "a.Co", 1, 100, 1e-17 );
+
+	testGsolver( "tabsumtot", "A.Co", 0.1, 50, 1e-18 );
 }

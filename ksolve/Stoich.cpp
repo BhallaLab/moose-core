@@ -697,7 +697,7 @@ void Stoich::installEnzyme( ZeroOrder* r1, ZeroOrder* r2, ZeroOrder* r3,
 }
 
 //////////////////////////////////////////////////////////////
-// Field interface functionsl
+// Field interface functions
 //////////////////////////////////////////////////////////////
 
 /**
@@ -815,6 +815,16 @@ double Stoich::getR1( unsigned int reacIndex, unsigned int voxel ) const
 double Stoich::getR2( unsigned int reacIndex, unsigned int voxel ) const
 {
 	return rates_[ reacIndex ]->getR2();
+}
+
+void Stoich::innerSetN( unsigned int meshIndex, Id id, double v )
+{
+	S_[ meshIndex ][ convertIdToPoolIndex( id ) ] = v;
+}
+
+void Stoich::innerSetNinit( unsigned int meshIndex, Id id, double v )
+{
+	Sinit_[ meshIndex ][ convertIdToPoolIndex( id ) ] = v;
 }
 
 //////////////////////////////////////////////////////////////

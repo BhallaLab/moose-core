@@ -17473,4 +17473,16 @@ I've implemented something to test handling of sumtotals and tables with
 GSSA, but it doesn't do its stuff in the pymoose runs.
 Checking in so I can debug it in the C++ regression tests.
 
+Turns out that the function updateDependentMathExpn never gets called. The
+problem is that the atot for the system starts out at zero, and so we simply
+skip all the calculations. We need to have it so that whenever there is an
+external assignment to a pool conc the system updates right away. Unfortunately
+this only applies to GssaStoich, not to the parent Stoich, which is what
+the ZombiePool sees. For a patch could put in a helper function that calls a
+virtual function...
+
+Did so. After some cleanup, it works. I have a little regression test for it
+but I really need to have a way to handle evaluation of regression tests
+stochastic runs, other than looking at the output.
+
 ============================================================================
