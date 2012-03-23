@@ -856,4 +856,10 @@ void rtTestChem()
 	testGsolver( "reac", "A.Co", 0.1, 100, 1e-19 );
 	testGsolver( "reac", "A.Co", 0.1, 100, 1e-18 );
 	testGsolver( "reac", "A.Co", 0.1, 100, 1e-17 );
+
+	testGsolver( "AabXJacb", "a.Co", 1, 100, 1e-21 );
+	testGsolver( "AabXJacb", "a.Co", 1, 100, 1e-20 );
+	testGsolver( "AabXJacb", "a.Co", 1, 100, 1e-19 );
+	testGsolver( "AabXJacb", "a.Co", 1, 100, 1e-18 );
+	testGsolver( "AabXJacb", "a.Co", 1, 100, 1e-17 );
 }

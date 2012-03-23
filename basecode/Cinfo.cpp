@@ -29,9 +29,16 @@ Cinfo::Cinfo( const string& name,
 	}
 	init( finfoArray, nFinfos );
 	cinfoMap()[ name ] = this;
+	doc_.clear();
+	// cout << "Doing initCinfo for " << name << " with numDoc = " << numDoc << endl;
 	if ( doc && numDoc ) {
-		for ( unsigned int i = 0; i < numDoc - 1; i += 2 )
-			doc_[ doc[i] ] = doc[i+i];
+		for ( unsigned int i = 0; i < numDoc - 1; i += 2 ) {
+			const string argName = doc[i];
+			const string argVal = doc[i+1];
+			// cout << "in initCinfo for " << name << ", doc[" << i << "] = " << doc[i] << ", " << doc[i+1] << endl;
+			// doc_[ doc[i] ] = doc[i+i];
+			doc_[ argName ] = argVal;
+		}
 	}
 }
 
