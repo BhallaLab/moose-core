@@ -543,5 +543,5 @@ void testBuiltinsProcess()
 void testMpiBuiltins( )
 {
  	testMpiFibonacci();
-	testMpiStatsReduce();
+	// testMpiStatsReduce();
 }

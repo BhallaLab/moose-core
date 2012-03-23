@@ -17461,4 +17461,16 @@ the issue is in how pymoose is closing threads.
 
 Ran into problems with these changes in regression tests. Had to reinstate
 reduceQ. Also put in a fix, yet to test, for SumTotals in GssaStoich.
+Checkin 3388.
+
+Now the problem is dependencies on buffered but variable molecules,
+like those controlled by a table, and on sumtots. Basically need a dependency
+table from pools to reacs. This would also help if we ever change the conc
+of a buffered molecule from the script: it is an operation that happens 
+in many scripts.
+
+I've implemented something to test handling of sumtotals and tables with 
+GSSA, but it doesn't do its stuff in the pymoose runs.
+Checking in so I can debug it in the C++ regression tests.
+
 ============================================================================
