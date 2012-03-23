@@ -42,7 +42,7 @@ class GssaStoich: public Stoich
 		void rebuildMatrix();
 		void updateDependentRates( unsigned int meshIndex,
 			const vector< unsigned int >& deps );
-		void updateDependentMathExpn( unsigned int meshIndex,
+		void updateDependentMathExpn( double t, unsigned int meshIndex,
 			const vector< unsigned int >& deps );
 		void updateAllRates( unsigned int meshIndex );
 		unsigned int pickReac( unsigned int meshIndex, gsl_rng* r );

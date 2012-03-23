@@ -17448,3 +17448,17 @@ Tracked down an obscure bug in the optimized compile that caused segvs at
 initialization. The Cinfo initializer for setting up classes was dying when
 loading in the 'docs' array of strings. Fix is equally obscure, I just set
 up temporary const strings rather than refer directly to the array.
+Checkin 3386.
+
+This seems to fix the segv on start in pymoose as well. Progress!
+Now the segv on quit. There seems to be a problem in 
+Qinfo::swapQ relating to vector< double >::reserve.
+Did some printf debugging. When this happens, the numQinfo seems too big, but
+not something to cause a memory allocation failure. Note it is happening
+on thread 3. However, on thread 1 we are already on the exit handlers.
+Can't figure out where thread2 is other than in the processEventLoop. I think
+the issue is in how pymoose is closing threads.
+
+Ran into problems with these changes in regression tests. Had to reinstate
+reduceQ. Also put in a fix, yet to test, for SumTotals in GssaStoich.
+============================================================================
