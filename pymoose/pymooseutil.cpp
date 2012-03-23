@@ -238,6 +238,7 @@ Shell& pymoose::getShell(int argc, char ** argv)
 void pymoose::finalize()
 {
     getShell().doQuit();
+	cout << "In pymoose::finalize()\n";
     if (!getShell().isSingleThreaded()){
         getShell().joinThreads();
         Qinfo::freeMutex();
