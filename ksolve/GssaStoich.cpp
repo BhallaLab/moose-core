@@ -185,6 +185,20 @@ void GssaStoich::setPath( const Eref& e, const Qinfo* q, string path )
 	}
 }
 
+void GssaStoich::innerSetN( unsigned int meshIndex, Id id, double v )
+{
+	Stoich::innerSetN( meshIndex, id, v );
+	unsigned int i = convertIdToPoolIndex( id );
+	// Check that everything has been initialized
+	if ( dependency_.size() == N_.nColumns() && i < S_[ meshIndex ].size() )
+		updateDependentRates( meshIndex, i );
+}
+
+void GssaStoich::innerSetNinit( unsigned int meshIndex, Id id, double v )
+{
+	Stoich::innerSetNinit( meshIndex, id, v );
+}
+
 ///////////////////////////////////////////////////
 // Setup funcs
 ///////////////////////////////////////////////////

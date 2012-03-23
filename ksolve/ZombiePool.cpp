@@ -252,7 +252,8 @@ void ZombiePool::remesh( const Eref& e, const Qinfo* q,
 
 void ZombiePool::setN( const Eref& e, const Qinfo* q, double v )
 {
-	S_[ e.index().value() ][ convertIdToPoolIndex( e.id() ) ] = v;
+	this->innerSetN( e.index().value(), e.id(), v );
+	// S_[ e.index().value() ][ convertIdToPoolIndex( e.id() ) ] = v;
 }
 
 double ZombiePool::getN( const Eref& e, const Qinfo* q ) const
@@ -262,7 +263,8 @@ double ZombiePool::getN( const Eref& e, const Qinfo* q ) const
 
 void ZombiePool::setNinit( const Eref& e, const Qinfo* q, double v )
 {
-	Sinit_[ e.index().value() ][ convertIdToPoolIndex( e.id() ) ] = v;
+	this->innerSetNinit( e.index().value(), e.id(), v );
+	// Sinit_[ e.index().value() ][ convertIdToPoolIndex( e.id() ) ] = v;
 }
 
 double ZombiePool::getNinit( const Eref& e, const Qinfo* q ) const
@@ -272,8 +274,10 @@ double ZombiePool::getNinit( const Eref& e, const Qinfo* q ) const
 
 void ZombiePool::setConc( const Eref& e, const Qinfo* q, double conc )
 {
-	unsigned int pool = convertIdToPoolIndex( e.id() );
-	S_[ e.index().value() ][ pool ] = NA * conc * lookupSizeFromMesh( e, requestSize() );
+	// unsigned int pool = convertIdToPoolIndex( e.id() );
+	double n = NA * conc * lookupSizeFromMesh( e, requestSize() );
+	// S_[ e.index().value() ][ pool ] = NA * conc * lookupSizeFromMesh( e, requestSize() );
+	this->innerSetN( e.index().value(), e.id(), n );
 }
 
 double ZombiePool::getConc( const Eref& e, const Qinfo* q ) const
@@ -284,8 +288,10 @@ double ZombiePool::getConc( const Eref& e, const Qinfo* q ) const
 
 void ZombiePool::setConcInit( const Eref& e, const Qinfo* q, double conc )
 {
-	unsigned int pool = convertIdToPoolIndex( e.id() );
-	Sinit_[ e.index().value() ][ pool ] = NA * conc * lookupSizeFromMesh( e, requestSize() );
+	// unsigned int pool = convertIdToPoolIndex( e.id() );
+	double n = NA * conc * lookupSizeFromMesh( e, requestSize() );
+	// Sinit_[ e.index().value() ][ pool ] = NA * conc * lookupSizeFromMesh( e, requestSize() );
+	this->innerSetNinit( e.index().value(), e.id(), n );
 }
 
 double ZombiePool::getConcInit( const Eref& e, const Qinfo* q ) const

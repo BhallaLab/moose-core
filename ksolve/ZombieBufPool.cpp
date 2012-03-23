@@ -82,9 +82,14 @@ ZombieBufPool::ZombieBufPool()
 
 void ZombieBufPool::setN( const Eref& e, const Qinfo* q, double v )
 {
+	this->innerSetN( e.index().value(), e.id(), v );
+	this->innerSetNinit( e.index().value(), e.id(), v );
+
+	/*
 	unsigned int i = convertIdToPoolIndex( e.id() );
 	S_[ e.index().value() ][ i ] = v;
 	Sinit_[ e.index().value() ][ i ] = v;
+	*/
 }
 
 double ZombieBufPool::getN( const Eref& e, const Qinfo* q ) const
@@ -110,10 +115,13 @@ void ZombieBufPool::setConc( const Eref& e, const Qinfo* q, double conc )
 		const SrcFinfo1< double >* >( req );
 	assert( requestSize );
 
-	unsigned int pool = convertIdToPoolIndex( e.id() );
 	double n = NA * conc * lookupSizeFromMesh( e, requestSize );
+	setN( e, q, n );
+	/*
+	unsigned int pool = convertIdToPoolIndex( e.id() );
 	S_[ e.index().value() ][ pool ] = n;
 	Sinit_[ e.index().value() ][ pool ] = n;
+	*/
 }
 
 double ZombieBufPool::getConc( const Eref& e, const Qinfo* q ) const

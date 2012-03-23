@@ -165,7 +165,13 @@ void testGsolver(string modelName, string plotName, double plotDt, double simTim
 	string plotfile = modelName + ".out";
 	Id tempId( "/model/graphs/conc1" );
 	vector< Id > kids = Field< vector< Id > >::get( tempId, "children" );
-	assert( kids.size() > 0 );
+	for ( unsigned int i = 0 ; i < kids.size(); ++i ) {
+		string str = Field< string >::get( kids[i], "name" );
+		SetGet2< string, string>::set( kids[i], "xplot", plotfile, str);
+	}
+	// This is to pick up if the graph is on another window.
+	tempId = Id( "/model/graphs/conc2" );
+	kids = Field< vector< Id > >::get( tempId, "children" );
 	for ( unsigned int i = 0 ; i < kids.size(); ++i ) {
 		string str = Field< string >::get( kids[i], "name" );
 		SetGet2< string, string>::set( kids[i], "xplot", plotfile, str);
