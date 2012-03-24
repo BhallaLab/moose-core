@@ -17486,3 +17486,6 @@ but I really need to have a way to handle evaluation of regression tests
 stochastic runs, other than looking at the output.
 
 ============================================================================
+24 march 2012.
+Turns out that the gsl solver (Stoich.cpp) also doesn't handle changes to
+conc correctly. One-line fix, seems to work.
