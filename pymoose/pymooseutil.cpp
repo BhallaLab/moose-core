@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Sat Mar 26 22:41:37 2011 (+0530)
 // Version: 
-// Last-Updated: Fri Mar  9 15:25:43 2012 (+0530)
-//           By: Subhasis Ray
-//     Update #: 371
+// Last-Updated: Fri Mar 23 20:25:02 2012 (+0530)
+//           By: subha
+//     Update #: 372
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -139,7 +139,6 @@ void pymoose::setup_runtime_env(bool verbose){
              << "   SINGLETHREADED = " << isSingleThreaded << endl
              << "   INFINITE = " << isInfinite << endl
              << "   NUMNODES = " << numNodes << endl
-             << "   NUMCORES = " << numCores << endl
              << "   NUMPTHREADS = " << numProcessThreads << endl
              << "========================================" << endl;
     }
@@ -162,42 +161,46 @@ Shell& pymoose::getShell(int argc, char ** argv)
     vector<string> args;
     map<string, string>::const_iterator it = getArgMap().find("SINGLETHREADED");    
     if (it != getArgMap().end()){
-        args.push_back("s");
         istringstream(it->second) >> _isSingleThreaded;
+        if (_isSingleThreaded){
+	  args.push_back("-s");
+	}
     }
-    it = getArgMap().find("NUMCORES");
-    if ((it == getArgMap().end()) || it->second.empty()){
-        _numCores = getNumCores();
-    } else {
-        istringstream(it->second) >> _numCores;
-    }
+    // This is not being used anywhere
+    // it = getArgMap().find("NUMCORES");
+    // if ((it == getArgMap().end()) || it->second.empty()){
+    //     _numCores = getNumCores();
+    // } else {
+    //     istringstream(it->second) >> _numCores;
+    // }
     it = getArgMap().find("NUMNODES");
     if (it != getArgMap().end()){
         istringstream(it->second) >> _numNodes;
-        args.push_back("n");
+        args.push_back("-n");
         args.push_back(it->second);
     }
     it = getArgMap().find("INFINITE");
     if (it != getArgMap().end()){
-        args.push_back("i");
         istringstream(it->second) >> _isInfinite;
+	if (_isInfinite){
+	  args.push_back("-i");
+	}
     }
     it = getArgMap().find("NUMPTHREADS");
     if (it != getArgMap().end()){
-        args.push_back("t");
-        args.push_back(it->second);
         istringstream(it->second) >> _numProcessThreads;
-    } else {
-        _numProcessThreads = _numCores;
+	if (_numProcessThreads > 0){
+	  args.push_back("-t");
+	  args.push_back(it->second);	
+	}
     }
-    if (_numProcessThreads == 0){
-        _isSingleThreaded = 1;
-    }
+    // if (_numProcessThreads == 0){
+    //     _isSingleThreaded = 1;
+    // }
     cout << "================================================" << endl
          << "Final system parameters:" << endl
          << " SINGLETHREADED: " << _isSingleThreaded << endl
          << " NUMNODES: " << _numNodes << endl
-         << " NUMCORES: " << _numCores << endl
          << " NUMPTHREADS: " << _numProcessThreads << endl
          << " INFINITE: " << _isInfinite << endl
          << "================================================" << endl;
@@ -208,7 +211,7 @@ Shell& pymoose::getShell(int argc, char ** argv)
         strncpy(argv_new[ii], args[ii].c_str(), args[ii].length()+1);
     }
     // Utilize the main::init function which has friend access to Id
-    Id shellId = init(argc, argv_new);
+    Id shellId = init(args.size(), argv_new);
     shell_ = reinterpret_cast<Shell*>(shellId.eref().data());
     shellE = shellId();
     for (unsigned ii = 0; ii < args.size(); ++ii){
@@ -237,15 +240,19 @@ Shell& pymoose::getShell(int argc, char ** argv)
 
 void pymoose::finalize()
 {
+  cout << "In pymoose::finalize() - ready to quit\n";
     getShell().doQuit();
-	cout << "In pymoose::finalize()\n";
+    cout << "In pymoose::finalize() - quit from shell. Going to join threads.\n";
     if (!getShell().isSingleThreaded()){
         getShell().joinThreads();
         Qinfo::freeMutex();
     }
     // getShell().clearSetMsgs();
     Neutral* ns = reinterpret_cast<Neutral*>(shellE->dataHandler()->data(0));
+    cout << "In pymoose::finalize() - Joined threads. Going to destroy Shell.\n";
     ns->destroy( shellE->id().eref(), 0, 0);
+    cout << "In pymoose::finalize() - Destroyed Shell.\n";
+
 #ifdef USE_MPI
     MPI_Finalize();
 #endif
