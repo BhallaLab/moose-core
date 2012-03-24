@@ -14,7 +14,7 @@ OBJ = moosemodule.o \
 	pymooseutil.o \
 
 
-$(TARGET): $(OBJ) $(HEADERS)
+$(TARGET): $(OBJ) $(HEADERS) ../basecode/main.cpp ../utility/_utility.o ../basecode/_basecode.o
 	$(LD) -r -o $(TARGET) $(OBJ)
 
 clean: 
