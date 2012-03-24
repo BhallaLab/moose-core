@@ -17492,3 +17492,7 @@ conc correctly. One-line fix, seems to work.
 
 An unexplained crash on loading with stargazin_psd6.g for gssa. Brought the 
 model into the regression tests.
+Turns out this model also crashes in debug mode, good.
+Tracked it down to the changes to conc, which should apply to the y_
+matrix only for variable pools, not for FuncPools or BufPools. Now clears
+regression tests.
