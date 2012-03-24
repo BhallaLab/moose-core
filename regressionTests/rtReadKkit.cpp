@@ -864,4 +864,5 @@ void rtTestChem()
 	testGsolver( "AabXJacb", "a.Co", 1, 100, 1e-17 );
 
 	testGsolver( "tabsumtot", "A.Co", 0.1, 50, 1e-18 );
+	testGsolver( "stargazin_psd6", "PSD/R_S2.Co", 1, 50, 1e-20 );
 }
