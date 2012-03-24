@@ -819,7 +819,9 @@ double Stoich::getR2( unsigned int reacIndex, unsigned int voxel ) const
 
 void Stoich::innerSetN( unsigned int meshIndex, Id id, double v )
 {
-	S_[ meshIndex ][ convertIdToPoolIndex( id ) ] = v;
+	unsigned int poolIndex = convertIdToPoolIndex( id );
+	S_[ meshIndex ][ poolIndex ] = v;
+	y_[ meshIndex ][ poolIndex ] = v;
 }
 
 void Stoich::innerSetNinit( unsigned int meshIndex, Id id, double v )
