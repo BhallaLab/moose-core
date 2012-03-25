@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Fri Mar  9 17:28:43 2012 (+0530)
+# Last-Updated: Sun Mar 25 23:43:04 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1386
+#     Update #: 1387
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -280,7 +280,7 @@ elements under current working element
 
 from collections import defaultdict
 import _moose
-from _moose import __version__, VERSION, SVN_REVISION, useClock, setClock, start, reinit, stop, isRunning, loadModel, getFieldDict, Id, ObjId, exists, seed, quit
+from _moose import __version__, VERSION, SVN_REVISION, useClock, setClock, start, reinit, stop, isRunning, loadModel, getFieldDict, Id, ObjId, exists, seed
 from _moose import wildcardFind as _wildcardFind # We override the original
 
 # Dict of available MOOSE class names. This is faster for look-up
