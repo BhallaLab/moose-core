@@ -2,16 +2,14 @@
 # 
 # Author: Subhasis Ray
 # Created: 2011-03-10 12:10:32 (+0530)
-TARGET = pymoose.o
+TARGET = _pymoose.o
 # CXXFLAGS += -I../basecode -I../msg -I../shell
 .PHONY: clean
 
-HEADERS = pymoose.h \
-	moosemodule.h \
+HEADERS = moosemodule.h
 
 
-OBJ = moosemodule.o \
-	pymooseutil.o \
+OBJ = moosemodule.o
 
 
 $(TARGET): $(OBJ) $(HEADERS) ../basecode/main.cpp ../utility/_utility.o ../basecode/_basecode.o
