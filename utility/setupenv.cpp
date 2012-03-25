@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Sat Mar 26 22:36:10 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Aug 17 12:01:04 2011 (+0530)
-//           By: Subhasis Ray
-//     Update #: 21
+// Last-Updated: Sat Mar 24 16:05:29 2012 (+0530)
+//           By: subha
+//     Update #: 26
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -41,6 +41,12 @@ const map<string, string>& getArgMap()
 {
     static map<string, string> argmap;
     if (argmap.empty()){
+        char * verbosity = getenv("VERBOSITY");
+        if (verbosity != NULL){
+            argmap.insert(pair<string, string>("VERBOSITY", string(verbosity)));
+        } else {
+            argmap.insert(pair<string, string>("VERBOSITY", "0"));
+        }
         char * isSingleThreaded = getenv("SINGLETHREADED");
         if (isSingleThreaded != NULL){
             argmap.insert(pair<string, string>("SINGLETHREADED", string(isSingleThreaded)));

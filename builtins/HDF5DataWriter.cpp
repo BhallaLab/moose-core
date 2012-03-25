@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Sat Feb 25 16:03:59 2012 (+0530)
 // Version: 
-// Last-Updated: Wed Feb 29 01:00:14 2012 (+0530)
-//           By: Subhasis Ray
-//     Update #: 660
+// Last-Updated: Wed Feb 29 18:00:46 2012 (+0530)
+//           By: subha
+//     Update #: 663
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -198,10 +198,10 @@ hid_t HDF5DataWriter::get_dataset(string path)
     hid_t prev_id = filehandle_;
     for ( unsigned int ii = 0; ii < path_tokens.size()-1; ++ii ){
         // First try to open existing group
-        hid_t id = H5Gcreate(prev_id, path_tokens[ii].c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        hid_t id = H5Gcreate2(prev_id, path_tokens[ii].c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         if (id < 0){
             // If that fails, try to create a group
-            id = H5Gopen(prev_id, path_tokens[ii].c_str(), H5P_DEFAULT);
+            id = H5Gopen2(prev_id, path_tokens[ii].c_str(), H5P_DEFAULT);
             if (id < 0){
                 // Failed to craete a group also, print the
                 // offending path (for debugging; the error is
@@ -232,7 +232,7 @@ hid_t HDF5DataWriter::get_dataset(string path)
     string name = path_tokens[path_tokens.size()-1];
     hid_t dataset_id = create_dataset(prev_id, name);
     if (dataset_id < 0){
-        dataset_id = H5Dopen(prev_id, name.c_str(), H5P_DEFAULT);
+        dataset_id = H5Dopen2(prev_id, name.c_str(), H5P_DEFAULT);
     }
     return dataset_id;
 }
@@ -249,7 +249,7 @@ hid_t HDF5DataWriter::create_dataset(hid_t parent_id, string name)
     hid_t chunk_params = H5Pcreate(H5P_DATASET_CREATE);
     status = H5Pset_chunk(chunk_params, 1, chunk_dims);
     hid_t dataspace = H5Screate_simple(1, dims, maxdims);            
-    hid_t dataset_id = H5Dcreate(parent_id, name.c_str(), H5T_NATIVE_DOUBLE, dataspace, H5P_DEFAULT, chunk_params, H5P_DEFAULT);
+    hid_t dataset_id = H5Dcreate2(parent_id, name.c_str(), H5T_NATIVE_DOUBLE, dataspace, H5P_DEFAULT, chunk_params, H5P_DEFAULT);
     return dataset_id;
 }
 

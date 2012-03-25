@@ -280,7 +280,7 @@ elements under current working element
 
 from collections import defaultdict
 import _moose
-from _moose import __version__, VERSION, SVN_REVISION, useClock, setClock, start, reinit, stop, isRunning, loadModel, getFieldDict, Id, ObjId, exists, seed
+from _moose import __version__, VERSION, SVN_REVISION, useClock, setClock, start, reinit, stop, isRunning, loadModel, getFieldDict, Id, ObjId, exists, seed, quit
 from _moose import wildcardFind as _wildcardFind # We override the original
 
 # Dict of available MOOSE class names. This is faster for look-up

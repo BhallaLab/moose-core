@@ -91,7 +91,7 @@ USE_GSL = 1
 endif
 # Optimized mode:
 ifeq ($(BUILD),release)
-CXXFLAGS  = -O3 -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER
+CXXFLAGS  = -O3 -pthread -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER
 USE_GSL = 1
 endif
 # Profiling mode:
@@ -303,7 +303,7 @@ libmoose.so: libs
 # There are some unix/gcc specific paths here. Should be cleaned up later.
 pymoose: CXXFLAGS += -DPYMOOSE -fPIC -fno-strict-aliasing -I/usr/include/${INSTALLED_PYTHON} # Should be updated according to location of user include directory
 pymoose: SUBDIR += pymoose
-pymoose: OBJLIBS += pymoose/pymoose.o
+pymoose: OBJLIBS += pymoose/_pymoose.o
 pymoose: LIBS += -l${INSTALLED_PYTHON}
 pymoose: python/moose/_moose.so
 python/moose/_moose.so: libs $(OBJLIBS)

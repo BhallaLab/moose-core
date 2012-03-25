@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 17:11:06 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Mar  1 15:39:35 2012 (+0530)
-//           By: Subhasis Ray
-//     Update #: 595
+// Last-Updated: Sun Mar 25 17:55:18 2012 (+0530)
+//           By: subha
+//     Update #: 598
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -60,7 +60,6 @@ extern "C" {
         ObjId oid_;
     } _ObjId;
 
-    static PyObject * MooseError;
     //////////////////////////////////////////
     // Methods for Id class
     //////////////////////////////////////////
@@ -126,6 +125,9 @@ extern "C" {
     static PyObject * _pymoose_syncDataHandler(PyObject * dummy, _Id * target);
     static PyObject * _pymoose_seed(PyObject * dummy, PyObject * args);
     static PyObject * _pymoose_wildcardFind(PyObject * dummy, PyObject * args);
+    // This should not be required or accessible to the user. Put here
+    // for debugging threading issue.
+    static PyObject * _pymoose_quit(PyObject * dummy);
     PyMODINIT_FUNC init_moose();
 
 
