@@ -26,7 +26,7 @@ class ZeroDimParallelHandler: public ZeroDimHandler
 		/// This is the generic constructor
 		ZeroDimParallelHandler( const DinfoBase* dinfo, 
 			const vector< DimInfo >& dims, unsigned short pathDepth,
-			bool isGlobal );
+			bool isGlobal, ThreadExecBalancer teb );
 
 		/// Special constructor used in Cinfo::makeCinfoElements
 		ZeroDimParallelHandler( const DinfoBase* dinfo, char* data );
@@ -73,6 +73,7 @@ class ZeroDimParallelHandler: public ZeroDimHandler
 		DataHandler* copyUsingNewDinfo( const DinfoBase* dinfo) const;
 
 	private:
+		ThreadExecBalancer internalThreadBalancer_;
 };
 
 #endif // _ZERO_DIM_PARALLEL_HANDLER_H

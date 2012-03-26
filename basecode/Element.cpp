@@ -48,9 +48,10 @@ Element::Element( Id id, const Cinfo* c, const string& name,
 	unsigned int numRealDimensions = numDimensionsActuallyUsed( dimensions,
 		raggedStart );
 
-	if ( c->hasInternalThreading() ) {
+	ThreadExecBalancer teb = c->internalThreadBalancer();
+	if ( teb ) {
 		dataHandler_ = new ZeroDimParallelHandler( c->dinfo(), dimensions,
-			pathDepth, isGlobal );
+			pathDepth, isGlobal, teb );
 	} else if ( raggedStart == 0 ) { // All clean
 		if ( numRealDimensions == 0 ) {
 			dataHandler_ = new ZeroDimHandler( c->dinfo(), dimensions,

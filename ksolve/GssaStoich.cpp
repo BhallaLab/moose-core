@@ -116,7 +116,7 @@ const Cinfo* GssaStoich::initCinfo()
 		sizeof( gssaStoichFinfos )/sizeof(Finfo *),
 		new Dinfo< GssaStoich >(),
 		doc, 6,
-		true // Flag for useInternalThreading.
+		&GssaStoich::internalThreadBalancer
 	);
 
 	return &gssaStoichCinfo;
@@ -402,6 +402,23 @@ void GssaStoich::makeReacDepsUnique()
 			unique( dep.begin(), dep.end() );
 		dep.resize( pos - dep.begin() );
 	}
+}
+///////////////////////////////////////////////////
+// Threading stuff for dependent zombies. Static func
+///////////////////////////////////////////////////
+bool GssaStoich::execThreadForZombie( ThreadId thread, DataId di ) const
+{
+	// Placeholder
+	return ( ( thread % Shell::numProcessThreads() ) == 0 );
+}
+
+bool GssaStoich::internalThreadBalancer( 
+	const char* data, ThreadId thread, DataId di )
+{
+	assert( data != 0 );
+	const GssaStoich* gs = reinterpret_cast< const GssaStoich* >(
+		data );
+	return gs->execThreadForZombie( thread, di );
 }
 
 ///////////////////////////////////////////////////
