@@ -12,8 +12,10 @@
 
 /// Generic constructor
 ZeroDimParallelHandler::ZeroDimParallelHandler( const DinfoBase* dinfo, 
-	const vector< DimInfo >&dims, unsigned short pathDepth, bool isGlobal )
-	: ZeroDimHandler( dinfo, dims, pathDepth, isGlobal )
+	const vector< DimInfo >&dims, unsigned short pathDepth, bool isGlobal,
+	ThreadExecBalancer teb )
+	: ZeroDimHandler( dinfo, dims, pathDepth, isGlobal ), 
+	internalThreadBalancer_( teb )
 {;}
 
 /// Special constructor using in Cinfo::makeCinfoElements
@@ -39,8 +41,12 @@ ZeroDimParallelHandler::~ZeroDimParallelHandler()
 
 bool ZeroDimParallelHandler::execThread( ThreadId thread, DataId di ) const
 {
-	return ( di == DataId::globalField || data( di ) != 0 );
+	if ( internalThreadBalancer_ )
+		return ( *internalThreadBalancer_ )( data( di ), thread, di );
+	else
+		return ( di == DataId::globalField || data( di ) != 0 );
 }
+
 ///////////////////////////////////////////////////////////////////////
 // Process
 ///////////////////////////////////////////////////////////////////////
@@ -97,6 +103,6 @@ DataHandler* ZeroDimParallelHandler::copyUsingNewDinfo(
 	const DinfoBase* dinfo ) const
 {
 	ZeroDimParallelHandler* ret = new ZeroDimParallelHandler( dinfo, 
-		dims_, pathDepth_, isGlobal_ );
+		dims_, pathDepth_, isGlobal_, internalThreadBalancer_ );
 	return ret;
 }

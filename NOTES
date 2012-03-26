@@ -17495,4 +17495,30 @@ model into the regression tests.
 Turns out this model also crashes in debug mode, good.
 Tracked it down to the changes to conc, which should apply to the y_
 matrix only for variable pools, not for FuncPools or BufPools. Now clears
-regression tests.
+regression tests. Checkin 3394 
+
+============================================================================
+25 march 2012.
+Puzzle with 2 values being returned for each timestep by ZombiePools and their
+ilk, but only for Gssa. Checked, the problem is that the getConc function
+is called on both threads. It is true that the GSSA itself is to be called
+on all threads, but why the ZombiePools?
+
+Turns out that the ZombieHandler uses the parent DataHandler's execThread call.
+This will usually be the right thing to do but not here.
+
+Could refer the getN call to the Stoich, and let it figure out if the thread
+needs selection. But the GetOpFunc call itself will be on the ZombiePool on two
+threads, and will get two responses even if the Get does not do anything.
+Approch: extend the execThreadCall that already goes to the parent so that 
+we know which id is being manipulated, and let the parent DataHandler handle it.
+Actually even this won't do. The ZeroDimParallelHandler explicitly does NOT
+know how to handle the threading and data decomposition of its objects.
+Perhaps the 'hasInternalThreading' argument to Cinfo should instead be a 
+static function passed in by the class, to help work out threading.
+return ( thread == threadNum_[ dataId ] ) // do stuff.
+
+============================================================================
+26 March 2012
+Put in the framework for handling this, put in a hack for the immediate issue of
+keeping the execution to a single thread. Seems to work.
