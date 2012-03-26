@@ -65,6 +65,11 @@ class GssaStoich: public Stoich
 		void updateAllRates( unsigned int meshIndex );
 		unsigned int pickReac( unsigned int meshIndex, gsl_rng* r );
 
+		bool execThreadForZombie( ThreadId thread, DataId di ) const;
+
+		static bool internalThreadBalancer( 
+			const char* data, ThreadId thread, DataId di );
+
 		static const Cinfo* initCinfo();
 	private:
 

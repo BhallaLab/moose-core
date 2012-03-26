@@ -18,11 +18,11 @@ Cinfo::Cinfo( const string& name,
 				DinfoBase* d,
 				const string* doc,
 				unsigned int numDoc,
-				bool hasInternalThreading
+				ThreadExecBalancer internalThreadBalancer
 )
 		: name_( name ), baseCinfo_( baseCinfo ), dinfo_( d ),
 			numBindIndex_( 0 ),
-			hasInternalThreading_( hasInternalThreading )
+			internalThreadBalancer_( internalThreadBalancer )
 {
 	if ( cinfoMap().find( name ) != cinfoMap().end() ) {
 		cout << "Warning: Duplicate Cinfo name " << name << endl;
@@ -246,9 +246,9 @@ void Cinfo::reportFids() const
 	}
 }
 
-bool Cinfo::hasInternalThreading() const
+ThreadExecBalancer Cinfo::internalThreadBalancer() const
 {
-	return hasInternalThreading_;
+	return internalThreadBalancer_;
 }
 
 ////////////////////////////////////////////////////////////////////////
