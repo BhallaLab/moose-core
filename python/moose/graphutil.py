@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sun Mar 18 13:42:28 2012 (+0530)
 # Version: 
-# Last-Updated: Sun Mar 18 15:17:05 2012 (+0530)
-#           By: Subhasis Ray
-#     Update #: 59
+# Last-Updated: Wed Mar 28 18:27:26 2012 (+0530)
+#           By: subha
+#     Update #: 103
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -34,7 +34,7 @@ import networkx as nx
 import numpy as np
 import moose 
 
-def moosegraph(element, ies=[], ied=[], iv=[]):
+def moosegraph(element, ies=['childMsg'], ied=['parentMsg'], iv=[], keep_solitary=False):
     """Create a graph out of all objects under teh element
     specified. Ignore edges going outside the subtree rooted at
     element.
@@ -48,6 +48,8 @@ def moosegraph(element, ies=[], ied=[], iv=[]):
 
     iv is a list of paths, possibly wildcards, to be ignored when
     building vertex set.
+
+    keep_solitary -- if True solitary nodes are not discarded
 
     Note that this is a temporary solution. We rely on neighbours
     field to create the graph. Ideally we should use the messages
@@ -91,24 +93,48 @@ def moosegraph(element, ies=[], ied=[], iv=[]):
     graph.add_nodes_from([vv.id_ for vv in valid_v])
     for vv in graph.nodes():
         for fname in vv[0].getFieldNames('srcFinfo'):
+            matches = [True for regex in ies_re if regex.search(fname)]
+            if matches:
+                continue
             nlist = vv[0].getNeighbors(fname)
             for nn in nlist:
                 if nn in graph.nodes():
-                    graph.add_edge(vv, nn, src=fname)
+                    try:
+                        src = graph.edge[vv][nn]['src']
+                        src.add(fname)
+                    except KeyError:
+                        graph.add_edge(vv, nn, src=set([fname]))
             
         for fname in vv[0].getFieldNames('destFinfo'):
+            matches = [True for regex in ied_re if regex.search(fname)]
+            if matches:
+                continue
             nlist = vv[0].getNeighbors(fname)
             for nn in nlist:
                 if nn in graph.nodes():
-                    graph.add_edge(nn, vv, dest=fname)
+                    try:
+                        dest = graph.edge[vv][nn]['dest']
+                        dest.add(fname)
+                    except KeyError:
+                        graph.add_edge(nn, vv, dest=set([fname]))
                 
         for fname in vv[0].getFieldNames('sharedFinfo'):
             nlist = vv[0].getNeighbors(fname)
             for nn in nlist:
                 if nn in graph.nodes():
-                    graph.add_edge(nn, vv, src=fname)
-                    graph.add_edge(vv, nn, dest=fname)
-
+                    try:
+                        src = graph.edge[vv][nn]['src']
+                        src.add(fname)
+                    except KeyError:
+                        graph.add_edge(vv, nn, src=set([fname]))
+                    try:
+                        dest = graph.edge[nn][vv]['dest']
+                        dest.add(fname)
+                    except KeyError:
+                        graph.add_edge(nn, vv, dest=set([fname]))
+    if not keep_solitary:
+        solitary=[ n for n,d in graph.degree_iter() if d==0 ]
+        graph.remove_nodes_from(solitary)
     return graph
 
 def draw_moosegraph(graph, pos=None, label_edges=True):
@@ -117,8 +143,14 @@ def draw_moosegraph(graph, pos=None, label_edges=True):
     edge_labels = {}
     if label_edges:
         for ee in graph.edges():
-            src = graph.edge[ee[0]][ee[1]]['src']
-            dest = graph.edge[ee[0]][ee[1]]['dest']
+            try:
+                src = ','.join(graph.edge[ee[0]][ee[1]]['src'])
+            except KeyError:
+                src = '?'
+            try:
+                dest = ','.join(graph.edge[ee[0]][ee[1]]['dest'])
+            except KeyError:
+                dest = '?'
             label = '%s-%s' % (src, dest)
             edge_labels[ee] = label
     nx.draw(graph, pos)
