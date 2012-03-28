@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sun Mar 18 13:42:28 2012 (+0530)
 # Version: 
-# Last-Updated: Sun Mar 18 15:17:05 2012 (+0530)
-#           By: Subhasis Ray
-#     Update #: 59
+# Last-Updated: Wed Mar 28 16:49:43 2012 (+0530)
+#           By: subha
+#     Update #: 62
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -91,19 +91,19 @@ def moosegraph(element, ies=[], ied=[], iv=[]):
     graph.add_nodes_from([vv.id_ for vv in valid_v])
     for vv in graph.nodes():
         for fname in vv[0].getFieldNames('srcFinfo'):
-            nlist = vv[0].getNeighbors(fname)
+            nlist = [nn.id_ for nn in vv[0].getNeighbors(fname)]
             for nn in nlist:
                 if nn in graph.nodes():
                     graph.add_edge(vv, nn, src=fname)
             
         for fname in vv[0].getFieldNames('destFinfo'):
-            nlist = vv[0].getNeighbors(fname)
+            nlist = [nn.id_ for nn in vv[0].getNeighbors(fname)]
             for nn in nlist:
                 if nn in graph.nodes():
                     graph.add_edge(nn, vv, dest=fname)
                 
         for fname in vv[0].getFieldNames('sharedFinfo'):
-            nlist = vv[0].getNeighbors(fname)
+            nlist = [nn.id_ for nn in vv[0].getNeighbors(fname)]
             for nn in nlist:
                 if nn in graph.nodes():
                     graph.add_edge(nn, vv, src=fname)
