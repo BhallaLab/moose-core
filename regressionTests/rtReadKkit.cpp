@@ -845,6 +845,16 @@ void rtTestChem()
 	static const double value20[] = { 20e-3, 0.5e-3, 5e-3 };
 	rtReadKkitModels( "acc20.g", acc20path, field20, value20, 2 );
 
+
+	static const char* enzcplxpath[] = { 
+		"/kkit/kinetics/E/kenz/kenz_cplx", 
+		"/kkit/kinetics/E/kenz",
+		"/kkit/kinetics/E/kenz"
+	};
+	static const char* enzcplxfield[] = { "concInit", "k3", "Km" };
+	static const double enzcplxvalue[] = { 1e-3, 0.1, 5e-3 };
+	rtReadKkitModels( "enzcplx.g", enzcplxpath, enzcplxfield, enzcplxvalue, 2 );
+
 	rtRunKkit();
 	rtReadCspace();
 	rtRunCspace();
