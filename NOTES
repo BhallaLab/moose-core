@@ -17522,3 +17522,10 @@ return ( thread == threadNum_[ dataId ] ) // do stuff.
 26 March 2012
 Put in the framework for handling this, put in a hack for the immediate issue of
 keeping the execution to a single thread. Seems to work.
+============================================================================
+02 April 2012
+
+Updated ReadKkit to handle graphs from enzcplx, and also something to correct
+the init conc of enz complexes. Added some of this to regression tests, clears.
+
+============================================================================

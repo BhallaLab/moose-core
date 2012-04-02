@@ -633,6 +633,15 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 	// double vol = atof( args[ enzMap_[ "vol" ] ].c_str());
 	bool isMM = atoi( args[ enzMap_[ "usecomplex" ] ].c_str());
 
+	double vsf = atof( args[ enzMap_[ "vol" ] ].c_str() ); 
+	/**
+	 * vsf is vol scale factor, which is what GENESIS stores in 'vol' field
+	 * n = vsf * conc( uM )
+	 * Also, n = ( conc (uM) / 1e6 ) * NA * vol
+	 * so, vol = 1e6 * vsf / NA
+	 */
+	double vol = 1.0e3 * vsf / KKIT_NA; // Converts volscale to actual vol in m^3
+
 	if ( isMM ) {
 		Id enz = shell_->doCreate( "MMenz", pa, tail, dim, true );
 		assert( enz != Id () );
@@ -665,7 +674,8 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 		Id cplx = shell_->doCreate( "Pool", enz, cplxName, dim, true );
 		assert( cplx != Id () );
 		poolIds_[ cplxPath ] = cplx; 
-		Field< double >::set( cplx, "nInit", nComplexInit );
+		// Field< double >::set( cplx, "nInit", nComplexInit );
+		Field< double >::set( cplx, "concInit", nComplexInit / ( NA * vol) );
 
 		// Use this later to assign mesh entries to enz cplx.
 		enzCplxMols_.push_back( pair< Id, Id >(  pa, cplx ) );
@@ -1075,14 +1085,29 @@ void ReadKkit::addmsg( const vector< string >& args)
 		Id plot = i->second;
 
 		i = poolIds_.find( src );
-		assert( i != poolIds_.end() );
-		Id pool = i->second;
+		Id pool;
+		if ( i == poolIds_.end() ) {
+			i = enzIds_.find( src ); // might be plotting an enzCplx.
+			if ( i == enzIds_.end() ) {
+				cout << "Error: ReadKkit: Unable to find src for plot: " <<
+					src << ", " << dest << endl;
+				assert( 0 );
+				return;
+			}
+			vector< Id > enzcplx;
+			i->second.element()->getNeighbours( enzcplx, 
+				i->second.element()->cinfo()->findFinfo( "toCplx" ) );
+			assert( enzcplx.size() == 1 );
+			pool = enzcplx[0];
+		}  else {
+			pool = i->second;
+		}
 
-		if ( args[4] == "Co" ) {
+		if ( args[4] == "Co" || args[4] == "CoComplex" ) {
 			MsgId ret = shell_->doAddMsg( "Single",
 				plot, "requestData", pool, "get_conc" );
 			assert( ret != Msg::bad );
-		} else if ( args[4] == "n" ) {
+		} else if ( args[4] == "n" || args[4] == "nComplex") {
 			MsgId ret = shell_->doAddMsg( "Single",
 				plot, "requestData", pool, "get_n" );
 			assert( ret != Msg::bad );
