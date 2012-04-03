@@ -257,6 +257,48 @@ void rtReadKkitModels( const string& modelname, const char** path,
 	cout << "." << flush;
 }
 
+void rtRunKkitModels( const string& modelname, double dt, double runTime,
+	const string& referenceOutputFile,
+	const char** plots, unsigned int numPlots )
+{
+	const double TOLERANCE = 1e-4;
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< unsigned int > dims( 1, 1 );
+	Shell::cleanSimulation();
+
+	Id mgr = shell->doLoadModel( modelname, "/kkit", "rk5" );
+	assert( mgr != Id() );
+
+	shell->doSetClock( 0, dt );
+	shell->doSetClock( 1, dt );
+	shell->doSetClock( 2, dt );
+	shell->doReinit();
+	shell->doStart( runTime );
+
+	for ( unsigned int i = 0; i < numPlots; ++i ) {
+		string plotName = string( "/kkit/graphs/" ) + string( plots[i] );
+		Id plotId( plotName );
+		assert( plotId != Id() );
+		unsigned int size = Field< unsigned int >::get( plotId, "size" );
+		assert( size == 1 + static_cast< unsigned int >( runTime / dt ) );
+		// Scale the output from mM to uM
+		bool ok = SetGet2< double, double >::set(
+			plotId, "linearTransform", 1000, 0 );
+		assert( ok );
+		plotName = string( "/graphs/" ) + string( plots[i] );
+		ok = SetGet3< string, string, string >::set(
+			plotId, "compareXplot", referenceOutputFile, 
+			plotName, "rmsr" );
+		assert( ok );
+
+		// Returns -1 on failure, otherwise the (positive) rms ratio.
+		double val = Field< double >::get( plotId, "outputValue" );
+		assert( val >= 0 && val < TOLERANCE );
+	}
+	shell->doDelete( mgr );
+	cout << "." << flush;
+}
+
 void rtRunKkit()
 {
 	const double TOLERANCE = 2e-3;
@@ -856,6 +898,8 @@ void rtTestChem()
 	rtReadKkitModels( "enzcplx.g", enzcplxpath, enzcplxfield, enzcplxvalue, 2 );
 
 	rtRunKkit();
+	const char* plots[] = {"conc1/S.Co", "conc1/E.Co", "conc1/P.Co", "conc2/kenz.CoComplex" };
+	rtRunKkitModels( "enzcplx.g", 1, 99, "enzcplx.plot", plots, 4 );
 	rtReadCspace();
 	rtRunCspace();
 	rtRunTabSumtot();

@@ -17527,5 +17527,12 @@ keeping the execution to a single thread. Seems to work.
 
 Updated ReadKkit to handle graphs from enzcplx, and also something to correct
 the init conc of enz complexes. Added some of this to regression tests, clears.
+Checkin 3404.
 
+This version still does not seem to handle a production run correctly. I'll do
+a comparison now with the GENESIS output of the run.
 ============================================================================
+03 April 2012
+Implemented another regression test to confirm that the enzcplx calculations
+and graphing match. Clears this. But this leaves unresolved the issue of 
+mismatch in a run where the intermediate values had been saved.
