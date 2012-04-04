@@ -633,14 +633,19 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 	// double vol = atof( args[ enzMap_[ "vol" ] ].c_str());
 	bool isMM = atoi( args[ enzMap_[ "usecomplex" ] ].c_str());
 
-	double vsf = atof( args[ enzMap_[ "vol" ] ].c_str() ); 
+	// double vsf = atof( args[ enzMap_[ "vol" ] ].c_str() ); 
+	// This is unreliable as the vsf stored in this way does not always
+	// match with the parent enzyme pool volume.
+	// double vol = 1.0e3 * vsf / KKIT_NA; // Converts volscale to actual vol in m^3
+	assert( poolVols_.find( pa ) != poolVols_.end() );
+	double vol = poolVols_[ pa ];
+	
 	/**
 	 * vsf is vol scale factor, which is what GENESIS stores in 'vol' field
 	 * n = vsf * conc( uM )
 	 * Also, n = ( conc (uM) / 1e6 ) * NA * vol
 	 * so, vol = 1e6 * vsf / NA
 	 */
-	double vol = 1.0e3 * vsf / KKIT_NA; // Converts volscale to actual vol in m^3
 
 	if ( isMM ) {
 		Id enz = shell_->doCreate( "MMenz", pa, tail, dim, true );
@@ -789,6 +794,7 @@ Id ReadKkit::buildPool( const vector< string >& args )
 	Field< double >::set( pool, "diffConst", diffConst );
 	// SetGet1< double >::set( pool, "setSize", vol );
 	separateVols( pool, vol );
+	poolVols_[pool] = vol;
 
 	Id info = buildInfo( pool, poolMap_, args );
 

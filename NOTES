@@ -17543,3 +17543,8 @@ Trying to tackle this in a new regression test. Haven't yet checked in.
 04 April 2012
 Added the new regression test for enzcplx calculations if they have a non-zero
 initial value.
+
+This still did not fix the problem case. Found that the kkit.g script held
+an invalid volume term for occasional enzyme complexes. This didn't 
+affect kkit, but does affect reading into MOOSE. So I use the parent pool 
+volume  which is what I should have done all along.
