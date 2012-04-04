@@ -280,7 +280,7 @@ void rtRunKkitModels( const string& modelname, double dt, double runTime,
 		Id plotId( plotName );
 		assert( plotId != Id() );
 		unsigned int size = Field< unsigned int >::get( plotId, "size" );
-		assert( size == 1 + static_cast< unsigned int >( runTime / dt ) );
+		assert( size == 1 + static_cast< unsigned int >( round( runTime / dt ) ) );
 		// Scale the output from mM to uM
 		bool ok = SetGet2< double, double >::set(
 			plotId, "linearTransform", 1000, 0 );
@@ -291,8 +291,15 @@ void rtRunKkitModels( const string& modelname, double dt, double runTime,
 			plotName, "rmsr" );
 		assert( ok );
 
+		/*
+		ok = SetGet2< string, string >::set(
+			plotId, "xplot", "check.plot", plots[i] );
+		assert( ok );
+		*/
+
 		// Returns -1 on failure, otherwise the (positive) rms ratio.
 		double val = Field< double >::get( plotId, "outputValue" );
+		// cout << "Plotname = " << plotName << ": rmsr = " << val << endl;
 		assert( val >= 0 && val < TOLERANCE );
 	}
 	shell->doDelete( mgr );
@@ -900,6 +907,10 @@ void rtTestChem()
 	rtRunKkit();
 	const char* plots[] = {"conc1/S.Co", "conc1/E.Co", "conc1/P.Co", "conc2/kenz.CoComplex" };
 	rtRunKkitModels( "enzcplx.g", 1, 99, "enzcplx.plot", plots, 4 );
+
+
+	const char* plots2[] = {"conc1/X.Co", "conc2/tot1.Co", "conc1/kenz.CoComplex" };
+	rtRunKkitModels( "enzCplxInit.g", 0.1, 19.9, "enzCplxInit.plot", plots2, 3 );
 	rtReadCspace();
 	rtRunCspace();
 	rtRunTabSumtot();
