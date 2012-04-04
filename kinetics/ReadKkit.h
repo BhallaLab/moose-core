@@ -201,6 +201,8 @@ class ReadKkit
 
 		map< Id, int > poolFlags_;
 
+		map< Id, double > poolVols_; // Need for enz complexes.
+
 		Shell* shell_;
 
 		static const double EPSILON;
