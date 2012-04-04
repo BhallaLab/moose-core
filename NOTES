@@ -17536,3 +17536,10 @@ a comparison now with the GENESIS output of the run.
 Implemented another regression test to confirm that the enzcplx calculations
 and graphing match. Clears this. But this leaves unresolved the issue of 
 mismatch in a run where the intermediate values had been saved.
+Checkin 3405.
+
+Trying to tackle this in a new regression test. Haven't yet checked in.
+============================================================================
+04 April 2012
+Added the new regression test for enzcplx calculations if they have a non-zero
+initial value.
