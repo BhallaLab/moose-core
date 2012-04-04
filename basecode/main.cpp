@@ -54,6 +54,7 @@ extern void testMpiMsg();
 extern void testKinetics();
 extern void testBiophysics();
 extern void testBiophysicsProcess();
+extern void testHSolve();
 extern void testKineticsProcess();
 extern void testGeom();
 extern void testMesh();
@@ -277,6 +278,7 @@ void nonMpiTests( Shell* s )
 		testBuiltins();
 		testKinetics();
 		testBiophysics();
+		testHSolve();
 		testGeom();
 		testMesh();
 #ifdef USE_SMOLDYN
