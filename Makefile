@@ -251,6 +251,7 @@ SUBDIR = \
 	msg \
 	shell \
 	biophysics\
+	hsolve\
 	randnum\
 	scheduling\
 	builtins\
@@ -273,6 +274,7 @@ OBJLIBS =	\
 	msg/_msg.o \
 	shell/_shell.o \
 	biophysics/_biophysics.o \
+	hsolve/_hsolve.o \
 	randnum/_randnum.o \
 	scheduling/_scheduling.o \
 	builtins/_builtins.o \
