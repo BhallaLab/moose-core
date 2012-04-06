@@ -521,6 +521,7 @@ void HHChannel::reinit( const Eref& er, ProcPtr info )
 	double A = 0.0;
 	double B = 0.0;
 	if ( Xpower_ > 0 ) {
+		assert( xGate_ );
 		xGate_->lookupBoth( Vm_, &A, &B );
 		if ( B < EPSILON ) {
 			cout << "Warning: B_ value for " << e->getName() <<
@@ -533,6 +534,7 @@ void HHChannel::reinit( const Eref& er, ProcPtr info )
 	}
 
 	if ( Ypower_ > 0 ) {
+		assert( yGate_ );
 		yGate_->lookupBoth( Vm_, &A, &B );
 		if ( B < EPSILON ) {
 			cout << "Warning: B value for " << e->getName() <<
@@ -545,6 +547,7 @@ void HHChannel::reinit( const Eref& er, ProcPtr info )
 	}
 
 	if ( Zpower_ > 0 ) {
+		assert( zGate_ );
 		if ( useConcentration_ )
 			zGate_->lookupBoth( conc_, &A, &B );
 		else

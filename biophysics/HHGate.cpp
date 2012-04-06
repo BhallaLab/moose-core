@@ -211,7 +211,10 @@ HHGate::HHGate()
 {;}
 
 HHGate::HHGate( Id originalChanId, Id originalGateId )
-	: xmin_(0), xmax_(1), invDx_(1), 
+	: 
+		A_( 0, 0 ),
+		B_( 0, 0 ),
+		xmin_(0), xmax_(1), invDx_(1), 
 		originalChanId_( originalChanId ),
 		originalGateId_( originalGateId ),
 		lookupByInterpolation_(0),
@@ -229,6 +232,7 @@ double HHGate::lookupTable( const vector< double >& tab, double v ) const
 	if ( lookupByInterpolation_ ) {
 		unsigned int index = 
 			static_cast< unsigned int >( ( v - xmin_ ) * invDx_ );
+		assert( tab.size() > index );
 		double frac = ( v - xmin_ - index / invDx_ ) * invDx_;
 		return tab[ index ] * ( 1 - frac ) + tab[ index + 1 ] * frac;
 	} else {
@@ -257,6 +261,7 @@ void HHGate::lookupBoth( double v, double* A, double* B ) const
 	} else {
 		unsigned int index =
 			static_cast< unsigned int >( ( v - xmin_ ) * invDx_ );
+		assert( A_.size() > index && B_.size() > index );
 		if ( lookupByInterpolation_ ) {
 			double frac = ( v - xmin_ - index / invDx_ ) * invDx_;
 			*A = A_[ index ] * ( 1 - frac ) + A_[ index + 1 ] * frac;
