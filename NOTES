@@ -17548,3 +17548,7 @@ This still did not fix the problem case. Found that the kkit.g script held
 an invalid volume term for occasional enzyme complexes. This didn't 
 affect kkit, but does affect reading into MOOSE. So I use the parent pool 
 volume  which is what I should have done all along.
+============================================================================
+06 April 2012
+Tracking down segv when reiniting HHChannels in pymoose. Put in some 
+assertions, will need to recompile in debug mode.
