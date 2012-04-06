@@ -212,8 +212,8 @@ HHGate::HHGate()
 
 HHGate::HHGate( Id originalChanId, Id originalGateId )
 	: 
-		A_( 0, 0 ),
-		B_( 0, 0 ),
+		A_( 1, 0.0 ),
+		B_( 1, 0.0 ),
 		xmin_(0), xmax_(1), invDx_(1), 
 		originalChanId_( originalChanId ),
 		originalGateId_( originalGateId ),
