@@ -931,68 +931,33 @@ void ReadCell::addC2M( Element* compt, double scale,
 
 void ReadCell::addChannelMessage( Id chan )
 {
-	//~ Id sli( "/shell/sli" );
-	//~ 
-	//~ vector< const char* > argVector;
-	//~ string argString;
-	//~ string token;
-	//~ vector< string > tokens;
-	//~ 
-	//~ /*
-	 //~ * Get extended Finfos on channel. (We're looking for fields added using
-	 //~ * "addfield"
-	 //~ */
-	//~ vector< Finfo* > chanFinfo;
-	//~ chan->listLocalFinfos( chanFinfo );
-	//~ 
-	//~ vector< Finfo* >::iterator cfinfo;
-	//~ for ( cfinfo = chanFinfo.begin(); cfinfo != chanFinfo.end(); cfinfo++ ) {
-		//~ // Ignore a Finfo if its name does not begin with "addmsg"..
-		//~ const string& name = ( *cfinfo )->name();
-		//~ if ( name.find( "addmsg", 0 ) != 0 )
-			//~ continue;
-		//~ 
-		//~ // ..or if the "addmsg" is not followed by a positive integer.
-		//~ unsigned int dummyInt;
-		//~ stringstream remaining( name.substr( 6 ) );
-		//~ if ( ( remaining >> dummyInt ).fail() )
-			//~ continue;
-		//~ 
-		//~ // Get the string contained in the field..
-		//~ if ( ( *cfinfo )->strGet( chan, argString ) == false )
-			//~ continue;
-		//~ 
-		//~ // ..extract tokens from the string..
-		//~ tokens.clear();
-		//~ tokens.push_back( "addmsg" );
-		//~ stringstream ss( argString );
-		//~ while ( ss >> token )
-			//~ tokens.push_back( token );
-		//~ 
-		//~ /*
-		 //~ * Convert token[ 1 ] and token[ 2 ] from relative paths to absolute ones.
-		 //~ * Ignore if the tokens are not valid paths. (Possible if using the new
-		 //~ * syntax: "addmsg src_elm/msg dest_elm/msg")
-		 //~ */
-		//~ if ( tokens.size() >= 3 ) {
-			//~ Id token1( chan->id().path() + "/" + tokens[ 1 ] );
-			//~ Id token2( chan->id().path() + "/" + tokens[ 2 ] );
-			//~ 
-			//~ if ( token1.good() )
-				//~ tokens[ 1 ] = token1.path();
-			//~ if ( token2.good() )
-				//~ tokens[ 2 ] = token2.path();
-		//~ }
-		//~ 
-		//~ // Get C-style strings
-		//~ argVector.clear();
-		//~ for ( unsigned i = 0; i < tokens.size(); i++ )
-			//~ argVector.push_back( tokens[ i ].c_str() );
-		//~ 
-		//~ // Request parser to add the message
-		//~ do_add( argVector.size(), &argVector[ 0 ], sli );
-		//~ // do_add is defined in GenesisParserWrapper.cpp
-	//~ }
+	/*
+	* Get child objects of type Mstring, named addmsg1, 2, etc.
+	* These define extra messages to be assembled at setup.
+	* Similar to what was done with GENESIS.
+	*/
+	vector< Id > kids;
+	Neutral::children( chan.eref(), kids );
+	for ( vector< Id >::iterator i = kids.begin(); i != kids.end(); ++i )
+	{
+		// Ignore kid if its name does not begin with "addmsg"..
+		const string& name = i->element()->getName();
+		if ( name.find( "addmsg", 0 ) != 0 )
+			continue;
+
+		string s = Field< string >::get( *i, "value" );
+		vector< string > token;
+		tokenize( s, " 	", token );
+		assert( token.size() == 4 );
+		Shell *shell = reinterpret_cast< Shell* >( Id().eref().data() );
+		ObjId src = shell->doFind( token[0] );
+		assert( !( src == ObjId::bad ) );
+		ObjId dest = shell->doFind( token[2] );
+		assert( !( dest == ObjId::bad ) );
+		MsgId mid = 
+			shell->doAddMsg( "single", src, token[1], dest, token[3] );
+		assert( mid != Msg::bad );
+	}
 }
 
 /**

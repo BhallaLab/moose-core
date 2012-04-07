@@ -17557,3 +17557,8 @@ assertions, will need to recompile in debug mode.
 Fixed silly bug in ReadCell: Cm value was being put into Rm. Now output looks
 reasonable. Next to put in the extra messages for some of the more complex
 channels.
+
+Set up framework for specifying additional messages from channels defined for
+ReadCell. This involved updates to ReadCell, and the construction of an
+Mstring class.
+
