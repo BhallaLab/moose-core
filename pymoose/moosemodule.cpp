@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Mon Apr  2 17:25:36 2012 (+0530)
-//           By: subha
-//     Update #: 5157
+// Last-Updated: Sun Apr  8 01:01:48 2012 (+0530)
+//           By: Subhasis Ray
+//     Update #: 5265
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -288,7 +288,7 @@ extern "C" {
                 return fieldType;
             }
         }
-        cerr << "Error: No field named '" << fieldName << "' of type '" << finfoType << "'" << endl;
+        // cerr << "Error: No field named '" << fieldName << "' of type '" << finfoType << "'" << endl;
         return fieldType;
     }
 
@@ -484,8 +484,8 @@ extern "C" {
         (hashfunc)_pymoose_ObjId_hash,         /* tp_hash */
         0,                                  /* tp_call */
         (reprfunc)_pymoose_ObjId_repr,               /* tp_str */
-        PyObject_GenericGetAttr,            /* tp_getattro */
-        PyObject_GenericSetAttr,            /* tp_setattro */
+        (getattrofunc)_pymoose_ObjId_getattro,            /* tp_getattro */
+        (setattrofunc)_pymoose_ObjId_setattro,            /* tp_setattro */
         0,                                  /* tp_as_buffer */
         Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
         "Individual moose object contained in an array-type object.",
@@ -887,6 +887,18 @@ extern "C" {
     }  // ! _pymoose_Id_getFieldType
 
     /**
+       Wrapper over getattro to allow direct access as a function with variable argument list
+     */
+    static PyObject * _pymoose_ObjId_getField(_ObjId * self, PyObject * args)
+    {
+        PyObject * attr;        
+        if (!PyArg_ParseTuple(args, "O:_pymoose_ObjId_getField", &attr)){
+            return NULL;
+        }
+        return _pymoose_ObjId_getattro(self, attr);
+    }
+    
+    /**
        2011-03-28 13:59:41 (+0530)
        
        Get a specified field. Re-done on: 2011-03-23 14:42:03 (+0530)
@@ -896,16 +908,18 @@ extern "C" {
        as 0. Then what is the point of having Id separately? ObjId
        would been just fine!
     */
-    static PyObject * _pymoose_ObjId_getField(_ObjId * self, PyObject * args)
+    static PyObject * _pymoose_ObjId_getattro(_ObjId * self, PyObject * attr)
     {
         extern PyTypeObject IdType;
         extern PyTypeObject ObjIdType;
-        const char * field = NULL;
+        const char * field;
         char ftype;
-        if (!PyArg_ParseTuple(args, "s:_pymoose_ObjId_getField", &field)){
-            return NULL;
-        }
         PyObject * ret;
+        if (PyString_Check(attr)){
+            field = PyString_AsString(attr);
+        } else {
+            return PyObject_GenericGetAttr((PyObject*)self, attr);
+        }
         // The GET_FIELD macro is just a short-cut to reduce typing
         // TYPE is the full type string for the field. TYPEC is the corresponding Python Py_BuildValue format character.
 #define GET_FIELD(TYPE, TYPEC)                                          \
@@ -933,20 +947,22 @@ extern "C" {
         
         string type = getFieldType(self->oid_, string(field), "valueFinfo");
         if (type.empty()){
-            string msg = "No such field on object ";
-            msg += self->oid_.id.path() + ": ";
-            msg += field;
-            PyErr_SetString(PyExc_AttributeError, msg.c_str());
-            return NULL;
+#ifndef NDEBUG
+            cout << "No such field on object "
+                 << self->oid_.id.path() + ": "
+                 << field << endl;
+#endif        
+            return PyObject_GenericGetAttr((PyObject*)self, attr);
         }
         ftype = shortType(type);
         if (!ftype){
-            string msg = "No short type for field ";
-            msg += field;
-            msg += " of type ";
-            msg += type;
-            cout << msg << endl;
-            Py_RETURN_NONE;
+#ifndef NDEBUG        
+            cout << "No short type for field " 
+                 << field
+                 << " of type "
+                 << type << endl;
+#endif
+            return PyObject_GenericGetAttr((PyObject*)self, attr);
         }
         switch(ftype){
             case 'b': {
@@ -1047,32 +1063,50 @@ extern "C" {
                 }
                 
             default:
-                PyErr_SetString(PyExc_TypeError, "Unrecognized field type.");
-                ret = NULL;            
+                return PyObject_GenericGetAttr((PyObject*)self, attr);
         }
 #undef GET_FIELD    
 #undef GET_VECFIELD
         return ret;        
     }
+
     /**
-       Set a specified field. Redone on 2011-03-23 14:41:45 (+0530)
+       Wrapper over setattro to make METHOD_VARARG
     */
     static PyObject * _pymoose_ObjId_setField(_ObjId * self, PyObject * args)
     {
-        
+        PyObject * field;
         PyObject * value;
-        char * field;
-        int ret = 0;
-        if (!PyArg_ParseTuple(args, "sO:_pymoose_ObjId_setField", &field,  &value)){
+        if (!PyArg_ParseTuple(args, "OO:_pymoose_ObjId_setField", &field, &value)){
             return NULL;
+        }
+        if (_pymoose_ObjId_setattro(self, field, value) == -1){
+            return NULL;
+        }
+        Py_RETURN_NONE;
+    }
+    
+    /**
+       Set a specified field. Redone on 2011-03-23 14:41:45 (+0530)
+    */
+    static int  _pymoose_ObjId_setattro(_ObjId * self, PyObject * attr, PyObject * value)
+    {
+        
+        int ret = -1;
+        const char * field;
+        if (PyString_Check(attr)){
+            field = PyString_AsString(attr);
+        } else {
+            PyErr_SetString(PyExc_TypeError, "Attribute name must be a string");
+            return -1;
         }
         char ftype = shortType(getFieldType(self->oid_, string(field), "valueFinfo"));
-        
         if (!ftype){
-            PyErr_SetString(PyExc_AttributeError, "Field not valid.");
-            return NULL;
+            ostringstream msg;
+            msg << "'moose.ObjId' object has no attribute '" << field << "'" << endl;
+            PyErr_SetString(PyExc_AttributeError, msg.str().c_str());
+            return -1;
         }
-        
         switch(ftype){
             case 'b':
                 {
@@ -1085,8 +1119,6 @@ extern "C" {
                     char * _value = PyString_AsString(value);
                     if (_value && _value[0]){
                         ret = Field<char>::set(self->oid_, string(field), _value[0]);
-                    } else {
-                        return NULL;
                     }
                     break;
                 }
@@ -1095,8 +1127,6 @@ extern "C" {
                     int _value = PyInt_AsLong(value);
                     if ((_value != -1) || (!PyErr_Occurred())){
                         ret = Field<int>::set(self->oid_, string(field), _value);
-                    } else {
-                        return NULL;
                     }
                     break;
                 }
@@ -1105,8 +1135,6 @@ extern "C" {
                     short _value = (short)PyInt_AsLong(value);
                     if ((_value != -1) || (!PyErr_Occurred())){
                         ret = Field<short>::set(self->oid_, string(field), _value);
-                    } else {
-                        return NULL;
                     }
                     break;
                 }
@@ -1115,8 +1143,6 @@ extern "C" {
                     long _value = PyInt_AsLong(value);
                     if ((_value != -1) || (!PyErr_Occurred())){
                         ret = Field<long>::set(self->oid_, string(field), _value);
-                    } else {
-                        return NULL;
                     }
                     break;
                 }
@@ -1150,8 +1176,6 @@ extern "C" {
                     char * _value = PyString_AsString(value);
                     if (_value){
                         ret = Field<string>::set(self->oid_, string(field), string(_value));
-                    } else {
-                        return NULL;
                     }
                     break;
                 }
@@ -1161,7 +1185,6 @@ extern "C" {
                         ret = Field<Id>::set(self->oid_, string(field), ((_Id*)value)->id_);
                     } else {
                         PyErr_SetString(PyExc_ValueError, "Null pointer passed as Id value.");
-                        return NULL;
                     }
                     break;
                 }
@@ -1171,20 +1194,17 @@ extern "C" {
                         ret = Field<ObjId>::set(self->oid_, string(field), ((_ObjId*)value)->oid_);
                     } else {
                         PyErr_SetString(PyExc_ValueError, "Null pointer passed as Id value.");
-                        return NULL;
                     }
                     break;
                 }
             case 'z': // DataId
                 {
-                    cout << "DataId handling not implemented in PyMoose yet." << endl;
-                    Py_RETURN_NONE;
+                    cout << "DataId handling not implemented in PyMoose yet." << endl;                    
                 }
             case 'v': 
                 {
                     if (!PySequence_Check(value)){
                         PyErr_SetString(PyExc_TypeError, "For setting vector<int> field, specified value must be a sequence." );
-                        return NULL;
                     }
                     Py_ssize_t length = PySequence_Length(value);
                     vector<int> _value;
@@ -1199,127 +1219,125 @@ extern "C" {
                 {
                     if (!PySequence_Check(value)){
                         PyErr_SetString(PyExc_TypeError, "For setting vector<short> field, specified value must be a sequence." );
-                        return NULL;
+                    } else {
+                        Py_ssize_t length = PySequence_Length(value);
+                        vector<short> _value;
+                        for (unsigned int ii = 0; ii < length; ++ii){
+                            short v = PyInt_AsLong(PySequence_GetItem(value, ii));
+                            _value.push_back(v);
+                        }
+                        ret = Field< vector < short > >::set(self->oid_, string(field), _value);
                     }
-                    Py_ssize_t length = PySequence_Length(value);
-                    vector<short> _value;
-                    for (unsigned int ii = 0; ii < length; ++ii){
-                        short v = PyInt_AsLong(PySequence_GetItem(value, ii));
-                        _value.push_back(v);
-                    }
-                    ret = Field< vector < short > >::set(self->oid_, string(field), _value);
                     break;
                 }
             case 'L': //SET_VECFIELD(long, l)
                 {
                     if (!PySequence_Check(value)){
                         PyErr_SetString(PyExc_TypeError, "For setting vector<long> field, specified value must be a sequence." );
-                        return NULL;
+                    } else {
+                        Py_ssize_t length = PySequence_Length(value);
+                        vector<long> _value;
+                        for (unsigned int ii = 0; ii < length; ++ii){
+                            long v = PyInt_AsLong(PySequence_GetItem(value, ii));
+                            _value.push_back(v);
+                        }
+                        ret = Field< vector < long > >::set(self->oid_, string(field), _value);
                     }
-                    Py_ssize_t length = PySequence_Length(value);
-                    vector<long> _value;
-                    for (unsigned int ii = 0; ii < length; ++ii){
-                        long v = PyInt_AsLong(PySequence_GetItem(value, ii));
-                        _value.push_back(v);
-                    }
-                    ret = Field< vector < long > >::set(self->oid_, string(field), _value);
                     break;
                 }
             case 'U': //SET_VECFIELD(unsigned int, I)
                 {
                     if (!PySequence_Check(value)){
                         PyErr_SetString(PyExc_TypeError, "For setting vector<unsigned int> field, specified value must be a sequence." );
-                        return NULL;
+                    } else {
+                        Py_ssize_t length = PySequence_Length(value);
+                        vector<unsigned int> _value;
+                        for (unsigned int ii = 0; ii < length; ++ii){
+                            unsigned int v = PyInt_AsUnsignedLongMask(PySequence_GetItem(value, ii));
+                            _value.push_back(v);
+                        }
+                        ret = Field< vector < unsigned int > >::set(self->oid_, string(field), _value);
                     }
-                    Py_ssize_t length = PySequence_Length(value);
-                    vector<unsigned int> _value;
-                    for (unsigned int ii = 0; ii < length; ++ii){
-                        unsigned int v = PyInt_AsUnsignedLongMask(PySequence_GetItem(value, ii));
-                        _value.push_back(v);
-                    }
-                    ret = Field< vector < unsigned int > >::set(self->oid_, string(field), _value);
                     break;
                 }
             case 'K': //SET_VECFIELD(unsigned long, k)
                 {
                     if (!PySequence_Check(value)){
                         PyErr_SetString(PyExc_TypeError, "For setting vector<unsigned long> field, specified value must be a sequence." );
-                        return NULL;
+                    } else {
+                        Py_ssize_t length = PySequence_Length(value);
+                        vector<unsigned long> _value;
+                        for (unsigned int ii = 0; ii < length; ++ii){
+                            unsigned long v = PyInt_AsUnsignedLongMask(PySequence_GetItem(value, ii));
+                            _value.push_back(v);
+                        }
+                        ret = Field< vector < unsigned long > >::set(self->oid_, string(field), _value);
                     }
-                    Py_ssize_t length = PySequence_Length(value);
-                    vector<unsigned long> _value;
-                    for (unsigned int ii = 0; ii < length; ++ii){
-                        unsigned long v = PyInt_AsUnsignedLongMask(PySequence_GetItem(value, ii));
-                        _value.push_back(v);
-                    }
-                    ret = Field< vector < unsigned long > >::set(self->oid_, string(field), _value);
                     break;
                 }
             case 'F': //SET_VECFIELD(float, f)
                 {
                     if (!PySequence_Check(value)){
                         PyErr_SetString(PyExc_TypeError, "For setting vector<float> field, specified value must be a sequence." );
-                        return NULL;
+                    } else {
+                        Py_ssize_t length = PySequence_Length(value);
+                        vector<float> _value;
+                        for (unsigned int ii = 0; ii < length; ++ii){
+                            float v = PyFloat_AsDouble(PySequence_GetItem(value, ii));
+                            _value.push_back(v);
+                        }
+                        ret = Field< vector < float > >::set(self->oid_, string(field), _value);
                     }
-                    Py_ssize_t length = PySequence_Length(value);
-                    vector<float> _value;
-                    for (unsigned int ii = 0; ii < length; ++ii){
-                        float v = PyFloat_AsDouble(PySequence_GetItem(value, ii));
-                        _value.push_back(v);
-                    }
-                    ret = Field< vector < float > >::set(self->oid_, string(field), _value);
                     break;
                 }
             case 'D': //SET_VECFIELD(double, d)
                 {
                     if (!PySequence_Check(value)){
                         PyErr_SetString(PyExc_TypeError, "For setting vector<double> field, specified value must be a sequence." );
-                        return NULL;
+                    } else {
+                        Py_ssize_t length = PySequence_Length(value);
+                        vector<double> _value;
+                        for (unsigned int ii = 0; ii < length; ++ii){
+                            double v = PyFloat_AsDouble(PySequence_GetItem(value, ii));
+                            _value.push_back(v);
+                        }
+                        ret = Field< vector < double > >::set(self->oid_, string(field), _value);
                     }
-                    Py_ssize_t length = PySequence_Length(value);
-                    vector<double> _value;
-                    for (unsigned int ii = 0; ii < length; ++ii){
-                        double v = PyFloat_AsDouble(PySequence_GetItem(value, ii));
-                        _value.push_back(v);
-                    }
-                    ret = Field< vector < double > >::set(self->oid_, string(field), _value);
                     break;
                 }                
             case 'S':
                 {
                     if (!PySequence_Check(value)){
                         PyErr_SetString(PyExc_TypeError, "For setting vector<string> field, specified value must be a sequence." );
-                        return NULL;
+                    } else {
+                        Py_ssize_t length = PySequence_Length(value);
+                        vector<string> _value;
+                        for (unsigned int ii = 0; ii < length; ++ii){
+                            char * v = PyString_AsString(PySequence_GetItem(value, ii));
+                            _value.push_back(string(v));
+                        }
+                        ret = Field< vector < string > >::set(self->oid_, string(field), _value);
                     }
-                    Py_ssize_t length = PySequence_Length(value);
-                    vector<string> _value;
-                    for (unsigned int ii = 0; ii < length; ++ii){
-                        char * v = PyString_AsString(PySequence_GetItem(value, ii));
-                        _value.push_back(string(v));
-                    }
-                    ret = Field< vector < string > >::set(self->oid_, string(field), _value);
                     break;
                 }
                 
-            default:
-                ret = 0;
+            default:                
                 break;
         }
-        
-        if (ret){
-            Py_RETURN_NONE;
+        if (ret == -1){
+            PyErr_SetString(PyExc_AttributeError, "Field is not defined.");
         } else {
-            PyErr_SetString(PyExc_TypeError, "The specified field type is not valid.");
-            return NULL;
+            ret = 0;
         }
-    } // _pymoose_Id_setField
+        return ret;
+    } // _pymoose_ObjId_setattro
 
     static PyObject * _pymoose_ObjId_getLookupField(_ObjId * self, PyObject * args)
     {
         extern PyTypeObject ObjIdType;
         PyObject * key;
         char * field;
-        PyObject * ret;
+        PyObject * ret = NULL;
         if (!PyArg_ParseTuple(args, "sO:_pymoose_ObjId_getLookupField", &field,  &key)){
             return NULL;
         }
@@ -2094,9 +2112,9 @@ extern "C" {
          "\tstr solverclass -- (optional) solver type to be used for simulating the model.\n"},
         {"connect", (PyCFunction)_pymoose_connect, METH_VARARGS, "Create a message between srcField on src element to destField on target element."},        
         {"getCwe", (PyCFunction)_pymoose_getCwe, METH_VARARGS, "Get the current working element. 'pwe' is an alias of this function."},
-        {"pwe", (PyCFunction)_pymoose_getCwe, METH_VARARGS, "Get the current working element. 'getCwe' is an alias of this function."},
+        // {"pwe", (PyCFunction)_pymoose_getCwe, METH_VARARGS, "Get the current working element. 'getCwe' is an alias of this function."},
         {"setCwe", (PyCFunction)_pymoose_setCwe, METH_VARARGS, "Set the current working element. 'ce' is an alias of this function"},
-        {"ce", (PyCFunction)_pymoose_setCwe, METH_VARARGS, "Set the current working element. setCwe is an alias of this function."},
+        // {"ce", (PyCFunction)_pymoose_setCwe, METH_VARARGS, "Set the current working element. setCwe is an alias of this function."},
         {"getFieldDict", (PyCFunction)_pymoose_getFieldDict, METH_VARARGS, "Get dictionary of field names and types for specified class.\n"
          " Parameters:\n"
          "str className -- MOOSE class to find the fields of.\n"
