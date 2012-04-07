@@ -498,7 +498,7 @@ Id ReadCell::buildCompartment(
 	Field< double >::set( compt, "length", length );
 	Field< double >::set( compt, "Rm", Rm );
 	Field< double >::set( compt, "Ra", Ra );
-	Field< double >::set( compt, "Rm", Cm );
+	Field< double >::set( compt, "Cm", Cm );
 	Field< double >::set( compt, "initVm", EREST_ACT_ );
 	Field< double >::set( compt, "Em", ELEAK_ );
 	Field< double >::set( compt, "Vm", EREST_ACT_ );
