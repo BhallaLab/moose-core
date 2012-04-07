@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 17:11:06 2011 (+0530)
 // Version: 
-// Last-Updated: Sun Mar 25 17:55:18 2012 (+0530)
-//           By: subha
-//     Update #: 598
+// Last-Updated: Sat Apr  7 23:49:58 2012 (+0530)
+//           By: Subhasis Ray
+//     Update #: 602
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -87,7 +87,9 @@ extern "C" {
     static void _pymoose_ObjId_dealloc(_ObjId * self);
     static PyObject * _pymoose_ObjId_repr(_ObjId * self);
     // static PyObject * _pymoose_ObjId_str(_ObjId * self);
+    static PyObject * _pymoose_ObjId_getattro(_ObjId * self, PyObject * attr);
     static PyObject * _pymoose_ObjId_getField(_ObjId * self, PyObject * args);
+    static int _pymoose_ObjId_setattro(_ObjId * self, PyObject * attr, PyObject * value);
     static PyObject * _pymoose_ObjId_setField(_ObjId * self, PyObject * args);
     static PyObject * _pymoose_ObjId_getLookupField(_ObjId * self, PyObject * args);
     static PyObject * _pymoose_ObjId_setLookupField(_ObjId * self, PyObject * args);
