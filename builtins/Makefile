@@ -13,6 +13,7 @@ OBJ = \
 	Arith.o	\
 	Group.o	\
 	Mdouble.o	\
+	Mstring.o	\
 	TableBase.o	\
 	TableEntry.o	\
 	Table.o	\
@@ -33,6 +34,7 @@ $(OBJ)	: $(HEADERS)
 Arith.o:	Arith.h
 Group.o:	Group.h
 Mdouble.o:		Mdouble.h
+Mstring.o:		Mstring.h
 TableEntry.o:		TableEntry.h
 TableBase.o:		TableBase.h TableEntry.h
 Table.o:		TableBase.h Table.h TableEntry.h
