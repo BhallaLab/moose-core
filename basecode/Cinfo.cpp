@@ -345,6 +345,13 @@ const Cinfo* Cinfo::initCinfo()
 			64
 		);
 
+    static string doc[] =
+    {
+        "Name", "Cinfo",
+        "Author", "Upi Bhalla",
+        "Description", "Class information object."
+    };
+
 	static Finfo* cinfoFinfos[] = {
 		&docs,				// ReadOnlyValue
 		&baseClass,		// ReadOnlyValue
@@ -361,7 +368,9 @@ const Cinfo* Cinfo::initCinfo()
 		Neutral::initCinfo(),
 		cinfoFinfos,
 		sizeof( cinfoFinfos ) / sizeof ( Finfo* ),
-		new Dinfo< Cinfo >()
+		new Dinfo< Cinfo >(),
+        doc,
+        sizeof(doc)/sizeof(string)        
 	);
 
 	return &cinfoCinfo;
@@ -375,7 +384,12 @@ static const Cinfo* cinfoCinfo = Cinfo::initCinfo();
 ///////////////////////////////////////////////////////////////////
 string Cinfo::getDocs() const
 {
-	return "";
+    ostringstream doc;
+    for (map <string, string>::const_iterator ii = doc_.begin(); ii != doc_.end(); ++ii){
+        doc << ii->first << ":\t\t" << ii->second << endl;
+    }
+    cout << "Doc is " << doc.str() << endl;
+	return doc.str();
 }
 
 

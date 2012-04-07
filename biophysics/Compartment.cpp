@@ -321,7 +321,9 @@ const Cinfo* Compartment::initCinfo()
 				Neutral::initCinfo(),
 				compartmentFinfos,
 				sizeof( compartmentFinfos ) / sizeof( Finfo* ),
-				new Dinfo< Compartment >()
+				new Dinfo< Compartment >(),
+                doc,
+                sizeof(doc)/sizeof(string)
 	);
 
 	return &compartmentCinfo;
