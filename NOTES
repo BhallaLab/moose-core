@@ -17552,3 +17552,8 @@ volume  which is what I should have done all along.
 06 April 2012
 Tracking down segv when reiniting HHChannels in pymoose. Put in some 
 assertions, will need to recompile in debug mode.
+============================================================================
+07 April 2012
+Fixed silly bug in ReadCell: Cm value was being put into Rm. Now output looks
+reasonable. Next to put in the extra messages for some of the more complex
+channels.
