@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Sun Mar 25 23:43:04 2012 (+0530)
+# Last-Updated: Sun Apr  8 01:35:40 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1387
+#     Update #: 1453
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -278,13 +278,14 @@ elements under current working element
 
 """
 
+import warnings
 from collections import defaultdict
 import _moose
 from _moose import __version__, VERSION, SVN_REVISION, useClock, setClock, start, reinit, stop, isRunning, loadModel, getFieldDict, Id, ObjId, exists, seed
 from _moose import wildcardFind as _wildcardFind # We override the original
 
 # Dict of available MOOSE class names. This is faster for look-up
-_moose_classes = dict([(child.getPath().rpartition('/')[-1], True) for child in Id('/classes')[0].getField('children')])
+_moose_classes = dict([(child[0].name, True) for child in Id('/classes')[0].getField('children')])
 
 class _MooseDescriptor(object):
     """Descriptor to give access to MOOSE class' ValueFinfo attributes"""
@@ -490,7 +491,7 @@ class NeutralArray(object):
 
     path = property(lambda self: self.id_.getPath())
     fieldNames = property(lambda self: self.id_[0].getFieldNames('valueFinfo'))
-    name = property(lambda self: self.id_[0].getField('name'))
+    name = property(lambda self: self.id_[0].name)
     shape = property(lambda self: self.id_.getShape())
     
 
@@ -793,6 +794,7 @@ def delete(target):
     _moose.delete(target)
     
 def setCwe(element):
+    """Set present working element"""
     if isinstance(element, NeutralArray):
         _moose.setCwe(element.id_)
     elif isinstance(element, Neutral):
@@ -805,6 +807,11 @@ def getCwe():
     obj = NeutralArray(_id)
     return obj
 
+def pwe():
+    """Print present working element. Convenience function for GENESIS
+    users."""
+    print _moose.getCwe().getPath()
+    
 def connect(src, srcMsg, dest, destMsg, msgType='Single'):
     """Connect src object's source field specified by srcMsg to
     destMsg field of target object."""
@@ -815,6 +822,7 @@ def connect(src, srcMsg, dest, destMsg, msgType='Single'):
     return src.connect(srcMsg, dest, destMsg, msgType)
 
 def le(element=None):
+    """List elements. """
     if element is None:
         element = getCwe()[0]
     elif isinstance(element, str):
@@ -822,7 +830,9 @@ def le(element=None):
     print 'Elements under', element.path
     for ch in element.children:
         print ch
-    
+
+ce = setCwe
+
 def syncDataHandler(target):
     """Synchronize data handlers for target.
 
@@ -836,37 +846,54 @@ def syncDataHandler(target):
         target = Id(target)
         _moose.syncDataHandler(target)
 
-def showfields(element):
+def showfield(element, field='*', showtype=False):
     """Show the fields of the element, their data types and values in
-    human readable format.
+    human readable format. Convenience function for GENESIS users.
 
     Parameters:
 
     element -- Element or path of an existing element or ObjId of an element.
 
-    showtype -- show the data type of each field or not.
+    field -- Field to be displayed. If '*', all fields are displayed.
+
+    showtype -- If True show the data type of each field.
 
     """
     if isinstance(element, str):
-        if not moose.exists(element):
+        if not _moose.exists(element):
             raise ValueError('%s -- no such moose object exists.' % (element))
         element = Neutral(element)
     if not isinstance(element, Neutral):
         if not isinstance(element, ObjId):
             raise TypeError('Expected argument of type ObjId or Neutral or a path to an existing object. Found %s' % (type(element)))
         element = Neutral(element)
-    value_field_dict = getFieldDict(element.className, 'valueFinfo')
-    print '------------------------------------'
-    print 'Value Fields of ', element.path
-    print '------------------------------------'
-    for key, dtype in value_field_dict.items():
-        if dtype == 'bad':
-            continue
-        value = element.oid_.getField(key)        
-        print dtype, key, ' = ', value
-        
-def wildcardFind(path):
-    return [eval('%s("%s")' % (id_[0].getField('class'), id_.getPath())) for id_ in _wildcardFind(path)]
+    if field == '*':        
+        value_field_dict = getFieldDict(element.className, 'valueFinfo')
+        max_type_len = max([len(dtype) for dtype in value_field_dict.values()])
+        max_field_len = max([len(dtype) for dtype in value_field_dict.keys()])
+        print 
+        print '[', element.path, ']'
+        for key, dtype in value_field_dict.items():
+            if dtype == 'bad' or key == 'this' or key == 'dummy' or key == 'me' or dtype.startswith('vector') or 'ObjId' in dtype:
+                continue
+            value = element.oid_.getField(key)
+            if showtype:
+                print dtype.ljust(max_type_len + 4)
+            print key.ljust(max_field_len + 4), '=', value
+    else:
+        try:
+            print field, '=', element.getField(field)
+        except AttributeError:
+            pass # Genesis silently ignores non existent fields
+
+def showfields(element, showtype=False):
+    """Convenience function. Should be deprecated if nobody uses it."""
+    warnings.warn('Deprecated. Use showfield(element, field="*", showtype=True) instead.', DeprecationWarning)
+    showfield(element, field='*', showtype=showtype)
+    
+def wildcardFind(cond):
+    """Search for objects that match condition cond."""
+    return [eval('%s("%s")' % (id_[0].getField('class'), id_.getPath())) for id_ in _wildcardFind(cond)]
     
 #######################################################
 # This is to generate class definitions automatically
