@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Sun Apr  8 01:01:48 2012 (+0530)
-//           By: Subhasis Ray
-//     Update #: 5265
+// Last-Updated: Sun Apr  8 13:42:29 2012 (+0530)
+//           By: subha
+//     Update #: 5267
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -596,7 +596,7 @@ extern "C" {
                 name = trimmed_path;
             }
             if (trimmed_path[0] != '/'){
-                parent_path = ShellPtr->getCwe().path() + parent_path;
+                parent_path = ShellPtr->getCwe().path() + "/" + parent_path;
             } else if (parent_path.empty()){
                 parent_path = "/";
             }
@@ -947,21 +947,10 @@ extern "C" {
         
         string type = getFieldType(self->oid_, string(field), "valueFinfo");
         if (type.empty()){
-#ifndef NDEBUG
-            cout << "No such field on object "
-                 << self->oid_.id.path() + ": "
-                 << field << endl;
-#endif        
             return PyObject_GenericGetAttr((PyObject*)self, attr);
         }
         ftype = shortType(type);
         if (!ftype){
-#ifndef NDEBUG        
-            cout << "No short type for field " 
-                 << field
-                 << " of type "
-                 << type << endl;
-#endif
             return PyObject_GenericGetAttr((PyObject*)self, attr);
         }
         switch(ftype){
