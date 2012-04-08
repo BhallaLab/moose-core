@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Sun Apr  8 01:35:40 2012 (+0530)
+# Last-Updated: Sun Apr  8 23:09:21 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1453
+#     Update #: 1454
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -878,7 +878,7 @@ def showfield(element, field='*', showtype=False):
                 continue
             value = element.oid_.getField(key)
             if showtype:
-                print dtype.ljust(max_type_len + 4)
+                print dtype.ljust(max_type_len + 4),
             print key.ljust(max_field_len + 4), '=', value
     else:
         try:
