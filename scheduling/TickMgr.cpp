@@ -117,19 +117,37 @@ void TickMgr::advancePhase2( ProcInfo* p )
 	}
 }
 
+void TickMgr::reinitPhase0()
+{
+	tickerator_ = 0;
+	nextTime_ = dt_;
+}
+
 void TickMgr::reinitPhase1( ProcInfo* p ) const
 {
+	p->dt = dt_;
+	p->currTime = 0.0;
+	assert( ticks_.size() > tickerator_ );
+	ticks_[ tickerator_ ]->reinit( p );
+/*
+
 	for ( vector< const Tick* >::const_iterator i = ticks_.begin(); 
 		i != ticks_.end(); ++i )
 	{
 		(*i)->reinit( p );
 	}
+	*/
 }
 
-void TickMgr::reinitPhase2( ProcInfo* p )
+bool TickMgr::reinitPhase2( ProcInfo* p )
 {
-	nextTime_ = dt_;
-	tickerator_ = 0;
+	++tickerator_;
+	if ( tickerator_ == ticks_.size() ) {
+		tickerator_ = 0;
+		nextTime_ = dt_;
+		return 1;
+	}
+	return 0;
 }
 
 const vector< const Tick* >& TickMgr::ticks() const

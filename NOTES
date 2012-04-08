@@ -17566,5 +17566,14 @@ Checkin 3413.
 08 April 2012
 Testing ReadCell framework, still in progress. Seems to be making some of the
 channels properly but doesn't yet match with genesis.
+Checkin 3415.
+
+There was a major issue with reinits. Specifically, the reinits were not
+going through the same careful separation into distinct ticks for each
+cycle, as the process calls were. Redid the reinit system, this has broken
+some early unit tests. Fixed those up to test the new version.
+
+Now the runtime channel initialization also looks fixed. There are 
+still discrepancies in the traces, but not much at the start.
 
 ============================================================================
