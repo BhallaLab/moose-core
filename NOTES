@@ -17561,4 +17561,10 @@ channels.
 Set up framework for specifying additional messages from channels defined for
 ReadCell. This involved updates to ReadCell, and the construction of an
 Mstring class.
+Checkin 3413.
+============================================================================
+08 April 2012
+Testing ReadCell framework, still in progress. Seems to be making some of the
+channels properly but doesn't yet match with genesis.
 
+============================================================================

@@ -938,6 +938,9 @@ void ReadCell::addChannelMessage( Id chan )
 	*/
 	vector< Id > kids;
 	Neutral::children( chan.eref(), kids );
+	Shell *shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	Id cwe = shell->getCwe();
+	shell->setCwe( chan );
 	for ( vector< Id >::iterator i = kids.begin(); i != kids.end(); ++i )
 	{
 		// Ignore kid if its name does not begin with "addmsg"..
@@ -949,15 +952,25 @@ void ReadCell::addChannelMessage( Id chan )
 		vector< string > token;
 		tokenize( s, " 	", token );
 		assert( token.size() == 4 );
-		Shell *shell = reinterpret_cast< Shell* >( Id().eref().data() );
 		ObjId src = shell->doFind( token[0] );
-		assert( !( src == ObjId::bad ) );
 		ObjId dest = shell->doFind( token[2] );
-		assert( !( dest == ObjId::bad ) );
+
+		// I would like to assert, or warn here, but there are legitimate 
+		// cases where not all possible messages are actually available 
+		// to set up. So I just bail.
+		if ( src == ObjId::bad || dest == ObjId::bad ) {
+#ifndef NDEBUG
+			cout << "ReadCell::addChannelMessage( " << chan.path() << 
+				"): " << name << " " << s << 
+				": Bad src " << src << " or dest " << dest << endl;
+#endif
+			continue; 
+		}
 		MsgId mid = 
 			shell->doAddMsg( "single", src, token[1], dest, token[3] );
 		assert( mid != Msg::bad );
 	}
+	shell->setCwe( cwe );
 }
 
 /**
