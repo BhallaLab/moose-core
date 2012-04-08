@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 17:11:06 2011 (+0530)
 // Version: 
-// Last-Updated: Sat Apr  7 23:49:58 2012 (+0530)
-//           By: Subhasis Ray
-//     Update #: 602
+// Last-Updated: Sun Apr  8 17:07:09 2012 (+0530)
+//           By: subha
+//     Update #: 603
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -123,7 +123,8 @@ extern "C" {
     static PyObject * _pymoose_move(PyObject * dummy, PyObject * args);
     static PyObject * _pymoose_delete(PyObject * dummy, PyObject * args);
     static PyObject * _pymoose_connect(PyObject * dummy, PyObject * args);
-    static PyObject * _pymoose_getFieldDict(PyObject * dummy, PyObject * args);    
+    static PyObject * _pymoose_getFieldDict(PyObject * dummy, PyObject * args);
+    static PyObject * _pymoose_getField(PyObject * dummy, PyObject * args);
     static PyObject * _pymoose_syncDataHandler(PyObject * dummy, _Id * target);
     static PyObject * _pymoose_seed(PyObject * dummy, PyObject * args);
     static PyObject * _pymoose_wildcardFind(PyObject * dummy, PyObject * args);

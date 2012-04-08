@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Sun Apr  8 14:22:18 2012 (+0530)
+// Last-Updated: Sun Apr  8 17:18:26 2012 (+0530)
 //           By: subha
-//     Update #: 5276
+//     Update #: 5367
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -2035,6 +2035,124 @@ extern "C" {
         return ret;
     }
 
+    static PyObject * _pymoose_getField(PyObject * dummy, PyObject * args)
+    {
+        PyObject * pyobj;
+        PyObject * ret;
+        const char * field;
+        const char * type;
+        if (!PyArg_ParseTuple(args, "Oss:_pymoose_getfield", &pyobj, &field, &type)){
+            return NULL;
+        }
+        if (!ObjId_Check(pyobj)){
+            PyErr_SetString(PyExc_TypeError, "Expected an ObjId as first argument.");
+            return NULL;
+        }
+        string fname(field), ftype(type);
+        ObjId oid = ((_ObjId*)pyobj)->oid_;
+        // Let us do this version using brute force. Might be simpler than getattro.
+        if (ftype == "char"){
+            char value =Field<char>::get(oid, fname);
+            return PyInt_FromLong(value);            
+        } else if (ftype == "double"){
+            double value = Field<double>::get(oid, fname);
+            return PyFloat_FromDouble(value);
+        } else if (ftype == "float"){
+            float value = Field<float>::get(oid, fname);
+            return PyFloat_FromDouble(value);
+        } else if (ftype == "int"){
+            int value = Field<int>::get(oid, fname);
+            return PyInt_FromLong(value);
+        } else if (ftype == "string"){
+            string value = Field<string>::get(oid, fname);
+            return PyString_FromString(value.c_str());
+        } else if (ftype == "unsigned int" || ftype == "unsigned" || ftype == "uint"){
+            unsigned int value = Field<unsigned int>::get(oid, fname);
+            return PyInt_FromLong(value);
+        } else if (ftype == "Id"){
+            _Id * value = (_Id*)PyObject_New(_Id, &IdType);
+            value->id_ = Field<Id>::get(oid, fname);
+            return (PyObject*) value;
+        } else if (ftype == "ObjId"){
+            _ObjId * value = (_ObjId*)PyObject_New(_ObjId, &ObjIdType);
+            value->oid_ = Field<ObjId>::get(oid, fname);
+            return (PyObject*)value;
+        } else if (ftype == "vector<int>"){
+            vector<int> value = Field< vector < int > >::get(oid, fname);
+            PyObject * ret = PyTuple_New((Py_ssize_t)value.size());
+            for (unsigned int ii = 0; ii < value.size(); ++ ii ){     
+                PyObject * entry = Py_BuildValue("i", value[ii]); 
+                if (!entry || PyTuple_SetItem(ret, (Py_ssize_t)ii, entry)){ 
+                    Py_XDECREF(ret);                                  
+                    ret = NULL;                                 
+                    break;                                      
+                }                                               
+            }
+            return ret;
+        } else if (ftype == "vector<double>"){
+            vector<double> value = Field< vector < double > >::get(oid, fname);
+            PyObject * ret = PyTuple_New((Py_ssize_t)value.size());
+            for (unsigned int ii = 0; ii < value.size(); ++ ii ){     
+                PyObject * entry = Py_BuildValue("f", value[ii]); 
+                if (!entry || PyTuple_SetItem(ret, (Py_ssize_t)ii, entry)){ 
+                    Py_XDECREF(ret);                                  
+                    ret = NULL;                                 
+                    break;                                      
+                }                                               
+            }
+            return ret;
+        } else if (ftype == "vector<float>"){
+            vector<float> value = Field< vector < float > >::get(oid, fname);
+            PyObject * ret = PyTuple_New((Py_ssize_t)value.size());
+            for (unsigned int ii = 0; ii < value.size(); ++ ii ){     
+                PyObject * entry = Py_BuildValue("f", value[ii]); 
+                if (!entry || PyTuple_SetItem(ret, (Py_ssize_t)ii, entry)){ 
+                    Py_XDECREF(ret);                                  
+                    ret = NULL;                                 
+                    break;                                      
+                }                                            
+            }
+            return ret;
+        } else if (ftype == "vector<string>"){
+            vector<string> value = Field< vector < string > >::get(oid, fname);
+            PyObject * ret = PyTuple_New((Py_ssize_t)value.size());
+            for (unsigned int ii = 0; ii < value.size(); ++ ii ){     
+                PyObject * entry = Py_BuildValue("s", value[ii].c_str()); 
+                if (!entry || PyTuple_SetItem(ret, (Py_ssize_t)ii, entry)){ 
+                    Py_XDECREF(ret);                                  
+                    return NULL;                                 
+                }                                            
+            }
+            return ret;
+        } else if (ftype == "vector<Id>"){
+            vector<Id> value = Field< vector < Id > >::get(oid, fname);
+            PyObject * ret = PyTuple_New((Py_ssize_t)value.size());
+            for (unsigned int ii = 0; ii < value.size(); ++ ii ){
+                _Id * entry = PyObject_New(_Id, &IdType);
+                entry->id_ = value[ii]; 
+                if (PyTuple_SetItem(ret, (Py_ssize_t)ii, (PyObject*)entry)){ 
+                    Py_XDECREF(ret);                                  
+                    return NULL;                                 
+                }                                            
+            }
+            return ret;
+        } else if (ftype == "vector<ObjId>"){
+            vector<ObjId> value = Field< vector < ObjId > >::get(oid, fname);
+            PyObject * ret = PyTuple_New((Py_ssize_t)value.size());
+            for (unsigned int ii = 0; ii < value.size(); ++ ii ){
+                _ObjId * entry = PyObject_New(_ObjId, &ObjIdType);
+                entry->oid_ = value[ii]; 
+                if (PyTuple_SetItem(ret, (Py_ssize_t)ii, (PyObject*)entry)){ 
+                    Py_XDECREF(ret);                                  
+                    return NULL;                                 
+                }                                            
+            }
+            return ret;
+        }
+        PyErr_SetString(PyExc_TypeError, "Field type not handled.");
+        return NULL;
+    }
+
     PyObject * _pymoose_syncDataHandler(PyObject * dummy, _Id * target)
     {
         ShellPtr->doSyncDataHandler(target->id_);
@@ -2113,12 +2231,14 @@ extern "C" {
          "str className -- MOOSE class to find the fields of.\n"
          "str finfoType -- (optional) Finfo type of the fields to find. If empty or not specified, all fields will be retrieved."
         },
+        {"getField", (PyCFunction)_pymoose_getField, METH_VARARGS,
+         "getField(ObjId, field, fieldtype) -- Get specified field of specified type from object Id."},
         {"syncDataHandler", (PyCFunction)_pymoose_syncDataHandler, METH_VARARGS,
          "synchronizes fieldDimension on the DataHandler"
          " across nodes. Used after function calls that might alter the"
          " number of Field entries in the table."
          " The target is the FieldElement whose fieldDimension needs updating."},
-        {"seed", (PyCFunction)_pymoose_seed, METH_VARARGS, "Seed the random number generator of MOOSE."},
+        {"seed", (PyCFunction)_pymoose_seed, METH_VARARGS, "seed(seedvalue) -- Seed the random number generator of MOOSE."},
         {"wildcardFind", (PyCFunction)_pymoose_wildcardFind, METH_VARARGS, "Return a list of Ids by a wildcard query."},
         {"quit", (PyCFunction)_pymoose_quit, METH_NOARGS, "Finalize MOOSE threads and quit MOOSE. This is made available for"
          " debugging purpose only. It will automatically get called when moose"
