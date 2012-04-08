@@ -270,11 +270,35 @@ void setupTicks()
 
 	ProcInfo p;
 	cdata->handleReinit();
+	assert( cdata->currTickPtr_ == 0 );
 	assert( Clock::procState_ == Clock::TurnOnReinit ); 
 	cdata->reinitPhase1( &p );
 	assert( Clock::procState_ == Clock::TurnOnReinit ); 
 	cdata->reinitPhase2( &p );
+	assert( Clock::procState_ == Clock::TurnOnReinit ); 
+	assert( cdata->tickPtr_.size() == 4 );
+	assert( cdata->currTickPtr_ == 1 );
+	// cycle 0 done. There are 4 tickPtrs.
+	cdata->reinitPhase1( &p );
+	cdata->reinitPhase2( &p );
+	assert( cdata->currTickPtr_ == 1 ); // We have two ticks for dt = 2.
+	cdata->reinitPhase1( &p );
+	cdata->reinitPhase2( &p );
+	assert( cdata->currTickPtr_ == 2 );
+	// cycle 1 done
+	cdata->reinitPhase1( &p );
+	cdata->reinitPhase2( &p );
+	assert( cdata->currTickPtr_ == 3 );
+	// cycle 2 done
+	cdata->reinitPhase1( &p );
+	cdata->reinitPhase2( &p );
+	assert( cdata->currTickPtr_ == 3 ); // Two ticks for dt = 5.
+	cdata->reinitPhase1( &p );
+	cdata->reinitPhase2( &p );
+	assert( cdata->currTickPtr_ == 4 );
+	// cycle 3 done. Now we should be done
 	assert( Clock::procState_ == Clock::TurnOffReinit ); 
+
 	Clock::procState_ = Clock::NoChange;
 	assert( cdata->doingReinit_ == 0 );
 

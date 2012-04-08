@@ -1296,6 +1296,8 @@ void Shell::handleUseClock( const Eref& e, const Qinfo* q,
 	// Hack to get around a common error.
 	if ( field.substr( 0, 4 ) == "proc" || field.substr( 0, 4 ) == "Proc" )
 		field = "proc"; 
+	if ( field.substr( 0, 4 ) == "init" || field.substr( 0, 4 ) == "Init" )
+		field = "init"; 
 	/*
 	string tickField = "process";
 	if ( field.substr( 0, 4 ) == "proc" || field.substr( 0, 4 ) == "Proc" )
