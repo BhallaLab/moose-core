@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Mon Apr  9 03:37:44 2012 (+0530)
+# Last-Updated: Mon Apr  9 03:32:28 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1711
+#     Update #: 1672
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -34,7 +34,7 @@ MOOSE = Multiscale Object Oriented Simulation Environment.
 
 Classes:
 
-Id:
+Id:pf[key]
 
 this is the unique identifier of a MOOSE object. Note that you
 can create multiple references to the same MOOSE object in Python, but
@@ -277,6 +277,7 @@ le(obj) -- list element under object, if no parameter specified, list
 elements under current working element
 
 """
+from functools import partial
 import warnings
 from collections import defaultdict
 import _moose
@@ -309,21 +310,19 @@ known_types = ['void',
 # Dict of available MOOSE class names. This is faster for look-up
 _moose_classes = dict([(child[0].name, True) for child in Id('/classes')[0].getField('children')])
 
-class _VFDescriptor(object):
-    """Descriptor to give access to MOOSE class' ValueFinfo attributes"""
-    def __init__(self, name):
-        self.name = name
+# class _MooseDescriptor(object):
+#     """Descriptor to give access to MOOSE class' ValueFinfo attributes"""
+#     def __init__(self, name):
+#         self.name = name
 
-    def __get__(self, obj, objtype=None):
-        if obj is None and objtype is not None:
-            return self
-        return obj.oid_.getField(self.name)
+#     def __get__(self, obj, objtype=None):
+#         return obj.oid_.getField(self.name)
 
-    def __set__(self, obj, value):
-        obj.oid_.setField(self.name, value)
+#     def __set__(self, obj, value):
+#         obj.oid_.setField(self.name, value)
         
-    def __delete__(self, obj):
-        raise AttributeError('ValueFinfos cannot be deleted.')
+#     def __delete__(self, obj):
+#         raise AttributeError('ValueFinfos cannot be deleted.')
 
 class _LFDescriptor(object):
     def __init__(self, name):
@@ -349,7 +348,7 @@ class _LookupField(object):
             self.obj.oid_.setLookupField(self.name, key, value)
         else:
             raise TypeError('obj is neither an ObjId nor a Neutral or subclass instance.')
-
+    
 class NeutralArray(object):
     """
     The base class. Each NeutralArray object has an unique Id (field
@@ -540,8 +539,6 @@ class Neutral(object):
     d = NeutralArray('c', 10)
     e = Neutral('c[9]') # Last element in d
     """
-    # _MooseMeta creates field access via getters and setters.
-    # __metaclass__ = _MooseMeta
     def __init__(self, *args, **kwargs):
         """Initialize a Neutral object.
 
@@ -909,104 +906,53 @@ def showfields(element, showtype=False):
 def wildcardFind(cond):
     """Search for objects that match condition cond."""
     return [eval('%s("%s")' % (id_[0].getField('class'), id_.getPath())) for id_ in _wildcardFind(cond)]
-
-def doc(arg):
-    """Display the documentation for class or field in a class.
-
-    There is no way to dynamically access the MOOSE docs using
-    pydoc. (using properties requires copying all the docs strings
-    from MOOSE increasing the loading time by ~3x). Hence we provide a
-    separate function.
-    """
-    if isinstance(arg, str):
-        tokens = arg.split('.')
-        print_field = len(tokens) > 1
-        class_path = '/classes/%s' % (tokens[0])
-        if exists(class_path):
-            if not print_field:
-                print Cinfo(class_path).docs
-        else:
-            print 'No such class:', tokens[0]
-            return
-    class_id = Id('/classes/%s' % (tokens[0]))
-    num_finfo = getField(class_id[0], 'num_valueFinfo', 'unsigned')
-    finfo = Id('/classes/%s/valueFinfo' % (tokens[0]))
-    print '\n* Value Field *'
-    for ii in range(num_finfo):
-        oid = ObjId(finfo, 0, ii, 0)
-        if print_field:
-            if oid.name == tokens[1]:
-                print oid.name, ':', oid.docs
-                return
-        else:
-            print oid.name, ':', oid.docs
-            print
-    num_finfo = getField(class_id[0], 'num_srcFinfo', 'unsigned')
-    finfo = Id('/classes/%s/srcFinfo' % (tokens[0]))
-    print '\n* Source Field *'
-    for ii in range(num_finfo):
-        oid = ObjId(finfo, 0, ii, 0)
-        if print_field:
-            if oid.name == tokens[1]:
-                print oid.name, ':', oid.docs
-                return
-        else:
-            print oid.name, ':', oid.docs
-            print
-    num_finfo = getField(class_id[0], 'num_destFinfo', 'unsigned')
-    finfo = Id('/classes/%s/destFinfo' % (tokens[0]))
-    print '\n* Destination Field *'
-    for ii in range(num_finfo):
-        oid = ObjId(finfo, 0, ii, 0)
-        if print_field:
-            if oid.name == tokens[1]:
-                print oid.name, ':', oid.docs
-                return
-        else:
-            print oid.name, ':', oid.docs
-            print
-    num_finfo = getField(class_id[0], 'num_lookupFinfo', 'unsigned')    
-    finfo = Id('/classes/%s/lookupFinfo' % (tokens[0]))
-    print '\n* Lookup Field *'
-    for ii in range(num_finfo):
-        oid = ObjId(finfo, 0, ii, 0)
-        if print_field:
-            if oid.name == tokens[1]:
-                print oid.name, ':', oid.docs
-                return
-        else:
-            print oid.name, ':', oid.docs
-            print
     
-    
-######################################################
+#######################################################
 # This is to generate class definitions automatically
 #######################################################
-def define_class(class_id):
-    """Define a class based on Cinfo element with Id=class_id."""
-    class_name = class_id[0].getField('name')
-    if class_name in globals().keys():
-        return
-    base = class_id[0].getField('baseClass')
-    if base != 'none':
-        try:
-            base_class = globals()[base]
-        except KeyError:
-            define_class(Id('/classes/'+base))
-            base_class = globals()[base]
-    else:
-        base_class = object
-    class_obj = type(class_name, (base_class,), {})
-    valueFinfos = getFieldDict(class_name, 'valueFinfo').keys()    
-    for fieldName in valueFinfos:
-        setattr(class_obj, fieldName, _VFDescriptor(fieldName))
-    lookupFinfos = getFieldDict(class_name, 'lookupFinfo').keys()
-    for fieldName in lookupFinfos:
-        setattr(class_obj, fieldName, _LFDescriptor(fieldName))
+
+def update_class(cls, class_id):
+    class_name = class_id[0].name
+    num_valueFinfo = getField(class_id[0], 'num_valueFinfo', 'unsigned')
+    num_destFinfo = getField(class_id[0], 'num_destFinfo', 'unsigned')
+    num_lookupFinfo = getField(class_id[0], 'num_lookupFinfo', 'unsigned')
+    valueFinfo = Id('/classes/%s/valueFinfo' % (class_name))
+    destFinfo = Id('/classes/%s/destFinfo' % (class_name))
+    lookupFinfo = Id('/classes/%s/lookupFinfo' % (class_name))
+    destFinfoNames = set([ObjId(destFinfo, 0, ii, 0).name for ii in range(num_destFinfo)])
+    for ii in range(num_valueFinfo):
+        field = ObjId(valueFinfo, 0, ii, 0)
+        fieldName = field.name
+        fget = partial(ObjId.getField, fieldName)
+        fset = None
+        if 'get_%s' % (fieldName) in destFinfoNames:
+            fset = partial(ObjId.setField, fieldName)
+        doc = None
+        # The following is to avoid duplicating the documentation
+        # in non-interactive mode. __main__.__file__ is not
+        # defined in interactive mode and that is when we create
+        # the documentation.
+        if not hasattr(main, '__file__'): 
+            doc = field.docs
+        setattr(cls, fieldName, property(fget=fget, fset=fset, doc=doc))
+
+    for ii in range(num_lookupFinfo):
+        field = ObjId(lookupFinfo, 0, ii, 0)
+        fieldName = field.name
+        fget = partial(_LookupField, fieldName)
+        # The following is to avoid duplicating the documentation
+        # in non-interactive mode. __main__.__file__ is not
+        # defined in interactive mode and that is when we create
+        # the documentation.
+        doc = None
+        if not hasattr(main, '__file__'): 
+            doc = field.docs
+        setattr(cls, fieldName, property(fget=fget, doc=doc))
 
     # Go through the destFinfos and make them look like methods
-    destFinfoDict = getFieldDict(class_name, 'destFinfo')
-    for fieldName, argtypes in destFinfoDict.items():
+    for ii in range(num_destFinfo):
+        field = ObjId(destFinfo, 0, ii, 0)
+        fieldName = field.name
         # get_<fieldName> and set_<fieldName> are internal
         # destFinfos generated for each valueFinfo (the latter
         # created for writable ones). They are not to be accessed
@@ -1030,7 +976,7 @@ def define_class(class_id):
         # type1, type2, ..., typeN> will have a type string:
         # "type1,type2,...,typeN". We split this string to find
         # out the formal arguments of the lambda
-        argtypes = argtypes.split(',')
+        argtypes = field.type.split(',')
         for index in range(len(argtypes)):
             # Check if we know how to handle this argument type
             if argtypes[index] not in known_types:
@@ -1048,7 +994,24 @@ def define_class(class_id):
             # lambda self, arg_1_type1, arg_2_type2, ..., arg_N_typeN:
             #     self.oid_.setField(fieldName, arg_1_type1, arg_2_type2, ..., arg_N_typeN)
             function_string = '%s: self.oid_.setDestField(%s)' % (fnsig, fnargs)
-            setattr(class_obj, fieldName, eval(function_string))
+            setattr(cls, fieldName, eval(function_string))
+
+def define_class(class_id):
+    """Define a class based on Cinfo element with Id=class_id."""
+    class_name = class_id[0].getField('name')
+    if class_name in globals().keys():
+        return
+    base = class_id[0].getField('baseClass')
+    if base != 'none':
+        try:
+            base_class = globals()[base]
+        except KeyError:
+            define_class(Id('/classes/'+base))
+            base_class = globals()[base]
+    else:
+        base_class = object
+    class_obj = type(class_name, (base_class,), {})
+    update_class(class_obj, class_id)
     # Add this class to globals dict
     globals()[class_name] = class_obj
     array_class_name = class_name + 'Array'
@@ -1059,11 +1022,9 @@ def define_class(class_id):
     array_class_obj = type(array_class_name, (base_class,), {})
     globals()[array_class_name] = array_class_obj
         
-            
-# Actually generate the class definitions
 classes_Id = Id('/classes')
-class_obj_list = classes_Id[0].getField('children')    
-for child in class_obj_list:
+
+for child in classes_Id[0].children:
     define_class(child)
 
 
