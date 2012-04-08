@@ -31,6 +31,9 @@ ReadCell::ReadCell()
 	spineDens( 0.0 ),
 	spineFreq( 0.0 ),
 	membFactor( 0.0 ),
+
+	erestFlag_( 0 ),
+	eleakFlag_( 0 ),
 	
 	cell_( Id() ),
 	currCell_( Id() ),
@@ -229,10 +232,13 @@ bool ReadCell::readScript( const string& line )
 			RA_ = atof( argv[ 2 ].c_str() );
 		if ( argv[ 1 ] == "CM" )
 			CM_ = atof( argv[ 2 ].c_str() );
-		if ( argv[ 1 ] == "EREST_ACT" )
+		if ( argv[ 1 ] == "EREST_ACT" ) {
 			EREST_ACT_ = atof( argv[ 2 ].c_str() );
-		if (argv[ 1 ] == "ELEAK" )
+			erestFlag_ = 1;
+		} if (argv[ 1 ] == "ELEAK" ) {
 			ELEAK_ = atof( argv[ 2 ].c_str() );
+			eleakFlag_ = 1;
+		}
 	} else if ( argv[ 0 ] == "*start_cell" ) {
 		if ( argv.size() == 1 ) {
 			graftFlag_ = 0;
@@ -487,6 +493,10 @@ Id ReadCell::buildCompartment(
 	} else {
 		Ra = RA_ * 8.0 / ( d * M_PI );
 	}
+
+	// Set each of these to the other only if the only one set was other
+	double eleak = ( erestFlag_ && !eleakFlag_ ) ? EREST_ACT_ : ELEAK_;
+	double erest = ( !erestFlag_ && eleakFlag_ ) ? ELEAK_ : EREST_ACT_;
 	
 	Field< double >::set( compt, "x0", x0 );
 	Field< double >::set( compt, "y0", y0 );
@@ -499,9 +509,9 @@ Id ReadCell::buildCompartment(
 	Field< double >::set( compt, "Rm", Rm );
 	Field< double >::set( compt, "Ra", Ra );
 	Field< double >::set( compt, "Cm", Cm );
-	Field< double >::set( compt, "initVm", EREST_ACT_ );
-	Field< double >::set( compt, "Em", ELEAK_ );
-	Field< double >::set( compt, "Vm", EREST_ACT_ );
+	Field< double >::set( compt, "initVm", erest );
+	Field< double >::set( compt, "Em", eleak );
+	Field< double >::set( compt, "Vm", erest );
 	
 	return compt;
 }

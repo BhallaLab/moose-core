@@ -310,9 +310,6 @@ void Tick::reinit( ProcInfo* info ) const
 	const vector< MsgFuncBinding >* m = ticke_->getMsgAndFunc( b );
 	for ( vector< MsgFuncBinding >::const_iterator i = m->begin();
 		i != m->end(); ++i ) {
-		// cout << info->nodeIndexInGroup << "." << info->threadIndexInGroup << ": reinit[" << index_ << "] binding = (" << i->mid << "," << i->fid << ")\n";
-		// Element->dataHandler keeps track of which entry needs to be
-		// updated by which thread.
 		Msg::getMsg( i->mid )->process( info, i->fid ); 
 	}
 }

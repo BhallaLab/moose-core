@@ -248,6 +248,7 @@ Clock::Clock()
 	  info_(),
 	  numPendingThreads_( 0 ),
 	  numThreads_( 0 ),
+	  currTickPtr_( 0 ),
 	  ticks_( Tick::maxTicks ),
 		countNull1_( 0 ),
 		countNull2_( 0 ),
@@ -621,14 +622,9 @@ void Clock::advancePhase2(  ProcInfo *p )
 		if ( currentTime_ > endTime_ ) {
 			Id clockId( 1 );
 			procState_ = StopOnly;
-			// isRunning_ = 0; // Should not set this flag here, it affects other threads.
 			finished()->send( clockId.eref(), p->threadIndexInGroup );
 			ack()->send( clockId.eref(), p->threadIndexInGroup, 
 				p->nodeIndexInGroup, OkStatus );
-			/*
-			Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
-			s->handleAck( p->nodeIndexInGroup, OkStatus );
-			*/
 		}
 		++countAdvance2_;
 	}
@@ -638,6 +634,9 @@ void Clock::advancePhase2(  ProcInfo *p )
 // Scheduling the 'reinit' operation for scheduled objects.
 // Three functions are involved: the handler for the reinit function,
 // and the reinitPhase1 and reinitPhase2.
+// Like the Process operation, reinit must go sequentially through all
+// Tick Managers in order of increasing dt. Within each TickManager
+// it must do the successive ticks in order of increasing index.
 /////////////////////////////////////////////////////////////////////
 
 /**
@@ -651,6 +650,15 @@ void Clock::handleReinit()
 	nextTime_ = 0.0;
 	nSteps_ = 0;
 	currentStep_ = 0;
+	currTickPtr_ = 0;
+
+	// Get all the TickMgrs in increasing order of dt for the reinit call.
+	for ( vector< TickMgr >::iterator i = tickMgr_.begin(); 
+		i != tickMgr_.end(); ++i )
+		i->reinitPhase0();
+	if ( tickPtr_.size() > 1 )
+		sort( tickPtr_.begin(), tickPtr_.end() );
+
 	if ( isRunning_ )
 		procState_ = StopThenReinit;
 	else
@@ -665,41 +673,46 @@ void Clock::handleReinit()
  * Reinit is used to reinit the state of the scheduling system.
  * This version is meant to be done through the multithread scheduling
  * loop.
- * In phase1 it calls reinit on all target Elements.
+ * In phase1 it calls reinit on the target Elements.
  */
 void Clock::reinitPhase1( ProcInfo* info )
 {
+	if ( tickPtr_.size() == 0 )
+		return;
+	assert( currTickPtr_ < tickPtr_.size() );
+	tickPtr_[ currTickPtr_ ].mgr()->reinitPhase1( info );
+
+	/*
+	tickPtr_[0].mgr()->reinitPhase1( info );
 	for ( vector< TickPtr >::const_iterator i = tickPtr_.begin();
 		i != tickPtr_.end(); ++i ) {
 		i->mgr()->reinitPhase1( info );
 	}
+	*/
 	if ( Shell::isSingleThreaded() || info->threadIndexInGroup == 1 )
 		++countReinit1_;
 }
 
 /**
- * In phase2 it initializes internal TickMgr state variables.
+ * In phase2 it advances the internal counter to move to the next tick,
+ * and when all ticks for this TickManager are done, to move to the next
+ * TickManager.
  */
 void Clock::reinitPhase2( ProcInfo* info )
 {
 	info->currTime = 0.0;
 	if ( Shell::isSingleThreaded() || info->threadIndexInGroup == 1 ) {
-		// doingReinit_ = 0; //Cannot touch this here, affects other threads
-		for ( vector< TickPtr >::iterator i = tickPtr_.begin();
-			i != tickPtr_.end(); ++i ) {
-			i->mgr()->reinitPhase2( info );
+		assert( currTickPtr_ < tickPtr_.size() );
+		if ( tickPtr_[ currTickPtr_ ].mgr()->reinitPhase2( info ) ) {
+			++currTickPtr_;
+			if ( currTickPtr_ >= tickPtr_.size() ) {
+				Id clockId( 1 );
+				ack()->send( clockId.eref(), info->threadIndexInGroup,
+					info->nodeIndexInGroup, OkStatus );
+				procState_ = TurnOffReinit;
+				++countReinit2_;
+			}
 		}
-		sort( tickPtr_.begin(), tickPtr_.end() );
-		Id clockId( 1 );
-		ack()->send( clockId.eref(), info->threadIndexInGroup,
-			info->nodeIndexInGroup, OkStatus );
-		/*
-		/// For 1-node testing if the send is causing problems:
-		Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
-		s->handleAck( info->nodeIndexInGroup, OkStatus );
-		*/
-		procState_ = TurnOffReinit;
-		++countReinit2_;
 	}
 }
 

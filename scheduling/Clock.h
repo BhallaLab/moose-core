@@ -167,6 +167,12 @@ class Clock
 		 * TickPtr contains pointers to tickMgr and is used to sort.
 		 */
 		vector< TickPtr > tickPtr_;
+		
+		/**
+		 * currTickPtr_ keeps track of which tickPtr_ is being reinited.
+		 * Used in the reinit call.
+		 */
+		unsigned int currTickPtr_;
 
 		/**
 		 * TickMgr groups together Ticks with the same dt. Within this

@@ -38,12 +38,15 @@ class TickMgr {
 		void advancePhase2( ProcInfo* p );
 
 		/**
-		 * New version of 'reinit'. This happens in two phases: where we
-		 * send the reinit call out to all scheduled objects, and when
-		 * we update internal state variables of the TickMgr.
+		 * New version of 'reinit'. This happens in three phases.
+		 * Zero: we set the nextTime to the dt.
+		 * One: we send the reinit call out to all scheduled objects,
+		 * Two: Advance to the next Tick, and when those are done, to 
+		 * the next TickMgr.
 		 */
+		void reinitPhase0();
 		void reinitPhase1( ProcInfo* p ) const;
-		void reinitPhase2( ProcInfo* p );
+		bool reinitPhase2( ProcInfo* p );
 
 
 		///////////////////////////////////////////////////////////////

@@ -113,6 +113,8 @@ class ReadCell
 		double spineDens;
 		double spineFreq;
 		double membFactor;
+		bool erestFlag_;
+		bool eleakFlag_;
 		
 		Id cell_;
 		Id currCell_;
