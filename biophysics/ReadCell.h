@@ -137,6 +137,7 @@ class ReadCell
 		bool polarFlag_;
 		bool relativeCoordsFlag_;
 		bool doubleEndpointFlag_;
+		bool symmetricFlag_;
 		
 		map< string, Id > chanProtos_;
 		

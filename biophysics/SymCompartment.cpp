@@ -232,8 +232,6 @@ void SymCompartment::innerInitProc( const Eref& e, ProcPtr p )
 void SymCompartment::innerReinit( const Eref& e, ProcPtr p )
 {
 	moose::Compartment::innerReinit( e, p );
-	coeff_ = 0.0;
-	coeff2_ = 0.0;
 
 	coeff_ *= Ra_;
 	coeff_ = ( 1 + coeff_ ) / 2.0;
@@ -247,6 +245,8 @@ void SymCompartment::innerReinit( const Eref& e, ProcPtr p )
 // This funciton is called during 'init' phase to send Raxial info around.
 void SymCompartment::innerInitReinit( const Eref& e, ProcPtr p )
 {
+	coeff_ = 0.0;
+	coeff2_ = 0.0;
 	requestSumAxial()->send( e, p->threadIndexInGroup );
 	requestSumAxial2()->send( e, p->threadIndexInGroup );
 }
