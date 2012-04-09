@@ -12,6 +12,8 @@
 #include "ReadCell.h"
 #include "../utility/utility.h"
 #include "../utility/numutil.h"
+#include "Compartment.h"
+#include "SymCompartment.h"
 #include <fstream>
 
 double calcSurf( double, double );
@@ -53,6 +55,7 @@ ReadCell::ReadCell()
 	polarFlag_( 0 ),
 	relativeCoordsFlag_( 0 ),
 	doubleEndpointFlag_( 0 ),
+	symmetricFlag_( 0 ),
 	
 	shell_( reinterpret_cast< Shell* >( Id().eref().data() ) )
 {
@@ -218,6 +221,8 @@ bool ReadCell::readScript( const string& line )
 		relativeCoordsFlag_ = 1;
 	} else if ( argv[ 0 ] == "*absolute" ) {
 		relativeCoordsFlag_ = 0;
+	} else if ( argv[ 0 ] == "*symmetric" ) {
+		symmetricFlag_ = 1;
 	} else if ( argv[ 0 ] == "*set_global" || argv[ 0 ] == "*set_compt_param" ) {
 		if ( argv.size() != 3 ) {
 			cerr << "Error: ReadCell: Bad line: " <<
@@ -366,6 +371,8 @@ Id ReadCell::buildCompartment(
 	double& length, // Length is sent back.
 	vector< string >& argv )
 {
+	static const Finfo* raxial2OutFinfo =
+			SymCompartment::initCinfo()->findFinfo( "Raxial2Out" );
 	/*
 	 * This section determines the parent compartment, to connect up with axial
 	 * messages. Here 'parent' refers to the biophysical relationship within 
@@ -440,8 +447,10 @@ Id ReadCell::buildCompartment(
 			numChannels_ += numProtoChans_;
 			numOthers_ += numProtoOthers_;
 		} else {
+			string comptType = ( symmetricFlag_ ) ? 
+				"SymCompartment" : "Compartment";
 			compt = shell_->doCreate(
-				"Compartment", currCell_, name, dimensions );
+				comptType, currCell_, name, dimensions );
 			if ( !graftFlag_ )
 				++numCompartments_;
 		}
@@ -477,7 +486,25 @@ Id ReadCell::buildCompartment(
 		dz = z - z0;
 		
 		length = sqrt( dx * dx + dy * dy + dz * dz );
-		shell_->doAddMsg( "Single", parentId, "axial", compt, "raxial" );
+		if ( symmetricFlag_ ) {
+			// Now find all sibling compartments on the same parent.
+			// They must be connected up using CONNECTCROSS.
+			vector< Id > sibs;
+			parentId.element()->getNeighbours( sibs, raxial2OutFinfo );
+
+			shell_->doAddMsg( "Single",
+				parentId, "CONNECTHEAD", compt, "CONNECTTAIL" );
+
+			for ( vector< Id >::iterator i = sibs.begin(); 
+				i != sibs.end(); ++i ) {
+				shell_->doAddMsg( "Single",
+					compt, "CONNECTCROSS", *i, "CONNECTCROSS" );
+			}
+
+		} else {
+			shell_->doAddMsg( "Single", 
+				parentId, "axial", compt, "raxial" );
+		}
 	} else {
 		length = sqrt( x * x + y * y + z * z ); 
 		// or it could be a sphere.
