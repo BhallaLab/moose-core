@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Mon Apr  9 03:37:44 2012 (+0530)
-#           By: Subhasis Ray
-#     Update #: 1711
+# Last-Updated: Mon Apr  9 14:00:58 2012 (+0530)
+#           By: subha
+#     Update #: 1717
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -350,6 +350,64 @@ class _LookupField(object):
         else:
             raise TypeError('obj is neither an ObjId nor a Neutral or subclass instance.')
 
+class _MooseMeta(type):
+    """Simple metaclass to create class definitions with attributes
+    created from that in the MOOSE underlying classes."""
+    def __init__(cls, class_name, bases, classdict):        
+        super(_MooseMeta, cls).__init__(class_name, bases, classdict)
+        valueFinfos = getFieldDict(class_name, 'valueFinfo').keys()    
+        for fieldName in valueFinfos:
+            setattr(cls, fieldName, _VFDescriptor(fieldName))
+        lookupFinfos = getFieldDict(class_name, 'lookupFinfo').keys()
+        for fieldName in lookupFinfos:
+            setattr(cls, fieldName, _LFDescriptor(fieldName))
+
+        # Go through the destFinfos and make them look like methods
+        destFinfoDict = getFieldDict(class_name, 'destFinfo')
+        for fieldName, argtypes in destFinfoDict.items():
+            # get_<fieldName> and set_<fieldName> are internal
+            # destFinfos generated for each valueFinfo (the latter
+            # created for writable ones). They are not to be accessed
+            # by users.
+            if fieldName.startswith('get_') or fieldName.startswith('set_'):
+                continue
+            # Can we handle the arguments required for this destFinfo?
+            # Start optimistically.
+            manageable = True
+            # We keep gathering the function signature in fnsig
+            # This will be a lambda function, lambda x, y, ...: expr
+            # where expr is evaluated and the result returned.
+            fnsig = 'lambda self'
+            # We gather the formal arguments in fnargs. field name
+            # must be the first argument passed to the
+            # ObjId.setField function.
+            fnargs = '"%s"' % (fieldName)
+            # 'type' is a string field in Finfos specifying the type
+            # (retrieved from the template parameters specified in the
+            # C++ definition). for DestFinfo with OpFuncN<MooseClass,
+            # type1, type2, ..., typeN> will have a type string:
+            # "type1,type2,...,typeN". We split this string to find
+            # out the formal arguments of the lambda
+            argtypes = argtypes.split(',')
+            for index in range(len(argtypes)):
+                # Check if we know how to handle this argument type
+                if argtypes[index] not in known_types:
+                    manageable = False
+                    break
+                elif argtypes[index] != 'void':
+                    # The replacements are for types with space (like
+                    # unsigned int) and templated types (like
+                    # vector<int>)
+                    arg = 'arg_%d_%s' % (index, argtypes[index].replace(' ', '_').replace('<', '_').replace('>', '_'))
+                    fnsig += ', %s' % (arg)
+                    fnargs += ', %s' % (arg)
+            if manageable:
+                # The final function will be:
+                # lambda self, arg_1_type1, arg_2_type2, ..., arg_N_typeN:
+                #     self.oid_.setField(fieldName, arg_1_type1, arg_2_type2, ..., arg_N_typeN)
+                function_string = '%s: self.oid_.setDestField(%s)' % (fnsig, fnargs)
+                setattr(cls, fieldName, eval(function_string))
+
 class NeutralArray(object):
     """
     The base class. Each NeutralArray object has an unique Id (field
@@ -541,7 +599,7 @@ class Neutral(object):
     e = Neutral('c[9]') # Last element in d
     """
     # _MooseMeta creates field access via getters and setters.
-    # __metaclass__ = _MooseMeta
+    __metaclass__ = _MooseMeta
     def __init__(self, *args, **kwargs):
         """Initialize a Neutral object.
 
@@ -997,58 +1055,6 @@ def define_class(class_id):
     else:
         base_class = object
     class_obj = type(class_name, (base_class,), {})
-    valueFinfos = getFieldDict(class_name, 'valueFinfo').keys()    
-    for fieldName in valueFinfos:
-        setattr(class_obj, fieldName, _VFDescriptor(fieldName))
-    lookupFinfos = getFieldDict(class_name, 'lookupFinfo').keys()
-    for fieldName in lookupFinfos:
-        setattr(class_obj, fieldName, _LFDescriptor(fieldName))
-
-    # Go through the destFinfos and make them look like methods
-    destFinfoDict = getFieldDict(class_name, 'destFinfo')
-    for fieldName, argtypes in destFinfoDict.items():
-        # get_<fieldName> and set_<fieldName> are internal
-        # destFinfos generated for each valueFinfo (the latter
-        # created for writable ones). They are not to be accessed
-        # by users.
-        if fieldName.startswith('get_') or fieldName.startswith('set_'):
-            continue
-        # Can we handle the arguments required for this destFinfo?
-        # Start optimistically.
-        manageable = True
-        # We keep gathering the function signature in fnsig
-        # This will be a lambda function, lambda x, y, ...: expr
-        # where expr is evaluated and the result returned.
-        fnsig = 'lambda self'
-        # We gather the formal arguments in fnargs. field name
-        # must be the first argument passed to the
-        # ObjId.setField function.
-        fnargs = '"%s"' % (fieldName)
-        # 'type' is a string field in Finfos specifying the type
-        # (retrieved from the template parameters specified in the
-        # C++ definition). for DestFinfo with OpFuncN<MooseClass,
-        # type1, type2, ..., typeN> will have a type string:
-        # "type1,type2,...,typeN". We split this string to find
-        # out the formal arguments of the lambda
-        argtypes = argtypes.split(',')
-        for index in range(len(argtypes)):
-            # Check if we know how to handle this argument type
-            if argtypes[index] not in known_types:
-                manageable = False
-                break
-            elif argtypes[index] != 'void':
-                # The replacements are for types with space (like
-                # unsigned int) and templated types (like
-                # vector<int>)
-                arg = 'arg_%d_%s' % (index, argtypes[index].replace(' ', '_').replace('<', '_').replace('>', '_'))
-                fnsig += ', %s' % (arg)
-                fnargs += ', %s' % (arg)
-        if manageable:
-            # The final function will be:
-            # lambda self, arg_1_type1, arg_2_type2, ..., arg_N_typeN:
-            #     self.oid_.setField(fieldName, arg_1_type1, arg_2_type2, ..., arg_N_typeN)
-            function_string = '%s: self.oid_.setDestField(%s)' % (fnsig, fnargs)
-            setattr(class_obj, fieldName, eval(function_string))
     # Add this class to globals dict
     globals()[class_name] = class_obj
     array_class_name = class_name + 'Array'
