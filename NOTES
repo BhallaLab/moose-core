@@ -17575,5 +17575,11 @@ some early unit tests. Fixed those up to test the new version.
 
 Now the runtime channel initialization also looks fixed. There are 
 still discrepancies in the traces, but not much at the start.
+Checkin 3420.
+
+============================================================================
+09 April 2012
+Several fixes to do with SymCompartment reading by ReadCell, and then in the
+SymCompartment code itself. Unfortunately still nto working right.
 
 ============================================================================
