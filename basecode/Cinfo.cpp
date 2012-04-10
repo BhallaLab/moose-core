@@ -388,7 +388,6 @@ string Cinfo::getDocs() const
     for (map <string, string>::const_iterator ii = doc_.begin(); ii != doc_.end(); ++ii){
         doc << ii->first << ":\t\t" << ii->second << endl;
     }
-    cout << "Doc is " << doc.str() << endl;
 	return doc.str();
 }
 
