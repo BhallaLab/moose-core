@@ -38,6 +38,8 @@ class TableBase
 		void xplot( string file, string plotname );
 		void recvData( PrepackedBuffer pb );
 		void loadXplot( string fname, string plotname );
+		void loadXplotRange( string fname, string plotname, 
+			unsigned int start, unsigned int end );
 		void loadCSV( 
 			string fname, int startLine, int colNum, char separator );
 		void compareXplot( string fname, string plotname, string op );

@@ -17583,3 +17583,8 @@ Several fixes to do with SymCompartment reading by ReadCell, and then in the
 SymCompartment code itself. Unfortunately still nto working right.
 
 ============================================================================
+11 April 2012.
+Added TableBase::loadXplotRange to pick up a specified subset of a specified
+plot.
+
+============================================================================
