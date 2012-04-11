@@ -74,6 +74,15 @@ const Cinfo* TableBase::initCinfo()
 			new OpFunc2< TableBase, string, string >( 
 				&TableBase::loadXplot ) );
 
+		static DestFinfo loadXplotRange( "loadXplotRange",
+			"Reads a single plot from an xplot file, and selects a "
+			"subset of points from it. "
+			"Arguments: filename, plotname, startindex, endindex"
+			"Uses C convention: startindex included, endindex not included."
+			"When the file has 2 columns, the 2nd column is loaded.",
+			new OpFunc4< TableBase, string, string, unsigned int, unsigned int >( 
+				&TableBase::loadXplotRange ) );
+
 		static DestFinfo compareXplot( "compareXplot",
 			"Reads a plot from an xplot file and compares with contents of TableBase."
 			"Result is put in 'output' field of table."
@@ -129,6 +138,7 @@ const Cinfo* TableBase::initCinfo()
 		&xplot,			// DestFinfo
 		&loadCSV,			// DestFinfo
 		&loadXplot,			// DestFinfo
+		&loadXplotRange,	// DestFinfo
 		&compareXplot,		// DestFinfo
 		&compareVec,		// DestFinfo
                 &clearVec,
@@ -281,6 +291,24 @@ void TableBase::loadXplot( string fname, string plotname )
 		cout << "TableBase::loadXplot: unable to load data from file " << fname <<endl;
 		return;
 	}
+}
+
+void TableBase::loadXplotRange( string fname, string plotname, 
+	unsigned int start, unsigned int end )
+{
+	vector< double > temp;
+	if ( !innerLoadXplot( fname, plotname, temp ) ) {
+		cout << "TableBase::loadXplot: unable to load data from file " << fname <<endl;
+		return;
+	}
+	if ( start > end || end > temp.size() ) {
+		cout << "TableBase::loadXplotRange: Bad range (" << start << 
+		", " << end << "] for table of size " << temp.size() <<
+		" from file " << fname << endl;
+		return;
+	}
+	vec_.clear();
+	vec_.insert( vec_.end(), temp.begin() + start, temp.begin() + end );
 }
 
 void TableBase::loadCSV( 
