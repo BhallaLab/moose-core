@@ -134,8 +134,9 @@ private:
 	unsigned int localIndex( Id id ) const;
 	map< Id, unsigned int > localIndex_;
 	
-	Id seed_;
 	double dt_;
+	string path_;
+	Id seed_;
 };
 
 #endif // _HSOLVE_H
