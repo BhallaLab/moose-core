@@ -17585,6 +17585,9 @@ SymCompartment code itself. Unfortunately still nto working right.
 ============================================================================
 11 April 2012.
 Added TableBase::loadXplotRange to pick up a specified subset of a specified
-plot.
+plot. Checkin 3438.
+
+Noticed that StimulusTable was not compiling. Tracked down to a Makefile
+error.
 
 ============================================================================
