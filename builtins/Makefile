@@ -38,7 +38,7 @@ Mstring.o:		Mstring.h
 TableEntry.o:		TableEntry.h
 TableBase.o:		TableBase.h TableEntry.h
 Table.o:		TableBase.h Table.h TableEntry.h
-StimlusTable.o:		TableBase.h StimlusTable.h TableEntry.h
+StimulusTable.o:		TableBase.h StimulusTable.h TableEntry.h
 Stats.o:	Stats.h
 Interpol2D.o:	Interpol2D.h
 HDF5WriterBase.o: HDF5WriterBase.h
