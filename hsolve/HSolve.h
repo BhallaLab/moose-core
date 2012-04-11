@@ -16,8 +16,7 @@
 class HSolve: public HSolveActive
 {
 public:
-	HSolve()
-	{ ; }
+	HSolve();
 	
 	void process( const Eref& hsolve, ProcPtr p );
 	void reinit( const Eref& hsolve, ProcPtr p );
@@ -25,8 +24,11 @@ public:
 	void setSeed( Id seed );
 	Id getSeed() const;
 	
-	void setPath( string path );
-	string getPath() const;
+	void setPath( const Eref& e, const Qinfo* q, string path );
+	string getPath( const Eref& e, const Qinfo* q ) const;
+	
+	void setDt( double dt );
+	double getDt() const;
 	
 	void setCaAdvance( int caAdvance );
 	int getCaAdvance() const;
@@ -118,7 +120,10 @@ public:
 	static const Cinfo* initCinfo();
 	
 private:
-	void setup( Eref hsolve, Id seed, double dt );
+	static vector< Id > children( Id obj );
+	static Id deepSearchForCompartment( Id base );
+	
+	void setup( Eref hsolve );
 	void zombify( Eref hsolve ) const;
 	
 	//~ void setupHub( Eref integ );
@@ -130,6 +135,7 @@ private:
 	map< Id, unsigned int > localIndex_;
 	
 	Id seed_;
+	double dt_;
 };
 
 #endif // _HSOLVE_H
