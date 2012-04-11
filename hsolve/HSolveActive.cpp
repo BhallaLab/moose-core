@@ -48,23 +48,26 @@ HSolveActive::HSolveActive()
 			using namespace moose;
 void HSolveActive::step( ProcPtr info ) {
 	cout << "... HS.step()" << endl;
-	cout << endl;
-	//~ cout << HSolveUtils::get< moose::Compartment, double >( Id( "/cc1" ), "Rm" ) << endl;
-	//~ cout << HSolveUtils::get< moose::Compartment, double >( Id( "/cc1" ), "Cm" ) << endl;
-	//~ cout << HSolveUtils::get< moose::Compartment, double >( Id( "/cc1" ), "Ra" ) << endl;
-	//~ cout << HSolveUtils::get< CaConc, double >( Id( "/cc" ), "Ca" ) << endl;
-	//~ cout << HSolveUtils::get< CaConc, double >( Id( "/cc" ), "CaBasal" ) << endl;
-	//~ cout << HSolveUtils::get< CaConc, double >( Id( "/cc" ), "tau" ) << endl;
-	cout << HSolveUtils::get< Compartment, double >( Id( "/cc" ), "Rm" ) << endl;
-	cout << HSolveUtils::get< Compartment, double >( Id( "/cc" ), "Cm" ) << endl;
-	cout << HSolveUtils::get< Compartment, double >( Id( "/cc" ), "Ra" ) << endl;
-	//~ cout << localGet< CaConc, double >( Id( "/ca" ).eref(), "Ca" ) << endl;
-	//~ cout << localGet< CaConc, double >( Id( "/ca" ).eref(), "CaBasal" ) << endl;
-	//~ cout << localGet< CaConc, double >( Id( "/ca" ).eref(), "tau" ) << endl;
-	//~ cout << HSolveUtils::get< Compartment, double >( Id( "/cc1" ), "Rm" ) << endl;
-	//~ cout << HSolveUtils::get< Compartment, double >( Id( "/cc1" ), "Cm" ) << endl;
-	//~ cout << HSolveUtils::get< Compartment, double >( Id( "/cc1" ), "Ra" ) << endl;
+	//~ cout << endl;
+	//~ cout << HSolveUtils::get< Compartment, double >( Id( "/cc" ), "Rm" ) << endl;
+	//~ cout << HSolveUtils::get< Compartment, double >( Id( "/cc" ), "Cm" ) << endl;
+	//~ cout << HSolveUtils::get< Compartment, double >( Id( "/cc" ), "Ra" ) << endl;
+	
+	/*
+	cout << HSolveUtils::get< moose::Compartment, double >( Id( "/cc1" ), "Rm" ) << endl;
+	cout << HSolveUtils::get< moose::Compartment, double >( Id( "/cc1" ), "Cm" ) << endl;
+	cout << HSolveUtils::get< moose::Compartment, double >( Id( "/cc1" ), "Ra" ) << endl;
+	cout << HSolveUtils::get< CaConc, double >( Id( "/cc" ), "Ca" ) << endl;
+	cout << HSolveUtils::get< CaConc, double >( Id( "/cc" ), "CaBasal" ) << endl;
+	cout << HSolveUtils::get< CaConc, double >( Id( "/cc" ), "tau" ) << endl;
+	cout << localGet< CaConc, double >( Id( "/ca" ).eref(), "Ca" ) << endl;
+	cout << localGet< CaConc, double >( Id( "/ca" ).eref(), "CaBasal" ) << endl;
+	cout << localGet< CaConc, double >( Id( "/ca" ).eref(), "tau" ) << endl;
+	cout << HSolveUtils::get< Compartment, double >( Id( "/cc1" ), "Rm" ) << endl;
+	cout << HSolveUtils::get< Compartment, double >( Id( "/cc1" ), "Cm" ) << endl;
+	cout << HSolveUtils::get< Compartment, double >( Id( "/cc1" ), "Ra" ) << endl;
 	return;
+	*/
 	
 	if ( !current_.size() ) {
 		current_.resize( channel_.size() );
