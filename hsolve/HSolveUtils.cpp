@@ -9,6 +9,9 @@
 
 #include "header.h"
 #include "HSolveUtils.h"
+#include "../biophysics/HHGate.h"
+#include "../biophysics/ChanBase.h"
+#include "../biophysics/HHChannel.h"
 
 void HSolveUtils::initialize( Id object )
 {
@@ -67,17 +70,32 @@ int HSolveUtils::gates( Id channel, vector< Id >& ret )
 {
 	unsigned int oldSize = ret.size();
 	
-	static vector< string > name;
-	name.push_back( "xGate" );
-	name.push_back( "yGate" );
-	name.push_back( "zGate" );
+	static string gateName[] = {
+		string( "gateX" ),
+		string( "gateY" ),
+		string( "gateZ" )
+	};
 	
-	for ( unsigned int i = 0; i < name.size(); i++ ) {
-		string gatePath = channel.path() + "/" + name[ i ];
+	static string powerField[] = {
+		string( "Xpower" ),
+		string( "Ypower" ),
+		string( "Zpower" )
+	};
+	
+	unsigned int nGates = 3; // Number of possible gates
+	
+	for ( unsigned int i = 0; i < nGates; i++ ) {
+		double power  = HSolveUtils::get< HHChannel, double >(
+			channel, powerField[ i ] );
 		
-		Id gate( gatePath );
-		if ( gate.path() == gatePath )
+		if ( power > 0.0 ) {
+			string gatePath = channel.path() + "/" + gateName[ i ];
+			
+			Id gate( gatePath );
+			assert( gate.path() == gatePath );
+			
 			ret.push_back( gate );
+		}
 	}
 	
 	return ret.size() - oldSize;
