@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "ElementValueFinfo.h"
 #include "HSolveStruct.h"
 #include "HinesMatrix.h"
 #include "HSolvePassive.h"
@@ -54,11 +55,24 @@ const Cinfo* HSolve::initCinfo()
 		&HSolve::getSeed
 	);
 	
-	static ValueFinfo< HSolve, string > path(
+	static ElementValueFinfo< HSolve, string > path(
 		"path",
-		"Specifies the path containing a compartmental model to be taken over.",
+		"Specifies the path to a compartmental model to be taken over. "
+		"This can be the path to any container object that has the model "
+		"under it (found by performing a deep search). Alternatively, this "
+		"can also be the path to any compartment within the neuron. This "
+		"compartment will be used as a handle to discover the rest of the "
+		"model, which means all the remaining compartments, channels, "
+		"synapses, etc.",
 		&HSolve::setPath,
 		&HSolve::getPath
+	);
+	
+	static ValueFinfo< HSolve, double > dt(
+		"dt",
+		"The time-step for this solver.",
+		&HSolve::setDt,
+		&HSolve::getDt
 	);
 	
 	static ValueFinfo< HSolve, int > caAdvance(
@@ -128,6 +142,8 @@ const Cinfo* HSolve::initCinfo()
 	static Finfo* hsolveFinfos[] = 
 	{
 		&seed,              // Value
+		&path,              // Value
+		&dt,                // Value
 		&caAdvance,         // Value
 		&vDiv,              // Value
 		&vMin,              // Value
@@ -159,6 +175,11 @@ const Cinfo* HSolve::initCinfo()
 
 static const Cinfo* hsolveCinfo = HSolve::initCinfo();
 
+HSolve::HSolve()
+	: dt_( 0.0 )
+{ ; }
+
+
 ///////////////////////////////////////////////////
 // Dest function definitions
 ///////////////////////////////////////////////////
@@ -187,6 +208,15 @@ void HSolve::zombify( Eref hsolve ) const
 		ZombieCompartment::zombify( hsolve.element(), i->eref().element() );
 }
 
+void HSolve::setup( Eref hsolve )
+{
+	// Setup solver.
+	this->HSolveActive::setup( seed_, dt_ );
+	
+	zombify( hsolve );
+	mapIds();
+}
+
 ///////////////////////////////////////////////////
 // Field function definitions
 ///////////////////////////////////////////////////
@@ -207,20 +237,109 @@ Id HSolve::getSeed() const
 	return seed_;
 }
 
-void HSolve::setPath( string path )
+void HSolve::setPath( const Eref& hsolve, const Qinfo* q, string path )
 {
-	;
+	if ( dt_ == 0.0 ) {
+		cerr << "Error: HSolve::setPath: Must set 'dt' first.\n";
+		return;
+	}
+	
+	seed_ = deepSearchForCompartment( Id( path ) );
+	
+	if ( seed_ == Id() )
+		cerr << "Error: HSolve::setPath: No compartments found at or below '"
+		     << path << "'.\n";
+	else
+		setup( hsolve );
 }
 
-string HSolve::getPath() const
+string HSolve::getPath( const Eref& e, const Qinfo* q ) const
 {
-	return "";
+	return seed_.path();
+}
+
+/**
+ * This function performs a depth-first search (for a compartment) in the tree
+ * with its root at 'base'. Returns (Id of) a compartment if found, else a
+ * blank Id.
+ */
+Id HSolve::deepSearchForCompartment( Id base )
+{
+	/* 
+	 * 'cstack' is a stack-of-stacks used to perform the depth-first search.
+	 *     The 0th entry in 'cstack' is a stack containing simply the base.
+	 *     The i-th entry in 'cstack' contains children of the node at the top
+	 *         of the stack at position ( i - 1 ).
+	 *     Hence, at any time, the top of the i-th stack is the i-th node on
+	 *     the ancestral path from the 'base' node to the 'current' node
+	 *     (more below) which is being examined. Also, the remaining nodes in
+	 *     the i-th stack are the siblings of this ancestor.
+	 * 
+	 * 'current' is the node at the top of the top of 'cstack'. If this node is
+	 *     a Compartment, then the search is completed, returning 'current'.
+	 *     Otherwise, the children of 'current' are pushed onto 'cstack' for a
+	 *     deeper search. If the deeper search yields nothing, then this
+	 *     'current' node is discarded. When an entire stack of siblings is
+	 *     exhausted in this way, then this empty stack is discarded, and
+	 *     the search moves 1 level up.
+	 * 
+	 * 'result' is a blank Id (moose root element) if the search failed.
+	 *     Otherwise, it is a compartment that was found under 'base'.
+	 */
+	vector< vector< Id > > cstack( 1, vector< Id >( 1, base ) );
+	Id current;
+	Id result;
+	
+	while ( !cstack.empty() )
+		if ( cstack.back().empty() ) {
+			cstack.pop_back();
+			
+			if ( !cstack.empty() )
+				cstack.back().pop_back();
+		} else {
+			current = cstack.back().back();
+			
+			if ( current()->cinfo() == moose::Compartment::initCinfo() ) {
+				result = current;
+				break;
+			}
+			
+			cstack.push_back( children( current ) );
+		}
+	
+	return result;
+}
+
+vector< Id > HSolve::children( Id obj )
+{
+	//~ return Field< vector< Id > >::get( obj, "children" );
+	//~ return Field< vector< Id > >::fastGet( obj.eref(), "children" );
+	//~ return localGet< Neutral, vector< Id > >( obj.eref(), "children" );
+	
+	vector< Id > c;
+	Neutral::children( obj.eref(), c );
+	return c;
+}
+
+void HSolve::setDt( double dt )
+{
+	if ( dt < 0.0 ) {
+		cerr << "Error: HSolve: 'dt' must be positive.\n";
+		return;
+	}
+	
+	dt_ = dt;
+}
+
+double HSolve::getDt() const
+{
+	return dt_;
 }
 
 void HSolve::setCaAdvance( int caAdvance )
 {
 	if ( caAdvance != 0 && caAdvance != 1 ) {
-		cout << "Error: HSolve: caAdvance should be either 0 or 1.\n";
+		cerr << "Error: HSolve: caAdvance should be either 0 or 1.\n";
 		return;
 	}
 	
