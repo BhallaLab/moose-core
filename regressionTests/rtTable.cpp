@@ -80,6 +80,19 @@ void rtTable()
 	val = Field< double >::get( tabid, "outputValue" );
 	assert( doubleEq( val, 9.9 ) );
 
+	// Check loading of a specified range of data in a table
+	ok = SetGet4< string, string, unsigned int, unsigned int >::set(
+		tabid, "loadXplotRange", 
+		"tab1.xplot", "plot2", 3, 6 );
+	assert( ok );
+	vector< double > vec = Field< vector< double > >::get( tabid, "vec" );
+	assert( vec.size() == 3 );
+	assert( doubleEq( vec[0], 3.1 ) );
+	assert( doubleEq( vec[1], 4.1 ) );
+	assert( doubleEq( vec[2], 5.1 ) );
+	
+
+
 	/////////////////////////////////////////////////////////////////////
 	shell->doDelete( tabid );
 	cout << "." << flush;
