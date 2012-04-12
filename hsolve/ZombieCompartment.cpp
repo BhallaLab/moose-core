@@ -744,11 +744,14 @@ void ZombieCompartment::zombify( Element* solver, Element* orig )
 		Msg::deleteMsg( mid );
 	
 	// Create zombie.
-	Element ze( orig->id(), zombieCompartmentCinfo, solver->dataHandler() );
-	Eref zer( &ze, 0 );
+	//~ Element ze( orig->id(), zombieCompartmentCinfo, solver->dataHandler() );
+	//~ Eref zer( &ze, 0 );
+	DataHandler* dh = orig->dataHandler()->copyUsingNewDinfo(
+		ZombieCompartment::initCinfo()->dinfo() );
 	Eref oer( orig, 0 );
 	Eref ser( solver, 0 );
-	ZombieCompartment* zd = reinterpret_cast< ZombieCompartment* >( zer.data() );
+	//~ ZombieCompartment* zd = reinterpret_cast< ZombieCompartment* >( zer.data() );
+	ZombieCompartment* zd = reinterpret_cast< ZombieCompartment* >( dh->data( 0 ) );
 	Compartment* od = reinterpret_cast< Compartment* >( oer.data() );
 	HSolve* sd = reinterpret_cast< HSolve* >( ser.data() );
 	zd->hsolve_ = sd;
