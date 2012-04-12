@@ -25,6 +25,8 @@ class StimulusTable: public TableBase
 		double getStartTime() const;
 		void setStopTime( double v );
 		double getStopTime() const;
+		void setLoopTime( double v );
+		double getLoopTime() const;
 		void setStepSize( double v );
 		double getStepSize() const;
 		void setStepPosition( double v );
@@ -47,6 +49,7 @@ class StimulusTable: public TableBase
 	private:
 		double start_;
 		double stop_;
+		double loopTime_;
 		double stepSize_;
 		double stepPosition_;
 		bool doLoop_;
