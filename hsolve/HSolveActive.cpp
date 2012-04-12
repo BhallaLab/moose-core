@@ -47,7 +47,7 @@ HSolveActive::HSolveActive()
 			//~ #include "../biophysics/CaConc.h"
 			using namespace moose;
 void HSolveActive::step( ProcPtr info ) {
-	cout << "... HS.step()" << endl;
+	//~ cout << "... HS.step()" << endl;
 	//~ cout << endl;
 	//~ cout << HSolveUtils::get< Compartment, double >( Id( "/cc" ), "Rm" ) << endl;
 	//~ cout << HSolveUtils::get< Compartment, double >( Id( "/cc" ), "Cm" ) << endl;
