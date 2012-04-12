@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Sun Apr  8 17:18:26 2012 (+0530)
+// Last-Updated: Thu Apr 12 10:08:58 2012 (+0530)
 //           By: subha
-//     Update #: 5367
+//     Update #: 5372
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -1510,12 +1510,16 @@ extern "C" {
         // Arbitrarily setting maximum on variable argument
         // list. Read: http://www.swig.org/Doc1.3/Varargs.html to
         // understand why
-        Py_ssize_t maxArgs = 5;
-        PyObject * arglist[5] = {NULL, NULL, NULL, NULL, NULL};
+        Py_ssize_t maxArgs = 10;
+        PyObject * arglist[10] = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
         ostringstream error;
         error << "_pymoose_ObjId_setDestField: ";
-        
-        if (!PyArg_UnpackTuple(args, "setDestField", minArgs, maxArgs, &arglist[0], &arglist[1], &arglist[2], &arglist[3], arglist[4])){
+        if (PyTuple_Size(args) > maxArgs){
+            error << "Cannot take more than " << maxArgs << "arguments.";
+            PyErr_SetString(PyExc_ValueError, error.str().c_str());
+            return NULL;
+        }
+        if (!PyArg_UnpackTuple(args, "setDestField", minArgs, maxArgs, &arglist[0], &arglist[1], &arglist[2], &arglist[3], &arglist[4], &arglist[5], &arglist[6], &arglist[7], &arglist[8], &arglist[9])){
             return NULL;
         }
         char * fieldName = PyString_AsString(arglist[0]);
