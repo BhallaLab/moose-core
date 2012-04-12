@@ -17591,3 +17591,6 @@ Noticed that StimulusTable was not compiling. Tracked down to a Makefile
 error.
 
 ============================================================================
+12 April 2012.
+Added a little regression test in rtTable.cpp to confirm that loadXplotRange
+is working.
