@@ -757,15 +757,16 @@ void ZombieCompartment::zombify( Element* solver, Element* orig )
 	zd->hsolve_ = sd;
 	zd->copyFields( od );
 	
-	unsigned int numEntries = orig->dataHandler()->localEntries();
+	//~ unsigned int numEntries = orig->dataHandler()->localEntries();
 	
-	DataHandler* zh = new ZombieHandler(
-		solver->dataHandler(), 
-		orig->dataHandler(),
-		0,
-		numEntries );
+	//~ DataHandler* zh = new ZombieHandler(
+		//~ solver->dataHandler(), 
+		//~ orig->dataHandler(),
+		//~ 0,
+		//~ numEntries );
 	
-	orig->zombieSwap( zombieCompartmentCinfo, zh );
+	//~ orig->zombieSwap( zombieCompartmentCinfo, zh );
+	orig->zombieSwap( zombieCompartmentCinfo, dh );
 }
 
 // static func
