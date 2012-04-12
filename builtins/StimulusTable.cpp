@@ -29,17 +29,35 @@ const Cinfo* StimulusTable::initCinfo()
 		static ValueFinfo< StimulusTable, double > startTime(
 			"startTime",
 			"Start time used when table is emitting values. For lookup"
-			"values below this, the table just sends out its zero entry.",
+			"values below this, the table just sends out its zero entry."
+			"Corresponds to zeroth entry of table.",
 			&StimulusTable::setStartTime,
 			&StimulusTable::getStartTime
 		);
 
 		static ValueFinfo< StimulusTable, double > stopTime(
 			"stopTime",
-			"Time to stop emitting values, or to cycle around."
-			"If it has stopped, then it sends out its last entry.",
+			"Time to stop emitting values."
+			"If time exceeds this, then the table sends out its last entry."
+			"The stopTime corresponds to the last entry of table.",
 			&StimulusTable::setStopTime,
 			&StimulusTable::getStopTime
+		);
+
+		static ValueFinfo< StimulusTable, double > loopTime(
+			"loopTime",
+			"If looping, this is the time between successive cycle starts."
+			"Defaults to the difference between stopTime and startTime, "
+			"so that the output waveform cycles with precisely the same "
+			"duration as the table contents."
+			"If larger than stopTime - startTime, then it pauses at the "
+			"last table value till it is time to "
+			"go around again."
+			"If smaller than stopTime - startTime, then it begins the next "
+			"cycle even before the first one has reached the end of the "
+			"table.",
+			&StimulusTable::setLoopTime,
+			&StimulusTable::getLoopTime
 		);
 
 		static ValueFinfo< StimulusTable, double > stepSize(
@@ -92,6 +110,7 @@ const Cinfo* StimulusTable::initCinfo()
 	static Finfo* stimulusTableFinfos[] = {
 		&startTime,
 		&stopTime,
+		&loopTime,
 		&stepSize,
 		&stepPosition,
 		&doLoop,
@@ -117,7 +136,8 @@ const Cinfo* StimulusTable::initCinfo()
 static const Cinfo* stimulusTableCinfo = StimulusTable::initCinfo();
 
 StimulusTable::StimulusTable()
-	: start_( 0 ), stop_( 1 ), stepSize_( 0 ), stepPosition_( 0 ), 
+	: start_( 0 ), stop_( 1 ), loopTime_( 1 ), 
+		stepSize_( 0 ), stepPosition_( 0 ), 
 	doLoop_( 0 )
 { ; }
 
@@ -132,11 +152,13 @@ void StimulusTable::process( const Eref& e, ProcPtr p )
 	else
 		stepPosition_ = p->currTime;
 
-	if ( doLoop_ ) {
-		if ( stepPosition_ > stop_ )
-			stepPosition_ -= stop_ - start_;
+	double lookupPosition = stepPosition_;
+	if ( doLoop_ && ( stepPosition_ > start_ + loopTime_ ) ) {
+		unsigned int i = floor( ( stepPosition_ - start_ ) / loopTime_ );
+			lookupPosition = stepPosition_ - loopTime_ * i;
 	}
-	double y = interpolate( start_, stop_, stepPosition_ );
+
+	double y = interpolate( start_, stop_, lookupPosition );
 	setOutputValue( y );
 
 	output()->send( e, p->threadIndexInGroup, y );
@@ -166,12 +188,27 @@ double StimulusTable::getStartTime() const
 
 void StimulusTable::setStopTime( double v )
 {
+	if ( doLoop_ && doubleEq( loopTime_, stop_ - start_ ) )
+		loopTime_ = v - start_;
 	stop_ = v;
 }
 
 double StimulusTable::getStopTime() const
 {
 	return stop_;
+}
+
+void StimulusTable::setLoopTime( double v )
+{
+	if ( loopTime_ >= 0 )
+		loopTime_ = v;
+	cout << "StimulusTable::setLoopTime: Warning: Cannot set to " << v <<
+		" as this value is below zero.\n";
+}
+
+double StimulusTable::getLoopTime() const
+{
+	return loopTime_;
 }
 
 void StimulusTable::setStepSize( double v )
@@ -197,6 +234,8 @@ double StimulusTable::getStepPosition() const
 void StimulusTable::setDoLoop( bool v )
 {
 	doLoop_ = v;
+	if ( loopTime_ == 0 )
+		loopTime_ = stop_ - start_;
 }
 
 bool StimulusTable::getDoLoop() const
