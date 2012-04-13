@@ -202,8 +202,10 @@ void StimulusTable::setLoopTime( double v )
 {
 	if ( loopTime_ >= 0 )
 		loopTime_ = v;
-	cout << "StimulusTable::setLoopTime: Warning: Cannot set to " << v <<
-		" as this value is below zero.\n";
+	else 
+		cout << "StimulusTable::setLoopTime: Warning: Cannot set to " << 
+			v << " as this value is below zero. Left unchanged at " <<
+			loopTime_ << "\n";
 }
 
 double StimulusTable::getLoopTime() const
