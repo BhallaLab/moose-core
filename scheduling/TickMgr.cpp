@@ -71,6 +71,12 @@ double TickMgr::getNextTime() const
 	return nextTime_;
 }
 
+void TickMgr::setNextTime( double t )
+{
+	if ( t >= 0 )
+		nextTime_ = t;
+}
+
 double TickMgr::getDt() const
 {
 	return dt_;

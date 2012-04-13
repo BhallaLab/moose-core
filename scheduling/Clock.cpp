@@ -415,6 +415,16 @@ void Clock::rebuild()
 	}
 	if ( tickPtr_.size() == 0 ) // Nothing happening in any of the ticks.
 		return;
+
+	// Here we put in current time so we can resume after changing a 
+	// dt. Given that we are rebuilding and cannot
+	// assume anything about prior dt, we do the simple thing and put
+	// all the tickMgrs at the current time.
+	for( vector< TickMgr >::iterator i = tickMgr_.begin(); 
+		i != tickMgr_.end(); ++i ) {
+		i->setNextTime( currentTime_ + i->getDt() );
+	}
+
 	sort( tickPtr_.begin(), tickPtr_.end() );
 	dt_ = tickPtr_[0].mgr()->getDt();
 }
