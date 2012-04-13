@@ -17600,4 +17600,6 @@ Checkin 3445.
 
 ============================================================================
 13 April.
-Minor fix to Stimulus table for spurious error message.
+Minor fix to Stimulus table for spurious error message.  Checkin 3450.
+Fix to scheduling so that changing dts can proceed without zeroing out internal
+times. Clears regression test, still to test with sim.

@@ -51,6 +51,7 @@ class TickMgr {
 
 		///////////////////////////////////////////////////////////////
 		double getNextTime() const;
+		void setNextTime( double t );
 		double getDt() const;
 
 		/**
