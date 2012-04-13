@@ -17596,5 +17596,8 @@ Added a little regression test in rtTable.cpp to confirm that loadXplotRange
 is working. Checkin 3442.
 
 Did a little work on StimulusTable to let it deliver repetitive stimuli.
+Checkin 3445.
 
 ============================================================================
+13 April.
+Minor fix to Stimulus table for spurious error message.
