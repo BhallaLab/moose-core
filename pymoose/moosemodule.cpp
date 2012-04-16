@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Apr 12 10:08:58 2012 (+0530)
+// Last-Updated: Mon Apr 16 11:32:03 2012 (+0530)
 //           By: subha
-//     Update #: 5372
+//     Update #: 5373
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -141,6 +141,7 @@ extern "C" {
     {
         const map<string, string>& argmap = getArgMap();
         vector<string> args;
+        args.push_back("moose");
         map<string, string>::const_iterator it;
         it = argmap.find("SINGLETHREADED");
         if (it != argmap.end()){
