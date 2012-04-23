@@ -27,7 +27,7 @@ class DesignerMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         self.connectActions()
         self.assignIcons()
         self.fileExtensionMap = {'neuroML(*.xml *.nml)':'XML','csv(*.csv)':'CSV','HDF5(*.h5 *.hdf5)':'HDF5','All Supported(*.h5 *hdf5 *.xml *.nml *.csv)':'All'}
-        self.fileBasedAction(['/home/chaitu/Desktop/GuiOG/Moogli/samples/mitral.h5'])
+        self.fileBasedAction([PATH_SAMPLES + '/mitralCell.xml'])
         
 
     def assignIcons(self):
