@@ -20,30 +20,37 @@ import sys
 import os
 from PyQt4 import QtCore, QtGui
 
-from OpenGL.GL import *
-from OpenGL.GLU import *
-from OpenGL.GLUT import *
+import OpenGL.GL as ogl
+import OpenGL.GLUT as oglut #using this only for denoting x,y,z on axis -> reconsider!
 
-from openGLHeaders.PyGLWidget import PyGLWidget
 from openGLHeaders.objects import *
 from openGLHeaders.group import *
+from PyQGLViewer import *
 
 from numpy import arange,digitize
 from defaults import *
 import pickle
 
-class canvas(PyGLWidget):
-	
-    def initializeGL(self):
-        # OpenGL state
-        #backGroundColor
-        glClearColor(DEFAULT_BGCOLOR[0],DEFAULT_BGCOLOR[1],DEFAULT_BGCOLOR[2],DEFAULT_BGCOLOR[3]) 
-        glEnable(GL_DEPTH_TEST)
-        self.reset_view()
+class canvas(QGLViewer):
+    compartmentSelected = QtCore.pyqtSignal(QtCore.QString)
+    def __init__(self,parent=None):
+        QGLViewer.__init__(self,parent)
+        self.setStateFileName('.MoogliState.xml')
 
-    def paintGL(self):
-        PyGLWidget.paintGL(self)
-	self.render()
+        self.selectedObjects = Group(self)
+        self.vizObjects = {}
+        self.sceneObjects = {}
+        self.cellComptDict = {}
+
+#        self.__rectangle = QtCore.QRect()
+#        self.__selectionMode = 0
+#        self.__objects = []
+#        self.__selection = []
+
+    def init(self):
+        self.restoreStateFromFile()
+#        self.setBackgroundColor(QtGui.QColor(255,255,255,255))
+        self.setSceneRadius(10.0)
 
     def clearCanvas(self):
         self.selectedObjects.removeAll()
@@ -51,73 +58,116 @@ class canvas(PyGLWidget):
         self.sceneObjects = {}
         self.cellComptDict = {}
 
-    def render(self):
-        glMatrixMode(GL_MODELVIEW)
-        glEnable(GL_LIGHTING)
-        glEnable(GL_LIGHT0)
-        glEnable(GL_COLOR_MATERIAL)
+    def draw(self):
+        for obj in self.sceneObjects.values():
+            obj.render()
+        for obj in self.vizObjects.values():#rendering the color changed compartments, rendering twice! ~optimize!
+            obj.render() 
+        self.selectedObjects.render()
+ #       if self.__selectionMode != 0:
+ #           self.__drawSelectionRectangle()
 
-        light0_pos = DEFAULT_LIGHT_POSITION
-        diffuse0 = DEFAULT_DIFFUSE_COLOR 
-        specular0 =DEFAULT_SPECULAR_COLOR
-        ambient0 = DEFAULT_AMBIENT_COLOR
+    def postDraw(self):
+        QGLViewer.postDraw(self)
+        self.drawCornerAxis()
 
-        glMatrixMode(GL_MODELVIEW)
-        glLightfv(GL_LIGHT0, GL_POSITION, light0_pos)
-        glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse0)
-        glLightfv(GL_LIGHT0, GL_SPECULAR, specular0)
-        glLightfv(GL_LIGHT0, GL_AMBIENT, ambient0)
+    def drawWithNames(self):
+        for i in range(len(self.sceneObjects.items())):
+            ogl.glPushMatrix()
+            ogl.glPushName(i)
+            self.sceneObjects.items()[i][1].render()
+            ogl.glPopName()
+            ogl.glPopMatrix()
 
-	for obj in self.sceneObjects.values():
-	    obj.render() #rendering all the compartments
-	    
-	for obj in self.vizObjects.values():
-	    obj.render() #rendering the color changed compartments, rendering twice! ~optimize!
+    def postSelection(self,point):
+        if self.selectedName() == -1:
+            self.selectedObjects.removeAll()
+        else:
+            self.compartmentSelected.emit(str(self.sceneObjects.items()[int(self.selectedName())][0]))
+            self.selectedObjects.add(self.sceneObjects.items()[int(self.selectedName())][1])
 
-	self.renderAxis()	#draws axes at right corner
-	self.selectedObjects.render()	
-	
+    # def __drawSelectionRectangle(self):
+    #     self.startScreenCoordinatesSystem()
+    #     ogl.glDisable(ogl.GL_LIGHTING)
+    #     ogl.glEnable(ogl.GL_BLEND)
+
+    #     ogl.glColor4f(0.0, 0.0, 0.3, 0.3)
+    #     ogl.glBegin(ogl.GL_QUADS)
+    #     ogl.glVertex2i(self.__rectangle.left(),  self.__rectangle.top())
+    #     ogl.glVertex2i(self.__rectangle.right(), self.__rectangle.top())
+    #     ogl.glVertex2i(self.__rectangle.right(), self.__rectangle.bottom())
+    #     ogl.glVertex2i(self.__rectangle.left(),  self.__rectangle.bottom())
+    #     ogl.glEnd()
+
+    #     ogl.glLineWidth(2.0)
+    #     ogl.glColor4f(0.4, 0.4, 0.5, 0.5)
+    #     ogl.glBegin(ogl.GL_LINE_LOOP)
+    #     ogl.glVertex2i(self.__rectangle.left(),  self.__rectangle.top())
+    #     ogl.glVertex2i(self.__rectangle.right(), self.__rectangle.top())
+    #     ogl.glVertex2i(self.__rectangle.right(), self.__rectangle.bottom())
+    #     ogl.glVertex2i(self.__rectangle.left(),  self.__rectangle.bottom())
+    #     ogl.glEnd()
+
+    #     ogl.glDisable(ogl.GL_BLEND)
+    #     ogl.glEnable(ogl.GL_LIGHTING)
+    #     self.stopScreenCoordinatesSystem()
+
+    # def endSelection(self,p):
+    #     selection = self.getMultipleSelection()
+    #     for zmin,zmax,id in selection:
+    #         if self.__selectionMode == 1:
+    #             self.addIdToSelection(id)
+    #         elif self.__selectionMode == 2 : 
+    #             self.removeIdFromSelection(id)
+    #     self.__selectionMode = 0
+    
+    # def mousePressEvent(self,e):
+    #     """ Mouse events functions """
+    #     # Start selection. Mode is ADD with Shift key and TOGGLE with Alt key.
+    #     self.__rectangle = QtCore.QRect(e.pos(), e.pos())
+    #     if e.button() == QtCore.Qt.LeftButton and e.modifiers() == QtCore.Qt.ShiftModifier:
+    #         self.__selectionMode = 1
+    #     elif e.button() == QtCore.Qt.LeftButton and e.modifiers() == QtCore.Qt.AltModifier:
+    #         self.__selectionMode = 2
+    #     else:
+    #         QGLViewer.mousePressEvent(self,e)
+    
+    # def mouseMoveEvent(self,e):
+    #     if self.__selectionMode != 0:
+    #         # Updates rectangle_ coordinates and redraws rectangle
+    #         self.__rectangle.setBottomRight(e.pos())
+    #         self.updateGL()
+    #     else:
+    #         QGLViewer.mouseMoveEvent(self,e)
+    
+    # def mouseReleaseEvent(self,e):
+    #     if self.__selectionMode != 0:
+    #         # Actual selection on the rectangular area.
+    #         # Possibly swap left/right and top/bottom to make rectangle_ valid.
+    #         self.__rectangle = self.__rectangle.normalized()
+    #         # Define selection window dimensions
+    #         self.setSelectRegionWidth(self.__rectangle.width())
+    #         self.setSelectRegionHeight(self.__rectangle.height())
+    #         # Compute rectangle center and perform selection
+    #         self.select(self.__rectangle.center())
+    #         # Update display to show new selected objects
+    #         self.updateGL()
+    #     else:
+    #         QGLViewer.mouseReleaseEvent(self,e)
+
+    # def addIdToSelection(self,id):
+    #     if not id in self.__selection:
+    #         self.__selection.append(id)
+    
+    # def removeIdFromSelection(self,id):
+    #     self.__selection.remove(id)
+    
     def addToVisualize(self,sceneObjectName):
         if sceneObjectName in self.sceneObjects:
             self.vizObjects[sceneObjectName] = self.sceneObjects[sceneObjectName]
         else:
             'This compartment has not been drawn on canvas'
 
-    # def updateViz(self):
-    # 	if self.gridRadiusViz==0:
-    #     	vals=[]
-    #     	for name in self.vizObjectNames:
-    #     		r=mc.pathToId(name+self.moosepath)
-    #     		d=float(mc.getField(r,self.variable))
-    #                     vals.append(d)
-    #     	inds = digitize(vals,self.stepVals)
-
-    #     	for i in range(0,len(self.vizObjects)):
-    #     		self.vizObjects[i].r,self.vizObjects[i].g,self.vizObjects[i].b=self.colorMap[inds[i]-1]
-
-    #     else:
-    #     	vals=[]
-    #     	vals_2=[]
-    #     	for name in self.vizObjectNames:
-    #                 r=mc.pathToId(name+self.moosepath)
-    #                 d=float(mc.getField(r,self.variable))
-                    
-
-    #                 r2=mc.pathToId(name+self.moosepath_2)
-    #                 d2=float(mc.getField(r2,self.variable_2))
-				
-    #                 vals.append(d)
-    #                 vals_2.append(d2)
-			
-    #     	inds = digitize(vals,self.stepVals)
-    #     	inds_2 = digitize(vals_2,self.stepVals_2)
-
-    #     	for i in range(0,len(self.vizObjects)):
-    #     		self.vizObjects[i].r,self.vizObjects[i].g,self.vizObjects[i].b=self.colorMap[inds[i]-1]
-    #     		self.vizObjects[i].radius=self.indRadius[inds_2[i]-1]
-
-    #     self.updateGL()
-    
     def drawNewCompartment(self,cellName,name,coords,style=3,cellCentre=[0.0,0.0,0.0],cellAngle=[0.0,0.0,0.0,0.0]):
         ''' name = 'segmentName',cellName= 'mitral', coords = [x0,y0,z0,x,y,z,d] , style = 1/2/3/4'''
         if (coords[0]!=coords[3] or coords[1]!=coords[4] or coords[2]!=coords[5]): #not a soma
@@ -142,8 +192,7 @@ class canvas(PyGLWidget):
         else:
             self.cellComptDict[cellName] = [compartment]
 
-
-    def copyCell(self,newCellName,oldCellName,newCellCentre=[0.0,0.0,0.0],newCellAngle=[0.0,0.0,0.0,0.0]):	
+    def copyCell(self,newCellName,oldCellName,newCellCentre=[0.0,0.0,0.0],newCellAngle=[0.0,0.0,0.0,0.0]):
         if self.cellComptDict.has_key(oldCellName):
             for cmpt in self.cellComptDict[oldCellName]:
 
@@ -161,6 +210,73 @@ class canvas(PyGLWidget):
 
         else:
             print 'No cell named ',oldCellName,' previously drawn.'
+
+    def drawCornerAxis(self):
+        # The viewport and the scissor are changed to fit the lower left
+        # corner. Original values are saved.
+        viewport = ogl.glGetIntegerv(ogl.GL_VIEWPORT)
+        scissor  = ogl.glGetIntegerv(ogl.GL_SCISSOR_BOX)
+
+        # Axis viewport size, in pixels
+        size = 150;
+        ogl.glViewport(0,0,size,size)
+        ogl.glScissor(0,0,size,size)
+
+        # The Z-buffer is cleared to make the axis appear over the
+        # original image.
+        ogl.glClear(ogl.GL_DEPTH_BUFFER_BIT)
+
+        # Tune for best line rendering
+        ogl.glDisable(ogl.GL_LIGHTING)
+        ogl.glLineWidth(3.0)
+
+        ogl.glMatrixMode(ogl.GL_PROJECTION)
+        ogl.glPushMatrix()
+        ogl.glLoadIdentity()
+        ogl.glOrtho(-1, 1, -1, 1, -1, 1)
+
+        ogl.glMatrixMode(ogl.GL_MODELVIEW)
+        ogl.glPushMatrix()
+        ogl.glLoadIdentity()
+        ogl.glMultMatrixd(self.camera().orientation().inverse().matrix())
+
+        ogl.glBegin(ogl.GL_LINES)
+        ogl.glColor3f(1.0, 0.0, 0.0)
+        ogl.glVertex3f(0.0, 0.0, 0.0)
+        ogl.glVertex3f(0.5, 0.0, 0.0)
+
+        ogl.glColor3f(0.0, 1.0, 0.0)
+        ogl.glVertex3f(0.0, 0.0, 0.0)
+        ogl.glVertex3f(0.0, 0.5, 0.0)
+    
+        ogl.glColor3f(0.0, 0.0, 1.0)
+        ogl.glVertex3f(0.0, 0.0, 0.0)
+        ogl.glVertex3f(0.0, 0.0, 0.5)
+        ogl.glEnd()
+
+        oglut.glutInit()
+        ogl.glColor(1,0,0)
+        ogl.glRasterPos3f(0.6, 0.0, 0.0)
+        oglut.glutBitmapCharacter(GLUT_BITMAP_8_BY_13,88)#ascii x
+        ogl.glColor(0,1,0)
+        ogl.glRasterPos3f(0.0, 0.6, 0.0)
+        oglut.glutBitmapCharacter(GLUT_BITMAP_8_BY_13,89)#ascii y
+        ogl.glColor(0,0,1)
+        ogl.glRasterPos3f(0.0, 0.0, 0.6)
+        oglut.glutBitmapCharacter(GLUT_BITMAP_8_BY_13,90)#ascii z
+
+        ogl.glMatrixMode(ogl.GL_PROJECTION)
+        ogl.glPopMatrix()
+
+        ogl.glMatrixMode(ogl.GL_MODELVIEW)
+        ogl.glPopMatrix()
+
+        ogl.glEnable(ogl.GL_LIGHTING)
+
+        # The viewport and the scissor are restored.
+        ogl.glScissor(*scissor)
+        ogl.glViewport(*viewport)
+
 
            
 class colorMap(object):
@@ -191,7 +307,6 @@ class colorMap(object):
             if (maxVal != None):
                 self.setMinMaxValue(minVal,maxVal)
 
-
 class newGLWindow(QtGui.QMainWindow):
     def __init__(self, parent = None):
         # initialization of the superclass
@@ -201,8 +316,8 @@ class newGLWindow(QtGui.QMainWindow):
         #self.setupUi(self)
 
     def windowTitle(self,name):
-    	self.name = name
-    	self.setupUi(self)
+        self.name = name
+        self.setupUi(self)
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -216,7 +331,7 @@ class newGLWindow(QtGui.QMainWindow):
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.verticalLayout = QtGui.QVBoxLayout(self.centralwidget)
         self.verticalLayout.setObjectName("verticalLayout")
-	self.canvas = canvas(self.centralwidget)
+        self.canvas = canvas(self.centralwidget)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -226,4 +341,3 @@ class newGLWindow(QtGui.QMainWindow):
         self.verticalLayout.addWidget(self.canvas)
         MainWindow.setCentralWidget(self.centralwidget)
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", self.name, None, QtGui.QApplication.UnicodeUTF8))
-
