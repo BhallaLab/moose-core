@@ -47,15 +47,15 @@ string& clean_type_name(string& arg)
     return arg;
 }
 
-std::string trim(const std::string myString)
+std::string trim(const std::string myString, const string& delimiters)
 {
     if (myString.length() == 0 )
     {
         return myString;        
     }
     
-    string::size_type  end = myString.find_last_not_of(DELIMITERS);
-    string::size_type begin = myString.find_first_not_of(DELIMITERS);
+    string::size_type  end = myString.find_last_not_of(delimiters);
+    string::size_type begin = myString.find_first_not_of(delimiters);
 
     if(begin != string::npos)
     {

@@ -11,6 +11,7 @@
 #include <iomanip>
 #include <fstream>
 #include "header.h"
+#include "utility/utility.h"
 #include "Pool.h"
 #include "FuncPool.h"
 #include "BufPool.h"
@@ -29,7 +30,7 @@ unsigned int chopLine( const string& line, vector< string >& ret )
 	stringstream ss( line );
 	string arg;
 	while ( ss >> arg ) {
-		ret.push_back( arg );
+            ret.push_back( trim(arg, "\"") );
 	}
 	return ret.size();
 }
