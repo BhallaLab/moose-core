@@ -17,6 +17,7 @@ void tokenize(std::vector< std::string >& tokens,
               const std::string& delimiters = " \t" );
 /** trims the leading and trailing white spaces */
 std::string trim(const std::string myString);
+std::string& clean_type_name(std::string& arg);
 // TODO: other std::string utilities to add
 // /** Trim leading and trailing whitespace and replace  convert any two or more consecutive whitespace inside the std::string by a single 'blank' character. */
 // std::string fulltrim(std::string& myString) const;

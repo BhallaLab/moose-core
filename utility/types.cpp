@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Wed Mar 23 10:10:45 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Jan  5 16:03:26 2012 (+0530)
-//           By: Subhasis Ray
-//     Update #: 49
+// Last-Updated: Mon Apr 23 09:50:40 2012 (+0530)
+//           By: subha
+//     Update #: 59
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -67,8 +67,13 @@ char shortType(string name)
         typemap.insert(pair<string, char>("vector<Id>", 'X'));
         typemap.insert(pair<string, char>("vector<ObjId>", 'Y'));
         typemap.insert(pair<string, char>("vector<DataId", 'Z'));
+        typemap.insert(pair<string, char>("void", '_'));
     }
-    return typemap[name];
+    map<string, char>::iterator iter = typemap.find(name);
+    if (iter == typemap.end()){
+        return 0;
+    }
+    return iter->second;
 }
 
 char shortFinfo(string finfoType)
@@ -81,7 +86,11 @@ char shortFinfo(string finfoType)
         finfomap.insert(pair<string, char>("valueFinfo", 'v'));
         finfomap.insert(pair<string, char>("lookupFinfo", 'l'));
     }
-    return finfomap[finfoType];
+    map <string, char>::iterator iter = finfomap.find(finfoType);
+    if (iter == finfomap.end()){
+        return 0;
+    }
+    return iter->second;
 }
 
 // 
