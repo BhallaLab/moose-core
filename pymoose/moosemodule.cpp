@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Mon Apr 23 14:18:31 2012 (+0530)
+// Last-Updated: Mon Apr 23 17:19:29 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 8238
+//     Update #: 8327
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -177,6 +177,22 @@ extern "C" {
         static map<string, PyObject * > inited_destfields;
         return inited_destfields;
     }
+    
+    /**
+       map of fields which are aliased in Python to avoid collision
+       with Python keywords.
+     */
+    static const map<string, string>& get_field_alias()
+    {
+        static map<string, string> alias;
+        if (alias.empty()){
+            alias["class_"] = "class";
+            alias["lambda_"] = "lambda";
+        }
+        return alias;
+    }
+
+
     // Minimum number of arguments for setting destFinfo - 1-st
     // the finfo name.
     static Py_ssize_t minArgs = 1;
@@ -1401,7 +1417,11 @@ extern "C" {
 #endif
     } // !  moose_ObjId_repr
 
-    
+
+    PyDoc_STRVAR(moose_ObjId_getId_documentation,
+                 "getId()\n"
+                 "\n"
+                 "Get the Id of this object\n");
     static PyObject* moose_ObjId_getId(_ObjId * self, PyObject * args)
     {
         extern PyTypeObject IdType;        
@@ -1413,19 +1433,19 @@ extern "C" {
         return (PyObject*)ret;
     }
 
-        PyDoc_STRVAR(moose_ObjId_getFieldType_documentation,
-                     "getFieldType(fieldName, finfoType='valueFinfo')\n"
-                     "\n"
-                     "Get the string representation of the type of this field.\n"
-                     "\n"
-                     "Parameters\n"
-                     "----------"
-                     "fieldName : string\n"
-                     "\tName of the field to be queried.\n"
-                     "finfoType : string\n"
-                     "\tFinfotype the field should be looked in for (can be \n"
-                     "valueFinfo, srcFinfo, destFinfo, lookupFinfo)");
-
+    PyDoc_STRVAR(moose_ObjId_getFieldType_documentation,
+                 "getFieldType(fieldName, finfoType='valueFinfo')\n"
+                 "\n"
+                 "Get the string representation of the type of this field.\n"
+                 "\n"
+                 "Parameters\n"
+                 "----------"
+                 "fieldName : string\n"
+                 "\tName of the field to be queried.\n"
+                 "finfoType : string\n"
+                 "\tFinfotype the field should be looked in for (can be \n"
+                 "valueFinfo, srcFinfo, destFinfo, lookupFinfo)");
+    
     static PyObject * moose_ObjId_getFieldType(_ObjId * self, PyObject * args)
     {
         char * fieldName = NULL;
@@ -1458,7 +1478,8 @@ extern "C" {
     
     PyDoc_STRVAR(moose_ObjId_getField_documentation,
                  "getField(fieldName)\n"
-                 "\nGet the value of the field.\n"
+                 "\n"
+                 "Get the value of the field.\n"
                  "\n"
                  "Parameters\n"
                  "----------"
@@ -1520,7 +1541,17 @@ extern "C" {
         
         string type = getFieldType(Field<string>::get(self->oid_, "class"), string(field), "valueFinfo");
         if (type.empty()){
-            return PyObject_GenericGetAttr((PyObject*)self, attr);
+            // Check if this field name is aliased and update fieldname and type if so.
+            map<string, string>::const_iterator it = get_field_alias().find(string(field));
+            if (it == get_field_alias().end()){
+                return PyObject_GenericGetAttr((PyObject*)self, attr);            
+            } else {
+                field = (it->second).c_str();
+                type = getFieldType(Field<string>::get(self->oid_, "class"), it->second, "valueFinfo");
+                // Update attr for next level (PyObject_GenericGetAttr) in case.
+                Py_XDECREF(attr);
+                attr = PyString_FromString(field);
+            }
         }
         ftype = shortType(type);
         if (!ftype){
@@ -1630,7 +1661,7 @@ extern "C" {
                 }
                 
             default:
-                return PyObject_GenericGetAttr((PyObject*)self, attr);
+                    return PyObject_GenericGetAttr((PyObject*)self, attr);
         }
 #undef GET_FIELD    
 #undef GET_VECFIELD
@@ -2182,9 +2213,21 @@ extern "C" {
         return NULL;
     }// moose_ObjId_setLookupField
 
+    PyDoc_STRVAR(moose_ObjId_setDestField_documentation,
+                 "setDestField(arg0, arg1, ...)\n"
+                 "Set a destination field. This is for advanced uses. destFields can\n"
+                 "(and should) be directly called like functions as\n"
+                 "`ObjId.fieldname(arg0, ...)`\n"
+                 "\n"
+                 "Parameters\n"
+                 "----------\n"
+                 "The number and type of paramateres depend on the destFinfo to be\n"
+                 "set. Use moose.doc('{classname}.{fieldname}') to get builtin\n"
+                 "documentation on the destFinfo `fieldname`\n"
+                 );
+    
     static PyObject * moose_ObjId_setDestField(PyObject * self, PyObject * args)
-    {
-                
+    {           
         return _setDestField(((_ObjId*)self)->oid_, args);        
     }
 
@@ -2363,6 +2406,22 @@ extern "C" {
         }        
     } // moose_ObjId_setDestField
 
+    PyDoc_STRVAR(moose_ObjId_getFieldNames_documenation,
+                 "getFieldNames(fieldType='')\n"
+                 "\n"
+                 "Get the names of fields on this ObjectId.\n"
+                 "\n"
+                 "Parameters\n"
+                 "----------\n"
+                 "fieldType : str\n"
+                 "\tField type to retrieve. Can be `valueFinfo`, `srcFinfo`,\n"
+                 "\t`destFinfo`, `lookupFinfo`, etc. If an empty string is specified,\n"
+                 "\tnames of all avaialable fields are returned.\n"
+                 "\n"
+                 "Returns\n"
+                 "-------\n"
+                 "\tout : tuple of strings.\n"
+                 );
     // 2011-03-23 15:28:26 (+0530)
     static PyObject * moose_ObjId_getFieldNames(_ObjId * self, PyObject *args)
     {
@@ -2401,6 +2460,21 @@ extern "C" {
         return pyret;             
     }
 
+    PyDoc_STRVAR(moose_ObjId_getNeighbors_documentation,
+                 "getNeighbours(fieldName)\n"
+                 "\n"
+                 "Get the objects connected to this ObjId by a message on specified\n"
+                 "field.\n"
+                 "\n"
+                 "Parameters\n"
+                 "----------\n"
+                 "fieldName : str\n"
+                 "\tname of the connection field (a destFinfo or srcFinfo)\n"
+                 "\n"
+                 "Returns\n"
+                 "-------\n"
+                 "out: tuple of Id-s.\n");
+                 
     static PyObject * moose_ObjId_getNeighbors(_ObjId * self, PyObject * args)
     {
         char * field = NULL;
@@ -2442,7 +2516,12 @@ extern "C" {
                  "\tfield to connect to on `destobj`.\n"
                  "msgtype : str\n"
                  "\ttype of the message. Can be `Single`, `OneToAll`, `AllToOne`,\n"
-                 " `OneToOne`, `Reduce`, `Sparse`. Default: `Single`.");
+                 " `OneToOne`, `Reduce`, `Sparse`. Default: `Single`."
+                 "\n"
+                 "Returns\n"
+                 "-------\n"
+                 "True on success, False on failure\n"
+                 );
     static PyObject * moose_ObjId_connect(_ObjId * self, PyObject * args)
     {
         PyObject * destPtr = NULL;
@@ -2471,6 +2550,12 @@ extern "C" {
         return Py_BuildValue("i", ret);
     }
 
+    PyDoc_STRVAR(moose_ObjId_compare_documentation,
+                 "Compare two ObjId instances. This just does a string comparison of\n"
+                 "the paths of the ObjId instances. This function exists only to\n"
+                 "facilitate certain operations requiring sorting/comparison, like\n"
+                 "using ObjIds for dict keys. Conceptually only equality comparison is\n"
+                 "meaningful for ObjIds.\n"); 
     static int moose_ObjId_compare(_ObjId * self, PyObject * other)
     {
         extern PyTypeObject ObjIdType;
@@ -2491,6 +2576,10 @@ extern "C" {
         return l_path.compare(r_path);
     }
 
+    PyDoc_STRVAR(moose_ObjId_getDataIndex_documentation,
+                 "getDataIndex()\n"
+                 "\n"
+                 "Return the dataIndex of this object.\n");
     static PyObject * moose_ObjId_getDataIndex(_ObjId * self, PyObject * args)
     {
         if (!PyArg_ParseTuple(args, ":moose_ObjId_getDataIndex")){
@@ -2520,46 +2609,32 @@ extern "C" {
     static PyMethodDef ObjIdMethods[] = {
         {"__init__", (PyCFunction)moose_ObjId_init, METH_KEYWORDS,
          moose_ObjId_init_documentation},
+        {"__cmp__", (PyCFunction)moose_ObjId_compare, METH_VARARGS,
+         moose_ObjId_compare_documentation},
         {"getFieldType", (PyCFunction)moose_ObjId_getFieldType, METH_VARARGS,
-         moose_ObjId_getFieldType_documentation
-        },        
+         moose_ObjId_getFieldType_documentation},        
         {"getField", (PyCFunction)moose_ObjId_getField, METH_VARARGS,
-         moose_ObjId_getField_documentation
-        },
+         moose_ObjId_getField_documentation},
         {"setField", (PyCFunction)moose_ObjId_setField, METH_VARARGS,
-         moose_ObjId_setField_documentation
-        },
+         moose_ObjId_setField_documentation},
         {"getLookupField", (PyCFunction)moose_ObjId_getLookupField, METH_VARARGS,
-         moose_ObjId_getLookupField_documentation
-        },
+         moose_ObjId_getLookupField_documentation},
         {"setLookupField", (PyCFunction)moose_ObjId_setLookupField, METH_VARARGS,
          moose_ObjId_setLookupField_documentation},
         {"getId", (PyCFunction)moose_ObjId_getId, METH_VARARGS,
-         "Return integer representation of the id of the element. This will be"
-         "an ObjId represented as a 3-tuple"},
+         moose_ObjId_getId_documentation},
         {"getFieldNames", (PyCFunction)moose_ObjId_getFieldNames, METH_VARARGS,
-         "Return a tuple containing the field-names."
-         "\n"
-         "If one of 'valueFinfo', 'lookupFinfo', 'srcFinfo', 'destFinfo' or"
-         "'sharedFinfo' is specified, then only fields of that type are"
-         "returned. If no argument is passed, all fields are returned."},
+         moose_ObjId_getFieldNames_documenation},
         {"getNeighbors", (PyCFunction)moose_ObjId_getNeighbors, METH_VARARGS,
-         "Retrieve a list of Ids connected via this field."},
+         moose_ObjId_getNeighbors_documentation},
         {"connect", (PyCFunction)moose_ObjId_connect, METH_VARARGS,
          moose_ObjId_connect_documentation},
         {"getDataIndex", (PyCFunction)moose_ObjId_getDataIndex, METH_VARARGS,
-         "Get the index of this ObjId in the containing Id object."},
+         moose_ObjId_getDataIndex_documentation},
         {"getFieldIndex", (PyCFunction)moose_ObjId_getFieldIndex, METH_VARARGS,
          "Get the index of this object as a field."},
         {"setDestField", (PyCFunction)moose_ObjId_setDestField, METH_VARARGS,
-         "Set a function field (DestFinfo). This should not be accessed directly. A python"
-         " member method should be wrapping it for each DestFinfo in each MOOSE"
-         " class. When used directly, it takes the form:\n"
-         " {ObjId}.setDestField({destFinfoName}, {arg1},{arg2}, ... , {argN})\n"
-         " where destFinfoName is the string representing the name of the"
-         " DestFinfo refering to the target function, arg1, ..., argN are the"
-         " arguments to be passed to the target function."
-         " Return True on success, False on failure."},
+         moose_ObjId_setDestField_documentation},
         {NULL, NULL, 0, NULL},        /* Sentinel */        
     };
 
