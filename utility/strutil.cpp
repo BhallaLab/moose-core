@@ -33,6 +33,20 @@ void tokenize(
 	}
 }
 
+string& clean_type_name(string& arg)
+{
+    for (size_t pos = arg.find(' '); pos != string::npos; pos = arg.find(' ')){
+        arg.replace(pos, 1, 1, '_');
+    }
+    for (size_t pos = arg.find('<'); pos != string::npos; pos = arg.find('<')){
+        arg.replace(pos, 1, 1, '_');
+    }
+    for (size_t pos = arg.find('>'); pos != string::npos; pos = arg.find('>')){
+        arg.replace(pos, 1, 1, '_');
+    }
+    return arg;
+}
+
 std::string trim(const std::string myString)
 {
     if (myString.length() == 0 )

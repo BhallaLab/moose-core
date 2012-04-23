@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Mon Feb 20 01:41:12 2012 (+0530)
 // Version: 
-// Last-Updated: Tue Mar  6 16:13:13 2012 (+0530)
-//           By: Subhasis Ray
-//     Update #: 163
+// Last-Updated: Mon Apr 23 09:45:08 2012 (+0530)
+//           By: subha
+//     Update #: 164
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -79,7 +79,7 @@ const Cinfo* PulseGen::initCinfo()
                                                      "Number of pulses in a sequence",
                                                      &PulseGen::setCount,
                                                      &PulseGen::getCount);
-    static ValueFinfo< PulseGen, unsigned int > trigMode("trigeMode",
+    static ValueFinfo< PulseGen, unsigned int > trigMode("trigMode",
                                                      "Number of pulses in a sequence",
                                                      &PulseGen::setTrigMode,
                                                      &PulseGen::getTrigMode);
@@ -137,6 +137,8 @@ const Cinfo* PulseGen::initCinfo()
                              );
 
     static Finfo* pulseGenFinfos[] = {
+        &output,
+        &baseLevel,
         &firstLevel,
         &firstWidth,
         &firstDelay,
@@ -144,6 +146,7 @@ const Cinfo* PulseGen::initCinfo()
         &secondWidth,
         &secondDelay,
         &count,
+        &trigMode,
         &level,
         &width,
         &delay,
