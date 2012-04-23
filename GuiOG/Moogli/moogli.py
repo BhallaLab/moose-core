@@ -27,7 +27,8 @@ class DesignerMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         self.connectActions()
         self.assignIcons()
         self.fileExtensionMap = {'neuroML(*.xml *.nml)':'XML','csv(*.csv)':'CSV','HDF5(*.h5 *.hdf5)':'HDF5','All Supported(*.h5 *hdf5 *.xml *.nml *.csv)':'All'}
-        self.fileBasedAction([PATH_SAMPLES + '/mitralCell.xml'])
+	self.sizeScale = DEFAULT_SIZE_SCALE #this should do into the canvas.py instead        
+	self.fileBasedAction([PATH_SAMPLES + '/mitralCell.xml'])
         
 
     def assignIcons(self):
@@ -322,7 +323,7 @@ class DesignerMainWindow(QtGui.QMainWindow,Ui_MainWindow):
         self.canvasStyleDict = {}
         self.attribStyleDict = {}
         for index,cmpt in enumerate(self.parsedList): #include cases for copy cell, and default offset
-            self.canvas.drawNewCompartment(cmpt[0],cmpt[1],[i*1e+04 for i in cmpt[2][:7]],style=DEFAULT_DRAW_STYLE)
+            self.canvas.drawNewCompartment(cmpt[0],cmpt[1],[i*self.sizeScale for i in cmpt[2][:7]],style=DEFAULT_DRAW_STYLE)
             self.canvasStyleDict[cmpt[0]+'/'+cmpt[1]] = index
             self.attribStyleDict[cmpt[0]+'/'+cmpt[1]] = [DEFAULT_DRAW_STYLE,'0.0,0.0,0.0','0.0,0.0,0.0,0.0'] 
         self.canvas.updateGL()
@@ -363,7 +364,7 @@ class DesignerMainWindow(QtGui.QMainWindow,Ui_MainWindow):
             index = self.canvasStyleDict[nameCellCmpt]
             attribStyle = self.attribStyleDict[nameCellCmpt]
 
-            self.canvas.drawNewCompartment(self.parsedList[index][0],self.parsedList[index][1],[i*1e+04 for i in self.parsedList[index][2][:7]],style=attribStyle[0],cellCentre=[float(i) for i in attribStyle[1].split(',')],cellAngle=[float(i) for i in attribStyle[2].split(',')])
+            self.canvas.drawNewCompartment(self.parsedList[index][0],self.parsedList[index][1],[i*self.sizeScale for i in self.parsedList[index][2][:7]],style=attribStyle[0],cellCentre=[float(i) for i in attribStyle[1].split(',')],cellAngle=[float(i) for i in attribStyle[2].split(',')])
 
         self.canvas.updateGL()
         self.newStyleDia.close()

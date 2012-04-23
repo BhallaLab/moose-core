@@ -13,7 +13,8 @@ DEFAULT_BGCOLOR = (1.0,1.0,1.0,1.0) #rbga
 DEFAULT_DRAW = True
 #True - AutoDraws canvas, draws all compartments in DEFAULT_DRAW_STYLE
 #False - Polite, promts user, to select specific compartments to be drawn in specific styles
-DEFAULT_DRAW_STYLE = 3 #1-Disks,2-Ball&Sticks,3-Cylinders,4-Capsules,5-Pyramids
+DEFAULT_DRAW_STYLE = 3 #1-Disks,2-Ball&Sticks,3-Cylinders,4-Capsules
+DEFAULT_SIZE_SCALE = 1e+04
 
 #3.Visualization Properties
 DEFAULT_VISUALIZE = False
