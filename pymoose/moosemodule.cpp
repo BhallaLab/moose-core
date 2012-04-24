@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Mon Apr 23 17:19:29 2012 (+0530)
+// Last-Updated: Tue Apr 24 23:12:36 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 8327
+//     Update #: 8397
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -588,7 +588,7 @@ extern "C" {
     /// Return the hash of the string `{objectpath}.{fieldName}`
     static long moose_Field_hash(_Field * self)
     {
-        string fieldPath = Field<string>::get(self->owner, "path") + "." + self->name;
+        string fieldPath = self->owner.path() + "." + self->name;
         PyObject * path = PyString_FromString(fieldPath.c_str());
         long hash = PyObject_Hash(path);
         Py_XDECREF(path);
@@ -599,7 +599,7 @@ extern "C" {
     static PyObject * moose_Field_repr(_Field * self)
     {
         ostringstream fieldPath;
-        fieldPath << Field<string>::get(self->owner, "path") << "." << string(self->name);
+        fieldPath << self->owner.path() << "." << self->name;
         return PyString_FromString(fieldPath.str().c_str());
     }
 
@@ -2571,8 +2571,8 @@ extern "C" {
             PyErr_SetString(PyExc_TypeError, error.str().c_str());
             ret = -1;
         }
-        string l_path = Field<string>::get(self->oid_, "path");
-        string r_path = Field<string>::get(((_ObjId*)other)->oid_, "path");
+        string l_path = self->oid_.path();
+        string r_path = ((_ObjId*)other)->oid_.path();
         return l_path.compare(r_path);
     }
 
@@ -3138,8 +3138,14 @@ extern "C" {
     {
         static vector <Id> classes(Field< vector<Id> >::get(ObjId("/classes"),
                                                             "children"));
-        for (unsigned int ii = 0; ii < classes.size(); ++ii){
-            if (!defineClass(module_dict, Field<string>::get(classes[ii], "name"))){
+        for (unsigned ii = 0; ii < classes.size(); ++ii){
+            const string& class_name = classes[ii].element()->getName();
+            const Cinfo * cinfo = Cinfo::find(class_name);
+            if (!cinfo){
+                cerr << "Error: no cinfo found with name " << class_name << endl;
+                return 0;
+            }
+            if (!define_class(module_dict, cinfo)){
                 return 0;
             }
         }
@@ -3160,25 +3166,17 @@ extern "C" {
                  "* documentationfor `field` in class `classname`.                  *\n"
                  "*-----------------------------------------------------------------*\n"
                  );
-    static int defineClass(PyObject * module_dict, string class_name)
+
+    static int define_class(PyObject * module_dict, const Cinfo * cinfo)
     {
+        const string& class_name = cinfo->name();
         map <string, PyTypeObject * >::iterator existing =
                 get_moose_classes().find(class_name);
         if (existing != get_moose_classes().end()){
             return 1;
         }
-        Id class_id("/classes/" + class_name);
-        if (class_id == Id() ){
-            if (class_name == "moose.ObjId" || class_name == "none"){
-                return 1;
-            }
-            ostringstream err;
-            err << "defineClass: Unknown class_name '" << class_name << "'";
-            PyErr_SetString(PyExc_RuntimeError, err.str().c_str());
-            return 0;
-        }
-        string baseclass_name = Field<string>::get(ObjId(class_id), "baseClass");
-        if (!defineClass(module_dict, baseclass_name)){
+        const Cinfo* base = cinfo->baseCinfo();
+        if (base && !define_class(module_dict, base)){
             return 0;
         }
         PyTypeObject * new_class =
@@ -3210,7 +3208,7 @@ extern "C" {
                 str.length());
         new_class->tp_doc = moose_Class_documentation;
         map<string, PyTypeObject *>::iterator base_iter =
-                get_moose_classes().find(baseclass_name);
+                get_moose_classes().find(cinfo->getBaseClass());
         if (base_iter == get_moose_classes().end()){
             new_class->tp_base = &ObjIdType;
         } else {
@@ -3218,11 +3216,11 @@ extern "C" {
         }
         Py_INCREF(new_class->tp_base);
         // Define all the lookupFields
-        if (!define_lookupFinfos(class_name)){            
+        if (!define_lookupFinfos(cinfo)){            
             return 0;
         }
         // Define the destFields
-        if (!define_destFinfos(class_name)){
+        if (!define_destFinfos(cinfo)){
             return 0;
         }
         // The getsetdef array must be terminated with empty objects.
@@ -3240,12 +3238,12 @@ extern "C" {
         get_moose_classes().insert(pair<string, PyTypeObject*> (class_name, new_class));
         Py_INCREF(new_class);
         PyDict_SetItemString(new_class->tp_dict, "__module__", PyString_FromString("moose"));
-        string doc = Field<string>::get(ObjId(class_id), "docs");
+        string doc = const_cast<Cinfo*>(cinfo)->getDocs();
         PyDict_SetItemString(new_class->tp_dict, "__doc__", PyString_FromString(doc.c_str()));
         PyDict_SetItemString(module_dict, class_name.c_str(), (PyObject *)new_class);
-        return 1;
+        return 1;                
     }
-
+    
     static PyObject * moose_ObjId_get_destField_attr(PyObject * self, void * closure)
     {
         if (!ObjId_SubtypeCheck(self)){
@@ -3260,7 +3258,7 @@ extern "C" {
             return NULL;
         }
         // If the DestField already exists, return it
-        string full_name = Field<string>::get(((_ObjId*)self)->oid_, "path") +
+        string full_name = ((_ObjId*)self)->oid_.path() +
                 "." + string(name);
         map<string, PyObject * >::iterator it = get_inited_destfields().find(full_name);
         if (it != get_inited_destfields().end()){
@@ -3285,23 +3283,21 @@ extern "C" {
     }
     
     
-    static int define_destFinfos(string class_name)
+    static int define_destFinfos(const Cinfo * cinfo)
     {
+        const string& class_name = cinfo->name();
         // Create methods for destFinfos. The tp_dict is initialized by
         // PyType_Ready. So we insert the dynamically generated
         // methods after that.        
-        unsigned int num_destFinfos = Field<unsigned int>::get(ObjId("/classes/"+class_name),
-                                                               "num_destFinfo");
-        Id destFinfoId("/classes/" + class_name + "/destFinfo");
         vector <PyGetSetDef>& vec = get_getsetdefs()[class_name];
 
         // We do not know the final number of user-accessible
         // destFinfos as we have to ignore the destFinfos starting
         // with get/set. So use a vector instead of C array.
         size_t curr_index = vec.size();
-        for (unsigned int ii = 0; ii < num_destFinfos; ++ii){
-            ObjId destFinfo(destFinfoId, DataId(0, ii, 0));
-            string destFinfo_name = Field<string>::get(destFinfo, "name");
+        for (unsigned int ii = 0; ii < cinfo->getNumDestFinfo(); ++ii){
+            Finfo * destFinfo = const_cast<Cinfo*>(cinfo)->getDestFinfo(ii);
+            const string& destFinfo_name = destFinfo->name();
             // get_{xyz} and set_{xyz} are internal destFinfos for
             // accessing valueFinfos. Ignore them.
             if (destFinfo_name.find("get_") == 0 || destFinfo_name.find("set_") == 0){
@@ -3345,7 +3341,7 @@ extern "C" {
         }
         assert(name);
         // If the LookupField already exists, return it
-        string full_name = Field<string>::get(((_ObjId*)self)->oid_, "path") + "." + string(name);
+        string full_name = ((_ObjId*)self)->oid_.path() + "." + string(name);
         map<string, PyObject * >::iterator it = get_inited_lookupfields().find(full_name);
         if (it != get_inited_lookupfields().end()){
             Py_XINCREF(it->second);
@@ -3376,16 +3372,13 @@ extern "C" {
         return NULL;
     }
     
-    static int define_lookupFinfos(string class_name)
+    static int define_lookupFinfos(const Cinfo * cinfo)
     {
-        Id class_id("/classes/" + class_name);
-        unsigned int num_lookupFinfos = Field<unsigned int>::get(ObjId(class_id), "num_lookupFinfo");
-        
-        Id lookupFinfoId("/classes/" + class_name + "/lookupFinfo");
+        const string & class_name = cinfo->name();
+        unsigned int num_lookupFinfos = cinfo->getNumLookupFinfo();
         unsigned int curr_index = get_getsetdefs()[class_name].size();
         for (unsigned int ii = 0; ii < num_lookupFinfos; ++ii){
-            ObjId lookupFinfo(lookupFinfoId, DataId(0, ii, 0));
-            string lookupFinfo_name = Field<string>::get(lookupFinfo, "name");
+            const string& lookupFinfo_name = const_cast<Cinfo*>(cinfo)->getLookupFinfo(ii)->name();
             PyGetSetDef getset;
             get_getsetdefs()[class_name].push_back(getset);
             get_getsetdefs()[class_name][curr_index].name = (char*)calloc(lookupFinfo_name.size() + 1, sizeof(char));
