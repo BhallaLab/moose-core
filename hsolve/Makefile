@@ -11,7 +11,6 @@
 TARGET = _hsolve.o
 
 OBJ = \
-	Cell.o \
 	HSolveStruct.o \
 	HinesMatrix.o \
 	HSolvePassive.o \
@@ -24,27 +23,21 @@ OBJ = \
 	testHSolve.o \
 	ZombieCompartment.o \
 
-	#~ HSolveHub.o \
-
 HEADERS = \
 	../basecode/header.h
 
 default: $(TARGET)
 
-#~ $(OBJ)	: $(HEADERS)
-#~ HSolveStruct.o:	HSolveStruct.h
-#~ HinesMatrix.o:	HinesMatrix.h TestHSolve.h ../utility/utility.h
-#~ HSolvePassive.o:	HSolvePassive.h HinesMatrix.h HSolveStruct.h ../biophysics/BioScan.h TestHSolve.h ../utility/utility.h
-#~ RateLookup.o:	RateLookup.h
-#~ HSolveActive.o:	HSolveActive.h RateLookup.h HSolvePassive.h HinesMatrix.h HSolveStruct.h ../biophysics/SynChan.h ../biophysics/SynInfo.h ../biophysics/SpikeGen.h
-#~ HSolveActiveSetup.o:	HSolveActive.h RateLookup.h HSolvePassive.h HinesMatrix.h HSolveStruct.h ../biophysics/BioScan.h
-#~ HSolveInterface.o:	HSolveActive.h RateLookup.h HSolvePassive.h HinesMatrix.h HSolveStruct.h
-#~ HSolve.o:	HSolve.h HSolveActive.h RateLookup.h HSolvePassive.h HinesMatrix.h HSolveStruct.h ../element/Neutral.h
-#~ HSolveHub.o:	HSolveHub.h ../basecode/SolveFinfo.h ../basecode/ThisFinfo.h HSolveActive.h RateLookup.h HSolvePassive.h HinesMatrix.h HSolveStruct.h ../biophysics/Compartment.h ../biophysics/HHChannel.h ../biophysics/CaConc.h ../element/Neutral.h
-
 $(OBJ)	: $(HEADERS)
-Cell.o:	Cell.h ../shell/Shell.h
-HSolve.o:	HSolve.h
+HSolveStruct.o:	HSolveStruct.h
+HinesMatrix.o:	HinesMatrix.h TestHSolve.h
+HSolvePassive.o:	HSolvePassive.h HinesMatrix.h HSolveStruct.h HSolveUtils.h TestHSolve.h ../biophysics/Compartment.h
+RateLookup.o:	RateLookup.h
+HSolveActive.o:	HSolveActive.h RateLookup.h HSolvePassive.h HinesMatrix.h HSolveStruct.h
+HSolveActiveSetup.o:	HSolveActive.h RateLookup.h HSolvePassive.h HinesMatrix.h HSolveStruct.h HSolveUtils.h ../biophysics/HHChannel.h ../biophysics/ChanBase.h ../biophysics/HHGate.h ../biophysics/CaConc.h
+HSolveInterface.o:	HSolve.h HSolveActive.h RateLookup.h HSolvePassive.h HinesMatrix.h HSolveStruct.h
+HSolve.o:	ZombieCompartment.h ../biophysics/Compartment.h HSolve.h HSolveActive.h RateLookup.h HSolvePassive.h HinesMatrix.h HSolveStruct.h ../basecode/ElementValueFinfo.h
+ZombieCompartment.o:	ZombieCompartment.h ../biophysics/Compartment.h HSolve.h HSolveActive.h RateLookup.h HSolvePassive.h HinesMatrix.h HSolveStruct.h ../basecode/ElementValueFinfo.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I. -I../basecode -I../msg $< -c
