@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri May  4 14:46:29 2012 (+0530)
 # Version: 
-# Last-Updated: Fri May  4 19:47:58 2012 (+0530)
+# Last-Updated: Fri May  4 21:05:04 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 116
+#     Update #: 140
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -76,6 +76,7 @@ channel_names = ['AR',
                  'NaPF_SS',
                  'NaPF_TCR',
                  'NaF2_nRT']
+
 ############################################
 # Parse configuration file
 ############################################
@@ -84,10 +85,10 @@ _parser.optionxform = str
 _parser.read(['defaults.ini', 'custom.ini'])
 
 # seed for random number generator in MOOSE
-moose_rngseed = int(_parser.get('numeric', 'moose_rngseed'))
+moose_rngseed = _parser.get('numeric', 'moose_rngseed')
 
 # seed for random number generator in numpy
-numpy_rngseed = int(_parser.get('numeric', 'numpy_rngseed'))
+numpy_rngseed = _parser.get('numeric', 'numpy_rngseed')
 # flag if the simulation uses stochastic synchans
 stochastic = _parser.get('numeric', 'stochastic') in ['Yes', 'yes', 'True', 'true', '1']
 reseed = _parser.get('numeric', 'reseed') in ['Yes', 'yes', 'True', 'true', '1']
@@ -95,7 +96,6 @@ solver = _parser.get('numeric', 'solver')
 simtime = float(_parser.get('scheduling', 'simtime'))
 simdt = float(_parser.get('scheduling', 'simdt'))
 plotdt = float(_parser.get('scheduling', 'plotdt'))
-
 
 ######################################################################
 # configuration for saving simulation data
@@ -131,7 +131,20 @@ benchmark = int(_parser.get('logging', 'benchmark'))
 benchmarker = logging.getLogger(logfileprefix + '.benchmark')
 benchmarker.setLevel(logging.DEBUG)
 
+_inited = False
+def init():
+    if _inited:
+        return
+    _inited = True
+    if reseed:
+        if moose_rngseed:
+            moose.seed(int(moose_rngseed))
+        else:
+            moose.seed(0)
+        if numpy_rngseed:
+            numpy.random.seed(int(numpy_rngseed))
 
-            
+init()
+
 # 
 # config.py ends here
