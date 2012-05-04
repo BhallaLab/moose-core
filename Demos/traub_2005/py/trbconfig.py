@@ -1,14 +1,14 @@
-# trbconfig.py --- 
+# config.py --- 
 # 
-# Filename: trbconfig.py
+# Filename: config.py
 # Description: 
 # Author: Subhasis Ray
 # Maintainer: 
-# Created: Fri Mar  9 23:26:30 2012 (+0530)
+# Created: Fri May  4 14:46:29 2012 (+0530)
 # Version: 
-# Last-Updated: Fri Mar  9 23:49:59 2012 (+0530)
+# Last-Updated: Fri May  4 19:47:58 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 49
+#     Update #: 116
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -22,61 +22,116 @@
 # 
 
 # Change log:
-#
-# 2012-03-09 23:26:34 (+0530) Subha started rewriting the code in
-# config.py in old moose.
+# 
+# 
 # 
 
 # Code:
 
-# List containing the name of the available channel classes.
-from nachans import *
-from kchans import *
-from cachans import *
-from archan import *
-from capool import *
+from datetime import datetime
+import ConfigParser as configparser
+import logging
+import numpy
+import os
 
-class TraubConfig(object):
-    """Configuration class. There should be no instances of this
-    class. Only a wrapper for methods."""
-    channel_names = ['AR',
-                     'CaPool',
-                     'CaL',
-                     'CaT',
-                     'CaT_A',
-                     'K2',
-                     'KA',
-                     'KA_IB',
-                     'KAHP',
-                     'KAHP_DP',
-                     'KAHP_SLOWER',
-                     'KC',
-                     'KC_FAST',
-                     'KDR',
-                     'KDR_FS',
-                     'KM',
-                     'NaF',
-                     'NaF2',
-                     'NaF_TCR',
-                     'NaP',
-                     'NaPF',
-                     'NaPF_SS',
-                     'NaPF_TCR',
-                     'NaF2_nRT']
-    _channel_lib = {}
-    @classmethod
-    def init_channel_lib(cls):
-        """Initialize the prototype channel library"""
-        if not cls._channel_lib:
-            if not moose.exists('/lib'):
-                lib = moose.Neutral('/lib')
-            for channel_name in cls.channel_names:
-                cls._channel_lib[channel_name] = eval('%s("%s", "/lib")' % (channel_name, channel_name))
-        return cls._channel_lib
+# runtime info
+timestamp = datetime.now()
+mypid = os.getpid()
+# Unit Conversion Factors
+uS = 1e-6 # micro Siemens to Siemens
+ms = 1e-3 # milli second to second
+mV = 1e-3 # milli Volt to Volt
+
+# limits on HH-gate tables
+vmin = -120 * mV
+vmax = 40 * mV
+ndivs = 640
+dv = (vmax - vmin)/ndivs
+
+# element to contain prototypes
+libpath = '/library'
+
+# defined channels to be initialized in prototypes
+channel_names = ['AR',
+                 'CaPool',
+                 'CaL',
+                 'CaT',
+                 'CaT_A',
+                 'K2',
+                 'KA',
+                 'KA_IB',
+                 'KAHP',
+                 'KAHP_DP',
+                 'KAHP_SLOWER',
+                 'KC',
+                 'KC_FAST',
+                 'KDR',
+                 'KDR_FS',
+                 'KM',
+                 'NaF',
+                 'NaF2',
+                 'NaF_TCR',
+                 'NaP',
+                 'NaPF',
+                 'NaPF_SS',
+                 'NaPF_TCR',
+                 'NaF2_nRT']
+############################################
+# Parse configuration file
+############################################
+_parser = configparser.SafeConfigParser()
+_parser.optionxform = str
+_parser.read(['defaults.ini', 'custom.ini'])
+
+# seed for random number generator in MOOSE
+moose_rngseed = int(_parser.get('numeric', 'moose_rngseed'))
+
+# seed for random number generator in numpy
+numpy_rngseed = int(_parser.get('numeric', 'numpy_rngseed'))
+# flag if the simulation uses stochastic synchans
+stochastic = _parser.get('numeric', 'stochastic') in ['Yes', 'yes', 'True', 'true', '1']
+reseed = _parser.get('numeric', 'reseed') in ['Yes', 'yes', 'True', 'true', '1']
+solver = _parser.get('numeric', 'solver')
+simtime = float(_parser.get('scheduling', 'simtime'))
+simdt = float(_parser.get('scheduling', 'simdt'))
+plotdt = float(_parser.get('scheduling', 'plotdt'))
 
 
-if '__main__' == __name__:
-    print TraubConfig.init_channel_lib()
+######################################################################
+# configuration for saving simulation data
+######################################################################
+datadir = os.path.join(_parser.get('directories', 'data'),
+                       timestamp.strftime('%Y_%m_%d'))
+if not os.access(datadir, os.F_OK):
+    os.mkdirs(datadir)
+protodir = _parser.get('directories', 'proto')
+datafileprefix = 'data'
+netfileprefix = 'network'
+filesuffix = '_%s_%d' % (timestamp.strftime('%Y%m%d_%H%M%S'), mypid)
+datafilepath = os.path.join(datadir, datafileprefix + filesuffix + '.h5')
+netfilepath = os.path.join(datadir, netfileprefix + filesuffix + '.h5')
 
+#####################################################################
+#  Logging
+#####################################################################
+logfileprefix = 'traub2005'
+logfilename = os.path.join(datadir, logfileprefix + filesuffix + '.log')
+loglevel = int(_parser.get('logging', 'level'))
+logger = logging.getLogger(logfileprefix)
+logging.basicConfig(filename=logfilename,
+                    level=loglevel,
+                    format='%(asctime)s \
+                    %(levelname)s \
+                    %(name)s \
+                    %(filename)s \
+                    %(funcName)s: \
+                    %(message)s',
+                    filemode='w')
+benchmark = int(_parser.get('logging', 'benchmark'))
+benchmarker = logging.getLogger(logfileprefix + '.benchmark')
+benchmarker.setLevel(logging.DEBUG)
+
+
+            
 # 
-# trbconfig.py ends here
+# config.py ends here
