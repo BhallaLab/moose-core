@@ -42,10 +42,10 @@ HSolveActive::HSolveActive()
 //////////////////////////////////////////////////////////////////////
 // Solving differential equations
 //////////////////////////////////////////////////////////////////////
-			#include "HSolveUtils.h"
-			#include "../biophysics/Compartment.h"
+			//~ #include "HSolveUtils.h"
+			//~ #include "../biophysics/Compartment.h"
 			//~ #include "../biophysics/CaConc.h"
-			using namespace moose;
+			//~ using namespace moose;
 void HSolveActive::step( ProcPtr info ) {
 	//~ cout << "... HS.step()" << endl;
 	//~ cout << endl;

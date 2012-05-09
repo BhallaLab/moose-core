@@ -26,7 +26,7 @@
 //////////////////////////////////////////////////////////////////////
 
 void HSolveActive::setup( Id seed, double dt ) {
-	cout << ".. HA.setup()" << endl;
+	//~ cout << ".. HA.setup()" << endl;
 	
 	this->HSolvePassive::setup( seed, dt );
 	
@@ -36,15 +36,92 @@ void HSolveActive::setup( Id seed, double dt ) {
 	createLookupTables();
 	readSynapses();
 	readExternalChannels();
+	
+	reinit();
 	cleanup();
 	
-	cout << "# of compartments: " << compartmentId_.size() << "." << endl;
-	cout << "# of channels: " << channelId_.size() << "." << endl;
-	cout << "# of gates: " << gateId_.size() << "." << endl;
-	cout << "# of states: " << state_.size() << "." << endl;
-	cout << "# of Ca pools: " << caConc_.size() << "." << endl;
-	cout << "# of SynChans: " << synchan_.size() << "." << endl;
-	cout << "# of SpikeGens: " << spikegen_.size() << "." << endl;
+	//~ cout << "# of compartments: " << compartmentId_.size() << "." << endl;
+	//~ cout << "# of channels: " << channelId_.size() << "." << endl;
+	//~ cout << "# of gates: " << gateId_.size() << "." << endl;
+	//~ cout << "# of states: " << state_.size() << "." << endl;
+	//~ cout << "# of Ca pools: " << caConc_.size() << "." << endl;
+	//~ cout << "# of SynChans: " << synchan_.size() << "." << endl;
+	//~ cout << "# of SpikeGens: " << spikegen_.size() << "." << endl;
+}
+
+void HSolveActive::reinit() {
+	reinitCompartments();
+	reinitCalcium();
+	reinitChannels();
+}
+
+void HSolveActive::reinitCompartments() {
+	for ( unsigned int ic = 0; ic < nCompt_; ++ic )
+		V_[ ic ] = tree_[ ic ].initVm;
+}
+
+void HSolveActive::reinitCalcium() {
+	;
+}
+
+void HSolveActive::reinitChannels() {
+	vector< double >::iterator iv;
+	vector< double >::iterator istate = state_.begin();
+	vector< int >::iterator ichannelcount = channelCount_.begin();
+	vector< ChannelStruct >::iterator ichan = channel_.begin();
+	vector< ChannelStruct >::iterator chanBoundary;
+	vector< unsigned int >::iterator icacount = caCount_.begin();
+	vector< double >::iterator ica = ca_.begin();
+	vector< double >::iterator caBoundary;
+	vector< LookupColumn >::iterator icolumn = column_.begin();
+	vector< LookupRow >::iterator icarowcompt;
+	vector< LookupRow* >::iterator icarow = caRow_.begin();
+	
+	LookupRow vRow;
+	double C1, C2;
+	for ( iv = V_.begin(); iv != V_.end(); ++iv ) {
+		vTable_.row( *iv, vRow );
+		icarowcompt = caRowCompt_.begin();
+		caBoundary = ica + *icacount;
+		for ( ; ica < caBoundary; ++ica ) {
+			caTable_.row( *ica, *icarowcompt );
+			++icarowcompt;
+		}
+		
+		chanBoundary = ichan + *ichannelcount;
+		for ( ; ichan < chanBoundary; ++ichan ) {
+			if ( ichan->Xpower_ > 0.0 ) {
+				vTable_.lookup( *icolumn, vRow, C1, C2 );
+				
+				*istate = C1 / C2;
+				
+				++icolumn, ++istate;
+			}
+			
+			if ( ichan->Ypower_ > 0.0 ) {
+				vTable_.lookup( *icolumn, vRow, C1, C2 );
+				
+				*istate = C1 / C2;
+				
+				++icolumn, ++istate;
+			}
+			
+			if ( ichan->Zpower_ > 0.0 ) {
+				LookupRow* caRow = *icarow;
+				if ( caRow ) {
+					caTable_.lookup( *icolumn, *caRow, C1, C2 );
+				} else {
+					vTable_.lookup( *icolumn, vRow, C1, C2 );
+				}
+				
+				*istate = C1 / C2;
+				
+				++icolumn, ++istate, ++icarow;
+			}
+		}
+		
+		++ichannelcount, ++icacount;
+	}
 }
 
 void HSolveActive::readHHChannels() {
@@ -278,6 +355,8 @@ void HSolveActive::createLookupTables() {
 		ia = A.begin();
 		ib = B.begin();
 		for ( unsigned int igrid = 0; igrid < grid.size(); ++igrid ) {
+			// Use one of the optimized forms below, instead of A and B
+			// directly. Also updated reinit() accordingly (for gate state).
 			a = *ia;
 			b = *ib;
 			
@@ -308,6 +387,8 @@ void HSolveActive::createLookupTables() {
 		ia = A.begin();
 		ib = B.begin();
 		for ( unsigned int igrid = 0; igrid < grid.size(); ++igrid ) {
+			// Use one of the optimized forms below, instead of A and B
+			// directly. Also updated reinit() accordingly (for gate state).
 			a = *ia;
 			b = *ib;
 			
