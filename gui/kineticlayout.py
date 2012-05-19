@@ -1,25 +1,24 @@
-#This file load Genesis/kkit files from moose
+#This file is for loading Genesis file to mooseGui
+
 import sys
 import os
-
 from PyQt4 import QtGui,QtCore,Qt
 import pygraphviz as pgv
 import pickle
 import random
 import config
 import re
-import math 
+import math
+
 from moose import *
 
-class Rect_Compt(QtGui.QGraphicsRectItem):
+class RectCompt(QtGui.QGraphicsRectItem):
     def __init__(self,parent,x,y,w,h,item):
         self.Rectemitter = QtCore.QObject()
         self.mooseObj_ = item
         self.layoutWidgetPt = parent
-        if isinstance(parent,kineticsWidget):
-            QtGui.QGraphicsRectItem.__init__(self,x,y,w,h)
-        elif isinstance(parent,Rect_Compt):
-            QtGui.QGraphicsRectItem.__init__(self,x,y,w,h,parent)
+        #if isinstance(parent,kineticsWidget):
+        QtGui.QGraphicsRectItem.__init__(self,x,y,w,h)
         
         self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
         self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
@@ -30,24 +29,29 @@ class Rect_Compt(QtGui.QGraphicsRectItem):
 
     def pointerLayoutpt(self):
         return (self.layoutWidgetPt)
-
+    
     def mouseDoubleClickEvent(self, event):
         self.Rectemitter.emit(QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.mooseObj_)
+    
+    def itemChange(self,change,value):
+        if change == QtGui.QGraphicsItem.ItemPositionChange:
+            self.Rectemitter.emit(QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.mooseObj_)
+        return QtGui.QGraphicsItem.itemChange(self,change,value)
 
 class Textitem(QtGui.QGraphicsTextItem):
     positionChange = QtCore.pyqtSignal(QtGui.QGraphicsItem)
     def __init__(self,parent,mooseObj):
-        #print "parent text",mooseObj.name
         self.mooseObj_ = mooseObj
         if isinstance(parent,kineticsWidget):
             QtGui.QGraphicsTextItem.__init__(self,mooseObj.name)
-
-        elif isinstance(parent,Rect_Compt):
-            QtGui.QGraphicsTextItem.__init__(self,parent)
+            self.layoutWidgetpt = parent
+        elif isinstance(parent,RectCompt):
             self.layoutWidgetpt = parent.pointerLayoutpt()
+            QtGui.QGraphicsTextItem.__init__(self,parent)
+
         self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
         self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
-        #self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges, 1) 
+        
         if config.QT_MINOR_VERSION >= 6:
             self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges, 1) 
         
@@ -70,75 +74,74 @@ class Textitem(QtGui.QGraphicsTextItem):
         self.setDefaultTextColor(QtGui.QColor(textcolor))
         textbgcolor = "<html><body bgcolor='"+textbgcolor+"'>"+self.mooseObj_.name+"</body></html>"
         self.setHtml(QtCore.QString(textbgcolor))
+    
+    def itemChange(self,change,value):
+        if change == QtGui.QGraphicsItem.ItemPositionChange:
+            self.positionChange.emit(self)
+        return QtGui.QGraphicsItem.itemChange(self,change,value)
 
 class GraphicalView(QtGui.QGraphicsView):
-    def __init__(self,parent):
+    def __init__(self,parent,border):
         QtGui.QGraphicsView.__init__(self,parent)
+        self.setScene(parent)
         self.sceneContainerPt = parent
-        self.setScene(self.sceneContainerPt)
+        self.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
         self.itemSelected = False
         self.customrubberBand=0
         self.rubberbandWidth = 0
         self.rubberbandHeight = 0
         self.moved = False
         self.showpopupmenu = False
+        self.border = 10
 
-    #def resizeEvent(self, event):
-    #    self.fitInView(self.sceneRect(), Qt.Qt.KeepAspectRatio)
-    #    return QtGui.QGraphicsView.resizeEvent(self, event)
-    '''
+    
     def mousePressEvent(self, event):
-        print "mousePresEvent GV"
         if event.buttons() == QtCore.Qt.LeftButton:
             self.startingPos = event.pos()
             self.startScenepos = self.mapToScene(self.startingPos)
             self.deviceTransform = self.viewportTransform()
             if config.QT_MINOR_VERSION >= 6:
                 # deviceTransform needs to be provided if the scene contains items that ignore transformations,which was introduced in 4.6
-                
                 sceneitems = self.sceneContainerPt.itemAt(self.startScenepos,self.deviceTransform)
             else:
                 #for below  Qt4.6 there is no view transform for itemAt 
                 #and if view is zoom out below 50%  and if textitem object is moved, zooming also happens.
-                
                 sceneitems = self.sceneContainerPt.itemAt(self.startScenepos)
 
-        #checking if mouse press position is on any item (in my case textitem or rectcompartment) if none, 
-        if ( sceneitems == None):
-            QtGui.QGraphicsView.mousePressEvent(self, event)
-             #Since qgraphicsrectitem is a item in qt, if I select inside the rectangle it would select the entire
-             #rectangle and would not allow me to select the items inside the rectangle so breaking the code by not
-             #calling parent class to inherit functionality rather writing custom code for rubberband effect here
-        elif( sceneitems != None):
-            if(isinstance(sceneitems, Textitem)):
+            #checking if mouse press position is on any item (in my case textitem or rectcompartment) if none, 
+            if ( sceneitems == None):
                 QtGui.QGraphicsView.mousePressEvent(self, event)
-                self.itemSelected = True
-        elif(isinstance(sceneitems, Rect_Compt)):
-            for previousSelection in self.sceneContainerPt.selectedItems():
-                if previousSelection.isSelected() == True:
-                    previousSelection.setSelected(0)
-            
-            #Checking if its on the border or inside
-            xs = sceneitems.mapToScene(sceneitems.boundingRect().topLeft()).x()+self.border/2
-            ys = sceneitems.mapToScene(sceneitems.boundingRect().topLeft()).y()+self.border/2
-            xe = sceneitems.mapToScene(sceneitems.boundingRect().bottomRight()).x()-self.border/2
-            ye = sceneitems.mapToScene(sceneitems.boundingRect().bottomRight()).y()-self.border/2
-            xp = self.startScenepos.x()
-            yp = self.startScenepos.y()
-            #if on border rubberband is not started, but called parent class for default implementation
-            if(((xp > xs-self.border/2) and (xp < xs+self.border/2) and (yp > ys-self.border/2) and (yp < ye+self.border/2) )or ((xp > xs+self.border/2) and (xp < xe-self.border/2) and (yp > ye-self.border/2) and (yp < ye+self.border/2) ) or ((xp > xs+self.border/2) and (xp < xe-self.border/2) and (yp > ys-self.border/2) and (yp < ys+self.border/2) ) or ((xp > xe-self.border/2) and (xp < xe+self.border/2) and (yp > ys-self.border/2) and (yp < ye+self.border/2) ) ):
-                QtGui.QGraphicsView.mousePressEvent(self, event)
-                self.itemSelected = True
-                if sceneitems.isSelected() == False:
-                    sceneitems.setSelected(1)
-            #if its inside the qgraphicsrectitem then custom code for starting rubberband selection 
-            else:
-                self.customrubberBand = QtGui.QRubberBand(QtGui.QRubberBand.Rectangle,self)
-                self.customrubberBand.setGeometry(QtCore.QRect(self.startingPos,QtCore.QSize()))
-                self.customrubberBand.show()
-    
+                #Since qgraphicsrectitem is a item in qt, if I select inside the rectangle it would select the entire
+                #rectangle and would not allow me to select the items inside the rectangle so breaking the code by not
+                #calling parent class to inherit functionality rather writing custom code for rubberband effect here
+            elif( sceneitems != None):
+                if(isinstance(sceneitems, Textitem)):
+                    QtGui.QGraphicsView.mousePressEvent(self, event)
+                    self.itemSelected = True
+                elif(isinstance(sceneitems, RectCompt)):
+                    for previousSelection in self.sceneContainerPt.selectedItems():
+                        if previousSelection.isSelected() == True:
+                            previousSelection.setSelected(0)
+                    #Checking if its on the border or inside
+                    xs = sceneitems.mapToScene(sceneitems.boundingRect().topLeft()).x()+self.border/2
+                    ys = sceneitems.mapToScene(sceneitems.boundingRect().topLeft()).y()+self.border/2
+                    xe = sceneitems.mapToScene(sceneitems.boundingRect().bottomRight()).x()-self.border/2
+                    ye = sceneitems.mapToScene(sceneitems.boundingRect().bottomRight()).y()-self.border/2
+                    xp = self.startScenepos.x()
+                    yp = self.startScenepos.y()
+                    
+                    #if on border rubberband is not started, but called parent class for default implementation
+                    if(((xp > xs-self.border/2) and (xp < xs+self.border/2) and (yp > ys-self.border/2) and (yp < ye+self.border/2) )or ((xp > xs+self.border/2) and (xp < xe-self.border/2) and (yp > ye-self.border/2) and (yp < ye+self.border/2) ) or ((xp > xs+self.border/2) and (xp < xe-self.border/2) and (yp > ys-self.border/2) and (yp < ys+self.border/2) ) or ((xp > xe-self.border/2) and (xp < xe+self.border/2) and (yp > ys-self.border/2) and (yp < ye+self.border/2) ) ):
+                        QtGui.QGraphicsView.mousePressEvent(self, event)
+                        self.itemSelected = True
+                        if sceneitems.isSelected() == False:
+                            sceneitems.setSelected(1)
+                        #if its inside the qgraphicsrectitem then custom code for starting rubberband selection 
+                    else:
+                        self.customrubberBand = QtGui.QRubberBand(QtGui.QRubberBand.Rectangle,self)
+                        self.customrubberBand.setGeometry(QtCore.QRect(self.startingPos,QtCore.QSize()))
+                        self.customrubberBand.show()
     def mouseMoveEvent(self,event):
-        print "mouseMoveEvvent GV"
         QtGui.QGraphicsView.mouseMoveEvent(self, event)
         if( (self.customrubberBand) and (event.buttons() == QtCore.Qt.LeftButton)):
             self.endingPos = event.pos()
@@ -154,9 +157,7 @@ class GraphicalView(QtGui.QGraphicsView):
                 if(isinstance(items,Textitem)):
                     if items.isSelected() == False:
                         items.setSelected(1)
-    
     def mouseReleaseEvent(self, event):
-        print "mouseRealeaseevent"
         self.setCursor(Qt.Qt.ArrowCursor)
         QtGui.QGraphicsView.mouseReleaseEvent(self, event)
         if(self.customrubberBand):
@@ -185,7 +186,7 @@ class GraphicalView(QtGui.QGraphicsView):
             popupmenu.addAction(self.move)
             popupmenu.exec_(event.globalPos())
         self.showpopupmenu = False
-    '''
+        
     def moveItem(self):
         self.setCursor(Qt.Qt.CrossCursor)
 
@@ -213,48 +214,33 @@ class GraphicalView(QtGui.QGraphicsView):
                         item.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, False)
         self.rubberBandactive = False
 
-
-
-
-
-class Widgetvisibility(Exception):pass
-
+    
 class kineticsWidget(QtGui.QWidget):
-    def __init__(self,size,modelpath,parent=None):
+    def __init__(self,size,modelPath,parent=None):
         QtGui.QWidget.__init__(self,parent)
-        #setting a horitonal layout for Qwidget
-
-        layout = QtGui.QHBoxLayout(self)
-        self.setLayout(layout)
-        self.setWindowTitle('KineticsLayout')
-
+        self.border = 10
+        hLayout = QtGui.QGridLayout(self)
+        self.setLayout(hLayout)
         self.sceneContainer = QtGui.QGraphicsScene(self)
-        self.sceneContainer.setBackgroundBrush(QtGui.QColor(230,230,219,120))
-
-        #Compartment and its objects
-        self.cmptmolDict = {}
-        self.setupCompt(modelpath,self.cmptmolDict)
-        #for k,v in self.cmptmolDict.items(): print k,v
-        #Reaction and Enz and its connections
-        zombieType = ['ZombieReac','ZombieEnz','ZombieMMenz','ZombieSumFunc']
-        self.connectDict = {}
-        self.setupItem(modelpath,zombieType,self.connectDict)
-        #for k,v in self.connectDict.items(): print k,v
+        self.sceneContainer.setBackgroundBrush(QtGui.QColor(230,220,219,120))
         
-        self.graph_cord = {}
-        self.qGraCompt = {}
-        self.moosetext_dict = {}
-        self.lineItem_dict = {}
-        self.object2line = {}
+        cmptMol = {}
+        self.setupCompt(modelPath,cmptMol)
+        # for k,v in cmptMol.items(): print k,v
+        srcdesConnection = {}
+        zombieType = ['ZombieReac','ZombieEnz','ZombieMMenz','ZombieSumFunc']
+        self.setupItem(modelPath,zombieType,srcdesConnection)
 
-        #created graph using pygraphviz to layout nodes
-        G = pgv.AGraph(fontname='Helvetica',fontsize=9,strict=False,directed=True)
+        G = pgv.AGraph(fontname='Helvetica',fontsize=9,strict=False,directed=None)
         #pickled the color map here and loading the file
         pkl_file = open('rainbow2.pkl','rb')
         picklecolorMap = pickle.load(pkl_file)
-        #creacting nodes
-        for compt,itemlist in self.cmptmolDict.items():
-            for items in (items for items in itemlist if len(items) != 0):
+        
+        self.lineItem_dict = {}
+        self.object2line = {}
+
+        for cmpt,itemlist in cmptMol.items():
+            for  items in (items for items in itemlist if len(items) != 0):
                 for item in items:
                     iteminfo = item.path+'/info'
                     bgcolor = ''
@@ -267,12 +253,11 @@ class kineticsWidget(QtGui.QWidget):
                     else:
                         bgcolor = Annotator(iteminfo).getField('color')
                         textcolor = Annotator(iteminfo).getField('textColor')
-            
                     textcolor,bgcolor = self.colorCheck(item,textcolor,bgcolor,picklecolorMap)
                     G.add_node(item.path,label=item.getField('name'),shape='box',color=bgcolor,style='filled',fontname='Helvetica',fontsize=9,fontcolor=textcolor)
         
         #creating edge
-        for inn,out in self.connectDict.items():
+        for inn,out in srcdesConnection.items():
             reacenz = len(filter(lambda x:isinstance(x,list), out))
             if (inn.class_ =='ZombieReac'): arrowcolor = 'green'
             elif((inn.class_ == 'ZombieEnz') or (inn.class_ =='ZombieMMenz')): arrowcolor = 'red'
@@ -286,92 +271,88 @@ class kineticsWidget(QtGui.QWidget):
                     G.add_edge(items.path,inn.path,color='blue')
 
         G.layout(prog='dot')
-        filename = modelpath.lstrip('/')
-        #print "filename",filename
-        G.draw(filename+'.png',prog='dot',format='png')
+        filename = modelPath.lstrip('/')
+        #G.draw(filename+'.png',prog='dot',format='png')
+        graphCord = {}
+        self.qGraCompt = {}
+        mooseId_GText = {}
         
         for n in G.nodes():
-            self.graph_cord[n] = n.attr
+            graphCord[n] = n.attr
 
         fnt = QtGui.QFont('Helvetica',9)
-        for compt,v in self.cmptmolDict.items():
-            self.create_compt(compt)
-            compt_ref = self.qGraCompt[compt]
+        for compt,v in cmptMol.items():
+            self.createCompt(compt)
+            comptRef = self.qGraCompt[compt]
             for  items in (items for items in itemlist if len(items) != 0):
                 for item in items:
-                    x = float(re.split(',',self.graph_cord[item.path]['pos'])[0])
-                    y = -float(re.split(',',self.graph_cord[item.path]['pos'])[1])
-                    w = float(self.graph_cord[item.path]['width'])
-                    h = float(self.graph_cord[item.path]['height'])
-                    w *= 72
-                    h *= 72
-                    textbgcolor = self.graph_cord[item.path]['color']
-                    textcolor = self.graph_cord[item.path]['fontcolor']
-                    pItem = Textitem(compt_ref,item)
+                    x = float(re.split(',',graphCord[item.path]['pos'])[0])
+                    y = -float(re.split(',',graphCord[item.path]['pos'])[1])
+                    # 72 is for dpi from pygraphviz
+                    w = float(graphCord[item.path]['width']) * 72
+                    h = float(graphCord[item.path]['height']) * 72
+                    textbgcolor = graphCord[item.path]['color']
+                    textcolor = graphCord[item.path]['fontcolor']
+                    pItem = Textitem(comptRef,item)
                     pItem.setFont(fnt)
-                    
                     pItem.setPos(x-w/2,y-h/2)
                     pItem.setDefaultTextColor(QtGui.QColor(textcolor))
                     textbgcolor = "<html><body bgcolor='"+textbgcolor+"'>"+item.name+"</body></html>"
                     pItem.setHtml(QtCore.QString(textbgcolor))
                     
-                    self.moosetext_dict[item.getId()] = pItem
-                    
+                    mooseId_GText[item.getId()] = pItem
                     self.connect(pItem, QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"), self.emitItemtoEditor)
                     pItem.positionChange.connect(self.positionChange)
-        
+
         for k, v in self.qGraCompt.items():
             rectcompt = v.childrenBoundingRect()
             v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
             v.setPen( QtGui.QPen( Qt.QColor(66,66,66,100),10,QtCore.Qt.SolidLine,QtCore.Qt.RoundCap,QtCore.Qt.RoundJoin ) )
             v.Rectemitter.connect(v.Rectemitter,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
             v.Rectemitter.connect(v.Rectemitter,QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.emitItemtoEditor)
-        
-        for inn,out in self.connectDict.items():
+
+        for inn,out in srcdesConnection.items():
             if ((len(filter(lambda x:isinstance(x,list), out))) != 0):
                 for items in (items for items in out[0] ):
                     src = ""
                     des = ""
-                    src = self.moosetext_dict[inn.getId()]
-                    des = self.moosetext_dict[items.getId()]
+                    src = mooseId_GText[inn.getId()]
+                    des = mooseId_GText[items.getId()]
                     self.lineCord(src,des,inn)
                 for items in (items for items in out[1] ):
                     src = ""
                     des = ""
-                    des = self.moosetext_dict[inn.getId()]
-                    src = self.moosetext_dict[items.getId()]
+                    des = mooseId_GText[inn.getId()]
+                    src = mooseId_GText[items.getId()]
                     self.lineCord(src,des,inn)
             else:
                 for items in (items for items in out ):
                     src = ""
                     des = ""
-                    src = self.moosetext_dict[inn.getId()]
-                    des = self.moosetext_dict[items.getId()]
+                    src = mooseId_GText[inn.getId()]
+                    des = mooseId_GText[items.getId()]
                     self.lineCord(src,des,inn)
 
-        self.view = GraphicalView(self.sceneContainer)
+        self.view = GraphicalView(self.sceneContainer,self.border)
         self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
-        self.view.centerOn(self.sceneContainer.itemsBoundingRect().center())
         self.view.show()
-        layout.addWidget(self.view)
-    def resizeEvent(self,event):
-        return QtGui.QWidget.resizeEvent(self,event)
-
-    def setupCompt(self,modelpath,comptDict):
-        cpath = modelpath+'/##[TYPE=MeshEntry]'
-        for meshEnt in wildcardFind(cpath):
+        hLayout.addWidget(self.view)
+    #setting up compartments and its children    
+    def setupCompt(self,modelPath,cmptmolDict):
+        cPath = modelPath+'/##[TYPE=MeshEntry]'
+        for meshEnt in wildcardFind(cPath):
             molList = []
-            reacList = []
+            reList = []
             for mitem in Neutral(meshEnt).getNeighbors('remesh'):
                 if ( (mitem[0].class_ != 'GslIntegrator') and ((mitem[0].parent).class_ != 'ZombieEnz') ):
                     molList.append(element(mitem))
-            for ritem in Neutral(meshEnt).getNeighbors('remeshReacs'):
-                reacList.append(element(ritem))
-            comptDict[meshEnt]=molList,reacList
+            for reitem in Neutral(meshEnt).getNeighbors('remeshReacs'):
+                reList.append(element(reitem))
+            cmptmolDict[meshEnt] = molList,reList
 
-    def setupItem(self,moosePath,searObject,cntDict):
+    def setupItem(self,modlePath,searObject,cntDict):
         for zombieObj in searObject:
-            path = moosePath+'/##[TYPE='+zombieObj+']'
+            path = modlePath+'/##[TYPE='+zombieObj+']'
             if zombieObj != 'ZombieSumFunc':
                 for items in wildcardFind(path):
                     sublist = []
@@ -425,19 +406,31 @@ class kineticsWidget(QtGui.QWidget):
                 r,g,b = pklcolor[tc]
                 bgcolor = "#"+hexchars[r/16] + hexchars[r % 16] + hexchars[g / 16] + hexchars[g % 16] + hexchars[b / 16] + hexchars[b % 16]
         return(textColor,bgcolor)
+   
     def randomColor(self):
         red = int(random.uniform(0, 255))
         green = int(random.uniform(0, 255))
         blue = int(random.uniform(0, 255))
         return (red,green,blue)
     
-    def create_compt(self,key):
-        self.new_Compt = Rect_Compt(self,0,0,0,0,key)
+    def createCompt(self,key):
+        self.new_Compt = RectCompt(self,0,0,0,0,key)
         self.qGraCompt[key] = self.new_Compt
         self.new_Compt.setRect(10,10,10,10)
         self.sceneContainer.addItem(self.new_Compt)
+    
+    def emitItemtoEditor(self,mooseObject):
+        self.emit(QtCore.SIGNAL("itemDoubleClicked(PyQt_PyObject)"), mooseObject)
+        
+    def positionChange(self,mooseObject):
+        #If the item position changes, the corresponding arrow's are claculated
+        if(isinstance(mooseObject, Textitem)):
+            self.updatearrow(mooseObject)
+        else:
+            for k, v in self.qGraCompt.items():
+                for rectChilditem in v.childItems():
+                    self.updatearrow(rectChilditem)
 
-        # Calculating line distance
     def lineCord(self,src,des,source):
         if( (src == "") & (des == "") ):
             print "Source or destination is missing or incorrect"
@@ -461,7 +454,7 @@ class kineticsWidget(QtGui.QWidget):
             else:
                 self.object2line[ des ] = []
                 self.object2line[ des ].append( ( qgLineitem, src) )
-
+      
     def calArrow(self,src,des):
         sX = src.sceneBoundingRect().x()
         sY = src.sceneBoundingRect().y()
@@ -472,6 +465,7 @@ class kineticsWidget(QtGui.QWidget):
         dY = des.sceneBoundingRect().y()
         dw = des.sceneBoundingRect().right() -des.sceneBoundingRect().left()
         dh = des.sceneBoundingRect().bottom() -des.sceneBoundingRect().top()
+
         #Here there is external boundary created for each textitem 
         #1. for checking if there is overLap
         #2. The start line and arrow head ends to this outer boundary
@@ -506,10 +500,9 @@ class kineticsWidget(QtGui.QWidget):
             # lineCord function add qgraphicsline to screen and also add's a ref for src and des
             arrow.append(QtCore.QPointF(0,0))
             arrow.append(QtCore.QPointF(0,0))
-    
             return (arrow)
 
-         #checking which side of rectangle intersect with other
+    #checking which side of rectangle intersect with other
     def calPoAng(self,X,Y,w,h,centerLine,linePoint):
             #Here the 1. a. intersect point between center and 4 sides of src and 
             #            b. intersect point between center and 4 sides of des and to draw a line connecting for src & des
@@ -547,18 +540,6 @@ class kineticsWidget(QtGui.QWidget):
         srcYArr = lineSpoint.y() + height
         return srcXArr,srcYArr
     
-    def positionChange(self,mooseObject):
-        #If the item position changes, the corresponding arrow's are claculated
-        if(isinstance(mooseObject, Textitem)):
-            self.updatearrow(mooseObject)
-        else:
-            for k, v in self.qGraCompt.items():
-                for rectChilditem in v.childItems():
-                    self.updatearrow(rectChilditem)
-    
-    def emitItemtoEditor(self,mooseObject):
-        self.emit(QtCore.SIGNAL("itemDoubleClicked(PyQt_PyObject)"), mooseObject)
-
     def updateItemSlot(self, mooseObject):
         #In this case if the name is updated from the keyboard both in mooseobj and gui gets updation
         changedItem = ''
@@ -569,14 +550,12 @@ class kineticsWidget(QtGui.QWidget):
             self.positionChange(changedItem.mooseObj_)
     
     def updatearrow(self,mooseObject):
-        listItem = []
-        for listItem in (v for k,v in self.object2line.items() if k.mooseObj_.getId() == mooseObject.mooseObj_.getId() ):
-            if len(listItem):
-                for ql,va in listItem:
-                    srcdes = self.lineItem_dict[ql]
-                    arrow = self.calArrow(srcdes[0],srcdes[1])
-                    ql.setPolygon(arrow)
-            break
+        listItem = self.object2line[mooseObject]
+        for ql, va in listItem:
+            srcdes = self.lineItem_dict[ql]
+            arrow = self.calArrow(srcdes[0],srcdes[1])
+            ql.setPolygon(arrow)
+
     def keyPressEvent(self,event):
         key = event.key()
         if key == QtCore.Qt.Key_A:
@@ -585,12 +564,12 @@ class kineticsWidget(QtGui.QWidget):
             self.view.scale(1.1,1.1)
         elif (key == 44 or key == 60):
             self.view.scale(1/1.1,1/1.1)
-
+    
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
-    size = QtCore.QSize(1200,1000)
-    modelPath = '/acc12'
+    size = QtCore.QSize(800,600)
+    modelPath = 'acc15'
     loadModel('/home/harsha/Genesis_file/'+modelPath+'.g','/'+modelPath)
-    dt = kineticsWidget(size,modelPath)
+    dt = kineticsWidget(size,'/'+modelPath)
     dt.show()
     sys.exit(app.exec_())

@@ -73,11 +73,9 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
           #      targetTree.setCurrentItem(item)
         targetLabel = QtGui.QLabel('Target Element')
         targetText = QtGui.QLineEdit(fileDialog)
-        #print "target text",str(targetText),currentPath
-        if (currentPath == '/'):
-            pass
-            #print "currentPath should be changed" 
+
         targetText.setText(currentPath)
+        targetText.setText('/dummy')
         targetPanel.layout().addWidget(targetLabel)
         targetPanel.layout().addWidget(targetText)
         layout = fileDialog.layout()
@@ -97,6 +95,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
                 #print ": filename",str(fileName),str(fileType),str(targetText.text())
                 modeltype  = self.mooseHandler.loadModel(str(fileName), str(fileType), str(targetText.text()))
                 modelpath = str(targetText.text())
+                
                 if modeltype == MooseHandler.type_kkit:
         
                     try:
