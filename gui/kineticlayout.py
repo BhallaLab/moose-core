@@ -157,6 +157,7 @@ class GraphicalView(QtGui.QGraphicsView):
                 if(isinstance(items,Textitem)):
                     if items.isSelected() == False:
                         items.setSelected(1)
+                        
     def mouseReleaseEvent(self, event):
         self.setCursor(Qt.Qt.ArrowCursor)
         QtGui.QGraphicsView.mouseReleaseEvent(self, event)
@@ -188,7 +189,7 @@ class GraphicalView(QtGui.QGraphicsView):
         self.showpopupmenu = False
         
     def moveItem(self):
-        self.setCursor(Qt.Qt.CrossCursor)
+      self.setCursor(Qt.Qt.CrossCursor)
 
     def zoomItem(self):
         vTransform = self.viewportTransform()
@@ -213,7 +214,6 @@ class GraphicalView(QtGui.QGraphicsView):
                     for item in ( Txtitem for Txtitem in self.sceneContainerPt.items() if isinstance (Txtitem, Textitem)):
                         item.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, False)
         self.rubberBandactive = False
-
     
 class kineticsWidget(QtGui.QWidget):
     def __init__(self,size,modelPath,parent=None):
@@ -426,6 +426,9 @@ class kineticsWidget(QtGui.QWidget):
         #If the item position changes, the corresponding arrow's are claculated
         if(isinstance(mooseObject, Textitem)):
             self.updatearrow(mooseObject)
+            for k, v in self.qGraCompt.items():
+                rectcompt = v.childrenBoundingRect()
+                v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
         else:
             for k, v in self.qGraCompt.items():
                 for rectChilditem in v.childItems():
@@ -549,8 +552,8 @@ class kineticsWidget(QtGui.QWidget):
             changedItem.updateSlot(self.graph_cord)
             self.positionChange(changedItem.mooseObj_)
     
-    def updatearrow(self,mooseObject):
-        listItem = self.object2line[mooseObject]
+    def updatearrow(self,qGTextitem):
+        listItem = self.object2line[qGTextitem]
         for ql, va in listItem:
             srcdes = self.lineItem_dict[ql]
             arrow = self.calArrow(srcdes[0],srcdes[1])
