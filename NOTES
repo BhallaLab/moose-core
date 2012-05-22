@@ -17249,10 +17249,10 @@ Spatial sims:
 	- Neuronal geometry		2
 	- Irregular boundary mesh	2
 Numerical engines			
-	- GSSA				1
+	* GSSA				1
 	- Smoldyn			2
 	- SigNeur			2
-	- Hsolve			Niraj
+	+ Hsolve			Niraj
 I/O
 	- SBML				Harsha
 	- NeuroML			Aditya/Niraj
@@ -17260,13 +17260,13 @@ I/O
 	- Data I/O			?
 	- SigNeurML			2
 GUI
-	- Demos				All
-	- Kinetics			Harsha
+	+ Demos				All
+	+ Kinetics			Harsha
 	- Neural			Chaitanya
 	- Network			?
-	- MOOGL				Chaitanya
+	+ MOOGL				Chaitanya
 Platforms
-	- Multithread			OK
+	+ Multithread			OK
 	- Multinode			4
 	- Compile on 3 OSs		Harsha
 
@@ -17602,4 +17602,67 @@ Checkin 3445.
 13 April.
 Minor fix to Stimulus table for spurious error message.  Checkin 3450.
 Fix to scheduling so that changing dts can proceed without zeroing out internal
-times. Clears regression test, still to test with sim.
+times. Clears regression test, still to test with sim. Checkin 3451.
+============================================================================
+22 May.
+Looking at loading multiscale models.
+
+Note that SED-ML allows insertion of things into an existing model it loads.
+	Also allows loading of multiple models, though it runs one at a time
+Distinction from SED-ML:
+- End result is a declaratively defined model.
+- Composes a model using the constituents. May replicate them.
+- Interactions between composed instances of models are defined.
+	- Note that NineML may define interactions between cell models: synapses
+	etc.
+	- These interactions are typically simple linear mappings.
+
+
+Base model setup
+- Specify source models in NeuroML, SBML etc.
+- Specify replications of source models
+	- Parameterize replication: scaling, distributions, transforms...
+- Specify regions where the models interact
+	e.g., subset of dendites and spines
+- Specify how structure of one scale of model defines structure of other scale
+	e.g., neuronal model defines space in SBML model.
+- Specify entirely new computations that are not part of any of the constituents
+	e.g., NO diffusion, extracellular fields
+	
+	For many of these, need wildcards and operator-based matching.
+
+Specify mappings at interfaces between different kinds of entities
+	- Setting a relationship between molecular conc and channel conductance
+		should be independent of the level of detail of each.
+		- Conc could be single compartment or spatial
+		- Channel conductance could be at different compartmental 
+		resolution
+	- Current to concentrations
+	- Synaptic activity to concentration
+	- Compartmental Vm to fields
+	- rate models to and from spiking
+
+Specify mappings at interfaces between similar entities, different numerics(?)
+	- # concs to regular concs
+	- spatial distribs to bulk concs
+	- Stoch to deterministic
+
+Numerics.
+	- Specify compartmentalization? That is part of base model setup too.
+	- Specify numerical methods and decomposition for all parts.
+	- Specify sync time between different methods
+	- Specify parallelization options.
+
+
+Points of contact with other standards
+	NeuroML, SBML: Base models
+	SED-ML: Output mapping. Runtime control and parameterization.
+	NineML: Several aspects of model composition. 
+		Interface entities (synapses)
+		Wildcarding options
+
+Some questions:
+	- Extensions to an existing ML, or a new one?
+
+
+
