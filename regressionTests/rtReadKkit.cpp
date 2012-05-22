@@ -178,7 +178,7 @@ void checkDisplayInfo()
 	string textColor = Field< string >::get( info, "textColor" );
 	assert( textColor == "yellow" );
 	string notes = Field< string >::get( info, "notes" );
-	assert( notes == "The total concn. of MAPK is 300nM  from Kholodenko, 2000." );
+	assert( notes == "The total concn. of MAPK is 300nM from Kholodenko, 2000." );
 
 	Id enzInfo( "/rkktest/kinetics/MAPK/int1/2/info" );
 	assert( enzInfo != Id() );
@@ -191,7 +191,7 @@ void checkDisplayInfo()
 	textColor = Field< string >::get( enzInfo, "textColor" );
 	assert( textColor == "30" );
 	notes = Field< string >::get( enzInfo, "notes" );
-	assert( notes == "Km is 8nM and Vmax is 0.25nM.s-1  from Kholodenko, 2000." );
+	assert( notes == "Km is 8nM and Vmax is 0.25nM.s-1 from Kholodenko, 2000." );
 }
 
 void rtReadKkit()
