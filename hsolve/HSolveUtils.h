@@ -61,12 +61,33 @@ public:
 	static int children( Id compartment, vector< Id >& ret );
 	static int channels( Id compartment, vector< Id >& ret );
 	static int hhchannels( Id compartment, vector< Id >& ret );
-	static int gates( Id channel, vector< Id >& ret );
+	static int gates( Id channel, vector< Id >& ret, bool getOriginals = true );
 	static int spikegens( Id compartment, vector< Id >& ret );
 	static int synchans( Id compartment, vector< Id >& ret );
 	static int leakageChannels( Id compartment, vector< Id >& ret );
 	static int caTarget( Id channel, vector< Id >& ret );
 	static int caDepend( Id channel, vector< Id >& ret );
+	
+	class Grid
+	{
+	public:
+		Grid( double min, double max, unsigned int divs )
+			:
+			min_( min ),
+			max_( max ),
+			divs_( divs )
+		{
+			dx_ = ( max_ - min_ ) / divs_;
+		}
+		
+		unsigned int size();
+		double entry( unsigned int i );
+		
+		double min_;
+		double max_;
+		unsigned int divs_;
+		double dx_;
+	};
 	
 	// Functions for accessing gates' lookup tables.
 	//~ static int domain(
@@ -75,7 +96,7 @@ public:
 		//~ double& max );
 	static void rates(
 		Id gate,
-		const vector< double >& grid,
+		Grid grid,
 		vector< double >& A,
 		vector< double >& B );
 	//~ static int modes(

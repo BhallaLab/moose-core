@@ -767,6 +767,11 @@ Id HHGate::originalChannelId() const
 	return originalChanId_;
 }
 
+Id HHGate::originalGateId() const
+{
+	return originalGateId_;
+}
+
 void HHGate::updateAlphaBeta()
 {
 }

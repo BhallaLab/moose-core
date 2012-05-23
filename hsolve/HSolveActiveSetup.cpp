@@ -61,7 +61,12 @@ void HSolveActive::reinitCompartments() {
 }
 
 void HSolveActive::reinitCalcium() {
-	;
+	caActivation_.assign( caActivation_.size(), 0.0 );
+	
+	for ( unsigned int i = 0; i < ca_.size(); ++i ) {
+		caConc_[ i ].c_ = 0.0;
+		ca_[ i ] = caConc_[ i ].CaBasal_;
+	}
 }
 
 void HSolveActive::reinitChannels() {
@@ -302,37 +307,60 @@ void HSolveActive::createLookupTables() {
 	/*
 	 * Finding the smallest xmin and largest xmax across all gates' lookup
 	 * tables.
+	 * 
+	 * # of divs is determined by finding the smallest dx (highest density).
 	 */
 	vMin_ = numeric_limits< double >::max();
 	vMax_ = numeric_limits< double >::min();
+	double vDx = numeric_limits< double >::max();
 	caMin_ = numeric_limits< double >::max();
 	caMax_ = numeric_limits< double >::min();
+	double caDx = numeric_limits< double >::max();
 	
 	double min;
 	double max;
+	unsigned int divs;
+	double dx;
 	
 	for ( unsigned int ig = 0; ig < caGate.size(); ++ig ) {
 		min = HSolveUtils::get< HHGate, double >( caGate[ ig ], "min" );
 		max = HSolveUtils::get< HHGate, double >( caGate[ ig ], "max" );
+		divs = HSolveUtils::get< HHGate, unsigned int >(
+			caGate[ ig ], "divs" );
+		
+		dx = ( max - min ) / divs;
+		
 		if ( min < caMin_ )
 			caMin_ = min;
 		if ( max > caMax_ )
 			caMax_ = max;
+		if ( dx < caDx )
+			caDx = dx;
 	}
+	double caDiv = ( caMax_ - caMin_ ) / caDx;
+	caDiv_ = static_cast< int >( caDiv + 0.5 ); // Round-off to nearest int.
 	
 	for ( unsigned int ig = 0; ig < vGate.size(); ++ig ) {
 		min = HSolveUtils::get< HHGate, double >( vGate[ ig ], "min" );
 		max = HSolveUtils::get< HHGate, double >( vGate[ ig ], "max" );
+		divs = HSolveUtils::get< HHGate, unsigned int >(
+			vGate[ ig ], "divs" );
+		
+		dx = ( max - min ) / divs;
+		
 		if ( min < vMin_ )
 			vMin_ = min;
 		if ( max > vMax_ )
 			vMax_ = max;
+		if ( dx < vDx )
+			vDx = dx;
 	}
+	double vDiv = ( vMax_ - vMin_ ) / vDx;
+	vDiv_ = static_cast< int >( vDiv + 0.5 ); // Round-off to nearest int.
 	
 	caTable_ = LookupTable( caMin_, caMax_, caDiv_, caGate.size() );
 	vTable_ = LookupTable( vMin_, vMax_, vDiv_, vGate.size() );
 	
-	vector< double > grid;
 	vector< double > A, B;
 	vector< double >::iterator ia, ib;
 	double a, b;
@@ -340,21 +368,22 @@ void HSolveActive::createLookupTables() {
 	//~ bool interpolate;
 	
 	// Calcium-dependent lookup tables
-	if ( !caGate.empty() ) {
-		grid.resize( 1 + caDiv_ );
-		double dca = ( caMax_ - caMin_ ) / caDiv_;
-		for ( int igrid = 0; igrid <= caDiv_; ++igrid )
-			grid[ igrid ] = caMin_ + igrid * dca;
-	}
+	HSolveUtils::Grid caGrid( caMin_, caMax_, caDiv_ );
+	//~ if ( !caGate.empty() ) {
+		//~ grid.resize( 1 + caDiv_ );
+		//~ double dca = ( caMax_ - caMin_ ) / caDiv_;
+		//~ for ( int igrid = 0; igrid <= caDiv_; ++igrid )
+			//~ grid[ igrid ] = caMin_ + igrid * dca;
+	//~ }
 	
 	for ( unsigned int ig = 0; ig < caGate.size(); ++ig ) {
-		HSolveUtils::rates( caGate[ ig ], grid, A, B );
+		HSolveUtils::rates( caGate[ ig ], caGrid, A, B );
 		//~ HSolveUtils::modes( caGate[ ig ], AMode, BMode );
 		//~ interpolate = ( AMode == 1 ) || ( BMode == 1 );
 		
 		ia = A.begin();
 		ib = B.begin();
-		for ( unsigned int igrid = 0; igrid < grid.size(); ++igrid ) {
+		for ( unsigned int igrid = 0; igrid < caGrid.size(); ++igrid ) {
 			// Use one of the optimized forms below, instead of A and B
 			// directly. Also updated reinit() accordingly (for gate state).
 			a = *ia;
@@ -372,21 +401,23 @@ void HSolveActive::createLookupTables() {
 	}
 	
 	// Voltage-dependent lookup tables
-	if ( !vGate.empty() ) {
-		grid.resize( 1 + vDiv_ );
-		double dv = ( vMax_ - vMin_ ) / vDiv_;
-		for ( int igrid = 0; igrid <= vDiv_; ++igrid )
-			grid[ igrid ] = vMin_ + igrid * dv;
-	}
+	HSolveUtils::Grid vGrid( vMin_, vMax_, vDiv_ );
+	//~ if ( !vGate.empty() ) {
+		//~ grid.resize( 1 + vDiv_ );
+		//~ double dv = ( vMax_ - vMin_ ) / vDiv_;
+		//~ for ( int igrid = 0; igrid <= vDiv_; ++igrid )
+			//~ grid[ igrid ] = vMin_ + igrid * dv;
+	//~ }
 	
 	for ( unsigned int ig = 0; ig < vGate.size(); ++ig ) {
-		HSolveUtils::rates( vGate[ ig ], grid, A, B );
+		//~ interpolate = HSolveUtils::get< HHGate, bool >( vGate[ ig ], "useInterpolation" );
+		HSolveUtils::rates( vGate[ ig ], vGrid, A, B );
 		//~ HSolveUtils::modes( vGate[ ig ], AMode, BMode );
 		//~ interpolate = ( AMode == 1 ) || ( BMode == 1 );
 		
 		ia = A.begin();
 		ib = B.begin();
-		for ( unsigned int igrid = 0; igrid < grid.size(); ++igrid ) {
+		for ( unsigned int igrid = 0; igrid < vGrid.size(); ++igrid ) {
 			// Use one of the optimized forms below, instead of A and B
 			// directly. Also updated reinit() accordingly (for gate state).
 			a = *ia;

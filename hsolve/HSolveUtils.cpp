@@ -66,7 +66,14 @@ int HSolveUtils::hhchannels( Id compartment, vector< Id >& ret )
 	return targets( compartment, "channel", ret, "HHChannel" );
 }
 
-int HSolveUtils::gates( Id channel, vector< Id >& ret )
+/**
+ * The 'getOriginals' flag requests Id:s of the prototype gates from which
+ * copies were created, instead of Id:s of the copied gates. Default is true.
+ */
+int HSolveUtils::gates(
+	Id channel,
+	vector< Id >& ret,
+	bool getOriginals )
 {
 	unsigned int oldSize = ret.size();
 	
@@ -93,6 +100,11 @@ int HSolveUtils::gates( Id channel, vector< Id >& ret )
 			
 			Id gate( gatePath );
 			assert( gate.path() == gatePath );
+			
+			if ( getOriginals ) {
+				HHGate* g = reinterpret_cast< HHGate* >( gate.eref().data() );
+				gate = g->originalGateId();
+			}
 			
 			ret.push_back( gate );
 		}
@@ -172,31 +184,64 @@ int HSolveUtils::caDepend( Id channel, vector< Id >& ret )
 	//~ return 1;
 //~ }
 
-#include "../biophysics/HHGate.h"
+unsigned int HSolveUtils::Grid::size()
+{
+	return divs_ + 1;
+}
+
+double HSolveUtils::Grid::entry( unsigned int i )
+{
+	assert( i <= divs_ + 1 );
+	
+	return ( min_ + dx_ * i );
+}
+
 void HSolveUtils::rates(
 	Id gateId,
-	const vector< double >& grid,
+	HSolveUtils::Grid grid,
 	vector< double >& A,
 	vector< double >& B )
 {
-	HHGate* gate = reinterpret_cast< HHGate* >( gateId.eref().data() );
+	double min = HSolveUtils::get< HHGate, double >( gateId, "min" );
+	double max = HSolveUtils::get< HHGate, double >( gateId, "max" );
+	unsigned int divs = HSolveUtils::get< HHGate, unsigned int >(
+		gateId, "divs" );
+	
+	if ( min == grid.min_ && max == grid.max_ && divs == grid.divs_ ) {
+		A = HSolveUtils::get< HHGate, vector< double > >( gateId, "tableA" );
+		B = HSolveUtils::get< HHGate, vector< double > >( gateId, "tableB" );
+		
+		return;
+	}
 	
 	A.resize( grid.size() );
 	B.resize( grid.size() );
 	
+	/*
+	 * Getting Id of original (prototype) gate, so that we can set fields on
+	 * it. Copied gates are read-only.
+	 */
+	HHGate* gate = reinterpret_cast< HHGate* >( gateId.eref().data() );
+	gateId = gate->originalGateId();
+	
+	/*
+	 * Setting interpolation flag on. Will set back to its original value once
+	 * we're done.
+	 */
 	bool useInterpolation = HSolveUtils::get< HHGate, bool >
 		( gateId, "useInterpolation" );
 	HSolveUtils::set< HHGate, bool >( gateId, "useInterpolation", 1 );
 	
-	vector< double >::const_iterator igrid;
+	unsigned int igrid;
 	double* ia = &A[ 0 ];
 	double* ib = &B[ 0 ];
-	for ( igrid = grid.begin(); igrid != grid.end(); ++igrid ) {
-		gate->lookupBoth( *igrid, ia, ib );
+	for ( igrid = 0; igrid < grid.size(); ++igrid ) {
+		gate->lookupBoth( grid.entry( igrid ), ia, ib );
 		
 		++ia, ++ib;
 	}
 	
+	// Setting interpolation flag back to its original value.
 	HSolveUtils::set< HHGate, bool >
 		( gateId, "useInterpolation", useInterpolation );
 }

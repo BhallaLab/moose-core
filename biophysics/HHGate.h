@@ -148,6 +148,11 @@ class HHGate
 		Id originalChannelId() const;
 		
 		/**
+		 * Returns the Id of the original Gate.
+		 */
+		Id originalGateId() const;
+		
+		/**
 		 * tabFill does interpolation and range resizing for
 		 * a table representing a lookup function.
 		 * newXdivs is one less than the size of the table; it is the number
