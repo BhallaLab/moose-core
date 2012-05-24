@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Apr 17 23:58:13 2009 (+0530)
 # Version: 
-# Last-Updated: Thu May 24 09:32:59 2012 (+0530)
+# Last-Updated: Thu May 24 18:21:09 2012 (+0530)
 #           By: subha
-#     Update #: 217
+#     Update #: 231
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -34,21 +34,21 @@ from numpy import where, linspace, exp
 import moose
 
 import config
-from channel import ChannelBase
+from channelbase import ChannelBase
 
 class NaChannel(ChannelBase):
     """Dummy base class for all Na+ channels"""
     def __init__(self, path, xpower, ypower=0.0, Ek=50e-3):
-        print 'NaChannel.__init__:', name, parent.path
         ChannelBase.__init__(self, path, xpower=xpower, ypower=ypower, Ek=Ek)
 
 class NaF(NaChannel):
     def __init__(self, path, shift=-3.5e-3, Ek=50e-3):
-        if moose.exists(parent.path + '/' + name):
+        if moose.exists(path):
             NaChannel.__init__(self, path, xpower=3.0, ypower=1.0, Ek=Ek)
             return
         NaChannel.__init__(self, path, xpower=3.0, ypower=1.0, Ek=Ek)
-        v = linspace(config.vmin, config.vmax, config.ndivs + 1) + shift
+        print 'shift', shift, type(shift)
+        v = ChannelBase.v_array + shift
         tau_m = where(v < -30e-3, \
                           1.0e-3 * (0.025 + 0.14 * exp((v + 30.0e-3) / 10.0e-3)), \
                           1.0e-3 * (0.02 + 0.145 * exp(( - v - 30.0e-3) / 10.0e-3)))
@@ -66,7 +66,7 @@ class NaF(NaChannel):
         
 class NaF2(NaChannel):
     def __init__(self, path, shift=-2.5e-3, Ek=50e-3):
-        if moose.exists(parent.path + '/' + name):
+        if moose.exists(path):
             NaChannel.__init__(self, path, xpower=3.0, ypower=1.0, Ek=Ek)
             return
         NaChannel.__init__(self, path, xpower=3.0, ypower=1.0, Ek=Ek)
@@ -99,7 +99,7 @@ class NaF2_nRT(NaF2):
 
 class NaP(NaChannel):
     def __init__(self, path, Ek=50e-3):
-        if moose.exists(parent.path + '/' + name):
+        if moose.exists(path):
             NaChannel.__init__(self, path, xpower=1.0, Ek=Ek)
             return
         NaChannel.__init__(self, path, xpower=1.0, Ek=Ek)
@@ -118,7 +118,7 @@ class NaP(NaChannel):
 class NaPF(NaChannel):
     """Persistent Na+ current, fast"""
     def __init__(self, path, Ek=50e-3):
-        if moose.exists(parent.path + '/' + name):
+        if moose.exists(path):
             NaChannel.__init__(self, path, xpower=3.0, Ek=Ek)
             return
         NaChannel.__init__(self, path, xpower=3.0, Ek=Ek)
@@ -135,7 +135,7 @@ class NaPF(NaChannel):
 
 class NaPF_SS(NaChannel):
     def __init__(self, path, shift=-2.5e-3, Ek=50e-3):
-        if moose.exists(parent.path + '/' + name):
+        if moose.exists(path):
             NaChannel.__init__(self, path, xpower=3.0, Ek=Ek)
             return
         NaChannel.__init__(self, path, xpower=3.0, Ek=Ek)
@@ -155,7 +155,7 @@ class NaPF_TCR(NaChannel):
     """Persistent Na+ channel specific to TCR cells. Only difference
     with NaPF is power of m is 1 as opposed 3."""
     def __init__(self, path, shift=7e-3, Ek=50e-3):
-        if moose.exists(parent.path + '/' + name):
+        if moose.exists(path):
             NaChannel.__init__(self, path, xpower=1.0, Ek=Ek)
             return 
         NaChannel.__init__(self, path, xpower=1.0, Ek=Ek)
@@ -173,7 +173,7 @@ class NaF_TCR(NaChannel):
     """Fast Na+ channel for TCR cells. This is almost identical to
     NaF, but there is a nasty voltage shift in the tables."""
     def __init__(self, path, Ek=50e-3):
-        if moose.exists(parent.path + '/' + name):
+        if moose.exists(path):
             NaChannel.__init__(self, path, xpower=3.0, ypower=1.0, Ek=Ek)
             return
         NaChannel.__init__(self, path, xpower=3.0, ypower=1.0, Ek=Ek)
@@ -208,9 +208,11 @@ def initNaChannelPrototypes(libpath='/library'):
         'NaF_TCR',
         ]
     prototypes = {}
-    for channel_name in channels_names:
+    for channel_name in channel_names:
         channel_class = eval(channel_name)
-        prototypes[channel_name] = channel_class(libpath, channel_name)        
+        path = '%s/%s' % (libpath, channel_name)
+        print 'path', path
+        prototypes[channel_name] = channel_class(path)
     return prototypes
 
 # 

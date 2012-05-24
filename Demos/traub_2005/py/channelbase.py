@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri May  4 14:55:52 2012 (+0530)
 # Version: 
-# Last-Updated: Thu May 24 15:06:33 2012 (+0530)
+# Last-Updated: Thu May 24 18:25:30 2012 (+0530)
 #           By: subha
-#     Update #: 29
+#     Update #: 35
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -39,8 +39,10 @@ class ChannelBase(moose.HHChannel):
     v_array = np.linspace(vmin, vmax, ndivs+1)
     def __init__(self, path, xpower=1, ypower=0, Ek=0.0):
         if moose.exists(path):
-            moose.HHChannel.__init__(path)
+            moose.HHChannel.__init__(self, path)
             return
+        print 'path:', path
+        moose.HHChannel.__init__(self, path)
         self.Ek = Ek
         if xpower != 0:
             self.Xpower = xpower

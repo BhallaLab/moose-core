@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Apr 27 15:34:07 2009 (+0530)
 # Version: 
-# Last-Updated: Thu May 24 09:33:51 2012 (+0530)
+# Last-Updated: Thu May 24 18:10:23 2012 (+0530)
 #           By: subha
-#     Update #: 18
+#     Update #: 19
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -35,7 +35,7 @@ import config
 import moose
 from numpy import exp, linspace
 
-from channel import ChannelBase
+from channelbase import ChannelBase
 
 class AR(ChannelBase):
     """Combined cation current."""

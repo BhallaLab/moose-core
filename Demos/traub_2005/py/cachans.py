@@ -31,7 +31,7 @@
 
 from numpy import where, exp, array
 import moose
-from channel import ChannelBase
+from channelbase import ChannelBase
 
 class CaChannel(ChannelBase):
     """This is just a place holder to maintain type information"""
