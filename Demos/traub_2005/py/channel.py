@@ -1,14 +1,14 @@
-# channel.py --- 
+# trbchan.py --- 
 # 
-# Filename: channel.py
+# Filename: trbchan.py
 # Description: 
-# Author: subhasis ray
+# Author: Subhasis Ray
 # Maintainer: 
-# Created: Fri Apr 17 15:17:35 2009 (+0530)
+# Created: Fri May  4 14:55:52 2012 (+0530)
 # Version: 
-# Last-Updated: Wed Jan  4 16:31:30 2012 (+0530)
-#           By: Subhasis Ray
-#     Update #: 45
+# Last-Updated: Thu May 24 15:06:33 2012 (+0530)
+#           By: subha
+#     Update #: 29
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -17,67 +17,44 @@
 
 # Commentary: 
 # 
-# 
+# Base class for channels in Traub model.
 # 
 # 
 
 # Change log:
 # 
-# 
-# 
-# 
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License as
-# published by the Free Software Foundation; either version 3, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program; see the file COPYING.  If not, write to
-# the Free Software Foundation, Inc., 51 Franklin Street, Fifth
-# Floor, Boston, MA 02110-1301, USA.
-# 
+# 2012-05-04 14:55:56 (+0530) subha started porting code from
+# channel.py in old moose version to dh_branch.
 # 
 
 # Code:
 
-import numpy
-import config
+import numpy as np
 import moose
 
 class ChannelBase(moose.HHChannel):
-    v_array = numpy.linspace(config.vmin, config.vmax, config.ndivs + 1)
-    def __init__(self, name, parent, xpower=1, ypower=0, Ek=0.0):
-        path = None
-        if isinstance(parent, str):
-            path = '%s/%s' % (parent, name)
-        elif isinstance(parent, moose.Neutral):
-            path = '%s/%s' % (parent.path, name)
-        elif isinstance(parent, moose.ObjId):
-            path = '%s/%s' % (parent.getField('path'), name)
-        print 'Creating', path
+    vmin = -120e-3
+    vmax = 40e-3
+    ndivs = 640
+    v_array = np.linspace(vmin, vmax, ndivs+1)
+    def __init__(self, path, xpower=1, ypower=0, Ek=0.0):
         if moose.exists(path):
-            moose.HHChannel.__init__(self, path)
+            moose.HHChannel.__init__(path)
             return
-        moose.HHChannel.__init__(self, path)            
         self.Ek = Ek
         if xpower != 0:
-            self.Xpower = float(xpower)
-            self.xGate = moose.HHGate(self.path + '/gateX')
-            self.xGate.min = config.vmin
-            self.xGate.max = config.vmax
-            self.xGate.divs = config.ndivs
-
+            self.Xpower = xpower
+            self.xGate = moose.HHGate('%s/gateX' % (path))
+            self.xGate.min = ChannelBase.vmin
+            self.xGate.max = ChannelBase.vmax
+            self.xGate.divs = ChannelBase.ndivs
         if ypower != 0:
-            self.Ypower = float(ypower)
-            self.yGate = moose.HHGate(self.path + '/gateY')
-            self.yGate.min = config.vmin
-            self.yGate.max = config.vmax
-            self.yGate.divs = config.ndivs
-            
+            self.Ypower = ypower
+            self.yGate = moose.HHGate('%s/gateY' % (path))
+            self.yGate.min = ChannelBase.vmin
+            self.yGate.max = ChannelBase.vmax
+            self.yGate.divs = ChannelBase.ndivs
+
+
 # 
-# channel.py ends here
+# trbchan.py ends here
