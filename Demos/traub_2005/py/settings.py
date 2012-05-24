@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed May 23 12:04:34 2012 (+0530)
 # Version: 
-# Last-Updated: Thu May 24 15:16:50 2012 (+0530)
+# Last-Updated: Thu May 24 15:18:06 2012 (+0530)
 #           By: subha
-#     Update #: 165
+#     Update #: 167
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -29,6 +29,7 @@
 
 # Code:
 import exceptions
+
 class ReinitializationWarning(exceptions.Warning):
     def __init__(self, *args, **kwargs):
         exceptions.Warning.__init__(self, *args, **kwargs)
@@ -37,6 +38,7 @@ class ReinitializationWarning(exceptions.Warning):
 class Settings(object):    
     pass
 
+    
 class SimulationSettings(Settings):
     """Class for storing simulation settings.
 
