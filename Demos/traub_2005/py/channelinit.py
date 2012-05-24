@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed May 23 21:24:11 2012 (+0530)
 # Version: 
-# Last-Updated: Thu May 24 16:54:32 2012 (+0530)
+# Last-Updated: Thu May 24 17:03:04 2012 (+0530)
 #           By: subha
-#     Update #: 63
+#     Update #: 66
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -28,7 +28,6 @@
 # 
 # Code:
 
-import config
 import nachans 
 import kchans 
 import archan
@@ -49,7 +48,7 @@ def init_chanlib():
     _channels.update(kchans.initKChannelPrototypes())
     _channels.update(archan.initARChannelPrototypes())
     _channels.update(cachans.initCaChannelPrototypes())
-    _channels.update(initCaPoolPrototype())    
+    _channels.update(capool.initCaPoolPrototypes())    
     return _channels
 
         
