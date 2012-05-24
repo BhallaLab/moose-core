@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri May  4 14:55:52 2012 (+0530)
 # Version: 
-# Last-Updated: Fri May  4 15:04:21 2012 (+0530)
-#           By: Subhasis Ray
-#     Update #: 20
+# Last-Updated: Thu May 24 15:02:11 2012 (+0530)
+#           By: subha
+#     Update #: 22
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -34,7 +34,10 @@ import trbconfig as cfg
 import moose
 
 class ChannelBase(moose.HHChannel):
-    v_array = np.linspace(cfg.vmin, cfg.vmax, cfg.ndivs+1)
+    vmin = -120e-3
+    vmax = 40e-3
+    ndivs = 640
+    v_array = np.linspace(vmin, vmax, ndivs+1)
     def __init__(self, path, xpower=1, ypower=0, Ek=0.0):
         if moose.exists(path):
             moose.HHChannel.__init__(path)
