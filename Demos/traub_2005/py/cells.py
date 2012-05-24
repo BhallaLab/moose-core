@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Mar  9 23:17:17 2012 (+0530)
 # Version: 
-# Last-Updated: Thu May 24 16:53:01 2012 (+0530)
+# Last-Updated: Thu May 24 18:12:38 2012 (+0530)
 #           By: subha
-#     Update #: 379
+#     Update #: 383
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -35,10 +35,10 @@ import config
 from config import logger
 import nachans
 import kchans
-import ar
+import archan
 import cachans
 import capool
-from init import init_chanlib
+from channelinit import init_chanlib
         
 def read_keyvals(filename):
     """Read the mapping between key value pairs from file.
@@ -70,7 +70,7 @@ def adjust_chanlib(cdict):
             ch.Ek = cdict['ENa']
         elif isinstance(ch, cachans.CaChannel):
             ch.Ek = cdict['ECa']
-        elif isinstance(ch, ar.AR):
+        elif isinstance(ch, archan.AR):
             ch.Ek = cdict['EAR']
             ch.X = cdict['X_AR']        
         elif isinstance(ch, capool.CaPool):
@@ -139,7 +139,7 @@ class CellMeta(type):
         return type.__new__(cls, name, bases, cdict)
 
     
-class CellBase(moose.Cell):
+class CellBase(moose.Neutral):
     __metaclass__ = CellMeta
     def __init__(self, *args):
         moose.Cell.__init__(self, *args)

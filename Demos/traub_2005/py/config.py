@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed May 23 11:31:40 2012 (+0530)
 # Version: 
-# Last-Updated: Thu May 24 16:56:27 2012 (+0530)
+# Last-Updated: Thu May 24 18:08:48 2012 (+0530)
 #           By: subha
-#     Update #: 70
+#     Update #: 82
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -102,6 +102,32 @@ spikeRecordingSettings.fields = {
     'Vm': 'Event',
     }
 
+#---------------------------------------------------------------------
+# Logging
+#---------------------------------------------------------------------
+import os
+from datetime import datetime
+import logging
+
+timestamp = datetime.now()
+mypid = os.getpid()
+data_dir = os.path.join('data', timestamp.strftime('%Y_%m_%d'))
+
+if not os.access(data_dir, os.F_OK):
+    os.mkdir(data_dir)
+
+filename_suffix = '_%s_%d' % (timestamp.strftime('%Y%m%d_%H%M%S'), mypid)
+
+def handleError(self, record):
+    raise
+
+LOG_FILENAME = os.path.join(data_dir, 'traub2005%s.log' % (filename_suffix))
+LOG_LEVEL = logging.DEBUG
+logging.Handler.handleError = handleError
+logging.basicConfig(filename=LOG_FILENAME, level=LOG_LEVEL, format='%(asctime)s %(levelname)s %(name)s %(filename)s %(funcName)s: %(message)s', filemode='w')
+# logging.basicConfig(level=LOG_LEVEL, format='%(asctime)s %(levelname)s %(name)s %(filename)s %(funcName)s: %(message)s', filemode='w')
+
+logger = logging.getLogger('traub2005')
 
 
 # 
