@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Apr 17 23:58:49 2009 (+0530)
 # Version: 
-# Last-Updated: Thu May 24 09:33:32 2012 (+0530)
+# Last-Updated: Thu May 24 18:09:32 2012 (+0530)
 #           By: subha
-#     Update #: 752
+#     Update #: 753
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -46,7 +46,7 @@
 # Code:
 
 import moose
-from channel import ChannelBase
+from channelbase import ChannelBase
 from numpy import where, linspace, exp, arange, ones, zeros, savetxt
 import config
 
