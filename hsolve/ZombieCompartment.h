@@ -2,7 +2,7 @@
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment,
 ** also known as GENESIS 3 base code.
-**           copyright (C) 2003-2006 Upinder S. Bhalla. and NCBS
+**           copyright (C) 2003-2012 Upinder S. Bhalla. and NCBS
 ** It is made available under the terms of the
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
@@ -12,10 +12,8 @@
 #define _ZOMBIE_COMPARTMENT_H
 
 /**
- * The Compartment class sets up an asymmetric compartment for
- * branched nerve calculations. Handles electronic structure and
- * also channels. This is not a particularly efficient way of doing
- * this, so we should use a solver for any substantial calculations.
+ * Zombie object that lets HSolve do its calculations, while letting the user
+ * interact with this object as if it were the original object.
  */
 class ZombieCompartment
 {
