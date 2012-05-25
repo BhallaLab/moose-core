@@ -214,8 +214,7 @@ void HSolveActive::readGates() {
 }
 
 void HSolveActive::readCalcium() {
-	CaConcStruct caConc;
-	double Ca, CaBasal, tau, B;
+	double Ca, CaBasal, tau, B, ceiling, floor;
 	vector< Id > caConcId;
 	vector< int > caTargetIndex;
 	map< Id, int > caConcIndex;
@@ -254,13 +253,19 @@ void HSolveActive::readCalcium() {
 						HSolveUtils::get< CaConc, double >( *iconc, "tau" );
 					B =
 						HSolveUtils::get< CaConc, double >( *iconc, "B" );
+					ceiling =
+						HSolveUtils::get< CaConc, double >( *iconc, "ceiling" );
+					floor =
+						HSolveUtils::get< CaConc, double >( *iconc, "floor" );
 					
-					caConc.c_ = Ca - CaBasal;
-					caConc.factor1_ = 4.0 / ( 2.0 + dt_ / tau ) - 1.0;
-					caConc.factor2_ = 2.0 * B * dt_ / ( 2.0 + dt_ / tau );
-					caConc.CaBasal_ = CaBasal;
-					
-					caConc_.push_back( caConc );
+					caConc_.push_back(
+						CaConcStruct(
+							Ca, CaBasal,
+							tau, B,
+							ceiling, floor,
+							dt_
+						)
+					);
 					caConcId_.push_back( *iconc );
 				}
 			

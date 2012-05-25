@@ -397,11 +397,64 @@ double HSolve::getCa( Id id ) const
 	return ca_[ index ];
 }
 
-void HSolve::setCa( Id id, double value )
+void HSolve::setCa( Id id, double Ca )
 {
 	unsigned int index = localIndex( id );
 	assert( index < caConc_.size() );
 	
-	ca_[ index ] = value;
-	caConc_[ index ].c_ = value - caConc_[ index ].CaBasal_;
+	ca_[ index ] = Ca;
+	caConc_[ index ].setCa( Ca );
+}
+
+double HSolve::getCaBasal( Id id ) const
+{
+	unsigned int index = localIndex( id );
+	assert( index < caConc_.size() );
+	return caConc_[ index ].CaBasal_;
+}
+
+void HSolve::setCaBasal( Id id, double CaBasal )
+{
+	unsigned int index = localIndex( id );
+	assert( index < caConc_.size() );
+	
+	caConc_[ index ].setCaBasal( CaBasal );
+}
+
+void HSolve::setTauB( Id id, double tau, double B )
+{
+	unsigned int index = localIndex( id );
+	assert( index < caConc_.size() );
+	
+	caConc_[ index ].setTauB( tau, B, dt_ );
+}
+
+double HSolve::getCaCeiling( Id id ) const
+{
+	unsigned int index = localIndex( id );
+	assert( index < caConc_.size() );
+	return caConc_[ index ].ceiling_;
+}
+
+void HSolve::setCaCeiling( Id id, double ceiling )
+{
+	unsigned int index = localIndex( id );
+	assert( index < caConc_.size() );
+	
+	caConc_[ index ].ceiling_ = ceiling;
+}
+
+double HSolve::getCaFloor( Id id ) const
+{
+	unsigned int index = localIndex( id );
+	assert( index < caConc_.size() );
+	return caConc_[ index ].floor_;
+}
+
+void HSolve::setCaFloor( Id id, double floor )
+{
+	unsigned int index = localIndex( id );
+	assert( index < caConc_.size() );
+	
+	caConc_[ index ].floor_ = floor;
 }

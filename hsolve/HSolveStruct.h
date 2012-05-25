@@ -89,6 +89,21 @@ struct CaConcStruct
 	double CaBasal_;
 	double factor1_;
 	double factor2_;
+	double ceiling_;
+	double floor_;
+	
+	CaConcStruct();
+	CaConcStruct(
+		double Ca,
+		double CaBasal,
+		double tau,
+		double B,
+		double ceiling,
+		double floor,
+		double dt );
+	void setCa( double Ca );
+	void setCaBasal( double CaBasal );
+	void setTauB( double tau, double B, double dt );
 	double process( double activation );
 };
 
