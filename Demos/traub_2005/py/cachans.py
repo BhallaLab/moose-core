@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Apr 18 00:18:24 2009 (+0530)
 # Version: 
-# Last-Updated: Thu May 24 15:12:19 2012 (+0530)
+# Last-Updated: Fri May 25 14:13:26 2012 (+0530)
 #           By: subha
-#     Update #: 239
+#     Update #: 245
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -37,9 +37,9 @@ class CaChannel(ChannelBase):
     """This is just a place holder to maintain type information"""
     def __init__(self, path, xpower=1.0, ypower=0.0, Ek=125e-3):
         if moose.exists(path):
-            ChannelBase.__init__(self, path, xpower, ypower)
+            ChannelBase.__init__(self, path, xpower=xpower, ypower=ypower)
             return
-        ChannelBase.__init__(self, path, xpower, ypower)
+        ChannelBase.__init__(self, path, xpower=xpower, ypower=ypower)
         self.Ek = Ek
 
 class CaL(CaChannel):
@@ -56,12 +56,11 @@ class CaL(CaChannel):
             CaChannel.__init__(self, path, xpower=2.0, Ek=125e-3)
             return
         CaChannel.__init__(self, path, xpower=2.0, Ek=125e-3)
-        for i in range(ChannelBase.ndivs + 1):
-            self.xGate.A[i] = CaL.alpha[i]
-            self.xGate.B[i] = CaL.beta[i]
+        self.xGate.tableA = CaL.alpha
+        self.xGate.tableB = CaL.beta
         self.xGate.tweakAlpha()
         self.X = 0.0
-        ca_msg_field = moose.MString('%s/addmsg1' % (self.path))
+        ca_msg_field = moose.Mstring('%s/addmsg1' % (self.path))
         ca_msg_field.value = '.	IkOut	../CaPool	current'
 
 
@@ -82,11 +81,10 @@ class CaT(CaChannel):
         CaChannel.__init__(self, path, xpower=2.0, ypower=1.0)
         self.Ek = 125e-3
         self.X = 0.0
-        for i in range(ChannelBase.ndivs + 1):
-            self.xGate.A[i] = CaT.tau_m[i]
-            self.xGate.B[i] = CaT.m_inf[i]
-            self.yGate.A[i] = CaT.tau_h[i]
-            self.yGate.B[i] = CaT.h_inf[i]
+        self.xGate.tableA = CaT.tau_m
+        self.xGate.tableB = CaT.m_inf
+        self.yGate.tableA = CaT.tau_h
+        self.yGate.tableB = CaT.h_inf
         self.xGate.tweakTau()
         self.yGate.tweakTau()
 
@@ -105,11 +103,10 @@ class CaT_A(CaChannel):
             return
         CaChannel.__init__(self, path, xpower=2.0, ypower=1.0, Ek=125e-3)
         self.Ek = 125e-3
-        for i in range(ChannelBase.ndivs + 1):
-            self.xGate.A[i] = CaT_A.tau_m[i]
-            self.xGate.B[i] = CaT_A.m_inf[i]
-            self.yGate.A[i] = CaT_A.tau_h[i]
-            self.yGate.B[i] = CaT_A.h_inf[i]
+        self.xGate.tableA = CaT_A.tau_m
+        self.xGate.tableB = CaT_A.m_inf
+        self.yGate.tableA = CaT_A.tau_h
+        self.yGate.tableB = CaT_A.h_inf
         self.xGate.tweakTau()
         self.yGate.tweakTau()
         self.X = 0
@@ -119,7 +116,7 @@ def initCaChannelPrototypes(libpath='/library'):
     prototypes = {}
     for channel_name in channel_names:
         channel_class = eval(channel_name)
-        channel = channel_class(libpath, channel_name)
+        channel = channel_class('%s/%s' % (libpath, channel_name))
         prototypes[channel_name] = channel
     return prototypes
 
