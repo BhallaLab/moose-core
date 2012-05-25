@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Apr 27 15:34:07 2009 (+0530)
 # Version: 
-# Last-Updated: Thu May 24 18:10:23 2012 (+0530)
+# Last-Updated: Fri May 25 12:42:33 2012 (+0530)
 #           By: subha
-#     Update #: 19
+#     Update #: 26
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -31,10 +31,8 @@
 
 # Code:
 
-import config
+from numpy import exp
 import moose
-from numpy import exp, linspace
-
 from channelbase import ChannelBase
 
 class AR(ChannelBase):
@@ -44,7 +42,10 @@ class AR(ChannelBase):
     tau_m = 1e-3 / ( exp( -14.6 - 0.086 * v * 1e3) + exp( -1.87 + 0.07 * v * 1e3))
 
     def __init__(self, path, Ek=-35e-3):
-	ChannelBase.__init__(self, path, 1, 0)
+        if moose.exists(path):
+            ChannelBase.__init__(self, path, xpower=1, ypower=0)
+            return
+        ChannelBase.__init__(self, path, xpower=1, ypower=0)
         self.xGate.tableA = AR.tau_m
         self.xGate.tableB = AR.m_inf
 	self.xGate.tweakTau()

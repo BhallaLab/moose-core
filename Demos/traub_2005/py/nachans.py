@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Apr 17 23:58:13 2009 (+0530)
 # Version: 
-# Last-Updated: Thu May 24 18:21:09 2012 (+0530)
+# Last-Updated: Fri May 25 12:32:48 2012 (+0530)
 #           By: subha
-#     Update #: 231
+#     Update #: 249
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -70,23 +70,19 @@ class NaF2(NaChannel):
             NaChannel.__init__(self, path, xpower=3.0, ypower=1.0, Ek=Ek)
             return
         NaChannel.__init__(self, path, xpower=3.0, ypower=1.0, Ek=Ek)
-        config.LOGGER.debug('NaF2: shift = %g' % (shift))
-        v = linspace(config.vmin, config.vmax, config.ndivs + 1)
-        tau_h = 1e-3 * (0.225 + 1.125 / ( 1 + exp( (  v + 37e-3 ) / 15e-3 ) ))
-        
+        config.logger.debug('NaF2: shift = %g' % (shift))
+        v = linspace(ChannelBase.vmin, ChannelBase.vmax, ChannelBase.ndivs + 1)
+        tau_h = 1e-3 * (0.225 + 1.125 / ( 1 + exp( (  v + 37e-3 ) / 15e-3 ) ))        
         h_inf = 1.0 / (1.0 + exp((v + 58.3e-3) / 6.7e-3))
         v = v + shift
         tau_m = where(v < -30e-3, \
                           1.0e-3 * (0.0125 + 0.1525 * exp ((v + 30e-3) / 10e-3)), \
-                          1.0e-3 * (0.02 + 0.145 * exp((-v - 30e-3) / 10e-3)))
-        
+                          1.0e-3 * (0.02 + 0.145 * exp((-v - 30e-3) / 10e-3)))        
         m_inf = 1.0 / (1.0 + exp(( - v - 38e-3) / 10e-3))
-
-        for i in range(config.ndivs + 1):
-            self.xGate.A[i] = tau_m[i]
-            self.xGate.B[i] = m_inf[i]
-            self.yGate.A[i] = tau_h[i]
-            self.yGate.B[i] = h_inf[i]
+        self.xGate.tableA = tau_m
+        self.xGate.tableB = m_inf
+        self.yGate.tableA = tau_h
+        self.yGate.tableB = h_inf
         self.xGate.tweakTau()
         self.yGate.tweakTau()
         self.X = 0.0
@@ -103,14 +99,13 @@ class NaP(NaChannel):
             NaChannel.__init__(self, path, xpower=1.0, Ek=Ek)
             return
         NaChannel.__init__(self, path, xpower=1.0, Ek=Ek)
-        v = linspace(config.vmin, config.vmax, config.ndivs + 1)
+        v = linspace(ChannelBase.vmin, ChannelBase.vmax, ChannelBase.ndivs + 1)
         tau_m = where(v < -40e-3, \
                           1.0e-3 * (0.025 + 0.14 * exp((v + 40e-3) / 10e-3)), \
                           1.0e-3 * (0.02 + 0.145 * exp((-v - 40e-3) / 10e-3)))
         m_inf = 1.0 / (1.0 + exp((-v - 48e-3) / 10e-3))
-        for i in range(config.ndivs + 1):
-            self.xGate.A[i] = tau_m[i]
-            self.xGate.B[i] = m_inf[i]
+        self.xGate.tableA = tau_m
+        self.xGate.tableB = m_inf
         self.xGate.tweakTau()
         self.X = 0.0
 
@@ -122,14 +117,13 @@ class NaPF(NaChannel):
             NaChannel.__init__(self, path, xpower=3.0, Ek=Ek)
             return
         NaChannel.__init__(self, path, xpower=3.0, Ek=Ek)
-        v = linspace(config.vmin, config.vmax, config.ndivs + 1)
+        v = linspace(ChannelBase.vmin, ChannelBase.vmax, ChannelBase.ndivs + 1)
         tau_m = where(v < -30e-3, \
                            1.0e-3 * (0.025 + 0.14 * exp((v  + 30.0e-3) / 10.0e-3)), \
                            1.0e-3 * (0.02 + 0.145 * exp((- v - 30.0e-3) / 10.0e-3)))
         m_inf = 1.0 / (1.0 + exp((-v - 38e-3) / 10e-3))
-        for i in range(config.ndivs + 1):
-            self.xGate.A[i] = tau_m[i]
-            self.xGate.B[i] = m_inf[i]
+        self.xGate.tableA = tau_m
+        self.xGate.tableB = m_inf
         self.xGate.tweakTau()
 
 
@@ -139,15 +133,14 @@ class NaPF_SS(NaChannel):
             NaChannel.__init__(self, path, xpower=3.0, Ek=Ek)
             return
         NaChannel.__init__(self, path, xpower=3.0, Ek=Ek)
-        config.LOGGER.debug('NaPF_SS: shift = %g' % (shift))
-        v = linspace(config.vmin, config.vmax, config.ndivs + 1) + shift
+        config.logger.debug('NaPF_SS: shift = %g' % (shift))
+        v = linspace(ChannelBase.vmin, ChannelBase.vmax, ChannelBase.ndivs + 1) + shift
         tau_m = where(v < -30e-3, \
                            1.0e-3 * (0.025 + 0.14 * exp((v  + 30.0e-3) / 10.0e-3)), \
                            1.0e-3 * (0.02 + 0.145 * exp((- v - 30.0e-3) / 10.0e-3)))
         m_inf = 1.0 / (1.0 + exp((- v - 38e-3) / 10e-3))
-        for i in range(config.ndivs + 1):
-            self.xGate.A[i] = tau_m[i]
-            self.xGate.B[i] = m_inf[i]
+        self.xGate.tableA = tau_m
+        self.xGate.tableB = m_inf
         self.xGate.tweakTau()
 
 
@@ -159,14 +152,13 @@ class NaPF_TCR(NaChannel):
             NaChannel.__init__(self, path, xpower=1.0, Ek=Ek)
             return 
         NaChannel.__init__(self, path, xpower=1.0, Ek=Ek)
-        v = linspace(config.vmin, config.vmax, config.ndivs + 1) + shift
+        v = linspace(ChannelBase.vmin, ChannelBase.vmax, ChannelBase.ndivs + 1) + shift
         tau_m = where(v < -30e-3, \
                            1.0e-3 * (0.025 + 0.14 * exp((v  + 30.0e-3) / 10.0e-3)), \
                            1.0e-3 * (0.02 + 0.145 * exp((- v - 30.0e-3) / 10.0e-3)))
         m_inf = 1.0 / (1.0 + exp((-v - 38e-3) / 10e-3))
-        for i in range(config.ndivs + 1):
-            self.xGate.A[i] = tau_m[i]
-            self.xGate.B[i] = m_inf[i]
+        self.xGate.tableA = tau_m
+        self.xGate.tableB = m_inf
         self.xGate.tweakTau()
 
 class NaF_TCR(NaChannel):
@@ -179,7 +171,7 @@ class NaF_TCR(NaChannel):
         NaChannel.__init__(self, path, xpower=3.0, ypower=1.0, Ek=Ek)
         shift_mnaf = -5.5e-3
         shift_hnaf = -7e-3
-        v = linspace(config.vmin, config.vmax, config.ndivs + 1) 
+        v = linspace(ChannelBase.vmin, ChannelBase.vmax, ChannelBase.ndivs + 1) 
         tau_h = 1.0e-3 * (0.15 + 1.15 / ( 1.0 + exp(( v + 37.0e-3) / 15.0e-3)))        
         h_inf = 1.0 / (1.0 + exp((v + shift_hnaf + 62.9e-3) / 10.7e-3))
         v = v + shift_mnaf
@@ -187,12 +179,10 @@ class NaF_TCR(NaChannel):
                           1.0e-3 * (0.025 + 0.14 * exp((v + 30.0e-3) / 10.0e-3)), \
                           1.0e-3 * (0.02 + 0.145 * exp(( - v - 30.0e-3) / 10.0e-3)))
         m_inf = 1.0 / (1.0 + exp(( - v - 38e-3) / 10e-3))
-
-        for i in range(config.ndivs + 1):
-            self.xGate.A[i] = tau_m[i]
-            self.xGate.B[i] = m_inf[i]
-            self.yGate.A[i] = tau_h[i]
-            self.yGate.B[i] = h_inf[i]
+        self.xGate.tableA = tau_m
+        self.xGate.tableB = m_inf
+        self.yGate.tableA = tau_h
+        self.yGate.tableB = h_inf
         self.xGate.tweakTau()
         self.yGate.tweakTau()
 

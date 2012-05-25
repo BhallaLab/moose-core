@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed May 23 11:31:40 2012 (+0530)
 # Version: 
-# Last-Updated: Thu May 24 18:08:48 2012 (+0530)
+# Last-Updated: Fri May 25 15:03:11 2012 (+0530)
 #           By: subha
-#     Update #: 82
+#     Update #: 85
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -41,7 +41,9 @@ simulationSettings.endTime = 10.0
 
 modelSettings.container = '/network'
 modelSettings.libpath = '/library'
+modelSettings.protodir = 'proto'
 
+modelSettings.morph_has_postion = False
 modelSettings.populationSize['SupPyrRS'] = 1000
 modelSettings.populationSize['SupPyrFRB'] = 50
 modelSettings.populationSize['SupBasket'] = 90       
