@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed May 23 21:24:11 2012 (+0530)
 # Version: 
-# Last-Updated: Thu May 24 17:03:04 2012 (+0530)
+# Last-Updated: Fri May 25 11:42:08 2012 (+0530)
 #           By: subha
-#     Update #: 66
+#     Update #: 74
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -28,6 +28,8 @@
 # 
 # Code:
 
+import moose
+import config
 import nachans 
 import kchans 
 import archan
@@ -44,6 +46,8 @@ def init_chanlib():
     global _channels
     if _channels:
         return _channels
+    if not moose.exists(config.modelSettings.libpath):
+        moose.Neutral(config.modelSettings.libpath)
     _channels.update(nachans.initNaChannelPrototypes())
     _channels.update(kchans.initKChannelPrototypes())
     _channels.update(archan.initARChannelPrototypes())
@@ -51,7 +55,7 @@ def init_chanlib():
     _channels.update(capool.initCaPoolPrototypes())    
     return _channels
 
-        
+init_chanlib()        
         
 # 
 # init.py ends here

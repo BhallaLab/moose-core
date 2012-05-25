@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Apr 17 23:58:49 2009 (+0530)
 # Version: 
-# Last-Updated: Thu May 24 18:09:32 2012 (+0530)
+# Last-Updated: Fri May 25 19:01:41 2012 (+0530)
 #           By: subha
-#     Update #: 753
+#     Update #: 834
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -47,14 +47,14 @@
 
 import moose
 from channelbase import ChannelBase
-from numpy import where, linspace, exp, arange, ones, zeros, savetxt
-import config
+from numpy import where, linspace, exp, arange, ones, zeros, array
+import numpy as np
 
 
 class KChannel(ChannelBase):
     """This is a dummy base class to keep type information."""
     def __init__(self, path, xpower=1, ypower=0, Ek=-95e-3):
-        if moose.exists(parent.path + '/' + name):
+        if moose.exists(path):
             ChannelBase.__init__(self, path, xpower, ypower)
             return
         ChannelBase.__init__(self, path, xpower, ypower)
@@ -81,14 +81,13 @@ class KDR(KChannel):
                       1e-3 * (0.25 + 4.35 * exp((- v - 10.0e-3) / 10.0e-3)))
     m_inf = 1.0 / (1.0 + exp((- v - 29.5e-3) / 10e-3))
     
-    def __init__(self, path, Ek=-95e-3):
-        if moose.exists(parent.path + '/' + name):
-            KChannel.__init__(self, path, xpower, ypower)
+    def __init__(self, path, xpower=4, ypower=0, Ek=-95e-3):
+        if moose.exists(path):
+            KChannel.__init__(self, path)
             return
-	KChannel.__init__(self, path, xpower=4.0, Ek=Ek)
-        self.xGate.A = KDR.tau_m
-        self.xGate.B = KDR.m_inf
-	self.xGate.tweakTau()
+        KChannel.__init__(self, path, xpower, ypower, Ek=Ek)
+        self.xGate.tableA = KDR.m_inf / KDR.tau_m
+        self.xGate.tableB = 1 / KDR.tau_m
         self.X = 0.0
 
 
@@ -101,13 +100,12 @@ class KDR_FS(KChannel):
                        1e-3 * (0.25 + 4.35 * exp((- v - 10.0e-3) / 10.0e-3)))
 
     def __init__(self, path, Ek=-95e-3):
-        if moose.exists(parent.path + '/' + name):
+        if moose.exists(path):
             KChannel.__init__(self, path, xpower=4, ypower=0, Ek=Ek)
             return
-	KChannel.__init__(self, path, 4, Ek=Ek)
-        self.xGate.A = KDR_FS.tau_m
-        self.xGate.B = KDR_FS.m_inf
-        self.xGate.tweakTau()
+        KChannel.__init__(self, path, 4, Ek=Ek)
+        self.xGate.tableA = KDR_FS.m_inf / KDR_FS.tau_m
+        self.xGate.tableB = 1 / KDR_FS.tau_m
         self.X = 0.0
 
 
@@ -122,17 +120,14 @@ class KA(KChannel):
                        9.5e-3)
 
     def __init__(self, path, Ek=-95e-3):
-        if moose.exists(parent.path + '/' + name):
+        if moose.exists(path):
             KChannel.__init__(self, path, 4, 1)
             return
-	KChannel.__init__(self, path, 4, 1)
-	for i in range(config.ndivs + 1):
-            self.xGate.A[i] = KA.tau_m[i]
-            self.xGate.B[i] = KA.m_inf[i]
-            self.yGate.A[i] = KA.tau_h[i]
-            self.yGate.B[i] = KA.h_inf[i]
-        self.xGate.tweakTau()
-	self.yGate.tweakTau()
+        KChannel.__init__(self, path, 4, 1)
+        self.xGate.tableA = KA.m_inf / KA.tau_m
+        self.xGate.tableB = 1  / KA.tau_m
+        self.yGate.tableA = KA.h_inf / KA.tau_h
+        self.yGate.tableB = 1 / KA.tau_h
         self.X = 0.0
 
 class KA_IB(KChannel):
@@ -147,16 +142,14 @@ class KA_IB(KChannel):
     #                          9.5e-3)
 
     def __init__(self, path, Ek=-95e-3):
-        if moose.exists(parent.path + '/' + name):
+        if moose.exists(path):
             KChannel.__init__(self, path, 4, 1)
             return
-	KChannel.__init__(self, path, 4, 1, Ek=Ek)
-        self.xGate.tableA = KA.tau_m
-        self.xGate.tableB = KA.m_in
-        self.yGate.tableA = 2.6*KA.tau_h
-        self.yGate.tableB = KA.h_inf
-        self.xGate.tweakTau()
-	self.yGate.tweakTau()
+        KChannel.__init__(self, path, 4, 1, Ek=Ek)
+        self.xGate.tableA = KA.m_inf / KA.tau_m
+        self.xGate.tableB = 1 / KA.tau_m 
+        self.yGate.tableA = KA.h_inf / (2.6*KA.tau_h)
+        self.yGate.tableB = 1 / (2.6*KA.tau_h)
         self.X = 0.0
 
 
@@ -171,17 +164,14 @@ class K2(KChannel):
 					exp((-v - 130e-3) / 7.1e-3)))
 
     def __init__(self, path, Ek=-95e-3):
-        if moose.exists(parent.path + '/' + name):
+        if moose.exists(path):
             KChannel.__init__(self, path, xpower=1.0, ypower=1.0)
             return
-	KChannel.__init__(self, path, xpower=1.0, ypower=1.0, Ek=Ek)
-	for i in range(config.ndivs + 1):
-            self.xGate.tableA = K2.tau_m
-            self.xGate.tableB = K2.m_inf
-            self.yGate.tableA = K2.tau_h
-            self.yGate.tableB = K2.h_inf
-        self.xGate.tweakTau()
-	self.yGate.tweakTau()
+        KChannel.__init__(self, path, xpower=1.0, ypower=1.0, Ek=Ek)
+        self.xGate.tableA = K2.m_inf / K2.tau_m
+        self.xGate.tableB = 1 / K2.tau_m
+        self.yGate.tableA = K2.h_inf / K2.tau_h
+        self.yGate.tableB = 1 / K2.tau_h
         self.X = 0.0
 	
 
@@ -190,14 +180,12 @@ class KM(KChannel):
     a =  1e3 * 0.02 / ( 1 + exp((-v - 20e-3 ) / 5e-3))
     b = 1e3 * 0.01 * exp((-v - 43e-3) / 18e-3)
     def __init__(self, path, Ek=-95e-3):
-        if moose.exists(parent.path + '/' + name):
+        if moose.exists(path):
             KChannel.__init__(self, path, xpower=1.0, ypower=0.0)
             return
-	KChannel.__init__(self, path, xpower=1.0, ypower=0.0, Ek=Ek)
-	for i in range(config.ndivs + 1):
-            self.xGate.A[i] = KM.a[i]
-            self.xGate.B[i] = KM.b[i]
-	self.xGate.tweakAlpha()
+        KChannel.__init__(self, path, xpower=1.0, ypower=0.0, Ek=Ek)
+        self.xGate.tableA = KM.a
+        self.xGate.tableB = KM.b + KM.b
         self.X = 0.0
 
         
@@ -209,7 +197,7 @@ class KCaChannel(KChannel):
     ca_conc = linspace(ca_min, ca_max, ca_divs + 1)
 
     def __init__(self, path, xpower=0.0, ypower=0.0, zpower=1.0, Ek=-95e-3):
-        if moose.exists(parent.path + '/' + name):
+        if moose.exists(path):
             KChannel.__init__(self, path, xpower, ypower, Ek=Ek)
             return
         KChannel.__init__(self, path, xpower, ypower, Ek=Ek)
@@ -221,18 +209,16 @@ class KCaChannel(KChannel):
         self.zGate.max = KCaChannel.ca_max
         self.zGate.useInterpolation = False
         self.useConcentration = True
-        ca_msg_field = moose.MString('%s/addmsg1')
+        ca_msg_field = moose.Mstring('%s/addmsg1' % (self.path))
         ca_msg_field.value = '../CaPool	concOut	. concen'
-        for handler in config.LOGGER.handlers:
-            handler.flush()
 
 
 class KAHPBase(KCaChannel):
-    def __init__(self, path, Ek=-95e-3):
-        if moose.exists(parent.path + '/' + name):
-            KCaChannel.__init__(self, path)
+    def __init__(self, path, xpower=0.0, ypower=0.0, zpower=1.0, Ek=-95e-3):
+        if moose.exists(path):
+            KCaChannel.__init__(self, path, xpower=xpower, ypower=ypower, zpower=zpower, Ek=Ek)
             return
-        KCaChannel.__init__(self, path)
+        KCaChannel.__init__(self, path, xpower=xpower, ypower=ypower, zpower=zpower, Ek=Ek)
         self.Z = 0.0
         
 
@@ -243,13 +229,12 @@ class KAHP(KAHPBase):
     beta =  ones(KCaChannel.ca_divs + 1) * 10.0
 
     def __init__(self, path, xpower=0.0, ypower=0.0, zpower=1.0, Ek=-95e-3):
-        if moose.exists(parent.path + '/' + name):
-            KAHPBase.__init__(self, path, Ek=Ek)
+        if moose.exists(path):
+            KAHPBase.__init__(self, path, xpower=xpower, ypower=ypower, zpower=zpower, Ek=Ek)
             return
-        KAHPBase.__init__(self, path, Ek=Ek)
+        KAHPBase.__init__(self, path, xpower=xpower, ypower=ypower, zpower=zpower, Ek=Ek)
         self.zGate.tableA = KAHP.alpha
-        self.zGate.tableB = KAHP.beta
-        self.zGate.tweakAlpha()
+        self.zGate.tableB =  KAHP.alpha + KAHP.beta
 #         self.zGate.A.calcMode = 1
 #         self.zGate.B.calcMode = 1
 
@@ -260,15 +245,14 @@ class KAHP_SLOWER(KAHPBase):
     beta =  ones(KCaChannel.ca_divs + 1) * 1.0
 
     def __init__(self, path, Ek=-95e-3):
-        if moose.exists(parent.path + '/' + name):
+        if moose.exists(path):
             KAHPBase.__init__(self, path, Ek=Ek)
             return
         KAHPBase.__init__(self, path, Ek=Ek)
         self.zGate.tableA = KAHP_SLOWER.alpha
-        self.zGate.tableB = KAHP_SLOWER.beta
-        self.zGate.tweakAlpha()
-        self.zGate.tableA.calcMode = 1
-        self.zGate.tableB.calcMode = 1
+        self.zGate.tableB = KAHP_SLOWER.alpha + KAHP_SLOWER.beta
+        # self.zGate.tableA.calcMode = 1
+        # self.zGate.tableB.calcMode = 1
 
 
 class KAHP_DP(KAHPBase):
@@ -276,13 +260,12 @@ class KAHP_DP(KAHPBase):
     alpha = where(KCaChannel.ca_conc < 100.0, 1e-1 * KCaChannel.ca_conc, 10.0)
     beta =  ones(KCaChannel.ca_divs + 1)
     def __init__(self, path, Ek=-95e-3):
-        if moose.exists(parent.path + '/' + name):
+        if moose.exists(path):
             KAHPBase.__init__(self, path, Ek=Ek)
             return
         KAHPBase.__init__(self, path, Ek=Ek)
         self.zGate.tableA = KAHP_DP.alpha
-        self.zGate.tableB = KAHP_DP.beta
-        self.zGate.tweakAlpha()
+        self.zGate.tableB = KAHP_DP.alpha + KAHP_DP.beta
 
 class KC(KCaChannel):
     """C type K+ channel"""
@@ -296,30 +279,35 @@ class KC(KCaChannel):
                   0.0)
 
     def __init__(self, path, Ek=-95e-3):
-        if moose.exists(parent.path + '/' + name):
+        if moose.exists(path):
             KCaChannel.__init__(self, path, Ek=Ek)
             return
         KCaChannel.__init__(self, path, xpower=1.0, ypower=0.0, zpower=1.0, Ek=Ek)
         self.zGate.tableA = KC.alpha_ca
         self.zGate.tableB = ones(KCaChannel.ca_divs + 1)
         self.xGate.tableA = KC.alpha
-        self.xGate.tableB = KC.beta
-        self.xGate.tweakAlpha()
+        self.xGate.tableB = KC.alpha + KC.beta
         self.instant = 4
         self.X = 0.0
+        b = np.asarray(self.xGate.tableB)
+        print 'x.B'
+        print b
         
 class KC_FAST(KC):
     """Fast KC channel"""
     def __init__(self, path, Ek=-95e-3):
-        if moose.exists(parent.path + '/' + name):
+        if moose.exists(path):
             KC.__init__(self, path, Ek=Ek)
             return
         KC.__init__(self, path, Ek=Ek)
-        self.xGate.tableA = 2 * array(self.xGate.tableA)
-        self.xGate.tableB = 2 * array(self.xGate.tableB)
+        self.xGate.tableA = 2 * KC.alpha
+        self.xGate.tableB = 2 * (KC.alpha + KC.beta)
+        b = np.asarray(self.xGate.tableB)
+        print 'x.B'
+        print b
 
 
-def initKChannelProtoTypes(libpath='/library'):
+def initKChannelPrototypes(libpath='/library'):
     channel_names = ['KDR', 
                      'KDR_FS', 
                      'KA', 
@@ -332,9 +320,11 @@ def initKChannelProtoTypes(libpath='/library'):
                      'KC',
                      'KC_FAST']
     prototypes = {}
-    for channel_name in channels_names:
+    for channel_name in channel_names:
+        print 'Creating ', channel_name
         channel_class = eval(channel_name)
-        prototypes[channel_name] = channel_class(libpath, channel_name)        
+        prototypes[channel_name] = channel_class('%s/%s' % (libpath, channel_name))
+        print 'finished creating:', prototypes[channel_name]
     return prototypes
         
 

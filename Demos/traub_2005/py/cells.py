@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Mar  9 23:17:17 2012 (+0530)
 # Version: 
-# Last-Updated: Thu May 24 18:12:38 2012 (+0530)
+# Last-Updated: Fri May 25 17:38:24 2012 (+0530)
 #           By: subha
-#     Update #: 383
+#     Update #: 421
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -49,21 +49,25 @@ def read_keyvals(filename):
 
     """
     ret = defaultdict(set)
-    with(open(filename, 'r')) as level_file:
-        for line in level_file:
-            tokens = line.split()
-            if not tokens:
-                continue
-            if len(tokens) != 2:
-                print filename, ' - Tokens: ', tokens, len(tokens)
-                return None
-            ret[int(tokens[1])].add(int(tokens[0]))
+    try:
+        with(open(filename, 'r')) as level_file:
+            for line in level_file:
+                tokens = line.split()
+                if not tokens:
+                    continue
+                if len(tokens) != 2:
+                    print filename, ' - Tokens: ', tokens, len(tokens)
+                    return None
+                ret[tokens[1]].add(tokens[0])
+    except IOError:
+        config.logger.info('No such file %s' % (filename))
     return ret
 
 def adjust_chanlib(cdict):
     """Update the revarsal potentials for channels. Set the initial X
     value for AR channel. Set the tau for Ca pool."""
-    for ch in init_chanlib().values():
+    channel_dict = init_chanlib()
+    for ch in channel_dict.values():
         if isinstance(ch, kchans.KChannel):
             ch.Ek = cdict['EK']
         elif isinstance(ch, nachans.NaChannel):
@@ -72,14 +76,14 @@ def adjust_chanlib(cdict):
             ch.Ek = cdict['ECa']
         elif isinstance(ch, archan.AR):
             ch.Ek = cdict['EAR']
-            ch.X = cdict['X_AR']        
+            if 'X_AR' in cdict:
+                ch.X = cdict['X_AR']        
         elif isinstance(ch, capool.CaPool):
             ch.tau = cdict['TauCa']            
 
-def read_prototype(cls, cdict):
+def read_prototype(celltype, cdict):
     """Read the cell prototype file for the specified class. The
     channel properties are updated using values in cdict."""
-    celltype = cls.__name__
     filename = '%s/%s.p' % (config.modelSettings.protodir, celltype)
     logger.debug('Reading prototype file %s' % (filename))
     adjust_chanlib(cdict)
@@ -93,13 +97,13 @@ def read_prototype(cls, cdict):
     # set the compartment postions to origin. This will avoid
     # incorrect assignemnt of position when the x/y/z values in
     # prototype file is just to for setting the compartment length.
-    if not config.has_comp_pos:
-        for comp in moose.wildCardFind('%s/##[TYPE=Compartment]' % (proto.path)):
+    if not config.modelSettings.morph_has_postion:
+        for comp in moose.wildcardFind('%s/##[TYPE=Compartment]' % (proto.path)):
             comp.x = 0.0
             comp.y = 0.0
             comp.z = 0.0
-    leveldict = read_keyvals('%s/%s.levels' % (config.protodir, celltype))
-    depths = read_keyvals('%s/%s.depths' % (config.protodir, celltype))
+    leveldict = read_keyvals('%s/%s.levels' % (config.modelSettings.protodir, celltype))
+    depths = read_keyvals('%s/%s.depths' % (config.modelSettings.protodir, celltype))
     depthdict = {}
     for level, depthset in depths.items():
         if len(depthset) != 1:
@@ -123,36 +127,38 @@ def assign_depths(cell, depthdict, leveldict):
     """
     if not depthdict:
         return
-    for level, complist in leveldict.items():
-        z = depthdict[level]
+    for level, depth in depthdict.items():
+        z = float(depth)
+        complist = leveldict[level]
         for comp_number in complist:
-            comp = moose.element('%s/comp_%d' % (cell.path, comp_number))
+            comp = moose.element('%s/comp_%s' % (cell.path, comp_number))
             comp.z = z
 
             
 class CellMeta(type):
-    def __new__(cls, name, bases, cdict):        
-        proto = read_prototype(cls, cdict)
-        if 'soma_tauCa' in cdict:
-            moose.element(proto.path + '/comp_1/CaPool').tau = cdict['soma_tauCa']
-        cdict['prototype'] = proto
+    def __new__(cls, name, bases, cdict):
+        if name != 'CellBase':
+            proto = read_prototype(name, cdict)
+            if 'soma_tauCa' in cdict:
+                moose.element(proto.path + '/comp_1/CaPool').tau = cdict['soma_tauCa']
+            cdict['prototype'] = proto
         return type.__new__(cls, name, bases, cdict)
 
     
 class CellBase(moose.Neutral):
     __metaclass__ = CellMeta
     def __init__(self, *args):
-        moose.Cell.__init__(self, *args)
+        moose.Neutral.__init__(self, *args)
         
     def comp(self, number):
         return moose.element('%s/comp_%d' % (self.path, number))
 
     @property
-    def get_soma(self):
+    def soma(self):
         return self.comp(1)
 
     @property
-    def get_presynaptic(self):
+    def presynaptic(self):
         """Presynaptic compartment. Each subclass should define
         _presynaptic as the index of this compartment."""
         return self.comp[self.__class__._presynaptic]
@@ -171,11 +177,11 @@ class SupPyrRS(CellBase):
     
 class SupPyrFRB(CellBase):
     _presynaptic = 72
-    ENa = 50e-3,
-    EK = -95e-3,
-    EAR = -35e-3,
-    ECa = 125e-3,
-    EGABA = -81e-3,
+    ENa = 50e-3
+    EK = -95e-3
+    EAR = -35e-3
+    ECa = 125e-3
+    EGABA = -81e-3
     TauCa = 20e-3    
     soma_tauCa = 100e-3
 
@@ -285,12 +291,12 @@ TuftedRS.post_init()
 
 class DeepLTS(CellBase):
     _presynaptic = 59
-    ENa = 50e-3,
-    EK = -100e-3,
-    EAR = -40e-3,
-    ECa = 125e-3,
-    EGABA = -75e-3, # Sanchez-Vives et al. 1997 
-    TauCa = 20e-3,
+    ENa = 50e-3
+    EK = -100e-3
+    EAR = -40e-3
+    ECa = 125e-3
+    EGABA = -75e-3 # Sanchez-Vives et al. 1997 
+    TauCa = 20e-3
     X_AR = 0.25
     soma_tauCa = 50e-3
 
@@ -345,7 +351,7 @@ class nRT(CellBase):
 
 _cellprototypes = {}
 
-def initPrototypes():
+def init_prototypes():
     global _cellprototypes
     if _cellprototypes:
         return _cellprototypes
@@ -366,6 +372,7 @@ def initPrototypes():
         'nRT': nRT(nRT.prototype),
     }
     return _cellprototypes
-    
+
+
 # 
 # trbcell.py ends here
