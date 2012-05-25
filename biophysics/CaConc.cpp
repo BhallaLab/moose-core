@@ -251,7 +251,7 @@ void CaConc::process( const Eref& e, ProcPtr p )
 {
 	double x = exp( -p->dt / tau_ );
 	Ca_ = CaBasal_ + c_ * x + ( B_ * activation_ * tau_ )  * (1.0 - x);
-	if (Ca_ > ceiling_){
+	if ( ceiling_ > 0.0 && Ca_ > ceiling_ ) {
 		Ca_ = ceiling_;
 	} else if ( Ca_ < floor_ ){
 		Ca_ = floor_;

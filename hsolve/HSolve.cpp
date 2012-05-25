@@ -17,6 +17,8 @@
 #include "HSolve.h"
 #include "../biophysics/Compartment.h"
 #include "ZombieCompartment.h"
+#include "../biophysics/CaConc.h"
+#include "ZombieCaConc.h"
 
 const Cinfo* HSolve::initCinfo()
 {
@@ -204,8 +206,12 @@ void HSolve::reinit( const Eref& hsolve, ProcPtr p )
 void HSolve::zombify( Eref hsolve ) const
 {
 	vector< Id >::const_iterator i;
+	
 	for ( i = compartmentId_.begin(); i != compartmentId_.end(); ++i )
 		ZombieCompartment::zombify( hsolve.element(), i->eref().element() );
+	
+	for ( i = caConcId_.begin(); i != caConcId_.end(); ++i )
+		ZombieCaConc::zombify( hsolve.element(), i->eref().element() );
 }
 
 void HSolve::setup( Eref hsolve )

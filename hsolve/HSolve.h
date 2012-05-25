@@ -112,7 +112,18 @@ public:
 	/// Interface to CaConc
 	//~ const vector< Id >& getCaConcs() const;
 	double getCa( Id id ) const;
-	void setCa( Id id, double value );
+	void setCa( Id id, double Ca );
+	
+	double getCaBasal( Id id ) const;
+	void setCaBasal( Id id, double CaBasal );
+	
+	void setTauB( Id id, double tau, double B );
+	
+	double getCaCeiling( Id id ) const;
+	void setCaCeiling( Id id, double floor );
+	
+	double getCaFloor( Id id ) const;
+	void setCaFloor( Id id, double floor );
 	
 	/// Interface to external channels
 	//~ const vector< vector< Id > >& getExternalChannels() const;
