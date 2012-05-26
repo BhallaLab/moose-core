@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Tue Apr 24 23:12:36 2012 (+0530)
-//           By: Subhasis Ray
-//     Update #: 8397
+// Last-Updated: Fri May 25 17:30:17 2012 (+0530)
+//           By: subha
+//     Update #: 8523
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -465,8 +465,6 @@ extern "C" {
             char type_code = shortType(typeVec[ii]);
             if (type_code == 0){
                 return -1;
-            } else if (type_code == '_'){ // void - typeVec should be empty
-                typeVec.clear();
             }
         }
         return 0;
@@ -842,6 +840,25 @@ extern "C" {
         0 // sq_inplace_repeat
     };
 
+    static PyGetSetDef IdGetSetters[] = {
+        {"path",
+         (getter)moose_Id_getPath,
+         NULL,
+         "Path of this object",
+         NULL},
+        {"shape",
+         (getter)moose_Id_getShape,
+         NULL,
+         "Dimensions of this object.",
+         NULL},
+        {"value",
+         (getter)moose_Id_getValue,
+         NULL,
+         "Value of this Id",
+         NULL},
+        {NULL}, /* sentinel */
+    };
+    
     ///////////////////////////////////////////////
     // Type defs for PyObject of Id
     ///////////////////////////////////////////////
@@ -876,7 +893,7 @@ extern "C" {
         0,                                  /* tp_iternext */
         IdMethods,                     /* tp_methods */
         0,                    /* tp_members */
-        0,                                  /* tp_getset */
+        IdGetSetters,                                  /* tp_getset */
         0,                                 /* tp_base */
         0,                                  /* tp_dict */
         0,                                  /* tp_descr_get */
@@ -906,7 +923,7 @@ extern "C" {
         string trimmed_type = trim(string(type));
         if (trimmed_type.length() <= 0){
             PyErr_SetString(PyExc_ValueError,
-                            "type must be non-empty string.");
+                            "moose_Id_create: type must be non-empty string.");
             return -1;
         }        
         string trimmed_path(path);
@@ -915,7 +932,7 @@ extern "C" {
         //  paths ending with '/' should raise exception
         if ((length > 1) && (trimmed_path[length - 1] == '/')){
             PyErr_SetString(PyExc_ValueError,
-                            "Non-root path must not end with '/'");
+                            "moose_Id_create: Non-root path must not end with '/'");
             return -1;
         }
         // prepare the dimensions vector
@@ -990,23 +1007,29 @@ extern "C" {
         char _default_type[] = "Neutral";
         char *type = _default_type;
         PyObject * dims = NULL;
-        if (kwargs == NULL && !PyArg_ParseTuple(args,
+        // If argument parsing fails, flag taht by returning
+        // -1. Caller should try alternative parsing.
+        if (kwargs == NULL){
+            if( !PyArg_ParseTuple(args,
                                                 "s|Os:moose_Id_init",
                                                 &path,
                                                 &dims,
                                                 &type)){
             return -1;
-        }
-        PyErr_Clear();
-        if (!PyArg_ParseTupleAndKeywords(args,
-                                         kwargs,
-                                         "s|Os:moose_Id_init",
-                                         kwlist,
-                                         &path,
-                                         &dims,
-                                         &type)){
+            }
+            PyErr_Clear();
+        } else if (!PyArg_ParseTupleAndKeywords(args,
+                                                kwargs,
+                                                "s|Os:moose_Id_init",
+                                                kwlist,
+                                                &path,
+                                                &dims,
+                                                &type)){
             return -1;
-        }        
+        }
+        // Parsing args successful, if any error happens now,
+        // different argument processing will not help. Indicate that
+        // by returning -2
         string trimmed_path(path);
         trimmed_path = trim(trimmed_path);
         size_t length = trimmed_path.length();
@@ -1022,16 +1045,19 @@ extern "C" {
             trimmed_path == "/root"){
             return 0;
         }
-        return moose_Id_create(self, trimmed_path, dims,
-                               type);        
-    }    
+        if (moose_Id_create(self, trimmed_path, dims,
+                             type) == 0){
+            return 0;
+        }
+        return -2;
+    }
     
     static int moose_Id_init(_Id * self, PyObject * args, PyObject * kwargs)
     {
         extern PyTypeObject IdType;
         PyObject * src = NULL;
         unsigned int id = 0;
-        int ret =moose_Id_init_from_path(self, args, kwargs);
+        int ret = moose_Id_init_from_path(self, args, kwargs);
         if (ret == 0){
             return 0;
         } else if (ret < -1){
@@ -1100,10 +1126,6 @@ extern "C" {
     */
     static PyObject * moose_Id_getPath(_Id * self, PyObject * args)
     {
-        PyObject * obj = NULL;
-        if (!PyArg_ParseTuple(args, ":moose_Id_getPath", &obj)){
-            return NULL;
-        }
         string path = self->id_.path();
         PyObject * ret = Py_BuildValue("s", path.c_str());
         return ret;
@@ -1121,9 +1143,6 @@ extern "C" {
     }
     static PyObject * moose_Id_getShape(_Id * self, PyObject * args)
     {
-        if (!PyArg_ParseTuple(args, ":moose_Id_getShape")){
-            return NULL;
-        }
         vector< unsigned int> dims = Field< vector <unsigned int> >::get(self->id_, "objectDimensions");
         if (dims.empty()){
             dims.push_back(1);
@@ -1376,8 +1395,11 @@ extern "C" {
             PyErr_SetString(PyExc_TypeError, error.str().c_str());
             return -1;
         }
-        if (moose_ObjId_init_from_path(self, args, kwargs) == 0){
+        int ret = moose_ObjId_init_from_path(self, args, kwargs);
+        if ( ret == 0){
             return 0;
+        } else if (ret < -1){
+            return -1;
         }
         PyErr_Clear();
         if (moose_ObjId_init_from_id(self, args, kwargs) == 0){
@@ -2269,12 +2291,11 @@ extern "C" {
             PyErr_SetString(PyExc_TypeError, error.str().c_str());
             return NULL;
         }
-
         // Construct the argument list
         ostringstream argstream;
         for (size_t ii = 0; ii < argType.size(); ++ii){
             PyObject * arg = arglist[ii+1];
-            if ( arg == NULL){
+            if ( arg == NULL && argType[ii] == "void"){
                 bool ret = SetGet0::set(oid, string(fieldName));
                 if (ret){
                     Py_RETURN_TRUE;
@@ -2708,30 +2729,73 @@ extern "C" {
         return ret;
     }
     
+    PyDoc_STRVAR(moose_copy_documentation,
+                 "copy(src, dest, name, n, toGlobal, copyExtMsg)\n"
+                 "Make copies of a moose object.\n"
+                 "Parameters\n"
+                 "----------\n"
+                 "src : Id, ObjId or str\n"
+                 "\tsource object.\n"
+                 "dest : Id, ObjId or str\n"
+                 "\tDestination object to copy into.\n"
+                 "name : str\n"
+                 "\tName of the new object. If omitted, name of the original will be used.\n"
+                 "n : int\n"
+                 "\tNumber of copies to make.\n"
+                 "toGlobal: int\n"
+                 "\tRelevant for parallel environments only. If false, the copies will\n"
+                 "reside on local node, otherwise all nodes get the copies.\n"
+                 "copyExtMsg: int\n"
+                 "\tIf true, messages to/from external objects are also copied.\n"
+                 "\n"
+                 "Returns\n"
+                 "-------\n"
+                 "True on success, False on failure\n"
+                 );
     static PyObject * moose_copy(PyObject * dummy, PyObject * args, PyObject * kwargs)
     {
         PyObject * src, *dest;
         char * newName;
-        static const char * kwlist[] = {"src", "dest", "name", "n", "toGlobal", "copyExtMsg", NULL};
+        static char * kwlist[] = {"src", "dest", "name", "n", "toGlobal", "copyExtMsg", NULL};
         unsigned int num=1, toGlobal=0, copyExtMsgs=0;
-        if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOs|III:moose_copy", const_cast<char**>(kwlist), &src, &dest, &newName, &num, &toGlobal, &copyExtMsgs)){
+        if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO|sIII", kwlist, &src, &dest, &newName, &num, &toGlobal, &copyExtMsgs)){
             return NULL;
         }
-        if (!Id_SubtypeCheck(src)){
-            PyErr_SetString(PyExc_TypeError, "Source must be instance of Id.");
-            return NULL;
-        } else if (!Id_SubtypeCheck(dest)){
-            PyErr_SetString(PyExc_TypeError, "Destination must be instance of Id.");
+        Id _src, _dest;
+        if (Id_SubtypeCheck(src)){
+            _src = ((_Id*)src)->id_;
+        } else if (ObjId_SubtypeCheck(src)){
+            _src = ((_ObjId*)src)->oid_.id;
+        } else if (PyString_Check(src)){
+            _src = Id(PyString_AsString(src));
+        } else {
+            PyErr_SetString(PyExc_TypeError, "Source must be instance of Id, ObjId or string.");
             return NULL;
         }
-        if (((_Id*)src)->id_ == Id()){
+        if (_src == Id()){
             PyErr_SetString(PyExc_ValueError, "Cannot make copy of moose shell.");
             return NULL;
         }
+        if (Id_SubtypeCheck(dest)){
+            _dest = ((_Id*)dest)->id_;
+        } else if (ObjId_SubtypeCheck(dest)){
+            _dest = ((_ObjId*)dest)->oid_.id;
+        } else if (PyString_Check(dest)){
+            _dest = Id(PyString_AsString(dest));
+        } else {
+            PyErr_SetString(PyExc_TypeError, "Destination must be instance of Id, ObjId or string.");
+            return NULL;
+        }
+        string name;
+        if (newName == NULL){
+            name = Field<string>::get(ObjId(_src, 0), "name");
+        } else {
+            name = string(newName);
+        }
         _Id * tgt = PyObject_New(_Id, &IdType);
-        tgt->id_ = ShellPtr->doCopy(((_Id*)src)->id_, ((_Id*)dest)->id_, string(newName), num, toGlobal, copyExtMsgs);
+        tgt->id_ = ShellPtr->doCopy(_src, _dest, name, num, toGlobal, copyExtMsgs);
         PyObject * ret = (PyObject*)tgt;
-        return ret;            
+        return ret;
     }
 
     // Not sure what this function should return... ideally the Id of the
@@ -3408,7 +3472,7 @@ extern "C" {
          "finfoType : string\n"
          "\tThe kind of field (`valueFinfo`, `srcFinfo`, `destFinfo`, `lookupFinfo`, etc.)."
         },
-        {"copy", (PyCFunction)moose_copy, METH_VARARGS|METH_KEYWORDS, "Copy a Id object to a target."},
+        {"copy", (PyCFunction)moose_copy, METH_VARARGS|METH_KEYWORDS, moose_copy_documentation},
         {"move", (PyCFunction)moose_move, METH_VARARGS, "Move a Id object to a destination."},
         {"delete", (PyCFunction)moose_delete, METH_VARARGS, "Delete the moose object."},
         {"useClock", (PyCFunction)moose_useClock, METH_VARARGS, "Schedule objects on a specified clock"},
