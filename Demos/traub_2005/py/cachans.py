@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Apr 18 00:18:24 2009 (+0530)
 # Version: 
-# Last-Updated: Fri May 25 14:13:26 2012 (+0530)
+# Last-Updated: Sat May 26 10:20:37 2012 (+0530)
 #           By: subha
-#     Update #: 245
+#     Update #: 254
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -34,6 +34,7 @@ import moose
 from channelbase import ChannelBase
 
 class CaChannel(ChannelBase):
+    _prototypes = {}
     """This is just a place holder to maintain type information"""
     def __init__(self, path, xpower=1.0, ypower=0.0, Ek=125e-3):
         if moose.exists(path):
@@ -113,12 +114,14 @@ class CaT_A(CaChannel):
 
 def initCaChannelPrototypes(libpath='/library'):
     channel_names = ['CaL', 'CaT', 'CaT_A']
-    prototypes = {}
+    if CaChannel._prototypes:
+        return CaChannel._prototypes
     for channel_name in channel_names:
         channel_class = eval(channel_name)
-        channel = channel_class('%s/%s' % (libpath, channel_name))
-        prototypes[channel_name] = channel
-    return prototypes
+        path = '%s/%s' % (libpath, channel_name)
+        CaChannel._prototypes[channel_name] = channel_class(path)
+        print 'Created channel prototype:', path
+    return CaChannel._prototypes
 
 # 
 # cachans.py ends here
