@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Apr 17 23:58:49 2009 (+0530)
 # Version: 
-# Last-Updated: Fri May 25 19:01:41 2012 (+0530)
+# Last-Updated: Sat May 26 14:42:23 2012 (+0530)
 #           By: subha
-#     Update #: 834
+#     Update #: 855
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -53,6 +53,7 @@ import numpy as np
 
 class KChannel(ChannelBase):
     """This is a dummy base class to keep type information."""
+    _prototypes = {}
     def __init__(self, path, xpower=1, ypower=0, Ek=-95e-3):
         if moose.exists(path):
             ChannelBase.__init__(self, path, xpower, ypower)
@@ -289,9 +290,7 @@ class KC(KCaChannel):
         self.xGate.tableB = KC.alpha + KC.beta
         self.instant = 4
         self.X = 0.0
-        b = np.asarray(self.xGate.tableB)
-        print 'x.B'
-        print b
+
         
 class KC_FAST(KC):
     """Fast KC channel"""
@@ -302,12 +301,11 @@ class KC_FAST(KC):
         KC.__init__(self, path, Ek=Ek)
         self.xGate.tableA = 2 * KC.alpha
         self.xGate.tableB = 2 * (KC.alpha + KC.beta)
-        b = np.asarray(self.xGate.tableB)
-        print 'x.B'
-        print b
 
-
+        
 def initKChannelPrototypes(libpath='/library'):
+    if KChannel._prototypes:
+        return KChannel._prototypes
     channel_names = ['KDR', 
                      'KDR_FS', 
                      'KA', 
@@ -318,14 +316,13 @@ def initKChannelPrototypes(libpath='/library'):
                      'KAHP_SLOWER',
                      'KAHP_DP',
                      'KC',
-                     'KC_FAST']
-    prototypes = {}
+                     'KC_FAST']    
     for channel_name in channel_names:
-        print 'Creating ', channel_name
         channel_class = eval(channel_name)
-        prototypes[channel_name] = channel_class('%s/%s' % (libpath, channel_name))
-        print 'finished creating:', prototypes[channel_name]
-    return prototypes
+        path = '%s/%s' % (libpath, channel_name)
+        KChannel._prototypes[channel_name] = channel_class(path)
+        print 'Created channel prototype:', path
+    return KChannel._prototypes
         
 
 # 

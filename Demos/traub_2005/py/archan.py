@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Apr 27 15:34:07 2009 (+0530)
 # Version: 
-# Last-Updated: Fri May 25 12:42:33 2012 (+0530)
+# Last-Updated: Sat May 26 12:25:11 2012 (+0530)
 #           By: subha
-#     Update #: 26
+#     Update #: 33
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -37,6 +37,7 @@ from channelbase import ChannelBase
 
 class AR(ChannelBase):
     """Combined cation current."""
+    _prototypes = {}
     v = ChannelBase.v_array
     m_inf  = 1 / ( 1 + exp( ( v * 1e3 + 75 ) / 5.5 ) )
     tau_m = 1e-3 / ( exp( -14.6 - 0.086 * v * 1e3) + exp( -1.87 + 0.07 * v * 1e3))
@@ -54,7 +55,12 @@ class AR(ChannelBase):
 
 
 def initARChannelPrototypes(libpath='/library'):
-    return {'AR': AR('%s/AR' % (libpath))}
+    if AR._prototypes:
+        return AR._prototypes
+    path = '%s/AR' % (libpath)
+    AR._prototypes['AR'] = AR(path)
+    print 'Created channel prototype:', path
+    return AR._prototypes
 
 # 
 # archan.py ends here

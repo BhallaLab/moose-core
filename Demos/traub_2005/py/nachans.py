@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Apr 17 23:58:13 2009 (+0530)
 # Version: 
-# Last-Updated: Fri May 25 12:32:48 2012 (+0530)
+# Last-Updated: Sat May 26 10:18:05 2012 (+0530)
 #           By: subha
-#     Update #: 249
+#     Update #: 261
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -38,6 +38,7 @@ from channelbase import ChannelBase
 
 class NaChannel(ChannelBase):
     """Dummy base class for all Na+ channels"""
+    _prototypes = {}
     def __init__(self, path, xpower, ypower=0.0, Ek=50e-3):
         ChannelBase.__init__(self, path, xpower=xpower, ypower=ypower, Ek=Ek)
 
@@ -186,7 +187,10 @@ class NaF_TCR(NaChannel):
         self.xGate.tweakTau()
         self.yGate.tweakTau()
 
+
 def initNaChannelPrototypes(libpath='/library'):
+    if NaChannel._prototypes:
+        return NaChannel._prototypes
     channel_names = [
         'NaF',
         'NaF2',
@@ -197,13 +201,12 @@ def initNaChannelPrototypes(libpath='/library'):
         'NaPF_TCR',
         'NaF_TCR',
         ]
-    prototypes = {}
     for channel_name in channel_names:
         channel_class = eval(channel_name)
         path = '%s/%s' % (libpath, channel_name)
-        print 'path', path
-        prototypes[channel_name] = channel_class(path)
-    return prototypes
+        NaChannel._prototypes[channel_name] = channel_class(path)
+        print 'Created channel prototype:', path
+    return NaChannel._prototypes
 
 # 
 # nachans.py ends here
