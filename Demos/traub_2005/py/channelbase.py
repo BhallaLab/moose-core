@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri May  4 14:55:52 2012 (+0530)
 # Version: 
-# Last-Updated: Thu May 24 18:25:30 2012 (+0530)
+# Last-Updated: Sat May 26 15:48:24 2012 (+0530)
 #           By: subha
-#     Update #: 35
+#     Update #: 36
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -41,7 +41,6 @@ class ChannelBase(moose.HHChannel):
         if moose.exists(path):
             moose.HHChannel.__init__(self, path)
             return
-        print 'path:', path
         moose.HHChannel.__init__(self, path)
         self.Ek = Ek
         if xpower != 0:
