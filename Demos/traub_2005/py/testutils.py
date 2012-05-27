@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat May 26 10:41:37 2012 (+0530)
 # Version: 
-# Last-Updated: Sat May 26 16:13:35 2012 (+0530)
+# Last-Updated: Sun May 27 17:28:36 2012 (+0530)
 #           By: subha
-#     Update #: 129
+#     Update #: 138
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -45,15 +45,15 @@ def make_testcomp(containerpath):
 
 def make_pulsegen(containerpath):
     pulsegen = moose.PulseGen('%s/testpulse' % (containerpath))
-    pulsegen.firstLevel = 1e-9
+    pulsegen.firstLevel = 1e-12
     pulsegen.firstDelay = 50e-3
     pulsegen.firstWidth = 100e-3
-    pulsegen.secondLevel = -1e-9
+    pulsegen.secondLevel = -1e-12
     pulsegen.secondDelay = 150e-3
     pulsegen.secondWidth = 100e-3
     return pulsegen
 
-def setup_single_compartment(container_path, channel_proto, Gbar=1.0e-12):
+def setup_single_compartment(container_path, channel_proto, Gbar=1e-9):
     comp = make_testcomp(container_path)
     channel = moose.copy(channel_proto, comp, channel_proto.name)[0]
     moose.connect(channel, 'channel', comp, 'channel')
@@ -66,7 +66,7 @@ def setup_single_compartment(container_path, channel_proto, Gbar=1.0e-12):
     moose.connect(gk_table, 'requestData', channel, 'get_Gk')
     moose.setClock(0, 1e-6)
     moose.setClock(1, 1e-6)
-    moose.useClock(0, '%s/##' % container_path, 'init')
+    moose.useClock(0, '%s/##[TYPE=Compartment]' % container_path, 'init')
     moose.useClock(1, '%s/##' % container_path, 'process')
     return {'compartment': comp,
             'stimulus': pulsegen,
@@ -134,10 +134,10 @@ def compare_data_arrays(left, right, plot=False):
         plt.plot(x, yp, 'bx', label='right')
         # plt.legend()
         # plt.subplot(222)
-        plt.plot(xp, fp, 'g+', label='left')
+        plt.plot(xp, fp, 'gx', label='left')
         # plt.legend()
         # plt.subplot(223)
-        plt.plot(x, err, 'r^', label='error')
+        plt.plot(x, err, 'rx', label='error')
         plt.legend()
         plt.show()
     return max(err)/(max(all_y) - min(all_y))
