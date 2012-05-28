@@ -233,6 +233,31 @@ void HSolve::addGkEk( Id id, double Gk, double Ek )
 	externalCurrent_[ 2 * index + 1 ] += Gk * Ek;
 }
 
+void HSolve::setPowers(
+	Id id,
+	double Xpower,
+	double Ypower,
+	double Zpower )
+{
+	unsigned int index = localIndex( id );
+	assert( index < channel_.size() );
+	channel_[ index ].setPowers( Xpower, Ypower, Zpower );
+}
+
+int HSolve::getInstant( Id id ) const
+{
+	unsigned int index = localIndex( id );
+	assert( index < channel_.size() );
+	return channel_[ index ].instant_;
+}
+
+void HSolve::setInstant( Id id, int instant )
+{
+	unsigned int index = localIndex( id );
+	assert( index < channel_.size() );
+	channel_[ index ].instant_ = instant;
+}
+
 double HSolve::getHHChannelGbar( Id id ) const
 {
 	unsigned int index = localIndex( id );

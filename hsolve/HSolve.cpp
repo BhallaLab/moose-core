@@ -19,6 +19,10 @@
 #include "ZombieCompartment.h"
 #include "../biophysics/CaConc.h"
 #include "ZombieCaConc.h"
+#include "../biophysics/HHGate.h"
+#include "../biophysics/ChanBase.h"
+#include "../biophysics/HHChannel.h"
+#include "ZombieHHChannel.h"
 
 const Cinfo* HSolve::initCinfo()
 {
@@ -212,6 +216,9 @@ void HSolve::zombify( Eref hsolve ) const
 	
 	for ( i = caConcId_.begin(); i != caConcId_.end(); ++i )
 		ZombieCaConc::zombify( hsolve.element(), i->eref().element() );
+	
+	for ( i = channelId_.begin(); i != channelId_.end(); ++i )
+		ZombieHHChannel::zombify( hsolve.element(), i->eref().element() );
 }
 
 void HSolve::setup( Eref hsolve )

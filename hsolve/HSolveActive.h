@@ -56,7 +56,7 @@ protected:
 	 */
 	vector< CurrentStruct >   current_;
 	vector< double >          state_;
-	vector< int >             instant_;
+	//~ vector< int >             instant_;
 	vector< ChannelStruct >   channel_;
 	vector< SpikeGenStruct >  spikegen_;
 	vector< SynChanStruct >   synchan_;
