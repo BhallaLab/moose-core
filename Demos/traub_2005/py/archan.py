@@ -47,9 +47,8 @@ class AR(ChannelBase):
             ChannelBase.__init__(self, path, xpower=1, ypower=0)
             return
         ChannelBase.__init__(self, path, xpower=1, ypower=0)
-        self.xGate.tableA = AR.tau_m
-        self.xGate.tableB = AR.m_inf
-	self.xGate.tweakTau()
+        self.xGate.tableA = AR.m_inf / AR.tau_m
+        self.xGate.tableB = 1 / AR.tau_m
 	self.X = 0.25
 	self.Ek = Ek
 
