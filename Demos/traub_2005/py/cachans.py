@@ -58,8 +58,7 @@ class CaL(CaChannel):
             return
         CaChannel.__init__(self, path, xpower=2.0, Ek=125e-3)
         self.xGate.tableA = CaL.alpha
-        self.xGate.tableB = CaL.beta
-        self.xGate.tweakAlpha()
+        self.xGate.tableB = CaL.alpha + CaL.beta
         self.X = 0.0
         ca_msg_field = moose.Mstring('%s/addmsg1' % (self.path))
         ca_msg_field.value = '.	IkOut	../CaPool	current'
@@ -82,12 +81,10 @@ class CaT(CaChannel):
         CaChannel.__init__(self, path, xpower=2.0, ypower=1.0)
         self.Ek = 125e-3
         self.X = 0.0
-        self.xGate.tableA = CaT.tau_m
-        self.xGate.tableB = CaT.m_inf
-        self.yGate.tableA = CaT.tau_h
-        self.yGate.tableB = CaT.h_inf
-        self.xGate.tweakTau()
-        self.yGate.tweakTau()
+        self.xGate.tableA = CaT.m_inf / CaT.tau_m
+        self.xGate.tableB = 1 / CaT.tau_m
+        self.yGate.tableA = CaT.h_inf / CaT.tau_h
+        self.yGate.tableB = 1 / CaT.tau_h
 
 
 class CaT_A(CaChannel):
@@ -104,12 +101,10 @@ class CaT_A(CaChannel):
             return
         CaChannel.__init__(self, path, xpower=2.0, ypower=1.0, Ek=125e-3)
         self.Ek = 125e-3
-        self.xGate.tableA = CaT_A.tau_m
-        self.xGate.tableB = CaT_A.m_inf
-        self.yGate.tableA = CaT_A.tau_h
-        self.yGate.tableB = CaT_A.h_inf
-        self.xGate.tweakTau()
-        self.yGate.tweakTau()
+        self.xGate.tableA = CaT_A.m_inf / CaT_A.tau_m 
+        self.xGate.tableB = 1 / CaT_A.tau_m
+        self.yGate.tableA = CaT_A.h_inf / CaT_A.tau_h
+        self.yGate.tableB = 1 / CaT_A.tau_h
         self.X = 0
 
 def initCaChannelPrototypes(libpath='/library'):

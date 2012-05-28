@@ -57,12 +57,10 @@ class NaF(NaChannel):
         v = v - shift
         tau_h = 1.0e-3 * (0.15 + 1.15 / ( 1.0 + exp(( v + 37.0e-3) / 15.0e-3)))
         h_inf = 1.0 / (1.0 + exp((v + 62.9e-3) / 10.7e-3))
-        self.xGate.tableA = tau_m
-        self.xGate.tableB = m_inf
-        self.yGate.tableA = tau_h
-        self.yGate.tableB = h_inf
-        self.xGate.tweakTau()
-        self.yGate.tweakTau()
+        self.xGate.tableA = m_inf/tau_m
+        self.xGate.tableB = 1/tau_m
+        self.yGate.tableA = h_inf/tau_h
+        self.yGate.tableB = 1/tau_h
         self.X = 0.0
         
 class NaF2(NaChannel):
@@ -80,12 +78,10 @@ class NaF2(NaChannel):
                           1.0e-3 * (0.0125 + 0.1525 * exp ((v + 30e-3) / 10e-3)), \
                           1.0e-3 * (0.02 + 0.145 * exp((-v - 30e-3) / 10e-3)))        
         m_inf = 1.0 / (1.0 + exp(( - v - 38e-3) / 10e-3))
-        self.xGate.tableA = tau_m
-        self.xGate.tableB = m_inf
-        self.yGate.tableA = tau_h
-        self.yGate.tableB = h_inf
-        self.xGate.tweakTau()
-        self.yGate.tweakTau()
+        self.xGate.tableA = m_inf/tau_m
+        self.xGate.tableB = 1/tau_m
+        self.yGate.tableA = h_inf/tau_h
+        self.yGate.tableB = 1/tau_h
         self.X = 0.0
 
 class NaF2_nRT(NaF2):
@@ -105,9 +101,8 @@ class NaP(NaChannel):
                           1.0e-3 * (0.025 + 0.14 * exp((v + 40e-3) / 10e-3)), \
                           1.0e-3 * (0.02 + 0.145 * exp((-v - 40e-3) / 10e-3)))
         m_inf = 1.0 / (1.0 + exp((-v - 48e-3) / 10e-3))
-        self.xGate.tableA = tau_m
-        self.xGate.tableB = m_inf
-        self.xGate.tweakTau()
+        self.xGate.tableA = m_inf/tau_m
+        self.xGate.tableB = 1/tau_m
         self.X = 0.0
 
 
@@ -123,9 +118,8 @@ class NaPF(NaChannel):
                            1.0e-3 * (0.025 + 0.14 * exp((v  + 30.0e-3) / 10.0e-3)), \
                            1.0e-3 * (0.02 + 0.145 * exp((- v - 30.0e-3) / 10.0e-3)))
         m_inf = 1.0 / (1.0 + exp((-v - 38e-3) / 10e-3))
-        self.xGate.tableA = tau_m
-        self.xGate.tableB = m_inf
-        self.xGate.tweakTau()
+        self.xGate.tableA = m_inf/tau_m
+        self.xGate.tableB = 1/tau_m
 
 
 class NaPF_SS(NaChannel):
@@ -140,9 +134,8 @@ class NaPF_SS(NaChannel):
                            1.0e-3 * (0.025 + 0.14 * exp((v  + 30.0e-3) / 10.0e-3)), \
                            1.0e-3 * (0.02 + 0.145 * exp((- v - 30.0e-3) / 10.0e-3)))
         m_inf = 1.0 / (1.0 + exp((- v - 38e-3) / 10e-3))
-        self.xGate.tableA = tau_m
-        self.xGate.tableB = m_inf
-        self.xGate.tweakTau()
+        self.xGate.tableA = m_inf/tau_m
+        self.xGate.tableB = 1/tau_m
 
 
 class NaPF_TCR(NaChannel):
@@ -158,10 +151,10 @@ class NaPF_TCR(NaChannel):
                            1.0e-3 * (0.025 + 0.14 * exp((v  + 30.0e-3) / 10.0e-3)), \
                            1.0e-3 * (0.02 + 0.145 * exp((- v - 30.0e-3) / 10.0e-3)))
         m_inf = 1.0 / (1.0 + exp((-v - 38e-3) / 10e-3))
-        self.xGate.tableA = tau_m
-        self.xGate.tableB = m_inf
-        self.xGate.tweakTau()
+        self.xGate.tableA = m_inf/tau_m
+        self.xGate.tableB = 1/tau_m
 
+        
 class NaF_TCR(NaChannel):
     """Fast Na+ channel for TCR cells. This is almost identical to
     NaF, but there is a nasty voltage shift in the tables."""
@@ -180,12 +173,10 @@ class NaF_TCR(NaChannel):
                           1.0e-3 * (0.025 + 0.14 * exp((v + 30.0e-3) / 10.0e-3)), \
                           1.0e-3 * (0.02 + 0.145 * exp(( - v - 30.0e-3) / 10.0e-3)))
         m_inf = 1.0 / (1.0 + exp(( - v - 38e-3) / 10e-3))
-        self.xGate.tableA = tau_m
-        self.xGate.tableB = m_inf
-        self.yGate.tableA = tau_h
-        self.yGate.tableB = h_inf
-        self.xGate.tweakTau()
-        self.yGate.tweakTau()
+        self.xGate.tableA = m_inf/tau_m
+        self.xGate.tableB = 1/tau_m
+        self.yGate.tableA = h_inf/tau_h
+        self.yGate.tableB = 1/tau_h
 
 
 def initNaChannelPrototypes(libpath='/library'):

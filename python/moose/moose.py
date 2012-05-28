@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Fri Apr 20 23:12:45 2012 (+0530)
+# Last-Updated: Mon May 28 09:09:39 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 1812
+#     Update #: 1815
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -500,7 +500,7 @@ def showfield(elem, field='*', showtype=False):
     """
     target = element(elem)
     if field == '*':        
-        value_field_dict = target.getFieldDict('valueFinfo')
+        value_field_dict = getFieldDict(target.class_, 'valueFinfo')
         max_type_len = max([len(dtype) for dtype in value_field_dict.values()])
         max_field_len = max([len(dtype) for dtype in value_field_dict.keys()])
         print 
