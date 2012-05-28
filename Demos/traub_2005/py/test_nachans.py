@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat May 26 10:29:41 2012 (+0530)
 # Version: 
-# Last-Updated: Sun May 27 17:27:24 2012 (+0530)
-#           By: subha
-#     Update #: 159
+# Last-Updated: Mon May 28 09:14:42 2012 (+0530)
+#           By: Subhasis Ray
+#     Update #: 160
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -87,7 +87,7 @@ class TestNaF(ChannelTestBase):
     def testNaF_Vm_Moose(self):
         self.compare_moose_Vm()
         
-    def testNaF_Vm_Moose(self):
+    def testNaF_Gk_Moose(self):
         self.compare_moose_Gk()
         
 
