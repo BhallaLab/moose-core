@@ -88,6 +88,15 @@ public:
 	
 	/// Interface to channels
 	//~ const vector< Id >& getHHChannels() const;
+	void setPowers(
+		Id id,
+		double Xpower,
+		double Ypower,
+		double Zpower );
+	
+	int getInstant( Id id ) const;
+	void setInstant( Id id, int instant );
+	
 	double getHHChannelGbar( Id id ) const;
 	void setHHChannelGbar( Id id, double value );
 	
@@ -136,8 +145,6 @@ private:
 	
 	void setup( Eref hsolve );
 	void zombify( Eref hsolve ) const;
-	
-	//~ void setupHub( Eref integ );
 	
 	// Mapping global Id to local index. Defined in HSolveInterface.cpp.
 	void mapIds();
