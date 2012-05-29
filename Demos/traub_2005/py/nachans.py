@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Apr 17 23:58:13 2009 (+0530)
 # Version: 
-# Last-Updated: Sat May 26 10:18:05 2012 (+0530)
+# Last-Updated: Mon May 28 15:30:28 2012 (+0530)
 #           By: subha
-#     Update #: 261
+#     Update #: 343
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -34,154 +34,138 @@ from numpy import where, linspace, exp
 import moose
 
 import config
-from channelbase import ChannelBase
+from channelbase import *
 
 class NaChannel(ChannelBase):
     """Dummy base class for all Na+ channels"""
-    _prototypes = {}
-    def __init__(self, path, xpower, ypower=0.0, Ek=50e-3):
-        ChannelBase.__init__(self, path, xpower=xpower, ypower=ypower, Ek=Ek)
+    abstract = True
+
+    Ek = 50e-3
+
+    def __init__(self, path):
+        ChannelBase.__init__(self, path)
+        
 
 class NaF(NaChannel):
-    def __init__(self, path, shift=-3.5e-3, Ek=50e-3):
-        if moose.exists(path):
-            NaChannel.__init__(self, path, xpower=3.0, ypower=1.0, Ek=Ek)
-            return
-        NaChannel.__init__(self, path, xpower=3.0, ypower=1.0, Ek=Ek)
-        print 'shift', shift, type(shift)
-        v = ChannelBase.v_array + shift
-        tau_m = where(v < -30e-3, \
-                          1.0e-3 * (0.025 + 0.14 * exp((v + 30.0e-3) / 10.0e-3)), \
-                          1.0e-3 * (0.02 + 0.145 * exp(( - v - 30.0e-3) / 10.0e-3)))
-        m_inf = 1.0 / (1.0 + exp(( - v - 38e-3) / 10e-3))
-        v = v - shift
-        tau_h = 1.0e-3 * (0.15 + 1.15 / ( 1.0 + exp(( v + 37.0e-3) / 15.0e-3)))
-        h_inf = 1.0 / (1.0 + exp((v + 62.9e-3) / 10.7e-3))
-        self.xGate.tableA = m_inf/tau_m
-        self.xGate.tableB = 1/tau_m
-        self.yGate.tableA = h_inf/tau_h
-        self.yGate.tableB = 1/tau_h
-        self.X = 0.0
+    abstract = False
+    Xpower = 3
+    Ypower = 1
+    X = 0.0
+    shift = -3.5e-3
+    v = v_array + shift
+    tau_x = where(v < -30e-3, \
+                      1.0e-3 * (0.025 + 0.14 * exp((v + 30.0e-3) / 10.0e-3)), \
+                      1.0e-3 * (0.02 + 0.145 * exp(( - v - 30.0e-3) / 10.0e-3)))
+    inf_x = 1.0 / (1.0 + exp(( - v - 38e-3) / 10e-3))
+    v = v - shift
+    tau_y = 1.0e-3 * (0.15 + 1.15 / ( 1.0 + exp(( v + 37.0e-3) / 15.0e-3)))
+    inf_y = 1.0 / (1.0 + exp((v + 62.9e-3) / 10.7e-3))
         
-class NaF2(NaChannel):
-    def __init__(self, path, shift=-2.5e-3, Ek=50e-3):
-        if moose.exists(path):
-            NaChannel.__init__(self, path, xpower=3.0, ypower=1.0, Ek=Ek)
-            return
-        NaChannel.__init__(self, path, xpower=3.0, ypower=1.0, Ek=Ek)
-        config.logger.debug('NaF2: shift = %g' % (shift))
-        v = linspace(ChannelBase.vmin, ChannelBase.vmax, ChannelBase.ndivs + 1)
-        tau_h = 1e-3 * (0.225 + 1.125 / ( 1 + exp( (  v + 37e-3 ) / 15e-3 ) ))        
-        h_inf = 1.0 / (1.0 + exp((v + 58.3e-3) / 6.7e-3))
-        v = v + shift
-        tau_m = where(v < -30e-3, \
-                          1.0e-3 * (0.0125 + 0.1525 * exp ((v + 30e-3) / 10e-3)), \
-                          1.0e-3 * (0.02 + 0.145 * exp((-v - 30e-3) / 10e-3)))        
-        m_inf = 1.0 / (1.0 + exp(( - v - 38e-3) / 10e-3))
-        self.xGate.tableA = m_inf/tau_m
-        self.xGate.tableB = 1/tau_m
-        self.yGate.tableA = h_inf/tau_h
-        self.yGate.tableB = 1/tau_h
-        self.X = 0.0
+    def __init__(self, path, shift=-3.5e-3, Ek=50e-3):
+        NaChannel.__init__(self, path )
+
+
+class NaF_TCR(NaF):    
+    """Fast Na+ channel for TCR cells. This is almost identical to
+    NaF, but there is a nasty voltage shift in the tables."""
+    abstract = False
+    shift_x = -5.5e-3
+    shift_y = -7e-3
+    v = v_array
+    tau_y = 1.0e-3 * (0.15 + 1.15 / ( 1.0 + exp(( v + 37.0e-3) / 15.0e-3)))        
+    inf_y = 1.0 / (1.0 + exp((v + shift_y + 62.9e-3) / 10.7e-3))
+    v = v + shift_x
+    tau_x = where(v < -30e-3, \
+                      1.0e-3 * (0.025 + 0.14 * exp((v + 30.0e-3) / 10.0e-3)), \
+                      1.0e-3 * (0.02 + 0.145 * exp(( - v - 30.0e-3) / 10.0e-3)))
+    inf_x = 1.0 / (1.0 + exp(( - v - 38e-3) / 10e-3))
+
+    def __init__(self, path):
+        NaChannel.__init__(self)
+
+        
+class NaF2(NaF):
+    abstract = False
+    shift = -2.5e-3
+    v = v_array + shift
+    tau_x = where(v < -30e-3, \
+                      1.0e-3 * (0.0125 + 0.1525 * exp ((v + 30e-3) / 10e-3)), \
+                      1.0e-3 * (0.02 + 0.145 * exp((-v - 30e-3) / 10e-3)))        
+    inf_x = 1.0 / (1.0 + exp(( - v - 38e-3) / 10e-3))
+    v = v_array
+    tau_y = 1e-3 * (0.225 + 1.125 / ( 1 + exp( (  v + 37e-3 ) / 15e-3 ) ))        
+    inf_y = 1.0 / (1.0 + exp((v + 58.3e-3) / 6.7e-3))
+
+    def __init__(self, path):
+        NaChannel.__init__(self, path)
 
 class NaF2_nRT(NaF2):
     """This is a version of NaF2 without the fastNa_shift - applicable to nRT cell."""
+
+    abstract = False
+    tau_x = where(v_array < -30e-3, \
+                      1.0e-3 * (0.0125 + 0.1525 * exp ((v_array + 30e-3) / 10e-3)), \
+                      1.0e-3 * (0.02 + 0.145 * exp((-v_array - 30e-3) / 10e-3)))        
+    inf_x = 1.0 / (1.0 + exp(( - v_array - 38e-3) / 10e-3))
+    tau_y = 1e-3 * (0.225 + 1.125 / ( 1 + exp( (  v_array + 37e-3 ) / 15e-3 ) ))        
+    inf_y = 1.0 / (1.0 + exp((v_array + 58.3e-3) / 6.7e-3))
     def __init__(self, path):
-        NaF2.__init__(self, path, shift=0.0)
+        NaF2.__init__(self, path)
 
 
 class NaP(NaChannel):
+    abstract = False
+    Xpower = 1.0
+    tau_m = where(v_array < -40e-3, \
+                      1.0e-3 * (0.025 + 0.14 * exp((v_array + 40e-3) / 10e-3)), \
+                      1.0e-3 * (0.02 + 0.145 * exp((-v_array - 40e-3) / 10e-3)))
+    m_inf = 1.0 / (1.0 + exp((-v_array - 48e-3) / 10e-3))
+
     def __init__(self, path, Ek=50e-3):
-        if moose.exists(path):
-            NaChannel.__init__(self, path, xpower=1.0, Ek=Ek)
-            return
-        NaChannel.__init__(self, path, xpower=1.0, Ek=Ek)
-        v = linspace(ChannelBase.vmin, ChannelBase.vmax, ChannelBase.ndivs + 1)
-        tau_m = where(v < -40e-3, \
-                          1.0e-3 * (0.025 + 0.14 * exp((v + 40e-3) / 10e-3)), \
-                          1.0e-3 * (0.02 + 0.145 * exp((-v - 40e-3) / 10e-3)))
-        m_inf = 1.0 / (1.0 + exp((-v - 48e-3) / 10e-3))
-        self.xGate.tableA = m_inf/tau_m
-        self.xGate.tableB = 1/tau_m
-        self.X = 0.0
+        NaChannel.__init__(self, path)
 
 
 class NaPF(NaChannel):
     """Persistent Na+ current, fast"""
-    def __init__(self, path, Ek=50e-3):
-        if moose.exists(path):
-            NaChannel.__init__(self, path, xpower=3.0, Ek=Ek)
-            return
-        NaChannel.__init__(self, path, xpower=3.0, Ek=Ek)
-        v = linspace(ChannelBase.vmin, ChannelBase.vmax, ChannelBase.ndivs + 1)
-        tau_m = where(v < -30e-3, \
-                           1.0e-3 * (0.025 + 0.14 * exp((v  + 30.0e-3) / 10.0e-3)), \
-                           1.0e-3 * (0.02 + 0.145 * exp((- v - 30.0e-3) / 10.0e-3)))
-        m_inf = 1.0 / (1.0 + exp((-v - 38e-3) / 10e-3))
-        self.xGate.tableA = m_inf/tau_m
-        self.xGate.tableB = 1/tau_m
+    abstract = False
+    Xpower = 3
+    tau_m = where(v_array < -30e-3, \
+                      1.0e-3 * (0.025 + 0.14 * exp((v_array  + 30.0e-3) / 10.0e-3)), \
+                      1.0e-3 * (0.02 + 0.145 * exp((- v_array - 30.0e-3) / 10.0e-3)))
+    m_inf = 1.0 / (1.0 + exp((-v_array - 38e-3) / 10e-3))
+    
+    def __init__(self, path):
+        NaChannel.__init__(self, path)
 
 
-class NaPF_SS(NaChannel):
-    def __init__(self, path, shift=-2.5e-3, Ek=50e-3):
-        if moose.exists(path):
-            NaChannel.__init__(self, path, xpower=3.0, Ek=Ek)
-            return
-        NaChannel.__init__(self, path, xpower=3.0, Ek=Ek)
-        config.logger.debug('NaPF_SS: shift = %g' % (shift))
-        v = linspace(ChannelBase.vmin, ChannelBase.vmax, ChannelBase.ndivs + 1) + shift
-        tau_m = where(v < -30e-3, \
-                           1.0e-3 * (0.025 + 0.14 * exp((v  + 30.0e-3) / 10.0e-3)), \
-                           1.0e-3 * (0.02 + 0.145 * exp((- v - 30.0e-3) / 10.0e-3)))
-        m_inf = 1.0 / (1.0 + exp((- v - 38e-3) / 10e-3))
-        self.xGate.tableA = m_inf/tau_m
-        self.xGate.tableB = 1/tau_m
+class NaPF_SS(NaPF):
+    abstract = False
+    shift = -2.5e-3
+    v = v_array + shift
+    tau_m = where(v < -30e-3, \
+                       1.0e-3 * (0.025 + 0.14 * exp((v  + 30.0e-3) / 10.0e-3)), \
+                       1.0e-3 * (0.02 + 0.145 * exp((- v - 30.0e-3) / 10.0e-3)))
+    m_inf = 1.0 / (1.0 + exp((- v - 38e-3) / 10e-3))
+
+    def __init__(self, path):
+        NaChannel.__init__(self, path)
 
 
-class NaPF_TCR(NaChannel):
+class NaPF_TCR(NaPF):
     """Persistent Na+ channel specific to TCR cells. Only difference
     with NaPF is power of m is 1 as opposed 3."""
-    def __init__(self, path, shift=7e-3, Ek=50e-3):
-        if moose.exists(path):
-            NaChannel.__init__(self, path, xpower=1.0, Ek=Ek)
-            return 
-        NaChannel.__init__(self, path, xpower=1.0, Ek=Ek)
-        v = linspace(ChannelBase.vmin, ChannelBase.vmax, ChannelBase.ndivs + 1) + shift
-        tau_m = where(v < -30e-3, \
-                           1.0e-3 * (0.025 + 0.14 * exp((v  + 30.0e-3) / 10.0e-3)), \
-                           1.0e-3 * (0.02 + 0.145 * exp((- v - 30.0e-3) / 10.0e-3)))
-        m_inf = 1.0 / (1.0 + exp((-v - 38e-3) / 10e-3))
-        self.xGate.tableA = m_inf/tau_m
-        self.xGate.tableB = 1/tau_m
+    abstract = False
+    shift = 7e-3
+    v = v_array + shift
+    tau_m = where(v < -30e-3, \
+                       1.0e-3 * (0.025 + 0.14 * exp((v  + 30.0e-3) / 10.0e-3)), \
+                       1.0e-3 * (0.02 + 0.145 * exp((- v - 30.0e-3) / 10.0e-3)))
+    m_inf = 1.0 / (1.0 + exp((-v - 38e-3) / 10e-3))
+    def __init__(self, path):
+        NaChannel.__init__(self, path)
 
         
-class NaF_TCR(NaChannel):
-    """Fast Na+ channel for TCR cells. This is almost identical to
-    NaF, but there is a nasty voltage shift in the tables."""
-    def __init__(self, path, Ek=50e-3):
-        if moose.exists(path):
-            NaChannel.__init__(self, path, xpower=3.0, ypower=1.0, Ek=Ek)
-            return
-        NaChannel.__init__(self, path, xpower=3.0, ypower=1.0, Ek=Ek)
-        shift_mnaf = -5.5e-3
-        shift_hnaf = -7e-3
-        v = linspace(ChannelBase.vmin, ChannelBase.vmax, ChannelBase.ndivs + 1) 
-        tau_h = 1.0e-3 * (0.15 + 1.15 / ( 1.0 + exp(( v + 37.0e-3) / 15.0e-3)))        
-        h_inf = 1.0 / (1.0 + exp((v + shift_hnaf + 62.9e-3) / 10.7e-3))
-        v = v + shift_mnaf
-        tau_m = where(v < -30e-3, \
-                          1.0e-3 * (0.025 + 0.14 * exp((v + 30.0e-3) / 10.0e-3)), \
-                          1.0e-3 * (0.02 + 0.145 * exp(( - v - 30.0e-3) / 10.0e-3)))
-        m_inf = 1.0 / (1.0 + exp(( - v - 38e-3) / 10e-3))
-        self.xGate.tableA = m_inf/tau_m
-        self.xGate.tableB = 1/tau_m
-        self.yGate.tableA = h_inf/tau_h
-        self.yGate.tableB = 1/tau_h
-
-
-def initNaChannelPrototypes(libpath='/library'):
-    if NaChannel._prototypes:
-        return NaChannel._prototypes
+def initNaChannelPrototypes():
     channel_names = [
         'NaF',
         'NaF2',
@@ -192,12 +176,8 @@ def initNaChannelPrototypes(libpath='/library'):
         'NaPF_TCR',
         'NaF_TCR',
         ]
-    for channel_name in channel_names:
-        channel_class = eval(channel_name)
-        path = '%s/%s' % (libpath, channel_name)
-        NaChannel._prototypes[channel_name] = channel_class(path)
-        print 'Created channel prototype:', path
-    return NaChannel._prototypes
+    return dict([(key, prototypes[key]) for key in channel_names])
+
 
 # 
 # nachans.py ends here

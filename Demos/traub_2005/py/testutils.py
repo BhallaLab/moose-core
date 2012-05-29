@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat May 26 10:41:37 2012 (+0530)
 # Version: 
-# Last-Updated: Sun May 27 17:28:36 2012 (+0530)
+# Last-Updated: Tue May 29 18:11:23 2012 (+0530)
 #           By: subha
-#     Update #: 138
+#     Update #: 161
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -29,10 +29,14 @@
 
 # Code:
 
+import uuid
 import numpy as np
 from matplotlib import pyplot as plt
 
 import moose
+import channelbase
+
+simdt = 1e-6
 
 def make_testcomp(containerpath):
     comp = moose.Compartment('%s/testcomp' % (containerpath))
@@ -53,7 +57,7 @@ def make_pulsegen(containerpath):
     pulsegen.secondWidth = 100e-3
     return pulsegen
 
-def setup_single_compartment(container_path, channel_proto, Gbar=1e-9):
+def setup_single_compartment(container_path, channel_proto, Gbar):
     comp = make_testcomp(container_path)
     channel = moose.copy(channel_proto, comp, channel_proto.name)[0]
     moose.connect(channel, 'channel', comp, 'channel')
@@ -64,16 +68,58 @@ def setup_single_compartment(container_path, channel_proto, Gbar=1e-9):
     moose.connect(vm_table, 'requestData', comp, 'get_Vm')
     gk_table = moose.Table('%s/Gk' % (container_path))
     moose.connect(gk_table, 'requestData', channel, 'get_Gk')
-    moose.setClock(0, 1e-6)
-    moose.setClock(1, 1e-6)
+    ik_table = moose.Table('%s/Ik' % (container_path))
+    moose.connect(ik_table, 'requestData', channel, 'get_Ik')
+    moose.setClock(0, simdt)
+    moose.setClock(1, simdt)
     moose.useClock(0, '%s/##[TYPE=Compartment]' % container_path, 'init')
     moose.useClock(1, '%s/##' % container_path, 'process')
     return {'compartment': comp,
             'stimulus': pulsegen,
             'channel': channel,
             'Vm': vm_table,
-            'Gk': gk_table}
+            'Gk': gk_table,
+            'Ik': ik_table}
     
+def run_single_channel(channelname, Gbar, simtime):
+    testId = uuid.uuid4().int
+    container = moose.Neutral('test%d' % (testId))
+    params = setup_single_compartment(
+        container.path,
+        channelbase.prototypes[channelname],
+        Gbar)
+    vm_data = params['Vm']
+    gk_data = params['Gk']
+    ik_data = params['Ik']
+    moose.reinit()
+    print 'Starting simulation for', simtime, 's'
+    moose.start(simtime)
+    print 'Finished simulation'
+    vm_file = '%s_Vm.dat' % (channelname)
+    gk_file = '%s_Gk.dat' % (channelname)
+    ik_file = '%s_Ik.dat' % (channelname)
+    tseries = np.array(range(len(vm_data.vec))) * simdt
+    print 'Vm:', len(vm_data.vec), 'Gk', len(gk_data.vec), 'Ik', len(ik_data.vec)
+    data = np.c_[tseries, vm_data.vec]
+    np.savetxt(vm_file, data)
+    print 'Saved Vm in', vm_file
+    data = np.c_[tseries, gk_data.vec]
+    np.savetxt(gk_file, data)
+    print 'Saved Gk in', gk_file
+    data = np.c_[tseries, ik_data.vec]
+    np.savetxt(ik_file, data)
+    print 'Saved Gk in', ik_file
+    return params
+
+def compare_channel_data(series, channelname, param, simulator):
+    if simulator == 'moose':
+        ref_file = 'testdata/%s_%s.dat.gz' % (channelname, param)
+    elif simulator == 'neuron':
+        ref_file = '../nrn/data/%s_%s.dat' % (channelname, param)
+    else:
+        raise ValueError('Unrecognised simulator: %s' % (simulator))
+    ref_series = np.loadtxt(ref_file)
+    return compare_data_arrays(ref_series, series, plot=False)
 
 def compare_data_arrays(left, right, plot=False):
     """compare two data arrays. They must have the same number of
