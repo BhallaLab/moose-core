@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Apr 18 00:18:24 2009 (+0530)
 # Version: 
-# Last-Updated: Sat May 26 10:20:37 2012 (+0530)
+# Last-Updated: Mon May 28 15:29:10 2012 (+0530)
 #           By: subha
-#     Update #: 254
+#     Update #: 292
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -31,92 +31,62 @@
 
 from numpy import where, exp, array
 import moose
-from channelbase import ChannelBase
+from channelbase import *
 
 class CaChannel(ChannelBase):
-    _prototypes = {}
+    """Base class for Ca channels."""
+    abstract = True
+    Ek = 125e-3
+    Xpower = 2
+    X = 0.0
     """This is just a place holder to maintain type information"""
-    def __init__(self, path, xpower=1.0, ypower=0.0, Ek=125e-3):
-        if moose.exists(path):
-            ChannelBase.__init__(self, path, xpower=xpower, ypower=ypower)
-            return
-        ChannelBase.__init__(self, path, xpower=xpower, ypower=ypower)
-        self.Ek = Ek
+    def __init__(self, path):
+        ChannelBase.__init__(self, path)
+
 
 class CaL(CaChannel):
     """Low threshold calcium channel"""
-    v = array(ChannelBase.v_array)
-    alpha = 1.6e3 / (1.0 + exp(-0.072 * (v * 1e3 - 5)))
-    v = v + 8.9e-3
-    beta = where( abs(v) * 1e3 < 1e-6,
+    abstract = False
+    alpha_x = 1.6e3 / (1.0 + exp(-0.072 * (v_array * 1e3 - 5)))
+    v = v_array + 8.9e-3
+    beta_x = where( abs(v) * 1e3 < 1e-6,
                   1e3 * 0.1 * exp(-v / 5e-3),
                   1e3 * 0.02 * v * 1e3 / (exp(v / 5e-3) - 1))
-
+    mstring = ('addmsg1', '.	IkOut	../CaPool	current')
     def __init__(self, path):
-        if moose.exists(path):
-            CaChannel.__init__(self, path, xpower=2.0, Ek=125e-3)
-            return
-        CaChannel.__init__(self, path, xpower=2.0, Ek=125e-3)
-        self.xGate.tableA = CaL.alpha
-        self.xGate.tableB = CaL.alpha + CaL.beta
-        self.X = 0.0
-        ca_msg_field = moose.Mstring('%s/addmsg1' % (self.path))
-        ca_msg_field.value = '.	IkOut	../CaPool	current'
+        CaChannel.__init__(self, path)
 
 
 class CaT(CaChannel):
-    v = ChannelBase.v_array
-    m_inf = 1 / (1 + exp( (- v - 56e-3) / 6.2e-3))
-    tau_m = 1e-3 * (0.204 + 0.333 / ( exp(( v + 15.8e-3) / 18.2e-3 ) + 
-                                      exp((- v - 131e-3) / 16.7e-3)))
-    h_inf = 1 / (1 + exp(( v + 80e-3 ) / 4e-3))
-    tau_h = where( v < -81e-3, 
-                   1e-3 * 0.333 * exp( ( v + 466e-3 ) / 66.6e-3 ),
-                   1e-3 * (9.32 + 0.333 * exp( ( -v - 21e-3 ) / 10.5e-3 )))
+    abstract = False
+    Ypower = 1
+    inf_x = 1 / (1 + exp( (- v_array - 56e-3) / 6.2e-3))
+    tau_x = 1e-3 * (0.204 + 0.333 / ( exp(( v_array + 15.8e-3) / 18.2e-3 ) + 
+                                      exp((- v_array - 131e-3) / 16.7e-3)))
+    inf_y = 1 / (1 + exp(( v_array + 80e-3 ) / 4e-3))
+    tau_y = where( v_array < -81e-3, 
+                   1e-3 * 0.333 * exp( ( v_array + 466e-3 ) / 66.6e-3 ),
+                   1e-3 * (9.32 + 0.333 * exp( ( -v_array - 21e-3 ) / 10.5e-3 )))
 
     def __init__(self, path):
-        if moose.exists(path):
-            CaChannel.__init__(self, path, xpower=2.0, ypower=1.0)
-            return
-        CaChannel.__init__(self, path, xpower=2.0, ypower=1.0)
-        self.Ek = 125e-3
-        self.X = 0.0
-        self.xGate.tableA = CaT.m_inf / CaT.tau_m
-        self.xGate.tableB = 1 / CaT.tau_m
-        self.yGate.tableA = CaT.h_inf / CaT.tau_h
-        self.yGate.tableB = 1 / CaT.tau_h
+        CaChannel.__init__(self, path)
 
 
-class CaT_A(CaChannel):
-    v = ChannelBase.v_array
-    m_inf  = 1.0 / ( 1 + exp( ( - v * 1e3 - 52 ) / 7.4 ) )
-    tau_m  = 1e-3 * (1 + .33 / ( exp( ( v * 1e3 + 27.0 ) / 10.0 ) + exp( ( - v * 1e3 - 102 ) / 15.0 )))
+class CaT_A(CaT):
+    inf_x  = 1.0 / ( 1 + exp( ( - v_array * 1e3 - 52 ) / 7.4 ) )
+    tau_x  = 1e-3 * (1 + .33 / ( exp( ( v_array * 1e3 + 27.0 ) / 10.0 ) + exp( ( - v_array * 1e3 - 102 ) / 15.0 )))
     
-    h_inf  = 1 / ( 1 + exp( ( v * 1e3 + 80 ) / 5 ) )
-    tau_h = 1e-3 * (28.30 + 0.33 / (exp(( v * 1e3 + 48.0)/ 4.0) + exp( ( -v * 1e3 - 407.0) / 50.0 ) ))
+    inf_y  = 1 / ( 1 + exp( ( v_array * 1e3 + 80 ) / 5 ) )
+    tau_y = 1e-3 * (28.30 + 0.33 / (exp(( v_array * 1e3 + 48.0)/ 4.0) + exp( ( -v_array * 1e3 - 407.0) / 50.0 ) ))
 
     def __init__(self, path):
-        if moose.exists(path):
-            CaChannel.__init__(self, path, xpower=2.0, ypower=1.0, Ek=125e-3)
-            return
-        CaChannel.__init__(self, path, xpower=2.0, ypower=1.0, Ek=125e-3)
-        self.Ek = 125e-3
-        self.xGate.tableA = CaT_A.m_inf / CaT_A.tau_m 
-        self.xGate.tableB = 1 / CaT_A.tau_m
-        self.yGate.tableA = CaT_A.h_inf / CaT_A.tau_h
-        self.yGate.tableB = 1 / CaT_A.tau_h
-        self.X = 0
+        CaChannel.__init__(self, path)
+
 
 def initCaChannelPrototypes(libpath='/library'):
     channel_names = ['CaL', 'CaT', 'CaT_A']
-    if CaChannel._prototypes:
-        return CaChannel._prototypes
-    for channel_name in channel_names:
-        channel_class = eval(channel_name)
-        path = '%s/%s' % (libpath, channel_name)
-        CaChannel._prototypes[channel_name] = channel_class(path)
-        print 'Created channel prototype:', path
-    return CaChannel._prototypes
+    return dict([(key, _prototypes[key]) for key in channel_names])
+
 
 # 
 # cachans.py ends here

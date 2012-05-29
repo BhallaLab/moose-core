@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat May 26 10:29:41 2012 (+0530)
 # Version: 
-# Last-Updated: Mon May 28 09:14:42 2012 (+0530)
-#           By: Subhasis Ray
-#     Update #: 160
+# Last-Updated: Tue May 29 17:39:36 2012 (+0530)
+#           By: subha
+#     Update #: 280
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -37,59 +37,70 @@ import uuid
 import numpy as np
 import unittest
 import moose
-import init
-from channelinit import init_chanlib
-import nachans
-from testutils import setup_single_compartment, compare_data_arrays
+import config
 
-simtime = 1.0
+lib = moose.Neutral(config.modelSettings.libpath)
+
+import channelbase
+import nachans
+from testutils import *
+
+simtime = 350e-3
+
 
 class ChannelTestBase(unittest.TestCase):
-    init.init()
     def __init__(self, *args, **kwargs):
         unittest.TestCase.__init__(self, *args, **kwargs)
-        self.testId = uuid.uuid4().int
-        self.container = moose.Neutral('test%d' % (self.testId))
-        self.params = setup_single_compartment(
-            self.container.path,
-            init_chanlib()[self.__class__.channel_name])
-        self.vm_data = self.params['Vm']
-        self.gk_data = self.params['Gk']
-        moose.reinit()
-        moose.showfield(self.params['channel'])
-        print 'Starting simulation for', simtime, 's'
-        moose.start(simtime)
-        print 'Finished simulation'
-        vm_file = '%s_Vm.dat' % self.__class__.channel_name
-        gk_file = '%s_Gk.dat' % self.__class__.channel_name
-        np.savetxt(vm_file, np.asarray(self.vm_data.vec))
-        print 'Saved Vm in', vm_file
-        np.savetxt(gk_file, np.asarray(self.gk_data.vec))
-        print 'Saved Gk in', gk_file
 
-    def compare_moose_Vm(self):
+    def compare_Vm(self, filename):
         print 'Comparing Vm ...'
-        self.ref_vm_data = np.loadtxt('testdata/%s_Vm.dat.gz' % (self.__class__.channel_name))
+        self.ref_vm_data = np.loadtxt(filename)
         err = compare_data_arrays(self.ref_vm_data, np.array(self.vm_data.vec), plot=True)
         self.assertAlmostEqual(err, 0.0)
         print 'OK'
 
-    def compare_moose_Gk(self):
+    def compare_Gk(self, filename):
         print 'Comparing Gk ...'
-        self.ref_gk_data = np.loadtxt('testdata/%s_Gk.dat.gz' % (self.__class__.channel_name))
+        self.ref_gk_data = np.loadtxt(filename)
         err = compare_data_arrays(self.ref_gk_data, np.array(self.gk_data.vec), plot=True)
         self.assertAlmostEqual(err, 0.0)
         print 'OK'
         
         
 class TestNaF(ChannelTestBase):
-    channel_name = 'NaF'
+    channelname = 'NaF'
+    params = run_single_channel(channelname, 1e-9, simtime)
+    tseries = np.array(range(0, len(params['Vm'].vec))) * simdt
+    print  'Gbar', params['channel'].Gbar
+    print 'Gk_last', params['Gk'].vec[-1]
     def testNaF_Vm_Moose(self):
-        self.compare_moose_Vm()
+        vm = np.asarray(self.params['Vm'].vec)        
+        err = compare_channel_data(vm, TestNaF.channelname, 'Vm', 'moose')
+        self.assertAlmostEqual(err, 0.0)
         
     def testNaF_Gk_Moose(self):
-        self.compare_moose_Gk()
-        
+        gk = np.asarray(self.params['Gk'].vec)
+        err = compare_channel_data(gk, TestNaF.channelname, 'Gk', 'moose')
+        self.assertAlmostEqual(err, 0.0)
+
+    def testNaF_Vm_Neuron(self):
+        vm = np.asarray(self.params['Vm'].vec)
+        data = np.c_[self.tseries, vm]
+        err = compare_channel_data(data, self.channelname, 'Vm', 'neuron')
+        self.assertAlmostEqual(err, 0.0)        
+
+    # def testNaF_Gk_Neuron(self):
+    #     gk = np.asarray(self.params['Gk'].vec)
+    #     data = np.c_[self.tseries, gk]
+    #     err = compare_channel_data(data, self.channelname, 'Gk', 'neuron')
+    #     self.assertAlmostEqual(err, 0.0)
+
+    def testNaF_Ik_Neuron(self):
+        ik = np.asarray(self.params['Ik'].vec)
+        data = np.c_[self.tseries, ik]
+        err = compare_channel_data(data, self.channelname, 'Ik', 'neuron')
+        self.assertAlmostEqual(err, 0.0)
+                
 
 if __name__ == '__main__':
     unittest.main()
