@@ -1,6 +1,5 @@
 load_file("nrngui.hoc")
-
-PI=3.141592
+// PI=3.141592
 FARADAY=96485
 
 celsius=30
@@ -14,42 +13,19 @@ objref testcomp, vvec, gvec, tvec, vfile, gfile
 
 testcomp = new singlecomp()
 
-
+testcomp.setup_channel("naf", 1e-9)
 testcomp.soma {
-    insert naf
     ena = 50 
-    gbar_naf = 1e-9 * 1e8 / area(0.5)
 }
 
 // (50 ms start positive current, 150 ms stop positive current, 200
 // ms start negative current, 300 ms stop negative current 350 ms stop
 // simulation)
 
-vvec = new Vector()
-gvec = new Vector()
-tvec = new Vector()
-
-vvec.record(&testcomp.soma.v(0.5), Dt)
-gvec.record(&testcomp.soma.ina(0.5), Dt)
-tvec.record(&t, Dt)
-
+testcomp.setup_recording("naf", Dt)
 run()
+testcomp.save_data("NaF", Dt)
 
-vfile = new File()
-vfile.wopen("data/NaF_Vm.dat")
-gfile = new File()
-gfile.wopen("data/NaF_Ik.dat")
-
-for ii = 0, gvec.size() - 1 {
-    vfile.printf("%g %g\n", tvec.x(ii)*1e-3, vvec.x(ii)*1e-3)    
-    testcomp.soma {
-        // ina in Neuron has opposite convention
-        gfile.printf("%g %g\n", tvec.x(ii)*1e-3, -gvec.x(ii) * 1e-3 * area(0.5) * 1e-8)
-    }
-}
-
-vfile.close()
-gfile.close()
 quit()
 
 
