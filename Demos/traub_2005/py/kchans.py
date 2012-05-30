@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Apr 17 23:58:49 2009 (+0530)
 # Version: 
-# Last-Updated: Mon May 28 15:03:06 2012 (+0530)
-#           By: subha
-#     Update #: 1005
+# Last-Updated: Thu May 31 00:13:53 2012 (+0530)
+#           By: Subhasis Ray
+#     Update #: 1006
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -122,6 +122,7 @@ class KA_IB(KA):
 
     abstract = False
 
+    inf_y =   1 / ( 1 + exp( ( v_array + 78e-3 ) / 6e-3 ) )
     tau_y = 2.6 * KA.tau_y
 
     def __init__(self, path):

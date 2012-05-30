@@ -2,9 +2,10 @@ begintemplate singlecomp
 public soma, stim1, stim2, vvec, gvec, setup_recording, save_data, setup_channel
 
 objectvar stim1, stim2, vvec, gvec
-strdef tstr1
+strdef tstr1, iontype
 objref this
 create soma
+e_value = 0.0
 
 proc init(){
     create soma
@@ -42,11 +43,18 @@ proc setup_channel(){
 }
 
 // setup_recording(channelname, Dt)
-proc setup_recording(){ 
+proc setup_recording(){ localobj strobj
+    strobj = new StringFunctions()
     vvec = new Vector()    
     vvec.record(&soma.v(0.5), $2)
     gvec = new Vector()
-    sprint(tstr1, "~gvec.record( &soma.ina_%s(0.5), %g)", $s1, $2)
+    if ( strobj.substr($s1, "na") == 0 ){
+	sprint(tstr1, "~gvec.record( &soma.ina_%s(0.5), %g)", $s1, $2)
+	e_value = ena
+    } else if ( strobj.substr($s1, "k") == 0 ){
+	sprint(tstr1, "~gvec.record( &soma.ik_%s(0.5), %g)", $s1, $2)
+	e_value = ek
+    }
     execute(tstr1, this)
 }
 
@@ -54,6 +62,7 @@ proc setup_recording(){
 proc save_data(){ localobj vfile, gfile
     print vvec.size(), gvec.size()
     sprint(tstr1, "data/%s_Vm.dat", $s1)
+    print "Saving Vm in ", tstr1
     vfile = new File()
     vfile.wopen(tstr1)
     sprint(tstr1, "data/%s_Gk.dat", $s1)
@@ -62,7 +71,7 @@ proc save_data(){ localobj vfile, gfile
     for ii = 0, vvec.size() - 1 {
 	vfile.printf("%g %g\n", ii * $2 * 1e-3, vvec.x[ii] * 1e-3)
 	soma {
-	    gfile.printf("%g %g\n", ii * $2 * 1e-3, gvec.x(ii) * 1e-3 * area(0.5) * 1e-8 / ((vvec.x(ii) - ena) * 1e-3))
+	    gfile.printf("%g %g\n", ii * $2 * 1e-3, gvec.x(ii) * 1e-3 * area(0.5) * 1e-8 / ((vvec.x(ii) - e_value) * 1e-3))
 	}
     }
     vfile.close()

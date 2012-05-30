@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri May  4 14:55:52 2012 (+0530)
 # Version: 
-# Last-Updated: Wed May 30 21:45:14 2012 (+0530)
-#           By: subha
-#     Update #: 280
+# Last-Updated: Thu May 31 00:16:02 2012 (+0530)
+#           By: Subhasis Ray
+#     Update #: 282
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -65,7 +65,6 @@ def setup_gate_tables(gate, param_dict, bases):
         gate.min = ca_min
         gate.max = ca_max
         gate.divs = ca_divs
-        gate.useConcentration = True
         gate.useInterpolation = False
     keys = ['%s_%s' % (key, suffix) for key in ['tau', 'inf', 'alpha', 'beta', 'tableA', 'tableB']]
     if keys[0] in param_dict:
@@ -130,6 +129,7 @@ class ChannelMeta(type):
             ca_msg_field = moose.Mstring('%s/addmsg1' % (proto.path))
             ca_msg_field.value = '../CaPool	concOut	. concen'
             proto.instant = get_class_field(name, cdict, bases, 'instant', default=0)
+            proto.useConcentration = True
         proto.Ek = get_class_field(name, cdict, bases, 'Ek', default=0.0)
         X = get_class_field(name, cdict, bases, 'X', -1)
         if X > 0:
