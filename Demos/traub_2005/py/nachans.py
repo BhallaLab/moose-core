@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Apr 17 23:58:13 2009 (+0530)
 # Version: 
-# Last-Updated: Mon May 28 15:30:28 2012 (+0530)
+# Last-Updated: Wed May 30 14:38:19 2012 (+0530)
 #           By: subha
-#     Update #: 343
+#     Update #: 373
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -51,15 +51,14 @@ class NaF(NaChannel):
     Xpower = 3
     Ypower = 1
     X = 0.0
+    Y =  0.54876953
     shift = -3.5e-3
-    v = v_array + shift
-    tau_x = where(v < -30e-3, \
-                      1.0e-3 * (0.025 + 0.14 * exp((v + 30.0e-3) / 10.0e-3)), \
-                      1.0e-3 * (0.02 + 0.145 * exp(( - v - 30.0e-3) / 10.0e-3)))
-    inf_x = 1.0 / (1.0 + exp(( - v - 38e-3) / 10e-3))
-    v = v - shift
-    tau_y = 1.0e-3 * (0.15 + 1.15 / ( 1.0 + exp(( v + 37.0e-3) / 15.0e-3)))
-    inf_y = 1.0 / (1.0 + exp((v + 62.9e-3) / 10.7e-3))
+    tau_x = where((v_array + shift) < -30e-3, \
+                      1.0e-3 * (0.025 + 0.14 * exp((v_array + shift + 30.0e-3) / 10.0e-3)), \
+                      1.0e-3 * (0.02 + 0.145 * exp(( - v_array - shift - 30.0e-3) / 10.0e-3)))
+    inf_x = 1.0 / (1.0 + exp(( - v_array - shift - 38e-3) / 10e-3))
+    tau_y = 1.0e-3 * (0.15 + 1.15 / ( 1.0 + exp(( v_array + 37.0e-3) / 15.0e-3)))
+    inf_y = 1.0 / (1.0 + exp((v_array + 62.9e-3) / 10.7e-3))
         
     def __init__(self, path, shift=-3.5e-3, Ek=50e-3):
         NaChannel.__init__(self, path )
@@ -71,14 +70,12 @@ class NaF_TCR(NaF):
     abstract = False
     shift_x = -5.5e-3
     shift_y = -7e-3
-    v = v_array
-    tau_y = 1.0e-3 * (0.15 + 1.15 / ( 1.0 + exp(( v + 37.0e-3) / 15.0e-3)))        
-    inf_y = 1.0 / (1.0 + exp((v + shift_y + 62.9e-3) / 10.7e-3))
-    v = v + shift_x
-    tau_x = where(v < -30e-3, \
-                      1.0e-3 * (0.025 + 0.14 * exp((v + 30.0e-3) / 10.0e-3)), \
-                      1.0e-3 * (0.02 + 0.145 * exp(( - v - 30.0e-3) / 10.0e-3)))
-    inf_x = 1.0 / (1.0 + exp(( - v - 38e-3) / 10e-3))
+    tau_y = 1.0e-3 * (0.15 + 1.15 / ( 1.0 + exp(( v_array + 37.0e-3) / 15.0e-3)))        
+    inf_y = 1.0 / (1.0 + exp((v_array + shift_y + 62.9e-3) / 10.7e-3))
+    tau_x = where((v_array + shift_x) < -30e-3, \
+                      1.0e-3 * (0.025 + 0.14 * exp((v_array + shift_x + 30.0e-3) / 10.0e-3)), \
+                      1.0e-3 * (0.02 + 0.145 * exp(( - v_array - shift_x - 30.0e-3) / 10.0e-3)))
+    inf_x = 1.0 / (1.0 + exp(( - v_array - shift_x - 38e-3) / 10e-3))
 
     def __init__(self, path):
         NaChannel.__init__(self)
@@ -86,22 +83,23 @@ class NaF_TCR(NaF):
         
 class NaF2(NaF):
     abstract = False
+    # shift=-2.5 for all cortical interneurons including spiny stellates
+    # In neuron cell templates fastNa_shift_naf2=-2.5
     shift = -2.5e-3
-    v = v_array + shift
-    tau_x = where(v < -30e-3, \
-                      1.0e-3 * (0.0125 + 0.1525 * exp ((v + 30e-3) / 10e-3)), \
-                      1.0e-3 * (0.02 + 0.145 * exp((-v - 30e-3) / 10e-3)))        
-    inf_x = 1.0 / (1.0 + exp(( - v - 38e-3) / 10e-3))
-    v = v_array
-    tau_y = 1e-3 * (0.225 + 1.125 / ( 1 + exp( (  v + 37e-3 ) / 15e-3 ) ))        
-    inf_y = 1.0 / (1.0 + exp((v + 58.3e-3) / 6.7e-3))
+    tau_x = where((v_array + shift) < -30e-3, \
+                      1.0e-3 * (0.0125 + 0.1525 * exp ((v_array + shift + 30e-3) / 10e-3)), \
+                      1.0e-3 * (0.02 + 0.145 * exp((- v_array - shift - 30e-3) / 10e-3)))        
+    inf_x = 1.0 / (1.0 + exp(( - v_array - shift - 38e-3) / 10e-3))
+    tau_y = 1e-3 * (0.225 + 1.125 / ( 1 + exp( (  v_array + 37e-3 ) / 15e-3 ) ))        
+    inf_y = 1.0 / (1.0 + exp((v_array + 58.3e-3) / 6.7e-3))
 
     def __init__(self, path):
         NaChannel.__init__(self, path)
 
 class NaF2_nRT(NaF2):
     """This is a version of NaF2 without the fastNa_shift - applicable to nRT cell."""
-
+    # for nRT cells, fastNa_shift_naf2 is not set in the cell
+    # template. In naf2.mod it is set to 0 in PARAMETERS section.
     abstract = False
     tau_x = where(v_array < -30e-3, \
                       1.0e-3 * (0.0125 + 0.1525 * exp ((v_array + 30e-3) / 10e-3)), \
