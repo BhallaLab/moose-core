@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat May 26 10:41:37 2012 (+0530)
 # Version: 
-# Last-Updated: Tue May 29 18:11:23 2012 (+0530)
+# Last-Updated: Wed May 30 17:58:38 2012 (+0530)
 #           By: subha
-#     Update #: 161
+#     Update #: 217
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -36,7 +36,7 @@ from matplotlib import pyplot as plt
 import moose
 import channelbase
 
-simdt = 1e-6
+simdt = 1e-5
 
 def make_testcomp(containerpath):
     comp = moose.Compartment('%s/testcomp' % (containerpath))
@@ -95,9 +95,9 @@ def run_single_channel(channelname, Gbar, simtime):
     print 'Starting simulation for', simtime, 's'
     moose.start(simtime)
     print 'Finished simulation'
-    vm_file = '%s_Vm.dat' % (channelname)
-    gk_file = '%s_Gk.dat' % (channelname)
-    ik_file = '%s_Ik.dat' % (channelname)
+    vm_file = 'data/%s_Vm.dat' % (channelname)
+    gk_file = 'data/%s_Gk.dat' % (channelname)
+    ik_file = 'data/%s_Ik.dat' % (channelname)
     tseries = np.array(range(len(vm_data.vec))) * simdt
     print 'Vm:', len(vm_data.vec), 'Gk', len(gk_data.vec), 'Ik', len(ik_data.vec)
     data = np.c_[tseries, vm_data.vec]
@@ -111,7 +111,7 @@ def run_single_channel(channelname, Gbar, simtime):
     print 'Saved Gk in', ik_file
     return params
 
-def compare_channel_data(series, channelname, param, simulator):
+def compare_channel_data(series, channelname, param, simulator, x_range=None):
     if simulator == 'moose':
         ref_file = 'testdata/%s_%s.dat.gz' % (channelname, param)
     elif simulator == 'neuron':
@@ -119,9 +119,9 @@ def compare_channel_data(series, channelname, param, simulator):
     else:
         raise ValueError('Unrecognised simulator: %s' % (simulator))
     ref_series = np.loadtxt(ref_file)
-    return compare_data_arrays(ref_series, series, plot=False)
+    return compare_data_arrays(ref_series, series, relative='meany', x_range=x_range, plot=False)
 
-def compare_data_arrays(left, right, plot=False):
+def compare_data_arrays(left, right, relative='maxw', plot=False, x_range=None):
     """compare two data arrays. They must have the same number of
     dimensions (1 or 2) and represent the same range of x values. In
     case they are 1 dimensional, we take x values as relative position
@@ -138,6 +138,13 @@ def compare_data_arrays(left, right, plot=False):
 
     If plot is True, left, right and their difference at common points
     are plotted.
+
+    relative: `rms` - return root mean square of the error values
+    `taxicab` - mean of the absolute error values
+    `maxw` - max(abs(error))/(max(y) - min(y))    
+    `meany` - rms(error)/mean(y)
+
+    x_range : (minx, maxx) range of X values to consider for comparison
 
     """
     if len(left.shape) != len(right.shape):
@@ -159,22 +166,26 @@ def compare_data_arrays(left, right, plot=False):
         fp = left
         yp = right
     elif len(right.shape) == 2:
-        print right.shape
         x = right[:,0]
         xp = left[:,0]
         fp = left[:,1]
         yp = right[:,1]
     else:
-        raise ValueError('Cannot handle more than 2 dmensional arrays.')
+        raise ValueError('Cannot handle more than 2 dimensional arrays.')
     if left.shape[0] != right.shape[0]:
         print 'Array sizes not matching: (%d <> %d) - interpolating' % (left.shape[0], right.shape[0])
         y = np.interp(x, xp, fp)
     else:
         y = fp
+    if x_range:
+        indices = np.nonzero((x > x_range[0]) & (x < x_range[1]))[0]
+        y = np.array(y[indices])
+        yp = np.array(yp[indices])
+        x = np.array(x[indices])
     err = y - yp
     # I measure a conservative relative error as maximum of all the
     # errors between pairs of points with
-    all_y = np.r_[fp, yp]
+    all_y = np.r_[y, yp]
     if plot:
         # plt.subplot(221)
         plt.plot(x, yp, 'bx', label='right')
@@ -186,7 +197,16 @@ def compare_data_arrays(left, right, plot=False):
         plt.plot(x, err, 'rx', label='error')
         plt.legend()
         plt.show()
-    return max(err)/(max(all_y) - min(all_y))
+    if relative == 'rms':
+        return np.sqrt(np.mean(err**2))
+    elif relative == 'taxicab':
+        return np.mean(np.abs(err))
+    elif relative == 'maxw':
+        return max(np.abs(err))/(max(all_y) - min(all_y))
+    elif relative == 'meany':
+        return np.sqrt(np.mean(err**2)) / np.mean(all_y)
+    else:
+        return err
     
     
 # 

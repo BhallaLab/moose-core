@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat May 26 10:29:41 2012 (+0530)
 # Version: 
-# Last-Updated: Wed May 30 00:36:18 2012 (+0530)
-#           By: Subhasis Ray
-#     Update #: 283
+# Last-Updated: Wed May 30 17:57:54 2012 (+0530)
+#           By: subha
+#     Update #: 305
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -71,36 +71,35 @@ class TestNaF(ChannelTestBase):
     channelname = 'NaF'
     params = run_single_channel(channelname, 1e-9, simtime)
     tseries = np.array(range(0, len(params['Vm'].vec))) * simdt
-    print  'Gbar', params['channel'].Gbar
-    print 'Gk_last', params['Gk'].vec[-1]
     def testNaF_Vm_Moose(self):
+        print 'Testing MOOSE Vm  ...',
         vm = np.asarray(self.params['Vm'].vec)        
-        err = compare_channel_data(vm, TestNaF.channelname, 'Vm', 'moose')
-        self.assertAlmostEqual(err, 0.0)
+        err = compare_channel_data(vm, TestNaF.channelname, 'Vm', 'moose', x_range=(simtime/10.0, simtime))
+        self.assertLess(err, 0.01)
+        print 'OK'
         
     def testNaF_Gk_Moose(self):
+        print 'Testing MOOSE Gk  ...',
         gk = np.asarray(self.params['Gk'].vec)
-        err = compare_channel_data(gk, TestNaF.channelname, 'Gk', 'moose')
-        self.assertAlmostEqual(err, 0.0)
+        err = compare_channel_data(gk, TestNaF.channelname, 'Gk', 'moose', x_range=(simtime/10.0, simtime))
+        self.assertLess(err, 0.05)
+        print 'OK'
 
     def testNaF_Vm_Neuron(self):
+        print 'Testing NEURON Vm  ...',
         vm = np.asarray(self.params['Vm'].vec)
         data = np.c_[self.tseries, vm]
-        err = compare_channel_data(data, self.channelname, 'Vm', 'neuron')
-        self.assertAlmostEqual(err, 0.0)        
+        err = compare_channel_data(data, self.channelname, 'Vm', 'neuron', x_range=(simtime/10.0, simtime))
+        self.assertLess(err, 0.01)        
+        print 'OK'
 
-    # def testNaF_Gk_Neuron(self):
-    #     gk = np.asarray(self.params['Gk'].vec)
-    #     data = np.c_[self.tseries, gk]
-    #     err = compare_channel_data(data, self.channelname, 'Gk', 'neuron')
-    #     self.assertAlmostEqual(err, 0.0)
-
-    def testNaF_Ik_Neuron(self):
-        ik = np.asarray(self.params['Ik'].vec)
-        data = np.c_[self.tseries, ik]
-        err = compare_channel_data(data, self.channelname, 'Ik', 'neuron')
-        self.assertAlmostEqual(err, 0.0)
-                
+    def testNaF_Gk_Neuron(self):
+        print 'Testing NEURON Gk  ...',
+        gk = np.asarray(self.params['Gk'].vec)
+        data = np.c_[self.tseries, gk]
+        err = compare_channel_data(data, self.channelname, 'Gk', 'neuron', x_range=(simtime/10.0, simtime))
+        self.assertLess(err, 0.05)
+        print 'OK'
 
 if __name__ == '__main__':
     unittest.main()
