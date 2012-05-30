@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri May  4 14:55:52 2012 (+0530)
 # Version: 
-# Last-Updated: Tue May 29 14:00:23 2012 (+0530)
+# Last-Updated: Wed May 30 21:45:14 2012 (+0530)
 #           By: subha
-#     Update #: 262
+#     Update #: 280
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -60,6 +60,7 @@ def setup_gate_tables(gate, param_dict, bases):
         gate.min = vmin
         gate.max = vmax
         gate.divs = vdivs
+        gate.useInterpolation = True
     else:
         gate.min = ca_min
         gate.max = ca_max
@@ -91,6 +92,7 @@ def setup_gate_tables(gate, param_dict, bases):
             
 def get_class_field(name, cdict, bases, fieldname, default=None):
     if fieldname in cdict:
+        print name, fieldname, cdict[fieldname]
         return cdict[fieldname]
     else:
         for base in bases:
@@ -107,18 +109,21 @@ class ChannelMeta(type):
         if  'abstract' in cdict and cdict['abstract'] == True:
             return type.__new__(cls, name, bases, cdict)
         proto = moose.HHChannel('%s/%s' % (config.modelSettings.libpath, name))
-        if 'Xpower' in cdict:
-            proto.Xpower = cdict['Xpower']
+        xpower = get_class_field(name, cdict, bases, 'Xpower', default=0.0)
+        if xpower > 0:
+            proto.Xpower = xpower
             gate = moose.HHGate('%s/gateX' % (proto.path))
             setup_gate_tables(gate, cdict, bases)
             cdict['xGate'] = gate
-        if 'Ypower' in cdict:
-            proto.Ypower = cdict['Ypower']
+        ypower = get_class_field(name, cdict, bases, 'Ypower', default=0.0)
+        if ypower > 0:
+            proto.Ypower = ypower
             gate = moose.HHGate('%s/gateY' % (proto.path))
             setup_gate_tables(gate, cdict, bases)
             cdict['yGate'] = gate
-        if 'Zpower' in cdict:
-            proto.Zpower = cdict['Zpower']
+        zpower = get_class_field(name, cdict, bases, 'Zpower', default=0.0)
+        if zpower > 0:
+            proto.Zpower = zpower
             gate = moose.HHGate('%s/gateZ' % (proto.path))
             setup_gate_tables(gate, cdict, bases)
             cdict['zGate'] = gate

@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat May 26 10:41:37 2012 (+0530)
 # Version: 
-# Last-Updated: Wed May 30 17:58:38 2012 (+0530)
+# Last-Updated: Wed May 30 21:58:19 2012 (+0530)
 #           By: subha
-#     Update #: 217
+#     Update #: 249
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -32,11 +32,17 @@
 import uuid
 import numpy as np
 from matplotlib import pyplot as plt
+import unittest
 
 import moose
+import config
 import channelbase
 
+simtime = 350e-3
+
 simdt = 1e-5
+
+lib = moose.Neutral(config.modelSettings.libpath)
 
 def make_testcomp(containerpath):
     comp = moose.Compartment('%s/testcomp' % (containerpath))
@@ -92,7 +98,7 @@ def run_single_channel(channelname, Gbar, simtime):
     gk_data = params['Gk']
     ik_data = params['Ik']
     moose.reinit()
-    print 'Starting simulation for', simtime, 's'
+    print 'Starting simulation', testId, 'for', simtime, 's'
     moose.start(simtime)
     print 'Finished simulation'
     vm_file = 'data/%s_Vm.dat' % (channelname)
@@ -111,7 +117,7 @@ def run_single_channel(channelname, Gbar, simtime):
     print 'Saved Gk in', ik_file
     return params
 
-def compare_channel_data(series, channelname, param, simulator, x_range=None):
+def compare_channel_data(series, channelname, param, simulator, x_range=None, plot=False):
     if simulator == 'moose':
         ref_file = 'testdata/%s_%s.dat.gz' % (channelname, param)
     elif simulator == 'neuron':
@@ -119,7 +125,7 @@ def compare_channel_data(series, channelname, param, simulator, x_range=None):
     else:
         raise ValueError('Unrecognised simulator: %s' % (simulator))
     ref_series = np.loadtxt(ref_file)
-    return compare_data_arrays(ref_series, series, relative='meany', x_range=x_range, plot=False)
+    return compare_data_arrays(ref_series, series, relative='meany', x_range=x_range, plot=plot)
 
 def compare_data_arrays(left, right, relative='maxw', plot=False, x_range=None):
     """compare two data arrays. They must have the same number of
@@ -178,15 +184,18 @@ def compare_data_arrays(left, right, relative='maxw', plot=False, x_range=None):
     else:
         y = fp
     if x_range:
-        indices = np.nonzero((x > x_range[0]) & (x < x_range[1]))[0]
+        indices = np.nonzero((x > x_range[0]) & (x <= x_range[1]))[0]
         y = np.array(y[indices])
         yp = np.array(yp[indices])
         x = np.array(x[indices])
+        indices = np.nonzero((xp > x_range[0]) & (xp <= x_range[1]))[0]
+        xp = xp[indices]
+        fp = fp[indices]
     err = y - yp
     # I measure a conservative relative error as maximum of all the
     # errors between pairs of points with
     all_y = np.r_[y, yp]
-    if plot:
+    if plot:        
         # plt.subplot(221)
         plt.plot(x, yp, 'bx', label='right')
         # plt.legend()
@@ -208,6 +217,25 @@ def compare_data_arrays(left, right, relative='maxw', plot=False, x_range=None):
     else:
         return err
     
+
+class ChannelTestBase(unittest.TestCase):
+    def __init__(self, *args, **kwargs):
+        unittest.TestCase.__init__(self, *args, **kwargs)
+
+    def compare_Vm(self, filename):
+        print 'Comparing Vm ...'
+        self.ref_vm_data = np.loadtxt(filename)
+        err = compare_data_arrays(self.ref_vm_data, np.array(self.vm_data.vec), plot=True)
+        self.assertAlmostEqual(err, 0.0)
+        print 'OK'
+
+    def compare_Gk(self, filename):
+        print 'Comparing Gk ...'
+        self.ref_gk_data = np.loadtxt(filename)
+        err = compare_data_arrays(self.ref_gk_data, np.array(self.gk_data.vec), plot=True)
+        self.assertAlmostEqual(err, 0.0)
+        print 'OK'
+
     
 # 
 # test_utils.py ends here
