@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat May 26 10:41:37 2012 (+0530)
 # Version: 
-# Last-Updated: Wed May 30 21:58:19 2012 (+0530)
-#           By: subha
-#     Update #: 249
+# Last-Updated: Thu May 31 00:42:31 2012 (+0530)
+#           By: Subhasis Ray
+#     Update #: 250
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -28,6 +28,11 @@
 # 
 
 # Code:
+
+import os
+os.environ['NUMPTHREADS'] = '1'
+import sys
+sys.path.append('../../../python')
 
 import uuid
 import numpy as np
