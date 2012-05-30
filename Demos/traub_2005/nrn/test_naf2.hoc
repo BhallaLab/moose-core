@@ -13,9 +13,9 @@ objref testcomp, vvec, gvec, tvec, vfile, gfile
 
 testcomp = new singlecomp()
 
-testcomp.setup_channel("naf", 1e-9)
+testcomp.setup_channel("naf2", 1e-9)
 testcomp.soma {
-    fastNa_shift_naf = -3.5
+    fastNa_shift_naf2 = -2.5
     ena = 50 
 }
 
@@ -23,9 +23,9 @@ testcomp.soma {
 // ms start negative current, 300 ms stop negative current 350 ms stop
 // simulation)
 
-testcomp.setup_recording("naf", Dt)
+testcomp.setup_recording("naf2", Dt)
 run()
-testcomp.save_data("NaF", Dt)
+testcomp.save_data("NaF2", Dt)
 
 quit()
 

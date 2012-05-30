@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Apr 17 23:58:13 2009 (+0530)
 # Version: 
-# Last-Updated: Wed May 30 14:38:19 2012 (+0530)
+# Last-Updated: Wed May 30 21:55:12 2012 (+0530)
 #           By: subha
-#     Update #: 373
+#     Update #: 379
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -114,10 +114,11 @@ class NaF2_nRT(NaF2):
 class NaP(NaChannel):
     abstract = False
     Xpower = 1.0
-    tau_m = where(v_array < -40e-3, \
+    Ypower = 0.0
+    tau_x = where(v_array < -40e-3, \
                       1.0e-3 * (0.025 + 0.14 * exp((v_array + 40e-3) / 10e-3)), \
                       1.0e-3 * (0.02 + 0.145 * exp((-v_array - 40e-3) / 10e-3)))
-    m_inf = 1.0 / (1.0 + exp((-v_array - 48e-3) / 10e-3))
+    inf_x = 1.0 / (1.0 + exp((-v_array - 48e-3) / 10e-3))
 
     def __init__(self, path, Ek=50e-3):
         NaChannel.__init__(self, path)
@@ -127,10 +128,10 @@ class NaPF(NaChannel):
     """Persistent Na+ current, fast"""
     abstract = False
     Xpower = 3
-    tau_m = where(v_array < -30e-3, \
+    tau_x = where(v_array < -30e-3, \
                       1.0e-3 * (0.025 + 0.14 * exp((v_array  + 30.0e-3) / 10.0e-3)), \
                       1.0e-3 * (0.02 + 0.145 * exp((- v_array - 30.0e-3) / 10.0e-3)))
-    m_inf = 1.0 / (1.0 + exp((-v_array - 38e-3) / 10e-3))
+    inf_x = 1.0 / (1.0 + exp((-v_array - 38e-3) / 10e-3))
     
     def __init__(self, path):
         NaChannel.__init__(self, path)
@@ -140,10 +141,10 @@ class NaPF_SS(NaPF):
     abstract = False
     shift = -2.5e-3
     v = v_array + shift
-    tau_m = where(v < -30e-3, \
+    tau_x = where(v < -30e-3, \
                        1.0e-3 * (0.025 + 0.14 * exp((v  + 30.0e-3) / 10.0e-3)), \
                        1.0e-3 * (0.02 + 0.145 * exp((- v - 30.0e-3) / 10.0e-3)))
-    m_inf = 1.0 / (1.0 + exp((- v - 38e-3) / 10e-3))
+    inf_x = 1.0 / (1.0 + exp((- v - 38e-3) / 10e-3))
 
     def __init__(self, path):
         NaChannel.__init__(self, path)
@@ -154,11 +155,11 @@ class NaPF_TCR(NaPF):
     with NaPF is power of m is 1 as opposed 3."""
     abstract = False
     shift = 7e-3
-    v = v_array + shift
-    tau_m = where(v < -30e-3, \
-                       1.0e-3 * (0.025 + 0.14 * exp((v  + 30.0e-3) / 10.0e-3)), \
-                       1.0e-3 * (0.02 + 0.145 * exp((- v - 30.0e-3) / 10.0e-3)))
-    m_inf = 1.0 / (1.0 + exp((-v - 38e-3) / 10e-3))
+    Xpower = 1
+    tau_x = where((v_array + shift) < -30e-3, \
+                       1.0e-3 * (0.025 + 0.14 * exp(((v_array + shift)  + 30.0e-3) / 10.0e-3)), \
+                       1.0e-3 * (0.02 + 0.145 * exp((- (v_array + shift) - 30.0e-3) / 10.0e-3)))
+    inf_x = 1.0 / (1.0 + exp((-(v_array + shift) - 38e-3) / 10e-3))
     def __init__(self, path):
         NaChannel.__init__(self, path)
 
