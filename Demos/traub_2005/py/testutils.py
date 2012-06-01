@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat May 26 10:41:37 2012 (+0530)
 # Version: 
-# Last-Updated: Fri Jun  1 10:45:36 2012 (+0530)
+# Last-Updated: Fri Jun  1 15:29:29 2012 (+0530)
 #           By: subha
-#     Update #: 287
+#     Update #: 295
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -56,7 +56,6 @@ def make_testcomp(containerpath):
     comp.Cm = 1e-12
     comp.Rm = 1e9
     comp.Ra = 1e5
-    comp.Vm = comp.initVm
     return comp
 
 def make_pulsegen(containerpath):
@@ -86,8 +85,11 @@ def setup_single_compartment(container_path, channel_proto, Gbar):
     moose.connect(ik_table, 'requestData', channel, 'get_Ik')
     moose.setClock(0, simdt)
     moose.setClock(1, simdt)
+    moose.setClock(2, simdt)
     moose.useClock(0, '%s/##[TYPE=Compartment]' % (container_path), 'init')
-    moose.useClock(1, '%s/##' % (container_path), 'process')
+    moose.useClock(1, '%s/##[TYPE=Compartment]' % (container_path), 'process')
+    moose.useClock(2, '%s/##[TYPE!=Compartment]' % (container_path), 'process')
+
     return {'compartment': comp,
             'stimulus': pulsegen,
             'channel': channel,

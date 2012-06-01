@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Apr 17 23:58:49 2009 (+0530)
 # Version: 
-# Last-Updated: Thu May 31 22:25:40 2012 (+0530)
+# Last-Updated: Fri Jun  1 13:55:58 2012 (+0530)
 #           By: subha
-#     Update #: 1022
+#     Update #: 1024
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -121,7 +121,6 @@ class K2(KChannel):
     tau_x = 1e-3 * (4.95 + 0.5 / ( exp( ( v_array * 1e3 - 81 ) / 25.6 ) + exp( ( - v_array * 1e3 - 132 ) / 18 ) ))
     inf_y  = 1 / ( 1 + exp( ( v_array*1e3 + 58 ) / 10.6 ) )
     tau_y  = 1e-3 * (60 + 0.5 / ( exp( ( v_array*1e3 - 1.33 ) / 200 ) + exp( ( - v_array*1e3 - 130 ) / 7.1 ) ))
-    Y = np.interp(-65e-3, v_array, inf_y)
 
     def __init__(self, path):
         KChannel.__init__(self, path)
