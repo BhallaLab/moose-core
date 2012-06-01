@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Apr 17 23:58:13 2009 (+0530)
 # Version: 
-# Last-Updated: Wed May 30 21:55:12 2012 (+0530)
+# Last-Updated: Fri Jun  1 16:33:29 2012 (+0530)
 #           By: subha
-#     Update #: 379
+#     Update #: 381
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -141,10 +141,10 @@ class NaPF_SS(NaPF):
     abstract = False
     shift = -2.5e-3
     v = v_array + shift
-    tau_x = where(v < -30e-3, \
-                       1.0e-3 * (0.025 + 0.14 * exp((v  + 30.0e-3) / 10.0e-3)), \
-                       1.0e-3 * (0.02 + 0.145 * exp((- v - 30.0e-3) / 10.0e-3)))
-    inf_x = 1.0 / (1.0 + exp((- v - 38e-3) / 10e-3))
+    tau_x = where((v_array + shift) < -30e-3, \
+                       1.0e-3 * (0.025 + 0.14 * exp(((v_array + shift)  + 30.0e-3) / 10.0e-3)), \
+                       1.0e-3 * (0.02 + 0.145 * exp((- (v_array + shift) - 30.0e-3) / 10.0e-3)))
+    inf_x = 1.0 / (1.0 + exp((- (v_array + shift) - 38e-3) / 10e-3))
 
     def __init__(self, path):
         NaChannel.__init__(self, path)

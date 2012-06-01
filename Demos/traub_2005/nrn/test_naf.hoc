@@ -16,7 +16,6 @@ testcomp = new singlecomp()
 testcomp.setup_channel("naf", 1e-9)
 testcomp.soma {
     fastNa_shift_naf = -3.5
-    ena = 50 
 }
 
 // (50 ms start positive current, 150 ms stop positive current, 200
