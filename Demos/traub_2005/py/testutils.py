@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat May 26 10:41:37 2012 (+0530)
 # Version: 
-# Last-Updated: Fri Jun  1 16:21:38 2012 (+0530)
+# Last-Updated: Fri Jun  1 17:04:29 2012 (+0530)
 #           By: subha
-#     Update #: 297
+#     Update #: 298
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -131,7 +131,7 @@ def compare_channel_data(series, channelname, param, simulator, x_range=None, pl
     if simulator == 'moose':
         ref_file = 'testdata/%s_%s.dat.gz' % (channelname, param)
     elif simulator == 'neuron':
-        ref_file = '../nrn/data/%s_%s.dat' % (channelname, param)
+        ref_file = '../nrn/data/%s_%s.dat.gz' % (channelname, param)
     else:
         raise ValueError('Unrecognised simulator: %s' % (simulator))
     ref_series = np.loadtxt(ref_file)
