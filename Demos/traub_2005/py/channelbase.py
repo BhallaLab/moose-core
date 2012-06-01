@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri May  4 14:55:52 2012 (+0530)
 # Version: 
-# Last-Updated: Thu May 31 00:16:02 2012 (+0530)
-#           By: Subhasis Ray
-#     Update #: 282
+# Last-Updated: Thu May 31 21:06:48 2012 (+0530)
+#           By: subha
+#     Update #: 293
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -60,22 +60,24 @@ def setup_gate_tables(gate, param_dict, bases):
         gate.min = vmin
         gate.max = vmax
         gate.divs = vdivs
-        gate.useInterpolation = True
     else:
         gate.min = ca_min
         gate.max = ca_max
         gate.divs = ca_divs
-        gate.useInterpolation = False
+    gate.useInterpolation = True
     keys = ['%s_%s' % (key, suffix) for key in ['tau', 'inf', 'alpha', 'beta', 'tableA', 'tableB']]
     if keys[0] in param_dict:
+        print 'Using tau/inf tables'
         gate.tableA = param_dict[keys[1]] / param_dict[keys[0]]
         gate.tableB = 1 / param_dict[keys[0]]
         return True
     elif keys[2] in param_dict:
+        print 'Using alpha/beta tables'
         gate.tableA = param_dict[keys[2]]
         gate.tableB = param_dict[keys[2]] + param_dict[keys[3]]
         return True
     elif keys[4] in param_dict:
+        print 'Using A/B tables'
         gate.tableA = param_dict[keys[4]]
         gate.tableB = param_dict[keys[5]]
         return True
@@ -100,6 +102,7 @@ def get_class_field(name, cdict, bases, fieldname, default=None):
     warn('field %s not in the hierarchy of %s class. Returning default value.' % (fieldname, name))
     return default
             
+
 class ChannelMeta(type):
     def __new__(cls, name, bases, cdict):     
         global prototypes
@@ -131,14 +134,15 @@ class ChannelMeta(type):
             proto.instant = get_class_field(name, cdict, bases, 'instant', default=0)
             proto.useConcentration = True
         proto.Ek = get_class_field(name, cdict, bases, 'Ek', default=0.0)
-        X = get_class_field(name, cdict, bases, 'X', -1)
-        if X > 0:
+        X = get_class_field(name, cdict, bases, 'X')
+        if X is not None:
+            print name, 'setting', X
             proto.X = X
-        Y = get_class_field(name, cdict, bases, 'Y', -1)
-        if Y > 0:
+        Y = get_class_field(name, cdict, bases, 'Y')
+        if Y is not None:
             proto.Y = Y
-        Z = get_class_field(name, cdict, bases, 'Z', -1)
-        if Z > 0:
+        Z = get_class_field(name, cdict, bases, 'Z')
+        if Z is not None:
             proto.Z = Z
         mstring_field = get_class_field(name, cdict, bases, 'mstring')
         if mstring_field is not None:

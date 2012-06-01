@@ -5,6 +5,7 @@ objectvar stim1, stim2, vvec, gvec
 strdef tstr1, iontype
 objref this
 create soma
+
 e_value = 0.0
 
 proc init(){
@@ -33,25 +34,36 @@ proc init(){
 }    
 
 // setup_channel(channelname, Gbar)
-proc setup_channel(){
+proc setup_channel(){ localobj strfn
     sprint(tstr1, "~insert %s", $s1)
     print tstr1
     soma execute(tstr1)
     sprint(tstr1, "~gbar_%s = %g * 1e8 / area(0.5)", $s1, $2)
     print tstr1
     soma execute(tstr1)
+    strfn = new StringFunctions()
+    if (strfn.substr($s1, "na") == 0){
+        sprint(tstr1, "~ena = 50.0")
+    } else if (strfn.substr($s1, "k") == 0){
+        sprint(tstr1, "~ek = -95.0")
+    } else if (strfn.substr($s1, "ar") == 0){
+        sprint(tstr1, "~ear = -35.0")
+    }
+    print tstr1
+    soma execute(tstr1)
+    
 }
 
 // setup_recording(channelname, Dt)
-proc setup_recording(){ localobj strobj
-    strobj = new StringFunctions()
+proc setup_recording(){ localobj strfn
+    strfn = new StringFunctions()
     vvec = new Vector()    
     vvec.record(&soma.v(0.5), $2)
     gvec = new Vector()
-    if ( strobj.substr($s1, "na") == 0 ){
+    if ( strfn.substr($s1, "na") == 0 ){
 	sprint(tstr1, "~gvec.record( &soma.ina_%s(0.5), %g)", $s1, $2)
 	e_value = ena
-    } else if ( strobj.substr($s1, "k") == 0 ){
+    } else if ( strfn.substr($s1, "k") == 0 ){
 	sprint(tstr1, "~gvec.record( &soma.ik_%s(0.5), %g)", $s1, $2)
 	e_value = ek
     }
