@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Fri May 25 17:30:17 2012 (+0530)
+// Last-Updated: Fri Jun  1 13:23:22 2012 (+0530)
 //           By: subha
-//     Update #: 8523
+//     Update #: 8551
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -729,6 +729,7 @@ extern "C" {
         0,                       /* tp_new */
         0,                                              /* tp_free */
     };
+
 
     static PyObject * moose_DestField_call(PyObject * self, PyObject * args,
                                            PyObject * kw)
@@ -1565,14 +1566,21 @@ extern "C" {
         if (type.empty()){
             // Check if this field name is aliased and update fieldname and type if so.
             map<string, string>::const_iterator it = get_field_alias().find(string(field));
-            if (it == get_field_alias().end()){
-                return PyObject_GenericGetAttr((PyObject*)self, attr);            
-            } else {
+            if (it != get_field_alias().end()){
                 field = (it->second).c_str();
                 type = getFieldType(Field<string>::get(self->oid_, "class"), it->second, "valueFinfo");
                 // Update attr for next level (PyObject_GenericGetAttr) in case.
                 Py_XDECREF(attr);
                 attr = PyString_FromString(field);
+            }
+        }
+        if (type.empty()){
+            // check if it is a fieldElementType - of no use currently:
+            type = getFieldType(Field<string>::get(self->oid_, "class"), string(field), "fieldElementFinfo");
+            if (type.empty()){
+                    return PyObject_GenericGetAttr((PyObject*)self, attr);            
+            } else {
+                type = "Id";
             }
         }
         ftype = shortType(type);
@@ -2624,6 +2632,31 @@ extern "C" {
 
     
     ///////////////////////////////////////////////
+    // Python geteset defs for PyObject of ObjId
+    ///////////////////////////////////////////////
+    static PyGetSetDef ObjIdGetSetters[] = {
+        {"id_",
+         (getter)moose_ObjId_getId,
+         NULL,
+         "Id of this object",
+         NULL,
+        },
+        {"dindex",
+         (getter)moose_ObjId_getDataIndex,
+         NULL,
+         "Data index of this ObjId.",
+         NULL,
+        },
+        {"findex",
+         (getter)moose_ObjId_getFieldIndex,
+         NULL,
+         "Field index of this ObjId.",
+         NULL,
+        },
+        {NULL}, /* sentinel */
+    };
+    
+    ///////////////////////////////////////////////
     // Python method lists for PyObject of ObjId
     ///////////////////////////////////////////////
 
@@ -3024,8 +3057,8 @@ extern "C" {
         if (!PyArg_ParseTuple(args, "Oss:moose_getfield", &pyobj, &field, &type)){
             return NULL;
         }
-        if (!ObjId_Check(pyobj)){
-            PyErr_SetString(PyExc_TypeError, "Expected an ObjId as first argument.");
+        if (!ObjId_SubtypeCheck(pyobj)){
+            PyErr_SetString(PyExc_TypeError, "moose.getField(ObjId, fieldname, fieldtype): First argument must be an instance of ObjId or its subclass");
             return NULL;
         }
         string fname(field), ftype(type);
