@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed May 30 23:51:58 2012 (+0530)
 # Version: 
-# Last-Updated: Thu May 31 00:52:59 2012 (+0530)
-#           By: Subhasis Ray
-#     Update #: 40
+# Last-Updated: Thu May 31 21:12:47 2012 (+0530)
+#           By: subha
+#     Update #: 97
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -32,138 +32,195 @@ import numpy as np
 from testutils import *
 from kchans import *
 
+
 class TestKDR(ChannelTestBase):
     channelname = 'KDR'
     params = run_single_channel(channelname, 1e-9, simtime)
     vm = np.array(params['Vm'].vec)
-    gk = np.array(params['Vm'].vec)
+    gk = np.array(params['Gk'].vec)
     tseries = np.arange(0, len(vm), 1.0) * simdt
     
     def testKDR_Vm_Neuron(self):
-        print 'Testing NEURON Vm ...',
         data = np.c_[self.tseries, self.vm]
-        err = compare_channel_data(data, TestKDR.channelname, 'Vm', 'neuron', x_range=(simtime/10.0, simtime))
+        err = compare_channel_data(data, self.channelname, 'Vm', 'neuron', x_range=(simtime/10.0, simtime))
         self.assertLess(err, 0.01)
-        print 'OK'
 
     def testKDR_Gk_Neuron(self):
-        print 'Testing NEURON Gk ...',
         data = np.c_[self.tseries, self.gk]
-        err = compare_channel_data(data, TestKDR.channelname, 'Gk', 'neuron', x_range=(simtime/10.0, simtime))
+        err = compare_channel_data(data, self.channelname, 'Gk', 'neuron', x_range=(simtime/10.0, simtime), plot=True)
         self.assertLess(err, 0.01)
-        print 'OK'
 
         
 class TestKDR_FS(ChannelTestBase):
     channelname = 'KDR_FS'
     params = run_single_channel(channelname, 1e-9, simtime)
     vm = np.array(params['Vm'].vec)
-    gk = np.array(params['Vm'].vec)
+    gk = np.array(params['Gk'].vec)
     tseries = np.arange(0, len(vm), 1.0) * simdt
     
     def testKDR_FS_Vm_Neuron(self):
-        print 'Testing NEURON Vm ...',
         data = np.c_[self.tseries, self.vm]
-        err = compare_channel_data(data, TestKDR_FS.channelname, 'Vm', 'neuron', x_range=(simtime/10.0, simtime))
+        err = compare_channel_data(data, self.channelname, 'Vm', 'neuron', x_range=(simtime/10.0, simtime))
         self.assertLess(err, 0.01)
-        print 'OK'
-
+        
     def testKDR_FS_Gk_Neuron(self):
-        print 'Testing NEURON Gk ...',
         data = np.c_[self.tseries, self.gk]
-        err = compare_channel_data(data, TestKDR_FS.channelname, 'Gk', 'neuron', x_range=(simtime/10.0, simtime))
+        err = compare_channel_data(data, self.channelname, 'Gk', 'neuron', x_range=(simtime/10.0, simtime), plot=True)
         self.assertLess(err, 0.01)
-        print 'OK'
+        
 
         
 class TestKA(ChannelTestBase):
     channelname = 'KA'
     params = run_single_channel(channelname, 1e-9, simtime)
     vm = np.array(params['Vm'].vec)
-    gk = np.array(params['Vm'].vec)
+    gk = np.array(params['Gk'].vec)
     tseries = np.arange(0, len(vm), 1.0) * simdt
     
     def testKA_Vm_Neuron(self):
-        print 'Testing NEURON Vm ...',
         data = np.c_[self.tseries, self.vm]
-        err = compare_channel_data(data, TestKA.channelname, 'Vm', 'neuron', x_range=(simtime/10.0, simtime))
+        err = compare_channel_data(data, self.channelname, 'Vm', 'neuron', x_range=(simtime/10.0, simtime))
         self.assertLess(err, 0.01)
-        print 'OK'
-
+        
     def testKA_Gk_Neuron(self):
-        print 'Testing NEURON Gk ...',
         data = np.c_[self.tseries, self.gk]
-        err = compare_channel_data(data, TestKA.channelname, 'Gk', 'neuron', x_range=(simtime/10.0, simtime))
+        err = compare_channel_data(data, self.channelname, 'Gk', 'neuron', plot=True)
         self.assertLess(err, 0.01)
-        print 'OK'
-
+        
 
 class TestKA_IB(ChannelTestBase):
     channelname = 'KA_IB'
     params = run_single_channel(channelname, 1e-9, simtime)
     vm = np.array(params['Vm'].vec)
-    gk = np.array(params['Vm'].vec)
+    gk = np.array(params['Gk'].vec)
     tseries = np.arange(0, len(vm), 1.0) * simdt
     
     def testKA_IB_Vm_Neuron(self):
-        print 'Testing NEURON Vm ...',
         data = np.c_[self.tseries, self.vm]
-        err = compare_channel_data(data, TestKA_IB.channelname, 'Vm', 'neuron', x_range=(simtime/10.0, simtime))
+        err = compare_channel_data(data, self.channelname, 'Vm', 'neuron', x_range=(simtime/10.0, simtime))
         self.assertLess(err, 0.01)
-        print 'OK'
+        
 
     def testKA_IB_Gk_Neuron(self):
-        print 'Testing NEURON Gk ...',
         data = np.c_[self.tseries, self.gk]
-        err = compare_channel_data(data, TestKA_IB.channelname, 'Gk', 'neuron', x_range=(simtime/10.0, simtime))
+        err = compare_channel_data(data, self.channelname, 'Gk', 'neuron', plot=True)
         self.assertLess(err, 0.01)
-        print 'OK'
+        
 
         
 class TestK2(ChannelTestBase):
     channelname = 'K2'
     params = run_single_channel(channelname, 1e-9, simtime)
     vm = np.array(params['Vm'].vec)
-    gk = np.array(params['Vm'].vec)
+    gk = np.array(params['Gk'].vec)
     tseries = np.arange(0, len(vm), 1.0) * simdt
     
     def testK2_Vm_Neuron(self):
-        print 'Testing NEURON Vm ...',
         data = np.c_[self.tseries, self.vm]
-        err = compare_channel_data(data, TestK2.channelname, 'Vm', 'neuron', x_range=(simtime/10.0, simtime))
+        err = compare_channel_data(data, self.channelname, 'Vm', 'neuron', x_range=(simtime/10.0, simtime))
         self.assertLess(err, 0.01)
-        print 'OK'
+        
 
     def testK2_Gk_Neuron(self):
-        print 'Testing NEURON Gk ...',
         data = np.c_[self.tseries, self.gk]
-        err = compare_channel_data(data, TestK2.channelname, 'Gk', 'neuron', x_range=(simtime/10.0, simtime))
+        err = compare_channel_data(data, self.channelname, 'Gk', 'neuron', plot=True)
         self.assertLess(err, 0.01)
-        print 'OK'
+        
 
         
 class TestKM(ChannelTestBase):
     channelname = 'KM'
     params = run_single_channel(channelname, 1e-9, simtime)
     vm = np.array(params['Vm'].vec)
-    gk = np.array(params['Vm'].vec)
+    gk = np.array(params['Gk'].vec)
     tseries = np.arange(0, len(vm), 1.0) * simdt
     
     def testKM_Vm_Neuron(self):
-        print 'Testing NEURON Vm ...',
         data = np.c_[self.tseries, self.vm]
-        err = compare_channel_data(data, TestKM.channelname, 'Vm', 'neuron', x_range=(simtime/10.0, simtime))
+        err = compare_channel_data(data, self.channelname, 'Vm', 'neuron', x_range=(simtime/10.0, simtime))
         self.assertLess(err, 0.01)
-        print 'OK'
 
     def testKM_Gk_Neuron(self):
-        print 'Testing NEURON Gk ...',
+        
         data = np.c_[self.tseries, self.gk]
-        err = compare_channel_data(data, TestKM.channelname, 'Gk', 'neuron', x_range=(simtime/10.0, simtime))
+        err = compare_channel_data(data, self.channelname, 'Gk', 'neuron', x_range=(simtime/10.0, simtime), plot=True)
         self.assertLess(err, 0.01)
-        print 'OK'
+        
+
+
+def setup_cadep_channel(container_path, channel_proto, Gbar, ca_start, ca_stop):
+    """Setup a test compartment with [Ca2+] dependent channel."""
+    params = setup_single_compartment(container_path, channel_proto, Gbar)
+    ca_table = moose.StimulusTable(container_path + '/CaStim')    
+    ca_table.vec = np.linspace(ca_start, ca_stop, 1000)
+    ca_recorder = moose.Table(container_path + '/Ca')
+    moose.connect(ca_table, 'output', ca_recorder, 'input')
+    moose.connect(ca_table, 'output', params['channel'], 'concen')
+    params['Ca'] = ca_recorder
+    params['CaStim'] = ca_table
+    moose.useClock(1, '%s,%s' % (ca_recorder.path, ca_table.path), 'process')
+    return params
+
+def run_cadep_channel(channelname, Gbar, simtime):
+    testId = uuid.uuid4().int
+    container = moose.Neutral('test%d' % (testId))
+    params = setup_cadep_channel(
+        container.path,
+        channelbase.prototypes[channelname],
+        Gbar,
+        0,
+        1e3)
+    ca_table = params['CaStim']
+    ca_table.startTime = 50e-3
+    ca_table.stopTime = 150e-3
+    ca_table.loopTime = 150e-3
+    vm_data = params['Vm']
+    gk_data = params['Gk']
+    ik_data = params['Ik']
+    ca_data = params['Ca']
+    moose.reinit()
+    print 'Starting simulation', testId, 'for', simtime, 's'
+    moose.start(simtime)
+    print 'Finished simulation'
+    vm_file = 'data/%s_Vm.dat' % (channelname)
+    gk_file = 'data/%s_Gk.dat' % (channelname)
+    ik_file = 'data/%s_Ik.dat' % (channelname)
+    ca_file = 'data/%s_Ca.dat' % (channelname)
+    tseries = np.array(range(len(vm_data.vec))) * simdt
+    print 'Vm:', len(vm_data.vec), 'Gk', len(gk_data.vec), 'Ik', len(ik_data.vec)
+    data = np.c_[tseries, vm_data.vec]
+    np.savetxt(vm_file, data)
+    print 'Saved Vm in', vm_file
+    data = np.c_[tseries, gk_data.vec]
+    np.savetxt(gk_file, data)
+    print 'Saved Gk in', gk_file
+    data = np.c_[tseries, ik_data.vec]
+    np.savetxt(ik_file, data)
+    print 'Saved Ik in', ik_file
+    np.savetxt(ca_file, data)
+    print 'Saved [Ca2+] in', ca_file
+    return params
 
         
+# class TestKAHP(ChannelTestBase):
+#     channelname = 'KAHP'
+#     params = run_cadep_channel(channelname, 1e-9, simtime)
+#     vm = np.array(params['Vm'].vec)
+#     gk = np.array(params['Gk'].vec)
+#     tseries = np.arange(0, len(vm), 1.0) * simdt
+    
+#     def testKAHP_Vm_Neuron(self):        
+#         data = np.c_[self.tseries, self.vm]
+#         err = compare_channel_data(data, self.channelname, 'Vm', 'neuron', x_range=(simtime/10.0, simtime))
+#         self.assertLess(err, 0.01)
+        
+#     def testKAHP_Gk_Neuron(self):        
+#         data = np.c_[self.tseries, self.gk]
+#         err = compare_channel_data(data, self.channelname, 'Gk', 'neuron', x_range=(simtime/10.0, simtime), plot=True)
+#         self.assertLess(err, 0.01)
+        
+    
+
         
 if __name__ == '__main__':
     unittest.main()
