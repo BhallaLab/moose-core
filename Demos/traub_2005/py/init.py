@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed May 23 21:24:11 2012 (+0530)
 # Version: 
-# Last-Updated: Fri May 25 15:53:18 2012 (+0530)
+# Last-Updated: Mon May 28 15:32:11 2012 (+0530)
 #           By: subha
-#     Update #: 78
+#     Update #: 80
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -55,8 +55,7 @@ import config
 import moose
 
 def init():
-    moose.Neutral(config.modelSettings.libpath)
-    init_chanlib()        
+    
 
 
 # 
