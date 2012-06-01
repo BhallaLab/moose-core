@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Apr 17 23:58:49 2009 (+0530)
 # Version: 
-# Last-Updated: Thu May 31 00:13:53 2012 (+0530)
-#           By: Subhasis Ray
-#     Update #: 1006
+# Last-Updated: Thu May 31 22:25:40 2012 (+0530)
+#           By: subha
+#     Update #: 1022
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -25,21 +25,6 @@
 # 
 # 
 # 
-# 
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License as
-# published by the Free Software Foundation; either version 3, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-# General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program; see the file COPYING.  If not, write to
-# the Free Software Foundation, Inc., 51 Franklin Street, Fifth
-# Floor, Boston, MA 02110-1301, USA.
 # 
 # 
 
@@ -132,15 +117,13 @@ class KA_IB(KA):
 class K2(KChannel):
     Xpower = 1
     Ypower = 1
-    inf_x = 1.0 / (1 + exp((-v_array - 10e-3) / 17e-3))
-    tau_x = 1e-3 * (4.95 + 0.5 / (exp((v_array - 81e-3) / 25.6e-3) + \
-                                      exp((-v_array - 132e-3) / 18e-3)))
-    
-    inf_y = 1.0 / (1 + exp((v_array + 58e-3) / 10.6e-3))
-    tau_y = 1e-3 * (60 + 0.5 / (exp((v_array - 1.33e-3) / 200e-3) + \
-					exp((-v_array - 130e-3) / 7.1e-3)))
+    inf_x  = 1 / ( 1 + exp( ( - v_array *1e3 - 10 ) / 17 ) )
+    tau_x = 1e-3 * (4.95 + 0.5 / ( exp( ( v_array * 1e3 - 81 ) / 25.6 ) + exp( ( - v_array * 1e3 - 132 ) / 18 ) ))
+    inf_y  = 1 / ( 1 + exp( ( v_array*1e3 + 58 ) / 10.6 ) )
+    tau_y  = 1e-3 * (60 + 0.5 / ( exp( ( v_array*1e3 - 1.33 ) / 200 ) + exp( ( - v_array*1e3 - 130 ) / 7.1 ) ))
+    Y = np.interp(-65e-3, v_array, inf_y)
 
-    def __init__(self, path, Ek=-95e-3):
+    def __init__(self, path):
         KChannel.__init__(self, path)
 	
 
@@ -156,7 +139,7 @@ class KM(KChannel):
 
     def __init__(self, path):
         KChannel.__init__(self, path)
-
+        
         
 class KCaChannel(KChannel):
     """[Ca+2] dependent K+ channel base class."""
@@ -165,7 +148,7 @@ class KCaChannel(KChannel):
 
     Zpower = 1
 
-    def __init__(self, path, xpower=0.0, ypower=0.0, zpower=1.0, Ek=-95e-3):
+    def __init__(self, path):
         KChannel.__init__(self, path)
 
 
@@ -174,10 +157,7 @@ class KAHPBase(KCaChannel):
     Z = 0.0
 
     def __init__(self, path):
-        if moose.exists(path):
-            KCaChannel.__init__(self, path, xpower=xpower, ypower=ypower, zpower=zpower, Ek=Ek)
-            return
-        KCaChannel.__init__(self, path, xpower=xpower, ypower=ypower, zpower=zpower, Ek=Ek)
+        KCaChannel.__init__(self, path)
         
 
 class KAHP(KAHPBase):
@@ -188,8 +168,6 @@ class KAHP(KAHPBase):
 
     def __init__(self, path):
         KAHPBase.__init__(self, path)
-#         self.zGate.A.calcMode = 1
-#         self.zGate.B.calcMode = 1
 
 
 class KAHP_SLOWER(KAHPBase):
@@ -199,8 +177,6 @@ class KAHP_SLOWER(KAHPBase):
 
     def __init__(self, path):
         KAHPBase.__init__(self, path)
-        # self.zGate.tableA.calcMode = 1
-        # self.zGate.tableB.calcMode = 1
 
 
 class KAHP_DP(KAHPBase):
@@ -208,10 +184,8 @@ class KAHP_DP(KAHPBase):
     abstract = False
     alpha_z = where(ca_conc < 100.0, 1e-1 * ca_conc, 10.0)
     beta_z =  ones(ca_divs + 1)
+
     def __init__(self, path):
-        if moose.exists(path):
-            KAHPBase.__init__(self, path)
-            return
         KAHPBase.__init__(self, path)
 
 

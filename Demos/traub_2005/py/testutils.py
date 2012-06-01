@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat May 26 10:41:37 2012 (+0530)
 # Version: 
-# Last-Updated: Thu May 31 00:42:31 2012 (+0530)
-#           By: Subhasis Ray
-#     Update #: 250
+# Last-Updated: Fri Jun  1 10:45:36 2012 (+0530)
+#           By: subha
+#     Update #: 287
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -45,7 +45,7 @@ import channelbase
 
 simtime = 350e-3
 
-simdt = 1e-5
+simdt = 1e-6
 
 lib = moose.Neutral(config.modelSettings.libpath)
 
@@ -56,6 +56,7 @@ def make_testcomp(containerpath):
     comp.Cm = 1e-12
     comp.Rm = 1e9
     comp.Ra = 1e5
+    comp.Vm = comp.initVm
     return comp
 
 def make_pulsegen(containerpath):
@@ -66,6 +67,8 @@ def make_pulsegen(containerpath):
     pulsegen.secondLevel = -1e-12
     pulsegen.secondDelay = 150e-3
     pulsegen.secondWidth = 100e-3
+    pulsegen.count = 3
+    pulsegen.delay[2] = 1e9
     return pulsegen
 
 def setup_single_compartment(container_path, channel_proto, Gbar):
@@ -83,8 +86,8 @@ def setup_single_compartment(container_path, channel_proto, Gbar):
     moose.connect(ik_table, 'requestData', channel, 'get_Ik')
     moose.setClock(0, simdt)
     moose.setClock(1, simdt)
-    moose.useClock(0, '%s/##[TYPE=Compartment]' % container_path, 'init')
-    moose.useClock(1, '%s/##' % container_path, 'process')
+    moose.useClock(0, '%s/##[TYPE=Compartment]' % (container_path), 'init')
+    moose.useClock(1, '%s/##' % (container_path), 'process')
     return {'compartment': comp,
             'stimulus': pulsegen,
             'channel': channel,
@@ -130,6 +133,9 @@ def compare_channel_data(series, channelname, param, simulator, x_range=None, pl
     else:
         raise ValueError('Unrecognised simulator: %s' % (simulator))
     ref_series = np.loadtxt(ref_file)
+    if plot:
+        plt.figure()
+        plt.title(channelname)
     return compare_data_arrays(ref_series, series, relative='meany', x_range=x_range, plot=plot)
 
 def compare_data_arrays(left, right, relative='maxw', plot=False, x_range=None):
@@ -161,6 +167,9 @@ def compare_data_arrays(left, right, relative='maxw', plot=False, x_range=None):
     if len(left.shape) != len(right.shape):
         print left.shape, right.shape
         raise ValueError('Arrays to be compared must have same dimensions.')
+    # y is the intrepolation result for x array using xp and fp when xp and x do not match.
+    # xp and fp are interpolation table's independent and dependent variables
+    # yp is a view of the original y values
     x = None
     y = None
     xp = None
@@ -173,42 +182,44 @@ def compare_data_arrays(left, right, relative='maxw', plot=False, x_range=None):
         right = tmp
     if len(right.shape) == 1:
         x = np.arange(right.shape[0]) * 1.0 / right.shape[0]
+        yp = right
         xp = np.arange(left.shape[0]) * 1.0 / left.shape[0]
         fp = left
-        yp = right
     elif len(right.shape) == 2:
         x = right[:,0]
+        yp = right[:,1]
         xp = left[:,0]
         fp = left[:,1]
-        yp = right[:,1]
     else:
         raise ValueError('Cannot handle more than 2 dimensional arrays.')
     if left.shape[0] != right.shape[0]:
         print 'Array sizes not matching: (%d <> %d) - interpolating' % (left.shape[0], right.shape[0])
         y = np.interp(x, xp, fp)
-    else:
-        y = fp
+    else: # assume we have the same X values when sizes are the same
+        y = np.array(fp)
     if x_range:
         indices = np.nonzero((x > x_range[0]) & (x <= x_range[1]))[0]
         y = np.array(y[indices])
         yp = np.array(yp[indices])
         x = np.array(x[indices])
+        # We update xp and fp to have the same plotting x-range
         indices = np.nonzero((xp > x_range[0]) & (xp <= x_range[1]))[0]
         xp = xp[indices]
         fp = fp[indices]
     err = y - yp
+    print min(err), max(err), min(y), max(y), min(yp), max(yp)
     # I measure a conservative relative error as maximum of all the
     # errors between pairs of points with
     all_y = np.r_[y, yp]
     if plot:        
         # plt.subplot(221)
-        plt.plot(x, yp, 'bx', label='right')
+        plt.plot(x, yp, 'b-.', label='right')
         # plt.legend()
         # plt.subplot(222)
-        plt.plot(xp, fp, 'gx', label='left')
+        plt.plot(xp, fp, 'g--', label='left')
         # plt.legend()
         # plt.subplot(223)
-        plt.plot(x, err, 'rx', label='error')
+        plt.plot(x, err, 'r:', label='error')
         plt.legend()
         plt.show()
     if relative == 'rms':
