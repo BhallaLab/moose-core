@@ -15,7 +15,7 @@ from moose import *
 class RectCompt(QtGui.QGraphicsRectItem):
     def __init__(self,parent,x,y,w,h,item):
         self.Rectemitter = QtCore.QObject()
-        self.mooseObj_ = item
+        self.mooseObj_ = item.parent
         self.layoutWidgetPt = parent
         #if isinstance(parent,kineticsWidget):
         QtGui.QGraphicsRectItem.__init__(self,x,y,w,h)
