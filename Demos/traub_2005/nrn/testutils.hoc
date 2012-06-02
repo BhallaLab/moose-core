@@ -75,6 +75,9 @@ proc setup_recording(){ localobj strfn
     } else if (strfn.substr($s1, "cal") == 0){
         sprint(tstr1, "~gvec.record( &soma.ica_%s(0.5), %g)", $s1, $2)
         e_value = 125.0
+    } else if (strfn.substr($s1, "cat") == 0){
+        sprint(tstr1, "~gvec.record( &soma.i_%s(0.5), %g)", $s1, $2)
+        e_value = 125.0
     }
     execute(tstr1, this)
 }
