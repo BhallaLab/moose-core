@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri May  4 14:55:52 2012 (+0530)
 # Version: 
-# Last-Updated: Thu May 31 21:06:48 2012 (+0530)
+# Last-Updated: Sat Jun  2 13:36:11 2012 (+0530)
 #           By: subha
-#     Update #: 293
+#     Update #: 294
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -146,7 +146,7 @@ class ChannelMeta(type):
             proto.Z = Z
         mstring_field = get_class_field(name, cdict, bases, 'mstring')
         if mstring_field is not None:
-            mstring = moose.MString('%s/%s' % (proto.path, mstring_field[0]))
+            mstring = moose.Mstring('%s/%s' % (proto.path, mstring_field[0]))
             mstring.value = mstring_field[1]
         cdict['prototype'] = proto
         prototypes[name] = proto
