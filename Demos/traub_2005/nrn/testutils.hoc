@@ -47,7 +47,10 @@ proc setup_channel(){ localobj strfn
     } else if (strfn.substr($s1, "k") == 0){
         sprint(tstr1, "~ek = -95.0")
     } else if (strfn.substr($s1, "ar") == 0){
-        sprint(tstr1, "~ear = -35.0")
+        sprint(tstr1, "~erev_ar = -35.0")
+    } else if (strfn.substr($s1, "cal") == 0){
+        // do nothing
+        // sprint(tstr1, "~vca = -125.0")
     }
     print tstr1
     soma execute(tstr1)
@@ -61,11 +64,17 @@ proc setup_recording(){ localobj strfn
     vvec.record(&soma.v(0.5), $2)
     gvec = new Vector()
     if ( strfn.substr($s1, "na") == 0 ){
-	sprint(tstr1, "~gvec.record( &soma.ina_%s(0.5), %g)", $s1, $2)
-	e_value = ena
+	    sprint(tstr1, "~gvec.record( &soma.ina_%s(0.5), %g)", $s1, $2)
+	    e_value = ena
     } else if ( strfn.substr($s1, "k") == 0 ){
-	sprint(tstr1, "~gvec.record( &soma.ik_%s(0.5), %g)", $s1, $2)
-	e_value = ek
+	    sprint(tstr1, "~gvec.record( &soma.ik_%s(0.5), %g)", $s1, $2)
+	    e_value = ek
+    } else if (strfn.substr($s1, "ar") == 0){
+      	sprint(tstr1, "~gvec.record( &soma.i_%s(0.5), %g)", $s1, $2)
+	    e_value = erev_ar
+    } else if (strfn.substr($s1, "cal") == 0){
+        sprint(tstr1, "~gvec.record( &soma.ica_%s(0.5), %g)", $s1, $2)
+        e_value = 125.0
     }
     execute(tstr1, this)
 }
@@ -80,11 +89,12 @@ proc save_data(){ localobj vfile, gfile
     sprint(tstr1, "data/%s_Gk.dat", $s1)
     gfile = new File()
     gfile.wopen(tstr1)    
+    print vvec.size(), gvec.size()
     for ii = 0, vvec.size() - 1 {
-	vfile.printf("%g %g\n", ii * $2 * 1e-3, vvec.x[ii] * 1e-3)
-	soma {
-	    gfile.printf("%g %g\n", ii * $2 * 1e-3, gvec.x(ii) * 1e-3 * area(0.5) * 1e-8 / ((vvec.x(ii) - e_value) * 1e-3))
-	}
+	    vfile.printf("%g %g\n", ii * $2 * 1e-3, vvec.x[ii] * 1e-3)
+	    soma {
+	        gfile.printf("%g %g\n", ii * $2 * 1e-3, gvec.x(ii) * 1e-3 * area(0.5) * 1e-8 / ((vvec.x(ii) - e_value) * 1e-3))
+	    }
     }
     vfile.close()
     gfile.close()
