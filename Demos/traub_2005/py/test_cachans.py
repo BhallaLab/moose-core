@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Jun  2 11:07:05 2012 (+0530)
 # Version: 
-# Last-Updated: Sat Jun  2 13:35:43 2012 (+0530)
+# Last-Updated: Sat Jun  2 14:06:23 2012 (+0530)
 #           By: subha
-#     Update #: 5
+#     Update #: 8
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -50,6 +50,25 @@ class TestCaL(ChannelTestBase):
         data = np.c_[self.tseries, self.gk]
         err = compare_channel_data(data, self.channelname, 'Gk', 'neuron', x_range=(simtime/10.0, simtime), plot=True)
         self.assertLess(err, 0.01)
+
+
+class TestCaT(ChannelTestBase):
+    channelname = 'CaT'
+    params = run_single_channel(channelname, 1e-9, simtime)
+    vm = np.array(params['Vm'].vec)
+    gk = np.array(params['Gk'].vec)
+    tseries = np.arange(0, len(vm), 1.0) * simdt
+    
+    def testCaT_Vm_Neuron(self):
+        data = np.c_[self.tseries, self.vm]
+        err = compare_channel_data(data, self.channelname, 'Vm', 'neuron', x_range=(simtime/10.0, simtime))
+        self.assertLess(err, 0.01)
+
+    def testCaT_Gk_Neuron(self):
+        data = np.c_[self.tseries, self.gk]
+        err = compare_channel_data(data, self.channelname, 'Gk', 'neuron', x_range=(simtime/10.0, simtime), plot=True)
+        self.assertLess(err, 0.01)
+
 
 if __name__ == '__main__':
     unittest.main()
