@@ -15,7 +15,7 @@ objref testcomp, vvec, gvec, tvec, vfile, gfile, ca_vec, ca_recvec, cafile
 
 testcomp = new singlecomp()
 
-testcomp.setup_channel("kahp_deeppyr", 1e-9)
+testcomp.setup_channel("kc", 1e-9)
 
 // We create a Ca vector to play 0 to 500 mM [Ca2+] from 0-175 ms and
 // loop afterwards
@@ -34,13 +34,13 @@ ca_vec.play(&testcomp.soma.cai(0.5), tvec, 1)
 // ms start negative current, 300 ms stop negative current 350 ms stop
 // simulation)
 
-testcomp.setup_recording("kahp_deeppyr", Dt)
+testcomp.setup_recording("kc", Dt)
 ca_recvec = new Vector()
 ca_recvec.record(&testcomp.soma.cai(0.5), Dt)
 run()
-testcomp.save_data("KAHP_DP", Dt)
+testcomp.save_data("KC", Dt)
 cafile = new File()
-cafile.wopen("data/KAHP_DP.dat")
+cafile.wopen("data/KC_Ca.dat")
 for ii = 0, ca_recvec.size() - 1 {
     cafile.printf("%g %g\n", ii * dt, ca_recvec.x[ii])
 }
