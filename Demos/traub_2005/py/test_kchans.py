@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed May 30 23:51:58 2012 (+0530)
 # Version: 
-# Last-Updated: Sun Jun  3 19:45:55 2012 (+0530)
+# Last-Updated: Sun Jun  3 19:52:36 2012 (+0530)
 #           By: subha
-#     Update #: 111
+#     Update #: 112
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -233,6 +233,23 @@ class TestKAHP_SLOWER(ChannelTestBase):
         err = compare_channel_data(data, self.channelname, 'Gk', 'neuron', x_range=(simtime/10.0, simtime), plot=True)
         self.assertLess(err, 0.01)
         
+
+class TestKAHP_DP(ChannelTestBase):
+    channelname = 'KAHP_DP'
+    params = run_cadep_channel(channelname, 1e-9, simtime)
+    vm = np.array(params['Vm'].vec)
+    gk = np.array(params['Gk'].vec)
+    tseries = np.arange(0, len(vm), 1.0) * simdt
+    
+    def testKAHP_DP_Vm_Neuron(self):        
+        data = np.c_[self.tseries, self.vm]
+        err = compare_channel_data(data, self.channelname, 'Vm', 'neuron', x_range=(simtime/10.0, simtime))
+        self.assertLess(err, 0.01)
+        
+    def testKAHP_DP_Gk_Neuron(self):        
+        data = np.c_[self.tseries, self.gk]
+        err = compare_channel_data(data, self.channelname, 'Gk', 'neuron', x_range=(simtime/10.0, simtime), plot=True)
+        self.assertLess(err, 0.01)
 
         
 if __name__ == '__main__':
