@@ -22,10 +22,8 @@ testcomp.setup_channel("kahp", 1e-9)
 ca_vec_size =  tstop / Dt + 1
 ca_vec = new Vector(ca_vec_size)
 tvec = new Vector(ca_vec_size)
-print "ca_vec_size", ca_vec_size
 for ii=0, ca_vec_size - 1 {
     ca_vec.x[ii] = ( 500.0 * (ii % (ca_vec_size/2))) / (0.5 * ca_vec_size)
-    print "cavec", ii, ca_vec.x[ii]
     tvec.x[ii] = ii * Dt
 }
 
