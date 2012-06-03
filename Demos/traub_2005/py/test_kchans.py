@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed May 30 23:51:58 2012 (+0530)
 # Version: 
-# Last-Updated: Thu May 31 21:12:47 2012 (+0530)
+# Last-Updated: Sun Jun  3 19:33:03 2012 (+0530)
 #           By: subha
-#     Update #: 97
+#     Update #: 110
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -106,7 +106,6 @@ class TestKA_IB(ChannelTestBase):
         err = compare_channel_data(data, self.channelname, 'Gk', 'neuron', plot=True)
         self.assertLess(err, 0.01)
         
-
         
 class TestK2(ChannelTestBase):
     channelname = 'K2'
@@ -120,13 +119,11 @@ class TestK2(ChannelTestBase):
         err = compare_channel_data(data, self.channelname, 'Vm', 'neuron', x_range=(simtime/10.0, simtime))
         self.assertLess(err, 0.01)
         
-
     def testK2_Gk_Neuron(self):
         data = np.c_[self.tseries, self.gk]
         err = compare_channel_data(data, self.channelname, 'Gk', 'neuron', plot=True)
         self.assertLess(err, 0.01)
         
-
         
 class TestKM(ChannelTestBase):
     channelname = 'KM'
@@ -145,7 +142,6 @@ class TestKM(ChannelTestBase):
         data = np.c_[self.tseries, self.gk]
         err = compare_channel_data(data, self.channelname, 'Gk', 'neuron', x_range=(simtime/10.0, simtime), plot=True)
         self.assertLess(err, 0.01)
-        
 
 
 def setup_cadep_channel(container_path, channel_proto, Gbar, ca_start, ca_stop):
@@ -153,6 +149,7 @@ def setup_cadep_channel(container_path, channel_proto, Gbar, ca_start, ca_stop):
     params = setup_single_compartment(container_path, channel_proto, Gbar)
     ca_table = moose.StimulusTable(container_path + '/CaStim')    
     ca_table.vec = np.linspace(ca_start, ca_stop, 1000)
+    ca_table.doLoop = True
     ca_recorder = moose.Table(container_path + '/Ca')
     moose.connect(ca_table, 'output', ca_recorder, 'input')
     moose.connect(ca_table, 'output', params['channel'], 'concen')
@@ -169,11 +166,10 @@ def run_cadep_channel(channelname, Gbar, simtime):
         channelbase.prototypes[channelname],
         Gbar,
         0,
-        1e3)
+        500.0)
     ca_table = params['CaStim']
-    ca_table.startTime = 50e-3
-    ca_table.stopTime = 150e-3
-    ca_table.loopTime = 150e-3
+    ca_table.startTime = 0.0
+    ca_table.stopTime = 175e-3
     vm_data = params['Vm']
     gk_data = params['Gk']
     ik_data = params['Ik']
@@ -202,22 +198,22 @@ def run_cadep_channel(channelname, Gbar, simtime):
     return params
 
         
-# class TestKAHP(ChannelTestBase):
-#     channelname = 'KAHP'
-#     params = run_cadep_channel(channelname, 1e-9, simtime)
-#     vm = np.array(params['Vm'].vec)
-#     gk = np.array(params['Gk'].vec)
-#     tseries = np.arange(0, len(vm), 1.0) * simdt
+class TestKAHP(ChannelTestBase):
+    channelname = 'KAHP'
+    params = run_cadep_channel(channelname, 1e-9, simtime)
+    vm = np.array(params['Vm'].vec)
+    gk = np.array(params['Gk'].vec)
+    tseries = np.arange(0, len(vm), 1.0) * simdt
     
-#     def testKAHP_Vm_Neuron(self):        
-#         data = np.c_[self.tseries, self.vm]
-#         err = compare_channel_data(data, self.channelname, 'Vm', 'neuron', x_range=(simtime/10.0, simtime))
-#         self.assertLess(err, 0.01)
+    def testKAHP_Vm_Neuron(self):        
+        data = np.c_[self.tseries, self.vm]
+        err = compare_channel_data(data, self.channelname, 'Vm', 'neuron', x_range=(simtime/10.0, simtime))
+        self.assertLess(err, 0.01)
         
-#     def testKAHP_Gk_Neuron(self):        
-#         data = np.c_[self.tseries, self.gk]
-#         err = compare_channel_data(data, self.channelname, 'Gk', 'neuron', x_range=(simtime/10.0, simtime), plot=True)
-#         self.assertLess(err, 0.01)
+    def testKAHP_Gk_Neuron(self):        
+        data = np.c_[self.tseries, self.gk]
+        err = compare_channel_data(data, self.channelname, 'Gk', 'neuron', x_range=(simtime/10.0, simtime), plot=True)
+        self.assertLess(err, 0.01)
         
     
 
