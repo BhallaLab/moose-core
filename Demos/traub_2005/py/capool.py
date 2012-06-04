@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Apr 22 22:21:11 2009 (+0530)
 # Version: 
-# Last-Updated: Sat May 26 10:23:30 2012 (+0530)
+# Last-Updated: Sun Jun  3 20:42:22 2012 (+0530)
 #           By: subha
-#     Update #: 180
+#     Update #: 185
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -29,18 +29,17 @@
 
 # Code:
 
+import config
 import moose
 
 class CaPool(moose.CaConc):
-    _prototypes = {}
+    prototype = moose.CaConc(config.modelSettings.libpath + '/CaPool')
+    prototype.CaBasal = 0.0
+    prototype.ceiling = 1e6
+    prototype.floor = 0.0
+    _prototypes = {'CaPool': prototype}
     def __init__(self, path):
-        if moose.exists(path):
-            moose.CaConc.__init__(self, path)
-            return
         moose.CaConc.__init__(self, path)
-        self.CaBasal = 0.0
-        self.ceiling = 1e6
-        self.floor = 0.0
         
 
 def initCaPoolPrototypes(libpath='/library'):
