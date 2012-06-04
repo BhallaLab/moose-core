@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sun Jun  3 20:31:03 2012 (+0530)
 # Version: 
-# Last-Updated: Mon Jun  4 11:55:12 2012 (+0530)
+# Last-Updated: Mon Jun  4 11:58:01 2012 (+0530)
 #           By: subha
-#     Update #: 60
+#     Update #: 61
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -50,7 +50,7 @@ def run_capool(poolname, Gbar, simtime):
     # compartment area in cm2 and multiplying by 1e3 for /mA->/A and
     # by 1e3 for /ms->/S
     capool.B = 52000 * 1e6 / (3.141592 * 1e-4 * 1e-4)
-    // beta = 1/tau (ms) = 0.02 => tau = 50 ms
+    # beta = 1/tau (ms) = 0.02 => tau = 50 ms
     capool.tau = 50e-3
     ca_data = moose.Table('%s/Ca' % (container.path))
     moose.connect(ca_data, 'requestData', capool, 'get_Ca')
