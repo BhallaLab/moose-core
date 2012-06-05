@@ -498,7 +498,7 @@ void HSolveActive::readSynapses() {
 void HSolveActive::readExternalChannels() {
 	vector< string > filter;
 	filter.push_back( "HHChannel" );
-	filter.push_back( "SynChan" );
+	//~ filter.push_back( "SynChan" );
 	
 	externalChannelId_.resize( compartmentId_.size() );
 	externalCurrent_.resize( 2 * compartmentId_.size(), 0.0 );

@@ -119,7 +119,7 @@ const Cinfo* ZombieCompartment::initCinfo()
 	
 	static DestFinfo handleChannel( "handleChannel", 
 		"Handles conductance and Reversal potential arguments from Channel",
-		new OpFunc2< ZombieCompartment, double, double >( &ZombieCompartment::handleChannel ) );
+		new EpFunc2< ZombieCompartment, double, double >( &ZombieCompartment::handleChannel ) );
 	// VmOut is declared above as it needs to be in scope for later funcs.
 	
 	static Finfo* channelShared[] =
@@ -701,8 +701,10 @@ void ZombieCompartment::initProc( const Eref& e, ProcPtr p )
 void ZombieCompartment::initReinit( const Eref& e, ProcPtr p )
 { ; }
 
-void ZombieCompartment::handleChannel( double Gk, double Ek )
-{ ; }
+void ZombieCompartment::handleChannel( const Eref& e, const Qinfo* q, double Gk, double Ek )
+{
+	hsolve_->addGkEk( e.id(), Gk, Ek );
+}
 
 void ZombieCompartment::handleRaxial( double Ra, double Vm )
 { ; }
