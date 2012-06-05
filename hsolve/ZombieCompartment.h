@@ -95,7 +95,7 @@ class ZombieCompartment
 			 * handleChannel handles information coming from the channel
 			 * to the compartment
 			 */
-			void handleChannel( double Gk, double Ek);
+			void handleChannel( const Eref& e, const Qinfo* q, double Gk, double Ek);
 
 			/**
 			 * handleRaxial handles incoming raxial message data.

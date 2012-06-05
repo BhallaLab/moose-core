@@ -49,7 +49,11 @@ void HSolve::mapIds()
 	mapIds( caConcId_ );
 	mapIds( channelId_ );
 	//~ mapIds( gateId_ );
-	//~ mapIds( externalChannelId_ ); // Need to put this in a loop.
+	
+	// Doesn't seem to be needed. Perhaps even the externalChannelId_ vector
+	// is not needed.
+	//~ for ( unsigned int ic = 0; ic < compartmentId_.size(); ++ic )
+		//~ mapIds( externalChannelId_[ ic ] );
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -178,9 +178,11 @@ void TableBase::linearTransform( double scale, double offset )
 
 void TableBase::xplot( string fname, string plotname )
 {
-	ofstream fout( fname.c_str(), ios_base::app | ios_base::out );
-	fout << "/newplot\n";
-	fout << "/plotname " << plotname << "\n";
+	ofstream fout( fname.c_str(), ios_base::out );
+	//~ fout << "/newplot\n";
+	//~ fout << "/plotname " << plotname << "\n";
+	fout.precision( 18 );
+	fout.setf( ios::scientific, ios::floatfield );
 	for ( vector< double >::iterator i = vec_.begin(); i != vec_.end(); ++i)
 		fout << *i << endl;
 	fout << "\n";
