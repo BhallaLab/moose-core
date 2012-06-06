@@ -214,7 +214,9 @@ class GraphicalView(QtGui.QGraphicsView):
                     for item in ( Txtitem for Txtitem in self.sceneContainerPt.items() if isinstance (Txtitem, Textitem)):
                         item.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, False)
         self.rubberBandactive = False
-    
+
+class Widgetvisibility(Exception):pass    
+
 class kineticsWidget(QtGui.QWidget):
     def __init__(self,size,modelPath,parent=None):
         QtGui.QWidget.__init__(self,parent)
