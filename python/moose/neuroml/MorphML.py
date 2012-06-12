@@ -264,7 +264,7 @@ class MorphML():
                 if 'CaConc' == neutralObj.class_: # Ion concentration pool
                     libcaconc = moose.CaConc("/library/"+mechanismname)
                     ## deep copies the library caconc under the compartment
-                    channel = moose.copy(libcaconc.id_,compartment.id_,mechanismname)
+                    channel = moose.copy(libcaconc,compartment,mechanismname)
                     channel = moose.CaConc(channel)
                     ## CaConc connections are made later using connect_CaConc()
                     ## Later, when calling connect_CaConc,
@@ -272,13 +272,13 @@ class MorphML():
                 elif 'HHChannel2D' == neutralObj.class_ : ## HHChannel2D
                     libchannel = moose.HHChannel2D("/library/"+mechanismname)
                     ## deep copies the library channel under the compartment
-                    channel = moose.copy(libchannel.id_,compartment.id_,mechanismname)
+                    channel = moose.copy(libchannel,compartment,mechanismname)
                     channel = moose.HHChannel2D(channel)
                     moose.connect(channel,'channel',compartment,'channel')
                 elif 'HHChannel' == neutralObj.class_ : ## HHChannel
                     libchannel = moose.HHChannel("/library/"+mechanismname)
                     ## deep copies the library channel under the compartment
-                    channel = moose.copy(libchannel.id_,compartment.id_,mechanismname)
+                    channel = moose.copy(libchannel,compartment,mechanismname)
                     channel = moose.HHChannel(channel)
                     moose.connect(channel,'channel',compartment,'channel')
             ## if mechanism is present in compartment, just wrap it
