@@ -83,7 +83,7 @@ class MorphML():
                 # moosesegment sends Ra and Vm to parent, parent sends only Vm
                 # actually for symmetric compartment, both parent and moosesegment require each other's Ra/2,
                 # but axial and raxial just serve to distinguish ends.
-                parent.connect('axial',moosesegment,'raxial')
+                moose.connect(parent,'axial',moosesegment,'raxial')
             else:
                 parent = None
             proximal = segment.find('./{'+self.mml+'}proximal')
@@ -239,7 +239,7 @@ class MorphML():
             ## these are potential locations, we do not actually make synapses.
             #synapse = self.context.deepCopy(self.context.pathToId('/library/'+value),\
             #    self.context.pathToId(compartment.path),value) # value contains name of synapse i.e. synapse_type
-            #compartment.connect("channel", synapse, "channel")
+            #moose.connect(compartment,"channel", synapse, "channel")
             ## I assume below that compartment name has _segid at its end
             segid = string.split(compartment.name,'_')[-1] # get segment id from compartment name
             self.segDict[segid][5].append(value)
@@ -249,7 +249,7 @@ class MorphML():
             ## hence include synapse_type in its name
             ## value contains name of synapse i.e. synapse_type
             #spikegen = moose.SpikeGen(compartment.path+'/'+value+'_spikegen')
-            #compartment.connect("VmSrc",spikegen,"Vm")
+            #moose.connect(compartment,"VmSrc",spikegen,"Vm")
             pass
         elif mechanismname is not None:
             ## if mechanism is not present in compartment, deep copy from library
@@ -274,13 +274,13 @@ class MorphML():
                     ## deep copies the library channel under the compartment
                     channel = moose.copy(libchannel.id_,compartment.id_,mechanismname)
                     channel = moose.HHChannel2D(channel)
-                    channel.connect('channel',compartment,'channel')
+                    moose.connect(channel,'channel',compartment,'channel')
                 elif 'HHChannel' == neutralObj.className : ## HHChannel
                     libchannel = moose.HHChannel("/library/"+mechanismname)
                     ## deep copies the library channel under the compartment
                     channel = moose.copy(libchannel.id_,compartment.id_,mechanismname)
                     channel = moose.HHChannel(channel)
-                    channel.connect('channel',compartment,'channel')
+                    moose.connect(channel,'channel',compartment,'channel')
             ## if mechanism is present in compartment, just wrap it
             else:
                 neutralObj = moose.Neutral(compartment.path+'/'+mechanismname)
