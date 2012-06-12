@@ -159,7 +159,7 @@ class NetworkML():
     def translate_rotate(self,obj,x,y,z,ztheta): # recursively translate all compartments under obj
         for childId in obj.children:
             childobj = moose.Neutral(childId)
-            if childobj.className in ['Compartment','SymCompartment']: # if childobj is a compartment or symcompartment translate, else skip it
+            if childobj.class_ in ['Compartment','SymCompartment']: # if childobj is a compartment or symcompartment translate, else skip it
                 child = moose.Compartment(childId) # SymCompartment inherits from Compartment, so this is fine for both Compartment and SymCompartment
                 x0 = child.x0
                 y0 = child.y0
@@ -245,7 +245,7 @@ class NetworkML():
         # ALSO for a saturating synapse i.e. KinSynChan, we always make a new synapse
         # as KinSynChan is not meant to represent multiple synapses
         libsyn = moose.SynChan('/library/'+syn_name)
-        if libsyn.className == 'KinSynChan' or libsyn.getField('graded') == 'True': # create a new synapse
+        if libsyn.class_ == 'KinSynChan' or libsyn.getField('graded') == 'True': # create a new synapse
             syn_name_full = syn_name+'_'+underscorize(pre_path)
             self.make_new_synapse(syn_name, postcomp, syn_name_full)
         else:
@@ -317,7 +317,7 @@ class NetworkML():
             #### delay and weight are arrays: multiple event messages can be connected to a single synapse
             ## first argument below is the array index, we connect to the latest synapse created above
             ## But KinSynChan ignores weight of the synapse, so set the Gbar for it
-            if libsyn.className == 'KinSynChan':
+            if libsyn.class_ == 'KinSynChan':
                 syn.Gbar = weight*syn.Gbar
             else:
                 syn.setWeight(syn.numSynapses-1, weight)
