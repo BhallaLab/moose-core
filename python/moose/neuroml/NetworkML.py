@@ -97,7 +97,7 @@ class NetworkML():
                     ## do not set count to 1, let it be at 2 by default
                     ## else it will set secondDelay to 0.0 and repeat the first pulse!
                     #pulsegen.count = 1
-                    pulsegen.connect('outputSrc',iclamp,'plusDest')
+                    moose.connect(pulsegen,'outputSrc',iclamp,'plusDest')
                     target = inputelem.find(".//{"+nml_ns+"}target")
                     population = target.attrib['population']
                     for site in target.findall(".//{"+nml_ns+"}site"):
@@ -109,7 +109,7 @@ class NetworkML():
                         segment_path = self.populationDict[population][1][int(cell_id)].path+'/'+\
                             self.cellSegmentDict[cell_name][segment_id][0]
                         compartment = moose.Compartment(segment_path)
-                        iclamp.connect('outputSrc',compartment,'injectMsg')
+                        moose.connect(iclamp,'outputSrc',compartment,'injectMsg')
             '''
 
     def createPopulations(self):
@@ -262,7 +262,7 @@ class NetworkML():
             table = moose.Table(syn.path+"/graded_table")
             #### always connect source to input - else 'cannot create message' error.
             precomp = moose.Compartment(pre_path)
-            precomp.connect("VmSrc",table,"msgInput")
+            moose.connect(precomp,"VmSrc",table,"msgInput")
             ## since there is no weight field for a graded synapse
             ## (no 'synapse' message connected),
             ## I set the Gbar to weight*Gbar
@@ -276,14 +276,14 @@ class NetworkML():
                 if not moose.exists(pre_path+'/'+syn_name+'_spikegen'):
                     spikegen = moose.SpikeGen(pre_path+'/'+syn_name+'_spikegen')
                     # connect the compartment Vm to the spikegen
-                    precomp.connect("VmSrc",spikegen,"Vm")
+                    moose.connect(precomp,"VmSrc",spikegen,"Vm")
                     # spikegens for different synapse_types can have different thresholds
                     spikegen.threshold = threshold
                     spikegen.edgeTriggered = 1 # This ensures that spike is generated only on leading edge.
                     #spikegen.refractT = 0.25e-3 ## usually events are raised at every time step that Vm > Threshold, can set either edgeTriggered as above or refractT
                 spikegen = moose.SpikeGen(pre_path+'/'+syn_name+'_spikegen') # wrap the spikegen in this compartment
                 # connect the spikegen to the synapse
-                spikegen.connect("event",syn,"synapse")
+                moose.connect(spikegen,"event",syn,"synapse")
             else:
                 # if connected to a file, create a timetable,
                 # put in a field specifying the connected filenumbers to this segment,
@@ -305,7 +305,7 @@ class NetworkML():
                     tt.addField('fileNumbers')
                     tt.setField('fileNumbers',filenums)
                     # Be careful to connect the timetable only once while creating it as below:
-                    tt.connect("event", syn, "synapse")
+                    moose.connect(tt,"event", syn, "synapse")
                 else:
                     # if it exists, append file number to the field 'fileNumbers'
                     tt = moose.TimeTable(tt_path)
@@ -333,6 +333,6 @@ class NetworkML():
         #### connect the post compartment to the synapse
         if syn.getField('mgblock')=='True': # If NMDA synapse based on mgblock, connect to mgblock
             mgblock = moose.Mg_block(syn.path+'/mgblock')
-            postcomp.connect("channel", mgblock, "channel")
+            moose.connect(postcomp,"channel", mgblock, "channel")
         else: # if SynChan or even NMDAChan, connect normally
-            postcomp.connect("channel", syn, "channel")
+            moose.connect(postcomp,"channel", syn, "channel")
