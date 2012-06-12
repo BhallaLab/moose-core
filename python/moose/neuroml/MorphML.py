@@ -261,7 +261,7 @@ class MorphML():
                     model_path = path.join(self.model_dir, model_filename)
                     cmlR.readChannelMLFromFile(model_path)
                 neutralObj = moose.Neutral("/library/"+mechanismname)
-                if 'CaConc' == neutralObj.className: # Ion concentration pool
+                if 'CaConc' == neutralObj.class_: # Ion concentration pool
                     libcaconc = moose.CaConc("/library/"+mechanismname)
                     ## deep copies the library caconc under the compartment
                     channel = moose.copy(libcaconc.id_,compartment.id_,mechanismname)
@@ -269,13 +269,13 @@ class MorphML():
                     ## CaConc connections are made later using connect_CaConc()
                     ## Later, when calling connect_CaConc,
                     ## B is set for caconc based on thickness of Ca shell and compartment l and dia.
-                elif 'HHChannel2D' == neutralObj.className : ## HHChannel2D
+                elif 'HHChannel2D' == neutralObj.class_ : ## HHChannel2D
                     libchannel = moose.HHChannel2D("/library/"+mechanismname)
                     ## deep copies the library channel under the compartment
                     channel = moose.copy(libchannel.id_,compartment.id_,mechanismname)
                     channel = moose.HHChannel2D(channel)
                     moose.connect(channel,'channel',compartment,'channel')
-                elif 'HHChannel' == neutralObj.className : ## HHChannel
+                elif 'HHChannel' == neutralObj.class_ : ## HHChannel
                     libchannel = moose.HHChannel("/library/"+mechanismname)
                     ## deep copies the library channel under the compartment
                     channel = moose.copy(libchannel.id_,compartment.id_,mechanismname)
@@ -284,11 +284,11 @@ class MorphML():
             ## if mechanism is present in compartment, just wrap it
             else:
                 neutralObj = moose.Neutral(compartment.path+'/'+mechanismname)
-                if 'CaConc' == neutralObj.className: # Ion concentration pool
+                if 'CaConc' == neutralObj.class_: # Ion concentration pool
                     caconc = moose.CaConc(compartment.path+'/'+mechanismname) # wraps existing channel
-                elif 'HHChannel2D' == neutralObj.className : ## HHChannel2D
+                elif 'HHChannel2D' == neutralObj.class_ : ## HHChannel2D
                     channel = moose.HHChannel2D(compartment.path+'/'+mechanismname) # wraps existing channel
-                elif 'HHChannel' == neutralObj.className : ## HHChannel
+                elif 'HHChannel' == neutralObj.class_ : ## HHChannel
                     channel = moose.HHChannel(compartment.path+'/'+mechanismname) # wraps existing channel
             if name == 'Gbar':
                 channel.Gbar = value*math.pi*compartment.diameter*compartment.length
