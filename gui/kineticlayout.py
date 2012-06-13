@@ -10,6 +10,8 @@ import config
 import re
 import math
 
+from filepaths import *
+
 from moose import *
 
 class RectCompt(QtGui.QGraphicsRectItem):
@@ -235,7 +237,7 @@ class kineticsWidget(QtGui.QWidget):
 
         G = pgv.AGraph(fontname='Helvetica',fontsize=9,strict=False,directed=None)
         #pickled the color map here and loading the file
-        pkl_file = open('rainbow2.pkl','rb')
+        pkl_file = open(os.path.join(PATH_COLORMAPS,'rainbow2.pkl'),'rb')
         picklecolorMap = pickle.load(pkl_file)
         
         self.lineItem_dict = {}
