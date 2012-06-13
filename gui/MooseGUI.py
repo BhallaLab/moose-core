@@ -21,6 +21,7 @@ from PyQt4 import QtGui
 from newgui import Ui_MainWindow
 #opengl imports
 from moosehandler import MooseHandler
+from filepaths import *
 import config
 import kineticlayout
 
