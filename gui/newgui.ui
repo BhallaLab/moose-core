@@ -65,6 +65,9 @@
     <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuClasses">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="title">
      <string>Classes</string>
     </property>
@@ -160,6 +163,9 @@
     <addaction name="menuRobot"/>
    </widget>
    <widget class="QMenu" name="menuView">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="title">
      <string>View</string>
     </property>
@@ -169,6 +175,9 @@
     <addaction name="actionSimulation_Control"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="title">
      <string>Edit</string>
     </property>
@@ -205,6 +214,9 @@
    </widget>
   </widget>
   <widget class="QDockWidget" name="moosePopulationEditDock">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="windowTitle">
     <string>Population Editor</string>
    </property>
@@ -356,6 +368,9 @@
    </widget>
   </widget>
   <widget class="QDockWidget" name="mooseLibraryDock">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="windowTitle">
     <string>Library</string>
    </property>
@@ -401,7 +416,10 @@
     </layout>
    </widget>
   </widget>
-  <widget class="QDockWidget" name="dockWidget">
+  <widget class="QDockWidget" name="mooseConnectDock">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="windowTitle">
     <string>Connect Elements</string>
    </property>
@@ -947,6 +965,7 @@
     <string>About</string>
    </property>
   </action>
+  <zorder>moosePopulationEditDock</zorder>
  </widget>
  <customwidgets>
   <customwidget>

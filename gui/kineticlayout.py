@@ -62,7 +62,7 @@ class Textitem(QtGui.QGraphicsTextItem):
     
     def updateSlot(self):
         iteminfo = self.mooseObj_.path+'/info'
-        pkl_file = open(os.path.join(PATH_COLORMAPS,'rainbow2.pkl'),'rb')
+        pkl_file = open(os.path.join(PATH_KKIT_COLORMAPS,'rainbow2.pkl'),'rb')
         picklecolorMap = pickle.load(pkl_file)
         if((self.mooseObj_.class_ =='ZombieEnz') or (self.mooseObj_.class_ =='ZombieMMenz')):
             textbgcolor = 'black'
@@ -237,7 +237,7 @@ class kineticsWidget(QtGui.QWidget):
 
         G = pgv.AGraph(fontname='Helvetica',fontsize=9,strict=False,directed=None)
         #pickled the color map here and loading the file
-        pkl_file = open(os.path.join(PATH_COLORMAPS,'rainbow2.pkl'),'rb')
+        pkl_file = open(os.path.join(PATH_KKIT_COLORMAPS,'rainbow2.pkl'),'rb')
         picklecolorMap = pickle.load(pkl_file)
         
         self.lineItem_dict = {}
