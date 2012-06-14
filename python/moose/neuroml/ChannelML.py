@@ -1,3 +1,15 @@
+## Description: class ChannelML for loading ChannelML from file or xml element into MOOSE
+## Version 1.0 by Aditya Gilra, NCBS, Bangalore, India, 2011 for serial MOOSE
+## Version 1.5 by Niraj Dudani, NCBS, Bangalore, India, 2012, ported to parallel MOOSE
+## Version 1.6 by Aditya Gilra, NCBS, Bangalore, India, 2012, minor changes for parallel MOOSE
+
+"""
+NeuroML.py is the preferred interface. Use this only if NeuroML L1,L2,L3 files are misnamed/scattered.
+Instantiate ChannelML class, and thence use method:
+readChannelMLFromFile(...) to load a standalone ChannelML file (synapse/channel), OR
+readChannelML(...) / readSynapseML to load from an xml.etree xml element (could be part of a larger NeuroML file).
+"""
+
 from xml.etree import ElementTree as ET
 import string
 import os, sys
@@ -38,6 +50,7 @@ class ChannelML():
         else:
             print "wrong units", units,": exiting ..."
             sys.exit(1)
+        moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
         print "loading synapse :",synapseElement.attrib['name'],"into /library ."
         moosesynapse = moose.SynChan('/library/'+synapseElement.attrib['name'])
         doub_exp_syn = synapseElement.find('./{'+self.cml+'}doub_exp_syn')
@@ -67,6 +80,7 @@ class ChannelML():
         else:
             print "wrong units", units,": exiting ..."
             sys.exit(1)
+        moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
         channel_name = channelElement.attrib['name']
         print "loading channel :", channel_name,"into /library ."
         IVrelation = channelElement.find('./{'+self.cml+'}current_voltage_relation')
@@ -81,9 +95,11 @@ class ChannelML():
         if IVrelation.attrib['cond_law']=="ohmic":
             moosechannel.Gbar = float(IVrelation.attrib['default_gmax']) * Gfactor
             moosechannel.Ek = float(IVrelation.attrib['default_erev']) * Vfactor
-            moosechannel.ion = IVrelation.attrib['ion']
+            moosechannelIon = moose.Mstring(moosechannel.path+'/ion')
+            moosechannelIon.value = IVrelation.attrib['ion']
             if concdep is not None:
-                moosechannel.ionDependency = concdep.attrib['ion']
+                moosechannelIonDependency = moose.Mstring(moosechannel.path+'/ionDependency')
+                moosechannelIonDependency.value = concdep.attrib['ion']
         
         gates = IVrelation.findall('./{'+self.cml+'}gate')
         if len(gates)>3:
@@ -269,6 +285,7 @@ class ChannelML():
             Gfactor = 1.0
             concfactor = 1.0
             Lfactor = 1.0
+        moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
         ionSpecies = ionConcElement.find('./{'+self.cml+'}ion_species')
         if ionSpecies is not None:
             if not 'ca' in ionSpecies.attrib['name']:
