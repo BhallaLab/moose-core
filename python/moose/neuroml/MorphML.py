@@ -1,3 +1,17 @@
+## Description: class MorphML for loading MorphML from file or xml element into MOOSE
+## Version 1.0 by Aditya Gilra, NCBS, Bangalore, India, 2011 for serial MOOSE
+## Version 1.5 by Niraj Dudani, NCBS, Bangalore, India, 2012, ported to parallel MOOSE
+## Version 1.6 by Aditya Gilra, NCBS, Bangalore, India, 2012, further changes for parallel MOOSE
+
+"""
+NeuroML.py is the preferred interface. Use this only if NeuroML L1,L2,L3 files are misnamed/scattered.
+Instantiate MorphML class, and thence use methods:
+readMorphMLFromFile(...) to load a standalone MorphML from file OR
+readMorphML(...) to load from an xml.etree xml element (could be part of a larger NeuroML file).
+It is assumed that any channels and synapses referred to by above MorphML
+have already been loaded under that same name in /library in MOOSE (use ChannelML loader).
+"""
+
 from xml.etree import ElementTree as ET
 import string
 import sys
@@ -46,6 +60,7 @@ class MorphML():
         else:
             self.length_factor = 1.0
         cellname = cell.attrib["name"]
+        moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
         print "loading cell :", cellname,"into /library ."
         #~ moosecell = moose.Cell('/library/'+cellname)
         moosecell = moose.Neutral('/library/'+cellname)
@@ -187,6 +202,7 @@ class MorphML():
                              parametername, " in mechanism ",mechanismname
             #### Connect the Ca pools and channels
             #### Am connecting these at the very end so that all channels and pools have been created
+            #### Note: this function is in moose.utils not moose.neuroml.utils !
             utils.connect_CaConc(self.cellDictByCableId[cellname][1].values())
         
         ##########################################################
@@ -202,7 +218,7 @@ class MorphML():
                         self.set_group_compartment_param(cell, cellname, potential_syn_loc,\
                          'spikegen_type', potential_syn_loc.attrib['synapse_type'], self.nml, mechanismname='spikegen')
 
-        print "Finished loading into library cell: ",cellname
+        print "Finished loading into library, cell: ",cellname
         return {cellname:self.segDict}
 
     def set_group_compartment_param(self, cell, cellname, parameter, name, value, grouptype, mechanismname=None):

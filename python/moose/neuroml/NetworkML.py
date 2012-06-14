@@ -1,3 +1,15 @@
+## Description: class NetworkML for loading NetworkML from file or xml element into MOOSE
+## Version 1.0 by Aditya Gilra, NCBS, Bangalore, India, 2011 for serial MOOSE
+## Version 1.5 by Niraj Dudani, NCBS, Bangalore, India, 2012, ported to parallel MOOSE
+## Version 1.6 by Aditya Gilra, NCBS, Bangalore, India, 2012, further changes for parallel MOOSE
+
+"""
+NeuroML.py is the preferred interface. Use this only if NeuroML L1,L2,L3 files are misnamed/scattered.
+Instantiate NetworlML class, and thence use method:
+readNetworkMLFromFile(...) to load a standalone NetworkML file, OR
+readNetworkML(...) to load from an xml.etree xml element (could be part of a larger NeuroML file).
+"""
+
 from xml.etree import ElementTree as ET
 import string
 import os
@@ -44,7 +56,7 @@ class NetworkML():
 
     def readNetworkML(self,network,cellSegmentDict,params={},lengthUnits="micrometer"):
         """
-        This returns populationDict = { 'populationname1':(cellname,{instanceid1:moosecell, ... }) , ... }
+        This returns populationDict = { 'populationname1':(cellname,{int(instanceid1):moosecell, ... }) , ... }
         and projectionDict = { 'projectionname1':(source,target,[(syn_name1,pre_seg_path,post_seg_path),...]) , ... }
         """
         if lengthUnits in ['micrometer','micron']:
@@ -73,7 +85,6 @@ class NetworkML():
                 Vfactor = 1.0
                 Tfactor = 1.0
                 Ifactor = 1.0
-            '''
             for inputelem in inputs.findall(".//{"+nml_ns+"}input"):
                 inputname = inputelem.attrib['name']
                 pulseinput = inputelem.find(".//{"+nml_ns+"}pulse_input")
@@ -97,7 +108,7 @@ class NetworkML():
                     ## do not set count to 1, let it be at 2 by default
                     ## else it will set secondDelay to 0.0 and repeat the first pulse!
                     #pulsegen.count = 1
-                    moose.connect(pulsegen,'outputSrc',iclamp,'plusDest')
+                    moose.connect(pulsegen,'outputOut',iclamp,'plusIn')
                     target = inputelem.find(".//{"+nml_ns+"}target")
                     population = target.attrib['population']
                     for site in target.findall(".//{"+nml_ns+"}site"):
@@ -109,8 +120,7 @@ class NetworkML():
                         segment_path = self.populationDict[population][1][int(cell_id)].path+'/'+\
                             self.cellSegmentDict[cell_name][segment_id][0]
                         compartment = moose.Compartment(segment_path)
-                        moose.connect(iclamp,'outputSrc',compartment,'injectMsg')
-            '''
+                        moose.connect(iclamp,'outputOut',compartment,'injectMsg')
 
     def createPopulations(self):
         self.populationDict = {}
@@ -139,6 +149,7 @@ class NetworkML():
                 self.cellSegmentDict.update(cellDict)
             libcell = moose.Neutral('/library/'+cellname)
             self.populationDict[populationname] = (cellname,{})
+            moose.Neutral('/cells')
             for instance in population.findall(".//{"+nml_ns+"}instance"):
                 instanceid = instance.attrib['id']
                 location = instance.find('./{'+nml_ns+'}location')
@@ -148,8 +159,10 @@ class NetworkML():
                     zrotation = float(string.split(rotationnote.text,'=')[1])
                 else:
                     zrotation = 0
-                ## deep copies the library cell to an instance
-                cell = moose.Neutral(libcell,"/"+populationname+"_"+instanceid)
+                ## deep copies the library cell to an instance under '/cells' named as <arg3>
+                ## /cells is useful for scheduling clocks as all sim elements are in /cells
+                cellid = moose.copy(libcell,moose.Neutral('/cells'),populationname+"_"+instanceid)
+                cell = moose.Neutral(cellid) # No Cell class in MOOSE anymore! :(
                 self.populationDict[populationname][1][int(instanceid)]=cell
                 x = float(location.attrib['x'])*self.length_factor
                 y = float(location.attrib['y'])*self.length_factor
@@ -159,8 +172,11 @@ class NetworkML():
     def translate_rotate(self,obj,x,y,z,ztheta): # recursively translate all compartments under obj
         for childId in obj.children:
             childobj = moose.Neutral(childId)
-            if childobj.class_ in ['Compartment','SymCompartment']: # if childobj is a compartment or symcompartment translate, else skip it
-                child = moose.Compartment(childId) # SymCompartment inherits from Compartment, so this is fine for both Compartment and SymCompartment
+            ## if childobj is a compartment or symcompartment translate, else skip it
+            if childobj.class_ in ['Compartment','SymCompartment']:
+                ## SymCompartment inherits from Compartment,
+                ## so below wrapping by Compartment() is fine for both Compartment and SymCompartment
+                child = moose.Compartment(childId)
                 x0 = child.x0
                 y0 = child.y0
                 x0new = x0*cos(ztheta)-y0*sin(ztheta)

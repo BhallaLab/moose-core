@@ -1,3 +1,16 @@
+## Description: utility functions used while loading NeuroML L1,2,3 files.
+## Version 1.0 by Aditya Gilra, NCBS, Bangalore, India, 2011 for serial MOOSE
+## Version 1.5 by Niraj Dudani, NCBS, Bangalore, India, 2012, modified for parallel MOOSE
+## Version 1.6 by Aditya Gilra, NCBS, Bangalore, India, 2012, minor changes for parallel MOOSE
+
+"""
+Some useful constants like namespaces are defined.
+And they can be set in ElementTree root element via set_neuroml_namespaces_attribs(neuromlroot).
+Use tweak_model(root_element, params) to exclude certain populations and projections
+while still including certain others.
+indent(...) is an in-place prettyprint formatter copied from http://effbot.org/zone/element-lib.htm
+"""
+
 from xml.etree import ElementTree as ET
 from math import *
 import moose
