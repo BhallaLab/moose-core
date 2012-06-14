@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Mon May 28 09:09:39 2012 (+0530)
-#           By: Subhasis Ray
-#     Update #: 1815
+# Last-Updated: Thu Jun 14 17:56:26 2012 (+0530)
+#           By: subha
+#     Update #: 1821
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -245,8 +245,15 @@ a child of the destination object.
 
 move(src, dest) -- move src object under dest object.
 
-useClock(tick, path, field) -- schedule <field> of every object that
-matches <path> on clock no. <tick>.
+useClock(tick, path, update_function) -- schedule <update_function> of
+every object that matches <path> on clock no. <tick>. Most commonly
+the function is 'process'.  NOTE: unlike earlier versions, now
+autoschedule is not available. You have to call useClock for every
+element that should be updated during the simulation. 
+
+Example: 
+moose.useClock(0, '/model/compartment_1', 'init')
+moose.useClock(1, '/model/compartment_1', 'process')
 
 setClock(tick, dt) -- set dt of clock no <tick>.
 
