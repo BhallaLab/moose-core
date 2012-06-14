@@ -240,7 +240,6 @@ class MooseHandler(QtCore.QObject):
             self._context.readNeuroML(filename, target)
         elif ret == MooseHandler.type_sbml:
             self._context.readSBML(filename, target)
-        
         return ret    
 
     def loadPythonScript(self, filename):

@@ -36,17 +36,24 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.setCorner(Qt.BottomRightCorner,Qt.RightDockWidgetArea)
         self.setCorner(Qt.BottomLeftCorner,Qt.LeftDockWidgetArea)
         self.mooseHandler = MooseHandler()
-#        self.setDefaults()         #defaults
 
+        self.defaultDockState()
         self.connectElements()        #connections
 
+    def defaultDockState(self):
+        self.moosePopulationEditDock.setVisible(False)
+        self.mooseLibraryDock.setVisible(False)
+        self.mooseConnectDock.setVisible(False)
+
+        self.menuHelp.setEnabled(False)
+        self.menuView.setEnabled(False)
+        self.menuClasses.setEnabled(False)
 
     def setDefaults(self):
         self.makeObjectFieldEditor(self.mtree.currentItem().getMooseObject())
 
     def connectElements(self):
         self.connect(self.actionLoad_Model,QtCore.SIGNAL('triggered()'), self.popupLoadModelDialog)
-        #self.connect(self.mtree,QtCore.SIGNAL('itemClicked(QTreeWidgetItem *, int)'),self.refreshObjectEditor)
         self.connect(self.actionQuit,QtCore.SIGNAL('triggered()'),self.doQuit)
 
     def popupLoadModelDialog(self):
@@ -98,7 +105,6 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
                 modelpath = str(targetText.text())
                 
                 if modeltype == MooseHandler.type_kkit:
-        
                     try:
                         self.addLayoutWindow(modelpath)
                         self.actionLoad_Model.setEnabled(0) #to prevent multiple loads
