@@ -86,7 +86,7 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
         """
         QtCore.QAbstractTableModel.__init__(self, parent)
         self.mooseObject = mooseObject
-        self._header = ('Field', 'Value', 'Plot')
+        self._header = ('Field', 'Value')
         self.fields = []
         self.plotNames = ['None']
         self.fieldFlags = {}
@@ -129,7 +129,7 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
         if not index.isValid() and index.row () >= len(self.fields):
             return False
         ret = True
-        value = str(value.toString()) # convert Qt datastructure to
+        value = (value.toString()) # convert Qt datastructure to
                                       # Python datastructure
         #add_chait
         if value =='':
@@ -143,11 +143,16 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
                 field = ObjectFieldsModel.py_moose_fieldname_map[field]
             except KeyError:
                 pass
-            
-            self.mooseObject.setField(field, value)
             if field == 'name':
-                
+                self.mooseObject.setField(field,str(value))
                 self.emit(QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'), self.mooseObject)
+            else:    
+                try: 
+                    self.mooseObject.setField(field,float(value))
+                except ValueError: #folks entering text instead of numerals here!
+                    print "Numeric value should be entered";
+                    pass
+            
         elif index.column() == 2 and role ==Qt.EditRole:
             try:
                 self.fieldPlotNameMap[self.fields[index.row()]] = str(value)

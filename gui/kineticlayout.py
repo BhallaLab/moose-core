@@ -60,9 +60,9 @@ class Textitem(QtGui.QGraphicsTextItem):
     def mouseDoubleClickEvent(self, event):
         self.emit(QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.mooseObj_)
     
-    def updateSlot(self,graph_cord):
+    def updateSlot(self):
         iteminfo = self.mooseObj_.path+'/info'
-        pkl_file = open('rainbow2.pkl','rb')
+        pkl_file = open(os.path.join(PATH_COLORMAPS,'rainbow2.pkl'),'rb')
         picklecolorMap = pickle.load(pkl_file)
         if((self.mooseObj_.class_ =='ZombieEnz') or (self.mooseObj_.class_ =='ZombieMMenz')):
             textbgcolor = 'black'
@@ -552,8 +552,9 @@ class kineticsWidget(QtGui.QWidget):
         changedItem = ''
         for changedItem in (item for item in self.sceneContainer.items() if isinstance(item, Textitem) and mooseObject.getId() == item.mooseObj_.getId()):
             break
+        
         if isinstance(changedItem,Textitem):
-            changedItem.updateSlot(self.graph_cord)
+            changedItem.updateSlot()
             self.positionChange(changedItem.mooseObj_)
     
     def updatearrow(self,qGTextitem):
