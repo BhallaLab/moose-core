@@ -22,6 +22,7 @@ def loadGran98NeuroML_L123(filename):
     resetSim(['/elec','/cells'],50e-6,50e-6) # from moose.utils
     moose.start(1.0)
     plot(somaVm.vec)
+    print "Showing",soma_path,"Vm"
     show()
 
 if __name__ == "__main__":
