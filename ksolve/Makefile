@@ -23,6 +23,7 @@ OBJ = \
 	RateTerm.o \
 	FuncTerm.o \
 	GssaStoich.o	\
+	EstimateDt.o	\
 	testKsolve.o	\
 
 	
