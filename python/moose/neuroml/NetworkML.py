@@ -147,7 +147,7 @@ class NetworkML():
                         )
                     )
                 self.cellSegmentDict.update(cellDict)
-            libcell = moose.Neutral('/library/'+cellname)
+            libcell = moose.Neuron('/library/'+cellname) #added cells as a Neuron class.
             self.populationDict[populationname] = (cellname,{})
             moose.Neutral('/cells')
             for instance in population.findall(".//{"+nml_ns+"}instance"):
@@ -162,7 +162,7 @@ class NetworkML():
                 ## deep copies the library cell to an instance under '/cells' named as <arg3>
                 ## /cells is useful for scheduling clocks as all sim elements are in /cells
                 cellid = moose.copy(libcell,moose.Neutral('/cells'),populationname+"_"+instanceid)
-                cell = moose.Neutral(cellid) # No Cell class in MOOSE anymore! :(
+                cell = moose.Neuron(cellid) # No Cell class in MOOSE anymore! :( addded Neuron class - Chaitanya
                 self.populationDict[populationname][1][int(instanceid)]=cell
                 x = float(location.attrib['x'])*self.length_factor
                 y = float(location.attrib['y'])*self.length_factor

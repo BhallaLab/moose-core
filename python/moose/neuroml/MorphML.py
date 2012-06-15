@@ -63,7 +63,8 @@ class MorphML():
         moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
         print "loading cell :", cellname,"into /library ."
         #~ moosecell = moose.Cell('/library/'+cellname)
-        moosecell = moose.Neutral('/library/'+cellname)
+        #using moose Neuron class - in previous version 'Cell' class Chaitanya
+        moosecell = moose.Neuron('/library/'+cellname)
         self.cellDictBySegmentId[cellname] = [moosecell,{}]
         self.cellDictByCableId[cellname] = [moosecell,{}]
         self.segDict = {}

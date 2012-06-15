@@ -130,7 +130,7 @@ Id ReadCell::read(
 	*/
 	
 	vector< int > dimensions( 1, 1 );
-	cell_ = shell_->doCreate( "Neutral", parent, cellName, dimensions );
+	cell_ = shell_->doCreate( "Neuron", parent, cellName, dimensions );
 	currCell_ = cell_;
 	
 	if ( innerRead( fin ) ) {

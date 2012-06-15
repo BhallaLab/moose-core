@@ -246,7 +246,9 @@ class MooseHandler(QtCore.QObject):
         """Evaluate a python script."""
         extension_start = filename.rfind('.py')
         script = filename[:extension_start]
-        exec 'import %s' % (script)
+        exec 'import %s as hello' % (script)
+        #hello = loadGran98NeuroML_L123()
+        #hello.loadGran98NeuroML_L123("Generated.net.xml")
 
     def addFieldTable(self, full_field_path):
         """
