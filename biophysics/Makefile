@@ -25,6 +25,7 @@ OBJ = \
 	SpikeGen.o	\
 	CaConc.o	\
 	Nernst.o	\
+	Neuron.o	\
 	GHK.o		\
 	NMDAChan.o	\
 	HHGate2D.o	\
@@ -66,6 +67,7 @@ NMDAChan.o: NMDAChan.h SynBase.h ChanBase.h Synapse.h SynChan.h
 SpikeGen.o: SpikeGen.h
 CaConc.o:	CaConc.h
 Nernst.o:	Nernst.h
+Neuron.o:	Neuron.h
 MgBlock.o:	MgBlock.h
 GHK.o:	GHK.h
 HHGate2D.o:	../builtins/Interpol2D.h HHGate2D.h

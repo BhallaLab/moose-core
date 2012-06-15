@@ -1,29 +1,34 @@
 # used to parse files more easily
 from __future__ import with_statement
-# Numpy module
+
+#numerical computations
 import numpy as np
+
 # for command-line arguments
 import sys
 import os
 import sys
 import subprocess
 from datetime import date
+
 #moose imports
 import moose
+import moose.utils as mooseUtils
 from collections import defaultdict
 from objectedit import ObjectFieldsModel, ObjectEditView
-# Qt4 bindings for core Qt functionalities (non-GUI)
-from PyQt4 import QtCore
-from PyQt4.QtCore import QEvent, Qt
-# Python Qt4 bindings for GUI objects
-from PyQt4 import QtGui
-# import the MainWindow widget from the converted .ui files
-from newgui import Ui_MainWindow
-#opengl imports
 from moosehandler import MooseHandler
 from filepaths import *
-import config
 import kineticlayout
+
+# Qt4 bindings for Qt
+from PyQt4 import QtCore,QtGui
+from PyQt4.QtCore import QEvent, Qt
+
+# import the MainWindow widget from the converted .ui (pyuic4) files
+from newgui import Ui_MainWindow
+
+import config
+
 
 class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
     """Customization for Qt Designer created window"""
@@ -37,8 +42,10 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.setCorner(Qt.BottomLeftCorner,Qt.LeftDockWidgetArea)
         self.mooseHandler = MooseHandler()
 
+        #do not show other docks
         self.defaultDockState()
-        self.connectElements()        #connections
+        #connections
+        self.connectElements()
 
     def defaultDockState(self):
         self.moosePopulationEditDock.setVisible(False)
@@ -49,8 +56,11 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.menuView.setEnabled(False)
         self.menuClasses.setEnabled(False)
 
-    def setDefaults(self):
-        self.makeObjectFieldEditor(self.mtree.currentItem().getMooseObject())
+    def runSimulation(self,time):
+        moose.start(time)
+
+    def setSimulationTimeStep(self,simPaths,simdt,plotdt):
+        mooseUtils.resetSim(simPaths,simdt,plotdt)
 
     def connectElements(self):
         self.connect(self.actionLoad_Model,QtCore.SIGNAL('triggered()'), self.popupLoadModelDialog)
