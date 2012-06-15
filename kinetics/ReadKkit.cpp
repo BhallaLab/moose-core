@@ -829,6 +829,7 @@ void ReadKkit::buildSumTotal( const string& src, const string& dest )
 	
 		// Turn dest into a FuncPool.
 		destId()->zombieSwap( FuncPool::initCinfo(), dup );
+		delete orig;
 	} else {
 		sumId = Neutral::child( destId.eref(), "sumFunc" );
 	}
@@ -1137,6 +1138,7 @@ void ReadKkit::addmsg( const vector< string >& args)
 					orig->copy( orig->pathDepth() - 1, orig->pathDepth(),
 					false, 1 );
 				destId.element()->zombieSwap( BufPool::initCinfo(), dup );
+				delete orig;
 			}
 			// NSLAVE is 1, CONCSLAVE is 2.
 			map< Id, int >::iterator i = poolFlags_.find( destId );
