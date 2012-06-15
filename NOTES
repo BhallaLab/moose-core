@@ -17605,6 +17605,8 @@ Fix to scheduling so that changing dts can proceed without zeroing out internal
 times. Clears regression test, still to test with sim. Checkin 3451.
 ============================================================================
 22 May.
+Minor fix to regression test.
+Checkin 3488
 Looking at loading multiscale models.
 
 Note that SED-ML allows insertion of things into an existing model it loads.
@@ -17663,6 +17665,41 @@ Points of contact with other standards
 
 Some questions:
 	- Extensions to an existing ML, or a new one?
+
+
+
+============================================================================
+11 June 2012
+Things to do
+
+Dt calculations. Currently working on ksolve/EstimateDt.
+	Done it, compiled, but it needs base class for pool, reac and enz.
+Base class for zombies: for wildcards and any tree traversal function.
+	Should use virtual funcs so as to reuse most of the Cinfo functions.
+		Problem is that then I need a wrapper func for the Cinfo to
+		call, which internally calls the virtual func.
+		Worth it though.
+	Should efficently eliminate zombie process calls.
+	Zombie will have to handle a ptr, not just be subclassed from solver.
+
+Enz should be base class for MMEnz, and should be able to swap between.
+kkit reading option : for compt models
+segvs: To get it to work. Harsha has provided list:
+slow msgs: 
+	- In addToQ, give SrcFinfo:send the ptr to Q rather than copying data.
+	- in swapQ, don't do memcpys. Find a way to pass ptrs to MPI to stitch.
+	- Redo Conv so it uses the original ptr, doesn't copy it.
+	- Figure out how to eliminate lockQmutex in addToQ.
+	- Msg::exec decision on direction, src, thread.
+	- SparseMsg::exec precompute thread and node portions.
+
+Global objects: for efficient channels
+	- Define a DataHandler in which the copy operation just does a pointer,
+		and which does reference counting.
+Array and non-array fields
+Fix leak found by valgrind. I think Zombies are not having their
+	data cleared out properly.
+
 
 
 
