@@ -17692,6 +17692,8 @@ slow msgs:
 	- Figure out how to eliminate lockQmutex in addToQ.
 	- Msg::exec decision on direction, src, thread.
 	- SparseMsg::exec precompute thread and node portions.
+Autoscheduling: Just give a clock # to each thing. System is smart enough
+	to ignore unused clocks with lower #s.
 
 Global objects: for efficient channels
 	- Define a DataHandler in which the copy operation just does a pointer,
@@ -17701,5 +17703,21 @@ Fix leak found by valgrind. I think Zombies are not having their
 	data cleared out properly.
 
 
+============================================================================
+15 June 2012.
+Checkin 3553 with the EstimateDt code.
 
+Implemented a skeleton baseclass for Pool. Will need to redo the
+existing classes to use it. Handles almost all the interface fields and msgs.
 
+What to call new pool base class?
+PoolBase:
+	+ Leave 'Pool' naming as is. Lots of tests and examples.
+	- Redo any path traversals that used to use 'Pool'
+	. Gives default status to EE pool (but it already has this status).
+	. Have to remember to use PoolBase for generic traversals.
+	. Unambiguous about what is the base. 
+Seems that PoolBase it is.
+First pass compiled.
+
+============================================================================

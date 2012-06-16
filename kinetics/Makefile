@@ -10,6 +10,7 @@
 TARGET = _kinetics.o
 
 OBJ = \
+	PoolBase.o	\
 	Pool.o	\
 	BufPool.o	\
 	FuncPool.o	\
@@ -34,16 +35,16 @@ HEADERS = \
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
-Pool.o:	Pool.h lookupSizeFromMesh.h
-BufPool.o:	Pool.h BufPool.h lookupSizeFromMesh.h
-FuncPool.o:	Pool.h FuncPool.h lookupSizeFromMesh.h
+Pool.o:	PoolBase.h Pool.h lookupSizeFromMesh.h
+BufPool.o:	PoolBase.h Pool.h BufPool.h lookupSizeFromMesh.h
+FuncPool.o:	PoolBase.h Pool.h FuncPool.h lookupSizeFromMesh.h
 Reac.o:	Reac.h lookupSizeFromMesh.h
 Enz.o:	Enz.h lookupSizeFromMesh.h
 MMenz.o:	MMenz.h  lookupSizeFromMesh.h
 Boundary.o:	Boundary.h
 ChemCompt.o:	ChemCompt.h
 Species.o:	Species.h
-ReadKkit.o:	lookupSizeFromMesh.h ReadKkit.h Pool.h FuncPool.h ../shell/Shell.h 
+ReadKkit.o:	lookupSizeFromMesh.h ReadKkit.h PoolBase.h Pool.h FuncPool.h ../shell/Shell.h 
 ReadCspace.o:	lookupSizeFromMesh.h ReadCspace.h ../shell/Shell.h
 MathFunc.o:	MathFunc.h
 SumFunc.o:	SumFunc.h
