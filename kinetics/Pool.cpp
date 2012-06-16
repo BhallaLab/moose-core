@@ -14,8 +14,6 @@
 
 #define EPSILON 1e-15
 
-const SpeciesId DefaultSpeciesId = 0;
-
 static SrcFinfo1< double >* requestSize() {
 	static SrcFinfo1< double > requestSize( 
 		"requestSize", 
