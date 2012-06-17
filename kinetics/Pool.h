@@ -11,45 +11,33 @@
 #define _POOL_H
 
 /**
- * SpeciesId identifies molecular species. This is a unique identifier for
- * any given molecular species, regardless of which compartment or solver
- * is handling it. 
- */
-typedef unsigned int SpeciesId;
-extern const SpeciesId DefaultSpeciesId;
-
-/**
  * The Pool class is a molecular pool. This is a set of molecules of a 
  * given species, in a uniform chemical context. Note that the same
  * species might be present in other compartments, or be handled by
  * other solvers.
  */
-class Pool
+class Pool: public PoolBase
 {
-	friend void testSyncArray( unsigned int size, unsigned int numThreads,
-		unsigned int method );
-	friend void checkVal( double time, const Pool* m, unsigned int size );
-	friend void forceCheckVal( double time, Element* e, unsigned int size );
-
 	public: 
 		Pool();
-		Pool( double nInit );
+		~Pool();
 
 		//////////////////////////////////////////////////////////////////
-		// Field assignment stuff
+		// Field assignment stuff. All override virtual funcs in the Pool
+		// base class.
 		//////////////////////////////////////////////////////////////////
 
-		void setN( double v );
-		double getN() const;
-		void setNinit( const Eref& e, const Qinfo* q, double v );
-		double getNinit( const Eref& e, const Qinfo* q ) const;
-		void setDiffConst( double v );
-		double getDiffConst() const;
+		void vSetN( const Eref& e, const Qinfo* q, double v );
+		double vGetN( const Eref& e, const Qinfo* q ) const;
+		void vSetNinit( const Eref& e, const Qinfo* q, double v );
+		double vGetNinit( const Eref& e, const Qinfo* q ) const;
+		void vSetDiffConst( const Eref& e, const Qinfo* q, double v );
+		double vGetDiffConst( const Eref& e, const Qinfo* q ) const;
 
-		void setConc( const Eref& e, const Qinfo* q, double v );
-		double getConc( const Eref& e, const Qinfo* q ) const;
-		void setConcInit( double v );
-		double getConcInit() const;
+		void vSetConc( const Eref& e, const Qinfo* q, double v );
+		double vGetConc( const Eref& e, const Qinfo* q ) const;
+		void vSetConcInit( const Eref& e, const Qinfo* q, double v );
+		double vGetConcInit( const Eref& e, const Qinfo* q ) const;
 
 		/**
 		 * Size is usually volume, but we also permit areal density
@@ -57,25 +45,33 @@ class Pool
 		 * entry in the parent compartment. If the message isn't set then
 		 * it defaults to 1.0.
 		 */
-		double getSize( const Eref& e, const Qinfo* q ) const;
+		void vSetSize( const Eref& e, const Qinfo* q, double v );
+		double vGetSize( const Eref& e, const Qinfo* q ) const;
 
-		void setSpecies( SpeciesId v );
-		SpeciesId getSpecies() const;
+		void vSetSpecies( const Eref& e, const Qinfo* q, SpeciesId v );
+		SpeciesId vGetSpecies( const Eref& e, const Qinfo* q ) const;
 
 		//////////////////////////////////////////////////////////////////
-		// Dest funcs
+		// Dest funcs. These too override virtual funcs in the Pool base 
+		// class.
 		//////////////////////////////////////////////////////////////////
 
-		void handleMolWt( double v );
-		void process( const Eref& e, ProcPtr p );
-		void reinit( const Eref& e, ProcPtr p );
-		void reac( double A, double B );
+		void vHandleMolWt( const Eref& e, const Qinfo* q, double v );
+		void vProcess( const Eref& e, ProcPtr p );
+		void vReinit( const Eref& e, ProcPtr p );
+		void vReac( double A, double B );
+		void vRemesh( const Eref& e, const Qinfo* q, 
+			unsigned int numTotalEntries, unsigned int startEntry, 
+			const vector< unsigned int >& localIndices, 
+			const vector< double >& vols );
+
+		//////////////////////////////////////////////////////////////////
+		// Novel Dest funcs not present in Pool base class.
+		//////////////////////////////////////////////////////////////////
 		void increment( double val );
 		void decrement( double val );
-		void remesh( const Eref& e, const Qinfo* q, 
-			unsigned int numTotalEntries, unsigned int startEntry, 
-			vector< unsigned int > localIndices, vector< double > vols );
 
+		//////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
 	private:
 		double n_; /// Number of molecules in pool
@@ -90,7 +86,6 @@ class Pool
 		 * the same species.
 		 */
 		unsigned int species_; 
-		
 };
 
 #endif	// _POOL_H

@@ -14,7 +14,7 @@ class BufPool: public Pool
 {
 	public: 
 		BufPool();
-		BufPool( double nInit );
+		~BufPool();
 
 		//////////////////////////////////////////////////////////////////
 		// Field assignment stuff

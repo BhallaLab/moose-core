@@ -21,6 +21,7 @@ class FuncPool: public Pool
 {
 	public: 
 		FuncPool();
+		~FuncPool();
 
 		//////////////////////////////////////////////////////////////////
 		// Field assignment stuff
@@ -30,8 +31,8 @@ class FuncPool: public Pool
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
 
-		void process( const Eref& e, ProcPtr p );
-		void reinit( const Eref& e, ProcPtr p );
+		void vProcess( const Eref& e, ProcPtr p );
+		void vReinit( const Eref& e, ProcPtr p );
 		void input( double v );
 
 		static const Cinfo* initCinfo();

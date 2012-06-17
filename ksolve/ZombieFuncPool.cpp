@@ -62,9 +62,9 @@ void ZombieFuncPool::zombify( Element* solver, Element* orig )
 	Eref oer( orig, 0 );
 
 	ZombieFuncPool* z = reinterpret_cast< ZombieFuncPool* >( zer.data() );
-	FuncPool* m = reinterpret_cast< FuncPool* >( oer.data() );
+	PoolBase* m = reinterpret_cast< PoolBase* >( oer.data() );
 
-	z->setN( zer, 0, m->getN() );
+	z->setN( zer, 0, m->getN( oer, 0 ) );
 	z->setNinit( zer, 0, m->getNinit( oer, 0 ) );
 	unsigned int numEntries = orig->dataHandler()->localEntries();
 	DataHandler* dh = new ZombieHandler( solver->dataHandler(),
@@ -104,6 +104,6 @@ void ZombieFuncPool::unzombify( Element* zombie )
 
 	FuncPool* m = reinterpret_cast< FuncPool* >( oer.data() );
 
-	m->setN( z->getN( zer, 0 ) );
+	m->setN( oer, 0, z->getN( zer, 0 ) );
 	m->setNinit( oer, 0, z->getNinit( zer, 0 ) );
 }

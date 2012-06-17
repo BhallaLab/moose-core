@@ -17718,6 +17718,11 @@ PoolBase:
 	. Have to remember to use PoolBase for generic traversals.
 	. Unambiguous about what is the base. 
 Seems that PoolBase it is.
-First pass compiled.
+First pass compiled. Checking 3554.
+Now compiles completely, lots of files fixed. Segv towards end of unit tests.
 
+============================================================================
+16 June 2012.
+Got the updated PoolBase system to work, clears unit and regression tests.
+Still isn't used in ZombiePool.
 ============================================================================

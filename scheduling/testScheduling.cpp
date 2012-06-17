@@ -23,6 +23,7 @@
 #include "SingleMsg.h"
 #include "../builtins/Arith.h"
 #include "../randnum/randnum.h"
+#include "../kinetics/PoolBase.h"
 #include "../kinetics/Pool.h"
 
 #include "../shell/Shell.h"
@@ -451,9 +452,9 @@ void testQueueAndStart()
 	Id pool = s->doCreate( "Pool", Id(), "pool", d2, false );
 	const Pool* p = reinterpret_cast< const Pool* >( pool.eref().data() );
 	for ( unsigned int i = 0; i < num; ++i ) {
-		if ( !doubleEq( p->getN(), 0.0 ) ) 
+		if ( !doubleEq( p->getN( pool.eref(), 0 ), 0.0 ) ) 
 			cout << "ugh" << i << "\n";
-		if ( !doubleEq( p->getConcInit(), 0.0 ) ) 
+		if ( !doubleEq( p->getConcInit( pool.eref(), 0 ), 0.0 ) ) 
 			cout << "ugh" << i << "\n";
 	}
 	Id reac = s->doCreate( "Reac", Id(), "reac", d2, false );

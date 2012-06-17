@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "PoolBase.h"
 #include "Pool.h"
 #include "BufPool.h"
 
@@ -63,9 +64,9 @@ static const Cinfo* bufPoolCinfo = BufPool::initCinfo();
 BufPool::BufPool()
 {;}
 
-BufPool::BufPool( double nInit)
-	: Pool( nInit )
+BufPool::~BufPool()
 {;}
+
 
 //////////////////////////////////////////////////////////////
 // MsgDest Definitions

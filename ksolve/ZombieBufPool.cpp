@@ -167,13 +167,13 @@ void ZombieBufPool::zombify( Element* solver, Element* orig )
 	unsigned int numEntries = orig->dataHandler()->localEntries();
 
 	ZombieBufPool* z = reinterpret_cast< ZombieBufPool* >( zer.data() );
-	BufPool* m = reinterpret_cast< BufPool* >( oer.data() );
+	PoolBase* m = reinterpret_cast< PoolBase* >( oer.data() );
 
 	unsigned int poolIndex = z->convertIdToPoolIndex( orig->id() );
-	z->concInit_[ poolIndex ] = m->getConcInit();
-	z->setN( zer, 0, m->getN() );
+	z->concInit_[ poolIndex ] = m->getConcInit( oer, 0 );
+	z->setN( zer, 0, m->getN( oer, 0 ) );
 	z->setNinit( zer, 0, m->getNinit( oer, 0 ) );
-	z->setDiffConst( zer, 0, m->getDiffConst() );
+	z->setDiffConst( zer, 0, m->getDiffConst( oer, 0 ) );
 	/*
 	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler(),
 		orig->dataHandler() );
@@ -200,6 +200,6 @@ void ZombieBufPool::unzombify( Element* zombie )
 
 	BufPool* m = reinterpret_cast< BufPool* >( oer.data() );
 
-	m->setN( z->getN( zer, 0 ) );
+	m->setN( oer, 0, z->getN( zer, 0 ) );
 	m->setNinit( oer, 0, z->getNinit( zer, 0 ) );
 }
