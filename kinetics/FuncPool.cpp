@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "PoolBase.h"
 #include "Pool.h"
 #include "FuncPool.h"
 
@@ -16,16 +17,9 @@ const Cinfo* FuncPool::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// Field Definitions
 		//////////////////////////////////////////////////////////////
-
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
-		static DestFinfo process( "process",
-			"Handles process call",
-			new ProcOpFunc< FuncPool >( &FuncPool::process ) );
-		static DestFinfo reinit( "reinit",
-			"Handles reinit call",
-			new ProcOpFunc< FuncPool >( &FuncPool::reinit ) );
 		static DestFinfo input( "input",
 			"Handles input to control value of n_",
 			new OpFunc1< FuncPool, double >( &FuncPool::input ) );
@@ -33,17 +27,9 @@ const Cinfo* FuncPool::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// SharedMsg Definitions
 		//////////////////////////////////////////////////////////////
-		static Finfo* procShared[] = {
-			&process, &reinit
-		};
-		static SharedFinfo proc( "proc",
-			"Shared message for process and reinit",
-			procShared, sizeof( procShared ) / sizeof( const Finfo* )
-		);
 
 	static Finfo* funcPoolFinfos[] = {
 		&input,				// DestFinfo
-		&proc,				// SharedFinfo
 	};
 
 	static Cinfo funcPoolCinfo (
@@ -65,23 +51,26 @@ static const Cinfo* funcPoolCinfo = FuncPool::initCinfo();
 FuncPool::FuncPool()
 {;}
 
+FuncPool::~FuncPool()
+{;}
+
 //////////////////////////////////////////////////////////////
 // MsgDest Definitions
 //////////////////////////////////////////////////////////////
 
-void FuncPool::process( const Eref& e, ProcPtr p )
+void FuncPool::vProcess( const Eref& e, ProcPtr p )
 {
-	Pool::reinit( e, p );
+	;
 }
 
-void FuncPool::reinit( const Eref& e, ProcPtr p )
+void FuncPool::vReinit( const Eref& e, ProcPtr p )
 {
 	Pool::reinit( e, p );
 }
 
 void FuncPool::input( double v )
 {
-	setConcInit( v );
+	Pool::vSetConcInit( Id().eref(), 0, v );
 }
 
 //////////////////////////////////////////////////////////////

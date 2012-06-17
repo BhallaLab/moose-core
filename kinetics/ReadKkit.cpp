@@ -12,6 +12,7 @@
 #include <fstream>
 #include "header.h"
 #include "utility/utility.h"
+#include "PoolBase.h"
 #include "Pool.h"
 #include "FuncPool.h"
 #include "BufPool.h"
