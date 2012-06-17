@@ -65,13 +65,14 @@ const Cinfo* ZombiePool::initCinfo()
 			&ZombiePool::getConcInit
 		);
 
-		static ReadOnlyElementValueFinfo< ZombiePool, double > size(
+		static ElementValueFinfo< ZombiePool, double > size(
 			"size",
 			"Size of compartment. Units are SI. "
 			"Utility field, the master size info is "
 			"stored on the compartment itself. For voxel-based spatial"
 			"models, the 'size' of the pool at a given index is the"
 			"size of that voxel.",
+			&ZombiePool::setSize,
 			&ZombiePool::getSize
 		);
 
@@ -356,15 +357,15 @@ void ZombiePool::zombify( Element* solver, Element* orig )
 	if ( mid != Msg::bad )
 		Msg::deleteMsg( mid );
 
-	Pool* m = reinterpret_cast< Pool* >( oer.data() );
-	z->setSpecies( zombier, 0, m->getSpecies() );
+	PoolBase* m = reinterpret_cast< PoolBase* >( oer.data() );
+	z->setSpecies( zombier, 0, m->getSpecies( oer, 0 ) );
 	unsigned int poolIndex = z->convertIdToPoolIndex( orig->id() );
-	z->concInit_[ poolIndex ] = m->getConcInit();
+	z->concInit_[ poolIndex ] = m->getConcInit( oer, 0 );
 
 	Eref zer( &temp, 0 );
-	z->setN( zer, 0, m->getN() );
+	z->setN( zer, 0, m->getN( oer, 0 ) );
 	z->setNinit( zer, 0, m->getNinit( oer, 0 ) );
-	z->setDiffConst( zer, 0, m->getDiffConst() );
+	z->setDiffConst( zer, 0, m->getDiffConst( oer, 0 ) );
 	/*
 	for ( unsigned int i = 0; i < numEntries; ++i ) {
 		Eref oer( orig, i );
@@ -399,7 +400,7 @@ void ZombiePool::unzombify( Element* zombie )
 
 	Pool* m = reinterpret_cast< Pool* >( oer.data() );
 
-	m->setN( z->getN( zer, 0 ) );
+	m->setN( oer, 0, z->getN( zer, 0 ) );
 	m->setNinit( oer, 0, z->getNinit( zer, 0 ) );
-	m->setSpecies( z->getSpecies( zer, 0 ) );
+	m->setSpecies( oer, 0, z->getSpecies( zer, 0 ) );
 }

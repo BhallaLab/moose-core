@@ -18,7 +18,7 @@ class MathFunc;
 #include "KinSparseMatrix.h"
 
 class Stoich;
-#include "../kinetics/Pool.h"
+#include "../kinetics/PoolBase.h"
 #include "../kinetics/lookupSizeFromMesh.h"
 #include "../mesh/Stencil.h"
 #include "Port.h"
