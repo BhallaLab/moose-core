@@ -120,6 +120,21 @@ class MoosePlotWindow(QtGui.QMainWindow):
 
     def __init__(self, *args):
         QtGui.QMainWindow.__init__(self, *args)
+
+        self.resize(567, 497)
+        self.centralwidget = QtGui.QWidget(self)
+        self.centralwidget.setObjectName("centralwidget")
+        self.verticalLayout = QtGui.QVBoxLayout(self.centralwidget)
+        self.verticalLayout.setObjectName("verticalLayout")
+        self.plot = MoosePlot(self.centralwidget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.plot.sizePolicy().hasHeightForWidth())
+        self.plot.setSizePolicy(sizePolicy)
+        self.plot.setObjectName("plot")
+        self.verticalLayout.addWidget(self.plot)
+        self.setCentralWidget(self.centralwidget)
         
     def closeEvent(self, event):
         self.emit(QtCore.SIGNAL('windowClosed()'))
@@ -152,10 +167,9 @@ if __name__ == '__main__':
     moose.reinit()
     moose.start(0.30)
  
-    plot = MoosePlot()
-    print len(testTable.vec)
-    plot.addTable(testTable)
-    plot.show()
+    plotWin = MoosePlotWindow()
+    plotWin.plot.addTable(testTable)
+    plotWin.show()
         
     sys.exit(app.exec_())
         

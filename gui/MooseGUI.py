@@ -51,8 +51,8 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         #plot variables
         self.plotConfigCurrentSelection = None
         self.plotConfigAcceptPushButton.setEnabled(False)
-        self.plotWindowFieldTableDict = {} #moosePlotWinName:[mooseTable]
-        self.plotWinNamePlotDict = {} #moosePlotWinName:mooseplot
+        self.plotWindowFieldTableDict = {} #guiPlotWinowName:[mooseTable]
+        self.plotNameWinDict = {} #guiPlotWindowName:moosePlotWindow
 
         #do not show other docks
         self.defaultDockState()
@@ -210,29 +210,21 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             #case when plotwin already exists - append new table to mooseplotwin
             self.plotWindowFieldTableDict[str(self.plotConfigWinSelectionComboBox.currentText())].append(newTable)
             #select the corresponding plot (mooseplot) from the plotwindow (mooseplotwindow) 
-            plot = self.plotWinNamePlotDict[str(self.plotConfigWinSelectionComboBox.currentText())] 
+            plotWin = self.plotNameWinDict[str(self.plotConfigWinSelectionComboBox.currentText())] 
             
             #do not like the legends shown in the plots, change the field 2 below
-            plot.addTable(newTable,newTable.getField('path'))
+            plotWin.plot.addTable(newTable,newTable.getField('path'))
+
         else:
-            #no previous mooseplotwin - so create now, and add table to corresp dict
+            #no previous mooseplotwin - so create, and add table to corresp dict
             self.plotWindowFieldTableDict[str(self.plotConfigWinSelectionComboBox.currentText())] = [newTable]
             plotWin = MoosePlotWindow(self)
             plotWin.setWindowTitle(str(self.plotConfigWinSelectionComboBox.currentText()))
 
-            plot = MoosePlot(plotWin)
-            #fix sizing! - somethign is wrong here. plot doesnt resize with plotwin
-            sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-            sizePolicy.setHorizontalStretch(0)
-            sizePolicy.setVerticalStretch(0)
-            sizePolicy.setHeightForWidth(plot.sizePolicy().hasHeightForWidth())
-            plot.setSizePolicy(sizePolicy)
-
             #do not like the legends shown in the plots, change the field 2 below
-            plot.addTable(newTable,newTable.getField('path'))
+            plotWin.plot.addTable(newTable,newTable.getField('path'))
             plotWin.show()
-            #create a new Dictionary entry of plotWindowName:plot
-            self.plotWinNamePlotDict[str(self.plotConfigWinSelectionComboBox.currentText())]=plot 
+            self.plotNameWinDict[str(self.plotConfigWinSelectionComboBox.currentText())] = plotWin
 
     def plotConfigAddNewPlotWindow(self):
         #called when new plotwindow pressed in plotconfig dock
