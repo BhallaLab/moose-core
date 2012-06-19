@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 17:11:06 2011 (+0530)
 // Version: 
-// Last-Updated: Tue Apr 24 22:41:08 2012 (+0530)
-//           By: Subhasis Ray
-//     Update #: 868
+// Last-Updated: Tue Jun 19 16:53:10 2012 (+0530)
+//           By: subha
+//     Update #: 908
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -174,7 +174,7 @@ extern "C" {
             if (item == NULL){                                      \
                 ostringstream error;                                \
                 error << "Item # " << ii << " is NULL";                 \
-                PyErr_SetString(PyExc_TypeError, error.str().c_str());  \
+                PyErr_SetString(PyExc_ValueError, error.str().c_str());  \
             } else {                                                    \
                 value = (BASETYPE*)to_cpp< BASETYPE >(item);         \
                 if (value == NULL){                                     \
@@ -188,6 +188,40 @@ extern "C" {
         return RET;                                                     \
     }
 
+#define PYSEQUENCE_TO_VECVEC(BASETYPE, SEQUENCE){   \
+        Py_ssize_t length1 = PySequence_Length(SEQUENCE);               \
+        vector < vector <BASETYPE> > * RET = new vector < vector < BASETYPE > >((unsigned)length1); \
+        for (unsigned int ii = 0; ii < length1; ++ii){                  \
+            PyObject * subseq = PySequence_GetItem(SEQUENCE, ii);       \
+            if (subseq == NULL){                                        \
+                ostringstream error;                                    \
+                error << "PYSEQUENCE_TO_VECVEC: Converting Python sequence of sequence to vector of vectors: Item # " \
+                      << ii << " is NULL.";                             \
+                PyErr_SetString(PyExc_ValueError, error.str().c_str()); \
+                return RET;                                             \
+            }                                                           \
+            if (!PySequence_Check(subseq)){                             \
+                PyErr_SetString(PyExc_TypeError, "PYSEQUENCE_TO_VECVEC: expected a sequence of sequences. Found oridinary sequence."); \
+                return RET;                                             \
+            }                                                           \
+            Py_ssize_t length2 = PySequence_Length(subseq);             \
+            for (unsigned jj = 0; jj < length2; ++jj){                  \
+                PyObject * item = PySequence_GetItem(subseq, jj);       \
+                if (item == NULL){                                      \
+                    ostringstream error;                                \
+                    error << "PYSEQUENCE_TO_VECVEC: found a null for "  \
+                          << jj << "-th item on" << ii                  \
+                          << "-th subsequence";                         \
+                    PyErr_SetString(PyExc_ValueError, error.str().c_str()); \
+                    return RET;                                         \
+                }                                                       \
+                BASETYPE * value = (BASETYPE*)to_cpp<BASETYPE>(item);   \
+                RET->at(ii).push_back(*value);                          \
+                delete value;                                           \
+            }                                                           \
+        }                                                               \
+        return RET;                                                     \
+    }
 
 /// Converts PyObject to C++ object
 /// Returns a pointer to the converted object. Deallocation is caller responsibility
@@ -277,6 +311,12 @@ template <class A> void * to_cpp(PyObject * object)
         PYSEQUENCE_TO_VECTOR( ObjId, object)        
     } else if (typeid(A) == typeid(vector<Id>)){
         PYSEQUENCE_TO_VECTOR( Id, object)
+    } else if (typeid(A) == typeid(vector< vector <double> >)){
+        PYSEQUENCE_TO_VECVEC(double, object);
+    } else if (typeid(A) == typeid(vector <vector <int > >)){
+        PYSEQUENCE_TO_VECVEC(int, object);
+    } else if (typeid(A) == typeid(vector < vector < unsigned int> >)){
+        PYSEQUENCE_TO_VECVEC(unsigned int, object);
     }
     return NULL;
 }
