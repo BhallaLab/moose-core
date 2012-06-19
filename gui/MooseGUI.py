@@ -17,7 +17,7 @@ import moose.utils as mooseUtils
 from collections import defaultdict
 from objectedit import ObjectFieldsModel, ObjectEditView
 from moosehandler import MooseHandler
-
+from mooseplot import MoosePlot,MoosePlotWindow
 import kineticlayout
 
 from filepaths import *
@@ -26,7 +26,7 @@ from defaults import *
 # Qt4 bindings for Qt
 from PyQt4 import QtCore,QtGui
 from PyQt4.QtCore import QEvent, Qt
-import matplotlib.pyplot as plt
+
 # import the MainWindow widget from the converted .ui (pyuic4) files
 from newgui import Ui_MainWindow
 
@@ -45,15 +45,15 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.setCorner(Qt.BottomLeftCorner,Qt.LeftDockWidgetArea)
         self.mooseHandler = MooseHandler()
 
-        
-
         #plot variables
-        self.plotWindowFieldTableDict = {}
         self.plotConfigCurrentSelection = None
         self.plotConfigAcceptPushButton.setEnabled(False)
+        self.plotWindowFieldTableDict = {} #moosePlotWinName:[mooseTable]
+        self.plotWinNamePlotDict = {} #moosePlotWinName:mooseplot
 
         #do not show other docks
         self.defaultDockState()
+
         #connections
         self.connectElements()
 
@@ -174,7 +174,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.updatePlotDock(obj)
 
     def updatePlotDock(self,obj):
-
+        #add plottable elements according to predefined  
         self.plotConfigCurrentSelectionLabel.setText(obj.getField('name'))
         fieldType = obj.getField('class')
         self.plotConfigCurrentSelectionTypeLabel.setText(fieldType)
@@ -194,12 +194,26 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         dataNeutral = moose.Neutral(self.plotConfigCurrentSelection.getField('path')+'/data')
         newTable = moose.Table(self.plotConfigCurrentSelection.getField('path')+'/data'+str(self.plotConfigFieldSelectionComboBox.currentText()))
         moose.connect(newTable,'requestData',self.plotConfigCurrentSelection,'get_'+str(self.plotConfigFieldSelectionComboBox.currentText()))
-        if str(self.plotConfigWinSelectionComboBox.currentText()) in self.plotWindowFieldTableDict:
-            self.plotWindowFieldTableDict[str(self.plotConfigWinSelectionComboBox.currentText())].append(newTable)
-        else:
-            self.plotWindowFieldTableDict[str(self.plotConfigWinSelectionComboBox.currentText())] = [newTable]
-        self.createPlots()
 
+        if str(self.plotConfigWinSelectionComboBox.currentText()) in self.plotWindowFieldTableDict:
+            #case when plotwin already exists - append new table to mooseplotwin
+            self.plotWindowFieldTableDict[str(self.plotConfigWinSelectionComboBox.currentText())].append(newTable)
+            #select the corresponding plot (mooseplot) from the plotwindow (mooseplotwindow) 
+            plot = self.plotWinNamePlotDict[str(self.plotConfigWinSelectionComboBox.currentText())] 
+            print plot,'if loop'
+            plot.addTable(newTable,newTable.getField('path'))
+
+
+        else:
+            #no previous mooseplotwin - so create now, and add table to corresp dict
+            self.plotWindowFieldTableDict[str(self.plotConfigWinSelectionComboBox.currentText())] = [newTable]
+            plotWin = MoosePlotWindow(self)
+            plotWin.setWindowTitle(str(self.plotConfigWinSelectionComboBox.currentText()))
+            plot = MoosePlot(plotWin)
+            plot.addTable(newTable,newTable.getField('path'))
+            plotWin.show()
+            #create a new Dictionary entry of plotWindowName:plot
+            self.plotWinNamePlotDict[str(self.plotConfigWinSelectionComboBox.currentText())]=plot 
 
     def plotConfigAddNewPlotWindow(self):
         #called when new plotwindow pressed in plotconfig dock
@@ -207,19 +221,6 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.plotConfigWinSelectionComboBox.addItem('Plot Window '+str(count+1))
         self.plotConfigWinSelectionComboBox.setCurrentIndex(count)
 
-    def createPlots(self):
-        for plotWindowName in self.plotWindowFieldTableDict:
-            fig = plt.figure()
-            fig.canvas.set_window_title(plotWindowName)
-            ax = fig.add_subplot(111)
-            ax.set_xlabel('time')
-            for table in self.plotWindowFieldTableDict[plotWindowName]:
-                line = ax.plot(table.vec,label=table.getField('path'))
-                #self.figLineDict[fig]
-            plt.show()
-
-#    def updatePlots(self,currentTime):
-        
 
 # create the GUI application
 app = QtGui.QApplication(sys.argv)

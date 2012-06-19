@@ -43,7 +43,7 @@ class MoosePlot(MyMplCanvas):
 
         self.plotNo = MoosePlot.plot_index
         MoosePlot.plot_index += 1
-#        self.setAcceptDrops(True)
+        self.setAcceptDrops(True)
         self.curveIndex = 0
         self.curveTableMap = {}
         self.tableCurveMap = {}
@@ -117,13 +117,14 @@ class MoosePlot(MyMplCanvas):
             table.dumpFile(filename)
 
 class MoosePlotWindow(QtGui.QMainWindow):
-    
+
     def __init__(self, *args):
         QtGui.QMainWindow.__init__(self, *args)
         
     def closeEvent(self, event):
         self.emit(QtCore.SIGNAL('windowClosed()'))
         self.hide()
+        
 
 import sys
 if __name__ == '__main__':
