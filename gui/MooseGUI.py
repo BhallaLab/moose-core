@@ -110,6 +110,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         targetText.setText('/dummy')
         targetPanel.layout().addWidget(targetLabel)
         targetPanel.layout().addWidget(targetText)
+        print "###############",targetText.text()
         layout = fileDialog.layout()
         #layout.addWidget(targetTree)
         layout.addWidget(targetPanel)
@@ -135,7 +136,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
                         
                     except kineticlayout.Widgetvisibility:
                         print 'No kkit layout for: %s' % (str(fileName))
-                    #self.populateKKitPlots()
+                    self.populateKKitPlots(modelpath)
                 #self.populateDataPlots()
                 #self.updateDefaultTimes(modeltype)
             #self.modelTreeWidget.recreateTree()
@@ -238,7 +239,17 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
     def doQuit(self):
         QtGui.qApp.closeAllWindows()
+    
+    def populateKKitPlots(self,path):
+        graphs = self.getKKitGraphs(path)
+        for graph in graphs:
+            print graph
 
+    def getKKitGraphs(self,path):
+        tableList = []
+        for child in moose.wildcardFind(path+'/graphs/#/##[TYPE=Table],'+path+'/moregraphs/#/##[TYPE=Table]'):
+            tableList.append(moose.Table(child))
+        return tableList
 
 # create the GUI application
 app = QtGui.QApplication(sys.argv)
