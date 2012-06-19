@@ -198,7 +198,10 @@ HHChannel2D::HHChannel2D()
 		conc2_(0.0),
 		Xdep0_( 0 ),
 		Ydep0_( 0 ),
-		Zdep0_( 0 )
+		Zdep0_( 0 ),
+        xGate_( 0 ),
+        yGate_( 0 ),
+        zGate_( 0 )
 {;}
 
 
