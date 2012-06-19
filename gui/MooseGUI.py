@@ -45,6 +45,9 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.setCorner(Qt.BottomLeftCorner,Qt.LeftDockWidgetArea)
         self.mooseHandler = MooseHandler()
 
+        #other variables
+        self.currentTime = 0.0
+
         #plot variables
         self.plotConfigCurrentSelection = None
         self.plotConfigAcceptPushButton.setEnabled(False)
@@ -58,6 +61,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.connectElements()
 
     def defaultDockState(self):
+        #this will eventually change corresponding to the "mode" of operation - Edit/Plot/Run
         self.moosePopulationEditDock.setVisible(False)
         self.mooseLibraryDock.setVisible(False)
         self.mooseConnectDock.setVisible(False)
@@ -67,11 +71,14 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.menuClasses.setEnabled(False)
 
     def connectElements(self):
+        #gui connections
         self.connect(self.actionLoad_Model,QtCore.SIGNAL('triggered()'), self.popupLoadModelDialog)
         self.connect(self.actionQuit,QtCore.SIGNAL('triggered()'),self.doQuit)
-
+        #plotdock connections
         self.connect(self.plotConfigAcceptPushButton,QtCore.SIGNAL('pressed()'),self.addFieldToPlot)
         self.connect(self.plotConfigNewWindowPushButton,QtCore.SIGNAL('pressed()'),self.plotConfigAddNewPlotWindow)
+        #internal connections
+        self.connect(self.mooseHandler, QtCore.SIGNAL('updatePlots(float)'), self.updatePlots)
 
     def popupLoadModelDialog(self):
         fileDialog = QtGui.QFileDialog(self)
@@ -150,14 +157,11 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.layoutWidget.setLayout(layout)
         self.sceneLayout.show()
 
-    def doQuit(self):
-        QtGui.qApp.closeAllWindows()
-
+        #objectEditor related
     def refreshObjectEditor(self,item,number):
         self.makeObjectFieldEditor(item.getMooseObject())
 
     def makeObjectFieldEditor(self, obj):
-        #print "mooesgui  - >makeobfeditatgui"
         if obj.class_ == 'Shell' or obj.class_ == 'PyMooseContext' or obj.class_ == 'GenesisParser':
             print '%s of class %s is a system object and not to be edited in object editor.' % (obj.path, obj.class_)
             return
@@ -171,10 +175,17 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.mTable.setModel(self.objFieldEditModel)
         if hasattr(self, 'sceneLayout'):
             self.connect(self.objFieldEditModel,QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'),self.sceneLayout.updateItemSlot)
-        self.updatePlotDock(obj)
+        self.updatePlotDockFields(obj)
 
-    def updatePlotDock(self,obj):
-        #add plottable elements according to predefined  
+        #plots related 
+    def updatePlots(self,currentTime):
+        #updates plots every update_plot_dt time steps see moosehandler.
+        for plotWinName,plot in self.plotWinNamePlotDict.iteritems():
+            plot.updatePlot(currentTime)
+        self.updateCurrentTime(currentTime)
+
+    def updatePlotDockFields(self,obj):
+        #add plot-able elements according to predefined  
         self.plotConfigCurrentSelectionLabel.setText(obj.getField('name'))
         fieldType = obj.getField('class')
         self.plotConfigCurrentSelectionTypeLabel.setText(fieldType)
@@ -184,10 +195,10 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             self.plotConfigCurrentSelection = obj
             self.plotConfigAcceptPushButton.setEnabled(True)
         except KeyError:
+            #undefined field - see PLOT_FIELDS variable in defaults.py
             self.plotConfigFieldSelectionComboBox.clear()
             self.plotConfigCurrentSelection = None
             self.plotConfigAcceptPushButton.setEnabled(False)
-
             
     def addFieldToPlot(self):
         #creates tables - called when 'Okay' pressed in plotconfig dock
@@ -200,16 +211,24 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             self.plotWindowFieldTableDict[str(self.plotConfigWinSelectionComboBox.currentText())].append(newTable)
             #select the corresponding plot (mooseplot) from the plotwindow (mooseplotwindow) 
             plot = self.plotWinNamePlotDict[str(self.plotConfigWinSelectionComboBox.currentText())] 
-            print plot,'if loop'
+            
+            #do not like the legends shown in the plots, change the field 2 below
             plot.addTable(newTable,newTable.getField('path'))
-
-
         else:
             #no previous mooseplotwin - so create now, and add table to corresp dict
             self.plotWindowFieldTableDict[str(self.plotConfigWinSelectionComboBox.currentText())] = [newTable]
             plotWin = MoosePlotWindow(self)
             plotWin.setWindowTitle(str(self.plotConfigWinSelectionComboBox.currentText()))
+
             plot = MoosePlot(plotWin)
+            #fix sizing! - somethign is wrong here. plot doesnt resize with plotwin
+            sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+            sizePolicy.setHorizontalStretch(0)
+            sizePolicy.setVerticalStretch(0)
+            sizePolicy.setHeightForWidth(plot.sizePolicy().hasHeightForWidth())
+            plot.setSizePolicy(sizePolicy)
+
+            #do not like the legends shown in the plots, change the field 2 below
             plot.addTable(newTable,newTable.getField('path'))
             plotWin.show()
             #create a new Dictionary entry of plotWindowName:plot
@@ -220,6 +239,13 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         count = self.plotConfigWinSelectionComboBox.count()
         self.plotConfigWinSelectionComboBox.addItem('Plot Window '+str(count+1))
         self.plotConfigWinSelectionComboBox.setCurrentIndex(count)
+        
+        #general
+    def updateCurrentTime(currentTime):
+        self.currentTime = currentTime
+
+    def doQuit(self):
+        QtGui.qApp.closeAllWindows()
 
 
 # create the GUI application
