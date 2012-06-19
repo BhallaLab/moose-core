@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Wed Mar 23 10:10:45 2011 (+0530)
 // Version: 
-// Last-Updated: Mon Apr 23 09:50:40 2012 (+0530)
+// Last-Updated: Tue Jun 19 16:52:07 2012 (+0530)
 //           By: subha
-//     Update #: 59
+//     Update #: 61
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -68,6 +68,9 @@ char shortType(string name)
         typemap.insert(pair<string, char>("vector<ObjId>", 'Y'));
         typemap.insert(pair<string, char>("vector<DataId", 'Z'));
         typemap.insert(pair<string, char>("void", '_'));
+        typemap.insert(pair<string, char>("vector< vector<unsigned int> >", 'P'));
+        typemap.insert(pair<string, char>("vector< vector<int> >", 'Q'));
+        typemap.insert(pair<string, char>("vector< vector<double> >", 'R'));
     }
     map<string, char>::iterator iter = typemap.find(name);
     if (iter == typemap.end()){
