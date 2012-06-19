@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Fri Jun  1 13:23:22 2012 (+0530)
+// Last-Updated: Tue Jun 19 17:41:22 2012 (+0530)
 //           By: subha
-//     Update #: 8551
+//     Update #: 8651
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -1561,6 +1561,41 @@ extern "C" {
                 memcpy(ptr, &(val[0]), val.size() * sizeof(TYPE));      \
                 return PyArray_Return(ret);                             \
         }                                                               \
+
+        
+#define GET_VECVEC(TYPE, TYPEC){                                        \
+                vector < vector <TYPE> > val = Field< vector < vector < TYPE > > >::get(self->oid_, string(field)); \
+                Py_ssize_t length1 = val.size();                        \
+                PyObject * ret = PyList_New(length1);                   \
+                ostringstream error;                                    \
+                error << "moose_ObjId_getattro: ";                      \
+                for (Py_ssize_t ii = 0; ii < length1; ++ii){            \
+                    Py_ssize_t length2 = val[ii].size();            \
+                    PyObject * subseq = PyList_New(length2);        \
+                    if ( PyList_SetItem(ret, ii, subseq) != 0 ){    \
+                        Py_DECREF(ret);                         \
+                        error << "Failed to set subsequence " << ii; \
+                        PyErr_SetString(PyExc_RuntimeError, error.str().c_str());\ 
+                    }                                                                   \
+                    for (Py_ssize_t jj = 0; jj < length2; ++jj){                        \
+                        PyObject * value = Py_BuildValue(#TYPEC, val[ii][jj]);          \
+                        if (value == NULL){                                             \
+                            Py_DECREF(ret);                                             \
+                            error << "failed to convert "                               \
+                                  << field << "[" << ii << "][" << jj << "]";           \
+                            PyErr_SetString(PyExc_RuntimeError, error.str().c_str());   \
+                            return NULL;                                                \
+                        }                                                               \
+                        if (PyList_SetItem(subseq, jj, value) != 0){                    \
+                            Py_DECREF(ret);                                             \
+                            error << "could not set item [" << ii << "][" << jj << "]"; \
+                            PyErr_SetString(PyExc_RuntimeError, error.str().c_str());   \
+                            return NULL;                                                \
+                        }                                                               \
+                    }                                                                   \
+                }                                                                       \
+            return ret;                                                             \
+        }
         
         string type = getFieldType(Field<string>::get(self->oid_, "class"), string(field), "valueFinfo");
         if (type.empty()){
@@ -1689,7 +1724,21 @@ extern "C" {
                     }
                     return ret;
                 }
-                
+            case 'P': // vector < vector < unsigned > >
+                {
+                    GET_VECVEC(unsigned int, I);
+                    break;
+                }
+            case 'Q': // vector < vector < int > >
+                {
+                    GET_VECVEC(int, i);                
+                    break;
+                }
+            case 'R': // vector < vector <double> >
+                {
+                    GET_VECVEC(double, d);
+                    break;
+                }
             default:
                     return PyObject_GenericGetAttr((PyObject*)self, attr);
         }
@@ -1738,8 +1787,8 @@ extern "C" {
             PyErr_SetString(PyExc_TypeError, "Attribute name must be a string");
             return -1;
         }
-        char ftype = shortType(getFieldType(Field<string>::get(self->oid_, "class"), string(field), "valueFinfo"));
-        if (!ftype){
+        string fieldtype = getFieldType(Field<string>::get(self->oid_, "class"), string(field), "valueFinfo");
+        if (fieldtype.length() == 0){
             // If it is instance of a MOOSE built-in class then throw
             // error (to avoid silently creating new attributes due to
             // typos). Otherwise, it must have been subclassed in
@@ -1754,6 +1803,7 @@ extern "C" {
             PyErr_SetString(PyExc_AttributeError, msg.str().c_str());
             return -1;
         }
+        char ftype = shortType(fieldtype);
         int ret = 0;
         switch(ftype){
             case 'b':
@@ -1972,7 +2022,33 @@ extern "C" {
                     }
                     break;
                 }
-                
+            case 'P': // vector< vector<unsigned int> >
+                {
+                    vector < vector <unsigned> > * _value = (vector < vector <unsigned> > *)to_cpp< vector < vector <unsigned> > >(value);
+                    if (!PyErr_Occurred()){
+                        ret = Field < vector < vector <unsigned> > >::set(self->oid_, string(field), *_value);
+                    }
+                    delete _value;
+                }
+                break;
+            case 'Q': // vector< vector<int> >
+                {
+                    vector < vector <int> > * _value = (vector < vector <int> > *)to_cpp< vector < vector <int> > >(value);
+                    if (!PyErr_Occurred()){
+                        ret = Field < vector < vector <int> > >::set(self->oid_, string(field), *_value);
+                    }
+                    delete _value;
+                }
+                break;
+            case 'R': // vector< vector<double> >
+            {
+                vector < vector <double> > * _value = (vector < vector <double> > *)to_cpp< vector < vector <double> > >(value);
+                    if (!PyErr_Occurred()){
+                        ret = Field < vector < vector <double> > >::set(self->oid_, string(field), *_value);
+                    }
+                    delete _value;
+                }
+                    break;
             default:                
                 break;
         }
@@ -2212,7 +2288,9 @@ extern "C" {
                 break;
             }
             default:
-                PyErr_SetString(PyExc_TypeError, "invalid key type");
+                ostringstream error;
+                error << "setLookupField: invalid key type " << type_vec[0];
+                PyErr_SetString(PyExc_TypeError, error.str().c_str());
         }
         return ret;        
     }// setLookupField
