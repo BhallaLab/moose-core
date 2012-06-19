@@ -242,8 +242,14 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
     
     def populateKKitPlots(self,path):
         graphs = self.getKKitGraphs(path)
+        #currently putting all plots on Plot Window 1 by default - perhaps not the nicest way to do it.
+        self.plotWindowFieldTableDict['Plot Window 1'] = graphs
+        plotWin = MoosePlotWindow(self)
+        plotWin.setWindowTitle('Plot Window 1')
         for graph in graphs:
-            print graph
+            plotWin.plot.addTable(graph,graph.getField('path'))
+        plotWin.show()
+        self.plotNameWinDict['Plot Window 1'] = plotWin
 
     def getKKitGraphs(self,path):
         tableList = []

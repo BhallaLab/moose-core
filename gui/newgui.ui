@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>799</width>
-    <height>764</height>
+    <height>798</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -60,7 +60,6 @@
     <addaction name="actionLoad_Model"/>
     <addaction name="actionNew_Plot"/>
     <addaction name="menuShell_Mode"/>
-    <addaction name="actionFirst_Time_Wizard"/>
     <addaction name="actionReset_Settings"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -192,7 +191,16 @@
     <addaction name="actionReport_a_Bug"/>
     <addaction name="actionRequest_a_Feature"/>
    </widget>
+   <widget class="QMenu" name="menuRun">
+    <property name="title">
+     <string>Run</string>
+    </property>
+    <addaction name="actionRun"/>
+    <addaction name="actionReset"/>
+    <addaction name="actionContinue"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuRun"/>
    <addaction name="menuEdit"/>
    <addaction name="menuView"/>
    <addaction name="menuClasses"/>
@@ -1148,6 +1156,24 @@
   <action name="actionAbout">
    <property name="text">
     <string>About</string>
+   </property>
+  </action>
+  <action name="actionRun">
+   <property name="text">
+    <string>Run</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionReset">
+   <property name="text">
+    <string>Reset</string>
+   </property>
+  </action>
+  <action name="actionContinue">
+   <property name="text">
+    <string>Continue</string>
    </property>
   </action>
   <zorder>moosePopulationEditDock</zorder>

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'newgui.ui'
 #
-# Created: Sun Jun 17 13:36:12 2012
+# Created: Tue Jun 19 21:26:26 2012
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,7 +17,7 @@ except AttributeError:
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(799, 764)
+        MainWindow.resize(799, 798)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.horizontalLayout_6 = QtGui.QHBoxLayout(self.centralwidget)
@@ -62,6 +62,8 @@ class Ui_MainWindow(object):
         self.menuEdit.setObjectName(_fromUtf8("menuEdit"))
         self.menuHelp = QtGui.QMenu(self.menubar)
         self.menuHelp.setObjectName(_fromUtf8("menuHelp"))
+        self.menuRun = QtGui.QMenu(self.menubar)
+        self.menuRun.setObjectName(_fromUtf8("menuRun"))
         MainWindow.setMenuBar(self.menubar)
         self.mooseObjectEditDock = QtGui.QDockWidget(MainWindow)
         self.mooseObjectEditDock.setObjectName(_fromUtf8("mooseObjectEditDock"))
@@ -457,12 +459,17 @@ class Ui_MainWindow(object):
         self.actionRequest_a_Feature.setObjectName(_fromUtf8("actionRequest_a_Feature"))
         self.actionAbout = QtGui.QAction(MainWindow)
         self.actionAbout.setObjectName(_fromUtf8("actionAbout"))
+        self.actionRun = QtGui.QAction(MainWindow)
+        self.actionRun.setObjectName(_fromUtf8("actionRun"))
+        self.actionReset = QtGui.QAction(MainWindow)
+        self.actionReset.setObjectName(_fromUtf8("actionReset"))
+        self.actionContinue = QtGui.QAction(MainWindow)
+        self.actionContinue.setObjectName(_fromUtf8("actionContinue"))
         self.menuShell_Mode.addAction(self.actionPython)
         self.menuShell_Mode.addAction(self.actionGenesis)
         self.menuFile.addAction(self.actionLoad_Model)
         self.menuFile.addAction(self.actionNew_Plot)
         self.menuFile.addAction(self.menuShell_Mode.menuAction())
-        self.menuFile.addAction(self.actionFirst_Time_Wizard)
         self.menuFile.addAction(self.actionReset_Settings)
         self.menuFile.addAction(self.actionQuit)
         self.menuBase.addAction(self.actionNeutral)
@@ -534,7 +541,11 @@ class Ui_MainWindow(object):
         self.menuHelp.addAction(self.actionDocumentation)
         self.menuHelp.addAction(self.actionReport_a_Bug)
         self.menuHelp.addAction(self.actionRequest_a_Feature)
+        self.menuRun.addAction(self.actionRun)
+        self.menuRun.addAction(self.actionReset)
+        self.menuRun.addAction(self.actionContinue)
         self.menubar.addAction(self.menuFile.menuAction())
+        self.menubar.addAction(self.menuRun.menuAction())
         self.menubar.addAction(self.menuEdit.menuAction())
         self.menubar.addAction(self.menuView.menuAction())
         self.menubar.addAction(self.menuClasses.menuAction())
@@ -557,6 +568,7 @@ class Ui_MainWindow(object):
         self.menuView.setTitle(QtGui.QApplication.translate("MainWindow", "View", None, QtGui.QApplication.UnicodeUTF8))
         self.menuEdit.setTitle(QtGui.QApplication.translate("MainWindow", "Edit", None, QtGui.QApplication.UnicodeUTF8))
         self.menuHelp.setTitle(QtGui.QApplication.translate("MainWindow", "Help", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuRun.setTitle(QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
         self.mooseObjectEditDock.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Property Editor", None, QtGui.QApplication.UnicodeUTF8))
         self.moosePopulationEditDock.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Population Editor", None, QtGui.QApplication.UnicodeUTF8))
         self.popFilterSelectLineEdit.setPlaceholderText(QtGui.QApplication.translate("MainWindow", "filter", None, QtGui.QApplication.UnicodeUTF8))
@@ -662,5 +674,9 @@ class Ui_MainWindow(object):
         self.actionReport_a_Bug.setText(QtGui.QApplication.translate("MainWindow", "Report a Bug", None, QtGui.QApplication.UnicodeUTF8))
         self.actionRequest_a_Feature.setText(QtGui.QApplication.translate("MainWindow", "Request a Feature", None, QtGui.QApplication.UnicodeUTF8))
         self.actionAbout.setText(QtGui.QApplication.translate("MainWindow", "About", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionRun.setText(QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionRun.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+R", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionReset.setText(QtGui.QApplication.translate("MainWindow", "Reset", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionContinue.setText(QtGui.QApplication.translate("MainWindow", "Continue", None, QtGui.QApplication.UnicodeUTF8))
 
 from objectedit import ObjectEditView
