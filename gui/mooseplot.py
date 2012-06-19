@@ -1,7 +1,9 @@
 import sys 
 from PyQt4 import QtGui, QtCore
 from PyQt4.Qt import Qt
+
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
@@ -133,6 +135,14 @@ class MoosePlotWindow(QtGui.QMainWindow):
         sizePolicy.setHeightForWidth(self.plot.sizePolicy().hasHeightForWidth())
         self.plot.setSizePolicy(sizePolicy)
         self.plot.setObjectName("plot")
+
+        qToolBar = QtGui.QToolBar()
+        self.toolbar = NavigationToolbar(self.plot, qToolBar)
+        qToolBar.addWidget(self.toolbar)
+        qToolBar.setMovable(False)
+        qToolBar.setFloatable(False)
+        self.addToolBar(Qt.BottomToolBarArea, qToolBar)
+
         self.verticalLayout.addWidget(self.plot)
         self.setCentralWidget(self.centralwidget)
         
