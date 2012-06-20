@@ -14,16 +14,13 @@ class ZombieBufPool: public ZombiePool
 {
 	public: 
 		ZombieBufPool();
+		~ZombieBufPool();
 
-		void setN( const Eref& e, const Qinfo* q, double v );
-		double getN( const Eref& e, const Qinfo* q ) const;
-		void setNinit( const Eref& e, const Qinfo* q, double v );
-		double getNinit( const Eref& e, const Qinfo* q ) const;
-
-		void setConc( const Eref& e, const Qinfo* q, double v );
-		double getConc( const Eref& e, const Qinfo* q ) const;
-		void setConcInit( const Eref& e, const Qinfo* q, double v );
-		double getConcInit( const Eref& e, const Qinfo* q ) const;
+		/// The 'get' functions are simply inherited from ZombiePool
+		void vSetN( const Eref& e, const Qinfo* q, double v );
+		void vSetNinit( const Eref& e, const Qinfo* q, double v );
+		void vSetConc( const Eref& e, const Qinfo* q, double v );
+		void vSetConcInit( const Eref& e, const Qinfo* q, double v );
 
 		static void zombify( Element* solver, Element* orig );
 		static void unzombify( Element* zombie );

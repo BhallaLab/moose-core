@@ -144,5 +144,5 @@ void testSimManager()
 	testBuildFromBareKineticTree();
 	testBuildFromKkitTree();
 	testMakeStandardElements();
-	testRemeshing();
+//	testRemeshing();
 }
