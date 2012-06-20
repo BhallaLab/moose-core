@@ -192,15 +192,20 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             self.makeObjectFieldEditor(self.propEditorCurrentSelection.getField('parent'))
 
     def propEditorSelectChild(self,item):
-        self.makeObjectFieldEditor(moose.Neutral(self.propEditorChildrenIdDict[str(item.text())]))
+        formattedText = str(item.text()).lstrip('    ')
+        self.makeObjectFieldEditor(moose.Neutral(self.propEditorChildrenIdDict[formattedText]))
         
     def propEditorChildren(self,obj):
         allChildren = obj.getField('children')
         self.propEditorChildrenIdDict = {}
         self.propEditorChildListWidget.clear()
+
+        self.propEditorChildListWidget.addItem(obj.getField('name'))
+        self.propEditorChildrenIdDict[obj.getField('name')] = obj.getId()
+
         for child in allChildren:
             self.propEditorChildrenIdDict[moose.Neutral(child).getField('name')] = child
-            self.propEditorChildListWidget.addItem(moose.Neutral(child).getField('name'))
+            self.propEditorChildListWidget.addItem('    '+moose.Neutral(child).getField('name'))
 
         #plot config dock related 
     def updatePlots(self,currentTime):
