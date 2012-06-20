@@ -138,7 +138,7 @@ class HHChannel2D: public ChanBase
 		 * the message source will be a CaConc object, but there
 		 * are other options for computing the conc.
 		 */
-		void conc( double conc );
+		void conc1( double conc );
 		void conc2( double conc );
 
 		double ( *takeXpower_ )( double, double );
@@ -187,7 +187,8 @@ class HHChannel2D: public ChanBase
 		static const Cinfo* initCinfo();
 		
 	private:
-		const double* dependency( string index, unsigned int dim );
+		int dependency( string index, unsigned int dim );
+		double depValue( int dependency );
 		double integrate( double state, double dt, double A, double B );
 
 		double Xpower_; /// Exponent for X gate
@@ -207,28 +208,19 @@ class HHChannel2D: public ChanBase
 
 		double g_;	/// Internal variable used to calculate conductance
 		
-		double conc_;
+		double conc1_;
 		double conc2_;
 		
 		string Xindex_;
 		string Yindex_;
 		string Zindex_;
 
-		const double* Xdep0_;
-		const double* Xdep1_;
-		const double* Ydep0_;
-		const double* Ydep1_;
-		const double* Zdep0_;
-		const double* Zdep1_;
-		
-		/*
 		int Xdep0_;
 		int Xdep1_;
 		int Ydep0_;
 		int Ydep1_;
 		int Zdep0_;
 		int Zdep1_;
-		*/
 
 		/**
 		 * HHGate2D data structure for the xGate. This is writable only
