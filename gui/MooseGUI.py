@@ -48,7 +48,11 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         #other variables
         self.currentTime = 0.0
 
-        #plot variables
+        #prop Editor variables
+        self.propEditorCurrentSelection = None
+        self.propEditorChildrenIdDict = {}
+
+        #plot config variables
         self.plotConfigCurrentSelection = None
         self.plotConfigAcceptPushButton.setEnabled(False)
         self.plotWindowFieldTableDict = {} #guiPlotWinowName:[mooseTable]
@@ -77,6 +81,9 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         #plotdock connections
         self.connect(self.plotConfigAcceptPushButton,QtCore.SIGNAL('pressed()'),self.addFieldToPlot)
         self.connect(self.plotConfigNewWindowPushButton,QtCore.SIGNAL('pressed()'),self.plotConfigAddNewPlotWindow)
+        #propEditor connections
+        self.connect(self.propEditorSelParentPushButton,QtCore.SIGNAL('pressed()'),self.propEditorSelectParent)
+        self.connect(self.propEditorChildListWidget,QtCore.SIGNAL('itemClicked(QListWidgetItem *)'),self.propEditorSelectChild)
         #internal connections
         self.connect(self.mooseHandler, QtCore.SIGNAL('updatePlots(float)'), self.updatePlots)
 
@@ -158,7 +165,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.layoutWidget.setLayout(layout)
         self.sceneLayout.show()
 
-        #objectEditor related
+        #property editor dock related
     def refreshObjectEditor(self,item,number):
         self.makeObjectFieldEditor(item.getMooseObject())
 
@@ -166,6 +173,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         if obj.class_ == 'Shell' or obj.class_ == 'PyMooseContext' or obj.class_ == 'GenesisParser':
             print '%s of class %s is a system object and not to be edited in object editor.' % (obj.path, obj.class_)
             return
+        self.propEditorCurrentSelection = obj
         try:
             self.objFieldEditModel = self.objFieldEditorMap[obj.getId()]
         except KeyError:
@@ -177,8 +185,24 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         if hasattr(self, 'sceneLayout'):
             self.connect(self.objFieldEditModel,QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'),self.sceneLayout.updateItemSlot)
         self.updatePlotDockFields(obj)
+        self.propEditorChildren(obj)
 
-        #plots related 
+    def propEditorSelectParent(self):
+        if self.propEditorCurrentSelection != None:
+            self.makeObjectFieldEditor(self.propEditorCurrentSelection.getField('parent'))
+
+    def propEditorSelectChild(self,item):
+        self.makeObjectFieldEditor(moose.Neutral(self.propEditorChildrenIdDict[str(item.text())]))
+        
+    def propEditorChildren(self,obj):
+        allChildren = obj.getField('children')
+        self.propEditorChildrenIdDict = {}
+        self.propEditorChildListWidget.clear()
+        for child in allChildren:
+            self.propEditorChildrenIdDict[moose.Neutral(child).getField('name')] = child
+            self.propEditorChildListWidget.addItem(moose.Neutral(child).getField('name'))
+
+        #plot config dock related 
     def updatePlots(self,currentTime):
         #updates plots every update_plot_dt time steps see moosehandler.
         for plotWinName,plot in self.plotWinNamePlotDict.iteritems():
