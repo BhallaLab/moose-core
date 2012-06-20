@@ -19,7 +19,9 @@ def loadGran98NeuroML_L123(filename):
         neuromlR.readNeuroMLFromFile(filename)
     soma_path = populationDict['Gran'][1][0].path+'/Soma_0'
     somaVm = setupTable('somaVm',moose.Compartment(soma_path),'VmOut')
+    print "Reinit MOOSE ... "
     resetSim(['/elec','/cells'],50e-6,50e-6) # from moose.utils
+    print "Running ... "
     moose.start(1.0)
     plot(somaVm.vec)
     print "Showing",soma_path,"Vm"
