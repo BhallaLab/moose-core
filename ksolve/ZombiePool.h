@@ -10,7 +10,7 @@
 #ifndef _ZOMBIE_POOL_H
 #define _ZOMBIE_POOL_H
 
-class ZombiePool: public Stoich
+class ZombiePool: public PoolBase
 {
 	public: 
 		ZombiePool();
@@ -20,36 +20,36 @@ class ZombiePool: public Stoich
 		// Field assignment stuff
 		//////////////////////////////////////////////////////////////////
 
-		void setN( const Eref& e, const Qinfo* q, double v );
-		double getN( const Eref& e, const Qinfo* q ) const;
-		void setNinit( const Eref& e, const Qinfo* q, double v );
-		double getNinit( const Eref& e, const Qinfo* q ) const;
-		void setDiffConst( const Eref& e, const Qinfo* q, double v );
-		double getDiffConst( const Eref& e, const Qinfo* q ) const;
+		void vSetN( const Eref& e, const Qinfo* q, double v );
+		double vGetN( const Eref& e, const Qinfo* q ) const;
+		void vSetNinit( const Eref& e, const Qinfo* q, double v );
+		double vGetNinit( const Eref& e, const Qinfo* q ) const;
+		void vSetDiffConst( const Eref& e, const Qinfo* q, double v );
+		double vGetDiffConst( const Eref& e, const Qinfo* q ) const;
 
-		void setConc( const Eref& e, const Qinfo* q, double v );
-		double getConc( const Eref& e, const Qinfo* q ) const;
-		void setConcInit( const Eref& e, const Qinfo* q, double v );
-		double getConcInit( const Eref& e, const Qinfo* q ) const;
+		void vSetConc( const Eref& e, const Qinfo* q, double v );
+		double vGetConc( const Eref& e, const Qinfo* q ) const;
+		void vSetConcInit( const Eref& e, const Qinfo* q, double v );
+		double vGetConcInit( const Eref& e, const Qinfo* q ) const;
 
-		void setSize( const Eref& e, const Qinfo* q, double v );
-		double getSize( const Eref& e, const Qinfo* q ) const;
+		void vSetSize( const Eref& e, const Qinfo* q, double v );
+		double vGetSize( const Eref& e, const Qinfo* q ) const;
 
-		void setSpecies( const Eref& e, const Qinfo* q, unsigned int v );
-		unsigned int getSpecies( const Eref& e, const Qinfo* q ) const;
-
-		void remesh( const Eref& e, const Qinfo* q, 
-			unsigned int numTotalEntries, unsigned int startEntry, 
-			vector< unsigned int > localIndices, vector< double > vols );
+		void vSetSpecies( const Eref& e, const Qinfo* q, unsigned int v );
+		unsigned int vGetSpecies( const Eref& e, const Qinfo* q ) const;
 
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
 
-		void process( const Eref& e, ProcPtr p );
-		void reinit( const Eref& e, ProcPtr p );
-		void reac( double A, double B );
-		void handleMolWt( const Eref& e, const Qinfo* q, double v );
+		// void vProcess( const Eref& e, ProcPtr p );
+		// void vReinit( const Eref& e, ProcPtr p );
+		// void vReac( double A, double B );
+		// void vHandleMolWt( const Eref& e, const Qinfo* q, double v );
+		void vRemesh( const Eref& e, const Qinfo* q, 
+			unsigned int numTotalEntries, unsigned int startEntry, 
+			const vector< unsigned int >& localIndices, 
+			const vector< double >& vols );
 
 		//////////////////////////////////////////////////////////////////
 		// utility funcs
@@ -58,7 +58,8 @@ class ZombiePool: public Stoich
 		static void unzombify( Element* zombie );
 
 		static const Cinfo* initCinfo();
-	private:
+	protected:
+		Stoich* stoich_;
 };
 
 #endif	// _ZOMBIE_POOL_H

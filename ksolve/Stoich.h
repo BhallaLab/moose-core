@@ -111,6 +111,11 @@ class Stoich
 		void installEnzyme( ZeroOrder* r1, ZeroOrder* r2, ZeroOrder* r3,
 			Id enzId, Id enzMolId, const vector< Id >& prds );
 
+		/**
+		 * Returns the total number of entries in the mesh. This is the
+		 * allocated size of the S_ matrix.
+		 */
+		unsigned int numMeshEntries() const;
 
 		/**
 		 * Returns the vector of doubles of current mol #s at the specified
@@ -129,6 +134,32 @@ class Stoich
 		 * mesh index
 		 */
 		const double* Sinit( unsigned int meshIndex ) const;
+
+		/**
+		 * Returns diffusion rate of specified pool
+		 */
+		double getDiffConst( unsigned int poolIndex ) const;
+
+		/**
+		 * Assigns diffusion rate of specified pool
+		 */
+		void setDiffConst( unsigned int poolIndex, double d );
+
+		/**
+		 * Returns SpeciesId of specified pool
+		 */
+		SpeciesId getSpecies( unsigned int poolIndex ) const;
+
+		/**
+		 * Assigns SpeciesId of specified pool
+		 */
+		void setSpecies( unsigned int poolIndex, SpeciesId s );
+
+		/**
+		 * Recalculates concentrations when remeshing happens and vols of
+		 * each voxel need updating.
+		 */
+		void updateMeshVols( const vector< double >& vols );
 
 		/**
 		 * Returns working memory for the calculations at the specified
