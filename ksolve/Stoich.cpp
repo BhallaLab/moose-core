@@ -969,6 +969,12 @@ void Stoich::updateDynamicBuffers()
 		S_[ *i ] = Sinit_[ *i ];
 }
  */
+
+unsigned int Stoich::numMeshEntries() const
+{
+	return concInit_.size();
+}
+
 const double* Stoich::S( unsigned int meshIndex ) const
 {
 	return &S_[meshIndex][0];
@@ -984,6 +990,33 @@ const double* Stoich::Sinit( unsigned int meshIndex ) const
 	return &Sinit_[meshIndex][0];
 }
 
+double Stoich::getDiffConst( unsigned int p ) const
+{
+	assert( p < diffConst_.size() );
+	return diffConst_[p];
+}
+
+void Stoich::setDiffConst( unsigned int p, double d )
+{
+	assert( p < diffConst_.size() );
+	if ( d < 0 ) {
+		cout << "Warning: Stoich::setDiffConst: D[" << p << 
+			"] cannot be -ve: " << d << endl;
+		return;
+	}
+	diffConst_[p] = d;
+}
+
+SpeciesId Stoich::getSpecies( unsigned int poolIndex ) const
+{
+	return species_[ poolIndex ];
+}
+
+void Stoich::setSpecies( unsigned int poolIndex, SpeciesId s )
+{
+	species_[ poolIndex ] = s;
+}
+
 double* Stoich::getY( unsigned int meshIndex )
 {
 	return &y_[meshIndex][0];
@@ -992,6 +1025,23 @@ double* Stoich::getY( unsigned int meshIndex )
 void Stoich::print() const
 {
 	N_.print();
+}
+
+void Stoich::updateMeshVols( const vector< double >& vols )
+{
+	if ( S_.size() != vols.size() ) {
+		cout << "Warning: Stoich::updateMeshVols: "
+		"Stoich mesh size does not match: (" <<
+		S_.size() << ", " << vols.size() << ")\n";
+		return;
+	}
+	for ( unsigned int i = 0; i < vols.size(); ++i ) {
+		for ( unsigned int poolIndex = 0; poolIndex < concInit_.size(); 
+			++poolIndex ) {
+			S_[i][poolIndex] = Sinit_[i][poolIndex] = 
+				concInit_[poolIndex] * vols[i] * NA;
+		}
+	}
 }
 
 #ifdef USE_GSL

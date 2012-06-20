@@ -246,7 +246,7 @@ void PoolBase::vReac( double A, double B )
 void PoolBase::vHandleMolWt( const Eref& e, const Qinfo* q, double v )
 {;}
 
-// void PoolBase::remesh(...) is a pure virtual
+// void PoolBase::vRemesh(...) is a pure virtual
 
 //////////////////////////////////////////////////////////////
 // Field Definitions

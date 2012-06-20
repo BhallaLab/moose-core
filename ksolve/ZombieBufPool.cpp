@@ -19,48 +19,14 @@
 const Cinfo* ZombieBufPool::initCinfo()
 {
 		//////////////////////////////////////////////////////////////
-		// Field Definitions
+		// Field Definitions: use virtual functions to deal with, the
+		// moose definitions are inherited.
 		//////////////////////////////////////////////////////////////
-		static ElementValueFinfo< ZombieBufPool, double > n(
-			"n",
-			"Number of molecules in pool",
-			&ZombieBufPool::setN,
-			&ZombieBufPool::getN
-		);
-
-		static ElementValueFinfo< ZombieBufPool, double > nInit(
-			"nInit",
-			"Initial value of number of molecules in pool",
-			&ZombieBufPool::setNinit,
-			&ZombieBufPool::getNinit
-		);
-
-		static ElementValueFinfo< ZombieBufPool, double > conc(
-			"conc",
-			"Concentration of molecules in pool",
-			&ZombieBufPool::setConc,
-			&ZombieBufPool::getConc
-		);
-
-		static ElementValueFinfo< ZombieBufPool, double > concInit(
-			"concInit",
-			"Initial value of molecular concentration in pool",
-			&ZombieBufPool::setConcInit,
-			&ZombieBufPool::getConcInit
-		);
-
-	static Finfo* zombieBufPoolFinfos[] = {
-		&n,				// Value
-		&nInit,			// Value
-		&conc,			// Value
-		&concInit,		// Value
-	};
-
 	static Cinfo zombieBufPoolCinfo (
 		"ZombieBufPool",
 		ZombiePool::initCinfo(),
-		zombieBufPoolFinfos,
-		sizeof( zombieBufPoolFinfos ) / sizeof ( Finfo* ),
+		0,
+		0,
 		new Dinfo< ZombieBufPool >()
 	);
 
@@ -72,87 +38,42 @@ const Cinfo* ZombieBufPool::initCinfo()
 //////////////////////////////////////////////////////////////
 static const Cinfo* zombieBufPoolCinfo = ZombieBufPool::initCinfo();
 
+static const SrcFinfo1< double >* requestSize =
+	dynamic_cast< const SrcFinfo1< double >* >(
+	zombieBufPoolCinfo->findFinfo( "requestSize" ) );
+
+
 ZombieBufPool::ZombieBufPool()
 {;}
 
+ZombieBufPool::~ZombieBufPool()
+{;}
 
 //////////////////////////////////////////////////////////////
 // Field functions
 //////////////////////////////////////////////////////////////
 
-void ZombieBufPool::setN( const Eref& e, const Qinfo* q, double v )
+void ZombieBufPool::vSetN( const Eref& e, const Qinfo* q, double v )
 {
-	this->innerSetN( e.index().value(), e.id(), v );
-	this->innerSetNinit( e.index().value(), e.id(), v );
-
-	/*
-	unsigned int i = convertIdToPoolIndex( e.id() );
-	S_[ e.index().value() ][ i ] = v;
-	Sinit_[ e.index().value() ][ i ] = v;
-	*/
+	stoich_->innerSetN( e.index().value(), e.id(), v );
+	stoich_->innerSetNinit( e.index().value(), e.id(), v );
 }
 
-double ZombieBufPool::getN( const Eref& e, const Qinfo* q ) const
+void ZombieBufPool::vSetNinit( const Eref& e, const Qinfo* q, double v )
 {
-	return S_[ e.index().value() ][ convertIdToPoolIndex( e.id() ) ];
+	vSetN( e, q, v );
 }
 
-void ZombieBufPool::setNinit( const Eref& e, const Qinfo* q, double v )
+void ZombieBufPool::vSetConc( const Eref& e, const Qinfo* q, double conc )
 {
-	setN( e, q, v );
-}
-
-double ZombieBufPool::getNinit( const Eref& e, const Qinfo* q ) const
-{
-	return Sinit_[ e.index().value() ][ convertIdToPoolIndex( e.id() ) ];
-}
-
-void ZombieBufPool::setConc( const Eref& e, const Qinfo* q, double conc )
-{
-	static const Finfo* req = 
-		ZombiePool::initCinfo()->findFinfo( "requestSize" );
-	static const SrcFinfo1< double >* requestSize = dynamic_cast< 
-		const SrcFinfo1< double >* >( req );
-	assert( requestSize );
-
 	double n = NA * conc * lookupSizeFromMesh( e, requestSize );
-	setN( e, q, n );
-	/*
-	unsigned int pool = convertIdToPoolIndex( e.id() );
-	S_[ e.index().value() ][ pool ] = n;
-	Sinit_[ e.index().value() ][ pool ] = n;
-	*/
+	vSetN( e, q, n );
 }
 
-double ZombieBufPool::getConc( const Eref& e, const Qinfo* q ) const
+void ZombieBufPool::vSetConcInit( const Eref& e, const Qinfo* q, double conc )
 {
-	static const Finfo* req = 
-		ZombiePool::initCinfo()->findFinfo( "requestSize" );
-	static const SrcFinfo1< double >* requestSize = dynamic_cast< 
-		const SrcFinfo1< double >* >( req );
-	assert( requestSize );
-
-	unsigned int pool = convertIdToPoolIndex( e.id() );
-	return S_[ e.index().value() ][ pool ] / ( NA * lookupSizeFromMesh( e, requestSize ) );
+	vSetConc( e, q, conc );
 }
-
-void ZombieBufPool::setConcInit( const Eref& e, const Qinfo* q, double conc )
-{
-	setConc( e, q, conc );
-}
-
-double ZombieBufPool::getConcInit( const Eref& e, const Qinfo* q ) const
-{
-	static const Finfo* req = 
-		ZombiePool::initCinfo()->findFinfo( "requestSize" );
-	static const SrcFinfo1< double >* requestSize = dynamic_cast< 
-		const SrcFinfo1< double >* >( req );
-	assert( requestSize );
-
-	unsigned int pool = convertIdToPoolIndex( e.id() );
-	return Sinit_[ e.index().value() ][ pool ] / ( NA * lookupSizeFromMesh( e, requestSize ) );
-}
-
 
 //////////////////////////////////////////////////////////////
 // Zombie conversion functions.
@@ -161,25 +82,18 @@ double ZombieBufPool::getConcInit( const Eref& e, const Qinfo* q ) const
 // static func
 void ZombieBufPool::zombify( Element* solver, Element* orig )
 {
-	Element temp( orig->id(), zombieBufPoolCinfo, solver->dataHandler() );
+	DataHandler* dh = orig->dataHandler()->copyUsingNewDinfo(
+		ZombieBufPool::initCinfo()->dinfo() );
+	Element temp( orig->id(), zombieBufPoolCinfo, dh );
 	Eref zer( &temp, 0 );
 	Eref oer( orig, 0 );
-	unsigned int numEntries = orig->dataHandler()->localEntries();
 
 	ZombieBufPool* z = reinterpret_cast< ZombieBufPool* >( zer.data() );
 	PoolBase* m = reinterpret_cast< PoolBase* >( oer.data() );
 
-	unsigned int poolIndex = z->convertIdToPoolIndex( orig->id() );
-	z->concInit_[ poolIndex ] = m->getConcInit( oer, 0 );
-	z->setN( zer, 0, m->getN( oer, 0 ) );
-	z->setNinit( zer, 0, m->getNinit( oer, 0 ) );
-	z->setDiffConst( zer, 0, m->getDiffConst( oer, 0 ) );
-	/*
-	DataHandler* dh = new DataHandlerWrapper( solver->dataHandler(),
-		orig->dataHandler() );
-	*/
-	DataHandler* dh = new ZombieHandler( solver->dataHandler(),
-		orig->dataHandler(), 0, numEntries );
+	z->stoich_ = reinterpret_cast< Stoich* >( solver->dataHandler()->data( 0 ) );
+	z->vSetNinit( zer, 0, m->getNinit( oer, 0 ) );
+	z->vSetDiffConst( zer, 0, m->getDiffConst( oer, 0 ) );
 	orig->zombieSwap( zombieBufPoolCinfo, dh );
 }
 
@@ -200,6 +114,6 @@ void ZombieBufPool::unzombify( Element* zombie )
 
 	BufPool* m = reinterpret_cast< BufPool* >( oer.data() );
 
-	m->setN( oer, 0, z->getN( zer, 0 ) );
-	m->setNinit( oer, 0, z->getNinit( zer, 0 ) );
+	m->setN( oer, 0, z->vGetN( zer, 0 ) );
+	m->setNinit( oer, 0, z->vGetNinit( zer, 0 ) );
 }
