@@ -347,7 +347,9 @@ def resetSim(simpaths, simdt, plotdt):
         moose__.useClock(0, simpath+'/##[TYPE=DiffAmp]', 'process')
         moose__.useClock(1, simpath+'/##[TYPE=Compartment]', 'process')
         moose__.useClock(2, simpath+'/##[TYPE=HHChannel]', 'process')
+        moose__.useClock(2, simpath+'/##[TYPE=HHGate]', 'process')
         moose__.useClock(2, simpath+'/##[TYPE=HHChannel2D]', 'process')
+        moose__.useClock(2, simpath+'/##[TYPE=HHGate2D]', 'process')
         moose__.useClock(2, simpath+'/##[TYPE=CaConc]', 'process')
         moose__.useClock(PLOTCLOCK, simpath+'/##[TYPE=Table]', 'process')
     moose__.reinit()
@@ -577,8 +579,8 @@ def connect_CaConc(compartment_list):
                         if child.class_=='Mstring' and child.name=='ionDependency':
                             child = moose__.Mstring(child)
                             if child.value in ['Ca','ca']:
-                                moose__.connect(caconc,'concSrc',channel,'concen')
-                                print 'Connected concSrc of',caconc.path,'to concen of',channel.path
+                                moose__.connect(caconc,'concOut',channel,'concen')
+                                print 'Connected concOut of',caconc.path,'to concen of',channel.path
 
 ############# added by Aditya Gilra -- end ################
 
