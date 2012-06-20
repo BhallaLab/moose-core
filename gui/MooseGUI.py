@@ -238,7 +238,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             plotWin = self.plotNameWinDict[str(self.plotConfigWinSelectionComboBox.currentText())] 
             
             #do not like the legends shown in the plots, change the field 2 below
-            plotWin.plot.addTable(newTable,newTable.getField('path'))
+            plotWin.plot.addTable(newTable,newTable.getField('name'))
 
         else:
             #no previous mooseplotwin - so create, and add table to corresp dict
@@ -247,7 +247,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             plotWin.setWindowTitle(str(self.plotConfigWinSelectionComboBox.currentText()))
 
             #do not like the legends shown in the plots, change the field 2 below
-            plotWin.plot.addTable(newTable,newTable.getField('path'))
+            plotWin.plot.addTable(newTable,newTable.getField('name'))
             plotWin.show()
             self.plotNameWinDict[str(self.plotConfigWinSelectionComboBox.currentText())] = plotWin
 
@@ -271,7 +271,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         plotWin = MoosePlotWindow(self)
         plotWin.setWindowTitle('Plot Window 1')
         for graph in graphs:
-            plotWin.plot.addTable(graph,graph.getField('path'))
+            plotWin.plot.addTable(graph,graph.getField('name'))
         plotWin.show()
         self.plotNameWinDict['Plot Window 1'] = plotWin
 
