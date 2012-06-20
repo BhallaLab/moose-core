@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'newgui.ui'
 #
-# Created: Wed Jun 20 14:40:08 2012
+# Created: Wed Jun 20 14:57:18 2012
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -103,7 +103,7 @@ class Ui_MainWindow(object):
         self.propEditorChildListWidget.setSizePolicy(sizePolicy)
         self.propEditorChildListWidget.setMaximumSize(QtCore.QSize(16777215, 75))
         self.propEditorChildListWidget.setEditTriggers(QtGui.QAbstractItemView.DoubleClicked|QtGui.QAbstractItemView.EditKeyPressed|QtGui.QAbstractItemView.SelectedClicked)
-        self.propEditorChildListWidget.setAlternatingRowColors(True)
+        self.propEditorChildListWidget.setAlternatingRowColors(False)
         self.propEditorChildListWidget.setObjectName(_fromUtf8("propEditorChildListWidget"))
         self.verticalLayout_2.addWidget(self.propEditorChildListWidget)
         spacerItem1 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
