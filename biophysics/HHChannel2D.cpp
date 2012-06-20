@@ -110,7 +110,7 @@ const Cinfo* HHChannel2D::initCinfo()
 	static DestFinfo concen( "concen",
 		"Incoming message from Concen object to specific conc to use"
 		"as the first concen variable",
-		new OpFunc1< HHChannel2D, double >( &HHChannel2D::conc )
+		new OpFunc1< HHChannel2D, double >( &HHChannel2D::conc1 )
 	);
 	static DestFinfo concen2( "concen2",
 		"Incoming message from Concen object to specific conc to use"
@@ -194,11 +194,14 @@ HHChannel2D::HHChannel2D()
 		Xpower_( 0.0 ),
 		Ypower_( 0.0 ),
 		Zpower_( 0.0 ),
-		conc_(0.0),
+		conc1_(0.0),
 		conc2_(0.0),
-		Xdep0_( 0 ),
-		Ydep0_( 0 ),
-		Zdep0_( 0 ),
+		Xdep0_( -1 ),
+		Xdep1_( -1 ),
+		Ydep0_( -1 ),
+		Ydep1_( -1 ),
+		Zdep0_( -1 ),
+		Zdep1_( -1 ),
         xGate_( 0 ),
         yGate_( 0 ),
         zGate_( 0 )
@@ -357,9 +360,19 @@ unsigned int  HHChannel2D::getNumZgates() const
 	return ( zGate_ != 0 );
 }
 
-const double* HHChannel2D::dependency( string index, unsigned int dim )
+double HHChannel2D::depValue( int dep )
 {
-	static const double dummy = 0.0;
+	switch( dep )
+	{
+		case 0: return Vm_;
+		case 1: return conc1_;
+		case 2: return conc2_;
+		default: assert( 0 ); return 0.0;
+	}
+}
+
+int HHChannel2D::dependency( string index, unsigned int dim )
+{
 	static vector< map< string, int > > dep;
 	if ( dep.empty() ) {
 		dep.resize( 2 );
@@ -382,25 +395,25 @@ const double* HHChannel2D::dependency( string index, unsigned int dim )
 	}
 	
 	if ( dep[ dim ].find( index ) == dep[ dim ].end() )
-		return &dummy;
+		return -1;
 	
 	if ( dep[ dim ][ index ] == 0 )
-		return &Vm_;
+		return 0;
 	if ( dep[ dim ][ index ] == 1 )
-		return &conc_;
+		return 1;
 	if ( dep[ dim ][ index ] == 2 )
-		return &conc2_;
+		return 2;
 
-	return &dummy;
+	return -1;
 }
 
 ///////////////////////////////////////////////////
 // Dest function definitions
 ///////////////////////////////////////////////////
 
-void HHChannel2D::conc( double conc )
+void HHChannel2D::conc1( double conc )
 {
-	conc_ = conc;
+	conc1_ = conc;
 }
 
 void HHChannel2D::conc2( double conc )
@@ -431,7 +444,7 @@ void HHChannel2D::process( const Eref& e, ProcPtr info )
 	double A = 0;
 	double B = 0;
 	if ( Xpower_ > 0 ) {
-		xGate_->lookupBoth( *Xdep0_, *Xdep1_, &A, &B );
+		xGate_->lookupBoth( depValue( Xdep0_ ), depValue( Xdep1_ ), &A, &B );
 		if ( instant_ & INSTANT_X )
 			X_ = A/B;
 		else 
@@ -440,7 +453,7 @@ void HHChannel2D::process( const Eref& e, ProcPtr info )
 	}
 
 	if ( Ypower_ > 0 ) {
-		yGate_->lookupBoth( *Ydep0_, *Ydep1_, &A, &B );
+		yGate_->lookupBoth( depValue( Ydep0_ ), depValue( Ydep1_ ), &A, &B );
 		if ( instant_ & INSTANT_Y )
 			Y_ = A/B;
 		else 
@@ -450,7 +463,7 @@ void HHChannel2D::process( const Eref& e, ProcPtr info )
 	}
 
 	if ( Zpower_ > 0 ) {
-			zGate_->lookupBoth( *Zdep0_, *Zdep1_, &A, &B );
+			zGate_->lookupBoth( depValue( Zdep0_ ), depValue( Zdep1_ ), &A, &B );
 		if ( instant_ & INSTANT_Z )
 			Z_ = A/B;
 		else 
@@ -492,7 +505,7 @@ void HHChannel2D::reinit( const Eref& er, ProcPtr info )
 	double A = 0.0;
 	double B = 0.0;
 	if ( Xpower_ > 0 ) {
-		xGate_->lookupBoth( *Xdep0_, *Xdep1_, &A, &B );
+		xGate_->lookupBoth( depValue( Xdep0_ ), depValue( Xdep1_ ), &A, &B );
 		if ( B < EPSILON ) {
 			cout << "Warning: B_ value for " << e->getName() <<
 					" is ~0. Check X table\n";
@@ -504,7 +517,7 @@ void HHChannel2D::reinit( const Eref& er, ProcPtr info )
 	}
 
 	if ( Ypower_ > 0 ) {
-		yGate_->lookupBoth( *Ydep0_, *Ydep1_, &A, &B );
+		yGate_->lookupBoth( depValue( Ydep0_ ), depValue( Ydep1_ ), &A, &B );
 		if ( B < EPSILON ) {
 			cout << "Warning: B value for " << e->getName() <<
 					" is ~0. Check Y table\n";
@@ -516,7 +529,7 @@ void HHChannel2D::reinit( const Eref& er, ProcPtr info )
 	}
 
 	if ( Zpower_ > 0 ) {
-		zGate_->lookupBoth( *Zdep0_, *Zdep1_, &A, &B );
+		zGate_->lookupBoth( depValue( Zdep0_ ), depValue( Zdep1_ ), &A, &B );
 		if ( B < EPSILON ) {
 			cout << "Warning: B value for " << e->getName() <<
 					" is ~0. Check Z table\n";
