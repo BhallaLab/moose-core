@@ -85,12 +85,10 @@ class ChannelML():
         print "loading channel :", channel_name,"into /library ."
         IVrelation = channelElement.find('./{'+self.cml+'}current_voltage_relation')
         concdep = IVrelation.find('./{'+self.cml+'}conc_dependence')
-        #~ if concdep is None:
-            #~ moosechannel = moose.HHChannel('/library/'+channel_name)
-        #~ else:
-            #~ moosechannel = moose.HHChannel2D('/library/'+channel_name)
-        # Building HHChannel even for concentration dependent channels.
-        moosechannel = moose.HHChannel('/library/'+channel_name)
+        if concdep is None:
+            moosechannel = moose.HHChannel('/library/'+channel_name)
+        else:
+            moosechannel = moose.HHChannel2D('/library/'+channel_name)
         
         if IVrelation.attrib['cond_law']=="ohmic":
             moosechannel.Gbar = float(IVrelation.attrib['default_gmax']) * Gfactor
@@ -144,28 +142,35 @@ class ChannelML():
                         break
                 else:
                     self.setQ10(q10settings)
-            
-            # Setting power first. This is necessary because it also
-            # initializes the gate's internal data structures as a side
-            # effect. Alternatively, gates can be initialized explicitly
-            # by calling HHChannel.createGate().
+
+            ############### HHChannel2D crashing on setting Xpower!
+            #### temperamental! If you print something before, it gives cannot creategate from copied channel, else crashes
+            ## Setting power first. This is necessary because it also
+            ## initializes the gate's internal data structures as a side
+            ## effect. Alternatively, gates can be initialized explicitly
+            ## by calling HHChannel.createGate().
             gate_power = float( gate.get( 'instances' ) )
             if num == 0:
                 moosechannel.Xpower = gate_power
+                if concdep is not None: moosechannel.Xindex = "VOLT_C1_INDEX"
             elif num == 1:
                 moosechannel.Ypower = gate_power
+                if concdep is not None: moosechannel.Yindex = "VOLT_C1_INDEX"
             elif num == 2:
                 moosechannel.Zpower = gate_power
+                if concdep is not None: moosechannel.Zindex = "VOLT_C1_INDEX"
             
-            # Getting handle to gate using the gate's path.
+            ## Getting handle to gate using the gate's path.
             gate_path = moosechannel.path + '/' + gate_full_name[ num ]
-            moosegate = moose.HHGate( gate_path )
-            
-            ## set SI values inside MOOSE
-            moosegate.min = VMIN_here*Vfactor
-            moosegate.max = VMAX_here*Vfactor
-            moosegate.divs = NDIVS_here
-            
+            if concdep is None:
+                moosegate = moose.HHGate( gate_path )
+                ## set SI values inside MOOSE
+                moosegate.min = VMIN_here*Vfactor
+                moosegate.max = VMAX_here*Vfactor
+                moosegate.divs = NDIVS_here
+            else:
+                moosegate = moose.HHGate2D( gate_path )
+                        
             for transition in gate.findall('./{'+self.cml+'}transition'):
                 ## make python functions with names of transitions...
                 fn_name = transition.attrib['name']
@@ -211,58 +216,62 @@ class ChannelML():
                     ## convert to SI before writing to table
                     tableA[i] = inf/tau / Tfactor
                     tableB[i] = 1.0/tau / Tfactor
+                
                 moosegate.tableA = tableA
                 moosegate.tableB = tableB
             
             ## Ca dependent channel
             else:
-                ## HHGate2D is not wrapped properly in pyMOOSE.
-                ## ymin, ymax and ydivs are not exposed.
-                ## Setting them creates new and useless attributes within python HHGate2D without warning!
-                ## Hence use runG to set these via Genesis command
                 ## UNITS: while calculating, use the units used in xml defn,
                 ##        while filling in table, I convert to SI units.
-                #~ self.context.runG("setfield "+moosegate.path+"/A"+\
-                    #~ #" ydivs "+str(CaNDIVS)+\ # these get overridden by the number of values in the table
-                    #~ " ymin "+str(float(concdep.attrib['min_conc'])*concfactor)+\
-                    #~ " ymax "+str(float(concdep.attrib['max_conc'])*concfactor))
-                #~ self.context.runG("setfield "+moosegate.path+"/B"+\
-                    #~ #" ydivs "+str(CaNDIVS)+\ # these get overridden by the number of values in the table
-                    #~ " ymin "+str(float(concdep.attrib['min_conc'])*concfactor)+\
-                    #~ " ymax "+str(float(concdep.attrib['max_conc'])*concfactor))
-                ## for Ca dep channel, I expect only generic alpha and beta functions
-                ## these have already been made above
-                ftableA = open("CaDepA.dat","w")
-                ftableB = open("CaDepB.dat","w")
                 v = VMIN_here - vNegOffset
                 CaMIN = float(concdep.attrib['min_conc'])
                 CaMAX = float(concdep.attrib['max_conc'])
                 CaNDIVS = 100
                 dCa = (CaMAX-CaMIN)/CaNDIVS
+                tableA = [[0.0]*(CaNDIVS+1)]*(NDIVS_here+1)
+                tableB = [[0.0]*(CaNDIVS+1)]*(NDIVS_here+1)
                 for i in range(NDIVS_here+1):
                     Ca = CaMIN
                     for j in range(CaNDIVS+1):
-                        ## convert to SI before writing to table
+                        ## convert to SI (Tfactor) before writing to table
                         ## in non-Ca channels, I put in q10factor into tau,
                         ## which percolated to A and B
                         ## Here, I do not calculate tau, so put q10factor directly into A and B.
                         alpha = self.alpha(v,Ca)*self.q10factor/Tfactor
-                        ftableA.write(str(alpha)+" ")
-                        ftableB.write(str(alpha+self.beta(v,Ca)*self.q10factor/Tfactor)+" ")
+                        tableA[i][j] = alpha
+                        tableB[i][j] = alpha+self.beta(v,Ca)*self.q10factor/Tfactor
                         Ca += dCa
-                    ftableA.write("\n")
-                    ftableB.write("\n")
                     v += dv_here
-                ftableA.close()
-                ftableB.close()
 
-                ### PRESENTLY, Interpol2D.cpp in MOOSE only allows loading via a data file,
-                ### one cannot set individual entries A[0][0] etc.
-                ### Thus pyMOOSE also has not wrapped Interpol2D
-                #~ self.context.runG("call "+moosegate.path+"/A load CaDepA.dat 0")
-                #~ self.context.runG("call "+moosegate.path+"/B load CaDepB.dat 0")
-                os.remove('CaDepA.dat')
-                os.remove('CaDepB.dat')
+                ## Presently HHGate2D doesn't allow the setting of tables as 2D vectors directly
+                #moosegate.tableA = tableA
+                #moosegate.tableB = tableB
+
+                ## Instead, I wrap the interpol2D objects inside HHGate2D and set the tables
+                moosegate_tableA = moose.Interpol2D(moosegate.path+'/tableA')
+                ## set SI values inside MOOSE
+                moosegate_tableA.xmin = VMIN_here*Vfactor
+                moosegate_tableA.xmax = VMAX_here*Vfactor
+                moosegate_tableA.xdivs = NDIVS_here
+                moosegate_tableA.dx = dv_here*Vfactor
+                moosegate_tableA.ymin = CaMIN*concfactor
+                moosegate_tableA.ymax = CaMAX*concfactor
+                moosegate_tableA.ydivs = CaNDIVS
+                moosegate_tableA.dy = dCa*concfactor
+                moosegate_tableA.tableVector2D = tableA
+
+                moosegate_tableB = moose.Interpol2D(moosegate.path+'/tableB')
+                ## set SI values inside MOOSE
+                moosegate_tableB.xmin = VMIN_here*Vfactor
+                moosegate_tableB.xmax = VMAX_here*Vfactor
+                moosegate_tableB.xdivs = NDIVS_here
+                moosegate_tableB.dx = dv_here*Vfactor
+                moosegate_tableB.ymin = CaMIN*concfactor
+                moosegate_tableB.ymax = CaMAX*concfactor
+                moosegate_tableB.ydivs = CaNDIVS
+                moosegate_tableB.dy = dCa*concfactor
+                moosegate_tableB.tableVector2D = tableB
 
     def setQ10(self,q10settings):
         if 'q10_factor' in q10settings.attrib.keys():
