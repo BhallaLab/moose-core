@@ -89,27 +89,19 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
     def popupLoadModelDialog(self):
         fileDialog = QtGui.QFileDialog(self)
-        fileDialog.setToolTip("<font color='blue'> Select a model Neural / KKit to open. Try Mitral.g / Kholodenko.g from DEMOS> mitral-ee / kholodenko folders </font>")
         fileDialog.setFileMode(QtGui.QFileDialog.ExistingFile)
-        ffilter = ''
+        ffilter =''
         for key in sorted(self.mooseHandler.fileExtensionMap.keys()):
             ffilter = ffilter + key + ';;'
         ffilter = ffilter[:-2]
         fileDialog.setFilter(self.tr(ffilter))
-        # The following version gymnastic is because QFileDialog.selectNameFilter() was introduced in Qt 4.4
-        if (config.QT_MAJOR_VERSION > 4) or ((config.QT_MAJOR_VERSION == 4) and (config.QT_MINOR_VERSION >= 4)):
-            for key, value in self.mooseHandler.fileExtensionMap.items():
-                if value == MooseHandler.type_genesis:
-                    fileDialog.selectNameFilter(key)
-                    break
+        fileDialog.setWindowTitle('Open File')
+
         targetPanel = QtGui.QFrame(fileDialog)
         targetPanel.setLayout(QtGui.QVBoxLayout())
-        #targetTree = MooseTreeWidget(fileDialog)
+
         currentPath = self.mooseHandler._current_element.path
         
-        #for item in targetTree.itemList:
-         #   if item.getMooseObject().path == currentPath:
-          #      targetTree.setCurrentItem(item)
         targetLabel = QtGui.QLabel('Target Element')
         targetText = QtGui.QLineEdit(fileDialog)
 
@@ -119,16 +111,24 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         targetPanel.layout().addWidget(targetText)
         print "###############",targetText.text()
         layout = fileDialog.layout()
-        #layout.addWidget(targetTree)
         layout.addWidget(targetPanel)
-        #self.connect(targetTree, QtCore.SIGNAL('itemClicked(QTreeWidgetItem *, int)'), lambda item, column: targetText.setText(item.getMooseObject().path))
+
         if fileDialog.exec_():
             fileNames = fileDialog.selectedFiles()
             fileFilter = fileDialog.selectedFilter()
             fileType = self.mooseHandler.fileExtensionMap[str(fileFilter)]
+
+            if fileType == self.mooseHandler.type_all:
+                reMap = str(fileNames[0]).rsplit('.')[1]
+                if reMap == 'g':
+                    fileType = self.mooseHandler.type_genesis
+                elif reMap == 'py':
+                    fileType = self.mooseHandler.type_python
+                else:
+                    fileType = self.mooseHandler.type_xml
+
             directory = fileDialog.directory() # Potential bug: if user types the whole file path, does it work? - no but gives error message
             #self.statusBar.showMessage('Loading model, please wait')
-            
             app = QtGui.qApp
             app.setOverrideCursor(QtGui.QCursor(Qt.BusyCursor)) #shows a hourglass - or a busy/working arrow
             for fileName in fileNames:
