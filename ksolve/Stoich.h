@@ -72,7 +72,7 @@ class Stoich
 		void handleNodeDiffBoundary( unsigned int nodeNum, 
 			vector< unsigned int > meshEntries, vector< double > remoteS );
 
-		void meshSplit( unsigned int totalNumMeshEntries, 
+		void meshSplit( vector< double > vols,
 			vector< unsigned int > localEntryList,
 			vector< vector< unsigned int > > outgoingDiffusion,
 			vector< vector< unsigned int > > incomingDiffusion
@@ -136,6 +136,14 @@ class Stoich
 		const double* Sinit( unsigned int meshIndex ) const;
 
 		/**
+		 * Utility function, used during zombification. Sets default 
+		 * concInit entry: a single value for the whole pool, which applies
+		 * regardless of subsequent scaling of volumes or assignment of 
+		 * individual mesh values. Used only when remeshing.
+		 */
+		void setConcInit( unsigned int poolIndex, double conc );
+
+		/**
 		 * Returns diffusion rate of specified pool
 		 */
 		double getDiffConst( unsigned int poolIndex ) const;
@@ -154,12 +162,6 @@ class Stoich
 		 * Assigns SpeciesId of specified pool
 		 */
 		void setSpecies( unsigned int poolIndex, SpeciesId s );
-
-		/**
-		 * Recalculates concentrations when remeshing happens and vols of
-		 * each voxel need updating.
-		 */
-		void updateMeshVols( const vector< double >& vols );
 
 		/**
 		 * Returns working memory for the calculations at the specified

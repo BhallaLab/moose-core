@@ -169,7 +169,7 @@ class ChemMesh
 };
 
 extern SrcFinfo4< 
-	unsigned int, 
+	vector< double >, 
 	vector< unsigned int>, 
 	vector< vector< unsigned int > >, 
 	vector< vector< unsigned int > >

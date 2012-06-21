@@ -38,10 +38,12 @@ static void rtReplicateModels()
 	Id b( "/model/kinetics/b" );
 	Id c( "/model/kinetics/c" );
 	Id cplx( "/model/kinetics/c/Jacb/Jacb_cplx" );
+	Id mesh( "/model/kinetics/mesh" );
 	assert( a != Id() );
 	assert( b != Id() );
 	assert( c != Id() );
 	assert( cplx != Id() );
+	assert( mesh != Id() );
 	assert( a.element()->dataHandler()->localEntries() == 1 );
 	bool ret = Field< double >::set( a, "diffConst", 0 );
 	assert( ret );
@@ -67,6 +69,13 @@ static void rtReplicateModels()
 	temp = Field< double >::get( J, "k3" );
 	assert( doubleEq( temp, 0.1 ) );
 
+	assert( mesh.element()->dataHandler()->localEntries() == 1 );
+	assert( a.element()->dataHandler()->localEntries() == 1 );
+	vector< double > checkInit;
+	Field< double >::getVec( mesh, "size", checkInit );
+	assert( checkInit.size() == 1 );
+	for ( unsigned int i = 0; i < checkInit.size(); ++i )
+		assert( doubleEq( checkInit[i], 1e-18 ) );
 
 	// Assign the CubeMesh dims as a 2x2x2 cube with mesh size of 1 um
 	// to match the default in the ReadCspace.
@@ -82,12 +91,19 @@ static void rtReplicateModels()
 	ret = Field< vector< double > >::set( compt, "coords", coords );
 	assert( ret );
 	Qinfo::waitProcCycles( 2 );
-	Id mesh( "/model/kinetics/mesh" );
-	assert( mesh != Id() );
 	assert( mesh.element()->dataHandler()->localEntries() == 8 );
 	assert( a.element()->dataHandler()->localEntries() == 8 );
 
-	vector< double > checkInit;
+	Field< double >::getVec( mesh, "size", checkInit );
+	assert( checkInit.size() == 8 );
+	for ( unsigned int i = 0; i < 8; ++i )
+		assert( doubleEq( checkInit[i], 8e-18 ) );
+
+	Field< double >::getVec( a, "size", checkInit );
+	assert( checkInit.size() == 8 );
+	for ( unsigned int i = 0; i < 8; ++i )
+		assert( doubleEq( checkInit[i], 8e-18 ) );
+
 	Field< double >::getVec( a, "concInit", checkInit );
 	assert( checkInit.size() == 8 );
 	for ( unsigned int i = 0; i < 8; ++i )

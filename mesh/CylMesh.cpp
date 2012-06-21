@@ -551,11 +551,12 @@ void CylMesh::innerHandleNodeInfo(
 			unsigned int numNodes, unsigned int numThreads )
 {
 	unsigned int numEntries = numEntries_;
+	vector< double > vols( numEntries, size_ / numEntries );
 	vector< unsigned int > localEntries( numEntries );
 	vector< vector< unsigned int > > outgoingEntries;
 	vector< vector< unsigned int > > incomingEntries;
 	meshSplit()->send( e, q->threadNum(), 
-		numEntries, localEntries,
+		vols, localEntries,
 		outgoingEntries, incomingEntries );
 }
 //////////////////////////////////////////////////////////////////
@@ -643,7 +644,7 @@ void CylMesh::transmitChange( const Eref& e, const Qinfo* q )
 	// This message tells the Stoich about the new mesh, and also about
 	// how it communicates with other nodes.
 	meshSplit()->send( e, q->threadNum(), 
-		totalNumEntries, localIndices, 
+		vols, localIndices, 
 		outgoingEntries, incomingEntries );
 
 	// This func goes down to the MeshEntry to tell all the pools and
