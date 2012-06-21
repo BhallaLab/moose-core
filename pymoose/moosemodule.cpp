@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Tue Jun 19 17:41:22 2012 (+0530)
+// Last-Updated: Thu Jun 21 17:55:55 2012 (+0530)
 //           By: subha
-//     Update #: 8651
+//     Update #: 8772
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -176,6 +176,12 @@ extern "C" {
     {
         static map<string, PyObject * > inited_destfields;
         return inited_destfields;
+    }
+
+    static map< string, PyObject *>& get_inited_elementfields()
+    {
+        static map< string, PyObject *> inited_elementfields;
+        return inited_elementfields;
     }
     
     /**
@@ -808,6 +814,75 @@ extern "C" {
         0,                                              /* tp_alloc */
         0,                       /* tp_new */
         0,                                              /* tp_free */
+    };
+
+    PyDoc_STRVAR(moose_ElementField_documentation,
+                 "ElementField represents fields that are themselves elements. For\n"
+                 "example, synapse in an IntFire neuron.\n");
+
+    static PyMethodDef ElementFieldMethods[] = {
+        {"setNum", (PyCFunction)moose_ElementField_setNum, METH_VARARGS,
+         "Set the number of entries."},
+        {"getNum", (PyCFunction)moose_ElementField_getNum, METH_VARARGS,
+         "Return number of entries in the field."},        
+        {NULL, NULL, 0, NULL},        /* Sentinel */        
+    };
+
+    
+    static PySequenceMethods ElementFieldSequenceMethods = {
+        (lenfunc)moose_ElementField_getNum, // sq_length
+        0, //sq_concat
+        0, //sq_repeat
+        (ssizeargfunc)moose_ElementField_getItem, //sq_item
+        0, // getslice
+        0, //sq_ass_item
+        0, // setslice
+        0, // sq_contains
+        0, // sq_inplace_concat
+        0 // sq_inplace_repeat
+    };
+    
+    static PyTypeObject moose_ElementField = {
+        PyObject_HEAD_INIT(NULL)
+        0,                                              /* tp_internal */
+        "moose.ElementField",                              /* tp_name */
+        sizeof(_Field),                                 /* tp_basicsize */
+        0,                                              /* tp_itemsize */
+        0,                                              /* tp_dealloc */
+        0,                                              /* tp_print */
+        0,                                              /* tp_getattr */
+        0,                                              /* tp_setattr */
+        0,                                              /* tp_compare */
+        (reprfunc)moose_Field_repr,                     /* tp_repr */
+        0,                                              /* tp_as_number */
+        &ElementFieldSequenceMethods,                   /* tp_as_sequence */
+        0,                                              /* tp_as_mapping */
+        (hashfunc)moose_Field_hash,                     /* tp_hash */
+        0,                                              /* tp_call */
+        (reprfunc)moose_Field_repr,                     /* tp_str */
+        0,                                              /* tp_getattro */
+        PyObject_GenericSetAttr,                        /* tp_setattro */
+        0,                                              /* tp_as_buffer */
+        Py_TPFLAGS_DEFAULT,
+        moose_ElementField_documentation,
+        0,                                              /* tp_traverse */
+        0,                                              /* tp_clear */
+        0,                                              /* tp_richcompare */
+        0,                                              /* tp_weaklistoffset */
+        0,                                              /* tp_iter */
+        0,                                              /* tp_iternext */
+        ElementFieldMethods,                           /* tp_methods */
+        0,                                              /* tp_members */
+        0,                                              /* tp_getset */
+        0,                                              /* tp_base */
+        0,                                              /* tp_dict */
+        0,                                              /* tp_descr_get */
+        0,                                              /* tp_descr_set */
+        0,                                              /* tp_dictoffset */
+        (initproc)moose_Field_init,                     /* tp_init */
+        0,                                              /* tp_alloc */
+        0,                       /* tp_new */
+        0,                                              /* tp_free */        
     };
 
     ///////////////////////////////////////////////
@@ -1575,7 +1650,7 @@ extern "C" {
                     if ( PyList_SetItem(ret, ii, subseq) != 0 ){    \
                         Py_DECREF(ret);                         \
                         error << "Failed to set subsequence " << ii; \
-                        PyErr_SetString(PyExc_RuntimeError, error.str().c_str());\ 
+                        PyErr_SetString(PyExc_RuntimeError, error.str().c_str());\
                     }                                                                   \
                     for (Py_ssize_t jj = 0; jj < length2; ++jj){                        \
                         PyObject * value = Py_BuildValue(#TYPEC, val[ii][jj]);          \
@@ -2516,7 +2591,7 @@ extern "C" {
     PyDoc_STRVAR(moose_ObjId_getFieldNames_documenation,
                  "getFieldNames(fieldType='')\n"
                  "\n"
-                 "Get the names of fields on this ObjectId.\n"
+                 "Get the names of fields on this ObjId.\n"
                  "\n"
                  "Parameters\n"
                  "----------\n"
@@ -3398,6 +3473,12 @@ extern "C" {
         if (!define_destFinfos(cinfo)){
             return 0;
         }
+
+        // Define the element fields
+        if (!define_elementFinfos(cinfo)){
+            return 0;
+        }
+
         // The getsetdef array must be terminated with empty objects.
         PyGetSetDef empty;
         empty.name = NULL;
@@ -3567,6 +3648,115 @@ extern "C" {
         }
         return 1;
     }
+
+    static PyObject * moose_ObjId_get_elementField_attr(PyObject * self,
+                                                       void * closure)
+    {
+        if (!ObjId_SubtypeCheck(self)){
+            PyErr_SetString(PyExc_TypeError,
+                            "First argument must be an instance of ObjId");
+            return NULL;
+        }
+        char * name = NULL;
+        if (!PyArg_ParseTuple((PyObject *)closure,
+                              "s:moose_ObjId_get_lookupField_attr: expected a string in getter closure.",
+                              &name)){
+            return NULL;
+        }
+        assert(name);
+        // If the ElementField already exists, return it
+        string full_name = ((_ObjId*)self)->oid_.path() + "." + string(name);
+        map<string, PyObject * >::iterator it = get_inited_elementfields().find(full_name);
+        if (it != get_inited_elementfields().end()){
+            Py_XINCREF(it->second);
+            return it->second;
+        }
+        
+        // Create a new instance of ElementField `name` and set it as
+        // an attribute of the object `self`.
+
+        // Create the argument for init method of ElementField.  This
+        // will be (fieldname, self)
+        PyObject * args = PyTuple_New(2);
+                
+        PyTuple_SetItem(args, 0, self);
+        Py_XINCREF(self); // compensate for stolen ref
+        PyTuple_SetItem(args, 1, PyString_FromString(name));
+        _Field * ret = PyObject_New(_Field, &moose_ElementField);
+        if (moose_ElementField.tp_init((PyObject*)ret, args, NULL) == 0){
+            Py_XDECREF(args);
+            get_inited_elementfields()[full_name] =  (PyObject*)ret;
+            // I thought PyObject_New creates a new ref, but without
+            // the following XINCREF, the finfo gets gc-ed.
+            Py_XINCREF(ret);
+            return (PyObject*)ret;
+        }
+        Py_XDECREF((PyObject*)ret);
+        Py_XDECREF(args);
+        return NULL;
+    }
+
+    static int define_elementFinfos(const Cinfo * cinfo)
+    {
+        const string & class_name = cinfo->name();
+        unsigned int num_fieldElementFinfo = cinfo->getNumFieldElementFinfo();
+        unsigned int curr_index = get_getsetdefs()[class_name].size();
+        for (unsigned int ii = 0; ii < num_fieldElementFinfo; ++ii){
+            const string& finfo_name = const_cast<Cinfo*>(cinfo)->getFieldElementFinfo(ii)->name();
+            cout << "# Creating element field: " << cinfo->name() << "." << finfo_name << endl;
+            PyGetSetDef getset;
+            get_getsetdefs()[class_name].push_back(getset);
+            get_getsetdefs()[class_name][curr_index].name = (char*)calloc(finfo_name.size() + 1, sizeof(char));
+            strncpy(get_getsetdefs()[class_name][curr_index].name, const_cast<char*>(finfo_name.c_str()), finfo_name.size());
+            get_getsetdefs()[class_name][curr_index].doc = "";
+            get_getsetdefs()[class_name][curr_index].get = (getter)moose_ObjId_get_elementField_attr;
+            PyObject * args = PyTuple_New(1);
+            PyTuple_SetItem(args, 0, PyString_FromString(finfo_name.c_str()));
+            get_getsetdefs()[class_name][curr_index].closure = (void*)args;
+            ++curr_index;
+        }
+        return 1;
+    }
+
+    Py_ssize_t moose_ElementField_getNum(_Field * self)
+    {
+        return Field<unsigned int>::get(self->owner, "num_" + string(self->name));
+    }
+
+    PyObject * moose_ElementField_setNum(_Field * self, PyObject * args)
+    {
+        unsigned int num;
+        if (!PyArg_ParseTuple(args, "I:moose.ElementField.setNum", &num)){
+            return NULL;
+        }
+        Field<unsigned int>::set(self->owner, "num_" + string(self->name), num);
+        Py_RETURN_NONE;
+    }
+
+    PyObject * moose_ElementField_getItem(_Field * self, PyObject * args)
+    {
+        int index;
+        unsigned int len = Field<unsigned int>::get(self->owner, "num_" + string(self->name));
+        if (!PyArg_ParseTuple(args, "i:moose.ElementField.getItem", &index)){
+            return NULL;
+        }
+        if (index > len){
+            PyErr_SetString(PyExc_IndexError, "moose.ElementField.getItem: index out of bounds.");
+            return NULL;
+        }
+        if (index < 0){
+            index += len;
+        }
+        if (index < 0){
+            PyErr_SetString(PyExc_IndexError, "moose.ElementField.getItem: invalid index.");
+            return NULL;
+        }
+        _ObjId * oid = PyObject_New(_ObjId, &ObjIdType);
+        oid->oid_ = ObjId(Id(self->owner.path() + "/" + self->name), DataId(index));
+        return (PyObject*)oid;
+    }
+
+
     /////////////////////////////////////////////////////////////////////
     // Method definitions for MOOSE module
     /////////////////////////////////////////////////////////////////////    
@@ -3715,8 +3905,14 @@ extern "C" {
             exit(-1);
         }        
         Py_INCREF(&moose_LookupField);
-        PyModule_AddObject(moose_module, "LookupField", (PyObject*)&moose_LookupField);
+        PyModule_AddObject(moose_module, "ElementField", (PyObject*)&moose_ElementField);
 
+        if (PyType_Ready(&moose_ElementField) < 0){
+            PyErr_Print();
+            exit(-1);
+        }        
+        Py_INCREF(&moose_ElementField);
+        PyModule_AddObject(moose_module, "ElementField", (PyObject*)&moose_ElementField);
         // Add DestField type
         // Py_TYPE(&moose_DestField) = &PyType_Type; // unnecessary - filled in by PyType_Ready
         // moose_DestField.tp_flags = Py_TPFLAGS_DEFAULT;
