@@ -549,11 +549,12 @@ void CubeMesh::innerHandleNodeInfo(
 			unsigned int numNodes, unsigned int numThreads )
 {
 	unsigned int numEntries = nx_ * ny_ * nz_ ;
+	vector< double > vols( numEntries, dx_ * dy_ * dz_ );
 	vector< unsigned int > localEntries( numEntries );
 	vector< vector< unsigned int > > outgoingEntries;
 	vector< vector< unsigned int > > incomingEntries;
 	meshSplit()->send( e, q->threadNum(), 
-		numEntries, localEntries,
+		vols, localEntries,
 		outgoingEntries, incomingEntries );
 }
 
@@ -588,8 +589,7 @@ void CubeMesh::transmitChange( const Eref& e, const Qinfo* q )
 	// This message tells the Stoich about the new mesh, and also about
 	// how it communicates with other nodes.
 	meshSplit()->send( e, q->threadNum(), 
-		totalNumEntries, localIndices, 
-		outgoingEntries, incomingEntries );
+		vols, localIndices, outgoingEntries, incomingEntries );
 
 	// This func goes down to the MeshEntry to tell all the pools and
 	// Reacs to deal with the new mesh. They then update the stoich.

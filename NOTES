@@ -17757,4 +17757,8 @@ copy.
 ============================================================================
 21 June 2012.
 Re-activated the testRemeshing unit test. Worked through the bug, now clears
-unit tests.
+unit tests. Checkin 3575.
+
+Sorted out meshSplit. Issue: which is authoritative: concInit or Sinit?
+Seems at present I must update concInit when zombifying. Done it.
+Now clears regression tests.

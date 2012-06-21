@@ -35,7 +35,7 @@ void regressionTests()
 	rtTable();
 	// rtTestChem();
 
-	// rtReacDiff();
+	rtReacDiff();
 	rtHHnetwork( 10 );
 	cout << endl;
 }

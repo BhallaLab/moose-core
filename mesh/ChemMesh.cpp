@@ -21,14 +21,14 @@ static SrcFinfo0 groupSurfaces(
 );
 
 SrcFinfo4< 
-	unsigned int, 
+	vector< double >,
 	vector< unsigned int>, 
 	vector< vector< unsigned int > >, 
 	vector< vector< unsigned int > >
 	>* meshSplit()
 {
 	static SrcFinfo4< 
-			unsigned int, 
+			vector< double >,
 			vector< unsigned int >, 
 			vector< vector< unsigned int > >, 
 			vector< vector< unsigned int > >
@@ -36,7 +36,7 @@ SrcFinfo4<
 	meshSplit(
 		"meshSplit",
 		"Defines how meshEntries communicate between nodes."
-		"Args: totalNumEntries, localEntryList, "
+		"Args: volListOfAllEntries, localEntryList, "
 		"outgoingDiffusion[node#][entry#], incomingDiffusion[node#][entry#]"
 		"This message is meant to go to the SimManager and Stoich."
 	);
