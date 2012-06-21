@@ -13,13 +13,17 @@ class DinfoBase
 {
 	public:
 		DinfoBase()
-			: makeCompilerHappy( 0 )
+			: isOneZombie_( 0 )
+		{;}
+		DinfoBase( bool isOneZombie )
+			: isOneZombie_( isOneZombie )
 		{;}
 		virtual ~DinfoBase()
 		{;}
 		virtual char* allocData( unsigned int numData ) const = 0;
 		virtual void destroyData( char* d ) const = 0;
 		virtual unsigned int size() const = 0;
+		virtual unsigned int sizeIncrement() const = 0;
 
 		/**
 		 * Return a newly allocated copy of the original data, repeated 
@@ -45,15 +49,25 @@ class DinfoBase
 		static unsigned int unserialize( const char* buf, Data* d ) const = 0;
 		*/
 		virtual bool isA( const DinfoBase* other ) const = 0;
+
+		bool isOneZombie() const {
+			return isOneZombie_;
+		}
 	private:
-		const int makeCompilerHappy;
+		const bool isOneZombie_;
 };
 
 template< class D > class Dinfo: public DinfoBase
 {
 	public:
 		Dinfo()
+			: sizeIncrement_( sizeof( D ) )
 		{;}
+		Dinfo( bool isOneZombie )
+			: DinfoBase( isOneZombie ), 
+				sizeIncrement_( isOneZombie ? 0 : sizeof( D ) )
+		{;}
+
 		char* allocData( unsigned int numData ) const {
 			if ( numData == 0 )
 				return 0;
@@ -66,6 +80,9 @@ template< class D > class Dinfo: public DinfoBase
 		{
 			if ( origEntries == 0 )
 				return 0;
+			if ( isOneZombie() )
+				copyEntries = 1;
+
 			D* ret = new( nothrow ) D[copyEntries];
 			if ( !ret )
 				return 0;
@@ -93,6 +110,8 @@ template< class D > class Dinfo: public DinfoBase
 				orig == 0 || data == 0 ) {
 				return;
 			}
+			if ( isOneZombie() )
+				copyEntries = 1;
 			const D* origData = reinterpret_cast< const D* >( orig );
 			D* tgt = reinterpret_cast< D* >( data );
 			for ( unsigned int i = 0; i < copyEntries; i+= origEntries ) {
@@ -117,6 +136,16 @@ template< class D > class Dinfo: public DinfoBase
 			return sizeof( D );
 		}
 
+		/**
+		 * This little hack is used for lookups of a data entry in an array.
+		 * Normally sizeIncrement is identical to size. However, if it is
+		 * a OneZombie then we always need to return the original pointer,
+		 * so here sizeIncrement becomes zero.
+		 */
+		unsigned int sizeIncrement() const {
+			return sizeIncrement_;
+		}
+
 		/*
 		// Will need to specialize for variable size and pointer-containing
 		// D.
@@ -135,12 +164,17 @@ template< class D > class Dinfo: public DinfoBase
 		bool isA( const DinfoBase* other ) const {
 			return dynamic_cast< const Dinfo< D >* >( other );
 		}
+	private:
+		unsigned int sizeIncrement_;
 };
 
 template< class D > class ZeroSizeDinfo: public Dinfo< D >
 {
 	public:
 		unsigned int size()  const {
+			return 0;
+		}
+		unsigned int sizeIncrement()  const {
 			return 0;
 		}
 };
