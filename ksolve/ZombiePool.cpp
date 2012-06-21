@@ -213,6 +213,8 @@ void ZombiePool::zombify( Element* solver, Element* orig )
 	PoolBase* m = reinterpret_cast< PoolBase* >( oer.data() );
 	// May need to extend to entire array.
 	z->stoich_ = reinterpret_cast< Stoich* >( solver->dataHandler()->data( 0 ) );
+	z->stoich_->setConcInit( z->stoich_->convertIdToPoolIndex( orig->id() ),
+		m->getConcInit( oer, 0 ) );
 	z->vSetSpecies( zombier, 0, m->getSpecies( oer, 0 ) );
 	z->vSetConcInit( zombier, 0, m->getConcInit( oer, 0 ) );
 	z->vSetN( zombier, 0, m->getN( oer, 0 ) );

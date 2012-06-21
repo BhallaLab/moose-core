@@ -126,11 +126,11 @@ const Cinfo* Stoich::initCinfo()
 			"Handles message from ChemMesh that defines how "
 			"meshEntries are decomposed on this node, and how they "
 			"communicate between nodes."
-			"Args: (totalNumEntries, localEntryList, "
+			"Args: (volumeVectorForAllEntries, localEntryList, "
 			"outgoingDiffusion[node#][entry#], "
 			"incomingDiffusion[node#][entry#])",
 			new OpFunc4< Stoich, 
-				unsigned int, vector< unsigned int >,
+				vector< double >, vector< unsigned int >,
 				vector< vector< unsigned int > >,
 				vector< vector< unsigned int > >
 			>( &Stoich::meshSplit )
@@ -521,13 +521,15 @@ void Stoich::handleRemesh( unsigned int numLocalMeshEntries,
 	cout << "Stoich::handleRemesh\n";
 }
 
-void Stoich::meshSplit( unsigned int totalNumMeshEntries, 
+void Stoich::meshSplit(
+	vector< double > vols,
 	vector< unsigned int > localEntryList,
 	vector< vector< unsigned int > > outgoingDiffusion,
 	vector< vector< unsigned int > > incomingDiffusion
 	)
 {
 	// cout << "Stoich::handleMeshSplit\n";
+	unsigned int totalNumMeshEntries = vols.size();
 	unsigned int numLocal = localEntryList.size();
 	S_.resize( totalNumMeshEntries );
 	Sinit_.resize( totalNumMeshEntries );
@@ -535,8 +537,13 @@ void Stoich::meshSplit( unsigned int totalNumMeshEntries,
 	flux_.resize( numLocal );
 	for ( unsigned int i = 0; i < numLocal; ++i ) {
 		// Assume that these values will later be initialized
-		S_[ localEntryList[i] ].resize( concInit_.size(), 0 );
-		Sinit_[ localEntryList[i] ].resize( concInit_.size(), 0 );
+		unsigned int k = localEntryList[i]; // Converts to global index
+		assert( k < totalNumMeshEntries );
+		S_[ k ].resize( concInit_.size(), 0 );
+		Sinit_[ k ].resize( concInit_.size(), 0 );
+		for ( unsigned int j = 0; j < concInit_.size(); ++j ) {
+			S_[k][j] = Sinit_[k][j] = concInit_[j] * vols[k] * NA;
+		}
 		y_[i].resize( numVarPools_, 0 );
 		flux_[i].resize( numVarPools_, 0 );
 	}
@@ -990,6 +997,13 @@ const double* Stoich::Sinit( unsigned int meshIndex ) const
 	return &Sinit_[meshIndex][0];
 }
 
+void Stoich::setConcInit( unsigned int poolIndex, double conc )
+{
+	assert( conc >= 0 );
+	assert( poolIndex < concInit_.size() );
+	concInit_[poolIndex] = conc;
+}
+
 double Stoich::getDiffConst( unsigned int p ) const
 {
 	assert( p < diffConst_.size() );
@@ -1025,23 +1039,6 @@ double* Stoich::getY( unsigned int meshIndex )
 void Stoich::print() const
 {
 	N_.print();
-}
-
-void Stoich::updateMeshVols( const vector< double >& vols )
-{
-	if ( S_.size() != vols.size() ) {
-		cout << "Warning: Stoich::updateMeshVols: "
-		"Stoich mesh size does not match: (" <<
-		S_.size() << ", " << vols.size() << ")\n";
-		return;
-	}
-	for ( unsigned int i = 0; i < vols.size(); ++i ) {
-		for ( unsigned int poolIndex = 0; poolIndex < concInit_.size(); 
-			++poolIndex ) {
-			S_[i][poolIndex] = Sinit_[i][poolIndex] = 
-				concInit_[poolIndex] * vols[i] * NA;
-		}
-	}
 }
 
 #ifdef USE_GSL
