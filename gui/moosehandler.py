@@ -92,8 +92,10 @@ class MooseHandler(QtCore.QObject):
     type_neuroml = 'NEUROML'
     type_sbml = 'SBML'
     type_python = 'PYTHON'
+    type_all = 'allType'
     # Map between file extension and known broad filetypes.
     fileExtensionMap = {
+        'All Supported(*.g *.xml *.bz2 *.zip *.gz *.py)': type_all,
         'Genesis Script(*.g)': type_genesis,
         'neuroML/SBML(*.xml *.bz2 *.zip *.gz)': type_xml,
         'Python script(*.py)': type_python
@@ -160,8 +162,6 @@ class MooseHandler(QtCore.QObject):
         elif filetype == MooseHandler.type_python:
             sys.path.append(directory)
             return self.loadPythonScript(filename)
-        
-
 
     def loadGenesisModel(self, filename, target):
         """Load a model specified in a GENESIS Script.
@@ -246,9 +246,10 @@ class MooseHandler(QtCore.QObject):
         """Evaluate a python script."""
         extension_start = filename.rfind('.py')
         script = filename[:extension_start]
-        exec 'import %s as hello' % (script)
-        #hello = loadGran98NeuroML_L123()
+        exec 'import %s' % (script)
+        #exec 'import %s as hello' % (script)
         #hello.loadGran98NeuroML_L123("Generated.net.xml")
+
 
     def addFieldTable(self, full_field_path):
         """
