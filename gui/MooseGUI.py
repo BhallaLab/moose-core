@@ -106,12 +106,13 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         targetText = QtGui.QLineEdit(fileDialog)
 
         targetText.setText(currentPath)
-        targetText.setText('/dummy')
+        targetText.setText('/')
         targetPanel.layout().addWidget(targetLabel)
         targetPanel.layout().addWidget(targetText)
-        print "###############",targetText.text()
         layout = fileDialog.layout()
         layout.addWidget(targetPanel)
+        self.connect(fileDialog, QtCore.SIGNAL('currentChanged(const QString &)'), lambda path:targetText.setText(os.path.basename(str(path)).rpartition('.')[0]))
+        self.connect(targetText, QtCore.SIGNAL('textChanged(const QString &)'), self.getElementpath)
 
         if fileDialog.exec_():
             fileNames = fileDialog.selectedFiles()
@@ -132,10 +133,12 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             app = QtGui.qApp
             app.setOverrideCursor(QtGui.QCursor(Qt.BusyCursor)) #shows a hourglass - or a busy/working arrow
             for fileName in fileNames:
-                #print ": filename",str(fileName),str(fileType),str(targetText.text())
-                modeltype  = self.mooseHandler.loadModel(str(fileName), str(fileType), str(targetText.text()))
-                modelpath = str(targetText.text())
-                
+                if(((str(targetText.text())) == '/') or ((str(targetText.text())) == ' ') ):
+                    modelpath = os.path.basename(str(fileName)).rpartition('.')[0]
+                else:
+                    modelpath = str(targetText.text())
+                modeltype  = self.mooseHandler.loadModel(str(fileName), str(fileType), modelpath)
+
                 if modeltype == MooseHandler.type_kkit:
                     try:
                         self.addLayoutWindow(modelpath)
@@ -149,8 +152,12 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             #self.modelTreeWidget.recreateTree()
             #self.enableControlButtons()
             #self.checkModelType()
-            print 'Loaded model',  fileName, 'of type', modeltype
+            print 'Loaded model',  fileName, 'of type', modeltype, 'under Element path ',modelpath
             app.restoreOverrideCursor()
+
+    def getElementpath(self,text):
+        if(text == '/' or text == ''):
+            QtGui.QMessageBox.about(self,"My message box","Target Element path should not be \'/\' or \'null\', filename will be selected as Element path")
 
     def resizeEvent(self, event):
         QtGui.QWidget.resizeEvent(self, event)
