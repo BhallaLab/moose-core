@@ -121,13 +121,17 @@ bool AnyDimHandler::resize( unsigned int dimension, unsigned int numEntries)
 			unsigned int newLocalEntries = end_ - start_;
 			data_ = dinfo()->allocData( newLocalEntries );
 			if ( isGlobal_ ) {
-				assert ( totalEntries_ == newLocalEntries);
-				unsigned int newBlockSize = numEntries * dinfo()->size();
-				unsigned int oldBlockSize = oldN * dinfo()->size();
-				unsigned int j = totalEntries_ / numEntries;
-				for ( unsigned int i = 0; i < j; ++i ) {
-					dinfo()->assignData( data_ + i * newBlockSize, 
+				if ( dinfo()->isOneZombie() ) {
+					dinfo()->assignData( data_, 1, temp, oldN );
+				} else {
+					assert ( totalEntries_ == newLocalEntries);
+					unsigned int newBlockSize = numEntries * dinfo()->size();
+					unsigned int oldBlockSize = oldN * dinfo()->size();
+					unsigned int j = totalEntries_ / numEntries;
+					for ( unsigned int i = 0; i < j; ++i ) {
+						dinfo()->assignData( data_ + i * newBlockSize, 
 						numEntries, temp + i * oldBlockSize, oldN );
+					}
 				}
 			} 
 			dinfo()->destroyData( temp );

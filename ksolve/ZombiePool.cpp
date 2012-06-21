@@ -31,12 +31,15 @@ const Cinfo* ZombiePool::initCinfo()
 		// SharedMsg Definitions: All inherited from PoolBase
 		//////////////////////////////////////////////////////////////
 
+	// Note that here the isOneZombie_ flag on the Dinfo constructor is
+	// true. This means that the duplicate and copy operations only make
+	// one copy, regardless of how many dims they are requested to do.
 	static Cinfo zombiePoolCinfo (
 		"ZombiePool",
 		PoolBase::initCinfo(),
 		0,
 		0,
-		new Dinfo< ZombiePool >()
+		new Dinfo< ZombiePool >( true )
 	);
 
 	return &zombiePoolCinfo;
@@ -65,20 +68,21 @@ ZombiePool::~ZombiePool()
 //////////////////////////////////////////////////////////////
 
 // vRemesh: All the work is done by the message from the compartment to the
-// Stoich. None of the ZombiePools is remeshed directly.
+// Stoich. None of the ZombiePools is remeshed directly. However, their
+// DataHandlers need updating.
 void ZombiePool::vRemesh( const Eref& e, const Qinfo* q, 
 	unsigned int numTotalEntries, unsigned int startEntry, 
 	const vector< unsigned int >& localIndices, 
 	const vector< double >& vols )
 {
 	;
-	/*
 	if ( e.index().value() != 0 )
 		return;
 	Neutral* n = reinterpret_cast< Neutral* >( e.data() );
 	if ( vols.size() != e.element()->dataHandler()->localEntries() )
 		n->setLastDimension( e, q, vols.size() );
 
+	/*
 	// We only want to update vols and concs once. The updateMeshVols 
 	// call does this for all pools in the stoich.
 	unsigned int poolIndex = stoich_->convertIdToPoolIndex( e.id() );

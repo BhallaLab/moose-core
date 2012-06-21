@@ -17746,5 +17746,15 @@ comment out the test testSimManager.cpp:testRemeshing. Also commented out
 rtTestChem and rtReacDiff from regressionTest.cpp: there is a recurring
 problem with gsl hitting negatives.
 Now clears regression and unit tests.
+Stage set now for fixing up the remeshing and routing it through the 
+solver.
+May also need to implement a new DataHandler that doesn't touch the
+data, just provides appropriate lookup options to the solver.
+Instead of this, added a field isOneZombie to Dinfo. It uses this field to
+tell itself to ignore resize calls on the zombie entry, and just do a single
+copy.
 
 ============================================================================
+21 June 2012.
+Re-activated the testRemeshing unit test. Worked through the bug, now clears
+unit tests.
