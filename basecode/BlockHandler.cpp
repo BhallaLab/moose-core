@@ -44,7 +44,7 @@ char* BlockHandler::data( DataId index ) const
 {
 	// unsigned int i = index & bitMask_;
 	assert( index.value() >= start_ && index.value() < end_ );
-	return data_ + ( index.value() - start_ ) * dinfo()->size();
+	return data_ + ( index.value() - start_ ) * dinfo()->sizeIncrement();
 }
 
 unsigned int BlockHandler::totalEntries() const
