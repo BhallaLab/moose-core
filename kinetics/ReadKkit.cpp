@@ -810,6 +810,30 @@ Id ReadKkit::buildPool( const vector< string >& args )
 	return pool;
 }
 
+/**
+ * Finds the source pool for a SumTot. It also deals with cases where 
+ * the source is an enz-substrate complex
+ */
+Id ReadKkit::findSumTotSrc( const string& src )
+{
+	map< string, Id >::iterator i = poolIds_.find( src );
+	if ( i != poolIds_.end() ) { 
+		return i->second;
+	}
+	i = enzIds_.find( src );
+	if ( i != enzIds_.end() ) {
+		string head;
+		string cplx = src + '/' + pathTail( src, head ) + "_cplx";
+		i = poolIds_.find( cplx );
+		if ( i != poolIds_.end() ) { 
+			return i->second;
+		}
+	}
+	cout << "Error: ReadKkit::findSumTotSrc: Cannot find source pool '" << src << endl;
+	assert( 0 );
+	return Id();
+}
+
 void ReadKkit::buildSumTotal( const string& src, const string& dest )
 {
 	map< string, Id >::iterator i = poolIds_.find( dest );
@@ -841,14 +865,12 @@ void ReadKkit::buildSumTotal( const string& src, const string& dest )
 		return;
 	}
 	
-	// Connect up messages
-	i = poolIds_.find( src );
-	assert( i != poolIds_.end() );
-	Id srcId = i->second;
+	Id srcId = findSumTotSrc( src );
 
 	bool ret = shell_->doAddMsg( "single", 
 		ObjId( srcId, 0 ), "nOut",
 		ObjId( sumId, 0 ), "input" ); 
+	assert( ret );
 
 	ret = shell_->doAddMsg( "single", 
 		ObjId( sumId, 0 ), "output",
