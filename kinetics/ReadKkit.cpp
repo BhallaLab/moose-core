@@ -1001,7 +1001,7 @@ unsigned int ReadKkit::loadTab( const vector< string >& args )
 {
 	Id tab;
 	unsigned int start = 0;
-	if ( args[1] == "-cont" || args[1] == "-end" ) {
+	if ( args[1].substr( 0, 5 ) == "-cont" || args[1] == "-end" ) {
 		start = 2;
 		tab = lastTab_;
 		assert( tab != Id() );

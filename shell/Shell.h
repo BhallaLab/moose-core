@@ -161,6 +161,12 @@ class Shell
 		ObjId doFind( const string& path ) const;
 
 		/**
+		 * Fallback Find function which treats index brackets as part of 
+		 * name string, and does not try to extract integer indices.
+		 */
+		ObjId doFindWithoutIndexing( const string& path ) const;
+
+		/**
 		 * Connects up process messages from the specified Tick to the
 		 * targets on the path. Does so for whole Elements, not individual
 		 * entries in the Element array.
