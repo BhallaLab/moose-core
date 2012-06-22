@@ -17794,4 +17794,9 @@ Acc85  Error: ZombieMMenz::zombify: No substrates
 
 Then put in compartmentalization option for ReadKkit.
 
-
+Fixed acc2 problem. Checkin 3583.
+Fixed acc30 problem. Turned out to be problem with handling indexing. Added
+	fallback routine to treat the whole name, complete with index,
+	as a string.
+Fixed acc33 problem. Silly mistake with handling the -continue flag for kkit
+	reads of tables.
