@@ -33,7 +33,7 @@ void regressionTests()
 	}
 	cout << "\nRegression Tests:";
 	rtTable();
-	// rtTestChem();
+	rtTestChem();
 
 	rtReacDiff();
 	rtHHnetwork( 10 );

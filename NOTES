@@ -17761,4 +17761,14 @@ unit tests. Checkin 3575.
 
 Sorted out meshSplit. Issue: which is authoritative: concInit or Sinit?
 Seems at present I must update concInit when zombifying. Done it.
-Now clears regression tests.
+Now clears regression tests. Checkin 3579.
+
+Let's look at the problem with gsl hitting negatives. That was rTestChem 
+in the regression tests. Alas, now there is a new one, with ZombieFuncPool.
+Probably because I haven't refactored its zombification too.
+Fixed that, now crashes somewhat later in rtReadKkit.cpp:705.
+============================================================================
+22 June 2012.
+Turned out to be a simple bug: I was comparing Finfos of the same field on
+a ZombiePool and a ZombieBufPool. Earlier they were different, now because of
+the common base class they are the same. Fixed.
