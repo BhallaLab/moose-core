@@ -12,7 +12,7 @@ HEADERS = moosemodule.h
 OBJ = moosemodule.o
 
 
-$(TARGET): $(OBJ) $(HEADERS) ../basecode/main.cpp ../utility/_utility.o ../basecode/_basecode.o
+$(TARGET): $(OBJ) $(HEADERS) ../basecode/main.cpp ../utility/_utility.o ../basecode/_basecode_pymoose.o
 	$(LD) -r -o $(TARGET) $(OBJ)
 
 clean: 
