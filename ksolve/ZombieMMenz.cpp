@@ -296,8 +296,12 @@ void ZombieMMenz::zombify( Element* solver, Element* orig )
 		meb = new MMEnzyme( mmEnz->getNumKm( oer, 0 ), mmEnz->getKcat(),
 			enzIndex, rateTerm );
 	} else {
-		cout << "Error: ZombieMMenz::zombify: No substrates\n";
-		exit( 0 );
+		cout << "Error: ZombieMMenz::zombify: No substrates."  
+		"Will ignore and continue, but don't be surprised if "
+		"simulation fails.\n";
+		// assert( 0 );
+		delete dh;
+		return;
 	}
 
 	num = orig->getNeighbours( prdvec, prd );
