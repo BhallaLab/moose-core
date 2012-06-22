@@ -66,6 +66,7 @@ class ReadKkit
 		Id buildText( const vector< string >& args );
 		Id buildGraph( const vector< string >& args );
 		Id buildGeometry( const vector< string >& args );
+		Id buildStim( const vector< string >& args );
 		Id buildInfo( Id parent, map< string, int >& m, 
 			const vector< string >& args );
 		void buildSumTotal( const string& src, const string& dest );
@@ -79,6 +80,7 @@ class ReadKkit
 		// Special ops in the model definition
 		//////////////////////////////////////////////////////////////////
 		void addmsg( const vector< string >& args );
+		void setupSlaveMsg( const string& src, const string& dest );
 		void innerAddMsg( 
 			const string& src, const map< string, Id >& m1, 
 				const string& srcMsg,
@@ -169,6 +171,7 @@ class ReadKkit
 		unsigned int numEnz_;
 		unsigned int numMMenz_;
 		unsigned int numPlot_;
+		unsigned int numStim_;
 		unsigned int numOthers_;
 
 		unsigned int lineNum_;
@@ -178,12 +181,14 @@ class ReadKkit
 		map< string, int > enzMap_;
 		map< string, int > groupMap_;
 		map< string, int > tableMap_;
+		map< string, int > stimMap_;
 		map< string, Id > poolIds_;
 		map< string, Id > reacIds_;
 		map< string, Id > enzIds_;
 		map< string, Id > mmEnzIds_;
 		map< string, Id > plotIds_;
 		map< string, Id > tabIds_;
+		map< string, Id > stimIds_;
 
 		/*
 		vector< Id > pools_;
