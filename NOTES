@@ -17776,8 +17776,8 @@ Now to tackle Harsha's list of segvs.
 
 Acc1   ReadKkit::undump: Do not know how to build 'kchan
 * Acc2   void ReadKkit::buildSumTotal assertion
-Acc3   Do not know how to build 'stim'
-Acc16  Do not know how to build 'stim'
+* Acc3   Do not know how to build 'stim'
+Acc16  Do not know how to build 'stim' : also kchan.
 
 *Acc30  Id ReadKkit::buildEnz assertion
 *Acc33  int ReadKkit::loadTab Assertion
@@ -17809,4 +17809,7 @@ Fixed acc67 problem: replaced failure assertion with a warning and did some
 	cleanup if the substrate messages fail. Checkin 3586.
 
 Fixed acc81 problem: I think it was probably the indexing issue. However, also
-	turned up a problem with -ve DiffConsts.
+	turned up a problem with -ve DiffConsts. Checkin 3587.
+
+Implented 'stim' class handling (actually a PulseGen) to deal with 
+acc3. Now it loads correctly but doesn't run.
