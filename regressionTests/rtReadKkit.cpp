@@ -702,7 +702,10 @@ void rtRunTabSumtot()
 	assert( dsf );
 	const Finfo* asf = a.element()->cinfo()->findFinfo( "set_concInit" );
 	assert( asf );
-	assert( dsf != asf );
+	assert( dsf == asf ); 
+	// They are now equal because 'a' and 'd'
+	// share the same base class, PoolBase.
+
 	/*
 	n = Field< double >::get( Id( "/ts/kinetics/tot1" ), "conc" );
 	assert( doubleEq( n, 1 * CONCSCALE ) );

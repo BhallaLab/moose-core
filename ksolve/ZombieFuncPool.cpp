@@ -57,18 +57,19 @@ void ZombieFuncPool::input( double v )
 // This is more involved as it also has to zombify the Func.
 void ZombieFuncPool::zombify( Element* solver, Element* orig )
 {
-	Element temp( orig->id(), zombieFuncPoolCinfo, solver->dataHandler() );
+	DataHandler* dh = orig->dataHandler()->copyUsingNewDinfo(
+		ZombieFuncPool::initCinfo()->dinfo() );
+	Element temp( orig->id(), zombieFuncPoolCinfo, dh );
 	Eref zer( &temp, 0 );
 	Eref oer( orig, 0 );
 
 	ZombieFuncPool* z = reinterpret_cast< ZombieFuncPool* >( zer.data() );
 	PoolBase* m = reinterpret_cast< PoolBase* >( oer.data() );
 
-	z->setN( zer, 0, m->getN( oer, 0 ) );
-	z->setNinit( zer, 0, m->getNinit( oer, 0 ) );
-	unsigned int numEntries = orig->dataHandler()->localEntries();
-	DataHandler* dh = new ZombieHandler( solver->dataHandler(),
-		orig->dataHandler(), 0, numEntries );
+	z->stoich_ = reinterpret_cast< Stoich* >( 
+		solver->dataHandler()->data( 0 ) );
+	z->vSetN( zer, 0, m->getN( oer, 0 ) );
+	z->vSetNinit( zer, 0, m->getNinit( oer, 0 ) );
 	orig->zombieSwap( zombieFuncPoolCinfo, dh );
 
 	// Later change name just to 'func'
