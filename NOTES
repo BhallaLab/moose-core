@@ -17787,10 +17787,14 @@ Acc55  ReadKkit::undump: Do not know how to build 'calculator'
 * Acc67  Error: ZombieMMenz::zombify: No substrates (I think there was no
 substrate in the model, an enzyme connected to product)
 
-Acc81 to Acc84  python: ReadKkit.cpp:738: Id ReadKkit::buildGroup(const
+* Acc81 to Acc84  python: ReadKkit.cpp:738: Id ReadKkit::buildGroup(const
 std::vector<std::basic_string<char> >&): Assertion `pa != Id()' failed.
+	Loads now, but unhappy about -ve diffconst. This was a flag for
+	telling the object to use a global diff const rather than the value on
+	the pool. I'll just zero out negative diff consts.
 
-Acc85  Error: ZombieMMenz::zombify: No substrates
+* Acc85  Error: ZombieMMenz::zombify: No substrates
+	This was fixed with the acc67.g bug.
 
 Then put in compartmentalization option for ReadKkit.
 
@@ -17802,4 +17806,7 @@ Fixed acc33 problem. Silly mistake with handling the -continue flag for kkit
 	reads of tables. Checkin 3584.
 
 Fixed acc67 problem: replaced failure assertion with a warning and did some 
-	cleanup if the substrate messages fail.
+	cleanup if the substrate messages fail. Checkin 3586.
+
+Fixed acc81 problem: I think it was probably the indexing issue. However, also
+	turned up a problem with -ve DiffConsts.
