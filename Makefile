@@ -314,6 +314,7 @@ pymoose: OBJLIBS := $(filter-out basecode/_basecode.o,$(OBJLIBS))
 pymoose: LIBS += -l${INSTALLED_PYTHON}	
 
 python/moose/_moose.so: libs $(OBJLIBS) basecode/_basecode_pymoose.o
+	$(MAKE) -C pymoose
 	$(CXX) -shared $(LDFLAGS) $(CXXFLAGS) -o $@ $(OBJLIBS) $(LIBS)
 	@echo "pymoose module built."
 
