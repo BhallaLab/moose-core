@@ -17779,13 +17779,13 @@ Acc1   ReadKkit::undump: Do not know how to build 'kchan
 Acc3   Do not know how to build 'stim'
 Acc16  Do not know how to build 'stim'
 
-Acc30  Id ReadKkit::buildEnz assertion
-Acc33  int ReadKkit::loadTab Assertion
+*Acc30  Id ReadKkit::buildEnz assertion
+*Acc33  int ReadKkit::loadTab Assertion
 
 Acc55  ReadKkit::undump: Do not know how to build 'calculator'
 
-Acc67  Error: ZombieMMenz::zombify: No substrates (I thing there was no
-substrated in the model, an enzyme connected to product)
+* Acc67  Error: ZombieMMenz::zombify: No substrates (I think there was no
+substrate in the model, an enzyme connected to product)
 
 Acc81 to Acc84  python: ReadKkit.cpp:738: Id ReadKkit::buildGroup(const
 std::vector<std::basic_string<char> >&): Assertion `pa != Id()' failed.
@@ -17799,4 +17799,7 @@ Fixed acc30 problem. Turned out to be problem with handling indexing. Added
 	fallback routine to treat the whole name, complete with index,
 	as a string.
 Fixed acc33 problem. Silly mistake with handling the -continue flag for kkit
-	reads of tables.
+	reads of tables. Checkin 3584.
+
+Fixed acc67 problem: replaced failure assertion with a warning and did some 
+	cleanup if the substrate messages fail.
