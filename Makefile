@@ -86,12 +86,12 @@ endif
 
 # Debug mode:
 ifeq ($(BUILD),debug)
-CXXFLAGS = -g -pthread -Wall -fPIC -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
+CXXFLAGS = -g -pthread  -fno-strict-aliasing -fPIC -fno-inline-functions -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
 USE_GSL = 1
 endif
 # Optimized mode:
 ifeq ($(BUILD),release)
-CXXFLAGS  = -O3 -pthread -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER
+CXXFLAGS  = -O3 -pthread  -fno-strict-aliasing -fPIC -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER
 USE_GSL = 1
 endif
 # Profiling mode:
@@ -294,6 +294,8 @@ export LD
 export LIBS
 export USE_GSL
 
+all: moose pymoose
+
 moose: libs $(OBJLIBS) $(PARALLEL_LIB)
 	$(CXX) $(CXXFLAGS) $(OBJLIBS) $(PARALLEL_LIB) $(LIBS) -o moose
 	@echo "Moose compilation finished"
@@ -302,24 +304,27 @@ libmoose.so: libs
 	$(CXX) -G $(LIBS) -o libmoose.so
 	@echo "Created dynamic library"
 
-# There are some unix/gcc specific paths here. Should be cleaned up later.
-pymoose: CXXFLAGS += -DPYMOOSE -fPIC -fno-strict-aliasing -I/usr/include/${INSTALLED_PYTHON} # Should be updated according to location of user include directory
-pymoose: SUBDIR += pymoose
-pymoose: OBJLIBS += pymoose/_pymoose.o
-pymoose: LIBS += -l${INSTALLED_PYTHON}
-pymoose: python/moose/_moose.so
-python/moose/_moose.so: libs $(OBJLIBS)
-	$(CXX) -shared $(LDFLAGS) $(CXXFLAGS) -o $@ $(OBJLIBS) $(LIBS)
 
+# There are some unix/gcc specific paths here. Should be cleaned up later.
+pymoose: python/moose/_moose.so
+pymoose: CXXFLAGS += -DPYMOOSE -I/usr/include/${INSTALLED_PYTHON} # Should be updated according to location of user include directory
+pymoose: SUBDIR += pymoose
+pymoose: OBJLIBS += pymoose/_pymoose.o basecode/_basecode_pymoose.o
+pymoose: OBJLIBS := $(filter-out basecode/_basecode.o,$(OBJLIBS))
+pymoose: LIBS += -l${INSTALLED_PYTHON}	
+
+python/moose/_moose.so: libs $(OBJLIBS) basecode/_basecode_pymoose.o
+	$(CXX) -shared $(LDFLAGS) $(CXXFLAGS) -o $@ $(OBJLIBS) $(LIBS)
+	@echo "pymoose module built."
+
+# This will generate an object file without main
+basecode/_basecode_pymoose.o: 	
+	$(MAKE) -C basecode pymoose 
+	@echo "_basecode_pymoose.o built"
 libs:
 	@(for i in $(SUBDIR) $(PARALLEL_DIR); do $(MAKE) -C $$i; done)
 	@echo "All Libs compiled"
 
-mpp: preprocessor/*.cpp preprocessor/*.h
-	@( rm -f mpp; cd preprocessor; make CXX="$(CXX)" CXXFLAGS="$(CXXFLAGS)"; ln mpp ..; cd ..)
-
-default: moose mpp
-
 clean:
 	@(for i in $(CLEANSUBDIR) ; do $(MAKE) -C $$i clean;  done)
-	-rm -rf moose mpp core.* DOCS/html python/moose/*.so python/moose/*.pyc  
+	-rm -rf moose  core.* DOCS/html python/moose/*.so python/moose/*.pyc  

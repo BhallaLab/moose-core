@@ -14,6 +14,7 @@
 
 TARGET = _basecode.o
 
+
 #  CXXFLAGS += -I.. -I../kinetics -I../biophysics
 
 OBJ = \
@@ -50,8 +51,8 @@ OBJ = \
 	FuncBarrier.o \
 	doubleEq.o \
 	ReduceBase.o \
-	main.o	\
 	testAsync.o	\
+	main.o	\
 
 HEADERS = \
 	header.h \
@@ -108,7 +109,20 @@ FuncBarrier.o:	FuncBarrier.h
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -I../msg $< -c
 
-$(TARGET):		$(OBJ) $(HEADERS)
+.PHONY: pymoose
+
+pymoose: CXXFLAGS += -DPYMOOSE
+pymoose: OBJ := $(filter-out main.o,$(OBJ))
+pymoose: OBJ += main_pymoose.o
+pymoose: _basecode_pymoose.o main_pymoose.o
+_basecode_pymoose.o: $(OBJ) main_pymoose.o
+	$(LD) -r -o _basecode_pymoose.o $(OBJ)
+
+main_pymoose.o: main.cpp
+	$(CXX) -c -o $@ $(CXXFLAGS) -I../msg $<
+	@echo "Compiled version of main file for pymoose."
+
+$(TARGET):		$(OBJ) $(HEADERS) 
 	$(LD) -r -o $(TARGET) $(OBJ)
 
 clean:
