@@ -69,6 +69,11 @@ class ReadKkit
 		Id buildInfo( Id parent, map< string, int >& m, 
 			const vector< string >& args );
 		void buildSumTotal( const string& src, const string& dest );
+		/**
+ 		* Finds the source pool for a SumTot. It also deals with cases where
+ 		* the source is an enz-substrate complex
+ 		*/
+		Id findSumTotSrc( const string& src );
 
 		//////////////////////////////////////////////////////////////////
 		// Special ops in the model definition

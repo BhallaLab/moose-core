@@ -86,7 +86,7 @@ endif
 
 # Debug mode:
 ifeq ($(BUILD),debug)
-CXXFLAGS = -g -pthread -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
+CXXFLAGS = -g -pthread -Wall -fPIC -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
 USE_GSL = 1
 endif
 # Optimized mode:
