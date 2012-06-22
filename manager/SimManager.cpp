@@ -446,6 +446,10 @@ void SimManager::buildFromKkitTree( const Eref& e, const Qinfo* q,
 	vector< Id > list;
 	if ( wildcardFind( plotpath, list ) > 0 )
 		shell->doUseClock( plotpath, "process", 2 );
+	string stimpath = basePath + "/kinetics/##[TYPE=PulseGen]";
+	if ( wildcardFind( stimpath, list ) > 0 )
+		shell->doUseClock( stimpath, "process", 0 );
+	
 	// shell->doReinit(); // Cannot use unless process is running.
 }
 

@@ -56,6 +56,7 @@ ReadKkit::ReadKkit()
 	numEnz_( 0 ),
 	numMMenz_( 0 ),
 	numPlot_( 0 ),
+	numStim_( 0 ),
 	numOthers_( 0 ),
 	lineNum_( 0 ),
 	shell_( reinterpret_cast< Shell* >( Id().eref().data() ) )
@@ -354,6 +355,8 @@ void ReadKkit::objdump( const vector< string >& args)
 		assignArgs( groupMap_, args );
 	else if ( args[1] == "xtab" )
 		assignArgs( tableMap_, args );
+	else if ( args[1] == "stim" )
+		assignArgs( stimMap_, args );
 }
 
 void ReadKkit::call( const vector< string >& args)
@@ -413,6 +416,8 @@ void ReadKkit::undump( const vector< string >& args)
 		buildGroup( args );
 	else if ( args[1] == "geometry" )
 		buildGeometry( args );
+	else if ( args[1] == "stim" )
+		buildStim( args );
 	else if ( args[1] == "xcoredraw" )
 		;
 	else if ( args[1] == "xtree" )
@@ -921,6 +926,42 @@ void ReadKkit::buildTableFollower( const string& src, const string& dest )
 	assert( ret );
 }
 */
+
+/**
+ * Build a Stim entry in simulation, i.e., a PulseGen
+ */
+Id ReadKkit::buildStim( const vector< string >& args )
+{
+	static vector< int > dim( 1, 1 );
+
+	string head;
+	string tail = pathTail( args[2], head );
+	Id pa = shell_->doFind( head ).id;
+	assert( pa != Id() );
+
+	double level1 = atof( args[ stimMap_[ "firstLevel" ] ].c_str() ); 
+	double width1 = atof( args[ stimMap_[ "firstWidth" ] ].c_str() ); 
+	double delay1 = atof( args[ stimMap_[ "firstDelay" ] ].c_str() ); 
+	double level2 = atof( args[ stimMap_[ "secondLevel" ] ].c_str() ); 
+	double width2 = atof( args[ stimMap_[ "secondWidth" ] ].c_str() ); 
+	double delay2 = atof( args[ stimMap_[ "secondLevel" ] ].c_str() ); 
+	double baselevel = atof( args[ stimMap_[ "baseLevel" ] ].c_str() );
+
+	Id stim = shell_->doCreate( "PulseGen", pa, tail, dim, true );
+	assert( stim != Id() );
+	string stimPath = args[2].substr( 10 );
+	stimIds_[ stimPath ] = stim;
+	Field< double >::set( stim, "firstLevel", level1 );
+	Field< double >::set( stim, "firstWidth", width1 );
+	Field< double >::set( stim, "firstDelay", delay1 );
+	Field< double >::set( stim, "secondLevel", level2 );
+	Field< double >::set( stim, "secondWidth", width2 );
+	Field< double >::set( stim, "secondDelay", delay2 );
+	Field< double >::set( stim, "baseLevel", baselevel );
+
+	numStim_++;
+	return stim;
+}
 	
 
 Id ReadKkit::buildGeometry( const vector< string >& args )
@@ -1156,35 +1197,66 @@ void ReadKkit::addmsg( const vector< string >& args)
 	}
 	else if ( args[3] == "SLAVE" ) { // Summation function.
 		if ( args[4] == "output" ) {
-			// Convert the pool to a BufPool, if it isn't one already
-			Id destId( basePath_ + "/kinetics/" + dest );
-			assert( destId != Id() );
-
-			if( !destId.element()->cinfo()->isA( "BufPool" )) {
-				const DataHandler* orig = destId()->dataHandler();
-				DataHandler* dup = 
-					orig->copy( orig->pathDepth() - 1, orig->pathDepth(),
-					false, 1 );
-				destId.element()->zombieSwap( BufPool::initCinfo(), dup );
-				delete orig;
-			}
-			// NSLAVE is 1, CONCSLAVE is 2.
-			map< Id, int >::iterator i = poolFlags_.find( destId );
-			if ( i == poolFlags_.end() || !( i->second & 2 ) ) {
-				innerAddMsg( src, tabIds_, "output", dest, poolIds_, 
-					"set_nInit" );
-			} else {
-				innerAddMsg( src, tabIds_, "output", dest, poolIds_,
-					"set_concInit" );
-				Id tabId( basePath_ + "/kinetics/" + src );
-				assert( tabId != Id() );
-				// Rescale from uM to millimolar.
-				SetGet2< double, double >::set( tabId, "linearTransform",
-					0.001, 0 );
-			}
-			// cout << "Added slave msg from " << src << " to " << dest << endl;
+			setupSlaveMsg( src, dest );
 		}
 	}
+}
+
+void ReadKkit::setupSlaveMsg( const string& src, const string& dest )
+{
+	// Convert the pool to a BufPool, if it isn't one already
+	Id destId( basePath_ + "/kinetics/" + dest );
+	assert( destId != Id() );
+
+	if( !destId.element()->cinfo()->isA( "BufPool" )) {
+		const DataHandler* orig = destId()->dataHandler();
+		DataHandler* dup = 
+			orig->copy( orig->pathDepth() - 1, orig->pathDepth(),
+			false, 1 );
+		destId.element()->zombieSwap( BufPool::initCinfo(), dup );
+		delete orig;
+	}
+
+	map< string, Id >* nameMap;
+	// Check if the src is a table or a stim
+	Id srcId( basePath_ + "/kinetics/" + src );
+	assert( srcId != Id() );
+	string output = "output";
+	if ( srcId.element()->cinfo()->isA( "TableBase" ) ) {
+		nameMap = &tabIds_;
+	} else if ( srcId.element()->cinfo()->isA( "PulseGen" ) ) {
+		nameMap = &stimIds_;
+		output = "outputOut";
+	} else {
+		cout << "Error: Unknown source for SLAVE msg: (" << src << 
+			", " << dest << ")\n";
+		return;
+	}
+
+	// NSLAVE is 1, CONCSLAVE is 2.
+	map< Id, int >::iterator i = poolFlags_.find( destId );
+	if ( i == poolFlags_.end() || !( i->second & 2 ) ) {
+		innerAddMsg( src, *nameMap, output, dest, poolIds_, 
+			"set_nInit" );
+	} else {
+		innerAddMsg( src, *nameMap, output, dest, poolIds_,
+			"set_concInit" );
+
+		double CONCSCALE = 0.001;
+		// Rescale from uM to millimolar.
+		if ( nameMap == &tabIds_ ) {
+			SetGet2< double, double >::set( srcId, "linearTransform",
+				CONCSCALE, 0 );
+		} else if ( nameMap == &stimIds_ ) {
+			double x = Field< double >::get( srcId, "baseLevel" );
+			Field< double >::set( srcId, "baseLevel", x * CONCSCALE );
+			x = Field< double >::get( srcId, "firstLevel" );
+			Field< double >::set( srcId, "firstLevel", x * CONCSCALE );
+			x = Field< double >::get( srcId, "secondLevel" );
+			Field< double >::set( srcId, "secondLevel", x * CONCSCALE );
+		}
+	}
+	// cout << "Added slave msg from " << src << " to " << dest << endl;
 }
 
 // We have a slight problem because MOOSE has a more precise value for

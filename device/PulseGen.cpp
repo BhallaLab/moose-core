@@ -48,7 +48,7 @@ const Cinfo* PulseGen::initCinfo()
                                                  "Output amplitude",
                                                  &PulseGen::getOutput);
     static ValueFinfo< PulseGen, double > baseLevel("baseLevel",
-                                                     "Amplitude of the base pulse in a sequence",
+                                                     "Basal level of the stimulus",
                                                      &PulseGen::setBaseLevel,
                                                      &PulseGen::getBaseLevel);
     static ValueFinfo< PulseGen, double > firstLevel("firstLevel",
@@ -56,11 +56,11 @@ const Cinfo* PulseGen::initCinfo()
                                                      &PulseGen::setFirstLevel,
                                                      &PulseGen::getFirstLevel);
     static ValueFinfo< PulseGen, double > firstWidth("firstWidth",
-                                                     "Amplitude of the first pulse in a sequence",
+                                                     "Width of the first pulse in a sequence",
                                                      &PulseGen::setFirstWidth,
                                                      &PulseGen::getFirstWidth);
     static ValueFinfo< PulseGen, double > firstDelay("firstDelay",
-                                                     "Amplitude of the first pulse in a sequence",
+                                                     "Delay to start of the first pulse in a sequence",
                                                      &PulseGen::setFirstDelay,
                                                      &PulseGen::getFirstDelay); 
     static ValueFinfo< PulseGen, double > secondLevel("secondLevel",
@@ -68,11 +68,11 @@ const Cinfo* PulseGen::initCinfo()
                                                      &PulseGen::setSecondLevel,
                                                      &PulseGen::getSecondLevel);
     static ValueFinfo< PulseGen, double > secondWidth("secondWidth",
-                                                     "Amplitude of the second pulse in a sequence",
+                                                     "Width of the second pulse in a sequence",
                                                      &PulseGen::setSecondWidth,
                                                      &PulseGen::getSecondWidth);
     static ValueFinfo< PulseGen, double > secondDelay("secondDelay",
-                                                     "Amplitude of the second pulse in a sequence",
+                                                     "Delay to start of of the second pulse in a sequence",
                                                      &PulseGen::setSecondDelay,
                                                      &PulseGen::getSecondDelay);
     static ValueFinfo< PulseGen, unsigned int > count("count",
@@ -80,7 +80,7 @@ const Cinfo* PulseGen::initCinfo()
                                                      &PulseGen::setCount,
                                                      &PulseGen::getCount);
     static ValueFinfo< PulseGen, unsigned int > trigMode("trigMode",
-                                                     "Number of pulses in a sequence",
+                                                     "Trigger mode for pulses in the sequence",
                                                      &PulseGen::setTrigMode,
                                                      &PulseGen::getTrigMode);
     static LookupValueFinfo < PulseGen, unsigned int, double > level("level",
