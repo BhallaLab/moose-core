@@ -775,6 +775,11 @@ Id ReadKkit::buildPool( const vector< string >& args )
 	int slaveEnable = atoi( args[ poolMap_[ "slave_enable" ] ].c_str() );
 	double diffConst = atof( args[ poolMap_[ "DiffConst" ] ].c_str() );
 
+	// I used -ve D as a flag to replace pool-specific D 
+	// with the global value of D. Here we just ignore it.
+	if ( diffConst < 0 ) 
+		diffConst = 0;
+
 	Id pool;
 	if ( slaveEnable == 0 ) {
 		pool = shell_->doCreate( "Pool", pa, tail, dim, true );
