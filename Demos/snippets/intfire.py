@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jun 21 16:40:25 2012 (+0530)
 # Version: 
-# Last-Updated: Sat Jun 23 13:40:19 2012 (+0530)
+# Last-Updated: Sat Jun 23 13:44:10 2012 (+0530)
 #           By: subha
-#     Update #: 33
+#     Update #: 35
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -71,6 +71,10 @@ def setup_synapse():
     sg1 = moose.SpikeGen('sg1')
     sg2 = moose.SpikeGen('sg2')
     if4.synapse.num = 2 # set synapse count to 2
+    if4.synapse[0].weight = 0.5
+    if4.synapse[0].delay = 1e-3
+    if4.synapse[1].weight = 2.0
+    if4.synapse[1].delay = 2e-3
     moose.connect(sg1, 'event', if4.synapse[0], 'addSpike')
     moose.connect(sg2, 'event', if4.synapse[1], 'addSpike')
 
