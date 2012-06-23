@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 17:11:06 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Jun 21 17:43:26 2012 (+0530)
+// Last-Updated: Sat Jun 23 10:16:18 2012 (+0530)
 //           By: subha
-//     Update #: 914
+//     Update #: 922
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -68,9 +68,9 @@ extern "C" {
     //////////////////////////////////////////
     // Methods for ElementField class
     //////////////////////////////////////////
-    static PyObject * moose_ElementField_setNum(_Field * self, PyObject * num);
-    static Py_ssize_t moose_ElementField_getNum(_Field * self);
-    static PyObject * moose_ElementField_getItem(_Field * self, PyObject * index);
+    static int moose_ElementField_setNum(_Field * self, PyObject * num, void * closure);
+    static PyObject * moose_ElementField_getNum(_Field * self, void * closure);
+    static PyObject * moose_ElementField_getItem(_Field * self, Py_ssize_t index);
     
     //////////////////////////////////////////
     // Methods for Id class
