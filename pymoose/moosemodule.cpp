@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Jun 21 17:55:55 2012 (+0530)
+// Last-Updated: Sat Jun 23 13:35:59 2012 (+0530)
 //           By: subha
-//     Update #: 8772
+//     Update #: 8849
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -607,14 +607,6 @@ extern "C" {
         return PyString_FromString(fieldPath.str().c_str());
     }
 
-    // static void moose_Field_dealloc(_Field * self)
-    // {
-    //     if (self->name != NULL && self->name[0] != '\0'){
-    //         cout << "deallocating " << self->name << endl;
-    //         free(self->name);
-    //     }
-    //     free(self);
-    // }
     
     PyDoc_STRVAR(moose_Field_documentation,
                  "Base class for MOOSE fields.\n"
@@ -820,14 +812,14 @@ extern "C" {
                  "ElementField represents fields that are themselves elements. For\n"
                  "example, synapse in an IntFire neuron.\n");
 
-    static PyMethodDef ElementFieldMethods[] = {
-        {"setNum", (PyCFunction)moose_ElementField_setNum, METH_VARARGS,
-         "Set the number of entries."},
-        {"getNum", (PyCFunction)moose_ElementField_getNum, METH_VARARGS,
-         "Return number of entries in the field."},        
-        {NULL, NULL, 0, NULL},        /* Sentinel */        
+    static PyGetSetDef ElementFieldGetSetters[] = {
+        {"num",
+         (getter)moose_ElementField_getNum,
+         (setter)moose_ElementField_setNum,
+         "Return number of entries in the field.",
+         NULL},
+        {NULL}, /* sentinel */
     };
-
     
     static PySequenceMethods ElementFieldSequenceMethods = {
         (lenfunc)moose_ElementField_getNum, // sq_length
@@ -871,9 +863,9 @@ extern "C" {
         0,                                              /* tp_weaklistoffset */
         0,                                              /* tp_iter */
         0,                                              /* tp_iternext */
-        ElementFieldMethods,                           /* tp_methods */
+        0,                           /* tp_methods */
         0,                                              /* tp_members */
-        0,                                              /* tp_getset */
+        ElementFieldGetSetters,                                              /* tp_getset */
         0,                                              /* tp_base */
         0,                                              /* tp_dict */
         0,                                              /* tp_descr_get */
@@ -1370,6 +1362,7 @@ extern "C" {
         char _dims[] = "dims";
         static char * kwlist [] = {_path, _dims, _dtype, NULL};
         _ObjId * instance = (_ObjId*)self;
+        instance->oid_ = ObjId::bad;
         if (kwargs == NULL){
             if (!PyArg_ParseTuple(args,
                                   "s|Os:moose_ObjId_init_from_path",
@@ -1388,7 +1381,7 @@ extern "C" {
             return -1;
         }        
         instance->oid_ = ObjId(path);
-        if (!(ObjId::bad == instance->oid_)){
+        if (!(ObjId(0, 0) == instance->oid_)){
             return 0;
         }
         // Path does not exist, create neww
@@ -1685,13 +1678,7 @@ extern "C" {
             }
         }
         if (type.empty()){
-            // check if it is a fieldElementType - of no use currently:
-            type = getFieldType(Field<string>::get(self->oid_, "class"), string(field), "fieldElementFinfo");
-            if (type.empty()){
-                    return PyObject_GenericGetAttr((PyObject*)self, attr);            
-            } else {
-                type = "Id";
-            }
+            return PyObject_GenericGetAttr((PyObject*)self, attr);            
         }
         ftype = shortType(type);
         if (!ftype){
@@ -3478,7 +3465,19 @@ extern "C" {
         if (!define_elementFinfos(cinfo)){
             return 0;
         }
-
+// #ifndef NDEBUG
+//         cout << "Get set defs:" << class_name << endl;
+//         for (unsigned int ii = 0; ii < get_getsetdefs()[class_name].size(); ++ii){
+//             cout << ii;
+//             if (get_getsetdefs()[class_name][ii].name != NULL){
+//                 cout << ": " << get_getsetdefs()[class_name][ii].name;
+//             } else {
+//                 cout << "Empty";
+//             }
+//             cout << endl;
+//         }
+//         cout << "End getsetdefs: " << class_name << endl;
+// #endif
         // The getsetdef array must be terminated with empty objects.
         PyGetSetDef empty;
         empty.name = NULL;
@@ -3663,7 +3662,6 @@ extern "C" {
                               &name)){
             return NULL;
         }
-        assert(name);
         // If the ElementField already exists, return it
         string full_name = ((_ObjId*)self)->oid_.path() + "." + string(name);
         map<string, PyObject * >::iterator it = get_inited_elementfields().find(full_name);
@@ -3674,15 +3672,14 @@ extern "C" {
         
         // Create a new instance of ElementField `name` and set it as
         // an attribute of the object `self`.
-
-        // Create the argument for init method of ElementField.  This
-        // will be (fieldname, self)
-        PyObject * args = PyTuple_New(2);
-                
+        // 1. Create the argument for init method of ElementField.  This
+        //   will be (fieldname, self)
+        PyObject * args = PyTuple_New(2);                
         PyTuple_SetItem(args, 0, self);
         Py_XINCREF(self); // compensate for stolen ref
         PyTuple_SetItem(args, 1, PyString_FromString(name));
         _Field * ret = PyObject_New(_Field, &moose_ElementField);
+        // 2. Now use this arg to actually create the element field.
         if (moose_ElementField.tp_init((PyObject*)ret, args, NULL) == 0){
             Py_XDECREF(args);
             get_inited_elementfields()[full_name] =  (PyObject*)ret;
@@ -3703,7 +3700,6 @@ extern "C" {
         unsigned int curr_index = get_getsetdefs()[class_name].size();
         for (unsigned int ii = 0; ii < num_fieldElementFinfo; ++ii){
             const string& finfo_name = const_cast<Cinfo*>(cinfo)->getFieldElementFinfo(ii)->name();
-            cout << "# Creating element field: " << cinfo->name() << "." << finfo_name << endl;
             PyGetSetDef getset;
             get_getsetdefs()[class_name].push_back(getset);
             get_getsetdefs()[class_name][curr_index].name = (char*)calloc(finfo_name.size() + 1, sizeof(char));
@@ -3718,29 +3714,31 @@ extern "C" {
         return 1;
     }
 
-    Py_ssize_t moose_ElementField_getNum(_Field * self)
+    PyObject * moose_ElementField_getNum(_Field * self, void * closure)
     {
-        return Field<unsigned int>::get(self->owner, "num_" + string(self->name));
+        unsigned int num = Field<unsigned int>::get(self->owner, "num_" + string(self->name));
+        return Py_BuildValue("I", num);
     }
 
-    PyObject * moose_ElementField_setNum(_Field * self, PyObject * args)
+    int moose_ElementField_setNum(_Field * self, PyObject * args, void * closure)
     {
         unsigned int num;
-        if (!PyArg_ParseTuple(args, "I:moose.ElementField.setNum", &num)){
-            return NULL;
+        if (!PyInt_Check(args)){
+            PyErr_SetString(PyExc_TypeError, "moose.ElementField.setNum - needes an integer.");
+            return -1;
         }
-        Field<unsigned int>::set(self->owner, "num_" + string(self->name), num);
-        Py_RETURN_NONE;
+        num = PyInt_AsUnsignedLongMask(args);
+        if (!Field<unsigned int>::set(self->owner, "num_" + string(self->name), num)){
+            PyErr_SetString(PyExc_RuntimeError, "moose.ElementField.setNum : Field::set returned False.");
+            return -1;
+        }
+        return 0;
     }
 
-    PyObject * moose_ElementField_getItem(_Field * self, PyObject * args)
+    PyObject * moose_ElementField_getItem(_Field * self, Py_ssize_t index)
     {
-        int index;
         unsigned int len = Field<unsigned int>::get(self->owner, "num_" + string(self->name));
-        if (!PyArg_ParseTuple(args, "i:moose.ElementField.getItem", &index)){
-            return NULL;
-        }
-        if (index > len){
+        if (index >= len){
             PyErr_SetString(PyExc_IndexError, "moose.ElementField.getItem: index out of bounds.");
             return NULL;
         }

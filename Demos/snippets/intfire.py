@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jun 21 16:40:25 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Jun 21 16:46:56 2012 (+0530)
+# Last-Updated: Sat Jun 23 13:40:19 2012 (+0530)
 #           By: subha
-#     Update #: 20
+#     Update #: 33
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -45,6 +45,8 @@
 
 # Code:
 
+import moose
+
 def connect_two_intfires():
     """Connect two IntFire neurons so that spike events in one gets
     transmitted to synapse of the other."""
@@ -61,9 +63,21 @@ def connect_spikegen():
     if3 = moose.IntFire('if3')
     sg = moose.SpikeGen('sg')
     syn = moose.element(if3.path + '/synapse')
-    moose.connect(sg, 'event', if3, 'addSpike')
+    moose.connect(sg, 'event', syn, 'addSpike')
 
+def setup_synapse():
+    """Create an intfire object and create two synapses on it."""
+    if4 = moose.IntFire('if4')
+    sg1 = moose.SpikeGen('sg1')
+    sg2 = moose.SpikeGen('sg2')
+    if4.synapse.num = 2 # set synapse count to 2
+    moose.connect(sg1, 'event', if4.synapse[0], 'addSpike')
+    moose.connect(sg2, 'event', if4.synapse[1], 'addSpike')
 
-
+if __name__ == '__main__':
+    connect_two_intfires()
+    connect_spikegen()
+    setup_synapse()
+    
 # 
 # intfire.py ends here
