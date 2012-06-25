@@ -308,7 +308,6 @@ libmoose.so: libs
 # There are some unix/gcc specific paths here. Should be cleaned up later.
 pymoose: python/moose/_moose.so
 pymoose: CXXFLAGS += -DPYMOOSE -I/usr/include/${INSTALLED_PYTHON} # Should be updated according to location of user include directory
-pymoose: SUBDIR += pymoose
 pymoose: OBJLIBS += pymoose/_pymoose.o basecode/_basecode_pymoose.o
 pymoose: OBJLIBS := $(filter-out basecode/_basecode.o,$(OBJLIBS))
 pymoose: LIBS += -l${INSTALLED_PYTHON}	
