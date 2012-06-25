@@ -17774,10 +17774,10 @@ a ZombiePool and a ZombieBufPool. Earlier they were different, now because of
 the common base class they are the same. Fixed. Checkin 3581.
 Now to tackle Harsha's list of segvs.
 
-Acc1   ReadKkit::undump: Do not know how to build 'kchan
+* Acc1   ReadKkit::undump: Do not know how to build 'kchan
 * Acc2   void ReadKkit::buildSumTotal assertion
 * Acc3   Do not know how to build 'stim'
-Acc16  Do not know how to build 'stim' : also kchan.
+* Acc16  Do not know how to build 'stim' : also kchan.
 
 *Acc30  Id ReadKkit::buildEnz assertion
 *Acc33  int ReadKkit::loadTab Assertion
@@ -17812,4 +17812,18 @@ Fixed acc81 problem: I think it was probably the indexing issue. However, also
 	turned up a problem with -ve DiffConsts. Checkin 3587.
 
 Implented 'stim' class handling (actually a PulseGen) to deal with 
-acc3. Now it loads correctly but doesn't run.
+acc3. Now it loads correctly but doesn't run. Checkin 3589.
+============================================================================
+23 June 2012.
+Now to put in a dummy kchan.
+Also set up Reacs in a heirarchy for zombies. 
+Also Subha may ask me to put in a flag so that the fix for indexing in 
+pathnames is optional.
+
+Proofs for book chapter.
+Ashesh
+student examiners
+DBT
+============================================================================
+24 June 2012. 
+Put in dummy kchan. Fixes acc16 and acc1.

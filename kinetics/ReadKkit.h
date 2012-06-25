@@ -67,6 +67,7 @@ class ReadKkit
 		Id buildGraph( const vector< string >& args );
 		Id buildGeometry( const vector< string >& args );
 		Id buildStim( const vector< string >& args );
+		Id buildChan( const vector< string >& args );
 		Id buildInfo( Id parent, map< string, int >& m, 
 			const vector< string >& args );
 		void buildSumTotal( const string& src, const string& dest );
@@ -189,6 +190,7 @@ class ReadKkit
 		map< string, Id > plotIds_;
 		map< string, Id > tabIds_;
 		map< string, Id > stimIds_;
+		map< string, Id > chanIds_;
 
 		/*
 		vector< Id > pools_;
