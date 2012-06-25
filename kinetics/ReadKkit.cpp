@@ -426,6 +426,8 @@ void ReadKkit::undump( const vector< string >& args)
 		;
 	else if ( args[1] == "doqcsinfo" )
 		;
+	else if ( args[1] == "kchan" )
+		buildChan( args );
 	else if ( args[1] == "xtab" )
 		buildTable( args );
 	else
@@ -962,6 +964,27 @@ Id ReadKkit::buildStim( const vector< string >& args )
 	numStim_++;
 	return stim;
 }
+
+/**
+ * Build a Kchan entry in simulation. For now a dummy Neutral.
+ */
+Id ReadKkit::buildChan( const vector< string >& args )
+{
+	static vector< int > dim( 1, 1 );
+
+	string head;
+	string tail = pathTail( args[2], head );
+	Id pa = shell_->doFind( head ).id;
+	assert( pa != Id() );
+
+	cout << "Warning: Kchan not yet supported in MOOSE, creating dummy:\n"
+		<< "	" << args[2] << "\n";
+	Id chan = shell_->doCreate( "Neutral", pa, tail, dim, true );
+	assert( chan != Id() );
+	string chanPath = args[2].substr( 10 );
+	chanIds_[ chanPath ] = chan;
+	return chan;
+}
 	
 
 Id ReadKkit::buildGeometry( const vector< string >& args )
@@ -1118,11 +1141,19 @@ void ReadKkit::addmsg( const vector< string >& args)
 	
 	if ( args[3] == "REAC" ) {
 		if ( args[4] == "A" && args[5] == "B" ) {
-			innerAddMsg( src, reacIds_, "sub", dest, poolIds_, "reac" );
+			// Ignore kchans
+			if ( chanIds_.find( src ) != chanIds_.end() )
+				; // found a kchan, do nothing
+			else
+				innerAddMsg( src, reacIds_, "sub", dest, poolIds_, "reac");
 		} 
 		else if ( args[4] == "B" && args[5] == "A" ) {
-			// dest pool is product of src reac
-			innerAddMsg( src, reacIds_, "prd", dest, poolIds_, "reac" );
+			// Ignore kchans
+			if ( chanIds_.find( src ) != chanIds_.end() )
+				; // found a kchan, do nothing
+			else
+				// dest pool is product of src reac
+				innerAddMsg( src, reacIds_, "prd", dest, poolIds_, "reac");
 		}
 		else if ( args[4] == "sA" && args[5] == "B" ) {
 			// Msg from enzyme to substrate.
