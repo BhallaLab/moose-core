@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'newgui.ui'
 #
-# Created: Wed Jun 20 14:57:18 2012
+# Created: Wed Jun 27 14:20:12 2012
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,7 +17,7 @@ except AttributeError:
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(799, 798)
+        MainWindow.resize(799, 948)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.horizontalLayout_6 = QtGui.QHBoxLayout(self.centralwidget)
@@ -346,24 +346,30 @@ class Ui_MainWindow(object):
         self.verticalLayout_6.setObjectName(_fromUtf8("verticalLayout_6"))
         self.gridLayout = QtGui.QGridLayout()
         self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
-        self.simControlPlotdtLineEdit = QtGui.QLineEdit(self.dockWidgetContents_5)
-        self.simControlPlotdtLineEdit.setObjectName(_fromUtf8("simControlPlotdtLineEdit"))
-        self.gridLayout.addWidget(self.simControlPlotdtLineEdit, 1, 2, 1, 1)
         self.simControlSimdtLineEdit = QtGui.QLineEdit(self.dockWidgetContents_5)
         self.simControlSimdtLineEdit.setObjectName(_fromUtf8("simControlSimdtLineEdit"))
-        self.gridLayout.addWidget(self.simControlSimdtLineEdit, 0, 2, 1, 1)
+        self.gridLayout.addWidget(self.simControlSimdtLineEdit, 1, 2, 1, 1)
+        self.simControlPlotdtLineEdit = QtGui.QLineEdit(self.dockWidgetContents_5)
+        self.simControlPlotdtLineEdit.setObjectName(_fromUtf8("simControlPlotdtLineEdit"))
+        self.gridLayout.addWidget(self.simControlPlotdtLineEdit, 2, 2, 1, 1)
         self.label_14 = QtGui.QLabel(self.dockWidgetContents_5)
         self.label_14.setObjectName(_fromUtf8("label_14"))
-        self.gridLayout.addWidget(self.label_14, 1, 0, 1, 1)
+        self.gridLayout.addWidget(self.label_14, 2, 0, 1, 1)
         self.simControlUpdatePlotdtLineEdit = QtGui.QLineEdit(self.dockWidgetContents_5)
         self.simControlUpdatePlotdtLineEdit.setObjectName(_fromUtf8("simControlUpdatePlotdtLineEdit"))
-        self.gridLayout.addWidget(self.simControlUpdatePlotdtLineEdit, 2, 2, 1, 1)
+        self.gridLayout.addWidget(self.simControlUpdatePlotdtLineEdit, 3, 2, 1, 1)
         self.label_15 = QtGui.QLabel(self.dockWidgetContents_5)
         self.label_15.setObjectName(_fromUtf8("label_15"))
-        self.gridLayout.addWidget(self.label_15, 2, 0, 1, 1)
+        self.gridLayout.addWidget(self.label_15, 3, 0, 1, 1)
         self.label_13 = QtGui.QLabel(self.dockWidgetContents_5)
         self.label_13.setObjectName(_fromUtf8("label_13"))
-        self.gridLayout.addWidget(self.label_13, 0, 0, 1, 1)
+        self.gridLayout.addWidget(self.label_13, 1, 0, 1, 1)
+        self.label_18 = QtGui.QLabel(self.dockWidgetContents_5)
+        self.label_18.setObjectName(_fromUtf8("label_18"))
+        self.gridLayout.addWidget(self.label_18, 0, 0, 1, 1)
+        self.simControlRunTimeLineEdit = QtGui.QLineEdit(self.dockWidgetContents_5)
+        self.simControlRunTimeLineEdit.setObjectName(_fromUtf8("simControlRunTimeLineEdit"))
+        self.gridLayout.addWidget(self.simControlRunTimeLineEdit, 0, 2, 1, 1)
         spacerItem17 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.gridLayout.addItem(spacerItem17, 0, 1, 1, 1)
         self.verticalLayout_6.addLayout(self.gridLayout)
@@ -694,6 +700,7 @@ class Ui_MainWindow(object):
         self.label_14.setText(QtGui.QApplication.translate("MainWindow", "Plotdt:", None, QtGui.QApplication.UnicodeUTF8))
         self.label_15.setText(QtGui.QApplication.translate("MainWindow", "Update Plotdt:", None, QtGui.QApplication.UnicodeUTF8))
         self.label_13.setText(QtGui.QApplication.translate("MainWindow", "Simdt:", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_18.setText(QtGui.QApplication.translate("MainWindow", "Run Time", None, QtGui.QApplication.UnicodeUTF8))
         self.simControlRunPushButton.setText(QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
         self.simControlResetPushButton.setText(QtGui.QApplication.translate("MainWindow", "Reset", None, QtGui.QApplication.UnicodeUTF8))
         self.simControlContinuePushButton.setText(QtGui.QApplication.translate("MainWindow", "Continue", None, QtGui.QApplication.UnicodeUTF8))
