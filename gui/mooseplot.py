@@ -81,10 +81,10 @@ class MoosePlot(MyMplCanvas):
         if currentTime > self.xmin:
             self.xmin = currentTime
         for curve, table in self.curveTableMap.items():
-            tabLen = len(table)
+            tabLen = len(table.vec)
             if tabLen == 0:
                 continue
-            ydata = array(table.table)           
+            ydata = array(table.vec)           
             xdata = linspace(0, currentTime, tabLen)
             curve.set_data([xdata[2:tabLen:1]],[ydata[2:tabLen:1]])
 
