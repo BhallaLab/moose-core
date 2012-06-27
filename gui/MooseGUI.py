@@ -86,6 +86,9 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.connect(self.propEditorChildListWidget,QtCore.SIGNAL('itemClicked(QListWidgetItem *)'),self.propEditorSelectChild)
         #internal connections
         self.connect(self.mooseHandler, QtCore.SIGNAL('updatePlots(float)'), self.updatePlots)
+        #run
+        #self.connect(self.runButtonToolbar, QtCore.SIGNAL('clicked()'), self.resetAndRunSlot)
+        self.connect(self.actionRun,QtCore.SIGNAL('triggered()'),self.resetAndRunSlot)
 
     def popupLoadModelDialog(self):
         fileDialog = QtGui.QFileDialog(self)
@@ -104,15 +107,16 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         
         targetLabel = QtGui.QLabel('Target Element')
         targetText = QtGui.QLineEdit(fileDialog)
-
+        
         targetText.setText(currentPath)
         targetText.setText('/')
+        targetText.setReadOnly(1)
         targetPanel.layout().addWidget(targetLabel)
         targetPanel.layout().addWidget(targetText)
         layout = fileDialog.layout()
         layout.addWidget(targetPanel)
-        self.connect(fileDialog, QtCore.SIGNAL('currentChanged(const QString &)'), lambda path:targetText.setText(os.path.basename(str(path)).rpartition('.')[0]))
-        self.connect(targetText, QtCore.SIGNAL('textChanged(const QString &)'), self.getElementpath)
+        self.connect(fileDialog, QtCore.SIGNAL('currentChanged(const QString &)'), lambda path:(targetText.setText(os.path.basename(str(path)).rpartition('.')[0])) )
+        #self.connect(targetText, QtCore.SIGNAL('textChanged(const QString &)'), self.getElementpath)
 
         if fileDialog.exec_():
             fileNames = fileDialog.selectedFiles()
@@ -138,7 +142,6 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
                 else:
                     modelpath = str(targetText.text())
                 modeltype  = self.mooseHandler.loadModel(str(fileName), str(fileType), modelpath)
-
                 if modeltype == MooseHandler.type_kkit:
                     try:
                         self.addLayoutWindow(modelpath)
@@ -147,8 +150,8 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
                     except kineticlayout.Widgetvisibility:
                         print 'No kkit layout for: %s' % (str(fileName))
                     self.populateKKitPlots(modelpath)
-                #self.populateDataPlots()
-                #self.updateDefaultTimes(modeltype)
+                self.populateDataPlots(modelpath)
+                self.updateDefaultTimes(modeltype)
             #self.modelTreeWidget.recreateTree()
             #self.enableControlButtons()
             #self.checkModelType()
@@ -156,6 +159,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             app.restoreOverrideCursor()
 
     def getElementpath(self,text):
+        #print "here",text
         if(text == '/' or text == ''):
             QtGui.QMessageBox.about(self,"My message box","Target Element path should not be \'/\' or \'null\', filename will be selected as Element path")
 
@@ -216,9 +220,10 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
         #plot config dock related 
     def updatePlots(self,currentTime):
+        print 'updating plots'
         #updates plots every update_plot_dt time steps see moosehandler.
-        for plotWinName,plot in self.plotWinNamePlotDict.iteritems():
-            plot.updatePlot(currentTime)
+        for plotWinName,plot in self.plotNameWinDict.iteritems():
+            plot.plot.updatePlot(currentTime)
         self.updateCurrentTime(currentTime)
 
     def updatePlotDockFields(self,obj):
@@ -236,7 +241,18 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             self.plotConfigFieldSelectionComboBox.clear()
             self.plotConfigCurrentSelection = None
             self.plotConfigAcceptPushButton.setEnabled(False)
-            
+    def populateDataPlots(self,modelpath):
+        """Create plots for all Table objects in /data element"""
+        #tables = self.mooseHandler.getDataTables()
+        '''
+        for gp in moose.wildcardFind(modelpath+'/graphs/#/##[TYPE=Table],'+modelpath+'/moregraphs/#/##[TYPE=Table]'):
+            table = moose.Table(gp).vec
+            print "table",table,gp
+            self.plots[0].addTable(table)
+            self.tablePlotMap[table] = self.plots[0]
+            config.LOGGER.info('Added plot ' + table.path)
+        self.plots[0].replot()
+        '''
     def addFieldToPlot(self):
         #creates tables - called when 'Okay' pressed in plotconfig dock
         dataNeutral = moose.Neutral(self.plotConfigCurrentSelection.getField('path')+'/data')
@@ -251,7 +267,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             
             #do not like the legends shown in the plots, change the field 2 below
             plotWin.plot.addTable(newTable,newTable.getField('name'))
-
+            
         else:
             #no previous mooseplotwin - so create, and add table to corresp dict
             self.plotWindowFieldTableDict[str(self.plotConfigWinSelectionComboBox.currentText())] = [newTable]
@@ -260,6 +276,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
             #do not like the legends shown in the plots, change the field 2 below
             plotWin.plot.addTable(newTable,newTable.getField('name'))
+            print "::",newTable.getField('name')
             plotWin.show()
             self.plotNameWinDict[str(self.plotConfigWinSelectionComboBox.currentText())] = plotWin
 
@@ -270,12 +287,44 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.plotConfigWinSelectionComboBox.setCurrentIndex(count)
         
         #general
-    def updateCurrentTime(currentTime):
+    def updateCurrentTime(self,currentTime):
         self.currentTime = currentTime
 
     def doQuit(self):
         QtGui.qApp.closeAllWindows()
+    def resetAndRunSlot(self):
+        print "reset and run"
+        moose.reinit()
+        moose.start(10)
+        rt = moose.element('/clock').runTime
+        ti = moose.element('/clock').tick
+        self.updatePlots(100)
+        print "runtime",rt,"simdt",ti[0].dt
+        for gp in moose.wildcardFind('/Kholodenko/graphs/#/##[TYPE=Table],/Kholodenko/moregraphs/#/##[TYPE=Table]'):
+            pass
+            #print gp,moose.Table(gp).vec
+
+        
     
+    def updateDefaultTimes(self, modeltype):
+        if(modeltype == MooseHandler.type_kkit):
+            tick = (moose.element('/clock').tick)
+            SIMDT = tick[0].dt
+            PLOTDT = tick[2].dt
+            self.simControlSimdtLineEdit.setText(QtCore.QString('%1.3e' % (SIMDT)))
+            self.simControlPlotdtLineEdit.setText(QtCore.QString('%1.3e' % (PLOTDT)))
+            self.simControlUpdatePlotdtLineEdit.setText(QtCore.QString('%1.3e' % (PLOTDT)))
+            
+        '''
+        if (modeltype == MooseHandler.type_kkit) or (modeltype == MooseHandler.type_sbml):
+            self.simdtText.setText(QtCore.QString('%1.3e' % (MooseHandler.DEFAULT_SIMDT_KKIT)))
+            self.plotdtText.setText(QtCore.QString('%1.3e' % (MooseHandler.DEFAULT_PLOTDT_KKIT)))
+            #self.gldtText.setText(QtCore.QString('%1.3e' % (MooseHandler.DEFAULT_GLDT_KKIT)))
+            self.runtimeText.setText(QtCore.QString('%1.3e' % (MooseHandler.DEFAULT_RUNTIME_KKIT)))
+            #harsha run from menu takes from self.runtimeText and run for toolbar takes from self.runTimeEditToolbar
+            self.runTimeEditToolbar.setText(QtCore.QString('%1.3e' % (MooseHandler.DEFAULT_RUNTIME_KKIT)))
+            self.updateTimeText.setText(QtCore.QString('%1.3e' % (MooseHandler.DEFAULT_PLOTUPDATE_DT_KKIT)))
+            '''
     def populateKKitPlots(self,path):
         graphs = self.getKKitGraphs(path)
         #currently putting all plots on Plot Window 1 by default - perhaps not the nicest way to do it.
