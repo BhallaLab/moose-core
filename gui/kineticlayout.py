@@ -230,12 +230,14 @@ class kineticsWidget(QtGui.QWidget):
         
         cmptMol = {}
         self.setupCompt(modelPath,cmptMol)
-        # for k,v in cmptMol.items(): print k,v
+        #for k,v in cmptMol.items(): print k,v
+
         srcdesConnection = {}
         zombieType = ['ZombieReac','ZombieEnz','ZombieMMenz','ZombieSumFunc']
         self.setupItem(modelPath,zombieType,srcdesConnection)
-
+        #for k,v in srcdesConnection.items(): print k,v
         G = pgv.AGraph(fontname='Helvetica',fontsize=9,strict=False,directed=None)
+
         #pickled the color map here and loading the file
         pkl_file = open(os.path.join(PATH_KKIT_COLORMAPS,'rainbow2.pkl'),'rb')
         picklecolorMap = pickle.load(pkl_file)
@@ -276,7 +278,7 @@ class kineticsWidget(QtGui.QWidget):
 
         G.layout(prog='dot')
         filename = modelPath.lstrip('/')
-        #G.draw(filename+'.png',prog='dot',format='png')
+        G.draw('/home/harsha/Desktop/'+filename+'.png',prog='dot',format='png')
         graphCord = {}
         self.qGraCompt = {}
         mooseId_GText = {}
@@ -348,7 +350,7 @@ class kineticsWidget(QtGui.QWidget):
             molList = []
             reList = []
             for mitem in Neutral(meshEnt).getNeighbors('remesh'):
-                if ( (mitem[0].class_ != 'GslIntegrator') and ((mitem[0].parent).class_ != 'ZombieEnz') ):
+                if ( (mitem[0].class_ != 'GslIntegrator')):# and ((mitem[0].parent).class_ != 'ZombieEnz') ):
                     molList.append(element(mitem))
             for reitem in Neutral(meshEnt).getNeighbors('remeshReacs'):
                 reList.append(element(reitem))
@@ -371,6 +373,7 @@ class kineticsWidget(QtGui.QWidget):
                     if (zombieObj == 'ZombieMMenz'):
                         for enzpar in items.getNeighbors('enzDest'):
                             sublist.append(element(enzpar))
+                    #print "items",items,sublist,prdlist
                     cntDict[items] = sublist,prdlist
             else:
                 #ZombieSumFunc adding inputs
@@ -380,6 +383,11 @@ class kineticsWidget(QtGui.QWidget):
                     funplist = []
                     nfunplist = []
                     for inpt in items.getNeighbors('input'): inputlist.append(element(inpt))
+                    '''
+                        for inPt in inpt:
+                            if ((inPt.parent).class_ != 'ZombieEnz'):
+                                inputlist.append(element(inPt))
+                    '''       
                     for zfun in items.getNeighbors('output'): funplist.append(element(zfun))
                     for i in funplist: nfunplist.append(element(i).getId())
                     nfunplist = list(set(nfunplist))
@@ -389,6 +397,7 @@ class kineticsWidget(QtGui.QWidget):
                             if(element(el).getId() == nfunplist[0]):
                                 cntDict[element(el)] = inputlist
                                 break
+                            
     def colorCheck(self,item,textColor,bgcolor,pklcolor):
         if(textColor == ''): textColor = 'green'
         if(bgcolor == ''): bgcolor = 'blue'
@@ -577,7 +586,8 @@ if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     size = QtCore.QSize(800,600)
     modelPath = 'acc15'
-    loadModel('/home/harsha/Genesis_file/'+modelPath+'.g','/'+modelPath)
+    modelPath = 'Osc_cspace_ref_model'
+    loadModel('/home/harsha/dh_branch/Demos/Genesis_files/'+modelPath+'.g','/'+modelPath)
     dt = kineticsWidget(size,'/'+modelPath)
     dt.show()
     sys.exit(app.exec_())
