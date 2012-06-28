@@ -47,6 +47,8 @@ class Interpol2D
 		void setSy( double value );
 		double getSy() const;
 
+        double getInterpolatedValue(vector<double> xy) const;
+    
 		////////////////////////////////////////////////////////////
 		// Here are the Interpol2D Destination functions
 		////////////////////////////////////////////////////////////
