@@ -99,7 +99,12 @@ const Cinfo* Interpol2D::initCinfo()
 			&Interpol2D::setTableVector,
 			&Interpol2D::getTableVector
 		);
-		
+    static ReadOnlyLookupValueFinfo< Interpol2D, vector < double >, double >
+        z("z",
+          "Interpolated value for specified x and y. This is provided for"
+          " debugging. Normally other objects will retrieve interpolated values"
+          " via lookup message.",
+          &Interpol2D::getInterpolatedValue);
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
@@ -120,6 +125,7 @@ const Cinfo* Interpol2D::initCinfo()
 		&ydivs,				// Value
 		&dy,				// Value
 		&table,				// Lookup
+        &z,                 // Lookup
 		&tableVector2D,		// Value
 	};
 
@@ -428,6 +434,21 @@ unsigned int Interpol2D::ydivs() const
 	return table_[0].size() - 1;
 }
 
+// This is a wrapper around interpolate to retrieve value by vector
+// containing x and y.
+double Interpol2D::getInterpolatedValue(vector <double> xy) const
+{
+    double x, y;
+    if (xy.size() < 2){
+        x = xmin_;
+        y = ymin_;
+    } else {
+        x = xy[0];
+        y = xy[1];
+    }
+    return interpolate(x, y);
+}
+    
 ////////////////////////////////////////////////////////////////////
 // Here we set up Interpol2D Destination functions
 ////////////////////////////////////////////////////////////////////
