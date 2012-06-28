@@ -443,8 +443,20 @@ double Interpol2D::getInterpolatedValue(vector <double> xy) const
         x = xmin_;
         y = ymin_;
     } else {
-        x = xy[0];
-        y = xy[1];
+        if (xy[0] < xmin_){
+            x = xmin_;
+        } else if (xy[0] > xmax_){
+            x = xmax_;
+        } else {
+            x = xy[0];
+        }
+        if (xy[1] < ymin_){
+            y = ymin_;
+        } else if (xy[1] > ymax_){
+            y = ymax_;
+        } else {
+            y = xy[1];
+        }
     }
     return interpolate(x, y);
 }
@@ -495,23 +507,19 @@ double Interpol2D::interpolate( double x, double y ) const
 	assert( table_.size() > 1 );
 	
 	double xv = ( x - xmin_ ) * invDx_;
-	unsigned long xInteger = static_cast< unsigned long >( (x - xmin_) * invDx_ );
+	unsigned long xInteger = static_cast< unsigned long >(xv);
 	assert( xInteger < table_.size() );
 	double xFraction = xv - xInteger;
 
 	double yv = ( y - ymin_ ) * invDy_;
-	unsigned long yInteger = static_cast< unsigned long >( (y - ymin_) * invDy_ );
+	unsigned long yInteger = static_cast< unsigned long >(yv);
 	assert( yInteger < table_[ 0 ].size() );
 	double yFraction = yv - yInteger;
 
-	bool isEndOfX, isEndOfY;
 	double xFyF = xFraction * yFraction;
 	
 	//If the value being looked up is at the boundary, we dont want to read past
 	//the boundary for the x interpolation.
-	( xInteger == table_.size() - 1 ) ? isEndOfX = true : isEndOfX = false;
-	( yInteger == table_.size() - 1 ) ? isEndOfY = true : isEndOfY = false;
-
 	vector< vector< double > >::const_iterator iz0 = table_.begin() + xInteger;
 	vector< double >::const_iterator iz00 = iz0->begin() + yInteger;
 	vector< double >::const_iterator iz10;
@@ -527,31 +535,19 @@ double Interpol2D::interpolate( double x, double y ) const
 	double z01;
 	double z10;
 	double z11;
-
+    bool isEndOfX = ( xInteger == table_.size() - 1 );
+    bool isEndOfY = ( yInteger == iz0->size() - 1);
 	//Upto this point, only iz00 is known. The rest are computed only
 	//conditionally.
-	if ( isEndOfX ) 
-	{
-		z10 = 0;
-		z11 = 0;
-		( isEndOfY == true ) ? z01 = 0 : z01 = *(iz00 + 1);
-	}
-	else
-	{
-		iz10 = ( iz0 + 1 )->begin() + yInteger;
-		z10 = *iz10;
-		if ( isEndOfY )
-		{
-			z01 = 0;
-			z11 = 0;
-		}
-		else
-		{
-			z01 = *( iz00 + 1 );
-			z11 = *( iz10 + 1 );
-		}
-	}
-	
+	if (isEndOfX){
+        z10 = 0.0;
+        z11 = 0.0;
+        isEndOfY? (z01 = 0, z11 = 0): (z01 = *(iz00 + 1), z11 = *(iz10 + 1));
+    } else {
+        iz10 = (iz0 + 1)->begin() + yInteger;
+        z10 = *iz10;
+        isEndOfY? (z01 = 0, z11 = 0): (z01 = *(iz00 + 1), z11 = *(iz10 + 1));
+    }
 	/* The following is the same as:
 			return (
 				z00 * ( 1 - xFraction ) * ( 1 - yFraction ) +
@@ -568,32 +564,23 @@ double Interpol2D::interpolate( double x, double y ) const
 
 double Interpol2D::innerLookup( double x, double y ) const
 {
-	bool isOutOfBounds = false;
-	
 	if ( table_.size() == 0 )
 		return 0.0;
 	
 	if ( x < xmin_ ) {
 		x = xmin_;
-		isOutOfBounds = true;
 	}
 	if ( x > xmax_ ) {
 		x = xmax_;
-		isOutOfBounds = true;
 	}
 	if ( y < ymin_ ) {
 		y = ymin_;
-		isOutOfBounds = true;
 	}
 	if ( y > ymax_ ) {
 		y = ymax_;
-		isOutOfBounds = true;
 	}
 	
-	if ( isOutOfBounds )
-		return indexWithoutCheck( x, y );
-	else 
-		return interpolate( x, y );
+    return interpolate( x, y );
 }
 
 bool Interpol2D::operator==( const Interpol2D& other ) const

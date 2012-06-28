@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jun 28 15:19:46 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Jun 28 15:33:02 2012 (+0530)
+# Last-Updated: Thu Jun 28 17:11:42 2012 (+0530)
 #           By: subha
-#     Update #: 28
+#     Update #: 49
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -54,21 +54,25 @@ import moose
 
 def interpolation_demo():
     interpol = moose.Interpol2D('/interpol2D')
-    interpol.xmin = -1.0
+    interpol.xmin = 0.0
     interpol.xmax = 1.0
-    interpol.ymin = -2.0
-    interpol.ymax = 2.0
+    interpol.ymin = 0.0
+    interpol.ymax = 1.0
     # Make a 50 element array with entries at equal distance from
     # [0,1) and reshape it into a 10x5 matrix and assign to table.
     matrix = np.linspace(0, 1.0, 50).reshape(10, 5)
+    print 'Setting table to'
+    print matrix
     interpol.tableVector2D = matrix
     # interpolating beyond top left corner.
     # value should be 
-    pos = (-0.2, 2.1)
+    pos = (0.8, 0.3)
     
     print 'Interpolated value at', pos
     print interpol.z[pos[0], pos[1]]
-    print 'Matrix entry:', matrix[4, 0]
+    
+    print 'Point going out of bound on both x and y', interpol.z[1.1, 1.1]
+    print 'Point going out of bound on both x and y', interpol.z[0.5, 1.1]
 
 if __name__ == '__main__':
     interpolation_demo()
