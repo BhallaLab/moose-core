@@ -88,6 +88,11 @@ string ReadKkit::getBasePath() const
 	return basePath_;
 }
 
+unsigned int ReadKkit::getVersion() const
+{
+	return version_;
+}
+
 //////////////////////////////////////////////////////////////////
 // The read functions.
 //////////////////////////////////////////////////////////////////
@@ -134,6 +139,8 @@ Id ReadKkit::read(
 	Qinfo q;
 	q.setThreadNum( ScriptThreadNum );
 	sm->setPlotDt( plotdt_ );
+	sm->setSimDt( simdt_ );
+	sm->setVersion( version_ );
 	sm->build( base.eref(), &q, method );
 	s->doReinit();
 	return base;
@@ -337,6 +344,20 @@ string ReadKkit::pathTail( const string& path, string& head ) const
 	return path.substr( pos + 1 );
 }
 
+string ReadKkit::cleanPath( const string& path ) const
+{
+	// Could surely do this better with STL. But harder to understand.
+	string ret = path;
+	for ( unsigned int i = 0; i < path.length(); ++i ) {
+		char c = ret[i];
+		if ( c == '*' )
+			ret[i] = 'p';
+		else if ( c == '[' || c == ']' || c == '-' || c == '@' || c == ' ')
+			ret[i] = '_';
+	}
+	return ret;
+}
+
 void assignArgs( map< string, int >& argConv, const vector< string >& args )
 {
 	for ( unsigned int i = 2; i != args.size(); ++i )
@@ -447,7 +468,8 @@ Id ReadKkit::buildReac( const vector< string >& args )
 	static vector< int > dim( 1, 1 );
 
 	string head;
-	string tail = pathTail( args[2], head );
+	string clean = cleanPath( args[2] );
+	string tail = pathTail( clean, head );
 	Id pa = shell_->doFind( head ).id;
 	assert( pa != Id() );
 
@@ -461,7 +483,7 @@ Id ReadKkit::buildReac( const vector< string >& args )
 	// the model has been created, once we know the order of each reac.
 
 	Id reac = shell_->doCreate( "Reac", pa, tail, dim, true );
-	reacIds_[ args[2].substr( 10 ) ] = reac; 
+	reacIds_[ clean.substr( 10 ) ] = reac; 
 
 	Field< double >::set( reac, "kf", kf );
 	Field< double >::set( reac, "kb", kb );
@@ -629,7 +651,8 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 {
 	static vector< int > dim( 1, 1 );
 	string head;
-	string tail = pathTail( args[2], head );
+	string clean = cleanPath( args[2] );
+	string tail = pathTail( clean, head );
 	Id pa = shell_->doFind( head ).id;
 	assert ( pa != Id() );
 
@@ -641,11 +664,6 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 		atof( args[ enzMap_[ "nComplexInit" ] ].c_str() );
 	// double vol = atof( args[ enzMap_[ "vol" ] ].c_str());
 	bool isMM = atoi( args[ enzMap_[ "usecomplex" ] ].c_str());
-
-	// double vsf = atof( args[ enzMap_[ "vol" ] ].c_str() ); 
-	// This is unreliable as the vsf stored in this way does not always
-	// match with the parent enzyme pool volume.
-	// double vol = 1.0e3 * vsf / KKIT_NA; // Converts volscale to actual vol in m^3
 	assert( poolVols_.find( pa ) != poolVols_.end() );
 	double vol = poolVols_[ pa ];
 	
@@ -659,7 +677,7 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 	if ( isMM ) {
 		Id enz = shell_->doCreate( "MMenz", pa, tail, dim, true );
 		assert( enz != Id () );
-		string mmEnzPath = args[2].substr( 10 );
+		string mmEnzPath = clean.substr( 10 );
 		mmEnzIds_[ mmEnzPath ] = enz; 
 
 		assert( k1 > EPSILON );
@@ -674,7 +692,7 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 		Id enz = shell_->doCreate( "Enz", pa, tail, dim, true );
 		// double parentVol = Field< double >::get( pa, "size" );
 		assert( enz != Id () );
-		string enzPath = args[2].substr( 10 );
+		string enzPath = clean.substr( 10 );
 		enzIds_[ enzPath ] = enz; 
 
 		// Need to figure out what to do about these. Perhaps it is OK
@@ -740,7 +758,7 @@ Id ReadKkit::buildGroup( const vector< string >& args )
 	static vector< int > dim( 1, 1 );
 
 	string head;
-	string tail = pathTail( args[2], head );
+	string tail = pathTail( cleanPath( args[2] ), head );
 
 	Id pa = shell_->doFind( head ).id;
 	assert( pa != Id() );
@@ -766,7 +784,8 @@ Id ReadKkit::buildPool( const vector< string >& args )
 	static vector< int > dim( 1, 1 );
 
 	string head;
-	string tail = pathTail( args[2], head );
+	string clean = cleanPath( args[2] );
+	string tail = pathTail( clean, head );
 	Id pa = shell_->doFind( head ).id;
 	assert( pa != Id() );
 
@@ -796,13 +815,13 @@ Id ReadKkit::buildPool( const vector< string >& args )
 		pool = shell_->doCreate( "Pool", pa, tail, dim, true );
 		/*
 		cout << "ReadKkit::buildPool: Unknown slave_enable flag '" << 
-			slaveEnable << "' on " << args[2] << "\n";
+			slaveEnable << "' on " << clean << "\n";
 			*/
 		poolFlags_[pool] = slaveEnable;
 	}
 	assert( pool != Id() );
 	// skip the 10 chars of "/kinetics/"
-	poolIds_[ args[2].substr( 10 ) ] = pool; 
+	poolIds_[ clean.substr( 10 ) ] = pool; 
 
 	Field< double >::set( pool, "concInit", nInit / ( NA * vol) );
 	Field< double >::set( pool, "diffConst", diffConst );
@@ -937,7 +956,8 @@ Id ReadKkit::buildStim( const vector< string >& args )
 	static vector< int > dim( 1, 1 );
 
 	string head;
-	string tail = pathTail( args[2], head );
+	string clean = cleanPath( args[2] );
+	string tail = pathTail( clean, head );
 	Id pa = shell_->doFind( head ).id;
 	assert( pa != Id() );
 
@@ -951,7 +971,7 @@ Id ReadKkit::buildStim( const vector< string >& args )
 
 	Id stim = shell_->doCreate( "PulseGen", pa, tail, dim, true );
 	assert( stim != Id() );
-	string stimPath = args[2].substr( 10 );
+	string stimPath = clean.substr( 10 );
 	stimIds_[ stimPath ] = stim;
 	Field< double >::set( stim, "firstLevel", level1 );
 	Field< double >::set( stim, "firstWidth", width1 );
@@ -973,15 +993,16 @@ Id ReadKkit::buildChan( const vector< string >& args )
 	static vector< int > dim( 1, 1 );
 
 	string head;
-	string tail = pathTail( args[2], head );
+	string clean = cleanPath( args[2] );
+	string tail = pathTail( clean, head );
 	Id pa = shell_->doFind( head ).id;
 	assert( pa != Id() );
 
 	cout << "Warning: Kchan not yet supported in MOOSE, creating dummy:\n"
-		<< "	" << args[2] << "\n";
+		<< "	" << clean << "\n";
 	Id chan = shell_->doCreate( "Neutral", pa, tail, dim, true );
 	assert( chan != Id() );
-	string chanPath = args[2].substr( 10 );
+	string chanPath = clean.substr( 10 );
 	chanIds_[ chanPath ] = chan;
 	return chan;
 }
@@ -999,7 +1020,7 @@ Id ReadKkit::buildGraph( const vector< string >& args )
 	static vector< int > dim( 1, 1 );
 
 	string head;
-	string tail = pathTail( args[2], head );
+	string tail = pathTail( cleanPath( args[2] ), head );
 
 	Id pa = shell_->doFind( head ).id;
 	assert( pa != Id() );
@@ -1014,7 +1035,7 @@ Id ReadKkit::buildPlot( const vector< string >& args )
 	static vector< int > dim( 1, 1 );
 
 	string head;
-	string tail = pathTail( args[2], head ); // Name of plot
+	string tail = pathTail( cleanPath( args[2] ), head ); // Name of plot
 	string temp;
 	string graph = pathTail( head, temp ); // Name of graph
 
@@ -1039,7 +1060,8 @@ Id ReadKkit::buildTable( const vector< string >& args )
 	static vector< int > dim( 1, 1 );
 
 	string head;
-	string tail = pathTail( args[2], head ); // Name of xtab
+	string clean = cleanPath( args[2] );
+	string tail = pathTail( clean, head ); // Name of xtab
 
 	Id pa = shell_->doFind( head ).id;
 	assert( pa != Id() );
@@ -1060,7 +1082,7 @@ Id ReadKkit::buildTable( const vector< string >& args )
 		// loadTab is invoked.
 	}
 
-	string temp = args[2].substr( 10 );
+	string temp = clean.substr( 10 );
 	tabIds_[ temp ] = tab; 
 
 	return tab;
@@ -1098,7 +1120,7 @@ unsigned int ReadKkit::loadTab( const vector< string >& args )
 	bool ok = Field< vector< double > >::set( tab, "vec", tabEntries_ );
 	assert( ok );
 
-	// cout << "Loading table for " << args[0] << "," << args[1] << "," << args[2] << endl;
+	// cout << "Loading table for " << args[0] << "," << args[1] << "," << clean << endl;
 	
 	if ( args[1] == "-end" )
 		lastTab_ = Id();
@@ -1136,8 +1158,8 @@ void ReadKkit::innerAddMsg(
 
 void ReadKkit::addmsg( const vector< string >& args)
 {
-	string src = args[1].substr( 10 );
-	string dest = args[2].substr( 10 );
+	string src = cleanPath( args[1] ).substr( 10 );
+	string dest = cleanPath( args[2] ).substr( 10 );
 	
 	if ( args[3] == "REAC" ) {
 		if ( args[4] == "A" && args[5] == "B" ) {
@@ -1185,7 +1207,7 @@ void ReadKkit::addmsg( const vector< string >& args)
 	else if ( args[3] == "PLOT" ) { // Time-course output for pool
 		string head;
 		string temp;
-		dest = pathTail( args[2], head );
+		dest = pathTail( cleanPath( args[2] ), head );
 		string graph = pathTail( head, temp );
 		temp = graph + "/" + dest;
 		map< string, Id >::const_iterator i = plotIds_.find( temp );

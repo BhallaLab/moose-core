@@ -17820,10 +17820,39 @@ Also set up Reacs in a heirarchy for zombies.
 Also Subha may ask me to put in a flag so that the fix for indexing in 
 pathnames is optional.
 
-Proofs for book chapter.
+*Proofs for book chapter.
 Ashesh
-student examiners
+*student examiners
 DBT
 ============================================================================
 24 June 2012. 
-Put in dummy kchan. Fixes acc16 and acc1.
+Put in dummy kchan. Fixes acc16 and acc1. Checkin 3595.
+============================================================================
+26 June 2012.
+Checked issue with accession 85 reported by Harsha.
+Turns out that it uses the enzyme as its own substrate.
+Related problem in the traffillator models
+osc_cspace_ref_model.g,  traff_nn_diff_TRI.g
+which are products of their own enzyme activity.
+
+As these are all legitimate models, I need to allow the zombies to handle
+such cases.
+
+Accession 68 has square bracket problems. I think I should undo the hack
+in the fallback function for indexing. Instead I should convert the square
+brackets to underscores in the first pass of ReadKkit.
+
+
+Working to add a 'version' field in ReadKkit. Done.
+
+Can't figure out where the problem arises that causes failure of acc85
+to add a message from enzyme mol to enzyme as substrate.
+
+Made a really simple model, with an enzyme that is its own substrate in
+one reac, and its own product in another.
+
+Tracked it down. It is a bug in the kkit model file acc85.g. I use REAC eA B
+rather than REAC sA B for an enzyme that is its own substrate. In GENESIS
+this is fine because both eA and sA are zero. 
+I don't want to do a special case in MOOSE for this one model. Should fix model.
+
