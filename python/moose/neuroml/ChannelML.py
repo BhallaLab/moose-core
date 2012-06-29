@@ -229,8 +229,11 @@ class ChannelML():
                 CaMAX = float(concdep.attrib['max_conc'])
                 CaNDIVS = 100
                 dCa = (CaMAX-CaMIN)/CaNDIVS
-                tableA = [[0.0]*(CaNDIVS+1)]*(NDIVS_here+1)
-                tableB = [[0.0]*(CaNDIVS+1)]*(NDIVS_here+1)
+                ## CAREFUL!: tableA = [[0.0]*(CaNDIVS+1)]*(NDIVS_here+1) will not work!
+                ## * does a shallow copy, same list will get repeated 200 times!
+                ## Thus setting tableA[35][1] = 5.0 will set all rows, 1st col to 5.0!!!!
+                tableA = [[0.0]*(CaNDIVS+1) for i in range(NDIVS_here+1)]
+                tableB = [[0.0]*(CaNDIVS+1) for i in range(NDIVS_here+1)]
                 for i in range(NDIVS_here+1):
                     Ca = CaMIN
                     for j in range(CaNDIVS+1):
@@ -254,11 +257,11 @@ class ChannelML():
                 moosegate_tableA.xmin = VMIN_here*Vfactor
                 moosegate_tableA.xmax = VMAX_here*Vfactor
                 moosegate_tableA.xdivs = NDIVS_here
-                moosegate_tableA.dx = dv_here*Vfactor
+                #moosegate_tableA.dx = dv_here*Vfactor
                 moosegate_tableA.ymin = CaMIN*concfactor
                 moosegate_tableA.ymax = CaMAX*concfactor
                 moosegate_tableA.ydivs = CaNDIVS
-                moosegate_tableA.dy = dCa*concfactor
+                #moosegate_tableA.dy = dCa*concfactor
                 moosegate_tableA.tableVector2D = tableA
 
                 moosegate_tableB = moose.Interpol2D(moosegate.path+'/tableB')
@@ -266,11 +269,11 @@ class ChannelML():
                 moosegate_tableB.xmin = VMIN_here*Vfactor
                 moosegate_tableB.xmax = VMAX_here*Vfactor
                 moosegate_tableB.xdivs = NDIVS_here
-                moosegate_tableB.dx = dv_here*Vfactor
+                #moosegate_tableB.dx = dv_here*Vfactor
                 moosegate_tableB.ymin = CaMIN*concfactor
                 moosegate_tableB.ymax = CaMAX*concfactor
                 moosegate_tableB.ydivs = CaNDIVS
-                moosegate_tableB.dy = dCa*concfactor
+                #moosegate_tableB.dy = dCa*concfactor
                 moosegate_tableB.tableVector2D = tableB
 
     def setQ10(self,q10settings):
