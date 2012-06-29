@@ -7,6 +7,7 @@
 # This code is available under GPL3 or greater GNU license 
 
 import moose
+import math
 from moose.utils import *
 import csv
 import numpy as np
@@ -35,11 +36,11 @@ def updateWeights(memory,weightMatrix):
             else:
                 newWeights.append(0)
         #add the new synaptic weights to the old ones.
-        weightMatrix[i] = [sum(a) for a in zip(*([weightMatrix[i]]+[newWeights]))] 
+        weightMatrix[i*len(memory):(i+1)*len(memory)] = [sum(a) for a in zip(*([weightMatrix[i*len(memory):(i+1)*len(memory)]]+[newWeights]))] 
     return weightMatrix
 
 def createNetwork(synWeights,inputGiven):
-    numberOfCells = len(synWeights[0])
+    numberOfCells = int(math.sqrt(len(synWeights)))
     cells = []
     hopfield = moose.Neutral('/hopfield')
     pg = moose.PulseGen('hopfield/inPulGen')
@@ -71,7 +72,7 @@ def createNetwork(synWeights,inputGiven):
         for connectCell in range(numberOfCells): #connectToCell
             if currentCell != connectCell: #no self connections
                 connSyn = moose.element('hopfield/cell_'+str(connectCell+1)).synapse[connectCell+1]
-                connSyn.weight = synWeights[currentCell][connectCell]
+                connSyn.weight = synWeights[currentCell*numberOfCells + connectCell]
                 connSyn.delay = 2e-3
                 moose.connect(moose.element('hopfield/cell_'+str(currentCell+1)), 'spike', connSyn, 'addSpike')
 
@@ -79,11 +80,13 @@ def createNetwork(synWeights,inputGiven):
 
 memoryFile1 = "memory1.csv"
 memory = readMemory(memoryFile1)
-synWeights = updateWeights(memory,[[0]*len(memory)]*len(memory))
+synWeights = updateWeights(memory,[0]*len(memory)*len(memory))
 
 memoryFile2 = "memory2.csv"
 memory2 = readMemory(memoryFile2)
 synWeights = updateWeights(memory2,synWeights)
+
+print synWeights
 
 inputFile = "input.csv"
 cells = createNetwork(synWeights,readMemory(inputFile))
