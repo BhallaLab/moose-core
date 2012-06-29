@@ -18,7 +18,9 @@ from collections import defaultdict
 from objectedit import ObjectFieldsModel, ObjectEditView
 from moosehandler import MooseHandler
 from mooseplot import MoosePlot,MoosePlotWindow
+
 import kineticlayout
+from neuralLayout import *
 
 from filepaths import *
 from defaults import *
@@ -47,6 +49,8 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
         #other variables
         self.currentTime = 0.0
+        self.allCompartments = []
+        self.modelHasCompartments = False
 
         #prop Editor variables
         self.propEditorCurrentSelection = None
@@ -132,7 +136,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
                 else:
                     fileType = self.mooseHandler.type_xml
 
-            directory = fileDialog.directory() # Potential bug: if user types the whole file path, does it work? - no but gives error message
+            directory = fileDialog.directory()
             #self.statusBar.showMessage('Loading model, please wait')
             app = QtGui.qApp
             app.setOverrideCursor(QtGui.QCursor(Qt.BusyCursor)) #shows a hourglass - or a busy/working arrow
@@ -144,7 +148,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
                 modeltype  = self.mooseHandler.loadModel(str(fileName), str(fileType), modelpath)
                 if modeltype == MooseHandler.type_kkit:
                     try:
-                        self.addLayoutWindow(modelpath)
+                        self.addKKITLayoutWindow(modelpath)
                         self.actionLoad_Model.setEnabled(0) #to prevent multiple loads
                         
                     except kineticlayout.Widgetvisibility:
@@ -152,21 +156,66 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
                     self.populateKKitPlots(modelpath)
                 self.populateDataPlots(modelpath)
                 self.updateDefaultTimes(modeltype)
-            #self.modelTreeWidget.recreateTree()
             #self.enableControlButtons()
-            #self.checkModelType()
+            self.checkModelForNeurons()
+            if self.modelHasCompartments:
+                self.addGLWindow()
             print 'Loaded model',  fileName, 'of type', modeltype, 'under Element path ',modelpath
             app.restoreOverrideCursor()
+
+
+    def checkModelForNeurons(self):
+        compartmentList = moose.wildcardFind('/##[TYPE=Compartment]')
+        if compartmentList: #if non empty 
+            for compartment in compartmentList:
+                if str(compartment.getField('path')).find('library') == -1: #non-library entry
+                    self.allCompartments.append(compartment)
+        if self.allCompartments:
+            self.modelHasCompartments = True
+
+    def addGLWindow(self):
+	self.layoutWidget = updatepaintGL(self.centralwidget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.centralwidget.sizePolicy().hasHeightForWidth())
+        self.layoutWidget.setSizePolicy(sizePolicy)
+        self.layoutWidget.setObjectName("layoutWidget")
+        self.horizontalLayout.addWidget(self.layoutWidget)
+        self.centralwidget.setSizePolicy(sizePolicy)
+        self.centralwidget.setObjectName("layoutWidget")
+        self.centralwidget.show()
+
+        QtCore.QObject.connect(self.layoutWidget,QtCore.SIGNAL('compartmentSelected(QString)'),self.pickCompartment)
+        self.updateCanvas()
+
+    def pickCompartment(self, name):
+        self.makeObjectFieldEditor(moose.element(str(name)))
+
+    def updateCanvas(self):
+        cellNameComptDict = {}
+        for compartment in self.allCompartments: 
+            cellName = compartment.getField('parent').getField('path') #enforcing a hierarchy /cell/compartment! - not a good idea 
+            if cellName in cellNameComptDict:
+                cellNameComptDict[cellName].append(compartment)
+            else:
+                cellNameComptDict[cellName] = [compartment]
+    
+        for cellName in cellNameComptDict:
+            self.layoutWidget.drawNewCell(cellName)
+
+        self.layoutWidget.updateGL()
 
     def getElementpath(self,text):
         #print "here",text
         if(text == '/' or text == ''):
             QtGui.QMessageBox.about(self,"My message box","Target Element path should not be \'/\' or \'null\', filename will be selected as Element path")
 
+
     def resizeEvent(self, event):
         QtGui.QWidget.resizeEvent(self, event)
 
-    def addLayoutWindow(self,modelpath):
+    def addKKITLayoutWindow(self,modelpath):
         centralWindowsize =  self.layoutWidget.size()
         layout = QtGui.QHBoxLayout(self.layoutWidget)
         self.sceneLayout = kineticlayout.kineticsWidget(centralWindowsize,modelpath,self.layoutWidget)
@@ -220,10 +269,10 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
         #plot config dock related 
     def updatePlots(self,currentTime):
-        print 'updating plots'
+        print len(self.plotNameWinDict),self.plotNameWinDict
         #updates plots every update_plot_dt time steps see moosehandler.
-        for plotWinName,plot in self.plotNameWinDict.iteritems():
-            plot.plot.updatePlot(currentTime)
+        for plotWinName,plotWin in self.plotNameWinDict.iteritems():
+            plotWin.plot.updatePlot(currentTime)
         self.updateCurrentTime(currentTime)
 
     def updatePlotDockFields(self,obj):
@@ -241,6 +290,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             self.plotConfigFieldSelectionComboBox.clear()
             self.plotConfigCurrentSelection = None
             self.plotConfigAcceptPushButton.setEnabled(False)
+
     def populateDataPlots(self,modelpath):
         """Create plots for all Table objects in /data element"""
         #tables = self.mooseHandler.getDataTables()
@@ -256,7 +306,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
     def addFieldToPlot(self):
         #creates tables - called when 'Okay' pressed in plotconfig dock
         dataNeutral = moose.Neutral(self.plotConfigCurrentSelection.getField('path')+'/data')
-        newTable = moose.Table(self.plotConfigCurrentSelection.getField('path')+'/data'+str(self.plotConfigFieldSelectionComboBox.currentText()))
+        newTable = moose.Table(self.plotConfigCurrentSelection.getField('path')+'/data/'+str(self.plotConfigFieldSelectionComboBox.currentText()))
         moose.connect(newTable,'requestData',self.plotConfigCurrentSelection,'get_'+str(self.plotConfigFieldSelectionComboBox.currentText()))
 
         if str(self.plotConfigWinSelectionComboBox.currentText()) in self.plotWindowFieldTableDict:
@@ -289,21 +339,23 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         #general
     def updateCurrentTime(self,currentTime):
         self.currentTime = currentTime
+        self.simControlCurrentTimeLabel.setText(str(self.currentTime))
 
     def doQuit(self):
         QtGui.qApp.closeAllWindows()
+
     def resetAndRunSlot(self):
         print "reset and run"
         moose.reinit()
-        moose.start(10)
+        moose.start(1000)
         rt = moose.element('/clock').runTime
         ti = moose.element('/clock').tick
-        self.updatePlots(100)
+        self.updatePlots(1000)
         print "runtime",rt,"simdt",ti[0].dt
-        for gp in moose.wildcardFind('/Kholodenko/graphs/#/##[TYPE=Table],/Kholodenko/moregraphs/#/##[TYPE=Table]'):
-            pass
-            #print gp,moose.Table(gp).vec
 
+        for gp in moose.wildcardFind('/Kholodenko/graphs/#/##[TYPE=Table],/Kholodenko/moregraphs/#/##[TYPE=Table]'):
+
+            print gp,moose.Table(gp).vec
         
     
     def updateDefaultTimes(self, modeltype):
@@ -346,6 +398,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 app = QtGui.QApplication(sys.argv)
 # instantiate the main window
 dmw = DesignerMainWindow()
+dmw.setWindowState(Qt.WindowMaximized)
 # show it
 dmw.show()
 # start the Qt main loop execution, exiting from this script
