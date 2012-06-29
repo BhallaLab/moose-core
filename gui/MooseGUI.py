@@ -91,8 +91,8 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         #internal connections
         self.connect(self.mooseHandler, QtCore.SIGNAL('updatePlots(float)'), self.updatePlots)
         #run
-        #self.connect(self.runButtonToolbar, QtCore.SIGNAL('clicked()'), self.resetAndRunSlot)
-        self.connect(self.actionRun,QtCore.SIGNAL('triggered()'),self.resetAndRunSlot)
+        self.connect(self.simControlRunPushButton, QtCore.SIGNAL('clicked()'), self._runSlot)
+        self.connect(self.actionRun,QtCore.SIGNAL('triggered()'),self._runSlot)
 
     def popupLoadModelDialog(self):
         fileDialog = QtGui.QFileDialog(self)
@@ -269,7 +269,6 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
         #plot config dock related 
     def updatePlots(self,currentTime):
-        print len(self.plotNameWinDict),self.plotNameWinDict
         #updates plots every update_plot_dt time steps see moosehandler.
         for plotWinName,plotWin in self.plotNameWinDict.iteritems():
             plotWin.plot.updatePlot(currentTime)
@@ -293,16 +292,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
     def populateDataPlots(self,modelpath):
         """Create plots for all Table objects in /data element"""
-        #tables = self.mooseHandler.getDataTables()
-        '''
-        for gp in moose.wildcardFind(modelpath+'/graphs/#/##[TYPE=Table],'+modelpath+'/moregraphs/#/##[TYPE=Table]'):
-            table = moose.Table(gp).vec
-            print "table",table,gp
-            self.plots[0].addTable(table)
-            self.tablePlotMap[table] = self.plots[0]
-            config.LOGGER.info('Added plot ' + table.path)
-        self.plots[0].replot()
-        '''
+
     def addFieldToPlot(self):
         #creates tables - called when 'Okay' pressed in plotconfig dock
         dataNeutral = moose.Neutral(self.plotConfigCurrentSelection.getField('path')+'/data')
@@ -346,18 +336,20 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
     def resetAndRunSlot(self):
         print "reset and run"
-        moose.reinit()
-        moose.start(1000)
-        rt = moose.element('/clock').runTime
-        ti = moose.element('/clock').tick
-        self.updatePlots(1000)
-        print "runtime",rt,"simdt",ti[0].dt
+        #moose.reinit()
+        #moose.start(100)
+        #self.updatePlots(10)
+    def _runSlot(self):
+        try:
+            runtime = float(str(self.simControlRunTimeLineEdit.text()))
+        except ValueError:
+            runtime = MooseHandler.runtime
+            self.simControlRunTimeLineEdit.setText(str(runtime))
+        self.mooseHandler.doRun(runtime)
+        self.updatePlots(self.mooseHandler.getCurrentTime())
+        #harsha: only after the model is run, saving the plot is enabled,otherwise there will be nothing to save
+        #self.saveTablePlotsAction.setEnabled(1)
 
-        for gp in moose.wildcardFind('/Kholodenko/graphs/#/##[TYPE=Table],/Kholodenko/moregraphs/#/##[TYPE=Table]'):
-
-            print gp,moose.Table(gp).vec
-        
-    
     def updateDefaultTimes(self, modeltype):
         if(modeltype == MooseHandler.type_kkit):
             tick = (moose.element('/clock').tick)
@@ -365,7 +357,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             PLOTDT = tick[2].dt
             self.simControlSimdtLineEdit.setText(QtCore.QString('%1.3e' % (SIMDT)))
             self.simControlPlotdtLineEdit.setText(QtCore.QString('%1.3e' % (PLOTDT)))
-            self.simControlUpdatePlotdtLineEdit.setText(QtCore.QString('%1.3e' % (PLOTDT)))
+            self.simControlUpdatePlotdtLineEdit.setText(QtCore.QString('%1.3e' % (PLOTDT/100)))
             
         '''
         if (modeltype == MooseHandler.type_kkit) or (modeltype == MooseHandler.type_sbml):
@@ -408,3 +400,4 @@ dmw.show()
 #http://www.mail-archive.com/matplotlib-users@lists.sourceforge.net/msg13241.html
 # with the same return code of Qt application
 sys.exit(app.exec_())
+
