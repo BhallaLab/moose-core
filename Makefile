@@ -85,8 +85,9 @@
 
 # BUILD (= debug, release)
 BUILD?=release
+PROFILE?=1
 USE_GSL?=1
-USE_SBML?=1
+USE_SBML?=0
 USE_NEUROML?=0
 USE_READLINE?=1
 USE_MPI?=0
@@ -96,6 +97,7 @@ USE_GL?=0
 GENERATE_WRAPPERS?=0
 SVN?=0
 export BUILD
+export PROFILE
 export USE_GSL
 export USE_SBML
 export USE_NEUROML
@@ -125,6 +127,9 @@ endif
 # Debug mode:
 ifeq ($(BUILD),debug)
 CXXFLAGS = -g -Wall -Wno-long-long -pedantic  -DUSE_GENESIS_PARSER
+endif
+ifeq ($(PROFILE),1)
+CXXFLAGS += -pg
 endif
 # Optimized mode:
 ifeq ($(BUILD),release)
@@ -319,7 +324,7 @@ libmoose.so: libs
 
 .PHONEY : pymoose
 
-pymoose: CXXFLAGS += -DPYMOOSE -fPIC -I/usr/include/${INSTALLED_PYTHON}
+pymoose: CXXFLAGS += -fpermissive -DPYMOOSE -fPIC -I/usr/include/${INSTALLED_PYTHON}
 pymoose: SUBDIR += pymoose	
 pymoose: OBJLIBS := pymoose/pymoose.o $(OBJLIBS)
 pymoose: LIBS += -l${INSTALLED_PYTHON}
@@ -340,6 +345,7 @@ $(LIBNEUROML_STATIC):
 libs:
 	@echo "Compiling with flags:"
 	@echo "	BUILD:" $(BUILD)
+	@echo " PROFILE:" $(PROFILE)
 	@echo "	USE_GSL:" $(USE_GSL)
 	@echo "	USE_SBML:" $(USE_SBML)
 	@echo "	USE_NEUROML:" $(USE_NEUROML)
