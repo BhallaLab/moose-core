@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Sat Jun 23 13:35:59 2012 (+0530)
+// Last-Updated: Fri Jun 29 15:55:08 2012 (+0530)
 //           By: subha
-//     Update #: 8849
+//     Update #: 8850
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -1381,7 +1381,7 @@ extern "C" {
             return -1;
         }        
         instance->oid_ = ObjId(path);
-        if (!(ObjId(0, 0) == instance->oid_)){
+        if (!(ObjId::bad == instance->oid_)){
             return 0;
         }
         // Path does not exist, create neww
