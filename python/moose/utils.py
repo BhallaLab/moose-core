@@ -346,6 +346,7 @@ def resetSim(simpaths, simdt, plotdt):
         moose__.useClock(0, simpath+'/##[TYPE=PulseGen]', 'process')
         moose__.useClock(0, simpath+'/##[TYPE=DiffAmp]', 'process')
         moose__.useClock(1, simpath+'/##[TYPE=Compartment]', 'process')
+        moose__.useClock(1, simpath+'/##[TYPE=IntFire]', 'process')
         moose__.useClock(2, simpath+'/##[TYPE=HHChannel]', 'process')
         moose__.useClock(2, simpath+'/##[TYPE=HHGate]', 'process')
         moose__.useClock(2, simpath+'/##[TYPE=HHChannel2D]', 'process')

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'newgui.ui'
 #
-# Created: Wed Jun 27 14:20:12 2012
+# Created: Wed Jun 27 14:32:28 2012
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -394,9 +394,9 @@ class Ui_MainWindow(object):
         self.horizontalLayout_22.addWidget(self.label_16)
         spacerItem19 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_22.addItem(spacerItem19)
-        self.label_17 = QtGui.QLabel(self.dockWidgetContents_5)
-        self.label_17.setObjectName(_fromUtf8("label_17"))
-        self.horizontalLayout_22.addWidget(self.label_17)
+        self.simControlCurrentTimeLabel = QtGui.QLabel(self.dockWidgetContents_5)
+        self.simControlCurrentTimeLabel.setObjectName(_fromUtf8("simControlCurrentTimeLabel"))
+        self.horizontalLayout_22.addWidget(self.simControlCurrentTimeLabel)
         self.verticalLayout_6.addLayout(self.horizontalLayout_22)
         spacerItem20 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout_6.addItem(spacerItem20)
@@ -705,7 +705,7 @@ class Ui_MainWindow(object):
         self.simControlResetPushButton.setText(QtGui.QApplication.translate("MainWindow", "Reset", None, QtGui.QApplication.UnicodeUTF8))
         self.simControlContinuePushButton.setText(QtGui.QApplication.translate("MainWindow", "Continue", None, QtGui.QApplication.UnicodeUTF8))
         self.label_16.setText(QtGui.QApplication.translate("MainWindow", "Current Time: ", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_17.setText(QtGui.QApplication.translate("MainWindow", "0.0", None, QtGui.QApplication.UnicodeUTF8))
+        self.simControlCurrentTimeLabel.setText(QtGui.QApplication.translate("MainWindow", "0.0", None, QtGui.QApplication.UnicodeUTF8))
         self.actionLoad_Model.setText(QtGui.QApplication.translate("MainWindow", "Load Model", None, QtGui.QApplication.UnicodeUTF8))
         self.actionLoad_Model.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+L", None, QtGui.QApplication.UnicodeUTF8))
         self.actionNew_Plot.setText(QtGui.QApplication.translate("MainWindow", "Save Plots", None, QtGui.QApplication.UnicodeUTF8))
