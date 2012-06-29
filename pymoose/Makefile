@@ -24,7 +24,7 @@
 ############################################################################
 
 TARGET=pymoose.o
-CXXFLAGS+=-fno-strict-aliasing -I/usr/local/include -I.. -I../basecode -I../connections -I../maindir -I../genesis_parser  -I../shell -I../element -I../scheduling -I../biophysics -I../hsolve -I../kinetics -I../ksolve -I../builtins -I../utility -I../randnum -I../robots -I../device
+CXXFLAGS+= -fpermissive -fno-strict-aliasing -I/usr/local/include -I.. -I../basecode -I../connections -I../maindir -I../genesis_parser  -I../shell -I../element -I../scheduling -I../biophysics -I../hsolve -I../kinetics -I../ksolve -I../builtins -I../utility -I../randnum -I../robots -I../device
 
 ifeq ($(USE_NEUROML),1)
 CXXFLAGS+=-I../neuroML_IO -I../external/neuroML_src -DUSE_NEUROML
