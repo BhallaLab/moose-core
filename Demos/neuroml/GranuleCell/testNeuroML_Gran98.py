@@ -11,25 +11,45 @@ import moose
 from moose.utils import *
 from moose.neuroml.NeuroML import NeuroML
 
-#from pylab import *
+from pylab import *
+
+simdt = 10e-6 # s
+plotdt = 10e-6 # s
+runtime = 0.7 # s
 
 def loadGran98NeuroML_L123(filename):
     neuromlR = NeuroML()
     populationDict, projectionDict = \
         neuromlR.readNeuroMLFromFile(filename)
-#    soma_path = populationDict['Gran'][1][0].path+'/Soma_0'
-#    somaVm = setupTable('somaVm',moose.Compartment(soma_path),'VmOut')
-#    print "Reinit MOOSE ... "
-#    resetSim(['/elec','/cells'],50e-6,50e-6) # from moose.utils
-#    print "Running ... "
-#    moose.start(1.0)
-#    plot(somaVm.vec)
-#    print "Showing",soma_path,"Vm"
-#    show()
+    soma_path = populationDict['Gran'][1][0].path+'/Soma_0'
+    somaVm = setupTable('somaVm',moose.Compartment(soma_path),'Vm')
+    somaCa = setupTable('somaCa',moose.CaConc(soma_path+'/Gran_CaPool_98'),'Ca')
+    #somaIKCa = setupTable('somaIKCa',moose.HHChannel(soma_path+'/Gran_KCa_98'),'Gk')
+    KDrX = setupTable('ChanX',moose.HHChannel(soma_path+'/Gran_KDr_98'),'X')
+    print "Reinit MOOSE ... "
+    resetSim(['/elec','/cells'],simdt,plotdt) # from moose.utils
+    print "Running ... "
+    moose.start(runtime)
+    tvec = arange(0.0,runtime,simdt)
+    plot(tvec,somaVm.vec[1:])
+    title('Soma Vm')
+    xlabel('time (s)')
+    ylabel('Voltage (V)')
+    figure()
+    plot(tvec,somaCa.vec[1:])
+    title('Soma Ca')
+    xlabel('time (s)')
+    ylabel('Ca conc (mol/m^3)')
+    plot(tvec,KDrX.vec[1:])
+    title('KDr X gate')
+    xlabel('time (s)')
+    ylabel('')
+    print "Showing plots ..."
+    show()
 
-#if __name__ == "__main__":
-#    if len(sys.argv)<2:
-filename = "Generated.net.xml"
-#    else:
-#        filename = sys.argv[1]
+if __name__ == "__main__":
+    if len(sys.argv)<2:
+        filename = "Generated.net.xml"
+    else:
+        filename = sys.argv[1]
 loadGran98NeuroML_L123(filename)

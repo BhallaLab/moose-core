@@ -76,7 +76,7 @@ class MooseXMLHandler(saxhandler.ContentHandler):
         """
         if name == 'sbml':
             self.model_type = MooseHandler.type_sbml
-        elif name == 'neuroml':
+        elif name == 'neuroml' or name == 'networkml':
             self.model_type = MooseHandler.type_neuroml
         else:
             pass

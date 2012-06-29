@@ -356,13 +356,13 @@ def resetSim(simpaths, simdt, plotdt):
     moose__.reinit()
 
 def setupTable(name, obj, qtyname):
-    """ Sets up a table with 'name' which stores 'qtyname' from 'obj'. """
+    """ Sets up a table with 'name' which stores 'qtyname' field from 'obj'. """
     # Setup the tables to pull data
     moose__.Neutral(obj.path+"/data") # in case /data does not exist, create
     vmTable = moose__.Table(obj.path+"/data/"+name)
     ## stepMode no longer supported, connect to 'input'/'spike' message dest to record Vm/spiktimes
     # vmTable.stepMode = TAB_BUF 
-    moose__.connect( obj, qtyname, vmTable, "input")
+    moose__.connect( vmTable, "requestData", obj, 'get_'+qtyname)
     return vmTable
 
 def connectSynapse(context, compartment, synname, gbar_factor):
