@@ -72,6 +72,13 @@ const Cinfo* SimManager::initCinfo()
 			&SimManager::getPlotDt
 		);
 
+		static ValueFinfo< SimManager, unsigned int > version(
+			"version",
+			"Numerical version number. Used by kkit",
+			&SimManager::setVersion,
+			&SimManager::getVersion
+		);
+
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
@@ -125,6 +132,7 @@ const Cinfo* SimManager::initCinfo()
 		&syncTime,		// Value
 		&autoPlot,		// Value
 		&plotDt,		// Value
+		&version,		// Value
 		&build,			// DestFinfo
 		&makeStandardElements,			// DestFinfo
 		&nodeMeshing,	// SharedFinfo
@@ -150,7 +158,9 @@ SimManager::SimManager()
 	: 
 		syncTime_( 0.005 ),
 		autoPlot_( 1 ),
-		plotdt_( 1 )
+		plotdt_( 1 ),
+		simdt_( 1 ),
+		version_( 0 )
 {;}
 
 SimManager::~SimManager()
@@ -188,6 +198,26 @@ void SimManager::setPlotDt( double v )
 double SimManager::getPlotDt() const
 {
 	return plotdt_;
+}
+
+void SimManager::setSimDt( double v )
+{
+	simdt_ = v;
+}
+
+double SimManager::getSimDt() const
+{
+	return simdt_;
+}
+
+void SimManager::setVersion( unsigned int v )
+{
+	version_ = v;
+}
+
+unsigned int SimManager::getVersion() const
+{
+	return version_;
 }
 //////////////////////////////////////////////////////////////
 // MsgDest Definitions

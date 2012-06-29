@@ -29,6 +29,7 @@ class ReadKkit
 		double getPlotDt() const;
 		double getDefaultVol() const;
 		string getBasePath() const;
+		unsigned int getVersion() const;
 
 		//////////////////////////////////////////////////////////////////
 		// Undump operations
@@ -145,6 +146,18 @@ class ReadKkit
 		 * Note that this prepends the basePath to the head.
 		 */
 		string pathTail( const string& path, string& head ) const;
+
+		/**
+		 * Utility function. Cleans up path strings. In most cases, it
+		 * replaces things with underscores.
+		 * Replaces square braces with underscores.
+		 * Replaces '*' with 'p' 
+		 *         as it is usually there to indicate phosphorylation
+		 * Replaces '-' with underscore
+		 * Replaces '@' with underscore
+		 * Replaces ' ' with underscore
+		 */
+		string cleanPath( const string& path ) const;
 
 		/**
 		 * make kinetics and graphs elements.

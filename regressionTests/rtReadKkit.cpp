@@ -57,7 +57,7 @@ void checkVolN( double v )
 	n = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MAPK" ), "n" );
 	assert( doubleEq( n, volscale * 0.3 / NA_RATIO ) );
 
-	n = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Ras-MKKKK" ), "n" );
+	n = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Ras_MKKKK" ), "n" );
 	assert( doubleEq( n, volscale * 0.001 / NA_RATIO ) );
 
 	n = Field< double >::get( Id( "/rkktest/kinetics/MAPK/int1" ), "n" );
@@ -87,7 +87,7 @@ void checkConc()
 	conc = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MAPK" ), "conc" );
 	assert( doubleEq( conc, 0.3 * CONC_RATIO ) );
 
-	conc = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Ras-MKKKK" ), "conc" );
+	conc = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Ras_MKKKK" ), "conc" );
 	assert( doubleEq( conc, 0.001 * CONC_RATIO ) );
 
 	conc = Field< double >::get( Id( "/rkktest/kinetics/MAPK/int1" ), "conc" );
@@ -134,14 +134,14 @@ void checkEnzRates( double v )
 	// MMEnz
 	////////////////////////////////////////////////////////////////////
 	// NumRates
-	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Ras-MKKKK/1" ), "numKm" );
+	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Ras_MKKKK/1" ), "numKm" );
 	assert( doubleEq( rate, volscale * 0.01 / NA_RATIO ) );
 
 	// ConcRates
-	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Ras-MKKKK/1" ), "Km" );
+	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Ras_MKKKK/1" ), "Km" );
 	assert( doubleEq( rate, 1e-5 ) );
 
-	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Ras-MKKKK/1" ), "kcat");
+	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Ras_MKKKK/1" ), "kcat");
 	assert( doubleEq( rate, 2.5 ) );
 
 	// NumRates
@@ -155,13 +155,13 @@ void checkEnzRates( double v )
 	assert( doubleEq( rate, 0.25 ) );
 
 	// NumRates
-	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MKKK-P/3" ), "numKm" );
+	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MKKK_P/3" ), "numKm" );
 	assert( doubleEq( rate, volscale * ( ( 0.1 + 0.025 ) / 8.3333 ) / NA_RATIO ) );
 
 	// ConcRates
-	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MKKK-P/3" ), "Km" );
+	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MKKK_P/3" ), "Km" );
 	assert( doubleEq( rate, ( ( 0.1 + 0.025 ) / 8.3333 ) * 1e-3 ) );
-	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MKKK-P/3" ), "kcat" );
+	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MKKK_P/3" ), "kcat" );
 	assert( doubleEq( rate, 0.025 ) );
 }
 
@@ -336,7 +336,7 @@ void rtRunKkit()
 	n = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MAPK" ), "n" );
 	assert( doubleEq( n, 0.3 / NA_RATIO ) );
 
-	n = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Ras-MKKKK" ), "n" );
+	n = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Ras_MKKKK" ), "n" );
 	assert( doubleEq( n, 0.001 / NA_RATIO ) );
 
 	n = Field< double >::get( Id( "/rkktest/kinetics/MAPK/int1" ), "n" );
@@ -377,9 +377,9 @@ void rtRunKkit()
 	// Now on to the enzymes.
 	///////////////////////////////////////////////////////////////////////
 
-	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Ras-MKKKK/1" ), "Km" );
+	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Ras_MKKKK/1" ), "Km" );
 	assert( doubleEq( rate, 0.01 * 1e-3 ) ); // Convert from uM to mM
-	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Ras-MKKKK/1" ), "kcat");
+	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Ras_MKKKK/1" ), "kcat");
 	assert( doubleEq( rate, 2.5 ) );
 
 	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/int1/2" ), "Km" );
@@ -387,9 +387,9 @@ void rtRunKkit()
 	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/int1/2" ), "kcat" );
 	assert( doubleEq( rate, 0.25 ) );
 
-	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MKKK-P/3" ), "Km" );
+	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MKKK_P/3" ), "Km" );
 	assert( doubleEq( rate, ( ( 0.1 + 0.025 ) / 8.3333 ) * 1e-3 ) );
-	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MKKK-P/3" ), "kcat" );
+	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MKKK_P/3" ), "kcat" );
 	assert( doubleEq( rate, 0.025 ) );
 	
 
@@ -416,11 +416,11 @@ void rtRunKkit()
 	shell->doReinit();
 	shell->doStart( 5001.0 );
 
-	Id plotId( "/rkktest/graphs/conc1/MAPK-PP.Co" );
+	Id plotId( "/rkktest/graphs/conc1/MAPK_PP.Co" );
 	vector< Id > ret = LookupField< string, vector< Id > >::get( 
 		plotId, "neighbours", "requestData" );
 	assert( ret.size() == 1 );
-	assert( ret[0] == Id( "/rkktest/kinetics/MAPK/MAPK-PP" ) );
+	assert( ret[0] == Id( "/rkktest/kinetics/MAPK/MAPK_PP" ) );
 
 	assert( plotId != Id() );
 	unsigned int size = Field< unsigned int >::get( plotId, "size" );
@@ -882,14 +882,14 @@ void rtTestChem()
 
 	static const char* acc8path[] = { 
 		"/kkit/kinetics/Ca", 
-		"/kkit/kinetics/PLA2/PIP2-PLA2*/kenz"
+		"/kkit/kinetics/PLA2/PIP2_PLA2p/kenz"
 	};
 	static const char* field[] = { "concInit", "Km" };
 	static const double value[] = { 0.08e-3, 20e-3 };
 	rtReadKkitModels( "acc8.g", acc8path, field, value, 2 );
 	rtReadKkitModels( "Anno_acc8.g", acc8path, field, value, 2 );
 	static const char* acc20path[] = { 
-		"/kkit/kinetics/CaM-Ca4", 
+		"/kkit/kinetics/CaM_Ca4", 
 		"/kkit/kinetics/NOSphos/nNOS",
 		"/kkit/kinetics/CaMKIIalpha/kenz"
 	};

@@ -821,6 +821,7 @@ bool Shell::chopPath( const string& path, vector< string >& ret,
 	return isAbsolute;
 }
 
+/*
 /// non-static func. Fallback which treats index brackets as part of 
 /// name string, and does not try to extract integer indices.
 ObjId Shell::doFindWithoutIndexing( const string& path ) const
@@ -847,6 +848,7 @@ ObjId Shell::doFindWithoutIndexing( const string& path ) const
 	assert( curr.element()->dataHandler() );
 	return ObjId( curr, 0 );
 }
+*/
 
 /// non-static func. Returns the Id found by traversing the specified path.
 ObjId Shell::doFind( const string& path ) const
@@ -872,10 +874,13 @@ ObjId Shell::doFind( const string& path ) const
 	assert( curr.element() );
 	assert( curr.element()->dataHandler() );
 	DataId di = curr.element()->dataHandler()->pathDataId( indices );
+	/*
+	* Deprecated this fallback. If can't find indices, then just bail.
 	if ( di == DataId::bad ) {
 		// Check if there are indices that should be treated as strings.
 		return doFindWithoutIndexing( path );
 	}
+	*/
 	return ObjId( curr, di );
 }
 
