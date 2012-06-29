@@ -24,6 +24,10 @@ class SimManager
 
 		void setPlotDt( double v );
 		double getPlotDt() const;
+		void setSimDt( double v );
+		double getSimDt() const;
+		void setVersion( unsigned int v );
+		unsigned int getVersion() const;
 
 		/// Destination function
 		void build( const Eref& e, const Qinfo* q, string method );
@@ -90,6 +94,8 @@ class SimManager
 		Id stoich_;
 
 		double plotdt_;
+		double simdt_;
+		unsigned int  version_;
 
 		/// Used while partitioning meshed model over many nodes.
 		unsigned int numChemNodes_;
