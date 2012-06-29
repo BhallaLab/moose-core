@@ -11,25 +11,25 @@ import moose
 from moose.utils import *
 from moose.neuroml.NeuroML import NeuroML
 
-from pylab import *
+#from pylab import *
 
 def loadGran98NeuroML_L123(filename):
     neuromlR = NeuroML()
     populationDict, projectionDict = \
         neuromlR.readNeuroMLFromFile(filename)
-    soma_path = populationDict['Gran'][1][0].path+'/Soma_0'
-    somaVm = setupTable('somaVm',moose.Compartment(soma_path),'VmOut')
-    print "Reinit MOOSE ... "
-    resetSim(['/elec','/cells'],50e-6,50e-6) # from moose.utils
-    print "Running ... "
-    moose.start(1.0)
-    plot(somaVm.vec)
-    print "Showing",soma_path,"Vm"
-    show()
+#    soma_path = populationDict['Gran'][1][0].path+'/Soma_0'
+#    somaVm = setupTable('somaVm',moose.Compartment(soma_path),'VmOut')
+#    print "Reinit MOOSE ... "
+#    resetSim(['/elec','/cells'],50e-6,50e-6) # from moose.utils
+#    print "Running ... "
+#    moose.start(1.0)
+#    plot(somaVm.vec)
+#    print "Showing",soma_path,"Vm"
+#    show()
 
-if __name__ == "__main__":
-    if len(sys.argv)<2:
-        filename = "Generated.net.xml"
-    else:
-        filename = sys.argv[1]
-    loadGran98NeuroML_L123(filename)
+#if __name__ == "__main__":
+#    if len(sys.argv)<2:
+filename = "Generated.net.xml"
+#    else:
+#        filename = sys.argv[1]
+loadGran98NeuroML_L123(filename)

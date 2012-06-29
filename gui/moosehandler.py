@@ -57,6 +57,8 @@ import xml.sax.handler as saxhandler
 import xml.sax.xmlreader as saxreader
 import xml.sax.saxutils as saxutils
 
+from moose.neuroml.NeuroML import NeuroML
+
 from PyQt4 import QtCore
 import moose
 import config
@@ -237,9 +239,11 @@ class MooseHandler(QtCore.QObject):
         self._saxhandler.model_type = None
         self._xmlreader.reset()
         if ret == MooseHandler.type_neuroml:
-            self._context.readNeuroML(filename, target)
+            #self._context.loadModel(filename, target)
+            neuromlR = NeuroML()
+            populationDict, projectionDict = neuromlR.readNeuroMLFromFile(filename)
         elif ret == MooseHandler.type_sbml:
-            self._context.readSBML(filename, target)
+            print 'Unsupported in GUI Mode'
         return ret    
 
     def loadPythonScript(self, filename):
@@ -249,7 +253,7 @@ class MooseHandler(QtCore.QObject):
         exec 'import %s' % (script)
         #exec 'import %s as hello' % (script)
         #hello.loadGran98NeuroML_L123("Generated.net.xml")
-
+        return MooseHandler.type_python
 
     def addFieldTable(self, full_field_path):
         """
