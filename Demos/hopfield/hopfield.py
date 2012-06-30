@@ -11,7 +11,8 @@ import math
 from moose.utils import *
 import csv
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
+from pylab import *
 
 def readMemory(memoryFile):
     f = open(memoryFile,'r')
@@ -42,16 +43,20 @@ def updateWeights(memory,weightMatrix):
 def createNetwork(synWeights,inputGiven):
     numberOfCells = int(math.sqrt(len(synWeights)))
     cells = []
+    Vms   = []
     hopfield = moose.Neutral('/hopfield')
     pg = moose.PulseGen('hopfield/inPulGen')
+#    pgTable = moose.Table('hopfield/inPulGen/pgTable')
+#    moose.connect(pgTable, 'requestData', pg, 'get_output')
     pg.count = 1
-    pg.level[0] = 2.0
-    pg.width[0] = 0.1
+    pg.level[0] = 3
+    pg.width[0] = 2e-03
     pg.delay[0] = 5e-02 #every 50ms
 
     for i in range(numberOfCells):
-        cell = moose.IntFire('hopfield/cell_'+str(i+1)) #non programmer friendly numbering
-        cell.setField('tau',10.0)
+        cellPath = '/hopfield/cell_'+str(i+1)
+        cell = moose.IntFire(cellPath) #non programmer friendly numbering
+        cell.setField('tau',10e-3)
         cell.setField('Vm', -0.07)
         #cell.setField('refractoryPeriod', 0.1)
         #cell.setField('thresh', 0.0)
@@ -60,23 +65,42 @@ def createNetwork(synWeights,inputGiven):
         cell.synapse[i+1].weight = 1
         cell.synapse[i+1].delay = 1e-3
 
-        inSpkGen = moose.SpikeGen('hopfield/cell_'+str(i+1)+'/inSpkGen')
+        VmVals = moose.Table(cellPath+'/Vm_cell_'+str(i+1))
+        moose.connect(VmVals, 'requestData', cell, 'get_Vm')
+
+        inSpkGen = moose.SpikeGen(cellPath+'/inSpkGen')
+        inSpkGen.setField('threshold', 2.0)
+        inSpkGen.setField('edgeTriggered', 1)
+        
         moose.connect(inSpkGen, 'event', cell.synapse[i+1] ,'addSpike') #self connection is the input 
 
         if inputGiven[i] == 1:
-            moose.connect(pg, 'outputOut', moose.element('hopfield/cell_'+str(i+1)+'/inSpkGen'), 'Vm')
+            moose.connect(pg, 'outputOut', moose.element(cellPath+'/inSpkGen'), 'Vm')
 
+#            pgTable = moose.Table(cellPath+'/inSpkGen/pgTable')
+#            moose.connect(pgTable, 'requestData', inSpkGen, 'get_hasFired')
+
+
+        Vms.append(VmVals)
         cells.append(cell)
 
     for currentCell in range(numberOfCells): #currCell 
         for connectCell in range(numberOfCells): #connectToCell
             if currentCell != connectCell: #no self connections
-                connSyn = moose.element('hopfield/cell_'+str(connectCell+1)).synapse[connectCell+1]
+                connSyn = moose.element('/hopfield/cell_'+str(connectCell+1)).synapse[connectCell+1]
                 connSyn.weight = synWeights[currentCell*numberOfCells + connectCell]
                 connSyn.delay = 2e-3
-                moose.connect(moose.element('hopfield/cell_'+str(currentCell+1)), 'spike', connSyn, 'addSpike')
+                moose.connect(moose.element('/hopfield/cell_'+str(currentCell+1)), 'spike', connSyn, 'addSpike')
 
-    return cells
+    return cells,Vms,pgTable
+
+#def saveMemories([memoryFiles]):
+#    synWeights = [0]*len(memories[0])*len(memories[0])
+#    for memory in memories:
+#        read
+
+
+    
 
 memoryFile1 = "memory1.csv"
 memory = readMemory(memoryFile1)
@@ -86,10 +110,19 @@ memoryFile2 = "memory2.csv"
 memory2 = readMemory(memoryFile2)
 synWeights = updateWeights(memory2,synWeights)
 
-print synWeights
+
 
 inputFile = "input.csv"
-cells = createNetwork(synWeights,readMemory(inputFile))
+cells,Vms,pgTable = createNetwork(synWeights,readMemory(inputFile))
 
 resetSim(['/hopfield'],1e-4,1e-3)
-moose.start(2.0)
+
+y = 0
+#for Vm in Vms:
+
+#    y += 1
+#    hold
+moose.start(0.2)
+plot(pgTable.vec[1:])
+#plot(Vms[0].vec[1:])
+show()
