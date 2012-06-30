@@ -51,7 +51,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.currentTime = 0.0
         self.allCompartments = []
         self.modelHasCompartments = False
-
+        self.allModelPaths = []
         #prop Editor variables
         self.propEditorCurrentSelection = None
         self.propEditorChildrenIdDict = {}
@@ -91,8 +91,8 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         #internal connections
         self.connect(self.mooseHandler, QtCore.SIGNAL('updatePlots(float)'), self.updatePlots)
         #run
-        self.connect(self.simControlRunPushButton, QtCore.SIGNAL('clicked()'), self._runSlot)
-        self.connect(self.actionRun,QtCore.SIGNAL('triggered()'),self._runSlot)
+        self.connect(self.simControlRunPushButton, QtCore.SIGNAL('clicked()'), self._resetAndRunSlot)
+        self.connect(self.actionRun,QtCore.SIGNAL('triggered()'),self._resetAndRunSlot)
 
     def popupLoadModelDialog(self):
         fileDialog = QtGui.QFileDialog(self)
@@ -154,6 +154,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
                     except kineticlayout.Widgetvisibility:
                         print 'No kkit layout for: %s' % (str(fileName))
                     self.populateKKitPlots(modelpath)
+                self.allModelPaths.append(modelpath)
                 self.populateDataPlots(modelpath)
                 self.updateDefaultTimes(modeltype)
             #self.enableControlButtons()
@@ -162,7 +163,6 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
                 self.addGLWindow()
             print 'Loaded model',  fileName, 'of type', modeltype, 'under Element path ',modelpath
             app.restoreOverrideCursor()
-
 
     def checkModelForNeurons(self):
         compartmentList = moose.wildcardFind('/##[TYPE=Compartment]')
@@ -297,7 +297,9 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         #creates tables - called when 'Okay' pressed in plotconfig dock
         dataNeutral = moose.Neutral(self.plotConfigCurrentSelection.getField('path')+'/data')
         newTable = moose.Table(self.plotConfigCurrentSelection.getField('path')+'/data/'+str(self.plotConfigFieldSelectionComboBox.currentText()))
-        moose.connect(newTable,'requestData',self.plotConfigCurrentSelection,'get_'+str(self.plotConfigFieldSelectionComboBox.currentText()))
+        moose.connect(newTable,'requestData', self.plotConfigCurrentSelection,'get_'+str(self.plotConfigFieldSelectionComboBox.currentText()))
+
+        #newTable = mooseUtils.setupTable(str(self.plotConfigFieldSelectionComboBox.currentText()), self.plotConfigCurrentSelection, str(self.plotConfigFieldSelectionComboBox.currentText())) 
 
         if str(self.plotConfigWinSelectionComboBox.currentText()) in self.plotWindowFieldTableDict:
             #case when plotwin already exists - append new table to mooseplotwin
@@ -316,9 +318,9 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
             #do not like the legends shown in the plots, change the field 2 below
             plotWin.plot.addTable(newTable,newTable.getField('name'))
-            print "::",newTable.getField('name')
-            plotWin.show()
             self.plotNameWinDict[str(self.plotConfigWinSelectionComboBox.currentText())] = plotWin
+            plotWin.show()
+
 
     def plotConfigAddNewPlotWindow(self):
         #called when new plotwindow pressed in plotconfig dock
@@ -334,30 +336,48 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
     def doQuit(self):
         QtGui.qApp.closeAllWindows()
 
-    def resetAndRunSlot(self):
-        print "reset and run"
-        #moose.reinit()
-        #moose.start(100)
-        #self.updatePlots(10)
-    def _runSlot(self):
+    def _resetAndRunSlot(self): #called when run is pressed
         try:
             runtime = float(str(self.simControlRunTimeLineEdit.text()))
         except ValueError:
             runtime = MooseHandler.runtime
             self.simControlRunTimeLineEdit.setText(str(runtime))
-        self.mooseHandler.doRun(runtime)
-        self.updatePlots(self.mooseHandler.getCurrentTime())
-        #harsha: only after the model is run, saving the plot is enabled,otherwise there will be nothing to save
-        #self.saveTablePlotsAction.setEnabled(1)
 
-    def updateDefaultTimes(self, modeltype):
+        for modelPath in self.allModelPaths:
+            self.mooseHandler.doResetAndRun([modelPath],runtime,float(self.simControlSimdtLineEdit.text()),float(self.simControlPlotdtLineEdit.text()),float(self.simControlUpdatePlotdtLineEdit.text()))
+
+    def _resetSlot(self): #called when reset is pressed
+        for modelPath in self.allModelPaths:
+            self.mooseHandler.doReset([modelPath],float(self.simControlSimdtLineEdit.text()),float(self.simControlPlotdtLineEdit.text()),float(self.simControlUpdatePlotdtLineEdit.text()))
+
+    def _runSlot(self): #called when continue is pressed
+        try:
+            runtime = float(str(self.simControlRunTimeLineEdit.text()))
+        except ValueError:
+            runtime = MooseHandler.runtime
+            self.simControlRunTimeLineEdit.setText(str(runtime))
+
+        self.mooseHandler.doRun(float(str(self.simControlRunTimeLineEdit.text())))
+        self.updatePlots(self.mooseHandler.getCurrentTime())
+        
+    def updateDefaultTimes(self, modeltype): 
         if(modeltype == MooseHandler.type_kkit):
-            tick = (moose.element('/clock').tick)
-            SIMDT = tick[0].dt
-            PLOTDT = tick[2].dt
-            self.simControlSimdtLineEdit.setText(QtCore.QString('%1.3e' % (SIMDT)))
-            self.simControlPlotdtLineEdit.setText(QtCore.QString('%1.3e' % (PLOTDT)))
-            self.simControlUpdatePlotdtLineEdit.setText(QtCore.QString('%1.3e' % (PLOTDT/100)))
+#            tick = (moose.element('/clock').tick)
+#            SIMDT = tick[0].dt
+#            PLOTDT = tick[2].dt
+            self.mooseHandler.updateDefaultsKKIT()
+
+#            self.simControlSimdtLineEdit.setText(str(SIMDT))
+#            self.simControlPlotdtLineEdit.setText(str(PLOTDT))
+#            self.simControlUpdatePlotdtLineEdit.setText(str(10*PLOTDT)) #update every 10 plot points
+#            self.simControlRunTimeLineEdit.setText(str(self.mooseHandler.runtime)) #default run time taken
+#        else: #use the default simdt/plotdt
+
+            self.simControlSimdtLineEdit.setText(str(self.mooseHandler.simdt))
+            self.simControlPlotdtLineEdit.setText(str(self.mooseHandler.plotdt))
+            self.simControlUpdatePlotdtLineEdit.setText(str(self.mooseHandler.plotupdate_dt)) 
+            self.simControlRunTimeLineEdit.setText(str(self.mooseHandler.runtime)) #default run time taken
+
             
         '''
         if (modeltype == MooseHandler.type_kkit) or (modeltype == MooseHandler.type_sbml):
