@@ -17856,3 +17856,25 @@ rather than REAC sA B for an enzyme that is its own substrate. In GENESIS
 this is fine because both eA and sA are zero. 
 I don't want to do a special case in MOOSE for this one model. Should fix model.
 
+============================================================================
+29 June 2012
+Some more fixes to the regression tests, because the kkit naming changes had
+broken them. Checkin 3607.
+
+Trying to get accession 85 to work. Even with the fix on eA, it fails,
+this time because of a negative concentration.
+
+Checked if self substrates and products are a problem. Used model 
+self_sub_prd.g
+This runs fine and generates correct results matching GENESIS.
+
+Something else is wrong in accession 85.
+
+In the meantime, someone has messed with the file output of TableBase.
+Fixed and put in an alternate function 'plainPlot' to make them happy.
+
+
+Put in a helper vector< Id > idMap_ to track down the affected molecule in
+accession 85. It is something called Heaviside_dup and is a SumTotal
+coming off one molecule, and is also a substrate of an enzyme.
+============================================================================

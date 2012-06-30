@@ -468,6 +468,11 @@ class Stoich
 		 * them.
 		 */
 		unsigned int objMapStart_;
+
+		/**
+		 * Map back from mol index to Id. Primarily for debugging.
+		 */
+		vector< Id > idMap_;
 		
 		/**
 		 * Number of variable molecules that the solver deals with.
