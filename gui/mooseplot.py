@@ -70,7 +70,8 @@ class MoosePlot(MyMplCanvas):
             yy = array(table.vec)
             xx = linspace(0.0,self.xmin,len(yy))
             curve.set_data(xx[1:len(xx)],yy[1:len(yy)])
-            
+
+    
         self.axes.relim()
         self.axes.autoscale_view(True,True,True)
         self.axes.legend()
@@ -78,6 +79,7 @@ class MoosePlot(MyMplCanvas):
 
     def updatePlot(self, currentTime):
         config.LOGGER.debug('update: %g' % (currentTime))
+        #print 'updateplots in mooseplot'
         if currentTime > self.xmin:
             self.xmin = currentTime
         for curve, table in self.curveTableMap.items():
