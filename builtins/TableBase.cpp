@@ -61,6 +61,12 @@ const Cinfo* TableBase::initCinfo()
 			"Argument 1 is filename, argument 2 is plotname",
 			new OpFunc2< TableBase, string, string >( &TableBase::xplot ) );
 
+		static DestFinfo plainPlot( "plainPlot",
+			"Dumps table contents to single-column ascii file. "
+			"Uses scientific notation. "
+			"Argument 1 is filename",
+			new OpFunc1< TableBase, string >( &TableBase::plainPlot ) );
+
 		static DestFinfo loadCSV( "loadCSV",
 			"Reads a single column from a CSV file. "
 			"Arguments: filename, column#, starting row#, separator",
@@ -136,6 +142,7 @@ const Cinfo* TableBase::initCinfo()
 		&group,			// DestFinfo
 		&linearTransform,	// DestFinfo
 		&xplot,			// DestFinfo
+		&plainPlot,			// DestFinfo
 		&loadCSV,			// DestFinfo
 		&loadXplot,			// DestFinfo
 		&loadXplotRange,	// DestFinfo
@@ -176,13 +183,21 @@ void TableBase::linearTransform( double scale, double offset )
 		*i = *i * scale + offset;
 }
 
-void TableBase::xplot( string fname, string plotname )
+void TableBase::plainPlot( string fname )
 {
 	ofstream fout( fname.c_str(), ios_base::out );
-	//~ fout << "/newplot\n";
-	//~ fout << "/plotname " << plotname << "\n";
 	fout.precision( 18 );
 	fout.setf( ios::scientific, ios::floatfield );
+	for ( vector< double >::iterator i = vec_.begin(); i != vec_.end(); ++i)
+		fout << *i << endl;
+	fout << "\n";
+}
+
+void TableBase::xplot( string fname, string plotname )
+{
+	ofstream fout( fname.c_str(), ios_base::app );
+	fout << "/newplot\n";
+	fout << "/plotname " << plotname << "\n";
 	for ( vector< double >::iterator i = vec_.begin(); i != vec_.end(); ++i)
 		fout << *i << endl;
 	fout << "\n";

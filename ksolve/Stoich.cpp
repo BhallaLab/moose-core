@@ -400,6 +400,7 @@ void Stoich::allocateModel( const vector< Id >& elist )
 		Element* ei = (*i)();
 		if ( ei->cinfo() == poolCinfo ) {
 			objMap_[ i->value() - objMapStart_ ] = numVarPools_;
+			idMap_.push_back( *i );
 			++numVarPools_;
 		} else if ( ei->cinfo() == bufPoolCinfo ) {
 			bufPools.push_back( *i );
@@ -433,6 +434,7 @@ void Stoich::allocateModel( const vector< Id >& elist )
 	numBufPools_ = 0;
 	for ( vector< Id >::const_iterator i = bufPools.begin(); i != bufPools.end(); ++i ){
 		objMap_[ i->value() - objMapStart_ ] = numVarPools_ + numBufPools_;
+		idMap_.push_back( *i );
 		++numBufPools_;
 	}
 
@@ -440,7 +442,9 @@ void Stoich::allocateModel( const vector< Id >& elist )
 	for ( vector< Id >::const_iterator i = funcPools.begin(); 
 		i != funcPools.end(); ++i ) {
 		objMap_[ i->value() - objMapStart_ ] = numFuncPools_++;
+		idMap_.push_back( *i );
 	}
+	assert( idMap_.size() == numFuncPools_ );
 	numFuncPools_ -= numVarPools_ + numBufPools_;
 	assert( numFunc == numFuncPools_ );
 
