@@ -46,8 +46,8 @@ def createNetwork(synWeights,inputGiven):
     Vms   = []
     hopfield = moose.Neutral('/hopfield')
     pg = moose.PulseGen('hopfield/inPulGen')
-#    pgTable = moose.Table('hopfield/inPulGen/pgTable')
-#    moose.connect(pgTable, 'requestData', pg, 'get_output')
+    pgTable = moose.Table('hopfield/inPulGen/pgTable')
+    moose.connect(pgTable, 'requestData', pg, 'get_output')
     pg.count = 1
     pg.level[0] = 3
     pg.width[0] = 2e-03
@@ -75,7 +75,7 @@ def createNetwork(synWeights,inputGiven):
         moose.connect(inSpkGen, 'event', cell.synapse[i+1] ,'addSpike') #self connection is the input 
 
         if inputGiven[i] == 1:
-            moose.connect(pg, 'outputOut', moose.element(cellPath+'/inSpkGen'), 'Vm')
+            print moose.connect(pg, 'outputOut', moose.element(cellPath+'/inSpkGen'), 'Vm')
 
 #            pgTable = moose.Table(cellPath+'/inSpkGen/pgTable')
 #            moose.connect(pgTable, 'requestData', inSpkGen, 'get_hasFired')
