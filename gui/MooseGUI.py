@@ -169,7 +169,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             app.restoreOverrideCursor()
 
     def checkModelForNeurons(self):
-        self.allCompartments = mooseUtils.findAllBut('/##[TYPE=Compartment]','library'))
+        self.allCompartments = mooseUtils.findAllBut('/##[TYPE=Compartment]','library')
         if self.allCompartments:
             self.modelHasCompartments = True
 
