@@ -313,7 +313,7 @@ class MooseHandler(QtCore.QObject):
         time_left = MooseHandler.runtime + MooseHandler.plotupdate_dt - next_stop 
         if MooseHandler.runtime < MooseHandler.plotupdate_dt:
             time_left = MooseHandler.runtime
-        #self._context.step(time_left)
+        #moose.start(time_left)
         self.emit(QtCore.SIGNAL('updatePlots(float)'), self.getCurrentTime())
 
     def doResetAndRun(self, paths, runtime, simdt=None, plotdt=None, plotupdate_dt=None):
