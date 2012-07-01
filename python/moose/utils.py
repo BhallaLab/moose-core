@@ -110,12 +110,11 @@ def getfields(moose_object):
 def findAllBut(moose_wildcard, exceptionString):
     '''Returns a list of moose objects as per moose_wildcard string and do not contain exceptionSting in path. Use this to pick Compartment objects everywhere except in library''' 
     allButList = []
-    allElements = moose.wildcardFind(moose_wildcard)
+    allElements = moose__.wildcardFind(moose_wildcard)
     if allElements: #if non empty 
         for entry in allElements:
             if str(entry.getField('path')).find(exceptionString) == -1: #non-library entry
                 allButList.append(entry)
-
     return allButList
 
 def apply_to_tree(moose_wildcard, python_filter=None, value=None):
