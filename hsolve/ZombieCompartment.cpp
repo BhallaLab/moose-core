@@ -714,8 +714,7 @@ void ZombieCompartment::handleAxial( double Vm )
 
 void ZombieCompartment::injectMsg( double current )
 {
-	//~ hsolve_->addInject( e.id(), current );
-	//~ sumInject_ += current;
+	hsolve_->addInject( e.id(), current );
 }
 
 void ZombieCompartment::randInject( double prob, double current )
