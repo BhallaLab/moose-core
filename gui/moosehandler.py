@@ -141,7 +141,8 @@ class MooseHandler(QtCore.QObject):
     
     def getCurrentTime(self):
         clock = moose.element('/clock')
-        return clock.runTime
+        return clock.getField('currentTime')
+
         
     def getCurrentElement(self):
         return self._current_element
@@ -292,9 +293,9 @@ class MooseHandler(QtCore.QObject):
 
         """
         mooseUtils.resetSim(paths, simdt, plotdt)
-        MooseHandler.simdt = simdt
-        MooseHandler.plotdt = plotdt
-        MooseHandler.plotupdate_dt = plotupdate_dt
+        #MooseHandler.simdt = simdt
+        #MooseHandler.plotdt = plotdt
+        #MooseHandler.plotupdate_dt = plotupdate_dt
 
     def doRun(self, time):
         """Just runs the simulation. 
@@ -303,18 +304,28 @@ class MooseHandler(QtCore.QObject):
         If an integer, it is the number of time steps.
 
         """
+        #Harsha
+        #continueTime helps to get the total run time required when user clicks on continue button.
+        continueTime = self.getCurrentTime()+MooseHandler.runtime 
         MooseHandler.runtime = time      
         next_stop = MooseHandler.plotupdate_dt
-#        print "time",time,next_stop
-        while next_stop <= MooseHandler.runtime:
-            moose.start(next_stop)
-            next_stop = next_stop + MooseHandler.plotupdate_dt
-            self.emit(QtCore.SIGNAL('updatePlots(float)'), self.getCurrentTime())
-        time_left = MooseHandler.runtime + MooseHandler.plotupdate_dt - next_stop 
         if MooseHandler.runtime < MooseHandler.plotupdate_dt:
-            time_left = MooseHandler.runtime
+            moose.start(MooseHandler.runtime)
+        else:
+            while next_stop <= MooseHandler.runtime:
+                moose.start(MooseHandler.plotupdate_dt)
+                next_stop = next_stop + MooseHandler.plotupdate_dt
+                self.emit(QtCore.SIGNAL('updatePlots(float)'), self.getCurrentTime())
+            if self.getCurrentTime() < continueTime:
+                time_left = continueTime - self.getCurrentTime()
+                moose.start(time_left)
+                self.emit(QtCore.SIGNAL('updatePlots(float)'), self.getCurrentTime())          
+#        time_left = MooseHandler.runtime + MooseHandler.plotupdate_dt - next_stop 
+#        if MooseHandler.runtime < MooseHandler.plotupdate_dt:
+#            time_left = MooseHandler.runtime
         #moose.start(time_left)
-        self.emit(QtCore.SIGNAL('updatePlots(float)'), self.getCurrentTime())
+#        print "after run ###",self.getCurrentTime()
+#        self.emit(QtCore.SIGNAL('updatePlots(float)'), self.getCurrentTime())
 
     def doResetAndRun(self, paths, runtime, simdt=None, plotdt=None, plotupdate_dt=None):
         """Reset and run the simulation.
@@ -332,7 +343,6 @@ class MooseHandler(QtCore.QObject):
             MooseHandler.plotupdate_dt = plotupdate_dt
         if runtime is not None and isinstance(runtime, float):
             MooseHandler.runtime = runtime
-            
         mooseUtils.resetSim(paths, simdt, plotdt)
         self.doRun(runtime)
 
