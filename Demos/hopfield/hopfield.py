@@ -44,9 +44,12 @@ def createNetwork(synWeights,inputGiven):
     numberOfCells = int(math.sqrt(len(synWeights)))
     cells = []
     Vms   = []
+    inTables = []
+
     hopfield = moose.Neutral('/hopfield')
-    pg = moose.PulseGen('hopfield/inPulGen')
-    pgTable = moose.Table('hopfield/inPulGen/pgTable')
+    pg = moose.PulseGen('/hopfield/inPulGen')
+
+    pgTable = moose.Table('/hopfield/inPulGen/pgTable')
     moose.connect(pgTable, 'requestData', pg, 'get_output')
     pg.count = 1
     pg.level[0] = 3
@@ -62,7 +65,7 @@ def createNetwork(synWeights,inputGiven):
         #cell.setField('thresh', 0.0)
         cell.synapse.num = numberOfCells+1 
         #number of synapses - for user friendly numbering - ignore synapse[0]
-        cell.synapse[i+1].weight = 1
+        cell.synapse[i+1].weight = 4
         cell.synapse[i+1].delay = 1e-3
 
         VmVals = moose.Table(cellPath+'/Vm_cell_'+str(i+1))
@@ -70,16 +73,16 @@ def createNetwork(synWeights,inputGiven):
 
         inSpkGen = moose.SpikeGen(cellPath+'/inSpkGen')
         inSpkGen.setField('threshold', 2.0)
-        inSpkGen.setField('edgeTriggered', 1)
-        
-        moose.connect(inSpkGen, 'event', cell.synapse[i+1] ,'addSpike') #self connection is the input 
+        inSpkGen.setField('edgeTriggered', True)
 
         if inputGiven[i] == 1:
-            print moose.connect(pg, 'outputOut', moose.element(cellPath+'/inSpkGen'), 'Vm')
+            moose.connect(pg, 'outputOut', moose.element(cellPath+'/inSpkGen'), 'Vm')
 
-#            pgTable = moose.Table(cellPath+'/inSpkGen/pgTable')
-#            moose.connect(pgTable, 'requestData', inSpkGen, 'get_hasFired')
+            inTable = moose.Table(cellPath+'/inSpkGen/inTable')
+            moose.connect(inTable, 'requestData', inSpkGen, 'get_hasFired')
+            inTables.append(inTable)
 
+        moose.connect(inSpkGen, 'event', cell.synapse[i+1] ,'addSpike') #self connection is the input 
 
         Vms.append(VmVals)
         cells.append(cell)
@@ -89,17 +92,15 @@ def createNetwork(synWeights,inputGiven):
             if currentCell != connectCell: #no self connections
                 connSyn = moose.element('/hopfield/cell_'+str(connectCell+1)).synapse[connectCell+1]
                 connSyn.weight = synWeights[currentCell*numberOfCells + connectCell]
-                connSyn.delay = 2e-3
+                connSyn.delay = 20e-3
                 moose.connect(moose.element('/hopfield/cell_'+str(currentCell+1)), 'spike', connSyn, 'addSpike')
 
-    return cells,Vms,pgTable
+    return cells,Vms,pgTable,inTables
 
 #def saveMemories([memoryFiles]):
 #    synWeights = [0]*len(memories[0])*len(memories[0])
 #    for memory in memories:
 #        read
-
-
     
 
 memoryFile1 = "memory1.csv"
@@ -110,19 +111,19 @@ memoryFile2 = "memory2.csv"
 memory2 = readMemory(memoryFile2)
 synWeights = updateWeights(memory2,synWeights)
 
-
-
 inputFile = "input.csv"
-cells,Vms,pgTable = createNetwork(synWeights,readMemory(inputFile))
+cells,Vms,pgTable,inTables = createNetwork(synWeights,readMemory(inputFile))
 
-resetSim(['/hopfield'],1e-4,1e-3)
-
-y = 0
-#for Vm in Vms:
-
-#    y += 1
-#    hold
+moose.setClock(0, 1e-4)
+moose.useClock(0, '/hopfield/inPulGen/pgTable,/hopfield/inPulGen,','process')
+moose.useClock(0, '/hopfield/##[TYPE=IntFire],/hopfield/##[TYPE=Table],/hopfield/##[TYPE=SpikeGen]', 'process')
+moose.reinit()
 moose.start(0.2)
-plot(pgTable.vec[1:])
+
+#plot(pgTable.vec[1:])
+#for yset,inTable in enumerate(inTables):
+#    plot(float(yset)+inTable.vec[1:])
+for ySet,Vm in enumerate(Vms):
+    plot(float(2*ySet)/(1e+7)+Vm.vec[1:])
 #plot(Vms[0].vec[1:])
 show()
