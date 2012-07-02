@@ -107,16 +107,6 @@ def getfields(moose_object):
         fields[name] = moose_object.getField(name)
     return fields
 
-def findAllBut(moose_wildcard, exceptionString):
-    '''Returns a list of moose objects as per moose_wildcard string and do not contain exceptionSting in path. Use this to pick Compartment objects everywhere except in library''' 
-    allButList = []
-    allElements = moose__.wildcardFind(moose_wildcard)
-    if allElements: #if non empty 
-        for entry in allElements:
-            if str(entry.getField('path')).find(exceptionString) == -1: #non-library entry
-                allButList.append(entry)
-    return allButList
-
 def apply_to_tree(moose_wildcard, python_filter=None, value=None):
     """
     Select objects by a moose/genesis wildcard, apply a python filter on them and apply a value on them.
@@ -343,34 +333,42 @@ def readcell_scrambled(filename, target):
 
 ############# added by Aditya Gilra -- begin ################
 
-def resetSim(simpaths, simdt, plotdt):
-    """ For each of the MOOSE paths in simpaths, this sets the clocks and finally resets MOOSE """
+def resetSim(simpaths, simdt, plotdt, hsolve_path=None):
+    """ For each of the MOOSE paths in simpaths, this sets the clocks and finally resets MOOSE.
+    If hsolve_path is set to a MOOSE hsolve object's path, it sets the clock for hsolve too. """
     moose__.setClock(0, simdt)
     moose__.setClock(1, simdt) #### The hsolve and ee methods use clock 1
     moose__.setClock(2, simdt) #### hsolve uses clock 2 for mg_block, nmdachan and others.
     moose__.setClock(PLOTCLOCK, plotdt) # PLOTCLOCK is in mooseConstants.py
-    ## You should remove below useClock-s, once hsolve is the default solver
-    ## Even if reinit() reschedules the clocks, all 'process' functions might get called twice!
     for simpath in simpaths:
-        moose__.useClock(0, simpath+'/##[TYPE=Compartment]', 'init')
+        moose__.useClock(PLOTCLOCK, simpath+'/##[TYPE=Table]', 'process')
         moose__.useClock(0, simpath+'/##[TYPE=PulseGen]', 'process')
         moose__.useClock(0, simpath+'/##[TYPE=DiffAmp]', 'process')
         moose__.useClock(0, simpath+'/##[TYPE=SpikeGen]', 'process')
-        moose__.useClock(1, simpath+'/##[TYPE=Compartment]', 'process')
-        moose__.useClock(1, simpath+'/##[TYPE=IntFire]', 'process')
-        moose__.useClock(2, simpath+'/##[TYPE=HHChannel]', 'process')
-        moose__.useClock(2, simpath+'/##[TYPE=HHGate]', 'process')
-        moose__.useClock(2, simpath+'/##[TYPE=HHChannel2D]', 'process')
-        moose__.useClock(2, simpath+'/##[TYPE=HHGate2D]', 'process')
-        moose__.useClock(2, simpath+'/##[TYPE=CaConc]', 'process')
-        moose__.useClock(PLOTCLOCK, simpath+'/##[TYPE=Table]', 'process')
+        ## hsolve takes care of the clocks for the biophysics
+        ## But if hsolve_path is not given, use clocks for the biophysics,
+        ## else just put a clock on the hsolve
+        if hsolve_path is None:
+            moose__.useClock(0, simpath+'/##[TYPE=Compartment]', 'init')
+            moose__.useClock(1, simpath+'/##[TYPE=Compartment]', 'process')
+            moose__.useClock(1, simpath+'/##[TYPE=IntFire]', 'process')
+            moose__.useClock(2, simpath+'/##[TYPE=HHChannel]', 'process')
+            moose__.useClock(2, simpath+'/##[TYPE=HHGate]', 'process')
+            moose__.useClock(2, simpath+'/##[TYPE=HHChannel2D]', 'process')
+            moose__.useClock(2, simpath+'/##[TYPE=HHGate2D]', 'process')
+            moose__.useClock(2, simpath+'/##[TYPE=CaConc]', 'process')
+        else:
+            moose__.useClock( 0, hsolve_path, 'process' )
     moose__.reinit()
 
-def setupTable(name, obj, qtyname):
-    """ Sets up a table with 'name' which stores 'qtyname' field from 'obj'. """
-    # Setup the tables to pull data
-    moose__.Neutral(obj.path+"/data") # in case /data does not exist, create
-    vmTable = moose__.Table(obj.path+"/data/"+name)
+def setupTable(name, obj, qtyname, tables_path=None):
+    """ Sets up a table with 'name' which stores 'qtyname' field from 'obj'.
+    The table is created under tables_path if not None, else under obj.path . """
+    if tables_path is None:
+        tables_path = obj.path+'/data'
+    ## in case tables_path does not exist, below wrapper will create it
+    moose__.Neutral(tables_path)
+    vmTable = moose__.Table(tables_path+'/'+name)
     ## stepMode no longer supported, connect to 'input'/'spike' message dest to record Vm/spiktimes
     # vmTable.stepMode = TAB_BUF 
     moose__.connect( vmTable, "requestData", obj, 'get_'+qtyname)
