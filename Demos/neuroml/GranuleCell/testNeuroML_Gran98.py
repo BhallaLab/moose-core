@@ -15,7 +15,7 @@ from pylab import *
 
 simdt = 10e-6 # s
 plotdt = 10e-6 # s
-runtime = 0.7 # s
+runtime = 1.0 # s
 
 def loadGran98NeuroML_L123(filename):
     neuromlR = NeuroML()
@@ -40,6 +40,7 @@ def loadGran98NeuroML_L123(filename):
     title('Soma Ca')
     xlabel('time (s)')
     ylabel('Ca conc (mol/m^3)')
+    figure()
     plot(tvec,KDrX.vec[1:])
     title('KDr X gate')
     xlabel('time (s)')

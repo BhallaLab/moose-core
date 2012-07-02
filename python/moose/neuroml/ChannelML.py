@@ -168,6 +168,9 @@ class ChannelML():
                 moosegate.min = VMIN_here*Vfactor
                 moosegate.max = VMAX_here*Vfactor
                 moosegate.divs = NDIVS_here
+                ## V.IMP to get smooth curves, else even with 3000 divisions
+                ## there are sudden transitions.
+                moosegate.useInterpolation = True
             else:
                 moosegate = moose.HHGate2D( gate_path )
                         
