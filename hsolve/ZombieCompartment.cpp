@@ -273,14 +273,14 @@ const Cinfo* ZombieCompartment::initCinfo()
 			"assigned by handleInject applies only for a single timestep."
 			"So it needs to be updated every dt for a steady (or varying)"
 			"injection current",
-			new OpFunc1< ZombieCompartment, double >( &ZombieCompartment::injectMsg )
+			new EpFunc1< ZombieCompartment, double >( &ZombieCompartment::injectMsg )
 		);
 		
 		static DestFinfo randInject( "randInject",
 			"Sends a random injection current to the compartment. Must be"
 			"updated each timestep."
 			"Arguments to randInject are probability and current.",
-			new OpFunc2< ZombieCompartment, double, double > (
+			new EpFunc2< ZombieCompartment, double, double > (
 				&ZombieCompartment::randInject ) );
 		
 		static DestFinfo cable( "cable", 
@@ -712,15 +712,15 @@ void ZombieCompartment::handleRaxial( double Ra, double Vm )
 void ZombieCompartment::handleAxial( double Vm )
 { ; }
 
-void ZombieCompartment::injectMsg( double current )
+void ZombieCompartment::injectMsg( const Eref& e, const Qinfo* q, double current )
 {
 	hsolve_->addInject( e.id(), current );
 }
 
-void ZombieCompartment::randInject( double prob, double current )
+void ZombieCompartment::randInject( const Eref& e, const Qinfo* q, double prob, double current )
 {
 	//~ if ( mtrand() < prob * dt_ ) {
-		//~ sumInject_ += current;
+		//~ hsolve_->addInject( e.id(), current );
 	//~ }
 }
 

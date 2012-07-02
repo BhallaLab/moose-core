@@ -114,7 +114,7 @@ class ZombieCompartment
 			 * be used as the destination of a message rather than as a
 			 * one-time assignment.
 			 */
-			void injectMsg( double current);
+			void injectMsg( const Eref& e, const Qinfo* q, double current);
 
 			/**
 			 * Injects a constantly updated current into the
@@ -122,7 +122,7 @@ class ZombieCompartment
 			 * the current amplitude that is random, it is the presence
 			 * or absence of the current that is probabilistic.
 			 */
-			void randInject( double prob, double current);
+			void randInject( const Eref& e, const Qinfo* q, double prob, double current);
 
 			/**
 			 * Dummy function to act as recipient of 'cable' message,
