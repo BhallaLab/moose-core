@@ -93,8 +93,8 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         #run
         self.connect(self.simControlRunPushButton, QtCore.SIGNAL('clicked()'), self._resetAndRunSlot)
         self.connect(self.actionRun,QtCore.SIGNAL('triggered()'),self._resetAndRunSlot)
-        #self.connect(self.simControlContinuePushButton, QtCore.SIGNAL('clicked()'), self._runSlot)
-        #self.connect(self.actionContinue,QtCore.SIGNAL('triggered()'),self._runSlot)
+        self.connect(self.simControlContinuePushButton, QtCore.SIGNAL('clicked()'), self._continueSlot)
+        self.connect(self.actionContinue,QtCore.SIGNAL('triggered()'),self._continueSlot)
         self.connect(self.simControlResetPushButton, QtCore.SIGNAL('clicked()'), self._resetSlot)
         self.connect(self.actionReset,QtCore.SIGNAL('triggered()'),self._resetSlot)
 
@@ -163,12 +163,14 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
                 self.updateDefaultTimes(modeltype)
             #self.enableControlButtons()
             self.checkModelForNeurons()
+            print "s",self.modelHasCompartments
             if self.modelHasCompartments:
                 self.addGLWindow()
             print 'Loaded model',  fileName, 'of type', modeltype, 'under Element path ',modelpath
             app.restoreOverrideCursor()
 
     def checkModelForNeurons(self):
+        print "insdeicde"
         self.allCompartments = mooseUtils.findAllBut('/##[TYPE=Compartment]','library')
         if self.allCompartments:
             self.modelHasCompartments = True
@@ -341,26 +343,38 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         except ValueError:
             runtime = MooseHandler.runtime
             self.simControlRunTimeLineEdit.setText(str(runtime))
-
+        
+        #totaltime = float(moose.element('/clock').getField('currentTime'))+float(self.simControlUpdatePlotdtLineEdit.text())
+        #print "$$$",totaltime
         for modelPath,modeltype in self.modelPathsModelTypeDict.iteritems():
             if modeltype == MooseHandler.type_kkit:
                 self.mooseHandler.doResetAndRun([modelPath],runtime,float(self.simControlSimdtLineEdit.text()),float(self.simControlPlotdtLineEdit.text()),float(self.simControlUpdatePlotdtLineEdit.text()))
             elif modeltype == MooseHandler.type_neuroml:
                 self.mooseHandler.doResetAndRun(['/cells','/elec'],runtime,float(self.simControlSimdtLineEdit.text()),float(self.simControlPlotdtLineEdit.text()),float(self.simControlUpdatePlotdtLineEdit.text()))
 
-    def _resetSlot(self): #called when reset is pressed
-        for modelPath,modelType in self.modelPathsModelTypeDict.iteritems():
-            if modeltype == MooseHandler.type_kkit:
-                self.mooseHandler.doResetAndRun([modelPath],runtime,float(self.simControlSimdtLineEdit.text()),float(self.simControlPlotdtLineEdit.text()),float(self.simControlUpdatePlotdtLineEdit.text()))
-            elif modeltype == MooseHandler.type_neuroml:
-                self.mooseHandler.doResetAndRun(['/cells','/elec'],runtime,float(self.simControlSimdtLineEdit.text()),float(self.simControlPlotdtLineEdit.text()),float(self.simControlUpdatePlotdtLineEdit.text()))
 
-    def _runSlot(self): #called when continue is pressed
+
+    def _resetSlot(self): #called when reset is pressed
         try:
             runtime = float(str(self.simControlRunTimeLineEdit.text()))
         except ValueError:
             runtime = MooseHandler.runtime
             self.simControlRunTimeLineEdit.setText(str(runtime))
+ 
+        for modelPath,modeltype in self.modelPathsModelTypeDict.iteritems():
+            if modeltype == MooseHandler.type_kkit:
+                self.mooseHandler.doReset([modelPath],float(self.simControlSimdtLineEdit.text()),float(self.simControlPlotdtLineEdit.text()),float(self.simControlUpdatePlotdtLineEdit.text()))
+            elif modeltype == MooseHandler.type_neuroml:
+                self.mooseHandler.doReset(['/cells','/elec'],runtime,float(self.simControlSimdtLineEdit.text()),float(self.simControlPlotdtLineEdit.text()),float(self.simControlUpdatePlotdtLineEdit.text()))
+            self.updatePlots(self.mooseHandler.getCurrentTime())
+
+    def _continueSlot(self): #called when continue is pressed
+        try:
+            runtime = float(str(self.simControlRunTimeLineEdit.text()))
+        except ValueError:
+            runtime = MooseHandler.runtime
+            self.simControlRunTimeLineEdit.setText(str(runtime))
+        #totaltime = MooseHandler.getCurrentTime()+self.simControlRunTimeLineEdit.text()
         self.mooseHandler.doRun(float(str(self.simControlRunTimeLineEdit.text()))) 
         #self.mooseHandler.doRun(self.mooseHandler.getCurrentTime()+float(str(self.simControlRunTimeLineEdit.text()))) 
         self.updatePlots(self.mooseHandler.getCurrentTime())
