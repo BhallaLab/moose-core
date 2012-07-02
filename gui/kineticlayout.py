@@ -278,7 +278,7 @@ class kineticsWidget(QtGui.QWidget):
 
         G.layout(prog='dot')
         filename = modelPath.lstrip('/')
-        G.draw('/home/harsha/Desktop/'+filename+'.png',prog='dot',format='png')
+        G.draw(os.getcwd()+filename+'.png',prog='dot',format='png')
         graphCord = {}
         self.qGraCompt = {}
         mooseId_GText = {}
