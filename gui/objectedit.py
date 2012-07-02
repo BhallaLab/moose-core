@@ -174,7 +174,8 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
         field = self.fields[index.row()]        
         if role == Qt.ToolTipRole:
             #print "$$",field,str(field)
-            return self.tr('<html>' + moose.doc(self.mooseObject.class_ + '.' + str(field)).replace(chr(27) + '[1m', '<b>').replace(chr(27) + '[0m', '</b>') + '</html>') # This is to remove special characters used for pretty printing in terminals
+            #return self.tr('<html>' + moose.doc(self.mooseObject.class_ + '.' + str(field)).replace(chr(27) + '[1m', '<b>').replace(chr(27) + '[0m', '</b>') + '</html>') # This is to remove special characters used for pretty printing in terminals
+            return self.tr('<html>' + moose.doc(self.mooseObject.class_ + '.' + str(field)) + '</html>') # This is to remove special characters used for pretty printing in terminals
         if index.column() == 0 and role == Qt.DisplayRole:
             ret = QtCore.QVariant(QtCore.QString(field))
         elif index.column() == 1 and (role == Qt.DisplayRole or role == Qt.EditRole):

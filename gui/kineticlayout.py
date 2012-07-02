@@ -218,7 +218,6 @@ class GraphicalView(QtGui.QGraphicsView):
         self.rubberBandactive = False
 
 class Widgetvisibility(Exception):pass    
-
 class kineticsWidget(QtGui.QWidget):
     def __init__(self,size,modelPath,parent=None):
         QtGui.QWidget.__init__(self,parent)
@@ -273,12 +272,13 @@ class kineticsWidget(QtGui.QWidget):
                 for items in (items for items in out[1] ):
                     G.add_edge(inn.path,items.path,color=arrowcolor)
             else:
+
                 for items in (items for items in out ):
                     G.add_edge(items.path,inn.path,color='blue')
 
         G.layout(prog='dot')
         filename = modelPath.lstrip('/')
-        #G.draw('/home/harsha1/Desktop/'+filename+'.png',prog='dot',format='png')
+        G.draw('/home/harsha/Desktop/'+filename+'.png',prog='dot',format='png')
         graphCord = {}
         self.qGraCompt = {}
         mooseId_GText = {}
@@ -290,7 +290,7 @@ class kineticsWidget(QtGui.QWidget):
         for compt,v in cmptMol.items():
             self.createCompt(compt)
             comptRef = self.qGraCompt[compt]
-            for  items in (items for items in itemlist if len(items) != 0):
+            for  items in (items for items in v if len(items) != 0):
                 for item in items:
                     x = float(re.split(',',graphCord[item.path]['pos'])[0])
                     y = -float(re.split(',',graphCord[item.path]['pos'])[1])
@@ -350,7 +350,7 @@ class kineticsWidget(QtGui.QWidget):
             molList = []
             reList = []
             for mitem in Neutral(meshEnt).getNeighbors('remesh'):
-                if ( (mitem[0].class_ != 'GslIntegrator')):# and ((mitem[0].parent).class_ != 'ZombieEnz') ):
+                if ( (mitem[0].class_ != 'GslIntegrator') and ((mitem[0].parent).class_ != 'ZombieEnz') ):
                     molList.append(element(mitem))
             for reitem in Neutral(meshEnt).getNeighbors('remeshReacs'):
                 reList.append(element(reitem))
@@ -359,6 +359,7 @@ class kineticsWidget(QtGui.QWidget):
     def setupItem(self,modlePath,searObject,cntDict):
         for zombieObj in searObject:
             path = modlePath+'/##[TYPE='+zombieObj+']'
+            
             if zombieObj != 'ZombieSumFunc':
                 for items in wildcardFind(path):
                     sublist = []
@@ -373,7 +374,6 @@ class kineticsWidget(QtGui.QWidget):
                     if (zombieObj == 'ZombieMMenz'):
                         for enzpar in items.getNeighbors('enzDest'):
                             sublist.append(element(enzpar))
-                    #print "items",items,sublist,prdlist
                     cntDict[items] = sublist,prdlist
             else:
                 #ZombieSumFunc adding inputs
@@ -382,12 +382,11 @@ class kineticsWidget(QtGui.QWidget):
                     outputlist = []
                     funplist = []
                     nfunplist = []
-                    for inpt in items.getNeighbors('input'): inputlist.append(element(inpt))
-                    '''
+                    for inpt in items.getNeighbors('input'):
+                        #inputlist.append(element(inpt))
                         for inPt in inpt:
-                            if ((inPt.parent).class_ != 'ZombieEnz'):
+                            if(((inPt.parent).class_ != 'ZombieEnz') and ((inPt.parent).class_ != 'ZombieMMenz')):
                                 inputlist.append(element(inPt))
-                    '''       
                     for zfun in items.getNeighbors('output'): funplist.append(element(zfun))
                     for i in funplist: nfunplist.append(element(i).getId())
                     nfunplist = list(set(nfunplist))
@@ -585,7 +584,7 @@ class kineticsWidget(QtGui.QWidget):
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     size = QtCore.QSize(800,600)
-    modelPath = 'acc15'
+    #modelPath = '68'
     modelPath = 'Osc_cspace_ref_model'
     loadModel('/home/harsha/dh_branch/Demos/Genesis_files/'+modelPath+'.g','/'+modelPath)
     dt = kineticsWidget(size,'/'+modelPath)
