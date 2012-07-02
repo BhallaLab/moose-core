@@ -99,6 +99,7 @@
 	#include "HHChannel2D.h"
 #ifdef USE_NUMPY
 #include <algorithm>
+#include <cstddef>    
 #ifndef PY_ARRAY_UNIQUE_SYMBOL
 #define PY_ARRAY_UNIQUE_SYMBOL Py_Array_API_pymoose_
 #endif
