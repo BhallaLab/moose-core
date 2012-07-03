@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Feb 22 23:24:21 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Mar  8 20:23:00 2012 (+0530)
-#           By: Subhasis Ray
-#     Update #: 849
+# Last-Updated: Tue Jul  3 18:39:35 2012 (+0530)
+#           By: subha
+#     Update #: 952
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -41,7 +41,7 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 
 import moose
 
-from squid import SquidAxon
+from squid import *
 from squid_setup import SquidSetup
 from electronics import ClampCircuit
 
@@ -113,6 +113,7 @@ class SquidDemo(QtGui.QMainWindow):
         self.setCentralWidget(self._getMdiArea())
         self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self._getRunControl())
         self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self._getElectronicsCtrl())
+        self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self._getChannelCtrl())
         self._initActions()
         self._getToolBar()
         # self._runtime_queue = Queue()
@@ -363,6 +364,51 @@ class SquidDemo(QtGui.QMainWindow):
         iClampPanel.setLayout(layout)
         return self._iClampCtrlBox
 
+    def _getChannelCtrl(self):
+        if hasattr(self, '_channelCtrl'):
+            return self._channelCtrl
+        self._channelCtrl = QtGui.QDockWidget(self)
+        self._channelCtrlBox = QtGui.QGroupBox('Ion channel settings', self._channelCtrl)
+        self._naConductanceLabel = QtGui.QLabel('G_max[Na] (mmho/cm^2)', self._channelCtrlBox)
+        self._naConductanceEdit = QtGui.QLineEdit(str(self.squid_setup.squid_axon.specific_gNa), 
+                                                  self._channelCtrlBox)        
+        self._kConductanceLabel = QtGui.QLabel('G_max[K] (mmho/cm^2)', self._channelCtrlBox)
+        self._kConductanceEdit = QtGui.QLineEdit(str(self.squid_setup.squid_axon.specific_gK), 
+                                              self._channelCtrlBox)
+        self._kOutLabel = QtGui.QLabel('[K+]out (mM)', self._channelCtrlBox)
+        self._kOutEdit = QtGui.QLineEdit(str(self.squid_setup.squid_axon.K_out), 
+                                         self._channelCtrlBox)
+        self._naOutLabel = QtGui.QLabel('[Na+]out (mM)', self._channelCtrlBox)
+        self._naOutEdit = QtGui.QLineEdit(str(self.squid_setup.squid_axon.Na_out), 
+                                         self._channelCtrlBox)
+        self._kInLabel = QtGui.QLabel('[K+]in (mM)', self._channelCtrlBox)
+        self._kInEdit = QtGui.QLabel(str(self.squid_setup.squid_axon.K_in), 
+                                         self._channelCtrlBox)
+        self._naInLabel = QtGui.QLabel('[Na+]in (mM)', self._channelCtrlBox)
+        self._naInEdit = QtGui.QLabel(str(self.squid_setup.squid_axon.Na_in), 
+                                         self._channelCtrlBox)
+        self._temperatureLabel = QtGui.QLabel('Temperature (C)', self._channelCtrlBox)
+        self._temperatureEdit = QtGui.QLineEdit(str(self.squid_setup.squid_axon.celsius),
+                                                self._channelCtrlBox)
+        layout = QtGui.QGridLayout(self._channelCtrlBox)
+        layout.addWidget(self._naConductanceLabel, 0, 0)
+        layout.addWidget(self._naConductanceEdit, 0, 1)
+        layout.addWidget(self._kConductanceLabel, 1, 0)
+        layout.addWidget(self._kConductanceEdit, 1, 1)
+        layout.addWidget(self._naOutLabel, 2, 0)
+        layout.addWidget(self._naOutEdit, 2, 1)
+        layout.addWidget(self._naInLabel, 3, 0)
+        layout.addWidget(self._naInEdit, 3, 1)
+        layout.addWidget(self._kOutLabel, 4, 0)
+        layout.addWidget(self._kOutEdit, 4, 1)
+        layout.addWidget(self._kInLabel, 5, 0)
+        layout.addWidget(self._kInEdit, 5, 1)
+        layout.addWidget(self._temperatureLabel, 6, 0)
+        layout.addWidget(self._temperatureEdit, 6, 1)
+        self._channelCtrlBox.setLayout(layout)
+        self._channelCtrl.setWidget(self._channelCtrlBox)
+        return self._channelCtrl    
+
     def __get_stateplot_data(self, name):
         data = []
         if name == 'V':
@@ -431,10 +477,15 @@ class SquidDemo(QtGui.QMainWindow):
                                                     secondWidth=secondWidth,
                                                     secondLevel=secondLevel,
                                                     singlePulse=singlePulse)
+        self.squid_setup.squid_axon.specific_gNa = float(str(self._naConductanceEdit.text()))
+        self.squid_setup.squid_axon.specific_gK = float(str(self._kConductanceEdit.text()))
+        self.squid_setup.squid_axon.celsius = float(str(self._temperatureEdit.text()))
+        self.squid_setup.squid_axon.K_out = float(str(self._kOutEdit.text()))
+        self.squid_setup.squid_axon.Na_out = float(str(self._naOutEdit.text()))
+        self.squid_setup.squid_axon.updateEk()
         self.squid_setup.schedule(self._simdt, self._plotdt, clampMode)
         self._runtime = float(str(self._runTimeEdit.text()))
         # The following line is for use with Qthread
-        print 'Starting simulation'
         self._simthread.set_runtime(self._runtime)
         self._timer = self.startTimer(300)
         # self._runtime_queue.put(self._runtime)
