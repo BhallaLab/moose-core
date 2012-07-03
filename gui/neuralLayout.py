@@ -118,9 +118,9 @@ class updatepaintGL(PyGLWidget):
     def drawNewCell(self, cellName, style=2, cellCentre=[0.0,0.0,0.0], cellAngle=[0.0,0.0,0.0,0.0]):
     	#***cellName = moosepath in the GL canvas***
         ch = moose.wildcardFind(str(cellName+'/##[TYPE=Compartment]'))
-
-	l_coords = []
-	for i in range(0,len(ch),1):
+        l_coords = []
+        if ch:
+            for i in range(0,len(ch),1):
     	    	x=float(ch[i].getField('x'))*(1e+04)
     	    	y=float(ch[i].getField('y'))*(1e+04)
     	    	z=float(ch[i].getField('z'))*(1e+04)
@@ -130,66 +130,67 @@ class updatepaintGL(PyGLWidget):
 	   	d=float(ch[i].getField('diameter'))*(1e+04)
     	    	l_coords.append((x0,y0,z0,x,y,z,d,ch[i].getField('path')))
 
+        elif moose.element(cellName).getField('class') == 'IntFire':
+            l_coords.append((0,0,0,0,0,0,0,cellName))
+
     	if self.viz==1:				#fix
     		self.selectionMode=0
     		
 	if (self.selectionMode):		#self.selectionMode = 1,cells are pickable
-		newCell = cellStruct(self,l_coords,cellName,style)
-		newCell._centralPos = cellCentre
-		newCell.rotation = cellAngle
-		self.sceneObjectNames.append(cellName)
-		self.sceneObjects.append(newCell)	
-		if self.viz==1:			#fix
-			self.vizObjects.append(newCell)
-			self.vizObjectNames.append(cellName)
+            newCell = cellStruct(self,l_coords,cellName,style)
+            newCell._centralPos = cellCentre
+            newCell.rotation = cellAngle
+            self.sceneObjectNames.append(cellName)
+            self.sceneObjects.append(newCell)	
+            if self.viz==1:			#fix
+                self.vizObjects.append(newCell)
+                self.vizObjectNames.append(cellName)
 			
 	else:					#self.selectionMode=0,comapartments are pickable
-		for i in range(0,len(l_coords),1):
-			if (l_coords[i][0] == l_coords[i][3] and l_coords[i][1] == l_coords[i][4] and l_coords[i][2] == l_coords[i][5]):
-				if style==0:
-					compartmentLine=somaDisk(self,l_coords[i],cellName)
-					compartmentLine._centralPos = cellCentre
-					compartmentLine.rotation = cellAngle
-					self.sceneObjectNames.append(l_coords[i][7])
-	    				self.sceneObjects.append(compartmentLine)
-	    		
-	    				if self.viz==1:
-						self.vizObjects.append(compartmentLine)
-						self.vizObjectNames.append(l_coords[i][7])
+            for i in range(0,len(l_coords),1):
+                if (l_coords[i][0] == l_coords[i][3] and l_coords[i][1] == l_coords[i][4] and l_coords[i][2] == l_coords[i][5]): #soma
+                    if style == 0:
+                        compartmentLine=somaDisk(self,l_coords[i],cellName)
+                        compartmentLine._centralPos = cellCentre
+                        compartmentLine.rotation = cellAngle
+                        self.sceneObjectNames.append(l_coords[i][7])
+                        self.sceneObjects.append(compartmentLine)
+                            
+                        if self.viz==1:
+                            self.vizObjects.append(compartmentLine)
+                            self.vizObjectNames.append(l_coords[i][7])
 				
-				elif (style==1) or (style==2):				#drawing of the soma in style 1&2
-					compartmentLine = somaSphere(self,l_coords[i],cellName) 	#$
-					
-				elif style==3:						#grid view, any choice to compartment as a disk
-					compartmentLine=somaDisk(self,[0,0,0,0,0,0,0,l_coords[i][7]],cellName)
-					compartmentLine.radius = 0.20
-					compartmentLine._centralPos = cellCentre
-					compartmentLine.rotation = cellAngle
-					self.sceneObjectNames.append(l_coords[i][7])
-	    				self.sceneObjects.append(compartmentLine)
-	    		
-	    				if self.viz==1:
-						self.vizObjects.append(compartmentLine)
-						self.vizObjectNames.append(l_coords[i][7])
+                    elif (style == 1) or (style == 2):	#drawing of the soma in style 1&2
+                        compartmentLine = somaSphere(self,l_coords[i],cellName) 	#$
+                            
+                    elif style == 3:	#grid view, any choice to compartment as a disk
+                        compartmentLine=somaDisk(self,[0,0,0,0,0,0,0,l_coords[i][7]],cellName)
+                        compartmentLine.radius = 0.20
+                        compartmentLine._centralPos = cellCentre
+                        compartmentLine.rotation = cellAngle
+                        self.sceneObjectNames.append(l_coords[i][7])
+                        self.sceneObjects.append(compartmentLine)
+                                    
+                        if self.viz==1:
+                            self.vizObjects.append(compartmentLine)
+                            self.vizObjectNames.append(l_coords[i][7])
 				
-			else:								#to draw compartments other than soma
-				if style==1:
-					compartmentLine=cLine(self,l_coords[i],cellName)	#$
-					
-				elif style==2:
-					compartmentLine=cCylinder(self,l_coords[i],cellName)	#$
+                else:	#to draw compartments other than soma
+                    if style == 1:
+                        compartmentLine=cLine(self,l_coords[i],cellName)#$
+                            
+                    elif style == 2:
+                        compartmentLine=cCylinder(self,l_coords[i],cellName)#$
 			
-			
-			if (style==1)or(style==2):					#necessary, appends includ the soma as well (= include code in "$" areas)
-				compartmentLine._centralPos = cellCentre
-				compartmentLine.rotation = cellAngle
-				self.sceneObjectNames.append(l_coords[i][7])
-	    			self.sceneObjects.append(compartmentLine)
+                if (style == 1)or(style == 2):#necessary, appends includ the soma as well (= include code in "$" areas)
+                    compartmentLine._centralPos = cellCentre
+                    compartmentLine.rotation = cellAngle
+                    self.sceneObjectNames.append(l_coords[i][7])
+                    self.sceneObjects.append(compartmentLine)
 	    		
-	    			if self.viz==1:
-					self.vizObjects.append(compartmentLine)
-					self.vizObjectNames.append(l_coords[i][7])	    		
-
+                    if self.viz==1:
+                        self.vizObjects.append(compartmentLine)
+                        self.vizObjectNames.append(l_coords[i][7])	    		
 
     def drawAllCells(self, style = 2, cellCentre=[0.0,0.0,0.0], cellAngle=[0.0,0.0,0.0,0.0]):
         an=moose.Neutral('/')						#moose root children

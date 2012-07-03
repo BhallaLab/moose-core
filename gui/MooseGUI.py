@@ -50,7 +50,9 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         #other variables
         self.currentTime = 0.0
         self.allCompartments = []
+        self.allIntFires = []
         self.modelHasCompartments = False
+        self.modelHasIntFires = False
         self.modelPathsModelTypeDict = {}
         #prop Editor variables
         self.propEditorCurrentSelection = None
@@ -163,15 +165,18 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
                 self.updateDefaultTimes(modeltype)
             #self.enableControlButtons()
             self.checkModelForNeurons()
-            if self.modelHasCompartments:
+            if self.modelHasCompartments or self.modelHasIntFires:
                 self.addGLWindow()
             print 'Loaded model',  fileName, 'of type', modeltype, 'under Element path ',modelpath
             app.restoreOverrideCursor()
 
     def checkModelForNeurons(self):
         self.allCompartments = mooseUtils.findAllBut('/##[TYPE=Compartment]','library')
+        self.allIntFires = mooseUtils.findAllBut('/##[TYPE=IntFire]','library')
         if self.allCompartments:
             self.modelHasCompartments = True
+        if self.allIntFires:
+            self.modelHasIntFires = True
 
     def addGLWindow(self):
 	self.layoutWidget = updatepaintGL(self.centralwidget)
@@ -198,17 +203,35 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
     def updateCanvas(self):
         cellNameComptDict = {}
         self.layoutWidget.viz = 1 #not the brightest way to go about
-        for compartment in self.allCompartments: 
-            cellName = compartment.getField('parent').getField('path') #enforcing a hierarchy /cell/compartment! - not a good idea 
-            if cellName in cellNameComptDict:
-                cellNameComptDict[cellName].append(compartment)
-            else:
-                cellNameComptDict[cellName] = [compartment]
-    
-        for cellName in cellNameComptDict:
-            self.layoutWidget.drawNewCell(cellName)
-        self.layoutWidget.updateGL()
-        self.layoutWidget.setColorMap()
+        if self.modelHasCompartments:
+            for compartment in self.allCompartments: 
+                cellName = compartment.getField('parent').getField('path') #enforcing a hierarchy /cell/compartment! - not a good idea 
+                if cellName in cellNameComptDict:
+                    cellNameComptDict[cellName].append(compartment)
+                else:
+                    cellNameComptDict[cellName] = [compartment]
+            for cellName in cellNameComptDict:
+                self.layoutWidget.drawNewCell(cellName)
+            self.layoutWidget.updateGL()
+            self.layoutWidget.setColorMap()
+        elif self.modelHasIntFires:
+            print 'modelHasIntFires:', len(self.allIntFires)
+            sideSquare = self.nearestSquare(len(self.allIntFires))
+            #for intFire in self.allIntFires:
+            intFireCellNumber = 1 
+            for yAxis in range(sideSquare):
+                for xAxis in range(sideSquare):
+                    self.layoutWidget.drawNewCell(cellName='/hopfield/cell_'+str(intFireCellNumber), style=3, cellCentre=[xAxis*0.5,yAxis*0.5,0.0])
+                    intFireCellNumber += 1
+            self.layoutWidget.updateGL()
+            self.layoutWidget.setColorMap(vizMinVal = float(-1e-7), vizMaxVal = 0)
+#setColorMap(self,vizMinVal=-0.1,vizMaxVal=0.07,moosepath='',variable='Vm',cMap='jet')
+                
+    def nearestSquare(self, n):	#add_chait
+    	i = 1
+	while i * i < n:
+		i += 1
+	return i
 
     def getElementpath(self,text):
         #print "here",text
@@ -277,7 +300,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         for plotWinName,plotWin in self.plotNameWinDict.iteritems():
             plotWin.plot.updatePlot(currentTime)
         self.updateCurrentTime(currentTime)
-        if self.modelHasCompartments:
+        if self.modelHasCompartments or self.modelHasIntFires:
             self.updateVisualization()
 
     def updatePlotDockFields(self,obj):
@@ -355,6 +378,9 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
                 self.mooseHandler.doResetAndRun([modelPath],runtime,float(self.simControlSimdtLineEdit.text()),float(self.simControlPlotdtLineEdit.text()),float(self.simControlUpdatePlotdtLineEdit.text()))
             elif modeltype == MooseHandler.type_neuroml:
                 self.mooseHandler.doResetAndRun(['/cells','/elec'],runtime,float(self.simControlSimdtLineEdit.text()),float(self.simControlPlotdtLineEdit.text()),float(self.simControlUpdatePlotdtLineEdit.text()))
+            elif modeltype == MooseHandler.type_python:
+                print 'pythonic'
+                self.mooseHandler.doResetAndRun(['/hopfield'],runtime,float(self.simControlSimdtLineEdit.text()),float(self.simControlPlotdtLineEdit.text()),float(self.simControlUpdatePlotdtLineEdit.text()))
 
     def _resetSlot(self): #called when reset is pressed
         try:
