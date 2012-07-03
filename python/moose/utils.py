@@ -107,6 +107,15 @@ def getfields(moose_object):
         fields[name] = moose_object.getField(name)
     return fields
 
+def findAllBut(moose_wildcard, stringToExclude):
+    allValidObjects = moose__.wildcardFind(moose_wildcard)
+    refinedList = []
+    for validObject in allValidObjects:
+        if validObject.getField('path').find(stringToExclude) == -1:
+            refinedList.append(validObject)
+
+    return refinedList
+
 def apply_to_tree(moose_wildcard, python_filter=None, value=None):
     """
     Select objects by a moose/genesis wildcard, apply a python filter on them and apply a value on them.
