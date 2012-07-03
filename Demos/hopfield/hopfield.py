@@ -45,7 +45,7 @@ def createNetwork(synWeights,inputGiven):
     cells = []
     Vms   = []
     inTables = []
-
+    cellNameObjectDict = {}
     hopfield = moose.Neutral('/hopfield')
     pg = moose.PulseGen('/hopfield/inPulGen')
 
@@ -76,24 +76,24 @@ def createNetwork(synWeights,inputGiven):
         inSpkGen.setField('edgeTriggered', True)
 
         if inputGiven[i] == 1:
-            moose.connect(pg, 'outputOut', moose.element(cellPath+'/inSpkGen'), 'Vm')
+            moose.connect(pg, 'outputOut', inSpkGen, 'Vm')
 
             inTable = moose.Table(cellPath+'/inSpkGen/inTable')
             moose.connect(inTable, 'requestData', inSpkGen, 'get_hasFired')
             inTables.append(inTable)
 
         moose.connect(inSpkGen, 'event', cell.synapse[i+1] ,'addSpike') #self connection is the input 
-
+        cellNameObjectDict[cellPath] = cell
         Vms.append(VmVals)
         cells.append(cell)
 
-    for currentCell in range(numberOfCells): #currCell 
-        for connectCell in range(numberOfCells): #connectToCell
+    for currentCell in range(numberOfCells):
+        for connectCell in range(numberOfCells):
             if currentCell != connectCell: #no self connections
-                connSyn = moose.element('/hopfield/cell_'+str(connectCell+1)).synapse[connectCell+1]
+                connSyn = cellNameObjectDict['/hopfield/cell_'+str(connectCell+1)].synapse[connectCell+1]
                 connSyn.weight = synWeights[currentCell*numberOfCells + connectCell]
                 connSyn.delay = 20e-3
-                moose.connect(moose.element('/hopfield/cell_'+str(currentCell+1)), 'spike', connSyn, 'addSpike')
+                moose.connect(cellNameObjectDict['/hopfield/cell_'+str(currentCell+1)], 'spike', connSyn, 'addSpike')
 
     return cells,Vms,pgTable,inTables
 
@@ -114,16 +114,16 @@ synWeights = updateWeights(memory2,synWeights)
 inputFile = "input.csv"
 cells,Vms,pgTable,inTables = createNetwork(synWeights,readMemory(inputFile))
 
-moose.setClock(0, 1e-4)
-moose.useClock(0, '/hopfield/inPulGen/pgTable,/hopfield/inPulGen,','process')
-moose.useClock(0, '/hopfield/##[TYPE=IntFire],/hopfield/##[TYPE=Table],/hopfield/##[TYPE=SpikeGen]', 'process')
-moose.reinit()
-moose.start(0.2)
+# moose.setClock(0, 1e-4)
+# moose.useClock(0, '/hopfield/inPulGen/pgTable,/hopfield/inPulGen,','process')
+# moose.useClock(0, '/hopfield/##[TYPE=IntFire],/hopfield/##[TYPE=Table],/hopfield/##[TYPE=SpikeGen]', 'process')
+# moose.reinit()
+# moose.start(0.2)
 
-#plot(pgTable.vec[1:])
-#for yset,inTable in enumerate(inTables):
-#    plot(float(yset)+inTable.vec[1:])
-for ySet,Vm in enumerate(Vms):
-    plot(float(2*ySet)/(1e+7)+Vm.vec[1:])
-#plot(Vms[0].vec[1:])
-show()
+# #plot(pgTable.vec[1:])
+# #for yset,inTable in enumerate(inTables):
+# #    plot(float(yset)+inTable.vec[1:])
+# for ySet,Vm in enumerate(Vms):
+#     plot(float(2*ySet)/(1e+7)+Vm.vec[1:])
+# #plot(Vms[0].vec[1:])
+# show()

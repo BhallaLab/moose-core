@@ -7,6 +7,7 @@ moose.Neutral('/elec')
 pg = moose.PulseGen('/elec/inPulGen')
 pgTable = moose.Table('/elec/inPulGen/pgTable')
 moose.connect(pgTable, 'requestData', pg, 'get_output')
+
 pg.count = 1
 pg.level[0] = 3
 pg.width[0] = 10e-03
@@ -23,23 +24,28 @@ cell.synapse[0].weight = 4
 cell.synapse[0].delay = 1e-3
 
 VmVal = moose.Table(cellPath+'/Vm_cell')
-moose.connect(VmVal, 'requestData', cell, 'get_Vm')
+print 'table>cell:',moose.connect(VmVal, 'requestData', cell, 'get_Vm')
 
 inSpkGen = moose.SpikeGen(cellPath+'/inSpkGen')
 inSpkGen.setField('threshold', 2.0)
-inSpkGen.setField('edgeTriggered', 1)
+inSpkGen.setField('edgeTriggered', True)
 
 if inputGiven == 1:
-    moose.connect(pg, 'outputOut', moose.element(cellPath+'/inSpkGen'), 'Vm')
+    print 'pulse>spike:', moose.connect(pg, 'outputOut', moose.element(cellPath+'/inSpkGen'), 'Vm')
     inTable = moose.Table(cellPath+'/inSpkGen/inTable')
-    moose.connect(inTable, 'requestData', inSpkGen, 'get_hasFired')
+    print 'table>spike:',moose.connect(inTable, 'requestData', inSpkGen, 'get_hasFired')
 
-moose.connect(inSpkGen, 'event', cell.synapse[0] ,'addSpike') #self connection is the input 
+print 'spike>cell:', moose.connect(inSpkGen, 'event', cell.synapse[0] ,'addSpike')
 
-resetSim([cellPath,'/elec'],1e-4,1e-3)
+moose.setClock(0, 1e-4)
+moose.useClock(0, '/cell,/cell/##,/elec/##','process')
+moose.reinit()
 moose.start(0.2)
 
+subplot(311)
 plot(pgTable.vec[1:])
-plot(float(1)+inTable.vec[1:])
-plot(float(2)+VmVal.vec[1:])
+subplot(312)
+plot(inTable.vec[1:])
+subplot(313)
+plot(VmVal.vec[1:])
 show()
