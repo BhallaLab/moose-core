@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Tue Jul  3 10:59:51 2012 (+0530)
+// Last-Updated: Tue Jul  3 12:50:50 2012 (+0530)
 //           By: subha
-//     Update #: 8887
+//     Update #: 8960
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -1451,7 +1451,8 @@ extern "C" {
                  "dtype : string\n"
                  "the MOOSE class name to be created.\n"
                  "id : Id or integer\n"
-                 "id of an existing element.\n");
+                 "id of an existing element.\n"
+                 "\n");
         
     static int moose_ObjId_init(PyObject * self, PyObject * args,
                                 PyObject * kwargs)
@@ -1512,7 +1513,8 @@ extern "C" {
     PyDoc_STRVAR(moose_ObjId_getId_documentation,
                  "getId()\n"
                  "\n"
-                 "Get the Id of this object\n");
+                 "Get the Id of this object\n"
+                 "\n");
     static PyObject* moose_ObjId_getId(_ObjId * self, PyObject * args)
     {
         extern PyTypeObject IdType;        
@@ -1535,7 +1537,8 @@ extern "C" {
                  "\tName of the field to be queried.\n"
                  "finfoType : string\n"
                  "\tFinfotype the field should be looked in for (can be \n"
-                 "valueFinfo, srcFinfo, destFinfo, lookupFinfo)");
+                 "valueFinfo, srcFinfo, destFinfo, lookupFinfo)\n"
+                 "\n");
     
     static PyObject * moose_ObjId_getFieldType(_ObjId * self, PyObject * args)
     {
@@ -2566,7 +2569,13 @@ extern "C" {
                  "Returns\n"
                  "-------\n"
                  "\tout : tuple of strings.\n"
-                 );
+                 "\n"
+                 "Example\n"
+                 "-------\n"
+                 "List names of all the source fields in PulseGen class:\n"
+                 ">>> moose.getFieldNames('PulseGen', 'srcFinfo')\n"
+                 "('childMsg', 'outputOut')\n"
+                 "\n");
     // 2011-03-23 15:28:26 (+0530)
     static PyObject * moose_ObjId_getFieldNames(_ObjId * self, PyObject *args)
     {
@@ -2618,7 +2627,8 @@ extern "C" {
                  "\n"
                  "Returns\n"
                  "-------\n"
-                 "out: tuple of Id-s.\n");
+                 "out: tuple of Id-s.\n"
+                 "\n");
                  
     static PyObject * moose_ObjId_getNeighbors(_ObjId * self, PyObject * args)
     {
@@ -2649,7 +2659,7 @@ extern "C" {
 
     // 2011-03-28 10:51:52 (+0530)
     PyDoc_STRVAR(moose_ObjId_connect_documentation,
-                 "connect(srcfield, destobj, destfield, msgtype)\n"
+                 "connect(srcfield, destobj, destfield, msgtype) -> bool\n"
                  "Connect another object via a message.\n"
                  "Parameters\n"
                  "----------\n"
@@ -2666,6 +2676,11 @@ extern "C" {
                  "Returns\n"
                  "-------\n"
                  "True on success, False on failure\n"
+                 "\n"
+                 "See also\n"
+                 "--------\n"
+                 "moose.connect\n"
+                 "\n"
                  );
     static PyObject * moose_ObjId_connect(_ObjId * self, PyObject * args)
     {
@@ -2857,7 +2872,20 @@ extern "C" {
     ////////////////////////////////////////////
     // Module functions
     ////////////////////////////////////////////
-    
+    PyDoc_STRVAR(moose_getFieldNames_documentation,
+                 "getFieldNames(className, finfoType='valueFinfo') -> tuple\n"
+                 "\n"
+                 "Get a tuple containing the name of all the fields of `finfoType`\n"
+                 "kind.\n"
+                 "\n"
+                 "Parameters\n"
+                 "----------\n"
+                 "className : string\n"
+                 "\tName of the class to look up.\n"
+                 "finfoType : string\n"
+                 "\tThe kind of field (`valueFinfo`, `srcFinfo`, `destFinfo`,\n"
+                 "`lookupFinfo`, `fieldElementFinfo`.).\n");
+
     static PyObject * moose_getFieldNames(PyObject * dummy, PyObject * args)
     {
         char * className = NULL;
@@ -2879,7 +2907,7 @@ extern "C" {
     }
     
     PyDoc_STRVAR(moose_copy_documentation,
-                 "copy(src, dest, name, n, toGlobal, copyExtMsg)\n"
+                 "copy(src, dest, name, n, toGlobal, copyExtMsg) -> bool\n"
                  "Make copies of a moose object.\n"
                  "Parameters\n"
                  "----------\n"
@@ -3002,6 +3030,33 @@ extern "C" {
         ShellPtr->doSetClock(tick, dt);
         Py_RETURN_NONE;
     }
+
+    PyDoc_STRVAR(moose_start_documentation,
+                 "start(t) -> None\n"
+                 "\n"
+                 "Run simulation for `t` time. Advances the simulator clock by `t`\n"
+                 "time.\n"                 
+                 "\n"
+                 "After setting up a simulation, YOU MUST CALL MOOSE.REINIT() before\n"
+                 "CALLING MOOSE.START() TO EXECUTE THE SIMULATION. Otherwise, the\n"
+                 "simulator behaviour will be undefined. Once moose.reinit() has been\n"
+                 "called, you can call moose.start(t) as many time as you like. This\n"
+                 "will continue the simulation from the last state for `t` time.\n"
+                 "\n"
+                 "Parameters\n"
+                 "----------\n"
+                 "t : float\n"
+                 "\tduration of simulation.\n"
+                 "\n"
+                 "Returns\n"
+                 "--------\n"
+                 "\tNone\n"
+                 "\n"
+                 "See also\n"
+                 "--------\n"
+                 "moose.reinit : (Re)initialize simulation\n"
+                 "\n"
+                 );
     static PyObject * moose_start(PyObject * dummy, PyObject * args)
     {
         double runtime;
@@ -3017,6 +3072,20 @@ extern "C" {
         Py_END_ALLOW_THREADS
         Py_RETURN_NONE;
     }
+
+    PyDoc_STRVAR(moose_reinit_documentation,
+                 "reinit() -> None\n"
+                 "\n"
+                 "Reinitialize simulation.\n"
+                 "\n"
+                 "This function (re)initializes moose simulation. It must be called\n"
+                 "before you start the simulation (see moose.start). If you want to\n"
+                 "continue simulation after you have called moose.reinit() and\n"
+                 "moose.start(), you must NOT call moose.reinit() again. Calling\n"
+                 "moose.reinit() again will take the system back to initial setting\n"
+                 "(like clear out all data recording tables, set state variables to\n"
+                 "their initial values, etc.\n"
+                 "\n");
     static PyObject * moose_reinit(PyObject * dummy, PyObject * args)
     {
         ShellPtr->doReinit();
@@ -3040,8 +3109,26 @@ extern "C" {
         }
         return Py_BuildValue("i", Id(path) != Id() || string(path) == "/" || string(path) == "/root");
     }
-    
-    static PyObject * moose_loadModel(PyObject * dummy, PyObject * args)
+
+    PyDoc_STRVAR(moose_loadModel_documentation,
+                 "loadModel(filename, modelpath, solverclass) -> moose.Id\n"
+                 "\n"
+                 "Load model from a file to a specified path.\n"
+                 "\n"
+                 "Parameters\n"
+                 "----------\n"
+                 "filename : str\n"
+                 "\tmodel description file.\n"
+                 "modelpath : str\n"
+                 "\tmoose path for the top level element of the model to be created.\n"
+                 "\tsolverclass : str\n"
+                 "\t(optional) solver type to be used for simulating the model.\n"
+                 "\n"
+                 "Returns\n"
+                 "-------\n"
+                 "Id instance refering to the loaded model container.\n"
+                 );
+                 static PyObject * moose_loadModel(PyObject * dummy, PyObject * args)
     {
         char * fname = NULL, * modelpath = NULL, * solverclass = NULL;
         if(!PyArg_ParseTuple(args, "ss|s:moose_loadModel", &fname, &modelpath, &solverclass)){
@@ -3092,6 +3179,40 @@ extern "C" {
         return ret;
     }
 
+    PyDoc_STRVAR(moose_connect_documentation,
+                 "connect(src, src_field, dest, dest_field, message_type) -> bool\n"
+                 "\n"
+                 "Create a message between `src_field` on `src` object to `dest_field`\n"
+                 "on `dest` object.\n"
+                 "\n"
+                 "Parameters\n"
+                 "----------\n"
+                 "src : ObjId\n"
+                 "\tthe source object\n"
+                 "src_field : str\n"
+                 "\tthe source field name. Fields listed under `srcFinfo` and\n"
+                 "`sharedFinfo` qualify for this.\n"
+                 "dest : ObjId\n"
+                 "\tthe destination object.\n"
+                 "dest_field : str\n"
+                 "\tthe destination field name. Fields listed under `destFinfo`\n"
+                 "and `sharedFinfo` qualify for this.\n"
+                 "message_type : str (optional)\n"
+                 "\tType of the message. Can be `Single`, `OneToOne`, `OneToAll`.\n"
+                 "If not specified, it defaults to `Single`.\n"
+                 "\n"
+                 "Example\n"
+                 "-------\n"
+                 "Connect the output of a pulse generator to the input of a spike\n"
+                 "generator:\n"
+                 "\n"
+                 ">>> pulsegen = moose.PulseGen('pulsegen')\n"
+                 ">>> spikegen = moose.SpikeGen('spikegen')\n"
+                 ">>> moose.connect(pulsegen, 'outputOut', spikegen, 'Vm')\n"
+                 "1\n"
+                 "\n"
+
+                 );
     static PyObject * moose_connect(PyObject * dummy, PyObject * args)
     {
         PyObject * srcPtr = NULL, * destPtr = NULL;
@@ -3112,7 +3233,26 @@ extern "C" {
         }
         return Py_BuildValue("i", ret);        
     }
-
+    PyDoc_STRVAR(moose_getFieldDict_documentation,
+                 "getFieldDict(className, finfoType) -> dict\n"
+                 "\n"
+                 "Get dictionary of field names and types for specified class.\n"
+                 "Parameters\n"
+                 "-----------\n"
+                 "className : str\n"
+                 "\tMOOSE class to find the fields of.\n"
+                 "finfoType : str (optional)\n"
+                 "\tFinfo type of the fields to find. If empty or not specified, all\n"
+                 "fields will be retrieved.\n"
+                 "note: This behaviour is different from `getFieldNames` where only\n"
+                 "`valueFinfo`s are returned when `finfoType` remains unspecified.\n"
+                 "\n"
+                 "Example\n"
+                 "-------\n"
+                 "List all the source fields on class Neutral:\n"
+                 ">>> moose.getFieldDict('Neutral', 'srcFinfo')\n"
+                 "{'childMsg': 'int'}\n"
+                 "\n");
     static PyObject * moose_getFieldDict(PyObject * dummy, PyObject * args)
     {
         char * className = NULL;
@@ -3735,52 +3875,24 @@ extern "C" {
     // Method definitions for MOOSE module
     /////////////////////////////////////////////////////////////////////    
     static PyMethodDef MooseMethods[] = {
-        {"getFieldNames", (PyCFunction)moose_getFieldNames, METH_VARARGS,
-         "getFieldNames(className, finfoType='valueFinfo')\n"
-         "\n"
-         "Get a tuple containing the name of all the fields of `finfoType` kind.\n"
-         "\n"
-         "Parameters\n"
-         "----------\n"
-         "className : string\n"
-         "\tName of the class to look up.\n"
-         "finfoType : string\n"
-         "\tThe kind of field (`valueFinfo`, `srcFinfo`, `destFinfo`, `lookupFinfo`, etc.)."
-        },
+        {"getFieldNames", (PyCFunction)moose_getFieldNames, METH_VARARGS, moose_getFieldNames_documentation},
         {"copy", (PyCFunction)moose_copy, METH_VARARGS|METH_KEYWORDS, moose_copy_documentation},
         {"move", (PyCFunction)moose_move, METH_VARARGS, "Move a Id object to a destination."},
         {"delete", (PyCFunction)moose_delete, METH_VARARGS, "Delete the moose object."},
         {"useClock", (PyCFunction)moose_useClock, METH_VARARGS, "Schedule objects on a specified clock"},
         {"setClock", (PyCFunction)moose_setClock, METH_VARARGS, "Set the dt of a clock."},
-        {"start", (PyCFunction)moose_start, METH_VARARGS, "Start simulation"},
-        {"reinit", (PyCFunction)moose_reinit, METH_VARARGS, "Reinitialize simulation"},
+        {"start", (PyCFunction)moose_start, METH_VARARGS, moose_start_documentation},
+        {"reinit", (PyCFunction)moose_reinit, METH_VARARGS, moose_reinit_documentation},
         {"stop", (PyCFunction)moose_stop, METH_VARARGS, "Stop simulation"},
         {"isRunning", (PyCFunction)moose_isRunning, METH_VARARGS, "True if the simulation is currently running."},
         {"exists", (PyCFunction)moose_exists, METH_VARARGS, "True if there is an object with specified path."},
-        {"loadModel", (PyCFunction)moose_loadModel, METH_VARARGS, "Load model from a file to a specified path.\n"
-         "Parameters:\n"
-         "\tstr filename -- model description file.\n"
-         "\tstr modelpath -- moose path for the top level element of the model to be created.\n"
-         "\tstr solverclass -- (optional) solver type to be used for simulating the model.\n"},
-        {"connect", (PyCFunction)moose_connect, METH_VARARGS, "Create a message between srcField on src element to destField on target element."},        
+        {"loadModel", (PyCFunction)moose_loadModel, METH_VARARGS, moose_loadModel_documentation},
+        {"connect", (PyCFunction)moose_connect, METH_VARARGS, moose_connect_documentation},        
         {"getCwe", (PyCFunction)moose_getCwe, METH_VARARGS, "Get the current working element. 'pwe' is an alias of this function."},
         // {"pwe", (PyCFunction)moose_getCwe, METH_VARARGS, "Get the current working element. 'getCwe' is an alias of this function."},
         {"setCwe", (PyCFunction)moose_setCwe, METH_VARARGS, "Set the current working element. 'ce' is an alias of this function"},
         // {"ce", (PyCFunction)moose_setCwe, METH_VARARGS, "Set the current working element. setCwe is an alias of this function."},
-        {"getFieldDict", (PyCFunction)moose_getFieldDict, METH_VARARGS,
-         "getFieldDict(className, finfoType)\n"
-         "\n"
-         "Get dictionary of field names and types for specified class.\n"
-         " Parameters\n"
-         "-----------\n"
-         "className : str\n"
-         "\tMOOSE class to find the fields of.\n"
-         "finfoType : str (optional)\n"
-         "\tFinfo type of the fields to find. If empty or not specified, all"
-         " fields will be retrieved.\n"
-         "note: This behaviour is different from `getFieldNames` where only"
-         " `valueFinfo`s are returned when `finfoType` remains unspecified."
-        },
+        {"getFieldDict", (PyCFunction)moose_getFieldDict, METH_VARARGS, moose_getFieldDict_documentation},
         {"getField", (PyCFunction)moose_getField, METH_VARARGS,
          "getField(ObjId, field, fieldtype) -- Get specified field of specified type from object Id."},
         {"syncDataHandler", (PyCFunction)moose_syncDataHandler, METH_VARARGS,
