@@ -45,7 +45,7 @@ LinearFill = 2 # Linear fill
 ## The hsolve and ee methods use clock 1.
 ## hsolve further uses clock 2 for mg_block, nmdachan and others.
 ## keep clock 3 for plots.
-PLOTCLOCK = 3
+PLOTCLOCK = 4
 
 # 2012-01-11 19:20:39 (+0530) Subha: checked for compatibility with dh_branch
 def listmsg(pymoose_object):
@@ -339,6 +339,7 @@ def resetSim(simpaths, simdt, plotdt, hsolve_path=None):
     moose__.setClock(0, simdt)
     moose__.setClock(1, simdt) #### The hsolve and ee methods use clock 1
     moose__.setClock(2, simdt) #### hsolve uses clock 2 for mg_block, nmdachan and others.
+    moose__.setClock(3, simdt)
     moose__.setClock(PLOTCLOCK, plotdt) # PLOTCLOCK is in mooseConstants.py
     for simpath in simpaths:
         moose__.useClock(PLOTCLOCK, simpath+'/##[TYPE=Table]', 'process')
@@ -356,7 +357,7 @@ def resetSim(simpaths, simdt, plotdt, hsolve_path=None):
             moose__.useClock(2, simpath+'/##[TYPE=HHGate]', 'process')
             moose__.useClock(2, simpath+'/##[TYPE=HHChannel2D]', 'process')
             moose__.useClock(2, simpath+'/##[TYPE=HHGate2D]', 'process')
-            moose__.useClock(2, simpath+'/##[TYPE=CaConc]', 'process')
+            moose__.useClock(3, simpath+'/##[TYPE=CaConc]', 'process')
         else:
             moose__.useClock( 0, hsolve_path, 'process' )
     moose__.reinit()
