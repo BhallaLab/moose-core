@@ -26,12 +26,12 @@ from OpenGL.GLUT import *
 from glWidget.GLWidget import PyGLWidget
 from glWidget.objects import *
 from glWidget.group import *
-
+from filepaths import PATH_Neural_COLORMAPS
 from numpy import arange,digitize
 import moose
 import defaults
 import pickle
-
+import os
 mc = moose
 
 class updatepaintGL(PyGLWidget):
@@ -80,11 +80,11 @@ class updatepaintGL(PyGLWidget):
 	self.selectedObjects.render()	
 	
     def updateViz(self):
-    	if self.gridRadiusViz==0:
+    	if self.gridRadiusViz == 0:
 		vals=[]
 		for name in self.vizObjectNames:
-			r=mc.pathToId(name+self.moosepath)
-			d=float(mc.getField(r,self.variable))
+			r = moose.element(name+self.moosepath)
+			d = float(r.getField(self.variable))
                         vals.append(d)
 		inds = digitize(vals,self.stepVals)
 
@@ -209,15 +209,15 @@ class updatepaintGL(PyGLWidget):
 	    	
 	
     def drawAllCellsUnder(self, path, style = 2, cellCentre=[0.0,0.0,0.0], cellAngle=[0.0,0.0,0.0,0.0]):
-	    pathID = mc.pathToId(path)
-	    if mc.className(pathID) =='Neutral':
-		an=moose.Neutral(pathID)					#this neutral element
-	    	all_ch=an.childList 					#all children under this neutral element
-	    	ch = self.get_childrenOfField(all_ch,'Cell')
-	    	for i in range(0,len(ch),1):
-	    		self.drawNewCell(moose.Cell(ch[i]).path,style,cellCentre,cellAngle)	 
-	    else: 	
-	    	print 'Select a Neutral element path'   	
+        pathID = mc.pathToId(path)
+        if mc.className(pathID) =='Neutral':
+            an=moose.Neutral(pathID)					#this neutral element
+            all_ch=an.childList 					#all children under this neutral element
+            ch = self.get_childrenOfField(all_ch,'Cell')
+            for i in range(0,len(ch),1):
+                self.drawNewCell(moose.Cell(ch[i]).path,style,cellCentre,cellAngle)	 
+        else: 	
+            print 'Select a Neutral element path'   	
 	    
 
     def get_childrenOfField(self,all_ch,field):	#'all_ch' is a tuple of moose.id, 'field' is the field to sort with; returns a tuple with valid moose.id's
@@ -228,10 +228,10 @@ class updatepaintGL(PyGLWidget):
         return tuple(ch)  
         
     def setColorMap(self,vizMinVal=-0.1,vizMaxVal=0.07,moosepath='',variable='Vm',cMap='jet'):
-    	self.colorMap=[]
-    	self.stepVals=[]
-    	self.moosepath=moosepath
-    	self.variable=variable
+    	self.colorMap = []
+    	self.stepVals = []
+    	self.moosepath = moosepath
+    	self.variable = variable
     	if cMap=='':
     		steps = 64
     		for x in range(0,steps):
@@ -240,7 +240,7 @@ class updatepaintGL(PyGLWidget):
 			g=min((2.0*x)/steps,(-2.0*x)/steps+2)
 			self.colorMap.append([r,g,b])
 	else:
-		f = open(cMap,'r')
+		f = open(os.path.join(PATH_Neural_COLORMAPS,cMap),'r')
 		self.colorMap = pickle.load(f)
 		steps = len(self.colorMap)
 		f.close()

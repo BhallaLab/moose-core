@@ -163,14 +163,12 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
                 self.updateDefaultTimes(modeltype)
             #self.enableControlButtons()
             self.checkModelForNeurons()
-            print "s",self.modelHasCompartments
             if self.modelHasCompartments:
                 self.addGLWindow()
             print 'Loaded model',  fileName, 'of type', modeltype, 'under Element path ',modelpath
             app.restoreOverrideCursor()
 
     def checkModelForNeurons(self):
-        print "insdeicde"
         self.allCompartments = mooseUtils.findAllBut('/##[TYPE=Compartment]','library')
         if self.allCompartments:
             self.modelHasCompartments = True
@@ -194,8 +192,12 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
     def pickCompartment(self, name):
         self.makeObjectFieldEditor(moose.element(str(name)))
 
+    def updateVisualization(self):
+        self.layoutWidget.updateViz()
+
     def updateCanvas(self):
         cellNameComptDict = {}
+        self.layoutWidget.viz = 1 #not the brightest way to go about
         for compartment in self.allCompartments: 
             cellName = compartment.getField('parent').getField('path') #enforcing a hierarchy /cell/compartment! - not a good idea 
             if cellName in cellNameComptDict:
@@ -205,8 +207,8 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
     
         for cellName in cellNameComptDict:
             self.layoutWidget.drawNewCell(cellName)
-
         self.layoutWidget.updateGL()
+        self.layoutWidget.setColorMap()
 
     def getElementpath(self,text):
         #print "here",text
@@ -275,6 +277,8 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         for plotWinName,plotWin in self.plotNameWinDict.iteritems():
             plotWin.plot.updatePlot(currentTime)
         self.updateCurrentTime(currentTime)
+        if self.modelHasCompartments:
+            self.updateVisualization()
 
     def updatePlotDockFields(self,obj):
         #add plot-able elements according to predefined  
@@ -352,8 +356,6 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             elif modeltype == MooseHandler.type_neuroml:
                 self.mooseHandler.doResetAndRun(['/cells','/elec'],runtime,float(self.simControlSimdtLineEdit.text()),float(self.simControlPlotdtLineEdit.text()),float(self.simControlUpdatePlotdtLineEdit.text()))
 
-
-
     def _resetSlot(self): #called when reset is pressed
         try:
             runtime = float(str(self.simControlRunTimeLineEdit.text()))
@@ -363,9 +365,9 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
  
         for modelPath,modeltype in self.modelPathsModelTypeDict.iteritems():
             if modeltype == MooseHandler.type_kkit:
-                self.mooseHandler.doReset([modelPath],float(self.simControlSimdtLineEdit.text()),float(self.simControlPlotdtLineEdit.text()),float(self.simControlUpdatePlotdtLineEdit.text()))
+                self.mooseHandler.doReset([modelPath],float(self.simControlSimdtLineEdit.text()),float(self.simControlPlotdtLineEdit.text()))
             elif modeltype == MooseHandler.type_neuroml:
-                self.mooseHandler.doReset(['/cells','/elec'],runtime,float(self.simControlSimdtLineEdit.text()),float(self.simControlPlotdtLineEdit.text()),float(self.simControlUpdatePlotdtLineEdit.text()))
+                self.mooseHandler.doReset(['/cells','/elec'],float(self.simControlSimdtLineEdit.text()),float(self.simControlPlotdtLineEdit.text()))
             self.updatePlots(self.mooseHandler.getCurrentTime())
 
     def _continueSlot(self): #called when continue is pressed
