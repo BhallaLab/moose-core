@@ -286,7 +286,7 @@ class MooseHandler(QtCore.QObject):
         MooseHandler.plotupdate_dt = MooseHandler.DEFAULT_PLOTUPDATE_DT_KKIT
         MooseHandler.runtime = MooseHandler.DEFAULT_RUNTIME_KKIT
 
-    def doReset(self, paths, simdt, plotdt, plotupdate_dt):
+    def doReset(self, paths, simdt, plotdt):
         """Reset moose.
         uses moose utils -resetSim : also includes moose.reinit()
         from all under list of paths (as in mooseutils) resets clocks 
