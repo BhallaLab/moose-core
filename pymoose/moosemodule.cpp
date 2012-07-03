@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Fri Jun 29 15:55:08 2012 (+0530)
+// Last-Updated: Tue Jul  3 10:59:51 2012 (+0530)
 //           By: subha
-//     Update #: 8850
+//     Update #: 8887
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -1664,8 +1664,9 @@ extern "C" {
                 }                                                                       \
             return ret;                                                             \
         }
-        
-        string type = getFieldType(Field<string>::get(self->oid_, "class"), string(field), "valueFinfo");
+        assert(!(self->oid_ == ObjId::bad));
+        string class_name = Field<string>::get(self->oid_, "class");
+        string type = getFieldType(class_name, string(field), "valueFinfo");
         if (type.empty()){
             // Check if this field name is aliased and update fieldname and type if so.
             map<string, string>::const_iterator it = get_field_alias().find(string(field));
@@ -1868,249 +1869,224 @@ extern "C" {
         char ftype = shortType(fieldtype);
         int ret = 0;
         switch(ftype){
-            case 'b':
-                {
-                    bool _value = (Py_True == value);
-                    ret = Field<bool>::set(self->oid_, string(field), _value);
-                    break;
+            case 'b': {
+                bool _value = (Py_True == value) || (PyInt_AsLong(value) != 0);
+                ret = Field<bool>::set(self->oid_, string(field), _value);
+                break;
+            }
+            case 'c': {
+                char * _value = PyString_AsString(value);
+                if (_value && _value[0]){
+                    ret = Field<char>::set(self->oid_, string(field), _value[0]);
                 }
-            case 'c':
-                {
-                    char * _value = PyString_AsString(value);
-                    if (_value && _value[0]){
-                        ret = Field<char>::set(self->oid_, string(field), _value[0]);
-                    }
-                    break;
+                break;
+            }
+            case 'i': {
+                int _value = PyInt_AsLong(value);
+                if ((_value != -1) || (!PyErr_Occurred())){
+                    ret = Field<int>::set(self->oid_, string(field), _value);
                 }
-            case 'i':
-                {
-                    int _value = PyInt_AsLong(value);
-                    if ((_value != -1) || (!PyErr_Occurred())){
-                        ret = Field<int>::set(self->oid_, string(field), _value);
-                    }
-                    break;
+                break;
+            }
+            case 'h':{
+                short _value = (short)PyInt_AsLong(value);
+                if ((_value != -1) || (!PyErr_Occurred())){
+                    ret = Field<short>::set(self->oid_, string(field), _value);
                 }
-            case 'h':
-                {
-                    short _value = (short)PyInt_AsLong(value);
-                    if ((_value != -1) || (!PyErr_Occurred())){
-                        ret = Field<short>::set(self->oid_, string(field), _value);
-                    }
-                    break;
+                break;
+            }
+            case 'l': {
+                long _value = PyInt_AsLong(value);
+                if ((_value != -1) || (!PyErr_Occurred())){
+                    ret = Field<long>::set(self->oid_, string(field), _value);
                 }
-            case 'l': 
-                {
-                    long _value = PyInt_AsLong(value);
-                    if ((_value != -1) || (!PyErr_Occurred())){
-                        ret = Field<long>::set(self->oid_, string(field), _value);
-                    }
-                    break;
+                break;
+            }
+            case 'I': {
+                unsigned long _value = PyInt_AsUnsignedLongMask(value);
+                ret = Field<unsigned int>::set(self->oid_, string(field), (unsigned int)_value);
+                break;
+            }
+            case 'k': {
+                unsigned long _value = PyInt_AsUnsignedLongMask(value);
+                ret = Field<unsigned long>::set(self->oid_, string(field), _value);
+                break;
+            }                
+            case 'f': {
+                float _value = PyFloat_AsDouble(value);
+                ret = Field<float>::set(self->oid_, string(field), _value);
+                break;
+            }
+            case 'd': {
+                double _value = PyFloat_AsDouble(value);
+                ret = Field<double>::set(self->oid_, string(field), _value);
+                break;
+            }
+            case 's': {
+                char * _value = PyString_AsString(value);
+                if (_value){
+                    ret = Field<string>::set(self->oid_, string(field), string(_value));
                 }
-            case 'I': 
-                {
-                    unsigned long _value = PyInt_AsUnsignedLongMask(value);
-                    ret = Field<unsigned int>::set(self->oid_, string(field), (unsigned int)_value);
-                    break;
-                }
-            case 'k':
-                {
-                    unsigned long _value = PyInt_AsUnsignedLongMask(value);
-                    ret = Field<unsigned long>::set(self->oid_, string(field), _value);
-                    break;
-                }
-                
-            case 'f': 
-                {
-                    float _value = PyFloat_AsDouble(value);
-                    ret = Field<float>::set(self->oid_, string(field), _value);
-                    break;
-                }
-            case 'd': 
-                {
-                    double _value = PyFloat_AsDouble(value);
-                    ret = Field<double>::set(self->oid_, string(field), _value);
-                    break;
-                }
-            case 's': 
-                {
-                    char * _value = PyString_AsString(value);
-                    if (_value){
-                        ret = Field<string>::set(self->oid_, string(field), string(_value));
-                    }
-                    break;
-                }
-            case 'x': // Id
-                {
-                    if (value){
-                        ret = Field<Id>::set(self->oid_, string(field), ((_Id*)value)->id_);
-                    } else {
-                        PyErr_SetString(PyExc_ValueError, "Null pointer passed as Id value.");
-                        return -1;
-                    }
-                    break;
-                }
-            case 'y': // ObjId
-                {
-                    if (value){
-                        ret = Field<ObjId>::set(self->oid_, string(field), ((_ObjId*)value)->oid_);
-                    } else {
-                        PyErr_SetString(PyExc_ValueError, "Null pointer passed as Id value.");
-                        return -1;
-                    }
-                    break;
-                }
-            case 'z': // DataId
-                {
-                    PyErr_SetString(PyExc_NotImplementedError, "DataId handling not implemented yet.");
+                break;
+            }
+            case 'x': {// Id
+                if (value){
+                    ret = Field<Id>::set(self->oid_, string(field), ((_Id*)value)->id_);
+                } else {
+                    PyErr_SetString(PyExc_ValueError, "Null pointer passed as Id value.");
                     return -1;
                 }
-            case 'v': 
-                {
-                    if (!PySequence_Check(value)){
-                        PyErr_SetString(PyExc_TypeError, "For setting vector<int> field, specified value must be a sequence." );
-                    }
+                break;
+            }
+            case 'y': {// ObjId
+                if (value){
+                    ret = Field<ObjId>::set(self->oid_, string(field), ((_ObjId*)value)->oid_);
+                } else {
+                    PyErr_SetString(PyExc_ValueError, "Null pointer passed as Id value.");
+                    return -1;
+                }
+                break;
+            }
+            case 'z': {// DataId
+                PyErr_SetString(PyExc_NotImplementedError, "DataId handling not implemented yet.");
+                return -1;
+            }
+            case 'v': {
+                if (!PySequence_Check(value)){
+                    PyErr_SetString(PyExc_TypeError, "For setting vector<int> field, specified value must be a sequence." );
+                }
+                Py_ssize_t length = PySequence_Length(value);
+                vector<int> _value;
+                for (unsigned int ii = 0; ii < length; ++ii){
+                    int v = PyInt_AsLong(PySequence_GetItem(value, ii));
+                    _value.push_back(v);
+                }
+                ret = Field< vector < int > >::set(self->oid_, string(field), _value);
+                break;
+            }
+            case 'w': {
+                if (!PySequence_Check(value)){
+                    PyErr_SetString(PyExc_TypeError, "For setting vector<short> field, specified value must be a sequence." );
+                } else {
                     Py_ssize_t length = PySequence_Length(value);
-                    vector<int> _value;
+                    vector<short> _value;
                     for (unsigned int ii = 0; ii < length; ++ii){
-                        int v = PyInt_AsLong(PySequence_GetItem(value, ii));
+                        short v = PyInt_AsLong(PySequence_GetItem(value, ii));
                         _value.push_back(v);
                     }
-                    ret = Field< vector < int > >::set(self->oid_, string(field), _value);
-                    break;
-                }
-            case 'w': 
-                {
-                    if (!PySequence_Check(value)){
-                        PyErr_SetString(PyExc_TypeError, "For setting vector<short> field, specified value must be a sequence." );
-                    } else {
-                        Py_ssize_t length = PySequence_Length(value);
-                        vector<short> _value;
-                        for (unsigned int ii = 0; ii < length; ++ii){
-                            short v = PyInt_AsLong(PySequence_GetItem(value, ii));
-                            _value.push_back(v);
-                        }
-                        ret = Field< vector < short > >::set(self->oid_, string(field), _value);
-                    }
-                    break;
-                }
-            case 'L': //SET_VECFIELD(long, l)
-                {
-                    if (!PySequence_Check(value)){
-                        PyErr_SetString(PyExc_TypeError,
-                                        "For setting vector<long> field, specified value must be a sequence." );
-                    } else {
-                        Py_ssize_t length = PySequence_Length(value);
-                        vector<long> _value;
-                        for (unsigned int ii = 0; ii < length; ++ii){
-                            long v = PyInt_AsLong(PySequence_GetItem(value, ii));
-                            _value.push_back(v);
-                        }
-                        ret = Field< vector < long > >::set(self->oid_, string(field), _value);
-                    }
-                    break;
-                }
-            case 'U': //SET_VECFIELD(unsigned int, I)
-                {
-                    if (!PySequence_Check(value)){
-                        PyErr_SetString(PyExc_TypeError, "For setting vector<unsigned int> field, specified value must be a sequence." );
-                    } else {
-                        Py_ssize_t length = PySequence_Length(value);
-                        vector<unsigned int> _value;
-                        for (unsigned int ii = 0; ii < length; ++ii){
-                            unsigned int v = PyInt_AsUnsignedLongMask(PySequence_GetItem(value, ii));
-                            _value.push_back(v);
-                        }
-                        ret = Field< vector < unsigned int > >::set(self->oid_, string(field), _value);
-                    }
-                    break;
-                }
-            case 'K': //SET_VECFIELD(unsigned long, k)
-                {
-                    if (!PySequence_Check(value)){
-                        PyErr_SetString(PyExc_TypeError, "For setting vector<unsigned long> field, specified value must be a sequence." );
-                    } else {
-                        Py_ssize_t length = PySequence_Length(value);
-                        vector<unsigned long> _value;
-                        for (unsigned int ii = 0; ii < length; ++ii){
-                            unsigned long v = PyInt_AsUnsignedLongMask(PySequence_GetItem(value, ii));
-                            _value.push_back(v);
-                        }
-                        ret = Field< vector < unsigned long > >::set(self->oid_, string(field), _value);
-                    }
-                    break;
-                }
-            case 'F': //SET_VECFIELD(float, f)
-                {
-                    if (!PySequence_Check(value)){
-                        PyErr_SetString(PyExc_TypeError, "For setting vector<float> field, specified value must be a sequence." );
-                    } else {
-                        Py_ssize_t length = PySequence_Length(value);
-                        vector<float> _value;
-                        for (unsigned int ii = 0; ii < length; ++ii){
-                            float v = PyFloat_AsDouble(PySequence_GetItem(value, ii));
-                            _value.push_back(v);
-                        }
-                        ret = Field< vector < float > >::set(self->oid_, string(field), _value);
-                    }
-                    break;
-                }
-            case 'D': //SET_VECFIELD(double, d)
-                {
-                    if (!PySequence_Check(value)){
-                        PyErr_SetString(PyExc_TypeError, "For setting vector<double> field, specified value must be a sequence." );
-                    } else {
-                        Py_ssize_t length = PySequence_Length(value);
-                        vector<double> _value;
-                        for (unsigned int ii = 0; ii < length; ++ii){
-                            double v = PyFloat_AsDouble(PySequence_GetItem(value, ii));
-                            _value.push_back(v);
-                        }
-                        ret = Field< vector < double > >::set(self->oid_, string(field), _value);
-                    }
-                    break;
-                }                
-            case 'S':
-                {
-                    if (!PySequence_Check(value)){
-                        PyErr_SetString(PyExc_TypeError, "For setting vector<string> field, specified value must be a sequence." );
-                    } else {
-                        Py_ssize_t length = PySequence_Length(value);
-                        vector<string> _value;
-                        for (unsigned int ii = 0; ii < length; ++ii){
-                            char * v = PyString_AsString(PySequence_GetItem(value, ii));
-                            _value.push_back(string(v));
-                        }
-                        ret = Field< vector < string > >::set(self->oid_, string(field), _value);
-                    }
-                    break;
-                }
-            case 'P': // vector< vector<unsigned int> >
-                {
-                    vector < vector <unsigned> > * _value = (vector < vector <unsigned> > *)to_cpp< vector < vector <unsigned> > >(value);
-                    if (!PyErr_Occurred()){
-                        ret = Field < vector < vector <unsigned> > >::set(self->oid_, string(field), *_value);
-                    }
-                    delete _value;
+                    ret = Field< vector < short > >::set(self->oid_, string(field), _value);
                 }
                 break;
-            case 'Q': // vector< vector<int> >
-                {
-                    vector < vector <int> > * _value = (vector < vector <int> > *)to_cpp< vector < vector <int> > >(value);
-                    if (!PyErr_Occurred()){
-                        ret = Field < vector < vector <int> > >::set(self->oid_, string(field), *_value);
+            }
+            case 'L': {//SET_VECFIELD(long, l)
+                if (!PySequence_Check(value)){
+                    PyErr_SetString(PyExc_TypeError,
+                                    "For setting vector<long> field, specified value must be a sequence." );
+                } else {
+                    Py_ssize_t length = PySequence_Length(value);
+                    vector<long> _value;
+                    for (unsigned int ii = 0; ii < length; ++ii){
+                        long v = PyInt_AsLong(PySequence_GetItem(value, ii));
+                        _value.push_back(v);
                     }
-                    delete _value;
+                    ret = Field< vector < long > >::set(self->oid_, string(field), _value);
                 }
                 break;
-            case 'R': // vector< vector<double> >
-            {
+            }
+            case 'U': {//SET_VECFIELD(unsigned int, I)
+                if (!PySequence_Check(value)){
+                    PyErr_SetString(PyExc_TypeError, "For setting vector<unsigned int> field, specified value must be a sequence." );
+                } else {
+                    Py_ssize_t length = PySequence_Length(value);
+                    vector<unsigned int> _value;
+                    for (unsigned int ii = 0; ii < length; ++ii){
+                        unsigned int v = PyInt_AsUnsignedLongMask(PySequence_GetItem(value, ii));
+                        _value.push_back(v);
+                    }
+                    ret = Field< vector < unsigned int > >::set(self->oid_, string(field), _value);
+                }
+                break;
+            }
+            case 'K': {//SET_VECFIELD(unsigned long, k)
+                if (!PySequence_Check(value)){
+                    PyErr_SetString(PyExc_TypeError, "For setting vector<unsigned long> field, specified value must be a sequence." );
+                } else {
+                    Py_ssize_t length = PySequence_Length(value);
+                    vector<unsigned long> _value;
+                    for (unsigned int ii = 0; ii < length; ++ii){
+                        unsigned long v = PyInt_AsUnsignedLongMask(PySequence_GetItem(value, ii));
+                        _value.push_back(v);
+                    }
+                    ret = Field< vector < unsigned long > >::set(self->oid_, string(field), _value);
+                }
+                break;
+            }
+            case 'F': {//SET_VECFIELD(float, f)
+                if (!PySequence_Check(value)){
+                    PyErr_SetString(PyExc_TypeError, "For setting vector<float> field, specified value must be a sequence." );
+                } else {
+                    Py_ssize_t length = PySequence_Length(value);
+                    vector<float> _value;
+                    for (unsigned int ii = 0; ii < length; ++ii){
+                        float v = PyFloat_AsDouble(PySequence_GetItem(value, ii));
+                        _value.push_back(v);
+                    }
+                    ret = Field< vector < float > >::set(self->oid_, string(field), _value);
+                }
+                break;
+            }
+            case 'D': {//SET_VECFIELD(double, d)
+                if (!PySequence_Check(value)){
+                    PyErr_SetString(PyExc_TypeError, "For setting vector<double> field, specified value must be a sequence." );
+                } else {
+                    Py_ssize_t length = PySequence_Length(value);
+                    vector<double> _value;
+                    for (unsigned int ii = 0; ii < length; ++ii){
+                        double v = PyFloat_AsDouble(PySequence_GetItem(value, ii));
+                        _value.push_back(v);
+                    }
+                    ret = Field< vector < double > >::set(self->oid_, string(field), _value);
+                }
+                break;
+            }                
+            case 'S': {
+                if (!PySequence_Check(value)){
+                    PyErr_SetString(PyExc_TypeError, "For setting vector<string> field, specified value must be a sequence." );
+                } else {
+                    Py_ssize_t length = PySequence_Length(value);
+                    vector<string> _value;
+                    for (unsigned int ii = 0; ii < length; ++ii){
+                        char * v = PyString_AsString(PySequence_GetItem(value, ii));
+                        _value.push_back(string(v));
+                    }
+                    ret = Field< vector < string > >::set(self->oid_, string(field), _value);
+                }
+                break;
+            }
+            case 'P': {// vector< vector<unsigned int> >
+                vector < vector <unsigned> > * _value = (vector < vector <unsigned> > *)to_cpp< vector < vector <unsigned> > >(value);
+                if (!PyErr_Occurred()){
+                    ret = Field < vector < vector <unsigned> > >::set(self->oid_, string(field), *_value);
+                }
+                delete _value;
+                break;
+            }
+            case 'Q': {// vector< vector<int> >
+                vector < vector <int> > * _value = (vector < vector <int> > *)to_cpp< vector < vector <int> > >(value);
+                if (!PyErr_Occurred()){
+                    ret = Field < vector < vector <int> > >::set(self->oid_, string(field), *_value);
+                }
+                delete _value;
+                break;
+            }
+            case 'R': {// vector< vector<double> >
                 vector < vector <double> > * _value = (vector < vector <double> > *)to_cpp< vector < vector <double> > >(value);
-                    if (!PyErr_Occurred()){
-                        ret = Field < vector < vector <double> > >::set(self->oid_, string(field), *_value);
-                    }
-                    delete _value;
+                if (!PyErr_Occurred()){
+                    ret = Field < vector < vector <double> > >::set(self->oid_, string(field), *_value);
                 }
-                    break;
+                delete _value;
+                break;
+            }
             default:                
                 break;
         }
