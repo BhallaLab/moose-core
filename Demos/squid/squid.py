@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Feb 13 11:35:11 2012 (+0530)
 # Version: 
-# Last-Updated: Wed Feb 22 22:44:59 2012 (+0530)
-#           By: Subhasis Ray
-#     Update #: 732
+# Last-Updated: Tue Jul  3 18:29:13 2012 (+0530)
+#           By: subha
+#     Update #: 759
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -164,8 +164,6 @@ class SquidAxon(moose.Compartment):
         self.Cl_out = 540.0        
         self.Cl_in = 100.0
 
-        self.specific_gNa = 120.0 # mmho/cm^2
-        self.specific_gK = 36.0 # mmho/cm^2
         self.length = 500 # um
         self.diameter = 500 # um
         self.Em = SquidAxon.EREST_ACT + 10.613
@@ -175,7 +173,7 @@ class SquidAxon(moose.Compartment):
         self.specific_ra = 0.030 # kohm-cm
         
         self.Na_channel = IonChannel('Na', self,
-                                     self.specific_gNa,
+                                     0.0,
                                      self.VNa,
                                      Xpower=3.0,
                                      Ypower=1.0)
@@ -188,13 +186,15 @@ class SquidAxon(moose.Compartment):
                                    SquidAxon.VMIN,
                                    SquidAxon.VMAX)
         self.K_channel = IonChannel('K', self,
-                                    self.specific_gK,
+                                    0.0,
                                     self.VK,
                                     Xpower=4.0)
         self.K_channel.setupAlpha('X', SquidAxon.K_n_params,
                                   SquidAxon.VDIVS,
                                   SquidAxon.VMIN,
                                   SquidAxon.VMAX)
+        self.specific_gNa = 120.0 # mmho/cm^2
+        self.specific_gK = 36.0 # mmho/cm^2
         
     @classmethod
     def reversal_potential(cls, temp, c_out, c_in):
@@ -242,6 +242,22 @@ class SquidAxon(moose.Compartment):
         self.Rm = value / self.area
 
     @property
+    def specific_gNa(self):
+        return self.Na_channel.Gbar / self.area
+
+    @specific_gNa.setter
+    def specific_gNa(self, value):
+        self.Na_channel.Gbar = value * self.area
+
+    @property
+    def specific_gK(self):
+        return self.K_channel.Gbar / self.area
+
+    @specific_gK.setter
+    def specific_gK(self, value):
+        self.K_channel.Gbar = value * self.area
+
+    @property
     def VK(self):
         """Reversal potential of K+ channels"""
         return SquidAxon.reversal_potential(self.temperature, self.K_out, self.K_in)
@@ -251,7 +267,22 @@ class SquidAxon(moose.Compartment):
         """Reversal potential of Na+ channels"""
         return SquidAxon.reversal_potential(self.temperature, self.Na_out, self.Na_in)
 
-    
+    def updateEk(self):
+        """Update the channels' Ek"""
+        self.Na_channel.Ek = self.VNa
+        self.K_channel.Ek = self.VK
+        print self.Na_channel.Ek
+        print self.K_channel.Ek
+        
+
+    @property
+    def celsius(self):
+        return self.temperature - CELSIUS_TO_KELVIN
+
+    @celsius.setter
+    def celsius(self, celsius):
+        self.temperature = celsius + CELSIUS_TO_KELVIN
+
 class SquidModel(moose.Neutral):
     """Container for squid demo."""
     def __init__(self, path):
@@ -270,17 +301,21 @@ class SquidModel(moose.Neutral):
         moose.connect(self.gK_table, 'requestData', self.squid_axon.K_channel, 'get_Gk')
         self.gNa_table = moose.Table('%s/gNa' % (self.path))
         moose.connect(self.gNa_table, 'requestData', self.squid_axon.Na_channel, 'get_Gk')
+        self.clocks_assigned = False
         
     def run(self, runtime, simdt=1e-6):
+        self.squid_axon.updateEk()
         moose.setClock(0, simdt)
         moose.setClock(1, simdt)
         moose.setClock(2, simdt)
         moose.setClock(3, simdt)
-        moose.useClock(0, '%s/#[TYPE=Compartment]' % (self.path), 'init')
-        moose.useClock(0, '%s/#[TYPE=PulseGen]' % (self.path), 'process')
-        moose.useClock(1, '%s/#[TYPE=Compartment]' % (self.path), 'process')
-        moose.useClock(2, '%s/#[TYPE=HHChannel]' % (self.squid_axon.path), 'process')
-        moose.useClock(3, '%s/#[TYPE=Table]' % (self.path), 'process')
+        if not self.clocks_assigned:
+            moose.useClock(0, '%s/#[TYPE=Compartment]' % (self.path), 'init')
+            moose.useClock(0, '%s/#[TYPE=PulseGen]' % (self.path), 'process')
+            moose.useClock(1, '%s/#[TYPE=Compartment]' % (self.path), 'process')
+            moose.useClock(2, '%s/#[TYPE=HHChannel]' % (self.squid_axon.path), 'process')
+            moose.useClock(3, '%s/#[TYPE=Table]' % (self.path), 'process')
+            self.clocks_assigned = True
         moose.reinit()
         moose.start(runtime)
 
