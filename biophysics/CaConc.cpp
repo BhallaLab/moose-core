@@ -264,6 +264,7 @@ void CaConc::process( const Eref& e, ProcPtr p )
 	concOut()->send( e, p->threadIndexInGroup, Ca_ );
 	activation_ = 0;
 #ifndef NDEBUG
+    cout << e.objId().path() << " Ca: " << Ca_ << endl;
     cout << e.objId().path() << ": end" << endl;
 #endif
 }

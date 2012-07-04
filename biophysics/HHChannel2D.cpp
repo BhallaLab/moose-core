@@ -497,6 +497,7 @@ void HHChannel2D::process( const Eref& e, ProcPtr info )
 	g_ = 0.0;
     
 #ifndef NDEBUG
+    cout << e.objId().path() << " Gk: " << Gk_ << " Vm: " << Vm_ << endl;    
     cout << e.objId().path() << ": end" << endl;
 #endif
 }

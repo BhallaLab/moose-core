@@ -569,6 +569,7 @@ void Compartment::process( const Eref& e, ProcPtr p )
 
 	// The axial/raxial messages go out in the 'init' phase.
 #ifndef NDEBUG
+    cout << e.objId().path() << " Vm: " << Vm_ << endl;
     cout << e.objId().path() << ": end" << endl;
 #endif
 }
