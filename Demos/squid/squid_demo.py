@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Feb 22 23:24:21 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Jul  3 18:39:35 2012 (+0530)
+# Last-Updated: Wed Jul  4 11:55:47 2012 (+0530)
 #           By: subha
-#     Update #: 952
+#     Update #: 1080
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -28,6 +28,7 @@
 
 # Code:
 import sys
+from collections import defaultdict
 from threading import Thread, Timer
 from Queue import Queue, Empty
 import time
@@ -120,6 +121,7 @@ class SquidDemo(QtGui.QMainWindow):
         self._timer = None
         self._simthread = SimulationThread()
         self._simthread.start()
+        self._plot_dict = defaultdict(list)
         # self._simthread = SimulationThread(self._runtime_queue)
         # self._simthread.start()
         
@@ -146,6 +148,7 @@ class SquidDemo(QtGui.QMainWindow):
         self._runTimeEdit = QtGui.QLineEdit("50.0", self._runControlWidget)
         self._simTimeStepEdit = QtGui.QLineEdit("0.01", self._runControlWidget)
         self._plotTimeStepEdit = QtGui.QLineEdit("0.1", self._runControlWidget)
+        self._plotOverlayButton = QtGui.QCheckBox('Overlay plots', self._runControlWidget)
         layout = QtGui.QGridLayout()
         layout.addWidget(self._runTimeLabel, 0,0)
         layout.addWidget(self._runTimeEdit, 0, 1)
@@ -153,6 +156,7 @@ class SquidDemo(QtGui.QMainWindow):
         layout.addWidget(self._simTimeStepEdit, 1, 1)
         layout.addWidget(self._plotTimeStepLabel, 2, 0)
         layout.addWidget(self._plotTimeStepEdit, 2, 1)
+        layout.addWidget(self._plotOverlayButton, 3, 0)
         self._simInputBox.setLayout(layout)
         self._runControlWidget.setWidget(self._simInputBox)
         return self._runControlWidget
@@ -170,27 +174,29 @@ class SquidDemo(QtGui.QMainWindow):
         # Vm and command voltage go in the same subplot
         self._vm_axes = self._plotFigure.add_subplot(2,2,1, title='Membrane potential')
         self._vm_axes.set_ylim(-20.0, 120.0)
-        self._vm_plot, = self._vm_axes.plot([], [], label='Vm')
-        self._command_plot, = self._vm_axes.plot([], [], label='command')
-        self._vm_axes.legend()
+        # self._vm_plot, = self._vm_axes.plot([], [], label='Vm')
+        # self._command_plot, = self._vm_axes.plot([], [], label='command')
+        # self._vm_axes.legend()
         # Channel conductances go to the same subplot
         self._g_axes = self._plotFigure.add_subplot(2,2,2, title='Channel conductance')
         self._g_axes.set_ylim(0.0, 0.5)
-        self._gna_plot, = self._g_axes.plot([], [], label='Na')
-        self._gk_plot, = self._g_axes.plot([], [], label='K')
-        self._g_axes.legend()
+        # self._gna_plot, = self._g_axes.plot([], [], label='Na')
+        # self._gk_plot, = self._g_axes.plot([], [], label='K')
+        # self._g_axes.legend()
         # Injection current for Vclamp/Iclamp go to the same subplot
         self._im_axes = self._plotFigure.add_subplot(2,2,3, title='Injection current')
         self._im_axes.set_ylim(-0.5, 0.5)
-        self._iclamp_plot, = self._im_axes.plot([], [], label='Iclamp')
-        self._vclamp_plot, = self._im_axes.plot([], [], label='Vclamp')
-        self._im_axes.legend()
+        # self._iclamp_plot, = self._im_axes.plot([], [], label='Iclamp')
+        # self._vclamp_plot, = self._im_axes.plot([], [], label='Vclamp')
+        # self._im_axes.legend()
         # Channel currents go to the same subplot
         self._i_axes = self._plotFigure.add_subplot(2,2,4, title='Channel current')
         self._i_axes.set_ylim(-10, 10)
-        self._ina_plot, = self._i_axes.plot([], [], label='Na')
-        self._ik_plot, = self._i_axes.plot([], [], label='K')
-        self._i_axes.legend()
+        # self._ina_plot, = self._i_axes.plot([], [], label='Na')
+        # self._ik_plot, = self._i_axes.plot([], [], label='K')
+        # self._i_axes.legend()
+        for axis in self._plotFigure.axes:
+            axis.autoscale(False)
         self._plotNavigator = NavigationToolbar(self._plotCanvas, self._plotWidget)
         layout = QtGui.QVBoxLayout()
         layout.addWidget(self._plotCanvas)
@@ -214,10 +220,12 @@ class SquidDemo(QtGui.QMainWindow):
         self._statePlotAxes.legend()
         self._activationParamAxes = self._statePlotFigure.add_subplot(2,1,2, title='H-H activation parameters vs time')
         self._activationParamAxes.set_xlabel('Time (ms)')
-        self._m_plot, = self._activationParamAxes.plot([],[], label='m')
-        self._h_plot, = self._activationParamAxes.plot([], [], label='h')
-        self._n_plot, = self._activationParamAxes.plot([], [], label='n')
-        self._activationParamAxes.legend()
+        for axis in self._plotFigure.axes:
+            axis.autoscale(False)
+        # self._m_plot, = self._activationParamAxes.plot([],[], label='m')
+        # self._h_plot, = self._activationParamAxes.plot([], [], label='h')
+        # self._n_plot, = self._activationParamAxes.plot([], [], label='n')
+        # self._activationParamAxes.legend()
         self._stateplot_xvar_label = QtGui.QLabel('Variable on X-axis')
         self._stateplot_xvar_combo = QtGui.QComboBox()
         self._stateplot_xvar_combo.addItems(['V', 'm', 'n', 'h'])
@@ -234,7 +242,7 @@ class SquidDemo(QtGui.QMainWindow):
         self.connect(self._stateplot_yvar_combo,
                      QtCore.SIGNAL('currentIndexChanged(const QString&)'),
                      self._statePlotYSlot)
-        self._statePlotNavigator = NavigationToolbar(self._statePlotCanvas, self._statePlotWidget)        
+        self._statePlotNavigator = NavigationToolbar(self._statePlotCanvas, self._statePlotWidget)
         frame = QtGui.QFrame()
         layout = QtGui.QHBoxLayout()
         layout.addWidget(self._stateplot_xvar_label)
@@ -444,6 +452,12 @@ class SquidDemo(QtGui.QMainWindow):
         self._statePlotCanvas.draw()
         
     def _runSlot(self):
+        if moose.isRunning():
+            print 'Stopping simulation in progress ...'
+            moose.stop()
+            self._simthread.set_runtime(0)       
+        self._runtime = float(str(self._runTimeEdit.text()))
+        self._overlayPlots(self._plotOverlayButton.isChecked())
         self._simdt = float(str(self._simTimeStepEdit.text()))
         self._plotdt = float(str(self._plotTimeStepEdit.text()))
         clampMode = None
@@ -484,7 +498,6 @@ class SquidDemo(QtGui.QMainWindow):
         self.squid_setup.squid_axon.Na_out = float(str(self._naOutEdit.text()))
         self.squid_setup.squid_axon.updateEk()
         self.squid_setup.schedule(self._simdt, self._plotdt, clampMode)
-        self._runtime = float(str(self._runTimeEdit.text()))
         # The following line is for use with Qthread
         self._simthread.set_runtime(self._runtime)
         self._timer = self.startTimer(300)
@@ -493,23 +506,59 @@ class SquidDemo(QtGui.QMainWindow):
         # self._timer.start()
         # time.sleep(3.0)
 
-    def _updateAllPlots(self):
-        print '_updateAllPlots'
-        self._updatePlots()
-        self._updateStatePlot()
-        # if hasattr(self, '_timer'):
-        #     self._timer.cancel()
-        # self._timer = Timer(3.0, self._updateAllPlots)        
-        # self._timer.start()
-        # time.sleep(3.0)
-        
-    def _updatePlots(self):
-        if len(self.squid_setup.vm_table.vec) <= 0:
-            return        
+    def _overlayPlots(self, overlay):        
+        if not overlay:
+            for axis in (self._plotFigure.axes + self._statePlotFigure.axes):
+                title = axis.get_title()
+                axis.clear()
+                axis.set_title(title)
+            suffix = ''
+        else:
+            suffix = '_%d' % (len(self._plot_dict['vm']))
         self._vm_axes.set_xlim(0.0, self._runtime)
         self._g_axes.set_xlim(0.0, self._runtime)
         self._im_axes.set_xlim(0.0, self._runtime)
         self._i_axes.set_xlim(0.0, self._runtime)
+        self._vm_plot, = self._vm_axes.plot([], [], label='Vm%s'%(suffix))
+        self._plot_dict['vm'].append(self._vm_plot)
+        self._command_plot, = self._vm_axes.plot([], [], label='command%s'%(suffix))
+        self._plot_dict['command'].append(self._command_plot)
+        # Channel conductances go to the same subplot
+        self._gna_plot, = self._g_axes.plot([], [], label='Na%s'%(suffix))
+        self._plot_dict['gna'].append(self._gna_plot)
+        self._gk_plot, = self._g_axes.plot([], [], label='K%s'%(suffix))
+        self._plot_dict['gk'].append(self._gk_plot)
+        # Injection current for Vclamp/Iclamp go to the same subplot
+        self._iclamp_plot, = self._im_axes.plot([], [], label='Iclamp%s'%(suffix))
+        self._vclamp_plot, = self._im_axes.plot([], [], label='Vclamp%s'%(suffix))
+        self._plot_dict['iclamp'].append(self._iclamp_plot)
+        self._plot_dict['vclamp'].append(self._vclamp_plot)
+        # Channel currents go to the same subplot
+        self._ina_plot, = self._i_axes.plot([], [], label='Na%s'%(suffix))
+        self._plot_dict['ina'].append(self._ina_plot)
+        self._ik_plot, = self._i_axes.plot([], [], label='K%s'%(suffix))
+        self._plot_dict['ik'].append(self._ik_plot)
+        self._i_axes.legend()
+        # State plots
+        self._state_plot, = self._statePlotAxes.plot([], [], label='state%s'%(suffix))
+        self._plot_dict['state'].append(self._state_plot)
+        self._m_plot, = self._activationParamAxes.plot([],[], label='m%s'%(suffix))
+        self._h_plot, = self._activationParamAxes.plot([], [], label='h%s'%(suffix))
+        self._n_plot, = self._activationParamAxes.plot([], [], label='n%s'%(suffix))
+        self._plot_dict['m'].append(self._m_plot)
+        self._plot_dict['h'].append(self._h_plot)
+        self._plot_dict['n'].append(self._n_plot)        
+        for axis in (self._plotFigure.axes + self._statePlotFigure.axes):
+            axis.legend()
+
+    def _updateAllPlots(self):
+        print '_updateAllPlots'
+        self._updatePlots()
+        self._updateStatePlot()
+
+    def _updatePlots(self):
+        if len(self.squid_setup.vm_table.vec) <= 0:
+            return        
         vm = numpy.asarray(self.squid_setup.vm_table.vec)
         print 'Size of vm', len(vm)
         cmd = numpy.asarray(self.squid_setup.cmd_table.vec)
@@ -535,6 +584,9 @@ class SquidDemo(QtGui.QMainWindow):
         self._gk_plot.set_data(time_series, gk)
         time_series = numpy.linspace(0, self._plotdt * len(gna), len(gna))
         self._gna_plot.set_data(time_series, gna)
+        for axis in self._plotFigure.axes:
+            axis.relim()
+            axis.autoscale(True, axis='y')
         self._plotCanvas.draw()
 
     def _updateStatePlot(self):
@@ -566,6 +618,9 @@ class SquidDemo(QtGui.QMainWindow):
         self._h_plot.set_data(time_series, h)
         time_series = numpy.linspace(0, self._plotdt*len(n), len(n))
         self._n_plot.set_data(time_series, n)
+        for axis in self._statePlotFigure.axes:
+            axis.relim()
+            axis.autoscale(True, axis='both')
         self._statePlotCanvas.draw()
                 
     def timerEvent(self, event):
@@ -573,6 +628,7 @@ class SquidDemo(QtGui.QMainWindow):
         self._updateAllPlots()
         if not moose.isRunning():
             self.killTimer(event.timerId())
+            self._timer = None
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
