@@ -249,10 +249,6 @@ void CaConc::reinit( const Eref& e, ProcPtr p )
 
 void CaConc::process( const Eref& e, ProcPtr p )
 {
-#ifndef NDEBUG
-    cout << e.objId().path() << ": start\n"
-         << (*p) << endl;
-#endif
 	double x = exp( -p->dt / tau_ );
 	Ca_ = CaBasal_ + c_ * x + ( B_ * activation_ * tau_ )  * (1.0 - x);
 	if ( ceiling_ > 0.0 && Ca_ > ceiling_ ) {
@@ -263,10 +259,6 @@ void CaConc::process( const Eref& e, ProcPtr p )
 	c_ = Ca_ - CaBasal_;
 	concOut()->send( e, p->threadIndexInGroup, Ca_ );
 	activation_ = 0;
-#ifndef NDEBUG
-    cout << e.objId().path() << " Ca: " << Ca_ << endl;
-    cout << e.objId().path() << ": end" << endl;
-#endif
 }
 
 
