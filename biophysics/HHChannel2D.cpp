@@ -449,6 +449,9 @@ void HHChannel2D::process( const Eref& e, ProcPtr info )
 	double B = 0;
 	if ( Xpower_ > 0 ) {
 		xGate_->lookupBoth( depValue( Xdep0_ ), depValue( Xdep1_ ), &A, &B );
+#ifndef NDEBUG
+        cout << e.objId().path() << " Ax " << A << " Bx " << B << endl;
+#endif
 		if ( instant_ & INSTANT_X )
 			X_ = A/B;
 		else 
@@ -458,6 +461,9 @@ void HHChannel2D::process( const Eref& e, ProcPtr info )
 
 	if ( Ypower_ > 0 ) {
 		yGate_->lookupBoth( depValue( Ydep0_ ), depValue( Ydep1_ ), &A, &B );
+#ifndef NDEBUG
+        cout << e.objId().path() << " Ay " << A << " By " << B << endl;
+#endif
 		if ( instant_ & INSTANT_Y )
 			Y_ = A/B;
 		else 
@@ -467,7 +473,10 @@ void HHChannel2D::process( const Eref& e, ProcPtr info )
 	}
 
 	if ( Zpower_ > 0 ) {
-			zGate_->lookupBoth( depValue( Zdep0_ ), depValue( Zdep1_ ), &A, &B );
+        zGate_->lookupBoth( depValue( Zdep0_ ), depValue( Zdep1_ ), &A, &B );
+#ifndef NDEBUG
+        cout << e.objId().path() << " Az " << A << " Bz " << B << endl;
+#endif
 		if ( instant_ & INSTANT_Z )
 			Z_ = A/B;
 		else 
@@ -493,76 +502,90 @@ void HHChannel2D::process( const Eref& e, ProcPtr info )
 	// Needed by GHK-type objects
 	permeability.send( e, info, Gk_ );
 	*/       
+ #ifndef NDEBUG
+     cout << e.objId().path() << " Gk: " << g_ << " Vm: " << Vm_ << endl;    
+     cout << e.objId().path() << ": end" << endl;
+ #endif
+     g_ = 0.0;
+
+ }
+
+ /**
+  * Here we get the steady-state values for the gate (the 'instant'
+  * calculation) as A_/B_.
+  */
+ void HHChannel2D::reinit( const Eref& er, ProcPtr info )
+ {
+     g_ = ChanBase::getGbar();
+     Element* e = er.element();
 #ifndef NDEBUG
-    cout << e.objId().path() << " Gk: " << g_ << " Vm: " << Vm_ << endl;    
-    cout << e.objId().path() << ": end" << endl;
+        cout << er.objId().path() << " Reinit: Xpower " << Xpower_ << " Ypower " << Ypower_ << endl;
 #endif
-	g_ = 0.0;
 
-}
+     double A = 0.0;
+     double B = 0.0;
+     if ( Xpower_ > 0 ) {
+         xGate_->lookupBoth( depValue( Xdep0_ ), depValue( Xdep1_ ), &A, &B );
+#ifndef NDEBUG
+        cout << er.objId().path() << " Reinit: Ax " << A << " Bx " << B << endl;
+#endif
+         if ( B < EPSILON ) {
+             cout << "Warning: B_ value for " << e->getName() <<
+                     " is ~0. Check X table\n";
+             return;
+         }
+                 if (!xInited_)
+                     X_ = A/B;
+         g_ *= takeXpower_( X_, Xpower_ );
+     }
 
-/**
- * Here we get the steady-state values for the gate (the 'instant'
- * calculation) as A_/B_.
- */
-void HHChannel2D::reinit( const Eref& er, ProcPtr info )
-{
-	g_ = ChanBase::getGbar();
-	Element* e = er.element();
+     if ( Ypower_ > 0 ) {
+         yGate_->lookupBoth( depValue( Ydep0_ ), depValue( Ydep1_ ), &A, &B );
+#ifndef NDEBUG
+        cout << er.objId().path() << " Reinit: Ay " << A << " By " << B << endl;
+#endif
+         if ( B < EPSILON ) {
+             cout << "Warning: B value for " << e->getName() <<
+                     " is ~0. Check Y table\n";
+             return;
+         }
+                 if (!yInited_)
+                     Y_ = A/B;
+         g_ *= takeYpower_( Y_, Ypower_ );
+     }
 
-	double A = 0.0;
-	double B = 0.0;
-	if ( Xpower_ > 0 ) {
-		xGate_->lookupBoth( depValue( Xdep0_ ), depValue( Xdep1_ ), &A, &B );
-		if ( B < EPSILON ) {
-			cout << "Warning: B_ value for " << e->getName() <<
-					" is ~0. Check X table\n";
-			return;
-		}
-                if (!xInited_)
-                    X_ = A/B;
-		g_ *= takeXpower_( X_, Xpower_ );
-	}
+     if ( Zpower_ > 0 ) {
+         zGate_->lookupBoth( depValue( Zdep0_ ), depValue( Zdep1_ ), &A, &B );
+#ifndef NDEBUG
+        cout << er.objId().path() << " Reinit: Az " << A << " Bz " << B << endl;
+#endif         
+         if ( B < EPSILON ) {
+             cout << "Warning: B value for " << e->getName() <<
+                     " is ~0. Check Z table\n";
+             return;
+         }
+                 if (!zInited_)
+                     Z_ = A/B;
+         g_ *= takeZpower_( Z_, Zpower_ );
+     }
 
-	if ( Ypower_ > 0 ) {
-		yGate_->lookupBoth( depValue( Ydep0_ ), depValue( Ydep1_ ), &A, &B );
-		if ( B < EPSILON ) {
-			cout << "Warning: B value for " << e->getName() <<
-					" is ~0. Check Y table\n";
-			return;
-		}
-                if (!yInited_)
-                    Y_ = A/B;
-		g_ *= takeYpower_( Y_, Ypower_ );
-	}
+     ChanBase::setGk( g_ );
+     ChanBase::updateIk();
+     // Gk_ = g_;
+     // Ik_ = ( Ek_ - Vm_ ) * g_;
 
-	if ( Zpower_ > 0 ) {
-		zGate_->lookupBoth( depValue( Zdep0_ ), depValue( Zdep1_ ), &A, &B );
-		if ( B < EPSILON ) {
-			cout << "Warning: B value for " << e->getName() <<
-					" is ~0. Check Z table\n";
-			return;
-		}
-                if (!zInited_)
-                    Z_ = A/B;
-		g_ *= takeZpower_( Z_, Zpower_ );
-	}
+     // Send out the relevant channel messages.
+     // Same for reinit as for process.
+     ChanBase::reinit( er, info );
 
-	ChanBase::setGk( g_ );
-	ChanBase::updateIk();
-	// Gk_ = g_;
-	// Ik_ = ( Ek_ - Vm_ ) * g_;
-
-	// Send out the relevant channel messages.
-	// Same for reinit as for process.
-	ChanBase::reinit( er, info );
-
-	/*
-	channelOut.send( er, info, Gk_, Ek_ );
-	// Needed by GHK-type objects
-	permeability.send( er, info, Gk_ );
-	*/
-	
+     /*
+     channelOut.send( er, info, Gk_, Ek_ );
+     // Needed by GHK-type objects
+     permeability.send( er, info, Gk_ );
+     */
+#ifndef NDEBUG
+     cout << er.objId().path() << " Reinit: Gk " << g_ << endl;
+#endif
 	g_ = 0.0;
 }
 
