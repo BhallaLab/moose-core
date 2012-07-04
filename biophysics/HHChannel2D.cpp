@@ -447,18 +447,11 @@ double HHChannel2D::integrate( double state, double dt, double A, double B )
 
 void HHChannel2D::process( const Eref& e, ProcPtr info )
 {
-#ifndef NDEBUG
-    cout << e.objId().path() << ": start\n"
-         << (*info) << endl;
-#endif
 	g_ += ChanBase::getGbar();
 	double A = 0;
 	double B = 0;
 	if ( Xpower_ > 0 ) {
 		xGate_->lookupBoth( depValue( Xdep0_ ), depValue( Xdep1_ ), &A, &B );
-#ifndef NDEBUG
-        cout << e.objId().path() << " Ax " << A << " Bx " << B << endl;
-#endif
 		if ( instant_ & INSTANT_X )
 			X_ = A/B;
 		else 
@@ -468,9 +461,6 @@ void HHChannel2D::process( const Eref& e, ProcPtr info )
 
 	if ( Ypower_ > 0 ) {
 		yGate_->lookupBoth( depValue( Ydep0_ ), depValue( Ydep1_ ), &A, &B );
-#ifndef NDEBUG
-        cout << e.objId().path() << " Ay " << A << " By " << B << endl;
-#endif
 		if ( instant_ & INSTANT_Y )
 			Y_ = A/B;
 		else 
@@ -481,9 +471,6 @@ void HHChannel2D::process( const Eref& e, ProcPtr info )
 
 	if ( Zpower_ > 0 ) {
         zGate_->lookupBoth( depValue( Zdep0_ ), depValue( Zdep1_ ), &A, &B );
-#ifndef NDEBUG
-        cout << e.objId().path() << " Az " << A << " Bz " << B << endl;
-#endif
 		if ( instant_ & INSTANT_Z )
 			Z_ = A/B;
 		else 
@@ -509,10 +496,6 @@ void HHChannel2D::process( const Eref& e, ProcPtr info )
 	// Needed by GHK-type objects
 	permeability.send( e, info, Gk_ );
 	*/       
- #ifndef NDEBUG
-     cout << e.objId().path() << " Gk: " << g_ << " Vm: " << Vm_ << endl;    
-     cout << e.objId().path() << ": end" << endl;
- #endif
      g_ = 0.0;
 
  }
@@ -525,17 +508,11 @@ void HHChannel2D::process( const Eref& e, ProcPtr info )
  {
      g_ = ChanBase::getGbar();
      Element* e = er.element();
-#ifndef NDEBUG
-     cout << er.objId().path() << " Reinit: Xpower " << Xpower_ << " Ypower " << Ypower_ << " Zpower " << Zpower_ << endl;
-#endif
 
      double A = 0.0;
      double B = 0.0;
      if ( Xpower_ > 0 ) {
          xGate_->lookupBoth( depValue( Xdep0_ ), depValue( Xdep1_ ), &A, &B );
-#ifndef NDEBUG
-        cout << er.objId().path() << " Reinit: Ax " << A << " Bx " << B << endl;
-#endif
          if ( B < EPSILON ) {
              cout << "Warning: B_ value for " << e->getName() <<
                      " is ~0. Check X table\n";
@@ -548,9 +525,6 @@ void HHChannel2D::process( const Eref& e, ProcPtr info )
 
      if ( Ypower_ > 0 ) {
          yGate_->lookupBoth( depValue( Ydep0_ ), depValue( Ydep1_ ), &A, &B );
-#ifndef NDEBUG
-        cout << er.objId().path() << " Reinit: Ay " << A << " By " << B << endl;
-#endif
          if ( B < EPSILON ) {
              cout << "Warning: B value for " << e->getName() <<
                      " is ~0. Check Y table\n";
@@ -563,9 +537,6 @@ void HHChannel2D::process( const Eref& e, ProcPtr info )
 
      if ( Zpower_ > 0 ) {
          zGate_->lookupBoth( depValue( Zdep0_ ), depValue( Zdep1_ ), &A, &B );
-#ifndef NDEBUG
-        cout << er.objId().path() << " Reinit: Az " << A << " Bz " << B << endl;
-#endif         
          if ( B < EPSILON ) {
              cout << "Warning: B value for " << e->getName() <<
                      " is ~0. Check Z table\n";
@@ -590,9 +561,6 @@ void HHChannel2D::process( const Eref& e, ProcPtr info )
      // Needed by GHK-type objects
      permeability.send( er, info, Gk_ );
      */
-#ifndef NDEBUG
-     cout << er.objId().path() << " Reinit: Gk " << g_ << endl;
-#endif
 	g_ = 0.0;
 }
 
