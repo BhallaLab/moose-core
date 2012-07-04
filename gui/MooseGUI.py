@@ -416,6 +416,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         except ValueError:
             runtime = MooseHandler.runtime
             self.simControlRunTimeLineEdit.setText(str(runtime))
+
         self.mooseHandler.doRun(float(str(self.simControlRunTimeLineEdit.text()))) 
         self.updatePlots(self.mooseHandler.getCurrentTime()) #updates the plots
         
