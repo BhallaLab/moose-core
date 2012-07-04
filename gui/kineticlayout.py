@@ -42,6 +42,8 @@ class RectCompt(QtGui.QGraphicsRectItem):
 
 class Textitem(QtGui.QGraphicsTextItem):
     positionChange = QtCore.pyqtSignal(QtGui.QGraphicsItem)
+    selectedChange = QtCore.pyqtSignal(QtGui.QGraphicsItem)
+
     def __init__(self,parent,mooseObj):
         self.mooseObj_ = mooseObj
         if isinstance(parent,kineticsWidget):
@@ -80,6 +82,8 @@ class Textitem(QtGui.QGraphicsTextItem):
     def itemChange(self,change,value):
         if change == QtGui.QGraphicsItem.ItemPositionChange:
             self.positionChange.emit(self)
+        if change == QtGui.QGraphicsItem.ItemSelectedChange and value == True:
+           self.selectedChange.emit(self)
         return QtGui.QGraphicsItem.itemChange(self,change,value)
 
 class GraphicalView(QtGui.QGraphicsView):
@@ -120,6 +124,7 @@ class GraphicalView(QtGui.QGraphicsView):
                 if(isinstance(sceneitems, Textitem)):
                     QtGui.QGraphicsView.mousePressEvent(self, event)
                     self.itemSelected = True
+
                 elif(isinstance(sceneitems, RectCompt)):
                     for previousSelection in self.sceneContainerPt.selectedItems():
                         if previousSelection.isSelected() == True:
@@ -272,16 +277,15 @@ class kineticsWidget(QtGui.QWidget):
                 for items in (items for items in out[1] ):
                     G.add_edge(inn.path,items.path,color=arrowcolor)
             else:
-
                 for items in (items for items in out ):
                     G.add_edge(items.path,inn.path,color='blue')
 
         G.layout(prog='dot')
         filename = modelPath.lstrip('/')
-        G.draw(os.getcwd()+filename+'.png',prog='dot',format='png')
+        G.draw(os.getcwd()+'/'+filename+'.png',prog='dot',format='png')
         graphCord = {}
         self.qGraCompt = {}
-        mooseId_GText = {}
+        self.mooseId_GText = {}
         
         for n in G.nodes():
             graphCord[n] = n.attr
@@ -306,14 +310,15 @@ class kineticsWidget(QtGui.QWidget):
                     textbgcolor = "<html><body bgcolor='"+textbgcolor+"'>"+item.name+"</body></html>"
                     pItem.setHtml(QtCore.QString(textbgcolor))
                     
-                    mooseId_GText[item.getId()] = pItem
+                    self.mooseId_GText[item.getId()] = pItem
                     self.connect(pItem, QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"), self.emitItemtoEditor)
                     pItem.positionChange.connect(self.positionChange)
+                    pItem.selectedChange.connect(self.emitItemtoEditor)
 
         for k, v in self.qGraCompt.items():
             rectcompt = v.childrenBoundingRect()
             v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
-            v.setPen( QtGui.QPen( Qt.QColor(66,66,66,100),10,QtCore.Qt.SolidLine,QtCore.Qt.RoundCap,QtCore.Qt.RoundJoin ) )
+            v.setPen(QtGui.QPen(Qt.QColor(66,66,66,100),10,QtCore.Qt.SolidLine,QtCore.Qt.RoundCap,QtCore.Qt.RoundJoin ))
             v.Rectemitter.connect(v.Rectemitter,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
             v.Rectemitter.connect(v.Rectemitter,QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.emitItemtoEditor)
 
@@ -322,27 +327,28 @@ class kineticsWidget(QtGui.QWidget):
                 for items in (items for items in out[0] ):
                     src = ""
                     des = ""
-                    src = mooseId_GText[inn.getId()]
-                    des = mooseId_GText[items.getId()]
+                    src = self.mooseId_GText[inn.getId()]
+                    des = self.mooseId_GText[items.getId()]
                     self.lineCord(src,des,inn)
                 for items in (items for items in out[1] ):
                     src = ""
                     des = ""
-                    des = mooseId_GText[inn.getId()]
-                    src = mooseId_GText[items.getId()]
+                    des = self.mooseId_GText[inn.getId()]
+                    src = self.mooseId_GText[items.getId()]
                     self.lineCord(src,des,inn)
             else:
                 for items in (items for items in out ):
                     src = ""
                     des = ""
-                    src = mooseId_GText[inn.getId()]
-                    des = mooseId_GText[items.getId()]
+                    src = self.mooseId_GText[inn.getId()]
+                    des = self.mooseId_GText[items.getId()]
                     self.lineCord(src,des,inn)
 
         self.view = GraphicalView(self.sceneContainer,self.border)
         self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
         self.view.show()
         hLayout.addWidget(self.view)
+
     #setting up compartments and its children    
     def setupCompt(self,modelPath,cmptmolDict):
         cPath = modelPath+'/##[TYPE=MeshEntry]'
@@ -350,7 +356,7 @@ class kineticsWidget(QtGui.QWidget):
             molList = []
             reList = []
             for mitem in Neutral(meshEnt).getNeighbors('remesh'):
-                if ( (mitem[0].class_ != 'GslIntegrator') and ((mitem[0].parent).class_ != 'ZombieEnz') ):
+                if ( (mitem[0].class_ != 'GslIntegrator')): # and ((mitem[0].parent).class_ != 'ZombieEnz') ):
                     molList.append(element(mitem))
             for reitem in Neutral(meshEnt).getNeighbors('remeshReacs'):
                 reList.append(element(reitem))
@@ -359,7 +365,6 @@ class kineticsWidget(QtGui.QWidget):
     def setupItem(self,modlePath,searObject,cntDict):
         for zombieObj in searObject:
             path = modlePath+'/##[TYPE='+zombieObj+']'
-            
             if zombieObj != 'ZombieSumFunc':
                 for items in wildcardFind(path):
                     sublist = []
@@ -371,6 +376,8 @@ class kineticsWidget(QtGui.QWidget):
                     if (zombieObj == 'ZombieEnz') :
                         for enzpar in items.getNeighbors('toZombieEnz'):
                             sublist.append(element(enzpar))
+                        for cplx in items.getNeighbors('cplxDest'):
+                            prdlist.append(element(cplx))
                     if (zombieObj == 'ZombieMMenz'):
                         for enzpar in items.getNeighbors('enzDest'):
                             sublist.append(element(enzpar))
@@ -383,10 +390,7 @@ class kineticsWidget(QtGui.QWidget):
                     funplist = []
                     nfunplist = []
                     for inpt in items.getNeighbors('input'):
-                        #inputlist.append(element(inpt))
-                        for inPt in inpt:
-                            if(((inPt.parent).class_ != 'ZombieEnz') and ((inPt.parent).class_ != 'ZombieMMenz')):
-                                inputlist.append(element(inPt))
+                        inputlist.append(element(inpt))
                     for zfun in items.getNeighbors('output'): funplist.append(element(zfun))
                     for i in funplist: nfunplist.append(element(i).getId())
                     nfunplist = list(set(nfunplist))
@@ -432,6 +436,10 @@ class kineticsWidget(QtGui.QWidget):
         self.sceneContainer.addItem(self.new_Compt)
     
     def emitItemtoEditor(self,mooseObject):
+        if(isinstance(mooseObject,Textitem)):
+            #need to pass mooseObject for objectoreditor
+           mooseObject = element(next((k for k,v in self.mooseId_GText.items() if v == mooseObject), None))
+
         self.emit(QtCore.SIGNAL("itemDoubleClicked(PyQt_PyObject)"), mooseObject)
         
     def positionChange(self,mooseObject):

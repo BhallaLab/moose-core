@@ -307,7 +307,8 @@ class MooseHandler(QtCore.QObject):
         """
         #Harsha
         #continueTime helps to get the total run time required when user clicks on continue button.
-        continueTime = self.getCurrentTime()+MooseHandler.runtime 
+        continueTime = self.getCurrentTime()+time 
+ 
         MooseHandler.runtime = time      
         next_stop = MooseHandler.plotupdate_dt
         if MooseHandler.runtime < MooseHandler.plotupdate_dt:
