@@ -30,8 +30,8 @@ class ChanBase
 		double getGbar() const;
 		void setEk( double Ek );
 		double getEk() const;
-		void setInstant( int Instant );
-		int getInstant() const;
+		// void setInstant( int Instant );
+		// int getInstant() const;
 		void setGk( double Gk );
 		double getGk() const;
 		/// Ik is read-only for MOOSE, but we provide the set 
