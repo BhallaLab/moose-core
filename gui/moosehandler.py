@@ -58,7 +58,6 @@ import xml.sax.xmlreader as saxreader
 import xml.sax.saxutils as saxutils
 
 from moose.neuroml.NeuroML import NeuroML
-import moose.utils as mooseUtils
 from PyQt4 import QtCore
 import moose
 import config
@@ -102,10 +101,10 @@ class MooseHandler(QtCore.QObject):
         'neuroML/SBML(*.xml *.bz2 *.zip *.gz)': type_xml,
         'Python script(*.py)': type_python
         }
-    DEFAULT_SIMDT = 2.5e-4
-    DEFAULT_PLOTDT = 2e-3
+    DEFAULT_SIMDT = 2e-5
+    DEFAULT_PLOTDT = 2e-5
     DEFAULT_RUNTIME = 1.0
-    DEFAULT_PLOTUPDATE_DT = 1e-1
+    DEFAULT_PLOTUPDATE_DT = 1e-2
 
     DEFAULT_SIMDT_KKIT = 0.1
     DEFAULT_RUNTIME_KKIT = 10.0
@@ -286,16 +285,18 @@ class MooseHandler(QtCore.QObject):
         MooseHandler.plotupdate_dt = MooseHandler.DEFAULT_PLOTUPDATE_DT_KKIT
         MooseHandler.runtime = MooseHandler.DEFAULT_RUNTIME_KKIT
 
-    def doReset(self, paths, simdt, plotdt):
-        """Reset moose.
-        uses moose utils -resetSim : also includes moose.reinit()
-        from all under list of paths (as in mooseutils) resets clocks 
+    def updateClocks(self, simdt, plotdt):
+        moose.setClock(0, simdt)
+        moose.setClock(1, simdt) 
+        moose.setClock(2, simdt) 
+        moose.setClock(3, simdt)
+        moose.setClock(4, plotdt)
 
+    def doReset(self, simdt, plotdt):
+        """update simdt and plot dt and Reinit moose.
         """
-        mooseUtils.resetSim(paths, simdt, plotdt)
-        #MooseHandler.simdt = simdt
-        #MooseHandler.plotdt = plotdt
-        #MooseHandler.plotupdate_dt = plotupdate_dt
+        self.updateClocks(simdt, plotdt)
+        moose.reinit()
 
     def doRun(self, time):
         """Just runs the simulation. 
@@ -320,14 +321,8 @@ class MooseHandler(QtCore.QObject):
                 time_left = continueTime - self.getCurrentTime()
                 moose.start(time_left)
                 self.emit(QtCore.SIGNAL('updatePlots(float)'), self.getCurrentTime())          
-#        time_left = MooseHandler.runtime + MooseHandler.plotupdate_dt - next_stop 
-#        if MooseHandler.runtime < MooseHandler.plotupdate_dt:
-#            time_left = MooseHandler.runtime
-        #moose.start(time_left)
-#        print "after run ###",self.getCurrentTime()
-#        self.emit(QtCore.SIGNAL('updatePlots(float)'), self.getCurrentTime())
 
-    def doResetAndRun(self, paths, runtime, simdt=None, plotdt=None, plotupdate_dt=None):
+    def doResetAndRun(self, runtime, simdt=None, plotdt=None, plotupdate_dt=None):
         """Reset and run the simulation.
 
         This is to replace separate reset and run methods as two
@@ -335,7 +330,7 @@ class MooseHandler(QtCore.QObject):
         end-user.
 
         """
-        if simdt is not None and isinstance(simdt, float):
+        if simdt is not None and isinstance(simdt, float): #why only float?
             MooseHandler.simdt = simdt
         if plotdt is not None and isinstance(plotdt, float):
             MooseHandler.plotdt = plotdt
@@ -343,7 +338,9 @@ class MooseHandler(QtCore.QObject):
             MooseHandler.plotupdate_dt = plotupdate_dt
         if runtime is not None and isinstance(runtime, float):
             MooseHandler.runtime = runtime
-        mooseUtils.resetSim(paths, simdt, plotdt)
+
+        self.updateClocks(simdt,plotdt)
+        moose.reinit()
         self.doRun(runtime)
 
         #if self._context.exists('/graphs'):
