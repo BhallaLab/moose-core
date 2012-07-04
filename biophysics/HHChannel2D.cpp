@@ -519,7 +519,7 @@ void HHChannel2D::process( const Eref& e, ProcPtr info )
      g_ = ChanBase::getGbar();
      Element* e = er.element();
 #ifndef NDEBUG
-        cout << er.objId().path() << " Reinit: Xpower " << Xpower_ << " Ypower " << Ypower_ << endl;
+     cout << er.objId().path() << " Reinit: Xpower " << Xpower_ << " Ypower " << Ypower_ << " Zpower " << Zpower_ << endl;
 #endif
 
      double A = 0.0;

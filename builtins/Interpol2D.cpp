@@ -564,6 +564,9 @@ double Interpol2D::interpolate( double x, double y ) const
 
 double Interpol2D::innerLookup( double x, double y ) const
 {
+#ifndef NDEBUG
+    cout << "Interpol2D: x " << x << " y " << y << endl;
+#endif
 	if ( table_.size() == 0 )
 		return 0.0;
 	
@@ -579,6 +582,9 @@ double Interpol2D::innerLookup( double x, double y ) const
 	if ( y > ymax_ ) {
 		y = ymax_;
 	}
+#ifndef NDEBUG
+    cout << "Interpol2D: after check x " << x << " y " << y << endl;
+#endif
 	
     return interpolate( x, y );
 }
