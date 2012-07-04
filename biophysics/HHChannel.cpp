@@ -510,12 +510,12 @@ void HHChannel::process( const Eref& e, ProcPtr info )
 	permeability.send( e, info, Gk_ );
 	*/
 	
-	g_ = 0.0;
-    
 #ifndef NDEBUG
-    cout << e.objId().path() << " Gk: " << Gk_ << " Vm: " << Vm_ << endl;
+    cout << e.objId().path() << " Gk: " << g_ << " Vm: " << Vm_ << endl;
     cout << e.objId().path() << ": end" << endl;
 #endif
+	g_ = 0.0;
+    
 }
 
 /**
