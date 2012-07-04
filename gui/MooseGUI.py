@@ -167,8 +167,32 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             self.checkModelForNeurons()
             if self.modelHasCompartments or self.modelHasIntFires:
                 self.addGLWindow()
+            self.assignClocks(modelpath,modeltype)
             print 'Loaded model',  fileName, 'of type', modeltype, 'under Element path ',modelpath
             app.restoreOverrideCursor()
+
+    def assignClocks(self,modelpath,modeltype):
+        if modeltype == MooseHandler.type_kkit:
+            #self.mooseHandler.updateClocks(MooseHandler.DEFAULT_SIMDT_KKIT, MooseHandler.DEFAULT_PLOTDT_KKIT)
+            #script auto asigns clocks!
+            pass
+        elif modeltype == MooseHandler.type_neuroml:
+            #self.mooseHandler.updateClocks(MooseHandler.DEFAULT_SIMDT, MooseHandler.DEFAULT_PLOTDT)
+            #use Aditya's method to assign clocks - also reinits!
+            mooseUtils.resetSim(['/cells','/elec'], MooseHandler.DEFAULT_SIMDT, MooseHandler.DEFAULT_PLOTDT)
+        elif modeltype == MooseHandler.type_python:
+            #specific for the hopfield tutorial!
+            #self.mooseHandler.updateClocks(MooseHandler.DEFAULT_SIMDT, MooseHandler.DEFAULT_PLOTDT)
+            clock = 1e-4
+            self.simControlSimdtLineEdit.setText(str(clock))
+            self.simControlPlotdtLineEdit.setText(str(clock))
+            self.mooseHandler.updateClocks(clock, clock) #simdt,plotdt
+            moose.useClock(1, '/hopfield/##[TYPE=IntFire]', 'process')
+            moose.useClock(2, '/hopfield/##[TYPE=PulseGen]', 'process')
+            moose.useClock(2, '/hopfield/##[TYPE=SpikeGen]', 'process')
+            moose.useClock(4, '/hopfield/##[TYPE=Table]', 'process') 
+        else:
+            print 'Clocks have not been assigned! - GUI does not supported this format yet'
 
     def checkModelForNeurons(self):
         self.allCompartments = mooseUtils.findAllBut('/##[TYPE=Compartment]','library')
@@ -230,7 +254,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
     def nearestSquare(self, n):	#add_chait
     	i = 1
 	while i * i < n:
-		i += 1
+            i += 1
 	return i
 
     def getElementpath(self,text):
@@ -327,8 +351,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         dataNeutral = moose.Neutral(self.plotConfigCurrentSelection.getField('path')+'/data')
         newTable = moose.Table(self.plotConfigCurrentSelection.getField('path')+'/data/'+str(self.plotConfigFieldSelectionComboBox.currentText()))
         moose.connect(newTable,'requestData', self.plotConfigCurrentSelection,'get_'+str(self.plotConfigFieldSelectionComboBox.currentText()))
-
-        #newTable = mooseUtils.setupTable(str(self.plotConfigFieldSelectionComboBox.currentText()), self.plotConfigCurrentSelection, str(self.plotConfigFieldSelectionComboBox.currentText())) 
+        moose.useClock(4, newTable.getField('path'), 'process') #assign clock after creation itself 
 
         if str(self.plotConfigWinSelectionComboBox.currentText()) in self.plotWindowFieldTableDict:
             #case when plotwin already exists - append new table to mooseplotwin
@@ -370,17 +393,10 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         except ValueError:
             runtime = MooseHandler.runtime
             self.simControlRunTimeLineEdit.setText(str(runtime))
-        
-        #totaltime = float(moose.element('/clock').getField('currentTime'))+float(self.simControlUpdatePlotdtLineEdit.text())
-        #print "$$$",totaltime
-        for modelPath,modeltype in self.modelPathsModelTypeDict.iteritems():
-            if modeltype == MooseHandler.type_kkit:
-                self.mooseHandler.doResetAndRun([modelPath],runtime,float(self.simControlSimdtLineEdit.text()),float(self.simControlPlotdtLineEdit.text()),float(self.simControlUpdatePlotdtLineEdit.text()))
-            elif modeltype == MooseHandler.type_neuroml:
-                self.mooseHandler.doResetAndRun(['/cells','/elec'],runtime,float(self.simControlSimdtLineEdit.text()),float(self.simControlPlotdtLineEdit.text()),float(self.simControlUpdatePlotdtLineEdit.text()))
-            elif modeltype == MooseHandler.type_python:
-                print 'pythonic'
-                self.mooseHandler.doResetAndRun(['/hopfield'],runtime,float(self.simControlSimdtLineEdit.text()),float(self.simControlPlotdtLineEdit.text()),float(self.simControlUpdatePlotdtLineEdit.text()))
+        self.mooseHandler.doResetAndRun(runtime,float(self.simControlSimdtLineEdit.text()),float(self.simControlPlotdtLineEdit.text()),float(self.simControlUpdatePlotdtLineEdit.text()))
+        self.simControlSimdtLineEdit.setEnabled(False)
+        self.simControlPlotdtLineEdit.setEnabled(False)
+        self.simControlUpdatePlotdtLineEdit.setEnabled(False)
 
     def _resetSlot(self): #called when reset is pressed
         try:
@@ -388,13 +404,11 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         except ValueError:
             runtime = MooseHandler.runtime
             self.simControlRunTimeLineEdit.setText(str(runtime))
- 
-        for modelPath,modeltype in self.modelPathsModelTypeDict.iteritems():
-            if modeltype == MooseHandler.type_kkit:
-                self.mooseHandler.doReset([modelPath],float(self.simControlSimdtLineEdit.text()),float(self.simControlPlotdtLineEdit.text()))
-            elif modeltype == MooseHandler.type_neuroml:
-                self.mooseHandler.doReset(['/cells','/elec'],float(self.simControlSimdtLineEdit.text()),float(self.simControlPlotdtLineEdit.text()))
-            self.updatePlots(self.mooseHandler.getCurrentTime())
+        self.mooseHandler.doReset(float(self.simControlSimdtLineEdit.text()),float(self.simControlPlotdtLineEdit.text()))
+        self.updatePlots(self.mooseHandler.getCurrentTime()) #clears the plots
+        self.simControlSimdtLineEdit.setEnabled(True)
+        self.simControlPlotdtLineEdit.setEnabled(True)
+        self.simControlUpdatePlotdtLineEdit.setEnabled(True)
 
     def _continueSlot(self): #called when continue is pressed
         try:
@@ -402,10 +416,8 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         except ValueError:
             runtime = MooseHandler.runtime
             self.simControlRunTimeLineEdit.setText(str(runtime))
-        #totaltime = MooseHandler.getCurrentTime()+self.simControlRunTimeLineEdit.text()
         self.mooseHandler.doRun(float(str(self.simControlRunTimeLineEdit.text()))) 
-        #self.mooseHandler.doRun(self.mooseHandler.getCurrentTime()+float(str(self.simControlRunTimeLineEdit.text()))) 
-        self.updatePlots(self.mooseHandler.getCurrentTime())
+        self.updatePlots(self.mooseHandler.getCurrentTime()) #updates the plots
         
     def updateDefaultTimes(self, modeltype): 
         if(modeltype == MooseHandler.type_kkit):
@@ -427,7 +439,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             self.updateTimeText.setText(QtCore.QString('%1.3e' % (MooseHandler.DEFAULT_PLOTUPDATE_DT_KKIT)))
             '''
     def populateKKitPlots(self,path):
-        graphs = self.getKKitGraphs(path)
+        graphs = self.getKKitGraphs(path) #clocks are assigned in the script itself!
         #currently putting all plots on Plot Window 1 by default - perhaps not the nicest way to do it.
         self.plotWindowFieldTableDict['Plot Window 1'] = graphs
         plotWin = MoosePlotWindow(self)

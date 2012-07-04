@@ -361,7 +361,6 @@ def resetSim(simpaths, simdt, plotdt, hsolve_path=None):
         if hsolve_path is None:
             moose__.useClock(0, simpath+'/##[TYPE=Compartment]', 'init')
             moose__.useClock(1, simpath+'/##[TYPE=Compartment]', 'process')
-            moose__.useClock(2, simpath+'/##[TYPE=IntFire]', 'process')
             moose__.useClock(2, simpath+'/##[TYPE=HHChannel]', 'process')
             moose__.useClock(2, simpath+'/##[TYPE=HHGate]', 'process')
             moose__.useClock(2, simpath+'/##[TYPE=HHChannel2D]', 'process')
