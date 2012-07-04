@@ -453,6 +453,10 @@ double HHChannel::integrate( double state, double dt, double A, double B )
 
 void HHChannel::process( const Eref& e, ProcPtr info )
 {
+#ifndef NDEBUG
+    cout << e.objId().path() << ": start\n"
+         << (*info) << endl;
+#endif
 	g_ += ChanBase::getGbar();
 	double A = 0;
 	double B = 0;
@@ -507,6 +511,9 @@ void HHChannel::process( const Eref& e, ProcPtr info )
 	*/
 	
 	g_ = 0.0;
+#ifndef NDEBUG
+    cout << e.objId().path() << ": end" << endl;
+#endif
 }
 
 /**
