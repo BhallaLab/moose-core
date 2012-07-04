@@ -548,10 +548,6 @@ double Compartment::getZ() const
 
 void Compartment::process( const Eref& e, ProcPtr p )
 {
-#ifndef NDEBUG    
-    cout << e.objId().path() << ": start\n"
-         << (*p) << endl;
-#endif
 	A_ += Inject_ + sumInject_ + Em_ * invRm_; 
 	if ( B_ > EPSILON ) {
 		double x = exp( -B_ * p->dt / Cm_ );
@@ -568,10 +564,6 @@ void Compartment::process( const Eref& e, ProcPtr p )
 	VmOut()->send( e, p->threadIndexInGroup, Vm_ );
 
 	// The axial/raxial messages go out in the 'init' phase.
-#ifndef NDEBUG
-    cout << e.objId().path() << " Vm: " << Vm_ << endl;
-    cout << e.objId().path() << ": end" << endl;
-#endif
 }
 
 void Compartment::reinit(  const Eref& e, ProcPtr p )
