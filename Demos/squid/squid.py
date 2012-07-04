@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Feb 13 11:35:11 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Jul  3 18:29:13 2012 (+0530)
+# Last-Updated: Wed Jul  4 15:15:50 2012 (+0530)
 #           By: subha
-#     Update #: 759
+#     Update #: 760
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -271,8 +271,6 @@ class SquidAxon(moose.Compartment):
         """Update the channels' Ek"""
         self.Na_channel.Ek = self.VNa
         self.K_channel.Ek = self.VK
-        print self.Na_channel.Ek
-        print self.K_channel.Ek
         
 
     @property
