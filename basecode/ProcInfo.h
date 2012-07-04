@@ -51,6 +51,23 @@ class ProcInfo
 			return threadIndexInGroup == 
 				( ( id.value() + dataIndex ) % numThreadsInGroup );
 		}
+#ifndef NDEBUG    
+    // This is for debugging. Is not thread safe.
+    friend ostream& operator <<( ostream& s, const ProcInfo p ){        
+        s << "Instance of class ProcInfo"
+          << "\nthreadId:\t" << p.threadId
+          << "\nprocIndex:\t" << p.procIndex
+          << "\nthreadIndexInGroup:\t" << p.threadIndexInGroup
+          << "\nnumThreadsInGroup:\t" << p.numThreadsInGroup
+          << "\nnodeIndexInGroup:\t" << p.nodeIndexInGroup
+          << "\nnumNodesInGroup:\t" << p.numNodesInGroup
+          << "\ngroupId:\t" << p.groupId
+          << "\nisMpiThread:\t" << p.isMpiThread
+          << endl;
+        return s;
+    }
+#endif
+
 };
 
 typedef const ProcInfo* ProcPtr;
