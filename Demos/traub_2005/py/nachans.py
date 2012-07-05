@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Apr 17 23:58:13 2009 (+0530)
 # Version: 
-# Last-Updated: Fri Jun  1 16:33:29 2012 (+0530)
+# Last-Updated: Thu Jul  5 11:36:31 2012 (+0530)
 #           By: subha
-#     Update #: 381
+#     Update #: 396
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -38,15 +38,16 @@ from channelbase import *
 
 class NaChannel(ChannelBase):
     """Dummy base class for all Na+ channels"""
+    annotation = {'cno': 'cno:cno_0000105'}
     abstract = True
-
     Ek = 50e-3
-
     def __init__(self, path):
         ChannelBase.__init__(self, path)
         
 
 class NaF(NaChannel):
+    """Fast Na channel.
+    """
     abstract = False
     Xpower = 3
     Ypower = 1

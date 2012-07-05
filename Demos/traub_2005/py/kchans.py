@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Apr 17 23:58:49 2009 (+0530)
 # Version: 
-# Last-Updated: Fri Jun  1 13:55:58 2012 (+0530)
+# Last-Updated: Thu Jul  5 11:18:14 2012 (+0530)
 #           By: subha
-#     Update #: 1024
+#     Update #: 1046
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -38,6 +38,7 @@ import numpy as np
 
 class KChannel(ChannelBase):
     """This is a dummy base class to keep type information."""
+    annotation = {'cno': 'cno_0000047'}
     abstract = True
     Ek = -95e-3
     X = 0.0
@@ -48,7 +49,12 @@ class KChannel(ChannelBase):
 class KDR(KChannel):
     """Delayed rectifier current
 
-    `In hippocampal pyramidal neurons, however, it has been reported have relatively slow activation, with a time to peak of some 50-100 msec and even slower inactivation. Such a slow activation would make it ill suited to participate in the repolarization of the AP.... An equation that can describe IK(DR) in cortical neurons is
+    `In hippocampal pyramidal neurons, however, it has been reported
+    have relatively slow activation, with a time to peak of some
+    50-100 msec and even slower inactivation. Such a slow activation
+    would make it ill suited to participate in the repolarization of
+    the AP.... An equation that can describe IK(DR) in cortical
+    neurons is
     
     IK(DR) = m^3 * h * gbar_K(DR) * (Vm - EK)
     
@@ -59,6 +65,7 @@ class KDR(KChannel):
     
     IK(DR) = m^4 * gbar_K(DR) * (Vm - EK)
     """
+    annotation = {'cno': 'cno_0000105'}
     abstract = False
 
     Xpower = 4
@@ -73,6 +80,7 @@ class KDR(KChannel):
 
 class KDR_FS(KDR):
     """KDR for fast spiking neurons"""
+    annotation = {'cno': 'cno_0000105'}
     abstract = False
 
     inf_x = 1.0 / (1.0 + exp((- v_array - 27e-3) / 11.5e-3))
@@ -86,6 +94,7 @@ class KDR_FS(KDR):
 
 class KA(KChannel):
     """A type K+ channel"""
+    annotation = {'cno': 'cno_0000105'}
     abstract = False
 
     Xpower = 4
@@ -105,6 +114,7 @@ class KA_IB(KA):
     """A type K+ channel for tufted intrinsically bursting cells -
     multiplies tau_h of KA by 2.6"""
 
+    annotation = {'cno': 'cno_0000105'}
     abstract = False
 
     inf_y =   1 / ( 1 + exp( ( v_array + 78e-3 ) / 6e-3 ) )
@@ -115,6 +125,7 @@ class KA_IB(KA):
 
 
 class K2(KChannel):
+    annotation = {'cno': 'cno_0000105'}
     Xpower = 1
     Ypower = 1
     inf_x  = 1 / ( 1 + exp( ( - v_array *1e3 - 10 ) / 17 ) )
@@ -128,6 +139,7 @@ class K2(KChannel):
 
 class KM(KChannel):
     """Mascarinic sensitive K channel"""
+    annotation = {'cno': 'cno_0000105'}
 
     abstract = False
 
@@ -142,9 +154,8 @@ class KM(KChannel):
         
 class KCaChannel(KChannel):
     """[Ca+2] dependent K+ channel base class."""
-
+    annotation = {'cno': 'cno_0000047'}
     abstract = True
-
     Zpower = 1
 
     def __init__(self, path):
@@ -152,6 +163,7 @@ class KCaChannel(KChannel):
 
 
 class KAHPBase(KCaChannel):
+    annotation = {'cno': 'cno_0000108'}
     abstract = True
     Z = 0.0
 
@@ -161,6 +173,7 @@ class KAHPBase(KCaChannel):
 
 class KAHP(KAHPBase):
     """AHP type K+ current"""
+    annotation = {'cno': 'cno_0000108'}
     abstract = False
     alpha_z = where(ca_conc < 100.0, 0.1 * ca_conc, 10.0)
     beta_z =  ones(ca_divs + 1) * 10.0
@@ -170,6 +183,7 @@ class KAHP(KAHPBase):
 
 
 class KAHP_SLOWER(KAHPBase):
+    annotation = {'cno': 'cno_0000108'}
     abstract = False
     alpha_z = where(ca_conc < 500.0, 1e3 * ca_conc / 50000, 10.0)
     beta_z =  ones(ca_divs + 1) * 1.0
@@ -180,6 +194,7 @@ class KAHP_SLOWER(KAHPBase):
 
 class KAHP_DP(KAHPBase):
     """KAHP for deep pyramidal cell"""
+    annotation = {'cno': 'cno_0000108'}
     abstract = False
     alpha_z = where(ca_conc < 100.0, 1e-1 * ca_conc, 10.0)
     beta_z =  ones(ca_divs + 1)
@@ -189,7 +204,9 @@ class KAHP_DP(KAHPBase):
 
 
 class KC(KCaChannel):
-    """C type K+ channel"""
+    """C type K+ channel
+    """
+    annotation = {'cno': 'cno_0000106'}
     abstract = False
 
     Xpower = 1
@@ -209,8 +226,9 @@ class KC(KCaChannel):
 
         
 class KC_FAST(KC):
-    """Fast KC channel"""
-
+    """Fast KC channel
+    """
+    annotation = {'cno': 'cno_0000106'}
     abstract = False
 
     tableA_x = KC.tableA_x * 2
