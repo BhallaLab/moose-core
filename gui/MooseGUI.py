@@ -391,7 +391,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         #general
     def updateCurrentTime(self,currentTime):
         self.currentTime = currentTime
-        self.simControlCurrentTimeLabel.setText(str(self.currentTime))
+        self.simControlCurrentTimeLabel.setText(str('%.3f' %self.currentTime))
 
     def doQuit(self):
         QtGui.qApp.closeAllWindows()
