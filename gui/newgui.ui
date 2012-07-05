@@ -22,11 +22,11 @@
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout_6">
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
-       <widget class="QWidget" name="layoutWidget" native="true"/>
-      </item>
-     </layout>
+     <widget class="QMdiArea" name="mdiArea">
+      <property name="viewMode">
+       <enum>QMdiArea::TabbedView</enum>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>

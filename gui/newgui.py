@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'newgui.ui'
 #
-# Created: Thu Jul  5 17:28:05 2012
-#      by: PyQt4 UI code generator 4.8.3
+# Created: Fri Jul  6 00:39:31 2012
+#      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -27,12 +27,10 @@ class Ui_MainWindow(object):
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.horizontalLayout_6 = QtGui.QHBoxLayout(self.centralwidget)
         self.horizontalLayout_6.setObjectName(_fromUtf8("horizontalLayout_6"))
-        self.horizontalLayout = QtGui.QHBoxLayout()
-        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
-        self.layoutWidget = QtGui.QWidget(self.centralwidget)
-        self.layoutWidget.setObjectName(_fromUtf8("layoutWidget"))
-        self.horizontalLayout.addWidget(self.layoutWidget)
-        self.horizontalLayout_6.addLayout(self.horizontalLayout)
+        self.mdiArea = QtGui.QMdiArea(self.centralwidget)
+        self.mdiArea.setViewMode(QtGui.QMdiArea.TabbedView)
+        self.mdiArea.setObjectName(_fromUtf8("mdiArea"))
+        self.horizontalLayout_6.addWidget(self.mdiArea)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 980, 25))
@@ -158,8 +156,8 @@ class Ui_MainWindow(object):
         self.horizontalLayout_7.setObjectName(_fromUtf8("horizontalLayout_7"))
         self.label = QtGui.QLabel(self.dockWidgetContents)
         font = QtGui.QFont()
-        font.setWeight(50)
         font.setBold(False)
+        font.setWeight(50)
         self.label.setFont(font)
         self.label.setObjectName(_fromUtf8("label"))
         self.horizontalLayout_7.addWidget(self.label)
