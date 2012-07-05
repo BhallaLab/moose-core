@@ -17,7 +17,7 @@ import moose.utils as mooseUtils
 from collections import defaultdict
 from objectedit import ObjectFieldsModel, ObjectEditView
 from moosehandler import MooseHandler
-from mooseplot import MoosePlot,MoosePlotWindow
+from mooseplot import MoosePlot,MoosePlotWindow,newPlotSubWindow
 
 import kineticlayout
 from neuralLayout import *
@@ -210,17 +210,13 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             self.modelHasIntFires = True
 
     def addGLWindow(self):
-	self.layoutWidget = updatepaintGL(self.centralwidget)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.centralwidget.sizePolicy().hasHeightForWidth())
-        self.layoutWidget.setSizePolicy(sizePolicy)
-        self.layoutWidget.setObjectName("layoutWidget")
-        self.horizontalLayout.addWidget(self.layoutWidget)
-        self.centralwidget.setSizePolicy(sizePolicy)
-        self.centralwidget.setObjectName("layoutWidget")
-        self.centralwidget.show()
+	vizWindow = newGLSubWindow()
+        vizWindow.setWindowTitle("GL Window")
+        vizWindow.setObjectName("GLWindow")
+        self.mdiArea.addSubWindow(vizWindow)
+        self.layoutWidget = updatepaintGL(parent=vizWindow)
+        self.layoutWidget.setObjectName('Layout')
+        vizWindow.setWidget(self.layoutWidget)
 
         QtCore.QObject.connect(self.layoutWidget,QtCore.SIGNAL('compartmentSelected(QString)'),self.pickCompartment)
         self.updateCanvas()
@@ -274,14 +270,23 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         QtGui.QWidget.resizeEvent(self, event)
 
     def addKKITLayoutWindow(self,modelpath):
-        centralWindowsize =  self.layoutWidget.size()
-        layout = QtGui.QHBoxLayout(self.layoutWidget)
-        self.sceneLayout = kineticlayout.kineticsWidget(centralWindowsize,modelpath,self.layoutWidget)
-        self.sceneLayout.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Expanding))
+        centralWindowsize =  self.mdiArea.size()
+        self.sceneLayout = kineticlayout.kineticsWidget(centralWindowsize,modelpath,self.mdiArea)
         self.connect(self.sceneLayout, QtCore.SIGNAL("itemDoubleClicked(PyQt_PyObject)"), self.makeObjectFieldEditor)
-        layout.addWidget(self.sceneLayout)
-        self.layoutWidget.setLayout(layout)
+        KKitWindow = self.mdiArea.addSubWindow(self.sceneLayout)
+        KKitWindow.setWindowTitle("KKit Layout")
+        KKitWindow.setObjectName("KKitLayout")
         self.sceneLayout.show()
+
+
+        # centralWindowsize =  self.layoutWidget.size()
+        # layout = QtGui.QHBoxLayout(self.layoutWidget)
+        # self.sceneLayout = kineticlayout.kineticsWidget(centralWindowsize,modelpath,self.layoutWidget)
+        # self.sceneLayout.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Expanding))
+        # self.connect(self.sceneLayout, QtCore.SIGNAL("itemDoubleClicked(PyQt_PyObject)"), self.makeObjectFieldEditor)
+        # layout.addWidget(self.sceneLayout)
+        # self.layoutWidget.setLayout(layout)
+        # self.sceneLayout.show()
 
         #property editor dock related
     def refreshObjectEditor(self,item,number):
@@ -374,7 +379,8 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         else:
             #no previous mooseplotwin - so create, and add table to corresp dict
             self.plotWindowFieldTableDict[str(self.plotConfigWinSelectionComboBox.currentText())] = [newTable]
-            plotWin = MoosePlotWindow(self)
+            plotWin = newPlotSubWindow(self)
+            self.mdiArea.addSubWindow(plotWin)
             plotWin.setWindowTitle(str(self.plotConfigWinSelectionComboBox.currentText()))
 
             #do not like the legends shown in the plots, change the field 2 below
@@ -458,7 +464,8 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         graphs = self.getKKitGraphs(path) #clocks are assigned in the script itself!
         #currently putting all plots on Plot Window 1 by default - perhaps not the nicest way to do it.
         self.plotWindowFieldTableDict['Plot Window 1'] = graphs
-        plotWin = MoosePlotWindow(self)
+        plotWin = newPlotSubWindow(self)
+        self.mdiArea.addSubWindow(plotWin)
         plotWin.setWindowTitle('Plot Window 1')
         for graph in graphs:
             plotWin.plot.addTable(graph,graph.getField('name'))
