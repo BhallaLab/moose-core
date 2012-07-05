@@ -137,6 +137,7 @@ class MooseHandler(QtCore.QObject):
         self._portPathMap = {}
         self._pathPortMap = defaultdict(set)
         self._portServerMap = {}
+        self.stopSimulation = 0
     
     def getCurrentTime(self):
         clock = moose.element('/clock')
@@ -314,11 +315,11 @@ class MooseHandler(QtCore.QObject):
         if MooseHandler.runtime < MooseHandler.plotupdate_dt:
             moose.start(MooseHandler.runtime)
         else:
-            while next_stop <= MooseHandler.runtime:
+            while (next_stop <= MooseHandler.runtime) and (self.stopSimulation == 0):
                 moose.start(MooseHandler.plotupdate_dt)
                 next_stop = next_stop + MooseHandler.plotupdate_dt
                 self.emit(QtCore.SIGNAL('updatePlots(float)'), self.getCurrentTime())
-            if self.getCurrentTime() < continueTime:
+            if (self.getCurrentTime() < continueTime) and (self.stopSimulation == 0):
                 time_left = continueTime - self.getCurrentTime()
                 moose.start(time_left)
                 self.emit(QtCore.SIGNAL('updatePlots(float)'), self.getCurrentTime())          

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>799</width>
+    <width>980</width>
     <height>948</height>
    </rect>
   </property>
@@ -19,6 +19,12 @@
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
        <widget class="QWidget" name="layoutWidget" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="maximumSize">
          <size>
           <width>16777215</width>
@@ -42,7 +48,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>799</width>
+     <width>980</width>
      <height>25</height>
     </rect>
    </property>
@@ -198,6 +204,7 @@
     <addaction name="actionRun"/>
     <addaction name="actionReset"/>
     <addaction name="actionContinue"/>
+    <addaction name="actionStop"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuRun"/>
@@ -222,14 +229,35 @@
    <widget class="QWidget" name="mooseObjectEditDockContents">
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
-      <widget class="ObjectEditView" name="mTable" native="true">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-      </widget>
+      <layout class="QHBoxLayout" name="horizontalLayout_25">
+       <item>
+        <widget class="QLabel" name="propEditorSelectionNameLabel">
+         <property name="text">
+          <string>None</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_21">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="propEditorSelParentPushButton">
+         <property name="text">
+          <string>Select Parent</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_21">
@@ -253,13 +281,6 @@
          </property>
         </spacer>
        </item>
-       <item>
-        <widget class="QPushButton" name="propEditorSelParentPushButton">
-         <property name="text">
-          <string>Select Parent</string>
-         </property>
-        </widget>
-       </item>
       </layout>
      </item>
      <item>
@@ -281,6 +302,40 @@
        </property>
        <property name="alternatingRowColors">
         <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_24">
+       <item>
+        <widget class="QLabel" name="label_19">
+         <property name="text">
+          <string>Properties</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_20">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="ObjectEditView" name="mTable" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
       </widget>
      </item>
@@ -823,7 +878,7 @@
        <item>
         <widget class="QPushButton" name="plotConfigAcceptPushButton">
          <property name="text">
-          <string>Okay</string>
+          <string>Show</string>
          </property>
         </widget>
        </item>
@@ -934,32 +989,25 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="simControlResetPushButton">
-         <property name="text">
-          <string>Reset</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QPushButton" name="simControlContinuePushButton">
          <property name="text">
           <string>Continue</string>
          </property>
         </widget>
        </item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_22">
        <item>
-        <widget class="QLabel" name="label_16">
+        <widget class="QPushButton" name="simControlResetPushButton">
          <property name="text">
-          <string>Current Time: </string>
+          <string>Reset</string>
          </property>
         </widget>
        </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_23">
        <item>
-        <spacer name="horizontalSpacer_15">
+        <spacer name="horizontalSpacer_19">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -970,6 +1018,37 @@
           </size>
          </property>
         </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="simControlStopPushButton">
+         <property name="text">
+          <string>Stop</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_22">
+       <item>
+        <spacer name="horizontalSpacer_15">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>10</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_16">
+         <property name="text">
+          <string>Current Time: </string>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QLabel" name="simControlCurrentTimeLabel">
@@ -1397,6 +1476,11 @@
   <action name="actionContinue">
    <property name="text">
     <string>Continue</string>
+   </property>
+  </action>
+  <action name="actionStop">
+   <property name="text">
+    <string>Stop</string>
    </property>
   </action>
   <zorder>moosePopulationEditDock</zorder>

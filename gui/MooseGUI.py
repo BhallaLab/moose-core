@@ -63,12 +63,17 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.plotConfigAcceptPushButton.setEnabled(False)
         self.plotWindowFieldTableDict = {} #guiPlotWinowName:[mooseTable]
         self.plotNameWinDict = {} #guiPlotWindowName:moosePlotWindow
+        
 
-        #do not show other docks
         self.defaultDockState()
-
+#        self.resizeCentralWidgets()
         #connections
         self.connectElements()
+
+#    def resizeCentralWidgets(self):
+#        widthOfEach =  int((self.layoutWidget.width()+self.plotMdiArea.width())/2)
+#        self.layoutWidget.resize(widthOfEach, self.layoutWidget.height())
+#        self.plotMdiArea.resize(widthOfEach, self.layoutWidget.height())
 
     def defaultDockState(self):
         #this will eventually change corresponding to the "mode" of operation - Edit/Plot/Run
@@ -99,7 +104,9 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.connect(self.actionContinue,QtCore.SIGNAL('triggered()'),self._continueSlot)
         self.connect(self.simControlResetPushButton, QtCore.SIGNAL('clicked()'), self._resetSlot)
         self.connect(self.actionReset,QtCore.SIGNAL('triggered()'),self._resetSlot)
-
+        self.connect(self.actionStop,QtCore.SIGNAL('triggered()'),self._stopSlot)
+        self.connect(self.simControlStopPushButton, QtCore.SIGNAL('clicked()'),self._stopSlot)
+        
     def popupLoadModelDialog(self):
         fileDialog = QtGui.QFileDialog(self)
         fileDialog.setFileMode(QtGui.QFileDialog.ExistingFile)
@@ -281,6 +288,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.makeObjectFieldEditor(item.getMooseObject())
 
     def makeObjectFieldEditor(self, obj):
+        self.propEditorSelectionNameLabel.setText(str(obj.getField('name')))
         if obj.class_ == 'Shell' or obj.class_ == 'PyMooseContext' or obj.class_ == 'GenesisParser':
             print '%s of class %s is a system object and not to be edited in object editor.' % (obj.path, obj.class_)
             return
@@ -311,8 +319,8 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.propEditorChildrenIdDict = {}
         self.propEditorChildListWidget.clear()
 
-        self.propEditorChildListWidget.addItem(obj.getField('name'))
-        self.propEditorChildrenIdDict[obj.getField('name')] = obj.getId()
+#        self.propEditorChildListWidget.addItem(obj.getField('name'))
+#        self.propEditorChildrenIdDict[obj.getField('name')] = obj.getId()
 
         for child in allChildren:
             self.propEditorChildrenIdDict[moose.Neutral(child).getField('name')] = child
@@ -326,6 +334,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.updateCurrentTime(currentTime)
         if self.modelHasCompartments or self.modelHasIntFires:
             self.updateVisualization()
+        QtCore.QCoreApplication.processEvents() 
 
     def updatePlotDockFields(self,obj):
         #add plot-able elements according to predefined  
@@ -388,6 +397,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         QtGui.qApp.closeAllWindows()
 
     def _resetAndRunSlot(self): #called when run is pressed
+        self.mooseHandler.stopSimulation = 0
         try:
             runtime = float(str(self.simControlRunTimeLineEdit.text()))
         except ValueError:
@@ -398,7 +408,11 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.simControlPlotdtLineEdit.setEnabled(False)
         self.simControlUpdatePlotdtLineEdit.setEnabled(False)
 
+    def _stopSlot(self):
+        self.mooseHandler.stopSimulation = 1
+    
     def _resetSlot(self): #called when reset is pressed
+        self.mooseHandler.stopSimulation = 0
         try:
             runtime = float(str(self.simControlRunTimeLineEdit.text()))
         except ValueError:
@@ -411,6 +425,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.simControlUpdatePlotdtLineEdit.setEnabled(True)
 
     def _continueSlot(self): #called when continue is pressed
+        self.mooseHandler.stopSimulation = 0
         try:
             runtime = float(str(self.simControlRunTimeLineEdit.text()))
         except ValueError:
