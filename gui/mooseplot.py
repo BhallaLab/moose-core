@@ -93,7 +93,6 @@ class MoosePlot(MyMplCanvas):
         self.axes.relim()
         self.axes.autoscale_view(True,True,True)
         self.axes.figure.canvas.draw()
-        QtCore.QCoreApplication.processEvents() #updation of plots
 
     def reset(self):
         table_list = []
