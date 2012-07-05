@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Apr 18 00:18:24 2009 (+0530)
 # Version: 
-# Last-Updated: Mon May 28 15:29:10 2012 (+0530)
+# Last-Updated: Thu Jul  5 11:20:11 2012 (+0530)
 #           By: subha
-#     Update #: 292
+#     Update #: 293
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -35,6 +35,7 @@ from channelbase import *
 
 class CaChannel(ChannelBase):
     """Base class for Ca channels."""
+    annotation = {'cno': 'cno:cno_0000105'}
     abstract = True
     Ek = 125e-3
     Xpower = 2
