@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Apr 27 15:34:07 2009 (+0530)
 # Version: 
-# Last-Updated: Mon May 28 15:29:20 2012 (+0530)
+# Last-Updated: Thu Jul  5 11:20:26 2012 (+0530)
 #           By: subha
-#     Update #: 47
+#     Update #: 48
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -37,6 +37,7 @@ from channelbase import *
 
 class AR(ChannelBase):
     """Combined cation current."""
+    annotation = {'cno': 'cno:cno_0000105'}
     abstract = False
     Xpower = 1
     inf_x  = 1 / ( 1 + exp( ( v_array * 1e3 + 75 ) / 5.5 ) )
