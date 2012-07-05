@@ -14,13 +14,19 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
    <layout class="QHBoxLayout" name="horizontalLayout_6">
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
        <widget class="QWidget" name="layoutWidget" native="true">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -252,6 +258,12 @@
        </item>
        <item>
         <widget class="QPushButton" name="propEditorSelParentPushButton">
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>23</height>
+          </size>
+         </property>
          <property name="text">
           <string>Select Parent</string>
          </property>
@@ -816,7 +828,20 @@
         </spacer>
        </item>
        <item>
-        <widget class="QComboBox" name="plotConfigFieldSelectionComboBox"/>
+        <widget class="QComboBox" name="plotConfigFieldSelectionComboBox">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>23</height>
+          </size>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>
@@ -844,6 +869,18 @@
        </item>
        <item>
         <widget class="QComboBox" name="plotConfigWinSelectionComboBox">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>23</height>
+          </size>
+         </property>
          <item>
           <property name="text">
            <string>Plot Window 1</string>
@@ -857,6 +894,18 @@
       <layout class="QHBoxLayout" name="horizontalLayout_18">
        <item>
         <widget class="QPushButton" name="plotConfigNewWindowPushButton">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>23</height>
+          </size>
+         </property>
          <property name="text">
           <string>New Plot Window</string>
          </property>
@@ -877,6 +926,18 @@
        </item>
        <item>
         <widget class="QPushButton" name="plotConfigAcceptPushButton">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>23</height>
+          </size>
+         </property>
          <property name="text">
           <string>Show</string>
          </property>
@@ -944,7 +1005,7 @@
        <item row="0" column="0">
         <widget class="QLabel" name="label_18">
          <property name="text">
-          <string>Run Time</string>
+          <string>Run Time:</string>
          </property>
         </widget>
        </item>
@@ -983,6 +1044,12 @@
        </item>
        <item>
         <widget class="QPushButton" name="simControlRunPushButton">
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>23</height>
+          </size>
+         </property>
          <property name="text">
           <string>Run</string>
          </property>
@@ -990,6 +1057,12 @@
        </item>
        <item>
         <widget class="QPushButton" name="simControlContinuePushButton">
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>23</height>
+          </size>
+         </property>
          <property name="text">
           <string>Continue</string>
          </property>
@@ -997,6 +1070,12 @@
        </item>
        <item>
         <widget class="QPushButton" name="simControlResetPushButton">
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>23</height>
+          </size>
+         </property>
          <property name="text">
           <string>Reset</string>
          </property>
@@ -1006,6 +1085,13 @@
      </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_23">
+       <item>
+        <widget class="QLabel" name="label_16">
+         <property name="text">
+          <string>Current Time: </string>
+         </property>
+        </widget>
+       </item>
        <item>
         <spacer name="horizontalSpacer_19">
          <property name="orientation">
@@ -1020,7 +1106,20 @@
         </spacer>
        </item>
        <item>
+        <widget class="QLabel" name="simControlCurrentTimeLabel">
+         <property name="text">
+          <string>0.0</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="simControlStopPushButton">
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>23</height>
+          </size>
+         </property>
          <property name="text">
           <string>Stop</string>
          </property>
@@ -1043,20 +1142,6 @@
          </property>
         </spacer>
        </item>
-       <item>
-        <widget class="QLabel" name="label_16">
-         <property name="text">
-          <string>Current Time: </string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="simControlCurrentTimeLabel">
-         <property name="text">
-          <string>0.0</string>
-         </property>
-        </widget>
-       </item>
       </layout>
      </item>
      <item>
@@ -1075,6 +1160,7 @@
     </layout>
    </widget>
   </widget>
+  <widget class="QStatusBar" name="statusBar"/>
   <action name="actionLoad_Model">
    <property name="text">
     <string>Load Model</string>
