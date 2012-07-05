@@ -15,24 +15,32 @@ import os
 class MyMplCanvas(FigureCanvas):
     """Ultimately, this is a QWidget (as well as a FigureCanvasAgg, etc.)."""
     def __init__(self, parent=None, width=5, height=5, dpi=100):
-        fig = Figure(figsize=(width, height), dpi=dpi)
+        self.fig = Figure(figsize=(width, height), dpi=dpi)
+        self.fig.set_size_inches(width,height,forward=True)
 
         self.xmin = 100.1
 
-        self.axes = fig.add_subplot(111)
+        self.axes = self.fig.add_subplot(111)
         self.axes.set_navigate(True)
         self.axes.hold(True)
         self.axes.set_xlabel('Time (s)')
         self.axes.set_ylabel('Value')
 
         self.compute_initial_figure()
-        FigureCanvas.__init__(self, fig)
+        FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
 
         FigureCanvas.setSizePolicy(self,
                                    QtGui.QSizePolicy.Expanding,
                                    QtGui.QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
+
+    def sizeHint(self):
+        w, h = self.get_width_height()
+        return QSize(w, h)
+
+    def minimumSizeHint(self):
+        return QSize(10, 10)
 
     def compute_initial_figure(self):
         pass
@@ -50,7 +58,8 @@ class MoosePlot(MyMplCanvas):
         self.curveTableMap = {}
         self.tableCurveMap = {}
         self.mpl_connect('pick_event',self.onpick)
-        
+
+
     def onpick(self,event):
         ind=event.ind[0]
         print self._labels[ind]
@@ -151,6 +160,37 @@ class MoosePlotWindow(QtGui.QMainWindow):
     def closeEvent(self, event):
         self.emit(QtCore.SIGNAL('windowClosed()'))
         self.hide()
+
+class newPlotSubWindow(QtGui.QMdiSubWindow):
+
+    def __init__(self, *args):
+        QtGui.QMdiSubWindow.__init__(self, *args)
+#        print self.height(),self.width(),float(self.width()*0.38,float(self.height()*0.38
+        self.verticalLayout = QtGui.QVBoxLayout(self)
+        self.verticalLayout.setObjectName("verticalLayout")
+
+        self.plot = MoosePlot(self,width=7,height=7)#, width=float(self.width()*0.38, height=float(self.height()*0.38)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.plot.sizePolicy().hasHeightForWidth())
+        self.plot.setSizePolicy(sizePolicy)
+        self.plot.setObjectName("plot")
+        self.setSizePolicy(sizePolicy)
+
+        self.verticalLayout.addWidget(self.plot)
+        # qToolBar = QtGui.QToolBar()
+        # self.toolbar = NavigationToolbar(self.plot, qToolBar)
+        # qToolBar.addWidget(self.toolbar)
+        # qToolBar.setMovable(False)
+        # qToolBar.setFloatable(False)
+        # self.addToolBar(Qt.BottomToolBarArea, qToolBar)
+
+        
+    def closeEvent(self, event):
+        self.emit(QtCore.SIGNAL('subWindowClosed()'))
+        self.hide()
+
         
 
 import sys
