@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Thu Jul  7 12:16:55 2011 (+0530)
 // Version: 
-// Last-Updated: Mon Jul 11 15:08:36 2011 (+0530)
+// Last-Updated: Thu Jul  5 21:08:07 2012 (+0530)
 //           By: Subhasis Ray
-//     Update #: 168
+//     Update #: 169
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -180,7 +180,8 @@ const Cinfo* LeakyIaF::initCinfo()
             &tSpike,
             &proc,					// SharedFinfo
             spike(), 		// MsgSrc
-            VmOut()
+            VmOut(),
+            &injectDest,            
 	};
 
 	static Cinfo leakyIaFCinfo (
