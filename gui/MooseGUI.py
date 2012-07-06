@@ -81,9 +81,11 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.mooseLibraryDock.setVisible(False)
         self.mooseConnectDock.setVisible(False)
         self.mooseShellDockWidget.setVisible(False)
+        self.menuHelp.setVisible(False)
         self.menuHelp.setEnabled(False)
-        self.menuView.setEnabled(False)
+        self.menuView.setEnabled(True)
         self.menuClasses.setEnabled(False)
+        self.menuClasses.setVisible(False)
 
     def connectElements(self):
         #gui connections
