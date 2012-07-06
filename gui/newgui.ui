@@ -906,13 +906,13 @@
           </size>
          </property>
          <property name="toolTip">
-          <string>New plot Window</string>
+          <string>Create plot tab</string>
          </property>
          <property name="statusTip">
           <string/>
          </property>
          <property name="text">
-          <string>New Plot Window</string>
+          <string>Create plot tab</string>
          </property>
         </widget>
        </item>
@@ -944,7 +944,7 @@
           </size>
          </property>
          <property name="text">
-          <string>Show</string>
+          <string>Create plot</string>
          </property>
         </widget>
        </item>
