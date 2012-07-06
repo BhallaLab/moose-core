@@ -156,15 +156,18 @@
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="enabled">
-     <bool>false</bool>
+     <bool>true</bool>
     </property>
     <property name="title">
      <string>View</string>
     </property>
-    <addaction name="actionMoose_Tree"/>
     <addaction name="actionMoose_Shell"/>
-    <addaction name="actionObject_Editor"/>
+    <addaction name="actionProperty_Editor"/>
     <addaction name="actionSimulation_Control"/>
+    <addaction name="actionPlot_Config"/>
+    <addaction name="separator"/>
+    <addaction name="actionViewAsSubWindows"/>
+    <addaction name="actionViewAsTabs"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="enabled">
@@ -1131,6 +1134,26 @@
    </widget>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QDockWidget" name="mooseShellDockWidget">
+   <property name="windowTitle">
+    <string>Shell</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_6">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPlainTextEdit" name="mooseShellPlainTextEdit">
+       <property name="plainText">
+        <string>Python
+&gt;&gt;&gt;</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
   <action name="actionLoad_Model">
    <property name="text">
     <string>Load Model</string>
@@ -1456,12 +1479,18 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Moose Shell</string>
    </property>
   </action>
-  <action name="actionObject_Editor">
+  <action name="actionProperty_Editor">
    <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
     <bool>true</bool>
    </property>
    <property name="text">
@@ -1470,6 +1499,9 @@
   </action>
   <action name="actionSimulation_Control">
    <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
     <bool>true</bool>
    </property>
    <property name="text">
@@ -1539,9 +1571,40 @@
     <string>Stop</string>
    </property>
   </action>
+  <action name="actionPlot_Config">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Plot Config</string>
+   </property>
+  </action>
+  <action name="actionViewAsSubWindows">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Sub Windows</string>
+   </property>
+  </action>
+  <action name="actionViewAsTabs">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Tabs</string>
+   </property>
+  </action>
   <zorder>moosePopulationEditDock</zorder>
   <zorder>plotConfigDockWidget</zorder>
   <zorder>simControlDockWidget</zorder>
+  <zorder>mooseShellDockWidget</zorder>
  </widget>
  <customwidgets>
   <customwidget>

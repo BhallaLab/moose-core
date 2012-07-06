@@ -80,7 +80,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.moosePopulationEditDock.setVisible(False)
         self.mooseLibraryDock.setVisible(False)
         self.mooseConnectDock.setVisible(False)
-
+        self.mooseShellDockWidget.setVisible(False)
         self.menuHelp.setEnabled(False)
         self.menuView.setEnabled(False)
         self.menuClasses.setEnabled(False)
@@ -106,7 +106,44 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.connect(self.actionReset,QtCore.SIGNAL('triggered()'),self._resetSlot)
         self.connect(self.actionStop,QtCore.SIGNAL('triggered()'),self._stopSlot)
         self.connect(self.simControlStopPushButton, QtCore.SIGNAL('clicked()'),self._stopSlot)
-        
+
+        self.connect(self.actionMoose_Shell,QtCore.SIGNAL('triggered(bool)'),self.toggleMooseShellDockVisibility)
+        self.connect(self.actionProperty_Editor,QtCore.SIGNAL('triggered(bool)'),self.togglePropEditorDockVisibility)
+        self.connect(self.actionPlot_Config,QtCore.SIGNAL('triggered(bool)'),self.togglePlotConfigDockVisibility)
+        self.connect(self.actionSimulation_Control,QtCore.SIGNAL('triggered(bool)'),self.toggleSimControlDoctVisibility)
+        self.connect(self.actionViewAsTabs,QtCore.SIGNAL('triggered(bool)'),self.switchTabbedView)
+        self.connect(self.actionViewAsSubWindows,QtCore.SIGNAL('triggered(bool)'),self.switchSubWindowView) 
+
+    def toggleMooseShellDockVisibility(self, checked):
+        self.mooseShellDockWidget.setVisible(checked)
+
+    def togglePropEditorDockVisibility(self, checked):
+        self.mooseObjectEditDock.setVisible(checked)
+            
+    def togglePlotConfigDockVisibility(self, checked):
+        self.plotConfigDockWidget.setVisible(checked)
+
+    def toggleSimControlDoctVisibility(self, checked):
+        self.simControlDockWidget.setVisible(checked)
+
+    def switchSubWindowView(self, checked):
+        self.actionViewAsTabs.setChecked(not checked)
+        self.actionViewAsSubWindows.setChecked(checked)
+        if checked:
+            self.mdiArea.setViewMode(self.mdiArea.SubWindowView)
+            self.mdiArea.cascadeSubWindows()
+        else:
+            self.mdiArea.setViewMode(self.mdiArea.TabbedView)
+
+    def switchTabbedView(self, checked):
+        self.actionViewAsTabs.setChecked(checked)
+        self.actionViewAsSubWindows.setChecked(not checked)
+        if checked:
+            self.mdiArea.setViewMode(self.mdiArea.TabbedView)
+        else:
+            self.mdiArea.setViewMode(self.mdiArea.SubWindowView)
+            self.mdiArea.casadeSubWindows()
+     
     def popupLoadModelDialog(self):
         fileDialog = QtGui.QFileDialog(self)
         fileDialog.setFileMode(QtGui.QFileDialog.ExistingFile)
@@ -380,6 +417,8 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             #no previous mooseplotwin - so create, and add table to corresp dict
             self.plotWindowFieldTableDict[str(self.plotConfigWinSelectionComboBox.currentText())] = [newTable]
             plotWin = newPlotSubWindow(self)
+            #plotWin = MoosePlotWindow()
+            #plot = MoosePlot(plotWindow)
             self.mdiArea.addSubWindow(plotWin)
             plotWin.setWindowTitle(str(self.plotConfigWinSelectionComboBox.currentText()))
 
@@ -465,7 +504,12 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         #currently putting all plots on Plot Window 1 by default - perhaps not the nicest way to do it.
         self.plotWindowFieldTableDict['Plot Window 1'] = graphs
         plotWin = newPlotSubWindow(self)
+        #plotWin = MoosePlotWindow()
+        #plot = MoosePlot(plotWin)
+        #plot.setObjectName("plot")
+        #plotWin.setWidget(plot)
         self.mdiArea.addSubWindow(plotWin)
+        self.mdiArea.setActiveSubWindow(plotWin)
         plotWin.setWindowTitle('Plot Window 1')
         for graph in graphs:
             plotWin.plot.addTable(graph,graph.getField('name'))
