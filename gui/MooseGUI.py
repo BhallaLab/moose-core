@@ -54,6 +54,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.modelHasCompartments = False
         self.modelHasIntFires = False
         self.modelPathsModelTypeDict = {}
+        self.activeWindow = 'None'
         #prop Editor variables
         self.propEditorCurrentSelection = None
         self.propEditorChildrenIdDict = {}
@@ -100,8 +101,11 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         #internal connections
         self.connect(self.mooseHandler, QtCore.SIGNAL('updatePlots(float)'), self.updatePlots)
         #run
+        self.connect(self.simControlRunPushButton,QtCore.SIGNAL('clicked()'),self.activeMdiWindow)
         self.connect(self.simControlRunPushButton, QtCore.SIGNAL('clicked()'), self._resetAndRunSlot)
+        self.connect(self.actionRun,QtCore.SIGNAL('triggered()'),self.activeMdiWindow)
         self.connect(self.actionRun,QtCore.SIGNAL('triggered()'),self._resetAndRunSlot)
+
         self.connect(self.simControlContinuePushButton, QtCore.SIGNAL('clicked()'), self._continueSlot)
         self.connect(self.actionContinue,QtCore.SIGNAL('triggered()'),self._continueSlot)
         self.connect(self.simControlResetPushButton, QtCore.SIGNAL('clicked()'), self._resetSlot)
@@ -142,6 +146,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.actionViewAsSubWindows.setChecked(not checked)
         if checked:
             self.mdiArea.setViewMode(self.mdiArea.TabbedView)
+
         else:
             self.mdiArea.setViewMode(self.mdiArea.SubWindowView)
             self.mdiArea.casadeSubWindows()
@@ -254,6 +259,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         vizWindow.setWindowTitle("GL Window")
         vizWindow.setObjectName("GLWindow")
         self.mdiArea.addSubWindow(vizWindow)
+        self.mdiArea.setActiveSubWindow(vizWindow)
         self.layoutWidget = updatepaintGL(parent=vizWindow)
         self.layoutWidget.setObjectName('Layout')
         vizWindow.setWidget(self.layoutWidget)
@@ -316,9 +322,8 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         KKitWindow = self.mdiArea.addSubWindow(self.sceneLayout)
         KKitWindow.setWindowTitle("KKit Layout")
         KKitWindow.setObjectName("KKitLayout")
+        self.activeWindow = KKitWindow
         self.sceneLayout.show()
-
-
         # centralWindowsize =  self.layoutWidget.size()
         # layout = QtGui.QHBoxLayout(self.layoutWidget)
         # self.sceneLayout = kineticlayout.kineticsWidget(centralWindowsize,modelpath,self.layoutWidget)
@@ -512,13 +517,18 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         #plot.setObjectName("plot")
         #plotWin.setWidget(plot)
         self.mdiArea.addSubWindow(plotWin)
-        self.mdiArea.setActiveSubWindow(plotWin)
+        #self.mdiArea.setActiveSubWindow(plotWin)
         plotWin.setWindowTitle('Plot Window 1')
+        #hLayout.add
         for graph in graphs:
             plotWin.plot.addTable(graph,graph.getField('name'))
         plotWin.show()
         self.plotNameWinDict['Plot Window 1'] = plotWin
+        self.mdiArea.setActiveSubWindow(self.activeWindow)
+        self.activeWindow = plotWin
 
+    def activeMdiWindow(self):
+        self.mdiArea.setActiveSubWindow(self.activeWindow)
     def getKKitGraphs(self,path):
         tableList = []
         for child in moose.wildcardFind(path+'/graphs/#/##[TYPE=Table],'+path+'/moregraphs/#/##[TYPE=Table]'):
