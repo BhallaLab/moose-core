@@ -77,7 +77,42 @@
                 <bio:mechanism name="Gran_CaPool_98" type="Ion Concentration">    <!--Note: not adding gmax for Ion Concentration. 
 Value for scaling factor to apply to current to get change in conc should be
  determined from ChannelML file for the CaPool...-->
+                </bio:mechanism>
 
+                <bio:mechanism name="Golgi_CaLVA" type="Channel Mechanism">
+                    <bio:parameter name="gmax" value="0.0">
+                        <bio:group>all</bio:group>
+                    </bio:parameter>
+                </bio:mechanism>
+
+                <bio:mechanism name="Golgi_CaHVA" type="Channel Mechanism">
+                    <bio:parameter name="gmax" value="0.0">
+                        <bio:group>all</bio:group>
+                    </bio:parameter>
+                </bio:mechanism>
+
+                <bio:mechanism name="Pyramidal_KM" type="Channel Mechanism">
+                    <bio:parameter name="gmax" value="0.0">
+                        <bio:group>all</bio:group>
+                    </bio:parameter>
+                </bio:mechanism>
+
+                <bio:mechanism name="Traub_KCaAHP" type="Channel Mechanism">
+                    <bio:parameter name="gmax" value="0.0">
+                        <bio:group>all</bio:group>
+                    </bio:parameter>
+                </bio:mechanism>
+
+                <bio:mechanism name="Traub_KA" type="Channel Mechanism">
+                    <bio:parameter name="gmax" value="0.0">
+                        <bio:group>all</bio:group>
+                    </bio:parameter>
+                </bio:mechanism>
+
+                <bio:mechanism name="Traub_NaP" type="Channel Mechanism">
+                    <bio:parameter name="gmax" value="0.0">
+                        <bio:group>all</bio:group>
+                    </bio:parameter>
                 </bio:mechanism>
 
                 <bio:spec_capacitance>
