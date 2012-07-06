@@ -89,6 +89,7 @@ class Textitem(QtGui.QGraphicsTextItem):
 class GraphicalView(QtGui.QGraphicsView):
     def __init__(self,parent,border):
         QtGui.QGraphicsView.__init__(self,parent)
+        #print '$$',parent,parent.sceneRect()
         self.setScene(parent)
         self.sceneContainerPt = parent
         self.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
@@ -99,8 +100,13 @@ class GraphicalView(QtGui.QGraphicsView):
         self.moved = False
         self.showpopupmenu = False
         self.border = 10
-
-    
+    ''' Need to check resize evenet v/s fitinview '''
+    '''
+    def resizeEvent(self, event):
+        """ zoom when resize! """
+        self.fitInView(self.sceneContainerPt.sceneRect(), Qt.Qt.IgnoreAspectRatio)
+        QtGui.QGraphicsView.resizeEvent(self, event)
+   ''' 
     def mousePressEvent(self, event):
         if event.buttons() == QtCore.Qt.LeftButton:
             self.startingPos = event.pos()
@@ -227,11 +233,12 @@ class kineticsWidget(QtGui.QWidget):
     def __init__(self,size,modelPath,parent=None):
         QtGui.QWidget.__init__(self,parent)
         self.border = 10
+        #print "size",size
         hLayout = QtGui.QGridLayout(self)
         self.setLayout(hLayout)
         self.sceneContainer = QtGui.QGraphicsScene(self)
         self.sceneContainer.setBackgroundBrush(QtGui.QColor(230,220,219,120))
-        
+        self.view = GraphicalView(self.sceneContainer,self.border)
         cmptMol = {}
         self.setupCompt(modelPath,cmptMol)
         #for k,v in cmptMol.items(): print k,v
@@ -240,7 +247,7 @@ class kineticsWidget(QtGui.QWidget):
         zombieType = ['ZombieReac','ZombieEnz','ZombieMMenz','ZombieSumFunc']
         self.setupItem(modelPath,zombieType,srcdesConnection)
         #for k,v in srcdesConnection.items(): print k,v
-        G = pgv.AGraph(fontname='Helvetica',fontsize=9,strict=False,directed=None)
+        G = pgv.AGraph(fontname='Helvetica',fontsize='12',strict=False,directed=None)
 
         #pickled the color map here and loading the file
         pkl_file = open(os.path.join(PATH_KKIT_COLORMAPS,'rainbow2.pkl'),'rb')
@@ -264,7 +271,7 @@ class kineticsWidget(QtGui.QWidget):
                         bgcolor = Annotator(iteminfo).getField('color')
                         textcolor = Annotator(iteminfo).getField('textColor')
                     textcolor,bgcolor = self.colorCheck(item,textcolor,bgcolor,picklecolorMap)
-                    G.add_node(item.path,label=item.getField('name'),shape='box',color=bgcolor,style='filled',fontname='Helvetica',fontsize=9,fontcolor=textcolor)
+                    G.add_node(item.path,label=item.getField('name'),shape='box',color=bgcolor,style='filled',fontname='Helvetica',fontsize='12',fontcolor=textcolor)
         
         #creating edge
         for inn,out in srcdesConnection.items():
@@ -282,7 +289,7 @@ class kineticsWidget(QtGui.QWidget):
 
         G.layout(prog='dot')
         filename = modelPath.lstrip('/')
-        G.draw(os.getcwd()+'/'+filename+'.png',prog='dot',format='png')
+        #G.draw(os.getcwd()+'/'+filename+'.png',prog='dot',format='png')
         graphCord = {}
         self.qGraCompt = {}
         self.mooseId_GText = {}
@@ -343,12 +350,11 @@ class kineticsWidget(QtGui.QWidget):
                     src = self.mooseId_GText[inn.getId()]
                     des = self.mooseId_GText[items.getId()]
                     self.lineCord(src,des,inn)
-
-        self.view = GraphicalView(self.sceneContainer,self.border)
+        #self.view.fitInView(self.sceneContainer.sceneRect().x()-10,self.sceneContainer.sceneRect().y()-10,self.sceneContainer.sceneRect().width()+20,self.sceneContainer.sceneRect().height()+20,Qt.Qt.IgnoreAspectRatio)
         self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
-        self.view.show()
         hLayout.addWidget(self.view)
-
+        #self.view.show()
+        
     #setting up compartments and its children    
     def setupCompt(self,modelPath,cmptmolDict):
         cPath = modelPath+'/##[TYPE=MeshEntry]'
@@ -579,11 +585,12 @@ class kineticsWidget(QtGui.QWidget):
             srcdes = self.lineItem_dict[ql]
             arrow = self.calArrow(srcdes[0],srcdes[1])
             ql.setPolygon(arrow)
-
+    
     def keyPressEvent(self,event):
         key = event.key()
         if key == QtCore.Qt.Key_A:
-            self.view.fitInView(self.sceneContainer.sceneRect().x()-10,self.sceneContainer.sceneRect().y()-10,self.sceneContainer.sceneRect().width()+20,self.sceneContainer.sceneRect().height()+20,Qt.Qt.IgnoreAspectRatio)
+            self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
+            #self.view.fitInView(self.sceneContainer.sceneRect().x()-10,self.sceneContainer.sceneRect().y()-10,self.sceneContainer.sceneRect().width()+20,self.sceneContainer.sceneRect().height()+20,Qt.Qt.IgnoreAspectRatio)
         elif (key == 46 or key == 62):
             self.view.scale(1.1,1.1)
         elif (key == 44 or key == 60):
@@ -591,7 +598,7 @@ class kineticsWidget(QtGui.QWidget):
     
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
-    size = QtCore.QSize(800,600)
+    size = QtCore.QSize(1800,1600)
     #modelPath = '68'
     modelPath = 'Osc_cspace_ref_model'
     loadModel('/home/harsha/dh_branch/Demos/Genesis_files/'+modelPath+'.g','/'+modelPath)
