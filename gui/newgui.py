@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'newgui.ui'
 #
-# Created: Fri Jul  6 12:19:29 2012
+# Created: Sat Jul  7 01:15:29 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -350,6 +350,7 @@ class Ui_MainWindow(object):
         self.plotConfigNewWindowPushButton = QtGui.QPushButton(self.dockWidgetContents_4)
         self.plotConfigNewWindowPushButton.setMinimumSize(QtCore.QSize(0, 0))
         self.plotConfigNewWindowPushButton.setMaximumSize(QtCore.QSize(16777215, 23))
+        self.plotConfigNewWindowPushButton.setStatusTip(_fromUtf8(""))
         self.plotConfigNewWindowPushButton.setObjectName(_fromUtf8("plotConfigNewWindowPushButton"))
         self.horizontalLayout_18.addWidget(self.plotConfigNewWindowPushButton)
         spacerItem17 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
@@ -766,8 +767,9 @@ class Ui_MainWindow(object):
         self.label_9.setText(QtGui.QApplication.translate("MainWindow", "Plot Field:", None, QtGui.QApplication.UnicodeUTF8))
         self.label_10.setText(QtGui.QApplication.translate("MainWindow", "Plot Window:", None, QtGui.QApplication.UnicodeUTF8))
         self.plotConfigWinSelectionComboBox.setItemText(0, QtGui.QApplication.translate("MainWindow", "Plot Window 1", None, QtGui.QApplication.UnicodeUTF8))
-        self.plotConfigNewWindowPushButton.setText(QtGui.QApplication.translate("MainWindow", "New Plot Window", None, QtGui.QApplication.UnicodeUTF8))
-        self.plotConfigAcceptPushButton.setText(QtGui.QApplication.translate("MainWindow", "Show", None, QtGui.QApplication.UnicodeUTF8))
+        self.plotConfigNewWindowPushButton.setToolTip(QtGui.QApplication.translate("MainWindow", "Create plot tab", None, QtGui.QApplication.UnicodeUTF8))
+        self.plotConfigNewWindowPushButton.setText(QtGui.QApplication.translate("MainWindow", "Create plot tab", None, QtGui.QApplication.UnicodeUTF8))
+        self.plotConfigAcceptPushButton.setText(QtGui.QApplication.translate("MainWindow", "Create plot", None, QtGui.QApplication.UnicodeUTF8))
         self.simControlDockWidget.setStatusTip(QtGui.QApplication.translate("MainWindow", "Set run time for the simulation", None, QtGui.QApplication.UnicodeUTF8))
         self.simControlDockWidget.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Simulation Control", None, QtGui.QApplication.UnicodeUTF8))
         self.label_13.setText(QtGui.QApplication.translate("MainWindow", "Simdt:", None, QtGui.QApplication.UnicodeUTF8))
