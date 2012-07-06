@@ -129,47 +129,61 @@ class MoosePlot(MyMplCanvas):
             print 'Saving', filename
             table.dumpFile(filename)
 
-class MoosePlotWindow(QtGui.QMainWindow):
+# class MoosePlotWindow(QtGui.QMainWindow):
 
+#     def __init__(self, *args):
+#         QtGui.QMainWindow.__init__(self, *args)
+
+#         self.resize(567, 497)
+#         self.centralwidget = QtGui.QWidget(self)
+#         self.centralwidget.setObjectName("centralwidget")
+#         self.verticalLayout = QtGui.QVBoxLayout(self.centralwidget)
+#         self.verticalLayout.setObjectName("verticalLayout")
+#         self.plot = MoosePlot(self.centralwidget)
+#         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+#         sizePolicy.setHorizontalStretch(0)
+#         sizePolicy.setVerticalStretch(0)
+#         sizePolicy.setHeightForWidth(self.plot.sizePolicy().hasHeightForWidth())
+#         self.plot.setSizePolicy(sizePolicy)
+#         self.plot.setObjectName("plot")
+
+#         qToolBar = QtGui.QToolBar()
+#         self.toolbar = NavigationToolbar(self.plot, qToolBar)
+#         qToolBar.addWidget(self.toolbar)
+#         qToolBar.setMovable(False)
+#         qToolBar.setFloatable(False)
+#         self.addToolBar(Qt.BottomToolBarArea, qToolBar)
+
+#         self.verticalLayout.addWidget(self.plot)
+#         self.setCentralWidget(self.centralwidget)
+        
+#     def closeEvent(self, event):
+#         self.emit(QtCore.SIGNAL('windowClosed()'))
+#         self.hide()
+
+class MoosePlotWindow(QtGui.QMdiSubWindow):
+    """This is to customize MDI sub window for our purpose.
+
+    In particular, we don't want anything to be deleted when the window is closed. 
+    
+    """
     def __init__(self, *args):
-        QtGui.QMainWindow.__init__(self, *args)
-
-        self.resize(567, 497)
-        self.centralwidget = QtGui.QWidget(self)
-        self.centralwidget.setObjectName("centralwidget")
-        self.verticalLayout = QtGui.QVBoxLayout(self.centralwidget)
-        self.verticalLayout.setObjectName("verticalLayout")
-        self.plot = MoosePlot(self.centralwidget)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.plot.sizePolicy().hasHeightForWidth())
-        self.plot.setSizePolicy(sizePolicy)
-        self.plot.setObjectName("plot")
-
-        qToolBar = QtGui.QToolBar()
-        self.toolbar = NavigationToolbar(self.plot, qToolBar)
-        qToolBar.addWidget(self.toolbar)
-        qToolBar.setMovable(False)
-        qToolBar.setFloatable(False)
-        self.addToolBar(Qt.BottomToolBarArea, qToolBar)
-
-        self.verticalLayout.addWidget(self.plot)
-        self.setCentralWidget(self.centralwidget)
+        QtGui.QMdiSubWindow.__init__(self, *args)
         
     def closeEvent(self, event):
-        self.emit(QtCore.SIGNAL('windowClosed()'))
+        self.emit(QtCore.SIGNAL('subWindowClosed()'))
         self.hide()
+
 
 class newPlotSubWindow(QtGui.QMdiSubWindow):
 
     def __init__(self, *args):
         QtGui.QMdiSubWindow.__init__(self, *args)
 #        print self.height(),self.width(),float(self.width()*0.38,float(self.height()*0.38
-        self.verticalLayout = QtGui.QVBoxLayout(self)
-        self.verticalLayout.setObjectName("verticalLayout")
+#        self.verticalLayout = QtGui.QVBoxLayout(self)
+#        self.verticalLayout.setObjectName("verticalLayout")
 
-        self.plot = MoosePlot(self,width=7,height=7)#, width=float(self.width()*0.38, height=float(self.height()*0.38)
+        self.plot = MoosePlot(self,width=6,height=6)#, width=float(self.width()*0.38, height=float(self.height()*0.38)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -178,7 +192,7 @@ class newPlotSubWindow(QtGui.QMdiSubWindow):
         self.plot.setObjectName("plot")
         self.setSizePolicy(sizePolicy)
 
-        self.verticalLayout.addWidget(self.plot)
+#        self.verticalLayout.addWidget(self.plot)
         # qToolBar = QtGui.QToolBar()
         # self.toolbar = NavigationToolbar(self.plot, qToolBar)
         # qToolBar.addWidget(self.toolbar)
