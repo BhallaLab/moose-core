@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'newgui.ui'
 #
-# Created: Fri Jul  6 11:59:09 2012
-#      by: PyQt4 UI code generator 4.9.1
+# Created: Fri Jul  6 12:19:29 2012
+#      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -156,8 +156,8 @@ class Ui_MainWindow(object):
         self.horizontalLayout_7.setObjectName(_fromUtf8("horizontalLayout_7"))
         self.label = QtGui.QLabel(self.dockWidgetContents)
         font = QtGui.QFont()
-        font.setBold(False)
         font.setWeight(50)
+        font.setBold(False)
         self.label.setFont(font)
         self.label.setObjectName(_fromUtf8("label"))
         self.horizontalLayout_7.addWidget(self.label)
@@ -716,6 +716,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "MainWindow", None, QtGui.QApplication.UnicodeUTF8))
+        self.mdiArea.setStatusTip(QtGui.QApplication.translate("MainWindow", "To load a model, Menu >File >Load Model or Ctrl+L", None, QtGui.QApplication.UnicodeUTF8))
         self.menuFile.setTitle(QtGui.QApplication.translate("MainWindow", "File", None, QtGui.QApplication.UnicodeUTF8))
         self.menuShell_Mode.setTitle(QtGui.QApplication.translate("MainWindow", "Shell Mode", None, QtGui.QApplication.UnicodeUTF8))
         self.menuClasses.setTitle(QtGui.QApplication.translate("MainWindow", "Classes", None, QtGui.QApplication.UnicodeUTF8))
@@ -729,6 +730,7 @@ class Ui_MainWindow(object):
         self.menuEdit.setTitle(QtGui.QApplication.translate("MainWindow", "Edit", None, QtGui.QApplication.UnicodeUTF8))
         self.menuHelp.setTitle(QtGui.QApplication.translate("MainWindow", "Help", None, QtGui.QApplication.UnicodeUTF8))
         self.menuRun.setTitle(QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
+        self.mooseObjectEditDock.setStatusTip(QtGui.QApplication.translate("MainWindow", "Property Editor.  Displays parent-child  relationship", None, QtGui.QApplication.UnicodeUTF8))
         self.mooseObjectEditDock.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Property Editor", None, QtGui.QApplication.UnicodeUTF8))
         self.propEditorSelectionNameLabel.setText(QtGui.QApplication.translate("MainWindow", "None", None, QtGui.QApplication.UnicodeUTF8))
         self.propEditorSelParentPushButton.setText(QtGui.QApplication.translate("MainWindow", "Select Parent", None, QtGui.QApplication.UnicodeUTF8))
@@ -755,6 +757,7 @@ class Ui_MainWindow(object):
         self.lineEdit_4.setPlaceholderText(QtGui.QApplication.translate("MainWindow", "filter", None, QtGui.QApplication.UnicodeUTF8))
         self.label_5.setText(QtGui.QApplication.translate("MainWindow", "Target field", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton.setText(QtGui.QApplication.translate("MainWindow", "Connect", None, QtGui.QApplication.UnicodeUTF8))
+        self.plotConfigDockWidget.setStatusTip(QtGui.QApplication.translate("MainWindow", "Plot Window. From \'Property Editor\'   Select \'plot Field\', \'plot Window\' to add a plot and \'show\' for displaying plots", None, QtGui.QApplication.UnicodeUTF8))
         self.plotConfigDockWidget.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Plot Configuration", None, QtGui.QApplication.UnicodeUTF8))
         self.label_8.setText(QtGui.QApplication.translate("MainWindow", "Current Selection:", None, QtGui.QApplication.UnicodeUTF8))
         self.plotConfigCurrentSelectionLabel.setText(QtGui.QApplication.translate("MainWindow", "None", None, QtGui.QApplication.UnicodeUTF8))
@@ -765,16 +768,25 @@ class Ui_MainWindow(object):
         self.plotConfigWinSelectionComboBox.setItemText(0, QtGui.QApplication.translate("MainWindow", "Plot Window 1", None, QtGui.QApplication.UnicodeUTF8))
         self.plotConfigNewWindowPushButton.setText(QtGui.QApplication.translate("MainWindow", "New Plot Window", None, QtGui.QApplication.UnicodeUTF8))
         self.plotConfigAcceptPushButton.setText(QtGui.QApplication.translate("MainWindow", "Show", None, QtGui.QApplication.UnicodeUTF8))
+        self.simControlDockWidget.setStatusTip(QtGui.QApplication.translate("MainWindow", "Set run time for the simulation", None, QtGui.QApplication.UnicodeUTF8))
         self.simControlDockWidget.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Simulation Control", None, QtGui.QApplication.UnicodeUTF8))
         self.label_13.setText(QtGui.QApplication.translate("MainWindow", "Simdt:", None, QtGui.QApplication.UnicodeUTF8))
         self.label_18.setText(QtGui.QApplication.translate("MainWindow", "Run Time:", None, QtGui.QApplication.UnicodeUTF8))
         self.label_14.setText(QtGui.QApplication.translate("MainWindow", "Plotdt:", None, QtGui.QApplication.UnicodeUTF8))
         self.label_15.setText(QtGui.QApplication.translate("MainWindow", "Update Plotdt:", None, QtGui.QApplication.UnicodeUTF8))
+        self.simControlRunPushButton.setToolTip(QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
+        self.simControlRunPushButton.setStatusTip(QtGui.QApplication.translate("MainWindow", "Run to start simulation", None, QtGui.QApplication.UnicodeUTF8))
         self.simControlRunPushButton.setText(QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
+        self.simControlContinuePushButton.setToolTip(QtGui.QApplication.translate("MainWindow", "continue", None, QtGui.QApplication.UnicodeUTF8))
+        self.simControlContinuePushButton.setStatusTip(QtGui.QApplication.translate("MainWindow", "Continue simulation", None, QtGui.QApplication.UnicodeUTF8))
         self.simControlContinuePushButton.setText(QtGui.QApplication.translate("MainWindow", "Continue", None, QtGui.QApplication.UnicodeUTF8))
+        self.simControlResetPushButton.setToolTip(QtGui.QApplication.translate("MainWindow", "Reset", None, QtGui.QApplication.UnicodeUTF8))
+        self.simControlResetPushButton.setStatusTip(QtGui.QApplication.translate("MainWindow", "Reset\'s simulation", None, QtGui.QApplication.UnicodeUTF8))
         self.simControlResetPushButton.setText(QtGui.QApplication.translate("MainWindow", "Reset", None, QtGui.QApplication.UnicodeUTF8))
         self.label_16.setText(QtGui.QApplication.translate("MainWindow", "Current Time: ", None, QtGui.QApplication.UnicodeUTF8))
         self.simControlCurrentTimeLabel.setText(QtGui.QApplication.translate("MainWindow", "0.0", None, QtGui.QApplication.UnicodeUTF8))
+        self.simControlStopPushButton.setToolTip(QtGui.QApplication.translate("MainWindow", "stop", None, QtGui.QApplication.UnicodeUTF8))
+        self.simControlStopPushButton.setStatusTip(QtGui.QApplication.translate("MainWindow", "Stop Simulation", None, QtGui.QApplication.UnicodeUTF8))
         self.simControlStopPushButton.setText(QtGui.QApplication.translate("MainWindow", "Stop", None, QtGui.QApplication.UnicodeUTF8))
         self.mooseShellDockWidget.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Shell", None, QtGui.QApplication.UnicodeUTF8))
         self.mooseShellPlainTextEdit.setPlainText(QtGui.QApplication.translate("MainWindow", "Python\n"

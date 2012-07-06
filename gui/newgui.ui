@@ -23,6 +23,9 @@
    <layout class="QHBoxLayout" name="horizontalLayout_6">
     <item>
      <widget class="QMdiArea" name="mdiArea">
+      <property name="statusTip">
+       <string>To load a model, Menu &gt;File &gt;Load Model or Ctrl+L</string>
+      </property>
       <property name="viewMode">
        <enum>QMdiArea::TabbedView</enum>
       </property>
@@ -209,6 +212,9 @@
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
+   </property>
+   <property name="statusTip">
+    <string>Property Editor.  Displays parent-child  relationship</string>
    </property>
    <property name="windowTitle">
     <string>Property Editor</string>
@@ -725,6 +731,9 @@
    </widget>
   </widget>
   <widget class="QDockWidget" name="plotConfigDockWidget">
+   <property name="statusTip">
+    <string>Plot Window. From 'Property Editor'   Select 'plot Field', 'plot Window' to add a plot and 'show' for displaying plots</string>
+   </property>
    <property name="windowTitle">
     <string>Plot Configuration</string>
    </property>
@@ -896,6 +905,12 @@
            <height>23</height>
           </size>
          </property>
+         <property name="toolTip">
+          <string>New plot Window</string>
+         </property>
+         <property name="statusTip">
+          <string/>
+         </property>
          <property name="text">
           <string>New Plot Window</string>
          </property>
@@ -952,6 +967,9 @@
    </widget>
   </widget>
   <widget class="QDockWidget" name="simControlDockWidget">
+   <property name="statusTip">
+    <string>Set run time for the simulation</string>
+   </property>
    <property name="windowTitle">
     <string>Simulation Control</string>
    </property>
@@ -1040,6 +1058,12 @@
            <height>23</height>
           </size>
          </property>
+         <property name="toolTip">
+          <string>Run</string>
+         </property>
+         <property name="statusTip">
+          <string>Run to start simulation</string>
+         </property>
          <property name="text">
           <string>Run</string>
          </property>
@@ -1053,6 +1077,12 @@
            <height>23</height>
           </size>
          </property>
+         <property name="toolTip">
+          <string>continue</string>
+         </property>
+         <property name="statusTip">
+          <string>Continue simulation</string>
+         </property>
          <property name="text">
           <string>Continue</string>
          </property>
@@ -1065,6 +1095,12 @@
            <width>16777215</width>
            <height>23</height>
           </size>
+         </property>
+         <property name="toolTip">
+          <string>Reset</string>
+         </property>
+         <property name="statusTip">
+          <string>Reset's simulation</string>
          </property>
          <property name="text">
           <string>Reset</string>
@@ -1109,6 +1145,12 @@
            <width>16777215</width>
            <height>23</height>
           </size>
+         </property>
+         <property name="toolTip">
+          <string>stop</string>
+         </property>
+         <property name="statusTip">
+          <string>Stop Simulation</string>
          </property>
          <property name="text">
           <string>Stop</string>

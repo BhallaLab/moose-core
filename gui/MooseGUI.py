@@ -149,6 +149,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
     def popupLoadModelDialog(self):
         fileDialog = QtGui.QFileDialog(self)
         fileDialog.setFileMode(QtGui.QFileDialog.ExistingFile)
+        fileDialog.setToolTip("<font color='white'> Select a model Neural / KKit to open. Try Mitral.g / Kholodenko.g from DEMOS> mitral-ee / kholodenko folders </font>")        
         ffilter =''
         for key in sorted(self.mooseHandler.fileExtensionMap.keys()):
             ffilter = ffilter + key + ';;'
