@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Fri Jul  8 10:00:33 2011 (+0530)
 // Version: 
-// Last-Updated: Fri Jul  8 15:37:43 2011 (+0530)
-//           By: Subhasis Ray
-//     Update #: 104
+// Last-Updated: Thu Jul  5 14:24:13 2012 (+0530)
+//           By: subha
+//     Update #: 106
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -186,12 +186,14 @@ const Cinfo* IzhikevichNrn::initCinfo()
         &b,
         &u,
         &Vm,
+        &Im,
         &Rm,
         &initVm,
         &initU,
         &alpha,
         &beta,
         &gamma,
+        &injectDest,
         &cDest,
         &dDest,
         &bDest,
