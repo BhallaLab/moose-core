@@ -314,6 +314,7 @@ class MooseHandler(QtCore.QObject):
         next_stop = MooseHandler.plotupdate_dt
         if MooseHandler.runtime < MooseHandler.plotupdate_dt:
             moose.start(MooseHandler.runtime)
+            self.emit(QtCore.SIGNAL('updatePlots(float)'), self.getCurrentTime())
         else:
             while (next_stop <= MooseHandler.runtime) and (self.stopSimulation == 0):
                 moose.start(MooseHandler.plotupdate_dt)
@@ -323,7 +324,7 @@ class MooseHandler(QtCore.QObject):
                 time_left = continueTime - self.getCurrentTime()
                 moose.start(time_left)
                 self.emit(QtCore.SIGNAL('updatePlots(float)'), self.getCurrentTime())          
-
+                
     def doResetAndRun(self, runtime, simdt=None, plotdt=None, plotupdate_dt=None):
         """Reset and run the simulation.
 
