@@ -9,13 +9,14 @@ The soma name below is hard coded for gran98, else any other file can be used by
 
 import moose
 from moose.utils import *
+
 from moose.neuroml.NeuroML import NeuroML
 
 from pylab import *
 
 simdt = 10e-6 # s
 plotdt = 10e-6 # s
-runtime = 1.0 # s
+runtime = 0.7 # s
 
 def loadGran98NeuroML_L123(filename):
     neuromlR = NeuroML()
@@ -24,8 +25,9 @@ def loadGran98NeuroML_L123(filename):
     soma_path = populationDict['Gran'][1][0].path+'/Soma_0'
     somaVm = setupTable('somaVm',moose.Compartment(soma_path),'Vm')
     somaCa = setupTable('somaCa',moose.CaConc(soma_path+'/Gran_CaPool_98'),'Ca')
-    #somaIKCa = setupTable('somaIKCa',moose.HHChannel(soma_path+'/Gran_KCa_98'),'Gk')
-    KDrX = setupTable('ChanX',moose.HHChannel(soma_path+'/Gran_KDr_98'),'X')
+    somaIKCa = setupTable('somaIKCa',moose.HHChannel(soma_path+'/Gran_KCa_98'),'Gk')
+    #KDrX = setupTable('ChanX',moose.HHChannel(soma_path+'/Gran_KDr_98'),'X')
+    soma = moose.Compartment(soma_path)
     print "Reinit MOOSE ... "
     resetSim(['/elec','/cells'],simdt,plotdt) # from moose.utils
     print "Running ... "
@@ -41,8 +43,8 @@ def loadGran98NeuroML_L123(filename):
     xlabel('time (s)')
     ylabel('Ca conc (mol/m^3)')
     figure()
-    plot(tvec,KDrX.vec[1:])
-    title('KDr X gate')
+    plot(tvec,somaIKCa.vec[1:])
+    title('KCa current (A)')
     xlabel('time (s)')
     ylabel('')
     print "Showing plots ..."
