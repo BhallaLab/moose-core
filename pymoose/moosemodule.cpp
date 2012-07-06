@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Tue Jul  3 12:50:50 2012 (+0530)
+// Last-Updated: Thu Jul  5 14:56:27 2012 (+0530)
 //           By: subha
-//     Update #: 8960
+//     Update #: 8978
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -2685,15 +2685,18 @@ extern "C" {
     static PyObject * moose_ObjId_connect(_ObjId * self, PyObject * args)
     {
         PyObject * destPtr = NULL;
-        char * srcField, * destField, * msgType;
-
+        char * srcField = NULL, * destField = NULL, * msgType = NULL;
+        static char default_msg_type[] = "Single";
         if(!PyArg_ParseTuple(args,
-                             "sOss:moose_ObjId_connect",
+                             "sOs|s:moose_ObjId_connect",
                              &srcField,
                              &destPtr,
                              &destField,
                              &msgType)){
             return NULL;
+        }
+        if (msgType == NULL){
+            msgType = default_msg_type;
         }
         _ObjId * dest = reinterpret_cast<_ObjId*>(destPtr);
         bool ret = (ShellPtr->doAddMsg(msgType,
@@ -3217,7 +3220,7 @@ extern "C" {
     {
         PyObject * srcPtr = NULL, * destPtr = NULL;
         char * srcField = NULL, * destField = NULL, * msgType = NULL;
-        char default_msg_type[] = "Single";
+        static char default_msg_type[] = "Single";
         if(!PyArg_ParseTuple(args, "OsOs|s:moose_connect", &srcPtr, &srcField, &destPtr, &destField, &msgType)){
             return NULL;
         }
