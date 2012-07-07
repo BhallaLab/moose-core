@@ -7,6 +7,7 @@ from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as Naviga
 
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
+import matplotlib.pyplot as plt
 from numpy import array,linspace
 import config
 import moose
@@ -25,15 +26,22 @@ class MyMplCanvas(FigureCanvas):
         self.axes.hold(True)
         self.axes.set_xlabel('Time (s)')
         self.axes.set_ylabel('Value')
-
+        #selfax = plt.subplot(111)
         self.compute_initial_figure()
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
-
+        
         FigureCanvas.setSizePolicy(self,
                                    QtGui.QSizePolicy.Expanding,
                                    QtGui.QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
+
+
+    def nicePlaceLegend(self):
+        box = self.axes.get_position()
+        self.axes.set_position([box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.9])
+        # Put a legend below current axis
+        self.axes.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),fancybox=True, shadow=True, ncol=5)
 
     def sizeHint(self):
         w, h = self.get_width_height()

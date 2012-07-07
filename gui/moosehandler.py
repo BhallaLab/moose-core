@@ -283,6 +283,8 @@ class MooseHandler(QtCore.QObject):
     def updateDefaultsKKIT(self):
         MooseHandler.simdt = MooseHandler.DEFAULT_SIMDT_KKIT
         MooseHandler.plotdt = MooseHandler.DEFAULT_PLOTDT_KKIT
+#        MooseHandler.simdt = (moose.element('/clock').tick)[0].dt
+#        MooseHandler.plotdt = (moose.element('/clock').tick)[1].dt
         MooseHandler.plotupdate_dt = MooseHandler.DEFAULT_PLOTUPDATE_DT_KKIT
         MooseHandler.runtime = MooseHandler.DEFAULT_RUNTIME_KKIT
 
@@ -309,8 +311,7 @@ class MooseHandler(QtCore.QObject):
         #Harsha
         #continueTime helps to get the total run time required when user clicks on continue button.
         continueTime = self.getCurrentTime()+time 
- 
-        MooseHandler.runtime = time      
+        MooseHandler.runtime = time
         next_stop = MooseHandler.plotupdate_dt
         if MooseHandler.runtime < MooseHandler.plotupdate_dt:
             moose.start(MooseHandler.runtime)
