@@ -1,6 +1,5 @@
-#PARTIAL DEMO
-# demo of a simple hopfield network using leaky integrate and fire neurons
-# memory.csv has the memory being saved, the synaptic weights are set at start according to this memory
+# A demo of a simple hopfield network using leaky integrate and fire neurons
+# memory1.csv and memory2.csv have the memory being saved, the synaptic weights are set at start according to this memory
 # memory must be a square matrix of 0's and 1's only
 # input.csv has partial input given as input to the cells.
 # - By C.H.Chaitanya
@@ -8,122 +7,155 @@
 
 import moose
 import math
-from moose.utils import *
 import csv
 import numpy as np
-#import matplotlib.pyplot as plt
-from pylab import *
+import matplotlib.pyplot as plt
 
-def readMemory(memoryFile):
-    f = open(memoryFile,'r')
-    testLine = f.readline()
-    dialect = csv.Sniffer().sniff(testLine) #to get the format of the csv
-    f.close()
-    f = open(memoryFile, 'r')
-    reader = csv.reader(f,dialect)
-    memory = []
-    for row in reader:
-        for i in row[0:]:
-            memory.append(int(i))
-    f.close()
-    return memory
+class hopfieldNetwork():
+    def __init__(self,numberOfNeurons):
+        self.cells = []
+        #self.Vms   = []
+        self.allSpikes = []
+        #self.inTables = []
+        self.inSpike = []
+        self.numNeurons = numberOfNeurons
+        self.synWeights = [0]*self.numNeurons*self.numNeurons
+        self.numMemories = 0
 
-def updateWeights(memory,weightMatrix):
-    for i in range(len(memory)):
-        newWeights = []
-        for j in range(len(memory)):
-            if i != j:
-                newWeights.append(memory[i]*memory[j])
-            else:
-                newWeights.append(0)
-        #add the new synaptic weights to the old ones.
-        weightMatrix[i*len(memory):(i+1)*len(memory)] = [sum(a) for a in zip(*([weightMatrix[i*len(memory):(i+1)*len(memory)]]+[newWeights]))] 
-    return weightMatrix
+    def readMemoryFile(self, memoryFile):
+        '''read a memory pattern to save from a file'''
+        f = open(memoryFile,'r')
+        testLine = f.readline()
+        dialect = csv.Sniffer().sniff(testLine) #to get the format of the csv
+        f.close()
+        f = open(memoryFile, 'r')
+        reader = csv.reader(f,dialect)
+        memory = []
+        for row in reader:
+            for i in row[0:]:
+                memory.append(int(i))
+        f.close()
+        self.numMemories += 1
+        return memory
 
-def createNetwork(synWeights,inputGiven):
-    numberOfCells = int(math.sqrt(len(synWeights)))
-    cells = []
-    Vms   = []
-    inTables = []
-    cellNameObjectDict = {}
-    hopfield = moose.Neutral('/hopfield')
-    pg = moose.PulseGen('/hopfield/inPulGen')
+    def updateWeights(self, memory):
+        for i in range(self.numNeurons):
+            for j in range(self.numNeurons):
+                if i != j:
+                    if memory[i] == 0:
+                        memory[i] = -1
+                    if memory[j] == 0:
+                        memory[j] = -1
+                    self.synWeights[i*len(memory)+j] += memory[i]*memory[j]
 
-    pgTable = moose.Table('/hopfield/inPulGen/pgTable')
-    moose.connect(pgTable, 'requestData', pg, 'get_output')
-    pg.count = 1
-    pg.level[0] = 3
-    pg.width[0] = 2e-03
-    pg.delay[0] = 5e-02 #every 50ms
+    def createNetwork(self):
+        '''setting up of the cells and their connections'''
+        hopfield = moose.Neutral('/hopfield')
+        pg = moose.PulseGen('/hopfield/inPulGen')
 
-    for i in range(numberOfCells):
-        cellPath = '/hopfield/cell_'+str(i+1)
-        cell = moose.IntFire(cellPath) #non programmer friendly numbering
-        cell.setField('tau',10e-3)
-        cell.setField('Vm', -0.07)
-        #cell.setField('refractoryPeriod', 0.1)
-        #cell.setField('thresh', 0.0)
-        cell.synapse.num = numberOfCells+1 
-        #number of synapses - for user friendly numbering - ignore synapse[0]
-        cell.synapse[i+1].weight = 4
-        cell.synapse[i+1].delay = 1e-3
+        pgTable = moose.Table('/hopfield/inPulGen/pgTable')
+        moose.connect(pgTable, 'requestData', pg, 'get_output')
 
-        VmVals = moose.Table(cellPath+'/Vm_cell_'+str(i+1))
-        moose.connect(VmVals, 'requestData', cell, 'get_Vm')
-
-        inSpkGen = moose.SpikeGen(cellPath+'/inSpkGen')
-        inSpkGen.setField('threshold', 2.0)
-        inSpkGen.setField('edgeTriggered', True)
-
-        if inputGiven[i] == 1:
-            moose.connect(pg, 'outputOut', inSpkGen, 'Vm')
-
-            inTable = moose.Table(cellPath+'/inSpkGen/inTable')
-            moose.connect(inTable, 'requestData', inSpkGen, 'get_hasFired')
-            inTables.append(inTable)
-
-        moose.connect(inSpkGen, 'event', cell.synapse[i+1] ,'addSpike') #self connection is the input 
-        cellNameObjectDict[cellPath] = cell
-        Vms.append(VmVals)
-        cells.append(cell)
-
-    for currentCell in range(numberOfCells):
-        for connectCell in range(numberOfCells):
-            if currentCell != connectCell: #no self connections
-                connSyn = cellNameObjectDict['/hopfield/cell_'+str(connectCell+1)].synapse[connectCell+1]
-                connSyn.weight = synWeights[currentCell*numberOfCells + connectCell]
-                connSyn.delay = 20e-3
-                moose.connect(cellNameObjectDict['/hopfield/cell_'+str(currentCell+1)], 'spike', connSyn, 'addSpike')
-
-    return cells,Vms,pgTable,inTables
-
-#def saveMemories([memoryFiles]):
-#    synWeights = [0]*len(memories[0])*len(memories[0])
-#    for memory in memories:
-#        read
+        pg.firstDelay = 10e-3
+        pg.firstWidth = 2e-03
+        pg.firstLevel = 3.0
+        pg.secondDelay = 1.0
     
+        for i in range(self.numNeurons):
+            cellPath = '/hopfield/cell_'+str(i)
+            cell = moose.IntFire(cellPath) 
+            cell.setField('tau',10e-3)
+            cell.setField('refractoryPeriod', 5e-3)
+            cell.setField('thresh', 0.99)
+            cell.synapse.num = self.numNeurons
+            #definite firing everytime ip is given
+            cell.synapse[i].weight = 1.00 #synapse i = input synapse
+            cell.synapse[i].delay = 0.0 #1e-3 #instantaneous
 
-memoryFile1 = "memory1.csv"
-memory = readMemory(memoryFile1)
-synWeights = updateWeights(memory,[0]*len(memory)*len(memory))
+            #VmVals = moose.Table(cellPath+'/Vm_cell_'+str(i))
+            #moose.connect(VmVals, 'requestData', cell, 'get_Vm')
+            spikeVals = moose.Table(cellPath+'/spike_cell_'+str(i))
+            moose.connect(cell, 'spike', spikeVals, 'input')
 
-memoryFile2 = "memory2.csv"
-memory2 = readMemory(memoryFile2)
-synWeights = updateWeights(memory2,synWeights)
+            inSpkGen = moose.SpikeGen(cellPath+'/inSpkGen')
+            inSpkGen.setField('edgeTriggered', True)
+            inSpkGen.setField('threshold', 2.0)
+            moose.connect(pg, 'outputOut', inSpkGen, 'Vm')
+            #inTable = moose.Table(cellPath+'/inSpkGen/inTable')
+            #moose.connect(inTable, 'requestData', inSpkGen, 'get_hasFired')
+            moose.connect(inSpkGen, 'event', cell.synapse[i] ,'addSpike') #self connection is the input 
+            self.inSpike.append(inSpkGen)
+            #self.inTables.append(inTable)
+            #self.Vms.append(VmVals)
+            self.cells.append(cell)
+            self.allSpikes.append(spikeVals)
 
-inputFile = "input.csv"
-cells,Vms,pgTable,inTables = createNetwork(synWeights,readMemory(inputFile))
+    def updateInputs(self,inputGiven):
+        '''assign inputs here'''
+        for i in range(self.numNeurons):
+            if inputGiven[i] == 1: 
+                self.inSpike[i].setField('threshold',2.0)
+            else:
+                self.inSpike[i].setField('threshold',4.0)
 
-# moose.setClock(0, 1e-4)
-# moose.useClock(0, '/hopfield/inPulGen/pgTable,/hopfield/inPulGen,','process')
-# moose.useClock(0, '/hopfield/##[TYPE=IntFire],/hopfield/##[TYPE=Table],/hopfield/##[TYPE=SpikeGen]', 'process')
-# moose.reinit()
-# moose.start(0.2)
+    def assignAllSynapticWeights(self):
+        '''always call before runnning model'''
+        for ii in range(self.numNeurons):
+            for jj in range(self.numNeurons):
+                if ii == jj:
+                    continue
+                self.cells[jj].synapse[ii].weight = float(self.synWeights[(jj*self.numNeurons)+ii]/self.numMemories)
+                self.cells[jj].synapse[ii].delay = 20e-3
+                moose.connect(self.cells[ii], 'spike', self.cells[jj].synapse[ii], 'addSpike')
 
-# #plot(pgTable.vec[1:])
-# #for yset,inTable in enumerate(inTables):
-# #    plot(float(yset)+inTable.vec[1:])
-# for ySet,Vm in enumerate(Vms):
-#     plot(float(2*ySet)/(1e+7)+Vm.vec[1:])
-# #plot(Vms[0].vec[1:])
-# show()
+
+def test(runtime=0.2):
+    hopF = hopfieldNetwork(100)
+
+    pattern1 = hopF.readMemoryFile('memory1.csv')
+    hopF.updateWeights(pattern1)
+    pattern2 = hopF.readMemoryFile('memory2.csv')
+    hopF.updateWeights(pattern2)
+
+    hopF.createNetwork()
+    hopF.assignAllSynapticWeights()
+
+    initialInputs = hopF.readMemoryFile('input.csv')
+    hopF.updateInputs(initialInputs)
+
+    moose.setClock(0, 1e-4)
+    moose.useClock(0, '/hopfield/##', 'process')
+    moose.reinit()
+    moose.start(runtime)
+
+    for ySet,Vm in enumerate(hopF.allSpikes):
+        ySpike = ySet
+        plt.subplot(211)    
+        if pattern1[ySet] == 1:
+            plt.scatter(Vm.vec[1:],ySpike*np.ones(len(Vm.vec[1:])),color='blue')
+        else:
+            plt.scatter(Vm.vec[1:],ySpike*np.ones(len(Vm.vec[1:])),color='red')
+        plt.subplot(212)
+        if pattern2[ySet] == 1:
+            plt.scatter(Vm.vec[1:],ySpike*np.ones(len(Vm.vec[1:])),color='blue')
+        else:
+            plt.scatter(Vm.vec[1:],ySpike*np.ones(len(Vm.vec[1:])),color='red')
+    
+    plt.subplot(211)
+    plt.xlim(0,0.25)
+    plt.ylim(0,100)
+    plt.xlabel('time')
+    plt.ylabel('neuron#')
+    plt.title('spikes:pattern1- red:misfire & blue:correct')
+    plt.subplot(212)
+    plt.xlim(0,0.25)
+    plt.ylim(0,100)
+    plt.xlabel('time')
+    plt.ylabel('neuron#')
+    plt.title('spikes:pattern2- red:misfire & blue:correct')
+
+    plt.show()
+
+if __name__ == '__main__':
+    test()
+
