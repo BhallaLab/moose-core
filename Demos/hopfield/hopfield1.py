@@ -15,31 +15,15 @@ import csv
 import numpy as np
 #import matplotlib.pyplot as plt
 from pylab import *
-from datetime import datetime
+#from datetime import datetime
 
 cell = []
 spikegen = []
 vmtable = []
 intable = {}
 
-def readMemory(memoryFile):
-    f = open(memoryFile,'r')
-    testLine = f.readline()
-    dialect = csv.Sniffer().sniff(testLine) #to get the format of the csv
-    f.close()
-    f = open(memoryFile, 'r')
-    reader = csv.reader(f,dialect)
-    memory = []
-    for row in reader:
-        for i in row[0:]:
-            memory.append(int(i))
-    f.close()
-    return memory
-
 def updateWeights(old_weights, training_data):
     training_data = training_data.ravel()
-    print training_data.shape
-    print old_weights.shape
     new_weights = np.array([x * y for x in training_data 
                             for y in training_data]).reshape(old_weights.shape)
     old_weights += new_weights
@@ -52,59 +36,59 @@ def createNetwork(synWeights,inputGiven):
     global vmtable
     global spikegen
     global intable 
-    start = datetime.now()
+#    start = datetime.now()
     numberOfCells = synWeights.shape[0]
     hopfield = moose.Neutral('/hopfield')
     data = moose.Neutral('/data')
     pg = moose.PulseGen('/hopfield/inPulGen')
     pgTable = moose.Table('/hopfield/inPulGen/pgTable')
     moose.connect(pgTable, 'requestData', pg, 'get_output')
+#    pg.firstDelay = 10e-3
+#    pg.firstWidth = 2e-03
+#    pg.firstLevel = 3
+#    pg.secondDelay = 1.0
     pg.count = 1
     pg.level[0] = 3
     pg.width[0] = 2e-03
-    pg.delay[0] = 5e-02 #every 50ms
-    start1 = datetime.now()
+    pg.delay[0] = 50e-03 #every 50ms
+#    start1 = datetime.now()
     for ii in range(numberOfCells):
         cell.append(moose.IntFire('/hopfield/cell_%d' % (ii)))
         cell[ii].tau = 10e-3
         cell[ii].Vm = -0.07
         cell[ii].synapse.num = numberOfCells
         cell[ii].synapse[ii].delay = 1e-3
-        cell[ii].synapse[ii].weight = 4.0
+        cell[ii].synapse[ii].weight = 1.0
+        cell[ii].setField('thresh', 0.98)
         vmtable.append(moose.Table('/data/Vm_%d' % (ii)))
         moose.connect(vmtable[ii], 'requestData', cell[ii], 'get_Vm')
-        spikegen[ii] = moose.SpikeGen('/hopfield/inSpkGen_%d' % (ii))
+        spikegen.append(moose.SpikeGen('/hopfield/inSpkGen_%d' % (ii)))
         if inputGiven[ii] == 0:
             spikegen[ii].threshold = 4.0
         else:
-            spiksegen[ii].threshold = 2.0
+            spikegen[ii].threshold = 2.0
         spikegen[ii].edgeTriggered = True # Redundant
         intable[ii] = moose.Table('/data/inTable_%d' % (ii))
         moose.connect(pg, 'outputOut', spikegen[ii], 'Vm')
         # No self connection - so we can use the synapse [ii] for input delivery
         moose.connect(spikegen[ii], 'event', cell[ii].synapse[ii], 'addSpike')
         moose.connect(intable[ii], 'requestData', spikegen[ii], 'get_hasFired')
-    end1 = datetime.now()
+#    end1 = datetime.now()
     for ii in range(numberOfCells):
         for jj in range(numberOfCells):
             if ii == jj:
                 continue
-            cell[jj].synapse[ii].weight = synWeights[ii,jj]
+            cell[jj].synapse[ii].weight = float(synWeights[ii,jj]/2.0)
             cell[jj].synapse[ii].delay = 20e-3
             moose.connect(cell[ii], 'spike', cell[jj].synapse[ii], 'addSpike')
-    end2 = datetime.now()
-    delta = end2 - start
-    print 'createNetwork: Total time:', delta.seconds + delta.microseconds * 1e-6
-    delta = end1 - start1
-    print 'createNetwork: create cells:', delta.seconds + delta.microseconds * 1e-6
-    delta = end2 - end1
-    print 'createNetwork: connect cells:', delta.seconds + delta.microseconds * 1e-6
+#    end2 = datetime.now()
+#    delta = end2 - start
+#    print 'createNetwork: Total time:', delta.seconds + delta.microseconds * 1e-6
+#    delta = end1 - start1
+#    print 'createNetwork: create cells:', delta.seconds + delta.microseconds * 1e-6
+#    delta = end2 - end1
+#    print 'createNetwork: connect cells:', delta.seconds + delta.microseconds * 1e-6
     return (cell,vmtable,pgTable, spikegen, intable)
-
-#def saveMemories([memoryFiles]):
-#    synWeights = [0]*len(memories[0])*len(memories[0])
-#    for memory in memories:
-#        read
     
 def update_conn(inputFileName):
     inputdata = np.loadtxt(inputFileName)
@@ -113,7 +97,6 @@ def update_conn(inputFileName):
             spikegen[ii].threshold = 4.0
         else:
             spiksegen[ii].threshold = 2.0
-    
                           
 if __name__ == '__main__':
     memoryFile1 = "memory1.csv"
@@ -127,16 +110,17 @@ if __name__ == '__main__':
 
     inputFile = "input.csv"
     inputData = np.loadtxt(inputFile)
-    cells,Vms,pgTable,inTables = createNetwork(synWeights,inputData)
+    #cells,Vms,pgTable,inTables = 
+    cell,vmtable,pgTable,spikegen,intable = createNetwork(synWeights,inputData)
     moose.setClock(0, 1e-4)
     moose.useClock(0, '/hopfield/##,/data/##','process')
     moose.reinit()
     moose.start(0.2)
     ii = 0
-    # for vm in Vms:
-    #     plot(np.linspace(0, 0.2, len(vm.vec)), vm.vec + ii*1.5e-7, label=vm.name)
-    #     ii += 1
-    # show()
+    for vm in vmtable:
+        plot(np.linspace(0, 0.2, len(vm.vec)), vm.vec + ii*1.5e-7, label=vm.name)
+        ii += 1
+    show()
 # #plot(pgTable.vec[1:])
 # #for yset,inTable in enumerate(inTables):
 # #    plot(float(yset)+inTable.vec[1:])
