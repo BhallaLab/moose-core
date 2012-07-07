@@ -46,6 +46,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.setCorner(Qt.BottomRightCorner,Qt.RightDockWidgetArea)
         self.setCorner(Qt.BottomLeftCorner,Qt.LeftDockWidgetArea)
         self.mooseHandler = MooseHandler()
+        self.mdiArea.setBackground(QtGui.QBrush(QtGui.QImage(os.path.join(config.KEY_ICON_DIR,'QMdiBackground.png'))))
 
         #other variables
         self.currentTime = 0.0
@@ -560,6 +561,8 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
 # create the GUI application
 app = QtGui.QApplication(sys.argv)
+icon = QtGui.QIcon(os.path.join(config.KEY_ICON_DIR,'moose_icon.png'))
+app.setWindowIcon(icon)
 # instantiate the main window
 dmw = DesignerMainWindow()
 dmw.setWindowState(Qt.WindowMaximized)
@@ -572,4 +575,5 @@ dmw.show()
 #http://www.mail-archive.com/matplotlib-users@lists.sourceforge.net/msg13241.html
 # with the same return code of Qt application
 sys.exit(app.exec_())
+
 
