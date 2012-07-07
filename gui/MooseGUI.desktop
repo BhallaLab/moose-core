@@ -1,0 +1,11 @@
+#!/usr/bin/env xdg-open
+
+[Desktop Entry]
+Version=1.5beta
+Type=Application
+Terminal=true
+Icon[en_US]=~/moose/branches/dh_branch/gui/icons/moose_icon.png
+Name[en_US]=MooseGUI
+Exec=python ~/moose/branches/dh_branch/gui/MooseGUI.py
+Name=MooseGUI
+Icon=~/moose/branches/dh_branch/gui/icons/moose_icon.png
