@@ -92,9 +92,11 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         #gui connections
         self.connect(self.actionLoad_Model,QtCore.SIGNAL('triggered()'), self.popupLoadModelDialog)
         self.connect(self.actionQuit,QtCore.SIGNAL('triggered()'),self.doQuit)
+        #self.connect(self.mdiArea,QtCore.SIGNAL('subWindowActivated(QMdiSubWindow)'),self.plotConfigCurrentPlotWinChanged)
         #plotdock connections
         self.connect(self.plotConfigAcceptPushButton,QtCore.SIGNAL('pressed()'),self.addFieldToPlot)
         self.connect(self.plotConfigNewWindowPushButton,QtCore.SIGNAL('pressed()'),self.plotConfigAddNewPlotWindow)
+        #self.connect(self.plotConfigWinSelectionComboBox,QtCore.SIGNAL('currentIndexChanged(int)'),self.activateSubWindow)
         #propEditor connections
         self.connect(self.propEditorSelParentPushButton,QtCore.SIGNAL('pressed()'),self.propEditorSelectParent)
         self.connect(self.propEditorChildListWidget,QtCore.SIGNAL('itemClicked(QListWidgetItem *)'),self.propEditorSelectChild)
@@ -150,7 +152,12 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         else:
             self.mdiArea.setViewMode(self.mdiArea.SubWindowView)
             self.mdiArea.casadeSubWindows()
-     
+
+#    def activateSubWindow(self,number):
+#        allList = self.mdiArea.subWindowList()
+#        self.activeWindow = allList[number+1]
+#        self.activeMdiWindow()
+
     def popupLoadModelDialog(self):
         fileDialog = QtGui.QFileDialog(self)
         fileDialog.setFileMode(QtGui.QFileDialog.ExistingFile)
@@ -195,7 +202,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
                     fileType = self.mooseHandler.type_xml
 
             directory = fileDialog.directory()
-            #self.statusBar.showMessage('Loading model, please wait')
+            self.statusBar.showMessage('Loading model, please wait')
             app = QtGui.qApp
             app.setOverrideCursor(QtGui.QCursor(Qt.BusyCursor)) #shows a hourglass - or a busy/working arrow
             for fileName in fileNames:
@@ -385,7 +392,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         if self.modelHasCompartments or self.modelHasIntFires:
             self.updateVisualization()
         QtCore.QCoreApplication.processEvents() 
-
+                     
     def updatePlotDockFields(self,obj):
         #add plot-able elements according to predefined  
         self.plotConfigCurrentSelectionLabel.setText(obj.getField('name'))
@@ -401,6 +408,12 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             self.plotConfigFieldSelectionComboBox.clear()
             self.plotConfigCurrentSelection = None
             self.plotConfigAcceptPushButton.setEnabled(False)
+    
+#    def plotConfigCurrentPlotWinChanged(self,qSubWin):
+#        number = self.plotConfigWinSelectionComboBox.findText(qSubWin.windowTitle())
+#        print number
+#        if number != -1:
+#            self.plotConfigWinSelectionComboBox.currentIndex(number)
 
     def populateDataPlots(self,modelpath):
         """Create plots for all Table objects in /data element"""
@@ -419,7 +432,8 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             plotWin = self.plotNameWinDict[str(self.plotConfigWinSelectionComboBox.currentText())] 
             
             #do not like the legends shown in the plots, change the field 2 below
-            plotWin.plot.addTable(newTable,newTable.getField('name'))
+            plotWin.plot.addTable(newTable,self.plotConfigCurrentSelection.getField('name')+'.'+newTable.getField('name'))
+            plotWin.plot.nicePlaceLegend()
             
         else:
             #no previous mooseplotwin - so create, and add table to corresp dict
@@ -431,7 +445,8 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             #plotWin.setWindowTitle(str(self.plotConfigWinSelectionComboBox.currentText()))
 
             #do not like the legends shown in the plots, change the field 2 below
-            self.activeWindow.plot.addTable(newTable,newTable.getField('name'))
+            self.activeWindow.plot.addTable(newTable,self.plotConfigCurrentSelection.getField('name')+'.'+newTable.getField('name'))
+            self.activeWindow.plot.nicePlaceLegend()
             self.plotNameWinDict[str(self.plotConfigWinSelectionComboBox.currentText())] = self.activeWindow
             self.activeMdiWindow()
 
@@ -529,12 +544,14 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         for graph in graphs:
             plotWin.plot.addTable(graph,graph.getField('name'))
         plotWin.show()
+        plotWin.plot.nicePlaceLegend()
         self.plotNameWinDict['Plot Window 1'] = plotWin
         self.mdiArea.setActiveSubWindow(self.activeWindow)
         self.activeWindow = plotWin
 
     def activeMdiWindow(self):
         self.mdiArea.setActiveSubWindow(self.activeWindow)
+
     def getKKitGraphs(self,path):
         tableList = []
         for child in moose.wildcardFind(path+'/graphs/#/##[TYPE=Table],'+path+'/moregraphs/#/##[TYPE=Table]'):
