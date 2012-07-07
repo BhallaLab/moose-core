@@ -11,7 +11,7 @@ import csv
 import numpy as np
 import matplotlib.pyplot as plt
 
-class hopfieldNetwork():
+class HopfieldNetwork():
     def __init__(self,numberOfNeurons):
         self.cells = []
         #self.Vms   = []
@@ -21,7 +21,16 @@ class hopfieldNetwork():
         self.numNeurons = numberOfNeurons
         self.synWeights = [0]*self.numNeurons*self.numNeurons
         self.numMemories = 0
+        self.createNetwork()
 
+    def mooseReinit(self):
+        moose.reinit()
+        
+    def clearAllMemory(self):
+        self.synWeights = [0]*self.numNeurons*self.numNeurons
+        self.numMemories = 0
+        self.clearAllSynapticWeights()
+        
     def readMemoryFile(self, memoryFile):
         '''read a memory pattern to save from a file'''
         f = open(memoryFile,'r')
@@ -35,7 +44,7 @@ class hopfieldNetwork():
             for i in row[0:]:
                 memory.append(int(i))
         f.close()
-        self.numMemories += 1
+
         return memory
 
     def updateWeights(self, memory):
@@ -47,6 +56,7 @@ class hopfieldNetwork():
                     if memory[j] == 0:
                         memory[j] = -1
                     self.synWeights[i*len(memory)+j] += memory[i]*memory[j]
+        self.numMemories += 1
 
     def createNetwork(self):
         '''setting up of the cells and their connections'''
@@ -89,6 +99,15 @@ class hopfieldNetwork():
             #self.Vms.append(VmVals)
             self.cells.append(cell)
             self.allSpikes.append(spikeVals)
+        
+        for ii in range(self.numNeurons):
+            for jj in range(self.numNeurons):
+                if ii == jj:
+                    continue
+                self.cells[jj].synapse[ii].weight = 0
+                self.cells[jj].synapse[ii].delay = 20e-3
+                moose.connect(self.cells[ii], 'spike', self.cells[jj].synapse[ii], 'addSpike')
+
 
     def updateInputs(self,inputGiven):
         '''assign inputs here'''
@@ -98,6 +117,11 @@ class hopfieldNetwork():
             else:
                 self.inSpike[i].setField('threshold',4.0)
 
+    def clearAllSynapticWeights(self):
+        for ii in range(self.numNeurons):
+            for jj in range(self.numNeurons):
+                self.cells[jj].synapse[ii].weight = 0.0
+
     def assignAllSynapticWeights(self):
         '''always call before runnning model'''
         for ii in range(self.numNeurons):
@@ -105,26 +129,29 @@ class hopfieldNetwork():
                 if ii == jj:
                     continue
                 self.cells[jj].synapse[ii].weight = float(self.synWeights[(jj*self.numNeurons)+ii]/self.numMemories)
-                self.cells[jj].synapse[ii].delay = 20e-3
-                moose.connect(self.cells[ii], 'spike', self.cells[jj].synapse[ii], 'addSpike')
 
+    def setClocksHopfield(self):
+        moose.setClock(0, 1e-4)
+        moose.useClock(0, '/hopfield/##', 'process')
+
+    def runMooseHopfield(self,runtime):
+        moose.start(runtime)
 
 def test(runtime=0.2):
-    hopF = hopfieldNetwork(100)
+    hopF = HopfieldNetwork(100)
 
     pattern1 = hopF.readMemoryFile('memory1.csv')
     hopF.updateWeights(pattern1)
     pattern2 = hopF.readMemoryFile('memory2.csv')
     hopF.updateWeights(pattern2)
 
-    hopF.createNetwork()
+    #hopF.createNetwork()
     hopF.assignAllSynapticWeights()
 
     initialInputs = hopF.readMemoryFile('input.csv')
     hopF.updateInputs(initialInputs)
+    hopF.setClocksHopfield()
 
-    moose.setClock(0, 1e-4)
-    moose.useClock(0, '/hopfield/##', 'process')
     moose.reinit()
     moose.start(runtime)
 
