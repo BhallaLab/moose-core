@@ -61,6 +61,8 @@ KEY_WINDOW_GEOMETRY = 'main/geometry'
 KEY_WINDOW_LAYOUT = 'main/layout'
 KEY_RUNTIME_AUTOHIDE = 'main/rtautohide'
 KEY_DEMOS_DIR = 'main/demosdir'
+KEY_HOME_DIR = os.path.abspath(__file__).rstrip('config.py')
+KEY_ICON_DIR = os.path.join(KEY_HOME_DIR,'icons')
 
 QT_VERSION = str(QtCore.QT_VERSION_STR).split('.')
 QT_MAJOR_VERSION = int(QT_VERSION[0])
