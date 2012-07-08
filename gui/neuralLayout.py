@@ -228,7 +228,7 @@ class updatepaintGL(PyGLWidget):
 	        ch.append(all_ch[i])
         return tuple(ch)  
         
-    def setColorMap(self,vizMinVal=-0.1,vizMaxVal=0.07,moosepath='',variable='Vm',cMap='jet'):
+    def setColorMap(self,vizMinVal=-0.07,vizMaxVal=0.02,moosepath='',variable='Vm',cMap='jet'):
     	self.colorMap = []
     	self.stepVals = []
     	self.moosepath = moosepath
