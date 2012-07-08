@@ -1,0 +1,93 @@
+Instructions by Aditya Gilra to use Ubuntu Customization Kit to make MOOSE liveDVDs / liveUSBs:
+Dt: 2012 Jul 09
+
+Customization of Ubuntu liveDVD / liveUSB:
+Not sure if you need to be running the same version of Ubuntu as the liveCD you're customizing?
+But 32-bit can be customized on 64-bit linux, not vice-versa.
+
+Install Ubuntu Customization Kit 2.4.5 via synaptic. 5GB free space needed to customize a live CD.
+
+2.4.5 has a bug (resolv.conf copying issues) and synaptic does not have the latest 2.4.7 by default.
+So:
+sudo nano /usr/lib/uck/remaster-live-cd.sh
+change around line 356:
+ cp -f /etc/resolv.conf "$REMASTER_DIR/etc/resolv.conf" || 
+to
+ cp -f --remove-destination /etc/resolv.conf "$REMASTER_DIR/etc/resolv.conf" ||
+
+Now run mainmenu -> system tools -> UCK, select the default downloaded ubuntu iso,
+ set the settings (use manual configuration) and system will be ready.
+You need an internet connection, as uck updates after setting up the file structure.
+Then it asks to select package manager / console application.
+Double click the choices to execute; select and ok will exit from UCK!!!
+package manager says none found, since synaptic not present by default on 12.04!
+use console application to install packages (by default you're logged in as root).
+
+From the console: nano /etc/apt/sources.list and add these lines:
+deb http://archive.ubuntu.com/ubuntu/ precise universe
+deb http://archive.ubuntu.com/ubuntu/ precise multiverse
+Reload/update package list! apt-get update (different from apt-get upgrade.)
+Now run 'software-center'. Install synaptic from software-center; OR 'apt-get install synaptic'.
+Below packages can also be installed via synaptic / software-center.
+You can even exit from the console and double-click package manager -- will work now that synaptic is installed.
+
+Dependencies for moose:
+Always first apt-get update (to get latest list of packages), then install/upgrade.
+apt-get install g++ swig subversion libgsl0-dev python-dev python-numpy
+(./configure, make and sudo make install : libSBML from sourceforge for 'make use_libSBML=1'; off by default.
+requires libxml2 and libxml2-dev via apt-get / synaptic.)
+for the gui:s
+apt-get install python-qt4
+apt-get install python-qt4-gl python-pygraphviz python-matplotlib (these require universe/multiverse repositories enabled, see above.)
+
+Adding user below retains that user in the liveCD and that user comes up as the default user in the liveCD.
+'adduser moose' (added /home/moose), but su moose goes to /home/aditya. But cannot create dir there.
+You need to cd /home/moose to mkdir there!
+Though changes to .subversion/servers in /home/aditya reflected in .subversion/servers in /home/moose!!!
+Now give superuser priviledges to 'moose' user. run 'visudo' and below the line:
+root    ALL=(ALL:ALL) ALL
+add this line:
+moose   ALL=(ALL:ALL) ALL
+
+Now 'su moose':
+nano ~/.subversion/servers and in the last [global] sections, set http-proxy- host and port.
+svn co https://moose.svn.sourceforge.net/svnroot/moose/moose/branches/dh_branch moose_src
+Inside /home/moose/moose/branches/dh_branch, run: make BUILD=release (default is debug)
+as root: cp -R /home/moose/moose/branches/dh_branch/python/moose /usr/lib/python2.7/dist-packages/
+But then, you cannot do an svn update and get the latest MOOSE gui. So instead:
+Added export PYTHONPATH=/home/moose/moose_src/python in /etc/skel/.bashrc (This gets loaded into /home/moose on login using liveCD/USB!).
+
+as moose: cp /home/moose/moose/branches/dh_branch/gui/MooseGUI.desktop /home/moose/Desktop/MooseGUI.desktop
+Warning: In the MooseGUI.desktop, write /home/moose/...not ~/ . Icons etc don't display with ~/ .
+
+Also installed openjdk-6-jre and icedtea-plugin (holder for icedtea-6-plugin) for java applets in firefox.
+
+For further customization of background etc, see here (but see only the customization part, the manual mounting etc does not use UCK):
+https://help.ubuntu.com/community/LiveCDCustomization
+
+ATTENTION: After customization, do not proceed with "building" using the GUI. It will delete the file structure and your customizations after creating your ISO :( ??!!
+Ctrl-C it in the terminal (note that the script unmounts the filesystems, so no problem with Ctrl-C). And then use commandline tools as below...
+
+The commandline tools of UCK are much more powerful. See them in logical order here:
+http://uck.svn.sourceforge.net/viewvc/uck/trunk/uck/docs/html/api.html
+and more tutorial-like here:
+http://fabrizioballiano.net/2007/11/27/remastering-an-ubuntu-alternate-iso-with-ubuntu-customization-kit-the-complete-guide/
+
+To make further changes to an existing customized file structure AFTER exiting the GUI (don't build via it, it'll delete your changes at the end),
+you first chroot to the customized file structure (no need of args -- defaults are fine as long as defaults were used in the gui):
+sudo uck-remaster-chroot-rootfs [remaster-dir] [what-to-execute]
+then make changes, then customize, pack-rootfs and pack the iso:
+$CUSTOMIZE_DIR/customize_iso
+### No need of finalize step: not present in uck-remaster
+### sudo uck-remaster-finalize-alternate gpg-key-id [remaster-dir]
+### [get ket from here: http://www.madboa.com/geek/gpg-quickstart/#keyintro ]
+sudo uck-remaster-pack-rootfs -c
+### sudo uck-remaster-pack-iso [iso-file-name.iso] [remaster-dir] [-h|--hybrid] [-g|--generate-md5] [-a|--arch=x86,x86_64,ia64,ppc]  [-d|--description=CD_description]
+sudo uck-remaster-pack-iso moose.iso -h
+[--hybrid is for usb-cum-cd. so give -h] The moose.iso is created in folder remaster-new-files.
+Do NOT do a uck-remaster-clean or uck-remaster-clean-all at the end if you want to reuse the customized file structure!
+
+To reuse just the settings (WARNING: deletes previous liveCD filestructure without confirmation),
+in ~/tmp (default location), run:
+sudo uck-remaster /media/data/FILAB/software/linux/ubuntu-12.04-desktop-i386.iso customization-scripts
+WARNING: The liveCD file structure gets deleted (without asking) and made again, so be careful :( !!!
