@@ -10,7 +10,7 @@ readNetworkMLFromFile(...) to load a standalone NetworkML file, OR
 readNetworkML(...) to load from an xml.etree xml element (could be part of a larger NeuroML file).
 """
 
-from xml.etree import ElementTree as ET
+from xml.etree import cElementTree as ET
 import string
 import os
 from math import cos, sin

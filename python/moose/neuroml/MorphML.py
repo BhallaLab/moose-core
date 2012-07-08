@@ -12,7 +12,7 @@ It is assumed that any channels and synapses referred to by above MorphML
 have already been loaded under that same name in /library in MOOSE (use ChannelML loader).
 """
 
-from xml.etree import ElementTree as ET
+from xml.etree import cElementTree as ET
 import string
 import sys
 import math
@@ -71,63 +71,96 @@ class MorphML():
         
         ############################################################
         #### load morphology and connections between compartments
-        for segment in cell.findall(".//{"+self.mml+"}segment"):
+        ## Many neurons exported from NEURON have multiple segments in a section
+        ## Combine those segments into one Compartment / section
+        ## assume segments of a compartment/section are in increasing order and
+        ## assume all segments of a compartment/section have the same cableid
+        ## findall() returns elements in document order:
+        running_cableid = ''
+        running_segid = ''
+        running_comp = None
+        segments = cell.findall(".//{"+self.mml+"}segment")
+        segmentstotal = len(segments)
+        for segnum,segment in enumerate(segments):
             segmentname = segment.attrib['name']
-            print segmentname
-            segmentid = segment.attrib['id']
-            # the moose "hsolve" method assumes compartments to be asymmetric compartments and symmetrizes them
-            # but that is not what we want when translating from Neuron which has only symcompartments -- so be careful!
-            moosesegmentname = segmentname+'_'+segmentid
-            moosesegmentpath = moosecell.path+'/'+moosesegmentname
-            self.segDict[segmentid]=[moosesegmentname]
-            #~ moosesegment = moose.Compartment(moosesegmentname, moosecell) # segmentname is NOT unique - eg: mitral bbmit exported from NEURON
-            moosesegment = moose.Compartment(moosesegmentpath) # segmentname is NOT unique - eg: mitral bbmit exported from NEURON
-            self.cellDictBySegmentId[cellname][1][segmentid] = moosesegment
-            # cable is an optional attribute. Need to change the way things are done.
+            ## cable is an optional attribute. WARNING: Here I assume it is always present.
             cableid = segment.attrib['cable']
-            ## ASSUME 1:1 CORRESPONDENCE BETWEEN Cable and Segment.
-            ## THIS MAY NOT BE TRUE - ENSURE YOUR SEGMENTS HAVE UNIQUE CABLE IDs ALSO!!!!
-            self.cellDictByCableId[cellname][1][cableid] = moosesegment # cables are grouped and densities set for cablegroups. Hence I need to refer to segment according to which cable they belong to.
-            if segment.attrib.has_key('parent'):
-                parentid = segment.attrib['parent'] # I assume the parent is created before the child so that I can immediately connect the child.
-                parent = self.cellDictBySegmentId[cellname][1][parentid]
-                # It is always assumed that axial of parent is connected to raxial of moosesegment
-                # THIS IS WHAT GENESIS readcell() DOES!!! UNLIKE NEURON!
-                # THIS IS IRRESPECTIVE OF WHETHER PROXIMAL x,y,z OF PARENT = PROXIMAL x,y,z OF CHILD.
-                # THIS IS ALSO IRRESPECTIVE OF fraction_along_parent SPECIFIED IN CABLE!
-                # THUS THERE WILL BE NUMERICAL DIFFERENCES BETWEEN MOOSE/GENESIS and NEURON.
-                # moosesegment sends Ra and Vm to parent, parent sends only Vm
-                # actually for symmetric compartment, both parent and moosesegment require each other's Ra/2,
-                # but axial and raxial just serve to distinguish ends.
-                moose.connect(parent,'axial',moosesegment,'raxial')
+            segmentid = segment.attrib['id']
+            ## old cableid still running, hence don't start a new compartment, skip to next segment
+            if cableid == running_cableid:
+                self.cellDictBySegmentId[cellname][1][segmentid] = running_comp
+            ## new cableid starts, hence start a new compartment; also finish previous / last compartment
             else:
-                parent = None
-            proximal = segment.find('./{'+self.mml+'}proximal')
-            if proximal==None:          # If proximal tag is not present,
-                                        # then parent attribute MUST be present in the segment tag!
-                ## if proximal is not present, then
-                ## by default the distal end of the parent is the proximal end of the child
-                moosesegment.x0 = parent.x
-                moosesegment.y0 = parent.y
-                moosesegment.z0 = parent.z
-            else:
-                moosesegment.x0 = float(proximal.attrib["x"])*self.length_factor
-                moosesegment.y0 = float(proximal.attrib["y"])*self.length_factor
-                moosesegment.z0 = float(proximal.attrib["z"])*self.length_factor
-            distal = segment.find('./{'+self.mml+'}distal')
-            moosesegment.x = float(distal.attrib["x"])*self.length_factor
-            moosesegment.y = float(distal.attrib["y"])*self.length_factor
-            moosesegment.z = float(distal.attrib["z"])*self.length_factor
-            ## proximal tag may not be present, so take only distal diameter
-            moosesegment.diameter = float(distal.attrib["diameter"]) * self.length_factor
-            moosesegment.length = math.sqrt((moosesegment.x-moosesegment.x0)**2+\
-                (moosesegment.y-moosesegment.y0)**2+(moosesegment.z-moosesegment.z0)**2)
-            if moosesegment.length == 0.0:          # neuroconstruct seems to set length=0 for round soma!
-                moosesegment.length = moosesegment.diameter
-            ## the empty list at the end below will get populated 
-            ## with the potential synapses on this segment inside set_compartment_param(..)
-            self.segDict[segmentid].extend([(moosesegment.x0,moosesegment.y0,moosesegment.z0),\
-                (moosesegment.x,moosesegment.y,moosesegment.z),moosesegment.diameter,moosesegment.length,[]])
+                ## the moose "hsolve" method assumes compartments to be asymmetric compartments and symmetrizes them
+                ## but that is not what we want when translating from Neuron which has only symcompartments -- so be careful!
+                moosecompname = segmentname+'_'+segmentid
+                moosecomppath = moosecell.path+'/'+moosecompname
+                self.segDict[segmentid]=[moosecompname] ## extended with details of compartment/section when finished up.
+                moosecomp = moose.Compartment(moosecomppath) # segmentname is NOT unique - eg: mitral bbmit exported from NEURON
+                self.cellDictBySegmentId[cellname][1][segmentid] = moosecomp
+                self.cellDictByCableId[cellname][1][cableid] = moosecomp # cables are grouped and densities set for cablegroups. Hence I need to refer to segment according to which cable they belong to.
+                if segment.attrib.has_key('parent'):
+                    parentid = segment.attrib['parent'] # I assume the parent is created before the child so that I can immediately connect the child.
+                    parent = self.cellDictBySegmentId[cellname][1][parentid]
+                    ## It is always assumed that axial of parent is connected to raxial of moosesegment
+                    ## THIS IS WHAT GENESIS readcell() DOES!!! UNLIKE NEURON!
+                    ## THIS IS IRRESPECTIVE OF WHETHER PROXIMAL x,y,z OF PARENT = PROXIMAL x,y,z OF CHILD.
+                    ## THIS IS ALSO IRRESPECTIVE OF fraction_along_parent SPECIFIED IN CABLE!
+                    ## THUS THERE WILL BE NUMERICAL DIFFERENCES BETWEEN MOOSE/GENESIS and NEURON.
+                    ## moosesegment sends Ra and Vm to parent, parent sends only Vm
+                    ## actually for symmetric compartment, both parent and moosesegment require each other's Ra/2,
+                    ## but axial and raxial just serve to distinguish ends.
+                    moose.connect(parent,'axial',moosecomp,'raxial')
+                else:
+                    parent = None
+                proximal = segment.find('./{'+self.mml+'}proximal')
+                if proximal==None:         # If proximal tag is not present,
+                                            # then parent attribute MUST be present in the segment tag!
+                    ## if proximal is not present, then
+                    ## by default the distal end of the parent is the proximal end of the child
+                    moosecomp.x0 = parent.x
+                    moosecomp.y0 = parent.y
+                    moosecomp.z0 = parent.z
+                else:
+                    moosecomp.x0 = float(proximal.attrib["x"])*self.length_factor
+                    moosecomp.y0 = float(proximal.attrib["y"])*self.length_factor
+                    moosecomp.z0 = float(proximal.attrib["z"])*self.length_factor
+                    
+            if segnum==0: # if first segment, change the running compartment from None
+                running_cableid = cableid
+                running_segid = segmentid
+                running_comp = moosecomp
+
+            ## finish up the previous compartment if new cable has started (except if it is the first),
+            ## OR finish up the current compartment if it is the last
+            lastSegBool = (segnum+1==segmentstotal)
+            if (cableid!=running_cableid and segnum!=0) or lastSegBool:
+                if lastSegBool: # if last segment, take distal values from this segment
+                    prev_segment = segment
+                else:
+                    prev_segment = segments[segnum-1]
+                distal = prev_segment.find('./{'+self.mml+'}distal')
+                running_comp.x = float(distal.attrib["x"])*self.length_factor
+                running_comp.y = float(distal.attrib["y"])*self.length_factor
+                running_comp.z = float(distal.attrib["z"])*self.length_factor
+                ## proximal tag may not be present, so take only distal diameter
+                running_comp.diameter = float(distal.attrib["diameter"]) * self.length_factor
+                running_comp.length = math.sqrt((running_comp.x-running_comp.x0)**2+\
+                    (running_comp.y-running_comp.y0)**2+(running_comp.z-running_comp.z0)**2)
+                if running_comp.length == 0.0:          # neuroconstruct seems to set length=0 for round soma!
+                    running_comp.length = running_comp.diameter
+                ## the empty list at the end below will get populated 
+                ## with the potential synapses on this segment, in function set_compartment_param(..)
+                self.segDict[running_segid].extend([(running_comp.x0,running_comp.y0,running_comp.z0),\
+                    (running_comp.x,running_comp.y,running_comp.z),running_comp.diameter,running_comp.length,[]])
+                print 'Set up compartment/section', running_comp.name
+
+            ## change the running variables whenever a new cable starts
+            ## important to change this after finishing the previous running compartment
+            if cableid!=running_cableid:
+                running_cableid = cableid
+                running_segid = segmentid
+                running_comp = moosecomp
 
         ###############################################
         #### load biophysics into the compartments
@@ -247,6 +280,7 @@ class MorphML():
         elif name == 'RM':
             compartment.Rm = value/(math.pi*compartment.diameter*compartment.length)
         elif name == 'RA':
+            print compartment.name
             compartment.Ra = value*compartment.length/(math.pi*(compartment.diameter/2.0)**2)
         elif name == 'Em':
             compartment.Em = value
