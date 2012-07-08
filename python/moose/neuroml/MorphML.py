@@ -19,6 +19,7 @@ import math
 from os import path
 import moose
 from moose import utils
+from moose.neuroml.utils import find_first_file
 from ChannelML import ChannelML
 
 class MorphML():
@@ -309,8 +310,16 @@ class MorphML():
                 if not moose.exists("/library/"+mechanismname):
                     cmlR = ChannelML(self.nml_params)
                     model_filename = mechanismname+'.xml'
-                    model_path = path.join(self.model_dir, model_filename)
-                    cmlR.readChannelMLFromFile(model_path)
+                    model_path = find_first_file(model_filename,self.model_dir)
+                    if model_path is not None:
+                        cmlR.readChannelMLFromFile(model_path)
+                    else:
+                        raise IOError(
+                            'For mechanism {0}: files {1} not found under {2}.'.format(
+                                mechanismname, model_filename, self.model_dir
+                            )
+                        )
+
                 neutralObj = moose.Neutral("/library/"+mechanismname)
                 if 'CaConc' == neutralObj.class_: # Ion concentration pool
                     libcaconc = moose.CaConc("/library/"+mechanismname)

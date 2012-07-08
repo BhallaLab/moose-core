@@ -48,7 +48,7 @@ class NeuroML():
         moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
         tree = ET.parse(filename)
         root_element = tree.getroot()
-        self.model_dir = path.dirname( filename )
+        self.model_dir = path.dirname( path.abspath( filename ) )
         self.lengthUnits = root_element.attrib['lengthUnits']
         self.temperature = CELSIUS_default # gets replaced below if tag for temperature is present
         self.temperature_default = True
