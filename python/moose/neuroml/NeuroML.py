@@ -23,7 +23,7 @@ For testing, you can also call this from the command line with a neuroML file as
 
 import moose
 from moose.utils import *
-from xml.etree import ElementTree as ET
+from xml.etree import cElementTree as ET
 from ChannelML import ChannelML
 from MorphML import MorphML
 from NetworkML import NetworkML
