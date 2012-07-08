@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sun Jul  8 14:00:31 2012 (+0530)
 # Version: 
-# Last-Updated: Sun Jul  8 15:06:29 2012 (+0530)
+# Last-Updated: Sun Jul  8 15:38:52 2012 (+0530)
 #           By: subha
-#     Update #: 126
+#     Update #: 169
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -65,23 +65,24 @@ def setupmodel(modelpath, iaf_Rm, iaf_Cm, pulse_interval):
     iaf = moose.LeakyIaF('%s/iaf' % (modelpath))
     iaf.Rm = iaf_Rm
     iaf.Cm = iaf_Cm
-    iaf.initVm = -65
-    iaf.Em = -65
-    iaf.Vreset = -65
-    iaf.Vthreshold = -40
+    iaf.initVm = -0.65
+    iaf.Em = -0.65
+    iaf.Vreset = -0.65
+    iaf.Vthreshold = 0.0
     syn = moose.SynChan('%s/syn' % (iaf.path))
     syn.synapse.num = 1
-    syn.Ek = -65
-    syn.Gk = 1.0
+    syn.synapse[0].delay = 0.01
+    syn.Ek = 0.0
+    syn.Gbar = 1.0
     moose.connect(syn, 'IkOut', iaf, 'injectDest')
     moose.connect(iaf, 'VmOut', syn, 'Vm')
     sg = moose.SpikeGen('%s/spike' % (modelpath))
-    sg.threshold = 0.5
+    sg.threshold = 0.1
     moose.connect(sg, 'event', syn.synapse[0], 'addSpike')
     pg = moose.PulseGen('%s/pulse' % (modelpath))
     pg.delay[0] = pulse_interval
     pg.width[0] = 1e-3
-    pg.level[0] = 1.0
+    pg.level[0] = 0.5
     moose.connect(pg, 'outputOut', sg, 'Vm')    
     return {
         'model': model_container,
@@ -95,6 +96,7 @@ if __name__ == '__main__':
     datapath = '/data'
     simtime = 1.0
     setup = setupmodel(modelpath, 1.0, 1.0, 0.1)
+    # Setup data recording
     data_container = moose.Neutral(datapath)
     vm_table = moose.Table('%s/vm' % (data_container.path))
     moose.connect(vm_table, 'requestData', setup['iaf'], 'get_Vm')
@@ -104,7 +106,8 @@ if __name__ == '__main__':
     pulse_table = moose.Table('%s/pulse' % (data_container.path))
     moose.connect(pulse_table, 'requestData', setup['pulsegen'], 'get_output')
     gsyn_table = moose.Table('%s/gk' % (datapath))
-    moose.connect(gsyn_table, 'requestData', setup['synchan'], 'get_Gk')
+    moose.connect(gsyn_table, 'requestData', setup['synchan'], 'get_Ik')
+    # Schedule model components for simulation
     moose.setClock(0, 1e-4)
     moose.setClock(1, 1e-4)
     moose.setClock(2, 1e-4)
@@ -113,15 +116,14 @@ if __name__ == '__main__':
     moose.useClock(1, setup['synchan'].path, 'process')
     moose.useClock(2, setup['iaf'].path, 'process')
     moose.useClock(3, '%s/##' % (datapath), 'process')
+    # Initialize and run simulation
+    moose.reinit()
     moose.start(simtime)
     t = np.linspace(0, simtime, len(pulse_table.vec))
-    plt.plot(t, pulse_table.vec * -1, 'g')
-    print 'Spike table', spike_table.vec
-    plt.plot(spike_table.vec, 'rx')
-    print np.nonzero(np.array(spike_table.vec > 0))[0]
-    # plt.plot(t, vm_table.vec * 1e3, 'b')
-    print 'Vm table', vm_table.vec
-    plt.plot(t, gsyn_table.vec, 'c')
+    plt.plot(t, pulse_table.vec, 'r', label='Input pulse')
+    plt.plot(t, vm_table.vec, 'b', label='Vm')
+    plt.plot(t, gsyn_table.vec, 'c', label='Isyn')
+    plt.legend()
     plt.show()
 
 # 
