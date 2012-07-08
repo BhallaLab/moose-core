@@ -271,7 +271,7 @@ class kineticsWidget(QtGui.QWidget):
                         bgcolor = Annotator(iteminfo).getField('color')
                         textcolor = Annotator(iteminfo).getField('textColor')
                     textcolor,bgcolor = self.colorCheck(item,textcolor,bgcolor,picklecolorMap)
-                    #G.add_node(item.path,label=item.getField('name'),shape='box',color=bgcolor,style='filled',fontname='Helvetica',fontsize='12',fontcolor=textcolor)
+                    G.add_node(item.path,label=item.getField('name'),shape='box',color=bgcolor,style='filled',fontname='Helvetica',fontsize='12',fontcolor=textcolor)
         
         #creating edge
         for inn,out in srcdesConnection.items():
@@ -289,7 +289,7 @@ class kineticsWidget(QtGui.QWidget):
 
         G.layout(prog='dot')
         filename = modelPath.lstrip('/')
-        G.draw(os.getcwd()+'/'+filename+'.png',prog='dot',format='png')
+        #G.draw(os.getcwd()+'/'+filename+'.png',prog='dot',format='png')
         graphCord = {}
         self.qGraCompt = {}
         self.mooseId_GText = {}
