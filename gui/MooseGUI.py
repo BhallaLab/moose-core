@@ -433,7 +433,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             plotWin = self.plotNameWinDict[str(self.plotConfigWinSelectionComboBox.currentText())] 
             plotWin.plot.addTable(newTable,self.plotConfigCurrentSelection.getField('name')+'.'+newTable.getField('name'))
             plotWin.plot.nicePlaceLegend()
-            #plotWin.show()
+            plotWin.plot.axes.figure.canvas.draw()    
             self.mdiArea.addSubWindow(plotWin)
             self.activeWindow = plotWin
 
@@ -444,6 +444,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             plotWin.setWindowTitle(str(self.plotConfigWinSelectionComboBox.currentText()))
             plotWin.plot.addTable(newTable,self.plotConfigCurrentSelection.getField('name')+'.'+newTable.getField('name'))
             plotWin.plot.nicePlaceLegend()
+            plotWin.plot.axes.figure.canvas.draw()
             plotWin.show()
             self.plotNameWinDict[str(self.plotConfigWinSelectionComboBox.currentText())] = plotWin
             self.mdiArea.addSubWindow(plotWin)
@@ -463,6 +464,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.plotWindowFieldTableDict[str(self.plotConfigWinSelectionComboBox.currentText())] = []
 
         plotWin.plot.nicePlaceLegend()
+        
         self.mdiArea.addSubWindow(plotWin)
         self.mdiArea.setActiveSubWindow(plotWin)
         plotWin.show()
