@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'hopfield_ui.ui'
 #
-# Created: Sat Jul  7 22:50:44 2012
+# Created: Sun Jul  8 14:11:37 2012
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,7 +17,7 @@ except AttributeError:
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(389, 459)
+        MainWindow.resize(389, 492)
         MainWindow.setTabShape(QtGui.QTabWidget.Rounded)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
@@ -1258,6 +1258,24 @@ class Ui_MainWindow(object):
         self.mem4PushButton = QtGui.QPushButton(self.centralwidget)
         self.mem4PushButton.setObjectName(_fromUtf8("mem4PushButton"))
         self.gridLayout_2.addWidget(self.mem4PushButton, 1, 3, 1, 1)
+        self.inputPushButton = QtGui.QPushButton(self.centralwidget)
+        self.inputPushButton.setObjectName(_fromUtf8("inputPushButton"))
+        self.gridLayout_2.addWidget(self.inputPushButton, 2, 2, 1, 1)
+        self.saveInputPushButton = QtGui.QPushButton(self.centralwidget)
+        self.saveInputPushButton.setObjectName(_fromUtf8("saveInputPushButton"))
+        self.gridLayout_2.addWidget(self.saveInputPushButton, 2, 3, 1, 1)
+        self.aPushButton = QtGui.QPushButton(self.centralwidget)
+        self.aPushButton.setObjectName(_fromUtf8("aPushButton"))
+        self.gridLayout_2.addWidget(self.aPushButton, 3, 0, 1, 1)
+        self.bPushButton = QtGui.QPushButton(self.centralwidget)
+        self.bPushButton.setObjectName(_fromUtf8("bPushButton"))
+        self.gridLayout_2.addWidget(self.bPushButton, 3, 1, 1, 1)
+        self.cPushButton = QtGui.QPushButton(self.centralwidget)
+        self.cPushButton.setObjectName(_fromUtf8("cPushButton"))
+        self.gridLayout_2.addWidget(self.cPushButton, 3, 2, 1, 1)
+        self.dPushButton = QtGui.QPushButton(self.centralwidget)
+        self.dPushButton.setObjectName(_fromUtf8("dPushButton"))
+        self.gridLayout_2.addWidget(self.dPushButton, 3, 3, 1, 1)
         self.verticalLayout.addLayout(self.gridLayout_2)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
@@ -1289,6 +1307,12 @@ class Ui_MainWindow(object):
         self.mem3PushButton.setText(QtGui.QApplication.translate("MainWindow", "Mem3", None, QtGui.QApplication.UnicodeUTF8))
         self.computeSynWeightsPushButton.setText(QtGui.QApplication.translate("MainWindow", "Compute", None, QtGui.QApplication.UnicodeUTF8))
         self.mem4PushButton.setText(QtGui.QApplication.translate("MainWindow", "Mem4", None, QtGui.QApplication.UnicodeUTF8))
+        self.inputPushButton.setText(QtGui.QApplication.translate("MainWindow", "Input", None, QtGui.QApplication.UnicodeUTF8))
+        self.saveInputPushButton.setText(QtGui.QApplication.translate("MainWindow", "Save ip", None, QtGui.QApplication.UnicodeUTF8))
+        self.aPushButton.setText(QtGui.QApplication.translate("MainWindow", "A", None, QtGui.QApplication.UnicodeUTF8))
+        self.bPushButton.setText(QtGui.QApplication.translate("MainWindow", "B", None, QtGui.QApplication.UnicodeUTF8))
+        self.cPushButton.setText(QtGui.QApplication.translate("MainWindow", "C", None, QtGui.QApplication.UnicodeUTF8))
+        self.dPushButton.setText(QtGui.QApplication.translate("MainWindow", "D", None, QtGui.QApplication.UnicodeUTF8))
         self.menuQuit.setTitle(QtGui.QApplication.translate("MainWindow", "File", None, QtGui.QApplication.UnicodeUTF8))
         self.actionQuit.setText(QtGui.QApplication.translate("MainWindow", "Quit", None, QtGui.QApplication.UnicodeUTF8))
 
