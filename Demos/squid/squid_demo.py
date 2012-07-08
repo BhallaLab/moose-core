@@ -35,8 +35,9 @@ import time
 
 from PyQt4 import QtGui
 from PyQt4 import QtCore
-from PyQt4 import Qwt5 as Qwt
-import PyQt4.Qwt5.anynumpy as numpy
+#from PyQt4 import Qwt5 as Qwt
+#import PyQt4.Qwt5.anynumpy as numpy
+import numpy
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas, NavigationToolbar2QTAgg as NavigationToolbar
 
