@@ -16,7 +16,7 @@ from pylab import *
 
 simdt = 10e-6 # s
 plotdt = 10e-6 # s
-runtime = 0.7 # s
+runtime = 0.2 # s
 
 def loadGran98NeuroML_L123(filename):
     neuromlR = NeuroML()
