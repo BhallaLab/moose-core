@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Jul  5 14:56:27 2012 (+0530)
+// Last-Updated: Sun Jul  8 18:00:07 2012 (+0530)
 //           By: subha
-//     Update #: 8978
+//     Update #: 9074
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -886,12 +886,21 @@ extern "C" {
         //  "Initialize a Id object."},
         {"delete", (PyCFunction)moose_Id_delete, METH_VARARGS,
          "Delete the underlying moose element"},
-        {"getValue", (PyCFunction)moose_Id_getValue, METH_VARARGS,
-         "Return integer representation of the id of the element."},
-        {"getPath", (PyCFunction)moose_Id_getPath, METH_VARARGS,
-         "Return the path of this Id object."},
-        {"getShape", (PyCFunction)moose_Id_getShape, METH_VARARGS,
-         "Get the shape of the Id object as a tuple."},
+        {"setField", (PyCFunction)moose_Id_setField, METH_VARARGS,
+         "setField(fieldname, value_vector)\n"
+         "\n"
+         "Set the value of `fieldname` in all elements under this Id.\n"
+         "\n"
+         "Parameters\n"
+         "----------\n"
+         "fieldname: str\n"
+         "\tfield to be set.\n"
+         "value: sequence of values\n"
+         "\tsequence of values corresponding to individual elements under this\n"
+         "Id.\n"
+         "\n"
+         "NOTE: This is an interface to SetGet::setVec\n"
+        },
         {NULL, NULL, 0, NULL},        /* Sentinel */        
     };
 
@@ -949,7 +958,7 @@ extern "C" {
         0,                                  /* tp_call */
         (reprfunc)moose_Id_str,               /* tp_str */
         PyObject_GenericGetAttr,            /* tp_getattro */
-        PyObject_GenericSetAttr,            /* tp_setattro */
+        (setattrofunc)moose_Id_setattro,            /* tp_setattro */
         0,                                  /* tp_as_buffer */
         Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
         "Id object of moose. Which can act as an array object.",
@@ -1308,6 +1317,215 @@ extern "C" {
         return ret;
     }
 
+
+    
+    static PyObject * moose_Id_setField(_Id * self, PyObject * args)
+    {
+        PyObject * field = NULL;
+        PyObject * value = NULL;
+        if (!PyArg_ParseTuple(args, "OO:moose_Id_setField", &field, &value)){
+            return NULL;
+        }
+        if (moose_Id_setattro(self, field, value) == -1){
+            return NULL;
+        }
+        Py_RETURN_NONE;
+    }
+
+    static int moose_Id_setattro(_Id * self, PyObject * attr, PyObject *value)
+    {
+        char * fieldname = NULL;
+        if (PyString_Check(attr)){
+            fieldname = PyString_AsString(attr);
+        } else {
+            PyErr_SetString(PyExc_TypeError, "Attribute name must be a string");
+            return -1;
+        }
+        string moose_class = Field<string>::get(self->id_, "class");
+        string fieldtype = getFieldType(moose_class, string(fieldname), "valueFinfo");
+        if (fieldtype.length() == 0){
+            // If it is instance of a MOOSE Id then throw
+            // error (to avoid silently creating new attributes due to
+            // typos). Otherwise, it must have been subclassed in
+            // Python. Then we allow normal Pythonic behaviour and
+            // consider such mistakes user's responsibility.
+            string class_name = ((PyTypeObject*)PyObject_Type((PyObject*)self))->tp_name;
+            if (class_name != "Id"){
+                Py_INCREF(attr);
+                int ret = PyObject_GenericSetAttr((PyObject*)self, attr, value);
+                Py_DECREF(attr);
+                return ret;
+            }
+            ostringstream msg;
+            msg << "'" << moose_class << "' class has no field '" << fieldname << "'" << endl;
+            PyErr_SetString(PyExc_AttributeError, msg.str().c_str());
+            return -1;
+        }
+        char ftype = shortType(fieldtype);
+        int ret = 0;
+        switch(ftype){
+            case 'b': {
+                if (!PySequence_Check(value)){
+                    PyErr_SetString(PyExc_TypeError, "For setting vector<int> field, specified value must be a sequence." );
+                }
+                Py_ssize_t length = PySequence_Length(value);
+                vector<bool> _value;
+                for (unsigned int ii = 0; ii < length; ++ii){
+                    PyObject * _v = PySequence_GetItem(value, ii);
+                    bool v = (Py_True ==_v) || (PyInt_AsLong(_v) != 0);
+                    _value.push_back(v);
+                }
+                ret = Field< bool >::setVec(self->id_, string(fieldname), _value);
+                break;
+            }
+            case 'c': {
+                if (!PySequence_Check(value)){
+                    PyErr_SetString(PyExc_TypeError, "For setting vector<int> field, specified value must be a sequence." );
+                }
+                Py_ssize_t length = PySequence_Length(value);
+                vector<char> _value;
+                for (unsigned int ii = 0; ii < length; ++ii){
+                    char * _v = PyString_AsString(value);
+                    if (_v && _v[0]){
+                        _value.push_back(_v[0]);
+                    } else {
+                        ostringstream err;
+                        err << ii << "-th element is not a character or string.";
+                        PyErr_SetString(PyExc_ValueError, err.str().c_str());
+                        return -1;
+                    }
+                }
+                ret = Field< char >::setVec(self->id_, string(fieldname), _value);
+                break;
+            }
+            case 'i': {
+                if (!PySequence_Check(value)){
+                    PyErr_SetString(PyExc_TypeError, "For setting vector<int> field, specified value must be a sequence." );
+                }
+                Py_ssize_t length = PySequence_Length(value);
+                vector<int> _value;
+                for (unsigned int ii = 0; ii < length; ++ii){
+                    int v = PyInt_AsLong(PySequence_GetItem(value, ii));
+                    _value.push_back(v);
+                }
+                ret = Field< int >::setVec(self->id_, string(fieldname), _value);
+                break;
+            }
+            case 'h': {
+                if (!PySequence_Check(value)){
+                    PyErr_SetString(PyExc_TypeError, "For setting vector<short> field, specified value must be a sequence." );
+                } else {
+                    Py_ssize_t length = PySequence_Length(value);
+                    vector<short> _value;
+                    for (unsigned int ii = 0; ii < length; ++ii){
+                        short v = PyInt_AsLong(PySequence_GetItem(value, ii));
+                        _value.push_back(v);
+                    }
+                    ret = Field< short >::setVec(self->id_, string(fieldname), _value);
+                }
+                break;
+            }
+            case 'l': {//SET_VECFIELD(long, l)
+                if (!PySequence_Check(value)){
+                    PyErr_SetString(PyExc_TypeError,
+                                    "For setting vector<long> field, specified value must be a sequence." );
+                } else {
+                    Py_ssize_t length = PySequence_Length(value);
+                    vector<long> _value;
+                    for (unsigned int ii = 0; ii < length; ++ii){
+                        long v = PyInt_AsLong(PySequence_GetItem(value, ii));
+                        _value.push_back(v);
+                    }
+                    ret = Field<long>::setVec(self->id_, string(fieldname), _value);
+                }
+                break;
+            }
+            case 'u': {//SET_VECFIELD(unsigned int, I)
+                if (!PySequence_Check(value)){
+                    PyErr_SetString(PyExc_TypeError, "For setting vector<unsigned int> field, specified value must be a sequence." );
+                } else {
+                    Py_ssize_t length = PySequence_Length(value);
+                    vector<unsigned int> _value;
+                    for (unsigned int ii = 0; ii < length; ++ii){
+                        unsigned int v = PyInt_AsUnsignedLongMask(PySequence_GetItem(value, ii));
+                        _value.push_back(v);
+                    }
+                    ret = Field< unsigned int >::setVec(self->id_, string(fieldname), _value);
+                }
+                break;
+            }
+            case 'I': {//SET_VECFIELD(unsigned long, k)
+                if (!PySequence_Check(value)){
+                    PyErr_SetString(PyExc_TypeError, "For setting vector<unsigned long> field, specified value must be a sequence." );
+                } else {
+                    Py_ssize_t length = PySequence_Length(value);
+                    vector<unsigned long> _value;
+                    for (unsigned int ii = 0; ii < length; ++ii){
+                        unsigned long v = PyInt_AsUnsignedLongMask(PySequence_GetItem(value, ii));
+                        _value.push_back(v);
+                    }
+                    ret = Field< unsigned long >::setVec(self->id_, string(fieldname), _value);
+                }
+                break;
+            }
+            case 'f': {//SET_VECFIELD(float, f)
+                if (!PySequence_Check(value)){
+                    PyErr_SetString(PyExc_TypeError, "For setting vector<float> field, specified value must be a sequence." );
+                } else {
+                    Py_ssize_t length = PySequence_Length(value);
+                    vector<float> _value;
+                    for (unsigned int ii = 0; ii < length; ++ii){
+                        float v = PyFloat_AsDouble(PySequence_GetItem(value, ii));
+                        _value.push_back(v);
+                    }
+                    ret = Field<float>::setVec(self->id_, string(fieldname), _value);
+                }
+                break;
+            }
+            case 'd': {//SET_VECFIELD(double, d)
+                if (!PySequence_Check(value)){
+                    PyErr_SetString(PyExc_TypeError, "For setting vector<double> field, specified value must be a sequence." );
+                } else {
+                    Py_ssize_t length = PySequence_Length(value);
+                    vector<double> _value;
+                    for (unsigned int ii = 0; ii < length; ++ii){
+                        double v = PyFloat_AsDouble(PySequence_GetItem(value, ii));
+                        _value.push_back(v);
+                    }
+                    ret = Field<double>::setVec(self->id_, string(fieldname), _value);
+                }
+                break;
+            }                
+            case 's': {
+                if (!PySequence_Check(value)){
+                    PyErr_SetString(PyExc_TypeError, "For setting vector<string> field, specified value must be a sequence." );
+                } else {
+                    Py_ssize_t length = PySequence_Length(value);
+                    vector<string> _value;
+                    for (unsigned int ii = 0; ii < length; ++ii){
+                        char * v = PyString_AsString(PySequence_GetItem(value, ii));
+                        _value.push_back(string(v));
+                    }
+                    ret = Field<string>::setVec(self->id_, string(fieldname), _value);
+                }
+                break;
+            }
+            default:                
+                break;
+        }
+        // MOOSE Field::set returns 1 for success 0 for
+        // failure. Python treats return value 0 from stters as
+        // success, anything else failure.
+        if (ret){
+            return 0;
+        } else {
+            ostringstream msg;
+            msg <<  "Failed to set field '"  << fieldname << "'";
+            PyErr_SetString(PyExc_AttributeError,msg.str().c_str());
+            return -1;
+        }
+        
+    }
     
     /////////////////////////////////////////////////////
     // ObjId functions.

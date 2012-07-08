@@ -36,15 +36,34 @@ can create multiple references to the same MOOSE object in Python, but
 as long as they have the same Id, they all point to the same entity in
 MOOSE.
 
+Constructor:
+
+You can create a new array element (and the correpsonding Id) via the Id
+constructor:
+
+Id(path, dimension, classname)
+
+Fields:
+
+value -- unsigned integer representation of id
+
+path -- string representing the path corresponding this id
+
+shape -- tuple containing the dimensions of this id
+
+
+Apart from these, every Id exposes the fields of all its elements in a
+vectorized form. For example:
+
+>>> iaf = moose.Id('/iaf', (10), 'IntFire')
+>>> iaf.Vm = range(10) 
+>>> print iaf[5].Vm 
+5.0
+
+
 Methods:
 
-getValue() -- unsigned integer representation of id
-
-getPath() -- string representing the path corresponding this id
-
-getShape -- tuple containing the dimensions of this id
-
-Id also implements part of the sequence protocol:
+Id implements part of the sequence protocol:
 
 len(id) -- the first dimension of id.
 
