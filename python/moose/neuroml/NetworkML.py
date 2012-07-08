@@ -17,7 +17,7 @@ from math import cos, sin
 from MorphML import MorphML
 from ChannelML import ChannelML
 import moose
-from moose.neuroml.utils import meta_ns, nml_ns
+from moose.neuroml.utils import meta_ns, nml_ns, find_first_file
 from moose import utils
 
 class NetworkML():
@@ -128,21 +128,20 @@ class NetworkML():
             cellname = population.attrib["cell_type"]
             populationname = population.attrib["name"]
             print "loading", populationname
-            ## if channel does not exist in library load it from xml file
+            ## if cell does not exist in library load it from xml file
             if not moose.exists('/library/'+cellname):
                 mmlR = MorphML(self.nml_params)
                 model_filenames = (cellname+'.xml', cellname+'.morph.xml')
                 success = False
                 for model_filename in model_filenames:
-                    model_path = os.path.join(self.model_dir, model_filename)
-                    try:
+                    model_path = find_first_file(model_filename,self.model_dir)
+                    if model_path is not None:
                         cellDict = mmlR.readMorphMLFromFile(model_path)
                         success = True
-                    except IOError:
-                        pass
+                        break
                 if not success:
                     raise IOError(
-                        'For cell {0}: files {1} not found in {2}.'.format(
+                        'For cell {0}: files {1} not found under {2}.'.format(
                             cellname, model_filenames, self.model_dir
                         )
                     )
