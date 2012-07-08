@@ -56,7 +56,9 @@ class HopfieldNetwork():
                     if memory[j] == 0:
                         memory[j] = -1
                     self.synWeights[i*len(memory)+j] += memory[i]*memory[j]
+
         self.numMemories += 1
+        print self.numMemories, '#number Of saved memories'
 
     def createNetwork(self):
         '''setting up of the cells and their connections'''
@@ -126,10 +128,10 @@ class HopfieldNetwork():
         '''always call before runnning model'''
         for ii in range(self.numNeurons):
             for jj in range(self.numNeurons):
-                if ii == jj:
+                if (ii == jj):
                     continue
                 self.cells[jj].synapse[ii].weight = float(self.synWeights[(jj*self.numNeurons)+ii]/self.numMemories)
-
+                
     def setClocksHopfield(self):
         moose.setClock(0, 1e-4)
         moose.useClock(0, '/hopfield/##', 'process')
