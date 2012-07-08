@@ -6,4 +6,4 @@ Select the 'files of type' combo box to 'NeuroML/SBML' and open the CA1.net.xml 
 Select the soma (graphical viewer or element tree) and drag and drop Vm from the properties editor to the plot pane.
 Run the simulation and see the soma Vm.
 
-To test on the terminal, just run CA1.py (pops up soma Vm).
+To test on the terminal, just run python CA1.py (pops up soma Vm).
