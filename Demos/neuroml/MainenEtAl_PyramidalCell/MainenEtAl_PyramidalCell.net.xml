@@ -3,21 +3,30 @@
 
 <meta:notes>
 
-Network structure (NeuroML 1.x) for project: CA1PyramidalCell
+Network structure (NeuroML 1.x) for project: MainenEtAl_PyramidalCell saved with neuroConstruct v1.5.3 on: 16:55:45, 08-Jul-12
+
+Cell Group: OriginalCell contains 1 cells
+
 
 </meta:notes>
 
 <meta:properties>
-    <meta:property tag="neuroConstruct_random_seed" value="-1533157804"/>
+    <meta:property tag="neuroConstruct_random_seed" value="1512224207"/>
 
     <meta:property tag="neuroConstruct_sim_config" value="Default Simulation Configuration"/>
+
+    <meta:property tag="neuroConstruct_sim_duration" value="60.0"/>
+
+    <meta:property tag="neuroConstruct_sim_time_step" value="0.01"/>
+
+    <meta:property tag="neuroConstruct_temperature" value="23.0"/>
 </meta:properties>
 
         <populations>
-    <!-- change cell_type to CA1 or CA1_onlysoma to switch between full / single compartment cell -->
-    <population name="CA1group" cell_type="CA1">
+    <population name="OriginalCell" cell_type="MainenCellMod">
         <meta:properties>
-            <meta:property tag="color" value="0.69921875 0.5703125 0.96484375"/>
+            <meta:property tag="color" value="0.19921875 0.19921875 0.19921875"/>
+
         </meta:properties>
         <instances size="1">
             <instance id="0">
@@ -33,9 +42,9 @@ Network structure (NeuroML 1.x) for project: CA1PyramidalCell
 
 
         <inputs units="Physiological Units">
-    <input name="CA1_10pA">
-        <pulse_input delay="0.0" duration="500.0" amplitude="3.0E-4"/>
-        <target population="CA1group">
+    <input name="SomaStim">
+        <pulse_input delay="0.0" duration="500.0" amplitude="5E-4"/>
+        <target population="OriginalCell">
             <sites size="1">
                 <site cell_id="0" segment_id="0" fraction_along="0.5"/>
             </sites>
