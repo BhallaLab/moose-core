@@ -1,5 +1,6 @@
 import sys
-
+import os
+os.environ['NUMPTHREADS'] = '1'
 from PyQt4 import QtCore,QtGui
 from PyQt4.QtCore import QEvent, Qt
 import numpy as np
@@ -25,6 +26,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.runCount = 0
         self.runPushButton.setEnabled(False)
         self.statusbar.showMessage('Hopfield Network Demo')
+        self.inputChanged = False
 
     def defaultButtonState(self):
         self.mem1PushButton.setEnabled(False)
@@ -58,6 +60,8 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             exec(('inpList.append(int(self.pushButton_%s.isChecked()))' %i))
         self.input = inpList
         self.inputPushButton.setEnabled(True)
+        self.inputChanged = True
+        self.runCount = 0
 
     def computeAllWeights(self):
         self.statusbar.showMessage('Computing synaptic weights')
@@ -67,28 +71,28 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
     def runStep(self):
         self.statusbar.showMessage('Running')
 
-        if self.runCount == 0:
-            if self.input:
-                inputPattern = self.input
-                self.hop.updateInputs(inputPattern) #input updating
-                self.hop.mooseReinit()
-                self.hop.runMooseHopfield(0.03010)
-            else:
-                print 'INPUT NOT GIVEN!'
-                return
+        if self.inputChanged:
+            inputPattern = self.input
+            self.hop.updateInputs(inputPattern) #input updating
+            self.hop.mooseReinit()
+            self.hop.runMooseHopfield(0.0310)
 
+        if self.runCount == 0:
             for i in range(100):
-                if np.any((self.hop.allSpikes[i].vec>0.0)&(self.hop.allSpikes[i].vec<0.0301)):
+                if np.any((self.hop.allSpikes[i].vec>0.0)&(self.hop.allSpikes[i].vec<0.0310)):
                     exec(('self.pushButton_%s.setChecked(True)' %i))
                 else:
                     exec(('self.pushButton_%s.setChecked(False)' %i))
+
         else:
             self.hop.runMooseHopfield(0.02)
+            #print 0.0310+(0.02*(self.runCount-1)),(0.0310+(0.02*self.runCount))
             for i in range(100):
                 if np.any((self.hop.allSpikes[i].vec>(0.0301+(0.02*(self.runCount-1))))&(self.hop.allSpikes[i].vec<(0.0301+(0.02*self.runCount)))):
                     exec(('self.pushButton_%s.setChecked(True)' %i))
                 else:
                     exec(('self.pushButton_%s.setChecked(False)' %i))
+
         self.runCount += 1
         self.statusbar.showMessage('Done Running')
         
@@ -141,7 +145,6 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             exec(('self.pushButton_%s.setChecked(d[int(%s)])' %(i,i)))
         self.statusbar.showMessage('Showing Sample D')
 
-
     def clearMemory(self):
         self.hop.clearAllMemory()
         self.clearDisplay()
@@ -175,9 +178,11 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         if savedAlready == 1:
             self.mem1 = pattern
             self.mem1PushButton.setEnabled(True)
+            #print pattern
         elif savedAlready == 2:
             self.mem2 = pattern
             self.mem2PushButton.setEnabled(True)
+            #print pattern
         elif savedAlready == 3:
             self.mem3 = pattern
             self.mem3PushButton.setEnabled(True)
