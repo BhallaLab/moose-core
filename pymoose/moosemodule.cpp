@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Sun Jul  8 18:51:51 2012 (+0530)
+// Last-Updated: Sun Jul  8 22:25:36 2012 (+0530)
 //           By: subha
-//     Update #: 9127
+//     Update #: 9128
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -886,6 +886,12 @@ extern "C" {
         //  "Initialize a Id object."},
         {"delete", (PyCFunction)moose_Id_delete, METH_VARARGS,
          "Delete the underlying moose element"},
+                {"getValue", (PyCFunction)moose_Id_getValue, METH_VARARGS,
+         "Return integer representation of the id of the element."},
+        {"getPath", (PyCFunction)moose_Id_getPath, METH_VARARGS,
+         "Return the path of this Id object."},
+        {"getShape", (PyCFunction)moose_Id_getShape, METH_VARARGS,
+         "Get the shape of the Id object as a tuple."},
         {"setField", (PyCFunction)moose_Id_setField, METH_VARARGS,
          "setField(fieldname, value_vector)\n"
          "\n"
