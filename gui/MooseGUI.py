@@ -242,6 +242,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             #self.mooseHandler.updateClocks(MooseHandler.DEFAULT_SIMDT, MooseHandler.DEFAULT_PLOTDT)
             #use Aditya's method to assign clocks - also reinits!
             mooseUtils.resetSim(['/cells','/elec'], MooseHandler.DEFAULT_SIMDT, MooseHandler.DEFAULT_PLOTDT)
+
         elif modeltype == MooseHandler.type_python:
             #specific for the hopfield tutorial!
             #self.mooseHandler.updateClocks(MooseHandler.DEFAULT_SIMDT, MooseHandler.DEFAULT_PLOTDT)
@@ -466,10 +467,10 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.plotWindowFieldTableDict[str(self.plotConfigWinSelectionComboBox.currentText())] = []
 
         #plotWin.plot.nicePlaceLegend()
-        
+
         self.mdiArea.addSubWindow(plotWin)
         self.mdiArea.setActiveSubWindow(plotWin)
-        plotWin.show()
+        plotWin.show()        
 
         self.activeWindow = plotWin
 
@@ -556,6 +557,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             plotWin.plot.addTable(graph,graph.getField('name'))
         plotWin.show()
         plotWin.plot.nicePlaceLegend()
+        plotWin.plot.axes.figure.canvas.draw()
         self.plotNameWinDict['Plot Window 1'] = plotWin
         self.mdiArea.setActiveSubWindow(self.activeWindow)
         self.activeWindow = plotWin

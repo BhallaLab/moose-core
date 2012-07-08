@@ -28,7 +28,7 @@ class MyMplCanvas(FigureCanvas):
         self.axes.set_ylabel('Value')
         #selfax = plt.subplot(111)
         self.compute_initial_figure()
-        FigureCanvas.__init__(self, self.fig)
+        self.canvas = FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
         
         FigureCanvas.setSizePolicy(self,
@@ -41,14 +41,14 @@ class MyMplCanvas(FigureCanvas):
         box = self.axes.get_position()
         self.axes.set_position([box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.9])
         # Put a legend below current axis
-        self.axes.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),fancybox=True, shadow=True, ncol=5)
+        self.axes.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),fancybox=True, shadow=True, ncol=3)
 
     def sizeHint(self):
         w, h = self.get_width_height()
-        return QSize(w, h)
+        return QtCore.QSize(w, h)
 
     def minimumSizeHint(self):
-        return QSize(10, 10)
+        return QtCore.QSize(10, 10)
 
     def compute_initial_figure(self):
         pass
@@ -135,38 +135,6 @@ class MoosePlot(MyMplCanvas):
             print 'Saving', filename
             table.dumpFile(filename)
 
-# class MoosePlotWindow(QtGui.QMainWindow):
-
-#     def __init__(self, *args):
-#         QtGui.QMainWindow.__init__(self, *args)
-
-#         self.resize(567, 497)
-#         self.centralwidget = QtGui.QWidget(self)
-#         self.centralwidget.setObjectName("centralwidget")
-#         self.verticalLayout = QtGui.QVBoxLayout(self.centralwidget)
-#         self.verticalLayout.setObjectName("verticalLayout")
-#         self.plot = MoosePlot(self.centralwidget)
-#         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-#         sizePolicy.setHorizontalStretch(0)
-#         sizePolicy.setVerticalStretch(0)
-#         sizePolicy.setHeightForWidth(self.plot.sizePolicy().hasHeightForWidth())
-#         self.plot.setSizePolicy(sizePolicy)
-#         self.plot.setObjectName("plot")
-
-#         qToolBar = QtGui.QToolBar()
-#         self.toolbar = NavigationToolbar(self.plot, qToolBar)
-#         qToolBar.addWidget(self.toolbar)
-#         qToolBar.setMovable(False)
-#         qToolBar.setFloatable(False)
-#         self.addToolBar(Qt.BottomToolBarArea, qToolBar)
-
-#         self.verticalLayout.addWidget(self.plot)
-#         self.setCentralWidget(self.centralwidget)
-        
-#     def closeEvent(self, event):
-#         self.emit(QtCore.SIGNAL('windowClosed()'))
-#         self.hide()
-
 class MoosePlotWindow(QtGui.QMdiSubWindow):
     """This is to customize MDI sub window for our purpose.
 
@@ -185,28 +153,18 @@ class newPlotSubWindow(QtGui.QMdiSubWindow):
 
     def __init__(self, *args):
         QtGui.QMdiSubWindow.__init__(self, *args)
-#        print self.height(),self.width(),float(self.width()*0.38,float(self.height()*0.38
-#        self.horizontalLayout = QtGui.QVBoxLayout(self)
-#        self.horizontalLayout.setObjectName("horizonalLayout")
-#        self.GLayout = QtGui.QGridLayout(self)
-        self.plot = MoosePlot(self,width=6,height=6)#, width=float(self.width()*0.38, height=float(self.height()*0.38)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.plot.sizePolicy().hasHeightForWidth())
-        self.plot.setSizePolicy(sizePolicy)
+        self.plot = MoosePlot(self,width=6,height=6)
         self.plot.setObjectName("plot")
-        self.setSizePolicy(sizePolicy)
-#        self.GLayout.addWidget(self.plot)
-#        self.horizontaLayout.addWidget(self.plot)
 
-        # qToolBar = QtGui.QToolBar()
-        # self.toolbar = NavigationToolbar(self.plot, qToolBar)
-        # qToolBar.addWidget(self.toolbar)
-        # qToolBar.setMovable(False)
-        # qToolBar.setFloatable(False)
-        # self.addToolBar(Qt.BottomToolBarArea, qToolBar)
+        l = self.layout()
+        l.addWidget(self.plot)
 
+        qToolBar = QtGui.QToolBar()
+        self.toolbar = NavigationToolbar(self.plot, qToolBar)
+        qToolBar.addWidget(self.toolbar)
+        qToolBar.setMovable(False)
+        qToolBar.setFloatable(False)
+        l.addWidget(qToolBar)
         
     def closeEvent(self, event):
         self.emit(QtCore.SIGNAL('subWindowClosed()'))
