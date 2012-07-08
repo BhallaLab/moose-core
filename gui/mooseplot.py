@@ -76,7 +76,6 @@ class MoosePlot(MyMplCanvas):
         try: #checks if table is already added
             curve = self.tableCurveMap[table]
         except KeyError:
-            print 'Adding Table ',table
             if curve_name is None:
                 curve_name = table.getField('path')
             curve, =  self.axes.plot([0],[0],label=curve_name)
