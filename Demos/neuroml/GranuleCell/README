@@ -7,4 +7,4 @@ Select the 'files of type' combo box to 'NeuroML/SBML' and open the GranuleCell.
 Select the soma (graphical viewer or element tree) and drag and drop Vm from the properties editor to the plot pane.
 Run the simulation and see the soma Vm.
 
-To test on the terminal, just run Granule98.py (uses exponential euler) or Granule98_hsolve.py (uses hines solver).
+To test on the terminal, just run python Granule98.py (uses exponential euler) or python Granule98_hsolve.py (uses hines solver).

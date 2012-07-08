@@ -115,6 +115,12 @@ Value for scaling factor to apply to current to get change in conc should be
                     </bio:parameter>
                 </bio:mechanism>
 
+                <!--<bio:mechanism name="Purkinje_KA" type="Channel Mechanism">
+                    <bio:parameter name="gmax" value="0.0">
+                        <bio:group>all</bio:group>
+                    </bio:parameter>
+                </bio:mechanism>-->
+
                 <bio:spec_capacitance>
                     <bio:parameter value="1.0">
                         <bio:group>all</bio:group>
