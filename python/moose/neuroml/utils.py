@@ -16,6 +16,8 @@ from math import *
 import moose
 import os
 
+neuroml_debug = False
+
 neuroml_ns='http://morphml.org/neuroml/schema'
 nml_ns='http://morphml.org/networkml/schema'
 mml_ns='http://morphml.org/morphml/schema'
