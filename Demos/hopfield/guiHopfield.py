@@ -20,6 +20,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.mem2 = []
         self.mem3 = []
         self.mem4 = []
+        self.input = []
         self.connectElements()
         self.runCount = 0
         self.runPushButton.setEnabled(False)
@@ -30,6 +31,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.mem2PushButton.setEnabled(False)
         self.mem3PushButton.setEnabled(False)
         self.mem4PushButton.setEnabled(False)
+        self.inputPushButton.setEnabled(False)
 
     def connectElements(self):
         self.connect(self.clearDisplayPushButton,QtCore.SIGNAL('clicked()'), self.clearDisplay)
@@ -41,24 +43,40 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.connect(self.mem2PushButton,QtCore.SIGNAL('clicked()'),self.retriveMem2)
         self.connect(self.mem3PushButton,QtCore.SIGNAL('clicked()'),self.retriveMem3)
         self.connect(self.mem4PushButton,QtCore.SIGNAL('clicked()'),self.retriveMem4)
+        self.connect(self.inputPushButton,QtCore.SIGNAL('clicked()'),self.retriveInput)
+        self.connect(self.saveInputPushButton,QtCore.SIGNAL('clicked()'),self.saveInput)
+        self.connect(self.aPushButton,QtCore.SIGNAL('clicked()'),self.retriveA)
+        self.connect(self.bPushButton,QtCore.SIGNAL('clicked()'),self.retriveB)
+        self.connect(self.cPushButton,QtCore.SIGNAL('clicked()'),self.retriveC)
+        self.connect(self.dPushButton,QtCore.SIGNAL('clicked()'),self.retriveD)
         self.connect(self.computeSynWeightsPushButton,QtCore.SIGNAL('clicked()'),self.computeAllWeights)
+
+    def saveInput(self):
+        print 'saving current pattern as input'
+        inpList = []
+        for i in range(100):
+            exec(('inpList.append(int(self.pushButton_%s.isChecked()))' %i))
+        self.input = inpList
+        self.inputPushButton.setEnabled(True)
 
     def computeAllWeights(self):
         self.statusbar.showMessage('Computing synaptic weights')
         self.hop.assignAllSynapticWeights() #weights are assigned
         self.runPushButton.setEnabled(True)
-        
 
     def runStep(self):
-        inputPattern = []
-        for i in range(100):
-            exec(('inputPattern.append(int(self.pushButton_%s.isChecked()))' %i))
-        self.hop.updateInputs(inputPattern) #input updating
         self.statusbar.showMessage('Running')
 
         if self.runCount == 0:
-            self.hop.mooseReinit()
-            self.hop.runMooseHopfield(0.03010)
+            if self.input:
+                inputPattern = self.input
+                self.hop.updateInputs(inputPattern) #input updating
+                self.hop.mooseReinit()
+                self.hop.runMooseHopfield(0.03010)
+            else:
+                print 'INPUT NOT GIVEN!'
+                return
+
             for i in range(100):
                 if np.any((self.hop.allSpikes[i].vec>0.0)&(self.hop.allSpikes[i].vec<0.0301)):
                     exec(('self.pushButton_%s.setChecked(True)' %i))
@@ -67,7 +85,6 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         else:
             self.hop.runMooseHopfield(0.02)
             for i in range(100):
-                
                 if np.any((self.hop.allSpikes[i].vec>(0.0301+(0.02*(self.runCount-1))))&(self.hop.allSpikes[i].vec<(0.0301+(0.02*self.runCount)))):
                     exec(('self.pushButton_%s.setChecked(True)' %i))
                 else:
@@ -95,6 +112,35 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             exec(('self.pushButton_%s.setChecked(self.mem4[int(%s)])' %(i,i)))
         self.statusbar.showMessage('Showing Mem4')
 
+    def retriveInput(self):
+        for i in range(100):
+            exec(('self.pushButton_%s.setChecked(self.input[int(%s)])' %(i,i)))
+        self.statusbar.showMessage('Showing Input')
+
+    def retriveA(self):
+        a = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        for i in range(100):
+            exec(('self.pushButton_%s.setChecked(a[int(%s)])' %(i,i)))
+        self.statusbar.showMessage('Showing Sample A')
+        
+    def retriveB(self):
+        b = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        for i in range(100):
+            exec(('self.pushButton_%s.setChecked(b[int(%s)])' %(i,i)))
+        self.statusbar.showMessage('Showing Sample B')
+
+    def retriveC(self):
+        c = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        for i in range(100):
+            exec(('self.pushButton_%s.setChecked(c[int(%s)])' %(i,i)))
+        self.statusbar.showMessage('Showing Sample C')
+
+    def retriveD(self):
+        d = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        for i in range(100):
+            exec(('self.pushButton_%s.setChecked(d[int(%s)])' %(i,i)))
+        self.statusbar.showMessage('Showing Sample D')
+
 
     def clearMemory(self):
         self.hop.clearAllMemory()
@@ -103,7 +149,11 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.mem1 = []
         self.mem2 = []
         self.mem3 = []
+        self.input = []
         self.statusbar.showMessage('Cleared all Memory')
+        self.runPushButton.setEnabled(False)
+        self.inputPushButton.setEnabled(False)
+        self.runCount = 0
         
     def randomizePattern(self):
         r = np.random.randint(2,size=100)
