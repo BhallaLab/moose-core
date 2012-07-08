@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Sun Jul  8 18:00:07 2012 (+0530)
+// Last-Updated: Sun Jul  8 18:51:51 2012 (+0530)
 //           By: subha
-//     Update #: 9074
+//     Update #: 9127
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -957,7 +957,7 @@ extern "C" {
         (hashfunc)moose_Id_hash,                                  /* tp_hash */
         0,                                  /* tp_call */
         (reprfunc)moose_Id_str,               /* tp_str */
-        PyObject_GenericGetAttr,            /* tp_getattro */
+        (getattrofunc)moose_Id_getattro,            /* tp_getattro */
         (setattrofunc)moose_Id_setattro,            /* tp_setattro */
         0,                                  /* tp_as_buffer */
         Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
@@ -1317,7 +1317,65 @@ extern "C" {
         return ret;
     }
 
+    static PyObject * moose_Id_getattro(_Id * self, PyObject * attr)
+    {
+        char * field = PyString_AsString(attr);
+        string class_name = Field<string>::get(self->id_, "class");
+        string type = getFieldType(class_name, string(field), "valueFinfo");
+        if (type.empty()){
+            // Check if this field name is aliased and update fieldname and type if so.
+            map<string, string>::const_iterator it = get_field_alias().find(string(field));
+            if (it != get_field_alias().end()){
+                field = const_cast<char*>((it->second).c_str());
+                type = getFieldType(Field<string>::get(self->id_, "class"), it->second, "valueFinfo");
+                // Update attr for next level (PyObject_GenericGetAttr) in case.
+                Py_XDECREF(attr);
+                attr = PyString_FromString(field);
+            }
+        }
+        if (type.empty()){
+            return PyObject_GenericGetAttr((PyObject*)self, attr);            
+        }
+        char ftype = shortType(type);
+        if (!ftype){
+            return PyObject_GenericGetAttr((PyObject*)self, attr);
+        }
 
+#define ID_GETVEC(TYPE)                                                 \
+        {                                                               \
+            vector<TYPE> val;                                           \
+            Field< TYPE >::getVec(self->id_, string(field), val);       \
+            npy_intp dims = val.size();                                 \
+            PyArrayObject * ret = (PyArrayObject*)PyArray_SimpleNew(1, &dims, get_npy_typenum(typeid(TYPE))); \
+            char * ptr = PyArray_BYTES(ret);                            \
+            memcpy(ptr, &(val[0]), val.size() * sizeof(TYPE));          \
+            return PyArray_Return(ret);                                 \
+        }                                                               \
+        
+        switch (ftype){
+            case 'b': ID_GETVEC(bool);
+            case 'c': ID_GETVEC(char);
+            case 'i': ID_GETVEC(int);
+            case 'h': ID_GETVEC(short);
+            case 'l': ID_GETVEC(long)
+            case 'I': ID_GETVEC(unsigned int);
+            case 'k': ID_GETVEC(unsigned long);
+            case 'f': ID_GETVEC(float);
+            case 'd': ID_GETVEC(double);
+            case 's': {
+                vector<string> val;
+                Field<string>::getVec(self->id_, string(field), val);
+                PyObject * ret = PyTuple_New(val.size());
+                for (unsigned int ii = 0; ii < val.size(); ++ii){
+                    PyTuple_SetItem(ret, (Py_ssize_t)ii, Py_BuildValue("s", val[ii].c_str()));
+                }
+                return ret;
+            }
+            default:
+                PyErr_SetString(PyExc_ValueError, "Unhandled field type.");
+                return NULL;                
+        }
+    }
     
     static PyObject * moose_Id_setField(_Id * self, PyObject * args)
     {
