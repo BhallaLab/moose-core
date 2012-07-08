@@ -46,7 +46,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.setCorner(Qt.BottomRightCorner,Qt.RightDockWidgetArea)
         self.setCorner(Qt.BottomLeftCorner,Qt.LeftDockWidgetArea)
         self.mooseHandler = MooseHandler()
-        self.mdiArea.setBackground(QtGui.QBrush(QtGui.QImage(os.path.join(config.KEY_ICON_DIR,'QMdiBackground.png'))))
+        #self.mdiArea.setBackground(QtGui.QBrush(QtGui.QImage(os.path.join(config.KEY_ICON_DIR,'QMdiBackground.png'))))
 
         #other variables
         self.currentTime = 0.0
@@ -65,7 +65,6 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.plotConfigAcceptPushButton.setEnabled(False)
         self.plotWindowFieldTableDict = {} #guiPlotWinowName:[mooseTable]
         self.plotNameWinDict = {} #guiPlotWindowName:moosePlotWindow
-        
 
         self.defaultDockState()
 #        self.resizeCentralWidgets()
@@ -98,9 +97,11 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.connect(self.plotConfigAcceptPushButton,QtCore.SIGNAL('pressed()'),self.addFieldToPlot)
         self.connect(self.plotConfigNewWindowPushButton,QtCore.SIGNAL('pressed()'),self.plotConfigAddNewPlotWindow)
         #self.connect(self.plotConfigWinSelectionComboBox,QtCore.SIGNAL('currentIndexChanged(int)'),self.activateSubWindow)
+        self.connect(self.plotConfigDockWidget,QtCore.SIGNAL('visibilityChanged(bool)'),self.actionPlot_Config.setChecked)
         #propEditor connections
         self.connect(self.propEditorSelParentPushButton,QtCore.SIGNAL('pressed()'),self.propEditorSelectParent)
         self.connect(self.propEditorChildListWidget,QtCore.SIGNAL('itemClicked(QListWidgetItem *)'),self.propEditorSelectChild)
+        self.connect(self.mooseObjectEditDock,QtCore.SIGNAL('visibilityChanged(bool)'),self.actionProperty_Editor.setChecked)
         #internal connections
         self.connect(self.mooseHandler, QtCore.SIGNAL('updatePlots(float)'), self.updatePlots)
         #run
@@ -108,6 +109,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.connect(self.simControlRunPushButton, QtCore.SIGNAL('clicked()'), self._resetAndRunSlot)
         self.connect(self.actionRun,QtCore.SIGNAL('triggered()'),self.activeMdiWindow)
         self.connect(self.actionRun,QtCore.SIGNAL('triggered()'),self._resetAndRunSlot)
+        self.connect(self.simControlDockWidget,QtCore.SIGNAL('visibilityChanged(bool)'),self.actionSimulation_Control.setChecked)
 
         self.connect(self.simControlContinuePushButton, QtCore.SIGNAL('clicked()'), self._continueSlot)
         self.connect(self.actionContinue,QtCore.SIGNAL('triggered()'),self._continueSlot)
@@ -116,7 +118,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.connect(self.actionStop,QtCore.SIGNAL('triggered()'),self._stopSlot)
         self.connect(self.simControlStopPushButton, QtCore.SIGNAL('clicked()'),self._stopSlot)
 
-        self.connect(self.actionMoose_Shell,QtCore.SIGNAL('triggered(bool)'),self.toggleMooseShellDockVisibility)
+        #self.connect(self.actionMoose_Shell,QtCore.SIGNAL('triggered(bool)'),self.toggleMooseShellDockVisibility)
         self.connect(self.actionProperty_Editor,QtCore.SIGNAL('triggered(bool)'),self.togglePropEditorDockVisibility)
         self.connect(self.actionPlot_Config,QtCore.SIGNAL('triggered(bool)'),self.togglePlotConfigDockVisibility)
         self.connect(self.actionSimulation_Control,QtCore.SIGNAL('triggered(bool)'),self.toggleSimControlDoctVisibility)
