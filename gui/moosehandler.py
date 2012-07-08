@@ -96,7 +96,7 @@ class MooseHandler(QtCore.QObject):
     type_all = 'allType'
     # Map between file extension and known broad filetypes.
     fileExtensionMap = {
-        'All Supported(*.g *.xml *.bz2 *.zip *.gz *.py)': type_all,
+        'All Supported(*.g *.xml *.bz2 *.zip *.gz)': type_all,
         'Genesis Script(*.g)': type_genesis,
         'neuroML/SBML(*.xml *.bz2 *.zip *.gz)': type_xml,
         'Python script(*.py)': type_python

@@ -294,12 +294,12 @@ class cCylinder(BaseObject):
   		vy = y2-y1
   		vz = z2-z1
 
-  		if(vz == 0.0):
-			vz = .001
+  		if(vz == 0.000):
+			vz = 0.01
 
 		v = sqrt( vx*vx + vy*vy + vz*vz )
  		ax = 57.2957795*arccos( vz/v )
-  		if ( vz < 0.0 ):
+  		if ( vz < 0.000 ):
       			ax = -ax
   		rx = -vy*vz
 		ry = vx*vz

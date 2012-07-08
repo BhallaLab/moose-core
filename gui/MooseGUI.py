@@ -105,9 +105,9 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         #internal connections
         self.connect(self.mooseHandler, QtCore.SIGNAL('updatePlots(float)'), self.updatePlots)
         #run
-        self.connect(self.simControlRunPushButton,QtCore.SIGNAL('clicked()'),self.activeMdiWindow)
+        #self.connect(self.simControlRunPushButton,QtCore.SIGNAL('clicked()'),self.activeMdiWindow)
         self.connect(self.simControlRunPushButton, QtCore.SIGNAL('clicked()'), self._resetAndRunSlot)
-        self.connect(self.actionRun,QtCore.SIGNAL('triggered()'),self.activeMdiWindow)
+        #self.connect(self.actionRun,QtCore.SIGNAL('triggered()'),self.activeMdiWindow)
         self.connect(self.actionRun,QtCore.SIGNAL('triggered()'),self._resetAndRunSlot)
         self.connect(self.simControlDockWidget,QtCore.SIGNAL('visibilityChanged(bool)'),self.actionSimulation_Control.setChecked)
 
