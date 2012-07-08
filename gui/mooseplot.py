@@ -186,8 +186,8 @@ class newPlotSubWindow(QtGui.QMdiSubWindow):
     def __init__(self, *args):
         QtGui.QMdiSubWindow.__init__(self, *args)
 #        print self.height(),self.width(),float(self.width()*0.38,float(self.height()*0.38
-#        self.verticalLayout = QtGui.QVBoxLayout(self)
-#        self.verticalLayout.setObjectName("verticalLayout")
+#        self.horizontalLayout = QtGui.QVBoxLayout(self)
+#        self.horizontalLayout.setObjectName("horizonalLayout")
 #        self.GLayout = QtGui.QGridLayout(self)
         self.plot = MoosePlot(self,width=6,height=6)#, width=float(self.width()*0.38, height=float(self.height()*0.38)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
@@ -198,7 +198,8 @@ class newPlotSubWindow(QtGui.QMdiSubWindow):
         self.plot.setObjectName("plot")
         self.setSizePolicy(sizePolicy)
 #        self.GLayout.addWidget(self.plot)
-#        self.verticalLayout.addWidget(self.plot)
+#        self.horizontaLayout.addWidget(self.plot)
+
         # qToolBar = QtGui.QToolBar()
         # self.toolbar = NavigationToolbar(self.plot, qToolBar)
         # qToolBar.addWidget(self.toolbar)
