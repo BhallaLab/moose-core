@@ -1,0 +1,11 @@
+#!/usr/bin/env xdg-open
+
+[Desktop Entry]
+Version=1.5beta
+Type=Application
+Terminal=true
+Icon[en_US]=/home/moose/moose_src/gui/icons/hopfield.png
+Name[en_US]=MooseGUI
+Exec=python /home/moose/moose_src/Demos/hopfield/guiHopfield.py
+Name=MooseGUI
+Icon=/home/moose/moose_src/gui/icons/hopfield.png
