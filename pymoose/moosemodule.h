@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 17:11:06 2011 (+0530)
 // Version: 
-// Last-Updated: Sat Jun 23 10:16:18 2012 (+0530)
+// Last-Updated: Sun Jul  8 17:51:47 2012 (+0530)
 //           By: subha
-//     Update #: 922
+//     Update #: 924
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -90,6 +90,8 @@ extern "C" {
     static PyObject * moose_Id_getShape(_Id * self, PyObject * args);    
     static PyObject * moose_Id_richCompare(_Id * self, PyObject * args, int op);
     static int moose_Id_contains(_Id * self, PyObject * args);
+    static int moose_Id_setattro(_Id * self, PyObject * attr, PyObject * value);
+    static PyObject * moose_Id_setField(_Id * self, PyObject *args);
     ///////////////////////////////////////////
     // Methods for ObjId class
     ///////////////////////////////////////////
