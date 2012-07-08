@@ -51,7 +51,7 @@ class ChannelML():
             print "wrong units", units,": exiting ..."
             sys.exit(1)
         moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
-        print "loading synapse :",synapseElement.attrib['name'],"into /library ."
+        if utils.neuroml_debug: print "loading synapse :",synapseElement.attrib['name'],"into /library ."
         moosesynapse = moose.SynChan('/library/'+synapseElement.attrib['name'])
         doub_exp_syn = synapseElement.find('./{'+self.cml+'}doub_exp_syn')
         moosesynapse.Ek = float(doub_exp_syn.attrib['reversal_potential'])*Vfactor
@@ -82,7 +82,7 @@ class ChannelML():
             sys.exit(1)
         moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
         channel_name = channelElement.attrib['name']
-        print "loading channel :", channel_name,"into /library ."
+        if utils.neuroml_debug: print "loading channel :", channel_name,"into /library ."
         IVrelation = channelElement.find('./{'+self.cml+'}current_voltage_relation')
         concdep = IVrelation.find('./{'+self.cml+'}conc_dependence')
         if concdep is None:

@@ -19,7 +19,7 @@ import math
 from os import path
 import moose
 from moose import utils
-from moose.neuroml.utils import find_first_file
+from moose.neuroml.utils import neuroml_debug, find_first_file
 from ChannelML import ChannelML
 
 class MorphML():
@@ -154,7 +154,7 @@ class MorphML():
                 ## with the potential synapses on this segment, in function set_compartment_param(..)
                 self.segDict[running_segid].extend([(running_comp.x0,running_comp.y0,running_comp.z0),\
                     (running_comp.x,running_comp.y,running_comp.z),running_comp.diameter,running_comp.length,[]])
-                print 'Set up compartment/section', running_comp.name
+                if neuroml_debug: print 'Set up compartment/section', running_comp.name
 
             ## change the running variables whenever a new cable starts
             ## important to change this after finishing the previous running compartment
@@ -218,7 +218,7 @@ class MorphML():
                             self.set_group_compartment_param(cell, cellname, parameter,\
                              'Em', Efactor*float(parameter.attrib["value"]), self.bio)
                         else:
-                            print "Yo programmer! You left out parameter ",\
+                            print "WARNING: Yo programmer of MorphML! You didn't implement parameter ",\
                              parametername, " in mechanism ",mechanismname
                     else:
                         if parametername in ['gmax']:
@@ -233,7 +233,7 @@ class MorphML():
                              'thick', self.length_factor*float(parameter.attrib["value"]),\
                              self.bio, mechanismname)
                         else:
-                            print "Yo programmer of morphml import! You left out parameter ",\
+                            print "WARNING: Yo programmer of MorphML import! You didn't implement parameter ",\
                              parametername, " in mechanism ",mechanismname
             #### Connect the Ca pools and channels
             #### Am connecting these at the very end so that all channels and pools have been created
@@ -281,7 +281,6 @@ class MorphML():
         elif name == 'RM':
             compartment.Rm = value/(math.pi*compartment.diameter*compartment.length)
         elif name == 'RA':
-            print compartment.name
             compartment.Ra = value*compartment.length/(math.pi*(compartment.diameter/2.0)**2)
         elif name == 'Em':
             compartment.Em = value
@@ -358,4 +357,4 @@ class MorphML():
                 caconc.thick = value ## JUST THIS WILL NOT DO - HAVE TO SET B based on this thick!
                 ## Later, when calling connect_CaConc,
                 ## B is set for caconc based on thickness of Ca shell and compartment l and dia.
-        print "Setting ",name," for ",compartment.path," value ",value
+        if neuroml_debug: print "Setting ",name," for ",compartment.path," value ",value
