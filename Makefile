@@ -85,13 +85,14 @@ INSTALLED_PYTHON := python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}
 endif
 
 # Debug mode:
+
 ifeq ($(BUILD),debug)
-CXXFLAGS = -g -pthread  -fno-strict-aliasing -fPIC -fno-inline-functions -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
+CXXFLAGS = -g -pthread -fpermissive -fno-strict-aliasing -fPIC -fno-inline-functions -Wall -Wno-long-long -pedantic -DUSE_GENESIS_PARSER
 USE_GSL = 1
 endif
 # Optimized mode:
 ifeq ($(BUILD),release)
-CXXFLAGS  = -O3 -pthread  -fno-strict-aliasing -fPIC -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER
+CXXFLAGS  = -O3 -pthread -fpermissive -fno-strict-aliasing -fPIC -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER
 USE_GSL = 1
 endif
 # Profiling mode:
