@@ -4,7 +4,7 @@ These files were exported from neuroConstruct as Level 3 NeuroML v 1.x files (no
 However, further NeuroML channels have been added to the single compartment, so that their effect can be studied.
 
 Fire up moose GUI. File->Load Model or Ctrl+L. Navigate to this directory.
-Select the 'files of type' combo box to 'NeuroML/SBML' and open the Generated.net.xml file.
+Select the 'files of type' combo box to 'NeuroML/SBML' and open the allChannelsCell.net.xml file.
 Select the soma (graphical viewer or element tree) and drag and drop Vm from the properties editor to the plot pane.
 Run the simulation and see the soma Vm.
 
