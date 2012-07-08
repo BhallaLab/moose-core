@@ -80,6 +80,8 @@ class MorphML():
         running_cableid = ''
         running_segid = ''
         running_comp = None
+        running_diameter = 0.0
+        running_dia_nums = 0
         segments = cell.findall(".//{"+self.mml+"}segment")
         segmentstotal = len(segments)
         for segnum,segment in enumerate(segments):
@@ -90,6 +92,14 @@ class MorphML():
             ## old cableid still running, hence don't start a new compartment, skip to next segment
             if cableid == running_cableid:
                 self.cellDictBySegmentId[cellname][1][segmentid] = running_comp
+                proximal = segment.find('./{'+self.mml+'}proximal')
+                if proximal is not None:
+                    running_diameter += float(proximal.attrib["diameter"]) * self.length_factor
+                    running_dia_nums += 1
+                distal = segment.find('./{'+self.mml+'}distal')
+                if distal is not None:
+                    running_diameter += float(distal.attrib["diameter"]) * self.length_factor
+                    running_dia_nums += 1
             ## new cableid starts, hence start a new compartment; also finish previous / last compartment
             else:
                 ## the moose "hsolve" method assumes compartments to be asymmetric compartments and symmetrizes them
@@ -115,8 +125,8 @@ class MorphML():
                 else:
                     parent = None
                 proximal = segment.find('./{'+self.mml+'}proximal')
-                if proximal==None:         # If proximal tag is not present,
-                                            # then parent attribute MUST be present in the segment tag!
+                if proximal is None:         # If proximal tag is not present,
+                                              # then parent attribute MUST be present in the segment tag!
                     ## if proximal is not present, then
                     ## by default the distal end of the parent is the proximal end of the child
                     moosecomp.x0 = parent.x
@@ -126,6 +136,12 @@ class MorphML():
                     moosecomp.x0 = float(proximal.attrib["x"])*self.length_factor
                     moosecomp.y0 = float(proximal.attrib["y"])*self.length_factor
                     moosecomp.z0 = float(proximal.attrib["z"])*self.length_factor
+                    running_diameter += float(proximal.attrib["diameter"]) * self.length_factor
+                    running_dia_nums += 1
+                distal = segment.find('./{'+self.mml+'}distal')
+                if distal is not None:
+                    running_diameter += float(distal.attrib["diameter"]) * self.length_factor
+                    running_dia_nums += 1
                     
             if segnum==0: # if first segment, change the running compartment from None
                 running_cableid = cableid
@@ -144,8 +160,19 @@ class MorphML():
                 running_comp.x = float(distal.attrib["x"])*self.length_factor
                 running_comp.y = float(distal.attrib["y"])*self.length_factor
                 running_comp.z = float(distal.attrib["z"])*self.length_factor
-                ## proximal tag may not be present, so take only distal diameter
-                running_comp.diameter = float(distal.attrib["diameter"]) * self.length_factor
+                proximal = segment.find('./{'+self.mml+'}proximal')
+                if proximal is not None:
+                    running_diameter += float(proximal.attrib["diameter"]) * self.length_factor
+                    running_dia_nums += 1
+                distal = segment.find('./{'+self.mml+'}distal')
+                if distal is not None:
+                    running_diameter += float(distal.attrib["diameter"]) * self.length_factor
+                    running_dia_nums += 1
+                ## Set the compartment diameter as the average diameter of all the segments in this section
+                running_comp.diameter = running_diameter / float(running_dia_nums)
+                running_diameter = 0.0
+                running_dia_nums = 0
+                ## Set the compartment length
                 running_comp.length = math.sqrt((running_comp.x-running_comp.x0)**2+\
                     (running_comp.y-running_comp.y0)**2+(running_comp.z-running_comp.z0)**2)
                 if running_comp.length == 0.0:          # neuroconstruct seems to set length=0 for round soma!
