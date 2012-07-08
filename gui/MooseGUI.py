@@ -431,37 +431,43 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             self.plotWindowFieldTableDict[str(self.plotConfigWinSelectionComboBox.currentText())].append(newTable)
             #select the corresponding plot (mooseplot) from the plotwindow (mooseplotwindow) 
             plotWin = self.plotNameWinDict[str(self.plotConfigWinSelectionComboBox.currentText())] 
-            
-            #do not like the legends shown in the plots, change the field 2 below
             plotWin.plot.addTable(newTable,self.plotConfigCurrentSelection.getField('name')+'.'+newTable.getField('name'))
             plotWin.plot.nicePlaceLegend()
-            
+            #plotWin.show()
+            self.mdiArea.addSubWindow(plotWin)
+            self.activeWindow = plotWin
+
         else:
             #no previous mooseplotwin - so create, and add table to corresp dict
             self.plotWindowFieldTableDict[str(self.plotConfigWinSelectionComboBox.currentText())] = [newTable]
-            #plotWin = newPlotSubWindow(self)
-            #plotWin = MoosePlotWindow()
-            #plot = MoosePlot(plotWindow)
-            #self.mdiArea.addSubWindow(plotWin)
-            #plotWin.setWindowTitle(str(self.plotConfigWinSelectionComboBox.currentText()))
-
-            #do not like the legends shown in the plots, change the field 2 below
-            self.activeWindow.plot.addTable(newTable,self.plotConfigCurrentSelection.getField('name')+'.'+newTable.getField('name'))
-            self.activeWindow.plot.nicePlaceLegend()
-            self.plotNameWinDict[str(self.plotConfigWinSelectionComboBox.currentText())] = self.activeWindow
-            self.activeMdiWindow()
+            plotWin = newPlotSubWindow(self.mdiArea)
+            plotWin.setWindowTitle(str(self.plotConfigWinSelectionComboBox.currentText()))
+            plotWin.plot.addTable(newTable,self.plotConfigCurrentSelection.getField('name')+'.'+newTable.getField('name'))
+            plotWin.plot.nicePlaceLegend()
+            plotWin.show()
+            self.plotNameWinDict[str(self.plotConfigWinSelectionComboBox.currentText())] = plotWin
+            self.mdiArea.addSubWindow(plotWin)
+            self.activeWindow = plotWin
 
     def plotConfigAddNewPlotWindow(self):
         #called when new plotwindow pressed in plotconfig dock
-        count = self.plotConfigWinSelectionComboBox.count()
-        self.plotConfigWinSelectionComboBox.addItem('Plot Window '+str(count+1))
+        count = len(self.plotNameWinDict)
+        if count != 0:
+            self.plotConfigWinSelectionComboBox.addItem('Plot Window '+str(count+1))
         self.plotConfigWinSelectionComboBox.setCurrentIndex(count)
+
         plotWin = newPlotSubWindow(self)
-        self.mdiArea.addSubWindow(plotWin)
         plotWin.setWindowTitle(str(self.plotConfigWinSelectionComboBox.currentText()))
+
+        self.plotNameWinDict[str(self.plotConfigWinSelectionComboBox.currentText())] = plotWin
+        self.plotWindowFieldTableDict[str(self.plotConfigWinSelectionComboBox.currentText())] = []
+
+        plotWin.plot.nicePlaceLegend()
+        self.mdiArea.addSubWindow(plotWin)
         self.mdiArea.setActiveSubWindow(plotWin)
-        self.activeWindow = plotWin
         plotWin.show()
+
+        self.activeWindow = plotWin
 
         #general
     def updateCurrentTime(self,currentTime):
@@ -533,7 +539,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         graphs = self.getKKitGraphs(path) #clocks are assigned in the script itself!
         #currently putting all plots on Plot Window 1 by default - perhaps not the nicest way to do it.
         self.plotWindowFieldTableDict['Plot Window 1'] = graphs
-        plotWin = newPlotSubWindow(self)
+        plotWin = newPlotSubWindow(self.mdiArea)
         #plotWin = MoosePlotWindow()
         #plot = MoosePlot(plotWin)
         #plot.setObjectName("plot")
