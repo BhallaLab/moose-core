@@ -918,7 +918,7 @@
           <string/>
          </property>
          <property name="text">
-          <string>Create plot tab</string>
+          <string>New plot tab</string>
          </property>
         </widget>
        </item>
@@ -950,7 +950,7 @@
           </size>
          </property>
          <property name="text">
-          <string>Create plot</string>
+          <string>Add Field</string>
          </property>
         </widget>
        </item>

@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'newgui.ui'
 #
-# Created: Sun Jul  8 02:20:18 2012
-#      by: PyQt4 UI code generator 4.8.3
+# Created: Sun Jul  8 10:33:40 2012
+#      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -157,8 +157,8 @@ class Ui_MainWindow(object):
         self.horizontalLayout_7.setObjectName(_fromUtf8("horizontalLayout_7"))
         self.label = QtGui.QLabel(self.dockWidgetContents)
         font = QtGui.QFont()
-        font.setWeight(50)
         font.setBold(False)
+        font.setWeight(50)
         self.label.setFont(font)
         self.label.setObjectName(_fromUtf8("label"))
         self.horizontalLayout_7.addWidget(self.label)
@@ -769,8 +769,8 @@ class Ui_MainWindow(object):
         self.label_10.setText(QtGui.QApplication.translate("MainWindow", "Plot Window:", None, QtGui.QApplication.UnicodeUTF8))
         self.plotConfigWinSelectionComboBox.setItemText(0, QtGui.QApplication.translate("MainWindow", "Plot Window 1", None, QtGui.QApplication.UnicodeUTF8))
         self.plotConfigNewWindowPushButton.setToolTip(QtGui.QApplication.translate("MainWindow", "Create plot tab", None, QtGui.QApplication.UnicodeUTF8))
-        self.plotConfigNewWindowPushButton.setText(QtGui.QApplication.translate("MainWindow", "Create plot tab", None, QtGui.QApplication.UnicodeUTF8))
-        self.plotConfigAcceptPushButton.setText(QtGui.QApplication.translate("MainWindow", "Create plot", None, QtGui.QApplication.UnicodeUTF8))
+        self.plotConfigNewWindowPushButton.setText(QtGui.QApplication.translate("MainWindow", "New plot tab", None, QtGui.QApplication.UnicodeUTF8))
+        self.plotConfigAcceptPushButton.setText(QtGui.QApplication.translate("MainWindow", "Add Field", None, QtGui.QApplication.UnicodeUTF8))
         self.simControlDockWidget.setStatusTip(QtGui.QApplication.translate("MainWindow", "Set run time for the simulation", None, QtGui.QApplication.UnicodeUTF8))
         self.simControlDockWidget.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Simulation Control", None, QtGui.QApplication.UnicodeUTF8))
         self.label_13.setText(QtGui.QApplication.translate("MainWindow", "Simdt:", None, QtGui.QApplication.UnicodeUTF8))
