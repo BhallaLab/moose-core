@@ -1,0 +1,11 @@
+#!/usr/bin/env xdg-open
+
+[Desktop Entry]
+Version=1.5beta
+Type=Application
+Terminal=true
+Icon[en_US]=/home/moose/moose_src/gui/icons/squid.png
+Name[en_US]=MooseGUI
+Exec=python /home/moose/moose_src/Demos/squid/squid_demo.py
+Name=HHSquidDemo
+Icon=/home/moose/moose_src/gui/icons/squid.png
