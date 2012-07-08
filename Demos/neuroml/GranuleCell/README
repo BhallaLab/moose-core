@@ -6,3 +6,5 @@ Fire up moose GUI. File->Load Model or Ctrl+L. Navigate to this directory.
 Select the 'files of type' combo box to 'NeuroML/SBML' and open the Generated.net.xml file.
 Select the soma (graphical viewer or element tree) and drag and drop Vm from the properties editor to the plot pane.
 Run the simulation and see the soma Vm.
+
+To test on the command-line interface (CLI), just run CLI_Granule98.py or CLI_Granule98_hsolve.py.
