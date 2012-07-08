@@ -67,7 +67,6 @@ class MoosePlot(MyMplCanvas):
         self.tableCurveMap = {}
         self.mpl_connect('pick_event',self.onpick)
 
-
     def onpick(self,event):
         ind=event.ind[0]
         print self._labels[ind]
@@ -87,7 +86,6 @@ class MoosePlot(MyMplCanvas):
             yy = array(table.vec)
             xx = linspace(0.0,self.xmin,len(yy))
             curve.set_data(xx[1:len(xx)],yy[1:len(yy)])
-
     
         self.axes.relim()
         self.axes.autoscale_view(True,True,True)
