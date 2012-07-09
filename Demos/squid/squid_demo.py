@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Feb 22 23:24:21 2012 (+0530)
 # Version: 
-# Last-Updated: Wed Jul  4 16:08:10 2012 (+0530)
+# Last-Updated: Mon Jul  9 18:22:59 2012 (+0530)
 #           By: subha
-#     Update #: 1147
+#     Update #: 1189
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -28,6 +28,10 @@
 
 # Code:
 import sys
+sys.path.append('../../python')
+import os
+os.environ['NUMPTHREADS'] = '1'
+
 from collections import defaultdict
 from threading import Thread, Timer
 from Queue import Queue, Empty
@@ -35,8 +39,6 @@ import time
 
 from PyQt4 import QtGui
 from PyQt4 import QtCore
-#from PyQt4 import Qwt5 as Qwt
-#import PyQt4.Qwt5.anynumpy as numpy
 import numpy
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas, NavigationToolbar2QTAgg as NavigationToolbar
@@ -112,16 +114,18 @@ class SquidDemo(QtGui.QMainWindow):
         QtGui.QMainWindow.__init__(self, *args)
         self.squid_setup = SquidSetup()
         self.setWindowTitle('Squid Axon Demo')
-        self.setCentralWidget(self._getMdiArea())
-        self.addDockWidget(QtCore.Qt.TopDockWidgetArea, self._getRunControl())
-        self._getRunControl().setAllowedAreas(QtCore.Qt.TopDockWidgetArea | QtCore.Qt.BottomDockWidgetArea)
-        self._getRunControl().setFeatures(QtGui.QDockWidget.DockWidgetMovable | QtGui.QDockWidget.DockWidgetFloatable)
+        self.setDockNestingEnabled(True)
+        self.setCentralWidget(self._getMdiArea())        
+        # self.addDockWidget(QtCore.Qt.TopDockWidgetArea, self._getRunControl())
+        # self._getRunControl().setAllowedAreas(QtCore.Qt.TopDockWidgetArea | QtCore.Qt.BottomDockWidgetArea)
+        # self._getRunControl().setFeatures(QtGui.QDockWidget.DockWidgetMovable | QtGui.QDockWidget.DockWidgetFloatable)
+        self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self._getChannelCtrl())
         self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self._getElectronicsCtrl())
-        self._getElectronicsCtrl().setAllowedAreas(QtCore.Qt.LeftDockWidgetArea | QtCore.Qt.RightDockWidgetArea)
-        self._getElectronicsCtrl().setFeatures(QtGui.QDockWidget.DockWidgetMovable |QtGui.QDockWidget.DockWidgetFloatable)
-        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self._getChannelCtrl())
         self._getChannelCtrl().setAllowedAreas(QtCore.Qt.LeftDockWidgetArea | QtCore.Qt.RightDockWidgetArea)
         self._getChannelCtrl().setFeatures(QtGui.QDockWidget.DockWidgetMovable |QtGui.QDockWidget.DockWidgetFloatable)
+        self._getElectronicsCtrl().setWindowFlags(QtCore.Qt.Window)
+        self._getElectronicsCtrl().setAllowedAreas(QtCore.Qt.LeftDockWidgetArea | QtCore.Qt.RightDockWidgetArea)
+        self._getElectronicsCtrl().setFeatures(QtGui.QDockWidget.DockWidgetMovable |QtGui.QDockWidget.DockWidgetFloatable)
         self._initActions()
         self._getToolBar()
         # self._runtime_queue = Queue()
@@ -388,12 +392,8 @@ class SquidDemo(QtGui.QMainWindow):
             return self._channelCtrl
         self._channelCtrl = QtGui.QDockWidget('Channel properties', self)
         self._channelCtrlBox = QtGui.QGroupBox(self._channelCtrl)
-        self._naConductanceLabel = QtGui.QLabel('G_max[Na] (mmho/cm^2)', self._channelCtrlBox)
-        self._naConductanceEdit = QtGui.QLineEdit(str(self.squid_setup.squid_axon.specific_gNa), 
-                                                  self._channelCtrlBox)        
-        self._kConductanceLabel = QtGui.QLabel('G_max[K] (mmho/cm^2)', self._channelCtrlBox)
-        self._kConductanceEdit = QtGui.QLineEdit(str(self.squid_setup.squid_axon.specific_gK), 
-                                              self._channelCtrlBox)
+        self._naConductanceToggle = QtGui.QCheckBox('Block Na+ channel', self._channelCtrlBox)
+        self._kConductanceToggle = QtGui.QCheckBox('Block K+ channel', self._channelCtrlBox)
         self._kOutLabel = QtGui.QLabel('[K+]out (mM)', self._channelCtrlBox)
         self._kOutEdit = QtGui.QLineEdit(str(self.squid_setup.squid_axon.K_out), 
                                          self._channelCtrlBox)
@@ -414,10 +414,8 @@ class SquidDemo(QtGui.QMainWindow):
                 child.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Fixed)
 
         layout = QtGui.QGridLayout(self._channelCtrlBox)
-        layout.addWidget(self._naConductanceLabel, 0, 0)
-        layout.addWidget(self._naConductanceEdit, 0, 1)
-        layout.addWidget(self._kConductanceLabel, 1, 0)
-        layout.addWidget(self._kConductanceEdit, 1, 1)
+        layout.addWidget(self._naConductanceToggle, 0, 0)
+        layout.addWidget(self._kConductanceToggle, 1, 0)
         layout.addWidget(self._naOutLabel, 2, 0)
         layout.addWidget(self._naOutEdit, 2, 1)
         layout.addWidget(self._naInLabel, 3, 0)
@@ -497,6 +495,7 @@ class SquidDemo(QtGui.QMainWindow):
             secondLevel = float(str(self._secondPulseEdit.text()))
             secondWidth = float(str(self._secondPulseWidthEdit.text()))
             singlePulse = (self._pulseMode.currentIndex() == 0)
+            print 'Single pulse?', singlePulse
             self._im_axes.set_ylim(-0.4, 0.4)
         self.squid_setup.clamp_ckt.configure_pulses(baseLevel=baseLevel,
                                                     firstDelay=firstDelay,
@@ -506,8 +505,14 @@ class SquidDemo(QtGui.QMainWindow):
                                                     secondWidth=secondWidth,
                                                     secondLevel=secondLevel,
                                                     singlePulse=singlePulse)
-        self.squid_setup.squid_axon.specific_gNa = float(str(self._naConductanceEdit.text()))
-        self.squid_setup.squid_axon.specific_gK = float(str(self._kConductanceEdit.text()))
+        if self._kConductanceToggle.isChecked():
+            self.squid_setup.squid_axon.specific_gK = 0.0
+        else:
+            self.squid_setup.squid_axon.specific_gK = SquidAxon.defaults['specific_gK']
+        if self._naConductanceToggle.isChecked():
+            self.squid_setup.squid_axon.specific_gNa = 0.0
+        else:
+            self.squid_setup.squid_axon.specific_gNa = SquidAxon.defaults['specific_gNa']
         self.squid_setup.squid_axon.celsius = float(str(self._temperatureEdit.text()))
         self.squid_setup.squid_axon.K_out = float(str(self._kOutEdit.text()))
         self.squid_setup.squid_axon.Na_out = float(str(self._naOutEdit.text()))
@@ -520,6 +525,9 @@ class SquidDemo(QtGui.QMainWindow):
         # self._timer = Timer(3.0, self._updateAllPlots)
         # self._timer.start()
         # time.sleep(3.0)
+
+    def set_defaults(self):
+        raise NotImplementedError('Restart the demo instead')
 
     def _overlayPlots(self, overlay):        
         if not overlay:
@@ -648,6 +656,7 @@ if __name__ == '__main__':
     squid_gui = SquidDemo()
     app.connect(app, QtCore.SIGNAL('lastWindowClosed()'), squid_gui._quitSlot)
     squid_gui.show()
+    print squid_gui.size()
     sys.exit(app.exec_())
     
 
