@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Feb 22 00:53:38 2012 (+0530)
 # Version: 
-# Last-Updated: Mon Jul  9 19:45:50 2012 (+0530)
-#           By: subha
-#     Update #: 198
+# Last-Updated: Mon Jul  9 22:05:11 2012 (+0530)
+#           By: Subhasis Ray
+#     Update #: 206
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -33,6 +33,14 @@ import moose
 
 class ClampCircuit(moose.Neutral):
     """Container for a Voltage-Clamp/Current clamp circuit."""
+    defaults = {
+        'level1': 25.0,
+        'width1': 50.0,
+        'delay1': 2.0,
+        'delay2': 1e6,
+        'trigMode': 0,
+        'delay3': 1e9
+        }
     def __init__(self, path, compartment):
         moose.Neutral.__init__(self, path)
         self.pulsegen = moose.PulseGen(path+"/pulse") # holding voltage/current generator

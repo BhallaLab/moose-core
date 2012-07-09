@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Feb 13 11:35:11 2012 (+0530)
 # Version: 
-# Last-Updated: Mon Jul  9 19:46:07 2012 (+0530)
-#           By: subha
-#     Update #: 761
+# Last-Updated: Mon Jul  9 21:33:47 2012 (+0530)
+#           By: Subhasis Ray
+#     Update #: 767
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -119,6 +119,25 @@ class SquidAxon(moose.Compartment):
     VMIN = -30.0
     VMAX = 120.0
     VDIVS = 150
+    defaults = {
+        'temperature': CELSIUS_TO_KELVIN + 6.3,
+        'K_out': 10.0,
+        'Na_out': 460.0,
+        'K_in': 301.4,
+        'Na_in': 70.96,
+        'Cl_out': 540.0,        
+        'Cl_in': 100.0,
+        'length': 500, # um
+        'diameter': 500, # um
+        'Em': EREST_ACT + 10.613,
+        'initVm': EREST_ACT,  
+        'specific_cm': 1.0, # uF/cm^2
+        'specific_gl':  0.3, # mmho/cm^2
+        'specific_ra': 0.030, # kohm-cm
+        'specific_gNa': 120.0, # mmho/cm^2
+        'specific_gK': 36.0 # mmho/cm^2
+    }
+    
     Na_m_params = {'A_A':0.1 * (25.0 + EREST_ACT),
                    'A_B': -0.1,
                    'A_C': -1.0,
@@ -153,24 +172,24 @@ class SquidAxon(moose.Compartment):
     electrical properties set and calculated using dimensions."""
     def __init__(self, path):
         moose.Compartment.__init__(self, path)
-        self.temperature = CELSIUS_TO_KELVIN + 6.3        
-        self.K_out = 10.0
-        self.Na_out = 460.0
+        self.temperature = SquidAxon.defaults['temperature']
+        self.K_out = SquidAxon.defaults['K_out']
+        self.Na_out = SquidAxon.defaults['Na_out']
         # Modified internal concentrations used to give HH values of
         # equilibrium constants from the Nernst equation at 6.3 deg C.
         # HH 1952a, p. 455        
-        self.K_in = 301.4
-        self.Na_in = 70.96
-        self.Cl_out = 540.0        
-        self.Cl_in = 100.0
+        self.K_in = SquidAxon.defaults['K_in']
+        self.Na_in = SquidAxon.defaults['Na_in']
+        self.Cl_out = SquidAxon.defaults['Cl_out']
+        self.Cl_in = SquidAxon.defaults['Cl_in']
 
-        self.length = 500 # um
-        self.diameter = 500 # um
-        self.Em = SquidAxon.EREST_ACT + 10.613
-        self.initVm = SquidAxon.EREST_ACT        
-        self.specific_cm = 1.0 # uF/cm^2
-        self.specific_gl =  0.3 # mmho/cm^2
-        self.specific_ra = 0.030 # kohm-cm
+        self.length = SquidAxon.defaults['length']
+        self.diameter = SquidAxon.defaults['diameter']
+        self.Em = SquidAxon.defaults['Em']
+        self.initVm = SquidAxon.defaults['initVm']
+        self.specific_cm = SquidAxon.defaults['specific_cm']
+        self.specific_gl = SquidAxon.defaults['specific_gl']
+        self.specific_ra = SquidAxon.defaults['specific_ra']
         
         self.Na_channel = IonChannel('Na', self,
                                      0.0,
@@ -193,8 +212,8 @@ class SquidAxon(moose.Compartment):
                                   SquidAxon.VDIVS,
                                   SquidAxon.VMIN,
                                   SquidAxon.VMAX)
-        self.specific_gNa = 120.0 # mmho/cm^2
-        self.specific_gK = 36.0 # mmho/cm^2
+        self.specific_gNa = SquidAxon.defaults['specific_gNa']
+        self.specific_gK = SquidAxon.defaults['specific_gK']
         
     @classmethod
     def reversal_potential(cls, temp, c_out, c_in):
@@ -280,6 +299,10 @@ class SquidAxon(moose.Compartment):
     @celsius.setter
     def celsius(self, celsius):
         self.temperature = celsius + CELSIUS_TO_KELVIN
+
+    def use_defaults(self):
+        for field, value in SquidAxon.defaults.items():
+            setattr(self, field, value)
 
 class SquidModel(moose.Neutral):
     """Container for squid demo."""
