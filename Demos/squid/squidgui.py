@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Jul  9 18:23:55 2012 (+0530)
 # Version: 
-# Last-Updated: Mon Jul  9 22:56:06 2012 (+0530)
+# Last-Updated: Mon Jul  9 23:35:33 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 236
+#     Update #: 306
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -150,9 +150,9 @@ class SquidGui(QtGui.QMainWindow):
         # self._i_axes.legend()
         for axis in self._plotFigure.axes:
             axis.autoscale(False)
-        self._plotNavigator = NavigationToolbar(self._plotCanvas, self._plotWidget)
         layout = QtGui.QVBoxLayout()
         layout.addWidget(self._plotCanvas)
+        self._plotNavigator = NavigationToolbar(self._plotCanvas, self._plotWidget)
         layout.addWidget(self._plotNavigator)
         self._plotWidget.setLayout(layout)
 
@@ -212,9 +212,9 @@ class SquidGui(QtGui.QMainWindow):
         self._runTimeLabel = QtGui.QLabel("Run time (ms)", self._runControlBox)
         self._simTimeStepLabel = QtGui.QLabel("Simulation time step (ms)", self._runControlBox)
         self._plotTimeStepLabel = QtGui.QLabel("Plotting interval (ms)", self._runControlBox)
-        self._runTimeEdit = QtGui.QLineEdit("50.0", self._runControlBox)
-        self._simTimeStepEdit = QtGui.QLineEdit("0.01", self._runControlBox)
-        self._plotTimeStepEdit = QtGui.QLineEdit("0.1", self._runControlBox)
+        self._runTimeEdit = QtGui.QLineEdit('%g' % (SquidGui.defaults['runtime']), self._runControlBox)
+        self._simTimeStepEdit = QtGui.QLineEdit('%g' % (SquidGui.defaults['simdt']), self._runControlBox)
+        self._plotTimeStepEdit = QtGui.QLineEdit('%g' % (SquidGui.defaults['plotdt']), self._runControlBox)
         self._plotOverlayButton = QtGui.QCheckBox('Overlay plots', self._runControlBox)
         layout = QtGui.QGridLayout()
         layout.addWidget(self._runTimeLabel, 0, 0)
@@ -232,19 +232,19 @@ class SquidGui(QtGui.QMainWindow):
         self._naConductanceToggle = QtGui.QCheckBox('Block Na+ channel', self._channelCtrlBox)
         self._kConductanceToggle = QtGui.QCheckBox('Block K+ channel', self._channelCtrlBox)
         self._kOutLabel = QtGui.QLabel('[K+]out (mM)', self._channelCtrlBox)
-        self._kOutEdit = QtGui.QLineEdit(str(self.squid_setup.squid_axon.K_out), 
+        self._kOutEdit = QtGui.QLineEdit('%g' % (self.squid_setup.squid_axon.K_out), 
                                          self._channelCtrlBox)
         self._naOutLabel = QtGui.QLabel('[Na+]out (mM)', self._channelCtrlBox)
-        self._naOutEdit = QtGui.QLineEdit(str(self.squid_setup.squid_axon.Na_out), 
+        self._naOutEdit = QtGui.QLineEdit('%g' % (self.squid_setup.squid_axon.Na_out), 
                                          self._channelCtrlBox)
         self._kInLabel = QtGui.QLabel('[K+]in (mM)', self._channelCtrlBox)
-        self._kInEdit = QtGui.QLabel(str(self.squid_setup.squid_axon.K_in), 
+        self._kInEdit = QtGui.QLabel('%g' % (self.squid_setup.squid_axon.K_in), 
                                          self._channelCtrlBox)
         self._naInLabel = QtGui.QLabel('[Na+]in (mM)', self._channelCtrlBox)
-        self._naInEdit = QtGui.QLabel(str(self.squid_setup.squid_axon.Na_in), 
+        self._naInEdit = QtGui.QLabel('%g' % (self.squid_setup.squid_axon.Na_in), 
                                          self._channelCtrlBox)
         self._temperatureLabel = QtGui.QLabel('Temperature (C)', self._channelCtrlBox)
-        self._temperatureEdit = QtGui.QLineEdit(str(self.squid_setup.squid_axon.celsius),
+        self._temperatureEdit = QtGui.QLineEdit('%g' % (self.defaults['temperature'] - CELSIUS_TO_KELVIN),
                                                 self._channelCtrlBox)
         for child in self._channelCtrlBox.children():
             if isinstance(child, QtGui.QLineEdit):
@@ -311,17 +311,17 @@ class SquidGui(QtGui.QMainWindow):
         vClampPanel = QtGui.QGroupBox('Voltage clamp settings', self)
         self._vClampCtrlBox = vClampPanel
         self._holdingVLabel = QtGui.QLabel("Holding Voltage (mV)", vClampPanel)
-        self._holdingVEdit = QtGui.QLineEdit(str(self.defaults['vclamp.holdingV']), vClampPanel)
+        self._holdingVEdit = QtGui.QLineEdit('%g' % (SquidGui.defaults['vclamp.holdingV']), vClampPanel)
         self._holdingTimeLabel = QtGui.QLabel("Holding Time (ms)", vClampPanel)
-        self._holdingTimeEdit = QtGui.QLineEdit(str(self.defaults['vclamp.holdingT']), vClampPanel)
+        self._holdingTimeEdit = QtGui.QLineEdit('%g' % (SquidGui.defaults['vclamp.holdingT']), vClampPanel)
         self._prePulseVLabel = QtGui.QLabel("Pre-pulse Voltage (mV)", vClampPanel)
-        self._prePulseVEdit = QtGui.QLineEdit(str(self.defaults['vclamp.prepulseV']), vClampPanel)
+        self._prePulseVEdit = QtGui.QLineEdit('%g' % (SquidGui.defaults['vclamp.prepulseV']), vClampPanel)
         self._prePulseTimeLabel = QtGui.QLabel("Pre-pulse Time (ms)", vClampPanel)
-        self._prePulseTimeEdit = QtGui.QLineEdit(str(self.defaults['vclamp.prepulseT']), vClampPanel)
+        self._prePulseTimeEdit = QtGui.QLineEdit('%g' % (SquidGui.defaults['vclamp.prepulseT']), vClampPanel)
         self._clampVLabel = QtGui.QLabel("Clamp Voltage (mV)", vClampPanel)
-        self._clampVEdit = QtGui.QLineEdit(str(self.defaults['vclamp.clampV']), vClampPanel)
+        self._clampVEdit = QtGui.QLineEdit('%g' % (SquidGui.defaults['vclamp.clampV']), vClampPanel)
         self._clampTimeLabel = QtGui.QLabel("Clamp Time (ms)", vClampPanel)
-        self._clampTimeEdit = QtGui.QLineEdit(str(self.defaults['vclamp.clampT']), vClampPanel)
+        self._clampTimeEdit = QtGui.QLineEdit('%g' % (SquidGui.defaults['vclamp.clampT']), vClampPanel)
         for child in vClampPanel.children():
             if isinstance(child, QtGui.QLineEdit):
                 child.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Fixed)
@@ -345,19 +345,19 @@ class SquidGui(QtGui.QMainWindow):
         iClampPanel = QtGui.QGroupBox('Current clamp settings', self)
         self._iClampCtrlBox = iClampPanel
         self._baseCurrentLabel = QtGui.QLabel("Base Current Level (uA)",iClampPanel)
-        self._baseCurrentEdit = QtGui.QLineEdit(str(self.defaults['iclamp.baseI']),iClampPanel)
+        self._baseCurrentEdit = QtGui.QLineEdit('%g' % (SquidGui.defaults['iclamp.baseI']),iClampPanel)
         self._firstPulseLabel = QtGui.QLabel("First Pulse Current (uA)", iClampPanel)
-        self._firstPulseEdit = QtGui.QLineEdit(str(self.defaults['iclamp.firstI']), iClampPanel)
+        self._firstPulseEdit = QtGui.QLineEdit('%g' % (SquidGui.defaults['iclamp.firstI']), iClampPanel)
         self._firstDelayLabel = QtGui.QLabel("First Onset Delay (ms)", iClampPanel)
-        self._firstDelayEdit = QtGui.QLineEdit(str(self.defaults['iclamp.firstD']),iClampPanel)
+        self._firstDelayEdit = QtGui.QLineEdit('%g' % (SquidGui.defaults['iclamp.firstD']),iClampPanel)
         self._firstPulseWidthLabel = QtGui.QLabel("First Pulse Width (ms)", iClampPanel)
-        self._firstPulseWidthEdit = QtGui.QLineEdit(str(self.defaults['iclamp.firstT']), iClampPanel)
+        self._firstPulseWidthEdit = QtGui.QLineEdit('%g' % (SquidGui.defaults['iclamp.firstT']), iClampPanel)
         self._secondPulseLabel = QtGui.QLabel("Second Pulse Current (uA)", iClampPanel)
-        self._secondPulseEdit = QtGui.QLineEdit(str(self.defaults['iclamp.secondI']), iClampPanel)
+        self._secondPulseEdit = QtGui.QLineEdit('%g' % (SquidGui.defaults['iclamp.secondI']), iClampPanel)
         self._secondDelayLabel = QtGui.QLabel("Second Onset Delay (ms)", iClampPanel)
-        self._secondDelayEdit = QtGui.QLineEdit(str(self.defaults['iclamp.secondD']),iClampPanel)
+        self._secondDelayEdit = QtGui.QLineEdit('%g' % (SquidGui.defaults['iclamp.secondD']),iClampPanel)
         self._secondPulseWidthLabel = QtGui.QLabel("Second Pulse Width (ms)", iClampPanel)
-        self._secondPulseWidthEdit = QtGui.QLineEdit(str(self.defaults['iclamp.secondT']), iClampPanel)
+        self._secondPulseWidthEdit = QtGui.QLineEdit('%g' % (SquidGui.defaults['iclamp.secondT']), iClampPanel)
         self._pulseMode = QtGui.QComboBox(iClampPanel)
         self._pulseMode.addItem("Single Pulse")
         self._pulseMode.addItem("Pulse Train")
@@ -465,6 +465,11 @@ class SquidGui(QtGui.QMainWindow):
             for axis in self._plotFigure.axes:
                 axis.relim()
                 axis.autoscale(True, axis='y')
+        else:
+            self._vm_axes.set_ylim(-20.0, 120.0)
+            self._g_axes.set_ylim(0.0, 0.5)
+            self._im_axes.set_ylim(-0.5, 0.5)
+            self._i_axes.set_ylim(-10, 10)
         self._plotCanvas.draw()
 
     def _updateStatePlot(self):
@@ -577,7 +582,6 @@ class SquidGui(QtGui.QMainWindow):
         self._autoscaleAction.setCheckable(True)
         self._autoscaleAction.setChecked(False)
         self.connect(self._autoscaleAction, QtCore.SIGNAL('toggled(bool)'), self._autoscale)
-        self._useDefaultsAction = QtGui.QAction(self.tr('Use default values')
         self._quitAction = QtGui.QAction(self.tr('&Quit'), self)
         self._quitAction.setShortcut(self.tr('Ctrl+Q'))
         self.connect(self._quitAction, QtCore.SIGNAL('triggered()'), QtGui.qApp.closeAllWindows)
@@ -589,6 +593,7 @@ class SquidGui(QtGui.QMainWindow):
         self._simToolBar.addAction(self._showLegendAction)
         self._simToolBar.addAction(self._autoscaleAction)
         self._simToolBar.addAction(self._showStatePlotAction)
+        self._simToolBar.addAction(self._resetToDefaultsAction)
 
     def _showLegend(self, on):
         if on:
@@ -615,9 +620,31 @@ class SquidGui(QtGui.QMainWindow):
         self._plotCanvas.draw()
         self._statePlotCanvas.draw()
         
-
     def _useDefaults(self):
-        self.squid_setup.use_defaults()
+        self._runTimeEdit.setText('%g' % (self.defaults['runtime']))
+        self._simTimeStepEdit.setText('%g' % (self.defaults['simdt']))
+        self._plotTimeStepEdit.setText('%g' % (self.defaults['plotdt']))
+        self._plotOverlayButton.setChecked(False)
+        self._naConductanceToggle.setChecked(False)
+        self._kConductanceToggle.setChecked(False)
+        self._kOutEdit.setText('%g' % (SquidGui.defaults['K_out']))
+        self._naOutEdit.setText('%g' % (SquidGui.defaults['Na_out']))
+        self._temperatureEdit.setText('%g' % (SquidGui.defaults['temperature'] - CELSIUS_TO_KELVIN))
+        self._holdingVEdit.setText('%g' % (SquidGui.defaults['vclamp.holdingV']))
+        self._holdingTimeEdit.setText('%g' % (SquidGui.defaults['vclamp.holdingT']))
+        self._prePulseVEdit.setText('%g' % (SquidGui.defaults['vclamp.prepulseV']))
+        self._prePulseTimeEdit.setText('%g' % (SquidGui.defaults['vclamp.prepulseT']))
+        self._clampVEdit.setText('%g' % (SquidGui.defaults['vclamp.clampV']))
+        self._clampTimeEdit.setText('%g' % (SquidGui.defaults['vclamp.clampT']))
+        self._baseCurrentEdit.setText('%g' % (SquidGui.defaults['iclamp.baseI']))
+        self._firstPulseEdit.setText('%g' % (SquidGui.defaults['iclamp.firstI']))
+        self._firstDelayEdit.setText('%g' % (SquidGui.defaults['iclamp.firstD']))
+        self._firstPulseWidthEdit.setText('%g' % (SquidGui.defaults['iclamp.firstT']))
+        self._secondPulseEdit.setText('%g' % (SquidGui.defaults['iclamp.secondI']))
+        self._secondDelayEdit.setText('%g' % (SquidGui.defaults['iclamp.secondD']))
+        self._secondPulseWidthEdit.setText('%g' % (SquidGui.defaults['iclamp.secondT']))
+        self._pulseMode.setCurrentIndex(0)
+        
 
     def closeEvent(self, event):
         QtGui.qApp.closeAllWindows()
