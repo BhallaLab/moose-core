@@ -22,7 +22,14 @@
 ///////////////////////////////////////////////////////
 // MsgSrc definitions
 ///////////////////////////////////////////////////////
-static SrcFinfo1< double > *concOut() {
+/*
+ * Static function.
+ * 
+ * This Finfo is used to send out CaConc to channels.
+ * The original CaConc sends this itself, whereas the HSolve
+ * sends on behalf of the Zombie.
+ */
+SrcFinfo1< double >* ZombieCaConc::concOut() {
 	static SrcFinfo1< double > concOut( "concOut", 
 			"Concentration of Ca in pool" );
 	return &concOut;
