@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Sun Jul  8 22:25:36 2012 (+0530)
-//           By: subha
-//     Update #: 9128
+// Last-Updated: Wed Jul 11 01:39:51 2012 (+0530)
+//           By: Subhasis Ray
+//     Update #: 9204
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -151,6 +151,30 @@ extern "C" {
     static Id shellId;
     static PyObject * MooseError;
 
+    static PyObject* get_Id_attr(_Id * id, string attribute)
+    {
+        if (attribute == "path"){
+            return moose_Id_getPath(id);
+        } else if (attribute == "value"){
+            moose_Id_getValue(id);
+        } else if (attribute == "shape"){
+            return moose_Id_getShape(id);
+        }
+        return NULL;
+    }
+
+    static PyObject * get_ObjId_attr(_ObjId * oid, string attribute)
+    {
+        if (attribute == "id_"){
+            return moose_ObjId_getId(oid);
+        } else if (attribute == "dindex"){
+            return moose_ObjId_getDataIndex(oid);
+        } else if (attribute == "findex"){
+            return moose_ObjId_getFieldIndex(oid);
+        }
+        return NULL;
+    }
+                
     // Global store of defined MOOSE classes.
     static map<string, PyTypeObject *>& get_moose_classes()
     {
@@ -886,11 +910,11 @@ extern "C" {
         //  "Initialize a Id object."},
         {"delete", (PyCFunction)moose_Id_delete, METH_VARARGS,
          "Delete the underlying moose element"},
-                {"getValue", (PyCFunction)moose_Id_getValue, METH_VARARGS,
+        {"getValue", (PyCFunction)moose_Id_getValue, METH_NOARGS,
          "Return integer representation of the id of the element."},
-        {"getPath", (PyCFunction)moose_Id_getPath, METH_VARARGS,
+        {"getPath", (PyCFunction)moose_Id_getPath, METH_NOARGS,
          "Return the path of this Id object."},
-        {"getShape", (PyCFunction)moose_Id_getShape, METH_VARARGS,
+        {"getShape", (PyCFunction)moose_Id_getShape, METH_NOARGS,
          "Get the shape of the Id object as a tuple."},
         {"setField", (PyCFunction)moose_Id_setField, METH_VARARGS,
          "setField(fieldname, value_vector)\n"
@@ -923,24 +947,6 @@ extern "C" {
         0 // sq_inplace_repeat
     };
 
-    static PyGetSetDef IdGetSetters[] = {
-        {"path",
-         (getter)moose_Id_getPath,
-         NULL,
-         "Path of this object",
-         NULL},
-        {"shape",
-         (getter)moose_Id_getShape,
-         NULL,
-         "Dimensions of this object.",
-         NULL},
-        {"value",
-         (getter)moose_Id_getValue,
-         NULL,
-         "Value of this Id",
-         NULL},
-        {NULL}, /* sentinel */
-    };
     
     ///////////////////////////////////////////////
     // Type defs for PyObject of Id
@@ -976,7 +982,7 @@ extern "C" {
         0,                                  /* tp_iternext */
         IdMethods,                     /* tp_methods */
         0,                    /* tp_members */
-        IdGetSetters,                                  /* tp_getset */
+        0,                                  /* tp_getset */
         0,                                 /* tp_base */
         0,                                  /* tp_dict */
         0,                                  /* tp_descr_get */
@@ -1195,11 +1201,8 @@ extern "C" {
     } // !  moose_Id_str
 
     // 2011-03-23 15:09:19 (+0530)
-    static PyObject* moose_Id_getValue(_Id * self, PyObject * args)
+    static PyObject* moose_Id_getValue(_Id * self)
     {
-        if (!PyArg_ParseTuple(args, ":moose_Id_getValue")){
-            return NULL;
-        }
         unsigned int id = self->id_.value();        
         PyObject * ret = Py_BuildValue("I", id);
         return ret;
@@ -1207,7 +1210,7 @@ extern "C" {
     /**
        Not to be redone. 2011-03-23 14:42:48 (+0530)
     */
-    static PyObject * moose_Id_getPath(_Id * self, PyObject * args)
+    static PyObject * moose_Id_getPath(_Id * self)
     {
         string path = self->id_.path();
         PyObject * ret = Py_BuildValue("s", path.c_str());
@@ -1224,7 +1227,7 @@ extern "C" {
             return (Py_ssize_t)dims[0];
         }
     }
-    static PyObject * moose_Id_getShape(_Id * self, PyObject * args)
+    static PyObject * moose_Id_getShape(_Id * self)
     {
         vector< unsigned int> dims = Field< vector <unsigned int> >::get(self->id_, "objectDimensions");
         if (dims.empty()){
@@ -1322,10 +1325,14 @@ extern "C" {
         }
         return ret;
     }
-
+    
     static PyObject * moose_Id_getattro(_Id * self, PyObject * attr)
     {
         char * field = PyString_AsString(attr);
+        PyObject * _ret = get_Id_attr(self, field);
+        if (_ret != NULL){
+            return _ret;
+        }        
         string class_name = Field<string>::get(self->id_, "class");
         string type = getFieldType(class_name, string(field), "valueFinfo");
         if (type.empty()){
@@ -1354,12 +1361,21 @@ extern "C" {
             npy_intp dims = val.size();                                 \
             PyArrayObject * ret = (PyArrayObject*)PyArray_SimpleNew(1, &dims, get_npy_typenum(typeid(TYPE))); \
             char * ptr = PyArray_BYTES(ret);                            \
-            memcpy(ptr, &(val[0]), val.size() * sizeof(TYPE));          \
+            memcpy(ptr, &val[0], val.size() * sizeof(TYPE));            \
             return PyArray_Return(ret);                                 \
-        }                                                               \
+        } // ID_GETVEC
         
         switch (ftype){
-            case 'b': ID_GETVEC(bool);
+            case 'b':         {                                                               
+                vector<bool> val;                                           
+                Field< bool >::getVec(self->id_, string(field), val);
+                npy_intp dims = val.size();
+                PyArrayObject * ret = (PyArrayObject*)PyArray_SimpleNew(1, &dims, get_npy_typenum(typeid(bool))); 
+                char * ptr = PyArray_BYTES(ret);                            
+                memcpy(ptr, &(val[0]), val.size() * sizeof(bool));            
+                return PyArray_Return(ret);                                 
+        } // ID_GETVEC
+
             case 'c': ID_GETVEC(char);
             case 'i': ID_GETVEC(int);
             case 'h': ID_GETVEC(short);
@@ -1797,12 +1813,9 @@ extern "C" {
                  "\n"
                  "Get the Id of this object\n"
                  "\n");
-    static PyObject* moose_ObjId_getId(_ObjId * self, PyObject * args)
+    static PyObject* moose_ObjId_getId(_ObjId * self)
     {
         extern PyTypeObject IdType;        
-        if (!PyArg_ParseTuple(args, ":ObjId.getId")){
-            return NULL;
-        }
         _Id * ret = PyObject_New(_Id, &IdType);
         ret->id_ = self->oid_.id;
         return (PyObject*)ret;
@@ -1895,6 +1908,10 @@ extern "C" {
         } else {
             return PyObject_GenericGetAttr((PyObject*)self, attr);
         }
+        PyObject * _ret = get_ObjId_attr(self, field);
+        if (_ret != NULL){
+            return _ret;
+        }
         // The GET_FIELD macro is just a short-cut to reduce typing
         // TYPE is the full type string for the field. TYPEC is the corresponding Python Py_BuildValue format character.
 #define GET_FIELD(TYPE, TYPEC)                                          \
@@ -1948,7 +1965,7 @@ extern "C" {
                     }                                                                   \
                 }                                                                       \
             return ret;                                                             \
-        }
+        } // GET_VECVEC
         assert(!(self->oid_ == ObjId::bad));
         string class_name = Field<string>::get(self->oid_, "class");
         string type = getFieldType(class_name, string(field), "valueFinfo");
@@ -3025,11 +3042,8 @@ extern "C" {
                  "getDataIndex()\n"
                  "\n"
                  "Return the dataIndex of this object.\n");
-    static PyObject * moose_ObjId_getDataIndex(_ObjId * self, PyObject * args)
+    static PyObject * moose_ObjId_getDataIndex(_ObjId * self)
     {
-        if (!PyArg_ParseTuple(args, ":moose_ObjId_getDataIndex")){
-            return NULL;
-        }
         PyObject * ret = Py_BuildValue("I", self->oid_.dataId.value());
         return ret;
     }
@@ -3037,40 +3051,11 @@ extern "C" {
     // WARNING: fieldIndex has been deprecated in dh_branch. This
     // needs to be updated accordingly.  The current code is just
     // place-holer to avoid compilation errors.
-    static PyObject * moose_ObjId_getFieldIndex(_ObjId * self, PyObject * args)
+    static PyObject * moose_ObjId_getFieldIndex(_ObjId * self)
     {
-        if (!PyArg_ParseTuple(args, ":moose_ObjId_getFieldIndex")){
-            return NULL;
-        }
         PyObject * ret = Py_BuildValue("I", self->oid_.dataId.value());
         return ret;
     }
-
-    
-    ///////////////////////////////////////////////
-    // Python geteset defs for PyObject of ObjId
-    ///////////////////////////////////////////////
-    static PyGetSetDef ObjIdGetSetters[] = {
-        {"id_",
-         (getter)moose_ObjId_getId,
-         NULL,
-         "Id of this object",
-         NULL,
-        },
-        {"dindex",
-         (getter)moose_ObjId_getDataIndex,
-         NULL,
-         "Data index of this ObjId.",
-         NULL,
-        },
-        {"findex",
-         (getter)moose_ObjId_getFieldIndex,
-         NULL,
-         "Field index of this ObjId.",
-         NULL,
-        },
-        {NULL}, /* sentinel */
-    };
     
     ///////////////////////////////////////////////
     // Python method lists for PyObject of ObjId
@@ -3091,7 +3076,7 @@ extern "C" {
          moose_ObjId_getLookupField_documentation},
         {"setLookupField", (PyCFunction)moose_ObjId_setLookupField, METH_VARARGS,
          moose_ObjId_setLookupField_documentation},
-        {"getId", (PyCFunction)moose_ObjId_getId, METH_VARARGS,
+        {"getId", (PyCFunction)moose_ObjId_getId, METH_NOARGS,
          moose_ObjId_getId_documentation},
         {"getFieldNames", (PyCFunction)moose_ObjId_getFieldNames, METH_VARARGS,
          moose_ObjId_getFieldNames_documenation},
@@ -3099,9 +3084,9 @@ extern "C" {
          moose_ObjId_getNeighbors_documentation},
         {"connect", (PyCFunction)moose_ObjId_connect, METH_VARARGS,
          moose_ObjId_connect_documentation},
-        {"getDataIndex", (PyCFunction)moose_ObjId_getDataIndex, METH_VARARGS,
+        {"getDataIndex", (PyCFunction)moose_ObjId_getDataIndex, METH_NOARGS,
          moose_ObjId_getDataIndex_documentation},
-        {"getFieldIndex", (PyCFunction)moose_ObjId_getFieldIndex, METH_VARARGS,
+        {"getFieldIndex", (PyCFunction)moose_ObjId_getFieldIndex, METH_NOARGS,
          "Get the index of this object as a field."},
         {"setDestField", (PyCFunction)moose_ObjId_setDestField, METH_VARARGS,
          moose_ObjId_setDestField_documentation},
