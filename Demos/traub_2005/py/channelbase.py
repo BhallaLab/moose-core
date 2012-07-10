@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri May  4 14:55:52 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Jul  5 11:22:41 2012 (+0530)
+# Last-Updated: Fri Jul  6 18:02:08 2012 (+0530)
 #           By: subha
-#     Update #: 297
+#     Update #: 309
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -148,6 +148,10 @@ class ChannelMeta(type):
         if mstring_field is not None:
             mstring = moose.Mstring('%s/%s' % (proto.path, mstring_field[0]))
             mstring.value = mstring_field[1]
+        if 'annotation' in cdict:
+            info = moose.Annotator('%s/info' % (proto.path))
+            info.notes = '\n'.join('%s: %s' % kv for kv in cdict['annotation'].items())
+            print proto.path, info.notes
         cdict['prototype'] = proto
         prototypes[name] = proto
         print 'Created prototype:', proto.path
