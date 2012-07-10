@@ -61,8 +61,8 @@ const Cinfo* HSolve::initCinfo()
 		&HSolve::getSeed
 	);
 	
-	static ElementValueFinfo< HSolve, string > path(
-		"path",
+	static ElementValueFinfo< HSolve, string > target(
+		"target",
 		"Specifies the path to a compartmental model to be taken over. "
 		"This can be the path to any container object that has the model "
 		"under it (found by performing a deep search). Alternatively, this "
@@ -148,7 +148,7 @@ const Cinfo* HSolve::initCinfo()
 	static Finfo* hsolveFinfos[] = 
 	{
 		&seed,              // Value
-		&path,              // Value
+		&target,              // Value
 		&dt,                // Value
 		&caAdvance,         // Value
 		&vDiv,              // Value
@@ -426,3 +426,41 @@ double HSolve::getCaMax() const
 {
 	return caMax_;
 }
+#if 0
+
+/// crate test object and push it into the container vector
+Id create_testobject(vector<Id> & container, string classname, Id parent, string name, vector<int> dims)
+{
+    Shell * shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
+    Id nid = shell->doCreate( classname, parent, name, dims );
+    container.push_back(nid);
+    return nid;
+}
+
+void clear_testobjects(vector<Id>& container)
+{
+   Shell * shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
+   while (!container.empty()){
+       Id id = container.back();
+       shell->doDelete(id);
+       container.pop_back();
+   }
+}
+
+
+void testHSolvePassiveSingleComp()
+{
+    Shell * shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
+    vector< int > dims( 1, 1 );
+    vector<Id> to_cleanup;
+	Id nid = create_testobject(to_cleanup, "Neuron", Id(), "n", dims );
+	Id comptId = create_testobject(to_cleanup, "Compartment", nid, "compt", dims );
+    Id hsolve = create_testobject(to_cleanup, "HSolve", nid, "solver", dims);
+    Field<string>::set(hsolve, "target", nid.path());
+    to_cleanup.push_back(nid);
+    clear_testobjects(to_cleanup);
+    cout << "." << flush;
+}
+
+#endif // if 0
+ 
