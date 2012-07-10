@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jul 10 16:16:55 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Jul 10 17:26:07 2012 (+0530)
-#           By: subha
-#     Update #: 92
+# Last-Updated: Tue Jul 10 20:36:10 2012 (+0530)
+#           By: Subhasis Ray
+#     Update #: 194
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -52,6 +52,8 @@ sys.path.append('../python')
 import moose
 import uuid
 import unittest
+import numpy as np
+import matplotlib.pyplot as plt
 
 def make_testcomp(containerpath):
     comp = moose.Compartment('%s/testcomp' % (containerpath))
@@ -64,7 +66,7 @@ def make_testcomp(containerpath):
 
 def make_pulsegen(containerpath):
     pulsegen = moose.PulseGen('%s/testpulse' % (containerpath))
-    pulsegen.firstLevel = 1e-12
+    pulsegen.firstLevel = 1e-9
     pulsegen.firstDelay = 50e-3
     pulsegen.firstWidth = 100e-3
     pulsegen.secondLevel = -1e-12
@@ -247,43 +249,103 @@ def setup_single_comp_model(model_container, data_container, simdt):
             'cell': cell,
             'vm_table': vm_table}
 
-def setup_hsolve_model(model_container, data_container, simdt):
+def setup_hsolve_single_comp_model(model_container, data_container, simdt):
     elements = setup_single_comp_model(model_container, data_container, simdt)
     solver = moose.HSolve(model_container.path + '/hsolve')
     solver.dt = simdt
     solver.target = elements['cell'].path
     elements['solver'] = solver
     return elements
-    
-class TestSingleCompPassive(unittest.TestCase):
-    """Test hsolve with a single compartment"""
-    def setUp(self):
-        simdt = 1e-4
-        hsolve_data = moose.Neutral('/hsolvedata')
-        hsolve_model = moose.Neutral('/hsolvemodel')
-        hsolve_elements = setup_hsolve_model(hsolve_model, hsolve_data, simdt)
-        fwdeuler_model = moose.Neutral('/fwdeulermodel')
-        fwdeuler_data = moose.Neutral('/fwdeulerdata')
-        fwdeuler_elements = setup_single_comp_model(fwdeuler_model, fwdeuler_data, simdt)
+
+def setup_passive_cable(model_container, data_container, comp_count, simdt):
+    """We are considering a passive cable with identical
+    compartments. Stimulus is applied on first compartment, data is
+    recorded from last compartment."""
+    cell = moose.Neuron(model_container.path + '/neuron')
+    comp = [moose.Compartment('%s/comp_%d' % (cell.path, ii)) for ii in range(comp_count)]
+    for c in comp:
+        c.Em = -65e-3
+        c.initVm = -65e-3
+        c.Cm = 1e-12
+        c.Rm = 1e9
+        c.Ra = 1e5
+    for ii in range(1, comp_count):
+        moose.connect(comp[ii-1], 'axial', comp[ii], 'raxial')
+    pulsegen = make_pulsegen(model_container.path)
+    pulsegen.firstDelay = simdt
+    moose.connect(pulsegen, 'outputOut', comp[0], 'injectMsg')
+    vm_table = moose.Table(data_container.path + '/Vm')
+    moose.connect(vm_table, 'requestData', comp[-1], 'get_Vm')
+    return {'pulsegen': pulsegen,
+            'soma': comp[-1],
+            'cell': cell,
+            'vm_table': vm_table}
+
+def setup_hsolve_passive_cable(model_container, data_container, comp_count, simdt):
+    elements = setup_passive_cable(model_container, data_container, comp_count, simdt)
+    solver = moose.HSolve(model_container.path + '/hsolve')
+    solver.dt = simdt
+    solver.target = elements['cell'].path
+    elements['solver'] = solver
+    return elements    
+
+def run_simulation(container, simdt, simtime):
         moose.setClock(0, simdt)
         moose.setClock(1, simdt)
         moose.setClock(2, simdt)
         moose.setClock(3, simdt)
-        moose.useClock(0, hsolve_model.path + '/##[TYPE=Compartment]', 'init')
-        moose.useClock(1, hsolve_model.path + '/##[TYPE=Compartment]', 'process')
-        moose.useClock(2, hsolve_model.path + '/##[TYPE!=Compartment]', 'process')
-        moose.useClock(3, hsolve_data.path + '/##', 'process')
-        moose.useClock(0, fwdeuler_model.path + '/##[TYPE=Compartment]', 'init')
-        moose.useClock(1, fwdeuler_model.path + '/##[TYPE=Compartment]', 'process')
-        moose.useClock(2, fwdeuler_model.path + '/##[TYPE!=Compartment]', 'process')
-        moose.useClock(3, fwdeuler_data.path + '/##', 'process')
+        moose.useClock(0, container.path + '/##[TYPE=Compartment]', 'init')
+        moose.useClock(1, container.path + '/##[TYPE=Compartment]', 'process')
+        moose.useClock(2, container.path + '/##[TYPE!=Compartment]', 'process')
         moose.reinit()
-        moose.start(10 * simdt)
-        print 'hsolve Vm:', hsolve_elements['vm_table'].vec
-        print 'euler Vm:', fwdeuler_elements['vm_table'].vec
+        moose.start(simtime)
+        
+    
+class TestSingleCompPassive(unittest.TestCase):
+    """Test hsolve with a single compartment"""
+    def setUp(self):
+        self.simdt = 1e-4
+        self.testId = uuid.uuid4().int
+        test_container = moose.Neutral('test%d' % (self.testId))
+        hsolve_data = moose.Neutral('%s/hsolvedata' % (test_container.path))
+        hsolve_model = moose.Neutral('%s/hsolvemodel' % (test_container.path))
+        self.hsolve_elements = setup_hsolve_single_comp_model(hsolve_model, hsolve_data, self.simdt)
+        fwdeuler_model = moose.Neutral('%s/fwdeulermodel' % (test_container.path))
+        fwdeuler_data = moose.Neutral('%s/fwdeulerdata' % (test_container.path))
+        self.fwdeuler_elements = setup_single_comp_model(fwdeuler_model, fwdeuler_data, self.simdt)
+        run_simulation(test_container, self.simdt, 1000*self.simdt)
+        print self.hsolve_elements['vm_table'].vec
+        print self.fwdeuler_elements['vm_table'].vec
 
     def testHSolveSingleComp(self):
-        pass
+        err = compare_data_arrays(self.hsolve_elements['vm_table'].vec, self.fwdeuler_elements['vm_table'].vec, plot=True)
+        print 'Difference:', err
+        self.assertLess(err, 0.01)
+
+class TestPassiveCable(unittest.TestCase):
+    """Test a passive cable in forward Euler and hsolve"""
+    def setUp(self):
+        self.comp_count = 100
+        self.simdt = 1e-6
+        self.testId = uuid.uuid4().int
+        test_container = moose.Neutral('test%d' % (self.testId))
+        hsolve_data = moose.Neutral('%s/hsolvedata' % (test_container.path))
+        hsolve_model = moose.Neutral('%s/hsolvemodel' % (test_container.path))
+        self.hsolve_elements = setup_hsolve_passive_cable(hsolve_model, hsolve_data, self.comp_count, self.simdt)
+        fwdeuler_model = moose.Neutral('%s/fwdeulermodel' % (test_container.path))
+        fwdeuler_data = moose.Neutral('%s/fwdeulerdata' % (test_container.path))
+        self.fwdeuler_elements = setup_passive_cable(fwdeuler_model, fwdeuler_data, self.comp_count, self.simdt)
+        # self.hsolve_elements['pulsegen'].firstLevel = 1e-9
+        # self.fwdeuler_elements['pulsegen'].firstLevel = 1e-9
+        run_simulation(test_container, self.simdt, 1000*self.simdt)
+        print self.hsolve_elements['vm_table'].vec
+        print self.fwdeuler_elements['vm_table'].vec
+        
+
+    def testHSolvePassiveCable(self):
+        compare_data_arrays(self.hsolve_elements['vm_table'].vec, self.fwdeuler_elements['vm_table'].vec, plot=True)
+        
+        
         
 if __name__ == '__main__':
     unittest.main()
