@@ -8,23 +8,20 @@
 **********************************************************************/
 
 #include "header.h"
-//~ #include "biophysics/Compartment.h"
-//~ #include "biophysics/SpikeGen.h"
-//~ #include "biophysics/CaConc.h"
 #include <queue>
-//~ #include "biophysics/SynInfo.h"
-//~ #include "biophysics/SynChan.h"
 #include "HSolveStruct.h"
 #include "HinesMatrix.h"
 #include "HSolvePassive.h"
 #include "RateLookup.h"
 #include "HSolveActive.h"
+#include "HSolve.h"
+#include "../biophysics/Compartment.h"
+#include "../biophysics/CaConc.h"
+using namespace moose;
+#include "ZombieCompartment.h"
+#include "ZombieCaConc.h"
 
 extern ostream& operator <<( ostream& s, const HinesMatrix& m );
-
-//~ static const Finfo* synGkFinfo = initSynChanCinfo()->findFinfo( "Gk" );
-//~ static const Finfo* synEkFinfo = initSynChanCinfo()->findFinfo( "Ek" );
-//~ static const Finfo* spikeVmFinfo = initSpikeGenCinfo()->findFinfo( "Vm" );
 
 const int HSolveActive::INSTANT_X = 1;
 const int HSolveActive::INSTANT_Y = 2;
@@ -55,7 +52,7 @@ void HSolveActive::step( ProcPtr info ) {
 	advanceCalcium();
 	advanceSynChans( info );
 	
-	sendValues();
+	sendValues( info );
 	sendSpikes( info );
 	
 	externalCurrent_.assign( externalCurrent_.size(), 0.0 );
@@ -304,40 +301,23 @@ void HSolveActive::sendSpikes( ProcPtr info ) {
  * This function dispatches state values via any source messages on biophysical
  * objects which have been taken over.
  */
-void HSolveActive::sendValues() {
-	//~ static const Slot compartmentVmSrcSlot =
-		//~ initCompartmentCinfo()->getSlot( "VmSrc" );
-	//~ static const Slot caConcConcSrcSlot =
-		//~ initCaConcCinfo()->getSlot( "concSrc" );
-	//~ static const Slot compartmentChannelVmSlot =
-		//~ initCompartmentCinfo()->getSlot( "channel.Vm" );
-	//~ 
-	//~ for ( unsigned int i = 0; i < compartmentId_.size(); ++i ) {
-		//~ send1< double > (
-			//~ compartmentId_[ i ].eref(),
-			//~ compartmentVmSrcSlot,
-			//~ V_[ i ]
-		//~ );
-		//~ 
-		//~ // An advantage of sending from the compartment here is that we can use
-		//~ // as simple 'send' as opposed to 'sendTo'. sendTo requires the conn
-		//~ // index for the target, and that will require extra book keeping.
-		//~ // Disadvantage is that the message will go out to regular HHChannels,
-		//~ // etc. A possibility is to delete those messages.
-		//~ send1< double >(
-			//~ compartmentId_[ i ].eref(),
-			//~ compartmentChannelVmSlot,
-			//~ V_[ i ]
-		//~ );
-	//~ }
-	//~ 
-	//~ /*
-	 //~ * Speed up this function by sending only from objects which have targets.
-	 //~ */
-	//~ for ( unsigned int i = 0; i < caConcId_.size(); ++i )
-		//~ send1< double > (
-			//~ caConcId_[ i ].eref(),
-			//~ caConcConcSrcSlot,
-			//~ ca_[ i ]
-		//~ );
+void HSolveActive::sendValues( ProcPtr info ) {
+	/*
+	 * Can speed up this function by sending only from objects
+	 * which have targets.
+	 */
+	 
+	for ( unsigned int i = 0; i < compartmentId_.size(); ++i )
+		ZombieCompartment::VmOut()->send(
+			compartmentId_[ i ].eref(),
+			info->threadIndexInGroup,
+			V_[ i ]
+		);
+	
+	for ( unsigned int i = 0; i < caConcId_.size(); ++i )
+		ZombieCaConc::concOut()->send(
+			caConcId_[ i ].eref(),
+			info->threadIndexInGroup,
+			ca_[ i ]
+		);
 }
