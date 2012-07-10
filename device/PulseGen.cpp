@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Mon Feb 20 01:41:12 2012 (+0530)
 // Version: 
-// Last-Updated: Mon Apr 23 09:45:08 2012 (+0530)
+// Last-Updated: Tue Jul 10 10:21:42 2012 (+0530)
 //           By: subha
-//     Update #: 164
+//     Update #: 168
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -80,7 +80,12 @@ const Cinfo* PulseGen::initCinfo()
                                                      &PulseGen::setCount,
                                                      &PulseGen::getCount);
     static ValueFinfo< PulseGen, unsigned int > trigMode("trigMode",
-                                                     "Trigger mode for pulses in the sequence",
+                                                         "Trigger mode for pulses in the sequence.\n"
+                                                         " 0 : free-running mode where it keeps looping its output\n"
+                                                         " 1 : external trigger, where it is triggered by an external input (and"
+                                                         " stops after creating the first train of pulses)\n"
+                                                         " 2 : external gate mode, where it keeps generating the pulses in a"
+                                                         " loop as long as the input is high.",
                                                      &PulseGen::setTrigMode,
                                                      &PulseGen::getTrigMode);
     static LookupValueFinfo < PulseGen, unsigned int, double > level("level",
