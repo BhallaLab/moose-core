@@ -50,7 +50,7 @@ const Cinfo* SimManager::initCinfo()
 		//////////////////////////////////////////////////////////////
 		static ValueFinfo< SimManager, double > syncTime(
 			"syncTime",
-			"SyncTime is the interval between synchornizing solvers"
+			"SyncTime is the interval between synchronizing solvers"
 			"5 msec is a typical value",
 			&SimManager::setSyncTime,
 			&SimManager::getSyncTime
@@ -70,6 +70,29 @@ const Cinfo* SimManager::initCinfo()
 			"chemical, a default of 1 sec is reasonable",
 			&SimManager::setPlotDt,
 			&SimManager::getPlotDt
+		);
+
+		static ValueFinfo< SimManager, double > runTime(
+			"runTime",
+			"runTime is the requested duration of the simulation that is "
+			"stored in some kinds of model definition files.",
+			&SimManager::setRunTime,
+			&SimManager::getRunTime
+		);
+
+		static ValueFinfo< SimManager, string > method(
+			"method",
+			"method is the numerical method used for the calculations."
+			"This will set up or even replace the solver with one able"
+			"to use the specified method. "
+			"Currently works only with two solvers: GSL and GSSA."
+			"The GSL solver has a variety of ODE methods, by default"
+			"Runge-Kutta-Fehlberg."
+			"The GSSA solver currently uses the Gillespie Stochastic"
+			"Systems Algorithm, somewhat optimized over the original"
+			"method.",
+			&SimManager::setMethod,
+			&SimManager::getMethod
 		);
 
 		static ValueFinfo< SimManager, unsigned int > version(
@@ -132,6 +155,8 @@ const Cinfo* SimManager::initCinfo()
 		&syncTime,		// Value
 		&autoPlot,		// Value
 		&plotDt,		// Value
+		&runTime,		// Value
+		&method,		// Value
 		&version,		// Value
 		&build,			// DestFinfo
 		&makeStandardElements,			// DestFinfo
@@ -210,6 +235,16 @@ double SimManager::getSimDt() const
 	return simdt_;
 }
 
+void SimManager::setRunTime( double v )
+{
+	runTime_ = v;
+}
+
+double SimManager::getRunTime() const
+{
+	return runTime_;
+}
+
 void SimManager::setVersion( unsigned int v )
 {
 	version_ = v;
@@ -218,6 +253,23 @@ void SimManager::setVersion( unsigned int v )
 unsigned int SimManager::getVersion() const
 {
 	return version_;
+}
+
+void SimManager::setMethod( string v )
+{
+	if ( v == "GSSA" || v == "gssa" || v == "Gillespie" || v == "gillespie")
+		// setupGssa();
+		;
+	else if ( v == "rk5" || v == "gsl" || v == "GSL" )
+		;
+		// setupRK5();
+	cout << "SimManager::setMethod: Not yet implemented\n";
+	method_ = v;
+}
+
+string SimManager::getMethod() const
+{
+	return method_;
 }
 //////////////////////////////////////////////////////////////
 // MsgDest Definitions
@@ -436,6 +488,8 @@ void SimManager::buildGsl( const Eref& e, const Qinfo* q,
 	assert( ret );
 	ret = Field< string >::set( gsl, "method", method );
 	assert( ret );
+	// The GSL does some massaging of the method string, so we ask it back.
+	method_ = Field< string >::get( gsl, "method" );
 	string path0 = basePath + "/kinetics/mesh," + 
 		basePath + "/kinetics/##[ISA=StimulusTable]";
 	shell->doUseClock( path0, "process", 0);
@@ -462,11 +516,14 @@ void SimManager::buildFromKkitTree( const Eref& e, const Qinfo* q,
 	string basePath = baseId_.path();
 	if ( method == "Gillespie" || method == "gillespie" || 
 		method == "GSSA" || method == "gssa" || method == "Gssa" ) {
+		method_ = "gssa";
 		buildGssa( e, q, shell );
 	} else if ( method == "Neutral" || method == "ee" || method == "EE" ) {
 		buildEE( shell );
+		method_ = "ee";
 	} else if ( method == "Smoldyn" || method == "smoldyn" ) {
 		buildSmoldyn( shell );
+		method_ = "smoldyn";
 	} else {
 		buildGsl( e, q, shell, method );
 	}
