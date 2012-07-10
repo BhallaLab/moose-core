@@ -500,17 +500,17 @@ void HSolveActive::readExternalChannels() {
 	filter.push_back( "HHChannel" );
 	//~ filter.push_back( "SynChan" );
 	
-	externalChannelId_.resize( compartmentId_.size() );
+	//~ externalChannelId_.resize( compartmentId_.size() );
 	externalCurrent_.resize( 2 * compartmentId_.size(), 0.0 );
 	
-	for ( unsigned int ic = 0; ic < compartmentId_.size(); ++ic )
-		HSolveUtils::targets(
-			compartmentId_[ ic ],
-			"channel",
-			externalChannelId_[ ic ],
-			filter,
-			false    // include = false. That is, use filter to exclude.
-		);
+	//~ for ( unsigned int ic = 0; ic < compartmentId_.size(); ++ic )
+		//~ HSolveUtils::targets(
+			//~ compartmentId_[ ic ],
+			//~ "channel",
+			//~ externalChannelId_[ ic ],
+			//~ filter,
+			//~ false    // include = false. That is, use filter to exclude.
+		//~ );
 }
 
 void HSolveActive::cleanup() {

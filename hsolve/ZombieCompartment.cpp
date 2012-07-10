@@ -9,7 +9,7 @@
 
 #include "header.h"
 #include "ElementValueFinfo.h"
-//~ #include "../randnum/randnum.h"
+#include "../randnum/randnum.h"
 #include "../biophysics/Compartment.h"
 #include "HinesMatrix.h"
 #include "HSolveStruct.h"
@@ -22,7 +22,14 @@
 using namespace moose;
 const double ZombieCompartment::EPSILON = 1.0e-15;
 
-static SrcFinfo1< double >* VmOut() {
+/*
+ * Static function.
+ * 
+ * This Finfo is used to send out Vm to channels, spikegens, etc.
+ * The original Compartment sends this itself, whereas the HSolve
+ * sends on behalf of the Zombie.
+ */
+SrcFinfo1< double >* ZombieCompartment::VmOut() {
 	static SrcFinfo1< double > VmOut( "VmOut", 
 		"Sends out Vm value of compartment on each timestep" );
 	return &VmOut;
