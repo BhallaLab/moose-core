@@ -140,6 +140,7 @@ Id ReadKkit::read(
 	q.setThreadNum( ScriptThreadNum );
 	sm->setPlotDt( plotdt_ );
 	sm->setSimDt( simdt_ );
+	sm->setRunTime( maxtime_ );
 	sm->setVersion( version_ );
 	sm->build( base.eref(), &q, method );
 	s->doReinit();
