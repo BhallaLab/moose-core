@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Jul  9 18:23:55 2012 (+0530)
 # Version: 
-# Last-Updated: Mon Jul  9 23:35:33 2012 (+0530)
-#           By: Subhasis Ray
-#     Update #: 306
+# Last-Updated: Tue Jul 10 13:56:55 2012 (+0530)
+#           By: subha
+#     Update #: 517
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -65,6 +65,10 @@ from squid import *
 from squid_setup import SquidSetup
 from electronics import ClampCircuit
 
+default_line_edit_size = QtCore.QSize(80, 25)
+def set_default_line_edit_size(widget):
+    widget.setMinimumSize(default_line_edit_size)
+    widget.setMaximumSize(default_line_edit_size)
 
 class SquidGui(QtGui.QMainWindow):
     defaults = {}
@@ -84,37 +88,48 @@ class SquidGui(QtGui.QMainWindow):
                   'iclamp.firstT': 40.0,
                   'iclamp.firstD': 5.0,
                   'iclamp.secondI': 0.0,
-                  'iclamp.secondT': 1e9,
-                  'iclamp.secondD': 1e9
+                  'iclamp.secondT': 0.0,
+                  'iclamp.secondD': 0.0
                   })
     def __init__(self, *args):
         QtGui.QMainWindow.__init__(self, *args)
         self.squid_setup = SquidSetup()
+        self._plotdt = SquidGui.defaults['plotdt']
         self._plot_dict = defaultdict(list)
         self.setWindowTitle('Squid Axon simulation')        
+        self.setDockNestingEnabled(True)
         # self._statePlotWidget.setVisible(True)
         self._createRunControl()
-        self._runControlBox.setWindowFlags(QtCore.Qt.Window)
-        self._runControlBox.setWindowTitle('Simulation control')
-        self._runControlBox.setVisible(True)
-        self.setCentralWidget(self._runControlBox)
+        self.addDockWidget(QtCore.Qt.TopDockWidgetArea, self._runControlDock) 
+        self._runControlDock.setFeatures(QtGui.QDockWidget.DockWidgetMovable |QtGui.QDockWidget.DockWidgetFloatable )	 
+        # self._runControlBox.setWindowFlags(QtCore.Qt.Window)
+        # self._runControlBox.setWindowTitle('Simulation control')
+        # self._runControlBox.setVisible(True)
         self._createChannelControl()
-        self._channelCtrlBox.setWindowFlags(QtCore.Qt.Window)
+        # self._channelCtrlBox.setWindowFlags(QtCore.Qt.Window)
         self._channelCtrlBox.setWindowTitle('Channel properties')
-        self._channelCtrlBox.setVisible(True)
+        # self._channelCtrlBox.setAllowedAreas(QtCore.Qt.LeftDockWidgetArea | QtCore.Qt.RightDockWidgetArea)	 
+        self._channelControlDock.setFeatures(QtGui.QDockWidget.DockWidgetMovable |QtGui.QDockWidget.DockWidgetFloatable )	 
+        self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self._channelControlDock) 
+        # self._channelCtrlBox.setVisible(True)
         self._createElectronicsControl()
-        self._electronicsTab.setWindowFlags(QtCore.Qt.Window)
-        self._electronicsTab.setWindowTitle('Electronics')
-        self._electronicsTab.setVisible(True)
+        self._electronicsDock.setFeatures(QtGui.QDockWidget.DockWidgetMovable |QtGui.QDockWidget.DockWidgetFloatable )	 
+        self._electronicsDock.setWindowTitle('Electronics')
+        self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self._electronicsDock) 
+        # self._electronicsTab.setWindowFlags(QtCore.Qt.Window)	 
+        # self._electronicsTab.setAllowedAreas(QtCore.Qt.LeftDockWidgetArea | QtCore.Qt.RightDockWidgetArea)	 
+        # self._electronicsTab.setFeatures(QtGui.QDockWidget.DockWidgetMovable |QtGui.QDockWidget.DockWidgetFloatable)
+        # self._electronicsTab.setVisible(True)
         self._createPlotWidget()             
-        self._plotWidget.setWindowFlags(QtCore.Qt.Window)
-        self._plotWidget.setWindowTitle('Plots')
-        self._plotWidget.setVisible(True)
+        self.setCentralWidget(self._plotWidget)
+        # self._plotWidget.setWindowFlags(QtCore.Qt.Window)
+        # self._plotWidget.setVisible(True)
         self._createStatePlotWidget()
         self._statePlotWidget.setWindowFlags(QtCore.Qt.Window)
         self._statePlotWidget.setWindowTitle('State plot')
         self._initActions()
-        self._createToolBar()
+        self._createRunToolBar()
+        self._createPlotToolBar()
         
     def _createPlotWidget(self):
         self._plotWidget = QtGui.QWidget()
@@ -123,6 +138,7 @@ class SquidGui(QtGui.QMainWindow):
         self._plotCanvas.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         self._plotCanvas.updateGeometry()
         self._plotCanvas.setParent(self._plotWidget)
+        self._plotCanvas.mpl_connect('scroll_event', self._onScroll)
         self._plotFigure.set_canvas(self._plotCanvas)
         # Vm and command voltage go in the same subplot
         self._vm_axes = self._plotFigure.add_subplot(2,2,1, title='Membrane potential')
@@ -156,7 +172,7 @@ class SquidGui(QtGui.QMainWindow):
         layout.addWidget(self._plotNavigator)
         self._plotWidget.setLayout(layout)
 
-    def _createStatePlotWidget(self):
+    def _createStatePlotWidget(self):        
         self._statePlotWidget = QtGui.QWidget()
         self._statePlotFigure = Figure()
         self._statePlotCanvas = FigureCanvas(self._statePlotFigure)
@@ -204,39 +220,38 @@ class SquidGui(QtGui.QMainWindow):
         layout.addWidget(frame)
         layout.addWidget(self._statePlotCanvas)
         layout.addWidget(self._statePlotNavigator)
-        self._statePlotWidget.setLayout(layout)
-        return self._statePlotWidget
+        self._statePlotWidget.setLayout(layout)        
 
     def _createRunControl(self):
-        self._runControlBox = QtGui.QGroupBox('Simulation control')
+        self._runControlBox = QtGui.QGroupBox(self)
         self._runTimeLabel = QtGui.QLabel("Run time (ms)", self._runControlBox)
         self._simTimeStepLabel = QtGui.QLabel("Simulation time step (ms)", self._runControlBox)
-        self._plotTimeStepLabel = QtGui.QLabel("Plotting interval (ms)", self._runControlBox)
         self._runTimeEdit = QtGui.QLineEdit('%g' % (SquidGui.defaults['runtime']), self._runControlBox)
+        set_default_line_edit_size(self._runTimeEdit)
         self._simTimeStepEdit = QtGui.QLineEdit('%g' % (SquidGui.defaults['simdt']), self._runControlBox)
-        self._plotTimeStepEdit = QtGui.QLineEdit('%g' % (SquidGui.defaults['plotdt']), self._runControlBox)
-        self._plotOverlayButton = QtGui.QCheckBox('Overlay plots', self._runControlBox)
-        layout = QtGui.QGridLayout()
-        layout.addWidget(self._runTimeLabel, 0, 0)
-        layout.addWidget(self._runTimeEdit, 0, 1)
-        layout.addWidget(self._simTimeStepLabel, 1, 0)
-        layout.addWidget(self._simTimeStepEdit, 1, 1)
-        layout.addWidget(self._plotTimeStepLabel, 2, 0)
-        layout.addWidget(self._plotTimeStepEdit, 2, 1)
-        layout.addWidget(self._plotOverlayButton, 3, 1)
+        set_default_line_edit_size(self._simTimeStepEdit)
+        layout = QtGui.QHBoxLayout()
+        layout.addWidget(self._runTimeLabel)
+        layout.addWidget(self._runTimeEdit)
+        layout.addWidget(self._simTimeStepLabel)
+        layout.addWidget(self._simTimeStepEdit)
         self._runControlBox.setLayout(layout)
-        return self._runControlBox
+        self._runControlDock = QtGui.QDockWidget('Simulation', self)
+        self._runControlDock.setWidget(self._runControlBox)
 
     def _createChannelControl(self):
-        self._channelCtrlBox = QtGui.QGroupBox('Channel properties', self)
+        self._channelControlDock = QtGui.QDockWidget('Channels', self)
+        self._channelCtrlBox = QtGui.QGroupBox(self)
         self._naConductanceToggle = QtGui.QCheckBox('Block Na+ channel', self._channelCtrlBox)
         self._kConductanceToggle = QtGui.QCheckBox('Block K+ channel', self._channelCtrlBox)
         self._kOutLabel = QtGui.QLabel('[K+]out (mM)', self._channelCtrlBox)
         self._kOutEdit = QtGui.QLineEdit('%g' % (self.squid_setup.squid_axon.K_out), 
                                          self._channelCtrlBox)
+        set_default_line_edit_size(self._kOutEdit)
         self._naOutLabel = QtGui.QLabel('[Na+]out (mM)', self._channelCtrlBox)
         self._naOutEdit = QtGui.QLineEdit('%g' % (self.squid_setup.squid_axon.Na_out), 
                                          self._channelCtrlBox)
+        set_default_line_edit_size(self._naOutEdit)
         self._kInLabel = QtGui.QLabel('[K+]in (mM)', self._channelCtrlBox)
         self._kInEdit = QtGui.QLabel('%g' % (self.squid_setup.squid_axon.K_in), 
                                          self._channelCtrlBox)
@@ -246,9 +261,10 @@ class SquidGui(QtGui.QMainWindow):
         self._temperatureLabel = QtGui.QLabel('Temperature (C)', self._channelCtrlBox)
         self._temperatureEdit = QtGui.QLineEdit('%g' % (self.defaults['temperature'] - CELSIUS_TO_KELVIN),
                                                 self._channelCtrlBox)
+        set_default_line_edit_size(self._temperatureEdit)
         for child in self._channelCtrlBox.children():
             if isinstance(child, QtGui.QLineEdit):
-                child.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Fixed)
+                set_default_line_edit_size(child)
         layout = QtGui.QGridLayout(self._channelCtrlBox)
         layout.addWidget(self._naConductanceToggle, 0, 0)
         layout.addWidget(self._kConductanceToggle, 1, 0)
@@ -263,8 +279,8 @@ class SquidGui(QtGui.QMainWindow):
         layout.addWidget(self._temperatureLabel, 6, 0)
         layout.addWidget(self._temperatureEdit, 6, 1)
         self._channelCtrlBox.setLayout(layout)
-        return self._channelCtrlBox
-        
+        self._channelControlDock.setWidget(self._channelCtrlBox)
+        return self._channelCtrlBox        
 
     def __get_stateplot_data(self, name):
         data = []
@@ -305,10 +321,11 @@ class SquidGui(QtGui.QMainWindow):
         self._electronicsTab = QtGui.QTabWidget(self)
         self._electronicsTab.addTab(self._getIClampCtrlBox(), 'Current clamp')
         self._electronicsTab.addTab(self._getVClampCtrlBox(), 'Voltage clamp')
-        return self._electronicsTab
+        self._electronicsDock = QtGui.QDockWidget(self)
+        self._electronicsDock.setWidget(self._electronicsTab)
 
     def _getVClampCtrlBox(self):
-        vClampPanel = QtGui.QGroupBox('Voltage clamp settings', self)
+        vClampPanel = QtGui.QGroupBox(self)
         self._vClampCtrlBox = vClampPanel
         self._holdingVLabel = QtGui.QLabel("Holding Voltage (mV)", vClampPanel)
         self._holdingVEdit = QtGui.QLineEdit('%g' % (SquidGui.defaults['vclamp.holdingV']), vClampPanel)
@@ -324,7 +341,7 @@ class SquidGui(QtGui.QMainWindow):
         self._clampTimeEdit = QtGui.QLineEdit('%g' % (SquidGui.defaults['vclamp.clampT']), vClampPanel)
         for child in vClampPanel.children():
             if isinstance(child, QtGui.QLineEdit):
-                child.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Fixed)
+                set_default_line_edit_size(child)
         layout = QtGui.QGridLayout(vClampPanel)
         layout.addWidget(self._holdingVLabel, 0, 0)
         layout.addWidget(self._holdingVEdit, 0, 1)
@@ -342,7 +359,7 @@ class SquidGui(QtGui.QMainWindow):
         return self._vClampCtrlBox
 
     def _getIClampCtrlBox(self):
-        iClampPanel = QtGui.QGroupBox('Current clamp settings', self)
+        iClampPanel = QtGui.QGroupBox(self)
         self._iClampCtrlBox = iClampPanel
         self._baseCurrentLabel = QtGui.QLabel("Base Current Level (uA)",iClampPanel)
         self._baseCurrentEdit = QtGui.QLineEdit('%g' % (SquidGui.defaults['iclamp.baseI']),iClampPanel)
@@ -363,7 +380,7 @@ class SquidGui(QtGui.QMainWindow):
         self._pulseMode.addItem("Pulse Train")
         for child in iClampPanel.children():
             if isinstance(child, QtGui.QLineEdit):
-                child.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.Fixed)
+                set_default_line_edit_size(child)
         layout = QtGui.QGridLayout(iClampPanel)
         layout.addWidget(self._baseCurrentLabel, 0, 0)
         layout.addWidget(self._baseCurrentEdit, 0, 1)
@@ -512,9 +529,8 @@ class SquidGui(QtGui.QMainWindow):
             print 'Stopping simulation in progress ...'
             moose.stop()
         self._runtime = float(str(self._runTimeEdit.text()))
-        self._overlayPlots(self._plotOverlayButton.isChecked())
+        self._overlayPlots(self._overlayAction.isChecked())
         self._simdt = float(str(self._simTimeStepEdit.text()))
-        self._plotdt = float(str(self._plotTimeStepEdit.text()))
         clampMode = None
         singlePulse = True
         if self._electronicsTab.currentWidget() == self._vClampCtrlBox:
@@ -563,12 +579,18 @@ class SquidGui(QtGui.QMainWindow):
         self.squid_setup.run(self._runtime)
         self._updateAllPlots()
 
+    def _toggleDocking(self, on):
+        self._channelControlDock.setFloating(on)
+        self._electronicsDock.setFloating(on)
+        self._runControlDock.setFloating(on)
+        
+
     def _initActions(self):
         self._runAction = QtGui.QAction(self.tr('Run'), self)
         self._runAction.setShortcut(self.tr('F5'))
         self._runAction.setToolTip('Run simulation (F5)')
         self.connect(self._runAction, QtCore.SIGNAL('triggered()'), self._runSlot)
-        self._resetToDefaultsAction = QtGui.QAction(self.tr('Default settings'), self)
+        self._resetToDefaultsAction = QtGui.QAction(self.tr('Restore defaults'), self)
         self._resetToDefaultsAction.setToolTip('Reset all settings to their default values')
         self.connect(self._resetToDefaultsAction, QtCore.SIGNAL('triggered()'), self._useDefaults)
         self._showLegendAction = QtGui.QAction(self.tr('Display legend'), self)
@@ -582,18 +604,30 @@ class SquidGui(QtGui.QMainWindow):
         self._autoscaleAction.setCheckable(True)
         self._autoscaleAction.setChecked(False)
         self.connect(self._autoscaleAction, QtCore.SIGNAL('toggled(bool)'), self._autoscale)
+        self._overlayAction = QtGui.QAction('Overlay plots', self)
+        self._overlayAction.setCheckable(True)
+        self._overlayAction.setChecked(False) 
+        self._dockAction = QtGui.QAction('Undock all frames', self)
+        self._dockAction.setCheckable(True)
+        self._dockAction.setChecked(False)
+        self.connect(self._dockAction, QtCore.SIGNAL('toggled(bool)'), self._toggleDocking)
         self._quitAction = QtGui.QAction(self.tr('&Quit'), self)
         self._quitAction.setShortcut(self.tr('Ctrl+Q'))
         self.connect(self._quitAction, QtCore.SIGNAL('triggered()'), QtGui.qApp.closeAllWindows)
 
-    def _createToolBar(self):
+    def _createRunToolBar(self):
         self._simToolBar = self.addToolBar(self.tr('Simulation control'))
         self._simToolBar.addAction(self._quitAction)
         self._simToolBar.addAction(self._runAction)
-        self._simToolBar.addAction(self._showLegendAction)
-        self._simToolBar.addAction(self._autoscaleAction)
-        self._simToolBar.addAction(self._showStatePlotAction)
         self._simToolBar.addAction(self._resetToDefaultsAction)
+        self._simToolBar.addAction(self._dockAction)
+
+    def _createPlotToolBar(self):
+        self._plotToolBar = self.addToolBar(self.tr('Plotting control'))
+        self._plotToolBar.addAction(self._showLegendAction)
+        self._plotToolBar.addAction(self._autoscaleAction)
+        self._plotToolBar.addAction(self._overlayAction)
+        self._plotToolBar.addAction(self._showStatePlotAction)
 
     def _showLegend(self, on):
         if on:
@@ -623,8 +657,7 @@ class SquidGui(QtGui.QMainWindow):
     def _useDefaults(self):
         self._runTimeEdit.setText('%g' % (self.defaults['runtime']))
         self._simTimeStepEdit.setText('%g' % (self.defaults['simdt']))
-        self._plotTimeStepEdit.setText('%g' % (self.defaults['plotdt']))
-        self._plotOverlayButton.setChecked(False)
+        self._overlayAction.setChecked(False)
         self._naConductanceToggle.setChecked(False)
         self._kConductanceToggle.setChecked(False)
         self._kOutEdit.setText('%g' % (SquidGui.defaults['K_out']))
@@ -644,7 +677,17 @@ class SquidGui(QtGui.QMainWindow):
         self._secondDelayEdit.setText('%g' % (SquidGui.defaults['iclamp.secondD']))
         self._secondPulseWidthEdit.setText('%g' % (SquidGui.defaults['iclamp.secondT']))
         self._pulseMode.setCurrentIndex(0)
-        
+
+    def _onScroll(self, event):
+        print '1'
+        axes = event.inaxes
+        if event.button == 'up':
+            axes.get_xaxis().zoom(0.9)
+            axes.get_yaxis().zoom(0.9)
+        else:
+            axes.get_xaxis().zoom(1.0)
+            axes.get_yaxis().zoom(1.0)
+        self._plotCanvas.draw()
 
     def closeEvent(self, event):
         QtGui.qApp.closeAllWindows()
