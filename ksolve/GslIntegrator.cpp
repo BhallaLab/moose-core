@@ -187,6 +187,7 @@ void GslIntegrator::setMethod( string method )
 		gslStepType_ = gsl_odeiv_step_rk4;
 	} else if ( method == "rk5" || method == "gsl" ) {
 		gslStepType_ = gsl_odeiv_step_rkf45;
+		method_ = "rk5";
 	} else if ( method == "rkck" ) {
 		gslStepType_ = gsl_odeiv_step_rkck;
 	} else if ( method == "rk8pd" ) {
@@ -206,6 +207,7 @@ void GslIntegrator::setMethod( string method )
 		cout << "Warning: GslIntegrator::innerSetMethod: method '" <<
 			method << "' not known, using rk5\n";
 		gslStepType_ = gsl_odeiv_step_rkf45;
+		method_ = "rk5";
 	}
 #endif // USE_GSL
 }

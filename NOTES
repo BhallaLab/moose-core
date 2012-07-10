@@ -17878,3 +17878,13 @@ Put in a helper vector< Id > idMap_ to track down the affected molecule in
 accession 85. It is something called Heaviside_dup and is a SumTotal
 coming off one molecule, and is also a substrate of an enzyme.
 ============================================================================
+30 June 2012.
+Looked at it again. The dup comes of a molecule that is the product of a 4th
+order reaction. Perhaps an error there? Also the Kf is very high.
+Tried to manually lower the rates. Still gives a segv.
+
+============================================================================
+10 July 2012.
+Put in fields for method and runTime in SimManager. At this point reading
+these fields makes sense, but it doesn't do the right thing when writing them.
+
