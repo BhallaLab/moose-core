@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Feb 22 00:53:38 2012 (+0530)
 # Version: 
-# Last-Updated: Mon Jul  9 22:05:11 2012 (+0530)
-#           By: Subhasis Ray
-#     Update #: 206
+# Last-Updated: Tue Jul 10 10:28:40 2012 (+0530)
+#           By: subha
+#     Update #: 221
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -42,15 +42,19 @@ class ClampCircuit(moose.Neutral):
         'delay3': 1e9
         }
     def __init__(self, path, compartment):
-        moose.Neutral.__init__(self, path)
+        moose.Neutral.__init__(self, path)        
         self.pulsegen = moose.PulseGen(path+"/pulse") # holding voltage/current generator
-        self.pulsegen.count = 3
+        self.pulsegen.count = 2
         self.pulsegen.firstLevel = 25.0
         self.pulsegen.firstWidth = 50.0
         self.pulsegen.firstDelay = 2.0
-        self.pulsegen.secondDelay = 1e6
-        self.pulsegen.trigMode = 0
-        self.pulsegen.delay[2] = 1e9
+        self.pulsegen.secondDelay = 0.0
+        self.pulsegen.trigMode = 2
+        self.gate = moose.PulseGen(path+"/gate") # holding voltage/current generator
+        self.gate.level[0] = 1.0
+        self.gate.delay[0] = 0.0
+        self.gate.width[0] = 1e9
+        moose.connect(self.gate, 'outputOut', self.pulsegen, 'input')
         self.lowpass = moose.RC(path+"/lowpass") # lowpass filter
         self.lowpass.R = 1.0
         self.lowpass.C = 0.03
@@ -87,10 +91,10 @@ class ClampCircuit(moose.Neutral):
         self.pulsegen.secondDelay = secondDelay
         self.pulsegen.secondWidth = secondWidth
         if singlePulse:
-            self.pulsegen.delay[2] = 1e10
+            self.pulsegen.trigMode = 1  
         else:
-            self.pulsegen.delay[2] = 0.0
-        
+            self.pulsegen.trigMode = 0
+        print 'Trigmode', self.pulsegen.trigMode
         
     def do_voltage_clamp(self):
         """Switch to voltage clamp circuitry. After this the simdt may
