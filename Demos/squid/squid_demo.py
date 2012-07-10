@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Jul  9 18:23:55 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Jul 10 14:58:44 2012 (+0530)
+# Last-Updated: Tue Jul 10 15:22:28 2012 (+0530)
 #           By: subha
-#     Update #: 649
+#     Update #: 662
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -99,7 +99,7 @@ class SquidGui(QtGui.QMainWindow):
         self.setWindowTitle('Squid Axon simulation')        
         self.setDockNestingEnabled(True)
         self._createRunControl()
-        self.addDockWidget(QtCore.Qt.TopDockWidgetArea, self._runControlDock) 
+        self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self._runControlDock) 
         self._runControlDock.setFeatures(QtGui.QDockWidget.DockWidgetMovable |QtGui.QDockWidget.DockWidgetFloatable )	 
         self._createChannelControl()
         self._channelCtrlBox.setWindowTitle('Channel properties')
@@ -195,17 +195,20 @@ class SquidGui(QtGui.QMainWindow):
 
     def _createRunControl(self):
         self._runControlBox = QtGui.QGroupBox(self)
+        self._runControlBox.setSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
         self._runTimeLabel = QtGui.QLabel("Run time (ms)", self._runControlBox)
         self._simTimeStepLabel = QtGui.QLabel("Simulation time step (ms)", self._runControlBox)
         self._runTimeEdit = QtGui.QLineEdit('%g' % (SquidGui.defaults['runtime']), self._runControlBox)
         set_default_line_edit_size(self._runTimeEdit)
         self._simTimeStepEdit = QtGui.QLineEdit('%g' % (SquidGui.defaults['simdt']), self._runControlBox)
         set_default_line_edit_size(self._simTimeStepEdit)
-        layout = QtGui.QHBoxLayout()
-        layout.addWidget(self._runTimeLabel)
-        layout.addWidget(self._runTimeEdit)
-        layout.addWidget(self._simTimeStepLabel)
-        layout.addWidget(self._simTimeStepEdit)
+        layout = QtGui.QGridLayout()
+        layout.addWidget(self._runTimeLabel, 0, 0)
+        layout.addWidget(self._runTimeEdit, 0, 1)
+        layout.addWidget(self._simTimeStepLabel, 1, 0)
+        layout.addWidget(self._simTimeStepEdit, 1, 1)
+        layout.setColumnStretch(2, 1.0)
+        layout.setRowStretch(2, 1.0)
         self._runControlBox.setLayout(layout)
         self._runControlDock = QtGui.QDockWidget('Simulation', self)
         self._runControlDock.setWidget(self._runControlBox)
@@ -249,6 +252,7 @@ class SquidGui(QtGui.QMainWindow):
         layout.addWidget(self._kInEdit, 5, 1)
         layout.addWidget(self._temperatureLabel, 6, 0)
         layout.addWidget(self._temperatureEdit, 6, 1)
+        layout.setRowStretch(7, 1.0)
         self._channelCtrlBox.setLayout(layout)
         self._channelControlDock.setWidget(self._channelCtrlBox)
         return self._channelCtrlBox        
@@ -326,6 +330,7 @@ class SquidGui(QtGui.QMainWindow):
         layout.addWidget(self._clampVEdit, 4, 1)
         layout.addWidget(self._clampTimeLabel, 5, 0)
         layout.addWidget(self._clampTimeEdit, 5, 1)
+        layout.setRowStretch(6, 1.0)
         vClampPanel.setLayout(layout)
         return self._vClampCtrlBox
 
@@ -368,6 +373,7 @@ class SquidGui(QtGui.QMainWindow):
         layout.addWidget(self._secondPulseWidthLabel, 6, 0)
         layout.addWidget(self._secondPulseWidthEdit, 6, 1)
         layout.addWidget(self._pulseMode, 7, 0, 1, 2)
+        layout.setRowStretch(8, 1.0)        
         # layout.setSizeConstraint(QtGui.QLayout.SetFixedSize)
         iClampPanel.setLayout(layout)
         return self._iClampCtrlBox
