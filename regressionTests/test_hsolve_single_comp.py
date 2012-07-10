@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jul 10 16:16:55 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Jul 10 20:36:10 2012 (+0530)
+# Last-Updated: Wed Jul 11 00:11:15 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 194
+#     Update #: 212
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -270,12 +270,12 @@ def setup_passive_cable(model_container, data_container, comp_count, simdt):
         c.Rm = 1e9
         c.Ra = 1e5
     for ii in range(1, comp_count):
-        moose.connect(comp[ii-1], 'axial', comp[ii], 'raxial')
+        moose.connect(comp[ii-1], 'raxial', comp[ii], 'axial')
     pulsegen = make_pulsegen(model_container.path)
     pulsegen.firstDelay = simdt
     moose.connect(pulsegen, 'outputOut', comp[0], 'injectMsg')
     vm_table = moose.Table(data_container.path + '/Vm')
-    moose.connect(vm_table, 'requestData', comp[-1], 'get_Vm')
+    moose.connect(vm_table, 'requestData', comp[50], 'get_Vm')
     return {'pulsegen': pulsegen,
             'soma': comp[-1],
             'cell': cell,
@@ -294,9 +294,11 @@ def run_simulation(container, simdt, simtime):
         moose.setClock(1, simdt)
         moose.setClock(2, simdt)
         moose.setClock(3, simdt)
-        moose.useClock(0, container.path + '/##[TYPE=Compartment]', 'init')
-        moose.useClock(1, container.path + '/##[TYPE=Compartment]', 'process')
-        moose.useClock(2, container.path + '/##[TYPE!=Compartment]', 'process')
+        moose.useClock(0, container.path + '/##[ISA=HSolve]', 'process')
+        moose.useClock(1, container.path + '/##[ISA=Compartment]', 'init')
+        moose.useClock(2, container.path + '/##[ISA=Compartment]', 'process')
+        moose.useClock(3, container.path + '/##[ISA=PulseGen]', 'process')
+        moose.useClock(3, container.path + '/##[ISA=Table]', 'process')
         moose.reinit()
         moose.start(simtime)
         
@@ -319,7 +321,7 @@ class TestSingleCompPassive(unittest.TestCase):
 
     def testHSolveSingleComp(self):
         err = compare_data_arrays(self.hsolve_elements['vm_table'].vec, self.fwdeuler_elements['vm_table'].vec, plot=True)
-        print 'Difference:', err
+        print 'testHSolveSingleComp: Error:', err
         self.assertLess(err, 0.01)
 
 class TestPassiveCable(unittest.TestCase):
@@ -343,9 +345,11 @@ class TestPassiveCable(unittest.TestCase):
         
 
     def testHSolvePassiveCable(self):
-        compare_data_arrays(self.hsolve_elements['vm_table'].vec, self.fwdeuler_elements['vm_table'].vec, plot=True)
+        err = compare_data_arrays(self.hsolve_elements['vm_table'].vec, self.fwdeuler_elements['vm_table'].vec, plot=True)
+        print 'testHSolvePassiveCable: Error:', err
+        self.assertLess(err, 0.01)
         
-        
+    
         
 if __name__ == '__main__':
     unittest.main()
