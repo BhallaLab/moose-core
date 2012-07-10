@@ -6,7 +6,10 @@ python testNeuroML_Gran98.py
 (other channels and morph xml files are already present in this same directory).
 The soma name below is hard coded for gran98, else any other file can be used by modifying this script.
 """
-
+import os
+os.environ['NUMPTHREADS'] = '1'
+import sys
+sys.path.append('../../../python')
 import moose
 from moose.utils import *
 
