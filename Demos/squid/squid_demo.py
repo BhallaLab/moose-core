@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Jul  9 18:23:55 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Jul 10 13:56:55 2012 (+0530)
+# Last-Updated: Tue Jul 10 14:58:44 2012 (+0530)
 #           By: subha
-#     Update #: 517
+#     Update #: 649
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -98,35 +98,23 @@ class SquidGui(QtGui.QMainWindow):
         self._plot_dict = defaultdict(list)
         self.setWindowTitle('Squid Axon simulation')        
         self.setDockNestingEnabled(True)
-        # self._statePlotWidget.setVisible(True)
         self._createRunControl()
         self.addDockWidget(QtCore.Qt.TopDockWidgetArea, self._runControlDock) 
         self._runControlDock.setFeatures(QtGui.QDockWidget.DockWidgetMovable |QtGui.QDockWidget.DockWidgetFloatable )	 
-        # self._runControlBox.setWindowFlags(QtCore.Qt.Window)
-        # self._runControlBox.setWindowTitle('Simulation control')
-        # self._runControlBox.setVisible(True)
         self._createChannelControl()
-        # self._channelCtrlBox.setWindowFlags(QtCore.Qt.Window)
         self._channelCtrlBox.setWindowTitle('Channel properties')
-        # self._channelCtrlBox.setAllowedAreas(QtCore.Qt.LeftDockWidgetArea | QtCore.Qt.RightDockWidgetArea)	 
         self._channelControlDock.setFeatures(QtGui.QDockWidget.DockWidgetMovable |QtGui.QDockWidget.DockWidgetFloatable )	 
         self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self._channelControlDock) 
-        # self._channelCtrlBox.setVisible(True)
         self._createElectronicsControl()
         self._electronicsDock.setFeatures(QtGui.QDockWidget.DockWidgetMovable |QtGui.QDockWidget.DockWidgetFloatable )	 
         self._electronicsDock.setWindowTitle('Electronics')
         self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self._electronicsDock) 
-        # self._electronicsTab.setWindowFlags(QtCore.Qt.Window)	 
-        # self._electronicsTab.setAllowedAreas(QtCore.Qt.LeftDockWidgetArea | QtCore.Qt.RightDockWidgetArea)	 
-        # self._electronicsTab.setFeatures(QtGui.QDockWidget.DockWidgetMovable |QtGui.QDockWidget.DockWidgetFloatable)
-        # self._electronicsTab.setVisible(True)
         self._createPlotWidget()             
         self.setCentralWidget(self._plotWidget)
-        # self._plotWidget.setWindowFlags(QtCore.Qt.Window)
-        # self._plotWidget.setVisible(True)
         self._createStatePlotWidget()
         self._statePlotWidget.setWindowFlags(QtCore.Qt.Window)
         self._statePlotWidget.setWindowTitle('State plot')
+        self._createHelpMessage()
         self._initActions()
         self._createRunToolBar()
         self._createPlotToolBar()
@@ -143,27 +131,15 @@ class SquidGui(QtGui.QMainWindow):
         # Vm and command voltage go in the same subplot
         self._vm_axes = self._plotFigure.add_subplot(2,2,1, title='Membrane potential')
         self._vm_axes.set_ylim(-20.0, 120.0)
-        # self._vm_plot, = self._vm_axes.plot([], [], label='Vm')
-        # self._command_plot, = self._vm_axes.plot([], [], label='command')
-        # self._vm_axes.legend()
         # Channel conductances go to the same subplot
         self._g_axes = self._plotFigure.add_subplot(2,2,2, title='Channel conductance')
         self._g_axes.set_ylim(0.0, 0.5)
-        # self._gna_plot, = self._g_axes.plot([], [], label='Na')
-        # self._gk_plot, = self._g_axes.plot([], [], label='K')
-        # self._g_axes.legend()
         # Injection current for Vclamp/Iclamp go to the same subplot
         self._im_axes = self._plotFigure.add_subplot(2,2,3, title='Injection current')
         self._im_axes.set_ylim(-0.5, 0.5)
-        # self._iclamp_plot, = self._im_axes.plot([], [], label='Iclamp')
-        # self._vclamp_plot, = self._im_axes.plot([], [], label='Vclamp')
-        # self._im_axes.legend()
         # Channel currents go to the same subplot
         self._i_axes = self._plotFigure.add_subplot(2,2,4, title='Channel current')
         self._i_axes.set_ylim(-10, 10)
-        # self._ina_plot, = self._i_axes.plot([], [], label='Na')
-        # self._ik_plot, = self._i_axes.plot([], [], label='K')
-        # self._i_axes.legend()
         for axis in self._plotFigure.axes:
             axis.autoscale(False)
         layout = QtGui.QVBoxLayout()
@@ -183,15 +159,10 @@ class SquidGui(QtGui.QMainWindow):
         self._statePlotFigure.subplots_adjust(hspace=0.5)
         self._statePlotAxes = self._statePlotFigure.add_subplot(2,1,1, title='State plot')
         self._state_plot, = self._statePlotAxes.plot([], [], label='state')
-        # self._statePlotAxes.legend()
         self._activationParamAxes = self._statePlotFigure.add_subplot(2,1,2, title='H-H activation parameters vs time')
         self._activationParamAxes.set_xlabel('Time (ms)')
         for axis in self._plotFigure.axes:
             axis.autoscale(False)
-        # self._m_plot, = self._activationParamAxes.plot([],[], label='m')
-        # self._h_plot, = self._activationParamAxes.plot([], [], label='h')
-        # self._n_plot, = self._activationParamAxes.plot([], [], label='n')
-        # self._activationParamAxes.legend()
         self._stateplot_xvar_label = QtGui.QLabel('Variable on X-axis')
         self._stateplot_xvar_combo = QtGui.QComboBox()
         self._stateplot_xvar_combo.addItems(['V', 'm', 'n', 'h'])
@@ -611,6 +582,8 @@ class SquidGui(QtGui.QMainWindow):
         self._dockAction.setCheckable(True)
         self._dockAction.setChecked(False)
         self.connect(self._dockAction, QtCore.SIGNAL('toggled(bool)'), self._toggleDocking)
+        self._helpAction = QtGui.QAction('Help', self)
+        self.connect(self._helpAction, QtCore.SIGNAL('triggered()'), self._helpMessage.exec_)
         self._quitAction = QtGui.QAction(self.tr('&Quit'), self)
         self._quitAction.setShortcut(self.tr('Ctrl+Q'))
         self.connect(self._quitAction, QtCore.SIGNAL('triggered()'), QtGui.qApp.closeAllWindows)
@@ -628,6 +601,7 @@ class SquidGui(QtGui.QMainWindow):
         self._plotToolBar.addAction(self._autoscaleAction)
         self._plotToolBar.addAction(self._overlayAction)
         self._plotToolBar.addAction(self._showStatePlotAction)
+        self._plotToolBar.addAction(self._helpAction)
 
     def _showLegend(self, on):
         if on:
@@ -681,16 +655,50 @@ class SquidGui(QtGui.QMainWindow):
     def _onScroll(self, event):
         print '1'
         axes = event.inaxes
+        zoom = 0.0
         if event.button == 'up':
-            axes.get_xaxis().zoom(0.9)
-            axes.get_yaxis().zoom(0.9)
-        else:
-            axes.get_xaxis().zoom(1.0)
-            axes.get_yaxis().zoom(1.0)
+            zoom = -1.0
+        elif event.button == 'down':
+            zoom = 1.0
+        if zoom != 0.0:
+            self._plotNavigator.push_current()
+            axes.get_xaxis().zoom(zoom)
+            axes.get_yaxis().zoom(zoom)        
         self._plotCanvas.draw()
 
     def closeEvent(self, event):
         QtGui.qApp.closeAllWindows()
+
+    
+    def _createHelpMessage(self):
+        self._helpMessage = QtGui.QMessageBox(self)
+        self._helpMessage.setText('Simulation of squid axon with Hodgkin-Huxley ion channels')
+        self._helpMessage.setInformativeText('<b>Navigation:</b>\
+<p>\
+<b>Zoom-in:</b> <br/>\
+a) scroll down, or<br/>\
+b) click magnifier icon and press left mouse button on the plot and drag, or<br/>\
+c) click compass icon and press right mouse button on the plot and drag towards top-right.<br/>\
+<b>Zoom-in X-axis:</b><br/>\
+click compass icon and press right mouse button on the plot and drag towards right.<br/>\
+<b>Zoom-in Y-axis:</b><br/>\
+click compass icon and press right mouse button on the plot and drag upwards.<br/>\
+<b>Zoom-out:</b> <br/>\
+a) scroll up, or<br/>\
+b) click magnifier icon and press right mouse button on the plot and drag<br/>\
+c) click compass icon and press right mouse button on the plot and drag towards bottom-left.<br/>\
+<B>Pan:</B> click compass-icon and left click-and-drag<br/>\
+<b>Zoom-out X-axis:</b> click compass icon and press right mouse button on the plot and drag towards left.<br/>\
+<b>Zoom-out Y-axis:</b> click compass icon and press right mouse button on the plot and drag downwards.<br/>\
+<b>Go forward/backward in zoom stack:</b> click right/left arrow icon.<br/>\
+<b>Reset to initial plot state:</b> click home icon.<br/>\
+<b>Change spacing and position of subplots:</b> click box-with-green arrow-heads<br/>\
+<b>Configure subplots:</b> click green tick-mark<br/>\
+<b>Save plot:</b> click floppy-disk icon.<br/>\
+</p>\
+')
+
+        
         
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
