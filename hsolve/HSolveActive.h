@@ -113,7 +113,7 @@ private:
 	void advanceChannels( double dt );
 	void advanceSynChans( ProcPtr info );
 	void sendSpikes( ProcPtr info );
-	void sendValues();
+	void sendValues( ProcPtr info);
 	
 	static const int INSTANT_X;
 	static const int INSTANT_Y;

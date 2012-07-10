@@ -57,6 +57,7 @@ class ZombieCaConc
 		double getThickness() const;
 		
 		static const Cinfo* initCinfo();
+        static SrcFinfo1< double >* concOut();
 		
 		//////////////////////////////////////////////////////////////////
 		// utility funcs
