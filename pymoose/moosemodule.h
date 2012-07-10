@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 17:11:06 2011 (+0530)
 // Version: 
-// Last-Updated: Sun Jul  8 18:50:40 2012 (+0530)
-//           By: subha
-//     Update #: 925
+// Last-Updated: Wed Jul 11 01:35:39 2012 (+0530)
+//           By: Subhasis Ray
+//     Update #: 929
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -81,13 +81,13 @@ extern "C" {
     static PyObject * moose_Id_repr(_Id * self);
     static PyObject * moose_Id_str(_Id * self);
     static PyObject * moose_Id_delete(_Id * self, PyObject * args);
-    static PyObject * moose_Id_getValue(_Id * self, PyObject * args);
-    static PyObject * moose_Id_getPath(_Id * self, PyObject * args);
+    static PyObject * moose_Id_getValue(_Id * self);
+    static PyObject * moose_Id_getPath(_Id * self);
     /* Id functions to allow part of sequence protocol */
     static Py_ssize_t moose_Id_getLength(_Id * self);
     static PyObject * moose_Id_getItem(_Id * self, Py_ssize_t index);
     static PyObject * moose_Id_getSlice(_Id * self, PyObject * args);    
-    static PyObject * moose_Id_getShape(_Id * self, PyObject * args);    
+    static PyObject * moose_Id_getShape(_Id * self);    
     static PyObject * moose_Id_richCompare(_Id * self, PyObject * args, int op);
     static int moose_Id_contains(_Id * self, PyObject * args);
     static PyObject * moose_Id_getattro(_Id * self, PyObject * attr);
@@ -108,10 +108,10 @@ extern "C" {
     static PyObject * moose_ObjId_setDestField(PyObject * self, PyObject * args);
     static PyObject * moose_ObjId_getFieldNames(_ObjId * self, PyObject * args);
     static PyObject * moose_ObjId_getFieldType(_ObjId * self, PyObject * args);
-    static PyObject * moose_ObjId_getDataIndex(_ObjId * self, PyObject * args);
-    static PyObject * moose_ObjId_getFieldIndex(_ObjId * self, PyObject * args);
+    static PyObject * moose_ObjId_getDataIndex(_ObjId * self);
+    static PyObject * moose_ObjId_getFieldIndex(_ObjId * self);
     static PyObject * moose_ObjId_getNeighbors(_ObjId * self, PyObject * args);
-    static PyObject * moose_ObjId_getId(_ObjId * self, PyObject * args);
+    static PyObject * moose_ObjId_getId(_ObjId * self);
     static PyObject * moose_ObjId_connect(_ObjId * self, PyObject * args);
     static int moose_ObjId_compare(_ObjId * self, PyObject * args);
 
