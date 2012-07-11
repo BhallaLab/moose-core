@@ -757,6 +757,20 @@
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_15">
        <item>
+        <widget class="QToolButton" name="toolButton_2">
+         <property name="text">
+          <string>...</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="toolButton">
+         <property name="text">
+          <string>...</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QLabel" name="label_8">
          <property name="text">
           <string>Selection-Type:</string>
@@ -1008,42 +1022,6 @@
         </widget>
        </item>
        <item>
-        <spacer name="horizontalSpacer_18">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QPushButton" name="simControlContinuePushButton">
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>23</height>
-          </size>
-         </property>
-         <property name="toolTip">
-          <string>continue</string>
-         </property>
-         <property name="statusTip">
-          <string>Continue simulation</string>
-         </property>
-         <property name="text">
-          <string>Continue</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_6">
-       <item>
         <widget class="QPushButton" name="simControlResetPushButton">
          <property name="maximumSize">
           <size>
@@ -1061,19 +1039,6 @@
           <string>Reset</string>
          </property>
         </widget>
-       </item>
-       <item>
-        <spacer name="horizontalSpacer_23">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
        </item>
        <item>
         <widget class="QPushButton" name="simControlStopPushButton">

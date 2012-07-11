@@ -508,9 +508,9 @@ void SimManager::buildFromKkitTree( const Eref& e, const Qinfo* q,
 	autoPlot_ = 0;
 	vector< int > dims( 1, 1 );
 
-	shell->doSetClock( 0, plotdt_ );
-	shell->doSetClock( 1, plotdt_ );
-	shell->doSetClock( 2, plotdt_ );
+	shell->doSetClock( 4, plotdt_ );
+	shell->doSetClock( 5, plotdt_ );
+	shell->doSetClock( 8, plotdt_ );
 	shell->doSetClock( 3, 0 );
 
 	string basePath = baseId_.path();

@@ -149,24 +149,24 @@ Id ReadKkit::read(
 
 void ReadKkit::run()
 {
-	shell_->doSetClock( 0, simdt_ );
-	shell_->doSetClock( 1, simdt_ );
-	shell_->doSetClock( 2, plotdt_ );
-	shell_->doSetClock( 3, 0 );
+	shell_->doSetClock( 4, simdt_ );
+	shell_->doSetClock( 5, simdt_ );
+	shell_->doSetClock( 8, plotdt_ );
+    shell_->doSetClock( 7, 0 );
 	string poolpath = basePath_ + "/kinetics/##[ISA=Pool]";
 	string reacpath = basePath_ + "/kinetics/##[ISA!=Pool]";
 	string plotpath = basePath_ + "/graphs/##[TYPE=Table]," + 
 		basePath_ + "/moregraphs/##[TYPE=Table]";
-	shell_->doUseClock( reacpath, "process", 0 );
-	shell_->doUseClock( poolpath, "process", 1 );
-	shell_->doUseClock( plotpath, "process", 2 );
+	shell_->doUseClock( reacpath, "process", 4 );
+	shell_->doUseClock( poolpath, "process", 5 );
+	shell_->doUseClock( plotpath, "process", 8 );
 	shell_->doReinit();
 	if ( useVariableDt_ ) {
-		shell_->doSetClock( 0, fastdt_ );
-		shell_->doSetClock( 1, fastdt_ );
+		shell_->doSetClock( 4, fastdt_ );
+		shell_->doSetClock( 5, fastdt_ );
 		shell_->doStart( transientTime_ );
-		shell_->doSetClock( 0, simdt_ );
-		shell_->doSetClock( 1, simdt_ );
+		shell_->doSetClock( 4, simdt_ );
+		shell_->doSetClock( 5, simdt_ );
 		shell_->doStart( maxtime_ - transientTime_ );
 	} else {
 		shell_->doStart( maxtime_ );
