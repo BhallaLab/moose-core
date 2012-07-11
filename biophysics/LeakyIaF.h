@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Thu Jul  7 12:16:08 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Jul 11 14:36:58 2012 (+0530)
+// Last-Updated: Wed Jul 11 15:17:44 2012 (+0530)
 //           By: subha
-//     Update #: 21
+//     Update #: 24
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -84,7 +84,7 @@ class LeakyIaF
     double refractoryPeriod_;
     double tSpike_;
     double sumInject_;
-    double dtRm_;
+    double dtCm_;
     double inject_;
 }; //! class LeakyIaF
 
