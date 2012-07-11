@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Thu Jul  7 12:16:55 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Jul  5 21:08:07 2012 (+0530)
-//           By: Subhasis Ray
-//     Update #: 169
+// Last-Updated: Wed Jul 11 14:22:03 2012 (+0530)
+//           By: subha
+//     Update #: 174
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -207,7 +207,8 @@ LeakyIaF::LeakyIaF():
         Vthreshold_(1.0),
         refractoryPeriod_(0.0),
         tSpike_(-DBL_MAX),
-        sumInject_(0.0)
+        sumInject_(0.0),
+        dtRm_(0.0)
 {
     ;
 }
@@ -319,7 +320,7 @@ void LeakyIaF::handleInject(double current)
 void LeakyIaF::process(const Eref & eref, ProcPtr proc)
 {
     double time = proc->currTime;
-    Vm_ += ((Em_ - Vm_)/Rm_ + sumInject_)/Cm_; // Forward Euler
+    Vm_ += ((Em_ - Vm_) * dtRm_ + sumInject_)/Cm_; // Forward Euler
     sumInject_ = 0.0;
     VmOut()->send(eref, proc->threadIndexInGroup, Vm_);
     if ((Vm_ > Vthreshold_) && (time > tSpike_ + refractoryPeriod_)){
@@ -334,6 +335,7 @@ void LeakyIaF::reinit(const Eref& eref, ProcPtr proc)
     Vm_ = initVm_;
     sumInject_ = 0.0;
     tSpike_ = -DBL_MAX;
+    dtRm_ = proc->dt / Rm_;
     VmOut()->send(eref, proc->threadIndexInGroup, Vm_);
 }
 
