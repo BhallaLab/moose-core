@@ -41,7 +41,7 @@ class MyMplCanvas(FigureCanvas):
         box = self.axes.get_position()
         self.axes.set_position([box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.9])
         # Put a legend below current axis
-        self.axes.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),fancybox=True, shadow=True, ncol=3)
+        self.axes.legend(loc='upper center',prop={'size':10}, bbox_to_anchor=(0.5, -0.05),fancybox=True, shadow=True, ncol=3)
 
     def sizeHint(self):
         w, h = self.get_width_height()
