@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Thu Jul  7 12:16:08 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Jul 11 14:21:00 2012 (+0530)
+// Last-Updated: Wed Jul 11 14:36:58 2012 (+0530)
 //           By: subha
-//     Update #: 18
+//     Update #: 21
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -64,6 +64,9 @@ class LeakyIaF
     void setTspike(double value);
     double getTspike() const;
 
+    void setInject(double current);
+    double getInject() const;
+    
     void handleInject(double value);
     
     void process(const Eref& e, ProcPtr p);
@@ -82,6 +85,7 @@ class LeakyIaF
     double tSpike_;
     double sumInject_;
     double dtRm_;
+    double inject_;
 }; //! class LeakyIaF
 
 #endif
