@@ -65,6 +65,12 @@ class ZombieCaConc
 		static void zombify( Element* solver, Element* orig );
 		static void unzombify( Element* zombie );
 		
+		/*
+		 * This Finfo is used to send out CaConc to channels.
+		 * The original CaConc sends this itself, whereas the HSolve
+		 * sends on behalf of the Zombie.
+		 */
+		static SrcFinfo1< double >* concOut();
 	private:
 		HSolve* hsolve_;
 		
