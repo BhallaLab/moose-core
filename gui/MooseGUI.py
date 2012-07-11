@@ -88,6 +88,15 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.menuClasses.setEnabled(False)
         self.menuClasses.setVisible(False)
 
+        checked = False
+        self.propEditorChildListWidget.setVisible(checked)
+        self.label_13.setVisible(checked)
+        self.label_14.setVisible(checked)
+        self.label_15.setVisible(checked)
+        self.simControlPlotdtLineEdit.setVisible(checked)
+        self.simControlSimdtLineEdit.setVisible(checked)
+        self.simControlUpdatePlotdtLineEdit.setVisible(checked)
+
     def connectElements(self):
         #gui connections
         self.connect(self.actionLoad_Model,QtCore.SIGNAL('triggered()'), self.popupLoadModelDialog)
@@ -102,11 +111,15 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.connect(self.propEditorSelParentPushButton,QtCore.SIGNAL('pressed()'),self.propEditorSelectParent)
         self.connect(self.propEditorChildListWidget,QtCore.SIGNAL('itemClicked(QListWidgetItem *)'),self.propEditorSelectChild)
         self.connect(self.mooseObjectEditDock,QtCore.SIGNAL('visibilityChanged(bool)'),self.actionProperty_Editor.setChecked)
+        self.connect(self.propEditorSeeChildrenPushButton,QtCore.SIGNAL('pressed()'),self.propEditorChildListToggleVisibility)
         #internal connections
         self.connect(self.mooseHandler, QtCore.SIGNAL('updatePlots(float)'), self.updatePlots)
         #run
         #self.connect(self.simControlRunPushButton,QtCore.SIGNAL('clicked()'),self.activeMdiWindow)
         self.connect(self.simControlRunPushButton, QtCore.SIGNAL('clicked()'), self._resetAndRunSlot)
+        self.connect(self.simControlAdvancedPushButton,QtCore.SIGNAL('clicked()'),self.simControlToggleAdvanced)
+        self.connect(self.simControlAdvancedToolButton,QtCore.SIGNAL('clicked()'),self.simControlToggleAdvanced)
+
         #self.connect(self.actionRun,QtCore.SIGNAL('triggered()'),self.activeMdiWindow)
         self.connect(self.actionRun,QtCore.SIGNAL('triggered()'),self._resetAndRunSlot)
         self.connect(self.simControlDockWidget,QtCore.SIGNAL('visibilityChanged(bool)'),self.actionSimulation_Control.setChecked)
@@ -124,6 +137,27 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.connect(self.actionSimulation_Control,QtCore.SIGNAL('triggered(bool)'),self.toggleSimControlDoctVisibility)
         self.connect(self.actionViewAsTabs,QtCore.SIGNAL('triggered(bool)'),self.switchTabbedView)
         self.connect(self.actionViewAsSubWindows,QtCore.SIGNAL('triggered(bool)'),self.switchSubWindowView) 
+
+    def propEditorChildListToggleVisibility(self):
+        checked = not(self.propEditorChildListWidget.isVisible())
+        self.propEditorChildListWidget.setVisible(checked)
+        if checked:
+            self.propEditorSeeChildrenPushButton.setText('Hide Children')
+        else:
+            self.propEditorSeeChildrenPushButton.setText('See  Children')
+
+    def simControlToggleAdvanced(self):
+        checked = not(self.label_13.isVisible())
+        self.label_13.setVisible(checked)
+        self.label_14.setVisible(checked)
+        self.label_15.setVisible(checked)
+        self.simControlPlotdtLineEdit.setVisible(checked)
+        self.simControlSimdtLineEdit.setVisible(checked)
+        self.simControlUpdatePlotdtLineEdit.setVisible(checked)
+        if checked:
+            self.simControlAdvancedToolButton.setText('>')
+        else:
+            self.simControlAdvancedToolButton.setText('V')
 
     def toggleMooseShellDockVisibility(self, checked):
         self.mooseShellDockWidget.setVisible(checked)
@@ -349,6 +383,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.makeObjectFieldEditor(item.getMooseObject())
 
     def makeObjectFieldEditor(self, obj):
+        self.propEditorChildren(obj)
         self.propEditorSelectionNameLabel.setText(str(obj.getField('name')))
         if obj.class_ == 'Shell' or obj.class_ == 'PyMooseContext' or obj.class_ == 'GenesisParser':
             print '%s of class %s is a system object and not to be edited in object editor.' % (obj.path, obj.class_)
@@ -365,7 +400,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         if hasattr(self, 'sceneLayout'):
             self.connect(self.objFieldEditModel,QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'),self.sceneLayout.updateItemSlot)
         self.updatePlotDockFields(obj)
-        self.propEditorChildren(obj)
+
 
     def propEditorSelectParent(self):
         if self.propEditorCurrentSelection != None:
