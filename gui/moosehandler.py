@@ -280,13 +280,20 @@ class MooseHandler(QtCore.QObject):
             self._tableIndex += 1
         return table
 
-    def updateDefaultsKKIT(self):
+    def updateDefaultsKKIT(self,modelpath):
+        t = (moose.element('/clock')).tick
+        MooseHandler.simdt = t[0].dt
+        MooseHandler.plotdt = t[1].dt
+        MooseHandler.runtime = moose.element('/'+modelpath).runTime
+        MooseHandler.plotupdate_dt = (moose.element('/'+modelpath).runTime/120) 
+        '''
         MooseHandler.simdt = MooseHandler.DEFAULT_SIMDT_KKIT
         MooseHandler.plotdt = MooseHandler.DEFAULT_PLOTDT_KKIT
         MooseHandler.plotupdate_dt = MooseHandler.DEFAULT_PLOTUPDATE_DT_KKIT
         MooseHandler.runtime = MooseHandler.DEFAULT_RUNTIME_KKIT
-
+        '''
     def updateClocks(self, simdt, plotdt):
+        #setclocks 0-3 electircal,4-5kinetics,6plotdt
         moose.setClock(0, simdt)
         moose.setClock(1, simdt) 
         moose.setClock(2, simdt) 
@@ -313,7 +320,7 @@ class MooseHandler(QtCore.QObject):
         MooseHandler.runtime = time      
         next_stop = MooseHandler.plotupdate_dt
         if MooseHandler.runtime < MooseHandler.plotupdate_dt:
-            moose.start(MooseHandler.runtime)
+            moose.start(MooseHandler.plotupdate_dt)
             self.emit(QtCore.SIGNAL('updatePlots(float)'), self.getCurrentTime())
         else:
             while (next_stop <= MooseHandler.runtime) and (self.stopSimulation == 0):
@@ -343,7 +350,9 @@ class MooseHandler(QtCore.QObject):
             MooseHandler.runtime = runtime
 
         self.updateClocks(simdt,plotdt)
-        moose.reinit()
+        if self.getCurrentTime() == 0.0:
+            moose.reinit()
+        else: pass
         self.doRun(runtime)
 
         #if self._context.exists('/graphs'):
