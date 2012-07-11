@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'newgui.ui'
 #
-# Created: Wed Jul 11 14:45:35 2012
+# Created: Wed Jul 11 17:00:18 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -300,15 +300,6 @@ class Ui_MainWindow(object):
         self.verticalLayout_5.setObjectName(_fromUtf8("verticalLayout_5"))
         self.horizontalLayout_15 = QtGui.QHBoxLayout()
         self.horizontalLayout_15.setObjectName(_fromUtf8("horizontalLayout_15"))
-        self.toolButton_2 = QtGui.QToolButton(self.dockWidgetContents_4)
-        self.toolButton_2.setObjectName(_fromUtf8("toolButton_2"))
-        self.horizontalLayout_15.addWidget(self.toolButton_2)
-        self.toolButton = QtGui.QToolButton(self.dockWidgetContents_4)
-        self.toolButton.setObjectName(_fromUtf8("toolButton"))
-        self.horizontalLayout_15.addWidget(self.toolButton)
-        self.label_8 = QtGui.QLabel(self.dockWidgetContents_4)
-        self.label_8.setObjectName(_fromUtf8("label_8"))
-        self.horizontalLayout_15.addWidget(self.label_8)
         spacerItem13 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_15.addItem(spacerItem13)
         self.plotConfigCurrentSelectionLabel = QtGui.QLabel(self.dockWidgetContents_4)
@@ -768,9 +759,6 @@ class Ui_MainWindow(object):
         self.pushButton.setText(QtGui.QApplication.translate("MainWindow", "Connect", None, QtGui.QApplication.UnicodeUTF8))
         self.plotConfigDockWidget.setStatusTip(QtGui.QApplication.translate("MainWindow", "Plot Window. From \'Property Editor\'   Select \'plot Field\', \'plot Window\' to add a plot and \'show\' for displaying plots", None, QtGui.QApplication.UnicodeUTF8))
         self.plotConfigDockWidget.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Plot Configuration", None, QtGui.QApplication.UnicodeUTF8))
-        self.toolButton_2.setText(QtGui.QApplication.translate("MainWindow", "...", None, QtGui.QApplication.UnicodeUTF8))
-        self.toolButton.setText(QtGui.QApplication.translate("MainWindow", "...", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_8.setText(QtGui.QApplication.translate("MainWindow", "Selection-Type:", None, QtGui.QApplication.UnicodeUTF8))
         self.plotConfigCurrentSelectionLabel.setText(QtGui.QApplication.translate("MainWindow", "None", None, QtGui.QApplication.UnicodeUTF8))
         self.label_9.setText(QtGui.QApplication.translate("MainWindow", "Plot Field:", None, QtGui.QApplication.UnicodeUTF8))
         self.label_10.setText(QtGui.QApplication.translate("MainWindow", "Plot Window:", None, QtGui.QApplication.UnicodeUTF8))
