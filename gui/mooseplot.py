@@ -41,7 +41,7 @@ class MyMplCanvas(FigureCanvas):
         box = self.axes.get_position()
         self.axes.set_position([box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.9])
         # Put a legend below current axis
-        self.axes.legend(loc='upper center',prop={'size':10}, bbox_to_anchor=(0.5, -0.05),fancybox=True, shadow=True, ncol=3)
+        self.axes.legend(loc='upper center',prop={'size':10}, bbox_to_anchor=(0.5, -0.083),fancybox=True, shadow=True, ncol=4)
 
     def sizeHint(self):
         w, h = self.get_width_height()
@@ -72,13 +72,13 @@ class MoosePlot(MyMplCanvas):
         print self._labels[ind]
         return True
 
-    def addTable(self,table,curve_name=None):
+    def addTable(self,table,curve_name=None,lineColor='blue'):
         try: #checks if table is already added
             curve = self.tableCurveMap[table]
         except KeyError:
             if curve_name is None:
                 curve_name = table.getField('path')
-            curve, =  self.axes.plot([0],[0],label=curve_name)
+            curve, =  self.axes.plot([0],[0],label=curve_name,color=lineColor)
             self.curveTableMap[curve] = table
             self.tableCurveMap[table] = curve
         if len(table.vec) > 0:

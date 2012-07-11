@@ -590,9 +590,15 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.mdiArea.addSubWindow(plotWin)
         #self.mdiArea.setActiveSubWindow(plotWin)
         plotWin.setWindowTitle('Plot Window 1')
-        #hLayout.add
         for graph in graphs:
-            plotWin.plot.addTable(graph,graph.getField('name'))
+            tab = moose.element(graph)
+            tableObject = tab.getNeighbors('requestData')
+            if(len(tableObject) > 0):
+                iteminfo = tableObject[0].path+'/info'
+                c = moose.Annotator(iteminfo).getField('color')
+                textColor = self.colorCheck(c)
+            else: textColor = 'blue'
+            plotWin.plot.addTable(graph,graph.getField('name'),textColor)
         plotWin.show()
         plotWin.plot.nicePlaceLegend()
         plotWin.plot.axes.figure.canvas.draw()
@@ -608,7 +614,21 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         for child in moose.wildcardFind(path+'/graphs/#/##[TYPE=Table],'+path+'/moregraphs/#/##[TYPE=Table]'):
             tableList.append(moose.Table(child))
         return tableList
-
+    def colorCheck(self,textColor):
+        pkl_file = open(os.path.join(PATH_KKIT_COLORMAPS,'rainbow2.pkl'),'rb')
+        picklecolorMap = pickle.load(pkl_file)
+        hexchars = "0123456789ABCDEF"
+        if (textColor == ''): textColor = 'blue'
+        if(isinstance(textColor,(list,tuple))):
+            r,g,b = textColor[0],textColor[1],textColor[2]
+            textColor = "#"+ hexchars[r / 16] + hexchars[r % 16] + hexchars[g / 16] + hexchars[g % 16] + hexchars[b / 16] + hexchars[b % 16]
+        elif ((not isinstance(textColor,(list,tuple)))):
+            if textColor.isdigit():
+                tc = int(textColor)
+                tc = (tc * 2 )
+                r,g,b = picklecolorMap[tc]
+                textColor = "#"+ hexchars[r / 16] + hexchars[r % 16] + hexchars[g / 16] + hexchars[g % 16] + hexchars[b / 16] + hexchars[b % 16]
+        return(textColor)
 # create the GUI application
 app = QtGui.QApplication(sys.argv)
 icon = QtGui.QIcon(os.path.join(config.KEY_ICON_DIR,'moose_icon.png'))
