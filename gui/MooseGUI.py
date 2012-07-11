@@ -433,10 +433,10 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         QtCore.QCoreApplication.processEvents() 
                      
     def updatePlotDockFields(self,obj):
-        #add plot-able elements according to predefined  
-        self.plotConfigCurrentSelectionLabel.setText(obj.getField('name'))
+        #add plot-able elements according to predefined  ('%.3f' %self.currentTime)
+        self.plotConfigCurrentSelectionLabel.setText(str(obj.getField('name')+'-'+obj.getField('class'))[:15])
         fieldType = obj.getField('class')
-        self.plotConfigCurrentSelectionTypeLabel.setText(fieldType)
+#        self.plotConfigCurrentSelectionTypeLabel.setText(fieldType)
         self.plotConfigFieldSelectionComboBox.clear()
         try: 
             self.plotConfigFieldSelectionComboBox.addItems(PLOT_FIELDS[fieldType])
