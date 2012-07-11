@@ -20,6 +20,7 @@ from moosehandler import MooseHandler
 from mooseplot import MoosePlot,MoosePlotWindow,newPlotSubWindow
 
 import kineticlayout
+#import kl 
 from neuralLayout import *
 
 from filepaths import *
@@ -124,8 +125,8 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.connect(self.actionRun,QtCore.SIGNAL('triggered()'),self._resetAndRunSlot)
         self.connect(self.simControlDockWidget,QtCore.SIGNAL('visibilityChanged(bool)'),self.actionSimulation_Control.setChecked)
 
-        self.connect(self.simControlContinuePushButton, QtCore.SIGNAL('clicked()'), self._continueSlot)
-        self.connect(self.actionContinue,QtCore.SIGNAL('triggered()'),self._continueSlot)
+        #self.connect(self.simControlContinuePushButton, QtCore.SIGNAL('clicked()'), self._continueSlot)
+        #self.connect(self.actionContinue,QtCore.SIGNAL('triggered()'),self._continueSlot)
         self.connect(self.simControlResetPushButton, QtCore.SIGNAL('clicked()'), self._resetSlot)
         self.connect(self.actionReset,QtCore.SIGNAL('triggered()'),self._resetSlot)
         self.connect(self.actionStop,QtCore.SIGNAL('triggered()'),self._stopSlot)
@@ -254,11 +255,12 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
                         self.actionLoad_Model.setEnabled(0) #to prevent multiple loads
                         
                     except kineticlayout.Widgetvisibility:
+                    #except kl.Widgetvisibility:
                         print 'No kkit layout for: %s' % (str(fileName))
                     self.populateKKitPlots(modelpath)
                 self.modelPathsModelTypeDict[modelpath] = modeltype
                 self.populateDataPlots(modelpath)
-                self.updateDefaultTimes(modeltype)
+                self.updateDefaultTimes(modeltype,modelpath)
             #self.enableControlButtons()
             self.checkModelForNeurons()
             if self.modelHasCompartments or self.modelHasIntFires:
@@ -363,6 +365,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
     def addKKITLayoutWindow(self,modelpath):
         centralWindowsize =  self.mdiArea.size()
         self.sceneLayout = kineticlayout.kineticsWidget(centralWindowsize,modelpath,self.mdiArea)
+        #self.sceneLayout = kl.KineticsWidget(centralWindowsize,modelpath,self.mdiArea)
         self.connect(self.sceneLayout, QtCore.SIGNAL("itemDoubleClicked(PyQt_PyObject)"), self.makeObjectFieldEditor)
         KKitWindow = self.mdiArea.addSubWindow(self.sceneLayout)
         KKitWindow.setWindowTitle("KKit Layout")
@@ -556,9 +559,9 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.mooseHandler.doRun(float(str(self.simControlRunTimeLineEdit.text()))) 
         self.updatePlots(self.mooseHandler.getCurrentTime()) #updates the plots
         
-    def updateDefaultTimes(self, modeltype): 
+    def updateDefaultTimes(self, modeltype,modelpath): 
         if(modeltype == MooseHandler.type_kkit):
-            self.mooseHandler.updateDefaultsKKIT()
+            self.mooseHandler.updateDefaultsKKIT(modelpath)
 
         self.simControlSimdtLineEdit.setText(str(self.mooseHandler.simdt))
         self.simControlPlotdtLineEdit.setText(str(self.mooseHandler.plotdt))
