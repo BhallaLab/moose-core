@@ -151,7 +151,13 @@ class ZombieCompartment
 			//////////////////////////////////////////////////////////////////
 			static void zombify( Element* solver, Element* orig );
 			static void unzombify( Element* zombie );
-	
+			
+			/*
+			 * This Finfo is used to send out Vm to channels, spikegens, etc.
+			 * The original Compartment sends this itself, whereas the HSolve
+			 * sends on behalf of the Zombie.
+			 */
+			static SrcFinfo1< double >* VmOut();
 	private:
 			HSolve* hsolve_;
 			

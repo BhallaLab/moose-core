@@ -33,7 +33,7 @@ protected:
 	 * GENESIS does its computations. A value of 1 means the membrane potential
 	 * at the middle of the time-step is used. This is the correct way of
 	 * integration, and is the default way.
-	 */	
+	 */
 	int                       caAdvance_;
 	
 	/**
@@ -80,7 +80,7 @@ protected:
 	vector< Id >              caConcId_;
 	vector< Id >              channelId_;
 	vector< Id >              gateId_;
-	vector< vector< Id > >    externalChannelId_;
+	//~ vector< vector< Id > >    externalChannelId_;
 	
 private:
 	/**
@@ -113,7 +113,7 @@ private:
 	void advanceChannels( double dt );
 	void advanceSynChans( ProcPtr info );
 	void sendSpikes( ProcPtr info );
-	void sendValues( ProcPtr info);
+	void sendValues( ProcPtr info );
 	
 	static const int INSTANT_X;
 	static const int INSTANT_Y;
