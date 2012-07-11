@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Thu Jul  7 12:16:55 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Jul 11 14:22:03 2012 (+0530)
+// Last-Updated: Wed Jul 11 14:37:08 2012 (+0530)
 //           By: subha
-//     Update #: 174
+//     Update #: 187
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -117,6 +117,13 @@ const Cinfo* LeakyIaF::initCinfo()
 			&LeakyIaF::getTspike
 		);
 
+        static ValueFinfo< LeakyIaF, double > inject(
+            "inject",
+            "Injection current.",
+            &LeakyIaF::setInject,
+            &LeakyIaF::getInject
+        );
+
 		/*
 		static ValueFinfo< LeakyIaF, unsigned int > numSynapses(
 			"numSynapses",
@@ -177,6 +184,7 @@ const Cinfo* LeakyIaF::initCinfo()
             &Vreset, // Value
             &Vthreshold,				// Value
             &refractoryPeriod,		// Value
+            &inject,
             &tSpike,
             &proc,					// SharedFinfo
             spike(), 		// MsgSrc
@@ -208,7 +216,8 @@ LeakyIaF::LeakyIaF():
         refractoryPeriod_(0.0),
         tSpike_(-DBL_MAX),
         sumInject_(0.0),
-        dtRm_(0.0)
+        dtRm_(0.0),
+        inject_(0.0)
 {
     ;
 }
@@ -312,6 +321,16 @@ double LeakyIaF::getTspike() const
     return tSpike_;
 }
 
+void LeakyIaF::setInject(double current)
+{
+    inject_ = current;
+}
+
+double LeakyIaF::getInject() const
+{
+    return inject_;
+}
+
 void LeakyIaF::handleInject(double current)
 {
     sumInject_ += current;
@@ -320,7 +339,7 @@ void LeakyIaF::handleInject(double current)
 void LeakyIaF::process(const Eref & eref, ProcPtr proc)
 {
     double time = proc->currTime;
-    Vm_ += ((Em_ - Vm_) * dtRm_ + sumInject_)/Cm_; // Forward Euler
+    Vm_ += ((Em_ - Vm_) * dtRm_ + inject_+ sumInject_)/Cm_; // Forward Euler
     sumInject_ = 0.0;
     VmOut()->send(eref, proc->threadIndexInGroup, Vm_);
     if ((Vm_ > Vthreshold_) && (time > tSpike_ + refractoryPeriod_)){
