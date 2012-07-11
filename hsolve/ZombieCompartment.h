@@ -60,7 +60,6 @@ class ZombieCompartment
 			double getY() const;
 			void setZ( double value );
 			double getZ() const;
-            static SrcFinfo1< double >* VmOut();
 			// Dest function definitions.
 			void dummy( const Eref& e, ProcPtr p );
 			
