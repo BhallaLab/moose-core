@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'newgui.ui'
 #
-# Created: Wed Jul 11 17:00:18 2012
+# Created: Wed Jul 11 22:00:04 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -369,6 +369,11 @@ class Ui_MainWindow(object):
         self.simControlRunTimeLineEdit = QtGui.QLineEdit(self.dockWidgetContents_5)
         self.simControlRunTimeLineEdit.setObjectName(_fromUtf8("simControlRunTimeLineEdit"))
         self.horizontalLayout_22.addWidget(self.simControlRunTimeLineEdit)
+        spacerItem19 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_22.addItem(spacerItem19)
+        self.label_8 = QtGui.QLabel(self.dockWidgetContents_5)
+        self.label_8.setObjectName(_fromUtf8("label_8"))
+        self.horizontalLayout_22.addWidget(self.label_8)
         self.verticalLayout_7.addLayout(self.horizontalLayout_22)
         self.horizontalLayout_20 = QtGui.QHBoxLayout()
         self.horizontalLayout_20.setObjectName(_fromUtf8("horizontalLayout_20"))
@@ -390,8 +395,8 @@ class Ui_MainWindow(object):
         self.label_16 = QtGui.QLabel(self.dockWidgetContents_5)
         self.label_16.setObjectName(_fromUtf8("label_16"))
         self.horizontalLayout_23.addWidget(self.label_16)
-        spacerItem19 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout_23.addItem(spacerItem19)
+        spacerItem20 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_23.addItem(spacerItem20)
         self.simControlCurrentTimeLabel = QtGui.QLabel(self.dockWidgetContents_5)
         self.simControlCurrentTimeLabel.setObjectName(_fromUtf8("simControlCurrentTimeLabel"))
         self.horizontalLayout_23.addWidget(self.simControlCurrentTimeLabel)
@@ -405,8 +410,8 @@ class Ui_MainWindow(object):
         self.simControlAdvancedPushButton.setFlat(True)
         self.simControlAdvancedPushButton.setObjectName(_fromUtf8("simControlAdvancedPushButton"))
         self.horizontalLayout_26.addWidget(self.simControlAdvancedPushButton)
-        spacerItem20 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.horizontalLayout_26.addItem(spacerItem20)
+        spacerItem21 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_26.addItem(spacerItem21)
         self.verticalLayout_7.addLayout(self.horizontalLayout_26)
         self.simControlAdvancedGridLayout = QtGui.QGridLayout()
         self.simControlAdvancedGridLayout.setObjectName(_fromUtf8("simControlAdvancedGridLayout"))
@@ -428,11 +433,11 @@ class Ui_MainWindow(object):
         self.simControlPlotdtLineEdit = QtGui.QLineEdit(self.dockWidgetContents_5)
         self.simControlPlotdtLineEdit.setObjectName(_fromUtf8("simControlPlotdtLineEdit"))
         self.simControlAdvancedGridLayout.addWidget(self.simControlPlotdtLineEdit, 2, 2, 1, 1)
-        spacerItem21 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.simControlAdvancedGridLayout.addItem(spacerItem21, 2, 1, 1, 1)
+        spacerItem22 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.simControlAdvancedGridLayout.addItem(spacerItem22, 2, 1, 1, 1)
         self.verticalLayout_7.addLayout(self.simControlAdvancedGridLayout)
-        spacerItem22 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        self.verticalLayout_7.addItem(spacerItem22)
+        spacerItem23 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout_7.addItem(spacerItem23)
         self.simControlDockWidget.setWidget(self.dockWidgetContents_5)
         MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(2), self.simControlDockWidget)
         self.statusBar = QtGui.QStatusBar(MainWindow)
@@ -769,6 +774,7 @@ class Ui_MainWindow(object):
         self.simControlDockWidget.setStatusTip(QtGui.QApplication.translate("MainWindow", "Set run time for the simulation", None, QtGui.QApplication.UnicodeUTF8))
         self.simControlDockWidget.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Simulation Control", None, QtGui.QApplication.UnicodeUTF8))
         self.label_18.setText(QtGui.QApplication.translate("MainWindow", "Run Time:", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_8.setText(QtGui.QApplication.translate("MainWindow", "sec", None, QtGui.QApplication.UnicodeUTF8))
         self.simControlRunPushButton.setToolTip(QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
         self.simControlRunPushButton.setStatusTip(QtGui.QApplication.translate("MainWindow", "Run to start simulation", None, QtGui.QApplication.UnicodeUTF8))
         self.simControlRunPushButton.setText(QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
