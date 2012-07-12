@@ -298,7 +298,9 @@ class MooseHandler(QtCore.QObject):
         moose.setClock(1, simdt) 
         moose.setClock(2, simdt) 
         moose.setClock(3, simdt)
-        moose.setClock(4, plotdt)
+        moose.setClock(4, simdt)
+        moose.setClock(5, simdt)
+        moose.setClock(6, plotdt)
 
     def doReset(self, simdt, plotdt):
         """update simdt and plot dt and Reinit moose.
