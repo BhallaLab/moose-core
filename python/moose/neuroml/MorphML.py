@@ -40,6 +40,7 @@ class MorphML():
         returns { cellname1 : segDict, ... }
         see readMorphML(...) for segDict 
         """
+        print filename
         tree = ET.parse(filename)
         neuroml_element = tree.getroot()
         cellsDict = {}
@@ -63,132 +64,137 @@ class MorphML():
         cellname = cell.attrib["name"]
         moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
         print "loading cell :", cellname,"into /library ."
-        #~ moosecell = moose.Cell('/library/'+cellname)
-        #using moose Neuron class - in previous version 'Cell' class Chaitanya
-        moosecell = moose.Neuron('/library/'+cellname)
-        self.cellDictBySegmentId[cellname] = [moosecell,{}]
-        self.cellDictByCableId[cellname] = [moosecell,{}]
-        self.segDict = {}
-        
-        ############################################################
-        #### load morphology and connections between compartments
-        ## Many neurons exported from NEURON have multiple segments in a section
-        ## Combine those segments into one Compartment / section
-        ## assume segments of a compartment/section are in increasing order and
-        ## assume all segments of a compartment/section have the same cableid
-        ## findall() returns elements in document order:
-        running_cableid = ''
-        running_segid = ''
-        running_comp = None
-        running_diameter = 0.0
-        running_dia_nums = 0
-        segments = cell.findall(".//{"+self.mml+"}segment")
-        segmentstotal = len(segments)
-        for segnum,segment in enumerate(segments):
-            segmentname = segment.attrib['name']
-            ## cable is an optional attribute. WARNING: Here I assume it is always present.
-            cableid = segment.attrib['cable']
-            segmentid = segment.attrib['id']
-            ## old cableid still running, hence don't start a new compartment, skip to next segment
-            if cableid == running_cableid:
-                self.cellDictBySegmentId[cellname][1][segmentid] = running_comp
-                proximal = segment.find('./{'+self.mml+'}proximal')
-                if proximal is not None:
-                    running_diameter += float(proximal.attrib["diameter"]) * self.length_factor
-                    running_dia_nums += 1
-                distal = segment.find('./{'+self.mml+'}distal')
-                if distal is not None:
-                    running_diameter += float(distal.attrib["diameter"]) * self.length_factor
-                    running_dia_nums += 1
-            ## new cableid starts, hence start a new compartment; also finish previous / last compartment
-            else:
-                ## the moose "hsolve" method assumes compartments to be asymmetric compartments and symmetrizes them
-                ## but that is not what we want when translating from Neuron which has only symcompartments -- so be careful!
-                moosecompname = segmentname+'_'+segmentid
-                moosecomppath = moosecell.path+'/'+moosecompname
-                self.segDict[segmentid]=[moosecompname] ## extended with details of compartment/section when finished up.
-                moosecomp = moose.Compartment(moosecomppath) # segmentname is NOT unique - eg: mitral bbmit exported from NEURON
-                self.cellDictBySegmentId[cellname][1][segmentid] = moosecomp
-                self.cellDictByCableId[cellname][1][cableid] = moosecomp # cables are grouped and densities set for cablegroups. Hence I need to refer to segment according to which cable they belong to.
-                if segment.attrib.has_key('parent'):
-                    parentid = segment.attrib['parent'] # I assume the parent is created before the child so that I can immediately connect the child.
-                    parent = self.cellDictBySegmentId[cellname][1][parentid]
-                    ## It is always assumed that axial of parent is connected to raxial of moosesegment
-                    ## THIS IS WHAT GENESIS readcell() DOES!!! UNLIKE NEURON!
-                    ## THIS IS IRRESPECTIVE OF WHETHER PROXIMAL x,y,z OF PARENT = PROXIMAL x,y,z OF CHILD.
-                    ## THIS IS ALSO IRRESPECTIVE OF fraction_along_parent SPECIFIED IN CABLE!
-                    ## THUS THERE WILL BE NUMERICAL DIFFERENCES BETWEEN MOOSE/GENESIS and NEURON.
-                    ## moosesegment sends Ra and Vm to parent, parent sends only Vm
-                    ## actually for symmetric compartment, both parent and moosesegment require each other's Ra/2,
-                    ## but axial and raxial just serve to distinguish ends.
-                    moose.connect(parent,'axial',moosecomp,'raxial')
-                else:
-                    parent = None
-                proximal = segment.find('./{'+self.mml+'}proximal')
-                if proximal is None:         # If proximal tag is not present,
-                                              # then parent attribute MUST be present in the segment tag!
-                    ## if proximal is not present, then
-                    ## by default the distal end of the parent is the proximal end of the child
-                    moosecomp.x0 = parent.x
-                    moosecomp.y0 = parent.y
-                    moosecomp.z0 = parent.z
-                else:
-                    moosecomp.x0 = float(proximal.attrib["x"])*self.length_factor
-                    moosecomp.y0 = float(proximal.attrib["y"])*self.length_factor
-                    moosecomp.z0 = float(proximal.attrib["z"])*self.length_factor
-                    running_diameter += float(proximal.attrib["diameter"]) * self.length_factor
-                    running_dia_nums += 1
-                distal = segment.find('./{'+self.mml+'}distal')
-                if distal is not None:
-                    running_diameter += float(distal.attrib["diameter"]) * self.length_factor
-                    running_dia_nums += 1
-                    
-            if segnum==0: # if first segment, change the running compartment from None
-                running_cableid = cableid
-                running_segid = segmentid
-                running_comp = moosecomp
 
-            ## finish up the previous compartment if new cable has started (except if it is the first),
-            ## OR finish up the current compartment if it is the last
-            lastSegBool = (segnum+1==segmentstotal)
-            if (cableid!=running_cableid and segnum!=0) or lastSegBool:
-                if lastSegBool: # if last segment, take distal values from this segment
-                    prev_segment = segment
+        if cellname == 'LIF':
+            moosecell = moose.LeakyIaF('/library/'+cellname)
+            self.segDict = {}
+        else:
+            #~ moosecell = moose.Cell('/library/'+cellname)
+            #using moose Neuron class - in previous version 'Cell' class Chaitanya
+            moosecell = moose.Neuron('/library/'+cellname)
+            self.cellDictBySegmentId[cellname] = [moosecell,{}]
+            self.cellDictByCableId[cellname] = [moosecell,{}]
+            self.segDict = {}
+            
+            ############################################################
+            #### load morphology and connections between compartments
+            ## Many neurons exported from NEURON have multiple segments in a section
+            ## Combine those segments into one Compartment / section
+            ## assume segments of a compartment/section are in increasing order and
+            ## assume all segments of a compartment/section have the same cableid
+            ## findall() returns elements in document order:
+            running_cableid = ''
+            running_segid = ''
+            running_comp = None
+            running_diameter = 0.0
+            running_dia_nums = 0
+            segments = cell.findall(".//{"+self.mml+"}segment")
+            segmentstotal = len(segments)
+            for segnum,segment in enumerate(segments):
+                segmentname = segment.attrib['name']
+                ## cable is an optional attribute. WARNING: Here I assume it is always present.
+                cableid = segment.attrib['cable']
+                segmentid = segment.attrib['id']
+                ## old cableid still running, hence don't start a new compartment, skip to next segment
+                if cableid == running_cableid:
+                    self.cellDictBySegmentId[cellname][1][segmentid] = running_comp
+                    proximal = segment.find('./{'+self.mml+'}proximal')
+                    if proximal is not None:
+                        running_diameter += float(proximal.attrib["diameter"]) * self.length_factor
+                        running_dia_nums += 1
+                    distal = segment.find('./{'+self.mml+'}distal')
+                    if distal is not None:
+                        running_diameter += float(distal.attrib["diameter"]) * self.length_factor
+                        running_dia_nums += 1
+                ## new cableid starts, hence start a new compartment; also finish previous / last compartment
                 else:
-                    prev_segment = segments[segnum-1]
-                distal = prev_segment.find('./{'+self.mml+'}distal')
-                running_comp.x = float(distal.attrib["x"])*self.length_factor
-                running_comp.y = float(distal.attrib["y"])*self.length_factor
-                running_comp.z = float(distal.attrib["z"])*self.length_factor
-                proximal = segment.find('./{'+self.mml+'}proximal')
-                if proximal is not None:
-                    running_diameter += float(proximal.attrib["diameter"]) * self.length_factor
-                    running_dia_nums += 1
-                distal = segment.find('./{'+self.mml+'}distal')
-                if distal is not None:
-                    running_diameter += float(distal.attrib["diameter"]) * self.length_factor
-                    running_dia_nums += 1
-                ## Set the compartment diameter as the average diameter of all the segments in this section
-                running_comp.diameter = running_diameter / float(running_dia_nums)
-                running_diameter = 0.0
-                running_dia_nums = 0
-                ## Set the compartment length
-                running_comp.length = math.sqrt((running_comp.x-running_comp.x0)**2+\
-                    (running_comp.y-running_comp.y0)**2+(running_comp.z-running_comp.z0)**2)
-                if running_comp.length == 0.0:          # neuroconstruct seems to set length=0 for round soma!
-                    running_comp.length = running_comp.diameter
-                ## the empty list at the end below will get populated 
-                ## with the potential synapses on this segment, in function set_compartment_param(..)
-                self.segDict[running_segid].extend([(running_comp.x0,running_comp.y0,running_comp.z0),\
-                    (running_comp.x,running_comp.y,running_comp.z),running_comp.diameter,running_comp.length,[]])
-                if neuroml_debug: print 'Set up compartment/section', running_comp.name
+                    ## the moose "hsolve" method assumes compartments to be asymmetric compartments and symmetrizes them
+                    ## but that is not what we want when translating from Neuron which has only symcompartments -- so be careful!
+                    moosecompname = segmentname+'_'+segmentid
+                    moosecomppath = moosecell.path+'/'+moosecompname
+                    self.segDict[segmentid]=[moosecompname] ## extended with details of compartment/section when finished up.
+                    moosecomp = moose.Compartment(moosecomppath) # segmentname is NOT unique - eg: mitral bbmit exported from NEURON
+                    self.cellDictBySegmentId[cellname][1][segmentid] = moosecomp
+                    self.cellDictByCableId[cellname][1][cableid] = moosecomp # cables are grouped and densities set for cablegroups. Hence I need to refer to segment according to which cable they belong to.
+                    if segment.attrib.has_key('parent'):
+                        parentid = segment.attrib['parent'] # I assume the parent is created before the child so that I can immediately connect the child.
+                        parent = self.cellDictBySegmentId[cellname][1][parentid]
+                        ## It is always assumed that axial of parent is connected to raxial of moosesegment
+                        ## THIS IS WHAT GENESIS readcell() DOES!!! UNLIKE NEURON!
+                        ## THIS IS IRRESPECTIVE OF WHETHER PROXIMAL x,y,z OF PARENT = PROXIMAL x,y,z OF CHILD.
+                        ## THIS IS ALSO IRRESPECTIVE OF fraction_along_parent SPECIFIED IN CABLE!
+                        ## THUS THERE WILL BE NUMERICAL DIFFERENCES BETWEEN MOOSE/GENESIS and NEURON.
+                        ## moosesegment sends Ra and Vm to parent, parent sends only Vm
+                        ## actually for symmetric compartment, both parent and moosesegment require each other's Ra/2,
+                        ## but axial and raxial just serve to distinguish ends.
+                        moose.connect(parent,'axial',moosecomp,'raxial')
+                    else:
+                        parent = None
+                    proximal = segment.find('./{'+self.mml+'}proximal')
+                    if proximal is None:         # If proximal tag is not present,
+                                                  # then parent attribute MUST be present in the segment tag!
+                        ## if proximal is not present, then
+                        ## by default the distal end of the parent is the proximal end of the child
+                        moosecomp.x0 = parent.x
+                        moosecomp.y0 = parent.y
+                        moosecomp.z0 = parent.z
+                    else:
+                        moosecomp.x0 = float(proximal.attrib["x"])*self.length_factor
+                        moosecomp.y0 = float(proximal.attrib["y"])*self.length_factor
+                        moosecomp.z0 = float(proximal.attrib["z"])*self.length_factor
+                        running_diameter += float(proximal.attrib["diameter"]) * self.length_factor
+                        running_dia_nums += 1
+                    distal = segment.find('./{'+self.mml+'}distal')
+                    if distal is not None:
+                        running_diameter += float(distal.attrib["diameter"]) * self.length_factor
+                        running_dia_nums += 1
+                        
+                if segnum==0: # if first segment, change the running compartment from None
+                    running_cableid = cableid
+                    running_segid = segmentid
+                    running_comp = moosecomp
 
-            ## change the running variables whenever a new cable starts
-            ## important to change this after finishing the previous running compartment
-            if cableid!=running_cableid:
-                running_cableid = cableid
-                running_segid = segmentid
-                running_comp = moosecomp
+                ## finish up the previous compartment if new cable has started (except if it is the first),
+                ## OR finish up the current compartment if it is the last
+                lastSegBool = (segnum+1==segmentstotal)
+                if (cableid!=running_cableid and segnum!=0) or lastSegBool:
+                    if lastSegBool: # if last segment, take distal values from this segment
+                        prev_segment = segment
+                    else:
+                        prev_segment = segments[segnum-1]
+                    distal = prev_segment.find('./{'+self.mml+'}distal')
+                    running_comp.x = float(distal.attrib["x"])*self.length_factor
+                    running_comp.y = float(distal.attrib["y"])*self.length_factor
+                    running_comp.z = float(distal.attrib["z"])*self.length_factor
+                    proximal = segment.find('./{'+self.mml+'}proximal')
+                    if proximal is not None:
+                        running_diameter += float(proximal.attrib["diameter"]) * self.length_factor
+                        running_dia_nums += 1
+                    distal = segment.find('./{'+self.mml+'}distal')
+                    if distal is not None:
+                        running_diameter += float(distal.attrib["diameter"]) * self.length_factor
+                        running_dia_nums += 1
+                    ## Set the compartment diameter as the average diameter of all the segments in this section
+                    running_comp.diameter = running_diameter / float(running_dia_nums)
+                    running_diameter = 0.0
+                    running_dia_nums = 0
+                    ## Set the compartment length
+                    running_comp.length = math.sqrt((running_comp.x-running_comp.x0)**2+\
+                        (running_comp.y-running_comp.y0)**2+(running_comp.z-running_comp.z0)**2)
+                    if running_comp.length == 0.0:          # neuroconstruct seems to set length=0 for round soma!
+                        running_comp.length = running_comp.diameter
+                    ## the empty list at the end below will get populated 
+                    ## with the potential synapses on this segment, in function set_compartment_param(..)
+                    self.segDict[running_segid].extend([(running_comp.x0,running_comp.y0,running_comp.z0),\
+                        (running_comp.x,running_comp.y,running_comp.z),running_comp.diameter,running_comp.length,[]])
+                    if neuroml_debug: print 'Set up compartment/section', running_comp.name
+
+                ## change the running variables whenever a new cable starts
+                ## important to change this after finishing the previous running compartment
+                if cableid!=running_cableid:
+                    running_cableid = cableid
+                    running_segid = segmentid
+                    running_comp = moosecomp
 
         ###############################################
         #### load biophysics into the compartments
@@ -196,76 +202,112 @@ class MorphML():
         if biophysics is not None:
             if biophysics.attrib["units"] == 'Physiological Units': # see pg 219 (sec 13.2) of Book of Genesis
                 CMfactor = 1e-2 # F/m^2 from microF/cm^2
+                Cfactor = 1e-6 # F from microF
                 RAfactor = 1e1 # Ohm*m from KOhm*cm
                 RMfactor = 1e-1 # Ohm*m^2 from KOhm*cm^2
+                Rfactor = 1e-3 # Ohm from KOhm
                 Efactor = 1e-3 # V from mV
                 Gfactor = 1e1 # S/m^2 from mS/cm^2
+                Ifactor = 1e-6 # A from microA
+                Tfactor = 1e-3 # s from ms
             else:
                 CMfactor = 1.0
+                Cfactor = 1.0
                 RAfactor = 1.0
                 RMfactor = 1.0
+                Rfactor = 1.0
                 Efactor = 1.0
                 Gfactor = 1.0
-            spec_capacitance = cell.find(".//{"+self.bio+"}spec_capacitance")
-            for parameter in spec_capacitance.findall(".//{"+self.bio+"}parameter"):
-                self.set_group_compartment_param(cell, cellname, parameter,\
-                 'CM', float(parameter.attrib["value"])*CMfactor, self.bio)
-            spec_axial_resitance = cell.find(".//{"+self.bio+"}spec_axial_resistance")
-            for parameter in spec_axial_resitance.findall(".//{"+self.bio+"}parameter"):
-                self.set_group_compartment_param(cell, cellname, parameter,\
-                 'RA', float(parameter.attrib["value"])*RAfactor, self.bio)
-            init_memb_potential = cell.find(".//{"+self.bio+"}init_memb_potential")
-            for parameter in init_memb_potential.findall(".//{"+self.bio+"}parameter"):
-                self.set_group_compartment_param(cell, cellname, parameter,\
-                 'initVm', float(parameter.attrib["value"])*Efactor, self.bio)
+                Ifactor = 1.0
+                Tfactor = 1.0
+
+            IaFpresent = False
             for mechanism in cell.findall(".//{"+self.bio+"}mechanism"):
                 mechanismname = mechanism.attrib["name"]
-                passive = False
-                if mechanism.attrib.has_key("passive_conductance"):
-                    if mechanism.attrib['passive_conductance'] in ["true",'True','TRUE']:
-                        passive = True
-                print "Loading mechanism ", mechanismname
-                ## ONLY creates channel if at least one parameter (like gmax) is specified in the xml
-                ## Neuroml does not allow you to specify all default values.
-                ## However, granule cell example in neuroconstruct has Ca ion pool without
-                ## a parameter, applying default values to all compartments!
+                if mechanismname == "integrate_and_fire": IaFpresent = True
+            ## integrate-and-fire-meachanism
+            if IaFpresent:
                 mech_params = mechanism.findall(".//{"+self.bio+"}parameter")
-                ## if no params, apply all default values to all compartments
-                if len(mech_params) == 0:
-                    for compartment in self.cellDictByCableId[cellname][1].values():
-                        self.set_compartment_param(compartment,None,'default',mechanismname)  
-                ## if params are present, apply params to specified cable/compartment groups
-                for parameter in mech_params:
-                    parametername = parameter.attrib['name']
-                    if passive==True:
-                        if passive and parametername in ['gmax']:
-                            self.set_group_compartment_param(cell, cellname, parameter,\
-                             'RM', RMfactor*1.0/float(parameter.attrib["value"]), self.bio)
-                        elif passive and parametername in ['e','erev']:
-                            self.set_group_compartment_param(cell, cellname, parameter,\
-                             'Em', Efactor*float(parameter.attrib["value"]), self.bio)
+                if len(mech_params) != 0:
+                    for parameter in mech_params:
+                        parametername = parameter.attrib['name']
+                        if parametername == 'inject':
+                            moosecell.inject = float(parameter.attrib["value"])*Ifactor
+                        elif parametername == 'Rm':
+                            moosecell.Rm = float(parameter.attrib["value"])*Rfactor
+                        elif parametername == 'Cm':
+                            moosecell.Cm = float(parameter.attrib["value"])*Cfactor
+                        elif parametername == 'Em':
+                            moosecell.Em = float(parameter.attrib["value"])*Efactor
+                        elif parametername == 'v_reset':
+                            moosecell.Vreset = float(parameter.attrib["value"])*Efactor # voltage after spike, typicaly below resting
+                            moosecell.initVm = moosecell.Vreset
+                        elif parametername == 'threshold':
+                            moosecell.Vthreshold = float(parameter.attrib["value"])*Efactor # firing threshold potential
+                        elif parametername == 't_refrac':
+                            moosecell.refractoryPeriod = float(parameter.attrib["value"])*Tfactor # min refractory time before next spike
+            ## non integrate-and-fire mechanisms
+            else:
+                spec_capacitance = cell.find(".//{"+self.bio+"}spec_capacitance")
+                for parameter in spec_capacitance.findall(".//{"+self.bio+"}parameter"):
+                    self.set_group_compartment_param(cell, cellname, parameter,\
+                     'CM', float(parameter.attrib["value"])*CMfactor, self.bio)
+                spec_axial_resitance = cell.find(".//{"+self.bio+"}spec_axial_resistance")
+                for parameter in spec_axial_resitance.findall(".//{"+self.bio+"}parameter"):
+                    self.set_group_compartment_param(cell, cellname, parameter,\
+                     'RA', float(parameter.attrib["value"])*RAfactor, self.bio)
+                init_memb_potential = cell.find(".//{"+self.bio+"}init_memb_potential")
+                for parameter in init_memb_potential.findall(".//{"+self.bio+"}parameter"):
+                    self.set_group_compartment_param(cell, cellname, parameter,\
+                     'initVm', float(parameter.attrib["value"])*Efactor, self.bio)
+                for mechanism in cell.findall(".//{"+self.bio+"}mechanism"):
+                    mechanismname = mechanism.attrib["name"]
+                    passive = False
+                    if mechanism.attrib.has_key("passive_conductance"):
+                        if mechanism.attrib['passive_conductance'] in ["true",'True','TRUE']:
+                            passive = True
+                    print "Loading mechanism ", mechanismname
+                    ## ONLY creates channel if at least one parameter (like gmax) is specified in the xml
+                    ## Neuroml does not allow you to specify all default values.
+                    ## However, granule cell example in neuroconstruct has Ca ion pool without
+                    ## a parameter, applying default values to all compartments!
+                    mech_params = mechanism.findall(".//{"+self.bio+"}parameter")
+                    ## if no params, apply all default values to all compartments
+                    if len(mech_params) == 0:
+                        for compartment in self.cellDictByCableId[cellname][1].values():
+                            self.set_compartment_param(compartment,None,'default',mechanismname)  
+                    ## if params are present, apply params to specified cable/compartment groups
+                    for parameter in mech_params:
+                        parametername = parameter.attrib['name']
+                        if passive==True:
+                            if passive and parametername in ['gmax']:
+                                self.set_group_compartment_param(cell, cellname, parameter,\
+                                 'RM', RMfactor*1.0/float(parameter.attrib["value"]), self.bio)
+                            elif passive and parametername in ['e','erev']:
+                                self.set_group_compartment_param(cell, cellname, parameter,\
+                                 'Em', Efactor*float(parameter.attrib["value"]), self.bio)
+                            else:
+                                print "WARNING: Yo programmer of MorphML! You didn't implement parameter ",\
+                                 parametername, " in mechanism ",mechanismname
                         else:
-                            print "WARNING: Yo programmer of MorphML! You didn't implement parameter ",\
-                             parametername, " in mechanism ",mechanismname
-                    else:
-                        if parametername in ['gmax']:
-                            gmaxval = float(eval(parameter.attrib["value"],{"__builtins__":None},{}))
-                            self.set_group_compartment_param(cell, cellname, parameter,\
-                             'Gbar', Gfactor*gmaxval, self.bio, mechanismname)
-                        elif parametername in ['e','erev']:
-                            self.set_group_compartment_param(cell, cellname, parameter,\
-                             'Ek', Efactor*float(parameter.attrib["value"]), self.bio, mechanismname)
-                        elif parametername in ['depth']: # has to be type Ion Concentration!
-                            self.set_group_compartment_param(cell, cellname, parameter,\
-                             'thick', self.length_factor*float(parameter.attrib["value"]),\
-                             self.bio, mechanismname)
-                        else:
-                            print "WARNING: Yo programmer of MorphML import! You didn't implement parameter ",\
-                             parametername, " in mechanism ",mechanismname
-            #### Connect the Ca pools and channels
-            #### Am connecting these at the very end so that all channels and pools have been created
-            #### Note: this function is in moose.utils not moose.neuroml.utils !
-            utils.connect_CaConc(self.cellDictByCableId[cellname][1].values())
+                            if parametername in ['gmax']:
+                                gmaxval = float(eval(parameter.attrib["value"],{"__builtins__":None},{}))
+                                self.set_group_compartment_param(cell, cellname, parameter,\
+                                 'Gbar', Gfactor*gmaxval, self.bio, mechanismname)
+                            elif parametername in ['e','erev']:
+                                self.set_group_compartment_param(cell, cellname, parameter,\
+                                 'Ek', Efactor*float(parameter.attrib["value"]), self.bio, mechanismname)
+                            elif parametername in ['depth']: # has to be type Ion Concentration!
+                                self.set_group_compartment_param(cell, cellname, parameter,\
+                                 'thick', self.length_factor*float(parameter.attrib["value"]),\
+                                 self.bio, mechanismname)
+                            else:
+                                print "WARNING: Yo programmer of MorphML import! You didn't implement parameter ",\
+                                 parametername, " in mechanism ",mechanismname
+                #### Connect the Ca pools and channels
+                #### Am connecting these at the very end so that all channels and pools have been created
+                #### Note: this function is in moose.utils not moose.neuroml.utils !
+                utils.connect_CaConc(self.cellDictByCableId[cellname][1].values())
         
         ##########################################################
         #### load connectivity / synapses into the compartments
