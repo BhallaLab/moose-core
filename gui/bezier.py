@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jul 11 11:21:50 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Jul 12 14:45:22 2012 (+0530)
+# Last-Updated: Thu Jul 12 17:55:45 2012 (+0530)
 #           By: subha
-#     Update #: 377
+#     Update #: 380
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -50,6 +50,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.path import Path
 import matplotlib.patches as patches
+
+def bezier_slope(p0, p1):
+    """Calculate the slope of cubic Bezier curve given two consecutive
+    points."""
+    d1 = 3 * (p1 - p0)
+    raise NotImplementedError('')
+
+    
 
 def bezier(p0, p1, p2, p3, t):
     """Evaluate cubic bezier curve going through p0, p1, p2 at
