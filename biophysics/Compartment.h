@@ -137,6 +137,14 @@ class Compartment
 			 */
 			static const Cinfo* initCinfo();
 
+			/*
+			 * This Finfo is used to send out Vm to channels, spikegens, etc.
+			 * 
+			 * It is exposed here so that HSolve can also use it to send out
+			 * the Vm to the recipients.
+			 */
+			static SrcFinfo1< double >* VmOut();
+
 			/**
 			 * Virtual function to handle Reinit.
 			 */

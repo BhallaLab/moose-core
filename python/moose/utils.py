@@ -380,6 +380,7 @@ def resetSim(simpaths, simdt, plotdt, hsolve_path=None):
             moose__.useClock(POOLCLOCK, simpath+'/##[TYPE=CaConc]', 'process')
         else:
             moose__.useClock( INITCLOCK, hsolve_path, 'process' )
+            moose__.useClock(2, simpath+'/##[TYPE=HHChannel2D]', 'process')
     moose__.reinit()
 
 def setupTable(name, obj, qtyname, tables_path=None):
