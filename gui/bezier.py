@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jul 11 11:21:50 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Jul 12 18:59:03 2012 (+0530)
+# Last-Updated: Thu Jul 12 19:10:45 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 404
+#     Update #: 412
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -83,7 +83,14 @@ def bezier(p0, p1, p2, p3, t):
     """
     p = np.vstack((p0, p1, p2, p3))
     s = 1 - t
-    return s * (s * (s * p[0] + 3 * t * p[1]) + 3 * t * t * p[2]) + t * t * t * p[3]    
+    return s * (s * (s * p[0] + 3 * t * p[1]) + 3 * t * t * p[2]) + t * t * t * p[3]
+
+def get_control_point_quad(p0, p1):
+    """This is a convenience fuction to return the bounding retangle
+    corner between points p0 and p1 as control point so that a nice
+    curve can be drawn from p0 to p1 that is tangential to the axes at
+    p0 and p1"""
+    return (p1[0], p0[1])
 
 def get_control_points_3(p1, p2, p3):
     """get the control points for ponts p1, p2 and p3"""
