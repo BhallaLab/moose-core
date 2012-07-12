@@ -7,6 +7,8 @@ python testNeuroML_CA1.py
 The soma name below is hard coded for CA1, else any other file can be used by modifying this script.
 """
 
+import os
+os.environ['NUMPTHREADS'] = '1'
 import moose
 from moose.utils import *
 

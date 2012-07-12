@@ -33,7 +33,7 @@
         
         <ion_species name="ca"/>
         
-        <decaying_pool_model resting_conc ="7.55e-5" decay_constant="1e-2">
+        <decaying_pool_model resting_conc ="7.55e-5" decay_constant="7e-2">
             
             <pool_volume_info shell_thickness = "8.4e-8"/>
             

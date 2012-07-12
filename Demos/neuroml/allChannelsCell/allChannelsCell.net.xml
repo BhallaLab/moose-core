@@ -17,6 +17,7 @@ Cell Group: Gran contains 1 cells
 </meta:properties>
 
         <populations>
+    <!-- Switch between Cerebellar Granule cell 1998 'Granule_98' and Solinas et al Golgi cell 'Simple_CML' -->
     <population name="Gran" cell_type="Granule_98">
         <meta:properties>
             <meta:property tag="color" value="0.69921875 0.5703125 0.96484375"/>
@@ -37,7 +38,7 @@ Cell Group: Gran contains 1 cells
 
         <inputs units="Physiological Units">
     <input name="Gran_10pA">
-        <pulse_input delay="100.0" duration="500.0" amplitude="1.0E-5"/>
+        <pulse_input delay="100.0" duration="500.0" amplitude="1.0E-4"/>
         <target population="Gran">
             <sites size="1">
                 <site cell_id="0" segment_id="0" fraction_along="0.5"/>
