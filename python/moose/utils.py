@@ -46,12 +46,15 @@ LinearFill = 2 # Linear fill
 ## The ee method uses clocks 1, 2.
 ## hsolve & ee use clock 3 for Ca/ion pools.
 ## clocks 4 and 5 are for biochemical simulations.
-## keep clock 6 for plots.
+## clock 6 for lookup tables, clock 7 for stimuli
+## clocks 8 and 9 for tables for plots.
 INITCLOCK = 0
 ELECCLOCK = 1
 CHAN2DCLOCK = 2
 POOLCLOCK = 3
-PLOTCLOCK = 6
+LOOKUPCLOCK = 6
+STIMCLOCK = 7
+PLOTCLOCK = 8
 
 # 2012-01-11 19:20:39 (+0530) Subha: checked for compatibility with dh_branch
 def listmsg(pymoose_object):
@@ -355,12 +358,13 @@ def resetSim(simpaths, simdt, plotdt, hsolve_path=None):
     moose__.setClock(ELECCLOCK, simdt) # The hsolve and ee methods use clock 1
     moose__.setClock(CHAN2DCLOCK, simdt) # hsolve uses clock 2 for mg_block, nmdachan and others.
     moose__.setClock(POOLCLOCK, simdt) # Ca/ion pools use clock 3
+    moose__.setClock(STIMCLOCK, simdt) # Ca/ion pools use clock 3
     moose__.setClock(PLOTCLOCK, plotdt) # for tables
     for simpath in simpaths:
         moose__.useClock(PLOTCLOCK, simpath+'/##[TYPE=Table]', 'process')
         moose__.useClock(ELECCLOCK, simpath+'/##[TYPE=PulseGen]', 'process')
-        moose__.useClock(ELECCLOCK, simpath+'/##[TYPE=DiffAmp]', 'process')
-        moose__.useClock(ELECCLOCK, simpath+'/##[TYPE=SpikeGen]', 'process')
+        moose__.useClock(STIMCLOCK, simpath+'/##[TYPE=DiffAmp]', 'process')
+        moose__.useClock(STIMCLOCK, simpath+'/##[TYPE=SpikeGen]', 'process')
         moose__.useClock(ELECCLOCK, simpath+'/##[TYPE=LeakyIaF]', 'process')
         moose__.useClock(ELECCLOCK, simpath+'/##[TYPE=IntFire]', 'process')
         ## hsolve takes care of the clocks for the biophysics
@@ -428,10 +432,10 @@ def printCellTree(cell):
     for compartmentid in cell.children: # compartments
         comp = moose__.Compartment(compartmentid)
         print "  |-",comp.path, 'l=',comp.length, 'd=',comp.diameter, 'Rm=',comp.Rm, 'Ra=',comp.Ra, 'Cm=',comp.Cm, 'EM=',comp.Em
-        for inmsg in comp.inMessages():
-            print "    |---", inmsg
-        for outmsg in comp.outMessages():
-            print "    |---", outmsg
+        #for inmsg in comp.inMessages():
+        #    print "    |---", inmsg
+        #for outmsg in comp.outMessages():
+        #    print "    |---", outmsg
         printRecursiveTree(compartmentid, level=2) # for channels and synapses and recursively lower levels
 
 def printRecursiveTree(elementid, level):
@@ -456,10 +460,10 @@ def printRecursiveTree(elementid, level):
             print spacefill+"|--", childobj.name, childobj.class_, 'CMg',childobj.CMg, 'KMg_A',childobj.KMg_A, 'KMg_B',childobj.KMg_B
         elif classname in ['Table']: # Table gives segfault if printRecursiveTree is called on it
             return # so go no deeper
-        for inmsg in childobj.inMessages():
-            print spacefill+"  |---", inmsg
-        for outmsg in childobj.outMessages():
-            print spacefill+"  |---", outmsg
+        #for inmsg in childobj.inMessages():
+        #    print spacefill+"  |---", inmsg
+        #for outmsg in childobj.outMessages():
+        #    print spacefill+"  |---", outmsg
         if len(childobj.children)>0:
             printRecursiveTree(childid, level+1)
 
