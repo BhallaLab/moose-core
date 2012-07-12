@@ -56,6 +56,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.allIntFires = []
         self.modelHasCompartments = False
         self.modelHasIntFires = False
+        self.modelHasLeakyIaF = False
         self.modelPathsModelTypeDict = {}
         self.activeWindow = 'None'
         #prop Editor variables
@@ -264,7 +265,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
                 self.updateDefaultTimes(modeltype,modelpath)
             #self.enableControlButtons()
             self.checkModelForNeurons()
-            if self.modelHasCompartments or self.modelHasIntFires:
+            if self.modelHasCompartments or self.modelHasIntFires or self.modelHasLeakyIaF:
                 self.addGLWindow()
             self.assignClocks(modelpath,modeltype)
             print 'Loaded model',  fileName, 'of type', modeltype, 'under Element path ',modelpath
@@ -297,10 +298,13 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
     def checkModelForNeurons(self):
         self.allCompartments = mooseUtils.findAllBut('/##[TYPE=Compartment]','library')
         self.allIntFires = mooseUtils.findAllBut('/##[TYPE=IntFire]','library')
+        self.allLeakyIaF = mooseUtils.findAllBut('/##[TYPE=LeakyIaF]','library')
         if self.allCompartments:
             self.modelHasCompartments = True
         if self.allIntFires:
             self.modelHasIntFires = True
+        if self.allLeakyIaF:
+            self.modelHasLeakyIaF = True
 
     def addGLWindow(self):
 	vizWindow = newGLSubWindow()
@@ -335,17 +339,22 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
                 self.layoutWidget.drawNewCell(cellName)
             self.layoutWidget.updateGL()
             self.layoutWidget.setColorMap()
-        elif self.modelHasIntFires:
-            print 'modelHasIntFires:', len(self.allIntFires)
-            sideSquare = self.nearestSquare(len(self.allIntFires))
+#        elif self.modelHasLeakyIaF:
+#            print 'modelHasIntFires:', len(self.allLeakyIaF)
+        elif self.modelHasIntFires or self.modelHasLeakyIaF:
+            #print 'modelHasIntFires:', len(self.allIntFires)
+            #sideSquare = self.nearestSquare(len(self.allIntFires))
+            sideSquare = self.nearestSquare(len(self.allLeakyIaF))
             #for intFire in self.allIntFires:
             intFireCellNumber = 1 
+            #self.layoutWidget.drawNewCell(cellName='/cells/LIFs_'+str(intFireCellNumber-1), style=3, cellCentre=[0.1, 0.1, 0.0])
             for yAxis in range(sideSquare):
                 for xAxis in range(sideSquare):
-                    self.layoutWidget.drawNewCell(cellName='/hopfield/cell_'+str(intFireCellNumber), style=3, cellCentre=[xAxis*0.5,yAxis*0.5,0.0])
+                    print 'we are here'
+                    self.layoutWidget.drawNewCell(cellName='/cells/LIFs_'+str(intFireCellNumber-1), style=3, cellCentre=[xAxis*0.5,yAxis*0.5,0.0])
                     intFireCellNumber += 1
             self.layoutWidget.updateGL()
-            self.layoutWidget.setColorMap(vizMinVal = float(-1e-7), vizMaxVal = 0)
+            self.layoutWidget.setColorMap(vizMinVal=-0.07,vizMaxVal=-0.04)
 #setColorMap(self,vizMinVal=-0.1,vizMaxVal=0.07,moosepath='',variable='Vm',cMap='jet')
                 
     def nearestSquare(self, n):	#add_chait
@@ -432,7 +441,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         for plotWinName,plotWin in self.plotNameWinDict.iteritems():
             plotWin.plot.updatePlot(currentTime)
         self.updateCurrentTime(currentTime)
-        if self.modelHasCompartments or self.modelHasIntFires:
+        if self.modelHasCompartments or self.modelHasIntFires or self.modelHasLeakyIaF:
             self.updateVisualization()
         QtCore.QCoreApplication.processEvents() 
                      
