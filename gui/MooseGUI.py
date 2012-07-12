@@ -7,6 +7,7 @@ import numpy as np
 # for command-line arguments
 import sys
 import os
+os.environ['NUMPTHREADS'] = '1'
 import sys
 import subprocess
 from datetime import date
@@ -437,7 +438,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
                      
     def updatePlotDockFields(self,obj):
         #add plot-able elements according to predefined  ('%.3f' %self.currentTime)
-        self.plotConfigCurrentSelectionLabel.setText(str(obj.getField('name')+'-'+obj.getField('class'))[:15])
+        self.plotConfigCurrentSelectionLabel.setText(str(obj.getField('name')+'-'+obj.getField('class')))
         fieldType = obj.getField('class')
 #        self.plotConfigCurrentSelectionTypeLabel.setText(fieldType)
         self.plotConfigFieldSelectionComboBox.clear()
