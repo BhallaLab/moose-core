@@ -117,10 +117,14 @@ class NetworkML():
                         else: segment_id = 0 # default segment_id is specified to be 0
                         ## population is populationname, self.populationDict[population][0] is cellname
                         cell_name = self.populationDict[population][0]
-                        segment_path = self.populationDict[population][1][int(cell_id)].path+'/'+\
-                            self.cellSegmentDict[cell_name][segment_id][0]
-                        compartment = moose.Compartment(segment_path)
-                        moose.connect(iclamp,'outputOut',compartment,'injectMsg')
+                        if cell_name == 'LIF':
+                            LIF = self.populationDict[population][1][int(cell_id)]
+                            moose.connect(iclamp,'outputOut',LIF,'injectDest')
+                        else:
+                            segment_path = self.populationDict[population][1][int(cell_id)].path+'/'+\
+                                self.cellSegmentDict[cell_name][segment_id][0]
+                            compartment = moose.Compartment(segment_path)
+                            moose.connect(iclamp,'outputOut',compartment,'injectMsg')
 
     def createPopulations(self):
         self.populationDict = {}
@@ -146,7 +150,10 @@ class NetworkML():
                         )
                     )
                 self.cellSegmentDict.update(cellDict)
-            libcell = moose.Neuron('/library/'+cellname) #added cells as a Neuron class.
+            if cellname == 'LIF':
+                libcell = moose.LeakyIaF('/library/'+cellname)
+            else:
+                libcell = moose.Neuron('/library/'+cellname) #added cells as a Neuron class.
             self.populationDict[populationname] = (cellname,{})
             moose.Neutral('/cells')
             for instance in population.findall(".//{"+nml_ns+"}instance"):
@@ -161,12 +168,16 @@ class NetworkML():
                 ## deep copies the library cell to an instance under '/cells' named as <arg3>
                 ## /cells is useful for scheduling clocks as all sim elements are in /cells
                 cellid = moose.copy(libcell,moose.Neutral('/cells'),populationname+"_"+instanceid)
-                cell = moose.Neuron(cellid) # No Cell class in MOOSE anymore! :( addded Neuron class - Chaitanya
-                self.populationDict[populationname][1][int(instanceid)]=cell
-                x = float(location.attrib['x'])*self.length_factor
-                y = float(location.attrib['y'])*self.length_factor
-                z = float(location.attrib['z'])*self.length_factor
-                self.translate_rotate(cell,x,y,z,zrotation)
+                if cellname == 'LIF':
+                    cell = moose.LeakyIaF(cellid)
+                    self.populationDict[populationname][1][int(instanceid)]=cell
+                else:
+                    cell = moose.Neuron(cellid) # No Cell class in MOOSE anymore! :( addded Neuron class - Chaitanya
+                    self.populationDict[populationname][1][int(instanceid)]=cell
+                    x = float(location.attrib['x'])*self.length_factor
+                    y = float(location.attrib['y'])*self.length_factor
+                    z = float(location.attrib['z'])*self.length_factor
+                    self.translate_rotate(cell,x,y,z,zrotation)
                 
     def translate_rotate(self,obj,x,y,z,ztheta): # recursively translate all compartments under obj
         for childId in obj.children:
