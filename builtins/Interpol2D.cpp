@@ -504,50 +504,56 @@ double Interpol2D::indexWithoutCheck( double x, double y ) const
  */
 double Interpol2D::interpolate( double x, double y ) const
 {
+    bool isEndOfX = false;
+    bool isEndOfY = false;
+    double z00=0.0, z01=0.0, z10=0.0, z11=0.0;
 	assert( table_.size() > 1 );
 	
 	double xv = ( x - xmin_ ) * invDx_;
 	unsigned long xInteger = static_cast< unsigned long >(xv);
-	assert( xInteger < table_.size() );
+    if (xInteger >= table_.size()){
+        xInteger = table_.size() - 1;
+    }
+    if (xInteger == table_.size() - 1){
+        isEndOfX = true;
+    }
+    
+    assert(xInteger >= 0);
 	double xFraction = xv - xInteger;
-
 	double yv = ( y - ymin_ ) * invDy_;
 	unsigned long yInteger = static_cast< unsigned long >(yv);
-	assert( yInteger < table_[ 0 ].size() );
+    if (yInteger >= table_[xInteger].size()){
+        yInteger = table_[xInteger].size() - 1;
+    }
+    assert(yInteger >= 0);
+    if (yInteger == table_[xInteger].size() - 1){
+        isEndOfY = true;
+    }
 	double yFraction = yv - yInteger;
-
 	double xFyF = xFraction * yFraction;
-	
 	//If the value being looked up is at the boundary, we dont want to read past
 	//the boundary for the x interpolation.
-	vector< vector< double > >::const_iterator iz0 = table_.begin() + xInteger;
-	vector< double >::const_iterator iz00 = iz0->begin() + yInteger;
-	vector< double >::const_iterator iz10;
-
+	// vector< vector< double > >::const_iterator iz0 = table_.begin() + xInteger;
+	// vector< double >::const_iterator iz00 = iz0->begin() + yInteger;
+	// vector< double >::const_iterator iz10;
+    
 	/* The following is the same as:
 			double z00 = table_[ xInteger ][ yInteger ];
 			double z01 = table_[ xInteger ][ yInteger + 1 ];
 			double z10 = table_[ xInteger + 1 ][ yInteger ];
 			double z11 = table_[ xInteger + 1 ][ yInteger + 1 ];
 	*/
-
-	double z00 = *iz00;
-	double z01;
-	double z10;
-	double z11;
-    bool isEndOfX = ( xInteger == table_.size() - 1 );
-    bool isEndOfY = ( yInteger == iz0->size() - 1);
-	//Upto this point, only iz00 is known. The rest are computed only
-	//conditionally.
-	if (isEndOfX){
-        z10 = 0.0;
-        z11 = 0.0;
-        isEndOfY? (z01 = 0, z11 = 0): (z01 = *(iz00 + 1), z11 = *(iz10 + 1));
-    } else {
-        iz10 = (iz0 + 1)->begin() + yInteger;
-        z10 = *iz10;
-        isEndOfY? (z01 = 0, z11 = 0): (z01 = *(iz00 + 1), z11 = *(iz10 + 1));
+	z00 = table_[xInteger][yInteger];
+    if (!isEndOfX){        
+        z10 = table_[xInteger+1][yInteger];
+        if (!isEndOfY){
+            z11 = table_[xInteger+1][yInteger+1];
+            z01 = table_[xInteger][yInteger+1];
+        }
+    } else if (!isEndOfY){
+        z01 = table_[xInteger][yInteger+1];
     }
+
 	/* The following is the same as:
 			return (
 				z00 * ( 1 - xFraction ) * ( 1 - yFraction ) +
