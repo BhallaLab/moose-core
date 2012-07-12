@@ -87,7 +87,6 @@ class updatepaintGL(PyGLWidget):
 			d = float(r.getField(self.variable))
                         vals.append(d)
 		inds = digitize(vals,self.stepVals)
-
 		for i in range(0,len(self.vizObjects)):
 			self.vizObjects[i].r,self.vizObjects[i].g,self.vizObjects[i].b=self.colorMap[inds[i]-1]
 
@@ -131,6 +130,9 @@ class updatepaintGL(PyGLWidget):
     	    	l_coords.append((x0,y0,z0,x,y,z,d,ch[i].getField('path')))
 
         elif moose.element(cellName).getField('class') == 'IntFire':
+            l_coords.append((0,0,0,0,0,0,0,cellName))
+            
+        elif moose.element(cellName).getField('class') == 'LeakyIaF':
             l_coords.append((0,0,0,0,0,0,0,cellName))
 
     	if self.viz==1:				#fix
