@@ -18,8 +18,8 @@
 #include "../biophysics/Compartment.h"
 #include "../biophysics/CaConc.h"
 using namespace moose;
-#include "ZombieCompartment.h"
-#include "ZombieCaConc.h"
+//~ #include "ZombieCompartment.h"
+//~ #include "ZombieCaConc.h"
 
 extern ostream& operator <<( ostream& s, const HinesMatrix& m );
 
@@ -308,14 +308,16 @@ void HSolveActive::sendValues( ProcPtr info ) {
 	 */
 	 
 	for ( unsigned int i = 0; i < compartmentId_.size(); ++i )
-		ZombieCompartment::VmOut()->send(
+		moose::Compartment::VmOut()->send(
+		//~ ZombieCompartment::VmOut()->send(
 			compartmentId_[ i ].eref(),
 			info->threadIndexInGroup,
 			V_[ i ]
 		);
 	
 	for ( unsigned int i = 0; i < caConcId_.size(); ++i )
-		ZombieCaConc::concOut()->send(
+		CaConc::concOut()->send(
+		//~ ZombieCaConc::concOut()->send(
 			caConcId_[ i ].eref(),
 			info->threadIndexInGroup,
 			ca_[ i ]

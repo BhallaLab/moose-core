@@ -66,6 +66,14 @@ class CaConc
         double getFloor() const;
 
 		static const Cinfo* initCinfo();
+
+		/*
+		 * This Finfo is used to send out Ca concentration to channels.
+		 * 
+		 * It is exposed here so that HSolve can also use it to send out
+		 * Ca concentration to the recipients.
+		 */
+		static SrcFinfo1< double >* concOut();
 	private:
 		double Ca_;
 		double CaBasal_;

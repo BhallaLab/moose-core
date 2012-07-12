@@ -14,7 +14,14 @@
 using namespace moose;
 const double Compartment::EPSILON = 1.0e-15;
 
-static SrcFinfo1< double >* VmOut() {
+/*
+ * This Finfo is used to send out Vm to channels, spikegens, etc.
+ * 
+ * It is exposed here so that HSolve can also use it to send out
+ * the Vm to the recipients.
+ */
+// Static function.
+SrcFinfo1< double >* Compartment::VmOut() {
 	static SrcFinfo1< double > VmOut( "VmOut", 
 		"Sends out Vm value of compartment on each timestep" );
 	return &VmOut;

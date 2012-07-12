@@ -14,7 +14,14 @@
 ///////////////////////////////////////////////////////
 // MsgSrc definitions
 ///////////////////////////////////////////////////////
-static SrcFinfo1< double > *concOut() {
+/*
+ * This Finfo is used to send out Ca concentration to channels.
+ * 
+ * It is exposed here so that HSolve can also use it to send out
+ * Ca concentration to the recipients.
+ */
+// Static function.
+SrcFinfo1< double >* CaConc::concOut() {
 	static SrcFinfo1< double > concOut( "concOut", 
 			"Concentration of Ca in pool" );
 	return &concOut;
