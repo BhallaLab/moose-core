@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jul 11 11:21:50 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Jul 12 17:55:45 2012 (+0530)
-#           By: subha
-#     Update #: 380
+# Last-Updated: Thu Jul 12 18:59:03 2012 (+0530)
+#           By: Subhasis Ray
+#     Update #: 404
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -51,13 +51,27 @@ import matplotlib.pyplot as plt
 from matplotlib.path import Path
 import matplotlib.patches as patches
 
-def bezier_slope(p0, p1):
-    """Calculate the slope of cubic Bezier curve given two consecutive
-    points."""
-    d1 = 3 * (p1 - p0)
-    raise NotImplementedError('')
+def bezier_angle(p0, p1):
+    """Calculate the angle of the slope of cubic Bezier curve given
+    two consecutive points. (i.e. (knot[0], cp[0]), or (cp[1],
+    knot[1])).
 
+    Example: angle with x-axis of the curve through knots [p0, p1, p2]
+    and control points u0, v0 and u1, v1:
+
+    at p0:
+    bezier_angle(p0, u0)
+
+    at p2:    
+    bezier_angle(v1, p2)
+
+    NOTE: this is not a general solution. It is for the end points of
+    the curve.
     
+    """
+    if p1[0] == p0[0]:
+        return np.pi/2
+    return np.atan((p1[1] - p0[1])/(p1[0] - p0[0]))    
 
 def bezier(p0, p1, p2, p3, t):
     """Evaluate cubic bezier curve going through p0, p1, p2 at
