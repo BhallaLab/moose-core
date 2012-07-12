@@ -14,7 +14,7 @@ Network structure (NeuroML 1.x) for project: CA1PyramidalCell
 </meta:properties>
 
         <populations>
-    <!-- change cell_type to CA1 or CA1_onlysoma to switch between full / single compartment cell -->
+    <!-- change cell_type to CA1 or CA1soma to switch between full / single compartment cell -->
     <population name="CA1group" cell_type="CA1">
         <meta:properties>
             <meta:property tag="color" value="0.69921875 0.5703125 0.96484375"/>
