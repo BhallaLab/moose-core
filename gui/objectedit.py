@@ -86,7 +86,7 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
         """
         QtCore.QAbstractTableModel.__init__(self, parent)
         self.mooseObject = mooseObject
-        self._header = ('Field', 'Value',' ')
+        self._header = ('Field', 'Value')
         self.fields = []
         self.plotNames = ['None']
         self.fieldFlags = {}
@@ -183,10 +183,7 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
                 field = ObjectFieldsModel.py_moose_fieldname_map[field]
             except KeyError:
                 pass
-            if ( (field == 'conc') or (field == 'concInit')):
-                ret = self.mooseObject.getField(field)*1000
-            else:
-                ret = self.mooseObject.getField(field)
+            ret = self.mooseObject.getField(field)
             #print 'Field', field, 'value', ret
             ret = QtCore.QVariant(QtCore.QString(str(ret)))            
         elif index.column() == 2 and role == Qt.DisplayRole:
