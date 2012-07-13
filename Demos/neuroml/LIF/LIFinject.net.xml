@@ -29,7 +29,9 @@ LIF cell with current injection: written by Aditya Gilra
 
         <inputs units="Physiological Units">
     <input name="LIF_10pA">
-        <pulse_input delay="100.0" duration="500.0" amplitude="1.0E-5"/>
+        <!--<pulse_input delay="100.0" duration="500.0" amplitude="1.0E-5"/>-->
+        <!-- injecting directly into soma.inject in the cell's MorphML -->
+        <pulse_input delay="100.0" duration="500.0" amplitude="0.0"/>
         <target population="LIFs">
             <sites size="1">
                 <site cell_id="0" segment_id="0" fraction_along="0.5"/>

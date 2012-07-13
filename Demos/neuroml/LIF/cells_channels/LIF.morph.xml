@@ -19,6 +19,7 @@
                     <bio:parameter name="v_reset" value="-0.070"/>
                     <bio:parameter name="threshold" value="-0.045"/>
                     <bio:parameter name="t_refrac" value="0.002"/>
+                    <bio:parameter name="inject" value="1.0e-5"/>
                 </bio:mechanism>
 
             </biophysics>

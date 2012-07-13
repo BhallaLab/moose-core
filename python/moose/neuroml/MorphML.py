@@ -246,6 +246,8 @@ class MorphML():
                             moosecell.Vthreshold = float(parameter.attrib["value"])*Efactor # firing threshold potential
                         elif parametername == 't_refrac':
                             moosecell.refractoryPeriod = float(parameter.attrib["value"])*Tfactor # min refractory time before next spike
+                        elif parametername == 'inject':
+                            moosecell.refractoryPeriod = float(parameter.attrib["value"])*Ifactor # inject into soma
             ## non integrate-and-fire mechanisms
             else:
                 spec_capacitance = cell.find(".//{"+self.bio+"}spec_capacitance")
