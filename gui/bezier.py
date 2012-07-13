@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jul 11 11:21:50 2012 (+0530)
 # Version: 
-# Last-Updated: Fri Jul 13 08:24:39 2012 (+0530)
+# Last-Updated: Fri Jul 13 09:11:03 2012 (+0530)
 #           By: subha
-#     Update #: 415
+#     Update #: 452
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -232,8 +232,29 @@ if __name__ == '__main__':
     ax.add_patch(patch)
     xs, ys = zip(*points)
     ax.plot(xs, ys, 'x--')
+    for i in range(len(knots)):
+        ax.text(knots[i][0]-0.05, knots[i][1] - 0.05, 'P%d' % (i), color='magenta', size='large')
+    for i in range(len(fcp)):
+        ax.text(fcp[i][0]-0.05, fcp[i][1] - 0.05, 'U%d' % (i), color='magenta', size='large')
+    for i in range(len(scp)):
+        ax.text(scp[i][0]-0.05, scp[i][1] - 0.05, 'V%d' % (i), color='magenta', size='large')
+
     p = bezier(knots[0], fcp[0], scp[0], knots[1], 0.5)
     plt.plot([p[0]], [p[1]], 'r^')
+    ax.text(p[0]-0.05, p[1] - 0.05, 't=0.5', color='magenta', size='large')    
+    p4 = [0.4,0.6]
+    cp1 = get_control_point_quad(p4, knots[1])
+    codes = [Path.MOVETO,
+             Path.CURVE3,
+             Path.CURVE3]
+    points = [p4, cp1, knots[1]]
+    path = Path(points, codes)
+    patch = patches.PathPatch(path, facecolor='green', lw=1)    
+    ax.add_patch(patch)
+    xs, ys = zip(*points)
+    plt.plot(xs, ys, 'rx--')
+    ax.text(p4[0]-0.05, p4[1] - 0.05, 'P\'', color='magenta', size='large')
+    ax.text(cp1[0]-0.05, cp1[1] - 0.05, 'U\'', color='magenta', size='large')    
     plt.show()
     
 # 
