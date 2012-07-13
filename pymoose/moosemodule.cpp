@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Jul 11 01:39:51 2012 (+0530)
-//           By: Subhasis Ray
-//     Update #: 9204
+// Last-Updated: Fri Jul 13 12:19:06 2012 (+0530)
+//           By: subha
+//     Update #: 9210
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -156,9 +156,17 @@ extern "C" {
         if (attribute == "path"){
             return moose_Id_getPath(id);
         } else if (attribute == "value"){
-            moose_Id_getValue(id);
+            return moose_Id_getValue(id);
         } else if (attribute == "shape"){
             return moose_Id_getShape(id);
+        } else if (attribute == "class_"){ // class is a common
+                                          // attribute to all ObjIds
+                                          // under this Id. Expect it
+                                          // to be a single value in
+                                          // stead of a list of class
+                                          // names.
+            string classname = Field<string>::get(id->id_, "class");
+            return Py_BuildValue("s", classname.c_str());
         }
         return NULL;
     }
