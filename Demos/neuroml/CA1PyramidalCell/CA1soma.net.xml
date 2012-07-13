@@ -34,7 +34,9 @@ Network structure (NeuroML 1.x) for project: CA1PyramidalCell
 
         <inputs units="Physiological Units">
     <input name="CA1_10pA">
-        <pulse_input delay="0.0" duration="500.0" amplitude="3.0E-4"/>
+        <!--<pulse_input delay="0.0" duration="500.0" amplitude="3.0E-4"/>-->
+        <!-- injecting directly into soma.inject in the cell's MorphML -->
+        <pulse_input delay="0.0" duration="500.0" amplitude="0.0"/>
         <target population="CA1group">
             <sites size="1">
                 <site cell_id="0" segment_id="0" fraction_along="0.5"/>

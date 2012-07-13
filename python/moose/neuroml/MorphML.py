@@ -279,13 +279,16 @@ class MorphML():
                     ## if params are present, apply params to specified cable/compartment groups
                     for parameter in mech_params:
                         parametername = parameter.attrib['name']
-                        if passive==True:
-                            if passive and parametername in ['gmax']:
+                        if passive:
+                            if parametername in ['gmax']:
                                 self.set_group_compartment_param(cell, cellname, parameter,\
                                  'RM', RMfactor*1.0/float(parameter.attrib["value"]), self.bio)
-                            elif passive and parametername in ['e','erev']:
+                            elif parametername in ['e','erev']:
                                 self.set_group_compartment_param(cell, cellname, parameter,\
                                  'Em', Efactor*float(parameter.attrib["value"]), self.bio)
+                            elif parametername in ['inject']:
+                                self.set_group_compartment_param(cell, cellname, parameter,\
+                                 'inject', Ifactor*float(parameter.attrib["value"]), self.bio)
                             else:
                                 print "WARNING: Yo programmer of MorphML! You didn't implement parameter ",\
                                  parametername, " in mechanism ",mechanismname
@@ -355,6 +358,9 @@ class MorphML():
             compartment.Em = value
         elif name == 'initVm':
             compartment.initVm = value
+        elif name == 'inject':
+            print compartment.name, 'inject', value, 'A.'
+            compartment.inject = value
         elif mechanismname is 'synapse': # synapse being added to the compartment
             ## these are potential locations, we do not actually make synapses.
             #synapse = self.context.deepCopy(self.context.pathToId('/library/'+value),\

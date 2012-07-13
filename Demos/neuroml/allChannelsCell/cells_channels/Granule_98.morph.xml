@@ -23,6 +23,10 @@
                     <meta:group>soma_group</meta:group>
                 </mml:cable>
 
+                <mml:cablegroup name="soma_group">
+                    <mml:cable id="0"/>
+               </mml:cablegroup>
+
             </mml:cables>
 
             <!--Adding the biophysical parameters-->
@@ -41,6 +45,9 @@
                     </bio:parameter>
                     <bio:parameter name="gmax" value="0.0330033">
                         <bio:group>all</bio:group>
+                    </bio:parameter>
+                    <bio:parameter name="inject" value="1.0e-4">
+                        <bio:group>soma_group</bio:group>
                     </bio:parameter>
                 </bio:mechanism>
 
