@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jul 11 11:21:50 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Jul 12 19:10:45 2012 (+0530)
-#           By: Subhasis Ray
-#     Update #: 412
+# Last-Updated: Fri Jul 13 08:24:39 2012 (+0530)
+#           By: subha
+#     Update #: 415
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -52,7 +52,7 @@ from matplotlib.path import Path
 import matplotlib.patches as patches
 
 def bezier_angle(p0, p1):
-    """Calculate the angle of the slope of cubic Bezier curve given
+    """Return the angle (in radian) of the slope of cubic Bezier curve given
     two consecutive points. (i.e. (knot[0], cp[0]), or (cp[1],
     knot[1])).
 
@@ -71,7 +71,7 @@ def bezier_angle(p0, p1):
     """
     if p1[0] == p0[0]:
         return np.pi/2
-    return np.atan((p1[1] - p0[1])/(p1[0] - p0[0]))    
+    return np.arctan((p1[1] - p0[1])/(p1[0] - p0[0]))    
 
 def bezier(p0, p1, p2, p3, t):
     """Evaluate cubic bezier curve going through p0, p1, p2 at
@@ -214,7 +214,7 @@ if __name__ == '__main__':
     print 'scp\n'
     print get_second_cp(knots, fcp1)
     print get_control_points_3(knots[0], knots[1], knots[2])
-
+    print bezier_angle(knots[0], fcp[0])
     # Display the example bezier curve through the knot points
     points = np.vstack([knots[0], fcp[0], scp[0], knots[1], knots[1], fcp[1], scp[1], knots[2]])
     codes = [Path.MOVETO,
