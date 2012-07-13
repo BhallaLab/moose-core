@@ -37,7 +37,9 @@ Cell Group: SampleCellGroup contains 1 cells
 
         <inputs units="Physiological Units">
     <input name="SampleIClamp">
-        <pulse_input delay="20.0" duration="60.0" amplitude="2.0E-4"/>
+        <!--<pulse_input delay="20.0" duration="60.0" amplitude="2.0E-4"/>-->
+        <!-- injecting directly into soma.inject in the cell's MorphML -->
+        <pulse_input delay="20.0" duration="60.0" amplitude="0.0"/>
         <target population="SampleCellGroup">
             <sites size="1">
                 <site cell_id="0" segment_id="0" fraction_along="0.5"/>
