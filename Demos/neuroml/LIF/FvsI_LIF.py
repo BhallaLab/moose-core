@@ -7,23 +7,31 @@
 ## Modification Date: 2012-06-08
 ########################################################################################
 
-from LIF_firing import *
-injectmax = 1000e-12 # Amperes
+from LIFxml_firing import *
+injectmax = 10e-12 # Amperes
 
 IF1 = create_LIF()
 
+## edge-detect the spikes using spike-gen (table does not have edge detect)
+spikeGen = moose.SpikeGen(IF1.path+'/spikeGen')
+spikeGen.threshold = IF1.Vthreshold
+moose.connect(IF1,'VmOut',spikeGen,'Vm')
 ## save spikes in table
 table_path = moose.Neutral(IF1.path+'/data').path
 IF1spikesTable = moose.Table(table_path+'/spikesTable')
-IF1spikesTable.threshold = Vthreshold-1e-3
-moose.connect(IF1,'spike',IF1spikesTable,'input')
+moose.connect(spikeGen,'event',IF1spikesTable,'input')
 
 ## from moose_utils.py sets clocks and resets/reinits
 resetSim(['/cells'], SIMDT, PLOTDT)
 
 ## Loop through different current injections
 freqList = []
-currentvec = arange(0.0, injectmax, injectmax/30.0)
+currentvec = arange(0.4e-12, injectmax, injectmax/30.0)
+### log scale for x-axisx
+#dlogI = log(2.5)
+#logcurrentvec = arange(log(injectmax)-30*dlogI,log(injectmax),dlogI)
+#currentvec = [0.0]
+#currentvec.extend( [exp(I) for I in logcurrentvec] )
 for currenti in currentvec:
     moose.reinit()
     IF1.inject = currenti
@@ -39,8 +47,8 @@ for currenti in currentvec:
 
 ## plot the F vs I curve of the neuron
 figure(facecolor='w')
-plot(currentvec, freqList,'o-')
-xlabel('time (s)')
-ylabel('frequency (Hz)')
-title('Leaky Integrate and Fire')
+plot(currentvec, freqList,'o-',linewidth=2)
+xlabel('current (A)',fontsize=24)
+ylabel('frequency (Hz)',fontsize=24)
+title('Leaky Integrate and Fire',fontsize=24)
 show()
