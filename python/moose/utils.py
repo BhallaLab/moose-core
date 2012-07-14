@@ -367,6 +367,7 @@ def resetSim(simpaths, simdt, plotdt, hsolve_path=None):
         moose__.useClock(STIMCLOCK, simpath+'/##[TYPE=SpikeGen]', 'process')
         moose__.useClock(ELECCLOCK, simpath+'/##[TYPE=LeakyIaF]', 'process')
         moose__.useClock(ELECCLOCK, simpath+'/##[TYPE=IntFire]', 'process')
+        moose__.useClock(CHAN2DCLOCK, simpath+'/##[TYPE=HHChannel2D]', 'process')
         ## hsolve takes care of the clocks for the biophysics
         ## But if hsolve_path is not given, use clocks for the biophysics,
         ## else just put a clock on the hsolve
@@ -375,12 +376,9 @@ def resetSim(simpaths, simdt, plotdt, hsolve_path=None):
             moose__.useClock(ELECCLOCK, simpath+'/##[TYPE=Compartment]', 'process')
             moose__.useClock(ELECCLOCK, simpath+'/##[TYPE=HHChannel]', 'process')
             moose__.useClock(ELECCLOCK, simpath+'/##[TYPE=HHGate]', 'process')
-            moose__.useClock(CHAN2DCLOCK, simpath+'/##[TYPE=HHChannel2D]', 'process')
-            moose__.useClock(CHAN2DCLOCK, simpath+'/##[TYPE=HHGate2D]', 'process')
             moose__.useClock(POOLCLOCK, simpath+'/##[TYPE=CaConc]', 'process')
-        else:
-            moose__.useClock(INITCLOCK, hsolve_path, 'process')
-            moose__.useClock(CHAN2DCLOCK, simpath+'/##[TYPE=HHChannel2D]', 'process')
+    if hsolve_path:
+        moose__.useClock(INITCLOCK, hsolve_path, 'process')
     moose__.reinit()
 
 def setupTable(name, obj, qtyname, tables_path=None):
