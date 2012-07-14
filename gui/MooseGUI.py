@@ -374,7 +374,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
     def addKKITLayoutWindow(self,modelpath):
         centralWindowsize =  self.mdiArea.size()
-        self.sceneLayout = kineticlayout.kineticsWidget(centralWindowsize,modelpath,self.mdiArea)
+        self.sceneLayout = kineticlayout.KineticsWidget(centralWindowsize,modelpath,self.mdiArea)
         #self.sceneLayout = kl.KineticsWidget(centralWindowsize,modelpath,self.mdiArea)
         self.connect(self.sceneLayout, QtCore.SIGNAL("itemDoubleClicked(PyQt_PyObject)"), self.makeObjectFieldEditor)
         KKitWindow = self.mdiArea.addSubWindow(self.sceneLayout)
