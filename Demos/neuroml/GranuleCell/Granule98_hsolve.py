@@ -19,7 +19,7 @@ from moose.neuroml.NeuroML import NeuroML
 from pylab import *
 
 simdt = 10e-6 # s
-plotdt = 10e-6 # s
+plotdt = 100e-6 # s
 runtime = 0.7 # s
 cells_path = '/cells' # neuromlR.readNeuroMLFromFile creates cells in '/cells'
 
@@ -36,25 +36,26 @@ def loadGran98NeuroML_L123(filename):
 
     h = moose.HSolve( cells_path+'/solve' )
     h.dt = simdt
-    h.path = cells_path
+    h.target = cells_path
 
     print "Reinit MOOSE ... "
     resetSim(['/elec',cells_path], simdt, plotdt, hsolve_path=cells_path+'/solve')
 
     print "Running ... "
     moose.start(runtime)
-    tvec = arange(0.0,runtime,simdt)
-    plot(tvec,somaVm.vec[1:])
+    tvec = arange(0.0,runtime*2.0,plotdt)
+    tvec = tvec[ : somaVm.vec.size ]
+    plot(tvec,somaVm.vec)
     title('Soma Vm')
     xlabel('time (s)')
     ylabel('Voltage (V)')
     figure()
-    plot(tvec,somaCa.vec[1:])
+    plot(tvec,somaCa.vec)
     title('Soma Ca')
     xlabel('time (s)')
     ylabel('Ca conc (mol/m^3)')
     figure()
-    plot(tvec,somaIKCa.vec[1:])
+    plot(tvec,somaIKCa.vec)
     title('soma KCa current')
     xlabel('time (s)')
     ylabel('KCa current (A)')
