@@ -17,7 +17,9 @@ class RectCompt1(QtGui.QGraphicsRectItem):
         self.Rectemitter1 = QtCore.QObject()
         self.mooseObj_ = item
         self.layoutWidgetPt = parent
+
         QtGui.QGraphicsRectItem.__init__(self,x,y,w,h,parent)
+
         self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
         self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
 
@@ -166,7 +168,7 @@ class GraphicalView(QtGui.QGraphicsView):
                 #rectangle and would not allow me to select the items inside the rectangle so breaking the code by not
                 #calling parent class to inherit functionality rather writing custom code for rubberband effect here
             elif( sceneitems != None):
-                if( isinstance(sceneitems, Textitem) or isinstance(sceneitems, RectCompt1) or isinstance(sceneitems, EllipseItem)):
+                if( (isinstance(sceneitems, Textitem)) or (isinstance(sceneitems, RectCompt1)) or (isinstance(sceneitems, EllipseItem)) ):
                     QtGui.QGraphicsView.mousePressEvent(self, event)
                     self.itemSelected = True
 
@@ -329,7 +331,7 @@ class KineticsWidget(QtGui.QWidget):
                                 reItem.ellemitter.connect(reItem.ellemitter, QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.emitItemtoEditor)
                                 reItem.ellemitter.connect(reItem.ellemitter,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
                                     
-                        elif((element(item[0]).class_) == 'ZombiePool' or (element(item[0]).class_) == 'ZombieFuncPool'):
+                        elif((element(item[0]).class_) == 'ZombiePool' or (element(item[0]).class_) == 'ZombieFuncPool' or (element(item[0]).class_) == 'ZombieBufPool'):
                             if( (element(item[0]).parent).class_ != 'ZombieEnz'):
                                 pItem = Textitem(comptRef,item)
                                 pItem.setFont(fnt)
@@ -345,6 +347,7 @@ class KineticsWidget(QtGui.QWidget):
                                 w = 8
                                 h = 8
                                 x = ((item[1])*xratio)/2+w/2
+                                #print "This",self.mooseId_GText[element(item[0]).parent.getId()]
                                 pItem = RectCompt1(x,item[2]*(-yratio),w,h,self.mooseId_GText[element(item[0]).parent.getId()],item[0])
                                 textcolor = ''
                                 #pItem.setBrush(QtGui.QColor(textcolor))
@@ -382,43 +385,64 @@ class KineticsWidget(QtGui.QWidget):
                     src = self.mooseId_GText[inn.getId()]
                     des = self.mooseId_GText[element(items[0]).getId()]
                     self.lineCord(src,des,items[1])
-        self.view.fitInView(self.sceneContainer.itemsBoundingRect())
+
+        self.view.fitInView(self.sceneContainer.sceneRect().x()-10,self.sceneContainer.sceneRect().y()-10,self.sceneContainer.sceneRect().width()+20,self.sceneContainer.sceneRect().height()+20,Qt.Qt.IgnoreAspectRatio)
+        #self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
         hLayout.addWidget(self.view)
         
     
     def lineCord(self,src,des,endtype):
         source = element(next((k for k,v in self.mooseId_GText.items() if v == src), None))
-        desc = element(next((k for k,v in self.mooseId_GText.items() if v == src), None))
-        if( (src == "") & (des == "") ):
+        desc = element(next((k for k,v in self.mooseId_GText.items() if v == des), None))
+        line = 0
+        if( (src == "") and (des == "") ):
             print "Source or destination is missing or incorrect"
         else:
             srcdes_list= [src,des,endtype]
             arrow = self.calArrow(src,des,endtype)
             if(source.class_ == "ZombieReac"):
                 qgLineitem = self.sceneContainer.addPolygon(arrow,QtGui.QPen(QtCore.Qt.green, 1, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
+                line = 1
             elif( (source.class_ == "ZombieEnz") or (source.class_ == "ZombieMMenz")):
+                
                 if ( (endtype == 's') or (endtype == 'p')):
                     qgLineitem = self.sceneContainer.addPolygon(arrow,QtGui.QPen(QtCore.Qt.red, 1, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
+                    line = 1
                 elif(endtype != 'cplx'):
-                    qgLineitem = self.sceneContainer.addPolygon(arrow,QtGui.QPen(QtCore.Qt.black ,1, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
-                else:
-                    arrow = QtGui.QPolygonF()
-                    arrow.append(QtCore.QPointF(0,0))
-                    arrow.append(QtCore.QPointF(0,0))
-                    qgLineitem = self.sceneContainer.addPolygon(arrow)
-            elif( (source.class_ == "ZombiePool") or (source.class_ == "ZombieFuncPool")):
+                    p = element(next((k for k,v in self.mooseId_GText.items() if v == src), None)) 
+                    parentinfo = p.path+'/info'
+                    textColor = Annotator(parentinfo).getField('textColor')
+                    if(isinstance(textColor,(list,tuple))):
+                        r,g,b = textColor[0],textColor[1],textColor[2]
+                        color = QtGui.QColor(r,g,b)
+                    elif ((not isinstance(textColor,(list,tuple)))):
+                        if textColor.isdigit():
+                            tc = int(textColor)
+                            tc = (tc * 2 )
+                            r,g,b = self.picklecolorMap[tc]
+                            color = QtGui.QColor(r,g,b)
+                        else: 
+                            color = QtGui.QColor(200,200,200)
+                    qgLineitem = self.sceneContainer.addPolygon(arrow,QtGui.QPen(color ,1, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
+                    line = 1
+                elif(endtype == 'cplx'):
+                    pass
+            elif( (source.class_ == "ZombiePool") or (source.class_ == "ZombieFuncPool") or (source.class_ == "ZombieBuffPool")):
                 qgLineitem = self.sceneContainer.addPolygon(arrow,QtGui.QPen(QtCore.Qt.blue, 1, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
-            self.lineItem_dict[qgLineitem] = srcdes_list
-            if src in self.object2line:
-                self.object2line[ src ].append( ( qgLineitem, des) )
-            else:
-                self.object2line[ src ] = []
-                self.object2line[ src ].append( ( qgLineitem, des) )
-            if des in self.object2line:
-                self.object2line[ des ].append( ( qgLineitem, src ) )
-            else:
-                self.object2line[ des ] = []
-                self.object2line[ des ].append( ( qgLineitem, src) )
+                line =1
+            if line == 1:            
+                self.lineItem_dict[qgLineitem] = srcdes_list
+                if src in self.object2line:
+                    self.object2line[ src ].append( ( qgLineitem, des) )
+                else:
+                    self.object2line[ src ] = []
+                    self.object2line[ src ].append( ( qgLineitem, des) )
+                if des in self.object2line:
+                    self.object2line[ des ].append( ( qgLineitem, src ) )
+                else:
+                    self.object2line[ des ] = []
+                    self.object2line[ des ].append( ( qgLineitem, src) )
+    
     def updateItemSlot(self, mooseObject):
         #In this case if the name is updated from the keyboard both in mooseobj and gui gets updation
         changedItem = ''
@@ -428,6 +452,7 @@ class KineticsWidget(QtGui.QWidget):
         if isinstance(changedItem,Textitem):
             changedItem.updateSlot()
             self.positionChange(changedItem.mooseObj_)
+
     def updatearrow(self,qGTextitem):
         listItem = self.object2line[qGTextitem]
         for ql, va in listItem:
@@ -437,8 +462,9 @@ class KineticsWidget(QtGui.QWidget):
                 mooseObj = element(next((k for k,v in self.mooseId_GText.items() if v == srcdes[1]), None))
                 for l1 in self.srcdesConnection[pItem]:
                     for k in l1:
-                        if element(k[0]) == mooseObj:   
+                        if (element(k[0]).getId() == mooseObj.getId()):   
                             endtype = k[1]
+                        else: pass
             elif(isinstance(srcdes[1],EllipseItem)):
                 pItem = element(next((k for k,v in self.mooseId_GText.items() if v == srcdes[1]), None))
                 mooseObject = element(next((k for k,v in self.mooseId_GText.items() if v == srcdes[0]), None))
@@ -648,9 +674,12 @@ class KineticsWidget(QtGui.QWidget):
 
     def setupCompt_Coord (self,filePath,mobject_Cord):
         cPath = filePath+'/##[TYPE=MeshEntry]'
+        xratio = 0
+        yratio = 0
+        x = []
+        y = []
+            
         for meshEnt in wildcardFind(cPath):
-            x = []
-            y = []
             molrecList = []
             pkl_file = open(os.path.join(PATH_KKIT_COLORMAPS,'rainbow2.pkl'),'rb')
             picklecolorMap = pickle.load(pkl_file)
@@ -708,12 +737,23 @@ if __name__ == "__main__":
     size = QtCore.QSize(1800,1600)
     modelPath = 'Kholodenko'
     modelPath = 'enz_classical_explicty'
-    modelPath = 'reaction'
+    #modelPath = 'reaction'
+    #modelPath = 'test_enzyme'
     #modelPath = 'OSC_Cspace_ref'
     #modelPath = 'traff_nn_diff_TRI'
-    modelPath = 'traff_nn_diff_BIS'
-    
-    loadModel('/home/harsha/dh_branch/Demos/Genesis_files/china_course/'+modelPath+'.g','/'+modelPath)
-    dt = KineticsWidget(size,'/'+modelPath)
-    dt.show()
+    #modelPath = 'traff_nn_diff_BIS'
+    #modelPath = 'EGFR_MAPK_58'
+    #modelPath = 'acc68'
+  
+    try:
+        filepath = '/home/harsha/dh_branch/Demos/Genesis_files/china_course/'+modelPath+'.g'
+        f = open(filepath, "r")
+        loadModel(filepath,'/'+modelPath)
+        dt = KineticsWidget(size,'/'+modelPath)
+        dt.show()
+  
+    except  IOError, what:
+      (errno, strerror) = what
+      print "Error number", errno, "(%s)" % strerror
+      sys.exit(0)    
     sys.exit(app.exec_())
