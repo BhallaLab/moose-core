@@ -30,6 +30,8 @@ class MyMplCanvas(FigureCanvas):
         self.compute_initial_figure()
         self.canvas = FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
+        self.alreadyPlaced = False
+        self.listOfFewColors = ['b','r','g','c','m','y','purple']
         
         FigureCanvas.setSizePolicy(self,
                                    QtGui.QSizePolicy.Expanding,
@@ -39,7 +41,9 @@ class MyMplCanvas(FigureCanvas):
 
     def nicePlaceLegend(self):
         box = self.axes.get_position()
-        self.axes.set_position([box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.9])
+        if self.alreadyPlaced == False:
+            self.axes.set_position([box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.9])
+            self.alreadyPlaced = True
         # Put a legend below current axis
         self.axes.legend(loc='upper center',prop={'size':10}, bbox_to_anchor=(0.5, -0.083),fancybox=True, shadow=True, ncol=4)
 
@@ -67,12 +71,15 @@ class MoosePlot(MyMplCanvas):
         self.tableCurveMap = {}
         self.mpl_connect('pick_event',self.onpick)
 
+
     def onpick(self,event):
         ind=event.ind[0]
         print self._labels[ind]
         return True
 
-    def addTable(self,table,curve_name=None,lineColor='blue'):
+    def addTable(self,table,curve_name=None,lineColor=None):
+        if lineColor == None:
+            lineColor = self.listOfFewColors[self.plotNo % len(self.listOfFewColors)]
         try: #checks if table is already added
             curve = self.tableCurveMap[table]
         except KeyError:
@@ -85,7 +92,8 @@ class MoosePlot(MyMplCanvas):
             yy = array(table.vec)
             xx = linspace(0.0,self.xmin,len(yy))
             curve.set_data(xx[1:len(xx)],yy[1:len(yy)])
-    
+            
+        self.plotNo += 1
         self.axes.relim()
         self.axes.autoscale_view(True,True,True)
         self.axes.legend()
