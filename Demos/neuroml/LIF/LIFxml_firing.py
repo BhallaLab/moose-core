@@ -15,8 +15,8 @@ sys.path.append('../../../python')
 ## simulation parameters
 SIMDT = 5e-5 # seconds
 PLOTDT = 5e-5 # seconds
-RUNTIME = 1.0 # seconds
-injectI = 10e-12 # Amperes
+RUNTIME = 2.0 # seconds
+injectI = 2.5e-12 # Amperes
 
 ## moose imports
 import moose
@@ -54,11 +54,11 @@ if __name__ == '__main__':
     moose.connect(IF1,'VmOut',spikeGen,'Vm')
     ## save spikes in table
     table_path = moose.Neutral(IF1.path+'/data').path
-    IF1SpikesTable = moose.Table(table_path+'/spikesTable')
-    moose.connect(spikeGen,'event',IF1SpikesTable,'input')
+    IF1spikesTable = moose.Table(table_path+'/spikesTable')
+    moose.connect(spikeGen,'event',IF1spikesTable,'input')
 
     run_LIF()
-    print "Spiketimes :",IF1SpikesTable.vec
+    print "Spiketimes :",IF1spikesTable.vec
     ## plot the membrane potential of the neuron
     timevec = arange(0.0,RUNTIME+PLOTDT/2.0,PLOTDT)
     figure(facecolor='w')

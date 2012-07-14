@@ -45,7 +45,7 @@ resetSim(['/cells'], SIMDT, PLOTDT)
 
 ## Loop through different current injections
 freqList = []
-currentvec = arange(0.0, injectmax, injectmax/100.0)
+currentvec = arange(0.0, injectmax, injectmax/50.0)
 for currenti in currentvec:
     moose.reinit()
     granCellSoma.inject = currenti
@@ -61,8 +61,8 @@ for currenti in currentvec:
 
 ## plot the F vs I curve of the neuron
 figure(facecolor='w')
-plot(currentvec, freqList,'o-')
-xlabel('time (s)')
-ylabel('frequency (Hz)')
-title('HH single-compartment Cell')
+plot(currentvec, freqList,'o-',linewidth=2)
+xlabel('time (s)',fontsize=24)
+ylabel('frequency (Hz)',fontsize=24)
+title('HH single-compartment Cell',fontsize=24)
 show()

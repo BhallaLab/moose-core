@@ -72,7 +72,7 @@
                     <bio:parameter name="gmax" value="0.0357143">
                         <bio:group>all</bio:group>
                     </bio:parameter>
-                    <bio:parameter name="inject" value="3.0e-4">
+                    <bio:parameter name="inject" value="3.0e-6">
                         <bio:group>soma_group</bio:group>
                     </bio:parameter>
                 </bio:mechanism>
