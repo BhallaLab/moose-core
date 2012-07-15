@@ -17887,4 +17887,8 @@ Tried to manually lower the rates. Still gives a segv.
 10 July 2012.
 Put in fields for method and runTime in SimManager. At this point reading
 these fields makes sense, but it doesn't do the right thing when writing them.
+Checkin 3722.
 
+============================================================================
+15 July 2012
+Update to enz model.
