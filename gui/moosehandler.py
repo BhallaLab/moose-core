@@ -285,7 +285,7 @@ class MooseHandler(QtCore.QObject):
         MooseHandler.simdt = t[4].dt
         MooseHandler.plotdt = t[8].dt
         MooseHandler.runtime = moose.element('/'+modelpath).runTime
-        MooseHandler.plotupdate_dt = (moose.element('/'+modelpath).runTime/120) 
+        MooseHandler.plotupdate_dt = MooseHandler.plotdt * 10 #(moose.element('/'+modelpath).runTime/120) 
         '''
         MooseHandler.simdt = MooseHandler.DEFAULT_SIMDT_KKIT
         MooseHandler.plotdt = MooseHandler.DEFAULT_PLOTDT_KKIT
