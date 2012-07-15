@@ -41,12 +41,6 @@ void testRemeshing()
 	assert( tau > 10 * DT );
 	assert( runtime > 10 * tau );
 
-	/*
-	shell->doSetClock( 0, DT );
-	shell->doSetClock( 1, DT );
-	shell->doSetClock( 2, DT );
-	*/
-
 	Id mgr = shell->doCreate( "SimManager", Id(), "meshTest", dims );
 	assert( mgr != Id() );
 	SimManager* sm = reinterpret_cast< SimManager* >( mgr.eref().data() );

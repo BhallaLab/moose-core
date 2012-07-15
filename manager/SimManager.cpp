@@ -403,11 +403,11 @@ void SimManager::buildFromBareKineticTree( const string& method )
 void SimManager::buildEE( Shell* shell )
 {
 	string basePath = baseId_.path();
-	shell->doUseClock( basePath + "/kinetics/##[TYPE=Pool]", "process", 0);
+	shell->doUseClock( basePath + "/kinetics/##[TYPE=Pool]", "process", 4);
 		// Normally we would simply say [ISA!=Pool] here. But that puts
 		// a Process operation on the mesh, which should not be done in
 		// this mode as diffusion isn't supported.
-	shell->doUseClock( basePath + "/kinetics/##[ISA!=Pool]", "process", 1);
+	shell->doUseClock( basePath + "/kinetics/##[ISA!=Pool]", "process", 5);
 }
 
 void SimManager::buildGssa( const Eref& e, const Qinfo* q, Shell* shell )
@@ -440,8 +440,8 @@ void SimManager::buildGssa( const Eref& e, const Qinfo* q, Shell* shell )
 
 	string path0 = basePath + "/kinetics/mesh," + 
 		basePath + "/kinetics/##[ISA=StimulusTable]";
-	shell->doUseClock( path0, "process", 0);
-	shell->doUseClock( basePath + "/stoich", "process", 1);
+	shell->doUseClock( path0, "process", 4);
+	shell->doUseClock( basePath + "/stoich", "process", 5);
 	/*
 	Id meshEntry = Neutral::child( mesh.eref(), "mesh" );
 	assert( meshEntry != Id() );
@@ -492,8 +492,8 @@ void SimManager::buildGsl( const Eref& e, const Qinfo* q,
 	method_ = Field< string >::get( gsl, "method" );
 	string path0 = basePath + "/kinetics/mesh," + 
 		basePath + "/kinetics/##[ISA=StimulusTable]";
-	shell->doUseClock( path0, "process", 0);
-	shell->doUseClock( basePath + "/stoich/gsl", "process", 1);
+	shell->doUseClock( path0, "process", 4);
+	shell->doUseClock( basePath + "/stoich/gsl", "process", 5);
 
 	Id meshEntry = Neutral::child( compt.eref(), "mesh" );
 	assert( meshEntry != Id() );
@@ -508,10 +508,15 @@ void SimManager::buildFromKkitTree( const Eref& e, const Qinfo* q,
 	autoPlot_ = 0;
 	vector< int > dims( 1, 1 );
 
+	shell->doSetClock( 0, 0 );
+	shell->doSetClock( 1, 0 );
+	shell->doSetClock( 2, 0 );
+	shell->doSetClock( 3, 0 );
 	shell->doSetClock( 4, plotdt_ );
 	shell->doSetClock( 5, plotdt_ );
+	shell->doSetClock( 6, simdt_ );
 	shell->doSetClock( 8, plotdt_ );
-	shell->doSetClock( 3, 0 );
+	shell->doSetClock( 9, 0 );
 
 	string basePath = baseId_.path();
 	if ( method == "Gillespie" || method == "gillespie" || 
@@ -532,10 +537,10 @@ void SimManager::buildFromKkitTree( const Eref& e, const Qinfo* q,
 		basePath + "/moregraphs/##[TYPE=Table]";
 	vector< Id > list;
 	if ( wildcardFind( plotpath, list ) > 0 )
-		shell->doUseClock( plotpath, "process", 2 );
+		shell->doUseClock( plotpath, "process", 8 );
 	string stimpath = basePath + "/kinetics/##[TYPE=PulseGen]";
 	if ( wildcardFind( stimpath, list ) > 0 )
-		shell->doUseClock( stimpath, "process", 0 );
+		shell->doUseClock( stimpath, "process", 6 );
 	
 	// shell->doReinit(); // Cannot use unless process is running.
 }

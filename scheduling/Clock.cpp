@@ -216,7 +216,26 @@ const Cinfo* Clock::initCinfo()
 	{
 		"Name", "Clock",
 		"Author", "Upinder S. Bhalla, Mar 2007, NCBS",
-		"Description", "Clock: Clock class. Handles sequencing of operations in simulations",
+		"Description", "Clock: Clock class. Handles sequencing of operations in simulations."
+		"Every object scheduled for operations in MOOSE is connected to one"
+		"of the 'Tick' objects sitting as children on the Clock."
+		"The Clock manages ten 'Ticks', each of which has its own dt."
+		"The Ticks increment their internal time by their 'dt' every time "
+		"they are updated, and in doing so they also call the Process"
+		"function for every object that is connected to them."
+		"The default scheduling (should not be overridden) has the "
+		"following assignment of classes to Ticks:"
+		"0: Biophysics - Init call on Compartments in EE method"
+		"1: Biophysics - Channels"
+		"2: Biophysics - Process call on Compartments"
+		"3: ?"
+		"4: Kinetics - Pools, or in ksolve mode: Mesh to handle diffusion"
+		"5: Kinetics - Reacs, enzymes, etc, or in ksolve mode: Stoich/GSL"
+		"6: Stimulus tables"
+		"7: More stimulus tables"
+		"8: Plots"
+		"9: Slower graphics like cell arrays or 3-D displays"
+		"",
 	};
 
 	static Cinfo clockCinfo(
