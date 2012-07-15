@@ -1,14 +1,14 @@
 //genesis
 // kkit Version 11 flat dumpfile
  
-// Saved on Wed Jul  8 18:59:13 2009
+// Saved on Sun Jul 15 11:46:45 2012
  
 include kkit {argv 1}
  
 FASTDT = 0.0001
 SIMDT = 0.002
 CONTROLDT = 5
-PLOTDT = 1
+PLOTDT = 5
 MAXTIME = 1000
 TRANSIENT_TIME = 2
 VARIABLE_DT_FLAG = 1
@@ -48,68 +48,54 @@ simobjdump transport input output alloced step_mode stepsize dt delay clock \
   kf xtree_fg_req xtree_textfg_req x y z
 simobjdump proto x y z
 simobjdump text str
-simundump geometry /kinetics/geometry 0 9.9998e-20 3 sphere "" white black 0 \
-  0 0
-simundump geometry /kinetics/geometry[1] 0 9.9998e-21 3 sphere "" white black \
-  0 0 0
-simundump geometry /kinetics/geometry[2] 0 1e-20 3 sphere "" white black 0 0 \
-  0
+simundump geometry /kinetics/geometry 0 1e-20 3 sphere "" white black 0 0 0
 simundump text /kinetics/notes 0 ""
 call /kinetics/notes LOAD \
 ""
-simundump text /kinetics/geometry/notes 0 ""
-call /kinetics/geometry/notes LOAD \
-""
-simundump text /kinetics/geometry[1]/notes 0 ""
-call /kinetics/geometry[1]/notes LOAD \
-""
-simundump text /kinetics/geometry[2]/notes 0 ""
-call /kinetics/geometry[2]/notes LOAD \
-""
-simundump kreac /kinetics/exo 0 0.0002 0.0002 "" white black 1 11 0
+simundump kreac /kinetics/exo 0 0.0002 0.0002 "" white black 2 7 0
 simundump text /kinetics/exo/notes 0 ""
 call /kinetics/exo/notes LOAD \
 ""
-simundump kreac /kinetics/endo 0 0.002 0.002 "" white black -3 11 0
+simundump kreac /kinetics/endo 0 0.002 0.002 "" white black -6 8 0
 simundump text /kinetics/endo/notes 0 ""
 call /kinetics/endo/notes LOAD \
 ""
-simundump kpool /kinetics/stot 0 0 0 0 0 0 0 0 6 0 /kinetics/geometry[2] blue \
-  black 3 11 0
+simundump kpool /kinetics/stot 0 0 0 0 0 0 0 0 6 0 /kinetics/geometry blue \
+  black 6 12 0
 simundump text /kinetics/stot/notes 0 ""
 call /kinetics/stot/notes LOAD \
 ""
 simundump group /kinetics/B 0 yellow black x 0 0 "" Bulk defaultfile.g 0 0 0 \
-  -7 6 0
+  -8 1 0
 simundump text /kinetics/B/notes 0 ""
 call /kinetics/B/notes LOAD \
 ""
 simundump kpool /kinetics/B/P 0 0 0.2 0.2 1.2 1.2 0 0 6 0 /kinetics/geometry \
-  4 yellow -2 4 0
+  4 yellow -2 -2 0
 simundump text /kinetics/B/P/notes 0 ""
 call /kinetics/B/P/notes LOAD \
 ""
-simundump kenz /kinetics/B/P/kenz 0 0 0 0 0 6 4.1667 4 1 0 0 "" red 4 "" -2 5 \
-  0
+simundump kenz /kinetics/B/P/kenz 0 0 0 0 0 6 4.1667 4 1 0 0 "" red 4 "" -2 \
+  -1 0
 simundump text /kinetics/B/P/kenz/notes 0 ""
 call /kinetics/B/P/kenz/notes LOAD \
 ""
-simundump kreac /kinetics/B/basal 0 0.01 0 "" white yellow -2 3 0
+simundump kreac /kinetics/B/basal 0 0.01 0 "" white yellow -2 -6 0
 simundump text /kinetics/B/basal/notes 0 ""
 call /kinetics/B/basal/notes LOAD \
 ""
 simundump kpool /kinetics/B/M 0 0 3 3 18 18 0 0 6 0 /kinetics/geometry 62 \
-  yellow -4 6 0
+  yellow -6 1 0
 simundump text /kinetics/B/M/notes 0 ""
 call /kinetics/B/M/notes LOAD \
 ""
 simundump kpool /kinetics/B/M* 0 0 0 0 0 0 0 0 6 0 /kinetics/geometry 28 \
-  yellow 0 6 0
+  yellow 2 1 0
 simundump text /kinetics/B/M*/notes 0 ""
 call /kinetics/B/M*/notes LOAD \
 ""
 simundump kenz /kinetics/B/M*/kenz 0 0 0 0 0 59.999 0.83333 4 1 0 0 "" red 28 \
-  "" -2 7 0
+  "" -2 4 0
 simundump text /kinetics/B/M*/kenz/notes 0 ""
 call /kinetics/B/M*/kenz/notes LOAD \
 ""
@@ -118,35 +104,38 @@ simundump group /kinetics/A 0 16 black x 0 0 "" PSD defaultfile.g 0 0 0 -5 16 \
 simundump text /kinetics/A/notes 0 ""
 call /kinetics/A/notes LOAD \
 ""
-simundump kreac /kinetics/A/basal 0 0.01 0 "" white 16 0 13 0
+simundump kreac /kinetics/A/basal 0 0.01 0 "" white 16 0 23 0
 simundump text /kinetics/A/basal/notes 0 ""
 call /kinetics/A/basal/notes LOAD \
 ""
 simundump kpool /kinetics/A/P 0 0 0.2 0.2 1.2 1.2 0 0 5.9999 0 \
-  /kinetics/geometry[1] 3 16 0 14 0
+  /kinetics/geometry 3 16 -1 11 0
 simundump text /kinetics/A/P/notes 0 ""
 call /kinetics/A/P/notes LOAD \
 ""
 simundump kenz /kinetics/A/P/kenz 0 0 0 0 0 5.9999 4.1667 4 1 0 0 "" red 3 "" \
-  0 15 0
+  -1 12 0
 simundump text /kinetics/A/P/kenz/notes 0 ""
 call /kinetics/A/P/kenz/notes LOAD \
 ""
 simundump kpool /kinetics/A/M 0 0 0 0 0 0 0 0 5.9999 0 /kinetics/geometry 53 \
-  16 -2 16 0
+  16 -4 18 0
 simundump text /kinetics/A/M/notes 0 "2.235\n"
 call /kinetics/A/M/notes LOAD \
 "2.235" \
 ""
 simundump kpool /kinetics/A/M* 0 0 0 0 0 0 0 0 5.9999 0 /kinetics/geometry 47 \
-  16 2 16 0
+  16 3 18 0
 simundump text /kinetics/A/M*/notes 0 ""
 call /kinetics/A/M*/notes LOAD \
 ""
 simundump kenz /kinetics/A/M*/kenz 0 0 0 0 0 5.9999 0.83335 4 1 0 0 "" red 57 \
-  "" 0 17 0
+  "" 0 20 0
 simundump text /kinetics/A/M*/kenz/notes 0 ""
 call /kinetics/A/M*/kenz/notes LOAD \
+""
+simundump text /kinetics/geometry/notes 0 ""
+call /kinetics/geometry/notes LOAD \
 ""
 simundump xgraph /graphs/conc1 0 0 1000 0.001 3 0
 simundump xgraph /graphs/conc2 0 0 1000 0 3 0
@@ -160,7 +149,7 @@ simundump xplot /graphs/conc2/M*.Co 3 524288 \
   "delete_plot.w <s> <d>; edit_plot.D <w>" 28 0 0 1
 simundump xgraph /moregraphs/conc3 0 0 1000 0 1 0
 simundump xgraph /moregraphs/conc4 0 0 1000 0 1 0
-simundump xcoredraw /edit/draw 0 -9 5 -2 19
+simundump xcoredraw /edit/draw 0 -11.317 7.317 -4.078 23.873
 simundump xtree /edit/draw/tree 0 \
   /kinetics/#[],/kinetics/#[]/#[],/kinetics/#[]/#[]/#[][TYPE!=proto],/kinetics/#[]/#[]/#[][TYPE!=linkinfo]/##[] \
   "edit_elm.D <v>; drag_from_edit.w <d> <S> <x> <y> <z>" auto 0.6
