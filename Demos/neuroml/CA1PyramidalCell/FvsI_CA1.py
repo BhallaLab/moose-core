@@ -1,3 +1,4 @@
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 ## all SI units
 ########################################################################################
@@ -10,7 +11,7 @@
 import os
 os.environ['NUMPTHREADS'] = '1'
 import sys
-sys.path.append('../../../python')
+sys.path.append('.')
 import moose
 from moose.utils import *
 
