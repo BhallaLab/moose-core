@@ -1,3 +1,4 @@
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 ## all SI units
 ########################################################################################
@@ -6,6 +7,11 @@
 ## Creation Date: 2012-06-08
 ## Modification Date: 2012-06-08
 ########################################################################################
+
+import os
+os.environ['NUMPTHREADS'] = '1'
+import sys
+sys.path.append('.')
 
 from LIFxml_firing import *
 injectmax = 10e-12 # Amperes
