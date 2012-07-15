@@ -17894,3 +17894,12 @@ Checkin 3722.
 Update to enz model.
 
 Minor updates to layout of trafficking models in Demos/Genesis_files.
+Checkin 3777.
+
+Fixed the dangling clocks in SimManager. I hadn't properly updated all of these
+so some of the kinetics/mesh examples were taking a very long time to run, as
+they were locked to a 1e-5 timestep. Need to do a 'clear'.
+This brings up a few things to fix in scheduling.
+- Resched
+- Get all clocks and associated dts. Should be easy with a getVec on the
+	Ticks, but there should be a nice way to organize it.
