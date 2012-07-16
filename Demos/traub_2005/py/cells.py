@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Mar  9 23:17:17 2012 (+0530)
 # Version: 
-# Last-Updated: Mon Jul 16 17:06:18 2012 (+0530)
+# Last-Updated: Mon Jul 16 17:48:21 2012 (+0530)
 #           By: subha
-#     Update #: 428
+#     Update #: 449
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -148,8 +148,9 @@ class CellMeta(type):
 class CellBase(moose.Neutral):
     __metaclass__ = CellMeta
     def __init__(self, path):
-        path_tokens = path.rsplit('/')
-        moose.copy(self.prototype, path_tokens[0], path_tokens[-1])
+        if not moose.exists(path):
+            path_tokens = path.rpartition('/')
+            moose.copy(self.prototype, path_tokens[0], path_tokens[-1])
         moose.Neutral.__init__(self, path)
         
     def comp(self, number):
@@ -176,6 +177,9 @@ class SupPyrRS(CellBase):
     TauCa = 20e-3
     soma_tauCa  = 100e-3
 
+    def __init__(self, path):
+        CellBase.__init__(self, path)
+
     
 class SupPyrFRB(CellBase):
     _presynaptic = 72
@@ -186,6 +190,9 @@ class SupPyrFRB(CellBase):
     EGABA = -81e-3
     TauCa = 20e-3    
     soma_tauCa = 100e-3
+
+    def __init__(self, path):
+        CellBase.__init__(self, path)
 
     
 class SupLTS(CellBase):
@@ -198,6 +205,9 @@ class SupLTS(CellBase):
     TauCa = 20e-3
     X_AR = 0.25
     soma_tauCa = 50e-3
+
+    def __init__(self, path):
+        CellBase.__init__(self, path)
     
 
 class SupAxoaxonic(CellBase):
@@ -211,6 +221,9 @@ class SupAxoaxonic(CellBase):
     TauCa = 20e-3
     soma_tauCa = 50e-3
 
+    def __init__(self, path):
+        CellBase.__init__(self, path)
+
 
 class SupBasket(CellBase):
     _presynaptic = 59
@@ -222,6 +235,9 @@ class SupBasket(CellBase):
     TauCa = 20e-3
     X_AR = 0.0
     soma_tauCa = 50e-3
+
+    def __init__(self, path):
+        CellBase.__init__(self, path)
 
     
 class SpinyStellate(CellBase):
@@ -236,6 +252,9 @@ class SpinyStellate(CellBase):
     X_AR = 0.0
     soma_tauCa = 50e-3
 
+    def __init__(self, path):
+        CellBase.__init__(self, path)
+
     
 class NontuftedRS(CellBase):
     _presynaptic = 48
@@ -248,6 +267,9 @@ class NontuftedRS(CellBase):
     X_AR = 0.25
     soma_tauCa = 100e-3
 
+    def __init__(self, path):
+        CellBase.__init__(self, path)
+
 
 class TuftedIB(CellBase):    
     _presynaptic = 60
@@ -259,6 +281,9 @@ class TuftedIB(CellBase):
     TauCa = 1e-3/0.075
     X_AR = 0.25
     soma_tauCa = 100e-3
+
+    def __init__(self, path):
+        CellBase.__init__(self, path)
     
     # for compartments in level 2, i.e. comp_2, 5, 6 have tauCa = 1e-3/0.02        
     @classmethod
@@ -281,6 +306,9 @@ class TuftedRS(CellBase):
     TauCa = 1e-3/0.075
     X_AR = 0.25
     soma_tauCa = 100e-3
+
+    def __init__(self, path):
+        CellBase.__init__(self, path)
     
     @classmethod
     def post_init(cls):
@@ -302,6 +330,9 @@ class DeepLTS(CellBase):
     X_AR = 0.25
     soma_tauCa = 50e-3
 
+    def __init__(self, path):
+        CellBase.__init__(self, path)
+
 
 class DeepAxoaxonic(CellBase):
     _presynaptic = 59
@@ -313,6 +344,9 @@ class DeepAxoaxonic(CellBase):
     X_AR = 0.0
     TauCa = 20e-3
     soma_tauCa = 50e-3
+
+    def __init__(self, path):
+        CellBase.__init__(self, path)
 
     
 class DeepBasket(CellBase):
@@ -326,6 +360,9 @@ class DeepBasket(CellBase):
     X_AR = 0.25
     soma_tauCa = 50e-3
 
+    def __init__(self, path):
+        CellBase.__init__(self, path)
+
     
 class TCR(CellBase):
     _presynaptic = 135
@@ -338,6 +375,9 @@ class TCR(CellBase):
     X_AR = 0.25
     soma_tauCa = 50e-3
 
+    def __init__(self, path):
+        CellBase.__init__(self, path)
+
 
 class nRT(CellBase):
     _presynaptic = 59
@@ -349,6 +389,9 @@ class nRT(CellBase):
     TauCa = 20e-3
     X_AR = 0.0
     soma_tauCa = 50e-3
+
+    def __init__(self, path):
+        CellBase.__init__(self, path)
 
 
 _cellprototypes = {}
