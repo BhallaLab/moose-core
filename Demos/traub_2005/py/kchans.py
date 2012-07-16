@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Apr 17 23:58:49 2009 (+0530)
 # Version: 
-# Last-Updated: Thu Jul  5 11:18:14 2012 (+0530)
+# Last-Updated: Mon Jul 16 16:48:04 2012 (+0530)
 #           By: subha
-#     Update #: 1046
+#     Update #: 1047
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -250,7 +250,7 @@ def initKChannelPrototypes(libpath='/library'):
                      'KAHP_DP',
                      'KC',
                      'KC_FAST']    
-    return dict([(key, _prototypes[key]) for key in channel_names])
+    return dict([(key, prototypes[key]) for key in channel_names])
         
 
 # 

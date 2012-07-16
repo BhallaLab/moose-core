@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Apr 27 15:34:07 2009 (+0530)
 # Version: 
-# Last-Updated: Thu Jul  5 11:20:26 2012 (+0530)
+# Last-Updated: Mon Jul 16 16:48:16 2012 (+0530)
 #           By: subha
-#     Update #: 48
+#     Update #: 49
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -50,7 +50,7 @@ class AR(ChannelBase):
 
 
 def initARChannelPrototypes(libpath='/library'):
-    return {'AR': _prototypes['AR']}
+    return {'AR': prototypes['AR']}
 
 
 # 
