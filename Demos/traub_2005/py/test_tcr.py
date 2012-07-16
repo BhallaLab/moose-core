@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Jul 16 16:12:55 2012 (+0530)
 # Version: 
-# Last-Updated: Mon Jul 16 17:08:04 2012 (+0530)
+# Last-Updated: Mon Jul 16 17:49:55 2012 (+0530)
 #           By: subha
-#     Update #: 77
+#     Update #: 98
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -37,6 +37,7 @@ sys.path.append('../../../python')
 import unittest
 import uuid
 
+import numpy as np
 import pylab
 import moose
 
@@ -58,7 +59,7 @@ def setupCurrentStepModel(testId, celltype, pulsearray, dt):
     """
     modelContainer = moose.Neutral('/test%d' % (testId))
     dataContainer = moose.Neutral('/data%d' % (testId))
-    cell = cells.TCR('%s/TCR' % (modelContainer.path))
+    cell = cells.TCR('%s/TCR' % (modelContainer.path)) # moose.copy(cells.TCR.prototype, modelContainer.path)#
     pulsegen = moose.PulseGen('%s/pulse' % (modelContainer.path))
     pulsegen.count = len(pulsearray)
     for ii in range(len(pulsearray)):
@@ -74,7 +75,7 @@ def setupCurrentStepModel(testId, celltype, pulsearray, dt):
     moose.useClock(0, '%s/##[ISA=Compartment]' % (cell.path), 'init')
     moose.useClock(1, '%s/##[ISA=Compartment]' % (cell.path), 'process')
     moose.useClock(7, pulsegen.path, 'process')
-    moose.useClock(8, somaVm.path, 'process')
+    moose.useClock(8, '%s/##' % (dataContainer.path), 'process')
     return {'cell': cell,
             'stimulus': pulsegen,
             'vmTable': somaVm,
@@ -91,7 +92,7 @@ pulsearray = [[1.0, 100e-3, 0.9e-9],
               [0.5, 100e-3, -0.1e-9],
               [0.5, 100e-3, -0.3e-9]]
 simdt = 1e-6
-simtime = 5e-3
+simtime = 5.0
 
 class TestTCR(unittest.TestCase):
     def setUp(self):
@@ -99,8 +100,10 @@ class TestTCR(unittest.TestCase):
         params = setupCurrentStepModel(self.testId, 'TCR', pulsearray, simdt)
         print 'Starting simulation'
         runsim(simtime)
-        tseries = np.arrange(0, simtime, len(params['vm'].vec))
+        tseries = np.linspace(0, simtime, len(params['vmTable'].vec))
+        pylab.subplot(211)
         pylab.plot(tseries, params['vmTable'].vec * 1e3, label='Vm (mV)')
+        pylab.subplot(212)
         pylab.plot(tseries, params['stimTable'].vec * 1e-12, label='Stimulus (pA)')
         pylab.show()
     def testDefault(self):
