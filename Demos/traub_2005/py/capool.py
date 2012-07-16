@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Apr 22 22:21:11 2009 (+0530)
 # Version: 
-# Last-Updated: Thu Jul  5 11:21:43 2012 (+0530)
+# Last-Updated: Mon Jul 16 16:51:24 2012 (+0530)
 #           By: subha
-#     Update #: 186
+#     Update #: 187
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -38,18 +38,18 @@ class CaPool(moose.CaConc):
     prototype.CaBasal = 0.0
     prototype.ceiling = 1e6
     prototype.floor = 0.0
-    _prototypes = {'CaPool': prototype}
+    prototypes = {'CaPool': prototype}
     def __init__(self, path):
         moose.CaConc.__init__(self, path)
         
 
 def initCaPoolPrototypes(libpath='/library'):
-    if CaPool._prototypes:
-        return CaPool._prototypes
+    if CaPool.prototypes:
+        return CaPool.prototypes
     path = '%s/CaPool' % (libpath)
-    CaPool._prototypes['CaPool'] = CaPool(path)
+    CaPool.prototypes['CaPool'] = CaPool(path)
     print 'Created CaConc prototype:', path
-    return CaPool._prototypes
+    return CaPool.prototypes
 
 
 # 

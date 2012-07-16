@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Apr 18 00:18:24 2009 (+0530)
 # Version: 
-# Last-Updated: Thu Jul  5 11:20:11 2012 (+0530)
+# Last-Updated: Mon Jul 16 16:51:24 2012 (+0530)
 #           By: subha
-#     Update #: 293
+#     Update #: 294
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -86,7 +86,7 @@ class CaT_A(CaT):
 
 def initCaChannelPrototypes(libpath='/library'):
     channel_names = ['CaL', 'CaT', 'CaT_A']
-    return dict([(key, _prototypes[key]) for key in channel_names])
+    return dict([(key, prototypes[key]) for key in channel_names])
 
 
 # 

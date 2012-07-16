@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed May 23 11:31:40 2012 (+0530)
 # Version: 
-# Last-Updated: Fri May 25 15:03:11 2012 (+0530)
+# Last-Updated: Mon Jul 16 16:47:11 2012 (+0530)
 #           By: subha
-#     Update #: 85
+#     Update #: 91
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -130,6 +130,16 @@ logging.basicConfig(filename=LOG_FILENAME, level=LOG_LEVEL, format='%(asctime)s 
 # logging.basicConfig(level=LOG_LEVEL, format='%(asctime)s %(levelname)s %(name)s %(filename)s %(funcName)s: %(message)s', filemode='w')
 
 logger = logging.getLogger('traub2005')
+
+import os
+os.environ['NUMPTHREADS'] = '1'
+import sys
+sys.path.append('../../../python')
+import moose
+############################################################
+# Initialize library and other containers.
+############################################################
+library = moose.Neutral(modelSettings.libpath)
 
 
 # 

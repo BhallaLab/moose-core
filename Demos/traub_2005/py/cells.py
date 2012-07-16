@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Mar  9 23:17:17 2012 (+0530)
 # Version: 
-# Last-Updated: Fri May 25 17:38:24 2012 (+0530)
+# Last-Updated: Mon Jul 16 17:06:18 2012 (+0530)
 #           By: subha
-#     Update #: 421
+#     Update #: 428
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -147,8 +147,10 @@ class CellMeta(type):
     
 class CellBase(moose.Neutral):
     __metaclass__ = CellMeta
-    def __init__(self, *args):
-        moose.Neutral.__init__(self, *args)
+    def __init__(self, path):
+        path_tokens = path.rsplit('/')
+        moose.copy(self.prototype, path_tokens[0], path_tokens[-1])
+        moose.Neutral.__init__(self, path)
         
     def comp(self, number):
         return moose.element('%s/comp_%d' % (self.path, number))
