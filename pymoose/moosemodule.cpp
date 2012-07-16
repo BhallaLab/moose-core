@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Fri Jul 13 12:19:06 2012 (+0530)
-//           By: subha
-//     Update #: 9210
+// Last-Updated: Mon Jul 16 23:59:23 2012 (+0530)
+//           By: Subhasis Ray
+//     Update #: 9216
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -3733,16 +3733,21 @@ extern "C" {
     {
         vector <Id> objects;
         char * wildcard_path = NULL;
-        if (!PyArg_ParseTuple(args, "s", &wildcard_path)){
+        if (!PyArg_ParseTuple(args, "s:moose.wildcardFind", &wildcard_path)){
             return NULL;
         }
         ShellPtr->wildcard(string(wildcard_path), objects);
         PyObject * ret = PyTuple_New(objects.size());
-                
+        if (ret == NULL){
+            PyErr_SetString(PyExc_RuntimeError, "moose.wildcardFind: failed to allocate new tuple.");
+            return NULL;
+        }
+            
         for (unsigned int ii = 0; ii < objects.size(); ++ii){
             _Id * entry = PyObject_New(_Id, &IdType);                       
             if (!entry){
                 Py_XDECREF(ret);
+                PyErr_SetString(PyExc_RuntimeError, "moose.wildcardFind: failed to allocate new Id.");
                 return NULL;
             }
             entry->id_ = objects[ii];
