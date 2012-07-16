@@ -223,7 +223,9 @@ bool ReadCell::readScript( const string& line )
 		relativeCoordsFlag_ = 0;
 	} else if ( argv[ 0 ] == "*symmetric" ) {
 		symmetricFlag_ = 1;
-	} else if ( argv[ 0 ] == "*set_global" || argv[ 0 ] == "*set_compt_param" ) {
+	} else if ( argv[ 0 ] == "*asymmetric" ) {
+        symmetricFlag_ = 0;
+    } else if ( argv[ 0 ] == "*set_global" || argv[ 0 ] == "*set_compt_param" ) {
 		if ( argv.size() != 3 ) {
 			cerr << "Error: ReadCell: Bad line: " <<
 				"File: " << fileName_ <<
