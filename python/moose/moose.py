@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Tue Jul  3 13:04:29 2012 (+0530)
-#           By: subha
-#     Update #: 1838
+# Last-Updated: Mon Jul 16 22:52:53 2012 (+0530)
+#           By: Subhasis Ray
+#     Update #: 1842
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -180,15 +180,14 @@ def element(path):
         path = path.getPath()
     elif isinstance(path, ObjId):
         oid = path
-        path = oid.getField('path')
     elif isinstance(path, str):
         if not _moose.exists(path):
             raise NameError('Object %s not defined' % (path))
         oid = _moose.ObjId(path)
     else:
         raise TypeError('expected argument: Id/ObjId/str')
-    className = oid.getField('class')
-    return eval('%s("%s")' % (className, path))
+    classObj = eval(oid.class_)
+    return classObj(oid)
 
 def arrayelement(path, className='Neutral'):
     """Return a reference to an existing object as an instance of the
