@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Mon Jul 16 22:52:53 2012 (+0530)
-#           By: Subhasis Ray
-#     Update #: 1842
+# Last-Updated: Tue Jul 17 12:13:37 2012 (+0530)
+#           By: subha
+#     Update #: 1844
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -217,6 +217,8 @@ def le(element=None):
         element = getCwe()[0]
     elif isinstance(element, str):
         element = Neutral(element)
+    elif isinstance(element, Id):
+        element = element[0]
     print 'Elements under', element.path
     for ch in element.children:
         print ch
