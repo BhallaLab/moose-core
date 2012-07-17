@@ -100,7 +100,9 @@ class GraphicalView(QtGui.QGraphicsView):
         self.rubberbandHeight = 0
         self.moved = False
         self.showpopupmenu = False
-        self.border = 10
+        self.border = 10        
+        self.setRenderHint(QtGui.QPainter.Antialiasing, True)
+        self.setRenderHint(QtGui.QPainter.SmoothPixmapTransform, True)
     ''' Need to check resize evenet v/s fitinview '''
     '''
     def resizeEvent(self, event):
