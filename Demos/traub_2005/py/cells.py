@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Mar  9 23:17:17 2012 (+0530)
 # Version: 
-# Last-Updated: Mon Jul 16 17:48:21 2012 (+0530)
-#           By: subha
-#     Update #: 449
+# Last-Updated: Mon Jul 16 23:56:23 2012 (+0530)
+#           By: Subhasis Ray
+#     Update #: 452
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -98,7 +98,7 @@ def read_prototype(celltype, cdict):
     # incorrect assignemnt of position when the x/y/z values in
     # prototype file is just to for setting the compartment length.
     if not config.modelSettings.morph_has_postion:
-        for comp in moose.wildcardFind('%s/##[TYPE=Compartment]' % (proto.path)):
+        for comp in moose.wildcardFind('%s/#[TYPE=Compartment]' % (proto.path)):
             comp.x = 0.0
             comp.y = 0.0
             comp.z = 0.0
