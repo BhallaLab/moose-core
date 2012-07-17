@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Mon Jul 16 23:59:23 2012 (+0530)
-//           By: Subhasis Ray
-//     Update #: 9216
+// Last-Updated: Tue Jul 17 16:47:53 2012 (+0530)
+//           By: subha
+//     Update #: 9217
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -3209,8 +3209,8 @@ extern "C" {
                  );
     static PyObject * moose_copy(PyObject * dummy, PyObject * args, PyObject * kwargs)
     {
-        PyObject * src, *dest;
-        char * newName;
+        PyObject * src = NULL, * dest = NULL;
+        char * newName = NULL;
         static char * kwlist[] = {"src", "dest", "name", "n", "toGlobal", "copyExtMsg", NULL};
         unsigned int num=1, toGlobal=0, copyExtMsgs=0;
         if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO|sIII", kwlist, &src, &dest, &newName, &num, &toGlobal, &copyExtMsgs)){
@@ -3230,7 +3230,7 @@ extern "C" {
         if (_src == Id()){
             PyErr_SetString(PyExc_ValueError, "Cannot make copy of moose shell.");
             return NULL;
-        }
+        } 
         if (Id_SubtypeCheck(dest)){
             _dest = ((_Id*)dest)->id_;
         } else if (ObjId_SubtypeCheck(dest)){
@@ -3243,6 +3243,7 @@ extern "C" {
         }
         string name;
         if (newName == NULL){
+            // Use the original name if name is not specified.
             name = Field<string>::get(ObjId(_src, 0), "name");
         } else {
             name = string(newName);
