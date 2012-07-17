@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Apr 17 23:58:49 2009 (+0530)
 # Version: 
-# Last-Updated: Mon Jul 16 16:48:04 2012 (+0530)
-#           By: subha
-#     Update #: 1047
+# Last-Updated: Tue Jul 17 23:21:29 2012 (+0530)
+#           By: Subhasis Ray
+#     Update #: 1049
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -83,6 +83,7 @@ class KDR_FS(KDR):
     annotation = {'cno': 'cno_0000105'}
     abstract = False
 
+    Ek = -100e-3
     inf_x = 1.0 / (1.0 + exp((- v_array - 27e-3) / 11.5e-3))
     tau_x =  where(v_array < -10e-3, \
                        1e-3 * (0.25 + 4.35 * exp((v_array + 10.0e-3) / 10.0e-3)), \
