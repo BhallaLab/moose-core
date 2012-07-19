@@ -15,19 +15,19 @@ soma{
     insert naf2
     gbar_naf2 = 0.15
     insert napf_spinstell
-    gbar_napf_spinstell = 0.00015
+    gbar_napf_spinstell = 0.00015 * 0.0
     insert kdr_fs 
     gbar_kdr_fs = 0.1
     insert kc_fast
     gbar_kc_fast = 0.01
     insert ka
-    gbar_ka =   0.03
+    gbar_ka = 0.03
     insert km
-    gbar_km =   0.00375
+    gbar_km = 0.00375
     insert k2
-    gbar_k2 =   0.0001 * 1e3
-    // insert kahp_slower
-    // gbar_kahp_slower =   0.0001
+    gbar_k2 = 0.0001
+    insert kahp_slower
+    gbar_kahp_slower =   0.0001
     // insert cal
     // gbar_cal =   0.0005
     // insert cat_a

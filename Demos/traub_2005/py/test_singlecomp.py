@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jul 17 21:01:14 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Jul 19 22:35:39 2012 (+0530)
+# Last-Updated: Thu Jul 19 22:37:13 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 223
+#     Update #: 225
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -172,22 +172,22 @@ class TestSingleComp(unittest.TestCase):
     def testDefault(self):
         nrndata = np.loadtxt('../nrn/data/singlecomp_Vm.dat')
         tseries = np.linspace(0, simtime, len(self.tables['Vm'].vec)) * 1e3
-        plotcount = len(channel_density) + 1
-        rows = int(np.sqrt(plotcount) + 0.5)
-        columns = int(plotcount * 1.0/rows + 0.5)
-        print plotcount, rows, columns
-        plt.subplot(rows, columns, 1)
+        # plotcount = len(channel_density) + 1
+        # rows = int(np.sqrt(plotcount) + 0.5)
+        # columns = int(plotcount * 1.0/rows + 0.5)
+        # print plotcount, rows, columns
+        # plt.subplot(rows, columns, 1)
         plt.plot(tseries, self.tables['Vm'].vec * 1e3, 'x', label='Vm (mV) - moose')
         plt.plot(nrndata[:,0], nrndata[:,1], '+', label='Vm (mV) - nrn')
         plt.plot(tseries, self.tables['pulsegen'].vec * 1e12, label='inject (pA)')
         plt.legend()
-        ii = 2
-        for key, value in self.tables.items():
-            if key.startswith('Gk'):
-                plt.subplot(rows, columns, ii)
-                plt.plot(tseries, value.vec, label=key)                
-                ii += 1
-                plt.legend()
+        # ii = 2
+        # for key, value in self.tables.items():
+        #     if key.startswith('Gk'):
+        #         plt.subplot(rows, columns, ii)
+        #         plt.plot(tseries, value.vec, label=key)                
+        #         ii += 1
+        #         plt.legend()
         plt.show()
         np.savetxt('data/singlecomp_Vm.dat', np.transpose(np.vstack((tseries, self.tables['Vm'].vec))))
 
