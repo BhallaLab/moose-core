@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jul 17 21:01:14 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Jul 19 22:37:13 2012 (+0530)
+# Last-Updated: Thu Jul 19 22:51:55 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 225
+#     Update #: 232
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -64,14 +64,14 @@ channel_density = {
     'NaF2':     1500.0,
     'NaPF_SS':  1.5,
     'KDR_FS':   1000.0,
-    'KC_FAST':  100.0,
+    # 'KC_FAST':  100.0,
     'KA':       300.0,
     'KM':       37.5,
     'K2':       1.0,
     # 'KAHP_SLOWER':      1.0,
-    # 'CaL':      5.0,
-    # 'CaT_A':    1.0,
-    # 'AR':       2.5
+    'CaL':      5.0,
+    'CaT_A':    1.0,
+    'AR':       2.5
 }
 
 compartment_propeties = {
@@ -146,7 +146,6 @@ class TestSingleComp(unittest.TestCase):
             self.tables['Gk_'+channel.name] = tab
         archan = moose.HHChannel(self.soma.path + '/AR')
         archan.X = 0.0
-        archan.Ek = -40e-3
         self.pulsegen = moose.PulseGen('%s/inject' % (self.model.path))
         moose.connect(self.pulsegen, 'outputOut', self.soma, 'injectMsg')
         tab = moose.Table('%s/injection' % (self.data.path))
@@ -177,8 +176,8 @@ class TestSingleComp(unittest.TestCase):
         # columns = int(plotcount * 1.0/rows + 0.5)
         # print plotcount, rows, columns
         # plt.subplot(rows, columns, 1)
-        plt.plot(tseries, self.tables['Vm'].vec * 1e3, 'x', label='Vm (mV) - moose')
-        plt.plot(nrndata[:,0], nrndata[:,1], '+', label='Vm (mV) - nrn')
+        plt.plot(tseries, self.tables['Vm'].vec * 1e3, label='Vm (mV) - moose')
+        plt.plot(nrndata[:,0], nrndata[:,1], label='Vm (mV) - nrn')
         plt.plot(tseries, self.tables['pulsegen'].vec * 1e12, label='inject (pA)')
         plt.legend()
         # ii = 2
@@ -189,7 +188,7 @@ class TestSingleComp(unittest.TestCase):
         #         ii += 1
         #         plt.legend()
         plt.show()
-        np.savetxt('data/singlecomp_Vm.dat', np.transpose(np.vstack((tseries, self.tables['Vm'].vec))))
+        np.savetxt('data/singlecomp_Vm.dat', np.transpose(np.vstack((tseries*1e-3, self.tables['Vm'].vec))))
 
 if __name__ == '__main__':
     unittest.main()
