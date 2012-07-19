@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat May 26 10:41:37 2012 (+0530)
 # Version: 
-# Last-Updated: Fri Jun  1 17:04:29 2012 (+0530)
+# Last-Updated: Tue Jul 17 17:09:59 2012 (+0530)
 #           By: subha
-#     Update #: 298
+#     Update #: 309
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -96,6 +96,12 @@ def setup_single_compartment(container_path, channel_proto, Gbar):
             'Vm': vm_table,
             'Gk': gk_table,
             'Ik': ik_table}
+
+def insert_hhchannel(compartment, channelclass, gbar):
+    channel = moose.copy(channelclass.prototype, compartment)
+    channel[0].Gbar = gbar
+    moose.connect(channel, 'channel', compartment, 'channel')
+    return channel[0]
     
 def run_single_channel(channelname, Gbar, simtime):
     testId = uuid.uuid4().int
