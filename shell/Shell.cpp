@@ -30,6 +30,10 @@
 // #include "../mesh/Boundary.h"
 // #include "../mesh/ChemMesh.h"
 
+#ifdef USE_SBML
+#include "../sbml/SbmlWriter.h"
+#endif
+
 const unsigned int Shell::OkStatus = ~0;
 const unsigned int Shell::ErrorStatus = ~1;
 
@@ -674,6 +678,19 @@ void Shell::doUseClock( string path, string field, unsigned int tick )
 	initAck();
 		requestUseClock()->send( sheller, ScriptThreadNum, path, field, tick );
 	waitForAck();
+}
+
+/**
+ * Write given model to SBML file. Returns success value.
+ */
+int Shell::doWriteSBML( const string& fname, const string& modelpath )
+{
+#ifdef USE_SBML
+	SbmlWriter sw;
+	return sw.write( fname, modelpath );
+#else
+    cerr << "Shell::WriteSBML: This copy of MOOSE has not been compiled with SBML writing support.\n";
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////////

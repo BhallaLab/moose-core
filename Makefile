@@ -53,6 +53,15 @@
 #
 # USE_MPI - compile with support for parallel computing through MPICH library
 #
+# USE_SBML (default value: 1) - compile with support for the Systems Biology
+# 		Markup Language (SBML). This allows you to read and write chemical 
+# 		kinetic models in the simulator-indpendent SBML format.
+# 
+
+# Default values for flags. The operator ?= assigns the given value only if the
+# variable is not already defined.
+USE_SBML?=0
+
 
 # BUILD (= debug, release)
 ifndef BUILD
@@ -203,6 +212,16 @@ LIBS+= -L/usr/lib -lgsl -lgslcblas
 CXXFLAGS+= -DUSE_GSL
 endif
 
+#harsha
+# To use SBML, pass USE_SBML=1 in make command line
+ifeq ($(USE_SBML),1)
+LIBS+= -lsbml
+CXXFLAGS+=-DUSE_SBML 
+LDFLAGS += -L/usr/lib
+SBML_DIR = sbml
+SBML_LIB = sbml/_sbml.o 
+endif
+
 # To use Smoldyn, pass USE_SMOLDYN=true ( anything on the right will do) in make command line
 ifdef USE_SMOLDYN
 #LIBS+= -L/usr/local/lib -lsmoldyn
@@ -265,6 +284,7 @@ SUBDIR = \
 	mesh \
 	manager \
 	$(SMOLDYN_DIR) \
+	$(SBML_DIR) \
 
 
 # Used for 'make clean'
@@ -288,12 +308,14 @@ OBJLIBS =	\
 	mesh/_mesh.o \
 	manager/_manager.o \
 	$(SMOLDYN_LIB) \
+	$(SBML_LIB) \
 
 export CXX
 export CXXFLAGS
 export LD
 export LIBS
 export USE_GSL
+export USE_SBML
 
 all: moose pymoose
 

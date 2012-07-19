@@ -185,6 +185,11 @@ class Shell
 		 */
 		 Id doLoadModel( const string& fname, const string& modelpath, 
 		 	const string& solverClass = "" );
+		
+		/**
+		 * Write given model to SBML file. Returns success value.
+		 */
+		 int doWriteSBML( const string& fname, const string& modelpath );
 
 		/**
  		 * This function synchronizes fieldDimension on the DataHandler 
