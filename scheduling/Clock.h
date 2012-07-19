@@ -38,6 +38,8 @@ class Clock
 
 		void setTickDt( unsigned int i, double v );
 		double getTickDt( unsigned int i ) const;
+
+		vector< double > getDts() const;
 		
 		//////////////////////////////////////////////////////////
 		//  Dest functions

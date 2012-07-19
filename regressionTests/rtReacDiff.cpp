@@ -163,12 +163,10 @@ static void rtReplicateModels()
 	assert( mid != Msg::bad );
 
 	// Set up scheduling.
-	shell->doSetClock( 0, 0.1 );
-	shell->doSetClock( 1, 0.1 );
-	shell->doSetClock( 2, 0.1 );
-	shell->doSetClock( 3, 0.1 );
+	for ( unsigned int i = 0; i < 10; ++i )
+		shell->doSetClock( i, 0.1 );
 	// shell->doUseClock( "/kinetics/stoich/gsl", "process", 0 );
-	shell->doUseClock( "/model/table", "process", 2 );
+	shell->doUseClock( "/model/table", "process", 8 );
 	shell->doReinit();
 	shell->doStart( 10 );
 

@@ -137,6 +137,13 @@ const Cinfo* Clock::initCinfo()
 			"Current simulation step",
 			&Clock::getCurrentStep
 		);
+
+		static ReadOnlyValueFinfo< Clock, vector< double > > getDts( 
+			"getDts",
+			"Utility function returning the dts of all the ticks.",
+			// &Clock::setNumTicks,
+			&Clock::getDts
+		);
 	///////////////////////////////////////////////////////
 	// Shared definitions
 	///////////////////////////////////////////////////////
@@ -340,6 +347,15 @@ void Clock::setNumTicks( unsigned int num )
 {
 	ticks_.resize( num );
 	rebuild();
+}
+
+vector< double > Clock::getDts() const
+{
+	vector< double > ret;
+	for ( unsigned int i = 0; i < ticks_.size(); ++i ) {
+		ret.push_back( ticks_[ i ].getDt() ); 
+	}
+	return ret;
 }
 
 ///////////////////////////////////////////////////

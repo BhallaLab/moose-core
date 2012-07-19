@@ -149,10 +149,8 @@ void testGsolver(string modelName, string plotName, double plotDt, double simTim
 	vector< unsigned int > dims( 1, 1 );
 	Id stoich = base;
 
-	s->doSetClock( 0, plotDt );
-	s->doSetClock( 1, plotDt );
-	s->doSetClock( 2, plotDt );
-	s->doSetClock( 3, plotDt );
+	for ( unsigned int i = 0; i < 10; ++i )
+		s->doSetClock( i, plotDt );
 
 	// string  plotpath = rk.getBasePath() + "/graphs/##[TYPE=Table]," +
 		// rk.getBasePath() + "/moregraphs/##[TYPE=Table]";
