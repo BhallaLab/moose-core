@@ -17903,3 +17903,11 @@ This brings up a few things to fix in scheduling.
 - Resched
 - Get all clocks and associated dts. Should be easy with a getVec on the
 	Ticks, but there should be a nice way to organize it.
+
+
+============================================================================
+19 July 2012.
+Multiple fixes to unit and regression tests, following from reassigning clocks
+to different object classes. 
+
+============================================================================

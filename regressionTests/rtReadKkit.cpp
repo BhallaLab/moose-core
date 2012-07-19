@@ -410,11 +410,10 @@ void rtRunKkit()
 	shell->doUseClock( "/rkktest/graphs/##[TYPE=Table],/rkktest/moregraphs/##[TYPE=Table]", "process", 2 );
 
 	*/
-	shell->doSetClock( 0, 10 );
-	shell->doSetClock( 1, 10 );
-	shell->doSetClock( 2, 10 );
+	for ( unsigned int i = 0; i < 10; ++i )
+		shell->doSetClock( i, 10 );
 	shell->doReinit();
-	shell->doStart( 5001.0 );
+	shell->doStart( 5000.0 );
 
 	Id plotId( "/rkktest/graphs/conc1/MAPK_PP.Co" );
 	vector< Id > ret = LookupField< string, vector< Id > >::get( 
@@ -475,7 +474,7 @@ void rtRunKkit()
 	assert( doubleEq( actualVol, vol ) );
 
 	shell->doReinit();
-	shell->doStart( 5001.0 );
+	shell->doStart( 5000.0 );
 	size = Field< unsigned int >::get( plotId, "size" );
 	assert( size == 501 ); // Note that dt was 10.
 
