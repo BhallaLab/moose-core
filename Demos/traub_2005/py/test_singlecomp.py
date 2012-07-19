@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jul 17 21:01:14 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Jul 19 22:51:55 2012 (+0530)
+# Last-Updated: Fri Jul 20 00:19:05 2012 (+0530)
 #           By: Subhasis Ray
-#     Update #: 232
+#     Update #: 295
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -48,6 +48,7 @@ from nachans import *
 from kchans import *
 from archan import *
 from cachans import *
+from capool import *
 
 simdt = 0.25e-4
 plotdt = 0.25e-4
@@ -64,11 +65,11 @@ channel_density = {
     'NaF2':     1500.0,
     'NaPF_SS':  1.5,
     'KDR_FS':   1000.0,
-    # 'KC_FAST':  100.0,
+    'KC_FAST':  100.0,
     'KA':       300.0,
     'KM':       37.5,
     'K2':       1.0,
-    # 'KAHP_SLOWER':      1.0,
+    'KAHP_SLOWER':      1.0,
     'CaL':      5.0,
     'CaT_A':    1.0,
     'AR':       2.5
@@ -117,7 +118,22 @@ def insert_channel(compartment, channeclass, gbar, density=False):
         channel.Gbar = gbar * np.pi * compartment.length * compartment.diameter
     moose.connect(channel, 'channel', compartment, 'channel')
     return channel
-    
+
+def insert_ca(compartment, phi, tau):
+    ca = moose.copy(CaPool.prototype, compartment)[0]
+    ca.B = phi / (np.pi * compartment.length * compartment.diameter)
+    ca.tau = tau
+    print ca.path, ca.B, ca.tau
+    for chan in moose.wildcardFind('%s/#[TYPE=HHChannel]' % (compartment.path)):
+        if chan.name.startswith('KC') or chan.name.startswith('KAHP'):
+            moose.connect(ca, 'concOut', chan, 'concen')
+        elif chan.name.startswith('CaL'):
+            moose.connect(chan, 'IkOut', ca, 'current')
+        else:
+            continue
+        moose.showfield(chan)
+    return ca
+
 class TestSingleComp(unittest.TestCase):
     def setUp(self):
         self.testId = uuid.uuid4().int
@@ -146,6 +162,10 @@ class TestSingleComp(unittest.TestCase):
             self.tables['Gk_'+channel.name] = tab
         archan = moose.HHChannel(self.soma.path + '/AR')
         archan.X = 0.0
+        ca = insert_ca(self.soma, 5.2e-6/2e-10, 50e-3)
+        tab = moose.Table('%s/Ca' % (self.data.path))
+        self.tables['Ca'] = tab
+        moose.connect(tab, 'requestData', ca, 'get_Ca')
         self.pulsegen = moose.PulseGen('%s/inject' % (self.model.path))
         moose.connect(self.pulsegen, 'outputOut', self.soma, 'injectMsg')
         tab = moose.Table('%s/injection' % (self.data.path))
@@ -165,6 +185,7 @@ class TestSingleComp(unittest.TestCase):
         moose.useClock(0, self.soma.path, 'init')
         moose.useClock(1, self.soma.path, 'process')
         moose.useClock(2, self.soma.path + '/#[TYPE=HHChannel]', 'process')
+        moose.useClock(3, self.soma.path + '/#[TYPE=CaConc]', 'process')
         moose.useClock(4, self.pulsegen.path, 'process')
         moose.useClock(9, self.data.path+'/#[TYPE=Table]', 'process')        
 
@@ -176,9 +197,12 @@ class TestSingleComp(unittest.TestCase):
         # columns = int(plotcount * 1.0/rows + 0.5)
         # print plotcount, rows, columns
         # plt.subplot(rows, columns, 1)
+        plt.subplot(2,1,1)
         plt.plot(tseries, self.tables['Vm'].vec * 1e3, label='Vm (mV) - moose')
         plt.plot(nrndata[:,0], nrndata[:,1], label='Vm (mV) - nrn')
         plt.plot(tseries, self.tables['pulsegen'].vec * 1e12, label='inject (pA)')
+        plt.subplot(2,1,2)
+        plt.plot(tseries, self.tables['Ca'].vec)
         plt.legend()
         # ii = 2
         # for key, value in self.tables.items():
