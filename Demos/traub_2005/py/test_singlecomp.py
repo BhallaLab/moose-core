@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jul 17 21:01:14 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Jul 19 16:58:47 2012 (+0530)
-#           By: subha
-#     Update #: 216
+# Last-Updated: Thu Jul 19 22:35:39 2012 (+0530)
+#           By: Subhasis Ray
+#     Update #: 223
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -62,12 +62,12 @@ erev = {
 
 channel_density = {
     'NaF2':     1500.0,
-    # 'NaPF_SS':  1.5,
-    # 'KDR_FS':   1000.0,
-    # 'KC_FAST':  100.0,
-    # 'KA':       300.0,
-    # 'KM':       37.5,
-    # 'K2':       1.0,
+    'NaPF_SS':  1.5,
+    'KDR_FS':   1000.0,
+    'KC_FAST':  100.0,
+    'KA':       300.0,
+    'KM':       37.5,
+    'K2':       1.0,
     # 'KAHP_SLOWER':      1.0,
     # 'CaL':      5.0,
     # 'CaT_A':    1.0,
@@ -84,7 +84,7 @@ compartment_propeties = {
     'Ra': 1.0,
     'specific': True}
 
-stimulus = [[1e9, 50e-3, 3e-10], # delay[0], width[0], level[0]
+stimulus = [[100e-3, 50e-3, 3e-10], # delay[0], width[0], level[0]
             [1e9, 0, 0]]
 
 def setup_clocks(simdt, plotdt):
@@ -160,8 +160,6 @@ class TestSingleComp(unittest.TestCase):
         setup_clocks(simdt, plotdt)
         self.assignClocks()        
         moose.reinit()
-        moose.showfield(self.soma)
-        moose.showfield(moose.element(self.soma.path + '/NaF2'))
         moose.start(simtime)
 
     def assignClocks(self):
@@ -172,7 +170,7 @@ class TestSingleComp(unittest.TestCase):
         moose.useClock(9, self.data.path+'/#[TYPE=Table]', 'process')        
 
     def testDefault(self):
-        nrndata = np.loadtxt('../nrn/data/singlecomp_Vm.plot')
+        nrndata = np.loadtxt('../nrn/data/singlecomp_Vm.dat')
         tseries = np.linspace(0, simtime, len(self.tables['Vm'].vec)) * 1e3
         plotcount = len(channel_density) + 1
         rows = int(np.sqrt(plotcount) + 0.5)
