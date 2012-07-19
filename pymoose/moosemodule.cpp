@@ -3389,6 +3389,17 @@ extern "C" {
         return Py_BuildValue("i", Id(path) != Id() || string(path) == "/" || string(path) == "/root");
     }
 
+    //Harsha : For writing genesis file to sbml
+    static PyObject * moose_writeSBML(PyObject * dummy, PyObject * args)
+    {
+        char * fname = NULL, * modelpath = NULL;
+        if(!PyArg_ParseTuple(args, "ss:moose_writeSBML", &fname, &modelpath)){
+            return NULL;
+        }
+        
+        int ret = ShellPtr->doWriteSBML(string(fname), string(modelpath));
+        return Py_BuildValue("i", ret);
+    }
     PyDoc_STRVAR(moose_loadModel_documentation,
                  "loadModel(filename, modelpath, solverclass) -> moose.Id\n"
                  "\n"
@@ -4170,6 +4181,7 @@ extern "C" {
         {"stop", (PyCFunction)moose_stop, METH_VARARGS, "Stop simulation"},
         {"isRunning", (PyCFunction)moose_isRunning, METH_VARARGS, "True if the simulation is currently running."},
         {"exists", (PyCFunction)moose_exists, METH_VARARGS, "True if there is an object with specified path."},
+        {"writeSBML", (PyCFunction)moose_writeSBML, METH_VARARGS, "Export biochemical model to an SBML file."},    
         {"loadModel", (PyCFunction)moose_loadModel, METH_VARARGS, moose_loadModel_documentation},
         {"connect", (PyCFunction)moose_connect, METH_VARARGS, moose_connect_documentation},        
         {"getCwe", (PyCFunction)moose_getCwe, METH_VARARGS, "Get the current working element. 'pwe' is an alias of this function."},
