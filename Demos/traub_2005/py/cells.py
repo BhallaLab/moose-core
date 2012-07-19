@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Mar  9 23:17:17 2012 (+0530)
 # Version: 
-# Last-Updated: Mon Jul 16 23:56:23 2012 (+0530)
-#           By: Subhasis Ray
-#     Update #: 452
+# Last-Updated: Thu Jul 19 10:41:35 2012 (+0530)
+#           By: subha
+#     Update #: 465
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -138,7 +138,18 @@ def assign_depths(cell, depthdict, leveldict):
 class CellMeta(type):
     def __new__(cls, name, bases, cdict):
         if name != 'CellBase':
-            proto = read_prototype(name, cdict)
+            proto = read_prototype(name, cdict)            
+            annotation = None
+            if 'annotation' in cdict:
+                annotation = cdict['annotation']
+            else:
+                for base in bases:
+                    if hasattr(base, 'annotation'):
+                        annotation = base.annotation
+                        break
+            if annotation is not None:
+                info = moose.Annotator('%s/info' % (proto.path))
+                info.notes = '\n'.join('"%s": "%s"' % kv for kv in annotation.items())
             if 'soma_tauCa' in cdict:
                 moose.element(proto.path + '/comp_1/CaPool').tau = cdict['soma_tauCa']
             cdict['prototype'] = proto
@@ -147,6 +158,7 @@ class CellMeta(type):
     
 class CellBase(moose.Neutral):
     __metaclass__ = CellMeta
+    annotation = {'cno': 'cno_0000020'}
     def __init__(self, path):
         if not moose.exists(path):
             path_tokens = path.rpartition('/')
