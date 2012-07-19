@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jul 17 21:01:14 2012 (+0530)
 # Version: 
-# Last-Updated: Wed Jul 18 02:42:26 2012 (+0530)
-#           By: Subhasis Ray
-#     Update #: 200
+# Last-Updated: Thu Jul 19 16:58:47 2012 (+0530)
+#           By: subha
+#     Update #: 216
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -49,8 +49,8 @@ from kchans import *
 from archan import *
 from cachans import *
 
-simdt = 0.1e-4
-plotdt = 0.25e-3
+simdt = 0.25e-4
+plotdt = 0.25e-4
 simtime = 350e-3
 
 erev = {
@@ -126,7 +126,6 @@ class TestSingleComp(unittest.TestCase):
         self.data = moose.Neutral('%s/data' % (self.container.path))
         self.soma = create_compartment('%s/soma' % (self.model.path),
                                        **compartment_propeties)
-        moose.showfield(self.soma)
         self.tables = {}
         tab = moose.Table('%s/Vm' % (self.data.path))
         self.tables['Vm'] = tab
@@ -161,6 +160,8 @@ class TestSingleComp(unittest.TestCase):
         setup_clocks(simdt, plotdt)
         self.assignClocks()        
         moose.reinit()
+        moose.showfield(self.soma)
+        moose.showfield(moose.element(self.soma.path + '/NaF2'))
         moose.start(simtime)
 
     def assignClocks(self):
@@ -178,8 +179,8 @@ class TestSingleComp(unittest.TestCase):
         columns = int(plotcount * 1.0/rows + 0.5)
         print plotcount, rows, columns
         plt.subplot(rows, columns, 1)
-        plt.plot(tseries, self.tables['Vm'].vec * 1e3, label='Vm (mV) - moose')
-        plt.plot(nrndata[:,0], nrndata[:,1], label='Vm (mV) - nrn')
+        plt.plot(tseries, self.tables['Vm'].vec * 1e3, 'x', label='Vm (mV) - moose')
+        plt.plot(nrndata[:,0], nrndata[:,1], '+', label='Vm (mV) - nrn')
         plt.plot(tseries, self.tables['pulsegen'].vec * 1e12, label='inject (pA)')
         plt.legend()
         ii = 2

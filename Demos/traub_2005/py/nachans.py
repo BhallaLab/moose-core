@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Apr 17 23:58:13 2009 (+0530)
 # Version: 
-# Last-Updated: Thu Jul  5 11:36:31 2012 (+0530)
+# Last-Updated: Thu Jul 19 17:19:28 2012 (+0530)
 #           By: subha
-#     Update #: 396
+#     Update #: 397
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -52,7 +52,7 @@ class NaF(NaChannel):
     Xpower = 3
     Ypower = 1
     X = 0.0
-    Y =  0.54876953
+    # Y =  0.54876953
     shift = -3.5e-3
     tau_x = where((v_array + shift) < -30e-3, \
                       1.0e-3 * (0.025 + 0.14 * exp((v_array + shift + 30.0e-3) / 10.0e-3)), \
