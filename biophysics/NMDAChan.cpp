@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Sun Feb 28 18:17:56 2010 (+0530)
 // Version: 
-// Last-Updated: Wed Jun 22 10:50:02 2011 (+0530)
-//           By: Subhasis Ray
-//     Update #: 537
+// Last-Updated: Sat Oct 15 19:05:21 2011 (+0530)
+//           By: subha
+//     Update #: 538
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -171,7 +171,7 @@ NMDAChan::NMDAChan(): c0_(16.0),
                       c10_(3.101),
                       Mg_(1.5), // mM (value from Traub et al 2005)
                       unblocked_(1.0),
-                      saturation_(DBL_MAX)
+                      saturation_(1.0)
 {
     tau2_ = 0.005;
     tau1_ = 0.130;
