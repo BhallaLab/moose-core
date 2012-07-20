@@ -267,6 +267,29 @@ the function is 'process'.  NOTE: unlike earlier versions, now
 autoschedule is not available. You have to call useClock for every
 element that should be updated during the simulation. 
 
+The sequence of clockticks with the same dt is according to their
+number. This is utilized for controlling the order of updates in
+various objects where it matters.
+
+The following convention should be observed when assigning clockticks
+to various components of a model:
+
+Clock ticks 0-3 are for electrical (biophysical) components, 4 and 5
+are for chemical kinetics, 6 and 7 are for lookup tables and stimulus,
+8 and 9 are for recording tables.
+
+Generally, 'process' is the method to be assigned a clock
+tick. Notable exception is 'init' method of Compartment class which is
+assigned tick 0.
+
+0 : Compartment: 'init'
+1 : Compartment: 'process'
+2 : HHChannel and other channels: 'process'
+3 : CaConc : 'process'
+4,5 : Elements for chemical kinetics : 'process'
+6,7 : Lookup (tables), stimulus : 'process'
+8,9 : Tables for plotting : process
+
 Example: 
 moose.useClock(0, '/model/compartment_1', 'init')
 moose.useClock(1, '/model/compartment_1', 'process')
