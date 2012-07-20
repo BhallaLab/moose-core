@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jul 17 21:01:14 2012 (+0530)
 # Version: 
-# Last-Updated: Fri Jul 20 00:19:05 2012 (+0530)
-#           By: Subhasis Ray
-#     Update #: 295
+# Last-Updated: Fri Jul 20 12:45:36 2012 (+0530)
+#           By: subha
+#     Update #: 307
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -162,7 +162,7 @@ class TestSingleComp(unittest.TestCase):
             self.tables['Gk_'+channel.name] = tab
         archan = moose.HHChannel(self.soma.path + '/AR')
         archan.X = 0.0
-        ca = insert_ca(self.soma, 5.2e-6/2e-10, 50e-3)
+        ca = insert_ca(self.soma, 2.6e7, 50e-3)
         tab = moose.Table('%s/Ca' % (self.data.path))
         self.tables['Ca'] = tab
         moose.connect(tab, 'requestData', ca, 'get_Ca')
@@ -202,7 +202,8 @@ class TestSingleComp(unittest.TestCase):
         plt.plot(nrndata[:,0], nrndata[:,1], label='Vm (mV) - nrn')
         plt.plot(tseries, self.tables['pulsegen'].vec * 1e12, label='inject (pA)')
         plt.subplot(2,1,2)
-        plt.plot(tseries, self.tables['Ca'].vec)
+        plt.plot(tseries, self.tables['Ca'].vec, label='Ca (mM) - moose')
+        plt.plot(nrndata[:,0], nrndata[:,2], label='Ca (mM) - nrn')
         plt.legend()
         # ii = 2
         # for key, value in self.tables.items():
@@ -212,7 +213,7 @@ class TestSingleComp(unittest.TestCase):
         #         ii += 1
         #         plt.legend()
         plt.show()
-        np.savetxt('data/singlecomp_Vm.dat', np.transpose(np.vstack((tseries*1e-3, self.tables['Vm'].vec))))
+        np.savetxt('data/singlecomp_Vm.dat', np.transpose(np.vstack((tseries*1e-3, self.tables['Vm'].vec, self.tables['Ca'].vec))))
 
 if __name__ == '__main__':
     unittest.main()
