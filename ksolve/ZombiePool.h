@@ -54,8 +54,7 @@ class ZombiePool: public PoolBase
 		//////////////////////////////////////////////////////////////////
 		// utility funcs
 		//////////////////////////////////////////////////////////////////
-		static void zombify( Element* solver, Element* orig );
-		static void unzombify( Element* zombie );
+		void setSolver( Id solver );
 
 		static const Cinfo* initCinfo();
 	protected:
