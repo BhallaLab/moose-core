@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Jul 16 16:12:55 2012 (+0530)
 # Version: 
-# Last-Updated: Mon Jul 16 17:49:55 2012 (+0530)
+# Last-Updated: Tue Jul 17 11:17:01 2012 (+0530)
 #           By: subha
-#     Update #: 98
+#     Update #: 99
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -100,12 +100,12 @@ class TestTCR(unittest.TestCase):
         params = setupCurrentStepModel(self.testId, 'TCR', pulsearray, simdt)
         print 'Starting simulation'
         runsim(simtime)
-        tseries = np.linspace(0, simtime, len(params['vmTable'].vec))
-        pylab.subplot(211)
-        pylab.plot(tseries, params['vmTable'].vec * 1e3, label='Vm (mV)')
-        pylab.subplot(212)
-        pylab.plot(tseries, params['stimTable'].vec * 1e-12, label='Stimulus (pA)')
-        pylab.show()
+        # tseries = np.linspace(0, simtime, len(params['vmTable'].vec))
+        # pylab.subplot(211)
+        # pylab.plot(tseries, params['vmTable'].vec * 1e3, label='Vm (mV)')
+        # pylab.subplot(212)
+        # pylab.plot(tseries, params['stimTable'].vec * 1e-12, label='Stimulus (pA)')
+        # pylab.show()
     def testDefault(self):
         pass
 
