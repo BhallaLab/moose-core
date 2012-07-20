@@ -60,12 +60,12 @@ endif
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
-Stoich.o:	ZombiePool.h ZombieReac.h ZombieBufPool.h ZombieEnz.h ZombieMMenz.h ../kinetics/Pool.h ../kinetics/Reac.h ../kinetics/BufPool.h ../kinetics/FuncPool.h ../kinetics/Enz.h ../kinetics/MMenz.h ../mesh/Boundary.h ../mesh/ChemMesh.h ../mesh/Stencil.h
-GssaStoich.o:	GssaStoich.h ZombiePool.h ZombieReac.h ZombieBufPool.h ZombieEnz.h ZombieMMenz.h ../kinetics/Pool.h ../kinetics/Reac.h ../kinetics/BufPool.h ../kinetics/FuncPool.h ../kinetics/Enz.h ../kinetics/MMenz.h ../mesh/Boundary.h ../mesh/ChemMesh.h ../randnum/randnum.h
+Stoich.o:	../kinetics/PoolBase.h ZombiePool.h ZombieReac.h ZombieBufPool.h ZombieEnz.h ZombieMMenz.h ../kinetics/Pool.h ../kinetics/Reac.h ../kinetics/BufPool.h ../kinetics/FuncPool.h ../kinetics/Enz.h ../kinetics/MMenz.h ../mesh/Boundary.h ../mesh/ChemMesh.h ../mesh/Stencil.h
+GssaStoich.o:	GssaStoich.h ../kinetics/PoolBase.h ZombiePool.h ZombieReac.h ZombieBufPool.h ZombieEnz.h ZombieMMenz.h ../kinetics/Pool.h ../kinetics/Reac.h ../kinetics/BufPool.h ../kinetics/FuncPool.h ../kinetics/Enz.h ../kinetics/MMenz.h ../mesh/Boundary.h ../mesh/ChemMesh.h ../randnum/randnum.h
 KinSparseMatrix.o:	KinSparseMatrix.h ../basecode/SparseMatrix.h
-ZombiePool.o:	ZombiePool.h
-ZombieBufPool.o:	ZombiePool.h ZombieBufPool.h
-ZombieFuncPool.o:	ZombiePool.h ZombieFuncPool.h ZombieSumFunc.h
+ZombiePool.o:	../kinetics/PoolBase.h ZombiePool.h
+ZombieBufPool.o:	../kinetics/PoolBase.h ZombiePool.h ZombieBufPool.h
+ZombieFuncPool.o:	../kinetics/PoolBase.h ZombiePool.h ZombieFuncPool.h ZombieSumFunc.h
 ZombieReac.o:	../kinetics/Reac.h ZombieReac.h
 ZombieEnz.o:	ZombieEnz.h
 ZombieMMenz.o:	ZombieMMenz.h

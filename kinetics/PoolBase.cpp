@@ -323,3 +323,41 @@ unsigned int PoolBase::getSpecies( const Eref& e, const Qinfo* q ) const
 {
 	return vGetSpecies( e, q );
 }
+
+//////////////////////////////////////////////////////////////
+// Zombie conversion routine: Converts Pool subclasses. There
+// will typically be a target specific follow-up function, for example,
+// to assign a pointer to the stoichiometry class.
+// There should also be a subsequent call to resched for the entire tree.
+//////////////////////////////////////////////////////////////
+// static func
+void PoolBase::zombify( Element* orig, const Cinfo* zClass, Id solver )
+{
+	if ( orig->cinfo() == zClass )
+		return;
+	DataHandler* origHandler = orig->dataHandler();
+	DataHandler* dh = origHandler->copyUsingNewDinfo( zClass->dinfo() );
+	Element temp( orig->id(), zClass, dh );
+	Eref zombier( &temp, 0 );
+
+	PoolBase* z = reinterpret_cast< PoolBase* >( zombier.data() );
+	Eref oer( orig, 0 );
+
+	z->setSolver( solver ); // call virtual func to assign solver info.
+
+	PoolBase* m = reinterpret_cast< PoolBase* >( oer.data() );
+	// May need to extend to entire array.
+	z->vSetSpecies( zombier, 0, m->vGetSpecies( oer, 0 ) );
+	z->vSetConcInit( zombier, 0, m->vGetConcInit( oer, 0 ) );
+	z->vSetN( zombier, 0, m->vGetN( oer, 0 ) );
+	z->vSetNinit( zombier, 0, m->vGetNinit( oer, 0 ) );
+	z->vSetDiffConst( zombier, 0, m->vGetDiffConst( oer, 0 ) );
+	orig->zombieSwap( zClass, dh );
+	delete origHandler;
+}
+
+// Virtual func: default does nothing.
+void PoolBase::setSolver( Id solver )
+{
+	;
+}

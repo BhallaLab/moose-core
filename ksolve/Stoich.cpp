@@ -468,6 +468,30 @@ void Stoich::allocateModel( const vector< Id >& elist )
 	N_.setSize( numVarPools_ + numBufPools_ + numFuncPools_, numReac_ );
 }
 
+void zombifyAndUnschedPool( 
+	const Eref& s, Element* orig, const Cinfo* zClass )
+{
+	////////////////////////////////////////////////////////
+	// Unschedule: Get rid of Process message
+	static const Finfo* procDest = 
+		PoolBase::initCinfo()->findFinfo( "process");
+	assert( procDest );
+
+	const DestFinfo* df = dynamic_cast< const DestFinfo* >( procDest );
+	assert( df );
+	MsgId mid = orig->findCaller( df->getFid() );
+	if ( mid != Msg::bad )
+		Msg::deleteMsg( mid );
+
+	////////////////////////////////////////////////////////
+	/*
+	PoolBase* pb = reinterpret_cast< PoolBase* >( orig->dataHandler()->data( 0 ) );
+	pb->zombify( orig, zClass );
+	*/
+	
+	PoolBase::zombify( orig, zClass, s.id() );
+}
+
 void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 {
 	static const Cinfo* poolCinfo = Pool::initCinfo();
@@ -484,13 +508,19 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 	for ( vector< Id >::const_iterator i = elist.begin(); i != elist.end(); ++i ){
 		Element* ei = (*i)();
 		if ( ei->cinfo() == poolCinfo ) {
-			ZombiePool::zombify( e.element(), (*i)() );
+			zombifyAndUnschedPool( e, (*i)(), ZombiePool::initCinfo() );
 		}
 		else if ( ei->cinfo() == bufPoolCinfo ) {
-			ZombieBufPool::zombify( e.element(), (*i)() );
+			zombifyAndUnschedPool( e, (*i)(), ZombieBufPool::initCinfo() );
 		}
 		else if ( ei->cinfo() == funcPoolCinfo ) {
-			ZombieFuncPool::zombify( e.element(), (*i)() );
+			zombifyAndUnschedPool( e, (*i)(), ZombieFuncPool::initCinfo());
+			// Has also got to zombify the Func.
+			Id funcId = Neutral::child( i->eref(), "sumFunc" );
+			if ( funcId != Id() ) {
+				if ( funcId()->cinfo()->isA( "SumFunc" ) )
+					ZombieSumFunc::zombify( e.element(), funcId(), (*i) );
+			}
 		}
 		else if ( ei->cinfo() == reacCinfo ) {
 			ZombieReac::zombify( e.element(), (*i)() );

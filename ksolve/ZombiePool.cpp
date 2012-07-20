@@ -136,7 +136,11 @@ double ZombiePool::vGetConc( const Eref& e, const Qinfo* q ) const
 void ZombiePool::vSetConcInit( const Eref& e, const Qinfo* q, double conc )
 {
 	double n = NA * conc * lookupSizeFromMesh( e, requestSize );
-	stoich_->innerSetNinit( e.index().value(), e.id(), n );
+	unsigned int i = e.index().value();
+	stoich_->innerSetNinit( i, e.id(), n );
+	if ( i == 0 )
+		stoich_->setConcInit( stoich_->convertIdToPoolIndex( e.id() ), 
+			conc );
 }
 
 double ZombiePool::vGetConcInit( const Eref& e, const Qinfo* q ) const
@@ -184,65 +188,9 @@ void ZombiePool::vHandleMolWt( const Eref& e, const Qinfo* q, double v )
 //////////////////////////////////////////////////////////////
 // Zombie conversion functions.
 //////////////////////////////////////////////////////////////
-
-// static func
-void ZombiePool::zombify( Element* solver, Element* orig )
+void ZombiePool::setSolver( Id solver )
 {
-	////////////////////////////////////////////////////////
-	// Get rid of Process message
-	static const Finfo* procDest = 
-		PoolBase::initCinfo()->findFinfo( "process");
-	assert( procDest );
-
-	const DestFinfo* df = dynamic_cast< const DestFinfo* >( procDest );
-	assert( df );
-	MsgId mid = orig->findCaller( df->getFid() );
-	if ( mid != Msg::bad )
-		Msg::deleteMsg( mid );
-	////////////////////////////////////////////////////////
-
-	DataHandler* origHandler = orig->dataHandler();
-	DataHandler* dh = origHandler->copyUsingNewDinfo( 
-		ZombiePool::initCinfo()->dinfo() );
-	Element temp( orig->id(), zombiePoolCinfo, dh );
-	Eref zombier( &temp, 0 );
-
-	ZombiePool* z = reinterpret_cast< ZombiePool* >( zombier.data() );
-	Eref oer( orig, 0 );
-
-	PoolBase* m = reinterpret_cast< PoolBase* >( oer.data() );
-	// May need to extend to entire array.
-	z->stoich_ = reinterpret_cast< Stoich* >( solver->dataHandler()->data( 0 ) );
-	z->stoich_->setConcInit( z->stoich_->convertIdToPoolIndex( orig->id() ),
-		m->getConcInit( oer, 0 ) );
-	z->vSetSpecies( zombier, 0, m->getSpecies( oer, 0 ) );
-	z->vSetConcInit( zombier, 0, m->getConcInit( oer, 0 ) );
-	z->vSetN( zombier, 0, m->getN( oer, 0 ) );
-	z->vSetNinit( zombier, 0, m->getNinit( oer, 0 ) );
-	z->vSetDiffConst( zombier, 0, m->getDiffConst( oer, 0 ) );
-	// DataHandler* zh = new ZombieHandler( solver->dataHandler(), orig->dataHandler(), 0, numEntries );
-	orig->zombieSwap( zombiePoolCinfo, dh );
-	delete origHandler;
+	assert ( solver != Id() );
+	stoich_ = reinterpret_cast< Stoich* >( solver.eref().data() );
 }
 
-// Static func
-void ZombiePool::unzombify( Element* zombie )
-{
-	Element temp( zombie->id(), zombie->cinfo(), zombie->dataHandler() );
-	Eref zer( &temp, 0 );
-	Eref oer( zombie, 0 );
-
-	ZombiePool* z = reinterpret_cast< ZombiePool* >( zer.data() );
-
-	// Here I am unsure how to recreate the correct kind of data handler
-	// for the original. Do later.
-	DataHandler* dh = 0;
-
-	zombie->zombieSwap( PoolBase::initCinfo(), dh );
-
-	PoolBase* m = reinterpret_cast< PoolBase* >( oer.data() );
-
-	m->setN( oer, 0, z->getN( zer, 0 ) );
-	m->setNinit( oer, 0, z->getNinit( zer, 0 ) );
-	m->setSpecies( oer, 0, z->getSpecies( zer, 0 ) );
-}

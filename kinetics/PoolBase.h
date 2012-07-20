@@ -87,6 +87,34 @@ class PoolBase
 		virtual void vSetSize( const Eref& e, const Qinfo* q, double v ) = 0;
 		virtual void vSetSpecies( const Eref& e, const Qinfo* q, SpeciesId v ) = 0;
 		virtual SpeciesId vGetSpecies( const Eref& e, const Qinfo* q ) const = 0;
+		
+		//////////////////////////////////////////////////////////////////
+		/**
+		 * zombify is the base function for conversion between pool 
+		 * subclasses. This can be overridden, but should work for most 
+		 * things. This takes the original Element, and without touching
+		 * its messaging, replaces it with a new data object of the 
+		 * specified zClass. It does the best it can with conversion of
+		 * fields. Typically needs to be followed by rescheduling and
+		 * possibly a class-specific function for assigning further
+		 * zombie fields outside the ken of the PoolBase.
+		 * The 'solver' argument specifies which object handles the solver
+		 * for this conversion. Typically this is the Stoich object for
+		 * deterministic calculations.
+		 * The term zombie arises because this operation was originally
+		 * carried out to strip an object of independent function, and
+		 * replace it with a solver-controlled facsimile.
+		 */
+		static void zombify( Element* original, const Cinfo* zClass, 
+			Id solver );
+		
+		/**
+		 * Assign whatever info is needed by the zombie based on the
+		 * solver Element. Encapsulates some unpleasant field extraction,
+		 * casting, and assignment. Default version of this function does
+		 * nothing.
+		 */
+		virtual void setSolver( Id solver );
 
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
