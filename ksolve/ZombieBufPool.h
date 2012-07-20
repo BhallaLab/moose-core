@@ -22,9 +22,6 @@ class ZombieBufPool: public ZombiePool
 		void vSetConc( const Eref& e, const Qinfo* q, double v );
 		void vSetConcInit( const Eref& e, const Qinfo* q, double v );
 
-		static void zombify( Element* solver, Element* orig );
-		static void unzombify( Element* zombie );
-
 		static const Cinfo* initCinfo();
 	private:
 };

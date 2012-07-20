@@ -17901,13 +17901,40 @@ so some of the kinetics/mesh examples were taking a very long time to run, as
 they were locked to a 1e-5 timestep. Need to do a 'clear'.
 This brings up a few things to fix in scheduling.
 - Resched
-- Get all clocks and associated dts. Should be easy with a getVec on the
+* Get all clocks and associated dts. Should be easy with a getVec on the
 	Ticks, but there should be a nice way to organize it.
-
+	Done, using a ReadOnly field on the Clock.
 
 ============================================================================
 19 July 2012.
 Multiple fixes to unit and regression tests, following from reassigning clocks
 to different object classes. 
+Checkin 3793.
 
 ============================================================================
+20 July 2012
+To switch num methods: Decide between swapping Stoich and GssaStoich,
+with zombifying/unzombifying.
+
+Direct swap:
+	Escape reparsing entire reaction tree
+	Need to build clean unzombification code.
+	Might lose data if we convert between two high-level methods keeping
+	track of individual molecules.
+Zombify/unzombify:
+	Need to do for any of the other kinds of method change.
+	Uses existing code for building
+
+The latter is more general, as it goes through the MOOSE reference object
+definitions.
+
+I've begun work on a general zombify function that is defined at the PoolBase
+level. It generally swaps one pool class with another - no restrictions.
+leaves assignment of the Stoich still to the derived zombie class, and 
+also rescheduling. Good general way to swap either way.
+
+Begun implementation, so far only for pools. Compiles. Crashes in unit tests.
+Now clears unit and regression tests.
+
+Next step is to show I can round-trip the conversions.
+Need to put in some auto scheduling.

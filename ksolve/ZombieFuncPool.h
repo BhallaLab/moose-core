@@ -17,9 +17,6 @@ class ZombieFuncPool: public ZombiePool
 
 		void input( double v );
 
-		static void zombify( Element* solver, Element* orig );
-		static void unzombify( Element* zombie );
-
 		static const Cinfo* initCinfo();
 	private:
 };
