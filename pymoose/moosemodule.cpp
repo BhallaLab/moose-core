@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Tue Jul 17 16:47:53 2012 (+0530)
-//           By: subha
-//     Update #: 9217
+// Last-Updated: Sat Jul 21 22:38:07 2012 (+0530)
+//           By: Subhasis Ray
+//     Update #: 9240
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -150,7 +150,6 @@ extern "C" {
     static int quitFlag = 0;
     static Id shellId;
     static PyObject * MooseError;
-
     static PyObject* get_Id_attr(_Id * id, string attribute)
     {
         if (attribute == "path"){
@@ -749,7 +748,7 @@ extern "C" {
         0,                                              /* tp_methods */
         0,                                              /* tp_members */
         0,                                              /* tp_getset */
-        0,                                              /* tp_base */
+        &moose_Field,                                              /* tp_base */
         0,                                              /* tp_dict */
         0,                                              /* tp_descr_get */
         0,                                              /* tp_descr_set */
@@ -829,7 +828,7 @@ extern "C" {
         0,                                              /* tp_methods */
         0,                                              /* tp_members */
         0,                                              /* tp_getset */
-        0,                                              /* tp_base */
+        &moose_Field,                                              /* tp_base */
         0,                                              /* tp_dict */
         0,                                              /* tp_descr_get */
         0,                                              /* tp_descr_set */
@@ -844,11 +843,14 @@ extern "C" {
                  "ElementField represents fields that are themselves elements. For\n"
                  "example, synapse in an IntFire neuron.\n");
 
+    PyDoc_STRVAR(moose_ElementField_num_documentation,
+                 "Return number of entries in the field.");
+    static char numfield[] = "num";
     static PyGetSetDef ElementFieldGetSetters[] = {
-        {"num",
+        {numfield,
          (getter)moose_ElementField_getNum,
          (setter)moose_ElementField_setNum,
-         "Return number of entries in the field.",
+         moose_ElementField_num_documentation,
          NULL},
         {NULL}, /* sentinel */
     };
@@ -898,7 +900,7 @@ extern "C" {
         0,                           /* tp_methods */
         0,                                              /* tp_members */
         ElementFieldGetSetters,                                              /* tp_getset */
-        0,                                              /* tp_base */
+        &moose_Field,                                              /* tp_base */
         0,                                              /* tp_dict */
         0,                                              /* tp_descr_get */
         0,                                              /* tp_descr_set */
@@ -3211,9 +3213,9 @@ extern "C" {
     {
         PyObject * src = NULL, * dest = NULL;
         char * newName = NULL;
-        static char * kwlist[] = {"src", "dest", "name", "n", "toGlobal", "copyExtMsg", NULL};
+        static const char * kwlist[] = {"src", "dest", "name", "n", "toGlobal", "copyExtMsg", NULL};
         unsigned int num=1, toGlobal=0, copyExtMsgs=0;
-        if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO|sIII", kwlist, &src, &dest, &newName, &num, &toGlobal, &copyExtMsgs)){
+        if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO|sIII", const_cast<char**>(kwlist), &src, &dest, &newName, &num, &toGlobal, &copyExtMsgs)){
             return NULL;
         }
         Id _src, _dest;
@@ -3975,7 +3977,7 @@ extern "C" {
             strncpy(vec[curr_index].name,
                     const_cast<char*>(destFinfo_name.c_str()),
                     destFinfo_name.size());
-            vec[curr_index].doc = "";
+            // vec[curr_index].doc = ;
             vec[curr_index].get = (getter)moose_ObjId_get_destField_attr;
             PyObject * args = PyTuple_New(1);
             
@@ -4049,7 +4051,7 @@ extern "C" {
             get_getsetdefs()[class_name].push_back(getset);
             get_getsetdefs()[class_name][curr_index].name = (char*)calloc(lookupFinfo_name.size() + 1, sizeof(char));
             strncpy(get_getsetdefs()[class_name][curr_index].name, const_cast<char*>(lookupFinfo_name.c_str()), lookupFinfo_name.size());
-            get_getsetdefs()[class_name][curr_index].doc = "";
+            // get_getsetdefs()[class_name][curr_index].doc = "";
             get_getsetdefs()[class_name][curr_index].get = (getter)moose_ObjId_get_lookupField_attr;
             PyObject * args = PyTuple_New(1);
             PyTuple_SetItem(args, 0, PyString_FromString(lookupFinfo_name.c_str()));
@@ -4115,7 +4117,7 @@ extern "C" {
             get_getsetdefs()[class_name].push_back(getset);
             get_getsetdefs()[class_name][curr_index].name = (char*)calloc(finfo_name.size() + 1, sizeof(char));
             strncpy(get_getsetdefs()[class_name][curr_index].name, const_cast<char*>(finfo_name.c_str()), finfo_name.size());
-            get_getsetdefs()[class_name][curr_index].doc = "";
+            // get_getsetdefs()[class_name][curr_index].doc = EMPTY_STRING;
             get_getsetdefs()[class_name][curr_index].get = (getter)moose_ObjId_get_elementField_attr;
             PyObject * args = PyTuple_New(1);
             PyTuple_SetItem(args, 0, PyString_FromString(finfo_name.c_str()));
