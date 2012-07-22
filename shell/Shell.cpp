@@ -690,6 +690,7 @@ int Shell::doWriteSBML( const string& fname, const string& modelpath )
 	return sw.write( fname, modelpath );
 #else
     cerr << "Shell::WriteSBML: This copy of MOOSE has not been compiled with SBML writing support.\n";
+	return 0;
 #endif
 }
 
@@ -1330,6 +1331,24 @@ void Shell::handleMove( const Eref& e, const Qinfo* q,
 	ack()->send( Eref( shelle_, 0 ), q->threadNum(), Shell::myNode(), OkStatus );
 }
 
+void Shell::addClockMsgs( 
+	const vector< Id >& list, const string& field, unsigned int tick )
+{
+	if ( !Id( 2 ).element() )
+		return;
+	ObjId tickId( Id( 2 ), DataId( tick ) );
+	for ( vector< Id >::const_iterator i = list.begin(); 
+		i != list.end(); ++i ) {
+		if ( i->element() ) {
+			stringstream ss;
+			ss << "proc" << tick;
+			innerAddMsg( "OneToAll", Msg::nextMsgId(), 
+				tickId, ss.str(), 
+				ObjId( *i, 0 ), field );
+		}
+	}
+}
+
 void Shell::handleUseClock( const Eref& e, const Qinfo* q,
 	string path, string field, unsigned int tick)
 {
@@ -1343,35 +1362,15 @@ void Shell::handleUseClock( const Eref& e, const Qinfo* q,
 		ack()->send( Eref( shelle_, 0 ), q->threadNum(), Shell::myNode(), OkStatus );
 		return;
 	}
-	string tickField = "proc";
+	// string tickField = "proc";
 	// Hack to get around a common error.
 	if ( field.substr( 0, 4 ) == "proc" || field.substr( 0, 4 ) == "Proc" )
 		field = "proc"; 
 	if ( field.substr( 0, 4 ) == "init" || field.substr( 0, 4 ) == "Init" )
 		field = "init"; 
-	/*
-	string tickField = "process";
-	if ( field.substr( 0, 4 ) == "proc" || field.substr( 0, 4 ) == "Proc" )
-		field = tickField = "proc"; // Use the shared Msg with process and reinit.
-		*/
-	for ( vector< Id >::iterator i = list.begin(); i != list.end(); ++i ) {
-		stringstream ss;
-		ObjId tickId( Id( 2 ), DataId( tick ) );
-		ss << tickField << tick;
-		// bool ret = 
-		innerAddMsg( "OneToAll", Msg::nextMsgId(), 
-			tickId, ss.str(), 
-			ObjId( *i, 0 ), field);
-		// We just skip messages that don't work.
-		/*
-		if ( !ret ) {
-			cout << Shell::myNode() << "Error: Shell::handleUseClock: Messaging failed\n";
-			ack()->send( Eref( shelle_, 0 ), &p_, Shell::myNode(), 
-				ErrorStatus );
-			return;
-		}
-		*/
-	}
+	
+	addClockMsgs( list, field, tick );
+
 	ack()->send( Eref( shelle_, 0 ), q->threadNum(), Shell::myNode(), OkStatus );
 }
 

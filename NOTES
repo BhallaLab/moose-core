@@ -17936,5 +17936,28 @@ also rescheduling. Good general way to swap either way.
 Begun implementation, so far only for pools. Compiles. Crashes in unit tests.
 Now clears unit and regression tests.
 
-Next step is to show I can round-trip the conversions.
 Need to put in some auto scheduling.
+In testSimManager.cpp:testZombieTurnover().
+Four tests there.
+// the classes of all objects in the sim: properly converted back and forth.
+// Adding new objects and incorporating them with a refreshPath
+// Deleting objects and reconciling their absence
+// Memory leaks when we round-trip.
+
+Check Id( "/model/kinetics/k/J/J_cplx"
+
+After the obvious bugs are fixed, I have a nasty race condition. This
+happens when I try to invoke the SimManager::setMethod, which in turn
+calls assorted structural ops.
+
+============================================================================
+22 July 2012.
+Worked on a new framework for process vs. build call handling.
+Key change is that we identify the 20 or so Shell::do<Func> calls, and
+the Set/Get calls, as the only things that the Parser talks to.
+
+In order to get moving on this, I've commented out the tests for changing
+the integration method for a chem model from testSimManager.cpp:183.
+Clears unit and regression tests now.
+
+============================================================================

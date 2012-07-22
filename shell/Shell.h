@@ -324,6 +324,13 @@ class Shell
 			string path, string field, unsigned int tick );
 
 		/**
+		 * Utility function to set up messages to schedule a list of Ids 
+		 * using the specified field and tick
+		 */
+		void addClockMsgs( const vector< Id >& list, const string& field, 
+			unsigned int tick );
+
+		/**
  		 * Tell all attached pools and vols to update themselves: set their
  		 * array sizes and set their new volumes.
  		 */
