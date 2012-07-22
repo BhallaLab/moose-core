@@ -507,9 +507,12 @@ Id Shell::doCreate( string type, Id parent, string name, vector< int > dimension
 	Id ret = Id::nextId();
 	vector< int > dims( dimensions );
 	dims.push_back( isGlobal );
+	innerCreate( type, parent, ret, name, dims );
+	/*
 	initAck(); // Nasty thread stuff happens here for multithread mode.
 		requestCreate()->send( Id().eref(), ScriptThreadNum, type, parent, ret, name, dims );
 	waitForAck();
+	*/
 	return ret;
 }
 
