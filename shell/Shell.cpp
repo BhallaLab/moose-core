@@ -518,9 +518,13 @@ Id Shell::doCreate( string type, Id parent, string name, vector< int > dimension
 
 bool Shell::doDelete( Id i )
 {
+	Neutral n;
+	n.destroy( i.eref(), 0, 0 );
+	/*
 	initAck();
 		requestDelete()->send( Id().eref(), ScriptThreadNum, i );
 	waitForAck();
+	*/
 	return 1;
 }
 
