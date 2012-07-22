@@ -17960,4 +17960,13 @@ In order to get moving on this, I've commented out the tests for changing
 the integration method for a chem model from testSimManager.cpp:183.
 Clears unit and regression tests now.
 
+Set up buildQ branch in order to play with the build call handling.
+General approach: 
+- Replace build calls with their threadless equivalents one by one.
+- Set up MPI calls within the build calls.
+Is there a way to test which thread one is on?
+
+Starting with Shell::doCreate. This relatively small change
+clears unit and regression tests.
+
 ============================================================================
