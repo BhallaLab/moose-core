@@ -7,6 +7,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 #include "header.h"
+#include "ElementValueFinfo.h"
 #include "../shell/Shell.h"
 #include "../shell/Wildcard.h"
 #include "SimManager.h"
@@ -80,7 +81,7 @@ const Cinfo* SimManager::initCinfo()
 			&SimManager::getRunTime
 		);
 
-		static ValueFinfo< SimManager, string > method(
+		static ElementValueFinfo< SimManager, string > method(
 			"method",
 			"method is the numerical method used for the calculations."
 			"This will set up or even replace the solver with one able"
@@ -255,19 +256,27 @@ unsigned int SimManager::getVersion() const
 	return version_;
 }
 
-void SimManager::setMethod( string v )
+void SimManager::setMethod( const Eref& e, const Qinfo* q, string v )
 {
-	if ( v == "GSSA" || v == "gssa" || v == "Gillespie" || v == "gillespie")
+	if ( q->protectedAddToStructuralQ() )
+		return;
+
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+
+	if ( v == "GSSA" || v == "gssa" || v == "Gillespie" || v == "gillespie") {
 		// setupGssa();
 		;
-	else if ( v == "rk5" || v == "gsl" || v == "GSL" )
-		;
+	} else if ( v == "rk5" || v == "gsl" || v == "GSL" ) {
+		buildGsl( e, q, shell, v );
 		// setupRK5();
+	} else if ( v == "ee" || v == "EE" || v == "ExpEuler" ) {
+		shell->doDelete( stoich_ );
+	}
 	cout << "SimManager::setMethod: Not yet implemented\n";
 	method_ = v;
 }
 
-string SimManager::getMethod() const
+string SimManager::getMethod( const Eref& e, const Qinfo* q ) const
 {
 	return method_;
 }

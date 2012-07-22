@@ -214,6 +214,7 @@ Stoich::~Stoich()
 	for ( vector< FuncTerm* >::iterator i = funcs_.begin();
 		i != funcs_.end(); ++i )
 		delete *i;
+	unZombifyModel();
 }
 
 //////////////////////////////////////////////////////////////
@@ -531,19 +532,34 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 		else if ( ei->cinfo() == enzCinfo ) {
 			ZombieEnz::zombify( e.element(), (*i)() );
 		}
-		/*
-		else if ( ei->cinfo()->isA( "MeshEntry" ) ) {
-			meshEntries.push_back( *i ); // Accumulate for later use. The
-			// function needs all the pools to have been assimilated first.
-		}
-		*/
 	}
-	/*
-	for ( vector< Id >::const_iterator i = meshEntries.begin(); i != meshEntries.end(); ++i ){
-			zombifyChemMesh( *i ); // It retains its identity.
-			// ZombieChemMesh::zombify( e.element(), (*i)() );
+}
+
+void Stoich::unZombifyModel()
+{
+	// Need to check for existence of molecule and whether it is still
+	// a zombie.
+	unsigned int i = 0;
+	for ( ; i < numVarPools_; ++i ) {
+		Element* e = idMap_[i].element();
+		if ( e != 0 &&  e->cinfo() == ZombiePool::initCinfo() )
+			PoolBase::zombify( e, Pool::initCinfo(), Id() );
 	}
-	*/
+	
+	for ( ; i < numVarPools_ + numBufPools_; ++i ) {
+		Element* e = idMap_[i].element();
+		if ( e != 0 &&  e->cinfo() == ZombieBufPool::initCinfo() )
+			PoolBase::zombify( e, BufPool::initCinfo(), Id() );
+	}
+	
+	for ( ; i < numVarPools_ + numBufPools_ + numFuncPools_; ++i ) {
+		Element* e = idMap_[i].element();
+		if ( e != 0 &&  e->cinfo() == ZombieFuncPool::initCinfo() )
+			PoolBase::zombify( e, FuncPool::initCinfo(), Id() );
+	}
+	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+
+	s->addClockMsgs( idMap_, "proc", 4 );
 }
 
 void Stoich::handleRemesh( unsigned int numLocalMeshEntries, 
