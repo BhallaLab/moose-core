@@ -30,8 +30,8 @@ class SimManager
 		double getRunTime() const;
 		void setVersion( unsigned int v );
 		unsigned int getVersion() const;
-		void setMethod( string v );
-		string getMethod() const;
+		void setMethod( const Eref& e, const Qinfo* q, string v );
+		string getMethod( const Eref& e, const Qinfo* q ) const;
 
 		/// Destination function
 		void build( const Eref& e, const Qinfo* q, string method );

@@ -83,7 +83,17 @@ class Stoich
 		//////////////////////////////////////////////////////////////////
 		void allocateObjMap( const vector< Id >& elist );
 		void allocateModel( const vector< Id >& elist );
+
+		/**
+		 * zombifyModel marches through the specified id list and 
+		 * converts all entries into zombies.
+		 */
 		void zombifyModel( const Eref& e, const vector< Id >& elist );
+
+		/**
+		 * Converts back to EE type basic Elements.
+		 */
+		void unZombifyModel();
 		void zombifyChemMesh( Id compt );
 
 		unsigned int convertIdToReacIndex( Id id ) const;
