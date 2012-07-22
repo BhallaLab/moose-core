@@ -17969,4 +17969,9 @@ Is there a way to test which thread one is on?
 Starting with Shell::doCreate. This relatively small change
 clears unit and regression tests.
 
+Also did Shell::doDelete. This too clears tests.
+
+Need to put in mutexes in these so that the Parser can call
+these safely during the Barriers.
+
 ============================================================================
