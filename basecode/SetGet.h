@@ -349,6 +349,50 @@ template< class A > class Field: public SetGet1< A >
 		 */
 		static void getVec( Id dest, const string& field, vector< A >& vec)
 		{
+			vec.resize( 0 );
+			Field< A > sg( dest );
+			ObjId tgt( dest );
+			FuncId fid;
+			string fullFieldName = "get_" + field;
+			if ( const OpFunc* func = 
+				sg.checkSet( fullFieldName, tgt, fid ) )
+			{
+				const GetOpFuncBase< A >* gof = 
+					dynamic_cast< const GetOpFuncBase< A >* >( func );
+				if ( gof ) {
+					Element* elm = dest.element();
+					DataHandler* dh = elm->dataHandler();
+					// This will need some serious MPI work.
+					unsigned int fieldMask = dh->fieldMask();
+					unsigned int size = dh->totalEntries();
+					vec.resize( size );
+					if ( fieldMask != 0 ) {
+						assert( dh->numDimensions() > 0 );
+						unsigned int maxNumEntries = dh->sizeOfDim(
+							dh->numDimensions() - 1 );
+						unsigned int numObj = size / maxNumEntries;
+						for ( unsigned int i = 0; i < numObj; ++i ) {
+							unsigned int numEntries = dh->getFieldArraySize( i );
+							for ( unsigned int j = 0; j < numEntries; ++j ) {
+								unsigned int k = j + i * ( fieldMask + 1 );
+								DataId di( k );
+								k = j + i * maxNumEntries;
+								vec[ k ] = gof->reduceOp( Eref( elm, di ));
+							}
+						}
+					} else {
+						for ( unsigned int i = 0; i < size; ++i ) {
+							Eref e( elm, i );
+							vec[i] = gof->reduceOp( e );
+						}
+					}
+					return;
+				}
+			}
+			cout << "Warning: Field::getVec conversion error for " <<
+				dest.path() << endl;
+		}
+		
 		/*
 			ObjId tgt( dest, DataId::any );
 			const vector< double* >* ret = innerGet( tgt, field );
@@ -366,7 +410,6 @@ template< class A > class Field: public SetGet1< A >
 				return;
 			}
 			*/
-		}
 
 		/**
 		 * Instant-return call for a single value along an existing Msg.
