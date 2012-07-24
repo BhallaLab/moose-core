@@ -17991,4 +17991,14 @@ call is direct.
 Done, compiled, with copious warnings. Clears first few unit tests but 
 doesn't do the 'get' properly. Anyway, let's check this in. Checkin 3808.
 
-Now proceeds past the 'get', fails in testSetGetVec.
+Now proceeds past the 'get', fails in testSetGetVec. Checkin 3809.
+
+Got first level of getVec to work, now fails with ragged array of
+synapse delays.
+
+I thought I fixed it with a much more complete getVec to handle field
+arrays, but still isn't working.
+
+Fixed it now. Needed careful attention to how DataHandler deals with
+field indexing.
+Now clears through till the testLookupSetGet.
