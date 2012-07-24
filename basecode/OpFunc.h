@@ -431,7 +431,7 @@ template< class T, class A > class GetOpFunc: public GetOpFuncBase< A >
  * A is the return type
  * L is the lookup index.
  */
-template< class T, class L, class A > class GetOpFunc1: public GetOpFuncBase< A >
+template< class T, class L, class A > class GetOpFunc1: public LookupGetOpFuncBase< L, A >
 {
 	public:
 		GetOpFunc1( A ( T::*func )( L ) const )
@@ -475,12 +475,9 @@ template< class T, class L, class A > class GetOpFunc1: public GetOpFuncBase< A 
 			returnFromGet( e, q, buf, conv0.ptr(), conv0.size() );
 		}
 
-		/// ReduceOp is not really permissible for this class.
-		A reduceOp( const Eref& e ) const {
-			static A ret;
-			return ret;
-			// L dummy;
-			// return ( reinterpret_cast< T* >( e.data() )->*func_)( dummy );
+		/// Distinct reduceOp with the index.
+		A reduceOp( const Eref& e, const L& index ) const {
+			return ( reinterpret_cast< T* >( e.data() )->*func_)( index );
 		}
 
 	private:

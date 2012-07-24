@@ -109,7 +109,7 @@ class SetGet0: public SetGet
 			FuncId fid;
 			ObjId tgt( dest );
 			if ( const OpFunc* func = sg.checkSet( field, tgt, fid ) ) {
-				func->op( dest.eref(), &qi_, 0 );
+				func->op( tgt.eref(), &qi_, 0 );
 				/*
 				mpiSend( fid, tgt, 0, 0 );
 				*/
@@ -144,7 +144,7 @@ template< class A > class SetGet1: public SetGet
 			ObjId tgt( dest );
 			if ( const OpFunc* func = sg.checkSet( field, tgt, fid ) ) {
 				Conv< A > conv( arg );
-				func->op( dest.eref(), &qi_, conv.ptr() );
+				func->op( tgt.eref(), &qi_, conv.ptr() );
 				// mpiSend( fid, tgt, conv.ptr, conv.size() );
 				return 1;
 			}
@@ -474,7 +474,7 @@ template< class A1, class A2 > class SetGet2: public SetGet
 				double *temp = new double[ totSize ];
 				conv1.val2buf( temp );
 				conv2.val2buf( temp + conv1.size() );
-				func->op( dest.eref(), &qi_, temp );
+				func->op( tgt.eref(), &qi_, temp );
 				delete[] temp;
 				/*
 				Qinfo::addDirectToQ( 
@@ -702,14 +702,19 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 		 */
 		static A get( const ObjId& dest, const string& field, L index)
 		{ 
-			const vector< double* >* ret = 
-				innerGet( dest, field, index );
-			if ( ret ) {
-				if ( ret->size() == 1 ) {
-					Conv< A > conv( (*ret)[0] );
-					return *conv;
-				}
+			LookupField< L, A > sg( dest );
+			ObjId tgt( dest );
+			FuncId fid;
+			string fullFieldName = "get_" + field;
+			if ( const OpFunc* func = 
+				sg.checkSet( fullFieldName, tgt, fid ) ) {
+				const LookupGetOpFuncBase< L, A >* gof = 
+				dynamic_cast< const LookupGetOpFuncBase< L, A >* >( func );
+				if ( gof )
+					return gof->reduceOp( tgt.eref(), index );
 			}
+			cout << "Warning: LookupField::Get conversion error for " << 
+				dest.id.path() << endl;
 			return A();
 		}
 
@@ -784,7 +789,7 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 				conv2.val2buf( temp + conv1.size() );
 				conv3.val2buf( temp + conv1.size() + conv2.size() );
 
-				func->op( dest.eref(), &qi_, temp );
+				func->op( tgt.eref(), &qi_, temp );
 
 				/*
 				Qinfo::addDirectToQ( 
@@ -860,7 +865,7 @@ template< class A1, class A2, class A3, class A4 > class SetGet4: public SetGet
 				conv2.val2buf( ptr ); ptr += conv2.size();
 				conv3.val2buf( ptr ); ptr += conv3.size();
 				conv4.val2buf( ptr );
-				func->op( dest.eref(), &qi_, temp );
+				func->op( tgt.eref(), &qi_, temp );
 				/*
 				Qinfo::addDirectToQ( 
 					ObjId(), tgt, 0, fid, 
@@ -948,7 +953,7 @@ template< class A1, class A2, class A3, class A4, class A5 > class SetGet5:
 				conv3.val2buf( ptr ); ptr += conv3.size();
 				conv4.val2buf( ptr ); ptr += conv4.size();
 				conv5.val2buf( ptr );
-				func->op( dest.eref(), &qi_, temp );
+				func->op( tgt.eref(), &qi_, temp );
 
 				/*
 				Qinfo::addDirectToQ( 
@@ -1042,7 +1047,7 @@ template< class A1, class A2, class A3, class A4, class A5, class A6 > class Set
 				conv4.val2buf( ptr ); ptr += conv4.size();
 				conv5.val2buf( ptr ); ptr += conv5.size();
 				conv6.val2buf( ptr );
-				func->op( dest.eref(), &qi_, temp );
+				func->op( tgt.eref(), &qi_, temp );
 
 				/*
 				Qinfo::addDirectToQ( 
