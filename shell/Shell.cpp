@@ -420,7 +420,7 @@ const Cinfo* Shell::initCinfo()
 
 		static DestFinfo setclock( "setclock", 
 			"Assigns clock ticks. Args: tick#, dt",
-			new OpFunc2< Shell, unsigned int, double >( & Shell::doSetClock ) );
+			new OpFunc3< Shell, unsigned int, double, bool >( & Shell::doSetClock ) );
 		static SharedFinfo master( "master",
 			"Issues commands from master shell to worker shells located "
 			"on different nodes. Also handles acknowledgements from them.",
@@ -502,12 +502,14 @@ void Shell::setShellElement( Element* shelle )
  * Idea is that the model should be fully defined before load balancing.
  *
  */
-Id Shell::doCreate( string type, Id parent, string name, vector< int > dimensions, bool isGlobal )
+Id Shell::doCreate( string type, Id parent, string name, vector< int > dimensions, bool isGlobal, bool qFlag )
 {
 	Id ret = Id::nextId();
 	vector< int > dims( dimensions );
 	dims.push_back( isGlobal );
-	innerCreate( type, parent, ret, name, dims );
+	Qinfo::buildOn( qFlag );
+		innerCreate( type, parent, ret, name, dims );
+	Qinfo::buildOff( qFlag );
 	/*
 	initAck(); // Nasty thread stuff happens here for multithread mode.
 		requestCreate()->send( Id().eref(), ScriptThreadNum, type, parent, ret, name, dims );
@@ -516,10 +518,12 @@ Id Shell::doCreate( string type, Id parent, string name, vector< int > dimension
 	return ret;
 }
 
-bool Shell::doDelete( Id i )
+bool Shell::doDelete( Id i, bool qFlag )
 {
 	Neutral n;
-	n.destroy( i.eref(), 0, 0 );
+	Qinfo::buildOn( qFlag );
+		n.destroy( i.eref(), 0, 0 );
+	Qinfo::buildOff( qFlag );
 	/*
 	initAck();
 		requestDelete()->send( Id().eref(), ScriptThreadNum, i );
@@ -530,7 +534,7 @@ bool Shell::doDelete( Id i )
 
 MsgId Shell::doAddMsg( const string& msgType, 
 	ObjId src, const string& srcField, 
-	ObjId dest, const string& destField )
+	ObjId dest, const string& destField, bool qFlag )
 {
 	if ( !src.id() ) {
 		cout << myNode_ << ": Error: Shell::doAddMsg: src not found" << endl;
@@ -607,14 +611,14 @@ void Shell::connectMasterMsg()
 	// innerAddMsg( string msgType, ObjId src, string srcField, ObjId dest, string destField )
 }
 
-void Shell::doQuit( )
+void Shell::doQuit( bool qFlag )
 {
 	// No acks needed: the next call from parser should be to 
 	// exit parser itself.
 	requestQuit()->send( Id().eref(), ScriptThreadNum );
 }
 
-void Shell::doStart( double runtime )
+void Shell::doStart( double runtime, bool qFlag )
 {
 	Eref sheller( shelle_, 0 );
 	// Check if sim not yet initialized. Do it if needed.
@@ -626,7 +630,7 @@ void Shell::doStart( double runtime )
 	// cout << Shell::myNode() << ": Shell::doStart(" << runtime << ")" << endl;
 }
 
-void Shell::doNonBlockingStart( double runtime )
+void Shell::doNonBlockingStart( double runtime, bool qFlag )
 {
 	Eref sheller( shelle_, 0 );
 	// Check if sim not yet initialized. Do it if needed.
@@ -634,7 +638,7 @@ void Shell::doNonBlockingStart( double runtime )
 	requestStart()->send( sheller, ScriptThreadNum, runtime );
 }
 
-void Shell::doReinit()
+void Shell::doReinit( bool qFlag )
 {
 	if ( !keepLooping() ) {
 		cout << "Error: Shell::doReinit: Should not be called unless ProcessLoop is running\n";
@@ -646,7 +650,7 @@ void Shell::doReinit()
 	waitForAck();
 }
 
-void Shell::doStop()
+void Shell::doStop( bool qFlag )
 {
 	if ( !keepLooping() ) {
 		cout << "Error: Shell::doStop: Should not be called unless ProcessLoop is running\n";
@@ -659,7 +663,7 @@ void Shell::doStop()
 }
 ////////////////////////////////////////////////////////////////////////
 
-void Shell::doSetClock( unsigned int tickNum, double dt )
+void Shell::doSetClock( unsigned int tickNum, double dt, bool qFlag )
 {
 	/*
 	// if ( q->addToStructuralQ() ) return;
@@ -679,7 +683,8 @@ void Shell::doSetClock( unsigned int tickNum, double dt )
 	SetGet2< unsigned int, double >::set( ObjId( 1 ), "setupTick", tickNum, dt );
 }
 
-void Shell::doUseClock( string path, string field, unsigned int tick )
+void Shell::doUseClock( string path, string field, unsigned int tick,
+	bool qFlag )
 {
 	Eref sheller( shelle_, 0 );
 	initAck();
@@ -690,7 +695,8 @@ void Shell::doUseClock( string path, string field, unsigned int tick )
 /**
  * Write given model to SBML file. Returns success value.
  */
-int Shell::doWriteSBML( const string& fname, const string& modelpath )
+int Shell::doWriteSBML( const string& fname, const string& modelpath,
+	bool qFlag )
 {
 #ifdef USE_SBML
 	SbmlWriter sw;
@@ -703,7 +709,7 @@ int Shell::doWriteSBML( const string& fname, const string& modelpath )
 
 ////////////////////////////////////////////////////////////////////////
 
-void Shell::doMove( Id orig, Id newParent )
+void Shell::doMove( Id orig, Id newParent, bool qFlag )
 {
 	if ( orig == Id() ) {
 		cout << "Error: Shell::doMove: Cannot move root Element\n";

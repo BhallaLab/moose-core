@@ -12,49 +12,12 @@
 #include "../shell/Shell.h"
 #include "../shell/Neutral.h"
 
-/*
-Eref SetGet::shelle_( 0, 0 );
-Element* SetGet::shell_;
-
-void SetGet::setShell()
-{
-	Id shellid;
-	shelle_ = shellid.eref();
-	shell_ = shelle_.element();
-}
-*/
-
-/**
- * completeSet: Confirms that the target function has been executed.
- * Later this has to be much more complete: perhaps await return of a baton
- * to ensure that the operation is complete through varous threading,
- * nesting, and multinode operations.
- * Even single thread, single node this current version is dubious: 
- * suppose the function called by 'set' issues a set command of its own?
- */
-void SetGet::completeSet() const
-{
-	// e_.element()->clearQ();
-	// Qinfo::clearQ( Shell::procInfo() );
-}
+// Static field defintion.
+Qinfo SetGet::qi_;
 
 //////////////////////////////////////////////////////////////////////
 // A group of functions to forward dispatch commands to the Shell.
 //////////////////////////////////////////////////////////////////////
-
-/*
-void SetGet::dispatchSet( const ObjId& oid, FuncId fid, 
-	const char* args, unsigned int size )
-{
-	Shell::dispatchSet( oid, fid, args, size );
-}
-
-void SetGet::dispatchSetVec( const ObjId& oid, FuncId fid, 
-	const PrepackedBuffer& arg )
-{
-	Shell::dispatchSetVec( oid, fid, arg );
-}
-*/
 
 const vector< double* >* SetGet::dispatchGet( 
 	const ObjId& tgt, FuncId tgtFid, const double* arg, unsigned int size )
@@ -70,7 +33,7 @@ const vector< double* >* SetGet::dispatchGet(
 
 //////////////////////////////////////////////////////////////////////
 
-unsigned int SetGet::checkSet( 
+const OpFunc* SetGet::checkSet( 
 	const string& field, ObjId& tgt, FuncId& fid ) const
 {
 	// string field = "set_" + destField;
@@ -123,17 +86,11 @@ unsigned int SetGet::checkSet(
 	
 	fid = df->getFid();
 	const OpFunc* func = df->getOpFunc();
-
-// 	fid = oid_.element()->cinfo()->getOpFuncId( field );
-//	const OpFunc* func = oid_.element()->cinfo()->getOpFunc( fid );
-	if ( !func ) {
-		cout << "set::Failed to find " << oid_ << "." << field << endl;
-		return 0;
-	}
+	assert( func );
 
 	// This is the crux of the function: typecheck for the field.
 	if ( func->checkSet( this ) ) {
-		return tgt.element()->dataHandler()->totalEntries();
+		return func;
 	} else {
 		cout << "set::Type mismatch" << oid_ << "." << field << endl;
 		return 0;

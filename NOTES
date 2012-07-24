@@ -17969,9 +17969,24 @@ Is there a way to test which thread one is on?
 Starting with Shell::doCreate. This relatively small change
 clears unit and regression tests.
 
-Also did Shell::doDelete. This too clears tests.
+Also did Shell::doDelete. This too clears tests. Checkin 3807.
 
 Need to put in mutexes in these so that the Parser can call
 these safely during the Barriers.
 
 ============================================================================
+23 July
+Put in the threading stuff for the new buildQ calls. Moderately nasty.
+Trying to compile. need to work out about protectedAddToStructuralQ.
+
+============================================================================
+24 July 2012
+Compiled. Fails very quickly in unit tests.
+Marching through SetGet.h to get it to work again. Currently in Field::get()
+around line 320. But compare with fastGet a few lines down.
+Done, now on to LookupField.
+Done, now need to set up a sensible Qinfo that will tell targets that the
+call is direct.
+
+Done, compiled, with copious warnings. Clears first few unit tests but 
+doesn't do the 'get' properly. Anyway, let's check this in.
