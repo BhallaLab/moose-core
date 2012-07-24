@@ -175,28 +175,32 @@ class Qinfo
 		 */
 		bool addToStructuralQ() const;
 
-		/**
-		 * Same as Qinfo::addToStructuralQ(), with the addition of a 
-		 * mutex check
-		 * so that this call can be made from any worker thread.
-		 * Designed to be used by SimManager and other objects that
-		 * manipulate the structure of the simulation.
-		 */
-		bool protectedAddToStructuralQ() const;
-
-		/**
-		 * Locks Qmutex if multithreaded and on thread 0
-		 */
-		static void lockQmutex( ThreadId threadNum );
-
-		/**
-		 * Unlocks Qmutex if multithreaded and on thread 0
-		 */
-		static void unlockQmutex( ThreadId threadNum );
+		/// Locks the ParserThread. Called when starting ProcessLoop.
+		static void lockParserThread();
 
 		//////////////////////////////////////////////////////////////
 		// From here, static funcs handling the Queues.
 		//////////////////////////////////////////////////////////////
+
+
+		/**
+ 		 * Presents a barrier to calls that modify MOOSE simulation
+		 * structure. This should be called before any build function.
+ 		 * It can be called in two contexts: from the parser, and from a
+		 * Handler. The former case is more common. If so, the call must
+		 * be called within a mutex protected portion of SwapQ.
+ 		 * The latter case applies if the call is initiated from within
+		 * the MOOSE messaging system, through a function Handler.
+ 		 * The qFlag must be set if the call is from a Handler. Otherwise
+		 * the system detects this and sends up an error.
+ 		 */
+		static void buildOn( bool qFlag );
+
+		/**
+		 * Releases barrier to calls that modify MOOSE simulation structure.
+		 * Call after build function is done.
+		 */
+		static void buildOff( bool qFlag );
 
 		/**
 		 * Read the inQ. Meant to run on all the sim threads.
@@ -432,6 +436,11 @@ class Qinfo
 		 */
 		static bool isSafeForStructuralOps_;
 
+		/**
+		 * Flag to tell system that the parser wants to run a function.
+		 */
+		static bool parserPending_;
+
 		/*
 		 * This handles incoming data from MPI. It is used as a buffer
 		 * for the MPI_Bcast or other calls to dump internode data into.
@@ -486,8 +495,8 @@ class Qinfo
 		static pthread_mutex_t *qMutex_;
 		static pthread_cond_t *qCond_;
 
-		// Another mutex for the structural queue
-		static pthread_mutex_t* sqMutex_;
+		// Another mutex for the parser
+		static pthread_mutex_t* pMutex_;
 
 		static bool waiting_;
 

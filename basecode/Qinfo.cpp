@@ -23,6 +23,7 @@
 
 // Declaration of static fields
 bool Qinfo::isSafeForStructuralOps_ = 0;
+bool Qinfo::parserPending_ = 0;
 const BindIndex Qinfo::DirectAdd = -1;
 vector< double > Qinfo::q0_( 1000, 0.0 );
 
@@ -40,7 +41,7 @@ vector< Qinfo > Qinfo::structuralQinfo_( 0 );
 vector< double > Qinfo::structuralQdata_( 0 );
 
 pthread_mutex_t* Qinfo::qMutex_;
-pthread_mutex_t* Qinfo::sqMutex_;
+pthread_mutex_t* Qinfo::pMutex_;
 pthread_cond_t* Qinfo::qCond_;
 
 bool Qinfo::waiting_ = 0;
@@ -158,6 +159,54 @@ void Qinfo::readQ( ThreadId threadNum )
 }
 
 /**
+ * Presents a barrier to calls that modify MOOSE simulation structure.
+ * This should be called before any build function.
+ * It can be called in two contexts: from the parser, and from a Handler.
+ * The former case is more common. If so, the call must be called within
+ * a mutex protected portion of SwapQ.
+ * The latter case applies if the call is initiated from within the MOOSE
+ * messaging system, through a function Handler.
+ * The qFlag must be set if the call is from a Handler. Otherwise the
+ * system detects this and sends up an error.
+ * static func
+ */
+void Qinfo::buildOn( bool qFlag )
+{
+	if ( qFlag ) {
+		if ( isSafeForStructuralOps_ )
+			return;
+		else
+			assert( 0 );
+	} else {
+		parserPending_ = true;
+		pthread_mutex_lock( pMutex_ );
+		pthread_mutex_lock( qMutex_ );
+		return;
+	}
+}
+
+/**
+ * Releases barrier to calls that modify MOOSE simulation structure.
+ * Call after the build function.
+ * Static func.
+ */
+void Qinfo::buildOff( bool qFlag )
+{
+	if ( !qFlag ) {
+		parserPending_ = false;
+		pthread_cond_signal( qCond_ );
+		pthread_mutex_unlock( qMutex_ );
+		pthread_mutex_unlock( pMutex_ );
+	}
+}
+
+// static function. Called just before we start the process loop
+void Qinfo::lockParserThread() 
+{
+	pthread_mutex_lock( pMutex_ );
+}
+
+/**
  * Stitches together thread blocks on
  * the inQ so that the readBuf function will go through as a single unit.
  * Runs only in barrier 1.
@@ -178,6 +227,17 @@ void Qinfo::swapQ()
 	 */
 	clearStructuralQ(); // static function.
 
+	if (parserPending_ ) {
+		pthread_mutex_unlock( pMutex_ );
+		pthread_mutex_lock( qMutex_ );
+		while (parserPending_ ) {
+			pthread_cond_wait( qCond_, qMutex_ );
+		}
+		pthread_mutex_unlock( qMutex_ );
+		pthread_mutex_lock( pMutex_ );
+	}
+
+
 	/**
 	 * This whole function is protected by a mutex so that the master
 	 * thread from the parser does not issue any more commands while we
@@ -185,7 +245,6 @@ void Qinfo::swapQ()
 	 * is for the master thread and therefore it must also be protected.
 	 */
 
-	if ( !Shell::isSingleThreaded() ) pthread_mutex_lock( qMutex_ );
 		/**
 	 	* Here we just deposit all the data from the data and Q vectors into
 	 	* the inQ.
@@ -241,15 +300,7 @@ void Qinfo::swapQ()
 			dBuf_[i].resize( 0 );
 		}
 
-		if ( waiting_ ) {
-			if ( numCyclesToWait_ == 0 ) {
-				waiting_ = 0;
-				pthread_cond_signal( qCond_ );
-			} else {
-				--numCyclesToWait_;
-			}
-		}
-	if ( !Shell::isSingleThreaded() ) pthread_mutex_unlock( qMutex_ );
+	// if ( !Shell::isSingleThreaded() ) pthread_mutex_lock( qMutex_ );
 	++numProcessCycles_;
 
 	// Used to avoid pounding on the CPU when nothing is happening.
@@ -262,7 +313,6 @@ void Qinfo::swapQ()
 			nanosleep( &req, 0 );
 		#endif // _MSC_VER
 	}
-
 }
 
 /**
@@ -270,9 +320,11 @@ void Qinfo::swapQ()
  * Should only be called on the master thread (thread 0).
  * Must not be called recursively.
  * Static func.
+ * Deprecated, here as dummy till I get round to cleaning out.
  */
 void Qinfo::waitProcCycles( unsigned int numCycles )
 {
+	/*
 	if ( Shell::keepLooping() && !Shell::isSingleThreaded()  ) {
 		pthread_mutex_lock( qMutex_ );
 			waiting_ = 1;
@@ -284,6 +336,7 @@ void Qinfo::waitProcCycles( unsigned int numCycles )
 		for ( unsigned int i = 0; i < numCycles; ++i )
 			clearQ( ScriptThreadNum );
 	}
+	*/
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -503,14 +556,12 @@ void Qinfo::addToQ( const ObjId& oi,
 	const double* arg, unsigned int size )
 {
 	if ( oi.element()->hasMsgs( bindIndex ) ) {
-		lockQmutex( threadNum );
 			vector< double >& vec = dBuf_[ threadNum ];
 			qBuf_[ threadNum ].push_back( 
 				Qinfo( oi, bindIndex, threadNum, vec.size(), size ) );
 			if ( size > 0 ) {
 				vec.insert( vec.end(), arg, arg + size );
 			}
-		unlockQmutex( threadNum );
 	}
 }
 
@@ -521,7 +572,6 @@ void Qinfo::addToQ( const ObjId& oi,
 	const double* arg2, unsigned int size2 )
 {
 	if ( oi.element()->hasMsgs( bindIndex ) ) {
-		lockQmutex( threadNum );
 			vector< double >& vec = dBuf_[ threadNum ];
 			qBuf_[ threadNum ].push_back( 
 				Qinfo( oi, bindIndex, threadNum, vec.size(), size1 + size2 ) );
@@ -529,7 +579,6 @@ void Qinfo::addToQ( const ObjId& oi,
 				vec.insert( vec.end(), arg1, arg1 + size1 );
 			if ( size2 > 0 )
 				vec.insert( vec.end(), arg2, arg2 + size2 );
-		unlockQmutex( threadNum );
 	}
 }
 
@@ -542,7 +591,6 @@ void Qinfo::addDirectToQ( const ObjId& src, const ObjId& dest,
 	static const unsigned int ObjFidSizeInDoubles = 
 		1 + ( sizeof( ObjFid ) - 1 ) / sizeof( double );
 
-	lockQmutex( threadNum );
 		vector< double >& vec = dBuf_[ threadNum ];
 		qBuf_[ threadNum ].push_back(
 			Qinfo( src, DirectAdd, threadNum, vec.size(), size ) );
@@ -552,7 +600,6 @@ void Qinfo::addDirectToQ( const ObjId& src, const ObjId& dest,
 		if ( size > 0 ) {
 			vec.insert( vec.end(), arg, arg + size );
 		}
-	unlockQmutex( threadNum );
 }
 
 // Static function
@@ -565,7 +612,6 @@ void Qinfo::addDirectToQ( const ObjId& src, const ObjId& dest,
 	static const unsigned int ObjFidSizeInDoubles = 
 		1 + ( sizeof( ObjFid ) - 1 ) / sizeof( double );
 
-	lockQmutex( threadNum );
 		vector< double >& vec = dBuf_[ threadNum ];
 		qBuf_[ threadNum ].push_back(
 			Qinfo( src, DirectAdd, threadNum, vec.size(), size1 + size2 ) );
@@ -576,7 +622,6 @@ void Qinfo::addDirectToQ( const ObjId& src, const ObjId& dest,
 			vec.insert( vec.end(), arg1, arg1 + size1 );
 		if ( size2 > 0 )
 			vec.insert( vec.end(), arg2, arg2 + size2 );
-	unlockQmutex( threadNum );
 }
 
 // Static function
@@ -590,7 +635,6 @@ void Qinfo::addVecDirectToQ( const ObjId& src, const ObjId& dest,
 
 	if ( entrySize == 0 || numEntries == 0 )
 		return;
-	lockQmutex( threadNum );
 		qBuf_[ threadNum ].push_back( 
 			Qinfo( src, DirectAdd, threadNum, dBuf_[threadNum].size(),
 				entrySize * numEntries ) );
@@ -600,7 +644,6 @@ void Qinfo::addVecDirectToQ( const ObjId& src, const ObjId& dest,
 		vector< double >& vec = dBuf_[ threadNum ];
 		vec.insert( vec.end(), ptr, ptr + ObjFidSizeInDoubles );
 		vec.insert( vec.end(), arg, arg + entrySize * numEntries );
-	unlockQmutex( threadNum );
 }
 
 /// Static func.
@@ -666,44 +709,14 @@ bool Qinfo::addToStructuralQ() const
 	return ret;
 }
 
-/**
- * Same as above, except that this call can happen from any thread and
- * is therefore protected by mutexes.
- */
-bool Qinfo::protectedAddToStructuralQ() const
-{
-	bool ret = 0;
-	// This function may be called in single-thread mode, so check for mutex
-	if ( sqMutex_ ) {
-		pthread_mutex_lock( sqMutex_ );
-			ret = addToStructuralQ();
-		pthread_mutex_unlock( sqMutex_ );
-	} else {
-		ret = addToStructuralQ();
-	}
-	return ret;
-}
-
-void Qinfo::lockQmutex( ThreadId threadNum )
-{
-	if ( !Shell::isSingleThreaded() && threadNum == ScriptThreadNum )
-		pthread_mutex_lock( qMutex_ );
-}
-
-void Qinfo::unlockQmutex( ThreadId threadNum )
-{
-	if ( !Shell::isSingleThreaded() && threadNum == ScriptThreadNum )
-		pthread_mutex_unlock( qMutex_ );
-}
-
 /// Static func
 void Qinfo::initMutex()
 {
 	qMutex_ = new pthread_mutex_t;
-	sqMutex_ = new pthread_mutex_t;
+	pMutex_ = new pthread_mutex_t;
 	int ret = pthread_mutex_init( qMutex_, NULL );
 	assert( ret == 0 );
-	ret = pthread_mutex_init( sqMutex_, NULL );
+	ret = pthread_mutex_init( pMutex_, NULL );
 	assert( ret == 0 );
 	qCond_ = new pthread_cond_t;
 	ret = pthread_cond_init( qCond_, NULL );
@@ -715,12 +728,12 @@ void Qinfo::freeMutex()
 {
 	int ret = pthread_mutex_destroy( qMutex_ );
 	assert( ret == 0 );
-	ret = pthread_mutex_destroy( sqMutex_ );
+	ret = pthread_mutex_destroy( pMutex_ );
 	assert( ret == 0 );
 	ret = pthread_cond_destroy( qCond_ );
 	assert( ret == 0 );
 	delete qMutex_;
-	delete sqMutex_;
+	delete pMutex_;
 	delete qCond_;
 }
 

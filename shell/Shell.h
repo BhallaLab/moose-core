@@ -77,13 +77,13 @@ class Shell
 		 */
 		Id doCreate( string type, Id parent, string name, 
 			vector< int > dimensions = vector< int >( 1, 1 ),
-			bool isGlobal = 0 );
+			bool isGlobal = 0, bool qFlag = 0 );
 
 		/**
 		 * Delete specified Element and all its children and all 
 		 * Msgs connected to it.
 		 */
-		bool doDelete( Id id );
+		bool doDelete( Id id, bool qFlag = 0 );
 
 		/**
 		 * Sets up a Message of specified type.
@@ -93,19 +93,19 @@ class Shell
 		 */
 		MsgId doAddMsg( const string& msgType, 
 			ObjId src, const string& srcField, 
-			ObjId dest, const string& destField);
+			ObjId dest, const string& destField, bool qFlag = 0);
 
 		/**
 		 * Cleanly quits simulation, wrapping up all nodes and threads.
 		 */
-		void doQuit( );
+		void doQuit( bool qFlag = 0 );
 
 		/**
 		 * Starts off simulation, to run for 'runtime' more than current
 		 * time. This version is blocking, and returns only when the 
 		 * simulation is done.
 		 */
-		void doStart( double runtime );
+		void doStart( double runtime, bool qFlag = 0 );
 
 		/**
 		 * Starts off simulation, to run for 'runtime' more than current
@@ -116,33 +116,33 @@ class Shell
 		 * or 'doReinit' at any time to stop the run with increasing
 		 * levels of prejudice.
 		 */
-		void doNonBlockingStart( double runtime );
+		void doNonBlockingStart( double runtime, bool qFlag = 0 );
 
 		/**
 		 * Reinitializes simulation: time goes to zero, all scheduled
 		 * objects are set to initial conditions. If simulation is
 		 * already running, first stops it.
 		 */
-		void doReinit();
+		void doReinit( bool qFlag = 0 );
 
 		/**
 		 * Cleanly stops simulation, ready to take up again from where
 		 * the stop occurred. Waits till current operations are done.
 		 */
-		void doStop();
+		void doStop( bool qFlag = 0 );
 
 		/**
 		 * Terminate ongoing simulation, with prejudice.
 		 * Uncleanly stops simulation. Things may be in a mess with
 		 * different objects at different times, but it stops at once.
 		 */
-		void doTerminate();
+		void doTerminate( bool qFlag = 0 );
 
 		/**
 		 * shifts orig Element (including offspring) to newParent. All old 
 		 * hierarchy, data, Msgs etc are preserved below the orig.
 		 */
-		void doMove( Id orig, Id newParent );
+		void doMove( Id orig, Id newParent, bool qFlag = 0 );
 
 		/**
 		 * Copies orig Element to newParent. n specifies how many copies
@@ -151,7 +151,8 @@ class Shell
 		 * to objects outside the copy tree. Usually we don't do this.
 		 */
 		Id doCopy( Id orig, Id newParent, string newName,
-			unsigned int n, bool toGlobal, bool copyExtMsgs);
+			unsigned int n, bool toGlobal, bool copyExtMsgs, 
+			bool qFlag = 0 );
 
 		/**
 		 * Looks up the Id specified by the given path. May include
@@ -174,7 +175,8 @@ class Shell
 		 * The target on the path usually has the 'process' field but
 		 * other options are allowed, like 'init'
 		 */
-		void doUseClock( string path, string field, unsigned int tick );
+		void doUseClock( string path, string field, unsigned int tick,
+			bool qFlag = 0 );
 
 		/**
 		 * Loads in a model to a specified path.
@@ -184,12 +186,13 @@ class Shell
 		 * Later to learn NineML
 		 */
 		 Id doLoadModel( const string& fname, const string& modelpath, 
-		 	const string& solverClass = "" );
+		 	const string& solverClass = "", bool qFlag = 0 );
 		
 		/**
 		 * Write given model to SBML file. Returns success value.
 		 */
-		 int doWriteSBML( const string& fname, const string& modelpath );
+		 int doWriteSBML( const string& fname, const string& modelpath,
+		 	bool qFlag = 0 );
 
 		/**
  		 * This function synchronizes fieldDimension on the DataHandler 
@@ -426,7 +429,7 @@ class Shell
 		// Sets up clock ticks. Essentially is a call into the 
 		// Clock::setupTick function, but may be needed to be called from
 		// the parser so it is a Shell function too.
-		void doSetClock( unsigned int tickNum, double dt );
+		void doSetClock( unsigned int tickNum, double dt, bool qFlag = 0 );
 
 		// Should set these up as streams so that we can build error
 		// messages similar to cout.
