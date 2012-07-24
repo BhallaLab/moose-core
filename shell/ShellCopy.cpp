@@ -12,7 +12,7 @@
 #include "Shell.h"
 
 /// Returns the Id of the root of the copied tree.
-Id Shell::doCopy( Id orig, Id newParent, string newName, unsigned int n, bool toGlobal, bool copyExtMsg )
+Id Shell::doCopy( Id orig, Id newParent, string newName, unsigned int n, bool toGlobal, bool copyExtMsg, bool qFlag )
 {
 	static const Finfo* reqf = 
 		Shell::initCinfo()->findFinfo( "copy" );

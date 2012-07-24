@@ -361,7 +361,7 @@ vector< unsigned int > Neutral::getDimensions(
 void Neutral::setLastDimension( const Eref& e, const Qinfo* q, 
 	unsigned int size )
 {
-	if ( q->protectedAddToStructuralQ() )
+	if ( q->addToStructuralQ() )
 		return;
 	// if ( Shell::isSingleThreaded() || q->threadNum() == 1 )
 	// e.element()->dataHandler()->setFieldDimension( size );

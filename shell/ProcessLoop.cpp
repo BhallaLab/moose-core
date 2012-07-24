@@ -174,6 +174,9 @@ void Shell::launchThreads()
 	// pthread_t* threads = new pthread_t[ numThreads ];
 	threads_ = new pthread_t[ numThreads ];
 
+	// Have to prevent the parser thread from doing stuff during 
+	// the process loop, except at very tightly controlled times.
+	Qinfo::lockParserThread();
 	for ( unsigned int i = 0; i < numThreads; ++i ) {
 		// Note that here we put # of compute cores, not total threads.
 		p[i].numThreadsInGroup = numProcessThreads_; 

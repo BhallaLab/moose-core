@@ -258,7 +258,7 @@ unsigned int SimManager::getVersion() const
 
 void SimManager::setMethod( const Eref& e, const Qinfo* q, string v )
 {
-	if ( q->protectedAddToStructuralQ() )
+	if ( q->addToStructuralQ() )
 		return;
 
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );

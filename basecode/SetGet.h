@@ -56,25 +56,6 @@ class SetGet
 		{;}
 
 		/**
-		 * Assigns 'field' on 'tgt' to 'val', after doing necessary type
-		 * conversion from the string val. Returns 0 if it can't
-		 * handle it, which is unusual.
-		bool innerStrSet( const ObjId& tgt, 
-			const string& field, const string& val ) const = 0;
-		 */
-
-		/**
-		 * Looks up field value on tgt, converts to string, and puts on 
-		 * 'ret'. Returns 0 if the class does not support 'get' operations,
-		 * which is usually the case. Fields are the exception.
-		virtual bool innerStrGet( const ObjId& tgt, 
-			const string& field, string& ret ) const {
-			return 0;
-		}
-		 */
-
-
-		/**
 		 * Utility function to check that the target field matches this
 		 * source type, to look up and pass back the fid, and to return
 		 * the number of targetEntries.
@@ -85,7 +66,7 @@ class SetGet
 		 * Returns # of tgts if good. This is 0 if bad. 
 		 * Passes back found fid.
 		 */
-		unsigned int checkSet( 
+		const OpFunc* checkSet( 
 			const string& field, ObjId& tgt, FuncId& fid ) const;
 
 //////////////////////////////////////////////////////////////////////
@@ -101,21 +82,12 @@ class SetGet
 		 */
 		static bool strSet( const ObjId& dest, const string& field, const string& val );
 
-		
-		/**
-		 * Waits for completion of a nonblocking 'set' call, either
-		 * string or typed versions.
-		 * Can be skipped if there is an absolute guarantee that there
-		 * won't be dependencies between the 'set' and subsequent calls,
-		 * till the next completeSet or harvestGet call.
-		 * Avoid using. If you have dependencies then use the blocking set.
-		 */
-		void completeSet() const;
-
 		/// Sends out request for data, and awaits its return.
 		static const vector< double* >* dispatchGet( 
 			const ObjId& tgt, FuncId tgtFid, 
 			const double* arg, unsigned int size );
+
+		static Qinfo qi_;
 
 	private:
 		ObjId oid_;
@@ -136,10 +108,11 @@ class SetGet0: public SetGet
 			SetGet0 sg( dest );
 			FuncId fid;
 			ObjId tgt( dest );
-			if ( sg.checkSet( field, tgt, fid ) ) {
-				Qinfo::addDirectToQ( ObjId(), tgt, 0, fid, 0, 0 );
-				Qinfo::waitProcCycles( 1 );
-				return 1;
+			if ( const OpFunc* func = sg.checkSet( field, tgt, fid ) ) {
+				func->op( dest.eref(), &qi_, 0 );
+				/*
+				mpiSend( fid, tgt, 0, 0 );
+				*/
 			}
 			return 0;
 		}
@@ -169,6 +142,13 @@ template< class A > class SetGet1: public SetGet
 			SetGet1< A > sg( dest );
 			FuncId fid;
 			ObjId tgt( dest );
+			if ( const OpFunc* func = sg.checkSet( field, tgt, fid ) ) {
+				Conv< A > conv( arg );
+				func->op( dest.eref(), &qi_, conv.ptr() );
+				// mpiSend( fid, tgt, conv.ptr, conv.size() );
+				return 1;
+			}
+			/*
 			if ( sg.checkSet( field, tgt, fid ) ) {
 				Conv< A > conv( arg );
 				Qinfo::addDirectToQ(
@@ -176,6 +156,7 @@ template< class A > class SetGet1: public SetGet
 				Qinfo::waitProcCycles( 1 );
 				return 1;
 			}
+			*/
 			return 0;
 		}
 
@@ -202,7 +183,7 @@ template< class A > class SetGet1: public SetGet
 			SetGet1< A > sg( tgt );
 			FuncId fid;
 
-			if ( sg.checkSet( field, tgt, fid ) ) {
+			if ( const OpFunc* func = sg.checkSet( field, tgt, fid ) ) {
 				Conv< A > conv( arg[0] );
 				unsigned int entrySize = conv.size();
 				tgt.dataId = DataId::any;
@@ -215,10 +196,15 @@ template< class A > class SetGet1: public SetGet
 					memcpy( ptr, conv.ptr(), entrySize * sizeof( double ) );
 					ptr += entrySize;
 				}
+				Element* elm = tgt.id.element();
+				elm->dataHandler()->forall( func, elm, &qi_, 
+					data, entrySize, arg.size() );
 
+				/*
 				Qinfo::addVecDirectToQ( ObjId(), tgt, ScriptThreadNum,
 					fid, data, entrySize, arg.size() );
 				Qinfo::waitProcCycles( 1 );
+				*/
 				delete[] data;
 
 				return 1;
@@ -296,7 +282,6 @@ template< class A > class Field: public SetGet1< A >
 		/**
 		 * Blocking call using typed values to get either single values or
 		 * vectors.
-		 */
 		static const vector< double* >* innerGet( 
 			const ObjId& dest, const string& field )
 		{ 
@@ -305,16 +290,45 @@ template< class A > class Field: public SetGet1< A >
 			FuncId fid;
 
 			string fullFieldName = "get_" + field;
-			if ( sg.checkSet( fullFieldName, tgt, fid ) ) {
+			if ( ( const OpFunc* func = 
+				sg.checkSet( fullFieldName, tgt, fid ) ) ) {
 				FuncId retFuncId = receiveGet()->getFid();
+
+
 				double temp = retFuncId;
 				return SetGet::dispatchGet( tgt, fid, &temp, 1 );
 			}
 			return 0;
 		}
+		 */
+
+
+			/*
+			if ( const OpFunc* func = sg.checkSet( field, tgt, fid ) ) {
+				Conv< A > conv( arg );
+				func->op( dest.eref(), &qi_, conv.ptr() );
+				// mpiSend( fid, tgt, conv.ptr, conv.size() );
+				return 1;
+			}
+			*/
 
 		static A get( const ObjId& dest, const string& field)
 		{ 
+			Field< A > sg( dest );
+			ObjId tgt( dest );
+			FuncId fid;
+			string fullFieldName = "get_" + field;
+			if ( const OpFunc* func = sg.checkSet( field, tgt, fid ) ) {
+				/// Do something else if off-node.
+				const GetOpFuncBase< A >* gof = 
+					dynamic_cast< const GetOpFuncBase< A >* >( func );
+				if ( gof )
+					return gof->reduceOp( tgt.eref() );
+			}
+			cout << "Warning: Field::Get conversion error for " << dest.id.path() <<
+				endl;
+
+			/*
 			const vector< double* >* ret = innerGet( dest, field );
 			if ( ret ) {
 				if ( ret->size() == 1 ) {
@@ -322,6 +336,7 @@ template< class A > class Field: public SetGet1< A >
 					return *conv;
 				}
 			}
+			*/
 			return A();
 		}
 
@@ -333,6 +348,7 @@ template< class A > class Field: public SetGet1< A >
 		 */
 		static void getVec( Id dest, const string& field, vector< A >& vec)
 		{
+		/*
 			ObjId tgt( dest, DataId::any );
 			const vector< double* >* ret = innerGet( tgt, field );
 
@@ -348,6 +364,7 @@ template< class A > class Field: public SetGet1< A >
 				}
 				return;
 			}
+			*/
 		}
 
 		/**
@@ -406,14 +423,22 @@ template< class A1, class A2 > class SetGet2: public SetGet
 			SetGet2< A1, A2 > sg( dest );
 			FuncId fid;
 			ObjId tgt( dest );
-			if ( sg.checkSet( field, tgt, fid ) ) {
+			if ( const OpFunc* func = sg.checkSet( field, tgt, fid ) ) {
 				Conv< A1 > conv1( arg1 );
 				Conv< A2 > conv2( arg2 );
+				unsigned int totSize = conv1.size() + conv2.size();
+				double *temp = new double[ totSize ];
+				conv1.val2buf( temp );
+				conv2.val2buf( temp + conv1.size() );
+				func->op( dest.eref(), &qi_, temp );
+				delete[] temp;
+				/*
 				Qinfo::addDirectToQ( 
 					ObjId(), tgt, 0, fid, 
 					conv1.ptr(), conv1.size(),
 					conv2.ptr(), conv2.size() );
 				Qinfo::waitProcCycles( 1 );
+				*/
 				return 1;
 			}
 			return 0;
@@ -438,7 +463,8 @@ template< class A1, class A2 > class SetGet2: public SetGet
 			ObjId tgt( destId, 0 );
 			SetGet2< A1, A2 > sg( tgt );
 			FuncId fid;
-			if ( sg.checkSet( field, tgt, fid ) ) {
+			// Need to do something similar for MPI.
+			if ( const OpFunc* func = sg.checkSet( field, tgt, fid ) ) {
 				Conv< A1 > conv1( arg1[0] );
 				Conv< A2 > conv2( arg2[0] );
 				unsigned int entrySize = conv1.size() + conv2.size();
@@ -454,10 +480,15 @@ template< class A1, class A2 > class SetGet2: public SetGet
 					memcpy( ptr, conv2.ptr(), conv2.size() * sizeof( double ) );
 					ptr += conv2.size();
 				}
+				Element* elm = tgt.id.element();
+				elm->dataHandler()->forall( func, elm, &qi_, 
+					data, entrySize, arg1.size() );
 
+				/*
 				Qinfo::addVecDirectToQ( ObjId(), tgt, ScriptThreadNum,
 					fid, data, entrySize, arg1.size() );
 				Qinfo::waitProcCycles( 1 );
+				*/
 				delete[] data;
 				return 1;
 			}
@@ -594,7 +625,12 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 			FuncId fid;
 
 			string fullFieldName = "get_" + field;
-			if ( sg.checkSet( fullFieldName, tgt, fid ) ) {
+			if ( const OpFunc* func = 
+				sg.checkSet( fullFieldName, tgt, fid ) ) 
+			{
+				// const GetOpFuncBase< A >* gof = dynamic_cast< const GetOpFuncBase< A >* >( func );
+				const vector< double* >* ret = 0;
+/*
 				FuncId retFuncId = receiveGet()->getFid();
 				Conv< FuncId > conv1( retFuncId );
 				Conv< L > conv2 ( index );
@@ -606,6 +642,7 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 						conv1.size() + conv2.size() );
 				delete[] temp;
 
+				*/
 				return ret;
 			}
 			return 0;
@@ -688,7 +725,7 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 			SetGet3< A1, A2, A3 > sg( dest );
 			FuncId fid;
 			ObjId tgt( dest );
-			if ( sg.checkSet( field, tgt, fid ) ) {
+			if ( const OpFunc* func = sg.checkSet( field, tgt, fid ) ) {
 				Conv< A1 > conv1( arg1 );
 				Conv< A2 > conv2( arg2 );
 				Conv< A3 > conv3( arg3 );
@@ -699,10 +736,14 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 				conv2.val2buf( temp + conv1.size() );
 				conv3.val2buf( temp + conv1.size() + conv2.size() );
 
+				func->op( dest.eref(), &qi_, temp );
+
+				/*
 				Qinfo::addDirectToQ( 
 					ObjId(), tgt, 0, fid, 
 					temp, totSize );
 				Qinfo::waitProcCycles( 1 );
+				*/
 				delete[] temp;
 				return 1;
 			}
@@ -757,7 +798,7 @@ template< class A1, class A2, class A3, class A4 > class SetGet4: public SetGet
 			SetGet4< A1, A2, A3, A4 > sg( dest );
 			FuncId fid;
 			ObjId tgt( dest );
-			if ( sg.checkSet( field, tgt, fid ) ) {
+			if ( const OpFunc* func = sg.checkSet( field, tgt, fid ) ) {
 				Conv< A1 > conv1( arg1 );
 				Conv< A2 > conv2( arg2 );
 				Conv< A3 > conv3( arg3 );
@@ -771,11 +812,13 @@ template< class A1, class A2, class A3, class A4 > class SetGet4: public SetGet
 				conv2.val2buf( ptr ); ptr += conv2.size();
 				conv3.val2buf( ptr ); ptr += conv3.size();
 				conv4.val2buf( ptr );
-
+				func->op( dest.eref(), &qi_, temp );
+				/*
 				Qinfo::addDirectToQ( 
 					ObjId(), tgt, 0, fid, 
 					temp, totSize );
 				Qinfo::waitProcCycles( 1 );
+				*/
 
 				delete[] temp;
 				return 1;
@@ -840,7 +883,7 @@ template< class A1, class A2, class A3, class A4, class A5 > class SetGet5:
 			SetGet5< A1, A2, A3, A4, A5 > sg( dest );
 			FuncId fid;
 			ObjId tgt( dest );
-			if ( sg.checkSet( field, tgt, fid ) ) {
+			if ( const OpFunc* func = sg.checkSet( field, tgt, fid ) ) {
 				Conv< A1 > conv1( arg1 );
 				Conv< A2 > conv2( arg2 );
 				Conv< A3 > conv3( arg3 );
@@ -857,11 +900,14 @@ template< class A1, class A2, class A3, class A4, class A5 > class SetGet5:
 				conv3.val2buf( ptr ); ptr += conv3.size();
 				conv4.val2buf( ptr ); ptr += conv4.size();
 				conv5.val2buf( ptr );
+				func->op( dest.eref(), &qi_, temp );
 
+				/*
 				Qinfo::addDirectToQ( 
 					ObjId(), tgt, 0, fid, 
 					temp, totSize );
 				Qinfo::waitProcCycles( 1 );
+				*/
 
 				delete[] temp;
 				return 1;
@@ -929,7 +975,7 @@ template< class A1, class A2, class A3, class A4, class A5, class A6 > class Set
 			SetGet6< A1, A2, A3, A4, A5, A6 > sg( dest );
 			FuncId fid;
 			ObjId tgt( dest );
-			if ( sg.checkSet( field, tgt, fid ) ) {
+			if ( const OpFunc* func = sg.checkSet( field, tgt, fid ) ) {
 				Conv< A1 > conv1( arg1 );
 				Conv< A2 > conv2( arg2 );
 				Conv< A3 > conv3( arg3 );
@@ -948,11 +994,14 @@ template< class A1, class A2, class A3, class A4, class A5, class A6 > class Set
 				conv4.val2buf( ptr ); ptr += conv4.size();
 				conv5.val2buf( ptr ); ptr += conv5.size();
 				conv6.val2buf( ptr );
+				func->op( dest.eref(), &qi_, temp );
 
+				/*
 				Qinfo::addDirectToQ( 
 					ObjId(), tgt, 0, fid, 
 					temp, totSize );
 				Qinfo::waitProcCycles( 1 );
+				*/
 
 				delete[] temp;
 
