@@ -318,7 +318,8 @@ template< class A > class Field: public SetGet1< A >
 			ObjId tgt( dest );
 			FuncId fid;
 			string fullFieldName = "get_" + field;
-			if ( const OpFunc* func = sg.checkSet( field, tgt, fid ) ) {
+			if ( const OpFunc* func = 
+				sg.checkSet( fullFieldName, tgt, fid ) ) {
 				/// Do something else if off-node.
 				const GetOpFuncBase< A >* gof = 
 					dynamic_cast< const GetOpFuncBase< A >* >( func );
@@ -628,8 +629,12 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 			if ( const OpFunc* func = 
 				sg.checkSet( fullFieldName, tgt, fid ) ) 
 			{
-				// const GetOpFuncBase< A >* gof = dynamic_cast< const GetOpFuncBase< A >* >( func );
+				const GetOpFuncBase< A >* gof = dynamic_cast< const GetOpFuncBase< A >* >( func );
 				const vector< double* >* ret = 0;
+				if ( gof ) {
+					// Iterate over the entries here.
+					;
+				}
 /*
 				FuncId retFuncId = receiveGet()->getFid();
 				Conv< FuncId > conv1( retFuncId );

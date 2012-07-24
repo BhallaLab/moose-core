@@ -17989,4 +17989,6 @@ Done, now need to set up a sensible Qinfo that will tell targets that the
 call is direct.
 
 Done, compiled, with copious warnings. Clears first few unit tests but 
-doesn't do the 'get' properly. Anyway, let's check this in.
+doesn't do the 'get' properly. Anyway, let's check this in. Checkin 3808.
+
+Now proceeds past the 'get', fails in testSetGetVec.
