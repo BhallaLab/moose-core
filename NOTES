@@ -18001,4 +18001,6 @@ arrays, but still isn't working.
 
 Fixed it now. Needed careful attention to how DataHandler deals with
 field indexing.
-Now clears through till the testLookupSetGet.
+Now clears through till the testLookupSetGet. Checkin 3810.
+
+Now clears all of testAsync.cpp. Fails in testMsg.

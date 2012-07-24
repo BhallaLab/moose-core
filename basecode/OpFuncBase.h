@@ -33,12 +33,25 @@ class OpFunc
 };
 
 /**
- * This is the base class for all Get OpFuncs. 
+ * This is the base class for all GetOpFuncs. 
  */
 template< class A > class GetOpFuncBase: public OpFunc
 {
 	public: 
 		virtual A reduceOp( const Eref& e ) const = 0;
+
+		string rttiType() const {
+			return Conv< A >::rttiType();
+		}
+};
+
+/**
+ * This is the base class for all LookupGetOpFuncs. 
+ */
+template< class L, class A > class LookupGetOpFuncBase: public OpFunc
+{
+	public: 
+		virtual A reduceOp( const Eref& e, const L& index ) const = 0;
 
 		string rttiType() const {
 			return Conv< A >::rttiType();
