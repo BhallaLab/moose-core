@@ -329,10 +329,10 @@ int main( int argc, char** argv )
 	// spawn a lot of other stuff.
 	Element* shelle = shellId();
 	Shell* s = reinterpret_cast< Shell* >( shelle->dataHandler()->data( 0 ) );
+	Qinfo::initMutex(); // Mutex used to align Parser and MOOSE threads.
 	nonMpiTests( s ); // These tests do not need the process loop.
 
 	if ( !s->isSingleThreaded() ) {
-		Qinfo::initMutex(); // Mutex used to align Parser and MOOSE threads.
 		Shell::launchThreads(); // Here we set off the thread/MPI process loop.
 	}
 	if ( Shell::myNode() == 0 ) {
