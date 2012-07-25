@@ -346,6 +346,7 @@ void testGetMsg()
 	
 }
 
+/// I think I may need to deprecate this entire test and functionality
 void testStatsReduce()
 {
 	if ( Shell::numNodes() > 1 )
@@ -420,6 +421,11 @@ void testStatsReduce()
 	shell->doStart( 1 );
 	*/
 	SetGet0::set( statsid, "trig" );
+
+	shell->doSetClock( 0, 1 );
+	shell->doReinit();
+	shell->doStart( 1 );
+
 	double x = Field< double >::get( statsid, "sum" );
 	assert( doubleEq( x, sum ) );
 	unsigned int i = Field< unsigned int >::get( statsid, "num" );

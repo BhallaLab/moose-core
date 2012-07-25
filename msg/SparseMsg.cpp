@@ -332,6 +332,7 @@ unsigned int SparseMsg::randomConnect( double probability )
 	vector< unsigned int > sizes( nCols, 0 );
 	bool isFirstRound = 1;
 	unsigned int totSynNum = 0;
+	unsigned int maxSynPerRow = 0;
 
 	// SynElement* syn = dynamic_cast< SynElement* >( e2_ );
 	Element* syn = e2_;
@@ -341,6 +342,8 @@ unsigned int SparseMsg::randomConnect( double probability )
 	// assert( nRows == syn->dataHandler()->sizeOfDim( 1 ) );
 
 	assert ( syn->dataHandler()->dims().size() > 1 );
+	FieldDataHandlerBase* fdh = 
+		dynamic_cast< FieldDataHandlerBase* >( syn->dataHandler() );
 
 	for ( unsigned int i = 0; i < nCols; ++i ) {
 		// Check if synapse is on local node
@@ -366,8 +369,9 @@ unsigned int SparseMsg::randomConnect( double probability )
 			if ( r < probability )
 				++totSynNum;
 		}
-		FieldDataHandlerBase* fdh = 
-			dynamic_cast< FieldDataHandlerBase* >( syn->dataHandler() );
+		if ( maxSynPerRow < synNum )
+			maxSynPerRow = synNum;
+			
 		if ( fdh ) {
 		// syn->dataHandler()->setFieldArraySize( i, synNum );
 			fdh->setFieldArraySize( i, synNum );
@@ -384,7 +388,9 @@ unsigned int SparseMsg::randomConnect( double probability )
 	sizes.push_back( biggest );
 	syn->dataHandler()->resize( sizes );
 	*/
-
+	// need to work on to handle multiple nodes using MPI
+	if ( fdh )
+		fdh->setMaxFieldEntries( maxSynPerRow );
 
 	// syn->dataHandler()->setNumData2( startSynapse, sizes );
 	// cout << Shell::myNode() << ": sizes.size() = " << sizes.size() << ", ncols = " << nCols << ", startSynapse = " << startSynapse << endl;

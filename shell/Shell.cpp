@@ -755,14 +755,15 @@ void Shell::doSetClock( unsigned int tickNum, double dt, bool qFlag )
 void Shell::doUseClock( string path, string field, unsigned int tick,
 	bool qFlag )
 {
-	/*
 	Qinfo::buildOn( qFlag );
+		innerUseClock( path, field, tick);
 	Qinfo::buildOff( qFlag );
-	*/
+	/*
 	Eref sheller( shelle_, 0 );
 	initAck();
 		requestUseClock()->send( sheller, ScriptThreadNum, path, field, tick );
 	waitForAck();
+	*/
 }
 
 /**
@@ -1009,6 +1010,7 @@ void Shell::clearRestructuringQ()
  */
 void Shell::doSyncDataHandler( Id tgt )
 {
+	/*
 	const Finfo* f = tgt()->cinfo()->findFinfo( "get_localNumField" );
 	assert( f );
 	const DestFinfo* df = dynamic_cast< const DestFinfo* >( f );
@@ -1032,7 +1034,6 @@ void Shell::doSyncDataHandler( Id tgt )
 	// fv->setFieldDimension( maxIndex_ );
 	Field< unsigned int >::set( ObjId( tgt, 0 ), 
 		"lastDimension", maxIndex_ );
-	/*
 	*/
 }
 
@@ -1447,18 +1448,13 @@ void Shell::addClockMsgs(
 	}
 }
 
-void Shell::handleUseClock( const Eref& e, const Qinfo* q,
-	string path, string field, unsigned int tick)
+bool Shell::innerUseClock( string path, string field, unsigned int tick)
 {
-	if ( q->addToStructuralQ() )
-		return;
-	// cout << q->getProcInfo()->threadIndexInGroup << ": in Shell::handleUseClock with path " << path << endl << flush;
 	vector< Id > list;
 	wildcard( path, list ); // By default scans only Elements.
 	if ( list.size() == 0 ) {
 		cout << "Warning: no Elements found on path " << path << endl;
-		ack()->send( Eref( shelle_, 0 ), q->threadNum(), Shell::myNode(), OkStatus );
-		return;
+		return 0;
 	}
 	// string tickField = "proc";
 	// Hack to get around a common error.
@@ -1468,8 +1464,21 @@ void Shell::handleUseClock( const Eref& e, const Qinfo* q,
 		field = "init"; 
 	
 	addClockMsgs( list, field, tick );
+	return 1;
+}
 
-	ack()->send( Eref( shelle_, 0 ), q->threadNum(), Shell::myNode(), OkStatus );
+void Shell::handleUseClock( const Eref& e, const Qinfo* q,
+	string path, string field, unsigned int tick)
+{
+	if ( q->addToStructuralQ() )
+		return;
+	// cout << q->getProcInfo()->threadIndexInGroup << ": in Shell::handleUseClock with path " << path << endl << flush;
+	if ( innerUseClock( path, field, tick ) )
+		ack()->send( Eref( shelle_, 0 ), q->threadNum(), 
+			Shell::myNode(), OkStatus );
+	else
+		ack()->send( Eref( shelle_, 0 ), q->threadNum(), 
+			Shell::myNode(), ErrorStatus );
 }
 
 void Shell::handleQuit()
