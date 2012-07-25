@@ -332,6 +332,7 @@ class Shell
 		/**
 		 * Sets up scheduling for elements on the path.
 		 */
+		bool innerUseClock( string path, string field, unsigned int tick);
 		void handleUseClock( const Eref& e, const Qinfo* q,
 			string path, string field, unsigned int tick );
 
