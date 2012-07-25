@@ -369,12 +369,14 @@ vector< double > Clock::getDts() const
 
 bool Clock::isRunning() const
 {
-	return isRunning_;
+	return isRunning_ || ( procState_ == StartOnly );
 }
 
 bool Clock::isDoingReinit() const
 {
-	return doingReinit_;
+	return doingReinit_ || ( procState_ == TurnOnReinit ) || 
+		( procState_ == ReinitThenStart ) || 
+		( procState_ == StopThenReinit );
 }
 
 
@@ -620,7 +622,7 @@ void Clock::handleStart( double runtime )
 	}
 	runTime_ = runtime;
 	endTime_ = runtime * ROUNDING + currentTime_;
-	isRunning_ = 1; // Was: Can't touch this here, instead defer to barrier3
+	// isRunning_ = 1; // Can't touch this here, instead defer to barrier3
 	if ( tickPtr_.size() == 0 || tickPtr_.size() != tickMgr_.size() || 
 		!tickPtr_[0].mgr()->isInited() )
 		procState_ = ReinitThenStart;
@@ -723,7 +725,7 @@ void Clock::handleReinit()
 	else
 		procState_ = TurnOnReinit;
 	// flipReinit_ = 1; // This tells the clock to reinit in barrier3.
-	doingReinit_ = 1; // Can't do this here, may mess up other threads.
+	// doingReinit_ = 1; // Can't do this here, may mess up other threads.
 	// isRunning_ = 0; // Can't do this here either.
 }
 
