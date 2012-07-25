@@ -18037,6 +18037,8 @@ doing different things.
 
 Fixed doCopy. This cleaned up some of the uncertainty.
 Now it goes either in doMove (yet to be fixed) or at testShell.cpp:1085.
-doMove is tested before, should fix it too.
+doMove is tested before, should fix it too. Checkin 3813.
+
+Fixed doMove.  Now reliably fails unit tests at testShell.cpp:1085. 
 
 ============================================================================

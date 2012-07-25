@@ -799,6 +799,7 @@ void Shell::doMove( Id orig, Id newParent, bool qFlag )
 		
 	}
 	Qinfo::buildOn( qFlag );
+		innerMove( orig, newParent );
 	Qinfo::buildOff( qFlag );
 	// Put in check here that newParent is not a child of orig.
 	/*
@@ -1386,8 +1387,7 @@ static bool changeTreeDepth( Id id, short delta )
 	return ret;
 }
 
-void Shell::handleMove( const Eref& e, const Qinfo* q,
-	Id orig, Id newParent )
+bool Shell::innerMove( Id orig, Id newParent )
 {
 	static const Finfo* pf = Neutral::initCinfo()->findFinfo( "parentMsg" );
 	static const DestFinfo* pf2 = dynamic_cast< const DestFinfo* >( pf );
@@ -1397,15 +1397,12 @@ void Shell::handleMove( const Eref& e, const Qinfo* q,
 	assert( !( orig == Id() ) );
 	assert( !( newParent() == 0 ) );
 
-	if ( q->addToStructuralQ() )
-		return;
-	
 	short origDepth = orig.element()->dataHandler()->pathDepth();
 	short newDepth = 1 +
 		newParent.element()->dataHandler()->pathDepth();
 	
 	if ( !changeTreeDepth( orig, newDepth - origDepth ) )
-		return;
+		return 0;
 
 	MsgId mid = orig()->findCaller( pafid );
 	Msg::deleteMsg( mid );
@@ -1415,10 +1412,21 @@ void Shell::handleMove( const Eref& e, const Qinfo* q,
 	if ( !f1->addMsg( pf, m->mid(), newParent() ) ) {
 		cout << "move: Error: unable to add parent->child msg from " <<
 			newParent()->getName() << " to " << orig()->getName() << "\n";
-		return;
+		return 0;
 	}
+	return 1;
+}
+
+void Shell::handleMove( const Eref& e, const Qinfo* q,
+	Id orig, Id newParent )
+{
+	if ( q->addToStructuralQ() )
+		return;
 	
-	ack()->send( Eref( shelle_, 0 ), q->threadNum(), Shell::myNode(), OkStatus );
+	if ( innerMove( orig, newParent ) )
+		ack()->send( Eref( shelle_, 0 ), q->threadNum(), Shell::myNode(), OkStatus );
+	else
+		ack()->send( Eref( shelle_, 0 ), q->threadNum(), Shell::myNode(), ErrorStatus );
 }
 
 void Shell::addClockMsgs( 
