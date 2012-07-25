@@ -1024,11 +1024,22 @@ void testShellAddMsg()
 	ret = SetGet1< double >::setVec( g1, "arg1", init ); // 12345
 	assert( ret );
 
-	assert( doubleEq( Field< double >::get( ObjId( a1, 0 ), "arg1Value" ), 1 ) );
-	assert( doubleEq( Field< double >::get( ObjId( a1, 1 ), "arg1Value" ), 2 ) );
-	assert( doubleEq( Field< double >::get( ObjId( a1, 2 ), "arg1Value" ), 3 ) );
-	assert( doubleEq( Field< double >::get( ObjId( a1, 3 ), "arg1Value" ), 4 ) );
-	assert( doubleEq( Field< double >::get( ObjId( a1, 4 ), "arg1Value" ), 5 ) );
+	double val = 0;
+	val = (reinterpret_cast< const Arith* >( ObjId( a1, 0 ).data() ) )->getArg1();
+	assert( doubleEq( val, 1 ) );
+	val = (reinterpret_cast< const Arith* >( ObjId( a1, 1 ).data() ) )->getArg1();
+	assert( doubleEq( val, 2 ) );
+
+	val = Field< double >::get( ObjId( a1, 0 ), "arg1Value" );
+	assert( doubleEq( val, 1 ) );
+	val = Field< double >::get( ObjId( a1, 1 ), "arg1Value" );
+	assert( doubleEq( val, 2 ) );
+	val = Field< double >::get( ObjId( a1, 2 ), "arg1Value" );
+	assert( doubleEq( val, 3 ) );
+	val = Field< double >::get( ObjId( a1, 3 ), "arg1Value" );
+	assert( doubleEq( val, 4 ) );
+	val = Field< double >::get( ObjId( a1, 4 ), "arg1Value" );
+	assert( doubleEq( val, 5 ) );
 
 	vector< double > retVec( 0 );
 	Field< double >::getVec( a1, "arg1Value", retVec );

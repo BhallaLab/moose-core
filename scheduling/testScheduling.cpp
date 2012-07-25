@@ -301,7 +301,7 @@ void setupTicks()
 	assert( Clock::procState_ == Clock::TurnOffReinit ); 
 
 	Clock::procState_ = Clock::NoChange;
-	assert( cdata->doingReinit_ == 0 );
+	// assert( cdata->doingReinit_ == 0 );
 
 	cdata->handleStart( runtime );
 

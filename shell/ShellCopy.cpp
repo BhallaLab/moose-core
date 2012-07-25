@@ -11,15 +11,18 @@
 #include "OneToAllMsg.h"
 #include "Shell.h"
 
-/// Returns the Id of the root of the copied tree.
-Id Shell::doCopy( Id orig, Id newParent, string newName, unsigned int n, bool toGlobal, bool copyExtMsg, bool qFlag )
+/// Returns the Id of the root of the copied tree upon success.
+Id Shell::doCopy( Id orig, Id newParent, string newName, 
+	unsigned int n, bool toGlobal, bool copyExtMsg, bool qFlag )
 {
+	/*
 	static const Finfo* reqf = 
 		Shell::initCinfo()->findFinfo( "copy" );
 	static const SrcFinfo5< vector< Id >, string, unsigned int, bool, bool >* 
 		requestCopy = dynamic_cast< const SrcFinfo5< vector< Id >, string, unsigned int, bool, bool >* >( reqf );
 	assert( reqf );
 	assert( requestCopy );
+	*/
 
 	if ( n > 1 && numNodes() > 1 && 
 		( !orig()->dataHandler()->isGlobal() ) ) {
@@ -39,11 +42,17 @@ Id Shell::doCopy( Id orig, Id newParent, string newName, unsigned int n, bool to
 	args.push_back( orig );
 	args.push_back( newParent );
 	args.push_back( newElm );
+	if ( innerCopy( args, newName, n, toGlobal, copyExtMsg ) )
+		return newElm;
+	else
+		return Id();
+	/*
 	initAck();
 		requestCopy->send( sheller, ScriptThreadNum, args, newName , n, toGlobal, copyExtMsg);
 	waitForAck();
 
 	return newElm;
+	*/
 }
 
 /// Runs in parallel on all nodes.
@@ -136,20 +145,9 @@ void innerCopyMsgs( map< Id, Id >& tree, unsigned int n, bool copyExtMsgs )
 
 // #define CHECK_TREE
 
-void Shell::handleCopy( const Eref& er, const Qinfo* q,
-	vector< Id > args, string newName,
+bool Shell::innerCopy( const vector< Id >& args, const string& newName,
 	unsigned int n, bool toGlobal, bool copyExtMsgs )
 {
-	static const Finfo* ackf = 
-		Shell::initCinfo()->findFinfo( "ack" );
-	static const SrcFinfo2< unsigned int, unsigned int >* 
-		ack = dynamic_cast< const SrcFinfo2< unsigned int, unsigned int >* >( ackf );
-	assert( ackf );
-	assert( ack );
-
-	if ( q->addToStructuralQ() )
-		return;
-
 	/// Test here for tree structure on different nodes
 #ifdef CHECK_TREE
 	vector< Id > temp;
@@ -173,13 +171,32 @@ void Shell::handleCopy( const Eref& er, const Qinfo* q,
 	Element* e = innerCopyElements( args[0], args[1], args[2], 
 		paDepth, origDepth, n, toGlobal, tree );
 	if ( !e ) {
-		ack->send( 
-			Eref( shelle_, 0 ), ScriptThreadNum, Shell::myNode(), ErrorStatus );
-		return;
+		return 0;
 	}
 	if ( newName != "" )
 		e->setName( newName );
 	//innerCopyData( orig, newParent );
 	innerCopyMsgs( tree, n, copyExtMsgs );
-	ack->send( Eref( shelle_, 0 ), ScriptThreadNum, Shell::myNode(), OkStatus );
+	return 1;
+}
+
+void Shell::handleCopy( const Eref& er, const Qinfo* q,
+	vector< Id > args, string newName,
+	unsigned int n, bool toGlobal, bool copyExtMsgs )
+{
+	static const Finfo* ackf = 
+		Shell::initCinfo()->findFinfo( "ack" );
+	static const SrcFinfo2< unsigned int, unsigned int >* 
+		ack = dynamic_cast< const SrcFinfo2< unsigned int, unsigned int >* >( ackf );
+	assert( ackf );
+	assert( ack );
+
+	if ( q->addToStructuralQ() )
+		return;
+	if ( innerCopy( args, newName, n, toGlobal, copyExtMsgs ) )
+		ack->send( Eref( shelle_, 0 ), ScriptThreadNum, 
+			Shell::myNode(), ErrorStatus );
+	else
+		ack->send( Eref( shelle_, 0 ), ScriptThreadNum, 
+			Shell::myNode(), OkStatus );
 }
