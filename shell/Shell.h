@@ -303,6 +303,11 @@ class Shell
 		/**
 		 * Moves Element orig onto the newParent.
 		 */
+		bool innerMove( Id orig, Id newParent );
+
+		/**
+		 * Handler to move Element orig onto the newParent.
+		 */
 		void handleMove( const Eref& e, const Qinfo* q,
 			Id orig, Id newParent );
 
