@@ -207,6 +207,20 @@ void Qinfo::lockParserThread()
 }
 
 /**
+ * System-independent timeout for busy loops when nothing is happening.
+ */
+void quickNap()
+{
+#ifdef WIN32 // If this is an MS VC++ compiler..
+	unsigned int milliseconds = 1;
+	Sleep( milliseconds );
+#else           // else assume POSIX compliant..
+	struct timespec req = { 0, 1000000 };
+	nanosleep( &req, 0 );
+#endif // _MSC_VER
+}
+
+/**
  * Stitches together thread blocks on
  * the inQ so that the readBuf function will go through as a single unit.
  * Runs only in barrier 1.
@@ -303,15 +317,10 @@ void Qinfo::swapQ()
 	// if ( !Shell::isSingleThreaded() ) pthread_mutex_lock( qMutex_ );
 	++numProcessCycles_;
 
+
 	// Used to avoid pounding on the CPU when nothing is happening.
 	if ( Shell::isParserIdle() && numQinfo == 0 ) {
-		#ifdef WIN32 // If this is an MS VC++ compiler..
-			unsigned int milliseconds = 1;
-			Sleep( milliseconds );
-		#else           // else assume POSIX compliant..
-			struct timespec req = { 0, 1000000 };
-			nanosleep( &req, 0 );
-		#endif // _MSC_VER
+		quickNap();
 	}
 }
 
@@ -337,6 +346,8 @@ void Qinfo::waitProcCycles( unsigned int numCycles )
 			clearQ( ScriptThreadNum );
 	}
 	*/
+		for ( unsigned int i = 0; i < numCycles; ++i )
+			clearQ( ScriptThreadNum );
 }
 
 //////////////////////////////////////////////////////////////////////

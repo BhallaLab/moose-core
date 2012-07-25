@@ -144,6 +144,13 @@ const Cinfo* Clock::initCinfo()
 			// &Clock::setNumTicks,
 			&Clock::getDts
 		);
+
+		static ReadOnlyValueFinfo< Clock, bool > isRunning( 
+			"isRunning",
+			"Utility function to report if simulation is in progress.",
+			// &Clock::setNumTicks,
+			&Clock::isRunning
+		);
 	///////////////////////////////////////////////////////
 	// Shared definitions
 	///////////////////////////////////////////////////////
@@ -209,6 +216,8 @@ const Cinfo* Clock::initCinfo()
 		&nsteps,
 		&numTicks,
 		&currentStep,
+		&getDts,
+		&isRunning,
 		// SrcFinfos
 		tickSrc(),
 		finished(),
@@ -358,6 +367,17 @@ vector< double > Clock::getDts() const
 	return ret;
 }
 
+bool Clock::isRunning() const
+{
+	return isRunning_;
+}
+
+bool Clock::isDoingReinit() const
+{
+	return doingReinit_;
+}
+
+
 ///////////////////////////////////////////////////
 // Dest function definitions
 ///////////////////////////////////////////////////
@@ -485,12 +505,6 @@ void Clock::rebuild()
 // Barrier 3
 ///////////////////////////////////////////////////
 
-bool Clock::isRunning() const
-{
-	return isRunning_;
-}
-
-
 /**
  * The processPhase1 operation is called on every thread in the main event 
  * loop, during phase1 of the loop. This has to drive thread-specific 
@@ -606,7 +620,7 @@ void Clock::handleStart( double runtime )
 	}
 	runTime_ = runtime;
 	endTime_ = runtime * ROUNDING + currentTime_;
-	// isRunning_ = 1; // Can't touch this here, instead defer to barrier3
+	isRunning_ = 1; // Was: Can't touch this here, instead defer to barrier3
 	if ( tickPtr_.size() == 0 || tickPtr_.size() != tickMgr_.size() || 
 		!tickPtr_[0].mgr()->isInited() )
 		procState_ = ReinitThenStart;
@@ -709,7 +723,7 @@ void Clock::handleReinit()
 	else
 		procState_ = TurnOnReinit;
 	// flipReinit_ = 1; // This tells the clock to reinit in barrier3.
-	// doingReinit_ = 1; // Can't do this here, may mess up other threads.
+	doingReinit_ = 1; // Can't do this here, may mess up other threads.
 	// isRunning_ = 0; // Can't do this here either.
 }
 
