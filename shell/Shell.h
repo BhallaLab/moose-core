@@ -276,6 +276,10 @@ class Shell
 		void innerCreate( string type, Id parent, Id newElm, string name,
 			const vector< int >& dimensions );
 
+		/// Does actual work of copying. Returns true on success.
+		bool innerCopy( const vector< Id >& args, const string& newName,
+			unsigned int n, bool toGlobal, bool copyExtMsgs );
+
 		/**
 		 * Connects src to dest on appropriate fields, with specified
 		 * msgType. 

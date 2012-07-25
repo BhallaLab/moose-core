@@ -18011,6 +18011,32 @@ Fixed minor issue of initializing the mutexes for Qinfo. Now goes
 on till testShell.cpp:1694.
 Fixed this: EpFunc.h::GetEpFunc1, made it subclass of 
 LookupGetOpFuncBase< L, A >.
-Now clears tests all the way to testMesh.cpp:350.
+Now clears tests all the way to testMesh.cpp:350. Checkin 3812.
+The problem here is with the propagation of mesh changes to 
+stoich and to the reaction system, including mols and reacs. The propagation
+is done through messaging. This violates the expectation that all structural
+ops should be done in a single blocking call. Patched it with 
+Qinfo::waitProcCycles, but I'm unhappy about this.
+
+Now fails unit tests at testShell.cpp:985, testShellAddMsg. I think I just
+need to now make this a direct blocking call.
+
+Working through the Shell functions. doStart is a problem: it waits for an
+ack message from the Clock to say sim is done.
+
+Deferred this issue. With the doAddMsg fixed we go on till 
+testScheduling.cpp:754.
+I think this too is a 'start' issue. Need to address cleanly.
+
+Somewhat stuck with testShell.cpp, doing unpredictable things around line 1012.
+Ran valgrind, nothing there.
+Seems that this is a threading issue after all. The parser thread is going
+through checking on the unit tests, while the process thread has gone
+ahead and may issue a 'reinit' call at an unexpected place.
+doing different things.
+
+Fixed doCopy. This cleaned up some of the uncertainty.
+Now it goes either in doMove (yet to be fixed) or at testShell.cpp:1085.
+doMove is tested before, should fix it too.
 
 ============================================================================

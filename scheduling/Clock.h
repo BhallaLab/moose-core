@@ -124,6 +124,10 @@ class Clock
 		 * Flag: True when the simulation is still running.
 		 */
 		bool isRunning() const;
+		/**
+		 * Flag: True when the simulation is busy with reinit
+		 */
+		bool isDoingReinit() const;
 
 		/**
 		 * Static function, used to flip flags to start or end simulation. 

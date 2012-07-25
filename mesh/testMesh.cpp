@@ -333,7 +333,6 @@ void testReMesh()
 
 	ret = SetGet2< double, unsigned int >::set( 
 		cube, "buildDefaultMesh", 1.0e-3, 1 );
-	Qinfo::waitProcCycles( 2 );
 	Field< double >::set( pool, "conc", 1 );
 	n = Field< double >::get( pool, "n" );
 	assert( doubleEq( n, NA / 1000.0 ) );
@@ -344,7 +343,7 @@ void testReMesh()
 	Field< double >::set( pool, "concInit", x );
 	ret = SetGet2< double, unsigned int >::set( 
 		cube, "buildDefaultMesh", 1, 8 );
-	linsize = Field< unsigned int >::get( pool, "linearSize" );
+	// This is nasty, needs the change to propagate through messages.
 	Qinfo::waitProcCycles( 2 );
 	linsize = Field< unsigned int >::get( pool, "linearSize" );
 	assert( linsize == 8 );
