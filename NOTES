@@ -18003,4 +18003,14 @@ Fixed it now. Needed careful attention to how DataHandler deals with
 field indexing.
 Now clears through till the testLookupSetGet. Checkin 3810.
 
-Now clears all of testAsync.cpp. Fails in testMsg.
+Now clears all of testAsync.cpp. Fails in testMsg. Checkin 3811.
+
+============================================================================
+25 July 2012.
+Fixed minor issue of initializing the mutexes for Qinfo. Now goes
+on till testShell.cpp:1694.
+Fixed this: EpFunc.h::GetEpFunc1, made it subclass of 
+LookupGetOpFuncBase< L, A >.
+Now clears tests all the way to testMesh.cpp:350.
+
+============================================================================

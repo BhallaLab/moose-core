@@ -382,7 +382,7 @@ template< class T, class A > class GetEpFunc: public GetOpFuncBase< A >
  * FuncId of the function on the object that requested the
  * value. The EpFunc then sends back a message with the info.
  */
-template< class T, class L, class A > class GetEpFunc1: public GetOpFuncBase< A >
+template< class T, class L, class A > class GetEpFunc1: public LookupGetOpFuncBase< L, A >
 {
 	public:
 		GetEpFunc1( A ( T::*func )( const Eref& e, const Qinfo* q, L ) const )
@@ -414,9 +414,10 @@ template< class T, class L, class A > class GetEpFunc1: public GetOpFuncBase< A 
 		}
 
 		/// ReduceOp not permissible.
-		A reduceOp( const Eref& e ) const {
-			static A ret;
-			return ret;
+		A reduceOp( const Eref& e, const L& index ) const {
+			Qinfo q; // default Qinfo
+			return ( reinterpret_cast< T* >( e.data() )->*func_)( 
+				e, &q, index );
 		}
 
 	private:
