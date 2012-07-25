@@ -18045,5 +18045,15 @@ Checkin 3814.
 After a lot of messing around, turns out that the problem was due to
 corrupted scheduling. I had used a hack for a shortcut to monitor 
 Clock::isRunning and Clock::isDoingReinit. Now clears unit tests
-till testScheduling.cpp:983.
+till testScheduling.cpp:983. Checkin 3815.
+
+Fixed Shell::doUseClock.
+Now stuck in doSyncDataHandler, but also other places.
+
+Replaced the functionality of doSyncDataHandler with updates within the
+SparseMsg itself, much cleaner.
+
+After a bit of messing with testBuiltins.cpp:testStatsReduce(), it now
+clears unit tests. Not regression tests.
+
 ============================================================================
