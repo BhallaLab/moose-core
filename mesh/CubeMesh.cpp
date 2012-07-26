@@ -443,7 +443,7 @@ void CubeMesh::innerSetCoords( const vector< double >& v)
 void CubeMesh::setCoords( const Eref& e, const Qinfo* q, vector< double > v)
 {
 	if ( v.size() < 9 ) {
-		cout << "CubeMesh::setCoords: Warning: size of argument vec should be >= 9, was " << v.size() << endl;
+		// cout << "CubeMesh::setCoords: Warning: size of argument vec should be >= 9, was " << v.size() << endl;
 	}
 	innerSetCoords( v );
 	transmitChange( e, q );
@@ -588,7 +588,7 @@ void CubeMesh::transmitChange( const Eref& e, const Qinfo* q )
 
 	// This message tells the Stoich about the new mesh, and also about
 	// how it communicates with other nodes.
-	meshSplit()->send( e, q->threadNum(), 
+	meshSplit()->fastSend( e, q->threadNum(), 
 		vols, localIndices, outgoingEntries, incomingEntries );
 
 	// This func goes down to the MeshEntry to tell all the pools and

@@ -389,8 +389,10 @@ void GslIntegrator::remesh( const Eref& e, const Qinfo* q,
 	if ( e.index().value() != 0 ) {
 		return;
 	}
+	/*
 	if ( q->addToStructuralQ() )
 		return;
+		*/
 	// cout << "GslIntegrator::remesh for " << e << endl;
 	assert( vols.size() > 0 );
 	if ( vols.size() != e.element()->dataHandler()->localEntries() ) {

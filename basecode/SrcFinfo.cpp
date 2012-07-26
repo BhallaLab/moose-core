@@ -83,3 +83,9 @@ void SrcFinfo0::sendTo( const Eref& e, const ProcInfo* p,
 	e.element()->tsend( q, getBindIndex(), p, 0, target );
 }
 */
+
+void SrcFinfo0::fastSend( const Eref& e, ThreadId threadNum ) const
+{
+	Qinfo qi( e.objId(), getBindIndex(), threadNum, 0, 0 );
+	e.element()->exec( &qi, 0 );
+}

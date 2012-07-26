@@ -71,7 +71,7 @@ void testRemeshing()
 
 	Field< bool >::set( kinetics, "preserveNumEntries", 0 );
 	Field< vector< double > >::set( kinetics, "coords", coords );
-	Qinfo::waitProcCycles( 2 );
+	// Qinfo::waitProcCycles( 2 );
 	unsigned int n = Field< unsigned int >::get( kinetics, "nx" );
 	assert( n == numVox );
 
