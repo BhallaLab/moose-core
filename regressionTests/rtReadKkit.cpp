@@ -220,7 +220,7 @@ void rtReadKkit()
 	bool ok = SetGet2< double, unsigned int >::set( parentCompartment,
 		"buildDefaultMesh", vol, 1 );
 	assert( ok );
-	Qinfo::waitProcCycles( 2 );
+	// Qinfo::waitProcCycles( 2 );
 
 
 	checkVolN( vol );

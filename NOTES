@@ -18054,6 +18054,27 @@ Replaced the functionality of doSyncDataHandler with updates within the
 SparseMsg itself, much cleaner.
 
 After a bit of messing with testBuiltins.cpp:testStatsReduce(), it now
-clears unit tests. Not regression tests.
+clears unit tests. Not regression tests. Checkin 3816.
 
+Next: Fix up regression tests
+Speed up messaging: Implement benchmarks for this.
+	- Large array of single msgs
+	- OneToAll
+	- AllToAll
+	- Sparse
+	Clean up the conversions, minimize data copying and conversion.
+	Eliminate at least one barrier.
+Fix integ method swap.
+Tackle MPI
+Space
+
+============================================================================
+26 July 2012.
+Turns out the problem in regression tests is the deferred issue of 
+dealing with mesh resizing.
+Should I invent a special instant-send option in SrcFinfo?
+Did so. Worked, but there are a huge number of cases of addToStructuralQ
+that I had to eliminate. I'll have to figure out how to handle those.
+
+Clears unit tests and most of the regression tests.
 ============================================================================

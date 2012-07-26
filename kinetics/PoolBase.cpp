@@ -227,6 +227,7 @@ void PoolBase::remesh( const Eref& e, const Qinfo* q,
 	unsigned int numTotalEntries, unsigned int startEntry, 
 	vector< unsigned int > localIndices, vector< double > vols )
 {
+	// cout << "PoolBase::remesh for " << e.element()->getName() << endl;
 	vRemesh( e, q, numTotalEntries, startEntry, localIndices, vols );
 }
 

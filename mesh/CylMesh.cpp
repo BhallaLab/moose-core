@@ -643,7 +643,7 @@ void CylMesh::transmitChange( const Eref& e, const Qinfo* q )
 
 	// This message tells the Stoich about the new mesh, and also about
 	// how it communicates with other nodes.
-	meshSplit()->send( e, q->threadNum(), 
+	meshSplit()->fastSend( e, q->threadNum(), 
 		vols, localIndices, 
 		outgoingEntries, incomingEntries );
 
