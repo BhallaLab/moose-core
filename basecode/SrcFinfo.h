@@ -71,6 +71,8 @@ class SrcFinfo0: public SrcFinfo
 		void send( const Eref& e, ThreadId threadNum ) const;
 //		void sendTo( const Eref& e, const ProcInfo* p, const ObjId& target) const;
 		/// Returns compiler-independent string with type info
+		void fastSend( const Eref& e, ThreadId threadNum ) const;
+
 		string rttiType() const {
 			return "void";
 		}
@@ -340,6 +342,31 @@ template < class T1, class T2, class T3, class T4 > class SrcFinfo4: public SrcF
 			Qinfo::addToQ( e.objId(), getBindIndex(),
 				threadNum, 
 				data, totSize );
+			delete[] data;
+		}
+
+		void fastSend( const Eref& e, ThreadId threadNum,
+			const T1& arg1, const T2& arg2, 
+			const T3& arg3, const T4& arg4 ) const
+		{
+			Conv< T1 > a1( arg1 );
+			Conv< T2 > a2( arg2 );
+			Conv< T3 > a3( arg3 );
+			Conv< T4 > a4( arg4 );
+			unsigned int totSize = a1.size() + a2.size() + 
+				a3.size() + a4.size();
+			double* data = new double[ totSize ];
+			double* ptr = data;
+			memcpy( ptr, a1.ptr(), a1.size() * sizeof( double ) );
+			ptr += a1.size();
+			memcpy( ptr, a2.ptr(), a2.size() * sizeof( double ) );
+			ptr += a2.size();
+			memcpy( ptr, a3.ptr(), a3.size() * sizeof( double ) );
+			ptr += a3.size();
+			memcpy( ptr, a4.ptr(), a4.size() * sizeof( double ) );
+			
+			Qinfo qi( e.objId(), getBindIndex(), threadNum, 0, totSize );
+			e.element()->exec( &qi, data );
 			delete[] data;
 		}
 

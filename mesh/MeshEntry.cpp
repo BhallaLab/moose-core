@@ -263,8 +263,9 @@ void MeshEntry::triggerRemesh( const Eref& e, unsigned int threadNum,
 	unsigned int startEntry, const vector< unsigned int >& localIndices,
 	const vector< double >& vols )
 {
-	remesh()->send( e, threadNum, parent_->getNumEntries(), 
+	// cout << "MeshEntry::triggerRemesh on " << e.element()->getName() << endl;
+	remesh()->fastSend( e, threadNum, parent_->getNumEntries(), 
 		startEntry, localIndices, vols );
-	remeshReacs()->send( e, threadNum );
+	remeshReacs()->fastSend( e, threadNum );
 }
 

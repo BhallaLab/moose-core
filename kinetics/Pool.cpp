@@ -141,8 +141,10 @@ void Pool::vRemesh( const Eref& e, const Qinfo* q,
 {
 	if ( e.index().value() != 0 )
 		return;
+	/*
 	if ( q->addToStructuralQ() )
 		return;
+		*/
 	Neutral* n = reinterpret_cast< Neutral* >( e.data() );
 	assert( vols.size() > 0 );
 	double concInit = concInit_; // replace when we fix the conc access
