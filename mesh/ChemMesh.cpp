@@ -155,7 +155,7 @@ const Cinfo* ChemMesh::initCinfo()
 			&ChemMesh::lookupEntry,
 			&ChemMesh::setNumEntries,
 			&ChemMesh::getNumEntries,
-			64
+			1
 		);
 
 	static Finfo* chemMeshFinfos[] = {
