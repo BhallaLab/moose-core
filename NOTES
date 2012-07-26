@@ -18076,5 +18076,7 @@ Should I invent a special instant-send option in SrcFinfo?
 Did so. Worked, but there are a huge number of cases of addToStructuralQ
 that I had to eliminate. I'll have to figure out how to handle those.
 
-Clears unit tests and most of the regression tests.
+Clears unit tests and most of the regression tests. Checkin 3817.
+Now clears all regression tests. Pending issue was a funny initialization
+of default chem mesh size of 64.
 ============================================================================
