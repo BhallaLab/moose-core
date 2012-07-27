@@ -18119,9 +18119,26 @@ For the Singles, doing only n = 500 for 100 steps.
 	About 30 seconds was just to destroy these messages, possibly 
 	a similar time or longer for setup.
 
-This set of runs 
-	Single takes	4.4 sec with 2 threads and 4.1 with 1
+Checkin 3820.
 
 
+Specific optimizations:
+- Avoid copying the separate thread buffers into a big one.
+	This will help only if we have a small fraction only going by MPI
+	Will need double buffering.
+- Eliminate the direct q handling stuff in Element::exec
+- Have SrcFinfos directly insert stuff into the data Qs?
+- Condense Qinfo
+- Have info about targets on the Element, indexed by msgBindIndex.
+	Tells us if offnode, and possibly target threads.
+- Revamp Conv. 
+- Ring buffer synapse queue with fixed intervals.
+- Actually by far the biggest message efficiency step will be to have solvers
+	that conduct their own ticks and only synchronize with the rest of
+	the world every 1 or 2 milliseconds.
+	- Solvers will have to take over plots as well, to dump data with a 
+	finer timestep than 2 ms.
+	- Hsolvers will essentially never emit more than 1 spike each tick,
+	so just need to specify the timestamp accurately.
 
 ============================================================================
