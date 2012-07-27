@@ -18078,5 +18078,24 @@ that I had to eliminate. I'll have to figure out how to handle those.
 
 Clears unit tests and most of the regression tests. Checkin 3817.
 Now clears all regression tests. Pending issue was a funny initialization
-of default chem mesh size of 64.
+of default chem mesh size of 64. Checkin 3818.
+With this phase 1 of the conversion is done. However it doesn't work with
+python. Minor fix later, it runs but it fails an assertion on exit.
+Ran valgrind. 
+
+Benchmarks: Arith array to self. First pass at writing it, not
+yet compiled. In msg::testMsg.
 ============================================================================
+27 July 2012
+Various bits of setup and cleanup so that the benchmarks can be run.
+I've also inserted flags so that even in debug mode, the regression and unit
+tests don't run by default. Instead one uses the -r and -u flags on the
+command line.
+Benchmark syntax for message tests:
+-b msg_<msgType>_<size>
+where 'msgType' is one of Single, OneToOne, Diagonal, OneToAll and Sparse,
+and where 'size' is the # of nodes of the fully connected network. The
+	# of travelling msgs is therefore size * size * numSteps. 
+NumSteps currently is hard-coded to 100.
+
+

@@ -336,10 +336,10 @@ extern "C" {
         shellId = init(argc, argv);
         
 #ifdef DO_UNIT_TESTS        
+        Qinfo::initMutex(); // Mutex used to align Parser and MOOSE threads
         nonMpiTests( ShellPtr ); // These tests do not need the process loop.
 #endif // DO_UNIT_TESTS
         if (!ShellPtr->isSingleThreaded()){
-            Qinfo::initMutex(); // Mutex used to align Parser and MOOSE threads.
             ShellPtr->launchThreads();
         }
         if ( ShellPtr->myNode() == 0 ) {

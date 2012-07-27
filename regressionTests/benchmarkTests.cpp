@@ -22,6 +22,9 @@ extern void perfTestMarkovSolver();
 extern void testGsolver( string modelName, string plotName,
 	double plotDt, double simtime );
 
+// Defined in testMsg.cpp
+extern void benchmarkMsg( unsigned int, string msgType);			
+
 void testKsolve()
 {
 	double ktime1 = testGslIntegrator( "Kholodenko", "conc1/MAPK-PP.Co",
@@ -51,6 +54,15 @@ void innerBenchmarks( const string& optarg )
 		rtHHnetwork( 1000 );
 	else if ( string("markovSolver") == optarg )
 		perfTestMarkovSolver( );
+	else if ( optarg.substr( 0, 3 ) == "msg" ) {
+		// split optarg here
+		string::size_type pos = optarg.find_first_of( '_' );
+		assert ( pos != string::npos );
+		string::size_type pos2 = optarg.find_last_of( '_' );
+		unsigned int numObj = atoi( optarg.substr( pos2 + 1, string::npos ).c_str() );
+		string msgType = optarg.substr( pos + 1, pos2 - pos - 1 );
+		benchmarkMsg( numObj, msgType );
+	}
 
 	cout << "Completed benchmark\n";
 }
@@ -61,7 +73,7 @@ bool benchmarkTests( int argc, char** argv )
 	bool doPlot = 0;
 	optind = 0; // forces reinit of getopt
 
-	while ( ( opt = getopt( argc, argv, "shiqn:t:b:B:" ) ) != -1 ) {
+	while ( ( opt = getopt( argc, argv, "shiqurn:t:b:B:" ) ) != -1 ) {
 		switch ( opt ) {
 			case 'B': // Benchmark
 				doPlot = 1; // fall through to case b.
