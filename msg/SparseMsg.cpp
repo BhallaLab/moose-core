@@ -341,7 +341,7 @@ unsigned int SparseMsg::randomConnect( double probability )
 	assert( nCols == syn->dataHandler()->parentDataHandler()->sizeOfDim( 0  ) );
 	// assert( nRows == syn->dataHandler()->sizeOfDim( 1 ) );
 
-	assert ( syn->dataHandler()->dims().size() > 1 );
+	assert ( syn->dataHandler()->dims().size() >= 1 );
 	FieldDataHandlerBase* fdh = 
 		dynamic_cast< FieldDataHandlerBase* >( syn->dataHandler() );
 
