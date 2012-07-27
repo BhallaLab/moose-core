@@ -18096,6 +18096,32 @@ Benchmark syntax for message tests:
 where 'msgType' is one of Single, OneToOne, Diagonal, OneToAll and Sparse,
 and where 'size' is the # of nodes of the fully connected network. The
 	# of travelling msgs is therefore size * size * numSteps. 
-NumSteps currently is hard-coded to 100.
+NumSteps currently is hard-coded to 100. 
+Checkin 3819.
+
+Did some benchmarking, the key findings are
+- SingleMsg is about 100 times slower than SparseMsg
+- More threads slower. Linearly so for most, sublinear for SparseMsg.
+Need to verify the message passing. Done so, for small numbers of cycles.
+Turns out that the doubles go happily up to over 10^300, so I can deal with
+n = 1000 for 100 steps. Takes 11 seconds with OneToAll, and only 7.5 with 
+Sparse.
+Compiled with optimization. 
+	Sparse Takes 	3.2 seconds on 2 threads, and 4.3 with 1.
+	OneToAll takes 	5.7 seconds with 2 threads and 4.7 with 1
+	OneToOne takes 	6.6 seconds with 2 threads and 6.6 with 1
+	Diagonal takes 	11.3 seconds with 2 threads and 8.9 with 1
+
+For the Singles, doing only n = 100 for 100 steps.
+	Single takes	4.4 sec with 2 threads and 4.1 with 1
+For the Singles, doing only n = 500 for 100 steps.
+	Single takes	sec with 2 threads and 450 with 1
+	About 30 seconds was just to destroy these messages, possibly 
+	a similar time or longer for setup.
+
+This set of runs 
+	Single takes	4.4 sec with 2 threads and 4.1 with 1
 
 
+
+============================================================================

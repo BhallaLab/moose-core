@@ -330,39 +330,43 @@ void benchmarkMsg( unsigned int n, string msgType )
 	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
 	vector< int > dimensions;
 	dimensions.push_back( n );
+	vector< double > init( n );
+	for ( unsigned int i = 0; i < n; ++i )
+		init[i] = (i + 1) * 1e6;
 
 	Id a1 = shell->doCreate( "Arith", Id(), "a1", dimensions );
+
 	if ( msgType == "Single" ) {
 		for ( unsigned int i = 0; i < n; ++i ) {
 			for ( unsigned int j = 0; j < n; ++j ) {
 				MsgId m1 = shell->doAddMsg( "Single", 
-					ObjId( a1, i ), "output", ObjId( a1, j ), "arg1" );
+					ObjId( a1, i ), "output", ObjId( a1, j ), "arg3" );
 				assert( m1 != Msg::bad );
 			}
 		}
 	} else if ( msgType == "OneToAll" ) {
 		for ( unsigned int i = 0; i < n; ++i ) {
 			MsgId m1 = shell->doAddMsg( "OneToAll", 
-				ObjId( a1, i ), "output", ObjId( a1, 0 ), "arg1" );
+				ObjId( a1, i ), "output", ObjId( a1, 0 ), "arg3" );
 			assert( m1 != Msg::bad );
 		}
 	} else if ( msgType == "OneToOne" ) {
 		for ( unsigned int i = 0; i < n; ++i ) { // just repeat it n times
 			MsgId m1 = shell->doAddMsg( "OneToOne", 
-				ObjId( a1, 0 ), "output", ObjId( a1, 0 ), "arg1" );
+				ObjId( a1, 0 ), "output", ObjId( a1, 0 ), "arg3" );
 			assert( m1 != Msg::bad );
 		}
 	} else if ( msgType == "Diagonal" ) {
 		for ( unsigned int i = 0; i < 2 * n; ++i ) { // Set up all offsets
 			MsgId m1 = shell->doAddMsg( "Diagonal", 
-				ObjId( a1, 0 ), "output", ObjId( a1, 0 ), "arg1" );
+				ObjId( a1, 0 ), "output", ObjId( a1, 0 ), "arg3" );
 			const Msg* m = Msg::getMsg( m1 );
 			Eref mer = m->manager();
 			Field< int >::set( mer.objId(), "stride", n - i );
 		}
 	} else if ( msgType == "Sparse" ) {
 		MsgId m1 = shell->doAddMsg( "Sparse", 
-			ObjId( a1, 0 ), "output", ObjId( a1, 0 ), "arg1" );
+			ObjId( a1, 0 ), "output", ObjId( a1, 0 ), "arg3" );
 		const Msg* m = Msg::getMsg( m1 );
 		Eref mer = m->manager();
 	
@@ -375,7 +379,18 @@ void benchmarkMsg( unsigned int n, string msgType )
 		shell->doSetClock( i, 0, false );
 	shell->doSetClock( 0, 1, false );
 	shell->doReinit( false );
+	SetGet1< double >::setVec( a1, "arg1", init );
 	shell->doStart( 100, false );
+	for ( unsigned int i = 0; i < n; ++i )
+		init[i] = 0; // be sure we don't retain old info.
+	init.clear();
+	Field< double >::getVec( a1, "outputValue", init );
+	cout << endl;
+	for ( unsigned int i = 0; i < n; ++i ) {
+		cout << i << " " << init[i] << "	";
+		if ( i % 5 == 4 )
+			cout << endl;
+	}
 
 	shell->doDelete( a1 );
 }
