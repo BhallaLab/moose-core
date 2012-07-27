@@ -130,7 +130,7 @@ void checkChildren( Id parent, const string& info )
 	}
 }
 
-Id init( int argc, char** argv )
+Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests )
 {
 	int numCores = getNumCores();
 	int numThreads = numCores;
@@ -157,7 +157,7 @@ Id init( int argc, char** argv )
 	 * Here we allow the user to override the automatic identification
 	 * of processor configuration
 	 */
-	while ( ( opt = getopt( argc, argv, "shiqn:t:b:B:" ) ) != -1 ) {
+	while ( ( opt = getopt( argc, argv, "shiqurn:t:b:B:" ) ) != -1 ) {
 		switch ( opt ) {
 			case 's': // Single threaded mode. Overrides numThreads.
 				isSingleThreaded = 1;
@@ -174,14 +174,21 @@ Id init( int argc, char** argv )
 				break;
 			case 'b': // Benchmark: handle later.
 				break;
-			case 'B': // Benchmark, dump data: handle later.
+			case 'B': // Benchmark plus dump data: handle later.
+				break;
+			case 'u': // Do unit tests, pass back.
+				doUnitTests = 1;
+				break;
+			case 'r': // Do regression tests: pass back
+				doRegressionTests = 1;
 				break;
 			case 'q': // quit immediately after completion.
 				quitFlag = 1;
 				break;
 			case 'h': // help
 			default:
-				cout << "Usage: moose -singleThreaded -help -infiniteLoop -quit -t numComputeThreads -n numNodes -benchmark [ksolve intFire hhNet]\n";
+				cout << "Usage: moose -singleThreaded -help -infiniteLoop -unit_tests -regression_tests -quit -t numComputeThreads -n numNodes -benchmark [ksolve intFire hhNet msg_<msgType>_<size>]\n";
+
 				exit( 1 );
 		}
 	}
@@ -214,9 +221,12 @@ Id init( int argc, char** argv )
 	new Element( clockId, Clock::initCinfo(), "clock", dims, 1, 1 );
 
 	// Some ugly hacks here to shift the Tick object to be Id(2).
+	Id::initIds(); // Shifted the dirty work to the Id class.
+	/*
 	Id::elements()[2] = Id::elements().back();
 	tickId.element()->id_ = 2;
 	Id::elements().pop_back();
+	*/
 
 	// Id tickId( 2 );
 	assert( tickId() != 0 );
@@ -324,22 +334,28 @@ void mpiTests()
 #ifndef PYMOOSE
 int main( int argc, char** argv )
 {
-	Id shellId = init( argc, argv );
+	bool doUnitTests = 0;
+	bool doRegressionTests = 0;
+	Id shellId = init( argc, argv, doUnitTests, doRegressionTests );
 	// Note that the main loop remains the parser loop, though it may
 	// spawn a lot of other stuff.
 	Element* shelle = shellId();
 	Shell* s = reinterpret_cast< Shell* >( shelle->dataHandler()->data( 0 ) );
 	Qinfo::initMutex(); // Mutex used to align Parser and MOOSE threads.
-	nonMpiTests( s ); // These tests do not need the process loop.
+	if ( doUnitTests )
+		nonMpiTests( s ); // These tests do not need the process loop.
 
 	if ( !s->isSingleThreaded() ) {
 		Shell::launchThreads(); // Here we set off the thread/MPI process loop.
 	}
 	if ( Shell::myNode() == 0 ) {
 #ifdef DO_UNIT_TESTS
-		mpiTests();
-		processTests( s );
-		regressionTests();
+		if ( doUnitTests ) {
+			mpiTests();
+			processTests( s );
+		}
+		if ( doRegressionTests )
+			regressionTests();
 #endif
 		// These are outside unit tests because they happen in optimized
 		// mode, using a command-line argument. As soon as they are done

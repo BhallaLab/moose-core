@@ -319,6 +319,67 @@ void testMsgElementListing()
 	cout << "." << flush;
 }
 
+/**
+ * In all cases we set up the same amount of data transfer by the msgs, that
+ * is, equivalent to a fully recurrently connected network.
+ * Used in regressionTests/benchmarkTests.cpp
+ */
+void benchmarkMsg( unsigned int n, string msgType )
+{
+	Eref sheller = Id().eref();
+	Shell* shell = reinterpret_cast< Shell* >( sheller.data() );
+	vector< int > dimensions;
+	dimensions.push_back( n );
+
+	Id a1 = shell->doCreate( "Arith", Id(), "a1", dimensions );
+	if ( msgType == "Single" ) {
+		for ( unsigned int i = 0; i < n; ++i ) {
+			for ( unsigned int j = 0; j < n; ++j ) {
+				MsgId m1 = shell->doAddMsg( "Single", 
+					ObjId( a1, i ), "output", ObjId( a1, j ), "arg1" );
+				assert( m1 != Msg::bad );
+			}
+		}
+	} else if ( msgType == "OneToAll" ) {
+		for ( unsigned int i = 0; i < n; ++i ) {
+			MsgId m1 = shell->doAddMsg( "OneToAll", 
+				ObjId( a1, i ), "output", ObjId( a1, 0 ), "arg1" );
+			assert( m1 != Msg::bad );
+		}
+	} else if ( msgType == "OneToOne" ) {
+		for ( unsigned int i = 0; i < n; ++i ) { // just repeat it n times
+			MsgId m1 = shell->doAddMsg( "OneToOne", 
+				ObjId( a1, 0 ), "output", ObjId( a1, 0 ), "arg1" );
+			assert( m1 != Msg::bad );
+		}
+	} else if ( msgType == "Diagonal" ) {
+		for ( unsigned int i = 0; i < 2 * n; ++i ) { // Set up all offsets
+			MsgId m1 = shell->doAddMsg( "Diagonal", 
+				ObjId( a1, 0 ), "output", ObjId( a1, 0 ), "arg1" );
+			const Msg* m = Msg::getMsg( m1 );
+			Eref mer = m->manager();
+			Field< int >::set( mer.objId(), "stride", n - i );
+		}
+	} else if ( msgType == "Sparse" ) {
+		MsgId m1 = shell->doAddMsg( "Sparse", 
+			ObjId( a1, 0 ), "output", ObjId( a1, 0 ), "arg1" );
+		const Msg* m = Msg::getMsg( m1 );
+		Eref mer = m->manager();
+	
+		SetGet2< double, long >::set( mer.objId(), 
+			"setRandomConnectivity", 1.0, 1234 );
+	} 
+
+	shell->doUseClock( "/a1", "proc", 0, false );
+	for ( unsigned int i = 0; i < 10; ++i )
+		shell->doSetClock( i, 0, false );
+	shell->doSetClock( 0, 1, false );
+	shell->doReinit( false );
+	shell->doStart( 100, false );
+
+	shell->doDelete( a1 );
+}
+
 void testMsg()
 {
 	testAssortedMsg();

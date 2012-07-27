@@ -16,7 +16,6 @@
  */
 class Id
 {
-	friend Id init( int argc, char** argv ); // accesses Id::elements().
 	public:
 		//////////////////////////////////////////////////////////////
 		//	Id creation
@@ -137,6 +136,11 @@ class Id
 		//		( id_ == other.id_ && index_ < other.index_ );
 			return ( id_ < other.id_ );
 		}
+
+		//////////////////////////////////////////////////////////////
+		//	Special setup functions, used only by init.
+		//////////////////////////////////////////////////////////////
+		static void initIds();
 
 		friend ostream& operator <<( ostream& s, const Id& i );
 		friend istream& operator >>( istream& s, Id& i );

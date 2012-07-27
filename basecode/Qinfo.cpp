@@ -739,6 +739,7 @@ void Qinfo::freeMutex()
 {
 	int ret = pthread_mutex_destroy( qMutex_ );
 	assert( ret == 0 );
+	pthread_mutex_unlock( pMutex_ );
 	ret = pthread_mutex_destroy( pMutex_ );
 	assert( ret == 0 );
 	ret = pthread_cond_destroy( qCond_ );
