@@ -18141,4 +18141,28 @@ Specific optimizations:
 	- Hsolvers will essentially never emit more than 1 spike each tick,
 	so just need to specify the timestamp accurately.
 
+
+First pass at profiling. This upsets someof the plans above.
+SingleMsg benchmark: 
+%time            self sec   # calls    Func name
+33.05      1.95     1.95 107048778     SingleMsg::exec(...)
+16.36      2.92     0.97 107073742     Msg::getMsg(unsigned int)
+15.08      3.81     0.89    10793      Element::exec(...)
+12.46      4.54     0.74 107981150     Id::operator()() const
+
+Only Element::exec is on my list of plans.
+
+For the Sparse msg, it is even less encouraging: 
+13.25      0.56     0.56 100001072     Eref::data() const
+12.89      1.10     0.54   100000      SparseMsg::exec(... )
+8.71      1.46     0.37 200102640      Element::dataHandler() const
+8.71      1.83     0.37 100000466      OpFunc1<Arith, double>::op(...)
+8.35      2.18     0.35                BlockHandler::execThread(... )
+8.11      2.52     0.34                BlockHandler::data(DataId) const
+
+I might be able to do a little with SparseMsg::exec.
+
+Tried the intFire test, doesn't terminate in 15 min. Eventually done around 20,
+but failed to produce the gmon.out file.
+
 ============================================================================
