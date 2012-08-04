@@ -168,7 +168,9 @@ endif
 
 # Libraries are defined below.
 SUBLIBS = 
-LIBS =	-lm -lpthread -L/usr/lib -L/usr/local/lib
+# Notice that pthread is included by default
+LIBS =	-L/usr/lib -L/usr/local/lib -lpthread
+
 #LIBS = 	-lm
 #ifeq ($(BUILD),thread)
 #LIBS += -lpthread
@@ -186,6 +188,15 @@ endif
 #
 # Developer options (Don't try these unless you are writing new code!)
 ##########################################################################
+
+# To use GSL, pass USE_GSL=true ( anything on the right will do) in make command line
+ifdef USE_GSL
+LIBS+= $(shell gsl-config --libs)
+CXXFLAGS+= -DUSE_GSL
+else
+LIBS+= -lm
+endif
+
 # For parallel (MPI) version:
 ifdef USE_MUSIC
 USE_MPI = 1		# Automatically enable MPI if USE_MUSIC is on
@@ -206,11 +217,6 @@ endif
 #CXXFLAGS = -g -Wall -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER -DUSE_READLINE
 
 
-# To use GSL, pass USE_GSL=true ( anything on the right will do) in make command line
-ifdef USE_GSL
-LIBS+= -L/usr/lib -lgsl -lgslcblas
-CXXFLAGS+= -DUSE_GSL
-endif
 
 #harsha
 # To use SBML, pass USE_SBML=1 in make command line
