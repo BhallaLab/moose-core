@@ -483,6 +483,16 @@ class Stoich
 		 * Map back from mol index to Id. Primarily for debugging.
 		 */
 		vector< Id > idMap_;
+
+		/**
+		 * Map back from reac index to Id. Needed to unzombify
+		 */
+		vector< Id > reacMap_;
+
+		/**
+		 * Map back from enz index to Id. Needed to unzombify
+		 */
+		vector< Id > enzMap_;
 		
 		/**
 		 * Number of variable molecules that the solver deals with.

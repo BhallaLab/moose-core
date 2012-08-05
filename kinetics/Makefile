@@ -39,9 +39,8 @@ $(OBJ)	: $(HEADERS)
 Pool.o:	PoolBase.h Pool.h lookupSizeFromMesh.h
 BufPool.o:	PoolBase.h Pool.h BufPool.h lookupSizeFromMesh.h
 FuncPool.o:	PoolBase.h Pool.h FuncPool.h lookupSizeFromMesh.h
-ReacBase.o:	ReacBase.h
-ReacBase.o:	Reac.h lookupSizeFromMesh.h
-Reac.o:	Reac.h lookupSizeFromMesh.h
+ReacBase.o:	ReacBase.h lookupSizeFromMesh.h
+Reac.o:	ReacBase.h Reac.h lookupSizeFromMesh.h
 Enz.o:	Enz.h lookupSizeFromMesh.h
 MMenz.o:	MMenz.h  lookupSizeFromMesh.h
 Boundary.o:	Boundary.h

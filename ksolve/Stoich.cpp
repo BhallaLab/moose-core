@@ -9,9 +9,11 @@
 
 #include "StoichHeaders.h"
 #include "ElementValueFinfo.h"
+#include "PoolBase.h"
 #include "Pool.h"
 #include "BufPool.h"
 #include "FuncPool.h"
+#include "ReacBase.h"
 #include "Reac.h"
 #include "Enz.h"
 #include "MMenz.h"
@@ -411,6 +413,7 @@ void Stoich::allocateModel( const vector< Id >& elist )
 			objMap_[ i->value() - objMapStart_ ] = numReac_;
 			++numReac_;
 		} else if ( ei->cinfo() == reacCinfo ) {
+			reacMap_.push_back( ei->id() );
 			if ( useOneWay_ ) {
 				objMap_[ i->value() - objMapStart_ ] = numReac_;
 				numReac_ += 2;
@@ -419,6 +422,7 @@ void Stoich::allocateModel( const vector< Id >& elist )
 				++numReac_;
 			}
 		} else if ( ei->cinfo() == enzCinfo ) {
+			enzMap_.push_back( ei->id() );
 			if ( useOneWay_ ) {
 				objMap_[ i->value() - objMapStart_ ] = numReac_;
 				numReac_ += 3;
@@ -524,7 +528,7 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 			}
 		}
 		else if ( ei->cinfo() == reacCinfo ) {
-			ZombieReac::zombify( e.element(), (*i)() );
+			ReacBase::zombify( ei, ZombieReac::initCinfo(), e.id() );
 		}
 		else if ( ei->cinfo() == mmEnzCinfo ) {
 			ZombieMMenz::zombify( e.element(), (*i)() );
@@ -558,6 +562,14 @@ void Stoich::unZombifyModel()
 			PoolBase::zombify( e, FuncPool::initCinfo(), Id() );
 	}
 	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+
+	for ( vector< Id >::iterator i = reacMap_.begin(); 
+						i != reacMap_.end(); ++i ) {
+		Element* e = i->element();
+		if ( e != 0 &&  e->cinfo() == ZombieReac::initCinfo() )
+			ReacBase::zombify( e, Reac::initCinfo(), Id() );
+			
+	}
 
 	s->addClockMsgs( idMap_, "proc", 4 );
 }
