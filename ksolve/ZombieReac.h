@@ -10,7 +10,7 @@
 #ifndef _ZOMBIE_REAC_H
 #define _ZOMBIE_REAC_H
 
-class ZombieReac
+class ZombieReac: public ReacBase
 {
 	public: 
 		ZombieReac();
@@ -20,28 +20,20 @@ class ZombieReac
 		// Field assignment stuff
 		//////////////////////////////////////////////////////////////////
 
-		void setNumKf( const Eref& e, const Qinfo* q, double v );
-		double getNumKf( const Eref& e, const Qinfo* q ) const;
-		void setNumKb( const Eref& e, const Qinfo* q, double v );
-		double getNumKb( const Eref& e, const Qinfo* q ) const;
+		void vSetNumKf( const Eref& e, const Qinfo* q, double v );
+		double vGetNumKf( const Eref& e, const Qinfo* q ) const;
+		void vSetNumKb( const Eref& e, const Qinfo* q, double v );
+		double vGetNumKb( const Eref& e, const Qinfo* q ) const;
 
-		void setConcKf( const Eref& e, const Qinfo* q, double v );
-		double getConcKf( const Eref& e, const Qinfo* q ) const;
-		void setConcKb( const Eref& e, const Qinfo* q, double v );
-		double getConcKb( const Eref& e, const Qinfo* q ) const;
-
-		unsigned int getNumSub( const Eref& e, const Qinfo* q ) const;
-		unsigned int getNumPrd( const Eref& e, const Qinfo* q ) const;
+		void vSetConcKf( const Eref& e, const Qinfo* q, double v );
+		double vGetConcKf( const Eref& e, const Qinfo* q ) const;
+		void vSetConcKb( const Eref& e, const Qinfo* q, double v );
+		double vGetConcKb( const Eref& e, const Qinfo* q ) const;
 
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
-
-		void process( const Eref& e, ProcPtr p );
-		void reinit( const Eref& e, ProcPtr p );
-		void sub( double v );
-		void prd( double v );
-		void remesh( const Eref& e, const Qinfo* q );
+		void vRemesh( const Eref& e, const Qinfo* q );
 
 		//////////////////////////////////////////////////////////////////
 		// utility funcs
@@ -49,14 +41,11 @@ class ZombieReac
 		ZeroOrder* makeHalfReaction( 
 			Element* orig, double rate, const SrcFinfo* finfo ) const;
 
-		static void zombify( Element* solver, Element* orig );
-		static void unzombify( Element* zombie );
+		void setSolver( Id solver, Id orig );
 
 		static const Cinfo* initCinfo();
 	private:
 		Stoich* stoich_;
-		double concKf_;
-		double concKb_;
 };
 
 #endif	// _ZOMBIE_REAC_H

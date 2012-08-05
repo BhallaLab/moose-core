@@ -10,147 +10,41 @@
 #include "header.h"
 #include "ElementValueFinfo.h"
 #include "lookupSizeFromMesh.h"
+#include "ReacBase.h"
 #include "Reac.h"
 
 #define EPSILON 1e-15
-
-static SrcFinfo2< double, double > *toSub() {
-	static SrcFinfo2< double, double > toSub( 
-			"toSub", 
-			"Sends out increment of molecules on product each timestep"
-			);
-	return &toSub;
-}
-
-static SrcFinfo2< double, double > *toPrd() {
-	static SrcFinfo2< double, double > toPrd( 
-			"toPrd", 
-			"Sends out increment of molecules on product each timestep"
-			);
-	return &toPrd;
-}
-
 const Cinfo* Reac::initCinfo()
 {
 		//////////////////////////////////////////////////////////////
-		// Field Definitions
+		// Field Definitions: All inherited from ReacBase
 		//////////////////////////////////////////////////////////////
-		static ElementValueFinfo< Reac, double > kf(
-			"kf",
-			"Forward rate constant, in # units",
-			&Reac::setNumKf,
-			&Reac::getNumKf
-		);
-
-		static ElementValueFinfo< Reac, double > kb(
-			"kb",
-			"Reverse rate constant, in # units",
-			&Reac::setNumKb,
-			&Reac::getNumKb
-		);
-
-		static ElementValueFinfo< Reac, double > Kf(
-			"Kf",
-			"Forward rate constant, in concentration units",
-			&Reac::setConcKf,
-			&Reac::getConcKf
-		);
-
-		static ElementValueFinfo< Reac, double > Kb(
-			"Kb",
-			"Reverse rate constant, in concentration units",
-			&Reac::setConcKb,
-			&Reac::getConcKb
-		);
-
-		static ReadOnlyElementValueFinfo< Reac, unsigned int > numSub(
-			"numSubstrates",
-			"Number of substrates of reaction",
-			&Reac::getNumSub
-		);
-
-		static ReadOnlyElementValueFinfo< Reac, unsigned int > numPrd(
-			"numProducts",
-			"Number of products of reaction",
-			&Reac::getNumPrd
-		);
-
 		//////////////////////////////////////////////////////////////
-		// MsgDest Definitions
+		// MsgDest Definitions: All inherited
 		//////////////////////////////////////////////////////////////
-		static DestFinfo process( "process",
-			"Handles process call",
-			new ProcOpFunc< Reac >( &Reac::process ) );
-		static DestFinfo reinit( "reinit",
-			"Handles reinit call",
-			new ProcOpFunc< Reac >( &Reac::reinit ) );
-
-		static DestFinfo group( "group",
-			"Handle for group msgs. Doesn't do anything",
-			new OpFuncDummy() );
-
-		static DestFinfo remesh( "remesh",
-			"Tells the reac to recompute its numRates, as remeshing has happened",
-			new EpFunc0< Reac >( & Reac::remesh ) );
-
 		//////////////////////////////////////////////////////////////
-		// Shared Msg Definitions
+		// Shared Msg Definitions: All inherited.
 		//////////////////////////////////////////////////////////////
-
-		static DestFinfo subDest( "subDest",
-				"Handles # of molecules of substrate",
-				new OpFunc1< Reac, double >( &Reac::sub ) );
-		static DestFinfo prdDest( "prdDest",
-				"Handles # of molecules of product",
-				new OpFunc1< Reac, double >( &Reac::prd ) );
-		static Finfo* subShared[] = {
-			toSub(), &subDest
-		};
-		static Finfo* prdShared[] = {
-			toPrd(), &prdDest
-		};
-		static SharedFinfo sub( "sub",
-			"Connects to substrate pool",
-			subShared, sizeof( subShared ) / sizeof( const Finfo* )
-		);
-		static SharedFinfo prd( "prd",
-			"Connects to substrate pool",
-			prdShared, sizeof( prdShared ) / sizeof( const Finfo* )
-		);
-		static Finfo* procShared[] = {
-			&process, &reinit
-		};
-		static SharedFinfo proc( "proc",
-			"Shared message for process and reinit",
-			procShared, sizeof( procShared ) / sizeof( const Finfo* )
-		);
-
-
-	static Finfo* reacFinfos[] = {
-		&kf,	// Value
-		&kb,	// Value
-		&Kf,	// Value
-		&Kb,	// Value
-		&numSub,	// ReadOnlyValue
-		&numPrd,	// ReadOnlyValue
-		&sub,				// SharedFinfo
-		&prd,				// SharedFinfo
-		&proc,				// SharedFinfo
-		&remesh,	// DestFinfo
-	};
-
 	static Cinfo reacCinfo (
 		"Reac",
-		Neutral::initCinfo(),
-		reacFinfos,
-		sizeof( reacFinfos ) / sizeof ( Finfo* ),
+		ReacBase::initCinfo(),
+		0,
+		0,
 		new Dinfo< Reac >()
 	);
 
 	return &reacCinfo;
 }
 
- static const Cinfo* reacCinfo = Reac::initCinfo();
+static const Cinfo* reacCinfo = Reac::initCinfo();
+
+static const SrcFinfo2< double, double >* toSub = 
+ 	dynamic_cast< const SrcFinfo2< double, double >* >(
+					reacCinfo->findFinfo( "toSub" ) );
+
+static const SrcFinfo2< double, double >* toPrd = 
+ 	dynamic_cast< const SrcFinfo2< double, double >* >(
+					reacCinfo->findFinfo( "toPrd" ) );
 
 //////////////////////////////////////////////////////////////
 // Reac internal functions
@@ -158,120 +52,105 @@ const Cinfo* Reac::initCinfo()
 
 
 Reac::Reac( )
-	: kf_( 0.1 ), kb_( 0.2 ), concKf_( 0.1 ), concKb_( 0.2 ),
-		sub_( 0.0 ), prd_( 0.0 )
+		: kf_( 0.1 ), kb_( 0.2 ), sub_( 0.0 ), prd_( 0.0 )
 {
 	;
 }
 
+/*
 Reac::Reac( double kf, double kb )
 	: kf_( kf ), kb_( kb ), concKf_( 0.1 ), concKb_( 0.2 ),
 		sub_( 0.0 ), prd_( 0.0 )
 {
 	;
 }
+*/
 
 //////////////////////////////////////////////////////////////
 // MsgDest Definitions
 //////////////////////////////////////////////////////////////
 
-void Reac::sub( double v )
+void Reac::vSub( double v )
 {
 	sub_ *= v;
 }
 
-void Reac::prd( double v )
+void Reac::vPrd( double v )
 {
 	prd_ *= v;
 }
 
-void Reac::process( const Eref& e, ProcPtr p )
+void Reac::vProcess( const Eref& e, ProcPtr p )
 {
-	toPrd()->send( e, p->threadIndexInGroup, sub_, prd_ );
-	toSub()->send( e, p->threadIndexInGroup, prd_, sub_ );
+	toPrd->send( e, p->threadIndexInGroup, sub_, prd_ );
+	toSub->send( e, p->threadIndexInGroup, prd_, sub_ );
 	
 	sub_ = kf_;
 	prd_ = kb_;
 }
 
-void Reac::reinit( const Eref& e, ProcPtr p )
+void Reac::vReinit( const Eref& e, ProcPtr p )
 {
 	sub_ = kf_ = concKf_ *
-		convertConcToNumRateUsingMesh( e, toSub(), 0 );
+		convertConcToNumRateUsingMesh( e, toSub, 0 );
 	prd_ = kb_ = concKb_ * 
-		convertConcToNumRateUsingMesh( e, toPrd(), 0 );
+		convertConcToNumRateUsingMesh( e, toPrd, 0 );
 }
 
-void Reac::remesh( const Eref& e, const Qinfo* q )
+void Reac::vRemesh( const Eref& e, const Qinfo* q )
 {
-	kf_ = concKf_ / convertConcToNumRateUsingMesh( e, toSub(), 0 );
-	kb_ = concKb_ / convertConcToNumRateUsingMesh( e, toPrd(), 0 );
+	kf_ = concKf_ / convertConcToNumRateUsingMesh( e, toSub, 0 );
+	kb_ = concKb_ / convertConcToNumRateUsingMesh( e, toPrd, 0 );
 }
 
 //////////////////////////////////////////////////////////////
 // Field Definitions
 //////////////////////////////////////////////////////////////
 
-void Reac::setNumKf( const Eref& e, const Qinfo* q, double v )
+void Reac::vSetNumKf( const Eref& e, const Qinfo* q, double v )
 {
 	sub_ = kf_ = v;
-	double volScale = convertConcToNumRateUsingMesh( e, toSub(), 0 );
+	double volScale = convertConcToNumRateUsingMesh( e, toSub, 0 );
 	concKf_ = kf_ * volScale;
 }
 
-double Reac::getNumKf( const Eref& e, const Qinfo* q) const
+double Reac::vGetNumKf( const Eref& e, const Qinfo* q) const
 {
-	double kf = concKf_ / convertConcToNumRateUsingMesh( e, toSub(), 0 );
+	double kf = concKf_ / convertConcToNumRateUsingMesh( e, toSub, 0 );
 	return kf;
 }
 
-void Reac::setNumKb( const Eref& e, const Qinfo* q, double v )
+void Reac::vSetNumKb( const Eref& e, const Qinfo* q, double v )
 {
 	prd_ = kb_ = v;
-	double volScale = convertConcToNumRateUsingMesh( e, toPrd(), 0 );
+	double volScale = convertConcToNumRateUsingMesh( e, toPrd, 0 );
 	concKb_ = kb_ * volScale;
 }
 
-double Reac::getNumKb( const Eref& e, const Qinfo* q ) const
+double Reac::vGetNumKb( const Eref& e, const Qinfo* q ) const
 {
-	double kb = concKb_ / convertConcToNumRateUsingMesh( e, toPrd(), 0 );
+	double kb = concKb_ / convertConcToNumRateUsingMesh( e, toPrd, 0 );
 	return kb;
 }
 
-void Reac::setConcKf( const Eref& e, const Qinfo* q, double v )
+void Reac::vSetConcKf( const Eref& e, const Qinfo* q, double v )
 {
 	concKf_ = v;
-	sub_ = kf_ = v / convertConcToNumRateUsingMesh( e, toSub(), 0 );
+	sub_ = kf_ = v / convertConcToNumRateUsingMesh( e, toSub, 0 );
 }
 
-double Reac::getConcKf( const Eref& e, const Qinfo* q ) const
+double Reac::vGetConcKf( const Eref& e, const Qinfo* q ) const
 {
 	return concKf_;
 }
 
-void Reac::setConcKb( const Eref& e, const Qinfo* q, double v )
+void Reac::vSetConcKb( const Eref& e, const Qinfo* q, double v )
 {
 	concKb_ = v;
-	prd_ = kb_ = v / convertConcToNumRateUsingMesh( e, toPrd(), 0 );
+	prd_ = kb_ = v / convertConcToNumRateUsingMesh( e, toPrd, 0 );
 }
 
-double Reac::getConcKb( const Eref& e, const Qinfo* q ) const
+double Reac::vGetConcKb( const Eref& e, const Qinfo* q ) const
 {
 	return concKb_;
-}
-
-unsigned int Reac::getNumSub( const Eref& e, const Qinfo* q ) const
-{
-	const vector< MsgFuncBinding >* mfb = 
-		e.element()->getMsgAndFunc( toSub()->getBindIndex() );
-	assert( mfb );
-	return ( mfb->size() );
-}
-
-unsigned int Reac::getNumPrd( const Eref& e, const Qinfo* q ) const
-{
-	const vector< MsgFuncBinding >* mfb = 
-		e.element()->getMsgAndFunc( toPrd()->getBindIndex() );
-	assert( mfb );
-	return ( mfb->size() );
 }
