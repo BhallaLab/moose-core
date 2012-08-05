@@ -8,153 +8,29 @@
 **********************************************************************/
 
 #include "StoichHeaders.h"
+#include "ReacBase.h"
 #include "ZombieReac.h"
 #include "Reac.h"
 #include "ElementValueFinfo.h"
 #include "DataHandlerWrapper.h"
 
-static SrcFinfo2< double, double > *toSub() {
-	static SrcFinfo2< double, double > toSub( 
-			"toSub", 
-			"Sends out increment of molecules on product each timestep"
-			);
-	return &toSub;
-}
-
-static SrcFinfo2< double, double > *toPrd() {
-	static SrcFinfo2< double, double > toPrd( 
-			"toPrd", 
-			"Sends out increment of molecules on product each timestep"
-			);
-	return &toPrd;
-}
-
-/*
-static SrcFinfo1< double > *requestSize() {
-	static SrcFinfo1< double > requestSize( 
-			"requestSize", 
-			"Requests size (volume) in which reaction is embedded. Used for"
-			"conversion to concentration units from molecule # units,"
-			"and for calculations when resized."
-			);
-	return &requestSize;
-}
-*/
-
 const Cinfo* ZombieReac::initCinfo()
 {
 		//////////////////////////////////////////////////////////////
-		// Field Definitions
+		// Field Definitions: All inherited.
 		//////////////////////////////////////////////////////////////
-		static ElementValueFinfo< ZombieReac, double > kf(
-			"kf",
-			"Forward rate constant, in # units",
-			&ZombieReac::setNumKf,
-			&ZombieReac::getNumKf
-		);
-
-		static ElementValueFinfo< ZombieReac, double > kb(
-			"kb",
-			"Reverse rate constant, in # units",
-			&ZombieReac::setNumKb,
-			&ZombieReac::getNumKb
-		);
-
-		static ElementValueFinfo< ZombieReac, double > Kf(
-			"Kf",
-			"Forward rate constant, in concentration units",
-			&ZombieReac::setConcKf,
-			&ZombieReac::getConcKf
-		);
-
-		static ElementValueFinfo< ZombieReac, double > Kb(
-			"Kb",
-			"Reverse rate constant, in concentration units",
-			&ZombieReac::setConcKb,
-			&ZombieReac::getConcKb
-		);
-
-		static ReadOnlyElementValueFinfo< ZombieReac, unsigned int > numSub(
-			"numSubstrates",
-			"Number of substrates of reaction",
-			&ZombieReac::getNumSub
-		);
-
-		static ReadOnlyElementValueFinfo< ZombieReac, unsigned int > numPrd(
-			"numProducts",
-			"Number of products of reaction",
-			&ZombieReac::getNumPrd
-		);
-
 		//////////////////////////////////////////////////////////////
-		// MsgDest Definitions
+		// MsgDest Definitions: All inherited.
 		//////////////////////////////////////////////////////////////
-		static DestFinfo process( "process",
-			"Handles process call",
-			new ProcOpFunc< ZombieReac >( &ZombieReac::process ) );
-
-		static DestFinfo reinit( "reinit",
-			"Handles reinit call",
-			new ProcOpFunc< ZombieReac >( &ZombieReac::reinit ) );
-
-		static DestFinfo group( "group",
-			"Handle for grouping. Doesn't do anything.",
-			new OpFuncDummy() );
-
-		static DestFinfo remesh( "remesh",
-			"Tells the reac to recompute its numRates, as remeshing has happ    ened",
-			new EpFunc0< ZombieReac >( &ZombieReac::remesh ) );
-
 		//////////////////////////////////////////////////////////////
-		// SharedMsg Definitions
+		// SharedMsg Definitions: All inherited
 		//////////////////////////////////////////////////////////////
-		static DestFinfo subDest( "subDest",
-				"Handles # of molecules of substrate",
-				new OpFunc1< ZombieReac, double >( &ZombieReac::sub ) );
-		static DestFinfo prdDest( "prdDest",
-				"Handles # of molecules of product",
-				new OpFunc1< ZombieReac, double >( &ZombieReac::prd ) );
-		static Finfo* subShared[] = {
-			toSub(), &subDest
-		};
-		static Finfo* prdShared[] = {
-			toPrd(), &prdDest
-		};
-		static SharedFinfo sub( "sub",
-			"Connects to substrate molecule",
-			subShared, sizeof( subShared ) / sizeof( const Finfo* )
-		);
-		static SharedFinfo prd( "prd",
-			"Connects to substrate molecule",
-			prdShared, sizeof( prdShared ) / sizeof( const Finfo* )
-		);
-		static Finfo* procShared[] = {
-			&process, &reinit
-		};
-		static SharedFinfo proc( "proc",
-			"Shared message for process and reinit",
-			procShared, sizeof( procShared ) / sizeof( const Finfo* )
-		);
-
-	static Finfo* zombieReacFinfos[] = {
-		&kf,		// Value
-		&kb,		// Value
-		&Kf,		// Value
-		&Kb,		// Value
-		&numSub,		// ReadOnlyValue
-		&numPrd,		// ReadOnlyValue
-		//requestSize(),	// SrcFinfo
-		&sub,		// SharedFinfo
-		&prd,		// SharedFinfo
-		&proc,		// SharedFinfo
-		&remesh,	// Destfinfo
-	};
 
 	static Cinfo zombieReacCinfo (
 		"ZombieReac",
-		Neutral::initCinfo(),
-		zombieReacFinfos,
-		sizeof( zombieReacFinfos ) / sizeof ( Finfo* ),
+		ReacBase::initCinfo(),
+		0,
+		0,
 		new Dinfo< ZombieReac >()
 	);
 
@@ -165,6 +41,14 @@ const Cinfo* ZombieReac::initCinfo()
 // Class definitions
 //////////////////////////////////////////////////////////////
 static const Cinfo* zombieReacCinfo = ZombieReac::initCinfo();
+
+static const SrcFinfo2< double, double >* toSub = 
+ 	dynamic_cast< const SrcFinfo2< double, double >* >(
+					zombieReacCinfo->findFinfo( "toSub" ) );
+
+static const SrcFinfo2< double, double >* toPrd = 
+ 	dynamic_cast< const SrcFinfo2< double, double >* >(
+					zombieReacCinfo->findFinfo( "toPrd" ) );
 
 ZombieReac::ZombieReac()
 {;}
@@ -177,23 +61,7 @@ ZombieReac::~ZombieReac()
 // MsgDest Definitions
 //////////////////////////////////////////////////////////////
 
-// Doesn't do anything on its own.
-void ZombieReac::process( const Eref& e, ProcPtr p )
-{;}
-
-void ZombieReac::reinit( const Eref& e, ProcPtr p )
-{;}
-
-
-void ZombieReac::sub( double v )
-{
-}
-
-void ZombieReac::prd( double v )
-{
-}
-
-void ZombieReac::remesh( const Eref& e, const Qinfo* q )
+void ZombieReac::vRemesh( const Eref& e, const Qinfo* q )
 {
 	stoich_->setReacKf( e, concKf_ );
 	stoich_->setReacKb( e, concKb_ );
@@ -204,14 +72,14 @@ void ZombieReac::remesh( const Eref& e, const Qinfo* q )
 //////////////////////////////////////////////////////////////
 
 // This conversion is deprecated, used mostly for kkit conversions.
-void ZombieReac::setNumKf( const Eref& e, const Qinfo* q, double v )
+void ZombieReac::vSetNumKf( const Eref& e, const Qinfo* q, double v )
 {
-	double volScale = convertConcToNumRateUsingMesh( e, toSub(), 0 );
+	double volScale = convertConcToNumRateUsingMesh( e, toSub, 0 );
 	concKf_ = v * volScale;
 	stoich_->setReacKf( e, concKf_ );
 }
 
-double ZombieReac::getNumKf( const Eref& e, const Qinfo* q ) const
+double ZombieReac::vGetNumKf( const Eref& e, const Qinfo* q ) const
 {
 	// Return value for voxel 0. Conceivably I might want to use the
 	// DataId part to specify which voxel to use, but that isn't in the
@@ -222,14 +90,14 @@ double ZombieReac::getNumKf( const Eref& e, const Qinfo* q ) const
 }
 
 // Deprecated, used for kkit conversion backward compatibility
-void ZombieReac::setNumKb( const Eref& e, const Qinfo* q, double v )
+void ZombieReac::vSetNumKb( const Eref& e, const Qinfo* q, double v )
 {
-	double volScale = convertConcToNumRateUsingMesh( e, toPrd(), 0 );
+	double volScale = convertConcToNumRateUsingMesh( e, toPrd, 0 );
 	concKb_ = v * volScale;
 	stoich_->setReacKb( e, concKb_ );
 }
 
-double ZombieReac::getNumKb( const Eref& e, const Qinfo* q ) const
+double ZombieReac::vGetNumKb( const Eref& e, const Qinfo* q ) const
 {
 	if ( stoich_->getOneWay() ) {
 		return stoich_->getR1( stoich_->convertIdToReacIndex( e.id() ) + 1, 0 );
@@ -238,45 +106,27 @@ double ZombieReac::getNumKb( const Eref& e, const Qinfo* q ) const
 	}
 }
 
-void ZombieReac::setConcKf( const Eref& e, const Qinfo* q, double v )
+void ZombieReac::vSetConcKf( const Eref& e, const Qinfo* q, double v )
 {
 	concKf_ = v;
 	stoich_->setReacKf( e, v );
 }
 
-double ZombieReac::getConcKf( const Eref& e, const Qinfo* q ) const
+double ZombieReac::vGetConcKf( const Eref& e, const Qinfo* q ) const
 {
 	return concKf_;
 }
 
-void ZombieReac::setConcKb( const Eref& e, const Qinfo* q, double v )
+void ZombieReac::vSetConcKb( const Eref& e, const Qinfo* q, double v )
 {
 	concKb_ = v;
 	stoich_->setReacKb( e, v );
 }
 
-double ZombieReac::getConcKb( const Eref& e, const Qinfo* q ) const
+double ZombieReac::vGetConcKb( const Eref& e, const Qinfo* q ) const
 {
 	return concKb_;
 }
-
-unsigned int ZombieReac::getNumSub( const Eref& e, const Qinfo* q ) const
-{
-	const vector< MsgFuncBinding >* mfb =
-	e.element()->getMsgAndFunc( toSub()->getBindIndex() );
-	assert( mfb );
-	return ( mfb->size() );
-}
-
-unsigned int ZombieReac::getNumPrd( const Eref& e, const Qinfo* q ) const
-{
-	const vector< MsgFuncBinding >* mfb =
-	e.element()->getMsgAndFunc( toPrd()->getBindIndex() );
-	assert( mfb );
-	return ( mfb->size() );
-}
-
-
 
 //////////////////////////////////////////////////////////////
 // Utility function
@@ -307,16 +157,39 @@ ZeroOrder* ZombieReac::makeHalfReaction(
 	return rateTerm;
 }
 
-// static func
-void ZombieReac::zombify( Element* solver, Element* orig )
+// Virtual func called in zombify before fields are assigned.
+void ZombieReac::setSolver( Id solver, Id orig )
 {
+		/*
 	static const SrcFinfo* sub = dynamic_cast< const SrcFinfo* >(
 		Reac::initCinfo()->findFinfo( "toSub" ) );
 	static const SrcFinfo* prd = dynamic_cast< const SrcFinfo* >(
 		Reac::initCinfo()->findFinfo( "toPrd" ) );
-	
 	assert( sub );
 	assert( prd );
+	*/
+	assert( solver != Id() );
+
+	stoich_ = reinterpret_cast< Stoich* >( solver.eref().data( ) );
+	/*
+	ReacBase* reac = reinterpret_cast< ReacBase* >( orig.eref()->data() );
+
+	double concKf = reac->getConcKf( orig.eref(), 0 );
+	double concKb = reac->getConcKb( orig.eref(), 0 );
+	ZeroOrder* forward = makeHalfReaction( orig.element(), concKf, sub );
+	ZeroOrder* reverse = makeHalfReaction( orig.element(), concKb, prd );
+	*/
+	// Values will be filled in later by the zombify function.
+	ZeroOrder* forward = makeHalfReaction( orig.element(), 0, toSub );
+	ZeroOrder* reverse = makeHalfReaction( orig.element(), 0, toPrd );
+
+	stoich_->installReaction( forward, reverse, orig );
+}
+
+/*
+// static func
+void ZombieReac::zombify( Element* solver, Element* orig )
+{
 
 	DataHandler* dh = orig->dataHandler()->copyUsingNewDinfo( ZombieReac::initCinfo()->dinfo() );
 
@@ -340,22 +213,4 @@ void ZombieReac::zombify( Element* solver, Element* orig )
 	zr->stoich_->setReacKf( Eref( orig, 0 ), concKf );
 	zr->stoich_->setReacKb( Eref( orig, 0 ), concKb );
 }
-
-// Static func
-void ZombieReac::unzombify( Element* zombie )
-{
-	DataHandler* dh = zombie->dataHandler()->copyUsingNewDinfo( Reac::initCinfo()->dinfo() );
-
-	ZombieReac* zr = reinterpret_cast< ZombieReac* >( zombie->dataHandler()->data( 0 ));
-
-	Reac* reac = reinterpret_cast< Reac* >( dh->data( 0 ));
-	double concKf = zr->getConcKf( Eref( zombie, 0 ), 0 );
-	double concKb = zr->getConcKb( Eref( zombie, 0 ), 0 );
-
-
-	zombie->zombieSwap( Reac::initCinfo(), dh );
-	// Now the zombie is a regular reac.
-
-	reac->setConcKf( Eref( zombie, 0 ), 0, concKf );
-	reac->setConcKb( Eref( zombie, 0 ), 0, concKb );
-}
+*/

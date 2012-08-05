@@ -18177,6 +18177,11 @@ Got staff to install Ubuntu 12.04, back to slowly fixing up the
 ReacBase and related files.
 
 ============================================================================
- 4 Aug 2012.
-Lost direction on trains, msany cancelled.  In this round the chinese'k
-============================================================================
+5 Aug 2012
+Baffling earlier notes. I think they were to say that I was unable to get the
+Python to link MOOSE, even though the system happily cleared unit tests.
+Subha tried some fixes to the Makefile, doesn't help.
+Anyway, for now back to the zombify/unzombify work. Checked in something
+for the ReacBase, not yet tied with the other Reac classes. Checkin 3824.
+
+Looks like Reacs are now oK. On to enzymes

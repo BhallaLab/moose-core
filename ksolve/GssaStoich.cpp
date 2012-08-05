@@ -9,9 +9,11 @@
 #include <gsl/gsl_rng.h>
 #include "StoichHeaders.h"
 #include "ElementValueFinfo.h"
+#include "PoolBase.h"
 #include "Pool.h"
 #include "BufPool.h"
 #include "FuncPool.h"
+#include "ReacBase.h"
 #include "Reac.h"
 #include "Enz.h"
 #include "MMenz.h"
