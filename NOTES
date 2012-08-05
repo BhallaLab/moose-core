@@ -18184,4 +18184,6 @@ Subha tried some fixes to the Makefile, doesn't help.
 Anyway, for now back to the zombify/unzombify work. Checked in something
 for the ReacBase, not yet tied with the other Reac classes. Checkin 3824.
 
-Looks like Reacs are now oK. On to enzymes
+Looks like Reacs are now oK. On to enzymes. Checkin 3825.
+
+============================================================================
