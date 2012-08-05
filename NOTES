@@ -18166,3 +18166,17 @@ Tried the intFire test, doesn't terminate in 15 min. Eventually done around 20,
 but failed to produce the gmon.out file.
 
 ============================================================================
+2 Aug 2012.
+Now to move back to integration method conversion, aka, de-zombification.
+
+Working on setting up a base class ReacBase.
+
+============================================================================
+ 3 Aug 2012.
+Got staff to install Ubuntu 12.04, back to slowly fixing up the
+ReacBase and related files.
+
+============================================================================
+ 4 Aug 2012.
+Lost direction on trains, msany cancelled.  In this round the chinese'k
+============================================================================

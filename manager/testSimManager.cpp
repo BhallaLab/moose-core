@@ -136,11 +136,13 @@ void testRemeshing()
 
 void verifyZombieTurnoverTypes( bool isZombie ) {
 	if ( isZombie ) {
-		assert( Id( "/model/kinetics/a" ).element()->cinfo()->isA( 
-			"ZombiePool" ) );
-		assert( Id( "/model/kinetics/b" ).element()->cinfo()->isA( 
-			"ZombiePool" ) );
+		string ctype = Id( "/model/kinetics/a" ).element()->cinfo()->name();
+		assert( ctype == "ZombiePool" );
+		ctype = Id( "/model/kinetics/b" ).element()->cinfo()->name();
+		assert( ctype == "ZombiePool" );
 		assert( Id( "/model/kinetics/k/Jjkl/Jjkl_cplx" ).element()->cinfo()->isA( "ZombiePool" ) );
+		ctype = Id( "/model/kinetics/AabX" ).element()->cinfo()->name();
+		assert( ctype == "ZombieReac" );
 		assert( Id( "/model/kinetics/AabX" ).element()->cinfo()->isA( 
 			"ZombieReac" ) );
 		assert( Id( "/model/kinetics/BbcX" ).element()->cinfo()->isA( 
@@ -176,16 +178,18 @@ void testZombieTurnover()
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	ReadCspace rc;
 	Id mgr = rc.readModelString( "|AabX|BbcX|CcdX|DdeX|Eefg|Ffgh|Gghi|Hhij|Iijk|Jjkl|Kklm|Llmn| 1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0 11.0 12.0 13.0 14.0 101 102 201 202 301 302 401 402 501 502 601 602 701 702 801 802 901 902 1001 1002 1101 1102 1201 1202",
-		"model", Id(), "gsl" );
+		"model", Id(), "ee" );
+	verifyZombieTurnoverTypes( 0 );
 	//  I would really like to be able to define MMenz as well here.
+	Field< string >::set( mgr, "method", "gsl" );
 	verifyZombieTurnoverTypes( 1 );
 
-	/*
 	Field< string >::set( mgr, "method", "ee" );
 	verifyZombieTurnoverTypes( 0 );
 	Field< string >::set( mgr, "method", "gsl" );
 	verifyZombieTurnoverTypes( 1 );
-	*/
+	Field< string >::set( mgr, "method", "ee" );
+	verifyZombieTurnoverTypes( 0 );
 
 	shell->doDelete( mgr );
 }
