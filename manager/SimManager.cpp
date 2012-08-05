@@ -271,8 +271,9 @@ void SimManager::setMethod( const Eref& e, const Qinfo* q, string v )
 		// setupRK5();
 	} else if ( v == "ee" || v == "EE" || v == "ExpEuler" ) {
 		shell->doDelete( stoich_ );
+	} else {
+		cout << "SimManager::setMethod(" << v << "): Not yet implemented\n";
 	}
-	cout << "SimManager::setMethod: Not yet implemented\n";
 	method_ = v;
 }
 

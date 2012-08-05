@@ -686,7 +686,7 @@ bool Qinfo::addToStructuralQ() const
 		1 + ( sizeof( ObjFid ) - 1 ) / sizeof( double );
 
 	bool ret = 0;
-		if ( !isSafeForStructuralOps_ ) {
+		if ( !( isSafeForStructuralOps_ || threadNum_ == ScriptThreadNum )){
 			if ( isDummy() )
 				cout << "d" << flush;
 			structuralQinfo_.push_back( *this );
