@@ -15,41 +15,35 @@
  * equation
  * V = kcat.[Etot].[S]/( Km + [S] )
  */
-class ZombieMMenz
+class ZombieMMenz: public EnzBase
 {
 	public: 
 		ZombieMMenz();
 
 		//////////////////////////////////////////////////////////////////
-		// Field assignment stuff
+		// Field assignment stuff: All override virtual funcs
 		//////////////////////////////////////////////////////////////////
 
-		void setKm( const Eref& e, const Qinfo* q, double v );
-		double getKm( const Eref& e, const Qinfo* q ) const;
-		void setNumKm( const Eref& e, const Qinfo* q, double v );
-		double getNumKm( const Eref& e, const Qinfo* q ) const;
-		void setKcat( const Eref& e, const Qinfo* q, double v );
-		double getKcat( const Eref& e, const Qinfo* q ) const;
-		unsigned int getNumSub( const Eref& e, const Qinfo* q ) const;
+		void vSetKm( const Eref& e, const Qinfo* q, double v );
+		double vGetKm( const Eref& e, const Qinfo* q ) const;
+		void vSetNumKm( const Eref& e, const Qinfo* q, double v );
+		double vGetNumKm( const Eref& e, const Qinfo* q ) const;
+		void vSetKcat( const Eref& e, const Qinfo* q, double v );
+		double vGetKcat( const Eref& e, const Qinfo* q ) const;
 
 		//////////////////////////////////////////////////////////////////
-		// Dest funcs
+		// Dest funcs: All override virtual funcs
 		//////////////////////////////////////////////////////////////////
 
-		void process( const Eref& e, ProcPtr p );
-		void reinit( const Eref& e, ProcPtr p );
-		void dummy( double n );
-		void remesh( const Eref& e, const Qinfo* q );
+		void vRemesh( const Eref& e, const Qinfo* q );
 
 		//////////////////////////////////////////////////////////////////
 		// Utility  funcs
 		//////////////////////////////////////////////////////////////////
-		//unsigned int convertId ( Id id ) const;
-		//unsigned int getSubIndex( Element* orig ) const;
-		//unsigned int getEnzIndex( Element* orig ) const;
 
-		static void zombify( Element* solver, Element* orig );
-		static void unzombify( Element* zombie );
+		/// Does ZombieMMenz specific functions during conversion to zombie
+		/// virtual func overrides default.
+		void setSolver( Id solver, Id orig );
 
 		static const Cinfo* initCinfo();
 	private:

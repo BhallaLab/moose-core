@@ -18185,5 +18185,17 @@ Anyway, for now back to the zombify/unzombify work. Checked in something
 for the ReacBase, not yet tied with the other Reac classes. Checkin 3824.
 
 Looks like Reacs are now oK. On to enzymes. Checkin 3825.
+Checked in skeleton for EnzBase too. Checkin 3826.
+
+Implemented the zombie stuff using base classes for MMenz. Assorted 
+odd crashes, suggest ptr problem.
+
+Yet to implement regular enz zombie stuff.
+
+============================================================================
+6 Aug 2012.
+Fixed up MMenz zombie stuff, tedious set of bugs. Put in a couple of unit
+tests. There is a random crash happening earlier too. Still to clear the
+zombie conversion of regular enzymes, but this was a necessary first step.
 
 ============================================================================
