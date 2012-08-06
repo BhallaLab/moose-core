@@ -86,7 +86,7 @@ const Cinfo* EnzBase::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
-		static DestFinfo enzDest( "enz",
+		static DestFinfo enzDest( "enzDest",
 				"Handles # of molecules of Enzyme",
 				new OpFunc1< EnzBase, double >( &EnzBase::enz ) );
 		static DestFinfo subDest( "subDest",
