@@ -86,7 +86,8 @@ class Stoich
 
 		/**
 		 * zombifyModel marches through the specified id list and 
-		 * converts all entries into zombies.
+		 * converts all entries into zombies. The first arg e is the
+		 * Eref of the Stoich itself.
 		 */
 		void zombifyModel( const Eref& e, const vector< Id >& elist );
 

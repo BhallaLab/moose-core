@@ -10,38 +10,43 @@
 #ifndef _ZOMBIE_ENZ_H
 #define _ZOMBIE_ENZ_H
 
-class ZombieEnz
+class ZombieEnz: public CplxEnzBase
 {
 	public: 
 		ZombieEnz();
+		~ZombieEnz();
 
 		//////////////////////////////////////////////////////////////////
 		// Field assignment stuff
 		//////////////////////////////////////////////////////////////////
 
-		void setK1( const Eref& e, const Qinfo* q, double v );
-		double getK1( const Eref& e, const Qinfo* q ) const;
-		void setK2( const Eref& e, const Qinfo* q, double v );
-		double getK2( const Eref& e, const Qinfo* q ) const;
-		void setK3( const Eref& e, const Qinfo* q, double v );
-		double getK3( const Eref& e, const Qinfo* q ) const;
+		void vSetK1( const Eref& e, const Qinfo* q, double v );
+		double vGetK1( const Eref& e, const Qinfo* q ) const;
+		void vSetK2( const Eref& e, const Qinfo* q, double v );
+		double vGetK2( const Eref& e, const Qinfo* q ) const;
+		void vSetKcat( const Eref& e, const Qinfo* q, double v );
+		double vGetKcat( const Eref& e, const Qinfo* q ) const;
 
-		void setKm( const Eref& e, const Qinfo* q, double v );
-		double getKm( const Eref& e, const Qinfo* q ) const;
-		void setRatio( const Eref& e, const Qinfo* q, double v );
-		double getRatio( const Eref& e, const Qinfo* q ) const;
-		void setConcK1( const Eref& e, const Qinfo* q, double v );
-		double getConcK1( const Eref& e, const Qinfo* q ) const;
-		unsigned int getNumSub( const Eref& e, const Qinfo* q ) const;
+		void vSetKm( const Eref& e, const Qinfo* q, double v );
+		double vGetKm( const Eref& e, const Qinfo* q ) const;
+		void vSetNumKm( const Eref& e, const Qinfo* q, double v );
+		double vGetNumKm( const Eref& e, const Qinfo* q ) const;
+		void vSetRatio( const Eref& e, const Qinfo* q, double v );
+		double vGetRatio( const Eref& e, const Qinfo* q ) const;
+		void vSetConcK1( const Eref& e, const Qinfo* q, double v );
+		double vGetConcK1( const Eref& e, const Qinfo* q ) const;
 
 		//////////////////////////////////////////////////////////////////
-		// Dest funcs
+		// Dest funcs are mostly dummies.
 		//////////////////////////////////////////////////////////////////
 
-		void process( const Eref& e, ProcPtr p );
-		void reinit( const Eref& e, ProcPtr p );
+		/*
+		void vCplx( double n ); //does nothing, dummy defined in CplxEnzBase
+		void vProcess( const Eref& e, ProcPtr p );
+		void vReinit( const Eref& e, ProcPtr p );
 		void dummy( double n );
-		void remesh( const Eref& e, const Qinfo* q );
+		*/
+		void vRemesh( const Eref& e, const Qinfo* q );
 
 		//////////////////////////////////////////////////////////////////
 		// Utility  funcs
@@ -49,8 +54,8 @@ class ZombieEnz
 		ZeroOrder* makeHalfReaction( 
 			Element* orig, double rate, const SrcFinfo* finfo, Id enz )
 			const;
-		static void zombify( Element* solver, Element* orig );
-		static void unzombify( Element* zombie );
+
+		void setSolver( Id solver, Id orig );
 
 		static const Cinfo* initCinfo();
 	private:

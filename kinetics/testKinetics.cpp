@@ -182,7 +182,7 @@ void testMathFuncProcess()
 
 	shell->doAddMsg( "Single", ObjId( mmid ), "sub", ObjId( pid ), "reac" );
 	shell->doAddMsg( "Single", ObjId( mmid ), "prd", ObjId( rid ), "reac" );
-	shell->doAddMsg( "Single", ObjId( qid ), "nOut", ObjId( mmid ), "enz" );
+	shell->doAddMsg( "Single", ObjId( qid ), "nOut", ObjId( mmid ), "enzDest" );
 	shell->doAddMsg( "Single", ObjId( rid ), "nOut", ObjId( tabid2 ), "input" );
 	shell->doSetClock( 0, 0.01 );
 	shell->doUseClock( "/n/##", "process", 0 );
@@ -385,7 +385,7 @@ void testMMenzProcess()
 
 	shell->doAddMsg( "Single", ObjId( mmid ), "sub", ObjId( pid ), "reac" );
 	shell->doAddMsg( "Single", ObjId( mmid ), "prd", ObjId( rid ), "reac" );
-	shell->doAddMsg( "Single", ObjId( qid ), "nOut", ObjId( mmid ), "enz" );
+	shell->doAddMsg( "Single", ObjId( qid ), "nOut", ObjId( mmid ), "enzDest" );
 	shell->doAddMsg( "Single", ObjId( pid ), "nOut", ObjId( tabid2 ), "input" );
 	shell->doSetClock( 0, 0.01 );
 	shell->doSetClock( 1, 0.01 );

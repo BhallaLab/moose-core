@@ -10,42 +10,47 @@
 #ifndef _ENZ_H
 #define _ENZ_H
 
-class Enz
+class Enz: public CplxEnzBase
 {
 	public: 
 		Enz();
+		~Enz();
 
 		//////////////////////////////////////////////////////////////////
-		// Field assignment stuff
+		// Virtual field stuff to overwrite EnzBase
 		//////////////////////////////////////////////////////////////////
-
-		void setK1( const Eref& e, const Qinfo* q, double v );
-		double getK1( const Eref& e, const Qinfo* q ) const;
-		void setK2( double v );
-		double getK2() const;
-		void setK3( double v );
-		double getK3() const;
-
-		void setKm( const Eref& e, const Qinfo* q, double v );
-		double getKm( const Eref& e, const Qinfo* q ) const;
-		void setRatio( const Eref& e, const Qinfo* q, double v );
-		double getRatio( const Eref& e, const Qinfo* q ) const;
-		void setConcK1( const Eref& e, const Qinfo* q, double v );
-		double getConcK1( const Eref& e, const Qinfo* q ) const;
-
-		unsigned int getNumSub( const Eref& e, const Qinfo* q ) const;
+		void vSetKm( const Eref& e, const Qinfo* q, double v );
+		double vGetKm( const Eref& e, const Qinfo* q ) const;
+		void vSetNumKm( const Eref& e, const Qinfo* q, double v );
+		double vGetNumKm( const Eref& e, const Qinfo* q ) const;
+		void vSetKcat( const Eref& e, const Qinfo* q, double v );
+		double vGetKcat( const Eref& e, const Qinfo* q ) const;
 
 		//////////////////////////////////////////////////////////////////
-		// Dest funcs
+		// Virtual field stuff to override CplxEnzBase
+		//////////////////////////////////////////////////////////////////
+		void vSetK1( const Eref& e, const Qinfo* q, double v );
+		double vGetK1( const Eref& e, const Qinfo* q ) const;
+		void vSetK2( const Eref& e, const Qinfo* q, double v );
+		double vGetK2( const Eref& e, const Qinfo* q ) const;
+		void vSetRatio( const Eref& e, const Qinfo* q, double v );
+		double vGetRatio( const Eref& e, const Qinfo* q ) const;
+		void vSetConcK1( const Eref& e, const Qinfo* q, double v );
+		double vGetConcK1( const Eref& e, const Qinfo* q ) const;
+
+		//////////////////////////////////////////////////////////////////
+		// Dest funcs, all virtual
 		//////////////////////////////////////////////////////////////////
 
-		void process( const Eref& e, ProcPtr p );
-		void reinit( const Eref& e, ProcPtr p );
-		void sub( double n );
-		void enz( double n );
-		void prd( double n );
-		void cplx( double n );
-		void remesh( const Eref& e, const Qinfo* q );
+		void vProcess( const Eref& e, ProcPtr p );
+		void vReinit( const Eref& e, ProcPtr p );
+		void vSub( double n );
+		void vEnz( double n );
+		void vPrd( double n );
+		void vCplx( double n );
+		void vRemesh( const Eref& e, const Qinfo* q );
+
+		//////////////////////////////////////////////////////////////////
 
 		static const Cinfo* initCinfo();
 	private:
