@@ -56,11 +56,11 @@ class EnzBase
 		//////////////////////////////////////////////////////////////////
 		// Virtual dest funcs
 		//////////////////////////////////////////////////////////////////
-		void vProcess( const Eref& e, ProcPtr p );
-		void vReinit( const Eref& e, ProcPtr p );
-		void vSub( double n );
-		void vEnz( double n );
-		void vRemesh( const Eref& e, const Qinfo* q );
+		virtual void vProcess( const Eref& e, ProcPtr p );
+		virtual void vReinit( const Eref& e, ProcPtr p );
+		virtual void vSub( double n );
+		virtual void vEnz( double n );
+		virtual void vRemesh( const Eref& e, const Qinfo* q );
 
 		//////////////////////////////////////////////////////////////////
 		// Zombification functions.

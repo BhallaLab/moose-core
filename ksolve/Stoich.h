@@ -493,6 +493,11 @@ class Stoich
 		 * Map back from enz index to Id. Needed to unzombify
 		 */
 		vector< Id > enzMap_;
+
+		/**
+		 * Map back from enz index to Id. Needed to unzombify
+		 */
+		vector< Id > mmEnzMap_;
 		
 		/**
 		 * Number of variable molecules that the solver deals with.
