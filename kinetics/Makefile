@@ -17,6 +17,7 @@ OBJ = \
 	ReacBase.o	\
 	Reac.o	\
 	EnzBase.o	\
+	CplxEnzBase.o	\
 	Enz.o	\
 	MMenz.o	\
 	Species.o	\
@@ -43,7 +44,8 @@ FuncPool.o:	PoolBase.h Pool.h FuncPool.h lookupSizeFromMesh.h
 ReacBase.o:	ReacBase.h lookupSizeFromMesh.h
 Reac.o:	ReacBase.h Reac.h lookupSizeFromMesh.h
 EnzBase.o:	EnzBase.h lookupSizeFromMesh.h
-Enz.o:	EnzBase.h Enz.h lookupSizeFromMesh.h
+CplxEnzBase.o:	EnzBase.h CplxEnzBase.h lookupSizeFromMesh.h
+Enz.o:	EnzBase.h CplxEnzBase.h Enz.h lookupSizeFromMesh.h
 MMenz.o:	EnzBase.h MMenz.h  lookupSizeFromMesh.h
 Boundary.o:	Boundary.h
 ChemCompt.o:	ChemCompt.h

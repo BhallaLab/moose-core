@@ -18197,5 +18197,8 @@ Yet to implement regular enz zombie stuff.
 Fixed up MMenz zombie stuff, tedious set of bugs. Put in a couple of unit
 tests. There is a random crash happening earlier too. Still to clear the
 zombie conversion of regular enzymes, but this was a necessary first step.
+Checkin 3827.
+
+Now clears unit tests but not regression tests.
 
 ============================================================================

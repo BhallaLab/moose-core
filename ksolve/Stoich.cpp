@@ -16,6 +16,7 @@
 #include "ReacBase.h"
 #include "Reac.h"
 #include "EnzBase.h"
+#include "CplxEnzBase.h"
 #include "Enz.h"
 #include "MMenz.h"
 #include "SumFunc.h"
@@ -210,6 +211,7 @@ Stoich::Stoich()
 
 Stoich::~Stoich()
 {
+	unZombifyModel();
 	for ( vector< RateTerm* >::iterator i = rates_.begin();
 		i != rates_.end(); ++i )
 		delete *i;
@@ -217,7 +219,6 @@ Stoich::~Stoich()
 	for ( vector< FuncTerm* >::iterator i = funcs_.begin();
 		i != funcs_.end(); ++i )
 		delete *i;
-	unZombifyModel();
 }
 
 //////////////////////////////////////////////////////////////
@@ -503,6 +504,7 @@ void zombifyAndUnschedPool(
 	PoolBase::zombify( orig, zClass, s.id() );
 }
 
+// e is the stoich Eref, elist is list of all Ids to zombify.
 void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 {
 	static const Cinfo* poolCinfo = Pool::initCinfo();
@@ -541,7 +543,8 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 			// ZombieMMenz::zombify( e.element(), (*i)() );
 		}
 		else if ( ei->cinfo() == enzCinfo ) {
-			ZombieEnz::zombify( e.element(), (*i)() );
+			CplxEnzBase::zombify( ei, ZombieEnz::initCinfo(), e.id() );
+		//	ZombieEnz::zombify( e.element(), (*i)() );
 		}
 	}
 }
@@ -580,8 +583,15 @@ void Stoich::unZombifyModel()
 	for ( vector< Id >::iterator i = mmEnzMap_.begin(); 
 						i != mmEnzMap_.end(); ++i ) {
 		Element* e = i->element();
-		if ( e != 0 &&  e->cinfo() == MMenz::initCinfo() )
+		if ( e != 0 &&  e->cinfo() == ZombieMMenz::initCinfo() )
 			EnzBase::zombify( e, MMenz::initCinfo(), Id() );
+	}
+	
+	for ( vector< Id >::iterator i = enzMap_.begin(); 
+						i != enzMap_.end(); ++i ) {
+		Element* e = i->element();
+		if ( e != 0 &&  e->cinfo() == ZombieEnz::initCinfo() )
+			CplxEnzBase::zombify( e, Enz::initCinfo(), Id() );
 	}
 
 	s->addClockMsgs( idMap_, "proc", 4 );
