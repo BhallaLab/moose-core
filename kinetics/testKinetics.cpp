@@ -13,6 +13,8 @@
 #include "../shell/Shell.h"
 #include "ReadKkit.h"
 #include "ReadCspace.h"
+#include "EnzBase.h"
+#include "MMenz.h"
 
 void testReadKkit()
 {
@@ -320,8 +322,98 @@ void testReadCspace()
 	cout << "." << flush;
 }
 
+void testMMenz()
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< int > dims( 1, 1 );
+	Id mmid = shell->doCreate( "MMenz", Id(), "mm", dims ); // mmenz
+	MMenz m;
+	ProcInfo p;
+
+	m.vSetKm( mmid.eref(), 0, 5.0 );
+	m.vSetKcat( mmid.eref(), 0, 4.0 );
+	m.vReinit( mmid.eref(), &p );
+	m.vSub( 2 );
+	m.vEnz( 3 );
+	assert( doubleEq( m.vGetKm( mmid.eref(), 0 ), 5.0 ) );
+	assert( doubleEq( m.vGetKcat( mmid.eref(), 0 ), 4.0 ) );
+	m.vProcess( mmid.eref(), &p );
+
+	shell->doDelete( mmid );
+	cout << "." << flush;
+}
+
+///////////////////////////////////////////////////////////////////////
+// The equation for conc of substrate of an MMenz reaction is a nasty
+// transcendental, so here we just work backwards and estimate t from
+// the substrate concentration
+///////////////////////////////////////////////////////////////////////
+double estT( double s )
+{
+	double E = 1.0;
+	double Km = 1.0;
+	double kcat = 1.0;
+	double s0 = 1.0;
+	double c = -Km * log( s0 ) - s0;
+	double t = (-1.0 /( E * kcat ) ) * ( ( Km * log( s ) + s ) + c );
+	return t;
+}
+
+void testMMenzProcess()
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< int > dims( 1, 1 );
+	//////////////////////////////////////////////////////////////////////
+	// This set is the test kinetic calculation using MathFunc
+	//////////////////////////////////////////////////////////////////////
+	Id nid = shell->doCreate( "Neutral", Id(), "n", dims );
+	//////////////////////////////////////////////////////////////////////
+	// This set is the reference kinetic calculation using MMEnz
+	//////////////////////////////////////////////////////////////////////
+	Id pid = shell->doCreate( "Pool", nid, "p", dims ); // substrate
+	Id qid = shell->doCreate( "Pool", nid, "q", dims );	// enz mol
+	Id rid = shell->doCreate( "Pool", nid, "r", dims ); // product
+	Id mmid = shell->doCreate( "MMenz", nid, "mm", dims ); // mmenz
+
+	Id tabid2 = shell->doCreate( "Table", nid, "tab2", dims ); //output plot
+
+	Field< double >::set( mmid, "Km", 1.0 );
+	Field< double >::set( mmid, "kcat", 1.0 );
+	Field< double >::set( pid, "nInit", 1.0 );
+	Field< double >::set( qid, "nInit", 1.0 );
+	Field< double >::set( rid, "nInit", 0.0 );
+
+	shell->doAddMsg( "Single", ObjId( mmid ), "sub", ObjId( pid ), "reac" );
+	shell->doAddMsg( "Single", ObjId( mmid ), "prd", ObjId( rid ), "reac" );
+	shell->doAddMsg( "Single", ObjId( qid ), "nOut", ObjId( mmid ), "enz" );
+	shell->doAddMsg( "Single", ObjId( pid ), "nOut", ObjId( tabid2 ), "input" );
+	shell->doSetClock( 0, 0.01 );
+	shell->doSetClock( 1, 0.01 );
+	shell->doUseClock( "/n/mm,/n/tab2", "process", 0 );
+	shell->doUseClock( "/n/#[ISA=Pool]", "process", 1 );
+	
+	//////////////////////////////////////////////////////////////////////
+	// Now run models and compare outputs
+	//////////////////////////////////////////////////////////////////////
+
+	shell->doReinit();
+	shell->doStart( 10 );
+
+	vector< double > vec = Field< vector< double > >::get( tabid2, "vec" );
+	assert( vec.size() == 1001 );
+	for ( unsigned int i = 0; i < vec.size(); ++i ) {
+		double t = 0.01 * i;
+		double et = estT( vec[i] );
+		assert( doubleApprox( t, et ) );
+	}
+
+	shell->doDelete( nid );
+	cout << "." << flush;
+}
+
 void testKinetics()
 {
+	testMMenz();
 	testMathFunc();
 	testPoolVolumeScaling();
 	testReacVolumeScaling();
@@ -334,5 +426,6 @@ void testMpiKinetics( )
 
 void testKineticsProcess( )
 {
+	testMMenzProcess();
 	testMathFuncProcess();
 }

@@ -15,6 +15,7 @@
 #include "FuncPool.h"
 #include "ReacBase.h"
 #include "Reac.h"
+#include "EnzBase.h"
 #include "Enz.h"
 #include "MMenz.h"
 #include "SumFunc.h"
@@ -399,6 +400,10 @@ void Stoich::allocateModel( const vector< Id >& elist )
 	vector< Id > bufPools;
 	vector< Id > funcPools;
 	unsigned int numFunc = 0;
+	idMap_.clear();
+	reacMap_.clear();
+	enzMap_.clear();
+	mmEnzMap_.clear();
 	for ( vector< Id >::const_iterator i = elist.begin(); i != elist.end(); ++i ){
 		Element* ei = (*i)();
 		if ( ei->cinfo() == poolCinfo ) {
@@ -410,6 +415,7 @@ void Stoich::allocateModel( const vector< Id >& elist )
 		} else if ( ei->cinfo() == funcPoolCinfo ) {
 			funcPools.push_back( *i );
 		} else if ( ei->cinfo() == mmEnzCinfo ){
+			mmEnzMap_.push_back( ei->id() );
 			objMap_[ i->value() - objMapStart_ ] = numReac_;
 			++numReac_;
 		} else if ( ei->cinfo() == reacCinfo ) {
@@ -531,7 +537,8 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 			ReacBase::zombify( ei, ZombieReac::initCinfo(), e.id() );
 		}
 		else if ( ei->cinfo() == mmEnzCinfo ) {
-			ZombieMMenz::zombify( e.element(), (*i)() );
+			EnzBase::zombify( ei, ZombieMMenz::initCinfo(), e.id() );
+			// ZombieMMenz::zombify( e.element(), (*i)() );
 		}
 		else if ( ei->cinfo() == enzCinfo ) {
 			ZombieEnz::zombify( e.element(), (*i)() );
@@ -568,7 +575,13 @@ void Stoich::unZombifyModel()
 		Element* e = i->element();
 		if ( e != 0 &&  e->cinfo() == ZombieReac::initCinfo() )
 			ReacBase::zombify( e, Reac::initCinfo(), Id() );
-			
+	}
+	
+	for ( vector< Id >::iterator i = mmEnzMap_.begin(); 
+						i != mmEnzMap_.end(); ++i ) {
+		Element* e = i->element();
+		if ( e != 0 &&  e->cinfo() == MMenz::initCinfo() )
+			EnzBase::zombify( e, MMenz::initCinfo(), Id() );
 	}
 
 	s->addClockMsgs( idMap_, "proc", 4 );

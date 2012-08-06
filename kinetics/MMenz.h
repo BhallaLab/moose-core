@@ -15,33 +15,32 @@
  * equation
  * V = kcat.[Etot].[S]/( Km + [S] )
  */
-class MMenz
+class MMenz: public EnzBase
 {
 	public: 
 		MMenz();
+		virtual ~MMenz();
 
 		//////////////////////////////////////////////////////////////////
 		// Field assignment stuff
 		//////////////////////////////////////////////////////////////////
 
-		void setKm( const Eref& e, const Qinfo* q, double v );
-		double getKm( const Eref& e, const Qinfo* q ) const;
-		void setNumKm( const Eref& e, const Qinfo* q, double v );
-		double getNumKm( const Eref& e, const Qinfo* q ) const;
-		unsigned int getNumSub( const Eref& e, const Qinfo* q ) const;
-		void setKcat( double v );
-		double getKcat() const;
+		void vSetKm( const Eref& e, const Qinfo* q, double v );
+		double vGetKm( const Eref& e, const Qinfo* q ) const;
+		void vSetNumKm( const Eref& e, const Qinfo* q, double v );
+		double vGetNumKm( const Eref& e, const Qinfo* q ) const;
+		void vSetKcat( const Eref& e, const Qinfo* q, double v );
+		double vGetKcat(const Eref& e, const Qinfo* q ) const;
 
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
 
-		void process( const Eref& e, ProcPtr p );
-		void reinit( const Eref& e, ProcPtr p );
-		void sub( double n );
-		void enz( double n );
-		void prd( double n );
-		void remesh( const Eref& e, const Qinfo* q );
+		void vProcess( const Eref& e, ProcPtr p );
+		void vReinit( const Eref& e, ProcPtr p );
+		void vSub( double n );
+		void vEnz( double n );
+		void vRemesh( const Eref& e, const Qinfo* q );
 
 		static const Cinfo* initCinfo();
 	private:

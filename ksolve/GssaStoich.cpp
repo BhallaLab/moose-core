@@ -15,6 +15,7 @@
 #include "FuncPool.h"
 #include "ReacBase.h"
 #include "Reac.h"
+#include "EnzBase.h"
 #include "Enz.h"
 #include "MMenz.h"
 #include "SumFunc.h"
