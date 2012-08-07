@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Aug  7 10:27:26 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Aug  7 11:10:42 2012 (+0530)
+# Last-Updated: Tue Aug  7 11:57:44 2012 (+0530)
 #           By: subha
-#     Update #: 66
+#     Update #: 73
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -87,15 +87,19 @@ moose.useClock(1, '/model/#[TYPE=Compartment]', 'process')
 moose.useClock(2, axon_Vm.path, 'process')
 # Now initialize everything and get set
 moose.reinit()
-# Here we take a simple approach to try current injection experiemnt:
-# Run the simulation for 50 ms. Set the `inject` field of the soma to
-# 1 nA and run for some more time. Finally, set the `inject` field
-# back to 0 and run for half a second.  Now run for 50 ms
 
-# Normally you should use a PulseGen object for this.
+# Here we take a simple approach to try current injection experiemnt:
+# Run the simulation for some time. Then set the `inject` field of the
+# soma to a positive value and run for some more time. This will
+# emulate a current injection for that duration. Finally, remove the
+# current injection by setting the `inject` field back to 0 and run
+# for some more time to get the discharging curve.
+
+# Normally you should use a PulseGen object for this instead of
+# stopping the simulation midway to set the inject field..
 moose.start(50e-3)
-# Now apply 1 nA current injection to soma
-soma.inject = 1e-9
+# Now apply 1 pA current injection to soma
+soma.inject = 1e-12
 # Run for 100 ms
 moose.start(100e-3)
 # Stop the current injection
