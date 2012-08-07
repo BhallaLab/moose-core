@@ -115,7 +115,7 @@ double ZombieMMenz::vGetKcat( const Eref& e, const Qinfo* q ) const
 void ZombieMMenz::setSolver( Id solver, Id orig )
 {
 	static const DestFinfo* enz = dynamic_cast< const DestFinfo* >(
-		EnzBase::initCinfo()->findFinfo( "enz" ) );
+		EnzBase::initCinfo()->findFinfo( "enzDest" ) );
 	static const SrcFinfo* sub = dynamic_cast< const SrcFinfo* >(
 		EnzBase::initCinfo()->findFinfo( "toSub" ) );
 	static const SrcFinfo* prd = dynamic_cast< const SrcFinfo* >(

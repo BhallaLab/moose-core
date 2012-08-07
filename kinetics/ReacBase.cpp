@@ -316,8 +316,12 @@ void ReacBase::zombify( Element* orig, const Cinfo* zClass, Id solver )
 	const ReacBase* m = reinterpret_cast< ReacBase* >( oer.data() );
 	z->setSolver( solver, orig->id() ); // call virtual func to assign solver info.
 	// May need to extend to entire array.
+	z->vSetConcKf( oer, 0, m->vGetConcKf( oer, 0 ) );
+	z->vSetConcKb( oer, 0, m->vGetConcKb( oer, 0 ) );
+	/*
 	z->vSetConcKf( zombier, 0, m->vGetConcKf( oer, 0 ) );
 	z->vSetConcKb( zombier, 0, m->vGetConcKb( oer, 0 ) );
+	*/
 	orig->zombieSwap( zClass, dh );
 	delete origHandler;
 }
