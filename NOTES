@@ -18199,6 +18199,17 @@ tests. There is a random crash happening earlier too. Still to clear the
 zombie conversion of regular enzymes, but this was a necessary first step.
 Checkin 3827.
 
-Now clears unit tests but not regression tests.
+Now clears unit tests but not regression tests. Checkin 3828.
+
+============================================================================
+7 Aug 2012
+Fixed up a series of rather subtle bugs found in the regression tests. All
+had to do with volume conversions during zombie creation. The trick was that 
+I was using a temporary object, zombier, as an argument to the assignment
+routine in the zombify function. This zombier however did not have the context
+of volume info and other messages that the original object did. Solution was
+rather simple, replace zombier with the original object oer. Since the 
+zombification routine only used the object to look up volume and message info,
+it did not change it at all. Now clears all regression tests.
 
 ============================================================================

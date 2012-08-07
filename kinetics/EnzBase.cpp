@@ -276,8 +276,10 @@ void EnzBase::zombify( Element* orig, const Cinfo* zClass, Id solver )
 	const EnzBase* m = reinterpret_cast< EnzBase* >( oer.data() );
 	z->setSolver( solver, orig->id() ); // call virtual func to assign solver info.
 	// May need to extend to entire array.
-	z->vSetKm( zombier, 0, m->vGetKm( oer, 0 ) );
-	z->vSetKcat( zombier, 0, m->vGetKcat( oer, 0 ) );
+	z->vSetKm( oer, 0, m->vGetKm( oer, 0 ) );
+	z->vSetKcat( oer, 0, m->vGetKcat( oer, 0 ) );
+	// z->vSetKm( zombier, 0, m->vGetKm( oer, 0 ) );
+	// z->vSetKcat( zombier, 0, m->vGetKcat( oer, 0 ) );
 	orig->zombieSwap( zClass, dh );
 	delete origHandler;
 }
