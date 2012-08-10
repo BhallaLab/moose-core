@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Jul 16 16:12:55 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Jul 17 11:17:01 2012 (+0530)
+# Last-Updated: Fri Jul 20 16:20:46 2012 (+0530)
 #           By: subha
-#     Update #: 99
+#     Update #: 116
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -29,6 +29,7 @@
 
 # Code:
 
+import time
 import os
 os.environ['NUMPTHREADS'] = '1'
 import sys
@@ -74,6 +75,8 @@ def setupCurrentStepModel(testId, celltype, pulsearray, dt):
     setupClocks(dt)
     moose.useClock(0, '%s/##[ISA=Compartment]' % (cell.path), 'init')
     moose.useClock(1, '%s/##[ISA=Compartment]' % (cell.path), 'process')
+    moose.useClock(2, '%s/##[ISA=HHChannel]' % (cell.path), 'process')
+    moose.useClock(3, '%s/##[ISA=CaConc]' % (cell.path), 'process')
     moose.useClock(7, pulsegen.path, 'process')
     moose.useClock(8, '%s/##' % (dataContainer.path), 'process')
     return {'cell': cell,
@@ -82,17 +85,22 @@ def setupCurrentStepModel(testId, celltype, pulsearray, dt):
             'stimTable': pulseTable
             }
     
-def runsim(simtime):
+def runsim(simtime, steptime=0.1):
     moose.reinit()
-    moose.start(simtime)
+    clock = moose.Clock('/clock')
+    # while clock.currentTime < simtime - steptime:
+    #     moose.start(steptime)
+    #     print 't =', clock.currentTime
+    #     time.sleep(0.005)
+    moose.start(simtime - clock.currentTime)
 
 pulsearray = [[1.0, 100e-3, 0.9e-9],
               [0.5, 100e-3, 0.3e-9],
               [0.5, 100e-3, 0.1e-9],
               [0.5, 100e-3, -0.1e-9],
               [0.5, 100e-3, -0.3e-9]]
-simdt = 1e-6
-simtime = 5.0
+simdt = 0.25e-4
+simtime = 1.0
 
 class TestTCR(unittest.TestCase):
     def setUp(self):

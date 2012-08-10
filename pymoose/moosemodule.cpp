@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Sat Jul 21 22:38:07 2012 (+0530)
-//           By: Subhasis Ray
-//     Update #: 9240
+// Last-Updated: Fri Aug 10 17:18:04 2012 (+0530)
+//           By: subha
+//     Update #: 9261
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -123,7 +123,7 @@ extern void testKinetics();
 extern void nonMpiTests(Shell *);
 extern void mpiTests();
 extern void processTests( Shell* );
-extern Id init(int argc, char ** argv);
+extern Id init(int argc, char ** argv, bool& doUnitTests, bool& doRegressionTests);
 
 extern void initMsgManagers();
 extern void destroyMsgManagers();
@@ -147,6 +147,8 @@ extern "C" {
     static int numCores = 1;
     static int myNode = 0;
     static int numProcessThreads = 0;
+    static int doUnitTests = 0;
+    static int doRegressionTests = 0;
     static int quitFlag = 0;
     static Id shellId;
     static PyObject * MooseError;
@@ -308,6 +310,15 @@ extern "C" {
         if (it != argmap.end()){
             istringstream(it->second) >> verbosity;            
         }
+        it = argmap.find("DOUNITTESTS");
+        if (it != argmap.end()){
+            istringstream(it->second) >> doUnitTests;            
+        }
+        it = argmap.find("DOREGRESSIONTESTS");
+        if (it != argmap.end()){
+            istringstream(it->second) >> doRegressionTests;            
+        }
+        
         if (verbosity > 0){
             cout << "ENVIRONMENT: " << endl
                  << "----------------------------------------" << endl
@@ -316,6 +327,8 @@ extern "C" {
                  << "   NUMNODES = " << numNodes << endl
                  << "   NUMPTHREADS = " << numProcessThreads << endl
                  << "   VERBOSITY = " << verbosity << endl
+                 << "   DOUNITTESTS = " << doUnitTests << endl
+                 << "   DOREGRESSIONTESTS = " << doRegressionTests << endl
                  << "========================================" << endl;
         }
         return args;
@@ -332,22 +345,24 @@ extern "C" {
             cout << "Warning: shell already initialized." << endl;
             return;
         }
+        bool dounit = doUnitTests != 0;
+        bool doregress = doRegressionTests != 0;
         // Utilize the main::init function which has friend access to Id
-        shellId = init(argc, argv);
-        
-#ifdef DO_UNIT_TESTS        
-        Qinfo::initMutex(); // Mutex used to align Parser and MOOSE threads
-        nonMpiTests( ShellPtr ); // These tests do not need the process loop.
-#endif // DO_UNIT_TESTS
+        shellId = init(argc, argv, dounit, doregress);
+        Qinfo::initMutex(); // Mutex used to align Parser and MOOSE threads        
+        if (dounit){
+            nonMpiTests( ShellPtr ); // These tests do not need the process loop.
+        }
+
         if (!ShellPtr->isSingleThreaded()){
             ShellPtr->launchThreads();
         }
         if ( ShellPtr->myNode() == 0 ) {
-#ifdef DO_UNIT_TESTS
-            mpiTests();
-            processTests( ShellPtr );
-            regressionTests();
-#endif
+            if (dounit){
+                mpiTests();
+                processTests( ShellPtr );
+                regressionTests();
+            }
             if ( benchmarkTests( argc, argv ) || quitFlag ){
                 ShellPtr->doQuit();
             }
