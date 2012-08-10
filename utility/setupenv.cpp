@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Sat Mar 26 22:36:10 2011 (+0530)
 // Version: 
-// Last-Updated: Sat Mar 24 16:05:29 2012 (+0530)
+// Last-Updated: Fri Aug 10 17:15:17 2012 (+0530)
 //           By: subha
-//     Update #: 26
+//     Update #: 31
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -86,6 +86,19 @@ const map<string, string>& getArgMap()
         } else {
             argmap.insert(pair<string, string>("QUIT", "0"));
         }
+        char * doUnitTests = getenv("DOUNITTESTS");
+        if (doUnitTests != NULL){
+            argmap.insert(pair<string, string>("DOUNITTESTS", string(doUnitTests)));
+        } else {
+            argmap.insert(pair<string, string>("DOUNITTESTS", "0"));
+        }
+        char * doRegressionTests = getenv("DOREGRESSIONTESTS");
+        if (doRegressionTests != NULL){
+            argmap.insert(pair<string, string>("DOREGRESSIONTESTS", string(doRegressionTests)));
+        } else {
+            argmap.insert(pair<string, string>("DOREGRESSIONTESTS", "0"));
+        }
+        
     }
     return argmap;
 }

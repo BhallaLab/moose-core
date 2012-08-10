@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jul 11 00:03:30 2012 (+0530)
 # Version: 
-# Last-Updated: Wed Jul 11 01:46:02 2012 (+0530)
-#           By: Subhasis Ray
-#     Update #: 59
+# Last-Updated: Wed Jul 11 09:57:12 2012 (+0530)
+#           By: subha
+#     Update #: 61
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -38,8 +38,8 @@ from matplotlib import pyplot as plt
 
 import moose
 
-simdt = 1e-6
-iodt = 1e-6
+simdt = 50e-6
+iodt = 50e-6
 simlength = 0.05
 inject = 5e-10
 erest_act = -0.065
