@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jul 17 21:01:14 2012 (+0530)
 # Version: 
-# Last-Updated: Fri Jul 20 12:45:36 2012 (+0530)
+# Last-Updated: Sat Aug 11 12:43:41 2012 (+0530)
 #           By: subha
-#     Update #: 307
+#     Update #: 312
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -34,7 +34,7 @@ import os
 os.environ['NUMPTHREADS'] = '1'
 import uuid
 import unittest
-
+from datetime import datetime
 import sys
 sys.path.append('../../../python')
 
@@ -179,7 +179,11 @@ class TestSingleComp(unittest.TestCase):
         setup_clocks(simdt, plotdt)
         self.assignClocks()        
         moose.reinit()
+        start = datetime.now()
         moose.start(simtime)
+        end = datetime.now()
+        delta = end - start
+        print 'Simulation of %g s finished in %g s' % (simtime, delta.seconds + delta.microseconds*1e-6)
 
     def assignClocks(self):
         moose.useClock(0, self.soma.path, 'init')
