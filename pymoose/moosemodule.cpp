@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Sat Aug 11 16:11:24 2012 (+0530)
-//           By: subha
-//     Update #: 9339
+// Last-Updated: Sat Aug 11 22:44:47 2012 (+0530)
+//           By: Subhasis Ray
+//     Update #: 9340
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -129,9 +129,7 @@ extern void initMsgManagers();
 extern void destroyMsgManagers();
 extern void speedTestMultiNodeIntFireNetwork( 
 	unsigned int size, unsigned int runsteps );
-#ifdef DO_UNIT_TESTS
 extern void regressionTests();
-#endif
 extern bool benchmarkTests( int argc, char** argv );
 extern int getNumCores();
 
