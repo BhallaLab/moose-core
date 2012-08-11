@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Fri Aug 10 17:18:04 2012 (+0530)
+// Last-Updated: Sat Aug 11 14:16:43 2012 (+0530)
 //           By: subha
-//     Update #: 9261
+//     Update #: 9299
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -2999,7 +2999,7 @@ extern "C" {
                  "\n"
                  "Returns\n"
                  "-------\n"
-                 "True on success, False on failure\n"
+                 "ObjId of the created message.\n"
                  "\n"
                  "See also\n"
                  "--------\n"
@@ -3008,6 +3008,7 @@ extern "C" {
                  );
     static PyObject * moose_ObjId_connect(_ObjId * self, PyObject * args)
     {
+        extern PyTypeObject ObjIdType;        
         PyObject * destPtr = NULL;
         char * srcField = NULL, * destField = NULL, * msgType = NULL;
         static char default_msg_type[] = "Single";
@@ -3023,18 +3024,21 @@ extern "C" {
             msgType = default_msg_type;
         }
         _ObjId * dest = reinterpret_cast<_ObjId*>(destPtr);
-        bool ret = (ShellPtr->doAddMsg(msgType,
+        MsgId mid = ShellPtr->doAddMsg(msgType,
                                        self->oid_,
                                        string(srcField),
                                        dest->oid_,
-                                       string(destField)) !=
-                    Msg::bad);
-        if (!ret){
+                                       string(destField));
+        if (mid == Msg::bad){
             PyErr_SetString(PyExc_NameError,
                             "connect failed: check field names and type compatibility.");
             return NULL;
         }
-        return Py_BuildValue("i", ret);
+        const Msg* msg = Msg::getMsg(mid);
+        Eref mer = msg->manager();
+        _ObjId* msgMgrId = (_ObjId*)PyObject_New(_ObjId, &ObjIdType);        
+        msgMgrId->oid_ = mer.objId();
+        return (PyObject*)msgMgrId;
     }
 
     PyDoc_STRVAR(moose_ObjId_compare_documentation,
@@ -3508,6 +3512,10 @@ extern "C" {
                  "\tType of the message. Can be `Single`, `OneToOne`, `OneToAll`.\n"
                  "If not specified, it defaults to `Single`.\n"
                  "\n"
+                 "Returns\n"
+                 "-------\n"
+                 "ObjId of the message-manager for the newly created message.\n"
+                 "\n"
                  "Example\n"
                  "-------\n"
                  "Connect the output of a pulse generator to the input of a spike\n"
@@ -3520,6 +3528,7 @@ extern "C" {
                  "\n"
 
                  );
+    
     static PyObject * moose_connect(PyObject * dummy, PyObject * args)
     {
         PyObject * srcPtr = NULL, * destPtr = NULL;
@@ -3533,13 +3542,19 @@ extern "C" {
         }
         _ObjId * dest = reinterpret_cast<_ObjId*>(destPtr);
         _ObjId * src = reinterpret_cast<_ObjId*>(srcPtr);
-        bool ret = (ShellPtr->doAddMsg(msgType, src->oid_, string(srcField), dest->oid_, string(destField)) != Msg::bad);
-        if (!ret){
+        MsgId mid = ShellPtr->doAddMsg(msgType, src->oid_, string(srcField), dest->oid_, string(destField));
+        if (mid == Msg::bad){
             PyErr_SetString(PyExc_NameError, "connect failed: check field names and type compatibility.");
             return NULL;
         }
-        return Py_BuildValue("i", ret);        
+        const Msg* msg = Msg::getMsg(mid);
+        Eref mer = msg->manager();
+        _ObjId * msgMgrId = (_ObjId*)PyObject_New(_ObjId, &ObjIdType);
+        msgMgrId->oid_ = mer.objId();
+        return (PyObject*) msgMgrId;
     }
+
+    
     PyDoc_STRVAR(moose_getFieldDict_documentation,
                  "getFieldDict(className, finfoType) -> dict\n"
                  "\n"
