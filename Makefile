@@ -168,7 +168,9 @@ endif
 
 # Libraries are defined below.
 SUBLIBS = 
-LIBS =	-lm -lpthread -L/usr/lib -L/usr/local/lib
+# Notice that pthread is included by default
+LIBS =	-L/usr/lib -L/usr/local/lib -lpthread
+
 #LIBS = 	-lm
 #ifeq ($(BUILD),thread)
 #LIBS += -lpthread
