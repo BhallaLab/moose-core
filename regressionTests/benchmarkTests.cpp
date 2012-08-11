@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include  <unistd.h>
 
 extern double testGslIntegrator( string modelName, string plotName,
 	double plotDt, double simtime );
