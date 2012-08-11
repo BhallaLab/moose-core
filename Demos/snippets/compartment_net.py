@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Aug 11 14:30:21 2012 (+0530)
 # Version: 
-# Last-Updated: Sat Aug 11 17:15:51 2012 (+0530)
+# Last-Updated: Sat Aug 11 17:49:55 2012 (+0530)
 #           By: subha
-#     Update #: 111
+#     Update #: 136
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -146,8 +146,9 @@ def create_k_proto():
     return k
 
 
-def create_compartments(path, size):
-    comps = moose.Id(path, size, 'Compartment')    
+def create_compartments(container, size):
+    path = container.path
+    comps = moose.Id(path+'/soma', size, 'Compartment')    
     comps.Em = [-65e-3] * size
     comps.initVm = [-65e-3] * size
     comps.Cm = [1e-12] * size
@@ -155,28 +156,23 @@ def create_compartments(path, size):
     comps.Ra = [1e5] * size
     nachan = moose.copy(create_na_proto(), comps)
     kchan = moose.copy(create_k_proto(), comps)
-    synchan = moose.SynChan(path + '/synchan')
-    # Question: What is this going to do? Connect comps[ii] to comps[ii]/synapse? 
+    synchan = moose.Id(path + '/synchan', size, 'SynChan')
+    synchan.Gbar = [1e-9] * size
+    for s in synchan: moose.SynChan(s).synapse.num = size
+    # Question: What is this going to do? Connect comps[ii] to comps[ii]/synchan? 
+    # if we had synchan under each  compartment created like: synchan = moose.SynChan(comps.path + '/synchan')
     m = moose.connect(comps, 'channel', synchan, 'channel', 'OneToOne')
-    ## Or is this the correct approach?
+    ## Or would this have been the correct approach?
     # for c in comps: moose.connect(c, 'channel', moose.SynChan(c.path+'/synchan'), 'channel', 'Single')
-    spikegen = moose.SpikeGen(path + '/spikegen')
+    spikegen = moose.Id(path + '/spikegen', size, 'SpikeGen')
+    spikegen.threshold = [0.0] * size
     m = moose.connect(comps, 'VmOut', spikegen, 'Vm', 'OneToOne')
-    ## This only works for synchan[0].
-    # synchan.synapse.num = size
     
-    ## Actually we have to go through each compartment and update the
-    ## synchan under it.
-    for c in comps:
-        s = moose.SynChan(c.path+'/synchan')
-        s.Gbar = 1e-9
-        print s.synapse.num
-        s.synapse.num = size
-    # Another approach could be to make spikegen and synchan outside the compartments and use OneToOne message.
+
     return comps
     
 if __name__ == '__main__':
-    comps = create_compartments('/comp', 10)
+    comps = create_compartments(moose.Neutral('network'), 10)
 
 
 # 
