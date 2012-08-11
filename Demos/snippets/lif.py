@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sun Jul  8 14:00:31 2012 (+0530)
 # Version: 
-# Last-Updated: Sun Jul  8 15:38:52 2012 (+0530)
+# Last-Updated: Tue Jul 17 16:45:44 2012 (+0530)
 #           By: subha
-#     Update #: 169
+#     Update #: 187
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -65,10 +65,11 @@ def setupmodel(modelpath, iaf_Rm, iaf_Cm, pulse_interval):
     iaf = moose.LeakyIaF('%s/iaf' % (modelpath))
     iaf.Rm = iaf_Rm
     iaf.Cm = iaf_Cm
-    iaf.initVm = -0.65
-    iaf.Em = -0.65
-    iaf.Vreset = -0.65
-    iaf.Vthreshold = 0.0
+    iaf.initVm = -0.070
+    iaf.Em = -0.065
+    iaf.Vreset = -0.070
+    iaf.Vthreshold = -0.055
+    # iaf.refractoryPeriod = 0.005
     syn = moose.SynChan('%s/syn' % (iaf.path))
     syn.synapse.num = 1
     syn.synapse[0].delay = 0.01
@@ -95,7 +96,7 @@ if __name__ == '__main__':
     modelpath = '/lif_demo'
     datapath = '/data'
     simtime = 1.0
-    setup = setupmodel(modelpath, 1.0, 1.0, 0.1)
+    setup = setupmodel(modelpath, 127e6, 7.8e-11, 0.1)
     # Setup data recording
     data_container = moose.Neutral(datapath)
     vm_table = moose.Table('%s/vm' % (data_container.path))
