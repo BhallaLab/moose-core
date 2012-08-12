@@ -191,12 +191,12 @@ void Shell::launchThreads()
 
 	// cout << myNode_ << "." << i << ": ptr= " << &( p[i] ) << ", Shell::procInfo = " << &p_ << " setting up procs\n";
 		if ( i < numProcessThreads_ ) { // These are the compute threads
-			int rc = pthread_create( threads_ + i, NULL, processEventLoop, 
+			int rc = pthread_create( threads_ + i, attr_, processEventLoop, 
 				(void *)&p[i] );
 			assert( rc == 0 );
 		} else if ( numNodes_ > 1 && i == numProcessThreads_ ) { // mpiThread stufff.
 			int rc = pthread_create( 
-				threads_ + i, NULL, mpiEventLoop, (void *)&p[i] );
+				threads_ + i, attr_, mpiEventLoop, (void *)&p[i] );
 			assert( rc == 0 );
 		}
 	}
