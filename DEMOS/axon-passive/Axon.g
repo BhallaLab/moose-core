@@ -43,9 +43,43 @@ readcell axon-passive.p /axon1
 
 
 ////////////////////////////////////////////////////////////////////////////////
+// SIMULATION CONTROL
+////////////////////////////////////////////////////////////////////////////////
+
+//=====================================
+//  Stimulus
+//=====================================
+// Varying current injection
+// create table /inject
+// call /inject TABCREATE 100 0 {SIMLENGTH}
+// setfield /inject step_mode 2
+// setfield /inject stepsize 0
+create pulsegen /inject
+setfield /inject level1 {INJECT} delay1 {200 * SIMDT} width1 {200 * SIMDT}
+addmsg /inject /axon0/soma INJECT output
+addmsg /inject /axon1/soma INJECT output
+
+// float current = { INJECT }
+
+// // Injection current flips between 0.0 and {INJECT} at regular intervals
+// int i
+// for ( i = 0; i <= 100; i = i + 1 )
+// 	if ( { i % 20 } == 0 )
+// 		current = { INJECT - current }
+// 	end
+	
+// 	setfield /inject table->table[{i}] { current }
+// end
+
+////////////////////////////////////////////////////////////////////////////////
 // PLOTTING
 ////////////////////////////////////////////////////////////////////////////////
 create neutral /data
+
+create table /data/inject 
+call /data/inject TABCREATE {SIMLENGTH / IODT} 0 {SIMLENGTH}
+setfield /data/inject step_mode 3
+addmsg /inject /data/inject INPUT output
 
 // axon0
 create table /data/Vm0_0
@@ -69,33 +103,6 @@ call /data/Vm100_1 TABCREATE {SIMLENGTH / IODT} 0 {SIMLENGTH}
 setfield /data/Vm100_1 step_mode 3
 addmsg /axon1/c100 /data/Vm100_1 INPUT Vm
 
-
-////////////////////////////////////////////////////////////////////////////////
-// SIMULATION CONTROL
-////////////////////////////////////////////////////////////////////////////////
-
-//=====================================
-//  Stimulus
-//=====================================
-// Varying current injection
-create table /inject
-call /inject TABCREATE 100 0 {SIMLENGTH}
-setfield /inject step_mode 2
-setfield /inject stepsize 0
-addmsg /inject /axon0/soma INJECT output
-addmsg /inject /axon1/soma INJECT output
-
-float current = { INJECT }
-
-// Injection current flips between 0.0 and {INJECT} at regular intervals
-int i
-for ( i = 0; i <= 100; i = i + 1 )
-	if ( { i % 20 } == 0 )
-		current = { INJECT - current }
-	end
-	
-	setfield /inject table->table[{i}] { current }
-end
 
 //=====================================
 //  Clocks
@@ -148,7 +155,6 @@ step {SIMLENGTH} -time
 ////////////////////////////////////////////////////////////////////////////////
 //  Write Plots
 ////////////////////////////////////////////////////////////////////////////////
-/*
 str filename
 str extension
 if ( MOOSE )
@@ -162,28 +168,29 @@ openfile {filename} w
 writefile {filename} "/newplot"
 writefile {filename} "/plotname Vm(0)"
 closefile {filename}
-tab2file {filename} /data/Vm0_0 table
+tab2file {filename} /data/Vm0_0 table -overwrite
 
 filename = "axon100_0" @ {extension}
 openfile {filename} w
 writefile {filename} "/newplot"
 writefile {filename} "/plotname Vm(100)"
 closefile {filename}
-tab2file {filename} /data/Vm100_0 table
+tab2file {filename} /data/Vm100_0 table -overwrite
 
 filename = "axon0_1" @ {extension}
 openfile {filename} w
 writefile {filename} "/newplot"
 writefile {filename} "/plotname Vm(0)"
 closefile {filename}
-tab2file {filename} /data/Vm0_1 table
+tab2file {filename} /data/Vm0_1 table -overwrite
 
 filename = "axon100_1" @ {extension}
 openfile {filename} w
 writefile {filename} "/newplot"
 writefile {filename} "/plotname Vm(100)"
 closefile {filename}
-tab2file {filename} /data/Vm100_1 table
+tab2file {filename} /data/Vm100_1 table -overwrite
+tab2file inject.dat /data/inject table -overwrite
 
 echo "
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -193,6 +200,6 @@ different point along the axon.
 If you have gnuplot, run 'gnuplot plot.gnuplot' to view the graphs.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 "
-*/
+
 
 quit
