@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Aug 11 14:30:21 2012 (+0530)
 # Version: 
-# Last-Updated: Sun Aug 12 15:36:02 2012 (+0530)
+# Last-Updated: Sun Aug 12 15:45:38 2012 (+0530)
 #           By: subha
-#     Update #: 517
+#     Update #: 521
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -125,6 +125,13 @@ def create_k_proto():
     return k
 
 def gate_params(channel):
+    """Return a dictionary containing x_inf, y_inf, tau_x, tau_y of
+    the specified `channel`.
+
+    If either gate is absent, the corresponding entries in the
+    dictionary are empty lists.
+    
+    """
     xGate = None
     x_inf = []
     tau_x = []
@@ -161,6 +168,7 @@ def gate_params(channel):
             'v_array': varray}
 
 def plot_gate_params(chan):
+    """Plot the gate parameters like m and h of the channel."""
     params = gate_params(moose.HHChannel(chan))    
     subplot(2,1,1)    
     plot(params['v_array'], na_params['x_inf'], label='m_inf')
