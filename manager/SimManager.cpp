@@ -262,17 +262,21 @@ void SimManager::setMethod( const Eref& e, const Qinfo* q, string v )
 		return;
 
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	if ( stoich_ != Id() && stoich_.element() != 0 )
+		shell->doDelete( stoich_ );
 
-	if ( v == "GSSA" || v == "gssa" || v == "Gillespie" || v == "gillespie") {
-		// setupGssa();
-		;
+	if ( v == "GSSA" || v == "gssa" || v == "Gillespie" || v == "gillespie")
+	{
+		buildGssa( e, q, shell );
 	} else if ( v == "rk5" || v == "gsl" || v == "GSL" ) {
 		buildGsl( e, q, shell, v );
 		// setupRK5();
 	} else if ( v == "ee" || v == "EE" || v == "ExpEuler" ) {
-		shell->doDelete( stoich_ );
+		// shell->doDelete( stoich_ );
+		;
 	} else {
-		cout << "SimManager::setMethod(" << v << "): Not yet implemented\n";
+		cout << "SimManager::setMethod(" << v << "): Not yet implemented.";
+		cout << "Falling back to EE method\n";
 	}
 	method_ = v;
 }

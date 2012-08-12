@@ -190,6 +190,10 @@ void testZombieTurnover()
 	verifyZombieTurnoverTypes( 1 );
 	Field< string >::set( mgr, "method", "ee" );
 	verifyZombieTurnoverTypes( 0 );
+	Field< string >::set( mgr, "method", "gssa" );
+	verifyZombieTurnoverTypes( 1 );
+	Field< string >::set( mgr, "method", "ee" );
+	verifyZombieTurnoverTypes( 0 );
 
 	shell->doDelete( mgr );
 }
