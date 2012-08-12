@@ -8,40 +8,46 @@
 # After scaling a passive parameter, run simulation again, and compare
 # plots for '/axon' and '/axon1'.
 
-from pymoose import tweak_field
+import sys
+sys.path.append('../../python')
+import moose
+# from pymoose import tweak_field
 
 path = '/axon1'
 wildcard = path + '/#[TYPE=Compartment]'
 
-def scale_cm( scale ):
-	tweak_field( wildcard, 'Cm', '{0} * Cm'.format( scale ) )
+# def scale_cm( scale ):
+# 	tweak_field( wildcard, 'Cm', '{0} * Cm'.format( scale ) )
 
-def scale_ra( scale ):
-	tweak_field( wildcard, 'Ra', '{0} * Ra'.format( scale ) )
+# def scale_ra( scale ):
+# 	tweak_field( wildcard, 'Ra', '{0} * Ra'.format( scale ) )
 
-def scale_rm( scale ):
-	tweak_field( wildcard, 'Rm', '{0} * Rm'.format( scale ) )
+# def scale_rm( scale ):
+# 	tweak_field( wildcard, 'Rm', '{0} * Rm'.format( scale ) )
 
-def scale_diameter( scale ):
-	tweak_field( wildcard, 'diameter', '{0} * diameter'.format( scale ) )
+# def scale_diameter( scale ):
+# 	tweak_field( wildcard, 'diameter', '{0} * diameter'.format( scale ) )
 	
-	cm_scale = scale
-	tweak_field( wildcard, 'Cm', '{0} * Cm'.format( cm_scale ) )
+# 	cm_scale = scale
+# 	tweak_field( wildcard, 'Cm', '{0} * Cm'.format( cm_scale ) )
 	
-	rm_scale = 1.0 / scale
-	tweak_field( wildcard, 'Rm', '{0} * Rm'.format( rm_scale ) )
+# 	rm_scale = 1.0 / scale
+# 	tweak_field( wildcard, 'Rm', '{0} * Rm'.format( rm_scale ) )
 	
-	ra_scale = 1.0 / ( scale * scale )
-	tweak_field( wildcard, 'Ra', '{0} * Ra'.format( ra_scale ) )
+# 	ra_scale = 1.0 / ( scale * scale )
+# 	tweak_field( wildcard, 'Ra', '{0} * Ra'.format( ra_scale ) )
 
-def scale_length( scale ):
-	tweak_field( wildcard, 'length', '{0} * length'.format( scale ) )
+# def scale_length( scale ):
+# 	tweak_field( wildcard, 'length', '{0} * length'.format( scale ) )
 	
-	cm_scale = scale
-	tweak_field( wildcard, 'Cm', '{0} * Cm'.format( cm_scale ) )
+# 	cm_scale = scale
+# 	tweak_field( wildcard, 'Cm', '{0} * Cm'.format( cm_scale ) )
 	
-	rm_scale = 1.0 / scale
-	tweak_field( wildcard, 'Rm', '{0} * Rm'.format( rm_scale ) )
+# 	rm_scale = 1.0 / scale
+# 	tweak_field( wildcard, 'Rm', '{0} * Rm'.format( rm_scale ) )
 	
-	ra_scale = scale
-	tweak_field( wildcard, 'Ra', '{0} * Ra'.format( ra_scale ) )
+# 	ra_scale = scale
+# 	tweak_field( wildcard, 'Ra', '{0} * Ra'.format( ra_scale ) )
+
+if __name__ == '__main__':
+    moose.context.loadG('Axon.g')
