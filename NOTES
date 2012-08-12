@@ -18212,4 +18212,38 @@ rather simple, replace zombier with the original object oer. Since the
 zombification routine only used the object to look up volume and message info,
 it did not change it at all. Now clears all regression tests.
 
+Should put in a couple of additional zombification tests for GSSA, and 
+also include some actual calculations in these tests. Otherwise on to next
+phase.
+
+============================================================================
+12 Aug 2012.
+Stuck on a couple of fronts.
+- Still cannot run with Python. When I import MOOSE into Python 
+	I get an error of the form:
+	ImportError: /usr/lib/libgsl.so.0: undefined symbol: cblas_sdsdot
+	The odd thing is that MOOSE compiles and runs fine through unit 
+	and regression tests on its own: it is only in PyMoose mode that
+	these problems arise.
+	The forums state that the key thing is to have -lgslcblas in the	
+	linking stage, which we do indeed have.
+	This is really a problem, as I did a complete OS upgrade just to be
+	able to run the python GUI. Now I cannot even run PyMOOSE.
+	Things tried:
+	- Lots of messing around with Makefiles, including reordering -lgslcblas
+	- Updating Python and entire system. Reinstalled python.
+	- Local compile and reinstall of GSL
+
+- Even outside of python, crashes in pthreads on pthread_join. This is after
+	clearing all unit tests, and as far as I can tell valgrind is happy
+	through all the tests as well.
+	Things tried:
+	- Put in a properly initialized pthread_attr_t in all the 
+		pthread_creates, rather than NULL.
+
+
+Give up on these. Now doing some pending things:
+Set up the SimManager::setMethod command to correctly handle converting to
+and from the GSSA as well as GSL. Clears unit tests.
+
 ============================================================================
