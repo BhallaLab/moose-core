@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Sat Aug 11 22:44:47 2012 (+0530)
-//           By: Subhasis Ray
-//     Update #: 9340
+// Last-Updated: Tue Aug 14 15:27:16 2012 (+0530)
+//           By: subha
+//     Update #: 9386
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -148,7 +148,6 @@ extern "C" {
     static int doUnitTests = 0;
     static int doRegressionTests = 0;
     static int quitFlag = 0;
-    static Id shellId;
     static PyObject * MooseError;
     static PyObject* get_Id_attr(_Id * id, string attribute)
     {
@@ -250,7 +249,7 @@ extern "C" {
 #define LookupField_Check(v) (Py_TYPE(v) == &LookupFieldType)
     
     // Macro to create the Shell * out of shellId
-#define ShellPtr reinterpret_cast<Shell*>(shellId.eref().data())    
+#define SHELLPTR reinterpret_cast<Shell*>(get_shell(0, NULL).eref().data())    
 
     ///////////////////////////////////////////////////////////////////////////
     // Helper routines
@@ -333,38 +332,43 @@ extern "C" {
     } //! setup_runtime_env()
 
     /**
-       Create the shell instance. This calls
+       Create the shell instance unless already created. This calls
        basecode/main.cpp:init(argc, argv) to do the initialization.
+
+       Return the Id of the Shell object.
     */
-    void create_shell(int argc, char ** argv)
+    Id get_shell(int argc, char ** argv)
     {
+        static Id shellId;
         static int inited = 0;
         if (inited){
-            cout << "Warning: shell already initialized." << endl;
-            return;
+            return shellId;
         }
         bool dounit = doUnitTests != 0;
         bool doregress = doRegressionTests != 0;
         // Utilize the main::init function which has friend access to Id
         shellId = init(argc, argv, dounit, doregress);
+        inited = 1;
+        Shell * shellPtr = reinterpret_cast<Shell*>(shellId.eref().data());
         Qinfo::initMutex(); // Mutex used to align Parser and MOOSE threads        
         if (dounit){
-            nonMpiTests( ShellPtr ); // These tests do not need the process loop.
+            nonMpiTests( shellPtr ); // These tests do not need the process loop.
         }
 
-        if (!ShellPtr->isSingleThreaded()){
-            ShellPtr->launchThreads();
+        if (!shellPtr->isSingleThreaded()){
+            shellPtr->launchThreads();
         }
-        if ( ShellPtr->myNode() == 0 ) {
+        if ( shellPtr->myNode() == 0 ) {
             if (dounit){
                 mpiTests();
-                processTests( ShellPtr );
+                processTests( shellPtr );
                 regressionTests();
             }
             if ( benchmarkTests( argc, argv ) || quitFlag ){
-                ShellPtr->doQuit();
+                shellPtr->doQuit();
             }
-        }        
+        }
+        return shellId;
     } //! create_shell()
 
     /**
@@ -372,6 +376,7 @@ extern "C" {
     */
     void finalize()
     {
+        Id shellId = get_shell(0, NULL);
         for (map<string, PyObject *>::iterator it =
                      get_inited_lookupfields().begin();
              it != get_inited_lookupfields().end();
@@ -397,10 +402,10 @@ extern "C" {
              ++it){
             Py_XDECREF(it->second);
         }
-        ShellPtr->doQuit();
+        SHELLPTR->doQuit();
         // Cleanup threads
-        if (!ShellPtr->isSingleThreaded()){
-            ShellPtr->joinThreads();
+        if (!SHELLPTR->isSingleThreaded()){
+            SHELLPTR->joinThreads();
             Qinfo::freeMutex();
         }
         // Destroy the Shell object
@@ -1085,7 +1090,7 @@ extern "C" {
         }
         // handle relative path
         if (trimmed_path[0] != '/'){
-            string current_path = ShellPtr->getCwe().path();
+            string current_path = SHELLPTR->getCwe().path();
             if (current_path != "/"){
                 parent_path = current_path + "/" + parent_path;
             } else {
@@ -1101,7 +1106,7 @@ extern "C" {
             PyErr_SetString(PyExc_ValueError, message.c_str());
             return -1;
         }
-        self->id_ = ShellPtr->doCreate(string(type),
+        self->id_ = SHELLPTR->doCreate(string(type),
                                        parent_id,
                                        string(name),
                                        vector<int>(vec_dims));
@@ -1210,7 +1215,7 @@ extern "C" {
             PyErr_SetString(PyExc_ValueError, "Cannot delete moose shell.");
             return NULL;
         }
-        ShellPtr->doDelete(self->id_);
+        SHELLPTR->doDelete(self->id_);
         self->id_ = Id();
         Py_RETURN_NONE;
     }
@@ -2985,7 +2990,7 @@ extern "C" {
             msgType = default_msg_type;
         }
         _ObjId * dest = reinterpret_cast<_ObjId*>(destPtr);
-        MsgId mid = ShellPtr->doAddMsg(msgType,
+        MsgId mid = SHELLPTR->doAddMsg(msgType,
                                        self->oid_,
                                        string(srcField),
                                        dest->oid_,
@@ -3231,7 +3236,7 @@ extern "C" {
             name = string(newName);
         }
         _Id * tgt = PyObject_New(_Id, &IdType);
-        tgt->id_ = ShellPtr->doCopy(_src, _dest, name, num, toGlobal, copyExtMsgs);
+        tgt->id_ = SHELLPTR->doCopy(_src, _dest, name, num, toGlobal, copyExtMsgs);
         PyObject * ret = (PyObject*)tgt;
         return ret;
     }
@@ -3248,7 +3253,7 @@ extern "C" {
             PyErr_SetString(PyExc_ValueError, "Cannot move moose shell");
             return NULL;
         }
-        ShellPtr->doMove(((_Id*)src)->id_, ((_Id*)dest)->id_);
+        SHELLPTR->doMove(((_Id*)src)->id_, ((_Id*)dest)->id_);
         Py_RETURN_NONE;
     }
 
@@ -3262,7 +3267,7 @@ extern "C" {
             PyErr_SetString(PyExc_ValueError, "Cannot delete moose shell.");
             return NULL;
         }
-        ShellPtr->doDelete(((_Id*)obj)->id_);
+        SHELLPTR->doDelete(((_Id*)obj)->id_);
         ((_Id*)obj)->id_ = Id();
         Py_RETURN_NONE;
     }
@@ -3274,7 +3279,7 @@ extern "C" {
         if(!PyArg_ParseTuple(args, "Iss:moose_useClock", &tick, &path, &field)){
             return NULL;
         }
-        ShellPtr->doUseClock(string(path), string(field), tick);
+        SHELLPTR->doUseClock(string(path), string(field), tick);
         Py_RETURN_NONE;
     }
     static PyObject * moose_setClock(PyObject * dummy, PyObject * args)
@@ -3288,7 +3293,7 @@ extern "C" {
             PyErr_SetString(PyExc_ValueError, "dt must be positive.");
             return NULL;
         }
-        ShellPtr->doSetClock(tick, dt);
+        SHELLPTR->doSetClock(tick, dt);
         Py_RETURN_NONE;
     }
 
@@ -3329,7 +3334,7 @@ extern "C" {
             return NULL;
         }
         Py_BEGIN_ALLOW_THREADS
-        ShellPtr->doStart(runtime);
+        SHELLPTR->doStart(runtime);
         Py_END_ALLOW_THREADS
         Py_RETURN_NONE;
     }
@@ -3349,17 +3354,17 @@ extern "C" {
                  "\n");
     static PyObject * moose_reinit(PyObject * dummy, PyObject * args)
     {
-        ShellPtr->doReinit();
+        SHELLPTR->doReinit();
         Py_RETURN_NONE;
     }
     static PyObject * moose_stop(PyObject * dummy, PyObject * args)
     {
-        ShellPtr->doStop();
+        SHELLPTR->doStop();
         Py_RETURN_NONE;
     }
     static PyObject * moose_isRunning(PyObject * dummy, PyObject * args)
     {
-        return Py_BuildValue("i", ShellPtr->isRunning());
+        return Py_BuildValue("i", SHELLPTR->isRunning());
     }
 
     static PyObject * moose_exists(PyObject * dummy, PyObject * args)
@@ -3379,7 +3384,7 @@ extern "C" {
             return NULL;
         }
         
-        int ret = ShellPtr->doWriteSBML(string(fname), string(modelpath));
+        int ret = SHELLPTR->doWriteSBML(string(fname), string(modelpath));
         return Py_BuildValue("i", ret);
     }
     PyDoc_STRVAR(moose_loadModel_documentation,
@@ -3408,9 +3413,9 @@ extern "C" {
         }
         _Id * model = (_Id*)PyObject_New(_Id, &IdType);
         if (!solverclass){
-            model->id_ = ShellPtr->doLoadModel(string(fname), string(modelpath));
+            model->id_ = SHELLPTR->doLoadModel(string(fname), string(modelpath));
         } else {
-            model->id_ = ShellPtr->doLoadModel(string(fname), string(modelpath), string(solverclass));
+            model->id_ = SHELLPTR->doLoadModel(string(fname), string(modelpath), string(solverclass));
         }
         PyObject * ret = reinterpret_cast<PyObject*>(model);
         return ret;
@@ -3436,7 +3441,7 @@ extern "C" {
         } else {
             return NULL;
         }
-        ShellPtr->setCwe(id);
+        SHELLPTR->setCwe(id);
         Py_RETURN_NONE;
     }
 
@@ -3446,7 +3451,7 @@ extern "C" {
             return NULL;
         }
         _Id * cwe = (_Id*)PyObject_New(_Id, &IdType);
-        cwe->id_ = ShellPtr->getCwe();        
+        cwe->id_ = SHELLPTR->getCwe();        
         PyObject * ret = (PyObject*)cwe;
         return ret;
     }
@@ -3503,7 +3508,7 @@ extern "C" {
         }
         _ObjId * dest = reinterpret_cast<_ObjId*>(destPtr);
         _ObjId * src = reinterpret_cast<_ObjId*>(srcPtr);
-        MsgId mid = ShellPtr->doAddMsg(msgType, src->oid_, string(srcField), dest->oid_, string(destField));
+        MsgId mid = SHELLPTR->doAddMsg(msgType, src->oid_, string(srcField), dest->oid_, string(destField));
         if (mid == Msg::bad){
             PyErr_SetString(PyExc_NameError, "connect failed: check field names and type compatibility.");
             return NULL;
@@ -3719,7 +3724,7 @@ extern "C" {
 
     static PyObject * moose_syncDataHandler(PyObject * dummy, _Id * target)
     {
-        ShellPtr->doSyncDataHandler(target->id_);
+        SHELLPTR->doSyncDataHandler(target->id_);
         Py_RETURN_NONE;
     }
 
@@ -3741,7 +3746,7 @@ extern "C" {
         if (!PyArg_ParseTuple(args, "s:moose.wildcardFind", &wildcard_path)){
             return NULL;
         }
-        ShellPtr->wildcard(string(wildcard_path), objects);
+        SHELLPTR->wildcard(string(wildcard_path), objects);
         PyObject * ret = PyTuple_New(objects.size());
         if (ret == NULL){
             PyErr_SetString(PyExc_RuntimeError, "moose.wildcardFind: failed to allocate new tuple.");
@@ -4227,7 +4232,7 @@ extern "C" {
             strncpy(argv[ii], args[ii].c_str(), args[ii].length()+1);            
         }
         PyEval_InitThreads();
-        create_shell(argc, argv);
+        Id shellId = get_shell(argc, argv);
         for (int ii = 1; ii < argc; ++ii){
             free(argv[ii]);
         }
@@ -4306,9 +4311,9 @@ extern "C" {
         PyModule_AddIntConstant(moose_module, "NUMNODES", numNodes);
         PyModule_AddIntConstant(moose_module, "MYNODE", myNode);
         PyModule_AddIntConstant(moose_module, "INFINITE", isInfinite);
-        PyModule_AddStringConstant(moose_module, "__version__", ShellPtr->doVersion().c_str());
-        PyModule_AddStringConstant(moose_module, "VERSION", ShellPtr->doVersion().c_str());
-        PyModule_AddStringConstant(moose_module, "SVN_REVISION", ShellPtr->doRevision().c_str());
+        PyModule_AddStringConstant(moose_module, "__version__", SHELLPTR->doVersion().c_str());
+        PyModule_AddStringConstant(moose_module, "VERSION", SHELLPTR->doVersion().c_str());
+        PyModule_AddStringConstant(moose_module, "SVN_REVISION", SHELLPTR->doRevision().c_str());
         PyObject * module_dict = PyModule_GetDict(moose_module);
         clock_t defclasses_start = clock();
         if (!defineAllClasses(module_dict)){
