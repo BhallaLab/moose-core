@@ -18244,6 +18244,42 @@ Stuck on a couple of fronts.
 
 Give up on these. Now doing some pending things:
 Set up the SimManager::setMethod command to correctly handle converting to
-and from the GSSA as well as GSL. Clears unit tests.
+and from the GSSA as well as GSL. Clears unit tests. Checkin 3843.
+
+Next: Get the SigNeuro sims going using a neuronal model for signaling geom.
+This is going to be awkward to test till I have the Python going.
+
+Tasks:
+	NeuroMesh
+	- NeuroMesh skeleton implementation
+	- NeuroMesh read structure from loaded neuron model
+	- NeuroMesh stencils 
+	- NeuroMesh Y junction diffusion
+	- NeuroMesh directed diffusion/transport.
+	- NeuroMesh talk to a sphereMesh or similar for nucleus or soma.
+	- NeuroMesh hemispherical junction diffusion
+	- NeuroMesh talk to CubeMesh or similar for NO-type free diffusion
+	- NeuroMesh talk to MatrixMesh for Glu-type membrane bound diffusion
+	SpineMesh
+	- Standalone SpineMesh with 1 to 5 compartments: 
+		neck, head bulk, head membrane, PSD, PSD membrane
+	- Neck with optional zero volume and surface, only diffusion constrict
+	- Communicate with NeuroMesh
+	- Set up so SpineMesh can also sit flat on a regular dendrite for
+		non-spiny synapses.
+	- SpineMesh structural changes?	
+	SimManager
+	- Specify chem sim in NeuroMesh geometry
+	- Specify SigNeur sim with only Ca effects on kinetics
+	- Specify SigNeur sim with partial bits of cells
+	- Specify SigNeuro sim with bidirectional chem<-->elec signaling
+	MatrixMesh
+
+============================================================================
+14 Aug
+Implementing CylBase to set up NeuroMesh. Will also retrofit into CylMesh.
+Fixes some errors in volume estimation.
+Also implemented NeuroNode as a standalone file. Compiles with
+CylBase and NeuroNode, clears unit tests.
 
 ============================================================================
