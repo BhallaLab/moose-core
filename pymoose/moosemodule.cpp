@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Tue Aug 14 15:27:16 2012 (+0530)
+// Last-Updated: Tue Aug 14 16:31:06 2012 (+0530)
 //           By: subha
-//     Update #: 9386
+//     Update #: 9388
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -339,15 +339,14 @@ extern "C" {
     */
     Id get_shell(int argc, char ** argv)
     {
-        static Id shellId;
         static int inited = 0;
         if (inited){
-            return shellId;
+            return Id(0);
         }
         bool dounit = doUnitTests != 0;
         bool doregress = doRegressionTests != 0;
         // Utilize the main::init function which has friend access to Id
-        shellId = init(argc, argv, dounit, doregress);
+        Id shellId = init(argc, argv, dounit, doregress);
         inited = 1;
         Shell * shellPtr = reinterpret_cast<Shell*>(shellId.eref().data());
         Qinfo::initMutex(); // Mutex used to align Parser and MOOSE threads        
