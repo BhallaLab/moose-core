@@ -12,8 +12,10 @@ TARGET = _mesh.o
 OBJ = \
 	ChemMesh.o	\
 	MeshEntry.o	\
+	CylBase.o	\
 	CylMesh.o	\
 	CubeMesh.o	\
+	NeuroNode.o	\
 	Boundary.o	\
 	Stencil.o	\
 	testMesh.o	\
@@ -28,8 +30,10 @@ $(OBJ)	: $(HEADERS)
 MeshEntry.o:	MeshEntry.h
 Boundary.o:	Boundary.h
 ChemMesh.o:	ChemMesh.h MeshEntry.h Boundary.h ../ksolve/RateTerm.h ../ksolve/FuncTerm.h ../ksolve/KinSparseMatrix.h ../ksolve/Stoich.h
-CylMesh.o:	ChemMesh.h CylMesh.h MeshEntry.h Boundary.h
+CylBase.o:	CylBase.h
+CylMesh.o:	ChemMesh.h CylBase.h CylMesh.h MeshEntry.h Boundary.h
 CubeMesh.o:	ChemMesh.h CubeMesh.h MeshEntry.h Boundary.h
+NeuroNode.o: CylBase.h NeuroNode.h
 Stencil.o:	Stencil.h
 testMesh.o:	MeshEntry.h ChemMesh.h CylMesh.h Boundary.h
 
