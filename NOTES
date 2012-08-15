@@ -18281,5 +18281,11 @@ Implementing CylBase to set up NeuroMesh. Will also retrofit into CylMesh.
 Fixes some errors in volume estimation.
 Also implemented NeuroNode as a standalone file. Compiles with
 CylBase and NeuroNode, clears unit tests.
+Now about line 320 in NeuroMesh.cpp.
+
+============================================================================
+15 Aug.
+Compiled NeuroMesh skeleton  code. Doesn't yet do the key operation of scanning
+a cell model, nor to generate the stencil. Most of the rest done.
 
 ============================================================================
