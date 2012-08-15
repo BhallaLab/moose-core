@@ -16,6 +16,8 @@ OBJ = \
 	CylMesh.o	\
 	CubeMesh.o	\
 	NeuroNode.o	\
+	NeuroStencil.o	\
+	NeuroMesh.o	\
 	Boundary.o	\
 	Stencil.o	\
 	testMesh.o	\
@@ -34,6 +36,8 @@ CylBase.o:	CylBase.h
 CylMesh.o:	ChemMesh.h CylBase.h CylMesh.h MeshEntry.h Boundary.h
 CubeMesh.o:	ChemMesh.h CubeMesh.h MeshEntry.h Boundary.h
 NeuroNode.o: CylBase.h NeuroNode.h
+NeuroStencil.o: CylBase.h NeuroNode.h NeuroStencil.h
+NeuroMesh.o: ChemMesh.h CylBase.h NeuroNode.h NeuroStencil.h NeuroMesh.h
 Stencil.o:	Stencil.h
 testMesh.o:	MeshEntry.h ChemMesh.h CylMesh.h Boundary.h
 

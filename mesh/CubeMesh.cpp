@@ -538,7 +538,7 @@ void CubeMesh::innerBuildDefaultMesh( const Eref& e, const Qinfo* q,
 void CubeMesh::innerHandleRequestMeshStats( const Eref& e, const Qinfo* q, 
 		const SrcFinfo2< unsigned int, vector< double > >* meshStatsFinfo )
 {
-	vector< double > meshSizes( dx_ * dy_ * dz_, 1 );
+	vector< double > meshSizes( 1, dx_ * dy_ * dz_ );
 	meshStatsFinfo->send( e, q->threadNum(), nx_ * ny_ * nz_, meshSizes );
 }
 
