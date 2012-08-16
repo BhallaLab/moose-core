@@ -13,12 +13,13 @@
 class NeuroStencil: public Stencil
 {
 	public:
+		NeuroStencil( const vector< NeuroNode >& nodes, 
+					const vector< unsigned int >& nodeIndex,
+					const vector< double >& vs,
+					const vector< double >& area);
 		NeuroStencil();
 
 		~NeuroStencil();
-
-		void setNodes( const vector< NeuroNode >* nodes );
-		void setNodeIndex( const vector< unsigned int >* nodeIndex );
 
 		/**
 		 * computes the Flux f in the voxel on meshIndex. Takes the
@@ -29,9 +30,35 @@ class NeuroStencil: public Stencil
 			vector< double >& f, const vector< vector< double > >& S, 
 			const vector< double >& diffConst ) const;
 
+		void addLinearFlux( unsigned int index, 
+			vector< double >& f, 
+			const vector< double >& tminus,
+			const vector< double >& t0,
+			const vector< double >& tplus,
+			double aminus,
+			double aplus,
+			double vsminus,
+			double vs0,
+			double vsplus,
+			double invSq,
+			const vector< double >& diffConst ) const;
+
+		void addHalfFlux( unsigned int index, 
+			vector< double >& f, 
+			const vector< double >& t0,
+			const vector< double >& tprime,
+			double area,
+			double vs0,
+			double vsprime,
+			double invSq,
+			const vector< double >& diffConst ) const;
+
 	private:
-		const vector< NeuroNode >* nodes_;
-		const vector< unsigned int >* nodeIndex_;
+		const vector< NeuroNode >& nodes_;
+		const vector< unsigned int >& nodeIndex_;
+		const vector< double >& vs_;
+		const vector< double >& area_;
+
 };
 
 #endif // _NEURO_STENCIL_H

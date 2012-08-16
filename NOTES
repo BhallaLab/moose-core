@@ -18251,7 +18251,7 @@ This is going to be awkward to test till I have the Python going.
 
 Tasks:
 	NeuroMesh
-	- NeuroMesh skeleton implementation
+	* NeuroMesh skeleton implementation
 	- NeuroMesh read structure from loaded neuron model
 	- NeuroMesh stencils 
 	- NeuroMesh Y junction diffusion
@@ -18287,5 +18287,31 @@ Now about line 320 in NeuroMesh.cpp.
 15 Aug.
 Compiled NeuroMesh skeleton  code. Doesn't yet do the key operation of scanning
 a cell model, nor to generate the stencil. Most of the rest done.
+Checkin 3851.
+
+I've run into rather nasty stuff in the NeuroStencil, dealing with the 
+diffusion scaling by area and volume, since the voxels are not uniform as
+they were with the CylMesh. Actually if I take the different diameters at
+either end of the CylMesh seriously it too should not have uniform volumes.
+I thought about dropping the careful conical section stuff. Turns out that
+even if I drop it for the intermediate section, I still have to deal with
+it at the ends. No change in complexity, perhaps a bit more storage. So I
+may as well deal with the full case of conical sections.
+
+============================================================================
+16 Aug 2012
+Some different ways to get the list of child nodes:
+- vector of child nodes on each NeuroNode.
+	Simplest, slowest, most memory
+- Number and index into array of child nodes
+	Most complex, medium speed and memory
+- Assume 2 child nodes, store them locally.
+	Simplest, fastest, least memory, what to do if more than 2? 
+		Fall back on option 2.
+		Which turns this into something really complex.
+
+Go for the simplest.
+
+Implemented and compiled the NeuroStencil. Quite messy.
 
 ============================================================================

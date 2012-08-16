@@ -17,11 +17,14 @@
  */
 
 NeuroNode::NeuroNode( const CylBase& cb, 
-	unsigned int parent, unsigned int startFid, Id elecCompt,
-	bool isDummyNode, bool isSphere, bool isStartNode )
+		unsigned int parent, const vector< unsigned int >& children,
+		unsigned int startFid, Id elecCompt,
+		bool isDummyNode, bool isSphere, bool isStartNode
+   	)
 		:
 				CylBase( cb ), 
 				parent_( parent ),
+				children_( children ),
 				startFid_( startFid ),
 				elecCompt_( elecCompt ),
 				isDummyNode_( isDummyNode ),
@@ -65,4 +68,9 @@ bool NeuroNode::isSphere() const
 bool NeuroNode::isStartNode() const
 {
 		return isStartNode_;
+}
+
+const vector< unsigned int >& NeuroNode::children() const
+{
+		return children_;
 }
