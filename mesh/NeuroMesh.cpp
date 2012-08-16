@@ -134,9 +134,35 @@ static const Cinfo* neuroMeshCinfo = NeuroMesh::initCinfo();
 NeuroMesh::NeuroMesh()
 	:
 		size_( 0.0 ),
-		diffLength_( 0.5e-6 )
+		diffLength_( 0.5e-6 ),
+		skipSpines_( false ),
+		ns_( nodes_, nodeIndex_, vs_, area_ )
 {
-	;
+	stencil_.resize( 1, &ns_ );
+}
+
+NeuroMesh::NeuroMesh( const NeuroMesh& other )
+	:
+		size_( other.size_ ),
+		diffLength_( other.diffLength_ ),
+		cell_( other.cell_ ),
+		ns_( nodes_, nodeIndex_, vs_, area_ )
+{
+	stencil_.resize( 1, &ns_ );
+}
+
+NeuroMesh& NeuroMesh::operator=( const NeuroMesh& other )
+{
+	nodes_ = other.nodes_;
+	nodeIndex_ = other.nodeIndex_;
+	vs_ = other.vs_;
+	area_ = other.area_;
+	size_ = other.size_;
+	diffLength_ = other.diffLength_;
+	cell_ = other.cell_;
+	skipSpines_ = other.skipSpines_;
+	stencil_.resize( 1, &ns_ );
+	return *this;
 }
 
 NeuroMesh::~NeuroMesh()
@@ -463,23 +489,30 @@ void NeuroMesh::innerBuildDefaultMesh( const Eref& e, const Qinfo* q,
 
 	diffLength_ = size / numEntries;
 
+	vector< unsigned int > noChildren( 0 );
+	vector< unsigned int > oneChild( 1, 2 );
+
 	if ( size < 20e-6 ) {
 			CylBase cb( 0, 0, 0, size, 0, numEntries );
-			NeuroNode soma( cb, 0, 0, Id(), false, true, true );
+			NeuroNode soma( cb, 0, noChildren, 0, Id(), 
+							false, true, true );
 			nodes_.resize( 1, soma );
 			nodeIndex_.resize( 1, 0 );
 	} else {
 			CylBase cb( 0, 0, 0, 20e-6, 0, 1 );
-			NeuroNode soma( cb, 0, 0, Id(), false, true, true );
+			NeuroNode soma( cb, 0, oneChild, 0, Id(), 
+							false, true, true );
 			nodes_.resize( 1, soma );
 			nodeIndex_.resize( 1, 0 );
 
 			CylBase cbDummy( 0, 0, 10e-6, 4e-6, 0, 1 );
-			NeuroNode dummy( cbDummy, 0, 1, Id(), true, false, false );
+			NeuroNode dummy( cbDummy, 0, noChildren, 1, Id(), 
+							true, false, false );
 			nodes_.push_back( dummy );
 
 			CylBase cbDend( 0, 0, size, 2e-6, size - 10e-6, numEntries - 1);
-			NeuroNode dend( cbDend, 1, 2, Id(), false, false, false );
+			NeuroNode dend( cbDend, 1, noChildren, 2, Id(), 
+							false, false, false );
 			nodes_.push_back( dend );
 			for ( unsigned int i = 1; i < numEntries; ++i )
 				nodeIndex_.push_back( 2 );
@@ -533,8 +566,6 @@ void NeuroMesh::transmitChange( const Eref& e, const Qinfo* q )
 //////////////////////////////////////////////////////////////////
 void NeuroMesh::buildStencil()
 {
-	ns_.setNodes( &nodes_ );
-	ns_.setNodeIndex( &nodeIndex_ );
-	stencil_.resize( 1, &ns_ );
+	; // stencil_.resize( 1, &ns_ );
 }
 

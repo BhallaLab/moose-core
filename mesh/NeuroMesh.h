@@ -32,7 +32,9 @@ class NeuroMesh: public ChemMesh
 {
 	public: 
 		NeuroMesh();
+		NeuroMesh( const NeuroMesh& other );
 		~NeuroMesh();
+		NeuroMesh& operator=( const NeuroMesh& other );
 		//////////////////////////////////////////////////////////////////
 		//  Utility func
 		//////////////////////////////////////////////////////////////////
@@ -141,6 +143,19 @@ class NeuroMesh: public ChemMesh
 		 * Looks up index of NeuroNode from the fid of each MeshEntry.
 		 */
 		vector< unsigned int > nodeIndex_;
+
+		/**
+		 * Volscale pre-calculations for each MeshEntry. 
+		 * vs = #mols / vol
+		 */
+		vector< double > vs_;
+
+		/**
+		 * Mesh junction area pre-calculations for each MeshEntry.
+		 * If we consider the Entry specified by the Index, the area
+		 * specified is the one more proximal, that is, closer to soma.
+		 */
+		vector< double > area_;
 
 		double size_; /// Total Volume
 		double diffLength_;	/// Max permitted length constant for diffusion
