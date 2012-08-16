@@ -19,7 +19,8 @@ class NeuroNode: public CylBase
 {
 	public:
 		NeuroNode( const CylBase& cb, 
-			unsigned int parent, unsigned int startFid_, Id elecCompt,
+			unsigned int parent, const vector< unsigned int >& children,
+			unsigned int startFid_, Id elecCompt,
 			bool isDummyNode, bool isSphere, bool isStartNode );
 		NeuroNode();
 
@@ -29,6 +30,7 @@ class NeuroNode: public CylBase
 		bool isDummyNode() const;
 		bool isSphere() const;
 		bool isStartNode() const;
+		const vector< unsigned int >& children() const;
 
 	private:
 		/**
@@ -42,10 +44,16 @@ class NeuroNode: public CylBase
 		unsigned int parent_; 
 
 		/**
+		 * Index of children of this NeuroNode.
+		 */
+		vector< unsigned int >children_;
+
+		/**
 		 * Index of starting MeshEntry handled by this NeuroNode. Assumes
 		 * a block of contiguous fids are handled by each NeuroNode.
 		 */
 		unsigned int startFid_;
+
 
 		/// Id of electrical compartment in which this diffusive compt lives
 		Id elecCompt_; 
