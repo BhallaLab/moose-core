@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Tue Aug 14 16:31:06 2012 (+0530)
+// Last-Updated: Thu Aug 16 13:48:28 2012 (+0530)
 //           By: subha
-//     Update #: 9388
+//     Update #: 9444
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -1470,13 +1470,10 @@ extern "C" {
             return -1;
         }
         char ftype = shortType(fieldtype);
-        PyObject * seq = value;        
         Py_ssize_t length = moose_Id_getLength(self);
-
+        bool is_seq = true;
         if (!PySequence_Check(value)){
-            PyErr_SetString(PyExc_TypeError, "For setting vector field, specified value must be a sequence of same"
-                            " length as the Id." );
-            return -1;
+            is_seq = false;
         } else if (length != PySequence_Length(value)){
             PyErr_SetString(PyExc_IndexError, "Length of the sequence on the right hand side does not match Id size.");
             return -1;
@@ -1484,102 +1481,155 @@ extern "C" {
         switch(ftype){
             case 'b': {
                 vector<bool> _value;
-                for (unsigned int ii = 0; ii < length; ++ii){
-                    PyObject * _v = PySequence_GetItem(value, ii);
-                    bool v = (Py_True ==_v) || (PyInt_AsLong(_v) != 0);
-                    _value.push_back(v);
+                if (is_seq){
+                    for (unsigned int ii = 0; ii < length; ++ii){
+                        PyObject * _v = PySequence_GetItem(value, ii);
+                        bool v = (Py_True ==_v) || (PyInt_AsLong(_v) != 0);
+                        _value.push_back(v);
+                    }
+                } else {
+                    bool v = (Py_True ==value) || (PyInt_AsLong(value) != 0);
+                    _value.assign(length, v);
                 }
                 ret = Field< bool >::setVec(self->id_, string(fieldname), _value);
                 break;
             }
             case 'c': {
                 vector<char> _value;
-                for (unsigned int ii = 0; ii < length; ++ii){
-                    char * _v = PyString_AsString(value);
-                    if (_v && _v[0]){
-                        _value.push_back(_v[0]);
-                    } else {
-                        ostringstream err;
-                        err << ii << "-th element is not a character or string.";
-                        PyErr_SetString(PyExc_ValueError, err.str().c_str());
-                        return -1;
+                if (is_seq){
+                    for (unsigned int ii = 0; ii < length; ++ii){
+                        PyObject * _v = PySequence_GetItem(value, ii);
+                        char * v = PyString_AsString(_v);
+                        if (v && v[0]){
+                            _value.push_back(v[0]);
+                        } else {
+                            ostringstream err;
+                            err << ii << "-th element is NUL";
+                            PyErr_SetString(PyExc_ValueError, err.str().c_str());
+                            return -1;
+                        }
                     }
-                }
+                } else {
+                        char * v = PyString_AsString(value);
+                        if (v && v[0]){
+                            _value.assign(length, v[0]);
+                        } else {
+                            PyErr_SetString(PyExc_ValueError,  "value is an empty string");
+                            return -1;
+                        }
+                }                    
                 ret = Field< char >::setVec(self->id_, string(fieldname), _value);
                 break;
             }
             case 'i': {
                 vector<int> _value;
-                for (unsigned int ii = 0; ii < length; ++ii){
-                    int v = PyInt_AsLong(PySequence_GetItem(value, ii));
-                    _value.push_back(v);
+                if (is_seq){
+                    for (unsigned int ii = 0; ii < length; ++ii){
+                        int v = PyInt_AsLong(PySequence_GetItem(value, ii));
+                        _value.push_back(v);
+                    }
+                } else {
+                    int v = PyInt_AsLong(value);
+                    _value.assign(length, v);
                 }
                 ret = Field< int >::setVec(self->id_, string(fieldname), _value);
                 break;
             }
             case 'h': {
                 vector<short> _value;
-                for (unsigned int ii = 0; ii < length; ++ii){
-                    short v = PyInt_AsLong(PySequence_GetItem(value, ii));
-                    _value.push_back(v);
+                if (is_seq){
+                    for (unsigned int ii = 0; ii < length; ++ii){
+                        short v = PyInt_AsLong(PySequence_GetItem(value, ii));
+                        _value.push_back(v);
+                    }
+                } else {
+                    short v = PyInt_AsLong(value);
+                    _value.assign(length, v);
                 }
                 ret = Field< short >::setVec(self->id_, string(fieldname), _value);
                 break;
             }
             case 'l': {//SET_VECFIELD(long, l)
                 vector<long> _value;
-                for (unsigned int ii = 0; ii < length; ++ii){
-                    long v = PyInt_AsLong(PySequence_GetItem(value, ii));
-                    _value.push_back(v);
+                if (is_seq){
+                    for (unsigned int ii = 0; ii < length; ++ii){
+                        long v = PyInt_AsLong(PySequence_GetItem(value, ii));
+                        _value.push_back(v);
+                    }
+                } else {
+                    long v = PyInt_AsLong(value);
+                    _value.assign(length, v);                    
                 }
                 ret = Field<long>::setVec(self->id_, string(fieldname), _value);
                 break;
             }
             case 'u': {//SET_VECFIELD(unsigned int, I)
                 vector<unsigned int> _value;
-                for (unsigned int ii = 0; ii < length; ++ii){
-                    unsigned int v = PyInt_AsUnsignedLongMask(PySequence_GetItem(value, ii));
-                    _value.push_back(v);
+                if (is_seq){
+                    for (unsigned int ii = 0; ii < length; ++ii){
+                        unsigned int v = PyInt_AsUnsignedLongMask(PySequence_GetItem(value, ii));
+                        _value.push_back(v);
+                    }
+                } else {
+                    unsigned int v = PyInt_AsUnsignedLongMask(value);
+                    _value.assign(length, v);
                 }
                 ret = Field< unsigned int >::setVec(self->id_, string(fieldname), _value);                
                 break;
             }
             case 'I': {//SET_VECFIELD(unsigned long, k)
                 vector<unsigned long> _value;
-                for (unsigned int ii = 0; ii < length; ++ii){
-                    unsigned long v = PyInt_AsUnsignedLongMask(PySequence_GetItem(value, ii));
-                    _value.push_back(v);
+                if (is_seq){
+                    for (unsigned int ii = 0; ii < length; ++ii){
+                        unsigned long v = PyInt_AsUnsignedLongMask(PySequence_GetItem(value, ii));
+                        _value.push_back(v);
+                    }
+                } else {
+                    unsigned long v = PyInt_AsUnsignedLongMask(value);
+                    _value.assign(length, v);
                 }
                 ret = Field< unsigned long >::setVec(self->id_, string(fieldname), _value);                
                 break;
             }
             case 'f': {//SET_VECFIELD(float, f)
-                Py_ssize_t length = PySequence_Length(value);
                 vector<float> _value;
-                for (unsigned int ii = 0; ii < length; ++ii){
-                    float v = PyFloat_AsDouble(PySequence_GetItem(value, ii));
-                    _value.push_back(v);
+                if (is_seq){
+                    for (unsigned int ii = 0; ii < length; ++ii){
+                        float v = PyFloat_AsDouble(PySequence_GetItem(value, ii));
+                        _value.push_back(v);
+                    }
+                } else {
+                    float v = PyFloat_AsDouble(value);                    
+                    _value.assign(length, v);
                 }
                 ret = Field<float>::setVec(self->id_, string(fieldname), _value);
                 break;
             }
             case 'd': {//SET_VECFIELD(double, d)
-                Py_ssize_t length = PySequence_Length(value);
                 vector<double> _value;
-                for (unsigned int ii = 0; ii < length; ++ii){
-                    double v = PyFloat_AsDouble(PySequence_GetItem(value, ii));
-                    _value.push_back(v);
+                if (is_seq){
+                    for (unsigned int ii = 0; ii < length; ++ii){
+                        double v = PyFloat_AsDouble(PySequence_GetItem(value, ii));
+                        _value.push_back(v);
+                    }
+                } else {
+                    double v = PyFloat_AsDouble(value);
+                    _value.assign(length, v);
                 }
                 ret = Field<double>::setVec(self->id_, string(fieldname), _value);
                 break;
             }                
             case 's': {
-                Py_ssize_t length = PySequence_Length(value);
                 vector<string> _value;
-                for (unsigned int ii = 0; ii < length; ++ii){
-                    char * v = PyString_AsString(PySequence_GetItem(value, ii));
-                    _value.push_back(string(v));
-                }
+                if (is_seq){
+                    for (unsigned int ii = 0; ii < length; ++ii){
+                        char * v = PyString_AsString(PySequence_GetItem(value, ii));
+                        _value.push_back(string(v));
+                    }
+                } else {
+                    char * v = PyString_AsString(value);
+                    _value.assign(length, string(v));
+                }                    
                 ret = Field<string>::setVec(self->id_, string(fieldname), _value);
                 break;
             }
@@ -1589,7 +1639,7 @@ extern "C" {
         // MOOSE Field::set returns 1 for success 0 for
         // failure. Python treats return value 0 from setters as
         // success, anything else failure.
-        if (ret){
+        if (ret || (PyErr_Occurred() == NULL)){
             return 0;
         } else {
             return -1;
