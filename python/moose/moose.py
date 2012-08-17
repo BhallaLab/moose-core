@@ -31,9 +31,13 @@
 
 
 import warnings
+import platform
+_py3k = False
+if int(platform.python_version_tuple()[0]) >= 3:
+    _py3k = True
 from collections import defaultdict
-import _moose
-from _moose import *
+from . import _moose
+from ._moose import *
 import __main__ as main
 
 sequence_types = [ 'vector<double>',
@@ -209,7 +213,7 @@ def arrayelement(path, className='Neutral'):
 def pwe():
     """Print present working element. Convenience function for GENESIS
     users."""
-    print _moose.getCwe().getPath()
+    print(_moose.getCwe().getPath())
     
 def le(element=None):
     """List elements. """
@@ -219,9 +223,9 @@ def le(element=None):
         element = Neutral(element)
     elif isinstance(element, Id):
         element = element[0]
-    print 'Elements under', element.path
+    print('Elements under', element.path)
     for ch in element.children:
-        print ch
+        print(ch)
 
 ce = setCwe
 
@@ -254,20 +258,27 @@ def showfield(elem, field='*', showtype=False):
     target = element(elem)
     if field == '*':        
         value_field_dict = getFieldDict(target.class_, 'valueFinfo')
-        max_type_len = max([len(dtype) for dtype in value_field_dict.values()])
-        max_field_len = max([len(dtype) for dtype in value_field_dict.keys()])
-        print 
-        print '[', target.path, ']'
-        for key, dtype in value_field_dict.items():
+        max_type_len = max([len(dtype) for dtype in list(value_field_dict.values())])
+        max_field_len = max([len(dtype) for dtype in list(value_field_dict.keys())])
+        print('\n[', target.path, ']')
+        for key, dtype in list(value_field_dict.items()):
             if dtype == 'bad' or key == 'this' or key == 'dummy' or key == 'me' or dtype.startswith('vector') or 'ObjId' in dtype:
                 continue
             value = target.getField(key)
             if showtype:
-                print dtype.ljust(max_type_len + 4),
-            print key.ljust(max_field_len + 4), '=', value
+                typestr = dtype.ljust(max_type_len + 4)
+                # The following hack is for handling both Python 2 and
+                # 3. Directly putting the print command in the if/else
+                # clause causes syntax error in both systems.
+                if _py3k:
+                    printcommand = 'print(%s, end=" ")' % (typestr)
+                else:
+                    printcommand = 'print %s,' % (typestr)
+                eval(printcommand)
+            print(key.ljust(max_field_len + 4), '=', value)
     else:
         try:
-            print field, '=', target.getField(field)
+            print(field, '=', target.getField(field))
         except AttributeError:
             pass # Genesis silently ignores non existent fields
 
@@ -294,58 +305,58 @@ def doc(arg):
         class_path = '/classes/%s' % (tokens[0])
         if exists(class_path):
             if not print_field:
-                print Cinfo(class_path).docs
+                print(Cinfo(class_path).docs)
         else:
-            print 'No such class:', tokens[0]
+            print('No such class:', tokens[0])
             return
     class_id = Id('/classes/%s' % (tokens[0]))
     num_finfo = getField(class_id[0], 'num_valueFinfo', 'unsigned')
     finfo = Id('/classes/%s/valueFinfo' % (tokens[0]))
-    print '\n* Value Field *'
+    print('\n* Value Field *')
     for ii in range(num_finfo):
         oid = ObjId(finfo, 0, ii, 0)
         if print_field:
             if oid.name == tokens[1]:
-                print oid.name, ':', oid.docs
+                print(oid.name, ':', oid.docs)
                 return
         else:
-            print oid.name, ':', oid.docs
+            print(oid.name, ':', oid.docs)
             print
     num_finfo = getField(class_id[0], 'num_srcFinfo', 'unsigned')
     finfo = Id('/classes/%s/srcFinfo' % (tokens[0]))
-    print '\n* Source Field *'
+    print('\n* Source Field *')
     for ii in range(num_finfo):
         oid = ObjId(finfo, 0, ii, 0)
         if print_field:
             if oid.name == tokens[1]:
-                print oid.name, ':', oid.docs
+                print(oid.name, ':', oid.docs)
                 return
         else:
-            print oid.name, ':', oid.docs
+            print(oid.name, ':', oid.docs)
             print
     num_finfo = getField(class_id[0], 'num_destFinfo', 'unsigned')
     finfo = Id('/classes/%s/destFinfo' % (tokens[0]))
-    print '\n* Destination Field *'
+    print('\n* Destination Field *')
     for ii in range(num_finfo):
         oid = ObjId(finfo, 0, ii, 0)
         if print_field:
             if oid.name == tokens[1]:
-                print oid.name, ':', oid.docs
+                print(oid.name, ':', oid.docs)
                 return
         else:
-            print oid.name, ':', oid.docs
+            print(oid.name, ':', oid.docs)
             print
     num_finfo = getField(class_id[0], 'num_lookupFinfo', 'unsigned')    
     finfo = Id('/classes/%s/lookupFinfo' % (tokens[0]))
-    print '\n* Lookup Field *'
+    print('\n* Lookup Field *')
     for ii in range(num_finfo):
         oid = ObjId(finfo, 0, ii, 0)
         if print_field:
             if oid.name == tokens[1]:
-                print oid.name, ':', oid.docs
+                print(oid.name, ':', oid.docs)
                 return
         else:
-            print oid.name, ':', oid.docs
+            print(oid.name, ':', oid.docs)
             print
     
 
