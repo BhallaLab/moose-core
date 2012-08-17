@@ -148,7 +148,21 @@ extern "C" {
     static int doUnitTests = 0;
     static int doRegressionTests = 0;
     static int quitFlag = 0;
-    static PyObject * MooseError;
+
+  // This had to be defined for py3k, but does not harm 2.
+struct module_state {
+    PyObject *error;
+};
+
+#if PY_MAJOR_VERSION >= 3
+#define PY3K
+  // Python 3 does not like global module state
+#define GETSTATE(m) ((struct module_state*)PyModule_GetState(m))
+#else // Python 2
+#define GETSTATE(m) (&_state)
+static struct module_state _state;
+#endif // PY_MAJOR_VERSION
+
     static PyObject* get_Id_attr(_Id * id, string attribute)
     {
         if (attribute == "path"){
@@ -375,6 +389,11 @@ extern "C" {
     */
     void finalize()
     {
+      static bool finalized = false;
+      if (finalized){
+        return;
+      }
+      finalized = true;
         Id shellId = get_shell(0, NULL);
         for (map<string, PyObject *>::iterator it =
                      get_inited_lookupfields().begin();
@@ -662,9 +681,11 @@ extern "C" {
                  "Instances contain the field name and a pointer to the owner object.");
 
 
-    static PyTypeObject moose_Field = {
-        PyObject_HEAD_INIT(NULL)
+  static PyTypeObject moose_Field = {
+      PyVarObject_HEAD_INIT(NULL, 0)
+#ifndef PY3K
         0,                                              /* tp_internal */
+#endif
         "moose.Field",                                  /* tp_name */
         sizeof(_Field),                                 /* tp_basicsize */
         0,                                              /* tp_itemsize */
@@ -734,8 +755,10 @@ extern "C" {
                  "Use moose.doc('classname.fieldname') to display builtin\n"
                  "documentation for `field` in class `classname`.\n");
     static PyTypeObject moose_LookupField = {
-        PyObject_HEAD_INIT(NULL)
+      PyVarObject_HEAD_INIT(NULL, 0)
+#ifndef PY3K      
         0,                                              /* tp_internal */
+#endif
         "moose.LookupField",                                  /* tp_name */
         sizeof(_Field),                                 /* tp_basicsize */
         0,                                              /* tp_itemsize */
@@ -814,8 +837,10 @@ extern "C" {
                  
 
     static PyTypeObject moose_DestField = {
-        PyObject_HEAD_INIT(NULL)
+      PyVarObject_HEAD_INIT(NULL, 0)
+#ifndef PY3K
         0,                                              /* tp_internal */
+#endif
         "moose.DestField",                              /* tp_name */
         sizeof(_Field),                                 /* tp_basicsize */
         0,                                              /* tp_itemsize */
@@ -886,8 +911,10 @@ extern "C" {
     };
     
     static PyTypeObject moose_ElementField = {
-        PyObject_HEAD_INIT(NULL)
+      PyVarObject_HEAD_INIT(NULL, 0)
+#ifndef PY3K
         0,                                              /* tp_internal */
+#endif
         "moose.ElementField",                              /* tp_name */
         sizeof(_Field),                                 /* tp_basicsize */
         0,                                              /* tp_itemsize */
@@ -966,9 +993,13 @@ extern "C" {
         0, //sq_concat
         0, //sq_repeat
         (ssizeargfunc)moose_Id_getItem, //sq_item
+#ifndef PY3K
         (ssizessizeargfunc)moose_Id_getSlice, // getslice
+#endif
         0, //sq_ass_item
+#ifndef PY3K
         0, // setslice
+#endif
         (objobjproc)moose_Id_contains, // sq_contains
         0, // sq_inplace_concat
         0 // sq_inplace_repeat
@@ -979,8 +1010,10 @@ extern "C" {
     // Type defs for PyObject of Id
     ///////////////////////////////////////////////
     PyTypeObject IdType = { 
-        PyObject_HEAD_INIT(NULL)               /* tp_head */
+      PyVarObject_HEAD_INIT(NULL, 0)               /* tp_head */
+#ifndef PY3K
         0,                                  /* tp_internal */
+#endif
         "moose.Id",                  /* tp_name */
         sizeof(_Id),                    /* tp_basicsize */
         0,                                  /* tp_itemsize */
@@ -1340,7 +1373,10 @@ extern "C" {
         } else {
             ret = 0;
         }
-        return Py_BuildValue("i", ret);
+        if (ret == 0){
+          Py_RETURN_TRUE;
+        }
+        Py_RETURN_FALSE;
     }
     
     static int moose_Id_contains(_Id * self, PyObject * obj)
@@ -3056,30 +3092,51 @@ extern "C" {
         return (PyObject*)msgMgrId;
     }
 
-    PyDoc_STRVAR(moose_ObjId_compare_documentation,
+    PyDoc_STRVAR(moose_ObjId_richcompare_documentation,
                  "Compare two ObjId instances. This just does a string comparison of\n"
                  "the paths of the ObjId instances. This function exists only to\n"
                  "facilitate certain operations requiring sorting/comparison, like\n"
                  "using ObjIds for dict keys. Conceptually only equality comparison is\n"
                  "meaningful for ObjIds.\n"); 
-    static int moose_ObjId_compare(_ObjId * self, PyObject * other)
+  static PyObject* moose_ObjId_richcompare(_ObjId * self, PyObject * other, int op)
     {
         extern PyTypeObject ObjIdType;
-        int ret;
-        if (self != NULL && other == NULL){
-            return 1;
-        } else if (self == NULL && other != NULL){
-            return -1;
-        } else if (!ObjId_SubtypeCheck(other)){
-            ostringstream error;
-            error << "Cannot compare ObjId with "
-                  << other->ob_type->tp_name;
-            PyErr_SetString(PyExc_TypeError, error.str().c_str());
-            ret = -1;
+        if ((self != NULL && other == NULL) || (self == NULL && other != NULL)){
+          if (op == Py_EQ){
+            Py_RETURN_FALSE;
+          } else if (op == Py_NE){
+            Py_RETURN_TRUE;
+          } else {
+            PyErr_SetString(PyExc_TypeError, "Cannot compare NULL with non-NULL");
+            return NULL;
+          }
+        }
+        if (!ObjId_SubtypeCheck(other)){
+          ostringstream error;
+          error << "Cannot compare ObjId with "
+                << other->ob_type->tp_name;
+          PyErr_SetString(PyExc_TypeError, error.str().c_str());
+          return NULL;
         }
         string l_path = self->oid_.path();
         string r_path = ((_ObjId*)other)->oid_.path();
-        return l_path.compare(r_path);
+        int result = l_path.compare(r_path);
+        if (result == 0){
+          if (op == Py_EQ || op == Py_LE || op == Py_GE){
+            Py_RETURN_TRUE;
+          }
+          Py_RETURN_FALSE;
+        } else if (result < 0){
+          if (op == Py_LT || op == Py_LE){
+            Py_RETURN_TRUE;
+          }
+          Py_RETURN_FALSE;
+        } else {
+          if (op == Py_GT || op == Py_GE){
+            Py_RETURN_TRUE;
+          }
+          Py_RETURN_FALSE;
+        }
     }
 
     PyDoc_STRVAR(moose_ObjId_getDataIndex_documentation,
@@ -3106,10 +3163,6 @@ extern "C" {
     ///////////////////////////////////////////////
 
     static PyMethodDef ObjIdMethods[] = {
-        {"__init__", (PyCFunction)moose_ObjId_init, METH_KEYWORDS,
-         moose_ObjId_init_documentation},
-        {"__cmp__", (PyCFunction)moose_ObjId_compare, METH_VARARGS,
-         moose_ObjId_compare_documentation},
         {"getFieldType", (PyCFunction)moose_ObjId_getFieldType, METH_VARARGS,
          moose_ObjId_getFieldType_documentation},        
         {"getField", (PyCFunction)moose_ObjId_getField, METH_VARARGS,
@@ -3141,8 +3194,10 @@ extern "C" {
     // Type defs for PyObject of ObjId
     ///////////////////////////////////////////////
     PyTypeObject ObjIdType = { 
-        PyObject_HEAD_INIT(NULL)            /* tp_head */
+      PyVarObject_HEAD_INIT(NULL, 0)            /* tp_head */
+#ifndef PY3K
         0,                                  /* tp_internal */
+#endif
         "moose.ObjId",                      /* tp_name */
         sizeof(_ObjId),                     /* tp_basicsize */
         0,                                  /* tp_itemsize */
@@ -3150,7 +3205,7 @@ extern "C" {
         0,                                  /* tp_print */
         0,                                  /* tp_getattr */
         0,                                  /* tp_setattr */
-        (cmpfunc)moose_ObjId_compare,       /* tp_compare */
+        0,       /* tp_compare */
         (reprfunc)moose_ObjId_repr,         /* tp_repr */
         0,                                  /* tp_as_number */
         0,                                  /* tp_as_sequence */
@@ -3165,7 +3220,7 @@ extern "C" {
         "Individual moose object contained in an array-type object.",
         0,                                  /* tp_traverse */
         0,                                  /* tp_clear */
-        0,                                  /* tp_richcompare */
+      (richcmpfunc)moose_ObjId_richcompare, /* tp_richcompare */
         0,                                  /* tp_weaklistoffset */
         0,                                  /* tp_iter */
         0,                                  /* tp_iternext */
@@ -3895,7 +3950,7 @@ extern "C" {
         // segmentation fault as it tries to convert the class object
         // to a heaptype object (resulting in an invalid pointer). If
         // heaptype is not set it uses tp_name to print the help.
-        new_class->ob_size = sizeof(_ObjId);        
+        Py_SIZE(new_class) = sizeof(_ObjId);        
         string str = "moose." + class_name;
         new_class->tp_name = (char *)calloc(str.length()+1,
                                             sizeof(char));
@@ -4264,9 +4319,43 @@ extern "C" {
 "of neural systems ranging from subcellular components and\n"
 "biochemical reactions to complex models of single neurons, large\n"
 "networks, and systems-level processes.");
-    
+
+#ifdef PY3K
+
+static int moose_traverse(PyObject *m, visitproc visit, void *arg) {
+  Py_VISIT(GETSTATE(m)->error);
+  return 0;
+}
+
+static int moose_clear(PyObject *m) {
+    Py_CLEAR(GETSTATE(m)->error);
+    // I did get a segmentation fault at exit (without running a reinit() or start()) after creating a compartment. After putting the finalize here it went away. But did not reoccur even after commenting it out. Will need closer debugging.
+    // - Subha 2012-08-18, 00:36    
+    finalize();
+    return 0;
+}
+
+
+static struct PyModuleDef MooseModuleDef = {
+        PyModuleDef_HEAD_INIT,
+        "moose", /* m_name */
+        moose_module_documentation, /* m_doc */
+        sizeof(struct module_state), /* m_size */
+        MooseMethods, /* m_methods */
+        0, /* m_reload */
+        moose_traverse, /* m_traverse */
+        moose_clear, /* m_clear */
+        NULL /* m_free */
+};
+
+#define INITERROR return NULL
+#define MODINIT(name) PyInit_##name()
+#else // Python 2
+#define INITERROR return
+#define MODINIT(name) init_##name()
+#endif
                  
-    PyMODINIT_FUNC init_moose()
+  PyMODINIT_FUNC MODINIT(_moose)
     {
         clock_t modinit_start = clock();
         PyGILState_STATE gstate;
@@ -4286,23 +4375,25 @@ extern "C" {
             free(argv[ii]);
         }
         // Now initialize the module
-        char moose_err[] = "moose.error";
+#ifdef PY3K
+	PyObject * moose_module = PyModule_Create(&MooseModuleDef);
+#else
         PyObject *moose_module = Py_InitModule3("_moose",
                                                 MooseMethods,
                                                 moose_module_documentation);
+#endif
         if (moose_module == NULL){
-            return;
+	  INITERROR;
         }
-
+	struct module_state * st = GETSTATE(moose_module);
+	st->error = PyErr_NewException("moose.Error", NULL, NULL);
+	if (st->error == NULL){
+	  Py_DECREF(moose_module);
+	  INITERROR;
+	}
         int registered = Py_AtExit(&finalize);
         if (registered != 0){
             cerr << "Failed to register finalize() to be called at exit. " << endl;
-        }
-
-        MooseError = PyErr_NewException(moose_err, NULL, NULL);
-        if (MooseError != NULL){
-            Py_INCREF(MooseError);
-            PyModule_AddObject(moose_module, "error", MooseError);
         }
 
         import_array();
@@ -4374,7 +4465,9 @@ extern "C" {
         PyGILState_Release(gstate);
         clock_t modinit_end = clock();
         cout << "Info: Time to initialize module:" << (modinit_end - modinit_start) * 1.0 /CLOCKS_PER_SEC << endl;
-
+#ifdef PY3K
+	return moose_module;
+#endif
     } //! init_moose
     
 } // end extern "C"
@@ -4386,7 +4479,7 @@ extern "C" {
 //////////////////////////////////////////////
 
 
-int main(int argc, char* argv[])
+int main(int argc, wchar_t* argv[])
 {
     for (int ii = 0; ii < argc; ++ii){
         cout << "ARGV: " << argv[ii];
@@ -4394,7 +4487,7 @@ int main(int argc, char* argv[])
     cout << endl;
     Py_SetProgramName(argv[0]);
     Py_Initialize();
-    init_moose();
+    MODINIT(_moose);
     return 0;
 }
 

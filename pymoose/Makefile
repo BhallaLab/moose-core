@@ -8,11 +8,12 @@ TARGET = _pymoose.o
 
 HEADERS = moosemodule.h
 
-
 OBJ = moosemodule.o
 
 $(TARGET): moosemodule.cpp $(OBJ) $(HEADERS) ../basecode/main.cpp ../utility/_utility.o ../basecode/_basecode_pymoose.o
-	$(LD) -r -o $(TARGET) $(OBJ)
+	$(LD) -r -o $(TARGET) $(OBJ) $(LDFLAGS)
+.cpp.o:
+	$(CXX) $(CXXFLAGS) $< -c
 
 clean: 
 	-rm -f *.o
