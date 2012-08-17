@@ -62,7 +62,7 @@
 # variable is not already defined.
 USE_SBML?=0
 
-
+PYTHON?=2
 # BUILD (= debug, release)
 ifndef BUILD
 BUILD=debug
@@ -85,13 +85,6 @@ MACHINE=$(shell uname -m)
 PLATFORM := $(shell uname -s)
 endif
 
-# Get the python version
-ifneq ($(OSTYPE),win32)
-PYTHON_VERSION := $(subst ., ,$(lastword $(shell python --version 2>&1)))
-PYTHON_VERSION_MAJOR := $(word 1,${PYTHON_VERSION})
-PYTHON_VERSION_MINOR := $(word 2,${PYTHON_VERSION})
-INSTALLED_PYTHON := python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}
-endif
 
 # Debug mode:
 
@@ -333,13 +326,28 @@ libmoose.so: libs
 	$(CXX) -G $(LIBS) -o libmoose.so
 	@echo "Created dynamic library"
 
+# Get the python version
+ifneq ($(OSTYPE),win32)
+ifeq ($(PYTHON),3)
+PYTHON_VERSION := $(subst ., ,$(lastword $(shell python3 --version 2>&1)))
+PYTHON_INCLUDES := $(shell python3-config --includes)
+PYTHON_LDFLAGS := $(shell python3-config --ldflags)
+else
+PYTHON_VERSION := $(subst ., ,$(lastword $(shell python2 --version 2>&1)))
+PYTHON_INCLUDES := $(shell python2-config --includes)
+PYTHON_LDFLAGS := $(shell python2-config --ldflags)
+endif
+PYTHON_VERSION_MAJOR := $(word 1,${PYTHON_VERSION})
+PYTHON_VERSION_MINOR := $(word 2,${PYTHON_VERSION})
+INSTALLED_PYTHON := python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}
+endif
 
-# There are some unix/gcc specific paths here. Should be cleaned up later.
+# There are some unix/gcc specific paths here. Should be cleaned up in future.
 pymoose: python/moose/_moose.so
-pymoose: CXXFLAGS += -DPYMOOSE -I/usr/include/${INSTALLED_PYTHON} # Should be updated according to location of user include directory
+pymoose: CXXFLAGS += -DPYMOOSE $(PYTHON_INCLUDES)
 pymoose: OBJLIBS += pymoose/_pymoose.o basecode/_basecode_pymoose.o
 pymoose: OBJLIBS := $(filter-out basecode/_basecode.o,$(OBJLIBS))
-pymoose: LIBS += -l${INSTALLED_PYTHON}	
+pymoose: LDFLAGS += $(PYTHON_LDFLAGS)
 
 python/moose/_moose.so: libs $(OBJLIBS) basecode/_basecode_pymoose.o
 	$(MAKE) -C pymoose

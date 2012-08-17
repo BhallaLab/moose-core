@@ -34,6 +34,19 @@
 #include <string>
 #include "../basecode/Id.h"
 extern "C" {
+#if PY_MAJOR_VERSION >= 3
+    // int has been replaced by long
+#define PyInt_Check PyLong_Check
+#define PyInt_AsLong PyLong_AsLong
+#define PyInt_AsUnsignedLongMask PyLong_AsUnsignedLongMask
+#define PyInt_FromLong PyLong_FromLong
+  // string has been replaced by unicode
+#define PyString_Check PyUnicode_Check
+#define PyString_FromString PyUnicode_FromString
+#define PyString_FromFormat PyUnicode_FromFormat
+#define PyString_AsString(str)\
+  PyBytes_AS_STRING(PyUnicode_AsEncodedString(str, "utf-8", "Error~"))
+#endif
     /**
        _Id wraps the Id class - where each element is identified by Id
     */
@@ -167,7 +180,11 @@ extern "C" {
     static PyObject * moose_ObjId_get_elementField_attr(PyObject * self, void * closure);
     static PyObject * moose_ObjId_get_destField_attr(PyObject * self, void * closure);
     static PyObject * _setDestField(ObjId oid, PyObject * args);
+#if PY_MAJOR_VERSION >= 3
+  PyMODINIT_FUNC PyInit_moose();
+#else
     PyMODINIT_FUNC init_moose();
+#endif
 
 
     int inner_getFieldDict(Id classId, string finfoType, vector<string>& fields, vector<string>& types); 
