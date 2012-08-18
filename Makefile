@@ -333,22 +333,21 @@ PYTHON_VERSION := $(subst ., ,$(lastword $(shell python3 --version 2>&1)))
 PYTHON_INCLUDES := $(shell python3-config --includes)
 PYTHON_LDFLAGS := $(shell python3-config --ldflags)
 else
-PYTHON_VERSION := $(subst ., ,$(lastword $(shell python2 --version 2>&1)))
-PYTHON_INCLUDES := $(shell python2-config --includes)
-PYTHON_LDFLAGS := $(shell python2-config --ldflags)
+PYTHON_VERSION := $(subst ., ,$(lastword $(shell python --version 2>&1)))
+PYTHON_INCLUDES := $(shell python-config --includes)
+PYTHON_LDFLAGS := $(shell python-config --ldflags)
 endif
 PYTHON_VERSION_MAJOR := $(word 1,${PYTHON_VERSION})
 PYTHON_VERSION_MINOR := $(word 2,${PYTHON_VERSION})
 INSTALLED_PYTHON := python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}
 endif
-
 # There are some unix/gcc specific paths here. Should be cleaned up in future.
 pymoose: python/moose/_moose.so
 pymoose: CXXFLAGS += -DPYMOOSE $(PYTHON_INCLUDES)
 pymoose: OBJLIBS += pymoose/_pymoose.o basecode/_basecode_pymoose.o
 pymoose: OBJLIBS := $(filter-out basecode/_basecode.o,$(OBJLIBS))
 pymoose: LDFLAGS += $(PYTHON_LDFLAGS)
-
+export CXXFLAGS
 python/moose/_moose.so: libs $(OBJLIBS) basecode/_basecode_pymoose.o
 	$(MAKE) -C pymoose
 	$(CXX) -shared $(LDFLAGS) $(CXXFLAGS) -o $@ $(OBJLIBS) $(LIBS)

@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 17:11:06 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Jul 11 01:35:39 2012 (+0530)
-//           By: Subhasis Ray
-//     Update #: 929
+// Last-Updated: Sat Aug 18 14:17:07 2012 (+0530)
+//           By: subha
+//     Update #: 931
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -126,7 +126,7 @@ extern "C" {
     static PyObject * moose_ObjId_getNeighbors(_ObjId * self, PyObject * args);
     static PyObject * moose_ObjId_getId(_ObjId * self);
     static PyObject * moose_ObjId_connect(_ObjId * self, PyObject * args);
-    static int moose_ObjId_compare(_ObjId * self, PyObject * args);
+    static PyObject * moose_ObjId_richcompare(_ObjId * self, PyObject * args, int op);
 
     ////////////////////////////////////////////
     // Methods for LookupField

@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Aug 16 13:48:28 2012 (+0530)
+// Last-Updated: Sat Aug 18 14:37:45 2012 (+0530)
 //           By: subha
-//     Update #: 9444
+//     Update #: 9459
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -683,9 +683,6 @@ static struct module_state _state;
 
   static PyTypeObject moose_Field = {
       PyVarObject_HEAD_INIT(NULL, 0)
-#ifndef PY3K
-        0,                                              /* tp_internal */
-#endif
         "moose.Field",                                  /* tp_name */
         sizeof(_Field),                                 /* tp_basicsize */
         0,                                              /* tp_itemsize */
@@ -756,9 +753,6 @@ static struct module_state _state;
                  "documentation for `field` in class `classname`.\n");
     static PyTypeObject moose_LookupField = {
       PyVarObject_HEAD_INIT(NULL, 0)
-#ifndef PY3K      
-        0,                                              /* tp_internal */
-#endif
         "moose.LookupField",                                  /* tp_name */
         sizeof(_Field),                                 /* tp_basicsize */
         0,                                              /* tp_itemsize */
@@ -838,9 +832,6 @@ static struct module_state _state;
 
     static PyTypeObject moose_DestField = {
       PyVarObject_HEAD_INIT(NULL, 0)
-#ifndef PY3K
-        0,                                              /* tp_internal */
-#endif
         "moose.DestField",                              /* tp_name */
         sizeof(_Field),                                 /* tp_basicsize */
         0,                                              /* tp_itemsize */
@@ -912,9 +903,6 @@ static struct module_state _state;
     
     static PyTypeObject moose_ElementField = {
       PyVarObject_HEAD_INIT(NULL, 0)
-#ifndef PY3K
-        0,                                              /* tp_internal */
-#endif
         "moose.ElementField",                              /* tp_name */
         sizeof(_Field),                                 /* tp_basicsize */
         0,                                              /* tp_itemsize */
@@ -1011,9 +999,6 @@ static struct module_state _state;
     ///////////////////////////////////////////////
     PyTypeObject IdType = { 
       PyVarObject_HEAD_INIT(NULL, 0)               /* tp_head */
-#ifndef PY3K
-        0,                                  /* tp_internal */
-#endif
         "moose.Id",                  /* tp_name */
         sizeof(_Id),                    /* tp_basicsize */
         0,                                  /* tp_itemsize */
@@ -3195,9 +3180,6 @@ static struct module_state _state;
     ///////////////////////////////////////////////
     PyTypeObject ObjIdType = { 
       PyVarObject_HEAD_INIT(NULL, 0)            /* tp_head */
-#ifndef PY3K
-        0,                                  /* tp_internal */
-#endif
         "moose.ObjId",                      /* tp_name */
         sizeof(_ObjId),                     /* tp_basicsize */
         0,                                  /* tp_itemsize */
@@ -4478,16 +4460,25 @@ static struct PyModuleDef MooseModuleDef = {
 // Main function
 //////////////////////////////////////////////
 
-
-int main(int argc, wchar_t* argv[])
+int main(int argc, char* argv[])
 {
+#ifdef PY3K
+    size_t len = strlen(argv[0]);
+    wchar_t * warg = (wchar_t*)calloc(sizeof(wchar_t), len);
+    mbstowcs(warg, argv[0], len);
+#else
+    char * warg = argv[0];
+#endif
     for (int ii = 0; ii < argc; ++ii){
         cout << "ARGV: " << argv[ii];
     }
     cout << endl;
-    Py_SetProgramName(argv[0]);
+    Py_SetProgramName(warg);
     Py_Initialize();
     MODINIT(_moose);
+#if PY3K
+    free(warg);
+#endif
     return 0;
 }
 
