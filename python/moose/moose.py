@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Tue Jul 17 12:13:37 2012 (+0530)
+# Last-Updated: Sat Aug 18 14:49:43 2012 (+0530)
 #           By: subha
-#     Update #: 1844
+#     Update #: 1849
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -215,16 +215,16 @@ def pwe():
     users."""
     print(_moose.getCwe().getPath())
     
-def le(element=None):
+def le(el=None):
     """List elements. """
-    if element is None:
-        element = getCwe()[0]
-    elif isinstance(element, str):
-        element = Neutral(element)
-    elif isinstance(element, Id):
-        element = element[0]
-    print('Elements under', element.path)
-    for ch in element.children:
+    if el is None:
+        el = getCwe()[0]
+    elif isinstance(el, str):
+        el = element(el)
+    elif isinstance(el, Id):
+        el = el[0]
+    print('Elements under', el.path)
+    for ch in el.children:
         print(ch)
 
 ce = setCwe
