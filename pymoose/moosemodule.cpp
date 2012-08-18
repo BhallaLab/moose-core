@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Sat Aug 18 14:37:45 2012 (+0530)
+// Last-Updated: Sat Aug 18 14:44:42 2012 (+0530)
 //           By: subha
-//     Update #: 9459
+//     Update #: 9460
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -4334,7 +4334,7 @@ static struct PyModuleDef MooseModuleDef = {
 #define MODINIT(name) PyInit_##name()
 #else // Python 2
 #define INITERROR return
-#define MODINIT(name) init_##name()
+#define MODINIT(name) init##name()
 #endif
                  
   PyMODINIT_FUNC MODINIT(_moose)
