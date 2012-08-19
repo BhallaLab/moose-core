@@ -18335,3 +18335,11 @@ pygraphviz
 QtOpenGL stuff: python-pyside-qtcore ,qtgui
 python-qt4-gl
 
+
+Now it loads MooseGui! But fails with kinetics models, suspect ongoing work
+by Harsha.
+Some minor checks for zero elements (typically after deleting objects) in
+SetGet.h. Checkin 3859.
+
+Added unit tests for CylBase. Fixed lots of bugs in implementation. Works.
+

@@ -15,6 +15,53 @@
 #include "ChemMesh.h"
 #include "CylMesh.h"
 #include "CubeMesh.h"
+#include "CylBase.h"
+
+/**
+ * Low-level test for Cylbase, no MOOSE calls
+ */
+void testCylBase()
+{
+	// CylBase( x, y, z, dia, len, numDivs );
+	CylBase  a( 0, 0, 0, 1,   1, 1 );
+	CylBase  b( 1, 2, 3, 1,   2, 10 );
+
+	assert( doubleEq( b.volume( a ), PI * 0.25 * 2 ) );
+	assert( a.getNumDivs() == 1 );
+	assert( b.getNumDivs() == 10 );
+
+	for ( unsigned int i = 0; i < 10; ++i ) {
+		assert( doubleEq( b.voxelVolume( a, i ), PI * 0.25 * 2 * 0.1 ) );
+		vector< double > coords = b.getCoordinates( a, i );
+		double x = i;
+		assert( doubleEq( coords[0], x / 10.0 ) );
+		assert( doubleEq( coords[1], x * 2.0 / 10.0 ) );
+		assert( doubleEq( coords[2], x * 3.0  / 10.0 ) );
+		assert( doubleEq( coords[3], (1.0 + x) / 10.0 ) );
+		assert( doubleEq( coords[4], (1.0 + x) * 2.0 / 10.0 ) );
+		assert( doubleEq( coords[5], (1.0 + x) * 3.0  / 10.0 ) );
+		assert( doubleEq( coords[6], 0.5 ) );
+		assert( doubleEq( coords[7], 0.5 ) );
+		assert( doubleEq( coords[8], 0.0 ) );
+		assert( doubleEq( coords[9], 0.0 ) );
+
+		assert( doubleEq( b.getDiffusionArea( a, i ), PI * 0.25 ) );
+	}
+	b.setDia( 2.0 );
+	assert( doubleEq( b.getDia(), 2.0 ) );
+	for ( unsigned int i = 0; i < 10; ++i ) {
+		double x = static_cast< double >( i ) / 10.0;
+		double r0 = 0.5 * ( a.getDia() * ( 1.0 - x ) + b.getDia() * x );
+		x = x + 0.1;
+		double r1 = 0.5 * ( a.getDia() * ( 1.0 - x ) + b.getDia() * x );
+		// len = 2, and we have 10 segments of it.
+		double vv = 0.2 * ( r0 * r0 + r0 * r1 + r1 * r1 ) * PI / 3.0;
+		assert( doubleEq( b.voxelVolume( a, i ), vv ) );
+		assert( doubleEq( b.getDiffusionArea( a, i ), PI * r0 * r0 ) );
+	}
+
+	cout << "." << flush;
+}
 
 /**
  * Low-level tests for the CylMesh object: No MOOSE calls involved.
@@ -368,6 +415,7 @@ void testReMesh()
 
 void testMesh()
 {
+	testCylBase();
 	testCylMesh();
 	testMidLevelCylMesh();
 	testCubeMesh();

@@ -64,8 +64,6 @@ class CylBase
  		*/
 		double getDiffusionArea( 
 			const CylBase& parent, unsigned int index ) const;
-	
-		unsigned int numDivs() const;
 
 	private:
 		/// end of the node. The start is given by parent coords.
