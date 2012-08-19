@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 17:11:06 2011 (+0530)
 // Version: 
-// Last-Updated: Sun Aug 19 14:42:45 2012 (+0530)
+// Last-Updated: Sun Aug 19 17:14:57 2012 (+0530)
 //           By: subha
-//     Update #: 937
+//     Update #: 938
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -93,7 +93,7 @@ extern "C" {
     
     static PyObject * moose_Id_repr(_Id * self);
     static PyObject * moose_Id_str(_Id * self);
-    static PyObject * moose_Id_delete(_Id * self, PyObject * args);
+    static PyObject * moose_Id_delete(_Id * self);
     static PyObject * moose_Id_getValue(_Id * self);
     static PyObject * moose_Id_getPath(_Id * self);
     /* Id functions to allow part of sequence protocol */
