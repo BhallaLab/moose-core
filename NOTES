@@ -18253,8 +18253,8 @@ Tasks:
 	NeuroMesh
 	* NeuroMesh skeleton implementation
 	- NeuroMesh read structure from loaded neuron model
-	- NeuroMesh stencils 
-	- NeuroMesh Y junction diffusion
+	* NeuroMesh stencils 
+	* NeuroMesh Y junction diffusion
 	- NeuroMesh directed diffusion/transport.
 	- NeuroMesh talk to a sphereMesh or similar for nucleus or soma.
 	- NeuroMesh hemispherical junction diffusion
@@ -18312,6 +18312,26 @@ Some different ways to get the list of child nodes:
 
 Go for the simplest.
 
-Implemented and compiled the NeuroStencil. Quite messy.
+Subha gave his compilation configuration. Turns out it differed from mine in
+that my system used GNU 'gold' as the linker, instead of the traditional 'ld'.
+When I removed the 'gold' package both the bugs from 12 Aug go away: it 
+is loaded properly by Python, and it does not segv on exit.
+
+Implemented and compiled the NeuroStencil. Quite messy. Checkin 3853.
+
+Need to build a unit test to be sure stencil is doing the right thing
+ in the wide range of possible branch/end/middle diffusion. 
+There are already likely issues to do with dummy nodes.
+
+Now to set up model loading.
 
 ============================================================================
+19 Aug
+Libraries needed:
+gsl
+numpy
+matplotlib
+pygraphviz
+QtOpenGL stuff: python-pyside-qtcore ,qtgui
+python-qt4-gl
+
