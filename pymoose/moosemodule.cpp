@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Sun Aug 19 14:56:48 2012 (+0530)
+// Last-Updated: Sun Aug 19 17:23:17 2012 (+0530)
 //           By: subha
-//     Update #: 9745
+//     Update #: 9799
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -960,12 +960,35 @@ static struct module_state _state;
     ///////////////////////////////////////////////
     // Python method lists for PyObject of Id
     ///////////////////////////////////////////////
+    PyDoc_STRVAR(moose_Id_delete_doc,
+                 "Id.delete()"
+                 "\n"
+                 "\nDelete the underlying moose object. This will invalidate all"
+                 "\nreferences to this object and any attempt to access it will raise a"
+                 "\nValueError."
+                 "\n");
+
+    PyDoc_STRVAR(moose_Id_setField_doc,
+                          "setField(fieldname, value_vector)\n"
+                 "\n"
+                 "Set the value of `fieldname` in all elements under this Id.\n"
+                 "\n"
+                 "Parameters\n"
+                 "----------\n"
+                 "fieldname: str\n"
+                 "\tfield to be set.\n"
+                 "value: sequence of values\n"
+                 "\tsequence of values corresponding to individual elements under this\n"
+                 "Id.\n"
+                 "\n"
+                 "NOTE: This is an interface to SetGet::setVec\n"
+                 );
     
     static PyMethodDef IdMethods[] = {
         // {"init", (PyCFunction)moose_Id_init, METH_VARARGS,
         //  "Initialize a Id object."},
-        {"delete", (PyCFunction)moose_Id_delete, METH_VARARGS,
-         "Delete the underlying moose element"},
+        {"delete", (PyCFunction)moose_Id_delete, METH_NOARGS,
+         moose_Id_delete_doc},
         {"getValue", (PyCFunction)moose_Id_getValue, METH_NOARGS,
          "Return integer representation of the id of the element."},
         {"getPath", (PyCFunction)moose_Id_getPath, METH_NOARGS,
@@ -973,20 +996,7 @@ static struct module_state _state;
         {"getShape", (PyCFunction)moose_Id_getShape, METH_NOARGS,
          "Get the shape of the Id object as a tuple."},
         {"setField", (PyCFunction)moose_Id_setField, METH_VARARGS,
-         "setField(fieldname, value_vector)\n"
-         "\n"
-         "Set the value of `fieldname` in all elements under this Id.\n"
-         "\n"
-         "Parameters\n"
-         "----------\n"
-         "fieldname: str\n"
-         "\tfield to be set.\n"
-         "value: sequence of values\n"
-         "\tsequence of values corresponding to individual elements under this\n"
-         "Id.\n"
-         "\n"
-         "NOTE: This is an interface to SetGet::setVec\n"
-        },
+         moose_Id_setField_doc},
         {NULL, NULL, 0, NULL},        /* Sentinel */        
     };
 
@@ -1011,6 +1021,49 @@ static struct module_state _state;
     ///////////////////////////////////////////////
     // Type defs for PyObject of Id
     ///////////////////////////////////////////////
+
+    PyDoc_STRVAR(moose_Id_doc,
+                 "An object uniquely identifying a moose element. moose elements are"
+                 "\narray-like objects which can have one or more single-objects within"
+                 "\nthem. Id can be traversed like a Python sequence and is item is an"
+                 "\nObjId identifying single-objects contained in the array element."
+                 "\n"
+                 "\nField access to Ids are vectorized. For example, Id.name returns a"
+                 "\ntuple containing the names of all the single-elements in this"
+                 "\nId. There are a few special fields that are unique for Id and are not"
+                 "\nvectorized. These are `path`, `value`, `shape` and `class_`."
+                 "\nThere are two ways an Id can be initialized, (1) create a new array"
+                 "\nelement or (2) create a reference to an existing object."
+                 "\n"
+                 "\n__init__(self, path=path, dims=dimesions, dtype=className)"
+                 "\n"
+                 "\nParameters"
+                 "\n----------"                 
+                 "\npath : str "
+                 "\nPath of an existing array element or for creating a new one. This has"
+                 "\nthe same format as unix file path: /{element1}/{element2} ... If there"
+                 "\nis no object with the specified path, moose attempts to create a new"
+                 "\narray element. For that to succeed everything until the last `/`"
+                 "\ncharacter must exist or an error is raised"
+                 "\n"
+                 "\ndims : int/tuple of ints"
+                 "\nThis is a tuple of integers specifying the size of the array element"
+                 "\nto be created along each dimension. Thus dims=(2,3) will create an"
+                 "\narray element with 2 rows and 3 columns. If a single integer is"
+                 "\nspecified, a one dimensional array element of that length is created."
+                 "\n"
+                 "\n__init__(self, id)"
+                 "\n"
+                 "\nCreate a reference to an existing array object."
+                 "\n"
+                 "\nParameters"
+                 "\n----------"
+                 "\nid : Id/int"
+                 "\nId of an existing array object. The new object will be another"
+                 "\nreference to this object."
+                 "\n"
+                 );
+    
     PyTypeObject IdType = { 
       PyVarObject_HEAD_INIT(NULL, 0)               /* tp_head */
         "moose.Id",                  /* tp_name */
@@ -1032,7 +1085,7 @@ static struct module_state _state;
         (setattrofunc)moose_Id_setattro,            /* tp_setattro */
         0,                                  /* tp_as_buffer */
         Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
-        "Id object of moose. Which can act as an array object.",
+        moose_Id_doc,
         0,                                  /* tp_traverse */
         0,                                  /* tp_clear */
         (richcmpfunc)moose_Id_richCompare,       /* tp_richcompare */
@@ -1229,20 +1282,22 @@ static struct module_state _state;
     // ObjId will destroy the containing element and invalidate all
     // the other ObjId with the same Id.
     // 2011-03-28 13:44:49 (+0530)
-    static PyObject * moose_Id_delete(_Id * self, PyObject * args)
+
+    static PyObject * moose_Id_delete(_Id * self)
     {
-        if (!PyArg_ParseTuple(args, ":moose_Id_delete")){
-            return NULL;
-        }
         if (self->id_ == Id()){
             PyErr_SetString(PyExc_ValueError, "Cannot delete moose shell.");
             return NULL;
+        }
+        if (!Id::isValid(self->id_)){
+            RAISE_INVALID_ID(NULL);
         }
         SHELLPTR->doDelete(self->id_);
         self->id_ = Id();
         Py_CLEAR(self);
         Py_RETURN_NONE;
     }
+    
     static PyObject * moose_Id_repr(_Id * self)
     {
         if (!Id::isValid(self->id_)){
@@ -1889,6 +1944,9 @@ static struct module_state _state;
     */
     static long moose_ObjId_hash(_ObjId * self)
     {
+        if (!Id::isValid(self->oid_.id)){
+            RAISE_INVALID_ID(-1);
+        }
         PyObject * path = Py_BuildValue("s", self->oid_.path().c_str());        
         long ret = PyObject_Hash(path);
         Py_XDECREF(path);
@@ -1921,6 +1979,9 @@ static struct module_state _state;
                  "\n");
     static PyObject* moose_ObjId_getId(_ObjId * self)
     {
+        if (!Id::isValid(self->oid_.id)){
+            RAISE_INVALID_ID(NULL);
+        }
         extern PyTypeObject IdType;        
         _Id * ret = PyObject_New(_Id, &IdType);
         ret->id_ = self->oid_.id;
@@ -3434,6 +3495,18 @@ static struct module_state _state;
         Py_RETURN_NONE;
     }
 
+    PyDoc_STRVAR(moose_delete_documentation,
+                 "moose.delete(id)"
+                 "\n"
+                 "\nDelete the underlying moose object. This does not delete any of the"
+                 "\nPython objects referring to this Id but does invalidate them. Any"
+                 "\nattempt to access them will raise a ValueError."
+                 "\n"
+                 "\nParameters"
+                 "\n----------"
+                 "\nid : Id"
+                 "\nId of the object to be deleted."
+                 "\n");
     static PyObject * moose_delete(PyObject * dummy, PyObject * args)
     {
         PyObject * obj;
@@ -4408,7 +4481,7 @@ static struct module_state _state;
         {"getFieldNames", (PyCFunction)moose_getFieldNames, METH_VARARGS, moose_getFieldNames_documentation},
         {"copy", (PyCFunction)moose_copy, METH_VARARGS|METH_KEYWORDS, moose_copy_documentation},
         {"move", (PyCFunction)moose_move, METH_VARARGS, "Move a Id object to a destination."},
-        {"delete", (PyCFunction)moose_delete, METH_VARARGS, "Delete the moose object."},
+        {"delete", (PyCFunction)moose_delete, METH_VARARGS, moose_delete_documentation},
         {"useClock", (PyCFunction)moose_useClock, METH_VARARGS, "Schedule objects on a specified clock"},
         {"setClock", (PyCFunction)moose_setClock, METH_VARARGS, "Set the dt of a clock."},
         {"start", (PyCFunction)moose_start, METH_VARARGS, moose_start_documentation},
