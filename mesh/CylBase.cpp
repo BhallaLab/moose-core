@@ -111,8 +111,8 @@ unsigned int CylBase::getNumDivs() const
  */
 double CylBase::volume( const CylBase& parent ) const
 {
-	double r0 = parent.dia_/2;
-	double r1 = dia_/2;
+	double r0 = parent.dia_/2.0;
+	double r1 = dia_/2.0;
 	return length_ * ( r0*r0 + r0 *r1 + r1 * r1 ) * PI / 3.0;
 }
 
@@ -131,8 +131,8 @@ double CylBase::voxelVolume( const CylBase& parent, unsigned int fid ) const
 				static_cast< double >( numDivs_ );
  	double frac1 = ( static_cast< double >( fid + 1 ) ) / 
 				static_cast< double >( numDivs_ );
-	double r0 = parent.dia_ * ( 1.0 - frac0 ) + dia_ * frac0;
-	double r1 = parent.dia_ * ( 1.0 - frac1 ) + dia_ * frac1;
+	double r0 = 0.5 * ( parent.dia_ * ( 1.0 - frac0 ) + dia_ * frac0 );
+	double r1 = 0.5 * ( parent.dia_ * ( 1.0 - frac1 ) + dia_ * frac1 );
 	double s0 = length_ * frac0;
 	double s1 = length_ * frac1;
 
@@ -150,11 +150,11 @@ vector< double > CylBase::getCoordinates(
  	double frac1 = ( static_cast< double >( fid + 1 ) ) / 
 				static_cast< double >( numDivs_ );
 
-	double r0 = parent.dia_ * ( 1.0 - frac0 ) + dia_ * frac0;
+	double r0 = 0.5 * ( parent.dia_ * ( 1.0 - frac0 ) + dia_ * frac0 );
 	// equivalent: double r0 = parent.dia_ + frac0 * ( dia_ - parent.dia_ );
-	double r1 = parent.dia_ * ( 1.0 - frac1 ) + dia_ * frac1;
+	double r1 = 0.5 * ( parent.dia_ * ( 1.0 - frac1 ) + dia_ * frac1 );
 
-	vector< double > ret( 0, 10 );
+	vector< double > ret( 10, 0.0 );
 	ret[0] = parent.x_ + frac0 * ( x_ - parent.x_ );
 	ret[1] = parent.y_ + frac0 * ( y_ - parent.y_ );
 	ret[2] = parent.z_ + frac0 * ( z_ - parent.z_ );
@@ -184,7 +184,7 @@ double CylBase::getDiffusionArea(
 	assert( fid < numDivs_ );
  	double frac0 = ( static_cast< double >( fid ) ) / 
 				static_cast< double >( numDivs_ );
-	double r0 = parent.dia_ * ( 1.0 - frac0 ) + dia_ * frac0;
+	double r0 = 0.5 * ( parent.dia_ * ( 1.0 - frac0 ) + dia_ * frac0 );
 	return PI * r0 * r0;
 }
 
