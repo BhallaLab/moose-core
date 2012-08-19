@@ -137,6 +137,18 @@ class Id
 			return ( id_ < other.id_ );
 		}
 
+    // The follwoing two functions check if the Id is associated with
+    // an existing element. Needed for handling objects that have been destroyed.
+        static bool isValid(Id id)
+        {
+            return (id.id_ < elements().size()) && (elements()[id.id_] != 0);
+        }
+
+        static bool isValid(unsigned int id)
+        {
+            return (id < elements().size()) && (elements()[id] != 0);
+        }                
+
 		//////////////////////////////////////////////////////////////
 		//	Special setup functions, used only by init.
 		//////////////////////////////////////////////////////////////

@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 17:11:06 2011 (+0530)
 // Version: 
-// Last-Updated: Sat Aug 18 14:17:07 2012 (+0530)
+// Last-Updated: Sun Aug 19 14:42:45 2012 (+0530)
 //           By: subha
-//     Update #: 931
+//     Update #: 937
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -118,7 +118,7 @@ extern "C" {
     static PyObject * moose_ObjId_setField(_ObjId * self, PyObject * args);
     static PyObject * moose_ObjId_getLookupField(_ObjId * self, PyObject * args);
     static PyObject * moose_ObjId_setLookupField(_ObjId * self, PyObject * args);
-    static PyObject * moose_ObjId_setDestField(PyObject * self, PyObject * args);
+    static PyObject * moose_ObjId_setDestField(_ObjId * self, PyObject * args);
     static PyObject * moose_ObjId_getFieldNames(_ObjId * self, PyObject * args);
     static PyObject * moose_ObjId_getFieldType(_ObjId * self, PyObject * args);
     static PyObject * moose_ObjId_getDataIndex(_ObjId * self);
@@ -161,14 +161,16 @@ extern "C" {
     static PyObject * moose_connect(PyObject * dummy, PyObject * args);
     static PyObject * moose_getFieldDict(PyObject * dummy, PyObject * args);
     static PyObject * moose_getField(PyObject * dummy, PyObject * args);
-    static PyObject * moose_syncDataHandler(PyObject * dummy, _Id * target);
+    static PyObject * moose_syncDataHandler(PyObject * dummy, PyObject * target);
     static PyObject * moose_seed(PyObject * dummy, PyObject * args);
     static PyObject * moose_wildcardFind(PyObject * dummy, PyObject * args);
     // This should not be required or accessible to the user. Put here
     // for debugging threading issue.
     static PyObject * moose_quit(PyObject * dummy);
-
-
+    
+    //////////////////////////////////////////////////////////////
+    // These are internal functions and not exposed in Python
+    //////////////////////////////////////////////////////////////
     static PyObject * getLookupField(ObjId oid, char * fieldName, PyObject * key);
     static int setLookupField(ObjId oid, char * fieldName, PyObject * key, PyObject * value);
     static int define_class(PyObject * module_dict, const Cinfo * cinfo);
@@ -181,7 +183,7 @@ extern "C" {
     static PyObject * moose_ObjId_get_destField_attr(PyObject * self, void * closure);
     static PyObject * _setDestField(ObjId oid, PyObject * args);
 #if PY_MAJOR_VERSION >= 3
-  PyMODINIT_FUNC PyInit_moose();
+    PyMODINIT_FUNC PyInit_moose();
 #else
     PyMODINIT_FUNC init_moose();
 #endif
