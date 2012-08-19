@@ -16,6 +16,7 @@
 #include "CylMesh.h"
 #include "CubeMesh.h"
 #include "CylBase.h"
+#include "NeuroNode.h"
 
 /**
  * Low-level test for Cylbase, no MOOSE calls
@@ -49,6 +50,7 @@ void testCylBase()
 	}
 	b.setDia( 2.0 );
 	assert( doubleEq( b.getDia(), 2.0 ) );
+	assert( doubleEq( b.volume( a ), PI * (2*(0.5*0.5+0.5+1)/3.0) ) );
 	for ( unsigned int i = 0; i < 10; ++i ) {
 		double x = static_cast< double >( i ) / 10.0;
 		double r0 = 0.5 * ( a.getDia() * ( 1.0 - x ) + b.getDia() * x );
@@ -59,6 +61,54 @@ void testCylBase()
 		assert( doubleEq( b.voxelVolume( a, i ), vv ) );
 		assert( doubleEq( b.getDiffusionArea( a, i ), PI * r0 * r0 ) );
 	}
+
+	cout << "." << flush;
+}
+
+/**
+ * Low-level test for NeuroNode, no MOOSE calls
+ */
+void testNeuroNode()
+{
+	CylBase  a( 0, 0, 0, 1,   1, 1 );
+	CylBase  b( 1, 2, 3, 2,   2, 10 );
+	vector< unsigned int > twoKids( 2, 2 );
+	twoKids[0] = 2;
+	twoKids[1] = 4;
+	vector< unsigned int > oneKid( 1, 2 );
+	vector< unsigned int > noKids( 0 );
+	NeuroNode na( a, 0, twoKids, 0, Id(), false, true, true );
+	NeuroNode ndummy( b, 0, oneKid, 1, Id(), true, false, false );
+	NeuroNode nb( b, 1, noKids, 1, Id(), false, false, false );
+
+	assert( na.parent() == 0 );
+	assert( na.startFid() == 0 );
+	assert( na.elecCompt() == Id() );
+	assert( na.isDummyNode() == false );
+	assert( na.isSphere() == true );
+	assert( na.isStartNode() == true );
+	assert( na.children().size() == 2 );
+	assert( na.children()[0] == 2 );
+	assert( na.children()[1] == 4 );
+	assert( doubleEq( na.volume( a ), PI * 0.25 ) );
+
+	assert( ndummy.parent() == 0 );
+	assert( ndummy.startFid() == 1 );
+	assert( ndummy.elecCompt() == Id() );
+	assert( ndummy.isDummyNode() == true );
+	assert( ndummy.isSphere() == false );
+	assert( ndummy.isStartNode() == false );
+	assert( ndummy.children().size() == 1 );
+	assert( ndummy.children()[0] == 2 );
+
+	assert( nb.parent() == 1 );
+	assert( nb.startFid() == 1 );
+	assert( nb.elecCompt() == Id() );
+	assert( nb.isDummyNode() == false );
+	assert( nb.isSphere() == false );
+	assert( nb.isStartNode() == false );
+	assert( nb.children().size() == 0 );
+	assert( doubleEq( nb.volume( a ), PI * (2*(0.5*0.5+0.5+1)/3.0) ) );
 
 	cout << "." << flush;
 }
@@ -416,6 +466,7 @@ void testReMesh()
 void testMesh()
 {
 	testCylBase();
+	testNeuroNode();
 	testCylMesh();
 	testMidLevelCylMesh();
 	testCubeMesh();

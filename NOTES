@@ -18342,4 +18342,6 @@ Some minor checks for zero elements (typically after deleting objects) in
 SetGet.h. Checkin 3859.
 
 Added unit tests for CylBase. Fixed lots of bugs in implementation. Works.
+Checkin 3861.
 
+Added unit tests for NeuroNode. Straightforward.
