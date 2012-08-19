@@ -50,7 +50,11 @@ class SetGet
 	public:
 		SetGet( const ObjId& oid )
 			: oid_( oid )
-		{;}
+		{
+			if ( oid_.id.element() == 0 ) {
+				cout << "Warning: SetGet: accessing null element: Was object deleted?\n";
+			}
+		}
 
 		virtual ~SetGet()
 		{;}
@@ -148,15 +152,6 @@ template< class A > class SetGet1: public SetGet
 				// mpiSend( fid, tgt, conv.ptr, conv.size() );
 				return 1;
 			}
-			/*
-			if ( sg.checkSet( field, tgt, fid ) ) {
-				Conv< A > conv( arg );
-				Qinfo::addDirectToQ(
-					ObjId(), tgt, 0, fid, conv.ptr(), conv.size() );
-				Qinfo::waitProcCycles( 1 );
-				return 1;
-			}
-			*/
 			return 0;
 		}
 
@@ -200,11 +195,6 @@ template< class A > class SetGet1: public SetGet
 				elm->dataHandler()->forall( func, elm, &qi_, 
 					data, entrySize, arg.size() );
 
-				/*
-				Qinfo::addVecDirectToQ( ObjId(), tgt, ScriptThreadNum,
-					fid, data, entrySize, arg.size() );
-				Qinfo::waitProcCycles( 1 );
-				*/
 				delete[] data;
 
 				return 1;
@@ -279,39 +269,6 @@ template< class A > class Field: public SetGet1< A >
 
 	//////////////////////////////////////////////////////////////////
 
-		/**
-		 * Blocking call using typed values to get either single values or
-		 * vectors.
-		static const vector< double* >* innerGet( 
-			const ObjId& dest, const string& field )
-		{ 
-			Field< A > sg( dest );
-			ObjId tgt( dest );
-			FuncId fid;
-
-			string fullFieldName = "get_" + field;
-			if ( ( const OpFunc* func = 
-				sg.checkSet( fullFieldName, tgt, fid ) ) ) {
-				FuncId retFuncId = receiveGet()->getFid();
-
-
-				double temp = retFuncId;
-				return SetGet::dispatchGet( tgt, fid, &temp, 1 );
-			}
-			return 0;
-		}
-		 */
-
-
-			/*
-			if ( const OpFunc* func = sg.checkSet( field, tgt, fid ) ) {
-				Conv< A > conv( arg );
-				func->op( dest.eref(), &qi_, conv.ptr() );
-				// mpiSend( fid, tgt, conv.ptr, conv.size() );
-				return 1;
-			}
-			*/
-
 		static A get( const ObjId& dest, const string& field)
 		{ 
 			Field< A > sg( dest );
@@ -329,15 +286,6 @@ template< class A > class Field: public SetGet1< A >
 			cout << "Warning: Field::Get conversion error for " << dest.id.path() <<
 				endl;
 
-			/*
-			const vector< double* >* ret = innerGet( dest, field );
-			if ( ret ) {
-				if ( ret->size() == 1 ) {
-					Conv< A > conv( ( *ret )[0] );
-					return *conv;
-				}
-			}
-			*/
 			return A();
 		}
 
@@ -393,23 +341,6 @@ template< class A > class Field: public SetGet1< A >
 				dest.path() << endl;
 		}
 		
-		/*
-			ObjId tgt( dest, DataId::any );
-			const vector< double* >* ret = innerGet( tgt, field );
-
-			vec.resize( 0 );
-			if ( ret ) {
-				vec.resize( ret->size() );
-				for ( unsigned int i = 0; i < ret->size(); ++i ) {
-					if ( ( *ret )[i] ) {
-						Conv< A > conv( (*ret)[i] );
-						// vec.push_back( *conv );
-						vec[i] = *conv;
-					}
-				}
-				return;
-			}
-			*/
 
 		/**
 		 * Instant-return call for a single value along an existing Msg.
@@ -527,12 +458,6 @@ template< class A1, class A2 > class SetGet2: public SetGet
 				Element* elm = tgt.id.element();
 				elm->dataHandler()->forall( func, elm, &qi_, 
 					data, entrySize, arg1.size() );
-
-				/*
-				Qinfo::addVecDirectToQ( ObjId(), tgt, ScriptThreadNum,
-					fid, data, entrySize, arg1.size() );
-				Qinfo::waitProcCycles( 1 );
-				*/
 				delete[] data;
 				return 1;
 			}
@@ -668,6 +593,9 @@ template< class L, class A > class LookupField: public SetGet2< L, A >
 			ObjId tgt( dest );
 			FuncId fid;
 
+			cerr << "Error: LookupField::innerGet not yet working\n";
+			assert( 0 );
+
 			string fullFieldName = "get_" + field;
 			if ( const OpFunc* func = 
 				sg.checkSet( fullFieldName, tgt, fid ) ) 
@@ -790,13 +718,6 @@ template< class A1, class A2, class A3 > class SetGet3: public SetGet
 				conv3.val2buf( temp + conv1.size() + conv2.size() );
 
 				func->op( tgt.eref(), &qi_, temp );
-
-				/*
-				Qinfo::addDirectToQ( 
-					ObjId(), tgt, 0, fid, 
-					temp, totSize );
-				Qinfo::waitProcCycles( 1 );
-				*/
 				delete[] temp;
 				return 1;
 			}
@@ -866,12 +787,6 @@ template< class A1, class A2, class A3, class A4 > class SetGet4: public SetGet
 				conv3.val2buf( ptr ); ptr += conv3.size();
 				conv4.val2buf( ptr );
 				func->op( tgt.eref(), &qi_, temp );
-				/*
-				Qinfo::addDirectToQ( 
-					ObjId(), tgt, 0, fid, 
-					temp, totSize );
-				Qinfo::waitProcCycles( 1 );
-				*/
 
 				delete[] temp;
 				return 1;
@@ -954,13 +869,6 @@ template< class A1, class A2, class A3, class A4, class A5 > class SetGet5:
 				conv4.val2buf( ptr ); ptr += conv4.size();
 				conv5.val2buf( ptr );
 				func->op( tgt.eref(), &qi_, temp );
-
-				/*
-				Qinfo::addDirectToQ( 
-					ObjId(), tgt, 0, fid, 
-					temp, totSize );
-				Qinfo::waitProcCycles( 1 );
-				*/
 
 				delete[] temp;
 				return 1;
@@ -1048,13 +956,6 @@ template< class A1, class A2, class A3, class A4, class A5, class A6 > class Set
 				conv5.val2buf( ptr ); ptr += conv5.size();
 				conv6.val2buf( ptr );
 				func->op( tgt.eref(), &qi_, temp );
-
-				/*
-				Qinfo::addDirectToQ( 
-					ObjId(), tgt, 0, fid, 
-					temp, totSize );
-				Qinfo::waitProcCycles( 1 );
-				*/
 
 				delete[] temp;
 

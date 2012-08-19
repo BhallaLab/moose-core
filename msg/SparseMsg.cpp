@@ -328,18 +328,13 @@ unsigned int SparseMsg::randomConnect( double probability )
 	unsigned int nCols = matrix_.nColumns();	// Destinations
 	matrix_.clear();
 	unsigned int totalSynapses = 0;
-	unsigned int startSynapse = 0;
 	vector< unsigned int > sizes( nCols, 0 );
 	bool isFirstRound = 1;
 	unsigned int totSynNum = 0;
 	unsigned int maxSynPerRow = 0;
 
-	// SynElement* syn = dynamic_cast< SynElement* >( e2_ );
 	Element* syn = e2_;
-	// syn->dataHandler()->getNumData2( sizes );
-	// assert( sizes.size() == nCols );
 	assert( nCols == syn->dataHandler()->parentDataHandler()->sizeOfDim( 0  ) );
-	// assert( nRows == syn->dataHandler()->sizeOfDim( 1 ) );
 
 	assert ( syn->dataHandler()->dims().size() >= 1 );
 	FieldDataHandlerBase* fdh = 
@@ -356,7 +351,6 @@ unsigned int SparseMsg::randomConnect( double probability )
 			double r = mtrand(); // Want to ensure it is called each time round the loop.
 			if ( isSynOnMyNode ) {
 				if ( isFirstRound ) {
-					startSynapse = totSynNum;
 					isFirstRound = 0;
 				}
 			}
@@ -373,9 +367,7 @@ unsigned int SparseMsg::randomConnect( double probability )
 			maxSynPerRow = synNum;
 			
 		if ( fdh ) {
-		// syn->dataHandler()->setFieldArraySize( i, synNum );
 			fdh->setFieldArraySize( i, synNum );
-		// sizes[ i ] = synNum;
 			totalSynapses += synNum;
 		}
 		matrix_.addRow( i, synIndex );
@@ -392,7 +384,6 @@ unsigned int SparseMsg::randomConnect( double probability )
 	if ( fdh )
 		fdh->setMaxFieldEntries( maxSynPerRow );
 
-	// syn->dataHandler()->setNumData2( startSynapse, sizes );
 	// cout << Shell::myNode() << ": sizes.size() = " << sizes.size() << ", ncols = " << nCols << ", startSynapse = " << startSynapse << endl;
 	matrix_.transpose();
 	return totalSynapses;
