@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Mon Aug 20 12:40:10 2012 (+0530)
+// Last-Updated: Mon Aug 20 19:53:18 2012 (+0530)
 //           By: subha
-//     Update #: 9813
+//     Update #: 9817
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -176,7 +176,8 @@ static struct module_state _state;
             return moose_Id_getValue(id);
         } else if (attribute == "shape"){
             return moose_Id_getShape(id);
-        } else if (attribute == "class_"){ // class is a common
+        } else if (attribute == "class_" || // !NOTE: Subha: 2012-08-20 19:52:21 (+0530) - the second check is to catch a strange bug where the field passed to moose_Id_getattro is 'class' in stead of 'class_'. Need to figure out how it is happening.
+                   attribute == "class"){ // class is a common
                                           // attribute to all ObjIds
                                           // under this Id. Expect it
                                           // to be a single value in
@@ -1459,7 +1460,7 @@ static struct module_state _state;
     
     static PyObject * moose_Id_getattro(_Id * self, PyObject * attr)
     {
-      extern PyTypeObject ObjIdType;
+        extern PyTypeObject ObjIdType;
         if (!Id::isValid(self->id_)){
             RAISE_INVALID_ID(NULL);
         }        
@@ -1467,7 +1468,7 @@ static struct module_state _state;
         PyObject * _ret = get_Id_attr(self, field);
         if (_ret != NULL){
             return _ret;
-        }        
+        }
         string class_name = Field<string>::get(self->id_, "class");
         string type = getFieldType(class_name, string(field), "valueFinfo");
         if (type.empty()){
