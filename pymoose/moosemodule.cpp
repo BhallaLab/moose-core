@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Sun Aug 19 17:23:17 2012 (+0530)
+// Last-Updated: Mon Aug 20 12:40:10 2012 (+0530)
 //           By: subha
-//     Update #: 9799
+//     Update #: 9813
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -1421,11 +1421,11 @@ static struct module_state _state;
     static PyObject * moose_Id_richCompare(_Id * self, PyObject * other, int op)
     {
         extern PyTypeObject IdType;
-        int ret = 0;
+        bool ret;
         if (!self || !other){
-            ret = 0;
+            ret = false;
         } else if (!Id_SubtypeCheck(other)){
-            ret = 0;
+            ret = false;
         } else if (op == Py_EQ){
             ret = (self->id_ == ((_Id*)other)->id_);
         } else if (op == Py_NE) {
@@ -1439,9 +1439,9 @@ static struct module_state _state;
         } else if (op == Py_GE){
             ret = ((((_Id*)other)->id_ < self->id_) || (self->id_ == ((_Id*)other)->id_));
         } else {
-            ret = 0;
+            ret = false;
         }
-        if (ret == 0){
+        if (ret){
           Py_RETURN_TRUE;
         }
         Py_RETURN_FALSE;
@@ -1459,6 +1459,7 @@ static struct module_state _state;
     
     static PyObject * moose_Id_getattro(_Id * self, PyObject * attr)
     {
+      extern PyTypeObject ObjIdType;
         if (!Id::isValid(self->id_)){
             RAISE_INVALID_ID(NULL);
         }        
@@ -1527,8 +1528,34 @@ static struct module_state _state;
                 }
                 return ret;
             }
+            case 'x': {
+                vector<Id> val;
+                Field<Id>::getVec(self->id_, string(field), val);
+                PyObject * ret = PyTuple_New(val.size());
+                for (unsigned int ii = 0; ii < val.size(); ++ii){
+                    _Id * v = PyObject_New(_Id, &IdType);
+                    v->id_ = val[ii];
+                    PyTuple_SetItem(ret, (Py_ssize_t)ii, (PyObject*)v);
+                }
+                return ret;
+            }
+            case 'y': {
+                vector<ObjId> val;
+                Field<ObjId>::getVec(self->id_, string(field), val);
+                PyObject * ret = PyTuple_New(val.size());
+                for (unsigned int ii = 0; ii < val.size(); ++ii){
+                    _ObjId * v = PyObject_New(_ObjId, &ObjIdType);
+                    v->oid_ = val[ii];
+                    PyTuple_SetItem(ret, (Py_ssize_t)ii, (PyObject*)v);
+                }
+                return ret;
+            }
+            case 'z': {
+                    PyErr_SetString(PyExc_NotImplementedError, "DataId handling not implemented yet.");
+                    return NULL;
+            }
             default:
-                PyErr_SetString(PyExc_ValueError, "Unhandled field type.");
+                PyErr_SetString(PyExc_ValueError, "unhandled field type.");
                 return NULL;                
         }
     }
@@ -4436,7 +4463,7 @@ static struct module_state _state;
     int moose_ElementField_setNum(_Field * self, PyObject * args, void * closure)
     {
         if (!Id::isValid(self->owner.id)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(-1);
         }
         unsigned int num;
         if (!PyInt_Check(args)){
@@ -4504,7 +4531,7 @@ static struct module_state _state;
          " across nodes. Used after function calls that might alter the"
          " number of Field entries in the table."
          " The target is the FieldElement whose fieldDimension needs updating."},
-        {"seed", (PyCFunction)moose_seed, METH_VARARGS, "seed(seedvalue) -- Seed the random number generator of MOOSE."},
+        {"seed", (PyCFunction)moose_seed, METH_VARARGS, moose_seed_documentation},
         {"wildcardFind", (PyCFunction)moose_wildcardFind, METH_VARARGS, "Return a list of Ids by a wildcard query."},
         {"quit", (PyCFunction)moose_quit, METH_NOARGS, "Finalize MOOSE threads and quit MOOSE. This is made available for"
          " debugging purpose only. It will automatically get called when moose"
