@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Sat Aug 18 14:49:43 2012 (+0530)
+# Last-Updated: Mon Aug 20 11:42:32 2012 (+0530)
 #           By: subha
-#     Update #: 1849
+#     Update #: 1851
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -287,10 +287,6 @@ def showfields(element, showtype=False):
     warnings.warn('Deprecated. Use showfield(element, field="*", showtype=True) instead.', DeprecationWarning)
     showfield(element, field='*', showtype=showtype)
     
-def wildcardFind(cond):
-    """Search for objects that match condition cond."""
-    return [element(id_) for id_ in _moose.wildcardFind(cond)]
-
 def doc(arg):
     """Display the documentation for class or field in a class.
 
