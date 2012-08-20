@@ -341,6 +341,11 @@ PYTHON_VERSION_MAJOR := $(word 1,${PYTHON_VERSION})
 PYTHON_VERSION_MINOR := $(word 2,${PYTHON_VERSION})
 INSTALLED_PYTHON := python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}
 endif
+
+ifndef $(PYTHON_INCLUDES)
+	PYTHON_INCLUDES := -I/usr/include/$(INSTALLED_PYTHON)
+	PYTHON_LDFLAGS := -L/usr/lib/$(INSTALLED_PYTHON)
+endif
 # There are some unix/gcc specific paths here. Should be cleaned up in future.
 pymoose: python/moose/_moose.so
 pymoose: CXXFLAGS += -DPYMOOSE $(PYTHON_INCLUDES)
