@@ -1,7 +1,7 @@
 import sys
 import os
 from PyQt4 import QtGui,QtCore,Qt
-import pygraphviz as pgv
+#import pygraphviz as pgv
 import pickle
 import random
 import config
@@ -368,13 +368,13 @@ class KineticsWidget(QtGui.QWidget):
                 for items in (items for items in out[0] ):
                     src = ""
                     des = ""
-                    src = self.mooseId_GText[inn.getId()]
+                    src = self.mooseId_GText[inn]
                     des = self.mooseId_GText[element(items[0]).getId()]
                     self.lineCord(src,des,items[1])
                 for items in (items for items in out[1] ):
                     src = ""
                     des = ""
-                    src = self.mooseId_GText[inn.getId()]
+                    src = self.mooseId_GText[inn]
                     des = self.mooseId_GText[element(items[0]).getId()]
                     self.lineCord(src,des,items[1])
             else:
@@ -382,7 +382,8 @@ class KineticsWidget(QtGui.QWidget):
                     src = ""
                     des = ""
                     #print "st",inn.getId()  ,items[0]
-                    src = self.mooseId_GText[inn.getId()]
+                    print "Check here ####",inn,inn.class_
+                    src = self.mooseId_GText[element(inn).getId()]
                     des = self.mooseId_GText[element(items[0]).getId()]
                     self.lineCord(src,des,items[1])
 
@@ -460,7 +461,8 @@ class KineticsWidget(QtGui.QWidget):
             if(isinstance(srcdes[0],EllipseItem)):
                 pItem = element(next((k for k,v in self.mooseId_GText.items() if v == srcdes[0]), None))
                 mooseObj = element(next((k for k,v in self.mooseId_GText.items() if v == srcdes[1]), None))
-                for l1 in self.srcdesConnection[pItem]:
+                print "HERE harsha 464",pItem
+                for l1 in self.srcdesConnection[pItem[0]]:
                     for k in l1:
                         if (element(k[0]).getId() == mooseObj.getId()):   
                             endtype = k[1]
@@ -640,18 +642,18 @@ class KineticsWidget(QtGui.QWidget):
                 for items in wildcardFind(path):
                     sublist = []
                     prdlist = []
-                    for sub in items.getNeighbors('sub'): 
-                        sublist.append((element(sub),'s'))
-                    for prd in items.getNeighbors('prd'):
-                        prdlist.append((element(prd),'p'))
+                    for sub in items[0].getNeighbors('sub'): 
+                        sublist.append((sub,'s'))
+                    for prd in items[0].getNeighbors('prd'):
+                        prdlist.append((prd,'p'))
                     if (zombieObj == 'ZombieEnz') :
-                        for enzpar in items.getNeighbors('toZombieEnz'):
-                            sublist.append((element(enzpar),'t'))
-                        for cplx in items.getNeighbors('cplxDest'):
-                            prdlist.append((element(cplx),'cplx'))
+                        for enzpar in items[0].getNeighbors('toEnz'):
+                            sublist.append((enzpar,'t'))
+                        for cplx in items[0].getNeighbors('cplxDest'):
+                            prdlist.append((cplx,'cplx'))
                     if (zombieObj == 'ZombieMMenz'):
-                        for enzpar in items.getNeighbors('enzDest'):
-                            sublist.append((element(enzpar),'t'))
+                        for enzpar in items[0].getNeighbors('enzDest'):
+                            sublist.append((enzpar,'t'))
                     cntDict[items] = sublist,prdlist
             else:
                 #ZombieSumFunc adding inputs
@@ -660,9 +662,9 @@ class KineticsWidget(QtGui.QWidget):
                     outputlist = []
                     funplist = []
                     nfunplist = []
-                    for inpt in items.getNeighbors('input'):
-                        inputlist.append((element(inpt),'st'))
-                    for zfun in items.getNeighbors('output'): funplist.append((element(zfun)))
+                    for inpt in items[0].getNeighbors('input'):
+                        inputlist.append((inpt,'st'))
+                    for zfun in items[0].getNeighbors('output'): funplist.append(zfun)
                     for i in funplist: nfunplist.append(element(i).getId())
                     nfunplist = list(set(nfunplist))
                     if(len(nfunplist) > 1): print "SumFunPool has multiple Funpool"
@@ -746,7 +748,7 @@ if __name__ == "__main__":
     #modelPath = 'acc68'
   
     try:
-        filepath = '/home/harsha/dh_branch/Demos/Genesis_files/china_course/'+modelPath+'.g'
+        filepath = '../Demos/Genesis_files/'+modelPath+'.g'
         f = open(filepath, "r")
         loadModel(filepath,'/'+modelPath)
         dt = KineticsWidget(size,'/'+modelPath)
