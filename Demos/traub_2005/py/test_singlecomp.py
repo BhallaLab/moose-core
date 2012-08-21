@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jul 17 21:01:14 2012 (+0530)
 # Version: 
-# Last-Updated: Sat Aug 11 12:43:41 2012 (+0530)
+# Last-Updated: Tue Aug 21 17:26:15 2012 (+0530)
 #           By: subha
-#     Update #: 312
+#     Update #: 313
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -124,7 +124,8 @@ def insert_ca(compartment, phi, tau):
     ca.B = phi / (np.pi * compartment.length * compartment.diameter)
     ca.tau = tau
     print ca.path, ca.B, ca.tau
-    for chan in moose.wildcardFind('%s/#[TYPE=HHChannel]' % (compartment.path)):
+    for channel in moose.wildcardFind('%s/#[TYPE=HHChannel]' % (compartment.path)):
+        chan = channel[0]
         if chan.name.startswith('KC') or chan.name.startswith('KAHP'):
             moose.connect(ca, 'concOut', chan, 'concen')
         elif chan.name.startswith('CaL'):
