@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Jul 16 16:12:55 2012 (+0530)
 # Version: 
-# Last-Updated: Fri Jul 20 16:20:46 2012 (+0530)
+# Last-Updated: Tue Aug 21 17:46:43 2012 (+0530)
 #           By: subha
-#     Update #: 116
+#     Update #: 133
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -28,7 +28,7 @@
 # 
 
 # Code:
-
+from datetime import datetime
 import time
 import os
 os.environ['NUMPTHREADS'] = '1'
@@ -49,7 +49,7 @@ def setupClocks(dt):
     for ii in range(10):
         moose.setClock(ii, dt)
 
-def setupCurrentStepModel(testId, celltype, pulsearray, dt):
+def setupCurrentStepModel(testId, celltype, pulsearray, dt, solver=None):
     """Setup a single cell simulation.
 
     simid - integer identifying the model
@@ -61,6 +61,14 @@ def setupCurrentStepModel(testId, celltype, pulsearray, dt):
     modelContainer = moose.Neutral('/test%d' % (testId))
     dataContainer = moose.Neutral('/data%d' % (testId))
     cell = cells.TCR('%s/TCR' % (modelContainer.path)) # moose.copy(cells.TCR.prototype, modelContainer.path)#
+    comps = moose.wildcardFind(cell.path + '/##[ISA=Compartment]')
+    for ch in comps:
+        print ch
+    if solver == 'hsolve':
+        hsolve = moose.HSolve(cell.path + '/solve')
+        hsolve.dt = dt
+        hsolve.seed = cell.soma
+        hsolve.target = cell.path
     pulsegen = moose.PulseGen('%s/pulse' % (modelContainer.path))
     pulsegen.count = len(pulsearray)
     for ii in range(len(pulsearray)):
@@ -105,15 +113,20 @@ simtime = 1.0
 class TestTCR(unittest.TestCase):
     def setUp(self):
         self.testId = uuid.uuid4().int
-        params = setupCurrentStepModel(self.testId, 'TCR', pulsearray, simdt)
+        params = setupCurrentStepModel(self.testId, 'TCR', pulsearray, simdt, solver='hsolve')
         print 'Starting simulation'
+        start = datetime.now()
         runsim(simtime)
-        # tseries = np.linspace(0, simtime, len(params['vmTable'].vec))
-        # pylab.subplot(211)
-        # pylab.plot(tseries, params['vmTable'].vec * 1e3, label='Vm (mV)')
-        # pylab.subplot(212)
-        # pylab.plot(tseries, params['stimTable'].vec * 1e-12, label='Stimulus (pA)')
-        # pylab.show()
+        end = datetime.now()
+        delta = end - start
+        print 'Simulation time:', delta.seconds + delta.microseconds * 1e-6
+        tseries = np.linspace(0, simtime, len(params['vmTable'].vec))
+        pylab.subplot(211)
+        pylab.plot(tseries, params['vmTable'].vec * 1e3, label='Vm (mV)')
+        pylab.subplot(212)
+        pylab.plot(tseries, params['stimTable'].vec * 1e-12, label='Stimulus (pA)')
+        pylab.show()
+
     def testDefault(self):
         pass
 
