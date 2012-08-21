@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Mon Aug 20 19:53:18 2012 (+0530)
+// Last-Updated: Tue Aug 21 13:30:16 2012 (+0530)
 //           By: subha
-//     Update #: 9817
+//     Update #: 9827
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -170,22 +170,33 @@ static struct module_state _state;
     
     static PyObject* get_Id_attr(_Id * id, string attribute)
     {
+        cout << "# 1 # " << id->id_.path() << endl;
         if (attribute == "path"){
             return moose_Id_getPath(id);
         } else if (attribute == "value"){
             return moose_Id_getValue(id);
         } else if (attribute == "shape"){
             return moose_Id_getShape(id);
-        } else if (attribute == "class_" || // !NOTE: Subha: 2012-08-20 19:52:21 (+0530) - the second check is to catch a strange bug where the field passed to moose_Id_getattro is 'class' in stead of 'class_'. Need to figure out how it is happening.
-                   attribute == "class"){ // class is a common
-                                          // attribute to all ObjIds
-                                          // under this Id. Expect it
-                                          // to be a single value in
-                                          // stead of a list of class
-                                          // names.
+        } else if (attribute == "class_" || attribute == "class")
+            // !NOTE: Subha: 2012-08-20 19:52:21 (+0530) - the second
+            // !check is to catch a strange bug where the field passed
+            // !to moose_Id_getattro is 'class' in stead of
+            // !'class_'. Need to figure out how it is happening.
+            // !Subha: 2012-08-21 13:25:06 (+0530) It turned out to be
+            // !a GCC optimization issue. GCC was optimizing the call
+            // !to get_field_alias by directly replacing `class_` with
+            // !`class`. This optimized run-path was somehow being
+            // !used only when therewas access to
+            // !obj.parent.class_. Possibly some form of cache
+            // !optimization.
+        {
+            // class is a common attribute to all ObjIds under this
+            // Id. Expect it to be a single value in stead of a list
+            // of class names.
+            
             string classname = Field<string>::get(id->id_, "class");
             return Py_BuildValue("s", classname.c_str());
-        }
+        }        
         return NULL;
     }
 
