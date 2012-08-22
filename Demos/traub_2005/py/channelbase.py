@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri May  4 14:55:52 2012 (+0530)
 # Version: 
-# Last-Updated: Fri Jul  6 18:02:08 2012 (+0530)
-#           By: subha
-#     Update #: 309
+# Last-Updated: Thu Jul 19 23:17:22 2012 (+0530)
+#           By: Subhasis Ray
+#     Update #: 314
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -146,6 +146,7 @@ class ChannelMeta(type):
             proto.Z = Z
         mstring_field = get_class_field(name, cdict, bases, 'mstring')
         if mstring_field is not None:
+            print 'mstring_field:', mstring_field
             mstring = moose.Mstring('%s/%s' % (proto.path, mstring_field[0]))
             mstring.value = mstring_field[1]
         if 'annotation' in cdict:

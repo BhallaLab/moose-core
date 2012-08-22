@@ -11,7 +11,7 @@ except ImportError:
     print 'Please include the directory containing moose.py and _moose.so in your PYTHONPATH environmental variable.'
     sys.exit(1)
 
-class TestObjId(unittest.TestCase):
+class TestNeutral(unittest.TestCase):
     def setUp(self):
         self.a_path = 'neutral%d' % (uuid.uuid4().int)
         self.b_path = self.a_path + '/b'

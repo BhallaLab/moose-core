@@ -106,11 +106,11 @@ def create_na_proto():
     lib = moose.Neutral('/library')
     na = moose.HHChannel('/library/na')
     na.Xpower = 3
-    xGate = moose.element(na.path + '/gateX')    
+    xGate = moose.HHGate(na.path + '/gateX')    
     xGate.setupAlpha(Na_m_params +
                       [VDIVS, VMIN, VMAX])
     na.Ypower = 1
-    yGate = moose.element(na.path + '/gateY')
+    yGate = moose.HHGate(na.path + '/gateY')
     yGate.setupAlpha(Na_h_params + 
                       [VDIVS, VMIN, VMAX])
     return na
@@ -119,7 +119,7 @@ def create_k_proto():
     lib = moose.Neutral('/library')
     k = moose.HHChannel('/library/k')
     k.Xpower = 4.0
-    xGate = moose.element(k.path + '/gateX')    
+    xGate = moose.HHGate(k.path + '/gateX')    
     xGate.setupAlpha(K_n_params +
                       [VDIVS, VMIN, VMAX])
     return k
@@ -188,7 +188,7 @@ def create_population(container, size):
     objects connected to these which can act as plug points for
     setting up synapses later."""
     path = container.path
-    comps = moose.Id(path+'/soma', size, 'Compartment')    
+    comps = moose.ematrix(path+'/soma', size, 'Compartment')    
     Em = EREST_ACT+10.613e-3
     comps.Em = np.random.normal(Em, np.abs(Em) * 0.1, size)
     comps.initVm = np.random.normal(EREST_ACT, np.abs(EREST_ACT) * 0.1, size)
@@ -203,7 +203,7 @@ def create_population(container, size):
     kchan.Gbar = [0.2836e-4] * size
     kchan.Ek = [-12e-3+EREST_ACT] * size
     moose.connect(kchan, 'channel', comps, 'channel', 'OneToOne')
-    synchan = moose.Id(path + '/synchan', size, 'SynChan')
+    synchan = moose.ematrix(path + '/synchan', size, 'SynChan')
     synchan.Gbar = [1e-8] * size
     synchan.tau1 = [2e-3] * size
     synchan.tau2 = [2e-3] * size
@@ -214,14 +214,14 @@ def create_population(container, size):
 
     ## Or would this have been the correct approach?
     # for c in comps: moose.connect(c, 'channel', moose.SynChan(c.path+'/synchan'), 'channel', 'Single')
-    spikegen = moose.Id(path + '/spikegen', size, 'SpikeGen')
+    spikegen = moose.ematrix(path + '/spikegen', size, 'SpikeGen')
     spikegen.threshold = [0.0] * size
     m = moose.connect(comps, 'VmOut', spikegen, 'Vm', 'OneToOne')
     return {'compartment': comps,
             'spikegen': spikegen,
             'synchan': synchan}
 
-def make_synapses(spikegen, synchan, connprob=1.0, delay=0.1e-3):
+def make_synapses(spikegen, synchan, connprob=1.0, delay=5e-3):
     """Create synapses from spikegen array to synchan array.
 
     connprob: connection probability.
@@ -235,7 +235,7 @@ def make_synapses(spikegen, synchan, connprob=1.0, delay=0.1e-3):
         s.synapse.num = scount
         delay_list = np.random.normal(delay, delay*0.1, scount)
         for jj in range(scount): s.synapse[jj].delay = delay_list[jj]
-    m = moose.connect(spikegen, 'event', moose.ObjId(synchan.path + '/synapse'),  'addSpike', 'Sparse')
+    m = moose.connect(spikegen, 'event', moose.element(synchan.path + '/synapse'),  'addSpike', 'Sparse')
     # The sparse message maintains an adjacency matrix. In the special
     # case of synapses on synchan objects, entry a[i][j] = k means
     # that source object no i (say spikegen[i] connects to synapse
