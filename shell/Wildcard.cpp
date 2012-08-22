@@ -245,7 +245,10 @@ bool matchName( Id parent, Id id,
 	const string& beforeBrace, const string& insideBrace )
 {
 	string temp = id()->getName();
-	assert( temp.length() > 0 );
+	cout << "temp " << temp << endl;
+	if ( temp.length() <= 0 ){
+	  return 0;
+	}
 	bool bracesInName = 
 		( temp.length() > 3 && 
 		temp[temp.length() - 1] == ']' );
