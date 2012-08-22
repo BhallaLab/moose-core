@@ -120,7 +120,7 @@ def findAllBut(moose_wildcard, stringToExclude):
     allValidObjects = moose__.wildcardFind(moose_wildcard)
     refinedList = []
     for validObject in allValidObjects:
-        if validObject.getField('path').find(stringToExclude) == -1:
+        if validObject.path.find(stringToExclude) == -1:
             refinedList.append(validObject)
 
     return refinedList
