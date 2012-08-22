@@ -245,7 +245,6 @@ bool matchName( Id parent, Id id,
 	const string& beforeBrace, const string& insideBrace )
 {
 	string temp = id()->getName();
-	cout << "temp " << temp << endl;
 	if ( temp.length() <= 0 ){
 	  return 0;
 	}

@@ -170,14 +170,13 @@ static struct module_state _state;
     
     static PyObject* get_Id_attr(_Id * id, string attribute)
     {
-      //cout << "# 1 # " << id->id_.path() << endl;
         if (attribute == "path"){
             return moose_Id_getPath(id);
         } else if (attribute == "value"){
             return moose_Id_getValue(id);
         } else if (attribute == "shape"){
             return moose_Id_getShape(id);
-        } else if (attribute == "class_" || attribute == "class")
+        } else if (attribute == "class_" || attribute == "class"){
             // !NOTE: Subha: 2012-08-20 19:52:21 (+0530) - the second
             // !check is to catch a strange bug where the field passed
             // !to moose_Id_getattro is 'class' in stead of
@@ -189,7 +188,6 @@ static struct module_state _state;
             // !used only when therewas access to
             // !obj.parent.class_. Possibly some form of cache
             // !optimization.
-        {
             // class is a common attribute to all ObjIds under this
             // Id. Expect it to be a single value in stead of a list
             // of class names.
@@ -973,7 +971,7 @@ static struct module_state _state;
     // Python method lists for PyObject of Id
     ///////////////////////////////////////////////
     PyDoc_STRVAR(moose_Id_delete_doc,
-                 "Id.delete()"
+                 "ematrix.delete()"
                  "\n"
                  "\nDelete the underlying moose object. This will invalidate all"
                  "\nreferences to this object and any attempt to access it will raise a"
@@ -981,9 +979,9 @@ static struct module_state _state;
                  "\n");
 
     PyDoc_STRVAR(moose_Id_setField_doc,
-                          "setField(fieldname, value_vector)\n"
+                 "setField(fieldname, value_vector)\n"
                  "\n"
-                 "Set the value of `fieldname` in all elements under this Id.\n"
+                 "Set the value of `fieldname` in all elements under this ematrix.\n"
                  "\n"
                  "Parameters\n"
                  "----------\n"
@@ -991,7 +989,7 @@ static struct module_state _state;
                  "\tfield to be set.\n"
                  "value: sequence of values\n"
                  "\tsequence of values corresponding to individual elements under this\n"
-                 "Id.\n"
+                 "ematrix.\n"
                  "\n"
                  "NOTE: This is an interface to SetGet::setVec\n"
                  );
@@ -1004,9 +1002,9 @@ static struct module_state _state;
         {"getValue", (PyCFunction)moose_Id_getValue, METH_NOARGS,
          "Return integer representation of the id of the element."},
         {"getPath", (PyCFunction)moose_Id_getPath, METH_NOARGS,
-         "Return the path of this Id object."},
+         "Return the path of this ematrix object."},
         {"getShape", (PyCFunction)moose_Id_getShape, METH_NOARGS,
-         "Get the shape of the Id object as a tuple."},
+         "Get the shape of the ematrix object as a tuple."},
         {"setField", (PyCFunction)moose_Id_setField, METH_VARARGS,
          moose_Id_setField_doc},
         {NULL, NULL, 0, NULL},        /* Sentinel */        
@@ -1037,14 +1035,14 @@ static struct module_state _state;
     PyDoc_STRVAR(moose_Id_doc,
                  "An object uniquely identifying a moose element. moose elements are"
                  "\narray-like objects which can have one or more single-objects within"
-                 "\nthem. Id can be traversed like a Python sequence and is item is an"
-                 "\nObjId identifying single-objects contained in the array element."
+                 "\nthem. ematrix can be traversed like a Python sequence and is item is an"
+                 "\nelement identifying single-objects contained in the array element."
                  "\n"
-                 "\nField access to Ids are vectorized. For example, Id.name returns a"
+                 "\nField access to ematrices are vectorized. For example, ematrix.name returns a"
                  "\ntuple containing the names of all the single-elements in this"
-                 "\nId. There are a few special fields that are unique for Id and are not"
+                 "\nematrix. There are a few special fields that are unique for ematrix and are not"
                  "\nvectorized. These are `path`, `value`, `shape` and `class_`."
-                 "\nThere are two ways an Id can be initialized, (1) create a new array"
+                 "\nThere are two ways an ematrix can be initialized, (1) create a new array"
                  "\nelement or (2) create a reference to an existing object."
                  "\n"
                  "\n__init__(self, path=path, dims=dimesions, dtype=className)"
@@ -1070,15 +1068,15 @@ static struct module_state _state;
                  "\n"
                  "\nParameters"
                  "\n----------"
-                 "\nid : Id/int"
-                 "\nId of an existing array object. The new object will be another"
+                 "\nid : ematrix/int"
+                 "\nematrix of an existing array object. The new object will be another"
                  "\nreference to this object."
                  "\n"
                  );
     
     PyTypeObject IdType = { 
       PyVarObject_HEAD_INIT(NULL, 0)               /* tp_head */
-        "moose.Id",                  /* tp_name */
+        "moose.ematrix",                  /* tp_name */
         sizeof(_Id),                    /* tp_basicsize */
         0,                                  /* tp_itemsize */
         0,                    /* tp_dealloc */
@@ -1314,15 +1312,21 @@ static struct module_state _state;
     {
         if (!Id::isValid(self->id_)){
             RAISE_INVALID_ID(NULL);
-        }        
-        return PyString_FromFormat("<Id: id=%u, path=%s>", self->id_.value(), self->id_.path().c_str());
+        }
+        ostringstream repr;
+        repr << "<moose.ematrix(" << Field<string>::get(self->id_, "class") << "): "
+             << "id=" << self->id_.value() << ","
+             << "path=" << self->id_.path() << ">";
+        return PyString_FromString(repr.str().c_str());
     } // !  moose_Id_repr
+
+  // The string representation is unused. repr is used everywhere.
     static PyObject * moose_Id_str(_Id * self)
     {
         if (!Id::isValid(self->id_)){
             RAISE_INVALID_ID(NULL);
         }        
-        return PyString_FromFormat("%s", Id::id2str(self->id_).c_str());
+        return PyString_FromFormat("<moose.ematrix: id=%u, path=%s>", self->id_.value(), self->id_.path().c_str());
     } // !  moose_Id_str
 
     // 2011-03-23 15:09:19 (+0530)
@@ -1610,7 +1614,7 @@ static struct module_state _state;
             // Python. Then we allow normal Pythonic behaviour and
             // consider such mistakes user's responsibility.
             string class_name = ((PyTypeObject*)PyObject_Type((PyObject*)self))->tp_name;
-            if (class_name != "Id"){
+            if (class_name != "ematrix"){
                 Py_INCREF(attr);
                 ret = PyObject_GenericSetAttr((PyObject*)self, attr, value);
                 Py_DECREF(attr);
@@ -1873,7 +1877,6 @@ static struct module_state _state;
     static int moose_ObjId_init_from_path(PyObject * self, PyObject * args,
                                           PyObject * kwargs)
     {
-        extern PyTypeObject ObjIdType;
         PyObject * dims = NULL;
         char * path = NULL;
         char * type = NULL;
@@ -1945,7 +1948,7 @@ static struct module_state _state;
                  " an integer for 1D objects). Default: (1,)\n"
                  "dtype : string\n"
                  "the MOOSE class name to be created.\n"
-                 "id : Id or integer\n"
+                 "id : ematrix or integer\n"
                  "id of an existing element.\n"
                  "\n");
         
@@ -1955,7 +1958,7 @@ static struct module_state _state;
         extern PyTypeObject ObjIdType;
         if (self && !ObjId_SubtypeCheck(self)){
             ostringstream error;
-            error << "Expected an ObjId or subclass. Found "
+            error << "Expected an element or subclass. Found "
                   << self->ob_type->tp_name;
             PyErr_SetString(PyExc_TypeError, error.str().c_str());
             return -1;
@@ -1996,25 +1999,19 @@ static struct module_state _state;
     {
         if (!Id::isValid(self->oid_.id)){
             RAISE_INVALID_ID(NULL);
-        }           
-#ifdef HAVE_LONG_LONG
-        return PyString_FromFormat("<ObjId: id=%u, dataId=%llu, path=%s>",
-                                   self->oid_.id.value(),
-                                   self->oid_.dataId.value(),
-                                   self->oid_.path().c_str());
-#else
-        return PyString_FromFormat("<ObjId: id=%u, dataId=%lu, path=%s>",
-                                   self->oid_.id.value(),
-                                   self->oid_.dataId.value(),
-                                   self->oid_.path().c_str());
-#endif
+        }
+        ostringstream repr;
+        repr << "<moose." << Field<string>::get(self->oid_, "class") << ": "
+             << "id=" << self->oid_.id.value() << ", "
+             << "dataId=" << self->oid_.dataId.value() << ", "
+             << "path=" << self->oid_.path() << ">";
+        return PyString_FromString(repr.str().c_str());
     } // !  moose_ObjId_repr
-
 
     PyDoc_STRVAR(moose_ObjId_getId_documentation,
                  "getId()\n"
                  "\n"
-                 "Get the Id of this object\n"
+                 "Get the ematrix of this object\n"
                  "\n");
     static PyObject* moose_ObjId_getId(_ObjId * self)
     {
@@ -2115,7 +2112,7 @@ static struct module_state _state;
         const char * field;
         char ftype;
         if(!ObjId_SubtypeCheck(self)){
-            cerr << "Expected an ObjId or subclass. But found `" << ((PyObject*)self)->ob_type->tp_name << endl;
+            cerr << "Expected an element or subclass. But found `" << ((PyObject*)self)->ob_type->tp_name << endl;
             return NULL;
         }
         if (PyString_Check(attr)){
@@ -2453,7 +2450,7 @@ static struct module_state _state;
                 if (value){
                     ret = Field<Id>::set(self->oid_, string(field), ((_Id*)value)->id_);
                 } else {
-                    PyErr_SetString(PyExc_ValueError, "Null pointer passed as Id value.");
+                    PyErr_SetString(PyExc_ValueError, "Null pointer passed as ematrix Id value.");
                     return -1;
                 }
                 break;
@@ -2462,7 +2459,7 @@ static struct module_state _state;
                 if (value){
                     ret = Field<ObjId>::set(self->oid_, string(field), ((_ObjId*)value)->oid_);
                 } else {
-                    PyErr_SetString(PyExc_ValueError, "Null pointer passed as Id value.");
+                    PyErr_SetString(PyExc_ValueError, "Null pointer passed as ematrix Id value.");
                     return -1;
                 }
                 break;
@@ -2889,7 +2886,7 @@ static struct module_state _state;
                  "setDestField(arg0, arg1, ...)\n"
                  "Set a destination field. This is for advanced uses. destFields can\n"
                  "(and should) be directly called like functions as\n"
-                 "`ObjId.fieldname(arg0, ...)`\n"
+                 "`element.fieldname(arg0, ...)`\n"
                  "\n"
                  "Parameters\n"
                  "----------\n"
@@ -3083,7 +3080,7 @@ static struct module_state _state;
     PyDoc_STRVAR(moose_ObjId_getFieldNames_documenation,
                  "getFieldNames(fieldType='')\n"
                  "\n"
-                 "Get the names of fields on this ObjId.\n"
+                 "Get the names of fields on this element.\n"
                  "\n"
                  "Parameters\n"
                  "----------\n"
@@ -3146,7 +3143,7 @@ static struct module_state _state;
     PyDoc_STRVAR(moose_ObjId_getNeighbors_documentation,
                  "getNeighbours(fieldName)\n"
                  "\n"
-                 "Get the objects connected to this ObjId by a message on specified\n"
+                 "Get the objects connected to this element by a message on specified\n"
                  "field.\n"
                  "\n"
                  "Parameters\n"
@@ -3156,7 +3153,7 @@ static struct module_state _state;
                  "\n"
                  "Returns\n"
                  "-------\n"
-                 "out: tuple of Id-s.\n"
+                 "out: tuple of ematrices.\n"
                  "\n");
                  
     static PyObject * moose_ObjId_getNeighbors(_ObjId * self, PyObject * args)
@@ -3197,7 +3194,7 @@ static struct module_state _state;
                  "----------\n"
                  "srcfield : str\n"
                  "\tsource field on self.\n"
-                 "destobj : ObjId\n"
+                 "destobj : element\n"
                  "\tDestination object to connect to.\n"
                  "destfield : str\n"
                  "\tfield to connect to on `destobj`.\n"
@@ -3207,7 +3204,7 @@ static struct module_state _state;
                  "\n"
                  "Returns\n"
                  "-------\n"
-                 "ObjId of the created message.\n"
+                 "element of the created message.\n"
                  "\n"
                  "See also\n"
                  "--------\n"
@@ -3253,11 +3250,11 @@ static struct module_state _state;
     }
 
     PyDoc_STRVAR(moose_ObjId_richcompare_documentation,
-                 "Compare two ObjId instances. This just does a string comparison of\n"
-                 "the paths of the ObjId instances. This function exists only to\n"
+                 "Compare two element instances. This just does a string comparison of\n"
+                 "the paths of the element instances. This function exists only to\n"
                  "facilitate certain operations requiring sorting/comparison, like\n"
-                 "using ObjIds for dict keys. Conceptually only equality comparison is\n"
-                 "meaningful for ObjIds.\n"); 
+                 "using elements for dict keys. Conceptually only equality comparison is\n"
+                 "meaningful for elements.\n"); 
   static PyObject* moose_ObjId_richcompare(_ObjId * self, PyObject * other, int op)
     {
         if (!Id::isValid(self->oid_.id)){
@@ -3348,6 +3345,8 @@ static struct module_state _state;
          moose_ObjId_setLookupField_documentation},
         {"getId", (PyCFunction)moose_ObjId_getId, METH_NOARGS,
          moose_ObjId_getId_documentation},
+        {"ematrix", (PyCFunction)moose_ObjId_getId, METH_NOARGS,
+         "Return the ematrix this element belongs to."},
         {"getFieldNames", (PyCFunction)moose_ObjId_getFieldNames, METH_VARARGS,
          moose_ObjId_getFieldNames_documenation},
         {"getNeighbors", (PyCFunction)moose_ObjId_getNeighbors, METH_VARARGS,
@@ -3368,7 +3367,7 @@ static struct module_state _state;
     ///////////////////////////////////////////////
     PyTypeObject ObjIdType = { 
       PyVarObject_HEAD_INIT(NULL, 0)            /* tp_head */
-        "moose.ObjId",                      /* tp_name */
+        "moose.element",                      /* tp_name */
         sizeof(_ObjId),                     /* tp_basicsize */
         0,                                  /* tp_itemsize */
         0,                                  /* tp_dealloc */
@@ -3450,9 +3449,9 @@ static struct module_state _state;
                  "Make copies of a moose object.\n"
                  "Parameters\n"
                  "----------\n"
-                 "src : Id, ObjId or str\n"
+                 "src : ematrix, element or str\n"
                  "\tsource object.\n"
-                 "dest : Id, ObjId or str\n"
+                 "dest : ematrix, element or str\n"
                  "\tDestination object to copy into.\n"
                  "name : str\n"
                  "\tName of the new object. If omitted, name of the original will be used.\n"
@@ -3466,7 +3465,7 @@ static struct module_state _state;
                  "\n"
                  "Returns\n"
                  "-------\n"
-                 "Id of the copied object\n"
+                 "ematrix of the copied object\n"
                  );
     static PyObject * moose_copy(PyObject * dummy, PyObject * args, PyObject * kwargs)
     {
@@ -3485,7 +3484,7 @@ static struct module_state _state;
         } else if (PyString_Check(src)){
             _src = Id(PyString_AsString(src));
         } else {
-            PyErr_SetString(PyExc_TypeError, "Source must be instance of Id, ObjId or string.");
+            PyErr_SetString(PyExc_TypeError, "Source must be instance of ematrix, element or string.");
             return NULL;
         }
         if (_src == Id()){
@@ -3499,7 +3498,7 @@ static struct module_state _state;
         } else if (PyString_Check(dest)){
             _dest = Id(PyString_AsString(dest));
         } else {
-            PyErr_SetString(PyExc_TypeError, "destination must be instance of Id, ObjId or string.");
+            PyErr_SetString(PyExc_TypeError, "destination must be instance of ematrix, element or string.");
             return NULL;
         }
         if (!Id::isValid(_src) || !Id::isValid(_dest)){
@@ -3538,13 +3537,13 @@ static struct module_state _state;
                  "moose.delete(id)"
                  "\n"
                  "\nDelete the underlying moose object. This does not delete any of the"
-                 "\nPython objects referring to this Id but does invalidate them. Any"
+                 "\nPython objects referring to this ematrix but does invalidate them. Any"
                  "\nattempt to access them will raise a ValueError."
                  "\n"
                  "\nParameters"
                  "\n----------"
-                 "\nid : Id"
-                 "\nId of the object to be deleted."
+                 "\nid : ematrix"
+                 "\nematrix of the object to be deleted."
                  "\n");
     static PyObject * moose_delete(PyObject * dummy, PyObject * args)
     {
@@ -3553,7 +3552,7 @@ static struct module_state _state;
             return NULL;
         }
         if (!Id_SubtypeCheck(obj)){
-            PyErr_SetString(PyExc_TypeError, "Id instance expected");
+            PyErr_SetString(PyExc_TypeError, "ematrix instance expected");
             return NULL;
         }
         if (((_Id*)obj)->id_ == Id()){
@@ -3683,7 +3682,7 @@ static struct module_state _state;
     }
     
     PyDoc_STRVAR(moose_loadModel_documentation,
-                 "loadModel(filename, modelpath, solverclass) -> moose.Id\n"
+                 "loadModel(filename, modelpath, solverclass) -> moose.ematrix\n"
                  "\n"
                  "Load model from a file to a specified path.\n"
                  "\n"
@@ -3698,7 +3697,7 @@ static struct module_state _state;
                  "\n"
                  "Returns\n"
                  "-------\n"
-                 "Id instance refering to the loaded model container.\n"
+                 "ematrix instance refering to the loaded model container.\n"
                  );
     
     static PyObject * moose_loadModel(PyObject * dummy, PyObject * args)
@@ -3731,7 +3730,7 @@ static struct module_state _state;
             } else if (ObjId_SubtypeCheck(element)){
                 id = (reinterpret_cast<_ObjId*>(element))->oid_.id;                    
             } else {
-                PyErr_SetString(PyExc_NameError, "setCwe: Argument must be an Id or ObjId");
+                PyErr_SetString(PyExc_NameError, "setCwe: Argument must be an ematrix or element");
                 return NULL;
             }
         } else {
@@ -3763,12 +3762,12 @@ static struct module_state _state;
                  "\n"
                  "Parameters\n"
                  "----------\n"
-                 "src : ObjId\n"
+                 "src : element\n"
                  "\tthe source object\n"
                  "src_field : str\n"
                  "\tthe source field name. Fields listed under `srcFinfo` and\n"
                  "`sharedFinfo` qualify for this.\n"
-                 "dest : ObjId\n"
+                 "dest : element\n"
                  "\tthe destination object.\n"
                  "dest_field : str\n"
                  "\tthe destination field name. Fields listed under `destFinfo`\n"
@@ -3779,7 +3778,7 @@ static struct module_state _state;
                  "\n"
                  "Returns\n"
                  "-------\n"
-                 "ObjId of the message-manager for the newly created message.\n"
+                 "element of the message-manager for the newly created message.\n"
                  "\n"
                  "Example\n"
                  "-------\n"
@@ -3904,7 +3903,7 @@ static struct module_state _state;
             return NULL;
         }
         if (!ObjId_SubtypeCheck(pyobj)){
-            PyErr_SetString(PyExc_TypeError, "moose.getField(ObjId, fieldname, fieldtype): First argument must be an instance of ObjId or its subclass");
+            PyErr_SetString(PyExc_TypeError, "moose.getField(element, fieldname, fieldtype): First argument must be an instance of element or its subclass");
             return NULL;
         }
         string fname(field), ftype(type);
@@ -4046,15 +4045,14 @@ static struct module_state _state;
                  "\n"
                  "Reseed MOOSE random number generator.\n"
                  "\n"
-                 "\n"
                  "Parameters\n"
                  "----------\n"
-                 "seed - int\n"
+                 "seed: int\n"
                  "Optional value to use for seeding. If 0, a random seed is"
                  "\nautomatically created using the current system time and other"
                  "\ninformation. If not specified, it defaults to 0."
                  "\n");
-
+    
     static PyObject * moose_seed(PyObject * dummy, PyObject * args)
     {
         long seed = 0;
@@ -4065,6 +4063,28 @@ static struct module_state _state;
         Py_RETURN_NONE;
     }
 
+    PyDoc_STRVAR(moose_wildcardFind_documentation,
+                 "moose.wildcardFind(expression) -> tuple of ematrices.\n"
+                 "\n"
+                 "Find an object by wildcard.\n"
+                 "\n"
+                 "Parameters\n"
+                 "----------\n"
+                 "expression: str\n"
+                 "MOOSE allows wildcard expressions of the form {PATH}/{WILDCARD}[{CONDITION}]\n"
+                 "where {PATH} is valid path in the element tree. {WILDCARD} can be `#` or\n"
+                 "`##`. `#` causes the search to be restricted to the children of the element\n"
+                 "specified by {PATH}. `##` makes the search to recursively go through all the\n"
+                 "descendants of the {PATH} element. {CONDITION} can be \n"
+                 "TYPE={CLASSNAME} : an element satisfies this condition if it is of class\n"
+                 "{CLASSNAME}.\n"
+                 "ISA={CLASSNAME} : alias for TYPE={CLASSNAME}\n"
+                 "CLASS={CLASSNAME} : alias for TYPE={CLASSNAME}\n"
+                 "FIELD({FIELDNAME}){OPERATOR}{VALUE} : compare field {FIELDNAME} with {VALUE}\n"
+                 "by {OPERATOR} where {OPERATOR} is a comparison operator (=, !=, >, <, >=,\n"
+                 "<=). For example, /mymodel/##[FIELD(Vm)>=-65] will return a list of all the\n"
+                 "objects under /mymodel whose Vm field is >= -65.\n"
+                 "\n");
     static PyObject * moose_wildcardFind(PyObject * dummy, PyObject * args)
     {
         vector <Id> objects;
@@ -4083,7 +4103,7 @@ static struct module_state _state;
             _Id * entry = PyObject_New(_Id, &IdType);                       
             if (!entry){
                 Py_XDECREF(ret);
-                PyErr_SetString(PyExc_RuntimeError, "moose.wildcardFind: failed to allocate new Id.");
+                PyErr_SetString(PyExc_RuntimeError, "moose.wildcardFind: failed to allocate new ematrix.");
                 return NULL;
             }
             entry->id_ = objects[ii];
@@ -4237,7 +4257,7 @@ static struct module_state _state;
     static PyObject * moose_ObjId_get_destField_attr(PyObject * self, void * closure)
     {
         if (!ObjId_SubtypeCheck(self)){
-            PyErr_SetString(PyExc_TypeError, "First argument must be an instance of ObjId");
+            PyErr_SetString(PyExc_TypeError, "First argument must be an instance of element");
             return NULL;
         }
         _ObjId * obj = (_ObjId*)self;
@@ -4326,7 +4346,7 @@ static struct module_state _state;
     {
         if (!ObjId_SubtypeCheck(self)){
             PyErr_SetString(PyExc_TypeError,
-                            "First argument must be an instance of ObjId");
+                            "First argument must be an instance of element");
             return NULL;
         }
         _ObjId * obj = (_ObjId*)self;
@@ -4398,7 +4418,7 @@ static struct module_state _state;
     {
         if (!ObjId_SubtypeCheck(self)){
             PyErr_SetString(PyExc_TypeError,
-                            "First argument must be an instance of ObjId");
+                            "First argument must be an instance of element");
             return NULL;
         }
         _ObjId * obj = (_ObjId*)self;
@@ -4519,7 +4539,7 @@ static struct module_state _state;
     static PyMethodDef MooseMethods[] = {
         {"getFieldNames", (PyCFunction)moose_getFieldNames, METH_VARARGS, moose_getFieldNames_documentation},
         {"copy", (PyCFunction)moose_copy, METH_VARARGS|METH_KEYWORDS, moose_copy_documentation},
-        {"move", (PyCFunction)moose_move, METH_VARARGS, "Move a Id object to a destination."},
+        {"move", (PyCFunction)moose_move, METH_VARARGS, "Move a ematrix object to a destination."},
         {"delete", (PyCFunction)moose_delete, METH_VARARGS, moose_delete_documentation},
         {"useClock", (PyCFunction)moose_useClock, METH_VARARGS, "Schedule objects on a specified clock"},
         {"setClock", (PyCFunction)moose_setClock, METH_VARARGS, "Set the dt of a clock."},
@@ -4537,14 +4557,14 @@ static struct module_state _state;
         // {"ce", (PyCFunction)moose_setCwe, METH_VARARGS, "Set the current working element. setCwe is an alias of this function."},
         {"getFieldDict", (PyCFunction)moose_getFieldDict, METH_VARARGS, moose_getFieldDict_documentation},
         {"getField", (PyCFunction)moose_getField, METH_VARARGS,
-         "getField(ObjId, field, fieldtype) -- Get specified field of specified type from object Id."},
+         "getField(element, field, fieldtype) -- Get specified field of specified type from object ematrix."},
         {"syncDataHandler", (PyCFunction)moose_syncDataHandler, METH_VARARGS,
          "synchronizes fieldDimension on the DataHandler"
          " across nodes. Used after function calls that might alter the"
          " number of Field entries in the table."
          " The target is the FieldElement whose fieldDimension needs updating."},
         {"seed", (PyCFunction)moose_seed, METH_VARARGS, moose_seed_documentation},
-        {"wildcardFind", (PyCFunction)moose_wildcardFind, METH_VARARGS, "Return a list of Ids by a wildcard query."},
+        {"wildcardFind", (PyCFunction)moose_wildcardFind, METH_VARARGS, moose_wildcardFind_documentation},
         {"quit", (PyCFunction)moose_quit, METH_NOARGS, "Finalize MOOSE threads and quit MOOSE. This is made available for"
          " debugging purpose only. It will automatically get called when moose"
          " module is unloaded. End user should not use this function."},
@@ -4631,7 +4651,7 @@ static struct PyModuleDef MooseModuleDef = {
 	  INITERROR;
         }
 	struct module_state * st = GETSTATE(moose_module);
-    const char error[] = "moose.Error";
+        char error[] = "moose.Error";
 	st->error = PyErr_NewException(error, NULL, NULL);
 	if (st->error == NULL){
 	  Py_DECREF(moose_module);
@@ -4651,7 +4671,7 @@ static struct PyModuleDef MooseModuleDef = {
             exit(-1);
         };            
         Py_INCREF(&IdType);
-        PyModule_AddObject(moose_module, "Id", (PyObject*)&IdType);
+        PyModule_AddObject(moose_module, "ematrix", (PyObject*)&IdType);
 
         // Add ObjId type
         // Py_TYPE(&ObjIdType) = &PyType_Type; // unnecessary - filled in by PyType_Ready
@@ -4661,7 +4681,7 @@ static struct PyModuleDef MooseModuleDef = {
             exit(-1);
         };
         Py_INCREF(&ObjIdType);
-        PyModule_AddObject(moose_module, "ObjId", (PyObject*)&ObjIdType);
+        PyModule_AddObject(moose_module, "element", (PyObject*)&ObjIdType);
 
         // Add LookupField type
         // Py_TYPE(&moose_LookupField) = &PyType_Type;  // unnecessary - filled in by PyType_Ready        

@@ -59,149 +59,40 @@ known_types = ['void',
                'long',
                'unsigned long',
                'string',
-               'Id',
-               'ObjId'] + sequence_types
+               'ematrix',
+               'element'] + sequence_types
 
-# Store a set of moose builtin classes
-moose_classes = set([ch[0].name for ch in ObjId('/classes').children])
-
-class NeutralArray(_moose.Id):
-    """
-    The base class. Each NeutralArray object has a unique Id (field
-    id_) and that is the only data directly visible under Python. All
-    operation are done on the objects by calling functions on the Id.
-    
-    A NeutralArray object is actually an array. The individual
-    elements in a NeutralArray are of class Neutral. To access these
-    individual elements, you can index the NeutralArray object.
-
-    """
-    def __init__(self, *args, **kwargs):
-        """
-        A NeutralArray object can be constructed in many ways. The
-        most basic one being:
-
-        neutral = moose.NeutralArray('my_neutral_object', (3))
-
-        This will create a NeutralArray object with name
-        'my_neutral_object' containing 3 elements. The object will be
-        created as a child of the current working entity. Any class
-        derived from NeutralArray can also be created using the same
-        constructor. Actually it takes keyword parameters to do that:
-
-        intfire = moose.NeutralArray(path='/my_neutral_object', dims=(3), type='IntFire')
-
-        will create an IntFire object of size 3 as a child of the root entity.
-
-        If the above code is already executed,
-
-        duplicate = moose.NeutralArray(intfire)
-
-        will create a duplicate reference to the existing intfire
-        object. They will share the same Id and any changes made via
-        the MOOSE API to one will be effective on the other.
-        
-        """
-        try:
-            Id.__init__(self, *args, **kwargs)
-        except TypeError:
-            path = None
-            dims = (1)
-            className = None
-            if kwargs:
-                try:
-                    path = kwargs['path']
-                except KeyError:
-                    pass
-                try:
-                    dims = kwargs['dims']
-                except KeyError:
-                    pass
-                try:
-                    className = kwargs['dtype']
-                except KeyError:
-                    pass
-                
-            if path is None:
-                if not args:
-                    raise TypeError("NeutralArray.__init__(path, dims=(1), dtype='Neutral'): required"
-                                    " argument `path` not specified.")
-                path = args[0]
-            if len(args) > 1:
-                dims = args[1]
-            if len(args) > 2:
-                className = args[2]
-            # Create a new ArrayElement
-            _base_class = self.__class__
-            if className is None:
-                className = self.__class__.__name__
-            if className.endswith('Array'):
-                className = className[:-len('Array')]
-                # For classes extended in Python get to the first MOOSE base class
-                while className not in moose_classes and className != 'ObjId':
-                    _base_class = self.__base__
-                    if _base_class == object:
-                        raise TypeError('Class %s does not inherit any MOOSE class.' % (self.__class__.__name__))                    
-                    className = _base_class.__name__
-                    if className.endswith('Array'):
-                        className = className[:-len('Array')]
-            Id.__init__(path=path, dims=dims, type=className)
-
-    def getFieldNames(self, ftype='valueFinfo'):
-        """Return a list of fields available in this object.
-
-        Parameters:
-
-        str ftype -- (default 'valueFinfo') category of field, valid values are:
-        valueFinfo, lookupFinfo, srcFinfo, destFinfo or sharedFinfo.
-
-        If empty string or not specified, returns names of fields from
-        all categories.
-        """        
-        return self[0].getFieldNames(ftype)
-
-    def getFieldType(self, field, ftype=''):
-        """Return the data type of the field as a string."""
-        return self[0].getFieldType(field, ftype)
-
-    path = property(lambda self: self.getPath())
-    fieldNames = property(lambda self: self.getFieldNames(ftype='valueFinfo'))
-    name = property(lambda self: self[0].name)
-    shape = property(lambda self: self.getShape())
-    
-################################################################
+######################################################################
 # Special function to generate objects of the right class from
 # a given path.
 #
-# As of 2012-08-22, these functions are deprecated as their
-# functionalities are now implemented directly in C.
-################################################################
+# As of 2012-08-22, element() function has been renamed to_el because
+# ObjId is now called element in pymoose. This function is not
+# entirely deprecated as we do not yet have a way to call the
+# destFields as functions from the base class.
+######################################################################
 
-def element(path):
+def to_el(path):
     """Return a reference to an existing object as an instance of the
-    right class. If path does not exist, raises NameError.
+    appropriate class. If path does not exist, raises NameError.
 
-    Id or ObjId can be provided in stead of path"""
-    warnings.warn('ObjId can be used directly for field access in any of its subclasses. To access ObjId for an Id use indexing (like myid[0]).', DeprecationWarning)
-    if isinstance(path, Id):
-        oid = path[0]
-        path = path.getPath()
-    elif isinstance(path, ObjId):
-        oid = path
+    ematrix or element can be provided in stead of path"""
+    if isinstance(path, ematrix) or isinstance(path, element):
+        classObj = eval(path.class_)
     elif isinstance(path, str):
         if not _moose.exists(path):
             raise NameError('Object %s not defined' % (path))
-        oid = _moose.ObjId(path)
+        oid = _moose.element(path)
+        classObj = eval(oid.class_)
     else:
-        raise TypeError('expected argument: Id/ObjId/str')
-    classObj = eval(oid.class_)
-    return classObj(oid)
+        raise TypeError('expected argument: ematrix/element/str')
+    return classObj(path)
 
 def arrayelement(path, className='Neutral'):
     """Return a reference to an existing object as an instance of the
     right class. If path does not exist, className is used for
     creating an instance of that class with the given path"""
-    warnings.warn('use ObjId.getId() to retrieve its Id. Ids can be used directly for getting tuple of the field values of its elements.', DeprecationWarning)
+    warnings.warn('use element.ematrix() to retrieve its container. ematrix instances can be used directly for getting tuple of the field values of its elements.', DeprecationWarning)
     if not exists(path):
         raise NameError('Object %s not defined' % (path))
     return Id(path)
@@ -209,8 +100,6 @@ def arrayelement(path, className='Neutral'):
 ################################################################
 # Wrappers for global functions
 ################################################################ 
-
-
     
 def pwe():
     """Print present working element. Convenience function for GENESIS
@@ -222,14 +111,16 @@ def le(el=None):
     if el is None:
         el = getCwe()[0]
     elif isinstance(el, str):
-        el = ObjId(el)
-    elif isinstance(el, Id):
+        if not exists(el):
+            raise ValueError('no such element')
+        el = element(el)
+    elif isinstance(el, ematrix):
         el = el[0]
     print('Elements under', el.path)
     for ch in el.children:
-        print(ch)
+        print(ch.path)
 
-ce = setCwe
+ce = setCwe # ce is a GENESIS shorthand for change element.
 
 def syncDataHandler(target):
     """Synchronize data handlers for target.
@@ -241,7 +132,7 @@ def syncDataHandler(target):
     if isinstance(target, str):
         if not _moose.exists(target):
             raise ValueError('%s: element does not exist.' % (target))
-        target = Id(target)
+        target = ematrix(target)
         _moose.syncDataHandler(target)
 
 def showfield(elem, field='*', showtype=False):
@@ -257,16 +148,19 @@ def showfield(elem, field='*', showtype=False):
     showtype -- If True show the data type of each field.
 
     """
-    target = ObjId(elem)
+    if isinstance(elem, str):
+        if not exists(elem):
+            raise ValueError('no such element')
+        elem = element(elem)
     if field == '*':        
-        value_field_dict = getFieldDict(target.class_, 'valueFinfo')
+        value_field_dict = getFieldDict(elem.class_, 'valueFinfo')
         max_type_len = max([len(dtype) for dtype in list(value_field_dict.values())])
         max_field_len = max([len(dtype) for dtype in list(value_field_dict.keys())])
-        print('\n[', target.path, ']')
+        print('\n[', elem.path, ']')
         for key, dtype in list(value_field_dict.items()):
             if dtype == 'bad' or key == 'this' or key == 'dummy' or key == 'me' or dtype.startswith('vector') or 'ObjId' in dtype:
                 continue
-            value = target.getField(key)
+            value = elem.getField(key)
             if showtype:
                 typestr = dtype.ljust(max_type_len + 4)
                 # The following hack is for handling both Python 2 and
@@ -280,7 +174,7 @@ def showfield(elem, field='*', showtype=False):
             print(key.ljust(max_field_len + 4), '=', value)
     else:
         try:
-            print(field, '=', target.getField(field))
+            print(field, '=', elem.getField(field))
         except AttributeError:
             pass # Genesis silently ignores non existent fields
 
@@ -307,12 +201,12 @@ def doc(arg):
         else:
             print('No such class:', tokens[0])
             return
-    class_id = Id('/classes/%s' % (tokens[0]))
+    class_id = ematrix('/classes/%s' % (tokens[0]))
     num_finfo = getField(class_id[0], 'num_valueFinfo', 'unsigned')
-    finfo = Id('/classes/%s/valueFinfo' % (tokens[0]))
+    finfo = ematrix('/classes/%s/valueFinfo' % (tokens[0]))
     print('\n* Value Field *')
     for ii in range(num_finfo):
-        oid = ObjId(finfo, 0, ii, 0)
+        oid = element(finfo, 0, ii, 0)
         if print_field:
             if oid.name == tokens[1]:
                 print(oid.name, ':', oid.docs)
@@ -321,10 +215,10 @@ def doc(arg):
             print(oid.name, ':', oid.docs)
             print
     num_finfo = getField(class_id[0], 'num_srcFinfo', 'unsigned')
-    finfo = Id('/classes/%s/srcFinfo' % (tokens[0]))
+    finfo = ematrix('/classes/%s/srcFinfo' % (tokens[0]))
     print('\n* Source Field *')
     for ii in range(num_finfo):
-        oid = ObjId(finfo, 0, ii, 0)
+        oid = element(finfo, 0, ii, 0)
         if print_field:
             if oid.name == tokens[1]:
                 print(oid.name, ':', oid.docs)
@@ -336,7 +230,7 @@ def doc(arg):
     finfo = Id('/classes/%s/destFinfo' % (tokens[0]))
     print('\n* Destination Field *')
     for ii in range(num_finfo):
-        oid = ObjId(finfo, 0, ii, 0)
+        oid = element(finfo, 0, ii, 0)
         if print_field:
             if oid.name == tokens[1]:
                 print(oid.name, ':', oid.docs)
@@ -345,10 +239,10 @@ def doc(arg):
             print(oid.name, ':', oid.docs)
             print
     num_finfo = getField(class_id[0], 'num_lookupFinfo', 'unsigned')    
-    finfo = Id('/classes/%s/lookupFinfo' % (tokens[0]))
+    finfo = ematrix('/classes/%s/lookupFinfo' % (tokens[0]))
     print('\n* Lookup Field *')
     for ii in range(num_finfo):
-        oid = ObjId(finfo, 0, ii, 0)
+        oid = element(finfo, 0, ii, 0)
         if print_field:
             if oid.name == tokens[1]:
                 print(oid.name, ':', oid.docs)
