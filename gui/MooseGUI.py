@@ -25,7 +25,7 @@ import kineticlayout
 from neuralLayout import *
 
 from filepaths import *
-from defaults import *
+import defaults
 
 # Qt4 bindings for Qt
 from PyQt4 import QtCore,QtGui
@@ -228,6 +228,13 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         #self.connect(targetText, QtCore.SIGNAL('textChanged(const QString &)'), self.getElementpath)
 
         if fileDialog.exec_():
+            # if defaults.DEFAULT_LOADFILE == 'Replace':
+            #     self.makeObjectFieldEditor(moose.Neutral('/'))
+            #     if self.mdiArea.currentSubWindow():
+            #         self.mdiArea.removeSubWindow(self.mdiArea.currentSubWindow())
+            #     self.mooseHandler.clearPreviousModel()
+            #     self.mooseHandler.prevTargetElements = {}
+
             fileNames = fileDialog.selectedFiles()
             fileFilter = fileDialog.selectedFilter()
             fileType = self.mooseHandler.fileExtensionMap[str(fileFilter)]
@@ -247,9 +254,9 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             app.setOverrideCursor(QtGui.QCursor(Qt.BusyCursor)) #shows a hourglass - or a busy/working arrow
             for fileName in fileNames:
                 if(((str(targetText.text())) == '/') or ((str(targetText.text())) == ' ') ):
-                    modelpath = os.path.basename(str(fileName)).rpartition('.')[0]
+                    modelpath = os.path.basename(str(fileName)).partition('.')[0]
                 else:
-                    modelpath = str(targetText.text())
+                    modelpath = '/'+str(targetText.text()).partition('.')[0]
                 modeltype  = self.mooseHandler.loadModel(str(fileName), str(fileType), modelpath)
                 if modeltype == MooseHandler.type_kkit:
                     try:
@@ -330,7 +337,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.layoutWidget.viz = 1 #not the brightest way to go about
         if self.modelHasCompartments:
             for compartment in self.allCompartments: 
-                cellName = compartment.getField('parent').getField('path') #enforcing a hierarchy /cell/compartment! - not a good idea 
+                cellName = compartment.parent[0].path #enforcing a hierarchy /cell/compartment! - not a good idea 
                 if cellName in cellNameComptDict:
                     cellNameComptDict[cellName].append(compartment)
                 else:
@@ -416,7 +423,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
 
     def propEditorSelectParent(self):
-        if self.propEditorCurrentSelection != None:
+        if self.propEditorCurrentSelection:
             self.makeObjectFieldEditor(self.propEditorCurrentSelection.getField('parent'))
 
     def propEditorSelectChild(self,item):
@@ -452,7 +459,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 #        self.plotConfigCurrentSelectionTypeLabel.setText(fieldType)
         self.plotConfigFieldSelectionComboBox.clear()
         try: 
-            self.plotConfigFieldSelectionComboBox.addItems(PLOT_FIELDS[fieldType])
+            self.plotConfigFieldSelectionComboBox.addItems(defaults.PLOT_FIELDS[fieldType])
             self.plotConfigCurrentSelection = obj
             self.plotConfigAcceptPushButton.setEnabled(True)
         except KeyError:
@@ -624,6 +631,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         for child in moose.wildcardFind(path+'/graphs/#/##[TYPE=Table],'+path+'/moregraphs/#/##[TYPE=Table]'):
             tableList.append(moose.Table(child))
         return tableList
+
     def colorCheck(self,textColor):
         pkl_file = open(os.path.join(PATH_KKIT_COLORMAPS,'rainbow2.pkl'),'rb')
         picklecolorMap = pickle.load(pkl_file)

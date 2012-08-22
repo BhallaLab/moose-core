@@ -120,14 +120,14 @@ class updatepaintGL(PyGLWidget):
         l_coords = []
         if ch:
             for i in range(0,len(ch),1):
-    	    	x=float(ch[i].getField('x'))*(1e+04)
-    	    	y=float(ch[i].getField('y'))*(1e+04)
-    	    	z=float(ch[i].getField('z'))*(1e+04)
-    	    	x0=float(ch[i].getField('x0'))*(1e+04)
-    	    	y0=float(ch[i].getField('y0'))*(1e+04)
-	   	z0=float(ch[i].getField('z0'))*(1e+04)
-	   	d=float(ch[i].getField('diameter'))*(1e+04)
-    	    	l_coords.append((x0,y0,z0,x,y,z,d,ch[i].getField('path')))
+    	    	x=float(ch[i][0].x)*(1e+04)
+    	    	y=float(ch[i][0].y)*(1e+04)
+    	    	z=float(ch[i][0].z)*(1e+04)
+    	    	x0=float(ch[i][0].x0)*(1e+04)
+    	    	y0=float(ch[i][0].y0)*(1e+04)
+	   	z0=float(ch[i][0].z0)*(1e+04)
+	   	d=float(ch[i][0].diameter)*(1e+04)
+    	    	l_coords.append((x0,y0,z0,x,y,z,d,ch[i][0].path))
 
         elif moose.element(cellName).getField('class') == 'IntFire':
             l_coords.append((0,0,0,0,0,0,0,cellName))
