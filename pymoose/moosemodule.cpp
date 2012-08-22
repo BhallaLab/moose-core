@@ -170,7 +170,7 @@ static struct module_state _state;
     
     static PyObject* get_Id_attr(_Id * id, string attribute)
     {
-        cout << "# 1 # " << id->id_.path() << endl;
+      //cout << "# 1 # " << id->id_.path() << endl;
         if (attribute == "path"){
             return moose_Id_getPath(id);
         } else if (attribute == "value"){

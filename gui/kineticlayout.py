@@ -167,8 +167,10 @@ class GraphicalView(QtGui.QGraphicsView):
                 #Since qgraphicsrectitem is a item in qt, if I select inside the rectangle it would select the entire
                 #rectangle and would not allow me to select the items inside the rectangle so breaking the code by not
                 #calling parent class to inherit functionality rather writing custom code for rubberband effect here
-            elif( sceneitems != None):
+            else:
+                print "s",sceneitems
                 if( (isinstance(sceneitems, Textitem)) or (isinstance(sceneitems, RectCompt1)) or (isinstance(sceneitems, EllipseItem)) ):
+                    print "sceneitems",sceneitems
                     QtGui.QGraphicsView.mousePressEvent(self, event)
                     self.itemSelected = True
 
@@ -459,25 +461,24 @@ class KineticsWidget(QtGui.QWidget):
         for ql, va in listItem:
             srcdes = self.lineItem_dict[ql]
             if(isinstance(srcdes[0],EllipseItem)):
-                pItem = element(next((k for k,v in self.mooseId_GText.items() if v == srcdes[0]), None))
-                mooseObj = element(next((k for k,v in self.mooseId_GText.items() if v == srcdes[1]), None))
-                print "HERE harsha 464",pItem
-                for l1 in self.srcdesConnection[pItem[0]]:
+                pItem = (next((k for k,v in self.mooseId_GText.items() if v == srcdes[0]), None))
+                mooseObj = (next((k for k,v in self.mooseId_GText.items() if v == srcdes[1]), None))
+                for l1 in self.srcdesConnection[pItem]:
                     for k in l1:
-                        if (element(k[0]).getId() == mooseObj.getId()):   
+                        if ((k[0]) == mooseObj):   
                             endtype = k[1]
                         else: pass
             elif(isinstance(srcdes[1],EllipseItem)):
-                pItem = element(next((k for k,v in self.mooseId_GText.items() if v == srcdes[1]), None))
-                mooseObject = element(next((k for k,v in self.mooseId_GText.items() if v == srcdes[0]), None))
+                pItem = (next((k for k,v in self.mooseId_GText.items() if v == srcdes[1]), None))
+                mooseObject = (next((k for k,v in self.mooseId_GText.items() if v == srcdes[0]), None))
                 for l1 in self.srcdesConnection[pItem]:
                     for k in l1:
-                        if element(k[0]) == mooseObj:
+                        if (k[0]) == mooseObj:
                             endtype = k[1]
             else:
                 
-                pItem  =  element(next((k for k,v in self.mooseId_GText.items() if v == srcdes[0]), None))
-                pItem1 =  element(next((k for k,v in self.mooseId_GText.items() if v == srcdes[1]), None))
+                pItem  =  (next((k for k,v in self.mooseId_GText.items() if v == srcdes[0]), None))
+                pItem1 =  (next((k for k,v in self.mooseId_GText.items() if v == srcdes[1]), None))
                 if(pItem.class_ == 'ZombieFuncPool' or pItem1.class_ == 'ZombieFuncPool'):
                     endtype = 'st'
             arrow = self.calArrow(srcdes[0],srcdes[1],endtype)
@@ -739,7 +740,7 @@ if __name__ == "__main__":
     size = QtCore.QSize(1800,1600)
     modelPath = 'Kholodenko'
     modelPath = 'enz_classical_explicty'
-    #modelPath = 'reaction'
+    modelPath = 'reaction'
     #modelPath = 'test_enzyme'
     #modelPath = 'OSC_Cspace_ref'
     #modelPath = 'traff_nn_diff_TRI'

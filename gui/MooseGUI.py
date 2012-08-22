@@ -254,9 +254,10 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             app.setOverrideCursor(QtGui.QCursor(Qt.BusyCursor)) #shows a hourglass - or a busy/working arrow
             for fileName in fileNames:
                 if(((str(targetText.text())) == '/') or ((str(targetText.text())) == ' ') ):
-                    modelpath = os.path.basename(str(fileName)).partition('.')[0]
+                    modelpath = os.path.basename(str(fileName)).rpartition('.')[0]
                 else:
-                    modelpath = '/'+str(targetText.text()).partition('.')[0]
+                    #modelpath = str(targetText.text()).partition('.')[-1]
+                    modelpath = str(targetText.text())
                 modeltype  = self.mooseHandler.loadModel(str(fileName), str(fileType), modelpath)
                 if modeltype == MooseHandler.type_kkit:
                     try:
