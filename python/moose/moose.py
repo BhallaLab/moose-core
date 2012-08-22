@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Mon Aug 20 11:42:32 2012 (+0530)
+# Last-Updated: Wed Aug 22 12:12:46 2012 (+0530)
 #           By: subha
-#     Update #: 1851
+#     Update #: 1866
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -172,6 +172,9 @@ class NeutralArray(_moose.Id):
 ################################################################
 # Special function to generate objects of the right class from
 # a given path.
+#
+# As of 2012-08-22, these functions are deprecated as their
+# functionalities are now implemented directly in C.
 ################################################################
 
 def element(path):
@@ -179,6 +182,7 @@ def element(path):
     right class. If path does not exist, raises NameError.
 
     Id or ObjId can be provided in stead of path"""
+    warnings.warn('ObjId can be used directly for field access in any of its subclasses. To access ObjId for an Id use indexing (like myid[0]).', DeprecationWarning)
     if isinstance(path, Id):
         oid = path[0]
         path = path.getPath()
@@ -197,12 +201,10 @@ def arrayelement(path, className='Neutral'):
     """Return a reference to an existing object as an instance of the
     right class. If path does not exist, className is used for
     creating an instance of that class with the given path"""
+    warnings.warn('use ObjId.getId() to retrieve its Id. Ids can be used directly for getting tuple of the field values of its elements.', DeprecationWarning)
     if not exists(path):
         raise NameError('Object %s not defined' % (path))
-    oid = ObjId(path)
-    className = oid.getField('class')
-    return eval('%sArray("%s")' % (className, path))
-    
+    return Id(path)
 
 ################################################################
 # Wrappers for global functions
@@ -220,7 +222,7 @@ def le(el=None):
     if el is None:
         el = getCwe()[0]
     elif isinstance(el, str):
-        el = element(el)
+        el = ObjId(el)
     elif isinstance(el, Id):
         el = el[0]
     print('Elements under', el.path)
@@ -255,7 +257,7 @@ def showfield(elem, field='*', showtype=False):
     showtype -- If True show the data type of each field.
 
     """
-    target = element(elem)
+    target = ObjId(elem)
     if field == '*':        
         value_field_dict = getFieldDict(target.class_, 'valueFinfo')
         max_type_len = max([len(dtype) for dtype in list(value_field_dict.values())])
