@@ -281,7 +281,7 @@ class MooseHandler(QtCore.QObject):
         return table
 
     def updateDefaultsKKIT(self,modelpath):
-        t = (moose.element('/clock')).tick
+        t = moose.to_el('/clock').tick
         MooseHandler.simdt = t[4].dt
         MooseHandler.plotdt = t[8].dt
         MooseHandler.runtime = moose.element('/'+modelpath).runTime
