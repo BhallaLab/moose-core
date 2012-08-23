@@ -147,7 +147,7 @@ class GraphicalView(QtGui.QGraphicsView):
         self.moved = False
         self.showpopupmenu = False
         self.border = 6
-    
+        self.setRenderHints(QtGui.QPainter.Antialiasing)
     def mousePressEvent(self, event):
         if event.buttons() == QtCore.Qt.LeftButton:
             self.startingPos = event.pos()
@@ -168,9 +168,9 @@ class GraphicalView(QtGui.QGraphicsView):
                 #rectangle and would not allow me to select the items inside the rectangle so breaking the code by not
                 #calling parent class to inherit functionality rather writing custom code for rubberband effect here
             else:
-                print "s",sceneitems
+                #print "s",sceneitems
                 if( (isinstance(sceneitems, Textitem)) or (isinstance(sceneitems, RectCompt1)) or (isinstance(sceneitems, EllipseItem)) ):
-                    print "sceneitems",sceneitems
+                    #print "sceneitems",sceneitems
                     QtGui.QGraphicsView.mousePressEvent(self, event)
                     self.itemSelected = True
 
@@ -210,7 +210,7 @@ class GraphicalView(QtGui.QGraphicsView):
                 preSelectItem.setSelected(0)
             #since it custom rubberband I am checking if with in the selected area any textitem, if s then setselected to true
             for items in self.sceneContainerPt.items(self.startScenepos.x(),self.startScenepos.y(),self.rubberbandWidth,self.rubberbandHeight,Qt.Qt.IntersectsItemShape):
-                if(isinstance(items,Textitem)):
+                if(isinstance(items,Textitem) or isinstance(items, RectCompt1) or isinstance(items, EllipseItem)):
                     if items.isSelected() == False:
                         items.setSelected(1)
                         
@@ -343,7 +343,7 @@ class KineticsWidget(QtGui.QWidget):
                                 pItem.setHtml(QtCore.QString(textbgcolor))
                                 self.connect(pItem, QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"), self.emitItemtoEditor)
                                 pItem.positionChange.connect(self.positionChange)
-                                pItem.selectedChange.connect(self.emitItemtoEditor)
+                                #pItem.selectedChange.connect(self.emitItemtoEditor)
 
                             else:
                                 w = 8
@@ -384,7 +384,7 @@ class KineticsWidget(QtGui.QWidget):
                     src = ""
                     des = ""
                     #print "st",inn.getId()  ,items[0]
-                    print "Check here ####",inn,inn.class_
+                    #print "Check here ####",inn,inn.class_
                     src = self.mooseId_GText[element(inn).getId()]
                     des = self.mooseId_GText[element(items[0]).getId()]
                     self.lineCord(src,des,items[1])
@@ -458,16 +458,30 @@ class KineticsWidget(QtGui.QWidget):
 
     def updatearrow(self,qGTextitem):
         listItem = self.object2line[qGTextitem]
+        #print "listItem",listItem
+        forloop = 0
         for ql, va in listItem:
             srcdes = self.lineItem_dict[ql]
+            #print srcdes
+            
+            forloop = 0
+            
             if(isinstance(srcdes[0],EllipseItem)):
                 pItem = (next((k for k,v in self.mooseId_GText.items() if v == srcdes[0]), None))
                 mooseObj = (next((k for k,v in self.mooseId_GText.items() if v == srcdes[1]), None))
                 for l1 in self.srcdesConnection[pItem]:
                     for k in l1:
+                        
                         if ((k[0]) == mooseObj):   
                             endtype = k[1]
-                        else: pass
+                        else:
+                            #Need to see what to do, if a sumtotal is connected to enzymesite which is Rectcompt1 arrow is not getting update,if i do this here, then when i move rectcompt1, some else breaks so postpone
+                            #forloop = 1
+                            '''
+                if (forloop == 1):
+                    gItem = self.mooseId_GText[k[0]]
+                    self.updatearrow(gItem)
+                    '''
             elif(isinstance(srcdes[1],EllipseItem)):
                 pItem = (next((k for k,v in self.mooseId_GText.items() if v == srcdes[1]), None))
                 mooseObject = (next((k for k,v in self.mooseId_GText.items() if v == srcdes[0]), None))
@@ -739,11 +753,11 @@ if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     size = QtCore.QSize(1800,1600)
     modelPath = 'Kholodenko'
-    modelPath = 'enz_classical_explicty'
-    modelPath = 'reaction'
+    #modelPath = 'enz_classical_explicty'
+    #modelPath = 'reaction'
     #modelPath = 'test_enzyme'
     #modelPath = 'OSC_Cspace_ref'
-    #modelPath = 'traff_nn_diff_TRI'
+    modelPath = 'traff_nn_diff_TRI'
     #modelPath = 'traff_nn_diff_BIS'
     #modelPath = 'EGFR_MAPK_58'
     #modelPath = 'acc68'
