@@ -205,11 +205,19 @@
     <addaction name="actionContinue"/>
     <addaction name="actionStop"/>
    </widget>
+   <widget class="QMenu" name="menuSolver">
+    <property name="title">
+     <string>Solver</string>
+    </property>
+    <addaction name="actionRK5"/>
+    <addaction name="actionGillespie"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuRun"/>
    <addaction name="menuEdit"/>
    <addaction name="menuView"/>
    <addaction name="menuClasses"/>
+   <addaction name="menuSolver"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QDockWidget" name="mooseObjectEditDock">
@@ -1654,6 +1662,33 @@
    </property>
    <property name="text">
     <string>Tabs</string>
+   </property>
+  </action>
+  <action name="actionRK5">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>RungeKutta</string>
+   </property>
+  </action>
+  <action name="actionEE">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>ExpEuler</string>
+   </property>
+  </action>
+  <action name="actionGillespie">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Gillespie</string>
    </property>
   </action>
   <zorder>moosePopulationEditDock</zorder>

@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'newgui.ui'
 #
-# Created: Wed Jul 11 22:00:04 2012
-#      by: PyQt4 UI code generator 4.8.3
+# Created: Thu Aug 23 19:22:38 2012
+#      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -65,6 +65,8 @@ class Ui_MainWindow(object):
         self.menuHelp.setObjectName(_fromUtf8("menuHelp"))
         self.menuRun = QtGui.QMenu(self.menubar)
         self.menuRun.setObjectName(_fromUtf8("menuRun"))
+        self.menuSolver = QtGui.QMenu(self.menubar)
+        self.menuSolver.setObjectName(_fromUtf8("menuSolver"))
         MainWindow.setMenuBar(self.menubar)
         self.mooseObjectEditDock = QtGui.QDockWidget(MainWindow)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
@@ -158,8 +160,8 @@ class Ui_MainWindow(object):
         self.horizontalLayout_7.setObjectName(_fromUtf8("horizontalLayout_7"))
         self.label = QtGui.QLabel(self.dockWidgetContents)
         font = QtGui.QFont()
-        font.setWeight(50)
         font.setBold(False)
+        font.setWeight(50)
         self.label.setFont(font)
         self.label.setObjectName(_fromUtf8("label"))
         self.horizontalLayout_7.addWidget(self.label)
@@ -626,6 +628,16 @@ class Ui_MainWindow(object):
         self.actionViewAsTabs.setCheckable(True)
         self.actionViewAsTabs.setChecked(True)
         self.actionViewAsTabs.setObjectName(_fromUtf8("actionViewAsTabs"))
+        self.actionRK5 = QtGui.QAction(MainWindow)
+        self.actionRK5.setCheckable(True)
+        self.actionRK5.setChecked(True)
+        self.actionRK5.setObjectName(_fromUtf8("actionRK5"))
+        self.actionEE = QtGui.QAction(MainWindow)
+        self.actionEE.setCheckable(True)
+        self.actionEE.setObjectName(_fromUtf8("actionEE"))
+        self.actionGillespie = QtGui.QAction(MainWindow)
+        self.actionGillespie.setCheckable(True)
+        self.actionGillespie.setObjectName(_fromUtf8("actionGillespie"))
         self.menuShell_Mode.addAction(self.actionPython)
         self.menuShell_Mode.addAction(self.actionGenesis)
         self.menuFile.addAction(self.actionLoad_Model)
@@ -709,11 +721,14 @@ class Ui_MainWindow(object):
         self.menuRun.addAction(self.actionReset)
         self.menuRun.addAction(self.actionContinue)
         self.menuRun.addAction(self.actionStop)
+        self.menuSolver.addAction(self.actionRK5)
+        self.menuSolver.addAction(self.actionGillespie)
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuRun.menuAction())
         self.menubar.addAction(self.menuEdit.menuAction())
         self.menubar.addAction(self.menuView.menuAction())
         self.menubar.addAction(self.menuClasses.menuAction())
+        self.menubar.addAction(self.menuSolver.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(MainWindow)
@@ -735,6 +750,7 @@ class Ui_MainWindow(object):
         self.menuEdit.setTitle(QtGui.QApplication.translate("MainWindow", "Edit", None, QtGui.QApplication.UnicodeUTF8))
         self.menuHelp.setTitle(QtGui.QApplication.translate("MainWindow", "Help", None, QtGui.QApplication.UnicodeUTF8))
         self.menuRun.setTitle(QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
+        self.menuSolver.setTitle(QtGui.QApplication.translate("MainWindow", "Solver", None, QtGui.QApplication.UnicodeUTF8))
         self.mooseObjectEditDock.setStatusTip(QtGui.QApplication.translate("MainWindow", "Property Editor.  Displays parent-child  relationship", None, QtGui.QApplication.UnicodeUTF8))
         self.mooseObjectEditDock.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Property Editor", None, QtGui.QApplication.UnicodeUTF8))
         self.propEditorSelectionNameLabel.setText(QtGui.QApplication.translate("MainWindow", "None", None, QtGui.QApplication.UnicodeUTF8))
@@ -875,5 +891,8 @@ class Ui_MainWindow(object):
         self.actionPlot_Config.setText(QtGui.QApplication.translate("MainWindow", "Plot Config", None, QtGui.QApplication.UnicodeUTF8))
         self.actionViewAsSubWindows.setText(QtGui.QApplication.translate("MainWindow", "Sub Windows", None, QtGui.QApplication.UnicodeUTF8))
         self.actionViewAsTabs.setText(QtGui.QApplication.translate("MainWindow", "Tabs", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionRK5.setText(QtGui.QApplication.translate("MainWindow", "RungeKutta", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionEE.setText(QtGui.QApplication.translate("MainWindow", "ExpEuler", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionGillespie.setText(QtGui.QApplication.translate("MainWindow", "Gillespie", None, QtGui.QApplication.UnicodeUTF8))
 
 from objectedit import ObjectEditView
