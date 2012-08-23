@@ -74,10 +74,29 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         #connections
         self.connectElements()
 
+        self.defaultKKITSolver = 'rk5'
+
+
 #    def resizeCentralWidgets(self):
 #        widthOfEach =  int((self.layoutWidget.width()+self.plotMdiArea.width())/2)
 #        self.layoutWidget.resize(widthOfEach, self.layoutWidget.height())
 #        self.plotMdiArea.resize(widthOfEach, self.layoutWidget.height())
+
+    def setAllToStartState(self):
+        self.currentTime = 0.0
+        self.allCompartments = []
+        self.allIntFires = []
+        self.modelHasCompartments = False
+        self.modelHasIntFires = False
+        self.modelHasLeakyIaF = False
+        self.activeWindow = 'None'
+        self.propEditorCurrentSelection = None
+        self.propEditorChildrenIdDict = {}
+        self.plotConfigCurrentSelection = None
+        self.plotConfigAcceptPushButton.setEnabled(False)
+        self.plotWindowFieldTableDict = {} #guiPlotWinowName:[mooseTable]
+        self.plotNameWinDict = {} #guiPlotWindowName:moosePlotWindow
+        print 'reset all to start state'
 
     def defaultDockState(self):
         #this will eventually change corresponding to the "mode" of operation - Edit/Plot/Run
@@ -140,6 +159,43 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.connect(self.actionSimulation_Control,QtCore.SIGNAL('triggered(bool)'),self.toggleSimControlDoctVisibility)
         self.connect(self.actionViewAsTabs,QtCore.SIGNAL('triggered(bool)'),self.switchTabbedView)
         self.connect(self.actionViewAsSubWindows,QtCore.SIGNAL('triggered(bool)'),self.switchSubWindowView) 
+        #solver
+        self.connect(self.actionRK5,QtCore.SIGNAL('triggered()'), self.changeToRK5)
+        #self.connect(self.actionEE, QtCore.SIGNAL('triggered()'), self.changeToEE)
+        self.connect(self.actionGillespie,QtCore.SIGNAL('triggered()'), self.changeToGill)
+
+    def changeToRK5(self):
+        print 'Changing to RK5'
+        #self.actionEE.setChecked(False)
+        self.actionGillespie.setChecked(False)
+        self.actionRK5.setChecked(True)
+        #for model in self.modelPathsModelTypeDict.keys():
+        #    moose.element(model).method = 'rk5'
+        #moose.reinit()
+        #self._resetSlot()
+        self.defaultKKITSolver = 'rk5'
+            
+    #def changeToEE(self):
+    #    print 'Changing to EE'
+    #    self.actionRK5.setChecked(False)
+    #    self.actionGillespie.setChecked(False)
+    #    self.actionEE.setChecked(True)
+        #for model in self.modelPathsModelTypeDict.keys():
+        #    moose.element(model).method = 'ee'
+        #moose.reinit()
+        #self._resetSlot()
+    #    self.defaultKKITSolver = 'ee'
+
+    def changeToGill(self):
+        print 'Changing to Gillespie'
+        self.actionRK5.setChecked(False)
+        #self.actionEE.setChecked(False)
+        self.actionGillespie.setChecked(True)
+        #for model in self.modelPathsModelTypeDict.keys():
+        #    moose.element(model).method = 'gssa'
+        #moose.reinit()
+        #self._resetSlot()
+        self.defaultKKITSolver = 'gssa'
 
     def propEditorChildListToggleVisibility(self):
         checked = not(self.propEditorChildListWidget.isVisible())
@@ -228,12 +284,12 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         #self.connect(targetText, QtCore.SIGNAL('textChanged(const QString &)'), self.getElementpath)
 
         if fileDialog.exec_():
-            # if defaults.DEFAULT_LOADFILE == 'Replace':
-            #     self.makeObjectFieldEditor(moose.Neutral('/'))
-            #     if self.mdiArea.currentSubWindow():
-            #         self.mdiArea.removeSubWindow(self.mdiArea.currentSubWindow())
-            #     self.mooseHandler.clearPreviousModel()
-            #     self.mooseHandler.prevTargetElements = {}
+            if self.modelPathsModelTypeDict.keys():
+                self.setAllToStartState()
+                while self.mdiArea.currentSubWindow():
+                    self.mdiArea.removeSubWindow(self.mdiArea.currentSubWindow())
+                #self.objFieldEditModel.mooseObject = None
+                self.mooseHandler.clearPreviousModel(self.modelPathsModelTypeDict)
 
             fileNames = fileDialog.selectedFiles()
             fileFilter = fileDialog.selectedFilter()
@@ -254,24 +310,32 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             app.setOverrideCursor(QtGui.QCursor(Qt.BusyCursor)) #shows a hourglass - or a busy/working arrow
             for fileName in fileNames:
                 if(((str(targetText.text())) == '/') or ((str(targetText.text())) == ' ') ):
-                    modelpath = os.path.basename(str(fileName)).rpartition('.')[0]
+                    modelpath = os.path.basename(str(fileName)).rpartition('.')[0] #case when users delibaretly want to load model under / or leave blank
+                    
                 else:
                     #modelpath = str(targetText.text()).partition('.')[-1]
                     modelpath = str(targetText.text())
-                modeltype  = self.mooseHandler.loadModel(str(fileName), str(fileType), modelpath)
+                modeltype = self.mooseHandler.loadModel(str(fileName), str(fileType), modelpath, self.defaultKKITSolver)
                 if modeltype == MooseHandler.type_kkit:
+                    modelpath = '/KKIT/'+modelpath
+                    #self.menuSolver.setEnabled(1)
                     try:
                         self.addKKITLayoutWindow(modelpath)
-                        self.actionLoad_Model.setEnabled(0) #to prevent multiple loads
+                        #self.actionLoad_Model.setEnabled(0) #to prevent multiple loads
                         
                     except kineticlayout.Widgetvisibility:
                     #except kl.Widgetvisibility:
                         print 'No kkit layout for: %s' % (str(fileName))
+                    #print moose.element(modelpath).getField('method')
                     self.populateKKitPlots(modelpath)
+                #else:
+                    #self.menuSolver.setEnabled(0)
+                #print modelpath,modeltype,'hello'
                 self.modelPathsModelTypeDict[modelpath] = modeltype
                 self.populateDataPlots(modelpath)
                 self.updateDefaultTimes(modeltype,modelpath)
             #self.enableControlButtons()
+            
             self.checkModelForNeurons()
             if self.modelHasCompartments or self.modelHasIntFires or self.modelHasLeakyIaF:
                 self.addGLWindow()
@@ -383,6 +447,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
     def addKKITLayoutWindow(self,modelpath):
         centralWindowsize =  self.mdiArea.size()
         self.sceneLayout = kineticlayout.KineticsWidget(centralWindowsize,modelpath,self.mdiArea)
+
         #self.sceneLayout = kl.KineticsWidget(centralWindowsize,modelpath,self.mdiArea)
         self.connect(self.sceneLayout, QtCore.SIGNAL("itemDoubleClicked(PyQt_PyObject)"), self.makeObjectFieldEditor)
         KKitWindow = self.mdiArea.addSubWindow(self.sceneLayout)
@@ -400,6 +465,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         # self.sceneLayout.show()
 
         #property editor dock related
+
     def refreshObjectEditor(self,item,number):
         self.makeObjectFieldEditor(item.getMooseObject())
 

@@ -152,21 +152,34 @@ class MooseHandler(QtCore.QObject):
 	self._context.runG(cmd)
         return 'In current PyMOOSE implementation running a GENESIS command does not return anything.'
 
-    def loadModel(self, filename, filetype, target='/'):
+    def clearPreviousModel(self,modelpathTypeDict):
+        for path in modelpathTypeDict.keys():
+            if modelpathTypeDict[path] == 'NEUROML':
+                if moose.exists('/cells'):
+                    moose.delete(moose.ematrix('/cells'))
+                if moose.exists('/elec'):
+                    moose.delete(moose.ematrix('/elec'))
+            elif modelpathTypeDict[path] == 'KKIT':
+                if moose.exists('/KKIT'):
+                    moose.delete(moose.ematrix('/KKIT'))
+            else:
+                print 'Did not delete previously loaded file. Restart moose instead'
+
+    def loadModel(self, filename, filetype, target='/', solver='rk5'):
         """Load a model from file."""
         directory = os.path.dirname(filename)
         os.chdir(directory)
         filename = os.path.basename(filename) # ideally this should not be required - but neuroML reader has a bug and gets a segmentation fault when given abosolute path.
         #moose.Property.addSimPath(directory)
         if filetype == MooseHandler.type_genesis:
-            return self.loadGenesisModel(filename, target)
+            return self.loadGenesisModel(filename, target, solver)
         elif filetype == MooseHandler.type_xml:
             return self.loadXMLModel(filename, target)
         elif filetype == MooseHandler.type_python:
             sys.path.append(directory)
             return self.loadPythonScript(filename)
 
-    def loadGenesisModel(self, filename, target):
+    def loadGenesisModel(self, filename, target, solver):
         """Load a model specified in a GENESIS Script.
 
         If the file is a kinetikit model (the criterion is 'include
@@ -214,10 +227,14 @@ class MooseHandler(QtCore.QObject):
                 # print iskkit, sentence
                 if iskkit:
                     filetype = MooseHandler.type_kkit                    
+                    self._context.Neutral('/KKIT')
                     break
         current = self._context.getCwe()
         #self._context.setCwe(target)
-        self._context.loadModel(filename,target)
+        if filetype == MooseHandler.type_kkit:
+            self._context.loadModel(filename,'/KKIT/'+target, solver) #add solver here
+        else:
+            self._context.loadModel(filename,target)
         self._context.setCwe(current)        
         return filetype
         
@@ -245,7 +262,7 @@ class MooseHandler(QtCore.QObject):
             populationDict, projectionDict = neuromlR.readNeuroMLFromFile(filename)
         elif ret == MooseHandler.type_sbml:
             print 'Unsupported in GUI Mode'
-        return ret    
+        return ret
 
     def loadPythonScript(self, filename):
         """Evaluate a python script."""
