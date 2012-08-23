@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Tue Aug 21 13:30:16 2012 (+0530)
+// Last-Updated: Thu Aug 23 12:42:26 2012 (+0530)
 //           By: subha
-//     Update #: 9827
+//     Update #: 9834
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -1861,7 +1861,8 @@ static struct module_state _state;
     {
         extern PyTypeObject ObjIdType;
         string basetype_str = "";
-        for (PyTypeObject * base = self->ob_type;
+        PyTypeObject * base = NULL;
+        for (base = Py_TYPE(self);
              base != &ObjIdType; base = base->tp_base){
             basetype_str = base->tp_name;
             size_t dot = basetype_str.find('.');
@@ -1870,6 +1871,9 @@ static struct module_state _state;
                 get_moose_classes().end()){
                 return basetype_str;
             }
+        }
+        if (base == Py_TYPE(self)){
+            return "Neutral";
         }
         return basetype_str;
     }
@@ -1956,7 +1960,7 @@ static struct module_state _state;
                                 PyObject * kwargs)
     {
         extern PyTypeObject ObjIdType;
-        if (self && !ObjId_SubtypeCheck(self)){
+        if (self && !PyObject_IsInstance(self, (PyObject*)Py_TYPE(self))){
             ostringstream error;
             error << "Expected an element or subclass. Found "
                   << self->ob_type->tp_name;
