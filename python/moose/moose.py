@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Wed Aug 22 12:12:46 2012 (+0530)
+# Last-Updated: Thu Aug 23 09:53:17 2012 (+0530)
 #           By: subha
-#     Update #: 1866
+#     Update #: 1868
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -92,7 +92,10 @@ def arrayelement(path, className='Neutral'):
     """Return a reference to an existing object as an instance of the
     right class. If path does not exist, className is used for
     creating an instance of that class with the given path"""
-    warnings.warn('use element.ematrix() to retrieve its container. ematrix instances can be used directly for getting tuple of the field values of its elements.', DeprecationWarning)
+    warnings.warn('use element.ematrix() to retrieve its container. \
+ematrix instances can be used directly for getting \
+tuple of the field values of its elements.', 
+                  DeprecationWarning)
     if not exists(path):
         raise NameError('Object %s not defined' % (path))
     return Id(path)
@@ -128,7 +131,8 @@ def syncDataHandler(target):
     Parameter:
     target -- target element or path or Id.
     """
-    raise NotImplementedError('The implementation is not working for IntFire - goes to invalid objects. First fix that issue with SynBase or something in that line.')
+    raise NotImplementedError('The implementation is not working for IntFire - goes to invalid objects. \
+First fix that issue with SynBase or something in that line.')
     if isinstance(target, str):
         if not _moose.exists(target):
             raise ValueError('%s: element does not exist.' % (target))
