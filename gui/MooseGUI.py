@@ -352,7 +352,6 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             #self.mooseHandler.updateClocks(MooseHandler.DEFAULT_SIMDT, MooseHandler.DEFAULT_PLOTDT)
             #use Aditya's method to assign clocks - also reinits!
             mooseUtils.resetSim(['/cells','/elec'], MooseHandler.DEFAULT_SIMDT, MooseHandler.DEFAULT_PLOTDT)
-
         elif modeltype == MooseHandler.type_python:
             #specific for the hopfield tutorial!
             #self.mooseHandler.updateClocks(MooseHandler.DEFAULT_SIMDT, MooseHandler.DEFAULT_PLOTDT)

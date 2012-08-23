@@ -165,6 +165,9 @@ class MooseHandler(QtCore.QObject):
             else:
                 print 'Did not delete previously loaded file. Restart moose instead'
 
+        for child in moose.element('/library').getField('children'):
+            moose.delete(child)
+
     def loadModel(self, filename, filetype, target='/', solver='rk5'):
         """Load a model from file."""
         directory = os.path.dirname(filename)
