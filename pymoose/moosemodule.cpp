@@ -1314,7 +1314,7 @@ static struct module_state _state;
             RAISE_INVALID_ID(NULL);
         }
         ostringstream repr;
-        repr << "<moose.ematrix(" << Field<string>::get(self->id_, "class") << "): "
+        repr << "<moose.ematrix: class=" << Field<string>::get(self->id_, "class") << "): "
              << "id=" << self->id_.value() << ","
              << "path=" << self->id_.path() << ">";
         return PyString_FromString(repr.str().c_str());
