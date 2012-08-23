@@ -170,6 +170,7 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
         """
         if not index.isValid() or index.row() >= len(self.fields):
             return None
+        
         ret = None
         field = self.fields[index.row()]        
         #if role == Qt.ToolTipRole:
@@ -183,7 +184,11 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
                 field = ObjectFieldsModel.py_moose_fieldname_map[field]
             except KeyError:
                 pass
-            ret = self.mooseObject.getField(field)
+            #print self.mooseObject
+            try: 
+                ret = self.mooseObject.getField(field)
+            except (ValueError,AttributeError):
+                pass
             #print 'Field', field, 'value', ret
             ret = QtCore.QVariant(QtCore.QString(str(ret)))            
         elif index.column() == 2 and role == Qt.DisplayRole:
