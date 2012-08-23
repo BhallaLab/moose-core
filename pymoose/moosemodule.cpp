@@ -653,7 +653,7 @@ static struct module_state _state;
             PyErr_SetString(PyExc_ValueError, "owner cannot be NULL");
             return -1;
         }
-        if (!ObjId_SubtypeCheck(owner)){
+        if (!PyObject_IsInstance(owner, (PyObject*)&ObjIdType)){
             PyErr_SetString(PyExc_TypeError, "Owner must be subtype of ObjId");
             return -1;
         }
@@ -1353,7 +1353,7 @@ static struct module_state _state;
     static Py_ssize_t moose_Id_getLength(_Id * self)
     {
         if (!Id::isValid(self->id_)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(-1);
         }        
         vector< unsigned int> dims = Field< vector <unsigned int> >::get(ObjId(self->id_), "objectDimensions");
         if (dims.empty()){
@@ -1440,7 +1440,7 @@ static struct module_state _state;
         bool ret;
         if (!self || !other){
             ret = false;
-        } else if (!Id_SubtypeCheck(other)){
+        } else if (!PyObject_IsInstance(other, (PyObject*)&IdType)){
             ret = false;
         } else if (op == Py_EQ){
             ret = (self->id_ == ((_Id*)other)->id_);
@@ -1842,7 +1842,7 @@ static struct module_state _state;
                 instance->oid_ = ObjId(((_Id*)obj)->id_,
                                        DataId(data, field, numFieldBits));
                 return 0;
-            } else if (ObjId_SubtypeCheck(obj)){
+            } else if (PyObject_IsInstance(obj, (PyObject*)&ObjIdType)){
                 if (!Id::isValid(((_ObjId*)obj)->oid_.id)){
                     RAISE_INVALID_ID(-1);
                 }                    
@@ -1959,11 +1959,10 @@ static struct module_state _state;
     static int moose_ObjId_init(PyObject * self, PyObject * args,
                                 PyObject * kwargs)
     {
-        extern PyTypeObject ObjIdType;
         if (self && !PyObject_IsInstance(self, (PyObject*)Py_TYPE(self))){
             ostringstream error;
             error << "Expected an element or subclass. Found "
-                  << self->ob_type->tp_name;
+                  << Py_TYPE(self)->tp_name;
             PyErr_SetString(PyExc_TypeError, error.str().c_str());
             return -1;
         }
@@ -2115,10 +2114,6 @@ static struct module_state _state;
         extern PyTypeObject ObjIdType;
         const char * field;
         char ftype;
-        if(!ObjId_SubtypeCheck(self)){
-            cerr << "Expected an element or subclass. But found `" << ((PyObject*)self)->ob_type->tp_name << endl;
-            return NULL;
-        }
         if (PyString_Check(attr)){
             field = PyString_AsString(attr);
         } else {
@@ -2182,7 +2177,11 @@ static struct module_state _state;
                 }                                                                       \
             return ret;                                                             \
         } // GET_VECVEC
-        assert(!(self->oid_ == ObjId::bad));
+
+	if (self->oid_ == ObjId::bad){
+	  PyErr_SetString(PyExc_RuntimeError, "bad ObjId.");
+	  return NULL;
+	}
         string class_name = Field<string>::get(self->oid_, "class");
         string type = getFieldType(class_name, string(field), "valueFinfo");
         if (type.empty()){
@@ -3275,10 +3274,10 @@ static struct module_state _state;
             return NULL;
           }
         }
-        if (!ObjId_SubtypeCheck(other)){
+        if (!PyObject_IsInstance(other, (PyObject*)&ObjIdType)){
           ostringstream error;
           error << "Cannot compare ObjId with "
-                << other->ob_type->tp_name;
+                << Py_TYPE(other)->tp_name;
           PyErr_SetString(PyExc_TypeError, error.str().c_str());
           return NULL;
         }
@@ -3481,9 +3480,9 @@ static struct module_state _state;
             return NULL;
         }
         Id _src, _dest;
-        if (Id_SubtypeCheck(src)){
+        if (PyObject_IsInstance(src, (PyObject*)&IdType)){
             _src = ((_Id*)src)->id_;
-        } else if (ObjId_SubtypeCheck(src)){
+        } else if (PyObject_IsInstance(src, (PyObject*)&ObjIdType)){
             _src = ((_ObjId*)src)->oid_.id;
         } else if (PyString_Check(src)){
             _src = Id(PyString_AsString(src));
@@ -3495,9 +3494,9 @@ static struct module_state _state;
             PyErr_SetString(PyExc_ValueError, "Cannot make copy of moose shell.");
             return NULL;
         } 
-        if (Id_SubtypeCheck(dest)){
+        if (PyObject_IsInstance(dest, (PyObject*)&IdType)){
             _dest = ((_Id*)dest)->id_;
-        } else if (ObjId_SubtypeCheck(dest)){
+        } else if (PyObject_IsInstance(dest, (PyObject*)&ObjIdType)){
             _dest = ((_ObjId*)dest)->oid_.id;
         } else if (PyString_Check(dest)){
             _dest = Id(PyString_AsString(dest));
@@ -3555,7 +3554,7 @@ static struct module_state _state;
         if (!PyArg_ParseTuple(args, "O:moose.delete", &obj)){
             return NULL;
         }
-        if (!Id_SubtypeCheck(obj)){
+        if (!PyObject_IsInstance(obj, (PyObject*)&IdType)){
             PyErr_SetString(PyExc_TypeError, "ematrix instance expected");
             return NULL;
         }
@@ -3729,9 +3728,9 @@ static struct module_state _state;
             id = Id(string(path));
         } else if (PyArg_ParseTuple(args, "O:moose_setCwe", &element)){
             PyErr_Clear();
-            if (Id_SubtypeCheck(element)){
+            if (PyObject_IsInstance(element, (PyObject*)&IdType)){
                 id = (reinterpret_cast<_Id*>(element))->id_;
-            } else if (ObjId_SubtypeCheck(element)){
+            } else if (PyObject_IsInstance(element, (PyObject*)&ObjIdType)){
                 id = (reinterpret_cast<_ObjId*>(element))->oid_.id;                    
             } else {
                 PyErr_SetString(PyExc_NameError, "setCwe: Argument must be an ematrix or element");
@@ -3906,7 +3905,7 @@ static struct module_state _state;
         if (!PyArg_ParseTuple(args, "Oss:moose_getfield", &pyobj, &field, &type)){
             return NULL;
         }
-        if (!ObjId_SubtypeCheck(pyobj)){
+        if (!PyObject_IsInstance(pyobj, (PyObject*)&ObjIdType)){
             PyErr_SetString(PyExc_TypeError, "moose.getField(element, fieldname, fieldtype): First argument must be an instance of element or its subclass");
             return NULL;
         }
@@ -4260,7 +4259,7 @@ static struct module_state _state;
     
     static PyObject * moose_ObjId_get_destField_attr(PyObject * self, void * closure)
     {
-        if (!ObjId_SubtypeCheck(self)){
+        if (!PyObject_IsInstance(self, (PyObject*)&ObjIdType)){
             PyErr_SetString(PyExc_TypeError, "First argument must be an instance of element");
             return NULL;
         }
@@ -4348,7 +4347,7 @@ static struct module_state _state;
     static PyObject * moose_ObjId_get_lookupField_attr(PyObject * self,
                                                        void * closure)
     {
-        if (!ObjId_SubtypeCheck(self)){
+        if (!PyObject_IsInstance(self, (PyObject*)&ObjIdType)){
             PyErr_SetString(PyExc_TypeError,
                             "First argument must be an instance of element");
             return NULL;
@@ -4420,7 +4419,7 @@ static struct module_state _state;
     static PyObject * moose_ObjId_get_elementField_attr(PyObject * self,
                                                        void * closure)
     {
-        if (!ObjId_SubtypeCheck(self)){
+      if (!PyObject_IsInstance(self, (PyObject*)&ObjIdType)){
             PyErr_SetString(PyExc_TypeError,
                             "First argument must be an instance of element");
             return NULL;
