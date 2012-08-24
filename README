@@ -6,6 +6,8 @@ systems ranging from subcellular components and biochemical reactions
 to complex models of single neurons, large networks, and systems-level
 processes.
 
+MOOSE is released under LGPL2.
+
 Homepage: http://moose.ncbs.res.in/
 Sourceforge project page: https://sourceforge.net/projects/moose/
 
@@ -100,7 +102,7 @@ Sourceforge project page: https://sourceforge.net/projects/moose/
      make BUILD=release PYTHON=3
 
 
-*** Running:
+*** Installation:
 
     The build process will generate the file _moose.so in
     moose/python/moose directory. The Python scripts for moose are
@@ -146,6 +148,71 @@ Sourceforge project page: https://sourceforge.net/projects/moose/
      sudo cp -r moose/gui /usr/lib/python/dist-packages/moosegui
      sudo ln -s /usr/lib/python/dist-packages/moosegui/MooseGUI.py /usr/bin/moosegui
      sudo chmod a+x /usr/bin/moosegui
+
       
-     
-     
+* Getting started:
+==============================================================================
+
+  MOOSE can be used as a python module. Look into the Demos directory
+  for sample code. A starting point can be Demos/snippets with useful
+  python code snippets that can be used as building blocks.
+
+  MOOSE also comes with a NeuroML reader. Demos/neuroml has some
+  python scripts showing how to load NeuroML models.
+
+  MOOSE is backward compatible with GENESIS
+  kinetikit. Demos/Genesis_files has some examples. You can load a
+  kinetikit model with the loadModel function:
+
+  moose.loadModel(kkit_file_path, target_model_path)
+
+  You can also load GENESIS prototype files. The same loadModel
+  function can be used for this (but you need to have all the channels
+  used in the prototype preloaded in /library):
+
+  moose.loadModel(prototype_file_path, prototype_model_path)
+
+  Top level moose documentation can be accessed in the Python
+  interpreter the usual way:
+
+  import moose
+
+  help(moose)
+
+
+  MOOSE classes have built-in documentation that can be accessed via
+  the doc() function:
+
+  moose.doc(classname)
+
+  will give the full documentation for the class including the fields
+  available.
+
+  moose.doc(classname.fieldname)
+
+  will give you information about a particular field in a class.
+
+
+* Support:
+==============================================================================
+  
+  You can join the MOOSE generic mailing list for your queries:
+  https://lists.sourceforge.net/lists/listinfo/moose-generic
+
+
+* Bugs:
+==============================================================================
+  
+  You can file bug reports and feature requets at the sourceforge tracker:
+  https://sourceforge.net/tracker/?atid=836272&group_id=165660
+
+
+* Authors:
+==============================================================================
+
+  Upinder S. Bhalla	Primary Architect, Chemical kinetic solvers
+  Niraj Dudani	Neuronal solver, parallelization
+  Subhasis Ray	Python interface, XML standards
+  G.V.HarshaRani	Web page design and User Interface
+  Chaitanya.H	Visualization and User Interface
+  Aditya Gilra  NeuroML reader

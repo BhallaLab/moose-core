@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Thu Aug 23 09:53:17 2012 (+0530)
+# Last-Updated: Fri Aug 24 12:32:59 2012 (+0530)
 #           By: subha
-#     Update #: 1868
+#     Update #: 1893
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -98,7 +98,7 @@ tuple of the field values of its elements.',
                   DeprecationWarning)
     if not exists(path):
         raise NameError('Object %s not defined' % (path))
-    return Id(path)
+    return ematrix(path)
 
 ################################################################
 # Wrappers for global functions
@@ -107,7 +107,7 @@ tuple of the field values of its elements.',
 def pwe():
     """Print present working element. Convenience function for GENESIS
     users."""
-    print(_moose.getCwe().getPath())
+    print _moose.getCwe().getPath()
     
 def le(el=None):
     """List elements. """
@@ -119,9 +119,9 @@ def le(el=None):
         el = element(el)
     elif isinstance(el, ematrix):
         el = el[0]
-    print('Elements under', el.path)
+    print 'Elements under', el.path
     for ch in el.children:
-        print(ch.path)
+        print ch.path
 
 ce = setCwe # ce is a GENESIS shorthand for change element.
 
@@ -129,7 +129,7 @@ def syncDataHandler(target):
     """Synchronize data handlers for target.
 
     Parameter:
-    target -- target element or path or Id.
+    target -- target element or path or ematrix.
     """
     raise NotImplementedError('The implementation is not working for IntFire - goes to invalid objects. \
 First fix that issue with SynBase or something in that line.')
@@ -145,7 +145,7 @@ def showfield(elem, field='*', showtype=False):
 
     Parameters:
 
-    element -- Element or path of an existing element or ObjId of an element.
+    element -- Element or path of an existing element.
 
     field -- Field to be displayed. If '*', all fields are displayed.
 
@@ -160,7 +160,7 @@ def showfield(elem, field='*', showtype=False):
         value_field_dict = getFieldDict(elem.class_, 'valueFinfo')
         max_type_len = max([len(dtype) for dtype in list(value_field_dict.values())])
         max_field_len = max([len(dtype) for dtype in list(value_field_dict.keys())])
-        print('\n[', elem.path, ']')
+        print '\n[', elem.path, ']'
         for key, dtype in list(value_field_dict.items()):
             if dtype == 'bad' or key == 'this' or key == 'dummy' or key == 'me' or dtype.startswith('vector') or 'ObjId' in dtype:
                 continue
@@ -170,15 +170,11 @@ def showfield(elem, field='*', showtype=False):
                 # The following hack is for handling both Python 2 and
                 # 3. Directly putting the print command in the if/else
                 # clause causes syntax error in both systems.
-                if _py3k:
-                    printcommand = 'print(%s, end=" ")' % (typestr)
-                else:
-                    printcommand = 'print %s,' % (typestr)
-                eval(printcommand)
-            print(key.ljust(max_field_len + 4), '=', value)
+                print typestr,
+            print key.ljust(max_field_len + 4), '=', value
     else:
         try:
-            print(field, '=', elem.getField(field))
+            print field, '=', elem.getField(field)
         except AttributeError:
             pass # Genesis silently ignores non existent fields
 
@@ -195,64 +191,65 @@ def doc(arg):
     from MOOSE increasing the loading time by ~3x). Hence we provide a
     separate function.
     """
+    indent = '    '
     if isinstance(arg, str):
         tokens = arg.split('.')
         print_field = len(tokens) > 1
         class_path = '/classes/%s' % (tokens[0])
         if exists(class_path):
             if not print_field:
-                print(Cinfo(class_path).docs)
+                print Cinfo(class_path).docs
         else:
-            print('No such class:', tokens[0])
+            print 'No such class:', tokens[0]
             return
     class_id = ematrix('/classes/%s' % (tokens[0]))
     num_finfo = getField(class_id[0], 'num_valueFinfo', 'unsigned')
     finfo = ematrix('/classes/%s/valueFinfo' % (tokens[0]))
-    print('\n* Value Field *')
+    print '\n* Value Field *\n'
     for ii in range(num_finfo):
         oid = element(finfo, 0, ii, 0)
         if print_field:
             if oid.name == tokens[1]:
-                print(oid.name, ':', oid.docs)
+                print indent, oid.name, ':', oid.docs
                 return
         else:
-            print(oid.name, ':', oid.docs)
+            print indent, oid.name, ':', oid.docs
             print
     num_finfo = getField(class_id[0], 'num_srcFinfo', 'unsigned')
     finfo = ematrix('/classes/%s/srcFinfo' % (tokens[0]))
-    print('\n* Source Field *')
+    print '\n* Source Field *\n'
     for ii in range(num_finfo):
         oid = element(finfo, 0, ii, 0)
         if print_field:
             if oid.name == tokens[1]:
-                print(oid.name, ':', oid.docs)
+                print indent, oid.name, ':', oid.docs
                 return
         else:
-            print(oid.name, ':', oid.docs)
+            print indent, oid.name, ':', oid.docs
             print
     num_finfo = getField(class_id[0], 'num_destFinfo', 'unsigned')
-    finfo = Id('/classes/%s/destFinfo' % (tokens[0]))
-    print('\n* Destination Field *')
+    finfo = ematrix('/classes/%s/destFinfo' % (tokens[0]))
+    print '\n* Destination Field *\n'
     for ii in range(num_finfo):
         oid = element(finfo, 0, ii, 0)
         if print_field:
             if oid.name == tokens[1]:
-                print(oid.name, ':', oid.docs)
+                print indent, oid.name, ':', oid.docs
                 return
         else:
-            print(oid.name, ':', oid.docs)
+            print indent, oid.name, ':', oid.docs
             print
     num_finfo = getField(class_id[0], 'num_lookupFinfo', 'unsigned')    
     finfo = ematrix('/classes/%s/lookupFinfo' % (tokens[0]))
-    print('\n* Lookup Field *')
+    print '\n* Lookup Field *\n'
     for ii in range(num_finfo):
         oid = element(finfo, 0, ii, 0)
         if print_field:
             if oid.name == tokens[1]:
-                print(oid.name, ':', oid.docs)
+                print indent, oid.name, ':', oid.docs
                 return
         else:
-            print(oid.name, ':', oid.docs)
+            print indent, oid.name, ':', oid.docs
             print
     
 
