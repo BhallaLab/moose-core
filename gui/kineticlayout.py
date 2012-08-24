@@ -113,7 +113,7 @@ class EllipseItem(QtGui.QGraphicsEllipseItem):
 class ComptRect(QtGui.QGraphicsRectItem):
     def __init__(self,parent,x,y,w,h,item):
         self.Rectemitter = QtCore.QObject()
-        self.mooseObj_ = item.parent
+        self.mooseObj_ = item[0].parent
         self.layoutWidgetPt = parent
         QtGui.QGraphicsRectItem.__init__(self,x,y,w,h)
         self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
@@ -125,6 +125,7 @@ class ComptRect(QtGui.QGraphicsRectItem):
         return (self.layoutWidgetPt)
     
     def mouseDoubleClickEvent(self, event):
+	#print "comptRect",self.mooseObj_
         self.Rectemitter.emit(QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.mooseObj_)
     
     def itemChange(self,change,value):
@@ -254,7 +255,7 @@ class GraphicalView(QtGui.QGraphicsView):
             for unselectitem in self.rubberbandlist:
                 if unselectitem.isSelected() == True:
                     unselectitem.setSelected(0)
-            for items in (qgraphicsitem for qgraphicsitem in self.rubberbandlist if isinstance(qgraphicsitem,Textitem)):
+            for items in (qgraphicsitem for qgraphicsitem in self.rubberbandlist if isinstance(qgraphicsitem,Textitem) or isinstance(qgraphicsitem,RectCompt1) or isinstance(qgraphicsitem, EllipseItem)):
                 self.fitInView(self.startScenepos.x(),self.startScenepos.y(),self.rubberbandWidth,self.rubberbandHeight,Qt.Qt.KeepAspectRatio)
                 if((self.matrix().m11()>=1.0)and(self.matrix().m22() >=1.0)):
                     for item in ( Txtitem for Txtitem in self.sceneContainerPt.items() if isinstance(Txtitem,Textitem) ):
@@ -264,7 +265,7 @@ class GraphicalView(QtGui.QGraphicsView):
             for unselectitem in self.rubberbandlist:
                 if unselectitem.isSelected() == True:
                     unselectitem.setSelected(0)
-            for items in (qgraphicsitem for qgraphicsitem in self.rubberbandlist if isinstance(qgraphicsitem,Textitem)):
+            for items in (qgraphicsitem for qgraphicsitem in self.rubberbandlist if isinstance(qgraphicsitem,Textitem) or isinstance(qgraphicsitem,RectCompt1) or isinstance(qgraphicsitem, EllipseItem)):
                 self.fitInView(self.endScenepos.x(),self.endScenepos.y(),abs(self.rubberbandWidth),abs(self.rubberbandHeight),Qt.Qt.KeepAspectRatio)
                 if((self.matrix().m11()>=1.0)and(self.matrix().m22() >=1.0)):
                     for item in ( Txtitem for Txtitem in self.sceneContainerPt.items() if isinstance (Txtitem, Textitem)):
@@ -462,7 +463,7 @@ class KineticsWidget(QtGui.QWidget):
         forloop = 0
         for ql, va in listItem:
             srcdes = self.lineItem_dict[ql]
-            #print srcdes
+            #print "HERE",srcdes[0]
             
             forloop = 0
             
@@ -475,13 +476,15 @@ class KineticsWidget(QtGui.QWidget):
                         if ((k[0]) == mooseObj):   
                             endtype = k[1]
                         else:
-                            #Need to see what to do, if a sumtotal is connected to enzymesite which is Rectcompt1 arrow is not getting update,if i do this here, then when i move rectcompt1, some else breaks so postpone
-                            #forloop = 1
-                            '''
+                            #Need to see what to do, if a sumtotal is connected to enzymecplx which is Rectcompt1 arrow is not getting update,if i do this here, then when i move rectcompt1, some else breaks so postpone
+                            forloop = 1
+                            
                 if (forloop == 1):
                     gItem = self.mooseId_GText[k[0]]
-                    self.updatearrow(gItem)
-                    '''
+                    #self.updatearrow(gItem)
+		    forloop = 0
+			
+               
             elif(isinstance(srcdes[1],EllipseItem)):
                 pItem = (next((k for k,v in self.mooseId_GText.items() if v == srcdes[1]), None))
                 mooseObject = (next((k for k,v in self.mooseId_GText.items() if v == srcdes[0]), None))
@@ -490,11 +493,12 @@ class KineticsWidget(QtGui.QWidget):
                         if (k[0]) == mooseObj:
                             endtype = k[1]
             else:
-                
+		#print "Does                 
                 pItem  =  (next((k for k,v in self.mooseId_GText.items() if v == srcdes[0]), None))
                 pItem1 =  (next((k for k,v in self.mooseId_GText.items() if v == srcdes[1]), None))
                 if(pItem.class_ == 'ZombieFuncPool' or pItem1.class_ == 'ZombieFuncPool'):
                     endtype = 'st'
+
             arrow = self.calArrow(srcdes[0],srcdes[1],endtype)
             ql.setPolygon(arrow)
       
@@ -599,6 +603,7 @@ class KineticsWidget(QtGui.QWidget):
 
     def positionChange(self,mooseObject):
         #If the item position changes, the corresponding arrow's are claculated
+       #print "mooseObject",mooseObject,type(mooseObject)
        if(isinstance(mooseObject, Textitem)):
             self.updatearrow(mooseObject)
             for k, v in self.qGraCompt.items():
