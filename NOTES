@@ -18349,6 +18349,6 @@ Added unit tests for NeuroNode. Straightforward. Checkin 3862.
 ============================================================================
 24 Aug.
 Should take over length assignment of NeuroNode since this has to match the
-coordinates. Done.
+coordinates. Done. Checkin 3893.
 
 ============================================================================

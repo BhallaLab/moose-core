@@ -17,6 +17,7 @@
 #include "CubeMesh.h"
 #include "CylBase.h"
 #include "NeuroNode.h"
+#include "NeuroStencil.h"
 
 /**
  * Low-level test for Cylbase, no MOOSE calls
@@ -178,7 +179,7 @@ void testNeuroStencil()
 	const unsigned int numNodes = 11;
 	const unsigned int numVoxels = 44; // 4 with 10 each, soma, 3 branch end
 	vector< NeuroNode > nodes;
-	vector< unsigned int> nodeIndex;
+	vector< unsigned int> nodeIndex( numVoxels, 0 );
 	vector< double > vs( numVoxels, 1 );
 	vector< double > area( numVoxels, 1 );
 	vector< double > diffConst( 1, 1e-12 );
@@ -187,12 +188,15 @@ void testNeuroStencil()
 
 	// S[meshIndex][poolIndex]
 	vector< vector< double > > S( numVoxels, molNum ); 
-	double sq = sqrt( 10.0 );
+	double sq = 10.0 / sqrt( 2 );
 		
 	// CylBase( x, y, z, dia, len, numDivs )
 	// NeuroNode( cb, parent, children, startFid, elecCompt, isSphere )
 	// buildNode( nodes, pa, x, y, z, dia, numDivs, isDummy, startFid )
 	unsigned int startFid = 0;
+	////////////////////////////////////////////////////////////////////
+	// Build the nodes
+	////////////////////////////////////////////////////////////////////
 	startFid = buildNode( nodes, 0, 0, 0, 0, 10, 1, 0, startFid ); // soma
 	startFid = buildNode( nodes, 0, 0, -5, 0, 3, 0, 1, startFid ); // dummy1
 	startFid = buildNode( nodes, 1, 0, -15, 0, 2, 10, 0, startFid ); // B1
@@ -207,7 +211,33 @@ void testNeuroStencil()
 	startFid = buildNode( nodes, 9, sq*2, 5+sq*2, 0, 1, 1, 0, startFid ); //AR2
 	assert( startFid == numVoxels );
 	assert( nodes.size() == numNodes );
-	// Setup done.
+	////////////////////////////////////////////////////////////////////
+	// Check lengths
+	for ( unsigned int i = 0; i < numNodes; ++i ) {
+		if ( !( nodes[i].isDummyNode() || nodes[i].isSphere() ) )
+			assert( doubleEq( nodes[i].getLength(), 10e-6 ) );
+	}
+	////////////////////////////////////////////////////////////////////
+	// Build nodeIndex vs and area arrays.
+	for ( unsigned int i = 0; i < numNodes; ++i ) {
+		assert( nodes[i].parent() < numNodes );
+		NeuroNode& parent = nodes[ nodes[i].parent() ];
+		unsigned int end = nodes[i].startFid() + nodes[i].getNumDivs();
+		for ( unsigned int j = nodes[i].startFid(); j < end; ++j ) {
+			assert( j < numVoxels );
+			nodeIndex[j] = i;
+			unsigned int k = j - nodes[i].startFid();
+			vs[j] = nodes[i].voxelVolume( parent, k );
+			area[j] = nodes[i].getDiffusionArea( parent, k );
+		}
+	}
+	assert( doubleEq( vs[ numVoxels-1 ], PI * 10e-6 * 0.25e-12 ) );
+	assert( doubleEq( area[ numVoxels-1 ], PI * 0.25e-12 ) );
+	////////////////////////////////////////////////////////////////////
+	// Setup done. Now build stencil
+	////////////////////////////////////////////////////////////////////
+	
+	NeuroStencil ns( nodes, nodeIndex, vs, area );
 	
 	cout << "." << flush;
 }
