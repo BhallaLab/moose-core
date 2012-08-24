@@ -182,12 +182,6 @@ void testNeuroStencil()
 	vector< unsigned int> nodeIndex( numVoxels, 0 );
 	vector< double > vs( numVoxels, 1 );
 	vector< double > area( numVoxels, 1 );
-	vector< double > diffConst( 1, 1e-12 );
-	vector< double > f( numVoxels, 0 );
-	vector< double > molNum( 1, 0 ); // We only have one pool
-
-	// S[meshIndex][poolIndex]
-	vector< vector< double > > S( numVoxels, molNum ); 
 	double sq = 10.0 / sqrt( 2 );
 		
 	// CylBase( x, y, z, dia, len, numDivs )
@@ -234,10 +228,19 @@ void testNeuroStencil()
 	assert( doubleEq( vs[ numVoxels-1 ], PI * 10e-6 * 0.25e-12 ) );
 	assert( doubleEq( area[ numVoxels-1 ], PI * 0.25e-12 ) );
 	////////////////////////////////////////////////////////////////////
-	// Setup done. Now build stencil
+	// Setup done. Now build stencil and test it.
 	////////////////////////////////////////////////////////////////////
-	
+	vector< double > diffConst( 1, 1e-12 );
+	vector< double > flux( numVoxels, 0 );
+	vector< double > molNum( 1, 0 ); // We only have one pool
+
+	// S[meshIndex][poolIndex]
+	vector< vector< double > > S( numVoxels, molNum ); 
+
 	NeuroStencil ns( nodes, nodeIndex, vs, area );
+	for ( unsigned int i = 0; i < numVoxels; ++i ) {
+		ns.addFlux( i, flux, S, diffConst );
+	}
 	
 	cout << "." << flush;
 }
