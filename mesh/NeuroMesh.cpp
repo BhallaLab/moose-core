@@ -494,25 +494,21 @@ void NeuroMesh::innerBuildDefaultMesh( const Eref& e, const Qinfo* q,
 
 	if ( size < 20e-6 ) {
 			CylBase cb( 0, 0, 0, size, 0, numEntries );
-			NeuroNode soma( cb, 0, noChildren, 0, Id(), 
-							false, true, true );
+			NeuroNode soma( cb, 0, noChildren, 0, Id(), true );
 			nodes_.resize( 1, soma );
 			nodeIndex_.resize( 1, 0 );
 	} else {
 			CylBase cb( 0, 0, 0, 20e-6, 0, 1 );
-			NeuroNode soma( cb, 0, oneChild, 0, Id(), 
-							false, true, true );
+			NeuroNode soma( cb, 0, oneChild, 0, Id(), true );
 			nodes_.resize( 1, soma );
 			nodeIndex_.resize( 1, 0 );
 
-			CylBase cbDummy( 0, 0, 10e-6, 4e-6, 0, 1 );
-			NeuroNode dummy( cbDummy, 0, noChildren, 1, Id(), 
-							true, false, false );
+			CylBase cbDummy( 0, 0, 10e-6, 4e-6, 0, 0 );
+			NeuroNode dummy( cbDummy, 0, noChildren, 1, Id(), false );
 			nodes_.push_back( dummy );
 
 			CylBase cbDend( 0, 0, size, 2e-6, size - 10e-6, numEntries - 1);
-			NeuroNode dend( cbDend, 1, noChildren, 2, Id(), 
-							false, false, false );
+			NeuroNode dend( cbDend, 1, noChildren, 2, Id(), false );
 			nodes_.push_back( dend );
 			for ( unsigned int i = 1; i < numEntries; ++i )
 				nodeIndex_.push_back( 2 );
