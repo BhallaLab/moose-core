@@ -21,16 +21,22 @@ class NeuroNode: public CylBase
 		NeuroNode( const CylBase& cb, 
 			unsigned int parent, const vector< unsigned int >& children,
 			unsigned int startFid_, Id elecCompt,
-			bool isDummyNode, bool isSphere, bool isStartNode );
+			bool isSphere );
 		NeuroNode();
 
 		unsigned int parent() const;
 		unsigned int startFid() const;
 		Id elecCompt() const;
-		bool isDummyNode() const;
+		bool isDummyNode() const; // True if CylBase::numDivs is zero.
 		bool isSphere() const;
-		bool isStartNode() const;
+		bool isStartNode() const; // True if startFid_ == 0
 		const vector< unsigned int >& children() const;
+
+		/**
+		 * Calculates and returns compartment length, from parent xyz to
+		 * self xyz. Assigns own length as a side-effect.
+		 */
+		double calculateLength( const CylBase& parent );
 
 	private:
 		/**
