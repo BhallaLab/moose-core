@@ -28,17 +28,19 @@ use console application to install packages (by default you're logged in as root
 From the console: nano /etc/apt/sources.list and add these lines:
 deb http://archive.ubuntu.com/ubuntu/ precise universe
 deb http://archive.ubuntu.com/ubuntu/ precise multiverse
+Run "gnome-control-center network" to set system proxy (sets env variable http_proxy). Set it at the end to what it'll be where the live USB/DVD is finally used.
 Reload/update package list! apt-get update (different from apt-get upgrade.)
 Now run 'software-center'. Install synaptic from software-center; OR 'apt-get install synaptic'.
 Below packages can also be installed via synaptic / software-center.
 You can even exit from the console and double-click package manager -- will work now that synaptic is installed.
+(You may also need to set synaptic proxy, but don't forget to set them before exiting to what they'll be where the liveUSB/DVD is used.)
 
 Dependencies for moose:
 Always first apt-get update (to get latest list of packages), then install/upgrade.
 apt-get install g++ swig subversion libgsl0-dev python-dev python-numpy
 (./configure, make and sudo make install : libSBML from sourceforge for 'make use_libSBML=1'; off by default.
 requires libxml2 and libxml2-dev via apt-get / synaptic.)
-for the gui:s
+for the gui:
 apt-get install python-qt4
 apt-get install python-qt4-gl python-pygraphviz python-matplotlib
 (these require universe/multiverse repositories enabled, see above.)
@@ -53,23 +55,23 @@ add this line:
 moose   ALL=(ALL:ALL) ALL
 
 Now 'su moose':
-nano ~/.subversion/servers and in the last [global] sections, set http-proxy- host and port.
-svn co https://moose.svn.sourceforge.net/svnroot/moose/moose/branches/dh_branch moose_src
-Inside /home/moose/moose/branches/dh_branch, run: make BUILD=release (default is debug)
-As root: cp -R /home/moose/moose/branches/dh_branch/python/moose /usr/lib/python2.7/dist-packages/
+nano ~/.subversion/servers and in the last [global] sections, set http-proxy- host and port
+(reset it back if you won't need to set proxy where you use the liveUSB/DVD).
+svn co https://moose.svn.sourceforge.net/svnroot/moose/moose/branches/buildQ moose_src
+Inside /home/moose/moose_src, run: make BUILD=release (default is debug)
+With this, after booting from liveCD, you can still svn update gui and Demos in place without needing to recompile.
+As root: cp -R /home/moose/moose_src/python/moose /usr/lib/python2.7/dist-packages/
 Somehow the desktop does not get the PYTHONPATH environment variable from ~/.bashrc .
 So desktop icons will not work by just setting PYTHONPATH in .bashrc .
-Add export PYTHONPATH=/home/moose/moose_src/python in /home/moose/.bashrc and /etc/skel/.bashrc
+Instead as root: cp -R /home/moose/moose_src/python/moose /usr/lib/python2.7/dist-packages
 (Forums claim that /etc/skel gets loaded into /home/ubuntu on login using liveCD/USB,
 so user customizations are lost, but my experience is that if you build with the GUI, /home/moose is retained).
-With this, after booting from liveCD, you can still svn update gui and Demos in place without compilation/copying.
 But updating moose source or python.moose code will require recompile/sudo copying. 
 
-As moose: cp /home/moose/moose/branches/dh_branch/gui/*.desktop /home/moose/Desktop/
-Warning: In the MooseGUI.desktop, write /home/moose/...not ~/ . Icons etc don't display with ~/ .
+As moose: cp /home/moose/moose_src/gui/*.desktop /home/moose/Desktop/
+Warning: In the MooseGUI.desktop, write /home/moose/... not ~/... . Icon images, etc don't display with ~/ .
 
 Also installed openjdk-6-jre and icedtea-plugin (holder for icedtea-6-plugin) for java applets in firefox.
-"gnome-control-center network" to set system proxy.
 
 For further customization of background etc, see here:
 (but see only the customization part, the manual mounting etc does not use UCK):
