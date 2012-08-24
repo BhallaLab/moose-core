@@ -72,14 +72,15 @@ void testNeuroNode()
 {
 	CylBase  a( 0, 0, 0, 1,   1, 1 );
 	CylBase  b( 1, 2, 3, 2,   2, 10 );
+	CylBase  dcb( 1, 2, 3, 2,   2, 0 );
 	vector< unsigned int > twoKids( 2, 2 );
 	twoKids[0] = 2;
 	twoKids[1] = 4;
 	vector< unsigned int > oneKid( 1, 2 );
 	vector< unsigned int > noKids( 0 );
-	NeuroNode na( a, 0, twoKids, 0, Id(), false, true, true );
-	NeuroNode ndummy( b, 0, oneKid, 1, Id(), true, false, false );
-	NeuroNode nb( b, 1, noKids, 1, Id(), false, false, false );
+	NeuroNode na( a, 0, twoKids, 0, Id(), true );
+	NeuroNode ndummy( dcb, 0, oneKid, 1, Id(), false );
+	NeuroNode nb( b, 1, noKids, 1, Id(), false );
 
 	assert( na.parent() == 0 );
 	assert( na.startFid() == 0 );
@@ -110,6 +111,104 @@ void testNeuroNode()
 	assert( nb.children().size() == 0 );
 	assert( doubleEq( nb.volume( a ), PI * (2*(0.5*0.5+0.5+1)/3.0) ) );
 
+	cout << "." << flush;
+}
+
+/**
+ * Low-level test for NeuroStencil, no MOOSE calls
+ * This outlines the policy for how nodes and dummies are 
+ * organized.
+ * The set of nodes represents a neuron like this:
+ *
+ *  \/ /  1
+ *   \/   2
+ *    |   3
+ *    |   4
+ * The soma is at the top of the vertical section. Diameter = 10 microns.
+ * Each little segment is a NeuroNode. Assume 10 microns each.
+ * Level 1 has only 1 voxel in each segment. 1 micron at tip
+ * Level 2 has 10 voxels in each segment. 1 micron at tip,
+ *   2 microns at soma surface
+ * The soma is between levels 2 and 3 and is a single voxel.
+ *  10 microns diameter.
+ * Level 3 has 10 voxels. 3 micron at soma, 2 microns at tip
+ * Level 4 has 10 voxels. 1 micron at tip.
+ * We have a total of 8 full nodes, plus 3 dummy nodes for 
+ * the segments at 2 and 3, since they plug into a sphere.
+	Order is depth first: 
+			0: soma
+			1: basal dummy
+			2: basal segment at level 3
+			3: basal segment at level 4
+			4: left dummy
+			5: left segment at level 2, apicalL1
+			6: left segment at level 1, apicalL2
+			7: other (middle) segment at level 1;  apicalM
+			8: right dummy
+			9: right segment at level 2, apicalR1
+			10: right segment at level 1, apicalR2
+ */
+unsigned int buildNode( vector< NeuroNode >& nodes, unsigned int parent, 
+		double x, double y, double z, double dia, 
+		unsigned int numDivs, bool isDummy, unsigned int startFid )
+{
+	x *= 1e-6;
+	y *= 1e-6;
+	z *= 1e-6;
+	dia *= 1e-6;
+	CylBase cb( x, y, z, dia, 1.0, numDivs );
+	vector< unsigned int > kids( 0 );
+	if ( nodes.size() == 0 ) { // make soma
+		NeuroNode nn( cb, parent, kids, startFid, Id(), true );
+		nodes.push_back( nn );
+	} else if ( isDummy ) { // make dummy
+		NeuroNode nn( cb, parent, kids, startFid, Id(), false );
+		nodes.push_back( nn );
+	} else {
+		NeuroNode nn( cb, parent, kids, startFid, Id(), false );
+		nodes.push_back( nn );
+	}
+	NeuroNode& paNode = nodes[ parent ];
+	nodes.back().calculateLength( paNode );
+	return startFid + numDivs;
+}
+
+void testNeuroStencil()
+{
+	const unsigned int numNodes = 11;
+	const unsigned int numVoxels = 44; // 4 with 10 each, soma, 3 branch end
+	vector< NeuroNode > nodes;
+	vector< unsigned int> nodeIndex;
+	vector< double > vs( numVoxels, 1 );
+	vector< double > area( numVoxels, 1 );
+	vector< double > diffConst( 1, 1e-12 );
+	vector< double > f( numVoxels, 0 );
+	vector< double > molNum( 1, 0 ); // We only have one pool
+
+	// S[meshIndex][poolIndex]
+	vector< vector< double > > S( numVoxels, molNum ); 
+	double sq = sqrt( 10.0 );
+		
+	// CylBase( x, y, z, dia, len, numDivs )
+	// NeuroNode( cb, parent, children, startFid, elecCompt, isSphere )
+	// buildNode( nodes, pa, x, y, z, dia, numDivs, isDummy, startFid )
+	unsigned int startFid = 0;
+	startFid = buildNode( nodes, 0, 0, 0, 0, 10, 1, 0, startFid ); // soma
+	startFid = buildNode( nodes, 0, 0, -5, 0, 3, 0, 1, startFid ); // dummy1
+	startFid = buildNode( nodes, 1, 0, -15, 0, 2, 10, 0, startFid ); // B1
+	startFid = buildNode( nodes, 2, 0, -25, 0, 1, 10, 0, startFid ); // B2
+
+	startFid = buildNode( nodes, 0, 0, 5, 0, 2, 0, 1, startFid ); // dummy2
+	startFid = buildNode( nodes, 4, -sq, 5+sq, 0, 1, 10, 0, startFid ); // AL1
+	startFid = buildNode( nodes, 5, -sq*2, 5+sq*2, 0, 1, 1, 0, startFid ); // AL2
+	startFid = buildNode( nodes, 5, 0, 5+sq*2, 0, 1, 1, 0, startFid ); // AM
+	startFid = buildNode( nodes, 0, 0, 5, 0, 2, 0, 1, startFid ); // dummy3
+	startFid = buildNode( nodes, 8, sq, 5+sq, 0, 1, 10, 0, startFid ); //AR1
+	startFid = buildNode( nodes, 9, sq*2, 5+sq*2, 0, 1, 1, 0, startFid ); //AR2
+	assert( startFid == numVoxels );
+	assert( nodes.size() == numNodes );
+	// Setup done.
+	
 	cout << "." << flush;
 }
 
@@ -467,6 +566,7 @@ void testMesh()
 {
 	testCylBase();
 	testNeuroNode();
+	testNeuroStencil();
 	testCylMesh();
 	testMidLevelCylMesh();
 	testCubeMesh();

@@ -18,8 +18,7 @@
 
 NeuroNode::NeuroNode( const CylBase& cb, 
 		unsigned int parent, const vector< unsigned int >& children,
-		unsigned int startFid, Id elecCompt,
-		bool isDummyNode, bool isSphere, bool isStartNode
+		unsigned int startFid, Id elecCompt, bool isSphere
    	)
 		:
 				CylBase( cb ), 
@@ -27,9 +26,7 @@ NeuroNode::NeuroNode( const CylBase& cb,
 				children_( children ),
 				startFid_( startFid ),
 				elecCompt_( elecCompt ),
-				isDummyNode_( isDummyNode ),
-				isSphere_( isSphere ),
-				isStartNode_( isStartNode )
+				isSphere_( isSphere )
 {;}
 
 NeuroNode::NeuroNode()
@@ -37,11 +34,8 @@ NeuroNode::NeuroNode()
 				parent_( 0 ),
 				startFid_( 0 ),
 				elecCompt_( Id() ),
-				isDummyNode_( false ),
-				isSphere_( false ),
-				isStartNode_( false )
+				isSphere_( false )
 {;}
-
 
 unsigned int NeuroNode::parent() const
 {
@@ -59,7 +53,7 @@ Id NeuroNode::elecCompt() const
 }
 bool NeuroNode::isDummyNode() const
 {
-		return isDummyNode_;
+		return ( getNumDivs() == 0 );
 }
 bool NeuroNode::isSphere() const
 {
@@ -67,10 +61,22 @@ bool NeuroNode::isSphere() const
 }
 bool NeuroNode::isStartNode() const
 {
-		return isStartNode_;
+		return ( startFid_ == 0 );
 }
 
 const vector< unsigned int >& NeuroNode::children() const
 {
 		return children_;
+}
+
+double NeuroNode::calculateLength( const CylBase& parent )
+{
+	if ( &parent == this ) // Do nothing
+			return getLength();
+	double dx = parent.getX() - getX();
+	double dy = parent.getY() - getY();
+	double dz = parent.getZ() - getZ();
+	double ret = sqrt( dx * dx + dy * dy + dz * dz );
+	setLength( ret );
+	return ret;
 }

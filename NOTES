@@ -18344,4 +18344,11 @@ SetGet.h. Checkin 3859.
 Added unit tests for CylBase. Fixed lots of bugs in implementation. Works.
 Checkin 3861.
 
-Added unit tests for NeuroNode. Straightforward.
+Added unit tests for NeuroNode. Straightforward. Checkin 3862.
+
+============================================================================
+24 Aug.
+Should take over length assignment of NeuroNode since this has to match the
+coordinates. Done.
+
+============================================================================
