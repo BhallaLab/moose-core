@@ -1,0 +1,151 @@
+-*- mode: org -*-
+
+MOOSE is the Multiscale Object-Oriented Simulation Environment. is the
+core of a modern software platform for the simulation of neural
+systems ranging from subcellular components and biochemical reactions
+to complex models of single neurons, large networks, and systems-level
+processes.
+
+Homepage: http://moose.ncbs.res.in/
+Sourceforge project page: https://sourceforge.net/projects/moose/
+
+
+* Getting MOOSE 
+==============================================================================
+
+** Released versions of MOOSE are available in the sourceforge fiel area:
+
+   https://sourceforge.net/projects/moose/files/moose/Moose%20Beta%201.4.0/
+
+   Download and install the prepackaged version suitable for your
+   platform. If no such package exists, you can build it from the sources
+   (download the file ending with tar.gz or tar.bz2 or zip and unpack it,
+   go through README and INSTALLATION).
+
+** Development version:
+
+   You can download the development sources using a subversion client:
+
+   svn co http://moose.svn.sourceforge.net/svnroot/moose/moose/trunk moose
+
+   or 
+
+   svn co http://moose.svn.sourceforge.net/svnroot/moose/moose/branches/{branchname} moose
+
+
+* Building MOOSE from sources
+==============================================================================
+
+** Linux:
+
+*** Requirements:
+   - g++
+   - gnu make
+   - Python development headers and libraries
+   - GNU Scientific Library (GSL) development packages
+   - pthreads library
+   - libsbml (if you want SBML support).
+   - numpy development libraries
+
+
+     On Debian based distributions these can be obtained by the command:
+
+     sudo apt-get install g++ make python-dev libgsl0-dev libpthread-stubs0-dev python-numpy
+
+     These names are for Ubuntu 12.04, the exact package names may
+     vary depending on your distribution.
+
+     On Fedora based distributions, you can use:
+
+     sudo yum install {package names}
+
+     where {package names} is the list of Fedora packages
+     corresponding to thos mentioned above.
+  
+
+
+*** Building:
+
+    You may need to inform make of C++ include directories and library
+    directories if your installed packages are at non-standard
+    location. For example, if your have libsbml installed in
+    /opt/libsbml and the header files are located in
+    /opt/libsbml/include and lib files are located in
+    /opt/libsbml/lib, you can set the environment variables CXXFLAGS
+    and LDFLAGS to include these before calling make:
+
+    export CXXFLAGS= -I/opt/libsbml/include
+    export LDFLAGS= -L/opt/libsbml/lib
+
+    Lookup the manuals for gcc and gnu make to understand CXXFLAGS and
+    LDFLAGS.
+
+
+**** Release build:
+     cd moose
+     make BUILD=release
+
+**** Debug build:
+     cd moose
+     make BUILD=debug
+
+**** Python 3K
+     By default, MOOSE is built for Python 2. In case you want to
+     build MOOSE for Python 3K, you need to pass the additional flag:
+
+     PYTHON=3
+
+     like:
+     
+     make BUILD=release PYTHON=3
+
+
+*** Running:
+
+    The build process will generate the file _moose.so in
+    moose/python/moose directory. The Python scripts for moose are
+    located in the same directory. To import moose from Python, you
+    need to add the moose/python directory in your PYTHONPATH
+    environment variable:
+
+    export PYTHONPATH=$HOME/moose/python
+
+    assuming you have the moose directory inside your home directory.
+    If you want to have MOOSE available to all users, copy it to your
+    Python dist-packages directory.
+
+    sudo cp -r $home/moose/python /usr/lib/python2.7/dist-packages/moose
+
+    /usr/lib/python2.7/ is the default location for installed Python
+    modules on Ubuntu with Python 2.7. Replace it with that for your
+    version.
+
+    Now you can import moose in a Python script or interpreter with the statement:
+
+    import moose
+
+
+**** GUI:
+     To run the moose GUI, you need some additional packages:
+
+     - Python bindings for Qt4 or higher
+     - matplotlib
+     - Python OpenGL
+     - Python bindings for Qt's OpenGL module
+
+     On Ubuntu 12.04 these can be installed with:
+
+     sudo apt-get install python-matplotlib python-qt4 python-qt4-gl 
+
+     The GUI code is located in moose/gui.
+
+     Again, for systemwide use, you can copy this directory somewhere
+     and create a link to the MooseGUI.py file in that directory and
+     make it executable:
+
+     sudo cp -r moose/gui /usr/lib/python/dist-packages/moosegui
+     sudo ln -s /usr/lib/python/dist-packages/moosegui/MooseGUI.py /usr/bin/moosegui
+     sudo chmod a+x /usr/bin/moosegui
+      
+     
+     
