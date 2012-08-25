@@ -46,13 +46,14 @@ Sourceforge project page: https://sourceforge.net/projects/moose/
    - Python development headers and libraries
    - GNU Scientific Library (GSL) development packages
    - pthreads library
+   - HDF5 development library   
    - libsbml (if you want SBML support).
    - numpy development libraries
 
 
      On Debian based distributions these can be obtained by the command:
 
-     sudo apt-get install g++ make python-dev libgsl0-dev libpthread-stubs0-dev python-numpy
+     sudo apt-get install g++ make python-dev libgsl0-dev libpthread-stubs0-dev python-numpy libhdf5-serial-dev
 
      These names are for Ubuntu 12.04, the exact package names may
      vary depending on your distribution.
@@ -126,6 +127,13 @@ Sourceforge project page: https://sourceforge.net/projects/moose/
 
     import moose
 
+***** Recommended:
+
+      In addition to the essential libraries for building MOOSE, you
+      can use many of the Python libraries freely available for
+      scientific computing. Among these are:
+      - scipy: provides many utility functions for data analysis
+      - h5py: provides capability to read and write HDF5 files.
 
 **** GUI:
      To run the moose GUI, you need some additional packages:
