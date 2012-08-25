@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Aug 23 17:34:55 2012 (+0530)
 # Version: 
-# Last-Updated: Fri Aug 24 15:44:04 2012 (+0530)
+# Last-Updated: Sat Aug 25 12:31:00 2012 (+0530)
 #           By: subha
-#     Update #: 155
+#     Update #: 265
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -51,10 +51,13 @@ import h5py as h5
 import time
 
 cpptonp = {
-    'int': 'i8',
+    'int': 'i4',
+    'long': 'i8',
     'bool': 'b',
-    'unsigned int': 'u8',
-    'float': 'f8',
+    'unsigned int': 'u4',
+    'unsigned long': 'u8',
+    'float': 'f4',
+    'double': 'f8',
     'string': 'S1024'}
     
 size_step=256
@@ -67,17 +70,29 @@ def savestate(filename=None):
     if filename is None:
         filename = 'moose_session_' + time.strftime('%Y%m%d_%H%M%S') + '.hdf5'
     with h5.File(filename, 'w') as fd:
-        root = fd.create_group('/root')
+        root = fd.create_group('/elements')
+        meta = fd.create_group('/metadata')
+        typeinfo_dataset = meta.create_dataset('typeinfo', shape=(size_step,), dtype=[('path', 'S1024'), ('class', 'S64'), ('dims', 'S64'), ('parent', 'S1024')], compression='gzip', compression_opts=6)
+        typeinfo = []
         class_dataset_dict = {}
         class_count_dict = {}
         class_array_dict = {}
+        objcount = 0
         for obj in moose__.wildcardFind("/##"):
             if obj.path.startswith('/Msg') or obj.path.startswith('/class') or obj.class_ == 'Table' or obj.class_ == 'TableEntry':
                 continue
-            # print obj.path, obj.class_
+            print 'Processing:', obj.path, obj.class_
+            typeinfo.append((obj.path, obj.class_, str(obj.shape), obj[0].parent.path))
+            objcount += 1
+            if len(typeinfo) == size_step:
+                typeinfo_dataset.resize(objcount)
+                typeinfo_dataset[objcount - size_step: objcount] = np.rec.array(typeinfo, typeinfo_dataset.dtype)
+                typeinfo = []
+            # If we do not yet have dataset for this class, create one and keep it in dict
             if obj.class_ not in class_dataset_dict:
-                # print 'Creating entries for class:', obj.class_
+                print 'Creating entries for class:', obj.class_
                 fielddict = moose__.getFieldDict(obj.class_, 'valueFinfo')
+                print fielddict
                 keys = sorted(list(fielddict.keys()))
                 fields = [] # [('path', 'S1024')]
                 for fieldname in keys:
@@ -91,9 +106,14 @@ def savestate(filename=None):
                 class_dataset_dict[obj.class_] = ds
                 class_array_dict[obj.class_] = []
                 class_count_dict[obj.class_] = 0
+            # Lookup the dataset for the class this object belongs to
             ds = class_dataset_dict[obj.class_]
             for entry in obj:
-                fields = [entry.getField(f) for f in ds.dtype.names]
+                fields = []
+                print entry.path,
+                for f in ds.dtype.names:
+                    print 'getting field:', f
+                    entry.getField(f)
                 fields = [f.path if isinstance(f, moose__.ematrix) or isinstance(f, moose__.element) else f for f in fields]
                 class_array_dict[obj.class_].append(fields)
                 # print 'fields:'
@@ -112,8 +132,34 @@ def savestate(filename=None):
             if len(class_array_dict[classname]) > 0:
                 start = class_count_dict[classname] - len(class_array_dict[classname])
                 ds[start:] = np.rec.array(class_array_dict[classname], dtype=ds.dtype)
-            
-                        
+
+        if len(typeinfo) > 0:
+            typeinfo_dataset.resize((objcount,))
+            typeinfo_dataset[objcount-len(typeinfo): objcount] = np.rec.array(typeinfo, dtype=typeinfo_dataset.dtype)
+
+def restorestate(filename):    
+    wfields = {}
+    for cinfo in moose__.element('/classes').children:
+        cname = cinfo[0].name
+        wfields[cname] = [f[len('set_'):] for f in moose__.getFieldNames(cname, 'destFinfo') 
+                          if f.startswith('set_') and f not in ['set_this', 'set_name', 'set_lastDimension', 'set_runTime'] and not f.startswith('set_num_')]
+    with h5.File(filename, 'r') as fd:
+        typeinfo = fd['/metadata/typeinfo'][:]
+        classdict = {}
+        dimsdict = dict(zip(typeinfo['path'], typeinfo['dims']))
+        classdict = dict(zip(typeinfo['path'], typeinfo['class']))
+        parentdict = dict(zip(typeinfo['path'], typeinfo['parent']))
+        sorted_paths = sorted(typeinfo['path'], key=lambda x: x.count('/'))
+        for path in sorted_paths:
+            name = path.rpartition('/')[-1].partition('[')[0]
+            moose__.ematrix(parentdict[path] + '/' + name, eval(dimsdict[path]), classdict[path])
+        for key in fd['/elements']:
+            dset = fd['/elements/'][key][:]
+            fieldnames = dset.dtype.names
+            for ii in range(len(dset)):
+                obj = moose__.element(dset['path'][ii])
+                for f in wfields[obj.class_]:
+                    obj.setField(f, dset[f][ii])
 
 # 
 # hdfutil.py ends here
