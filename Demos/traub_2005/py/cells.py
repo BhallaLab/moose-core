@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Mar  9 23:17:17 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Jul 19 10:41:35 2012 (+0530)
+# Last-Updated: Mon Aug 27 17:05:14 2012 (+0530)
 #           By: subha
-#     Update #: 465
+#     Update #: 669
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -29,6 +29,8 @@
 
 # Code:
 
+import csv
+import numpy as np
 from collections import defaultdict
 import moose
 import config
@@ -39,7 +41,26 @@ import archan
 import cachans
 import capool
 from channelinit import init_chanlib
-        
+
+channel_name_list = ['AR','CaPool','CaL','CaT','CaT_A','K2','KA','KA_IB','KAHP','KAHP_DP','KAHP_SLOWER','KC','KC_FAST','KDR','KDR_FS','KM','NaF','NaF2','NaF_TCR','NaP','NaPF','NaPF_SS','NaPF_TCR', 'NaF2_nRT']
+channel_types = ['ar','cad','cal','cat', 'k2', 'ka','kahp','kc','kdr','km','naf','naf2','nap','napf']
+channel_type_dict = {
+    'cad': ['CaPool'],
+    'km': ['KM'],
+    'ar': ['AR'],
+    'cal': ['CaL'],    
+    'cat':['CaT', 'CaT_A'],
+    'k2': ['K2'],    
+    'ka': ['KA', 'KA_IB'],
+    'kahp': ['KAHP', 'KAHP_DP','KAHP_SLOWER'],
+    'kc': ['KC', 'KC_FAST'],
+    'kdr': ['KDR', 'KDR_FS'],
+    'nap':['NaP'],
+    'naf': ['NaF', 'NaF_TCR'],
+    'napf': ['NaPF', 'NaPF_SS','NaPF_TCR'],
+    'naf2': ['NaF2', 'NaF2_nRT']}
+
+
 def read_keyvals(filename):
     """Read the mapping between key value pairs from file.
     
@@ -68,6 +89,7 @@ def adjust_chanlib(cdict):
     value for AR channel. Set the tau for Ca pool."""
     channel_dict = init_chanlib()
     for ch in channel_dict.values():
+        print 'adjust_chanlib:', ch.path
         if isinstance(ch, kchans.KChannel):
             ch.Ek = cdict['EK']
         elif isinstance(ch, nachans.NaChannel):
@@ -78,9 +100,9 @@ def adjust_chanlib(cdict):
             ch.Ek = cdict['EAR']
             if 'X_AR' in cdict:
                 ch.X = cdict['X_AR']        
-        elif isinstance(ch, capool.CaPool):
+        elif isinstance(ch, moose.CaConc):
             ch.tau = cdict['TauCa']            
-
+            print 'Tau_Ca set to', ch.tau
 def read_prototype(celltype, cdict):
     """Read the cell prototype file for the specified class. The
     channel properties are updated using values in cdict."""
@@ -176,7 +198,61 @@ class CellBase(moose.Neutral):
     def presynaptic(self):
         """Presynaptic compartment. Each subclass should define
         _presynaptic as the index of this compartment."""
-        return self.comp[self.__class__._presynaptic]
+        return self.comp(self.__class__._presynaptic)
+
+    def dump_cell(self, file_path):
+        """Dump the cell information compartment by compartment for
+        comparison with NEURON in csv format. All parameters are
+        converted to SI units."""
+        with open(file_path, 'w') as dump_file:
+            fieldnames = ["comp", "len", "dia", "sarea", "xarea", "Em", "Cm","Rm","Ra"]
+            for chtype in channel_types:
+                if chtype != 'cad':
+                    fieldnames += ['e_' + chtype, 'gbar_' + chtype]
+                else:
+                    fieldnames += ['tau_' + chtype, 'beta_' + chtype]
+            print fieldnames
+            writer = csv.DictWriter(dump_file, fieldnames=fieldnames, delimiter=',')
+            writer.writeheader()
+            comps = moose.wildcardFind('%s/##[TYPE=Compartment]' % (self.path))
+            comps = sorted(comps, key=lambda x: int(x.name[0].rpartition('_')[-1]))            
+            for comp_e in comps:
+                comp = moose.element(comp_e)
+                row = {}
+                row['comp'] = comp.name
+                row['len'] = comp.length
+                row['dia'] = comp.diameter
+                row['sarea'] = comp.length * comp.diameter * np.pi
+                row['xarea'] = comp.diameter * comp.diameter * np.pi/4
+                row['Em'] = comp.Em
+                row['Cm'] = comp.Cm
+                row['Rm'] = comp.Rm
+                row['Ra'] = comp.Ra
+                if moose.exists(comp.path + '/CaPool'):
+                    ca_pool = moose.CaConc(comp.path + '/CaPool')
+                for chtype in channel_types:
+                    found = False
+                    for chname in channel_type_dict[chtype]:
+                        chpath = comp.path + '/' + chname
+                        if moose.exists(chpath):
+                            found = True
+                            channel = moose.element(chpath)
+                            if channel.class_ == 'HHChannel':
+                                row['e_'+chtype] = channel.Ek
+                                row['gbar_'+chtype] = channel.Gbar                        
+                            elif channel.class_ == 'CaConc':
+                                row['tau_cad'] = channel.tau
+                                row['beta_cad'] = channel.B
+                            break
+                    if not found:
+                        print 'could not find', chtype
+                        if chtype != 'cad':
+                            row['e_'+chtype] = 0.0
+                            row['gbar_'+chtype] = 0.0
+                        else:
+                            row['tau_cad'] = 0.0
+                            row['beta_cad'] = 0.0
+                writer.writerow(row)
 
 
 class SupPyrRS(CellBase):
