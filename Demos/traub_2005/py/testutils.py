@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat May 26 10:41:37 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Jul 17 17:09:59 2012 (+0530)
+# Last-Updated: Mon Aug 27 16:58:55 2012 (+0530)
 #           By: subha
-#     Update #: 309
+#     Update #: 357
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -236,6 +236,66 @@ def compare_data_arrays(left, right, relative='maxw', plot=False, x_range=None):
     else:
         return err
     
+import csv
+
+def compare_cell_dump(left, right, rtol=1e-3, atol=1e-8, row_header=True, col_header=True):
+    print 'Comparing:', left, 'with', right
+    ret = True
+    left_file = open(left, 'rb')
+    right_file = open(right, 'rb')
+    left_reader = csv.DictReader(left_file, delimiter=',')
+    right_reader = csv.DictReader(right_file, delimiter=',')
+    lheader = list(left_reader.fieldnames)
+    lheader.remove('comp')
+    lheader = sorted(lheader)
+    rheader = list(right_reader.fieldnames)
+    rheader.remove('comp')
+    rheader = sorted(rheader)
+    if len(lheader) != len(rheader):
+        print 'Column number mismatch: left %d <-> right %d' % (len(lheader), len(rheader))
+        return False
+    for ii in range(len(lheader)):
+        if lheader[ii] != rheader[ii]:
+            print ii, '-th column name mismatch:', lheader[ii], '<->', rheader[ii]
+            return False
+    
+    index = 2
+    left_end = False
+    right_end = False
+    while True:
+        try:
+            left_row = left_reader.next()
+        except StopIteration:
+            left_end = True
+        try:
+            right_row = right_reader.next()
+        except StopIteration:
+            right_end = True
+        if left_end and not right_end:
+            print left, 'run out of line after', index, 'rows'
+            return False
+        if right_end and not left_end:
+            print right, 'run out of line after', index, 'rows'
+            return False
+        if left_end and right_end:
+            return ret
+        if len(left_row) != len(right_row):
+            print 'No. of columns differ: left - ', len(left_row), 'right -', len(right_row)
+            ret = False
+            break        
+        for key in lheader:
+            try:
+                left = float(left_row[key])
+                right = float(right_row[key])
+                if not np.allclose(float(left), float(right), rtol=rtol, atol=atol):
+                    print 'Mismatch in row:%s, column:%s. Values: %g <> %g' % (index, key, left, right)
+                    ret = False
+            except ValueError, e:
+                print e
+                print 'Row:', index, 'Key:', key, left_row[key], right_row[key]
+        index = index + 1
+    return ret
+
 
 class ChannelTestBase(unittest.TestCase):
     def __init__(self, *args, **kwargs):
