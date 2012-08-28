@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Mar  9 23:17:17 2012 (+0530)
 # Version: 
-# Last-Updated: Mon Aug 27 17:05:14 2012 (+0530)
+# Last-Updated: Mon Aug 27 18:52:54 2012 (+0530)
 #           By: subha
-#     Update #: 669
+#     Update #: 674
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -42,8 +42,21 @@ import cachans
 import capool
 from channelinit import init_chanlib
 
-channel_name_list = ['AR','CaPool','CaL','CaT','CaT_A','K2','KA','KA_IB','KAHP','KAHP_DP','KAHP_SLOWER','KC','KC_FAST','KDR','KDR_FS','KM','NaF','NaF2','NaF_TCR','NaP','NaPF','NaPF_SS','NaPF_TCR', 'NaF2_nRT']
-channel_types = ['ar','cad','cal','cat', 'k2', 'ka','kahp','kc','kdr','km','naf','naf2','nap','napf']
+channel_types = ['ar',
+                 'cad',
+                 'cal',
+                 'cat',
+                 'k2',
+                 'ka',
+                 'kahp',
+                 'kc',
+                 'kdr',
+                 'km',
+                 'naf',
+                 'naf2',
+                 'nap',
+                 'napf']
+
 channel_type_dict = {
     'cad': ['CaPool'],
     'km': ['KM'],
@@ -102,7 +115,7 @@ def adjust_chanlib(cdict):
                 ch.X = cdict['X_AR']        
         elif isinstance(ch, moose.CaConc):
             ch.tau = cdict['TauCa']            
-            print 'Tau_Ca set to', ch.tau
+
 def read_prototype(celltype, cdict):
     """Read the cell prototype file for the specified class. The
     channel properties are updated using values in cdict."""
@@ -245,7 +258,6 @@ class CellBase(moose.Neutral):
                                 row['beta_cad'] = channel.B
                             break
                     if not found:
-                        print 'could not find', chtype
                         if chtype != 'cad':
                             row['e_'+chtype] = 0.0
                             row['gbar_'+chtype] = 0.0
