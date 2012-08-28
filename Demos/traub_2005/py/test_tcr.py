@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Jul 16 16:12:55 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Aug 28 12:24:49 2012 (+0530)
+# Last-Updated: Tue Aug 28 15:22:59 2012 (+0530)
 #           By: subha
-#     Update #: 271
+#     Update #: 294
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -135,6 +135,26 @@ class TestTCR(unittest.TestCase):
     def setUp(self):
         self.testId = uuid.uuid4().int
         params = setupCurrentStepModel(self.testId, 'TCR', pulsearray, simdt, plotdt, solver='hsolve')
+        cell = params['cell']
+        moose.le('/library')
+        kahp_slower = moose.element(cell.soma.path + '/KAHP_SLOWER')
+        capool = moose.element(cell.soma.path + '/CaPool')
+        # print '************* Messages for KAHP_SLOWER ******************'
+        # for msg in kahp_slower.msgIn:
+        #     print 'E1:', msg.e1
+        #     print '\nSrc fields on E1:\n', msg.srcFieldsOnE1
+        #     print '\nDest fields on E1:\n', msg.destFieldsOnE1
+        #     print 'E2:', msg.e2
+        #     print '\nSrc fields on E2:\n', msg.srcFieldsOnE2
+        #     print '\nDest fields on E2:\n', msg.destFieldsOnE2
+        # print '************* Messages for CaPool ******************'
+        # for msg in capool.msgOut:
+        #     print 'E1:', msg.e1
+        #     print 'Src fields on E1:\n', msg.srcFieldsOnE1
+        #     print 'Dest fields on E1:\n', msg.destFieldsOnE1
+        #     print 'E2:', msg.e2
+        #     print '\nSrc fields on E2:\n', msg.srcFieldsOnE2
+        #     print '\nDest fields on E2:\n', msg.destFieldsOnE2
         print 'Finished model setup'
         self.dump_file = 'data/TCR.csv'
         params['cell'].dump_cell(self.dump_file)

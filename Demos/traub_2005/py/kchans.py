@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Apr 17 23:58:49 2009 (+0530)
 # Version: 
-# Last-Updated: Tue Jul 17 23:21:29 2012 (+0530)
-#           By: Subhasis Ray
-#     Update #: 1049
+# Last-Updated: Tue Aug 28 14:35:03 2012 (+0530)
+#           By: subha
+#     Update #: 1054
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -141,11 +141,8 @@ class K2(KChannel):
 class KM(KChannel):
     """Mascarinic sensitive K channel"""
     annotation = {'cno': 'cno_0000105'}
-
     abstract = False
-
     Xpower = 1
-
     alpha_x =  1e3 * 0.02 / ( 1 + exp((-v_array - 20e-3 ) / 5e-3))
     beta_x = 1e3 * 0.01 * exp((-v_array - 43e-3) / 18e-3)
 
@@ -158,7 +155,7 @@ class KCaChannel(KChannel):
     annotation = {'cno': 'cno_0000047'}
     abstract = True
     Zpower = 1
-
+    mstring = ('addmsg1', '../CaPool concOut . concen')
     def __init__(self, path):
         KChannel.__init__(self, path)
 
