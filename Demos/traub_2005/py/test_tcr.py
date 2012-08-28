@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Jul 16 16:12:55 2012 (+0530)
 # Version: 
-# Last-Updated: Mon Aug 27 16:59:35 2012 (+0530)
+# Last-Updated: Tue Aug 28 12:24:49 2012 (+0530)
 #           By: subha
-#     Update #: 203
+#     Update #: 271
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -44,13 +44,27 @@ import pylab
 import moose
 from testutils import compare_cell_dump
 import cells
+from moose import utils
 
-def setupClocks(dt):
+INITCLOCK = 0
+ELECCLOCK = 1
+CHANCLOCK = 2
+POOLCLOCK = 3
+LOOKUPCLOCK = 6
+STIMCLOCK = 7
+PLOTCLOCK = 8
+
+def setupClocks(simdt, plotdt):
     print 'Setting up clocks'
-    for ii in range(10):
-        moose.setClock(ii, dt)
-
-def setupCurrentStepModel(testId, celltype, pulsearray, dt, solver=None):
+    moose.setClock(INITCLOCK, simdt)
+    moose.setClock(ELECCLOCK, simdt)
+    moose.setClock(CHANCLOCK, simdt)
+    moose.setClock(POOLCLOCK, simdt)
+    moose.setClock(LOOKUPCLOCK, simdt)
+    moose.setClock(STIMCLOCK, simdt)
+    moose.setClock(PLOTCLOCK, plotdt)
+    
+def setupCurrentStepModel(testId, celltype, pulsearray, simdt, plotdt, solver=None):
     """Setup a single cell simulation.
 
     simid - integer identifying the model
@@ -62,11 +76,6 @@ def setupCurrentStepModel(testId, celltype, pulsearray, dt, solver=None):
     modelContainer = moose.Neutral('/test%d' % (testId))
     dataContainer = moose.Neutral('/data%d' % (testId))
     cell = cells.TCR('%s/TCR' % (modelContainer.path)) # moose.copy(cells.TCR.prototype, modelContainer.path)#
-    if solver == 'hsolve':
-        hsolve = moose.HSolve(cell.path + '/solve')
-        hsolve.dt = dt
-        hsolve.seed = cell.soma
-        hsolve.target = cell.path
     pulsegen = moose.PulseGen('%s/pulse' % (modelContainer.path))
     pulsegen.count = len(pulsearray)
     for ii in range(len(pulsearray)):
@@ -80,28 +89,34 @@ def setupCurrentStepModel(testId, celltype, pulsearray, dt, solver=None):
     moose.connect(somaVm, 'requestData', cell.soma, 'get_Vm')
     pulseTable = moose.Table('%s/pulse' % (dataContainer.path))
     moose.connect(pulseTable, 'requestData', pulsegen, 'get_output')
-    setupClocks(dt)
-    moose.useClock(0, '%s/##[ISA=Compartment]' % (cell.path), 'init')
-    moose.useClock(1, '%s/##[ISA=Compartment]' % (cell.path), 'process')
-    moose.useClock(2, '%s/##[ISA=HHChannel]' % (cell.path), 'process')
-    moose.useClock(3, '%s/##[ISA=CaConc]' % (cell.path), 'process')
-    moose.useClock(7, pulsegen.path, 'process')
-    moose.useClock(8, '%s/##' % (dataContainer.path), 'process')
+    hsolve_path = None
+    if solver == 'hsolve':
+        hsolve = moose.HSolve(modelContainer.path + '/solve')
+        hsolve.dt = simdt
+        hsolve_path = hsolve.path
+        hsolve.target = cell.path
+    setupClocks(simdt, plotdt)
+    if hsolve_path is None:
+        moose.useClock(INITCLOCK, modelContainer.path+'/##[TYPE=Compartment]', 'init')
+        moose.useClock(ELECCLOCK, modelContainer.path+'/##[TYPE=Compartment]', 'process')
+        moose.useClock(CHANCLOCK, modelContainer.path+'/##[TYPE=HHChannel]', 'process')
+        moose.useClock(POOLCLOCK, modelContainer.path+'/##[TYPE=CaConc]', 'process')
+    else:
+        moose.useClock(INITCLOCK, hsolve_path, 'process')
+    moose.useClock(STIMCLOCK, modelContainer.path+'/##[TYPE=PulseGen]', 'process')
+    moose.useClock(PLOTCLOCK, dataContainer.path+'/##[TYPE=Table]', 'process')
     return {'cell': cell,
             'stimulus': pulsegen,
             'presynapticVm': presynVm,
             'somaVm': somaVm,
-            'stimTable': pulseTable
+            'stimTable': pulseTable,
+            'model': modelContainer,
             }
     
 def runsim(simtime, steptime=0.1):
-    moose.reinit()
-    clock = moose.Clock('/clock')
-    # while clock.currentTime < simtime - steptime:
-    #     moose.start(steptime)
-    #     print 't =', clock.currentTime
-    #     time.sleep(0.005)
-    moose.start(simtime - clock.currentTime)
+    print 'Starting simulation for:', simtime, 's'
+    moose.start(simtime)
+    print 'Finished simulation'
 
 # pulsearray = [[1.0, 100e-3, 1e-9],
 #               [0.5, 100e-3, 0.3e-9],
@@ -112,17 +127,17 @@ def runsim(simtime, steptime=0.1):
 pulsearray = [[100e-3, 100e-3, 1e-9],
               [1e9, 0, 0]]
 
-simdt = 0.25e-4
+simdt = 0.25e-5
+plotdt = 0.25e-3
 simtime = 1.0
 
 class TestTCR(unittest.TestCase):
     def setUp(self):
         self.testId = uuid.uuid4().int
-        params = setupCurrentStepModel(self.testId, 'TCR', pulsearray, simdt)
-        dump_file = 'data/TCR.csv'
-        params['cell'].dump_cell(dump_file)
-        compare_cell_dump(dump_file, '../nrn/'+dump_file)
-        print 'Starting simulation'
+        params = setupCurrentStepModel(self.testId, 'TCR', pulsearray, simdt, plotdt, solver='hsolve')
+        print 'Finished model setup'
+        self.dump_file = 'data/TCR.csv'
+        params['cell'].dump_cell(self.dump_file)
         start = datetime.now()
         runsim(simtime)
         end = datetime.now()
@@ -154,8 +169,10 @@ class TestTCR(unittest.TestCase):
         pylab.legend()
         pylab.show()
 
-    def testDefault(self):
-        pass
+    def testChannelDensities(self):
+        equal = compare_cell_dump(self.dump_file, '../nrn/'+self.dump_file)
+        self.assertTrue(equal)
+
 
 if __name__ == '__main__':
     unittest.main()
