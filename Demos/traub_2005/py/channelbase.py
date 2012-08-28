@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri May  4 14:55:52 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Jul 19 23:17:22 2012 (+0530)
-#           By: Subhasis Ray
-#     Update #: 314
+# Last-Updated: Tue Aug 28 14:35:25 2012 (+0530)
+#           By: subha
+#     Update #: 315
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -99,7 +99,7 @@ def get_class_field(name, cdict, bases, fieldname, default=None):
         for base in bases:
             if hasattr(base, fieldname):
                 return getattr(base, fieldname)
-    warn('field %s not in the hierarchy of %s class. Returning default value.' % (fieldname, name))
+    # warn('field %s not in the hierarchy of %s class. Returning default value.' % (fieldname, name))
     return default
             
 
