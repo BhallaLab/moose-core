@@ -374,12 +374,12 @@ void ZombieHHChannel::reinit( const Eref& er, ProcPtr info )
 
 void ZombieHHChannel::handleConc( double conc )
 {
-    cout << "Handle concen: " << conc << endl;
+    ;
 }
 
 void ZombieHHChannel::createGate(const Eref& e, const Qinfo * q, string name)
 {
-    cout << "ZombieHHChannel::createGate" << endl;
+    ;
 }
 
 ///////////////////////////////////////////////////
@@ -407,17 +407,14 @@ void ZombieHHChannel::setNumGates(unsigned int num)
 
 unsigned int ZombieHHChannel::getNumXgates() const
 {
-    cout << "ZombieHHChannel::getNumXgates()" << endl;
     return -1;
 }
 unsigned int ZombieHHChannel::getNumYgates() const
 {
-    cout << "ZombieHHChannel::getNumYgates()" << endl;
     return -1;
 }
 unsigned int ZombieHHChannel::getNumZgates() const
 {
-    cout << "ZombieHHChannel::getNumZgates()" << endl;
     return -1;
 }
 
