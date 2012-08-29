@@ -420,7 +420,7 @@ ObjId SparseMsg::findOtherEnd( ObjId f ) const
 			else
 				return ObjId( e2()->id(), DataId( colIndex[0] ) );
 		}
-		return ObjId( e2()->id(), DataId::bad );
+		return ObjId( e2()->id(), DataId::bad() );
 	} else if ( f.id() == e2() ) { // Bad! Slow! Avoid!
 		vector< unsigned int > entry;
 		vector< unsigned int > rowIndex;
@@ -435,9 +435,9 @@ ObjId SparseMsg::findOtherEnd( ObjId f ) const
 			else
 				return ObjId( e1()->id(), DataId( rowIndex[0] ) );
 		}
-		return ObjId( e1()->id(), DataId::bad );
+		return ObjId( e1()->id(), DataId::bad() );
 	}
-	return ObjId::bad;
+	return ObjId::bad();
 }
 
 Msg* SparseMsg::copy( Id origSrc, Id newSrc, Id newTgt,

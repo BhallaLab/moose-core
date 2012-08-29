@@ -13,7 +13,12 @@ using namespace std;
 #include "DataId.h"
 
 
-const DataId DataId::bad( ~0U );
+const DataId DataId::bad()
+{
+  static DataId bad_( ~0U );
+  return bad_;
+}
+
 const DataId DataId::any( ~1U );
 const DataId DataId::globalField( ~2U );
 

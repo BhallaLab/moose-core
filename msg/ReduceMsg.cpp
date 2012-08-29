@@ -101,7 +101,7 @@ ObjId ReduceMsg::findOtherEnd( ObjId f ) const
 	if ( f.id() == e2() ) {
 		return ObjId( e1()->id(), i1_ );
 	}
-	return ObjId::bad;
+	return ObjId::bad();
 }
 
 /// Dummy. We should never be copying assignment messages.

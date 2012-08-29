@@ -997,7 +997,7 @@ void ReadCell::addChannelMessage( Id chan )
 		// I would like to assert, or warn here, but there are legitimate 
 		// cases where not all possible messages are actually available 
 		// to set up. So I just bail.
-		if ( src == ObjId::bad || dest == ObjId::bad ) {
+		if ( src == ObjId::bad() || dest == ObjId::bad() ) {
 #ifndef NDEBUG
 			cout << "ReadCell::addChannelMessage( " << chan.path() << 
 				"): " << name << " " << s << 
