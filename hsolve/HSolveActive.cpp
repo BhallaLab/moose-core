@@ -17,6 +17,7 @@
 #include "HSolve.h"
 #include "../biophysics/Compartment.h"
 #include "../biophysics/CaConc.h"
+#include "ZombieCaConc.h"
 using namespace moose;
 //~ #include "ZombieCompartment.h"
 //~ #include "ZombieCaConc.h"
@@ -307,17 +308,17 @@ void HSolveActive::sendValues( ProcPtr info ) {
 	 * which have targets.
 	 */
 	 
-	for ( unsigned int i = 0; i < compartmentId_.size(); ++i )
-		moose::Compartment::VmOut()->send(
-		//~ ZombieCompartment::VmOut()->send(
-			compartmentId_[ i ].eref(),
-			info->threadIndexInGroup,
-			V_[ i ]
-		);
+	// for ( unsigned int i = 0; i < compartmentId_.size(); ++i )
+	// 	moose::Compartment::VmOut()->send(
+	// 	//~ ZombieCompartment::VmOut()->send(
+	// 		compartmentId_[ i ].eref(),
+	// 		info->threadIndexInGroup,
+	// 		V_[ i ]
+	// 	);
 	
 	for ( unsigned int i = 0; i < caConcId_.size(); ++i )
-		CaConc::concOut()->send(
-		//~ ZombieCaConc::concOut()->send(
+        //		CaConc::concOut()->send(
+        ZombieCaConc::concOut()->send(
 			caConcId_[ i ].eref(),
 			info->threadIndexInGroup,
 			ca_[ i ]
