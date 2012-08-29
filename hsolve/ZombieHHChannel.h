@@ -73,26 +73,30 @@ class ZombieHHChannel
 		
 		void process( const Eref& e, ProcPtr p );
 		void reinit( const Eref& e, ProcPtr p );
-		
-		// Not sure if the Zombie should hold these. Keeping them out for now.
-		//~ /////////////////////////////////////////////////////////////
-		//~ // Gate handling functions
-		//~ /////////////////////////////////////////////////////////////
-		//~ /**
-		 //~ * Access function used for the X gate. The index is ignored.
-		 //~ */
-		//~ HHGate* getXgate( unsigned int i );
-		//~ 
-		//~ /**
-		 //~ * Access function used for the Y gate. The index is ignored.
-		 //~ */
-		//~ HHGate* getYgate( unsigned int i );
-		//~ 
-		//~ /**
-		 //~ * Access function used for the Z gate. The index is ignored.
-		 //~ */
-		//~ HHGate* getZgate( unsigned int i );
-		
+        void handleConc( double value);
+    void createGate(const Eref& e, const Qinfo* q, string name);
+    // Not sure if the Zombie should hold these. Keeping them out for now.
+		 /////////////////////////////////////////////////////////////
+		 // Gate handling functions
+		 /////////////////////////////////////////////////////////////
+		 /**
+		  * Access function used for the X gate. The index is ignored.
+		  */
+		 HHGate* getXgate( unsigned int i );
+		 
+		 /**
+		  * Access function used for the Y gate. The index is ignored.
+		  */
+		 HHGate* getYgate( unsigned int i );
+		 
+		 /**
+		  * Access function used for the Z gate. The index is ignored.
+		  */
+		 HHGate* getZgate( unsigned int i );
+    void setNumGates(unsigned int num);
+    unsigned int getNumXgates() const;
+    unsigned int getNumYgates() const;
+    unsigned int getNumZgates() const;
 		/////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
 		
@@ -119,19 +123,19 @@ class ZombieHHChannel
 		
 		
 		// Not sure if the Zombie should hold these. Keeping them out for now.
-		//~ /**
-		 //~ * HHGate data structure for the xGate. This is writable only
-		 //~ * on the HHChannel that originally created the HHGate, for others
-		 //~ * it must be treated as readonly.
-		 //~ */
-		//~ HHGate* xGate_;
-		//~ 
-		//~ /// HHGate data structure for the yGate. 
-		//~ HHGate* yGate_;
-		//~ 
-		//~ /// HHGate data structure for the yGate. 
-		//~ HHGate* zGate_;
-		//~ 
+		 /**
+		  * HHGate data structure for the xGate. This is writable only
+		  * on the HHChannel that originally created the HHGate, for others
+		  * it must be treated as readonly.
+		  */
+		 // HHGate* xGate_;
+		 
+		 // /// HHGate data structure for the yGate. 
+		 // HHGate* yGate_;
+		 
+		 // /// HHGate data structure for the yGate. 
+		 // HHGate* zGate_;
+		 
 		//~ Id myId_;
 };
 
