@@ -14,7 +14,11 @@
 //	ObjId I/O 
 //////////////////////////////////////////////////////////////
 
-const ObjId ObjId::bad( Id(), DataId::bad );
+const ObjId ObjId::bad()
+{
+  static ObjId bad_( Id(), DataId::bad() );
+  return bad_;
+}
 
 ostream& operator <<( ostream& s, const ObjId& i )
 {

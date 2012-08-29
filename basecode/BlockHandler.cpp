@@ -128,7 +128,7 @@ DataId BlockHandler::pathDataId(
 	const vector< vector< unsigned int > >& indices) const
 {
 	if ( indices.size() != static_cast< unsigned int >( pathDepth_ ) + 1 )
-		return DataId::bad;
+	  return DataId::bad();
 
 	unsigned short depth = 0;
 	unsigned long long linearIndex = 0;
@@ -147,7 +147,7 @@ DataId BlockHandler::pathDataId(
 			linearIndex *= dims_[i].size;
 			j++;
 		} else {
-			return DataId::bad;
+		  return DataId::bad();
 		}
 	}
 

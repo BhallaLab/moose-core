@@ -84,7 +84,7 @@ class ObjId
 		DataId dataId;
 
 		/// A useful test value
-		static const ObjId bad;
+		static const ObjId bad();
 	private:
 };
 

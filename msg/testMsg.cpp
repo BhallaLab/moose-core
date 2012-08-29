@@ -121,13 +121,13 @@ void testAssortedMsg()
 	assert( f == ObjId( a1, 3 ) );
 
 	f = Msg::getMsg( m1 )->findOtherEnd( ObjId( a1, 0 ) );
-	assert( f == ObjId( a2, DataId::bad ) );
+	assert( f == ObjId( a2, DataId::bad() ) );
 
 	f = Msg::getMsg( m1 )->findOtherEnd( ObjId( a2, 0 ) );
-	assert( f == ObjId( a1, DataId::bad ) );
+	assert( f == ObjId( a1, DataId::bad() ) );
 
 	f = Msg::getMsg( m1 )->findOtherEnd( ObjId( b2, 1 ) );
-	assert( f == ObjId::bad );
+	assert( f == ObjId::bad() );
 
 	// OneToAll
 	f = Msg::getMsg( m2 )->findOtherEnd( ObjId( b1, 2 ) );
@@ -145,10 +145,10 @@ void testAssortedMsg()
 	assert( f == ObjId( b1, 2 ) );
 
 	f = Msg::getMsg( m2 )->findOtherEnd( ObjId( b1, 0 ) );
-	assert( f == ObjId( b2, DataId::bad ) );
+	assert( f == ObjId( b2, DataId::bad() ) );
 
 	f = Msg::getMsg( m2 )->findOtherEnd( ObjId( a2, 1 ) );
-	assert( f == ObjId::bad );
+	assert( f == ObjId::bad() );
 
 	// OneToOne
 	for ( unsigned int i = 0; i < 5; ++i ) {
@@ -158,7 +158,7 @@ void testAssortedMsg()
 		assert( f == ObjId( c1, i ) );
 	}
 	f = Msg::getMsg( m3 )->findOtherEnd( ObjId( a2, 1 ) );
-	assert( f == ObjId::bad );
+	assert( f == ObjId::bad() );
 
 	// Diagonal
 	for ( unsigned int i = 0; i < 4; ++i ) {
@@ -168,12 +168,12 @@ void testAssortedMsg()
 		assert( f == ObjId( d1, i ) );
 	}
 	f = Msg::getMsg( m4 )->findOtherEnd( ObjId( d1, 4 ) );
-	assert( f == ObjId( d2, DataId::bad ) );
+	assert( f == ObjId( d2, DataId::bad() ) );
 	f = Msg::getMsg( m4 )->findOtherEnd( ObjId( d2, 0 ) );
-	assert( f == ObjId( d1, DataId::bad ) );
+	assert( f == ObjId( d1, DataId::bad() ) );
 
 	f = Msg::getMsg( m4 )->findOtherEnd( ObjId( a2, 1 ) );
-	assert( f == ObjId::bad );
+	assert( f == ObjId::bad() );
 
 	// Sparse
 	for ( unsigned int i = 0; i < 5; ++i ) {
@@ -184,7 +184,7 @@ void testAssortedMsg()
 	}
 
 	f = Msg::getMsg( m5 )->findOtherEnd( ObjId( a2, 1 ) );
-	assert( f == ObjId::bad );
+	assert( f == ObjId::bad() );
 
 	cout << "." << flush;
 
