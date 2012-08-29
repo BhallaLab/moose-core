@@ -141,10 +141,10 @@ extern "C" {
     static int verbosity = 1;
     static int isSingleThreaded = 0;
     static int isInfinite = 0;
-    static int numNodes = 1;
-    static int numCores = 1;
-    static int myNode = 0;
-    static int numProcessThreads = 0;
+    static unsigned int numNodes = 1;
+    static unsigned int numCores = 1;
+    static unsigned int myNode = 0;
+    static unsigned int numProcessThreads = 0;
     static int doUnitTests = 0;
     static int doRegressionTests = 0;
     static int quitFlag = 0;
