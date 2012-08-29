@@ -119,46 +119,46 @@ const Cinfo* ZombieHHChannel::initCinfo()
 ///////////////////////////////////////////////////////
 // MsgDest definitions
 ///////////////////////////////////////////////////////
-		//~ static DestFinfo concen( "concen", 
-			//~ "Incoming message from Concen object to specific conc to use"
-			//~ "in the Z gate calculations",
-			//~ new OpFunc1< ZombieHHChannel, double >( &ZombieHHChannel::handleConc )
-		//~ );
-		//~ static DestFinfo createGate( "createGate",
-			//~ "Function to create specified gate."
-			//~ "Argument: Gate type [X Y Z]",
-			//~ new EpFunc1< ZombieHHChannel, string >( &ZombieHHChannel::createGate )
-		//~ );
+		 static DestFinfo concen( "concen", 
+			 "Incoming message from Concen object to specific conc to use"
+			 "in the Z gate calculations",
+			 new OpFunc1< ZombieHHChannel, double >( &ZombieHHChannel::handleConc )
+		 );
+		 static DestFinfo createGate( "createGate",
+			 "Function to create specified gate."
+			 "Argument: Gate type [X Y Z]",
+			 new EpFunc1< ZombieHHChannel, string >( &ZombieHHChannel::createGate )
+		 );
 ///////////////////////////////////////////////////////
 // FieldElementFinfo definition for HHGates. Note that these are made
 // with the deferCreate flag off, so that the HHGates are created 
 // right away even if they are empty.
 // Assume only a single entry allocated in each gate.
 ///////////////////////////////////////////////////////
-		//~ static FieldElementFinfo< ZombieHHChannel, HHGate > gateX( "gateX",
-			//~ "Sets up HHGate X for channel",
-			//~ HHGate::initCinfo(),
-			//~ &ZombieHHChannel::getXgate,
-			//~ &ZombieHHChannel::setNumGates,
-			//~ &ZombieHHChannel::getNumXgates,
-			//~ 1
-		//~ );
-		//~ static FieldElementFinfo< ZombieHHChannel, HHGate > gateY( "gateY",
-			//~ "Sets up HHGate Y for channel",
-			//~ HHGate::initCinfo(),
-			//~ &ZombieHHChannel::getYgate,
-			//~ &ZombieHHChannel::setNumGates,
-			//~ &ZombieHHChannel::getNumYgates,
-			//~ 1
-		//~ );
-		//~ static FieldElementFinfo< ZombieHHChannel, HHGate > gateZ( "gateZ",
-			//~ "Sets up HHGate Z for channel",
-			//~ HHGate::initCinfo(),
-			//~ &ZombieHHChannel::getZgate,
-			//~ &ZombieHHChannel::setNumGates,
-			//~ &ZombieHHChannel::getNumZgates,
-			//~ 1
-		//~ );
+		 static FieldElementFinfo< ZombieHHChannel, HHGate > gateX( "gateX",
+			 "Sets up HHGate X for channel",
+			 HHGate::initCinfo(),
+			 &ZombieHHChannel::getXgate,
+			 &ZombieHHChannel::setNumGates,
+			 &ZombieHHChannel::getNumXgates,
+			 1
+		 );
+		 static FieldElementFinfo< ZombieHHChannel, HHGate > gateY( "gateY",
+			 "Sets up HHGate Y for channel",
+			 HHGate::initCinfo(),
+			 &ZombieHHChannel::getYgate,
+			 &ZombieHHChannel::setNumGates,
+			 &ZombieHHChannel::getNumYgates,
+			 1
+		 );
+		 static FieldElementFinfo< ZombieHHChannel, HHGate > gateZ( "gateZ",
+			 "Sets up HHGate Z for channel",
+			 HHGate::initCinfo(),
+			 &ZombieHHChannel::getZgate,
+			 &ZombieHHChannel::setNumGates,
+			 &ZombieHHChannel::getNumZgates,
+			 1
+		 );
 	
 ///////////////////////////////////////////////////////
 	static Finfo* zombieHHChannelFinfos[] =
@@ -172,11 +172,11 @@ const Cinfo* ZombieHHChannel::initCinfo()
 		&Y,					// Value
 		&Z,					// Value
 		&useConcentration,	// Value
-		//~ &concen,			// Dest
-		//~ &createGate,		// Dest
-		//~ &gateX,				// FieldElement
-		//~ &gateY,				// FieldElement
-		//~ &gateZ				// FieldElement
+		&concen,			// Dest
+		&createGate,		// Dest
+		&gateX,				// FieldElement
+		&gateY,				// FieldElement
+		&gateZ				// FieldElement
 	};
 	
 	static string doc[] =
@@ -204,7 +204,7 @@ const Cinfo* ZombieHHChannel::initCinfo()
 	 */
 	static Cinfo zombieHHChannelCinfo(
 		"ZombieHHChannel",
-		Neutral::initCinfo(),
+		ChanBase::initCinfo(),
 		zombieHHChannelFinfos,
 		sizeof( zombieHHChannelFinfos )/sizeof(Finfo *),
 		new Dinfo< ZombieHHChannel >()
@@ -372,30 +372,56 @@ void ZombieHHChannel::process( const Eref& e, ProcPtr info )
 void ZombieHHChannel::reinit( const Eref& er, ProcPtr info )
 { ; }
 
-//~ void ZombieHHChannel::handleConc( double conc )
-//~ { ; }
+void ZombieHHChannel::handleConc( double conc )
+{
+    cout << "Handle concen: " << conc << endl;
+}
 
+void ZombieHHChannel::createGate(const Eref& e, const Qinfo * q, string name)
+{
+    cout << "ZombieHHChannel::createGate" << endl;
+}
 
 ///////////////////////////////////////////////////
 // HHGate functions
 ///////////////////////////////////////////////////
 
 
-//~ HHGate* ZombieHHChannel::getXgate( unsigned int i )
-//~ {
-	//~ return xGate_;
-//~ }
-//~ 
-//~ HHGate* ZombieHHChannel::getYgate( unsigned int i )
-//~ {
-	//~ return yGate_;
-//~ }
-//~ 
-//~ HHGate* ZombieHHChannel::getZgate( unsigned int i )
-//~ {
-	//~ return zGate_;
-//~ }
+ HHGate* ZombieHHChannel::getXgate( unsigned int i )
+ {
+	 return NULL;
+ }
+ 
+ HHGate* ZombieHHChannel::getYgate( unsigned int i )
+ {
+	 return NULL;
+ }
+ 
+ HHGate* ZombieHHChannel::getZgate( unsigned int i )
+ {
+	 return NULL;
+ }
 
+void ZombieHHChannel::setNumGates(unsigned int num)
+{;}
+
+unsigned int ZombieHHChannel::getNumXgates() const
+{
+    cout << "ZombieHHChannel::getNumXgates()" << endl;
+    return -1;
+}
+unsigned int ZombieHHChannel::getNumYgates() const
+{
+    cout << "ZombieHHChannel::getNumYgates()" << endl;
+    return -1;
+}
+unsigned int ZombieHHChannel::getNumZgates() const
+{
+    cout << "ZombieHHChannel::getNumZgates()" << endl;
+    return -1;
+}
+
+        
 //////////////////////////////////////////////////////////////
 // Zombie conversion functions.
 //////////////////////////////////////////////////////////////
@@ -423,7 +449,6 @@ void ZombieHHChannel::zombify( Element* solver, Element* orig )
 	HSolve* sd = reinterpret_cast< HSolve* >( ser.data() );
 	zd->hsolve_ = sd;
 	zd->copyFields( oer.id() );
-	
 	orig->zombieSwap( zombieHHChannelCinfo, dh );
 }
 
