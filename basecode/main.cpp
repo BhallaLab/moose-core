@@ -132,10 +132,10 @@ void checkChildren( Id parent, const string& info )
 
 Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests )
 {
-	int numCores = getNumCores();
-	int numThreads = numCores;
-	int numNodes = 1;
-	int myNode = 0;
+	unsigned int numCores = getNumCores();
+	unsigned int numThreads = numCores;
+	unsigned int numNodes = 1;
+	unsigned int myNode = 0;
 	bool isSingleThreaded = 0;
 	bool isInfinite = 0;
 	int opt;
@@ -166,11 +166,11 @@ Id init( int argc, char** argv, bool& doUnitTests, bool& doRegressionTests )
 				isInfinite = 1;
 				break;
 			case 'n': // Multiple nodes
-				numNodes = atoi( optarg );
+			  numNodes = (unsigned int)atoi( optarg );
 				break;
 			case 't': // Number of process threads to use. Default is
 				// obtained from hardware NumCores.
-				numThreads = atoi( optarg );
+			  numThreads = (unsigned int)atoi( optarg );
 				break;
 			case 'b': // Benchmark: handle later.
 				break;
