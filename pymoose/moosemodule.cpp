@@ -1889,7 +1889,7 @@ static struct module_state _state;
         char _dims[] = "dims";
         static char * kwlist [] = {_path, _dims, _dtype, NULL};
         _ObjId * instance = (_ObjId*)self;
-        instance->oid_ = ObjId::bad;
+        instance->oid_ = ObjId::bad();
 
         // First try to parse the arguments as (path, dims, class)
         bool parse_success = false;
@@ -1915,7 +1915,7 @@ static struct module_state _state;
         }
         // First see if there is an existing object with at path
         instance->oid_ = ObjId(path);
-        if (!(ObjId::bad == instance->oid_)){
+        if (!(ObjId::bad() == instance->oid_)){
             return 0;
         }
         string basetype_str;
@@ -2178,7 +2178,7 @@ static struct module_state _state;
             return ret;                                                             \
         } // GET_VECVEC
 
-	if (self->oid_ == ObjId::bad){
+	if (self->oid_ == ObjId::bad()){
 	  PyErr_SetString(PyExc_RuntimeError, "bad ObjId.");
 	  return NULL;
 	}

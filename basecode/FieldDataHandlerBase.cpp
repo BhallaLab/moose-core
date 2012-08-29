@@ -136,7 +136,7 @@ DataId FieldDataHandlerBase::pathDataId(
 	const vector< vector< unsigned int > >& indices) const
 {
 	if ( indices.size() != static_cast< unsigned int >( pathDepth_ ) + 1 )
-		return DataId::bad;
+	  return DataId::bad();
 	return DataId( 0 );
 }
 

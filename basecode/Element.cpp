@@ -318,7 +318,7 @@ void Element::exec( const Qinfo* qi, const double* arg )
 		const ObjFid *ofid = reinterpret_cast< const ObjFid* >( arg );
 		const OpFunc* f = 
 			ofid->oi.element()->cinfo()->getOpFunc( ofid->fid );
-		if ( ofid->oi.dataId == DataId::bad )  {
+		if ( ofid->oi.dataId == DataId::bad() )  {
 			return;
 		}
 		if ( ofid->oi.dataId == DataId::any ) {
