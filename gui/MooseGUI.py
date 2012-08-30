@@ -129,6 +129,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.connect(self.plotConfigNewWindowPushButton,QtCore.SIGNAL('pressed()'),self.plotConfigAddNewPlotWindow)
         #self.connect(self.plotConfigWinSelectionComboBox,QtCore.SIGNAL('currentIndexChanged(int)'),self.activateSubWindow)
         self.connect(self.plotConfigDockWidget,QtCore.SIGNAL('visibilityChanged(bool)'),self.actionPlot_Config.setChecked)
+        self.connect(self.plotConfigOverlayPlotsCheckBox,QtCore.SIGNAL('stateChanged(int)'),self.plotConfigOverlayPlotsAction)
         #propEditor connections
         self.connect(self.propEditorSelParentPushButton,QtCore.SIGNAL('pressed()'),self.propEditorSelectParent)
         self.connect(self.propEditorChildListWidget,QtCore.SIGNAL('itemClicked(QListWidgetItem *)'),self.propEditorSelectChild)
@@ -543,6 +544,20 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
     def populateDataPlots(self,modelpath):
         """Create plots for all Table objects in /data element"""
 
+    def plotConfigOverlayPlotsAction(self, state):
+        if state==0: #no overlay for current plotwindow
+            try:
+                plotWin = self.plotNameWinDict[str(self.plotConfigWinSelectionComboBox.currentText())] 
+                plotWin.plot.clearOldLines()
+            except KeyError:
+                pass
+        elif state==2:
+            try:
+                plotWin = self.plotNameWinDict[str(self.plotConfigWinSelectionComboBox.currentText())] 
+                plotWin.plot.changeToOverlay()
+            except KeyError:
+                pass
+
     def addFieldToPlot(self):
         #creates tables - called when 'Okay' pressed in plotconfig dock
         dataNeutral = moose.Neutral(self.plotConfigCurrentSelection.getField('path')+'/data')
@@ -559,7 +574,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             plotWin.plot.nicePlaceLegend()
             plotWin.plot.axes.figure.canvas.draw()    
             self.activeWindow = plotWin
-
+            self.plotConfigOverlayPlotsCheckBox.setChecked(plotWin.plot.overlayPlots)
         else:
             #no previous mooseplotwin - so create, and add table to corresp dict
             self.plotWindowFieldTableDict[str(self.plotConfigWinSelectionComboBox.currentText())] = [newTable]
@@ -570,7 +585,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             plotWin.plot.axes.figure.canvas.draw()
             plotWin.show()
             self.plotNameWinDict[str(self.plotConfigWinSelectionComboBox.currentText())] = plotWin
-            
+            self.plotConfigOverlayPlotsCheckBox.setChecked(False)
             #self.mdiArea.addSubWindow(plotWin)
             self.activeWindow = plotWin
 
@@ -586,9 +601,9 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
         self.plotNameWinDict[str(self.plotConfigWinSelectionComboBox.currentText())] = plotWin
         self.plotWindowFieldTableDict[str(self.plotConfigWinSelectionComboBox.currentText())] = []
-
+        self.plotConfigOverlayPlotsCheckBox.setChecked(False)
         #plotWin.plot.nicePlaceLegend()
-
+        self.plotConfigOverlayPlotsCheckBox.setChecked(False)
         self.mdiArea.addSubWindow(plotWin)
         self.mdiArea.setActiveSubWindow(plotWin)
         plotWin.show()        
