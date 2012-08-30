@@ -30,8 +30,9 @@ class MyMplCanvas(FigureCanvas):
         self.compute_initial_figure()
         self.canvas = FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
-        self.alreadyPlaced = False
+
         self.listOfFewColors = ['b','r','g','c','m','y','purple']
+        self.listOfLineStyles = ['-','--','-.',':']
         
         FigureCanvas.setSizePolicy(self,
                                    QtGui.QSizePolicy.Expanding,
@@ -39,13 +40,6 @@ class MyMplCanvas(FigureCanvas):
         FigureCanvas.updateGeometry(self)
 
 
-    def nicePlaceLegend(self):
-        box = self.axes.get_position()
-        if self.alreadyPlaced == False:
-            self.axes.set_position([box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.9])
-            self.alreadyPlaced = True
-        # Put a legend below current axis
-        self.axes.legend(loc='upper center',prop={'size':10}, bbox_to_anchor=(0.5, -0.083),fancybox=True, shadow=True, ncol=4)
 
     def sizeHint(self):
         w, h = self.get_width_height()
@@ -70,7 +64,35 @@ class MoosePlot(MyMplCanvas):
         self.curveTableMap = {}
         self.tableCurveMap = {}
         self.mpl_connect('pick_event',self.onpick)
+        self.prevCurves = []
+        self.oldCurves = []
+        self.overlayPlots = False
+        self.alreadyOverlayed = False #check for already overlayed
+        self.alreadyPlaced = False
 
+    def nicePlaceLegend(self):
+        box = self.axes.get_position()
+        if self.alreadyPlaced == False:
+            self.axes.set_position([box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.9])
+            self.alreadyPlaced = True
+        # Put a legend below current axis
+        self.axes.legend(loc='upper center',prop={'size':10}, bbox_to_anchor=(0.5, -0.083),fancybox=True, shadow=True, ncol=4)
+
+    def changeToOverlay(self):
+        #print 'overlay on'
+        self.overlayPlots = True
+        self.oldCurves.extend(self.curveTableMap.keys()) # save the existing curves
+
+    def clearOldLines(self):
+        #print 'overlay off'
+        self.oldCurves = []
+
+        for line in self.prevCurves:
+            line.pop(0).remove()
+        self.prevCurves = []
+
+        self.overlayPlots = False
+        self.alreadyOverlayed = False
 
     def onpick(self,event):
         ind=event.ind[0]
@@ -91,7 +113,7 @@ class MoosePlot(MyMplCanvas):
         if len(table.vec) > 0:
             yy = array(table.vec)
             xx = linspace(0.0,self.xmin,len(yy))
-            curve.set_data(xx[1:len(xx)],yy[1:len(yy)])
+            curve.set_data(xx[0:len(xx)],yy[0:len(yy)])
             
         self.plotNo += 1
         self.axes.relim()
@@ -102,6 +124,14 @@ class MoosePlot(MyMplCanvas):
     def updatePlot(self, currentTime):
         config.LOGGER.debug('update: %g' % (currentTime))
         #print 'updateplots in mooseplot'
+
+        if self.overlayPlots and not self.alreadyOverlayed :
+            self.alreadyOverlayed = True
+            for curve in self.oldCurves:
+                l = self.axes.plot(curve.get_data()[0][0],curve.get_data()[1][0],label=str(curve.get_label())+'_old',ls='--',color=curve.get_color())
+                self.prevCurves.append(l)
+            self.nicePlaceLegend()
+                    
         if currentTime > self.xmin:
             self.xmin = currentTime
         for curve, table in self.curveTableMap.items():
@@ -110,7 +140,9 @@ class MoosePlot(MyMplCanvas):
                 continue
             ydata = array(table.vec)           
             xdata = linspace(0, currentTime, tabLen)
-            curve.set_data([xdata[2:tabLen:1]],[ydata[2:tabLen:1]])
+            curve.set_data([xdata[0:tabLen:1]],[ydata[0:tabLen:1]])
+            curve.set_linestyle('-')
+
 
         self.axes.relim()
         self.axes.autoscale_view(True,True,True)

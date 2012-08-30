@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'newgui.ui'
 #
-# Created: Thu Aug 23 19:22:38 2012
+# Created: Thu Aug 30 17:46:16 2012
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -351,6 +351,10 @@ class Ui_MainWindow(object):
         self.plotConfigAcceptPushButton.setObjectName(_fromUtf8("plotConfigAcceptPushButton"))
         self.horizontalLayout_18.addWidget(self.plotConfigAcceptPushButton)
         self.verticalLayout_5.addLayout(self.horizontalLayout_18)
+        self.plotConfigOverlayPlotsCheckBox = QtGui.QCheckBox(self.dockWidgetContents_4)
+        self.plotConfigOverlayPlotsCheckBox.setTristate(False)
+        self.plotConfigOverlayPlotsCheckBox.setObjectName(_fromUtf8("plotConfigOverlayPlotsCheckBox"))
+        self.verticalLayout_5.addWidget(self.plotConfigOverlayPlotsCheckBox)
         spacerItem17 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout_5.addItem(spacerItem17)
         self.plotConfigDockWidget.setWidget(self.dockWidgetContents_4)
@@ -787,6 +791,7 @@ class Ui_MainWindow(object):
         self.plotConfigNewWindowPushButton.setToolTip(QtGui.QApplication.translate("MainWindow", "Create plot tab", None, QtGui.QApplication.UnicodeUTF8))
         self.plotConfigNewWindowPushButton.setText(QtGui.QApplication.translate("MainWindow", "New plot tab", None, QtGui.QApplication.UnicodeUTF8))
         self.plotConfigAcceptPushButton.setText(QtGui.QApplication.translate("MainWindow", "Add Field", None, QtGui.QApplication.UnicodeUTF8))
+        self.plotConfigOverlayPlotsCheckBox.setText(QtGui.QApplication.translate("MainWindow", "Overlay Plots", None, QtGui.QApplication.UnicodeUTF8))
         self.simControlDockWidget.setStatusTip(QtGui.QApplication.translate("MainWindow", "Set run time for the simulation", None, QtGui.QApplication.UnicodeUTF8))
         self.simControlDockWidget.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Simulation Control", None, QtGui.QApplication.UnicodeUTF8))
         self.label_18.setText(QtGui.QApplication.translate("MainWindow", "Run Time:", None, QtGui.QApplication.UnicodeUTF8))

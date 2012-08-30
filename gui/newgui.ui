@@ -933,6 +933,16 @@
       </layout>
      </item>
      <item>
+      <widget class="QCheckBox" name="plotConfigOverlayPlotsCheckBox">
+       <property name="text">
+        <string>Overlay Plots</string>
+       </property>
+       <property name="tristate">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="verticalSpacer">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
