@@ -426,6 +426,45 @@ double HSolve::getCaMax() const
 {
 	return caMax_;
 }
+
+const set<string>& HSolve::handledClasses()
+{
+    static set<string> classes;
+    if (classes.empty()){
+        classes.insert("CaConc");
+        classes.insert("ZombieCaConc");
+        classes.insert("HHChannel");
+        classes.insert("ZombieHHChannel");
+        classes.insert("Compartment");
+        classes.insert("ZombieCompartment");
+    }
+    return classes;
+}
+
+/**
+   Utility function to delete incoming messages on orig.
+   To be used in zombifying elements.
+*/
+void HSolve::deleteIncomingMessages( Element * orig, const string finfo)
+{
+	const DestFinfo * concenDest = dynamic_cast<const DestFinfo*>(orig->cinfo()->findFinfo(finfo));
+    assert(concenDest);
+    MsgId mid = orig->findCaller(concenDest->getFid());
+    while (mid != Msg::bad){
+        const Msg * msg = Msg::getMsg(mid);
+        assert(msg);
+        ObjId other = msg->findOtherEnd(orig->id());
+        Element * otherEl = other.id.element();
+        if (otherEl &&  HSolve::handledClasses().find(otherEl->cinfo()->name()) != HSolve::handledClasses().end()){
+#ifndef NDEBUG
+            cout << "Deleting " << finfo << " message between " << msg->getE1().path() << " and " << msg->getE2().path() << endl;
+#endif // NDEBUG
+            Msg::deleteMsg(mid);
+        }
+        mid = orig->findCaller(concenDest->getFid());
+    }
+}
+
 #if 0
 
 /// crate test object and push it into the container vector
@@ -461,6 +500,8 @@ void testHSolvePassiveSingleComp()
     clear_testobjects(to_cleanup);
     cout << "." << flush;
 }
+
+
 
 #endif // if 0
  
