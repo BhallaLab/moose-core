@@ -9,7 +9,7 @@
 
 #ifndef _HSOLVE_H
 #define _HSOLVE_H
-
+#include <set>
 /**
  * HSolve adapts the integrator HSolveActive into a MOOSE class.
  */
@@ -138,6 +138,10 @@ public:
 	//~ const vector< vector< Id > >& getExternalChannels() const;
 	
 	static const Cinfo* initCinfo();
+
+    static const std::set<string>& handledClasses();
+    
+    static void deleteIncomingMessages( Element * orig, const string finfo);
 	
 private:
 	static vector< Id > children( Id obj );
