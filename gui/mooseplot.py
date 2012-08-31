@@ -93,7 +93,8 @@ class MoosePlot(MyMplCanvas):
 
         self.overlayPlots = False
         self.alreadyOverlayed = False
-
+        self.nicePlaceLegend()
+        
     def onpick(self,event):
         ind=event.ind[0]
         print self._labels[ind]
