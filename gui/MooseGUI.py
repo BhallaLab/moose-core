@@ -619,6 +619,11 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         QtGui.qApp.closeAllWindows()
 
     def _resetAndRunSlot(self): #called when run is pressed
+
+        self.simControlResetPushButton.setEnabled(False) #do not let user reset when running 
+        self.actionReset.setEnabled(False) #do not let user reset when running 
+        self.actionLoad_Model.setEnabled(False) #do not let user load new model when running 
+
         self.mooseHandler.stopSimulation = 0
         try:
             runtime = float(str(self.simControlRunTimeLineEdit.text()))
@@ -630,10 +635,21 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.simControlPlotdtLineEdit.setEnabled(False)
         self.simControlUpdatePlotdtLineEdit.setEnabled(False)
 
+        self.simControlResetPushButton.setEnabled(True)
+        self.actionReset.setEnabled(True)
+        self.actionLoad_Model.setEnabled(True)
+
     def _stopSlot(self):
         self.mooseHandler.stopSimulation = 1
+
+        self.actionReset.setEnabled(True)
+        self.simControlResetPushButton.setEnabled(True)
+        self.actionLoad_Model.setEnabled(True)
     
     def _resetSlot(self): #called when reset is pressed
+        #if moose.isRunning(): # do not let user reset when already moose running.
+        #    self._stopSlot()
+
         self.mooseHandler.stopSimulation = 0
         try:
             runtime = float(str(self.simControlRunTimeLineEdit.text()))
