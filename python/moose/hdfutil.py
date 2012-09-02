@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Aug 23 17:34:55 2012 (+0530)
 # Version: 
-# Last-Updated: Sat Aug 25 12:31:00 2012 (+0530)
+# Last-Updated: Sun Sep  2 17:27:19 2012 (+0530)
 #           By: subha
-#     Update #: 265
+#     Update #: 332
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -17,9 +17,48 @@
 
 # Commentary: 
 # 
-# Utility function to save data in hdf5 format
+# Utility function to save data in hdf5 format.
 # 
-# 
+# In this utility we are trying to address a serialization
+# problem. The ultimate goal is to be able to save a snapshot of
+# complete simulator state in a portable format so that it can be
+# loaded later to reach that state and continue from there.
+#
+# TODO: random number generators: the full RNG state has to be
+# saved. MOOSE does not provide access to this at user level.
+#
+# TODO: what about internal variables? they affect the state of the
+# simulation yet MOOSE does not allow access to these variables. Do we
+# need a change in the API to make all internal variables accessible
+# in a generic manner?
+#
+# TODO: How do we translate MOOSE tree to HDF5? MOOSE has ematrix and
+# elements. ematrix is a container and each element belongs to an
+# ematrix. 
+#
+#                    em-0
+#              el-00 el-01 el-02
+#               /      |       \
+#              /       |        \
+#             em-1     em-2      em-3
+#           el-10    el-20     el-30 el-31 el-32 el-33
+#                     /                 \
+#                    /                   \
+#                   em-4                 em-5
+#                el-40 el-41             el-50
+#
+#
+# Serializing MOOSE tree structure into an HDF5 tree structure has
+# some issues to be resolved.  Each ematrix is saved as a HDF
+# group. All the elements inside it as a HDF dataset.  But the problem
+# is that HDF datasets cannot have children. But in MOOSE the
+# parent-child relation is opposite, each element can have one or more
+# ematrices as children.
+#
+# Serializing MOOSE tree structure into HDF5 tables for each class.
+# This is the approach I took initially. This is possibly more space
+# saving.
+
 
 # Change log:
 # 
@@ -49,7 +88,12 @@ import moose as moose__
 import numpy as np
 import h5py as h5
 import time
+from collections import defaultdict
 
+size_step=256
+
+
+# maps cpp data type names to numpy data types
 cpptonp = {
     'int': 'i4',
     'long': 'i8',
@@ -60,7 +104,41 @@ cpptonp = {
     'double': 'f8',
     'string': 'S1024'}
     
-size_step=256
+dtype_table = {}
+
+def savetreeintables(moosenode, hdfnode):
+    """Dump the MOOSE element tree rooted at moosenode as datasets
+    under hdfnode."""
+    raise NotImplementedError('yet to complete the coding.'
+    for em in moose.wildcardFind(moosenode.path+'/##'):
+        if em.class_ in dtype_table:
+            dtype = dtype_table[em.class_]
+        else:
+            print 'Creating entries for class:', obj.class_
+            fielddict = moose__.getFieldDict(obj.class_, 'valueFinfo')
+            print fielddict
+            keys = sorted(list(fielddict.keys()))
+            fields = [] # [('path', 'S1024')]
+            for fieldname in keys:
+                ftype = fielddict[fieldname]
+                if ftype in cpptonp:
+                    fields.append((fieldname, cpptonp[ftype]))
+                elif ftype == 'Id' or ftype == 'ObjId':
+                    fields.append((fieldname, 'S1024'))
+            # print fields
+            ds = root.create_dataset(obj.class_, shape=(size_step,), dtype=fields, compression='gzip', compression_opts=6)
+            class_dataset_dict[obj.class_] = ds
+            class_array_dict[obj.class_] = []
+            class_count_dict[obj.class_] = 0
+            
+
+def visit_and_save_node(moosenode, hdfnode):
+    """Dump the tree rooted at `moosenode` in hdf5 node `hdfnode`
+    using hdf5 format."""
+    for el in moosenode:
+        newnode = hdfnode.create_group(el.name)
+        for attr in moosenode.get
+
 def savestate(filename=None):
     """Dump the state of MOOSE in an hdf5 file.
     
