@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Aug 23 17:34:55 2012 (+0530)
 # Version: 
-# Last-Updated: Sun Sep  2 17:27:19 2012 (+0530)
+# Last-Updated: Mon Sep  3 17:55:03 2012 (+0530)
 #           By: subha
-#     Update #: 332
+#     Update #: 618
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -102,48 +102,133 @@ cpptonp = {
     'unsigned long': 'u8',
     'float': 'f4',
     'double': 'f8',
-    'string': 'S1024'}
-    
-dtype_table = {}
+    'string': 'S1024',
+    'Id': 'S1024',
+    'ObjId': 'S1024',
+    }
 
-def savetreeintables(moosenode, hdfnode):
+dtype_table = {}
+# dims allows only 3 dims for the time being
+em_dtype = np.dtype([('path', 'S1024'), ('class', 'S64'), ('dims', 'i4', (3,))])
+
+def get_rec_dtype(em):
+    bad_fields = []
+    # Check if already have data type information for this class.
+    # Create it otherwise.    
+    if em.class_ in dtype_table:
+        dtype = dtype_table[em.class_]
+    else:
+        print 'Creating entries for class:', obj.class_
+        fielddict = moose__.getFieldDict(obj.class_, 'valueFinfo')
+        print fielddict
+        keys = sorted(list(fielddict.keys()))
+        fields = [] # [('path', 'S1024')]
+        for fieldname in keys:
+            ftype = fielddict[fieldname]
+            # If we do not have the type of this field in cpp-np data
+            # type map, skip it. We can handle vectors as nested
+            # table, but the problem with that is numpy requires all
+            # entries to have a fixed size for this table. Since
+            # vectors can have arbitrary length, we cannot get such a
+            # fixed size without checking the size of the vector field
+            # in all elements.
+            if ftype in cpptonp:
+                fields.append((fieldname, cpptonp[ftype]))
+        dtype_table[obj.class_] = np.dtype(fields)
+        return dtype_table[obj.class_]
+            
+def save_dataset(classname, rec, dtype, hdfnode):
+    """Saves the data from rec into dataset"""
+    # Check if there is a dataset for this class. Create it
+    # otherwise.
+    if len(rec) == 0:
+        return
+    if classname in hdfnode:
+        ds = hdfnode[classname]
+        oldlen = ds.len()
+        newlen = oldlen + len(rec)
+        ds.resize(newlen)
+    else:
+        ds = hdfnode.create_dataset(classname, 
+                                    shape=(len(rec),),
+                                    dtype=dtype, 
+                                    compression='gzip', 
+                                    compression_opts=6)
+    ds[oldlen:newlen] = np.rec.array(rec, dtype=dtype)
+    
+def savetree(moosenode, hdfnode):
     """Dump the MOOSE element tree rooted at moosenode as datasets
     under hdfnode."""
-    raise NotImplementedError('yet to complete the coding.'
-    for em in moose.wildcardFind(moosenode.path+'/##'):
-        if em.class_ in dtype_table:
-            dtype = dtype_table[em.class_]
-        else:
-            print 'Creating entries for class:', obj.class_
-            fielddict = moose__.getFieldDict(obj.class_, 'valueFinfo')
-            print fielddict
-            keys = sorted(list(fielddict.keys()))
-            fields = [] # [('path', 'S1024')]
-            for fieldname in keys:
-                ftype = fielddict[fieldname]
-                if ftype in cpptonp:
-                    fields.append((fieldname, cpptonp[ftype]))
-                elif ftype == 'Id' or ftype == 'ObjId':
-                    fields.append((fieldname, 'S1024'))
-            # print fields
-            ds = root.create_dataset(obj.class_, shape=(size_step,), dtype=fields, compression='gzip', compression_opts=6)
-            class_dataset_dict[obj.class_] = ds
-            class_array_dict[obj.class_] = []
-            class_count_dict[obj.class_] = 0
-            
+    # Keep track of total number of ematrices seen in each class.
+    obj_count = defaultdict(int)
+    # Buffer the last `size_step` object records for each class in
+    # this array.
+    obj_rec = defaultdict(list)
+    em_rec = []
+    hdfnode.attr['path'] = moosenode.path
+    elements = hdfnode.create_group('elements')
+    for em in moose.wildcardFind(moosenode.path+'/##'):        
+        em_rec.append((em.path, em.class_, em.shape))
+        dtype = get_rec_dtype(em)
+        for obj in em:            
+            fields = []
+            for fname in dtype.names:
+                f = obj.getField(fname)
+                if isinstance(f, moose.ematrix) or isinstance(f, moose.element):
+                    fields.append(f.path)
+                else:
+                    fields.append(f)
+            obj_rec[em.class_].append(fields)
+            obj_count[em.class_] += 1
+            if obj_count[em.class_] % size_step == 0:
+                save_dataset(em.class_, obj_rec[em.class_], dtype, elements)
+                obj_rec[em.class_][:] = [] # clear the records after saving
+    # now save the remaining records (length < size_step)
+    for classname, rec in obj_rec.items():
+        save_dataset(classname, rec, dtype_table[classname], hdfnode)
+    ematrix = hdfnode.create_dataset('ematrix', shape=(len(em_rec),), dtype=em_dtype)
+    ematrix[:] = em_rec
 
-def visit_and_save_node(moosenode, hdfnode):
-    """Dump the tree rooted at `moosenode` in hdf5 node `hdfnode`
-    using hdf5 format."""
-    for el in moosenode:
-        newnode = hdfnode.create_group(el.name)
-        for attr in moosenode.get
-
+def loadtree(hdfnode, moosenode):
+    """Load the element tree saved under the group `hdfnode` into `moosenode`"""    
+    pathclass = {}    
+    basepath = hdfnode.attr['path']
+    if basepath != '/':
+        basepath = basepath + '/'
+    emdata = hdfnode['ematrix'][:]
+    sorted_paths = sorted(emdata['path'], key=lambda x: x.count('/'))
+    dims = dict(emdata['path', 'dims'])
+    classes = dict(emdata['path', 'class'])
+    current = moose.getCwe()
+    moose.setCwe(moosenode)
+    # First create all the ematrices
+    for path in sorted_paths:
+        rpath = path[len(basepath):]
+        classname = classes[path]
+        shape = dims[path]
+        em = moose.ematrix(rpath, shape, classname)
+    wfields = {}
+    for cinfo in moose__.element('/classes').children:
+        cname = cinfo[0].name
+        wfields[cname] = [f[len('set_'):] for f in moose__.getFieldNames(cname, 'destFinfo') 
+                          if f.startswith('set_') and f not in ['set_this', 'set_name', 'set_lastDimension', 'set_runTime'] and not f.startswith('set_num_')]
+        for key in hdfnode['/elements']:
+            dset = hdfnode['/elements/'][key][:]
+            fieldnames = dset.dtype.names
+            for ii in range(len(dset)):
+                obj = moose__.element(dset['path'][ii][len(basepath):])
+                for f in wfields[obj.class_]:
+                    obj.setField(f, dset[f][ii])
+        
+        
+    
 def savestate(filename=None):
     """Dump the state of MOOSE in an hdf5 file.
     
     The file will have a data set for each class.
     Each such dataset will be a column of field values.
+
+    This function needs more work on moose serialization.
     """    
     if filename is None:
         filename = 'moose_session_' + time.strftime('%Y%m%d_%H%M%S') + '.hdf5'
