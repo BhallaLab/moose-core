@@ -115,6 +115,56 @@ void testNeuroNode()
 	cout << "." << flush;
 }
 
+void zebraConcPattern( vector< vector< double > >& S )
+{
+	// Set up an alternating pattern of zero/nonzero voxels to do test
+	// calculations
+	assert( S.size() == 44 );
+	for ( unsigned int i = 0; i < S.size(); ++i )
+		S[i][0] = 0;
+
+	S[0][0] = 100; // soma
+	S[2][0] = 10; // basal dend
+	S[4][0] = 1; // basal
+	S[6][0] = 10; // basal
+	S[8][0] = 1; // basal
+	S[10][0] = 10; // basal
+	S[12][0] = 1; // basal
+	S[14][0] = 10; // basal
+	S[16][0] = 1; // basal
+	S[18][0] = 10; // basal
+	S[20][0] = 1; // basal tip
+
+	S[22][0] = 10; // Apical left dend second compt.
+	S[24][0] = 1; // Apical left dend
+	S[26][0] = 10; // Apical left dend
+	S[28][0] = 1; // Apical left dend
+	S[30][0] = 10; // Apical left dend last compt
+
+	// Tip compts are 31 and 32:
+	S[32][0] = 1; // Apical middle Tip compartment.
+
+	S[34][0] = 10; // Apical right dend second compt.
+	S[36][0] = 1; // Apical right dend
+	S[38][0] = 10; // Apical right dend
+	S[40][0] = 1; // Apical right dend
+	S[42][0] = 10; // Apical right dend last compt
+
+	S[43][0] = 1; // Apical right tip.
+}
+
+/// Set up uniform concentrations in each voxel. Only the end voxels
+/// should see a nonzero flux.
+void uniformConcPattern( vector< vector< double > >& S, 
+				vector< double >& vs )
+{
+	// Set up uniform concs throughout. This means to scale each # by 
+	// voxel size.
+	assert( S.size() == 44 );
+	for ( unsigned int i = 0; i < S.size(); ++i )
+		S[i][0] = 10 * vs[i];
+}
+
 /**
  * Low-level test for NeuroStencil, no MOOSE calls
  * This outlines the policy for how nodes and dummies are 
@@ -157,7 +207,7 @@ unsigned int buildNode( vector< NeuroNode >& nodes, unsigned int parent,
 	y *= 1e-6;
 	z *= 1e-6;
 	dia *= 1e-6;
-	CylBase cb( x, y, z, dia, 1.0, numDivs );
+	CylBase cb( x, y, z, dia, dia/2, numDivs );
 	vector< unsigned int > kids( 0 );
 	if ( nodes.size() == 0 ) { // make soma
 		NeuroNode nn( cb, parent, kids, startFid, Id(), true );
@@ -173,6 +223,59 @@ unsigned int buildNode( vector< NeuroNode >& nodes, unsigned int parent,
 	nodes.back().calculateLength( paNode );
 	return startFid + numDivs;
 }
+
+void testNeuroStencilFlux()
+{
+	NeuroStencil ns;
+	vector< double > flux( 1, 0 );
+	vector< double > tminus( 1, 10.0 );
+	vector< double > t0( 1, 100.0 );
+	vector< double > tplus( 1, 1000.0 );
+	vector< double > diffConst( 1, 1.0 );
+
+	ns.addHalfFlux( 0, flux, t0, tminus, 1, 1, 1, 1, diffConst );
+	assert( doubleEq( flux[0], -90 ) );
+
+	flux[0] = 0;
+	ns.addLinearFlux( 0, flux, tminus, t0, tplus, 1, 1, 1, 1, 1, 1, diffConst );
+	assert( doubleEq( flux[0], 1000 + 10 - 200 ) );
+
+	cout << "." << flush;
+}
+
+void connectChildNodes( vector< NeuroNode >& nodes )
+{
+	assert( nodes.size() == 11 );
+	for ( unsigned int i = 1; i < nodes.size(); ++i ) {
+		assert( nodes[i].parent() < nodes.size() );
+		NeuroNode& parent = nodes[ nodes[i].parent() ];
+		parent.addChild( i );
+	}
+	////////////////////////////////////////////////////////////////////
+	// Check children
+	assert( nodes[0].children().size() == 3 );
+	assert( nodes[0].children()[0] == 1 );
+	assert( nodes[0].children()[1] == 4 );
+	assert( nodes[0].children()[2] == 8 );
+	assert( nodes[1].children().size() == 1 );
+	assert( nodes[1].children()[0] == 2 );
+	assert( nodes[2].children().size() == 1 );
+	assert( nodes[2].children()[0] == 3 );
+	assert( nodes[3].children().size() == 0 );
+	assert( nodes[4].children().size() == 1 );
+	assert( nodes[4].children()[0] == 5 );
+	assert( nodes[5].children().size() == 2 );
+	assert( nodes[5].children()[0] == 6 );
+	assert( nodes[5].children()[1] == 7 );
+	assert( nodes[6].children().size() == 0 );
+	assert( nodes[7].children().size() == 0 );
+	assert( nodes[8].children().size() == 1 );
+	assert( nodes[8].children()[0] == 9 );
+	assert( nodes[9].children().size() == 1 );
+	assert( nodes[9].children()[0] == 10 );
+	assert( nodes[10].children().size() == 0 );
+}
+
 
 void testNeuroStencil()
 {
@@ -205,6 +308,8 @@ void testNeuroStencil()
 	startFid = buildNode( nodes, 9, sq*2, 5+sq*2, 0, 1, 1, 0, startFid ); //AR2
 	assert( startFid == numVoxels );
 	assert( nodes.size() == numNodes );
+	connectChildNodes( nodes );
+
 	////////////////////////////////////////////////////////////////////
 	// Check lengths
 	for ( unsigned int i = 0; i < numNodes; ++i ) {
@@ -221,26 +326,49 @@ void testNeuroStencil()
 			assert( j < numVoxels );
 			nodeIndex[j] = i;
 			unsigned int k = j - nodes[i].startFid();
-			vs[j] = nodes[i].voxelVolume( parent, k );
+			vs[j] = 0.001 * NA * nodes[i].voxelVolume( parent, k );
 			area[j] = nodes[i].getDiffusionArea( parent, k );
 		}
 	}
-	assert( doubleEq( vs[ numVoxels-1 ], PI * 10e-6 * 0.25e-12 ) );
+	assert( doubleEq( vs[ numVoxels-1 ], NA * 0.001 * PI * 10e-6 * 0.25e-12 ) );
 	assert( doubleEq( area[ numVoxels-1 ], PI * 0.25e-12 ) );
 	////////////////////////////////////////////////////////////////////
 	// Setup done. Now build stencil and test it.
 	////////////////////////////////////////////////////////////////////
 	vector< double > diffConst( 1, 1e-12 );
-	vector< double > flux( numVoxels, 0 );
+	vector< double > temp( 1, 0.0 );
+	vector< vector< double > > flux( numVoxels, temp );
 	vector< double > molNum( 1, 0 ); // We only have one pool
 
 	// S[meshIndex][poolIndex]
 	vector< vector< double > > S( numVoxels, molNum ); 
 
 	NeuroStencil ns( nodes, nodeIndex, vs, area );
+
+	zebraConcPattern( S );
+
 	for ( unsigned int i = 0; i < numVoxels; ++i ) {
-		ns.addFlux( i, flux, S, diffConst );
+		ns.addFlux( i, flux[i], S, diffConst );
 	}
+	/*
+	for ( unsigned int i = 0; i < numVoxels; ++i ) {
+		cout << "S[" << i << "][0] = " << S[i][0] << 
+			", flux[" << i << "][0] = " << flux[i][0] << endl;
+	}
+	*/
+
+	uniformConcPattern( S, vs );
+
+	for ( unsigned int i = 0; i < numVoxels; ++i ) {
+		flux[i][0] = 0.0;
+		ns.addFlux( i, flux[i], S, diffConst );
+	}
+	/*
+	for ( unsigned int i = 0; i < numVoxels; ++i ) {
+		cout << "S[" << i << "][0] = " << S[i][0] << 
+			", flux[" << i << "][0] = " << flux[i][0] << endl;
+	}
+	*/
 	
 	cout << "." << flush;
 }
@@ -599,6 +727,7 @@ void testMesh()
 {
 	testCylBase();
 	testNeuroNode();
+	testNeuroStencilFlux();
 	testNeuroStencil();
 	testCylMesh();
 	testMidLevelCylMesh();

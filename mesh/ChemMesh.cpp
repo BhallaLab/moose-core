@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "ElementValueFinfo.h"
 #include "Boundary.h"
 #include "MeshEntry.h"
 #include "Stencil.h"
@@ -58,9 +59,13 @@ const Cinfo* ChemMesh::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// Field Definitions
 		//////////////////////////////////////////////////////////////
-		static ReadOnlyValueFinfo< ChemMesh, double > size(
+		static ElementValueFinfo< ChemMesh, double > size(
 			"size",
-			"Size of entire chemical domain",
+			"Size of entire chemical domain."
+			"Assigning this assumes that the geometry is that of the "
+			"default mesh, which may not be what you want. If so, use"
+			"a more specific mesh assignment function.",
+			&ChemMesh::setEntireSize,
 			&ChemMesh::getEntireSize
 		);
 
@@ -227,9 +232,14 @@ void ChemMesh::handleNodeInfo( const Eref& e, const Qinfo* q,
 // Field Definitions
 //////////////////////////////////////////////////////////////
 
-double ChemMesh::getEntireSize() const
+double ChemMesh::getEntireSize( const Eref& e, const Qinfo* q ) const
 {
 	return size_;
+}
+
+void ChemMesh::setEntireSize( const Eref& e, const Qinfo* q, double size )
+{
+	buildDefaultMesh( e, q, size, getNumEntries() );
 }
 
 unsigned int ChemMesh::getDimensions() const
