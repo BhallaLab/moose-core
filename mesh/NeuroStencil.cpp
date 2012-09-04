@@ -39,12 +39,12 @@ NeuroStencil::NeuroStencil()
 NeuroStencil::~NeuroStencil()
 {;}
 
-		/**
-		 * computes the Flux f in the voxel on meshIndex. Takes the
-		 * matrix of molNumber[meshIndex][pool] and 
-		 * the vector of diffusionConst[pool] as arguments.
-		 */
 /**
+ * computes the Flux f in the voxel on meshIndex. Takes the
+ * matrix S of molNumber[meshIndex][pool] and 
+ * the vector of diffusionConst[pool] as arguments.
+ * The vectors Flux and DiffConst are indexed by Pool number.
+ *
  * This is a little nasty and isn't yet done for the CylMesh, though
  * perhaps it should be called a ConeFrustrumMesh.
  * Since we have different areas at either end of the voxel, but each
@@ -65,6 +65,7 @@ NeuroStencil::~NeuroStencil()
  * where VS is VolScale, to go from conc units to # units, taking local
  * volume into account.
  *
+ * 
  */
 void NeuroStencil::addFlux( unsigned int index, 
 			vector< double >& f, const vector< vector< double > >& S, 
@@ -74,7 +75,11 @@ void NeuroStencil::addFlux( unsigned int index,
 	assert( nodes_.size() > nodeIndex_[index] );
 	const vector< double >& t0 = S[ index ];
 	const NeuroNode& node = nodes_[ nodeIndex_[ index ] ];
-	const NeuroNode& parent = nodes_[ nodeIndex_[ node.parent() ] ];
+	const NeuroNode* pa = &nodes_[ node.parent() ];
+	if ( pa->isDummyNode() )
+			pa = &nodes_[ pa->parent() ];
+	assert( !pa->isDummyNode() );
+	const NeuroNode& parent = *pa;
 	double vs0 = vs_[index];
 	double len = node.getLength() / node.getNumDivs();
 	double invSq = 1.0 / ( len * len );

@@ -27,10 +27,24 @@ class NeuroNode: public CylBase
 		unsigned int parent() const;
 		unsigned int startFid() const;
 		Id elecCompt() const;
+
+		/**
+		 * True when this is a dummy node to represent the coordinates
+		 * of the start end of a compartment. For example, the start coords
+		 * of a compartment 
+		 * sitting on a spherical soma, or the start coords of a spine neck 
+		 * along a longer dendritic compartment.
+		 * In all other cases the start coordinates are just those of the
+		 * end of the parent compartment.
+		 *
+		 * When the isDummyNode is true, the elecCompt represents the Id of
+		 * the compartment whose start it is.
+		 */
 		bool isDummyNode() const; // True if CylBase::numDivs is zero.
 		bool isSphere() const;
 		bool isStartNode() const; // True if startFid_ == 0
 		const vector< unsigned int >& children() const;
+		void addChild( unsigned int child );
 
 		/**
 		 * Calculates and returns compartment length, from parent xyz to
@@ -65,31 +79,10 @@ class NeuroNode: public CylBase
 		Id elecCompt_; 
 
 		/**
-		 * True when this is a dummy node to represent the coordinates
-		 * of the start end of a compartment. For example, the start coords
-		 * of a compartment 
-		 * sitting on a spherical soma, or the start coords of a spine neck 
-		 * along a longer dendritic compartment.
-		 * In all other cases the start coordinates are just those of the
-		 * end of the parent compartment.
-		 *
-		 * When the isDummyNode is true, the elecCompt represents the Id of
-		 * the compartment whose start it is.
-		 */
-		bool isDummyNode_; 
-
-		/**
 		 * Special case for soma, perhaps for spine heads.
 		 * When true, xyz are centre, and dia is dia.
 		 */
 		bool isSphere_;
-
-		/**
-		 * Special case for starting node of tree, typically soma. 
-		 * There should
-		 * be just one StartNode. Its parent is undefined.
-		 */
-		bool isStartNode_;
 
 	// For spines we will also need a double to indicate position along
 	// parent dendrite. 

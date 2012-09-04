@@ -18353,5 +18353,24 @@ coordinates. Done. Checkin 3893.
 
 Finally exercised the NeuroStencil::addFlux function. Runs without crashing,
 but output is not right. most values are zero, some are uninitialized.
+Checkin 3895.
+
+Did some more tests on flux handling. Now I simply print out flux values.
+They are still wrong, despite some fixes.
 
 ============================================================================
+26 Aug.
+Tracked down fundamental issue with flux calculations: how to handle 
+cross-section area.
+
+============================================================================
+29 Aug.
+See:
+Mass and Heat Transfer: Analysis of Mass Contactors and Heat ..., Volume 10
+ By T. W. Fraser Russell, Anne S. Robinson, Norman J. Wagner. CUP.
+Page 211 ish.
+============================================================================
+4 Sep 2012.
+Conical diffusion still pending.
+Added ChemMesh::setEntireSize so that the field is now read-write. It is a bit
+ugly, uses buildDefaultMesh internally.

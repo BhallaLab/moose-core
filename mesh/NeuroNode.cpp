@@ -68,6 +68,10 @@ const vector< unsigned int >& NeuroNode::children() const
 {
 		return children_;
 }
+void NeuroNode::addChild( unsigned int child )
+{
+	children_.push_back( child );
+}
 
 double NeuroNode::calculateLength( const CylBase& parent )
 {

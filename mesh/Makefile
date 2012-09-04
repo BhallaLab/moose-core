@@ -39,7 +39,7 @@ NeuroNode.o: CylBase.h NeuroNode.h
 NeuroStencil.o: CylBase.h NeuroNode.h NeuroStencil.h
 NeuroMesh.o: ChemMesh.h CylBase.h NeuroNode.h NeuroStencil.h NeuroMesh.h
 Stencil.o:	Stencil.h
-testMesh.o:	MeshEntry.h ChemMesh.h CylMesh.h Boundary.h
+testMesh.o:	CylBase.h NeuroNode.h NeuroStencil.h MeshEntry.h ChemMesh.h CylMesh.h Boundary.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I.. -I../basecode $< -c

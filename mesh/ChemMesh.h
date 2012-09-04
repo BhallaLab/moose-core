@@ -27,7 +27,14 @@ class ChemMesh
 		// Field assignment stuff
 		//////////////////////////////////////////////////////////////////
 
-		double getEntireSize() const;
+		double getEntireSize( const Eref& e, const Qinfo* q ) const;
+		/**
+		 * This is a little nasty. It calls buildDefaultMesh with the 
+		 * current numEntries. Should not be used if the mesh has been
+		 * changed to something more interesting.
+		 * Perhaps I need to do something like changeVolOfExistingMesh.
+		 */
+		void setEntireSize( const Eref& e, const Qinfo* q, double size );
 
 		unsigned int getDimensions() const;
 		virtual unsigned int innerGetDimensions() const = 0;
