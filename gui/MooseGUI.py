@@ -570,7 +570,10 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             self.plotWindowFieldTableDict[str(self.plotConfigWinSelectionComboBox.currentText())].append(newTable)
             #select the corresponding plot (mooseplot) from the plotwindow (mooseplotwindow) 
             plotWin = self.plotNameWinDict[str(self.plotConfigWinSelectionComboBox.currentText())] 
-            plotWin.plot.addTable(newTable,self.plotConfigCurrentSelection.getField('name')+'.'+newTable.getField('name'))
+            iteminfo = self.plotConfigCurrentSelection.getField('path')+'/info'
+            c = moose.Annotator(iteminfo).getField('color')
+            graphColor = self.colorCheck(c)
+            plotWin.plot.addTable(newTable,self.plotConfigCurrentSelection.getField('name')+'.'+newTable.getField('name'),graphColor)
             plotWin.plot.nicePlaceLegend()
             plotWin.plot.axes.figure.canvas.draw()    
             self.activeWindow = plotWin
@@ -580,7 +583,10 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             self.plotWindowFieldTableDict[str(self.plotConfigWinSelectionComboBox.currentText())] = [newTable]
             plotWin = newPlotSubWindow(self.mdiArea)
             plotWin.setWindowTitle(str(self.plotConfigWinSelectionComboBox.currentText()))
-            plotWin.plot.addTable(newTable,self.plotConfigCurrentSelection.getField('name')+'.'+newTable.getField('name'))
+            iteminfo = self.plotConfigCurrentSelection.getField('path')+'/info'
+            c = moose.Annotator(iteminfo).getField('color')
+            graphColor = self.colorCheck(c)
+            plotWin.plot.addTable(newTable,self.plotConfigCurrentSelection.getField('name')+'.'+newTable.getField('name'),graphColor)
             plotWin.plot.nicePlaceLegend()
             plotWin.plot.axes.figure.canvas.draw()
             plotWin.show()
@@ -710,9 +716,9 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             if(len(tableObject) > 0):
                 iteminfo = tableObject[0].path+'/info'
                 c = moose.Annotator(iteminfo).getField('color')
-                textColor = self.colorCheck(c)
-            else: textColor = 'blue'
-            plotWin.plot.addTable(graph,graph.getField('name'),textColor)
+                graphColor = self.colorCheck(c)
+            else: graphColor = 'blue'
+            plotWin.plot.addTable(graph,graph.getField('name'),graphColor)
         plotWin.show()
         plotWin.plot.nicePlaceLegend()
         plotWin.plot.axes.figure.canvas.draw()
