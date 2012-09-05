@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 17:11:06 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Sep  5 12:44:09 2012 (+0530)
+// Last-Updated: Wed Sep  5 16:07:52 2012 (+0530)
 //           By: subha
-//     Update #: 940
+//     Update #: 942
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -100,7 +100,8 @@ extern "C" {
     static Py_ssize_t moose_Id_getLength(_Id * self);
     static PyObject * moose_Id_getItem(_Id * self, Py_ssize_t index);
     static PyObject * moose_Id_getSlice(_Id * self, PyObject * args);    
-    static PyObject * moose_Id_getShape(_Id * self);    
+    static PyObject * moose_Id_getShape(_Id * self);
+    static PyObject * moose_Id_subscript(_Id * self, PyObject * op);
     static PyObject * moose_Id_richCompare(_Id * self, PyObject * args, int op);
     static int moose_Id_contains(_Id * self, PyObject * args);
     static PyObject * moose_Id_getattro(_Id * self, PyObject * attr);
