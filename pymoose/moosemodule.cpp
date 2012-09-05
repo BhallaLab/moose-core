@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Sep  5 12:55:14 2012 (+0530)
+// Last-Updated: Wed Sep  5 16:13:17 2012 (+0530)
 //           By: subha
-//     Update #: 9930
+//     Update #: 9976
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -924,7 +924,7 @@ static struct module_state _state;
         0, // sq_inplace_concat
         0 // sq_inplace_repeat
     };
-    
+
     static PyTypeObject moose_ElementField = {
       PyVarObject_HEAD_INIT(NULL, 0)
         "moose.ElementField",                              /* tp_name */
@@ -1027,7 +1027,12 @@ static struct module_state _state;
         0 // sq_inplace_repeat
     };
 
-    
+    static PyMappingMethods IdMappingMethods = {
+        (lenfunc)moose_Id_getLength, //mp_length
+        (binaryfunc)moose_Id_subscript, // mp_subscript
+        0 // mp_ass_subscript
+    };
+
     ///////////////////////////////////////////////
     // Type defs for PyObject of Id
     ///////////////////////////////////////////////
@@ -1087,7 +1092,7 @@ static struct module_state _state;
         (reprfunc)moose_Id_repr,                        /* tp_repr */
         0,                                  /* tp_as_number */
         &IdSequenceMethods,             /* tp_as_sequence */
-        0,                                  /* tp_as_mapping */
+        &IdMappingMethods,              /* tp_as_mapping */
         (hashfunc)moose_Id_hash,                                  /* tp_hash */
         0,                                  /* tp_call */
         (reprfunc)moose_Id_str,               /* tp_str */
@@ -1348,8 +1353,9 @@ static struct module_state _state;
         PyObject * ret = Py_BuildValue("s", path.c_str());
         return ret;
     }
-
-    /** Subset of sequence protocol functions */
+    ////////////////////////////////////////////
+    // Subset of sequence protocol functions
+    ////////////////////////////////////////////
     static Py_ssize_t moose_Id_getLength(_Id * self)
     {
         if (!Id::isValid(self->id_)){
@@ -1432,6 +1438,53 @@ static struct module_state _state;
             }
         }
         return ret;
+    }
+
+    ///////////////////////////////////////////////////
+    // Mapping protocol
+    ///////////////////////////////////////////////////
+    static PyObject * moose_Id_subscript(_Id * self, PyObject *op)
+    {
+        if (PyInt_Check(op) || PyLong_Check(op)){
+            Py_ssize_t value = PyInt_AsLong(op);
+            return moose_Id_getItem(self, value);
+        }
+        vector< unsigned int> dims = Field< vector <unsigned int> >::get(self->id_, "objectDimensions");
+        if (dims.size() > 1 &&
+            PyTuple_Check(op) && PyTuple_Size(op) == dims.size()){
+            ostringstream path;
+            path << self->id_.path();
+            for (Py_ssize_t ii = 0; ii < dims.size(); ++ii){
+                PyObject * index = PyTuple_GetItem(op, ii);
+                if (!PyInt_Check(index)){
+                    PyErr_SetString(PyExc_TypeError, "subscript must be integer.");
+                    return NULL;
+                }
+                unsigned int ix = PyInt_AsUnsignedLongMask(index);
+                if (ix >= dims[ii]){
+                    PyErr_SetString(PyExc_IndexError, "subscript out of range.");
+                    return NULL;
+                }
+                path << "[" << ix << "]";
+            }
+            ObjId oid(path.str());
+            if (oid == ObjId::bad()){
+                PyErr_SetString(PyExc_SystemError, "bad ObjId at specified index.");
+                return NULL;
+            }
+            string class_name = Field<string>::get(oid, "class");
+            map<string, PyTypeObject*>::iterator it = get_moose_classes().find(class_name);
+            if (it == get_moose_classes().end()){
+                PyErr_SetString(PyExc_SystemError, "moose_Id_subscript: unknown class");
+                return NULL;
+            }
+            PyObject * ret = (PyObject*)PyObject_New(_ObjId, it->second);
+            Py_XINCREF(ret);
+            return ret;
+        } else {
+            PyErr_SetString(PyExc_IndexError, "invalid subscript");
+            return NULL;
+        }    
     }
     
     static PyObject * moose_Id_richCompare(_Id * self, PyObject * other, int op)
