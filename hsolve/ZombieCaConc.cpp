@@ -310,7 +310,7 @@ void ZombieCaConc::zombify( Element* solver, Element* orig )
     // maintain a datastructure for putting back the messages at
     // unzombify.
     
-    // HSolve::deleteIncomingMessages(orig, "current");
+    HSolve::deleteIncomingMessages(orig, "current");
 
 	// Create zombie.
 	DataHandler* dh = orig->dataHandler()->copyUsingNewDinfo(

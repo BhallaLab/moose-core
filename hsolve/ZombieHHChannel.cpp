@@ -441,8 +441,8 @@ void ZombieHHChannel::zombify( Element* solver, Element* orig )
     // maintain a datastructure for putting back the messages at
     // unzombify.
 
-    // HSolve::deleteIncomingMessages(orig, "concen");
-    // HSolve::deleteIncomingMessages(orig, "Vm");
+    HSolve::deleteIncomingMessages(orig, "concen");
+    HSolve::deleteIncomingMessages(orig, "Vm");
 
 	// Create zombie.
 	DataHandler* dh = orig->dataHandler()->copyUsingNewDinfo(
