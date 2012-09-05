@@ -456,9 +456,6 @@ void HSolve::deleteIncomingMessages( Element * orig, const string finfo)
         ObjId other = msg->findOtherEnd(orig->id());
         Element * otherEl = other.id.element();
         if (otherEl &&  HSolve::handledClasses().find(otherEl->cinfo()->name()) != HSolve::handledClasses().end()){
-#ifndef NDEBUG
-            cout << "Deleting " << finfo << " message between " << msg->getE1().path() << " and " << msg->getE2().path() << endl;
-#endif // NDEBUG
             Msg::deleteMsg(mid);
         }
         mid = orig->findCaller(concenDest->getFid());

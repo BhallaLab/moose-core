@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Sep  5 10:13:12 2012 (+0530)
+// Last-Updated: Wed Sep  5 12:55:14 2012 (+0530)
 //           By: subha
-//     Update #: 9861
+//     Update #: 9930
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -2196,17 +2196,6 @@ static struct module_state _state;
             }
         }
         if (type.empty()){
-            if (!getFieldType(class_name, string(field), "destFinfo").empty() || !getFieldType(class_name, string(field), "lookupFinfo").empty()) {
-                // convert this object into the appropriate subclass
-                // and retrieve the property in a generic way.
-                map <string, PyTypeObject*>::iterator it = get_moose_classes().find(class_name);
-                if (it != get_moose_classes().end()){
-                    PyTypeObject * pytype = it->second;
-                    _ObjId * subobj = PyObject_New(_ObjId, pytype);
-                    subobj->oid_ = self->oid_;
-                    return PyObject_GenericGetAttr((PyObject*)subobj, attr);
-                }
-            }                
             return PyObject_GenericGetAttr((PyObject*)self, attr);            
         }
         ftype = shortType(type);
@@ -4405,6 +4394,72 @@ static struct module_state _state;
         Py_XDECREF(args);
         return NULL;
     }
+
+    static PyObject * oid_to_element(ObjId oid)
+    {
+        string classname = Field<string>::get(oid, "class");
+        map<string, PyTypeObject *>::iterator it = get_moose_classes().find(classname);
+        if (it == get_moose_classes().end()){
+            return NULL;
+        }
+        PyTypeObject * pyclass = it->second;
+        _ObjId * new_obj = PyObject_New(_ObjId, pyclass);
+        new_obj->oid_ = oid;
+        Py_XINCREF(new_obj);
+        return (PyObject*)new_obj;
+    }
+
+    PyDoc_STRVAR(moose_element_documentation,
+                 "moose.element(arg) -> moose object\n"
+                 "\n"
+                 "Convert a path or an object to the appropriate builtin moose class\n"
+                 "instance\n"
+                 "Parameters\n"
+                 "----------\n"
+                 "arg: str or ematrix or moose object\n"
+                 "path of the moose element to be converted or another element (possibly\n"
+                 "available as a superclass instance).\n"
+                 "\n"
+                 "Returns\n"
+                 "An element of the moose builtin class the specified object belongs\n"
+                 "to.\n"
+                 "\n");
+    static PyObject * moose_element(PyObject* dummy, PyObject * args)
+    {
+        char * path = NULL;
+        PyObject * obj = NULL;
+        ObjId oid;
+        if (PyArg_ParseTuple(args, "s", &path)){
+            oid = ObjId(path);
+            if (ObjId::bad() == oid){
+                PyErr_SetString(PyExc_ValueError, "moose_element: path does not exist");
+                return NULL;
+            }
+            PyObject * new_obj = oid_to_element(oid);
+            if (new_obj){
+                return new_obj;
+            }
+            PyErr_SetString(PyExc_TypeError, "moose_element: unknown class");
+            return NULL;
+        }        
+        if (!PyArg_ParseTuple(args, "O", &obj)){
+            PyErr_SetString(PyExc_TypeError, "moose_element: argument must be a path or an existing element or an ematrix");
+            return NULL;
+        }
+        if (PyObject_IsInstance(obj, (PyObject*)&ObjIdType)){
+            oid = ((_ObjId*)obj)->oid_;
+        } else if (PyObject_IsInstance(obj, (PyObject*)&IdType)){
+            oid = ObjId(((_Id*)obj)->id_);
+        }
+        if (oid == ObjId::bad()){
+            PyErr_SetString(PyExc_TypeError, "moose_element: cannot convert to moose element.");
+            return NULL;
+        }
+        PyObject * new_obj = oid_to_element(oid);
+        if (new_obj){
+            return new_obj;
+        }
+    }
     
     static int define_lookupFinfos(const Cinfo * cinfo)
     {
@@ -4551,6 +4606,7 @@ static struct module_state _state;
     // Method definitions for MOOSE module
     /////////////////////////////////////////////////////////////////////    
     static PyMethodDef MooseMethods[] = {
+        {"element", (PyCFunction)moose_element, METH_VARARGS, moose_element_documentation},
         {"getFieldNames", (PyCFunction)moose_getFieldNames, METH_VARARGS, moose_getFieldNames_documentation},
         {"copy", (PyCFunction)moose_copy, METH_VARARGS|METH_KEYWORDS, moose_copy_documentation},
         {"move", (PyCFunction)moose_move, METH_VARARGS, "Move a ematrix object to a destination."},
@@ -4695,7 +4751,7 @@ static struct PyModuleDef MooseModuleDef = {
             exit(-1);
         };
         Py_INCREF(&ObjIdType);
-        PyModule_AddObject(moose_module, "element", (PyObject*)&ObjIdType);
+        PyModule_AddObject(moose_module, "melement", (PyObject*)&ObjIdType);
 
         // Add LookupField type
         // Py_TYPE(&moose_LookupField) = &PyType_Type;  // unnecessary - filled in by PyType_Ready        

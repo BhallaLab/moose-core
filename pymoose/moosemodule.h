@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 17:11:06 2011 (+0530)
 // Version: 
-// Last-Updated: Sun Aug 19 17:14:57 2012 (+0530)
+// Last-Updated: Wed Sep  5 12:44:09 2012 (+0530)
 //           By: subha
-//     Update #: 938
+//     Update #: 940
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -144,6 +144,8 @@ extern "C" {
 
 
     // The following are global functions
+    static PyObject * oid_to_element(ObjId oid);
+    static PyObject * moose_element(PyObject * dummy, PyObject * args);
     static PyObject * moose_useClock(PyObject * dummy, PyObject * args);
     static PyObject * moose_setClock(PyObject * dummy, PyObject * args);
     static PyObject * moose_start(PyObject * dummy, PyObject * args);
