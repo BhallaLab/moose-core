@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Tue Sep  4 15:31:52 2012 (+0530)
+// Last-Updated: Wed Sep  5 10:13:12 2012 (+0530)
 //           By: subha
-//     Update #: 9846
+//     Update #: 9861
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -2197,8 +2197,15 @@ static struct module_state _state;
         }
         if (type.empty()){
             if (!getFieldType(class_name, string(field), "destFinfo").empty() || !getFieldType(class_name, string(field), "lookupFinfo").empty()) {
-                PyTypeObject * pyclass = get_moose_classes()[class_name];
-                return PyDict_GetItem(pyclass->tp_dict, attr);
+                // convert this object into the appropriate subclass
+                // and retrieve the property in a generic way.
+                map <string, PyTypeObject*>::iterator it = get_moose_classes().find(class_name);
+                if (it != get_moose_classes().end()){
+                    PyTypeObject * pytype = it->second;
+                    _ObjId * subobj = PyObject_New(_ObjId, pytype);
+                    subobj->oid_ = self->oid_;
+                    return PyObject_GenericGetAttr((PyObject*)subobj, attr);
+                }
             }                
             return PyObject_GenericGetAttr((PyObject*)self, attr);            
         }
