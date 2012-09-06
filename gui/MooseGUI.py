@@ -16,7 +16,8 @@ from datetime import date
 import moose
 import moose.utils as mooseUtils
 from collections import defaultdict
-from objectedit import ObjectFieldsModel, ObjectEditView
+#from objectedit import ObjectFieldsModel, ObjectEditView
+from objectedit2 import ObjectFieldsModel
 from moosehandler import MooseHandler
 from mooseplot import MoosePlot,MoosePlotWindow,newPlotSubWindow
 
@@ -482,8 +483,8 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             self.objFieldEditModel = ObjectFieldsModel(obj)
             self.objFieldEditorMap[obj.getId()] = self.objFieldEditModel
 
-        self.mTable.setObjectName(str(obj.getId()))
-        self.mTable.setModel(self.objFieldEditModel)
+        self.propEditorTableView.setObjectName(str(obj.getId()))
+        self.propEditorTableView.setModel(self.objFieldEditModel)
         if hasattr(self, 'sceneLayout'):
             self.connect(self.objFieldEditModel,QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'),self.sceneLayout.updateItemSlot)
         self.updatePlotDockFields(obj)

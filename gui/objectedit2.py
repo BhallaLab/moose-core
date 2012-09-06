@@ -2,14 +2,11 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 import sys
 import moose
-
+import defaults
 #these will go to defaults.py
 #these fields will be ignored
 extra_fields = ['this','me','parent','path','class','children','linearSize','objectDimensions','lastDimension','localNumField','pathIndices','msgOut','msgIn','diffConst','speciesId','Coordinates','neighbors','DiffusionArea','DiffusionScaling','x','x0','x1','dx','nx','y','y0','y1','dy','ny','z','z0','z1','dz','nz','coords','isToroid','preserveNumEntries','numKm','numSubstrates','concK1']
 #these fields denote the units of the field
-field_units ={
-    'Rm':'ohm'
-}
 
 def main():
     app = QApplication(sys.argv)
@@ -24,30 +21,37 @@ class MyWindow(QWidget):
         #c = moose.ZombiePool('/compartment')
         c = moose.Compartment('/compartment')
 
-        tablemodel = MyTableModel(c,self) #my_array, self)
+        tablemodel = ObjectFieldsModel(c,['Field','Value'],self) #my_array, self)
         tableview = QTableView()
         tableview.setModel(tablemodel)
+        #tableview.setShowGrid(False)
+
+        vh = tableview.verticalHeader()
+        vh.setVisible(False)
+
+        hh = tableview.horizontalHeader()
+        hh.setStretchLastSection(True)
+
+        tableview.setAlternatingRowColors(True)
+        #tableview.resizeColumnsToContents()
 
         layout = QVBoxLayout(self)
         layout.addWidget(tableview)
         self.setLayout(layout)
 
-class MyTableModel(QAbstractTableModel):
-    def __init__(self, datain, parent=None, *args):
+class ObjectFieldsModel(QAbstractTableModel):
+    def __init__(self, datain, headerdata=['Field','Value'], parent=None, *args):
         QAbstractTableModel.__init__(self, parent, *args)
-#        self.setAlternatingRowColors(True)
         self.fieldFlags = {}
-        #self.arraydata = []
         self.fields = []
         self.mooseObject = datain
-        
+        self.headerdata = headerdata
+
         for fieldName in self.mooseObject.getFieldNames('valueFinfo'):
             if(fieldName in extra_fields):
                 continue
             else:
                 value = self.mooseObject.getField(fieldName)
-                
-                #self.arraydata.append([fieldName+'(mV)',value])
                 self.fields.append(fieldName)
             flag = Qt.ItemIsEnabled | Qt.ItemIsSelectable
             srchField = 'set_'+fieldName
@@ -55,15 +59,10 @@ class MyTableModel(QAbstractTableModel):
                 for fn in (fn for fn in moose.getFieldDict(self.mooseObject.class_,'destFinfo').keys() if fn.startswith(srchField)):
                     flag = flag | Qt.ItemIsEditable
                     value = self.mooseObject.getField(fieldName)
-                    print fieldName
             except Exception, e:
-                print fieldName
                 pass
 
-#            print 'da'
             self.fieldFlags[fieldName] = flag
-#            print 'fa'
-#        print 'exiting init'
 
     def rowCount(self, parent):
         return len(self.fields)
@@ -72,7 +71,6 @@ class MyTableModel(QAbstractTableModel):
         return 2#len(self.fields)
 
     def setData(self, index, value, role=Qt.EditRole):
-#        print 'setData Enter'
         oldValue = str(index.data().toString())
         
         if not index.isValid() and index.row () >= len(self.fields):
@@ -99,11 +97,9 @@ class MyTableModel(QAbstractTableModel):
             
         if ret:
             self.emit(SIGNAL('dataChanged(const QModelIndex&, const QModelIndex&)'), index, index)
-#        print 'setData Exit'
         return ret
 
     def flags(self, index):
-#        print 'flags Enter'
         flag = Qt.ItemIsEnabled
         if index.isValid():
             try:
@@ -112,23 +108,46 @@ class MyTableModel(QAbstractTableModel):
                 flag = Qt.ItemIsEnabled
             if index.column() == 0:
                 flag = flag & ~Qt.ItemIsEditable
-#        print 'flags Exit'
         return flag
 
     def data(self, index, role):
-#        print 'data enter'
         ret = None
         field = self.fields[index.row()]
         if index.column() == 0 and role == Qt.DisplayRole:
             try:
-                ret = QVariant(QString(field)+' ('+field_units[field]+')')
+                ret = QVariant(QString(field)+' ('+defaults.FIELD_UNITS[field]+')')
             except KeyError:
                 ret = QVariant(QString(field))
         elif index.column() == 1 and (role == Qt.DisplayRole or role == Qt.EditRole):
-            ret = self.mooseObject.getField(field)
-            ret = QVariant(QString(str(ret)))
-#        print 'data exit'
+            try:
+                ret = self.mooseObject.getField(str(field))
+                ret = QVariant(QString(str(ret)))
+            except ValueError:
+                ret = None
         return ret 
+
+    def headerData(self, col, orientation, role):
+        if orientation == Qt.Horizontal and role == Qt.DisplayRole:
+            return QVariant(self.headerdata[col])
+        return QVariant()
+
+class ObjectEditView(QTableView):
+    def __init__(self, *args):
+        QTableView.__init__(self, *args)
+        #self.setEditTriggers(self.DoubleClicked | self.SelectedClicked | self.EditKeyPressed)
+        vh = self.verticalHeader()
+        vh.setVisible(False)
+
+        hh = self.horizontalHeader()
+        hh.setStretchLastSection(True)
+
+        self.setAlternatingRowColors(True)
+        self.resizeColumnsToContents()
+
+    def dataChanged(self, tl, br):
+        QTableView.dataChanged(self, tl, br)
+        self.viewport().update()
+
 
 if __name__ == "__main__":
     main()
