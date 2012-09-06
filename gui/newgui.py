@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'newgui.ui'
 #
-# Created: Thu Aug 30 17:46:16 2012
+# Created: Fri Sep  7 05:00:10 2012
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -119,15 +119,15 @@ class Ui_MainWindow(object):
         spacerItem2 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_24.addItem(spacerItem2)
         self.verticalLayout_2.addLayout(self.horizontalLayout_24)
-        self.mTable = ObjectEditView(self.mooseObjectEditDockContents)
+        self.propEditorTableView = ObjectEditView(self.mooseObjectEditDockContents)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.mTable.sizePolicy().hasHeightForWidth())
-        self.mTable.setSizePolicy(sizePolicy)
-        self.mTable.setMaximumSize(QtCore.QSize(16777215, 16777215))
-        self.mTable.setObjectName(_fromUtf8("mTable"))
-        self.verticalLayout_2.addWidget(self.mTable)
+        sizePolicy.setHeightForWidth(self.propEditorTableView.sizePolicy().hasHeightForWidth())
+        self.propEditorTableView.setSizePolicy(sizePolicy)
+        self.propEditorTableView.setMaximumSize(QtCore.QSize(16777215, 16777215))
+        self.propEditorTableView.setObjectName(_fromUtf8("propEditorTableView"))
+        self.verticalLayout_2.addWidget(self.propEditorTableView)
         spacerItem3 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout_2.addItem(spacerItem3)
         self.mooseObjectEditDock.setWidget(self.mooseObjectEditDockContents)
@@ -900,4 +900,4 @@ class Ui_MainWindow(object):
         self.actionEE.setText(QtGui.QApplication.translate("MainWindow", "ExpEuler", None, QtGui.QApplication.UnicodeUTF8))
         self.actionGillespie.setText(QtGui.QApplication.translate("MainWindow", "Gillespie", None, QtGui.QApplication.UnicodeUTF8))
 
-from objectedit import ObjectEditView
+from objectedit2 import ObjectEditView

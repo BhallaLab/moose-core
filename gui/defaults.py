@@ -9,7 +9,8 @@ PLOT_FIELDS={
     }
 FIELD_UNITS={
     'Vm':'Volts',
-    'conc':'mM'
+    'conc':'mM',
+    'Rm':'ohm'
 }
 
 
