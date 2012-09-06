@@ -352,7 +352,7 @@
       </layout>
      </item>
      <item>
-      <widget class="ObjectEditView" name="mTable" native="true">
+      <widget class="ObjectEditView" name="propEditorTableView" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
          <horstretch>0</horstretch>
