@@ -51,6 +51,7 @@ from PyQt4 import QtGui
 import moose
 import config
 
+import defaults
 #app = QtGui.QApplication([])
 
 class ObjectFieldsModel(QtCore.QAbstractTableModel):
@@ -178,7 +179,10 @@ class ObjectFieldsModel(QtCore.QAbstractTableModel):
             #return self.tr('<html>' + moose.doc(self.mooseObject.class_ + '.' + str(field)).replace(chr(27) + '[1m', '<b>').replace(chr(27) + '[0m', '</b>') + '</html>') # This is to remove special characters used for pretty printing in terminals
          #   return self.tr('<html>' + moose.doc(self.mooseObject.class_ + '.' + str(field)) + '</html>') # This is to remove special characters used for pretty printing in terminals
         if index.column() == 0 and role == Qt.DisplayRole:
-            ret = QtCore.QVariant(QtCore.QString(field))
+            try:
+                ret = QtCore.QVariant(QtCore.QString(field)+' ('+defaults.FIELD_UNITS[field]+')')
+            except KeyError:
+                ret = QtCore.QVariant(QtCore.QString(field))
         elif index.column() == 1 and (role == Qt.DisplayRole or role == Qt.EditRole):
             try:
                 field = ObjectFieldsModel.py_moose_fieldname_map[field]
