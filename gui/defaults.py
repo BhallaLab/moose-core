@@ -7,3 +7,9 @@ PLOT_FIELDS={
     'HHChannel2D':['Ik','Gk'],
     'CaConc':['Ca']
     }
+FIELD_UNITS={
+    'Vm':'Volts',
+    'conc':'mM'
+}
+
+
