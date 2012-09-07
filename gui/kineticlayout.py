@@ -316,17 +316,13 @@ class KineticsWidget(QtGui.QWidget):
         xratio,yratio = self.setupCompt_Coord(modelPath,cmptMol)
         #for k,v in cmptMol.items(): print k,'\n',v
         #print xratio,yratio,'\n'
-
         self.srcdesConnection = {}
         zombieType = ['ZombieReac','ZombieEnz','ZombieMMenz','ZombieSumFunc']
         self.setupItem(modelPath,zombieType,self.srcdesConnection)
-
         #for m,n in self.srcdesConnection.items():print m,n
-
         #pickled the color map here and loading the file
         pkl_file = open(os.path.join(PATH_KKIT_COLORMAPS,'rainbow2.pkl'),'rb')
-        self.picklecolorMap = pickle.load(pkl_file)
-        
+        self.picklecolorMap = pickle.load(pkl_file)        
         self.lineItem_dict = {}
         self.object2line = {}
         #This is check which version of kkit, b'cos anything below kkit8 didn't had xyz co-ordinates
@@ -349,42 +345,42 @@ class KineticsWidget(QtGui.QWidget):
             for cmpt,itemlist in cmptMol.items():
                 self.createCompt(cmpt)
                 comptRef = self.qGraCompt[cmpt]
-                for  item in (item for item  in itemlist if len(item) != 0):
-                        if( ((element(item[0]).class_) == 'ZombieEnz') or ((element(item[0]).class_) == 'ZombieMMenz') or (element(item[0]).class_) == 'ZombieReac'):
-                                iteminfo = (element(item[0]).parent).path+'/info'
-                                if(element(item[0]).class_ == 'ZombieReac'):
-                                    reItem = EllipseItem(item[1]*xratio,item[2]*(-yratio),15,15,comptRef,item)
-         
-                                else:
-                                    reItem = EllipseItem(item[1]*xratio,item[2]*(-yratio),15,15,comptRef,item)
-                                    textcolor = ''
-                                    bgcolor = Annotator(iteminfo).getField('color')
-                                    textcolor,bgcolor = self.colorCheck(textcolor,bgcolor,self.picklecolorMap)
-                                    reItem.setBrush(QtGui.QColor(bgcolor))
-                                reItem.ellemitter.connect(reItem.ellemitter, QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.emitItemtoEditor)
-                                reItem.ellemitter.connect(reItem.ellemitter,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.emitItemtoEditor)
-                                reItem.ellemitter.connect(reItem.ellemitter,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
-                                self.mooseId_GText[element(item[0]).getId()] = reItem
-                                               
-                        elif((element(item[0]).class_) == 'ZombiePool' or (element(item[0]).class_) == 'ZombieFuncPool' or (element(item[0]).class_) == 'ZombieBufPool'):
-                            if( (element(item[0]).parent).class_ != 'ZombieEnz'):
-                                pItem = Textitem(comptRef,item,xratio,yratio,self.picklecolorMap)
-                                pItem.textemitter.connect(pItem.textemitter, QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.emitItemtoEditor)
-                                pItem.textemitter.connect(pItem.textemitter,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.emitItemtoEditor)
-                                pItem.textemitter.connect(pItem.textemitter,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
+                # for  item in (item for item  in itemlist if len(item) != 0): # THIS IS HORRIBLE!!!
+                for item in itemlist:
+                    if len(item) == 0:
+                        continue
+                    if item[0].class_ == 'ZombieEnz' or item[0].class_ == 'ZombieMMenz' or item[0].class_ == 'ZombieReac':
+                        iteminfo = (element(item[0]).parent).path+'/info'
+                        if item[0].class_ == 'ZombieReac':
+                            reItem = EllipseItem(item[1]*xratio,item[2]*(-yratio),15,15,comptRef,item)
 
-                            else:
-                                w = 8
-                                h = 8
-                                x = ((item[1])*xratio)/2+w/2
-                                pItem = RectCompt1(x,item[2]*(-yratio),w,h,self.mooseId_GText[element(item[0]).parent.getId()],item[0])
-                                textcolor = ''
-                                pItem.Rectemitter1.connect(pItem.Rectemitter1,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
-                                pItem.Rectemitter1.connect(pItem.Rectemitter1,QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.emitItemtoEditor)
-                                pItem.Rectemitter1.connect(pItem.Rectemitter1,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.emitItemtoEditor)
-                            
-                            self.mooseId_GText[element(item[0]).getId()] = pItem
+                        else:
+                            reItem = EllipseItem(item[1]*xratio,item[2]*(-yratio),15,15,comptRef,item)
+                            textcolor = ''
+                            bgcolor = Annotator(iteminfo).getField('color')
+                            textcolor,bgcolor = self.colorCheck(textcolor,bgcolor,self.picklecolorMap)
+                            reItem.setBrush(QtGui.QColor(bgcolor))
+                        reItem.ellemitter.connect(reItem.ellemitter, QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.emitItemtoEditor)
+                        reItem.ellemitter.connect(reItem.ellemitter,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.emitItemtoEditor)
+                        reItem.ellemitter.connect(reItem.ellemitter,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
+                        self.mooseId_GText[element(item[0]).getId()] = reItem
 
+                    elif item[0].class_ == 'ZombiePool' or item[0].class_ == 'ZombieFuncPool' or item[0].class_ == 'ZombieBufPool':
+                        if item[0][0].parent.class_ != 'ZombieEnz':
+                            pItem = Textitem(comptRef,item,xratio,yratio,self.picklecolorMap)
+                            pItem.textemitter.connect(pItem.textemitter, QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.emitItemtoEditor)
+                            pItem.textemitter.connect(pItem.textemitter,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.emitItemtoEditor)
+                            pItem.textemitter.connect(pItem.textemitter,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
+                        else:
+                            w = 8
+                            h = 8
+                            x = ((item[1])*xratio)/2+w/2
+                            pItem = RectCompt1(x,item[2]*(-yratio),w,h,self.mooseId_GText[element(item[0]).parent.getId()],item[0])
+                            textcolor = ''
+                            pItem.Rectemitter1.connect(pItem.Rectemitter1,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
+                            pItem.Rectemitter1.connect(pItem.Rectemitter1,QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.emitItemtoEditor)
+                            pItem.Rectemitter1.connect(pItem.Rectemitter1,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.emitItemtoEditor)
+                        self.mooseId_GText[element(item[0]).getId()] = pItem
         for k, v in self.qGraCompt.items():
             rectcompt = v.childrenBoundingRect()
             v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
@@ -392,7 +388,6 @@ class KineticsWidget(QtGui.QWidget):
             v.Rectemitter.connect(v.Rectemitter,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
             v.Rectemitter.connect(v.Rectemitter,QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.emitItemtoEditor)                
             v.Rectemitter.connect(v.Rectemitter,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.emitItemtoEditor)
-
         for inn,out in self.srcdesConnection.items():
             if ((len(filter(lambda x:isinstance(x,list), out))) != 0):
                 for items in (items for items in out[0] ):
@@ -413,8 +408,7 @@ class KineticsWidget(QtGui.QWidget):
                     des = ""
                     src = self.mooseId_GText[element(inn).getId()]
                     des = self.mooseId_GText[element(items[0]).getId()]
-                    self.lineCord(src,des,items[1])
-        
+                    self.lineCord(src,des,items[1])        
         #self.view.fitInView(self.sceneContainer.sceneRect().x()-10,self.sceneContainer.sceneRect().y()-10,self.sceneContainer.sceneRect().width()+20,self.sceneContainer.sceneRect().height()+20,Qt.Qt.KeepAspectRatio)
         self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
         hLayout.addWidget(self.view)
