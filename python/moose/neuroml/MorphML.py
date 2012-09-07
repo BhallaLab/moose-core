@@ -29,6 +29,7 @@ class MorphML():
         self.bio='http://morphml.org/biophysics/schema'
         self.mml='http://morphml.org/morphml/schema'
         self.nml='http://morphml.org/networkml/schema'
+        self.meta='http://morphml.org/metadata/schema'
         self.cellDictBySegmentId={}
         self.cellDictByCableId={}
         self.nml_params = nml_params
@@ -180,6 +181,30 @@ class MorphML():
                 if neuroml_debug: print 'Set up compartment/section', running_comp.name
 
         ###############################################
+        #### load cablegroups into a dictionary
+        self.cablegroupsDict = {}
+        ## Two ways of specifying cablegroups in neuroml 1.x
+        ## <cablegroup>s with list of <cable>s
+        cablegroups = cell.findall(".//{"+self.mml+"}cablegroup")
+        for cablegroup in cablegroups:
+            cablegroupname = cablegroup.attrib['name']
+            self.cablegroupsDict[cablegroupname] = []
+            for cable in cablegroup.findall(".//{"+self.mml+"}cable"):
+                cableid = cable.attrib['id']
+                self.cablegroupsDict[cablegroupname].append(cableid)        
+        ## <cable>s with list of <meta:group>s
+        cables = cell.findall(".//{"+self.mml+"}cable")
+        for cable in cables:
+            cableid = cable.attrib['id']
+            cablegroups = cable.findall(".//{"+self.meta+"}group")
+            for cablegroup in cablegroups:
+                cablegroupname = cablegroup.text
+                if cablegroupname in self.cablegroupsDict.keys():
+                    self.cablegroupsDict[cablegroupname].append(cableid)
+                else:
+                    self.cablegroupsDict[cablegroupname] = [cableid]
+
+        ###############################################
         #### load biophysics into the compartments
         biophysics = cell.find(".//{"+self.neuroml+"}biophysics")
         if biophysics is not None:
@@ -324,12 +349,9 @@ class MorphML():
                 for compartment in self.cellDictByCableId[cellname][1].values():
                     self.set_compartment_param(compartment,name,value,mechanismname)
             else:
-                for cablegroup in cell.findall(".//{"+self.mml+"}cablegroup"):
-                    if cablegroup.attrib['name'] == cablegroupname:
-                        for cable in cablegroup.findall(".//{"+self.mml+"}cable"):
-                            cableid = cable.attrib['id']
-                            compartment = self.cellDictByCableId[cellname][1][cableid]
-                            self.set_compartment_param(compartment,name,value,mechanismname)
+                for cableid in self.cablegroupsDict[cablegroupname]:
+                    compartment = self.cellDictByCableId[cellname][1][cableid]
+                    self.set_compartment_param(compartment,name,value,mechanismname)
 
     def set_compartment_param(self, compartment, name, value, mechanismname):
         """ Set the param for the compartment depending on name and mechanismname. """
