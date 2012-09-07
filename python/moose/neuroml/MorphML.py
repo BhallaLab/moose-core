@@ -12,7 +12,7 @@ It is assumed that any channels and synapses referred to by above MorphML
 have already been loaded under that same name in /library in MOOSE (use ChannelML loader).
 """
 
-from xml.etree import cElementTree as ET
+from xml.etree import cElementTree as ET # cELementTree is mostly API-compatible but faster than ElementTree
 import string
 import sys
 import math
@@ -108,14 +108,19 @@ class MorphML():
                         running_dia_nums += 1
                 ## new cableid starts, hence start a new compartment; also finish previous / last compartment
                 else:
+                    ## Create a new compartment
                     ## the moose "hsolve" method assumes compartments to be asymmetric compartments and symmetrizes them
                     ## but that is not what we want when translating from Neuron which has only symcompartments -- so be careful!
-                    moosecompname = segmentname+'_'+segmentid
+                    moosecompname = segmentname+'_'+segmentid # just segmentname is NOT unique - eg: mitral bbmit exported from NEURON
                     moosecomppath = moosecell.path+'/'+moosecompname
-                    self.segDict[segmentid]=[moosecompname] ## extended with details of compartment/section when finished up.
-                    moosecomp = moose.Compartment(moosecomppath) # segmentname is NOT unique - eg: mitral bbmit exported from NEURON
+                    moosecomp = moose.Compartment(moosecomppath)
                     self.cellDictBySegmentId[cellname][1][segmentid] = moosecomp
                     self.cellDictByCableId[cellname][1][cableid] = moosecomp # cables are grouped and densities set for cablegroups. Hence I need to refer to segment according to which cable they belong to.
+                    running_cableid = cableid
+                    running_segid = segmentid
+                    running_comp = moosecomp
+                    running_diameter = 0.0
+                    running_dia_nums = 0
                     if segment.attrib.has_key('parent'):
                         parentid = segment.attrib['parent'] # I assume the parent is created before the child so that I can immediately connect the child.
                         parent = self.cellDictBySegmentId[cellname][1][parentid]
@@ -148,53 +153,31 @@ class MorphML():
                     if distal is not None:
                         running_diameter += float(distal.attrib["diameter"]) * self.length_factor
                         running_dia_nums += 1
-                        
-                if segnum==0: # if first segment, change the running compartment from None
-                    running_cableid = cableid
-                    running_segid = segmentid
-                    running_comp = moosecomp
+                    ## finished creating new compartment
 
-                ## finish up the previous compartment if new cable has started (except if it is the first),
-                ## OR finish up the current compartment if it is the last
-                lastSegBool = (segnum+1==segmentstotal)
-                if (cableid!=running_cableid and segnum!=0) or lastSegBool:
-                    if lastSegBool: # if last segment, take distal values from this segment
-                        prev_segment = segment
-                    else:
-                        prev_segment = segments[segnum-1]
-                    distal = prev_segment.find('./{'+self.mml+'}distal')
+                ## Update the end position, diameter and length, and segDict of this comp/cable/section
+                ## with each segment that is part of this cable (assumes contiguous segments in xml).
+                ## This ensures that we don't have to do any 'closing ceremonies',
+                ## if a new cable is encoutered in next iteration.
+                if distal is not None:
                     running_comp.x = float(distal.attrib["x"])*self.length_factor
                     running_comp.y = float(distal.attrib["y"])*self.length_factor
                     running_comp.z = float(distal.attrib["z"])*self.length_factor
-                    proximal = segment.find('./{'+self.mml+'}proximal')
-                    if proximal is not None:
-                        running_diameter += float(proximal.attrib["diameter"]) * self.length_factor
-                        running_dia_nums += 1
-                    distal = segment.find('./{'+self.mml+'}distal')
-                    if distal is not None:
-                        running_diameter += float(distal.attrib["diameter"]) * self.length_factor
-                        running_dia_nums += 1
-                    ## Set the compartment diameter as the average diameter of all the segments in this section
-                    running_comp.diameter = running_diameter / float(running_dia_nums)
-                    running_diameter = 0.0
-                    running_dia_nums = 0
-                    ## Set the compartment length
-                    running_comp.length = math.sqrt((running_comp.x-running_comp.x0)**2+\
-                        (running_comp.y-running_comp.y0)**2+(running_comp.z-running_comp.z0)**2)
-                    if running_comp.length == 0.0:          # neuroconstruct seems to set length=0 for round soma!
-                        running_comp.length = running_comp.diameter
-                    ## the empty list at the end below will get populated 
-                    ## with the potential synapses on this segment, in function set_compartment_param(..)
-                    self.segDict[running_segid].extend([(running_comp.x0,running_comp.y0,running_comp.z0),\
-                        (running_comp.x,running_comp.y,running_comp.z),running_comp.diameter,running_comp.length,[]])
-                    if neuroml_debug: print 'Set up compartment/section', running_comp.name
-
-                ## change the running variables whenever a new cable starts
-                ## important to change this after finishing the previous running compartment
-                if cableid!=running_cableid:
-                    running_cableid = cableid
-                    running_segid = segmentid
-                    running_comp = moosecomp
+                ## Set the compartment diameter as the average diameter of all the segments in this section
+                running_comp.diameter = running_diameter / float(running_dia_nums)
+                ## Set the compartment length
+                running_comp.length = math.sqrt((running_comp.x-running_comp.x0)**2+\
+                    (running_comp.y-running_comp.y0)**2+(running_comp.z-running_comp.z0)**2)
+                ## NeuroML specs say that if (x0,y0,z0)=(x,y,z), then round compartment e.g. soma.
+                ## In Moose set length = dia to give same surface area as sphere of dia.
+                if running_comp.length == 0.0:
+                    running_comp.length = running_comp.diameter
+                ## Set the segDict
+                ## the empty list at the end below will get populated 
+                ## with the potential synapses on this segment, in function set_compartment_param(..)
+                self.segDict[running_segid] = [running_comp.name,(running_comp.x0,running_comp.y0,running_comp.z0),\
+                    (running_comp.x,running_comp.y,running_comp.z),running_comp.diameter,running_comp.length,[]]
+                if neuroml_debug: print 'Set up compartment/section', running_comp.name
 
         ###############################################
         #### load biophysics into the compartments
