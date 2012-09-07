@@ -12,7 +12,7 @@ from filepaths import *
 
 from moose import *
 
-class RectCompt1(QtGui.QGraphicsRectItem):
+class Rectcplx(QtGui.QGraphicsRectItem):
     def __init__(self,x,y,w,h,parent,item):
         self.Rectemitter1 = QtCore.QObject()
         self.mooseObj_ = item
@@ -41,10 +41,8 @@ class RectCompt1(QtGui.QGraphicsRectItem):
         return QtGui.QGraphicsItem.itemChange(self,change,value)
 
 class Textitem(QtGui.QGraphicsSimpleTextItem):
-    def __init__(self,parent,item,xr,yr,pickle):
+    def __init__(self,parent,item,xpos,ypos,pickle):
         self.mooseObj_ = item[0][0]
-        x = item[1]
-        y = item[2]
         textcolor = item[3]
         bgcolor = item[4]
         self.picklecolorMap = pickle
@@ -62,7 +60,7 @@ class Textitem(QtGui.QGraphicsSimpleTextItem):
         self.bcolor = Qt.QColor(b)
         self.setPen(QtGui.QPen(QtGui.QBrush(Qt.Qt.black)))
         self.setBrush(QtGui.QBrush(tcolor))
-        self.setPos(x*xr,y*(-yr))
+        self.setPos(xpos,ypos)
         self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
         self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
         
@@ -200,7 +198,7 @@ class GraphicalView(QtGui.QGraphicsView):
                 #calling parent class to inherit functionality rather writing custom code for rubberband effect here
             else:
                 #print "s",sceneitems
-                if( (isinstance(sceneitems, Textitem)) or (isinstance(sceneitems, RectCompt1)) or (isinstance(sceneitems, EllipseItem)) ):
+                if( (isinstance(sceneitems, Textitem)) or (isinstance(sceneitems, Rectcplx)) or (isinstance(sceneitems, EllipseItem)) ):
                     #print "sceneitems",sceneitems
                     QtGui.QGraphicsView.mousePressEvent(self, event)
                     self.itemSelected = True
@@ -241,7 +239,7 @@ class GraphicalView(QtGui.QGraphicsView):
                 preSelectItem.setSelected(0)
             #since it custom rubberband I am checking if with in the selected area any textitem, if s then setselected to true
             for items in self.sceneContainerPt.items(self.startScenepos.x(),self.startScenepos.y(),self.rubberbandWidth,self.rubberbandHeight,Qt.Qt.IntersectsItemShape):
-                if(isinstance(items,Textitem) or isinstance(items, RectCompt1) or isinstance(items, EllipseItem)):
+                if(isinstance(items,Textitem) or isinstance(items, Rectcplx) or isinstance(items, EllipseItem)):
                     if items.isSelected() == False:
                         items.setSelected(1)
                         
@@ -283,7 +281,7 @@ class GraphicalView(QtGui.QGraphicsView):
             for unselectitem in self.rubberbandlist:
                 if unselectitem.isSelected() == True:
                     unselectitem.setSelected(0)
-            for items in (qgraphicsitem for qgraphicsitem in self.rubberbandlist if isinstance(qgraphicsitem,Textitem) or isinstance(qgraphicsitem,RectCompt1) or isinstance(qgraphicsitem, EllipseItem)):
+            for items in (qgraphicsitem for qgraphicsitem in self.rubberbandlist if isinstance(qgraphicsitem,Textitem) or isinstance(qgraphicsitem,Rectcplx) or isinstance(qgraphicsitem, EllipseItem)):
                 self.fitInView(self.startScenepos.x(),self.startScenepos.y(),self.rubberbandWidth,self.rubberbandHeight,Qt.Qt.KeepAspectRatio)
                 if((self.matrix().m11()>=1.0)and(self.matrix().m22() >=1.0)):
                     for item in ( Txtitem for Txtitem in self.sceneContainerPt.items() if isinstance(Txtitem,Textitem) ):
@@ -293,7 +291,7 @@ class GraphicalView(QtGui.QGraphicsView):
             for unselectitem in self.rubberbandlist:
                 if unselectitem.isSelected() == True:
                     unselectitem.setSelected(0)
-            for items in (qgraphicsitem for qgraphicsitem in self.rubberbandlist if isinstance(qgraphicsitem,Textitem) or isinstance(qgraphicsitem,RectCompt1) or isinstance(qgraphicsitem, EllipseItem)):
+            for items in (qgraphicsitem for qgraphicsitem in self.rubberbandlist if isinstance(qgraphicsitem,Textitem) or isinstance(qgraphicsitem,Rectcplx) or isinstance(qgraphicsitem, EllipseItem)):
                 self.fitInView(self.endScenepos.x(),self.endScenepos.y(),abs(self.rubberbandWidth),abs(self.rubberbandHeight),Qt.Qt.KeepAspectRatio)
                 if((self.matrix().m11()>=1.0)and(self.matrix().m22() >=1.0)):
                     for item in ( Txtitem for Txtitem in self.sceneContainerPt.items() if isinstance (Txtitem, Textitem)):
@@ -313,9 +311,18 @@ class KineticsWidget(QtGui.QWidget):
         self.sceneContainer.setBackgroundBrush(QtGui.QColor(230,220,219,120))
         self.view = GraphicalView(self.sceneContainer,self.border)
         cmptMol = {}
-        xratio,yratio = self.setupCompt_Coord(modelPath,cmptMol)
+        maxX,minX,maxY,minY = self.setupCompt_Coord(modelPath,cmptMol)
         #for k,v in cmptMol.items(): print k,'\n',v
-        #print xratio,yratio,'\n'
+        if maxX - minX != 0:
+            xnewratio = (size.width()-10)/(maxX-minX)
+        else:
+            xnewratio = size.width()-10
+        
+        if maxY - minY != 0:
+            ynewratio = (size.height()-10)/(maxY-minY)
+        else:
+            ynewratio = size.height()-10
+        #print size,maxX,minX,maxY,minY,"xnw",xnewratio,"ynew",ynewratio
         self.srcdesConnection = {}
         zombieType = ['ZombieReac','ZombieEnz','ZombieMMenz','ZombieSumFunc']
         self.setupItem(modelPath,zombieType,self.srcdesConnection)
@@ -339,9 +346,13 @@ class KineticsWidget(QtGui.QWidget):
             msgBox.exec_()
             raise Widgetvisibility()
         else:
-            fnt = QtGui.QFont('Helvetica',11)
+            fnt = QtGui.QFont('Helvetica',18)
             self.qGraCompt = {}
             self.mooseId_GText = {}
+            self.ellipse_width = 15
+            self.ellipse_height = 15
+            self.cplx_width = 8
+            self.cplx_height = 8
             for cmpt,itemlist in cmptMol.items():
                 self.createCompt(cmpt)
                 comptRef = self.qGraCompt[cmpt]
@@ -351,11 +362,13 @@ class KineticsWidget(QtGui.QWidget):
                         continue
                     if item[0].class_ == 'ZombieEnz' or item[0].class_ == 'ZombieMMenz' or item[0].class_ == 'ZombieReac':
                         iteminfo = (element(item[0]).parent).path+'/info'
+                        xpos = (item[1]-minX)*xnewratio
+                        ypos = -(item[2]-minY)*ynewratio
                         if item[0].class_ == 'ZombieReac':
-                            reItem = EllipseItem(item[1]*xratio,item[2]*(-yratio),15,15,comptRef,item)
+                            reItem = EllipseItem(xpos,ypos,self.ellipse_width,self.ellipse_height,comptRef,item)
 
                         else:
-                            reItem = EllipseItem(item[1]*xratio,item[2]*(-yratio),15,15,comptRef,item)
+                            reItem = EllipseItem(xpos,ypos,self.ellipse_width,self.ellipse_height,comptRef,item)
                             textcolor = ''
                             bgcolor = Annotator(iteminfo).getField('color')
                             textcolor,bgcolor = self.colorCheck(textcolor,bgcolor,self.picklecolorMap)
@@ -366,16 +379,19 @@ class KineticsWidget(QtGui.QWidget):
                         self.mooseId_GText[element(item[0]).getId()] = reItem
 
                     elif item[0].class_ == 'ZombiePool' or item[0].class_ == 'ZombieFuncPool' or item[0].class_ == 'ZombieBufPool':
+                        xpos = (item[1]-minX)*xnewratio
+                        ypos = -(item[2]-minY)*ynewratio
                         if item[0][0].parent.class_ != 'ZombieEnz':
-                            pItem = Textitem(comptRef,item,xratio,yratio,self.picklecolorMap)
+                            pItem = Textitem(comptRef,item,xpos,ypos,self.picklecolorMap)
+                            pItem.setFont(fnt)
                             pItem.textemitter.connect(pItem.textemitter, QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.emitItemtoEditor)
                             pItem.textemitter.connect(pItem.textemitter,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.emitItemtoEditor)
                             pItem.textemitter.connect(pItem.textemitter,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
                         else:
-                            w = 8
-                            h = 8
-                            x = ((item[1])*xratio)/2+w/2
-                            pItem = RectCompt1(x,item[2]*(-yratio),w,h,self.mooseId_GText[element(item[0]).parent.getId()],item[0])
+                            #cplx has made to sit under enz, for which xpos added with width/2 and height is added by ellipseitem height which is 15 for now
+                            xpos = xpos+(self.cplx_width/2)
+                            ypos = ypos+self.ellipse_width
+                            pItem = Rectcplx(xpos,ypos,self.cplx_width,self.cplx_height,self.mooseId_GText[element(item[0]).parent.getId()],item[0])
                             textcolor = ''
                             pItem.Rectemitter1.connect(pItem.Rectemitter1,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
                             pItem.Rectemitter1.connect(pItem.Rectemitter1,QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.emitItemtoEditor)
@@ -716,7 +732,7 @@ class KineticsWidget(QtGui.QWidget):
             for reitem in Neutral(meshEnt).getNeighbors('remeshReacs'):
                 reiteminfo = reitem.path+'/info'
                 xxr = float(element(reiteminfo).getField('x'))
-                yyr = float(element(reiteminfo).getField('y')-1)                
+                yyr = float(element(reiteminfo).getField('y'))                
                 textcolor = Annotator(reiteminfo).getField('textColor')
                 bgcolor  =  Annotator(reiteminfo).getField('color')
                 textcolor,bgcolor = self.colorCheck(textcolor,bgcolor,picklecolorMap)
@@ -745,11 +761,11 @@ class KineticsWidget(QtGui.QWidget):
                         molrecList.append((mitem,xx1,yy1,textcolor,bgcolor))
                         x.append(xx1)
                         y.append(yy1)
-                    
+                    #print "$",x[-1],y[-1]
             mobject_Cord[meshEnt] = molrecList
         xratio = ((max(x))-(min(x)))
         yratio = ((max(y))-(min(y)))
-        return(xratio,yratio)
+        return(max(x),min(x),max(y),min(y))
     
     def keyPressEvent(self,event):
         key = event.key()
@@ -764,13 +780,13 @@ class KineticsWidget(QtGui.QWidget):
         
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
-    size = QtCore.QSize(1800,1600)
+    size = QtCore.QSize(992, 704)
     modelPath = 'Kholodenko'
-    #modelPath = 'enz_classical_explicty'
-    #modelPath = 'reaction'
+    modelPath = 'enz_classical_explicit'
+    modelPath = 'reaction1'
     #modelPath = 'test_enzyme'
-    #modelPath = 'OSC_Cspace_ref'
-    modelPath = 'osc1'
+    #modelPath = 'OSC_Cspace'
+    #modelPath = 'osc1'
     #modelPath = 'traff_nn_diff_TRI'
     #modelPath = 'traff_nn_diff_BIS'
     #modelPath = 'EGFR_MAPK_58'
