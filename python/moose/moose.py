@@ -60,7 +60,7 @@ known_types = ['void',
                'unsigned long',
                'string',
                'ematrix',
-               'element'] + sequence_types
+               'melement'] + sequence_types
 
 ######################################################################
 # Special function to generate objects of the right class from
@@ -77,7 +77,7 @@ def to_el(path):
     appropriate class. If path does not exist, raises NameError.
 
     ematrix or element can be provided in stead of path"""
-    if isinstance(path, ematrix) or isinstance(path, element):
+    if isinstance(path, ematrix) or isinstance(path, melement):
         classObj = eval(path.class_)
     elif isinstance(path, str):
         if not _moose.exists(path):

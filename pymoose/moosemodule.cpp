@@ -4494,7 +4494,8 @@ static struct module_state _state;
             }
             PyErr_SetString(PyExc_TypeError, "moose_element: unknown class");
             return NULL;
-        }        
+        }
+        PyErr_Clear();
         if (!PyArg_ParseTuple(args, "O", &obj)){
             PyErr_SetString(PyExc_TypeError, "moose_element: argument must be a path or an existing element or an ematrix");
             return NULL;
@@ -4509,9 +4510,10 @@ static struct module_state _state;
             return NULL;
         }
         PyObject * new_obj = oid_to_element(oid);
-        if (new_obj){
-            return new_obj;
+        if (!new_obj){
+          PyErr_SetString(PyExc_RuntimeError, "moose_element: not a moose class.");
         }
+        return new_obj;
     }
     
     static int define_lookupFinfos(const Cinfo * cinfo)
