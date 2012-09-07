@@ -20,7 +20,10 @@ class MyWindow(QWidget):
         
         #c = moose.ZombiePool('/compartment')
         c = moose.Compartment('/compartment')
-
+	moose.loadModel('../Demos/Genesis_files/reaction.g','/rec')
+        for l in moose.wildcardFind('/rec/##[TYPE=ZombiePool]'):
+            if( moose.element(l).path == '/rec/kinetics/Sub'):
+                c = moose.element(l)
         tablemodel = ObjectFieldsModel(c,['Field','Value'],self) #my_array, self)
         tableview = QTableView()
         tableview.setModel(tablemodel)
@@ -48,6 +51,7 @@ class ObjectFieldsModel(QAbstractTableModel):
         self.headerdata = headerdata
 
         for fieldName in self.mooseObject.getFieldNames('valueFinfo'):
+            
             if(fieldName in extra_fields):
                 continue
             else:

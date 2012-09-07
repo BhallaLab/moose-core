@@ -82,7 +82,7 @@ class Textitem(QtGui.QGraphicsTextItem):
     
     def itemChange(self,change,value):
         if change == QtGui.QGraphicsItem.ItemPositionChange:
-            self.positionChange.emit(self)
+            self.positionChange.emit(QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.mooseObj_)
         if change == QtGui.QGraphicsItem.ItemSelectedChange and value == True:
            self.selectedChange.emit(self)
         return QtGui.QGraphicsItem.itemChange(self,change,value)
