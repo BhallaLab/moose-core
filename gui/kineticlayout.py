@@ -346,7 +346,7 @@ class KineticsWidget(QtGui.QWidget):
             msgBox.exec_()
             raise Widgetvisibility()
         else:
-            fnt = QtGui.QFont('Helvetica',18)
+            fnt = QtGui.QFont('Helvetica',8)
             self.qGraCompt = {}
             self.mooseId_GText = {}
             self.ellipse_width = 15
@@ -642,9 +642,14 @@ class KineticsWidget(QtGui.QWidget):
                     v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
     
             else:
-                for k, v in self.qGraCompt.items():
-                    for rectChilditem in v.childItems():
-                        self.updatearrow(rectChilditem)
+
+                if mooseObject.class_ == "CubeMesh":
+                    for k, v in self.qGraCompt.items():
+                        mesh = mooseObject.path+'/mesh'
+                        if k.path == mesh:
+                            for rectChilditem in v.childItems():
+                                self.updatearrow(rectChilditem)
+
     def colorCheck(self,textColor,bgcolor,pklcolor):
         if(textColor == ''): textColor = 'green'
         if(bgcolor == ''): bgcolor = 'blue'
@@ -781,9 +786,11 @@ class KineticsWidget(QtGui.QWidget):
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     size = QtCore.QSize(992, 704)
+    modelPath = '77'
     modelPath = 'Kholodenko'
-    modelPath = 'enz_classical_explicit'
-    modelPath = 'reaction1'
+    modelPath = 'motors8'
+    #modelPath = 'enz_classical_explicit'
+    #modelPath = 'reaction1'
     #modelPath = 'test_enzyme'
     #modelPath = 'OSC_Cspace'
     #modelPath = 'osc1'
