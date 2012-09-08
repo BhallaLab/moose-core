@@ -294,7 +294,7 @@ class cCylinder(BaseObject):
   		vy = y2-y1
   		vz = z2-z1
 
-  		if(vz == 0.000):
+  		if(vz == 0.0):
 			vz = 0.01
 
 		v = sqrt( vx*vx + vy*vy + vz*vz )

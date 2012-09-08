@@ -489,7 +489,6 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             self.connect(self.objFieldEditModel,QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'),self.sceneLayout.updateItemSlot)
         self.updatePlotDockFields(obj)
 
-
     def propEditorSelectParent(self):
         if self.propEditorCurrentSelection:
             self.makeObjectFieldEditor(self.propEditorCurrentSelection.getField('parent'))
@@ -572,9 +571,9 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             #select the corresponding plot (mooseplot) from the plotwindow (mooseplotwindow) 
             plotWin = self.plotNameWinDict[str(self.plotConfigWinSelectionComboBox.currentText())] 
             iteminfo = self.plotConfigCurrentSelection.getField('path')+'/info'
-            c = moose.Annotator(iteminfo).getField('color')
-            graphColor = self.colorCheck(c)
-            plotWin.plot.addTable(newTable,self.plotConfigCurrentSelection.getField('name')+'.'+newTable.getField('name'),graphColor)
+            #c = moose.Annotator(iteminfo).getField('color')
+            #graphColor = self.colorCheck(c)
+            plotWin.plot.addTable(newTable,self.plotConfigCurrentSelection.getField('name')+'.'+newTable.getField('name'))#,graphColor)
             plotWin.plot.nicePlaceLegend()
             plotWin.plot.axes.figure.canvas.draw()    
             self.activeWindow = plotWin
@@ -585,9 +584,9 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             plotWin = newPlotSubWindow(self.mdiArea)
             plotWin.setWindowTitle(str(self.plotConfigWinSelectionComboBox.currentText()))
             iteminfo = self.plotConfigCurrentSelection.getField('path')+'/info'
-            c = moose.Annotator(iteminfo).getField('color')
-            graphColor = self.colorCheck(c)
-            plotWin.plot.addTable(newTable,self.plotConfigCurrentSelection.getField('name')+'.'+newTable.getField('name'),graphColor)
+            #c = moose.Annotator(iteminfo).getField('color')
+            #graphColor = self.colorCheck(c)
+            plotWin.plot.addTable(newTable,self.plotConfigCurrentSelection.getField('name')+'.'+newTable.getField('name'))#,graphColor)
             plotWin.plot.nicePlaceLegend()
             plotWin.plot.axes.figure.canvas.draw()
             plotWin.show()
@@ -767,5 +766,3 @@ dmw.show()
 #http://www.mail-archive.com/matplotlib-users@lists.sourceforge.net/msg13241.html
 # with the same return code of Qt application
 sys.exit(app.exec_())
-
-
