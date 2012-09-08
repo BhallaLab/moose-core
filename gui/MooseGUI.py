@@ -570,10 +570,16 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             self.plotWindowFieldTableDict[str(self.plotConfigWinSelectionComboBox.currentText())].append(newTable)
             #select the corresponding plot (mooseplot) from the plotwindow (mooseplotwindow) 
             plotWin = self.plotNameWinDict[str(self.plotConfigWinSelectionComboBox.currentText())] 
+            #harsha start:The color shd be accessed only for KKIT file and for neuronal model shd pass none, for now hacking
             iteminfo = self.plotConfigCurrentSelection.getField('path')+'/info'
-            #c = moose.Annotator(iteminfo).getField('color')
-            #graphColor = self.colorCheck(c)
-            plotWin.plot.addTable(newTable,self.plotConfigCurrentSelection.getField('name')+'.'+newTable.getField('name'))#,graphColor)
+            c = moose.Annotator(iteminfo).getField('color')
+            graphColor = self.colorCheck(c)
+            #end
+            
+            if graphColor == "white":
+                graphColor = None
+            print "F",graphColor
+            plotWin.plot.addTable(newTable,self.plotConfigCurrentSelection.getField('name')+'.'+newTable.getField('name'),graphColor)
             plotWin.plot.nicePlaceLegend()
             plotWin.plot.axes.figure.canvas.draw()    
             self.activeWindow = plotWin
@@ -583,10 +589,14 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             self.plotWindowFieldTableDict[str(self.plotConfigWinSelectionComboBox.currentText())] = [newTable]
             plotWin = newPlotSubWindow(self.mdiArea)
             plotWin.setWindowTitle(str(self.plotConfigWinSelectionComboBox.currentText()))
+            #harsha start:The color shd be accessed only for KKIT file and for neuronal model shd pass none, for now hacking
             iteminfo = self.plotConfigCurrentSelection.getField('path')+'/info'
-            #c = moose.Annotator(iteminfo).getField('color')
-            #graphColor = self.colorCheck(c)
-            plotWin.plot.addTable(newTable,self.plotConfigCurrentSelection.getField('name')+'.'+newTable.getField('name'))#,graphColor)
+            c = moose.Annotator(iteminfo).getField('color')
+            graphColor = self.colorCheck(c)
+            #end
+            if graphColor == "white":
+                graphColor = None
+            plotWin.plot.addTable(newTable,self.plotConfigCurrentSelection.getField('name')+'.'+newTable.getField('name'),graphColor)
             plotWin.plot.nicePlaceLegend()
             plotWin.plot.axes.figure.canvas.draw()
             plotWin.show()
