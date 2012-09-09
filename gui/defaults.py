@@ -8,10 +8,27 @@ PLOT_FIELDS={
     'CaConc':['Ca']
     }
 FIELD_UNITS={
-    'Vm':'Volts',
+    'Vm':'V',
     'conc':'mM',
     'concInit':'mM',
-    'Rm':'ohm'
+    'Rm':'ohm',
+    'Ra':'ohm',
+    'Cm':'F',
+    'initVm':'V',
+    'Im':'A',
+    'Em':'V',
+    'inject':'A',
+    'Ek':'V',    
+    'Gk':'S',
+    'Gbar':'S',
+    'Ik':'A',
+    'Ca':'mM',
+    'CaBasal':'mM',
+    'tau':'s',
+    'Ca_base':'mM',
+    'B':'mM/A',
+    'thick':'m',
+    'ceiling':'mM',
+    'floor':'mM'
 }
-
 
