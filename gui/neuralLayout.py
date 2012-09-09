@@ -71,8 +71,8 @@ class updatepaintGL(PyGLWidget):
 		glLightfv(GL_LIGHT0, GL_AMBIENT, ambient0)
 	self.renderAxis()	#draws 3 axes at origin
 
-	for obj in self.sceneObjects:
-	    obj.render()
+#	for obj in self.sceneObjects:
+#	    obj.render()
 	    
 	for obj in self.vizObjects:
 	    obj.render()
@@ -150,8 +150,7 @@ class updatepaintGL(PyGLWidget):
 			
 	else:					#self.selectionMode=0,comapartments are pickable
             for i in range(0,len(l_coords),1):
-                cLength = sqrt((l_coords[i][0]-l_coords[i][3])**2+(l_coords[i][1]-l_coords[i][4])**2+(l_coords[i][2]-l_coords[i][5])**2)
-                if (l_coords[i][0] == l_coords[i][3] and l_coords[i][1] == l_coords[i][4] and l_coords[i][2] == l_coords[i][5]) or (cLength == l_coords[i][6]): #soma
+                if (l_coords[i][0] == l_coords[i][3] and l_coords[i][1] == l_coords[i][4] and l_coords[i][2] == l_coords[i][5]) or ((moose.element(l_coords[i][7]).length)*(1e+04) == l_coords[i][6]): #soma
                     if style == 0:
                         compartmentLine=somaDisk(self,l_coords[i],cellName)
                         compartmentLine._centralPos = cellCentre

@@ -209,7 +209,7 @@ class somaSphere(BaseObject):
 		glTranslate(*self._centralPos[:3])		#move pen to given location
 		glTranslate(*self.centre[:3])			#mid point of the compartment line
 
-		gluSphere(gluNewQuadric(),self.radius, 20, 20)
+		gluSphere(gluNewQuadric(),self.radius, 9, 9)
 
 		glTranslate(*[i*-1 for i in self.centre[:3]])	#bring back pen to origin and orientation
 		glTranslate(*[i*-1 for i in self._centralPos[:3]])
@@ -288,7 +288,7 @@ class cCylinder(BaseObject):
 		"""
 		x1,y1,z1,x2,y2,z2 = self.l_coords[:6]
 		radius = self.l_coords[6]/2
-		subdivisions = 10
+		subdivisions = 5
 		
 		vx = x2-x1
   		vy = y2-y1
@@ -320,12 +320,12 @@ class cCylinder(BaseObject):
   		
   		gluQuadricOrientation(quadric,GLU_INSIDE)
   		#gluDisk( quadric, 0.0, radius, subdivisions, 1)
-  		gluSphere(gluNewQuadric(),radius, 10, 10)
+  		#gluSphere(gluNewQuadric(),radius, 5, 5)
   		glTranslatef( 0,0,v )
   		
   		gluQuadricOrientation(quadric,GLU_OUTSIDE)
   		#gluDisk( quadric, 0.0, radius, subdivisions, 1)
-  		gluSphere(gluNewQuadric(),radius, 10, 10)
+  		#gluSphere(gluNewQuadric(),radius, 5, 5)
   		
   		glTranslate(*[i*-1 for i in self._centralPos[:3]])	#bring pen back to origin.
 		glRotate(*[i*-1 for i in self.rotation[:4]])		#bring back to original orientation
