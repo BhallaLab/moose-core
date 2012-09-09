@@ -20,7 +20,7 @@ from OpenGL.GL import *
 from OpenGL.raw.GLUT import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
-from numpy import sqrt,arccos
+from numpy import sqrt,arccos,arctan,absolute
 
 class BaseObject(object):
 	"""
@@ -289,46 +289,104 @@ class cCylinder(BaseObject):
 		x1,y1,z1,x2,y2,z2 = self.l_coords[:6]
 		radius = self.l_coords[6]/2
 		subdivisions = 5
-		
+		quadric = gluNewQuadric()
 		vx = x2-x1
-  		vy = y2-y1
-  		vz = z2-z1
+		vy = y2-y1
+		vz = z2-z1
 
-  		if(vz == 0.0):
-			vz = 0.01
+		#float ax,rx,ry,rz;
+		length = sqrt( vx*vx + vy*vy + vz*vz )
 
-		v = sqrt( vx*vx + vy*vy + vz*vz )
- 		ax = 57.2957795*arccos( vz/v )
-  		if ( vz < 0.000 ):
-      			ax = -ax
-  		rx = -vy*vz
-		ry = vx*vz
-  		glPushMatrix()
+		glPushMatrix()
+
 		glColor(self.r, self.g, self.b)
-		
 		glRotate(*self.rotation[:4]) 		#get pen to set orientation, in absolute coordinates [0,0,0,0].
 		glTranslate(*self._centralPos[:3])	#if absolute coordinates [0,0,0]
+
+		glTranslatef( x1,y1,z1 )
+		if (absolute(vz) < 0.0001):
+			glRotatef(90, 0,1,0)
+			if vx == 0:
+				if vy < 0:
+					ax = 57.2957795
+				else:
+					ax = -57.2957795
+			else:
+				ax = 57.2957795*-arctan( vy / vx )
+			if (vx < 0):
+				ax = ax + 180
+			rx = 1
+			ry = 0
+			rz = 0
+		else:
+			ax = 57.2957795*arccos( vz/ length )
+			if (vz < 0.0):
+				ax = -ax
+			rx = -vy*vz
+			ry = vx*vz
+			rz = 0
+
+		v = sqrt( vx*vx + vy*vy + vz*vz )
+
+		glRotatef(ax, rx, ry, rz)
+		gluQuadricOrientation(quadric,GLU_OUTSIDE)
+		gluCylinder(quadric, radius, radius, length, subdivisions, 1)
+
+		gluQuadricOrientation(quadric,GLU_INSIDE)
+		gluDisk( quadric, 0.0, radius, subdivisions, 1)
+
+		glTranslatef( 0,0,v )
 		
-  		glTranslatef(x1,y1,z1 )
-  		glRotatef(ax,rx,ry,0.0)
-  		
-  		quadric = gluNewQuadric()
-  		gluQuadricNormals(quadric, GLU_SMOOTH)
-  		
-  		gluQuadricOrientation(quadric,GLU_OUTSIDE)
-  		gluCylinder(quadric, radius, radius, v, subdivisions, 1)
-  		
-  		gluQuadricOrientation(quadric,GLU_INSIDE)
-  		#gluDisk( quadric, 0.0, radius, subdivisions, 1)
-  		#gluSphere(gluNewQuadric(),radius, 5, 5)
-  		glTranslatef( 0,0,v )
-  		
-  		gluQuadricOrientation(quadric,GLU_OUTSIDE)
-  		#gluDisk( quadric, 0.0, radius, subdivisions, 1)
-  		#gluSphere(gluNewQuadric(),radius, 5, 5)
-  		
+		gluQuadricOrientation(quadric,GLU_OUTSIDE)
+		gluDisk( quadric, 0.0, radius, subdivisions, 1)
+
   		glTranslate(*[i*-1 for i in self._centralPos[:3]])	#bring pen back to origin.
 		glRotate(*[i*-1 for i in self.rotation[:4]])		#bring back to original orientation
+		glPopMatrix()
+
+		# x1,y1,z1,x2,y2,z2 = self.l_coords[:6]
+		# radius = self.l_coords[6]/2
+		# subdivisions = 5
+		
+		# vx = x2-x1
+  		# vy = y2-y1
+  		# vz = z2-z1
+
+  		# if(vz == 0.0):
+		# 	vz = 0.01
+
+		# v = sqrt( vx*vx + vy*vy + vz*vz )
+ 		# ax = 57.2957795*arccos( vz/v )
+  		# if ( vz < 0.000 ):
+      		# 	ax = -ax
+  		# rx = -vy*vz
+		# ry = vx*vz
+  		# glPushMatrix()
+		# glColor(self.r, self.g, self.b)
+		
+		# glRotate(*self.rotation[:4]) 		#get pen to set orientation, in absolute coordinates [0,0,0,0].
+		# glTranslate(*self._centralPos[:3])	#if absolute coordinates [0,0,0]
+		
+  		# glTranslatef(x1,y1,z1 )
+  		# glRotatef(ax,rx,ry,0.0)
   		
-  		glPopMatrix()	
+  		# quadric = gluNewQuadric()
+  		# gluQuadricNormals(quadric, GLU_SMOOTH)
+  		
+  		# gluQuadricOrientation(quadric,GLU_OUTSIDE)
+  		# gluCylinder(quadric, radius, radius, v, subdivisions, 1)
+  		
+  		# gluQuadricOrientation(quadric,GLU_INSIDE)
+  		# #gluDisk( quadric, 0.0, radius, subdivisions, 1)
+  		# #gluSphere(gluNewQuadric(),radius, 5, 5)
+  		# glTranslatef( 0,0,v )
+  		
+  		# gluQuadricOrientation(quadric,GLU_OUTSIDE)
+  		# #gluDisk( quadric, 0.0, radius, subdivisions, 1)
+  		# #gluSphere(gluNewQuadric(),radius, 5, 5)
+  		
+  		# glTranslate(*[i*-1 for i in self._centralPos[:3]])	#bring pen back to origin.
+		# glRotate(*[i*-1 for i in self.rotation[:4]])		#bring back to original orientation
+  		
+  		# glPopMatrix()	
 
