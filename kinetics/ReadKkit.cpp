@@ -198,7 +198,7 @@ void ReadKkit::innerRead( ifstream& fin )
 		lineNum_++;
 		if ( clearLine )
 			line = "";
-
+                temp = trim(temp);
 		if ( temp.length() == 0 )
 				continue;
 		pos = temp.find_last_not_of( "\t " );

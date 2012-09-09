@@ -9,6 +9,7 @@
 
 #include "header.h"
 #include <fstream>
+#include "../utility/strutil.h"
 #include "TableEntry.h"
 #include "TableBase.h"
 
@@ -275,6 +276,7 @@ bool innerLoadXplot( string fname, string plotname, vector< double >& v )
 	{
 		while ( fin.good() ) { // Break out of this loop if we find a number
 			getline( fin, line );
+                        line = trim(line);
 			if ( isdigit( line[0] ) )
 				break;;
 			if ( line[0] == '-' && line.length() > 1 && isdigit( line[1] ) )
@@ -283,6 +285,7 @@ bool innerLoadXplot( string fname, string plotname, vector< double >& v )
 	} else { // Find plotname and then begin loading.
 		while ( fin.good() ) {
 			getline( fin, line );
+                        line = trim(line);
 			if ( isNamedPlot ( line, plotname ) ) {
 				if ( !getline ( fin, line ) )
 					return 0;
@@ -297,6 +300,7 @@ bool innerLoadXplot( string fname, string plotname, vector< double >& v )
 			break;
 		v.push_back( getYcolumn( line ) );
 		getline( fin, line );
+                line = trim(line);
 	} while ( fin.good() );
 
 	return ( v.size() > 0 );

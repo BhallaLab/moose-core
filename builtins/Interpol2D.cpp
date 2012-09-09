@@ -10,6 +10,7 @@
 #include <fstream>
 #include <sstream>
 #include "header.h"
+#include "../utility/strutil.h"
 #include "Interpol2D.h"
 
 const unsigned int Interpol2D::MAX_DIVS = 100000;
@@ -709,10 +710,12 @@ void Interpol2D::load( const string& fname, unsigned int skiplines )
 	if ( fin.good() ) {
 		unsigned int i;
 		for ( i = 0; i < skiplines; i++ ) {
-			if ( fin.good () )
-				getline( fin, line );
-			else
-				break;
+                  if ( fin.good () ){
+                    getline( fin, line );
+                    line = trim(line);
+                  } else {
+                    break;
+                  }
 		}
 		if ( !fin.good() )
 			return;
@@ -724,6 +727,7 @@ void Interpol2D::load( const string& fname, unsigned int skiplines )
 			table_.resize( table_.size() + 1 );
 			
 			getline( fin, line );
+                        line = trim(line);
 			istringstream sstream( line );
 			while( sstream >> y )
 				table_.back().push_back( y );
