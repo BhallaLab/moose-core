@@ -10,6 +10,7 @@
 #include <fstream>
 #include "header.h"
 #include "Shell.h"
+#include "../utility/strutil.h"
 #include "LoadModels.h" // For the ModelType enum.
 #include "../biophysics/ReadCell.h"
 #include "../kinetics/ReadKkit.h"
@@ -21,14 +22,17 @@ ModelType findModelType( string filename, ifstream& fin, string& line )
 		return DOTP;
 
 	getline( fin, line );
+        line = trim(line);
 	if ( line == "//genesis" ) {
 		getline( fin, line );
+                line = trim(line);
 		if ( line.substr( 0, 7 ) == "// kkit" )
 			return KKIT;
 	}
 	if ( line.substr( 0, 9 ) == "//  DOQCS" ) {
 		while ( getline( fin, line ) )
 		{
+                        line = trim(line);
 			if ( line.substr( 0, 7 ) == "// kkit" )
 				return KKIT;
 		}

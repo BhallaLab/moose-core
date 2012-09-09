@@ -329,7 +329,7 @@ class KineticsWidget(QtGui.QWidget):
                     print "HERE len(item)",len(item), item
                     if len(item) == 0:
                         continue
-                    print "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$:",item[0][0].class_,type(item[0])
+                    print "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$:",item[0].class_,type(item[0])
                     if item[0][0].class_ in ['ZombieMMenz', 'ZombieEnz', 'ZombieReac']:
                         print "@@@@",item[0]
                         iteminfo = item[0][0].parent.path+'/info'
@@ -777,7 +777,7 @@ if __name__ == "__main__":
     #modelPath = 'acc68'
   
     try:
-        filepath = '/home/harsha/tbuildQ/Demos/Genesis_files/'+modelPath+'.g'
+        filepath = '../Demos/Genesis_files/'+modelPath+'.g'
         f = open(filepath, "r")
         loadModel(filepath,'/'+modelPath)
         print '%%%%%', sys.path

@@ -3768,6 +3768,11 @@ static struct module_state _state;
         } else {
             model->id_ = SHELLPTR->doLoadModel(string(fname), string(modelpath), string(solverclass));
         }
+        if (model->id_ == Id()){
+          Py_XDECREF(model);
+          PyErr_SetString(PyExc_IOError, "could not load model");
+          return NULL;
+        }
         PyObject * ret = reinterpret_cast<PyObject*>(model);
         return ret;
     }
