@@ -354,6 +354,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             #self.mooseHandler.updateClocks(MooseHandler.DEFAULT_SIMDT, MooseHandler.DEFAULT_PLOTDT)
             #use Aditya's method to assign clocks - also reinits!
             mooseUtils.resetSim(['/cells','/elec'], MooseHandler.DEFAULT_SIMDT, MooseHandler.DEFAULT_PLOTDT)
+#            print MooseHandler.DEFAULT_SIMDT, MooseHandler.DEFAULT_PLOTDT
         elif modeltype == MooseHandler.type_python:
             #specific for the hopfield tutorial!
             #self.mooseHandler.updateClocks(MooseHandler.DEFAULT_SIMDT, MooseHandler.DEFAULT_PLOTDT)
@@ -364,7 +365,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             moose.useClock(1, '/hopfield/##[TYPE=IntFire]', 'process')
             moose.useClock(2, '/hopfield/##[TYPE=PulseGen]', 'process')
             moose.useClock(2, '/hopfield/##[TYPE=SpikeGen]', 'process')
-            moose.useClock(4, '/hopfield/##[TYPE=Table]', 'process') 
+            moose.useClock(8, '/hopfield/##[TYPE=Table]', 'process') 
         else:
             print 'Clocks have not been assigned! - GUI does not supported this format yet'
 
@@ -563,7 +564,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         dataNeutral = moose.Neutral(self.plotConfigCurrentSelection.getField('path')+'/data')
         newTable = moose.Table(self.plotConfigCurrentSelection.getField('path')+'/data/'+str(self.plotConfigFieldSelectionComboBox.currentText()))
         moose.connect(newTable,'requestData', self.plotConfigCurrentSelection,'get_'+str(self.plotConfigFieldSelectionComboBox.currentText()))
-        moose.useClock(4, newTable.getField('path'), 'process') #assign clock after creation itself 
+        moose.useClock(8, newTable.getField('path'), 'process') #assign clock after creation itself 
 
         if str(self.plotConfigWinSelectionComboBox.currentText()) in self.plotWindowFieldTableDict:
             #case when plotwin already exists - append new table to mooseplotwin
@@ -692,6 +693,8 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
     def updateDefaultTimes(self, modeltype,modelpath): 
         if(modeltype == MooseHandler.type_kkit):
             self.mooseHandler.updateDefaultsKKIT(modelpath)
+        elif (modeltype == MooseHandler.type_neuroml): 
+            self.mooseHandler.updateDefaultsNeural(modelpath)
 
         self.simControlSimdtLineEdit.setText(str(self.mooseHandler.simdt))
         self.simControlPlotdtLineEdit.setText(str(self.mooseHandler.plotdt))
