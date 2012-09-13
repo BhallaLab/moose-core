@@ -344,49 +344,4 @@ class cCylinder(BaseObject):
 		glRotate(*[i*-1 for i in self.rotation[:4]])		#bring back to original orientation
 		glPopMatrix()
 
-		# x1,y1,z1,x2,y2,z2 = self.l_coords[:6]
-		# radius = self.l_coords[6]/2
-		# subdivisions = 5
-		
-		# vx = x2-x1
-  		# vy = y2-y1
-  		# vz = z2-z1
-
-  		# if(vz == 0.0):
-		# 	vz = 0.01
-
-		# v = sqrt( vx*vx + vy*vy + vz*vz )
- 		# ax = 57.2957795*arccos( vz/v )
-  		# if ( vz < 0.000 ):
-      		# 	ax = -ax
-  		# rx = -vy*vz
-		# ry = vx*vz
-  		# glPushMatrix()
-		# glColor(self.r, self.g, self.b)
-		
-		# glRotate(*self.rotation[:4]) 		#get pen to set orientation, in absolute coordinates [0,0,0,0].
-		# glTranslate(*self._centralPos[:3])	#if absolute coordinates [0,0,0]
-		
-  		# glTranslatef(x1,y1,z1 )
-  		# glRotatef(ax,rx,ry,0.0)
-  		
-  		# quadric = gluNewQuadric()
-  		# gluQuadricNormals(quadric, GLU_SMOOTH)
-  		
-  		# gluQuadricOrientation(quadric,GLU_OUTSIDE)
-  		# gluCylinder(quadric, radius, radius, v, subdivisions, 1)
-  		
-  		# gluQuadricOrientation(quadric,GLU_INSIDE)
-  		# #gluDisk( quadric, 0.0, radius, subdivisions, 1)
-  		# #gluSphere(gluNewQuadric(),radius, 5, 5)
-  		# glTranslatef( 0,0,v )
-  		
-  		# gluQuadricOrientation(quadric,GLU_OUTSIDE)
-  		# #gluDisk( quadric, 0.0, radius, subdivisions, 1)
-  		# #gluSphere(gluNewQuadric(),radius, 5, 5)
-  		
-  		# glTranslate(*[i*-1 for i in self._centralPos[:3]])	#bring pen back to origin.
-		# glRotate(*[i*-1 for i in self.rotation[:4]])		#bring back to original orientation
-  		
-  		# glPopMatrix()	
 

@@ -300,6 +300,12 @@ class MooseHandler(QtCore.QObject):
             self._tableIndex += 1
         return table
 
+    def updateDefaultsNeural(self,modelpath):
+        MooseHandler.simdt = MooseHandler.DEFAULT_SIMDT
+        MooseHandler.plotdt = MooseHandler.DEFAULT_PLOTDT
+        MooseHandler.plotupdate_dt = MooseHandler.DEFAULT_PLOTUPDATE_DT
+        MooseHandler.runtime = MooseHandler.DEFAULT_RUNTIME
+
     def updateDefaultsKKIT(self,modelpath):
         t = moose.element('/clock').tick
         MooseHandler.simdt = t[4].dt
