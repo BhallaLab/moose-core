@@ -782,6 +782,11 @@ class KineticsWidget(QtGui.QWidget):
         elif (key == 44 or key == 60):
             self.view.scale(1/1.1,1/1.1)
 
+    def deleteItem(self):
+        item = self.sceneContainer.items()
+        for ii in item:
+            self.sceneContainer.removeItem(ii)
+        print 'deleted items'
         
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
