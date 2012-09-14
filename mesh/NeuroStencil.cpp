@@ -50,7 +50,8 @@ NeuroStencil::~NeuroStencil()
  * Since we have different areas at either end of the voxel, but each
  * voxel has the same length, we get the term for the flux as:
  *
- * flux = ( Cminus*Aminus + Cplus*Aplus - C0*(Aminus + Aplus) ) / lensq
+ * flux = D*( Cminus*Aminus + Cplus*Aplus - C0*(Aminus + Aplus) ) / lensq
+ * <Unit error.>
  *
  * where Cminus is the concentration in the compartment to the left,
  * Cplus is conc in compt to right
@@ -60,11 +61,24 @@ NeuroStencil::~NeuroStencil()
  * To add to the fun, S is in # units, not conc. So in terms of 
  * tminus, t0 and tplus, the # unit versions, we have:
  *
- * numFlux = VS0 * ( tminus*Aminus/VSminus + tplus*Aplus/VSplus - t0*(Aminus+Aplus)/VS0 ) / lensq
+ * numFlux = D*VS0 * ( tminus*Aminus/VSminus + tplus*Aplus/VSplus - t0*(Aminus+Aplus)/VS0 ) / lensq
+ * <Unit error.>
  *
  * where VS is VolScale, to go from conc units to # units, taking local
  * volume into account.
  *
+ * I can only use a 3-point stencil if I have a uniform subdivision of a
+ * long compartment, otherwise I have to do individual fluxes on either 
+ * side.
+ *
+ * numFlux|left = D * Aminus * (tminus/VSminus - t0/VS0)*2/(lenMinus + len0)
+ * numFlux|right = D * Aplus * (tplus/VSplus - t0/VS0)*2/(lenPlus + len0)
+ *
+ * To confirm, if we have a uniform length subdivision we can merge these:
+ * 2/(lenMinus+len0) = 2/lenPlus+len0) = 1/len
+ * numFlux = numFluxLeft+numFluxright =
+ * 	D * (tminus*Aminus/VSminus + tplus*Aplus/VSplus - 
+ * 		t0*(Aminus+Aplus)/VS0) / len
  * 
  */
 void NeuroStencil::addFlux( unsigned int index, 
@@ -82,65 +96,64 @@ void NeuroStencil::addFlux( unsigned int index,
 	const NeuroNode& parent = *pa;
 	double vs0 = vs_[index];
 	double len = node.getLength() / node.getNumDivs();
-	double invSq = 1.0 / ( len * len );
 	unsigned int minusIndex = index - 1;
 
 	if ( index - node.startFid() < node.getNumDivs() -1 ) { //Not last voxel
 		if ( index == node.startFid() ) { // Is first voxel
-			if ( node.isStartNode() ) { // root of the tree.
-				addHalfFlux( index, f, t0, S[ index+1 ],
-					area_[ index+1 ], vs0, vs_[ index+1 ],
-					invSq, diffConst );
-				return;
-			} else { // Not root, can make linear diffusion with parent.
+			addHalfFlux( index, f, t0, S[ index+1 ],
+				area_[ index+1 ], vs0, vs_[ index+1 ],
+				len, diffConst );
+			if ( !node.isStartNode() ) { // Not root, diff with parent node.
 				minusIndex = parent.startFid() + parent.getNumDivs() - 1;
+				double paLen = parent.getLength() / parent.getNumDivs();
+				addHalfFlux( index, f, t0, S[ minusIndex ],
+					area_[ minusIndex ], vs0, vs_[ minusIndex],
+					(len + paLen)/2.0, diffConst );
 			}
+		} else { // this is the only time we have a nice linear case, but
+				// it is likely very frequent especially for long compts.
+			addLinearFlux( index, f, S[ minusIndex ], t0, S[ index+1 ],
+				area_[ index ], area_[ index+1 ], 
+				vs_[ minusIndex ], vs0, vs_[ index+1],
+				len, diffConst );
 		}
-		addLinearFlux( index, f, S[ minusIndex ], t0, S[ index+1 ],
-			area_[ index ], area_[ index+1 ], 
-			vs_[ minusIndex ], vs0, vs_[ index+1],
-			invSq, diffConst );
-		return;
-	} else { // Last voxel
-		if ( node.children().size() == 1 ) { // OK, another linear diffusion
-			unsigned int plusIndex = 
-				nodes_[ node.children()[0] ].startFid();
-			if ( index == node.startFid() ) { // First voxel
-				if ( node.isStartNode() ) { // root of the tree
-					// do stuff here for half diffusion.
-					addHalfFlux( index, f, t0, S[ plusIndex ],
-						area_[ plusIndex ], vs0, vs_[ plusIndex ],
-						invSq, diffConst );
-					return;
-				} else {
-					minusIndex = parent.startFid() + parent.getNumDivs() -1;
-				}
+	} else { // Last voxel. Diffuse into all children. Check for dummies
+		for ( unsigned int i = 0; i < node.children().size(); ++i ) {
+			const NeuroNode* pchild = &nodes_[ node.children()[i] ];
+			if ( pchild->isDummyNode() ) {
+				assert( pchild->children().size() == 1 );
+				pchild = &nodes_[ pchild->children()[0] ];
+				assert( !pchild->isDummyNode() );
 			}
-			addLinearFlux( index, f, S[ minusIndex ], t0, S[ plusIndex ],
-				area_[ index ], area_[ plusIndex ], 
-				vs_[ minusIndex ], vs0, vs_[ plusIndex ],
-				invSq, diffConst );
-			return;
-		} else { // Do halfFluxes for all combinations.
-			for ( unsigned int i = 0; i < node.children().size(); ++i ) {
-				unsigned int plusIndex = 
-					nodes_[ node.children()[i] ].startFid();
-				addHalfFlux( index, f, t0, S[ plusIndex ],
-					area_[ plusIndex ], vs0, vs_[ plusIndex ],
-					invSq, diffConst );
-			}
-			if ( index == node.startFid() ) {
-				if ( node.isStartNode() ) 
-					return; // No diffusion at all here.
+			const NeuroNode& child = *pchild;
+			unsigned int plusIndex = child.startFid();
+			double childLen = child.getLength() / child.getNumDivs();
+			addHalfFlux( index, f, t0, S[ plusIndex ],
+				area_[ plusIndex ], vs0, vs_[ plusIndex ],
+				( len + childLen) / 2.0, diffConst );
+		}
+		if ( index == node.startFid() ) { // Is first voxel
+			if ( node.isStartNode() ) {
+				return; // No diffusion at all here.
+			} else { // Diffuse into parent.
 				minusIndex = parent.startFid() + parent.getNumDivs() - 1;
+				double paLen = parent.getLength() / parent.getNumDivs();
+				addHalfFlux( index, f, t0, S[ minusIndex ],
+					area_[ minusIndex ], vs0, vs_[ minusIndex ],
+					( len + paLen ) / 2.0 , diffConst );
 			}
+		} else { // Not first voxel. Connect to previous.
 			addHalfFlux( index, f, t0, S[ minusIndex ],
 				area_[ minusIndex ], vs0, vs_[ minusIndex ],
-				invSq, diffConst );
+				len, diffConst );
 		}
 	}
 }
 
+/**
+ * This only works if we have uniform subdivisions of length len.
+ * The XA can vary, but again has to do so linearly
+ */
 void NeuroStencil::addLinearFlux( unsigned int index, 
 			vector< double >& f, 
 			const vector< double >& tminus,
@@ -151,14 +164,14 @@ void NeuroStencil::addLinearFlux( unsigned int index,
 			double vsminus,
 			double vs0,
 			double vsplus,
-			double invSq,
+			double len,
 			const vector< double >& diffConst ) const
 {
 		for ( unsigned int i = 0; i < f.size(); ++i )
-			f[i] += vs0 * diffConst[i] * invSq * 
+			f[i] += diffConst[i] * 
 				( tminus[i] * aminus / vsminus + 
 				  tplus[i] * aplus / vsplus - 
-				  t0[i] * (aminus + aplus )/vs0 );
+				  t0[i] * (aminus + aplus ) / vs0 ) / len;
 }
 
 void NeuroStencil::addHalfFlux( unsigned int index, 
@@ -168,10 +181,10 @@ void NeuroStencil::addHalfFlux( unsigned int index,
 			double area,
 			double vs0,
 			double vsprime,
-			double invSq,
+			double aveLen,
 			const vector< double >& diffConst ) const
 {
 		for ( unsigned int i = 0; i < f.size(); ++i )
-			f[i] += vs0 * diffConst[i] * invSq * area *
-				( tprime[i] / vsprime - t0[i] / vs0 );
+			f[i] += diffConst[i] * area *
+				( tprime[i] / vsprime - t0[i] / vs0 ) / aveLen;
 }
