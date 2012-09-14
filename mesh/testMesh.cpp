@@ -350,11 +350,11 @@ void testNeuroStencil()
 	for ( unsigned int i = 0; i < numVoxels; ++i ) {
 		ns.addFlux( i, flux[i], S, diffConst );
 	}
-	/*
 	for ( unsigned int i = 0; i < numVoxels; ++i ) {
 		cout << "S[" << i << "][0] = " << S[i][0] << 
 			", flux[" << i << "][0] = " << flux[i][0] << endl;
 	}
+	/*
 	*/
 
 	uniformConcPattern( S, vs );
@@ -363,12 +363,13 @@ void testNeuroStencil()
 		flux[i][0] = 0.0;
 		ns.addFlux( i, flux[i], S, diffConst );
 	}
-	/*
 	for ( unsigned int i = 0; i < numVoxels; ++i ) {
+		assert( doubleEq( flux[i][0], 0.0 ) );
+		/*
 		cout << "S[" << i << "][0] = " << S[i][0] << 
 			", flux[" << i << "][0] = " << flux[i][0] << endl;
+			*/
 	}
-	*/
 	
 	cout << "." << flush;
 }

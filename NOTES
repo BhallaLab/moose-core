@@ -18373,4 +18373,83 @@ Page 211 ish.
 4 Sep 2012.
 Conical diffusion still pending.
 Added ChemMesh::setEntireSize so that the field is now read-write. It is a bit
-ugly, uses buildDefaultMesh internally.
+ugly, uses buildDefaultMesh internally.  Checkin 3921.
+
+
+Need to fix issue with null FieldElements: Accessign them should not
+cause segv. For example:
+
+Ca = HHChannel( 'Ca' )
+>>> le('Ca')
+Elements under /Ca
+/Ca/gateX
+/Ca/gateY
+/Ca/gateZ
+>>> foo = element( 'Ca/gateX' )
+>>> foo
+<moose.HHGate: id=712, dataId=0, path=/Ca/gateX>
+>>> foo.min
+Segmentation fault (core dumped)
+
+============================================================================
+
+10 Sep 2012
+
+Notes from INCF meeting demos.
+- The graphics are excruciatingly slow. Something is clearly very wrong. Even
+old GENESIS graphics are much faster. 
+- GL click to select takes forever, is inaccurate, gets item behind rather than
+	in front, many other issues.
+- GL should really run in another thread so it doesn't bring everything in the
+	interface to a grinding halt.
+- Need to update without stopping.
+- Subha pointed out issue of Ids vs elements. Will this speed up handilg
+- Kinetics models: The reactions cannot be clicked to view, except in one
+of the compartments. 
+- Loading models also takes a very long time, even fails for some big models
+	with around 500 molecules.
+	The same models load within a second from the command line.
+
+============================================================================
+
+12 Sep 2012
+To do for Release 1.0:
+
+Documentation: Tutorial and GUI Help systems.
+SBML read and write
+HSolve tests
+NeuroML and .p files load into Hsolve by default
+Graphics cleanup.
+Kinetics model editing and building
+Toggle Gillespie/GSL
+
+Release 1.01:
+Documentation: Main commands and objects. Help system.
+Hsolve create/delete cycling
+NeuroML write
+More graphics cleanup
+SigNeur operations
+Threading cleanup.
+GUI: Chem compt view
+
+Release 1.02:
+Documentation: Scheduling.
+GUI: Channel view
+
+============================================================================
+13-14 Sep:
+Seems like I should have a motor function in the in Stencil class.
+Needs similar info to diffusion but calculations not identical. 
+See ~/homework/PRAGATI/NOTES around 13 Sep.
+Typically motor will be in addition to diffusion.
+
+Back to testing the NeuroStencil. It is still doing funny things, not zeros
+in the test for uniform conc.
+Tracked it down. Turns out it was close enough to zero, the error was just
+rounding error. Put it into unit test rather than printf debug.
+
+I'm trying to figure out another test for the NeuroStencil here. Possibly
+can do something analytical for a cone using our approximation.
+
+Next, need to put in infrastructure for motors in the stencils.
+============================================================================
