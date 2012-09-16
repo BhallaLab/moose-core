@@ -18413,7 +18413,7 @@ of the compartments.
 ============================================================================
 
 12 Sep 2012
-To do for Release 1.0:
+To do for Release 1.0.0:
 
 Documentation: Tutorial and GUI Help systems.
 SBML read and write
@@ -18450,6 +18450,56 @@ rounding error. Put it into unit test rather than printf debug.
 
 I'm trying to figure out another test for the NeuroStencil here. Possibly
 can do something analytical for a cone using our approximation.
+- Should be able to do branching of cylindrical segments obeying Rall's Law to
+	 achieve equivalence of dendrites, so that the decay outward is 
+	equivalent to a single long compartment, which we can estimate.
 
 Next, need to put in infrastructure for motors in the stencils.
+	Test cases: 
+		Uniform dia cylinder, different compt lengths.
+		Branching cylinder. At junction each branch gets # proportional
+			to area.
+
+============================================================================
+15 Sep 2012.
+A more structured approach to releases.
+
+Each release will have six major components, and we'll subdivide development
+efforts among these six for clarity.
+To do for Release 1.0.0:
+Component	Targets
+Documentation	Tutorial and GUI help (For neuron and chemical modeling GUIs)
+I/O		SBML and Kkit read, NeuroML and .p read
+Numerics	Hsolve functioning, Gillespie/GSL switch.
+GUI		Cleanup. Faster load and click to select.
+Basecode	Scheduling clean up
+Project		Release build
+
+Release 1.01:
+Component	Targets
+Documentation	Main commands and objects. Help system.
+I/O		SBML write
+Numerics	solve create/delete cycling
+GUI		Move to top bar panel for run and plot control. Side panel
+		only for field info.
+Basecode	Threading cleaning
+Project		Deb dependencies for user compilation and build
+
+
+Release 1.02:
+Component	Targets
+Documentation	Example files for how to load and run different kinds of models
+I/O		NeuroML write
+Numerics	SigNeur: spatial diffusion
+GUI		Chem compartment view (new panel showing geoemtry of chem compt
+Basecode	Cleaner access to msgs and clock ticks.
+Project		Whatever deps for Mac compilation and build
+
+etc.
+============================================================================
+15-16 Sep 2012
+Continuing work on NeuroMesh. Set up a unit test, beginning the implementation.
+
+Clears first set of unit tests, which check for the qualitative aspects
+of setting up the mesh. Lots still to do by way of checking quantitative stuff.
 ============================================================================

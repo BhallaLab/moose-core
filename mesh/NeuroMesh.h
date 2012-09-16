@@ -164,9 +164,9 @@ class NeuroMesh: public ChemMesh
 		/// Flag. True if mesh should ignore spines when scanning dend tree.
 		bool skipSpines_; 
 
-		NeuroStencil ns_;
 
 		/*
+		NeuroStencil ns_;
 		bool useCaps_; // Flag: Should the ends have hemispherical caps?
 		double totLen_;	/// Utility value: Total length of cylinder
 		double rSlope_;	/// Utility value: dr/dx

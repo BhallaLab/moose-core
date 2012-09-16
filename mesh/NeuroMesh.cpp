@@ -135,21 +135,15 @@ NeuroMesh::NeuroMesh()
 	:
 		size_( 0.0 ),
 		diffLength_( 0.5e-6 ),
-		skipSpines_( false ),
-		ns_( nodes_, nodeIndex_, vs_, area_ )
-{
-	stencil_.resize( 1, &ns_ );
-}
+		skipSpines_( false )
+{;}
 
 NeuroMesh::NeuroMesh( const NeuroMesh& other )
 	:
 		size_( other.size_ ),
 		diffLength_( other.diffLength_ ),
-		cell_( other.cell_ ),
-		ns_( nodes_, nodeIndex_, vs_, area_ )
-{
-	stencil_.resize( 1, &ns_ );
-}
+		cell_( other.cell_ )
+{;}
 
 NeuroMesh& NeuroMesh::operator=( const NeuroMesh& other )
 {
@@ -161,7 +155,6 @@ NeuroMesh& NeuroMesh::operator=( const NeuroMesh& other )
 	diffLength_ = other.diffLength_;
 	cell_ = other.cell_;
 	skipSpines_ = other.skipSpines_;
-	stencil_.resize( 1, &ns_ );
 	return *this;
 }
 
@@ -177,36 +170,31 @@ NeuroMesh::~NeuroMesh()
 /**
  * This assumes that lambda is the quantity to preserve, over numEntries.
  * So when the compartment changes size, so does numEntries.
+ * Assumes that the soma node is at index 0.
  */
 void NeuroMesh::updateCoords()
 {
-		/*
-	double temp = sqrt( 
-		( x1_ - x0_ ) * ( x1_ - x0_ ) + 
-		( y1_ - y0_ ) * ( y1_ - y0_ ) + 
-		( z1_ - z0_ ) * ( z1_ - z0_ )
-	);
-
-	if ( doubleEq( temp, 0.0 ) ) {
-		cout << "Error: NeuroMesh::updateCoords:\n"
-		"total length of compartment = 0 with these parameters\n";
-		return;
+	unsigned int startFid = 0;
+	for ( vector< NeuroNode >::iterator i = nodes_.begin();
+				i != nodes_.end(); ++i ) {
+		if ( !i->isDummyNode() ) {
+			double len = i->getLength();
+			unsigned int numDivs = floor( 0.5 + len / diffLength_ );
+			if ( numDivs < 1 ) 
+				numDivs = 1;
+			i->setNumDivs( numDivs );
+			i->setStartFid( startFid );
+			startFid += numDivs;
+		}
 	}
-	totLen_ = temp;
-
-
-	temp = totLen_ / lambda_;
-	if ( temp < 1.0 ) {
-		lambda_ = totLen_;
-		numEntries_ = 1;
-	} else {
-		numEntries_ = static_cast< unsigned int >( round ( temp ) );
-		lambda_ = totLen_ / numEntries_;
+	nodeIndex_.resize( startFid );
+	for ( unsigned int i = 0; i < nodes_.size(); ++i ) {
+		unsigned int end = nodes_[i].startFid() + nodes_[i].getNumDivs();
+		assert( end <= startFid );
+		assert( nodes_[i].getNumDivs() > 0 );
+		for ( unsigned int j = nodes_[i].startFid(); j < end; ++j )
+			nodeIndex_[j] = i;
 	}
-	rSlope_ = ( r1_ - r0_ ) / numEntries_;
-	lenSlope_ = lambda_ * rSlope_ * 2 / ( r0_ + r1_ );
-
-	*/
 	buildStencil();
 }
 
@@ -226,10 +214,74 @@ unsigned int NeuroMesh::innerGetDimensions() const
 	return 3;
 }
 
+Id getParentFromMsg( Id pa )
+{
+	return Id();
+}
+
+// I assume 'cell' is the parent of the compartment tree.
 void NeuroMesh::setCell( Id cell )
 {
-		// Much more to do here.
 		cell_ = cell;
+		vector< Id > compts = Field< vector< Id > >::get( cell, "children");
+		map< Id, unsigned int > comptMap;
+
+		Id soma;
+		double maxDia = 0.0;
+		unsigned int maxDiaIndex = 0;
+		nodes_.resize( 0 );
+		for ( unsigned int i = 0; i < compts.size(); ++i ) {
+			if ( compts[i].element()->cinfo()->isA( "Compartment" ) ) {
+				comptMap[ compts[i] ] = nodes_.size();
+				nodes_.push_back( NeuroNode( compts[i] ) );
+				if ( nodes_.back().getDia() > maxDia ) {
+					maxDia = nodes_.back().getDia();
+					maxDiaIndex = nodes_.size() -1;
+				}
+				string name = compts[i].element()->getName();
+				if ( strncasecmp( name.c_str(), "soma", 4 ) == 0 ) {
+					soma = compts[i];
+				}
+			}
+		}
+		// Figure out soma compartment.
+		if ( nodes_[maxDiaIndex].elecCompt() == soma ) { // Happy, happy
+			;
+		} else if ( soma == Id() ) {
+			soma = nodes_[maxDiaIndex].elecCompt();
+		} else { // Disagreement. Ugh.
+			string name = nodes_[ maxDiaIndex ].elecCompt().element()->getName();
+			// OK, somehow this model has more than one soma compartment.
+			if ( strncasecmp( name.c_str(), "soma", 4 ) == 0 ) {
+				soma = nodes_[maxDiaIndex].elecCompt();
+			} else { 
+				cout << "Warning: named 'soma' compartment isn't biggest\n";
+				soma = nodes_[maxDiaIndex].elecCompt();
+			}
+		}
+		// Move soma to start of nodes_ vector.
+		if ( maxDiaIndex != 0 ) {
+			NeuroNode temp = nodes_[0];
+			nodes_[0] = nodes_[maxDiaIndex];
+			nodes_[maxDiaIndex] = temp;
+		}
+
+		// Assign parent and child compts.
+		// Need to know if compt is a sphere, to decide if it needs a
+		// dummyNode to connect to.
+		for ( unsigned int i = 0; i < nodes_.size(); ++i ) {
+			// returns Id() if no parent found.
+			Id pa = getParentFromMsg( nodes_[i].elecCompt() ); 
+			if ( pa != Id() ) {
+				unsigned int ipa = comptMap[pa];
+				nodes_[i].setParent( ipa );
+				nodes_[ipa].addChild( i );
+			}
+		}
+
+		// Assign startFids.
+		// Fix up subdivisions
+		updateCoords();
 }
 
 Id NeuroMesh::getCell() const
@@ -562,6 +614,9 @@ void NeuroMesh::transmitChange( const Eref& e, const Qinfo* q )
 //////////////////////////////////////////////////////////////////
 void NeuroMesh::buildStencil()
 {
-	; // stencil_.resize( 1, &ns_ );
+	for ( unsigned int i = 0; i < stencil_.size(); ++i )
+		delete stencil_[i];
+	stencil_.resize( 1 );
+	stencil_[0] = new NeuroStencil( nodes_, nodeIndex_, vs_, area_);
 }
 
