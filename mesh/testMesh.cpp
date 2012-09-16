@@ -350,11 +350,11 @@ void testNeuroStencil()
 	for ( unsigned int i = 0; i < numVoxels; ++i ) {
 		ns.addFlux( i, flux[i], S, diffConst );
 	}
+	/*
 	for ( unsigned int i = 0; i < numVoxels; ++i ) {
 		cout << "S[" << i << "][0] = " << S[i][0] << 
 			", flux[" << i << "][0] = " << flux[i][0] << endl;
 	}
-	/*
 	*/
 
 	uniformConcPattern( S, vs );
@@ -724,6 +724,82 @@ void testReMesh()
 	cout << "." << flush;
 }
 
+/**
+ * theta in degrees
+ * len and dia in metres as usual
+ */
+Id makeCompt( Id parentCompt, Id parentObj, 
+		string name, double len, double dia, double theta )
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< int > dims( 1, 1 );
+	Id ret = shell->doCreate( "Compartment", parentObj, name, dims );
+	double pax = 0;
+	double pay = 0;
+	if ( parentCompt != Id() ) {
+		pax = Field< double >::get( parentCompt, "x" );
+		pay = Field< double >::get( parentCompt, "y" );
+		shell->doAddMsg( "Single", parentCompt, "axial", ret, "raxial" );
+	}
+	Field< double >::set( ret, "x0", pax );
+	Field< double >::set( ret, "y0", pay );
+	Field< double >::set( ret, "z0", 0.0 );
+	double x = pax + len * sin( theta * PI / 360.0 );
+	double y = pay + len * cos( theta * PI / 360.0 );
+	Field< double >::set( ret, "x", x );
+	Field< double >::set( ret, "y", y );
+	Field< double >::set( ret, "y", 0.0 );
+	Field< double >::set( ret, "diameter", dia );
+	Field< double >::set( ret, "length", len );
+
+	return ret;
+}
+
+void testNeuroMesh()
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< int > dims( 1, 1 );
+	// Build a cell
+	Id cell = shell->doCreate( "Neutral", Id(), "cell", dims );
+	double len = 100e-6; // metres
+	double dia = 10e-6; // metres
+	double diffLength = 10e-6; // metres
+	Id soma = makeCompt( Id(), cell, "soma", dia, dia, 0 );
+	dia /= sqrt( 2.0 );
+	Id d1 = makeCompt( soma, cell, "d1", len , dia, 0 );
+	Id d2 = makeCompt( soma, cell, "d2", len , dia, 180 );
+	dia /= sqrt( 2.0 );
+	Id d11 = makeCompt( soma, cell, "d11", len , dia, -45 );
+	Id d12 = makeCompt( soma, cell, "d12", len , dia, 45 );
+	Id d21 = makeCompt( soma, cell, "d21", len , dia, 45 );
+	Id d22 = makeCompt( soma, cell, "d22", len , dia, -45 );
+	dia /= sqrt( 2.0 );
+	Id d111 = makeCompt( soma, cell, "d111", len , dia, -90 );
+	Id d112 = makeCompt( soma, cell, "d112", len , dia, 0 );
+	Id d121 = makeCompt( soma, cell, "d121", len , dia, 0 );
+	Id d122 = makeCompt( soma, cell, "d122", len , dia, 90 );
+	Id d211 = makeCompt( soma, cell, "d211", len , dia, 90 );
+	Id d212 = makeCompt( soma, cell, "d212", len , dia, 180 );
+	Id d221 = makeCompt( soma, cell, "d221", len , dia, 180 );
+	Id d222 = makeCompt( soma, cell, "d222", len , dia, -90 );
+
+	// Scan it with neuroMesh
+	Id nm = shell->doCreate( "NeuroMesh", Id(), "neuromesh", dims );
+	Field< double >::set( nm, "diffLength", diffLength );
+	Field< Id >::set( nm, "cell", cell );
+	unsigned int ns = Field< unsigned int >::get( nm, "numSegments" );
+	assert( ns == 15 );
+	unsigned int ndc = Field< unsigned int >::get( nm, "numDiffCompts" );
+	assert( ndc == 141 );
+
+	// Insert a molecule at soma
+	// Watch diffusion
+	
+	shell->doDelete( cell );
+	shell->doDelete( nm );
+	cout << "." << flush;
+}
+
 void testMesh()
 {
 	testCylBase();
@@ -734,4 +810,5 @@ void testMesh()
 	testMidLevelCylMesh();
 	testCubeMesh();
 	testReMesh();
+	testNeuroMesh();
 }

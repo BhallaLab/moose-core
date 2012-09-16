@@ -29,6 +29,26 @@ NeuroNode::NeuroNode( const CylBase& cb,
 				isSphere_( isSphere )
 {;}
 
+NeuroNode::NeuroNode( Id elecCompt )
+		:
+				parent_( 0 ),
+				startFid_( 0 ),
+				elecCompt_( elecCompt ),
+				isSphere_( false )
+{
+	double dia = Field< double >::get( elecCompt, "diameter" );
+	setDia( dia );
+	double length = Field< double >::get( elecCompt, "length" );
+	setLength( length );
+	double x = Field< double >::get( elecCompt, "x" );
+	double y = Field< double >::get( elecCompt, "y" );
+	double z = Field< double >::get( elecCompt, "z" );
+	setX( x );
+	setY( y );
+	setZ( z );
+}
+
+
 NeuroNode::NeuroNode()
 		:
 				parent_( 0 ),
@@ -68,9 +88,20 @@ const vector< unsigned int >& NeuroNode::children() const
 {
 		return children_;
 }
+
 void NeuroNode::addChild( unsigned int child )
 {
 	children_.push_back( child );
+}
+
+void NeuroNode::setParent( unsigned int parent )
+{
+	parent_ = parent;
+}
+
+void NeuroNode::setStartFid( unsigned int fid )
+{
+	startFid_ = fid;
 }
 
 double NeuroNode::calculateLength( const CylBase& parent )
