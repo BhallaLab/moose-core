@@ -195,6 +195,18 @@ void NeuroMesh::updateCoords()
 		for ( unsigned int j = nodes_[i].startFid(); j < end; ++j )
 			nodeIndex_[j] = i;
 	}
+	// Assign volumes and areas
+	vs_.resize( startFid );
+	area_.resize( startFid );
+	for ( unsigned int i = 0; i < nodes_.size(); ++i ) {
+		const NeuroNode& nn = nodes_[i];
+		assert( nn.parent() < nodes_.size() );
+		const NeuroNode& parent = nodes_[ nn.parent() ];
+		for ( unsigned int j = 0; j < nn.getNumDivs(); ++j ) {
+			vs_[j + nn.startFid()] = NA * nn.voxelVolume( parent, j );
+			area_[j + nn.startFid()] = nn.getDiffusionArea( parent, j );
+		}
+	}
 	buildStencil();
 }
 
@@ -214,9 +226,20 @@ unsigned int NeuroMesh::innerGetDimensions() const
 	return 3;
 }
 
-Id getParentFromMsg( Id pa )
+Id getParentFromMsg( Id id )
 {
-	return Id();
+	const Element* e = id.element();
+	const Finfo* finfo = id.element()->cinfo()->findFinfo( "axialOut" );
+	if ( e->cinfo()->isA( "SymCompartment" ) )
+		finfo = id.element()->cinfo()->findFinfo( "raxialOut" );
+	assert( finfo );
+	vector< Id > ret;
+	id.element()->getNeighbours( ret, finfo );
+	assert( ret.size() <= 1 );
+	if ( ret.size() == 1 )
+			return ret[0];
+	else 
+			return Id();
 }
 
 // I assume 'cell' is the parent of the compartment tree.
@@ -279,8 +302,6 @@ void NeuroMesh::setCell( Id cell )
 			}
 		}
 
-		// Assign startFids.
-		// Fix up subdivisions
 		updateCoords();
 }
 
@@ -620,3 +641,15 @@ void NeuroMesh::buildStencil()
 	stencil_[0] = new NeuroStencil( nodes_, nodeIndex_, vs_, area_);
 }
 
+
+const Stencil* NeuroMesh::getStencil() const
+{
+	if ( stencil_.size() > 0 )
+			return stencil_[0];
+	return 0;
+}
+
+const vector< NeuroNode >& NeuroMesh::getNodes() const
+{
+	return nodes_;
+}

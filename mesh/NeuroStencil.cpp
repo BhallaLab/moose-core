@@ -168,7 +168,7 @@ void NeuroStencil::addLinearFlux( unsigned int index,
 			const vector< double >& diffConst ) const
 {
 		for ( unsigned int i = 0; i < f.size(); ++i )
-			f[i] += diffConst[i] * 
+			f[i] += diffConst[i] * NA *
 				( tminus[i] * aminus / vsminus + 
 				  tplus[i] * aplus / vsplus - 
 				  t0[i] * (aminus + aplus ) / vs0 ) / len;
@@ -185,6 +185,6 @@ void NeuroStencil::addHalfFlux( unsigned int index,
 			const vector< double >& diffConst ) const
 {
 		for ( unsigned int i = 0; i < f.size(); ++i )
-			f[i] += diffConst[i] * area *
+			f[i] += diffConst[i] * NA * area *
 				( tprime[i] / vsprime - t0[i] / vs0 ) / aveLen;
 }

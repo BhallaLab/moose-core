@@ -44,14 +44,16 @@ class CylBase
 
 		/**
 		 * Returns a vector with the coordinates of the specified MeshEntry.
-		 * The MeshEntry is a voxel within this CylBase. Does 
-		 * interpolation from the ends of the Node.
+		 * The MeshEntry (entry argument) is a voxel within this CylBase,
+		 * 'entry' is indexed from 0 to numDivs.
+		 * The parent is the parent CylBase with its own set of coords.
+		 * The function does interpolation from the ends of the Node.
 		 * These are detailed coordinates representative of the shape of
 		 * the MeshEntry. For cylinders it is  x1y1z1 x2y2z2 r0 r1 phi0 phi1
 		 * For spheres it is xyzdia.
 		 */
 		vector< double > getCoordinates( const CylBase& parent,
-					   	unsigned int fid ) const;
+					   	unsigned int entry ) const;
 
 		/**
  		* Returns diffusion cross-section from specified index to next.

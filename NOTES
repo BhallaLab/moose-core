@@ -18502,4 +18502,18 @@ Continuing work on NeuroMesh. Set up a unit test, beginning the implementation.
 
 Clears first set of unit tests, which check for the qualitative aspects
 of setting up the mesh. Lots still to do by way of checking quantitative stuff.
+Checkin 3949.
+
+Put in the test for NeuroMesh diffusion calculations. Runs but output
+is wrong.
+============================================================================
+17 Sep 2012.
+Sorted out major issue with NeuroMesh calculations. Output now is better,
+but two issues:
+
+1. The junction of the compartments to the soma adopt the soma diameter as
+their proximal diameter. Not right. Should be their own diameter.
+2. The decay of conc along dendrite is OK for first half, then the
+remaining dendrite segments seem to be connected up wrongly.
+
 ============================================================================
