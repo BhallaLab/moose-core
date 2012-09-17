@@ -127,6 +127,12 @@ class NeuroMesh: public ChemMesh
 
 		void buildStencil();
 
+		//////////////////////////////////////////////////////////////////
+		// Utility functions for testing
+		const Stencil* getStencil() const;
+		const vector< NeuroNode >& getNodes() const;
+
+		//////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
 
 	private:
@@ -146,7 +152,8 @@ class NeuroMesh: public ChemMesh
 
 		/**
 		 * Volscale pre-calculations for each MeshEntry. 
-		 * vs = #mols / vol
+		 * vs = #molecules / vol
+		 * where vol is expressed in m^3.
 		 */
 		vector< double > vs_;
 

@@ -18,6 +18,7 @@
 #include "CylBase.h"
 #include "NeuroNode.h"
 #include "NeuroStencil.h"
+#include "NeuroMesh.h"
 
 /**
  * Low-level test for Cylbase, no MOOSE calls
@@ -234,11 +235,11 @@ void testNeuroStencilFlux()
 	vector< double > diffConst( 1, 1.0 );
 
 	ns.addHalfFlux( 0, flux, t0, tminus, 1, 1, 1, 1, diffConst );
-	assert( doubleEq( flux[0], -90 ) );
+	assert( doubleEq( flux[0], -90 * NA ) );
 
 	flux[0] = 0;
 	ns.addLinearFlux( 0, flux, tminus, t0, tplus, 1, 1, 1, 1, 1, 1, diffConst );
-	assert( doubleEq( flux[0], 1000 + 10 - 200 ) );
+	assert( doubleEq( flux[0], ( 1000 + 10 - 200 ) * NA ) );
 
 	cout << "." << flush;
 }
@@ -364,7 +365,9 @@ void testNeuroStencil()
 		ns.addFlux( i, flux[i], S, diffConst );
 	}
 	for ( unsigned int i = 0; i < numVoxels; ++i ) {
-		assert( doubleEq( flux[i][0], 0.0 ) );
+		assert( doubleEq( flux[i][0] / 1e12, 0.0 ) );
+		// Actually we could divide flux by NA: the roundoff error is
+		// due to differences in NA-type numbers.
 		/*
 		cout << "S[" << i << "][0] = " << S[i][0] << 
 			", flux[" << i << "][0] = " << flux[i][0] << endl;
@@ -739,7 +742,7 @@ Id makeCompt( Id parentCompt, Id parentObj,
 	if ( parentCompt != Id() ) {
 		pax = Field< double >::get( parentCompt, "x" );
 		pay = Field< double >::get( parentCompt, "y" );
-		shell->doAddMsg( "Single", parentCompt, "axial", ret, "raxial" );
+		shell->doAddMsg( "Single", parentCompt, "raxial", ret, "axial" );
 	}
 	Field< double >::set( ret, "x0", pax );
 	Field< double >::set( ret, "y0", pay );
@@ -761,29 +764,29 @@ void testNeuroMesh()
 	vector< int > dims( 1, 1 );
 	// Build a cell
 	Id cell = shell->doCreate( "Neutral", Id(), "cell", dims );
-	double len = 100e-6; // metres
-	double dia = 10e-6; // metres
-	double diffLength = 10e-6; // metres
+	double len = 10e-6; // metres
+	double dia = 1e-6; // metres
+	double diffLength = 1e-6; // metres
 	Id soma = makeCompt( Id(), cell, "soma", dia, dia, 0 );
 	dia /= sqrt( 2.0 );
 	Id d1 = makeCompt( soma, cell, "d1", len , dia, 0 );
 	Id d2 = makeCompt( soma, cell, "d2", len , dia, 180 );
 	dia /= sqrt( 2.0 );
-	Id d11 = makeCompt( soma, cell, "d11", len , dia, -45 );
-	Id d12 = makeCompt( soma, cell, "d12", len , dia, 45 );
-	Id d21 = makeCompt( soma, cell, "d21", len , dia, 45 );
-	Id d22 = makeCompt( soma, cell, "d22", len , dia, -45 );
+	Id d11 = makeCompt( d1, cell, "d11", len , dia, -45 );
+	Id d12 = makeCompt( d1, cell, "d12", len , dia, 45 );
+	Id d21 = makeCompt( d2, cell, "d21", len , dia, 45 );
+	Id d22 = makeCompt( d2, cell, "d22", len , dia, -45 );
 	dia /= sqrt( 2.0 );
-	Id d111 = makeCompt( soma, cell, "d111", len , dia, -90 );
-	Id d112 = makeCompt( soma, cell, "d112", len , dia, 0 );
-	Id d121 = makeCompt( soma, cell, "d121", len , dia, 0 );
-	Id d122 = makeCompt( soma, cell, "d122", len , dia, 90 );
-	Id d211 = makeCompt( soma, cell, "d211", len , dia, 90 );
-	Id d212 = makeCompt( soma, cell, "d212", len , dia, 180 );
-	Id d221 = makeCompt( soma, cell, "d221", len , dia, 180 );
-	Id d222 = makeCompt( soma, cell, "d222", len , dia, -90 );
+	Id d111 = makeCompt( d11, cell, "d111", len , dia, -90 );
+	Id d112 = makeCompt( d11, cell, "d112", len , dia, 0 );
+	Id d121 = makeCompt( d12, cell, "d121", len , dia, 0 );
+	Id d122 = makeCompt( d12, cell, "d122", len , dia, 90 );
+	Id d211 = makeCompt( d21, cell, "d211", len , dia, 90 );
+	Id d212 = makeCompt( d21, cell, "d212", len , dia, 180 );
+	Id d221 = makeCompt( d22, cell, "d221", len , dia, 180 );
+	Id d222 = makeCompt( d22, cell, "d222", len , dia, -90 );
 
-	// Scan it with neuroMesh
+	// Scan it with neuroMesh and check outcome.
 	Id nm = shell->doCreate( "NeuroMesh", Id(), "neuromesh", dims );
 	Field< double >::set( nm, "diffLength", diffLength );
 	Field< Id >::set( nm, "cell", cell );
@@ -791,9 +794,50 @@ void testNeuroMesh()
 	assert( ns == 15 );
 	unsigned int ndc = Field< unsigned int >::get( nm, "numDiffCompts" );
 	assert( ndc == 141 );
+	const vector< NeuroNode >& nodes = 
+			reinterpret_cast< NeuroMesh* >( nm.eref().data() )->
+			getNodes();
+	assert( nodes.size() == ns );
+	assert( nodes[0].children().size() == 2 );
+	assert( nodes[1].children().size() == 2 );
+	assert( nodes[2].children().size() == 2 );
+
 
 	// Insert a molecule at soma
-	// Watch diffusion
+	vector< double > molNum( 1, 0 ); // We only have one pool
+	// S[meshIndex][poolIndex]
+	vector< vector< double > > S( ndc, molNum ); 
+	S[0][0] = 1.0e6;
+	vector< double > diffConst( 1, 1e-12 );
+	vector< double > temp( 1, 0.0 );
+	vector< vector< double > > flux( ndc, temp );
+	
+	// Watch diffusion using stencil and direct calls to the flux 
+	// calculations rather than going through the ksolve.
+	const Stencil* stencil = 
+			reinterpret_cast< NeuroMesh* >( nm.eref().data() )->
+			getStencil();
+	assert( stencil != 0 );	
+	double maxt = 10.0;
+	double dt = 0.01;
+	for ( double t = 0; t < maxt; t += dt ) {
+		for ( unsigned int i = 0; i < ndc; ++i )
+			flux[i][0] = 0.0;
+		
+		for ( unsigned int i = 0; i < ndc; ++i ) {
+			stencil->addFlux( i, flux[i], S, diffConst );
+		}
+		for ( unsigned int i = 0; i < ndc; ++i )
+			S[i][0] += flux[i][0] * dt;
+	}
+	// Here we need to figure out how to compare with the analytic solution
+	// y = initConc * dx * (0.5 / sqrt( PI * DiffConst * runtime ) ) * 
+	//        exp( -x * x / ( 4 * DiffConst * runtime ) )
+	//  Turns out that the ordering is sequential for 30 compts, but
+	//  I have used conical segment calculations which will give different
+	//  results from simple diffusion in a cylinder.
+	for ( unsigned int i = 0; i < ndc; ++i )
+		cout << "S[" << i << "][0] = " << S[i][0] << endl;
 	
 	shell->doDelete( cell );
 	shell->doDelete( nm );
