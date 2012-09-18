@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Tue Sep 18 14:11:14 2012 (+0530)
+# Last-Updated: Tue Sep 18 14:29:22 2012 (+0530)
 #           By: subha
-#     Update #: 2000
+#     Update #: 2020
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -111,7 +111,14 @@ def pwe():
     print _moose.getCwe().getPath()
     
 def le(el=None):
-    """List elements. """
+    """List elements. 
+    
+    Parameters
+    ----------
+    el: str/melement/ematrix/None
+    The element or the path under which to look. If `None`, children
+    of current working element are displayed.
+    """
     if el is None:
         el = getCwe()[0]
     elif isinstance(el, str):
@@ -119,7 +126,7 @@ def le(el=None):
             raise ValueError('no such element')
         el = element(el)
     elif isinstance(el, ematrix):
-        el = el[0]
+        el = el[0]    
     print 'Elements under', el.path
     for ch in el.children:
         print ch.path
@@ -146,11 +153,14 @@ def showfield(elem, field='*', showtype=False):
 
     Parameters:
 
-    element -- Element or path of an existing element.
+    elem: str/melement instance
+    Element or path of an existing element.
 
-    field -- Field to be displayed. If '*', all fields are displayed.
+    field: str
+    Field to be displayed. If '*', all fields are displayed.
 
-    showtype -- If True show the data type of each field.
+    showtype: bool
+    If True show the data type of each field.
 
     """
     if isinstance(elem, str):
@@ -186,6 +196,20 @@ def showfields(element, showtype=False):
     
 def doc(arg):
     """Display the documentation for class or field in a class.
+    
+    Parameters
+    ----------
+    arg: str or moose class or instance of melement or instance of ematrix
+
+    argument can be a string specifying a moose class name and a field
+    name separated by a dot. e.g., 'Neutral.name'. Prepending `moose.`
+    is allowed. Thus moose.doc('moose.Neutral.name') is equivalent to
+    the above.
+    
+    argument can also be string specifying just a moose class name or
+    a moose class or a moose object (instance of melement or ematrix
+    or there subclasses). In that case, the builtin documentation for
+    the corresponding moose class is displayed.
 
     """
     # There is no way to dynamically access the MOOSE docs using
@@ -203,7 +227,7 @@ def doc(arg):
         print_field = len(tokens) > 1
     elif isinstance(arg, type):
         tokens = [arg.__name__]
-    elif isinstance(arg, Neutral):
+    elif isinstance(arg, melement) or isinstance(arg, ematrix):
         tokens = [arg.class_]
     else:
         raise TypeError('Require a string or a moose class or a moose object')
