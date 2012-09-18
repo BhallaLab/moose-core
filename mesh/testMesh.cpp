@@ -797,7 +797,7 @@ void testNeuroMesh()
 	const vector< NeuroNode >& nodes = 
 			reinterpret_cast< NeuroMesh* >( nm.eref().data() )->
 			getNodes();
-	assert( nodes.size() == ns );
+	assert( nodes.size() == ns + 14 ); // 14 dummy nodes.
 	assert( nodes[0].children().size() == 2 );
 	assert( nodes[1].children().size() == 2 );
 	assert( nodes[2].children().size() == 2 );
@@ -836,8 +836,14 @@ void testNeuroMesh()
 	//  Turns out that the ordering is sequential for 30 compts, but
 	//  I have used conical segment calculations which will give different
 	//  results from simple diffusion in a cylinder.
-	for ( unsigned int i = 0; i < ndc; ++i )
-		cout << "S[" << i << "][0] = " << S[i][0] << endl;
+	for ( unsigned int i = 0; i < nodes.size(); ++i ) {
+		cout << "node[" << i << "], dia = " << nodes[i].getDia() << 
+				", parent = " << nodes[i].parent() << endl;
+		for ( unsigned int j = 0; j < nodes[i].getNumDivs(); ++j ) {
+			unsigned int k = j + nodes[i].startFid();
+			cout << "S[" << k << "][0] = " << S[k][0] << endl;
+		}
+	}
 	
 	shell->doDelete( cell );
 	shell->doDelete( nm );
