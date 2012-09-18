@@ -94,6 +94,11 @@ void NeuroNode::addChild( unsigned int child )
 	children_.push_back( child );
 }
 
+void NeuroNode::clearChildren()
+{
+	children_.resize( 0 );
+}
+
 void NeuroNode::setParent( unsigned int parent )
 {
 	parent_ = parent;

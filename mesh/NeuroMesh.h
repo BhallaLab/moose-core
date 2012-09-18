@@ -131,6 +131,17 @@ class NeuroMesh: public ChemMesh
 		void buildStencil();
 
 		//////////////////////////////////////////////////////////////////
+		// Utility functions for building tree.
+		/// This shuffles the nodes_ vector to put soma node at the start
+		Id putSomaAtStart( Id origSoma, unsigned int maxDiaIndex );
+
+		/**
+		 * buildNodeTree: This connects up parent and child nodes
+		 * and if needed inserts dummy nodes to build up the model tree.
+		 */
+		void buildNodeTree( const map< Id, unsigned int >& comptMap );
+
+		//////////////////////////////////////////////////////////////////
 		// Utility functions for testing
 		const Stencil* getStencil() const;
 		const vector< NeuroNode >& getNodes() const;

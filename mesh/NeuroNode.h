@@ -64,6 +64,11 @@ class NeuroNode: public CylBase
 		void addChild( unsigned int child );
 
 		/**
+		 * Zeroes out the child vector
+		 */
+		void clearChildren();
+
+		/**
 		 * Assigns parent node info
 		 */
 		void setParent( unsigned int parent );
