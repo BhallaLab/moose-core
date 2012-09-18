@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Tue Sep 18 12:23:28 2012 (+0530)
+# Last-Updated: Tue Sep 18 14:11:14 2012 (+0530)
 #           By: subha
-#     Update #: 1902
+#     Update #: 2000
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -29,9 +29,10 @@
 
 # Code:
 
-
+import cStringIO
 import warnings
 import platform
+import pydoc
 _py3k = False
 if int(platform.python_version_tuple()[0]) >= 3:
     _py3k = True
@@ -186,72 +187,61 @@ def showfields(element, showtype=False):
 def doc(arg):
     """Display the documentation for class or field in a class.
 
-    There is no way to dynamically access the MOOSE docs using
-    pydoc. (using properties requires copying all the docs strings
-    from MOOSE increasing the loading time by ~3x). Hence we provide a
-    separate function.
     """
+    # There is no way to dynamically access the MOOSE docs using
+    # pydoc. (using properties requires copying all the docs strings
+    # from MOOSE increasing the loading time by ~3x). Hence we provide a
+    # separate function.
+    docstring = cStringIO.StringIO()
     indent = '    '
+    tokens = None
+    print_field = False
     if isinstance(arg, str):
         tokens = arg.split('.')
+        if tokens[0] == 'moose':
+            tokens = tokens[1:]
         print_field = len(tokens) > 1
-        class_path = '/classes/%s' % (tokens[0])
-        if exists(class_path):
-            if not print_field:
-                print Cinfo(class_path).docs
-        else:
-            print 'No such class:', tokens[0]
-            return
+    elif isinstance(arg, type):
+        tokens = [arg.__name__]
+    elif isinstance(arg, Neutral):
+        tokens = [arg.class_]
+    else:
+        raise TypeError('Require a string or a moose class or a moose object')
+    class_path = '/classes/%s' % (tokens[0])
+    if exists(class_path):
+        if not print_field:
+            docstring.write('%s\n' % (Cinfo(class_path).docs))
+    else:
+        raise NameError('name \'%s\' not defined.' % (tokens[0]))
     class_id = ematrix('/classes/%s' % (tokens[0]))
-    num_finfo = getField(class_id[0], 'num_valueFinfo', 'unsigned')
-    finfo = ematrix('/classes/%s/valueFinfo' % (tokens[0]))
-    print '\n* Value Field *\n'
-    for ii in range(num_finfo):
-        oid = melement(finfo, 0, ii, 0)
-        if print_field:
-            if oid.name == tokens[1]:
-                print indent, oid.name, ':', oid.docs
-                return
-        else:
-            print indent, oid.name, ':', oid.docs
-            print
-    num_finfo = getField(class_id[0], 'num_srcFinfo', 'unsigned')
-    finfo = ematrix('/classes/%s/srcFinfo' % (tokens[0]))
-    print '\n* Source Field *\n'
-    for ii in range(num_finfo):
-        oid = melement(finfo, 0, ii, 0)
-        if print_field:
-            if oid.name == tokens[1]:
-                print indent, oid.name, ':', oid.docs
-                return
-        else:
-            print indent, oid.name, ':', oid.docs
-            print
-    num_finfo = getField(class_id[0], 'num_destFinfo', 'unsigned')
-    finfo = ematrix('/classes/%s/destFinfo' % (tokens[0]))
-    print '\n* Destination Field *\n'
-    for ii in range(num_finfo):
-        oid = melement(finfo, 0, ii, 0)
-        if print_field:
-            if oid.name == tokens[1]:
-                print indent, oid.name, ':', oid.docs
-                return
-        else:
-            print indent, oid.name, ':', oid.docs
-            print
-    num_finfo = getField(class_id[0], 'num_lookupFinfo', 'unsigned')    
-    finfo = ematrix('/classes/%s/lookupFinfo' % (tokens[0]))
-    print '\n* Lookup Field *\n'
-    for ii in range(num_finfo):
-        oid = melement(finfo, 0, ii, 0)
-        if print_field:
-            if oid.name == tokens[1]:
-                print indent, oid.name, ':', oid.docs
-                return
-        else:
-            print indent, oid.name, ':', oid.docs
-            print
-    
+    finfotypes = ['valueFinfo', 'srcFinfo', 'destFinfo', 'lookupFinfo']
+    readablefinfotypes = ['value field', 'source field', 'destination field', 'lookup field']
+    if print_field:
+        fieldfound = False
+        for rtype, ftype in zip(readablefinfotypes, finfotypes):
+            numfinfo = getField(class_id[0], 'num_'+ftype, 'unsigned')
+            finfo = ematrix('/classes/%s/%s' % (tokens[0], ftype))
+            for ii in range(numfinfo):
+                oid = melement(finfo, 0, ii, 0)
+                if oid.name == tokens[1]:
+                    docstring.write('%s%s.%s: %s - %s\n' % (indent, tokens[0], tokens[1], oid.docs, rtype))
+                    fieldfound = True
+                    break
+            if fieldfound:
+                break
+    else:
+        finfoheaders = ['* Value Fields *', '* Source Fields *', '* Destination Fields *', '* Lookup Fields *']
+        for header, ftype in zip(finfoheaders, finfotypes):
+            docstring.write('\n%s\n' % (header))
+            numfinfo = getField(class_id[0], 'num_'+ftype, 'unsigned')
+            finfo = ematrix('/classes/%s/%s' % (tokens[0], ftype))
+            for ii in range(numfinfo):
+                oid = melement(finfo, 0, ii, 0)
+                docstring.write('%s%s: %s\n' % (indent, oid.name, oid.type))
+            
+    pydoc.pager(docstring.getvalue())
+    docstring.close()
+                
 
 # 
 # moose.py ends here
