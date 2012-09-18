@@ -234,22 +234,26 @@ void NeuroMesh::updateCoords()
 	}
 	nodeIndex_.resize( startFid );
 	for ( unsigned int i = 0; i < nodes_.size(); ++i ) {
-		unsigned int end = nodes_[i].startFid() + nodes_[i].getNumDivs();
-		assert( end <= startFid );
-		assert( nodes_[i].getNumDivs() > 0 );
-		for ( unsigned int j = nodes_[i].startFid(); j < end; ++j )
-			nodeIndex_[j] = i;
+		if ( !nodes_[i].isDummyNode() ) {
+			unsigned int end = nodes_[i].startFid() +nodes_[i].getNumDivs();
+			assert( end <= startFid );
+			assert( nodes_[i].getNumDivs() > 0 );
+			for ( unsigned int j = nodes_[i].startFid(); j < end; ++j )
+				nodeIndex_[j] = i;
+		}
 	}
 	// Assign volumes and areas
 	vs_.resize( startFid );
 	area_.resize( startFid );
 	for ( unsigned int i = 0; i < nodes_.size(); ++i ) {
 		const NeuroNode& nn = nodes_[i];
-		assert( nn.parent() < nodes_.size() );
-		const NeuroNode& parent = nodes_[ nn.parent() ];
-		for ( unsigned int j = 0; j < nn.getNumDivs(); ++j ) {
-			vs_[j + nn.startFid()] = NA * nn.voxelVolume( parent, j );
-			area_[j + nn.startFid()] = nn.getDiffusionArea( parent, j );
+		if ( !nn.isDummyNode() ) {
+			assert( nn.parent() < nodes_.size() );
+			const NeuroNode& parent = nodes_[ nn.parent() ];
+			for ( unsigned int j = 0; j < nn.getNumDivs(); ++j ) {
+				vs_[j + nn.startFid()] = NA * nn.voxelVolume( parent, j );
+				area_[j + nn.startFid()] = nn.getDiffusionArea( parent, j );
+			}
 		}
 	}
 	buildStencil();
@@ -315,6 +319,79 @@ Id getParentFromMsg( Id id )
 			return Id();
 }
 
+Id NeuroMesh::putSomaAtStart( Id origSoma, unsigned int maxDiaIndex )
+{
+	Id soma = origSoma;
+	if ( nodes_[maxDiaIndex].elecCompt() == soma ) { // Happy, happy
+		;
+	} else if ( soma == Id() ) {
+		soma = nodes_[maxDiaIndex].elecCompt();
+	} else { // Disagreement. Ugh.
+		string name = nodes_[ maxDiaIndex ].elecCompt().element()->getName();
+		// OK, somehow this model has more than one soma compartment.
+		if ( strncasecmp( name.c_str(), "soma", 4 ) == 0 ) {
+			soma = nodes_[maxDiaIndex].elecCompt();
+		} else { 
+			cout << "Warning: named 'soma' compartment isn't biggest\n";
+			soma = nodes_[maxDiaIndex].elecCompt();
+		}
+	}
+	// Move soma to start of nodes_ vector.
+	if ( maxDiaIndex != 0 ) {
+		NeuroNode temp = nodes_[0];
+		nodes_[0] = nodes_[maxDiaIndex];
+		nodes_[maxDiaIndex] = temp;
+	}
+	return soma;
+}
+
+void NeuroMesh::buildNodeTree( const map< Id, unsigned int >& comptMap )
+{
+		// First pass: just build up the tree.
+	for ( unsigned int i = 0; i < nodes_.size(); ++i ) {
+		// returns Id() if no parent found.
+		Id pa = getParentFromMsg( nodes_[i].elecCompt() ); 
+		if ( pa != Id() ) {
+			map< Id, unsigned int >::const_iterator mapEntry = 
+					comptMap.find( pa );
+			assert( mapEntry != comptMap.end() );
+			unsigned int ipa = mapEntry->second;
+			// unsigned int ipa = comptMap[pa];
+			nodes_[i].setParent( ipa );
+			nodes_[ipa].addChild( i );
+		}
+	}
+	// Second pass: insert dummy nodes.
+	// Need to know if parent has multiple children, because each of
+	// them will need a dummyNode to connect to.
+	// In all the policies so far, the dummy nodes take the same diameter
+	// as the children that they host.
+	for ( unsigned int i = 0; i < nodes_.size(); ++i ) {
+		vector< unsigned int > kids = nodes_[i].children();
+		if ( kids.size() > 1 ) {
+			for( unsigned int j = 0; j < kids.size(); ++j ) {
+				NeuroNode dummy( nodes_[ kids[j] ] );
+				dummy.clearChildren();
+				dummy.setNumDivs( 0 );
+				// Don't worry about coords yet.
+				dummy.setX( nodes_[i].getX() );
+				dummy.setY( nodes_[i].getY() );
+				dummy.setZ( nodes_[i].getZ() );
+				// Now insert the dummy as a surrogate parent.
+				dummy.setParent( i );
+				dummy.addChild( kids[j] );
+				nodes_[ kids[j] ].setParent( nodes_.size() );
+				kids[j] = nodes_.size();
+				nodes_.push_back( dummy );
+			}
+			// Connect up the parent to the dummy nodes.
+			nodes_[i].clearChildren();
+			for( unsigned int j = 0; j < kids.size(); ++j )
+				nodes_[i].addChild( kids[j] );
+		}
+	}
+}
+
 // I assume 'cell' is the parent of the compartment tree.
 void NeuroMesh::setCell( Id cell )
 {
@@ -341,39 +418,10 @@ void NeuroMesh::setCell( Id cell )
 			}
 		}
 		// Figure out soma compartment.
-		if ( nodes_[maxDiaIndex].elecCompt() == soma ) { // Happy, happy
-			;
-		} else if ( soma == Id() ) {
-			soma = nodes_[maxDiaIndex].elecCompt();
-		} else { // Disagreement. Ugh.
-			string name = nodes_[ maxDiaIndex ].elecCompt().element()->getName();
-			// OK, somehow this model has more than one soma compartment.
-			if ( strncasecmp( name.c_str(), "soma", 4 ) == 0 ) {
-				soma = nodes_[maxDiaIndex].elecCompt();
-			} else { 
-				cout << "Warning: named 'soma' compartment isn't biggest\n";
-				soma = nodes_[maxDiaIndex].elecCompt();
-			}
-		}
-		// Move soma to start of nodes_ vector.
-		if ( maxDiaIndex != 0 ) {
-			NeuroNode temp = nodes_[0];
-			nodes_[0] = nodes_[maxDiaIndex];
-			nodes_[maxDiaIndex] = temp;
-		}
+		soma = putSomaAtStart( soma, maxDiaIndex );
 
-		// Assign parent and child compts.
-		// Need to know if compt is a sphere, to decide if it needs a
-		// dummyNode to connect to.
-		for ( unsigned int i = 0; i < nodes_.size(); ++i ) {
-			// returns Id() if no parent found.
-			Id pa = getParentFromMsg( nodes_[i].elecCompt() ); 
-			if ( pa != Id() ) {
-				unsigned int ipa = comptMap[pa];
-				nodes_[i].setParent( ipa );
-				nodes_[ipa].addChild( i );
-			}
-		}
+		// Assign parent and child compts to node entries.
+		buildNodeTree( comptMap );
 
 		updateCoords();
 }
