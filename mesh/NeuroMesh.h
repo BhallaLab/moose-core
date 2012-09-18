@@ -75,6 +75,9 @@ class NeuroMesh: public ChemMesh
 		void setDiffLength( double v );
 		double getDiffLength() const;
 
+		void setGeometryPolicy( string v );
+		string getGeometryPolicy() const;
+
 		unsigned int innerGetDimensions() const;
 
 		//////////////////////////////////////////////////////////////////
@@ -171,6 +174,7 @@ class NeuroMesh: public ChemMesh
 		/// Flag. True if mesh should ignore spines when scanning dend tree.
 		bool skipSpines_; 
 
+		string geometryPolicy_;
 
 		/*
 		NeuroStencil ns_;

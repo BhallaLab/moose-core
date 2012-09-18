@@ -18516,4 +18516,43 @@ their proximal diameter. Not right. Should be their own diameter.
 2. The decay of conc along dendrite is OK for first half, then the
 remaining dendrite segments seem to be connected up wrongly.
 
+Checkin 3950 anyway.
+
 ============================================================================
+18 Sep 2012
+
+Need to have the NeuroMesh handle a few specific, explicit policies for how
+to deal with junctions and branching.
+- Fallback mode: 
+	- Use cylinders. Diameter is just compartment dia.
+	- Place somatic dendrites on surface of spherical soma, or at ends
+		of cylindrical soma
+	- Place dendritic spines on surface of cylindrical dendrites, not
+		emerging from their middle.
+	- Ignore spatial overlap.
+- Default mode:
+	- Use frustrums of cones. Distal diameter is always from compt dia.
+	- For linear dendrites (no branching), proximal diameter is 
+		diameter of the parent compartment
+	- For branching dendrites and dendrites emerging from soma,
+		proximal diameter is from compt dia. Don't worry about overlap.
+	- Place somatic dendrites on surface of spherical soma, or at ends
+		of cylindrical soma
+	- Place dendritic spines on surface of cylindrical dendrites, not
+		emerging from their middle.
+		
+- Trousers mode:
+	- Use frustrums of cones. Distal diameter is always from compt dia.
+	- For linear dendrites (no branching), proximal diameter is 
+		diameter of the parent compartment
+	- For branching dendrites, use a trouser function. Avoid overlap.
+	- For soma, use some variant of trousers. Here we must avoid overlap
+	- For spines, use a way to smoothly merge into parent dend. Radius of
+		curvature should be similar to that of the spine neck.
+	- Place somatic dendrites on surface of spherical soma, or at ends
+		of cylindrical soma
+	- Place dendritic spines on surface of cylindrical dendrites, not
+		emerging from their middle.
+		
+
+Put skeleton code for NeuroMesh::geometryPolicy in.
