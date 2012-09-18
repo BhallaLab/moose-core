@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Fri Aug 24 12:32:59 2012 (+0530)
+# Last-Updated: Tue Sep 18 12:23:28 2012 (+0530)
 #           By: subha
-#     Update #: 1893
+#     Update #: 1902
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -207,7 +207,7 @@ def doc(arg):
     finfo = ematrix('/classes/%s/valueFinfo' % (tokens[0]))
     print '\n* Value Field *\n'
     for ii in range(num_finfo):
-        oid = element(finfo, 0, ii, 0)
+        oid = melement(finfo, 0, ii, 0)
         if print_field:
             if oid.name == tokens[1]:
                 print indent, oid.name, ':', oid.docs
@@ -219,7 +219,7 @@ def doc(arg):
     finfo = ematrix('/classes/%s/srcFinfo' % (tokens[0]))
     print '\n* Source Field *\n'
     for ii in range(num_finfo):
-        oid = element(finfo, 0, ii, 0)
+        oid = melement(finfo, 0, ii, 0)
         if print_field:
             if oid.name == tokens[1]:
                 print indent, oid.name, ':', oid.docs
@@ -231,7 +231,7 @@ def doc(arg):
     finfo = ematrix('/classes/%s/destFinfo' % (tokens[0]))
     print '\n* Destination Field *\n'
     for ii in range(num_finfo):
-        oid = element(finfo, 0, ii, 0)
+        oid = melement(finfo, 0, ii, 0)
         if print_field:
             if oid.name == tokens[1]:
                 print indent, oid.name, ':', oid.docs
@@ -243,7 +243,7 @@ def doc(arg):
     finfo = ematrix('/classes/%s/lookupFinfo' % (tokens[0]))
     print '\n* Lookup Field *\n'
     for ii in range(num_finfo):
-        oid = element(finfo, 0, ii, 0)
+        oid = melement(finfo, 0, ii, 0)
         if print_field:
             if oid.name == tokens[1]:
                 print indent, oid.name, ':', oid.docs
