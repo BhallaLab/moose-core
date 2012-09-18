@@ -7,7 +7,9 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+#include <cctype>
 #include "header.h"
+
 #include "ElementValueFinfo.h"
 #include "Boundary.h"
 #include "MeshEntry.h"
@@ -94,6 +96,45 @@ const Cinfo* NeuroMesh::initCinfo()
 			&NeuroMesh::getDiffLength
 		);
 
+		static ValueFinfo< NeuroMesh, string > geometryPolicy(
+			"geometryPolicy",
+			"Policy for how to interpret electrical model geometry (which "
+			"is a branching 1-dimensional tree) in terms of 3-D constructs"
+			"like spheres, cylinders, and cones."
+			"There are three options, default, trousers, and cylinder:"
+			"default mode:"
+	" - Use frustrums of cones. Distal diameter is always from compt dia."
+	" - For linear dendrites (no branching), proximal diameter is "
+	" diameter of the parent compartment"
+	" - For branching dendrites and dendrites emerging from soma,"
+	" proximal diameter is from compt dia. Don't worry about overlap."
+	" - Place somatic dendrites on surface of spherical soma, or at ends"
+	" of cylindrical soma"
+	" - Place dendritic spines on surface of cylindrical dendrites, not"
+	" emerging from their middle."
+	"trousers mode:"
+	" - Use frustrums of cones. Distal diameter is always from compt dia."
+	" - For linear dendrites (no branching), proximal diameter is "
+	" diameter of the parent compartment"
+	" - For branching dendrites, use a trouser function. Avoid overlap."
+	" - For soma, use some variant of trousers. Here we must avoid overlap"
+	" - For spines, use a way to smoothly merge into parent dend. Radius of"
+	" curvature should be similar to that of the spine neck."
+	" - Place somatic dendrites on surface of spherical soma, or at ends"
+	" of cylindrical soma"
+	" - Place dendritic spines on surface of cylindrical dendrites, not"
+	" emerging from their middle."
+	"cylinder mode:"
+	" - Use cylinders. Diameter is just compartment dia."
+	" - Place somatic dendrites on surface of spherical soma, or at ends"
+	" of cylindrical soma"
+	" - Place dendritic spines on surface of cylindrical dendrites, not"
+	" emerging from their middle."
+	" - Ignore spatial overlap.",
+			&NeuroMesh::setGeometryPolicy,
+			&NeuroMesh::getGeometryPolicy
+		);
+
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
@@ -135,14 +176,17 @@ NeuroMesh::NeuroMesh()
 	:
 		size_( 0.0 ),
 		diffLength_( 0.5e-6 ),
-		skipSpines_( false )
+		skipSpines_( false ),
+		geometryPolicy_( "default" )
 {;}
 
 NeuroMesh::NeuroMesh( const NeuroMesh& other )
 	:
 		size_( other.size_ ),
 		diffLength_( other.diffLength_ ),
-		cell_( other.cell_ )
+		cell_( other.cell_ ),
+		skipSpines_( other.skipSpines_ ),
+		geometryPolicy_( other.geometryPolicy_ )
 {;}
 
 NeuroMesh& NeuroMesh::operator=( const NeuroMesh& other )
@@ -155,6 +199,7 @@ NeuroMesh& NeuroMesh::operator=( const NeuroMesh& other )
 	diffLength_ = other.diffLength_;
 	cell_ = other.cell_;
 	skipSpines_ = other.skipSpines_;
+	geometryPolicy_ = other.geometryPolicy_;
 	return *this;
 }
 
@@ -219,6 +264,34 @@ void NeuroMesh::setDiffLength( double v )
 double NeuroMesh::getDiffLength() const
 {
 	return diffLength_;
+}
+
+void NeuroMesh::setGeometryPolicy( string v )
+{
+	// STL magic! Converts the string v to lower case. Unfortunately
+	// someone has overloaded tolower so it can have one or two args, so
+	// this marvellous construct is useless.
+	// std::transform( v.begin(), v.end(), v.begin(), std::tolower );
+	for( string::iterator i = v.begin(); i != v.end(); ++i )
+		*i = tolower( *i );
+
+	if ( !( v == "cylinders" || v == "trousers" || v == "default" ) ) {
+		cout << "Warning: NeuroMesh::setGeometryPolicy( " << v << 
+			" ):\n Mode must be one of cylinders, trousers, or default."
+			"Using default\n";
+		v = "default";
+	}
+
+	if ( v == geometryPolicy_ )
+			return;
+	geometryPolicy_ = v;
+	if ( cell_ != Id() )
+		setCell( cell_ );
+}
+
+string NeuroMesh::getGeometryPolicy() const
+{
+	return geometryPolicy_;
 }
 
 unsigned int NeuroMesh::innerGetDimensions() const
