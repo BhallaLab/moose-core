@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Sep  5 16:13:17 2012 (+0530)
+// Last-Updated: Tue Sep 18 12:20:49 2012 (+0530)
 //           By: subha
-//     Update #: 9976
+//     Update #: 10006
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -1873,10 +1873,13 @@ static struct module_state _state;
         _ObjId * instance = (_ObjId*)self;
         unsigned int id = 0, data = 0, field = 0, numFieldBits = 0;
         PyObject * obj = NULL;
-        if (PyArg_ParseTupleAndKeywords(args, kwargs,
+        if ((kwargs && PyArg_ParseTupleAndKeywords(args, kwargs,
                                         "I|III:moose_ObjId_init",
                                         kwlist,
-                                        &id, &data, &field, &numFieldBits)){
+                                        &id, &data, &field, &numFieldBits))
+            || (!kwargs && PyArg_ParseTuple(args, "I|III:moose_ObjId_init_from_id",
+                                            &id, &data, &field, &numFieldBits))){
+            PyErr_Clear();
             if (!Id::isValid(id)){
                 RAISE_INVALID_ID(-1);
             }
@@ -1884,9 +1887,21 @@ static struct module_state _state;
             return 0;
         }
         PyErr_Clear();
-        if (PyArg_ParseTupleAndKeywords(args, kwargs, "O|III:moose_ObjId_init",
-                                        kwlist,
-                                        &obj, &data, &field, &numFieldBits)){
+        if ((kwargs && PyArg_ParseTupleAndKeywords(args,
+                                                   kwargs,
+                                                   "O|III:moose_ObjId_init_from_id",
+                                                   kwlist,
+                                                   &obj,
+                                                   &data,
+                                                   &field,
+                                                   &numFieldBits)) ||
+            (!kwargs && PyArg_ParseTuple(args,
+                                         "O|III:moose_ObjId_init_from_id",
+                                         &obj,
+                                         &data,
+                                         &field,
+                                         &numFieldBits))){
+            PyErr_Clear();
             // If first argument is an Id object, construct an ObjId out of it
             if (Id_Check(obj)){
                 if (!Id::isValid(((_Id*)obj)->id_)){
@@ -1956,16 +1971,17 @@ static struct module_state _state;
             }
         } else if (PyArg_ParseTupleAndKeywords(args,
                                                 kwargs,
-                                                "s|Os:moose_ObjId_init",
+                                                "s|Os:moose_ObjId_init_from_path",
                                                 kwlist,
                                                 &path,
                                                 &dims,
                                                 &type)){\
             parse_success = true;
         }
+        PyErr_Clear();
         if (!parse_success){
             return -2;
-        }
+        }    
         // First see if there is an existing object with at path
         instance->oid_ = ObjId(path);
         if (!(ObjId::bad() == instance->oid_)){
@@ -2020,12 +2036,10 @@ static struct module_state _state;
             return -1;
         }
         int ret = moose_ObjId_init_from_path(self, args, kwargs);
-        
         if (ret >= -1){
             return ret;
         }
         // parsing arguments as (path, dims, classname) failed. See if it is existing Id or ObjId.
-        PyErr_Clear();
         if (moose_ObjId_init_from_id(self, args, kwargs) == 0){
             return 0;
         }

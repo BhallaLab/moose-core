@@ -77,7 +77,7 @@ elem in em -- True if elem is contained in em.
 
 
 
-element
+melement
 ----------------
 
 Single moose object. It has three numbers to uniquely identify it:
@@ -86,7 +86,7 @@ id - id of the ematrix containing this element
 
 dataIndex - index of this element in the container ematrix
 
-unsigned integer fieldIndex - if this is a tertiary object, i.e. acts
+fieldIndex - if this is a tertiary object, i.e. acts
 as a field in another element (like synapse[0] in IntFire[1]), then
 the index of this field in the containing element.
 
@@ -126,11 +126,7 @@ module functions
 ----------------
 
 element(path) - returns a reference to an existing object converted to
-the right class. Raises NameError if path does not exist.
-
-arrayelement(path) - returns a reference to an existing object
-converted to the corresponding Array class. Raises NameError if path
-does not exist.
+the right class. Raises ValueError if path does not exist.
 
 copy(src=<src>, dest=<dest>, name=<name_of_the_copy>, n=<num_copies>,
 copyMsg=<whether_to_copy_messages) -- make a copy of source object as
