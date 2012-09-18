@@ -150,6 +150,7 @@ const Cinfo* NeuroMesh::initCinfo()
 		&numSegments,		// ReadOnlyValue
 		&numDiffCompts,		// ReadOnlyValue
 		&diffLength,			// Value
+		&geometryPolicy,		// Value
 	};
 
 	static Cinfo neuroMeshCinfo (
