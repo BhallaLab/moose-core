@@ -18560,5 +18560,5 @@ Put skeleton code for NeuroMesh::geometryPolicy in.
 Put in some more elaborate printf debugging to check the tree structure of
 the test model in testNeuroMesh. Turns out to be OK. Addresses point 2 from
 yesterday.
-Next: put in dummy nodes.
+Next: put in dummy nodes. Checkin 3953.
 Now to put in the geometry policy implementation.
