@@ -280,9 +280,9 @@ void NeuroMesh::setGeometryPolicy( string v )
 	for( string::iterator i = v.begin(); i != v.end(); ++i )
 		*i = tolower( *i );
 
-	if ( !( v == "cylinders" || v == "trousers" || v == "default" ) ) {
+	if ( !( v == "cylinder" || v == "trousers" || v == "default" ) ) {
 		cout << "Warning: NeuroMesh::setGeometryPolicy( " << v << 
-			" ):\n Mode must be one of cylinders, trousers, or default."
+			" ):\n Mode must be one of cylinder, trousers, or default."
 			"Using default\n";
 		v = "default";
 	}
@@ -367,6 +367,7 @@ void NeuroMesh::buildNodeTree( const map< Id, unsigned int >& comptMap )
 	// them will need a dummyNode to connect to.
 	// In all the policies so far, the dummy nodes take the same diameter
 	// as the children that they host.
+	bool isCylinder = (geometryPolicy_ == "cylinder" );
 	for ( unsigned int i = 0; i < nodes_.size(); ++i ) {
 		vector< unsigned int > kids = nodes_[i].children();
 		if ( kids.size() > 1 ) {
@@ -374,6 +375,7 @@ void NeuroMesh::buildNodeTree( const map< Id, unsigned int >& comptMap )
 				NeuroNode dummy( nodes_[ kids[j] ] );
 				dummy.clearChildren();
 				dummy.setNumDivs( 0 );
+				dummy.setIsCylinder( isCylinder );
 				// Don't worry about coords yet.
 				dummy.setX( nodes_[i].getX() );
 				dummy.setY( nodes_[i].getY() );

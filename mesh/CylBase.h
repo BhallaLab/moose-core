@@ -33,6 +33,8 @@ class CylBase
 		double getLength() const;
 		void setNumDivs( unsigned int v );
 		unsigned int getNumDivs() const;
+		void setIsCylinder( bool v );
+		bool getIsCylinder() const;
 
 		/// Returns vol of current node. Usually needs to refer to parent.
 		double volume( const CylBase& parent ) const;
@@ -76,6 +78,7 @@ class CylBase
 		double dia_; /// Diameter of node end.
 		double length_; /// Length of compartment.
 		unsigned int numDivs_;	/// Number of subdivisions of cylinder.
+		bool isCylinder_;	/// True if this acts like a regular cylinder.
 };
 
 #endif	// _CYL_BASE_H
