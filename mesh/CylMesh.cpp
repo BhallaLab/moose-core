@@ -555,7 +555,9 @@ void CylMesh::innerHandleNodeInfo(
 	vector< unsigned int > localEntries( numEntries );
 	vector< vector< unsigned int > > outgoingEntries;
 	vector< vector< unsigned int > > incomingEntries;
+	double oldvol = getMeshEntrySize( 0 );
 	meshSplit()->send( e, q->threadNum(), 
+		oldvol,
 		vols, localEntries,
 		outgoingEntries, incomingEntries );
 }
@@ -622,6 +624,7 @@ void CylMesh::transmitChange( const Eref& e, const Qinfo* q )
 	assert( 
 		meshEntry.eref().data() == reinterpret_cast< char* >( lookupEntry( 0 ) )
 	);
+	double oldvol = getMeshEntrySize( 0 );
 	unsigned int totalNumEntries = numEntries_;
 	unsigned int localNumEntries = totalNumEntries;
 	unsigned int startEntry = 0;
@@ -644,13 +647,14 @@ void CylMesh::transmitChange( const Eref& e, const Qinfo* q )
 	// This message tells the Stoich about the new mesh, and also about
 	// how it communicates with other nodes.
 	meshSplit()->fastSend( e, q->threadNum(), 
+		oldvol,
 		vols, localIndices, 
 		outgoingEntries, incomingEntries );
 
 	// This func goes down to the MeshEntry to tell all the pools and
 	// Reacs to deal with the new mesh. They then update the stoich.
 	lookupEntry( 0 )->triggerRemesh( meshEntry.eref(), q->threadNum(), 
-		startEntry, localIndices, vols );
+		oldvol, startEntry, localIndices, vols );
 }
 
 //////////////////////////////////////////////////////////////////

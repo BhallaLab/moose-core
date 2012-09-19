@@ -14,14 +14,14 @@
 #include "Stencil.h"
 #include "ChemMesh.h"
 
-static SrcFinfo4< unsigned int, unsigned int, vector< unsigned int>, vector< double > >  *remesh()
+static SrcFinfo5< double, unsigned int, unsigned int, vector< unsigned int>, vector< double > >  *remesh()
 {
-	static SrcFinfo4< unsigned int, unsigned int, vector< unsigned int>, vector< double > >  remesh(
+	static SrcFinfo5< double, unsigned int, unsigned int, vector< unsigned int>, vector< double > >  remesh(
 	"remesh",
 	"Tells the target pool or other entity that the compartment subdivision"
 	"(meshing) has changed, and that it has to redo its volume and "
 	"memory allocation accordingly."
-	"Arguments are: numTotalEntries, startEntry, localIndices, vols"
+	"Arguments are: oldvol, numTotalEntries, startEntry, localIndices, vols"
 	"The vols specifies volumes of each local mesh entry. It also specifies"
 	"how many meshEntries are present on the local node." 
 	"The localIndices vector is used for general load balancing only."
@@ -260,11 +260,12 @@ vector< double >MeshEntry::getDiffusionScaling( const Eref& e, const Qinfo* q ) 
 // Utility function to pass on mesh changes
 //////////////////////////////////////////////////////////////
 void MeshEntry::triggerRemesh( const Eref& e, unsigned int threadNum,
+	double oldvol, 
 	unsigned int startEntry, const vector< unsigned int >& localIndices,
 	const vector< double >& vols )
 {
 	// cout << "MeshEntry::triggerRemesh on " << e.element()->getName() << endl;
-	remesh()->fastSend( e, threadNum, parent_->getNumEntries(), 
+	remesh()->fastSend( e, threadNum, oldvol, parent_->getNumEntries(), 
 		startEntry, localIndices, vols );
 	remeshReacs()->fastSend( e, threadNum );
 }

@@ -666,7 +666,7 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 	// double vol = atof( args[ enzMap_[ "vol" ] ].c_str());
 	bool isMM = atoi( args[ enzMap_[ "usecomplex" ] ].c_str());
 	assert( poolVols_.find( pa ) != poolVols_.end() );
-	double vol = poolVols_[ pa ];
+	// double vol = poolVols_[ pa ];
 	
 	/**
 	 * vsf is vol scale factor, which is what GENESIS stores in 'vol' field
@@ -708,7 +708,7 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 		assert( cplx != Id () );
 		poolIds_[ cplxPath ] = cplx; 
 		// Field< double >::set( cplx, "nInit", nComplexInit );
-		Field< double >::set( cplx, "concInit", nComplexInit / ( NA * vol) );
+		Field< double >::set( cplx, "nInit", nComplexInit );
 
 		// Use this later to assign mesh entries to enz cplx.
 		enzCplxMols_.push_back( pair< Id, Id >(  pa, cplx ) );
@@ -824,7 +824,7 @@ Id ReadKkit::buildPool( const vector< string >& args )
 	// skip the 10 chars of "/kinetics/"
 	poolIds_[ clean.substr( 10 ) ] = pool; 
 
-	Field< double >::set( pool, "concInit", nInit / ( NA * vol) );
+	Field< double >::set( pool, "nInit", nInit );
 	Field< double >::set( pool, "diffConst", diffConst );
 	// SetGet1< double >::set( pool, "setSize", vol );
 	separateVols( pool, vol );

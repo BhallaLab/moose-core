@@ -418,6 +418,35 @@ template < class T1, class T2, class T3, class T4, class T5 > class SrcFinfo5: p
 			delete[] data;
 		}
 
+		void fastSend( const Eref& e, ThreadId threadNum,
+			const T1& arg1, const T2& arg2, 
+			const T3& arg3, const T4& arg4, 
+			const T5& arg5 ) const
+		{
+			Conv< T1 > a1( arg1 );
+			Conv< T2 > a2( arg2 );
+			Conv< T3 > a3( arg3 );
+			Conv< T4 > a4( arg4 );
+			Conv< T5 > a5( arg5 );
+			unsigned int totSize = a1.size() + a2.size() + 
+				a3.size() + a4.size() + a5.size();
+			double* data = new double[ totSize ];
+			double* ptr = data;
+			memcpy( ptr, a1.ptr(), a1.size() * sizeof( double ) );
+			ptr += a1.size();
+			memcpy( ptr, a2.ptr(), a2.size() * sizeof( double ) );
+			ptr += a2.size();
+			memcpy( ptr, a3.ptr(), a3.size() * sizeof( double ) );
+			ptr += a3.size();
+			memcpy( ptr, a4.ptr(), a4.size() * sizeof( double ) );
+			ptr += a4.size();
+			memcpy( ptr, a5.ptr(), a5.size() * sizeof( double ) );
+			
+			Qinfo qi( e.objId(), getBindIndex(), threadNum, 0, totSize );
+			e.element()->exec( &qi, data );
+			delete[] data;
+		}
+
 		string rttiType() const {
 			return Conv<T1>::rttiType() + "," + Conv< T2 >::rttiType() +
 				"," + Conv<T3>::rttiType() + "," + Conv< T4 >::rttiType() +

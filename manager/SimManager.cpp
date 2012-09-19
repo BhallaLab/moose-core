@@ -121,12 +121,14 @@ const Cinfo* SimManager::initCinfo()
 		static DestFinfo meshSplit( "meshSplit",
 			"Handles message from ChemMesh that defines how"
 			"meshEntries communicate between nodes."
-			"First arg is list of other nodes, second arg is list number of"
+			"First arg is oldvol, next is list of other nodes, third arg is list number of"
 			"meshEntries to be transferred for each of these nodes, "
-			"third arg is catenated list of meshEntries indices on"
+			"fourth arg is catenated list of meshEntries indices on"
 			"my node going to each of the other connected nodes, and"
-			"fourth arg is matching list of meshEntries on other nodes",
-			new EpFunc4< SimManager, vector< unsigned int >, vector< unsigned int>, vector<     unsigned int >, vector< unsigned int > >( &SimManager::meshSplit )
+			"last arg is matching list of meshEntries on other nodes",
+			new EpFunc5< SimManager, double, vector< unsigned int >, 
+			vector< unsigned int>, vector< unsigned int >, 
+			vector< unsigned int > >( &SimManager::meshSplit )
 		);
 
 		static DestFinfo meshStats( "meshStats",
@@ -388,6 +390,7 @@ void SimManager::makeStandardElements( const Eref& e, const Qinfo* q,
 }
 
 void SimManager::meshSplit( const Eref& e, const Qinfo* q,
+	double oldVol,
 	vector< unsigned int > nodeList, 
 	vector< unsigned int > numEntriesPerNode, 
 	vector< unsigned int > outgoingEntries, 

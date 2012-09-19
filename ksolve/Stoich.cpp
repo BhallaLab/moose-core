@@ -130,10 +130,11 @@ const Cinfo* Stoich::initCinfo()
 			"Handles message from ChemMesh that defines how "
 			"meshEntries are decomposed on this node, and how they "
 			"communicate between nodes."
-			"Args: (volumeVectorForAllEntries, localEntryList, "
+			"Args: (oldVol, volumeVectorForAllEntries, localEntryList, "
 			"outgoingDiffusion[node#][entry#], "
 			"incomingDiffusion[node#][entry#])",
-			new OpFunc4< Stoich, 
+			new OpFunc5< Stoich, 
+				double,
 				vector< double >, vector< unsigned int >,
 				vector< vector< unsigned int > >,
 				vector< vector< unsigned int > >
@@ -607,6 +608,7 @@ void Stoich::handleRemesh( unsigned int numLocalMeshEntries,
 }
 
 void Stoich::meshSplit(
+	double oldVol,
 	vector< double > vols,
 	vector< unsigned int > localEntryList,
 	vector< vector< unsigned int > > outgoingDiffusion,
@@ -626,8 +628,14 @@ void Stoich::meshSplit(
 		assert( k < totalNumMeshEntries );
 		S_[ k ].resize( concInit_.size(), 0 );
 		Sinit_[ k ].resize( concInit_.size(), 0 );
+		/*
 		for ( unsigned int j = 0; j < concInit_.size(); ++j ) {
 			S_[k][j] = Sinit_[k][j] = concInit_[j] * vols[k] * NA;
+		}
+		*/
+		for ( unsigned int j = 0; j < concInit_.size(); ++j ) {
+			Sinit_[k][j] *= vols[k] / oldVol;
+			S_[k][j] = Sinit_[k][j];
 		}
 		y_[i].resize( numVarPools_, 0 );
 		flux_[i].resize( numVarPools_, 0 );

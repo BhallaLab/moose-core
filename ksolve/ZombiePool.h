@@ -47,6 +47,7 @@ class ZombiePool: public PoolBase
 		// void vReac( double A, double B );
 		// void vHandleMolWt( const Eref& e, const Qinfo* q, double v );
 		void vRemesh( const Eref& e, const Qinfo* q, 
+			double oldvol,
 			unsigned int numTotalEntries, unsigned int startEntry, 
 			const vector< unsigned int >& localIndices, 
 			const vector< double >& vols );
