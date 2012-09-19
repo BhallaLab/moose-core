@@ -18650,6 +18650,12 @@ Credits
 ............................................................................
 
 Commented out the failing unit tests so that I can go on with other fixes
-for the release.
+for the release. Checkin 3957.
+Ran valgrind --leak-check=full ./moose -u
+Most gratifying:
+==2931== All heap blocks were freed -- no leaks are possible
+............................................................................
+Working on examples for model loading and for solver swaps.
+This uncovered a crash-on-exit bug. Fixed.
 
 ============================================================================
