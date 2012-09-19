@@ -758,24 +758,20 @@ Id makeCompt( Id parentCompt, Id parentObj,
 	return ret;
 }
 
-void testNeuroMesh()
+pair< unsigned int, unsigned int > buildBranchingCell( 
+				Id cell, double len, double dia )
 {
-	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-	vector< int > dims( 1, 1 );
-	// Build a cell
-	Id cell = shell->doCreate( "Neutral", Id(), "cell", dims );
-	double len = 10e-6; // metres
-	double dia = 1e-6; // metres
-	double diffLength = 1e-6; // metres
 	Id soma = makeCompt( Id(), cell, "soma", dia, dia, 0 );
 	dia /= sqrt( 2.0 );
 	Id d1 = makeCompt( soma, cell, "d1", len , dia, 0 );
 	Id d2 = makeCompt( soma, cell, "d2", len , dia, 180 );
+	Id d1a = makeCompt( d1, cell, "d1a", len , dia, 0 );
+	Id d2a = makeCompt( d2, cell, "d2a", len , dia, 180 );
 	dia /= sqrt( 2.0 );
-	Id d11 = makeCompt( d1, cell, "d11", len , dia, -45 );
-	Id d12 = makeCompt( d1, cell, "d12", len , dia, 45 );
-	Id d21 = makeCompt( d2, cell, "d21", len , dia, 45 );
-	Id d22 = makeCompt( d2, cell, "d22", len , dia, -45 );
+	Id d11 = makeCompt( d1a, cell, "d11", len , dia, -45 );
+	Id d12 = makeCompt( d1a, cell, "d12", len , dia, 45 );
+	Id d21 = makeCompt( d2a, cell, "d21", len , dia, 45 );
+	Id d22 = makeCompt( d2a, cell, "d22", len , dia, -45 );
 	dia /= sqrt( 2.0 );
 	Id d111 = makeCompt( d11, cell, "d111", len , dia, -90 );
 	Id d112 = makeCompt( d11, cell, "d112", len , dia, 0 );
@@ -786,21 +782,42 @@ void testNeuroMesh()
 	Id d221 = makeCompt( d22, cell, "d221", len , dia, 180 );
 	Id d222 = makeCompt( d22, cell, "d222", len , dia, -90 );
 
+	return pair< unsigned int, unsigned int >( 17, 161 );
+}
+
+void testNeuroMesh()
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< int > dims( 1, 1 );
+	// Build a cell
+	Id cell = shell->doCreate( "Neutral", Id(), "cell", dims );
+	double len = 10e-6; // metres
+	double dia = 1e-6; // metres
+	double diffLength = 1e-6; // metres
+
+	pair< unsigned int, unsigned int > ret = 
+			buildBranchingCell( cell, len, dia );
+
 	// Scan it with neuroMesh and check outcome.
 	Id nm = shell->doCreate( "NeuroMesh", Id(), "neuromesh", dims );
 	Field< double >::set( nm, "diffLength", diffLength );
+	Field< string >::set( nm, "geometryPolicy", "cylinder" );
 	Field< Id >::set( nm, "cell", cell );
 	unsigned int ns = Field< unsigned int >::get( nm, "numSegments" );
-	assert( ns == 15 );
+	assert( ns == ret.first );
 	unsigned int ndc = Field< unsigned int >::get( nm, "numDiffCompts" );
-	assert( ndc == 141 );
+	assert( ndc == ret.second );
 	const vector< NeuroNode >& nodes = 
 			reinterpret_cast< NeuroMesh* >( nm.eref().data() )->
 			getNodes();
 	assert( nodes.size() == ns + 14 ); // 14 dummy nodes.
 	assert( nodes[0].children().size() == 2 );
-	assert( nodes[1].children().size() == 2 );
-	assert( nodes[2].children().size() == 2 );
+	assert( nodes[1].children().size() == 1 );
+	assert( nodes[2].children().size() == 1 );
+	assert( nodes[3].children().size() == 2 );
+	assert( nodes[4].children().size() == 2 );
+	assert( nodes[5].children().size() == 2 );
+	assert( nodes[6].children().size() == 2 );
 
 
 	// Insert a molecule at soma
@@ -819,7 +836,7 @@ void testNeuroMesh()
 			getStencil();
 	assert( stencil != 0 );	
 	double maxt = 10.0;
-	double dt = 0.01;
+	double dt = 0.001;
 	for ( double t = 0; t < maxt; t += dt ) {
 		for ( unsigned int i = 0; i < ndc; ++i )
 			flux[i][0] = 0.0;
@@ -836,14 +853,29 @@ void testNeuroMesh()
 	//  Turns out that the ordering is sequential for 30 compts, but
 	//  I have used conical segment calculations which will give different
 	//  results from simple diffusion in a cylinder.
+	//  For now, comment out. I need to move on to other things for now.
+	/*
+	double tot = 0.0;
 	for ( unsigned int i = 0; i < nodes.size(); ++i ) {
 		cout << "node[" << i << "], dia = " << nodes[i].getDia() << 
 				", parent = " << nodes[i].parent() << endl;
 		for ( unsigned int j = 0; j < nodes[i].getNumDivs(); ++j ) {
 			unsigned int k = j + nodes[i].startFid();
 			cout << "S[" << k << "][0] = " << S[k][0] << endl;
+			tot += S[k][0];
 		}
 	}
+	assert( doubleEq( tot, 1.0e6 ) );
+	tot = 0;
+	for ( double x = 0; x < len * 4; x += diffLength ) {
+		double y = 1.0e6 * diffLength * 
+			(0.5 / sqrt( PI * diffConst[0] * maxt ) ) * 
+			exp( -x * x / ( 4 * diffConst[0] * maxt ) );
+		cout << rint( x / diffLength ) << ": " << y << endl;
+		tot += y;
+	}
+	assert( doubleEq( tot, 1.0e6 ) );
+	*/
 	
 	shell->doDelete( cell );
 	shell->doDelete( nm );
