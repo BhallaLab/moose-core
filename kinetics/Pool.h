@@ -61,6 +61,7 @@ class Pool: public PoolBase
 		void vReinit( const Eref& e, ProcPtr p );
 		void vReac( double A, double B );
 		void vRemesh( const Eref& e, const Qinfo* q, 
+			double oldvol,
 			unsigned int numTotalEntries, unsigned int startEntry, 
 			const vector< unsigned int >& localIndices, 
 			const vector< double >& vols );
@@ -75,11 +76,11 @@ class Pool: public PoolBase
 		static const Cinfo* initCinfo();
 	private:
 		double n_; /// Number of molecules in pool
-		/// double nInit_; /// initial condition 
-		double concInit_; /// initial concentration. 
+		double nInit_; /// initial number of molecules.
 		double diffConst_;	/// Diffusion constant
 		double A_; /// Internal state variables, used only in explict mode
 		double B_;
+		double prevSize_; /// Keeps track of volumes, specially for remesh.
 
 		/**
 		 * System wide identifier for all mol pools that are chemically

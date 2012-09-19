@@ -608,6 +608,7 @@ void NeuroMesh::innerHandleNodeInfo(
 {
 	unsigned int numEntries = nodeIndex_.size();
 	vector< double > vols( numEntries, 0.0 );
+	double oldVol = getMeshEntrySize( 0 );
 	for ( unsigned int i = 0; i < numEntries; ++i ) {
 		assert( nodeIndex_[i] < nodes_.size() );
 		NeuroNode& node = nodes_[ nodeIndex_[i] ];
@@ -619,6 +620,7 @@ void NeuroMesh::innerHandleNodeInfo(
 	vector< vector< unsigned int > > outgoingEntries;
 	vector< vector< unsigned int > > incomingEntries;
 	meshSplit()->send( e, q->threadNum(), 
+		oldVol,
 		vols, localEntries,
 		outgoingEntries, incomingEntries );
 }
@@ -732,6 +734,7 @@ void NeuroMesh::transmitChange( const Eref& e, const Qinfo* q )
 	vector< double > vols( localNumEntries, 0.0 );
 	vector< vector< unsigned int > > outgoingEntries; // [node#][Entry#]
 	vector< vector< unsigned int > > incomingEntries; // [node#][Entry#]
+	double oldVol = getMeshEntrySize( 0 );
 
 	// This function updates the size of the FieldDataHandler for the 
 	// MeshEntries.
@@ -745,13 +748,14 @@ void NeuroMesh::transmitChange( const Eref& e, const Qinfo* q )
 	// This message tells the Stoich about the new mesh, and also about
 	// how it communicates with other nodes.
 	meshSplit()->fastSend( e, q->threadNum(), 
+		oldVol,
 		vols, localIndices, 
 		outgoingEntries, incomingEntries );
 
 	// This func goes down to the MeshEntry to tell all the pools and
 	// Reacs to deal with the new mesh. They then update the stoich.
 	lookupEntry( 0 )->triggerRemesh( meshEntry.eref(), q->threadNum(), 
-		startEntry, localIndices, vols );
+		oldVol, startEntry, localIndices, vols );
 }
 
 //////////////////////////////////////////////////////////////////

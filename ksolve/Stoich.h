@@ -72,7 +72,7 @@ class Stoich
 		void handleNodeDiffBoundary( unsigned int nodeNum, 
 			vector< unsigned int > meshEntries, vector< double > remoteS );
 
-		void meshSplit( vector< double > vols,
+		void meshSplit( double oldVol, vector< double > vols,
 			vector< unsigned int > localEntryList,
 			vector< vector< unsigned int > > outgoingDiffusion,
 			vector< vector< unsigned int > > incomingDiffusion

@@ -18658,4 +18658,25 @@ Most gratifying:
 Working on examples for model loading and for solver swaps.
 This uncovered a crash-on-exit bug. Fixed.
 
+Tracked problem with swapping between GSL and GSSA. Nasty dependence on
+message traversal in Pool::zombieSwap because we need to get volumes for
+the old Pool::setNinit. Message traversal is a bad idea here because we use
+temporary Erefs during the swap.
+Will need to change Pool to use nInit internally rather than concInit. 
+Still issue of funny concInit table in solver.
+
+The change to use nInit internally has cascaded horribly, though it is probably
+the correct thing to do. It involves having the mesh inform the changed
+pool what its old volume was. Changes to mesh, to pools, and even to SrcFinfo
+to add a missing fastSend.
+
+This clears unit tests but now GSSA calculations fail utterly. Turns out the
+GSL was also too big by about 18 orders of magnitude, just that this doesn't
+faze the GSL integrator like it does GSSA. So I need to get rid of the 
+reliance on the concInit vector in Stoich.
+
+Did that, but it wasn't the problem. Problem was that concInit was set in the
+pools during object creation through the kkit reader. Changed that to 
+nInit and all was well. Including being able to switch from gsl to gssa.
+
 ============================================================================

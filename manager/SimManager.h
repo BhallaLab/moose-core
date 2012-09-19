@@ -64,6 +64,7 @@ class SimManager
 		 */
 		void makeStandardElements( const Eref& e, const Qinfo*q, string meshClass );
 		void meshSplit( const Eref& e, const Qinfo* q, 
+			double oldVol,
 			vector< unsigned int > nodeList,
 			vector< unsigned int > numEntriesPerNode,
 			vector< unsigned int > outgoingEntries,
