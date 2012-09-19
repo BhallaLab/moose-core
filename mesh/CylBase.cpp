@@ -20,7 +20,8 @@ CylBase::CylBase( double x, double y, double z,
 		z_( z ),
 		dia_( dia ),
 		length_( length ),
-		numDivs_( numDivs )
+		numDivs_( numDivs ),
+		isCylinder_( false )
 {
 	;
 }
@@ -32,7 +33,8 @@ CylBase::CylBase()
 		z_( 0.0 ),
 		dia_( 1.0 ),
 		length_( 1.0 ),
-		numDivs_( 1.0 )
+		numDivs_( 1.0 ),
+		isCylinder_( false )
 {
 	;
 }
@@ -96,6 +98,16 @@ unsigned int CylBase::getNumDivs() const
 {
 	return numDivs_;
 }
+
+void CylBase::setIsCylinder( bool v )
+{
+	isCylinder_ = v;
+}
+
+bool CylBase::getIsCylinder() const
+{
+	return isCylinder_;
+}
 //////////////////////////////////////////////////////////////////
 // FieldElement assignment stuff for MeshEntries
 //////////////////////////////////////////////////////////////////
@@ -111,6 +123,8 @@ unsigned int CylBase::getNumDivs() const
  */
 double CylBase::volume( const CylBase& parent ) const
 {
+	if ( isCylinder_ )
+			return length_ * dia_ * dia_ * PI / 4.0;
 	double r0 = parent.dia_/2.0;
 	double r1 = dia_/2.0;
 	return length_ * ( r0*r0 + r0 *r1 + r1 * r1 ) * PI / 3.0;
@@ -127,6 +141,9 @@ double CylBase::volume( const CylBase& parent ) const
 double CylBase::voxelVolume( const CylBase& parent, unsigned int fid ) const
 {
 	assert( numDivs_ > fid );
+	if ( isCylinder_ )
+			return length_ * dia_ * dia_ * PI / ( 4.0 * numDivs_ );
+
  	double frac0 = ( static_cast< double >( fid ) ) / 
 				static_cast< double >( numDivs_ );
  	double frac1 = ( static_cast< double >( fid + 1 ) ) / 
@@ -182,6 +199,8 @@ double CylBase::getDiffusionArea(
 				const CylBase& parent, unsigned int fid ) const
 {
 	assert( fid < numDivs_ );
+	if ( isCylinder_ )
+			return PI * dia_ * dia_ / 4.0;
  	double frac0 = ( static_cast< double >( fid ) ) / 
 				static_cast< double >( numDivs_ );
 	double r0 = 0.5 * ( parent.dia_ * ( 1.0 - frac0 ) + dia_ * frac0 );
