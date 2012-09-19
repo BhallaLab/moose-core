@@ -175,7 +175,8 @@ class ChemMesh
 		vector< Boundary > boundaries_;
 };
 
-extern SrcFinfo4< 
+extern SrcFinfo5< 
+	double,
 	vector< double >, 
 	vector< unsigned int>, 
 	vector< vector< unsigned int > >, 

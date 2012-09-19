@@ -445,8 +445,9 @@ void CubeMesh::setCoords( const Eref& e, const Qinfo* q, vector< double > v)
 	if ( v.size() < 9 ) {
 		// cout << "CubeMesh::setCoords: Warning: size of argument vec should be >= 9, was " << v.size() << endl;
 	}
+	double oldVol = getMeshEntrySize( 0 );
 	innerSetCoords( v );
-	transmitChange( e, q );
+	transmitChange( e, q, oldVol );
 }
 
 vector< double > CubeMesh::getCoords( const Eref& e, const Qinfo* q ) const
@@ -553,7 +554,9 @@ void CubeMesh::innerHandleNodeInfo(
 	vector< unsigned int > localEntries( numEntries );
 	vector< vector< unsigned int > > outgoingEntries;
 	vector< vector< unsigned int > > incomingEntries;
+	double oldvol = getMeshEntrySize( 0 );
 	meshSplit()->send( e, q->threadNum(), 
+		oldvol,
 		vols, localEntries,
 		outgoingEntries, incomingEntries );
 }
@@ -561,7 +564,7 @@ void CubeMesh::innerHandleNodeInfo(
 /////////////////////////////////////////////////////////////////////////
 // Utility function to tell target nodes that something has happened.
 /////////////////////////////////////////////////////////////////////////
-void CubeMesh::transmitChange( const Eref& e, const Qinfo* q )
+void CubeMesh::transmitChange( const Eref& e, const Qinfo* q, double oldvol)
 {
 	Id meshEntry( e.id().value() + 1 );
 	assert( 
@@ -589,12 +592,12 @@ void CubeMesh::transmitChange( const Eref& e, const Qinfo* q )
 	// This message tells the Stoich about the new mesh, and also about
 	// how it communicates with other nodes.
 	meshSplit()->fastSend( e, q->threadNum(), 
-		vols, localIndices, outgoingEntries, incomingEntries );
+		oldvol, vols, localIndices, outgoingEntries, incomingEntries );
 
 	// This func goes down to the MeshEntry to tell all the pools and
 	// Reacs to deal with the new mesh. They then update the stoich.
 	lookupEntry( 0 )->triggerRemesh( meshEntry.eref(), q->threadNum(), 
-		startEntry, localIndices, vols );
+		oldvol, startEntry, localIndices, vols );
 }
 
 //////////////////////////////////////////////////////////////////

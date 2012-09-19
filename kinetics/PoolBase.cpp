@@ -109,7 +109,7 @@ const Cinfo* PoolBase::initCinfo()
 		static DestFinfo remesh( "remesh",
 			"Handle commands to remesh the pool. This may involve changing "
 			"the number of pool entries, as well as changing their volumes",
-			new EpFunc4< PoolBase, unsigned int, unsigned int, vector< unsigned int >, vector< double > >( &PoolBase::remesh )
+			new EpFunc5< PoolBase, double, unsigned int, unsigned int, vector< unsigned int >, vector< double > >( &PoolBase::remesh )
 		);
 
 		//////////////////////////////////////////////////////////////
@@ -224,11 +224,12 @@ void PoolBase::handleMolWt( const Eref& e, const Qinfo* q, double v )
 }
 
 void PoolBase::remesh( const Eref& e, const Qinfo* q, 
+	double oldvol,
 	unsigned int numTotalEntries, unsigned int startEntry, 
 	vector< unsigned int > localIndices, vector< double > vols )
 {
 	// cout << "PoolBase::remesh for " << e.element()->getName() << endl;
-	vRemesh( e, q, numTotalEntries, startEntry, localIndices, vols );
+	vRemesh( e, q, oldvol, numTotalEntries, startEntry, localIndices, vols);
 }
 
 //////////////////////////////////////////////////////////////
@@ -349,7 +350,7 @@ void PoolBase::zombify( Element* orig, const Cinfo* zClass, Id solver )
 	PoolBase* m = reinterpret_cast< PoolBase* >( oer.data() );
 	// May need to extend to entire array.
 	z->vSetSpecies( zombier, 0, m->vGetSpecies( oer, 0 ) );
-	z->vSetConcInit( zombier, 0, m->vGetConcInit( oer, 0 ) );
+//	z->vSetConcInit( zombier, 0, m->vGetConcInit( oer, 0 ) );
 	z->vSetN( zombier, 0, m->vGetN( oer, 0 ) );
 	z->vSetNinit( zombier, 0, m->vGetNinit( oer, 0 ) );
 	z->vSetDiffConst( zombier, 0, m->vGetDiffConst( oer, 0 ) );

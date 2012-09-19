@@ -66,7 +66,11 @@ const Cinfo* GslIntegrator::initCinfo()
 		static DestFinfo remesh( "remesh",
 			"Handle commands to remesh the pool. This may involve changing "
 			"the number of pool entries, as well as changing their volumes",
-			new EpFunc4< GslIntegrator, unsigned int, unsigned int, vector< unsigned int >, vector< double > >( &GslIntegrator::remesh )
+			new EpFunc5< GslIntegrator, 
+			double,
+			unsigned int, unsigned int, 
+			vector< unsigned int >, vector< double > >( 
+					&GslIntegrator::remesh )
 		);
 		
 		///////////////////////////////////////////////////////
@@ -383,6 +387,7 @@ void GslIntegrator::reinit( const Eref& e, ProcPtr info )
 }
 
 void GslIntegrator::remesh( const Eref& e, const Qinfo* q,
+	double oldVol,
 	unsigned int numTotalEntries, unsigned int startEntry, 
 	vector< unsigned int > localIndices, vector< double > vols )
 {

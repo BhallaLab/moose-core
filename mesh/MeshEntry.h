@@ -111,6 +111,7 @@ class MeshEntry
 		// Utility func
 		//////////////////////////////////////////////////////////////////
 		void triggerRemesh( const Eref& e, unsigned int threadNum,
+			double oldvol,
 			unsigned int startEntry, 
 			const vector< unsigned int >& localIndices,
 			const vector< double >& vols );

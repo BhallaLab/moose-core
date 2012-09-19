@@ -21,14 +21,16 @@ static SrcFinfo0 groupSurfaces(
 		"Goes to all surfaces that define this ChemMesh"
 );
 
-SrcFinfo4< 
+SrcFinfo5< 
+	double,
 	vector< double >,
 	vector< unsigned int>, 
 	vector< vector< unsigned int > >, 
 	vector< vector< unsigned int > >
 	>* meshSplit()
 {
-	static SrcFinfo4< 
+	static SrcFinfo5< 
+			double,
 			vector< double >,
 			vector< unsigned int >, 
 			vector< vector< unsigned int > >, 
@@ -37,7 +39,7 @@ SrcFinfo4<
 	meshSplit(
 		"meshSplit",
 		"Defines how meshEntries communicate between nodes."
-		"Args: volListOfAllEntries, localEntryList, "
+		"Args: oldVol, volListOfAllEntries, localEntryList, "
 		"outgoingDiffusion[node#][entry#], incomingDiffusion[node#][entry#]"
 		"This message is meant to go to the SimManager and Stoich."
 	);
