@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Feb 13 11:35:11 2012 (+0530)
 # Version: 
-# Last-Updated: Mon Jul  9 21:33:47 2012 (+0530)
-#           By: Subhasis Ray
-#     Update #: 767
+# Last-Updated: Thu Sep 20 14:05:27 2012 (+0530)
+#           By: subha
+#     Update #: 771
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -27,7 +27,8 @@
 # 
 
 # Code:
-
+import sys
+sys.path.append('../../python')
 import numpy
 import moose
 
@@ -309,6 +310,7 @@ class SquidModel(moose.Neutral):
     def __init__(self, path):
         moose.Neutral.__init__(self, path)
         self.squid_axon = SquidAxon(path+'/squid_axon')
+        print self.squid_axon.Na_channel.Gbar, self.squid_axon.K_channel.Gbar
         self.current_clamp = moose.PulseGen(path+'/pulsegen')
         self.current_clamp.firstDelay = 5.0 # ms
         self.current_clamp.firstWidth = 40 # ms
