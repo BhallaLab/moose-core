@@ -762,11 +762,8 @@ class Ui_MainWindow(object):
         self.propEditorSelParentPushButton.setText(QtGui.QApplication.translate("MainWindow", "Select Parent", None, QtGui.QApplication.UnicodeUTF8))
         self.label_19.setText(QtGui.QApplication.translate("MainWindow", "Properties", None, QtGui.QApplication.UnicodeUTF8))
         self.moosePopulationEditDock.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Population Editor", None, QtGui.QApplication.UnicodeUTF8))
-        if QtCore.PYQT_VERSION & 0xff0000 >=4:
-            if QtCore.PYQT_VERSION & 0x00ff00 >= 8:
-                self.popFilterSelectLineEdit.setPlaceholderText(QtGui.QApplication.translate("MainWindow", "filter", None, QtGui.QApplication.UnicodeUTF8))
-        else:
-            raise Exception('Need at least PyQt 4')
+        if QtCore.PYQT_VERSION & 0xff0000 >=0x040800:
+            self.popFilterSelectLineEdit.setPlaceholderText(QtGui.QApplication.translate("MainWindow", "filter", None, QtGui.QApplication.UnicodeUTF8))
         self.popSelectParentPushButton.setText(QtGui.QApplication.translate("MainWindow", "SelectParent", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("MainWindow", "Common Properties", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("MainWindow", "Distribution: ", None, QtGui.QApplication.UnicodeUTF8))
@@ -778,12 +775,14 @@ class Ui_MainWindow(object):
         self.libMakeCopiesButton.setText(QtGui.QApplication.translate("MainWindow", "MakeCopies", None, QtGui.QApplication.UnicodeUTF8))
         self.mooseConnectDock.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Connect Elements", None, QtGui.QApplication.UnicodeUTF8))
         self.label_4.setText(QtGui.QApplication.translate("MainWindow", "Sources (Current Selection):", None, QtGui.QApplication.UnicodeUTF8))
-        self.lineEdit_2.setPlaceholderText(QtGui.QApplication.translate("MainWindow", "filter", None, QtGui.QApplication.UnicodeUTF8))
+        if QtCore.PYQT_VERSION & 0xff0000 >=0x040800:
+            self.lineEdit_2.setPlaceholderText(QtGui.QApplication.translate("MainWindow", "filter", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("MainWindow", "Source field", None, QtGui.QApplication.UnicodeUTF8))
         self.label_6.setText(QtGui.QApplication.translate("MainWindow", "Connect via", None, QtGui.QApplication.UnicodeUTF8))
         self.comboBox.setItemText(0, QtGui.QApplication.translate("MainWindow", "one2one", None, QtGui.QApplication.UnicodeUTF8))
         self.label_7.setText(QtGui.QApplication.translate("MainWindow", "Target", None, QtGui.QApplication.UnicodeUTF8))
-        self.lineEdit_4.setPlaceholderText(QtGui.QApplication.translate("MainWindow", "filter", None, QtGui.QApplication.UnicodeUTF8))
+        if QtCore.PYQT_VERSION & 0xff0000 >=0x040800:
+            self.lineEdit_4.setPlaceholderText(QtGui.QApplication.translate("MainWindow", "filter", None, QtGui.QApplication.UnicodeUTF8))
         self.label_5.setText(QtGui.QApplication.translate("MainWindow", "Target field", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton.setText(QtGui.QApplication.translate("MainWindow", "Connect", None, QtGui.QApplication.UnicodeUTF8))
         self.plotConfigDockWidget.setStatusTip(QtGui.QApplication.translate("MainWindow", "Plot Window. From \'Property Editor\'   Select \'plot Field\', \'plot Window\' to add a plot and \'show\' for displaying plots", None, QtGui.QApplication.UnicodeUTF8))
