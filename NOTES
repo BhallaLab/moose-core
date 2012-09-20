@@ -18682,3 +18682,8 @@ nInit and all was well. Including being able to switch from gsl to gssa.
 Checkin 3959.
 
 ============================================================================
+20 Sep 2012
+Working on WriteKkit.cpp.
+Skeleton in place. Need to replace couts with fouts and to begin to pass in
+Ids.
+Put in the fouts. No real stuff passed in as yet.

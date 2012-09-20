@@ -411,6 +411,13 @@ void testMMenzProcess()
 	cout << "." << flush;
 }
 
+void testWriteKkit( Id id )
+{
+	extern void writeKkit( Id model, const string& s );
+	writeKkit( id, "kkitWriteTest.g" );
+	cout << "." << flush;
+}
+
 void testKinetics()
 {
 	testMMenz();
@@ -418,6 +425,7 @@ void testKinetics()
 	testPoolVolumeScaling();
 	testReacVolumeScaling();
 	testReadCspace();
+	testWriteKkit( Id() );
 }
 
 void testMpiKinetics( )
