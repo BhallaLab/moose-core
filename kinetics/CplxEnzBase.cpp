@@ -122,12 +122,24 @@ const Cinfo* CplxEnzBase::initCinfo()
 		&cplx,				// SharedFinfo
 	};
 
+	static string doc[] = 
+	{
+			"Name", "CplxEnzBase",
+			"Author", "Upi Bhalla",
+			"Description:", 
+			"Base class for mass-action enzymes in which there is an "
+			" explicit pool for the enzyme-substrate complex. "
+ 			"It models the reaction: "
+ 			"E + S <===> E.S ----> E + P"
+	};
 	static Cinfo cplxEnzCinfo (
 		"CplxEnzBase",
 		EnzBase::initCinfo(),
 		cplxEnzFinfos,
 		sizeof( cplxEnzFinfos ) / sizeof ( Finfo* ),
-		new ZeroSizeDinfo< int >()
+		new ZeroSizeDinfo< int >(),
+		doc,
+		sizeof( doc )/sizeof( string )
 	);
 
 	return &cplxEnzCinfo;
