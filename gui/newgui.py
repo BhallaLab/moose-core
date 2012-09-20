@@ -762,7 +762,11 @@ class Ui_MainWindow(object):
         self.propEditorSelParentPushButton.setText(QtGui.QApplication.translate("MainWindow", "Select Parent", None, QtGui.QApplication.UnicodeUTF8))
         self.label_19.setText(QtGui.QApplication.translate("MainWindow", "Properties", None, QtGui.QApplication.UnicodeUTF8))
         self.moosePopulationEditDock.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Population Editor", None, QtGui.QApplication.UnicodeUTF8))
-        self.popFilterSelectLineEdit.setPlaceholderText(QtGui.QApplication.translate("MainWindow", "filter", None, QtGui.QApplication.UnicodeUTF8))
+        if QtCore.PYQT_VERSION & 0xff0000 >=4:
+            if QtCore.PYQT_VERSION & 0x00ff00 >= 8:
+                self.popFilterSelectLineEdit.setPlaceholderText(QtGui.QApplication.translate("MainWindow", "filter", None, QtGui.QApplication.UnicodeUTF8))
+        else:
+            raise Exception('Need at least PyQt 4')
         self.popSelectParentPushButton.setText(QtGui.QApplication.translate("MainWindow", "SelectParent", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("MainWindow", "Common Properties", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("MainWindow", "Distribution: ", None, QtGui.QApplication.UnicodeUTF8))
