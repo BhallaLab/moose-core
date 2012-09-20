@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Jul  9 18:23:55 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Jul 10 15:22:28 2012 (+0530)
+# Last-Updated: Thu Sep 20 17:06:17 2012 (+0530)
 #           By: subha
-#     Update #: 662
+#     Update #: 760
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -112,9 +112,10 @@ class SquidGui(QtGui.QMainWindow):
         self._createPlotWidget()             
         self.setCentralWidget(self._plotWidget)
         self._createStatePlotWidget()
+        self._createHelpMessage()
+        self._helpWindow.setVisible(False)
         self._statePlotWidget.setWindowFlags(QtCore.Qt.Window)
         self._statePlotWidget.setWindowTitle('State plot')
-        self._createHelpMessage()
         self._initActions()
         self._createRunToolBar()
         self._createPlotToolBar()
@@ -589,10 +590,14 @@ class SquidGui(QtGui.QMainWindow):
         self._dockAction.setChecked(False)
         self.connect(self._dockAction, QtCore.SIGNAL('toggled(bool)'), self._toggleDocking)
         self._helpAction = QtGui.QAction('Help', self)
-        self.connect(self._helpAction, QtCore.SIGNAL('triggered()'), self._helpMessage.exec_)
+        self._helpAction.setCheckable(True)        
+        self.connect(self._helpAction, QtCore.SIGNAL('toggled(bool)'), self._helpWindow.setVisible)
         self._quitAction = QtGui.QAction(self.tr('&Quit'), self)
         self._quitAction.setShortcut(self.tr('Ctrl+Q'))
         self.connect(self._quitAction, QtCore.SIGNAL('triggered()'), QtGui.qApp.closeAllWindows)
+        self._closeStatePlotAction = QtGui.QAction('Close', self)
+        self.connect(self._closeStatePlotAction, QtCore.SIGNAL('triggered()'), self._statePlotWidget.hide)
+        
 
     def _createRunToolBar(self):
         self._simToolBar = self.addToolBar(self.tr('Simulation control'))
@@ -677,35 +682,39 @@ class SquidGui(QtGui.QMainWindow):
 
     
     def _createHelpMessage(self):
-        self._helpMessage = QtGui.QMessageBox(self)
-        self._helpMessage.setText('Simulation of squid axon with Hodgkin-Huxley ion channels')
-        self._helpMessage.setInformativeText('<b>Navigation:</b>\
-<p>\
-<b>Zoom-in:</b> <br/>\
-a) scroll down, or<br/>\
-b) click magnifier icon and press left mouse button on the plot and drag, or<br/>\
-c) click compass icon and press right mouse button on the plot and drag towards top-right.<br/>\
-<b>Zoom-in X-axis:</b><br/>\
-click compass icon and press right mouse button on the plot and drag towards right.<br/>\
-<b>Zoom-in Y-axis:</b><br/>\
-click compass icon and press right mouse button on the plot and drag upwards.<br/>\
-<b>Zoom-out:</b> <br/>\
-a) scroll up, or<br/>\
-b) click magnifier icon and press right mouse button on the plot and drag<br/>\
-c) click compass icon and press right mouse button on the plot and drag towards bottom-left.<br/>\
-<B>Pan:</B> click compass-icon and left click-and-drag<br/>\
-<b>Zoom-out X-axis:</b> click compass icon and press right mouse button on the plot and drag towards left.<br/>\
-<b>Zoom-out Y-axis:</b> click compass icon and press right mouse button on the plot and drag downwards.<br/>\
-<b>Go forward/backward in zoom stack:</b> click right/left arrow icon.<br/>\
-<b>Reset to initial plot state:</b> click home icon.<br/>\
-<b>Change spacing and position of subplots:</b> click box-with-green arrow-heads<br/>\
-<b>Configure subplots:</b> click green tick-mark<br/>\
-<b>Save plot:</b> click floppy-disk icon.<br/>\
-</p>\
-')
+        if hasattr(self, '_helpWindow'):
+            return
+        self._helpWindow = QtGui.QWidget()
+        self._helpWindow.setWindowFlags(QtCore.Qt.Window)
+        layout = QtGui.QVBoxLayout()
+        self._helpWindow.setLayout(layout)
+        self._helpMessageArea = QtGui.QScrollArea()
+        self._helpMessageText = QtGui.QTextBrowser()
+        self._helpMessageArea.setWidget(self._helpMessageText)
+        layout.addWidget(self._helpMessageText)
+        self._helpBaseURL = 'help.html'
+        self._helpMessageText.setSource(QtCore.QUrl(self._helpBaseURL))
+        self._helpMessageText.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        self._helpMessageArea.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+        self._helpMessageText.setMinimumSize(800, 600)
+        self._closeHelpAction = QtGui.QAction('Close', self)
+        self.connect(self._closeHelpAction, QtCore.SIGNAL('triggered()'), self._helpWindow.hide)
+        self._helpTOCAction = QtGui.QAction('Table of Contents', self)
+        self.connect(self._helpTOCAction, QtCore.SIGNAL('triggered()'), self._jumpToHelpTOC)        
+        panel = QtGui.QFrame()
+        layout.addWidget(panel)
+        layout = QtGui.QHBoxLayout()
+        panel.setLayout(layout)
+        self._helpTOCButton = QtGui.QToolButton()
+        self._helpTOCButton.setDefaultAction(self._helpTOCAction)
+        layout.addWidget(self._helpTOCButton)
+        self._closeHelpButton = QtGui.QToolButton()
+        self._closeHelpButton.setDefaultAction(self._closeHelpAction)
+        layout.addWidget(self._closeHelpButton)
+        
+    def _jumpToHelpTOC(self):
+        self._helpMessageText.setSource(QtCore.QUrl(self._helpBaseURL))
 
-        
-        
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     app.connect(app, QtCore.SIGNAL('lastWindowClosed()'), app, QtCore.SLOT('quit()'))
