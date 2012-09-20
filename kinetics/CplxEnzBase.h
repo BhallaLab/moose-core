@@ -10,6 +10,11 @@
 #ifndef _CPLX_ENZ_BASE_H
 #define _CPLX_ENZ_BASE_H
 
+/**
+ * This class is for mass-action enzymes, in which there is an explict
+ * pool for the enzyme-substrate complex. It models the reaction
+ * E + S <===> E.S ----> E + P
+ */
 class CplxEnzBase: public EnzBase
 {
 	public: 
