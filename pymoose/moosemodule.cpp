@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Tue Sep 18 12:20:49 2012 (+0530)
+// Last-Updated: Thu Sep 20 10:36:23 2012 (+0530)
 //           By: subha
-//     Update #: 10006
+//     Update #: 10041
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -163,8 +163,8 @@ struct module_state {
 static struct module_state _state;
 #endif // PY_MAJOR_VERSION
 
-#define RAISE_INVALID_ID(ret) {                          \
-        PyErr_SetString(PyExc_ValueError, "invalid Id"); \
+#define RAISE_INVALID_ID(ret, msg) {                         \
+        PyErr_SetString(PyExc_ValueError, msg": invalid Id"); \
         return ret;                                      \
     }
     
@@ -657,10 +657,12 @@ static struct module_state _state;
             PyErr_SetString(PyExc_TypeError, "Owner must be subtype of ObjId");
             return -1;
         }
-        if (!Id::isValid(self->owner.id)){
-            RAISE_INVALID_ID(-1);
-        }
         self->owner = ((_ObjId*)owner)->oid_;
+        if (!Id::isValid(self->owner.id)){
+            Py_XDECREF(owner);
+            Py_XDECREF(self);
+            RAISE_INVALID_ID(-1, "moose_Field_init");
+        }
         size_t size = strlen(fieldName);
         char * name = (char*)calloc(size+1, sizeof(char));
         strncpy(name, fieldName, size);
@@ -678,7 +680,7 @@ static struct module_state _state;
     static long moose_Field_hash(_Field * self)
     {
         if (!Id::isValid(self->owner.id)){
-            RAISE_INVALID_ID(-1);
+            RAISE_INVALID_ID(-1, "moose_Field_hash");
         }
         string fieldPath = self->owner.path() + "." + self->name;
         PyObject * path = PyString_FromString(fieldPath.c_str());
@@ -691,7 +693,7 @@ static struct module_state _state;
     static PyObject * moose_Field_repr(_Field * self)
     {
         if (!Id::isValid(self->owner.id)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_Field_repr");
         }
         ostringstream fieldPath;
         fieldPath << self->owner.path() << "." << self->name;
@@ -1305,7 +1307,7 @@ static struct module_state _state;
             return NULL;
         }
         if (!Id::isValid(self->id_)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_Id_delete");
         }
         SHELLPTR->doDelete(self->id_);
         self->id_ = Id();
@@ -1316,7 +1318,7 @@ static struct module_state _state;
     static PyObject * moose_Id_repr(_Id * self)
     {
         if (!Id::isValid(self->id_)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_Id_repr");
         }
         ostringstream repr;
         repr << "<moose.ematrix: class=" << Field<string>::get(self->id_, "class") << "): "
@@ -1329,7 +1331,7 @@ static struct module_state _state;
     static PyObject * moose_Id_str(_Id * self)
     {
         if (!Id::isValid(self->id_)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_Id_str");
         }        
         return PyString_FromFormat("<moose.ematrix: id=%u, path=%s>", self->id_.value(), self->id_.path().c_str());
     } // !  moose_Id_str
@@ -1347,7 +1349,7 @@ static struct module_state _state;
     static PyObject * moose_Id_getPath(_Id * self)
     {
         if (!Id::isValid(self->id_)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_Id_getPath");
         }        
         string path = self->id_.path();
         PyObject * ret = Py_BuildValue("s", path.c_str());
@@ -1359,7 +1361,7 @@ static struct module_state _state;
     static Py_ssize_t moose_Id_getLength(_Id * self)
     {
         if (!Id::isValid(self->id_)){
-            RAISE_INVALID_ID(-1);
+            RAISE_INVALID_ID(-1, "moose_Id_getLength");
         }        
         vector< unsigned int> dims = Field< vector <unsigned int> >::get(ObjId(self->id_), "objectDimensions");
         if (dims.empty()){
@@ -1372,7 +1374,7 @@ static struct module_state _state;
     {
         vector< unsigned int> dims = Field< vector <unsigned int> >::get(self->id_, "objectDimensions");
         if (!Id::isValid(self->id_)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_Id_getShape");
         }        
         if (dims.empty()){
             dims.push_back(1);
@@ -1390,7 +1392,7 @@ static struct module_state _state;
     static PyObject * moose_Id_getItem(_Id * self, Py_ssize_t index)
     {
         if (!Id::isValid(self->id_)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_Id_getItem");
         }        
         extern PyTypeObject ObjIdType;
         if (index < 0){
@@ -1407,7 +1409,7 @@ static struct module_state _state;
     static PyObject * moose_Id_getSlice(_Id * self, PyObject * args)
     {
         if (!Id::isValid(self->id_)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_Id_getSlice");
         }        
         extern PyTypeObject ObjIdType;
         Py_ssize_t start, end;
@@ -1530,7 +1532,7 @@ static struct module_state _state;
     {
         extern PyTypeObject ObjIdType;
         if (!Id::isValid(self->id_)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_Id_getattro");
         }        
         char * field = PyString_AsString(attr);
         PyObject * _ret = get_Id_attr(self, field);
@@ -1632,7 +1634,7 @@ static struct module_state _state;
     static PyObject * moose_Id_setField(_Id * self, PyObject * args)
     {
         if (!Id::isValid(self->id_)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_Id_setField");
         }        
         PyObject * field = NULL;
         PyObject * value = NULL;
@@ -1648,7 +1650,7 @@ static struct module_state _state;
     static int moose_Id_setattro(_Id * self, PyObject * attr, PyObject *value)
     {
         if (!Id::isValid(self->id_)){
-            RAISE_INVALID_ID(-1);
+            RAISE_INVALID_ID(-1, "moose_Id_setattro");
         }
         char * fieldname = NULL;
         int ret = -1;
@@ -1881,7 +1883,7 @@ static struct module_state _state;
                                             &id, &data, &field, &numFieldBits))){
             PyErr_Clear();
             if (!Id::isValid(id)){
-                RAISE_INVALID_ID(-1);
+                RAISE_INVALID_ID(-1, "moose_ObjId_init_from_id");
             }
             instance->oid_ = ObjId(Id(id), DataId(data, field, numFieldBits));
             return 0;
@@ -1905,14 +1907,14 @@ static struct module_state _state;
             // If first argument is an Id object, construct an ObjId out of it
             if (Id_Check(obj)){
                 if (!Id::isValid(((_Id*)obj)->id_)){
-                    RAISE_INVALID_ID(-1);
+                    RAISE_INVALID_ID(-1, "moose_ObjId_init_from_id");
                 }                    
                 instance->oid_ = ObjId(((_Id*)obj)->id_,
                                        DataId(data, field, numFieldBits));
                 return 0;
             } else if (PyObject_IsInstance(obj, (PyObject*)&ObjIdType)){
                 if (!Id::isValid(((_ObjId*)obj)->oid_.id)){
-                    RAISE_INVALID_ID(-1);
+                    RAISE_INVALID_ID(-1, "moose_ObjId_init_from_id");
                 }                    
                 instance->oid_ = ((_ObjId*)obj)->oid_;
                 return 0;
@@ -2057,7 +2059,7 @@ static struct module_state _state;
     static long moose_ObjId_hash(_ObjId * self)
     {
         if (!Id::isValid(self->oid_.id)){
-            RAISE_INVALID_ID(-1);
+            RAISE_INVALID_ID(-1, "moose_ObjId_hash");
         }
         PyObject * path = Py_BuildValue("s", self->oid_.path().c_str());        
         long ret = PyObject_Hash(path);
@@ -2068,7 +2070,7 @@ static struct module_state _state;
     static PyObject * moose_ObjId_repr(_ObjId * self)
     {
         if (!Id::isValid(self->oid_.id)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_ObjId_repr");
         }
         ostringstream repr;
         repr << "<moose." << Field<string>::get(self->oid_, "class") << ": "
@@ -2086,7 +2088,7 @@ static struct module_state _state;
     static PyObject* moose_ObjId_getId(_ObjId * self)
     {
         if (!Id::isValid(self->oid_.id)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_ObjId_getId");
         }
         extern PyTypeObject IdType;        
         _Id * ret = PyObject_New(_Id, &IdType);
@@ -2111,7 +2113,7 @@ static struct module_state _state;
     static PyObject * moose_ObjId_getFieldType(_ObjId * self, PyObject * args)
     {
         if (Id::isValid(self->oid_.id)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_ObjId_getFieldType");
         }
         char * fieldName = NULL;
         char * finfoType = NULL;
@@ -2153,7 +2155,7 @@ static struct module_state _state;
     static PyObject * moose_ObjId_getField(_ObjId * self, PyObject * args)
     {
         if (!Id::isValid(self->oid_.id)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_ObjId_getField");
         }
         PyObject * attr;        
         if (!PyArg_ParseTuple(args, "O:moose_ObjId_getField", &attr)){
@@ -2175,7 +2177,7 @@ static struct module_state _state;
     static PyObject * moose_ObjId_getattro(_ObjId * self, PyObject * attr)
     {
         if (!Id::isValid(self->oid_.id)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_ObjId_getattro");
         }
         extern PyTypeObject IdType;
         extern PyTypeObject ObjIdType;
@@ -2428,7 +2430,7 @@ static struct module_state _state;
     static int  moose_ObjId_setattro(_ObjId * self, PyObject * attr, PyObject * value)
     {
         if (!Id::isValid(self->oid_.id)){
-            RAISE_INVALID_ID(-1);
+            RAISE_INVALID_ID(-1, "moose_ObjId_setattro");
         }
         const char * field;
         if (PyString_Check(attr)){
@@ -2829,7 +2831,7 @@ static struct module_state _state;
     static PyObject * moose_ObjId_getLookupField(_ObjId * self, PyObject * args)
     {
         if (!Id::isValid(self->oid_.id)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_ObjId_getLookupField");
         }
         char * fieldName = NULL;
         PyObject * key = NULL;
@@ -2968,7 +2970,7 @@ static struct module_state _state;
     static PyObject * moose_ObjId_setDestField(_ObjId * self, PyObject * args)
     {
         if (!Id::isValid(self->oid_.id)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_ObjId_setDestField");
         }
         return _setDestField(((_ObjId*)self)->oid_, args);        
     }
@@ -3143,8 +3145,15 @@ static struct module_state _state;
         if (ret){
             Py_RETURN_TRUE;
         } else {
-            Py_RETURN_FALSE;
-        }        
+            ostringstream err;
+            err << fieldName << " takes arguments (";
+            for (unsigned int ii = 0; ii < argType.size(); ++ii){
+                error << argType[ii] << ",";
+            }
+            error << ")";                    
+            PyErr_SetString(PyExc_TypeError, err.str().c_str());
+            return NULL;
+        }
     } // moose_ObjId_setDestField
 
     PyDoc_STRVAR(moose_ObjId_getFieldNames_documenation,
@@ -3173,7 +3182,7 @@ static struct module_state _state;
     static PyObject * moose_ObjId_getFieldNames(_ObjId * self, PyObject *args)
     {
         if (!Id::isValid(self->oid_.id)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_ObjId_getFieldNames");
         }
         char * ftype = NULL;
         if (!PyArg_ParseTuple(args, "|s:moose_ObjId_getFieldNames", &ftype)){
@@ -3229,7 +3238,7 @@ static struct module_state _state;
     static PyObject * moose_ObjId_getNeighbors(_ObjId * self, PyObject * args)
     {
         if (!Id::isValid(self->oid_.id)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_ObjId_getNeighbors");
         }
         char * field = NULL;
         if (!PyArg_ParseTuple(args, "s:moose_ObjId_getNeighbors", &field)){
@@ -3284,7 +3293,7 @@ static struct module_state _state;
     static PyObject * moose_ObjId_connect(_ObjId * self, PyObject * args)
     {
         if (!Id::isValid(self->oid_.id)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_ObjId_connect");
         }
         extern PyTypeObject ObjIdType;        
         PyObject * destPtr = NULL;
@@ -3328,7 +3337,7 @@ static struct module_state _state;
   static PyObject* moose_ObjId_richcompare(_ObjId * self, PyObject * other, int op)
     {
         if (!Id::isValid(self->oid_.id)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_ObjId_richcompare");
         }
         extern PyTypeObject ObjIdType;
         if ((self != NULL && other == NULL) || (self == NULL && other != NULL)){
@@ -3349,7 +3358,7 @@ static struct module_state _state;
           return NULL;
         }
         if (!Id::isValid(((_ObjId*)other)->oid_.id)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_ObjId_richcompare");
         }
 
         string l_path = self->oid_.path();
@@ -3380,7 +3389,7 @@ static struct module_state _state;
     static PyObject * moose_ObjId_getDataIndex(_ObjId * self)
     {
         if (!Id::isValid(self->oid_.id)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_ObjId_getDataIndex");
         }        
         PyObject * ret = Py_BuildValue("I", self->oid_.dataId.value());
         return ret;
@@ -3392,7 +3401,7 @@ static struct module_state _state;
     static PyObject * moose_ObjId_getFieldIndex(_ObjId * self)
     {
         if (!Id::isValid(self->oid_.id)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_ObjId_getFieldIndex");
         }
         PyObject * ret = Py_BuildValue("I", self->oid_.dataId.value());
         return ret;
@@ -3572,7 +3581,7 @@ static struct module_state _state;
             return NULL;
         }
         if (!Id::isValid(_src) || !Id::isValid(_dest)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_copy");
         }
         string name;
         if (newName == NULL){
@@ -3630,7 +3639,7 @@ static struct module_state _state;
             return NULL;
         }
         if (!Id::isValid(((_Id*)obj)->id_)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_delete");
         }
         SHELLPTR->doDelete(((_Id*)obj)->id_);
         Py_RETURN_NONE;
@@ -3812,7 +3821,7 @@ static struct module_state _state;
             return NULL;
         }
         if (!Id::isValid(id)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_setCwe");
         }
         SHELLPTR->setCwe(id);
         Py_RETURN_NONE;
@@ -3882,7 +3891,7 @@ static struct module_state _state;
         _ObjId * dest = reinterpret_cast<_ObjId*>(destPtr);
         _ObjId * src = reinterpret_cast<_ObjId*>(srcPtr);
         if (!Id::isValid(dest->oid_.id) || !Id::isValid(src->oid_.id)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_connect");
         }
         MsgId mid = SHELLPTR->doAddMsg(msgType, src->oid_, string(srcField), dest->oid_, string(destField));
         if (mid == Msg::bad){
@@ -3984,7 +3993,7 @@ static struct module_state _state;
         string fname(field), ftype(type);
         ObjId oid = ((_ObjId*)pyobj)->oid_;
         if (!Id::isValid(oid.id)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_getField");
         }
         // Let us do this version using brute force. Might be simpler than getattro.
         if (ftype == "char"){
@@ -4109,7 +4118,7 @@ static struct module_state _state;
         }
         Id id = ((_Id*)obj)->id_;
         if (!Id::isValid(id)){
-                RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_syncDataHandler");
         }
         SHELLPTR->doSyncDataHandler(id);
         Py_RETURN_NONE;
@@ -4337,7 +4346,7 @@ static struct module_state _state;
         }
         _ObjId * obj = (_ObjId*)self;
         if (!Id::isValid(obj->oid_.id)){
-                RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_ObjId_get_destField_attr");
         }
         char * name = NULL;
         if (!PyArg_ParseTuple((PyObject *)closure,
@@ -4426,7 +4435,7 @@ static struct module_state _state;
         }
         _ObjId * obj = (_ObjId*)self;
         if (!Id::isValid(obj->oid_.id)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_ObjId_get_lookupField_attr");
         }
         char * name = NULL;
         if (!PyArg_ParseTuple((PyObject *)closure,
@@ -4566,7 +4575,7 @@ static struct module_state _state;
         }
         _ObjId * obj = (_ObjId*)self;
         if (!Id::isValid(obj->oid_.id)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_ObjId_get_elementField_attr");
         }
         char * name = NULL;
         if (!PyArg_ParseTuple((PyObject *)closure,
@@ -4629,7 +4638,7 @@ static struct module_state _state;
     PyObject * moose_ElementField_getNum(_Field * self, void * closure)
     {
         if (!Id::isValid(self->owner.id)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_ElementField_getNum");
         }
         unsigned int num = Field<unsigned int>::get(self->owner, "num_" + string(self->name));
         return Py_BuildValue("I", num);
@@ -4638,7 +4647,7 @@ static struct module_state _state;
     int moose_ElementField_setNum(_Field * self, PyObject * args, void * closure)
     {
         if (!Id::isValid(self->owner.id)){
-            RAISE_INVALID_ID(-1);
+            RAISE_INVALID_ID(-1, "moose_ElementField_setNum");
         }
         unsigned int num;
         if (!PyInt_Check(args)){
@@ -4656,7 +4665,7 @@ static struct module_state _state;
     PyObject * moose_ElementField_getItem(_Field * self, Py_ssize_t index)
     {
         if (!Id::isValid(self->owner.id)){
-            RAISE_INVALID_ID(NULL);
+            RAISE_INVALID_ID(NULL, "moose_ElementField_getItem");
         }
         unsigned int len = Field<unsigned int>::get(self->owner, "num_" + string(self->name));
         if (index >= len){
