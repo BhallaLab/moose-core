@@ -18679,4 +18679,6 @@ Did that, but it wasn't the problem. Problem was that concInit was set in the
 pools during object creation through the kkit reader. Changed that to 
 nInit and all was well. Including being able to switch from gsl to gssa.
 
+Checkin 3959.
+
 ============================================================================
