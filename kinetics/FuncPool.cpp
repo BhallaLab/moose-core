@@ -22,7 +22,7 @@ const Cinfo* FuncPool::initCinfo()
 		//////////////////////////////////////////////////////////////
 		static DestFinfo input( "input",
 			"Handles input to control value of n_",
-			new OpFunc1< FuncPool, double >( &FuncPool::input ) );
+			new EpFunc1< FuncPool, double >( &FuncPool::input ) );
 
 		//////////////////////////////////////////////////////////////
 		// SharedMsg Definitions
@@ -68,9 +68,9 @@ void FuncPool::vReinit( const Eref& e, ProcPtr p )
 	Pool::reinit( e, p );
 }
 
-void FuncPool::input( double v )
+void FuncPool::input( const Eref& e, const Qinfo* q, double v )
 {
-	Pool::vSetConcInit( Id().eref(), 0, v );
+	Pool::vSetConcInit( e, q, v );
 }
 
 //////////////////////////////////////////////////////////////

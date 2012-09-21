@@ -16,6 +16,7 @@ extern void testGsolver( string modelName, string plotName,
 	double plotDt, double simtime, double volume );
 extern ModelType findModelType( string filename, ifstream& fin, 
 	string& line );
+extern void writeKkit( Id model, const string& fname );
 
 void rtFindModelType()
 {
@@ -932,4 +933,16 @@ void rtTestChem()
 
 	testGsolver( "tabsumtot", "A.Co", 0.1, 50, 1e-18 );
 	testGsolver( "stargazin_psd6", "PSD/R_S2.Co", 1, 50, 1e-20 );
+}
+
+void rtTestWriteKkit()
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< unsigned int > dims( 1, 1 );
+	Shell::cleanSimulation();
+
+	Id model = shell->doLoadModel( "Kholodenko.g", "/rkktest", "Neutral" );
+	assert( model != Id() );
+
+	writeKkit( model, "writeK.g" );
 }
