@@ -26,8 +26,8 @@ from OpenGL.GLUT import *
 from glWidget.GLWidget import PyGLWidget
 from glWidget.objects import *
 from glWidget.group import *
-from filepaths import PATH_Neural_COLORMAPS
 from numpy import arange,digitize,sqrt
+import config
 import moose
 import defaults
 import pickle
@@ -243,7 +243,7 @@ class updatepaintGL(PyGLWidget):
 			g=min((2.0*x)/steps,(-2.0*x)/steps+2)
 			self.colorMap.append([r,g,b])
 	else:
-		f = open(os.path.join(PATH_Neural_COLORMAPS,cMap),'r')
+		f = open(os.path.join(str(config.get_settings().value(config.KEY_COLORMAP_DIR).toString()),'Neural', cMap),'r')
 		self.colorMap = pickle.load(f)
 		steps = len(self.colorMap)
 		f.close()
