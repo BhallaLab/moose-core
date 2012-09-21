@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # squidgui.py --- 
 # 
 # Filename: squidgui.py
@@ -6,9 +7,9 @@
 # Maintainer: 
 # Created: Mon Jul  9 18:23:55 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Sep 20 17:06:17 2012 (+0530)
+# Last-Updated: Fri Sep 21 11:44:05 2012 (+0530)
 #           By: subha
-#     Update #: 760
+#     Update #: 822
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -100,13 +101,13 @@ class SquidGui(QtGui.QMainWindow):
         self.setDockNestingEnabled(True)
         self._createRunControl()
         self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self._runControlDock) 
-        self._runControlDock.setFeatures(QtGui.QDockWidget.DockWidgetMovable |QtGui.QDockWidget.DockWidgetFloatable )	 
+        self._runControlDock.setFeatures(QtGui.QDockWidget.AllDockWidgetFeatures)	 
         self._createChannelControl()
         self._channelCtrlBox.setWindowTitle('Channel properties')
-        self._channelControlDock.setFeatures(QtGui.QDockWidget.DockWidgetMovable |QtGui.QDockWidget.DockWidgetFloatable )	 
+        self._channelControlDock.setFeatures(QtGui.QDockWidget.AllDockWidgetFeatures)	 
         self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self._channelControlDock) 
         self._createElectronicsControl()
-        self._electronicsDock.setFeatures(QtGui.QDockWidget.DockWidgetMovable |QtGui.QDockWidget.DockWidgetFloatable )	 
+        self._electronicsDock.setFeatures(QtGui.QDockWidget.AllDockWidgetFeatures)	 
         self._electronicsDock.setWindowTitle('Electronics')
         self.addDockWidget(QtCore.Qt.LeftDockWidgetArea, self._electronicsDock) 
         self._createPlotWidget()             
@@ -182,17 +183,26 @@ class SquidGui(QtGui.QMainWindow):
                      self._statePlotYSlot)
         self._statePlotNavigator = NavigationToolbar(self._statePlotCanvas, self._statePlotWidget)
         frame = QtGui.QFrame()
+        frame.setFrameStyle(QtGui.QFrame.StyledPanel + QtGui.QFrame.Raised)
         layout = QtGui.QHBoxLayout()
         layout.addWidget(self._stateplot_xvar_label)
         layout.addWidget(self._stateplot_xvar_combo)
         layout.addWidget(self._stateplot_yvar_label)
         layout.addWidget(self._stateplot_yvar_combo)
         frame.setLayout(layout)
+        self._closeStatePlotAction = QtGui.QAction('Close', self)
+        self.connect(self._closeStatePlotAction, QtCore.SIGNAL('triggered()'), self._statePlotWidget.close)
+        self._closeStatePlotButton = QtGui.QToolButton()
+        self._closeStatePlotButton.setDefaultAction(self._closeStatePlotAction)
         layout = QtGui.QVBoxLayout()
         layout.addWidget(frame)
         layout.addWidget(self._statePlotCanvas)
         layout.addWidget(self._statePlotNavigator)
-        self._statePlotWidget.setLayout(layout)        
+        layout.addWidget(self._closeStatePlotButton)
+        self._statePlotWidget.setLayout(layout)  
+        # Setting the close event so that when the help window is
+        # closed the ``State plot`` button becomes unchecked
+        self._statePlotWidget.closeEvent = lambda event: self._showStatePlotAction.setChecked(False)
 
     def _createRunControl(self):
         self._runControlBox = QtGui.QGroupBox(self)
@@ -562,6 +572,10 @@ class SquidGui(QtGui.QMainWindow):
         self._electronicsDock.setFloating(on)
         self._runControlDock.setFloating(on)
         
+    def _restoreDocks(self):
+        self._channelControlDock.setVisible(True)
+        self._electronicsDock.setVisible(True)
+        self._runControlDock.setVisible(True)
 
     def _initActions(self):
         self._runAction = QtGui.QAction(self.tr('Run'), self)
@@ -585,18 +599,19 @@ class SquidGui(QtGui.QMainWindow):
         self._overlayAction = QtGui.QAction('Overlay plots', self)
         self._overlayAction.setCheckable(True)
         self._overlayAction.setChecked(False) 
-        self._dockAction = QtGui.QAction('Undock all frames', self)
+        self._dockAction = QtGui.QAction('Undock all', self)
         self._dockAction.setCheckable(True)
         self._dockAction.setChecked(False)
         self.connect(self._dockAction, QtCore.SIGNAL('toggled(bool)'), self._toggleDocking)
+        self._restoreDocksAction = QtGui.QAction('Show all', self)
+        self.connect(self._restoreDocksAction, QtCore.SIGNAL('triggered()'), self._restoreDocks)
         self._helpAction = QtGui.QAction('Help', self)
         self._helpAction.setCheckable(True)        
         self.connect(self._helpAction, QtCore.SIGNAL('toggled(bool)'), self._helpWindow.setVisible)
         self._quitAction = QtGui.QAction(self.tr('&Quit'), self)
         self._quitAction.setShortcut(self.tr('Ctrl+Q'))
         self.connect(self._quitAction, QtCore.SIGNAL('triggered()'), QtGui.qApp.closeAllWindows)
-        self._closeStatePlotAction = QtGui.QAction('Close', self)
-        self.connect(self._closeStatePlotAction, QtCore.SIGNAL('triggered()'), self._statePlotWidget.hide)
+
         
 
     def _createRunToolBar(self):
@@ -605,6 +620,7 @@ class SquidGui(QtGui.QMainWindow):
         self._simToolBar.addAction(self._runAction)
         self._simToolBar.addAction(self._resetToDefaultsAction)
         self._simToolBar.addAction(self._dockAction)
+        self._simToolBar.addAction(self._restoreDocksAction)
 
     def _createPlotToolBar(self):
         self._plotToolBar = self.addToolBar(self.tr('Plotting control'))
@@ -680,7 +696,6 @@ class SquidGui(QtGui.QMainWindow):
     def closeEvent(self, event):
         QtGui.qApp.closeAllWindows()
 
-    
     def _createHelpMessage(self):
         if hasattr(self, '_helpWindow'):
             return
@@ -690,6 +705,7 @@ class SquidGui(QtGui.QMainWindow):
         self._helpWindow.setLayout(layout)
         self._helpMessageArea = QtGui.QScrollArea()
         self._helpMessageText = QtGui.QTextBrowser()
+        self._helpMessageText.setOpenExternalLinks(True)
         self._helpMessageArea.setWidget(self._helpMessageText)
         layout.addWidget(self._helpMessageText)
         self._helpBaseURL = 'help.html'
@@ -698,10 +714,16 @@ class SquidGui(QtGui.QMainWindow):
         self._helpMessageArea.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         self._helpMessageText.setMinimumSize(800, 600)
         self._closeHelpAction = QtGui.QAction('Close', self)
-        self.connect(self._closeHelpAction, QtCore.SIGNAL('triggered()'), self._helpWindow.hide)
+        self.connect(self._closeHelpAction, QtCore.SIGNAL('triggered()'), self._helpWindow.close)        
+        # Setting the close event so that the ``Help`` button is
+        # unchecked when the help window is closed
+        self._helpWindow.closeEvent = lambda event: self._helpAction.setChecked(False)
         self._helpTOCAction = QtGui.QAction('Table of Contents', self)
         self.connect(self._helpTOCAction, QtCore.SIGNAL('triggered()'), self._jumpToHelpTOC)        
+        # This panel is for putting two buttons using horizontal
+        # layout
         panel = QtGui.QFrame()
+        panel.setFrameStyle(QtGui.QFrame.StyledPanel + QtGui.QFrame.Raised)
         layout.addWidget(panel)
         layout = QtGui.QHBoxLayout()
         panel.setLayout(layout)
