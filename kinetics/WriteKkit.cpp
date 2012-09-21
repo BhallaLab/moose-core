@@ -13,6 +13,8 @@
 #include "header.h"
 #include "PoolBase.h"
 #include "../shell/Wildcard.h"
+#include "EnzBase.h"
+#include "CplxEnzBase.h"
 
 void writeHeader( ofstream& fout, 
 		double simdt, double plotdt, double maxtime, double defaultVol)
@@ -109,11 +111,21 @@ void writePool( ofstream& fout, Id id,
 
 Id getEnzMol( Id id )
 {
+	static const Finfo* enzFinfo = 
+			EnzBase::initCinfo()->findFinfo( "enzDest" );
+	vector< Id > ret;
+	if ( id.element()->getNeighbours( ret, enzFinfo ) > 0 ) 
+		return ret[0];
 	return Id();
 }
 
 Id getEnzCplx( Id id )
 {
+	static const Finfo* cplxFinfo = 
+			CplxEnzBase::initCinfo()->findFinfo( "cplxDest" );
+	vector< Id > ret;
+	if ( id.element()->getNeighbours( ret, cplxFinfo ) > 0 )
+		return ret[0];
 	return Id();
 }
 
@@ -169,11 +181,23 @@ void writeEnz( ofstream& fout, Id id,
 			" " << x << " " << y << " 0\n";
 }
 
-void writeGroup()
+void writeGroup( ofstream& fout, Id id,
+				string colour, string textcolour,
+			 	double x, double y )
 {
+	string path = id.path();
+	size_t pos = path.find( "/kinetics" );
+	if ( pos == string::npos ) // Might be finding unrelated neutrals
+			return;
+	path = path.substr( pos );
+	fout << "simundump group " << path << " 0 " << 
+			colour << " " << textcolour << " x 0 0 \"\" defaultfile \\\n";
+	fout << "  defaultfile.g 0 0 0 " << x << " " << y << " 0\n";
 }
 
-void writePlot()
+void writeTable( ofstream& fout, Id id,
+				string colour, string textcolour,
+			 	double x, double y )
 {
 		/*
 simundump xplot /graphs/conc1/Sub.Co 3 524288 \
@@ -214,7 +238,35 @@ void writeFooter( ofstream& fout )
 
 Id findInfo( Id id )
 {
-		return Id();
+	vector< Id > kids;
+	Neutral::children( id.eref(), kids );
+
+	for ( vector< Id >::iterator i = kids.begin(); i != kids.end(); ++i ) {
+		Element* e = i->element();
+		if ( e->getName() == "info" && e->cinfo()->isA( "Annotator" ) )
+			return *i;
+	}
+	return Id();
+}
+
+void getInfoFields( Id id, string& bg, string& fg, 
+				double& x, double& y, double side, double dx )
+{
+	Id info = findInfo( id );
+	if ( info != Id() ) {
+		bg = Field< string >::get( info, "color" );
+		fg = Field< string >::get( info, "textColor" );
+		x = Field< double >::get( info, "x" );
+		y = Field< double >::get( info, "y" );
+	} else {
+		bg = "cyan";
+		fg = "black";
+		x += dx;
+		if ( x > side ) {
+				x = 0;
+				y += dx;
+		}
+	}
 }
 
 void writeKkit( Id model, const string& fname )
@@ -237,30 +289,22 @@ void writeKkit( Id model, const string& fname )
 		double side = floor( 1.0 + sqrt( static_cast< double >( num ) ) );
 		double dx = side / num;
 		for( vector< Id >::iterator i = ids.begin(); i != ids.end(); ++i ) {
-			Id info = findInfo( *i );
-			if ( info != Id() ) {
-				bg = Field< string >::get( info, "color" );
-				fg = Field< string >::get( info, "textColor" );
-				x = Field< double >::get( info, "x" );
-				y = Field< double >::get( info, "y" );
-			} else {
-				x += dx;
-				if ( x > side ) {
-						x = 0;
-						y += dx;
-				}
-			}
+			getInfoFields( *i, bg, fg, x, y , side, dx );
 			if ( i->element()->cinfo()->isA( "PoolBase" ) ) {
-				// Check that we don't have an enz cplx.
-				writePool( fout, *i, fg, bg, x, y );
+				ObjId pa = Neutral::parent( i->eref() );
+				// Check that it isn't an enz cplx.
+				if ( !pa.element()->cinfo()->isA( "CplxEnzBase" ) )
+					writePool( fout, *i, fg, bg, x, y );
 			} else if ( i->element()->cinfo()->isA( "ReacBase" ) ) {
 				writeReac( fout, *i, fg, bg, x, y );
 			} else if ( i->element()->cinfo()->isA( "EnzBase" ) ) {
 				writeEnz( fout, *i, fg, bg, x, y );
 			} else if ( i->element()->cinfo()->name() == "Neutral" ) {
+				writeGroup( fout, *i, fg, bg, x, y );
+			} else if ( i->element()->cinfo()->name() == "TableBase" ) {
+				writeTable( fout, *i, fg, bg, x, y );
 			}
 		}
-		writePlot();
 		writeMsgs();
 		writeFooter( fout );
 }

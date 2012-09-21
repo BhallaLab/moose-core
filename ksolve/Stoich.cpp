@@ -618,6 +618,7 @@ void Stoich::meshSplit(
 	// cout << "Stoich::handleMeshSplit\n";
 	unsigned int totalNumMeshEntries = vols.size();
 	unsigned int numLocal = localEntryList.size();
+	vector< double > orig = Sinit_[0];
 	S_.resize( totalNumMeshEntries );
 	Sinit_.resize( totalNumMeshEntries );
 	y_.resize( numLocal );
@@ -634,8 +635,7 @@ void Stoich::meshSplit(
 		}
 		*/
 		for ( unsigned int j = 0; j < concInit_.size(); ++j ) {
-			Sinit_[k][j] *= vols[k] / oldVol;
-			S_[k][j] = Sinit_[k][j];
+			S_[k][j] = Sinit_[k][j] = orig[j] * vols[k] / oldVol;
 		}
 		y_[i].resize( numVarPools_, 0 );
 		flux_[i].resize( numVarPools_, 0 );

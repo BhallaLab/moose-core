@@ -18686,4 +18686,14 @@ Checkin 3959.
 Working on WriteKkit.cpp.
 Skeleton in place. Need to replace couts with fouts and to begin to pass in
 Ids.
-Put in the fouts. No real stuff passed in as yet.
+Put in the fouts. No real stuff passed in as yet. 
+Checkin 3968.
+
+Now partial implementation in place. Put test in regression tests.
+Unfortunately some other changes have caused errors, in rtTestChem (line 889).
+
+============================================================================
+21 Sep 2012
+Fixed errors in regression tests resulting from changes to volume handling
+in Pool.
+============================================================================

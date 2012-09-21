@@ -33,7 +33,7 @@ class FuncPool: public Pool
 
 		void vProcess( const Eref& e, ProcPtr p );
 		void vReinit( const Eref& e, ProcPtr p );
-		void input( double v );
+		void input( const Eref& e, const Qinfo* q, double v );
 
 		static const Cinfo* initCinfo();
 	private:

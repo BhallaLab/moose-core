@@ -104,6 +104,11 @@ static void rtReplicateModels()
 	for ( unsigned int i = 0; i < 8; ++i )
 		assert( doubleEq( checkInit[i], 8e-18 ) );
 
+	Field< double >::getVec( a, "nInit", checkInit );
+	assert( checkInit.size() == 8 );
+	for ( unsigned int i = 0; i < 8; ++i )
+		assert( doubleEq( checkInit[i], 8 * CONCSCALE * NA * 1e-18 ) );
+
 	Field< double >::getVec( a, "concInit", checkInit );
 	assert( checkInit.size() == 8 );
 	for ( unsigned int i = 0; i < 8; ++i )
