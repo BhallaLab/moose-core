@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # used to parse files more easily
 from __future__ import with_statement
 
