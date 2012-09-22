@@ -320,10 +320,7 @@ class KineticsWidget(QtGui.QWidget):
         # This is check which version of kkit, b'cos anything below
         # kkit8 didn't had xyz co-ordinates
         if self.noPositionInfo:
-            msgBox = QtGui.QMessageBox()
-            msgBox.setText("The Layout module works for kkit version 8 or higher.")
-            msgBox.setStandardButtons(QtGui.QMessageBox.Ok)
-            msgBox.exec_()
+            QtGui.QMessageBox.warning(self, 'No coordinates found', 'Kinetic layout works only for models using kkit8 or later')
             raise Widgetvisibility()
         # Set the factors for scaling from kkit coordinates to
         # available screen space
@@ -354,6 +351,7 @@ class KineticsWidget(QtGui.QWidget):
             for reac, dinfo in displayDict.items():
                 x, y = self.reposition(dinfo.x, dinfo.y)
                 reacItem = EllipseItem(x, y, self.ellipse_width, self.ellipse_height)
+        # TODO continue from here
         for cmpt,itemlist in cmptMol.items():
             self.createCompt(cmpt)
             comptRef = self.qGraCompt[cmpt]
