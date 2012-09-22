@@ -317,6 +317,16 @@ class KineticsWidget(QtGui.QWidget):
         self.colorMap = pickle.load(cmapFile)
         cmapFile.close()
         self.setupDisplayInfo(modelPath)
+        # This is check which version of kkit, b'cos anything below
+        # kkit8 didn't had xyz co-ordinates
+        if self.noPositionInfo:
+            msgBox = QtGui.QMessageBox()
+            msgBox.setText("The Layout module works for kkit version 8 or higher.")
+            msgBox.setStandardButtons(QtGui.QMessageBox.Ok)
+            msgBox.exec_()
+            raise Widgetvisibility()
+        # Set the factors for scaling from kkit coordinates to
+        # available screen space
         self.xratio = size.width() - 10
         self.yratio = size.height() - 10
         if self.xmax > self.xmin:
@@ -329,80 +339,66 @@ class KineticsWidget(QtGui.QWidget):
         self.setupItem(modelPath,zombieType,self.srcdesConnection)
         #for m,n in self.srcdesConnection.items():print m,n
         self.lineItem_dict = {}
-        self.object2line = {}
-        #This is check which version of kkit, b'cos anything below kkit8 didn't had xyz co-ordinates
-        allZero = "True"
+        self.object2line = {}        
+        fnt = QtGui.QFont('Helvetica',8)
+        self.qGraCompt = {}
+        self.mooseId_GText = {}
+        self.ellipse_width = 15
+        self.ellipse_height = 15
+        self.cplx_width = 8
+        self.cplx_height = 8
+        for meshEntry, displayDict in self.meshEntryDisplay.items():
+            self.createCompt(meshEntry)
+            comptRef = self.qGraCompt[cmpt]
+            # Setup diplay of the reactions
+            for reac, dinfo in displayDict.items():
+                x, y = self.reposition(dinfo.x, dinfo.y)
+                reacItem = EllipseItem(x, y, self.ellipse_width, self.ellipse_height)
         for cmpt,itemlist in cmptMol.items():
-            for  item in (item for item in itemlist if len(item) != 0):
-                if item[1] != 0.0 or item[2] != 0.0:
-                    allZero = False
-                    break
-        if allZero:
-            msgBox = QtGui.QMessageBox()
-            msgBox.setText("The Layout module works for kkit version 8 or higher.")
-            msgBox.setStandardButtons(QtGui.QMessageBox.Ok)
-            msgBox.exec_()
-            raise Widgetvisibility()
-        else:
-            fnt = QtGui.QFont('Helvetica',8)
-            self.qGraCompt = {}
-            self.mooseId_GText = {}
-            self.ellipse_width = 15
-            self.ellipse_height = 15
-            self.cplx_width = 8
-            self.cplx_height = 8
-            for meshEntry, displayDict in self.meshEntryDisplay.items():
-                self.createCompt(meshEntry)
-                comptRef = self.qGraCompt[cmpt]
-                # Setup diplay of the reactions
-                for reac, dinfo in displayDict.items():
-                    x, y = self.reposition(dinfo.x, dinfo.y)
-                    reacItem = EllipseItem(x, y, self.ellipse_width, self.ellipse_height)
-            for cmpt,itemlist in cmptMol.items():
-                self.createCompt(cmpt)
-                comptRef = self.qGraCompt[cmpt]
-                # for  item in (item for item  in itemlist if len(item) != 0): # THIS IS HORRIBLE!!!
-                for item in itemlist:
-                    if len(item) == 0:
-                        continue
-                    if item[0].class_ == 'ZombieEnz' or item[0].class_ == 'ZombieMMenz' or item[0].class_ == 'ZombieReac':
-                        iteminfo = (element(item[0]).parent).path+'/info'
-                        xpos = (item[1]-minX)*xnewratio
-                        ypos = -(item[2]-minY)*ynewratio
-                        if item[0].class_ == 'ZombieReac':
-                            reItem = EllipseItem(xpos,ypos,self.ellipse_width,self.ellipse_height,comptRef,item)
+            self.createCompt(cmpt)
+            comptRef = self.qGraCompt[cmpt]
+            # for  item in (item for item  in itemlist if len(item) != 0): # THIS IS HORRIBLE!!!
+            for item in itemlist:
+                if len(item) == 0:
+                    continue
+                if item[0].class_ == 'ZombieEnz' or item[0].class_ == 'ZombieMMenz' or item[0].class_ == 'ZombieReac':
+                    iteminfo = (element(item[0]).parent).path+'/info'
+                    xpos = (item[1]-minX)*xnewratio
+                    ypos = -(item[2]-minY)*ynewratio
+                    if item[0].class_ == 'ZombieReac':
+                        reItem = EllipseItem(xpos,ypos,self.ellipse_width,self.ellipse_height,comptRef,item)
 
-                        else:
-                            reItem = EllipseItem(xpos,ypos,self.ellipse_width,self.ellipse_height,comptRef,item)
-                            textcolor = ''
-                            bgcolor = Annotator(iteminfo).getField('color')
-                            textcolor,bgcolor = self.colorCheck(textcolor,bgcolor,self.picklecolorMap)
-                            reItem.setBrush(QtGui.QColor(bgcolor))
-                        reItem.ellemitter.connect(reItem.ellemitter, QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.emitItemtoEditor)
-                        reItem.ellemitter.connect(reItem.ellemitter,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.emitItemtoEditor)
-                        reItem.ellemitter.connect(reItem.ellemitter,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
-                        self.mooseId_GText[element(item[0]).getId()] = reItem
+                    else:
+                        reItem = EllipseItem(xpos,ypos,self.ellipse_width,self.ellipse_height,comptRef,item)
+                        textcolor = ''
+                        bgcolor = Annotator(iteminfo).getField('color')
+                        textcolor,bgcolor = self.colorCheck(textcolor,bgcolor,self.picklecolorMap)
+                        reItem.setBrush(QtGui.QColor(bgcolor))
+                    reItem.ellemitter.connect(reItem.ellemitter, QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.emitItemtoEditor)
+                    reItem.ellemitter.connect(reItem.ellemitter,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.emitItemtoEditor)
+                    reItem.ellemitter.connect(reItem.ellemitter,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
+                    self.mooseId_GText[element(item[0]).getId()] = reItem
 
-                    elif item[0].class_ == 'ZombiePool' or item[0].class_ == 'ZombieFuncPool' or item[0].class_ == 'ZombieBufPool':
-                        xpos = (item[1]-minX)*xnewratio
-                        ypos = -(item[2]-minY)*ynewratio
-                        if item[0][0].parent.class_ != 'ZombieEnz':
-                            pItem = Textitem(comptRef,item,xpos,ypos,self.picklecolorMap)
-                            pItem.setFont(fnt)
-                            pItem.textemitter.connect(pItem.textemitter, QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.emitItemtoEditor)
-                            pItem.textemitter.connect(pItem.textemitter,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.emitItemtoEditor)
-                            pItem.textemitter.connect(pItem.textemitter,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
-                        else:
-                            #cplx has made to sit under enz, for which xpos added with width/2 and height is added by ellipseitem height which is 15 for now
-                            xpos = xpos+(self.cplx_width/2)
-                            ypos = ypos+self.ellipse_width
-                            pItem = Rectcplx(xpos,ypos,self.cplx_width,self.cplx_height,self.mooseId_GText[element(item[0]).parent.getId()],item[0])
-                            textcolor = ''
-                            pItem.Rectemitter1.connect(pItem.Rectemitter1,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
-                            pItem.Rectemitter1.connect(pItem.Rectemitter1,QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.emitItemtoEditor)
-                            pItem.Rectemitter1.connect(pItem.Rectemitter1,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.emitItemtoEditor)
-                        self.mooseId_GText[element(item[0]).getId()] = pItem
-        for k, v in self.qGraCompt.items():
+                elif item[0].class_ == 'ZombiePool' or item[0].class_ == 'ZombieFuncPool' or item[0].class_ == 'ZombieBufPool':
+                    xpos = (item[1]-minX)*xnewratio
+                    ypos = -(item[2]-minY)*ynewratio
+                    if item[0][0].parent.class_ != 'ZombieEnz':
+                        pItem = Textitem(comptRef,item,xpos,ypos,self.picklecolorMap)
+                        pItem.setFont(fnt)
+                        pItem.textemitter.connect(pItem.textemitter, QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.emitItemtoEditor)
+                        pItem.textemitter.connect(pItem.textemitter,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.emitItemtoEditor)
+                        pItem.textemitter.connect(pItem.textemitter,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
+                    else:
+                        #cplx has made to sit under enz, for which xpos added with width/2 and height is added by ellipseitem height which is 15 for now
+                        xpos = xpos+(self.cplx_width/2)
+                        ypos = ypos+self.ellipse_width
+                        pItem = Rectcplx(xpos,ypos,self.cplx_width,self.cplx_height,self.mooseId_GText[element(item[0]).parent.getId()],item[0])
+                        textcolor = ''
+                        pItem.Rectemitter1.connect(pItem.Rectemitter1,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
+                        pItem.Rectemitter1.connect(pItem.Rectemitter1,QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.emitItemtoEditor)
+                        pItem.Rectemitter1.connect(pItem.Rectemitter1,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.emitItemtoEditor)
+                    self.mooseId_GText[element(item[0]).getId()] = pItem
+    for k, v in self.qGraCompt.items():
             rectcompt = v.childrenBoundingRect()
             v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
             v.setPen(QtGui.QPen(Qt.QColor(66,66,66,100),10,QtCore.Qt.SolidLine,QtCore.Qt.RoundCap,QtCore.Qt.RoundJoin ))
@@ -732,8 +728,8 @@ class KineticsWidget(QtGui.QWidget):
 
     def setupDisplayInfo(self, modelPath):
         """Setup display information for compartments and pools and
-        reactions"""        
-        meshEntryWildcard = modelPath + '/##[TYPE=MeshEntry]'
+        reactions"""
+        meshEntryWildcard = modelPath + '/##[TYPE=MeshEntry]'        
         self.meshEntryDisplay = {}
         for meshEntry in moose.wildcardFind(meshEntryWildcard):
             print 'Processing MeshEntry:', meshEntry
@@ -743,7 +739,7 @@ class KineticsWidget(QtGui.QWidget):
                                                 'enzyme': enzymeDisplayDict,
                                                 'pool': poolDisplayDict}            
         xvalues = []
-        yvalues = []
+        yvalues = []        
         for entry in self.meshEntryDisplay.values():
             for ddict in entry.values():
                 for dinfo in ddict.values():
@@ -753,6 +749,7 @@ class KineticsWidget(QtGui.QWidget):
         self.xmin = min(xvalues)        
         self.ymax = max(yvalues)
         self.ymin = min(yvalues)
+        self.noPositionInfo = len(np.nonzero(xvalues)[0]) > 0 and len(np.nonzero(yvalues)[0]) > 0
         
     def keyPressEvent(self,event):
         key = event.key()
