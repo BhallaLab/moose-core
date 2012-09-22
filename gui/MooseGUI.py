@@ -54,8 +54,6 @@ def copyDemos():
 class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
     """Customization for Qt Designer created window"""
     def __init__(self, interpreter=None,parent = None):
-        for key in config.settings:
-            print key, config.settings[key]
         copyDemos()
         # initialization of the superclass
         self.configWidget = ConfigWidget()        
