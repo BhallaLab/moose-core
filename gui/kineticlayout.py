@@ -8,7 +8,7 @@ import config
 import re
 import math
 sys.path.append('../python')
-from filepaths import *
+#from filepaths import *
 
 from moose import *
 
@@ -328,7 +328,7 @@ class KineticsWidget(QtGui.QWidget):
         self.setupItem(modelPath,zombieType,self.srcdesConnection)
         #for m,n in self.srcdesConnection.items():print m,n
         #pickled the color map here and loading the file
-        pkl_file = open(os.path.join(config.settings[config.KEY_COLORMAP_DIR], 'KKIT','rainbow2.pkl'),'rb')
+        pkl_file = open(os.path.join(config.settings[config.KEY_COLORMAP_DIR], 'rainbow2.pkl'),'rb')
         self.picklecolorMap = pickle.load(pkl_file)        
         self.lineItem_dict = {}
         self.object2line = {}
@@ -732,7 +732,7 @@ class KineticsWidget(QtGui.QWidget):
             
         for meshEnt in wildcardFind(cPath):
             molrecList = []
-            pkl_file = open(os.path.join(PATH_KKIT_COLORMAPS,'rainbow2.pkl'),'rb')
+            pkl_file = open(os.path.join(config.settings[config.KEY_COLORMAP_DIR],'rainbow2.pkl'),'rb')
             picklecolorMap = pickle.load(pkl_file)
             for reitem in Neutral(meshEnt).getNeighbors('remeshReacs'):
                 reiteminfo = reitem.path+'/info'
