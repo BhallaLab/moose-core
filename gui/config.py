@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Feb 13 16:07:56 2010 (+0530)
 # Version: 
-# Last-Updated: Fri Sep 21 14:44:24 2012 (+0530)
+# Last-Updated: Sat Sep 22 15:01:54 2012 (+0530)
 #           By: subha
-#     Update #: 158
+#     Update #: 270
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -17,13 +17,16 @@
 
 # Commentary: 
 # 
-# 
-# 
+# Provides keys for accessing per-user settings.
+# Provides initialization of several per-user variables for MooseGUI.
+# As part of initialization, creates `~/.moose` and `~/moose`
+# directories.
+#
 # 
 
 # Change log:
 # 
-# 
+# 2012-09-22 13:49:36 (+0530) Subha: cleaned up the initialization
 # 
 # 
 # This program is free software; you can redistribute it and/or
@@ -52,7 +55,6 @@ import logging
 from PyQt4.Qt import Qt
 from PyQt4 import QtGui, QtCore
 
-settings = None
 TEMPDIR = tempfile.gettempdir()
 KEY_FIRSTTIME = 'firsttime'
 # KEY_STATE_FILE = 'statefile'
@@ -61,10 +63,13 @@ KEY_WINDOW_GEOMETRY = 'main/geometry'
 KEY_WINDOW_LAYOUT = 'main/layout'
 KEY_RUNTIME_AUTOHIDE = 'main/rtautohide'
 KEY_DEMOS_DIR = 'main/demosdir'
-KEY_HOME_DIR = 'main/homedir' #os.path.abspath(__file__).rstrip('config.py')
-KEY_ICON_DIR = 'main/icondir' #os.path.join(KEY_HOME_DIR,'icons')
-KEY_COLORMAP_DIR = 'main/colormapdir' #os.path.join(KEY_HOME_DIR, 'colormaps')
+KEY_HOME_DIR = 'main/homedir' 
+KEY_ICON_DIR = 'main/icondir' 
+KEY_COLORMAP_DIR = 'main/colormapdir' 
 KEY_LOCAL_DEMOS_DIR = 'main/localdemosdir'
+KEY_MOOSE_LOCAL_DIR = 'main/localdir'
+KEY_NUMPTHREADS = 'main/numpthreads'
+
 QT_VERSION = str(QtCore.QT_VERSION_STR).split('.')
 QT_MAJOR_VERSION = int(QT_VERSION[0])
 QT_MINOR_VERSION = int(QT_VERSION[1])
@@ -76,16 +81,105 @@ MOOSE_DEMOS_DIR = '/usr/share/moose/Demos'
 MOOSE_GUI_DIR = os.path.dirname(os.path.abspath(__file__))
 MOOSE_CFG_DIR = os.path.join(os.environ['HOME'], '.moose')
 MOOSE_LOCAL_DIR = os.path.join(os.environ['HOME'], 'moose')
+MOOSE_NUMPTHREADS = '1'
 
-def get_settings():
-    '''Initializes the QSettings for the application and returns it.'''
-    global settings
-    if not settings:
-	QtCore.QCoreApplication.setOrganizationName('NCBS')
-	QtCore.QCoreApplication.setOrganizationDomain('ncbs.res.in')
-	QtCore.QCoreApplication.setApplicationName('MOOSE')
-        settings = QtCore.QSettings()
-    return settings
+class MooseSetting(dict):
+    """
+    dict-like access to QSettings.
+
+    This subclass of dict wraps a QSettings object and lets one set
+    and get values as Python strings rather than QVariant.
+    
+    This is supposed yo be a singleton in the whole application.
+    """
+    _instance = None    
+    def __new__(cls, *args, **kwargs):
+        # This is designed to check if the class has been
+        # instantiated, if so, returns the single instance, otherwise
+        # creates it.
+        if cls._instance is None:           
+            cls._instance = super(MooseSetting, cls).__new__(cls, *args, **kwargs)
+            errs = init_dirs()
+            for e in errs:
+                print e
+            QtCore.QCoreApplication.setOrganizationName('NCBS')
+            QtCore.QCoreApplication.setOrganizationDomain('ncbs.res.in')
+            QtCore.QCoreApplication.setApplicationName('MOOSE')
+            cls._instance.qsettings = QtCore.QSettings()
+            cls._instance.qsettings.setValue(KEY_DEMOS_DIR, MOOSE_DEMOS_DIR)
+            cls._instance.qsettings.setValue(KEY_LOCAL_DEMOS_DIR, os.path.join(MOOSE_LOCAL_DIR, 'Demos'))
+            cls._instance.qsettings.setValue(KEY_MOOSE_LOCAL_DIR, MOOSE_LOCAL_DIR)
+            cls._instance.qsettings.setValue(KEY_COLORMAP_DIR, os.path.join(MOOSE_GUI_DIR, 'colormaps'))
+            cls._instance.qsettings.setValue(KEY_HOME_DIR, os.environ['HOME'])
+            cls._instance.qsettings.setValue(KEY_ICON_DIR, os.path.join(MOOSE_GUI_DIR, 'icons'))
+            cls._instance.qsettings.setValue(KEY_NUMPTHREADS, '1')
+        return cls._instance
+
+    def __init__(self, *args, **kwargs):
+        super(MooseSetting, self).__init__(self, *args, **kwargs)
+
+    def __iter__(self):
+        return (str(key) for key in self.qsettings.allKeys())
+        
+    def __setitem__(self, key, value):
+        if isinstance(key, str):
+            self.qsettings.setValue(key, value)
+        else:
+            raise TypeError('Expect only strings as keys')
+
+    def __getitem__(self, key):
+        return str(self.qsettings.value(key).toString())
+
+    def keys(self):
+        return [str(key) for key in self.qsettings.allKeys()]
+
+    def values(self):
+        return [str(self.qsettings.value(key).toString()) for key in self.qsettings.allKeys()]
+
+    def itervalues(self):
+        return (str(self.qsettings.value(key).toString()) for key in self.qsettings.allKeys())
+
+def init_dirs():
+    """Check if there is a `.moose` directory in user's home
+    directory. If not, we assume this to be the first run of MOOSE.
+    Then we try to create the `~/.moose` directory and `~/moose`
+    directory.
+    """  
+    global MOOSE_DEMOS_DIR
+    global MOOSE_LOCAL_DIR
+    global MOOSE_CFG_DIR
+    errors = []
+    moose_cfg_dir = os.path.join(os.environ['HOME'], '.moose')
+    moose_local_dir = os.path.join(os.environ['HOME'], 'moose')
+    if not os.path.exists(moose_cfg_dir):
+        try:
+            os.mkdir(moose_cfg_dir)
+            MOOSE_CFG_DIR = moose_cfg_dir
+            print 'Created moose configuration directory:', moose_cfg_dir
+        except OSError, e:
+            errors.append(e)
+            print e
+    if not os.path.exists(moose_local_dir):
+        try:
+            os.mkdir(moose_local_dir)
+            MOOSE_LOCAL_DIR = moose_local_dir
+            print 'Created local moose directory:', moose_local_dir    
+        except OSError, e:
+            errors.append(e)
+            print e
+    moose_demos_dir = MOOSE_DEMOS_DIR
+    if not os.access(moose_demos_dir, os.R_OK + os.X_OK):
+        # Is it built from source? Then Demos directory will be
+        # located in the parent directory.
+        moose_demos_dir = os.path.normpath(os.path.join(MOOSE_GUI_DIR, '../Demos'))
+        if not os.access(moose_demos_dir, os.R_OK + os.X_OK):
+            print "Could not access Demos directory: %s" % (moose_demos_dir)
+            errors.append(OSError(errno.EACCES, 'Cannot access %s' % (moose_demos_dir)))
+        else:
+            MOOSE_DEMOS_DIR = moose_demos_dir        
+    return errors
+
+settings = MooseSetting()
 
 # LOG_FILENAME = os.path.join(TEMPDIR, 'moose.log')
 LOG_LEVEL = logging.ERROR
