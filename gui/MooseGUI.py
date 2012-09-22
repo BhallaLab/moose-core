@@ -47,6 +47,7 @@ def copyDemos():
         progressDialog = QtGui.QProgressDialog()
         progressDialog.setLabelText('Copying the MOOSE demos to your home directory')
         progressDialog.setModal(True)
+        progressDialog.setVisible(True)
         copyTree(config.settings[config.KEY_DEMOS_DIR], 
                  os.path.join(config.settings[config.KEY_MOOSE_LOCAL_DIR], 'Demos'), 
                  progressDialog)    
@@ -94,11 +95,34 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
         self.defaultKKITSolver = 'rk5'
 
+    def showAboutMoose(self):
+        with open(config.MOOSE_ABOUT_FILE, 'r') as aboutfile:
+            QtGui.QMessageBox.about(self, 'About MOOSE', ''.join(aboutfile.readlines()))
 
+    def showDocumentation(self):
+        if hasattr(self, 'documentationViewer'):
+            self.documentationViewer.setVisible(True)
+            return
+        self.documentationViewer = QtGui.QTextBrowser()
+        self.documentationViewer.setOpenLinks(True)
+        self.documentationViewer.setOpenExternalLinks(True)
+        print 'Docs in ', os.path.join(config.settings[config.KEY_DOCS_DIR], 'html')
+        self.documentationViewer.setSearchPaths([config.settings[config.KEY_DOCS_DIR],
+                                                 os.path.join(config.settings[config.KEY_DOCS_DIR], 'html'),
+                                                 os.path.join(config.settings[config.KEY_DOCS_DIR], 'images')])
+        self.documentationViewer.setSource(QtCore.QUrl('index.html'))
+        self.documentationViewer.setMinimumSize(800, 600)
+        self.documentationViewer.setVisible(True)
+            
 #    def resizeCentralWidgets(self):
 #        widthOfEach =  int((self.layoutWidget.width()+self.plotMdiArea.width())/2)
 #        self.layoutWidget.resize(widthOfEach, self.layoutWidget.height())
 #        self.plotMdiArea.resize(widthOfEach, self.layoutWidget.height())
+
+    def populateHelpMenu(self):
+        print 'This is a place holder for populating the help menu'
+        self.connect(self.actionAbout, QtCore.SIGNAL('triggered()'), self.showAboutMoose)
+        self.connect(self.actionDocumentation, QtCore.SIGNAL('triggered()'), self.showDocumentation)
 
     def setAllToStartState(self):
         self.currentTime = 0.0
@@ -122,6 +146,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.mooseLibraryDock.setVisible(False)
         self.mooseConnectDock.setVisible(False)
         self.mooseShellDockWidget.setVisible(False)
+        self.populateHelpMenu()
         self.menuHelp.setVisible(True)
         self.menuHelp.setEnabled(True)
         self.menuView.setEnabled(True)
