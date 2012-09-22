@@ -51,7 +51,6 @@ import os
 import config
 from PyQt4 import QtGui, QtCore
 import config
-from mooseglobals import MooseGlobals
 from utils import *
         
 class ConfigWidget(QtGui.QDialog):
