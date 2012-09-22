@@ -16,6 +16,8 @@
 #include "EnzBase.h"
 #include "CplxEnzBase.h"
 #include "ReacBase.h"
+#include "../builtins/TableBase.h"
+#include "../builtins/Table.h"
 
 void writeHeader( ofstream& fout, 
 		double simdt, double plotdt, double maxtime, double defaultVol)
@@ -196,6 +198,12 @@ void writeGroup( ofstream& fout, Id id,
 	fout << "  defaultfile.g 0 0 0 " << x << " " << y << " 0\n";
 }
 
+void writeStimulusTable( ofstream& fout, Id id,
+				string colour, string textcolour,
+			 	double x, double y )
+{
+}
+
 void writePlot( ofstream& fout, Id id,
 				string colour, string textcolour,
 			 	double x, double y )
@@ -207,29 +215,12 @@ void writePlot( ofstream& fout, Id id,
 	path = path.substr( pos + 2 );
 	fout << "simundump xplot " << path << " 3 524288 \\\n" << 
 	"\"delete_plot.w <s> <d>; edit_plot.D <w>\" " << textcolour << " 0 0 1\n";
-		/*
-simundump xplot /graphs/conc1/Sub.Co 3 524288 \
-  "delete_plot.w <s> <d>; edit_plot.D <w>" blue 0 0 1
-simundump xplot /graphs/conc1/Prd.Co 3 524288 \
-  "delete_plot.w <s> <d>; edit_plot.D <w>" 60 0 0 1
-  */
 }
 
 void writeLookupTable( ofstream& fout, Id id,
 				string colour, string textcolour,
 			 	double x, double y )
 {
-}
-
-void writeTable( ofstream& fout, Id id,
-				string colour, string textcolour,
-			 	double x, double y )
-{
-	ObjId pa = Neutral::parent( id.eref() );
-	if ( pa.id.element()->getName().substr( 0, 4 ) == "conc" )
-		writePlot( fout, id, colour, textcolour, x , y);
-	else
-		writeLookupTable( fout, id, colour, textcolour, x , y);
 }
 
 void writeGui( ofstream& fout )
@@ -418,14 +409,35 @@ void writeMsgs( ofstream& fout, const vector< string >& msgs )
 			fout << *i << endl;
 }
 
-void storeFuncPoolMsgs( Id enz, vector< string >& msgs )
+void storeFuncPoolMsgs( Id pool, vector< string >& msgs )
 {
 	;
 }
 
-void storeTableMsgs( Id enz, vector< string >& msgs )
+void storeStimulusTableMsgs( Id tab, vector< string >& msgs )
 {
-	;
+}
+
+void storePlotMsgs( Id tab, vector< string >& msgs )
+{
+	static const Finfo* plotFinfo = 
+			Table::initCinfo()->findFinfo( "requestData" );
+	vector< Id > pools;
+	
+	tab.element()->getNeighbours( pools, plotFinfo );
+	assert( pools.size() == 1 );
+	string bg;
+	string fg;
+	double x;
+	double y;
+	getInfoFields( pools[0], bg, fg, x, y, 1, 1 );
+	string tabPath = tab.path(); 
+	size_t pos = tabPath.substr( 2 ).find( "/" );
+	assert( pos != string::npos );
+	tabPath = tabPath.substr( 2 + pos );
+	string s = "addmsg " + trimPath( pools[0].path() ) + " " + tabPath + 
+			" PLOT Co *" + pools[0].element()->getName() + " *" + bg;
+	msgs.push_back( s );
 }
 
 void writeKkit( Id model, const string& fname )
@@ -449,27 +461,30 @@ void writeKkit( Id model, const string& fname )
 		double side = floor( 1.0 + sqrt( static_cast< double >( num ) ) );
 		double dx = side / num;
 		for( vector< Id >::iterator i = ids.begin(); i != ids.end(); ++i ) {
-			getInfoFields( *i, fg, bg, x, y , side, dx );
+			getInfoFields( *i, bg, fg, x, y , side, dx );
 			if ( i->element()->cinfo()->isA( "PoolBase" ) ) {
 				ObjId pa = Neutral::parent( i->eref() );
 				// Check that it isn't an enz cplx.
 				if ( !pa.element()->cinfo()->isA( "CplxEnzBase" ) ) {
-					writePool( fout, *i, fg, bg, x, y );
+					writePool( fout, *i, bg, fg, x, y );
 				}
 				if ( i->element()->cinfo()->isA( "FuncPool" ) ) {
 					storeFuncPoolMsgs( *i, msgs );
 				}
 			} else if ( i->element()->cinfo()->isA( "ReacBase" ) ) {
-				writeReac( fout, *i, fg, bg, x, y );
+				writeReac( fout, *i, bg, fg, x, y );
 				storeReacMsgs( *i, msgs );
 			} else if ( i->element()->cinfo()->isA( "EnzBase" ) ) {
-				writeEnz( fout, *i, fg, bg, x, y );
+				writeEnz( fout, *i, bg, fg, x, y );
 				storeEnzMsgs( *i, msgs );
 			} else if ( i->element()->cinfo()->name() == "Neutral" ) {
-				writeGroup( fout, *i, fg, bg, x, y );
-			} else if ( i->element()->cinfo()->isA( "TableBase" ) ) {
-				writeTable( fout, *i, fg, bg, x, y );
-				storeTableMsgs( *i, msgs );
+				writeGroup( fout, *i, bg, fg, x, y );
+			} else if ( i->element()->cinfo()->isA( "StimulusTable" ) ) {
+				writeStimulusTable( fout, *i, bg, fg, x, y );
+				storeStimulusTableMsgs( *i, msgs );
+			} else if ( i->element()->cinfo()->isA( "Table" ) ) {
+				writePlot( fout, *i, bg, fg, x, y );
+				storePlotMsgs( *i, msgs );
 			}
 		}
 		writeMsgs( fout, msgs );

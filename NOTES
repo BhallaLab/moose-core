@@ -18701,4 +18701,6 @@ Almost set up reac and enz messaging.
 22 Sep 2012
 Now it generates a runnable version of the Kholodenko model, but graphs don't
 work yet. Checkin 3980.
+Graphs work but their colour isn't yet converted.
+Now I have graph colour also converted.
 ============================================================================
