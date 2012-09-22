@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Feb 13 16:07:56 2010 (+0530)
 # Version: 
-# Last-Updated: Sat Sep 22 18:03:25 2012 (+0530)
+# Last-Updated: Sat Sep 22 18:28:57 2012 (+0530)
 #           By: subha
-#     Update #: 300
+#     Update #: 302
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -121,6 +121,7 @@ class MooseSetting(dict):
                 cls._instance.qsettings.setValue(KEY_ICON_DIR, os.path.join(MOOSE_GUI_DIR, 'icons'))
                 cls._instance.qsettings.setValue(KEY_NUMPTHREADS, '1')
                 cls._instance.qsettings.setValue(KEY_FIRSTTIME, True)
+            os.environ['NUMPTHREADS'] = str(cls._instance.qsettings.value(KEY_NUMPTHREADS).toString())
         return cls._instance
 
     def __init__(self, *args, **kwargs):

@@ -8,7 +8,6 @@ import numpy as np
 # for command-line arguments
 import sys
 import os
-os.environ['NUMPTHREADS'] = '1'
 import sys
 import subprocess
 import shutil
