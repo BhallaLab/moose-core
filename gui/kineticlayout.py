@@ -3,14 +3,120 @@ import os
 from PyQt4 import QtGui,QtCore,Qt
 #import pygraphviz as pgv
 import pickle
+import numpy as np
 import random
 import config
 import re
 import math
-sys.path.append('../python')
-#from filepaths import *
+import collections
+from collections import namedtuple
 
 from moose import *
+
+def get_color(colorspec, cmap=None):
+    """Takes a color specification and a colormap and tries to build a
+    QColor out of it.
+
+    Parameters
+    ----------
+    colorspec: int, str or some sequence with 3-4 elements 
+    if int or string representation of an int, it is used as an index
+    into the colormap `cmap`. Otherwise it can be a named color or an
+    triplet containing r,g, b values.
+
+    cmap: a colormap that can be looked up using integers (a sequence
+    or a dict)
+
+    Returns 
+    ------- 
+    if colorspec is int, or a string representation of an int, 2 *
+    colorspec-th entry from cmap is taken as rgb triplet and the
+    corresponding QColor returned. If cmap is not specified this
+    throws an error. If colorspec is a color name or an rgb triplet,
+    corresponding QColor is returned.
+    """
+    color = None
+    cindex = None
+    if isinstance(colorspec, basestring) or \
+            isinstance(colorspec, int):
+        try:
+            cindex = 2 * int(colorspec)
+        except ValueError, e_value:
+            # This is a funny situation. Not only does Qt accept
+            # standard color names, but also arbitrary strings.
+            color = QtGui.QColor(colorspec)
+            if not color.isValid():
+                raise Exception('Invalid color name: %s' % (colorspec))
+    elif isinstance(colorspec, collections.Sequence):
+        if len(colorspec) < 3:
+            raise Exception('Invalid color specified. Need at least (r, g, b)')
+        color = QtGui.QColor(*colorspec)
+    if cindex:        
+        rgb = cmap[cindex]
+        color = QtGui.QColor(*rgb)            
+    return color
+                
+            
+                              
+def sanitize_color(facecolor, bgcolor, cmap):
+    """Sanitize the colors of font face and background using colormap
+    if required
+    
+    Parameters
+    ----------
+    facecolor: string or tuple or list
+    The font face color. If this is a string, it is taken as the color name. If it is a tuple or list, it is taken as r, g, b values.
+
+    bgcolor: string or tuple or list
+    Background color for the text item.
+
+    cmap: a map from integer values to (r,g,b) triplets.
+
+    """
+    fc = None
+    bc = None
+    rgb_fc = []
+    rgb_bc = []
+    if not facecolor:
+        rgb_fc = [0, 255, 0]
+    if not bgcolor:
+        rgb_bc = [0, 0, 255]
+    # If for some reason face and background colors are same, make the
+    # face color random. I do not know how this situation can arise!
+    # -Subha (2012-09-22)
+    if facecolor == bgcolor:
+        rgb_fc = np.random.randint(low=0, high=255, size=3)
+    if rgb_fc:
+        fc = getQColor(rgb_fc)
+    else:
+        fc = getQColor(facecolor, cmap)
+    if rgb_bc:
+        bc = getQColor(rgb_bc)
+    else:
+        bc = getQColor(bgcolor, cmap)
+    return fc, bc
+
+# This creates a named tuple for display info for kinetic objects
+# x and y are coordinates
+# fc = face color, bc = background color
+displayinfo = namedtuple('displayinfo', 
+                         ['mobj', 'x', 'y', 'fc', 'bc'], 
+                         verbose=True)
+
+def extract_display_info(el):
+    """Extract display information from element.
+    
+    The assumption is there will be an Annotator object named `info`
+    under `el`. `info` will contain all the relevant display fields.
+    """
+    miteminfo = el.path+'/info'
+    textcolor = Annotator(miteminfo).getField('textColor')
+    bgcolor  =  Annotator(miteminfo).getField('color')
+    textcolor,bgcolor = get_colors(textcolor,bgcolor,picklecolorMap)
+    return displayinfo(x=float(miteminfo.getField('x')), 
+                       y=float(miteminfo.getField('y')), 
+                       fc=textcolor, 
+                       bc=bgcolor)
 
 class Rectcplx(QtGui.QGraphicsRectItem):
     def __init__(self,x,y,w,h,parent,item):
