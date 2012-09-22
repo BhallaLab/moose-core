@@ -28,7 +28,6 @@ import kineticlayout
 #import kl 
 from neuralLayout import *
 
-from filepaths import *
 import defaults
 
 # Qt4 bindings for Qt
@@ -43,7 +42,7 @@ import config
 def copyDemos():
     """Check if this is the first run and copy the demos to
     ~/moose/Demos if so."""
-    if config.settings[config.KEY_FIRSTTIME] == 'True':
+    if config.settings[config.KEY_FIRSTTIME] in ['True', 'true', '1', 'Yes', 'yes', 'Y']:
         print 'Copying demos'
         progressDialog = QtGui.QProgressDialog()
         progressDialog.setLabelText('Copying the MOOSE demos to your home directory')
@@ -55,6 +54,8 @@ def copyDemos():
 class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
     """Customization for Qt Designer created window"""
     def __init__(self, interpreter=None,parent = None):
+        for key in config.settings:
+            print key, config.settings[key]
         copyDemos()
         # initialization of the superclass
         self.configWidget = ConfigWidget()        
@@ -773,8 +774,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         return tableList
 
     def colorCheck(self,textColor):
-        pkl_file = open(os.path.join(config.settings[config.KEY_COLORMAP_DIR], 
-                                     'KKIT',
+        pkl_file = open(os.path.join(config.settings[config.KEY_COLORMAP_DIR],                                      
                                      'rainbow2.pkl'),
                         'rb')
         picklecolorMap = pickle.load(pkl_file)
