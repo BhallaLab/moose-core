@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Feb 13 16:07:56 2010 (+0530)
 # Version: 
-# Last-Updated: Sat Sep 22 15:48:39 2012 (+0530)
+# Last-Updated: Sat Sep 22 18:03:25 2012 (+0530)
 #           By: subha
-#     Update #: 283
+#     Update #: 300
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -63,6 +63,7 @@ KEY_WINDOW_GEOMETRY = 'main/geometry'
 KEY_WINDOW_LAYOUT = 'main/layout'
 KEY_RUNTIME_AUTOHIDE = 'main/rtautohide'
 KEY_DEMOS_DIR = 'main/demosdir'
+KEY_DOCS_DIR = 'main/docsdir'
 KEY_HOME_DIR = 'main/homedir' 
 KEY_ICON_DIR = 'main/icondir' 
 KEY_COLORMAP_DIR = 'main/colormapdir' 
@@ -78,10 +79,12 @@ MOOSE_DOC_URL = 'http://moose.ncbs.res.in/content/view/5/6/'
 MOOSE_REPORT_BUG_URL = 'http://sourceforge.net/tracker/?func=add&group_id=165660&atid=836272'
 
 MOOSE_DEMOS_DIR = '/usr/share/moose/Demos'
+MOOSE_DOCS_DIR =  '/usr/share/doc/moose'
 MOOSE_GUI_DIR = os.path.dirname(os.path.abspath(__file__))
 MOOSE_CFG_DIR = os.path.join(os.environ['HOME'], '.moose')
 MOOSE_LOCAL_DIR = os.path.join(os.environ['HOME'], 'moose')
 MOOSE_NUMPTHREADS = '1'
+MOOSE_ABOUT_FILE = os.path.join(MOOSE_GUI_DIR, 'about.html')
 
 class MooseSetting(dict):
     """
@@ -111,6 +114,7 @@ class MooseSetting(dict):
                 cls._instance.qsettings.setValue(KEY_FIRSTTIME, False)
                 cls._instance.qsettings.setValue(KEY_DEMOS_DIR, MOOSE_DEMOS_DIR)
                 cls._instance.qsettings.setValue(KEY_LOCAL_DEMOS_DIR, os.path.join(MOOSE_LOCAL_DIR, 'Demos'))
+                cls._instance.qsettings.setValue(KEY_DOCS_DIR, MOOSE_DOCS_DIR)
                 cls._instance.qsettings.setValue(KEY_MOOSE_LOCAL_DIR, MOOSE_LOCAL_DIR)
                 cls._instance.qsettings.setValue(KEY_COLORMAP_DIR, os.path.join(MOOSE_GUI_DIR, 'colormaps'))
                 cls._instance.qsettings.setValue(KEY_HOME_DIR, os.environ['HOME'])
@@ -153,6 +157,7 @@ def init_dirs():
     global MOOSE_DEMOS_DIR
     global MOOSE_LOCAL_DIR
     global MOOSE_CFG_DIR
+    global MOOSE_DOCS_DIR
     errors = []
     moose_cfg_dir = os.path.join(os.environ['HOME'], '.moose')
     moose_local_dir = os.path.join(os.environ['HOME'], 'moose')
@@ -183,6 +188,16 @@ def init_dirs():
             errors.append(OSError(errno.EACCES, 'Cannot access %s' % (moose_demos_dir)))
         else:
             MOOSE_DEMOS_DIR = moose_demos_dir        
+    moose_docs_dir = MOOSE_DOCS_DIR
+    if not os.access(moose_docs_dir, os.R_OK + os.X_OK):
+        # Is it built from source? Then Docs directory will be
+        # located in the parent directory.
+        moose_docs_dir = os.path.normpath(os.path.join(MOOSE_GUI_DIR, '../Docs'))
+        if not os.access(moose_docs_dir, os.R_OK + os.X_OK):
+            print "Could not access Demos directory: %s" % (moose_docs_dir)
+            errors.append(OSError(errno.EACCES, 'Cannot access %s' % (moose_docs_dir)))
+        else:
+            MOOSE_DOCS_DIR = moose_docs_dir            
     return firsttime, errors
 
 settings = MooseSetting()
