@@ -119,10 +119,16 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 #        self.layoutWidget.resize(widthOfEach, self.layoutWidget.height())
 #        self.plotMdiArea.resize(widthOfEach, self.layoutWidget.height())
 
+    def reportBug(self):
+        QtGui.QDesktopServices.openUrl(QtCore.QUrl(config.MOOSE_REPORT_BUG_URL))
+
     def populateHelpMenu(self):
         print 'This is a place holder for populating the help menu'
         self.connect(self.actionAbout, QtCore.SIGNAL('triggered()'), self.showAboutMoose)
         self.connect(self.actionDocumentation, QtCore.SIGNAL('triggered()'), self.showDocumentation)
+        self.connect(self.actionReport_a_Bug, QtCore.SIGNAL('triggered()'), self.reportBug)
+        self.actionDemos.setVisible(False)
+        self.actionRequest_a_Feature.setVisible(False)
 
     def setAllToStartState(self):
         self.currentTime = 0.0
