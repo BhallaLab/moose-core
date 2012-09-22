@@ -328,7 +328,7 @@ class KineticsWidget(QtGui.QWidget):
         self.setupItem(modelPath,zombieType,self.srcdesConnection)
         #for m,n in self.srcdesConnection.items():print m,n
         #pickled the color map here and loading the file
-        pkl_file = open(os.path.join(str(config.get_settings().value(config.KEY_COLORMAP_DIR).toString()), 'KKIT','rainbow2.pkl'),'rb')
+        pkl_file = open(os.path.join(config.settings[config.KEY_COLORMAP_DIR], 'KKIT','rainbow2.pkl'),'rb')
         self.picklecolorMap = pickle.load(pkl_file)        
         self.lineItem_dict = {}
         self.object2line = {}

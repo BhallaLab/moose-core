@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Sep 22 15:19:09 2012 (+0530)
 # Version: 
-# Last-Updated: Sat Sep 22 15:29:59 2012 (+0530)
+# Last-Updated: Sat Sep 22 16:09:07 2012 (+0530)
 #           By: subha
-#     Update #: 18
+#     Update #: 19
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -84,11 +84,11 @@ def copyTree(src, dst, progressDialog):
     if not os.access(src, os.R_OK + os.X_OK):
         print 'Failed to access directory', src
         return
-    print 'Copying %s to : %s'  % (src, dst)
+    # print 'Copying %s to : %s'  % (src, dst)
     try:
         os.makedirs(dst)
     except OSError, e:
-        print e
+        # print e
         errors.append(e)
     size = 0
     for dirpath, dirnames, filenames in os.walk(src):
@@ -97,33 +97,33 @@ def copyTree(src, dst, progressDialog):
             try:
                 size += os.path.getsize(srcname)
             except OSError, e:
-                print e
+                # print e
                 errors.append(e)
     progressDialog.setMaximum(size)
-    print 'Total size to copy', size
+    # print 'Total size to copy', size
     size = 0
     for dirpath, dirnames, filenames in os.walk(src):
         dstdir = os.path.join(dst, os.path.split(dirpath)[-1])
         try:
             os.makedirs(dstdir)
         except OSError, e:
-            print e
+            # print e
             errors.append(e)
-        print 'Copying files from %s to %s' % (dirpath, dstdir)
+        # print 'Copying files from %s to %s' % (dirpath, dstdir)
         for fname in filenames:
             srcname = os.path.join(dirpath, fname)
             dstname = os.path.join(dstdir, fname)
-            print 'Copying:', srcname, 'to', dstname        
+            # print 'Copying:', srcname, 'to', dstname        
             try:
                 shutil.copy2(srcname, dstname)
             except IOError, e:
-                print e
+                # print e
                 errors.append(e)
             size += os.path.getsize(srcname)
             progressDialog.setValue(size)            
             if progressDialog.wasCanceled():
                 return errors
-            print 'Copied till:', size
+            # print 'Copied till:', size
     progressDialog.close()
     return errors
 

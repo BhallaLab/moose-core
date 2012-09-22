@@ -243,7 +243,7 @@ class updatepaintGL(PyGLWidget):
 			g=min((2.0*x)/steps,(-2.0*x)/steps+2)
 			self.colorMap.append([r,g,b])
 	else:
-		f = open(os.path.join(str(config.get_settings().value(config.KEY_COLORMAP_DIR).toString()),'Neural', cMap),'r')
+		f = open(os.path.join(config.settings[config.KEY_COLORMAP_DIR],'Neural', cMap),'r')
 		self.colorMap = pickle.load(f)
 		steps = len(self.colorMap)
 		f.close()
