@@ -18695,5 +18695,10 @@ Unfortunately some other changes have caused errors, in rtTestChem (line 889).
 ============================================================================
 21 Sep 2012
 Fixed errors in regression tests resulting from changes to volume handling
-in Pool.
+in Pool. Checkin 3972.
+Almost set up reac and enz messaging.
+============================================================================
+22 Sep 2012
+Now it generates a runnable version of the Kholodenko model, but graphs don't
+work yet.
 ============================================================================
