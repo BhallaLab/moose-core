@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Feb 13 16:07:56 2010 (+0530)
 # Version: 
-# Last-Updated: Sat Sep 22 15:01:54 2012 (+0530)
+# Last-Updated: Sat Sep 22 15:48:39 2012 (+0530)
 #           By: subha
-#     Update #: 270
+#     Update #: 283
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -99,20 +99,24 @@ class MooseSetting(dict):
         # creates it.
         if cls._instance is None:           
             cls._instance = super(MooseSetting, cls).__new__(cls, *args, **kwargs)
-            errs = init_dirs()
+            firsttime, errs = init_dirs()
             for e in errs:
                 print e
             QtCore.QCoreApplication.setOrganizationName('NCBS')
             QtCore.QCoreApplication.setOrganizationDomain('ncbs.res.in')
             QtCore.QCoreApplication.setApplicationName('MOOSE')
             cls._instance.qsettings = QtCore.QSettings()
-            cls._instance.qsettings.setValue(KEY_DEMOS_DIR, MOOSE_DEMOS_DIR)
-            cls._instance.qsettings.setValue(KEY_LOCAL_DEMOS_DIR, os.path.join(MOOSE_LOCAL_DIR, 'Demos'))
-            cls._instance.qsettings.setValue(KEY_MOOSE_LOCAL_DIR, MOOSE_LOCAL_DIR)
-            cls._instance.qsettings.setValue(KEY_COLORMAP_DIR, os.path.join(MOOSE_GUI_DIR, 'colormaps'))
-            cls._instance.qsettings.setValue(KEY_HOME_DIR, os.environ['HOME'])
-            cls._instance.qsettings.setValue(KEY_ICON_DIR, os.path.join(MOOSE_GUI_DIR, 'icons'))
-            cls._instance.qsettings.setValue(KEY_NUMPTHREADS, '1')
+            # If this is the first time, then set some defaults
+            if firsttime:
+                cls._instance.qsettings.setValue(KEY_FIRSTTIME, False)
+                cls._instance.qsettings.setValue(KEY_DEMOS_DIR, MOOSE_DEMOS_DIR)
+                cls._instance.qsettings.setValue(KEY_LOCAL_DEMOS_DIR, os.path.join(MOOSE_LOCAL_DIR, 'Demos'))
+                cls._instance.qsettings.setValue(KEY_MOOSE_LOCAL_DIR, MOOSE_LOCAL_DIR)
+                cls._instance.qsettings.setValue(KEY_COLORMAP_DIR, os.path.join(MOOSE_GUI_DIR, 'colormaps'))
+                cls._instance.qsettings.setValue(KEY_HOME_DIR, os.environ['HOME'])
+                cls._instance.qsettings.setValue(KEY_ICON_DIR, os.path.join(MOOSE_GUI_DIR, 'icons'))
+                cls._instance.qsettings.setValue(KEY_NUMPTHREADS, '1')
+                cls._instance.qsettings.setValue(KEY_FIRSTTIME, True)
         return cls._instance
 
     def __init__(self, *args, **kwargs):
@@ -145,6 +149,7 @@ def init_dirs():
     Then we try to create the `~/.moose` directory and `~/moose`
     directory.
     """  
+    firsttime = False
     global MOOSE_DEMOS_DIR
     global MOOSE_LOCAL_DIR
     global MOOSE_CFG_DIR
@@ -152,6 +157,7 @@ def init_dirs():
     moose_cfg_dir = os.path.join(os.environ['HOME'], '.moose')
     moose_local_dir = os.path.join(os.environ['HOME'], 'moose')
     if not os.path.exists(moose_cfg_dir):
+        firsttime = True
         try:
             os.mkdir(moose_cfg_dir)
             MOOSE_CFG_DIR = moose_cfg_dir
@@ -177,7 +183,7 @@ def init_dirs():
             errors.append(OSError(errno.EACCES, 'Cannot access %s' % (moose_demos_dir)))
         else:
             MOOSE_DEMOS_DIR = moose_demos_dir        
-    return errors
+    return firsttime, errors
 
 settings = MooseSetting()
 
