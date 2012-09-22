@@ -15,6 +15,7 @@
 #include "../shell/Wildcard.h"
 #include "EnzBase.h"
 #include "CplxEnzBase.h"
+#include "ReacBase.h"
 
 void writeHeader( ofstream& fout, 
 		double simdt, double plotdt, double maxtime, double defaultVol)
@@ -64,7 +65,7 @@ void writeHeader( ofstream& fout,
 	"simobjdump transport input output alloced step_mode stepsize dt delay clock \\\n"
   	"  kf xtree_fg_req xtree_textfg_req x y z\n"
 	"simobjdump proto x y z\n"
-	"simundump geometry /kinetics/geometry 0 1.6667e-19 3 sphere "" white black 0 0 0\n\n";
+	"simundump geometry /kinetics/geometry 0 1.6667e-19 3 sphere \"\" white black 0 0 0\n\n";
 }
 
 
@@ -146,7 +147,7 @@ void writeEnz( ofstream& fout, Id id,
 	Id enzMol = getEnzMol( id );
 	assert( enzMol != Id() );
 	double vol = Field< double >::get( enzMol, "size" ) * NA * 1e-3; 
-	unsigned int isMassAction = 0;
+	unsigned int isMichaelisMenten = 0;
 	if ( id.element()->cinfo()->isA( "CplxEnzBase" ) ) {
 		k1 = Field< double >::get( id, "k1" );
 		k2 = Field< double >::get( id, "k2" );
@@ -157,12 +158,12 @@ void writeEnz( ofstream& fout, Id id,
 		n = Field< double >::get( cplx, "n" );
 		concInit = Field< double >::get( cplx, "concInit" );
 		conc = Field< double >::get( cplx, "conc" );
-		isMassAction = 1;
 	} else {
 		k1 = Field< double >::get( id, "numKm" );
 		k3 = Field< double >::get( id, "kcat" );
 		k2 = 4.0 * k3;
 		k1 = (k2 + k3) / k1;
+		isMichaelsMenten = 1;
 	}
 
 	fout << "simundump kenz " << path << " 0 " << 
@@ -175,9 +176,9 @@ void writeEnz( ofstream& fout, Id id,
 			k2 << " " <<
 			k3 << " " <<
 			0 << " " <<
-			isMassAction << " " <<
+			isMichaelisMenten << " " <<
 			"\"\"" << " " << 
-			colour << " " << textcolour << "\"\"" << 
+			colour << " " << textcolour << " \"\"" << 
 			" " << x << " " << y << " 0\n";
 }
 
@@ -195,16 +196,40 @@ void writeGroup( ofstream& fout, Id id,
 	fout << "  defaultfile.g 0 0 0 " << x << " " << y << " 0\n";
 }
 
-void writeTable( ofstream& fout, Id id,
+void writePlot( ofstream& fout, Id id,
 				string colour, string textcolour,
 			 	double x, double y )
 {
+	string path = id.path();
+	size_t pos = path.substr( 2 ).find( "/" );
+	if ( pos == string::npos ) // Might be finding unrelated neutrals
+			return;
+	path = path.substr( pos + 2 );
+	fout << "simundump xplot " << path << " 3 524288 \\\n" << 
+	"\"delete_plot.w <s> <d>; edit_plot.D <w>\" " << textcolour << " 0 0 1\n";
 		/*
 simundump xplot /graphs/conc1/Sub.Co 3 524288 \
   "delete_plot.w <s> <d>; edit_plot.D <w>" blue 0 0 1
 simundump xplot /graphs/conc1/Prd.Co 3 524288 \
   "delete_plot.w <s> <d>; edit_plot.D <w>" 60 0 0 1
   */
+}
+
+void writeLookupTable( ofstream& fout, Id id,
+				string colour, string textcolour,
+			 	double x, double y )
+{
+}
+
+void writeTable( ofstream& fout, Id id,
+				string colour, string textcolour,
+			 	double x, double y )
+{
+	ObjId pa = Neutral::parent( id.eref() );
+	if ( pa.id.element()->getName().substr( 0, 4 ) == "conc" )
+		writePlot( fout, id, colour, textcolour, x , y);
+	else
+		writeLookupTable( fout, id, colour, textcolour, x , y);
 }
 
 void writeGui( ofstream& fout )
@@ -214,7 +239,8 @@ void writeGui( ofstream& fout )
 	"simundump xgraph /moregraphs/conc3 0 0 100 0 1 0\n"
 	"simundump xgraph /moregraphs/conc4 0 0 100 0 1 0\n"
 	"simundump xcoredraw /edit/draw 0 -6 4 -2 6\n"
-	"simundump xtree /edit/draw/tree 0 /kinetics/#[],/kinetics/#[]/#[],/kinetics/#[]/#[]/#[][TYPE!=proto],/kinetics/#[]/#[]/#[][TYPE!=linkinfo]/##[] edit_elm.D <v>; drag_from_edit.w <d> <S> <x> <y> <z> auto 0.6\n"
+	"simundump xtree /edit/draw/tree 0 \\\n"
+	"  /kinetics/#[],/kinetics/#[]/#[],/kinetics/#[]/#[]/#[][TYPE!=proto],/kinetics/#[]/#[]/#[][TYPE!=linkinfo]/##[] \"edit_elm.D <v>; drag_from_edit.w <d> <S> <x> <y> <z>\" auto 0.6\n"
 	"simundump xtext /file/notes 0 1\n";
 }
 
@@ -269,9 +295,108 @@ void getInfoFields( Id id, string& bg, string& fg,
 	}
 }
 
+
+string trimPath( const string& path )
+{
+	size_t pos = path.find( "/kinetics" );
+	if ( pos == string::npos ) // Might be finding unrelated neutrals
+			return "";
+	return path.substr( pos );
+}
+
+void storeReacMsgs( Id reac, vector< string >& msgs )
+{
+	// const Finfo* reacFinfo = PoolBase::initCinfo()->findFinfo( "reacDest" );
+	// const Finfo* noutFinfo = PoolBase::initCinfo()->findFinfo( "nOut" );
+	static const Finfo* subFinfo = 
+			ReacBase::initCinfo()->findFinfo( "toSub" );
+	static const Finfo* prdFinfo = 
+			ReacBase::initCinfo()->findFinfo( "toPrd" );
+	vector< Id > targets;
+	
+	reac.element()->getNeighbours( targets, subFinfo );
+	string reacPath = trimPath( reac.path() );
+	for ( vector< Id >::iterator i = targets.begin(); i != targets.end(); ++i ) {
+		string s = "addmsg " + trimPath( i->path() ) + " " + reacPath +
+			   	" SUBSTRATE n";
+		msgs.push_back( s );
+		s = "addmsg " + reacPath + " " + trimPath( i->path() ) + 
+				" REAC A B";
+		msgs.push_back( s );
+	}
+
+	targets.resize( 0 );
+	reac.element()->getNeighbours( targets, prdFinfo );
+	for ( vector< Id >::iterator i = targets.begin(); i != targets.end(); ++i ) {
+		string s = "addmsg " + trimPath( i->path() ) + " " + reacPath +
+			   	" PRODUCT n";
+		msgs.push_back( s );
+		s = "addmsg " + reacPath + " " + trimPath( i->path() ) + 
+				" REAC B A";
+		msgs.push_back( s );
+	}
+}
+
+void storeMMenzMsgs( Id enz, vector< string >& msgs )
+{
+	static const Finfo* subFinfo = 
+			EnzBase::initCinfo()->findFinfo( "toSub" );
+	static const Finfo* prdFinfo = 
+			EnzBase::initCinfo()->findFinfo( "toPrd" );
+	static const Finfo* enzFinfo = 
+			EnzBase::initCinfo()->findFinfo( "enzDest" );
+	vector< Id > targets;
+	
+	string enzPath = trimPath( enz.path() );
+	enz.element()->getNeighbours( targets, subFinfo );
+	for ( vector< Id >::iterator i = targets.begin(); i != targets.end(); ++i ) {
+		string tgtPath = trimPath( i->path() );
+		string s = "addmsg " + tgtPath + " " + enzPath + " SUBSTRATE n";
+		msgs.push_back( s );
+		s = "addmsg " + enzPath + " " + tgtPath + " REAC sA B";
+		msgs.push_back( s );
+	}
+
+	targets.resize( 0 );
+	enz.element()->getNeighbours( targets, prdFinfo );
+	for ( vector< Id >::iterator i = targets.begin(); i != targets.end(); ++i ) {
+		string tgtPath = trimPath( i->path() );
+		string s = "addmsg " + enzPath + " " + tgtPath + " MM_PRD pA";
+		msgs.push_back( s );
+	}
+
+	targets.resize( 0 );
+	enz.element()->getNeighbours( targets, enzFinfo );
+	for ( vector< Id >::iterator i = targets.begin(); i != targets.end(); ++i ) {
+		string tgtPath = trimPath( i->path() );
+		string s = "addmsg " + tgtPath + " " + enzPath + " ENZYME n";
+		msgs.push_back( s );
+	}
+}
+
+void storeCplxEnzMsgs( Id enz, vector< string >& msgs )
+{
+}
+
+void storeEnzMsgs( Id enz, vector< string >& msgs )
+{
+	if ( enz.element()->cinfo()->isA( "CplxEnzBase" ) ) 
+		storeCplxEnzMsgs( enz, msgs );
+	else
+		storeMMenzMsgs( enz, msgs );
+}
+
+void writeMsgs( ofstream& fout, const vector< string >& msgs )
+{
+	for ( vector< string >::const_iterator i = msgs.begin();
+					i != msgs.end(); ++i )
+			fout << *i << endl;
+}
+
 void writeKkit( Id model, const string& fname )
 {
 		vector< Id > ids;
+		vector< string > msgs;
 		unsigned int num = simpleWildcardFind( model.path() + "/##", ids );
 		if ( num == 0 ) {
 			cout << "Warning: writeKkit:: No model found on " << model << 
@@ -289,22 +414,25 @@ void writeKkit( Id model, const string& fname )
 		double side = floor( 1.0 + sqrt( static_cast< double >( num ) ) );
 		double dx = side / num;
 		for( vector< Id >::iterator i = ids.begin(); i != ids.end(); ++i ) {
-			getInfoFields( *i, bg, fg, x, y , side, dx );
+			getInfoFields( *i, fg, bg, x, y , side, dx );
 			if ( i->element()->cinfo()->isA( "PoolBase" ) ) {
 				ObjId pa = Neutral::parent( i->eref() );
 				// Check that it isn't an enz cplx.
-				if ( !pa.element()->cinfo()->isA( "CplxEnzBase" ) )
+				if ( !pa.element()->cinfo()->isA( "CplxEnzBase" ) ) {
 					writePool( fout, *i, fg, bg, x, y );
+				}
 			} else if ( i->element()->cinfo()->isA( "ReacBase" ) ) {
 				writeReac( fout, *i, fg, bg, x, y );
+				storeReacMsgs( *i, msgs );
 			} else if ( i->element()->cinfo()->isA( "EnzBase" ) ) {
 				writeEnz( fout, *i, fg, bg, x, y );
+				storeEnzMsgs( *i, msgs );
 			} else if ( i->element()->cinfo()->name() == "Neutral" ) {
 				writeGroup( fout, *i, fg, bg, x, y );
-			} else if ( i->element()->cinfo()->name() == "TableBase" ) {
+			} else if ( i->element()->cinfo()->isA( "TableBase" ) ) {
 				writeTable( fout, *i, fg, bg, x, y );
 			}
 		}
-		writeMsgs();
+		writeMsgs( fout, msgs );
 		writeFooter( fout );
 }
