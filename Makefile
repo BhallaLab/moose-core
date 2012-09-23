@@ -369,3 +369,32 @@ libs:
 clean:
 	@(for i in $(CLEANSUBDIR) ; do $(MAKE) -C $$i clean;  done)
 	-rm -rf moose  core.* DOCS/html python/moose/*.so python/moose/*.pyc  
+
+## get the default python module install location
+pydir_cmd := python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"
+pydistpkg_dir := $(shell $(pydir_cmd))
+install_prefix=/usr
+## Note that $(DESTDIR) is provided by dpkg-buildpackage to specify the local install for deb packaging
+## if doing sudo make install, $(DESTDIR) will be undefined and will cause no trouble
+install:
+	## delete older .../share/moose, - before rm means ignore errors (eg not found)
+	-rm -rf $(DESTDIR)$(install_prefix)/share/moose
+	## -p creates parent directories also if they don't exist
+	mkdir -p $(DESTDIR)$(install_prefix)/share/moose
+	## copy filtering out the .svn (hidden) files
+	rsync -r --exclude=.svn Demos/* $(DESTDIR)$(install_prefix)/share/moose/Demos
+	rsync -r --exclude=.svn gui/* $(DESTDIR)$(install_prefix)/share/moose/gui
+	test -d $(DESTDIR)$(install_prefix)/share/doc || mkdir -p $(DESTDIR)$(install_prefix)/share/doc
+	rsync -r --exclude=.svn Docs/* $(DESTDIR)$(install_prefix)/share/doc/moose
+	## pymoose module goes to python's dist-packages
+	## make directory in case non-existent (needed for deb pkg building)
+	mkdir -p $(DESTDIR)$(pydistpkg_dir)
+	rsync -r --exclude=.svn python/* $(DESTDIR)$(pydistpkg_dir)/
+	## shell command moosegui for the moose GUI.
+	chmod a+x $(DESTDIR)$(install_prefix)/share/moose/gui/MooseGUI.py
+	## -rm instructs make to ignore errors from make eg. file not found
+	-rm -f $(DESTDIR)$(install_prefix)/bin/moosegui
+	mkdir -p $(DESTDIR)$(install_prefix)/bin
+	ln -s $(DESTDIR)$(install_prefix)/share/moose/gui/MooseGUI.py $(DESTDIR)$(install_prefix)/bin/moosegui
+	
+.PHONY: install
