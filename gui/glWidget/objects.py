@@ -188,6 +188,7 @@ class somaSphere(BaseObject):
 		self.radius = l_coords[6]/2
 		self.centre = [l_coords[0],l_coords[1],l_coords[2]]
 		self.daddy  = cellName
+		self.l_coords = l_coords
 
 	def setCellParentProps(self,centralPos,rotation,r,g,b):
 		self._centralPos = centralPos	
