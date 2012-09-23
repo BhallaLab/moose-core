@@ -945,4 +945,14 @@ void rtTestWriteKkit()
 	assert( model != Id() );
 
 	shell->doSaveModel( model, "writeK.g" );
+	shell->doDelete( model );
+
+	model = shell->doLoadModel( "tabsumtot.g", "/tabtest", "Neutral" );
+	assert( model != Id() );
+
+	shell->doSaveModel( model, "writeTabTest.g" );
+	shell->doDelete( model );
+
+
+	cout << "." << flush;
 }

@@ -18,6 +18,7 @@
 #include "ReacBase.h"
 #include "../builtins/TableBase.h"
 #include "../builtins/Table.h"
+#include "../builtins/StimulusTable.h"
 
 void writeHeader( ofstream& fout, 
 		double simdt, double plotdt, double maxtime, double defaultVol)
@@ -86,6 +87,32 @@ void writeReac( ofstream& fout, Id id,
 			colour << " " << textcolour << " " << x << " " << y << " 0\n";
 }
 
+unsigned int getSlaveEnable( Id id )
+{
+	static const Finfo* setNinitFinfo = 
+			PoolBase::initCinfo()->findFinfo( "set_nInit" );
+	static const Finfo* setConcInitFinfo = 
+			PoolBase::initCinfo()->findFinfo( "set_concInit" );
+	unsigned int ret = 0;
+	vector< Id > src;
+	if ( id.element()->cinfo()->isA( "BufPool" ) ) {
+		if ( id.element()->getNeighbours( src, setConcInitFinfo ) > 0 ) {
+				ret = 2;
+		} else if ( id.element()->getNeighbours( src, setNinitFinfo ) > 0 ){
+				ret = 4;
+		}
+	} else {
+		return 0;
+	}
+	if ( ret == 0 )
+			return 4; // Just simple buffered molecule
+	if ( src[0].element()->cinfo()->isA( "StimulusTable" ) )
+			return ret; // Following a table, this is fine.
+	
+	// Fallback: I have no idea what sent it the input, assume it is legit.
+	return ret;
+}
+
 void writePool( ofstream& fout, Id id,
 				string colour, string textcolour,
 			 	double x, double y )
@@ -99,6 +126,7 @@ void writePool( ofstream& fout, Id id,
 	double nInit = Field< double >::get( id, "nInit" );
 	double n = Field< double >::get( id, "n" );
 	double size = Field< double >::get( id, "size" );
+	unsigned int slave_enable = getSlaveEnable( id );
 
 	fout << "simundump kpool " << path << " 0 " << 
 			diffConst << " " <<
@@ -108,7 +136,8 @@ void writePool( ofstream& fout, Id id,
 			nInit << " " <<
 			0 << " " << 0 << " " << // mwt, nMin
 			size * NA * 1e-3  << " " << // volscale
-			"0 /kinetics/geometry " << 
+			slave_enable << // GENEISIS field here.
+			" /kinetics/geometry " << 
 			colour << " " << textcolour << " " << x << " " << y << " 0\n";
 }
 
@@ -202,6 +231,35 @@ void writeStimulusTable( ofstream& fout, Id id,
 				string colour, string textcolour,
 			 	double x, double y )
 {
+	string path = id.path();
+	size_t pos = path.find( "/kinetics" );
+	path = path.substr( pos );
+	unsigned int stepMode = Field< bool >::get( id, "doLoop" );
+	if ( stepMode == 0 )
+			stepMode = 2; // TAB_ONCE in GENESIS/kkit terms.
+	double stepSize = Field< double >::get( id, "stepSize" );
+
+	fout << "simundump xtab " << path << " 0 0 0 1 " << stepMode <<
+			" " << stepSize << " \"\" edit_xtab \"\" " << 
+			colour << " " << textcolour << " " <<
+			"0 0 0 1 " << x << " " << y << " 0\n";
+
+	vector< double > vec = Field < vector< double > >::get( id, "vec" );
+	double startTime = Field< double >::get( id, "startTime" );
+	double stopTime = Field< double >::get( id, "stopTime" );
+
+	fout << "loadtab " << path << " table 1 " << vec.size() - 1 << " " <<
+			startTime << " " << stopTime << "\\\n";
+	for ( unsigned int i = 0; i < vec.size(); ++i ) {
+			fout << " " << vec[i] * 1000;
+			if ( i % 10 == 9 )
+					fout << "\\\n";
+	}
+	fout << "\n";
+
+	double dx = ( stopTime - startTime ) / ( vec.size() - 1 );
+	fout << "setfield " << path << " table->dx " << dx << endl;
+	fout << "setfield " << path << " table->invdx " << 1.0/dx << endl;
 }
 
 void writePlot( ofstream& fout, Id id,
@@ -416,6 +474,19 @@ void storeFuncPoolMsgs( Id pool, vector< string >& msgs )
 
 void storeStimulusTableMsgs( Id tab, vector< string >& msgs )
 {
+	static const Finfo* outputFinfo = 
+			StimulusTable::initCinfo()->findFinfo( "output" );
+	// In GENESIS we don't need to explicitly connect up the enz cplx, so
+	// no need to deal with the toCplx msg.
+	vector< Id > targets;
+	
+	string tabPath = trimPath( tab.path() );
+	tab.element()->getNeighbours( targets, outputFinfo );
+	for ( vector< Id >::iterator i = targets.begin(); i != targets.end(); ++i ) {
+		string tgtPath = trimPath( i->path() );
+		string s = "addmsg " + tabPath + " " + tgtPath + " SLAVE output";
+		msgs.push_back( s );
+	}
 }
 
 void storePlotMsgs( Id tab, vector< string >& msgs )
