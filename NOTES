@@ -18710,5 +18710,11 @@ A little remaining stuff to get StimTables in.
 23 Sep 2012.
 Extracting runtime information is done, but there is a fair amount of 
 reworking of SimManager to do. Needed to bring hsolve and cell models into
-its ambit.
+its ambit. Checkin 4005.
+Before I sign off on writeKkit, 
+- Check on a big model with regular enz.
+- I should set it up to handle Stimulus Tables.  Need test model
+	Set up stimulus table test using tabsumtot.g, already in regression
+	tests. Looks OK, but now I also have to get the sumtot to work properly.
+StimulusTables now work. Sumtot not yet.
 ============================================================================
