@@ -282,6 +282,8 @@ void ReadCspace::expandEnzyme(
 		ret = shell->doAddMsg( "OneToOne", 
 			mol_[ name[ p2 ] - 'a' ], "reac", enzId, "prd" );
 
+	assert( ret != Msg::bad );
+
 	reac_.push_back( enzId );
 	parms_.push_back( DEFAULT_RATE );
 	parms_.push_back( DEFAULT_KM );

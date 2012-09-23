@@ -187,6 +187,21 @@ class Shell
 		 */
 		 Id doLoadModel( const string& fname, const string& modelpath, 
 		 	const string& solverClass = "", bool qFlag = 0 );
+
+		/**
+		 * Saves specified model to specified file, using filetype 
+		 * identified by filename extension. Currently known filetypes are:
+		 * .g: Kkit model
+		 *
+		 * Still to come:
+		 * .p: GENESIS neuron morphology and channel spec file
+		 * .sbml: SBML file
+		 * .nml: NeuroML file
+		 * .9ml: NineML file
+		 * .snml: SigNeurML
+		 */
+		 void doSaveModel( Id model, const string& fileName, 
+			 bool qflag = 0 ) const;
 		
 		/**
 		 * Write given model to SBML file. Returns success value.
