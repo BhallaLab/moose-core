@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Sep 20 10:36:23 2012 (+0530)
+// Last-Updated: Sun Sep 23 13:56:20 2012 (+0530)
 //           By: subha
-//     Update #: 10041
+//     Update #: 10058
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -3800,6 +3800,50 @@ static struct module_state _state;
         return ret;
     }
 
+    PyDoc_STRVAR(moose_saveModel_documentation,
+                 "saveModel(source, fileame)\n"
+                 "\n"
+                 "Save model rooted at `source` to file `filename`.\n"
+                 "\n"
+                 "Parameters\n"
+                 "----------\n"
+                 "source: ematrix or element or str\n"
+                 "root of the model tree\n"
+                 "\n"
+                 "filename: str\n"
+                 "destination file to save the model in.\n"
+                 "\n"
+                 "Returns\n"
+                 "-------\n"
+                 "None\n"
+                 "\n");
+
+    static PyObject * moose_saveModel(PyObject * dummy, PyObject * args)
+    {
+        char * filename = NULL;
+        PyObject * source = NULL;
+        Id model;
+        if (!PyArg_ParseTuple(args, "Os: moose_saveModel", &source, &filename)){
+            return NULL;
+        }
+        if (PyString_Check(source)){
+            char * srcPath = PyString_AsString(source);
+            if (!srcPath){
+                return NULL;
+            }
+            model = Id(string(srcPath));
+        } else if (Id_Check(source)){
+            model = ((_Id*)source)->id_;
+        } else if (ObjId_Check(source)){
+            model = ((_ObjId*)source)->oid_.id;
+        } else {
+            PyErr_SetString(PyExc_TypeError, "moose_saveModel: need an ematrix, element or string for first argument.");
+            return NULL;
+        }
+        SHELLPTR->doSaveModel(model, filename);
+        Py_RETURN_NONE;
+    }
+    
     static PyObject * moose_setCwe(PyObject * dummy, PyObject * args)
     {
         PyObject * element = NULL;
@@ -4703,6 +4747,7 @@ static struct module_state _state;
         {"exists", (PyCFunction)moose_exists, METH_VARARGS, "True if there is an object with specified path."},
         {"writeSBML", (PyCFunction)moose_writeSBML, METH_VARARGS, "Export biochemical model to an SBML file."},    
         {"loadModel", (PyCFunction)moose_loadModel, METH_VARARGS, moose_loadModel_documentation},
+        {"saveModel", (PyCFunction)moose_saveModel, METH_VARARGS, moose_saveModel_documentation},
         {"connect", (PyCFunction)moose_connect, METH_VARARGS, moose_connect_documentation},        
         {"getCwe", (PyCFunction)moose_getCwe, METH_VARARGS, "Get the current working element. 'pwe' is an alias of this function."},
         // {"pwe", (PyCFunction)moose_getCwe, METH_VARARGS, "Get the current working element. 'getCwe' is an alias of this function."},
