@@ -103,6 +103,14 @@ const Cinfo* SimManager::initCinfo()
 			&SimManager::getVersion
 		);
 
+		static ReadOnlyElementValueFinfo< SimManager, string > modelFamily(
+			"modelFamily",
+			"Family classification of model: *kinetic, and *neuron "
+			"are the options so far. In due course expect to see things"
+			"like detailedNetwork, intFireNetwork, sigNeur and so on.",
+			&SimManager::getModelFamily
+		);
+
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
@@ -161,6 +169,7 @@ const Cinfo* SimManager::initCinfo()
 		&runTime,		// Value
 		&method,		// Value
 		&version,		// Value
+		&modelFamily,	// Value
 		&build,			// DestFinfo
 		&makeStandardElements,			// DestFinfo
 		&nodeMeshing,	// SharedFinfo
@@ -287,6 +296,15 @@ string SimManager::getMethod( const Eref& e, const Qinfo* q ) const
 {
 	return method_;
 }
+
+string SimManager::getModelFamily( const Eref& e, const Qinfo* q ) const
+{
+	Id mesh = findChemMesh();
+	if ( mesh != Id() )
+			return "kinetic";
+	return "unknown";
+}
+
 //////////////////////////////////////////////////////////////
 // MsgDest Definitions
 //////////////////////////////////////////////////////////////
@@ -534,6 +552,8 @@ void SimManager::buildFromKkitTree( const Eref& e, const Qinfo* q,
 	shell->doSetClock( 6, simdt_ );
 	shell->doSetClock( 8, plotdt_ );
 	shell->doSetClock( 9, 0 );
+
+	Field< double >::set( Id( 1 ), "runTime", runTime_ );
 
 	string basePath = baseId_.path();
 	if ( method == "Gillespie" || method == "gillespie" || 

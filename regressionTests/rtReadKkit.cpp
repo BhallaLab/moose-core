@@ -944,5 +944,5 @@ void rtTestWriteKkit()
 	Id model = shell->doLoadModel( "Kholodenko.g", "/rkktest", "Neutral" );
 	assert( model != Id() );
 
-	writeKkit( model, "writeK.g" );
+	shell->doSaveModel( model, "writeK.g" );
 }

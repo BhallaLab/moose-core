@@ -16,6 +16,7 @@ OBJ = \
 	ShellThreads.o	\
 	ProcessLoop.o	\
 	LoadModels.o \
+	SaveModels.o \
 	Neutral.o	\
 	Wildcard.o	\
 	testShell.o	\
@@ -36,6 +37,7 @@ ShellSetGet.o:	Shell.h
 ShellThreads.o:	Shell.h Neutral.h ../scheduling/Clock.h
 ProcessLoop.o:	Shell.h ../basecode/FuncBarrier.h
 LoadModels.o:	Shell.h Neutral.h ../kinetics/ReadKkit.h ../biophysics/ReadCell.h
+SaveModels.o:	Shell.h Neutral.h
 Neutral.o:	Neutral.h ../basecode/ElementValueFinfo.h
 Wildcard.o:	Wildcard.h Shell.h Neutral.h ../basecode/ElementValueFinfo.h
 testShell.o:	Wildcard.h Shell.h Neutral.h ../scheduling/Tick.h ../scheduling/testScheduling.h ../builtins/Arith.h ../basecode/SparseMatrix.h ../msg/SparseMsg.h ../msg/SingleMsg.h ../basecode/SetGet.h

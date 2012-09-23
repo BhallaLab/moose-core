@@ -138,10 +138,9 @@ const Cinfo* Clock::initCinfo()
 			&Clock::getCurrentStep
 		);
 
-		static ReadOnlyValueFinfo< Clock, vector< double > > getDts( 
-			"getDts",
-			"Utility function returning the dts of all the ticks.",
-			// &Clock::setNumTicks,
+		static ReadOnlyValueFinfo< Clock, vector< double > > dts( 
+			"dts",
+			"Utility function returning the dt (timestep) of all ticks.",
 			&Clock::getDts
 		);
 
@@ -216,7 +215,7 @@ const Cinfo* Clock::initCinfo()
 		&nsteps,
 		&numTicks,
 		&currentStep,
-		&getDts,
+		&dts,
 		&isRunning,
 		// SrcFinfos
 		tickSrc(),
@@ -241,16 +240,16 @@ const Cinfo* Clock::initCinfo()
 		"function for every object that is connected to them."
 		"The default scheduling (should not be overridden) has the "
 		"following assignment of classes to Ticks:"
-		"0: Biophysics - Init call on Compartments in EE method"
-		"1: Biophysics - Channels"
-		"2: Biophysics - Process call on Compartments"
-		"3: ?"
-		"4: Kinetics - Pools, or in ksolve mode: Mesh to handle diffusion"
-		"5: Kinetics - Reacs, enzymes, etc, or in ksolve mode: Stoich/GSL"
-		"6: Stimulus tables"
-		"7: More stimulus tables"
-		"8: Plots"
-		"9: Slower graphics like cell arrays or 3-D displays"
+		"0. Biophysics: Init call on Compartments in EE method"
+		"1. Biophysics: Channels"
+		"2. Biophysics: Process call on Compartments"
+		"3. Undefined "
+		"4. Kinetics: Pools, or in ksolve mode: Mesh to handle diffusion"
+		"5. Kinetics: Reacs, enzymes, etc, or in ksolve mode: Stoich/GSL"
+		"6. Stimulus tables"
+		"7. More stimulus tables"
+		"8. Plots"
+		"9. Slower graphics like cell arrays or 3-D displays"
 		"",
 	};
 
@@ -706,7 +705,7 @@ void Clock::advancePhase2(  ProcInfo *p )
 void Clock::handleReinit()
 {
 	info_.currTime = 0.0;
-	runTime_ = 0.0;
+	// runTime_ = 0.0;
 	currentTime_ = 0.0;
 	nextTime_ = 0.0;
 	nSteps_ = 0;
