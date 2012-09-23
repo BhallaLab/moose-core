@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 17:11:06 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Sep  5 16:07:52 2012 (+0530)
+// Last-Updated: Sun Sep 23 13:22:14 2012 (+0530)
 //           By: subha
-//     Update #: 942
+//     Update #: 943
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -155,6 +155,7 @@ extern "C" {
     static PyObject * moose_isRunning(PyObject * dummy, PyObject * args);
     static PyObject * moose_exists(PyObject * dummy, PyObject * args);
     static PyObject * moose_loadModel(PyObject * dummy, PyObject * args);
+    static PyObject * moose_saveModel(PyObject * dummy, PyObject * args);
     static PyObject * moose_writeSBML(PyObject * dummy, PyObject * args);
     static PyObject * moose_setCwe(PyObject * dummy, PyObject * args);
     static PyObject * moose_getCwe(PyObject * dummy, PyObject * args);
