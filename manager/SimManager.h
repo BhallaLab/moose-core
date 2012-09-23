@@ -33,6 +33,8 @@ class SimManager
 		void setMethod( const Eref& e, const Qinfo* q, string v );
 		string getMethod( const Eref& e, const Qinfo* q ) const;
 
+		string getModelFamily( const Eref& e, const Qinfo* q ) const;
+
 		/// Destination function
 		void build( const Eref& e, const Qinfo* q, string method );
 

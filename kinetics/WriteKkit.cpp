@@ -440,6 +440,52 @@ void storePlotMsgs( Id tab, vector< string >& msgs )
 	msgs.push_back( s );
 }
 
+/**
+ * A bunch of heuristics to find good SimTimes to use for kkit. 
+ * Returns runTime.
+ */
+double estimateSimTimes( double& simDt, double& plotDt )
+{
+		double runTime = Field< double >::get( Id( 1 ), "runTime" );
+		if ( runTime <= 0 )
+				runTime = 100.0;
+		vector< double > dts = 
+				Field< vector< double> >::get( Id( 1 ), "dts" );
+		simDt = dts[6];
+		plotDt = dts[8];
+		if ( plotDt <= 0 )
+				plotDt = runTime / 200.0;
+		if ( simDt == 0 )
+				simDt = 0.01;
+		if ( simDt > plotDt )
+				simDt = plotDt / 100;
+
+		return runTime;
+}
+
+/// Returns an estimate of the default volume used in the model.
+double estimateDefaultVol( Id model )
+{
+		vector< Id > children = 
+				Field< vector< Id > >::get( model, "children" );
+		vector< double > vols;
+		double maxVol = 0;
+		for ( vector< Id >::iterator i = children.begin(); 
+						i != children.end(); ++i ) {
+				if ( i->element()->cinfo()->isA( "ChemMesh" ) ) {
+						double v = Field< double >::get( *i, "size" );
+						if ( i->element()->getName() == "kinetics" )
+								return v;
+						vols.push_back( v );
+						if ( maxVol < v ) 
+								maxVol = v;
+				}
+		}
+		if ( maxVol > 0 )
+				return maxVol;
+		return 1.0e-15;
+}
+
 void writeKkit( Id model, const string& fname )
 {
 		vector< Id > ids;
@@ -451,7 +497,12 @@ void writeKkit( Id model, const string& fname )
 			return;
 		}
 		ofstream fout( fname.c_str(), ios::out );
-		writeHeader( fout, 1, 1, 1, 1 );
+		
+		double simDt;
+		double plotDt;
+		double runTime = estimateSimTimes( simDt, plotDt );
+		double defaultVol = estimateDefaultVol( model );
+		writeHeader( fout, simDt, plotDt, runTime, defaultVol );
 		writeGui( fout );
 
 		string bg = "cyan";

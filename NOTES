@@ -18702,5 +18702,13 @@ Almost set up reac and enz messaging.
 Now it generates a runnable version of the Kholodenko model, but graphs don't
 work yet. Checkin 3980.
 Graphs work but their colour isn't yet converted.
-Now I have graph colour also converted.
+Now I have graph colour also converted. Checkin 4001
+Now to put it all into SimManager and extract runtime parameters.
+A little remaining stuff to get StimTables in.
+
+============================================================================
+23 Sep 2012.
+Extracting runtime information is done, but there is a fair amount of 
+reworking of SimManager to do. Needed to bring hsolve and cell models into
+its ambit.
 ============================================================================
