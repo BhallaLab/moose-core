@@ -117,8 +117,9 @@ def getReactionDisplayData(mentry, cmap):
     ret = {}
     for el in mentry:
         for reaction in el.getNeighbors('remeshReacs'):
-            dinfo = extract_display_info(el, cmap)
-            ret[reaction] = dinfo
+            dinfo = extract_display_info(reaction[0], cmap)
+            for r in reaction:
+                ret[r] = dinfo
     return ret
 
 def getPoolDisplayData(mentry, cmap):
@@ -140,8 +141,10 @@ def getPoolDisplayData(mentry, cmap):
             parent = moose.element(pool[0].parent)
             if isinstance(parent, moose.EnzBase):
                 dinfo = extract_display_info(parent, cmap)
-                enzymes[pool] = dinfo
+                for p in pool:
+                    enzymes[p] = dinfo
             else:
                 dinfo = extract_display_info(pool, cmap)
-                others[pool] = dinfo
+                for p in pool:
+                    others[p] = dinfo            
     return (enzymes, others)

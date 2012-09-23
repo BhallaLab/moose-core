@@ -10,6 +10,7 @@ import re
 import math
 import collections
 import kineticsutils as kutils
+from kineticsutils import displayinfo
 
 import moose
 
@@ -41,6 +42,27 @@ class Rectcplx(QtGui.QGraphicsRectItem):
         if change == QtGui.QGraphicsItem.ItemSelectedChange and value == True:
             self.Rectemitter1.emit(QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),element(self.mooseObj_))
         return QtGui.QGraphicsItem.itemChange(self,change,value)
+
+class KineticsDisplayItem(QtGui.QGraphicsObject):
+    """Base class for display elemenets in kinetics layout"""
+    def __init__(self, mooseObject, parent=None):
+        QtGui.QGraphicsObject.__init__(self, parent)
+        self.mobj = mooseObject
+        self.gobj = None
+    
+class PoolItem(KineticsDisplayItem):
+    def __init__(self, *args, **kwargs):
+        KineticsDisplayItem.__init__(self, *args, **kwargs)
+        self.gobj = QtGui.QGraphicsSimpleTextItem(self.mobj.name, self)
+        
+    def setDisplayProperties(self, dinfo):
+        """Set the display properties of this item."""
+        self.setPos(dinfo.x, dinfo.y)
+        self.gobj.setPen(QtGui.QPen(QtGui.QBrush(dinfo.fc)))
+        self.gobj.setBrush(QtGui.QBrush(dinfo.bc))
+        self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable+QtGui.QGraphicsItem.ItemIsMovable)
+        if QtCore.QT_VERSION >= 0x040600:
+            self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges)
 
 class Textitem(QtGui.QGraphicsSimpleTextItem):
     def __init__(self,parent,item,xpos,ypos,pickle):
@@ -95,7 +117,7 @@ class EllipseItem(QtGui.QGraphicsEllipseItem):
 
     def __init__(self,x,y,w,h,parent,mooseObj):
         self.ellemitter = QtCore.QObject()
-        self.mooseObj_ = mooseObj[0]
+        self.mooseObj_ = mooseObj
         self.x = x
         self.y = y
         self.w = w
@@ -344,89 +366,55 @@ class KineticsWidget(QtGui.QWidget):
         self.ellipse_height = 15
         self.cplx_width = 8
         self.cplx_height = 8
+        self.displayMeshEntries()
+        hLayout.addWidget(self.view)
+
+    def displayReactions(self, displayDict, meshEntry):
+        """Setup display of reaction obejcts"""
+        ret = {}
+        for reac, dinfo in displayDict.items():
+            x, y = self.reposition(dinfo.x, dinfo.y)
+            reacItem = EllipseItem(x, y, 
+                                   self.ellipse_width, 
+                                   self.ellipse_height, meshEntry, reac)
+            reacItem.setBrush(dinfo.bc)
+            ret[reac] = reacItem
+            # Where does the textcolor go??
+            # TODO: connect the signals
+        return ret
+
+    def displayEnzymes(self, displayDict, meshEntry):
+        """Display the enzymes"""
+        ret = {}
+        for enzPool, dinfo in displayDict.items():
+            x, y = self.reposition(dinfo.x, dinfo.y)
+            # dinfo.x, dinfo.y = x+self.cplx_width/2, y+self.ellipse_width
+            # TODO: replace Rectcplx with saner object
+            enzItem = Rectcplx(xpos,ypos,self.cplx_width,self.cplx_height,self.mooseId_GText[element(item[0]).parent.getId()],item[0])
+            ret[enzPool] = enzItem
+        return ret
+
+    def displayPools(self, displayDict, meshEntry):
+        ret = {}
+        for pool, dinfo in displayDict.items():
+            x, y = self.reposition(dinfo.x, dinfo.y)            
+            poolItem = PoolItem(pool)        
+            poolItem.setDisplayProperties(displayinfo(x, y, dinfo.fc, dinfo.bc))
+            ret[pool] = poolItem
+        return ret
+        
+    def displayMeshEntries(self):
+        """Set up the display items for mesh entries."""
+        self.poolGraphicMap = {}
+        self.reacGraphicMap = {}
+        self.enzGraphicMap = {}
         for meshEntry, displayDict in self.meshEntryDisplay.items():
             self.createCompt(meshEntry)
-            comptRef = self.qGraCompt[cmpt]
-            # Setup diplay of the reactions
-            for reac, dinfo in displayDict.items():
-                x, y = self.reposition(dinfo.x, dinfo.y)
-                reacItem = EllipseItem(x, y, self.ellipse_width, self.ellipse_height)
-        # TODO continue from here
-        for cmpt,itemlist in cmptMol.items():
-            self.createCompt(cmpt)
-            comptRef = self.qGraCompt[cmpt]
-            # for  item in (item for item  in itemlist if len(item) != 0): # THIS IS HORRIBLE!!!
-            for item in itemlist:
-                if len(item) == 0:
-                    continue
-                if item[0].class_ == 'ZombieEnz' or item[0].class_ == 'ZombieMMenz' or item[0].class_ == 'ZombieReac':
-                    iteminfo = (element(item[0]).parent).path+'/info'
-                    xpos = (item[1]-minX)*xnewratio
-                    ypos = -(item[2]-minY)*ynewratio
-                    if item[0].class_ == 'ZombieReac':
-                        reItem = EllipseItem(xpos,ypos,self.ellipse_width,self.ellipse_height,comptRef,item)
-
-                    else:
-                        reItem = EllipseItem(xpos,ypos,self.ellipse_width,self.ellipse_height,comptRef,item)
-                        textcolor = ''
-                        bgcolor = Annotator(iteminfo).getField('color')
-                        textcolor,bgcolor = self.colorCheck(textcolor,bgcolor,self.picklecolorMap)
-                        reItem.setBrush(QtGui.QColor(bgcolor))
-                    reItem.ellemitter.connect(reItem.ellemitter, QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.emitItemtoEditor)
-                    reItem.ellemitter.connect(reItem.ellemitter,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.emitItemtoEditor)
-                    reItem.ellemitter.connect(reItem.ellemitter,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
-                    self.mooseId_GText[element(item[0]).getId()] = reItem
-
-                elif item[0].class_ == 'ZombiePool' or item[0].class_ == 'ZombieFuncPool' or item[0].class_ == 'ZombieBufPool':
-                    xpos = (item[1]-minX)*xnewratio
-                    ypos = -(item[2]-minY)*ynewratio
-                    if item[0][0].parent.class_ != 'ZombieEnz':
-                        pItem = Textitem(comptRef,item,xpos,ypos,self.picklecolorMap)
-                        pItem.setFont(fnt)
-                        pItem.textemitter.connect(pItem.textemitter, QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.emitItemtoEditor)
-                        pItem.textemitter.connect(pItem.textemitter,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.emitItemtoEditor)
-                        pItem.textemitter.connect(pItem.textemitter,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
-                    else:
-                        #cplx has made to sit under enz, for which xpos added with width/2 and height is added by ellipseitem height which is 15 for now
-                        xpos = xpos+(self.cplx_width/2)
-                        ypos = ypos+self.ellipse_width
-                        pItem = Rectcplx(xpos,ypos,self.cplx_width,self.cplx_height,self.mooseId_GText[element(item[0]).parent.getId()],item[0])
-                        textcolor = ''
-                        pItem.Rectemitter1.connect(pItem.Rectemitter1,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
-                        pItem.Rectemitter1.connect(pItem.Rectemitter1,QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.emitItemtoEditor)
-                        pItem.Rectemitter1.connect(pItem.Rectemitter1,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.emitItemtoEditor)
-                    self.mooseId_GText[element(item[0]).getId()] = pItem
-    for k, v in self.qGraCompt.items():
-            rectcompt = v.childrenBoundingRect()
-            v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
-            v.setPen(QtGui.QPen(Qt.QColor(66,66,66,100),10,QtCore.Qt.SolidLine,QtCore.Qt.RoundCap,QtCore.Qt.RoundJoin ))
-            v.Rectemitter.connect(v.Rectemitter,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
-            v.Rectemitter.connect(v.Rectemitter,QtCore.SIGNAL("qgtextDoubleClick(PyQt_PyObject)"),self.emitItemtoEditor)                
-            v.Rectemitter.connect(v.Rectemitter,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.emitItemtoEditor)
-        for inn,out in self.srcdesConnection.items():
-            if ((len(filter(lambda x:isinstance(x,list), out))) != 0):
-                for items in (items for items in out[0] ):
-                    src = ""
-                    des = ""
-                    src = self.mooseId_GText[inn]
-                    des = self.mooseId_GText[element(items[0]).getId()]
-                    self.lineCord(src,des,items[1])
-                for items in (items for items in out[1] ):
-                    src = ""
-                    des = ""
-                    src = self.mooseId_GText[inn]
-                    des = self.mooseId_GText[element(items[0]).getId()]
-                    self.lineCord(src,des,items[1])
-            else:
-                for items in (items for items in out ):
-                    src = ""
-                    des = ""
-                    src = self.mooseId_GText[element(inn).getId()]
-                    des = self.mooseId_GText[element(items[0]).getId()]
-                    self.lineCord(src,des,items[1])        
-        #self.view.fitInView(self.sceneContainer.sceneRect().x()-10,self.sceneContainer.sceneRect().y()-10,self.sceneContainer.sceneRect().width()+20,self.sceneContainer.sceneRect().height()+20,Qt.Qt.KeepAspectRatio)
-        self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
-        hLayout.addWidget(self.view)
+            comptRef = self.qGraCompt[meshEntry]
+            self.poolGraphicMap.update(self.displayPools(displayDict['pool'], meshEntry))
+            # self.reacGraphicMap.update(self.displayReactions(displayDict['reaction'], meshEntry))
+            # self.enzGraphicMap.update(self.displayEnzymes(displayDict['enzyme'], meshEntry))
+            print 'Here:', comptRef
         
     def reposition(self, x, y):
         return (x - self.xmin)/self.xratio, -(y - self.ymin)/self.yratio
@@ -747,7 +735,7 @@ class KineticsWidget(QtGui.QWidget):
         self.xmin = min(xvalues)        
         self.ymax = max(yvalues)
         self.ymin = min(yvalues)
-        self.noPositionInfo = len(np.nonzero(xvalues)[0]) > 0 and len(np.nonzero(yvalues)[0]) > 0
+        self.noPositionInfo = len(np.nonzero(xvalues)[0]) == 0 and len(np.nonzero(yvalues)[0]) == 0
         
     def keyPressEvent(self,event):
         key = event.key()
@@ -770,7 +758,7 @@ if __name__ == "__main__":
     size = QtCore.QSize(992, 704)
     modelPath = '77'
     modelPath = 'Kholodenko'
-    modelPath = 'motors8'
+    # modelPath = 'motors8'
     #modelPath = 'enz_classical_explicit'
     #modelPath = 'reaction1'
     #modelPath = 'test_enzyme'
