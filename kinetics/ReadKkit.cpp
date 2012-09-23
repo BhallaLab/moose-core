@@ -887,6 +887,11 @@ void ReadKkit::buildSumTotal( const string& src, const string& dest )
 		// Turn dest into a FuncPool.
 		destId()->zombieSwap( FuncPool::initCinfo(), dup );
 		delete orig;
+
+		bool ret = shell_->doAddMsg( "single", 
+			ObjId( sumId, 0 ), "output",
+			ObjId( destId, 0 ), "input" ); 
+		assert( ret );
 	} else {
 		sumId = Neutral::child( destId.eref(), "sumFunc" );
 	}
@@ -904,11 +909,6 @@ void ReadKkit::buildSumTotal( const string& src, const string& dest )
 		ObjId( sumId, 0 ), "input" ); 
 	assert( ret );
 
-	ret = shell_->doAddMsg( "single", 
-		ObjId( sumId, 0 ), "output",
-		ObjId( destId, 0 ), "input" ); 
-
-	assert( ret );
 }
 
 /*

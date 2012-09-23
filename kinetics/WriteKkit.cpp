@@ -19,6 +19,9 @@
 #include "../builtins/TableBase.h"
 #include "../builtins/Table.h"
 #include "../builtins/StimulusTable.h"
+#include "Pool.h"
+#include "FuncPool.h"
+#include "SumFunc.h"
 
 void writeHeader( ofstream& fout, 
 		double simdt, double plotdt, double maxtime, double defaultVol)
@@ -469,7 +472,33 @@ void writeMsgs( ofstream& fout, const vector< string >& msgs )
 
 void storeFuncPoolMsgs( Id pool, vector< string >& msgs )
 {
-	;
+	// Find the child SumFunc by following the input msg.
+	static const Finfo* poolInputFinfo = 
+			FuncPool::initCinfo()->findFinfo( "input" );
+
+	static const Finfo* funcInputFinfo = 
+			SumFunc::initCinfo()->findFinfo( "input" );
+
+	assert( poolInputFinfo );
+	assert( funcInputFinfo );
+	vector< Id > funcs;
+	pool.element()->getNeighbours( funcs, poolInputFinfo );
+	assert( funcs.size() == 1 );
+	
+	// Get the msg sources into this SumFunc.
+	vector< Id > src;
+	funcs[0].element()->getNeighbours( src, funcInputFinfo );
+	assert( src.size() > 0 );
+
+	string poolPath = trimPath( pool.path() );
+
+	// Write them out as msgs.
+	for ( vector< Id >::iterator i = src.begin(); i != src.end(); ++i ) {
+		string srcPath = trimPath( i->path() );
+		string s = "addmsg " + srcPath + " " + poolPath + 
+			" SUMTOTAL n nInit";
+		msgs.push_back( s );
+	}
 }
 
 void storeStimulusTableMsgs( Id tab, vector< string >& msgs )

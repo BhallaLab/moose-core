@@ -18717,4 +18717,8 @@ Before I sign off on writeKkit,
 	Set up stimulus table test using tabsumtot.g, already in regression
 	tests. Looks OK, but now I also have to get the sumtot to work properly.
 StimulusTables now work. Sumtot not yet.
+
+Sumtot assertion on messaging revealed a benign bug in the ReadKkit.
+Now the regression test on writing tabsumtot.g clears too.
+
 ============================================================================
