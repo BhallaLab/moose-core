@@ -91,7 +91,7 @@ def sanitize_color(facecolor, bgcolor, cmap):
 # fc = face color, bc = background color
 displayinfo = namedtuple('displayinfo', 
                          ['x', 'y', 'fc', 'bc'], 
-                         verbose=True)
+                         verbose=False)
 
 def extract_display_info(el, cmap):
     """Extract display information from element.
