@@ -101,7 +101,7 @@ def sanitize_color(facecolor, bgcolor, cmap):
 # fc = face color, bc = background color
 displayinfo = namedtuple('displayinfo', 
                          ['mobj', 'x', 'y', 'fc', 'bc'], 
-                         verbose=True)
+                         verbose=False)
 
 def extract_display_info(el):
     """Extract display information from element.
@@ -417,6 +417,9 @@ class KineticsWidget(QtGui.QWidget):
         self.sceneContainer.setBackgroundBrush(QtGui.QColor(230,220,219,120))
         self.view = GraphicalView(self.sceneContainer,self.border)
         cmptMol = {}
+        # Do yourself a favor by loading the colormap before using it and not loading it again and again in a loop
+        pkl_file = open(os.path.join(config.settings[config.KEY_COLORMAP_DIR], 'rainbow2.pkl'),'rb')
+        self.picklecolorMap = pickle.load(pkl_file)        
         maxX,minX,maxY,minY = self.setupCompt_Coord(modelPath,cmptMol)
         #for k,v in cmptMol.items(): print k,'\n',v
         if maxX - minX != 0:
@@ -433,9 +436,9 @@ class KineticsWidget(QtGui.QWidget):
         zombieType = ['ZombieReac','ZombieEnz','ZombieMMenz','ZombieSumFunc']
         self.setupItem(modelPath,zombieType,self.srcdesConnection)
         #for m,n in self.srcdesConnection.items():print m,n
-        #pickled the color map here and loading the file
-        pkl_file = open(os.path.join(config.settings[config.KEY_COLORMAP_DIR], 'rainbow2.pkl'),'rb')
-        self.picklecolorMap = pickle.load(pkl_file)        
+        #pickled the color map here and loading the file # Subha - moved this above
+        # pkl_file = open(os.path.join(config.settings[config.KEY_COLORMAP_DIR], 'rainbow2.pkl'),'rb')
+        # self.picklecolorMap = pickle.load(pkl_file)        
         self.lineItem_dict = {}
         self.object2line = {}
         #This is check which version of kkit, b'cos anything below kkit8 didn't had xyz co-ordinates
@@ -761,6 +764,8 @@ class KineticsWidget(QtGui.QWidget):
         if(bgcolor == ''): bgcolor = 'blue'
         if(textColor == bgcolor): textColor = self.randomColor()
         hexchars = "0123456789ABCDEF"
+        # Subha: THIS HEXCHAR CIRCUS IS EQUIVALENT TO: 
+        # textColor = '%02x%02x%02x' % (r, g, b)
         if(isinstance(textColor,(list,tuple))):
             r,g,b = textColor[0],textColor[1],textColor[2]
             textColor = "#"+ hexchars[r / 16] + hexchars[r % 16] + hexchars[g / 16] + hexchars[g % 16] + hexchars[b / 16] + hexchars[b % 16]
@@ -838,15 +843,19 @@ class KineticsWidget(QtGui.QWidget):
             
         for meshEnt in wildcardFind(cPath):
             molrecList = []
-            pkl_file = open(os.path.join(config.settings[config.KEY_COLORMAP_DIR],'rainbow2.pkl'),'rb')
-            picklecolorMap = pickle.load(pkl_file)
+            #!!! WHY LOAD THE SAME FILE AGAIN AND AGAIN IN A LOOP????
+            #!!! YOU ALREADY LOADED IT IN THE CONSTRUCTOR!!!
+            # - Subha
+            # pkl_file = open(os.path.join(config.settings[config.KEY_COLORMAP_DIR],'rainbow2.pkl'),'rb')
+            # picklecolorMap = pickle.load(pkl_file)
             for reitem in Neutral(meshEnt).getNeighbors('remeshReacs'):
                 reiteminfo = reitem.path+'/info'
+                #!!! DRY = DO NOT REPEAT YOURSELF !!!
                 xxr = float(element(reiteminfo).getField('x'))
                 yyr = float(element(reiteminfo).getField('y'))                
                 textcolor = Annotator(reiteminfo).getField('textColor')
                 bgcolor  =  Annotator(reiteminfo).getField('color')
-                textcolor,bgcolor = self.colorCheck(textcolor,bgcolor,picklecolorMap)
+                textcolor,bgcolor = self.colorCheck(textcolor,bgcolor,self.picklecolorMap)
                 molrecList.append((reitem,xxr,yyr,textcolor,bgcolor))
                 x.append(xxr)
                 y.append(yyr)
@@ -858,7 +867,7 @@ class KineticsWidget(QtGui.QWidget):
                         yy = float(element(miteminfo).getField('y'))
                         textcolor = Annotator(miteminfo).getField('textColor')
                         bgcolor = Annotator(miteminfo).getField('color')
-                        textcolor,bgcolor = self.colorCheck(textcolor,bgcolor,picklecolorMap)
+                        textcolor,bgcolor = self.colorCheck(textcolor,bgcolor,self.picklecolorMap)
                         molrecList.append((mitem, xx,yy,textcolor,bgcolor))
                         x.append(xx)
                         y.append(yy)
@@ -868,7 +877,7 @@ class KineticsWidget(QtGui.QWidget):
                         yy1 = float(element(miteminfo).getField('y'))
                         textcolor = Annotator(miteminfo).getField('textColor')
                         bgcolor = Annotator(miteminfo).getField('color')
-                        textcolor,bgcolor = self.colorCheck(textcolor,bgcolor,picklecolorMap)
+                        textcolor,bgcolor = self.colorCheck(textcolor,bgcolor,self.picklecolorMap)
                         molrecList.append((mitem,xx1,yy1,textcolor,bgcolor))
                         x.append(xx1)
                         y.append(yy1)
@@ -897,9 +906,9 @@ class KineticsWidget(QtGui.QWidget):
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     size = QtCore.QSize(992, 704)
-    modelPath = '77'
+    # modelPath = '77'
     modelPath = 'Kholodenko'
-    modelPath = 'motors8'
+    # modelPath = 'motors8'
     #modelPath = 'enz_classical_explicit'
     #modelPath = 'reaction1'
     #modelPath = 'test_enzyme'
