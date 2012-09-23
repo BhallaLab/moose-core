@@ -421,7 +421,7 @@ void storeCplxEnzMsgs( Id enz, vector< string >& msgs )
 	static const Finfo* prdFinfo = 
 			EnzBase::initCinfo()->findFinfo( "toPrd" );
 	static const Finfo* enzFinfo = 
-			EnzBase::initCinfo()->findFinfo( "toEnz" );
+			CplxEnzBase::initCinfo()->findFinfo( "toEnz" );
 	// In GENESIS we don't need to explicitly connect up the enz cplx, so
 	// no need to deal with the toCplx msg.
 	vector< Id > targets;
