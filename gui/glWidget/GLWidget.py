@@ -102,6 +102,9 @@ class PyGLWidget(QtOpenGL.QGLWidget):
 	self.vizObjectNames=[]
 	self.vizObjects=[]
 
+        self.sceneLayoutDict = {}
+        self.gotSceneLayout = False
+        
     	self.gridRadiusViz = 0
 	
     @QtCore.pyqtSlot()
@@ -267,7 +270,33 @@ class PyGLWidget(QtOpenGL.QGLWidget):
         self.last_point_ok_, self.last_point_3D_ = self.map_to_sphere(self.last_point_2D_)
 	if (_event.button()==1):
 	    self.pressEventPicking()
-	    
+            # x1,y1,z1,x2,y2,z3 = self.drawARay(self.last_point_2D_.x(),self.last_point_2D_.y())
+            # #print x1,y1,z1,x2,y2,z3
+            # if self.gotSceneLayout == False:
+            #     for ii,obj in enumerate(self.sceneObjects):
+            #         self.sceneLayoutDict[self.sceneObjectNames[ii]] = ((obj.l_coords[0]+obj.l_coords[3])/2,(obj.l_coords[1]+obj.l_coords[4])/2,(obj.l_coords[2]+obj.l_coords[5])/2)
+            #     #print self.sceneLayoutDict
+
+#(P.x - x1) * (B.y - A.y1) - (P.y - A.y1) * (B.x - A.x))
+
+
+    def drawARay(self,x,y):
+        modelview = glGetDoublev( GL_MODELVIEW_MATRIX  )
+        projection = glGetDoublev( GL_PROJECTION_MATRIX )
+        viewport = glGetIntegerv( GL_VIEWPORT )
+ 
+        winZ = 0.0
+        winX = float(x)
+        winY = float(viewport[3]) - float(y)
+        glReadPixels( x, int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, winZ )
+        posX1, posY1, posZ1 = gluUnProject( winX, winY, winZ, modelview, projection, viewport)
+
+        winZ = 1.0
+        winZ = glReadPixels( x, int(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT )
+        posX2, posY2, posZ2 = gluUnProject( winX, winY, winZ, modelview, projection, viewport)        
+ 
+        return posX1, posY1, posZ1, posX2, posY2, posZ2
+
     def mouseMoveEvent(self, _event):
         newPoint2D = _event.pos()
 
@@ -507,10 +536,13 @@ class PyGLWidget(QtOpenGL.QGLWidget):
 	hits = glRenderMode(GL_RENDER)
 	names =[]		
 	nearestHit = None
-	for hit in hits:
+	for i,hit in enumerate(hits):
+            
 	    near, far, names = hit
+            #print i,hit,names
 	    if (nearestHit == None) or (near < nearestHit[0]):
-		nearestHit = [near, names[0]]
+		nearestHit = [near, names[-1]]
+                
 	if names:	
 	    self.compartmentSelected.emit(str(self.sceneObjectNames[names[0]]))	#printing the cell path
 	    #self.compartmentSelected.emit(QtCore.SIGNAL('PyQt_PyObject'),self.sceneObjectNames[names[0]])
