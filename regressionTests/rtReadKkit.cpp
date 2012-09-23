@@ -953,6 +953,11 @@ void rtTestWriteKkit()
 	shell->doSaveModel( model, "writeTabTest.g" );
 	shell->doDelete( model );
 
+	model = shell->doLoadModel( "Osc_cspace_ref_model.g", "/model", "gsl" );
+	assert( model != Id() );
+
+	shell->doSaveModel( model, "oscTest.g" );
+	shell->doDelete( model );
 
 	cout << "." << flush;
 }
