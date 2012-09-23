@@ -1083,8 +1083,11 @@ Id ReadKkit::buildTable( const vector< string >& args )
 		// loadTab is invoked.
 	}
 
+
 	string temp = clean.substr( 10 );
 	tabIds_[ temp ] = tab; 
+
+	Id info = buildInfo( tab, tableMap_, args );
 
 	return tab;
 }
