@@ -99,19 +99,22 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             QtGui.QMessageBox.about(self, 'About MOOSE', ''.join(aboutfile.readlines()))
 
     def showDocumentation(self):
-        if hasattr(self, 'documentationViewer'):
+        if not hasattr(self, 'documentationViewer'):
+            self.documentationViewer = QtGui.QTextBrowser()
+            self.documentationViewer.setOpenLinks(True)
+            self.documentationViewer.setOpenExternalLinks(True)
+            print 'Docs in ', os.path.join(config.settings[config.KEY_DOCS_DIR], 'html')
+            self.documentationViewer.setSearchPaths([config.settings[config.KEY_DOCS_DIR],
+                                                     os.path.join(config.settings[config.KEY_DOCS_DIR], 'html'),
+                                                     os.path.join(config.settings[config.KEY_DOCS_DIR], 'images')])
+            self.documentationViewer.setMinimumSize(800, 600)
             self.documentationViewer.setVisible(True)
-            return
-        self.documentationViewer = QtGui.QTextBrowser()
-        self.documentationViewer.setOpenLinks(True)
-        self.documentationViewer.setOpenExternalLinks(True)
-        print 'Docs in ', os.path.join(config.settings[config.KEY_DOCS_DIR], 'html')
-        self.documentationViewer.setSearchPaths([config.settings[config.KEY_DOCS_DIR],
-                                                 os.path.join(config.settings[config.KEY_DOCS_DIR], 'html'),
-                                                 os.path.join(config.settings[config.KEY_DOCS_DIR], 'images')])
         self.documentationViewer.setSource(QtCore.QUrl('index.html'))
-        self.documentationViewer.setMinimumSize(800, 600)
-        self.documentationViewer.setVisible(True)
+
+    def showKkitDocumentation(self):
+        self.showDocumentation()
+        self.documentationViewer.setSource(QtCore.QUrl('Kkit2Documentation.html'))
+        self.documentationViewer.reload()
             
 #    def resizeCentralWidgets(self):
 #        widthOfEach =  int((self.layoutWidget.width()+self.plotMdiArea.width())/2)
@@ -125,6 +128,9 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         print 'This is a place holder for populating the help menu'
         self.connect(self.actionAbout, QtCore.SIGNAL('triggered()'), self.showAboutMoose)
         self.connect(self.actionDocumentation, QtCore.SIGNAL('triggered()'), self.showDocumentation)
+        self.actionKkitDocumentation = QtGui.QAction('Kkit', self)
+        self.connect(self.actionKkitDocumentation, QtCore.SIGNAL('triggered()'), self.showKkitDocumentation)
+        self.menuHelp.insertAction(self.actionReport_a_Bug, self.actionKkitDocumentation)
         self.connect(self.actionReport_a_Bug, QtCore.SIGNAL('triggered()'), self.reportBug)
         self.actionDemos.setVisible(False)
         self.actionRequest_a_Feature.setVisible(False)
