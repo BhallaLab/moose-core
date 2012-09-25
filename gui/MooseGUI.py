@@ -163,13 +163,6 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.menuView.setEnabled(True)
         self.menuClasses.setEnabled(False)
         self.menuClasses.setVisible(False)
-        # Subha: hack to add a menu item for options
-        self.configWidgetAction = QtGui.QAction('Configuration', self)
-        self.connect(self.configWidgetAction, QtCore.SIGNAL('triggered()'), self.configWidget.exec_)
-        self.menuOptions = self.menuBar().addMenu('Options')
-        self.menuOptions.setObjectName('menuOptions')
-        self.menuOptions.addAction(self.configWidgetAction)
-        #! Subha - till here
         checked = False
         self.propEditorChildListWidget.setVisible(checked)
         self.label_13.setVisible(checked)
@@ -224,6 +217,8 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.connect(self.actionRK5,QtCore.SIGNAL('triggered()'), self.changeToRK5)
         #self.connect(self.actionEE, QtCore.SIGNAL('triggered()'), self.changeToEE)
         self.connect(self.actionGillespie,QtCore.SIGNAL('triggered()'), self.changeToGill)
+        # Edit menu
+        self.connect(self.actionSettings, QtCore.SIGNAL('triggered()'), self.configWidget.exec_)
 
     def changeToRK5(self):
         print 'Changing to RK5'

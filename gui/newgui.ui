@@ -180,11 +180,12 @@
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="enabled">
-     <bool>false</bool>
+     <bool>true</bool>
     </property>
     <property name="title">
      <string>Edit</string>
     </property>
+    <addaction name="actionSettings"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -1602,6 +1603,9 @@
    </property>
   </action>
   <action name="actionDemos">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Demos</string>
    </property>
@@ -1612,6 +1616,9 @@
    </property>
   </action>
   <action name="actionRequest_a_Feature">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Request a Feature</string>
    </property>
@@ -1699,6 +1706,14 @@
    </property>
    <property name="text">
     <string>Gillespie</string>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="text">
+    <string>Settings</string>
+   </property>
+   <property name="toolTip">
+    <string>Change moose configuration</string>
    </property>
   </action>
   <zorder>moosePopulationEditDock</zorder>
