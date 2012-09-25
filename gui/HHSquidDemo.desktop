@@ -1,11 +1,13 @@
 #!/usr/bin/env xdg-open
 
 [Desktop Entry]
-Version=1.5beta
+Version=2.0
 Type=Application
-Terminal=true
-Icon[en_US]=/home/moose/moose_src/gui/icons/squid.png
-Name[en_US]=HHSquidDemo
-Exec=python /home/moose/moose_src/Demos/squid/squid_demo.py
-Name=HHSquidDemo
-Icon=/home/moose/moose_src/gui/icons/squid.png
+Terminal=false
+Icon[en_US]=squid
+Name[en_US]=MooseSquidAxon
+Exec=python /usr/share/moose/Demos/squid/squid_demo.py
+Name=MooseSquidAxon
+Icon=squid
+Comment=MOOSE Demo: H-H Squid Axon
+Categories=Education;Science;Biology;Math
