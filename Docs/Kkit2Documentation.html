@@ -7,8 +7,8 @@
 <meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
 <meta name="title" content="Kinetikit 12: Interface for chemical kinetic models in MOOSEGUI."/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-09-24 14:58:27 IST"/>
-<meta name="author" content="Upi Bhalla: documentation, Harsha Rani, H. Chaitanya: GUI."/>
+<meta name="generated" content="2012-09-25 15:16:43 IST"/>
+<meta name="author" content="Documentation and numerics: Upi Bhalla. GUI: Harsha Rani, H. Chaitanya"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
 <style type="text/css">
@@ -100,7 +100,7 @@
 <ul>
 <li><a href="#sec-1">1 Introduction</a>
 <ul>
-<li><a href="#sec-1-1">1.1 What are chemical kinetic models</a></li>
+<li><a href="#sec-1-1">1.1 What are chemical kinetic models?</a></li>
 <li><a href="#sec-1-2">1.2 Levels of model</a></li>
 <li><a href="#sec-1-3">1.3 Numerical methods</a></li>
 </ul>
@@ -140,17 +140,17 @@
 </div>
 
 <div id="outline-container-1-1" class="outline-3">
-<h3 id="sec-1-1"><span class="section-number-3">1.1</span> What are chemical kinetic models</h3>
+<h3 id="sec-1-1"><span class="section-number-3">1.1</span> What are chemical kinetic models?</h3>
 <div class="outline-text-3" id="text-1-1">
 
-<p>   A large fraction of neuronal computation occurs through chemical
+<p>   Much of neuronal computation occurs through chemical
    signaling.  For example, many forms of synaptic plasticity begin
    with calcium influx into the synapse, followed by calcium binding
    to calmodulin, and then calmodulin activation of numerous
    enzymes. These events can be represented in chemical terms:
 </p><blockquote>
 
-<p>4 Ca<sup>2+</sup> + CaM &lt;&mdash;&gt; Ca<sub>4</sub>.CaM
+<p>4 Ca<sup>2+</sup> + CaM &lt;====&gt; Ca<sub>4</sub>.CaM
 </p>
 </blockquote>
 
@@ -160,8 +160,12 @@
    Differential Equations, if we ignore space:
 </p><blockquote>
 
-<p>d[Ca]/dt = -4 * Kf * [Ca]<sup>4</sup> * [CaM] + 4 * Kb * [Ca<sub>4</sub>.CaM]
+<p>d[Ca]/dt = -4Kf * [Ca]<sup>4</sup> * [CaM] + 4Kb * [Ca<sub>4</sub>.CaM]
+</p>
+<p>
 d[CaM]/dt = -Kf * [Ca]<sup>4</sup> * [CaM] + Kb * [Ca<sub>4</sub>.CaM]
+</p>
+<p>
 d[Ca<sub>4</sub>.CaM]/dt = Kf * [Ca]<sup>4</sup> * [CaM] - Kb * [Ca<sub>4</sub>.CaM]
 </p>
 </blockquote>
@@ -221,27 +225,34 @@ d[Ca<sub>4</sub>.CaM]/dt = Kf * [Ca]<sup>4</sup> * [CaM] - Kb * [Ca<sub>4</sub>.
 <div class="outline-text-3" id="text-2-1">
 
 <ul>
-<li>Load models using File-&gt;Load. Chemical schematic appears in
-     'Model layout' tab.
+<li>Load models using <i>File-&gt;Load</i>. Chemical schematic appears in
+     <b>Model layout</b> tab.
 </li>
-<li>Run models using 'Run' button.
+<li>Run models using <b>Run</b> button.
 </li>
-<li>View plots by clicking on 'Plot Window' tab.
+<li>View plots by clicking on <b>Plot Window</b> tab.
 </li>
-<li>View parameters in 'Model layout' tab by clicking on icons, and
-     looking at entries in 'Properties' table to the right.
+<li>View parameters in <b>Model layout</b> tab by clicking on icons, and
+     looking at entries in <b>Properties</b> table to the right.
 </li>
-<li>Edit parameters by changing their values in the 'Properties' table.
+<li>Edit parameters by changing their values in the <b>Properties</b> table.
 </li>
 <li>Plot variables belonging to an object by clicking on its icon,
-     and then clicking 'Add Field' in the 'Plot Configuration' panel.
+     and then clicking <b>Add Field</b> in the <b>Plot Configuration</b> panel.
 </li>
 <li>Manipulate and save plots using the icons at the bottom of the
-     'Plot Window'.
+     <b>Plot Window</b>.
+</li>
+<li>Select numerical method using options under <i>Solver</i> menu item.
 </li>
 </ul>
 
 
+<p>
+Most of these operations are detailed in other sections, and are shared with
+other aspects of the MOOSE simulation interface. Here we focus on the 
+Kinetikit-specific items.
+</p>
 </div>
 
 </div>
@@ -250,7 +261,7 @@ d[Ca<sub>4</sub>.CaM]/dt = Kf * [Ca]<sup>4</sup> * [CaM] - Kb * [Ca<sub>4</sub>.
 <h3 id="sec-2-2"><span class="section-number-3">2.2</span> Model layout and icons</h3>
 <div class="outline-text-3" id="text-2-2">
 
-<p>   When you are in the 'Model layout' tab you will see a collection of
+<p>   When you are in the <b>Model layout</b> tab you will see a collection of
    icons, arrows, and grey boxes surrounding these. This is a
    schematic of the reaction scheme being modeled. You can view and
    change parameters, and change the layout of the model. In the next
@@ -264,7 +275,7 @@ d[Ca<sub>4</sub>.CaM]/dt = Kf * [Ca]<sup>4</sup> * [CaM] - Kb * [Ca<sub>4</sub>.
 <h4 id="sec-2-2-1"><span class="section-number-4">2.2.1</span> Compartment</h4>
 <div class="outline-text-4" id="text-2-2-1">
 
-<p>    The 'compartment' in moose is usually but not always contiguous
+<p>    The <i>compartment</i> in moose is usually a contiguous
     domain in which a certain set of chemical reactions and molecular
     species occur. The definition is very closely related to that of a
     cell-biological compartment. Examples include the extracellular
@@ -272,33 +283,35 @@ d[Ca<sub>4</sub>.CaM]/dt = Kf * [Ca]<sup>4</sup> * [CaM] - Kb * [Ca<sub>4</sub>.
     nucleus. Compartments can be nested, ways, but of course you
     cannot put a bigger compartment into a smaller one.
 </p><ul>
-<li><b>Icon</b> Grey boundary around a set of reactions. 
+<li><b>Icon</b>: Grey boundary around a set of reactions. 
 </li>
-<li><b>Compartment editable parameters</b>
-<dl>
-<dt>Name</dt><dd>The name of the compartment.
-</dd>
-<dt>Size</dt><dd>This is the volume, surface area or length of the
+<li><b>Moving Compartments</b>:
+         Click and drag on the boundary.
+</li>
+<li><b>Resizing Compartment boundary</b>:
+        Happens automatically when
+        contents are repositioned, so that the boundary just contains
+        contents.
+</li>
+<li><b>Compartment editable parameters</b>:
+<ul>
+<li><span style="text-decoration:underline;">Name</span>: The name of the compartment.
+</li>
+<li><span style="text-decoration:underline;">Size</span>: This is the volume, surface area or length of the
                  compartment, depending on its type.
 
-</dd>
-</dl>
+</li>
+</ul>
 
 </li>
-<li><b>Compartment fixed parameters</b>
-<dl>
-<dt>numDimensions</dt><dd>This specifies whether the compartment is a
+<li><b>Compartment fixed parameters</b>:
+<ul>
+<li><span style="text-decoration:underline;">numDimensions</span>: This specifies whether the compartment is a
                           volume, a 2-D surface, or if it is just
                           being represented as a length.
-</dd>
-</dl>
+</li>
+</ul>
 
-</li>
-<li><b>Moving Compartments</b> Click and drag on the boundary.
-</li>
-<li><b>Resizing Compartment boundary</b> Happens automatically when
-       contents are repositioned, so that the boundary just contains
-       contents.
 </li>
 </ul>
 
@@ -315,19 +328,21 @@ d[Ca<sub>4</sub>.CaM]/dt = Kf * [Ca]<sup>4</sup> * [CaM] - Kb * [Ca<sub>4</sub>.
     compartment. Different chemical states of the same molecule are
     in different pools.
 </p><ul>
-<li><b>Icon</b> Colored rectangle with pool name in it.
+<li><b>Icon</b>: Colored rectangle with pool name in it.
 </li>
-<li><b>Pool editable parameters</b>
-<dl>
-<dt>Name</dt><dd>Name of the pool
-</dd>
-<dt>n</dt><dd>Number of molecules in the pool
-</dd>
-<dt>nInit</dt><dd>Initial number of molecules in the pool. 'n' gets
-                 set to this value when the 'Reinit' operation is
+<li><b>Moving pools</b>: Click and drag.
+</li>
+<li><b>Pool editable parameters</b>:
+<ul>
+<li><span style="text-decoration:underline;">Name</span>: Name of the pool
+</li>
+<li><span style="text-decoration:underline;">n</span>: Number of molecules in the pool
+</li>
+<li><span style="text-decoration:underline;">nInit</span>: Initial number of molecules in the pool. <b>n</b> gets
+                 set to this value when the <i>Reinit</i> operation is
                  done.
-</dd>
-<dt>conc</dt><dd>Concentration of the molecules in the pool.
+</li>
+<li><span style="text-decoration:underline;">conc</span>: Concentration of the molecules in the pool.
 <blockquote>
 
 <p>conc = n * unit_scale_factor / (NA * vol)
@@ -335,8 +350,8 @@ d[Ca<sub>4</sub>.CaM]/dt = Kf * [Ca]<sup>4</sup> * [CaM] - Kb * [Ca<sub>4</sub>.
 </blockquote>
 
 
-</dd>
-<dt>concInit</dt><dd>Initial concentration of the molecules in the
+</li>
+<li><span style="text-decoration:underline;">concInit</span>: Initial concentration of the molecules in the
                     pool.
 <blockquote>
 
@@ -346,22 +361,20 @@ d[Ca<sub>4</sub>.CaM]/dt = Kf * [Ca]<sup>4</sup> * [CaM] - Kb * [Ca<sub>4</sub>.
 
 
 <p>
-                     'conc' is set to this value when the 'Reinit' operation is
+                     <b>conc</b> is set to this value when the <i>Reinit</i> operation is
                     done.
-</p></dd>
-</dl>
+</p></li>
+</ul>
 
 </li>
 <li><b>Pool fixed parameters</b>
-<dl>
-<dt>size</dt><dd>Derived from the compartment that holds the
+<ul>
+<li><span style="text-decoration:underline;">size</span>: Derived from the compartment that holds the
                 pool. Specifies volume, surface area or length of the
                 holding compartment.
-</dd>
-</dl>
-
 </li>
-<li><b>Moving pools</b> Click and drag.
+</ul>
+
 </li>
 </ul>
 
@@ -377,16 +390,18 @@ d[Ca<sub>4</sub>.CaM]/dt = Kf * [Ca]<sup>4</sup> * [CaM] - Kb * [Ca<sub>4</sub>.
 <p>    Some pools are set to a fixed n and concentration throughout a
     simulation. These are buffered pools.
 </p><ul>
-<li><b>Icon</b> Colored rectangle with pool name in it.
+<li><b>Icon</b>: Colored rectangle with pool name in it.
+</li>
+<li><b>Moving Buffered pools</b>: Click and drag.
 </li>
 <li><b>Buffered Pool editable parameters</b>
-<dl>
-<dt>Name</dt><dd>Name of the pool
-</dd>
-<dt>nInit</dt><dd>Fixed number of molecules in the pool.  'n' gets set
+<ul>
+<li><span style="text-decoration:underline;">Name</span>: Name of the pool
+</li>
+<li><span style="text-decoration:underline;">nInit</span>: Fixed number of molecules in the pool.  'n' gets set
                  to this value throughout the run.
-</dd>
-<dt>concInit</dt><dd>Fixed concentration of the molecules in
+</li>
+<li><span style="text-decoration:underline;">concInit</span>: Fixed concentration of the molecules in
                      the pool.
 <blockquote>
 
@@ -395,26 +410,24 @@ d[Ca<sub>4</sub>.CaM]/dt = Kf * [Ca]<sup>4</sup> * [CaM] - Kb * [Ca<sub>4</sub>.
 </blockquote>
 
 
-</dd>
-</dl>
+</li>
+</ul>
 
-<p>     'conc' is set to this value throughout the run.
+<p>     <b>conc</b> is set to this value throughout the run.
 </p></li>
-<li><b>Pool fixed parameters</b>
-<dl>
-<dt>n</dt><dd>Number of molecules in the pool. Derived from 'nInit'.
-</dd>
-<dt>conc</dt><dd>Concentration of molecules in the pool.  Derived from
-                'concInit'.
-</dd>
-<dt>size</dt><dd>Derived from the compartment that holds the
+<li><b>Pool fixed parameters</b>:
+<ul>
+<li><span style="text-decoration:underline;">n</span>: Number of molecules in the pool. Derived from <b>nInit</b>.
+</li>
+<li><span style="text-decoration:underline;">conc</span>: Concentration of molecules in the pool.  Derived from
+                <b>concInit</b>.
+</li>
+<li><span style="text-decoration:underline;">size</span>: Derived from the compartment that holds the
                 pool. Specifies volume, surface area or length of the
                 holding compartment.
-</dd>
-</dl>
-
 </li>
-<li><b>Moving Buffered pools</b> Click and drag.
+</ul>
+
 </li>
 </ul>
 
@@ -431,26 +444,28 @@ d[Ca<sub>4</sub>.CaM]/dt = Kf * [Ca]<sup>4</sup> * [CaM] - Kb * [Ca<sub>4</sub>.
     reversible, but you can set either of the rates to zero to get
     irreversibility.
 </p><ul>
-<li><b>Icon</b> Reversible reaction arrow.
+<li><b>Icon</b>: Reversible reaction arrow.
 </li>
-<li><b>Reaction editable parameters</b>
+<li><b>Moving Reactions</b>: Click and drag.
+</li>
+<li><b>Reaction editable parameters</b>:
 <ul>
-<li><b>Name</b> Name of reaction
+<li><span style="text-decoration:underline;">Name</span>: Name of reaction
 </li>
-<li><b>Kf</b> Forward rate of reaction, in concentration/time
+<li><span style="text-decoration:underline;">Kf</span>: Forward rate of reaction, in concentration/time
         units. This is the normal way to express and manipulate the
         reaction rate.
 </li>
-<li><b>kf</b> Forward rate of reaction, in number/time units. This is
+<li><span style="text-decoration:underline;">kf</span>: Forward rate of reaction, in number/time units. This is
         used internally for computations, but is volume-dependent and
         should not be used to manipulate the reaction rate unless you
         really know what you are doing.
 </li>
-<li><b>Kb</b> Backward rate of reaction, in concentration/time
+<li><span style="text-decoration:underline;">Kb</span>: Backward rate of reaction, in concentration/time
         units. This is the normal way to express and manipulate the
         reaction rate.
 </li>
-<li><b>kb</b> Backward rate of reaction, in number/time units. This is
+<li><span style="text-decoration:underline;">kb</span>: Backward rate of reaction, in number/time units. This is
         used internally for computations, but is volume-dependent and
         should not be used to manipulate the reaction rate unless you
         really know what you are doing.
@@ -458,16 +473,14 @@ d[Ca<sub>4</sub>.CaM]/dt = Kf * [Ca]<sup>4</sup> * [CaM] - Kb * [Ca<sub>4</sub>.
 </ul>
 
 </li>
-<li><b>Reaction fixed parameters</b>
-<dl>
-<dt>numProducts</dt><dd>Number of product molecules
-</dd>
-<dt>numSubstrates</dt><dd>Number of substrates molecules
-</dd>
-</dl>
-
+<li><b>Reaction fixed parameters</b>:
+<ul>
+<li><span style="text-decoration:underline;">numProducts</span>: Number of product molecules
 </li>
-<li><b>Moving Reactions</b> Click and drag.
+<li><span style="text-decoration:underline;">numSubstrates</span>: Number of substrates molecules
+</li>
+</ul>
+
 </li>
 </ul>
 
@@ -490,17 +503,17 @@ d[Ca<sub>4</sub>.CaM]/dt = Kf * [Ca]<sup>4</sup> * [CaM] - Kb * [Ca<sub>4</sub>.
 
 <p>
     Note that the second reaction is irreversible. Note also that
-    mass-action enzymes require the creation of a pool to represent
-    the E.S (enzyme-substrate) complex.
+    mass-action enzymes include a pool to represent
+    the <b>E.S</b> (enzyme-substrate) complex.
 </p>
 <ul>
-<li><b>Icon</b> Colored ellipse atop a small square. The ellipse
-      represents the enzyme The small square represents E.S, the
+<li><b>Icon</b>: Colored ellipse atop a small square. The ellipse
+      represents the enzyme. The small square represents <b>E.S</b>, the
       enzyme-substrate complex.
 
 <p>
-      The ellipse icon has the same color as the enzyme E.  It is
-      connected to the enzyme pool E with a straight line of the same
+      The ellipse icon has the same color as the enzyme pool <b>E</b>.  It is
+      connected to the enzyme pool <b>E</b> with a straight line of the same
       color.
 </p>
 <p>
@@ -512,46 +525,49 @@ d[Ca<sub>4</sub>.CaM]/dt = Kf * [Ca]<sup>4</sup> * [CaM] - Kb * [Ca<sub>4</sub>.
       since the same enzyme might catalyze many reactions.
 </p>
 </li>
-<li><b>Enzyme editable parameters</b>
-<dl>
-<dt>Name</dt><dd>Name of enzyme.
-</dd>
-<dt>Km</dt><dd>Michaelis-Menten value for enzyme, in concentration units.
-</dd>
-<dt>kcat</dt><dd>Production rate of enzyme, in 1/time units.  Equal to
-               k3, the rate of the second, irreversible reaction.
-</dd>
-<dt>k1</dt><dd>Forward rate of the E+S reaction, in number and 1/time
-              units. This is what is used in the internal calculations.
-</dd>
-<dt>k2</dt><dd>Backward rate of the E+S reaction, in 1/time units. Used
-              in internal calculations.
-</dd>
-<dt>k3</dt><dd>Forward rate of the E.S&mdash;&gt; E + P reaction, in 1/time
-              units. Equivalent to kcat.  Used in internal
-              calculations.
-</dd>
-<dt>ratio</dt><dd>Ratio of k2/k3. Needed to define the internal rates
-                 in terms of Km and kcat. I usually use a value of 4.
-
-</dd>
-</dl>
+<li><b>Moving Enzymes</b>: Click and drag on the ellipse.
 
 </li>
-<li><b>Enzyme-substrate-complex editable parameters</b> 
+<li><b>Enzyme editable parameters</b>
+<ul>
+<li><span style="text-decoration:underline;">Name</span>: Name of enzyme.
+</li>
+<li><span style="text-decoration:underline;">Km</span>: Michaelis-Menten value for enzyme, in concentration units.
+</li>
+<li><span style="text-decoration:underline;">kcat</span>: Production rate of enzyme, in 1/time units.  Equal to
+               k3, the rate of the second, irreversible reaction.
+</li>
+<li><span style="text-decoration:underline;">k1</span>: Forward rate of the <b>E+S</b> reaction, in number and 1/time
+              units. This is what is used in the internal calculations.
+</li>
+<li><span style="text-decoration:underline;">k2</span>: Backward rate of the <b>E+S</b> reaction, in 1/time units. Used
+              in internal calculations.
+</li>
+<li><span style="text-decoration:underline;">k3</span>: Forward rate of the <b>E.S&mdash;&gt; E + P</b> reaction, in 1/time
+              units. Equivalent to <b>kcat</b>.  Used in internal
+              calculations.
+</li>
+<li><span style="text-decoration:underline;">ratio</span>: Ratio of <b>k2/k3</b>. Needed to define the internal rates
+                 in terms of <b>Km</b> and <b>kcat</b>. I usually use a value of 4.
+
+</li>
+</ul>
+
+</li>
+<li><b>Enzyme-substrate-complex editable parameters</b>:
 
 <p> 
       These are identical to those of any other pool.
-</p><dl>
-<dt>Name</dt><dd>Name of the E.S complex. Defaults to
-       '&lt;enzymeName&gt;_cplx'.
-</dd>
-<dt>n</dt><dd>Number of molecules in the pool
-</dd>
-<dt>nInit</dt><dd>Initial number of molecules in the complex.  'n' gets
-                set to this value when the 'Reinit' operation is done.
-</dd>
-<dt>conc</dt><dd>Concentration of the molecules in the pool.
+</p><ul>
+<li><span style="text-decoration:underline;">Name</span>: Name of the <b>E.S</b> complex. Defaults to
+       <i>&lt;enzymeName&gt;_cplx</i>.
+</li>
+<li><span style="text-decoration:underline;">n</span>: Number of molecules in the pool
+</li>
+<li><span style="text-decoration:underline;">nInit</span>: Initial number of molecules in the complex.  <b>n</b> gets
+                set to this value when the <i>Reinit</i> operation is done.
+</li>
+<li><span style="text-decoration:underline;">conc</span>: Concentration of the molecules in the pool.
 <blockquote>
 
 <p>conc = n * unit_scale_factor / (NA * vol)
@@ -559,8 +575,8 @@ d[Ca<sub>4</sub>.CaM]/dt = Kf * [Ca]<sup>4</sup> * [CaM] - Kb * [Ca<sub>4</sub>.
 </blockquote>
 
 
-</dd>
-<dt>concInit</dt><dd>Initial concentration of the molecules in 
+</li>
+<li><span style="text-decoration:underline;">concInit</span>: Initial concentration of the molecules in 
                   the pool.
 <blockquote>
 
@@ -570,27 +586,25 @@ d[Ca<sub>4</sub>.CaM]/dt = Kf * [Ca]<sup>4</sup> * [CaM] - Kb * [Ca<sub>4</sub>.
 
 
 <p>
-                  'conc' is set to this value when the 'Reinit'
+                  <b>conc</b> is set to this value when the <i>Reinit</i>
                    operation is done.
 </p>
-</dd>
-</dl>
-
-</li>
-<li><b>Enzyme-substrate-complex fixed parameters</b>
-<dl>
-<dt>size</dt><dd>Derived from the compartment that holds the
-</dd>
-</dl>
-
-<p>      pool. Specifies volume, surface area or length of the holding
-      compartment. Note that the Enzyme-substrate-complex is assumed
-      to be in the same compartment as the enzyme molecule.
-</p>
-</li>
-<li><b>Moving Enzymes</b> Click and drag on the ellipse.
 </li>
 </ul>
+
+</li>
+<li><b>Enzyme-substrate-complex fixed parameters</b>:
+<ul>
+<li><span style="text-decoration:underline;">size</span>: Derived from the compartment that holds the
+        pool. Specifies volume, surface area or length of the holding
+        compartment. Note that the Enzyme-substrate-complex is assumed
+        to be in the same compartment as the enzyme molecule.
+</li>
+</ul>
+
+</li>
+</ul>
+
 
 
 </div>
@@ -606,16 +620,24 @@ d[Ca<sub>4</sub>.CaM]/dt = Kf * [Ca]<sup>4</sup> * [CaM] - Kb * [Ca<sub>4</sub>.
 </p><blockquote>
 
 <p>V = Vmax*[S]/(Km+[S]) = kcat*[Etot]*[S]/(Km+[S])
-where Vmax is the maximum rate of the enzyme,
-[Etot] is the total amount of the enzyme
-Km is the Michaelis-Menten constant
-S is the substrate.
 </p>
 </blockquote>
 
 
 <p>
-    Nominally these enzymes model the same chemical equation as the
+    where 
+</p><ul>
+<li><i>Vmax</i> is the maximum rate of the enzyme
+</li>
+<li><i>[Etot]</i> is the total amount of the enzyme
+</li>
+<li><i>Km</i> is the Michaelis-Menten constant
+</li>
+<li><i>S</i> is the substrate.
+</li>
+</ul>
+
+<p>    Nominally these enzymes model the same chemical equation as the
     mass-action enzyme:
 </p><blockquote>
 
@@ -625,12 +647,12 @@ S is the substrate.
 
 
 <p>
-    but they make the assumption that the E.S is in a quasi-
-    steady-state with E and S, and they also ignore sequestration of
+    but they make the assumption that the <b>E.S</b> is in a quasi-
+    steady-state with <b>E</b> and <b>S</b>, and they also ignore sequestration of
     the enzyme into the complex. So there is no representation of the
-    E.S complex.
+    <b>E.S</b> complex.
 </p><ul>
-<li><b>Icon</b> Colored ellipse. The ellipse represents the enzyme The
+<li><b>Icon</b>: Colored ellipse. The ellipse represents the enzyme The
       ellipse icon has the same color as the enzyme E.  It is
       connected to the enzyme pool E with a straight line of the same
       color.  The ellipse icon sits on a continuous, typically curved
@@ -638,20 +660,20 @@ S is the substrate.
       enzyme pool can have any number of enzyme activities, since the
       same enzyme might catalyze many reactions.
 </li>
-<li><b>Enzyme editable parameters</b>
-<dl>
-<dt>Name</dt><dd>Name of enzyme.
-</dd>
-<dt>Km</dt><dd>Michaelis-Menten value for enzyme, in concentration
-            units.
-</dd>
-<dt>kcat</dt><dd>Production rate of enzyme, in 1/time units.  Equal to
-              k3, the rate of the second, irreversible reaction.
-</dd>
-</dl>
-
+<li><b>Moving Enzymes</b>: Click and drag.
 </li>
-<li><b>Moving Enzymes</b> Click and drag.
+<li><b>Enzyme editable parameters</b>:
+<ul>
+<li><span style="text-decoration:underline;">Name</span>: Name of enzyme.
+</li>
+<li><span style="text-decoration:underline;">Km</span>: Michaelis-Menten value for enzyme, in concentration
+            units.
+</li>
+<li><span style="text-decoration:underline;">kcat</span>: Production rate of enzyme, in 1/time units.  Equal to
+              <b>k3</b>, the rate of the second, irreversible reaction.
+</li>
+</ul>
+
 </li>
 </ul>
 
@@ -667,8 +689,8 @@ S is the substrate.
 <p>    This is a pool whose concentration is just the sum of
     the concentrations of pools connected into it.  It behaves like a
     buffer whose concentration varies as the simulation proceeds Note
-    that this violates mass conservation: One can use a SumTotal in a
-    reaction, just like a buffer, but the SumTotal itself will never
+    that this violates mass conservation: One can use a <i>SumTotal</i> in a
+    reaction, just like a buffer, but the <i>SumTotal</i> itself will never
     be depleted. Typically used when we have multiple molecular forms
     of an enzyme, all with similar activity, and we just want to use
     a single enzyme activity to represent the whole lot.
@@ -676,34 +698,32 @@ S is the substrate.
 <ul>
 <li><b>Icon</b> Colored rectangle with pool name. The input pools
       connect to the SumTotal with blue arrows.
-
 </li>
-<li><b>SumTotal editable parameters</b>
-<dl>
-<dt>Name</dt><dd>Name of the pool
-
-</dd>
-</dl>
-
+<li><b>Moving SumTotals</b>: Click and drag.
 </li>
-<li><b>Pool fixed parameters</b>
-<dl>
-<dt>n</dt><dd>Number of molecules in the pool. Computed as it runs.
-</dd>
-<dt>conc</dt><dd>Concentration of molecules in the pool.  Computed as it
-             runs.
-</dd>
-<dt>size</dt><dd>Derived from the compartment that holds the
-             pool. Specifies volume, surface area or length of the
-             holding compartment.
-
-</dd>
-</dl>
-
-</li>
-<li><b>Moving SumTotals</b> Click and drag.
+<li><b>SumTotal editable parameters</b>:
+<ul>
+<li><span style="text-decoration:underline;">Name</span>: Name of the pool
 </li>
 </ul>
+
+</li>
+<li><b>SumTotal fixed parameters</b>:
+<ul>
+<li><span style="text-decoration:underline;">n</span>: Number of molecules in the pool. Computed as it runs.
+</li>
+<li><span style="text-decoration:underline;">conc</span>: Concentration of molecules in the pool.  Computed as it
+             runs.
+</li>
+<li><span style="text-decoration:underline;">size</span>: Derived from the compartment that holds the
+             pool. Specifies volume, surface area or length of the
+             holding compartment.
+</li>
+</ul>
+
+</li>
+</ul>
+
 
 
 </div>
@@ -715,15 +735,16 @@ S is the substrate.
 <h3 id="sec-2-3"><span class="section-number-3">2.3</span> Model operations</h3>
 <div class="outline-text-3" id="text-2-3">
 
-<ul>
-<li><b>Loading models</b> File-&gt;Load Model-&gt; select from dialog.  This
+<dl>
+<dt>Loading models</dt><dd><i>File-&gt;Load Model -&gt; select from dialog</i>.  This
      operation deletes the previously loaded model.  Currently only
      understands Kkit.g format models.
-</li>
-<li><b>Saving models</b> File-&gt;Save Model-&gt;select from dialog.
+</dd>
+<dt>Saving models</dt><dd><i>File-&gt;Save Model-&gt;select from dialog</i>.
      Currently only understands Kkit.g format models.
-</li>
-<li><b>Merging models</b> File-&gt;Merge Model -&gt; select from dialog. This
+</dd>
+<dt>Merging models</dt><dd><i>File-&gt;Merge Model -&gt; select from dialog</i>.
+     This
      operation tries to merge the new model into the currently loaded
      model. It does so by recognizing existing molecular pool names,
      and not duplicating those. Instead, any new reactions involving
@@ -731,27 +752,27 @@ S is the substrate.
      new pools and reactions are created as usual. Note that
      parameters of existing pools get updated to values from the new
      model.
-</li>
-<li><b>Changing numerical methods</b> Solver menu item in title bar has
+</dd>
+<dt>Changing numerical methods</dt><dd>Solver menu item in title bar has
      options. Currently supports:
-<dl>
-<dt>Runge Kutta</dt><dd>This is the Runge-Kutta-Fehlberg implementation
-                      from the Gnu Scientific Library (GSL). It is a
+<ul>
+<li><span style="text-decoration:underline;">Runge Kutta</span>: This is the Runge-Kutta-Fehlberg implementation
+                      from the GNU Scientific Library (GSL). It is a
                       fifth order variable timestep explicit
                       method. Works well for most reaction systems
                       except if they have very stiff reactions.
-</dd>
-<dt>Gillespie</dt><dd>Optimized Gillespie Stochastic Systems Algorithm,
+</li>
+<li><span style="text-decoration:underline;">Gillespie</span>: Optimized Gillespie stochastic systems algorithm,
                     custom implementation. This uses variable timesteps
                     internally.  Note that it slows down with
                     increasing numbers of molecules in each pool. It
                     also slows down, but not so badly, if the number of
                     reactions goes up.
-</dd>
-</dl>
-
 </li>
 </ul>
+
+</dd>
+</dl>
 
 
 </div>
@@ -760,9 +781,9 @@ S is the substrate.
 </div>
 
 <div id="postamble">
-<p class="date">Date: 2012-09-24 14:58:27 IST</p>
-<p class="author">Author: Upi Bhalla: documentation, Harsha Rani, H. Chaitanya: GUI.</p>
-<p class="creator">Org version 7.8.11 with Emacs version 23</p>
+<p class="date">Date: 2012-09-25 15:16:43 IST</p>
+<p class="author">Author: Documentation and numerics: Upi Bhalla. GUI: Harsha Rani, H. Chaitanya</p>
+<p class="creator">Org version 7.8.02 with Emacs version 23</p>
 <a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a>
 
 </div>
