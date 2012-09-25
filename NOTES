@@ -18727,6 +18727,14 @@ is old and ReadKkit cannot handle some of the comments. WriteKkit
 doesn't complain but the output file is messed up. When I replace
 acc8.g with a newly saved version the genesis output is OK.
 Instead of acc8.g I use Osc_cspace_ref_model.g. This
-goes through the read-write cycle fine, works.
+goes through the read-write cycle fine, works. Checkin 4014.
 
+============================================================================
+25 Sep 2015
+
+Subhasis provided instructions on converting documents using eeeeeeeemax:
+C-c C-e b (Control+c followed by Control+e followed by b). 
+Or you can press Alt+x and enter: org-export-as-html in the minibuffer.
+
+I've used it to fine-tune the kkit12 documentation.
 ============================================================================
