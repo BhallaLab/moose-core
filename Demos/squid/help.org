@@ -4,8 +4,14 @@ Simulation of squid axon with Hodgkin-Huxley ion channels
 
 * Navigation: navigation toolbar is located at bottom of the plots
   This uses the built-in navigation toolbar of [[http://matplotlib.org/users/navigation_toolbar.html][matplotlib]] [click to
-  open in your default web-browser].  You can hover the mouse cursor
-  on any icon on this toolbar to get a brief tool-tip. To summarize:
+  open in your default web-browser].  
+
+#+CAPTION: Navigation toolbar for plots
+#+LABEL: fignavigationtoolbar
+[[./images/navigationtoolbar.jpg]]
+
+  You can hover the mouse cursor on any icon on this toolbar to get a
+  brief tool-tip. To summarize:
 
 ** Zoom
    1. Zoom-in:
