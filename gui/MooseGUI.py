@@ -108,7 +108,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
                                                      os.path.join(config.settings[config.KEY_DOCS_DIR], 'html'),
                                                      os.path.join(config.settings[config.KEY_DOCS_DIR], 'images')])
             self.documentationViewer.setMinimumSize(800, 600)
-        self.documentationViewer.setVisible(True)
+            self.documentationViewer.setVisible(True)
         self.documentationViewer.setSource(QtCore.QUrl('index.html'))
 
     def showKkitDocumentation(self):
@@ -175,6 +175,8 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
     def connectElements(self):
         #gui connections
         self.connect(self.actionLoad_Model,QtCore.SIGNAL('triggered()'), self.popupLoadModelDialog)
+	self.connect(self.actionSave_Model,QtCore.SIGNAL('triggered()'), self.popupSaveModelDialog)
+        self.connect(self.actionNew_Plot,QtCore.SIGNAL('triggered()'),self.savePlots)
         self.connect(self.actionQuit,QtCore.SIGNAL('triggered()'),self.doQuit)
         #self.connect(self.mdiArea,QtCore.SIGNAL('subWindowActivated(QMdiSubWindow)'),self.plotConfigCurrentPlotWinChanged)
         #plotdock connections
@@ -309,7 +311,20 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 #        allList = self.mdiArea.subWindowList()
 #        self.activeWindow = allList[number+1]
 #        self.activeMdiWindow()
-
+    def savePlots(self):
+        print "plots to be saved"
+        #MoosePlot.savePlotData()
+        
+    def popupSaveModelDialog(self):
+        files_types = "*.g"
+        filename = QtGui.QFileDialog.getSaveFileName(self, 'Save File', '',files_types)
+        if( (str(filename).rfind('.')) >= 0):
+            fileName = str(filename)
+        else: fileName = str(filename)+'.g'
+        fname = open(fileName, 'w')
+        moose.saveModel(self.modelpath,fileName)
+        print "Model Saved",fileName
+ 
     def popupLoadModelDialog(self):
         fileDialog = QtGui.QFileDialog(self)
         fileDialog.setFileMode(QtGui.QFileDialog.ExistingFile)
@@ -369,34 +384,36 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
                     modelpath = os.path.basename(str(fileName)).rpartition('.')[0] #case when users delibaretly want to load model under / or leave blank
                     
                 else:
-                    #modelpath = str(targetText.text()).partition('.')[-1]
-                    modelpath = str(targetText.text())
-                modeltype = self.mooseHandler.loadModel(str(fileName), str(fileType), modelpath, self.defaultKKITSolver)
+                    #self.modelpath = str(targetText.text()).partition('.')[-1]
+                    self.modelpath = str(targetText.text())
+                    
+                modeltype = self.mooseHandler.loadModel(str(fileName), str(fileType), self.modelpath, self.defaultKKITSolver)
                 if modeltype == MooseHandler.type_kkit:
-                    modelpath = '/KKIT/'+modelpath
+                    self.modelpath = '/KKIT/'+self.modelpath
+                    
                     #self.menuSolver.setEnabled(1)
                     try:
-                        self.addKKITLayoutWindow(modelpath)
+                        self.addKKITLayoutWindow(self.modelpath)
                         #self.actionLoad_Model.setEnabled(0) #to prevent multiple loads
                         
                     except kineticlayout.Widgetvisibility:
                     #except kl.Widgetvisibility:
                         print 'No kkit layout for: %s' % (str(fileName))
-                    #print moose.element(modelpath).getField('method')
-                    self.populateKKitPlots(modelpath)
+                    #print moose.element(self.modelpath).getField('method')
+                    self.populateKKitPlots(self.modelpath)
                 #else:
                     #self.menuSolver.setEnabled(0)
-                #print modelpath,modeltype,'hello'
-                self.modelPathsModelTypeDict[modelpath] = modeltype
-                self.populateDataPlots(modelpath)
-                self.updateDefaultTimes(modeltype,modelpath)
+                #print self.modelpath,modeltype,'hello'
+                self.modelPathsModelTypeDict[self.modelpath] = modeltype
+                self.populateDataPlots(self.modelpath)
+                self.updateDefaultTimes(modeltype,self.modelpath)
             #self.enableControlButtons()
             
             self.checkModelForNeurons()
             if self.modelHasCompartments or self.modelHasIntFires or self.modelHasLeakyIaF:
                 self.addGLWindow()
-            self.assignClocks(modelpath,modeltype)
-            print 'Loaded model',  fileName, 'of type', modeltype, 'under Element path ',modelpath
+            self.assignClocks(self.modelpath,modeltype)
+            print 'Loaded model',  fileName, 'of type', modeltype, 'under Element path ',self.modelpath
             app.restoreOverrideCursor()
 
     def assignClocks(self,modelpath,modeltype):
@@ -503,9 +520,9 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
     def addKKITLayoutWindow(self,modelpath):
         centralWindowsize =  self.mdiArea.size()
-        self.sceneLayout = kineticlayout.KineticsWidget(centralWindowsize,modelpath,self.mdiArea)
+        self.sceneLayout = kineticlayout.KineticsWidget(centralWindowsize,self.modelpath,self.mdiArea)
 
-        #self.sceneLayout = kl.KineticsWidget(centralWindowsize,modelpath,self.mdiArea)
+        #self.sceneLayout = kl.KineticsWidget(centralWindowsize,self.modelpath,self.mdiArea)
         self.connect(self.sceneLayout, QtCore.SIGNAL("itemDoubleClicked(PyQt_PyObject)"), self.makeObjectFieldEditor)
         KKitWindow = self.mdiArea.addSubWindow(self.sceneLayout)
 	self.connect(self,QtCore.SIGNAL("resize(QResizeEvent)"),self.sceneLayout.GrViewresize)
@@ -517,7 +534,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 	self.sceneLayout.GrVfitinView()
         # centralWindowsize =  self.layoutWidget.size()
         # layout = QtGui.QHBoxLayout(self.layoutWidget)
-        # self.sceneLayout = kineticlayout.kineticsWidget(centralWindowsize,modelpath,self.layoutWidget)
+        # self.sceneLayout = kineticlayout.kineticsWidget(centralWindowsize,self.modelpath,self.layoutWidget)
         # self.sceneLayout.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Expanding))
         # self.connect(self.sceneLayout, QtCore.SIGNAL("itemDoubleClicked(PyQt_PyObject)"), self.makeObjectFieldEditor)
         # layout.addWidget(self.sceneLayout)
@@ -713,6 +730,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.simControlResetPushButton.setEnabled(True)
         self.actionReset.setEnabled(True)
         self.actionLoad_Model.setEnabled(True)
+	self.actionSave_Model.setEnabled(True)
 
     def _stopSlot(self):
         self.mooseHandler.stopSimulation = 1
@@ -720,6 +738,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.actionReset.setEnabled(True)
         self.simControlResetPushButton.setEnabled(True)
         self.actionLoad_Model.setEnabled(True)
+	self.actionSave_Model.setEnabled(True)
     
     def _resetSlot(self): #called when reset is pressed
         #if moose.isRunning(): # do not let user reset when already moose running.
@@ -750,9 +769,9 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         
     def updateDefaultTimes(self, modeltype,modelpath): 
         if(modeltype == MooseHandler.type_kkit):
-            self.mooseHandler.updateDefaultsKKIT(modelpath)
+            self.mooseHandler.updateDefaultsKKIT(self.modelpath)
         elif (modeltype == MooseHandler.type_neuroml): 
-            self.mooseHandler.updateDefaultsNeural(modelpath)
+            self.mooseHandler.updateDefaultsNeural(self.modelpath)
 
         self.simControlSimdtLineEdit.setText(str(self.mooseHandler.simdt))
         self.simControlPlotdtLineEdit.setText(str(self.mooseHandler.plotdt))
