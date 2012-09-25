@@ -108,7 +108,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
                                                      os.path.join(config.settings[config.KEY_DOCS_DIR], 'html'),
                                                      os.path.join(config.settings[config.KEY_DOCS_DIR], 'images')])
             self.documentationViewer.setMinimumSize(800, 600)
-            self.documentationViewer.setVisible(True)
+        self.documentationViewer.setVisible(True)
         self.documentationViewer.setSource(QtCore.QUrl('index.html'))
 
     def showKkitDocumentation(self):
