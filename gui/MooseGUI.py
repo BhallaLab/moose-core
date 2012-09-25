@@ -504,6 +504,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
     def resizeEvent(self, event):
         QtGui.QWidget.resizeEvent(self, event)
+	self.emit(QtCore.SIGNAL("resize(QResizeEvent)"),event)
 
     def addKKITLayoutWindow(self,modelpath):
         centralWindowsize =  self.mdiArea.size()
@@ -512,10 +513,13 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         #self.sceneLayout = kl.KineticsWidget(centralWindowsize,modelpath,self.mdiArea)
         self.connect(self.sceneLayout, QtCore.SIGNAL("itemDoubleClicked(PyQt_PyObject)"), self.makeObjectFieldEditor)
         KKitWindow = self.mdiArea.addSubWindow(self.sceneLayout)
+	self.connect(self,QtCore.SIGNAL("resize(QResizeEvent)"),self.sceneLayout.GrViewresize)
+	#self.sceneLayout.fitinView()
         KKitWindow.setWindowTitle("KKit Layout")
         KKitWindow.setObjectName("KKitLayout")
         self.activeWindow = KKitWindow
         self.sceneLayout.show()
+	self.sceneLayout.GrVfitinView()
         # centralWindowsize =  self.layoutWidget.size()
         # layout = QtGui.QHBoxLayout(self.layoutWidget)
         # self.sceneLayout = kineticlayout.kineticsWidget(centralWindowsize,modelpath,self.layoutWidget)
