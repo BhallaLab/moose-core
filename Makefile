@@ -370,13 +370,24 @@ clean:
 	@(for i in $(CLEANSUBDIR) ; do $(MAKE) -C $$i clean;  done)
 	-rm -rf moose  core.* DOCS/html python/moose/*.so python/moose/*.pyc  
 
+############ INSTALL (works for sudo make install and deb packaging using dpkg-buildpackage)
 ## get the default python module install location
+## no need to know this, the default for public modules is /usr/share/pyshared
 pydir_cmd := python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"
 pydistpkg_dir := $(shell $(pydir_cmd))
+## /usr/share/pyshared/ is a directory which is independent of python version,
+## but modules need to be registered with update-python-modules, giving a list of files
+## debhelper (dpkg-buildpackage) will also copy to this location and do the registration.
+## For make install, I stick to the default python .../dist-packages directory.
+pydistpkg_dirB := /usr/share/pyshared/
+
 install_prefix=/usr
 ## Note that $(DESTDIR) is provided by dpkg-buildpackage to specify the local install for deb packaging
 ## if doing sudo make install, $(DESTDIR) will be undefined and will cause no trouble
 install:
+	## discard symbols from object files
+	strip python/moose/_moose.so
+
 	## delete older .../share/moose, - before rm means ignore errors (eg not found)
 	-rm -rf $(DESTDIR)$(install_prefix)/share/moose
 	## -p creates parent directories also if they don't exist
@@ -386,15 +397,37 @@ install:
 	rsync -r --exclude=.svn gui/* $(DESTDIR)$(install_prefix)/share/moose/gui
 	test -d $(DESTDIR)$(install_prefix)/share/doc || mkdir -p $(DESTDIR)$(install_prefix)/share/doc
 	rsync -r --exclude=.svn Docs/* $(DESTDIR)$(install_prefix)/share/doc/moose
+
 	## pymoose module goes to python's dist-packages
+	## delete older .../dist-packages/moose, - before rm means ignore errors (eg not found)
+	-rm -rf $(DESTDIR)$(pydistpkg_dir)/moose
+	-rm -rf $(DESTDIR)$(pydistpkg_dirB)/moose
 	## make directory in case non-existent (needed for deb pkg building)
 	mkdir -p $(DESTDIR)$(pydistpkg_dir)
-	rsync -r --exclude=.svn python/* $(DESTDIR)$(pydistpkg_dir)/
+	rsync -r --exclude=.svn --exclude=moose_py3k.py python/* $(DESTDIR)$(pydistpkg_dir)/
+
 	## shell command moosegui for the moose GUI.
 	chmod a+x $(DESTDIR)$(install_prefix)/share/moose/gui/MooseGUI.py
 	## -rm instructs make to ignore errors from make eg. file not found
 	-rm -f $(DESTDIR)$(install_prefix)/bin/moosegui
 	mkdir -p $(DESTDIR)$(install_prefix)/bin
 	ln -s $(DESTDIR)$(install_prefix)/share/moose/gui/MooseGUI.py $(DESTDIR)$(install_prefix)/bin/moosegui
+
+	## byte compile the module, gui, Demos (since, later running as user cannot create .pyc in root-owned dirs)
+	python -c "import compileall; compileall.compile_dir('$(DESTDIR)$(pydistpkg_dir)/moose',force=1)"
+	python -c "import compileall; compileall.compile_dir('$(DESTDIR)$(install_prefix)/share/moose/gui',force=1)"
+	python -c "import compileall; compileall.compile_dir('$(DESTDIR)$(install_prefix)/share/moose/Demos',force=1)"
+
+	## see standards.freedesktop.org for specifications for where to put menu entries and icons
+	## copy the .desktop files to /usr/share/applications for link to show up in main menu
+	mkdir -p $(DESTDIR)$(install_prefix)/share/applications
+	cp gui/MooseGUI.desktop $(DESTDIR)$(install_prefix)/share/applications/
+	cp gui/HHSquidDemo.desktop $(DESTDIR)$(install_prefix)/share/applications/
+	## copy icon to /usr/share/icons/hicolor/<size>/apps (hicolor is the fallback theme)
+	mkdir -p $(DESTDIR)$(install_prefix)/share/icons/hicolor/scalable/apps
+	cp gui/icons/moose_icon.png $(DESTDIR)$(install_prefix)/share/icons/hicolor/scalable/apps/
+	cp gui/icons/squid.png $(DESTDIR)$(install_prefix)/share/icons/hicolor/scalable/apps/
+	## need to update the icon cache to show the icon
+	update-icon-caches $(DESTDIR)$(install_prefix)/share/icons/hicolor/
 	
 .PHONY: install
