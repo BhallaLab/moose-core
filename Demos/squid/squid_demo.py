@@ -469,7 +469,7 @@ class SquidGui(QtGui.QMainWindow):
         if self._autoscaleAction.isChecked():
             for axis in self._plotFigure.axes:
                 axis.relim()
-                axis.autoscale(True, axis='y')
+                axis.set_autoscale_on(True)
         else:
             self._vm_axes.set_ylim(-20.0, 120.0)
             self._g_axes.set_ylim(0.0, 0.5)
@@ -513,7 +513,7 @@ class SquidGui(QtGui.QMainWindow):
         if self._autoscaleAction.isChecked():
             for axis in self._statePlotFigure.axes:
                 axis.relim()
-                axis.autoscale(True, axis='both')
+                axis.set_autoscale_on(True)
         self._statePlotCanvas.draw()
 
     def _runSlot(self):
@@ -648,10 +648,10 @@ class SquidGui(QtGui.QMainWindow):
         if on:
             for axis in (self._plotFigure.axes + self._statePlotFigure.axes):            
                 axis.relim()
-                axis.autoscale(True, axis='y')
+                axis.set_autoscale_on(True, axis='y')
         else:
             for axis in self._plotFigure.axes:
-                axis.autoscale(False)            
+                axis.set_autoscale_on(False)            
             self._vm_axes.set_ylim(-20.0, 120.0)
             self._g_axes.set_ylim(0.0, 0.5)
             self._im_axes.set_ylim(-0.5, 0.5)
