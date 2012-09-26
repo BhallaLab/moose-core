@@ -161,8 +161,8 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.menuHelp.setVisible(True)
         self.menuHelp.setEnabled(True)
         self.menuView.setEnabled(True)
-        self.menuClasses.setEnabled(False)
-        self.menuClasses.setVisible(False)
+        #self.menuClasses.setEnabled(False)
+        #self.menuClasses.setVisible(False)
         checked = False
         self.propEditorChildListWidget.setVisible(checked)
         self.label_13.setVisible(checked)
@@ -322,6 +322,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             fileName = str(filename)
         else: fileName = str(filename)+'.g'
         fname = open(fileName, 'w')
+        print "path",self.modelpath
         moose.saveModel(self.modelpath,fileName)
         print "Model Saved",fileName
  

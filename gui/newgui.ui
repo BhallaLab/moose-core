@@ -1728,7 +1728,7 @@
   <customwidget>
    <class>ObjectEditView</class>
    <extends>QWidget</extends>
-   <header>objectedit.h</header>
+   <header>objectedit2.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
