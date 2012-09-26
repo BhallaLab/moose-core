@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Sep 22 15:19:09 2012 (+0530)
 # Version: 
-# Last-Updated: Sat Sep 22 16:09:07 2012 (+0530)
+# Last-Updated: Wed Sep 26 16:35:38 2012 (+0530)
 #           By: subha
-#     Update #: 19
+#     Update #: 50
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -56,7 +56,7 @@ def resizeWidthToContents(lineEdit):
     w = fm.boundingRect(text).width()
     lineEdit.resize(w, lineEdit.height())
 
-def copyTree(src, dst, progressDialog):
+def copyTree(src, dst, progressDialog=None):
     """Copy the contents of source directory recursively into
     destination directory recursively. Display the progress in
     progressDialog. This does not overwrite any existing files or
@@ -84,26 +84,28 @@ def copyTree(src, dst, progressDialog):
     if not os.access(src, os.R_OK + os.X_OK):
         print 'Failed to access directory', src
         return
-    # print 'Copying %s to : %s'  % (src, dst)
-    try:
-        os.makedirs(dst)
-    except OSError, e:
-        # print e
-        errors.append(e)
-    size = 0
+    print 'Copying %s to : %s'  % (src, dst)
+    if not os.access(src, os.R_OK + os.X_OK):
+        try:
+            os.makedirs(dst)
+        except OSError, e:
+            # print e
+            errors.append(e)
+    totalsize = 0
     for dirpath, dirnames, filenames in os.walk(src):
         for fname in filenames:
             srcname = os.path.join(dirpath, fname)
             try:
-                size += os.path.getsize(srcname)
+                totalsize += os.path.getsize(srcname)
             except OSError, e:
                 # print e
                 errors.append(e)
-    progressDialog.setMaximum(size)
-    # print 'Total size to copy', size
+    if progressDialog:
+        progressDialog.setMaximum(totalsize)
     size = 0
     for dirpath, dirnames, filenames in os.walk(src):
-        dstdir = os.path.join(dst, os.path.split(dirpath)[-1])
+        dstdir = os.path.join(dst, dirpath[len(src)+1:])
+        # print 'Destination dir', dstdir, dirpath[len(src)+1:]
         try:
             os.makedirs(dstdir)
         except OSError, e:
@@ -120,11 +122,16 @@ def copyTree(src, dst, progressDialog):
                 # print e
                 errors.append(e)
             size += os.path.getsize(srcname)
-            progressDialog.setValue(size)            
-            if progressDialog.wasCanceled():
-                return errors
-            # print 'Copied till:', size
-    progressDialog.close()
+            if progressDialog:
+                progressDialog.setValue(size)            
+                if progressDialog.wasCanceled():
+                    return errors
+            else:
+                print 'Copied %d bytes of %d.' % (size, totalsize)
+    if progressDialog:
+        progressDialog.close()
+    else:
+        print 'Finished.'
     return errors
 
 
