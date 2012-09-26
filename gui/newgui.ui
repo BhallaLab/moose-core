@@ -60,6 +60,8 @@
      <addaction name="actionGenesis"/>
     </widget>
     <addaction name="actionLoad_Model"/>
+    <addaction name="actionSave_Model"/>
+    <addaction name="actionMerge_Models"/>
     <addaction name="actionNew_Plot"/>
     <addaction name="menuShell_Mode"/>
     <addaction name="actionReset_Settings"/>
@@ -1714,6 +1716,19 @@
    </property>
    <property name="toolTip">
     <string>Change moose configuration</string>
+   </property>
+  </action>
+  <action name="actionSave_Model">
+   <property name="text">
+    <string>Save Model</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionMerge_Models">
+   <property name="text">
+    <string>Merge Models</string>
    </property>
   </action>
   <zorder>moosePopulationEditDock</zorder>
