@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'newgui.ui'
 #
-# Created: Wed Sep 26 12:02:13 2012
+# Created: Wed Sep 26 12:36:15 2012
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -40,6 +40,7 @@ class Ui_MainWindow(object):
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
         self.menuShell_Mode = QtGui.QMenu(self.menuFile)
         self.menuShell_Mode.setObjectName(_fromUtf8("menuShell_Mode"))
+	'''
         self.menuClasses = QtGui.QMenu(self.menubar)
         self.menuClasses.setEnabled(False)
         self.menuClasses.setObjectName(_fromUtf8("menuClasses"))
@@ -55,6 +56,7 @@ class Ui_MainWindow(object):
         self.menuDevice.setObjectName(_fromUtf8("menuDevice"))
         self.menuRobot = QtGui.QMenu(self.menuClasses)
         self.menuRobot.setObjectName(_fromUtf8("menuRobot"))
+	'''
         self.menuView = QtGui.QMenu(self.menubar)
         self.menuView.setEnabled(True)
         self.menuView.setObjectName(_fromUtf8("menuView"))
@@ -63,8 +65,10 @@ class Ui_MainWindow(object):
         self.menuEdit.setObjectName(_fromUtf8("menuEdit"))
         self.menuHelp = QtGui.QMenu(self.menubar)
         self.menuHelp.setObjectName(_fromUtf8("menuHelp"))
+	'''
         self.menuRun = QtGui.QMenu(self.menubar)
         self.menuRun.setObjectName(_fromUtf8("menuRun"))
+	'''
         self.menuSolver = QtGui.QMenu(self.menubar)
         self.menuSolver.setObjectName(_fromUtf8("menuSolver"))
         MainWindow.setMenuBar(self.menubar)
@@ -615,6 +619,7 @@ class Ui_MainWindow(object):
         self.actionRequest_a_Feature.setObjectName(_fromUtf8("actionRequest_a_Feature"))
         self.actionAbout = QtGui.QAction(MainWindow)
         self.actionAbout.setObjectName(_fromUtf8("actionAbout"))
+	
         self.actionRun = QtGui.QAction(MainWindow)
         self.actionRun.setObjectName(_fromUtf8("actionRun"))
         self.actionReset = QtGui.QAction(MainWindow)
@@ -623,6 +628,7 @@ class Ui_MainWindow(object):
         self.actionContinue.setObjectName(_fromUtf8("actionContinue"))
         self.actionStop = QtGui.QAction(MainWindow)
         self.actionStop.setObjectName(_fromUtf8("actionStop"))
+	
         self.actionPlot_Config = QtGui.QAction(MainWindow)
         self.actionPlot_Config.setCheckable(True)
         self.actionPlot_Config.setChecked(True)
@@ -659,6 +665,7 @@ class Ui_MainWindow(object):
         self.menuFile.addAction(self.menuShell_Mode.menuAction())
         self.menuFile.addAction(self.actionReset_Settings)
         self.menuFile.addAction(self.actionQuit)
+	'''
         self.menuBase.addAction(self.actionNeutral)
         self.menuBase.addAction(self.actionTick)
         self.menuBuiltins.addAction(self.actionTimeTables)
@@ -719,6 +726,7 @@ class Ui_MainWindow(object):
         self.menuClasses.addAction(self.menuKinects.menuAction())
         self.menuClasses.addAction(self.menuDevice.menuAction())
         self.menuClasses.addAction(self.menuRobot.menuAction())
+	'''
         self.menuView.addAction(self.actionMoose_Shell)
         self.menuView.addAction(self.actionProperty_Editor)
         self.menuView.addAction(self.actionSimulation_Control)
@@ -732,17 +740,19 @@ class Ui_MainWindow(object):
         self.menuHelp.addAction(self.actionDocumentation)
         self.menuHelp.addAction(self.actionReport_a_Bug)
         self.menuHelp.addAction(self.actionRequest_a_Feature)
+	'''
         self.menuRun.addAction(self.actionRun)
         self.menuRun.addAction(self.actionReset)
         self.menuRun.addAction(self.actionContinue)
         self.menuRun.addAction(self.actionStop)
+	'''
         self.menuSolver.addAction(self.actionRK5)
         self.menuSolver.addAction(self.actionGillespie)
         self.menubar.addAction(self.menuFile.menuAction())
-        self.menubar.addAction(self.menuRun.menuAction())
+        #self.menubar.addAction(self.menuRun.menuAction())
         self.menubar.addAction(self.menuEdit.menuAction())
         self.menubar.addAction(self.menuView.menuAction())
-        self.menubar.addAction(self.menuClasses.menuAction())
+        #self.menubar.addAction(self.menuClasses.menuAction())
         self.menubar.addAction(self.menuSolver.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
 
@@ -754,17 +764,19 @@ class Ui_MainWindow(object):
         self.mdiArea.setStatusTip(QtGui.QApplication.translate("MainWindow", "To load a model, Menu >File >Load Model or Ctrl+L", None, QtGui.QApplication.UnicodeUTF8))
         self.menuFile.setTitle(QtGui.QApplication.translate("MainWindow", "File", None, QtGui.QApplication.UnicodeUTF8))
         self.menuShell_Mode.setTitle(QtGui.QApplication.translate("MainWindow", "Shell Mode", None, QtGui.QApplication.UnicodeUTF8))
-        self.menuClasses.setTitle(QtGui.QApplication.translate("MainWindow", "Classes", None, QtGui.QApplication.UnicodeUTF8))
+        '''
+	self.menuClasses.setTitle(QtGui.QApplication.translate("MainWindow", "Classes", None, QtGui.QApplication.UnicodeUTF8))
         self.menuBase.setTitle(QtGui.QApplication.translate("MainWindow", "Base", None, QtGui.QApplication.UnicodeUTF8))
         self.menuBuiltins.setTitle(QtGui.QApplication.translate("MainWindow", "Builtins", None, QtGui.QApplication.UnicodeUTF8))
         self.menuBipoPhysics.setTitle(QtGui.QApplication.translate("MainWindow", "BioPhysics", None, QtGui.QApplication.UnicodeUTF8))
         self.menuKinects.setTitle(QtGui.QApplication.translate("MainWindow", "Kinects", None, QtGui.QApplication.UnicodeUTF8))
         self.menuDevice.setTitle(QtGui.QApplication.translate("MainWindow", "Device", None, QtGui.QApplication.UnicodeUTF8))
         self.menuRobot.setTitle(QtGui.QApplication.translate("MainWindow", "Robot", None, QtGui.QApplication.UnicodeUTF8))
+	'''
         self.menuView.setTitle(QtGui.QApplication.translate("MainWindow", "View", None, QtGui.QApplication.UnicodeUTF8))
         self.menuEdit.setTitle(QtGui.QApplication.translate("MainWindow", "Edit", None, QtGui.QApplication.UnicodeUTF8))
         self.menuHelp.setTitle(QtGui.QApplication.translate("MainWindow", "Help", None, QtGui.QApplication.UnicodeUTF8))
-        self.menuRun.setTitle(QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
+        #self.menuRun.setTitle(QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
         self.menuSolver.setTitle(QtGui.QApplication.translate("MainWindow", "Solver", None, QtGui.QApplication.UnicodeUTF8))
         self.mooseObjectEditDock.setStatusTip(QtGui.QApplication.translate("MainWindow", "Property Editor.  Displays parent-child  relationship", None, QtGui.QApplication.UnicodeUTF8))
         self.mooseObjectEditDock.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Property Editor", None, QtGui.QApplication.UnicodeUTF8))
@@ -896,11 +908,13 @@ class Ui_MainWindow(object):
         self.actionReport_a_Bug.setText(QtGui.QApplication.translate("MainWindow", "Report a Bug", None, QtGui.QApplication.UnicodeUTF8))
         self.actionRequest_a_Feature.setText(QtGui.QApplication.translate("MainWindow", "Request a Feature", None, QtGui.QApplication.UnicodeUTF8))
         self.actionAbout.setText(QtGui.QApplication.translate("MainWindow", "About", None, QtGui.QApplication.UnicodeUTF8))
+	'''
         self.actionRun.setText(QtGui.QApplication.translate("MainWindow", "Run", None, QtGui.QApplication.UnicodeUTF8))
         self.actionRun.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+R", None, QtGui.QApplication.UnicodeUTF8))
         self.actionReset.setText(QtGui.QApplication.translate("MainWindow", "Reset", None, QtGui.QApplication.UnicodeUTF8))
         self.actionContinue.setText(QtGui.QApplication.translate("MainWindow", "Continue", None, QtGui.QApplication.UnicodeUTF8))
         self.actionStop.setText(QtGui.QApplication.translate("MainWindow", "Stop", None, QtGui.QApplication.UnicodeUTF8))
+	'''
         self.actionPlot_Config.setText(QtGui.QApplication.translate("MainWindow", "Plot Config", None, QtGui.QApplication.UnicodeUTF8))
         self.actionViewAsSubWindows.setText(QtGui.QApplication.translate("MainWindow", "Sub Windows", None, QtGui.QApplication.UnicodeUTF8))
         self.actionViewAsTabs.setText(QtGui.QApplication.translate("MainWindow", "Tabs", None, QtGui.QApplication.UnicodeUTF8))
@@ -913,4 +927,4 @@ class Ui_MainWindow(object):
         self.actionSave_Model.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+S", None, QtGui.QApplication.UnicodeUTF8))
         self.actionMerge_Models.setText(QtGui.QApplication.translate("MainWindow", "Merge Models", None, QtGui.QApplication.UnicodeUTF8))
 
-from objectedit import ObjectEditView
+from objectedit2 import ObjectEditView
