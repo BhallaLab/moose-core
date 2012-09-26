@@ -18736,5 +18736,8 @@ Subhasis provided instructions on converting documents using eeeeeeeemax:
 C-c C-e b (Control+c followed by Control+e followed by b). 
 Or you can press Alt+x and enter: org-export-as-html in the minibuffer.
 
-I've used it to fine-tune the kkit12 documentation.
+I've used it to fine-tune the kkit12 documentation. Checkin 4022.
 ============================================================================
+26 Sep 2012
+Harsha reported a bug in WriteKkit. Fixed. But there is now an issue with
+the gui, that stores only 100 seconds for runtime.
