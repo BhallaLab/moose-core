@@ -94,7 +94,6 @@ class ClampCircuit(moose.Neutral):
             self.pulsegen.trigMode = 1  
         else:
             self.pulsegen.trigMode = 0
-        print 'Trigmode', self.pulsegen.trigMode
         
     def do_voltage_clamp(self):
         """Switch to voltage clamp circuitry. After this the simdt may
