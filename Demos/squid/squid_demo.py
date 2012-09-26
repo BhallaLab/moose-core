@@ -648,7 +648,7 @@ class SquidGui(QtGui.QMainWindow):
         if on:
             for axis in (self._plotFigure.axes + self._statePlotFigure.axes):            
                 axis.relim()
-                axis.set_autoscale_on(True, axis='y')
+                axis.set_autoscale_on(True)
         else:
             for axis in self._plotFigure.axes:
                 axis.set_autoscale_on(False)            
