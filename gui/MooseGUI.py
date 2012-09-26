@@ -227,32 +227,32 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         #self.actionEE.setChecked(False)
         self.actionGillespie.setChecked(False)
         self.actionRK5.setChecked(True)
-        #for model in self.modelPathsModelTypeDict.keys():
-        #    moose.element(model).method = 'rk5'
-        #moose.reinit()
-        #self._resetSlot()
+        for model in self.modelPathsModelTypeDict.keys():
+            moose.element(model).method = 'rk5'
+        moose.reinit()
+        self._resetSlot()
         self.defaultKKITSolver = 'rk5'
-            
-    #def changeToEE(self):
-    #    print 'Changing to EE'
-    #    self.actionRK5.setChecked(False)
-    #    self.actionGillespie.setChecked(False)
-    #    self.actionEE.setChecked(True)
-        #for model in self.modelPathsModelTypeDict.keys():
-        #    moose.element(model).method = 'ee'
-        #moose.reinit()
-        #self._resetSlot()
-    #    self.defaultKKITSolver = 'ee'
-
+    '''        
+    def changeToEE(self):
+        print 'Changing to EE'
+        self.actionRK5.setChecked(False)
+        self.actionGillespie.setChecked(False)
+        self.actionEE.setChecked(True)
+        for model in self.modelPathsModelTypeDict.keys():
+            moose.element(model).method = 'ee'
+        moose.reinit()
+        self._resetSlot()
+        self.defaultKKITSolver = 'ee'
+    '''    
     def changeToGill(self):
         print 'Changing to Gillespie'
         self.actionRK5.setChecked(False)
         #self.actionEE.setChecked(False)
         self.actionGillespie.setChecked(True)
-        #for model in self.modelPathsModelTypeDict.keys():
-        #    moose.element(model).method = 'gssa'
-        #moose.reinit()
-        #self._resetSlot()
+        for model in self.modelPathsModelTypeDict.keys():
+            moose.element(model).method = 'gssa'
+        moose.reinit()
+        self._resetSlot()
         self.defaultKKITSolver = 'gssa'
 
     def propEditorChildListToggleVisibility(self):
@@ -313,7 +313,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 #        self.activeMdiWindow()
     def savePlots(self):
         print "plots to be saved"
-        #MoosePlot.savePlotData()
+        #MoosePlot.savePlotData('/home/harsha/Desktop')
         
     def popupSaveModelDialog(self):
         files_types = "*.g"
