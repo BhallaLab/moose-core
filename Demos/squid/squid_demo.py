@@ -143,7 +143,7 @@ class SquidGui(QtGui.QMainWindow):
         self._i_axes = self._plotFigure.add_subplot(2,2,4, title='Channel current')
         self._i_axes.set_ylim(-10, 10)
         for axis in self._plotFigure.axes:
-            axis.autoscale(False)
+            axis.set_autoscale_on(False)
         layout = QtGui.QVBoxLayout()
         layout.addWidget(self._plotCanvas)
         self._plotNavigator = NavigationToolbar(self._plotCanvas, self._plotWidget)
@@ -163,8 +163,8 @@ class SquidGui(QtGui.QMainWindow):
         self._state_plot, = self._statePlotAxes.plot([], [], label='state')
         self._activationParamAxes = self._statePlotFigure.add_subplot(2,1,2, title='H-H activation parameters vs time')
         self._activationParamAxes.set_xlabel('Time (ms)')
-        for axis in self._plotFigure.axes:
-            axis.autoscale(False)
+        #for axis in self._plotFigure.axes:
+        #    axis.autoscale(False)
         self._stateplot_xvar_label = QtGui.QLabel('Variable on X-axis')
         self._stateplot_xvar_combo = QtGui.QComboBox()
         self._stateplot_xvar_combo.addItems(['V', 'm', 'n', 'h'])
@@ -475,6 +475,10 @@ class SquidGui(QtGui.QMainWindow):
             self._g_axes.set_ylim(0.0, 0.5)
             self._im_axes.set_ylim(-0.5, 0.5)
             self._i_axes.set_ylim(-10, 10)
+        self._vm_axes.set_xlim(0.0, time_series[-1])
+        self._g_axes.set_xlim(0.0, time_series[-1])
+        self._im_axes.set_xlim(0.0, time_series[-1])
+        self._i_axes.set_xlim(0.0, time_series[-1])
         self._plotCanvas.draw()
 
     def _updateStatePlot(self):
@@ -680,7 +684,8 @@ class SquidGui(QtGui.QMainWindow):
         self._pulseMode.setCurrentIndex(0)
 
     def _onScroll(self, event):
-        print '1'
+        if event.inaxes is None:
+            return  
         axes = event.inaxes
         zoom = 0.0
         if event.button == 'up':
