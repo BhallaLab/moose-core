@@ -401,11 +401,7 @@
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_5">
        <item>
-        <widget class="QLineEdit" name="popFilterSelectLineEdit">
-         <property name="placeholderText">
-          <string>filter</string>
-         </property>
-        </widget>
+        <widget class="QLineEdit" name="popFilterSelectLineEdit"/>
        </item>
        <item>
         <spacer name="horizontalSpacer_5">
@@ -624,11 +620,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="lineEdit_2">
-         <property name="placeholderText">
-          <string>filter</string>
-         </property>
-        </widget>
+        <widget class="QLineEdit" name="lineEdit_2"/>
        </item>
       </layout>
      </item>
@@ -705,11 +697,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="lineEdit_4">
-         <property name="placeholderText">
-          <string>filter</string>
-         </property>
-        </widget>
+        <widget class="QLineEdit" name="lineEdit_4"/>
        </item>
       </layout>
      </item>
