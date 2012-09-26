@@ -316,16 +316,24 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         #MoosePlot.savePlotData('/home/harsha/Desktop')
         
     def popupSaveModelDialog(self):
-        files_types = "*.g"
-        filename = QtGui.QFileDialog.getSaveFileName(self, 'Save File', '',files_types)
-        if( (str(filename).rfind('.')) >= 0):
-            fileName = str(filename)
-        else: fileName = str(filename)+'.g'
-        fname = open(fileName, 'w')
-        print "path",self.modelpath
-        moose.saveModel(self.modelpath,fileName)
-        print "Model Saved",fileName
- 
+        type_genesis = 'GENESIS'
+        #type_SBML = 'SBML'
+        filters = {'Genesis Script(*.g)': type_genesis}
+        filename, filter_ = QtGui.QFileDialog.getSaveFileNameAndFilter(self,self.tr('Save File'),'',';;'.join(filters))
+        if str(filename).rfind('.') != -1:
+            filename = filename[:str(filename).rfind('.')]
+        if str(filter_).rfind('.') != -1:
+            extension = filter_[str(filter_).rfind('.'):len(filter_)-1]
+        filename = filename+extension
+        if filters[str(filter_)] == 'GENESIS':
+            self.mooseHandler.saveGenesisModel(self.modelpath,filename)
+            '''
+            #need to check with upi if moose need to stopped and set the runtime to save the model
+            # after saving model continue running??
+            if moose.isRunning():
+                self._stopSlot()
+                print "moose stoped",MooseHandler.runtim
+            '''
     def popupLoadModelDialog(self):
         fileDialog = QtGui.QFileDialog(self)
         fileDialog.setFileMode(QtGui.QFileDialog.ExistingFile)
@@ -827,16 +835,16 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         return tableList
 
     def colorCheck(self,textColor):
-        pkl_file = open(os.path.join(config.settings[config.KEY_COLORMAP_DIR],                                      
-                                     'rainbow2.pkl'),
-                        'rb')
+        pkl_file = open(os.path.join(config.settings[config.KEY_COLORMAP_DIR],'rainbow2.pkl'),'rb')
         picklecolorMap = pickle.load(pkl_file)
         hexchars = "0123456789ABCDEF"
         if (textColor == ''): textColor = 'blue'
+        '''
         if(isinstance(textColor,(list,tuple))):
             r,g,b = textColor[0],textColor[1],textColor[2]
             textColor = "#"+ hexchars[r / 16] + hexchars[r % 16] + hexchars[g / 16] + hexchars[g % 16] + hexchars[b / 16] + hexchars[b % 16]
-        elif ((not isinstance(textColor,(list,tuple)))):
+        el'''
+        if ((not isinstance(textColor,(list,tuple)))):
             if textColor.isdigit():
                 tc = int(textColor)
                 tc = (tc * 2 )

@@ -167,7 +167,10 @@ class MooseHandler(QtCore.QObject):
 
         for child in moose.element('/library').getField('children'):
             moose.delete(child)
-
+    def saveGenesisModel(self,modelpath,filename):
+        self._context.saveModel(modelpath,str(filename))
+        print "Model is saved in",filename
+        
     def loadModel(self, filename, filetype, target='/', solver='rk5'):
         """Load a model from file."""
         directory = os.path.dirname(filename)
