@@ -270,10 +270,12 @@ void writePlot( ofstream& fout, Id id,
 			 	double x, double y )
 {
 	string path = id.path();
-	size_t pos = path.substr( 2 ).find( "/" );
-	if ( pos == string::npos ) // Might be finding unrelated neutrals
+	size_t pos = path.find( "/graphs" );
+	if ( pos == string::npos ) 
+		pos = path.find( "/moregraphs" );
+		if ( pos == string::npos ) 
 			return;
-	path = path.substr( pos + 2 );
+	path = path.substr( pos );
 	fout << "simundump xplot " << path << " 3 524288 \\\n" << 
 	"\"delete_plot.w <s> <d>; edit_plot.D <w>\" " << textcolour << " 0 0 1\n";
 }
@@ -532,9 +534,12 @@ void storePlotMsgs( Id tab, vector< string >& msgs )
 	double y;
 	getInfoFields( pools[0], bg, fg, x, y, 1, 1 );
 	string tabPath = tab.path(); 
-	size_t pos = tabPath.substr( 2 ).find( "/" );
-	assert( pos != string::npos );
-	tabPath = tabPath.substr( 2 + pos );
+
+	size_t pos = tabPath.find( "/graphs" );
+	if ( pos == string::npos ) 
+		pos = tabPath.find( "/moregraphs" );
+		assert( pos != string::npos );
+	tabPath = tabPath.substr( pos );
 	string s = "addmsg " + trimPath( pools[0].path() ) + " " + tabPath + 
 			" PLOT Co *" + pools[0].element()->getName() + " *" + bg;
 	msgs.push_back( s );
