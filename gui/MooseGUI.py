@@ -327,13 +327,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         filename = filename+extension
         if filters[str(filter_)] == 'GENESIS':
             self.mooseHandler.saveGenesisModel(self.modelpath,filename)
-            '''
-            #need to check with upi if moose need to stopped and set the runtime to save the model
-            # after saving model continue running??
-            if moose.isRunning():
-                self._stopSlot()
-                print "moose stoped",MooseHandler.runtim
-            '''
+
     def popupLoadModelDialog(self):
         fileDialog = QtGui.QFileDialog(self)
         fileDialog.setFileMode(QtGui.QFileDialog.ExistingFile)
@@ -567,7 +561,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         except KeyError:
             self.objFieldEditModel = ObjectFieldsModel(obj)
             self.objFieldEditorMap[obj.getId()] = self.objFieldEditModel
-
+        
         self.propEditorTableView.setObjectName(str(obj.getId()))
         self.propEditorTableView.setModel(self.objFieldEditModel)
         if hasattr(self, 'sceneLayout'):
