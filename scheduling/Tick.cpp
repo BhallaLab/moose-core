@@ -23,7 +23,7 @@
 // of the Ticks.
 // vector< SrcFinfo* > process;
 
-vector< SrcFinfo* > processVec() {
+vector< SrcFinfo* >& processVec() {
 	static SrcFinfo1< ProcPtr > process0( "process0", "Process for Tick 0" );
 	static SrcFinfo1< ProcPtr > process1( "process1", "Process for Tick 1" );
 	static SrcFinfo1< ProcPtr > process2( "process2", "Process for Tick 2" );
@@ -42,7 +42,7 @@ vector< SrcFinfo* > processVec() {
 	return processVec;
 }
 
-vector< SrcFinfo* > reinitVec() {
+vector< SrcFinfo* >& reinitVec() {
 
 	static SrcFinfo1< ProcPtr > reinit0( "reinit0", "Reinit for Tick 0" );
 	static SrcFinfo1< ProcPtr > reinit1( "reinit1", "Reinit for Tick 1" );
@@ -254,26 +254,15 @@ void Tick::setElement( const Element* e )
 }
 
 /**
- * This sends out the call to reinit objects.
-void Tick::reinit( const Eref& e, ProcInfo* info ) const
-{
-	info->dt = dt_;
-	info->currTime = 0;
-
-	assert( index_ < reinitVec().size() );
-	BindIndex b = reinitVec()[ index_ ]->getBindIndex();
-	const vector< MsgFuncBinding >* m = e.element()->getMsgAndFunc( b );
-	for ( vector< MsgFuncBinding >::const_iterator i = m->begin();
-		i != m->end(); ++i ) {
-		// Element->dataHandler keeps track of which entry needs to be
-		// updated by which thread.
-		Msg::getMsg( i->mid )->process( info, i->fid ); 
-	}
-}
+ * Checks if we have any tick targets.
  */
+bool Tick::hasTickTargets() const
+{
+	assert( ticke_ );
+	BindIndex b = processVec()[ index_ ]->getBindIndex();
+	return ticke_->hasMsgs( b );
+}
 
-////////////////////////////////////////////////////////////////////////
-// New version here
 ////////////////////////////////////////////////////////////////////////
 
 /**

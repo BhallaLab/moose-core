@@ -34,6 +34,11 @@ class Tick
 		///////////////////////////////////////////////////////
 
 		/**
+		 * Returns true if there are outgoing tick messages.
+		 */
+		bool hasTickTargets() const;
+
+		/**
 		 * New version of 'advance'
  		 * This function is called to advance this one tick through one
 		 * 'process' cycle. It is called in parallel on multiple threads,
