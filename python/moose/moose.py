@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Thu Sep 27 14:09:58 2012 (+0530)
+# Last-Updated: Thu Sep 27 19:28:42 2012 (+0530)
 #           By: subha
-#     Update #: 2136
+#     Update #: 2152
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -198,6 +198,35 @@ finfotypes = [('valueFinfo', 'value field') ,
               ('srcFinfo', 'source field'),
               ('destFinfo', 'destination field'),
               ('lookupFinfo', 'lookup field')]
+
+# 2012-01-11 19:20:39 (+0530) Subha: checked for compatibility with dh_branch
+# 2012-09-27 19:26:30 (+0530) Subha: updated for compatibility with buildQ branch
+def listmsg(pymoose_object):
+    """Return a list containing the incoming and outgoing messages of
+    the given object."""
+    obj = pymoose_object
+    ret = []
+    if type(pymoose_object) is type(""):
+        obj = moose__.Neutral(pymoose_object)
+    for msg in obj.inMsg:
+        ret.append(msg)
+    for msg in obj.outMsg:
+        ret.append(msg)
+    return ret
+
+# 2012-01-11 19:20:39 (+0530) Subha: checked for compatibility with dh_branch
+# 2012-09-27 19:26:30 (+0530) Subha: updated for compatibility with buildQ branch
+def showmsg(pymoose_object):
+    """Prints the incoming and outgoing messages of the given object."""
+    obj = pymoose_object
+    if type(pymoose_object) is type(""):
+        obj = moose__.Neutral(pymoose_object)
+    print 'INCOMING:'
+    for msg in obj.msgIn:
+        print msg.e2.path, msg.destFieldsOnE2, '<---', msg.e1.path, msg.srcFieldsOnE1
+    print 'OUTGOING:'
+    for msg in obj.msgOut:
+        print msg.e1.path, msg.srcFieldsOnE1, '--->', msg.e2.path, msg.destFieldsOnE2
 
 def getfielddoc(tokens, indent=''):
     """Get the documentation for field specified by
