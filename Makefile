@@ -381,6 +381,8 @@ pydistpkg_dir := $(shell $(pydir_cmd))
 ## For make install, I stick to the default python .../dist-packages directory.
 pydistpkg_dirB := /usr/share/pyshared/
 
+username=$(shell basename $(HOME))
+
 install_prefix=/usr
 ## Note that $(DESTDIR) is provided by dpkg-buildpackage to specify the local install for deb packaging
 ## if doing sudo make install, $(DESTDIR) will be undefined and will cause no trouble
@@ -422,7 +424,16 @@ install:
 	## copy the .desktop files to /usr/share/applications for link to show up in main menu
 	mkdir -p $(DESTDIR)$(install_prefix)/share/applications
 	cp gui/MooseGUI.desktop $(DESTDIR)$(install_prefix)/share/applications/
-	cp gui/HHSquidDemo.desktop $(DESTDIR)$(install_prefix)/share/applications/
+	cp gui/MooseSquidAxon.desktop $(DESTDIR)$(install_prefix)/share/applications/
+	## copy the .desktop files to the desktop too to get icons
+	cp gui/MooseGUI.desktop $$HOME/Desktop/
+	chmod a+x $$HOME/Desktop/MooseGUI.desktop
+	chown $(username) $(HOME)/Desktop/MooseGUI.desktop
+	chgrp $(username) $(HOME)/Desktop/MooseGUI.desktop
+	cp gui/MooseSquidAxon.desktop $$HOME/Desktop/
+	chmod a+x $$HOME/Desktop/MooseSquidAxon.desktop
+	chgrp $(username) $(HOME)/Desktop/MooseSquidAxon.desktop
+	chown $(username) $(HOME)/Desktop/MooseSquidAxon.desktop
 	## copy icon to /usr/share/icons/hicolor/<size>/apps (hicolor is the fallback theme)
 	mkdir -p $(DESTDIR)$(install_prefix)/share/icons/hicolor/scalable/apps
 	cp gui/icons/moose_icon.png $(DESTDIR)$(install_prefix)/share/icons/hicolor/scalable/apps/
