@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Tue Sep 18 14:29:22 2012 (+0530)
+# Last-Updated: Thu Sep 27 14:09:58 2012 (+0530)
 #           By: subha
-#     Update #: 2020
+#     Update #: 2136
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -194,7 +194,76 @@ def showfields(element, showtype=False):
     warnings.warn('Deprecated. Use showfield(element, field="*", showtype=True) instead.', DeprecationWarning)
     showfield(element, field='*', showtype=showtype)
     
-def doc(arg):
+finfotypes = [('valueFinfo', 'value field') , 
+              ('srcFinfo', 'source field'),
+              ('destFinfo', 'destination field'),
+              ('lookupFinfo', 'lookup field')]
+
+def getfielddoc(tokens, indent=''):
+    """Get the documentation for field specified by
+    tokens[0].tokens[1].
+
+    tokens should be a two element list/tuple where tokens[0] is a
+    MOOSE class name and tokens[1] is the field name.
+    """
+    assert(len(tokens) > 1)
+    for ftype, rtype in finfotypes:
+        cel = _moose.element('/classes/'+tokens[0])
+        numfinfo = getField(cel, 'num_'+ftype, 'unsigned')
+        print 'numfinfo', numfinfo
+        finfo = element('/classes/%s/%s' % (tokens[0], ftype))
+        for ii in range(numfinfo):
+            oid = melement(finfo.getId(), 0, ii, 0)
+            print oid, oid.name
+            if oid.name == tokens[1]:
+                return '%s%s.%s: %s - %s\n' % \
+                    (indent, tokens[0], tokens[1], 
+                     oid.docs, rtype)    
+    raise NameError('`%s` has no field called `%s`' 
+                    % (tokens[0], tokens[1]))
+                    
+    
+def getmoosedoc(tokens):
+    """Retrieve MOOSE builtin documentation for tokens.
+    
+    tokens is a list or tuple containing: (classname, [fieldname])"""
+    indent = '    '
+    docstring = cStringIO.StringIO()
+    if not tokens:
+        return ""
+    class_path = '/classes/%s' % (tokens[0])
+    if exists(class_path):
+        if len(tokens) == 1:
+            docstring.write('%s\n' % (Cinfo(class_path).docs))
+    else:
+        raise NameError('name \'%s\' not defined.' % (tokens[0]))
+    class_id = ematrix('/classes/%s' % (tokens[0]))
+    if len(tokens) > 1:
+        docstring.write(getfielddoc(tokens))
+    else:
+        finfoheaders = ['* Value Fields *', 
+                        '* Source Fields *',
+                        '* Destination Fields *',
+                        '* Lookup Fields *']
+        for ftype, rname in finfotypes:
+            docstring.write('\n*%s*\n' % (rname))
+            numfinfo = getField(class_id[0], 'num_'+ftype, 'unsigned')
+            finfo = ematrix('/classes/%s/%s' % (tokens[0], ftype))
+            for ii in range(numfinfo):
+                oid = melement(finfo, 0, ii, 0)
+                docstring.write('%s%s: %s\n' % 
+                                (indent, oid.name, oid.type))
+    ret = docstring.getvalue()
+    docstring.close()
+    return ret
+
+# the global pager is set from pydoc even if the user asks for paged
+# help once. this is to strike a balance between GENESIS user's
+# expectation of control returning to command line after printing the
+# help and python user's expectation of seeing the help via more/less.
+pager=None
+
+def doc(arg, paged=False):
     """Display the documentation for class or field in a class.
     
     Parameters
@@ -211,60 +280,39 @@ def doc(arg):
     or there subclasses). In that case, the builtin documentation for
     the corresponding moose class is displayed.
 
+    paged: bool
+    
+    Whether to display the docs via builtin pager or print and
+    exit. If not specified, it defaults to False and moose.doc(xyz)
+    will print help on xyz and return control to command line.
+
     """
     # There is no way to dynamically access the MOOSE docs using
     # pydoc. (using properties requires copying all the docs strings
     # from MOOSE increasing the loading time by ~3x). Hence we provide a
     # separate function.
-    docstring = cStringIO.StringIO()
-    indent = '    '
-    tokens = None
-    print_field = False
+    global pager
+    if paged and pager is None:
+        pager = pydoc.pager
+    tokens = []
+    text = ''
     if isinstance(arg, str):
         tokens = arg.split('.')
         if tokens[0] == 'moose':
             tokens = tokens[1:]
-        print_field = len(tokens) > 1
     elif isinstance(arg, type):
         tokens = [arg.__name__]
     elif isinstance(arg, melement) or isinstance(arg, ematrix):
+        text = '%s: %s\n\n' % (arg.path, arg.class_)
         tokens = [arg.class_]
+    if tokens:
+        text += getmoosedoc(tokens)
     else:
-        raise TypeError('Require a string or a moose class or a moose object')
-    class_path = '/classes/%s' % (tokens[0])
-    if exists(class_path):
-        if not print_field:
-            docstring.write('%s\n' % (Cinfo(class_path).docs))
+        text += pydoc.gethelp(arg)
+    if pager:
+        pager(text)
     else:
-        raise NameError('name \'%s\' not defined.' % (tokens[0]))
-    class_id = ematrix('/classes/%s' % (tokens[0]))
-    finfotypes = ['valueFinfo', 'srcFinfo', 'destFinfo', 'lookupFinfo']
-    readablefinfotypes = ['value field', 'source field', 'destination field', 'lookup field']
-    if print_field:
-        fieldfound = False
-        for rtype, ftype in zip(readablefinfotypes, finfotypes):
-            numfinfo = getField(class_id[0], 'num_'+ftype, 'unsigned')
-            finfo = ematrix('/classes/%s/%s' % (tokens[0], ftype))
-            for ii in range(numfinfo):
-                oid = melement(finfo, 0, ii, 0)
-                if oid.name == tokens[1]:
-                    docstring.write('%s%s.%s: %s - %s\n' % (indent, tokens[0], tokens[1], oid.docs, rtype))
-                    fieldfound = True
-                    break
-            if fieldfound:
-                break
-    else:
-        finfoheaders = ['* Value Fields *', '* Source Fields *', '* Destination Fields *', '* Lookup Fields *']
-        for header, ftype in zip(finfoheaders, finfotypes):
-            docstring.write('\n%s\n' % (header))
-            numfinfo = getField(class_id[0], 'num_'+ftype, 'unsigned')
-            finfo = ematrix('/classes/%s/%s' % (tokens[0], ftype))
-            for ii in range(numfinfo):
-                oid = melement(finfo, 0, ii, 0)
-                docstring.write('%s%s: %s\n' % (indent, oid.name, oid.type))
-            
-    pydoc.pager(docstring.getvalue())
-    docstring.close()
+        print text
                 
 
 # 
