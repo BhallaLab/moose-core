@@ -56,32 +56,6 @@ LOOKUPCLOCK = 6
 STIMCLOCK = 7
 PLOTCLOCK = 8
 
-# 2012-01-11 19:20:39 (+0530) Subha: checked for compatibility with dh_branch
-def listmsg(pymoose_object):
-    """Prints the incoming and outgoing messages of the given object."""
-    obj = pymoose_object
-    ret = []
-    if type(pymoose_object) is type(""):
-        obj = moose__.Neutral(pymoose_object)
-    for msg in obj.inMessages():
-        ret.append(msg)
-    for msg in obj.outMessages():
-        ret.append(msg)
-    return ret
-
-# 2012-01-11 19:20:39 (+0530) Subha: checked for compatibility with dh_branch
-def showmsg(pymoose_object):
-    """Prints the incoming and outgoing messages of the given object."""
-    obj = pymoose_object
-    if type(pymoose_object) is type(""):
-        obj = moose__.Neutral(pymoose_object)
-    print 'INCOMING:'
-    for msg in obj.inMessages():
-        print msg
-    print 'OUTGOING:'
-    for msg in obj.outMessages():
-        print msg
-
 
 def readtable(table, filename, separator=None):
     """Reads the file specified by filename to fill the MOOSE table object.
