@@ -18762,4 +18762,7 @@ had to do was to derive them from LookupValuFinfoBase rather than Finfo.
 Fixed other bug with path of ticks. Still is a bug there, in that
 the number in the ematrix is 16, not 10. Will discuss with Subha.
 
+Working on cleaning up scheduling. Main aim is to ensure we don't do any
+ticks if there are no objects on them. Huge mess, but I've come a good way
+along.
 ============================================================================
