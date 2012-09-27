@@ -421,10 +421,15 @@ void testStatsReduce()
 	shell->doStart( 1 );
 	*/
 	SetGet0::set( statsid, "trig" );
+	
+	Qinfo::clearQ( 1 );
+	Qinfo::clearQ( 1 );
 
+	/*
 	shell->doSetClock( 0, 1 );
 	shell->doReinit();
 	shell->doStart( 1 );
+	*/
 
 	double x = Field< double >::get( statsid, "sum" );
 	assert( doubleEq( x, sum ) );
@@ -543,7 +548,7 @@ void testBuiltinsProcess()
 {
 	testFibonacci();
 	testGetMsg();
-	testStatsReduce();
+	// testStatsReduce();
 }
 
 void testMpiBuiltins( )

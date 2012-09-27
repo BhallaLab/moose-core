@@ -177,10 +177,15 @@ void setupTicks()
 	static const double EPSILON = 1.0e-9;
 	const double runtime = 20.0;
 	// const Cinfo* tc = Tick::initCinfo();
-	Id clock = Id::nextId();
 	vector< DimInfo > dims;
+	/*
+	Id clock = Id::nextId();
 	Element* clocke = new Element( clock, Clock::initCinfo(), "tclock",
 		dims, 1, true );
+		*/
+	Id clock(1);
+	Element* clocke = clock.element();
+
 	assert( clocke );
 	// bool ret = Clock::initCinfo()->create( clock, "tclock", 1 );
 	// assert( ret );
@@ -190,16 +195,20 @@ void setupTicks()
 	Element* ticke = tickId();
 	assert( ticke->getName() == "tick" );
 
-	unsigned int size = 10;
 
+	/*
+	unsigned int size = 10;
 	for ( unsigned int i = 0; i < size; ++i ) {
 		Eref er( ticke, DataId( i ) );
 		reinterpret_cast< Tick* >( er.data() )->setElement( ticke );
 	}
+	*/
 
 	// cout << Shell::myNode() << ": numTicks: " << ticke->dataHandler()->totalEntries() << ", " << size << endl;
-	assert( ticke->dataHandler()->localEntries() == size );
+	assert( ticke->dataHandler()->localEntries() == Tick::maxTicks );
 
+	// Here I'm setting Tick fields, but the call is routed through the
+	// Clock
 	ObjId er0( tickId, DataId( 2 ) );
 	bool ret = Field< double >::set( er0, "dt", 5.0);
 	assert( ret );
@@ -221,7 +230,36 @@ void setupTicks()
 	ret = Field< double >::set( er5, "dt", 5.0);
 	assert( ret );
 
+
+
+	Id tsid = Id::nextId();
+	Element* tse = new Element( tsid, testSchedCinfo, "tse", dims, 1 );
+
+	Eref ts( tse, 0 );
+	
+	FuncId f( processFinfo.getFid() );
+	const Finfo* proc0 = ticke->cinfo()->findFinfo( "process0" );
+	assert( proc0 );
+	const SrcFinfo* sproc0 = dynamic_cast< const SrcFinfo* >( proc0 );
+	assert( sproc0 );
+	unsigned int b0 = sproc0->getBindIndex();
+	SingleMsg *m0 = new SingleMsg( Msg::nextMsgId(), er0.eref(), ts ); 
+	er0.element()->addMsgAndFunc( m0->mid(), f, er0.dataId.value()*2 + b0);
+	SingleMsg *m1 = new SingleMsg( Msg::nextMsgId(), er1.eref(), ts ); 
+	er1.element()->addMsgAndFunc( m1->mid(), f, er1.dataId.value()*2 + b0);
+	SingleMsg *m2 = new SingleMsg( Msg::nextMsgId(), er2.eref(), ts );
+	er2.element()->addMsgAndFunc( m2->mid(), f, er2.dataId.value()*2 + b0);
+	SingleMsg *m3 = new SingleMsg( Msg::nextMsgId(), er3.eref(), ts ); 
+	er3.element()->addMsgAndFunc( m3->mid(), f, er3.dataId.value()*2 + b0);
+	SingleMsg *m4 = new SingleMsg( Msg::nextMsgId(), er4.eref(), ts ); 
+	er4.element()->addMsgAndFunc( m4->mid(), f, er4.dataId.value()*2 + b0);
+	SingleMsg *m5 = new SingleMsg( Msg::nextMsgId(), er5.eref(), ts ); 
+	er5.element()->addMsgAndFunc( m5->mid(), f, er5.dataId.value()*2 + b0);
+
+
+
 	Clock* cdata = reinterpret_cast< Clock* >( clocker.data() );
+	cdata->rebuild();
 	assert( cdata->tickPtr_.size() == 4 );
 	assert( fabs( cdata->tickPtr_[0].mgr()->dt_ - 1.0 ) < EPSILON );
 	assert( fabs( cdata->tickPtr_[1].mgr()->dt_ - 2.0 ) < EPSILON );
@@ -243,33 +281,9 @@ void setupTicks()
 	assert( cdata->tickPtr_[3].mgr()->ticks_[0] == reinterpret_cast< const Tick* >( er0.data() ) );
 	assert( cdata->tickPtr_[3].mgr()->ticks_[1] == reinterpret_cast< const Tick* >( er5.data() ) );
 
-	Id tsid = Id::nextId();
-	Element* tse = new Element( tsid, testSchedCinfo, "tse", dims, 1 );
-
-	Eref ts( tse, 0 );
-	
-	FuncId f( processFinfo.getFid() );
-	const Finfo* proc0 = ticke->cinfo()->findFinfo( "process0" );
-	assert( proc0 );
-	const SrcFinfo* sproc0 = dynamic_cast< const SrcFinfo* >( proc0 );
-	assert( sproc0 );
-	unsigned int b0 = sproc0->getBindIndex();
-	SingleMsg *m0 = new SingleMsg( Msg::nextMsgId(), er0.eref(), ts ); 
-	er0.element()->addMsgAndFunc( m0->mid(), f, 0 + b0 );
-	SingleMsg *m1 = new SingleMsg( Msg::nextMsgId(), er1.eref(), ts ); 
-	er1.element()->addMsgAndFunc( m1->mid(), f, 2 + b0 );
-	SingleMsg *m2 = new SingleMsg( Msg::nextMsgId(), er2.eref(), ts );
-	er2.element()->addMsgAndFunc( m2->mid(), f, 4 + b0 );
-	SingleMsg *m3 = new SingleMsg( Msg::nextMsgId(), er3.eref(), ts ); 
-	er3.element()->addMsgAndFunc( m3->mid(), f, 6 + b0 );
-	SingleMsg *m4 = new SingleMsg( Msg::nextMsgId(), er4.eref(), ts ); 
-	er4.element()->addMsgAndFunc( m4->mid(), f, 8 + b0 );
-	SingleMsg *m5 = new SingleMsg( Msg::nextMsgId(), er5.eref(), ts ); 
-	er5.element()->addMsgAndFunc( m5->mid(), f, 14 + b0 );
-
-	cdata->rebuild();
 
 	ProcInfo p;
+	p.threadIndexInGroup = 1;
 	cdata->handleReinit();
 	assert( cdata->currTickPtr_ == 0 );
 	assert( Clock::procState_ == Clock::TurnOnReinit ); 
@@ -320,9 +334,17 @@ void setupTicks()
 	Qinfo::clearQ( p.threadIndexInGroup );
 	Qinfo::clearQ( p.threadIndexInGroup );
 
+	/*
 	tickId.destroy();
 	clock.destroy();
+	*/
 	tsid.destroy();
+	for ( unsigned int i = 0; i < Tick::maxTicks; ++i ) {
+		cdata->ticks_[i].setDt( 0.0 );
+	}
+	cdata->rebuild();
+	assert( cdata->tickMgr_.size() == 0 );
+	assert( cdata->tickPtr_.size() == 0 );
 	cout << "." << flush;
 }
 

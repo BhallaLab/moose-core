@@ -1459,14 +1459,14 @@ void testUpValue()
 	assert ( ticke != 0 );
 	assert ( ticke->getName() == "tick" );
 
-	assert( ticke->dataHandler()->localEntries() == 10 );
+	assert( ticke->dataHandler()->localEntries() == Tick::maxTicks );
 	assert( ticke->dataHandler()->totalEntries() == 16 );
 	FieldDataHandlerBase * fdh =
 		static_cast< FieldDataHandlerBase *>( ticke->dataHandler() );
 	// fdh->setFieldDimension( fdh->biggestFieldArraySize() );
 	fdh->resize( fdh->numDimensions() - 1, fdh->biggestFieldArraySize() );
 	// fdh->syncFieldArraySize();
-	assert( ticke->dataHandler()->totalEntries() == 10 );
+	assert( ticke->dataHandler()->totalEntries() == Tick::maxTicks );
 	/*
 	bool ret = Field< unsigned int >::set( clocker, "numTicks", size );
 	assert( ret );

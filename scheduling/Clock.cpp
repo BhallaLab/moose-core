@@ -282,6 +282,7 @@ Clock::Clock()
 	  info_(),
 	  numPendingThreads_( 0 ),
 	  numThreads_( 0 ),
+	  isDirty_( false ),
 	  currTickPtr_( 0 ),
 	  ticks_( Tick::maxTicks ),
 		countNull1_( 0 ),
@@ -402,7 +403,8 @@ void Clock::setTickDt( unsigned int i, double dt )
 {
 	if ( i < ticks_.size() ) {
 		ticks_[ i ].setDt( dt ); 
-		rebuild();
+		isDirty_ = true;
+		// rebuild(); deferred till 'start'.
 	} else {
 		cout << "Clock::setTickDt:: Tick " << i << " not found\n";
 	}
@@ -425,9 +427,8 @@ void Clock::setupTick( unsigned int tickNum, double dt )
 {
 	assert( tickNum < Tick::maxTicks );
 	ticks_[ tickNum ].setDt( dt );
-	// ticks_[ tickNum ].setStage( stage );
-	rebuild();
-	// ack()->send( clockId.eref(), p, p->nodeIndexInGroup, OkStatus );
+	isDirty_ = true;
+	// rebuild(); deferred till 'start'
 }
 
 ///////////////////////////////////////////////////
@@ -439,6 +440,8 @@ void Clock::addTick( Tick* t )
 	static const double EPSILON = 1.0e-9;
 
 	if ( t->getDt() < EPSILON )
+		return;
+	if ( !t->hasTickTargets() )
 		return;
 	for ( vector< TickMgr >::iterator j = tickMgr_.begin(); 
 		j != tickMgr_.end(); ++j)
@@ -483,6 +486,8 @@ void Clock::rebuild()
 
 	sort( tickPtr_.begin(), tickPtr_.end() );
 	dt_ = tickPtr_[0].mgr()->getDt();
+
+	isDirty_ = false;
 }
 
 
@@ -615,8 +620,10 @@ void Clock::handleStart( double runtime )
 		cout << "Clock::handleStart: Warning: simulation already in progress.\n Command ignored\n";
 		return;
 	}
+	if ( isDirty_ )
+		rebuild();
 	if ( tickPtr_.size() == 0 || tickPtr_[0].mgr() == 0 ) {
-		cout << "Clock::handleStart: Warning: simulation not yet initialized.\n Command ignored\n";
+		cout << "Clock::handleStart: Warning: Nothing to simulate or simulation not yet initialized.\n Command ignored\n";
 		return;
 	}
 	runTime_ = runtime;
@@ -712,6 +719,9 @@ void Clock::handleReinit()
 	currentStep_ = 0;
 	currTickPtr_ = 0;
 
+	if ( isDirty_ )
+		rebuild();
+
 	// Get all the TickMgrs in increasing order of dt for the reinit call.
 	for ( vector< TickMgr >::iterator i = tickMgr_.begin(); 
 		i != tickMgr_.end(); ++i )
@@ -761,9 +771,10 @@ void Clock::reinitPhase1( ProcInfo* info )
 void Clock::reinitPhase2( ProcInfo* info )
 {
 	info->currTime = 0.0;
+
 	if ( Shell::isSingleThreaded() || info->threadIndexInGroup == 1 ) {
-		assert( currTickPtr_ < tickPtr_.size() );
-		if ( tickPtr_[ currTickPtr_ ].mgr()->reinitPhase2( info ) ) {
+		if ( tickPtr_.size() == 0 || 
+					tickPtr_[ currTickPtr_ ].mgr()->reinitPhase2( info ) ) {
 			++currTickPtr_;
 			if ( currTickPtr_ >= tickPtr_.size() ) {
 				Id clockId( 1 );
