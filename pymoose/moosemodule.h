@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 17:11:06 2011 (+0530)
 // Version: 
-// Last-Updated: Sun Sep 23 13:22:14 2012 (+0530)
+// Last-Updated: Thu Sep 27 17:19:22 2012 (+0530)
 //           By: subha
-//     Update #: 943
+//     Update #: 1125
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -195,9 +195,12 @@ extern "C" {
 
     int inner_getFieldDict(Id classId, string finfoType, vector<string>& fields, vector<string>& types); 
 
+extern PyTypeObject ObjIdType;
+extern PyTypeObject IdType;
 
     
 } //!extern "C"
+
 
 #define PYSEQUENCE_TO_VECTOR(BASETYPE, SEQUENCE){                       \
         Py_ssize_t length = PySequence_Length(SEQUENCE);            \
@@ -380,9 +383,130 @@ template <class A> inline PyObject* _set_vector_destFinfo(ObjId obj, string fiel
         Py_RETURN_FALSE;
     }
 }
+            // assert(value_ptr) != NULL);
+            // vector<Id> value = LookupField< KeyType, vector<Id> > ::get(oid, fname, *cpp_key);
+            // for (unsigned ii = 0; ii < value.length(); ++ii){
+            //     PyObject* item = PyObject_New(_Id, &IdType);
+            //     ((_Id*)item)->id_ = item;
+            //     if (PyList_Append(value_ptr, item) < 0){
+            //         Py_XDECREF(item);
+            //         Py_XDECREF(value_ptr);
+            //         return NULL;
+            //     }
+            // }
+            // ret = (PyObject*)value_ptr;
+            // break;
 
-/// The circus with value_ptr is to allow Id, ObjId to be allocated.
-template <class KeyType> inline PyObject * lookup_value(const ObjId& oid, string fname, char value_type_code, char key_type_code, PyObject * key, void * value_ptr=NULL)
+
+/**
+   Convert simple C++ data `v` of type A into Python object.
+ */
+template <typename A> PyObject *
+to_py(A* v)
+{    
+    if (typeid(A) == typeid(bool)){
+        if (*((bool*)v)){
+            Py_RETURN_TRUE;
+        } else {
+            Py_RETURN_FALSE;
+        }        
+    } else if (typeid(A) == typeid(int)){
+        return PyInt_FromLong(*((int*)v));
+    } else if ( typeid(A) == typeid(short)){
+        return PyInt_FromLong(*((short*)v));
+    }else if (typeid(A) == typeid(long)){
+        return PyLong_FromLong(*((long*)v));
+    } else if (typeid(A) == typeid(float)){
+        return PyFloat_FromDouble(*((float*)v));
+    } else if (typeid(A) == typeid(double)){
+        return PyFloat_FromDouble(*((double*)v));
+    } else if (typeid(A) == typeid(string)){
+        return PyString_FromString((*((string*)v)).c_str());
+    } else if (typeid(A) == typeid(unsigned int)){
+        return PyLong_FromUnsignedLong(*((unsigned int*)v));
+    } else if (typeid(A) == typeid(unsigned long)){
+        return PyLong_FromUnsignedLong(*((unsigned long*)v));
+    }
+#ifdef HAVE_LONG_LONG            
+    else if (typeid(A) == typeid(long long)) {
+        return  PyLong_FromLongLong(*((long long *)v));
+    } else if (typeid(A) == typeid(unsigned long long)){                       
+        return PyLong_FromUnsignedLongLong(*((unsigned long long*)v));
+    }
+#endif    
+    else if (typeid(A) == typeid(ObjId)){
+        _ObjId * obj = PyObject_New(_ObjId, &ObjIdType);
+        obj->oid_ = *((ObjId*)v);
+        return (PyObject*)obj;
+    } else if (typeid(A) == typeid(Id)){
+        _Id * obj = PyObject_New(_Id, &IdType);
+        obj->id_ = *((Id*)v);
+        return (PyObject*)obj;
+    }
+    return NULL;
+}
+
+/**
+   Convert C++ vector `value` into a Python list.
+ */
+template<typename T> PyObject * to_pylist(vector<T>& value, PyObject * ret)
+{
+    assert(ret!=NULL);
+    assert(PyList_Check(ret));
+    assert(PyList_Size(ret) == 0);
+    for (unsigned int ii = 0; ii < value.size(); ++ii){
+        PyObject * v = to_py<T>(&value[ii]);
+        if (PyList_Append(ret, v) < 0){
+            Py_XDECREF(v);
+            return NULL;
+        }
+    }
+    return ret;    
+}
+
+/**
+   Return vector value for `key` from LookupField `fieldname` of ObjId
+   `oid`.
+   
+   Side effect: ret is populated with Python objects for individual
+   entries in the vector value.
+   
+   Returns NULL on failure, `ret` otherwise.  */
+template <typename KeyType, typename ValueType>
+PyObject * get_vec_lookupfield(ObjId oid, string fieldname, KeyType key, PyObject * ret)
+{
+    assert(ret!=NULL);
+    assert(PyList_Check(ret));
+    assert(PyList_Size(ret) == 0);
+    vector<ValueType> value = LookupField<KeyType, vector<ValueType> >::get(oid, fieldname, key);
+    return to_pylist(value, ret);
+}
+
+/**
+   Lookup entry for `key` from lookup field `fieldname` of object
+   `oid`.  Here the lookup field must have primitive data types or
+   ObjId or Id as the value. No vectors or other fancy datastructures
+   are handled.  */
+template <typename KeyType, typename ValueType>
+PyObject * get_simple_lookupfield(ObjId oid, string fieldname, KeyType key)
+{
+    ValueType value = LookupField<KeyType, ValueType>::get(oid, fieldname, key);
+    PyObject * v = to_py<ValueType>(&value);
+    return v;
+}
+
+/**
+   Get the value for key from LookupField fname.
+ */
+// The circus with value_ptr is to allow Id, ObjId and vectors to be
+// allocated.
+template <class KeyType> inline PyObject *
+lookup_value(const ObjId& oid,
+             string fname,
+             char value_type_code,
+             char key_type_code,
+             PyObject * key,
+             void * value_ptr=NULL)
 {
     PyObject * ret = NULL;
     KeyType * cpp_key = (KeyType *)to_cpp<KeyType>(key);
@@ -391,83 +515,74 @@ template <class KeyType> inline PyObject * lookup_value(const ObjId& oid, string
     }
     string value_type_str = string(1, value_type_code);
     switch (value_type_code){
-        case 'b': { // boolean is a special case that PyBuildValue does not handle
-            bool value = LookupField < KeyType, bool > ::get(oid, fname, *cpp_key);
-            if (value){
-                Py_RETURN_TRUE;
-            } else {
-                Py_RETURN_FALSE;
-            }
-        }
-        case 'c': {
-            char value = LookupField < KeyType, char > ::get(oid, fname, *cpp_key);
-            ret = Py_BuildValue(value_type_str.c_str(), value);
+        case 'b': // boolean is a special case that PyBuildValue does not handle
+            ret = get_simple_lookupfield < KeyType, bool >(oid, fname, *cpp_key);
             break;
-        }            
-        case 'h': {
-            short value = LookupField < KeyType, short > ::get(oid, fname, *cpp_key);
-            ret = Py_BuildValue(value_type_str.c_str(), value);
+        case 'c': 
+            ret = get_simple_lookupfield < KeyType, char >(oid, fname, *cpp_key);
             break;
-        }            
-        case 'H': {
-            unsigned short value = LookupField < KeyType, unsigned short > ::get(oid, fname, *cpp_key);
-            ret = Py_BuildValue(value_type_str.c_str(), value);
+        case 'h': 
+            ret = get_simple_lookupfield < KeyType, short >(oid, fname, *cpp_key);
             break;
-        }            
-        case 'i': {
-            int value = LookupField < KeyType, int > ::get(oid, fname, *cpp_key);
-            ret = Py_BuildValue(value_type_str.c_str(), value);
+        case 'H': 
+            ret = get_simple_lookupfield< KeyType, unsigned short >(oid, fname, *cpp_key);
             break;
-        }            
-        case 'I': {
-            unsigned int value = LookupField < KeyType, unsigned int > ::get(oid, fname, *cpp_key);
-            ret = Py_BuildValue(value_type_str.c_str(), value);
+        case 'i': 
+            ret = get_simple_lookupfield < KeyType, int >(oid, fname, *cpp_key);
             break;
-        }            
-        case 'l': {
-            long value = LookupField < KeyType, long > ::get(oid, fname, *cpp_key);
-            ret = Py_BuildValue(value_type_str.c_str(), value);
+        case 'I': 
+            ret = get_simple_lookupfield < KeyType, unsigned int >(oid, fname, *cpp_key);
             break;
-        }                        
-        case 'k': {
-            unsigned long value = LookupField < KeyType, unsigned long > ::get(oid, fname, *cpp_key);
-            ret = Py_BuildValue(value_type_str.c_str(), value);
+        case 'l': 
+            ret = get_simple_lookupfield< KeyType, long >(oid, fname, *cpp_key);
             break;
-        }
+        case 'k': 
+            ret = get_simple_lookupfield< KeyType, unsigned long >(oid, fname, *cpp_key);
+            break;
 #ifdef HAVE_LONG_LONG            
-        case 'L': {
-            long long value = LookupField < KeyType, long long > ::get(oid, fname, *cpp_key);
-            ret = Py_BuildValue(value_type_str.c_str(), value);
+        case 'L': 
+            ret = get_simple_lookupfield< KeyType, long long>(oid, fname, *cpp_key);
             break;
-        }                        
-        case 'K': {
-            unsigned long long value = LookupField < KeyType, unsigned long long > ::get(oid, fname, *cpp_key);
-            ret = Py_BuildValue(value_type_str.c_str(), value);
+        case 'K': 
+            ret = get_simple_lookupfield< KeyType, unsigned long long>(oid, fname, *cpp_key);
             break;
-        }
 #endif
-        case 'd': {
-            double value = LookupField < KeyType, double > ::get(oid, fname, *cpp_key);
-            ret = Py_BuildValue(value_type_str.c_str(), value);
+        case 'd':
+            ret = get_simple_lookupfield< KeyType, double>(oid, fname, *cpp_key);
             break;
-        }                        
-        case 'f': {
-            float value = LookupField < KeyType, float > ::get(oid, fname, *cpp_key);
-            ret = Py_BuildValue(value_type_str.c_str(), value);
+        case 'f': 
+            ret = get_simple_lookupfield< KeyType, float >(oid, fname, *cpp_key);
             break;
-        }
-        case 'x': {
-            assert(value_ptr != NULL);
-            ((_Id*)value_ptr)->id_ = LookupField < KeyType, Id > ::get(oid, fname, *cpp_key);
-            ret = (PyObject*)value_ptr;
+        case 'x':
+            ret = get_simple_lookupfield<KeyType, Id>(oid, fname, *cpp_key);
             break;
-        }
-        case 'y': {
-            assert(value_ptr != NULL);
-            ((_ObjId*)value_ptr)->oid_ = LookupField < KeyType, Id > ::get(oid, fname, *cpp_key);
-            ret = (PyObject*)value_ptr;
+        case 'y':
+            ret = get_simple_lookupfield< KeyType, Id >(oid, fname, *cpp_key);
             break;
-        }
+        case 'X': 
+            ret = get_vec_lookupfield<KeyType, Id>(oid, fname, *cpp_key, (PyObject*)value_ptr);
+            break;
+        case 'Y': 
+            ret = get_vec_lookupfield<KeyType, ObjId>(oid, fname, *cpp_key, (PyObject*)value_ptr);
+            break;
+        case 'v': 
+            ret = get_vec_lookupfield<KeyType, int>(oid, fname, *cpp_key, (PyObject*)value_ptr);
+            break;
+        case 'w': 
+            ret = get_vec_lookupfield<KeyType, short>(oid, fname, *cpp_key, (PyObject*)value_ptr);
+            break;
+        case 'U': 
+            ret = get_vec_lookupfield<KeyType, unsigned int>(oid, fname, *cpp_key, (PyObject*)value_ptr);
+            break;
+        case 'F': 
+            ret = get_vec_lookupfield<KeyType, float>(oid, fname, *cpp_key, (PyObject*)value_ptr);
+            break;
+        case 'D': 
+            ret = get_vec_lookupfield<KeyType, double>(oid, fname, *cpp_key, (PyObject*)value_ptr);
+            break;
+        case 'S': 
+            ret = get_vec_lookupfield<KeyType, string>(oid, fname, *cpp_key, (PyObject*)value_ptr);
+            break;
         default:
             PyErr_SetString(PyExc_TypeError, "invalid value type");
     }

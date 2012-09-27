@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Feb 13 16:07:56 2010 (+0530)
 # Version: 
-# Last-Updated: Sat Sep 22 18:28:57 2012 (+0530)
+# Last-Updated: Thu Sep 27 17:52:21 2012 (+0530)
 #           By: subha
-#     Update #: 302
+#     Update #: 346
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -70,6 +70,7 @@ KEY_COLORMAP_DIR = 'main/colormapdir'
 KEY_LOCAL_DEMOS_DIR = 'main/localdemosdir'
 KEY_MOOSE_LOCAL_DIR = 'main/localdir'
 KEY_NUMPTHREADS = 'main/numpthreads'
+KEY_LOCAL_BUILD = 'main/localbuild'
 
 QT_VERSION = str(QtCore.QT_VERSION_STR).split('.')
 QT_MAJOR_VERSION = int(QT_VERSION[0])
@@ -85,6 +86,7 @@ MOOSE_CFG_DIR = os.path.join(os.environ['HOME'], '.moose')
 MOOSE_LOCAL_DIR = os.path.join(os.environ['HOME'], 'moose')
 MOOSE_NUMPTHREADS = '1'
 MOOSE_ABOUT_FILE = os.path.join(MOOSE_GUI_DIR, 'about.html')
+LOCAL_BUILD = False
 
 class MooseSetting(dict):
     """
@@ -111,16 +113,19 @@ class MooseSetting(dict):
             cls._instance.qsettings = QtCore.QSettings()
             # If this is the first time, then set some defaults
             if firsttime:
-                cls._instance.qsettings.setValue(KEY_FIRSTTIME, False)
-                cls._instance.qsettings.setValue(KEY_DEMOS_DIR, MOOSE_DEMOS_DIR)
-                cls._instance.qsettings.setValue(KEY_LOCAL_DEMOS_DIR, os.path.join(MOOSE_LOCAL_DIR, 'Demos'))
-                cls._instance.qsettings.setValue(KEY_DOCS_DIR, MOOSE_DOCS_DIR)
-                cls._instance.qsettings.setValue(KEY_MOOSE_LOCAL_DIR, MOOSE_LOCAL_DIR)
+                cls._instance.qsettings.setValue(KEY_FIRSTTIME, True)
                 cls._instance.qsettings.setValue(KEY_COLORMAP_DIR, os.path.join(MOOSE_GUI_DIR, 'colormaps'))
-                cls._instance.qsettings.setValue(KEY_HOME_DIR, os.environ['HOME'])
                 cls._instance.qsettings.setValue(KEY_ICON_DIR, os.path.join(MOOSE_GUI_DIR, 'icons'))
                 cls._instance.qsettings.setValue(KEY_NUMPTHREADS, '1')
-                cls._instance.qsettings.setValue(KEY_FIRSTTIME, True)
+            else:
+                cls._instance.qsettings.setValue(KEY_FIRSTTIME, False)
+            # These are to be checked at every run
+            cls._instance.qsettings.setValue(KEY_HOME_DIR, os.environ['HOME'])
+            cls._instance.qsettings.setValue(KEY_DEMOS_DIR, MOOSE_DEMOS_DIR)
+            cls._instance.qsettings.setValue(KEY_LOCAL_DEMOS_DIR, os.path.join(MOOSE_LOCAL_DIR, 'Demos'))
+            cls._instance.qsettings.setValue(KEY_DOCS_DIR, MOOSE_DOCS_DIR)
+            cls._instance.qsettings.setValue(KEY_MOOSE_LOCAL_DIR, MOOSE_LOCAL_DIR)
+            cls._instance.qsettings.setValue(KEY_LOCAL_BUILD, LOCAL_BUILD)
             os.environ['NUMPTHREADS'] = str(cls._instance.qsettings.value(KEY_NUMPTHREADS).toString())
         return cls._instance
 
@@ -159,9 +164,12 @@ def init_dirs():
     global MOOSE_LOCAL_DIR
     global MOOSE_CFG_DIR
     global MOOSE_DOCS_DIR
+    global LOCAL_BUILD
+    # If we have a Makefile above GUI directory, then this must be a
+    # locally built version
+    LOCAL_BUILD = os.access(os.path.join(MOOSE_GUI_DIR, '../Makefile'), os.R_OK)
     errors = []
     moose_cfg_dir = os.path.join(os.environ['HOME'], '.moose')
-    moose_local_dir = os.path.join(os.environ['HOME'], 'moose')
     if not os.path.exists(moose_cfg_dir):
         firsttime = True
         try:
@@ -171,34 +179,22 @@ def init_dirs():
         except OSError, e:
             errors.append(e)
             print e
-    if not os.path.exists(moose_local_dir):
-        try:
-            os.mkdir(moose_local_dir)
-            MOOSE_LOCAL_DIR = moose_local_dir
-            print 'Created local moose directory:', moose_local_dir    
-        except OSError, e:
-            errors.append(e)
-            print e
-    moose_demos_dir = MOOSE_DEMOS_DIR
-    if not os.access(moose_demos_dir, os.R_OK + os.X_OK):
-        # Is it built from source? Then Demos directory will be
-        # located in the parent directory.
-        moose_demos_dir = os.path.normpath(os.path.join(MOOSE_GUI_DIR, '../Demos'))
-        if not os.access(moose_demos_dir, os.R_OK + os.X_OK):
-            print "Could not access Demos directory: %s" % (moose_demos_dir)
-            errors.append(OSError(errno.EACCES, 'Cannot access %s' % (moose_demos_dir)))
-        else:
-            MOOSE_DEMOS_DIR = moose_demos_dir        
-    moose_docs_dir = MOOSE_DOCS_DIR
-    if not os.access(moose_docs_dir, os.R_OK + os.X_OK):
-        # Is it built from source? Then Docs directory will be
-        # located in the parent directory.
-        moose_docs_dir = os.path.normpath(os.path.join(MOOSE_GUI_DIR, '../Docs'))
-        if not os.access(moose_docs_dir, os.R_OK + os.X_OK):
-            print "Could not access Demos directory: %s" % (moose_docs_dir)
-            errors.append(OSError(errno.EACCES, 'Cannot access %s' % (moose_docs_dir)))
-        else:
-            MOOSE_DOCS_DIR = moose_docs_dir            
+    if LOCAL_BUILD:
+        MOOSE_LOCAL_DIR = os.path.normpath(os.path.join(MOOSE_GUI_DIR, '..'))
+        MOOSE_DEMOS_DIR = os.path.join(MOOSE_LOCAL_DIR, 'Demos')
+        MOOSE_DOCS_DIR = os.path.join(MOOSE_LOCAL_DIR, 'Docs')
+    else:
+        MOOSE_LOCAL_DIR = os.path.join(os.environ['HOME'], 'moose')
+        if not os.path.exists(MOOSE_LOCAL_DIR):
+            try:
+                os.mkdir(MOOSE_LOCAL_DIR)
+                print 'Created local moose directory:', MOOSE_LOCAL_DIR    
+            except OSError, e:
+                errors.append(e)
+                print e
+    if not os.access(MOOSE_DOCS_DIR, os.R_OK + os.X_OK):
+        print "Could not access Demos directory: %s" % (MOOSE_DOCS_DIR)
+        errors.append(OSError(errno.EACCES, 'Cannot access %s' % (MOOSE_DOCS_DIR)))
     return firsttime, errors
 
 settings = MooseSetting()
