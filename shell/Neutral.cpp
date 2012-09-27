@@ -451,7 +451,12 @@ vector< Id > Neutral::getNeighbours(
 {
 	vector< Id > ret;
 	const Finfo* finfo = e.element()->cinfo()->findFinfo( field );
-	e.element()->getNeighbours( ret, finfo );
+	if ( finfo )
+		e.element()->getNeighbours( ret, finfo );
+	else
+		cout << "Warning: Neutral::getNeighbours: Id.Field '" << 
+				e.id().path() << "." << field <<
+				"' not found\n";
 	return ret;
 }
 

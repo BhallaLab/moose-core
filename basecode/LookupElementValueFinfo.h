@@ -16,7 +16,7 @@
  * L is the lookup class
  * F is the field class.
  */
-template < class T, class L, class F > class LookupElementValueFinfo: public Finfo
+template < class T, class L, class F > class LookupElementValueFinfo: public LookupValueFinfoBase
 {
 	public:
 		~LookupElementValueFinfo() {
@@ -27,7 +27,7 @@ template < class T, class L, class F > class LookupElementValueFinfo: public Fin
 		LookupElementValueFinfo( const string& name, const string& doc, 
 			void ( T::*setFunc )( const Eref&, const Qinfo*, L, F ),
 			F ( T::*getFunc )( const Eref&, const Qinfo*, L ) const )
-			: Finfo( name, doc )
+			: LookupValueFinfoBase( name, doc )
 		{
 				string setname = "set_" + name;
 				set_ = new DestFinfo(
@@ -76,7 +76,7 @@ template < class T, class L, class F > class LookupElementValueFinfo: public Fin
 };
 
 template < class T, class L, class F > 
-	class ReadOnlyLookupElementValueFinfo: public Finfo
+	class ReadOnlyLookupElementValueFinfo: public LookupValueFinfoBase
 {
 	public:
 		~ReadOnlyLookupElementValueFinfo() {
@@ -86,7 +86,7 @@ template < class T, class L, class F >
 		ReadOnlyLookupElementValueFinfo( 
 			const string& name, const string& doc, 
 			F ( T::*getFunc )( const Eref& e, const Qinfo* q, L ) const )
-			: Finfo( name, doc )
+			: LookupValueFinfoBase( name, doc )
 		{
 				string getname = "get_" + name;
 				get_ = new DestFinfo(

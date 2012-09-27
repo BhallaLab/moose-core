@@ -76,7 +76,7 @@ Kinetikit-specific items.
     species occur. The definition is very closely related to that of a
     cell-biological compartment. Examples include the extracellular
     space, the cell membrane, the cytosol, and the
-    nucleus. Compartments can be nested, ways, but of course you
+    nucleus. Compartments can be nested, but of course you
     cannot put a bigger compartment into a smaller one.
     + *Icon*: Grey boundary around a set of reactions. 
     + *Moving Compartments*:
@@ -89,11 +89,10 @@ Kinetikit-specific items.
        + _Name_: The name of the compartment.
        + _Size_: This is the volume, surface area or length of the
                  compartment, depending on its type.
-
     + *Compartment fixed parameters*:
       + _numDimensions_: This specifies whether the compartment is a
-                          volume, a 2-D surface, or if it is just
-                          being represented as a length.
+                 volume, a 2-D surface, or if it is just
+                 being represented as a length.
 
 *** Pool
     This is the set of molecules of a given species within a
@@ -124,20 +123,20 @@ Kinetikit-specific items.
                 holding compartment.
 
 *** Buffered pools
-    Some pools are set to a fixed n and concentration throughout a
+    Some pools are set to a fixed *n*, that is number of molecules, and
+	therefore a fixed concentration, throughout a
     simulation. These are buffered pools.
     + *Icon*: Colored rectangle with pool name in it.
     + *Moving Buffered pools*: Click and drag.
     + *Buffered Pool editable parameters*
       + _Name_: Name of the pool
-      + _nInit_: Fixed number of molecules in the pool.  'n' gets set
+      + _nInit_: Fixed number of molecules in the pool. *n* gets set
                  to this value throughout the run.
-      + _concInit_: Fixed concentration of the molecules in
-		     the pool.
-        #+BEGIN_QUOTE
-	 concInit = nInit * unit\_scale\_factor / (NA * vol)
-	 #+END_QUOTE
-     *conc* is set to this value throughout the run.
+      + _concInit_: Fixed concentration of the molecules in the pool.
+        	#+BEGIN_QUOTE
+		 	concInit = nInit * unit\_scale\_factor / (NA * vol)
+		 	#+END_QUOTE
+     			*conc* is set to this value throughout the run.
     + *Pool fixed parameters*:
       + _n_: Number of molecules in the pool. Derived from *nInit*.
       + _conc_: Concentration of molecules in the pool.  Derived from
