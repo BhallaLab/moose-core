@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Sun Sep 23 13:56:20 2012 (+0530)
+// Last-Updated: Thu Sep 27 16:50:55 2012 (+0530)
 //           By: subha
-//     Update #: 10058
+//     Update #: 10111
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -2102,7 +2102,7 @@ static struct module_state _state;
                  "Get the string representation of the type of this field.\n"
                  "\n"
                  "Parameters\n"
-                 "----------"
+                 "----------\n"
                  "fieldName : string\n"
                  "\tName of the field to be queried.\n"
                  "finfoType : string\n"
@@ -2149,7 +2149,7 @@ static struct module_state _state;
                  "Get the value of the field.\n"
                  "\n"
                  "Parameters\n"
-                 "----------"
+                 "----------\n"
                  "fieldName : string\n"
                  "\tName of the field.");
     static PyObject * moose_ObjId_getField(_ObjId * self, PyObject * args)
@@ -2405,7 +2405,7 @@ static struct module_state _state;
                  "Set the value of specified field.\n"
                  "\n"
                  "Parameters\n"
-                 "----------"
+                 "----------\n"
                  "fieldName : string\n"
                  "\tField to be assigned value to.\n"
                  "value : python datatype compatible with the type of the field\n"
@@ -2717,11 +2717,20 @@ static struct module_state _state;
         char key_type_code = shortType(type_vec[0]);
         char value_type_code = shortType(type_vec[1]);
         void * value_ptr = NULL;
-        if (value_type_code == 'x'){
-            value_ptr = PyObject_New(_Id, &IdType);
-        } else if (value_type_code == 'y'){
-            value_ptr = PyObject_New(_ObjId, &ObjIdType);
-        }
+        switch (value_type_code){
+            case 'x': {
+                value_ptr = PyObject_New(_Id, &IdType);
+                break;
+            }
+            case 'y': {
+                value_ptr = PyObject_New(_ObjId, &ObjIdType);
+                break;
+            }
+            case 'C': case 'v': case 'w': case 'L': case 'U': case 'K': case 'F': case 'D': case 'S':  case 'X': case 'Y': {
+                value_ptr = PyList_New(0);
+                break;
+            }
+        } //! switch( value_type_code )
         switch(key_type_code){
             case 'b': {
                 ret = lookup_value <bool> (target, string(fieldName), value_type_code, key_type_code, key, value_ptr);
@@ -2811,17 +2820,20 @@ static struct module_state _state;
                 ostringstream error;
                 error << "Unhandled key type `" << type_vec[0] << "` for " << Field<string>::get(target, "class") << "." << fieldName;
                 PyErr_SetString(PyExc_TypeError, error.str().c_str());
-        }                
+        }
+        if (ret == NULL && value_ptr != NULL){
+            Py_XDECREF(value_ptr);
+        }
         return ret;
     }
 
     PyDoc_STRVAR(moose_ObjId_getLookupField_documentation,
                  "getLookupField(fieldName, key)\n"
                  "\n"
-                 "Lookup entry for `key` in `fieldName` \n"
+                 "Lookup entry for `key` in `fieldName`\n"
                  "\n"
                  "Parameters\n"
-                 "----------"
+                 "----------\n"
                  "fieldName : string\n"
                  "\tName of the lookupfield.\n"
                  "key : appropriate type for key of the lookupfield (as in the dict"
@@ -3619,10 +3631,10 @@ static struct module_state _state;
                  "\nPython objects referring to this ematrix but does invalidate them. Any"
                  "\nattempt to access them will raise a ValueError."
                  "\n"
-                 "\nParameters"
+                 "\nParameters\n"
                  "\n----------"
                  "\nid : ematrix"
-                 "\nematrix of the object to be deleted."
+                 "\n\tematrix of the object to be deleted."
                  "\n");
     static PyObject * moose_delete(PyObject * dummy, PyObject * args)
     {
@@ -3682,7 +3694,7 @@ static struct module_state _state;
                  "called, you can call moose.start(t) as many time as you like. This\n"
                  "will continue the simulation from the last state for `t` time.\n"
                  "\n"
-                 "Parameters\n"
+                 "\nParameters\n"
                  "----------\n"
                  "t : float\n"
                  "\tduration of simulation.\n"
@@ -3765,7 +3777,7 @@ static struct module_state _state;
                  "\n"
                  "Load model from a file to a specified path.\n"
                  "\n"
-                 "Parameters\n"
+                 "\nParameters\n"
                  "----------\n"
                  "filename : str\n"
                  "\tmodel description file.\n"
@@ -3805,13 +3817,13 @@ static struct module_state _state;
                  "\n"
                  "Save model rooted at `source` to file `filename`.\n"
                  "\n"
-                 "Parameters\n"
+                 "\nParameters\n"
                  "----------\n"
                  "source: ematrix or element or str\n"
-                 "root of the model tree\n"
+                 "\troot of the model tree\n"
                  "\n"
                  "filename: str\n"
-                 "destination file to save the model in.\n"
+                 "\tdestination file to save the model in.\n"
                  "\n"
                  "Returns\n"
                  "-------\n"
@@ -4173,12 +4185,12 @@ static struct module_state _state;
                  "\n"
                  "Reseed MOOSE random number generator.\n"
                  "\n"
-                 "Parameters\n"
+                 "\nParameters\n"
                  "----------\n"
                  "seed: int\n"
-                 "Optional value to use for seeding. If 0, a random seed is"
-                 "\nautomatically created using the current system time and other"
-                 "\ninformation. If not specified, it defaults to 0."
+                 "\tOptional value to use for seeding. If 0, a random seed is"
+                 "\n\tautomatically created using the current system time and other"
+                 "\n\tinformation. If not specified, it defaults to 0."
                  "\n");
     
     static PyObject * moose_seed(PyObject * dummy, PyObject * args)
@@ -4196,22 +4208,27 @@ static struct module_state _state;
                  "\n"
                  "Find an object by wildcard.\n"
                  "\n"
-                 "Parameters\n"
+                 "\nParameters\n"
                  "----------\n"
                  "expression: str\n"
-                 "MOOSE allows wildcard expressions of the form {PATH}/{WILDCARD}[{CONDITION}]\n"
-                 "where {PATH} is valid path in the element tree. {WILDCARD} can be `#` or\n"
-                 "`##`. `#` causes the search to be restricted to the children of the element\n"
-                 "specified by {PATH}. `##` makes the search to recursively go through all the\n"
-                 "descendants of the {PATH} element. {CONDITION} can be \n"
-                 "TYPE={CLASSNAME} : an element satisfies this condition if it is of class\n"
-                 "{CLASSNAME}.\n"
-                 "ISA={CLASSNAME} : alias for TYPE={CLASSNAME}\n"
-                 "CLASS={CLASSNAME} : alias for TYPE={CLASSNAME}\n"
-                 "FIELD({FIELDNAME}){OPERATOR}{VALUE} : compare field {FIELDNAME} with {VALUE}\n"
-                 "by {OPERATOR} where {OPERATOR} is a comparison operator (=, !=, >, <, >=,\n"
-                 "<=). For example, /mymodel/##[FIELD(Vm)>=-65] will return a list of all the\n"
-                 "objects under /mymodel whose Vm field is >= -65.\n"
+                 "\tMOOSE allows wildcard expressions of the form\n"
+                 "\t{PATH}/{WILDCARD}[{CONDITION}]\n"
+                 "\twhere {PATH} is valid path in the element tree.\n"
+                 "\t{WILDCARD} can be `#` or `##`.\n"
+                 "\t`#` causes the search to be restricted to the children of the\n"
+                 "\telement specified by {PATH}.\n"
+                 "\t`##` makes the search to recursively go through all the descendants\n"
+                 "\tof the {PATH} element.\n"
+                 "\t{CONDITION} can be\n"
+                 "\tTYPE={CLASSNAME} : an element satisfies this condition if it is of\n"
+                 "\tclass {CLASSNAME}.\n"
+                 "\tISA={CLASSNAME} : alias for TYPE={CLASSNAME}\n"
+                 "\tCLASS={CLASSNAME} : alias for TYPE={CLASSNAME}\n"
+                 "\tFIELD({FIELDNAME}){OPERATOR}{VALUE} : compare field {FIELDNAME} with\n"
+                 "\t{VALUE} by {OPERATOR} where {OPERATOR} is a comparison operator (=,\n"
+                 "\t!=, >, <, >=, <=).\n"
+                 "\tFor example, /mymodel/##[FIELD(Vm)>=-65] will return a list of all\n"
+                 "\tthe objects under /mymodel whose Vm field is >= -65.\n"
                  "\n");
     static PyObject * moose_wildcardFind(PyObject * dummy, PyObject * args)
     {
