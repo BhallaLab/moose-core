@@ -18740,4 +18740,9 @@ I've used it to fine-tune the kkit12 documentation. Checkin 4022.
 ============================================================================
 26 Sep 2012
 Harsha reported a bug in WriteKkit. Fixed. But there is now an issue with
-the gui, that stores only 100 seconds for runtime.
+the gui, that stores only 100 seconds for runtime. Checkin 4034.
+
+Now I have a bug in Downloads/sumtotal.g. Harsha has reported correctly that
+the system does not set up the sumtotal messages here.
+
+============================================================================
