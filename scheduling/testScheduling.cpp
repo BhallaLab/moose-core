@@ -964,6 +964,53 @@ void speedTestMultiNodeIntFireNetwork( unsigned int size, unsigned int runsteps 
 	shell->doDelete( i2 );
 	shell->doQuit();
 }
+
+/// Tests how the scheduling ticks have been configured.
+void testTickConfig()
+{
+	Id tick( 2 );
+	assert( tick.element() );
+	assert( tick.element()->getName() == "tick" );
+	DataHandler* dh = tick.element()->dataHandler();
+	assert( dh );
+	FieldDataHandlerBase* fdb = dynamic_cast< FieldDataHandlerBase *>(dh);
+	assert( fdb );
+
+	assert ( fdb->localEntries() == Tick::maxTicks );
+	assert ( dh->localEntries() == Tick::maxTicks );
+
+	assert( dh->numDimensions() == 1 );
+	assert( dh->pathDepth() == 2 );
+	assert( dh->sizeOfDim( 0 ) == 16 );
+	assert( dh->sizeOfDim( 1 ) == 0 );
+
+	assert( dh->dims().size() == 1 );
+	assert( dh->dims()[0].size == 16 );
+	assert( dh->dims()[0].depth == 2 );
+	assert( dh->dims()[0].isRagged );
+	assert( dh->getFieldArraySize( 0 ) == Tick::maxTicks );
+	assert( dh->fieldMask() == 0x0f);
+	assert( fdb->numFieldBits() == 4 );
+
+	unsigned int i = dh->linearIndex( 123 );
+	// The zeroDimHandler clears out any attempt to get indices other than
+	// zero, so the parent index terms in the linearIndex vanish.
+	unsigned int j = 123 % 16; 
+	assert( i == j );
+
+	for ( unsigned int i = 0; i < Tick::maxTicks; ++i ) {
+		vector< vector< unsigned int > > pathIndices = 
+				dh->pathIndices( i );
+		assert( pathIndices.size() == 3 );
+		assert( pathIndices[0].size() == 0 );
+		assert( pathIndices[1].size() == 0 );
+		assert( pathIndices[2].size() == 1 );
+		assert( pathIndices[2][0] == i );
+	}
+
+	cout << "." << flush;
+}
+
 void testScheduling()
 {
 	testTicks();
@@ -972,6 +1019,7 @@ void testScheduling()
 
 void testSchedulingProcess()
 {
+	testTickConfig(); // Checks that the system has correctly built ticks
 	testThreads();
 	testQueueAndStart();
 	testThreadIntFireNetwork();

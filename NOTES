@@ -18759,5 +18759,7 @@ the finfo before calling the Element::getNeighbours.
 Cinfo should build in the ReadOnlyLookupElementValueFinfos. Trivial, all I
 had to do was to derive them from LookupValuFinfoBase rather than Finfo.
 
+Fixed other bug with path of ticks. Still is a bug there, in that
+the number in the ematrix is 16, not 10. Will discuss with Subha.
 
 ============================================================================
