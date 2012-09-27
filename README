@@ -105,27 +105,15 @@ Sourceforge project page: https://sourceforge.net/projects/moose/
 
 *** Installation:
 
-    The build process will generate the file _moose.so in
-    moose/python/moose directory. The Python scripts for moose are
-    located in the same directory. To import moose from Python, you
-    need to add the moose/python directory in your PYTHONPATH
-    environment variable:
-
-    export PYTHONPATH=$HOME/moose/python
-
-    assuming you have the moose directory inside your home directory.
-    If you want to have MOOSE available to all users, copy it to your
-    Python dist-packages directory.
-
-    sudo cp -r $home/moose/python /usr/lib/python2.7/dist-packages/moose
-
-    /usr/lib/python2.7/ is the default location for installed Python
-    modules on Ubuntu with Python 2.7. Replace it with that for your
-    version.
+    sudo make install
 
     Now you can import moose in a Python script or interpreter with the statement:
 
     import moose
+
+    If you have installed the GUI dependencies below for running the graphical user interface,
+    then you can run the GUI by double-clicking on the desktop icon or via the main-menu.
+    The squid axon tutorial/demo is also accessible via these routes.
 
 ***** Recommended:
 
@@ -147,17 +135,12 @@ Sourceforge project page: https://sourceforge.net/projects/moose/
 
      sudo apt-get install python-matplotlib python-qt4 python-qt4-gl 
 
-     The GUI code is located in moose/gui.
+     If you have installed moose as above 'sudo make install', and above dependencies,
+     you can run 'moosegui' in the terminal, or via the desktop / main menu shortcuts.
+     There are also shortcuts for the squid axon tutorial/demo on the desktop / main menu.
+     MOOSE GUI creates a ~/moose/Demos directory (home folder) on first run.
+     File->load models from there. Help is available from the GUI menu.
 
-     Again, for systemwide use, you can copy this directory somewhere
-     and create a link to the MooseGUI.py file in that directory and
-     make it executable:
-
-     sudo cp -r moose/gui /usr/lib/python/dist-packages/moosegui
-     sudo ln -s /usr/lib/python/dist-packages/moosegui/MooseGUI.py /usr/bin/moosegui
-     sudo chmod a+x /usr/bin/moosegui
-
-      
 * Getting started:
 ==============================================================================
 
@@ -223,4 +206,4 @@ Sourceforge project page: https://sourceforge.net/projects/moose/
   Subhasis Ray	Python interface, XML standards
   G.V.HarshaRani	Web page design and User Interface
   Chaitanya.H	Visualization and User Interface
-  Aditya Gilra  NeuroML reader
+  Aditya Gilra  NeuroML reader and .deb packaging
