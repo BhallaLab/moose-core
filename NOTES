@@ -18746,3 +18746,18 @@ Now I have a bug in Downloads/sumtotal.g. Harsha has reported correctly that
 the system does not set up the sumtotal messages here.
 
 ============================================================================
+27 Sep 2012.
+Fixed sumtotal bug reported by Harsha. It was because the linear class 
+hierarchy in MOOSE does not let me recognize ZombieSumFuncs as related to
+regular SumFuncs. Checkin 4044.
+
+Bug fixes:
+the lookupFinfo for 'neighbours' lookup should not do an assertion around
+Element.cpp:559. Actually this is OK, the calling function should test for
+the finfo before calling the Element::getNeighbours.
+
+Cinfo should build in the ReadOnlyLookupElementValueFinfos. Trivial, all I
+had to do was to derive them from LookupValuFinfoBase rather than Finfo.
+
+
+============================================================================

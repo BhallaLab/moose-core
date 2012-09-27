@@ -2749,7 +2749,7 @@ void testCinfoFields()
 	assert( cinfo->getValueFinfo( 2 + nvf ) == cinfo->findFinfo( "tau" ) );
 
 	unsigned int nlf = neutralCinfo->getNumLookupFinfo();
-	assert( nlf == 0 );
+	assert( nlf == 1 ); // Neutral inserts a lookup field for neighbours
 	assert( cinfo->getNumLookupFinfo() == 0 + nlf );
 	assert( cinfo->getLookupFinfo( 0 + nlf )->name() == "dummy");
 
