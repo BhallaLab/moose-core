@@ -331,7 +331,7 @@ class  KineticsWidget(QtGui.QWidget):
 	# Get all the compartments and its members  
         cmptMol = {}
         self.setupComptObj(modelPath,cmptMol)
-        #for k,v in cmptMol.items(): print k,v
+        #for k,v in test.items(): print k,v
 
 	#Check to see if all the cordinates are zero (which is a case for kkit8 version)
         x = []
@@ -375,9 +375,10 @@ class  KineticsWidget(QtGui.QWidget):
             self.ellipse_height = 15
             self.cplx_width = 8
             self.cplx_height = 8
-            for cmpt,mreObj in cmptMol.items():
+            for cmpt in sorted(cmptMol.iterkeys()):
                 self.createCompt(cmpt)
                 comptRef = self.qGraCompt[cmpt]
+                mreObj = cmptMol[cmpt]
                 for mre in mreObj:
                     if len(mre) == 0:
                         continue
@@ -841,6 +842,7 @@ if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     size = QtCore.QSize(1024 ,768)
     modelPath = 'Kholodenko'
+    modelPath = 'acc61'
   
     try:
         filepath = '../Demos/Genesis_files/'+modelPath+'.g'
