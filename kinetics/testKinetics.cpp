@@ -425,7 +425,9 @@ void testKinetics()
 	testPoolVolumeScaling();
 	testReacVolumeScaling();
 	testReadCspace();
-	testWriteKkit( Id() );
+
+	// This is now handled with real models in the regression tests.
+	// testWriteKkit( Id() ); 
 }
 
 void testMpiKinetics( )
