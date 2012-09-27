@@ -164,9 +164,12 @@ class MooseHandler(QtCore.QObject):
                     moose.delete(moose.ematrix('/KKIT'))
             else:
                 print 'Did not delete previously loaded file. Restart moose instead'
+            '''Harsha Dict is also cleaned up '''
+            modelpathTypeDict = {}
 
         for child in moose.element('/library').getField('children'):
             moose.delete(child)
+
     """ Added: Harsha """
     def saveGenesisModel(self,modelpath,filename):
         """ Saving model to Genesis File Format"""

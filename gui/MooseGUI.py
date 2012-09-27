@@ -364,6 +364,10 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
                     self.mdiArea.removeSubWindow(self.mdiArea.currentSubWindow())
                 #self.objFieldEditModel.mooseObject = None
                 self.mooseHandler.clearPreviousModel(self.modelPathsModelTypeDict)
+                #harsha: re-initialise self.modelPathsModelTypeDict,reset to RK5 method and overlay checkbox is unchecked while reloading a model
+                self.modelPathsModelTypeDict = {}
+                self.changeToRK5()
+                self.plotConfigOverlayPlotsCheckBox.setChecked(False)
 
             fileNames = fileDialog.selectedFiles()
             fileFilter = fileDialog.selectedFilter()
@@ -551,7 +555,11 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
     def makeObjectFieldEditor(self, obj):
         self.propEditorChildren(obj)
-        self.propEditorSelectionNameLabel.setText(str(obj.getField('name')))
+        objPath = str(obj.getField('path'))
+        objPath_sp = objPath.split(self.modelpath)
+        display = str(obj.getField('class'))+': ..'+ objPath_sp[len(objPath_sp)-1]
+        self.propEditorSelectionNameLabel.setText(display)
+        #self.propEditorSelectionNameLabel.setText(str(obj.getField('name')))
         if obj.class_ == 'Shell' or obj.class_ == 'PyMooseContext' or obj.class_ == 'GenesisParser':
             print '%s of class %s is a system object and not to be edited in object editor.' % (obj.path, obj.class_)
             return
