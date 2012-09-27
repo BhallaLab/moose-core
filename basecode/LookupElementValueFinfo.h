@@ -67,7 +67,7 @@ template < class T, class L, class F > class LookupElementValueFinfo: public Loo
 		}
 
 		string rttiType() const {
-			return Conv<F>::rttiType();
+			return Conv<L>::rttiType() + "," + Conv<F>::rttiType();
 		}
 
 	private:
@@ -116,7 +116,7 @@ template < class T, class L, class F >
 		}
 
 		string rttiType() const {
-			return Conv<F>::rttiType();
+                        return Conv<L>::rttiType() + "," + Conv<F>::rttiType();
 		}
 
 	private:
