@@ -1,7 +1,8 @@
-# This example illustrates loading and running a kinetic model defined
-# in kkit format. We use the gsl solver here. The model already defines
-# a couple of plots and sets the runtime to 100 seconds. The
-# script dumps the output into an xplot file called data.plot.
+# This example illustrates loading, running, and saving a kinetic model 
+# defined in kkit format. We use the gsl solver here. The model already
+# defines a couple of plots and sets the runtime to 100 seconds. The
+# script dumps the output into an xplot file called data.plot and the
+# saved version into saveReaction.g
 
 import moose
 def main():
@@ -15,6 +16,7 @@ def main():
 		for x in moose.wildcardFind( '/model/graphs/conc#/#' ):
 				moose.element( x[0] ).xplot( 'data.plot', x[0].name )
 
+		moose.saveModel( modelId, 'saveReaction.g' )
 		quit()
 
 # Run the 'main' if this script is executed standalone.

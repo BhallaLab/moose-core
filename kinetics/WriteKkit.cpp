@@ -624,7 +624,10 @@ void writeKkit( Id model, const string& fname )
 				if ( !pa.element()->cinfo()->isA( "CplxEnzBase" ) ) {
 					writePool( fout, *i, bg, fg, x, y );
 				}
-				if ( i->element()->cinfo()->isA( "FuncPool" ) ) {
+				// Unpleasant to have to check both the class and zombie.
+				// The single class inheritance makes things messy.
+				if ( i->element()->cinfo()->isA( "FuncPool" ) ||
+					 i->element()->cinfo()->isA( "ZombieFuncPool" ) ) {
 					storeFuncPoolMsgs( *i, msgs );
 				}
 			} else if ( i->element()->cinfo()->isA( "ReacBase" ) ) {
