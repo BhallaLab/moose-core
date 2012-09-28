@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Sep 27 16:50:55 2012 (+0530)
+// Last-Updated: Sat Sep 29 01:23:44 2012 (+0530)
 //           By: subha
-//     Update #: 10111
+//     Update #: 10112
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -1997,13 +1997,13 @@ static struct module_state _state;
         }
         if (basetype_str.length() == 0){
             PyErr_SetString(PyExc_TypeError, "Unknown class. Need a valid MOOSE class or subclass thereof.");
-            Py_XDECREF(self);
+            // Py_XDECREF(self);
             return -1;
         }
         
         Id new_id = create_Id_from_path(path, pysequence_to_dimvec(dims), basetype_str);
         if (new_id == Id() && PyErr_Occurred()){
-            Py_XDECREF(self);
+          // Py_XDECREF(self);
             return -1;
         }
         instance->oid_ = ObjId(new_id);
