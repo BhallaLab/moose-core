@@ -61,7 +61,7 @@
 # Default values for flags. The operator ?= assigns the given value only if the
 # variable is not already defined.
 USE_SBML?=0
-
+USE_HDF5?=1
 PYTHON?=2
 # BUILD (= debug, release)
 ifndef BUILD
@@ -258,7 +258,7 @@ else
 #	CXX = CC	# Choose between Solaris CC and g++ on a Solaris machine
 endif
 
-ifdef USE_HDF5
+ifeq ($(USE_HDF5),1)
 	CXXFLAGS+= -DUSE_HDF5  -DH5_NO_DEPRECATED_SYMBOLS -I/usr/local/hdf5/include
 	LIBS+= -lhdf5
 endif
