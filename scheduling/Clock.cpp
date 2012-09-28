@@ -472,8 +472,10 @@ void Clock::rebuild()
 	for( unsigned int i = 0; i < ticks_.size(); ++i ) {
 		addTick( &( ticks_[i] ) ); // This fills in only ticks that are used
 	}
-	if ( tickPtr_.size() == 0 ) // Nothing happening in any of the ticks.
+	if ( tickPtr_.size() == 0 ) { // Nothing happening in any of the ticks.
+		isDirty_ = false;
 		return;
+	}
 
 	// Here we put in current time so we can resume after changing a 
 	// dt. Given that we are rebuilding and cannot
@@ -620,7 +622,7 @@ void Clock::handleStart( double runtime )
 		cout << "Clock::handleStart: Warning: simulation already in progress.\n Command ignored\n";
 		return;
 	}
-	if ( isDirty_ )
+	if ( isDirty_ || currentTime_ == 0 )
 		rebuild();
 	if ( tickPtr_.size() == 0 || tickPtr_[0].mgr() == 0 ) {
 		cout << "Clock::handleStart: Warning: Nothing to simulate or simulation not yet initialized.\n Command ignored\n";
@@ -711,6 +713,8 @@ void Clock::advancePhase2(  ProcInfo *p )
  */
 void Clock::handleReinit()
 {
+	if ( isDirty_ )
+		rebuild();
 	info_.currTime = 0.0;
 	// runTime_ = 0.0;
 	currentTime_ = 0.0;
@@ -718,9 +722,6 @@ void Clock::handleReinit()
 	nSteps_ = 0;
 	currentStep_ = 0;
 	currTickPtr_ = 0;
-
-	if ( isDirty_ )
-		rebuild();
 
 	// Get all the TickMgrs in increasing order of dt for the reinit call.
 	for ( vector< TickMgr >::iterator i = tickMgr_.begin(); 
