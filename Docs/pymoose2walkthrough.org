@@ -351,3 +351,24 @@ print m.e1.path, m.e2.path, m.srcFieldsOnE1, m.destFieldsOnE2
 moose.connect(vmtab, 'requestData', soma, 'get_Vm')
 #+end_src
   This finishes our model and recording setup.
+
+* Scheduling and running the simulation
+  With the model all setup, we have to schedule the simulation. MOOSE
+  has a central clock element(`/clock`) to manage time. Clock has a
+  set of =Tick= elements under it that take care of advancing the
+  state of each element with time as the simulation progresses. Every
+  element to be included in a simulation must be assigned a tick. Each
+  tick can have a different ticking interval (=dt=) that allows
+  different elements to be updated at different rates. We initialize
+  the ticks and set their =dt= values using the =setClock= function.
+  
+#+begin_src python
+moose.setClock(0, 0.025e-3)
+moose.setClock(1, 0.025e-3)
+moose.setClock(2, 0.25e-3)
+#+end_src  
+  This will initialize ticks #0 and 1 with =dt = 25= \mu s and tick #2
+  with =dt = 250= \mu s. Thus all the elements scheduled on ticks # 0
+  and 1 will be updated every 25 \mu s and those on tick # 2 every 250
+  \mu s.
+  

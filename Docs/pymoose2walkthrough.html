@@ -1,13 +1,13 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Getting started with python scripting for MOOSE</title>
-<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
 <meta name="title" content="Getting started with python scripting for MOOSE"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-09-28 17:54:59 IST"/>
+<meta name="generated" content="2012-09-28 19:19:51 IST"/>
 <meta name="author" content="Subhasis Ray"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -107,6 +107,7 @@ install it at <a href="http://moose.ncbs.res.in">MOOSE website</a>.
 <li><a href="#sec-3">3 Creating objects and traversing the object hierarchy</a></li>
 <li><a href="#sec-4">4 Setting the properties of elements: accessing fields</a></li>
 <li><a href="#sec-5">5 Putting them together: setting up connections</a></li>
+<li><a href="#sec-6">6 Scheduling and running the simulation</a></li>
 </ul>
 </div>
 </div>
@@ -653,12 +654,44 @@ pulse.delay[1] = 1e9
 
 <p>
   This finishes our model and recording setup.
-</p></div>
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-6" class="outline-2">
+<h2 id="sec-6"><span class="section-number-2">6</span> Scheduling and running the simulation</h2>
+<div class="outline-text-2" id="text-6">
+
+<p>  With the model all setup, we have to schedule the simulation. MOOSE
+  has a central clock element(`/clock`) to manage time. Clock has a
+  set of <code>Tick</code> elements under it that take care of advancing the
+  state of each element with time as the simulation progresses. Every
+  element to be included in a simulation must be assigned a tick. Each
+  tick can have a different ticking interval (<code>dt</code>) that allows
+  different elements to be updated at different rates. We initialize
+  the ticks and set their <code>dt</code> values using the <code>setClock</code> function.
+</p>
+
+
+
+<pre class="src src-python">moose.setClock(0, 0.025e-3)
+moose.setClock(1, 0.025e-3)
+moose.setClock(2, 0.25e-3)
+</pre>
+
+<p>
+  This will initialize ticks #0 and 1 with <code>dt = 25</code> &mu; s and tick #2
+  with <code>dt = 250</code> &mu; s. Thus all the elements scheduled on ticks # 0
+  and 1 will be updated every 25 &mu; s and those on tick # 2 every 250
+  &mu; s.
+</p>
+</div>
 </div>
 </div>
 
 <div id="postamble">
-<p class="date">Date: 2012-09-28 17:54:59 IST</p>
+<p class="date">Date: 2012-09-28 19:19:51 IST</p>
 <p class="author">Author: Subhasis Ray</p>
 <p class="creator">Org version 7.8.11 with Emacs version 23</p>
 <a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a>
