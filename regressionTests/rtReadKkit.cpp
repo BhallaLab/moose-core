@@ -475,6 +475,8 @@ void rtRunKkit()
 	assert( doubleEq( actualVol, vol ) );
 
 	shell->doReinit();
+	size = Field< unsigned int >::get( plotId, "size" );
+	assert( size == 1 ); // Reinit should generate one data point.
 	shell->doStart( 5000.0 );
 	size = Field< unsigned int >::get( plotId, "size" );
 	assert( size == 501 ); // Note that dt was 10.
