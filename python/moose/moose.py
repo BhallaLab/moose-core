@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Thu Sep 27 19:28:42 2012 (+0530)
+# Last-Updated: Fri Sep 28 14:45:36 2012 (+0530)
 #           By: subha
-#     Update #: 2152
+#     Update #: 2154
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -239,11 +239,9 @@ def getfielddoc(tokens, indent=''):
     for ftype, rtype in finfotypes:
         cel = _moose.element('/classes/'+tokens[0])
         numfinfo = getField(cel, 'num_'+ftype, 'unsigned')
-        print 'numfinfo', numfinfo
         finfo = element('/classes/%s/%s' % (tokens[0], ftype))
         for ii in range(numfinfo):
             oid = melement(finfo.getId(), 0, ii, 0)
-            print oid, oid.name
             if oid.name == tokens[1]:
                 return '%s%s.%s: %s - %s\n' % \
                     (indent, tokens[0], tokens[1], 
