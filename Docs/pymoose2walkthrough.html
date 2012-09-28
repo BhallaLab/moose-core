@@ -7,7 +7,7 @@
 <meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
 <meta name="title" content="Getting started with python scripting for MOOSE"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-09-28 19:19:51 IST"/>
+<meta name="generated" content="2012-09-28 20:49:23 IST"/>
 <meta name="author" content="Subhasis Ray"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -458,7 +458,9 @@ install it at <a href="http://moose.ncbs.res.in">MOOSE website</a>.
 
 
 
-<pre class="src src-python">comp.Cm, comp.Rm = 1e-9, 1e5
+<pre class="src src-python">comp.Cm = 1e-9
+comp.Rm = 1e5
+comp.initVm = -0.07
 </pre>
 
 
@@ -467,7 +469,7 @@ install it at <a href="http://moose.ncbs.res.in">MOOSE website</a>.
 </p>
 
 
-<pre class="src src-python"><span style="color: #a020f0;">print</span> comp.Cm, comp.Rm
+<pre class="src src-python"><span style="color: #a020f0;">print</span> comp.Cm, comp.Rm, comp.initVm
 </pre>
 
 
@@ -476,7 +478,7 @@ install it at <a href="http://moose.ncbs.res.in">MOOSE website</a>.
 </p>
 
 
-<pre class="example">1e-09 100000.0
+<pre class="example">1e-09 100000.0 -0.07
 </pre>
 
 
@@ -684,14 +686,28 @@ moose.setClock(2, 0.25e-3)
   This will initialize ticks #0 and 1 with <code>dt = 25</code> &mu; s and tick #2
   with <code>dt = 250</code> &mu; s. Thus all the elements scheduled on ticks # 0
   and 1 will be updated every 25 &mu; s and those on tick # 2 every 250
-  &mu; s.
+  &mu; s. We use the faster clocks for the model components where finer
+  timescale is required for numerical accuracy and the slower clock to
+  sample the values of <code>Vm</code>.
 </p>
-</div>
+<p>  
+  So to assign tick # 2 to the table for recording <code>Vm</code>, we pass its
+  whole path to the <code>useClock</code> function.
+</p>
+
+
+<pre class="src src-python">moose.useClock(0, <span style="color: #8b2252;">'/data/soma_Vm'</span>, <span style="color: #8b2252;">'process'</span>)
+</pre>
+
+<p>
+  This can be read as "use tick # 0 on the element at path
+  <code>/data/soma_Vm</code> to call its <code>process</code> method.
+</p></div>
 </div>
 </div>
 
 <div id="postamble">
-<p class="date">Date: 2012-09-28 19:19:51 IST</p>
+<p class="date">Date: 2012-09-28 20:49:23 IST</p>
 <p class="author">Author: Subhasis Ray</p>
 <p class="creator">Org version 7.8.11 with Emacs version 23</p>
 <a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a>
