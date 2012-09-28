@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>MOOSEGUI: Graphical interface for MOOSE.</title>
+<meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
+<meta name="title" content="MOOSEGUI: Graphical interface for MOOSE."/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2012-09-28 22:00:45 IST"/>
+<meta name="author" content="This document: Upi Bhalla. GUI: Harsha Rani, H. Chaitanya"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  {margin-left:auto; margin-right:0px;  text-align:right;}
+  .left   {margin-left:0px;  margin-right:auto; text-align:left;}
+  .center {margin-left:auto; margin-right:auto; text-align:center;}
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top;  }
+  th.right  { text-align:center;  }
+  th.left   { text-align:center;   }
+  th.center { text-align:center; }
+  td.right  { text-align:right;  }
+  td.left   { text-align:left;   }
+  td.center { text-align:center; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  div.inlinetask {
+    padding:10px;
+    border:2px solid gray;
+    margin:10px;
+    background: #ffffcc;
+  }
+  textarea { overflow-x: auto; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+
+</head>
+<body>
+
+<div id="preamble">
+
+</div>
+
+<div id="content">
+<h1 class="title">MOOSEGUI: Graphical interface for MOOSE.</h1>
+
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 Introduction</a>
+<ul>
+<li><a href="#sec-1-1">1.1 Platform</a></li>
+<li><a href="#sec-1-2">1.2 Layout of interface</a></li>
+<li><a href="#sec-1-3">1.3 The menu bar</a></li>
+<li><a href="#sec-1-4">1.4 The Model window</a></li>
+<li><a href="#sec-1-5">1.5 The plot window</a></li>
+<li><a href="#sec-1-6">1.6 The side panel</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> Introduction</h2>
+<div class="outline-text-2" id="text-1">
+
+<p>  The Moose GUI lets you work on <a href="Kkit2Documentation.html">chemical</a>
+  and <a href="NeuronalDocumentation.html">compartmental neuronal</a> models
+  using a common interface framework. This document describes this common
+  framework. In MOOSE 2.0.0, the interface lets you read, run, edit, and
+  write chemical kinetic models, and to read, edit and run neuronal models.
+</p>
+
+</div>
+
+<div id="outline-container-1-1" class="outline-3">
+<h3 id="sec-1-1"><span class="section-number-3">1.1</span> Platform</h3>
+<div class="outline-text-3" id="text-1-1">
+
+
+</div>
+
+</div>
+
+<div id="outline-container-1-2" class="outline-3">
+<h3 id="sec-1-2"><span class="section-number-3">1.2</span> Layout of interface</h3>
+<div class="outline-text-3" id="text-1-2">
+
+<p>   <img src="./images/MooseGuiImage.png"  alt="./images/MooseGuiImage.png" />
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-1-3" class="outline-3">
+<h3 id="sec-1-3"><span class="section-number-3">1.3</span> The menu bar</h3>
+<div class="outline-text-3" id="text-1-3">
+
+<p>        In Ubuntu 12.04, the menu bar appears only when the mouse is in the 
+        top menu strip of the screen. In other distributions it should
+        appear over the top of the interface. The menu bar contains the
+        following entries: <b>File</b>, <b>Edit</b>, <b>View</b>, <b>Solver</b>, <b>Help</b>.
+</p><dl>
+<dt>File</dt><dd>
+<ul>
+<li><b>Load Model</b>:
+                  This leads to a file finder dialog. The default location
+                  should bring you to the <i>Demos</i> directory of MOOSE. 
+                  Here you can go into the <i>Genesis<sub>files</sub></i> subdirectory,
+                  which contains legacy Kinetikit  (.g) format models.
+                  The <i>neuroml</i> subdirectory leads to a number of example
+                  neuronal and network models, each in their own subdirectory.
+                  The other demos are mostly standalone demos.
+</li>
+<li><b>Save Model</b>:
+                  This currently works only for chemical kinetic models, and
+                  only works for the Kinetikit format.
+</li>
+<li><b>Merge Models</b>:
+                  This allows one to load in a new chemical kinetic model on 
+                  top of an already loaded model.
+</li>
+<li><b>Save plots</b>:
+                  Dumps plot contents to disk in xplot (ascii) format.
+</li>
+<li><b>Shell model</b>:
+                  Not yet operational
+</li>
+<li><b>Reset settings</b>:
+                  Restores interface settings to default.
+</li>
+<li><b>Quit</b>:
+                  Quits the interface.
+</li>
+</ul>
+
+</dd>
+<dt>Edit</dt><dd>
+<ul>
+<li><b>Settings</b>: 
+                  Provides for changing interface settings such as 
+                  file locations.
+</li>
+</ul>
+
+</dd>
+<dt>View</dt><dd>
+<p>
+                This allows one to control display of various parts of the
+                interface.
+</p><ul>
+<li><b>Moose shell</b>:
+                  Currently inactive.
+</li>
+<li><b>Property editor</b>:
+                  Toggles visibility of the panels for viewing and editing
+                  object parameters.
+                  This is to the upper right of the interface in the
+                  interface layout example figure above.
+</li>
+<li><b>Simulation control</b>:
+                  Toggles visibility of the panels for controlling running
+                  of the simulation, at the bottom right of the interface
+                  layout.
+</li>
+<li><b>Plot config</b>:
+                  Toggles visibility of panels for making plots. This is
+                  in the middle right of the interface layout.
+</li>
+<li><b>Sub Windows</b>:
+                  This sets up the model view and the plot view panels into
+                  separate sub-windows of the screen. Useful when you want
+                  to watch plots at the same time as the cell display,
+                  or to select and edit different parts of the model 
+                  while watching the simulation progress.
+</li>
+<li><b>Tabs</b>:
+                  This sets up the model view and plot view panels into
+                  tabs on the screen, as in the example interface figure above.
+                  This is useful to dedicate a larger portion of screen area
+                  to each display.
+</li>
+</ul>
+
+</dd>
+<dt>Solver</dt><dd>
+<ul>
+<li>Runge Kutta
+</li>
+<li>Gillespie
+</li>
+</ul>
+
+</dd>
+<dt>Help</dt><dd>
+<ul>
+<li>About
+</li>
+<li>General documentation ( this file )
+</li>
+<li>Kkit
+</li>
+<li>Nkit
+</li>
+<li>Report a bug.
+</li>
+</ul>
+
+</dd>
+</dl>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-1-4" class="outline-3">
+<h3 id="sec-1-4"><span class="section-number-3">1.4</span> The Model window</h3>
+<div class="outline-text-3" id="text-1-4">
+
+<p>        What you see
+</p><ul>
+<li>zooming and panning
+</li>
+<li>Selecting and viewing objects in the window
+</li>
+</ul>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-1-5" class="outline-3">
+<h3 id="sec-1-5"><span class="section-number-3">1.5</span> The plot window</h3>
+<div class="outline-text-3" id="text-1-5">
+
+<p>        What you see
+</p><ul>
+<li>Zoom/Pan
+</li>
+<li>File ops
+</li>
+</ul>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-1-6" class="outline-3">
+<h3 id="sec-1-6"><span class="section-number-3">1.6</span> The side panel</h3>
+<div class="outline-text-3" id="text-1-6">
+
+<p>        *** Property editor
+        *** Plot configuration
+        *** Run control
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="postamble">
+<p class="date">Date: 2012-09-28 22:00:45 IST</p>
+<p class="author">Author: This document: Upi Bhalla. GUI: Harsha Rani, H. Chaitanya</p>
+<p class="creator">Org version 7.8.02 with Emacs version 23</p>
+<a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a>
+
+</div>
+</body>
+</html>

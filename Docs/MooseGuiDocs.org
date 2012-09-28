@@ -1,0 +1,100 @@
+MOOSEGUI: Graphical interface for MOOSE.
+#+AUTHOR: This document: Upi Bhalla. GUI: Harsha Rani, H. Chaitanya
+
+* Introduction
+  The Moose GUI lets you work on [[file:Kkit2Documentation.org][chemical]]
+  and [[file:NeuronalDocumentation.org][compartmental neuronal]] models
+  using a common interface framework. This document describes this common
+  framework. In MOOSE 2.0.0, the interface lets you read, run, edit, and
+  write chemical kinetic models, and to read, edit and run neuronal models.
+
+** Platform
+
+** Layout of interface
+   [[./images/MooseGuiImage.png]]
+
+** The menu bar
+	In Ubuntu 12.04, the menu bar appears only when the mouse is in the 
+	top menu strip of the screen. In other distributions it should
+	appear over the top of the interface. The menu bar contains the
+	following entries: *File*, *Edit*, *View*, *Solver*, *Help*.
+	+ File ::
+		- *Load Model*:
+		  This leads to a file finder dialog. The default location
+		  should bring you to the /Demos/ directory of MOOSE. 
+		  Here you can go into the /Genesis_files/ subdirectory,
+		  which contains legacy Kinetikit  (.g) format models.
+		  The /neuroml/ subdirectory leads to a number of example
+		  neuronal and network models, each in their own subdirectory.
+		  The other demos are mostly standalone demos.
+		- *Save Model*:
+		  This currently works only for chemical kinetic models, and
+		  only works for the Kinetikit format.
+		- *Merge Models*:
+		  This allows one to load in a new chemical kinetic model on 
+		  top of an already loaded model.
+		- *Save plots*:
+		  Dumps plot contents to disk in xplot (ascii) format.
+		- *Shell model*:
+		  Not yet operational
+		- *Reset settings*:
+		  Restores interface settings to default.
+		- *Quit*:
+		  Quits the interface.
+	+ Edit ::
+		- *Settings*: 
+		  Provides for changing interface settings such as 
+		  file locations.
+	+ View ::
+		This allows one to control display of various parts of the
+		interface.
+		- *Moose shell*:
+		  Currently inactive.
+		- *Property editor*:
+		  Toggles visibility of the panels for viewing and editing
+		  object parameters.
+		  This is to the upper right of the interface in the
+		  interface layout example figure above.
+		- *Simulation control*:
+		  Toggles visibility of the panels for controlling running
+		  of the simulation, at the bottom right of the interface
+		  layout.
+		- *Plot config*:
+		  Toggles visibility of panels for making plots. This is
+		  in the middle right of the interface layout.
+		- *Sub Windows*:
+		  This sets up the model view and the plot view panels into
+		  separate sub-windows of the screen. Useful when you want
+	   	  to watch plots at the same time as the cell display,
+		  or to select and edit different parts of the model 
+		  while watching the simulation progress.
+		- *Tabs*:
+		  This sets up the model view and plot view panels into
+		  tabs on the screen, as in the example interface figure above.
+		  This is useful to dedicate a larger portion of screen area
+		  to each display.
+	+ Solver ::
+		- Runge Kutta
+		- Gillespie
+	+ Help ::
+		- About
+		- General documentation ( this file )
+		- Kkit
+		- Nkit
+		- Report a bug.
+
+** The Model window
+	What you see
+	+ zooming and panning
+	+ Selecting and viewing objects in the window
+
+** The plot window
+	What you see
+	+ Zoom/Pan
+	+ File ops
+
+** The side panel
+	*** Property editor
+	*** Plot configuration
+	*** Run control
+
