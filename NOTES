@@ -18771,4 +18771,7 @@ Now it seems OK. checkin 4060.
 Some more scheduling cleaning. There is a Heisenbug in the scheduling tests,
 in that it sometimes misses out a timestep. Haven't tracked yet. It has made
 it hard to run valgrind on regression tests as it tends to catch it.
+
+Fixed a bug with GssaStoich.cpp where it would get into an infinite loop
+if there were no molecules present.
 ============================================================================
