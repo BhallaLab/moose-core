@@ -1,0 +1,668 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>Getting started with python scripting for MOOSE</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="title" content="Getting started with python scripting for MOOSE"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2012-09-28 17:54:59 IST"/>
+<meta name="author" content="Subhasis Ray"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  {margin-left:auto; margin-right:0px;  text-align:right;}
+  .left   {margin-left:0px;  margin-right:auto; text-align:left;}
+  .center {margin-left:auto; margin-right:auto; text-align:center;}
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top;  }
+  th.right  { text-align:center;  }
+  th.left   { text-align:center;   }
+  th.center { text-align:center; }
+  td.right  { text-align:right;  }
+  td.left   { text-align:left;   }
+  td.center { text-align:center; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  div.inlinetask {
+    padding:10px;
+    border:2px solid gray;
+    margin:10px;
+    background: #ffffcc;
+  }
+  textarea { overflow-x: auto; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+
+</head>
+<body>
+
+<div id="preamble">
+
+</div>
+
+<div id="content">
+<h1 class="title">Getting started with python scripting for MOOSE</h1>
+
+<p>This document assumes that you have a working MOOSE installation. You
+can get details and further documentation regarding how to obtain and
+install it at <a href="http://moose.ncbs.res.in">MOOSE website</a>.
+</p>
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 Introduction</a></li>
+<li><a href="#sec-2">2 Importing MOOSE and accessing builtin documentation</a></li>
+<li><a href="#sec-3">3 Creating objects and traversing the object hierarchy</a></li>
+<li><a href="#sec-4">4 Setting the properties of elements: accessing fields</a></li>
+<li><a href="#sec-5">5 Putting them together: setting up connections</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> Introduction</h2>
+<div class="outline-text-2" id="text-1">
+
+<p>  Multiscale Object Oriented Simulation Environment (MOOSE) is a
+  general purpose simulation environment. PyMOOSE is its incarnation
+  as a Python module. This document describes how to use the moose
+  module in Python scripts or in an interactive Python shell. It aims
+  to give you enough overview to help you start scripting using MOOSE
+  and extract further information that may be required for advanced
+  work. Knowledge of Python or programming in general will be helpful.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> Importing MOOSE and accessing builtin documentation</h2>
+<div class="outline-text-2" id="text-2">
+
+<p>  In a python script you import modules to access the functionalities
+  they provide.
+</p>
+
+
+<pre class="src src-python"><span style="color: #a020f0;">import</span> moose
+</pre>
+
+<p>
+  Now you are ready to start using the <code>moose</code> module. You can use
+  Python's builtin <code>help</code> function to read the toplevel documentation
+  for the moose module:
+</p>
+
+
+<pre class="src src-python"><span style="color: #7a378b;">help</span>(moose)
+</pre>
+
+<p>
+  This will give you an overview of the module. You can also access
+  the documentation for individual classes and functions this way.
+</p>
+
+
+<pre class="src src-python"><span style="color: #7a378b;">help</span>(moose.connect)
+</pre>
+
+<p>
+  To list the available functions and classes you can use <code>dir</code>
+  function.
+</p>
+
+
+<pre class="src src-python"><span style="color: #7a378b;">dir</span>(moose)
+</pre>
+
+<p>
+  MOOSE has builtin documentation in the C++ code independent of
+  Python. The python module provides a separate <code>doc</code> function to
+  extract this documentation.
+</p>
+
+
+
+<pre class="src src-python">moose.doc(moose.Compartment)
+</pre>
+
+
+<p>  
+  The class level documentation will show you whatever the
+  author/maintainer of the class wrote for documentation followed by a
+  list of various kinds of fields and their data types. This can be
+  very useful in an interactive session.
+</p>
+<p>
+  Each field can have its own detailed documentation, too. But then
+  you'll need to quote it and pass it as a string to the
+  function. Otherwise, <code>moose.doc</code> will receive the field value as
+  parameter and get confused.
+</p>
+
+
+<pre class="src src-python">moose.doc(<span style="color: #8b2252;">'Compartment.Rm'</span>)
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> Creating objects and traversing the object hierarchy</h2>
+<div class="outline-text-2" id="text-3">
+
+<p>  Objects are the building block of models in MOOSE. Biological
+  entities are represented by classes and there instantiations are
+  objects of those classes. We call MOOSE objects <code>element</code> and use
+  object and element interchangably in the context of MOOSE. Elements
+  are conceptually laid out in a tree-like hierarchical structure. If
+  you are familiar with file system hieararchies in common operating
+  systems, this should be simple.
+</p>
+<p>
+  At the top of the object hierarchy sits the <code>Shell</code>, equivalent to
+  the root directory in UNIX-based systems and represented by the path
+  `/`. You can list the existing objects under `/` using the <code>le</code>
+  function.
+</p>
+
+
+
+<pre class="src src-python">moose.le()
+</pre>
+
+<p>
+  This shows something like
+</p>
+
+
+<pre class="example">Elements under /
+/Msgs
+/clock
+/classes
+</pre>
+
+
+<p>  
+  `Msgs`, `clock` and `classes` are predefined objects in MOOSE. And
+  each object can contain other objects inside them. You can see them
+  by passing the path of the parent object to <code>le</code>. Entering
+</p>
+
+
+
+<pre class="src src-python">moose.le(<span style="color: #8b2252;">'/clock'</span>)
+</pre>
+
+
+<p>
+  prints
+</p>
+
+
+<pre class="example">Elements under /clock
+/clock/tick[0]
+</pre>
+
+
+<p>
+  Now let us create some objects of our own. This can be done by
+  invoking MOOSE class constructors (just like regular Python
+  classes).
+</p>
+
+
+<pre class="src src-python"><span style="color: #a0522d;">model</span> = moose.Neutral(<span style="color: #8b2252;">'/model'</span>)
+</pre>
+
+<p>
+  The above creates a <code>Neutral</code> object named <code>model</code>. We can create
+  something under <code>model</code>:
+</p>
+
+
+<pre class="src src-python"><span style="color: #a0522d;">soma</span> = moose.Compartment(<span style="color: #8b2252;">'/model/soma'</span>)
+</pre>
+
+<p>
+  Every <code>element</code> has a unique path. This is a concatenation of the
+  names of all the objects one has to traverse starting with the root
+  to reach that <code>element</code>.
+</p>
+
+
+<pre class="src src-python"><span style="color: #a020f0;">print</span> soma.path
+</pre>
+
+<p>
+  shows you its path:
+</p>
+
+
+<pre class="example">/model/soma
+</pre>
+
+<p>
+  and the name of the <code>element</code> can be printed, too:
+</p>
+
+
+<pre class="src src-python"><span style="color: #a020f0;">print</span> soma.name
+</pre>
+
+<p>
+  shows:
+</p>
+
+
+<pre class="example">soma
+</pre>
+
+<p>
+  The <code>Compartment</code> elements model small portions of a neuron. Some
+  basic experiments can be carried out using a single compartment.
+  Let us create another object to act on the <code>soma</code>. This will be a
+  step current generator to inject a current pulse into the soma.
+</p>
+
+
+<pre class="src src-python"><span style="color: #a0522d;">pulse</span> = moose.PulseGen(<span style="color: #8b2252;">'/model/pulse'</span>)
+</pre>
+
+<p>
+  You can use <code>le</code> at any point to see what is there:
+</p>
+
+
+<pre class="src src-python">moose.le(<span style="color: #8b2252;">'/model'</span>)
+</pre>
+
+<p>
+  will show you
+</p>
+
+
+<pre class="example">Elements under /model
+/model/soma
+/model/pulse
+</pre>
+
+<p>
+  And finally, we can create a <code>Table</code> to record the timeseries of the
+  soma's membrane potential. It is good practice to organize the data
+  separately from the model. So we do it as below:
+</p>
+
+
+<pre class="src src-python"><span style="color: #a0522d;">data</span> = moose.Neutral(<span style="color: #8b2252;">'/data'</span>)
+<span style="color: #a0522d;">vmtab</span> = moose.Table(<span style="color: #8b2252;">'/data/soma_Vm'</span>)
+</pre>
+
+<p>
+  Now that we have the essential elements for a small model, we can go
+  on to set the properties of this model and the experimental
+  protocol.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> Setting the properties of elements: accessing fields</h2>
+<div class="outline-text-2" id="text-4">
+
+<p>  Elements have several kinds of fields. The simplest ones are the
+  <code>value fields</code>. These can be accessed like ordinary Python
+  members. You can list the available value fields using
+  <code>getFieldNames</code> function:
+</p>
+
+
+
+<pre class="src src-python">soma.getFieldNames(<span style="color: #8b2252;">'valueFinfo'</span>)
+</pre>
+
+<p>
+  Here <code>valueFinfo</code> is the type name for value fields. <i>finfo</i> is
+  short form of <i>field info</i>. For each type of field there is a name
+  ending with <i>-Finfo</i>. The above will give you the following list:
+</p>
+
+
+
+<pre class="example"> ('this',
+'name',
+'me',
+'parent',
+'children',
+'path',
+'class',
+'linearSize',
+'objectDimensions',
+'lastDimension',
+'localNumField',
+'pathIndices',
+'msgOut',
+'msgIn',
+'Vm',
+'Cm',
+'Em',
+'Im',
+'inject',
+'initVm',
+'Rm',
+'Ra',
+'diameter',
+'length',
+'x0',
+'y0',
+'z0',
+'x',
+'y',
+'z')
+</pre>
+
+<p>
+  Some of these fields are for internal or advanced use, some give
+  access to the physical properties of the biological entity we are
+  trying to model. Now we are interested in <code>Cm</code>, <code>Rm</code>, <code>Em</code> and
+  <code>initVm</code>. In the most basic form, a neuronal compartment acts like a
+  parallel <code>RC</code> circuit with a battery attached. Where <code>R</code> and <code>C</code> are
+  resistor and capacitor connected in parallel and the battery with
+  voltage <code>Em</code> is in series with the resistor [see figure below].
+</p>
+
+<div id="figneuronalcompartment" class="figure">
+<p><img src="./images/neuronalcompartment.jpg"  alt="./images/neuronalcompartment.jpg" /></p>
+<p>Passive neuronal compartment</p>
+</div>
+
+<p>
+  The fields are populated with some defaults which you can print out:
+</p>
+
+
+<pre class="src src-python"><span style="color: #a020f0;">print</span> comp.Cm, comp.Rm, comp.Vm, comp.Em, comp.initVm
+</pre>
+
+
+<p>
+  This will give you:
+</p>
+
+
+<pre class="example">1.0 1.0 -0.06 -0.06 -0.06
+</pre>
+
+<p>
+  You can set the <code>Cm</code> and <code>Rm</code> fields to something realistic using
+  simple assignment (we follow SI unit throughout, MOOSE is unit
+  agnostic and things should work fine as long as you use values all
+  converted to a consistent unit system):
+</p>
+
+
+
+<pre class="src src-python">comp.Cm, comp.Rm = 1e-9, 1e5
+</pre>
+
+
+<p>
+  And see that the changes took effect:
+</p>
+
+
+<pre class="src src-python"><span style="color: #a020f0;">print</span> comp.Cm, comp.Rm
+</pre>
+
+
+<p>
+  This will give you:
+</p>
+
+
+<pre class="example">1e-09 100000.0
+</pre>
+
+
+<p>
+  Now we can setup the current pulse to be delivered to the soma:
+</p>
+
+
+<pre class="src src-python">pulse.delay[0] = 50e-3
+pulse.width[0] = 100e-3
+pulse.level[0] = 1e-9
+pulse.delay[1] = 1e9
+</pre>
+
+<p>
+  This tells the pulse generator to create a 100 ms long pulse 50 ms
+  after the start of the simulation. The amplitude of the pulse is set
+  to 1 nA. We set the delay for the next pulse to a very large value
+  (larger than the total simulation time) so that the stimulation
+  stops after the first pulse. Had we set <code>pulse.delay[1] = 0</code> , it
+  would have generated a pulse train at 50 ms intervals.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-5" class="outline-2">
+<h2 id="sec-5"><span class="section-number-2">5</span> Putting them together: setting up connections</h2>
+<div class="outline-text-2" id="text-5">
+
+<p>  In order for the elements to interact during simulation, we need to
+  connect them via messages. Elements are connected to each other
+  using special source and destination fields. These types are named
+  <code>srcFinfo</code> and <code>destFinfo</code>. You can query the available source and
+  destination fields on an element using <code>getFieldNames</code> as
+  before. This time, let us do it another way: by the class name:
+</p>
+
+
+<pre class="src src-python">moose.getFieldNames(<span style="color: #8b2252;">'PulseGen'</span>, <span style="color: #8b2252;">'srcFinfo'</span>)
+</pre>
+
+<p>
+  This form has the advantage that you can get information about a
+  class without creating elements of that class. The above code shows:
+</p>
+
+
+<pre class="example">('childMsg', 'outputOut')
+</pre>
+
+<p>
+  Here <code>childMsg</code> is a source field that is used by the MOOSE
+  internals to connect child elements to parent elements. The second
+  one is of our interest. You utilize the builtin documentation here:
+</p>
+
+
+
+<pre class="src src-python">moose.doc(<span style="color: #8b2252;">'PulseGen.outputOut'</span>)
+</pre>
+
+<p>
+  will show you:
+</p>
+
+
+<pre class="example">PulseGen.outputOut: double - source field
+      Current output level.
+</pre>
+
+<p>
+  As you may have already guessed, this is the output of the pulse
+  generator and this must be injected into the <code>soma</code> to stimulate
+  it. But where in the <code>soma</code> can we send it? Again, MOOSE has some
+  introspection built in:
+</p>
+
+
+<pre class="src src-python">soma.getFieldNames(<span style="color: #8b2252;">'destFinfo'</span>)
+</pre>
+
+<p>
+  shows
+</p>
+
+
+<pre class="example">('parentMsg',
+ 'set_this',
+ 'get_this',
+   ...
+ 'set_z',
+ 'get_z',
+ 'injectMsg',
+ 'randInject',
+ 'cable',
+ 'process',
+ 'reinit',
+ 'initProc',
+ 'initReinit',
+ 'handleChannel',
+ 'handleRaxial',
+ 'handleAxial')
+</pre>
+
+<p>
+  Now that is a long list. But fortunately you can ignore anything
+  that starts with <code>get_</code> or <code>set_</code>. Those are internal <code>destFinfo</code>
+  used for accessing value fields. Among the rest <code>injectMsg</code> seems to
+  be the most likely candidate. And that is indeed the case. Use the
+  <code>connect</code> function to connect the pulse generator output to the soma
+  input:
+</p>
+
+
+<pre class="src src-python"><span style="color: #a0522d;">m</span> = moose.connect(pulse, <span style="color: #8b2252;">'outputOut'</span>, soma, <span style="color: #8b2252;">'injectMsg'</span>)
+</pre>
+
+<p>
+  <code>connect(source, source_field, dest, dest_field)</code> creates a
+  `message` from <code>source</code> element's <code>source_field</code> field to <code>dest</code>
+  elements <code>dest_field</code> field and returns that message. Messages are
+  also elements. You can print them to see their identity:
+</p>
+
+
+<pre class="src src-python"><span style="color: #a020f0;">print</span> m
+</pre>
+
+<p>
+  on my system gives
+</p>
+
+
+<pre class="example">&lt;moose.SingleMsg: id=5, dataId=733, path=/Msgs/singleMsg[733]&gt;
+</pre>
+
+<p>
+  Yes, you can print any element and the string representation will
+  show you the class, two numbers(<code>id</code> and <code>dataId</code>) uniquely
+  identifying it among all elements, and its path. You can get some
+  more information about a message:
+</p>
+
+
+<pre class="src src-python"><span style="color: #a020f0;">print</span> m.e1.path, m.e2.path, m.srcFieldsOnE1, m.destFieldsOnE2
+</pre>
+
+<p>
+  will tell you what you already know:
+</p>
+
+
+<pre class="example">/model/pulse /model/soma ('outputOut',) ('injectMsg',)
+</pre>
+
+<p>
+  This message has fields <code>e1</code> and <code>e2</code> referring to the source and
+  destination elements, which are <code>pulse</code> and <code>soma</code> respectively. The
+  next two items are lists of the field names which are connected by
+  this message.
+</p>
+<p>
+  Next we connect the table to the soma to retrieve its membrane
+  potential <code>Vm</code>. This is where all those <code>destFinfo</code> starting with
+  <code>get_</code> or <code>set_</code> come in use. For each value field `X`, there is a
+  <code>destFinfo</code> <code>get_{X}</code> to retrieve the value at simulation time. This
+  is used by the table to record the values <code>Vm</code> takes.
+</p>
+
+
+
+<pre class="src src-python">moose.connect(vmtab, <span style="color: #8b2252;">'requestData'</span>, soma, <span style="color: #8b2252;">'get_Vm'</span>)
+</pre>
+
+<p>
+  This finishes our model and recording setup.
+</p></div>
+</div>
+</div>
+
+<div id="postamble">
+<p class="date">Date: 2012-09-28 17:54:59 IST</p>
+<p class="author">Author: Subhasis Ray</p>
+<p class="creator">Org version 7.8.11 with Emacs version 23</p>
+<a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a>
+
+</div>
+</body>
+</html>
