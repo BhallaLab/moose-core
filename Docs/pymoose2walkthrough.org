@@ -225,17 +225,19 @@ print comp.Cm, comp.Rm, comp.Vm, comp.Em, comp.initVm
   converted to a consistent unit system):
 
 #+begin_src python
-comp.Cm, comp.Rm = 1e-9, 1e5
+comp.Cm = 1e-9
+comp.Rm = 1e5
+comp.initVm = -0.07
 #+end_src  
 
   And see that the changes took effect:
 #+begin_src python
-print comp.Cm, comp.Rm
+print comp.Cm, comp.Rm, comp.initVm
 #+end_src
 
   This will give you:
 #+begin_example
-1e-09 100000.0
+1e-09 100000.0 -0.07
 #+end_example
 
   Now we can setup the current pulse to be delivered to the soma:
@@ -370,5 +372,60 @@ moose.setClock(2, 0.25e-3)
   This will initialize ticks #0 and 1 with =dt = 25= \mu s and tick #2
   with =dt = 250= \mu s. Thus all the elements scheduled on ticks # 0
   and 1 will be updated every 25 \mu s and those on tick # 2 every 250
-  \mu s.
+  \mu s. We use the faster clocks for the model components where finer
+  timescale is required for numerical accuracy and the slower clock to
+  sample the values of =Vm=.
   
+  So to assign tick # 2 to the table for recording =Vm=, we pass its
+  whole path to the =useClock= function.
+#+begin_src python
+moose.useClock(2, '/data/soma_Vm', 'process')
+#+end_src
+  This can be read as "use tick # 1 on the element at path
+  ~/data/soma_Vm~ to call its ~process~ method at every step". Every
+  class that is supposed to update its state or take some action
+  during simulation implements a ~process~ method. And in most cases
+  that is the method we want the ticks to call at every time step. A
+  less common method is ~init~, which is implemented in some classes
+  to interleave actions or updates that must be executed in a specific
+  order. The =Compartment= class is one such case where a neuronal
+  compartment has to know the =Vm= of its neighboring compartments
+  before it can calculate its =Vm= for the next step. This is done with
+#+begin_src python
+moose.useClock(0, soma.path, 'init')
+#+end_src
+  Here we used the =path= field in stead of writing the path
+  explicitly.
+
+  Next we assign tick # 1 to process method of everthing under
+  ~/model~. 
+#+begin_src python
+moose.useClock(1, '/model/##', 'process')
+#+end_src
+  Here the second argument is an example of wildcard path. The ~##~
+  matches everything under the path preceding it at any depth. Thus if
+  we had some other objects under ~/model/soma~, =process= method of
+  those would also have been scheduled on tick # 1. This is very
+  useful for complex models where it is tedius to scheduled each
+  element individually. In this case we could have used ~/model/#~ as
+  well for the path. This is a single level wildcard which matches
+  only the children of ~/model~ but does not go farther down in the
+  hierarchy. 
+
+  Once the elements are assigned ticks, we can put the model to its initial state using
+#+begin_src python
+moose.reinit()
+#+end_src
+  Finally, we run the simulation for 300 ms:
+#+begin_src python
+moose.start(300e-3)
+#+end_src
+  The data will be recorded by the ~soma_vm~ table, which is
+  referenced by the variable =vmtab=. The =Table= class provides a
+  numpy array interface to its content. The field is =vec=. So you can
+  easily plot the membrane potential using the [[http://matplotlib.org/][matplotlib]] library.
+#+begin_src python
+import pylab
+pylab.plot(vmtab.vec)
+pylab.show()
+#+end_src
