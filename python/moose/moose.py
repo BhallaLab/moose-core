@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Fri Sep 28 14:45:36 2012 (+0530)
+# Last-Updated: Fri Sep 28 14:56:12 2012 (+0530)
 #           By: subha
-#     Update #: 2154
+#     Update #: 2157
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -243,9 +243,9 @@ def getfielddoc(tokens, indent=''):
         for ii in range(numfinfo):
             oid = melement(finfo.getId(), 0, ii, 0)
             if oid.name == tokens[1]:
-                return '%s%s.%s: %s - %s\n' % \
+                return '%s%s.%s: %s - %s\n\t%s\n' % \
                     (indent, tokens[0], tokens[1], 
-                     oid.docs, rtype)    
+                     oid.type, rtype, oid.docs)    
     raise NameError('`%s` has no field called `%s`' 
                     % (tokens[0], tokens[1]))
                     
