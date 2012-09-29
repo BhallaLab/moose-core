@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Sat Sep 29 01:23:44 2012 (+0530)
+// Last-Updated: Sat Sep 29 17:54:57 2012 (+0530)
 //           By: subha
-//     Update #: 10112
+//     Update #: 10119
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -1321,7 +1321,8 @@ static struct module_state _state;
             RAISE_INVALID_ID(NULL, "moose_Id_repr");
         }
         ostringstream repr;
-        repr << "<moose.ematrix: class=" << Field<string>::get(self->id_, "class") << "): "
+        repr << "<moose.ematrix: class="
+             << Field<string>::get(self->id_, "class") << ", "
              << "id=" << self->id_.value() << ","
              << "path=" << self->id_.path() << ">";
         return PyString_FromString(repr.str().c_str());
@@ -1333,7 +1334,9 @@ static struct module_state _state;
         if (!Id::isValid(self->id_)){
             RAISE_INVALID_ID(NULL, "moose_Id_str");
         }        
-        return PyString_FromFormat("<moose.ematrix: id=%u, path=%s>", self->id_.value(), self->id_.path().c_str());
+        return PyString_FromFormat("<moose.ematrix: class=%s, id=%u, path=%s>",
+                                   Field<string>::get(self->id_, "class").c_str(),
+                                   self->id_.value(), self->id_.path().c_str());
     } // !  moose_Id_str
 
     // 2011-03-23 15:09:19 (+0530)
@@ -2032,7 +2035,7 @@ static struct module_state _state;
     {
         if (self && !PyObject_IsInstance(self, (PyObject*)Py_TYPE(self))){
             ostringstream error;
-            error << "Expected an element or subclass. Found "
+            error << "Expected an melement or subclass. Found "
                   << Py_TYPE(self)->tp_name;
             PyErr_SetString(PyExc_TypeError, error.str().c_str());
             return -1;
@@ -3458,7 +3461,7 @@ static struct module_state _state;
     ///////////////////////////////////////////////
     PyTypeObject ObjIdType = { 
       PyVarObject_HEAD_INIT(NULL, 0)            /* tp_head */
-        "moose.element",                      /* tp_name */
+        "moose.melement",                      /* tp_name */
         sizeof(_ObjId),                     /* tp_basicsize */
         0,                                  /* tp_itemsize */
         0,                                  /* tp_dealloc */
