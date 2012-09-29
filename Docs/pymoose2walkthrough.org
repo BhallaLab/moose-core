@@ -6,68 +6,69 @@ can get details and further documentation regarding how to obtain and
 install it at [[http://moose.ncbs.res.in][MOOSE website]].
 
 * Introduction
-  Multiscale Object Oriented Simulation Environment (MOOSE) is a
-  general purpose simulation environment. PyMOOSE is its incarnation
-  as a Python module. This document describes how to use the moose
-  module in Python scripts or in an interactive Python shell. It aims
-  to give you enough overview to help you start scripting using MOOSE
-  and extract further information that may be required for advanced
+  This document describes how to use the =moose= module in Python
+  scripts or in an interactive Python shell. It aims to give you
+  enough overview to help you start scripting using MOOSE and extract
+  farther information that may be required for advanced
   work. Knowledge of Python or programming in general will be helpful.
-  If you just want to run some existing models in one of the supported
-  formats, you can fire the MOOSE GUI and locate and load the model
-  from the ~File~ menu. The GUI is described in [[another document]].
+  If you just want to simulate existing models in one of the supported
+  formats, you can fire the MOOSE GUI and locate the model file using
+  the ~File~ menu and load it. The GUI is described [[./MooseGuiDocs.org][here]]. The example
+  code in the boxes can be entered in a Python shell.
   
-* Importing MOOSE and accessing builtin documentation
+* Importing MOOSE and accessing built-in documentation
   In a python script you import modules to access the functionalities
   they provide.
 #+begin_src python :tangle yes
   import moose
 #+end_src
-  Now you are ready to start using the =moose= module. You can use
-  Python's builtin =help= function to read the toplevel documentation
-  for the moose module:
+  This makes the =moose= module available for use in Python. You can
+  use Python's builtin =help= function to read the toplevel
+  documentation for the moose module:
 #+begin_src python :tangle yes
   help(moose)
 #+end_src
-  This will give you an overview of the module. You can also access
-  the documentation for individual classes and functions this way.
+  This will give you an overview of the module. Press `q` to exit the
+  pager and get back to the interpreter. You can also access the
+  documentation for individual classes and functions this way.
 #+begin_src python :tangle yes
 help(moose.connect)
 #+end_src
   To list the available functions and classes you can use =dir=
-  function.
+  function[fn:: To list the classes only, use =moose.le('/classes')=].
 #+begin_src python :tangle yes
   dir(moose)
 #+end_src
-  MOOSE has builtin documentation in the C++ code independent of
-  Python. The python module provides a separate =doc= function to
+  MOOSE has builtin documentation in the C++-source-code independent
+  of Python. The =moose= module has a separate =doc= function to
   extract this documentation.
 
 #+begin_src python :tangle yes
 moose.doc(moose.Compartment)
 #+end_src
   
-  The class level documentation will show you whatever the
+  The class level documentation will show whatever the
   author/maintainer of the class wrote for documentation followed by a
   list of various kinds of fields and their data types. This can be
   very useful in an interactive session.
 
-  Each field can have its own detailed documentation, too. But then
-  you'll need to quote it and pass it as a string to the
-  function. Otherwise, =moose.doc= will receive the field value as
-  parameter and get confused.
+  Each field can have its own detailed documentation, too. 
 #+begin_src python :tangle yes
 moose.doc('Compartment.Rm')
 #+end_src
-
+  Note that you need to quote it and pass it as a string to the
+  function. Otherwise, =moose.doc= will receive the field value as
+  parameter and get confused.  
+  
 * Creating objects and traversing the object hierarchy
-  Objects are the building block of models in MOOSE. Biological
-  entities are represented by classes and there instantiations are
-  objects of those classes. We call MOOSE objects =element= and use
-  object and element interchangably in the context of MOOSE. Elements
-  are conceptually laid out in a tree-like hierarchical structure. If
-  you are familiar with file system hieararchies in common operating
-  systems, this should be simple.
+  Types of biological entities like neurons, enzymes, etc are
+  represented by classes and individual instances of those types are
+  objects of those classes. Objects are the building-blocks of models
+  in MOOSE. We call MOOSE objects `element` and use object and element
+  interchangably in the context of MOOSE. Elements are conceptually
+  laid out in a tree-like hierarchical structure. If you are familiar
+  with file system hieararchies in common operating systems, this
+  should be simple.
 
   At the top of the object hierarchy sits the =Shell=, equivalent to
   the root directory in UNIX-based systems and represented by the path
@@ -105,14 +106,15 @@ Elements under /clock
 #+begin_src python :tangle yes
 model = moose.Neutral('/model')
 #+end_src
-  The above creates a =Neutral= object named ~model~. We can create
-  something under ~model~:
+  The above creates a =Neutral= object named ~model~. =Neutral= is the
+  most basic class in MOOSE. A =Neutral= element can act as a
+  container for other elements. We can create something under ~model~:
 #+begin_src python :tangle yes
 soma = moose.Compartment('/model/soma')
 #+end_src
-  Every =element= has a unique path. This is a concatenation of the
+  Every element has a unique path. This is a concatenation of the
   names of all the objects one has to traverse starting with the root
-  to reach that =element=.
+  to reach that element.
 #+begin_src python :tangle yes
 print soma.path
 #+end_src
@@ -120,7 +122,7 @@ print soma.path
 #+begin_example
 /model/soma
 #+end_example
-  and the name of the =element= can be printed, too:
+  and the name of the element can be printed, too:
 #+begin_src python :tangle yes
 print soma.name
 #+end_src
@@ -165,9 +167,10 @@ vmtab = moose.Table('/data/soma_Vm')
 #+begin_src python :tangle yes
 soma.getFieldNames('valueFinfo')
 #+end_src  
-  Here ~valueFinfo~ is the type name for value fields. /finfo/ is
-  short form of /field info/. For each type of field there is a name
-  ending with /-Finfo/. The above will give you the following list:
+  Here =valueFinfo= is the type name for value fields. ~Finfo~ is
+  short form of /field information/. For each type of field there is a
+  name ending with ~-Finfo~. The above will display the following
+  list:
 
 #+begin_example
   ('this',
@@ -213,34 +216,54 @@ soma.getFieldNames('valueFinfo')
 #+LABEL: figneuronalcompartment
 [[./images/neuronalcompartment.jpg]]
 
-  The fields are populated with some defaults which you can print out:
+  The fields are populated with some defaults.
 #+begin_src python :tangle yes
-print comp.Cm, comp.Rm, comp.Vm, comp.Em, comp.initVm
+print soma.Cm, soma.Rm, soma.Vm, soma.Em, soma.initVm
 #+end_src
-
-  This will give you:
+  will give you:
 #+begin_example
 1.0 1.0 -0.06 -0.06 -0.06
 #+end_example
   You can set the =Cm= and =Rm= fields to something realistic using
-  simple assignment (we follow SI unit throughout, MOOSE is unit
-  agnostic and things should work fine as long as you use values all
-  converted to a consistent unit system):
+  simple assignment (we follow SI unit)[fn:: MOOSE is unit agnostic
+  and things should work fine as long as you use values all converted
+  to a consistent unit system.].
 
 #+begin_src python :tangle yes
-comp.Cm = 1e-9
-comp.Rm = 1e5
-comp.initVm = -0.07
+soma.Cm = 1e-9
+soma.Rm = 1e7
+soma.initVm = -0.07
 #+end_src  
-
-  And see that the changes took effect:
+  Instead of writing print statements for each field, you could use
+  the utility function showfield to see that the changes took effect:
 #+begin_src python :tangle yes
-print comp.Cm, comp.Rm, comp.initVm
+moose.showfield(soma)
 #+end_src
-
-  This will give you:
+  will list most of the fields with their values:
 #+begin_example
-1e-09 100000.0 -0.07
+[ /model/soma ]
+diameter             = 0.0
+linearSize           = 1
+localNumField        = 0
+Ra                   = 1.0
+y0                   = 0.0
+Rm                   = 10000000.0
+inject               = 0.0
+Em                   = -0.06
+initVm               = -0.07
+x                    = 0.0
+path                 = /model/soma
+x0                   = 0.0
+z0                   = 0.0
+class                = Compartment
+name                 = soma
+Cm                   = 1e-09
+Vm                   = -0.06
+length               = 0.0
+Im                   = 0.0
+y                    = 0.0
+lastDimension        = 0
+z                    = 0.0
 #+end_example
 
   Now we can setup the current pulse to be delivered to the soma:
@@ -254,8 +277,8 @@ pulse.delay[1] = 1e9
   after the start of the simulation. The amplitude of the pulse is set
   to 1 nA. We set the delay for the next pulse to a very large value
   (larger than the total simulation time) so that the stimulation
-  stops after the first pulse. Had we set =pulse.delay[1] = 0= , it
-  would have generated a pulse train at 50 ms intervals.
+  stops after the first pulse. Had we set =pulse.delay = 0= , it would have
+  generated a pulse train at 50 ms intervals.
   
 * Putting them together: setting up connections
   In order for the elements to interact during simulation, we need to
@@ -274,20 +297,18 @@ moose.getFieldNames('PulseGen', 'srcFinfo')
 #+end_example
   Here =childMsg= is a source field that is used by the MOOSE
   internals to connect child elements to parent elements. The second
-  one is of our interest. You utilize the builtin documentation here:
-
+  one is of our interest. Check out the builtin documentation here:
 #+begin_src python :tangle yes
 moose.doc('PulseGen.outputOut')
 #+end_src
-  will show you:
+  shows
 #+begin_example
   PulseGen.outputOut: double - source field
 	Current output level.
 #+end_example
-  As you may have already guessed, this is the output of the pulse
-  generator and this must be injected into the ~soma~ to stimulate
-  it. But where in the ~soma~ can we send it? Again, MOOSE has some
-  introspection built in:
+  so this is the output of the pulse generator and this must be
+  injected into the ~soma~ to stimulate it. But where in the ~soma~
+  can we send it? Again, MOOSE has some introspection built in:
 #+begin_src python :tangle yes
 soma.getFieldNames('destFinfo')
 #+end_src
@@ -310,12 +331,12 @@ soma.getFieldNames('destFinfo')
  'handleRaxial',
  'handleAxial')
 #+end_example
-  Now that is a long list. But fortunately you can ignore anything
-  that starts with ~get_~ or ~set_~. Those are internal =destFinfo=
-  used for accessing value fields. Among the rest =injectMsg= seems to
-  be the most likely candidate. And that is indeed the case. Use the
-  =connect= function to connect the pulse generator output to the soma
-  input:
+  Now that is a long list. But much of it are fields for internal or
+  special use. Anything that starts with ~get_~ or ~set_~ are internal
+  =destFinfo= used for accessing value fields (we shall use one of
+  those when setting up data recording). Among the rest =injectMsg=
+  seems to be the most likely candidate. Use the =connect= function to
+  connect the pulse generator output to the soma input:
 #+begin_src python :tangle yes
 m = moose.connect(pulse, 'outputOut', soma, 'injectMsg')
 #+end_src  
@@ -326,14 +347,13 @@ m = moose.connect(pulse, 'outputOut', soma, 'injectMsg')
 #+begin_src python :tangle yes
 print m
 #+end_src
-  on my system gives
+  on my system gives[fn:: You can print any element and the string
+  representation will show you the class, two numbers(=id= and
+  =dataId=) uniquely identifying it among all elements, and its path.]
 #+begin_example
 <moose.SingleMsg: id=5, dataId=733, path=/Msgs/singleMsg[733]>
 #+end_example
-  Yes, you can print any element and the string representation will
-  show you the class, two numbers(=id= and =dataId=) uniquely
-  identifying it among all elements, and its path. You can get some
-  more information about a message:
+  You can get some more information about a message:
 #+begin_src python :tangle yes
 print m.e1.path, m.e2.path, m.srcFieldsOnE1, m.destFieldsOnE2
 #+end_src  
@@ -341,16 +361,29 @@ print m.e1.path, m.e2.path, m.srcFieldsOnE1, m.destFieldsOnE2
 #+begin_example
 /model/pulse /model/soma ('outputOut',) ('injectMsg',)
 #+end_example
-  This message has fields =e1= and =e2= referring to the source and
-  destination elements, which are ~pulse~ and ~soma~ respectively. The
-  next two items are lists of the field names which are connected by
-  this message.
+  A message element has fields =e1= and =e2= referring to the elements
+  it connects. For single one-directional messages these are source
+  and destination elements, which are ~pulse~ and ~soma~
+  respectively. The next two items are lists of the field names which
+  are connected by this message.
 
-  Next we connect the table to the soma to retrieve its membrane
-  potential =Vm=. This is where all those =destFinfo= starting with
-  ~get_~ or ~set_~ come in use. For each value field `X`, there is a
-  =destFinfo= =get_{X}= to retrieve the value at simulation time. This
-  is used by the table to record the values =Vm= takes.
+  You could also check which elements are connected to a particular
+  field:
+#+begin_src python :tangle yes
+print soma.neighbours['injectMsg']
+#+end_src  
+  shows
+#+begin_example
+[<moose.ematrix: class=PulseGen, id=729,path=/model/pulse>]
+#+end_example
+  Notice that the list contains something called ematrix. We discuss
+  this [[#ADVANCED][later]]. Also =neighbours= is a new kind of field:
+  =lookupFinfo= which behaves like a dictionary. Next we connect the
+  table to the soma to retrieve its membrane potential =Vm=. This is
+  where all those =destFinfo= starting with ~get_~ or ~set_~ come in
+  use. For each value field `X`, there is a =destFinfo= =get_{X}= to
+  retrieve the value at simulation time. This is used by the table to
+  record the values =Vm= takes.
 
 #+begin_src python :tangle yes
 moose.connect(vmtab, 'requestData', soma, 'get_Vm')
@@ -358,7 +391,7 @@ moose.connect(vmtab, 'requestData', soma, 'get_Vm')
   This finishes our model and recording setup.
 
 * Scheduling and running the simulation
-  With the model all setup, we have to schedule the simulation. MOOSE
+  With the model all set up, we have to schedule the simulation. MOOSE
   has a central clock element(`/clock`) to manage time. Clock has a
   set of =Tick= elements under it that take care of advancing the
   state of each element with time as the simulation progresses. Every
@@ -376,29 +409,33 @@ moose.setClock(2, 0.25e-3)
   with =dt = 250= \mu s. Thus all the elements scheduled on ticks # 0
   and 1 will be updated every 25 \mu s and those on tick # 2 every 250
   \mu s. We use the faster clocks for the model components where finer
-  timescale is required for numerical accuracy and the slower clock to
-  sample the values of =Vm=.
+  timescale is required for numerical accuracy and the slower clock to 
+ sample the values of =Vm=.
   
   So to assign tick # 2 to the table for recording =Vm=, we pass its
   whole path to the =useClock= function.
 #+begin_src python :tangle yes
   moose.useClock(2, '/data/soma_Vm', 'process')
 #+end_src
-  Read this as "use tick # 2 on the element at path
-  ~/data/soma_Vm~ to call its ~process~ method at every step". Every
-  class that is supposed to update its state or take some action
-  during simulation implements a ~process~ method. And in most cases
-  that is the method we want the ticks to call at every time step. A
-  less common method is ~init~, which is implemented in some classes
-  to interleave actions or updates that must be executed in a specific
-  order[1]. The =Compartment= class is one such case where a neuronal
-  compartment has to know the =Vm= of its neighboring compartments
-  before it can calculate its =Vm= for the next step. This is done
-  with
+  Read this as "use tick # 2 on the element at path ~/data/soma_Vm~ to
+  call its ~process~ method at every step". Every class that is
+  supposed to update its state or take some action during simulation
+  implements a ~process~ method. And in most cases that is the method
+  we want the ticks to call at every time step. A less common method
+  is ~init~, which is implemented in some classes to interleave
+  actions or updates that must be executed in a specific order[fn:: In
+  principle any function available in a MOOSE class can be executed
+  periodically this way as long as that class exposes the function for
+  scheduling following the MOOSE API. So you have to consult the
+  class' documentation for any nonstandard methods that can be
+  scheduled this way. ]. The =Compartment= class is one such case
+  where a neuronal compartment has to know the =Vm= of its neighboring
+  compartments before it can calculate its =Vm= for the next
+  step. This is done with
 #+begin_src python :tangle yes
 moose.useClock(0, soma.path, 'init')
 #+end_src
-  Here we used the =path= field in stead of writing the path
+  Here we used the =path= field instead of writing the path
   explicitly. 
 
   Next we assign tick # 1 to process method of everthing under
@@ -423,7 +460,7 @@ moose.useClock(1, '/model/##', 'process')
 #+end_src
   You may remember that we had changed initVm from -0.06 to -0.07. The
   reinit call we initialize ~Vm~ to that value. You can verify that:
-#+begin_src 
+#+begin_src python :tangle yes
   print soma.Vm
 #+end_src
 #+begin_example
@@ -450,6 +487,75 @@ pylab.show()
   data. The third line plots the ~Vm~ and the fourth line makes it
   visible. Does the plot match your expectation?
 
+* Some more stuff
+  :PROPERTIES:
+  :CUSTOM_ID: ADVANCED
+  :END:
+** =ematrix=, =melement= and =element=
+  MOOSE elements are instances of the class =melement=.
+  =Compartment=, =PulseGen= and other MOOSE classes are derived
+  classes of =melement=. All =melement= instances are contained in
+  array-like structures called =ematrix=. Each =ematrix= object has a
+  numerical =id_= field uniquely identifying it. An =ematrix= can have
+  one or more elements. You can create an array of elements:
+#+begin_src python
+comp_array = moose.ematrix('/model/comp', (3,), 'Compartment')
+#+end_src 
+  This tells MOOSE to create an =ematrix= of 3 =Compartment= elements
+  with path ~/model/comp~. For =ematrix= objects with multiple
+  elements, the index in the =ematrix= is part of the element path.
+#+begin_src python
+print comp_array.path, type(comp_array)
+#+end_src
+  shows that =comp_array= is an instance of =ematrix= class. You can
+  loop through the elements in an =ematrix= like a Python list:
+#+begin_src python
+for comp in comp_array:   
+    print comp.path, type(comp)
+#+end_src
+  shows
+#+begin_example
+/model/comp[0] <type 'moose.melement'>
+/model/comp[1] <type 'moose.melement'>
+/model/comp[2] <type 'moose.melement'>
+#+end_example
+  Thus elements are instances of class =melement=. All elements in an
+  =ematrix= share the =id_= of the =ematrix= which can retrieved by
+  =melement.getId()=.
+
+  A frequent use case is that after loading a model from a file one
+  knows the paths of various model components but does not know the
+  appropriate class name for them. For this scenario there is a
+  function called =element= which converts (`casts` in programming
+  jargon) a path or any moose object to its proper MOOSE class. You
+  can create additional references to ~soma~ in the example this way:
+#+begin_src python :tangle yes
+x = moose.element('/model/soma')
+#+end_src  
+  Any MOOSE class can be extended in Python. But any additional
+  attributes added in Python are invisible to MOOSE. So those can be
+  used for functionalities at the Python level only. You can see
+  ~Demos/squid/squid.py~ for an example.
+  
+** =Finfos=
+   The following kinds of =Finfo= are accessible in Python
+   - valueFinfo :: simple values. For each readable =valueFinfo= ~XYZ~
+                   there is a =destFinfo= ~get_XYZ~ that can be used
+                   for reading the value at run time. If ~XYZ~ is
+                   writable then there will also be =destFinfo= to set
+                   it: ~set_XYZ~. Example: =Compartment.Rm=
+   - lookupFinfo :: lookup tables. These fields act like Python
+                    dictionaries but iteration is not
+                    supported. Example: =Neutral.neighbours=.
+   - srcFinfo :: source of a message. Example: =PulseGen.outputOut=.
+   - destFinfo :: destination of a message. Example:
+                  =Compartment.injectMsg=. Apart from being used in
+                  setting up messages, these are accessible as
+                  functions from Python. =HHGate.setupAlpha= is an
+                  example.
+   - sharedFinfo :: a composition of source and destination
+                    fields. Example: =Compartment.channel=.
+
 * Moving on
   Now you know the basics of pymoose and how to access the help
   system. MOOSE is backward compatible with GENESIS and most GENESIS
@@ -462,12 +568,8 @@ pylab.show()
   classes or functionalities. Beyond that you can browse the code in
   the ~Demos~ directory to see some more complex models. If the
   builtin MOOSE classes do not satisfy your needs entirely, you are
-  welcome to add new classes to MOOSE. The [[API documentation]] will help
-  you get started. Finally you can write to the [[moose mailing list]] for
-  help.
+  welcome to add new classes to MOOSE. The [[API.txt][API documentation]] will help
+  you get started. Finally you can join the [[https://lists.sourceforge.net/lists/listinfo/moose-generic][moose mailing list]] and
+  request for help.
 
-[1] In principle any function available in a MOOSE class can be
-  executed periodically this way as long as that class exposes the
-  function for scheduling following the MOOSE API. So you have to
-  consult the class' documentation for any nonstandard methods that
-  can be scheduled this way.
+
