@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Fri Sep 28 14:56:12 2012 (+0530)
+# Last-Updated: Sat Sep 29 10:58:27 2012 (+0530)
 #           By: subha
-#     Update #: 2157
+#     Update #: 2161
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -207,7 +207,7 @@ def listmsg(pymoose_object):
     obj = pymoose_object
     ret = []
     if type(pymoose_object) is type(""):
-        obj = moose__.Neutral(pymoose_object)
+        obj = _moose.Neutral(pymoose_object)
     for msg in obj.inMsg:
         ret.append(msg)
     for msg in obj.outMsg:
@@ -220,7 +220,7 @@ def showmsg(pymoose_object):
     """Prints the incoming and outgoing messages of the given object."""
     obj = pymoose_object
     if type(pymoose_object) is type(""):
-        obj = moose__.Neutral(pymoose_object)
+        obj = _moose.Neutral(pymoose_object)
     print 'INCOMING:'
     for msg in obj.msgIn:
         print msg.e2.path, msg.destFieldsOnE2, '<---', msg.e1.path, msg.srcFieldsOnE1
