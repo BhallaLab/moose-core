@@ -109,11 +109,11 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
                                                      os.path.join(config.settings[config.KEY_DOCS_DIR], 'images')])
             self.documentationViewer.setMinimumSize(800, 600)
             self.documentationViewer.setVisible(True)
-        self.documentationViewer.setSource(QtCore.QUrl('index.html'))
+        self.documentationViewer.setSource(QtCore.QUrl('MooseGuiDocs.html'))
 
     def showKkitDocumentation(self):
         self.showDocumentation()
-        self.documentationViewer.setSource(QtCore.QUrl('Kkit2Documentation.html'))
+        self.documentationViewer.setSource(QtCore.QUrl('Kkit12Documentation.html'))
         self.documentationViewer.reload()
             
 #    def resizeCentralWidgets(self):
@@ -125,7 +125,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         QtGui.QDesktopServices.openUrl(QtCore.QUrl(config.MOOSE_REPORT_BUG_URL))
 
     def populateHelpMenu(self):
-        print 'This is a place holder for populating the help menu'
+#        print 'This is a place holder for populating the help menu'
         self.connect(self.actionAbout, QtCore.SIGNAL('triggered()'), self.showAboutMoose)
         self.connect(self.actionDocumentation, QtCore.SIGNAL('triggered()'), self.showDocumentation)
         self.actionKkitDocumentation = QtGui.QAction('Kkit', self)
