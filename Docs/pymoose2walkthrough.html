@@ -7,7 +7,7 @@
 <meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
 <meta name="title" content="Getting started with python scripting for MOOSE"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-09-29 18:08:36 IST"/>
+<meta name="generated" content="2012-09-29 19:24:15 IST"/>
 <meta name="author" content="Subhasis Ray"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -179,7 +179,7 @@ install it at <a href="http://moose.ncbs.res.in">MOOSE website</a>.
 </pre>
 
 <p>
-  MOOSE has builtin documentation in the C++-source-code independent
+  MOOSE has built-in documentation in the C++-source-code independent
   of Python. The <code>moose</code> module has a separate <code>doc</code> function to
   extract this documentation.
 </p>
@@ -205,9 +205,9 @@ install it at <a href="http://moose.ncbs.res.in">MOOSE website</a>.
 </pre>
 
 <p>
-  Note that you need to quote it and pass it as a string to the
-  function. Otherwise, <code>moose.doc</code> will receive the field value as
-  parameter and get confused.  
+  Note that you need to put the class-name followed by dot followed by
+  field-name within quotes. Otherwise, <code>moose.doc</code> will receive the
+  field value as parameter and get confused.
 </p>
 </div>
 
@@ -217,14 +217,14 @@ install it at <a href="http://moose.ncbs.res.in">MOOSE website</a>.
 <h2 id="sec-3"><span class="section-number-2">3</span> Creating objects and traversing the object hierarchy</h2>
 <div class="outline-text-2" id="text-3">
 
-<p>  Types of biological entities like neurons, enzymes, etc are
-  represented by classes and individual instances of those types are
-  objects of those classes. Objects are the building-blocks of models
-  in MOOSE. We call MOOSE objects `element` and use object and element
-  interchangably in the context of MOOSE. Elements are conceptually
-  laid out in a tree-like hierarchical structure. If you are familiar
-  with file system hieararchies in common operating systems, this
-  should be simple.
+<p>  Differebt types of biological entities like neurons, enzymes, etc
+  are represented by classes and individual instances of those types
+  are objects of those classes. Objects are the building-blocks of
+  models in MOOSE. We call MOOSE objects `element` and use object and
+  element interchangably in the context of MOOSE. Elements are
+  conceptually laid out in a tree-like hierarchical structure. If you
+  are familiar with file system hieararchies in common operating
+  systems, this should be simple.
 </p>
 <p>
   At the top of the object hierarchy sits the <code>Shell</code>, equivalent to
@@ -565,7 +565,7 @@ pulse.delay[1] = 1e9
 <p>
   Here <code>childMsg</code> is a source field that is used by the MOOSE
   internals to connect child elements to parent elements. The second
-  one is of our interest. Check out the builtin documentation here:
+  one is of our interest. Check out the built-in documentation here:
 </p>
 
 
@@ -974,7 +974,7 @@ pylab.show()
   has small executable python scripts that show usage of specific
   classes or functionalities. Beyond that you can browse the code in
   the <code>Demos</code> directory to see some more complex models. If the
-  builtin MOOSE classes do not satisfy your needs entirely, you are
+  built-in MOOSE classes do not satisfy your needs entirely, you are
   welcome to add new classes to MOOSE. The <a href="#API.txt">API documentation</a> will help
   you get started. Finally you can join the <a href="https://lists.sourceforge.net/lists/listinfo/moose-generic">moose mailing list</a> and
   request for help.
@@ -1016,7 +1016,7 @@ pylab.show()
 </div>
 
 <div id="postamble">
-<p class="date">Date: 2012-09-29 18:08:36 IST</p>
+<p class="date">Date: 2012-09-29 19:24:15 IST</p>
 <p class="author">Author: Subhasis Ray</p>
 <p class="creator">Org version 7.8.11 with Emacs version 23</p>
 <a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a>
