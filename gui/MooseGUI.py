@@ -98,24 +98,35 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         with open(config.MOOSE_ABOUT_FILE, 'r') as aboutfile:
             QtGui.QMessageBox.about(self, 'About MOOSE', ''.join(aboutfile.readlines()))
 
-    def showDocumentation(self):
+    def showDocumentation(self, source):
         if not hasattr(self, 'documentationViewer'):
             self.documentationViewer = QtGui.QTextBrowser()
             self.documentationViewer.setOpenLinks(True)
             self.documentationViewer.setOpenExternalLinks(True)
-            print 'Docs in ', os.path.join(config.settings[config.KEY_DOCS_DIR], 'html')
             self.documentationViewer.setSearchPaths([config.settings[config.KEY_DOCS_DIR],
                                                      os.path.join(config.settings[config.KEY_DOCS_DIR], 'html'),
                                                      os.path.join(config.settings[config.KEY_DOCS_DIR], 'images')])
-            self.documentationViewer.setMinimumSize(800, 600)
-            self.documentationViewer.setVisible(True)
-        self.documentationViewer.setSource(QtCore.QUrl('MooseGuiDocs.html'))
+            self.documentationViewer.setMinimumSize(800, 480)
+        self.documentationViewer.setSource(QtCore.QUrl(source))
+        self.documentationViewer.setWindowTitle(source)
+        self.documentationViewer.reload()
+        self.documentationViewer.setVisible(True)
+
+    def showCppDocumentation(self):        
+        self.showDocumentation('index.html')
 
     def showKkitDocumentation(self):
-        self.showDocumentation()
-        self.documentationViewer.setSource(QtCore.QUrl('Kkit12Documentation.html'))
-        self.documentationViewer.reload()
-            
+        self.showDocumentation('Kkit12Documentation.html')
+
+    def showNkitDocumentation(self):
+        self.showDocumentation('Nkit2Documentation.html')
+
+    def showPyMooseWalkThrough(self):
+        self.showDocumentation('pymoose2walkthrough.html')
+        
+    def showMooseGuiDocumentation(self):
+        self.showDocumentation('MooseGuiDocs.html')
+        
 #    def resizeCentralWidgets(self):
 #        widthOfEach =  int((self.layoutWidget.width()+self.plotMdiArea.width())/2)
 #        self.layoutWidget.resize(widthOfEach, self.layoutWidget.height())
@@ -127,13 +138,13 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
     def populateHelpMenu(self):
 #        print 'This is a place holder for populating the help menu'
         self.connect(self.actionAbout, QtCore.SIGNAL('triggered()'), self.showAboutMoose)
-        self.connect(self.actionDocumentation, QtCore.SIGNAL('triggered()'), self.showDocumentation)
-        self.actionKkitDocumentation = QtGui.QAction('Kkit', self)
+        self.connect(self.actionMooseCppDocumentation, QtCore.SIGNAL('triggered()'), self.showCppDocumentation)
         self.connect(self.actionKkitDocumentation, QtCore.SIGNAL('triggered()'), self.showKkitDocumentation)
-        self.menuHelp.insertAction(self.actionReport_a_Bug, self.actionKkitDocumentation)
+        self.connect(self.actionNkitDocumentation, QtCore.SIGNAL('triggered()'), self.showNkitDocumentation)
+        self.connect(self.actionPyMooseWalkThrough, QtCore.SIGNAL('triggered()'), self.showPyMooseWalkThrough)
+        self.connect(self.actionMooseGuiDocumentation, QtCore.SIGNAL('triggered()'), self.showMooseGuiDocumentation)
         self.connect(self.actionReport_a_Bug, QtCore.SIGNAL('triggered()'), self.reportBug)
         self.actionDemos.setVisible(False)
-        self.actionRequest_a_Feature.setVisible(False)
 
     def setAllToStartState(self):
         self.currentTime = 0.0

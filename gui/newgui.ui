@@ -195,9 +195,12 @@
     </property>
     <addaction name="actionAbout"/>
     <addaction name="actionDemos"/>
-    <addaction name="actionDocumentation"/>
+    <addaction name="actionMooseCppDocumentation"/>
+    <addaction name="actionMooseGuiDocumentation"/>
+    <addaction name="actionNkitDocumentation"/>
+    <addaction name="actionKkitDocumentation"/>
+    <addaction name="actionPyMooseWalkThrough"/>
     <addaction name="actionReport_a_Bug"/>
-    <addaction name="actionRequest_a_Feature"/>
    </widget>
    <widget class="QMenu" name="menuRun">
     <property name="title">
@@ -1587,9 +1590,9 @@
     <string>First Time Wizard</string>
    </property>
   </action>
-  <action name="actionDocumentation">
+  <action name="actionMooseGuiDocumentation">
    <property name="text">
-    <string>Documentation</string>
+    <string>MooseGUI documentation</string>
    </property>
   </action>
   <action name="actionDemos">
@@ -1717,6 +1720,38 @@
   <action name="actionMerge_Models">
    <property name="text">
     <string>Merge Models</string>
+   </property>
+  </action>
+  <action name="actionKkitDocumentation">
+   <property name="text">
+    <string>Kkit documentation</string>
+   </property>
+   <property name="toolTip">
+    <string>Display documentation for Kkit12 </string>
+   </property>
+  </action>
+  <action name="actionNkitDocumentation">
+   <property name="text">
+    <string>Nkit documentation</string>
+   </property>
+   <property name="toolTip">
+    <string>Display documentation of Nkit</string>
+   </property>
+  </action>
+  <action name="actionPyMooseWalkThrough">
+   <property name="text">
+    <string>pymoose scripting tutorial</string>
+   </property>
+   <property name="toolTip">
+    <string>PyMOOSE scripting tutorial for beginners</string>
+   </property>
+  </action>
+  <action name="actionMooseCppDocumentation">
+   <property name="text">
+    <string>MOOSE C++ documentation</string>
+   </property>
+   <property name="toolTip">
+    <string>Documentation generated from C++ sources by Doxygen</string>
    </property>
   </action>
   <zorder>moosePopulationEditDock</zorder>

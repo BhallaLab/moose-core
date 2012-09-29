@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Sat Sep 29 10:58:27 2012 (+0530)
+# Last-Updated: Sat Sep 29 11:00:39 2012 (+0530)
 #           By: subha
-#     Update #: 2161
+#     Update #: 2162
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -62,44 +62,6 @@ known_types = ['void',
                'string',
                'ematrix',
                'melement'] + sequence_types
-
-######################################################################
-# Special function to generate objects of the right class from
-# a given path.
-#
-# As of 2012-08-22, element() function has been renamed to_el because
-# ObjId is now called element in pymoose. This function is not
-# entirely deprecated as we do not yet have a way to call the
-# destFields as functions from the base class.
-######################################################################
-
-def to_el(path):
-    """Return a reference to an existing object as an instance of the
-    appropriate class. If path does not exist, raises NameError.
-
-    ematrix or element can be provided in stead of path"""
-    if isinstance(path, ematrix) or isinstance(path, melement):
-        classObj = eval(path.class_)
-    elif isinstance(path, str):
-        if not _moose.exists(path):
-            raise NameError('Object %s not defined' % (path))
-        oid = _moose.element(path)
-        classObj = eval(oid.class_)
-    else:
-        raise TypeError('expected argument: ematrix/element/str')
-    return classObj(path)
-
-def arrayelement(path, className='Neutral'):
-    """Return a reference to an existing object as an instance of the
-    right class. If path does not exist, className is used for
-    creating an instance of that class with the given path"""
-    warnings.warn('use element.ematrix() to retrieve its container. \
-ematrix instances can be used directly for getting \
-tuple of the field values of its elements.', 
-                  DeprecationWarning)
-    if not exists(path):
-        raise NameError('Object %s not defined' % (path))
-    return ematrix(path)
 
 ################################################################
 # Wrappers for global functions
