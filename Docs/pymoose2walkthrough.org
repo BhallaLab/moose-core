@@ -39,7 +39,7 @@ help(moose.connect)
 #+begin_src python :tangle yes
   dir(moose)
 #+end_src
-  MOOSE has builtin documentation in the C++-source-code independent
+  MOOSE has built-in documentation in the C++-source-code independent
   of Python. The =moose= module has a separate =doc= function to
   extract this documentation.
 
@@ -56,19 +56,19 @@ moose.doc(moose.Compartment)
 #+begin_src python :tangle yes
 moose.doc('Compartment.Rm')
 #+end_src
-  Note that you need to quote it and pass it as a string to the
-  function. Otherwise, =moose.doc= will receive the field value as
-  parameter and get confused.  
+  Note that you need to put the class-name followed by dot followed by
+  field-name within quotes. Otherwise, =moose.doc= will receive the
+  field value as parameter and get confused.
   
 * Creating objects and traversing the object hierarchy
-  Types of biological entities like neurons, enzymes, etc are
-  represented by classes and individual instances of those types are
-  objects of those classes. Objects are the building-blocks of models
-  in MOOSE. We call MOOSE objects `element` and use object and element
-  interchangably in the context of MOOSE. Elements are conceptually
-  laid out in a tree-like hierarchical structure. If you are familiar
-  with file system hieararchies in common operating systems, this
-  should be simple.
+  Differebt types of biological entities like neurons, enzymes, etc
+  are represented by classes and individual instances of those types
+  are objects of those classes. Objects are the building-blocks of
+  models in MOOSE. We call MOOSE objects `element` and use object and
+  element interchangably in the context of MOOSE. Elements are
+  conceptually laid out in a tree-like hierarchical structure. If you
+  are familiar with file system hieararchies in common operating
+  systems, this should be simple.
 
   At the top of the object hierarchy sits the =Shell=, equivalent to
   the root directory in UNIX-based systems and represented by the path
@@ -297,7 +297,7 @@ moose.getFieldNames('PulseGen', 'srcFinfo')
 #+end_example
   Here =childMsg= is a source field that is used by the MOOSE
   internals to connect child elements to parent elements. The second
-  one is of our interest. Check out the builtin documentation here:
+  one is of our interest. Check out the built-in documentation here:
 #+begin_src python :tangle yes
 moose.doc('PulseGen.outputOut')
 #+end_src
@@ -567,7 +567,7 @@ x = moose.element('/model/soma')
   has small executable python scripts that show usage of specific
   classes or functionalities. Beyond that you can browse the code in
   the ~Demos~ directory to see some more complex models. If the
-  builtin MOOSE classes do not satisfy your needs entirely, you are
+  built-in MOOSE classes do not satisfy your needs entirely, you are
   welcome to add new classes to MOOSE. The [[API.txt][API documentation]] will help
   you get started. Finally you can join the [[https://lists.sourceforge.net/lists/listinfo/moose-generic][moose mailing list]] and
   request for help.
