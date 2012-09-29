@@ -7,7 +7,7 @@
 <meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
 <meta name="title" content="MOOSEGUI: Graphical interface for MOOSE."/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-09-28 22:00:45 IST"/>
+<meta name="generated" content="2012-09-29 16:26:18 IST"/>
 <meta name="author" content="This document: Upi Bhalla. GUI: Harsha Rani, H. Chaitanya"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -116,8 +116,8 @@
 <h2 id="sec-1"><span class="section-number-2">1</span> Introduction</h2>
 <div class="outline-text-2" id="text-1">
 
-<p>  The Moose GUI lets you work on <a href="Kkit2Documentation.html">chemical</a>
-  and <a href="NeuronalDocumentation.html">compartmental neuronal</a> models
+<p>  The Moose GUI lets you work on <a href="Kkit12Documentation.html">chemical</a>
+  and <a href="Nkit2Documentation.html">compartmental neuronal</a> models
   using a common interface framework. This document describes this common
   framework. In MOOSE 2.0.0, the interface lets you read, run, edit, and
   write chemical kinetic models, and to read, edit and run neuronal models.
@@ -236,25 +236,37 @@
 
 </dd>
 <dt>Solver</dt><dd>
-<ul>
+<p>
+           The Solver options currently only select between methods for
+           kinetic models. Details are in the 
+           <a href="Kkit2Documentation.html">chemical kinetics documentation</a>.
+           Options are:
+</p><ul>
 <li>Runge Kutta
+                  This is the default method for integration of ODE systems. It
+                  uses the Gnu Scientific Library 5-th order explicit variable-
+                  timestep Runge-Kutta-Fehlberb method.
 </li>
 <li>Gillespie
+                  This is an implementation of Gillespies Stochastic Systems
+                  Algorithm, which computes reaction progress using a stochastic
+                  method.
 </li>
 </ul>
 
 </dd>
 <dt>Help</dt><dd>
 <ul>
-<li>About
+<li><b>About</b>:
+                  Version and general information about MOOSE.
 </li>
-<li>General documentation ( this file )
+<li><b>General documentation</b>: This file. How to use the common
+                  interface framework.
 </li>
-<li>Kkit
+<li>*Kkit": Documentation on the use of Kinetikit version 12.
 </li>
-<li>Nkit
-</li>
-<li>Report a bug.
+<li><b>Nkit": Docomentation on the use of Neurokit version 2.                 - *Report a bug</b>: Takes you to the SourceForge bug tracker for
+                   Moose.
 </li>
 </ul>
 
@@ -314,7 +326,7 @@
 </div>
 
 <div id="postamble">
-<p class="date">Date: 2012-09-28 22:00:45 IST</p>
+<p class="date">Date: 2012-09-29 16:26:18 IST</p>
 <p class="author">Author: This document: Upi Bhalla. GUI: Harsha Rani, H. Chaitanya</p>
 <p class="creator">Org version 7.8.02 with Emacs version 23</p>
 <a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a>
