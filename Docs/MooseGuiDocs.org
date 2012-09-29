@@ -2,8 +2,8 @@ MOOSEGUI: Graphical interface for MOOSE.
 #+AUTHOR: This document: Upi Bhalla. GUI: Harsha Rani, H. Chaitanya
 
 * Introduction
-  The Moose GUI lets you work on [[file:Kkit2Documentation.org][chemical]]
-  and [[file:NeuronalDocumentation.org][compartmental neuronal]] models
+  The Moose GUI lets you work on [[file:Kkit12Documentation.org][chemical]]
+  and [[file:Nkit2Documentation.org][compartmental neuronal]] models
   using a common interface framework. This document describes this common
   framework. In MOOSE 2.0.0, the interface lets you read, run, edit, and
   write chemical kinetic models, and to read, edit and run neuronal models.
@@ -74,14 +74,27 @@ MOOSEGUI: Graphical interface for MOOSE.
 		  This is useful to dedicate a larger portion of screen area
 		  to each display.
 	+ Solver ::
+	   The Solver options currently only select between methods for
+	   kinetic models. Details are in the 
+	   [[file:Kkit12Documentation.org][chemical kinetics documentation]].
+	   Options are:
 		- Runge Kutta
+		  This is the default method for integration of ODE systems. It
+		  uses the Gnu Scientific Library 5-th order explicit variable-
+		  timestep Runge-Kutta-Fehlberb method.
 		- Gillespie
+		  This is an implementation of Gillespies Stochastic Systems
+		  Algorithm, which computes reaction progress using a stochastic
+	   	  method.
 	+ Help ::
-		- About
-		- General documentation ( this file )
-		- Kkit
-		- Nkit
-		- Report a bug.
+		- *About*:
+		  Version and general information about MOOSE.
+		- *General documentation*: This file. How to use the common
+		  interface framework.
+		- *Kkit": Documentation on the use of Kinetikit version 12.
+		- *Nkit*": Docomentation on the use of Neurokit version 2.
+		- *Report a bug*: Takes you to the SourceForge bug tracker for
+		   Moose.
 
 ** The Model window
 	What you see
