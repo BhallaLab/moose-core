@@ -18775,3 +18775,9 @@ it hard to run valgrind on regression tests as it tends to catch it.
 Fixed a bug with GssaStoich.cpp where it would get into an infinite loop
 if there were no molecules present.
 ============================================================================
+29 Sep 2012.
+More documentation stuff.
+============================================================================
+30 Sep 2012.
+MooseGui documentation now more or less OK.
+============================================================================
