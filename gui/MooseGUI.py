@@ -2,10 +2,10 @@
 # used to parse files more easily
 from __future__ import with_statement
 
-#numerical computations
+# numerical computations
 import numpy as np
 
-# for command-line arguments
+# for command-line arguments and environment settings
 import sys
 import os
 import sys
@@ -14,6 +14,7 @@ import shutil
 from datetime import date
 import config
 from utils import copyTree
+
 #moose imports
 import moose
 import moose.utils as mooseUtils
@@ -172,8 +173,8 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.menuHelp.setVisible(True)
         self.menuHelp.setEnabled(True)
         self.menuView.setEnabled(True)
-        #self.menuClasses.setEnabled(False)
-        #self.menuClasses.setVisible(False)
+        self.menuClasses.setEnabled(False)
+        self.menuClasses.setVisible(False)
         checked = False
         self.propEditorChildListWidget.setVisible(checked)
         self.label_13.setVisible(checked)
