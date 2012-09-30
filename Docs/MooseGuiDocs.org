@@ -8,9 +8,11 @@ MOOSEGUI: Graphical interface for MOOSE.
   framework. In MOOSE 2.0.0, the interface lets you read, run, edit, and
   write chemical kinetic models, and to read, edit and run neuronal models.
 
-** Platform
-
 ** Layout of interface
+	The *MooseGui* interface consists of a model view window to the
+	left, occupying most of the screen. To the right there is a panel
+	with controls for viewing and editing model parameters, for 
+	configuring plots, and for running the model.
 
    [[./images/MooseGuiImage.png]]
 
@@ -27,8 +29,8 @@ MOOSEGUI: Graphical interface for MOOSE.
 		- *Load Model*:
 		  This leads to a file finder dialog. The default location
 		  should bring you to the /Demos/ directory of MOOSE. 
-		  Here you can go into the /Genesis_files/ subdirectory,
-		  which contains legacy Kinetikit  (.g) format models.
+		  Here you can go into the /Genesis-files/ subdirectory,
+		  which contains legacy /Kinetikit/ (.g) format models.
 		  The /neuroml/ subdirectory leads to a number of example
 		  neuronal and network models, each in their own subdirectory.
 		  The other demos are mostly standalone demos.
@@ -103,28 +105,65 @@ MOOSEGUI: Graphical interface for MOOSE.
 
 ** The Model window
 	The Model window displays a view of the model structure. These views
-	vary depending on the model type. For a neuronal or neuronal network
-	model, the window displays a 3-D view of the cell(s) in the model,
-	and furthermore it sets the color of each compartment based on some
-	variable value, typically /Vm/, the membrane potential of the 
-	compartment. Note the 3-D axis indicators in the bottom left.
+	vary depending on the model type. 
+*** 3-D display of neuronal models in Neurokit:
 
    	[[./images/NkitModelWindow.png]]
 
-	In this window, the individual compartments can be clicked to select,
+	The individual compartments of the neuron model can be clicked to 
+	select,
 	and when selected, the compartment parameters and variables are
 	displayed in the /property editor/ described below.
+	For a neuronal or neuronal network
+	model, the window displays a 3-D view of the cell(s) in the model.
+	It does so using /OpenGL/, which is a standard for displaying 3-D 
+	views.
+	In addition, the display sets the color of each compartment based on
+	some variable value, typically /Vm/, the membrane potential of the 
+	compartment.
+ 	Note the 3-D axis indicators in the bottom left.
 
+	The controls for moving the display are as follows:
+	+ *Zoom*: One can zoom in and out of the field of view in the 
+		/OpenGL/ window using the comma and period keys (think in
+		terms of the angle bracket symbols on the same keys).
+		In addition, the scroll wheel or the vertical scroll line on 
+		the track pad will also cause the display to zoom in and out.
+	+ *Pan*: The arrow keys  will move the display left, right, up and
+		down. Pan can also be done using the mouse if you hold
+		down the *shift* key and the *left mouse button*
+		at the same time.
+	+ *Pitch*: For reasons entirely unknown to me, the keys *y* and *u*
+		are assigned to rotate the display about the vertical axis,
+		otherwise known as /pitch/. 
+	+ *Yaw*: The keys *q* and *a* control
+		rotation around the horizontal axis, otherwise known as 
+		/yaw/. 
+	+ *Roll*: To complete the key binding hall of fame, the keys *z* and
+		*x* rotate the display around the axis going into the display
+		from your eyes.
+	+ *Mouse controls*: One can also acheive a combination of /pitch/,
+		/roll/, and /yaw/ by holding the left mouse button down and
+		moving the mouse.
+
+*** 2-D display of chemical kinetics models in Kinetikit:
 	For a chemical kinetics network, the window displays a schematic
-	of the chemical reaction system. There are distinct icons for 
+	of the chemical reaction system. This is in the tab 
+	labeled /Kkit Layout/. There are distinct icons for 
 	molecules, reactions and enzymes, and these are connected by arrows
 	to set up the reaction scheme. Again, any icon can be clicked to select
 	and its parameters and variables come up in the /property editor/.
 
 	[[./images/KkitModelWindow.png]]
 
-	+ zooming, rotating and panning
-	+ Selecting and viewing objects in the window
+	The chemical network is displayed only in 2 dimensions. The controls
+	are correspondingly simpler:
+	+ *Zoom*: Comma and period keys. Alternatively, the mouse scroll
+		wheel or vertical scroll line on the track pad will cause
+		the display to zooom in and out.
+	+ *Pan*: The arrow keys move the display left, right, up, and down.
+	+ *Entire Model View*: Pressing the *a* key will fit the entire model
+		into the entire field of view.
 
 ** The plot window
 	The plot window displays time-series plots of the simulation. Plots
@@ -134,15 +173,38 @@ MOOSEGUI: Graphical interface for MOOSE.
 
 	[[./images/KkitPlotWindow.png]]
 
-	+ Zoom/Pan
-	+ File ops
+	The plots are done using /MatPlotLib/, so the usual controls
+	apply. Beneath the plot window there is a little row of icons:
+
+	[[./images/PlotWindowIcons.png]]
+
+	These are the plot controls. If you hover the mouse over them for a
+	few seconds, a function reminder box pops up. 
+	The functions as follows:
+	+ [[./images/MatPlotLibHomeIcon.png]] *Home*: Returns the plot display
+		to its default position.
+	+ [[./images/MatPlotLibDoUndo.png]] *Undo/Redo*: Undoes or re-does
+		manipulations you have done to the display.
+	+ [[./images/MatPlotLibPan.png]] *Pan*: The plots will pan around
+		with the mouse when you hold the left button down. The plots
+		will zoom with the mouse when you hold the right button down.
+	+ [[./images/MatPlotLibZoom.png]] *Zoom to rectangle*: With the
+		*left* button-mouse, this will zoom in to the specified
+		rectangle so that the plots become bigger. 
+		With the *right* button-mouse, the entire plot display will
+		be shrunk to fit into the specified rectangle.
+	+ [[./images/MatPlotLibConfigureSubplots.png]] *Configure subplots*: 
+		You don't want to mess with these.
+	+ [[./images/MatPlotLibSave.png]] *Save*: Pops up a dialog box to
+		save the plot. At this point it only saves into a .png file.
 
 ** The side panel
-	The side panel displays three controls: the *Property editor*, the
+	The /side panel/ is located on the right of the screen. 
+	It displays three controls: the *Property editor*, the
 	*Plot configuration* and the *Run control*.
 
 *** Property editor
-	The property editor displays parameters and variables of the
+	The /property editor/ displays parameters and variables of the
 	selected model component (object). 
 
 	[[./images/PropertyEditor.png]]
@@ -162,7 +224,7 @@ MOOSEGUI: Graphical interface for MOOSE.
 	value in the second column and change it.
 
 *** Plot configuration
-	The Plot configuration panel lets one set up new plots based on
+	The /Plot configuration/ panel lets one set up new plots based on
 	selected objects and their fields.
 
 	[[./images/PlotConfig.png]]
@@ -178,7 +240,7 @@ MOOSEGUI: Graphical interface for MOOSE.
 		plots from the previous run.
 
 *** Simulation control
-	The \Simulation control\ panel controls how the model is run.
+	The /Simulation control/ panel controls how the model is run.
 
 	[[./images/SimulationControl.png]]
 
