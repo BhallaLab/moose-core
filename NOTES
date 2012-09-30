@@ -18780,4 +18780,10 @@ More documentation stuff.
 ============================================================================
 30 Sep 2012.
 MooseGui documentation now more or less OK.
+For the kinetics documentation I should really make a little model with
+all the possible icons. Done. Called it kkit_objects_example.g.
+
+Used it to make up the icons. Updated the Kkit documentation. I think that is
+it for documentation for this round.
+
 ============================================================================

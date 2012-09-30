@@ -7,7 +7,7 @@
 <meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
 <meta name="title" content="Kinetikit 12: Interface for chemical kinetic models in MOOSEGUI."/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-09-25 15:16:43 IST"/>
+<meta name="generated" content="2012-09-30 11:25:59 IST"/>
 <meta name="author" content="Documentation and numerics: Upi Bhalla. GUI: Harsha Rani, H. Chaitanya"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -261,12 +261,15 @@ Kinetikit-specific items.
 <h3 id="sec-2-2"><span class="section-number-3">2.2</span> Model layout and icons</h3>
 <div class="outline-text-3" id="text-2-2">
 
-<p>   When you are in the <b>Model layout</b> tab you will see a collection of
+<p>   When you are in the <b>Kkit layout</b> tab you will see a collection of
    icons, arrows, and grey boxes surrounding these. This is a
    schematic of the reaction scheme being modeled. You can view and
    change parameters, and change the layout of the model. In the next
    MOOSE release you will also be able to add and remove molecules and
    reactions.
+</p>
+<p>
+        <img src="./images/KkitModelWindow.png"  alt="./images/KkitModelWindow.png" />
 </p>
 
 </div>
@@ -280,7 +283,7 @@ Kinetikit-specific items.
     species occur. The definition is very closely related to that of a
     cell-biological compartment. Examples include the extracellular
     space, the cell membrane, the cytosol, and the
-    nucleus. Compartments can be nested, ways, but of course you
+    nucleus. Compartments can be nested, but of course you
     cannot put a bigger compartment into a smaller one.
 </p><ul>
 <li><b>Icon</b>: Grey boundary around a set of reactions. 
@@ -299,7 +302,6 @@ Kinetikit-specific items.
 </li>
 <li><span style="text-decoration:underline;">Size</span>: This is the volume, surface area or length of the
                  compartment, depending on its type.
-
 </li>
 </ul>
 
@@ -307,8 +309,8 @@ Kinetikit-specific items.
 <li><b>Compartment fixed parameters</b>:
 <ul>
 <li><span style="text-decoration:underline;">numDimensions</span>: This specifies whether the compartment is a
-                          volume, a 2-D surface, or if it is just
-                          being represented as a length.
+                 volume, a 2-D surface, or if it is just
+                 being represented as a length.
 </li>
 </ul>
 
@@ -328,7 +330,8 @@ Kinetikit-specific items.
     compartment. Different chemical states of the same molecule are
     in different pools.
 </p><ul>
-<li><b>Icon</b>: Colored rectangle with pool name in it.
+<li><b>Icon</b>: <img src="./images/KkitPoolIcon.png"  alt="./images/KkitPoolIcon.png" /> Colored rectangle 
+        with pool name in it.
 </li>
 <li><b>Moving pools</b>: Click and drag.
 </li>
@@ -387,10 +390,12 @@ Kinetikit-specific items.
 <h4 id="sec-2-2-3"><span class="section-number-4">2.2.3</span> Buffered pools</h4>
 <div class="outline-text-4" id="text-2-2-3">
 
-<p>    Some pools are set to a fixed n and concentration throughout a
-    simulation. These are buffered pools.
+<p>    Some pools are set to a fixed <b>n</b>, that is number of molecules, and
+        therefore a fixed concentration, throughout a
+        simulation. These are buffered pools.
 </p><ul>
-<li><b>Icon</b>: Colored rectangle with pool name in it.
+<li><b>Icon</b>: <img src="./images/KkitPoolIcon.png"  alt="./images/KkitPoolIcon.png" /> Colored rectangle with pool name
+         in it.
 </li>
 <li><b>Moving Buffered pools</b>: Click and drag.
 </li>
@@ -398,11 +403,10 @@ Kinetikit-specific items.
 <ul>
 <li><span style="text-decoration:underline;">Name</span>: Name of the pool
 </li>
-<li><span style="text-decoration:underline;">nInit</span>: Fixed number of molecules in the pool.  'n' gets set
+<li><span style="text-decoration:underline;">nInit</span>: Fixed number of molecules in the pool. <b>n</b> gets set
                  to this value throughout the run.
 </li>
-<li><span style="text-decoration:underline;">concInit</span>: Fixed concentration of the molecules in
-                     the pool.
+<li><span style="text-decoration:underline;">concInit</span>: Fixed concentration of the molecules in the pool.
 <blockquote>
 
 <p>concInit = nInit * unit_scale_factor / (NA * vol)
@@ -410,11 +414,12 @@ Kinetikit-specific items.
 </blockquote>
 
 
-</li>
+<p>
+                        <b>conc</b> is set to this value throughout the run.
+</p></li>
 </ul>
 
-<p>     <b>conc</b> is set to this value throughout the run.
-</p></li>
+</li>
 <li><b>Pool fixed parameters</b>:
 <ul>
 <li><span style="text-decoration:underline;">n</span>: Number of molecules in the pool. Derived from <b>nInit</b>.
@@ -442,9 +447,15 @@ Kinetikit-specific items.
 
 <p>    These are conversion reactions between sets of pools.  They are
     reversible, but you can set either of the rates to zero to get
-    irreversibility.
-</p><ul>
-<li><b>Icon</b>: Reversible reaction arrow.
+    irreversibility. In the illustration below, <b>D</b> and <b>A</b> are substrates,
+        and <b>B</b> is the product of the reaction. This is indicated by the 
+        direction of the green arrow.
+</p>
+<p>
+        <img src="./images/KkitReaction.png"  alt="./images/KkitReaction.png" />
+</p>
+<ul>
+<li><b>Icon</b>: <img src="./images/KkitReacIcon.png"  alt="./images/KkitReacIcon.png" /> Reversible reaction arrow.
 </li>
 <li><b>Moving Reactions</b>: Click and drag.
 </li>
@@ -505,9 +516,16 @@ Kinetikit-specific items.
     Note that the second reaction is irreversible. Note also that
     mass-action enzymes include a pool to represent
     the <b>E.S</b> (enzyme-substrate) complex.
+        In the example below, the enzyme pool is named <i>MassActionEnz</i>,
+        the substrate is <i>C</i>, and the product is <i>E</i>. The direction of
+        the enzyme reaction is indicated by the red arrows. 
+</p>
+<p>
+        <img src="./images/MassActionEnzReac.png"  alt="./images/MassActionEnzReac.png" />
 </p>
 <ul>
-<li><b>Icon</b>: Colored ellipse atop a small square. The ellipse
+<li><b>Icon</b>: <img src="./images/MassActionEnzIcon.png"  alt="./images/MassActionEnzIcon.png" /> Colored ellipse 
+        atop a small square. The ellipse
       represents the enzyme. The small square represents <b>E.S</b>, the
       enzyme-substrate complex.
 
@@ -651,8 +669,16 @@ Kinetikit-specific items.
     steady-state with <b>E</b> and <b>S</b>, and they also ignore sequestration of
     the enzyme into the complex. So there is no representation of the
     <b>E.S</b> complex.
-</p><ul>
-<li><b>Icon</b>: Colored ellipse. The ellipse represents the enzyme The
+        In the example below, the enzyme pool is named <i>MM_Enz</i>,
+        the substrate is <i>E</i>, and the product is <i>F</i>. The direction of
+        the enzyme reaction is indicated by the red arrows. 
+</p>
+<p>
+        <img src="./images/MM_EnzReac.png"  alt="./images/MM_EnzReac.png" />
+</p>
+<ul>
+<li><b>Icon</b>: <img src="./images/MM_EnzIcon.png"  alt="./images/MM_EnzIcon.png" /> Colored ellipse.
+         The ellipse represents the enzyme The
       ellipse icon has the same color as the enzyme E.  It is
       connected to the enzyme pool E with a straight line of the same
       color.  The ellipse icon sits on a continuous, typically curved
@@ -696,8 +722,13 @@ Kinetikit-specific items.
     a single enzyme activity to represent the whole lot.
 </p>
 <ul>
-<li><b>Icon</b> Colored rectangle with pool name. The input pools
+<li><b>Icon</b> Colored rectangle with pool name. This is <i>tot1</i> in the
+        example image below. The input pools <i>A</i> and <i>B</i>
       connect to the SumTotal with blue arrows.
+
+<p>        
+        <img src="./images/KkitSumTotal.png"  alt="./images/KkitSumTotal.png" />
+</p>
 </li>
 <li><b>Moving SumTotals</b>: Click and drag.
 </li>
@@ -781,7 +812,7 @@ Kinetikit-specific items.
 </div>
 
 <div id="postamble">
-<p class="date">Date: 2012-09-25 15:16:43 IST</p>
+<p class="date">Date: 2012-09-30 11:25:59 IST</p>
 <p class="author">Author: Documentation and numerics: Upi Bhalla. GUI: Harsha Rani, H. Chaitanya</p>
 <p class="creator">Org version 7.8.02 with Emacs version 23</p>
 <a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a>
