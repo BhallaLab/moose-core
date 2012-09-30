@@ -63,12 +63,14 @@ other aspects of the MOOSE simulation interface. Here we focus on the
 Kinetikit-specific items.
 
 ** Model layout and icons
-   When you are in the *Model layout* tab you will see a collection of
+   When you are in the *Kkit layout* tab you will see a collection of
    icons, arrows, and grey boxes surrounding these. This is a
    schematic of the reaction scheme being modeled. You can view and
    change parameters, and change the layout of the model. In the next
    MOOSE release you will also be able to add and remove molecules and
    reactions.
+
+	[[./images/KkitModelWindow.png]]
 
 *** Compartment
     The /compartment/ in moose is usually a contiguous
@@ -98,7 +100,8 @@ Kinetikit-specific items.
     This is the set of molecules of a given species within a
     compartment. Different chemical states of the same molecule are
     in different pools.
-    + *Icon*: Colored rectangle with pool name in it.
+    + *Icon*: [[./images/KkitPoolIcon.png]] Colored rectangle 
+	with pool name in it.
     + *Moving pools*: Click and drag.
     + *Pool editable parameters*:
       + _Name_: Name of the pool
@@ -125,8 +128,9 @@ Kinetikit-specific items.
 *** Buffered pools
     Some pools are set to a fixed *n*, that is number of molecules, and
 	therefore a fixed concentration, throughout a
-    simulation. These are buffered pools.
-    + *Icon*: Colored rectangle with pool name in it.
+    	simulation. These are buffered pools.
+    + *Icon*: [[./images/KkitPoolIcon.png]] Colored rectangle with pool name
+	 in it.
     + *Moving Buffered pools*: Click and drag.
     + *Buffered Pool editable parameters*
       + _Name_: Name of the pool
@@ -148,8 +152,13 @@ Kinetikit-specific items.
 *** Reaction
     These are conversion reactions between sets of pools.  They are
     reversible, but you can set either of the rates to zero to get
-    irreversibility.
-    + *Icon*: Reversible reaction arrow.
+    irreversibility. In the illustration below, *D* and *A* are substrates,
+	and *B* is the product of the reaction. This is indicated by the 
+	direction of the green arrow.
+
+	[[./images/KkitReaction.png]]
+
+    + *Icon*: [[./images/KkitReacIcon.png]] Reversible reaction arrow.
     + *Moving Reactions*: Click and drag.
     + *Reaction editable parameters*:
       + _Name_: Name of reaction
@@ -179,8 +188,14 @@ Kinetikit-specific items.
     Note that the second reaction is irreversible. Note also that
     mass-action enzymes include a pool to represent
     the *E.S* (enzyme-substrate) complex.
+	In the example below, the enzyme pool is named /MassActionEnz/,
+	the substrate is /C/, and the product is /E/. The direction of
+	the enzyme reaction is indicated by the red arrows. 
 
-    + *Icon*: Colored ellipse atop a small square. The ellipse
+	[[./images/MassActionEnzReac.png]]
+
+    + *Icon*: [[./images/MassActionEnzIcon.png]] Colored ellipse 
+	atop a small square. The ellipse
       represents the enzyme. The small square represents *E.S*, the
       enzyme-substrate complex.
 
@@ -258,7 +273,14 @@ Kinetikit-specific items.
     steady-state with *E* and *S*, and they also ignore sequestration of
     the enzyme into the complex. So there is no representation of the
     *E.S* complex.
-    + *Icon*: Colored ellipse. The ellipse represents the enzyme The
+	In the example below, the enzyme pool is named /MM\_Enz/,
+	the substrate is /E/, and the product is /F/. The direction of
+	the enzyme reaction is indicated by the red arrows. 
+
+	[[./images/MM_EnzReac.png]]
+
+    + *Icon*: [[./images/MM_EnzIcon.png]] Colored ellipse.
+	 The ellipse represents the enzyme The
       ellipse icon has the same color as the enzyme E.  It is
       connected to the enzyme pool E with a straight line of the same
       color.  The ellipse icon sits on a continuous, typically curved
@@ -283,8 +305,12 @@ Kinetikit-specific items.
     of an enzyme, all with similar activity, and we just want to use
     a single enzyme activity to represent the whole lot.
 
-    + *Icon* Colored rectangle with pool name. The input pools
+    + *Icon* Colored rectangle with pool name. This is /tot1/ in the
+	example image below. The input pools /A/ and /B/
       connect to the SumTotal with blue arrows.
+	
+	[[./images/KkitSumTotal.png]]
+
     + *Moving SumTotals*: Click and drag.
     + *SumTotal editable parameters*:
       + _Name_: Name of the pool
