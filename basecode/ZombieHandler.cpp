@@ -10,7 +10,7 @@
 #include "header.h"
 
 ZombieHandler::ZombieHandler( const DataHandler* parentHandler,
-	const DataHandler* origHandler,
+	DataHandler* origHandler,
 	unsigned int start, unsigned int end )
 	: DataHandler( origHandler ),
 		parent_( parentHandler ),
@@ -89,6 +89,11 @@ DataId ZombieHandler::pathDataId(
 	}
 
 	return DataId( linearIndex );
+}
+
+DataHandler* ZombieHandler::origHandler() const
+{
+	return orig_;
 }
 ////////////////////////////////////////////////////////////////////
 // Load balancing
