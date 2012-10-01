@@ -173,8 +173,8 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.menuHelp.setVisible(True)
         self.menuHelp.setEnabled(True)
         self.menuView.setEnabled(True)
-        self.menuClasses.setEnabled(False)
-        self.menuClasses.setVisible(False)
+        # self.menuClasses.setEnabled(False)
+        # self.menuClasses.setVisible(False)
         checked = False
         self.propEditorChildListWidget.setVisible(checked)
         self.label_13.setVisible(checked)
