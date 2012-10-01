@@ -52,118 +52,12 @@
     <property name="title">
      <string>File</string>
     </property>
-    <widget class="QMenu" name="menuShell_Mode">
-     <property name="title">
-      <string>Shell Mode</string>
-     </property>
-     <addaction name="actionPython"/>
-     <addaction name="actionGenesis"/>
-    </widget>
     <addaction name="actionLoad_Model"/>
     <addaction name="actionSave_Model"/>
     <addaction name="actionMerge_Models"/>
     <addaction name="actionNew_Plot"/>
-    <addaction name="menuShell_Mode"/>
     <addaction name="actionReset_Settings"/>
     <addaction name="actionQuit"/>
-   </widget>
-   <widget class="QMenu" name="menuClasses">
-    <property name="enabled">
-     <bool>false</bool>
-    </property>
-    <property name="title">
-     <string>Classes</string>
-    </property>
-    <widget class="QMenu" name="menuBase">
-     <property name="title">
-      <string>Base</string>
-     </property>
-     <addaction name="actionNeutral"/>
-     <addaction name="actionTick"/>
-    </widget>
-    <widget class="QMenu" name="menuBuiltins">
-     <property name="title">
-      <string>Builtins</string>
-     </property>
-     <addaction name="actionTimeTables"/>
-     <addaction name="actionInterpol"/>
-     <addaction name="actionAscFile"/>
-     <addaction name="actionInterpol2D"/>
-     <addaction name="actionCalculator"/>
-     <addaction name="actionTable"/>
-    </widget>
-    <widget class="QMenu" name="menuBipoPhysics">
-     <property name="title">
-      <string>BioPhysics</string>
-     </property>
-     <addaction name="actionHHChannel"/>
-     <addaction name="actionCell"/>
-     <addaction name="actionCompartment"/>
-     <addaction name="actionMg_block"/>
-     <addaction name="actionCaConc"/>
-     <addaction name="actionNerst"/>
-     <addaction name="actionTauPump"/>
-     <addaction name="actionIntFire"/>
-     <addaction name="actionIzhikevichNrn"/>
-     <addaction name="actionSymCompartment"/>
-     <addaction name="actionDifChan"/>
-     <addaction name="actionRandomSpike"/>
-     <addaction name="actionSpikeGen"/>
-     <addaction name="actionScript_out"/>
-     <addaction name="separator"/>
-     <addaction name="actionHHGate"/>
-     <addaction name="actionHHGate2D"/>
-     <addaction name="actionGHK"/>
-     <addaction name="actionHHChannel2D"/>
-     <addaction name="actionNMDAChan"/>
-     <addaction name="actionSynChan"/>
-     <addaction name="actionBinSynChan"/>
-     <addaction name="actionStochSynChan"/>
-    </widget>
-    <widget class="QMenu" name="menuKinects">
-     <property name="title">
-      <string>Kinects</string>
-     </property>
-     <addaction name="actionMolecule"/>
-     <addaction name="actionReaction"/>
-     <addaction name="actionSurface"/>
-     <addaction name="actionEnzyme"/>
-     <addaction name="actionParticle"/>
-     <addaction name="actionGeometry"/>
-     <addaction name="actionMathfunc"/>
-     <addaction name="actionKinComprt"/>
-     <addaction name="actionKinPlaceHolder"/>
-     <addaction name="separator"/>
-     <addaction name="actionPanel"/>
-     <addaction name="actionTriPanel"/>
-     <addaction name="actionCylPanel"/>
-     <addaction name="actionDiskHolder"/>
-     <addaction name="actionRectPanel"/>
-     <addaction name="actionSpherePanel"/>
-     <addaction name="actionHemispherePanel"/>
-    </widget>
-    <widget class="QMenu" name="menuDevice">
-     <property name="title">
-      <string>Device</string>
-     </property>
-     <addaction name="actionPulseGen"/>
-     <addaction name="actionDiffAmp"/>
-     <addaction name="actionRC"/>
-     <addaction name="actionPIDController"/>
-    </widget>
-    <widget class="QMenu" name="menuRobot">
-     <property name="title">
-      <string>Robot</string>
-     </property>
-     <addaction name="actionAdaptot"/>
-     <addaction name="actionSigNeur"/>
-    </widget>
-    <addaction name="menuBase"/>
-    <addaction name="menuBuiltins"/>
-    <addaction name="menuBipoPhysics"/>
-    <addaction name="menuKinects"/>
-    <addaction name="menuDevice"/>
-    <addaction name="menuRobot"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="enabled">
@@ -172,7 +66,6 @@
     <property name="title">
      <string>View</string>
     </property>
-    <addaction name="actionMoose_Shell"/>
     <addaction name="actionProperty_Editor"/>
     <addaction name="actionSimulation_Control"/>
     <addaction name="actionPlot_Config"/>
@@ -194,7 +87,6 @@
      <string>Help</string>
     </property>
     <addaction name="actionAbout"/>
-    <addaction name="actionDemos"/>
     <addaction name="actionMooseCppDocumentation"/>
     <addaction name="actionMooseGuiDocumentation"/>
     <addaction name="actionNkitDocumentation"/>
@@ -222,7 +114,6 @@
    <addaction name="menuRun"/>
    <addaction name="menuEdit"/>
    <addaction name="menuView"/>
-   <addaction name="menuClasses"/>
    <addaction name="menuSolver"/>
    <addaction name="menuHelp"/>
   </widget>
