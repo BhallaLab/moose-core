@@ -1,9 +1,10 @@
 Neuronal simulations in MOOSEGUI
-#+AUTHOR: Numerics: Upi Bhalla, Niraj Dudani. Python bindings: Subhasis Ray. GUI: H. Chaitanya, Subhasis Ray. NeuroML import and Neuronal Documentation: Aditya Gilra.
+#+AUTHOR: This document: Aditya Gilra. MOOSE: Numerics: Upi Bhalla, Niraj Dudani; Python bindings: Subhasis Ray; GUI: H. Chaitanya, Harsha Rani, Subhasis Ray; NeuroML import: Aditya Gilra.
+#+EMAIL: 
 
 * Introduction
   Neuronal models in various formats can be loaded and simulated in
-  the MOOSE *Graphical User Interface*. The GUI displays the neurons
+  the *MOOSE Graphical User Interface*. The GUI displays the neurons
   in 3D, and allows visual selection and editing of neuronal
   properties. Plotting and visualization of activity proceeds
   concurrently with the simulation. Support for creating and editing
@@ -26,34 +27,33 @@ Neuronal simulations in MOOSEGUI
 
 #+CAPTION: compartments in a neuron
 #+LABEL: figcompneuron
-#+ATTR_HTML: width="800"
 [[./images/neuroncompartment.png]]
 
-  Neurons fire action potentials / spikes (sharp rise and fall of
+   Neurons fire action potentials / spikes (sharp rise and fall of
    membrane potential Vm) due to voltage dependent channels. These
    result in opening of excitatory / inhibitory synaptic channels
    (conductances with batteries, similar to voltage gated channels) on
    other connected neurons in the network.
 
-  MOOSE can handle large networks of detailed neurons, each with
-  complicated channel dynamics. Further, MOOSE can integrate chemical
-  signalling with electrical activity. Presently, creating and
-  simulating these requires pyMOOSE scripting, but these will be
-  incorporated into the GUI in the future.
+   MOOSE can handle large networks of detailed neurons, each with
+   complicated channel dynamics. Further, MOOSE can integrate chemical
+   signalling with electrical activity. Presently, creating and
+   simulating these requires pyMOOSE scripting, but these will be
+   incorporated into the GUI in the future.
 
-  To understand channel kinetics and neuronal action potentials, run
-  the Squid Axon demo installed along with MOOSEGUI and consult its
-  help/tutorial.
+   To understand channel kinetics and neuronal action potentials, run
+   the Squid Axon demo installed along with MOOSEGUI and consult its
+   help/tutorial.
 
-Read more about compartmental modelling in the first few chapters of the
-[[http://www.genesis-sim.org/GENESIS/iBoG/iBoGpdf/index.html][Book of Genesis]].
+   Read more about compartmental modelling in the first few chapters
+   of the [[http://www.genesis-sim.org/GENESIS/iBoG/iBoGpdf/index.html][Book of Genesis]].
 
-Models can be defined in [[http://www.neuroml.org][NeuroML]], an XML
-format which is mostly supported across simulators. Channels, neuronal
-morphology (compartments), and networks can be specified using various
-levels of NeuroML, namely ChannelML, MorphML and NetworkML. Importing of
-cell models in the [[http://www.genesis-sim.org/GENESIS][GENESIS]] .p
-format is supported for backwards compatibitility.
+   Models can be defined in [[http://www.neuroml.org][NeuroML]], an XML format which is mostly
+   supported across simulators. Channels, neuronal morphology
+   (compartments), and networks can be specified using various levels
+   of NeuroML, namely ChannelML, MorphML and NetworkML. Importing of
+   cell models in the [[http://www.genesis-sim.org/GENESIS][GENESIS]] .p format is supported for backwards
+   compatibitility.
 
 * Neuronal simulations in MOOSEGUI
 
@@ -61,7 +61,7 @@ format is supported for backwards compatibitility.
    + On first run, the MOOSEGUI creates moose/Demos directory in
      user's home folder. A few neuronal models are provided in
      directories inside moose/Demos/neuroml. For example, /File->Load/
-     moose/Demos/neuroml/CA1PyramidalCell/CA1.net.xml, which is a
+     ~/moose/Demos/neuroml/CA1PyramidalCell/CA1.net.xml, which is a
      model of hippocampal CA1 pyramidal cell
      [[http://senselab.med.yale.edu/ModelDB/ShowModel.asp?model=55035][Migliore
      et al, 2005]] (exported using
@@ -89,12 +89,12 @@ User interface help is available at /Help->User Interface/. Here we delve into
 neuronal simulations.
 
 ** Modelling details
-   MOOSE uses SI units throughout.
+   MOOSEGUI uses SI units throughout.
 
    Some salient properties of neuronal building blocks in MOOSE are
    described below. Variables that are updated at every simulation time
    step are are listed *dynamical*. Rest are parameters.
-   + Compartment :: When you select a compartment, you can view and
+   + *Compartment* :: When you select a compartment, you can view and
                     edit its properties in the right pane. *Vm* and
                     *Im* are plot-able.
       - Vm :: *dynamical* membrane potential (across Cm) in Volts.
@@ -108,10 +108,12 @@ neuronal simulations.
       - Rm :: membrane leak resistance in Ohms due to leaky channels.
       - diameter :: diameter of the compartment in metres.
       - length :: length of the compartment in metres.
-   + HHChannel :: After selecting a compartment, you can click *See
-                  children* on the right pane to list its membrane
-                  channels, etc. Presently all channels are Hodgkin-Huxley
-                  channels with voltage dependent dynamical gates.
+
+   After selecting a compartment, you can click *See children* on the right
+   pane to list its membrane channels, Ca pool, etc.
+
+   + *HHChannel* :: Hodgkin-Huxley channel with voltage dependent
+                  dynamical gates.
       - Gbar :: peak channel conductance in Siemens.
       - Ek :: reversal potential of the channel, due to
               electrochemical gradient of the ion(s) it allows.
@@ -132,8 +134,71 @@ neuronal simulations.
                  on increasing Vm, with time constant \tau(Vm).
       - Xpower,Ypower,Zpower :: powers to which gates are raised in
            the Gk(t) formula above.
+   + *HHChannel2D* :: The Hodgkin-Huxley channel2D can have the usual
+                  voltage dependent dynamical gates, and also gates
+                  that dependent on voltage and an ionic
+                  concentration, as for say Ca-dependent K
+                  conductance. It has the properties of HHChannel
+                  above, and a few more like Xindex as in the
+                  [[http://www.genesis-sim.org/GENESIS/Hyperdoc/Manual-26.html#ss26.61][GENESIS
+                  tab2Dchannel reference]].
+
+
+   + *CaConc* :: This is a pool of Ca ions in each compartment, in a
+                 shell volume under the cell membrane. The dynamical
+                 Ca concentration increases when Ca channels open, and
+                 decays back to resting with a specified time constant
+                 \tau. Its concentration controls Ca-dependent K
+                 channels, etc.
+       - Ca :: *dynamical* Ca concentration in the pool in mMolar=mol/m^3.
+               d[Ca^{2+}]/dt = B \times I_{Ca} - [Ca^{2+}]/\tau
+       - CaBasal/Ca\_base :: Base Ca concentration to which the Ca decays
+       - tau :: time constant with which the Ca concentration decays
+                to the base Ca level.
+       - B :: constant in the [Ca^{2+}] equation above.
+       - thick :: thickness of the Ca shell within the cell membrane
+                  which is used to calculate B (see Chapter 19 of
+                  [[http://www.genesis-sim.org/GENESIS/iBoG/iBoGpdf/index.html][Book of GENESIS]].)
 
 ** Demos:
-   - Cerebellar granule cell :: to add
-   - Purkinje cell :: to add
-   - Olfactory bulb subnetwork :: to add
+   - Cerebellar granule cell :: /File->Load/ 
+        ~/moose/Demos/neuroml/GranuleCell/GranuleCell.net.xml . This
+        is a single compartment Cerebellar granule cell with a variety
+        of channels [[Maex, R. and De Schutter, E.,
+        1997][http://www.tnb.ua.ac.be/models/network.shtml]] (exported
+        from [[neuroConstruct][http://www.neuroconstruct.org]]). Click
+        on its soma, and *See children* for its list of channels. Vary
+        the Gbar of these channels to obtain regular firing, adapting
+        and bursty behaviour (may need to increase tau of the Ca
+        pool).
+   - Purkinje cell :: /File->Load/ 
+                      ~/moose/Demos/neuroml/PurkinjeCell/Purkinje.net.xml
+                      . This is a purely passive cell, but with
+                      extensive morphology [De Schutter, E. and Bower,
+                      J. M., 1994] (exported from
+                      [[neuroConstruct][http://www.neuroconstruct.org]]). The
+                      channel specifications are in an obsolete ChannelML
+                      format which MOOSE does not support.
+   - Olfactory bulb subnetwork :: /File->Load/ 
+        ~/moose/Demos/neuroml/OlfactoryBulb/numgloms2\_seed100.0\_decimated.xml
+        . This is a pruned and decimated version of a detailed network
+        model of the Olfactory bulb [Gilra A. and Bhalla U., in
+        preparation] without channels and synaptic connections. We
+        hope to post the ChannelML specifications of the channels and
+        synapses soon.
+   - All channels cell :: /File->Load/ 
+        ~/moose/Demos/neuroml/allChannelsCell/allChannelsCell.net.xml
+        . This is the Cerebellar granule cell as above, but with loads
+        of channels from various cell types (exported from
+        [[neuroConstruct][http://www.neuroconstruct.org]]). Play
+        around with the channel properties to see what they do. You
+        can also edit the ChannelML files in
+        ~/moose/Demos/neuroml/allChannelsCell/cells_channels/ to
+        experiment further.
+    - NeuroML python scripts :: In directory
+         ~/moose/Demos/neuroml/GranuleCell, you can run 'python
+         FvsI_Granule98.py' which plots firing rate vs injected
+         current for the granule cell. Consult this python script to
+         see how to read in a NeuroML model and to set up
+         simulations. There are ample snippets in
+         ~/moose/Demos/snippets too.
