@@ -108,7 +108,11 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
                                                      os.path.join(config.settings[config.KEY_DOCS_DIR], 'html'),
                                                      os.path.join(config.settings[config.KEY_DOCS_DIR], 'images')])
             self.documentationViewer.setMinimumSize(800, 480)
-        self.documentationViewer.setSource(QtCore.QUrl(source))
+        url = QtCore.QUrl(source)
+        err = url.errorString()
+        if err:
+            QtGui.QMessageBox.warning(self, 'Could not access documentation', err)
+        self.documentationViewer.setSource()
         self.documentationViewer.setWindowTitle(source)
         self.documentationViewer.reload()
         self.documentationViewer.setVisible(True)
