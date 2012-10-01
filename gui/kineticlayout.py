@@ -788,10 +788,10 @@ class  KineticsWidget(QtGui.QWidget):
                     v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
     
             else:
-
+                print "mooseObj",mooseObject.class_
                 if mooseObject.class_ == "CubeMesh":
                     for k, v in self.qGraCompt.items():
-                        mesh = mooseObject.path+'/mesh'
+                        mesh = mooseObject.path+'/mesh[0]'
                         if k.path == mesh:
                             for rectChilditem in v.childItems():
                                 self.updatearrow(rectChilditem)
@@ -842,7 +842,7 @@ if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     size = QtCore.QSize(1024 ,768)
     modelPath = 'Kholodenko'
-    modelPath = 'acc61'
+    #modelPath = 'acc61'
   
     try:
         filepath = '../Demos/Genesis_files/'+modelPath+'.g'
