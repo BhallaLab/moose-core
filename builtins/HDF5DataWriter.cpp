@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Sat Feb 25 16:03:59 2012 (+0530)
 // Version: 
-// Last-Updated: Wed Feb 29 18:00:46 2012 (+0530)
+// Last-Updated: Tue Oct  2 01:58:19 2012 (+0530)
 //           By: subha
-//     Update #: 663
+//     Update #: 681
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -63,46 +63,46 @@ static SrcFinfo0 * clear(){
 
 const Cinfo * HDF5DataWriter::initCinfo()
 {
-    static Finfo * processShared[] = {
-        new DestFinfo(
-                "procss",
-                "Handle process calls. Write data to file and clear all Table objects"
-                " associated with this.",
-                new ProcOpFunc<HDF5DataWriter>(&HDF5DataWriter::process)),
-        new DestFinfo(
-                "reinit",
-                "Reinitialize the object",
-                new ProcOpFunc<HDF5DataWriter>(&HDF5DataWriter::reinit)),
-    };
-    static Finfo * finfos[] = {
-        requestData(),
-        clear(),
-        recvDataBuf(),        
-        new SharedFinfo(
-                "proc",
-                "This is a shared message to receive Process messages from the scheduler objects."
-                "The first entry in the shared msg is a MsgDest for the Process"
-                " operation. It has a single argument, ProcInfo, which holds lots of"
-                " information about current time, thread, dt and so on. The second entry"
-                " is a MsgDest for the Reinit operation. It also uses ProcInfo.",
-                processShared, sizeof( processShared ) / sizeof( Finfo* )),
-    };
+  static ProcOpFunc<HDF5DataWriter> procFunc(&HDF5DataWriter::process);
+  static ProcOpFunc<HDF5DataWriter> reinitFunc(&HDF5DataWriter::reinit);
+  static DestFinfo process(
+      "process",
+      "Handle process calls. Write data to file and clear all Table objects"
+      " associated with this.",
+      &procFunc);
+  static  DestFinfo reinit(
+      "reinit",
+      "Reinitialize the object",
+      &reinitFunc);
+  static Finfo * processShared[] = {
+    &process, &reinit
+  };
+  static SharedFinfo proc(
+      "proc",
+      "Shared message to receive process and reinit",
+      processShared, sizeof( processShared ) / sizeof( Finfo* ));
+  static Finfo * finfos[] = {
+    requestData(),
+    clear(),
+    recvDataBuf(),        
+    &proc,
+  };
 
-    static string doc[] = {
-        "Name", "HDF5DataWriter",
-        "Author", "Subhasis Ray",
-        "Description", "HDF5 file writer for saving data tables. It saves the tables added to"
-        " it via addObject function into an HDF5 file. At every process call it"
-        " writes the contents of the tables to the file and clears the table"
-        " vectors. You can explicitly save the data via the flush function."
-    };
+  static string doc[] = {
+    "Name", "HDF5DataWriter",
+    "Author", "Subhasis Ray",
+    "Description", "HDF5 file writer for saving data tables. It saves the tables added to"
+    " it via addObject function into an HDF5 file. At every process call it"
+    " writes the contents of the tables to the file and clears the table"
+    " vectors. You can explicitly save the data via the flush function."
+  };
 
     static Cinfo cinfo(
-            "HDF5DataWriter",
-            HDF5WriterBase::initCinfo(),
-            finfos,
-            sizeof(finfos)/sizeof(Finfo*),
-            new Dinfo<HDF5DataWriter>());
+        "HDF5DataWriter",
+        HDF5WriterBase::initCinfo(),
+        finfos,
+        sizeof(finfos)/sizeof(Finfo*),
+        new Dinfo<HDF5DataWriter>());
     return &cinfo;
 }
 
