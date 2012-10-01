@@ -7,8 +7,8 @@ lang="en" xml:lang="en">
 <title>Neuronal simulations in MOOSEGUI</title>
 <meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-09-28 18:05:15 IST"/>
-<meta name="author" content="Numerics: Upi Bhalla, Niraj Dudani. Python bindings: Subhasis Ray. GUI: H. Chaitanya, Subhasis Ray. NeuroML import and Neuronal Documentation: Aditya Gilra."/>
+<meta name="generated" content="2012-10-01 22:24:14 IST"/>
+<meta name="author" content="This document: Aditya Gilra. MOOSE: Numerics: Upi Bhalla, Niraj Dudani; Python bindings: Subhasis Ray; GUI: H. Chaitanya, Harsha Rani, Subhasis Ray; NeuroML import: Aditya Gilra."/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
 <style type="text/css">
@@ -95,7 +95,7 @@ lang="en" xml:lang="en">
 <div class="outline-text-2" id="text-1">
 
 <p>Neuronal models in various formats can be loaded and simulated in
-the MOOSE <b>Graphical User Interface</b>. The GUI displays the neurons
+the <b>MOOSE Graphical User Interface</b>. The GUI displays the neurons
 in 3D, and allows visual selection and editing of neuronal
 properties. Plotting and visualization of activity proceeds
 concurrently with the simulation. Support for creating and editing
@@ -126,7 +126,7 @@ across the membrane capacitance Cm, as in the figure below.
 </p>
 
 <div id="figcompneuron" class="figure">
-<p><img src="./images/neuroncompartment.png" width="800" alt="./images/neuroncompartment.png" /></p>
+<p><img src="./images/neuroncompartment.png"  alt="./images/neuroncompartment.png" /></p>
 <p>compartments in a neuron</p>
 </div>
 
@@ -150,16 +150,16 @@ the Squid Axon demo installed along with MOOSEGUI and consult its
 help/tutorial.
 </p>
 <p>
-Read more about compartmental modelling in the first few chapters of the
-<a href="http://www.genesis-sim.org/GENESIS/iBoG/iBoGpdf/index.html">Book of Genesis</a>.
+Read more about compartmental modelling in the first few chapters
+of the <a href="http://www.genesis-sim.org/GENESIS/iBoG/iBoGpdf/index.html">Book of Genesis</a>.
 </p>
 <p>
-Models can be defined in <a href="http://www.neuroml.org">NeuroML</a>, an XML
-format which is mostly supported across simulators. Channels, neuronal
-morphology (compartments), and networks can be specified using various
-levels of NeuroML, namely ChannelML, MorphML and NetworkML. Importing of
-cell models in the <a href="http://www.genesis-sim.org/GENESIS">GENESIS</a> .p
-format is supported for backwards compatibitility.
+Models can be defined in <a href="http://www.neuroml.org">NeuroML</a>, an XML format which is mostly
+supported across simulators. Channels, neuronal morphology
+(compartments), and networks can be specified using various levels
+of NeuroML, namely ChannelML, MorphML and NetworkML. Importing of
+cell models in the <a href="http://www.genesis-sim.org/GENESIS">GENESIS</a> .p format is supported for backwards
+compatibitility.
 </p>
 </div>
 
@@ -182,7 +182,7 @@ format is supported for backwards compatibitility.
 On first run, the MOOSEGUI creates moose/Demos directory in
 user's home folder. A few neuronal models are provided in
 directories inside moose/Demos/neuroml. For example, <i>File-&gt;Load</i>
-moose/Demos/neuroml/CA1PyramidalCell/CA1.net.xml, which is a
+~/moose/Demos/neuroml/CA1PyramidalCell/CA1.net.xml, which is a
 model of hippocampal CA1 pyramidal cell
 <a href="http://senselab.med.yale.edu/ModelDB/ShowModel.asp?model=55035">Migliore et al, 2005</a> (exported using
 <a href="http://www.neuroconstruct.org">neuroConstruct</a>). A 3D
@@ -233,14 +233,14 @@ neuronal simulations.
 <h3 id="sec-3.2"><span class="section-number-3">3.2</span> Modelling details </h3>
 <div class="outline-text-3" id="text-3.2">
 
-<p>MOOSE uses SI units throughout.
+<p>MOOSEGUI uses SI units throughout.
 </p>
 <p>
 Some salient properties of neuronal building blocks in MOOSE are
 described below. Variables that are updated at every simulation time
 step are are listed <b>dynamical</b>. Rest are parameters.
 </p><dl>
-<dt>Compartment</dt><dd>
+<dt><b>Compartment</b></dt><dd>
 When you select a compartment, you can view and
 edit its properties in the right pane. <b>Vm</b> and
 <b>Im</b> are plot-able.
@@ -273,13 +273,19 @@ diameter of the compartment in metres.
 </dd>
 <dt>length</dt><dd>
 length of the compartment in metres.
+
 </dd>
 </dl>
 </dd>
-<dt>HHChannel</dt><dd>
-After selecting a compartment, you can click <b>See                   children</b> on the right pane to list its membrane
-channels, etc. Presently all channels are Hodgkin-Huxley
-channels with voltage dependent dynamical gates.
+</dl>
+
+<p>After selecting a compartment, you can click <b>See children</b> on the right
+pane to list its membrane channels, Ca pool, etc.
+</p>
+<dl>
+<dt><b>HHChannel</b></dt><dd>
+Hodgkin-Huxley channel with voltage dependent
+dynamical gates.
 <dl>
 <dt>Gbar</dt><dd>
 peak channel conductance in Siemens.
@@ -312,6 +318,46 @@ on increasing Vm, with time constant &tau;(Vm).
 <dt>Xpower,Ypower,Zpower</dt><dd>
 powers to which gates are raised in
 the Gk(t) formula above.
+</dd>
+</dl>
+</dd>
+<dt><b>HHChannel2D</b></dt><dd>
+The Hodgkin-Huxley channel2D can have the usual
+voltage dependent dynamical gates, and also gates
+that dependent on voltage and an ionic
+concentration, as for say Ca-dependent K
+conductance. It has the properties of HHChannel
+above, and a few more like Xindex as in the
+<a href="http://www.genesis-sim.org/GENESIS/Hyperdoc/Manual-26.html#ss26.61">GENESIS tab2Dchannel reference</a>.
+
+
+</dd>
+<dt><b>CaConc</b></dt><dd>
+This is a pool of Ca ions in each compartment, in a
+shell volume under the cell membrane. The dynamical
+Ca concentration increases when Ca channels open, and
+decays back to resting with a specified time constant
+&tau;. Its concentration controls Ca-dependent K
+channels, etc.
+<dl>
+<dt>Ca</dt><dd>
+<b>dynamical</b> Ca concentration in the pool in mMolar=mol/m<sup>3</sup>.
+d[Ca<sup>2+</sup>]/dt = B &times; I<sub>Ca</sub> - [Ca<sup>2+</sup>]/&tau;
+</dd>
+<dt>CaBasal/Ca_base</dt><dd>
+Base Ca concentration to which the Ca decays
+</dd>
+<dt>tau</dt><dd>
+time constant with which the Ca concentration decays
+to the base Ca level.
+</dd>
+<dt>B</dt><dd>
+constant in the [Ca<sup>2+</sup>] equation above.
+</dd>
+<dt>thick</dt><dd>
+thickness of the Ca shell within the cell membrane
+which is used to calculate B (see Chapter 19 of
+<a href="http://www.genesis-sim.org/GENESIS/iBoG/iBoGpdf/index.html">Book of GENESIS</a>.)
 
 </dd>
 </dl>
@@ -327,23 +373,66 @@ the Gk(t) formula above.
 
 <dl>
 <dt>Cerebellar granule cell</dt><dd>
-to add
+<i>File-&gt;Load</i> 
+~/moose/Demos/neuroml/GranuleCell/GranuleCell.net.xml . This
+is a single compartment Cerebellar granule cell with a variety
+of channels <a href="#Maex,==R.==and==De==Schutter,==E.,==1997">http://www.tnb.ua.ac.be/models/network.shtml</a> (exported
+from <a href="#sec-3.1">http://www.neuroconstruct.org</a>). Click
+on its soma, and <b>See children</b> for its list of channels. Vary
+the Gbar of these channels to obtain regular firing, adapting
+and bursty behaviour (may need to increase tau of the Ca
+pool).
 </dd>
 <dt>Purkinje cell</dt><dd>
-to add
+<i>File-&gt;Load</i> 
+~/moose/Demos/neuroml/PurkinjeCell/Purkinje.net.xml
+. This is a purely passive cell, but with
+extensive morphology [De Schutter, E. and Bower,
+J. M., 1994] (exported from
+<a href="#sec-3.1">http://www.neuroconstruct.org</a>). The
+channel specifications are in an obsolete ChannelML
+format which MOOSE does not support.
 </dd>
 <dt>Olfactory bulb subnetwork</dt><dd>
-to add
+<i>File-&gt;Load</i> 
+~/moose/Demos/neuroml/OlfactoryBulb/numgloms2_seed100.0_decimated.xml
+. This is a pruned and decimated version of a detailed network
+model of the Olfactory bulb [Gilra A. and Bhalla U., in
+preparation] without channels and synaptic connections. We
+hope to post the ChannelML specifications of the channels and
+synapses soon.
+</dd>
+<dt>All channels cell</dt><dd>
+<i>File-&gt;Load</i> 
+~/moose/Demos/neuroml/allChannelsCell/allChannelsCell.net.xml
+. This is the Cerebellar granule cell as above, but with loads
+of channels from various cell types (exported from
+<a href="#sec-3.1">http://www.neuroconstruct.org</a>). Play
+around with the channel properties to see what they do. You
+can also edit the ChannelML files in
+~/moose/Demos/neuroml/allChannelsCell/cells<sub>channels</sub>/ to
+experiment further.
+<dl>
+<dt>NeuroML python scripts</dt><dd>
+In directory
+~/moose/Demos/neuroml/GranuleCell, you can run 'python
+FvsI<sub>Granule98</sub>.py' which plots firing rate vs injected
+current for the granule cell. Consult this python script to
+see how to read in a NeuroML model and to set up
+simulations. There are ample snippets in
+~/moose/Demos/snippets too.
+</dd>
+</dl>
 </dd>
 </dl>
 </div>
 </div>
 </div>
 <div id="postamble">
-<p class="author"> Author: Numerics: Upi Bhalla, Niraj Dudani. Python bindings: Subhasis Ray. GUI: H. Chaitanya, Subhasis Ray. NeuroML import and Neuronal Documentation: Aditya Gilra.
-<a href="mailto:aditya@rumandraisin">&lt;aditya@rumandraisin&gt;</a>
+<p class="author"> Author: This document: Aditya Gilra. MOOSE: Numerics: Upi Bhalla, Niraj Dudani; Python bindings: Subhasis Ray; GUI: H. Chaitanya, Harsha Rani, Subhasis Ray; NeuroML import: Aditya Gilra.
+<a href="mailto:">&lt;&gt;</a>
 </p>
-<p class="date"> Date: 2012-09-28 18:05:15 IST</p>
+<p class="date"> Date: 2012-10-01 22:24:14 IST</p>
 <p class="creator">HTML generated by org-mode 6.33x in emacs 23</p>
 </div>
 </div>
