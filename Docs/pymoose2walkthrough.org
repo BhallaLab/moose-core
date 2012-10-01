@@ -562,14 +562,16 @@ x = moose.element('/model/soma')
   classes have been reimplemented in MOOSE. There is slight change in
   naming (MOOSE uses CamelCase), and setting up messages are
   different. But [[http://www.genesis-sim.org/GENESIS/Hyperdoc/Manual.html][GENESIS documentation]] is still a good source for
-  documentation on classes that have been ported from GENESIS. In
-  addition, the ~Demos/snippets~ directory in your MOOSE installation
-  has small executable python scripts that show usage of specific
-  classes or functionalities. Beyond that you can browse the code in
-  the ~Demos~ directory to see some more complex models. If the
-  built-in MOOSE classes do not satisfy your needs entirely, you are
-  welcome to add new classes to MOOSE. The [[API.txt][API documentation]] will help
-  you get started. Finally you can join the [[https://lists.sourceforge.net/lists/listinfo/moose-generic][moose mailing list]] and
-  request for help.
+  documentation on classes that have been ported from GENESIS. 
+
+  In addition, the ~Demos/snippets~ directory in your MOOSE
+  installation has small executable python scripts that show usage of
+  specific classes or functionalities. Beyond that you can browse the
+  code in the ~Demos~ directory to see some more complex models.
+
+  If the built-in MOOSE classes do not satisfy your needs entirely,
+  you are welcome to add new classes to MOOSE. The [[API.txt][API documentation]]
+  will help you get started. Finally you can join the [[https://lists.sourceforge.net/lists/listinfo/moose-generic][moose mailing
+  list]] and request for help.
 
 
