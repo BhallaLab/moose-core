@@ -141,18 +141,20 @@ void ZombieSumFunc::zombify( Element* solver, Element* orig, Id molId )
 // Static func
 void ZombieSumFunc::unzombify( Element* zombie )
 {
+	DataHandler* oldHandler = zombie->dataHandler();
 	Element temp( zombie->id(), zombie->cinfo(), zombie->dataHandler() );
 	Eref zer( &temp, 0 );
 	Eref oer( zombie, 0 );
 
-	// ZombieSumFunc* z = reinterpret_cast< ZombieSumFunc* >( zer.data() );
+	ZombieHandler* zh = dynamic_cast< ZombieHandler* >( oldHandler );
+	assert( zh );
 
-	// Here I am unsure how to recreate the correct kind of data handler
-	// for the original. Do later.
-	DataHandler* dh = 0;
+	DataHandler* sumFuncHandler = zh->origHandler();
 
-	zombie->zombieSwap( SumFunc::initCinfo(), dh );
+	zombie->zombieSwap( SumFunc::initCinfo(), sumFuncHandler );
 
-	// SumFunc* m = reinterpret_cast< SumFunc* >( oer.data() );
+	// Delete the old handler, which is a ZombieHandler and thus
+	// leaves its contents intact.
+	delete zh;
 }
 

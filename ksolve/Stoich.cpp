@@ -569,8 +569,15 @@ void Stoich::unZombifyModel()
 	
 	for ( ; i < numVarPools_ + numBufPools_ + numFuncPools_; ++i ) {
 		Element* e = idMap_[i].element();
-		if ( e != 0 &&  e->cinfo() == ZombieFuncPool::initCinfo() )
+		if ( e != 0 &&  e->cinfo() == ZombieFuncPool::initCinfo() ) {
 			PoolBase::zombify( e, FuncPool::initCinfo(), Id() );
+			// Has also got to unzombify the Func.
+			Id funcId = Neutral::child( idMap_[i].eref(), "sumFunc" );
+			if ( funcId != Id() ) {
+				assert ( funcId()->cinfo()->isA( "ZombieSumFunc" ) );
+				ZombieSumFunc::unzombify( funcId.element() );
+			}
+		}
 	}
 	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
 

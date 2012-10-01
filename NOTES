@@ -18787,3 +18787,9 @@ Used it to make up the icons. Updated the Kkit documentation. I think that is
 it for documentation for this round.
 
 ============================================================================
+01 Oct 2012.
+Harsha had pointed out a problem with going back and forth between GSL and
+GSSA. Turned out to be a problem with unzombification of SumTotals. 
+Fixed that. Unfortunately there is still a problem when actually running the
+model.
+============================================================================
