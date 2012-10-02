@@ -320,6 +320,8 @@ void testGetMsg()
 		tabid, "num_table" );
 	assert( numEntries == 0 );
 	shell->doReinit();
+	numEntries = Field< unsigned int >::get( tabid, "num_table" );
+	assert( numEntries == 1 ); // One for reinit call.
 	SetGet1< double >::set( arithid, "arg1", 0.0 );
 	SetGet1< double >::set( arithid, "arg2", 2.0 );
 	shell->doStart( 100 );
