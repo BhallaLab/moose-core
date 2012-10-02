@@ -282,6 +282,7 @@ void setupTicks()
 	assert( cdata->tickPtr_[3].mgr()->ticks_[1] == reinterpret_cast< const Tick* >( er5.data() ) );
 
 
+	Qinfo::emptyAllQs();
 	ProcInfo p;
 	p.threadIndexInGroup = 1;
 	cdata->handleReinit();
@@ -331,8 +332,11 @@ void setupTicks()
 
 	assert( doubleEq( cdata->getCurrentTime(), runtime ) );
 	// Get rid of pending events in the queues.
+	Qinfo::emptyAllQs();
+	/*
 	Qinfo::clearQ( p.threadIndexInGroup );
 	Qinfo::clearQ( p.threadIndexInGroup );
+	*/
 
 	/*
 	tickId.destroy();
