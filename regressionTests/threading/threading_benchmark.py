@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Oct  1 17:31:36 2012 (+0530)
 # Version: 
-# Last-Updated: Mon Oct  1 17:57:48 2012 (+0530)
+# Last-Updated: Tue Oct  2 14:58:11 2012 (+0530)
 #           By: subha
-#     Update #: 25
+#     Update #: 42
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -48,30 +48,37 @@
 import os
 import subprocess
 from datetime import datetime
-max_threads = 8
+import pylab
+max_threads = 16
+repeats = 4
 
 def test_singlemessages():
     nthreads = 1
-    times = []
+    times = {}
     while nthreads <= max_threads:
-	start = datetime.now()
-	os.environ['NUMPTHREADS'] = str(nthreads)	
-	proc = subprocess.Popen(['python', 'twocomp.py'], 
-				stdin=subprocess.PIPE,
-				stdout=subprocess.PIPE,
-				stderr=subprocess.PIPE)
-	out, err = proc.communicate()
-	end = datetime.now()
-	delay = end - start
-	times.append(delay)
-	print 'finished with %d threads in %g s' % (nthreads, delay.seconds + delay.microseconds*1e-6)
+	tsum = 0.0
+	for ii in range(repeats):
+	    start = datetime.now()
+	    os.environ['NUMPTHREADS'] = str(nthreads)	
+	    proc = subprocess.Popen(['python', 'twocomp.py'], 
+				    stdin=subprocess.PIPE,
+				    stdout=subprocess.PIPE,
+				    stderr=subprocess.PIPE)
+	    out, err = proc.communicate()
+	    end = datetime.now()
+	    delay = end - start
+	    tsum += delay.seconds + delay.microseconds*1e-6
+	times[nthreads] = tsum/repeats
+	print 'finished with %d threads in %g s' % (nthreads, tsum/repeats)
 	nthreads += 1
     return times
 
 if __name__ == '__main__':
     times = test_singlemessages()
-    for dt in times:
-	print dt.seconds + dt.microseconds * 1e-6
+    nthreads = sorted(times.keys())
+    t = [times[k]  for k in nthreads]
+    pylab.plot(nthreads, t)
+    pylab.show()
 
 # 
 # threading_benchmark.py ends here
