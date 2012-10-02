@@ -622,6 +622,9 @@ void Clock::handleStart( double runtime )
 		cout << "Clock::handleStart: Warning: simulation already in progress.\n Command ignored\n";
 		return;
 	}
+	// The currentTime_ check here is just a sanity check in case someone
+	// hard-wired additional messages into the Ticks, bypassing the 
+	// regular clock handling functions which would have set isDirty_.
 	if ( isDirty_ || currentTime_ == 0 )
 		rebuild();
 	if ( tickPtr_.size() == 0 || tickPtr_[0].mgr() == 0 ) {

@@ -18793,3 +18793,9 @@ GSSA. Turned out to be a problem with unzombification of SumTotals.
 Fixed that. Unfortunately there is still a problem when actually running the
 model.
 ============================================================================
+02 Oct 2012
+Some fixes to the HDF5 code.
+Revisiting the (small) memory leak in the unit test setupTicks that valgrind
+detected. Still unable to clear it. Continuing issues also with the 
+runtime: the call for data at reinit is not adding an entry to the table.
+
