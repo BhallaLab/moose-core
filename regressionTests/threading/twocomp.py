@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Oct  1 17:34:37 2012 (+0530)
 # Version: 
-# Last-Updated: Mon Oct  1 17:50:04 2012 (+0530)
+# Last-Updated: Tue Oct  2 17:11:00 2012 (+0530)
 #           By: subha
-#     Update #: 35
+#     Update #: 37
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -47,6 +47,7 @@
 
 import pylab
 import moose
+from datetime import datetime
 
 if __name__ == '__main__':
     # Create the somatic compartment
@@ -92,7 +93,11 @@ if __name__ == '__main__':
     moose.useClock(2, axon_Vm.path, 'process')
     # Now initialize everything and get set
     moose.reinit()
+    start = datetime.now()
     moose.start(300e-3)
+    end = datetime.now()
+    delta = end - start
+    print 'Simulation time (excluding reinit): %g s' % (delta.seconds + delta.microseconds * 1e-6)
 
 # 
 # twocomp.py ends here
