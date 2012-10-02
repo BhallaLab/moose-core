@@ -63,17 +63,17 @@ static SrcFinfo0 * clear(){
 
 const Cinfo * HDF5DataWriter::initCinfo()
 {
-  static ProcOpFunc<HDF5DataWriter> procFunc(&HDF5DataWriter::process);
-  static ProcOpFunc<HDF5DataWriter> reinitFunc(&HDF5DataWriter::reinit);
   static DestFinfo process(
       "process",
       "Handle process calls. Write data to file and clear all Table objects"
       " associated with this.",
-      &procFunc);
+  		new ProcOpFunc<HDF5DataWriter>( &HDF5DataWriter::process)
+	);
   static  DestFinfo reinit(
       "reinit",
       "Reinitialize the object",
-      &reinitFunc);
+  		new ProcOpFunc<HDF5DataWriter>( &HDF5DataWriter::reinit )
+    );
   static Finfo * processShared[] = {
     &process, &reinit
   };
@@ -102,7 +102,9 @@ const Cinfo * HDF5DataWriter::initCinfo()
         HDF5WriterBase::initCinfo(),
         finfos,
         sizeof(finfos)/sizeof(Finfo*),
-        new Dinfo<HDF5DataWriter>());
+        new Dinfo<HDF5DataWriter>(),
+		doc, sizeof( doc ) / sizeof( string )
+	   	);
     return &cinfo;
 }
 
@@ -216,11 +218,13 @@ hid_t HDF5DataWriter::get_dataset(string path)
             } else if (prev_id != filehandle_){
                 // Successfully created new group, close the old group
                 status = H5Gclose(prev_id);
+				assert( status >= 0 );
                 prev_id = id;
             }
         } else if (prev_id != filehandle_){
             // Successfully opened new group, close the old group
             status = H5Gclose(prev_id);
+			assert( status >= 0 );
         }
         prev_id = id;
     }
@@ -248,6 +252,7 @@ hid_t HDF5DataWriter::create_dataset(hid_t parent_id, string name)
     hsize_t chunk_dims[] = {CHUNK_SIZE}; // 1 K
     hid_t chunk_params = H5Pcreate(H5P_DATASET_CREATE);
     status = H5Pset_chunk(chunk_params, 1, chunk_dims);
+	assert( status >= 0 );
     hid_t dataspace = H5Screate_simple(1, dims, maxdims);            
     hid_t dataset_id = H5Dcreate2(parent_id, name.c_str(), H5T_NATIVE_DOUBLE, dataspace, H5P_DEFAULT, chunk_params, H5P_DEFAULT);
     return dataset_id;
