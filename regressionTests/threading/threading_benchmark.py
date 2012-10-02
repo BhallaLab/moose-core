@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Oct  1 17:31:36 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Oct  2 14:58:11 2012 (+0530)
+# Last-Updated: Tue Oct  2 17:12:52 2012 (+0530)
 #           By: subha
-#     Update #: 42
+#     Update #: 46
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -68,6 +68,9 @@ def test_singlemessages():
 	    end = datetime.now()
 	    delay = end - start
 	    tsum += delay.seconds + delay.microseconds*1e-6
+            print '- Output from subprocess -'
+            print out
+            print '-! End of output !-'
 	times[nthreads] = tsum/repeats
 	print 'finished with %d threads in %g s' % (nthreads, tsum/repeats)
 	nthreads += 1
