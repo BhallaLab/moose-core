@@ -66,10 +66,10 @@ const Cinfo* HDF5WriterBase::initCinfo()
       
 
   static Finfo * finfos[] = {
-    fileName,
-    isOpen,
-    mode,
-    flush
+    &fileName,
+    &isOpen,
+    &mode,
+    &flush
   };
 
   static Cinfo hdf5Cinfo(
