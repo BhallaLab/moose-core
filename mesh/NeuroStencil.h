@@ -59,6 +59,19 @@ class NeuroStencil: public Stencil
 		const vector< double >& vs_;
 		const vector< double >& area_;
 
+		/**
+		 * This stores the effective length between nodes as a sparse
+		 * matrix. Most node pairs are not coupled so we leave them out.
+		 * L_[voxelIndex][voxelIndex]
+		 * This is actually a symmetric matrix, in due course would like
+		 * to implement a symmetric sparse matrix.
+		 * Effective length is computed as 
+		 * Lij = 0.5* (Lmax * Amin / Amax + Lmin )
+		 * where Lmin and Amin are length and area of the smaller diameter
+		 * voxel.
+		 */
+		SparseMatrix< double > L_;
+
 };
 
 #endif // _NEURO_STENCIL_H

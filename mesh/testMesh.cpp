@@ -17,6 +17,7 @@
 #include "CubeMesh.h"
 #include "CylBase.h"
 #include "NeuroNode.h"
+#include "SparseMatrix.h"
 #include "NeuroStencil.h"
 #include "NeuroMesh.h"
 
@@ -785,7 +786,102 @@ pair< unsigned int, unsigned int > buildBranchingCell(
 	return pair< unsigned int, unsigned int >( 17, 161 );
 }
 
-void testNeuroMesh()
+	// y = initConc * dx * (0.5 / sqrt( PI * DiffConst * runtime ) ) * 
+	//        exp( -x * x / ( 4 * DiffConst * runtime ) )
+double diffusionFunction( double D, double dx, double x, double t )
+{
+	return
+		dx * (0.5 / sqrt( PI * D * t ) ) * exp( -x * x / ( 4 * D * t ) );
+}
+
+void testNeuroMeshLinear()
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< int > dims( 1, 1 );
+	// Build a linear cylindrical cell, no tapering.
+	Id cell = shell->doCreate( "Neutral", Id(), "cell", dims );
+	unsigned int numCompts = 500;
+	double dia = 1e-6; // metres
+	double diffLength = 0.2e-6; // metres
+	double len = diffLength * numCompts;
+	double maxt = 100.0;
+	double dt = 0.01;
+	double D = 1e-12;
+	double totNum = 1e6;
+
+	Id soma = makeCompt( Id(), cell, "soma", len, dia, 0 );
+
+	// Scan it with neuroMesh and check outcome.
+	Id nm = shell->doCreate( "NeuroMesh", Id(), "neuromesh", dims );
+	Field< double >::set( nm, "diffLength", diffLength );
+	Field< string >::set( nm, "geometryPolicy", "cylinder" );
+	Field< Id >::set( nm, "cell", cell );
+	unsigned int ns = Field< unsigned int >::get( nm, "numSegments" );
+	assert( ns == 1 );
+	unsigned int ndc = Field< unsigned int >::get( nm, "numDiffCompts" );
+	assert( ndc == numCompts );
+	const vector< NeuroNode >& nodes = 
+			reinterpret_cast< NeuroMesh* >( nm.eref().data() )->
+			getNodes();
+	assert( nodes.size() == 1 );
+	assert( nodes[0].children().size() == 0 );
+
+	// Insert a molecule at first subdivision of soma. I use a dummy 
+	// matrix S rather than the one in the system.
+	// Field< double >::set( ObjId( soma, 0 ), "nInit", 1.0e6 );
+	vector< double > molNum( 1, 0 ); // We only have one pool
+	// S[meshIndex][poolIndex]
+	vector< vector< double > > S( ndc, molNum ); 
+	S[0][0] = totNum;
+	vector< double > diffConst( 1, D );
+	vector< double > temp( 1, 0.0 );
+	vector< vector< double > > flux( ndc, temp );
+	
+	// Watch diffusion using stencil and direct calls to the flux 
+	// calculations rather than going through the ksolve.
+	const Stencil* stencil = 
+			reinterpret_cast< NeuroMesh* >( nm.eref().data() )->
+			getStencil();
+	assert( stencil != 0 );	
+	for ( double t = 0; t < maxt; t += dt ) {
+		for ( unsigned int i = 0; i < ndc; ++i )
+			flux[i][0] = 0.0;
+		
+		for ( unsigned int i = 0; i < ndc; ++i ) {
+			stencil->addFlux( i, flux[i], S, diffConst );
+		}
+		for ( unsigned int i = 0; i < ndc; ++i )
+			S[i][0] += flux[i][0] * dt;
+	}
+
+	// Compare with analytic calculation
+	double tot1 = 0.0;
+	double tot2 = 0.0;
+	double dlBy2 = diffLength/2.0;
+	double x = dlBy2;
+	for ( unsigned int j = 0; j < numCompts; ++j ) {
+			// Factor of two because we compute a half-infinite cylinder.
+		double y = 2 * totNum * 
+			diffusionFunction( diffConst[0], diffLength, x, maxt );
+		unsigned int k = j + nodes[0].startFid();
+		//cout << "S[" << k << "][0] = " << S[k][0] << "	" << y << endl;
+		tot1 += S[k][0];
+		tot2 += y;
+		x += diffLength;
+		// Here we compare only half of the length because edge effects 
+		// mess up the flux calculation.
+		if ( j < numCompts/2 )
+			assert ( doubleApprox( y, S[k][0] ) ); 
+	}
+	assert( doubleEq( tot1, totNum ) );
+	assert( doubleEq( tot2, totNum ) );
+	
+	shell->doDelete( cell );
+	shell->doDelete( nm );
+	cout << "." << flush;
+}
+
+void testNeuroMeshBranching()
 {
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	vector< int > dims( 1, 1 );
@@ -794,6 +890,10 @@ void testNeuroMesh()
 	double len = 10e-6; // metres
 	double dia = 1e-6; // metres
 	double diffLength = 1e-6; // metres
+	double D = 4e-12; // Diff const, m^2/s
+	double totNum = 1e6; // Molecules
+	double maxt = 10.0;
+	double dt = 0.001;
 
 	pair< unsigned int, unsigned int > ret = 
 			buildBranchingCell( cell, len, dia );
@@ -824,8 +924,8 @@ void testNeuroMesh()
 	vector< double > molNum( 1, 0 ); // We only have one pool
 	// S[meshIndex][poolIndex]
 	vector< vector< double > > S( ndc, molNum ); 
-	S[0][0] = 1.0e6;
-	vector< double > diffConst( 1, 1e-12 );
+	S[0][0] = totNum;
+	vector< double > diffConst( 1, D );
 	vector< double > temp( 1, 0.0 );
 	vector< vector< double > > flux( ndc, temp );
 	
@@ -835,8 +935,6 @@ void testNeuroMesh()
 			reinterpret_cast< NeuroMesh* >( nm.eref().data() )->
 			getStencil();
 	assert( stencil != 0 );	
-	double maxt = 10.0;
-	double dt = 0.001;
 	for ( double t = 0; t < maxt; t += dt ) {
 		for ( unsigned int i = 0; i < ndc; ++i )
 			flux[i][0] = 0.0;
@@ -847,35 +945,35 @@ void testNeuroMesh()
 		for ( unsigned int i = 0; i < ndc; ++i )
 			S[i][0] += flux[i][0] * dt;
 	}
-	// Here we need to figure out how to compare with the analytic solution
-	// y = initConc * dx * (0.5 / sqrt( PI * DiffConst * runtime ) ) * 
-	//        exp( -x * x / ( 4 * DiffConst * runtime ) )
-	//  Turns out that the ordering is sequential for 30 compts, but
-	//  I have used conical segment calculations which will give different
-	//  results from simple diffusion in a cylinder.
-	//  For now, comment out. I need to move on to other things for now.
-	/*
 	double tot = 0.0;
 	for ( unsigned int i = 0; i < nodes.size(); ++i ) {
-		cout << "node[" << i << "], dia = " << nodes[i].getDia() << 
-				", parent = " << nodes[i].parent() << endl;
 		for ( unsigned int j = 0; j < nodes[i].getNumDivs(); ++j ) {
 			unsigned int k = j + nodes[i].startFid();
-			cout << "S[" << k << "][0] = " << S[k][0] << endl;
+			//cout << "S[" << k << "][0] = " << S[k][0] << endl;
 			tot += S[k][0];
 		}
 	}
-	assert( doubleEq( tot, 1.0e6 ) );
+
+	// Compare with analytic solution.
+	assert( doubleEq( tot, totNum ) );
+	double x = 1.5 * diffLength;
+	for ( unsigned int i = 1; i < 11; ++i ) { // First segment of tree.
+		double y = totNum * diffusionFunction(
+				diffConst[0], diffLength, x, maxt );
+		assert( doubleApprox( y, S[i][0] ) );
+		// cout << "S[" << i << "][0] = " << S[i][0] << "	" << y << endl;
+		x += diffLength;
+	}
 	tot = 0;
-	for ( double x = 0; x < len * 4; x += diffLength ) {
-		double y = 1.0e6 * diffLength * 
-			(0.5 / sqrt( PI * diffConst[0] * maxt ) ) * 
-			exp( -x * x / ( 4 * diffConst[0] * maxt ) );
-		cout << rint( x / diffLength ) << ": " << y << endl;
+	for ( double x = diffLength / 2.0 ; x < 10 * len; x += diffLength ) {
+			// the 2x is needed because we add up only half of the 2-sided
+			// diffusion distribution.
+		double y = 2 * totNum * diffusionFunction( 
+				diffConst[0], diffLength, x, maxt );
+		// cout << floor( x / diffLength ) << ": " << y << endl;
 		tot += y;
 	}
-	assert( doubleEq( tot, 1.0e6 ) );
-	*/
+	assert( doubleEq( tot, totNum ) );
 	
 	shell->doDelete( cell );
 	shell->doDelete( nm );
@@ -892,5 +990,6 @@ void testMesh()
 	testMidLevelCylMesh();
 	testCubeMesh();
 	testReMesh();
-	testNeuroMesh();
+	testNeuroMeshLinear();
+	testNeuroMeshBranching();
 }

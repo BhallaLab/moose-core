@@ -17,6 +17,7 @@
 #include "ChemMesh.h"
 #include "CylBase.h"
 #include "NeuroNode.h"
+#include "SparseMatrix.h"
 #include "NeuroStencil.h"
 #include "NeuroMesh.h"
 #include "../utility/numutil.h"

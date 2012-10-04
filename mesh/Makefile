@@ -36,10 +36,10 @@ CylBase.o:	CylBase.h
 CylMesh.o:	ChemMesh.h CylBase.h CylMesh.h MeshEntry.h Boundary.h
 CubeMesh.o:	ChemMesh.h CubeMesh.h MeshEntry.h Boundary.h
 NeuroNode.o: CylBase.h NeuroNode.h
-NeuroStencil.o: CylBase.h NeuroNode.h NeuroStencil.h
-NeuroMesh.o: ChemMesh.h CylBase.h NeuroNode.h NeuroStencil.h NeuroMesh.h
+NeuroStencil.o: ../basecode/SparseMatrix.h CylBase.h NeuroNode.h NeuroStencil.h
+NeuroMesh.o: ../basecode/SparseMatrix.h ChemMesh.h CylBase.h NeuroNode.h NeuroStencil.h NeuroMesh.h
 Stencil.o:	Stencil.h
-testMesh.o:	CylBase.h NeuroNode.h NeuroStencil.h MeshEntry.h ChemMesh.h CylMesh.h Boundary.h
+testMesh.o:	../basecode/SparseMatrix.h CylBase.h NeuroNode.h NeuroStencil.h MeshEntry.h ChemMesh.h CylMesh.h Boundary.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I.. -I../basecode $< -c

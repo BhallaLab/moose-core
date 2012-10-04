@@ -187,18 +187,19 @@ vector< double > CylBase::getCoordinates(
 }
 
 /**
- * Returns diffusion cross-section from specified index to next.
- * For index 0, this is cross-section to parent.
+ * Returns diffusion cross-section from specified index to previous.
+ * For index 0, this is cross-section area of parent.
  * For index numDivs-1, it is the cross-section from the second-last to
  * the last voxel in this CylBase.
- * Thus there is no valid value for (index == numDivs - 1), it has
+ * For index numDivs it is the area of this CylBase.
+ * Thus there is no valid value for (index > numDivs), it has
  * to be computed external to the CylBase, typically by calling the
  * getDiffusionArea for the child CylBase.
  */
 double CylBase::getDiffusionArea( 
 				const CylBase& parent, unsigned int fid ) const
 {
-	assert( fid < numDivs_ );
+	assert( fid < numDivs_ + 1 );
 	if ( isCylinder_ )
 			return PI * dia_ * dia_ / 4.0;
  	double frac0 = ( static_cast< double >( fid ) ) / 
