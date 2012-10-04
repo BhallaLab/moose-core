@@ -332,8 +332,8 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 #        self.activeWindow = allList[number+1]
 #        self.activeMdiWindow()
     def savePlots(self):
-        print "plots to be saved"
-        #MoosePlot.savePlotData('/home/harsha/Desktop')
+        #print "plots to be saved"
+        pass
         
     def popupSaveModelDialog(self):
         type_genesis = 'GENESIS'
@@ -424,7 +424,6 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
                         #self.actionLoad_Model.setEnabled(0) #to prevent multiple loads
                         
                     except kineticlayout.Widgetvisibility:
-                    #except kl.Widgetvisibility:
                         print 'No kkit layout for: %s' % (str(fileName))
                     #print moose.element(self.modelpath).getField('method')
                     self.populateKKitPlots(self.modelpath)
@@ -575,9 +574,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
     def makeObjectFieldEditor(self, obj):
         self.propEditorChildren(obj)
-        objPath = str(obj.getField('path'))
-        objPath_sp = objPath.split(self.modelpath)
-        display = str(obj.getField('class'))+': ..'+ objPath_sp[len(objPath_sp)-1]
+        display = self.strTruncate(obj)
         self.propEditorSelectionNameLabel.setText(display)
         #self.propEditorSelectionNameLabel.setText(str(obj.getField('name')))
         if obj.class_ == 'Shell' or obj.class_ == 'PyMooseContext' or obj.class_ == 'GenesisParser':
@@ -652,6 +649,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         """Create plots for all Table objects in /data element"""
 
     def plotConfigOverlayPlotsAction(self, state):
+        #print "here",state
         if state==0: #no overlay for current plotwindow
             try:
                 plotWin = self.plotNameWinDict[str(self.plotConfigWinSelectionComboBox.currentText())] 
@@ -660,7 +658,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
                 pass
         elif state==2:
             try:
-                plotWin = self.plotNameWinDict[str(self.plotConfigWinSelectionComboBox.currentText())] 
+                plotWin = self.plotNameWinDict[str(self.plotConfigWinSelectionComboBox.currentText())]
                 plotWin.plot.changeToOverlay()
             except KeyError:
                 pass
@@ -874,7 +872,32 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
                 textColor = "#"+ hexchars[r / 16] + hexchars[r % 16] + hexchars[g / 16] + hexchars[g % 16] + hexchars[b / 16] + hexchars[b % 16]
         return(textColor)
 
-
+    #harsha: truncating str for displaying under property Editor 
+    def strTruncate(self,mobj):
+        objPathinfo = str(mobj.getField('path'))
+        objPath_sp = objPathinfo.split('/')
+        objClassinfo = str(mobj.getField('class'))
+        maxlenChar = 35
+        pathlength = maxlenChar - len(objClassinfo)
+        displayf = objClassinfo+' : ' + objPathinfo
+        pathstr = ''
+        if len(displayf) >maxlenChar:
+            for i in range(0,len(objPath_sp)):
+                l = len(objPath_sp)-i-1
+                if (len(pathstr) + len(objPath_sp[l])) < pathlength:
+                    if objPath_sp[l] != 'KKIT':
+                        pathstr = "/"+objPath_sp[l]+pathstr
+                    else:
+                        pathstr = objPath_sp[l]+pathstr
+                else:
+                    break;
+            if len(pathstr) == 0:
+                pathstr = objPath_sp[len(objPath_sp)-i-1]
+            display = objClassinfo+': ..'+pathstr
+        else:
+            display = displayf
+        return(display)
+        
 
 
 if __name__ == '__main__':
