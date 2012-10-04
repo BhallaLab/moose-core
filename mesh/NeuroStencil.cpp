@@ -11,6 +11,7 @@
 #include "CylBase.h"
 #include "NeuroNode.h"
 #include "Stencil.h"
+#include "SparseMatrix.h"
 #include "NeuroStencil.h"
 
 NeuroStencil::NeuroStencil( const vector< NeuroNode >& nodes, 
@@ -22,7 +23,51 @@ NeuroStencil::NeuroStencil( const vector< NeuroNode >& nodes,
 				nodeIndex_( nodeIndex ),
 				vs_( vs ),
 				area_( area )
-{;}
+{
+	assert( area_.size() == nodeIndex_.size() );
+
+	// Junction area: It is fine within a cylinder, but
+	// at the junction between two cylinders it is the minimum of the two.
+	// This is handled at addFlux
+
+	L_.setSize( nodeIndex_.size(), nodeIndex_.size() );	
+	for ( unsigned int i = 0; i < nodeIndex_.size(); ++i ) {
+		const NeuroNode &nn = nodes_[ nodeIndex[i] ];
+		const NeuroNode *pa = &nodes_[ nn.parent() ];
+		if ( pa->isDummyNode() )
+				pa = &nodes_[ pa->parent() ];
+		assert( !pa->isDummyNode() );
+		const NeuroNode &parent = *pa;
+		if ( i == 0 ) { // Here we rely on other indices providing values
+			continue;
+		}
+		double L1 = nn.getLength() / nn.getNumDivs();
+		double L2 = parent.getLength() / parent.getNumDivs();
+		unsigned int j = i - nn.startFid();
+		unsigned int parentFid = i - 1;
+		if ( j == 0 )
+				parentFid = parent.startFid() + parent.getNumDivs() - 1;
+		double length;
+		// This is a hack to deal with the problem 
+		// This is useful but only if each input is independent.
+		// If we have identical conc gradients on enough small child
+		// dendrites we could end up with the area difference
+		// balancing out.
+		/*
+		double A1 = nn.getDiffusionArea( parent, j );
+		double A2 = nn.getDiffusionArea( parent, j+1 );
+		if ( A1 > A2 ) {
+			length = 0.5 * ( L1 * A2 / A1 + L2 );
+		} else {
+			length = 0.5 * ( L2 * A1 / A2 + L1 );
+		}
+		*/
+		length = 0.5 * (L1 + L2 );
+		L_.set( parentFid, i, length );
+		L_.set( i, parentFid, -length );
+	}
+	// L_.printInternal();
+}
 
 static vector< NeuroNode > nn;
 static vector< unsigned int > ni;
@@ -38,6 +83,33 @@ NeuroStencil::NeuroStencil()
 
 NeuroStencil::~NeuroStencil()
 {;}
+
+void NeuroStencil::addFlux( unsigned int index, 
+			vector< double >& f, const vector< vector< double > >& S, 
+			const vector< double >& diffConst ) const
+{
+	assert( index < nodeIndex_.size() );
+	assert( nodes_.size() > nodeIndex_[index] );
+	// const vector< double >& t0 = S[ index ];
+
+	const double* entry;
+	const unsigned int* colIndex;
+	unsigned int n = L_.getRow( index, &entry, &colIndex );
+	for ( unsigned int q = 0; q < n; ++q ) {
+		unsigned int j = colIndex[q];
+		if ( index < j ) { // always use the area for the more distal voxel
+			for ( unsigned int k = 0; k < f.size(); ++k ) {
+				f[k] -= diffConst[k] * NA * area_[j] * 
+					( S[index][k]/vs_[index] - S[j][k]/vs_[j] ) / entry[q];
+			}
+		} else {
+			for ( unsigned int k = 0; k < f.size(); ++k ) {
+				f[k] += diffConst[k] * NA * area_[index] * 
+					( S[index][k]/vs_[index] - S[j][k]/vs_[j] ) / entry[q];
+			}
+		}
+	}
+}
 
 /**
  * computes the Flux f in the voxel on meshIndex. Takes the
@@ -81,6 +153,7 @@ NeuroStencil::~NeuroStencil()
  * 		t0*(Aminus+Aplus)/VS0) / len
  * 
  */
+/*
 void NeuroStencil::addFlux( unsigned int index, 
 			vector< double >& f, const vector< vector< double > >& S, 
 			const vector< double >& diffConst ) const
@@ -149,6 +222,7 @@ void NeuroStencil::addFlux( unsigned int index,
 		}
 	}
 }
+*/
 
 /**
  * This only works if we have uniform subdivisions of length len.

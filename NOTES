@@ -18799,3 +18799,67 @@ Revisiting the (small) memory leak in the unit test setupTicks that valgrind
 detected. Still unable to clear it. Continuing issues also with the 
 runtime: the call for data at reinit is not adding an entry to the table.
 
+
+Now back to the neuronal diffusion code. Plan to redo as sparse matrix.
+
+i : index for left voxel
+j : index for right voxel
+k : mol index
+Dk : Diffusion const for molecule k.
+Fijk : Flux from i to j for molecule k
+Sik : Molecule counts
+VSi : volscale
+Ai : Cross-section Area of voxel (sub-cylinder) i.
+Aij : Area at interface between i and j. This is symmetric and is the
+	smaller of Ai and Aj. So one could do with a vector of min area of 
+	junction with parent.
+Li : Length of sub-cylinder i.
+
+Lij : Length from cylinder i to j. Obtained in a heuristic as:
+	Lij = 0.5 * ( Lmax * Amin / Amax + Lmin )
+	Reasoning is that if we have cylinders of the same area, then the
+	concentration gradient is linear. But if we have very different area
+	cylinders (e.g., small dendrite on soma), then most of the conc
+	gradient is on the smaller cylinder and the gradient on the large
+	voxel will be short and steep.
+
+With all this, the # flux equation for the diffusion going from i to j is:
+
+Fijk = -Fjik = Dk * NA * Aij * ( Sik / VSi - Sjk / VSj ) / Lij
+
+We could extend this further if we have motors. The flux equation for a 
+motor is
+
+Fijk = -Fjik = Vk * Sik / ((Li + Lj)/2)
+
+Where Vk is the transport speed of molecule k
+and we use geometrical cylinder lengths because we assume the motor just
+chugs along at a fixed speed regardless of gradient.
+This will typically be used for a very small number of cargo complexes, and
+I'll want to expose the cargo to some off reaction processes that can then
+separate out the components.
+
+To compute this, I'll put Lij on the sparse matrix. I'll need to precompute
+Aij and VSi. Given the odd access sequence of the Stoich (with various 
+threads) it is a little awkward to march through the sparse matrix, but
+anyway much better than the previous incarnation of NeuroStencil.
+
+Should look into building thread/range specific subdivisions of SparseMatrix
+for faster access and thread safety.
+
+
+============================================================================
+03 Oct 2012
+Made the SparseMatrix version. Far cleaner and easier to understand, probably
+faster too.
+Now handles the linear diffusion calculations.
+The assignment of the sparse matrix for branching seems wrong.
+Fixed it. Now the test seems to be getting close, down to the numerical
+issues of spatial discretization.
+
+============================================================================
+04 Oct 2012.
+NeuroMesh branching cell unit test built. There are assorted numerical issues
+ with getting the test grid size right, but finally it seems OK.
+
+============================================================================
