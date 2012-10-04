@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'newgui.ui'
 #
-# Created: Mon Oct  1 12:41:28 2012
+# Created: Thu Oct  4 20:01:20 2012
 #      by: PyQt4 UI code generator 4.8.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -641,6 +641,8 @@ class Ui_MainWindow(object):
         self.actionPyMooseWalkThrough.setObjectName(_fromUtf8("actionPyMooseWalkThrough"))
         self.actionMooseCppDocumentation = QtGui.QAction(MainWindow)
         self.actionMooseCppDocumentation.setObjectName(_fromUtf8("actionMooseCppDocumentation"))
+        self.actionBuiltInDocumentation = QtGui.QAction(MainWindow)
+        self.actionBuiltInDocumentation.setObjectName(_fromUtf8("actionBuiltInDocumentation"))
         self.menuFile.addAction(self.actionLoad_Model)
         self.menuFile.addAction(self.actionSave_Model)
         self.menuFile.addAction(self.actionMerge_Models)
@@ -655,11 +657,12 @@ class Ui_MainWindow(object):
         self.menuView.addAction(self.actionViewAsTabs)
         self.menuEdit.addAction(self.actionSettings)
         self.menuHelp.addAction(self.actionAbout)
-        self.menuHelp.addAction(self.actionMooseCppDocumentation)
         self.menuHelp.addAction(self.actionMooseGuiDocumentation)
         self.menuHelp.addAction(self.actionNkitDocumentation)
         self.menuHelp.addAction(self.actionKkitDocumentation)
         self.menuHelp.addAction(self.actionPyMooseWalkThrough)
+        self.menuHelp.addAction(self.actionBuiltInDocumentation)
+        self.menuHelp.addAction(self.actionMooseCppDocumentation)
         self.menuHelp.addAction(self.actionReport_a_Bug)
         self.menuRun.addAction(self.actionRun)
         self.menuRun.addAction(self.actionReset)
@@ -838,7 +841,9 @@ class Ui_MainWindow(object):
         self.actionNkitDocumentation.setToolTip(QtGui.QApplication.translate("MainWindow", "Display documentation of Nkit", None, QtGui.QApplication.UnicodeUTF8))
         self.actionPyMooseWalkThrough.setText(QtGui.QApplication.translate("MainWindow", "pymoose scripting tutorial", None, QtGui.QApplication.UnicodeUTF8))
         self.actionPyMooseWalkThrough.setToolTip(QtGui.QApplication.translate("MainWindow", "PyMOOSE scripting tutorial for beginners", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionMooseCppDocumentation.setText(QtGui.QApplication.translate("MainWindow", "MOOSE C++ documentation", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionMooseCppDocumentation.setText(QtGui.QApplication.translate("MainWindow", "C++ API documentation", None, QtGui.QApplication.UnicodeUTF8))
         self.actionMooseCppDocumentation.setToolTip(QtGui.QApplication.translate("MainWindow", "Documentation generated from C++ sources by Doxygen", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionBuiltInDocumentation.setText(QtGui.QApplication.translate("MainWindow", "Built-in documentation", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionBuiltInDocumentation.setToolTip(QtGui.QApplication.translate("MainWindow", "Read built-in documentation at one place", None, QtGui.QApplication.UnicodeUTF8))
 
 from objectedit2 import ObjectEditView

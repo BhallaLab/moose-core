@@ -87,11 +87,12 @@
      <string>Help</string>
     </property>
     <addaction name="actionAbout"/>
-    <addaction name="actionMooseCppDocumentation"/>
     <addaction name="actionMooseGuiDocumentation"/>
     <addaction name="actionNkitDocumentation"/>
     <addaction name="actionKkitDocumentation"/>
     <addaction name="actionPyMooseWalkThrough"/>
+    <addaction name="actionBuiltInDocumentation"/>
+    <addaction name="actionMooseCppDocumentation"/>
     <addaction name="actionReport_a_Bug"/>
    </widget>
    <widget class="QMenu" name="menuRun">
@@ -1639,10 +1640,18 @@
   </action>
   <action name="actionMooseCppDocumentation">
    <property name="text">
-    <string>MOOSE C++ documentation</string>
+    <string>C++ API documentation</string>
    </property>
    <property name="toolTip">
     <string>Documentation generated from C++ sources by Doxygen</string>
+   </property>
+  </action>
+  <action name="actionBuiltInDocumentation">
+   <property name="text">
+    <string>Built-in documentation</string>
+   </property>
+   <property name="toolTip">
+    <string>Read built-in documentation at one place</string>
    </property>
   </action>
   <zorder>moosePopulationEditDock</zorder>

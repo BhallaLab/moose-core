@@ -131,6 +131,9 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         
     def showMooseGuiDocumentation(self):
         self.showDocumentation('MooseGuiDocs.html')
+
+    def showBuiltInDocumentation(self):
+        self.showDocumentation('moosebuiltindocs.html')
         
 #    def resizeCentralWidgets(self):
 #        widthOfEach =  int((self.layoutWidget.width()+self.plotMdiArea.width())/2)
@@ -148,6 +151,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.connect(self.actionNkitDocumentation, QtCore.SIGNAL('triggered()'), self.showNkitDocumentation)
         self.connect(self.actionPyMooseWalkThrough, QtCore.SIGNAL('triggered()'), self.showPyMooseWalkThrough)
         self.connect(self.actionMooseGuiDocumentation, QtCore.SIGNAL('triggered()'), self.showMooseGuiDocumentation)
+        self.connect(self.actionBuiltInDocumentation, QtCore.SIGNAL('triggered()'), self.showBuiltInDocumentation)
         self.connect(self.actionReport_a_Bug, QtCore.SIGNAL('triggered()'), self.reportBug)
         self.actionDemos.setVisible(False)
 
