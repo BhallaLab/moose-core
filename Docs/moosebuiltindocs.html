@@ -3,12 +3,12 @@
                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<title>MOOSE Classes' Built-in Documentation</title>
+<title>Documentation for all MOOSE classes and functions</title>
 <meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
-<meta name="title" content="MOOSE Classes' Built-in Documentation"/>
+<meta name="title" content="Documentation for all MOOSE classes and functions"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-10-04 16:27:18 IST"/>
-<meta name="author" content=""/>
+<meta name="generated" content="2012-10-04 20:12:08 IST"/>
+<meta name="author" content="Automatically extracted on 2012-10-04T20:11:55.291611"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
 <style type="text/css">
@@ -91,125 +91,174 @@
 </div>
 
 <div id="content">
-<h1 class="title">MOOSE Classes' Built-in Documentation</h1>
+<h1 class="title">Documentation for all MOOSE classes and functions</h1>
 
-<p><i>automatically extracted on 2012-10-04T16:26:57.313801</i>
+<p><i>As visible in Python module</i>
 </p>
-
-
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#sec-1">1 Annotator</a></li>
-<li><a href="#sec-2">2 Arith</a></li>
-<li><a href="#sec-3">3 Boundary</a></li>
-<li><a href="#sec-4">4 BufPool</a></li>
-<li><a href="#sec-5">5 CaConc</a></li>
-<li><a href="#sec-6">6 ChanBase</a></li>
-<li><a href="#sec-7">7 ChemMesh</a></li>
-<li><a href="#sec-8">8 Cinfo</a></li>
-<li><a href="#sec-9">9 Clock</a></li>
-<li><a href="#sec-10">10 Compartment</a></li>
-<li><a href="#sec-11">11 CplxEnzBase</a></li>
-<li><a href="#sec-12">12 CubeMesh</a></li>
-<li><a href="#sec-13">13 CylMesh</a></li>
-<li><a href="#sec-14">14 CylPanel</a></li>
-<li><a href="#sec-15">15 DiagonalMsg</a></li>
-<li><a href="#sec-16">16 DiffAmp</a></li>
-<li><a href="#sec-17">17 DiskPanel</a></li>
-<li><a href="#sec-18">18 Enz</a></li>
-<li><a href="#sec-19">19 EnzBase</a></li>
-<li><a href="#sec-20">20 Finfo</a></li>
-<li><a href="#sec-21">21 FuncPool</a></li>
-<li><a href="#sec-22">22 GHK</a></li>
-<li><a href="#sec-23">23 Geometry</a></li>
-<li><a href="#sec-24">24 Group</a></li>
-<li><a href="#sec-25">25 GslIntegrator</a></li>
-<li><a href="#sec-26">26 GssaStoich</a></li>
-<li><a href="#sec-27">27 HDF5DataWriter</a></li>
-<li><a href="#sec-28">28 HDF5WriterBase</a></li>
-<li><a href="#sec-29">29 HHChannel</a></li>
-<li><a href="#sec-30">30 HHChannel2D</a></li>
-<li><a href="#sec-31">31 HHGate</a></li>
-<li><a href="#sec-32">32 HHGate2D</a></li>
-<li><a href="#sec-33">33 HSolve</a></li>
-<li><a href="#sec-34">34 HemispherePanel</a></li>
-<li><a href="#sec-35">35 IntFire</a></li>
-<li><a href="#sec-36">36 Interpol2D</a></li>
-<li><a href="#sec-37">37 IzhikevichNrn</a></li>
-<li><a href="#sec-38">38 LeakyIaF</a></li>
-<li><a href="#sec-39">39 MMenz</a></li>
-<li><a href="#sec-40">40 MarkovChannel</a></li>
-<li><a href="#sec-41">41 MarkovGslSolver</a></li>
-<li><a href="#sec-42">42 MarkovRateTable</a></li>
-<li><a href="#sec-43">43 MarkovSolver</a></li>
-<li><a href="#sec-44">44 MarkovSolverBase</a></li>
-<li><a href="#sec-45">45 MathFunc</a></li>
-<li><a href="#sec-46">46 Mdouble</a></li>
-<li><a href="#sec-47">47 MeshEntry</a></li>
-<li><a href="#sec-48">48 MgBlock</a></li>
-<li><a href="#sec-49">49 Msg</a></li>
-<li><a href="#sec-50">50 Mstring</a></li>
-<li><a href="#sec-51">51 NMDAChan</a></li>
-<li><a href="#sec-52">52 Nernst</a></li>
-<li><a href="#sec-53">53 NeuroMesh</a></li>
-<li><a href="#sec-54">54 Neuron</a></li>
-<li><a href="#sec-55">55 Neutral</a></li>
-<li><a href="#sec-56">56 OneToAllMsg</a></li>
-<li><a href="#sec-57">57 OneToOneMsg</a></li>
-<li><a href="#sec-58">58 PIDController</a></li>
-<li><a href="#sec-59">59 Panel</a></li>
-<li><a href="#sec-60">60 Pool</a></li>
-<li><a href="#sec-61">61 PoolBase</a></li>
-<li><a href="#sec-62">62 Port</a></li>
-<li><a href="#sec-63">63 PulseGen</a></li>
-<li><a href="#sec-64">64 RC</a></li>
-<li><a href="#sec-65">65 Reac</a></li>
-<li><a href="#sec-66">66 ReacBase</a></li>
-<li><a href="#sec-67">67 RectPanel</a></li>
-<li><a href="#sec-68">68 ReduceMsg</a></li>
-<li><a href="#sec-69">69 Shell</a></li>
-<li><a href="#sec-70">70 SimManager</a></li>
-<li><a href="#sec-71">71 SingleMsg</a></li>
-<li><a href="#sec-72">72 SparseMsg</a></li>
-<li><a href="#sec-73">73 Species</a></li>
-<li><a href="#sec-74">74 SpherePanel</a></li>
-<li><a href="#sec-75">75 SpikeGen</a></li>
-<li><a href="#sec-76">76 Stats</a></li>
-<li><a href="#sec-77">77 StimulusTable</a></li>
-<li><a href="#sec-78">78 Stoich</a></li>
-<li><a href="#sec-79">79 SumFunc</a></li>
-<li><a href="#sec-80">80 Surface</a></li>
-<li><a href="#sec-81">81 SymCompartment</a></li>
-<li><a href="#sec-82">82 SynBase</a></li>
-<li><a href="#sec-83">83 SynChan</a></li>
-<li><a href="#sec-84">84 SynChanBase</a></li>
-<li><a href="#sec-85">85 Synapse</a></li>
-<li><a href="#sec-86">86 Table</a></li>
-<li><a href="#sec-87">87 TableBase</a></li>
-<li><a href="#sec-88">88 TableEntry</a></li>
-<li><a href="#sec-89">89 Tick</a></li>
-<li><a href="#sec-90">90 TriPanel</a></li>
-<li><a href="#sec-91">91 VectorTable</a></li>
-<li><a href="#sec-92">92 ZombieBufPool</a></li>
-<li><a href="#sec-93">93 ZombieCaConc</a></li>
-<li><a href="#sec-94">94 ZombieCompartment</a></li>
-<li><a href="#sec-95">95 ZombieEnz</a></li>
-<li><a href="#sec-96">96 ZombieFuncPool</a></li>
-<li><a href="#sec-97">97 ZombieHHChannel</a></li>
-<li><a href="#sec-98">98 ZombieMMenz</a></li>
-<li><a href="#sec-99">99 ZombiePool</a></li>
-<li><a href="#sec-100">100 ZombieReac</a></li>
-<li><a href="#sec-101">101 ZombieSumFunc</a></li>
-<li><a href="#sec-102">102 testSched</a></li>
+<li><a href="#sec-1">1 MOOSE Classes</a>
+<ul>
+<li><a href="#sec-1-1">1.1 Annotator</a></li>
+<li><a href="#sec-1-2">1.2 Arith</a></li>
+<li><a href="#sec-1-3">1.3 Boundary</a></li>
+<li><a href="#sec-1-4">1.4 BufPool</a></li>
+<li><a href="#sec-1-5">1.5 CaConc</a></li>
+<li><a href="#sec-1-6">1.6 ChanBase</a></li>
+<li><a href="#sec-1-7">1.7 ChemMesh</a></li>
+<li><a href="#sec-1-8">1.8 Cinfo</a></li>
+<li><a href="#sec-1-9">1.9 Clock</a></li>
+<li><a href="#sec-1-10">1.10 Compartment</a></li>
+<li><a href="#sec-1-11">1.11 CplxEnzBase</a></li>
+<li><a href="#sec-1-12">1.12 CubeMesh</a></li>
+<li><a href="#sec-1-13">1.13 CylMesh</a></li>
+<li><a href="#sec-1-14">1.14 CylPanel</a></li>
+<li><a href="#sec-1-15">1.15 DiagonalMsg</a></li>
+<li><a href="#sec-1-16">1.16 DiffAmp</a></li>
+<li><a href="#sec-1-17">1.17 DiskPanel</a></li>
+<li><a href="#sec-1-18">1.18 Enz</a></li>
+<li><a href="#sec-1-19">1.19 EnzBase</a></li>
+<li><a href="#sec-1-20">1.20 Finfo</a></li>
+<li><a href="#sec-1-21">1.21 FuncPool</a></li>
+<li><a href="#sec-1-22">1.22 GHK</a></li>
+<li><a href="#sec-1-23">1.23 Geometry</a></li>
+<li><a href="#sec-1-24">1.24 Group</a></li>
+<li><a href="#sec-1-25">1.25 GslIntegrator</a></li>
+<li><a href="#sec-1-26">1.26 GssaStoich</a></li>
+<li><a href="#sec-1-27">1.27 HDF5DataWriter</a></li>
+<li><a href="#sec-1-28">1.28 HDF5WriterBase</a></li>
+<li><a href="#sec-1-29">1.29 HHChannel</a></li>
+<li><a href="#sec-1-30">1.30 HHChannel2D</a></li>
+<li><a href="#sec-1-31">1.31 HHGate</a></li>
+<li><a href="#sec-1-32">1.32 HHGate2D</a></li>
+<li><a href="#sec-1-33">1.33 HSolve</a></li>
+<li><a href="#sec-1-34">1.34 HemispherePanel</a></li>
+<li><a href="#sec-1-35">1.35 IntFire</a></li>
+<li><a href="#sec-1-36">1.36 Interpol2D</a></li>
+<li><a href="#sec-1-37">1.37 IzhikevichNrn</a></li>
+<li><a href="#sec-1-38">1.38 LeakyIaF</a></li>
+<li><a href="#sec-1-39">1.39 MMenz</a></li>
+<li><a href="#sec-1-40">1.40 MarkovChannel</a></li>
+<li><a href="#sec-1-41">1.41 MarkovGslSolver</a></li>
+<li><a href="#sec-1-42">1.42 MarkovRateTable</a></li>
+<li><a href="#sec-1-43">1.43 MarkovSolver</a></li>
+<li><a href="#sec-1-44">1.44 MarkovSolverBase</a></li>
+<li><a href="#sec-1-45">1.45 MathFunc</a></li>
+<li><a href="#sec-1-46">1.46 Mdouble</a></li>
+<li><a href="#sec-1-47">1.47 MeshEntry</a></li>
+<li><a href="#sec-1-48">1.48 MgBlock</a></li>
+<li><a href="#sec-1-49">1.49 Msg</a></li>
+<li><a href="#sec-1-50">1.50 Mstring</a></li>
+<li><a href="#sec-1-51">1.51 NMDAChan</a></li>
+<li><a href="#sec-1-52">1.52 Nernst</a></li>
+<li><a href="#sec-1-53">1.53 NeuroMesh</a></li>
+<li><a href="#sec-1-54">1.54 Neuron</a></li>
+<li><a href="#sec-1-55">1.55 Neutral</a></li>
+<li><a href="#sec-1-56">1.56 OneToAllMsg</a></li>
+<li><a href="#sec-1-57">1.57 OneToOneMsg</a></li>
+<li><a href="#sec-1-58">1.58 PIDController</a></li>
+<li><a href="#sec-1-59">1.59 Panel</a></li>
+<li><a href="#sec-1-60">1.60 Pool</a></li>
+<li><a href="#sec-1-61">1.61 PoolBase</a></li>
+<li><a href="#sec-1-62">1.62 Port</a></li>
+<li><a href="#sec-1-63">1.63 PulseGen</a></li>
+<li><a href="#sec-1-64">1.64 RC</a></li>
+<li><a href="#sec-1-65">1.65 Reac</a></li>
+<li><a href="#sec-1-66">1.66 ReacBase</a></li>
+<li><a href="#sec-1-67">1.67 RectPanel</a></li>
+<li><a href="#sec-1-68">1.68 ReduceMsg</a></li>
+<li><a href="#sec-1-69">1.69 Shell</a></li>
+<li><a href="#sec-1-70">1.70 SimManager</a></li>
+<li><a href="#sec-1-71">1.71 SingleMsg</a></li>
+<li><a href="#sec-1-72">1.72 SparseMsg</a></li>
+<li><a href="#sec-1-73">1.73 Species</a></li>
+<li><a href="#sec-1-74">1.74 SpherePanel</a></li>
+<li><a href="#sec-1-75">1.75 SpikeGen</a></li>
+<li><a href="#sec-1-76">1.76 Stats</a></li>
+<li><a href="#sec-1-77">1.77 StimulusTable</a></li>
+<li><a href="#sec-1-78">1.78 Stoich</a></li>
+<li><a href="#sec-1-79">1.79 SumFunc</a></li>
+<li><a href="#sec-1-80">1.80 Surface</a></li>
+<li><a href="#sec-1-81">1.81 SymCompartment</a></li>
+<li><a href="#sec-1-82">1.82 SynBase</a></li>
+<li><a href="#sec-1-83">1.83 SynChan</a></li>
+<li><a href="#sec-1-84">1.84 SynChanBase</a></li>
+<li><a href="#sec-1-85">1.85 Synapse</a></li>
+<li><a href="#sec-1-86">1.86 Table</a></li>
+<li><a href="#sec-1-87">1.87 TableBase</a></li>
+<li><a href="#sec-1-88">1.88 TableEntry</a></li>
+<li><a href="#sec-1-89">1.89 Tick</a></li>
+<li><a href="#sec-1-90">1.90 TriPanel</a></li>
+<li><a href="#sec-1-91">1.91 VectorTable</a></li>
+<li><a href="#sec-1-92">1.92 ZombieBufPool</a></li>
+<li><a href="#sec-1-93">1.93 ZombieCaConc</a></li>
+<li><a href="#sec-1-94">1.94 ZombieCompartment</a></li>
+<li><a href="#sec-1-95">1.95 ZombieEnz</a></li>
+<li><a href="#sec-1-96">1.96 ZombieFuncPool</a></li>
+<li><a href="#sec-1-97">1.97 ZombieHHChannel</a></li>
+<li><a href="#sec-1-98">1.98 ZombieMMenz</a></li>
+<li><a href="#sec-1-99">1.99 ZombiePool</a></li>
+<li><a href="#sec-1-100">1.100 ZombieReac</a></li>
+<li><a href="#sec-1-101">1.101 ZombieSumFunc</a></li>
+<li><a href="#sec-1-102">1.102 testSched</a></li>
+</ul>
+</li>
+<li><a href="#sec-2">2 MOOSE Functions</a>
+<ul>
+<li><a href="#sec-2-1">2.1 ce</a></li>
+<li><a href="#sec-2-2">2.2 connect</a></li>
+<li><a href="#sec-2-3">2.3 copy</a></li>
+<li><a href="#sec-2-4">2.4 delete</a></li>
+<li><a href="#sec-2-5">2.5 element</a></li>
+<li><a href="#sec-2-6">2.6 exists</a></li>
+<li><a href="#sec-2-7">2.7 getCwe</a></li>
+<li><a href="#sec-2-8">2.8 getField</a></li>
+<li><a href="#sec-2-9">2.9 getFieldDict</a></li>
+<li><a href="#sec-2-10">2.10 getFieldNames</a></li>
+<li><a href="#sec-2-11">2.11 isRunning</a></li>
+<li><a href="#sec-2-12">2.12 loadModel</a></li>
+<li><a href="#sec-2-13">2.13 move</a></li>
+<li><a href="#sec-2-14">2.14 quit</a></li>
+<li><a href="#sec-2-15">2.15 reinit</a></li>
+<li><a href="#sec-2-16">2.16 saveModel</a></li>
+<li><a href="#sec-2-17">2.17 seed</a></li>
+<li><a href="#sec-2-18">2.18 setClock</a></li>
+<li><a href="#sec-2-19">2.19 setCwe</a></li>
+<li><a href="#sec-2-20">2.20 start</a></li>
+<li><a href="#sec-2-21">2.21 stop</a></li>
+<li><a href="#sec-2-22">2.22 useClock</a></li>
+<li><a href="#sec-2-23">2.23 wildcardFind</a></li>
+<li><a href="#sec-2-24">2.24 writeSBML</a></li>
+<li><a href="#sec-2-25">2.25 doc</a></li>
+<li><a href="#sec-2-26">2.26 getfielddoc</a></li>
+<li><a href="#sec-2-27">2.27 getmoosedoc</a></li>
+<li><a href="#sec-2-28">2.28 le</a></li>
+<li><a href="#sec-2-29">2.29 listmsg</a></li>
+<li><a href="#sec-2-30">2.30 pwe</a></li>
+<li><a href="#sec-2-31">2.31 showfield</a></li>
+<li><a href="#sec-2-32">2.32 showfields</a></li>
+<li><a href="#sec-2-33">2.33 showmsg</a></li>
+<li><a href="#sec-2-34">2.34 syncDataHandler</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-1" class="outline-3">
-<h3 id="sec-1"><span class="section-number-3">1</span> Annotator</h3>
-<div class="outline-text-3" id="text-1">
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> MOOSE Classes</h2>
+<div class="outline-text-2" id="text-1">
+
+
+
+
+</div>
+
+<div id="outline-container-1-1" class="outline-3">
+<h3 id="sec-1-1"><span class="section-number-3">1.1</span> Annotator</h3>
+<div class="outline-text-3" id="text-1-1">
 
 
 <ul>
@@ -303,7 +352,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -313,7 +362,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -321,6 +370,9 @@
 </p>
 </dd>
 </dl>
+
+</li>
+<li><b>Shared message field</b>
 
 </li>
 <li><b>Lookup field</b>
@@ -339,9 +391,9 @@
 
 </div>
 
-<div id="outline-container-2" class="outline-3">
-<h3 id="sec-2"><span class="section-number-3">2</span> Arith</h3>
-<div class="outline-text-3" id="text-2">
+<div id="outline-container-1-2" class="outline-3">
+<h3 id="sec-1-2"><span class="section-number-3">1.2</span> Arith</h3>
+<div class="outline-text-3" id="text-1-2">
 
 
 <ul>
@@ -419,7 +471,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -433,7 +485,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -467,6 +519,16 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message for process and reinit
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -487,9 +549,9 @@
 
 </div>
 
-<div id="outline-container-3" class="outline-3">
-<h3 id="sec-3"><span class="section-number-3">3</span> Boundary</h3>
-<div class="outline-text-3" id="text-3">
+<div id="outline-container-1-3" class="outline-3">
+<h3 id="sec-1-3"><span class="section-number-3">1.3</span> Boundary</h3>
+<div class="outline-text-3" id="text-1-3">
 
 
 <ul>
@@ -559,7 +621,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -577,7 +639,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -593,6 +655,9 @@
 </p>
 </dd>
 </dl>
+
+</li>
+<li><b>Shared message field</b>
 
 </li>
 <li><b>Lookup field</b>
@@ -611,9 +676,9 @@
 
 </div>
 
-<div id="outline-container-4" class="outline-3">
-<h3 id="sec-4"><span class="section-number-3">4</span> BufPool</h3>
-<div class="outline-text-3" id="text-4">
+<div id="outline-container-1-4" class="outline-3">
+<h3 id="sec-1-4"><span class="section-number-3">1.4</span> BufPool</h3>
+<div class="outline-text-3" id="text-1-4">
 
 
 <ul>
@@ -707,7 +772,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -729,7 +794,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -779,6 +844,32 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>reac:    <i>void</i></dt><dd>
+<p>
+       Connects to reaction
+</p></dd>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message for process and reinit
+</p></dd>
+<dt>species: <i>void</i></dt><dd>
+<p>
+       Shared message for connecting to species objects
+</p></dd>
+<dt>mesh:    <i>void</i></dt><dd>
+<p>
+       Shared message for dealing with mesh operations
+</p></dd>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message for process and reinit
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -795,9 +886,9 @@
 
 </div>
 
-<div id="outline-container-5" class="outline-3">
-<h3 id="sec-5"><span class="section-number-3">5</span> CaConc</h3>
-<div class="outline-text-3" id="text-5">
+<div id="outline-container-1-5" class="outline-3">
+<h3 id="sec-1-5"><span class="section-number-3">1.5</span> CaConc</h3>
+<div class="outline-text-3" id="text-1-5">
 
 
 <ul>
@@ -895,7 +986,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -909,7 +1000,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -947,6 +1038,16 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message to receive Process message from scheduler
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -963,9 +1064,9 @@
 
 </div>
 
-<div id="outline-container-6" class="outline-3">
-<h3 id="sec-6"><span class="section-number-3">6</span> ChanBase</h3>
-<div class="outline-text-3" id="text-6">
+<div id="outline-container-1-6" class="outline-3">
+<h3 id="sec-1-6"><span class="section-number-3">1.6</span> ChanBase</h3>
+<div class="outline-text-3" id="text-1-6">
 
 
 <ul>
@@ -1047,7 +1148,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -1069,7 +1170,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -1082,6 +1183,20 @@
 <dt>Vm:      <i>double</i></dt><dd>
 <p>
        Handles Vm message coming in from compartment
+</p>
+</dd>
+</dl>
+
+</li>
+<li><b>Shared message field</b>
+<dl>
+<dt>channel: <i>void</i></dt><dd>
+<p>
+       This is a shared message to couple channel to compartment. The first entry is a MsgSrc to send Gk and Ek to the compartment The second entry is a MsgDest for Vm from the compartment.
+</p></dd>
+<dt>ghk:     <i>void</i></dt><dd>
+<p>
+       Message to Goldman-Hodgkin-Katz object
 </p>
 </dd>
 </dl>
@@ -1103,9 +1218,9 @@
 
 </div>
 
-<div id="outline-container-7" class="outline-3">
-<h3 id="sec-7"><span class="section-number-3">7</span> ChemMesh</h3>
-<div class="outline-text-3" id="text-7">
+<div id="outline-container-1-7" class="outline-3">
+<h3 id="sec-1-7"><span class="section-number-3">1.7</span> ChemMesh</h3>
+<div class="outline-text-3" id="text-1-7">
 
 
 <ul>
@@ -1179,7 +1294,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -1197,7 +1312,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -1219,6 +1334,16 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>nodeMeshing:     <i>void</i></dt><dd>
+<p>
+       Connects to SimManager to coordinate meshing with paralleldecomposition and with the Stoich
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -1235,9 +1360,9 @@
 
 </div>
 
-<div id="outline-container-8" class="outline-3">
-<h3 id="sec-8"><span class="section-number-3">8</span> Cinfo</h3>
-<div class="outline-text-3" id="text-8">
+<div id="outline-container-1-8" class="outline-3">
+<h3 id="sec-1-8"><span class="section-number-3">1.8</span> Cinfo</h3>
+<div class="outline-text-3" id="text-1-8">
 
 <p>   Author:              Upi Bhalla
 </p>
@@ -1318,7 +1443,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -1328,7 +1453,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -1336,6 +1461,9 @@
 </p>
 </dd>
 </dl>
+
+</li>
+<li><b>Shared message field</b>
 
 </li>
 <li><b>Lookup field</b>
@@ -1354,9 +1482,9 @@
 
 </div>
 
-<div id="outline-container-9" class="outline-3">
-<h3 id="sec-9"><span class="section-number-3">9</span> Clock</h3>
-<div class="outline-text-3" id="text-9">
+<div id="outline-container-1-9" class="outline-3">
+<h3 id="sec-1-9"><span class="section-number-3">1.9</span> Clock</h3>
+<div class="outline-text-3" id="text-1-9">
 
 
 <ul>
@@ -1450,7 +1578,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -1472,7 +1600,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -1502,6 +1630,16 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>clockControl:    <i>void</i></dt><dd>
+<p>
+       Controls all scheduling aspects of Clock, usually from Shell
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -1518,9 +1656,9 @@
 
 </div>
 
-<div id="outline-container-10" class="outline-3">
-<h3 id="sec-10"><span class="section-number-3">10</span> Compartment</h3>
-<div class="outline-text-3" id="text-10">
+<div id="outline-container-1-10" class="outline-3">
+<h3 id="sec-1-10"><span class="section-number-3">1.10</span> Compartment</h3>
+<div class="outline-text-3" id="text-1-10">
 
 <p>   Author:              Upi Bhalla
 </p>
@@ -1657,7 +1795,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -1679,7 +1817,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -1733,6 +1871,32 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       This is a shared message to receive Process messages from the scheduler objects. The Process should be called <span style="text-decoration:underline;">second</span> in each clock tick, after the Init message.The first entry in the shared msg is a MsgDest for the Process operation. It has a single argument, ProcInfo, which holds lots of information about current time, thread, dt and so on. The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo. 
+</p></dd>
+<dt>init:    <i>void</i></dt><dd>
+<p>
+       This is a shared message to receive Init messages from the scheduler objects. Its job is to separate the compartmental calculations from the message passing. It doesn't really need to be shared, as it does not use the reinit part, but the scheduler objects expect this form of message for all scheduled output. The first entry is a MsgDest for the Process operation. It has a single argument, ProcInfo, which holds lots of information about current time, thread, dt and so on. The second entry is a dummy MsgDest for the Reinit operation. It also uses ProcInfo. 
+</p></dd>
+<dt>channel: <i>void</i></dt><dd>
+<p>
+       This is a shared message from a compartment to channels. The first entry is a MsgDest for the info coming from the channel. It expects Gk and Ek from the channel as args. The second entry is a MsgSrc sending Vm 
+</p></dd>
+<dt>axial:   <i>void</i></dt><dd>
+<p>
+       This is a shared message between asymmetric compartments. axial messages (this kind) connect up to raxial messages (defined below). The soma should use raxial messages to connect to the axial message of all the immediately adjacent dendritic compartments.This puts the (low) somatic resistance in series with these dendrites. Dendrites should then use raxial messages toconnect on to more distal dendrites. In other words, raxial messages should face outward from the soma. The first entry is a MsgSrc sending Vm to the axialFuncof the target compartment. The second entry is a MsgDest for the info coming from the other compt. It expects Ra and Vm from the other compt as args. Note that the message is named after the source type. 
+</p></dd>
+<dt>raxial:  <i>void</i></dt><dd>
+<p>
+       This is a raxial shared message between asymmetric compartments. The first entry is a MsgDest for the info coming from the other compt. It expects Vm from the other compt as an arg. The second is a MsgSrc sending Ra and Vm to the raxialFunc of the target compartment. 
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -1749,9 +1913,9 @@
 
 </div>
 
-<div id="outline-container-11" class="outline-3">
-<h3 id="sec-11"><span class="section-number-3">11</span> CplxEnzBase</h3>
-<div class="outline-text-3" id="text-11">
+<div id="outline-container-1-11" class="outline-3">
+<h3 id="sec-1-11"><span class="section-number-3">1.11</span> CplxEnzBase</h3>
+<div class="outline-text-3" id="text-1-11">
 
 <p>   Author:              Upi Bhalla
 </p>
@@ -1860,7 +2024,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -1886,7 +2050,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -1928,6 +2092,32 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>sub:     <i>void</i></dt><dd>
+<p>
+       Connects to substrate molecule
+</p></dd>
+<dt>prd:     <i>void</i></dt><dd>
+<p>
+       Connects to product molecule
+</p></dd>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message for process and reinit
+</p></dd>
+<dt>enz:     <i>void</i></dt><dd>
+<p>
+       Connects to enzyme pool
+</p></dd>
+<dt>cplx:    <i>void</i></dt><dd>
+<p>
+       Connects to enz-sub complex pool
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -1944,9 +2134,9 @@
 
 </div>
 
-<div id="outline-container-12" class="outline-3">
-<h3 id="sec-12"><span class="section-number-3">12</span> CubeMesh</h3>
-<div class="outline-text-3" id="text-12">
+<div id="outline-container-1-12" class="outline-3">
+<h3 id="sec-1-12"><span class="section-number-3">1.12</span> CubeMesh</h3>
+<div class="outline-text-3" id="text-1-12">
 
 
 <ul>
@@ -2088,7 +2278,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -2106,7 +2296,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -2128,6 +2318,16 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>nodeMeshing:     <i>void</i></dt><dd>
+<p>
+       Connects to SimManager to coordinate meshing with paralleldecomposition and with the Stoich
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -2144,9 +2344,9 @@
 
 </div>
 
-<div id="outline-container-13" class="outline-3">
-<h3 id="sec-13"><span class="section-number-3">13</span> CylMesh</h3>
-<div class="outline-text-3" id="text-13">
+<div id="outline-container-1-13" class="outline-3">
+<h3 id="sec-1-13"><span class="section-number-3">1.13</span> CylMesh</h3>
+<div class="outline-text-3" id="text-1-13">
 
 
 <ul>
@@ -2264,7 +2464,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -2282,7 +2482,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -2304,6 +2504,16 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>nodeMeshing:     <i>void</i></dt><dd>
+<p>
+       Connects to SimManager to coordinate meshing with paralleldecomposition and with the Stoich
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -2320,9 +2530,9 @@
 
 </div>
 
-<div id="outline-container-14" class="outline-3">
-<h3 id="sec-14"><span class="section-number-3">14</span> CylPanel</h3>
-<div class="outline-text-3" id="text-14">
+<div id="outline-container-1-14" class="outline-3">
+<h3 id="sec-1-14"><span class="section-number-3">1.14</span> CylPanel</h3>
+<div class="outline-text-3" id="text-1-14">
 
 
 <ul>
@@ -2408,7 +2618,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -2422,7 +2632,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -2434,6 +2644,9 @@
 </p>
 </dd>
 </dl>
+
+</li>
+<li><b>Shared message field</b>
 
 </li>
 <li><b>Lookup field</b>
@@ -2464,9 +2677,9 @@
 
 </div>
 
-<div id="outline-container-15" class="outline-3">
-<h3 id="sec-15"><span class="section-number-3">15</span> DiagonalMsg</h3>
-<div class="outline-text-3" id="text-15">
+<div id="outline-container-1-15" class="outline-3">
+<h3 id="sec-1-15"><span class="section-number-3">1.15</span> DiagonalMsg</h3>
+<div class="outline-text-3" id="text-1-15">
 
 
 <ul>
@@ -2560,7 +2773,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -2570,7 +2783,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -2578,6 +2791,9 @@
 </p>
 </dd>
 </dl>
+
+</li>
+<li><b>Shared message field</b>
 
 </li>
 <li><b>Lookup field</b>
@@ -2596,9 +2812,9 @@
 
 </div>
 
-<div id="outline-container-16" class="outline-3">
-<h3 id="sec-16"><span class="section-number-3">16</span> DiffAmp</h3>
-<div class="outline-text-3" id="text-16">
+<div id="outline-container-1-16" class="outline-3">
+<h3 id="sec-1-16"><span class="section-number-3">1.16</span> DiffAmp</h3>
+<div class="outline-text-3" id="text-1-16">
 
 
 <ul>
@@ -2676,7 +2892,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -2690,7 +2906,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -2720,6 +2936,16 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       This is a shared message to receive Process messages from the scheduler objects.The first entry in the shared msg is a MsgDest for the Process operation. It has a single argument, ProcInfo, which holds lots of information about current time, thread, dt and so on. The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo. 
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -2736,9 +2962,9 @@
 
 </div>
 
-<div id="outline-container-17" class="outline-3">
-<h3 id="sec-17"><span class="section-number-3">17</span> DiskPanel</h3>
-<div class="outline-text-3" id="text-17">
+<div id="outline-container-1-17" class="outline-3">
+<h3 id="sec-1-17"><span class="section-number-3">1.17</span> DiskPanel</h3>
+<div class="outline-text-3" id="text-1-17">
 
 
 <ul>
@@ -2824,7 +3050,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -2838,7 +3064,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -2850,6 +3076,9 @@
 </p>
 </dd>
 </dl>
+
+</li>
+<li><b>Shared message field</b>
 
 </li>
 <li><b>Lookup field</b>
@@ -2880,9 +3109,9 @@
 
 </div>
 
-<div id="outline-container-18" class="outline-3">
-<h3 id="sec-18"><span class="section-number-3">18</span> Enz</h3>
-<div class="outline-text-3" id="text-18">
+<div id="outline-container-1-18" class="outline-3">
+<h3 id="sec-1-18"><span class="section-number-3">1.18</span> Enz</h3>
+<div class="outline-text-3" id="text-1-18">
 
 
 <ul>
@@ -2984,7 +3213,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -3010,7 +3239,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -3052,6 +3281,32 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>sub:     <i>void</i></dt><dd>
+<p>
+       Connects to substrate molecule
+</p></dd>
+<dt>prd:     <i>void</i></dt><dd>
+<p>
+       Connects to product molecule
+</p></dd>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message for process and reinit
+</p></dd>
+<dt>enz:     <i>void</i></dt><dd>
+<p>
+       Connects to enzyme pool
+</p></dd>
+<dt>cplx:    <i>void</i></dt><dd>
+<p>
+       Connects to enz-sub complex pool
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -3068,9 +3323,9 @@
 
 </div>
 
-<div id="outline-container-19" class="outline-3">
-<h3 id="sec-19"><span class="section-number-3">19</span> EnzBase</h3>
-<div class="outline-text-3" id="text-19">
+<div id="outline-container-1-19" class="outline-3">
+<h3 id="sec-1-19"><span class="section-number-3">1.19</span> EnzBase</h3>
+<div class="outline-text-3" id="text-1-19">
 
 
 <ul>
@@ -3152,7 +3407,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -3170,7 +3425,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -3204,6 +3459,24 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>sub:     <i>void</i></dt><dd>
+<p>
+       Connects to substrate molecule
+</p></dd>
+<dt>prd:     <i>void</i></dt><dd>
+<p>
+       Connects to product molecule
+</p></dd>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message for process and reinit
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -3220,9 +3493,9 @@
 
 </div>
 
-<div id="outline-container-20" class="outline-3">
-<h3 id="sec-20"><span class="section-number-3">20</span> Finfo</h3>
-<div class="outline-text-3" id="text-20">
+<div id="outline-container-1-20" class="outline-3">
+<h3 id="sec-1-20"><span class="section-number-3">1.20</span> Finfo</h3>
+<div class="outline-text-3" id="text-1-20">
 
 
 <ul>
@@ -3308,7 +3581,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -3318,7 +3591,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -3326,6 +3599,9 @@
 </p>
 </dd>
 </dl>
+
+</li>
+<li><b>Shared message field</b>
 
 </li>
 <li><b>Lookup field</b>
@@ -3344,9 +3620,9 @@
 
 </div>
 
-<div id="outline-container-21" class="outline-3">
-<h3 id="sec-21"><span class="section-number-3">21</span> FuncPool</h3>
-<div class="outline-text-3" id="text-21">
+<div id="outline-container-1-21" class="outline-3">
+<h3 id="sec-1-21"><span class="section-number-3">1.21</span> FuncPool</h3>
+<div class="outline-text-3" id="text-1-21">
 
 
 <ul>
@@ -3440,7 +3716,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -3462,7 +3738,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -3508,6 +3784,28 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>reac:    <i>void</i></dt><dd>
+<p>
+       Connects to reaction
+</p></dd>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message for process and reinit
+</p></dd>
+<dt>species: <i>void</i></dt><dd>
+<p>
+       Shared message for connecting to species objects
+</p></dd>
+<dt>mesh:    <i>void</i></dt><dd>
+<p>
+       Shared message for dealing with mesh operations
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -3524,9 +3822,9 @@
 
 </div>
 
-<div id="outline-container-22" class="outline-3">
-<h3 id="sec-22"><span class="section-number-3">22</span> GHK</h3>
-<div class="outline-text-3" id="text-22">
+<div id="outline-container-1-22" class="outline-3">
+<h3 id="sec-1-22"><span class="section-number-3">1.22</span> GHK</h3>
+<div class="outline-text-3" id="text-1-22">
 
 
 <ul>
@@ -3628,7 +3926,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -3650,7 +3948,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -3684,6 +3982,20 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>channel: <i>void</i></dt><dd>
+<p>
+       This is a shared message to couple channel to compartment. The first entry is a MsgSrc to send Gk and Ek to the compartment The second entry is a MsgDest for Vm from the compartment.
+</p></dd>
+<dt>ghk:     <i>void</i></dt><dd>
+<p>
+       Message from channel to current Goldman-Hodgkin-Katz objectThis shared message connects to an HHChannel. The first entry is a MsgSrc which relays the Vm received from a compartment. The second entry is a MsgDest which receives channel conductance, and interprets it as permeability.
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -3700,9 +4012,9 @@
 
 </div>
 
-<div id="outline-container-23" class="outline-3">
-<h3 id="sec-23"><span class="section-number-3">23</span> Geometry</h3>
-<div class="outline-text-3" id="text-23">
+<div id="outline-container-1-23" class="outline-3">
+<h3 id="sec-1-23"><span class="section-number-3">1.23</span> Geometry</h3>
+<div class="outline-text-3" id="text-1-23">
 
 
 <ul>
@@ -3776,7 +4088,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -3790,7 +4102,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -3799,6 +4111,16 @@
 <dt>handleSizeRequest:       <i>void</i></dt><dd>
 <p>
        Handles a request for size. Part of SharedMsg to ChemCompt.
+</p>
+</dd>
+</dl>
+
+</li>
+<li><b>Shared message field</b>
+<dl>
+<dt>compt:   <i>void</i></dt><dd>
+<p>
+       Connects to compartment(s) to specify geometry.
 </p>
 </dd>
 </dl>
@@ -3820,9 +4142,9 @@
 
 </div>
 
-<div id="outline-container-24" class="outline-3">
-<h3 id="sec-24"><span class="section-number-3">24</span> Group</h3>
-<div class="outline-text-3" id="text-24">
+<div id="outline-container-1-24" class="outline-3">
+<h3 id="sec-1-24"><span class="section-number-3">1.24</span> Group</h3>
+<div class="outline-text-3" id="text-1-24">
 
 
 <ul>
@@ -3888,7 +4210,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -3902,7 +4224,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -3910,6 +4232,9 @@
 </p>
 </dd>
 </dl>
+
+</li>
+<li><b>Shared message field</b>
 
 </li>
 <li><b>Lookup field</b>
@@ -3928,9 +4253,9 @@
 
 </div>
 
-<div id="outline-container-25" class="outline-3">
-<h3 id="sec-25"><span class="section-number-3">25</span> GslIntegrator</h3>
-<div class="outline-text-3" id="text-25">
+<div id="outline-container-1-25" class="outline-3">
+<h3 id="sec-1-25"><span class="section-number-3">1.25</span> GslIntegrator</h3>
+<div class="outline-text-3" id="text-1-25">
 
 
 <ul>
@@ -4012,7 +4337,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -4022,7 +4347,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -4048,6 +4373,16 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message for process and reinit
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -4064,9 +4399,9 @@
 
 </div>
 
-<div id="outline-container-26" class="outline-3">
-<h3 id="sec-26"><span class="section-number-3">26</span> GssaStoich</h3>
-<div class="outline-text-3" id="text-26">
+<div id="outline-container-1-26" class="outline-3">
+<h3 id="sec-1-26"><span class="section-number-3">1.26</span> GssaStoich</h3>
+<div class="outline-text-3" id="text-1-26">
 
 <p>   Author:              Upinder S. Bhalla, 2008, 2011, NCBS
 </p>
@@ -4168,7 +4503,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -4186,7 +4521,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -4208,6 +4543,16 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message for process and reinit
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -4224,9 +4569,9 @@
 
 </div>
 
-<div id="outline-container-27" class="outline-3">
-<h3 id="sec-27"><span class="section-number-3">27</span> HDF5DataWriter</h3>
-<div class="outline-text-3" id="text-27">
+<div id="outline-container-1-27" class="outline-3">
+<h3 id="sec-1-27"><span class="section-number-3">1.27</span> HDF5DataWriter</h3>
+<div class="outline-text-3" id="text-1-27">
 
 <p>   Author:              Subhasis Ray
 </p>
@@ -4311,7 +4656,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -4329,7 +4674,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -4355,6 +4700,16 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message to receive process and reinit
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -4371,9 +4726,9 @@
 
 </div>
 
-<div id="outline-container-28" class="outline-3">
-<h3 id="sec-28"><span class="section-number-3">28</span> HDF5WriterBase</h3>
-<div class="outline-text-3" id="text-28">
+<div id="outline-container-1-28" class="outline-3">
+<h3 id="sec-1-28"><span class="section-number-3">1.28</span> HDF5WriterBase</h3>
+<div class="outline-text-3" id="text-1-28">
 
 
 <ul>
@@ -4451,7 +4806,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -4461,7 +4816,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -4473,6 +4828,9 @@
 </p>
 </dd>
 </dl>
+
+</li>
+<li><b>Shared message field</b>
 
 </li>
 <li><b>Lookup field</b>
@@ -4491,9 +4849,9 @@
 
 </div>
 
-<div id="outline-container-29" class="outline-3">
-<h3 id="sec-29"><span class="section-number-3">29</span> HHChannel</h3>
-<div class="outline-text-3" id="text-29">
+<div id="outline-container-1-29" class="outline-3">
+<h3 id="sec-1-29"><span class="section-number-3">1.29</span> HHChannel</h3>
+<div class="outline-text-3" id="text-1-29">
 
 
 <ul>
@@ -4607,7 +4965,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -4629,7 +4987,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -4663,6 +5021,25 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>channel: <i>void</i></dt><dd>
+<p>
+       This is a shared message to couple channel to compartment. The first entry is a MsgSrc to send Gk and Ek to the compartment The second entry is a MsgDest for Vm from the compartment.
+</p></dd>
+<dt>ghk:     <i>void</i></dt><dd>
+<p>
+       Message to Goldman-Hodgkin-Katz object
+</p></dd>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       This is a shared message to receive Process message from thescheduler. The first entry is a MsgDest for the Process operation. It has a single argument, ProcInfo, which holds lots of information about current time, thread, dt andso on.
+        The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo.
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -4679,9 +5056,9 @@
 
 </div>
 
-<div id="outline-container-30" class="outline-3">
-<h3 id="sec-30"><span class="section-number-3">30</span> HHChannel2D</h3>
-<div class="outline-text-3" id="text-30">
+<div id="outline-container-1-30" class="outline-3">
+<h3 id="sec-1-30"><span class="section-number-3">1.30</span> HHChannel2D</h3>
+<div class="outline-text-3" id="text-1-30">
 
 
 <ul>
@@ -4803,7 +5180,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -4825,7 +5202,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -4859,6 +5236,25 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>channel: <i>void</i></dt><dd>
+<p>
+       This is a shared message to couple channel to compartment. The first entry is a MsgSrc to send Gk and Ek to the compartment The second entry is a MsgDest for Vm from the compartment.
+</p></dd>
+<dt>ghk:     <i>void</i></dt><dd>
+<p>
+       Message to Goldman-Hodgkin-Katz object
+</p></dd>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       This is a shared message to receive Process message from thescheduler. The first entry is a MsgDest for the Process operation. It has a single argument, ProcInfo, which holds lots of information about current time, thread, dt andso on.
+        The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo.
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -4875,9 +5271,9 @@
 
 </div>
 
-<div id="outline-container-31" class="outline-3">
-<h3 id="sec-31"><span class="section-number-3">31</span> HHGate</h3>
-<div class="outline-text-3" id="text-31">
+<div id="outline-container-1-31" class="outline-3">
+<h3 id="sec-1-31"><span class="section-number-3">1.31</span> HHGate</h3>
+<div class="outline-text-3" id="text-1-31">
 
 
 <ul>
@@ -4983,7 +5379,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -4993,7 +5389,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -5023,6 +5419,9 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -5047,9 +5446,9 @@
 
 </div>
 
-<div id="outline-container-32" class="outline-3">
-<h3 id="sec-32"><span class="section-number-3">32</span> HHGate2D</h3>
-<div class="outline-text-3" id="text-32">
+<div id="outline-container-1-32" class="outline-3">
+<h3 id="sec-1-32"><span class="section-number-3">1.32</span> HHGate2D</h3>
+<div class="outline-text-3" id="text-1-32">
 
 
 <ul>
@@ -5115,7 +5514,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -5125,7 +5524,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -5133,6 +5532,9 @@
 </p>
 </dd>
 </dl>
+
+</li>
+<li><b>Shared message field</b>
 
 </li>
 <li><b>Lookup field</b>
@@ -5159,9 +5561,9 @@
 
 </div>
 
-<div id="outline-container-33" class="outline-3">
-<h3 id="sec-33"><span class="section-number-3">33</span> HSolve</h3>
-<div class="outline-text-3" id="text-33">
+<div id="outline-container-1-33" class="outline-3">
+<h3 id="sec-1-33"><span class="section-number-3">1.33</span> HSolve</h3>
+<div class="outline-text-3" id="text-1-33">
 
 
 <ul>
@@ -5267,7 +5669,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -5277,7 +5679,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -5290,6 +5692,16 @@
 <dt>reinit:  <i>void</i></dt><dd>
 <p>
        Handles 'reinit' call: Solver reads in model.
+</p>
+</dd>
+</dl>
+
+</li>
+<li><b>Shared message field</b>
+<dl>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Handles 'reinit' and 'process' calls from a clock.
 </p>
 </dd>
 </dl>
@@ -5311,9 +5723,9 @@
 
 </div>
 
-<div id="outline-container-34" class="outline-3">
-<h3 id="sec-34"><span class="section-number-3">34</span> HemispherePanel</h3>
-<div class="outline-text-3" id="text-34">
+<div id="outline-container-1-34" class="outline-3">
+<h3 id="sec-1-34"><span class="section-number-3">1.34</span> HemispherePanel</h3>
+<div class="outline-text-3" id="text-1-34">
 
 
 <ul>
@@ -5399,7 +5811,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -5413,7 +5825,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -5425,6 +5837,9 @@
 </p>
 </dd>
 </dl>
+
+</li>
+<li><b>Shared message field</b>
 
 </li>
 <li><b>Lookup field</b>
@@ -5455,9 +5870,9 @@
 
 </div>
 
-<div id="outline-container-35" class="outline-3">
-<h3 id="sec-35"><span class="section-number-3">35</span> IntFire</h3>
-<div class="outline-text-3" id="text-35">
+<div id="outline-container-1-35" class="outline-3">
+<h3 id="sec-1-35"><span class="section-number-3">1.35</span> IntFire</h3>
+<div class="outline-text-3" id="text-1-35">
 
 
 <ul>
@@ -5543,7 +5958,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -5557,7 +5972,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -5570,6 +5985,16 @@
 <dt>reinit:  <i>void</i></dt><dd>
 <p>
        Handles reinit call
+</p>
+</dd>
+</dl>
+
+</li>
+<li><b>Shared message field</b>
+<dl>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message for process and reinit
 </p>
 </dd>
 </dl>
@@ -5591,9 +6016,9 @@
 
 </div>
 
-<div id="outline-container-36" class="outline-3">
-<h3 id="sec-36"><span class="section-number-3">36</span> Interpol2D</h3>
-<div class="outline-text-3" id="text-36">
+<div id="outline-container-1-36" class="outline-3">
+<h3 id="sec-1-36"><span class="section-number-3">1.36</span> Interpol2D</h3>
+<div class="outline-text-3" id="text-1-36">
 
 
 <ul>
@@ -5695,7 +6120,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -5709,7 +6134,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -5718,6 +6143,16 @@
 <dt>lookup:  <i>double,double</i></dt><dd>
 <p>
        Looks up table value based on indices v1 and v2, and sendsvalue back using the 'trig' message
+</p>
+</dd>
+</dl>
+
+</li>
+<li><b>Shared message field</b>
+<dl>
+<dt>lookupReturn2D:  <i>void</i></dt><dd>
+<p>
+       This is a shared message for doing lookups on the table. Receives 2 doubles: x, y. Sends back a double with the looked-up z value.
 </p>
 </dd>
 </dl>
@@ -5747,9 +6182,9 @@
 
 </div>
 
-<div id="outline-container-37" class="outline-3">
-<h3 id="sec-37"><span class="section-number-3">37</span> IzhikevichNrn</h3>
-<div class="outline-text-3" id="text-37">
+<div id="outline-container-1-37" class="outline-3">
+<h3 id="sec-1-37"><span class="section-number-3">1.37</span> IzhikevichNrn</h3>
+<div class="outline-text-3" id="text-1-37">
 
 
 <ul>
@@ -5871,7 +6306,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -5889,7 +6324,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -5927,6 +6362,16 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message to receive Process message from scheduler
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -5943,9 +6388,9 @@
 
 </div>
 
-<div id="outline-container-38" class="outline-3">
-<h3 id="sec-38"><span class="section-number-3">38</span> LeakyIaF</h3>
-<div class="outline-text-3" id="text-38">
+<div id="outline-container-1-38" class="outline-3">
+<h3 id="sec-1-38"><span class="section-number-3">1.38</span> LeakyIaF</h3>
+<div class="outline-text-3" id="text-1-38">
 
 
 <ul>
@@ -6051,7 +6496,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -6069,7 +6514,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -6091,6 +6536,16 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message for process and reinit
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -6107,9 +6562,9 @@
 
 </div>
 
-<div id="outline-container-39" class="outline-3">
-<h3 id="sec-39"><span class="section-number-3">39</span> MMenz</h3>
-<div class="outline-text-3" id="text-39">
+<div id="outline-container-1-39" class="outline-3">
+<h3 id="sec-1-39"><span class="section-number-3">1.39</span> MMenz</h3>
+<div class="outline-text-3" id="text-1-39">
 
 
 <ul>
@@ -6191,7 +6646,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -6209,7 +6664,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -6243,6 +6698,24 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>sub:     <i>void</i></dt><dd>
+<p>
+       Connects to substrate molecule
+</p></dd>
+<dt>prd:     <i>void</i></dt><dd>
+<p>
+       Connects to product molecule
+</p></dd>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message for process and reinit
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -6259,9 +6732,9 @@
 
 </div>
 
-<div id="outline-container-40" class="outline-3">
-<h3 id="sec-40"><span class="section-number-3">40</span> MarkovChannel</h3>
-<div class="outline-text-3" id="text-40">
+<div id="outline-container-1-40" class="outline-3">
+<h3 id="sec-1-40"><span class="section-number-3">1.40</span> MarkovChannel</h3>
+<div class="outline-text-3" id="text-1-40">
 
 
 <ul>
@@ -6375,7 +6848,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -6397,7 +6870,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -6435,6 +6908,24 @@
 
 
 <ul>
+<li><b>Shared message field</b>
+<dl>
+<dt>channel: <i>void</i></dt><dd>
+<p>
+       This is a shared message to couple channel to compartment. The first entry is a MsgSrc to send Gk and Ek to the compartment The second entry is a MsgDest for Vm from the compartment.
+</p></dd>
+<dt>ghk:     <i>void</i></dt><dd>
+<p>
+       Message to Goldman-Hodgkin-Katz object
+</p></dd>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       This is a shared message to receive Process message from thescheduler. The first entry is a MsgDest for the Process operation. It has a single argument, ProcInfo, which holds lots of information about current time, thread, dt andso on. The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo.
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -6451,9 +6942,9 @@
 
 </div>
 
-<div id="outline-container-41" class="outline-3">
-<h3 id="sec-41"><span class="section-number-3">41</span> MarkovGslSolver</h3>
-<div class="outline-text-3" id="text-41">
+<div id="outline-container-1-41" class="outline-3">
+<h3 id="sec-1-41"><span class="section-number-3">1.41</span> MarkovGslSolver</h3>
+<div class="outline-text-3" id="text-1-41">
 
 
 <ul>
@@ -6539,7 +7030,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -6553,7 +7044,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -6579,6 +7070,16 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message for process and reinit
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -6595,9 +7096,9 @@
 
 </div>
 
-<div id="outline-container-42" class="outline-3">
-<h3 id="sec-42"><span class="section-number-3">42</span> MarkovRateTable</h3>
-<div class="outline-text-3" id="text-42">
+<div id="outline-container-1-42" class="outline-3">
+<h3 id="sec-1-42"><span class="section-number-3">1.42</span> MarkovRateTable</h3>
+<div class="outline-text-3" id="text-1-42">
 
 
 <ul>
@@ -6679,7 +7180,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -6693,7 +7194,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -6735,6 +7236,20 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>channel: <i>void</i></dt><dd>
+<p>
+       This message couples the rate table to the compartment. The rate table needs updates on voltage in order to compute the rate table.
+</p></dd>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       This is a shared message to receive Process message from thescheduler. The first entry is a MsgDest for the Process operation. It has a single argument, ProcInfo, which holds lots of information about current time, thread, dt andso on. The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo.
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -6751,9 +7266,9 @@
 
 </div>
 
-<div id="outline-container-43" class="outline-3">
-<h3 id="sec-43"><span class="section-number-3">43</span> MarkovSolver</h3>
-<div class="outline-text-3" id="text-43">
+<div id="outline-container-1-43" class="outline-3">
+<h3 id="sec-1-43"><span class="section-number-3">1.43</span> MarkovSolver</h3>
+<div class="outline-text-3" id="text-1-43">
 
 
 <ul>
@@ -6863,7 +7378,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -6877,7 +7392,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -6915,6 +7430,24 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>channel: <i>void</i></dt><dd>
+<p>
+       This message couples the MarkovSolverBase to the Compartment. The compartment needs Vm in order to look up the correct matrix exponential for computing the state.
+</p></dd>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       This is a shared message to receive Process message from thescheduler. The first entry is a MsgDest for the Process operation. It has a single argument, ProcInfo, which holds lots of information about current time, thread, dt andso on. The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo.
+</p></dd>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       This is a shared message to receive Process message from thescheduler. The first entry is a MsgDest for the Process operation. It has a single argument, ProcInfo, which holds lots of information about current time, thread, dt andso on. The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo.
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -6931,9 +7464,9 @@
 
 </div>
 
-<div id="outline-container-44" class="outline-3">
-<h3 id="sec-44"><span class="section-number-3">44</span> MarkovSolverBase</h3>
-<div class="outline-text-3" id="text-44">
+<div id="outline-container-1-44" class="outline-3">
+<h3 id="sec-1-44"><span class="section-number-3">1.44</span> MarkovSolverBase</h3>
+<div class="outline-text-3" id="text-1-44">
 
 
 <ul>
@@ -7043,7 +7576,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -7057,7 +7590,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -7087,6 +7620,20 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>channel: <i>void</i></dt><dd>
+<p>
+       This message couples the MarkovSolverBase to the Compartment. The compartment needs Vm in order to look up the correct matrix exponential for computing the state.
+</p></dd>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       This is a shared message to receive Process message from thescheduler. The first entry is a MsgDest for the Process operation. It has a single argument, ProcInfo, which holds lots of information about current time, thread, dt andso on. The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo.
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -7103,9 +7650,9 @@
 
 </div>
 
-<div id="outline-container-45" class="outline-3">
-<h3 id="sec-45"><span class="section-number-3">45</span> MathFunc</h3>
-<div class="outline-text-3" id="text-45">
+<div id="outline-container-1-45" class="outline-3">
+<h3 id="sec-1-45"><span class="section-number-3">1.45</span> MathFunc</h3>
+<div class="outline-text-3" id="text-1-45">
 
 
 <ul>
@@ -7183,7 +7730,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -7197,7 +7744,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -7231,6 +7778,16 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message for process and reinit
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -7247,9 +7804,9 @@
 
 </div>
 
-<div id="outline-container-46" class="outline-3">
-<h3 id="sec-46"><span class="section-number-3">46</span> Mdouble</h3>
-<div class="outline-text-3" id="text-46">
+<div id="outline-container-1-46" class="outline-3">
+<h3 id="sec-1-46"><span class="section-number-3">1.46</span> Mdouble</h3>
+<div class="outline-text-3" id="text-1-46">
 
 
 <ul>
@@ -7323,7 +7880,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -7333,7 +7890,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -7341,6 +7898,9 @@
 </p>
 </dd>
 </dl>
+
+</li>
+<li><b>Shared message field</b>
 
 </li>
 <li><b>Lookup field</b>
@@ -7359,9 +7919,9 @@
 
 </div>
 
-<div id="outline-container-47" class="outline-3">
-<h3 id="sec-47"><span class="section-number-3">47</span> MeshEntry</h3>
-<div class="outline-text-3" id="text-47">
+<div id="outline-container-1-47" class="outline-3">
+<h3 id="sec-1-47"><span class="section-number-3">1.47</span> MeshEntry</h3>
+<div class="outline-text-3" id="text-1-47">
 
 
 <ul>
@@ -7455,7 +8015,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -7473,7 +8033,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -7495,6 +8055,20 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message for process and reinit
+</p></dd>
+<dt>mesh:    <i>void</i></dt><dd>
+<p>
+       Shared message for updating mesh volumes and subdivisions,typically controls pool sizes
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -7511,9 +8085,9 @@
 
 </div>
 
-<div id="outline-container-48" class="outline-3">
-<h3 id="sec-48"><span class="section-number-3">48</span> MgBlock</h3>
-<div class="outline-text-3" id="text-48">
+<div id="outline-container-1-48" class="outline-3">
+<h3 id="sec-1-48"><span class="section-number-3">1.48</span> MgBlock</h3>
+<div class="outline-text-3" id="text-1-48">
 
 
 <ul>
@@ -7615,7 +8189,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -7637,7 +8211,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -7665,6 +8239,20 @@
 
 
 <ul>
+<li><b>Shared message field</b>
+<dl>
+<dt>channel: <i>void</i></dt><dd>
+<p>
+       This is a shared message to couple channel to compartment. The first entry is a MsgSrc to send Gk and Ek to the compartment The second entry is a MsgDest for Vm from the compartment.
+</p></dd>
+<dt>ghk:     <i>void</i></dt><dd>
+<p>
+       Message to Goldman-Hodgkin-Katz object
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -7681,9 +8269,9 @@
 
 </div>
 
-<div id="outline-container-49" class="outline-3">
-<h3 id="sec-49"><span class="section-number-3">49</span> Msg</h3>
-<div class="outline-text-3" id="text-49">
+<div id="outline-container-1-49" class="outline-3">
+<h3 id="sec-1-49"><span class="section-number-3">1.49</span> Msg</h3>
+<div class="outline-text-3" id="text-1-49">
 
 
 <ul>
@@ -7773,7 +8361,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -7783,7 +8371,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -7791,6 +8379,9 @@
 </p>
 </dd>
 </dl>
+
+</li>
+<li><b>Shared message field</b>
 
 </li>
 <li><b>Lookup field</b>
@@ -7809,9 +8400,9 @@
 
 </div>
 
-<div id="outline-container-50" class="outline-3">
-<h3 id="sec-50"><span class="section-number-3">50</span> Mstring</h3>
-<div class="outline-text-3" id="text-50">
+<div id="outline-container-1-50" class="outline-3">
+<h3 id="sec-1-50"><span class="section-number-3">1.50</span> Mstring</h3>
+<div class="outline-text-3" id="text-1-50">
 
 
 <ul>
@@ -7885,7 +8476,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -7895,7 +8486,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -7903,6 +8494,9 @@
 </p>
 </dd>
 </dl>
+
+</li>
+<li><b>Shared message field</b>
 
 </li>
 <li><b>Lookup field</b>
@@ -7921,9 +8515,9 @@
 
 </div>
 
-<div id="outline-container-51" class="outline-3">
-<h3 id="sec-51"><span class="section-number-3">51</span> NMDAChan</h3>
-<div class="outline-text-3" id="text-51">
+<div id="outline-container-1-51" class="outline-3">
+<h3 id="sec-1-51"><span class="section-number-3">1.51</span> NMDAChan</h3>
+<div class="outline-text-3" id="text-1-51">
 
 <p>   Author:              Subhasis Ray, 2010, NCBS
 </p>
@@ -8044,7 +8638,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -8066,7 +8660,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -8104,6 +8698,24 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>channel: <i>void</i></dt><dd>
+<p>
+       This is a shared message to couple channel to compartment. The first entry is a MsgSrc to send Gk and Ek to the compartment The second entry is a MsgDest for Vm from the compartment.
+</p></dd>
+<dt>ghk:     <i>void</i></dt><dd>
+<p>
+       Message to Goldman-Hodgkin-Katz object
+</p></dd>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message to receive Process message from scheduler
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -8124,9 +8736,9 @@
 
 </div>
 
-<div id="outline-container-52" class="outline-3">
-<h3 id="sec-52"><span class="section-number-3">52</span> Nernst</h3>
-<div class="outline-text-3" id="text-52">
+<div id="outline-container-1-52" class="outline-3">
+<h3 id="sec-1-52"><span class="section-number-3">1.52</span> Nernst</h3>
+<div class="outline-text-3" id="text-1-52">
 
 
 <ul>
@@ -8216,7 +8828,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -8230,7 +8842,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -8246,6 +8858,9 @@
 </p>
 </dd>
 </dl>
+
+</li>
+<li><b>Shared message field</b>
 
 </li>
 <li><b>Lookup field</b>
@@ -8264,9 +8879,9 @@
 
 </div>
 
-<div id="outline-container-53" class="outline-3">
-<h3 id="sec-53"><span class="section-number-3">53</span> NeuroMesh</h3>
-<div class="outline-text-3" id="text-53">
+<div id="outline-container-1-53" class="outline-3">
+<h3 id="sec-1-53"><span class="section-number-3">1.53</span> NeuroMesh</h3>
+<div class="outline-text-3" id="text-1-53">
 
 
 <ul>
@@ -8368,7 +8983,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -8386,7 +9001,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -8408,6 +9023,16 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>nodeMeshing:     <i>void</i></dt><dd>
+<p>
+       Connects to SimManager to coordinate meshing with paralleldecomposition and with the Stoich
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -8424,9 +9049,9 @@
 
 </div>
 
-<div id="outline-container-54" class="outline-3">
-<h3 id="sec-54"><span class="section-number-3">54</span> Neuron</h3>
-<div class="outline-text-3" id="text-54">
+<div id="outline-container-1-54" class="outline-3">
+<h3 id="sec-1-54"><span class="section-number-3">1.54</span> Neuron</h3>
+<div class="outline-text-3" id="text-1-54">
 
 <p>   Author:              C H Chaitanya
 </p>
@@ -8499,7 +9124,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -8509,7 +9134,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -8517,6 +9142,9 @@
 </p>
 </dd>
 </dl>
+
+</li>
+<li><b>Shared message field</b>
 
 </li>
 <li><b>Lookup field</b>
@@ -8535,9 +9163,9 @@
 
 </div>
 
-<div id="outline-container-55" class="outline-3">
-<h3 id="sec-55"><span class="section-number-3">55</span> Neutral</h3>
-<div class="outline-text-3" id="text-55">
+<div id="outline-container-1-55" class="outline-3">
+<h3 id="sec-1-55"><span class="section-number-3">1.55</span> Neutral</h3>
+<div class="outline-text-3" id="text-1-55">
 
 <p>   Author:              Upinder S. Bhalla, 2007, NCBS
 </p>
@@ -8610,7 +9238,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -8620,7 +9248,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -8628,6 +9256,9 @@
 </p>
 </dd>
 </dl>
+
+</li>
+<li><b>Shared message field</b>
 
 </li>
 <li><b>Lookup field</b>
@@ -8646,9 +9277,9 @@
 
 </div>
 
-<div id="outline-container-56" class="outline-3">
-<h3 id="sec-56"><span class="section-number-3">56</span> OneToAllMsg</h3>
-<div class="outline-text-3" id="text-56">
+<div id="outline-container-1-56" class="outline-3">
+<h3 id="sec-1-56"><span class="section-number-3">1.56</span> OneToAllMsg</h3>
+<div class="outline-text-3" id="text-1-56">
 
 
 <ul>
@@ -8742,7 +9373,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -8752,7 +9383,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -8760,6 +9391,9 @@
 </p>
 </dd>
 </dl>
+
+</li>
+<li><b>Shared message field</b>
 
 </li>
 <li><b>Lookup field</b>
@@ -8778,9 +9412,9 @@
 
 </div>
 
-<div id="outline-container-57" class="outline-3">
-<h3 id="sec-57"><span class="section-number-3">57</span> OneToOneMsg</h3>
-<div class="outline-text-3" id="text-57">
+<div id="outline-container-1-57" class="outline-3">
+<h3 id="sec-1-57"><span class="section-number-3">1.57</span> OneToOneMsg</h3>
+<div class="outline-text-3" id="text-1-57">
 
 
 <ul>
@@ -8870,7 +9504,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -8880,7 +9514,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -8888,6 +9522,9 @@
 </p>
 </dd>
 </dl>
+
+</li>
+<li><b>Shared message field</b>
 
 </li>
 <li><b>Lookup field</b>
@@ -8906,9 +9543,9 @@
 
 </div>
 
-<div id="outline-container-58" class="outline-3">
-<h3 id="sec-58"><span class="section-number-3">58</span> PIDController</h3>
-<div class="outline-text-3" id="text-58">
+<div id="outline-container-1-58" class="outline-3">
+<h3 id="sec-1-58"><span class="section-number-3">1.58</span> PIDController</h3>
+<div class="outline-text-3" id="text-1-58">
 
 
 <ul>
@@ -9019,7 +9656,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -9033,7 +9670,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -9063,6 +9700,16 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       This is a shared message to receive Process messages from the scheduler objects.The first entry in the shared msg is a MsgDest for the Process operation. It has a single argument, ProcInfo, which holds lots of information about current time, thread, dt and so on. The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo. 
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -9079,9 +9726,9 @@
 
 </div>
 
-<div id="outline-container-59" class="outline-3">
-<h3 id="sec-59"><span class="section-number-3">59</span> Panel</h3>
-<div class="outline-text-3" id="text-59">
+<div id="outline-container-1-59" class="outline-3">
+<h3 id="sec-1-59"><span class="section-number-3">1.59</span> Panel</h3>
+<div class="outline-text-3" id="text-1-59">
 
 
 <ul>
@@ -9167,7 +9814,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -9181,7 +9828,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -9193,6 +9840,9 @@
 </p>
 </dd>
 </dl>
+
+</li>
+<li><b>Shared message field</b>
 
 </li>
 <li><b>Lookup field</b>
@@ -9223,9 +9873,9 @@
 
 </div>
 
-<div id="outline-container-60" class="outline-3">
-<h3 id="sec-60"><span class="section-number-3">60</span> Pool</h3>
-<div class="outline-text-3" id="text-60">
+<div id="outline-container-1-60" class="outline-3">
+<h3 id="sec-1-60"><span class="section-number-3">1.60</span> Pool</h3>
+<div class="outline-text-3" id="text-1-60">
 
 
 <ul>
@@ -9319,7 +9969,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -9341,7 +9991,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -9383,6 +10033,28 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>reac:    <i>void</i></dt><dd>
+<p>
+       Connects to reaction
+</p></dd>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message for process and reinit
+</p></dd>
+<dt>species: <i>void</i></dt><dd>
+<p>
+       Shared message for connecting to species objects
+</p></dd>
+<dt>mesh:    <i>void</i></dt><dd>
+<p>
+       Shared message for dealing with mesh operations
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -9399,9 +10071,9 @@
 
 </div>
 
-<div id="outline-container-61" class="outline-3">
-<h3 id="sec-61"><span class="section-number-3">61</span> PoolBase</h3>
-<div class="outline-text-3" id="text-61">
+<div id="outline-container-1-61" class="outline-3">
+<h3 id="sec-1-61"><span class="section-number-3">1.61</span> PoolBase</h3>
+<div class="outline-text-3" id="text-1-61">
 
 
 <ul>
@@ -9495,7 +10167,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -9517,7 +10189,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -9551,6 +10223,28 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>reac:    <i>void</i></dt><dd>
+<p>
+       Connects to reaction
+</p></dd>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message for process and reinit
+</p></dd>
+<dt>species: <i>void</i></dt><dd>
+<p>
+       Shared message for connecting to species objects
+</p></dd>
+<dt>mesh:    <i>void</i></dt><dd>
+<p>
+       Shared message for dealing with mesh operations
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -9567,9 +10261,9 @@
 
 </div>
 
-<div id="outline-container-62" class="outline-3">
-<h3 id="sec-62"><span class="section-number-3">62</span> Port</h3>
-<div class="outline-text-3" id="text-62">
+<div id="outline-container-1-62" class="outline-3">
+<h3 id="sec-1-62"><span class="section-number-3">1.62</span> Port</h3>
+<div class="outline-text-3" id="text-1-62">
 
 
 <ul>
@@ -9655,7 +10349,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -9681,7 +10375,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -9707,6 +10401,20 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>port1:   <i>void</i></dt><dd>
+<p>
+       Shared message for port. This one initiates the request forsetting up the communications between the portsThe shared message also handles the runtime data transfer
+</p></dd>
+<dt>port2:   <i>void</i></dt><dd>
+<p>
+       Shared message for port. This one responds to the request forsetting up the communications between the portsThe shared message also handles the runtime data transfer
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -9723,9 +10431,9 @@
 
 </div>
 
-<div id="outline-container-63" class="outline-3">
-<h3 id="sec-63"><span class="section-number-3">63</span> PulseGen</h3>
-<div class="outline-text-3" id="text-63">
+<div id="outline-container-1-63" class="outline-3">
+<h3 id="sec-1-63"><span class="section-number-3">1.63</span> PulseGen</h3>
+<div class="outline-text-3" id="text-1-63">
 
 
 <ul>
@@ -9834,7 +10542,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -9848,7 +10556,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -9882,6 +10590,16 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       This is a shared message to receive Process messages from the scheduler objects.The first entry in the shared msg is a MsgDest for the Process operation. It has a single argument, ProcInfo, which holds lots of information about current time, thread, dt and so on. The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo. 
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -9910,9 +10628,9 @@
 
 </div>
 
-<div id="outline-container-64" class="outline-3">
-<h3 id="sec-64"><span class="section-number-3">64</span> RC</h3>
-<div class="outline-text-3" id="text-64">
+<div id="outline-container-1-64" class="outline-3">
+<h3 id="sec-1-64"><span class="section-number-3">1.64</span> RC</h3>
+<div class="outline-text-3" id="text-1-64">
 
 
 <ul>
@@ -9998,7 +10716,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -10012,7 +10730,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -10034,6 +10752,16 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       This is a shared message to receive Process messages from the scheduler objects.The first entry in the shared msg is a MsgDest for the Process operation. It has a single argument, ProcInfo, which holds lots of information about current time, thread, dt and so on. The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo. 
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -10050,9 +10778,9 @@
 
 </div>
 
-<div id="outline-container-65" class="outline-3">
-<h3 id="sec-65"><span class="section-number-3">65</span> Reac</h3>
-<div class="outline-text-3" id="text-65">
+<div id="outline-container-1-65" class="outline-3">
+<h3 id="sec-1-65"><span class="section-number-3">1.65</span> Reac</h3>
+<div class="outline-text-3" id="text-1-65">
 
 
 <ul>
@@ -10142,7 +10870,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -10160,7 +10888,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -10190,6 +10918,24 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>sub:     <i>void</i></dt><dd>
+<p>
+       Connects to substrate pool
+</p></dd>
+<dt>prd:     <i>void</i></dt><dd>
+<p>
+       Connects to substrate pool
+</p></dd>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message for process and reinit
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -10206,9 +10952,9 @@
 
 </div>
 
-<div id="outline-container-66" class="outline-3">
-<h3 id="sec-66"><span class="section-number-3">66</span> ReacBase</h3>
-<div class="outline-text-3" id="text-66">
+<div id="outline-container-1-66" class="outline-3">
+<h3 id="sec-1-66"><span class="section-number-3">1.66</span> ReacBase</h3>
+<div class="outline-text-3" id="text-1-66">
 
 
 <ul>
@@ -10298,7 +11044,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -10316,7 +11062,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -10346,6 +11092,24 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>sub:     <i>void</i></dt><dd>
+<p>
+       Connects to substrate pool
+</p></dd>
+<dt>prd:     <i>void</i></dt><dd>
+<p>
+       Connects to substrate pool
+</p></dd>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message for process and reinit
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -10362,9 +11126,9 @@
 
 </div>
 
-<div id="outline-container-67" class="outline-3">
-<h3 id="sec-67"><span class="section-number-3">67</span> RectPanel</h3>
-<div class="outline-text-3" id="text-67">
+<div id="outline-container-1-67" class="outline-3">
+<h3 id="sec-1-67"><span class="section-number-3">1.67</span> RectPanel</h3>
+<div class="outline-text-3" id="text-1-67">
 
 
 <ul>
@@ -10450,7 +11214,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -10464,7 +11228,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -10476,6 +11240,9 @@
 </p>
 </dd>
 </dl>
+
+</li>
+<li><b>Shared message field</b>
 
 </li>
 <li><b>Lookup field</b>
@@ -10506,9 +11273,9 @@
 
 </div>
 
-<div id="outline-container-68" class="outline-3">
-<h3 id="sec-68"><span class="section-number-3">68</span> ReduceMsg</h3>
-<div class="outline-text-3" id="text-68">
+<div id="outline-container-1-68" class="outline-3">
+<h3 id="sec-1-68"><span class="section-number-3">1.68</span> ReduceMsg</h3>
+<div class="outline-text-3" id="text-1-68">
 
 
 <ul>
@@ -10602,7 +11369,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -10612,7 +11379,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -10620,6 +11387,9 @@
 </p>
 </dd>
 </dl>
+
+</li>
+<li><b>Shared message field</b>
 
 </li>
 <li><b>Lookup field</b>
@@ -10638,9 +11408,9 @@
 
 </div>
 
-<div id="outline-container-69" class="outline-3">
-<h3 id="sec-69"><span class="section-number-3">69</span> Shell</h3>
-<div class="outline-text-3" id="text-69">
+<div id="outline-container-1-69" class="outline-3">
+<h3 id="sec-1-69"><span class="section-number-3">1.69</span> Shell</h3>
+<div class="outline-text-3" id="text-1-69">
 
 
 <ul>
@@ -10706,7 +11476,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -10784,7 +11554,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -10850,6 +11620,24 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>master:  <i>void</i></dt><dd>
+<p>
+       Issues commands from master shell to worker shells located on different nodes. Also handles acknowledgements from them.
+</p></dd>
+<dt>worker:  <i>void</i></dt><dd>
+<p>
+       Handles commands arriving from master shell on node 0.Sends out acknowledgements from them.
+</p></dd>
+<dt>clockControl:    <i>void</i></dt><dd>
+<p>
+       Controls the system Clock
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -10866,9 +11654,9 @@
 
 </div>
 
-<div id="outline-container-70" class="outline-3">
-<h3 id="sec-70"><span class="section-number-3">70</span> SimManager</h3>
-<div class="outline-text-3" id="text-70">
+<div id="outline-container-1-70" class="outline-3">
+<h3 id="sec-1-70"><span class="section-number-3">1.70</span> SimManager</h3>
+<div class="outline-text-3" id="text-1-70">
 
 
 <ul>
@@ -10962,7 +11750,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -10980,7 +11768,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -11006,6 +11794,16 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>nodeMeshing:     <i>void</i></dt><dd>
+<p>
+       Connects to ChemMesh to coordinate meshing with paralleldecomposition and with the Stoich
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -11022,9 +11820,9 @@
 
 </div>
 
-<div id="outline-container-71" class="outline-3">
-<h3 id="sec-71"><span class="section-number-3">71</span> SingleMsg</h3>
-<div class="outline-text-3" id="text-71">
+<div id="outline-container-1-71" class="outline-3">
+<h3 id="sec-1-71"><span class="section-number-3">1.71</span> SingleMsg</h3>
+<div class="outline-text-3" id="text-1-71">
 
 
 <ul>
@@ -11122,7 +11920,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -11132,7 +11930,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -11140,6 +11938,9 @@
 </p>
 </dd>
 </dl>
+
+</li>
+<li><b>Shared message field</b>
 
 </li>
 <li><b>Lookup field</b>
@@ -11158,9 +11959,9 @@
 
 </div>
 
-<div id="outline-container-72" class="outline-3">
-<h3 id="sec-72"><span class="section-number-3">72</span> SparseMsg</h3>
-<div class="outline-text-3" id="text-72">
+<div id="outline-container-1-72" class="outline-3">
+<h3 id="sec-1-72"><span class="section-number-3">1.72</span> SparseMsg</h3>
+<div class="outline-text-3" id="text-1-72">
 
 
 <ul>
@@ -11270,7 +12071,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -11280,7 +12081,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -11310,6 +12111,9 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -11326,9 +12130,9 @@
 
 </div>
 
-<div id="outline-container-73" class="outline-3">
-<h3 id="sec-73"><span class="section-number-3">73</span> Species</h3>
-<div class="outline-text-3" id="text-73">
+<div id="outline-container-1-73" class="outline-3">
+<h3 id="sec-1-73"><span class="section-number-3">1.73</span> Species</h3>
+<div class="outline-text-3" id="text-1-73">
 
 
 <ul>
@@ -11398,7 +12202,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -11412,7 +12216,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -11421,6 +12225,16 @@
 <dt>handleMolWtRequest:      <i>void</i></dt><dd>
 <p>
        Handle requests for molWt.
+</p>
+</dd>
+</dl>
+
+</li>
+<li><b>Shared message field</b>
+<dl>
+<dt>pool:    <i>void</i></dt><dd>
+<p>
+       Connects to pools of this Species type
 </p>
 </dd>
 </dl>
@@ -11442,9 +12256,9 @@
 
 </div>
 
-<div id="outline-container-74" class="outline-3">
-<h3 id="sec-74"><span class="section-number-3">74</span> SpherePanel</h3>
-<div class="outline-text-3" id="text-74">
+<div id="outline-container-1-74" class="outline-3">
+<h3 id="sec-1-74"><span class="section-number-3">1.74</span> SpherePanel</h3>
+<div class="outline-text-3" id="text-1-74">
 
 
 <ul>
@@ -11530,7 +12344,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -11544,7 +12358,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -11556,6 +12370,9 @@
 </p>
 </dd>
 </dl>
+
+</li>
+<li><b>Shared message field</b>
 
 </li>
 <li><b>Lookup field</b>
@@ -11586,9 +12403,9 @@
 
 </div>
 
-<div id="outline-container-75" class="outline-3">
-<h3 id="sec-75"><span class="section-number-3">75</span> SpikeGen</h3>
-<div class="outline-text-3" id="text-75">
+<div id="outline-container-1-75" class="outline-3">
+<h3 id="sec-1-75"><span class="section-number-3">1.75</span> SpikeGen</h3>
+<div class="outline-text-3" id="text-1-75">
 
 
 <ul>
@@ -11674,7 +12491,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -11688,7 +12505,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -11710,6 +12527,16 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message to receive Process message from scheduler
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -11726,9 +12553,9 @@
 
 </div>
 
-<div id="outline-container-76" class="outline-3">
-<h3 id="sec-76"><span class="section-number-3">76</span> Stats</h3>
-<div class="outline-text-3" id="text-76">
+<div id="outline-container-1-76" class="outline-3">
+<h3 id="sec-1-76"><span class="section-number-3">1.76</span> Stats</h3>
+<div class="outline-text-3" id="text-1-76">
 
 
 <ul>
@@ -11810,7 +12637,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -11824,7 +12651,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -11854,6 +12681,16 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message for process and reinit
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -11870,9 +12707,9 @@
 
 </div>
 
-<div id="outline-container-77" class="outline-3">
-<h3 id="sec-77"><span class="section-number-3">77</span> StimulusTable</h3>
-<div class="outline-text-3" id="text-77">
+<div id="outline-container-1-77" class="outline-3">
+<h3 id="sec-1-77"><span class="section-number-3">1.77</span> StimulusTable</h3>
+<div class="outline-text-3" id="text-1-77">
 
 
 <ul>
@@ -11974,7 +12811,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -11988,7 +12825,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -12046,6 +12883,16 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message for process and reinit
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -12066,9 +12913,9 @@
 
 </div>
 
-<div id="outline-container-78" class="outline-3">
-<h3 id="sec-78"><span class="section-number-3">78</span> Stoich</h3>
-<div class="outline-text-3" id="text-78">
+<div id="outline-container-1-78" class="outline-3">
+<h3 id="sec-1-78"><span class="section-number-3">1.78</span> Stoich</h3>
+<div class="outline-text-3" id="text-1-78">
 
 
 <ul>
@@ -12154,7 +13001,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -12172,7 +13019,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -12184,6 +13031,9 @@
 </p>
 </dd>
 </dl>
+
+</li>
+<li><b>Shared message field</b>
 
 </li>
 <li><b>Lookup field</b>
@@ -12202,9 +13052,9 @@
 
 </div>
 
-<div id="outline-container-79" class="outline-3">
-<h3 id="sec-79"><span class="section-number-3">79</span> SumFunc</h3>
-<div class="outline-text-3" id="text-79">
+<div id="outline-container-1-79" class="outline-3">
+<h3 id="sec-1-79"><span class="section-number-3">1.79</span> SumFunc</h3>
+<div class="outline-text-3" id="text-1-79">
 
 
 <ul>
@@ -12274,7 +13124,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -12288,7 +13138,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -12310,6 +13160,16 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message for process and reinit
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -12326,9 +13186,9 @@
 
 </div>
 
-<div id="outline-container-80" class="outline-3">
-<h3 id="sec-80"><span class="section-number-3">80</span> Surface</h3>
-<div class="outline-text-3" id="text-80">
+<div id="outline-container-1-80" class="outline-3">
+<h3 id="sec-1-80"><span class="section-number-3">1.80</span> Surface</h3>
+<div class="outline-text-3" id="text-1-80">
 
 
 <ul>
@@ -12398,7 +13258,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -12428,7 +13288,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -12436,6 +13296,9 @@
 </p>
 </dd>
 </dl>
+
+</li>
+<li><b>Shared message field</b>
 
 </li>
 <li><b>Lookup field</b>
@@ -12454,9 +13317,9 @@
 
 </div>
 
-<div id="outline-container-81" class="outline-3">
-<h3 id="sec-81"><span class="section-number-3">81</span> SymCompartment</h3>
-<div class="outline-text-3" id="text-81">
+<div id="outline-container-1-81" class="outline-3">
+<h3 id="sec-1-81"><span class="section-number-3">1.81</span> SymCompartment</h3>
+<div class="outline-text-3" id="text-1-81">
 
 
 <ul>
@@ -12586,7 +13449,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -12668,7 +13531,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -12738,6 +13601,52 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       This is a shared message to receive Process messages from the scheduler objects. The Process should be called <span style="text-decoration:underline;">second</span> in each clock tick, after the Init message.The first entry in the shared msg is a MsgDest for the Process operation. It has a single argument, ProcInfo, which holds lots of information about current time, thread, dt and so on. The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo. 
+</p></dd>
+<dt>init:    <i>void</i></dt><dd>
+<p>
+       This is a shared message to receive Init messages from the scheduler objects. Its job is to separate the compartmental calculations from the message passing. It doesn't really need to be shared, as it does not use the reinit part, but the scheduler objects expect this form of message for all scheduled output. The first entry is a MsgDest for the Process operation. It has a single argument, ProcInfo, which holds lots of information about current time, thread, dt and so on. The second entry is a dummy MsgDest for the Reinit operation. It also uses ProcInfo. 
+</p></dd>
+<dt>channel: <i>void</i></dt><dd>
+<p>
+       This is a shared message from a compartment to channels. The first entry is a MsgDest for the info coming from the channel. It expects Gk and Ek from the channel as args. The second entry is a MsgSrc sending Vm 
+</p></dd>
+<dt>axial:   <i>void</i></dt><dd>
+<p>
+       This is a shared message between asymmetric compartments. axial messages (this kind) connect up to raxial messages (defined below). The soma should use raxial messages to connect to the axial message of all the immediately adjacent dendritic compartments.This puts the (low) somatic resistance in series with these dendrites. Dendrites should then use raxial messages toconnect on to more distal dendrites. In other words, raxial messages should face outward from the soma. The first entry is a MsgSrc sending Vm to the axialFuncof the target compartment. The second entry is a MsgDest for the info coming from the other compt. It expects Ra and Vm from the other compt as args. Note that the message is named after the source type. 
+</p></dd>
+<dt>raxial:  <i>void</i></dt><dd>
+<p>
+       This is a raxial shared message between asymmetric compartments. The first entry is a MsgDest for the info coming from the other compt. It expects Vm from the other compt as an arg. The second is a MsgSrc sending Ra and Vm to the raxialFunc of the target compartment. 
+</p></dd>
+<dt>raxial1: <i>void</i></dt><dd>
+<p>
+       This is a raxial shared message between symmetric compartments.It goes from the tail of the current compartment to one closer to the soma.
+</p></dd>
+<dt>CONNECTTAIL:     <i>void</i></dt><dd>
+<p>
+       This is a raxial shared message between symmetric compartments.It is an alias for raxial1.
+</p></dd>
+<dt>raxial2: <i>void</i></dt><dd>
+<p>
+       This is a raxial2 shared message between symmetric compartments.It goes from the head of the current compartment to a compartment further away from the soma
+</p></dd>
+<dt>CONNECTHEAD:     <i>void</i></dt><dd>
+<p>
+       This is a raxial2 shared message between symmetric compartments.It is an alias for raxial2.It goes from the current compartment to one further from the soma
+</p></dd>
+<dt>CONNECTCROSS:    <i>void</i></dt><dd>
+<p>
+       This is a raxial2 shared message between symmetric compartments.It is an alias for raxial2.Conceptually, this goes from the tail of the current compartment to the tail of a sibling compartment. However,this works out to the same as CONNECTHEAD in terms of equivalentcircuit.
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -12754,9 +13663,9 @@
 
 </div>
 
-<div id="outline-container-82" class="outline-3">
-<h3 id="sec-82"><span class="section-number-3">82</span> SynBase</h3>
-<div class="outline-text-3" id="text-82">
+<div id="outline-container-1-82" class="outline-3">
+<h3 id="sec-1-82"><span class="section-number-3">1.82</span> SynBase</h3>
+<div class="outline-text-3" id="text-1-82">
 
 
 <ul>
@@ -12826,7 +13735,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -12836,7 +13745,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -12844,6 +13753,9 @@
 </p>
 </dd>
 </dl>
+
+</li>
+<li><b>Shared message field</b>
 
 </li>
 <li><b>Lookup field</b>
@@ -12862,9 +13774,9 @@
 
 </div>
 
-<div id="outline-container-83" class="outline-3">
-<h3 id="sec-83"><span class="section-number-3">83</span> SynChan</h3>
-<div class="outline-text-3" id="text-83">
+<div id="outline-container-1-83" class="outline-3">
+<h3 id="sec-1-83"><span class="section-number-3">1.83</span> SynChan</h3>
+<div class="outline-text-3" id="text-1-83">
 
 
 <ul>
@@ -12962,7 +13874,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -12984,7 +13896,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -13018,6 +13930,24 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>channel: <i>void</i></dt><dd>
+<p>
+       This is a shared message to couple channel to compartment. The first entry is a MsgSrc to send Gk and Ek to the compartment The second entry is a MsgDest for Vm from the compartment.
+</p></dd>
+<dt>ghk:     <i>void</i></dt><dd>
+<p>
+       Message to Goldman-Hodgkin-Katz object
+</p></dd>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message to receive Process message from scheduler
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -13034,9 +13964,9 @@
 
 </div>
 
-<div id="outline-container-84" class="outline-3">
-<h3 id="sec-84"><span class="section-number-3">84</span> SynChanBase</h3>
-<div class="outline-text-3" id="text-84">
+<div id="outline-container-1-84" class="outline-3">
+<h3 id="sec-1-84"><span class="section-number-3">1.84</span> SynChanBase</h3>
+<div class="outline-text-3" id="text-1-84">
 
 
 <ul>
@@ -13122,7 +14052,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -13144,7 +14074,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -13157,6 +14087,20 @@
 <dt>Vm:      <i>double</i></dt><dd>
 <p>
        Handles Vm message coming in from compartment
+</p>
+</dd>
+</dl>
+
+</li>
+<li><b>Shared message field</b>
+<dl>
+<dt>channel: <i>void</i></dt><dd>
+<p>
+       This is a shared message to couple channel to compartment. The first entry is a MsgSrc to send Gk and Ek to the compartment The second entry is a MsgDest for Vm from the compartment.
+</p></dd>
+<dt>ghk:     <i>void</i></dt><dd>
+<p>
+       Message to Goldman-Hodgkin-Katz object
 </p>
 </dd>
 </dl>
@@ -13178,9 +14122,9 @@
 
 </div>
 
-<div id="outline-container-85" class="outline-3">
-<h3 id="sec-85"><span class="section-number-3">85</span> Synapse</h3>
-<div class="outline-text-3" id="text-85">
+<div id="outline-container-1-85" class="outline-3">
+<h3 id="sec-1-85"><span class="section-number-3">1.85</span> Synapse</h3>
+<div class="outline-text-3" id="text-1-85">
 
 
 <ul>
@@ -13254,7 +14198,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -13264,7 +14208,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -13276,6 +14220,9 @@
 </p>
 </dd>
 </dl>
+
+</li>
+<li><b>Shared message field</b>
 
 </li>
 <li><b>Lookup field</b>
@@ -13294,9 +14241,9 @@
 
 </div>
 
-<div id="outline-container-86" class="outline-3">
-<h3 id="sec-86"><span class="section-number-3">86</span> Table</h3>
-<div class="outline-text-3" id="text-86">
+<div id="outline-container-1-86" class="outline-3">
+<h3 id="sec-1-86"><span class="section-number-3">1.86</span> Table</h3>
+<div class="outline-text-3" id="text-1-86">
 
 
 <ul>
@@ -13378,7 +14325,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -13392,7 +14339,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -13462,6 +14409,16 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message for process and reinit
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -13482,9 +14439,9 @@
 
 </div>
 
-<div id="outline-container-87" class="outline-3">
-<h3 id="sec-87"><span class="section-number-3">87</span> TableBase</h3>
-<div class="outline-text-3" id="text-87">
+<div id="outline-container-1-87" class="outline-3">
+<h3 id="sec-1-87"><span class="section-number-3">1.87</span> TableBase</h3>
+<div class="outline-text-3" id="text-1-87">
 
 
 <ul>
@@ -13562,7 +14519,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -13572,7 +14529,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -13622,6 +14579,9 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -13642,9 +14602,9 @@
 
 </div>
 
-<div id="outline-container-88" class="outline-3">
-<h3 id="sec-88"><span class="section-number-3">88</span> TableEntry</h3>
-<div class="outline-text-3" id="text-88">
+<div id="outline-container-1-88" class="outline-3">
+<h3 id="sec-1-88"><span class="section-number-3">1.88</span> TableEntry</h3>
+<div class="outline-text-3" id="text-1-88">
 
 
 <ul>
@@ -13714,7 +14674,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -13724,7 +14684,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -13732,6 +14692,9 @@
 </p>
 </dd>
 </dl>
+
+</li>
+<li><b>Shared message field</b>
 
 </li>
 <li><b>Lookup field</b>
@@ -13750,9 +14713,9 @@
 
 </div>
 
-<div id="outline-container-89" class="outline-3">
-<h3 id="sec-89"><span class="section-number-3">89</span> Tick</h3>
-<div class="outline-text-3" id="text-89">
+<div id="outline-container-1-89" class="outline-3">
+<h3 id="sec-1-89"><span class="section-number-3">1.89</span> Tick</h3>
+<div class="outline-text-3" id="text-1-89">
 
 
 <ul>
@@ -13826,7 +14789,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -13916,11 +14879,57 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
        Message from Parent Element(s)
+</p>
+</dd>
+</dl>
+
+</li>
+<li><b>Shared message field</b>
+<dl>
+<dt>proc0:   <i>void</i></dt><dd>
+<p>
+       Shared proc/reinit message
+</p></dd>
+<dt>proc1:   <i>void</i></dt><dd>
+<p>
+       Shared proc/reinit message
+</p></dd>
+<dt>proc2:   <i>void</i></dt><dd>
+<p>
+       Shared proc/reinit message
+</p></dd>
+<dt>proc3:   <i>void</i></dt><dd>
+<p>
+       Shared proc/reinit message
+</p></dd>
+<dt>proc4:   <i>void</i></dt><dd>
+<p>
+       Shared proc/reinit message
+</p></dd>
+<dt>proc5:   <i>void</i></dt><dd>
+<p>
+       Shared proc/reinit message
+</p></dd>
+<dt>proc6:   <i>void</i></dt><dd>
+<p>
+       Shared proc/reinit message
+</p></dd>
+<dt>proc7:   <i>void</i></dt><dd>
+<p>
+       Shared proc/reinit message
+</p></dd>
+<dt>proc8:   <i>void</i></dt><dd>
+<p>
+       Shared proc/reinit message
+</p></dd>
+<dt>proc9:   <i>void</i></dt><dd>
+<p>
+       Shared proc/reinit message
 </p>
 </dd>
 </dl>
@@ -13942,9 +14951,9 @@
 
 </div>
 
-<div id="outline-container-90" class="outline-3">
-<h3 id="sec-90"><span class="section-number-3">90</span> TriPanel</h3>
-<div class="outline-text-3" id="text-90">
+<div id="outline-container-1-90" class="outline-3">
+<h3 id="sec-1-90"><span class="section-number-3">1.90</span> TriPanel</h3>
+<div class="outline-text-3" id="text-1-90">
 
 
 <ul>
@@ -14030,7 +15039,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -14044,7 +15053,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -14056,6 +15065,9 @@
 </p>
 </dd>
 </dl>
+
+</li>
+<li><b>Shared message field</b>
 
 </li>
 <li><b>Lookup field</b>
@@ -14086,9 +15098,9 @@
 
 </div>
 
-<div id="outline-container-91" class="outline-3">
-<h3 id="sec-91"><span class="section-number-3">91</span> VectorTable</h3>
-<div class="outline-text-3" id="text-91">
+<div id="outline-container-1-91" class="outline-3">
+<h3 id="sec-1-91"><span class="section-number-3">1.91</span> VectorTable</h3>
+<div class="outline-text-3" id="text-1-91">
 
 
 <ul>
@@ -14174,7 +15186,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -14184,7 +15196,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -14192,6 +15204,9 @@
 </p>
 </dd>
 </dl>
+
+</li>
+<li><b>Shared message field</b>
 
 </li>
 <li><b>Lookup field</b>
@@ -14218,9 +15233,9 @@
 
 </div>
 
-<div id="outline-container-92" class="outline-3">
-<h3 id="sec-92"><span class="section-number-3">92</span> ZombieBufPool</h3>
-<div class="outline-text-3" id="text-92">
+<div id="outline-container-1-92" class="outline-3">
+<h3 id="sec-1-92"><span class="section-number-3">1.92</span> ZombieBufPool</h3>
+<div class="outline-text-3" id="text-1-92">
 
 
 <ul>
@@ -14314,7 +15329,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -14336,7 +15351,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -14370,6 +15385,28 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>reac:    <i>void</i></dt><dd>
+<p>
+       Connects to reaction
+</p></dd>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message for process and reinit
+</p></dd>
+<dt>species: <i>void</i></dt><dd>
+<p>
+       Shared message for connecting to species objects
+</p></dd>
+<dt>mesh:    <i>void</i></dt><dd>
+<p>
+       Shared message for dealing with mesh operations
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -14386,9 +15423,9 @@
 
 </div>
 
-<div id="outline-container-93" class="outline-3">
-<h3 id="sec-93"><span class="section-number-3">93</span> ZombieCaConc</h3>
-<div class="outline-text-3" id="text-93">
+<div id="outline-container-1-93" class="outline-3">
+<h3 id="sec-1-93"><span class="section-number-3">1.93</span> ZombieCaConc</h3>
+<div class="outline-text-3" id="text-1-93">
 
 
 <ul>
@@ -14486,7 +15523,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -14500,7 +15537,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -14538,6 +15575,16 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message to receive Process message from scheduler
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -14554,9 +15601,9 @@
 
 </div>
 
-<div id="outline-container-94" class="outline-3">
-<h3 id="sec-94"><span class="section-number-3">94</span> ZombieCompartment</h3>
-<div class="outline-text-3" id="text-94">
+<div id="outline-container-1-94" class="outline-3">
+<h3 id="sec-1-94"><span class="section-number-3">1.94</span> ZombieCompartment</h3>
+<div class="outline-text-3" id="text-1-94">
 
 
 <ul>
@@ -14686,7 +15733,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -14708,7 +15755,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -14762,6 +15809,32 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       This is a shared message to receive Process messages from the scheduler objects. The Process should be called <span style="text-decoration:underline;">second</span> in each clock tick, after the Init message.The first entry in the shared msg is a MsgDest for the Process operation. It has a single argument, ProcInfo, which holds lots of information about current time, thread, dt and so on. The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo. 
+</p></dd>
+<dt>init:    <i>void</i></dt><dd>
+<p>
+       This is a shared message to receive Init messages from the scheduler objects. Its job is to separate the compartmental calculations from the message passing. It doesn't really need to be shared, as it does not use the reinit part, but the scheduler objects expect this form of message for all scheduled output. The first entry is a MsgDest for the Process operation. It has a single argument, ProcInfo, which holds lots of information about current time, thread, dt and so on. The second entry is a dummy MsgDest for the Reinit operation. It also uses ProcInfo. 
+</p></dd>
+<dt>channel: <i>void</i></dt><dd>
+<p>
+       This is a shared message from a compartment to channels. The first entry is a MsgDest for the info coming from the channel. It expects Gk and Ek from the channel as args. The second entry is a MsgSrc sending Vm 
+</p></dd>
+<dt>axial:   <i>void</i></dt><dd>
+<p>
+       This is a shared message between asymmetric compartments. axial messages (this kind) connect up to raxial messages (defined below). The soma should use raxial messages to connect to the axial message of all the immediately adjacent dendritic compartments.This puts the (low) somatic resistance in series with these dendrites. Dendrites should then use raxial messages toconnect on to more distal dendrites. In other words, raxial messages should face outward from the soma. The first entry is a MsgSrc sending Vm to the axialFuncof the target compartment. The second entry is a MsgDest for the info coming from the other compt. It expects Ra and Vm from the other compt as args. Note that the message is named after the source type. 
+</p></dd>
+<dt>raxial:  <i>void</i></dt><dd>
+<p>
+       This is a raxial shared message between asymmetric compartments. The first entry is a MsgDest for the info coming from the other compt. It expects Vm from the other compt as an arg. The second is a MsgSrc sending Ra and Vm to the raxialFunc of the target compartment. 
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -14778,9 +15851,9 @@
 
 </div>
 
-<div id="outline-container-95" class="outline-3">
-<h3 id="sec-95"><span class="section-number-3">95</span> ZombieEnz</h3>
-<div class="outline-text-3" id="text-95">
+<div id="outline-container-1-95" class="outline-3">
+<h3 id="sec-1-95"><span class="section-number-3">1.95</span> ZombieEnz</h3>
+<div class="outline-text-3" id="text-1-95">
 
 
 <ul>
@@ -14882,7 +15955,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -14908,7 +15981,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -14950,6 +16023,32 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>sub:     <i>void</i></dt><dd>
+<p>
+       Connects to substrate molecule
+</p></dd>
+<dt>prd:     <i>void</i></dt><dd>
+<p>
+       Connects to product molecule
+</p></dd>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message for process and reinit
+</p></dd>
+<dt>enz:     <i>void</i></dt><dd>
+<p>
+       Connects to enzyme pool
+</p></dd>
+<dt>cplx:    <i>void</i></dt><dd>
+<p>
+       Connects to enz-sub complex pool
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -14966,9 +16065,9 @@
 
 </div>
 
-<div id="outline-container-96" class="outline-3">
-<h3 id="sec-96"><span class="section-number-3">96</span> ZombieFuncPool</h3>
-<div class="outline-text-3" id="text-96">
+<div id="outline-container-1-96" class="outline-3">
+<h3 id="sec-1-96"><span class="section-number-3">1.96</span> ZombieFuncPool</h3>
+<div class="outline-text-3" id="text-1-96">
 
 
 <ul>
@@ -15062,7 +16161,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -15084,7 +16183,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -15122,6 +16221,28 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>reac:    <i>void</i></dt><dd>
+<p>
+       Connects to reaction
+</p></dd>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message for process and reinit
+</p></dd>
+<dt>species: <i>void</i></dt><dd>
+<p>
+       Shared message for connecting to species objects
+</p></dd>
+<dt>mesh:    <i>void</i></dt><dd>
+<p>
+       Shared message for dealing with mesh operations
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -15138,9 +16259,9 @@
 
 </div>
 
-<div id="outline-container-97" class="outline-3">
-<h3 id="sec-97"><span class="section-number-3">97</span> ZombieHHChannel</h3>
-<div class="outline-text-3" id="text-97">
+<div id="outline-container-1-97" class="outline-3">
+<h3 id="sec-1-97"><span class="section-number-3">1.97</span> ZombieHHChannel</h3>
+<div class="outline-text-3" id="text-1-97">
 
 
 <ul>
@@ -15254,7 +16375,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -15276,7 +16397,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -15310,6 +16431,25 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>channel: <i>void</i></dt><dd>
+<p>
+       This is a shared message to couple channel to compartment. The first entry is a MsgSrc to send Gk and Ek to the compartment The second entry is a MsgDest for Vm from the compartment.
+</p></dd>
+<dt>ghk:     <i>void</i></dt><dd>
+<p>
+       Message to Goldman-Hodgkin-Katz object
+</p></dd>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       This is a shared message to receive Process message from thescheduler. The first entry is a MsgDest for the Process operation. It has a single argument, ProcInfo, which holds lots of information about current time, thread, dt andso on.
+        The second entry is a MsgDest for the Reinit operation. It also uses ProcInfo.
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -15326,9 +16466,9 @@
 
 </div>
 
-<div id="outline-container-98" class="outline-3">
-<h3 id="sec-98"><span class="section-number-3">98</span> ZombieMMenz</h3>
-<div class="outline-text-3" id="text-98">
+<div id="outline-container-1-98" class="outline-3">
+<h3 id="sec-1-98"><span class="section-number-3">1.98</span> ZombieMMenz</h3>
+<div class="outline-text-3" id="text-1-98">
 
 
 <ul>
@@ -15410,7 +16550,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -15428,7 +16568,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -15462,6 +16602,24 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>sub:     <i>void</i></dt><dd>
+<p>
+       Connects to substrate molecule
+</p></dd>
+<dt>prd:     <i>void</i></dt><dd>
+<p>
+       Connects to product molecule
+</p></dd>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message for process and reinit
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -15478,9 +16636,9 @@
 
 </div>
 
-<div id="outline-container-99" class="outline-3">
-<h3 id="sec-99"><span class="section-number-3">99</span> ZombiePool</h3>
-<div class="outline-text-3" id="text-99">
+<div id="outline-container-1-99" class="outline-3">
+<h3 id="sec-1-99"><span class="section-number-3">1.99</span> ZombiePool</h3>
+<div class="outline-text-3" id="text-1-99">
 
 
 <ul>
@@ -15574,7 +16732,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -15596,7 +16754,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -15630,6 +16788,28 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>reac:    <i>void</i></dt><dd>
+<p>
+       Connects to reaction
+</p></dd>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message for process and reinit
+</p></dd>
+<dt>species: <i>void</i></dt><dd>
+<p>
+       Shared message for connecting to species objects
+</p></dd>
+<dt>mesh:    <i>void</i></dt><dd>
+<p>
+       Shared message for dealing with mesh operations
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -15646,9 +16826,9 @@
 
 </div>
 
-<div id="outline-container-100" class="outline-3">
-<h3 id="sec-100"><span class="section-number-3">100</span> ZombieReac</h3>
-<div class="outline-text-3" id="text-100">
+<div id="outline-container-1-100" class="outline-3">
+<h3 id="sec-1-100"><span class="section-number-3">1.100</span> ZombieReac</h3>
+<div class="outline-text-3" id="text-1-100">
 
 
 <ul>
@@ -15738,7 +16918,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -15756,7 +16936,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -15786,6 +16966,24 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>sub:     <i>void</i></dt><dd>
+<p>
+       Connects to substrate pool
+</p></dd>
+<dt>prd:     <i>void</i></dt><dd>
+<p>
+       Connects to substrate pool
+</p></dd>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message for process and reinit
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -15802,9 +17000,9 @@
 
 </div>
 
-<div id="outline-container-101" class="outline-3">
-<h3 id="sec-101"><span class="section-number-3">101</span> ZombieSumFunc</h3>
-<div class="outline-text-3" id="text-101">
+<div id="outline-container-1-101" class="outline-3">
+<h3 id="sec-1-101"><span class="section-number-3">1.101</span> ZombieSumFunc</h3>
+<div class="outline-text-3" id="text-1-101">
 
 
 <ul>
@@ -15874,7 +17072,7 @@
 </dl>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 <dl>
 <dt>childMsg:        <i>int</i></dt><dd>
 <p>
@@ -15888,7 +17086,7 @@
 </dl>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>parentMsg:       <i>int</i></dt><dd>
 <p>
@@ -15910,6 +17108,16 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+<dl>
+<dt>proc:    <i>void</i></dt><dd>
+<p>
+       Shared message for process and reinit
+</p>
+</dd>
+</dl>
+
+</li>
 <li><b>Lookup field</b>
 <dl>
 <dt>neighbours:      <i>string,vector&lt;Id&gt;</i></dt><dd>
@@ -15926,19 +17134,19 @@
 
 </div>
 
-<div id="outline-container-102" class="outline-3">
-<h3 id="sec-102"><span class="section-number-3">102</span> testSched</h3>
-<div class="outline-text-3" id="text-102">
+<div id="outline-container-1-102" class="outline-3">
+<h3 id="sec-1-102"><span class="section-number-3">1.102</span> testSched</h3>
+<div class="outline-text-3" id="text-1-102">
 
 
 <ul>
 <li><b>Value field</b>
 
 </li>
-<li><b>Source field</b>
+<li><b>Source message field</b>
 
 </li>
-<li><b>Destination field</b>
+<li><b>Destination message field</b>
 <dl>
 <dt>process: <i>void</i></dt><dd>
 <p>
@@ -15948,17 +17156,729 @@
 </dl>
 
 </li>
+<li><b>Shared message field</b>
+
+</li>
 <li><b>Lookup field</b>
 </li>
 </ul>
 
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> MOOSE Functions</h2>
+<div class="outline-text-2" id="text-2">
+
+
+
+
+</div>
+
+<div id="outline-container-2-1" class="outline-3">
+<h3 id="sec-2-1"><span class="section-number-3">2.1</span> ce</h3>
+<div class="outline-text-3" id="text-2-1">
+
+<p>   Set the current working element. 'ce' is an alias of this function
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-2" class="outline-3">
+<h3 id="sec-2-2"><span class="section-number-3">2.2</span> connect</h3>
+<div class="outline-text-3" id="text-2-2">
+
+<p>   connect(src, src<sub>field</sub>, dest, dest<sub>field</sub>, message<sub>type</sub>) -&gt; bool
+</p>
+<p>   
+   Create a message between `src<sub>field`</sub> on `src` object to `dest<sub>field`</sub>
+   on `dest` object.
+</p>
+<p>   
+   Parameters
+
+</p>
+<hr/>
+<p>
+   src : element
+           the source object
+   src<sub>field</sub> : str
+           the source field name. Fields listed under `srcFinfo` and
+   `sharedFinfo` qualify for this.
+   dest : element
+           the destination object.
+   dest<sub>field</sub> : str
+           the destination field name. Fields listed under `destFinfo`
+   and `sharedFinfo` qualify for this.
+   message<sub>type</sub> : str (optional)
+           Type of the message. Can be `Single`, `OneToOne`, `OneToAll`.
+   If not specified, it defaults to `Single`.
+</p>
+<p>   
+   Returns
+
+</p>
+<hr/>
+<p>
+   element of the message-manager for the newly created message.
+</p>
+<p>   
+   Example
+
+</p>
+<hr/>
+<p>
+   Connect the output of a pulse generator to the input of a spike
+   generator:
+</p>
+<p>   
+   &gt;&gt;&gt; pulsegen = moose.PulseGen('pulsegen')
+   &gt;&gt;&gt; spikegen = moose.SpikeGen('spikegen')
+   &gt;&gt;&gt; moose.connect(pulsegen, 'outputOut', spikegen, 'Vm')
+   1
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-3" class="outline-3">
+<h3 id="sec-2-3"><span class="section-number-3">2.3</span> copy</h3>
+<div class="outline-text-3" id="text-2-3">
+
+<p>   copy(src, dest, name, n, toGlobal, copyExtMsg) -&gt; bool
+   Make copies of a moose object.
+   Parameters
+
+</p>
+<hr/>
+<p>
+   src : ematrix, element or str
+           source object.
+   dest : ematrix, element or str
+           Destination object to copy into.
+   name : str
+           Name of the new object. If omitted, name of the original will be used.
+   n : int
+           Number of copies to make.
+   toGlobal: int
+           Relevant for parallel environments only. If false, the copies will
+   reside on local node, otherwise all nodes get the copies.
+   copyExtMsg: int
+           If true, messages to/from external objects are also copied.
+</p>
+<p>   
+   Returns
+
+</p>
+<hr/>
+<p>
+   ematrix of the copied object
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-4" class="outline-3">
+<h3 id="sec-2-4"><span class="section-number-3">2.4</span> delete</h3>
+<div class="outline-text-3" id="text-2-4">
+
+<p>   moose.delete(id)
+</p>
+<p>   
+   Delete the underlying moose object. This does not delete any of the
+   Python objects referring to this ematrix but does invalidate them. Any
+   attempt to access them will raise a ValueError.
+</p>
+<p>   
+   Parameters
+</p>
+
+<hr/>
+<p>
+   id : ematrix
+           ematrix of the object to be deleted.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-5" class="outline-3">
+<h3 id="sec-2-5"><span class="section-number-3">2.5</span> element</h3>
+<div class="outline-text-3" id="text-2-5">
+
+<p>   moose.element(arg) -&gt; moose object
+</p>
+<p>   
+   Convert a path or an object to the appropriate builtin moose class
+   instance
+   Parameters
+
+</p>
+<hr/>
+<p>
+   arg: str or ematrix or moose object
+   path of the moose element to be converted or another element (possibly
+   available as a superclass instance).
+</p>
+<p>   
+   Returns
+   An element of the moose builtin class the specified object belongs
+   to.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-6" class="outline-3">
+<h3 id="sec-2-6"><span class="section-number-3">2.6</span> exists</h3>
+<div class="outline-text-3" id="text-2-6">
+
+<p>   True if there is an object with specified path.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-7" class="outline-3">
+<h3 id="sec-2-7"><span class="section-number-3">2.7</span> getCwe</h3>
+<div class="outline-text-3" id="text-2-7">
+
+<p>   Get the current working element. 'pwe' is an alias of this function.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-8" class="outline-3">
+<h3 id="sec-2-8"><span class="section-number-3">2.8</span> getField</h3>
+<div class="outline-text-3" id="text-2-8">
+
+<p>   getField(element, field, fieldtype) &ndash; Get specified field of specified type from object ematrix.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-9" class="outline-3">
+<h3 id="sec-2-9"><span class="section-number-3">2.9</span> getFieldDict</h3>
+<div class="outline-text-3" id="text-2-9">
+
+<p>   getFieldDict(className, finfoType) -&gt; dict
+</p>
+<p>   
+   Get dictionary of field names and types for specified class.
+   Parameters
+
+</p>
+<hr/>
+<p>
+   className : str
+           MOOSE class to find the fields of.
+   finfoType : str (optional)
+           Finfo type of the fields to find. If empty or not specified, all
+   fields will be retrieved.
+   note: This behaviour is different from `getFieldNames` where only
+   `valueFinfo`s are returned when `finfoType` remains unspecified.
+</p>
+<p>   
+   Example
+
+</p>
+<hr/>
+<p>
+   List all the source fields on class Neutral:
+   &gt;&gt;&gt; moose.getFieldDict('Neutral', 'srcFinfo')
+   {'childMsg': 'int'}
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-10" class="outline-3">
+<h3 id="sec-2-10"><span class="section-number-3">2.10</span> getFieldNames</h3>
+<div class="outline-text-3" id="text-2-10">
+
+<p>   getFieldNames(className, finfoType='valueFinfo') -&gt; tuple
+</p>
+<p>   
+   Get a tuple containing the name of all the fields of `finfoType`
+   kind.
+</p>
+<p>   
+   Parameters
+
+</p>
+<hr/>
+<p>
+   className : string
+           Name of the class to look up.
+   finfoType : string
+           The kind of field (`valueFinfo`, `srcFinfo`, `destFinfo`,
+   `lookupFinfo`, `fieldElementFinfo`.).
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-11" class="outline-3">
+<h3 id="sec-2-11"><span class="section-number-3">2.11</span> isRunning</h3>
+<div class="outline-text-3" id="text-2-11">
+
+<p>   True if the simulation is currently running.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-12" class="outline-3">
+<h3 id="sec-2-12"><span class="section-number-3">2.12</span> loadModel</h3>
+<div class="outline-text-3" id="text-2-12">
+
+<p>   loadModel(filename, modelpath, solverclass) -&gt; moose.ematrix
+</p>
+<p>   
+   Load model from a file to a specified path.
+</p>
+
+<p>   
+   Parameters
+
+</p>
+<hr/>
+<p>
+   filename : str
+           model description file.
+   modelpath : str
+           moose path for the top level element of the model to be created.
+           solverclass : str
+           (optional) solver type to be used for simulating the model.
+</p>
+<p>   
+   Returns
+
+</p>
+<hr/>
+<p>
+   ematrix instance refering to the loaded model container.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-13" class="outline-3">
+<h3 id="sec-2-13"><span class="section-number-3">2.13</span> move</h3>
+<div class="outline-text-3" id="text-2-13">
+
+<p>   Move a ematrix object to a destination.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-14" class="outline-3">
+<h3 id="sec-2-14"><span class="section-number-3">2.14</span> quit</h3>
+<div class="outline-text-3" id="text-2-14">
+
+<p>   Finalize MOOSE threads and quit MOOSE. This is made available for debugging purpose only. It will automatically get called when moose module is unloaded. End user should not use this function.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-15" class="outline-3">
+<h3 id="sec-2-15"><span class="section-number-3">2.15</span> reinit</h3>
+<div class="outline-text-3" id="text-2-15">
+
+<p>   reinit() -&gt; None
+</p>
+<p>   
+   Reinitialize simulation.
+</p>
+<p>   
+   This function (re)initializes moose simulation. It must be called
+   before you start the simulation (see moose.start). If you want to
+   continue simulation after you have called moose.reinit() and
+   moose.start(), you must NOT call moose.reinit() again. Calling
+   moose.reinit() again will take the system back to initial setting
+   (like clear out all data recording tables, set state variables to
+   their initial values, etc.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-16" class="outline-3">
+<h3 id="sec-2-16"><span class="section-number-3">2.16</span> saveModel</h3>
+<div class="outline-text-3" id="text-2-16">
+
+<p>   saveModel(source, fileame)
+</p>
+<p>   
+   Save model rooted at `source` to file `filename`.
+</p>
+
+<p>   
+   Parameters
+
+</p>
+<hr/>
+<p>
+   source: ematrix or element or str
+           root of the model tree
+</p>
+<p>   
+   filename: str
+           destination file to save the model in.
+</p>
+<p>   
+   Returns
+
+</p>
+<hr/>
+<p>
+   None
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-17" class="outline-3">
+<h3 id="sec-2-17"><span class="section-number-3">2.17</span> seed</h3>
+<div class="outline-text-3" id="text-2-17">
+
+<p>   moose.seed(seedvalue) -&gt; None
+</p>
+<p>   
+   Reseed MOOSE random number generator.
+</p>
+
+<p>   
+   Parameters
+
+</p>
+<hr/>
+<p>
+   seed: int
+           Optional value to use for seeding. If 0, a random seed is
+           automatically created using the current system time and other
+           information. If not specified, it defaults to 0.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-18" class="outline-3">
+<h3 id="sec-2-18"><span class="section-number-3">2.18</span> setClock</h3>
+<div class="outline-text-3" id="text-2-18">
+
+<p>   Set the dt of a clock.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-19" class="outline-3">
+<h3 id="sec-2-19"><span class="section-number-3">2.19</span> setCwe</h3>
+<div class="outline-text-3" id="text-2-19">
+
+<p>   Set the current working element. 'ce' is an alias of this function
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-20" class="outline-3">
+<h3 id="sec-2-20"><span class="section-number-3">2.20</span> start</h3>
+<div class="outline-text-3" id="text-2-20">
+
+<p>   start(t) -&gt; None
+</p>
+<p>   
+   Run simulation for `t` time. Advances the simulator clock by `t`
+   time.
+</p>
+<p>   
+   After setting up a simulation, YOU MUST CALL MOOSE.REINIT() before
+   CALLING MOOSE.START() TO EXECUTE THE SIMULATION. Otherwise, the
+   simulator behaviour will be undefined. Once moose.reinit() has been
+   called, you can call moose.start(t) as many time as you like. This
+   will continue the simulation from the last state for `t` time.
+</p>
+
+<p>   
+   Parameters
+
+</p>
+<hr/>
+<p>
+   t : float
+           duration of simulation.
+</p>
+<p>   
+   Returns
+
+</p>
+<hr/>
+<p>
+           None
+</p>
+<p>   
+   See also
+
+</p>
+<hr/>
+<p>
+   moose.reinit : (Re)initialize simulation
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-21" class="outline-3">
+<h3 id="sec-2-21"><span class="section-number-3">2.21</span> stop</h3>
+<div class="outline-text-3" id="text-2-21">
+
+<p>   Stop simulation
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-22" class="outline-3">
+<h3 id="sec-2-22"><span class="section-number-3">2.22</span> useClock</h3>
+<div class="outline-text-3" id="text-2-22">
+
+<p>   Schedule objects on a specified clock
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-23" class="outline-3">
+<h3 id="sec-2-23"><span class="section-number-3">2.23</span> wildcardFind</h3>
+<div class="outline-text-3" id="text-2-23">
+
+<p>   moose.wildcardFind(expression) -&gt; tuple of ematrices.
+</p>
+<p>   
+   Find an object by wildcard.
+</p>
+
+<p>   
+   Parameters
+
+</p>
+<hr/>
+<p>
+   expression: str
+           MOOSE allows wildcard expressions of the form
+           {PATH}/{WILDCARD}[{CONDITION}]
+           where {PATH} is valid path in the element tree.
+           {WILDCARD} can be `#` or `##`.
+           `#` causes the search to be restricted to the children of the
+           element specified by {PATH}.
+           `##` makes the search to recursively go through all the descendants
+           of the {PATH} element.
+           {CONDITION} can be
+           TYPE={CLASSNAME} : an element satisfies this condition if it is of
+           class {CLASSNAME}.
+           ISA={CLASSNAME} : alias for TYPE={CLASSNAME}
+           CLASS={CLASSNAME} : alias for TYPE={CLASSNAME}
+           FIELD({FIELDNAME}){OPERATOR}{VALUE} : compare field {FIELDNAME} with
+           {VALUE} by {OPERATOR} where {OPERATOR} is a comparison operator (=,
+           !=, &gt;, &lt;, &gt;=, &lt;=).
+           For example, /mymodel/##[FIELD(Vm)&gt;=-65] will return a list of all
+           the objects under /mymodel whose Vm field is &gt;= -65.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-24" class="outline-3">
+<h3 id="sec-2-24"><span class="section-number-3">2.24</span> writeSBML</h3>
+<div class="outline-text-3" id="text-2-24">
+
+<p>   Export biochemical model to an SBML file.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-25" class="outline-3">
+<h3 id="sec-2-25"><span class="section-number-3">2.25</span> doc</h3>
+<div class="outline-text-3" id="text-2-25">
+
+<p>   Display the documentation for class or field in a class.
+</p>
+<p>   
+   Parameters
+
+</p>
+<hr/>
+<p>
+   arg: str or moose class or instance of melement or instance of ematrix
+</p>
+<p>   
+   argument can be a string specifying a moose class name and a field
+   name separated by a dot. e.g., 'Neutral.name'. Prepending `moose.`
+   is allowed. Thus moose.doc('moose.Neutral.name') is equivalent to
+   the above.
+</p>
+<p>   
+   argument can also be string specifying just a moose class name or
+   a moose class or a moose object (instance of melement or ematrix
+   or there subclasses). In that case, the builtin documentation for
+   the corresponding moose class is displayed.
+</p>
+<p>   
+   paged: bool
+</p>
+<p>   
+   Whether to display the docs via builtin pager or print and
+   exit. If not specified, it defaults to False and moose.doc(xyz)
+   will print help on xyz and return control to command line.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-26" class="outline-3">
+<h3 id="sec-2-26"><span class="section-number-3">2.26</span> getfielddoc</h3>
+<div class="outline-text-3" id="text-2-26">
+
+<p>   Get the documentation for field specified by
+   tokens.
+</p>
+<p>   
+   tokens should be a two element list/tuple where first element is a
+   MOOSE class name and second is the field name.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-27" class="outline-3">
+<h3 id="sec-2-27"><span class="section-number-3">2.27</span> getmoosedoc</h3>
+<div class="outline-text-3" id="text-2-27">
+
+<p>   Retrieve MOOSE builtin documentation for tokens.
+</p>
+<p>   
+   tokens is a list or tuple containing: (classname, [fieldname])
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-28" class="outline-3">
+<h3 id="sec-2-28"><span class="section-number-3">2.28</span> le</h3>
+<div class="outline-text-3" id="text-2-28">
+
+<p>   List elements. 
+</p>
+<p>   
+   Parameters
+
+</p>
+<hr/>
+<p>
+   el: str/melement/ematrix/None
+   The element or the path under which to look. If `None`, children
+   of current working element are displayed.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-29" class="outline-3">
+<h3 id="sec-2-29"><span class="section-number-3">2.29</span> listmsg</h3>
+<div class="outline-text-3" id="text-2-29">
+
+<p>   Return a list containing the incoming and outgoing messages of
+   the given object.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-30" class="outline-3">
+<h3 id="sec-2-30"><span class="section-number-3">2.30</span> pwe</h3>
+<div class="outline-text-3" id="text-2-30">
+
+<p>   Print present working element. Convenience function for GENESIS
+   users.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-31" class="outline-3">
+<h3 id="sec-2-31"><span class="section-number-3">2.31</span> showfield</h3>
+<div class="outline-text-3" id="text-2-31">
+
+<p>   Show the fields of the element, their data types and values in
+   human readable format. Convenience function for GENESIS users.
+</p>
+<p>   
+   Parameters:
+</p>
+<p>   
+   elem: str/melement instance
+   Element or path of an existing element.
+</p>
+<p>   
+   field: str
+   Field to be displayed. If '*', all fields are displayed.
+</p>
+<p>   
+   showtype: bool
+   If True show the data type of each field.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-32" class="outline-3">
+<h3 id="sec-2-32"><span class="section-number-3">2.32</span> showfields</h3>
+<div class="outline-text-3" id="text-2-32">
+
+<p>   Convenience function. Should be deprecated if nobody uses it.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-33" class="outline-3">
+<h3 id="sec-2-33"><span class="section-number-3">2.33</span> showmsg</h3>
+<div class="outline-text-3" id="text-2-33">
+
+<p>   Prints the incoming and outgoing messages of the given object.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2-34" class="outline-3">
+<h3 id="sec-2-34"><span class="section-number-3">2.34</span> syncDataHandler</h3>
+<div class="outline-text-3" id="text-2-34">
+
+<p>   Synchronize data handlers for target.
+</p>
+<p>   
+   Parameter:
+   target &ndash; target element or path or ematrix.
+</p></div>
 </div>
 </div>
 </div>
 
 <div id="postamble">
-<p class="date">Date: 2012-10-04 16:27:18 IST</p>
-<p class="author">Author: </p>
+<p class="date">Date: 2012-10-04 20:12:08 IST</p>
+<p class="author">Author: Automatically extracted on 2012-10-04T20:11:55.291611</p>
 <p class="creator">Org version 7.8.11 with Emacs version 23</p>
 <a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a>
 

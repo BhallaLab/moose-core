@@ -386,7 +386,7 @@ string Cinfo::getDocs() const
 {
     ostringstream doc;
     for (map <string, string>::const_iterator ii = doc_.begin(); ii != doc_.end(); ++ii){
-        doc << ii->first << ":\t\t" << ii->second << endl;
+        doc << '\n' << ii->first << ":\t\t" << ii->second << endl;
     }
 	return doc.str();
 }

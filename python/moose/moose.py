@@ -7,9 +7,9 @@
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
 # Created: Sat Mar 12 14:02:40 2011 (+0530)
 # Version: 
-# Last-Updated: Sat Sep 29 11:00:39 2012 (+0530)
+# Last-Updated: Thu Oct  4 20:04:06 2012 (+0530)
 #           By: subha
-#     Update #: 2162
+#     Update #: 2170
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -157,8 +157,9 @@ def showfields(element, showtype=False):
     showfield(element, field='*', showtype=showtype)
     
 finfotypes = [('valueFinfo', 'value field') , 
-              ('srcFinfo', 'source field'),
-              ('destFinfo', 'destination field'),
+              ('srcFinfo', 'source message field'),
+              ('destFinfo', 'destination message field'),
+              ('sharedFinfo', 'shared message field'),
               ('lookupFinfo', 'lookup field')]
 
 # 2012-01-11 19:20:39 (+0530) Subha: checked for compatibility with dh_branch
@@ -192,10 +193,10 @@ def showmsg(pymoose_object):
 
 def getfielddoc(tokens, indent=''):
     """Get the documentation for field specified by
-    tokens[0].tokens[1].
+    tokens.
 
-    tokens should be a two element list/tuple where tokens[0] is a
-    MOOSE class name and tokens[1] is the field name.
+    tokens should be a two element list/tuple where first element is a
+    MOOSE class name and second is the field name.
     """
     assert(len(tokens) > 1)
     for ftype, rtype in finfotypes:
@@ -230,12 +231,8 @@ def getmoosedoc(tokens):
     if len(tokens) > 1:
         docstring.write(getfielddoc(tokens))
     else:
-        finfoheaders = ['* Value Fields *', 
-                        '* Source Fields *',
-                        '* Destination Fields *',
-                        '* Lookup Fields *']
         for ftype, rname in finfotypes:
-            docstring.write('\n*%s*\n' % (rname))
+            docstring.write('\n*%s*\n' % (rname.capitalize()))
             numfinfo = getField(class_id[0], 'num_'+ftype, 'unsigned')
             finfo = ematrix('/classes/%s/%s' % (tokens[0], ftype))
             for ii in range(numfinfo):

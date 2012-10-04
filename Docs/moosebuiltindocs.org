@@ -1,3 +1,7 @@
+Documentation for all MOOSE classes and functions
+#+AUTHOR: Automatically extracted on 2012-10-04T20:11:55.291611
+
+/As visible in Python module/
 * MOOSE Classes
 
 
@@ -7912,10 +7916,10 @@
 
 ** getfielddoc
    Get the documentation for field specified by
-   tokens[0].tokens[1].
+   tokens.
    
-   tokens should be a two element list/tuple where tokens[0] is a
-   MOOSE class name and tokens[1] is the field name.
+   tokens should be a two element list/tuple where first element is a
+   MOOSE class name and second is the field name.
 
 ** getmoosedoc
    Retrieve MOOSE builtin documentation for tokens.
@@ -7964,4 +7968,4 @@
    Synchronize data handlers for target.
    
    Parameter:
-   target -- target element or path or ematrix./automatically extracted on 2012-10-04T16:53:46.099563/
+   target -- target element or path or ematrix.
