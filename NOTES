@@ -18860,6 +18860,150 @@ issues of spatial discretization.
 ============================================================================
 04 Oct 2012.
 NeuroMesh branching cell unit test built. There are assorted numerical issues
- with getting the test grid size right, but finally it seems OK.
+ with getting the test grid size right, but finally it seems OK. Checkin 4109.
+
+============================================================================
+06 Oct 2012.
+Designing for neuronal traffic. This is to be a function implemented on top
+of the NeuroMesh.
+Based on the discussion with John Mercer, I need to do the following:
+- Have stochastic movement of molecular 'blobs' back, forth, on, off, etc.
+	Do this by making a standard set of reactions between compartments:
+	forward motors, backward, on and off.
+- Assemble and disassemble the molecular 'blobs' with varying composition. 
+	Assume the blob remains intact during traffic.
+	Note that this creates a new kind of simulation entity, where 
+		each entity of a given kind may have a different composition
+		of molecules. PoolBlob.
+		This is similar to rule-based modeling, see Hlavacek et al.
+		We're not going the full way with the rule-based models at
+		this point, just making, moving and decomposing the entities.
+		Specifically, no reactions on the composite entities. Yet.
+
+There are two ways to go about this.
+- Multiple instances of single particle Gillespie, one for each 'blob'.
+	Here we just let the blob go about its operations, and we do an 
+	independent set of calculations for each blob. This will need lots of
+	Gillespie solvers, as many as molecular blobs. Which is itself a 
+	variable.
+- Multi particle Gillespie, in which we do the regular Gillespie calculations
+	but keep track of specific molecular 'blobs' that are part of the
+	stochastically reacting pools.
+	So, on each firing involving a blob we pick one of the blobs to
+	do the transition. 
+	This requires a new subclass of Pool, which maintains a list of 
+	individual entities. RulePool.
+	This requires additional features in the Gillespie solver, to pick
+	one of the entities on the RulePool whenever there is a a transition.
+
+The Multi particle Gillespie approach seems best for now. It lets me set up
+arbitrary reaction schemes for each compartment in the mesh, using existing
+infrastructure.
+
+Design of Blobs.
+	- They are single-particle, hence stochastic.
+	- Note that the PSD might also be implemented in this manner, but it
+		would have to allow internal reactions as well.
+	- The simple way to do this is to have them like compartments, with
+		a bunch of transport reactions that bring each molecule in.
+		When the blobbing reaction fires, the (integral) molecules in
+		the compartment are assembled into the blob, and the remainder
+		stay put till there are enough for another blob.
+	- Release of blob is a reversal of this process. Also easy.
+	- Mostly based on existing formalisms. The only new thing the
+		blob does is to vacuum up the integral molecules.
+	- For the case where we have specific binding 
+		sites, with limiting stoichiometry of on-reactions:
+			- We could maintain a compartment-specific set of
+			target 'sites' (just pools) with a suitable conc
+			to ensure stoichiometry.
+			- Sites with arbitrary capacity are just buffered.
+	- Need a trigger to convert compartment contents into the blob.
+		This would probably
+		need to be a rule that requires a certain composition
+		of filled sites in the blob, and then applies a certain
+		transition probability.
+			- Rule also has to decide if this blob-grouping is
+			allowed to keep generating blobs, or only one.
+			- The only-one case would be easy if the sites are
+			zeroed out as soon as the blob is formed. 
+	- We would like a way to have new scaffold molecules come in,
+		and when they do, a stoichiometric set of new sites appears.
+			- Scaffold molecules can also be regular pools that
+			are transported in.
+			- Problem with the scaffold going out again. How to
+			deal with things that may have bound to its sites?
+				- Can get this to work if the scaffold _is_ the 
+				compartment. Then all the individual site
+				reactions play well with the rest of the 
+				chemical system.
+				- Do not allow exit of scaffolds. Entry would
+				correspond either to synthesis, or transport in.
+			- Problem with multiple scaffold molecules. Which one
+				 owns which sites?
+				Option 1: Make separate scaffold/compts for
+				each molecule.
+					- Need an array of them.
+					- May need to expand/contract.
+					- Needs additional sim infrastructure.
+					- Linear increase in sim cost with more
+						scaffold molecules.
+				Option 2: Put multiple scaffolds in the
+					compartment.
+					- Don't care which owns which sites.
+					- At 'firing' time, just randomly sort
+						out a set to take.
+					- No particular extra sim cost.
+
+
+To do:
+	Implement RulePool that manages an array of specific entities: MolBlobs.
+	Implement MolBlobs that keep an array of pool Ids and their 
+		stoichiometry.
+	Implement MolBlobTriggers that manage a list of pool Ids, and spawn/
+		kill MolBlobs.
+	Implement extension to Gillespie to accomplish all this.
+	Test case 1: simple scaffold formation/destruction system implemented
+		both as regular combinatoric set of pools, as well as with
+		MolBlobs.
+	Test case 2: simple diffusion implemented with the Multi particle
+		Gillespie set up in a cylinder. Compare with analytical.
+
+Note added later:
+	I should permit reactions of specific states of scaffolds in and out
+	of the system. On the rule-based compartment side, we have detailed
+	site occupancy information. On the bulk side we have whatever
+	combinatorial subset is modeled, including cases which meld together
+	sets of sites. For example, CaMKII phospho states expressed just
+	as CaMKII_12.P_y. This does not preclude specific limited interfaces,
+	like just the newly synthesized molecule and just the degraded form.
+	It allows more flexibility.
+
+============================================================================
+07 Oct 2012.
+Prioritizing. 
+SigNeur: needed for Spatial pattern sims. Specifically the Stargazin model
+	and friends.
+Traffic: Needed for consolidating Pragati's two models. Also tie to expts on
+	motion of molecules.
+
+Stuff to do to get SigNeur code working.
+	Diffusion in subsets of dendritic tree
+	SpineMesh implementation
+	Coupling of different meshes/compartments: spines and dends
+	Reimplementation of adaptors.
+	(?) Specify signaling compts in .p
+	Specify entire thing in a NeuroML extension.
+	SimManager features for setting all this up.
+	Array calculations in Gillespie solver.
+	Coupling between stochastic calculations in spines and deterministic
+		 in dends.
+	Test case 1: Diffusion in and out of spines
+	Test case 2: Ca computed simultaneously in elec and chem models.
+	Test case 3: Replicate model from Neural Networks paper
+	
+
+Tons of stuff to do but I'll go with the SigNeur code. Starting with 
+setting up a signeur directory and an Adaptor in it.
 
 ============================================================================
