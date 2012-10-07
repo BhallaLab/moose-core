@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'newgui.ui'
 #
-# Created: Thu Oct  4 20:01:20 2012
-#      by: PyQt4 UI code generator 4.8.3
+# Created: Sun Oct  7 13:54:09 2012
+#      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -143,8 +143,8 @@ class Ui_MainWindow(object):
         self.horizontalLayout_7.setObjectName(_fromUtf8("horizontalLayout_7"))
         self.label = QtGui.QLabel(self.dockWidgetContents)
         font = QtGui.QFont()
-        font.setWeight(50)
         font.setBold(False)
+        font.setWeight(50)
         self.label.setFont(font)
         self.label.setObjectName(_fromUtf8("label"))
         self.horizontalLayout_7.addWidget(self.label)
@@ -446,8 +446,8 @@ class Ui_MainWindow(object):
         self.actionLoad_Model = QtGui.QAction(MainWindow)
         self.actionLoad_Model.setSoftKeyRole(QtGui.QAction.NoSoftKey)
         self.actionLoad_Model.setObjectName(_fromUtf8("actionLoad_Model"))
-        self.actionNew_Plot = QtGui.QAction(MainWindow)
-        self.actionNew_Plot.setObjectName(_fromUtf8("actionNew_Plot"))
+        self.actionSave_Plot = QtGui.QAction(MainWindow)
+        self.actionSave_Plot.setObjectName(_fromUtf8("actionSave_Plot"))
         self.actionNew_Visualization = QtGui.QAction(MainWindow)
         self.actionNew_Visualization.setObjectName(_fromUtf8("actionNew_Visualization"))
         self.actionPython = QtGui.QAction(MainWindow)
@@ -646,7 +646,7 @@ class Ui_MainWindow(object):
         self.menuFile.addAction(self.actionLoad_Model)
         self.menuFile.addAction(self.actionSave_Model)
         self.menuFile.addAction(self.actionMerge_Models)
-        self.menuFile.addAction(self.actionNew_Plot)
+        self.menuFile.addAction(self.actionSave_Plot)
         self.menuFile.addAction(self.actionReset_Settings)
         self.menuFile.addAction(self.actionQuit)
         self.menuView.addAction(self.actionProperty_Editor)
@@ -748,7 +748,7 @@ class Ui_MainWindow(object):
 ">>>", None, QtGui.QApplication.UnicodeUTF8))
         self.actionLoad_Model.setText(QtGui.QApplication.translate("MainWindow", "Load Model", None, QtGui.QApplication.UnicodeUTF8))
         self.actionLoad_Model.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+L", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionNew_Plot.setText(QtGui.QApplication.translate("MainWindow", "Save Plots", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionSave_Plot.setText(QtGui.QApplication.translate("MainWindow", "Save All Plots", None, QtGui.QApplication.UnicodeUTF8))
         self.actionNew_Visualization.setText(QtGui.QApplication.translate("MainWindow", "New Visualization", None, QtGui.QApplication.UnicodeUTF8))
         self.actionPython.setText(QtGui.QApplication.translate("MainWindow", "Python", None, QtGui.QApplication.UnicodeUTF8))
         self.actionGenesis.setText(QtGui.QApplication.translate("MainWindow", "Genesis", None, QtGui.QApplication.UnicodeUTF8))

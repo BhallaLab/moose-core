@@ -55,7 +55,7 @@
     <addaction name="actionLoad_Model"/>
     <addaction name="actionSave_Model"/>
     <addaction name="actionMerge_Models"/>
-    <addaction name="actionNew_Plot"/>
+    <addaction name="actionSave_Plot"/>
     <addaction name="actionReset_Settings"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -1124,9 +1124,9 @@
     <enum>QAction::NoSoftKey</enum>
    </property>
   </action>
-  <action name="actionNew_Plot">
+  <action name="actionSave_Plot">
    <property name="text">
-    <string>Save Plots</string>
+    <string>Save All Plots</string>
    </property>
   </action>
   <action name="actionNew_Visualization">
