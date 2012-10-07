@@ -196,7 +196,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         #gui connections
         self.connect(self.actionLoad_Model,QtCore.SIGNAL('triggered()'), self.popupLoadModelDialog)
 	self.connect(self.actionSave_Model,QtCore.SIGNAL('triggered()'), self.popupSaveModelDialog)
-        self.connect(self.actionNew_Plot,QtCore.SIGNAL('triggered()'),self.savePlots)
+        self.connect(self.actionSave_Plot,QtCore.SIGNAL('triggered()'),self.savePlots)
         self.connect(self.actionQuit,QtCore.SIGNAL('triggered()'),self.doQuit)
         #self.connect(self.mdiArea,QtCore.SIGNAL('subWindowActivated(QMdiSubWindow)'),self.plotConfigCurrentPlotWinChanged)
         #plotdock connections
@@ -332,8 +332,24 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 #        self.activeWindow = allList[number+1]
 #        self.activeMdiWindow()
     def savePlots(self):
-        #print "plots to be saved"
-        pass
+        if not self.plotNameWinDict:
+            print 'No plots to save'
+            return
+
+        fileDialog2 = QtGui.QFileDialog(self)        
+        fileDialog2.setFileMode(QtGui.QFileDialog.Directory)
+        fileDialog2.setWindowTitle('Select Directory to save plots')
+        fileDialog2.setOptions(QtGui.QFileDialog.ShowDirsOnly)
+        fileDialog2.setLabelText(QtGui.QFileDialog.Accept, self.tr("Save"))
+        targetPanel = QtGui.QFrame(fileDialog2)
+        targetPanel.setLayout(QtGui.QVBoxLayout())
+        layout = fileDialog2.layout()
+        layout.addWidget(targetPanel)
+        if fileDialog2.exec_():
+            directory = fileDialog2.directory().path() 
+            for plotWinName,plotWin in self.plotNameWinDict.iteritems():
+                plotWin.plot.savePlotData(str(directory))
+            print "All plots are saved in ", str(directory)
         
     def popupSaveModelDialog(self):
         type_genesis = 'GENESIS'
