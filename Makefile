@@ -282,6 +282,7 @@ SUBDIR = \
 	geom \
 	mesh \
 	manager \
+	signeur \
 	$(SMOLDYN_DIR) \
 	$(SBML_DIR) \
 
@@ -306,6 +307,7 @@ OBJLIBS =	\
 	geom/_geom.o \
 	mesh/_mesh.o \
 	manager/_manager.o \
+	signeur/_signeur.o \
 	$(SMOLDYN_LIB) \
 	$(SBML_LIB) \
 
