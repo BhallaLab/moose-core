@@ -48,6 +48,7 @@ class GraphicalView(QtGui.QGraphicsView):
                 #for below  Qt4.6 there is no view transform for itemAt 
                 #and if view is zoom out below 50%  and if textitem object is moved, zooming also happens.
                 sceneitems = self.sceneContainerPt.itemAt(self.startScenepos)
+
             #checking if mouse press position is on any item (in my case textitem or rectcompartment) if none, 
             if ( sceneitems == None):
                 QtGui.QGraphicsView.mousePressEvent(self, event)
@@ -55,9 +56,9 @@ class GraphicalView(QtGui.QGraphicsView):
                 #rectangle and would not allow me to select the items inside the rectangle so breaking the code by not
                 #calling parent class to inherit functionality rather writing custom code for rubberband effect here
             else:
-                if( (isinstance(sceneitems.parentWidget(), PoolItem)) or (isinstance(sceneitems.parentWidget(), CplxItem)) or (isinstance(sceneitems, ReacItem)) or  (isinstance(sceneitems.parentWidget(), EnzItem)) ):
+                if( (isinstance(sceneitems.parentWidget(), PoolItem)) or (isinstance(sceneitems.parentWidget(), CplxItem)) or (isinstance(sceneitems, ReacItem)) or (isinstance(sceneitems.parentWidget(),EnzItem)) ):
                     QtGui.QGraphicsView.mousePressEvent(self, event)
-                    sceneitems.itemSelected = True
+                    self.itemSelected = True
 
                 elif(isinstance(sceneitems, ComptItem)):
                     for previousSelection in self.sceneContainerPt.selectedItems():
@@ -82,6 +83,7 @@ class GraphicalView(QtGui.QGraphicsView):
                         self.customrubberBand = QtGui.QRubberBand(QtGui.QRubberBand.Rectangle,self)
                         self.customrubberBand.setGeometry(QtCore.QRect(self.startingPos,QtCore.QSize()))
                         self.customrubberBand.show()
+    
     def mouseMoveEvent(self,event):
         QtGui.QGraphicsView.mouseMoveEvent(self, event)
         if( (self.customrubberBand) and (event.buttons() == QtCore.Qt.LeftButton)):
@@ -92,12 +94,17 @@ class GraphicalView(QtGui.QGraphicsView):
             self.customrubberBand.setGeometry(QtCore.QRect(self.startingPos, event.pos()).normalized())
             #unselecting any previosly selected item in scene
             for preSelectItem in self.sceneContainerPt.selectedItems():
-                  preSelectItem.setSelected(0)
+                preSelectItem.setSelected(0)
             #since it custom rubberband I am checking if with in the selected area any textitem, if s then setselected to true
             for items in self.sceneContainerPt.items(self.startScenepos.x(),self.startScenepos.y(),self.rubberbandWidth,self.rubberbandHeight,Qt.Qt.IntersectsItemShape):
-               if(isinstance(items.parentWidget(),PoolItem) or isinstance(items.parentWidget(), CplxItem) or isinstance(items, ReacItem) or isinstance(items.parentWidget(),EnzItem)):
-                   if items.isSelected() == False:
-                       items.setSelected(1)
+                if(isinstance(items.parentWidget(),PoolItem) or isinstance(items.parentWidget(), CplxItem) or isinstance(items, ReacItem) or isinstance(items.parentWidget(),EnzItem)):
+                    if(not isinstance(items,ReacItem)):
+                        if items.parentWidget().isSelected() == False:
+                            items.parentWidget().setSelected(1)
+                    else:
+                         if items.isSelected() == False:
+                            items.setSelected(1)
+                        
                         
     def mouseReleaseEvent(self, event):
         self.setCursor(Qt.Qt.ArrowCursor)
@@ -185,9 +192,9 @@ class PoolItem(KineticsDisplayItem):
         
         self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
         self.setFlag(QtGui.QGraphicsItem.ItemIsMovable,True)
-
+        #self.gobj.setFocus(1)
         if QtCore.QT_VERSION >= 0x040600:
-            self.gobj.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges,1)
+            self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges,1)
 
 class ReacItem(KineticsDisplayItem):
     defaultWidth = 20
@@ -366,6 +373,7 @@ class  KineticsWidget(QtGui.QWidget):
 
                     mobjItem.connect(mobjItem,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
                     mobjItem.connect(mobjItem,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.emitItemtoEditor)
+                    #mobjItem.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, True)
                     self.mooseId_GText[element(mre).getId()] = mobjItem
             for k, v in self.qGraCompt.items():
                 rectcompt = v.childrenBoundingRect()
@@ -668,7 +676,7 @@ class  KineticsWidget(QtGui.QWidget):
                 else:
                     self.object2line[ des ] = []
                     self.object2line[ des ].append( ( qgLineitem, src) )
-
+            #qgLineitem.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, True)
     def setupItem(self,modlePath,cntDict):
         zombieType = ['ZombieReac','ZombieEnz','ZombieMMenz','ZombieSumFunc']
         for zombieObj in zombieType:
