@@ -173,7 +173,7 @@ class MoosePlot(MyMplCanvas):
         for table in self.tableCurveMap.keys():
             filename = os.path.join(directory, table.name + '.plot')
             print 'Saving', filename
-            table.dumpFile(filename)
+            table.plainPlot(filename)
 
 class MoosePlotWindow(QtGui.QMdiSubWindow):
     """This is to customize MDI sub window for our purpose.
