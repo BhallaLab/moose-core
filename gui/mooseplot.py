@@ -67,8 +67,9 @@ class MoosePlot(MyMplCanvas):
         self.prevCurves = []
         self.oldCurves = []
         self.overlayPlots = False
-        self.alreadyOverlayed = False #check for already overlayed
+        self.alreadyOverlayed = False #if previously overlays
         self.alreadyPlaced = False
+        self.numberOfOverlayed = 0
 
     def nicePlaceLegend(self):
         box = self.axes.get_position()
@@ -90,7 +91,7 @@ class MoosePlot(MyMplCanvas):
         for line in self.prevCurves:
             line.pop(0).remove()
         self.prevCurves = []
-
+        self.numberOfOverlayed = 0
         self.overlayPlots = False
         self.alreadyOverlayed = False
         self.nicePlaceLegend()
@@ -124,12 +125,18 @@ class MoosePlot(MyMplCanvas):
 
     def updatePlot(self, currentTime):
         config.LOGGER.debug('update: %g' % (currentTime))
-        #print 'updateplots in mooseplot'
+
+        if self.overlayPlots and currentTime == 0.0: #very dirty hack to enable multiple overlays
+            for ii in self.curveTableMap.keys():
+                if ii not in self.oldCurves: #shameful patchwork by me, - Chaitanya
+                    self.oldCurves.extend(self.curveTableMap.keys())
+            self.alreadyOverlayed = False
 
         if self.overlayPlots and not self.alreadyOverlayed :
             self.alreadyOverlayed = True
             for curve in self.oldCurves:
-                l = self.axes.plot(curve.get_data()[0][0],curve.get_data()[1][0],label=str(curve.get_label())+'_old',ls='--',color=curve.get_color())
+                l = self.axes.plot(curve.get_data()[0][0],curve.get_data()[1][0],label=str(curve.get_label())+'_old'+str(self.numberOfOverlayed),ls='--',color=curve.get_color())
+                self.numberOfOverlayed += 1
                 self.prevCurves.append(l)
             self.nicePlaceLegend()
                     
@@ -143,7 +150,6 @@ class MoosePlot(MyMplCanvas):
             xdata = linspace(0, currentTime, tabLen)
             curve.set_data([xdata[0:tabLen:1]],[ydata[0:tabLen:1]])
             curve.set_linestyle('-')
-
 
         self.axes.relim()
         self.axes.autoscale_view(True,True,True)
