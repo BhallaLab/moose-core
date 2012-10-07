@@ -249,7 +249,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.actionRK5.setChecked(True)
         for model in self.modelPathsModelTypeDict.keys():
             moose.element(model).method = 'rk5'
-        moose.reinit()
+        #moose.reinit()
         self._resetSlot()
         self.defaultKKITSolver = 'rk5'
     '''        
@@ -260,7 +260,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.actionEE.setChecked(True)
         for model in self.modelPathsModelTypeDict.keys():
             moose.element(model).method = 'ee'
-        moose.reinit()
+        #moose.reinit()
         self._resetSlot()
         self.defaultKKITSolver = 'ee'
     '''    
@@ -271,7 +271,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.actionGillespie.setChecked(True)
         for model in self.modelPathsModelTypeDict.keys():
             moose.element(model).method = 'gssa'
-        moose.reinit()
+        #moose.reinit()
         self._resetSlot()
         self.defaultKKITSolver = 'gssa'
 
@@ -699,7 +699,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             
             if graphColor == "white":
                 graphColor = None
-            print "F",graphColor
+            #print "F",graphColor
             plotWin.plot.addTable(newTable,self.plotConfigCurrentSelection.getField('name')+'.'+newTable.getField('name'),graphColor)
             plotWin.plot.nicePlaceLegend()
             plotWin.plot.axes.figure.canvas.draw()    
