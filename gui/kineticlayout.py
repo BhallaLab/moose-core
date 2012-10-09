@@ -6,6 +6,7 @@ import random
 import config
 import re
 import math
+from collections import defaultdict
 sys.path.append('../python')
 
 from moose import *
@@ -23,7 +24,7 @@ class GraphicalView(QtGui.QGraphicsView):
         self.showpopupmenu = False
         self.border = 6
         self.setRenderHints(QtGui.QPainter.Antialiasing)
-        self.layoutPt = layoutPt
+        self.layoutPt = layoutPt        
     
     def resizeEvent1(self, event):
         """ zoom when resize! """
@@ -119,6 +120,7 @@ class GraphicalView(QtGui.QGraphicsView):
             self.rubberbandHeight = (self.endScenepos.y()-self.startScenepos.y())
             selecteditems = self.sceneContainerPt.selectedItems()
             if self.rubberbandWidth != 0 and self.rubberbandHeight != 0 and len(selecteditems) != 0 :
+                #self.zoomItem()
                 self.showpopupmenu = True
         self.itemSelected = False
         if self.showpopupmenu:
@@ -139,8 +141,25 @@ class GraphicalView(QtGui.QGraphicsView):
       self.setCursor(Qt.Qt.CrossCursor)
 
     def zoomItem(self):
-        #self.layoutPt.mobjItemignore()
+        self.zooming = True
+        self.layoutPt.updateItemTransformationMode(True)
+        '''
+        for item in self.sceneContainerPt.items():
+            if isinstance(item, PoolItem):
+                print item.mobj[0].name, item.gobj.sceneBoundingRect()
+                rect = self.layoutPt.recalcSceneBoundingRect(item.gobj)
+                print item.mobj[0].name, 'after mapping', rect
+        '''
         self.fitInView(self.startScenepos.x(),self.startScenepos.y(),self.rubberbandWidth,self.rubberbandHeight,Qt.Qt.IgnoreAspectRatio)
+        '''
+        for item in self.sceneContainerPt.items():
+            if isinstance(item, PoolItem):
+                print item.mobj[0].name, 'After fitInView', item.gobj.sceneBoundingRect()
+                rect = self.layoutPt.recalcSceneBoundingRect(item.gobj)
+                print item.mobj[0].name, 'After fitInView', 'after mapping', rect
+        '''
+        self.layoutPt.drawLine_arrow(zooming=True)
+        # self.layoutPt.updateItemTransformationMode(False)
         self.rubberBandactive = False
 
 class KineticsDisplayItem(QtGui.QGraphicsWidget):
@@ -197,32 +216,29 @@ class PoolItem(KineticsDisplayItem):
             self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges,1)
 
 class ReacItem(KineticsDisplayItem):
-    defaultWidth = 20
-    defaultHeight = 10
+    defaultWidth = 35
+    defaultHeight = 35
     def __init__(self, *args, **kwargs):
         KineticsDisplayItem.__init__(self, *args, **kwargs)
-        self.gobj = QtGui.QGraphicsPolygonItem(self)
-    
-    def paint(self, painter, option, widget):
-        x = 0
-        y = 0
-        width = 30
-        height = 30
-        painter.setPen(QtGui.QPen(QtGui.QBrush(Qt.Qt.black),1))
-        arrow = QtGui.QPolygonF([QtCore.QPointF(x,y+height/2),QtCore.QPointF(x+width,y+height/2)])
-        painter.drawPolygon(arrow)
-        arrow = QtGui.QPolygonF([QtCore.QPointF(x,y+height/2),QtCore.QPointF(x+(math.sin(90)*8),y+height/2+math.cos(90)*8)])
-        painter.drawPolygon(arrow)
-        arrow = QtGui.QPolygonF([QtCore.QPointF(x+width,y+height/2),QtCore.QPointF(x+width+(math.sin(225)*8),y+height/2+math.cos(225)*8)])
-        painter.drawPolygon(arrow)
+        width = 30.0
+        height = 30.0
+        points = [QtCore.QPointF(width/4, 0),
+                  QtCore.QPointF(0, height/4),
+                  QtCore.QPointF(width, height/4),
+                  QtCore.QPointF(3*width/4, height/2)]
+        path = QtGui.QPainterPath()
+        path.moveTo(points[0])
+        for p in points[1:]:
+            path.lineTo(p)
+            path.moveTo(p)
+        self.gobj = QtGui.QGraphicsPathItem(path, self)
+        self.gobj.setPen(QtGui.QPen(QtCore.Qt.black, 2))
         
     def setDisplayProperties(self, x,y,textcolor,bgcolor):
         """Set the display properties of this item."""
-        width = 30
-        height = 30
-        self.setGeometry(x,y,width,height)
-        self.gobj.setPen(QtGui.QPen(QtGui.QBrush(textcolor)))
-        self.gobj.setBrush(QtGui.QBrush(bgcolor))
+        self.setGeometry(x,y, 
+                         self.gobj.boundingRect().width(), 
+                         self.gobj.boundingRect().height())
         self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable
                      +QtGui.QGraphicsItem.ItemIsMovable)
         if QtCore.QT_VERSION >= 0x040600:
@@ -300,7 +316,7 @@ class  KineticsWidget(QtGui.QWidget):
         self.setupComptObj(modelPath,cmptMol)
         #for k,v in test.items(): print k,v
         self.itemignoretransFlag = False
-
+        
 	#Check to see if all the cordinates are zero (which is a case for kkit8 version)
         x = []
         y = []
@@ -321,7 +337,8 @@ class  KineticsWidget(QtGui.QWidget):
 	    self.sceneContainer = QtGui.QGraphicsScene(self)
 	    self.sceneContainer.setSceneRect(self.sceneContainer.itemsBoundingRect())
 	    self.sceneContainer.setBackgroundBrush(QtGui.QColor(230,220,219,120))
-		
+            self.view = GraphicalView(self.sceneContainer,self.border,self)
+
             if xMax - xMin != 0:
                 xratio = (size.width()-10)/(xMax-xMin)
             else:
@@ -377,56 +394,56 @@ class  KineticsWidget(QtGui.QWidget):
                     self.mooseId_GText[element(mre).getId()] = mobjItem
             for k, v in self.qGraCompt.items():
                 rectcompt = v.childrenBoundingRect()
+                self.comptborder = 10
                 v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
-                v.setPen(QtGui.QPen(Qt.QColor(66,66,66,100),10,QtCore.Qt.SolidLine,QtCore.Qt.RoundCap,QtCore.Qt.RoundJoin ))
+                v.setPen(QtGui.QPen(Qt.QColor(66,66,66,100),self.comptborder,QtCore.Qt.SolidLine,QtCore.Qt.RoundCap,QtCore.Qt.RoundJoin ))
                 v.cmptEmitter.connect(v.cmptEmitter,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
                 v.cmptEmitter.connect(v.cmptEmitter,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.emitItemtoEditor)
 
             self.srcdesConnection = {}
             self.lineItem_dict = {}
-            self.object2line = {}
-            
+            self.object2line = defaultdict(list)
             self.setupItem(modelPath,self.srcdesConnection)
+            self.drawLine_arrow(zooming=False)
 
-            for inn,out in self.srcdesConnection.items():
+            hLayout.addWidget(self.view)
+
+    def updateItemTransformationMode(self, on):
+        self.comptborder = 5 # TODO: update border
+        for v in self.sceneContainer.items():
+            if( not isinstance(v,ComptItem)):
+                if ( isinstance(v, PoolItem) or isinstance(v, ReacItem) or isinstance(v, EnzItem) or isinstance(v, CplxItem) ):
+                    print "v",v
+                    v.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, on)
+
+    def drawLine_arrow(self, zooming=False):        
+        for inn,out in self.srcdesConnection.items():
                 if isinstance(out,tuple):
                     if len(out[0])== 0:
                         print "Reaction or Enzyme doesn't input mssg"
                     else:
                         for items in (items for items in out[0] ):
-                            src = ""
-                            des = ""
                             src = self.mooseId_GText[inn]
                             des = self.mooseId_GText[element(items[0]).getId()]
-                            self.lineCord(src,des,items[1])
+                            self.lineCord(src,des,items[1],zooming)
                     if len(out[1]) == 0:
                         print "Reaction or Enzyme doesn't output mssg"
                     else:
                         for items in (items for items in out[1] ):
-                            src = ""
-                            des = ""
                             src = self.mooseId_GText[inn]
                             des = self.mooseId_GText[element(items[0]).getId()]
-                            self.lineCord(src,des,items[1])
+                            self.lineCord(src,des,items[1],zooming)
                 elif isinstance(out,list):
                     if len(out) == 0:
                         print "Func pool doesn't have sumtotal"
                     else:
                          for items in (items for items in out ):
-                             src = ""
-                             des = ""
+                             
                              src = self.mooseId_GText[element(inn).getId()]
                              des = self.mooseId_GText[element(items[0]).getId()]
-                             self.lineCord(src,des,items[1])
-            
-            self.view = GraphicalView(self.sceneContainer,self.border,self)
-            hLayout.addWidget(self.view)
-        
-    def mobjItemignore(self):
-        for k,v in self.mooseId_GText.items():
-            v.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, True)
-            self.ignoredtransformation = True
-            self.updatearrow(v)
+                             print "-----------------------------------sumtotal",src,des
+                             self.lineCord(src,des,items[1],zooming)
+    
     def GrVfitinView(self):
         self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
         
@@ -477,14 +494,7 @@ class  KineticsWidget(QtGui.QWidget):
                 if(pItem.class_ == 'ZombieFuncPool' or pItem1.class_ == 'ZombieFuncPool'):
                     endtype = 'st'
 
-            '''
-            if self.ignoredtransformation == False:
-                arrow = self.callArrow(srcdes[0],srcdes[1],endtype)
-            else:
-                arrow = self.callArrowIgnore(srcdes[0],srcdes[1],endtype)
-            #print "arrow",arrow
-            '''
-            arrow = self.callArrow(srcdes[0],srcdes[1],endtype)
+            arrow = self.calcArrow(srcdes[0],srcdes[1],endtype,False)
             ql.setPolygon(arrow)
 
     def coordinates(self,x,y,cmptMol):
@@ -514,107 +524,103 @@ class  KineticsWidget(QtGui.QWidget):
     def nonzero(self,seq):
       return (item for item in seq if item!=0)
 
-    def callArrow(self,src,des,endtype):
-        sX = src.sceneBoundingRect().x()
-        sY = src.sceneBoundingRect().y()
-        sw = src.sceneBoundingRect().right() -src.sceneBoundingRect().left()
-        sh = src.sceneBoundingRect().bottom() -src.sceneBoundingRect().top()
-        
-        dX = des.sceneBoundingRect().x()
-        dY = des.sceneBoundingRect().y()
-        dw = des.sceneBoundingRect().right() -des.sceneBoundingRect().left()
-        dh = des.sceneBoundingRect().bottom() -des.sceneBoundingRect().top()
+    def recalcSceneBoundingRect(self, rect):
+        vp_trans = self.view.viewportTransform()
+        trans = rect.deviceTransform(vp_trans)
+        bbox = rect.boundingRect()
+        sx = trans.mapRect(bbox);
+        mappedRect = self.view.mapToScene(sx.toRect()).boundingRect()
+        return mappedRect
 
-        #Here there is external boundary created for each textitem 
-        #1. for checking if there is overLap
-        #2. The start line and arrow head ends to this outer boundary
-        
-        srcRect = src.sceneBoundingRect()
-        desRect = des.sceneBoundingRect()
-        t = srcRect.intersects(desRect)
+    def calcArrow(self,src,des,endtype,zooming):
+        #print "Zooming",zooming
+        if zooming:
+            print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ zooming is true~~~~~~~~~~~~~~~~"
+            srcRect = self.recalcSceneBoundingRect(src.gobj)
+            desRect = self.recalcSceneBoundingRect(des.gobj)
+        else:
+            srcRect = src.sceneBoundingRect()
+            desRect = des.sceneBoundingRect()
         arrow = QtGui.QPolygonF()
-
-        if not t:
-            centerPoint = QtCore.QLineF(src.sceneBoundingRect().center().x(),src.sceneBoundingRect().center().y(),des.sceneBoundingRect().center().x(),des.sceneBoundingRect().center().y())
-            lineSrcpoint = QtCore.QPointF(0,0)
-            srcAngle = self.calPoAng(sX,sY,sw,sh,centerPoint,lineSrcpoint)
-            lineDespoint = QtCore.QPointF(0,0)
-            self.calPoAng(dX,dY,dw,dh,centerPoint,lineDespoint)
-            # src and des are connected with line co-ordinates
-            #Arrow head is drawned if the distance between src and des line is >8 just for clean appeareance
-            if endtype == 'p':
-                if(abs(lineSrcpoint.x()-lineDespoint.x()) > 8 or abs(lineSrcpoint.y()-lineDespoint.y())>8):
-                    #Arrow head for Source is calculated
-                    srcAngle = self.calPoAng(dX,dY,dw,dh,centerPoint,lineDespoint)
-                    degree = -60
-                    srcXArr1,srcYArr1= self.arrowHead(srcAngle,degree,lineDespoint)
-                    degree = -120
-                    srcXArr2,srcYArr2 = self.arrowHead(srcAngle,degree,lineDespoint)
-                    arrow.append(QtCore.QPointF(lineSrcpoint.x(),lineSrcpoint.y()))
-                    arrow.append(QtCore.QPointF(lineDespoint.x(),lineDespoint.y()))
-                    
-                    arrow.append(QtCore.QPointF(srcXArr1,srcYArr1))
-                    arrow.append(QtCore.QPointF(lineDespoint.x(),lineDespoint.y()))
-                    arrow.append(QtCore.QPointF(srcXArr2,srcYArr2))                    
-                    arrow.append(QtCore.QPointF(lineDespoint.x(),lineDespoint.y()))
-            elif endtype == 'st':
-                if(abs(lineSrcpoint.x()-lineDespoint.x()) > 8 or abs(lineSrcpoint.y()-lineDespoint.y())>8):
-                    #Arrow head for Source is calculated
-                    desAngle = self.calPoAng(sX,sY,sw,sh,centerPoint,lineSrcpoint)
-                    degree = 120
-                    srcXArr1,srcYArr1= self.arrowHead(srcAngle,degree,lineSrcpoint)
-                    degree = 60
-                    srcXArr2,srcYArr2 = self.arrowHead(srcAngle,degree,lineSrcpoint)
-                    arrow.append(QtCore.QPointF(lineDespoint.x(),lineDespoint.y()))
-                    arrow.append(QtCore.QPointF(lineSrcpoint.x(),lineSrcpoint.y()))
-                    
-                    arrow.append(QtCore.QPointF(srcXArr1,srcYArr1))
-                    arrow.append(QtCore.QPointF(lineSrcpoint.x(),lineSrcpoint.y()))
-                    arrow.append(QtCore.QPointF(srcXArr2,srcYArr2))                    
-                    arrow.append(QtCore.QPointF(lineSrcpoint.x(),lineSrcpoint.y()))
-            else:
-                arrow.append(QtCore.QPointF(lineSrcpoint.x(),lineSrcpoint.y()))
-                arrow.append(QtCore.QPointF(lineDespoint.x(),lineDespoint.y()))
-                                    
-            return (arrow)
-        elif t:
+        if srcRect.intersects(desRect):                
             # This is created for getting a emptyline for reference b'cos 
             # lineCord function add qgraphicsline to screen and also add's a ref for src and des
             arrow.append(QtCore.QPointF(0,0))
             arrow.append(QtCore.QPointF(0,0))
-            return (arrow)
+            return arrow
+        tmpLine = QtCore.QLineF(srcRect.center().x(),
+                                    srcRect.center().y(),
+                                    desRect.center().x(),
+                                    desRect.center().y())
+        srcIntersects, lineSrcPoint = self.calcLineRectIntersection(srcRect, tmpLine)
+        destIntersects, lineDestPoint = self.calcLineRectIntersection(desRect, tmpLine)
+        if not srcIntersects:
+            print 'Source does not intersect line. Arrow points:', lineSrcPoint, src.mobj[0].name, src.mobj[0].class_
+        if not destIntersects:
+            print 'Dest does not intersect line. Arrow points:', lineDestPoint,  des.mobj[0].name, des.mobj[0].class_
+        print "endtype", endtype, lineSrcPoint, lineDestPoint
+        # src and des are connected with line co-ordinates
+        # Arrow head is drawned if the distance between src and des line is >8 just for clean appeareance
+        if (abs(lineSrcPoint.x()-lineDestPoint.x()) > 8 or abs(lineSrcPoint.y()-lineDestPoint.y())>8):
+            srcAngle = tmpLine.angle()
+            if endtype == 'p':
+                #Arrow head for Destination is calculated
+                arrow.append(lineSrcPoint)
+                arrow.append(lineDestPoint)
+                degree = -60
+                srcXArr1,srcYArr1= self.arrowHead(srcAngle,degree,lineDestPoint)
+	        arrow.append(QtCore.QPointF(srcXArr1,srcYArr1))
+                arrow.append(QtCore.QPointF(lineDestPoint.x(),lineDestPoint.y()))
+                
+		degree = -120
+                srcXArr2,srcYArr2 = self.arrowHead(srcAngle,degree,lineDestPoint)
+                arrow.append(QtCore.QPointF(srcXArr2,srcYArr2))                    
+                arrow.append(QtCore.QPointF(lineDestPoint.x(),lineDestPoint.y()))
+ 
+            elif endtype == 'st':
+                #Arrow head for Source is calculated
+                arrow.append(lineDestPoint)
+                arrow.append(lineSrcPoint)
+                degree = 60
+                srcXArr2,srcYArr2 = self.arrowHead(srcAngle,degree,lineSrcPoint)
+                arrow.append(QtCore.QPointF(srcXArr2,srcYArr2))                    
+                arrow.append(QtCore.QPointF(lineSrcPoint.x(),lineSrcPoint.y()))
+
+                degree = 120
+                srcXArr1,srcYArr1= self.arrowHead(srcAngle,degree,lineSrcPoint)
+		arrow.append(QtCore.QPointF(srcXArr1,srcYArr1))
+                arrow.append(QtCore.QPointF(lineSrcPoint.x(),lineSrcPoint.y()))
+
+            else:
+                arrow.append(lineSrcPoint)
+                arrow.append(lineDestPoint)
+        return arrow
 
     #checking which side of rectangle intersect with other
-    def calPoAng(self,X,Y,w,h,centerLine,linePoint):
-            #Here the 1. a. intersect point between center and 4 sides of src and 
-            #            b. intersect point between center and 4 sides of des and to draw a line connecting for src & des
-            #         2. angle for src for the arrow head calculation is returned
-            #lItemSP = QtCore.QLineF(X-5,Y-5,X+w+5,Y-5)
-            lItemSP = QtCore.QLineF(X,Y,X+w,Y)
-            boundintersect= lItemSP.intersect(centerLine,linePoint)
-            if (boundintersect == 1):
-                return centerLine.angle()
-            else:
-                #lItemSP = QtCore.QLineF(X+w+5,Y-5,X+w+5,Y+h+5)
-                lItemSP = QtCore.QLineF(X+w,Y,X+w,Y+h)
-                boundintersect= lItemSP.intersect(centerLine,linePoint)
-                if (boundintersect == 1):
-                    return centerLine.angle()
-                else:
-                    #lItemSP = QtCore.QLineF(X+w+5,Y+h+5,X-5,Y+h+5)
-                    lItemSP = QtCore.QLineF(X+w,Y+h,X,Y+h)
-                    boundintersect= lItemSP.intersect(centerLine,linePoint)
-                    if (boundintersect == 1):
-                        return centerLine.angle()
-                    else:
-                        #lItemSP = QtCore.QLineF(X-5,Y+h+5,X-5,Y-5)
-                        lItemSP = QtCore.QLineF(X,Y+h,X,Y)
-                        boundintersect= lItemSP.intersect(centerLine,linePoint)
-                        if (boundintersect == 1):
-                            return centerLine.angle()
-                        else:
-                            linePoint = QtCore.QPointF(0,0)
-                            return 0
+    def calcLineRectIntersection(self, rect, centerLine):
+        """Here the 1. a. intersect point between center and 4 sides of src and 
+        
+                    b. intersect point between center and 4 sides of
+                    des and to draw a line connecting for src & des
+        
+                    2. angle for src for the arrow head calculation is returned"""
+        x = rect.x()
+        y = rect.y()
+        w = rect.width()
+        h = rect.height()
+        borders = [(x,y,x+w,y),
+                   (x+w,y,x+w,y+h),
+                   (x+w,y+h,x,y+h),
+                   (x,y+h,x,y)]
+        intersectionPoint = QtCore.QPointF()
+        intersects = False
+        for lineEnds in borders:
+            line = QtCore.QLineF(*lineEnds)
+            intersectType = centerLine.intersect(line, intersectionPoint)
+            if intersectType == centerLine.BoundedIntersection:
+                intersects = True
+                break
+        return (intersects, intersectionPoint)
 
     #arrow head is calculated
     def arrowHead(self,srcAngle,degree,lineSpoint):
@@ -626,57 +632,58 @@ class  KineticsWidget(QtGui.QWidget):
         srcYArr = lineSpoint.y() + height
         return srcXArr,srcYArr
 
-    def lineCord(self,src,des,endtype):
+    def lineCord(self,src,des,endtype,zooming):
         source = element(next((k for k,v in self.mooseId_GText.items() if v == src), None))
         desc = element(next((k for k,v in self.mooseId_GText.items() if v == des), None))
         line = 0
-        if( (src == "") and (des == "") ):
+        if (src == "") and (des == ""):
             print "Source or destination is missing or incorrect"
-        else:
-            srcdes_list= [src,des,endtype]
-            arrow = self.callArrow(src,des,endtype)
-            if(source.class_ == "ZombieReac"):
-                qgLineitem = self.sceneContainer.addPolygon(arrow,QtGui.QPen(QtCore.Qt.green, 1, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
-                line = 1
-            elif( (source.class_ == "ZombieEnz") or (source.class_ == "ZombieMMenz")):
-                if ( (endtype == 's') or (endtype == 'p')):
-                    qgLineitem = self.sceneContainer.addPolygon(arrow,QtGui.QPen(QtCore.Qt.red, 1, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
-                    line = 1
-                elif(endtype != 'cplx'):
-                    p = element(next((k for k,v in self.mooseId_GText.items() if v == src), None)) 
-                    parentinfo = p.path+'/info'
-                    textColor = Annotator(parentinfo).getField('textColor')
-                    if(isinstance(textColor,(list,tuple))):
-                        r,g,b = textColor[0],textColor[1],textColor[2]
+            return 
+        srcdes_list = [src,des,endtype]        
+        arrow = self.calcArrow(src,des,endtype,zooming)
+        # xform = self.view.viewportTransform()
+        # width = 1/math.sqrt((xform.m11()*xform.m11() + xform.m22()*xform.m22())/2)
+        # print self.view().transform().m11(), self.view().transform().m22()
+        # rect = self.recalcSceneBoundingRect(QtGui.QGraphicsRectItem(0, 0, 1, 1))
+        # width = math.sqrt((rect.width()*rect.width()+rect.height()*rect.height())/2.0)        
+        # print 'Width', width
+        # print "@@@@ zooming?",zooming,arrow
+        if zooming:
+            for l,v in self.object2line[src]:
+                if v == des:
+                    l.setPolygon(arrow)
+                    return
+        qgLineitem = self.sceneContainer.addPolygon(arrow)        
+        pen = QtGui.QPen(QtCore.Qt.green, 1, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin)
+        pen.setCosmetic(True)
+        # Green is default color moose.ReacBase and derivatives - already set above
+        if  isinstance(source, moose.EnzBase):
+            if ( (endtype == 's') or (endtype == 'p')):
+                pen.setColor(QtCore.Qt.red)
+            elif(endtype != 'cplx'):
+                print "between enz and enzsite"
+                p = element(next((k for k,v in self.mooseId_GText.items() if v == src), None)) 
+                parentinfo = p.path+'/info'
+                textColor = Annotator(parentinfo).getField('textColor')
+                if(isinstance(textColor,(list,tuple))):
+                    r,g,b = textColor[0],textColor[1],textColor[2]
+                    color = QtGui.QColor(r,g,b)
+                elif ((not isinstance(textColor,(list,tuple)))):
+                    if textColor.isdigit():
+                        tc = int(textColor)
+                        tc = (tc * 2 )
+                        r,g,b = self.picklecolorMap[tc]
                         color = QtGui.QColor(r,g,b)
-                    elif ((not isinstance(textColor,(list,tuple)))):
-                        if textColor.isdigit():
-                            tc = int(textColor)
-                            tc = (tc * 2 )
-                            r,g,b = self.picklecolorMap[tc]
-                            color = QtGui.QColor(r,g,b)
-                        else: 
-                            color = QtGui.QColor(200,200,200)
-                    qgLineitem = self.sceneContainer.addPolygon(arrow,QtGui.QPen(color,1, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
-                    line = 1
-                elif(endtype == 'cplx'):
-                    pass
-            elif( (source.class_ == "ZombiePool") or (source.class_ == "ZombieFuncPool") or (source.class_ == "ZombieBuffPool")):
-                qgLineitem = self.sceneContainer.addPolygon(arrow,QtGui.QPen(QtCore.Qt.blue, 1, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
-                line =1
-            if line == 1:            
-                self.lineItem_dict[qgLineitem] = srcdes_list
-                if src in self.object2line:
-                    self.object2line[ src ].append( ( qgLineitem, des) )
-                else:
-                    self.object2line[ src ] = []
-                    self.object2line[ src ].append( ( qgLineitem, des) )
-                if des in self.object2line:
-                    self.object2line[ des ].append( ( qgLineitem, src ) )
-                else:
-                    self.object2line[ des ] = []
-                    self.object2line[ des ].append( ( qgLineitem, src) )
-            #qgLineitem.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, True)
+                    else: 
+                        color = QtGui.QColor(200,200,200)
+                pen.setColor(color)
+        elif isinstance(source, moose.PoolBase):
+            pen.setColor(QtCore.Qt.blue)
+        self.lineItem_dict[qgLineitem] = srcdes_list
+        self.object2line[ src ].append( ( qgLineitem, des) )
+        self.object2line[ des ].append( ( qgLineitem, src ) )
+        qgLineitem.setPen(pen)
+
     def setupItem(self,modlePath,cntDict):
         zombieType = ['ZombieReac','ZombieEnz','ZombieMMenz','ZombieSumFunc']
         for zombieObj in zombieType:
@@ -827,14 +834,16 @@ class  KineticsWidget(QtGui.QWidget):
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     size = QtCore.QSize(1024 ,768)
-    #modelPath = '77'
-    #modelPath = 'enz_classical_explicit'
+    modelPath = '77'
+    modelPath = 'enz_classical_explicit'
     #modelPath = 'acc61'
-    modelPath = 'reaction1'
+    modelPath = 'reaction4'
     #modelPath = 're'
-    modelPath = 'Kholodenko'
+    #modelPath = 'Kholodenko'
+    modelPath = 'EGFR_MAPK_58'
     try:
         filepath = '../Demos/Genesis_files/'+modelPath+'.g'
+        #filepath = '/home/harsha/genesis_files/'+modelPath+'.g'
         f = open(filepath, "r")
         loadModel(filepath,'/'+modelPath)
         dt = KineticsWidget(size,'/'+modelPath)
