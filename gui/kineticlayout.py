@@ -141,25 +141,11 @@ class GraphicalView(QtGui.QGraphicsView):
       self.setCursor(Qt.Qt.CrossCursor)
 
     def zoomItem(self):
+        # First items are ignoretransformation,view is fitted and recalculated the arrow
         self.zooming = True
         self.layoutPt.updateItemTransformationMode(True)
-        '''
-        for item in self.sceneContainerPt.items():
-            if isinstance(item, PoolItem):
-                print item.mobj[0].name, item.gobj.sceneBoundingRect()
-                rect = self.layoutPt.recalcSceneBoundingRect(item.gobj)
-                print item.mobj[0].name, 'after mapping', rect
-        '''
         self.fitInView(self.startScenepos.x(),self.startScenepos.y(),self.rubberbandWidth,self.rubberbandHeight,Qt.Qt.IgnoreAspectRatio)
-        '''
-        for item in self.sceneContainerPt.items():
-            if isinstance(item, PoolItem):
-                print item.mobj[0].name, 'After fitInView', item.gobj.sceneBoundingRect()
-                rect = self.layoutPt.recalcSceneBoundingRect(item.gobj)
-                print item.mobj[0].name, 'After fitInView', 'after mapping', rect
-        '''
         self.layoutPt.drawLine_arrow(zooming=True)
-        # self.layoutPt.updateItemTransformationMode(False)
         self.rubberBandactive = False
 
 class KineticsDisplayItem(QtGui.QGraphicsWidget):
@@ -214,6 +200,10 @@ class PoolItem(KineticsDisplayItem):
         #self.gobj.setFocus(1)
         if QtCore.QT_VERSION >= 0x040600:
             self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges,1)
+    def updateSlot(self):
+        self.gobj.setText(self.mobj[0].name)
+        self.bg.setRect(0, 0, self.gobj.boundingRect().width()+PoolItem.fontMetrics.width('  '), self.gobj.boundingRect().height())
+
 
 class ReacItem(KineticsDisplayItem):
     defaultWidth = 35
@@ -315,7 +305,7 @@ class  KineticsWidget(QtGui.QWidget):
         cmptMol = {}
         self.setupComptObj(modelPath,cmptMol)
         #for k,v in test.items(): print k,v
-        self.itemignoretransFlag = False
+        self.itemignorestransformFlag = False
         
 	#Check to see if all the cordinates are zero (which is a case for kkit8 version)
         x = []
@@ -390,7 +380,6 @@ class  KineticsWidget(QtGui.QWidget):
 
                     mobjItem.connect(mobjItem,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
                     mobjItem.connect(mobjItem,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.emitItemtoEditor)
-                    #mobjItem.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, True)
                     self.mooseId_GText[element(mre).getId()] = mobjItem
             for k, v in self.qGraCompt.items():
                 rectcompt = v.childrenBoundingRect()
@@ -409,12 +398,13 @@ class  KineticsWidget(QtGui.QWidget):
             hLayout.addWidget(self.view)
 
     def updateItemTransformationMode(self, on):
-        self.comptborder = 5 # TODO: update border
+        self.comptborder = 1 # TODO: update border
         for v in self.sceneContainer.items():
             if( not isinstance(v,ComptItem)):
                 if ( isinstance(v, PoolItem) or isinstance(v, ReacItem) or isinstance(v, EnzItem) or isinstance(v, CplxItem) ):
-                    print "v",v
                     v.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, on)
+            else:
+                v.setPen(QtGui.QPen(Qt.QColor(66,66,66,100),self.comptborder,QtCore.Qt.SolidLine,QtCore.Qt.RoundCap,QtCore.Qt.RoundJoin ))
 
     def drawLine_arrow(self, zooming=False):        
         for inn,out in self.srcdesConnection.items():
@@ -441,7 +431,6 @@ class  KineticsWidget(QtGui.QWidget):
                              
                              src = self.mooseId_GText[element(inn).getId()]
                              des = self.mooseId_GText[element(items[0]).getId()]
-                             print "-----------------------------------sumtotal",src,des
                              self.lineCord(src,des,items[1],zooming)
     
     def GrVfitinView(self):
@@ -454,13 +443,14 @@ class  KineticsWidget(QtGui.QWidget):
     def updateItemSlot(self, mooseObject):
         #In this case if the name is updated from the keyboard both in mooseobj and gui gets updation
         changedItem = ''
-        for changedItem in (item for item in self.sceneContainer.items() if isinstance(item, PoolItem) and mooseObject.getId() == item.mooseObj_.getId()):
-            break
-        if isinstance(changedItem,PoolItem):
-            changedItem.updateSlot()
-            #once the text is edited in editor, width gets resized for the positionChange signal shd be emitted"
-            self.positionChange(changedItem.mooseObj_)
-
+        #print "mooseObject",mooseObject
+        for item in self.sceneContainer.items():
+            if isinstance(item,PoolItem):
+                if mooseObject.getId() == element(item.mobj).getId():
+                    item.updateSlot()
+                    #once the text is edited in editor, laydisplay gets updated in turn resize the length, positionChanged signal shd be emitted
+                    self.positionChange(mooseObject)
+ 
     def updatearrow(self,qGTextitem):
         #if there is no arrow to update then return
         if qGTextitem not in self.object2line:
@@ -468,7 +458,6 @@ class  KineticsWidget(QtGui.QWidget):
         listItem = self.object2line[qGTextitem]
         for ql, va in listItem:
             srcdes = self.lineItem_dict[ql]
-            forloop = 0
             if(isinstance(srcdes[0],ReacItem) or isinstance(srcdes[0],EnzItem) ):
                 pItem = (next((k for k,v in self.mooseId_GText.items() if v == srcdes[0]), None))
                 mooseObj = (next((k for k,v in self.mooseId_GText.items() if v == srcdes[1]), None))
@@ -533,14 +522,12 @@ class  KineticsWidget(QtGui.QWidget):
         return mappedRect
 
     def calcArrow(self,src,des,endtype,zooming):
-        #print "Zooming",zooming
         if zooming:
-            print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ zooming is true~~~~~~~~~~~~~~~~"
             srcRect = self.recalcSceneBoundingRect(src.gobj)
             desRect = self.recalcSceneBoundingRect(des.gobj)
         else:
-            srcRect = src.sceneBoundingRect()
-            desRect = des.sceneBoundingRect()
+            srcRect = src.gobj.sceneBoundingRect()
+            desRect = des.gobj.sceneBoundingRect()
         arrow = QtGui.QPolygonF()
         if srcRect.intersects(desRect):                
             # This is created for getting a emptyline for reference b'cos 
@@ -558,7 +545,6 @@ class  KineticsWidget(QtGui.QWidget):
             print 'Source does not intersect line. Arrow points:', lineSrcPoint, src.mobj[0].name, src.mobj[0].class_
         if not destIntersects:
             print 'Dest does not intersect line. Arrow points:', lineDestPoint,  des.mobj[0].name, des.mobj[0].class_
-        print "endtype", endtype, lineSrcPoint, lineDestPoint
         # src and des are connected with line co-ordinates
         # Arrow head is drawned if the distance between src and des line is >8 just for clean appeareance
         if (abs(lineSrcPoint.x()-lineDestPoint.x()) > 8 or abs(lineSrcPoint.y()-lineDestPoint.y())>8):
@@ -641,13 +627,6 @@ class  KineticsWidget(QtGui.QWidget):
             return 
         srcdes_list = [src,des,endtype]        
         arrow = self.calcArrow(src,des,endtype,zooming)
-        # xform = self.view.viewportTransform()
-        # width = 1/math.sqrt((xform.m11()*xform.m11() + xform.m22()*xform.m22())/2)
-        # print self.view().transform().m11(), self.view().transform().m22()
-        # rect = self.recalcSceneBoundingRect(QtGui.QGraphicsRectItem(0, 0, 1, 1))
-        # width = math.sqrt((rect.width()*rect.width()+rect.height()*rect.height())/2.0)        
-        # print 'Width', width
-        # print "@@@@ zooming?",zooming,arrow
         if zooming:
             for l,v in self.object2line[src]:
                 if v == des:
@@ -661,7 +640,6 @@ class  KineticsWidget(QtGui.QWidget):
             if ( (endtype == 's') or (endtype == 'p')):
                 pen.setColor(QtCore.Qt.red)
             elif(endtype != 'cplx'):
-                print "between enz and enzsite"
                 p = element(next((k for k,v in self.mooseId_GText.items() if v == src), None)) 
                 parentinfo = p.path+'/info'
                 textColor = Annotator(parentinfo).getField('textColor')
