@@ -1,7 +1,10 @@
 # moose.py --- 
 # 
 # Filename: moose.py
-# Description: 
+# Description: THIS IS OUTDATED CODE AND KEPT FOR HISTORICAL REFERENCE
+#              moose.py in this directory is the replacement for this 
+#              script.
+#  
 # Author: Subhasis Ray
 # Maintainer: 
 # Copyright (C) 2010 Subhasis Ray, all rights reserved.
@@ -18,7 +21,7 @@
 
 # Commentary: 
 # 
-# 
+# THIS IS OUTDATED CODE AND KEPT FOR HISTORICAL REFERENCE
 # 
 # 
 
