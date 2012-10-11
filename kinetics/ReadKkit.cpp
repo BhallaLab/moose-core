@@ -16,6 +16,8 @@
 #include "Pool.h"
 #include "FuncPool.h"
 #include "BufPool.h"
+#include "ReacBase.h"
+#include "EnzBase.h"
 
 #include "../shell/Shell.h"
 #include "../manager/SimManager.h"
@@ -579,6 +581,34 @@ void ReadKkit::assignPoolCompartments()
 	}
 }
 
+Id findMeshOfReac( Id reac )
+{
+	static const Finfo* subFinfo =
+		   	ReacBase::initCinfo()->findFinfo( "toSub" );
+	assert( subFinfo );
+
+	static const Finfo* meshEntryFinfo =
+		   	PoolBase::initCinfo()->findFinfo( "requestSize" );
+	assert( meshEntryFinfo );
+
+		vector< Id > subVec;
+		unsigned int numSub = 
+				reac.element()->getNeighbours( subVec, subFinfo );
+		assert( numSub > 0 );
+		// For now just put the reac in the compt belonging to the 
+		// first substrate
+		vector< Id > meshEntries;
+		subVec[0].element()->getNeighbours( meshEntries, meshEntryFinfo );
+		assert (meshEntries.size() > 0 );
+
+		/*
+		ObjId mesh = Neutral::parent( meshEntries[0].eref() );
+
+		return mesh.id;
+		*/
+		return meshEntries[0];
+}
+
 /**
  * Goes through all Reacs and connects them up to each of the compartments
  * in which one or more of their reactants resides.
@@ -589,17 +619,54 @@ void ReadKkit::assignReacCompartments()
 {
 	// Temporarily just assign them to the base compartment.
 	// Possibly use compartments_ vector later.
+		/*
 	Id kinId = Neutral::child( baseId_.eref(), "kinetics" );
 	assert( kinId != Id() );
 	Id meshId = Neutral::child( kinId.eref(), "mesh" );
 	assert( meshId != Id() );
+	*/
 	for ( map< string, Id >::iterator i = reacIds_.begin(); 
 		i != reacIds_.end(); ++i ) {
+		Id meshId = findMeshOfReac( i->second );
 		MsgId ret = shell_->doAddMsg( "Single", 
 			ObjId( meshId, 0 ), "remeshReacs",
 			ObjId( i->second, 0 ), "remesh" );
 		assert( ret != Msg::bad );
 	}
+}
+
+
+/**
+ * Return the MeshEntry into which the enzyme should be placed.
+ * This is simple: Just identify the compartment holding the enzyme
+ * molecule.
+ */
+Id findMeshOfEnz( Id enz )
+{
+	static const Finfo* enzFinfo =
+		   	EnzBase::initCinfo()->findFinfo( "enzDest" );
+	assert( enzFinfo );
+
+	static const Finfo* meshEntryFinfo =
+		   	PoolBase::initCinfo()->findFinfo( "requestSize" );
+	assert( meshEntryFinfo );
+
+		vector< Id > enzVec;
+		unsigned int numEnz = 
+				enz.element()->getNeighbours( enzVec, enzFinfo );
+		assert( numEnz == 1 );
+		// For now just put the reac in the compt belonging to the 
+		// first substrate
+		vector< Id > meshEntries;
+		enzVec[0].element()->getNeighbours( meshEntries, meshEntryFinfo );
+		assert (meshEntries.size() > 0 );
+
+		/*
+		ObjId mesh = Neutral::parent( meshEntries[0].eref() );
+
+		return mesh.id;
+		*/
+		return meshEntries[0];
 }
 
 /**
@@ -612,12 +679,15 @@ void ReadKkit::assignEnzCompartments()
 {
 	// Temporarily just assign them to the base compartment.
 	// Possibly use compartments_ vector later.
+		/*
 	Id kinId = Neutral::child( baseId_.eref(), "kinetics" );
 	assert( kinId != Id() );
 	Id meshId = Neutral::child( kinId.eref(), "mesh" );
 	assert( meshId != Id() );
+	*/
 	for ( map< string, Id >::iterator i = enzIds_.begin(); 
 		i != enzIds_.end(); ++i ) {
+		Id meshId = findMeshOfEnz( i->second );
 		MsgId ret = shell_->doAddMsg( "Single", 
 			ObjId( meshId, 0 ), "remeshReacs",
 			ObjId( i->second, 0 ), "remesh" );

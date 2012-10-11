@@ -49,8 +49,17 @@ class NeuroMesh: public ChemMesh
 		// Field assignment stuff
 		//////////////////////////////////////////////////////////////////
 
+		/**
+		 * Assigns the parent of all the cell compartments.
+		 */
 		void setCell( Id cellmodel );
 		Id getCell() const;
+
+		/**
+		 * Assigns a group of compartments to be used for the mesh.
+		 */
+		void setCellPortion( Id cell, vector< Id > portion );
+
 		/**
 		 * The SubTree is a contiguous set of compartments to model.
 		 * The first entry is the root of the tree, closest to the soma.

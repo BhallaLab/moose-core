@@ -140,6 +140,15 @@ const Cinfo* NeuroMesh::initCinfo()
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
 
+		static DestFinfo setCellPortion( "setCellPortion",
+			"Tells NeuroMesh to mesh up a subpart of a cell. For now"
+			"assumed contiguous."
+			"The first argument is the cell Id. The second is the vector"
+			"of Ids to consider in meshing up the subpart.",
+			new OpFunc2< NeuroMesh, Id, vector< Id > >(
+				&NeuroMesh::setCellPortion )
+		);
+
 		//////////////////////////////////////////////////////////////
 		// Field Elements
 		//////////////////////////////////////////////////////////////
@@ -152,6 +161,7 @@ const Cinfo* NeuroMesh::initCinfo()
 		&numDiffCompts,		// ReadOnlyValue
 		&diffLength,			// Value
 		&geometryPolicy,		// Value
+		&setCellPortion,			// DestFinfo
 	};
 
 	static Cinfo neuroMeshCinfo (
@@ -399,8 +409,16 @@ void NeuroMesh::buildNodeTree( const map< Id, unsigned int >& comptMap )
 // I assume 'cell' is the parent of the compartment tree.
 void NeuroMesh::setCell( Id cell )
 {
-		cell_ = cell;
 		vector< Id > compts = Field< vector< Id > >::get( cell, "children");
+		setCellPortion( cell, compts );
+}
+
+// Here we set a portion of a cell, specified by a vector of Ids. We
+// also need to define the cell parent.
+void NeuroMesh::setCellPortion( Id cell, vector< Id > portion )
+{
+		cell_ = cell;
+		vector< Id >& compts = portion;
 		map< Id, unsigned int > comptMap;
 
 		Id soma;
