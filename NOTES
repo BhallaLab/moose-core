@@ -18988,10 +18988,10 @@ Traffic: Needed for consolidating Pragati's two models. Also tie to expts on
 	motion of molecules.
 
 Stuff to do to get SigNeur code working.
-	Diffusion in subsets of dendritic tree
+	+Diffusion in subsets of dendritic tree
 	SpineMesh implementation
 	Coupling of different meshes/compartments: spines and dends
-	Reimplementation of adaptors.
+	+Reimplementation of adaptors.
 	(?) Specify signaling compts in .p
 	Specify entire thing in a NeuroML extension.
 	SimManager features for setting all this up.
@@ -19005,5 +19005,74 @@ Stuff to do to get SigNeur code working.
 
 Tons of stuff to do but I'll go with the SigNeur code. Starting with 
 setting up a signeur directory and an Adaptor in it.
+Checkin 4119.
+
+============================================================================
+
+09 Oct 2012
+Coupling meshes/compartments is the key step.
+- How to define it in as SBML/kkit compatible a manner as possible
+	- Use a single kkit model that defines all compartments, and uses
+		permitted inter-compartment transport reactions. These include:
+		- Exchange and binding reactions
+		- Enzyme-catalyzed steps
+		- Note that diffusion and Motors would have to be excluded
+			here. Even with diffusion we do not permit molecular
+			transfer without a special binding step.
+	- Within-compartment transfer includes:
+		- Diffusion. Implicitly defined in kkit from diffusion const.
+		- Motors. Cannot currently define properly in kkit.
+- How to solve it.
+	- Reactions between compts need to know which mesh entries correspond.
+		Examples:
+		- Spines on a dendrite
+		- Dend/spine signaling with extracellular diffusion
+		- Compartments on either side of a membrane.
+	- If both sides are deterministic, compute the rate of each reaction
+		across for a each molecule across the given boundary. 
+		This is almost identical to what the reacs
+		do anyway. To do this the reacs need mol concs on either side
+		of the boundary, at the finer of the two mesh divisions. Assume
+		for now integral mesh matching.
+		- Provide this rate term to both the solvers, with appropriate
+		summing up for the coarser grid.
+		- Keep this rate fixed during the entire interval between
+		the synchronization between solvers.
+	- If one of the solvers is stochastic, and the other is not,
+		then the reac should be stochastic. I think it can be within 
+		the regular Gillespie form, just taking a non-integral # from
+		the deterministic side. The stochastic side obtains mol concs
+		from the deterministic side, and does the usual calculations.
+		The # actually changed are used to update the deterministic
+		side. 
+		In rare cases this update will give a negative conc on the
+		deterministic side. If so, we roll back the increment by the
+		minimum number of molecules, and now have to update both the
+		stoch and deterministic sides. The stoch update will cascade
+		to multiple affected reactions, as usual.
+	- If both solvers are stochastic proceed again as above. Do the
+		Gillespie calculation on the smaller voxel side.
+	- If one solver is Smoldyn, its entire volume is a single division.
+		I think Smoldyn will let us have reactions with an external
+		pool. We assign this pool conc each sync step. Use Smoldyn
+		to decide how many molecules actually transit each time.
+		Still have potential issue of local -ve concs.
+
+- How to set it up.
+	Sim Manager will need hint about whether to load in a multicompt
+	model into multiple solvers or a single one. Substantially different
+	setup in the two cases.
+
+
+Currently we have an issue as all reacs and enzymes seem to be set into
+the kinetics compartment. Error.
+
+Working on this. 
+
+============================================================================
+10 Oct 2012.
+Got reacs to go into correct compartment.
+Got enzs to go into correct compartment.
+Both were an issue with readKkit. 
 
 ============================================================================
