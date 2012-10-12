@@ -83,6 +83,13 @@ public:
 		unsigned int size();
 		double entry( unsigned int i );
 		
+		bool operator ==( const Grid& other ) {
+			return
+				min_ == other.min_ &&
+				max_ == other.max_ &&
+				divs_ == other.divs_;
+		}
+		
 		double min_;
 		double max_;
 		unsigned int divs_;
