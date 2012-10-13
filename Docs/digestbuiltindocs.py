@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Oct  4 11:33:31 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Oct  4 16:53:43 2012 (+0530)
+# Last-Updated: Thu Oct  4 20:11:52 2012 (+0530)
 #           By: subha
-#     Update #: 234
+#     Update #: 246
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -132,12 +132,14 @@ if __name__ == '__main__':
 	docio = open(sys.argv[1], 'w')
     else:
 	docio = cStringIO.StringIO()
-    docio.write(config['heading1'] + 'MOOSE Classes\n')
+    docio.write('Documentation for all MOOSE classes and functions\n')
     ts = datetime.now()
+    docio.write('#+AUTHOR: Automatically extracted on %s\n' % (ts.isoformat()))
+    docio.write('\n/As visible in Python module/\n')
+    docio.write(config['heading1'] + 'MOOSE Classes\n')
     extract_all_class_doc(docio, config['heading2'], config['ulist1'])
     docio.write('\n\n'+config['heading1'] + 'MOOSE Functions\n')
     extract_all_func_doc(docio, config['heading2'])
-    docio.write('/automatically extracted on %s/\n' % (ts.isoformat()))
     if isinstance(docio, cStringIO.OutputType):
 	print docio.getvalue()
     else:
