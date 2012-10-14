@@ -72,14 +72,14 @@ tricks and links to such things.
 ** Before you write anything, think!
    It is often better to make rough outlines using pen and paper
    before you start typing your code. Just like writing an essay or a
-   novel, programs need a coherent flow of thought, and an outline is
-   very important to achieve that.
+   novel, programs need a coherent flow of thought, and an outline
+   helps with that.
 
 ** "The most effective debugging tool is still careful thought, coupled with judiciously placed print statements."
    Brian Kernighan wrote that in 1979 and it still applies no matter
    how proficient you are with gdb or some other debugger. Jumping
    into a debugger without re-reading your code is a sure sign that
-   you are not using your brain. A debugger can help you narrow down
-   the code you need to investigate, but usually a second reading of
-   your code (better after a break) is the most efficient and
-   educational way to find and fix a bug.
+   you are not using your brain properly. A debugger can help you
+   narrow down the code you need to investigate, but usually a second
+   reading of your code (better after a break) is the most efficient
+   and educational way to find and fix a bug.
