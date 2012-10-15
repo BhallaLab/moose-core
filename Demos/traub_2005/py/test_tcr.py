@@ -42,7 +42,7 @@ import uuid
 import numpy as np
 import pylab
 import moose
-from testutils import compare_cell_dump
+from testutils import compare_cell_dump, setupClocks, assignClocks
 import cells
 from moose import utils
 
@@ -58,24 +58,21 @@ SIMDT = 5e-6
 PLOTDT = 0.25e-3
 SIMTIME = 1.0
 
-def setupClocks(simdt, plotdt):
-    print 'Setting up clocks: simdt', simdt, 'plotdt', plotdt
-    moose.setClock(INITCLOCK, simdt)
-    moose.setClock(ELECCLOCK, simdt)
-    moose.setClock(CHANCLOCK, simdt)
-    moose.setClock(POOLCLOCK, simdt)
-    moose.setClock(LOOKUPCLOCK, simdt)
-    moose.setClock(STIMCLOCK, simdt)
-    moose.setClock(PLOTCLOCK, plotdt)
     
 def setupCurrentStepModel(testId, celltype, pulsearray, simdt, plotdt, solver='euler'):
     """Setup a single cell simulation.
 
-    simid - integer identifying the model
+    testId: integer - identifying the model
 
-    celltype - str cell type
+    celltype: str - cell type
     
-    pulsearray - an nx3 array with row[i] = (delay[i], width[i], level[i]) of current injection.
+    pulsearray: nx3 array - with row[i] = (delay[i], width[i], level[i]) of current injection.
+
+    simdt: float - simulation time step
+
+    plotdt: float - sampling interval for plotting 
+
+    solver: str - numerical method to use, can be `hsolve` or `ee`
     """
     modelContainer = moose.Neutral('/test%d' % (testId))
     dataContainer = moose.Neutral('/data%d' % (testId))
@@ -112,7 +109,6 @@ def setupCurrentStepModel(testId, celltype, pulsearray, simdt, plotdt, solver='e
         moose.useClock(ELECCLOCK, modelContainer.path+'/##[TYPE=Compartment]', 'process')
         moose.useClock(CHANCLOCK, modelContainer.path+'/##[TYPE=HHChannel]', 'process')
         moose.useClock(POOLCLOCK, modelContainer.path+'/##[TYPE=CaConc]', 'process')
-
     return {'cell': cell,
             'stimulus': pulsegen,
             'presynapticVm': presynVm,
@@ -151,23 +147,6 @@ class TestTCR(unittest.TestCase):
         moose.le('/library')
         kahp_slower = moose.element(cell.soma.path + '/KAHP_SLOWER')
         capool = moose.element(cell.soma.path + '/CaPool')
-        # print '************* Messages for KAHP_SLOWER ******************'
-        # for msg in kahp_slower.msgIn:
-        #     print 'E1:', msg.e1
-        #     print '\nSrc fields on E1:\n', msg.srcFieldsOnE1
-        #     print '\nDest fields on E1:\n', msg.destFieldsOnE1
-        #     print 'E2:', msg.e2
-        #     print '\nSrc fields on E2:\n', msg.srcFieldsOnE2
-        #     print '\nDest fields on E2:\n', msg.destFieldsOnE2
-        # print '************* Messages for CaPool ******************'
-        # for msg in capool.msgOut:
-        #     print 'E1:', msg.e1
-        #     print 'Src fields on E1:\n', msg.srcFieldsOnE1
-        #     print 'Dest fields on E1:\n', msg.destFieldsOnE1
-        #     print 'E2:', msg.e2
-        #     print '\nSrc fields on E2:\n', msg.srcFieldsOnE2
-        #     print '\nDest fields on E2:\n', msg.destFieldsOnE2
-        # print 'Finished model setup'
         # self.dump_file = 'data/TCR.csv'
         # params['cell'].dump_cell(self.dump_file)
         moose.reinit()
@@ -175,11 +154,11 @@ class TestTCR(unittest.TestCase):
         runsim(SIMTIME)
         end = datetime.now()
         delta = end - start
-        print 'Simulation time:', delta.seconds + delta.microseconds * 1e-6
-            
+        print 'Simulation time:', delta.seconds + delta.microseconds * 1e-6            
         tseries = np.linspace(0, SIMTIME, len(params['somaVm'].vec))
         for table_id in params['data'].children:
-            np.savetxt('data/%s_Vm_%s.dat' % (table_id[0].name, self.solver), np.transpose(np.vstack((tseries, table_id[0].vec))))
+            np.savetxt('data/TCR_%s_%s.dat' % (table_id[0].name, self.solver), 
+                       np.transpose(np.vstack((tseries, table_id[0].vec))))
         # np.savetxt('data/TCR_soma_Vm_%s.dat' % (self.solver), np.transpose(np.vstack((tseries, params['somaVm'].vec))))
         # np.savetxt('data/TCR_presynaptic_Vm_%s.dat' % (self.solver), np.transpose(np.vstack((tseries, params['presynapticVm'].vec))))
         # pylab.subplot(211)

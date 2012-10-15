@@ -30,9 +30,14 @@
 # Code:
 
 import numpy as np
+import testutils
 from testutils import *
 from cachans import *
+from channel_test_util import ChannelTestBase, run_single_channel, compare_channel_data
 
+simtime = 350e-3
+simdt = testutils.SIMDT
+plotdt = testutils.PLOTDT
 
 class TestCaL(ChannelTestBase):
     channelname = 'CaL'
