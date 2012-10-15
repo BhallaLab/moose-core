@@ -88,11 +88,6 @@ compartment_propeties = {
 stimulus = [[100e-3, 50e-3, 3e-10], # delay[0], width[0], level[0]
             [1e9, 0, 0]]
 
-def setup_clocks(simdt, plotdt):
-    for ii in range(10):
-        moose.setClock(ii, simdt)
-    moose.setClock(9, plotdt)
-
 def create_compartment(path, length, diameter, initVm, Em, Rm, Cm, Ra, specific=False):
     comp = moose.Compartment(path)
     comp.length = length
@@ -178,7 +173,7 @@ class TestSingleComp(unittest.TestCase):
             self.pulsegen.width[ii] = stimulus[ii][1]
             self.pulsegen.level[ii] = stimulus[ii][2]
         setup_clocks(simdt, plotdt)
-        self.assignClocks()        
+        assign_clocks(self.model, self.data)        
         moose.reinit()
         start = datetime.now()
         moose.start(simtime)
@@ -186,30 +181,27 @@ class TestSingleComp(unittest.TestCase):
         delta = end - start
         print 'Simulation of %g s finished in %g s' % (simtime, delta.seconds + delta.microseconds*1e-6)
 
-    def assignClocks(self):
-        moose.useClock(0, self.soma.path, 'init')
-        moose.useClock(1, self.soma.path, 'process')
-        moose.useClock(2, self.soma.path + '/#[TYPE=HHChannel]', 'process')
-        moose.useClock(3, self.soma.path + '/#[TYPE=CaConc]', 'process')
-        moose.useClock(4, self.pulsegen.path, 'process')
-        moose.useClock(9, self.data.path+'/#[TYPE=Table]', 'process')        
 
     def testDefault(self):
-        nrndata = np.loadtxt('../nrn/data/singlecomp_Vm.dat')
+        vm_axis = plt.subplot(2,1,1)
+        ca_axis = plt.subplot(2,1,2)
+        try:
+            nrndata = np.loadtxt('../nrn/data/singlecomp_Vm.dat')
+            vm_axis.plot(nrndata[:,0], nrndata[:,1], label='Vm (mV) - nrn')
+            ca_axis.plot(nrndata[:,0], nrndata[:,2], label='Ca (mM) - nrn')
+        except IOError, e:
+            print e
         tseries = np.linspace(0, simtime, len(self.tables['Vm'].vec)) * 1e3
         # plotcount = len(channel_density) + 1
         # rows = int(np.sqrt(plotcount) + 0.5)
         # columns = int(plotcount * 1.0/rows + 0.5)
         # print plotcount, rows, columns
         # plt.subplot(rows, columns, 1)
-        plt.subplot(2,1,1)
-        plt.plot(tseries, self.tables['Vm'].vec * 1e3, label='Vm (mV) - moose')
-        plt.plot(nrndata[:,0], nrndata[:,1], label='Vm (mV) - nrn')
-        plt.plot(tseries, self.tables['pulsegen'].vec * 1e12, label='inject (pA)')
-        plt.subplot(2,1,2)
-        plt.plot(tseries, self.tables['Ca'].vec, label='Ca (mM) - moose')
-        plt.plot(nrndata[:,0], nrndata[:,2], label='Ca (mM) - nrn')
-        plt.legend()
+        vm_axis.plot(tseries, self.tables['Vm'].vec * 1e3, label='Vm (mV) - moose')
+        vm_axis.plot(tseries, self.tables['pulsegen'].vec * 1e12, label='inject (pA)')
+        ca_axis.plot(tseries, self.tables['Ca'].vec, label='Ca (mM) - moose')
+        vm_axis.legend()
+        ca_axis.legend()
         # ii = 2
         # for key, value in self.tables.items():
         #     if key.startswith('Gk'):
@@ -218,7 +210,11 @@ class TestSingleComp(unittest.TestCase):
         #         ii += 1
         #         plt.legend()
         plt.show()
-        np.savetxt('data/singlecomp_Vm.dat', np.transpose(np.vstack((tseries*1e-3, self.tables['Vm'].vec, self.tables['Ca'].vec))))
+        data = np.vstack((tseries*1e-3, 
+                          self.tables['Vm'].vec, 
+                          self.tables['Ca'].vec))
+        np.savetxt('data/singlecomp_Vm.dat', 
+                   np.transpose(data))
 
 if __name__ == '__main__':
     unittest.main()

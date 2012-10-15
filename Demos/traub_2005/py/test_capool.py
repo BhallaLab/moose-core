@@ -31,16 +31,25 @@
 
 import uuid
 import numpy as np
+import testutils
 from testutils import *
 from cachans import *
 from capool import *
+from channel_test_util import compare_channel_data, run_single_channel, ChannelTestBase
+
+
+simtime = 350e-3
+simdt = testutils.SIMDT
+plotdt = testutils.PLOTDT
 
 
 def run_capool(poolname, Gbar, simtime):
     testId = uuid.uuid4().int
     container = moose.Neutral('test%d' % (testId))
+    model = moose.Neutral('%s/model' % (container.path))
+    data = moose.Neutral('%s/data' % (container.path))
     params = setup_single_compartment(
-        container.path,
+        model, data,
         channelbase.prototypes['CaL'],
         Gbar)
     channelname = 'CaL'
@@ -52,9 +61,10 @@ def run_capool(poolname, Gbar, simtime):
     capool.B = 52000 * 1e6 / (3.141592 * 1e-4 * 1e-4)
     # beta = 1/tau (ms) = 0.02 => tau = 50 ms
     capool.tau = 50e-3
-    ca_data = moose.Table('%s/Ca' % (container.path))
+    ca_data = moose.Table('%s/Ca' % (data.path))
     moose.connect(ca_data, 'requestData', capool, 'get_Ca')
-    moose.useClock(2, '%s,%s' % (capool.path, ca_data.path), 'process')
+    setup_clocks(simdt, plotdt)
+    assign_clocks(model, data)
     vm_data = params['Vm']
     gk_data = params['Gk']
     ik_data = params['Ik']
@@ -78,6 +88,7 @@ def run_capool(poolname, Gbar, simtime):
     data = np.c_[tseries, ik_data.vec]
     np.savetxt(ik_file, data)
     print 'Saved Ik in', ik_file
+    print '>>', len(ca_data.vec)
     data = np.c_[tseries, ca_data.vec]
     np.savetxt(ca_file, data)
     print 'Saved [Ca2+] in', ca_file

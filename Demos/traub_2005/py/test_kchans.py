@@ -28,9 +28,18 @@
 
 # Code:
 
+import uuid
+import unittest
 import numpy as np
-from testutils import *
+import testutils 
+import channelbase
+from testutils import setup_single_compartment
+from channel_test_util import compare_channel_data, run_single_channel, ChannelTestBase
 from kchans import *
+
+simtime = 350e-3
+simdt = testutils.SIMDT
+plotdt = testutils.PLOTDT
 
 
 class TestKDR(ChannelTestBase):
@@ -144,25 +153,29 @@ class TestKM(ChannelTestBase):
         self.assertLess(err, 0.01)
 
 
-def setup_cadep_channel(container_path, channel_proto, Gbar, ca_start, ca_stop):
+def setup_cadep_channel(model_container, data_container, channel_proto, Gbar, ca_start, ca_stop):
     """Setup a test compartment with [Ca2+] dependent channel."""
-    params = setup_single_compartment(container_path, channel_proto, Gbar)
-    ca_table = moose.StimulusTable(container_path + '/CaStim')    
+    params = setup_single_compartment(model_container, data_container, channel_proto, Gbar)
+    ca_table = moose.StimulusTable(model_container.path + '/CaStim')    
     ca_table.vec = np.linspace(ca_start, ca_stop, 1000)
     ca_table.doLoop = True
-    ca_recorder = moose.Table(container_path + '/Ca')
+    ca_recorder = moose.Table(data_container.path + '/Ca')
     moose.connect(ca_table, 'output', ca_recorder, 'input')
     moose.connect(ca_table, 'output', params['channel'], 'concen')
     params['Ca'] = ca_recorder
     params['CaStim'] = ca_table
+    testutils.setup_clocks(simdt, plotdt)
+    testutils.assign_clocks(model_container, data_container)    
     moose.useClock(1, '%s,%s' % (ca_recorder.path, ca_table.path), 'process')
     return params
 
 def run_cadep_channel(channelname, Gbar, simtime):
     testId = uuid.uuid4().int
     container = moose.Neutral('test%d' % (testId))
+    model_container = moose.Neutral('%s/model' % (container.path)) 
+    data_container = moose.Neutral('%s/data' % (container.path))
     params = setup_cadep_channel(
-        container.path,
+        model_container, data_container,
         channelbase.prototypes[channelname],
         Gbar,
         0,

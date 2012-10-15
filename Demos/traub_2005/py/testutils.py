@@ -33,7 +33,6 @@ import os
 os.environ['NUMPTHREADS'] = '1'
 import sys
 sys.path.append('../../../python')
-
 import uuid
 import numpy as np
 from matplotlib import pyplot as plt
@@ -43,11 +42,70 @@ import moose
 import config
 import channelbase
 
-simtime = 350e-3
+INITCLOCK = 0
+ELECCLOCK = 1
+CHANCLOCK = 2
+POOLCLOCK = 3
+LOOKUPCLOCK = 6
+STIMCLOCK = 7
+PLOTCLOCK = 8
 
-simdt = 1e-6
+SIMDT = 5e-6
+PLOTDT = 0.25e-3
 
 lib = moose.Neutral(config.modelSettings.libpath)
+
+def setup_clocks(simdt, plotdt):
+    print 'Setting up clocks: simdt', simdt, 'plotdt', plotdt
+    moose.setClock(INITCLOCK, simdt)
+    moose.setClock(ELECCLOCK, simdt)
+    moose.setClock(CHANCLOCK, simdt)
+    moose.setClock(POOLCLOCK, simdt)
+    moose.setClock(LOOKUPCLOCK, simdt)
+    moose.setClock(STIMCLOCK, simdt)
+    moose.setClock(PLOTCLOCK, plotdt)
+
+def assign_clocks(model_container, data_container, solver='ee'):
+    """Assign clockticks to elements.
+    
+    Parameters
+    ----------
+    model_container: element
+
+    All model components are under this element. The model elements
+    are assigned clocks as required to maintain the right update
+    sequence. 
+
+    INITCLOCK = 0 calls `init` method in Compartments
+
+    ELECCLOCK = 1 calls `process` method of Compartments
+
+    CHANCLOCK = 2 calls `process` method for HHChannels
+
+    POOLCLOCK = 3 is not used in electrical simulation
+
+    LOOKUPCLOCK = 6 is not used in these simulations.
+
+    STIMCLOCK = 7 calls `process` method in stimulus objects like
+    PulseGen.
+
+    data_container: element     
+    All data recording tables are under this element. They are
+    assigned PLOTCLOCK, the clock whose update interval is plotdt.
+
+    PLOTCLOCK = 8 calls `process` method of Table elements under
+    data_container
+
+    """
+    moose.useClock(STIMCLOCK, model_container.path+'/##[TYPE=PulseGen]', 'process')
+    moose.useClock(PLOTCLOCK, data_container.path+'/##[TYPE=Table]', 'process')
+    if solver == 'hsolve':
+        moose.useClock(INITCLOCK, model_container.path+'/##[TYPE=HSolve]', 'process')
+    else:
+        moose.useClock(INITCLOCK, model_container.path+'/##[TYPE=Compartment]', 'init')
+        moose.useClock(ELECCLOCK, model_container.path+'/##[TYPE=Compartment]', 'process')
+        moose.useClock(CHANCLOCK, model_container.path+'/##[TYPE=HHChannel]', 'process')
+        moose.useClock(POOLCLOCK, model_container.path+'/##[TYPE=CaConc]', 'process')
 
 def make_testcomp(containerpath):
     comp = moose.Compartment('%s/testcomp' % (containerpath))
@@ -70,26 +128,37 @@ def make_pulsegen(containerpath):
     pulsegen.delay[2] = 1e9
     return pulsegen
 
-def setup_single_compartment(container_path, channel_proto, Gbar):
-    comp = make_testcomp(container_path)
+
+def setup_single_compartment(model_container, data_container, channel_proto, Gbar):
+    """Setup a single compartment with a channel
+
+    Parameters
+    ----------
+    model_container: element
+     The model compartment is created under this element
+
+    data_container: element
+     The tables to record data are created under this
+
+    channel_proto: element
+     Channel prototype in library
+
+    Gbar: float
+     Maximum conductance density of the channel
+
+    """
+    comp = make_testcomp(model_container.path)
     channel = moose.copy(channel_proto, comp, channel_proto.name)[0]
     moose.connect(channel, 'channel', comp, 'channel')
     channel.Gbar = Gbar
-    pulsegen = make_pulsegen(container_path)
+    pulsegen = make_pulsegen(model_container.path)
     moose.connect(pulsegen, 'outputOut', comp, 'injectMsg')
-    vm_table = moose.Table('%s/Vm' % (container_path))
+    vm_table = moose.Table('%s/Vm' % (data_container.path))
     moose.connect(vm_table, 'requestData', comp, 'get_Vm')
-    gk_table = moose.Table('%s/Gk' % (container_path))
+    gk_table = moose.Table('%s/Gk' % (data_container.path))
     moose.connect(gk_table, 'requestData', channel, 'get_Gk')
-    ik_table = moose.Table('%s/Ik' % (container_path))
+    ik_table = moose.Table('%s/Ik' % (data_container.path))
     moose.connect(ik_table, 'requestData', channel, 'get_Ik')
-    moose.setClock(0, simdt)
-    moose.setClock(1, simdt)
-    moose.setClock(2, simdt)
-    moose.useClock(0, '%s/##[TYPE=Compartment]' % (container_path), 'init')
-    moose.useClock(1, '%s/##[TYPE=Compartment]' % (container_path), 'process')
-    moose.useClock(2, '%s/##[TYPE!=Compartment]' % (container_path), 'process')
-
     return {'compartment': comp,
             'stimulus': pulsegen,
             'channel': channel,
@@ -103,54 +172,14 @@ def insert_hhchannel(compartment, channelclass, gbar):
     moose.connect(channel, 'channel', compartment, 'channel')
     return channel[0]
     
-def run_single_channel(channelname, Gbar, simtime):
-    testId = uuid.uuid4().int
-    container = moose.Neutral('test%d' % (testId))
-    params = setup_single_compartment(
-        container.path,
-        channelbase.prototypes[channelname],
-        Gbar)
-    vm_data = params['Vm']
-    gk_data = params['Gk']
-    ik_data = params['Ik']
-    moose.reinit()
-    print 'Starting simulation', testId, 'for', simtime, 's'
-    moose.start(simtime)
-    print 'Finished simulation'
-    vm_file = 'data/%s_Vm.dat' % (channelname)
-    gk_file = 'data/%s_Gk.dat' % (channelname)
-    ik_file = 'data/%s_Ik.dat' % (channelname)
-    tseries = np.array(range(len(vm_data.vec))) * simdt
-    print 'Vm:', len(vm_data.vec), 'Gk', len(gk_data.vec), 'Ik', len(ik_data.vec)
-    data = np.c_[tseries, vm_data.vec]
-    np.savetxt(vm_file, data)
-    print 'Saved Vm in', vm_file
-    data = np.c_[tseries, gk_data.vec]
-    np.savetxt(gk_file, data)
-    print 'Saved Gk in', gk_file
-    data = np.c_[tseries, ik_data.vec]
-    np.savetxt(ik_file, data)
-    print 'Saved Gk in', ik_file
-    return params
-
-def compare_channel_data(series, channelname, param, simulator, x_range=None, plot=False):
-    if simulator == 'moose':
-        ref_file = 'testdata/%s_%s.dat.gz' % (channelname, param)
-    elif simulator == 'neuron':
-        ref_file = '../nrn/data/%s_%s.dat.gz' % (channelname, param)
-    else:
-        raise ValueError('Unrecognised simulator: %s' % (simulator))
-    ref_series = np.loadtxt(ref_file)
-    if plot:
-        plt.figure()
-        plt.title(channelname)
-    return compare_data_arrays(ref_series, series, relative='meany', x_range=x_range, plot=plot)
-
 def compare_data_arrays(left, right, relative='maxw', plot=False, x_range=None):
-    """compare two data arrays. They must have the same number of
-    dimensions (1 or 2) and represent the same range of x values. In
-    case they are 1 dimensional, we take x values as relative position
-    of that data point in the total x-range.
+    """Compare two data arrays and return some measure of the
+    error. 
+
+    The arrays must have the same number of dimensions (1 or 2) and
+    represent the same range of x values. In case they are 1
+    dimensional, we take x values as relative position of that data
+    point in the total x-range.
 
     We interpolate the y values for the x-values of the series with
     lower resolution using the heigher resolution series as the
@@ -239,6 +268,9 @@ def compare_data_arrays(left, right, relative='maxw', plot=False, x_range=None):
 import csv
 
 def compare_cell_dump(left, right, rtol=1e-3, atol=1e-8, row_header=True, col_header=True):
+    """This is a utility function to compare various compartment
+    parameters for a single cell model dumped in csv format using
+    NEURON and MOOSE."""
     print 'Comparing:', left, 'with', right
     ret = True
     left_file = open(left, 'rb')
@@ -257,8 +289,7 @@ def compare_cell_dump(left, right, rtol=1e-3, atol=1e-8, row_header=True, col_he
     for ii in range(len(lheader)):
         if lheader[ii] != rheader[ii]:
             print ii, '-th column name mismatch:', lheader[ii], '<->', rheader[ii]
-            return False
-    
+            return False    
     index = 2
     left_end = False
     right_end = False
@@ -297,9 +328,6 @@ def compare_cell_dump(left, right, rtol=1e-3, atol=1e-8, row_header=True, col_he
     return ret
 
 
-class ChannelTestBase(unittest.TestCase):
-    def __init__(self, *args, **kwargs):
-        unittest.TestCase.__init__(self, *args, **kwargs)
 
 
     

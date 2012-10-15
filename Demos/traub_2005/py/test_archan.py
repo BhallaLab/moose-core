@@ -30,9 +30,14 @@
 
 
 import numpy as np
+import testutils
 from testutils import *
 from archan import *
+from channel_test_util import compare_channel_data, run_single_channel, ChannelTestBase
 
+simtime = 350e-3
+simdt = testutils.SIMDT
+plotdt = testutils.PLOTDT
 
 class TestAR(ChannelTestBase):
     channelname = 'AR'

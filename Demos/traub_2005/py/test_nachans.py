@@ -34,9 +34,14 @@ os.environ['NUMPTHREADS'] = '1'
 import sys
 sys.path.append('../../../python')
 import numpy as np
-
+import testutils
 from testutils import *
+from channel_test_util import ChannelTestBase, run_single_channel, compare_channel_data
 import nachans
+
+simtime = 350e-3
+simdt = testutils.SIMDT
+plotdt = testutils.PLOTDT
         
         
 class TestNaF(ChannelTestBase):
