@@ -83,3 +83,53 @@ tricks and links to such things.
    narrow down the code you need to investigate, but usually a second
    reading of your code (better after a break) is the most efficient
    and educational way to find and fix a bug.
+
+* Fast Python: Some points regarding performance for more advanced users (but good to practice these from the beginning)!
+** These points are quoted from a post by Guido van Rossum on Google+ on 11 Sep 2012   
+   - Avoid overengineering datastructures. Tuples are better than
+     objects (try namedtuple too though). Prefer simple fields over
+     getter/setter functions.
+
+   - Built-in datatypes are your friends. Use more numbers, strings,
+     tuples, lists, sets, dicts. Also check out the collections
+     library, esp. deque.
+   
+   - Be suspicious of function/method calls; creating a stack frame is
+     expensive.
+   
+   - Don't write Java (or C++, or Javascript, ...) in Python.
+   
+   - Are you sure it's too slow? Profile before optimizing!
+   
+   - The universal speed-up is rewriting small bits of code in C. Do
+     this only when all else fails.
+
+   - I'm -0 on using generator[ expression]s unless you know you have
+     huge lists of values to iterate over. The concrete list
+     [comprehension] is usually faster than the genexpr until memory
+     allocation becomes critical.﻿
+
+** Michael Foord added the following points to the same post by Guido
+   Understand the performance characteristics of basic operations on
+   the builtin types. For example 
+
+   - Checking for membership in a list is O(N) but for a set or
+     dictionary it is O(1).
+
+   - Adding lists and tuples creates new objects.
+
+   - Inserting to the left of a list is O(N) whilst append is O(1)
+     (use a deque instead). And so on.﻿
+
+** Richard Merren added to the same post by Guido
+   - Use dicts to store and retrieve information--they are very fast.
+
+   - Break your task up to simple and testable/verifiable functions so
+     that you make less errors on each part.
+   
+   - Don't be afraid to give variables and functions long and
+     descriptive names so you can reread your code and figure out what
+     it does.
+
+   - Do things the way they make sense to you and don't worry about
+     optimizing your code until you find out which part is slow.
