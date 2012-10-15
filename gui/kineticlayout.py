@@ -10,6 +10,7 @@ from collections import defaultdict
 sys.path.append('../python')
 
 from moose import *
+
 class GraphicalView(QtGui.QGraphicsView):
     def __init__(self,parent,border,layoutPt):
         QtGui.QGraphicsView.__init__(self,parent)
@@ -28,7 +29,6 @@ class GraphicalView(QtGui.QGraphicsView):
     
     def resizeEvent1(self, event):
         """ zoom when resize! """
-        #print "zoom in qgraphicview resizeevent1"
         #self.fitInView(self.sceneContainerPt.sceneRect(), Qt.Qt.IgnoreAspectRatio)
         self.fitInView(self.sceneContainerPt.itemsBoundingRect().x()-10,self.sceneContainerPt.itemsBoundingRect().y()-10,self.sceneContainerPt.itemsBoundingRect().width()+20,self.sceneContainerPt.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
         QtGui.QGraphicsView.resizeEvent(self, event)
@@ -49,7 +49,6 @@ class GraphicalView(QtGui.QGraphicsView):
                 #for below  Qt4.6 there is no view transform for itemAt 
                 #and if view is zoom out below 50%  and if textitem object is moved, zooming also happens.
                 sceneitems = self.sceneContainerPt.itemAt(self.startScenepos)
-
             #checking if mouse press position is on any item (in my case textitem or rectcompartment) if none, 
             if ( sceneitems == None):
                 QtGui.QGraphicsView.mousePressEvent(self, event)
@@ -142,10 +141,12 @@ class GraphicalView(QtGui.QGraphicsView):
 
     def zoomItem(self):
         # First items are ignoretransformation,view is fitted and recalculated the arrow
-        self.zooming = True
+        #global itemignoreZooming = True
         self.layoutPt.updateItemTransformationMode(True)
         self.fitInView(self.startScenepos.x(),self.startScenepos.y(),self.rubberbandWidth,self.rubberbandHeight,Qt.Qt.IgnoreAspectRatio)
-        self.layoutPt.drawLine_arrow(zooming=True)
+        global itemignoreZooming
+        itemignoreZooming = True
+        self.layoutPt.drawLine_arrow(itemignoreZooming=True)
         self.rubberBandactive = False
 
 class KineticsDisplayItem(QtGui.QGraphicsWidget):
@@ -157,13 +158,13 @@ class KineticsDisplayItem(QtGui.QGraphicsWidget):
 
     def setDisplayProperties(self, dinfo):
         self.setGeometry(dinfo.x, dinfo.y)        
-
     def itemChange(self,change,value):
         if change == QtGui.QGraphicsItem.ItemPositionChange:
             self.emit(QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),element(self.mobj))
         if change == QtGui.QGraphicsItem.ItemSelectedChange and value == True:
             self.emit(QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),element(self.mobj))
         return QtGui.QGraphicsItem.itemChange(self,change,value)
+
 
 class PoolItem(KineticsDisplayItem):
     """Class for displaying pools. Uses a QGraphicsSimpleTextItem to
@@ -203,7 +204,6 @@ class PoolItem(KineticsDisplayItem):
     def updateSlot(self):
         self.gobj.setText(self.mobj[0].name)
         self.bg.setRect(0, 0, self.gobj.boundingRect().width()+PoolItem.fontMetrics.width('  '), self.gobj.boundingRect().height())
-
 
 class ReacItem(KineticsDisplayItem):
     defaultWidth = 35
@@ -256,6 +256,7 @@ class EnzItem(KineticsDisplayItem):
         if QtCore.QT_VERSION >= 0x040600:
             self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges,1)
 
+
 class CplxItem(KineticsDisplayItem):
     defaultWidth = 10
     defaultHeight = 10    
@@ -301,11 +302,12 @@ class  KineticsWidget(QtGui.QWidget):
     def __init__(self,size,modelPath,parent=None):
         QtGui.QWidget.__init__(self,parent)
 	
+        itemignoreZooming = False
 	# Get all the compartments and its members  
         cmptMol = {}
         self.setupComptObj(modelPath,cmptMol)
         #for k,v in test.items(): print k,v
-        self.itemignorestransformFlag = False
+        #self.itemignorestransformFlag = False
         
 	#Check to see if all the cordinates are zero (which is a case for kkit8 version)
         x = []
@@ -345,94 +347,30 @@ class  KineticsWidget(QtGui.QWidget):
             #Compartment info goes here
             self.qGraCompt = {}
             #Map from mooseId to Graphicsobject
-            self.mooseId_GText = {}
+            self.mooseId_GObj = {}
 
             #pickled the color map here and loading the file
             pkl_file = open(os.path.join(config.settings[config.KEY_COLORMAP_DIR], 'rainbow2.pkl'),'rb')
             self.picklecolorMap = pickle.load(pkl_file)
 
-            for cmpt in sorted(cmptMol.iterkeys()):
-                self.createCompt(cmpt)
-                comptRef = self.qGraCompt[cmpt]
-                mreObj = cmptMol[cmpt]
-                for mre in mreObj:
-                    if len(mre) == 0:
-                        continue
-                    xpos,ypos = self.positioninfo(mre,xratio,yratio,xMin,yMin)
-                    textcolor,bgcolor = self.colorCheck(mre,self.picklecolorMap)
-                    if mre.class_ == 'ZombieReac':
-                        mobjItem = ReacItem(mre,comptRef)
-                        mobjItem.setDisplayProperties(xpos,ypos,textcolor,bgcolor)
-                    elif mre.class_ =='ZombieEnz' or mre.class_ == 'ZombieMMenz':
-                        mobjItem = EnzItem(mre,comptRef)
-                        mobjItem.setDisplayProperties(xpos,ypos,textcolor,bgcolor)
-                    elif mre.class_ == 'ZombiePool' or mre.class_ == 'ZombieFuncPool' or mre.class_ == 'ZombieBufPool':
-                        if mre[0].parent.class_ != 'ZombieEnz':
-                            mobjItem = PoolItem(mre,comptRef)
-                            mobjItem.setDisplayProperties(xpos,ypos,textcolor,bgcolor)
-                        else:
-                            #cplx has made to sit under enz, for which xpos added with width/2
-                            #oct4 Here I am not adding enzyme as parent for cplx
-                            xpos = xpos+(self.cplx_width/2)
-                            ypos = ypos
-                            mobjItem = CplxItem(mre,self.mooseId_GText[element(mre[0]).parent.getId()])
-                            mobjItem.setDisplayProperties(xpos,ypos,textcolor,bgcolor)
-
-                    mobjItem.connect(mobjItem,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
-                    mobjItem.connect(mobjItem,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.emitItemtoEditor)
-                    self.mooseId_GText[element(mre).getId()] = mobjItem
-            for k, v in self.qGraCompt.items():
-                rectcompt = v.childrenBoundingRect()
-                self.comptborder = 10
-                v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
-                v.setPen(QtGui.QPen(Qt.QColor(66,66,66,100),self.comptborder,QtCore.Qt.SolidLine,QtCore.Qt.RoundCap,QtCore.Qt.RoundJoin ))
-                v.cmptEmitter.connect(v.cmptEmitter,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
-                v.cmptEmitter.connect(v.cmptEmitter,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.emitItemtoEditor)
-
+            #Create compartment and its members are created on to QGraphicsScene
+            self.mooseObjOntoscene(cmptMol,xratio,yratio,xMin,yMin)
+            
+            # Connecting lines to src and des is done here
             self.srcdesConnection = {}
             self.lineItem_dict = {}
             self.object2line = defaultdict(list)
             self.setupItem(modelPath,self.srcdesConnection)
-            self.drawLine_arrow(zooming=False)
+            self.drawLine_arrow(itemignoreZooming=False)
 
             hLayout.addWidget(self.view)
 
     def updateItemTransformationMode(self, on):
-        self.comptborder = 1 # TODO: update border
         for v in self.sceneContainer.items():
             if( not isinstance(v,ComptItem)):
                 if ( isinstance(v, PoolItem) or isinstance(v, ReacItem) or isinstance(v, EnzItem) or isinstance(v, CplxItem) ):
                     v.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, on)
-            else:
-                v.setPen(QtGui.QPen(Qt.QColor(66,66,66,100),self.comptborder,QtCore.Qt.SolidLine,QtCore.Qt.RoundCap,QtCore.Qt.RoundJoin ))
 
-    def drawLine_arrow(self, zooming=False):        
-        for inn,out in self.srcdesConnection.items():
-                if isinstance(out,tuple):
-                    if len(out[0])== 0:
-                        print "Reaction or Enzyme doesn't input mssg"
-                    else:
-                        for items in (items for items in out[0] ):
-                            src = self.mooseId_GText[inn]
-                            des = self.mooseId_GText[element(items[0]).getId()]
-                            self.lineCord(src,des,items[1],zooming)
-                    if len(out[1]) == 0:
-                        print "Reaction or Enzyme doesn't output mssg"
-                    else:
-                        for items in (items for items in out[1] ):
-                            src = self.mooseId_GText[inn]
-                            des = self.mooseId_GText[element(items[0]).getId()]
-                            self.lineCord(src,des,items[1],zooming)
-                elif isinstance(out,list):
-                    if len(out) == 0:
-                        print "Func pool doesn't have sumtotal"
-                    else:
-                         for items in (items for items in out ):
-                             
-                             src = self.mooseId_GText[element(inn).getId()]
-                             des = self.mooseId_GText[element(items[0]).getId()]
-                             self.lineCord(src,des,items[1],zooming)
-    
     def GrVfitinView(self):
         self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
         
@@ -440,53 +378,20 @@ class  KineticsWidget(QtGui.QWidget):
         #when Gui resize and event is sent which inturn call resizeEvent of qgraphicsview
         self.view.resizeEvent1(event)
 
-    def updateItemSlot(self, mooseObject):
-        #In this case if the name is updated from the keyboard both in mooseobj and gui gets updation
-        changedItem = ''
-        #print "mooseObject",mooseObject
-        for item in self.sceneContainer.items():
-            if isinstance(item,PoolItem):
-                if mooseObject.getId() == element(item.mobj).getId():
-                    item.updateSlot()
-                    #once the text is edited in editor, laydisplay gets updated in turn resize the length, positionChanged signal shd be emitted
-                    self.positionChange(mooseObject)
- 
-    def updatearrow(self,qGTextitem):
-        #if there is no arrow to update then return
-        if qGTextitem not in self.object2line:
-            return
-        listItem = self.object2line[qGTextitem]
-        for ql, va in listItem:
-            srcdes = self.lineItem_dict[ql]
-            if(isinstance(srcdes[0],ReacItem) or isinstance(srcdes[0],EnzItem) ):
-                pItem = (next((k for k,v in self.mooseId_GText.items() if v == srcdes[0]), None))
-                mooseObj = (next((k for k,v in self.mooseId_GText.items() if v == srcdes[1]), None))
-                for l1 in self.srcdesConnection[pItem]:
-                    for k in l1:
-                        if ((k[0]) == mooseObj):   
-                            endtype = k[1]
-                        else:
-                            if ( isinstance(qGTextitem,ReacItem) or isinstance(qGTextitem,EnzItem) ):
-                                gItem = self.mooseId_GText[k[0]]
-                                self.updatearrow(gItem)
-               
-            elif(isinstance(srcdes[1],ReacItem) or isinstance(srcdes[1],EnzItem) ):
-                pItem = (next((k for k,v in self.mooseId_GText.items() if v == srcdes[1]), None))
-                mooseObject = (next((k for k,v in self.mooseId_GText.items() if v == srcdes[0]), None))
-                for l1 in self.srcdesConnection[pItem]:
-                    for k in l1:
-                        if (k[0]) == mooseObj:
-                            endtype = k[1]
-            else:
-                pItem  =  (next((k for k,v in self.mooseId_GText.items() if v == srcdes[0]), None))
-                pItem1 =  (next((k for k,v in self.mooseId_GText.items() if v == srcdes[1]), None))
-                if(pItem.class_ == 'ZombieFuncPool' or pItem1.class_ == 'ZombieFuncPool'):
-                    endtype = 'st'
-
-            arrow = self.calcArrow(srcdes[0],srcdes[1],endtype,False)
-            ql.setPolygon(arrow)
-
+    def setupComptObj(self,filePath,mobject):
+        ''' Compartment and its members are populated from moose '''
+        cPath = filePath+'/##[TYPE=MeshEntry]'
+        for meshEnt in wildcardFind(cPath):
+            molrecList = []
+            for reitem in Neutral(meshEnt).getNeighbors('remeshReacs'):
+                molrecList.append(reitem)
+            for mitem in Neutral(meshEnt).getNeighbors('remesh'):
+                if ( (mitem[0].class_ != 'GslIntegrator')):
+                        molrecList.append(mitem)
+            mobject[meshEnt] = molrecList
+    
     def coordinates(self,x,y,cmptMol):
+        ''' Coordinates of each moose object retirved but cplx its enz parent is taken '''
         xMin = 0.0
         xMax = 1.0
         yMin = 0.0
@@ -513,231 +418,54 @@ class  KineticsWidget(QtGui.QWidget):
     def nonzero(self,seq):
       return (item for item in seq if item!=0)
 
-    def recalcSceneBoundingRect(self, rect):
-        vp_trans = self.view.viewportTransform()
-        trans = rect.deviceTransform(vp_trans)
-        bbox = rect.boundingRect()
-        sx = trans.mapRect(bbox);
-        mappedRect = self.view.mapToScene(sx.toRect()).boundingRect()
-        return mappedRect
-
-    def calcArrow(self,src,des,endtype,zooming):
-        if zooming:
-            srcRect = self.recalcSceneBoundingRect(src.gobj)
-            desRect = self.recalcSceneBoundingRect(des.gobj)
-        else:
-            srcRect = src.gobj.sceneBoundingRect()
-            desRect = des.gobj.sceneBoundingRect()
-        arrow = QtGui.QPolygonF()
-        if srcRect.intersects(desRect):                
-            # This is created for getting a emptyline for reference b'cos 
-            # lineCord function add qgraphicsline to screen and also add's a ref for src and des
-            arrow.append(QtCore.QPointF(0,0))
-            arrow.append(QtCore.QPointF(0,0))
-            return arrow
-        tmpLine = QtCore.QLineF(srcRect.center().x(),
-                                    srcRect.center().y(),
-                                    desRect.center().x(),
-                                    desRect.center().y())
-        srcIntersects, lineSrcPoint = self.calcLineRectIntersection(srcRect, tmpLine)
-        destIntersects, lineDestPoint = self.calcLineRectIntersection(desRect, tmpLine)
-        if not srcIntersects:
-            print 'Source does not intersect line. Arrow points:', lineSrcPoint, src.mobj[0].name, src.mobj[0].class_
-        if not destIntersects:
-            print 'Dest does not intersect line. Arrow points:', lineDestPoint,  des.mobj[0].name, des.mobj[0].class_
-        # src and des are connected with line co-ordinates
-        # Arrow head is drawned if the distance between src and des line is >8 just for clean appeareance
-        if (abs(lineSrcPoint.x()-lineDestPoint.x()) > 8 or abs(lineSrcPoint.y()-lineDestPoint.y())>8):
-            srcAngle = tmpLine.angle()
-            if endtype == 'p':
-                #Arrow head for Destination is calculated
-                arrow.append(lineSrcPoint)
-                arrow.append(lineDestPoint)
-                degree = -60
-                srcXArr1,srcYArr1= self.arrowHead(srcAngle,degree,lineDestPoint)
-	        arrow.append(QtCore.QPointF(srcXArr1,srcYArr1))
-                arrow.append(QtCore.QPointF(lineDestPoint.x(),lineDestPoint.y()))
-                
-		degree = -120
-                srcXArr2,srcYArr2 = self.arrowHead(srcAngle,degree,lineDestPoint)
-                arrow.append(QtCore.QPointF(srcXArr2,srcYArr2))                    
-                arrow.append(QtCore.QPointF(lineDestPoint.x(),lineDestPoint.y()))
- 
-            elif endtype == 'st':
-                #Arrow head for Source is calculated
-                arrow.append(lineDestPoint)
-                arrow.append(lineSrcPoint)
-                degree = 60
-                srcXArr2,srcYArr2 = self.arrowHead(srcAngle,degree,lineSrcPoint)
-                arrow.append(QtCore.QPointF(srcXArr2,srcYArr2))                    
-                arrow.append(QtCore.QPointF(lineSrcPoint.x(),lineSrcPoint.y()))
-
-                degree = 120
-                srcXArr1,srcYArr1= self.arrowHead(srcAngle,degree,lineSrcPoint)
-		arrow.append(QtCore.QPointF(srcXArr1,srcYArr1))
-                arrow.append(QtCore.QPointF(lineSrcPoint.x(),lineSrcPoint.y()))
-
-            else:
-                arrow.append(lineSrcPoint)
-                arrow.append(lineDestPoint)
-        return arrow
-
-    #checking which side of rectangle intersect with other
-    def calcLineRectIntersection(self, rect, centerLine):
-        """Here the 1. a. intersect point between center and 4 sides of src and 
-        
-                    b. intersect point between center and 4 sides of
-                    des and to draw a line connecting for src & des
-        
-                    2. angle for src for the arrow head calculation is returned"""
-        x = rect.x()
-        y = rect.y()
-        w = rect.width()
-        h = rect.height()
-        borders = [(x,y,x+w,y),
-                   (x+w,y,x+w,y+h),
-                   (x+w,y+h,x,y+h),
-                   (x,y+h,x,y)]
-        intersectionPoint = QtCore.QPointF()
-        intersects = False
-        for lineEnds in borders:
-            line = QtCore.QLineF(*lineEnds)
-            intersectType = centerLine.intersect(line, intersectionPoint)
-            if intersectType == centerLine.BoundedIntersection:
-                intersects = True
-                break
-        return (intersects, intersectionPoint)
-
-    #arrow head is calculated
-    def arrowHead(self,srcAngle,degree,lineSpoint):
-        r = 8
-        delta = math.radians(srcAngle) + math.radians(degree)
-        width = math.sin(delta)*r
-        height = math.cos(delta)*r
-        srcXArr = lineSpoint.x() + width
-        srcYArr = lineSpoint.y() + height
-        return srcXArr,srcYArr
-
-    def lineCord(self,src,des,endtype,zooming):
-        source = element(next((k for k,v in self.mooseId_GText.items() if v == src), None))
-        desc = element(next((k for k,v in self.mooseId_GText.items() if v == des), None))
-        line = 0
-        if (src == "") and (des == ""):
-            print "Source or destination is missing or incorrect"
-            return 
-        srcdes_list = [src,des,endtype]        
-        arrow = self.calcArrow(src,des,endtype,zooming)
-        if zooming:
-            for l,v in self.object2line[src]:
-                if v == des:
-                    l.setPolygon(arrow)
-                    return
-        qgLineitem = self.sceneContainer.addPolygon(arrow)        
-        pen = QtGui.QPen(QtCore.Qt.green, 1, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin)
-        pen.setCosmetic(True)
-        # Green is default color moose.ReacBase and derivatives - already set above
-        if  isinstance(source, moose.EnzBase):
-            if ( (endtype == 's') or (endtype == 'p')):
-                pen.setColor(QtCore.Qt.red)
-            elif(endtype != 'cplx'):
-                p = element(next((k for k,v in self.mooseId_GText.items() if v == src), None)) 
-                parentinfo = p.path+'/info'
-                textColor = Annotator(parentinfo).getField('textColor')
-                if(isinstance(textColor,(list,tuple))):
-                    r,g,b = textColor[0],textColor[1],textColor[2]
-                    color = QtGui.QColor(r,g,b)
-                elif ((not isinstance(textColor,(list,tuple)))):
-                    if textColor.isdigit():
-                        tc = int(textColor)
-                        tc = (tc * 2 )
-                        r,g,b = self.picklecolorMap[tc]
-                        color = QtGui.QColor(r,g,b)
-                    else: 
-                        color = QtGui.QColor(200,200,200)
-                pen.setColor(color)
-        elif isinstance(source, moose.PoolBase):
-            pen.setColor(QtCore.Qt.blue)
-        self.lineItem_dict[qgLineitem] = srcdes_list
-        self.object2line[ src ].append( ( qgLineitem, des) )
-        self.object2line[ des ].append( ( qgLineitem, src ) )
-        qgLineitem.setPen(pen)
-
-    def setupItem(self,modlePath,cntDict):
-        zombieType = ['ZombieReac','ZombieEnz','ZombieMMenz','ZombieSumFunc']
-        for zombieObj in zombieType:
-            path = modlePath+'/##[TYPE='+zombieObj+']'
-            if zombieObj != 'ZombieSumFunc':
-                for items in wildcardFind(path):
-                    sublist = []
-                    prdlist = []
-                    for sub in items[0].getNeighbors('sub'): 
-                        sublist.append((sub,'s'))
-                    for prd in items[0].getNeighbors('prd'):
-                        prdlist.append((prd,'p'))
-                    if (zombieObj == 'ZombieEnz') :
-                        for enzpar in items[0].getNeighbors('toEnz'):
-                            sublist.append((enzpar,'t'))
-                        for cplx in items[0].getNeighbors('cplxDest'):
-                            prdlist.append((cplx,'cplx'))
-                    if (zombieObj == 'ZombieMMenz'):
-                        for enzpar in items[0].getNeighbors('enzDest'):
-                            sublist.append((enzpar,'t'))
-                    cntDict[items] = sublist,prdlist
-            else:
-                #ZombieSumFunc adding inputs
-                for items in wildcardFind(path):
-                    inputlist = []
-                    outputlist = []
-                    funplist = []
-                    nfunplist = []
-                    for inpt in items[0].getNeighbors('input'):
-                        inputlist.append((inpt,'st'))
-                    for zfun in items[0].getNeighbors('output'): funplist.append(zfun)
-                    for i in funplist: nfunplist.append(element(i).getId())
-                    nfunplist = list(set(nfunplist))
-                    if(len(nfunplist) > 1): print "SumFunPool has multiple Funpool"
+    def mooseObjOntoscene(self,cmptMol,xratio,yratio,xMin,yMin):
+        ''' All the moose Object are put to scene '''
+        for cmpt in sorted(cmptMol.iterkeys()):
+            self.createCompt(cmpt)
+            comptRef = self.qGraCompt[cmpt]
+            mreObj = cmptMol[cmpt]
+            for mre in mreObj:
+                if len(mre) == 0:
+                    print cmpt, " has no members in it"
+                    continue
+                xpos,ypos = self.positioninfo(mre,xratio,yratio,xMin,yMin)
+                textcolor,bgcolor = self.colorCheck(mre,self.picklecolorMap)
+                if mre.class_ == 'ZombieReac':
+                    mobjItem = ReacItem(mre,comptRef)
+                    mobjItem.setDisplayProperties(xpos,ypos,textcolor,bgcolor)
+                elif mre.class_ =='ZombieEnz' or mre.class_ == 'ZombieMMenz':
+                    mobjItem = EnzItem(mre,comptRef)
+                    mobjItem.setDisplayProperties(xpos,ypos,textcolor,bgcolor)
+                elif mre.class_ == 'ZombiePool' or mre.class_ == 'ZombieFuncPool' or mre.class_ == 'ZombieBufPool':
+                    if mre[0].parent.class_ != 'ZombieEnz':
+                        mobjItem = PoolItem(mre,comptRef)
+                        mobjItem.setDisplayProperties(xpos,ypos,textcolor,bgcolor)
                     else:
-                        for el in funplist:
-                            if(element(el).getId() == nfunplist[0]):
-                                cntDict[element(el)] = inputlist
-                                break
-
-    def keyPressEvent(self,event):
-        key = event.key()
-        if key == QtCore.Qt.Key_A:
-            #pass
-            self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
-        elif (key == 46 or key == 62):
-            self.view.scale(1.1,1.1)
-        elif (key == 44 or key == 60):
-            self.view.scale(1/1.1,1/1.1)
-
-    def positionChange(self,mooseObject):
-        #If the item position changes, the corresponding arrow's are claculated
-       if ( mooseObject.class_ == 'ZombiePool' or mooseObject.class_ == 'ZombieFuncPool' or mooseObject.class_ == 'ZombieSumFunc' or mooseObject.class_ == 'ZombieBufPool'):
-            pool = self.mooseId_GText[mooseObject.getId()]
-            self.updatearrow(pool)
-            for k, v in self.qGraCompt.items():
-                rectcompt = v.childrenBoundingRect()
-                v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
-       else:
-            if((mooseObject.class_ == 'ZombieMMenz') or (mooseObject.class_ == 'ZombieEnz') or (mooseObject.class_ == 'ZombieReac') ):
-                refenz = self.mooseId_GText[mooseObject.getId()]
-                self.updatearrow(refenz)
-                for k, v in self.qGraCompt.items():
-                    rectcompt = v.childrenBoundingRect()
-                    v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
+                        #cplx has made to sit under enz, for which xpos added with width/2
+                        #oct4 Here I am not adding enzyme as parent for cplx
+                        xpos = xpos+(self.cplx_width/2)
+                        ypos = ypos
+                        mobjItem = CplxItem(mre,self.mooseId_GObj[element(mre[0]).parent.getId()])
+                        mobjItem.setDisplayProperties(xpos,ypos,textcolor,bgcolor)
+                mobjItem.connect(mobjItem,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
+                mobjItem.connect(mobjItem,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.emitItemtoEditor)
+                self.mooseId_GObj[element(mre).getId()] = mobjItem
+        ''' compartment is rectangle is set '''
+        for k, v in self.qGraCompt.items():
+            rectcompt = v.childrenBoundingRect()
+            self.comptborder = 1
+            v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
+            pen = QtGui.QPen(Qt.QColor(66,66,66,100), 10, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin)
+            pen.setCosmetic(True)
+            v.setPen(pen)
+            v.cmptEmitter.connect(v.cmptEmitter,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
+            v.cmptEmitter.connect(v.cmptEmitter,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.emitItemtoEditor)
     
-            else:
-                if mooseObject.class_ == "CubeMesh":
-                    for k, v in self.qGraCompt.items():
-                        mesh = mooseObject.path+'/mesh[0]'
-                        if k.path == mesh:
-                            for rectChilditem in v.childItems():
-                                self.updatearrow(rectChilditem)
-
-    def emitItemtoEditor(self,mooseObject):
-        self.emit(QtCore.SIGNAL("itemDoubleClicked(PyQt_PyObject)"),mooseObject)
+    def createCompt(self,key):
+        self.new_Compt = ComptItem(self,0,0,0,0,key)
+        self.qGraCompt[key] = self.new_Compt
+        self.new_Compt.setRect(10,10,10,10)
+        self.sceneContainer.addItem(self.new_Compt)
 
     def positioninfo(self,mre,xratio,yratio,xMin,yMin):
         if ((mre[0].parent).class_ == 'ZombieEnz'):
@@ -791,23 +519,327 @@ class  KineticsWidget(QtGui.QWidget):
         red = int(random.uniform(0, 255))
         green = int(random.uniform(0, 255))
         blue = int(random.uniform(0, 255))
-        return (red,green,blue)            
-    def createCompt(self,key):
-        self.new_Compt = ComptItem(self,0,0,0,0,key)
-        self.qGraCompt[key] = self.new_Compt
-        self.new_Compt.setRect(10,10,10,10)
-        self.sceneContainer.addItem(self.new_Compt)
+        return (red,green,blue)
     
-    def setupComptObj(self,filePath,mobject):
-        cPath = filePath+'/##[TYPE=MeshEntry]'
-        for meshEnt in wildcardFind(cPath):
-            molrecList = []
-            for reitem in Neutral(meshEnt).getNeighbors('remeshReacs'):
-                molrecList.append(reitem)
-            for mitem in Neutral(meshEnt).getNeighbors('remesh'):
-                if ( (mitem[0].class_ != 'GslIntegrator')):
-                        molrecList.append(mitem)
-            mobject[meshEnt] = molrecList
+    def positionChange(self,mooseObject):
+        #If the item position changes, the corresponding arrow's are claculated
+       if ( mooseObject.class_ == 'ZombiePool' or mooseObject.class_ == 'ZombieFuncPool' or mooseObject.class_ == 'ZombieSumFunc' or mooseObject.class_ == 'ZombieBufPool'):
+            pool = self.mooseId_GObj[mooseObject.getId()]
+            self.updatearrow(pool)
+            for k, v in self.qGraCompt.items():
+                rectcompt = v.childrenBoundingRect()
+                v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
+       else:
+            if((mooseObject.class_ == 'ZombieMMenz') or (mooseObject.class_ == 'ZombieEnz') or (mooseObject.class_ == 'ZombieReac') ):
+                refenz = self.mooseId_GObj[mooseObject.getId()]
+                self.updatearrow(refenz)
+                for k, v in self.qGraCompt.items():
+                    rectcompt = v.childrenBoundingRect()
+                    v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
+    
+            else:
+                if mooseObject.class_ == "CubeMesh":
+                    for k, v in self.qGraCompt.items():
+                        mesh = mooseObject.path+'/mesh[0]'
+                        if k.path == mesh:
+                            for rectChilditem in v.childItems():
+                                self.updatearrow(rectChilditem)
+
+    def emitItemtoEditor(self,mooseObject):
+        self.emit(QtCore.SIGNAL("itemDoubleClicked(PyQt_PyObject)"),mooseObject)
+
+    def setupItem(self,modlePath,cntDict):
+        ''' Reaction's and enzyme's substrate and product and sumtotal is collected '''
+        zombieType = ['ZombieReac','ZombieEnz','ZombieMMenz','ZombieSumFunc']
+        for zombieObj in zombieType:
+            path = modlePath+'/##[TYPE='+zombieObj+']'
+            if zombieObj != 'ZombieSumFunc':
+                for items in wildcardFind(path):
+                    sublist = []
+                    prdlist = []
+                    for sub in items[0].getNeighbors('sub'): 
+                        sublist.append((sub,'s'))
+                    for prd in items[0].getNeighbors('prd'):
+                        prdlist.append((prd,'p'))
+                    if (zombieObj == 'ZombieEnz') :
+                        for enzpar in items[0].getNeighbors('toEnz'):
+                            sublist.append((enzpar,'t'))
+                        for cplx in items[0].getNeighbors('cplxDest'):
+                            prdlist.append((cplx,'cplx'))
+                    if (zombieObj == 'ZombieMMenz'):
+                        for enzpar in items[0].getNeighbors('enzDest'):
+                            sublist.append((enzpar,'t'))
+                    cntDict[items] = sublist,prdlist
+            else:
+                #ZombieSumFunc adding inputs
+                for items in wildcardFind(path):
+                    inputlist = []
+                    outputlist = []
+                    funplist = []
+                    nfunplist = []
+                    for inpt in items[0].getNeighbors('input'):
+                        inputlist.append((inpt,'st'))
+                    for zfun in items[0].getNeighbors('output'): funplist.append(zfun)
+                    for i in funplist: nfunplist.append(element(i).getId())
+                    nfunplist = list(set(nfunplist))
+                    if(len(nfunplist) > 1): print "SumFunPool has multiple Funpool"
+                    else:
+                        for el in funplist:
+                            if(element(el).getId() == nfunplist[0]):
+                                cntDict[element(el)] = inputlist
+                                break
+    def drawLine_arrow(self, itemignoreZooming=False):        
+        for inn,out in self.srcdesConnection.items():
+            if isinstance(out,tuple):
+                if len(out[0])== 0:
+                    print "Reaction or Enzyme doesn't input mssg"
+                else:
+                    for items in (items for items in out[0] ):
+                        src = self.mooseId_GObj[inn]
+                        des = self.mooseId_GObj[element(items[0]).getId()]
+                        self.lineCord(src,des,items[1],itemignoreZooming)
+                if len(out[1]) == 0:
+                    print "Reaction or Enzyme doesn't output mssg"
+                else:
+                    for items in (items for items in out[1] ):
+                        src = self.mooseId_GObj[inn]
+                        des = self.mooseId_GObj[element(items[0]).getId()]
+                        self.lineCord(src,des,items[1],itemignoreZooming)
+            elif isinstance(out,list):
+                if len(out) == 0:
+                    print "Func pool doesn't have sumtotal"
+                else:
+                    for items in (items for items in out ):
+                        src = self.mooseId_GObj[element(inn).getId()]
+                        des = self.mooseId_GObj[element(items[0]).getId()]
+                        self.lineCord(src,des,items[1],itemignoreZooming)
+    
+    def lineCord(self,src,des,endtype,itemignoreZooming):
+        source = element(next((k for k,v in self.mooseId_GObj.items() if v == src), None))
+        desc = element(next((k for k,v in self.mooseId_GObj.items() if v == des), None))
+        line = 0
+        if (src == "") and (des == ""):
+            print "Source or destination is missing or incorrect"
+            return 
+        srcdes_list = [src,des,endtype]        
+        arrow = self.calcArrow(src,des,endtype,itemignoreZooming)
+        for l,v in self.object2line[src]:
+                if v == des:
+                    l.setPolygon(arrow)
+                    return
+        '''
+        if itemignoreZooming:
+            for l,v in self.object2line[src]:
+                if v == des:
+                    l.setPolygon(arrow)
+                    return
+        else:
+            for l,v in self.object2line[src]:
+                if v == des:
+                    l.setPolygon(arrow)
+                    return
+        '''    
+        qgLineitem = self.sceneContainer.addPolygon(arrow)        
+        pen = QtGui.QPen(QtCore.Qt.green, 1, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin)
+        pen.setCosmetic(True)
+        # Green is default color moose.ReacBase and derivatives - already set above
+        if  isinstance(source, moose.EnzBase):
+            if ( (endtype == 's') or (endtype == 'p')):
+                pen.setColor(QtCore.Qt.red)
+            elif(endtype != 'cplx'):
+                p = element(next((k for k,v in self.mooseId_GObj.items() if v == src), None)) 
+                parentinfo = p.path+'/info'
+                textColor = Annotator(parentinfo).getField('textColor')
+                if(isinstance(textColor,(list,tuple))):
+                    r,g,b = textColor[0],textColor[1],textColor[2]
+                    color = QtGui.QColor(r,g,b)
+                elif ((not isinstance(textColor,(list,tuple)))):
+                    if textColor.isdigit():
+                        tc = int(textColor)
+                        tc = (tc * 2 )
+                        r,g,b = self.picklecolorMap[tc]
+                        color = QtGui.QColor(r,g,b)
+                    else: 
+                        color = QtGui.QColor(200,200,200)
+                pen.setColor(color)
+        elif isinstance(source, moose.PoolBase):
+            pen.setColor(QtCore.Qt.blue)
+        self.lineItem_dict[qgLineitem] = srcdes_list
+        self.object2line[ src ].append( ( qgLineitem, des) )
+        self.object2line[ des ].append( ( qgLineitem, src ) )
+        qgLineitem.setPen(pen)
+        
+    def calcArrow(self,src,des,endtype,itemignoreZooming):
+        ''' if PoolItem then boundingrect should be background rather than graphicsobject '''
+        srcobj = src.gobj
+        desobj = des.gobj
+        if isinstance(src,PoolItem):
+            srcobj = src.bg
+        if isinstance(des,PoolItem):
+            desobj = des.bg
+        
+        if itemignoreZooming:
+            srcRect = self.recalcSceneBoundingRect(srcobj)
+            desRect = self.recalcSceneBoundingRect(desobj)
+        else:
+            srcRect = srcobj.sceneBoundingRect()
+            desRect = desobj.sceneBoundingRect()
+
+        arrow = QtGui.QPolygonF()
+        if srcRect.intersects(desRect):                
+            # This is created for getting a emptyline for reference b'cos 
+            # lineCord function add qgraphicsline to screen and also add's a ref for src and des
+            arrow.append(QtCore.QPointF(0,0))
+            arrow.append(QtCore.QPointF(0,0))
+            return arrow
+        tmpLine = QtCore.QLineF(srcRect.center().x(),
+                                    srcRect.center().y(),
+                                    desRect.center().x(),
+                                    desRect.center().y())
+        srcIntersects, lineSrcPoint = self.calcLineRectIntersection(srcRect, tmpLine)
+        destIntersects, lineDestPoint = self.calcLineRectIntersection(desRect, tmpLine)
+        if not srcIntersects:
+            print 'Source does not intersect line. Arrow points:', lineSrcPoint, src.mobj[0].name, src.mobj[0].class_
+        if not destIntersects:
+            print 'Dest does not intersect line. Arrow points:', lineDestPoint,  des.mobj[0].name, des.mobj[0].class_
+        # src and des are connected with line co-ordinates
+        # Arrow head is drawned if the distance between src and des line is >8 just for clean appeareance
+        if (abs(lineSrcPoint.x()-lineDestPoint.x()) > 8 or abs(lineSrcPoint.y()-lineDestPoint.y())>8):
+            srcAngle = tmpLine.angle()
+            if endtype == 'p':
+                #Arrow head for Destination is calculated
+                arrow.append(lineSrcPoint)
+                arrow.append(lineDestPoint)
+                degree = -60
+                srcXArr1,srcYArr1= self.arrowHead(srcAngle,degree,lineDestPoint)
+	        arrow.append(QtCore.QPointF(srcXArr1,srcYArr1))
+                arrow.append(QtCore.QPointF(lineDestPoint.x(),lineDestPoint.y()))
+                
+		degree = -120
+                srcXArr2,srcYArr2 = self.arrowHead(srcAngle,degree,lineDestPoint)
+                arrow.append(QtCore.QPointF(srcXArr2,srcYArr2))                    
+                arrow.append(QtCore.QPointF(lineDestPoint.x(),lineDestPoint.y()))
+ 
+            elif endtype == 'st':
+                #Arrow head for Source is calculated
+                arrow.append(lineDestPoint)
+                arrow.append(lineSrcPoint)
+                degree = 60
+                srcXArr2,srcYArr2 = self.arrowHead(srcAngle,degree,lineSrcPoint)
+                arrow.append(QtCore.QPointF(srcXArr2,srcYArr2))                    
+                arrow.append(QtCore.QPointF(lineSrcPoint.x(),lineSrcPoint.y()))
+
+                degree = 120
+                srcXArr1,srcYArr1= self.arrowHead(srcAngle,degree,lineSrcPoint)
+		arrow.append(QtCore.QPointF(srcXArr1,srcYArr1))
+                arrow.append(QtCore.QPointF(lineSrcPoint.x(),lineSrcPoint.y()))
+
+            else:
+                arrow.append(lineSrcPoint)
+                arrow.append(lineDestPoint)
+        return arrow
+    
+    def recalcSceneBoundingRect(self, rect):
+        vp_trans = self.view.viewportTransform()
+        trans = rect.deviceTransform(vp_trans)
+        bbox = rect.boundingRect()
+        sx = trans.mapRect(bbox);
+        mappedRect = self.view.mapToScene(sx.toRect()).boundingRect()
+        return mappedRect
+
+    def calcLineRectIntersection(self, rect, centerLine):
+        '''      checking which side of rectangle intersect with other '''
+        """Here the 1. a. intersect point between center and 4 sides of src and 
+        
+                    b. intersect point between center and 4 sides of
+                    des and to draw a line connecting for src & des
+        
+                    2. angle for src for the arrow head calculation is returned"""
+        x = rect.x()
+        y = rect.y()
+        w = rect.width()
+        h = rect.height()
+        borders = [(x,y,x+w,y),
+                   (x+w,y,x+w,y+h),
+                   (x+w,y+h,x,y+h),
+                   (x,y+h,x,y)]
+        intersectionPoint = QtCore.QPointF()
+        intersects = False
+        for lineEnds in borders:
+            line = QtCore.QLineF(*lineEnds)
+            intersectType = centerLine.intersect(line, intersectionPoint)
+            if intersectType == centerLine.BoundedIntersection:
+                intersects = True
+                break
+        return (intersects, intersectionPoint)
+
+    def arrowHead(self,srcAngle,degree,lineSpoint):
+        '''  arrow head is calculated '''
+        r = 8
+        delta = math.radians(srcAngle) + math.radians(degree)
+        width = math.sin(delta)*r
+        height = math.cos(delta)*r
+        srcXArr = lineSpoint.x() + width
+        srcYArr = lineSpoint.y() + height
+        return srcXArr,srcYArr
+   
+    def updateItemSlot(self, mooseObject):
+        #In this case if the name is updated from the keyboard both in mooseobj and gui gets updation
+        changedItem = ''
+        for item in self.sceneContainer.items():
+            if isinstance(item,PoolItem):
+                if mooseObject.getId() == element(item.mobj).getId():
+                    item.updateSlot()
+                    #once the text is edited in editor, laydisplay gets updated in turn resize the length, positionChanged signal shd be emitted
+                    self.positionChange(mooseObject)
+ 
+    def updatearrow(self,qGTextitem):
+        #if there is no arrow to update then return
+        if qGTextitem not in self.object2line:
+            return
+        listItem = self.object2line[qGTextitem]
+        for ql, va in listItem:
+            srcdes = self.lineItem_dict[ql]
+            if(isinstance(srcdes[0],ReacItem) or isinstance(srcdes[0],EnzItem) ):
+                pItem = (next((k for k,v in self.mooseId_GObj.items() if v == srcdes[0]), None))
+                mooseObj = (next((k for k,v in self.mooseId_GObj.items() if v == srcdes[1]), None))
+                for l1 in self.srcdesConnection[pItem]:
+                    for k in l1:
+                        if ((k[0]) == mooseObj):   
+                            endtype = k[1]
+                        else:
+                            if ( isinstance(qGTextitem,ReacItem) or isinstance(qGTextitem,EnzItem) ):
+                                gItem = self.mooseId_GObj[k[0]]
+                                self.updatearrow(gItem)
+               
+            elif(isinstance(srcdes[1],ReacItem) or isinstance(srcdes[1],EnzItem) ):
+                pItem = (next((k for k,v in self.mooseId_GObj.items() if v == srcdes[1]), None))
+                mooseObject = (next((k for k,v in self.mooseId_GObj.items() if v == srcdes[0]), None))
+                for l1 in self.srcdesConnection[pItem]:
+                    for k in l1:
+                        if (k[0]) == mooseObj:
+                            endtype = k[1]
+            else:
+                pItem  =  (next((k for k,v in self.mooseId_GObj.items() if v == srcdes[0]), None))
+                pItem1 =  (next((k for k,v in self.mooseId_GObj.items() if v == srcdes[1]), None))
+                if(pItem.class_ == 'ZombieFuncPool' or pItem1.class_ == 'ZombieFuncPool'):
+                    endtype = 'st'
+
+            arrow = self.calcArrow(srcdes[0],srcdes[1],endtype,itemignoreZooming)
+            ql.setPolygon(arrow)
+
+    def keyPressEvent(self,event):
+        key = event.key()
+        if key == QtCore.Qt.Key_A:
+            itemignoreZooming = False
+            self.updateItemTransformationMode(itemignoreZooming)
+            self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
+            self.drawLine_arrow(itemignoreZooming=False)
+
+        elif (key == 46 or key == 62):
+            self.view.scale(1.1,1.1)
+        elif (key == 44 or key == 60):
+            self.view.scale(1/1.1,1/1.1)
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
@@ -817,8 +849,10 @@ if __name__ == "__main__":
     #modelPath = 'acc61'
     modelPath = 'reaction4'
     #modelPath = 're'
-    #modelPath = 'Kholodenko'
-    modelPath = 'EGFR_MAPK_58'
+    modelPath = 'Kholodenko'
+    #modelPath = 'EGFR_MAPK_58'
+
+    itemignoreZooming = False
     try:
         filepath = '../Demos/Genesis_files/'+modelPath+'.g'
         #filepath = '/home/harsha/genesis_files/'+modelPath+'.g'
