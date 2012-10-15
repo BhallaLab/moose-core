@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat May 26 10:41:37 2012 (+0530)
 # Version: 
-# Last-Updated: Mon Aug 27 16:58:55 2012 (+0530)
+# Last-Updated: Mon Oct 15 16:12:41 2012 (+0530)
 #           By: subha
-#     Update #: 357
+#     Update #: 368
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -65,7 +65,7 @@ def setup_clocks(simdt, plotdt):
     moose.setClock(STIMCLOCK, simdt)
     moose.setClock(PLOTCLOCK, plotdt)
 
-def assign_clocks(model_container, data_container, solver='ee'):
+def assign_clocks(model_container, data_container, solver='euler'):
     """Assign clockticks to elements.
     
     Parameters
@@ -97,15 +97,44 @@ def assign_clocks(model_container, data_container, solver='ee'):
     data_container
 
     """
-    moose.useClock(STIMCLOCK, model_container.path+'/##[TYPE=PulseGen]', 'process')
-    moose.useClock(PLOTCLOCK, data_container.path+'/##[TYPE=Table]', 'process')
+    moose.useClock(STIMCLOCK,
+                   model_container.path+'/##[TYPE=PulseGen]',
+                   'process')
+    moose.useClock(PLOTCLOCK,
+                   data_container.path+'/##[TYPE=Table]',
+                   'process')
     if solver == 'hsolve':
-        moose.useClock(INITCLOCK, model_container.path+'/##[TYPE=HSolve]', 'process')
+        moose.useClock(INITCLOCK,
+                       model_container.path+'/##[TYPE=HSolve]',
+                       'process')
     else:
-        moose.useClock(INITCLOCK, model_container.path+'/##[TYPE=Compartment]', 'init')
-        moose.useClock(ELECCLOCK, model_container.path+'/##[TYPE=Compartment]', 'process')
-        moose.useClock(CHANCLOCK, model_container.path+'/##[TYPE=HHChannel]', 'process')
-        moose.useClock(POOLCLOCK, model_container.path+'/##[TYPE=CaConc]', 'process')
+        moose.useClock(INITCLOCK, 
+                       model_container.path+'/##[TYPE=Compartment]', 
+                       'init')
+        moose.useClock(ELECCLOCK,
+                       model_container.path+'/##[TYPE=Compartment]', 
+                       'process')
+        moose.useClock(CHANCLOCK, 
+                       model_container.path+'/##[TYPE=HHChannel]',
+                       'process')
+        moose.useClock(POOLCLOCK,
+                       model_container.path+'/##[TYPE=CaConc]',
+                       'process')
+    
+def step_run(simtime, steptime, verbose=True):
+    """Run the simulation in steps of `steptime` for `simtime`."""
+    clock = moose.Clock('/clock')
+    if verbose:
+        print 'Starting simulation for', simtime
+    while clock.currentTime < simtime - steptime:
+        moose.start(steptime)
+        if verbose:
+            print 'Simulated till', clock.currentTime, 's'
+    remaining = simtime % steptime
+    moose.start(remaining)
+    if verbose:
+        print 'Finished simulation'
+    
 
 def make_testcomp(containerpath):
     comp = moose.Compartment('%s/testcomp' % (containerpath))
