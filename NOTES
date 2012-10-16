@@ -19062,7 +19062,22 @@ Coupling meshes/compartments is the key step.
 	Sim Manager will need hint about whether to load in a multicompt
 	model into multiple solvers or a single one. Substantially different
 	setup in the two cases.
+	- Stoichs themselves will need to traverse paths differently, 
+		If they are in multiple sover mode, then they have to set
+		up lists of cross-compartment reactions and identify
+		whether they are on the sender or receiver mesh.
 
+	- Message between Stoichs: 
+		Send vector of doubles of pools needed for cross-compt reacs,
+			for a given meshIndex. Or all indices?
+		Recv vector of doubles of cross-compt V, ie, reac rates.
+			In the case of rk5 calculations, V is the rate at the
+			start of the time interval, and remains fixed.
+			In the case of Gillespie calculations, V is the 
+			(integer) # of transitions on each reacn.
+		Send Rollback vector of doubles if recved rate V gives a 
+			negative anywhere, esp for Gillespie. The Rollback
+			vector contains the permitted values of V.
 
 Currently we have an issue as all reacs and enzymes seem to be set into
 the kinetics compartment. Error.
@@ -19074,5 +19089,56 @@ Working on this.
 Got reacs to go into correct compartment.
 Got enzs to go into correct compartment.
 Both were an issue with readKkit. 
+
+============================================================================
+13 Oct.
+Using revision 4125, getting close to release candidate.
+Ran valgrind -u. Still has the 96 bytes of leak. Acceptable.
+Ran valgrind -r. Not so good. Loses 576 bytes, seems to be in the ReadKkit 
+	tests. Barely acceptable.
+
+
+============================================================================
+14 Oct.
+Steps for stoich communication
+* Set up test having A<===>B into different meshes.
+* Set up messaging between Stoichs. Test should create message.
+- Set up ode calculations. Test should directly call update operations and see.
+- Set up traversal with listing of cross-compt reactions and pools
+- Set up Manager. 
+- Set up Gillespie-ODE calculations. Test should call update ops.
+- Set up rollback for Gillespie-ODE calculations. Test rollback ops
+
+============================================================================
+15 Oct 
+	Set up the test for A<==>B into different meshes.
+
+To set up Stoich paths restricted to one compartment.  Options:
+	- Set compartment base as path. 
+		- It will digest all contained objects that have not yet 
+			been solved. 
+		- Every time it runs into a reac with a dangling message, 
+			it will traverse the msg to the target pool.
+			- Assume reac is assigned to correct compt. This is
+			the one which has the finest mesh size.
+			- Possible problem of assignment of enzymes. Currently
+			put, logically enough, into compt which has the 
+			enzyme molecule. By this rule we would possibly have
+			different parts of enzyme in different places.
+			- Best solution is to allow either case. If we get
+			it wrong all that happens is we do fewer calculations
+			at a coarser grid size. So it would be nice but
+			not critical to optimize a bit by correctly placing 
+			the reac during setup time.
+		- Assumes common base for all the related compts. Consider
+			dendritic spines. They have to be in a single compt,
+			indexed by spine # in some way.
+	- Special command specifying both full path and compartment base
+			Doesn't seem necessary, see above.
+		
+
+I've now set up the framework for the messaging between Stoichs. Doesn't
+actually do anything, just the placeholders for the handlers and 'send' calls.
+Tested that the shared message is created.
 
 ============================================================================
