@@ -124,6 +124,13 @@ class Stoich
 		// Model traversal and building functions
 		//////////////////////////////////////////////////////////////////
 		void allocateObjMap( const vector< Id >& elist );
+
+		/// Using the computed array sizes, now allocate space for them.
+		void resizeArrays();
+		/// Identifies and allocates objects in the Stoich.
+		void allocateModelObject( 
+				Id id, vector< Id >& bufPools, vector< Id >& funcPools );
+		/// Calculate sizes of all arrays, and allocate them.
 		void allocateModel( const vector< Id >& elist );
 
 		/**
@@ -134,9 +141,15 @@ class Stoich
 		void zombifyModel( const Eref& e, const vector< Id >& elist );
 
 		/**
-		 * Converts back to EE type basic Elements.
+		 * Converts back to ExpEuler type basic kinetic Elements.
 		 */
 		void unZombifyModel();
+
+		/// unZombifies Pools. Helper for unZombifyModel.
+		void unZombifyPools();
+		/// unZombifies Funcs. Helper for unZombifyModel.
+		void unZombifyFuncs();
+
 		void zombifyChemMesh( Id compt );
 
 		unsigned int convertIdToReacIndex( Id id ) const;

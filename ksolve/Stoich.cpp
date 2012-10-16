@@ -544,7 +544,9 @@ void Stoich::allocateObjMap( const vector< Id >& elist )
 	assert( objMap_.size() >= elist.size() );
 }
 
-void Stoich::allocateModel( const vector< Id >& elist )
+/// Identifies and allocates objects in the Stoich.
+void Stoich::allocateModelObject( Id id, 
+				vector< Id >& bufPools, vector< Id >& funcPools )
 {
 	static const Cinfo* poolCinfo = Pool::initCinfo();
 	static const Cinfo* bufPoolCinfo = BufPool::initCinfo();
@@ -553,53 +555,81 @@ void Stoich::allocateModel( const vector< Id >& elist )
 	static const Cinfo* enzCinfo = Enz::initCinfo();
 	static const Cinfo* mmEnzCinfo = MMenz::initCinfo();
 	static const Cinfo* sumFuncCinfo = SumFunc::initCinfo();
-	// static const Cinfo* meshEntryCinfo = MeshEntry::initCinfo();
+
+	Element* ei = id.element();
+	if ( ei->cinfo() == poolCinfo ) {
+		objMap_[ id.value() - objMapStart_ ] = numVarPools_;
+		idMap_.push_back( id );
+		++numVarPools_;
+	} else if ( ei->cinfo() == bufPoolCinfo ) {
+			bufPools.push_back( id );
+	} else if ( ei->cinfo() == funcPoolCinfo ) {
+			funcPools.push_back( id );
+	} else if ( ei->cinfo() == mmEnzCinfo ){
+			mmEnzMap_.push_back( ei->id() );
+			objMap_[ id.value() - objMapStart_ ] = numReac_;
+			++numReac_;
+	} else if ( ei->cinfo() == reacCinfo ) {
+			reacMap_.push_back( ei->id() );
+			if ( useOneWay_ ) {
+				objMap_[ id.value() - objMapStart_ ] = numReac_;
+				numReac_ += 2;
+			} else {
+				objMap_[ id.value() - objMapStart_ ] = numReac_;
+				++numReac_;
+			}
+	} else if ( ei->cinfo() == enzCinfo ) {
+			enzMap_.push_back( ei->id() );
+			if ( useOneWay_ ) {
+				objMap_[ id.value() - objMapStart_ ] = numReac_;
+				numReac_ += 3;
+			} else {
+				objMap_[ id.value() - objMapStart_ ] = numReac_;
+				numReac_ += 2;
+			}
+	} else if ( ei->cinfo() == sumFuncCinfo ){
+			objMap_[ id.value() - objMapStart_ ] = numFuncPools_;
+			++numFuncPools_;
+	} 
+}
+
+/// Using the computed array sizes, now allocate space for them.
+void Stoich::resizeArrays()
+{
+	concInit_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0 );
+	S_.resize( 1 );
+	Sinit_.resize( 1 );
+	y_.resize( 1 );
+	flux_.resize( 1 );
+	S_[0].resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0 );
+	Sinit_[0].resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0);
+	y_[0].resize( numVarPools_, 0.0 );
+	flux_[0].resize( numVarPools_, 0.0 );
+
+	diffConst_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0 );
+	species_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0 );
+	rates_.resize( numReac_ );
+	// v_.resize( numReac_, 0.0 ); // v is now allocated dynamically
+	funcs_.resize( numFuncPools_ );
+	N_.setSize( numVarPools_ + numBufPools_ + numFuncPools_, numReac_ );
+}
+
+/// Calculate sizes of all arrays, and allocate them.
+void Stoich::allocateModel( const vector< Id >& elist )
+{
 	numVarPools_ = 0;
 	numReac_ = 0;
+	numFuncPools_ = 0;
 	vector< Id > bufPools;
 	vector< Id > funcPools;
-	unsigned int numFunc = 0;
 	idMap_.clear();
 	reacMap_.clear();
 	enzMap_.clear();
 	mmEnzMap_.clear();
-	for ( vector< Id >::const_iterator i = elist.begin(); i != elist.end(); ++i ){
-		Element* ei = (*i)();
-		if ( ei->cinfo() == poolCinfo ) {
-			objMap_[ i->value() - objMapStart_ ] = numVarPools_;
-			idMap_.push_back( *i );
-			++numVarPools_;
-		} else if ( ei->cinfo() == bufPoolCinfo ) {
-			bufPools.push_back( *i );
-		} else if ( ei->cinfo() == funcPoolCinfo ) {
-			funcPools.push_back( *i );
-		} else if ( ei->cinfo() == mmEnzCinfo ){
-			mmEnzMap_.push_back( ei->id() );
-			objMap_[ i->value() - objMapStart_ ] = numReac_;
-			++numReac_;
-		} else if ( ei->cinfo() == reacCinfo ) {
-			reacMap_.push_back( ei->id() );
-			if ( useOneWay_ ) {
-				objMap_[ i->value() - objMapStart_ ] = numReac_;
-				numReac_ += 2;
-			} else {
-				objMap_[ i->value() - objMapStart_ ] = numReac_;
-				++numReac_;
-			}
-		} else if ( ei->cinfo() == enzCinfo ) {
-			enzMap_.push_back( ei->id() );
-			if ( useOneWay_ ) {
-				objMap_[ i->value() - objMapStart_ ] = numReac_;
-				numReac_ += 3;
-			} else {
-				objMap_[ i->value() - objMapStart_ ] = numReac_;
-				numReac_ += 2;
-			}
-		} else if ( ei->cinfo() == sumFuncCinfo ){
-			objMap_[ i->value() - objMapStart_ ] = numFunc;
-			++numFunc;
-		} 
-	}
+
+	for ( vector< Id >::const_iterator i = elist.begin(); 
+					i != elist.end(); ++i )
+			allocateModelObject( *i, bufPools, funcPools );
 
 	numBufPools_ = 0;
 	for ( vector< Id >::const_iterator i = bufPools.begin(); i != bufPools.end(); ++i ){
@@ -616,26 +646,9 @@ void Stoich::allocateModel( const vector< Id >& elist )
 	}
 	assert( idMap_.size() == numFuncPools_ );
 	numFuncPools_ -= numVarPools_ + numBufPools_;
-	assert( numFunc == numFuncPools_ );
-
 	numVarPoolsBytes_ = numVarPools_ * sizeof( double );
-	concInit_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0 );
-	S_.resize( 1 );
-	Sinit_.resize( 1 );
-	y_.resize( 1 );
-	flux_.resize( 1 );
-	S_[0].resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0 );
-	Sinit_[0].resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0);
-	y_[0].resize( numVarPools_, 0.0 );
-	flux_[0].resize( numVarPools_, 0.0 );
 
-	diffConst_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0 );
-	// compartment_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0 );
-	species_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0 );
-	rates_.resize( numReac_ );
-	// v_.resize( numReac_, 0.0 ); // v is now allocated dynamically
-	funcs_.resize( numFuncPools_ );
-	N_.setSize( numVarPools_ + numBufPools_ + numFuncPools_, numReac_ );
+	resizeArrays();
 }
 
 void zombifyAndUnschedPool( 
@@ -698,21 +711,16 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 		}
 		else if ( ei->cinfo() == mmEnzCinfo ) {
 			EnzBase::zombify( ei, ZombieMMenz::initCinfo(), e.id() );
-			// ZombieMMenz::zombify( e.element(), (*i)() );
 		}
 		else if ( ei->cinfo() == enzCinfo ) {
 			CplxEnzBase::zombify( ei, ZombieEnz::initCinfo(), e.id() );
-		//	ZombieEnz::zombify( e.element(), (*i)() );
 		}
 	}
 }
 
-void Stoich::unZombifyModel()
+void Stoich::unZombifyPools()
 {
-	// Need to check for existence of molecule and whether it is still
-	// a zombie.
 	unsigned int i = 0;
-	assert (idMap_.size() == numVarPools_ + numBufPools_ + numFuncPools_);
 	for ( ; i < numVarPools_; ++i ) {
 		Element* e = idMap_[i].element();
 		if ( e != 0 &&  e->cinfo() == ZombiePool::initCinfo() )
@@ -724,8 +732,13 @@ void Stoich::unZombifyModel()
 		if ( e != 0 &&  e->cinfo() == ZombieBufPool::initCinfo() )
 			PoolBase::zombify( e, BufPool::initCinfo(), Id() );
 	}
-	
-	for ( ; i < numVarPools_ + numBufPools_ + numFuncPools_; ++i ) {
+}
+
+void Stoich::unZombifyFuncs()
+{
+	unsigned int start = numVarPools_ + numBufPools_;
+	for ( unsigned int k = 0; k < numFuncPools_; ++k ) {
+		unsigned int i = k + start;
 		Element* e = idMap_[i].element();
 		if ( e != 0 &&  e->cinfo() == ZombieFuncPool::initCinfo() ) {
 			PoolBase::zombify( e, FuncPool::initCinfo(), Id() );
@@ -737,6 +750,15 @@ void Stoich::unZombifyModel()
 			}
 		}
 	}
+}
+
+void Stoich::unZombifyModel()
+{
+	assert (idMap_.size() == numVarPools_ + numBufPools_ + numFuncPools_);
+
+	unZombifyPools();
+	unZombifyFuncs();
+
 	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
 
 	for ( vector< Id >::iterator i = reacMap_.begin(); 
