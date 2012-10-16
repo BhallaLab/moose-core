@@ -78,6 +78,48 @@ class Stoich
 			vector< vector< unsigned int > > incomingDiffusion
 		);
 
+		/**
+		 * In the case of reactions that cross compt boundaries and hence
+		 * solvers and meshes, I need to pass two things:
+		 * First, an identifier for which boundary.
+		 * Second, for all mesh entries, the pools which have a reaction
+		 * that crosses the boundary. 
+		 */
+		void handlePoolsReactingAcrossBoundary( 
+						unsigned int boundary, vector< double > );
+
+		/** 
+		 * In the case of reactions that cross compt boundaries and hence
+		 * solvers and meshes, I need to pass two things:
+		 * First, an identifier for which boundary.
+		 * Second, for all mesh entries, the reac rates for every 
+		 * reaction that crosses the boundary. 
+		 */
+		void handleReacRatesAcrossBoundary( 
+						unsigned int boundary, vector< double > );
+
+
+		/** When we have reactions that cross compartment boundaries,
+		 * we may have different solvers and meshes on either side.
+		 * Only one side does the calculations to assure mass 
+		 * conservation. 
+		 * There are rare cases when the calculations of one 
+		 * solver, typically a Gillespie one, gives such a large 
+		 * change that the concentrations on the other side would 
+		 * become negative in one or more molecules 
+		 * This message handles such cases on the Gillespie side, 
+		 * by telling the solver to roll back its recent 
+		 * calculation and instead use the specified vector for 
+		 * the rates, that is the # of mols changed in the latest 
+		 * timestep. 
+		 * This message handle info for two things: 
+		 * Arg 1: An identifier for the boundary. 
+		 * Arg 2: A vector of reaction rates for every reaction 
+		 * across the boundary, in every mesh entry.
+		 */
+		void handleReacRollbacksAcrossBoundary( 
+						unsigned int boundary, vector< double > );
+
 		//////////////////////////////////////////////////////////////////
 		// Model traversal and building functions
 		//////////////////////////////////////////////////////////////////

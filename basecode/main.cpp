@@ -52,6 +52,7 @@ extern void testMpiShell();
 extern void testMsg();
 extern void testMpiMsg();
 extern void testKinetics();
+extern void testKineticSolvers();
 extern void testBiophysics();
 extern void testBiophysicsProcess();
 extern void testHSolve();
@@ -289,6 +290,7 @@ void nonMpiTests( Shell* s )
 		testScheduling();
 		testBuiltins();
 		testKinetics();
+		testKineticSolvers();
 		testBiophysics();
 		testHSolve();
 		testGeom();

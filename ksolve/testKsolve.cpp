@@ -190,3 +190,93 @@ void testGsolver(string modelName, string plotName, double plotDt, double simTim
 	s->doDelete( base );
 	cout << "." << flush;
 }
+
+////////////////////////////////////////////////////////////////////////
+// Proper unit tests below here. Don't need whole MOOSE infrastructure.
+////////////////////////////////////////////////////////////////////////
+
+/**
+ * This makes *meshA* and *meshB*, and puts *poolA* and *poolB* in it.
+ * There is
+ * a reversible conversion reaction *reac* also in meshA.
+ */
+Id makeInterMeshReac( Shell* s )
+{
+	vector< int > dims( 1, 1 );
+	Id model = s->doCreate( "Neutral", Id(), "model", dims );
+	Id meshA = s->doCreate( "CubeMesh", model, "meshA", dims );
+	Id meshEntryA = Neutral::child( meshA.eref(), "mesh" );
+	Id meshB = s->doCreate( "CubeMesh", model, "meshB", dims );
+	Id meshEntryB = Neutral::child( meshB.eref(), "mesh" );
+	Id poolA = s->doCreate( "Pool", meshA, "A", dims );
+	Id poolB = s->doCreate( "Pool", meshB, "B", dims );
+	Id reac = s->doCreate( "Reac", meshA, "reac", dims );
+
+	Field< double >::set( poolA, "nInit", 100 );
+
+	MsgId mid = s->doAddMsg( "OneToOne",
+		poolA, "mesh", meshEntryA, "mesh" );
+	assert( mid != Msg::bad );
+	mid = s->doAddMsg( "OneToOne", poolB, "mesh", meshEntryB, "mesh" );
+	assert( mid != Msg::bad );
+	mid = s->doAddMsg( "Single", meshEntryA, "remeshReacs", reac, "remesh");
+	assert( mid != Msg::bad );
+
+	mid = s->doAddMsg( "Single", reac, "sub", poolA, "reac" );
+	assert( mid != Msg::bad );
+	mid = s->doAddMsg( "Single", reac, "prd", poolB, "reac" );
+	assert( mid != Msg::bad );
+
+	Field< double >::set( meshA, "size", 1 );
+	Field< double >::set( meshB, "size", 10 );
+	double ret = Field< double >::get( poolA, "size" );
+	assert( doubleEq( ret, 1 ) );
+	ret = Field< double >::get( poolB, "size" );
+	assert( doubleEq( ret, 10 ) );
+
+	return model;
+}
+
+void testInterMeshReac()
+{
+	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< int > dims( 1, 1 );
+	Id model = makeInterMeshReac( s );
+	// Create solvers for meshA and meshB.
+	Id meshA( "/model/meshA" );
+	assert ( meshA != Id() );
+	Id meshB( "/model/meshA" );
+	assert ( meshB != Id() );
+	Id stoichA = s->doCreate( "Stoich", model, "stoichA", dims );
+	assert ( stoichA != Id() );
+	Id stoichB = s->doCreate( "Stoich", model, "stoichB", dims );
+	assert ( stoichB != Id() );
+
+	MsgId mid = s->doAddMsg( "Single", meshA, "meshSplit", stoichA, 
+					"meshSplit" );
+	assert( mid != Msg::bad );
+	mid = s->doAddMsg( "Single", meshB, "meshSplit", stoichB, "meshSplit" );
+	assert( mid != Msg::bad );
+
+	mid = s->doAddMsg( "Single", stoichA, "boundaryReacIn", 
+					stoichB, "boundaryReacOut" );
+	assert( mid != Msg::bad );
+
+	// Should put in a flag or variant that sets up compartment-specific
+	// models.
+	/*
+	Field< string >::set( stoichA, "path", "/model/meshA/poolA,/model/meshA/reac" );
+	Field< string >::set( stoichB, "path", "/model/meshB/poolB" );
+	*/
+
+	// Set up messaging between solvers.
+
+	s->doDelete( model );
+	cout << "." << flush;
+}
+
+
+void testKineticSolvers()
+{
+	testInterMeshReac();
+}
