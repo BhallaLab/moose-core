@@ -19142,3 +19142,5 @@ actually do anything, just the placeholders for the handlers and 'send' calls.
 Tested that the shared message is created.
 
 ============================================================================
+16 Oct
+Some minor refactoring of Stoich.cpp, to clean up some overly long functions.
