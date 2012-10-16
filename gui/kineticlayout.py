@@ -10,6 +10,7 @@ from collections import defaultdict
 sys.path.append('../python')
 
 from moose import *
+itemignoreZooming = False
 
 class GraphicalView(QtGui.QGraphicsView):
     def __init__(self,parent,border,layoutPt):
@@ -824,7 +825,6 @@ class  KineticsWidget(QtGui.QWidget):
                 pItem1 =  (next((k for k,v in self.mooseId_GObj.items() if v == srcdes[1]), None))
                 if(pItem.class_ == 'ZombieFuncPool' or pItem1.class_ == 'ZombieFuncPool'):
                     endtype = 'st'
-
             arrow = self.calcArrow(srcdes[0],srcdes[1],endtype,itemignoreZooming)
             ql.setPolygon(arrow)
 
