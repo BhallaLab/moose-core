@@ -10,6 +10,7 @@ from collections import defaultdict
 sys.path.append('../python')
 
 from moose import *
+global itemignoreZooming
 itemignoreZooming = False
 
 class GraphicalView(QtGui.QGraphicsView):
@@ -143,11 +144,11 @@ class GraphicalView(QtGui.QGraphicsView):
     def zoomItem(self):
         # First items are ignoretransformation,view is fitted and recalculated the arrow
         #global itemignoreZooming = True
-        self.layoutPt.updateItemTransformationMode(True)
-        self.fitInView(self.startScenepos.x(),self.startScenepos.y(),self.rubberbandWidth,self.rubberbandHeight,Qt.Qt.IgnoreAspectRatio)
         global itemignoreZooming
         itemignoreZooming = True
-        self.layoutPt.drawLine_arrow(itemignoreZooming=True)
+        self.layoutPt.updateItemTransformationMode()
+        self.fitInView(self.startScenepos.x(),self.startScenepos.y(),self.rubberbandWidth,self.rubberbandHeight,Qt.Qt.IgnoreAspectRatio)
+        self.layoutPt.drawLine_arrow()
         self.rubberBandactive = False
 
 class KineticsDisplayItem(QtGui.QGraphicsWidget):
@@ -170,13 +171,15 @@ class KineticsDisplayItem(QtGui.QGraphicsWidget):
 class PoolItem(KineticsDisplayItem):
     """Class for displaying pools. Uses a QGraphicsSimpleTextItem to
     display the name."""    
+    #font = QtGui.QFont('times',180)
+    #fontMetrics = QtGui.QFontMetrics(font)
     fontMetrics = None
     def __init__(self, *args, **kwargs):
         
         KineticsDisplayItem.__init__(self, *args, **kwargs)
         self.bg = QtGui.QGraphicsRectItem(self)
         self.gobj = QtGui.QGraphicsSimpleTextItem(self.mobj[0].name, self.bg)        
-        
+        #self.gobj.setFont(PoolItem.font)
         if not PoolItem.fontMetrics:
             PoolItem.fontMetrics = QtGui.QFontMetrics(self.gobj.font())
         self.bg.setRect(0, 
@@ -207,16 +210,16 @@ class PoolItem(KineticsDisplayItem):
         self.bg.setRect(0, 0, self.gobj.boundingRect().width()+PoolItem.fontMetrics.width('  '), self.gobj.boundingRect().height())
 
 class ReacItem(KineticsDisplayItem):
-    defaultWidth = 35
-    defaultHeight = 35
+    defaultWidth = 30
+    defaultHeight = 30
     def __init__(self, *args, **kwargs):
         KineticsDisplayItem.__init__(self, *args, **kwargs)
         width = 30.0
         height = 30.0
-        points = [QtCore.QPointF(width/4, 0),
-                  QtCore.QPointF(0, height/4),
-                  QtCore.QPointF(width, height/4),
-                  QtCore.QPointF(3*width/4, height/2)]
+        points = [QtCore.QPointF(ReacItem.defaultWidth/4, 0),
+                  QtCore.QPointF(0,ReacItem.defaultHeight/4),
+                  QtCore.QPointF(ReacItem.defaultWidth,ReacItem.defaultHeight/4),
+                  QtCore.QPointF(3*ReacItem.defaultWidth/4, ReacItem.defaultHeight/2)]
         path = QtGui.QPainterPath()
         path.moveTo(points[0])
         for p in points[1:]:
@@ -250,7 +253,6 @@ class EnzItem(KineticsDisplayItem):
         self.setGeometry(x,y, 
                          self.gobj.boundingRect().width(), 
                          self.gobj.boundingRect().height())
-        #self.gobj.setPen(QtGui.QPen(QtGui.QBrush(textcolor)))
         self.gobj.setBrush(QtGui.QBrush(textcolor))
         self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable
                      +QtGui.QGraphicsItem.ItemIsMovable)
@@ -302,7 +304,7 @@ class Widgetvisibility(Exception):pass
 class  KineticsWidget(QtGui.QWidget):
     def __init__(self,size,modelPath,parent=None):
         QtGui.QWidget.__init__(self,parent)
-	
+	global itemignoreZooming
         itemignoreZooming = False
 	# Get all the compartments and its members  
         cmptMol = {}
@@ -362,18 +364,20 @@ class  KineticsWidget(QtGui.QWidget):
             self.lineItem_dict = {}
             self.object2line = defaultdict(list)
             self.setupItem(modelPath,self.srcdesConnection)
-            self.drawLine_arrow(itemignoreZooming=False)
+            self.drawLine_arrow()
 
             hLayout.addWidget(self.view)
 
-    def updateItemTransformationMode(self, on):
+    def updateItemTransformationMode(self):
+        global itemignoreZooming
         for v in self.sceneContainer.items():
             if( not isinstance(v,ComptItem)):
                 if ( isinstance(v, PoolItem) or isinstance(v, ReacItem) or isinstance(v, EnzItem) or isinstance(v, CplxItem) ):
-                    v.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations, on)
+                    v.setFlag(QtGui.QGraphicsItem.ItemIgnoresTransformations,itemignoreZooming)
 
     def GrVfitinView(self):
-        self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
+        pass
+        #self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
         
     def GrViewresize(self,event):
         #when Gui resize and event is sent which inturn call resizeEvent of qgraphicsview
@@ -438,9 +442,12 @@ class  KineticsWidget(QtGui.QWidget):
                     mobjItem = EnzItem(mre,comptRef)
                     mobjItem.setDisplayProperties(xpos,ypos,textcolor,bgcolor)
                 elif mre.class_ == 'ZombiePool' or mre.class_ == 'ZombieFuncPool' or mre.class_ == 'ZombieBufPool':
+                    fnt = QtGui.QFont('Helvetica',8)
                     if mre[0].parent.class_ != 'ZombieEnz':
                         mobjItem = PoolItem(mre,comptRef)
+                        #mobjItem.setfont(fnt)
                         mobjItem.setDisplayProperties(xpos,ypos,textcolor,bgcolor)
+                        
                     else:
                         #cplx has made to sit under enz, for which xpos added with width/2
                         #oct4 Here I am not adding enzyme as parent for cplx
@@ -589,7 +596,8 @@ class  KineticsWidget(QtGui.QWidget):
                             if(element(el).getId() == nfunplist[0]):
                                 cntDict[element(el)] = inputlist
                                 break
-    def drawLine_arrow(self, itemignoreZooming=False):        
+    def drawLine_arrow(self):
+        global itemignoreZooming
         for inn,out in self.srcdesConnection.items():
             if isinstance(out,tuple):
                 if len(out[0])== 0:
@@ -598,14 +606,14 @@ class  KineticsWidget(QtGui.QWidget):
                     for items in (items for items in out[0] ):
                         src = self.mooseId_GObj[inn]
                         des = self.mooseId_GObj[element(items[0]).getId()]
-                        self.lineCord(src,des,items[1],itemignoreZooming)
+                        self.lineCord(src,des,items[1])
                 if len(out[1]) == 0:
                     print "Reaction or Enzyme doesn't output mssg"
                 else:
                     for items in (items for items in out[1] ):
                         src = self.mooseId_GObj[inn]
                         des = self.mooseId_GObj[element(items[0]).getId()]
-                        self.lineCord(src,des,items[1],itemignoreZooming)
+                        self.lineCord(src,des,items[1])
             elif isinstance(out,list):
                 if len(out) == 0:
                     print "Func pool doesn't have sumtotal"
@@ -613,9 +621,10 @@ class  KineticsWidget(QtGui.QWidget):
                     for items in (items for items in out ):
                         src = self.mooseId_GObj[element(inn).getId()]
                         des = self.mooseId_GObj[element(items[0]).getId()]
-                        self.lineCord(src,des,items[1],itemignoreZooming)
+                        self.lineCord(src,des,items[1])
     
-    def lineCord(self,src,des,endtype,itemignoreZooming):
+    def lineCord(self,src,des,endtype):
+        global itemignoreZooming
         source = element(next((k for k,v in self.mooseId_GObj.items() if v == src), None))
         desc = element(next((k for k,v in self.mooseId_GObj.items() if v == des), None))
         line = 0
@@ -623,7 +632,7 @@ class  KineticsWidget(QtGui.QWidget):
             print "Source or destination is missing or incorrect"
             return 
         srcdes_list = [src,des,endtype]        
-        arrow = self.calcArrow(src,des,endtype,itemignoreZooming)
+        arrow = self.calcArrow(src,des,endtype)
         for l,v in self.object2line[src]:
                 if v == des:
                     l.setPolygon(arrow)
@@ -670,7 +679,8 @@ class  KineticsWidget(QtGui.QWidget):
         self.object2line[ des ].append( ( qgLineitem, src ) )
         qgLineitem.setPen(pen)
         
-    def calcArrow(self,src,des,endtype,itemignoreZooming):
+    def calcArrow(self,src,des,endtype):
+        global itemignoreZooming
         ''' if PoolItem then boundingrect should be background rather than graphicsobject '''
         srcobj = src.gobj
         desobj = des.gobj
@@ -825,29 +835,103 @@ class  KineticsWidget(QtGui.QWidget):
                 pItem1 =  (next((k for k,v in self.mooseId_GObj.items() if v == srcdes[1]), None))
                 if(pItem.class_ == 'ZombieFuncPool' or pItem1.class_ == 'ZombieFuncPool'):
                     endtype = 'st'
-            arrow = self.calcArrow(srcdes[0],srcdes[1],endtype,itemignoreZooming)
+            arrow = self.calcArrow(srcdes[0],srcdes[1],endtype)
             ql.setPolygon(arrow)
 
     def keyPressEvent(self,event):
         key = event.key()
+        global itemignoreZooming
         if key == QtCore.Qt.Key_A:
-            itemignoreZooming = False
-            self.updateItemTransformationMode(itemignoreZooming)
-            self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
-            self.drawLine_arrow(itemignoreZooming=False)
+            #global itemignoreZooming
 
-        elif (key == 46 or key == 62):
-            self.view.scale(1.1,1.1)
-        elif (key == 44 or key == 60):
-            self.view.scale(1/1.1,1/1.1)
+            if itemignoreZooming:
+                itemignoreZooming = False
+                self.updateItemTransformationMode()
+                self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
+                self.drawLine_arrow()
+            else:
+                self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
 
+        elif (key == 46):
+            self.view
+            #print '1',self.view.mapToScene(self.sceneContainer.sceneRect())
+            self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.KeepAspectRatioByExpanding)
+            
+            
+            if not itemignoreZooming:
+                #self.view.scale(1.1,1.1)
+                self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
+                self.drawLine_arrow()
+            else:
+            
+                itemignoreZooming = True
+                self.updateItemTransformationMode()
+                self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
+                #self.view.scale(1.1,1.1)
+                self.drawLine_arrow()
+                
+            
+        elif (key == 44):
+            if not itemignoreZooming:
+                #print "1",itemignoreZooming
+                self.view.scale(1/1.1,1/1.1)
+                self.drawLine_arrow()
+            else:
+            
+                itemignoreZooming = False
+                self.updateItemTransformationMode()
+                self.view.scale(1/1.1,1/1.1)
+                self.drawLine_arrow()
+
+        elif (key == 62):
+            
+            if not itemignoreZooming:
+                itemignoreZooming = True
+                self.updateItemTransformationMode()
+                self.view.scale(1.1,1.1)
+                self.drawLine_arrow()
+            else:
+                self.view.scale(1.1,1.1)
+                self.drawLine_arrow()
+        elif(key == 60):
+            if not itemignoreZooming:
+                itemignoreZooming = True
+                self.updateItemTransformationMode()
+                self.view.scale(1/1.1,1/1.1)
+                self.drawLine_arrow()
+            else:
+                self.view.scale(1/1.1,1/1.1)
+                self.drawLine_arrow()
+    '''        
+    def scaleItemTransformationMode(self,key,zoomInOut):
+        
+        global itemignoreZooming
+        if key == 44 or key == 46:
+            if not itemignoreZooming:
+                if key == 44:
+                    self.view.scale(1.1,1.1)
+                else:
+                    self.view.scale(1/1.1,1/1.1)
+                self.drawLine_arrow()
+            else:
+                itemignoreZooming = False
+                self.updateItemTransformationMode()
+                if key == 44:
+                    self.view.scale(1.1,1.1)
+                else:
+                    self.view.scale(1/1.1,1/1.1)
+
+                self.drawLine_arrow()
+    '''
+
+    
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     size = QtCore.QSize(1024 ,768)
     modelPath = '77'
     modelPath = 'enz_classical_explicit'
     #modelPath = 'acc61'
-    modelPath = 'reaction4'
+    #modelPath = 'reaction4'
     #modelPath = 're'
     modelPath = 'Kholodenko'
     #modelPath = 'EGFR_MAPK_58'
