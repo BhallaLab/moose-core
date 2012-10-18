@@ -215,8 +215,8 @@ class ReacItem(KineticsDisplayItem):
     '''
     @staticmethod
     def rescale( scale ):
-        defaultWidth = 30.0 * scale
-        defaultHeight = 30.0 * scale
+        ReacItem.defaultWidth *= scale
+        ReacItem.defaultHeight *= scale
     '''
     def __init__(self, *args, **kwargs):
         KineticsDisplayItem.__init__(self, *args, **kwargs)
@@ -231,19 +231,18 @@ class ReacItem(KineticsDisplayItem):
             path.moveTo(p)
         self.gobj = QtGui.QGraphicsPathItem(path, self)
         self.gobj.setPen(QtGui.QPen(QtCore.Qt.black, 2))
-    '''    
+    '''
     def refresh( self ):
         points = [QtCore.QPointF(ReacItem.defaultWidth/4, 0),
                   QtCore.QPointF(0, ReacItem.defaultHeight/4),
                   QtCore.QPointF(ReacItem.defaultWidth, ReacItem.defaultHeight/4),
                   QtCore.QPointF(3*ReacItem.defaultWidth/4, ReacItem.defaultHeight/2)]
-        print 'in ReacItem::refresh'
         path = QtGui.QPainterPath()
         path.moveTo(points[0])
         for p in points[1:]:
             path.lineTo(p)
             path.moveTo(p)
-        self.gobj.setPath( path )
+        self.gobj.setPath(path)
      '''
     def setDisplayProperties(self, x,y,textcolor,bgcolor):
         """Set the display properties of this item."""
@@ -907,7 +906,6 @@ class  KineticsWidget(QtGui.QWidget):
                         +PoolItem.fontMetrics.width('  '), 
                         item.gobj.boundingRect().height())
                 item.bg.setRect(0, 0, item.gobj.boundingRect().width()+PoolItem.fontMetrics.width('  '), item.gobj.boundingRect().height())
-
         self.drawLine_arrow(itemignoreZooming=False)
         for k, v in self.qGraCompt.items():
             rectcompt = v.childrenBoundingRect()
@@ -928,17 +926,21 @@ class  KineticsWidget(QtGui.QWidget):
             self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
             self.drawLine_arrow(itemignoreZooming=False)
 
-        elif (key == 46): # '.' key, lower case for '>'
+        elif (key == 46): # '.' key, lower case for '>' zooms in 
             self.view.scale(1.1,1.1)
-        elif (key == 44): # ',' key, lower case for '<'
+        elif (key == 44): # ',' key, lower case for '<' zooms in
             self.view.scale(1/1.1,1/1.1)
-        elif (key == 60): # '<' key.
+        elif (key == 60): # '<' key. zooms in, with icon scales according to iconScale factor
             self.iconScale *= 0.8
             self.updateScale( self.iconScale )
-        elif (key == 62): # '>' key.
+        elif (key == 62): # '>' key. zooms out with icon's scales according to iconScale factor
             self.iconScale *= 1.25
             self.updateScale( self.iconScale )
-
+        elif (key == QtCore.Qt.Key_F1):
+            self.iconScale = 1
+            self.updateScale( self.iconScale )
+            self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
+            
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     size = QtCore.QSize(1024 ,768)
