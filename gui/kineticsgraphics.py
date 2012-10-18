@@ -1,35 +1,6 @@
-# Filename: kineticsgraphics.py
-# Description: 
-# Author: Subhasis Ray
-# Maintainer: 
-# Copyright (C) 2010 Subhasis Ray, all rights reserved.
-# Created: Sun Sep 23 21:32:21 2012 (+0530)
-# Version: 
-# Last-Updated: Mon Sep 24 01:41:16 2012 (+0530)
-#           By: subha
-#     Update #: 2164
-# URL: 
-# Keywords: 
-# Compatibility: 
-# 
-# 
-
-# Commentary: 
-# 
-# GraphicsItems for displaying chemical kintics elements.
-# 
-# 
-
-# Change log:
-# 
-# 
-# 
-
-# Code:
-
-from PyQt4 import QtGui, QtCore
-from kineticsutils import displayinfo
-import moose
+from PyQt4 import QtGui, QtCore, Qt
+import config
+from moose import *
 
 class KineticsDisplayItem(QtGui.QGraphicsWidget):
     """Base class for display elemenets in kinetics layout"""
@@ -40,15 +11,27 @@ class KineticsDisplayItem(QtGui.QGraphicsWidget):
 
     def setDisplayProperties(self, dinfo):
         self.setGeometry(dinfo.x, dinfo.y)        
-    
+    def itemChange(self,change,value):
+        if change == QtGui.QGraphicsItem.ItemPositionChange:
+            self.emit(QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),element(self.mobj))
+        if change == QtGui.QGraphicsItem.ItemSelectedChange and value == True:
+            self.emit(QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),element(self.mobj))
+        return QtGui.QGraphicsItem.itemChange(self,change,value)
+
+
 class PoolItem(KineticsDisplayItem):
     """Class for displaying pools. Uses a QGraphicsSimpleTextItem to
     display the name."""    
-    fontMetrics = None
+    #fontMetrics = None
+    defaultFontsize = 12
+    font =QtGui.QFont("Helvetica")
+    font.setPointSize(defaultFontsize)
+    fontMetrics = QtGui.QFontMetrics(font)
     def __init__(self, *args, **kwargs):
         KineticsDisplayItem.__init__(self, *args, **kwargs)
         self.bg = QtGui.QGraphicsRectItem(self)
-        self.gobj = QtGui.QGraphicsSimpleTextItem(self.mobj.name, self.bg)        
+        self.gobj = QtGui.QGraphicsSimpleTextItem(self.mobj[0].name, self.bg)        
+        self.gobj.setFont(PoolItem.font)
         if not PoolItem.fontMetrics:
             PoolItem.fontMetrics = QtGui.QFontMetrics(self.gobj.font())
         self.bg.setRect(0, 
@@ -56,64 +39,158 @@ class PoolItem(KineticsDisplayItem):
                         self.gobj.boundingRect().width()
                         +PoolItem.fontMetrics.width('  '), 
                         self.gobj.boundingRect().height())
+        self.bg.setPen(Qt.QColor(0,0,0,0))
         self.gobj.setPos(PoolItem.fontMetrics.width(' '), 0)
-
-    def setDisplayProperties(self, dinfo):
+        
+    def setDisplayProperties(self,x,y,textcolor,bgcolor):
         """Set the display properties of this item."""
-        self.setGeometry(dinfo.x, dinfo.y, 
-                         self.bg.boundingRect().width(), 
-                         self.bg.boundingRect().height())
-        self.gobj.setPen(QtGui.QPen(QtGui.QBrush(dinfo.fc)))
-        self.gobj.setBrush(QtGui.QBrush(dinfo.fc))
-        self.bg.setBrush(QtGui.QBrush(dinfo.bc))
-        self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable
-                     +QtGui.QGraphicsItem.ItemIsMovable)
+        self.setGeometry(x, y,self.gobj.boundingRect().width()
+                        +PoolItem.fontMetrics.width('  '), 
+                        self.gobj.boundingRect().height())
+
+        self.gobj.setPen(QtGui.QPen(QtGui.QBrush(textcolor)))
+        self.gobj.setBrush(QtGui.QBrush(textcolor))
+        self.bg.setBrush(QtGui.QBrush(bgcolor))
+        
+        self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
+        self.setFlag(QtGui.QGraphicsItem.ItemIsMovable,True)
+        #self.gobj.setFocus(1)
         if QtCore.QT_VERSION >= 0x040600:
-            self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges)
+            self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges,1)
+    
+    def refresh(self,scale):
+        fontsize = PoolItem.defaultFontsize*scale
+        font =QtGui.QFont("Helvetica")
+        font.setPointSize(fontsize)
+        self.gobj.setFont(font)
+
+    def updateSlot(self):
+        self.gobj.setText(self.mobj[0].name)
+        self.bg.setRect(0, 0, self.gobj.boundingRect().width()+PoolItem.fontMetrics.width('  '), self.gobj.boundingRect().height())
 
 class ReacItem(KineticsDisplayItem):
-    defaultWidth = 20
-    defaultHeight = 10
+    defaultWidth = 30
+    defaultHeight = 30
+    defaultPenWidth = 2
+    '''
+    @staticmethod
+    def rescale( scale ):
+        ReacItem.defaultWidth *= scale
+        ReacItem.defaultHeight *= scale
+    '''
     def __init__(self, *args, **kwargs):
         KineticsDisplayItem.__init__(self, *args, **kwargs)
-        self.gobj = QtGui.QGraphicsEllipseItem(0, 0, 
-                                               ReacItem.defaultWidth, 
-                                               ReacItem.defaultHeight, self)
-        
-    def setDisplayProperties(self, dinfo):
+        points = [QtCore.QPointF(ReacItem.defaultWidth/4, 0),
+                  QtCore.QPointF(0, ReacItem.defaultHeight/4),
+                  QtCore.QPointF(ReacItem.defaultWidth, ReacItem.defaultHeight/4),
+                  QtCore.QPointF(3*ReacItem.defaultWidth/4, ReacItem.defaultHeight/2)]
+
+        path = QtGui.QPainterPath()
+        path.moveTo(points[0])
+        for p in points[1:]:
+            path.lineTo(p)
+            path.moveTo(p)
+        self.gobj = QtGui.QGraphicsPathItem(path, self)
+        self.gobj.setPen(QtGui.QPen(QtCore.Qt.black, 2,Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
+    
+    def refresh( self,scale):
+        defaultWidth = ReacItem.defaultWidth*scale
+        defaultHeight = ReacItem.defaultHeight*scale
+        points = [QtCore.QPointF(defaultWidth/4, 0),
+                          QtCore.QPointF(0,defaultHeight/4),
+                          QtCore.QPointF(defaultWidth, defaultHeight/4),
+                          QtCore.QPointF(3*defaultWidth/4,defaultHeight/2)]
+        path = QtGui.QPainterPath()
+        path.moveTo(points[0])
+        for p in points[1:]:
+            path.lineTo(p)
+            path.moveTo(p)
+                
+        self.gobj.setPath(path)
+        ReacPen = self.gobj.pen()
+        defaultpenwidth = ReacItem.defaultPenWidth
+        reacWidth =  ReacItem.defaultPenWidth*scale
+        ReacPen.setWidth(reacWidth)
+        self.gobj.setPen(ReacPen)
+    def setDisplayProperties(self, x,y,textcolor,bgcolor):
         """Set the display properties of this item."""
-        self.setGeometry(dinfo.x, dinfo.y, 
+        self.setGeometry(x,y, 
                          self.gobj.boundingRect().width(), 
                          self.gobj.boundingRect().height())
-        self.gobj.setPen(QtGui.QPen(QtGui.QBrush(dinfo.fc)))
-        self.gobj.setBrush(QtGui.QBrush(dinfo.bc))
         self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable
                      +QtGui.QGraphicsItem.ItemIsMovable)
         if QtCore.QT_VERSION >= 0x040600:
-            self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges)
+            self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges,1)
 
 class EnzItem(KineticsDisplayItem):
     defaultWidth = 20
     defaultHeight = 10    
     def __init__(self, *args, **kwargs):
         KineticsDisplayItem.__init__(self, *args, **kwargs)
-        self.gobj = QtGui.QGraphicsRectItem(0, 0, 
+        self.gobj = QtGui.QGraphicsEllipseItem(0, 0, 
                                             EnzItem.defaultWidth, 
                                             EnzItem.defaultHeight, self)
         
-    def setDisplayProperties(self, dinfo):
+    def setDisplayProperties(self,x,y,textcolor,bgcolor):
         """Set the display properties of this item."""
-        self.setGeometry(dinfo.x, dinfo.y, 
+        self.setGeometry(x,y, 
                          self.gobj.boundingRect().width(), 
                          self.gobj.boundingRect().height())
-        self.gobj.setPen(QtGui.QPen(QtGui.QBrush(dinfo.fc)))
-        self.gobj.setBrush(QtGui.QBrush(dinfo.bc))
+        #self.gobj.setPen(QtGui.QPen(QtGui.QBrush(textcolor)))
+        self.gobj.setBrush(QtGui.QBrush(textcolor))
         self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable
                      +QtGui.QGraphicsItem.ItemIsMovable)
         if QtCore.QT_VERSION >= 0x040600:
-            self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges)
-        print self.mobj.path, self.pos(), self.boundingRect(), dinfo.bc.name()
-        
+            self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges,1)
+    
+    def refresh(self,scale):
+        defaultWidth = EnzItem.defaultWidth*scale
+        defaultHeight = EnzItem.defaultHeight*scale
+        self.gobj.setRect(0,0,defaultWidth,defaultHeight)
+
+class CplxItem(KineticsDisplayItem):
+    defaultWidth = 10
+    defaultHeight = 10    
+    def __init__(self, *args, **kwargs):
+        KineticsDisplayItem.__init__(self, *args, **kwargs)
+        self.gobj = QtGui.QGraphicsRectItem(0,0, CplxItem.defaultWidth, CplxItem.defaultHeight, self)
+
+    def setDisplayProperties(self,x,y,textcolor,bgcolor):
+        """Set the display properties of this item."""
+        self.setGeometry(self.gobj.boundingRect().width()/2,self.gobj.boundingRect().height(), 
+                         self.gobj.boundingRect().width(), 
+                         self.gobj.boundingRect().height())
+
+        self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
+        if QtCore.QT_VERSION >= 0x040600:
+            self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges,1)
+
+    def refresh(self,scale):
+        defaultWidth = CplxItem.defaultWidth*scale
+        defaultHeight = CplxItem.defaultHeight*scale
+        self.gobj.setRect(0,0,defaultWidth,defaultHeight)
+
+class ComptItem(QtGui.QGraphicsRectItem):
+    def __init__(self,parent,x,y,w,h,item):
+        self.cmptEmitter = QtCore.QObject()
+        self.mooseObj_ = item[0].parent
+        self.layoutWidgetPt = parent
+        QtGui.QGraphicsRectItem.__init__(self,x,y,w,h)
+
+        self.setFlag(QtGui.QGraphicsItem.ItemIsMovable, True );
+        self.setFlag(QtGui.QGraphicsItem.ItemIsSelectable)
+        if config.QT_MINOR_VERSION >= 6:
+            self.setFlag(QtGui.QGraphicsItem.ItemSendsGeometryChanges, 1) 
+
+    def pointerLayoutpt(self):
+        return (self.layoutWidgetPt)
+
+    def itemChange(self,change,value):
+        if change == QtGui.QGraphicsItem.ItemPositionChange:
+            self.cmptEmitter.emit(QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.mooseObj_)
+        if change == QtGui.QGraphicsItem.ItemSelectedChange and value == True:
+            self.cmptEmitter.emit(QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.mooseObj_)
+        return QtGui.QGraphicsItem.itemChange(self,change,value)
 
 import sys
 if __name__ == '__main__':
@@ -123,14 +200,14 @@ if __name__ == '__main__':
     c = moose.Enz('enzyme')
     gview = QtGui.QGraphicsView()
     scene = QtGui.QGraphicsScene(gview)
-    item = PoolItem(a)
-    dinfo = displayinfo(5, 5, QtGui.QColor('red'), QtGui.QColor('blue'))
-    item.setDisplayProperties(dinfo)
+    #item = PoolItem(a)
+    #dinfo = (5, 5, QtGui.QColor('red'), QtGui.QColor('blue'))
+    #item.setDisplayProperties(dinfo)
     reacItem = ReacItem(b)
-    reacItem.setDisplayProperties(displayinfo(50, 5, QtGui.QColor('yellow'), QtGui.QColor('green')))
+    reacItem.setDisplayProperties(50, 5, QtGui.QColor('yellow'), QtGui.QColor('green'))
     enzItem = EnzItem(c)
-    enzItem.setDisplayProperties(displayinfo(100, 10, QtGui.QColor('blue'), QtGui.QColor('yellow')))
-    scene.addItem(item)
+    enzItem.setDisplayProperties(100, 10, QtGui.QColor('blue'), QtGui.QColor('yellow'))
+    #scene.addItem(item)
     scene.addItem(reacItem)
     scene.addItem(enzItem)
     gview.setScene(scene)
