@@ -160,10 +160,16 @@ MOOSEGUI: Graphical interface for MOOSE.
 	are correspondingly simpler:
 	+ *Zoom*: Comma and period keys. Alternatively, the mouse scroll
 		wheel or vertical scroll line on the track pad will cause
-		the display to zooom in and out.
+		the display to zoom in and out.
 	+ *Pan*: The arrow keys move the display left, right, up, and down.
 	+ *Entire Model View*: Pressing the *a* key will fit the entire model
 		into the entire field of view.
+	+ *Resize Icons*: Angle bracket keys, that is, *<* and *>*.
+		This resizes
+		the icons while leaving their positions on the screen layout
+		more or less the same.
+	+ *Original Model View*: Presing the *A* key (capital A) will revert 
+		to the original model view including the original icon scaling.
 
 ** The plot window
 	The plot window displays time-series plots of the simulation. Plots
