@@ -104,7 +104,7 @@ class GraphicalView(QtGui.QGraphicsView):
                         if items.parentWidget().isSelected() == False:
                             items.parentWidget().setSelected(1)
                     else:
-                         if items.isSelected() == False:
+                        if items.isSelected() == False:
                             items.setSelected(1)
                         
                         
@@ -335,7 +335,7 @@ class  KineticsWidget(QtGui.QWidget):
         return(xpos,ypos)
 
     def colorCheck(self,mre,picklecolorMap):
-        if ( (mre[0]).class_ == 'ZombieEnz' or (mre[0]).class_ == 'ZombieMMenz' ):
+        if isinstance(element(mre),EnzBase):
             iteminfo = (mre[0].parent).path+'/info'
             textcolor = Annotator(iteminfo).getField('color')
             bgcolor = Annotator(iteminfo).getField('textColor')
@@ -520,7 +520,6 @@ class  KineticsWidget(QtGui.QWidget):
         
     def calcArrow(self,src,des,endtype,itemignoreZooming):
         ''' if PoolItem then boundingrect should be background rather than graphicsobject '''
-        #print "3#"
         srcobj = src.gobj
         desobj = des.gobj
         if isinstance(src,PoolItem):
@@ -534,7 +533,6 @@ class  KineticsWidget(QtGui.QWidget):
         else:
             srcRect = srcobj.sceneBoundingRect()
             desRect = desobj.sceneBoundingRect()
-        #print "1",src.gobj,srcRect,desRect
         arrow = QtGui.QPolygonF()
         if srcRect.intersects(desRect):                
             # This is created for getting a emptyline for reference b'cos 
@@ -681,8 +679,8 @@ class  KineticsWidget(QtGui.QWidget):
         for item in self.sceneContainer.items():
             if isinstance(item,ReacItem) or isinstance(item,EnzItem):
                 item.refresh(scale)
-                Xpos,Ypos = self.positioninfo(item.mobj)
-                item.setGeometry(Xpos,Ypos, 
+                xpos,ypos = self.positioninfo(item.mobj)
+                item.setGeometry(xpos,ypos, 
                          item.gobj.boundingRect().width(), 
                          item.gobj.boundingRect().height())
 
@@ -694,8 +692,8 @@ class  KineticsWidget(QtGui.QWidget):
 
             elif isinstance(item,PoolItem):
                 item.refresh(scale)
-                Xpos,Ypos = self.positioninfo(item.mobj)
-                item.setGeometry(Xpos, Ypos,item.gobj.boundingRect().width()
+                xpos,ypos = self.positioninfo(item.mobj)
+                item.setGeometry(xpos, ypos,item.gobj.boundingRect().width()
                         +PoolItem.fontMetrics.width('  '), 
                         item.gobj.boundingRect().height())
                 item.bg.setRect(0, 0, item.gobj.boundingRect().width()+PoolItem.fontMetrics.width('  '), item.gobj.boundingRect().height())
@@ -740,7 +738,7 @@ class  KineticsWidget(QtGui.QWidget):
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     size = QtCore.QSize(1024 ,768)
-    #modelPath = 'Kholodenko'
+    modelPath = 'Kholodenko'
 
 
     itemignoreZooming = False
