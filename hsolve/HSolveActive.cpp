@@ -33,8 +33,8 @@ HSolveActive::HSolveActive()
 	caAdvance_ = 1;
 	
 	// Default lookup table size
-	vDiv_ = 3000;    // for voltage
-	caDiv_ = 3000;   // for calcium
+	//~ vDiv_ = 3000;    // for voltage
+	//~ caDiv_ = 3000;   // for calcium
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -287,15 +287,9 @@ void HSolveActive::advanceSynChans( ProcPtr info ) {
 }
 
 void HSolveActive::sendSpikes( ProcPtr info ) {
-	//~ vector< SpikeGenStruct >::iterator ispike;
-	//~ for ( ispike = spikegen_.begin(); ispike != spikegen_.end(); ++ispike ) {
-		//~ /* Scope resolution used here to resolve ambiguity between the "set"
-		 //~ * function (used here for setting element field values) which belongs
-		 //~ * in the global namespace, and the STL "set" container, which is in the
-		 //~ * std namespace.
-		 //~ */
-		//~ ::set< double >( ispike->elm_, spikeVmFinfo, V_[ ispike->compt_ ] );
-	//~ }
+	vector< SpikeGenStruct >::iterator ispike;
+	for ( ispike = spikegen_.begin(); ispike != spikegen_.end(); ++ispike )
+		ispike->send( info );
 }
 
 /**
@@ -308,17 +302,17 @@ void HSolveActive::sendValues( ProcPtr info ) {
 	 * which have targets.
 	 */
 	 
-	// for ( unsigned int i = 0; i < compartmentId_.size(); ++i )
-	// 	moose::Compartment::VmOut()->send(
-	// 	//~ ZombieCompartment::VmOut()->send(
-	// 		compartmentId_[ i ].eref(),
-	// 		info->threadIndexInGroup,
-	// 		V_[ i ]
-	// 	);
+	for ( unsigned int i = 0; i < compartmentId_.size(); ++i )
+		moose::Compartment::VmOut()->send(
+		//~ ZombieCompartment::VmOut()->send(
+			compartmentId_[ i ].eref(),
+			info->threadIndexInGroup,
+			V_[ i ]
+		);
 	
 	for ( unsigned int i = 0; i < caConcId_.size(); ++i )
-        //		CaConc::concOut()->send(
-        ZombieCaConc::concOut()->send(
+		//~ CaConc::concOut()->send(
+		ZombieCaConc::concOut()->send(
 			caConcId_[ i ].eref(),
 			info->threadIndexInGroup,
 			ca_[ i ]
