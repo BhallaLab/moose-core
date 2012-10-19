@@ -71,9 +71,16 @@ private:
 
 struct SpikeGenStruct
 {
-	// Index of parent compartment
-	unsigned int compt_;
-	Id elm_;
+	SpikeGenStruct( double* Vm, Eref e )
+		:
+		Vm_( Vm ),
+		e_( e )
+	{ ; }
+	
+	double* Vm_;
+	Eref e_;
+	
+	void send( ProcPtr info );
 };
 
 struct SynChanStruct
