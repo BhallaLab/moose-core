@@ -31,7 +31,6 @@ class GraphicalView(QtGui.QGraphicsView):
         self.layoutPt = layoutPt        
     def resizeEvent1(self, event):
         """ zoom when resize! """
-        #self.fitInView(self.sceneContainerPt.sceneRect(), Qt.Qt.IgnoreAspectRatio)
         self.fitInView(self.sceneContainerPt.itemsBoundingRect().x()-10,self.sceneContainerPt.itemsBoundingRect().y()-10,self.sceneContainerPt.itemsBoundingRect().width()+20,self.sceneContainerPt.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
         QtGui.QGraphicsView.resizeEvent(self, event)
         
@@ -145,11 +144,11 @@ class GraphicalView(QtGui.QGraphicsView):
     def zoomItem(self):
         # First items are ignoretransformation,view is fitted and recalculated the arrow
         #global itemignoreZooming = True
-        self.layoutPt.updateItemTransformationMode(True)
+        #self.layoutPt.updateItemTransformationMode(True)
         self.fitInView(self.startScenepos.x(),self.startScenepos.y(),self.rubberbandWidth,self.rubberbandHeight,Qt.Qt.IgnoreAspectRatio)
-        global itemignoreZooming
-        itemignoreZooming = True
-        self.layoutPt.drawLine_arrow(itemignoreZooming=True)
+        #global itemignoreZooming
+        #itemignoreZooming = True
+        #self.layoutPt.drawLine_arrow(itemignoreZooming=True)
         self.rubberBandactive = False
 
 class Widgetvisibility(Exception):pass
@@ -479,10 +478,8 @@ class  KineticsWidget(QtGui.QWidget):
         srcdes_list = [src,des,endtype]
         
         arrow = self.calcArrow(src,des,endtype,itemignoreZooming)
-        #penwidth = 1*self.iconScale
         for l,v in self.object2line[src]:
                 if v == des:
-                    #print"4"
                     l.setPolygon(arrow)
                     arrowPen = l.pen()
                     arrowPenWidth = self.arrowsize*self.iconScale
@@ -577,15 +574,12 @@ class  KineticsWidget(QtGui.QWidget):
                 #Arrow head for Source is calculated
                 arrow.append(lineDestPoint)
                 arrow.append(lineSrcPoint)
-                print "icon",self.iconScale,
-                degree = 60*self.iconScale
-                print degree,
+                degree = 60
                 srcXArr2,srcYArr2 = self.arrowHead(srcAngle,degree,lineSrcPoint)
                 arrow.append(QtCore.QPointF(srcXArr2,srcYArr2))                    
                 arrow.append(QtCore.QPointF(lineSrcPoint.x(),lineSrcPoint.y()))
 
-                degree = 120*self.iconScale
-                print degree
+                degree = 120
                 srcXArr1,srcYArr1= self.arrowHead(srcAngle,degree,lineSrcPoint)
 		arrow.append(QtCore.QPointF(srcXArr1,srcYArr1))
                 arrow.append(QtCore.QPointF(lineSrcPoint.x(),lineSrcPoint.y()))
@@ -631,7 +625,7 @@ class  KineticsWidget(QtGui.QWidget):
 
     def arrowHead(self,srcAngle,degree,lineSpoint):
         '''  arrow head is calculated '''
-        r = 8
+        r = 8*self.iconScale
         delta = math.radians(srcAngle) + math.radians(degree)
         width = math.sin(delta)*r
         height = math.cos(delta)*r
@@ -718,7 +712,7 @@ class  KineticsWidget(QtGui.QWidget):
     def keyPressEvent(self,event):
         # key1 = event.key() # key event does not distinguish between capital and non-capital letters
         key = event.text().toAscii().toHex()
-        if key ==  '41': # A fits the view to icongScale factor
+        if key ==  '41': # 'A' fits the view to iconScale factor
             itemignoreZooming = False
             self.updateItemTransformationMode(itemignoreZooming)
             self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
@@ -738,7 +732,7 @@ class  KineticsWidget(QtGui.QWidget):
             self.iconScale *= 1.25
             self.updateScale( self.iconScale )
 
-        elif (key == '61'):#'a' fits the view to initial value where iconscale=1
+        elif (key == '61'):  # 'a' fits the view to initial value where iconscale=1
             self.iconScale = 1
             self.updateScale( self.iconScale )
             self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
@@ -746,18 +740,12 @@ class  KineticsWidget(QtGui.QWidget):
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     size = QtCore.QSize(1024 ,768)
-    modelPath = '77'
-    modelPath = 'enz_classical_explicit'
-    #modelPath = 'acc61'
-    #odelPath = 'reaction1'
-    #modelPath = 're'
     #modelPath = 'Kholodenko'
-    #modelPath = 'EGFR_MAPK_58'
+
 
     itemignoreZooming = False
     try:
         filepath = '../Demos/Genesis_files/'+modelPath+'.g'
-        #filepath = '/home/harsha/genesis_files/'+modelPath+'.g'
         f = open(filepath, "r")
         loadModel(filepath,'/'+modelPath)
         dt = KineticsWidget(size,'/'+modelPath)
