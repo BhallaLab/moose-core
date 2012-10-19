@@ -9,6 +9,7 @@
 
 #include <cmath>
 #include "header.h"
+#include "../biophysics/SpikeGen.h"
 #include "HSolveStruct.h"
 
 void ChannelStruct::setPowers(
@@ -49,7 +50,6 @@ PFDD ChannelStruct::selectPower( double power )
 		return powerN;
 }
 
-
 void ChannelStruct::process( double*& state, CurrentStruct& current )
 {
 	double fraction = 1.0;
@@ -62,6 +62,14 @@ void ChannelStruct::process( double*& state, CurrentStruct& current )
 		fraction *= takeZpower_( *( state++ ), Zpower_ );
 	
 	current.Gk = Gbar_ * fraction;
+}
+
+void SpikeGenStruct::send( ProcPtr info  )
+{
+	SpikeGen* spike = reinterpret_cast< SpikeGen* >( e_.data() );
+	
+	spike->handleVm( *Vm_ );
+	spike->process( e_, info );
 }
 
 CaConcStruct::CaConcStruct()

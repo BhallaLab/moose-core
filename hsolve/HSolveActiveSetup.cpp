@@ -471,7 +471,6 @@ void HSolveActive::readSynapses() {
 	vector< Id > synId;
 	vector< Id >::iterator syn;
 	vector< Id >::iterator spike;
-	SpikeGenStruct spikegen;
 	SynChanStruct synchan;
 	
 	for ( unsigned int ic = 0; ic < nCompt_; ++ic ) {
@@ -487,11 +486,10 @@ void HSolveActive::readSynapses() {
 		HSolveUtils::spikegens( compartmentId_[ ic ], spikeId );
 		// Very unlikely that there will be >1 spikegens in a compartment,
 		// but lets take care of it anyway.
-		for ( spike = spikeId.begin(); spike != spikeId.end(); ++spike ) {
-			spikegen.compt_ = ic;
-			spikegen.elm_ = *spike;
-			spikegen_.push_back( spikegen );
-		}
+		for ( spike = spikeId.begin(); spike != spikeId.end(); ++spike )
+			spikegen_.push_back(
+				SpikeGenStruct( &V_[ ic ], spike->eref() )
+			);
 	}
 }
 
