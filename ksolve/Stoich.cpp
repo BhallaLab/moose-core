@@ -419,34 +419,51 @@ void Stoich::handleMatchedMolsAtPort( unsigned int port, vector< SpeciesId > mol
 	;
 }
 
-// Just dump the pool #s into S_.
+// Just dump the pool #s into S_. The vector n is a linearized version of
+// a 2-D matrix[meshIndex][poolIndex]
 void Stoich::handlePoolsReactingAcrossBoundary( 
 		unsigned int boundary, vector< double > n )
 {
-	/*
 	// Would like to check this during setup.
+	// boundaryPools[boundary][poolIndex] is a 2-D vector which
+	// contains the vector of all pools that are brought across for each
+	// boundary.
 	assert( boundaryPools_.size() > boundary );
-	assert( boundaryPools_[boundary].size == n.size() );
+	const vector< unsigned int >& bp = boundaryPools_[boundary];
+	assert( bp.size() * S_.size() == n.size() );
 	// Deal with all mesh entries.
 	unsigned int k = 0;
 	for ( unsigned int i = 0; i < S_.size(); ++i ) {
-		for ( unsigned int j = 0; j < n.size(); ++j ) {
-			poolNum = boundaryPools_[boundary][j];
-			S_[i][poolNum] = n[k++];
+		for ( unsigned int j = 0; j < bp.size(); ++j ) {
+			S_[i][ bp[j] ] = n[k++];
 		}
 	}
-	 */
 }
 
 void Stoich::handleReacRatesAcrossBoundary( 
-			unsigned int boundary, vector< double > )
+			unsigned int boundary, vector< double > v )
 {
+	// boundaryReacs[boundary] is a 1-D vector indicating the start
+	// ReacIndex of the vector of reac rates occuring over the 
+	// specified boundary. This ReacIndex refers to the extRates vector
+	// that the Stoich::updateV will use.
+	assert( boundaryReacs_.size() > boundary );
+
+	unsigned int boundaryReacIndex = boundaryReacs_[boundary];
+	unsigned int k = 0;
+	unsigned int numRates = v.size() / extRates_.size();
+	for ( unsigned int i = 0; i < extRates_.size(); ++i ) { // # mesh
+		for ( unsigned int j = 0; j < numRates; ++j ) { // # rates
+			extRates_[i][ boundaryReacIndex + j ] = v[k++];
+		}
+	}
 }
 
 
 void Stoich::handleReacRollbacksAcrossBoundary( 
 			unsigned int boundary, vector< double > )
 {
+	// Doesn't do anything for Stoich. Used in Gssa.
 }
 
 
@@ -666,12 +683,7 @@ void zombifyAndUnschedPool(
 	if ( mid != Msg::bad )
 		Msg::deleteMsg( mid );
 
-	////////////////////////////////////////////////////////
-	/*
-	PoolBase* pb = reinterpret_cast< PoolBase* >( orig->dataHandler()->data( 0 ) );
-	pb->zombify( orig, zClass );
-	*/
-	
+	// Complete the unzombification.
 	PoolBase::zombify( orig, zClass, s.id() );
 }
 
@@ -684,9 +696,6 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 	static const Cinfo* reacCinfo = Reac::initCinfo();
 	static const Cinfo* enzCinfo = Enz::initCinfo();
 	static const Cinfo* mmEnzCinfo = MMenz::initCinfo();
-	// static const Cinfo* chemComptCinfo = ChemMesh::initCinfo();
-	// static const Cinfo* sumFuncCinfo = SumFunc::initCinfo();
-	// The FuncPool handles zombification of stuff coming in to it.
 	vector< Id > meshEntries;
 
 	for ( vector< Id >::const_iterator i = elist.begin(); i != elist.end(); ++i ){
@@ -1129,6 +1138,7 @@ void Stoich::updateV( unsigned int meshIndex, vector< double >& v )
 	// to the corresponding v_ vector entry
 	// for_each( rates_.begin(), rates_.end(), assign);
 
+	// v.resize( rates_.size() );
 	vector< RateTerm* >::const_iterator i;
 	vector< double >::iterator j = v.begin();
 	const double* S = &S_[meshIndex][0];
@@ -1139,7 +1149,11 @@ void Stoich::updateV( unsigned int meshIndex, vector< double >& v )
 		assert( !isnan( *( j-1 ) ) );
 	}
 
-	// I should use forall here.
+	// Here we handle external rates due to inter-compartment traffic.
+	// The external rates are computed by Stoichs handling other 
+	// compartments. This requires that v be only the size of rates_.
+	// v.insert( j, extRates_[meshIndex].begin(), extRates_[meshIndex].end());
+
 	/*
 	vector< SumTotal >::const_iterator k;
 	for ( k = sumTotals_.begin(); k != sumTotals_.end(); k++ )

@@ -19144,3 +19144,76 @@ Tested that the shared message is created.
 ============================================================================
 16 Oct
 Some minor refactoring of Stoich.cpp, to clean up some overly long functions.
+Checkin 4137.
+============================================================================
+21 Oct
+Based on the Charm++ rewrite that Pritish is doing, I will need to revisit
+how the Stoichs work. Currently they take one meshIndex at a time as an 
+argument that the Process method passes in via GSL. The Charm++ framework
+instead treats each processor as a completely separate object, ignoring
+possible shared memory. If I take this idea to the Stoichs, then each has
+a range of meshEntries that it deals with, and handles all the iteration
+internally. In this framework the inter-Stoich operations are much the same,
+since in either case the equivalent info has to be passed around.
+However, the intra-stoich operations can be done much more cleanly and quickly.
+Also, the Stencil design for diffusion can be much improved.
+
+
+Reran Unit tests. Still the same 96 bytes from testScheduling
+Reran regression tests. Still the same 576 bytes from ReadKkit::buildSumTotal.
+
+
+Another design option: Merge the diffusion and the compartment exchange
+calculations. Motors should also fall in this framework.
+
+Similarities: 
+	Rates can be expressed in terms of regular kf and kb, 
+	Rates parameters need special calculations to set up at meshing time.
+	The rate calculations cross processors
+	The rate calculations cross solvers (GSL<-->GSSA<-->Smoldyn)
+	The rate calculations cross boundaries between compts
+	A subset of molecules are involved
+	May need many-to-one mesh exchanges.
+	
+Differences:
+	The setup calculations differ.
+	Diffusion and motors need calculations among voxels within a Stoich.
+	Diffusion/motors only use A <---> B. Exchange calculations may involve 
+		many mols
+	Diffusion involves most/all molecules. Compt exchange involves few.
+		Motors involve few.
+	Diffusion across compts will need special matching.
+	Motors will typically handle Blobs/RulePools later.
+
+Implementation:
+	Cross solver/processor/boundary calculations in all cases 
+		will be shared, and mol-specific.
+	Need a special general-mol subsystem for within-processor diffusion
+	Need another specific-mol subsystem for within-processor cross-voxel
+		movement like motors. Either that or put the motors on another
+		solver and use the diffusion framework plus cross-solver
+		framework to talk to other molecules. Defer.
+	Need the core ODE/GSSA update calculations.
+	Split up Stoich into:
+		- StoichCore: This has the code for set up reac system,
+			zombification and unzombification.
+			It sets up the Stoichiometry matrix, the RateTerms,
+			and the Sinit_ and S_ arrays for all the molecules.
+			MOOSE interface only for path.
+		- Diffusion: For diffusion handling within a processor.
+			This defines the diffusion, and sets up rate calculation
+			framework, but does not compute it.
+		- Boundaries: For boundary handling between 
+			processors/stoichs/compartments
+		- Integrators: GSL, Gillespie etc.
+			These independently set up the calculations. A bit
+			different from what I do now, where I leave the
+			calculations to the Stoich for the GSL, and do them
+			directly in the Gssa. I think the latter is beter.
+
+
+Implemented StoichCore. Basically chopped out lots of stuff from Stoich.
+
+============================================================================
+
+
