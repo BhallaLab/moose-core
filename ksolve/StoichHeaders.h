@@ -23,3 +23,4 @@ class Stoich;
 #include "../mesh/Stencil.h"
 #include "Port.h"
 #include "Stoich.h"
+#include "StoichCore.h"

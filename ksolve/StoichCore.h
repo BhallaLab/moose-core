@@ -7,14 +7,14 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifndef _STOICH_H
-#define _STOICH_H
+#ifndef _STOICH_CORE_H
+#define _STOICH_CORE_H
 
-class Stoich
+class StoichCore
 {
 	public: 
-		Stoich();
-		~Stoich();
+		StoichCore();
+		~StoichCore();
 
 		//////////////////////////////////////////////////////////////////
 		// Field assignment stuff
@@ -27,98 +27,8 @@ class Stoich
 		void setPath( const Eref& e, const Qinfo* q, string v );
 		string getPath( const Eref& e, const Qinfo* q ) const;
 
-		unsigned int getNumMeshEntries() const;
+		// unsigned int getNumMeshEntries() const;
 		double getEstimatedDt() const;
-
-		Port* getPort( unsigned int i );
-		unsigned int getNumPorts() const;
-		void setNumPorts( unsigned int num );
-
-		/*
-		unsigned int numCompartments() const;
-		double getCompartmentVolume( short i ) const;
-		void setCompartmentVolume( short comptIndex, double v );
-		*/
-
-		//////////////////////////////////////////////////////////////////
-		// Dest funcs
-		//////////////////////////////////////////////////////////////////
-
-		/**
-		 * Handles incoming messages representing influx of molecules
- 		 */
-		void influx( unsigned int port, vector< double > mol );
-
-		/**
-		 * Scans through incoming and self molecule list, matching up Ids
-		 * to use in the port. Sets up the data structures to do so.
-		 * Sends out a message indicated the selected subset.
-		 */
-		void handleAvailableMolsAtPort( unsigned int port, vector< SpeciesId > mols );
-
-		/**
-		 * Scans through incoming and self molecule list, checking that
-		 * all match. Sets up the data structures for the port.
-		 */
-		void handleMatchedMolsAtPort( unsigned int port, vector< SpeciesId > mols );
-
-
-		void handleRemesh( unsigned int numLocalMeshEntries, 
-			vector< unsigned int > computedEntries, 
-			vector< unsigned int > allocatedEntries, 
-			vector< vector< unsigned int > > outgoingDiffusion, 
-			vector< vector< unsigned int > > incomingDiffusion );
-
-		void handleNodeDiffBoundary( unsigned int nodeNum, 
-			vector< unsigned int > meshEntries, vector< double > remoteS );
-
-		void meshSplit( double oldVol, vector< double > vols,
-			vector< unsigned int > localEntryList,
-			vector< vector< unsigned int > > outgoingDiffusion,
-			vector< vector< unsigned int > > incomingDiffusion
-		);
-
-		/**
-		 * In the case of reactions that cross compt boundaries and hence
-		 * solvers and meshes, I need to pass two things:
-		 * First, an identifier for which boundary.
-		 * Second, for all mesh entries, the pools which have a reaction
-		 * that crosses the boundary. 
-		 */
-		void handlePoolsReactingAcrossBoundary( 
-						unsigned int boundary, vector< double > );
-
-		/** 
-		 * In the case of reactions that cross compt boundaries and hence
-		 * solvers and meshes, I need to pass two things:
-		 * First, an identifier for which boundary.
-		 * Second, for all mesh entries, the reac rates for every 
-		 * reaction that crosses the boundary. 
-		 */
-		void handleReacRatesAcrossBoundary( 
-						unsigned int boundary, vector< double > );
-
-
-		/** When we have reactions that cross compartment boundaries,
-		 * we may have different solvers and meshes on either side.
-		 * Only one side does the calculations to assure mass 
-		 * conservation. 
-		 * There are rare cases when the calculations of one 
-		 * solver, typically a Gillespie one, gives such a large 
-		 * change that the concentrations on the other side would 
-		 * become negative in one or more molecules 
-		 * This message handles such cases on the Gillespie side, 
-		 * by telling the solver to roll back its recent 
-		 * calculation and instead use the specified vector for 
-		 * the rates, that is the # of mols changed in the latest 
-		 * timestep. 
-		 * This message handle info for two things: 
-		 * Arg 1: An identifier for the boundary. 
-		 * Arg 2: A vector of reaction rates for every reaction 
-		 * across the boundary, in every mesh entry.
-		 */
-		void handleReacRollbacksAcrossBoundary( 
-						unsigned int boundary, vector< double > );
 
 		//////////////////////////////////////////////////////////////////
 		// Model traversal and building functions
@@ -178,12 +88,6 @@ class Stoich
 			Id enzId, Id enzMolId, const vector< Id >& prds );
 
 		/**
-		 * Returns the total number of entries in the mesh. This is the
-		 * allocated size of the S_ matrix.
-		 */
-		unsigned int numMeshEntries() const;
-
-		/**
 		 * Returns the vector of doubles of current mol #s at the specified
 		 * mesh index
 		 */
@@ -200,14 +104,6 @@ class Stoich
 		 * mesh index
 		 */
 		const double* Sinit( unsigned int meshIndex ) const;
-
-		/**
-		 * Utility function, used during zombification. Sets default 
-		 * concInit entry: a single value for the whole pool, which applies
-		 * regardless of subsequent scaling of volumes or assignment of 
-		 * individual mesh values. Used only when remeshing.
-		 */
-		void setConcInit( unsigned int poolIndex, double conc );
 
 		/**
 		 * Returns diffusion rate of specified pool
@@ -228,12 +124,6 @@ class Stoich
 		 * Assigns SpeciesId of specified pool
 		 */
 		void setSpecies( unsigned int poolIndex, SpeciesId s );
-
-		/**
-		 * Returns working memory for the calculations at the specified
-		 * mesh index
-		 */
-		double* getY( unsigned int meshIndex );
 
 		/**
 		 * Sets the forward rate v (given in millimoloar concentration units)
@@ -306,88 +196,15 @@ class Stoich
 		 * need to do additional stuff to update dependent reacs
 		 */
 		virtual void innerSetNinit( unsigned int meshIndex, Id id, double v );
-		//////////////////////////////////////////////////////////////////
-		// Compute functions
-		//////////////////////////////////////////////////////////////////
 
-		/**
-		 * Reinitializes all variables and rates. This function may also do 
-		 * reallocation, so it must be called in a thread-safe manner
-		 * by whatever object directly handles the process calls.
-		 */
-		void innerReinit();
-
-		/**
-		 * Update the v_ vector for individual reaction velocities. Uses
-		 * hooks into the S_ vector for its arguments.
-		 */
-		void updateV( unsigned int meshIndex, vector< double >& v );
-
-		/**
-		 * Update all the function-computed molecule terms. These are not
-		 * integrated, but their values may be used by molecules that will
-		 * be integrated using the solver.
-		 * Uses hooks into the S_ vector for arguments other than t.
-		 */
-		void updateFuncs( double t, unsigned int meshIndex );
-
-		void updateRates( vector< double>* yprime, double dt, 
-			unsigned int meshIndex, vector< double >& v );
-
-		/**
-		 * Update diffusion terms for all molecules on specified meshIndex.
-		 * The stencil says how to weight diffusive flux from various offset
-		 * indices with respect to the current meshIndex.
-		 * The first entry of the stencil is the index offset.
-		 * The second entry of the stencil is the scale factor, including
-		 * coeffs of that term and 1/dx^2.
-		 * For example, in the Method Of Lines with second order stencil
-		 * in one dimension we have:
-		 * du/dt = (u_-1 - 2u + u_+1) / dx^2
-		 * The scale factor for u_-1 is then 1/dx^2. Index offset is -1.
-		 * The scale factor for u is then -2/dx^2. Index offset is 0.
-		 * The scale factor for u_+1 is then 1/dx^2. Index offset is +1.
-		 */
-		void updateDiffusion( unsigned int meshIndex, 
-			const vector< const Stencil* >& stencil);
-
-		/**
-		 * Clear out the flux matrix, that is the matrix of all diffusive
-		 * and port-related influx and efflux from each mesh location for
-		 * each molecule. This should be called after the timestep for
-		 * numerical integration but before any of the flux updates
-		 * (such as updateDiffusion).
-		 */
-		void clearFlux();
-		void clearFlux( unsigned int meshIndex, unsigned int threadNum );
-
-		/**
-		 * Utility func for debugging: Prints N_ matrix
-		 */
+		/// Utility function, prints out N_, used for debugging
 		void print() const;
-
-#ifdef USE_GSL
-		static int gslFunc( double t, const double* y, double* yprime, void* s );
-		int innerGslFunc( double t, const double* y, double* yprime,
-			unsigned int meshIndex );
-#endif // USE_GSL
-
-
 		//////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
 	protected:
 		bool useOneWay_;
 		string path_;
 		Id stoichId_;
-
-		/**
-		 * concInit is the reference array of initial concs of molecules,
-		 * in millimolar (SI units). This is non-spatial, like most of
-		 * the prototype reaction systems. If the reaction is spatial
-		 * these init
-		 * concs will subsequently be overridden
-		 */
-		vector< double > concInit_;
 
 		/**
 		 * 
@@ -432,28 +249,6 @@ class Stoich
 		vector< vector< double > > Sinit_;
 
 		/**
-		 * y_ is working memory. It maps onto S_, but stores only the 
-		 * variable molecules (up to numVarPools).
-		 * Has to be distinct from S because GSL uses this and swaps it
-		 * back and forth with a distinct buffer.
-		 * The array looks like y_[meshIndex][poolIndex]
-		 * The entire y_ vector is allocated, but the pools are only 
-		 * allocated for local meshEntries and for pools on
-		 * diffusive boundaries with other nodes.
-		 */
-		vector< vector< double > > y_;
-
-		/**
-		 * Summed external flux terms for each meshpoint and each pool. 
-		 * These are in units of d#/dt and add onto whatever form of 
-		 * numerical integration (or stochastic calculation) is in play.
-		 * Note that these terms are constant for the entire duration of
-		 * one clock tick, so it represents a first order Euler integration.
-		 * The clock tick has to be set with this recognized.
-		 */
-		vector< vector< double > > flux_;
-
-		/**
 		 * vector of indices of meshEntries to be computed locally.
 		 * This may not necessarily be a contiguous set, depending on
 		 * how boundaries and voxelization is done.
@@ -461,73 +256,10 @@ class Stoich
 		vector< unsigned int > localMeshEntries_;
 
 		/**
-		 * List of target nodes
-		 */
-		vector< unsigned int > diffNodes_;
-
-		/**
-		 * outgoing_[targetNode][meshEntries]
-		 * For each target node, this provides a list of meshEntries to
-		 * transmit. Note that for each meshEntry the entire list of 
-		 * diffusive molecules is sent across.
-		 */
-		vector< vector< unsigned int > > outgoing_;
-
-		/**
-		 * incoming_[targetNode][meshEntries]
-		 * For each target node, this provides a list of meshEntries that
-		 * are received and put into the appropriate locations on the 
-		 * S_ vector.
-		 */
-		vector< vector< unsigned int > > incoming_;
-
-		/**
 		 * Vector of diffusion constants, one per VarPool.
 		 */
 		vector< double > diffConst_;
 
-		/**
-		 * Vector of indices for non-zero diffusion constants. Later.
-		vector< unsigned int > indexOfDiffusingPools_;
-		 */
-
-		/**
-		 * Lookup from each molecule to its parent compartment index
-		 * compartment_.size() == number of distinct pools == max poolIndex
-		vector< short > compartment_;
-		 */
-
-		/**
-		 * boundaryPools[boundary][poolIndex] is a 2-D vector which contains
-		 * the vector of all pools that react across the specified 
-		 * inter-compartment boundary.
-		 */
-		vector< vector< unsigned int > > boundaryPools_;
-
-		/**
-		 * extRates_[meshIndex][boundary][reacIndex]: a 3-D matrix
-		 * of reaction rates implemented where the boundary and
-		 * reacIndex are merged together linearly.
-		 * For now.
-		 * On each meshIndex, there may be a set of reactions that cross
-		 * one or more boundaries into the domains/compartments handled by
-		 * other solvers. The extRates vector holds these reaction rates.
-		 * The reacIndex spans all boundaries.
-		 * Of the two Stoichs involved in the cross-boundary reaction,
-		 * one does the calculations, and passes the vector to the other.
-		 * This vector is updated once every tick of the synchronization
-		 * clock.
-		 * It does _not_ change with the internal variable timestep of 
-		 * the solver.
-		 */
-		vector< vector< double > > extRates_;
-
-		/**
-		 * boundaryReacs_[boundary] is a 1-D vector indicating the start
-		 * ReacIndex of the vector of reac rates occuring over the 
-		 * specified boundary.
-		 */
-		vector< unsigned int > boundaryReacs_;
 
 		/**
 		 * Lookup from each molecule to its Species identifer
@@ -543,12 +275,6 @@ class Stoich
 
 		/// N_ is the stoichiometry matrix.
 		KinSparseMatrix N_;
-
-
-		/**
-		 * totPortSize_: The sum of all port entries
-		 */
-		unsigned int totPortSize_;
 
 		/**
 		 * Maps Ids to objects in the S_, RateTerm, and FuncTerm vectors.
@@ -610,48 +336,6 @@ class Stoich
 		 * The enzyme reactions count as two reaction steps.
 		 */
 		unsigned int numReac_;
-
-		/**
-		 * The Ports are interfaces to other solvers by way of a spatial
-		 * junction between the solver domains. They manage 
-		 * the info about which molecules exchange, 
-		 * They are also the connection point for the messages that 
-		 * handle the port data transfer.
-		 * Each Port connects to exactly one other solver.
-		 */
-		vector< Port > ports_;
 };
 
-class StoichThread
-{
-	public:
-		StoichThread()
-			: s_( 0 ), p_( 0 ), meshIndex_( 0 )
-		{;}
-
-		void set( Stoich* s, const ProcInfo* p, unsigned int m )
-		{
-			s_ = s;
-			p_ = p;
-			meshIndex_ = m;
-		}
-
-		Stoich* stoich() const {
-			return s_;
-		}
-
-		const ProcInfo* procInfo() const {
-			return p_;
-		}
-
-		unsigned int meshIndex() const {
-			return meshIndex_;
-		}
-	
-	private:
-		Stoich* s_;
-		const ProcInfo* p_;
-		unsigned int meshIndex_;
-};
-
-#endif	// _STOICH_H
+#endif	// _STOICH_CORE_H
