@@ -40,9 +40,13 @@ from newgui import Ui_MainWindow
 import config
 
 def copyDemos():
-    """Check if this is the first run and copy the demos to
-    ~/moose/Demos if so."""
-    if config.settings[config.KEY_FIRSTTIME] in ['True', 'true', '1', 'Yes', 'yes', 'Y']:
+    """Check if this is the first run, 
+    and not a local build
+    (i.e. not running from <source>/gui dir,
+    but running moosegui after 'make install' / package)
+    and copy the demos to ~/moose/Demos if so."""
+    if config.settings[config.KEY_FIRSTTIME] in ['True', 'true', '1', 'Yes', 'yes', 'Y'] and \
+            not config.settings[config.KEY_LOCAL_BUILD]:
         print 'Copying demos'
         progressDialog = QtGui.QProgressDialog()
         progressDialog.setLabelText('Copying the MOOSE demos to your home directory')
@@ -466,7 +470,15 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         elif modeltype == MooseHandler.type_neuroml:
             #self.mooseHandler.updateClocks(MooseHandler.DEFAULT_SIMDT, MooseHandler.DEFAULT_PLOTDT)
             #use Aditya's method to assign clocks - also reinits!
-            mooseUtils.resetSim(['/cells','/elec'], MooseHandler.DEFAULT_SIMDT, MooseHandler.DEFAULT_PLOTDT)
+            ## Exponential Euler
+            #mooseUtils.resetSim(['/cells','/elec'], MooseHandler.DEFAULT_SIMDT, MooseHandler.DEFAULT_PLOTDT)
+            ## HSolve
+            h = moose.HSolve( '/cells/solve' )
+            h.dt = MooseHandler.DEFAULT_SIMDT
+            h.target = '/cells'
+            mooseUtils.resetSim(['/cells','/elec'],
+                MooseHandler.DEFAULT_SIMDT, MooseHandler.DEFAULT_PLOTDT, hsolve_path='/cells/solve')
+            
 #            print MooseHandler.DEFAULT_SIMDT, MooseHandler.DEFAULT_PLOTDT
         elif modeltype == MooseHandler.type_python:
             #specific for the hopfield tutorial!
