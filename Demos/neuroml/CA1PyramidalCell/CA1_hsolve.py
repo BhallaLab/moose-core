@@ -32,7 +32,7 @@ def loadGran98NeuroML_L123(filename):
     
     h = moose.HSolve( cells_path+'/solve' )
     h.dt = simdt
-    h.path = cells_path
+    h.target = cells_path
 
     print "Reinit MOOSE ... "
     resetSim(['/elec','/cells'],simdt,plotdt,hsolve_path=cells_path+'/solve') # from moose.utils
