@@ -19157,6 +19157,8 @@ internally. In this framework the inter-Stoich operations are much the same,
 since in either case the equivalent info has to be passed around.
 However, the intra-stoich operations can be done much more cleanly and quickly.
 Also, the Stencil design for diffusion can be much improved.
+Also, the numerical integration of the diffusion within the Stoich can be
+done perhaps using the GSL, fixed timestep Runge-Kutta or something.
 
 
 Reran Unit tests. Still the same 96 bytes from testScheduling
@@ -19200,6 +19202,8 @@ Implementation:
 			It sets up the Stoichiometry matrix, the RateTerms,
 			and the Sinit_ and S_ arrays for all the molecules.
 			MOOSE interface only for path.
+			If there is one StoichCore per processor, then 
+			one would like to share the Stoich matrix and RateTerms.
 		- Diffusion: For diffusion handling within a processor.
 			This defines the diffusion, and sets up rate calculation
 			framework, but does not compute it.
@@ -19207,13 +19211,91 @@ Implementation:
 			processors/stoichs/compartments
 		- Integrators: GSL, Gillespie etc.
 			These independently set up the calculations. A bit
-			different from what I do now, where I leave the
-			calculations to the Stoich for the GSL, and do them
-			directly in the Gssa. I think the latter is beter.
+			different from what I do now in the GSL, where I leave
+			the calculations to the Stoich. More like the GSSA,
+			which is a subclass of Stoich and does its own
+			calculations. I think the latter is better.
 
 
 Implemented StoichCore. Basically chopped out lots of stuff from Stoich.
+Working on implementing GslStoich, derived from StoichCore.
 
 ============================================================================
+22 Oct 2012.
+Following discussion with Pritish, some more design decisions about how to
+partition things. In Charm++, there are things that are one per node,
+others that are one per thread/processor. 
+Charm++ tries to avoid having the user deal with explicit multithreading.
 
+Option 1:
+Separate the StoichCore further into StoichCore and StoichPools. 
+The latter deals with the molecule arrays.
+StoichCore is present one per address space/node
+StoichPools are present one per thread/processor
+	All the StoichPools on a given node share a const StoichCore ptr.
+	So StoichPools are NOT derived from StoichCore.
+	Each StoichPools handles the storage of a given range of meshIndices.
+GslStoich is present one per thread/processor
+	Has a pointer to StoichCore and the matching StoichPools
 
+Option 1.5:
+GslStoich is derived from StoichPools. So it has the pools but encapsulates
+the pool assignment operations.
+
+Option 2:
+StoichCore is present one per address-space/node.
+	StoichCore manages all the voxels on a node.
+GslStoich is present one per thread/processor
+	Each GslStoich points to the StoichCore, but only updates a 
+	section of its mols.
+		Fragile partitioning.
+		Shared StoichCore should really be read-only.
+
+Option 3:
+Separate StoichCore into portion that only does the setup and RateTerms.
+One StoichCore per node.
+GslStoich is present one per thread/processor
+	Has a pointer to StoichCore 
+	Manages the pool arrays itself.
+	GslStoich becomes bulky.
+	May want Pools to be available to some other solver.
+
+Conclusion: Choose option 1.5 even though it has most components. 
+
+Starting on implementation of StoichPools.
+
+============================================================================
+23 Oct 2012.
+
+Setup sequence:
+Create a StoichCore. 
+	Assign its Path
+Create a small array of GslStoichs, one per thread.
+	Assign the StoichCore to each of these.
+	Assign some kind of meshing to each.
+
+Issue: If we have distinct GslStoichs, how does the 
+	Stoich::convertIdToPoolIndex function work? We cannot ask the singleton
+	stoich to do it for us as it isn't handling the pools. But we 
+	do not know which of the GslStoichs to use.
+	- Partly a mismatch between global containers (Elements holding pools)
+	with local specific entities (the stoich)
+	- If the pool has the Id of the handling Stoich rather than the ptr,
+	we could look up a thread-specific stoich, but it wouldn't help.
+	- We could consult all the stoichs to find which is handling this 
+	pool meshIndex. May well be on another node.
+		- This shifts responsibility from DataHandler to the Stoichs.
+	- We could ask the DataHandler of the current ZombiePool what to do.
+	It could indicate which Stoich to use. It could also say that it isn't
+	on the current node. What then? 
+	The current code doesn't deal with this situation.
+		- Set calls are easy: just ignore.
+		- Get calls go two ways: through messaging and direct to
+		parser. In both cases they return the value. No way to 
+		either ignore or say no-value.
+		- Alternate is to have a query call go out to check presence.
+		- Or, pair< node, thread > ObjId.locate()
+
+Turns out this isn't an issue. Each ZombiePool has its own stoich field. 
+	Unless we're doing something funny with it.
+============================================================================
