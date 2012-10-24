@@ -12,6 +12,13 @@
 #include <sstream>
 #include <iomanip>
 
+HinesMatrix::HinesMatrix()
+	:
+	nCompt_( 0 ),
+	dt_( 0.0 ),
+	stage_( -1 )
+{ ; }
+
 void HinesMatrix::setup( const vector< TreeNodeStruct >& tree, double dt )
 {
 	clear();

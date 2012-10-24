@@ -50,6 +50,8 @@ struct TreeNodeStruct
 class HinesMatrix
 {
 public:
+	HinesMatrix();
+	
 	void setup( const vector< TreeNodeStruct >& tree, double dt );
 	
 	unsigned int getSize() const;
