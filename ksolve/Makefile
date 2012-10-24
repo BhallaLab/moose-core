@@ -13,6 +13,7 @@ OBJ = \
 	Port.o	\
 	Stoich.o	\
 	StoichCore.o	\
+	StoichPools.o	\
 	KinSparseMatrix.o	\
 	ZombiePool.o \
 	ZombieBufPool.o \
@@ -38,6 +39,7 @@ HEADERS = \
 	Port.h \
 	Stoich.h \
 	StoichCore.h \
+	StoichPools.h \
 	RateTerm.h \
 	FuncTerm.h \
 	KinSparseMatrix.h \
@@ -64,6 +66,7 @@ default: $(TARGET)
 $(OBJ)	: $(HEADERS)
 Stoich.o:	../kinetics/PoolBase.h ZombiePool.h ../kinetics/ReacBase.h ZombieReac.h ZombieBufPool.h ../kinetics/EnzBase.h ZombieEnz.h ZombieMMenz.h ../kinetics/Pool.h ../kinetics/Reac.h ../kinetics/BufPool.h ../kinetics/FuncPool.h ../kinetics/Enz.h ../kinetics/MMenz.h ../mesh/Boundary.h ../mesh/ChemMesh.h ../mesh/Stencil.h
 StoichCore.o:	../kinetics/PoolBase.h ZombiePool.h ../kinetics/ReacBase.h ZombieReac.h ZombieBufPool.h ../kinetics/EnzBase.h ZombieEnz.h ZombieMMenz.h ../kinetics/Pool.h ../kinetics/Reac.h ../kinetics/BufPool.h ../kinetics/FuncPool.h ../kinetics/Enz.h ../kinetics/MMenz.h ../mesh/Boundary.h ../mesh/ChemMesh.h ../mesh/Stencil.h
+StoichPools.o: StoichPools.h
 GssaStoich.o:	GssaStoich.h ../kinetics/PoolBase.h ZombiePool.h ../kinetics/ReacBase.h ZombieReac.h ZombieBufPool.h ../kinetics/EnzBase.h ZombieEnz.h ZombieMMenz.h ../kinetics/Pool.h ../kinetics/Reac.h ../kinetics/BufPool.h ../kinetics/FuncPool.h ../kinetics/Enz.h ../kinetics/MMenz.h ../mesh/Boundary.h ../mesh/ChemMesh.h ../randnum/randnum.h
 KinSparseMatrix.o:	KinSparseMatrix.h ../basecode/SparseMatrix.h
 ZombiePool.o:	../kinetics/PoolBase.h ZombiePool.h
