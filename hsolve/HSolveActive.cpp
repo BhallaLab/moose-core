@@ -41,6 +41,9 @@ HSolveActive::HSolveActive()
 // Solving differential equations
 //////////////////////////////////////////////////////////////////////
 void HSolveActive::step( ProcPtr info ) {
+	if ( nCompt_ <= 0 )
+		return;
+	
 	if ( !current_.size() ) {
 		current_.resize( channel_.size() );
 	}
