@@ -275,8 +275,59 @@ void testInterMeshReac()
 	cout << "." << flush;
 }
 
+Id makeSimpleReac( Shell* s )
+{
+	vector< int > dims( 1, 1 );
+	Id model = s->doCreate( "Neutral", Id(), "model", dims );
+	Id meshA = s->doCreate( "CubeMesh", model, "meshA", dims );
+	Id meshEntryA = Neutral::child( meshA.eref(), "mesh" );
+	Id poolA = s->doCreate( "Pool", meshA, "A", dims );
+	Id poolB = s->doCreate( "Pool", meshA, "B", dims );
+	Id reac = s->doCreate( "Reac", meshA, "reac", dims );
+
+	Field< double >::set( poolA, "nInit", 100 );
+
+	MsgId mid = s->doAddMsg( "OneToOne", poolA, "mesh", meshEntryA, "mesh");
+	assert( mid != Msg::bad );
+	mid = s->doAddMsg( "OneToOne", poolB, "mesh", meshEntryA, "mesh" );
+	assert( mid != Msg::bad );
+	mid = s->doAddMsg( "Single", meshEntryA, "remeshReacs", reac, "remesh");
+	assert( mid != Msg::bad );
+
+	mid = s->doAddMsg( "Single", reac, "sub", poolA, "reac" );
+	assert( mid != Msg::bad );
+	mid = s->doAddMsg( "Single", reac, "prd", poolB, "reac" );
+	assert( mid != Msg::bad );
+
+	return model;
+}
+
+void testGslStoich()
+{
+	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< int > dims( 1, 1 );
+	Id model = makeSimpleReac( s );
+	// Create solver 
+	Id meshA( "/model/meshA" );
+	assert ( meshA != Id() );
+	Id stoichA = s->doCreate( "StoichCore", model, "stoichA", dims );
+	assert ( stoichA != Id() );
+	Field< string >::set( stoichA, "path", "/model/meshA/##" );
+	unsigned int nVarPools = 
+			Field< unsigned int >::get( stoichA, "nVarPools" );
+	assert( nVarPools == 2 );
+	Id solver = s->doCreate( "GslStoich", model, "solver", dims );
+	SetGet1< Id >::set( solver, "stoich", stoichA );
+
+	//MsgId mid = s->doAddMsg( "Single", meshA, "meshSplit", solver, "remesh" );
+	// assert( mid != Msg::bad );
+
+	s->doDelete( model );
+	cout << "." << flush;
+}
 
 void testKineticSolvers()
 {
 	testInterMeshReac();
+//	testGslStoich();
 }
