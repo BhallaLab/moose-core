@@ -342,6 +342,7 @@ def resetSim(simpaths, simdt, plotdt, hsolve_path=None):
         moose__.useClock(ELECCLOCK, simpath+'/##[TYPE=LeakyIaF]', 'process')
         moose__.useClock(ELECCLOCK, simpath+'/##[TYPE=IntFire]', 'process')
         moose__.useClock(CHANCLOCK, simpath+'/##[TYPE=HHChannel2D]', 'process')
+        moose__.useClock(CHANCLOCK, simpath+'/##[TYPE=SynChan]', 'process')
         ## hsolve takes care of the clocks for the biophysics
         ## But if hsolve_path is not given, use clocks for the biophysics,
         ## else just put a clock on the hsolve
@@ -349,7 +350,6 @@ def resetSim(simpaths, simdt, plotdt, hsolve_path=None):
             moose__.useClock(INITCLOCK, simpath+'/##[TYPE=Compartment]', 'init')
             moose__.useClock(ELECCLOCK, simpath+'/##[TYPE=Compartment]', 'process')
             moose__.useClock(CHANCLOCK, simpath+'/##[TYPE=HHChannel]', 'process')
-            #~ moose__.useClock(ELECCLOCK, simpath+'/##[TYPE=HHGate]', 'process')
             moose__.useClock(POOLCLOCK, simpath+'/##[TYPE=CaConc]', 'process')
     if hsolve_path:
         moose__.useClock(INITCLOCK, hsolve_path, 'process')
