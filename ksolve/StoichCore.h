@@ -187,6 +187,15 @@ class StoichCore
 		/// Utility function, prints out N_, used for debugging
 		void print() const;
 		//////////////////////////////////////////////////////////////////
+		// Utility funcs for numeric calculations
+		//////////////////////////////////////////////////////////////////
+
+		/// Updates the yprime array, rate of change of each molecule
+		void updateRates( const double* s, double* yprime );
+
+		/// Updates the function values, within s.
+		void updateFuncs( double* s, double t );
+		//////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
 	protected:
 		bool useOneWay_;

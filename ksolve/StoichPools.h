@@ -53,6 +53,11 @@ class StoichPools
 		 */
 		const double* Sinit( unsigned int meshIndex ) const;
 
+		/**
+		 * Returns size of S and Sinit vectors.
+		 */
+		unsigned int numMeshEntries() const;
+
 		//////////////////////////////////////////////////////////////////
 		// Field assignment functions
 		//////////////////////////////////////////////////////////////////
