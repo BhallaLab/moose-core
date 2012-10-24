@@ -50,7 +50,7 @@ LinearFill = 2 # Linear fill
 ## clocks 8 and 9 for tables for plots.
 INITCLOCK = 0
 ELECCLOCK = 1
-CHAN2DCLOCK = 2
+CHANCLOCK = 2
 POOLCLOCK = 3
 LOOKUPCLOCK = 6
 STIMCLOCK = 7
@@ -330,7 +330,7 @@ def resetSim(simpaths, simdt, plotdt, hsolve_path=None):
     If hsolve_path is set to a MOOSE hsolve object's path, it sets the clock for hsolve too. """
     moose__.setClock(INITCLOCK, simdt)
     moose__.setClock(ELECCLOCK, simdt) # The hsolve and ee methods use clock 1
-    moose__.setClock(CHAN2DCLOCK, simdt) # hsolve uses clock 2 for mg_block, nmdachan and others.
+    moose__.setClock(CHANCLOCK, simdt) # hsolve uses clock 2 for mg_block, nmdachan and others.
     moose__.setClock(POOLCLOCK, simdt) # Ca/ion pools use clock 3
     moose__.setClock(STIMCLOCK, simdt) # Ca/ion pools use clock 3
     moose__.setClock(PLOTCLOCK, plotdt) # for tables
@@ -341,15 +341,15 @@ def resetSim(simpaths, simdt, plotdt, hsolve_path=None):
         moose__.useClock(STIMCLOCK, simpath+'/##[TYPE=SpikeGen]', 'process')
         moose__.useClock(ELECCLOCK, simpath+'/##[TYPE=LeakyIaF]', 'process')
         moose__.useClock(ELECCLOCK, simpath+'/##[TYPE=IntFire]', 'process')
-        moose__.useClock(CHAN2DCLOCK, simpath+'/##[TYPE=HHChannel2D]', 'process')
+        moose__.useClock(CHANCLOCK, simpath+'/##[TYPE=HHChannel2D]', 'process')
         ## hsolve takes care of the clocks for the biophysics
         ## But if hsolve_path is not given, use clocks for the biophysics,
         ## else just put a clock on the hsolve
         if hsolve_path is None:
             moose__.useClock(INITCLOCK, simpath+'/##[TYPE=Compartment]', 'init')
             moose__.useClock(ELECCLOCK, simpath+'/##[TYPE=Compartment]', 'process')
-            moose__.useClock(ELECCLOCK, simpath+'/##[TYPE=HHChannel]', 'process')
-            moose__.useClock(ELECCLOCK, simpath+'/##[TYPE=HHGate]', 'process')
+            moose__.useClock(CHANCLOCK, simpath+'/##[TYPE=HHChannel]', 'process')
+            #~ moose__.useClock(ELECCLOCK, simpath+'/##[TYPE=HHGate]', 'process')
             moose__.useClock(POOLCLOCK, simpath+'/##[TYPE=CaConc]', 'process')
     if hsolve_path:
         moose__.useClock(INITCLOCK, hsolve_path, 'process')
