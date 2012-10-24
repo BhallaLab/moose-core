@@ -715,3 +715,59 @@ void StoichCore::print() const
 {
 	N_.print();
 }
+
+
+/////////////////////////////////////////////////////////////////////
+// Numeric funcs. These are in StoichCore because the rate terms are here.
+/////////////////////////////////////////////////////////////////////
+
+/**
+ * updateRates computes the velocity *v* of each reaction. Then it
+ * uses this to compute the rate of change, *yprime*, for each pool
+ */
+
+void StoichCore::updateRates( const double* s, double* yprime )
+{
+	vector< RateTerm* >::const_iterator i;
+	vector< double > v( numReac_ );
+	vector< double >::iterator j = v.begin();
+
+	for ( i = rates_.begin(); i != rates_.end(); i++) {
+		*j++ = (**i)( s );
+		assert( !isnan( *( j-1 ) ) );
+	}
+
+	for (unsigned int i = 0; i < numVarPools_; ++i)
+		*yprime++ = N_.computeRowRate( i , v );
+}
+
+/*
+void StoichCore::updateRates( double* yprime, const vector< double >&v )
+{
+	for (unsigned int i = 0; i < numVarPools_; ++i)
+		*yprime++ = N_.computeRowRate( i , v );
+}
+
+void StoichCore::updateV( const double* s, vector< double >& v )
+{
+	vector< RateTerm* >::const_iterator i;
+	vector< double >::iterator j = v.begin();
+
+	for ( i = rates_.begin(); i != rates_.end(); i++) {
+		*j++ = (**i)( s );
+		assert( !isnan( *( j-1 ) ) );
+	}
+}
+*/
+
+// s is the array of pools, S_[meshIndex][0]
+void StoichCore::updateFuncs( double* s, double t )
+{
+	double* j = s + numVarPools_ + numBufPools_;
+
+	for ( vector< FuncTerm* >::iterator i = funcs_.begin();
+					i != funcs_.end(); ++i ) {
+		*j++ = (**i)( s, t );
+		assert( !isnan( *(j-1) ) );
+	}
+}

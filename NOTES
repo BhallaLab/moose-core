@@ -19299,3 +19299,12 @@ Issue: If we have distinct GslStoichs, how does the
 Turns out this isn't an issue. Each ZombiePool has its own stoich field. 
 	Unless we're doing something funny with it.
 ============================================================================
+24 Oct 2012.
+
+Made the GslStoich, compiles. Now to set up some tests for this whole
+subsystem. So far I have StoichCore, StoichPools, and GslStoich. Between them
+they should handle most of the functionality of the original Stoich.
+
+Set up a test in testKsolve.cpp, doesn't clear it yet.
+
+

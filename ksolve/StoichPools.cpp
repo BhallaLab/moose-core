@@ -87,3 +87,7 @@ const double* StoichPools::Sinit( unsigned int meshIndex ) const
 	return &Sinit_[meshIndex][0];
 }
 
+unsigned int StoichPools::numMeshEntries() const
+{
+	return Sinit_.size();
+}
