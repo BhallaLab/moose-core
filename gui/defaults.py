@@ -2,10 +2,14 @@ PLOT_FIELDS={
     'LeakyIaF':['Vm'],
     'Compartment':['Vm','Im'],
     'HHChannel':['Ik','Gk'],
+    'HHChannel2D':['Ik','Gk'],
+    'CaConc':['Ca'],
+    'ZombieCompartment':['Vm','Im'],
+    'ZombieHHChannel':['Ik','Gk'],
+    'ZombieHHChannel2D':['Ik','Gk'],
+    'ZombieCaConc':['Ca'],
     'ZombiePool':['n','conc'],
     'ZombieBufPool':['n','conc'],
-    'HHChannel2D':['Ik','Gk'],
-    'CaConc':['Ca']
     }
 FIELD_UNITS={
     'Vm':'V',
