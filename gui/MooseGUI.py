@@ -549,7 +549,6 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             #self.layoutWidget.drawNewCell(cellName='/cells/LIFs_'+str(intFireCellNumber-1), style=3, cellCentre=[0.1, 0.1, 0.0])
             for yAxis in range(sideSquare):
                 for xAxis in range(sideSquare):
-                    print 'we are here'
                     self.layoutWidget.drawNewCell(cellName='/cells/LIFs_'+str(intFireCellNumber-1), style=3, cellCentre=[xAxis*0.5,yAxis*0.5,0.0])
                     intFireCellNumber += 1
             self.layoutWidget.updateGL()
