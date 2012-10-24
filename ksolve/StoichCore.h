@@ -184,19 +184,6 @@ class StoichCore
 		 */
 		double getR2( unsigned int reacIndex, unsigned int voxel ) const;
 
-		/**
-		 * Virtual function to assign N. Derived classes (GssaStoich) will
-		 * need to do additional stuff to update dependent reacs
-		 */
-		virtual void innerSetN( unsigned int meshIndex, Id id, double v );
-
-		/**
-		 * Virtual function to assign Ninit. Derived classes (GssaStoich)
-		 * will
-		 * need to do additional stuff to update dependent reacs
-		 */
-		virtual void innerSetNinit( unsigned int meshIndex, Id id, double v );
-
 		/// Utility function, prints out N_, used for debugging
 		void print() const;
 		//////////////////////////////////////////////////////////////////
@@ -207,53 +194,9 @@ class StoichCore
 		Id stoichId_;
 
 		/**
-		 * 
-		 * S_ is the array of molecules. Stored as n, number of molecules
-		 * per mesh entry. 
-		 * The array looks like n = S_[meshIndex][poolIndex]
-		 * The meshIndex specifies which spatial mesh entry to use.
-		 * The poolIndex specifies which molecular species pool to use.
-		 * We choose the poolIndex as the right-hand index because we need
-		 * to be able to pass the entire block of pools around for 
-		 * integration.
-		 *
-		 * The entire S_ vector is allocated, but the pools are only 
-		 * allocated for local meshEntries and for pools on
-		 * diffusive boundaries with other nodes.
-		 *
-		 * The first numVarPools_ in the poolIndex are state variables and
-		 * are integrated using the ODE solver. 
-		 * The last numEfflux_ molecules within numVarPools are those that
-		 * go out to another solver. They are also integrated by the ODE
-		 * solver, so that at the end of dt each has exactly as many
-		 * molecules as diffused away.
-		 * The next numBufPools_ are fixed but can be changed by the script.
-		 * The next numFuncPools_ are computed using arbitrary functions of
-		 * any of the molecule levels, and the time.
-		 * The functions evaluate _before_ the ODE. 
-		 * The functions should not cascade as there is no guarantee of
-		 * execution order.
+		 * vector of initial concentrations, one per Pool of any kind
 		 */
-		vector< vector< double > > S_;
-
-		/**
-		 * Sinit_ specifies initial conditions at t = 0. Whenever the reac
-		 * system is rebuilt or reinited, all S_ values become set to Sinit.
-		 * Also used for buffered molecules as the fixed values of these
-		 * molecules.
-		 * The array looks like Sinit_[meshIndex][poolIndex]
-		 * The entire Sinit_ vector is allocated, but the pools are only 
-		 * allocated for local meshEntries and for pools on
-		 * diffusive boundaries with other nodes.
-		 */
-		vector< vector< double > > Sinit_;
-
-		/**
-		 * vector of indices of meshEntries to be computed locally.
-		 * This may not necessarily be a contiguous set, depending on
-		 * how boundaries and voxelization is done.
-		 */
-		vector< unsigned int > localMeshEntries_;
+		vector< double > initConcs_;
 
 		/**
 		 * Vector of diffusion constants, one per VarPool.

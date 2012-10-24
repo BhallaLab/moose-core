@@ -98,8 +98,6 @@ StoichCore::StoichCore()
 	: 
 		useOneWay_( 0 ),
 		path_( "" ),
-		S_(1),
-		Sinit_(1),
 		objMapStart_( 0 ),
 		numVarPools_( 0 ),
 		numVarPoolsBytes_( 0 ),
@@ -235,10 +233,12 @@ void StoichCore::allocateModelObject( Id id,
 /// Using the computed array sizes, now allocate space for them.
 void StoichCore::resizeArrays()
 {
+	/*
 	S_.resize( 1 );
 	Sinit_.resize( 1 );
 	S_[0].resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0 );
 	Sinit_[0].resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0);
+	*/
 
 	diffConst_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0 );
 	species_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0 );
@@ -416,7 +416,7 @@ unsigned int StoichCore::convertIdToPoolIndex( Id id ) const
 	unsigned int i = id.value() - objMapStart_;
 	assert( i < objMap_.size() );
 	i = objMap_[i];
-	assert( i < S_.size() );
+	assert( i < numVarPools_ + numBufPools_ + numFuncPools_ );
 	return i;
 }
 
@@ -681,33 +681,6 @@ double StoichCore::getR1( unsigned int reacIndex, unsigned int voxel ) const
 double StoichCore::getR2( unsigned int reacIndex, unsigned int voxel ) const
 {
 	return rates_[ reacIndex ]->getR2();
-}
-
-void StoichCore::innerSetN( unsigned int meshIndex, Id id, double v )
-{
-	unsigned int poolIndex = convertIdToPoolIndex( id );
-	assert( poolIndex < S_[meshIndex].size() );
-	S_[ meshIndex ][ poolIndex ] = v;
-}
-
-void StoichCore::innerSetNinit( unsigned int meshIndex, Id id, double v )
-{
-	Sinit_[ meshIndex ][ convertIdToPoolIndex( id ) ] = v;
-}
-
-const double* StoichCore::S( unsigned int meshIndex ) const
-{
-	return &S_[meshIndex][0];
-}
-
-double* StoichCore::varS( unsigned int meshIndex )
-{
-	return &S_[meshIndex][0];
-}
-
-const double* StoichCore::Sinit( unsigned int meshIndex ) const
-{
-	return &Sinit_[meshIndex][0];
 }
 
 double StoichCore::getDiffConst( unsigned int p ) const
