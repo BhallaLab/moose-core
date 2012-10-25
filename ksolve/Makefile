@@ -20,6 +20,7 @@ OBJ = \
 	ZombieBufPool.o \
 	ZombieFuncPool.o \
 	ZombieReac.o \
+	ZReac.o \
 	ZombieEnz.o \
 	ZombieMMenz.o \
 	ZombieSumFunc.o \
@@ -76,7 +77,8 @@ ZombiePool.o:	../kinetics/PoolBase.h ZombiePool.h
 ZPool.o:	../kinetics/PoolBase.h ZPool.h
 ZombieBufPool.o:	../kinetics/PoolBase.h ZombiePool.h ZombieBufPool.h
 ZombieFuncPool.o:	../kinetics/PoolBase.h ZombiePool.h ZombieFuncPool.h ZombieSumFunc.h
-ZombieReac.o:	../kinetics/Reac.h ZombieReac.h
+ZombieReac.o:	../kinetics/ReacBase.h ../kinetics/Reac.h ZombieReac.h
+ZReac.o:	../kinetics/ReacBase.h ZReac.h
 ZombieEnz.o:	ZombieEnz.h
 ZombieMMenz.o:	ZombieMMenz.h
 ZombieSumFunc.o:	../kinetics/SumFunc.h ZombieSumFunc.h

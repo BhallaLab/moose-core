@@ -19326,3 +19326,11 @@ the GslStoichs. More complicated threadwise lookup is then easier.
 25 Oct 2012.
 Added ZPool class, so we can incrementally convert from the old Zombie class.
 Compiles.
+
+Setting up the model zombification code in StoichCore. I will need to
+refer to parent of the StoichCore for the GslStoich or GssaStoich when
+zombifying pools.  Other issue is to assign the correct GslStoich to each
+Pool. When remeshed, I would have to have a distinct GslStoich matching the
+zonation of the threads.
+
+

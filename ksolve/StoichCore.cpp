@@ -21,10 +21,12 @@
 #include "MMenz.h"
 #include "SumFunc.h"
 #include "MathFunc.h"
+#include "StoichPools.h"
+#include "ZPool.h"
 #include "ZombiePool.h"
 #include "ZombieBufPool.h"
 #include "ZombieFuncPool.h"
-#include "ZombieReac.h"
+#include "ZReac.h"
 #include "ZombieEnz.h"
 #include "ZombieMMenz.h"
 #include "ZombieSumFunc.h"
@@ -315,10 +317,15 @@ void StoichCore::zombifyModel( const Eref& e, const vector< Id >& elist )
 	static const Cinfo* mmEnzCinfo = MMenz::initCinfo();
 	vector< Id > meshEntries;
 
+	ObjId stoichParent = Neutral::parent( e );
+	assert( stoichParent.element()->cinfo()->isA( "GslStoich" ) ||
+		stoichParent.element()->cinfo()->isA( "GssaStoich" ) );
+
 	for ( vector< Id >::const_iterator i = elist.begin(); i != elist.end(); ++i ){
 		Element* ei = (*i)();
 		if ( ei->cinfo() == poolCinfo ) {
-			zombifyAndUnschedPool( e, (*i)(), ZombiePool::initCinfo() );
+			zombifyAndUnschedPool( stoichParent.eref(), 
+							(*i)(), ZPool::initCinfo() );
 		}
 		else if ( ei->cinfo() == bufPoolCinfo ) {
 			zombifyAndUnschedPool( e, (*i)(), ZombieBufPool::initCinfo() );
@@ -333,7 +340,7 @@ void StoichCore::zombifyModel( const Eref& e, const vector< Id >& elist )
 			}
 		}
 		else if ( ei->cinfo() == reacCinfo ) {
-			ReacBase::zombify( ei, ZombieReac::initCinfo(), e.id() );
+			ReacBase::zombify( ei, ZReac::initCinfo(), e.id() );
 		}
 		else if ( ei->cinfo() == mmEnzCinfo ) {
 			EnzBase::zombify( ei, ZombieMMenz::initCinfo(), e.id() );
@@ -349,7 +356,7 @@ void StoichCore::unZombifyPools()
 	unsigned int i = 0;
 	for ( ; i < numVarPools_; ++i ) {
 		Element* e = idMap_[i].element();
-		if ( e != 0 &&  e->cinfo() == ZombiePool::initCinfo() )
+		if ( e != 0 &&  e->cinfo() == ZPool::initCinfo() )
 			PoolBase::zombify( e, Pool::initCinfo(), Id() );
 	}
 	
@@ -390,7 +397,7 @@ void StoichCore::unZombifyModel()
 	for ( vector< Id >::iterator i = reacMap_.begin(); 
 						i != reacMap_.end(); ++i ) {
 		Element* e = i->element();
-		if ( e != 0 &&  e->cinfo() == ZombieReac::initCinfo() )
+		if ( e != 0 &&  e->cinfo() == ZReac::initCinfo() )
 			ReacBase::zombify( e, Reac::initCinfo(), Id() );
 	}
 	
@@ -578,7 +585,7 @@ void StoichCore::installEnzyme( ZeroOrder* r1, ZeroOrder* r2, ZeroOrder* r3,
 void StoichCore::setReacKf( const Eref& e, double v ) const
 {
 	static const SrcFinfo* toSub = dynamic_cast< const SrcFinfo* > (
-		ZombieReac::initCinfo()->findFinfo( "toSub" ) );
+		ZReac::initCinfo()->findFinfo( "toSub" ) );
 
 	assert( toSub );
 	double volScale = convertConcToNumRateUsingMesh( e, toSub, 0 );
@@ -592,7 +599,7 @@ void StoichCore::setReacKf( const Eref& e, double v ) const
 void StoichCore::setReacKb( const Eref& e, double v ) const
 {
 	static const SrcFinfo* toPrd = static_cast< const SrcFinfo* > (
-		ZombieReac::initCinfo()->findFinfo( "toPrd" ) );
+		ZReac::initCinfo()->findFinfo( "toPrd" ) );
 
 	assert( toPrd );
 	double volScale = convertConcToNumRateUsingMesh( e, toPrd, 0 );
