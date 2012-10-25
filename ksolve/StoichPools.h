@@ -14,7 +14,7 @@ class StoichPools
 {
 	public: 
 		StoichPools();
-		~StoichPools();
+		virtual ~StoichPools();
 
 		//////////////////////////////////////////////////////////////////
 		// Field assignment stuff
@@ -36,36 +36,52 @@ class StoichPools
 
 
 		/**
-		 * Returns the vector of doubles of current mol #s at the specified
+		 * Returns the array of doubles of current mol #s at the specified
 		 * mesh index
 		 */
 		const double* S( unsigned int meshIndex ) const;
 
 		/**
-		 * Returns the vector of doubles of current mol #s at the specified
+		 * Returns the array of doubles of current mol #s at the specified
 		 * mesh index. Dangerous, allows one to modify the values.
 		 */
 		double* varS( unsigned int meshIndex );
 
 		/**
-		 * Returns the vector of doubles of initial mol #s at the specified
+		 * Returns the array of doubles of initial mol #s at the specified
 		 * mesh index
 		 */
 		const double* Sinit( unsigned int meshIndex ) const;
+
+		/**
+		 * Returns the array of doubles of initial mol #s at the specified
+		 * mesh index, as a writable array.
+		 */
+		double* varSinit( unsigned int meshIndex );
 
 		/**
 		 * Returns size of S and Sinit vectors.
 		 */
 		unsigned int numMeshEntries() const;
 
+		/**
+		 * Returns # of pools in S[meshEntry]. 0 if empty or out of range.
+		 */
+		unsigned int numPoolEntries( unsigned int meshEntry ) const;
+
 		//////////////////////////////////////////////////////////////////
 		// Field assignment functions
 		//////////////////////////////////////////////////////////////////
 
-		void innerSetN( unsigned int meshIndex, 
-						unsigned int poolIndex, double v );
-		void innerSetNinit( unsigned int meshIndex, 
-						unsigned int poolIndex, double v );
+		virtual void setN( const Eref& e, double v ) = 0;
+		virtual double getN( const Eref& e ) const = 0;
+		virtual void setNinit( const Eref& e, double v ) = 0;
+		virtual double getNinit( const Eref& e ) const = 0;
+		virtual void setSpecies( const Eref& e, unsigned int v ) = 0;
+		virtual unsigned int getSpecies( const Eref& e ) = 0;
+		virtual void setDiffConst( const Eref& e, double v ) = 0;
+		virtual double getDiffConst( const Eref& e ) const = 0;
+
 	private:
 		/**
 		 * 

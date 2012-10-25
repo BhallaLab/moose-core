@@ -75,6 +75,18 @@ class GslStoich: public StoichPools
 		
 		/// This does the real work for GSL to advance.
 		int innerGslFunc( double t, const double* y, double* yprime );
+		//////////////////////////////////////////////////////////////////
+		// Field access functions, overriding virtual defns.
+		//////////////////////////////////////////////////////////////////
+
+		void setN( const Eref& e, double v );
+		double getN( const Eref& e ) const;
+		void setNinit( const Eref& e, double v );
+		double getNinit( const Eref& e ) const;
+		void setSpecies( const Eref& e, unsigned int v );
+		unsigned int getSpecies( const Eref& e );
+		void setDiffConst( const Eref& e, double v );
+		double getDiffConst( const Eref& e ) const;
 
 ///////////////////////////////////////////////////////////0
 		static const Cinfo* initCinfo();
