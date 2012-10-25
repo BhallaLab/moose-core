@@ -300,24 +300,21 @@ void HSolveActive::sendSpikes( ProcPtr info ) {
  * objects which have been taken over.
  */
 void HSolveActive::sendValues( ProcPtr info ) {
-	/*
-	 * Can speed up this function by sending only from objects
-	 * which have targets.
-	 */
-	 
-	for ( unsigned int i = 0; i < compartmentId_.size(); ++i )
+	vector< unsigned int >::iterator i;
+	
+	for ( i = outVm_.begin(); i != outVm_.end(); ++i )
 		moose::Compartment::VmOut()->send(
 		//~ ZombieCompartment::VmOut()->send(
-			compartmentId_[ i ].eref(),
+			compartmentId_[ *i ].eref(),
 			info->threadIndexInGroup,
-			V_[ i ]
+			V_[ *i ]
 		);
 	
-	for ( unsigned int i = 0; i < caConcId_.size(); ++i )
+	for ( i = outCa_.begin(); i != outCa_.end(); ++i )
 		//~ CaConc::concOut()->send(
 		ZombieCaConc::concOut()->send(
-			caConcId_[ i ].eref(),
+			caConcId_[ *i ].eref(),
 			info->threadIndexInGroup,
-			ca_[ i ]
+			ca_[ *i ]
 		);
 }
