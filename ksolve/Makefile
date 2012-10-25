@@ -16,6 +16,7 @@ OBJ = \
 	StoichPools.o	\
 	KinSparseMatrix.o	\
 	ZombiePool.o \
+	ZPool.o \
 	ZombieBufPool.o \
 	ZombieFuncPool.o \
 	ZombieReac.o \
@@ -72,6 +73,7 @@ GssaStoich.o:	GssaStoich.h ../kinetics/PoolBase.h ZombiePool.h ../kinetics/ReacB
 GslStoich.o:	GslStoich.h
 KinSparseMatrix.o:	KinSparseMatrix.h ../basecode/SparseMatrix.h
 ZombiePool.o:	../kinetics/PoolBase.h ZombiePool.h
+ZPool.o:	../kinetics/PoolBase.h ZPool.h
 ZombieBufPool.o:	../kinetics/PoolBase.h ZombiePool.h ZombieBufPool.h
 ZombieFuncPool.o:	../kinetics/PoolBase.h ZombiePool.h ZombieFuncPool.h ZombieSumFunc.h
 ZombieReac.o:	../kinetics/Reac.h ZombieReac.h

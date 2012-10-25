@@ -6,10 +6,7 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
-#include <vector>
-using namespace std;
-
-#include <cassert>
+#include "header.h"
 #include "StoichPools.h"
 
 extern const double NA;
@@ -59,6 +56,7 @@ void StoichPools::meshSplit(
 	// localMeshEntries_ = localEntryList;
 }
 
+/*
 void StoichPools::innerSetN( unsigned int meshIndex, 
 				unsigned int poolIndex, double v )
 {
@@ -71,6 +69,7 @@ void StoichPools::innerSetNinit( unsigned int meshIndex,
 {
 	Sinit_[ meshIndex ][ poolIndex ] = v;
 }
+*/
 
 const double* StoichPools::S( unsigned int meshIndex ) const
 {
@@ -87,7 +86,19 @@ const double* StoichPools::Sinit( unsigned int meshIndex ) const
 	return &Sinit_[meshIndex][0];
 }
 
+double* StoichPools::varSinit( unsigned int meshIndex )
+{
+	return &Sinit_[meshIndex][0];
+}
+
 unsigned int StoichPools::numMeshEntries() const
 {
 	return Sinit_.size();
+}
+
+unsigned int StoichPools::numPoolEntries( unsigned int i ) const
+{
+	if ( i >= Sinit_.size() )
+			return 0;
+	return Sinit_[i].size();
 }

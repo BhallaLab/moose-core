@@ -404,53 +404,6 @@ void GslStoich::remesh( const Eref& e, const Qinfo* q,
 // Numerical function definitions
 ///////////////////////////////////////////////////
 
-/*
-// Update the v_ vector for individual reac velocities.
-void GslStoich::updateV( vector< double >& v )
-{
-	// Some algorithm to assign the values from the computed rates
-	// to the corresponding v_ vector entry
-	// for_each( rates_.begin(), rates_.end(), assign);
-
-	// v.resize( rates_.size() );
-	vector< RateTerm* >::const_iterator i;
-	vector< double >::iterator j = v.begin();
-	const double* s = S( currMeshEntry_ );
-
-	for ( i = rates_.begin(); i != rates_.end(); i++)
-	{
-		*j++ = (**i)( s );
-		assert( !isnan( *( j-1 ) ) );
-	}
-}
-
-void GslStoich::updateRates( vector< double>* yprime, double dt, 
-	vector< double >& v )
-{
-	stoich_->updateV( S( currMeshEntry_ ), v );
-
-	stoich_->updateRates( yprime, dt, v );
-}
-
-// Update the function-computed molecule terms. These are not integrated,
-// but their values may be used by molecules that are.
-// The molecule vector S_ has a section for FuncTerms. In this section
-// there is a one-to-one match between entries in S_ and FuncTerm entries.
-void GslStoich::updateFuncs( double t, unsigned int meshIndex )
-{
-	vector< FuncTerm* >::const_iterator i;
-	vector< double >::iterator j = S_[meshIndex].begin() + numVarPools_ + numBufPools_;
-
-	for ( i = funcs_.begin(); i != funcs_.end(); i++)
-	{
-		*j++ = (**i)( &( S_[meshIndex][0] ), t );
-		assert( !isnan( *( j-1 ) ) );
-	}
-}
-*/
-
-
-
 /**
  * This is the function used by GSL to advance the simulation one step.
  * We have a design decision here: to perform the calculations 'in place'
@@ -490,4 +443,72 @@ int GslStoich::innerGslFunc( double t, const double* y, double* yprime )
 	// flux_ matrix.
 
 	return GSL_SUCCESS;
+}
+
+///////////////////////////////////////////////////
+// Field access functions
+///////////////////////////////////////////////////
+
+void GslStoich::setN( const Eref& e, double v )
+{
+	unsigned int i = e.index().value(); // Later: Handle node location.
+	unsigned int j = stoich_->convertIdToPoolIndex( e.id() );
+	assert( i < numMeshEntries() );
+	assert( j < numPoolEntries( i ) );
+	varS(i)[j] = v;
+}
+
+double GslStoich::getN( const Eref& e ) const
+{
+	unsigned int i = e.index().value();
+	unsigned int j = stoich_->convertIdToPoolIndex( e.id() );
+	assert( i < numMeshEntries() );
+	assert( j < numPoolEntries( i ) );
+	return S(i)[j];
+}
+
+void GslStoich::setNinit( const Eref& e, double v )
+{
+	unsigned int i = e.index().value();
+	unsigned int j = stoich_->convertIdToPoolIndex( e.id() );
+	assert( i < numMeshEntries() );
+	assert( j < numPoolEntries( i ) );
+	varSinit(i)[j] = v;
+}
+
+double GslStoich::getNinit( const Eref& e ) const
+{
+	unsigned int i = e.index().value();
+	unsigned int j = stoich_->convertIdToPoolIndex( e.id() );
+	assert( i < numMeshEntries() );
+	assert( j < numPoolEntries( i ) );
+	return Sinit(i)[j];
+}
+
+void GslStoich::setSpecies( const Eref& e, unsigned int v )
+{
+	unsigned int j = stoich_->convertIdToPoolIndex( e.id() );
+	assert( j < numPoolEntries( e.index().value() ) );
+	stoich_->setSpecies( j, v );
+}
+
+unsigned int GslStoich::getSpecies( const Eref& e )
+{
+	unsigned int j = stoich_->convertIdToPoolIndex( e.id() );
+	assert( j < numPoolEntries( e.index().value() ) );
+	return stoich_->getSpecies( j );
+}
+
+void GslStoich::setDiffConst( const Eref& e, double v )
+{
+	unsigned int j = stoich_->convertIdToPoolIndex( e.id() );
+	assert( j < numPoolEntries( e.index().value() ) );
+	stoich_->setDiffConst( j, v );
+}
+
+double GslStoich::getDiffConst( const Eref& e ) const
+{
+	unsigned int j = stoich_->convertIdToPoolIndex( e.id() );
+	assert( j < numPoolEntries( e.index().value() ) );
+	return stoich_->getDiffConst( j );
 }

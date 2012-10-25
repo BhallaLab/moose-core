@@ -19305,6 +19305,24 @@ Made the GslStoich, compiles. Now to set up some tests for this whole
 subsystem. So far I have StoichCore, StoichPools, and GslStoich. Between them
 they should handle most of the functionality of the original Stoich.
 
-Set up a test in testKsolve.cpp, doesn't clear it yet.
+Set up a test in testKsolve.cpp, doesn't clear it yet. Checkin 4182.
 
 
+
+Can clean up n and nInit access by having innerGetN and innerGetNinit on the
+GslStoich. But I still need to handle DiffConst, and Species. Either I
+make the StoichCore accessible from the GslStoich, or I provide these as
+virtual funcs from the StoichPools class.
+	We have to choose between various kinds of ugliness:
+	- Providing a bunch of virtual wrapper set/get funcs in StoichPools, and
+	- Using the Id::value() as an integer index for all these funcs.
+	Or:
+	- Exposing the StoichCore from the StoichPools as a virtual func.
+
+The virtual wrappers have the merit that they let us handle meshing within
+the GslStoichs. More complicated threadwise lookup is then easier.
+
+============================================================================
+25 Oct 2012.
+Added ZPool class, so we can incrementally convert from the old Zombie class.
+Compiles.
