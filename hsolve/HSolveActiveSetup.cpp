@@ -14,6 +14,7 @@
 #include "../biophysics/HHGate.h"
 #include "../biophysics/ChanBase.h"
 #include "../biophysics/HHChannel.h"
+#include "../biophysics/SpikeGen.h"
 #include "HSolveUtils.h"
 #include "HSolveStruct.h"
 #include "HinesMatrix.h"
@@ -34,8 +35,9 @@ void HSolveActive::setup( Id seed, double dt ) {
 	readGates();
 	readCalcium();
 	createLookupTables();
-	readSynapses();
+	readSynapses(); // Reads SynChans, SpikeGens. Drops process msg for SpikeGens.
 	readExternalChannels();
+	manageOutgoingMessages(); // Manages messages going out from the cell's components.
 	
 	reinit();
 	cleanup();
@@ -466,6 +468,16 @@ void HSolveActive::createLookupTables() {
 	}
 }
 
+/**
+ * Reads in SynChans and SpikeGens.
+ * 
+ * Unlike Compartments, HHChannels, etc., neither of these are zombified.
+ * In other words, their fields are not managed by HSolve, and their "process"
+ * functions are invoked to do their calculations. For SynChans, the process
+ * calls are made by their respective clocks, and hence the process message is
+ * not dropped. On the other hand, we drop the SpikeGen process messages here,
+ * and explicitly call the SpikeGen process() from the HSolve via a pointer.
+ */
 void HSolveActive::readSynapses() {
 	vector< Id > spikeId;
 	vector< Id > synId;
@@ -482,14 +494,24 @@ void HSolveActive::readSynapses() {
 			synchan_.push_back( synchan );
 		}
 		
+		static const Finfo* procDest = SpikeGen::initCinfo()->findFinfo( "process");
+		assert( procDest );
+		const DestFinfo* df = dynamic_cast< const DestFinfo* >( procDest );
+		assert( df );
+		
 		spikeId.clear();
 		HSolveUtils::spikegens( compartmentId_[ ic ], spikeId );
 		// Very unlikely that there will be >1 spikegens in a compartment,
 		// but lets take care of it anyway.
-		for ( spike = spikeId.begin(); spike != spikeId.end(); ++spike )
+		for ( spike = spikeId.begin(); spike != spikeId.end(); ++spike ) {
 			spikegen_.push_back(
 				SpikeGenStruct( &V_[ ic ], spike->eref() )
 			);
+			
+			MsgId mid = spike->element()->findCaller( df->getFid() );
+			if ( mid != Msg::bad )
+				Msg::deleteMsg( mid );
+		}
 	}
 }
 
@@ -509,6 +531,57 @@ void HSolveActive::readExternalChannels() {
 			//~ filter,
 			//~ false    // include = false. That is, use filter to exclude.
 		//~ );
+}
+
+void HSolveActive::manageOutgoingMessages() {
+	vector< Id > targets;
+	vector< string > filter;
+	
+	/*
+	 * Going through all comparments, and finding out which ones have external
+	 * targets through the VmOut msg. External refers to objects that do not
+	 * belong the cell being managed by this HSolve. We find these by excluding
+	 * any HHChannels and SpikeGens from the VmOut targets. These will then
+	 * be used in HSolveActive::sendValues() to send out the messages behalf of
+	 * the original objects.
+	 */
+	filter.push_back( "HHChannel" );
+	filter.push_back( "SpikeGen" );
+	for ( unsigned int ic = 0; ic < compartmentId_.size(); ++ic ) {
+		targets.clear();
+		
+		int nTargets = HSolveUtils::targets(
+			compartmentId_[ ic ],
+			"VmOut",
+			targets,
+			filter,
+			false    // include = false. That is, use filter to exclude.
+		);
+		
+		if ( nTargets )
+			outVm_.push_back( ic );
+	}
+	
+	/*
+	 * As before, going through all CaConcs, and finding any which have external
+	 * targets.
+	 */
+	filter.clear();
+	filter.push_back( "HHChannel" );
+	for ( unsigned int ica = 0; ica < caConcId_.size(); ++ica ) {
+		targets.clear();
+		
+		int nTargets = HSolveUtils::targets(
+			caConcId_[ ica ],
+			"concOut",
+			targets,
+			filter,
+			false    // include = false. That is, use filter to exclude.
+		);
+		
+		if ( nTargets )
+			outCa_.push_back( ica );
+	}
 }
 
 void HSolveActive::cleanup() {
