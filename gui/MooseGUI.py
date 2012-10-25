@@ -469,17 +469,20 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             pass
         elif modeltype == MooseHandler.type_neuroml:
             #self.mooseHandler.updateClocks(MooseHandler.DEFAULT_SIMDT, MooseHandler.DEFAULT_PLOTDT)
-            #use Aditya's method to assign clocks - also reinits!
-            ## Exponential Euler
-            #mooseUtils.resetSim(['/cells','/elec'], MooseHandler.DEFAULT_SIMDT, MooseHandler.DEFAULT_PLOTDT)
-            ## HSolve
-            h = moose.HSolve( '/cells/solve' )
-            h.dt = MooseHandler.DEFAULT_SIMDT
-            h.target = '/cells'
-            mooseUtils.resetSim(['/cells','/elec'],
-                MooseHandler.DEFAULT_SIMDT, MooseHandler.DEFAULT_PLOTDT, hsolve_path='/cells/solve')
-            
-#            print MooseHandler.DEFAULT_SIMDT, MooseHandler.DEFAULT_PLOTDT
+            #print MooseHandler.DEFAULT_SIMDT, MooseHandler.DEFAULT_PLOTDT
+            if moose.exists('/cells'):
+                #use Aditya's method to assign clocks - also reinits!
+                ## Exponential Euler
+                #mooseUtils.resetSim(['/cells','/elec'], MooseHandler.DEFAULT_SIMDT, MooseHandler.DEFAULT_PLOTDT)
+                ## HSolve
+                h = moose.HSolve( '/cells/solve' )
+                h.dt = MooseHandler.DEFAULT_SIMDT
+                h.target = '/cells'
+                mooseUtils.resetSim(['/cells','/elec'],
+                    MooseHandler.DEFAULT_SIMDT, MooseHandler.DEFAULT_PLOTDT, hsolve_path='/cells/solve')
+            else:
+                print "This NeuroML model does not have any <population> of cells."
+                print "You need to load a NetworkML or NeuroML level 3 model."
         elif modeltype == MooseHandler.type_python:
             #specific for the hopfield tutorial!
             #self.mooseHandler.updateClocks(MooseHandler.DEFAULT_SIMDT, MooseHandler.DEFAULT_PLOTDT)
@@ -492,7 +495,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             moose.useClock(2, '/hopfield/##[TYPE=SpikeGen]', 'process')
             moose.useClock(8, '/hopfield/##[TYPE=Table]', 'process') 
         else:
-            print 'Clocks have not been assigned! - GUI does not supported this format yet'
+            print 'Clocks have not been assigned! - GUI does not support this format yet'
 
     def checkModelForNeurons(self):
         self.allCompartments = mooseUtils.findAllBut('/##[TYPE=Compartment]','library')
