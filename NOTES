@@ -19338,6 +19338,6 @@ zonation of the threads.
 Got the GslSolver system to load in a model, yet to see if it did so correctly.
 
 Numerous fixes later, GslSolver now clears unit tests comparing output of
-a simple reaction with analytic solution.
+a simple reaction with analytic solution. Checkin 4190.
 
 ============================================================================
