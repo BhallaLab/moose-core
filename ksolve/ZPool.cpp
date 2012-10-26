@@ -59,6 +59,7 @@ static const SrcFinfo1< double >* requestSize =
     zombiePoolCinfo->findFinfo( "requestSize" ) );
 
 ZPool::ZPool()
+		: stoich_( 0 )
 {;}
 
 ZPool::~ZPool()

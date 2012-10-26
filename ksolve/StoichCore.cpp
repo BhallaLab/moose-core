@@ -147,6 +147,9 @@ void StoichCore::setPath( const Eref& e, const Qinfo* q, string v )
 
 	allocateObjMap( elist );
 	allocateModel( elist );
+	ObjId pa = Neutral::parent( e );
+	if ( pa.element()->cinfo()->findFinfo( "stoich" ) )
+		SetGet1< Id >::setRepeat( pa.id, "stoich", e.id() );
 	zombifyModel( e, elist );
 }
 
@@ -163,6 +166,13 @@ double StoichCore::getEstimatedDt() const
 unsigned int StoichCore::getNumVarPools() const
 {
 	return numVarPools_;
+}
+
+unsigned int StoichCore::getNumAllPools() const
+{
+	assert( diffConst_.size() == 
+					numVarPools_ + numBufPools_ + numFuncPools_ );
+	return numVarPools_ + numBufPools_ + numFuncPools_;
 }
 
 //////////////////////////////////////////////////////////////

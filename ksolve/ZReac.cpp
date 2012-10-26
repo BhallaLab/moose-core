@@ -51,6 +51,7 @@ static const SrcFinfo2< double, double >* toPrd =
 					zombieReacCinfo->findFinfo( "toPrd" ) );
 
 ZReac::ZReac()
+		: stoich_( 0 )
 {;}
 
 ZReac::~ZReac()
