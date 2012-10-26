@@ -197,14 +197,7 @@ void HSolve::process( const Eref& hsolve, ProcPtr p )
 
 void HSolve::reinit( const Eref& hsolve, ProcPtr p )
 {
-	//~ if ( seed_ == Id() )
-		//~ return;
-	//~ 
-	//~ // Setup solver.
-	//~ this->HSolveActive::setup( seed_, p->dt );
-	//~ 
-	//~ zombify( hsolve );
-	//~ mapIds();
+	this->HSolveActive::reinit();
 }
 
 void HSolve::zombify( Eref hsolve ) const
