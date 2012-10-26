@@ -19,6 +19,8 @@
 #include <gsl/gsl_odeiv.h>
 #include "ElementValueFinfo.h"
 #include "GslIntegrator.h"
+#include "StoichPools.h"
+#include "GslStoich.h"
 #include "../shell/Shell.h"
 #include "ReadKkit.h"
 
@@ -286,6 +288,8 @@ Id makeSimpleReac( Shell* s )
 	Id reac = s->doCreate( "Reac", meshA, "reac", dims );
 
 	Field< double >::set( poolA, "nInit", 100 );
+	Field< double >::set( reac, "Kf", 0.1 );
+	Field< double >::set( reac, "Kb", 0.1 );
 
 	MsgId mid = s->doAddMsg( "OneToOne", poolA, "mesh", meshEntryA, "mesh");
 	assert( mid != Msg::bad );
@@ -318,10 +322,34 @@ void testGslStoich()
 	Id stoichA = s->doCreate( "StoichCore", solver, "stoichA", dims );
 	assert ( stoichA != Id() );
 	Field< string >::set( stoichA, "path", "/model/meshA/##" );
-	// SetGet1< Id >::set( solver, "stoich", stoichA );
 	unsigned int nVarPools = 
 			Field< unsigned int >::get( stoichA, "nVarPools" );
 	assert( nVarPools == 2 );
+	GslStoich* gs = reinterpret_cast< GslStoich* >( solver.eref().data() );
+	ProcInfo p;
+	p.dt = 1;
+	p.currTime = 0;
+
+	Id poolA( "/model/meshA/A" );
+	assert( poolA != Id() );
+	double x = Field< double >::get( poolA, "nInit" );
+	assert( doubleEq( x, 100 ) );
+	x = Field< double >::get( poolA, "n" );
+	assert( doubleEq( x, 0 ) );
+
+	gs->reinit( solver.eref(), &p );
+
+	x = Field< double >::get( poolA, "nInit" );
+	assert( doubleEq( x, 100 ) );
+	x = Field< double >::get( poolA, "n" );
+	assert( doubleEq( x, 100 ) );
+
+	for ( p.currTime = 0.0; p.currTime < 100.5; p.currTime += p.dt ) {
+		double n = Field< double >::get( poolA, "n" );
+		// cout << p.currTime << "	" << n << "	" << 50 + 50 * exp( -p.currTime * 0.2 ) << endl;
+		assert( doubleEq( n, 50 + 50 * exp( -p.currTime * 0.2 ) ) );
+		gs->process( solver.eref(), &p );
+	}
 
 	//MsgId mid = s->doAddMsg( "Single", meshA, "meshSplit", solver, "remesh" );
 	// assert( mid != Msg::bad );

@@ -261,6 +261,8 @@ void GslStoich::stoich( const Eref& e, const Qinfo* q, Id stoichId )
 	unsigned int nVarPools = stoich_->getNumVarPools();
 	// stoich_->clearFlux();
 	resizeArrays( stoich_->getNumAllPools() );
+	vector< double > temp( stoich_->getNumVarPools(), 0.0 );
+	y_.resize( numMeshEntries(), temp );
 
 	isInitialized_ = 1;
         // Allocate GSL functions if not already allocated,
@@ -295,7 +297,7 @@ void GslStoich::stoich( const Eref& e, const Qinfo* q, Id stoichId )
         assert(gslControl_!= 0);
         
         
-	gslSys_.function = &Stoich::gslFunc;
+	gslSys_.function = &GslStoich::gslFunc;
 	gslSys_.jacobian = 0;
 	gslSys_.dimension = nVarPools;
 	gslSys_.params = static_cast< void* >( this );
@@ -336,6 +338,11 @@ void GslStoich::reinit( const Eref& e, ProcPtr info )
 	// stoich_->clearFlux();
 	// stoich_->innerReinit();
 	unsigned int nVarPools = stoich_->getNumVarPools();
+	for ( unsigned int i = 0; i < numMeshEntries(); ++i ) {
+		memcpy( varS( i ), Sinit( i ), nVarPools * sizeof( double ) );
+		memcpy( &(y_[i][0]), Sinit( i ), nVarPools * sizeof( double ) );
+	}
+
 #ifdef USE_GSL
 	if ( isInitialized_ ) {
         assert( gslStepType_ != 0 );
