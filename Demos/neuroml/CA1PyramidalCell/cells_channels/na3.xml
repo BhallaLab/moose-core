@@ -52,7 +52,7 @@
           <parameter name="ar" value ="1"/>  <!--Note: Changing this parameter from 1 will not enable the inactivation gate s!-->
         </parameters>
 
-        <current_voltage_relation cond_law="ohmic" ion="na" default_gmax="25" default_erev="50">
+        <current_voltage_relation cond_law="ohmic" ion="na" default_gmax="25" default_erev="60">
 
             <q10_settings gate="m" q10_factor="2" experimental_temp="24"/>
             <q10_settings gate="h" q10_factor="2" experimental_temp="24"/>

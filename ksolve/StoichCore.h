@@ -23,6 +23,7 @@ class StoichCore
 		void setOneWay( bool v );
 		bool getOneWay() const;
 		unsigned int getNumVarPools() const;
+		unsigned int getNumAllPools() const;
 
 		void setPath( const Eref& e, const Qinfo* q, string v );
 		string getPath( const Eref& e, const Qinfo* q ) const;
@@ -86,24 +87,6 @@ class StoichCore
 		 */
 		void installEnzyme( ZeroOrder* r1, ZeroOrder* r2, ZeroOrder* r3,
 			Id enzId, Id enzMolId, const vector< Id >& prds );
-
-		/**
-		 * Returns the vector of doubles of current mol #s at the specified
-		 * mesh index
-		 */
-		const double* S( unsigned int meshIndex ) const;
-
-		/**
-		 * Returns the vector of doubles of current mol #s at the specified
-		 * mesh index. Dangerous, allows one to modify the values.
-		 */
-		double* varS( unsigned int meshIndex );
-
-		/**
-		 * Returns the vector of doubles of initial mol #s at the specified
-		 * mesh index
-		 */
-		const double* Sinit( unsigned int meshIndex ) const;
 
 		/**
 		 * Returns diffusion rate of specified pool

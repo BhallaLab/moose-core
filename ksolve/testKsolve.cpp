@@ -310,14 +310,18 @@ void testGslStoich()
 	// Create solver 
 	Id meshA( "/model/meshA" );
 	assert ( meshA != Id() );
-	Id stoichA = s->doCreate( "StoichCore", model, "stoichA", dims );
+	// This sequence is somewhat messy. We must create the core on the
+	// GslStoich. We then must assign the path to the StoichCore, 
+	// use the converted model to allocate the arrays in the GslStoich,
+	// and when this is done we can complete zombification.
+	Id solver = s->doCreate( "GslStoich", model, "solver", dims );
+	Id stoichA = s->doCreate( "StoichCore", solver, "stoichA", dims );
 	assert ( stoichA != Id() );
 	Field< string >::set( stoichA, "path", "/model/meshA/##" );
+	// SetGet1< Id >::set( solver, "stoich", stoichA );
 	unsigned int nVarPools = 
 			Field< unsigned int >::get( stoichA, "nVarPools" );
 	assert( nVarPools == 2 );
-	Id solver = s->doCreate( "GslStoich", model, "solver", dims );
-	SetGet1< Id >::set( solver, "stoich", stoichA );
 
 	//MsgId mid = s->doAddMsg( "Single", meshA, "meshSplit", solver, "remesh" );
 	// assert( mid != Msg::bad );
@@ -329,5 +333,5 @@ void testGslStoich()
 void testKineticSolvers()
 {
 	testInterMeshReac();
-//	testGslStoich();
+	testGslStoich();
 }
