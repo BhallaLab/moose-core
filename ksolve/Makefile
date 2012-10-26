@@ -22,7 +22,9 @@ OBJ = \
 	ZombieReac.o \
 	ZReac.o \
 	ZombieEnz.o \
+	ZEnz.o \
 	ZombieMMenz.o \
+	ZMMenz.o \
 	ZombieSumFunc.o \
 	RateTerm.o \
 	FuncTerm.o \
@@ -80,7 +82,9 @@ ZombieFuncPool.o:	../kinetics/PoolBase.h ZombiePool.h ZombieFuncPool.h ZombieSum
 ZombieReac.o:	../kinetics/ReacBase.h ../kinetics/Reac.h ZombieReac.h
 ZReac.o:	../kinetics/ReacBase.h ZReac.h
 ZombieEnz.o:	ZombieEnz.h
+ZEnz.o:	ZEnz.h
 ZombieMMenz.o:	ZombieMMenz.h
+ZMMenz.o:	ZMMenz.h
 ZombieSumFunc.o:	../kinetics/SumFunc.h ZombieSumFunc.h
 testKsolve.o:	../kinetics/ReadKkit.h ../shell/Shell.h
 RateTerm.o:		RateTerm.h
