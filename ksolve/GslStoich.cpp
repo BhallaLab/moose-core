@@ -260,6 +260,7 @@ void GslStoich::stoich( const Eref& e, const Qinfo* q, Id stoichId )
 	stoich_ = reinterpret_cast< StoichCore* >( stoichId.eref().data() );
 	unsigned int nVarPools = stoich_->getNumVarPools();
 	// stoich_->clearFlux();
+	resizeArrays( stoich_->getNumAllPools() );
 
 	isInitialized_ = 1;
         // Allocate GSL functions if not already allocated,

@@ -45,6 +45,7 @@ unsigned int getReactantVols( const Eref& reac, const SrcFinfo* pools,
 	static const unsigned int meshIndex = 0;
 	static const Cinfo* poolCinfo = Cinfo::find( "Pool" );
 	static const Cinfo* zombiePoolCinfo = Cinfo::find( "ZombiePool" );
+	static const Cinfo* zPoolCinfo = Cinfo::find( "ZPool" );
 
 	static const Finfo* f1 = poolCinfo->findFinfo( "requestSize" );
 	static const SrcFinfo* poolRequestSize = 
@@ -53,6 +54,10 @@ unsigned int getReactantVols( const Eref& reac, const SrcFinfo* pools,
 	static const Finfo* f2 = zombiePoolCinfo->findFinfo( "requestSize" );
 	static const SrcFinfo* zombiePoolRequestSize = 
 		dynamic_cast< const SrcFinfo* >( f2 );
+
+	static const Finfo* f3 = zPoolCinfo->findFinfo( "requestSize" );
+	static const SrcFinfo* zPoolRequestSize = 
+		dynamic_cast< const SrcFinfo* >( f3 );
 
 	const vector< MsgFuncBinding >* mfb = 
 		reac.element()->getMsgAndFunc( pools->getBindIndex() );
@@ -72,6 +77,8 @@ unsigned int getReactantVols( const Eref& reac, const SrcFinfo* pools,
 				v = lookupSizeFromMesh( pooler, poolRequestSize );
 			} else if ( pool->cinfo()->isA( "ZombiePool" ) ) {
 				v = lookupSizeFromMesh( pooler, zombiePoolRequestSize );
+			} else if ( pool->cinfo()->isA( "ZPool" ) ) {
+				v = lookupSizeFromMesh( pooler, zPoolRequestSize );
 			} else {
 				cout << "Error: getReactantVols: pool is neither regular nor zombie\n";
 				assert( 0 );

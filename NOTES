@@ -19333,4 +19333,8 @@ zombifying pools.  Other issue is to assign the correct GslStoich to each
 Pool. When remeshed, I would have to have a distinct GslStoich matching the
 zonation of the threads.
 
+============================================================================
+26 Oct 2012.
+Got the GslSolver system to load in a model, yet to see if it did so correctly.
 
+============================================================================
