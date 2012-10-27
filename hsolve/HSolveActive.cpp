@@ -115,18 +115,17 @@ void HSolveActive::updateMatrix() {
 		value.injectVarying = 0.0;
 	}
 	
-	double Gk, Ek;
-	vector< SynChanStruct >::iterator isyn;
-	for ( isyn = synchan_.begin(); isyn != synchan_.end(); ++isyn ) {
+	// Synapses are being handled as external channels.
+	//~ double Gk, Ek;
+	//~ vector< SynChanStruct >::iterator isyn;
+	//~ for ( isyn = synchan_.begin(); isyn != synchan_.end(); ++isyn ) {
 		//~ get< double >( isyn->elm_, synGkFinfo, Gk );
 		//~ get< double >( isyn->elm_, synEkFinfo, Ek );
-		Gk = 0.0;
-		Ek = 0.0;
-		
-		unsigned int ic = isyn->compt_;
-		HS_[ 4 * ic ] += Gk;
-		HS_[ 4 * ic + 3 ] += Gk * Ek;
-	}
+		//~ 
+		//~ unsigned int ic = isyn->compt_;
+		//~ HS_[ 4 * ic ] += Gk;
+		//~ HS_[ 4 * ic + 3 ] += Gk * Ek;
+	//~ }
 	
 	ihs = HS_.begin();
 	vector< double >::iterator iec;

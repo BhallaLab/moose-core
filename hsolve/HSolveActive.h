@@ -19,7 +19,7 @@ public:
 	
 	void setup( Id seed, double dt );
 	void step( ProcPtr info );
-	void reinit();
+	void reinit( ProcPtr info );
 	
 protected:
 	/**
