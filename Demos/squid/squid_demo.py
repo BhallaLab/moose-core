@@ -713,7 +713,8 @@ class SquidGui(QtGui.QMainWindow):
         self._helpMessageText.setOpenExternalLinks(True)
         self._helpMessageArea.setWidget(self._helpMessageText)
         layout.addWidget(self._helpMessageText)
-        self._helpBaseURL = 'help.html'
+        self._squidGuiPath = os.path.dirname(os.path.abspath(__file__))
+        self._helpBaseURL = os.path.join(self._squidGuiPath,'help.html')
         self._helpMessageText.setSource(QtCore.QUrl(self._helpBaseURL))
         self._helpMessageText.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         self._helpMessageArea.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)

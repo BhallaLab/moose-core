@@ -45,8 +45,11 @@ def copyDemos():
     (i.e. not running from <source>/gui dir,
     but running moosegui after 'make install' / package)
     and copy the demos to ~/moose/Demos if so."""
-    if config.settings[config.KEY_FIRSTTIME] in ['True', 'true', '1', 'Yes', 'yes', 'Y'] and \
-            not config.settings[config.KEY_LOCAL_BUILD]:
+    ## Note that config.settings[...] returns a string 'true'/'false'
+    ## and not a boolean variable! Hence the str checks...
+    true_strs = ['True', 'true', '1', 'Yes', 'yes', 'Y']
+    if (config.settings[config.KEY_FIRSTTIME] in true_strs) and \
+            (config.settings[config.KEY_LOCAL_BUILD] not in true_strs):
         print 'Copying demos'
         progressDialog = QtGui.QProgressDialog()
         progressDialog.setLabelText('Copying the MOOSE demos to your home directory')
