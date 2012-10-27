@@ -48,7 +48,7 @@ def loadGran98NeuroML_L123(filename):
 
 if __name__ == "__main__":
     if len(sys.argv)<2:
-        filename = "CA1.net.xml"
+        filename = "CA1soma.net.xml"
     else:
         filename = sys.argv[1]
 loadGran98NeuroML_L123(filename)

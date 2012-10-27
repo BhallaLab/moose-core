@@ -5,6 +5,8 @@
         <cell name="CA1soma">
 
             <meta:notes>Only soma of more detailed cell</meta:notes>
+            <meta:notes>MOOSE NeuroML importer still does not support changing channel parameters post load and inhomogenous tags. Thus this model has been modified.
+            All inhomogeneous tags have been removed. All changed channel parameters have been hardcoded into modified channels.</meta:notes>
 
             <mml:segments>
 
@@ -37,12 +39,8 @@
 
             <biophysics units="Physiological Units">
 
-                <bio:mechanism name="hd" type="Channel Mechanism">
+                <bio:mechanism name="hd_minus73" type="Channel Mechanism">
                     <bio:parameter name="gmax" value="0.05">
-                        <bio:group>all</bio:group>
-                    </bio:parameter>
-                    <bio:parameter name="vhalfl" value="-73.0">    <!--Note: Units of extra parameters are not known, except if it's e!!-->
-
                         <bio:group>all</bio:group>
                     </bio:parameter>
                 </bio:mechanism>

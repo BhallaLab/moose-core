@@ -5,8 +5,7 @@
         <cell name="CA1">
 
             <meta:notes>Cell exported from NEURON ModelView in NeuroML Level 2 format and imported into neuroConstruct. The densities of hd, kap, kad have been replaced with variable mechanisms recreating the densities as used in the original model from ModelDB.</meta:notes>
-            <meta:notes>MOOSE NeuroML importer still does not support changing channel parameters post load and inhomogenous tags. Thus this model has been modified.
-            All inhomogeneous tags have been removed. All changed channel parameters have been hardcoded into modified channels.</meta:notes>
+
             <mml:segments>
 
                 <mml:segment id="0" name="Seg0_soma_0" cable="0">
@@ -12533,22 +12532,25 @@
 
             <biophysics units="Physiological Units">
 
-                <bio:mechanism name="kdr" type="Channel Mechanism">
-                    <bio:parameter name="gmax" value="10.0">
-                        <bio:group>all</bio:group>
-                    </bio:parameter>
-                </bio:mechanism>
-
-                <bio:mechanism name="kap" type="Channel Mechanism">
-                    <bio:parameter name="gmax" value="30.0">
-                        <bio:group>axon_group</bio:group>
+                <!-- If you add NaF and KDr to the axon_group also, you'll get tiny spikelets alongwith the usual spikes!! -->
+                
+                <bio:mechanism name="Gran_KDr_98" type="Channel Mechanism">
+                    <bio:parameter name="gmax" value="4000.0">
+                        <!--<bio:group>axon_group</bio:group>-->
                         <bio:group>soma_group</bio:group>
                     </bio:parameter>
                 </bio:mechanism>
 
-                <!--<bio:mechanism name="hd" type="Channel Mechanism">
-                    <bio:parameter name="gmax" value="-1.0E8">
-                        <bio:group>ModelViewParmSubset_5</bio:group>
+                <bio:mechanism name="Gran_NaF_98" type="Channel Mechanism">
+                    <bio:parameter name="gmax" value="5000.0">
+                        <!--<bio:group>axon_group</bio:group>-->
+                        <bio:group>soma_group</bio:group>
+                    </bio:parameter>
+                </bio:mechanism>
+
+<!--                <bio:mechanism name="Purkinje_KA" type="Channel Mechanism">
+                    <bio:parameter name="gmax" value="500.0">
+                        <bio:group>soma_group</bio:group>
                     </bio:parameter>
                 </bio:mechanism>-->
 
@@ -12559,29 +12561,8 @@
                     <bio:parameter name="gmax" value="0.0357143">
                         <bio:group>all</bio:group>
                     </bio:parameter>
-                </bio:mechanism>
-
-                <!--<bio:mechanism name="hd_minus73" type="Channel Mechanism">
-                    <bio:parameter name="gmax" value="-1.0E8">
-                        <bio:group>ModelViewParmSubset_7</bio:group>
-                    </bio:parameter>
-                </bio:mechanism>-->
-
-                <bio:mechanism name="hd_minus73" type="Channel Mechanism">
-                    <bio:parameter name="gmax" value="0.05">
+                    <bio:parameter name="inject" value="3.0e-4">
                         <bio:group>soma_group</bio:group>
-                    </bio:parameter>
-                </bio:mechanism>
-
-                <bio:mechanism name="nax" type="Channel Mechanism">
-                    <bio:parameter name="gmax" value="125.0">
-                        <bio:group>OneSecGrp_SectionRef_5</bio:group>
-                    </bio:parameter>
-                </bio:mechanism>
-
-                <bio:mechanism name="na3" type="Channel Mechanism">
-                    <bio:parameter name="gmax" value="25.0">
-                        <bio:group>ModelViewParmSubset_2</bio:group>
                     </bio:parameter>
                 </bio:mechanism>
 
