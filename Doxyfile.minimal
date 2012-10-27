@@ -459,7 +459,7 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-INPUT                  = ./Docs ./basecode ./biophysics ./builtins ./kinetics ./ksolve ./msg ./randnum ./scheduling ./shell
+INPUT                  = ./Docs ./basecode ./biophysics ./builtins ./device ./geom ./hsolve ./kinetics ./ksolve ./manager ./mesh ./msg ./randnum ./sbml ./scheduling ./shell ./signeur ./smol ./testReduce ./threadTests ./utility
 
 # If the value of the INPUT tag contains directories, you can use the 
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 
@@ -520,7 +520,7 @@ EXAMPLE_RECURSIVE      = NO
 # directories that contain image that are included in the documentation (see 
 # the \image command).
 
-IMAGE_PATH             = 
+IMAGE_PATH             = ./Docs/images
 
 # The INPUT_FILTER tag can be used to specify a program that doxygen should 
 # invoke to filter for each input file. Doxygen will invoke the filter program 
