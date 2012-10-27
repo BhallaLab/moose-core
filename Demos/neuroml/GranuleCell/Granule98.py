@@ -17,7 +17,7 @@ from moose.neuroml.NeuroML import NeuroML
 
 from pylab import *
 
-simdt = 10e-6 # s
+simdt = 1e-6 # s
 plotdt = 10e-6 # s
 runtime = 0.7 # s
 
@@ -35,7 +35,7 @@ def loadGran98NeuroML_L123(filename):
     resetSim(['/elec','/cells'],simdt,plotdt) # from moose.utils
     print "Running ... "
     moose.start(runtime)
-    tvec = arange(0.0,runtime,simdt)
+    tvec = arange(0.0,runtime,plotdt)
     plot(tvec,somaVm.vec[1:])
     title('Soma Vm')
     xlabel('time (s)')

@@ -23,11 +23,11 @@ SIMDT = 25e-6 # s
 PLOTDT = 25e-6 # s
 RUNTIME = 1.0 # s
 
-injectmax = 200e-12 # Amperes
+injectmax = 2e-12 # Amperes
 
 neuromlR = NeuroML()
-neuromlR.readNeuroMLFromFile('cells_channels/CA1.morph.xml')
-libcell = moose.Neuron('/library/CA1')
+neuromlR.readNeuroMLFromFile('cells_channels/CA1soma.morph.xml')
+libcell = moose.Neuron('/library/CA1soma')
 CA1Cellid = moose.copy(libcell,moose.Neutral('/cells'),'CA1')
 CA1Cell = moose.Neuron(CA1Cellid)
 #printCellTree(CA1Cell)
@@ -36,6 +36,7 @@ CA1Cell = moose.Neuron(CA1Cellid)
 spikeGen = moose.SpikeGen(CA1Cell.path+'/spikeGen')
 spikeGen.threshold = -30e-3 # V
 CA1CellSoma = moose.Compartment(CA1Cell.path+'/Seg0_soma_0_0')
+CA1CellSoma.inject = 0 # by default the cell has a current injection
 moose.connect(CA1CellSoma,'VmOut',spikeGen,'Vm')
 ## save spikes in table
 table_path = moose.Neutral(CA1Cell.path+'/data').path
@@ -45,12 +46,17 @@ moose.connect(spikeGen,'event',CA1CellSpikesTable,'input')
 #CA1CellVmTable = moose.Table(table_path+'/vmTable')
 #moose.connect(CA1CellSoma,'VmOut',CA1CellVmTable,'input')
 
+cells_path = '/cells'
+h = moose.HSolve( cells_path+'/solve' )
+h.dt = SIMDT
+h.target = cells_path
+
 ## from moose_utils.py sets clocks and resets/reinits
-resetSim(['/cells'], SIMDT, PLOTDT)
+resetSim(['/cells'],SIMDT,PLOTDT,hsolve_path=cells_path+'/solve') # from moose.utils
 
 ## Loop through different current injections
 freqList = []
-currentvec = arange(100e-12, injectmax, injectmax/50.0)
+currentvec = arange(0, injectmax, injectmax/50.0)
 for currenti in currentvec:
     moose.reinit()
     CA1CellSoma.inject = currenti
