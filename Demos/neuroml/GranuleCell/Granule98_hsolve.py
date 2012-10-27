@@ -19,7 +19,7 @@ from moose.neuroml.NeuroML import NeuroML
 from pylab import *
 
 simdt = 10e-6 # s
-plotdt = 100e-6 # s
+plotdt = 10e-6 # s
 runtime = 0.7 # s
 cells_path = '/cells' # neuromlR.readNeuroMLFromFile creates cells in '/cells'
 
