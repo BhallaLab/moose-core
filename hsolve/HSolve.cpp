@@ -197,7 +197,7 @@ void HSolve::process( const Eref& hsolve, ProcPtr p )
 
 void HSolve::reinit( const Eref& hsolve, ProcPtr p )
 {
-	this->HSolveActive::reinit();
+	this->HSolveActive::reinit( p );
 }
 
 void HSolve::zombify( Eref hsolve ) const

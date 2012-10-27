@@ -39,7 +39,7 @@ void HSolveActive::setup( Id seed, double dt ) {
 	readExternalChannels();
 	manageOutgoingMessages(); // Manages messages going out from the cell's components.
 	
-	reinit();
+	//~ reinit();
 	cleanup();
 	
 	//~ cout << "# of compartments: " << compartmentId_.size() << "." << endl;
@@ -51,10 +51,13 @@ void HSolveActive::setup( Id seed, double dt ) {
 	//~ cout << "# of SpikeGens: " << spikegen_.size() << "." << endl;
 }
 
-void HSolveActive::reinit() {
+void HSolveActive::reinit( ProcPtr info ) {
+	externalCurrent_.assign( externalCurrent_.size(), 0.0 );
+	
 	reinitCompartments();
 	reinitCalcium();
 	reinitChannels();
+	sendValues( info );
 }
 
 void HSolveActive::reinitCompartments() {
