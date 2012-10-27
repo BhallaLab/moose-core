@@ -18,7 +18,9 @@ OBJ = \
 	ZombiePool.o \
 	ZPool.o \
 	ZombieBufPool.o \
+	ZBufPool.o \
 	ZombieFuncPool.o \
+	ZFuncPool.o \
 	ZombieReac.o \
 	ZReac.o \
 	ZombieEnz.o \
@@ -78,7 +80,9 @@ KinSparseMatrix.o:	KinSparseMatrix.h ../basecode/SparseMatrix.h
 ZombiePool.o:	../kinetics/PoolBase.h ZombiePool.h
 ZPool.o:	../kinetics/PoolBase.h ZPool.h
 ZombieBufPool.o:	../kinetics/PoolBase.h ZombiePool.h ZombieBufPool.h
+ZBufPool.o:	../kinetics/PoolBase.h ZPool.h ZBufPool.h
 ZombieFuncPool.o:	../kinetics/PoolBase.h ZombiePool.h ZombieFuncPool.h ZombieSumFunc.h
+ZFuncPool.o:	../kinetics/PoolBase.h ZPool.h ZFuncPool.h
 ZombieReac.o:	../kinetics/ReacBase.h ../kinetics/Reac.h ZombieReac.h
 ZReac.o:	../kinetics/ReacBase.h ZReac.h
 ZombieEnz.o:	ZombieEnz.h
