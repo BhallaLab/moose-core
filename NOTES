@@ -19339,5 +19339,10 @@ Got the GslSolver system to load in a model, yet to see if it did so correctly.
 
 Numerous fixes later, GslSolver now clears unit tests comparing output of
 a simple reaction with analytic solution. Checkin 4190.
+Added in clones for ZombieEnz and ZombieMMEnz into the GslSolver fold.
+Checkin 4192.
+
+Working on SumFuncs. This is messy. Should define a generic func system base
+class like I have for Pools etc.
 
 ============================================================================
