@@ -24,6 +24,9 @@ OBJ = \
 	ReadKkit.o	\
 	WriteKkit.o	\
 	ReadCspace.o	\
+	SumTotalTerm.o	\
+	MathFuncTerm.o	\
+	FuncBase.o	\
 	MathFunc.o	\
 	SumFunc.o	\
 	lookupSizeFromMesh.o	\
@@ -54,8 +57,11 @@ Species.o:	Species.h
 ReadKkit.o:	lookupSizeFromMesh.h ReadKkit.h PoolBase.h Pool.h FuncPool.h ../shell/Shell.h 
 WriteKkit.o:	lookupSizeFromMesh.h PoolBase.h
 ReadCspace.o:	lookupSizeFromMesh.h ReadCspace.h ../shell/Shell.h
+FuncBase.o:	FuncBase.h
 MathFunc.o:	MathFunc.h
-SumFunc.o:	SumFunc.h
+MathFuncTerm.o:	MathFunc.h MathFuncTerm.h
+SumTotalTerm.o: FuncTerm.h SumTotalTerm.h
+SumFunc.o:	FuncBase.h SumFunc.h FuncTerm.h SumTotalTerm.h
 lookupSizeFromMesh.o: lookupSizeFromMesh.h
 testKinetics.o:	ReadKkit.h
 
