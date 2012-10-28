@@ -27,6 +27,7 @@ class FuncTerm
 		 * S. It returns the number of indices found, which are the
 		 * entries in molIndex.
 		 */
+		virtual void setReactants( const vector< unsigned int >& mol ) = 0;
 		virtual unsigned int  getReactants( 
 			vector< unsigned int >& molIndex ) const = 0;
 		virtual const string& function() const = 0;

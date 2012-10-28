@@ -19357,3 +19357,16 @@ I should now be able to get rid of ZombieSumFunc.
 Compiles, and clears unit tests. Still haven't deployed the GslStoich
 in a big way.
 ============================================================================
+28 Oct 2012
+
+Redid a few more FuncTerm and FuncBase derived classes. Did a make clean, this
+turned up a lot of dependencies needing fixing. Clears tests. Checkin 4207.
+
+Now I need to get GslStoich to take over all these things and confirm it
+does everything that Stoich does. Then change gears to building in the
+compartmental and diffusion calculations.
+
+GslStoich now takes over all the things, at least in principle. Tests to
+commence.
+
+============================================================================
