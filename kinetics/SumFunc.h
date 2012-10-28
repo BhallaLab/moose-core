@@ -14,17 +14,19 @@
  * SumFunc.
  * This is the MOOSE class to sum together assorted inputs.
  */
-class SumFunc {
+class SumFunc: public FuncBase
+{
 	public:
 		SumFunc();
-		void process( const Eref& e, ProcPtr info);
-		void reinit( const Eref& e, ProcPtr info );
-		void input( double d );
-		double getResult() const;
+		~SumFunc();
+		void vProcess( const Eref& e, ProcPtr info);
+		void vReinit( const Eref& e, ProcPtr info );
+		void vInput( double d );
+		FuncTerm* func();
 
 		static const Cinfo* initCinfo();
 	private:
-		double result_;
+		SumTotalTerm st_;
 };
 
 #endif // _SUMFUNC_H

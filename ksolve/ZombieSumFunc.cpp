@@ -8,6 +8,8 @@
 **********************************************************************/
 
 #include "StoichHeaders.h"
+#include "FuncBase.h"
+#include "../kinetics/SumTotalTerm.h"
 #include "SumFunc.h"
 #include "ZombieSumFunc.h"
 #include "ZombieSumFunc.h"
@@ -131,7 +133,9 @@ void ZombieSumFunc::zombify( Element* solver, Element* orig, Id molId )
 	vector< unsigned int > poolIndex( numSrc );
 	for ( unsigned int i = 0; i < numSrc; ++i )
 		poolIndex[i] = z->convertIdToPoolIndex( srcPools[i] );
-	z->funcs_[ funcIndex ] = new SumTotal( poolIndex );
+	SumTotalTerm * stt = new SumTotalTerm();
+	stt->setReactants( poolIndex );
+	z->funcs_[ funcIndex ] = stt;
 
 	DataHandler* dh = new ZombieHandler( solver->dataHandler(),
 		orig->dataHandler() );

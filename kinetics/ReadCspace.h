@@ -7,8 +7,8 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifndef _ReadCspace_h
-#define _ReadCspace_h
+#ifndef _READCSPACE_H
+#define _READCSPACE_H
 
 class CspaceMolInfo 
 {
@@ -127,4 +127,4 @@ class ReadCspace
 		vector< CspaceReacInfo > reaclist_;
 };
 
-#endif // _ReadCspace_h
+#endif // _READCSPACE_H

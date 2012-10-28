@@ -16,30 +16,7 @@ using namespace std;
 #include "header.h"
 #include "MathFunc.h"
 #include "FuncTerm.h"
-
-FuncTerm::~FuncTerm()
-{;}
-
-double SumTotal::operator() ( const double* S, double t ) const
-{
-	double ret = 0.0;
-	for( vector< unsigned int >::const_iterator i = mol_.begin(); 
-		i != mol_.end(); i++ )
-		ret += S[ *i ];
-	return ret;
-}
-
-unsigned int SumTotal::getReactants( vector< unsigned int >& molIndex) const
-{
-	molIndex = mol_;
-	return mol_.size();
-}
-
-const string& SumTotal::function() const
-{
-	static string ret = "f( arg1, arg2 ) = arg1 + arg2";
-	return ret;
-}
+#include "MathFuncTerm.h"
 
 
 double MathTerm::operator() ( const double* S, double t ) const

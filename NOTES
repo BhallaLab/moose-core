@@ -19346,3 +19346,14 @@ Working on SumFuncs. This is messy. Should define a generic func system base
 class like I have for Pools etc.
 
 ============================================================================
+27 Oct 2012. 
+Cleaner design for functions: Define a FuncBase in moose/kinetics. This 
+provides a virtual FuncTerm to handle its operations. Derived classes can
+simply adopt the FuncTerms hitherto used in ksolve. Then no zombification
+needed other than removing them from the schedule list. 
+
+I should now be able to get rid of ZombieSumFunc.
+
+Compiles, and clears unit tests. Still haven't deployed the GslStoich
+in a big way.
+============================================================================

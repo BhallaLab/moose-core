@@ -8,17 +8,9 @@
 ** Written by Raamesh Deshpande 2007
 ** Modified by Upi Bhalla 2010
 **********************************************************************/
-/*
-#include <string>
-#include <iostream>
-#include <fstream>
-// #include <ifstream>
-#include <vector>
-#include <map>
-#include "assert.h"
-#include "math.h"
-#include <sstream>
-*/
+
+#ifndef _MATH_FUNC_H
+#define _MATH_FUNC_H
  
 namespace MathFuncNames
 {
@@ -86,3 +78,4 @@ class MathFunc {
     int status_; //MMLSTRING, FNSTRING, ERROR, BLANK
 };
 
+#endif // _MATH_FUNC_H

@@ -8,65 +8,28 @@
 **********************************************************************/
 
 #include "header.h"
+#include "FuncTerm.h"
+#include "SumTotalTerm.h"
+#include "FuncBase.h"
 #include "SumFunc.h"
 
 const Cinfo* SumFunc::initCinfo()
 {
-		//////////////////////////////////////////////////////////////
-		// Field Definitions
-		//////////////////////////////////////////////////////////////
-		static ReadOnlyValueFinfo< SumFunc, double > result(
-			"result",
-			"outcome of summation",
-			&SumFunc::getResult
-		);
-
-		//////////////////////////////////////////////////////////////
-		// MsgDest Definitions
-		//////////////////////////////////////////////////////////////
-		static DestFinfo process( "process",
-			"Handles process call",
-			new ProcOpFunc< SumFunc >( &SumFunc::process ) );
-		static DestFinfo reinit( "reinit",
-			"Handles reinit call",
-			new ProcOpFunc< SumFunc >( &SumFunc::reinit ) );
-		static DestFinfo input( "input",
-			"Handles input values",
-			new OpFunc1< SumFunc, double >( &SumFunc::input ) );
-
-		//////////////////////////////////////////////////////////////
-		// SrcFinfo Definitions
-		//////////////////////////////////////////////////////////////
-
-		static SrcFinfo1< double > output(
-				"output", 
-				"Sends out sum on each timestep"
-		);
-
-		//////////////////////////////////////////////////////////////
-		// SharedMsg Definitions
-		//////////////////////////////////////////////////////////////
-		static Finfo* procShared[] = {
-			&process, &reinit
-		};
-		static SharedFinfo proc( "proc",
-			"Shared message for process and reinit",
-			procShared, sizeof( procShared ) / sizeof( const Finfo* )
-		);
-
-	static Finfo* sumFuncFinfos[] = {
-		&result,	// Value
-		&input,				// DestFinfo
-		&output,			// SrcFinfo
-		&proc,				// SharedFinfo
+	static string doc[] =
+	{
+			"Name", "SumFunc",
+			"Author", "Upi Bhalla",
+			"Description",
+			"SumFunc object. Adds up all inputs",
 	};
 
 	static Cinfo sumFuncCinfo (
 		"SumFunc",
-		Neutral::initCinfo(),
-		sumFuncFinfos,
-		sizeof( sumFuncFinfos ) / sizeof ( Finfo* ),
-		new Dinfo< SumFunc >()
+		FuncBase::initCinfo(),
+		0, 0,
+		new Dinfo< SumFunc >(),
+		doc,
+		sizeof( doc ) / sizeof( string )
 	);
 
 	return &sumFuncCinfo;
@@ -80,36 +43,36 @@ const SrcFinfo1< double >& output =
 	*dynamic_cast< const SrcFinfo1< double >* >( 
 	sumFuncCinfo->findFinfo( "output" ) );
 
-
 SumFunc::SumFunc()
-	: result_( 0.0 )
+	: FuncBase()
+{;}
+
+SumFunc::~SumFunc()
 {;}
 
 //////////////////////////////////////////////////////////////
 // MsgDest Definitions
 //////////////////////////////////////////////////////////////
 
-void SumFunc::process( const Eref& e, ProcPtr p )
+void SumFunc::vProcess( const Eref& e, ProcPtr p )
 {
 	output.send( e, p->threadIndexInGroup, result_ );
-	result_ = 0.0;
+	result_ = 0;
 }
 
-void SumFunc::reinit( const Eref& e, ProcPtr p )
+void SumFunc::vReinit( const Eref& e, ProcPtr p )
 {
-	process( e, p );
+	vProcess( e, p );
 }
 
-void SumFunc::input( double v )
+void SumFunc::vInput( double v )
 {
 	result_ += v;
 }
 
 //////////////////////////////////////////////////////////////
-// Field Definitions
-//////////////////////////////////////////////////////////////
 
-double SumFunc::getResult() const
+FuncTerm* SumFunc::func()
 {
-	return result_;
+	return &st_;
 }

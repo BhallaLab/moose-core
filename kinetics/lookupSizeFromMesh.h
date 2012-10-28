@@ -6,6 +6,9 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
+#ifndef _LOOKUP_SIZE_FROM_MESH_H
+#define _LOOKUP_SIZE_FROM_MESH_H
+
 
 /**
  * Used to provide the conversion factor from preferred units to SI.
@@ -76,3 +79,5 @@ double convertConcToNumRateUsingVol( const Eref& e, const SrcFinfo* pools,
  */
 double convertConcToNumRateInTwoCompts( double v1, unsigned int n1, 
 	double v2, unsigned int n2, double scale );
+
+#endif	// _LOOKUP_SIZE_FROM_MESH_H

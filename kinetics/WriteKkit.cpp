@@ -21,6 +21,9 @@
 #include "../builtins/StimulusTable.h"
 #include "Pool.h"
 #include "FuncPool.h"
+#include "FuncTerm.h"
+#include "SumTotalTerm.h"
+#include "FuncBase.h"
 #include "SumFunc.h"
 
 void writeHeader( ofstream& fout, 

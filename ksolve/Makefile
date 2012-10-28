@@ -29,7 +29,6 @@ OBJ = \
 	ZMMenz.o \
 	ZombieSumFunc.o \
 	RateTerm.o \
-	FuncTerm.o \
 	GssaStoich.o	\
 	GslStoich.o	\
 	EstimateDt.o	\
@@ -48,7 +47,6 @@ HEADERS = \
 	StoichCore.h \
 	StoichPools.h \
 	RateTerm.h \
-	FuncTerm.h \
 	KinSparseMatrix.h \
 	../kinetics/Pool.h \
 	../kinetics/lookupSizeFromMesh.h \
@@ -92,7 +90,6 @@ ZMMenz.o:	ZMMenz.h
 ZombieSumFunc.o:	../kinetics/SumFunc.h ZombieSumFunc.h
 testKsolve.o:	../kinetics/ReadKkit.h ../shell/Shell.h
 RateTerm.o:		RateTerm.h
-FuncTerm.o:		FuncTerm.h
 
 #KineticHub.o:	KineticHub.h
 
