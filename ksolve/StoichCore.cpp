@@ -26,13 +26,11 @@
 #include "MathFunc.h"
 #include "StoichPools.h"
 #include "ZPool.h"
-#include "ZombiePool.h"
-#include "ZombieBufPool.h"
-#include "ZombieFuncPool.h"
+#include "ZBufPool.h"
+#include "ZFuncPool.h"
 #include "ZReac.h"
-#include "ZombieEnz.h"
-#include "ZombieMMenz.h"
-#include "ZombieSumFunc.h"
+#include "ZEnz.h"
+#include "ZMMenz.h"
 #include "../shell/Shell.h"
 
 #ifdef USE_GSL
@@ -319,6 +317,38 @@ static void zombifyAndUnschedPool(
 	PoolBase::zombify( orig, zClass, s.id() );
 }
 
+void StoichCore::installAndUnschedFunc( Id func, Id Pool )
+{
+	// Unsched Func
+	static const Finfo* procDest = 
+		FuncBase::initCinfo()->findFinfo( "process");
+	assert( procDest );
+
+	const DestFinfo* df = dynamic_cast< const DestFinfo* >( procDest );
+	assert( df );
+	MsgId mid = func.element()->findCaller( df->getFid() );
+	if ( mid != Msg::bad )
+		Msg::deleteMsg( mid );
+
+
+	// Install the FuncTerm
+	static const Finfo* funcSrcFinfo = 
+			FuncBase::initCinfo()->findFinfo( "output" );
+	FuncBase* fb = reinterpret_cast< FuncBase* >( func.eref().data() );
+	FuncTerm* ft = fb->func();
+	vector< Id > srcPools;
+	unsigned int numSrc = func.element()->getNeighbours( 
+					srcPools, funcSrcFinfo );
+	assert( numSrc > 0 );
+	vector< unsigned int > poolIndex( numSrc, 0 );
+	for ( unsigned int i = 0; i < numSrc; ++i )
+		poolIndex[i] = convertIdToPoolIndex( srcPools[i] );
+	ft->setReactants( poolIndex );
+	unsigned int funcIndex = convertIdToFuncIndex( func );
+	funcs_[ funcIndex ] = ft;
+	// Somewhere I have to tie the output of the FuncTerm to the funcPool.
+}
+
 // e is the stoich Eref, elist is list of all Ids to zombify.
 void StoichCore::zombifyModel( const Eref& e, const vector< Id >& elist )
 {
@@ -341,25 +371,25 @@ void StoichCore::zombifyModel( const Eref& e, const vector< Id >& elist )
 							(*i)(), ZPool::initCinfo() );
 		}
 		else if ( ei->cinfo() == bufPoolCinfo ) {
-			zombifyAndUnschedPool( e, (*i)(), ZombieBufPool::initCinfo() );
+			zombifyAndUnschedPool( e, (*i)(), ZBufPool::initCinfo() );
 		}
 		else if ( ei->cinfo() == funcPoolCinfo ) {
-			zombifyAndUnschedPool( e, (*i)(), ZombieFuncPool::initCinfo());
+			zombifyAndUnschedPool( e, (*i)(), ZFuncPool::initCinfo());
 			// Has also got to zombify the Func.
-			Id funcId = Neutral::child( i->eref(), "sumFunc" );
+			Id funcId = Neutral::child( i->eref(), "func" );
 			if ( funcId != Id() ) {
-				if ( funcId()->cinfo()->isA( "SumFunc" ) )
-					ZombieSumFunc::zombify( e.element(), funcId(), (*i) );
+				if ( funcId()->cinfo()->isA( "FuncBase" ) )
+					installAndUnschedFunc( funcId, (*i) );
 			}
 		}
 		else if ( ei->cinfo() == reacCinfo ) {
 			ReacBase::zombify( ei, ZReac::initCinfo(), e.id() );
 		}
 		else if ( ei->cinfo() == mmEnzCinfo ) {
-			EnzBase::zombify( ei, ZombieMMenz::initCinfo(), e.id() );
+			EnzBase::zombify( ei, ZMMenz::initCinfo(), e.id() );
 		}
 		else if ( ei->cinfo() == enzCinfo ) {
-			CplxEnzBase::zombify( ei, ZombieEnz::initCinfo(), e.id() );
+			CplxEnzBase::zombify( ei, ZEnz::initCinfo(), e.id() );
 		}
 	}
 }
@@ -375,24 +405,28 @@ void StoichCore::unZombifyPools()
 	
 	for ( ; i < numVarPools_ + numBufPools_; ++i ) {
 		Element* e = idMap_[i].element();
-		if ( e != 0 &&  e->cinfo() == ZombieBufPool::initCinfo() )
+		if ( e != 0 &&  e->cinfo() == ZBufPool::initCinfo() )
 			PoolBase::zombify( e, BufPool::initCinfo(), Id() );
 	}
 }
 
 void StoichCore::unZombifyFuncs()
 {
+	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
 	unsigned int start = numVarPools_ + numBufPools_;
 	for ( unsigned int k = 0; k < numFuncPools_; ++k ) {
 		unsigned int i = k + start;
 		Element* e = idMap_[i].element();
-		if ( e != 0 &&  e->cinfo() == ZombieFuncPool::initCinfo() ) {
+		if ( e != 0 &&  e->cinfo() == ZFuncPool::initCinfo() ) {
 			PoolBase::zombify( e, FuncPool::initCinfo(), Id() );
 			// Has also got to unzombify the Func.
-			Id funcId = Neutral::child( idMap_[i].eref(), "sumFunc" );
+			Id funcId = Neutral::child( idMap_[i].eref(), "func" );
 			if ( funcId != Id() ) {
-				assert ( funcId()->cinfo()->isA( "ZombieSumFunc" ) );
-				ZombieSumFunc::unzombify( funcId.element() );
+				assert ( funcId()->cinfo()->isA( "FuncBase" ) );
+				MsgId mid = s->doAddMsg( "OneToAll", 
+				ObjId( 2, 5), "proc5", funcId, "proc" );
+				assert( mid != Msg::bad );
+				// reschedFunc( funcId.element() );
 			}
 		}
 	}
@@ -417,14 +451,14 @@ void StoichCore::unZombifyModel()
 	for ( vector< Id >::iterator i = mmEnzMap_.begin(); 
 						i != mmEnzMap_.end(); ++i ) {
 		Element* e = i->element();
-		if ( e != 0 &&  e->cinfo() == ZombieMMenz::initCinfo() )
+		if ( e != 0 &&  e->cinfo() == ZMMenz::initCinfo() )
 			EnzBase::zombify( e, MMenz::initCinfo(), Id() );
 	}
 	
 	for ( vector< Id >::iterator i = enzMap_.begin(); 
 						i != enzMap_.end(); ++i ) {
 		Element* e = i->element();
-		if ( e != 0 &&  e->cinfo() == ZombieEnz::initCinfo() )
+		if ( e != 0 &&  e->cinfo() == ZEnz::initCinfo() )
 			CplxEnzBase::zombify( e, Enz::initCinfo(), Id() );
 	}
 
@@ -627,7 +661,7 @@ void StoichCore::setReacKb( const Eref& e, double v ) const
 void StoichCore::setMMenzKm( const Eref& e, double v ) const
 {
 	static const SrcFinfo* toSub = dynamic_cast< const SrcFinfo* > (
-		ZombieMMenz::initCinfo()->findFinfo( "toSub" ) );
+		ZMMenz::initCinfo()->findFinfo( "toSub" ) );
 	// Identify MMenz rate term
 	RateTerm* rt = rates_[ convertIdToReacIndex( e.id() ) ];
 	MMEnzymeBase* enz = dynamic_cast< MMEnzymeBase* >( rt );
@@ -661,7 +695,7 @@ void StoichCore::setMMenzKcat( const Eref& e, double v ) const
 void StoichCore::setEnzK1( const Eref& e, double v ) const
 {
 	static const SrcFinfo* toSub = dynamic_cast< const SrcFinfo* > (
-		ZombieEnz::initCinfo()->findFinfo( "toSub" ) );
+		ZEnz::initCinfo()->findFinfo( "toSub" ) );
 	assert( toSub );
 
 	double volScale = convertConcToNumRateUsingMesh( e, toSub, 1 );
