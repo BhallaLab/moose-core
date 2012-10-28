@@ -89,6 +89,13 @@ class StoichCore
 			Id enzId, Id enzMolId, const vector< Id >& prds );
 
 		/**
+		 * This installs a funcTerm. Should be generic, that is, work
+		 * for any form of func. The pool is the FuncPool being
+		 * controlled.
+		 */
+		void installAndUnschedFunc( Id func, Id pool );
+
+		/**
 		 * Returns diffusion rate of specified pool
 		 */
 		double getDiffConst( unsigned int poolIndex ) const;
