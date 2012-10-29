@@ -65,7 +65,7 @@ USE_HDF5?=1
 PYTHON?=2
 # BUILD (= debug, release)
 ifndef BUILD
-BUILD=debug
+BUILD=release
 endif
 
 #If using mac uncomment the following lines
