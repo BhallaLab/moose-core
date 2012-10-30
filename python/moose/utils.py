@@ -325,9 +325,9 @@ def readcell_scrambled(filename, target):
 
 ############# added by Aditya Gilra -- begin ################
 
-def resetSim(simpaths, simdt, plotdt, hsolve_path=None):
+def resetSim(simpaths, simdt, plotdt, simmethod='hsolve'):
     """ For each of the MOOSE paths in simpaths, this sets the clocks and finally resets MOOSE.
-    If hsolve_path is set to a MOOSE hsolve object's path, it sets the clock for hsolve too. """
+    If simmethod=='hsolve', it sets up hsolve-s for each Neuron under simpaths, and clocks for hsolve-s too. """
     moose__.setClock(INITCLOCK, simdt)
     moose__.setClock(ELECCLOCK, simdt) # The hsolve and ee methods use clock 1
     moose__.setClock(CHANCLOCK, simdt) # hsolve uses clock 2 for mg_block, nmdachan and others.
@@ -343,16 +343,25 @@ def resetSim(simpaths, simdt, plotdt, hsolve_path=None):
         moose__.useClock(ELECCLOCK, simpath+'/##[TYPE=IntFire]', 'process')
         moose__.useClock(CHANCLOCK, simpath+'/##[TYPE=HHChannel2D]', 'process')
         moose__.useClock(CHANCLOCK, simpath+'/##[TYPE=SynChan]', 'process')
+        ## If simmethod is not hsolve, set clocks for the biophysics,
+        ## else just put a clock on the hsolve:
         ## hsolve takes care of the clocks for the biophysics
-        ## But if hsolve_path is not given, use clocks for the biophysics,
-        ## else just put a clock on the hsolve
-        if hsolve_path is None:
+        if 'hsolve' not in simmethod.lower():
             moose__.useClock(INITCLOCK, simpath+'/##[TYPE=Compartment]', 'init')
             moose__.useClock(ELECCLOCK, simpath+'/##[TYPE=Compartment]', 'process')
             moose__.useClock(CHANCLOCK, simpath+'/##[TYPE=HHChannel]', 'process')
             moose__.useClock(POOLCLOCK, simpath+'/##[TYPE=CaConc]', 'process')
-    if hsolve_path:
-        moose__.useClock(INITCLOCK, hsolve_path, 'process')
+        else: # use hsolve, one hsolve for each Neuron
+            element = moose__.Neutral(simpath)
+            for childid in element.children: 
+                childobj = moose__.Neutral(childid)
+                classname = childobj.class_
+                if classname in ['Neuron']:
+                    neuronpath = childobj.path
+                    h = moose__.HSolve( neuronpath+'/solve' )
+                    h.dt = simdt
+                    h.target = neuronpath
+                    moose__.useClock(INITCLOCK, h.path, 'process')
     moose__.reinit()
 
 def setupTable(name, obj, qtyname, tables_path=None):

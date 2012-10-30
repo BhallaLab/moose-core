@@ -476,13 +476,9 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             if moose.exists('/cells'):
                 #use Aditya's method to assign clocks - also reinits!
                 ## Exponential Euler
-                #mooseUtils.resetSim(['/cells','/elec'], MooseHandler.DEFAULT_SIMDT, MooseHandler.DEFAULT_PLOTDT)
+                #mooseUtils.resetSim(['/cells','/elec'], MooseHandler.DEFAULT_SIMDT, MooseHandler.DEFAULT_PLOTDT, simmethod='ee')
                 ## HSolve
-                h = moose.HSolve( '/cells/solve' )
-                h.dt = MooseHandler.DEFAULT_SIMDT
-                h.target = '/cells'
-                mooseUtils.resetSim(['/cells','/elec'],
-                    MooseHandler.DEFAULT_SIMDT, MooseHandler.DEFAULT_PLOTDT, hsolve_path='/cells/solve')
+                mooseUtils.resetSim(['/cells','/elec'], MooseHandler.DEFAULT_SIMDT, MooseHandler.DEFAULT_PLOTDT)
             else:
                 print "This NeuroML model does not have any <population> of cells."
                 print "You need to load a NetworkML or NeuroML level 3 model."
