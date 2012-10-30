@@ -46,16 +46,22 @@ def copyDemos():
     then copy the demos to ~/moose_<version>/Demos."""
     ## Note that config.settings[...] returns a string 'true'/'false'
     ## and not a boolean variable! Hence the str checks...
-    if (config.settings[config.KEY_FIRSTTIME_THISVERSION] in config.TRUE_STRS) and \
+    ## confirm that Demos have not been copied for this version and GUI is not a local build
+    if (config.settings[config.KEY_DEMOS_COPIED_THISVERSION] not in config.TRUE_STRS) and \
             (config.settings[config.KEY_LOCAL_BUILD] not in config.TRUE_STRS):
         print 'Copying demos'
         progressDialog = QtGui.QProgressDialog()
         progressDialog.setLabelText('Copying the MOOSE demos to your home directory')
         progressDialog.setModal(True)
         progressDialog.setVisible(True)
-        copyTree(config.settings[config.KEY_DEMOS_DIR], 
+        ## copyTree will create a ~/moose_<ver> also if it doesn't exist
+        ## since it uses os.makedirs() that can make nested dirs
+        errors = copyTree(config.settings[config.KEY_DEMOS_DIR], 
                  os.path.join(config.settings[config.KEY_MOOSE_LOCAL_DIR], 'Demos'), 
-                 progressDialog)    
+                 progressDialog)
+        if errors or errors is None: # if src not found, copyTree returns None; if errors checks for non-empty list
+            print "Error(s) during copying. Will not try again. Please copy manually."
+        config.settings[config.KEY_DEMOS_COPIED_THISVERSION] = 'True' # string not boolean
 
 class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
     """Customization for Qt Designer created window"""

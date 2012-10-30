@@ -61,6 +61,7 @@ MOOSE_VERSION = moose.VERSION
 TEMPDIR = tempfile.gettempdir()
 KEY_FIRSTTIME = 'firsttime'
 KEY_FIRSTTIME_THISVERSION = 'firsttime_'+MOOSE_VERSION
+KEY_DEMOS_COPIED_THISVERSION = 'demoscopied_'+MOOSE_VERSION
 # KEY_STATE_FILE = 'statefile'
 
 TRUE_STRS = ['True', 'true', '1', 'Yes', 'yes', 'Y']
@@ -92,7 +93,10 @@ MOOSE_CFG_DIR = os.path.join(os.environ['HOME'], '.moose')
 MOOSE_LOCAL_DIR = os.path.join(os.environ['HOME'], 'moose')
 MOOSE_NUMPTHREADS = '1'
 MOOSE_ABOUT_FILE = os.path.join(MOOSE_GUI_DIR, 'about.html')
-LOCAL_BUILD = False
+
+# If we have a Makefile above GUI directory, then this must be a
+# locally built version
+LOCAL_BUILD = os.access(os.path.join(MOOSE_GUI_DIR, '../Makefile'), os.R_OK)
 
 class MooseSetting(dict):
     """
@@ -126,6 +130,7 @@ class MooseSetting(dict):
             # If this is the first time, then set some defaults
             if firsttime:
                 cls._instance.qsettings.setValue(KEY_FIRSTTIME_THISVERSION, 'True') # string not boolean
+                cls._instance.qsettings.setValue(KEY_DEMOS_COPIED_THISVERSION, 'False') # string not boolean
                 cls._instance.qsettings.setValue(KEY_COLORMAP_DIR, os.path.join(MOOSE_GUI_DIR, 'colormaps'))
                 cls._instance.qsettings.setValue(KEY_ICON_DIR, os.path.join(MOOSE_GUI_DIR, 'icons'))
                 cls._instance.qsettings.setValue(KEY_NUMPTHREADS, '1')
@@ -174,9 +179,6 @@ def init_dirs():
     global MOOSE_CFG_DIR
     global MOOSE_DOCS_DIR
     global LOCAL_BUILD
-    # If we have a Makefile above GUI directory, then this must be a
-    # locally built version
-    LOCAL_BUILD = os.access(os.path.join(MOOSE_GUI_DIR, '../Makefile'), os.R_OK)
     errors = []
     if LOCAL_BUILD:
         MOOSE_LOCAL_DIR = os.path.normpath(os.path.join(MOOSE_GUI_DIR, '..'))
