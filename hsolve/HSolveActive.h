@@ -101,6 +101,7 @@ private:
 	/**
 	 * Reinit code: Defined in HSolveActiveSetup.cpp
 	 */
+	void reinitSpikeGens( ProcPtr info );
 	void reinitCompartments();
 	void reinitCalcium();
 	void reinitChannels();

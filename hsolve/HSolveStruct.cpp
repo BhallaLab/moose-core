@@ -64,6 +64,13 @@ void ChannelStruct::process( double*& state, CurrentStruct& current )
 	current.Gk = Gbar_ * fraction;
 }
 
+void SpikeGenStruct::reinit( ProcPtr info  )
+{
+	SpikeGen* spike = reinterpret_cast< SpikeGen* >( e_.data() );
+	
+	spike->reinit( e_, info );
+}
+
 void SpikeGenStruct::send( ProcPtr info  )
 {
 	SpikeGen* spike = reinterpret_cast< SpikeGen* >( e_.data() );

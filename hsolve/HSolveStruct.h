@@ -80,6 +80,7 @@ struct SpikeGenStruct
 	double* Vm_;
 	Eref e_;
 	
+	void reinit( ProcPtr info );
 	void send( ProcPtr info );
 };
 
