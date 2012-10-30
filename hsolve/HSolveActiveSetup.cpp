@@ -54,10 +54,17 @@ void HSolveActive::setup( Id seed, double dt ) {
 void HSolveActive::reinit( ProcPtr info ) {
 	externalCurrent_.assign( externalCurrent_.size(), 0.0 );
 	
+	reinitSpikeGens( info );
 	reinitCompartments();
 	reinitCalcium();
 	reinitChannels();
 	sendValues( info );
+}
+
+void HSolveActive::reinitSpikeGens( ProcPtr info ) {
+	vector< SpikeGenStruct >::iterator ispike;
+	for ( ispike = spikegen_.begin(); ispike != spikegen_.end(); ++ispike )
+		ispike->reinit( info );
 }
 
 void HSolveActive::reinitCompartments() {
