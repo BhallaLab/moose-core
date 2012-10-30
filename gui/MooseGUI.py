@@ -40,16 +40,14 @@ from newgui import Ui_MainWindow
 import config
 
 def copyDemos():
-    """Check if this is the first run, 
-    and not a local build
-    (i.e. not running from <source>/gui dir,
-    but running moosegui after 'make install' / package)
-    and copy the demos to ~/moose/Demos if so."""
+    """Check if this is the first run for this version, 
+    and not a local build (i.e. not running from <source>/gui dir,
+    but running 'moosegui' after 'make install' OR deb package),
+    then copy the demos to ~/moose_<version>/Demos."""
     ## Note that config.settings[...] returns a string 'true'/'false'
     ## and not a boolean variable! Hence the str checks...
-    true_strs = ['True', 'true', '1', 'Yes', 'yes', 'Y']
-    if (config.settings[config.KEY_FIRSTTIME] in true_strs) and \
-            (config.settings[config.KEY_LOCAL_BUILD] not in true_strs):
+    if (config.settings[config.KEY_FIRSTTIME_THISVERSION] in config.TRUE_STRS) and \
+            (config.settings[config.KEY_LOCAL_BUILD] not in config.TRUE_STRS):
         print 'Copying demos'
         progressDialog = QtGui.QProgressDialog()
         progressDialog.setLabelText('Copying the MOOSE demos to your home directory')
@@ -945,5 +943,5 @@ if __name__ == '__main__':
     #http://lionel.textmalaysia.com/a-simple-tutorial-on-gui-programming-using-qt-designer-with-pyqt4.html
     #http://www.mail-archive.com/matplotlib-users@lists.sourceforge.net/msg13241.html
     # with the same return code of Qt application
-    config.settings[config.KEY_FIRSTTIME] = 'False'
+    config.settings[config.KEY_FIRSTTIME_THISVERSION] = 'False' # string not boolean
     sys.exit(app.exec_())
