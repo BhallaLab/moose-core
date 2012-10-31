@@ -950,7 +950,7 @@ void ReadKkit::buildSumTotal( const string& src, const string& dest )
 	// Check if the pool has not yet been converted to handle SumTots.
 	if ( destId()->cinfo()->name() == "Pool" ) {
 		vector< int > dim( 1, 1 );
-		sumId = shell_->doCreate( "SumFunc", destId, "sumFunc", dim, true );
+		sumId = shell_->doCreate( "SumFunc", destId, "func", dim, true );
 		const DataHandler* orig = destId()->dataHandler();
 		DataHandler* dup = orig->copy( orig->pathDepth() - 1, orig->pathDepth(), false, 1 );
 	
@@ -963,7 +963,7 @@ void ReadKkit::buildSumTotal( const string& src, const string& dest )
 			ObjId( destId, 0 ), "input" ); 
 		assert( ret );
 	} else {
-		sumId = Neutral::child( destId.eref(), "sumFunc" );
+		sumId = Neutral::child( destId.eref(), "func" );
 	}
 
 	if ( sumId == Id() ) {

@@ -15,7 +15,7 @@ Sourceforge project page: https://sourceforge.net/projects/moose/
 * Getting MOOSE 
 ==============================================================================
 
-** Released versions of MOOSE are available in the sourceforge fiel area:
+** Released versions of MOOSE are available in the sourceforge file area:
 
    https://sourceforge.net/projects/moose/files/moose/Moose%20Beta%201.4.0/
 
@@ -207,3 +207,55 @@ Sourceforge project page: https://sourceforge.net/projects/moose/
   G.V.HarshaRani	Web page design and User Interface
   Chaitanya.H	Visualization and User Interface
   Aditya Gilra  NeuroML reader and .deb packaging
+
+
+==============================================================================
+
+MOOSE 2.0.0 "Kalakand"
+
+We announce the release of MOOSE 2.0.0, "Kalakand"*. Debian packages and
+tarballs can be downloaded from 
+
+	http://moose.ncbs.res.in
+
+The latest code is in the usual SourceForge repository at 
+
+	http://sourceforge.net/projects/moose
+
+This is the first full release of MOOSE. In this release the MOOSE team has
+been conservative about features, and has instead focused on the basics:
+a decent GUI, documentation, basic numerics, and a cleaner install framework.
+
+In this release you can load and run NEUROML (compartmental neuronal models
+and networks) from the GUI. You can also load, run, and save chemical kinetic
+models in the Kinetikit (kkit.g) format. There are demo models for each of
+these.
+
+There are also a couple of standalone demos, most importantly the Squid demo
+for the original Hodgkin-Huxley model. This is based on the GENESIS demo of the
+same name and is an excellent teaching tool.
+
+The scripting language is now Python. The GUI is written in this, and we
+have production simulations in Python.
+
+Behind the scenes we have set in place a more structured development process
+with a strong test framework. We invite you to look at the roadmap and
+indicate what developments you would like best.
+
+We aim to have a much shorter and incremental release cycle from now. Further,
+the build process is now easier with the debian packaging, so it will be
+simpler to grab the latest source code from SourceForge if you want to try out
+new features/bugs hot off the keyboard. Along the way we will fold in the 
+ports to other OSs, depending on what else is prioritized in the roadmap.
+
+*Kalakand is an Indian milk-based sweet. The naming scheme is from an old lab
+tradition to name things after Indian sweets. The order is alphabetical in the
+sequence of most Indian alphabets.
+
+The MOOSE team:
+  Niraj Dudani		Neuronal solver, parallelization
+  Subhasis Ray		Python interface, XML standards
+  G.V.HarshaRani	Web page design and User Interface
+  Chaitanya.H		Visualization and User Interface
+  Aditya Gilra  	NeuroML reader and .deb packaging
+  Upinder S. Bhalla	Primary Architect, Chemical kinetic solvers

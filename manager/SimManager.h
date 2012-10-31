@@ -99,6 +99,7 @@ class SimManager
 
 		Id baseId_;
 		Id stoich_;
+		Id stoichCore_;
 
 		double plotdt_;
 		double simdt_;

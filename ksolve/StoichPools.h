@@ -82,6 +82,9 @@ class StoichPools
 		virtual void setDiffConst( const Eref& e, double v ) = 0;
 		virtual double getDiffConst( const Eref& e ) const = 0;
 
+		//////////////////////////////////////////////////////////////////
+		static const Cinfo* initCinfo();
+		//////////////////////////////////////////////////////////////////
 	private:
 		/**
 		 * 
