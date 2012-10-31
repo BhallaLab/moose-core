@@ -343,7 +343,6 @@ class  KineticsWidget(QtGui.QWidget):
             iteminfo = mre.path+'/info'
             textcolor = Annotator(iteminfo).getField('textColor')
             bgcolor = Annotator(iteminfo).getField('color')
-
         if(textcolor == ''): textcolor = 'green'
         if(bgcolor == ''): bgcolor = 'blue'
         if(textcolor == bgcolor): textcolor = self.randomColor()
@@ -354,9 +353,9 @@ class  KineticsWidget(QtGui.QWidget):
                 textcolor = picklecolorMap[tc]
                 textColor = QtGui.QColor(textcolor[0],textcolor[1],textcolor[2])
             else:
-                textColor = QtGui.QColor(textcolor)
+                textColor = self.validColorcheck(textcolor)
         else:
-            textColor = QtGui.QColor(textcolor)
+            textColor = self.validColorcheck(textcolor)
             
         if ((not isinstance(bgcolor,(list,tuple)))):
             if bgcolor.isdigit():
@@ -365,9 +364,9 @@ class  KineticsWidget(QtGui.QWidget):
                 bgcolor = picklecolorMap[tc]
                 bgColor = QtGui.QColor(bgcolor[0],bgcolor[1],bgcolor[2])
             else: 
-                bgColor = QtGui.QColor(bgcolor)
+                bgColor = self.validColorcheck(bgcolor)
         else:
-            bgColor = QtGui.QColor(bgcolor)
+            bgColor = self.validColorcheck(bgcolor)
         return(textColor,bgColor)
    
     def randomColor(self):
@@ -376,6 +375,17 @@ class  KineticsWidget(QtGui.QWidget):
         blue = int(random.uniform(0, 255))
         return (red,green,blue)
     
+    def validColorcheck(self,color):
+        ''' 
+        Both in Qt4.7 and 4.8 if not a valid color it makes it as back but in 4.7 there will be a warning mssg which is taken here
+        checking if textcolor or backgroundcolor is valid color, if 'No' making white color as default
+        where I have not taken care for checking what will be backgroundcolor for textcolor or textcolor for backgroundcolor 
+        '''
+        if QtGui.QColor(color).isValid():
+            return (QtGui.QColor(color))
+        else:
+            return(QtGui.QColor("white"))
+
     def positionChange(self,mooseObject):
         #If the item position changes, the corresponding arrow's are claculated
        if isinstance(element(mooseObject),PoolBase):
