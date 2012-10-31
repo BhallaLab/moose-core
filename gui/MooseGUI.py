@@ -54,13 +54,17 @@ def copyDemos():
         progressDialog.setLabelText('Copying the MOOSE demos to your home directory')
         progressDialog.setModal(True)
         progressDialog.setVisible(True)
+        src = config.settings[config.KEY_DEMOS_DIR]
+        dst = os.path.join(config.settings[config.KEY_MOOSE_LOCAL_DIR], 'Demos')
         ## copyTree will create a ~/moose_<ver> also if it doesn't exist
         ## since it uses os.makedirs() that can make nested dirs
-        errors = copyTree(config.settings[config.KEY_DEMOS_DIR], 
-                 os.path.join(config.settings[config.KEY_MOOSE_LOCAL_DIR], 'Demos'), 
-                 progressDialog)
-        if errors or errors is None: # if src not found, copyTree returns None; if errors checks for non-empty list
-            print "Error(s) during copying. Will not try again. Please copy manually."
+        errors = copyTree(src,dst,progressDialog)
+        ## 'if errors' checks for non-empty list, copyTree returns None when src is not found
+        if errors or errors is None:
+            if errors:
+                for e in errors: print e
+            print "Error(s) during copying from ",src," to ",dst
+            print "Will not try again. Please copy manually."
         config.settings[config.KEY_DEMOS_COPIED_THISVERSION] = 'True' # string not boolean
 
 class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):

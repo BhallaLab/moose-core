@@ -122,11 +122,12 @@ class MooseSetting(dict):
             ## then set firsttime=True and do what needs to be done first time.
             if cls._instance[KEY_FIRSTTIME_THISVERSION] in ['']+TRUE_STRS:
                 firsttime = True
-                errs = init_dirs()
-                for e in errs:
-                    print e
             else:
                 firsttime = False
+            ## intialize directories based on local build or otherwise
+            errs = init_dirs()
+            for e in errs:
+                print e
             # If this is the first time, then set some defaults
             if firsttime:
                 cls._instance.qsettings.setValue(KEY_FIRSTTIME_THISVERSION, 'True') # string not boolean
@@ -171,8 +172,7 @@ class MooseSetting(dict):
         return (str(self.qsettings.value(key).toString()) for key in self.qsettings.allKeys())
 
 def init_dirs():
-    """This is called during the first run of this version of MOOSE.
-    We try to create the `~/moose_<version>` directory.
+    """ Set directories based on local build or global moosegui.
     """  
     global MOOSE_DEMOS_DIR
     global MOOSE_LOCAL_DIR
@@ -186,13 +186,15 @@ def init_dirs():
         MOOSE_DOCS_DIR = os.path.join(MOOSE_LOCAL_DIR, 'Docs')
     else:
         MOOSE_LOCAL_DIR = os.path.join(os.environ['HOME'], 'moose_'+MOOSE_VERSION)
-        if not os.path.exists(MOOSE_LOCAL_DIR):
-            try:
-                os.mkdir(MOOSE_LOCAL_DIR)
-                print 'Created local moose directory:', MOOSE_LOCAL_DIR
-            except OSError, e:
-                errors.append(e)
-                print e
+        ## Create this directory only when Demos are copied there.
+        ## IMPORTANT: FOR NEXT version we need to prompt the user for this directory.
+        #if not os.path.exists(MOOSE_LOCAL_DIR):
+        #    try:
+        #        os.mkdir(MOOSE_LOCAL_DIR)
+        #        print 'Created local moose directory:', MOOSE_LOCAL_DIR
+        #    except OSError, e:
+        #        errors.append(e)
+        #        print e
     if not os.access(MOOSE_DOCS_DIR, os.R_OK + os.X_OK):
         print "Could not access documentation directory: %s" % (MOOSE_DOCS_DIR)
         errors.append(OSError(errno.EACCES, 'Cannot access %s' % (MOOSE_DOCS_DIR)))
