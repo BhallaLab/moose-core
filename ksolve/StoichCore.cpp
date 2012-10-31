@@ -116,9 +116,13 @@ StoichCore::~StoichCore()
 		i != rates_.end(); ++i )
 		delete *i;
 
+	/*
+	 * Do NOT delete FuncTerms, they are just pointers stolen from
+	 * the non-zombified objects.
 	for ( vector< FuncTerm* >::iterator i = funcs_.begin();
 		i != funcs_.end(); ++i )
 		delete *i;
+		*/
 }
 
 //////////////////////////////////////////////////////////////
@@ -333,7 +337,7 @@ void StoichCore::installAndUnschedFunc( Id func, Id Pool )
 
 	// Install the FuncTerm
 	static const Finfo* funcSrcFinfo = 
-			FuncBase::initCinfo()->findFinfo( "output" );
+			FuncBase::initCinfo()->findFinfo( "input" );
 	FuncBase* fb = reinterpret_cast< FuncBase* >( func.eref().data() );
 	FuncTerm* ft = fb->func();
 	vector< Id > srcPools;
@@ -371,16 +375,17 @@ void StoichCore::zombifyModel( const Eref& e, const vector< Id >& elist )
 							(*i)(), ZPool::initCinfo() );
 		}
 		else if ( ei->cinfo() == bufPoolCinfo ) {
-			zombifyAndUnschedPool( e, (*i)(), ZBufPool::initCinfo() );
+			zombifyAndUnschedPool( stoichParent.eref(), 
+							(*i)(), ZBufPool::initCinfo() );
 		}
 		else if ( ei->cinfo() == funcPoolCinfo ) {
-			zombifyAndUnschedPool( e, (*i)(), ZFuncPool::initCinfo());
+			zombifyAndUnschedPool( stoichParent.eref(), 
+							(*i)(), ZFuncPool::initCinfo());
 			// Has also got to zombify the Func.
 			Id funcId = Neutral::child( i->eref(), "func" );
-			if ( funcId != Id() ) {
-				if ( funcId()->cinfo()->isA( "FuncBase" ) )
-					installAndUnschedFunc( funcId, (*i) );
-			}
+			assert( funcId != Id() );
+			assert( funcId()->cinfo()->isA( "FuncBase" ) );
+			installAndUnschedFunc( funcId, (*i) );
 		}
 		else if ( ei->cinfo() == reacCinfo ) {
 			ReacBase::zombify( ei, ZReac::initCinfo(), e.id() );
@@ -783,8 +788,9 @@ void StoichCore::print() const
 void StoichCore::updateRates( const double* s, double* yprime )
 {
 	vector< RateTerm* >::const_iterator i;
-	vector< double > v( numReac_ );
+	vector< double > v( numReac_, 0.0 );
 	vector< double >::iterator j = v.begin();
+	assert( numReac_ == rates_.size() );
 
 	for ( i = rates_.begin(); i != rates_.end(); i++) {
 		*j++ = (**i)( s );

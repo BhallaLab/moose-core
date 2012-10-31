@@ -112,22 +112,6 @@ Id ReadCspace::readModelString( const string& model,
 	mesh_ = Neutral::child( compt_.eref(), "mesh" );
 	assert( mesh_ != Id() );
 
-	
-/*
-	base_ = s->doCreate( solverClass, pa, modelname, dims, false );
-	assert( base_ != Id() );
-
-	Id comptId = s->doCreate( "CubeMesh", base_, "compartment", dims, false );
-	assert( comptId != Id() );
-	mesh_ = Neutral::child( comptId.eref(), "mesh" );
-	assert( mesh_ != Id() );
-	double side = 1e-6;
-	vector< double > coords( 9, side );
-	coords[0] = coords[1] = coords[2] = 0;
-	bool ret = Field< vector< double > >::set( comptId, "coords", coords );
-	assert( ret );
-	*/
-
 	string temp = model.substr( pos + 1 );
 	pos = temp.find_first_of( " 	\n" );
 	
@@ -172,7 +156,7 @@ void ReadCspace::makePlots( double plotdt )
 	assert( graphs != Id () );
 	for ( unsigned int i = 0; i < children.size(); ++i ) {
 		const Cinfo* kidCinfo = children[i].element()->cinfo();
-		if ( kidCinfo->isA( "ZombiePool" ) || kidCinfo->isA( "Pool" ) ) {
+		if ( kidCinfo->isA( "PoolBase" ) ) {
 			string plotname = "plot" + children[i].element()->getName();
     		Id tab = shell->doCreate( "Table", graphs, plotname, dims );
 			assert( tab != Id() );
@@ -191,49 +175,6 @@ void ReadCspace::makePlots( double plotdt )
     string plotpath = basepath + "/graphs/##[TYPE=Table]";
     shell->doUseClock( plotpath, "process", 2 ); 
 }
-
-/*
-void ReadCspace::setupGslRun( double plotdt )
-{
-	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-    vector< int > dims( 1, 1 ); 
-	shell->setCwe( base_ );
-	Field< string >::set( base_, "path", "##" );
-
-    Id gsl = shell->doCreate( "GslIntegrator", base_, "gsl", dims );
-    bool ret = SetGet1< Id >::set( gsl, "stoich", base_ );
-    assert( ret );
-    ret = Field< bool >::get( gsl, "isInitialized" );
-    assert( ret );
-
-	vector< Id > children;
-	Neutral::children( base_.eref(), children );
-	for ( unsigned int i = 0; i < children.size(); ++i ) {
-		// cout << "In readCspace: " << children[i].path() << endl;
-		if ( children[i].element()->cinfo()->isA( "ZombiePool" ) ) {
-			string plotname = "plot" + children[i].element()->getName();
-    		Id tab = shell->doCreate( "Table", base_, plotname, dims );
-			assert( tab != Id() );
-			// cout << "ReadCspace made plot " << plotname << endl;
-			MsgId mid = shell->doAddMsg( "Single", 
-				tab, "requestData", children[i], "get_conc" );
-			assert( mid != Msg::bad );
-		}
-	}
-
-    shell->doSetClock( 0, plotdt );
-    shell->doSetClock( 1, plotdt );
-    shell->doSetClock( 2, plotdt );
-    shell->doSetClock( 3, 0 ); 
-
-	string basePath = base_.path();
-
-    string plotpath = basePath + "/##[TYPE=Table]";
-    shell->doUseClock( basePath + "/gsl", "process", 0 ); 
-    shell->doUseClock( plotpath, "process", 2 ); 
-    shell->doReinit();
-}
-*/
 
 
 /////////////////////////////////////////////////////////////////////

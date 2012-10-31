@@ -429,11 +429,6 @@ void SimManager::meshStats( const Eref& e, const Qinfo* q,
 // Utility functions
 //////////////////////////////////////////////////////////////
 
-void SimManager::buildFromBareKineticTree( const string& method )
-{
-	;
-}
-
  // Don't make any solvers.
 void SimManager::buildEE( Shell* shell )
 {
@@ -493,24 +488,30 @@ void SimManager::buildGsl( const Eref& e, const Qinfo* q,
 	vector< int > dims( 1, 1 );
 	 // This is a placeholder for more sophisticated node-balancing info
 	 // May also need to put in volscales here.
-	stoich_ = shell->doCreate( "Stoich", baseId_, "stoich", dims );
-	Field< string >::set( stoich_, "path", baseId_.path() + "/kinetics/##");
+	stoich_ = shell->doCreate( "GslStoich", baseId_, "stoich", dims );
+	stoichCore_ = 
+			shell->doCreate( "StoichCore", stoich_, "stoichCore", dims );
+	Field< string >::set( stoichCore_, "path", 
+					baseId_.path() + "/kinetics/##");
 
 	string basePath = baseId_.path();
 	Id compt( basePath + "/kinetics" );
 	assert( compt != Id() );
+	Id mesh( basePath + "/kinetics/mesh" );
+	assert( compt != Id() );
 
-	MsgId mid = shell->doAddMsg( "Single", compt, "meshSplit", 
-		stoich_, "meshSplit" );
+	MsgId mid = shell->doAddMsg( "OneToAll", mesh, "remesh", 
+		stoich_, "remesh" );
 	assert( mid != Msg::bad );
 
-	double chemLoad = estimateChemLoad( compt, stoich_ );
+	double chemLoad = estimateChemLoad( compt, stoichCore_ );
 	// Here we would also estimate cell load
 	Id hsolver;
 	double hsolveLoad = estimateHsolveLoad( hsolver );
 
 	numChemNodes_ = Shell::numNodes() * chemLoad / ( chemLoad + hsolveLoad);
 	
+	/*
 	nodeInfo()->send( e, q->threadNum(), numChemNodes_,
 		Shell::numProcessThreads() ); 
 	Qinfo::waitProcCycles( 2 );
@@ -521,19 +522,15 @@ void SimManager::buildGsl( const Eref& e, const Qinfo* q,
 	assert( ret );
 	ret = Field< bool >::get( gsl, "isInitialized" );
 	assert( ret );
-	ret = Field< string >::set( gsl, "method", method );
+	*/
+	bool ret = Field< string >::set( stoich_, "method", method );
 	assert( ret );
 	// The GSL does some massaging of the method string, so we ask it back.
-	method_ = Field< string >::get( gsl, "method" );
+	method_ = Field< string >::get( stoich_, "method" );
 	string path0 = basePath + "/kinetics/mesh," + 
 		basePath + "/kinetics/##[ISA=StimulusTable]";
 	shell->doUseClock( path0, "process", 4);
-	shell->doUseClock( basePath + "/stoich/gsl", "process", 5);
-
-	Id meshEntry = Neutral::child( compt.eref(), "mesh" );
-	assert( meshEntry != Id() );
-	mid = shell->doAddMsg( "OneToOne", meshEntry, "remesh", gsl, "remesh" );
-	assert( mid != Msg::bad );
+	shell->doUseClock( basePath + "/stoich", "process", 5);
 }
 
 void SimManager::buildFromKkitTree( const Eref& e, const Qinfo* q,

@@ -466,10 +466,10 @@ unsigned int Neutral::buildTree( const Eref& e, const Qinfo* q, vector< Id >& tr
 	const 
 {
 	unsigned int ret = 1;
-	tree.push_back( e.element()->id() );
 	vector< Id > kids = getChildren( e, q );
 	for ( vector< Id >::iterator i = kids.begin(); i != kids.end(); ++i )
 		ret += buildTree( i->eref(), q, tree );
+	tree.push_back( e.element()->id() );
 	return ret;
 }
 //////////////////////////////////////////////////////////////////////////

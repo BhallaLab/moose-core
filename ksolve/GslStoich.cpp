@@ -98,7 +98,7 @@ const Cinfo* GslStoich::initCinfo()
 	
 	static  Cinfo gslIntegratorCinfo(
 		"GslStoich",
-		Neutral::initCinfo(),
+		StoichPools::initCinfo(),
 		gslIntegratorFinfos,
 		sizeof(gslIntegratorFinfos)/sizeof(Finfo *),
 		new Dinfo< GslStoich >
@@ -315,6 +315,7 @@ void GslStoich::stoich( const Eref& e, const Qinfo* q, Id stoichId )
 void GslStoich::process( const Eref& e, ProcPtr info )
 {
 #ifdef USE_GSL
+			// Hack till we sort out threadData
 	double nextt = info->currTime + info->dt;
 	for ( currMeshEntry_ = 0; 
 					currMeshEntry_ < numMeshEntries(); ++currMeshEntry_ ) {
@@ -341,6 +342,7 @@ void GslStoich::reinit( const Eref& e, ProcPtr info )
 	for ( unsigned int i = 0; i < numMeshEntries(); ++i ) {
 		memcpy( varS( i ), Sinit( i ), nVarPools * sizeof( double ) );
 		memcpy( &(y_[i][0]), Sinit( i ), nVarPools * sizeof( double ) );
+		stoich_->updateFuncs( varS( i ), 0 );
 	}
 
 #ifdef USE_GSL
@@ -386,27 +388,22 @@ void GslStoich::remesh( const Eref& e, const Qinfo* q,
 	if ( e.index().value() != 0 ) {
 		return;
 	}
-	/*
-	if ( q->addToStructuralQ() )
-		return;
-		*/
 	// cout << "GslStoich::remesh for " << e << endl;
 	assert( vols.size() > 0 );
-	if ( vols.size() != e.element()->dataHandler()->localEntries() ) {
-		Neutral* n = reinterpret_cast< Neutral* >( e.data() );
-		Id stoichId = stoichId_;
-		n->setLastDimension( e, q, vols.size() );
-	// instead of setLastDimension we should use a function that sets up
-	// an arbitrary mapping of indices.
+	// Here we could have a change in the meshing, or in the volumes.
+	// Either way we need to do scaling.
+	unsigned int numPools = numPoolEntries( 0 );
+	vector< double > initConcs( numPools, 0.0 );
+	vector< unsigned int > localEntryList( vols.size(), 0 );
+	for ( unsigned int i = 0; i < vols.size(); ++i )
+			localEntryList[i] = i;
 
-	// Note that at this point the data pointer may be invalid!
-	// Now we reassign everything.
-		assert( e.element()->dataHandler()->localEntries() == vols.size() );
-		GslStoich* gsldata = reinterpret_cast< GslStoich* >( e.data() );
-		for ( unsigned int i = 0; i < vols.size(); ++i ) {
-			gsldata[i].stoich( e, q, stoichId );
-		}
+	for ( unsigned int i = 0; i < numPools; ++i ) {
+		initConcs[i] = Sinit( 0 )[i] / ( NA * oldVol );
 	}
+	meshSplit( initConcs, vols, localEntryList );
+	vector< double > temp( numPools, 0.0 );
+	y_.resize( vols.size(), temp );
 }
 ///////////////////////////////////////////////////
 // Numerical function definitions
@@ -445,6 +442,12 @@ int GslStoich::innerGslFunc( double t, const double* y, double* yprime )
 	stoich_->updateFuncs( varS( currMeshEntry_ ), t );
 
 	stoich_->updateRates( S( currMeshEntry_ ), yprime );
+	/*
+	cout << "\nTime = " << t << endl;
+	for ( unsigned int i = 0; i < stoich_->getNumVarPools(); ++i )
+			cout << i << "	" << S( currMeshEntry_ )[i] << 
+					"	" << S( currMeshEntry_ )[i] << endl;
+					*/
 
 	// updateDiffusion happens in the previous Process Tick, coordinated
 	// by the MeshEntries. At this point the new values are there in the
