@@ -11,6 +11,29 @@
 
 extern const double NA;
 
+const Cinfo* StoichPools::initCinfo()
+{
+	static string doc[] = 
+	{
+			"Name", "StoichPools",
+			"Author", "Upinder S. Bhalla, 2012, NCBS",
+			"Description", "Pure virtual base class for handling "
+					"reaction pools. GslStoich is derived from this."
+	};
+
+	static Cinfo stoichPoolsCinfo(
+		"StoichPools",
+		Neutral::initCinfo(),
+		0, 0,
+		new ZeroSizeDinfo< int >(),
+		doc, sizeof( doc ) / sizeof( string )
+	);
+	
+	return &stoichPoolsCinfo;
+}
+
+static const Cinfo* stoichPoolsCinfo = StoichPools::initCinfo();
+
 //////////////////////////////////////////////////////////////
 // Class definitions
 //////////////////////////////////////////////////////////////

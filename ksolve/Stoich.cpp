@@ -712,7 +712,7 @@ void Stoich::zombifyModel( const Eref& e, const vector< Id >& elist )
 		else if ( ei->cinfo() == funcPoolCinfo ) {
 			zombifyAndUnschedPool( e, (*i)(), ZombieFuncPool::initCinfo());
 			// Has also got to zombify the Func.
-			Id funcId = Neutral::child( i->eref(), "sumFunc" );
+			Id funcId = Neutral::child( i->eref(), "func" );
 			if ( funcId != Id() ) {
 				if ( funcId()->cinfo()->isA( "SumFunc" ) )
 					ZombieSumFunc::zombify( e.element(), funcId(), (*i) );

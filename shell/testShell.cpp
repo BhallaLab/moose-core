@@ -222,12 +222,12 @@ void verifyKids( Id f1, Id f2a, Id f2b, Id f3, Id f4a, Id f4b )
 	int num = f1Data->buildTree( f1.eref(), &q, tree );
 	assert( num == 6 );
 	assert( tree.size() == 6 );
-	assert( tree[0] == f1 );
-	assert( tree[1] == f2a );
+	assert( tree[5] == f1 );
+	assert( tree[3] == f2a );
 	assert( tree[2] == f3 );
-	assert( tree[3] == f4a );
-	assert( tree[4] == f4b );
-	assert( tree[5] == f2b );
+	assert( tree[0] == f4a );
+	assert( tree[1] == f4b );
+	assert( tree[4] == f2b );
 }
 
 /// Test the Neutral::children and buildTree

@@ -171,6 +171,7 @@ unsigned int ZPool::vGetSpecies( const Eref& e, const Qinfo* q ) const
 void ZPool::setSolver( Id solver )
 {
 	assert ( solver != Id() );
+	assert( solver.element()->cinfo()->isA( "StoichPools" ) );
 	stoich_ = reinterpret_cast< StoichPools* >( solver.eref().data() );
 }
 

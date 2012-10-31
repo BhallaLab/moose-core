@@ -19369,4 +19369,70 @@ compartmental and diffusion calculations.
 GslStoich now takes over all the things, at least in principle. Tests to
 commence.
 
+Replaced the old Stoich with GslStoich in SimManager. Breaks unit tests.
+
+============================================================================
+29 Oct 2012
+Struggled a bit with testSimManager:testRemeshing(). Turns out I need to
+define my policy for handling the per-thread entities like solvers. 
+
+Where does the remesh call come? To the GslStoich ie, StoichPools; and 
+also to the ZPools. 
+
+Policy for solvers (here, GslStoich) is clear: Make one on each thread,
+at creation time.
+
+Policy for pools to be worked out. Options:
+- Flat array over all memory space, manage by index
+- Subdivide as per thread. Separate sections of DataHandler.
+
+Also, who controls it:
+	- The solver: remesh call to solver then subdivides pools
+	- The pools themselves: Remesh call goes to each pool entry.
+	- Some thread-level subdivision: Remesh goes to DataHandler.
+		
+If we do one solver per thread, then by default it will subdivide its managed
+pools by thread.
+
+Data Handler design options:
+- One per Element, and it figures out which sub-address-space to use
+- One per Thread, so a small array on each Element.
+
+In both cases a key problem is how does a message figure out which
+node/handler to ask for. Currently the Handler maintains the policy. If we
+have one Handler per thread, then how?
+
+Suppose we go with:
+- One Element per node
+- One DataHandler per thread: there is a small array of Handlers on the Element
+	- What if there is a single object? Most of the Handlers will be empty.
+- Element carries decomposition policy info, if in doubt can refer up.
+- GslStoich is on a OnePerThreadHandler.
+	- Handles the pools already assigned to its thread
+- Remeshing request comes to StoichPools, as it knows best about policy.
+	This simply means that the ZPools ignore the message.
+	But I would have to then always define one ZPool per thread, since
+	each needs to know its stoich. 
+	No, just need matching ZPools and GslStoichs
+
+
+For now: Just resize the S and Sinit and y vectors.
+
+Good progress with this. Have had to disable testSimManager.cpp:testRemeshing()
+because it tests diffusion which isn't yet on. Incrementally working through
+unit tests. Those cleared, now grinding through regression tests which are
+significantly nastier. Currently it fails to work with MMenz.
+============================================================================
+31 Oct 2012
+Inching ahead with regression tests. I suspect there is something missing
+in my Func zombification. Fixed.
+
+Now a small error due to lack of reinit value update on SumTotal.
+
+Now clears all unit and regression tests, except for the diffusion tests.
+I've disabled those till I code in the features for that.
+There is a segv on exit.
+The GUI does not work with the new classes. Will need to work with Harsha
+to fix. Will checkin anyway.
+
 ============================================================================

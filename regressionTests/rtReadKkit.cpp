@@ -292,10 +292,10 @@ void rtRunKkitModels( const string& modelname, double dt, double runTime,
 			plotName, "rmsr" );
 		assert( ok );
 
-		/*
 		ok = SetGet2< string, string >::set(
 			plotId, "xplot", "check.plot", plots[i] );
 		assert( ok );
+		/*
 		*/
 
 		// Returns -1 on failure, otherwise the (positive) rms ratio.
@@ -307,49 +307,33 @@ void rtRunKkitModels( const string& modelname, double dt, double runTime,
 	cout << "." << flush;
 }
 
-void rtRunKkit()
+void checkKholodenkoModel( double volScaleFactor )
 {
-	const double TOLERANCE = 2e-3;
 	const double NA_RATIO = 6e23 / NA;
-
-	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
-	vector< unsigned int > dims( 1, 1 );
-	Shell::cleanSimulation();
-
-	Id modelId = shell->doLoadModel( "Kholodenko.g", "/rkktest", "rk5" );
-	assert( modelId != Id() );
-	Id stoichId( "/rkktest/stoich" );
-	assert( stoichId != Id() );
-	Id comptId( "/rkktest/kinetics" );
-	assert( comptId != Id() );
-	unsigned int numVarMols = Field< unsigned int >::get( 
-		stoichId, "nVarPools" );
-	assert ( numVarMols == 15 );
-
 	double n;
 	assert( Id( "/rkktest/kinetics/MAPK/MKKK" ) != Id() );
 	n = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MKKK" ), "n" );
-	assert( doubleEq( n, 0.1 / NA_RATIO ) );
+	assert( doubleEq( n / volScaleFactor, 0.1 / NA_RATIO ) );
 
 	n = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MKK" ), "n" );
-	assert( doubleEq( n, 0.3 / NA_RATIO ) );
+	assert( doubleEq( n / volScaleFactor, 0.3 / NA_RATIO ) );
 
 	n = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MAPK" ), "n" );
-	assert( doubleEq( n, 0.3 / NA_RATIO ) );
+	assert( doubleEq( n / volScaleFactor, 0.3 / NA_RATIO ) );
 
 	n = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Ras_MKKKK" ), "n" );
-	assert( doubleEq( n, 0.001 / NA_RATIO ) );
+	assert( doubleEq( n / volScaleFactor, 0.001 / NA_RATIO ) );
 
 	n = Field< double >::get( Id( "/rkktest/kinetics/MAPK/int1" ), "n" );
-	assert( doubleEq( n, 0.001 / NA_RATIO ) );
+	assert( doubleEq( n / volScaleFactor, 0.001 / NA_RATIO ) );
 	n = Field< double >::get( Id( "/rkktest/kinetics/MAPK/int2" ), "n" );
-	assert( doubleEq( n, 0.001 / NA_RATIO ) );
+	assert( doubleEq( n / volScaleFactor, 0.001 / NA_RATIO ) );
 	n = Field< double >::get( Id( "/rkktest/kinetics/MAPK/int3" ), "n" );
-	assert( doubleEq( n, 0.001 / NA_RATIO ) );
+	assert( doubleEq( n / volScaleFactor, 0.001 / NA_RATIO ) );
 	n = Field< double >::get( Id( "/rkktest/kinetics/MAPK/int4" ), "n" );
-	assert( doubleEq( n, 0.001 / NA_RATIO ) );
+	assert( doubleEq( n / volScaleFactor, 0.001 / NA_RATIO ) );
 	n = Field< double >::get( Id( "/rkktest/kinetics/MAPK/int5" ), "n" );
-	assert( doubleEq( n, 0.001 / NA_RATIO ) );
+	assert( doubleEq( n / volScaleFactor, 0.001 / NA_RATIO ) );
 
 	double conc;
 	// Original concs were in uM, but MOOSE uses mM.
@@ -364,9 +348,9 @@ void rtRunKkit()
 	double rate;
 	// NumRates
 	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Neg_feedback" ), "kf" );
-	assert( doubleEq( rate, 1.0 * NA_RATIO ) );
+	assert( doubleEq( rate * volScaleFactor, 1.0 * NA_RATIO ) );
 	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Neg_feedback" ), "kb" );
-	assert( doubleEq( rate, 0.009 ) );
+	assert( doubleEq( rate, 0.009 ) ); // This is 1st order, dont scale it.
 
 	// conc rates
 	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Neg_feedback" ), "Kf" );
@@ -392,29 +376,36 @@ void rtRunKkit()
 	assert( doubleEq( rate, ( ( 0.1 + 0.025 ) / 8.3333 ) * 1e-3 ) );
 	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MKKK_P/3" ), "kcat" );
 	assert( doubleEq( rate, 0.025 ) );
+}
+
+void rtRunKkit()
+{
+	const double TOLERANCE = 2e-3;
+	const double NA_RATIO = 6e23 / NA;
+
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< unsigned int > dims( 1, 1 );
+	Shell::cleanSimulation();
+
+	Id modelId = shell->doLoadModel( "Kholodenko.g", "/rkktest", "rk5" );
+	assert( modelId != Id() );
+	Id stoichId( "/rkktest/stoich/stoichCore" );
+	assert( stoichId != Id() );
+	Id comptId( "/rkktest/kinetics" );
+	assert( comptId != Id() );
+	unsigned int numVarMols = Field< unsigned int >::get( 
+		stoichId, "nVarPools" );
+	assert ( numVarMols == 15 );
+
+	checkKholodenkoModel( 1.0 );
 	
-
-	/*
-	Id gsl = shell->doCreate( "GslIntegrator", kineticId, "gsl", dims );
-	bool ret = SetGet1< Id >::set( gsl, "stoich", kineticId );
-	assert( ret );
-	ret = Field< bool >::get( gsl, "isInitialized" );
-	assert( ret );
-
-	shell->doSetClock( 0, 10 );
-	shell->doSetClock( 1, 10 );
-	shell->doSetClock( 2, 10 );
-	shell->doSetClock( 3, 0 );
-	shell->doSetClock( 4, 0 );
-	shell->doSetClock( 5, 0 );
-	shell->doUseClock( "/rkktest/gsl", "process", 0 );
-	shell->doUseClock( "/rkktest/graphs/##[TYPE=Table],/rkktest/moregraphs/##[TYPE=Table]", "process", 2 );
-
-	*/
 	for ( unsigned int i = 0; i < 10; ++i )
 		shell->doSetClock( i, 10 );
 	shell->doReinit();
 	shell->doStart( 5000.0 );
+	double n;
+	n = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MKK" ), "n" );
+	assert( !doubleEq( n, 0.3 / NA_RATIO ) );
 
 	Id plotId( "/rkktest/graphs/conc1/MAPK_PP.Co" );
 	vector< Id > ret = LookupField< string, vector< Id > >::get( 
@@ -448,33 +439,16 @@ void rtRunKkit()
 	/////////////////////////////////////////////////////////////////////
 	// Change volume and run it again.
 	/////////////////////////////////////////////////////////////////////
-	/*
-	double vol = LookupField< short, double >::get( stoichId, 
-		"compartmentVolume", 0);
-	vol *= 0.1;
-	ok = LookupField< short, double >::set( stoichId, "compartmentVolume",
-		0, vol );
-
-	assert( ok );
-	*/
 	Id parentCompartment( "/rkktest/kinetics" );
 	double vol = Field< double >::get( parentCompartment, "size" );
 	ok = SetGet2< double, unsigned int >::set( parentCompartment,
 		"buildDefaultMesh", vol * 0.1, 1 );
-	/*
-	double side = pow( vol, 1.0/3.0 );
-	ok = Field< double >::set( Id( "/rkktest/kinetics" ), "x1", side );
-	assert( ok );
-	ok = Field< double >::set( Id( "/rkktest/kinetics" ), "y1", side );
-	assert( ok );
-	ok = Field< double >::set( Id( "/rkktest/kinetics" ), "z1", side );
-	assert( ok );
-	*/
 	double actualVol = 
 		Field< double >::get( Id( "/rkktest/kinetics/mesh" ), "size" );
 	assert( doubleEq( actualVol, vol ) );
 
 	shell->doReinit();
+	checkKholodenkoModel( 0.1 );
 	size = Field< unsigned int >::get( plotId, "size" );
 	assert( size == 1 ); // Reinit should generate one data point.
 	shell->doStart( 5000.0 );
@@ -608,7 +582,7 @@ void rtRunCspace()
 
 	Id base = shell->doLoadModel( "Osc.cspace", "/osc", "gsl" );
 	assert( base != Id() );
-	Id stoich( "/osc/stoich" );
+	Id stoich( "/osc/stoich/stoichCore" );
 	unsigned int numVarMols = Field< unsigned int >::get( 
 		stoich, "nVarPools" );
 	assert ( numVarMols == 10 ); // 6 mols + 4 enz
@@ -677,7 +651,7 @@ void rtRunTabSumtot()
 
 	Id modelId = shell->doLoadModel( "tabsumtot.g", "/ts", "rk5" );
 	assert( modelId != Id() );
-	Id stoichId( "/ts/stoich" );
+	Id stoichId( "/ts/stoich/stoichCore" );
 	assert( stoichId != Id() );
 	Id comptId( "/ts/kinetics" );
 	assert( comptId != Id() );
@@ -699,7 +673,7 @@ void rtRunTabSumtot()
 
 	Id d( "/ts/kinetics/D" );
 	assert( d != Id() );
-	assert( d.element()->cinfo()->name() == "ZombieBufPool" );
+	assert( d.element()->cinfo()->name() == "ZBufPool" );
 	const Finfo* dsf = d.element()->cinfo()->findFinfo( "set_concInit" );
 	assert( dsf );
 	const Finfo* asf = a.element()->cinfo()->findFinfo( "set_concInit" );
