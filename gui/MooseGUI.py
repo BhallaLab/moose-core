@@ -425,7 +425,7 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             fileType = self.mooseHandler.fileExtensionMap[str(fileFilter)]
 
             if fileType == self.mooseHandler.type_all:
-                reMap = str(fileNames[0]).rsplit('.')[1]
+                reMap = str(fileNames[0]).rsplit('.')[-1]
                 if reMap == 'g':
                     fileType = self.mooseHandler.type_genesis
                 elif reMap == 'py':
