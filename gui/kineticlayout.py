@@ -164,8 +164,12 @@ class  KineticsWidget(QtGui.QWidget):
 	# Get all the compartments and its members  
         cmptMol = {}
         self.setupComptObj(modelPath,cmptMol)
-        #for k,v in test.items(): print k,v
-        
+        '''
+        for k,v in cmptMol.items(): 
+            print k
+            for vl in v:
+                print vl.class_,vl
+        '''
 	#Check to see if all the cordinates are zero (which is a case for kkit8 version)
         x = []
         y = []
@@ -244,7 +248,7 @@ class  KineticsWidget(QtGui.QWidget):
             for reitem in Neutral(meshEnt).getNeighbors('remeshReacs'):
                 molrecList.append(reitem)
             for mitem in Neutral(meshEnt).getNeighbors('remesh'):
-                if ( (mitem[0].class_ != 'GslIntegrator')):
+                if ( (mitem[0].class_ != 'GslStoich')):
                         molrecList.append(mitem)
             mobject[meshEnt] = molrecList
     
@@ -257,7 +261,8 @@ class  KineticsWidget(QtGui.QWidget):
         allzeroCord = False
         for mreObjitems in cmptMol.itervalues():
             for mre in mreObjitems:
-                if ((mre[0].parent).class_ == 'ZombieEnz'):
+                if isinstance(element(mre[0].parent),CplxEnzBase):
+                 #if ((mre[0].parent).class_ == 'CplxEnzBase'):
                     mreObjinfo = (mre[0].parent).path+'/info'
                 else:
                     mreObjinfo = mre.path+'/info'
@@ -296,7 +301,8 @@ class  KineticsWidget(QtGui.QWidget):
                     mobjItem = EnzItem(mre,comptRef)
 
                 elif isinstance(element(mre),PoolBase):#' or mre.class_ == 'ZombieFuncPool' or mre.class_ == 'ZombieBufPool':
-                    if mre[0].parent.class_ != 'ZombieEnz':
+                    if not isinstance(element(mre[0].parent),CplxEnzBase):
+                    #if mre[0].parent.class_ != 'ZEnz':
                         mobjItem = PoolItem(mre,comptRef)
 
                     else:
@@ -323,7 +329,8 @@ class  KineticsWidget(QtGui.QWidget):
         self.sceneContainer.addItem(self.new_Compt)
 
     def positioninfo(self,mre):#,xratio,yratio,xMin,yMin):
-        if ((mre[0].parent).class_ == 'ZombieEnz'):
+        if isinstance(element(mre[0].parent),CplxEnzBase):
+        #if ((mre[0].parent).class_ == 'ZEnz'):
             iteminfo = (mre[0].parent).path+'/info'
         else:
             iteminfo = mre.path+'/info'
@@ -414,10 +421,11 @@ class  KineticsWidget(QtGui.QWidget):
 
     def setupItem(self,modlePath,cntDict):
         ''' Reaction's and enzyme's substrate and product and sumtotal is collected '''
-        zombieType = ['ZombieReac','ZombieEnz','ZombieMMenz','ZombieSumFunc']
-        for zombieObj in zombieType:
-            path = modlePath+'/##[TYPE='+zombieObj+']'
-            if zombieObj != 'ZombieSumFunc':
+        #zombieType = ['ZReac','ZEnz','ZMMenz','ZSumFunc']
+        zombieType = ['ReacBase','EnzBase','FuncBase']
+        for baseObj in zombieType:
+            path = modlePath+'/##[ISA='+baseObj+']'
+            if baseObj != 'FuncBase':
                 for items in wildcardFind(path):
                     sublist = []
                     prdlist = []
@@ -425,12 +433,12 @@ class  KineticsWidget(QtGui.QWidget):
                         sublist.append((sub,'s'))
                     for prd in items[0].getNeighbors('prd'):
                         prdlist.append((prd,'p'))
-                    if (zombieObj == 'ZombieEnz') :
+                    if (baseObj == 'CplxEnzBase') :
                         for enzpar in items[0].getNeighbors('toEnz'):
                             sublist.append((enzpar,'t'))
                         for cplx in items[0].getNeighbors('cplxDest'):
                             prdlist.append((cplx,'cplx'))
-                    if (zombieObj == 'ZombieMMenz'):
+                    if (baseObj == 'EnzBase'):
                         for enzpar in items[0].getNeighbors('enzDest'):
                             sublist.append((enzpar,'t'))
                     cntDict[items] = sublist,prdlist
