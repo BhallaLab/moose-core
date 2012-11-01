@@ -184,6 +184,10 @@ class DesignerMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.plotConfigAcceptPushButton.setEnabled(False)
         self.plotWindowFieldTableDict = {} #guiPlotWinowName:[mooseTable]
         self.plotNameWinDict = {} #guiPlotWindowName:moosePlotWindow
+        #harsha: when new models loads these 2 fields had old values, clearing them
+        self.propEditorSelectionNameLabel.setText('')
+        self.plotConfigCurrentSelectionLabel.setText('')
+        self.propEditorChildListWidget.setVisible(False)
         print 'reset all to start state'
 
     def defaultDockState(self):
