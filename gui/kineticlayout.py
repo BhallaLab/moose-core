@@ -675,7 +675,7 @@ class  KineticsWidget(QtGui.QWidget):
                             endtype = k[1]
                         else:
                             if ( isinstance(qGTextitem,ReacItem) or isinstance(qGTextitem,EnzItem) ):
-                                gItem = self.mooseId_GObj[k[0]]
+                                gItem = self.mooseId_GObj[k[0]](element
                                 self.updatearrow(gItem)
                
             elif(isinstance(srcdes[1],ReacItem) or isinstance(srcdes[1],EnzItem) ):
@@ -688,7 +688,8 @@ class  KineticsWidget(QtGui.QWidget):
             else:
                 pItem  =  (next((k for k,v in self.mooseId_GObj.items() if v == srcdes[0]), None))
                 pItem1 =  (next((k for k,v in self.mooseId_GObj.items() if v == srcdes[1]), None))
-                if(pItem.class_ == 'ZombieFuncPool' or pItem1.class_ == 'ZombieFuncPool'):
+                if(pItem.class_ == 'ZFuncPool' or pItem1.class_ == 'ZFuncPool'):
+                #if (isinstance(pItem,FuncBase) or isinstance(pItem1,FuncBase)):
                     endtype = 'st'
             arrow = self.calcArrow(srcdes[0],srcdes[1],endtype,itemignoreZooming)
             ql.setPolygon(arrow)
