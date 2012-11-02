@@ -19485,3 +19485,14 @@ same for all molecules.
 Minor fix resolves issue of segv on exit. But took a long while to figure it 
 out. Had to do with the updated ordering of deleting element trees twig first
 rather than root first.
+
+Making good progress on diffusion framework within stoich. It looks a lot
+faster and cleaner than old one. Key issue is to get pointer to the mesh.
+
+
+Now the code compiles and clears unit tests, without actually being exercised.
+The ChemMesh subclasses need to define a useful getStencil function.
+Opportunity here to do completely general 1,2,3-D boundaries in the CubeMesh,
+and other good things.
+
+============================================================================

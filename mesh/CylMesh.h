@@ -114,6 +114,9 @@ class CylMesh: public ChemMesh
 
 		void buildStencil();
 
+		unsigned int getStencil( unsigned int meshIndex,
+			const double** entry, const unsigned int** colIndex ) const;
+
 		static const Cinfo* initCinfo();
 
 	private:

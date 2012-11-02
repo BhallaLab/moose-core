@@ -146,6 +146,11 @@ class CubeMesh: public ChemMesh
 		 */
 		void buildStencil();
 
+		/// Derived function to return SparseMatrix-style row info for
+		/// specified mesh entry. 
+		unsigned int getStencil( unsigned int meshIndex,
+				const double** entry, const unsigned int** colIndex ) const;
+
 		//////////////////////////////////////////////////////////////////
 
 		static const Cinfo* initCinfo();

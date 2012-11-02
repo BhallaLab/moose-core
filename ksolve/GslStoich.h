@@ -28,6 +28,8 @@ class GslStoich: public StoichPools
 		void setAbsoluteAccuracy( double value );
 		double getInternalDt() const;
 		void setInternalDt( double value );
+		Id getCompartment() const;
+		void setCompartment( Id value );
 
 ///////////////////////////////////////////////////
 // Dest function definitions
@@ -46,21 +48,9 @@ class GslStoich: public StoichPools
 ///////////////////////////////////////////////////////////0
 // Numerical functions
 ///////////////////////////////////////////////////////////0
-		
-		/// Updates the v_ vector of individual reaction velocities.
-		void updateV( unsigned int meshIndex, vector< double >& v );
 
-		/**
-		 * Update all the function-computed molecule terms. These are not
-		 * integrated, but their values may be used by molecules that will
-		 * be integrated using the solver.
-		 * Uses hooks into the S_ vector for arguments other than t.
-		 */
-		void updateFuncs( unsigned int meshIndex, double t );
-
-		// Should redo so meshIndex isn't in here.
-		void updateDiffusion( unsigned int meshIndex, 
-						const vector< const Stencil* >& stencil );
+		// Does calculations for diffusion.
+		void updateDiffusion( double* yprime );
 		
 		/**
  		 * gslFunc is the function used by GSL to advance the simulation one
@@ -99,6 +89,9 @@ class GslStoich: public StoichPools
 		vector< vector < double > >  y_;
 		Id stoichId_;
 		StoichCore* stoich_;
+
+		Id compartmentId_;
+		ChemMesh* diffusionMesh_;
 
 		// Used to keep track of meshEntry when passing self into GSL.
 		unsigned int currMeshEntry_; 

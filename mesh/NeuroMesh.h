@@ -139,6 +139,9 @@ class NeuroMesh: public ChemMesh
 
 		void buildStencil();
 
+		unsigned int getStencil( unsigned int meshIndex,
+			const double** entry, const unsigned int** colIndex ) const;
+
 		//////////////////////////////////////////////////////////////////
 		// Utility functions for building tree.
 		/// This shuffles the nodes_ vector to put soma node at the start
