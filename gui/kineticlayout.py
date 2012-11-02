@@ -675,7 +675,7 @@ class  KineticsWidget(QtGui.QWidget):
                             endtype = k[1]
                         else:
                             if ( isinstance(qGTextitem,ReacItem) or isinstance(qGTextitem,EnzItem) ):
-                                gItem = self.mooseId_GObj[k[0]](element
+                                gItem = self.mooseId_GObj[k[0]]
                                 self.updatearrow(gItem)
                
             elif(isinstance(srcdes[1],ReacItem) or isinstance(srcdes[1],EnzItem) ):
