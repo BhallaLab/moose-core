@@ -666,4 +666,11 @@ void CylMesh::buildStencil()
 		delete stencil_[i];
 	stencil_.resize( 1 );
 	stencil_[0] = new LineStencil( lambda_ );
+}	
+
+unsigned int CylMesh::getStencil( unsigned int meshIndex,
+			const double** entry, const unsigned int** colIndex ) const
+{
+	return 0;
 }
+

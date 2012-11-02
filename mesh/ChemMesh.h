@@ -144,6 +144,26 @@ class ChemMesh
 			const = 0;
 
 		//////////////////////////////////////////////////////////////////
+		// Function to look up scale factor derived from area and length
+		// of compartment junction, for all the mesh entries connected to
+		// the specified one. 
+		// Modeled on equivalent function in SparseMatrix.
+		// meshIndex: index of reference mesh entry
+		// entry: array of values of scale factor
+		// colIndex: array of indices for each entry. 
+		// Returns number of entries and colIndexes.
+		// For a 1-D mesh, there will be 2 except at boundaries
+		// For a 2-D mesh, there will be 4 except at boundaries
+		// For a 3-D mesh, there will be 6 except at boundaries
+		// For a neuromesh, there will be a variable number depending on
+		// branching.
+		// For a CylMesh there are 2 except at boundaries.
+		//////////////////////////////////////////////////////////////////
+		virtual unsigned int getStencil( unsigned int meshIndex,
+				const double** entry, const unsigned int** colIndex )
+			   	const = 0;
+
+		//////////////////////////////////////////////////////////////////
 
 		static const Cinfo* initCinfo();
 

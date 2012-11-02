@@ -12,8 +12,11 @@
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_odeiv.h>
 #include "StoichPools.h"
-#include "GslStoich.h"
 #include "../shell/Shell.h"
+#include "../mesh/MeshEntry.h"
+#include "../mesh/Boundary.h"
+#include "../mesh/ChemMesh.h"
+#include "GslStoich.h"
 
 const Cinfo* GslStoich::initCinfo()
 {
@@ -49,13 +52,27 @@ const Cinfo* GslStoich::initCinfo()
 			&GslStoich::getInternalDt
 		);
 
+		static ValueFinfo< GslStoich, Id > compartment( 
+			"compartment",
+			"This is the Id of the compartment, which must be derived from"
+			"the ChemMesh baseclass. The GslStoich needs"
+			"the ChemMesh Id only for diffusion, "
+			" and one can pass in Id() instead if there is no diffusion,"
+			" or just leave it unset.",
+			&GslStoich::setCompartment,
+			&GslStoich::getCompartment
+		);
+
 		///////////////////////////////////////////////////////
 		// DestFinfo definitions
 		///////////////////////////////////////////////////////
 		static DestFinfo stoich( "stoich",
-			"Handle data from Stoich",
+			"Assign the StoichCore and ChemMesh Ids. The GslStoich needs"
+			"the StoichCore pointer in all cases, in order to perform all"
+			"calculations.",
 			new EpFunc1< GslStoich, Id >( &GslStoich::stoich )
 		);
+
 
 		static DestFinfo process( "process",
 			"Handles process call",
@@ -91,6 +108,7 @@ const Cinfo* GslStoich::initCinfo()
 		&method,			// Value
 		&relativeAccuracy,	// Value
 		&absoluteAccuracy,	// Value
+		&compartment,		// Value
 		&stoich,			// DestFinfo
 		&remesh,			// DestFinfo
 		&proc,				// SharedFinfo
@@ -123,6 +141,8 @@ GslStoich::GslStoich()
 	y_( 0 ),
 	stoichId_(),
 	stoich_( 0 ),
+	compartmentId_( 0 ),
+	diffusionMesh_( 0 ),
 	gslStepType_( 0 ), 
 	gslStep_( 0 ), 
 	gslControl_( 0 ), 
@@ -245,6 +265,25 @@ void GslStoich::setInternalDt( double value )
 	internalStepSize_ = value;
 }
 
+Id GslStoich::getCompartment() const
+{
+	return compartmentId_;
+}
+void GslStoich::setCompartment( Id value )
+{
+	if ( value == Id() || !value.element()->cinfo()->isA( "ChemMesh" ) )
+   	{
+		cout << "Warning: GslStoich::setCompartment: "
+				"Value must be a ChemMesh subclass\n";
+		compartmentId_ = Id();
+		diffusionMesh_ = 0;
+	} else {
+		compartmentId_ = value;
+		diffusionMesh_ = reinterpret_cast< ChemMesh* >(
+				compartmentId_.eref().data() );
+	}
+}
+
 ///////////////////////////////////////////////////
 // Dest function definitions
 ///////////////////////////////////////////////////
@@ -257,7 +296,12 @@ void GslStoich::stoich( const Eref& e, const Qinfo* q, Id stoichId )
 {
 #ifdef USE_GSL
 	stoichId_ = stoichId;
+	if ( stoichId_ == Id() ) {
+		isInitialized_ = 0;
+		return;
+	}
 	stoich_ = reinterpret_cast< StoichCore* >( stoichId.eref().data() );
+
 	unsigned int nVarPools = stoich_->getNumVarPools();
 	// stoich_->clearFlux();
 	resizeArrays( stoich_->getNumAllPools() );
@@ -314,6 +358,8 @@ void GslStoich::stoich( const Eref& e, const Qinfo* q, Id stoichId )
  */
 void GslStoich::process( const Eref& e, ProcPtr info )
 {
+	if ( !isInitialized_ )
+			return;
 #ifdef USE_GSL
 			// Hack till we sort out threadData
 	double nextt = info->currTime + info->dt;
@@ -336,8 +382,8 @@ void GslStoich::process( const Eref& e, ProcPtr info )
 
 void GslStoich::reinit( const Eref& e, ProcPtr info )
 {
-	// stoich_->clearFlux();
-	// stoich_->innerReinit();
+	if ( !isInitialized_ )
+			return;
 	unsigned int nVarPools = stoich_->getNumVarPools();
 	for ( unsigned int i = 0; i < numMeshEntries(); ++i ) {
 		memcpy( varS( i ), Sinit( i ), nVarPools * sizeof( double ) );
@@ -432,6 +478,27 @@ int GslStoich::gslFunc( double t, const double* y, double* yprime, void* s )
 	return g->innerGslFunc( t, y, yprime );
 }
 
+void GslStoich::updateDiffusion( double *yprime )
+{
+	const double *adx; 
+	const unsigned int* colIndex;
+	unsigned int numInRow = 
+			diffusionMesh_->getStencil( currMeshEntry_, &adx, &colIndex);
+	double vSelf = diffusionMesh_->getMeshEntrySize( currMeshEntry_ );
+	const double* sSelf = S( currMeshEntry_ );
+	for ( unsigned int i = 0; i < numInRow; ++i ) {
+		double scale = adx[i] ;
+		unsigned int other = colIndex[i];
+
+		// Get all concs at the other meshEntry
+		const double* sOther = S( other ); 
+		double vOther = diffusionMesh_->getMeshEntrySize( other );
+		
+		for ( unsigned int j = 0; j < stoich_->getNumVarPools(); ++j )
+			yprime[j] += stoich_->getDiffConst(j) * scale * 
+					( sOther[j]/vOther - sSelf[j]/vSelf );
+	}
+}
 
 int GslStoich::innerGslFunc( double t, const double* y, double* yprime ) 
 {
@@ -443,21 +510,8 @@ int GslStoich::innerGslFunc( double t, const double* y, double* yprime )
 
 	stoich_->updateRates( S( currMeshEntry_ ), yprime );
 
-	/*
-	// Compute diffusion
-	const double *adx; 
-	const unsigned int* colIndex;
-	unsigned int numEntries = diffMesh->getRow( currMeshEntry_, adx, colIndex);
-	double vSelf = vols[ currMeshEntry];
-	for ( unsigned int i = 0; i < numEntries; ++i ) {
-		double scale = adx[i] ;
-		unsigned int other = colIndex[i];
-		double* sOther = S( other ); // Get all concs at the other meshEntry
-		double vOther = vols[other];
-		
-		for ( unsigned int j = 0; j < stoich_->getNumVarPools(); ++j )
-			yprime[j] += diffConst[j] * scale * ( sOther[j]/vOther - sSelf[j]/vSelf );
-			*/
+	if ( diffusionMesh_ )
+		updateDiffusion( yprime );
 	
 	/*
 	cout << "\nTime = " << t << endl;
