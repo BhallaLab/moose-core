@@ -19436,3 +19436,52 @@ The GUI does not work with the new classes. Will need to work with Harsha
 to fix. Will checkin anyway.
 
 ============================================================================
+01 Nov 2012
+
+Lots to do:
+Track down segv on exit
+Convert GSSA to ZPools etc; eliminate old Zombies and Stoich.
+Put in intra-solver diffusion
+Put in between-solver transfer of stuff.
+
+Start with intra-solver diffusion, then between solver stuff. Idea is that I
+should tinker with the interface for just one of the solvers before converting
+the GSSA solver as well.
+
+I'm thinking of just using a SparseMatrix for all diffusion, regardless of
+mesh type. The entries would indicate vol scaling between voxels. If I do this
+I should perhaps invent a SymmetricSparseMatrix, thus halve storage. But it
+would slow things down for lookup.
+
+Need a vector of flux across all mesh boundaries, equivalent to v. This would
+be used just twice, on either side of the boundary. May be faster to compute
+on the fly. Easier too.
+
+flux = D[mol] * ( N[other]*kf[i,j] - N[self]*kb[i,j])
+Can I eliminate one of the sparse matrices? 
+
+flux = D[mol] * area_scale_term[other,self] * ( conc[other] - conc[self] ) /
+		 dx[other,self]
+
+The area term and dx term can be merged into 'adx.
+To convert conc terms to N, we do:
+
+flux = D[mol] * adx[other,self] * ( N[other]/vol[other] - N[self]/vol[self] )/NA
+
+So in principle the calculation only needs one sparse matrix. The job of the
+mesh is to provide this sparse matrix (instead of the earlier stencil).
+The sparse matrix also makes it easy to handle irregular boundaries, e.g., in
+a cubic mesh.
+
+From this we need to be able to provide updates to yprime for every given 
+MeshEntry. That is, self.
+For every given value of the MeshEntry, we look up a row of terms from the
+SparseMatrix. Even better, all terms other than the diffusion const are the
+same for all molecules.
+
+
+============================================================================
+02 Nov 2012
+Minor fix resolves issue of segv on exit. But took a long while to figure it 
+out. Had to do with the updated ordering of deleting element trees twig first
+rather than root first.

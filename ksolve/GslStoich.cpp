@@ -442,6 +442,23 @@ int GslStoich::innerGslFunc( double t, const double* y, double* yprime )
 	stoich_->updateFuncs( varS( currMeshEntry_ ), t );
 
 	stoich_->updateRates( S( currMeshEntry_ ), yprime );
+
+	/*
+	// Compute diffusion
+	const double *adx; 
+	const unsigned int* colIndex;
+	unsigned int numEntries = diffMesh->getRow( currMeshEntry_, adx, colIndex);
+	double vSelf = vols[ currMeshEntry];
+	for ( unsigned int i = 0; i < numEntries; ++i ) {
+		double scale = adx[i] ;
+		unsigned int other = colIndex[i];
+		double* sOther = S( other ); // Get all concs at the other meshEntry
+		double vOther = vols[other];
+		
+		for ( unsigned int j = 0; j < stoich_->getNumVarPools(); ++j )
+			yprime[j] += diffConst[j] * scale * ( sOther[j]/vOther - sSelf[j]/vSelf );
+			*/
+	
 	/*
 	cout << "\nTime = " << t << endl;
 	for ( unsigned int i = 0; i < stoich_->getNumVarPools(); ++i )
