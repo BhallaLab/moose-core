@@ -511,18 +511,7 @@ void SimManager::buildGsl( const Eref& e, const Qinfo* q,
 
 	numChemNodes_ = Shell::numNodes() * chemLoad / ( chemLoad + hsolveLoad);
 	
-	/*
-	nodeInfo()->send( e, q->threadNum(), numChemNodes_,
-		Shell::numProcessThreads() ); 
-	Qinfo::waitProcCycles( 2 );
-
-	Id gsl = shell->doCreate( "GslIntegrator", stoich_, "gsl", dims );
-	assert( gsl != Id() );
-	bool ret = SetGet1< Id >::set( gsl, "stoich", stoich_ );
-	assert( ret );
-	ret = Field< bool >::get( gsl, "isInitialized" );
-	assert( ret );
-	*/
+	SetGet1< Id >::set( stoich_, "compartment", compt );
 	bool ret = Field< string >::set( stoich_, "method", method );
 	assert( ret );
 	// The GSL does some massaging of the method string, so we ask it back.

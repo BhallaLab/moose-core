@@ -790,3 +790,23 @@ void CubeMesh::buildStencil()
 	stencil_.push_back( s );
 }
 
+//////////////////////////////////////////////////////////////////
+
+// Should really separate 1,2 and 3D meshes.
+unsigned int CubeMesh::getStencil( unsigned int meshIndex,
+			const double** entry, const unsigned int** colIndex ) const
+{
+		// A 1-D mesh has 3 kinds of rows: left, middle and right.
+		// Plus a pathological one where it is really a single point.
+		// A 2-D mesh has 9 kinds of rows: the 8 directions, middle.
+		// There are two pathological cases if the mesh is 1 entry wide or
+		// tall. So 11.
+		// A 3-D mesh has 27 kinds of rows plus 3 pathological ones.
+		//
+		// So the approach we take here is to predefine all the kinds of
+		// rows, it isn't a large number.
+		// This approach lets us pick out any arbitrary boundary by defining
+		// which kind of 'row' applies at each mesh entry.
+	// return rowSelect_[row]( entry, colIndex );
+	return 0;
+}

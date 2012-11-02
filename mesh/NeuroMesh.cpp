@@ -795,6 +795,11 @@ const Stencil* NeuroMesh::getStencil() const
 			return stencil_[0];
 	return 0;
 }
+unsigned int NeuroMesh::getStencil( unsigned int meshIndex,
+		const double** entry, const unsigned int** colIndex ) const
+{
+		return 0;
+}
 
 const vector< NeuroNode >& NeuroMesh::getNodes() const
 {
