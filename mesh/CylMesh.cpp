@@ -198,6 +198,8 @@ void CylMesh::updateCoords()
 	rSlope_ = ( r1_ - r0_ ) / numEntries_;
 	lenSlope_ = lambda_ * rSlope_ * 2 / ( r0_ + r1_ );
 
+	dx2_[0] = lambda_;
+	dx2_[1] = lambda_;
 	buildStencil();
 }
 
@@ -669,8 +671,26 @@ void CylMesh::buildStencil()
 }	
 
 unsigned int CylMesh::getStencil( unsigned int meshIndex,
-			const double** entry, const unsigned int** colIndex ) const
+			const double** entry, const int ** colIndex ) const
 {
-	return 0;
+	static const int leftIndex = -1;
+	static const int rightIndex = 1;
+	static const int middleIndex[2] = { -1, 1 };
+	assert ( numEntries_ > 1 );
+	// Should use try-catch?
+	if ( meshIndex == 0 ) {
+			*entry = &lambda_;
+			*colIndex = &rightIndex;
+			return 1;
+	} else if ( meshIndex == numEntries_ - 1 ) {
+			assert( meshIndex > 0 );
+			*entry = &lambda_;
+			*colIndex = &leftIndex;
+			return 1;
+	}
+	assert ( numEntries_ > 2 );
+	*entry = dx2_;
+	*colIndex = middleIndex;
+	return 2;
 }
 
