@@ -481,14 +481,14 @@ int GslStoich::gslFunc( double t, const double* y, double* yprime, void* s )
 void GslStoich::updateDiffusion( double *yprime )
 {
 	const double *adx; 
-	const unsigned int* colIndex;
+	const int* colIndex;
 	unsigned int numInRow = 
 			diffusionMesh_->getStencil( currMeshEntry_, &adx, &colIndex);
 	double vSelf = diffusionMesh_->getMeshEntrySize( currMeshEntry_ );
 	const double* sSelf = S( currMeshEntry_ );
 	for ( unsigned int i = 0; i < numInRow; ++i ) {
 		double scale = adx[i] ;
-		unsigned int other = colIndex[i];
+		unsigned int other = colIndex[i] + currMeshEntry_;
 
 		// Get all concs at the other meshEntry
 		const double* sOther = S( other ); 
@@ -510,7 +510,7 @@ int GslStoich::innerGslFunc( double t, const double* y, double* yprime )
 
 	stoich_->updateRates( S( currMeshEntry_ ), yprime );
 
-	if ( diffusionMesh_ )
+	if ( diffusionMesh_ && diffusionMesh_->innerGetNumEntries() > 1 )
 		updateDiffusion( yprime );
 	
 	/*

@@ -794,7 +794,7 @@ void CubeMesh::buildStencil()
 
 // Should really separate 1,2 and 3D meshes.
 unsigned int CubeMesh::getStencil( unsigned int meshIndex,
-			const double** entry, const unsigned int** colIndex ) const
+			const double** entry, const int** colIndex ) const
 {
 		// A 1-D mesh has 3 kinds of rows: left, middle and right.
 		// Plus a pathological one where it is really a single point.
