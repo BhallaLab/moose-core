@@ -150,7 +150,8 @@ class ChemMesh
 		// Modeled on equivalent function in SparseMatrix.
 		// meshIndex: index of reference mesh entry
 		// entry: array of values of scale factor
-		// colIndex: array of indices for each entry. 
+		// colIndex: array of relative indices for each entry. The values
+		// 	returned here are the offset from the meshIndex.
 		// Returns number of entries and colIndexes.
 		// For a 1-D mesh, there will be 2 except at boundaries
 		// For a 2-D mesh, there will be 4 except at boundaries
@@ -160,7 +161,7 @@ class ChemMesh
 		// For a CylMesh there are 2 except at boundaries.
 		//////////////////////////////////////////////////////////////////
 		virtual unsigned int getStencil( unsigned int meshIndex,
-				const double** entry, const unsigned int** colIndex )
+				const double** entry, const int** colIndex )
 			   	const = 0;
 
 		//////////////////////////////////////////////////////////////////

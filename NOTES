@@ -19492,7 +19492,14 @@ faster and cleaner than old one. Key issue is to get pointer to the mesh.
 
 Now the code compiles and clears unit tests, without actually being exercised.
 The ChemMesh subclasses need to define a useful getStencil function.
+Checkin 4239.
+
 Opportunity here to do completely general 1,2,3-D boundaries in the CubeMesh,
-and other good things.
+and other good things. 
+
+============================================================================
+04 Nov 2012.
+Put in a prototype getStencil function for the CylMesh. This revealed need to
+change its interface, done.
 
 ============================================================================
