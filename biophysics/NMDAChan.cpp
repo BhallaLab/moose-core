@@ -25,9 +25,9 @@
 // Maintainer: 
 // Created: Sun Feb 28 18:17:56 2010 (+0530)
 // Version: 
-// Last-Updated: Sat May 28 14:40:47 2011 (+0530)
-//           By: Subhasis Ray
-//     Update #: 526
+// Last-Updated: Mon Nov  5 16:59:58 2012 (+0530)
+//           By: subha
+//     Update #: 530
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -141,16 +141,24 @@ const Cinfo* NMDAChan::initCinfo()
                 "linearly for t = tau2. Then decays exponentially with time constant "
                 "t = tau1. "
                 "g is a function of voltage and the extracellular [Mg2+] defined as: "
-                "1 / { 1 + (a1 + a2) * (a1 * B1 + a2 * B2)/ [A * a1 * (b1 + B1) + A * a2 * (b2 + B2)]} "
-                "a1 = 1e3 * exp( - c0 * V - c1) s^-1, c0 = 16.0 / V, c1 = 2.91 "
-                "a2 = 1e-3 * [Mg2+] * exp( -c2 * V - c3) mM^-1 s, c2 = 45.0 / V, c3 = 6.97 "
-                "b1 = 1e3 * exp(c4  * V + c5) s^-1, c4 = 9.0 / V, c5 = 1.22 "
-                "b2 = 1e3 * exp(c6 * V + c7) s^-1, c6 = 17.0 / V, c7 = 0.96 "
-                "A = 1e3 * exp(-c8) s^-1, c8 = 2.847 "
-                "B1 = 1e3 * exp(-c9) s^-1, c9 = 0.693 s^-1 "
-                "B2 = 1e3 * exp(-c10) s^-1, c10 = 3.101. "
-                "The behaviour of S(t) is as follows: "
-                "If a spike arrives, then the slope of the linear rise of S(t) is incremented by weight / tau2. "
+                "1 / { 1 + (a1 + a2) * (a1 * B1 + a2 * B2)/ [A * a1 * (b1 + B1) + A * a2 * (b2 + B2)]} \n"
+		"\n"
+                "a1 = 1e3 * exp( - c0 * V - c1) s^{-1}, c0 = 16.0 / V, c1 = 2.91 \n"
+		"\n"
+                "a2 = 1e-3 * [Mg2+] * exp( -c2 * V - c3) mM^{-1} s, c2 = 45.0 / V, c3 = 6.97 \n"
+		"\n"
+                "b1 = 1e3 * exp(c4  * V + c5) s^{-1}, c4 = 9.0 / V, c5 = 1.22 \n"
+		"\n"
+                "b2 = 1e3 * exp(c6 * V + c7) s^{-1}, c6 = 17.0 / V, c7 = 0.96 \n"
+		"\n"
+                "A = 1e3 * exp(-c8) s^{-1}, c8 = 2.847 \n"
+		"\n"
+                "B1 = 1e3 * exp(-c9) s^{-1}, c9 = 0.693 s^{-1} \n"
+		"\n"
+                "B2 = 1e3 * exp(-c10) s^{-1}, c10 = 3.101. \n"
+		"\n"
+                "The behaviour of S(t) is as follows: \n"
+                "If a spike arrives, then the slope of the linear rise of S(t) is incremented by weight / tau2. \n"
                 "After tau2 time, this component is removed from the slope (reduced by weight/tau) "
                 "and added over to the rate of decay of S(t)."
                 , 

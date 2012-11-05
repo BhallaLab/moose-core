@@ -187,22 +187,32 @@ MOOSEGUI: Graphical interface for MOOSE.
 	These are the plot controls. If you hover the mouse over them for a
 	few seconds, a function reminder box pops up. 
 	The functions as follows:
-	+ [[./images/MatPlotLibHomeIcon.png]] *Home*: Returns the plot display
-		to its default position.
-	+ [[./images/MatPlotLibDoUndo.png]] *Undo/Redo*: Undoes or re-does
-		manipulations you have done to the display.
-	+ [[./images/MatPlotLibPan.png]] *Pan*: The plots will pan around
-		with the mouse when you hold the left button down. The plots
-		will zoom with the mouse when you hold the right button down.
-	+ [[./images/MatPlotLibZoom.png]] *Zoom to rectangle*: With the
-		*left* button-mouse, this will zoom in to the specified
-		rectangle so that the plots become bigger. 
-		With the *right* button-mouse, the entire plot display will
-		be shrunk to fit into the specified rectangle.
-	+ [[./images/MatPlotLibConfigureSubplots.png]] *Configure subplots*: 
-		You don't want to mess with these.
-	+ [[./images/MatPlotLibSave.png]] *Save*: Pops up a dialog box to
-		save the plot. At this point it only saves into a .png file.
+
+#+ATTR_LaTeX: scale=1
+[[./images/MatPlotLibHomeIcon.png]] 
+	+ *Home*: Returns the plot display to its default position.
+#+ATTR_LaTeX: scale=1
+[[./images/MatPlotLibDoUndo.png]] 
+	+ *Undo/Redo*: Undoes or re-does manipulations you have done
+          to the display.
+#+ATTR_LaTeX: scale=1
+[[./images/MatPlotLibPan.png]]
+	+ *Pan*: The plots will pan around with the mouse when you
+          hold the left button down. The plots will zoom with the
+          mouse when you hold the right button down.
+#+ATTR_LaTeX: scale=1
+[[./images/MatPlotLibZoom.png]]
+	+ *Zoom to rectangle*: With the *left* button-mouse, this will
+          zoom in to the specified rectangle so that the plots become
+          bigger.  With the *right* button-mouse, the entire plot
+          display will be shrunk to fit into the specified rectangle.
+#+ATTR_LaTeX: scale=1
+[[./images/MatPlotLibConfigureSubplots.png]]
+	+ *Configure subplots*: You don't want to mess with these.
+#+ATTR_LaTeX: scale=1
+[[./images/MatPlotLibSave.png]] 
+	+ *Save*: Pops up a dialog box to save the plot. At this point
+          it only saves into a .png file.
 
 ** The side panel
 	The /side panel/ is located on the right of the screen. 
