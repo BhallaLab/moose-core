@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Fri Jul  8 10:00:33 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Jul  5 14:24:13 2012 (+0530)
+// Last-Updated: Mon Nov  5 16:58:20 2012 (+0530)
 //           By: subha
-//     Update #: 106
+//     Update #: 110
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -93,12 +93,12 @@ const Cinfo* IzhikevichNrn::initCinfo()
             &IzhikevichNrn::getD);
     static ValueFinfo<IzhikevichNrn, double> a(
             "a",
-            "Parameter a in Izhikevich model. Unit is s^-1",
+            "Parameter a in Izhikevich model. Unit is s^{-1}",
             &IzhikevichNrn::setA,
             &IzhikevichNrn::getA);
     static ValueFinfo<IzhikevichNrn, double> b(
             "b",
-            "Parameter b in Izhikevich model. Unit is s^-1",
+            "Parameter b in Izhikevich model. Unit is s^{-1}",
             &IzhikevichNrn::setB,
             &IzhikevichNrn::getB);
     static ValueFinfo<IzhikevichNrn, double> Vm(
@@ -108,7 +108,7 @@ const Cinfo* IzhikevichNrn::initCinfo()
             &IzhikevichNrn::getVm);
     static ReadOnlyValueFinfo<IzhikevichNrn, double> u(
             "u",
-            "Parameter u in Izhikevich equation. Unit is V/s^-1",
+            "Parameter u in Izhikevich equation. Unit is V/s",
             &IzhikevichNrn::getU);
     static ReadOnlyValueFinfo<IzhikevichNrn, double> Im(
             "Im",
@@ -127,14 +127,14 @@ const Cinfo* IzhikevichNrn::initCinfo()
     
     static ValueFinfo<IzhikevichNrn, double> alpha(
             "alpha",
-            "Coefficient of v^2 in Izhikevich equation. Defaults to 0.04 in physiological unit. In SI it should be 40000.0. Unit is V^-1 s^-1",
+            "Coefficient of v^2 in Izhikevich equation. Defaults to 0.04 in physiological unit. In SI it should be 40000.0. Unit is V^-1 s^{-1}",
             &IzhikevichNrn::setAlpha,
             &IzhikevichNrn::getAlpha);
 
     static ValueFinfo<IzhikevichNrn, double> beta(
             "beta",
             "Coefficient of v in Izhikevich model. Defaults to 5 in physiological"
-            " unit, 5000.0 for SI units. Unit is s^-1",
+            " unit, 5000.0 for SI units. Unit is s^{-1}",
             &IzhikevichNrn::setBeta,
             &IzhikevichNrn::getBeta);
     static ValueFinfo<IzhikevichNrn, double> gamma(
