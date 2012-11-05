@@ -1,6 +1,6 @@
 Getting started with python scripting for MOOSE
 #+AUTHOR: Subhasis Ray
-#+EMAIL: lastname dot firstname at gmail dot com
+#+EMAIL: last-name dot first-name at gmail dot com
 This document assumes that you have a working MOOSE installation. You
 can get details and further documentation regarding how to obtain and
 install it at [[http://moose.ncbs.res.in][MOOSE website]].
@@ -23,7 +23,7 @@ install it at [[http://moose.ncbs.res.in][MOOSE website]].
   import moose
 #+end_src
   This makes the =moose= module available for use in Python. You can
-  use Python's builtin =help= function to read the toplevel
+  use Python's built-in =help= function to read the top-level
   documentation for the moose module:
 #+begin_src python :tangle yes
   help(moose)
@@ -61,13 +61,13 @@ moose.doc('Compartment.Rm')
   field value as parameter and get confused.
   
 * Creating objects and traversing the object hierarchy
-  Differebt types of biological entities like neurons, enzymes, etc
+  Different types of biological entities like neurons, enzymes, etc
   are represented by classes and individual instances of those types
   are objects of those classes. Objects are the building-blocks of
   models in MOOSE. We call MOOSE objects `element` and use object and
-  element interchangably in the context of MOOSE. Elements are
+  element interchangeably in the context of MOOSE. Elements are
   conceptually laid out in a tree-like hierarchical structure. If you
-  are familiar with file system hieararchies in common operating
+  are familiar with file system hierarchies in common operating
   systems, this should be simple.
 
   At the top of the object hierarchy sits the =Shell=, equivalent to
@@ -147,7 +147,7 @@ Elements under /model
 /model/soma
 /model/pulse
 #+end_example
-  And finally, we can create a =Table= to record the timeseries of the
+  And finally, we can create a =Table= to record the time series of the
   soma's membrane potential. It is good practice to organize the data
   separately from the model. So we do it as below:
 #+begin_src python :tangle yes
@@ -438,18 +438,18 @@ moose.useClock(0, soma.path, 'init')
   Here we used the =path= field instead of writing the path
   explicitly. 
 
-  Next we assign tick # 1 to process method of everthing under
+  Next we assign tick # 1 to process method of everything under
   ~/model~.
 #+begin_src python :tangle yes
 moose.useClock(1, '/model/##', 'process')
 #+end_src
-  Here the second argument is an example of wildcard path. The ~##~
+  Here the second argument is an example of wild-card path. The ~##~
   matches everything under the path preceding it at any depth. Thus if
   we had some other objects under ~/model/soma~, =process= method of
   those would also have been scheduled on tick # 1. This is very
-  useful for complex models where it is tedius to scheduled each
+  useful for complex models where it is tedious to scheduled each
   element individually. In this case we could have used ~/model/#~ as
-  well for the path. This is a single level wildcard which matches
+  well for the path. This is a single level wild-card which matches
   only the children of ~/model~ but does not go farther down in the
   hierarchy. 
 
@@ -483,7 +483,7 @@ pylab.show()
 #+end_src
   The first line imports the pylab submodule from matplotlib. This
   useful for interactive plotting. The second line creates the time
-  points to match our somulation time and length of the recorded
+  points to match our simulation time and length of the recorded
   data. The third line plots the ~Vm~ and the fourth line makes it
   visible. Does the plot match your expectation?
 
