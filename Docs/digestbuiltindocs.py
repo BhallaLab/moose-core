@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Oct  4 11:33:31 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Oct  4 20:11:52 2012 (+0530)
+# Last-Updated: Mon Nov  5 16:47:03 2012 (+0530)
 #           By: subha
-#     Update #: 246
+#     Update #: 248
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -91,7 +91,7 @@ def extract_ftype_doc(cinfo, finfotype, docio, indent, lmarker):
 					 fid.name.startswith('set_')):
 	    continue
 	dtype = type_mangling_regex.sub('', fid.type)
-	docio.write('\n%s%s%s:\t/%s/ ::\n' % (indent, lmarker, fid.name, dtype))
+	docio.write('\n%s%s%s: /%s/ ::\n' % (indent, lmarker, fid.name, dtype))
 	doc = fid.docs.replace('\n', '\n%s' % (indent2))
 	docio.write(indent2+doc)
 

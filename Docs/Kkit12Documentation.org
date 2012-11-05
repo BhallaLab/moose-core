@@ -8,24 +8,29 @@ Kinetikit 12: Interface for chemical kinetic models in MOOSEGUI.
   models. Kinetikit, also known as kkit, was at version 11 with
   GENESIS. Here we start with Kinetikit 12.
 
-** What are chemical kinetic models?
+** TODO What are chemical kinetic models?
    Much of neuronal computation occurs through chemical
    signaling.  For example, many forms of synaptic plasticity begin
    with calcium influx into the synapse, followed by calcium binding
    to calmodulin, and then calmodulin activation of numerous
    enzymes. These events can be represented in chemical terms:
-#+BEGIN_QUOTE
-   4 Ca^{2+} + CaM <====> Ca_4.CaM
-#+END_QUOTE
+\begin{equation}   
+   4 Ca^{2+} + CaM <===> Ca_4.CaM
+\end{equation}   
+
    Such chemical equations can be modeled through standard Ordinary
    Differential Equations, if we ignore space:
-#+BEGIN_QUOTE
+
+\begin{equation}   
    d[Ca]/dt = -4Kf * [Ca]^4 * [CaM] + 4Kb * [Ca_4.CaM]
-
+\end{equation}
+\begin{equation}
    d[CaM]/dt = -Kf * [Ca]^4 * [CaM] + Kb * [Ca_4.CaM]
-
+\end{equation}
+\begin{equation}
    d[Ca_4.CaM]/dt = Kf * [Ca]^4 * [CaM] - Kb * [Ca_4.CaM]
-#+END_QUOTE
+\end{equation}
+
    MOOSE models these chemical systems. This help document describes
    how to do such modelling using the graphical interface,
    Kinetikit 2.
