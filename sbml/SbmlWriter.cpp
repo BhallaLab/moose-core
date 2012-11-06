@@ -23,6 +23,7 @@
 #include <sbml/SBMLTypes.h>
 #include "SbmlWriter.h"
 #include "../shell/Wildcard.h"
+#include "../shell/Neutral.h"
 //#include "kinetics/ChemCompt.h"
 //#include <sbml/annotation/ModelHistory.h>
 
@@ -112,79 +113,113 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
   unit = unitdef->createUnit();
   unit->setKind(UNIT_KIND_MOLE);
   unit->setExponent(1);
-  unit->setScale(-6);
+  unit->setScale(-3);
  
   //Getting Compartment from moose
   vector< Id > chemCompt;
 
-  wildcardFind(path+"/##[ISA=ChemMesh]",chemCompt);
-  //cout << "compts vector size  " << compts.size()<<endl;
+  //wildcardFind(path+"/##[ISA=ChemMesh]",chemCompt);
+  wildcardFind(path+"/##[TYPE=MeshEntry]",chemCompt);
+  //cout << "compts vector size  " << chemCompt.size()<<endl;
   vector< Id >::iterator itr;
-
   for (itr = chemCompt.begin(); itr != chemCompt.end();itr++)
     {
-          vector <unsigned int>dims = Field <vector <unsigned int> > :: get(ObjId(*itr),"objectDimensions");
-	  //cout << itr->path() << ": no. of dimensions: " << dims.size();
-	  unsigned int dims_size;
-	  if (dims.size() == 0){ 
-	    dims_size = 1;
-	    }
-	  if (dims.size()>0){ 
-	    dims_size= dims.size();
-	    }
-	  //cout << " dims_size: " << dims_size << endl;
-	  for (unsigned index = 0; index < dims_size; ++index){
-	    string comptname = Field<string>::get(ObjId(*itr,index),"name") ;
-	    double size = Field<double>::get(ObjId(*itr,index),"size");
-	    unsigned int ndim = Field<unsigned int>::get(ObjId(*itr,index),"numDimensions");
-	    ostringstream cid;
-	    cid << (*itr)  << "_" << index;
-	    comptname = nameString(comptname);
-	    string comptname_id = changeName(comptname,cid.str());
-	    string clean_comptname = idBeginWith(comptname_id);
-	    cout <<  "id: "<< clean_comptname << " compatname " << comptname << " size: "<< size << " dimensions: " << ndim << endl;
-	    	    
-	    ::Compartment* compt = cremodel_->createCompartment();
-	    compt->setId(clean_comptname);
-	    compt->setName(comptname);
-	    compt->setSpatialDimensions(ndim);
-	    if(ndim == 3)
-	      compt->setSize(size*1e3);
-	    else
-	      compt->setSize(size);
-	    vector< Id > Compt_spe;
-	    wildcardFind(itr->path()+"/##[TYPE=ZombiePool]",Compt_spe);
-	    vector < Id > :: iterator itr2;
-	    vector <int> :: size_type i;
-	    i = Compt_spe.size();
-	    cout << "size" << i;
-	    for (itr2 = Compt_spe.begin();itr2 != Compt_spe.end();itr2++)
-	      { string poolname = Field<string> :: get(ObjId(*itr2),"name");
-		cout << *itr2 << " path " <<  itr2->path() << " class "<<  poolname << " parent " << comptname << endl;
-		
-		//string parentName;
-		//ostringstream parentId;
-		//Id parent = Neutral::getParent(*itr2);
-		//parentName = parent()->name();
-		//parentId << parent()->id().id() << "_" << parent()->id().index()
-		//string parentpool = Field< string > :: get(ObjId(*itr2),"parent");
-		/*
-		Species *sp = model_->createSpecies();
-		string molName = (moleEl)->name();
-		mid << moleEl.id().id() << "_" << moleEl.id().index();
-		molName = nameString( molName ); 
-		string newSpName = changeName( molName,mid.str() );
-		newSpName = idBeginWith( newSpName );
-		sp->setId( newSpName );
-		sp->setCompartment( parentCompt );
-		sp->setHasOnlySubstanceUnits( true );
-		*/
-		//cout << *itr2 << " path " <<  itr2->path() << " class "<<  poolname << " parent " << parent << endl;
-	      } 
+      vector <unsigned int>dims = Field <vector <unsigned int> > :: get(ObjId(*itr),"objectDimensions");
+      //cout << "mesh id " << *itr << " " << itr->path() << ": no. of dimensions: " << dims.size() << endl;
+      unsigned int dims_size;
+      if (dims.size() == 0){
+	dims_size = 1;
+	}
+      if (dims.size()>0){ 
+	dims_size= dims.size();
+	}
+      for (unsigned index = 0; index < dims_size; ++index)
+	{ ObjId meshParent = Neutral::parent( itr->eref() );
+	  string comptname = Field<string>::get(ObjId(meshParent),"name") ;
+	  /* or cout << " name from element: " << meshParent.element()->getName() << endl; */
+	  double size = Field<double>::get(ObjId(*itr,index),"size");
+	  unsigned int ndim = Field<unsigned int>::get(ObjId(*itr,index),"dimensions");
+	  ostringstream cid;
+	  cid << (meshParent)  << "_" << index;
+	  comptname = nameString(comptname);
+	  string comptname_id = changeName(comptname,cid.str());
+	  string clean_comptname = idBeginWith(comptname_id);
+	  //cout <<  "compartmen id: "<< meshParent << " compartment name "<< clean_comptname <<  " size: "<< size << " dimensions: " << ndim <<endl;
+	  
+	  ::Compartment* compt = cremodel_->createCompartment();
+	  compt->setId(clean_comptname);
+	  compt->setName(comptname);
+	  compt->setSpatialDimensions(ndim);
+	  if(ndim == 3)
+	    compt->setSize(size*1e3);
+	  else
+	    compt->setSize(size);
+	  
+	   /* All the pools are taken here */
+	  vector <Id> :: iterator itrp;
+	  vector< Id > Compt_spe = LookupField< string, vector< Id > >::get(*itr, "neighbours", "remesh" );
+	  for (itrp = Compt_spe.begin();itrp != Compt_spe.end();itrp++)
+	    { string poolclass = Field<string> :: get(ObjId(*itrp),"class");
+	      if (poolclass != "GslStoich")
+		{
+		  string poolname = Field<string> :: get(ObjId(*itrp),"name");
+		  ostringstream pid;
+		  pid << (*itrp) <<"_"<<index;
+		  poolname = nameString(poolname);
+		  string pool_id = changeName(poolname,pid.str());
+		  string clean_poolname = idBeginWith(pool_id);
+		  double initamt = 0.0;
+		  initamt = Field<double> :: get(ObjId(*itrp),"nInit");
+		  //cout << "poolclass:"<< poolclass << " id: " << *itrp << " path " <<  itrp->path()  << " compartment " << clean_comptname << " initamt " << initamt << endl;
+		  Species *sp = cremodel_->createSpecies();
+		  sp->setId( clean_poolname );
+		  sp->setCompartment( clean_comptname );
+		  sp->setInitialAmount( initamt ); 
+		  sp->setHasOnlySubstanceUnits( true );
+		  /* Buffered Molecule setting BoundaryCondition and constant has to be made true */
+		  if (poolclass == "ZBufPool")
+		    {sp->setBoundaryCondition(true);
+		      sp->setConstant(true);
+		    }//zbufpool
 
-	    
-	  }// for unsigned int
-    } // itr=compts
+		  /* Funpool need to get SumFunPool */
+		  if (poolclass == "ZFuncPool")
+		    { vector< Id > funpoolChildren = Field< vector< Id > >::get( *itrp, "children" );
+		      for ( vector< Id >::iterator itrfunpoolchild = funpoolChildren.begin();  itrfunpoolchild != funpoolChildren.end(); ++itrfunpoolchild )
+			{
+			  string funpoolclass = Field<string> :: get(ObjId(*itrfunpoolchild),"class");
+			  if (funpoolclass == "SumFunc")
+			    {vector < Id > sumfunpool = LookupField <string,vector < Id> >::get(*itrfunpoolchild, "neighbours","input");
+			      int sumtot_count = sumfunpool.size();
+			      if ( sumtot_count > 0 )
+				{
+				  ostringstream sumtotal_formula;
+				  for(vector< Id >::iterator itrsumfunc = sumfunpool.begin();itrsumfunc != sumfunpool.end(); itrsumfunc++)
+				    { 
+				      ostringstream spId;
+				      sumtot_count -= 1;
+				      string sfName = Field<string> :: get(ObjId(*itrsumfunc),"name");
+				      ostringstream sumFuncid;
+				      sumFuncid << (*itrsumfunc) <<"_"<<index;
+				      string sumFuncname = nameString(sfName);
+				      string sumFunc_id = changeName(sumFuncname,sumFuncid.str());
+				      string clean_sumFuncname = idBeginWith(sumFunc_id);
+				      if ( sumtot_count == 0 )
+					sumtotal_formula << clean_sumFuncname;
+				      else
+					sumtotal_formula << clean_sumFuncname << "+";
+				    }
+				  Rule * rule =  cremodel_->createAssignmentRule();
+				  rule->setVariable( clean_poolname );
+				  rule->setFormula( sumtotal_formula.str() );
+				}
+			    }
+			}
+		    } //zfunPool
+		} //poolclass != gsl
+	    } //itrp
+	}//index
+    }//itr
 }//createModel
 #endif
 
