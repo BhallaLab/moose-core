@@ -19500,6 +19500,40 @@ and other good things.
 ============================================================================
 04 Nov 2012.
 Put in a prototype getStencil function for the CylMesh. This revealed need to
-change its interface, done.
+change its interface, done. Checkin 4242.
+
+For the CubeMesh, the design depends on whether I want a truly general mesh
+with arbitrary borders, or just a cube of points. I assume it is the first.
+Options:
+	1. Define each mesh point individually, sequencing arbitrary, record
+		coords for each point, use sparse matrix to indicate which 
+		points are connected.
+	2. Embed entire system in a 3-D mesh. Individually define mesh points
+		by a) indices into 3-D, and b) identifiers for stencil.
+
+Both these have the problem of how to find an index, given a point in 3-D space.
+
+Worked through options. Going for a simple SparseMatrix for the whole thing,
+even if we do the default cube.
+
+Need to revisit getNeighbours (now nicely encoded in sparse matrix) and
+m2s and s2m.
+
+============================================================================
+06 Nov
+Compiles now with reasonable CubeMesh code, fails in testMesh:testCubeMesh.
+
+Now clears fairly stringent CubeMesh unit tests. Would like to do tests with a
+sphere imposed on it. Later.
+
+============================================================================
+07 Nov.
+Fixed up and extended the unit tests for CubeMesh. In due course I will need
+to come back to it to provide an interface for generalized 3-D geometries. 
+For now move on. Should really check it in.
+Next: Revive testSimManager::testRemeshing.
+
+Did so. Now it is going through the motions but getting the wrong answer.
+Not off by a huge amount.
 
 ============================================================================

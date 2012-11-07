@@ -102,6 +102,7 @@ void testRemeshing()
 		double y = dx *  // This part represents the init conc of 1 in dx
 		( 0.5 / sqrt( PI * DiffConst * runtime ) ) * exp( -x * x / ( 4 * DiffConst * runtime ) ); // This part is the solution as a func of x,t.
 		err += ( y - conc[i] ) * ( y - conc[i] );
+		cout << i << "	" << x << "	" << y << "	" << conc[i] << endl;
 	}
 	assert( doubleApprox( err, 0 ) );
 
@@ -220,6 +221,6 @@ void testSimManager()
 	testBuildFromBareKineticTree();
 	testBuildFromKkitTree();
 	testMakeStandardElements();
-//	testRemeshing(); Disabled till we have the diffusion working again.
+//	testRemeshing();
 	testZombieTurnover(); 
 }

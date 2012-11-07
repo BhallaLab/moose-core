@@ -671,11 +671,11 @@ void CylMesh::buildStencil()
 }	
 
 unsigned int CylMesh::getStencil( unsigned int meshIndex,
-			const double** entry, const int ** colIndex ) const
+			const double** entry, const unsigned int** colIndex ) const
 {
-	static const int leftIndex = -1;
-	static const int rightIndex = 1;
-	static const int middleIndex[2] = { -1, 1 };
+	static unsigned int leftIndex;
+	static const unsigned int rightIndex = 1;
+	static unsigned int middleIndex[2];
 	assert ( numEntries_ > 1 );
 	// Should use try-catch?
 	if ( meshIndex == 0 ) {
@@ -685,12 +685,14 @@ unsigned int CylMesh::getStencil( unsigned int meshIndex,
 	} else if ( meshIndex == numEntries_ - 1 ) {
 			assert( meshIndex > 0 );
 			*entry = &lambda_;
+			leftIndex = meshIndex - 1;
 			*colIndex = &leftIndex;
 			return 1;
 	}
 	assert ( numEntries_ > 2 );
 	*entry = dx2_;
+	middleIndex[0] = meshIndex - 1;
+	middleIndex[1] = meshIndex + 1;
 	*colIndex = middleIndex;
 	return 2;
 }
-

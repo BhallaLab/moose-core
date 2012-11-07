@@ -511,8 +511,9 @@ void SimManager::buildGsl( const Eref& e, const Qinfo* q,
 
 	numChemNodes_ = Shell::numNodes() * chemLoad / ( chemLoad + hsolveLoad);
 	
-	SetGet1< Id >::set( stoich_, "compartment", compt );
-	bool ret = Field< string >::set( stoich_, "method", method );
+	bool ret = Field< Id >::set( stoich_, "compartment", compt );
+	assert( ret );
+	ret = Field< string >::set( stoich_, "method", method );
 	assert( ret );
 	// The GSL does some massaging of the method string, so we ask it back.
 	method_ = Field< string >::get( stoich_, "method" );
