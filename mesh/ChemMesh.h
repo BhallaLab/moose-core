@@ -161,7 +161,7 @@ class ChemMesh
 		// For a CylMesh there are 2 except at boundaries.
 		//////////////////////////////////////////////////////////////////
 		virtual unsigned int getStencil( unsigned int meshIndex,
-				const double** entry, const int** colIndex )
+				const double** entry, const unsigned int** colIndex )
 			   	const = 0;
 
 		//////////////////////////////////////////////////////////////////

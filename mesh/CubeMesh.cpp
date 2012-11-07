@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "SparseMatrix.h"
 #include "ElementValueFinfo.h"
 #include "Boundary.h"
 #include "MeshEntry.h"
@@ -258,8 +259,10 @@ void CubeMesh::updateCoords()
 	unsigned int size = nx_ * ny_ * nz_;
 	m2s_.resize( size );
 	s2m_.resize( size );
-	for ( unsigned int i = 0; i < size; ++i )
+	m_.setSize( size, size );
+	for ( unsigned int i = 0; i < size; ++i ) {
 		m2s_[i] = s2m_[i] = i;
+	}
 
 	size_ = ( x1_ - x0_ ) * ( y1_ - y0_ ) * ( z1_ - z0_ );
 	if ( size_ < 0 )
@@ -671,6 +674,18 @@ unsigned int CubeMesh::neighbor( unsigned int spaceIndex,
 /// Virtual function to return info on Entries connected to this one
 vector< unsigned int > CubeMesh::getNeighbors( unsigned int fid ) const
 {
+	const double* entry;
+	const unsigned int *colIndex;
+
+	unsigned int n = m_.getRow( fid, &entry, &colIndex );
+
+	vector< unsigned int > ret;
+	ret.insert( ret.end(), colIndex, colIndex + n );
+
+	return ret;
+
+	/*
+	
 	assert( fid < m2s_.size() );
 
 	vector< unsigned int > ret;
@@ -701,6 +716,7 @@ vector< unsigned int > CubeMesh::getNeighbors( unsigned int fid ) const
 		ret.push_back( nIndex );
 
 	return ret;	
+	*/
 }
 
 /// Virtual function to return diffusion X-section area for each neighbor
@@ -764,8 +780,162 @@ void CubeMesh::innerSetNumEntries( unsigned int n )
 
 //////////////////////////////////////////////////////////////////
 
+bool CubeMesh::isInsideCuboid( double x, double y, double z ) const
+{
+		return ( x >= x0_ && x < x1_ && y >= y0_ && y < y1_ && 
+						z >= z0_ && z < z1_ ); 
+}
+
+bool CubeMesh::isInsideSpheroid( double x, double y, double z ) const
+{
+	double cx = ( x0_ + x1_ ) / 2.0;
+	double cy = ( y0_ + y1_ ) / 2.0;
+	double cz = ( z0_ + z1_ ) / 2.0;
+
+	double rx = ( x - cx ) / fabs( x1_ - x0_ ) / 2.0;
+	double ry = ( y - cy ) / fabs( y1_ - y0_ ) / 2.0;
+	double rz = ( z - cz ) / fabs( z1_ - z0_ ) / 2.0;
+
+	return ( ( rx * rx + ry * ry + rz * rz ) < 1.0 );
+}
+
+/*
+// Doesn't work, need all 3 coords and their dimensions.
+unsigned int buildStencilDim( 
+	unsigned int i, unsigned int ni, double dx,
+	unsigned int stencilSize,
+	vector< double >& entry,
+	vector< unsigned int >& colIndex )
+{
+	if ( i > 0 ) {
+		entry[ stencilSize ] = dx;
+		colIndex[ stencilSize ] = i-1;
+		++stencilSize;
+	}
+	if ( i < ni - 1 ) {
+		entry[ stencilSize ] = dx;
+		colIndex[ stencilSize ] = i+1;
+		++stencilSize;
+	}
+	return stencilSize;
+}
+*/
+
+void CubeMesh::fillSpaceToMeshLookup()
+{
+	static const unsigned int flag = ~0;
+	unsigned int num = 0;
+	unsigned int q = 0;
+	m2s_.clear();
+	s2m_.resize( nx_ * ny_ * nz_, flag );
+	for( unsigned int k = 0; k < nz_; ++k ) {
+		double z = k * dz_ + z0_;
+		for( unsigned int j = 0; j < ny_; ++j ) {
+			double y = j * dy_ + y0_;
+			for( unsigned int i = 0; i < nx_; ++i ) {
+				double x = i * dx_ + x0_;
+				if ( isInsideCuboid( x, y, z ) ) {
+					s2m_[q] = num;
+					m2s_.push_back( q );
+					++num;
+				} else {
+					s2m_[q] = flag;
+				}
+				++q;
+			}
+		}
+	}
+	assert( m2s_.size() == num );
+	m_.clear();
+	m_.setSize( num, num );
+}
+
+// This is a general version of the function, just relies on the
+// contents of the s2m_ and m2s_ vectors to do its job.
+// Assumes that entire volume is bounded by nx_, ny_, nz.
+//
 void CubeMesh::buildStencil()
 {
+	static const unsigned int flag = ~0;
+	fillSpaceToMeshLookup();
+	unsigned int num = m2s_.size();
+	for ( unsigned int i = 0; i < num; ++i ) {
+		unsigned int q = m2s_[i];
+		unsigned int ix = q % nx_;
+		unsigned int iy = ( q / nx_ ) % ny_;
+		unsigned int iz = ( q / ( nx_ * ny_ ) ) % nz_;
+		unsigned int ne = 0;
+		vector< double > entry( 6, 0 );
+		vector< unsigned int > colIndex( 6, 0 );
+
+		if ( ix > 0 && s2m_[q-1] != flag ) {
+			entry[ne] = dx_;
+			colIndex[ne++] = s2m_[q-1];
+		}
+		if ( ( ix < nx_ - 1 ) && s2m_[q+1] != flag ) {
+			entry[ne] = dx_;
+			colIndex[ne++] = s2m_[q+1];
+		}
+		if ( iy > 0 && s2m_[ q-nx_ ] != flag ) {
+			assert( q >= nx_ );
+			entry[ne] = dy_;
+			colIndex[ne++] = s2m_[q-nx_];
+		}
+		if ( iy < ny_ - 1 && s2m_[ q+nx_ ] != flag ) {
+			assert( q+nx_ < s2m_.size() );
+			entry[ne] = dy_;
+			colIndex[ne++] = s2m_[q+nx_];
+		}
+		if ( iz > 0 && s2m_[ q - nx_*ny_ ] != flag ) {
+			assert( q >= nx_ * ny_ );
+			entry[ne] = dz_;
+			colIndex[ne++] = s2m_[ q - nx_*ny_ ];
+		}
+		if ( iz < nz_ - 1 && s2m_[ q + nx_*ny_ ] ) {
+			assert( q+nx_ < s2m_.size() );
+			entry[ne] = dz_;
+			colIndex[ne++] = s2m_[q + nx_*ny_ ];
+		}
+		entry.resize( ne );
+		colIndex.resize( ne );
+		m_.addRow( i, entry, colIndex );
+	}
+}
+
+/*
+void CubeMesh::buildStencil()
+{
+	// For now, in the absence of a boundary, just fill in the 
+	// sparse matrix geometrically.
+	//
+	// spaceIndex = ( z * ny + y ) * nx + x
+	unsigned int num = nx_ * ny_ * nz_;
+	vector< double > entry( 6, 0 );
+	vector< unsigned int > colIndex( 6, 0 );
+	
+	m_.setSize( num, num );
+	for( unsigned int k = 0; k < nz_; ++k ) {
+		unsigned int p = 
+			buildStencilDim( k, nz_, dz_, 0, entry, colIndex );
+		for( unsigned int j = 0; j < ny_; ++j ) {
+			unsigned int q =
+				buildStencilDim( j, ny_, dy_, p, entry, colIndex );
+			for( unsigned int i = 0; i < nx_; ++i ) {
+				unsigned int r =
+					buildStencilDim( i, nx_, dx_, q, entry, colIndex );
+				if ( r > 0 ) {
+					unsigned int spaceIndex = ( k * ny_ + j ) * nx_ + i;
+					entry.resize( r );
+					colIndex.resize( r );
+					m_.addRow( spaceIndex, entry, colIndex );
+					entry.resize( 6 );
+					colIndex.resize( 6 );
+				}
+			}
+		}
+	}
+	*/
+		/*
 	for ( unsigned int i = 0; i < stencil_.size(); ++i )
 		delete stencil_[i];
 	stencil_.resize( 0 );
@@ -789,13 +959,15 @@ void CubeMesh::buildStencil()
 
 	stencil_.push_back( s );
 }
+	*/
 
 //////////////////////////////////////////////////////////////////
 
 // Should really separate 1,2 and 3D meshes.
 unsigned int CubeMesh::getStencil( unsigned int meshIndex,
-			const double** entry, const int** colIndex ) const
+			const double** entry, const unsigned int** colIndex ) const
 {
+		return m_.getRow( meshIndex, entry, colIndex );
 		// A 1-D mesh has 3 kinds of rows: left, middle and right.
 		// Plus a pathological one where it is really a single point.
 		// A 2-D mesh has 9 kinds of rows: the 8 directions, middle.
@@ -808,5 +980,4 @@ unsigned int CubeMesh::getStencil( unsigned int meshIndex,
 		// This approach lets us pick out any arbitrary boundary by defining
 		// which kind of 'row' applies at each mesh entry.
 	// return rowSelect_[row]( entry, colIndex );
-	return 0;
 }

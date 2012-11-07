@@ -796,7 +796,7 @@ const Stencil* NeuroMesh::getStencil() const
 	return 0;
 }
 unsigned int NeuroMesh::getStencil( unsigned int meshIndex,
-		const double** entry, const int** colIndex ) const
+		const double** entry, const unsigned int** colIndex ) const
 {
 		return 0;
 }

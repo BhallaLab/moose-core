@@ -135,6 +135,9 @@ class CubeMesh: public ChemMesh
 			int dx, int dy, int dz ) const;
 
 		void transmitChange( const Eref& e, const Qinfo* q, double oldvol );
+
+		bool isInsideCuboid( double x, double y, double z ) const;
+		bool isInsideSpheroid( double x, double y, double z ) const;
 		//////////////////////////////////////////////////////////////////
 		//  Stuff for diffusion
 		//////////////////////////////////////////////////////////////////
@@ -143,13 +146,20 @@ class CubeMesh: public ChemMesh
 		 * Sets up the stencil that defines how to combine neighbouring
 		 * mesh elements to set up the diffusion du/dt term, using the
 		 * method of lines.
+		 * This is a very general function. It uses the information in the
+		 * m2s_ and s2m_ vectors to work out the adjacency matrix. So
+		 * we could use an arbitrary 3-D image to define the diffusive
+		 * volume and boundaries using m2s_ and s2m_. We could also use
+		 * geometric shapes through the fillSpaceToMeshLookup() function,
+		 * which is currently a dummy and just does a cuboid.
 		 */
 		void buildStencil();
+		void fillSpaceToMeshLookup();
 
 		/// Derived function to return SparseMatrix-style row info for
 		/// specified mesh entry. 
 		unsigned int getStencil( unsigned int meshIndex,
-				const double** entry, const int** colIndex ) const;
+				const double** entry, const unsigned int** colIndex ) const;
 
 		//////////////////////////////////////////////////////////////////
 
@@ -174,6 +184,8 @@ class CubeMesh: public ChemMesh
 		unsigned int nx_; /// # of entries in x in surround volume
 		unsigned int ny_; /// # of entries in y in surround volume
 		unsigned int nz_; /// # of entries in z in surround volume
+
+		SparseMatrix< double > m_; /// Handles the stencil
 
 		/**
 		 * For spherical mesh, coords are xyz r0 r1 theta0 theta1 phi0 phi1
