@@ -34,11 +34,12 @@ class SbmlWriter
 		Model* cremodel_;	
 		string nameString( string str );
 		string changeName( string parent,string child );
-		string idBeginWith( string name );
-
+		string idBeginWith(string name );
+		string cleanNameId( Id itrid,int index);
+		//string cleanNameId(id index);
 		//~static int targets( Eref object, const string& msg,vector< Eref >& target,const string& type = "" );		
 		//~ static bool isType( Eref object, const string& type );
-		//~ string parmUnit( double rct_order );
+		string parmUnit( double rct_order );
 		//~ double transformUnits( double mvalue,UnitDefinition * ud );
 		//~ string nameString( string str );
 		//~ string changeName( string parent, string child );

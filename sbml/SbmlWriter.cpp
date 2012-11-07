@@ -26,7 +26,8 @@
 #include "../shell/Neutral.h"
 //#include "kinetics/ChemCompt.h"
 //#include <sbml/annotation/ModelHistory.h>
-
+#include <set>
+#include <sstream>
 
 /**
 *  write a Model after validation
@@ -121,8 +122,8 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
   //wildcardFind(path+"/##[ISA=ChemMesh]",chemCompt);
   wildcardFind(path+"/##[TYPE=MeshEntry]",chemCompt);
   //cout << "compts vector size  " << chemCompt.size()<<endl;
-  vector< Id >::iterator itr;
-  for (itr = chemCompt.begin(); itr != chemCompt.end();itr++)
+
+  for ( vector< Id >::iterator itr = chemCompt.begin(); itr != chemCompt.end();itr++)
     {
       vector <unsigned int>dims = Field <vector <unsigned int> > :: get(ObjId(*itr),"objectDimensions");
       //cout << "mesh id " << *itr << " " << itr->path() << ": no. of dimensions: " << dims.size() << endl;
@@ -137,13 +138,14 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	{ ObjId meshParent = Neutral::parent( itr->eref() );
 	  string comptname = Field<string>::get(ObjId(meshParent),"name") ;
 	  /* or cout << " name from element: " << meshParent.element()->getName() << endl; */
-	  double size = Field<double>::get(ObjId(*itr,index),"size");
-	  unsigned int ndim = Field<unsigned int>::get(ObjId(*itr,index),"dimensions");
-	  ostringstream cid;
+  	  ostringstream cid;
 	  cid << (meshParent)  << "_" << index;
 	  comptname = nameString(comptname);
 	  string comptname_id = changeName(comptname,cid.str());
 	  string clean_comptname = idBeginWith(comptname_id);
+
+	  double size = Field<double>::get(ObjId(*itr,index),"size");
+	  unsigned int ndim = Field<unsigned int>::get(ObjId(*itr,index),"dimensions");
 	  //cout <<  "compartmen id: "<< meshParent << " compartment name "<< clean_comptname <<  " size: "<< size << " dimensions: " << ndim <<endl;
 	  
 	  ::Compartment* compt = cremodel_->createCompartment();
@@ -156,18 +158,12 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	    compt->setSize(size);
 	  
 	   /* All the pools are taken here */
-	  vector <Id> :: iterator itrp;
 	  vector< Id > Compt_spe = LookupField< string, vector< Id > >::get(*itr, "neighbours", "remesh" );
-	  for (itrp = Compt_spe.begin();itrp != Compt_spe.end();itrp++)
+	  for (vector <Id> :: iterator itrp = Compt_spe.begin();itrp != Compt_spe.end();itrp++)
 	    { string poolclass = Field<string> :: get(ObjId(*itrp),"class");
 	      if (poolclass != "GslStoich")
 		{
-		  string poolname = Field<string> :: get(ObjId(*itrp),"name");
-		  ostringstream pid;
-		  pid << (*itrp) <<"_"<<index;
-		  poolname = nameString(poolname);
-		  string pool_id = changeName(poolname,pid.str());
-		  string clean_poolname = idBeginWith(pool_id);
+		  string clean_poolname = cleanNameId(*itrp,index);
 		  double initamt = 0.0;
 		  initamt = Field<double> :: get(ObjId(*itrp),"nInit");
 		  //cout << "poolclass:"<< poolclass << " id: " << *itrp << " path " <<  itrp->path()  << " compartment " << clean_comptname << " initamt " << initamt << endl;
@@ -195,15 +191,10 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 				{
 				  ostringstream sumtotal_formula;
 				  for(vector< Id >::iterator itrsumfunc = sumfunpool.begin();itrsumfunc != sumfunpool.end(); itrsumfunc++)
-				    { 
+				    {  /* Check with Upi: Finds the source pool for a SumTot. It also deals with cases wherthe source is an enz-substrate complex Readkkit.cpp */
 				      ostringstream spId;
 				      sumtot_count -= 1;
-				      string sfName = Field<string> :: get(ObjId(*itrsumfunc),"name");
-				      ostringstream sumFuncid;
-				      sumFuncid << (*itrsumfunc) <<"_"<<index;
-				      string sumFuncname = nameString(sfName);
-				      string sumFunc_id = changeName(sumFuncname,sumFuncid.str());
-				      string clean_sumFuncname = idBeginWith(sumFunc_id);
+				      string clean_sumFuncname = cleanNameId(*itrsumfunc,index);
 				      if ( sumtot_count == 0 )
 					sumtotal_formula << clean_sumFuncname;
 				      else
@@ -218,6 +209,98 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		    } //zfunPool
 		} //poolclass != gsl
 	    } //itrp
+	  vector< Id > Compt_ReacEnz = LookupField< string, vector< Id > >::get(*itr, "neighbours", "remeshReacs" );
+	  for (vector <Id> :: iterator itrRE= Compt_ReacEnz.begin();itrRE != Compt_ReacEnz.end();itrRE++)
+	    { string re_enClass = Field<string> :: get(ObjId(*itrRE),"class");
+	      if (re_enClass == "ZReac")
+		{
+		  string clean_reacname = cleanNameId(*itrRE,index);
+		  Reaction* reaction;
+		  reaction = cremodel_->createReaction(); 
+		  
+		  SpeciesReference* spr;
+		  KineticLaw* kl;
+		  Parameter* para; 
+		  
+		  reaction->setId( clean_reacname);
+		  double kf = Field<double>::get(ObjId(*itrRE),"kf");
+		  double kb = Field<double>::get(ObjId(*itrRE),"kb");
+		  if (kb == 0.0)
+		    reaction->setReversible( false );
+		  else
+		    reaction->setReversible( true );
+		  vector < Id > rct = LookupField <string,vector < Id> >::get(*itrRE, "neighbours","sub");
+		  std::set < Id > rctUniq;
+		  rctUniq.insert(rct.begin(),rct.end());
+		  for (std::set < Id> :: iterator rRct = rctUniq.begin();rRct!=rctUniq.end();rRct++)
+		    { double rctstoch = count( rct.begin(),rct.end(),*rRct );
+		      string clean_rctname = cleanNameId(*rRct,index);
+		      spr = reaction->createReactant();
+		      spr->setSpecies( clean_rctname );
+		      spr->setStoichiometry( rctstoch );
+		    } //rRct
+		  
+		  vector < Id > prd = LookupField <string,vector < Id> >::get(*itrRE, "neighbours","prd");
+ 		  std::set < Id > prdUniq;
+		  prdUniq.insert(prd.begin(),prd.end());
+		  for (std::set < Id> :: iterator rPrd = prdUniq.begin();rPrd!=prdUniq.end();rPrd++)
+		    { double prdstoch = count( prd.begin(),prd.end(),*rPrd );
+		      string clean_prdname = cleanNameId(*rPrd,index);
+		      spr = reaction->createProduct();
+		      spr->setSpecies( clean_prdname );
+		      spr->setStoichiometry( prdstoch );
+		    } //rprd
+		  
+		  ostringstream rate_law,kfparm,kbparm;
+		  kfparm << clean_reacname << "_" << "kf";
+		  kbparm << clean_reacname << "_" << "kb";
+		  rate_law << kfparm.str();
+		  double rctstoch = 0.0,rct_order = 0.0,prdstoch = 0.0,prd_order =0.0;
+		  for( std::set < Id> :: iterator ri = rctUniq.begin(); ri != rctUniq.end(); ri++ )
+		    { string clean_rctname = cleanNameId(*ri,index);
+		      rctstoch = count( rct.begin(),rct.end(),*ri );
+		      rct_order += rctstoch;
+		      if ( rctstoch == 1 )
+			rate_law << "*" << clean_rctname;
+		      else
+			rate_law << "*" <<clean_rctname << "^" << rctstoch;
+		    }
+		  if ( kb != 0.0 )
+		    {
+		      rate_law << "-" << kbparm.str();
+		      for(std::set < Id> :: iterator pi = prdUniq.begin(); pi != prdUniq.end(); pi++ )
+			{ string clean_prdname = cleanNameId(*pi,index);
+			  prdstoch = count( prd.begin(),prd.end(),*pi );
+			  prd_order +=prdstoch;
+			  if ( prdstoch == 1 )
+			    rate_law << "*" << clean_prdname;
+			  else
+			    rate_law << "*" << clean_prdname << "^" << prdstoch;
+			} 
+		    }
+		  kl = reaction->createKineticLaw();
+		  kl->setFormula( rate_law.str() );
+		  //cout<<"rate law: "<<rate_law.str()<<endl;
+		  // Create local Parameter objects inside the KineticLaw object.
+		  para = kl->createParameter();
+		  para->setId( kfparm.str() );
+		  string unit=parmUnit( rct_order-1 );
+		  para->setUnits( unit );
+		  double rvalue,pvalue;
+		  const double m = 1.0;
+		  rvalue = kf *(pow(m,rct_order-1));
+		  para->setValue( rvalue );
+		  if ( kb != 0.0 ){
+		    pvalue = kb * (pow(m,prd_order-1));
+		    para = kl->createParameter();
+		    para->setId( kbparm.str() );
+		    string unit=parmUnit( prd_order-1 );
+		    para->setUnits( unit );
+		    para->setValue( pvalue );
+		  }
+		}//re_enclass
+	    }//itrRE
+
 	}//index
     }//itr
 }//createModel
@@ -241,6 +324,17 @@ bool SbmlWriter::writeModel( const SBMLDocument* sbmlDoc, const string& filename
       return false;
     }
     
+}
+//string SbmlWriter::cleanNameId(vector < Id > const &itr,int index)
+
+string SbmlWriter::cleanNameId(Id itrid,int  index)
+{ string objname = Field<string> :: get(ObjId(itrid),"name");
+  ostringstream Objid;
+  Objid << (itrid) <<"_"<<index;
+  objname = nameString(objname);
+  string objname_id = changeName(objname,Objid.str());
+  string clean_nameid = idBeginWith(objname_id);
+  return clean_nameid ;
 }
 /* *  removes special characters  **/
 string SbmlWriter::nameString( string str )
@@ -314,4 +408,49 @@ string SbmlWriter::idBeginWith( string name )
   if ( isdigit(name.at(0)) )
     changedName = "_" + name;
   return changedName;
+}
+string SbmlWriter::parmUnit( double rct_order )
+{
+  ostringstream unit_stream;
+  int order = ( int) rct_order;
+  switch( order )
+    {
+      case 0:
+	unit_stream<<"per_second";
+	break;
+      case 1:
+	unit_stream<<"per_uMole_per_second";
+	break;
+      case 2:
+	unit_stream<<"per_uMole_sq_per_second";
+	break;
+      default:
+	unit_stream<<"per_uMole_"<<rct_order<<"_per_second";
+	break;
+    }
+  ListOfUnitDefinitions * lud =cremodel_->getListOfUnitDefinitions();
+  bool flag = false;
+  for ( unsigned int i=0;i<lud->size();i++ )
+    {
+      UnitDefinition * ud = lud->get(i);
+      if ( ud->getId() == unit_stream.str() ){
+	flag = true;
+	break;
+	}
+    }
+  if ( !flag ){
+    UnitDefinition* unitdef;
+    Unit* unit;
+    unitdef = cremodel_->createUnitDefinition();
+    unitdef->setId( unit_stream.str() );
+    // Create individual unit objects that will be put inside the UnitDefinition .
+    unit = unitdef->createUnit();
+    unit->setKind( UNIT_KIND_MOLE );
+    unit->setExponent( -order );
+    unit->setScale( -6 );
+    unit = unitdef->createUnit();
+    unit->setKind( UNIT_KIND_SECOND );
+    unit->setExponent( -1 );
+  }
+  return unit_stream.str();
 }
