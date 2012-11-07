@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "SparseMatrix.h"
 #include "../shell/Shell.h"
 #include "Boundary.h"
 #include "MeshEntry.h"
@@ -572,6 +573,13 @@ void testCubeMesh()
 
 	cm.innerSetCoords( coords );
 
+	vector< unsigned int > neighbors = cm.getNeighbors( 0 );
+	assert( neighbors.size() == 3 );
+	assert( neighbors[0] = 1 );
+	assert( neighbors[0] = 2 );
+	assert( neighbors[0] = 8 );
+
+	assert( cm.innerGetNumEntries() == 64 );
 	assert( doubleEq( cm.getX0(), 0 ) );
 	assert( doubleEq( cm.getY0(), 0 ) );
 	assert( doubleEq( cm.getZ0(), 0 ) );
@@ -583,6 +591,10 @@ void testCubeMesh()
 	assert( doubleEq( cm.getDx(), 1 ) );
 	assert( doubleEq( cm.getDy(), 1 ) );
 	assert( doubleEq( cm.getDz(), 1 ) );
+
+	assert( cm.getNx() == 2 );
+	assert( cm.getNy() == 4 );
+	assert( cm.getNz() == 8 );
 
 	cm.setX0( 1 );
 	cm.setY0( 2 );
@@ -603,45 +615,45 @@ void testCubeMesh()
 	assert( doubleEq( temp[6], 1 ) );
 	assert( doubleEq( temp[7], 1 ) );
 	assert( doubleEq( temp[8], 1 ) );
+	assert( cm.innerGetNumEntries() == 64 );
+	assert( cm.getNx() == 4 );
+	assert( cm.getNy() == 4 );
+	assert( cm.getNz() == 4 );
 
-	vector< unsigned int > m2s;
-	vector< unsigned int > s2m( 64, ~0);
-	for ( unsigned int i = 0; i < 4; ++i ) {
-		for ( unsigned int j = 0; j < 4; ++j ) {
-			for ( unsigned int k = 0; k < 4; ++k ) {
-				unsigned int index = ( i * 4 + j ) * 4 + k;
-				if ( i*i + j * j + k * k < 15 ) { 
-					// include shell around 1 octant of sphere
-					s2m[index] = m2s.size();
-					m2s.push_back( index );
-				} else {
-					s2m[index] = ~0;
-				}
-			}
-		}
-	}
-	unsigned int numEntries = m2s.size();
-	cm.setMeshToSpace( m2s );
-	cm.setSpaceToMesh( s2m );
-
-	assert( cm.getNumEntries() == numEntries );
-	assert( cm.getMeshEntrySize( 0 ) == 1 );
-
-	coords = cm.getCoordinates( 0 );
-	assert( doubleEq( coords[0], 1 ) );
-	assert( doubleEq( coords[1], 2 ) );
-	assert( doubleEq( coords[2], 4 ) );
-	assert( doubleEq( coords[3], 2 ) );
-	assert( doubleEq( coords[4], 3 ) );
-	assert( doubleEq( coords[5], 5 ) );
-
-	vector< unsigned int > neighbors = cm.getNeighbors( 0 );
+	neighbors = cm.getNeighbors( 0 );
 	assert( neighbors.size() == 3 );
-	assert( neighbors[0] = 1 );
-	assert( neighbors[1] = s2m[ 4 ] );
-	assert( neighbors[2] = s2m[ 16 ] );
+	assert( neighbors[0] == 1 );
+	assert( neighbors[1] == 4 );
+	assert( neighbors[2] = 16 );
 
+	neighbors = cm.getNeighbors( 63 );
+	assert( neighbors.size() == 3 );
+	assert( neighbors[0] == 62 );
+	assert( neighbors[1] == 59 );
 
+	neighbors = cm.getNeighbors( 2 );
+	assert( neighbors.size() == 4 );
+	assert( neighbors[0] == 1 );
+	assert( neighbors[1] == 3 );
+	assert( neighbors[2] == 6 );
+	assert( neighbors[3] == 18 );
+
+	neighbors = cm.getNeighbors( 6 );
+	assert( neighbors.size() == 5 );
+	assert( neighbors[0] == 5 );
+	assert( neighbors[1] == 7 );
+	assert( neighbors[2] == 2 );
+	assert( neighbors[3] == 10 );
+	assert( neighbors[4] == 22 );
+
+	neighbors = cm.getNeighbors( 22 );
+	assert( neighbors.size() == 6 );
+	assert( neighbors[0] == 21 );
+	assert( neighbors[1] == 23 );
+	assert( neighbors[2] == 18 );
+	assert( neighbors[3] == 26 );
+	assert( neighbors[4] == 6 );
+	assert( neighbors[5] == 38 );
 
 	cm.setPreserveNumEntries( 1 );
 	assert( cm.getNx() == 4 );
