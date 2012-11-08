@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat May 26 10:41:37 2012 (+0530)
 # Version: 
-# Last-Updated: Mon Oct 15 16:12:41 2012 (+0530)
+# Last-Updated: Thu Nov  8 17:27:54 2012 (+0530)
 #           By: subha
-#     Update #: 368
+#     Update #: 369
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -131,7 +131,8 @@ def step_run(simtime, steptime, verbose=True):
         if verbose:
             print 'Simulated till', clock.currentTime, 's'
     remaining = simtime % steptime
-    moose.start(remaining)
+    if remaining > 0:
+        moose.start(remaining)
     if verbose:
         print 'Finished simulation'
     
