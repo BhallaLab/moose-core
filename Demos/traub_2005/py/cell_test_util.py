@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Oct 15 15:03:09 2012 (+0530)
 # Version: 
-# Last-Updated: Mon Oct 15 15:45:19 2012 (+0530)
+# Last-Updated: Thu Nov  8 17:31:54 2012 (+0530)
 #           By: subha
-#     Update #: 72
+#     Update #: 169
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -29,13 +29,21 @@
 
 # Code:
 
+from datetime import datetime
+import time
+import os
+os.environ['NUMPTHREADS'] = '1'
+import sys
+sys.path.append('../../../python')
 import uuid
 import unittest
 import numpy as np
 from matplotlib import pyplot as plt
+import pylab
 import moose
 import cells
-from testutils import compare_cell_dump, setup_clocks, assign_clocks
+import testutils
+from testutils import compare_cell_dump, setup_clocks, assign_clocks, step_run
 
 
 def setup_current_step_model(model_container, data_container, 
@@ -80,7 +88,7 @@ def setup_current_step_model(model_container, data_container,
         hsolve.target = cell.path
     return {'cell': cell,
             'stimulus': pulsegen,
-            'presynapticVm': presyn_vm,
+            'presynVm': presyn_vm,
             'somaVm': soma_vm,
             'injectionCurrent': pulse_table,
             'hsolve': hsolve
@@ -88,14 +96,103 @@ def setup_current_step_model(model_container, data_container,
 
 
 class SingleCellCurrentStepTest(unittest.TestCase):
+    """Base class for simulating a single cell with step current
+    injection"""
     def __init__(self, *args, **kwargs):
-        unittest.TestCase.__init__(self, *args, **kwargs)
+        unittest.TestCase.__init__(self, *args, **kwargs)        
+        self.pulse_array =  [[100e-3, 100e-3, 1e-9],
+                             [1e9, 0, 0]]
+        self.solver = 'hsolve'
+        self.simdt = testutils.SIMDT
+        self.plotdt = testutils.PLOTDT
+        self.tseries = [0.0]
     
     def setUp(self):
         self.test_id = uuid.uuid4().int
         self.test_container = moose.Neutral('test%d' % (self.test_id))
         self.model_container = moose.Neutral('%s/model' % (self.test_container.path))
-        self.data_container = moose.Neutral('%s/data' % (self.test_container.path))
+        self.data_container = moose.Neutral('%s/data' % (self.test_container.path))    
+        params = setup_current_step_model(
+            self.model_container, 
+            self.data_container, 
+            self.celltype, 
+            self.pulse_array, 
+            self.simdt, 
+            self.plotdt,
+            solver=self.solver)
+        self.cell = params['cell']       
+        self.somaVmTab = params['somaVm']
+        self.presynVmTab = params['presynVm']
+        self.injectionTab = params['injectionCurrent']
+        self.pulsegen = params['stimulus']
+        testutils.setup_clocks(testutils.SIMDT, testutils.PLOTDT)
+        testutils.assign_clocks(self.model_container, 
+                                self.data_container, 
+                                solver=self.solver)
+
+    def tweak_stimulus(self, pulsearray):
+        """Update the pulsegen for this model with new (delay, width,
+        level) values specified in `pulsearray` list."""        
+        for ii in range(len(pulsearray)):
+            self.pulsegen.delay[ii] = pulsearray[ii][0]
+            self.pulsegen.width[ii] = pulsearray[ii][1]
+            self.pulsegen.level[ii] = pulsearray[ii][2]
+
+    def runsim(self, simtime, pulsearray=None):
+        """Run the simulation for `simtime`. Save the data at the end."""
+        if pulsearray is not None:            
+            self.tweak_stimulus(pulsearray)
+        moose.reinit()
+        start = datetime.now()
+        step_run(simtime, 0.1)
+        end = datetime.now()
+        delta = end - start
+        print 'Simulation time with solver %s: %g s' % \
+            (self.solver, 
+             delta.seconds + delta.microseconds * 1e-6)            
+        self.tseries = np.linspace(0, simtime, len(self.somaVmTab.vec))
+        # Now save the data
+        for table_id in self.data_container.children:
+            data = np.vstack((self.tseries, table_id[0].vec))
+            fname = 'data/%s_%s_%s.dat' % (self.celltype, 
+                                           table_id[0].name,
+                                           self.solver)
+            np.savetxt(fname, np.transpose(data))
+            print 'Saved', table_id[0].name, 'in', fname
+        
+    def plot_vm(self):
+        """Plot Vm for presynaptic compartment and soma - along with
+        the same in NEURON simulation if possible."""
+        pylab.subplot(211)
+        pylab.title('Soma Vm')
+        pylab.plot(self.tseries*1e3, self.somaVmTab.vec * 1e3,
+                   label='Vm (mV) - moose')
+        pylab.plot(self.tseries*1e3, self.injectionTab.vec * 1e9,
+                   label='Stimulus (nA)')
+        try:
+            nrn_data = np.loadtxt('../nrn/data/%s_soma_Vm.dat' % \
+                                      (self.celltype))
+            pylab.plot(nrn_data[:,0], nrn_data[:,1],
+                       label='Vm (mV) - neuron')
+        except IOError:
+            print 'No neuron data found.'
+        pylab.legend()
+        pylab.subplot(212)
+        pylab.title('Presynaptic Vm')
+        pylab.plot(self.tseries*1e3, self.presynVmTab.vec * 1e3,
+                   label='Vm (mV) - moose')
+        pylab.plot(self.tseries*1e3, self.injectionTab.vec * 1e9,
+                   label='Stimulus (nA)')
+        try:
+            nrn_data = np.loadtxt('../nrn/data/%s_presynaptic_Vm.dat' % \
+                                      (self.celltype))
+            pylab.plot(nrn_data[:,0], nrn_data[:,1], 
+                       label='Vm (mV) - neuron')
+        except IOError:
+            print 'No neuron data found.'
+        pylab.legend()
+        pylab.show()
+        
     
 # 
 # cell_test_util.py ends here
