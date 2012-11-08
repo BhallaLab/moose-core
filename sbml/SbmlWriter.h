@@ -40,6 +40,7 @@ class SbmlWriter
 		//~static int targets( Eref object, const string& msg,vector< Eref >& target,const string& type = "" );		
 		//~ static bool isType( Eref object, const string& type );
 		string parmUnit( double rct_order );
+		void getSubPrd(SpeciesReference* spr,vector < Id> subprdId, int index,ostringstream& rate_law,double &rct_order,bool w);
 		//~ double transformUnits( double mvalue,UnitDefinition * ud );
 		//~ string nameString( string str );
 		//~ string changeName( string parent, string child );

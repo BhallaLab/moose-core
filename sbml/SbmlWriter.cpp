@@ -210,78 +210,59 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		} //poolclass != gsl
 	    } //itrp
 	  vector< Id > Compt_ReacEnz = LookupField< string, vector< Id > >::get(*itr, "neighbours", "remeshReacs" );
+	  //cout << Compt_ReacEnz.size() <<endl;
 	  for (vector <Id> :: iterator itrRE= Compt_ReacEnz.begin();itrRE != Compt_ReacEnz.end();itrRE++)
-	    { string re_enClass = Field<string> :: get(ObjId(*itrRE),"class");
+	    {string clean_reacname = cleanNameId(*itrRE,index);
+	      Reaction* reaction;
+	      reaction = cremodel_->createReaction(); 
+	      reaction->setId( clean_reacname);
+	      string re_enClass = Field<string> :: get(ObjId(*itrRE),"class");
+	      //cout << re_enClass << endl;
+	      /* Reaction */
 	      if (re_enClass == "ZReac")
-		{
-		  string clean_reacname = cleanNameId(*itrRE,index);
-		  Reaction* reaction;
-		  reaction = cremodel_->createReaction(); 
-		  
-		  SpeciesReference* spr;
+		{ SpeciesReference* spr;
 		  KineticLaw* kl;
 		  Parameter* para; 
-		  
-		  reaction->setId( clean_reacname);
 		  double kf = Field<double>::get(ObjId(*itrRE),"kf");
 		  double kb = Field<double>::get(ObjId(*itrRE),"kb");
 		  if (kb == 0.0)
 		    reaction->setReversible( false );
 		  else
 		    reaction->setReversible( true );
+		  
+		  /* Reaction's Reactant are Written */
 		  vector < Id > rct = LookupField <string,vector < Id> >::get(*itrRE, "neighbours","sub");
 		  std::set < Id > rctUniq;
 		  rctUniq.insert(rct.begin(),rct.end());
-		  for (std::set < Id> :: iterator rRct = rctUniq.begin();rRct!=rctUniq.end();rRct++)
-		    { double rctstoch = count( rct.begin(),rct.end(),*rRct );
-		      string clean_rctname = cleanNameId(*rRct,index);
-		      spr = reaction->createReactant();
-		      spr->setSpecies( clean_rctname );
-		      spr->setStoichiometry( rctstoch );
-		    } //rRct
+		  spr = reaction->createReactant();
+
+		  ostringstream rate_law,kfparm,kbparm;
+		  double rct_order = 0.0;
+		  kfparm << clean_reacname << "_" << "kf";
+		  rate_law << kfparm.str();
+		  /* This function print out reactants and update rate_law string */
+		  getSubPrd(spr,rct,index,rate_law,rct_order,true);
+
+		  /*Reaction's Product are Written */
 		  
 		  vector < Id > prd = LookupField <string,vector < Id> >::get(*itrRE, "neighbours","prd");
  		  std::set < Id > prdUniq;
 		  prdUniq.insert(prd.begin(),prd.end());
-		  for (std::set < Id> :: iterator rPrd = prdUniq.begin();rPrd!=prdUniq.end();rPrd++)
-		    { double prdstoch = count( prd.begin(),prd.end(),*rPrd );
-		      string clean_prdname = cleanNameId(*rPrd,index);
-		      spr = reaction->createProduct();
-		      spr->setSpecies( clean_prdname );
-		      spr->setStoichiometry( prdstoch );
-		    } //rprd
-		  
-		  ostringstream rate_law,kfparm,kbparm;
-		  kfparm << clean_reacname << "_" << "kf";
+		  spr = reaction->createProduct();
+
+		  double prd_order =0.0;
 		  kbparm << clean_reacname << "_" << "kb";
-		  rate_law << kfparm.str();
-		  double rctstoch = 0.0,rct_order = 0.0,prdstoch = 0.0,prd_order =0.0;
-		  for( std::set < Id> :: iterator ri = rctUniq.begin(); ri != rctUniq.end(); ri++ )
-		    { string clean_rctname = cleanNameId(*ri,index);
-		      rctstoch = count( rct.begin(),rct.end(),*ri );
-		      rct_order += rctstoch;
-		      if ( rctstoch == 1 )
-			rate_law << "*" << clean_rctname;
-		      else
-			rate_law << "*" <<clean_rctname << "^" << rctstoch;
-		    }
+		  
+  		  /* This function print out product and update rate_law string  if kb != 0 */
 		  if ( kb != 0.0 )
-		    {
-		      rate_law << "-" << kbparm.str();
-		      for(std::set < Id> :: iterator pi = prdUniq.begin(); pi != prdUniq.end(); pi++ )
-			{ string clean_prdname = cleanNameId(*pi,index);
-			  prdstoch = count( prd.begin(),prd.end(),*pi );
-			  prd_order +=prdstoch;
-			  if ( prdstoch == 1 )
-			    rate_law << "*" << clean_prdname;
-			  else
-			    rate_law << "*" << clean_prdname << "^" << prdstoch;
-			} 
+		    {rate_law << "-" << kbparm.str();
+		    getSubPrd(spr,prd,index,rate_law,prd_order,true);
 		    }
+		  else
+		      getSubPrd(spr,prd,index,rate_law,prd_order,false);
+
 		  kl = reaction->createKineticLaw();
 		  kl->setFormula( rate_law.str() );
-		  //cout<<"rate law: "<<rate_law.str()<<endl;
-		  // Create local Parameter objects inside the KineticLaw object.
 		  para = kl->createParameter();
 		  para->setId( kfparm.str() );
 		  string unit=parmUnit( rct_order-1 );
@@ -299,7 +280,27 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		    para->setValue( pvalue );
 		  }
 		}//re_enclass
+	      /*     Reaction End */
+
+	      /* Enzyme Start */
+	      else if(re_enClass == "ZEnz")
+		{
+		  double k1 = Field<double>::get(ObjId(*itrRE),"k1");
+		  double k2 = Field<double>::get(ObjId(*itrRE),"k2");
+  		  double k3 = Field<double>::get(ObjId(*itrRE),"k3");
+  		  cout << "explicit " << k1 << " " <<k2 << "" << k3 <<endl;
+		  
+		}// else 
+	      
+	      else if(re_enClass == "ZMMenz")
+		{
+		  double km = Field<double>::get(ObjId(*itrRE),"Km");
+		  double kcat = Field<double>::get(ObjId(*itrRE),"kcat");
+  		  cout << "explicit " << km << " " <<kcat <<endl;
+		}// else 
+	      
 	    }//itrRE
+	  
 
 	}//index
     }//itr
@@ -335,6 +336,27 @@ string SbmlWriter::cleanNameId(Id itrid,int  index)
   string objname_id = changeName(objname,Objid.str());
   string clean_nameid = idBeginWith(objname_id);
   return clean_nameid ;
+}
+void SbmlWriter::getSubPrd(SpeciesReference* spr,vector < Id> rctprd, int index,ostringstream& rate_law,double &rct_order,bool w)
+{ 
+  std::set < Id > rctprdUniq;
+  rctprdUniq.insert(rctprd.begin(),rctprd.end());
+  for (std::set < Id> :: iterator rRctPrd = rctprdUniq.begin();rRctPrd!=rctprdUniq.end();rRctPrd++)
+    { double stoch = count( rctprd.begin(),rctprd.end(),*rRctPrd );
+      string clean_name = cleanNameId(*rRctPrd,index);
+      spr->setSpecies( clean_name );
+      spr->setStoichiometry( stoch );
+      /* Rate law is also updated in rate_law string */
+      if (w)
+	{
+	  rct_order += stoch;
+	  if ( stoch == 1 )
+	    rate_law << "*" << clean_name;
+	  else
+	    rate_law << "*" <<clean_name << "^" << stoch;
+	}
+    } //rRct
+  //return rctprdUniq ;
 }
 /* *  removes special characters  **/
 string SbmlWriter::nameString( string str )
