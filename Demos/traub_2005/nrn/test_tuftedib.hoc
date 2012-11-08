@@ -9,7 +9,7 @@ secondorder=2
 dt = 0.025
 // plotdt = 1e-2
 celsius=30
-v_init = -65
+v_init = -70
 // cvode.active()
 define_shape()
 /* runcell(runtime, delay) */
