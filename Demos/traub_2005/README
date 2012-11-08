@@ -34,3 +34,6 @@ described in detail in the readme of the NEURON model).
   
   The standard test is apply 1 pA current injection from 50 to 150 ms,
   then apply a -1 pA current injection from 200 to 300 ms.
+
+  The test_{celltype} files have step current injection test for each
+  celltype.
