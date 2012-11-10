@@ -31,14 +31,14 @@ void testRemeshing()
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	vector< int > dims( 1, 1 );
 	vector< double > coords( 9, 0 );
-	coords[3] = 1.000000001e-4;
+	coords[3] = 50.00000001e-6;
 	coords[4] = coords[5] = 1e-6;
 	coords[6] = 1e-6;
 	coords[7] = coords[8] = 1e-6;
 	unsigned int numVox = coords[3] / coords[6];
 	double tau = 4 * coords[6] * coords[6] / ( DiffConst * PI );
-	double runtime = 100;
-	double DT = 0.1;
+	double runtime = 50;
+	double DT = 0.025;
 	assert( tau > 10 * DT );
 	assert( runtime > 10 * tau );
 
@@ -86,7 +86,10 @@ void testRemeshing()
 	n = pool()->dataHandler()->localEntries();
 	assert( n == numVox );
 	Field< double >::setRepeat( pool, "concInit", 0 );
-	Field< double >::set( ObjId( pool, 0 ), "concInit", 1 );
+	Field< double >::set( ObjId( pool, 0 ), "concInit", 1.0 );
+
+	double x = Field< double >::get( ObjId( pool, 0 ), "nInit" );
+	assert( doubleEq( x, 1.0 * NA * coords[6] * coords[7] * coords[8] ) );
 
 	n = gslStoich.element()->dataHandler()->localEntries();
 	assert( n == 1 ); // Later this gets messy, one dataHandler per thread.
@@ -97,19 +100,24 @@ void testRemeshing()
 	assert( conc.size() == numVox );
 	double dx = coords[6];
 	double err = 0;
+	double analyticTot = 0;
+	double myTot = 0;
 	for ( unsigned int i = 0; i < numVox; ++i ) {
-		double x = i * dx;
+		double x = i * dx + dx * 0.5;
 		double y = dx *  // This part represents the init conc of 1 in dx
-		( 0.5 / sqrt( PI * DiffConst * runtime ) ) * exp( -x * x / ( 4 * DiffConst * runtime ) ); // This part is the solution as a func of x,t.
+		( 1.0 / sqrt( PI * DiffConst * runtime ) ) * exp( -x * x / ( 4 * DiffConst * runtime ) ); // This part is the solution as a func of x,t.
 		err += ( y - conc[i] ) * ( y - conc[i] );
-		cout << i << "	" << x << "	" << y << "	" << conc[i] << endl;
+		//cout << i << "	" << x << "	" << y << "	" << conc[i] << endl;
+		analyticTot += y;
+		myTot += conc[i];
 	}
-	assert( doubleApprox( err, 0 ) );
-
+	// cout << "analyticTot= " << analyticTot << ", myTot= " << myTot << endl;
+	assert( err < 1.0e-5 );
 
 	// Another long, thin, cuboid: 100um x 1um x 1um, in 0.5 um segments.
-	runtime = 50;
-	coords[6] = 5.000000001e-7;
+	runtime = 20;
+	coords[6] = 5.0e-7;
+	coords[3] = 2.0e-5;
 	numVox = coords[3] / coords[6];
 	Field< vector< double > >::set( kinetics, "coords", coords );
 	Qinfo::waitProcCycles( 2 );
@@ -120,20 +128,31 @@ void testRemeshing()
 	Field< double >::setRepeat( pool, "concInit", 0 );
 	Field< double >::set( ObjId( pool, 0 ), "concInit", 2 );
 	n = gslStoich.element()->dataHandler()->localEntries();
-	assert( n == numVox );
+	assert( n == 1 ); // New design for GslStoich.
+	sm->setPlotDt( DT/1.0 );
+	sm->setSimDt( DT/1.0 );
+	for ( unsigned int i = 0; i < 10; ++i )
+			shell->doSetClock( i , DT / 5.0 );
 	shell->doReinit();
 	shell->doStart( runtime );
 	dx = coords[6];
 	err = 0;
 	Field< double >::getVec( pool, "conc", conc );
 	assert( conc.size() == numVox );
+
+	analyticTot = 0;
+	myTot = 0;
 	for ( unsigned int i = 0; i < numVox; ++i ) {
-		double x = i * dx;
+		double x = i * dx + dx * 0.5;
 		double y = 2 * dx * // This part represents the init conc of 2 in dx
-		( 0.5 / sqrt( PI * DiffConst * runtime ) ) * exp( -x * x / ( 4 * DiffConst * runtime ) ); // This part is the solution as a func of x,t.
+		( 1.0 / sqrt( PI * DiffConst * runtime ) ) * exp( -x * x / ( 4 * DiffConst * runtime ) ); // This part is the solution as a func of x,t.
 		err += ( y - conc[i] ) * ( y - conc[i] );
+		// cout << i << "	" << x << "	" << y << "	" << conc[i] << endl;
+		analyticTot += y;
+		myTot += conc[i];
 	}
-	assert( doubleApprox( err/5, 0 ) );
+	// cout << "analyticTot= " << analyticTot << ", myTot= " << myTot << endl;
+	assert( err < 2.5e-5 );
 
 	shell->doDelete( mgr );
 	cout << "." << flush;
@@ -221,6 +240,6 @@ void testSimManager()
 	testBuildFromBareKineticTree();
 	testBuildFromKkitTree();
 	testMakeStandardElements();
-//	testRemeshing();
+	testRemeshing();
 	testZombieTurnover(); 
 }
