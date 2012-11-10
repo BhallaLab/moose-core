@@ -729,11 +729,11 @@ vector< double > CubeMesh::getDiffusionArea( unsigned int fid ) const
 
 	unsigned int nIndex = neighbor( spaceIndex, 0, 0, 1 );
 	if ( nIndex != EMPTY ) 
-		ret.push_back( dy_ * dz_ );
+		ret.push_back( dx_ * dy_ );
 
 	nIndex = neighbor( spaceIndex, 0, 0, -1 );
 	if ( nIndex != EMPTY ) 
-		ret.push_back( dy_ * dz_ );
+		ret.push_back( dx_ * dy_ );
 
 	nIndex = neighbor( spaceIndex, 0, 1, 0 );
 	if ( nIndex != EMPTY ) 
@@ -745,11 +745,11 @@ vector< double > CubeMesh::getDiffusionArea( unsigned int fid ) const
 
 	nIndex = neighbor( spaceIndex, 1, 0, 0 );
 	if ( nIndex != EMPTY ) 
-		ret.push_back( dx_ * dy_ );
+		ret.push_back( dy_ * dz_ );
 
 	nIndex = neighbor( spaceIndex, -1, 0, 0 );
 	if ( nIndex != EMPTY ) 
-		ret.push_back( dx_ * dy_ );
+		ret.push_back( dy_ * dz_ );
 
 	return ret;
 }

@@ -19535,5 +19535,20 @@ Next: Revive testSimManager::testRemeshing.
 
 Did so. Now it is going through the motions but getting the wrong answer.
 Not off by a huge amount.
+Checkin 4247 after temporarily commenting out the testRemeshing.
+
+Fixed up some stuff in the testRemeshing, still doesn't work. Because the
+mesh is cubic, the fix ended up being identical to the earlier version.
 
 ============================================================================
+08 Nov.
+Slowly grinding through unit tests.
+
+============================================================================
+09 Nov
+Fixed an error in the handling of recalculations for changed mesh size.
+Now strugging to work out a reasonable dt.
+============================================================================
+10 Nov
+Now calculations are OK enough. Clears unit tests, some regression tests
+still to revive.
