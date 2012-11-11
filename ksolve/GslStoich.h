@@ -50,7 +50,10 @@ class GslStoich: public StoichPools
 ///////////////////////////////////////////////////////////0
 
 		// Does calculations for diffusion.
-		void updateDiffusion( double* yprime );
+		void updateDiffusion( 
+				vector< vector< double > >& lastS, 
+				vector< vector< double > >& y, 
+				double dt );
 		
 		/**
  		 * gslFunc is the function used by GSL to advance the simulation one

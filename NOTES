@@ -19552,3 +19552,16 @@ Now strugging to work out a reasonable dt.
 10 Nov
 Now calculations are OK enough. Clears unit tests, some regression tests
 still to revive.
+============================================================================
+11 Nov.
+Working through regression tests. It is clear that the new numerical approach
+is actually worse than the previous one. I need a smaller dt in all cases to
+get to the criterion. I'm trying to use the RK method along with the 
+flux, to handle all the time-advance calculations but this seems wrong.
+Will later try something cleaner but for now I'll take half the RK timestep
+for the diffusion calculations, and use forward Euler for the calculations.
+
+Now clears all unit and regression tests. Indeed the accuracy is better than
+it was.
+
+============================================================================

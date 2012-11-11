@@ -361,8 +361,10 @@ void GslStoich::process( const Eref& e, ProcPtr info )
 	if ( !isInitialized_ )
 			return;
 #ifdef USE_GSL
-			// Hack till we sort out threadData
+	
+	vector< vector< double > > lastS = y_;
 	double nextt = info->currTime + info->dt;
+	// Hack till we sort out threadData
 	for ( currMeshEntry_ = 0; 
 					currMeshEntry_ < numMeshEntries(); ++currMeshEntry_ ) {
 		double t = info->currTime;
@@ -376,6 +378,8 @@ void GslStoich::process( const Eref& e, ProcPtr info )
 
 		}
 	}
+	if ( diffusionMesh_ && diffusionMesh_->innerGetNumEntries() > 1 )
+		updateDiffusion( lastS, y_, info->dt );
 #endif // USE_GSL
 	// stoich_->clearFlux( e.index().value(), info->threadIndexInGroup );
 }
@@ -478,27 +482,41 @@ int GslStoich::gslFunc( double t, const double* y, double* yprime, void* s )
 	return g->innerGslFunc( t, y, yprime );
 }
 
-void GslStoich::updateDiffusion( double *yprime )
+void GslStoich::updateDiffusion( 
+	vector< vector< double > >& lastS,
+	vector< vector< double > >& y,
+			   	double dt )
 {
 	const double *adx; 
 	const unsigned int* colIndex;
-	unsigned int numInRow = 
-			diffusionMesh_->getStencil( currMeshEntry_, &adx, &colIndex);
-	double vSelf = diffusionMesh_->getMeshEntrySize( currMeshEntry_ );
-	const double* sSelf = S( currMeshEntry_ );
-	vector< double > xa = diffusionMesh_->getDiffusionArea( currMeshEntry_);
-	assert ( xa.size() == numInRow );
-	for ( unsigned int i = 0; i < numInRow; ++i ) {
-		unsigned int other = colIndex[i];
 
-		// Get all concs at the other meshEntry
-		const double* sOther = S( other ); 
-		double vOther = diffusionMesh_->getMeshEntrySize( other );
-		double scale = xa[i] / adx[i] ;
+	// Get value at midpoint.
+	for ( unsigned int me = 0; me < numMeshEntries(); ++me ) {
+		for ( unsigned int i = 0; i < stoich_->getNumVarPools(); ++i ) {
+			lastS[me][i] = ( lastS[me][i] + y[me][i] ) / 2.0;
+		}
+	}
+
+	// Simple forward Euler hack here. Later do a Crank Nicolson.
+	for ( unsigned int me = 0; me < numMeshEntries(); ++me ) {
+		unsigned int numInRow = 
+			diffusionMesh_->getStencil( me, &adx, &colIndex);
+		double vSelf = diffusionMesh_->getMeshEntrySize( me );
+		const double* sSelf = &(lastS[ me ][0]);
+		vector< double > xa = diffusionMesh_->getDiffusionArea( me);
+		assert ( xa.size() == numInRow );
+		for ( unsigned int i = 0; i < numInRow; ++i ) {
+			unsigned int other = colIndex[i];
+
+			// Get all concs at the other meshEntry
+			const double* sOther = &( lastS[other][0] ); 
+			double vOther = diffusionMesh_->getMeshEntrySize( other );
+			double scale = dt * xa[i] / adx[i] ;
 		
-		for ( unsigned int j = 0; j < stoich_->getNumVarPools(); ++j )
-			yprime[j] += stoich_->getDiffConst(j) * scale * 
-					( sOther[j]/vOther - sSelf[j]/vSelf );
+			for ( unsigned int j = 0; j < stoich_->getNumVarPools(); ++j )
+				y[me][j] += stoich_->getDiffConst(j) * scale * 
+						( sOther[j]/vOther - sSelf[j]/vSelf );
+		}
 	}
 }
 
@@ -511,9 +529,6 @@ int GslStoich::innerGslFunc( double t, const double* y, double* yprime )
 	stoich_->updateFuncs( varS( currMeshEntry_ ), t );
 
 	stoich_->updateRates( S( currMeshEntry_ ), yprime );
-
-	if ( diffusionMesh_ && diffusionMesh_->innerGetNumEntries() > 1 )
-		updateDiffusion( yprime );
 	
 	/*
 	cout << "\nTime = " << t << endl;
