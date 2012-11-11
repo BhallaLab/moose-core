@@ -19564,4 +19564,11 @@ for the diffusion calculations, and use forward Euler for the calculations.
 Now clears all unit and regression tests. Indeed the accuracy is better than
 it was.
 
+Spent a while tracking down the long-pending memory leak in the unit
+tests. Finally caught it: using an unallocated vector index for the queue,
+that was nevertheless safe because of how vectors are assigned.
+
+The regression tests still lose 192+168 bytes, all from ReadKkit it seems.
+Deal with it later.
+
 ============================================================================

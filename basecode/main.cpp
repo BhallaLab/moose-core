@@ -282,8 +282,8 @@ void nonMpiTests( Shell* s )
 		unsigned int numCores = s->numCores();
 		unsigned int numThreads = s->numProcessThreads();
 		if ( numCores > 0 )
-		// s->setHardware( isSingleThreaded, numCores, numNodes, myNode );
-		s->setHardware( 0, 1, 1, 0 );
+		// s->setHardware( numthreads, numCores, numNodes, myNode );
+		s->setHardware( 1, 1, 1, 0 );
 		testAsync();
 		testMsg();
 		testShell();
