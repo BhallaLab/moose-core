@@ -309,6 +309,8 @@ void Qinfo::swapQ()
 			prevQueueDataIndex += dBuf_[i].size();
 		}
 		assert( prevQueueDataIndex == bufsize );
+		assert( qBuf_.size() > Shell::numProcessThreads() );
+		assert( dBuf_.size() > Shell::numProcessThreads() );
 		for ( unsigned int i = 0; i <= Shell::numProcessThreads(); ++i ) {
 			qBuf_[i].resize( 0 );
 			dBuf_[i].resize( 0 );
@@ -567,6 +569,8 @@ void Qinfo::addToQ( const ObjId& oi,
 	const double* arg, unsigned int size )
 {
 	if ( oi.element()->hasMsgs( bindIndex ) ) {
+			assert( dBuf_.size() > threadNum );
+			assert( qBuf_.size() > threadNum );
 			vector< double >& vec = dBuf_[ threadNum ];
 			qBuf_[ threadNum ].push_back( 
 				Qinfo( oi, bindIndex, threadNum, vec.size(), size ) );
@@ -583,6 +587,8 @@ void Qinfo::addToQ( const ObjId& oi,
 	const double* arg2, unsigned int size2 )
 {
 	if ( oi.element()->hasMsgs( bindIndex ) ) {
+			assert( dBuf_.size() > threadNum );
+			assert( qBuf_.size() > threadNum );
 			vector< double >& vec = dBuf_[ threadNum ];
 			qBuf_[ threadNum ].push_back( 
 				Qinfo( oi, bindIndex, threadNum, vec.size(), size1 + size2 ) );
@@ -601,6 +607,8 @@ void Qinfo::addDirectToQ( const ObjId& src, const ObjId& dest,
 {
 	static const unsigned int ObjFidSizeInDoubles = 
 		1 + ( sizeof( ObjFid ) - 1 ) / sizeof( double );
+		assert( dBuf_.size() > threadNum );
+		assert( qBuf_.size() > threadNum );
 
 		vector< double >& vec = dBuf_[ threadNum ];
 		qBuf_[ threadNum ].push_back(
