@@ -214,21 +214,26 @@ double checkDiff( const vector< double >& conc,
 	// const double scaleFactor = 0.5 * dx; // Case for input in middle
 	// int mid = conc.size() / 2; // Case for input in middle
 
-	const double scaleFactor = dx/2; // Case for input at end as well. Hm.
+	const double scaleFactor = dx; 
 	int mid = 0; // Case for input at end.
 	double err = 0;
 
+	double tot1 = 0;
+	double tot2 = 0;
+
 	for ( unsigned int j = 0; j < conc.size(); ++j ) {
 		int i = static_cast< int >( j );
-		double x = ( i - mid ) * dx;
+		double x = ( i - mid ) * dx + dx /2;
 		double y = scaleFactor * 
 			( 1.0 / sqrt( PI * D * t ) ) * exp( -x * x / ( 4 * D * t ) );
 		//assert( doubleApprox( conc[j], y ) );
-		// cout << endl << t << "	" << j << ":	" << y << "	" << conc[j];
+		//cout << endl << t << "	" << j << ":	" << y << "	" << conc[j];
 		err += ( y - conc[j] ) * ( y - conc[j] );
+		tot1 += y;
+		tot2 += conc[j];
 	}
+	// cout << t << "	" << tot1 << "	" << tot2 << endl;
 	return sqrt( err );
-	cout << endl;
 }
 
 /**
@@ -239,7 +244,7 @@ static void testDiff1D()
 {
 	// Diffusion length in mesh entries
 	static const unsigned int diffLength = 20; 
-	static const double dt = 0.01;
+	static const double dt = 0.05;
 	static const double dx = 0.5e-6;
 	static const double D = 1e-12;
 
@@ -254,6 +259,8 @@ static void testDiff1D()
 	assert( mgr != Id() );
 	SimManager* sm = reinterpret_cast< SimManager* >( mgr.eref().data() );
 	sm->setPlotDt( dt );
+	for ( unsigned int i = 0; i < 10; ++i )
+			shell->doSetClock( i, dt );
 	sm->makeStandardElements( mgr.eref(), 0, "CylMesh" );
 	Id kinetics( "/diff/kinetics" );
 	assert( kinetics != Id() );
@@ -283,10 +290,10 @@ static void testDiff1D()
 	Field< double >::setRepeat( a, "concInit", 0 );
 	Field< double >::set( ObjId( a, 0 ), "concInit", 1 );
 
-	Id stoich( "/diff/stoich" );
-	assert( stoich != Id() );
-	Id gsl( "/diff/stoich/gsl" );
+	Id gsl( "/diff/stoich" );
 	assert( gsl != Id() );
+	Id stoich( "/diff/stoich/stoichCore" );
+	assert( stoich != Id() );
 
     shell->doReinit();
 
@@ -308,6 +315,7 @@ static void testDiff1D()
 /**
  * Checks calculations in n-dimensions. Uses point at corner as input.
  * Assumes cube.
+ * 		c(x,t) = ( c0 / 2 / sqrt(PI.D.t) ).exp(-x^2/(4Dt)
  */
 double checkNdimDiff( const vector< double >& conc, double D, double t, 
 		double dx, double n, unsigned int cubeSide )
@@ -319,23 +327,34 @@ double checkNdimDiff( const vector< double >& conc, double D, double t,
 	if ( n >= 2 ) dimY = cubeSide;
 	if ( n == 3 ) dimZ = cubeSide;
 
+	double tot1 = 0.0;
+	double tot2 = 0.0;
 	for ( unsigned int i = 0; i < dimZ; ++i ) {
+		double z = 0.0; 
+		if ( n > 2.5 )
+			z = i * dx + dx * 0.5;
 		for ( unsigned int j = 0; j < dimY; ++j ) {
+			double y = 0.0; 
+			if ( n > 1.5 )
+				y = j * dx + dx * 0.5;
 			for ( unsigned int k = 0; k < cubeSide; ++k ) {
-				double x = k * dx;
-				double y = j * dx;
-				double z = i * dx;
+				double x = k * dx + dx * 0.5;
 				double rsq = x * x + y * y + z * z;
 				unsigned int index = ( i * cubeSide + j ) * cubeSide + k;
-				double c = scaleFactor * pow( 4 * PI * D * t, -n/2 ) * 
+				double c = scaleFactor * pow( PI * D * t, -n/2 ) * 
 					exp( -rsq / ( 4 * D * t ) );
 				// cout << endl << t << "	(" << i << "," << j << "," << k  << "), r= " << rsq << "	" << c << "	" << conc[index];
 				err += ( c - conc[index] ) * ( c - conc[index] );
+				tot1 += c;
+				tot2 += conc[index];
 			}
 		}
 	}
+	assert ( tot1 < 1.001 && tot1 > 0.97 );
+	assert ( doubleApprox( tot2, 1.0 ) );
+	// cout << "t = " << t << ";	tot1 = " << tot1 << ";	tot2 = " << tot2 << endl;
+
 	return sqrt( err );
-	cout << endl;
 }
 
 
@@ -530,7 +549,7 @@ static void testReacDiffNd( unsigned int n )
 
 void rtReacDiff()
 {
-		/* This is currently not handled by the new GslStoich class. Soon.
+		/* This is currently not handled by the new GslStoich class. Soon.*/
 	rtReplicateModels();
 	testDiff1D();
 	testDiffNd( 1 );
@@ -538,6 +557,4 @@ void rtReacDiff()
 	testDiffNd( 3 );
 
 	testReacDiffNd( 2 );
-	*/
-		cout << "rtReacDiff temporarily disabled for refactoring\n";
 }

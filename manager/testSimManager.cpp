@@ -38,7 +38,7 @@ void testRemeshing()
 	unsigned int numVox = coords[3] / coords[6];
 	double tau = 4 * coords[6] * coords[6] / ( DiffConst * PI );
 	double runtime = 50;
-	double DT = 0.025;
+	double DT = 0.1;
 	assert( tau > 10 * DT );
 	assert( runtime > 10 * tau );
 
@@ -129,10 +129,12 @@ void testRemeshing()
 	Field< double >::set( ObjId( pool, 0 ), "concInit", 2 );
 	n = gslStoich.element()->dataHandler()->localEntries();
 	assert( n == 1 ); // New design for GslStoich.
-	sm->setPlotDt( DT/1.0 );
-	sm->setSimDt( DT/1.0 );
+	sm->setPlotDt( DT );
+	sm->setSimDt( DT );
+	/*
 	for ( unsigned int i = 0; i < 10; ++i )
 			shell->doSetClock( i , DT / 5.0 );
+			*/
 	shell->doReinit();
 	shell->doStart( runtime );
 	dx = coords[6];
@@ -152,7 +154,7 @@ void testRemeshing()
 		myTot += conc[i];
 	}
 	// cout << "analyticTot= " << analyticTot << ", myTot= " << myTot << endl;
-	assert( err < 2.5e-5 );
+	assert( err < 1.0e-5 );
 
 	shell->doDelete( mgr );
 	cout << "." << flush;
