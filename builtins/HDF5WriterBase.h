@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Sat Feb 25 14:39:19 2012 (+0530)
 // Version: 
-// Last-Updated: Mon Feb 27 23:05:31 2012 (+0530)
-//           By: Subhasis Ray
-//     Update #: 48
+// Last-Updated: Wed Nov 14 17:58:53 2012 (+0530)
+//           By: subha
+//     Update #: 53
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -48,7 +48,12 @@ class HDF5WriterBase
   protected:
     herr_t openFile();
     
+    /// map from element path to nodes in hdf5file.  Multiple MOOSE
+    /// tables can be written to the single file corresponding to a
+    /// HDF5Writer. Each one will be represented by a specific data
+    /// node in the file.
     map <string, hid_t> nodemap_;
+    /// File handle for the HDF5 file opened by this object
     hid_t filehandle_;
     string filename_;
     unsigned int openmode_;
