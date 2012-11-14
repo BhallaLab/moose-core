@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Sat Feb 25 14:42:03 2012 (+0530)
 // Version: 
-// Last-Updated: Tue Oct  2 01:51:28 2012 (+0530)
+// Last-Updated: Wed Nov 14 18:39:19 2012 (+0530)
 //           By: subha
-//     Update #: 270
+//     Update #: 282
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -71,13 +71,23 @@ const Cinfo* HDF5WriterBase::initCinfo()
     &mode,
     &flush
   };
+  static string doc[] = {
+    "Name", "HDF5WriterBase",
+    "Author", "Subhasis Ray",
+    "Description", "HDF5 file writer base class. This is not to be used directly. Instead,"
+    " it should be subclassed to provide specific data writing functions."
+    " This class provides most basic properties like filename, file opening"
+    " mode, file open status."
+  };
+
 
   static Cinfo hdf5Cinfo(
       "HDF5WriterBase",
       Neutral::initCinfo(),
       finfos,
       sizeof(finfos)/sizeof(Finfo*),
-      new Dinfo<HDF5WriterBase>());
+      new Dinfo<HDF5WriterBase>(),
+      doc, sizeof(doc)/sizeof(string));
   return &hdf5Cinfo;                
 }
 
@@ -95,6 +105,7 @@ HDF5WriterBase::~HDF5WriterBase()
         return;
     }
     herr_t err = H5Fclose(filehandle_);
+    filehandle_ = -1;
     if (err < 0){
         cerr << "Error: Error occurred when closing file. Error code: " << err << endl;
     }

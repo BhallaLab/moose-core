@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Sat Feb 25 16:03:59 2012 (+0530)
 // Version: 
-// Last-Updated: Tue Oct  2 01:58:19 2012 (+0530)
+// Last-Updated: Wed Nov 14 18:47:02 2012 (+0530)
 //           By: subha
-//     Update #: 681
+//     Update #: 735
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -66,12 +66,14 @@ const Cinfo * HDF5DataWriter::initCinfo()
   static DestFinfo process(
       "process",
       "Handle process calls. Write data to file and clear all Table objects"
-      " associated with this.",
+      " associated with this. Hence you want to keep it on a slow clock"
+      " 1000 times or more slower than that for the tables.",
   		new ProcOpFunc<HDF5DataWriter>( &HDF5DataWriter::process)
 	);
   static  DestFinfo reinit(
       "reinit",
-      "Reinitialize the object",
+      "Reinitialize the object. If the current file handle is valid, it tries"
+      " to close that and open the file specified in current filename field.",
   		new ProcOpFunc<HDF5DataWriter>( &HDF5DataWriter::reinit )
     );
   static Finfo * processShared[] = {
@@ -91,10 +93,20 @@ const Cinfo * HDF5DataWriter::initCinfo()
   static string doc[] = {
     "Name", "HDF5DataWriter",
     "Author", "Subhasis Ray",
-    "Description", "HDF5 file writer for saving data tables. It saves the tables added to"
-    " it via addObject function into an HDF5 file. At every process call it"
-    " writes the contents of the tables to the file and clears the table"
-    " vectors. You can explicitly save the data via the flush function."
+    "Description", "HDF5 file writer for saving data tables. It saves the tables connected"
+    " to it via `requestData` field into an HDF5 file.  The path of the"
+    " table is maintained in the HDF5 file, with a HDF5 group for each"
+    " element above the table."
+    "\n"
+    "Thus, if you have a table `/data/VmTable` in MOOSE, then it will be"
+    " written as an HDF5 table called `VmTable` inside an HDF5 Group called"
+    " `data`."
+    "\n"
+    "However Table inside Table is considered a pathological case and is"
+    " not handled.\n"
+    "At every process call it writes the contents of the tables to the file"
+    " and clears the table vectors. You can explicitly force writing of the"
+    " data via the `flush` function."
   };
 
     static Cinfo cinfo(
@@ -103,8 +115,7 @@ const Cinfo * HDF5DataWriter::initCinfo()
         finfos,
         sizeof(finfos)/sizeof(Finfo*),
         new Dinfo<HDF5DataWriter>(),
-		doc, sizeof( doc ) / sizeof( string )
-	   	);
+	doc, sizeof( doc ) / sizeof( string ));
     return &cinfo;
 }
 
@@ -116,19 +127,25 @@ HDF5DataWriter::HDF5DataWriter()
 
 HDF5DataWriter::~HDF5DataWriter()
 {
-    flush();
+    if (filehandle_ < 0){
+      return;
+    }
+    this->flush();
     for (map < string, hid_t >::iterator ii = nodemap_.begin(); ii != nodemap_.end(); ++ii){
         if (ii->second >= 0){
             herr_t status = H5Dclose(ii->second);
             if (status < 0){
-                cerr << "Warning: closing dataset for " << ii->first << ", returned status = " << status << endl;
+  	        cerr << "Warning: closing dataset for " << ii->first << ", returned status = " << status << endl;
             }
         }
     }
+    filehandle_ = -1;
 }
+
 void HDF5DataWriter::flush()
 {
     if (filehandle_ < 0){
+        cerr << "HDF5DataWriter::flush() - Filehandle invalid. Cannot write data." << endl;
         return;
     }
     for (map < string, vector < double > >::iterator ii = datamap_.begin(); ii != datamap_.end(); ++ ii){
@@ -174,13 +191,15 @@ void HDF5DataWriter::process(const Eref & e, ProcPtr p)
 
 void HDF5DataWriter::reinit(const Eref & e, ProcPtr p)
 {
+  // TODO: It will be preferable to initialize datamap_ and nodemap_
+  // here. But is there a way to figure out what tables are connected
+  // to this object at this point? Subha, 2012-11-13
     if (filename_.empty()){
         filename_ = "moose_output.h5";
     }
-    if (filehandle_ < 0){
-        openFile();
+    if (filehandle_ < 0){      
+      openFile();      
     }
-    cout << "Openfile:" << filehandle_ << endl;
 }
 
 /**
@@ -188,7 +207,7 @@ void HDF5DataWriter::reinit(const Eref & e, ProcPtr p)
    groups in the path and creating them if required.  */
 hid_t HDF5DataWriter::get_dataset(string path)
 {
-    if (filehandle_<0){
+    if (filehandle_ < 0){
         return -1;
     }
     herr_t status;
