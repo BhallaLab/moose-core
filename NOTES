@@ -19569,6 +19569,135 @@ tests. Finally caught it: using an unallocated vector index for the queue,
 that was nevertheless safe because of how vectors are assigned.
 
 The regression tests still lose 192+168 bytes, all from ReadKkit it seems.
-Deal with it later.
+Deal with it later. Checkin 4269.
 
+Next:
+Cross-boundary diffusion
+Cross-boundary reactions.
 ============================================================================
+14 Nov.
+I have a skeleton for how junction messages may go back and forth.
+This will used an array of class SolverJunction, each of whose entries 
+is accessed through a FieldElement.
+The hard thing here is to figure out how to set up the SolverJunctions.
+Cases:
+Description		Solver A		Solver B
+Multinode diff mesh	GSL same model		GSL same model
+Different compt chem	GSL A, mesh		GSL B, mesh
+Different compt diffn	GSL A, mesh		GSL B, mesh
+Diff compt reac+diff	GSL A, mesh		GSL B, mesh
+Different solvers	Solver A		Solver B
+Motors			any of the above.
+
+The key thing is to embed all info needed to set up the junctions in the 
+object definition of the model, and to update whenever mesh changes.
+
+Use case is the SigNeur system. Here I have the combo case of different
+compartment reac+diff. There are also special diffusion interchanges through
+the spine neck. Will need a special SpineCompartment class for that.
+
+To identify reactions: Just follow the messages. 
+To identify diffusion: 
+	- Nonzero DiffConst.
+	- Identity:
+		- Molecule with identical name? 
+		- Molecule with identical SpeciesId?
+		I don't yet set up SpeciesId from ReadKkit. Easy though.
+		But this just regresses the problem: Who sets up the species 
+		info? SBML might.
+		-> So for now just take the name.
+	- Diffusion within, but not across compts, or special rates across 
+		compts.
+		- Compt sets a single global scale factor for diffn consts
+			across junctions, over and above geometry.
+		- Junctions permit more fine-tuning, beyond what is automatic.
+To identify mesh entries on the junction: Options.
+	- SimManager does it based on preprogrammed ideas. Not general.
+	- Rely on the 'geometry' objects. 
+		- Shared panels? But we don't always have clear-cut panels
+		that match: cylinder of dendrite and cylinder ends of spine.
+	- Find subdomain of space where junction should lie, then scan mesh.
+	- Query to compartment with other one as arg.
+		Return vector< pair< meshindex, meshindex > >.
+		where reacs or diffusion can occur across the pair.
+	-> The last option works best. The compartments can use internal
+		logic or reference to geoms, etc, to build mesh pairs.
+To specify which kinds of ChemMesh: put the correct ones in place.
+To specify which compartments have a stoich, and of which kind: 
+
+current layout is messy:
+/model	
+	/kinetics
+		/mesh
+		/<pools>
+		/<reacs>
+		/<enzs>
+		/<groups (deprecated)>
+	/compartment_<1,2,3...>
+		/mesh
+		(ToBeImplemented:
+		/<pools>
+		/<reacs>
+		/<enzs>
+	/stoich
+		/stoichCore
+	/geometry
+	/graphs
+	/groups
+
+I want to traverse this to figure out how to set up stoichs. Preferably
+stoichs should explicitly reside within the compartment they manage, but
+a stoich may manage multiple nested compartments so it isn't easy.
+- Simple approach: Permit a stoich only to manage a single compartment.
+- Compromise: Stoich can manage either a single compt, or all the compts in
+	a model provided they are all single voxel compts.
+	- Should implement a default single-voxel ChemMesh
+	- Should encourage use of ZombieSwap for changing mesh properties.
+
+-> If there is a stoich on the /model, it is a global stoich
+-> Otherwise there should be a stoich within each compt.
+-> SimManager has to traverse the tree and tell the stoichs about each other
+	so they can set up interfaces by referring to their Compartments.
+
+
+Working on implementation of baseclass fuctions for handling the junctions
+between two StoichSolvers.
+==========================================================================
+16 Nov.
+Implementation taking shape. Current issue: where do I store the vector of
+RateTerms that define the flux? 
+- On original StoichCore
+	- Has much of the infrastructure for managing reacs, including some
+	but not all of what I'll need for handling rate changes.
+	- Will need to do some fixes so as to use only part of the rates_ 
+	vector for the regular calculations.
+	- Need new stuff to handle changes in diff consts.
+- On GslStoich
+	- Neither here nor there: will need to sub-map between the RateTerm
+	vector and the SolverJunction that each entry belongs to.
+- On the SolverJunctions
+	- Logically reasonable subdivision
+	- Need to rebuild entire management structure from StoichCore.
+-> Store it on the original StoichCore.
+
+Specific issues with handling rate changes for cross-compartment reacs:
+	- A single rate may control many RateTerms. 
+	- Or, a single RateTerm may control many but not all cross reacs. 
+		This is cleaner. It is similar to what we have in the regular
+		reacs anyway: a single RateTerm controls the calculations in
+		all voxels. 
+		- The Junction handles this part of the calculation anyway.
+		- The Junction should identify the rate term and then the
+		range of voxels to apply, for outgoing fluxes.
+	- Updates on the parameters can control the RateTerm in the usual way.
+-> Good, the cross compartment reacs are done comfortably in the current
+	framework.
+	
+Specific issues with handling DiffusionConst updates.
+	- Single update will control multiple RateTerms as well as multiple
+	meshEntries. The multiple RateTerms are one for each Junction, as the
+	meshing may differ.
+	- Other implementation: tap into the DiffConst vector from the 
+	StoichCore. 
+	
+==========================================================================

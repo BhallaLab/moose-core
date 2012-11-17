@@ -83,6 +83,48 @@ class StoichPools
 		virtual double getDiffConst( const Eref& e ) const = 0;
 
 		//////////////////////////////////////////////////////////////////
+		// Junction FieldElement access functions
+		//////////////////////////////////////////////////////////////////
+		
+		/// Returns pointer to specified Junction
+		SolverJunction* getJunction( unsigned int i );
+		
+		/// Returns number of junctions.
+		unsigned int getNumJunctions() const;
+
+		/// Dummy function, we have to manipulate the junctions using the
+		// add/drop junction functions.
+		void setNumJunctions( unsigned int v );
+		//////////////////////////////////////////////////////////////////
+		// Cross-solver computation functions
+		//////////////////////////////////////////////////////////////////
+		//
+		/// Handles arriving messages through junction
+		void handleJunction( unsigned int fieldIndex, vector< double > v );
+
+		/// Create a junction between self and specified other StoichPool
+		void addJunction( const Eref& e, const Qinfo* q, Id other );
+		/// Remove the junction between self and specified other StoichPool
+		void dropJunction( const Eref& e, const Qinfo* q, Id other );
+
+
+		//////////////////////////////////////////////////////////////////
+		// Matching virtual functions
+		//////////////////////////////////////////////////////////////////
+		/// Sends messages through junction. Called during Process.
+		virtual void vUpdateJunction( const Eref& e, const Qinfo* q ) = 0;
+
+		/// Handles arriving messages through junction. Callsed 
+		virtual void vHandleJunction( unsigned int fieldIndex, 
+						const vector< double >& v ) = 0;
+
+		/// Create a junction between self and specified other StoichPool
+		virtual void vAddJunction( const Eref& e, const Qinfo* q, Id other ) = 0;
+		/// Remove the junction between self and specified other StoichPool
+		virtual void vDropJunction( const Eref& e, const Qinfo* q, Id other ) = 0;
+
+
+		//////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
 		//////////////////////////////////////////////////////////////////
 	private:
@@ -135,6 +177,13 @@ class StoichPools
 		 * globalMeshIndex = localMeshEntries_[localIndex]
 		 */
 		vector< unsigned int > localMeshEntries_;
+
+		/**
+		 * Vector of Junctions between solvers. These specify how solvers
+		 * communicate between each other in cases of diffusion, motors,
+		 * or reactions. Accessed through FieldElements.
+		 */
+		vector< SolverJunction > junctions_;
 };
 
 #endif	// _STOICH_POOLS_H

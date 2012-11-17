@@ -831,3 +831,9 @@ void StoichCore::updateFuncs( double* s, double t )
 		assert( !isnan( *(j-1) ) );
 	}
 }
+
+/// Updates the rates for cross-compartment reactions.
+void StoichCore::updateJunctionRates( const double* s,
+	const vector< unsigned int >& reacTerms, double* yprime )
+{
+}

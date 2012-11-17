@@ -185,6 +185,10 @@ class StoichCore
 
 		/// Updates the function values, within s.
 		void updateFuncs( double* s, double t );
+
+		/// Updates the rates for cross-compartment reactions.
+		void updateJunctionRates( const double* s,
+			   const vector< unsigned int >& reacTerms, double* yprime );
 		//////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
 	protected:

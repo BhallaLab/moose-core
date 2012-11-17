@@ -32,6 +32,7 @@ OBJ = \
 	GssaStoich.o	\
 	GslStoich.o	\
 	EstimateDt.o	\
+	SolverJunction.o	\
 	testKsolve.o	\
 
 	
@@ -88,6 +89,7 @@ ZEnz.o:	ZEnz.h
 ZombieMMenz.o:	ZombieMMenz.h
 ZMMenz.o:	ZMMenz.h
 ZombieSumFunc.o:	../kinetics/SumFunc.h ZombieSumFunc.h
+SolverJunction0:	SolverJunction.h
 testKsolve.o:	../kinetics/ReadKkit.h ../shell/Shell.h
 RateTerm.o:		RateTerm.h
 

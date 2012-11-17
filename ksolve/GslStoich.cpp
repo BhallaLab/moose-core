@@ -18,6 +18,14 @@
 #include "../mesh/ChemMesh.h"
 #include "GslStoich.h"
 
+static SrcFinfo1< vector< double > >* updateJunction() {
+	static SrcFinfo1< vector< double > > updateJunction( 
+		"updateJunction", 
+		"Sends out vector of all mol # changes to cross junction."
+	);
+	return &updateJunction;
+}
+
 const Cinfo* GslStoich::initCinfo()
 {
 		///////////////////////////////////////////////////////
@@ -382,6 +390,76 @@ void GslStoich::process( const Eref& e, ProcPtr info )
 		updateDiffusion( lastS, y_, info->dt );
 #endif // USE_GSL
 	// stoich_->clearFlux( e.index().value(), info->threadIndexInGroup );
+}
+
+///////////////////////////////////////////////////////////////////////////
+// Junction operations
+///////////////////////////////////////////////////////////////////////////
+
+void GslStoich::updateJunctionDiffusion( unsigned int meshIndex, 
+				const vector< unsigned int >& diffTerms, double* v )
+{;}
+
+/**
+ * This function calculates cross-junction rates and sends out as msgs.
+ * Since we need specific messages between solvers, we handle them through
+ * FieldElements which are one per junction. The messages pass the 
+ * updateJunction/handleJunction message both ways.
+ */
+void GslStoich::vUpdateJunction( const Eref& e, const Qinfo* q )
+{
+	Id junction( e.id().value() + 1 );
+	assert( junction.element()->cinfo()->isA( "SolverJunction" ) );
+	for ( unsigned int i = 0; i < getNumJunctions(); ++i ) {
+		SolverJunction* j = getJunction(i);
+		unsigned int numReac = j->reacTerms().size();
+		unsigned int numDiff = j->diffTerms().size();
+		unsigned int numMesh = j->meshIndex().size();
+		vector< double > v( ( numReac + numDiff ) * numMesh, 0 );
+		double* yprime = &v[0];
+		for ( vector< unsigned int >::const_iterator k = 
+						j->meshIndex().begin(); 
+						k != j->meshIndex().end(); ++k ) {
+			stoich_->updateJunctionRates( S( *k ), j->reacTerms(), yprime );
+			updateJunctionDiffusion( *k, j->diffTerms(), yprime + numReac );
+			yprime += numReac + numDiff;
+		}
+
+		Eref je( e.element(), i );
+		// Each Junction FieldElement connects up to precisely one target.
+		updateJunction()->send( je, q->threadNum(), v );
+	}
+}
+
+/**
+ * Handles incoming cross-border rates. Just adds onto y_ matrix, using
+ * Forward Euler.
+ */
+void GslStoich::vHandleJunction( unsigned int fieldIndex,
+	   	const vector< double >& v )
+{
+	assert( fieldIndex < getNumJunctions() );
+	const SolverJunction* j = getJunction( fieldIndex );
+	assert( j );
+	j->incrementTargets( y_, v );
+}
+
+/**
+ * Utility function called by the manager. Sets up the mutual messaging,
+ * and then configures the junctions on either end.
+ * These functions should really migrate down to the parent class.
+ */
+void GslStoich::vAddJunction( const Eref& e, const Qinfo* q, Id other )
+{
+	// Set up message
+	// Identify which molecules
+	// Identify which meshEntries
+	// Set up crossTerm reactions
+}
+
+void GslStoich::vDropJunction( const Eref& e, const Qinfo* q, Id other )
+{
+		// Clean up the junction.
 }
 
 void GslStoich::reinit( const Eref& e, ProcPtr info )
