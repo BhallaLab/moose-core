@@ -22,5 +22,6 @@ class Stoich;
 #include "../kinetics/lookupSizeFromMesh.h"
 #include "../mesh/Stencil.h"
 #include "Port.h"
+#include "SolverJunction.h"
 #include "Stoich.h"
 #include "StoichCore.h"
