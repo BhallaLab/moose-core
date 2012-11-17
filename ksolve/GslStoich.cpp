@@ -18,6 +18,7 @@
 #include "../mesh/ChemMesh.h"
 #include "GslStoich.h"
 
+/*
 static SrcFinfo1< vector< double > >* updateJunction() {
 	static SrcFinfo1< vector< double > > updateJunction( 
 		"updateJunction", 
@@ -25,6 +26,7 @@ static SrcFinfo1< vector< double > >* updateJunction() {
 	);
 	return &updateJunction;
 }
+*/
 
 const Cinfo* GslStoich::initCinfo()
 {
@@ -388,6 +390,8 @@ void GslStoich::process( const Eref& e, ProcPtr info )
 	}
 	if ( diffusionMesh_ && diffusionMesh_->innerGetNumEntries() > 1 )
 		updateDiffusion( lastS, y_, info->dt );
+	if ( getNumJunctions() > 0 )
+		vUpdateJunction( e, info->threadIndexInGroup, info->dt );
 #endif // USE_GSL
 	// stoich_->clearFlux( e.index().value(), info->threadIndexInGroup );
 }
@@ -406,7 +410,8 @@ void GslStoich::updateJunctionDiffusion( unsigned int meshIndex,
  * FieldElements which are one per junction. The messages pass the 
  * updateJunction/handleJunction message both ways.
  */
-void GslStoich::vUpdateJunction( const Eref& e, const Qinfo* q )
+void GslStoich::vUpdateJunction( const Eref& e, 
+				unsigned int threadNum, double dt )
 {
 	Id junction( e.id().value() + 1 );
 	assert( junction.element()->cinfo()->isA( "SolverJunction" ) );
@@ -425,9 +430,12 @@ void GslStoich::vUpdateJunction( const Eref& e, const Qinfo* q )
 			yprime += numReac + numDiff;
 		}
 
+		for ( vector< double >::iterator k = v.begin(); k != v.end(); ++k )
+			*k *= dt; // Simple Euler. Ugh.
+
 		Eref je( e.element(), i );
 		// Each Junction FieldElement connects up to precisely one target.
-		updateJunction()->send( je, q->threadNum(), v );
+		updateJunction()->send( je, threadNum, v );
 	}
 }
 

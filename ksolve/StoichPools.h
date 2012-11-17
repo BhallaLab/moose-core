@@ -112,7 +112,8 @@ class StoichPools
 		// Matching virtual functions
 		//////////////////////////////////////////////////////////////////
 		/// Sends messages through junction. Called during Process.
-		virtual void vUpdateJunction( const Eref& e, const Qinfo* q ) = 0;
+		virtual void vUpdateJunction( const Eref& e, 
+				unsigned int threadNum, double dt ) = 0;
 
 		/// Handles arriving messages through junction. Callsed 
 		virtual void vHandleJunction( unsigned int fieldIndex, 

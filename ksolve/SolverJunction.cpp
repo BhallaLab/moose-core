@@ -12,6 +12,15 @@
 #include "StoichPools.h"
 #include "UpFunc.h"
 
+SrcFinfo1< vector< double > >* updateJunction()
+{
+	static SrcFinfo1< vector< double > > updateJunction(
+		"updateJunction",
+		"Sends out vector of all mol # changes to cross junction."
+	);
+	return &updateJunction;
+}
+
 const Cinfo* SolverJunction::initCinfo()
 {
 	//////////////////////////////////////////////////////////////////
@@ -53,12 +62,27 @@ const Cinfo* SolverJunction::initCinfo()
 		new UpFunc1< StoichPools, vector< double > >( 
 				&StoichPools::handleJunction ) );
 
+	//////////////////////////////////////////////////////////////////
+	// Shared Finfos
+	//////////////////////////////////////////////////////////////////
+	static Finfo* junctionShared[] = {
+			&handleJunction,
+			updateJunction()
+	};
+
+	static SharedFinfo junction( "junction",
+		"Shared message between SolverJunctions to handle cross-solver "
+		"reactions and diffusion.",
+		junctionShared,
+		sizeof( junctionShared ) / sizeof( const Finfo* )
+	);
+
 	static Finfo* synapseFinfos[] = {
 		&numReacs,				// ReadOnly Fields
 		&numDiffMols,			// ReadOnly Fields
 		&numMeshEntries,		// ReadOnly Fields
 		&otherCompartment,		// ReadOnly Fields
-		&handleJunction, 		// DestFinfo
+		&junction, 				// SharedFinfo
 	};
 
 	static Cinfo synapseCinfo (
@@ -108,7 +132,7 @@ Id SolverJunction::getOtherCompartment() const
 }
 
 /////////////////////////////////////////////////////////////////////////
-// Uitility functions
+// Utility functions
 /////////////////////////////////////////////////////////////////////////
 const vector< unsigned int >& SolverJunction::reacTerms() const
 {
@@ -130,5 +154,16 @@ void SolverJunction::incrementTargets(
 				vector< vector< double > >& y,
 				const vector< double >& v ) const
 {
-	;
+	typedef vector< pair< unsigned int, unsigned int> >::const_iterator VPI;
+	unsigned int numTerms = reacTerms_.size() + diffTerms_.size();
+	assert( v.size() == numTerms * meshIndex_.size() );
+
+	for ( VPI i = targetMeshIndices_.begin(); 
+					i != targetMeshIndices_.end(); ++i ) {
+		unsigned int k = numTerms * i->first;
+		assert( k < v.size() );
+		for ( VPI j = targetMols_.begin(); j != targetMols_.end(); ++j ) {
+			y[ i->second ][ j->second ] = v[ k + j->first];
+		}
+	}
 }
