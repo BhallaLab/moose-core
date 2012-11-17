@@ -54,6 +54,11 @@ class GslStoich: public StoichPools
 				vector< vector< double > >& lastS, 
 				vector< vector< double > >& y, 
 				double dt );
+
+		void updateJunctionDiffusion( 
+				unsigned int meshIndex,
+				const vector< unsigned int >& diffTerms,
+				double* v );
 		
 		/**
  		 * gslFunc is the function used by GSL to advance the simulation one
@@ -80,6 +85,22 @@ class GslStoich: public StoichPools
 		unsigned int getSpecies( const Eref& e );
 		void setDiffConst( const Eref& e, double v );
 		double getDiffConst( const Eref& e ) const;
+
+		//////////////////////////////////////////////////////////////////
+		// Junction operations.
+		//////////////////////////////////////////////////////////////////
+		/// Sends messages through junction. Called during Process.
+		void vUpdateJunction( const Eref& e, const Qinfo* q );
+
+		/// Handles arriving messages through junction. Callsed 
+		void vHandleJunction( unsigned int fieldIndex, 
+						const vector< double >& v );
+
+		/// Create a junction between self and specified other StoichPool
+		void vAddJunction( const Eref& e, const Qinfo* q, Id other );
+		/// Remove the junction between self and specified other StoichPool
+		void vDropJunction( const Eref& e, const Qinfo* q, Id other );
+
 
 ///////////////////////////////////////////////////////////0
 		static const Cinfo* initCinfo();
