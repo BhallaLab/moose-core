@@ -101,4 +101,6 @@ class SolverJunction
 		vector< pair< unsigned int, unsigned int > > targetMeshIndices_;
 };
 
+extern SrcFinfo1< vector< double > >* updateJunction();
+
 #endif // _SOLVER_JUNCTION_H

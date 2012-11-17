@@ -90,7 +90,8 @@ class GslStoich: public StoichPools
 		// Junction operations.
 		//////////////////////////////////////////////////////////////////
 		/// Sends messages through junction. Called during Process.
-		void vUpdateJunction( const Eref& e, const Qinfo* q );
+		void vUpdateJunction( const Eref& e, unsigned int threadNum,
+					double dt );
 
 		/// Handles arriving messages through junction. Callsed 
 		void vHandleJunction( unsigned int fieldIndex, 
