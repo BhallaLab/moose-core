@@ -801,25 +801,6 @@ void StoichCore::updateRates( const double* s, double* yprime )
 		*yprime++ = N_.computeRowRate( i , v );
 }
 
-/*
-void StoichCore::updateRates( double* yprime, const vector< double >&v )
-{
-	for (unsigned int i = 0; i < numVarPools_; ++i)
-		*yprime++ = N_.computeRowRate( i , v );
-}
-
-void StoichCore::updateV( const double* s, vector< double >& v )
-{
-	vector< RateTerm* >::const_iterator i;
-	vector< double >::iterator j = v.begin();
-
-	for ( i = rates_.begin(); i != rates_.end(); i++) {
-		*j++ = (**i)( s );
-		assert( !isnan( *( j-1 ) ) );
-	}
-}
-*/
-
 // s is the array of pools, S_[meshIndex][0]
 void StoichCore::updateFuncs( double* s, double t )
 {
@@ -832,8 +813,20 @@ void StoichCore::updateFuncs( double* s, double t )
 	}
 }
 
-/// Updates the rates for cross-compartment reactions.
+/**
+ * updateJunctionRates:
+ * Updates the rates for cross-compartment reactions. These are located
+ * at the end of the rates_ vector, and are directly indext by the the
+ * reacTerms.
+ */
 void StoichCore::updateJunctionRates( const double* s,
 	const vector< unsigned int >& reacTerms, double* yprime )
 {
+	for ( vector< unsigned int >::const_iterator i = reacTerms.begin(); 
+					i != reacTerms.end(); ++i )
+	{
+			assert( *i < rates_.size() );
+			*yprime++ += (*rates_[*i])( s );
+	}
 }
+

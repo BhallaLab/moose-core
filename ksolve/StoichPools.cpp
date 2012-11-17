@@ -12,6 +12,18 @@
 
 extern const double NA;
 
+/*
+static SrcFinfo1< vector< double > >* updateJunction()
+{
+	static SrcFinfo1< vector< double > > updateJunction(
+		"updateJunction",
+		"Sends out vector of all mol # changes to cross junction."
+	);
+	return &updateJunction;
+}
+*/
+
+
 const Cinfo* StoichPools::initCinfo()
 {
 	static DestFinfo addJunction( "addJunction",
