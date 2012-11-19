@@ -19701,3 +19701,26 @@ Specific issues with handling DiffusionConst updates.
 	StoichCore. 
 	
 ==========================================================================
+17 Nov.
+
+General architecture for solver communication taking shape:
+
+- StoichPools is the base class for GslStoich and in due course for
+	GssaStoich and Smol. 
+- StoichPools has a vector of FieldElements called SolverJunctions. These
+	can talk to one another through the 'junction' shared message. 
+- All reaction and diffusion communication between solvers, including internode
+	communication, goes through the SolverJunctions and their messages.
+- Communications happen through 'process'
+- Data transferred is currently the increment in the remote object in a time dt.
+	This amounts to a Simple Euler calculation.
+- Junctions are built using the StoichPools::addJunction, which takes the 
+	target StoichPool Id as an argument.
+
+Designing tests for this.
+
+Checkin 4281.
+==========================================================================
+19 Nov.
+Incrementally building in the structure for setting up the junctions based on
+the object structure of the simulation. Long way to go yet.
