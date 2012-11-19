@@ -102,6 +102,12 @@ class GslStoich: public StoichPools
 		/// Remove the junction between self and specified other StoichPool
 		void vDropJunction( const Eref& e, const Qinfo* q, Id other );
 
+		/// Returns indices of cross-compt reacs terms into rates_ vector.
+		void vBuildReacTerms( vector< unsigned int >& reacTerms, 
+				Id other ) const;
+
+		/// Returns map of diffusing pools and their names.
+		void vBuildDiffTerms( map< string, Id>& diffTerms ) const; 
 
 ///////////////////////////////////////////////////////////0
 		static const Cinfo* initCinfo();

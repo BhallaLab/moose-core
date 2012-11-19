@@ -57,6 +57,18 @@ class SolverJunction
 						const vector< double >& v ) const;
 
 		//////////////////////////////////////////////////////////////////
+		// Setup functions
+		//////////////////////////////////////////////////////////////////
+		void setReacTerms( const vector< unsigned int >& reacTerms );
+		void setDiffTerms( const vector< unsigned int >& diffTerms );
+		void setMeshIndex( const vector< unsigned int >& meshIndex );
+
+		void setTargetMols( 
+			const vector< pair< unsigned int, unsigned int > >& val );
+		void setTargetMeshIndices( 
+			const vector< pair< unsigned int, unsigned int > >& val );
+
+		//////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
 	private:
 		/**
@@ -101,6 +113,6 @@ class SolverJunction
 		vector< pair< unsigned int, unsigned int > > targetMeshIndices_;
 };
 
-extern SrcFinfo1< vector< double > >* updateJunction();
+extern SrcFinfo1< vector< double > >* updateJunctionFinfo();
 
 #endif // _SOLVER_JUNCTION_H

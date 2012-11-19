@@ -107,6 +107,14 @@ class StoichPools
 		/// Remove the junction between self and specified other StoichPool
 		void dropJunction( const Eref& e, const Qinfo* q, Id other );
 
+		void innerConnectJunctions( 
+						Id me, Id other, StoichPools* otherSP );
+
+		void findDiffusionTerms(
+				const StoichPools* otherSP,
+				vector< unsigned int >& selfTerms,
+				vector< unsigned int >& otherTerms
+			) const;
 
 		//////////////////////////////////////////////////////////////////
 		// Matching virtual functions
@@ -124,6 +132,18 @@ class StoichPools
 		/// Remove the junction between self and specified other StoichPool
 		virtual void vDropJunction( const Eref& e, const Qinfo* q, Id other ) = 0;
 
+		/**
+		 * Generate the vector of indices into the rates_ vector for
+		 * reaction rate terms.
+		 */
+		virtual void vBuildReacTerms( 
+					vector< unsigned int >& reacTerms, Id other ) const = 0;
+
+		/**
+		 * Generate the map of varPools that diffuse. 
+		 */
+		virtual void vBuildDiffTerms( map< string, Id >& diffTerms )
+				const = 0;
 
 		//////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();

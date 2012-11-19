@@ -12,7 +12,7 @@
 #include "StoichPools.h"
 #include "UpFunc.h"
 
-SrcFinfo1< vector< double > >* updateJunction()
+SrcFinfo1< vector< double > >* updateJunctionFinfo()
 {
 	static SrcFinfo1< vector< double > > updateJunction(
 		"updateJunction",
@@ -67,7 +67,7 @@ const Cinfo* SolverJunction::initCinfo()
 	//////////////////////////////////////////////////////////////////
 	static Finfo* junctionShared[] = {
 			&handleJunction,
-			updateJunction()
+			updateJunctionFinfo()
 	};
 
 	static SharedFinfo junction( "junction",
@@ -166,4 +166,30 @@ void SolverJunction::incrementTargets(
 			y[ i->second ][ j->second ] = v[ k + j->first];
 		}
 	}
+}
+
+void SolverJunction::setReacTerms( const vector< unsigned int >& reacTerms )
+{
+	reacTerms_ = reacTerms;
+}
+
+void SolverJunction::setDiffTerms( const vector< unsigned int >& diffTerms )
+{
+	diffTerms_ = diffTerms;
+}
+
+void SolverJunction::setMeshIndex( const vector< unsigned int >& meshIndex )
+{
+	meshIndex_ = meshIndex;
+}
+
+void SolverJunction::setTargetMols( 
+			const vector< pair< unsigned int, unsigned int > >& val )
+{
+	targetMols_ = val;
+}
+void SolverJunction::setTargetMeshIndices( 
+			const vector< pair< unsigned int, unsigned int > >& val )
+{
+	targetMeshIndices_ = val;
 }

@@ -435,7 +435,7 @@ void GslStoich::vUpdateJunction( const Eref& e,
 
 		Eref je( e.element(), i );
 		// Each Junction FieldElement connects up to precisely one target.
-		updateJunction()->send( je, threadNum, v );
+		updateJunctionFinfo()->send( je, threadNum, v );
 	}
 }
 
@@ -459,16 +459,40 @@ void GslStoich::vHandleJunction( unsigned int fieldIndex,
  */
 void GslStoich::vAddJunction( const Eref& e, const Qinfo* q, Id other )
 {
-	// Set up message
-	// Identify which molecules
+	// Identify which molecules that react
+		// Scan through all reactions and enzymes on self.
+		// Identify those that have a substrate or tgt in other
+		// Vice versa for other compt.
+	
+	// Identify which molecules that diffuse (D != 0)
+		// Scan through all molecules on self
+		// Scan through all molecules on other
+		// Build hash table on names of each.
+		// Scan through smaller hash table, find matches
+	
 	// Identify which meshEntries
-	// Set up crossTerm reactions
+		// Send down to respective compartments to do this.
+
+	// Set up values.
 }
 
 void GslStoich::vDropJunction( const Eref& e, const Qinfo* q, Id other )
 {
-		// Clean up the junction.
 }
+
+void GslStoich::vBuildReacTerms( vector< unsigned int >& reacTerms, 
+				Id other ) const
+{
+		;
+}
+
+void GslStoich::vBuildDiffTerms( map< string, Id>& diffTerms ) const
+{
+		;
+}
+///////////////////////////////////////////////////
+// Reinit and process.
+///////////////////////////////////////////////////
 
 void GslStoich::reinit( const Eref& e, ProcPtr info )
 {

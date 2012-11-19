@@ -9,6 +9,7 @@
 #include "header.h"
 #include "SolverJunction.h"
 #include "StoichPools.h"
+#include "../shell/Shell.h"
 
 extern const double NA;
 
@@ -201,9 +202,96 @@ void StoichPools::handleJunction( unsigned int fieldIndex,
 	vHandleJunction( fieldIndex, v );
 }
 
+bool validateJunction( Id me, Id other )
+{
+	// Check that types match
+	if ( !other.element()->cinfo()->isA( "StoichPools" ) ) {
+		cout << "Warning: StoichPools::vAddJunction: Other Id '" <<
+				other.path() << " is not a StoichPool\n";
+		return false;
+	}
+	// Check if junction already exists.
+	Id myJunction( me.value() + 1);
+	Id otherJunction( other.value() + 1);
+	vector< Id > ret;
+	myJunction.element()->getNeighbours( ret, updateJunctionFinfo() );
+	if ( find( ret.begin(), ret.end(), otherJunction ) != ret.end() ) {
+		cout << "Warning: StoichPools::vAddJunction: junction already" <<
+		" present from " << 
+		me.path() << " to " << other.path() << endl;
+		return false;
+	}
+	return true;
+}
+
+void StoichPools::findDiffusionTerms( 
+				const StoichPools* otherSP,
+				vector< unsigned int >& selfTerms,
+				vector< unsigned int >& otherTerms
+	) const
+{
+	map< string, Id > selfDiffTerms;
+	this->vBuildDiffTerms( selfDiffTerms );
+	map< string, Id > otherDiffTerms;
+	otherSP->vBuildDiffTerms( otherDiffTerms );
+	vector< Id > selfDiffPools;
+	vector< Id > otherDiffPools;
+	map< string, Id >::iterator j;
+	for ( map< string, Id >::iterator i = selfDiffTerms.begin();
+					i != selfDiffTerms.end(); ++i )
+	{
+		j = otherDiffTerms.find( i->first );
+		if ( j != otherDiffTerms.end() )
+			selfDiffPools.push_back( i->second );
+			otherDiffPools.push_back( j->second );
+	}
+}
+
+void StoichPools::innerConnectJunctions( 
+			Id me, Id other, StoichPools* otherSP )
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	Id myJunction( me.value() + 1);
+	Id otherJunction( other.value() + 1);
+	// Set up message
+	ObjId myOid( myJunction, getNumJunctions() );
+	ObjId otherOid( otherJunction, otherSP->getNumJunctions() );
+	MsgId mid = shell->doAddMsg( "single", myOid, "junction", 
+					otherOid, "junction" );
+	assert( mid != Msg::bad );
+
+	// Make junction entries
+	junctions_.resize( junctions_.size() + 1 );
+	otherSP->junctions_.resize( otherSP->junctions_.size() + 1 );
+}
+
 void StoichPools::addJunction( const Eref& e, const Qinfo* q, Id other )
 {
-	vAddJunction( e, q, other );
+	if ( !validateJunction( e.id(), other ) ) 
+			return;
+
+	StoichPools* otherSP = 
+			reinterpret_cast< StoichPools* >( other.eref().data() );
+	
+	// Set up message
+	innerConnectJunctions( e.id(), other, otherSP );
+
+	// Work out reaction terms
+	vector< unsigned int > reacTerms;
+	this->vBuildReacTerms( reacTerms, other );
+	junctions_.back().setReacTerms( reacTerms );
+	otherSP->vBuildReacTerms( reacTerms, e.id() );
+	otherSP->junctions_.back().setReacTerms( reacTerms );
+
+	// Work out diffusion terms
+	vector< unsigned int > selfDiffPoolIndex;
+	vector< unsigned int > otherDiffPoolIndex;
+	//findDiffusionTerms( otherSP, selfDiffPoolIndex, otherDiffPoolIndex );
+
+	// Work out matching meshEntries.
+	// matchMeshEntries( otherSP );
+
+	// Set up the targetMols and targetMeshIndices vectors.
 }
 
 
@@ -211,3 +299,4 @@ void StoichPools::dropJunction( const Eref& e, const Qinfo* q, Id other )
 {
 	vDropJunction( e, q, other );
 }
+
