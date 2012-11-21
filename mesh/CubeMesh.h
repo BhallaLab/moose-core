@@ -150,6 +150,12 @@ class CubeMesh: public ChemMesh
 		void matchMeshEntries( const ChemMesh* other,
 			vector< pair< unsigned int, unsigned int > >& ret ) const;
 
+		/**
+		 * Specialization for cube-to-cube mesh matching
+		 */
+		void matchCubeMeshEntries( const CubeMesh* other,
+			vector< pair< unsigned int, unsigned int > >& ret ) const;
+
 		/// Utility function for special case in matchMeshEntries.
 		void matchSameSpacing( const CubeMesh* other,
 			vector< pair< unsigned int, unsigned int > >& ret ) const;
@@ -171,6 +177,18 @@ class CubeMesh: public ChemMesh
 		/// Return 0 if spacing same, -1 if self smaller, +1 if self bigger
 		int compareMeshSpacing( const CubeMesh* other ) const;
 
+		/// Defines a cuboid volume of intersection between self and other.
+		void defineIntersection( const CubeMesh* other,
+			double& xmin, double &xmax,
+			double& ymin, double &ymax,
+			double& zmin, double &zmax ) const;
+		
+		/// Fills surface_ vector with spatial meshIndices for a rectangle
+		void fillTwoDimSurface();
+
+		/// Fills surface_ vector with spatial meshIndices for a cuboid,
+		/// that is, puts the surfaces of the cuboid in the vector.
+		void fillThreeDimSurface();
 
 		//////////////////////////////////////////////////////////////////
 		//  Stuff for diffusion

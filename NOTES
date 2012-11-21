@@ -19797,4 +19797,8 @@ Issues:
 
 For what it's worth, compiled and cleared unit and regression tests
 for previous implementation. It just bypasses the actual mesh handling at
-this point.
+this point. Checkin 4287.
+
+Implemented but not tested the new algorithm. For it to work I need also to
+get the surface_ vector set up in the mesh.
+
