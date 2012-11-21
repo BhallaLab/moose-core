@@ -104,10 +104,22 @@ class GslStoich: public StoichPools
 
 		/// Returns indices of cross-compt reacs terms into rates_ vector.
 		void vBuildReacTerms( vector< unsigned int >& reacTerms, 
+				vector< pair< unsigned int, unsigned int > >& reacPoolIndex,
 				Id other ) const;
 
 		/// Returns map of diffusing pools and their names.
 		void vBuildDiffTerms( map< string, Id>& diffTerms ) const; 
+
+		/// Generates mapping of mesh entries between solvers.
+		void matchMeshEntries( const StoichPools* other,
+			vector< unsigned int >& selfMeshIndex, 
+			vector< pair< unsigned int, unsigned int > >& selfMeshMap,
+			vector< unsigned int >& otherMeshIndex, 
+			vector< pair< unsigned int, unsigned int > >& otherMeshMap
+		) const;
+
+		/// Returns pointer to ChemMesh entry for compartment.
+		const ChemMesh* compartmentMesh() const;
 
 ///////////////////////////////////////////////////////////0
 		static const Cinfo* initCinfo();

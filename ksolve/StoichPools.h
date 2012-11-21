@@ -10,6 +10,9 @@
 #ifndef _STOICH_POOLS_H
 #define _STOICH_POOLS_H
 
+#ifndef _CHEM_MESH_H
+class ChemMesh;
+#endif
 class StoichPools
 {
 	public: 
@@ -137,13 +140,38 @@ class StoichPools
 		 * reaction rate terms.
 		 */
 		virtual void vBuildReacTerms( 
-					vector< unsigned int >& reacTerms, Id other ) const = 0;
+			vector< unsigned int >& reacTerms,
+			vector< pair< unsigned int, unsigned int > >& reacPoolIndex,	
+			Id other 
+		) const = 0;
 
 		/**
 		 * Generate the map of varPools that diffuse. 
 		 */
 		virtual void vBuildDiffTerms( map< string, Id >& diffTerms )
 				const = 0;
+
+		/**
+		 * Works out which meshEntries talk to each other. The outcome
+		 * is reported as 
+		 * - MeshIndex vectors for self and other, to specify which entries
+		 *   to use
+		 * - MeshMap vectors for self and other, to map from the index
+		 *   in the data transfer vector between solvers, to the meshIndex
+		 *   on the solver.
+		 * This function is expected to refer to a ChemMesh in order to
+		 * figure out the details. Even derived classes of StoichPools
+		 * that do not use a mesh (e.g., Smoldyn) will use a dummy 
+		 * ChemMesh to do the needful.
+		 */
+		virtual void matchMeshEntries( const StoichPools* other,
+			vector< unsigned int >& selfMeshIndex, 
+			vector< pair< unsigned int, unsigned int > >& selfMeshMap,
+			vector< unsigned int >& otherMeshIndex, 
+			vector< pair< unsigned int, unsigned int > >& otherMeshMap
+		) const = 0;
+
+		virtual const ChemMesh* compartmentMesh() const = 0;
 
 		//////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();

@@ -59,14 +59,11 @@ class SolverJunction
 		//////////////////////////////////////////////////////////////////
 		// Setup functions
 		//////////////////////////////////////////////////////////////////
-		void setReacTerms( const vector< unsigned int >& reacTerms );
+		void setReacTerms( const vector< unsigned int >& reacTerms,
+			const vector< pair< unsigned int, unsigned int > >& poolMap );
 		void setDiffTerms( const vector< unsigned int >& diffTerms );
-		void setMeshIndex( const vector< unsigned int >& meshIndex );
-
-		void setTargetMols( 
-			const vector< pair< unsigned int, unsigned int > >& val );
-		void setTargetMeshIndices( 
-			const vector< pair< unsigned int, unsigned int > >& val );
+		void setMeshIndex( const vector< unsigned int >& meshIndex,
+			const vector< pair< unsigned int, unsigned int > >& meshMap );
 
 		//////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
@@ -106,8 +103,10 @@ class SolverJunction
 		 * A simple one-to-one map won't work, because a
 		 * given reac may have multiple targets, and a given meshIndex
 		 * may map onto multiple (or fractional) target meshIndices.
-		 * So each of the vectors below has first the index of the source,
-		 * and then the index of the target.
+		 * So each of the vectors below has first the index = 
+		 * (mesh * (total num of reac&diffterms) + reac&diff index )
+		 * used in the transmitted vector, 
+		 * and then the index (meshIndex or poolIndex) of the target.
 		 */
 		vector< pair< unsigned int, unsigned int > > targetMols_;
 		vector< pair< unsigned int, unsigned int > > targetMeshIndices_;

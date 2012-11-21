@@ -116,6 +116,22 @@ class CylMesh: public ChemMesh
 
 		unsigned int getStencil( unsigned int meshIndex,
 			const double** entry, const unsigned int** colIndex ) const;
+		
+		//////////////////////////////////////////////////////////////////
+		// inherited virtual funcs for Boundary
+		//////////////////////////////////////////////////////////////////
+		
+		void matchMeshEntries( const ChemMesh* other, 
+			vector< pair< unsigned int, unsigned int > > & ret ) const;
+
+		double nearest( double x, double y, double z, 
+						unsigned int& index ) const;
+	
+		void indexToSpace( unsigned int index, 
+						double& x, double& y, double& z ) const;
+		
+
+		//////////////////////////////////////////////////////////////////
 
 		static const Cinfo* initCinfo();
 
