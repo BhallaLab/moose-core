@@ -276,22 +276,46 @@ void StoichPools::addJunction( const Eref& e, const Qinfo* q, Id other )
 	// Set up message
 	innerConnectJunctions( e.id(), other, otherSP );
 
-	// Work out reaction terms
+	// Work out reaction terms.
+	//
+	// This is an index into the rates_ array on the parent Stoich.
 	vector< unsigned int > reacTerms;
-	this->vBuildReacTerms( reacTerms, other );
-	junctions_.back().setReacTerms( reacTerms );
-	otherSP->vBuildReacTerms( reacTerms, e.id() );
-	otherSP->junctions_.back().setReacTerms( reacTerms );
+
+	// This identifies the poolIndex for each reacTermIndex.
+	// First of pair is reacTerm index, second is poolIndex.
+	vector< pair< unsigned int, unsigned int > > reacPoolIndex;
+	this->vBuildReacTerms( reacTerms, reacPoolIndex, other );
+	junctions_.back().setReacTerms( reacTerms, reacPoolIndex );
+
+	reacTerms.resize( 0 );
+	reacPoolIndex.resize( 0 );
+	otherSP->vBuildReacTerms( reacTerms, reacPoolIndex, e.id() );
+	otherSP->junctions_.back().setReacTerms( reacTerms, reacPoolIndex );
 
 	// Work out diffusion terms
+	// Here the vectors are just the PoolIndices (as used within the Stoichs
+	// to identify pools) for diffusing molecules. These map one-to-one
+	// with each other and with data transfer terms.
 	vector< unsigned int > selfDiffPoolIndex;
 	vector< unsigned int > otherDiffPoolIndex;
-	//findDiffusionTerms( otherSP, selfDiffPoolIndex, otherDiffPoolIndex );
+	findDiffusionTerms( otherSP, selfDiffPoolIndex, otherDiffPoolIndex );
+	junctions_.back().setDiffTerms( selfDiffPoolIndex );
+	otherSP->junctions_.back().setDiffTerms( otherDiffPoolIndex );
 
-	// Work out matching meshEntries.
-	// matchMeshEntries( otherSP );
-
-	// Set up the targetMols and targetMeshIndices vectors.
+	// Work out matching meshEntries. Virtual func. Voxelized solvers 
+	// refer to their ChemMesh. Non-voxelized ones always have a single
+	// meshEntry, and hold a dummy ChemMesh to do this calculation.
+	// In these vectors the first entry of the pair is the index in the 
+	// arriving // vector of rates modulo # of reacs, and the second is 
+	// the target meshIndex.
+	vector< unsigned int > selfMeshIndex; 
+	vector< unsigned int > otherMeshIndex; 
+	vector< pair< unsigned int, unsigned int > > selfMeshMap; 
+	vector< pair< unsigned int, unsigned int > > otherMeshMap; 
+	this->matchMeshEntries( otherSP, selfMeshIndex, selfMeshMap,
+					otherMeshIndex, otherMeshMap );
+	junctions_.back().setMeshIndex( selfMeshIndex, selfMeshMap );
+	otherSP->junctions_.back().setMeshIndex( otherMeshIndex, otherMeshMap );
 }
 
 

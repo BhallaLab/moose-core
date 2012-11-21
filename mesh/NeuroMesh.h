@@ -143,6 +143,20 @@ class NeuroMesh: public ChemMesh
 			const double** entry, const unsigned int** colIndex ) const;
 
 		//////////////////////////////////////////////////////////////////
+		// inherited virtual funcs for Boundary
+		//////////////////////////////////////////////////////////////////
+		
+		void matchMeshEntries( const ChemMesh* other, 
+			vector< pair< unsigned int, unsigned int > > & ret ) const;
+
+		double nearest( double x, double y, double z, 
+						unsigned int& index ) const;
+	
+		void indexToSpace( unsigned int index, 
+						double& x, double& y, double& z ) const;
+		
+
+		//////////////////////////////////////////////////////////////////
 		// Utility functions for building tree.
 		/// This shuffles the nodes_ vector to put soma node at the start
 		Id putSomaAtStart( Id origSoma, unsigned int maxDiaIndex );

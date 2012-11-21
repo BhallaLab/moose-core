@@ -481,6 +481,7 @@ void GslStoich::vDropJunction( const Eref& e, const Qinfo* q, Id other )
 }
 
 void GslStoich::vBuildReacTerms( vector< unsigned int >& reacTerms, 
+	vector< pair< unsigned int, unsigned int > >& reacPoolIndex,
 				Id other ) const
 {
 		;
@@ -489,6 +490,24 @@ void GslStoich::vBuildReacTerms( vector< unsigned int >& reacTerms,
 void GslStoich::vBuildDiffTerms( map< string, Id>& diffTerms ) const
 {
 		;
+}
+
+// Virtual func figures out which meshEntries line up, passes the job to
+// the relevant ChemCompt.
+typedef vector< pair< unsigned int, unsigned int > > VPII;
+void GslStoich::matchMeshEntries( 
+	const StoichPools* other,
+	vector< unsigned int >& selfMeshIndex, VPII& selfMeshMap, 
+	vector< unsigned int >& otherMeshIndex, VPII& otherMeshMap
+	) const
+{
+	vector< pair< unsigned int, unsigned int > > meshMatch;
+	diffusionMesh_->matchMeshEntries( other->compartmentMesh(), meshMatch );
+}
+
+const ChemMesh* GslStoich::compartmentMesh() const
+{
+	return diffusionMesh_;
 }
 ///////////////////////////////////////////////////
 // Reinit and process.

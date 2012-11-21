@@ -805,3 +805,23 @@ const vector< NeuroNode >& NeuroMesh::getNodes() const
 {
 	return nodes_;
 }
+
+//////////////////////////////////////////////////////////////////
+// Utility function for junctions
+//////////////////////////////////////////////////////////////////
+
+void NeuroMesh::matchMeshEntries( const ChemMesh* other,
+	   vector< pair< unsigned int, unsigned int > >& ret ) const
+{
+}
+
+void NeuroMesh::indexToSpace( unsigned int index,
+			double& x, double& y, double& z ) const 
+{
+}
+
+double NeuroMesh::nearest( double x, double y, double z, 
+				unsigned int& index ) const
+{
+	return 0;
+}

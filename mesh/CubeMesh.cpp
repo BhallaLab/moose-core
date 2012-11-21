@@ -17,6 +17,7 @@
 #include "CubeMesh.h"
 
 static const unsigned int EMPTY = ~0;
+typedef pair< unsigned int, unsigned int > PII;
 
 const Cinfo* CubeMesh::initCinfo()
 {
@@ -980,4 +981,140 @@ unsigned int CubeMesh::getStencil( unsigned int meshIndex,
 		// This approach lets us pick out any arbitrary boundary by defining
 		// which kind of 'row' applies at each mesh entry.
 	// return rowSelect_[row]( entry, colIndex );
+}
+
+//////////////////////////////////////////////////////////////////
+
+double distance( double x, double y, double z )
+{
+	return sqrt( x * x + y * y + z * z );
+}
+
+void flipRet( vector< pair< unsigned int, unsigned int > >& ret )
+{
+   vector< pair< unsigned int, unsigned int > >::iterator i;
+   for ( i = ret.begin(); i != ret.end(); ++i ) {
+		  unsigned int temp = i->first;
+		  i->first = i->second;
+		  i->second = temp;
+   }
+}
+
+void CubeMesh::matchSameSpacing( const CubeMesh* other,
+	   vector< pair< unsigned int, unsigned int > >& ret ) const
+{
+	if ( numDims() == 1 ) {
+		unsigned int index;
+		double dist = 
+			other->nearest( x0_ + dx_/2.0, y0_ + dy_/2.0, z0_ + dz_/2.0,
+				index );
+		// The meshes should not overlap, nor should they be apart.
+		if ( dist > dx_ * 0.95 && dist < dx_ * sqrt( 1.25 ) )
+			ret.push_back( PII( 0, index ) );
+	} else if ( other->numDims() == 1 ) {
+		other->matchSameSpacing( this, ret );
+		flipRet( ret );
+		return;
+	} 
+	// From here on we have multiple dims on both meshes, so we need to
+	// scan through the surface 
+	cout << "Multiple dims not yet implemented\n";
+}
+
+// For now: Just brute force through the surface list.
+// Surface list applies only if 2 or 3 D.
+void CubeMesh::matchMeshEntries( const ChemMesh* other,
+	   vector< pair< unsigned int, unsigned int > >& ret ) const
+{
+	const CubeMesh* cm = dynamic_cast< const CubeMesh* >( other );
+
+	if ( cm ) {
+		if ( compareMeshSpacing( cm ) == 0 ) { // Equal spacing.
+				matchSameSpacing( cm, ret );
+		} else if ( compareMeshSpacing( cm ) == -1 ) { // self is finer
+				cout << "Warning:CubeMesh::matchMeshEntries: cannot yet handle unequal meshes\n";
+		} else { // other is finer.
+				cout << "Warning:CubeMesh::matchMeshEntries: cannot yet handle unequal meshes\n";
+		}
+	}
+}
+
+unsigned int CubeMesh::numDims() const
+{
+	return ( ( nx_ > 1 ) + ( ny_ > 1 ) + ( nz_ > 1 ) );
+}
+
+
+void CubeMesh::indexToSpace( unsigned int index,
+			double& x, double& y, double& z ) const 
+{
+	assert ( index < nx_ * ny_ * nz_ );
+
+	// index = m2s_[index];
+	unsigned int ix = index % nx_;
+	index /= nx_;
+	unsigned int iy = index % ny_;
+	index /= ny_;
+	unsigned int iz = index % nz_;
+
+	x = x0_ + ix * dx_ + dx_ * 0.5;
+	y = y0_ + iy * dy_ + dy_ * 0.5;
+	z = z0_ + iz * dz_ + dz_ * 0.5;
+}
+
+double CubeMesh::nearest( double x, double y, double z, 
+				unsigned int& index ) const
+{
+	if ( x > x0_ && x < x1_ && y > y0_ && y < y1_ && z > z0_ && z < z1_ )
+	{
+		unsigned int ix = ( x - x0_ ) / dx_;
+		unsigned int iy = ( y - y0_ ) / dy_;
+		unsigned int iz = ( z - z0_ ) / dz_;
+		index = ( iz * ny_ + iy ) * nx_ + ix;
+		/*
+		unsigned int innerIndex = s2m_( index );
+		if ( innerIndex != ~0 ) { // Inside filled volume
+			index = innerIndex;
+			double tx = x0_ + ix * dx_ + dx_ * 0.5;
+			double ty = y0_ + iy * dy_ + dy_ * 0.5;
+			double tz = z0_ + iz * dz_ + dz_ * 0.5;
+			return distance( x - tx, y - ty, z - tz );
+		} else { // outside filled vol but inside cube zone.
+		}
+		 */
+	}
+	// Brute force it. Look at entire surface for nearest point.
+	double rmin = 1e99;
+	for ( vector< unsigned int >::const_iterator i = surface_.begin(); 
+					i != surface_.end(); ++i )
+   	{
+		double tx, ty, tz;
+		indexToSpace( *i, tx, ty, tz );
+		double r = distance( tx - x, ty - y, tz - z );
+		if ( rmin > r ) {
+				rmin = r;
+				index = *i;
+		}
+	}
+	return rmin;
+}
+
+int CubeMesh::compareMeshSpacing( const CubeMesh* other ) const
+{
+	if ( doubleApprox( dx_, other->dx_ ) &&
+		doubleApprox( dy_, other->dy_ ) &&
+		doubleApprox( dz_, other->dz_ ) )
+			return 0;
+	if ( dx_ <= other->dx_ * 1.0000001 && 
+		dy_ <= other->dy_ * 1.0000001 && 
+		dz_ <= other->dz_ * 1.0000001 )
+		return -1;
+
+	if ( dx_ >= other->dx_ * 1.0000001 && 
+		dy_ >= other->dy_ * 1.0000001 && 
+		dz_ >= other->dz_ * 1.0000001 )
+		return 1;
+
+	cout << "Warning: CubeMesh::compareMeshSpacing: inconsistent spacing\n";
+	return 0;
 }

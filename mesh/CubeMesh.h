@@ -138,6 +138,40 @@ class CubeMesh: public ChemMesh
 
 		bool isInsideCuboid( double x, double y, double z ) const;
 		bool isInsideSpheroid( double x, double y, double z ) const;
+
+		//////////////////////////////////////////////////////////////////
+		//  Stuff for junctions
+		//////////////////////////////////////////////////////////////////
+
+		/**
+		 * Key virtual function for generating a map between facing
+		 * surfaces on a CubeMesh and another ChemMesh
+		 */
+		void matchMeshEntries( const ChemMesh* other,
+			vector< pair< unsigned int, unsigned int > >& ret ) const;
+
+		/// Utility function for special case in matchMeshEntries.
+		void matchSameSpacing( const CubeMesh* other,
+			vector< pair< unsigned int, unsigned int > >& ret ) const;
+
+		/// Utility function for returning # of dimensions in mesh
+		unsigned int numDims() const;
+		
+		/// Converts the integer meshIndex to spatial coords.
+		void indexToSpace( unsigned int index, 
+						double& x, double& y, double& z ) const;
+
+		/**
+		 * Virtual function to return the distance and index of nearest
+		 * meshEntry. Places entry at centre of voxel.
+		 */
+		double nearest( double x, double y, double z, unsigned int& index )
+			   	const;
+		
+		/// Return 0 if spacing same, -1 if self smaller, +1 if self bigger
+		int compareMeshSpacing( const CubeMesh* other ) const;
+
+
 		//////////////////////////////////////////////////////////////////
 		//  Stuff for diffusion
 		//////////////////////////////////////////////////////////////////
@@ -212,6 +246,12 @@ class CubeMesh: public ChemMesh
 		 * outside the included volume of the mesh, returns ~0.
 		 */
 		vector< unsigned int > s2m_;
+
+		/**
+		 * Vector of spatial meshIndices comprising surface of volume in 
+		 * CubeMesh.
+		 */
+		vector< unsigned int > surface_;
 };
 
 #endif	// _CUBE_MESH_H
