@@ -118,6 +118,15 @@ class ChemMesh
 		void setNumBoundary( unsigned int num );
 		unsigned int getNumBoundary( ) const;
 
+		virtual void matchMeshEntries( const ChemMesh* other, 
+			vector< pair< unsigned int, unsigned int > > & ret ) const = 0;
+
+		virtual double nearest( double x, double y, double z, 
+						unsigned int& index ) const = 0;
+	
+		virtual void indexToSpace( unsigned int index, 
+						double& x, double& y, double& z ) const = 0;
+
 		//////////////////////////////////////////////////////////////////
 		// FieldElement assignment stuff for MeshEntries
 		//////////////////////////////////////////////////////////////////

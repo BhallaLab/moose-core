@@ -19723,4 +19723,78 @@ Checkin 4281.
 ==========================================================================
 19 Nov.
 Incrementally building in the structure for setting up the junctions based on
-the object structure of the simulation. Long way to go yet.
+the object structure of the simulation. Long way to go yet. Checkin 4282.
+Starting on unit tests just for the junction setup. Fails already.
+Fixed that. Looks like junctions are now OK.
+
+Further elaboration of junction setup in StoichPools:;addJunction.
+Skeleton code laid out, significant work to do to fill in.
+==========================================================================
+20 Nov.
+Really stuck on how to build the junction mesh entry list. Want to avoid
+N^2 scan of all possible positions.
+Use cases:
+	- NeuroMesh and SpineMesh.	// neuronal model
+		Sort by axis with largest variation, for both meshes
+		March up axis on each mesh, doing a match.
+	- NeuroMesh and CubeMesh	// intra to extracellular diffusion
+		Make list of NeuroMesh entries within CubeMesh
+		Use coord lookup trick to find (s2m)
+	- SpineMesh and CubeMesh	// intraspine to extracellular diffusion
+		Same as above.
+	- CubeMesh and CubeMesh		// General case.
+		Compute line between centroids
+		Pick axis.
+		Confirm no overlap
+		Assign matching plane
+		
+
+Tackle CubeMesh in all its horribleness first.
+New functions:
+	double nearest( x, y, z, unsigned int& index )
+	returns the distance from the specified point xyz to the nearest point
+	in the CubeMesh. The meshIndex of the nearest voxel is passed back.
+	Assumption: the mesh is (nearly) cubical. Won't break otherwise, but
+	the distance isn't so useful if you're looking to find junctions.
+	Finds this in 3D by using the standard grid subdivision and estimating
+	resultant coords. If within, returns directly. If outside, finds the
+	face where the line from xyz to middle crosses, and then just scans
+	through that section of the 'surface' vector to locate the point.
+	In 2D it is similar.
+	Speedup if the 'fullmesh' flag is set. Then it just uses the crossing
+	point on the face to find the nearest.
+	In 1D it just returns centre-to-centre distance.
+
+	bool inside( x, y, z )
+		Easy, the s2m function does this.
+
+	unsigned int numDims() const
+
+	int compareMeshSpacing( const ChemMesh* other )
+		-1: me smaller. 0: equal. 1: other bigger.
+
+
+Got the reference code in for CubeMesh. Compiles, fails unit tests.
+==========================================================================
+21 Nov.
+Cleaner idea for finding contacting surfaces: 
+1. Define the intersecting cuboid, if any, between the respective CubeMeshes.
+2. Allocate entire volume with uint voxels at the coarser mesh size. 
+3. Scan through the coarser mesh surface, putting meshIndices into the
+	relevant locations of the intersecting cuboid
+4. Scan through the finer mesh surface, looking up locations on intersecting
+	cuboid. If occupied then add pair to list.
+
+Cost: linear in number of surface voxels. Memory will be steeper but not
+too bad either.
+
+Issues:
+	- What if the meshes intersect, not just abut?
+	- How to deal with cuboid centre offset? Should I shift positions
+		toward each other on the centroid? Or just define a generous
+		intersection radius?
+	- Extend to neurons in a volume. Specially for surface emission.
+
+For what it's worth, compiled and cleared unit and regression tests
+for previous implementation. It just bypasses the actual mesh handling at
+this point.

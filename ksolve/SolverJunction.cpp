@@ -168,9 +168,11 @@ void SolverJunction::incrementTargets(
 	}
 }
 
-void SolverJunction::setReacTerms( const vector< unsigned int >& reacTerms )
+void SolverJunction::setReacTerms( const vector< unsigned int >& reacTerms,
+	const vector< pair< unsigned int, unsigned int > >& poolMap )
 {
 	reacTerms_ = reacTerms;
+	targetMols_ = poolMap;
 }
 
 void SolverJunction::setDiffTerms( const vector< unsigned int >& diffTerms )
@@ -178,18 +180,9 @@ void SolverJunction::setDiffTerms( const vector< unsigned int >& diffTerms )
 	diffTerms_ = diffTerms;
 }
 
-void SolverJunction::setMeshIndex( const vector< unsigned int >& meshIndex )
+void SolverJunction::setMeshIndex( const vector< unsigned int >& meshIndex,
+	const vector< pair< unsigned int, unsigned int > >& meshMap )
 {
 	meshIndex_ = meshIndex;
-}
-
-void SolverJunction::setTargetMols( 
-			const vector< pair< unsigned int, unsigned int > >& val )
-{
-	targetMols_ = val;
-}
-void SolverJunction::setTargetMeshIndices( 
-			const vector< pair< unsigned int, unsigned int > >& val )
-{
-	targetMeshIndices_ = val;
+	targetMeshIndices_ = meshMap;
 }

@@ -361,8 +361,67 @@ void testGslStoich()
 	cout << "." << flush;
 }
 
+void testJunctionSetup()
+{
+	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< int > dims( 1, 1 );
+	Id model = makeInterMeshReac( s );
+	// Create solvers for meshA and meshB.
+	Id meshA( "/model/meshA/mesh" );
+	assert ( meshA != Id() );
+	Id meshB( "/model/meshB/mesh" );
+	assert ( meshB != Id() );
+	Id stoichA = s->doCreate( "GslStoich", model, "stoichA", dims );
+	assert ( stoichA != Id() );
+	Id stoichCoreA = 
+			s->doCreate( "StoichCore", stoichA, "stoichCore", dims );
+	assert ( stoichCoreA != Id() );
+	// Note that this funciton magically attaches the StoichCore to the
+	// Stoich as well. Unpleasant side-effect.
+	Field< string >::set( stoichCoreA, "path", "/model/meshA/##" );
+	Field< Id >::set( stoichA, "compartment", Id( "/model/meshA" ) );
+	Field< string >::set( stoichA, "method", "rk5" );
+
+
+
+	Id stoichB = s->doCreate( "GslStoich", model, "stoichB", dims );
+	assert ( stoichB != Id() );
+	Id stoichCoreB = 
+			s->doCreate( "StoichCore", stoichB, "stoichCore", dims );
+	assert ( stoichCoreB != Id() );
+	Field< string >::set( stoichCoreB, "path", "/model/meshB/##" );
+	Field< Id >::set( stoichB, "compartment", Id( "/model/meshB" ) );
+	Field< string >::set( stoichB, "method", "rk5" );
+
+	MsgId mid = s->doAddMsg( "Single", meshA, "remesh", stoichA, 
+					"remesh" );
+	assert( mid != Msg::bad );
+	mid = s->doAddMsg( "Single", meshB, "remesh", stoichB, "remesh" );
+	assert( mid != Msg::bad );
+
+	assert( Field< unsigned int >::get( stoichA, "num_junction" ) == 0 );
+	assert( Field< unsigned int >::get( stoichB, "num_junction" ) == 0 );
+	SetGet1<Id>::set( stoichA, "addJunction", stoichB );
+	assert( Field< unsigned int >::get( stoichA, "num_junction" ) == 1 );
+	assert( Field< unsigned int >::get( stoichB, "num_junction" ) == 1 );
+
+	Id junctionA( "/model/stoichA/junction" );
+	Id junctionB( "/model/stoichB/junction" );
+	assert ( junctionA != Id() );
+	assert ( junctionB != Id() );
+
+	vector< Id > tgts;
+	junctionA.element()->getNeighbours( tgts, updateJunctionFinfo() );
+	assert( tgts.size() == 1 );
+	assert( tgts[0] == junctionB );
+
+	s->doDelete( model );
+	cout << "." << flush;
+}
+
 void testKineticSolvers()
 {
 	testInterMeshReac();
 	testGslStoich();
+	testJunctionSetup();
 }

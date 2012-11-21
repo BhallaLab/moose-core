@@ -696,3 +696,23 @@ unsigned int CylMesh::getStencil( unsigned int meshIndex,
 	*colIndex = middleIndex;
 	return 2;
 }
+
+//////////////////////////////////////////////////////////////////
+// Utility function for junctions
+//////////////////////////////////////////////////////////////////
+
+void CylMesh::matchMeshEntries( const ChemMesh* other,
+	   vector< pair< unsigned int, unsigned int > >& ret ) const
+{
+}
+
+void CylMesh::indexToSpace( unsigned int index,
+			double& x, double& y, double& z ) const 
+{
+}
+
+double CylMesh::nearest( double x, double y, double z, 
+				unsigned int& index ) const
+{
+	return 0;
+}
