@@ -1,31 +1,11 @@
-# /*******************************************************************
-#  * File:             pymoose.py
-#  * Description:      This is a wrapper over moose.py and apart from
-#  *                   exposing the functions thereof, it adds some 
-#  *                   utility functions.
-#  * Author1:          Subhasis Ray
-#  * E-mail1:          ray dot subhasis at gmail dot com
-#  * Created:          2008-10-12 22:50:06
-#  * Author2:          Aditya Gilra
-#  * E-mail2:          aditya underscore gilra at yahoo dot com
-#  ********************************************************************/
-# /**********************************************************************
-# ** This program is part of 'MOOSE', the
-# ** Messaging Object Oriented Simulation Environment,
-# ** also known as GENESIS 3 base code.
-# **           copyright (C) 2003-2008 Upinder S. Bhalla. and NCBS
-# ** It is made available under the terms of the
-# ** GNU General Public License version 2
-# ** See the file COPYING.LIB for the full notice.
-# **********************************************************************/
-import types
-import parser
-import token
-import symbol
-import string
-import os
-import math
-import moose as moose__
+#!/usr/bin/env python
+"""Utility functions for MOOSE
+"""
+__author__ = 'Subhasis Ray and Aditya Gilra, NCBS'
+__date__ = '21 November 2012'
+
+import types, parser, token, symbol, string, os, math
+import _moose
 
 ## for Ca Pool
 #FARADAY = 96154.0 # Coulombs # from cadecay.mod : 1/(2*96154.0) = 5.2e-6 which is the Book of Genesis / readcell value
@@ -91,7 +71,7 @@ def getfields(moose_object):
     return fields
 
 def findAllBut(moose_wildcard, stringToExclude):
-    allValidObjects = moose__.wildcardFind(moose_wildcard)
+    allValidObjects = _moose.wildcardFind(moose_wildcard)
     refinedList = []
     for validObject in allValidObjects:
         if validObject.path.find(stringToExclude) == -1:
@@ -157,17 +137,17 @@ def apply_to_tree(moose_wildcard, python_filter=None, value=None):
     """
     if not isinstance(moose_wildcard, str):
         raise TypeError('moose_wildcard must be a string.')
-    id_list = moose__.context.getWildcardList(moose_wildcard, True)
+    id_list = _moose.getWildcardList(moose_wildcard, True)
     if isinstance(python_filter, types.LambdaType):
         id_list = [moose_id for moose_id in id_list if python_filter(moose_id)]
     elif isinstance(python_filter, str):
-        id_list = [moose_id for moose_id in id_list if hasattr(eval('moose__.%s(moose_id)' % (moose__.Neutral(moose_id).class_)), python_filter)]
+        id_list = [moose_id for moose_id in id_list if hasattr(eval('_moose.%s(moose_id)' % (_moose.Neutral(moose_id).class_)), python_filter)]
     else:
         pass
     if isinstance(value, types.LambdaType):
         if isinstance(python_filter, str):
             for moose_id in id_list:
-                moose_obj = eval('moose__.%s(moose_id)' % (moose__.Neutral(moose_id).class_))
+                moose_obj = eval('_moose.%s(moose_id)' % (_moose.Neutral(moose_id).class_))
                 setattr(moose_obj, python_filter, value(moose_id))
         else:
             for moose_id in id_list:
@@ -175,7 +155,7 @@ def apply_to_tree(moose_wildcard, python_filter=None, value=None):
     else:
         if isinstance(python_filter, str):
             for moose_id in id_list:
-                moose_obj = eval('moose__.%s(moose_id)' % (moose__.Neutral(moose_id).class_))
+                moose_obj = eval('_moose.%s(moose_id)' % (_moose.Neutral(moose_id).class_))
                 setattr(moose_obj, python_filter, value)
         else:
             raise TypeError('Second argument must be a string specifying a field to assign to when third argument is a value')
@@ -195,7 +175,7 @@ def tweak_field(moose_wildcard, field, assignment_string):
     """    
     if not isinstance(moose_wildcard, str):
         raise TypeError('moose_wildcard must be a string.')
-    id_list = moose__.context.getWildcardList(moose_wildcard, True)
+    id_list = _moose.getWildcardList(moose_wildcard, True)
     expression = parser.expr(assignment_string)
     expr_list = expression.tolist()
     # This is a hack: I just tried out some possible syntax trees and
@@ -215,9 +195,9 @@ def tweak_field(moose_wildcard, field, assignment_string):
     new_expr = parser.sequence2st(tmp)
     code = new_expr.compile()
     for moose_id in id_list:
-        moose_obj = eval('moose__.%s(moose_id)' % (moose__.Neutral(moose_id).class_))
+        moose_obj = eval('_moose.%s(moose_id)' % (_moose.Neutral(moose_id).class_))
         value = eval(code)
-        moose__.context.setField(moose_id, field, str(value))
+        _moose.setField(moose_id, field, str(value))
         
 # 2012-01-11 19:20:39 (+0530) Subha: checked for compatibility with dh_branch        
 def printtree(root, vchar='|', hchar='__', vcount=1, depth=0, prefix='', is_last=False):
@@ -240,8 +220,8 @@ def printtree(root, vchar='|', hchar='__', vcount=1, depth=0, prefix='', is_last
     is_last - for internal use - should not be explicitly passed.
 
     """
-    if isinstance(root, str) or isinstance(root, moose__.Id):
-        root = moose__.Neutral(root)
+    if isinstance(root, str) or isinstance(root, _moose.ematrix) or isinstance(root, _moose.melement):
+        root = _moose.Neutral(root)
 
     for i in range(vcount):
         print prefix
@@ -258,7 +238,7 @@ def printtree(root, vchar='|', hchar='__', vcount=1, depth=0, prefix='', is_last
 
     print root.name
     
-    children = [ moose__.Neutral(child) for child in root.children ]
+    children = [ _moose.Neutral(child) for child in root.children ]
     for i in range(0, len(children) - 1):
         printtree(children[i],
                   vchar, hchar, vcount, depth + 1, 
@@ -275,7 +255,7 @@ def df_traverse(root, operation, *args):
         return
     operation(root, *args)
     for child in root.children:
-    	childNode = moose__.Neutral(child)
+    	childNode = _moose.Neutral(child)
         df_traverse(childNode, operation, *args)
     root._visited = True
 
@@ -320,49 +300,49 @@ def readcell_scrambled(filename, target):
         stack.extend(children)
         tmpfile.write(data[current])
     tmpfile.close()
-    moose__.context.readCell(tmpfilename, target)
-    return moose__.Cell(target)
+    _moose.readCell(tmpfilename, target)
+    return _moose.Cell(target)
 
 ############# added by Aditya Gilra -- begin ################
 
 def resetSim(simpaths, simdt, plotdt, simmethod='hsolve'):
     """ For each of the MOOSE paths in simpaths, this sets the clocks and finally resets MOOSE.
     If simmethod=='hsolve', it sets up hsolve-s for each Neuron under simpaths, and clocks for hsolve-s too. """
-    moose__.setClock(INITCLOCK, simdt)
-    moose__.setClock(ELECCLOCK, simdt) # The hsolve and ee methods use clock 1
-    moose__.setClock(CHANCLOCK, simdt) # hsolve uses clock 2 for mg_block, nmdachan and others.
-    moose__.setClock(POOLCLOCK, simdt) # Ca/ion pools use clock 3
-    moose__.setClock(STIMCLOCK, simdt) # Ca/ion pools use clock 3
-    moose__.setClock(PLOTCLOCK, plotdt) # for tables
+    _moose.setClock(INITCLOCK, simdt)
+    _moose.setClock(ELECCLOCK, simdt) # The hsolve and ee methods use clock 1
+    _moose.setClock(CHANCLOCK, simdt) # hsolve uses clock 2 for mg_block, nmdachan and others.
+    _moose.setClock(POOLCLOCK, simdt) # Ca/ion pools use clock 3
+    _moose.setClock(STIMCLOCK, simdt) # Ca/ion pools use clock 3
+    _moose.setClock(PLOTCLOCK, plotdt) # for tables
     for simpath in simpaths:
-        moose__.useClock(PLOTCLOCK, simpath+'/##[TYPE=Table]', 'process')
-        moose__.useClock(ELECCLOCK, simpath+'/##[TYPE=PulseGen]', 'process')
-        moose__.useClock(STIMCLOCK, simpath+'/##[TYPE=DiffAmp]', 'process')
-        moose__.useClock(STIMCLOCK, simpath+'/##[TYPE=SpikeGen]', 'process')
-        moose__.useClock(ELECCLOCK, simpath+'/##[TYPE=LeakyIaF]', 'process')
-        moose__.useClock(ELECCLOCK, simpath+'/##[TYPE=IntFire]', 'process')
-        moose__.useClock(CHANCLOCK, simpath+'/##[TYPE=HHChannel2D]', 'process')
-        moose__.useClock(CHANCLOCK, simpath+'/##[TYPE=SynChan]', 'process')
+        _moose.useClock(PLOTCLOCK, simpath+'/##[TYPE=Table]', 'process')
+        _moose.useClock(ELECCLOCK, simpath+'/##[TYPE=PulseGen]', 'process')
+        _moose.useClock(STIMCLOCK, simpath+'/##[TYPE=DiffAmp]', 'process')
+        _moose.useClock(STIMCLOCK, simpath+'/##[TYPE=SpikeGen]', 'process')
+        _moose.useClock(ELECCLOCK, simpath+'/##[TYPE=LeakyIaF]', 'process')
+        _moose.useClock(ELECCLOCK, simpath+'/##[TYPE=IntFire]', 'process')
+        _moose.useClock(CHANCLOCK, simpath+'/##[TYPE=HHChannel2D]', 'process')
+        _moose.useClock(CHANCLOCK, simpath+'/##[TYPE=SynChan]', 'process')
         ## If simmethod is not hsolve, set clocks for the biophysics,
         ## else just put a clock on the hsolve:
         ## hsolve takes care of the clocks for the biophysics
         if 'hsolve' not in simmethod.lower():
-            moose__.useClock(INITCLOCK, simpath+'/##[TYPE=Compartment]', 'init')
-            moose__.useClock(ELECCLOCK, simpath+'/##[TYPE=Compartment]', 'process')
-            moose__.useClock(CHANCLOCK, simpath+'/##[TYPE=HHChannel]', 'process')
-            moose__.useClock(POOLCLOCK, simpath+'/##[TYPE=CaConc]', 'process')
+            _moose.useClock(INITCLOCK, simpath+'/##[TYPE=Compartment]', 'init')
+            _moose.useClock(ELECCLOCK, simpath+'/##[TYPE=Compartment]', 'process')
+            _moose.useClock(CHANCLOCK, simpath+'/##[TYPE=HHChannel]', 'process')
+            _moose.useClock(POOLCLOCK, simpath+'/##[TYPE=CaConc]', 'process')
         else: # use hsolve, one hsolve for each Neuron
-            element = moose__.Neutral(simpath)
+            element = _moose.Neutral(simpath)
             for childid in element.children: 
-                childobj = moose__.Neutral(childid)
+                childobj = _moose.Neutral(childid)
                 classname = childobj.class_
                 if classname in ['Neuron']:
                     neuronpath = childobj.path
-                    h = moose__.HSolve( neuronpath+'/solve' )
+                    h = _moose.HSolve( neuronpath+'/solve' )
                     h.dt = simdt
                     h.target = neuronpath
-                    moose__.useClock(INITCLOCK, h.path, 'process')
-    moose__.reinit()
+                    _moose.useClock(INITCLOCK, h.path, 'process')
+    _moose.reinit()
 
 def setupTable(name, obj, qtyname, tables_path=None):
     """ Sets up a table with 'name' which stores 'qtyname' field from 'obj'.
@@ -370,11 +350,11 @@ def setupTable(name, obj, qtyname, tables_path=None):
     if tables_path is None:
         tables_path = obj.path+'/data'
     ## in case tables_path does not exist, below wrapper will create it
-    moose__.Neutral(tables_path)
-    vmTable = moose__.Table(tables_path+'/'+name)
+    _moose.Neutral(tables_path)
+    vmTable = _moose.Table(tables_path+'/'+name)
     ## stepMode no longer supported, connect to 'input'/'spike' message dest to record Vm/spiktimes
     # vmTable.stepMode = TAB_BUF 
-    moose__.connect( vmTable, "requestData", obj, 'get_'+qtyname)
+    _moose.connect( vmTable, "requestData", obj, 'get_'+qtyname)
     return vmTable
 
 def connectSynapse(context, compartment, synname, gbar_factor):
@@ -384,10 +364,10 @@ def connectSynapse(context, compartment, synname, gbar_factor):
     """
     synapseid = context.deepCopy(context.pathToId('/library/'+synname),\
         context.pathToId(compartment.path),synname)
-    synapse = moose__.SynChan(synapseid)
+    synapse = _moose.SynChan(synapseid)
     synapse.Gbar = synapse.Gbar*gbar_factor
     if synapse.getField('mgblock')=='True': # If NMDA synapse based on mgblock, connect to mgblock
-        mgblock = moose__.Mg_block(synapse.path+'/mgblock')
+        mgblock = _moose.Mg_block(synapse.path+'/mgblock')
         compartment.connect("channel", mgblock, "channel")
     else:
         compartment.connect("channel", synapse, "channel")
@@ -395,10 +375,10 @@ def connectSynapse(context, compartment, synname, gbar_factor):
 
 def printNetTree():
     """ Prints all the cells under /, and recursive prints the cell tree for each cell. """
-    root = moose__.Neutral('/')
+    root = _moose.Neutral('/')
     for id in root.children: # all subelements of 'root'
-        if moose__.Neutral(id).class_ == 'Cell':
-            cell = moose__.Cell(id)
+        if _moose.Neutral(id).class_ == 'Cell':
+            cell = _moose.Cell(id)
             print "-------------------- CELL : ",cell.name," ---------------------------"
             printCellTree(cell)
 
@@ -412,7 +392,7 @@ def printCellTree(cell):
     Thus NMDA synapses' mgblock-s will be left out.
     """
     for compartmentid in cell.children: # compartments
-        comp = moose__.Compartment(compartmentid)
+        comp = _moose.Compartment(compartmentid)
         print "  |-",comp.path, 'l=',comp.length, 'd=',comp.diameter, 'Rm=',comp.Rm, 'Ra=',comp.Ra, 'Cm=',comp.Cm, 'EM=',comp.Em
         #for inmsg in comp.inMessages():
         #    print "    |---", inmsg
@@ -424,21 +404,21 @@ def printRecursiveTree(elementid, level):
     """ Recursive helper function for printCellTree,
     specify depth/'level' to recurse and print subelements under MOOSE 'elementid'. """
     spacefill = '  '*level
-    element = moose__.Neutral(elementid)
+    element = _moose.Neutral(elementid)
     for childid in element.children: 
-        childobj = moose__.Neutral(childid)
+        childobj = _moose.Neutral(childid)
         classname = childobj.class_
         if classname in ['SynChan','KinSynChan']:
-            childobj = moose__.SynChan(childid)
+            childobj = _moose.SynChan(childid)
             print spacefill+"|--", childobj.name, childobj.class_, 'Gbar=',childobj.Gbar
         elif classname in ['HHChannel', 'HHChannel2D']:
-            childobj = moose__.HHChannel(childid)
+            childobj = _moose.HHChannel(childid)
             print spacefill+"|--", childobj.name, childobj.class_, 'Gbar=',childobj.Gbar, 'Ek=',childobj.Ek
         elif classname in ['CaConc']:
-            childobj = moose__.CaConc(childid)
+            childobj = _moose.CaConc(childid)
             print spacefill+"|--", childobj.name, childobj.class_, 'thick=',childobj.thick, 'B=',childobj.B
         elif classname in ['Mg_block']:
-            childobj = moose__.Mg_block(childid)
+            childobj = _moose.Mg_block(childid)
             print spacefill+"|--", childobj.name, childobj.class_, 'CMg',childobj.CMg, 'KMg_A',childobj.KMg_A, 'KMg_B',childobj.KMg_B
         elif classname in ['Table']: # Table gives segfault if printRecursiveTree is called on it
             return # so go no deeper
@@ -462,15 +442,15 @@ def setup_vclamp(compartment, name, delay1, width1, level1, gain=0.5e-5):
     """
     ## If /elec doesn't exists it creates /elec and returns a reference to it.
     ## If it does, it just returns its reference.
-    moose__.Neutral('/elec')
-    pulsegen = moose__.PulseGen('/elec/pulsegen'+name)
-    vclamp = moose__.DiffAmp('/elec/vclamp'+name)
+    _moose.Neutral('/elec')
+    pulsegen = _moose.PulseGen('/elec/pulsegen'+name)
+    vclamp = _moose.DiffAmp('/elec/vclamp'+name)
     vclamp.saturation = 999.0
     vclamp.gain = 1.0
-    lowpass = moose__.RC('/elec/lowpass'+name)
+    lowpass = _moose.RC('/elec/lowpass'+name)
     lowpass.R = 1.0
     lowpass.C = 50e-6 # 50 microseconds tau
-    PID = moose__.PIDController('/elec/PID'+name)
+    PID = _moose.PIDController('/elec/PID'+name)
     PID.gain = gain
     PID.tau_i = 20e-6
     PID.tau_d = 5e-6
@@ -491,7 +471,7 @@ def setup_vclamp(compartment, name, delay1, width1, level1, gain=0.5e-5):
     pulsegen.secondLevel = -70e-3
     pulsegen.secondWidth = 0.0
 
-    vclamp_I = moose__.Table("/elec/vClampITable"+name)
+    vclamp_I = _moose.Table("/elec/vClampITable"+name)
     vclamp_I.stepMode = TAB_BUF #TAB_BUF: table acts as a buffer.
     vclamp_I.connect("inputRequest", PID, "output")
     vclamp_I.useClock(PLOTCLOCK)
@@ -506,9 +486,9 @@ def setup_iclamp(compartment, name, delay1, width1, level1):
     """
     ## If /elec doesn't exists it creates /elec and returns a reference to it.
     ## If it does, it just returns its reference.
-    moose__.Neutral('/elec')
-    pulsegen = moose__.PulseGen('/elec/pulsegen'+name)
-    iclamp = moose__.DiffAmp('/elec/iclamp'+name)
+    _moose.Neutral('/elec')
+    pulsegen = _moose.PulseGen('/elec/pulsegen'+name)
+    iclamp = _moose.DiffAmp('/elec/iclamp'+name)
     iclamp.saturation = 1e6
     iclamp.gain = 1.0
     pulsegen.trigMode = 0 # free run
@@ -528,7 +508,7 @@ def get_matching_children(parent, names):
     with their names containing any of the strings in list 'names'. """
     matchlist = []
     for childID in parent.children:
-        child = moose__.Neutral(childID)
+        child = _moose.Neutral(childID)
         for name in names:
             if name in child.name:
                 matchlist.append(childID)
@@ -545,11 +525,11 @@ def blockChannels(cell, channel_list):
     e.g. 'K' should block all K channels (ensure that you don't use capital K elsewhere in your channel name!)
     """
     for compartmentid in cell.children: # compartments
-        comp = moose__.Compartment(compartmentid)
+        comp = _moose.Compartment(compartmentid)
         for childid in comp.children:
-            child = moose__.Neutral(childid)
+            child = _moose.Neutral(childid)
             if child.class_ in ['HHChannel', 'HHChannel2D']:
-                chan = moose__.HHChannel(childid)
+                chan = _moose.HHChannel(childid)
                 for channame in channel_list:
                     if channame in chan.name:
                         chan.Gbar = 0.0
@@ -562,9 +542,9 @@ def connect_CaConc(compartment_list):
     for compartment in compartment_list:
         caconc = None
         for child in compartment.children:
-            neutralwrap = moose__.Neutral(child)
+            neutralwrap = _moose.Neutral(child)
             if neutralwrap.class_ == 'CaConc':
-                caconc = moose__.CaConc(child)
+                caconc = _moose.CaConc(child)
                 break
         if caconc is not None:
             ## B has to be set for caconc based on thickness of Ca shell and compartment l and dia.
@@ -573,89 +553,93 @@ def connect_CaConc(compartment_list):
             caconc.B = 1 / (2*FARADAY) / \
                 (math.pi*compartment.diameter*compartment.length * caconc.thick)
             for child in compartment.children:
-                neutralwrap = moose__.Neutral(child)
+                neutralwrap = _moose.Neutral(child)
                 if neutralwrap.class_ == 'HHChannel':
-                    channel = moose__.HHChannel(child)
+                    channel = _moose.HHChannel(child)
                     ## If child Mstring 'ion' is present and is Ca, connect channel current to caconc
                     for childid in channel.children:
-                        child = moose__.Neutral(childid)
+                        child = _moose.Neutral(childid)
                         if child.class_=='Mstring' and child.name=='ion':
-                            child = moose__.Mstring(child)
+                            child = _moose.Mstring(child)
                             if child.value in ['Ca','ca']:
-                                moose__.connect(channel,'IkOut',caconc,'current')
+                                _moose.connect(channel,'IkOut',caconc,'current')
                                 print 'Connected IkOut of',channel.path,'to current of',caconc.path
                 if neutralwrap.class_ == 'HHChannel2D':
-                    channel = moose__.HHChannel2D(child)
+                    channel = _moose.HHChannel2D(child)
                     ## If child Mstring 'ionDependency' is present, connect caconc Ca conc to channel
                     for childid in channel.children:
-                        child = moose__.Neutral(childid)
+                        child = _moose.Neutral(childid)
                         if child.class_=='Mstring' and child.name=='ionDependency':
-                            child = moose__.Mstring(child)
+                            child = _moose.Mstring(child)
                             if child.value in ['Ca','ca']:
-                                moose__.connect(caconc,'concOut',channel,'concen')
+                                _moose.connect(caconc,'concOut',channel,'concen')
                                 print 'Connected concOut of',caconc.path,'to concen of',channel.path
 
 ############# added by Aditya Gilra -- end ################
 
 import unittest
 import sys
-from cStringIO import StringIO
+from cStringIO import StringIO as _sio
 
-class TestMooseUtils(unittest.TestCase):
+class _TestMooseUtils(unittest.TestCase):
     def test_printtree(self):
         orig_stdout = sys.stdout
-        sys.stdout = StringIO()
-        s = moose__.Neutral('/cell')
-        soma = moose__.Neutral('%s/soma'% (s.path))
-        d1 = moose__.Neutral('%s/d1'% (soma.path))
-        d2 = moose__.Neutral('%s/d2'% (soma.path))
-        d3 = moose__.Neutral('%s/d3'% (d1.path))
-        d4 = moose__.Neutral('%s/d4'% (d1.path))
-        d5 = moose__.Neutral('%s/d5'% (s.path))
-        printtree(s)        
-        expected = 'cell            \
-                    |               \
-                    |__soma         \
-                    |  |            \
-                    |  |__d1        \
-                    |  |  |         \
-                    |  |  |__d3     \
-                    |  |  |         \
-                    |  |  |__d4     \
-                    |  |            \
-                    |  |__d2        \
-                    |               \
-                    |__d5'
+        sys.stdout = _sio()
+        s = _moose.Neutral('/cell')
+        soma = _moose.Neutral('%s/soma'% (s.path))
+        d1 = _moose.Neutral('%s/d1'% (soma.path))
+        d2 = _moose.Neutral('%s/d2'% (soma.path))
+        d3 = _moose.Neutral('%s/d3'% (d1.path))
+        d4 = _moose.Neutral('%s/d4'% (d1.path))
+        d5 = _moose.Neutral('%s/d5'% (s.path))
+        printtree(s)                
+        expected = """
+cell
+|
+|__ soma
+|  |
+|  |__ d1
+|  |  |
+|  |  |__ d3
+|  |  |
+|  |  |__ d4
+|  |
+|  |__ d2
+|
+|__ d5
+"""
         self.assertEqual(sys.stdout.getvalue(), expected)
-
-        s1 = moose__.Neutral('cell1')
-        c1 = moose__.Neutral('%s/c1' % (s1.path))
-        c2 = moose__.Neutral('%s/c2' % (c1.path))
-        c3 = moose__.Neutral('%s/c3' % (c1.path))
-        c4 = moose__.Neutral('%s/c4' % (c2.path))
-        c5 = moose__.Neutral('%s/c5' % (c3.path))
-        c6 = moose__.Neutral('%s/c6' % (c3.path))
-        c7 = moose__.Neutral('%s/c7' % (c4.path))
-        c8 = moose__.Neutral('%s/c8' % (c5.path))
+        sys.stdout = _sio()
+        s1 = _moose.Neutral('cell1')
+        c1 = _moose.Neutral('%s/c1' % (s1.path))
+        c2 = _moose.Neutral('%s/c2' % (c1.path))
+        c3 = _moose.Neutral('%s/c3' % (c1.path))
+        c4 = _moose.Neutral('%s/c4' % (c2.path))
+        c5 = _moose.Neutral('%s/c5' % (c3.path))
+        c6 = _moose.Neutral('%s/c6' % (c3.path))
+        c7 = _moose.Neutral('%s/c7' % (c4.path))
+        c8 = _moose.Neutral('%s/c8' % (c5.path))
         printtree(s1)
-        expected1 = 'cell1                  \
-                     |                      \
-                     |__c1                  \
-                        |                   \
-                        |__c2               \
-                        |  |                \
-                        |  |__c4            \
-                        |     |             \
-                        |     |__c7         \
-                        |                   \
-                        |__c3               \
-                           |                \
-                           |__c5            \
-                           |  |             \
-                           |  |__c8         \
-                           |                \
-                           |__c6'
-        self.assertEqual(sys.stdout.getvalue(), expected)
+        expected1 = """
+cell1
+|
+|__ c1
+   |
+   |__ c2
+   |  |
+   |  |__ c4
+   |     |
+   |     |__ c7
+   |
+   |__ c3
+      |
+      |__ c5
+      |  |
+      |  |__ c8
+      |
+      |__ c6
+"""
+        self.assertEqual(sys.stdout.getvalue(), expected1)
         
 
 if __name__ == "__main__": # test printtree
