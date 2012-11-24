@@ -992,6 +992,198 @@ void testNeuroMeshBranching()
 	cout << "." << flush;
 }
 
+// Assorted definitions from CubeMesh.cpp
+static const unsigned int EMPTY = ~0;
+static const unsigned int SURFACE = ~1;
+static const unsigned int ABUT = ~2;
+static const unsigned int MULTI = ~3;
+typedef pair< unsigned int, unsigned int > PII;
+extern void setIntersectVoxel( 
+		vector< PII >& intersect, 
+		unsigned int ix, unsigned int iy, unsigned int iz,
+		unsigned int nx, unsigned int ny, unsigned int nz,
+		unsigned int meshIndex );
+
+extern void checkAbut( 
+		vector< PII >& intersect, 
+		unsigned int ix, unsigned int iy, unsigned int iz,
+		unsigned int nx, unsigned int ny, unsigned int nz,
+		unsigned int meshIndex,
+		vector< PII >& ret );
+
+void testIntersectVoxel()
+{
+		/**
+		 * Here is the geometry of the surface. * is surface, - is empty.
+		 *
+		 *			-***-
+		 *			-*---
+		 *			-***-
+		 *
+		 *
+		 *			1***1
+		 *			1*32-
+		 *			1***1
+		 *
+		 * 	1 is ABUT
+		 * 	2 is 2 points
+		 * 	3 is MULTI
+		 *
+		 */
+
+
+	unsigned int nx = 5;
+	unsigned int ny = 3;
+	unsigned int nz = 1;
+	vector< PII > intersect( nx * ny * nz, PII( EMPTY, EMPTY ) );
+	unsigned int meshIndex = 0;
+	setIntersectVoxel( intersect, 1, 0, 0, nx, ny, nz, meshIndex++ );
+	setIntersectVoxel( intersect, 2, 0, 0, nx, ny, nz, meshIndex++ );
+	setIntersectVoxel( intersect, 3, 0, 0, nx, ny, nz, meshIndex++ );
+	setIntersectVoxel( intersect, 1, 1, 0, nx, ny, nz, meshIndex++ );
+	setIntersectVoxel( intersect, 1, 2, 0, nx, ny, nz, meshIndex++ );
+	setIntersectVoxel( intersect, 2, 2, 0, nx, ny, nz, meshIndex++ );
+	setIntersectVoxel( intersect, 3, 2, 0, nx, ny, nz, meshIndex++ );
+
+	assert( intersect[0].first == 0 && intersect[0].second == ABUT );
+	assert( intersect[1].first == 0 && intersect[1].second == SURFACE );
+	assert( intersect[2].first == 1 && intersect[2].second == SURFACE );
+	assert( intersect[3].first == 2 && intersect[3].second == SURFACE );
+	assert( intersect[4].first == 2 && intersect[4].second == ABUT );
+
+	assert( intersect[5].first == 3 && intersect[5].second == ABUT );
+	assert( intersect[6].first == 3 && intersect[6].second == SURFACE );
+	assert( intersect[7].first == 1 && intersect[7].second == MULTI );
+	assert( intersect[8].first == 2 && intersect[8].second == 6 );
+	assert( intersect[9].first == EMPTY && intersect[9].second == EMPTY );
+
+	assert( intersect[10].first == 4 && intersect[10].second == ABUT );
+	assert( intersect[11].first == 4 && intersect[11].second == SURFACE );
+	assert( intersect[12].first == 5 && intersect[12].second == SURFACE );
+	assert( intersect[13].first == 6 && intersect[13].second == SURFACE );
+	assert( intersect[14].first == 6 && intersect[14].second == ABUT );
+
+	// Next: test out checkAbut.
+	vector< PII > ret;
+	checkAbut( intersect, 0, 0, 0, nx, ny, nz, 1234, ret );
+	assert( ret.size() == 1 );
+	assert( ret[0].first == 0 && ret[0].second == 1234 );
+	ret.clear();
+	// The ones below are either SURFACE or EMPTY and should not add points
+	checkAbut( intersect, 1, 0, 0, nx, ny, nz, 1234, ret );
+	checkAbut( intersect, 2, 0, 0, nx, ny, nz, 1234, ret );
+	checkAbut( intersect, 3, 0, 0, nx, ny, nz, 1234, ret );
+	checkAbut( intersect, 1, 1, 0, nx, ny, nz, 1234, ret );
+	checkAbut( intersect, 4, 1, 0, nx, ny, nz, 1234, ret );
+	checkAbut( intersect, 1, 2, 0, nx, ny, nz, 1234, ret );
+	checkAbut( intersect, 2, 2, 0, nx, ny, nz, 1234, ret );
+	checkAbut( intersect, 3, 2, 0, nx, ny, nz, 1234, ret );
+	assert( ret.size() == 0 );
+	checkAbut( intersect, 2, 1, 0, nx, ny, nz, 9999, ret );
+	assert( ret.size() == 3 );
+	assert( ret[0].first == 3 && ret[0].second == 9999 );
+	assert( ret[1].first == 5 && ret[1].second == 9999 );
+	assert( ret[2].first == 1 && ret[1].second == 9999 );
+	ret.clear();
+	checkAbut( intersect, 3, 1, 0, nx, ny, nz, 8888, ret );
+	assert( ret.size() == 2 );
+	assert( ret[0].first == 2 && ret[0].second == 8888 );
+	assert( ret[1].first == 6 && ret[1].second == 8888 );
+	ret.clear();
+	checkAbut( intersect, 4, 0, 0, nx, ny, nz, 7777, ret );
+	checkAbut( intersect, 0, 1, 0, nx, ny, nz, 6666, ret );
+	checkAbut( intersect, 0, 2, 0, nx, ny, nz, 5555, ret );
+	checkAbut( intersect, 4, 2, 0, nx, ny, nz, 4444, ret );
+	assert( ret.size() == 4 );
+	assert( ret[0].first == 2 && ret[0].second == 7777 );
+	assert( ret[1].first == 3 && ret[1].second == 6666 );
+	assert( ret[2].first == 4 && ret[2].second == 5555 );
+	assert( ret[3].first == 6 && ret[3].second == 4444 );
+	
+	cout << "." << flush;
+}
+
+void testCubeMeshFillTwoDimSurface()
+{
+	CubeMesh cm;
+	vector< double > coords( 9, 0.0 );
+	coords[3] = 5.0;
+	coords[4] = 3.0;
+	coords[5] = 1.0;
+	coords[6] = coords[7] = coords[8] = 1.0;
+	cm.setPreserveNumEntries( false );
+	cm.innerSetCoords( coords );
+	assert( cm.numDims() == 2 );
+	const vector< unsigned int >& surface = cm.surface();
+	assert( surface.size() == 12 );
+	for ( unsigned int i = 0; i < 5; ++i ) {
+		assert( surface[i] == i );
+		assert( surface[i + 5] == i + 10 );
+	}
+	assert( surface[10] == 5 );
+	assert( surface[11] == 9 );
+	cout << "." << flush;
+}
+
+void testCubeMeshFillThreeDimSurface()
+{
+	cout << "." << flush;
+}
+
+void testCubeMeshJunctionTwoDimSurface()
+{
+		/**					
+		 * 						8	9
+		 * 10	11	12	13	14	6	7
+		 * 5	6	7	8	9	4	5
+		 * 0	1	2	3	4	2	3
+		 * 						0	1
+		 *
+		 * So, junction should be (4,2),(9,4),(14,6)
+		 */
+	CubeMesh cm1;
+	vector< double > coords( 9, 0.0 );
+	coords[3] = 5.0;
+	coords[4] = 3.0;
+	coords[5] = 1.0;
+	coords[6] = coords[7] = coords[8] = 1.0;
+	cm1.setPreserveNumEntries( false );
+	cm1.innerSetCoords( coords );
+	const vector< unsigned int >& surface = cm1.surface();
+	assert( surface.size() == 12 );
+
+	CubeMesh cm2;
+	coords[0] = 5.0;
+	coords[1] = -1.0;
+	coords[2] = 0.0;
+	coords[3] = 7.0;
+	coords[4] = 4.0;
+	coords[5] = 1.0;
+	coords[6] = coords[7] = coords[8] = 1.0;
+	cm2.setPreserveNumEntries( false );
+	cm2.innerSetCoords( coords );
+	const vector< unsigned int >& surface2 = cm2.surface();
+	assert( surface2.size() == 10 );
+
+	vector< pair< unsigned int, unsigned int > > ret;
+	cm1.matchCubeMeshEntries( &cm2, ret );
+	assert( ret.size() == 3 ); 
+
+	assert( ret[0].first == 4 );
+	assert( ret[0].second == 2 );
+	assert( ret[1].first == 9 );
+	assert( ret[1].second == 4 );
+	assert( ret[2].first == 14 );
+	assert( ret[2].second == 6 );
+	
+	cout << "." << flush;
+}
+
+void testCubeMeshJunctionThreeDimSurface()
+{
+	cout << "." << flush;
+}
+
 void testMesh()
 {
 	testCylBase();
@@ -1004,4 +1196,9 @@ void testMesh()
 	testReMesh();
 	testNeuroMeshLinear();
 	testNeuroMeshBranching();
+	testIntersectVoxel();
+	testCubeMeshFillTwoDimSurface();
+	testCubeMeshFillThreeDimSurface();
+	testCubeMeshJunctionTwoDimSurface();
+	testCubeMeshJunctionThreeDimSurface();
 }

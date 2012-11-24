@@ -17,6 +17,9 @@
 #include "CubeMesh.h"
 
 static const unsigned int EMPTY = ~0;
+static const unsigned int SURFACE = ~1;
+static const unsigned int ABUT = ~2;
+static const unsigned int MULTI = ~3;
 typedef pair< unsigned int, unsigned int > PII;
 
 const Cinfo* CubeMesh::initCinfo()
@@ -252,32 +255,32 @@ void CubeMesh::fillTwoDimSurface()
 			surface_.push_back( j  );
 		for ( unsigned int j = size - ny_; j < size; ++j )
 			surface_.push_back( j  );
-		for ( unsigned int i = 0; i < nz_; i += ny_ )
-			surface_.push_back( i  );
-		for ( unsigned int i = 0; i < nz_; i += ny_ )
-			surface_.push_back( i + ny_ - 1  );
+		for ( unsigned int i = 1; i < nz_ - 1; ++i )
+			surface_.push_back( i * ny_  );
+		for ( unsigned int i = 1; i < nz_ - 1; ++i )
+			surface_.push_back( ny_ - 1 + i * ny_  );
 	} else if ( ny_ == 1 ) {
 		for ( unsigned int k = 0; k < nx_; ++k )
 			surface_.push_back( k  );
 		for ( unsigned int k = size - nx_; k < size; ++k )
 			surface_.push_back( k  );
-		for ( unsigned int i = 0; i < nz_; i += nx_ )
-			surface_.push_back( i  );
-		for ( unsigned int i = 0; i < nz_; i += nx_ )
-			surface_.push_back( i + nx_ - 1  );
+		for ( unsigned int i = 1; i < nz_ - 1; ++i )
+			surface_.push_back( i * nx_  );
+		for ( unsigned int i = 1; i < nz_ - 1; ++i )
+			surface_.push_back( nx_ - 1 + i * nx_  );
 	} else if ( nz_ == 1 ) {
 		for ( unsigned int k = 0; k < nx_; ++k )
 			surface_.push_back( k  );
 		for ( unsigned int k = size - nx_; k < size; ++k )
 			surface_.push_back( k  );
-		for ( unsigned int j = 0; j < ny_; j += nx_ )
-			surface_.push_back( j  );
-		for ( unsigned int j = 0; j < ny_; j += nx_ )
-			surface_.push_back( j + nx_ - 1  );
+		for ( unsigned int j = 1; j < ny_ - 1; ++j )
+			surface_.push_back( j * nx_  );
+		for ( unsigned int j = 1; j < ny_ - 1; ++j )
+			surface_.push_back( j * nx_ + nx_ - 1  );
 	}
 }
 
-void CubeMesh::fillThreeDimSurface()
+void CubeMesh::fillThreeDimSurface() // Need to fix duplicate points.
 {
 	unsigned int size = nx_ * ny_ * nz_;
 	// z == 0 plane
@@ -775,40 +778,6 @@ vector< unsigned int > CubeMesh::getNeighbors( unsigned int fid ) const
 	ret.insert( ret.end(), colIndex, colIndex + n );
 
 	return ret;
-
-	/*
-	
-	assert( fid < m2s_.size() );
-
-	vector< unsigned int > ret;
-	unsigned int spaceIndex = m2s_[fid];
-
-	unsigned int nIndex = neighbor( spaceIndex, 0, 0, 1 );
-	if ( nIndex != EMPTY ) 
-		ret.push_back( nIndex );
-
-	nIndex = neighbor( spaceIndex, 0, 0, -1 );
-	if ( nIndex != EMPTY ) 
-		ret.push_back( nIndex );
-
-	nIndex = neighbor( spaceIndex, 0, 1, 0 );
-	if ( nIndex != EMPTY ) 
-		ret.push_back( nIndex );
-
-	nIndex = neighbor( spaceIndex, 0, -1, 0 );
-	if ( nIndex != EMPTY ) 
-		ret.push_back( nIndex );
-
-	nIndex = neighbor( spaceIndex, 1, 0, 0 );
-	if ( nIndex != EMPTY ) 
-		ret.push_back( nIndex );
-
-	nIndex = neighbor( spaceIndex, -1, 0, 0 );
-	if ( nIndex != EMPTY ) 
-		ret.push_back( nIndex );
-
-	return ret;	
-	*/
 }
 
 /// Virtual function to return diffusion X-section area for each neighbor
@@ -891,28 +860,6 @@ bool CubeMesh::isInsideSpheroid( double x, double y, double z ) const
 	return ( ( rx * rx + ry * ry + rz * rz ) < 1.0 );
 }
 
-/*
-// Doesn't work, need all 3 coords and their dimensions.
-unsigned int buildStencilDim( 
-	unsigned int i, unsigned int ni, double dx,
-	unsigned int stencilSize,
-	vector< double >& entry,
-	vector< unsigned int >& colIndex )
-{
-	if ( i > 0 ) {
-		entry[ stencilSize ] = dx;
-		colIndex[ stencilSize ] = i-1;
-		++stencilSize;
-	}
-	if ( i < ni - 1 ) {
-		entry[ stencilSize ] = dx;
-		colIndex[ stencilSize ] = i+1;
-		++stencilSize;
-	}
-	return stencilSize;
-}
-*/
-
 void CubeMesh::fillSpaceToMeshLookup()
 {
 	static const unsigned int flag = EMPTY;
@@ -994,65 +941,6 @@ void CubeMesh::buildStencil()
 	}
 }
 
-/*
-void CubeMesh::buildStencil()
-{
-	// For now, in the absence of a boundary, just fill in the 
-	// sparse matrix geometrically.
-	//
-	// spaceIndex = ( z * ny + y ) * nx + x
-	unsigned int num = nx_ * ny_ * nz_;
-	vector< double > entry( 6, 0 );
-	vector< unsigned int > colIndex( 6, 0 );
-	
-	m_.setSize( num, num );
-	for( unsigned int k = 0; k < nz_; ++k ) {
-		unsigned int p = 
-			buildStencilDim( k, nz_, dz_, 0, entry, colIndex );
-		for( unsigned int j = 0; j < ny_; ++j ) {
-			unsigned int q =
-				buildStencilDim( j, ny_, dy_, p, entry, colIndex );
-			for( unsigned int i = 0; i < nx_; ++i ) {
-				unsigned int r =
-					buildStencilDim( i, nx_, dx_, q, entry, colIndex );
-				if ( r > 0 ) {
-					unsigned int spaceIndex = ( k * ny_ + j ) * nx_ + i;
-					entry.resize( r );
-					colIndex.resize( r );
-					m_.addRow( spaceIndex, entry, colIndex );
-					entry.resize( 6 );
-					colIndex.resize( 6 );
-				}
-			}
-		}
-	}
-	*/
-		/*
-	for ( unsigned int i = 0; i < stencil_.size(); ++i )
-		delete stencil_[i];
-	stencil_.resize( 0 );
-	Stencil* s = 0;
-	if ( nx_ > 1 && ny_ == 1 && nz_ == 1 )
-		s = new LineStencil( dx_ );
-	else if ( nx_ == 1 && ny_ > 1 && nz_ == 1 )
-		s = new LineStencil( dy_ );
-	else if ( nx_ == 1 && ny_ == 1 && nz_ > 1 )
-		s = new LineStencil( dz_ );
-	else if ( nx_ > 1 && ny_ > 1 && nz_ == 1 )
-		s = new RectangleStencil( dx_, dy_, nx_ );
-	else if ( nx_ > 1 && ny_ == 1 && nz_ > 1 )
-		s = new RectangleStencil( dx_, dz_, nx_ );
-	else if ( nx_ == 1 && ny_ > 1 && nz_ > 1 )
-		s = new RectangleStencil( dy_, dz_, ny_ );
-	else if ( nx_ > 1 && ny_ > 1 && nz_ > 1 )
-		s = new CuboidStencil( dx_, dy_, dz_, nx_, ny_ );
-	else
-		s = new DummyStencil();
-
-	stencil_.push_back( s );
-}
-	*/
-
 //////////////////////////////////////////////////////////////////
 
 // Should really separate 1,2 and 3D meshes.
@@ -1075,6 +963,11 @@ unsigned int CubeMesh::getStencil( unsigned int meshIndex,
 }
 
 //////////////////////////////////////////////////////////////////
+
+const vector< unsigned int >& CubeMesh::surface() const
+{
+	return surface_;
+}
 
 double distance( double x, double y, double z )
 {
@@ -1200,16 +1093,18 @@ int CubeMesh::compareMeshSpacing( const CubeMesh* other ) const
 	if ( doubleApprox( dx_, other->dx_ ) &&
 		doubleApprox( dy_, other->dy_ ) &&
 		doubleApprox( dz_, other->dz_ ) )
-			return 0;
-	if ( dx_ <= other->dx_ * 1.0000001 && 
-		dy_ <= other->dy_ * 1.0000001 && 
-		dz_ <= other->dz_ * 1.0000001 )
-		return -1;
+			return 0; // equal
 
-	if ( dx_ >= other->dx_ * 1.0000001 && 
-		dy_ >= other->dy_ * 1.0000001 && 
-		dz_ >= other->dz_ * 1.0000001 )
-		return 1;
+	if ( dx_ >= other->dx_ && 
+		dy_ >= other->dy_ && 
+		dz_ >= other->dz_ )
+		return 1; // bigger
+
+	if ( dx_ <= other->dx_ &&
+		dy_ <= other->dy_ &&
+		dz_ <= other->dz_ )
+		return -1; // smaller than other.
+
 
 	cout << "Warning: CubeMesh::compareMeshSpacing: inconsistent spacing\n";
 	return 0;
@@ -1238,13 +1133,134 @@ void CubeMesh::defineIntersection( const CubeMesh* other,
 	temp = ( zmin - z0_) / dz_;
 	if ( temp - floor( temp ) > meshSlop )
 		zmin = floor( temp ) * dz_;
+
+	// Provide 1 voxel padding all around.
+	xmin -= dx_;
+	xmax += dx_;
+	ymin -= dy_;
+	ymax += dy_;
+	zmin -= dz_;
+	zmax += dz_;
+}
+
+/**
+ * The intersect pairs are always meshIndex in first, and a flag in 
+ * the second. The flag can be: 
+ * 	EMPTY: empty
+ * 	SURFACE: on the surface
+ * 	ABUT: One place removed from the surface, only one entry
+ * 	MULTI: Multiple surface voxels are only one place removed from here.
+ * 	a number: Special case where 2 surface voxels abut. The number is the
+ * 	meshIndex of the second surface voxel.
+ */
+
+/**
+ * setAbut assigns the voxel flags based on what was already there
+ */
+void setAbut( PII& voxel, unsigned int meshIndex )
+{
+	if ( voxel.second == SURFACE ) // Don't touch surface voxels.
+		return;
+	if ( voxel.second == EMPTY )
+			voxel = PII( meshIndex, ABUT );
+	else if ( voxel.second == ABUT )
+			voxel.second = meshIndex; // set up 2 index case
+	else // 2 or more indices are already here.
+			voxel.second = MULTI;
+}
+
+void setIntersectVoxel( 
+		vector< PII >& intersect, 
+		unsigned int ix, unsigned int iy, unsigned int iz,
+		unsigned int nx, unsigned int ny, unsigned int nz,
+		unsigned int meshIndex )
+{
+	assert( ix < nx && iy < ny && iz < nz );
+	unsigned int index = ( iz * ny + iy ) * nx + ix;
+	assert( index < intersect.size() );
+	intersect[index] = PII( meshIndex, SURFACE );
+	if ( ix + 1 < nx )
+		setAbut( intersect[ (iz*ny + iy) * nx + ix+1 ], meshIndex);
+	if ( ix > 0 )
+		setAbut( intersect[ (iz*ny + iy) * nx + ix-1 ], meshIndex);
+
+	if ( iy + 1 < ny )
+		setAbut( intersect[ ( iz*ny + iy+1 ) * nx + ix ], meshIndex);
+	if ( iy > 0 )
+		setAbut( intersect[ ( iz*ny + iy-1 ) * nx + ix ], meshIndex);
+
+	if ( iz + 1 < nz )
+		setAbut( intersect[ ( (iz+1)*ny + iy ) * nx + ix ], meshIndex);
+	if ( iz > 0 )
+		setAbut( intersect[ ( (iz-1)*ny + iy ) * nx + ix ], meshIndex);
+}
+
+
+/**
+ * checkAbut checks the intersect vector for the current position 
+ * ix, iy, iz, to determine how many diffusion terms to extract. It
+ * then puts each of the extracted terms into the ret vector. There is
+ * a minor efficiency for one and two diffusion terms as they are
+ * encoded within the intersect vector. Higher-order surface alignments
+ * require an in-line scan of neighbouring voxels.
+ */
+void checkAbut( 
+		vector< PII >& intersect, 
+		unsigned int ix, unsigned int iy, unsigned int iz,
+		unsigned int nx, unsigned int ny, unsigned int nz,
+		unsigned int meshIndex,
+		vector< PII >& ret 
+   	)
+{
+	unsigned int index = ( iz * ny + iy ) * nx + ix;
+	unsigned int localFlag = intersect[index].second;
+
+	if ( localFlag == EMPTY || localFlag == SURFACE )
+			return; // Nothing to put into the ret vector
+	if ( localFlag == ABUT ) {
+		ret.push_back( PII( intersect[index].first, meshIndex ) );
+	} else if ( localFlag == MULTI ) { // grind through all 6 cases.
+		if ( ix + 1 < nx ) {
+			index = ( iz * ny + iy ) * nx + ix + 1;
+			if ( intersect[index].second == SURFACE )
+				ret.push_back( PII( intersect[index].first, meshIndex ) );
+		}
+		if ( ix > 0 ) {
+			index = ( iz * ny + iy ) * nx + ix - 1;
+			if ( intersect[index].second == SURFACE )
+				ret.push_back( PII( intersect[index].first, meshIndex ) );
+		}
+		if ( iy + 1 < ny ) {
+			index = ( iz * ny + iy + 1 ) * nx + ix;
+			if ( intersect[index].second == SURFACE )
+				ret.push_back( PII( intersect[index].first, meshIndex ) );
+		}
+		if ( iy > 0 ) {
+			index = ( iz * ny + iy -1 ) * nx + ix;
+			if ( intersect[index].second == SURFACE )
+				ret.push_back( PII( intersect[index].first, meshIndex ) );
+		}
+		if ( iz + 1 < nz ) {
+			index = ( (iz+1) * ny + iy ) * nx + ix;
+			if ( intersect[index].second == SURFACE )
+				ret.push_back( PII( intersect[index].first, meshIndex ) );
+		}
+		if ( iz > 0 ) {
+			index = ( (iz-1) * ny + iy ) * nx + ix;
+			if ( intersect[index].second == SURFACE )
+				ret.push_back( PII( intersect[index].first, meshIndex ) );
+		}
+	} else { // Precisely two abutments, both encoded ahead of time.
+		ret.push_back( PII( intersect[index].first, meshIndex ) );
+		ret.push_back( PII( localFlag, meshIndex ) );
+	}
 }
 
 void CubeMesh::matchCubeMeshEntries( const CubeMesh* other,
 	   vector< pair< unsigned int, unsigned int > >& ret ) const
 {
-	bool selfIsCoarser = ( compareMeshSpacing( other ) == 1 );
-	if ( !selfIsCoarser ) {
+		// Flip meshes if the other grid is coarser.
+	if ( compareMeshSpacing( other ) == -1 ) {
 			other->matchMeshEntries( this, ret );
 			flipRet( ret );
 			return;
@@ -1258,25 +1274,36 @@ void CubeMesh::matchCubeMeshEntries( const CubeMesh* other,
 	unsigned int nx = 0.5 + ( xmax - xmin ) / dx_;
 	unsigned int ny = 0.5 + ( ymax - ymin ) / dy_;
 	unsigned int nz = 0.5 + ( zmax - zmin ) / dz_;
-	vector< unsigned int > intersect( nx * ny * nz, EMPTY );
+	vector< PII > intersect( nx * ny * nz, PII( EMPTY, EMPTY ) );
 	
 	// offset terms for nx, ny, nz from coord system for coarser grid.
-	unsigned int ox = round( ( xmin - x0_ ) / dx_ );
-	unsigned int oy = round( ( ymin - y0_ ) / dy_ );
-	unsigned int oz = round( ( zmin - z0_ ) / dz_ );
+	// Note that these can go negative if the intersect grid goes past
+	// the coarse grid.
+	int ox = round( ( xmin - x0_ ) / dx_ );
+	int oy = round( ( ymin - y0_ ) / dy_ );
+	int oz = round( ( zmin - z0_ ) / dz_ );
 	
 	// Scan through mesh surface using coarser grid, assign cuboid voxels
 	for ( vector< unsigned int >::const_iterator i = surface_.begin();
 					i != surface_.end(); ++i ) {
 		unsigned int index = *i;
-		unsigned int ix = index % nx_ - ox;
-		index /= nx_;
-		unsigned int iy = index % ny_ - oy;
-		index /= ny_;
-		unsigned int iz = index % ny_ - oz;
-		assert( ix < nx && iy < ny && iz < nz );
-		index = ( iz * ny + iy ) * nx + ix;
-		intersect[index] = *i;
+		double x, y, z;
+		indexToSpace( index, x, y, z );
+		if ( x >= xmin && x <= xmax && y >= ymin && y <= ymax && 
+						z >= zmin && z <= zmax ) {
+			int ix = index % nx_ - ox;
+			assert( ix >= 0 );
+			unsigned int uix = ix;
+			index /= nx_;
+			int iy = index % ny_ - oy;
+			assert( iy >= 0 );
+			unsigned int uiy = iy;
+			index /= ny_;
+			int iz = index % nz_ - oz;
+			assert( iz >= 0 );
+			unsigned int uiz = iz;
+			setIntersectVoxel( intersect, uix, uiy, uiz, nx, ny, nz, *i );
+		}
 	}
 	
 	// Scan through finer mesh surface, check for occupied voxels.
@@ -1290,9 +1317,7 @@ void CubeMesh::matchCubeMeshEntries( const CubeMesh* other,
 			unsigned int ix = ( x - xmin ) / dx_;
 			unsigned int iy = ( y - ymin ) / dy_;
 			unsigned int iz = ( z - zmin ) / dz_;
-			unsigned int index = ( iz * ny + iy ) * nx + ix;
-			if ( intersect[index] != EMPTY )
-				ret.push_back( PII( intersect[index], *i ) );
+			checkAbut( intersect, ix, iy, iz, nx, ny, nz, *i, ret );
 		}
 	}
 }
