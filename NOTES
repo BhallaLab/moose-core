@@ -19800,5 +19800,45 @@ for previous implementation. It just bypasses the actual mesh handling at
 this point. Checkin 4287.
 
 Implemented but not tested the new algorithm. For it to work I need also to
-get the surface_ vector set up in the mesh.
+get the surface_ vector set up in the mesh. Did it. Checkin 4288.
 
+Marching through tests. Now at crux point:
+How to deal with the zero volume of intersection cuboid in cases where there
+is perfect abutment.
+1. Make intersection cuboid bigger by 1 voxel each way. This way it will
+	capture all the relevent voxels. Easy.
+2. When the fine-mesh surface scans the intersection cuboid, look for 
+	abutment rather than overlap, on a suitable stencil.
+	Moderately easy. 6x more checks isn't too bad.
+		Or, at time of coarse-mesh filling, could also paint outer
+		abutting voxels and inner abutting voxels with neighbour
+		indices.
+		- Could 'paint' singleton abutters with actual index, and flag
+		others. But then how do we distinguish between surface and
+		abutting voxels?
+		- intersection cuboid could have pair< index, flag >
+			where flag tells if point is surface, inside, or 
+			outside. Could even have an extra case where the flag
+			field too is an index, for 2 outside points.
+		- Note that we can have up to 3 outside points for a 2-d 
+			surface, and 5 for 3-d surfaces.
+			
+	2a. Warn if there is actual overlap.
+
+
+
+Did some systematic unit tests for the functions setIntersectVoxel and 
+	checkAbut, which are at the heart of these calcuations. Clears.
+	Fails the subsequent unit test to actually define the meshEntries at
+	a diffusion junction. But it seems close.
+==========================================================================
+24 Nov
+Cleared the unit test now for generating the mesh junction vector. 
+Next:
+	- Set up code to harvest the mesh junction vector for use in the 
+		solver calculations. See GslStoich::matchMeshEntries.
+		Should perhaps migrate up to the StoichPool
+	- Set up test code for 3D junction.
+
+
+==========================================================================
