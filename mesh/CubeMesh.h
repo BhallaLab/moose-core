@@ -190,6 +190,8 @@ class CubeMesh: public ChemMesh
 		/// that is, puts the surfaces of the cuboid in the vector.
 		void fillThreeDimSurface();
 
+		/// Utility and test function to read surface.
+		const vector< unsigned int >& surface() const;
 		//////////////////////////////////////////////////////////////////
 		//  Stuff for diffusion
 		//////////////////////////////////////////////////////////////////
