@@ -206,7 +206,7 @@ bool validateJunction( Id me, Id other )
 {
 	// Check that types match
 	if ( !other.element()->cinfo()->isA( "StoichPools" ) ) {
-		cout << "Warning: StoichPools::vAddJunction: Other Id '" <<
+		cout << "Warning: StoichPools::validateJunction: Other Id '" <<
 				other.path() << " is not a StoichPool\n";
 		return false;
 	}
@@ -216,8 +216,8 @@ bool validateJunction( Id me, Id other )
 	vector< Id > ret;
 	myJunction.element()->getNeighbours( ret, updateJunctionFinfo() );
 	if ( find( ret.begin(), ret.end(), otherJunction ) != ret.end() ) {
-		cout << "Warning: StoichPools::vAddJunction: junction already" <<
-		" present from " << 
+		cout << "Warning: StoichPools::validateJunction: junction " <<
+		" already present from " << 
 		me.path() << " to " << other.path() << endl;
 		return false;
 	}
