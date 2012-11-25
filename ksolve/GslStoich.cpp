@@ -494,6 +494,7 @@ void GslStoich::vBuildDiffTerms( map< string, Id>& diffTerms ) const
 
 // Virtual func figures out which meshEntries line up, passes the job to
 // the relevant ChemCompt.
+typedef pair< unsigned int, unsigned int > PII;
 typedef vector< pair< unsigned int, unsigned int > > VPII;
 void GslStoich::matchMeshEntries( 
 	const StoichPools* other,
@@ -501,8 +502,41 @@ void GslStoich::matchMeshEntries(
 	vector< unsigned int >& otherMeshIndex, VPII& otherMeshMap
 	) const
 {
+	// This vector is a map of meshIndices in this to other compartment.
 	vector< pair< unsigned int, unsigned int > > meshMatch;
 	diffusionMesh_->matchMeshEntries( other->compartmentMesh(), meshMatch );
+	// First, extract the meshIndices. Need to make sure they are unique.
+	for ( VPII::iterator i = meshMatch.begin(); i != meshMatch.end(); ++i ){
+		selfMeshIndex.push_back( i->first );
+		otherMeshIndex.push_back( i->second );
+	}
+	sort( selfMeshIndex.begin(), selfMeshIndex.end() );
+	vector< unsigned int >::iterator end = 
+			unique( selfMeshIndex.begin(), selfMeshIndex.end() );
+	selfMeshIndex.resize( end - selfMeshIndex.begin() );
+	map< unsigned int, unsigned int > selfMeshLookup;
+	for ( unsigned int i = 0; i < selfMeshIndex.size(); ++i )
+		selfMeshLookup[ selfMeshIndex[i] ] = i;
+
+	sort( otherMeshIndex.begin(), otherMeshIndex.end() );
+	end = unique( otherMeshIndex.begin(), otherMeshIndex.end() );
+	otherMeshIndex.resize( end - otherMeshIndex.begin() );
+	map< unsigned int, unsigned int > otherMeshLookup;
+	for ( unsigned int i = 0; i < otherMeshIndex.size(); ++i )
+		otherMeshLookup[ otherMeshIndex[i] ] = i;
+
+	// Now stuff values into the meshMaps.
+	for ( VPII::iterator i = meshMatch.begin(); i != meshMatch.end(); ++i ){
+		map< unsigned int, unsigned int >::iterator k = 
+				otherMeshLookup.find( i->second );
+		assert( k != otherMeshLookup.end() );
+		selfMeshMap.push_back( PII( k->second, i->first ) );
+
+
+		k =	selfMeshLookup.find( i->first );
+		assert( k != selfMeshLookup.end() );
+		otherMeshMap.push_back( PII( k->second, i->second ) );
+	}
 }
 
 const ChemMesh* GslStoich::compartmentMesh() const
