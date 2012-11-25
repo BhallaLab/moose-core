@@ -19834,6 +19834,8 @@ Did some systematic unit tests for the functions setIntersectVoxel and
 ==========================================================================
 24 Nov
 Cleared the unit test now for generating the mesh junction vector. 
+Checkin 4291.
+
 Next:
 	- Set up code to harvest the mesh junction vector for use in the 
 		solver calculations. See GslStoich::matchMeshEntries.
@@ -19842,3 +19844,14 @@ Next:
 
 
 ==========================================================================
+25 Nov.
+Some documentation for the mess of data structures I'm using to pass data around
+between solvers.
+
+Wrapped up implementation for setting up the mesh-related arrays in the
+SolverJunction. Yet to compile
+Next: Unit test for this setup.
+Next: set up diffusion across junctions
+Next: test diffusion across junctions
+Next: set up reactions across junctions
+Next: test reactions across junctions
