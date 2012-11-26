@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Sat Nov 24 19:10:14 2012 (+0530)
 # Version: 
-# Last-Updated: Mon Nov 26 10:16:09 2012 (+0530)
+# Last-Updated: Mon Nov 26 11:03:49 2012 (+0530)
 #           By: subha
-#     Update #: 47
+#     Update #: 51
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -49,6 +49,14 @@
 """Run all snippets in the current directory.
 
 Spawns new Python process to run the scripts.
+
+NOTE: Some of the snippets use matplotlib to display interactive plots
+(so the excecution will stop unltil you manually close the plot). In
+order to run this non-interactively, you can edit your matplotlibrc
+(usually located in ~/.matplotlib/) and add the following line:
+
+backend: Agg
+
 """
 import os
 import sys
