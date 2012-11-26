@@ -7,9 +7,9 @@
 # Maintainer: 
 # Created: Sat Nov 24 19:10:14 2012 (+0530)
 # Version: 
-# Last-Updated: Sat Nov 24 19:47:51 2012 (+0530)
+# Last-Updated: Mon Nov 26 10:16:09 2012 (+0530)
 #           By: subha
-#     Update #: 37
+#     Update #: 47
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -58,6 +58,8 @@ os.environ['NUMPTHREADS'] = '1'
 os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + ':../../python'
 
 thisfile = os.path.abspath(__file__)
+
+
 def get_snippet_files(directory='.'):
     snippets = set()
     for root, dirs, files in os.walk(directory):
@@ -81,6 +83,18 @@ def run_snippets(files):
             print 'OK'
     
 if __name__ == '__main__':
+    # First change to current directory
+    if len(sys.argv) == 1:
+        os.chdir(os.path.dirname(thisfile))
+    else:
+        try:
+            os.chdir(sys.argv[1])
+        except OSError:
+            print """Usage: %s [directory]\n
+Exceute each python file in directory one by one in separate Python 
+subprocess. If directory is not specified, location of this file is 
+used.""" % (sys.argv[0])
+            sys.exit(1)
     files = get_snippet_files()
     run_snippets(files)
     
