@@ -1,8 +1,8 @@
 /*******************************************************************
  * File:            SbmlWriter.h
  * Description:      
- * Author:          Siji P George
- * E-mail:          siji.suresh@gmail.com
+ * Author:          
+ * E-mail:          
  ********************************************************************/
 /**********************************************************************
 ** This program is part of 'MOOSE', the
@@ -27,7 +27,7 @@ class SbmlWriter
 		int write( string filename, string location );
 #ifdef USE_SBML
 		void createModel( string filename, SBMLDocument& doc ,string target);
-		//bool validateModel( SBMLDocument* sbmlDoc );
+		bool validateModel(SBMLDocument* sbmlDoc );
 		bool writeModel( const SBMLDocument* sbmlDoc, const string& filename );
 		 
 	private:
@@ -40,13 +40,16 @@ class SbmlWriter
 		//~static int targets( Eref object, const string& msg,vector< Eref >& target,const string& type = "" );		
 		//~ static bool isType( Eref object, const string& type );
 		string parmUnit( double rct_order );
-		void getSubPrd(SpeciesReference* spr,vector < Id> subprdId, int index,ostringstream& rate_law,double &rct_order,bool w);
+		//void getSubPrd(SpeciesReference* spr,vector < Id> subprdId, int index,ostringstream& rate_law,double &rct_order,bool w);
+		void getSubPrd(Reaction* rec,string type,string enztype,Id itrRE, int index,ostringstream& rate_law,double &rct_order,bool w);
+		void getModifier(ModifierSpeciesReference* mspr,vector < Id> mod, int index,ostringstream& rate_law,double &rct_order,bool w);
 		//~ double transformUnits( double mvalue,UnitDefinition * ud );
 		//~ string nameString( string str );
 		//~ string changeName( string parent, string child );
 		//~ string idBeginWith( string name );
 		//~ string getParentFunc( Eref p );
-		//~ void printParameters( KineticLaw* kl,string k,double kvalue,string unit );
+		void printParameters( KineticLaw* kl,string k,double kvalue,string unit );
+		string findNotes(Id itr);
 		//~ void printReactants( Reaction* reaction,vector< Eref > sub,ostringstream& rlaw );
 		//~ void printProducts( Reaction* reaction,vector< Eref > cplx,ostringstream& rlaw );
 		//~ void printenzReactants( Reaction* reaction,vector< Eref > sub,ostringstream& rlaw,string parentCompt );
