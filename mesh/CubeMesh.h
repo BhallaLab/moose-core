@@ -64,6 +64,9 @@ class CubeMesh: public ChemMesh
 		void setSpaceToMesh( vector< unsigned int > v );
 		vector< unsigned int > getSpaceToMesh() const;
 
+		void setSurface( vector< unsigned int > v );
+		vector< unsigned int > getSurface() const;
+
 		unsigned int innerGetDimensions() const;
 
 		void setIsToroid( bool v );
@@ -151,7 +154,8 @@ class CubeMesh: public ChemMesh
 			vector< pair< unsigned int, unsigned int > >& ret ) const;
 
 		/**
-		 * Specialization for cube-to-cube mesh matching
+		 * Specialization for cube-to-cube mesh matching. Return vector is
+		 * of pairs of meshIndices (not spatialIndices).
 		 */
 		void matchCubeMeshEntries( const CubeMesh* other,
 			vector< pair< unsigned int, unsigned int > >& ret ) const;

@@ -19849,9 +19849,23 @@ Some documentation for the mess of data structures I'm using to pass data around
 between solvers.
 
 Wrapped up implementation for setting up the mesh-related arrays in the
-SolverJunction. Yet to compile
+SolverJunction. Yet to compile. Now compiled.
 Next: Unit test for this setup.
 Next: set up diffusion across junctions
 Next: test diffusion across junctions
 Next: set up reactions across junctions
 Next: test reactions across junctions
+Next: Return to CubeMesh using a general voxel assignment routine and
+	automatic set up of s2m_, m2s_, surface_ and m_.
+==========================================================================
+28 Nov
+Trying unit test for setup of SolverJunction. Error because the surface_
+vector of the CubeMesh is not being set up properly.
+
+==========================================================================
+30 Nov
+Seems to report spaceIndex rather than meshIndex.
+Worked through, fixed it. Now clears unit tests, though I have lots more to put
+into testKsolve.cpp:testMatchMeshEntries.
+
+==========================================================================

@@ -504,6 +504,8 @@ void GslStoich::matchMeshEntries(
 {
 	// This vector is a map of meshIndices in this to other compartment.
 	vector< pair< unsigned int, unsigned int > > meshMatch;
+	assert( compartmentMesh() );
+	assert( other->compartmentMesh() );
 	diffusionMesh_->matchMeshEntries( other->compartmentMesh(), meshMatch );
 	// First, extract the meshIndices. Need to make sure they are unique.
 	for ( VPII::iterator i = meshMatch.begin(); i != meshMatch.end(); ++i ){
