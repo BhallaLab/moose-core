@@ -1005,7 +1005,7 @@ extern void setIntersectVoxel(
 		unsigned int meshIndex );
 
 extern void checkAbut( 
-		vector< PII >& intersect, 
+		const vector< PII >& intersect, 
 		unsigned int ix, unsigned int iy, unsigned int iz,
 		unsigned int nx, unsigned int ny, unsigned int nz,
 		unsigned int meshIndex,
@@ -1149,7 +1149,7 @@ void testCubeMeshJunctionTwoDimSurface()
 	coords[6] = coords[7] = coords[8] = 1.0;
 	cm1.setPreserveNumEntries( false );
 	cm1.innerSetCoords( coords );
-	const vector< unsigned int >& surface = cm1.surface();
+	vector< unsigned int > surface = cm1.surface();
 	assert( surface.size() == 12 );
 
 	CubeMesh cm2;
@@ -1175,7 +1175,66 @@ void testCubeMeshJunctionTwoDimSurface()
 	assert( ret[1].second == 4 );
 	assert( ret[2].first == 14 );
 	assert( ret[2].second == 6 );
+
+	/**
+	 * That was too easy, since the spatial and meshIndices were
+	 * identical. Now trim the geometries a bit to look like:
+		 * 						6	7
+		 * 10	11	12	13	-	4	5
+		 * 5	6	7	8	9	2	3
+		 * 0	1	2	3	4	-	1
+		 * 						-	0
+		 *
+		 * So, junction should be (9,2) only.
+		 */
 	
+	// Trimming cm1. At this point we don't assume automatic updates of
+	// the m2s, s2m and surface vectors when any of them is changed.
+	vector< unsigned int > m2s = cm1.getMeshToSpace();
+	assert( m2s.size() == 15 );
+	m2s.resize( 14 );
+	cm1.setMeshToSpace( m2s );
+	vector< unsigned int > s2m = cm1.getSpaceToMesh();
+	assert( s2m.size() == 15 );
+	s2m[14] = ~0;
+	cm1.setSpaceToMesh( s2m );
+	surface.resize( 4 ); 
+	// As a shortcut, just assign the places near the junction
+	// Note that the indices are spaceIndices.
+	surface[0] = 3;
+	surface[1] = 4;
+	surface[2] = 9;
+	surface[3] = 13;
+	cm1.setSurface( surface );
+	
+	// Trimming cm2.
+	m2s = cm2.getMeshToSpace();
+	assert( m2s.size() == 10 );
+	m2s.resize( 8 );
+	m2s[0] = 1;
+	for ( unsigned int i = 1; i < 8; ++i )
+		m2s[i] = i + 2;
+	cm2.setMeshToSpace( m2s );
+	s2m.clear();
+	s2m.resize( 10, ~0 );
+	for ( unsigned int i = 0; i < 8; ++i )
+		s2m[ m2s[i] ] = i;
+	cm2.setSpaceToMesh( s2m );
+	// As a shortcut, just assign the places near the junction
+	// Note that the indices are spaceIndices.
+	surface[0] = 3;
+	surface[1] = 4;
+	surface[2] = 6;
+	surface[3] = 8;
+	cm2.setSurface( surface );
+
+	// Now test it out.
+	ret.resize( 0 );
+	cm1.matchCubeMeshEntries( &cm2, ret );
+	assert( ret.size() == 1 ); 
+	assert( ret[0].first == 9 );
+	assert( ret[0].second == 2 );
+
 	cout << "." << flush;
 }
 

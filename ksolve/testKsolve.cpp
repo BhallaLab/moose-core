@@ -419,9 +419,141 @@ void testJunctionSetup()
 	cout << "." << flush;
 }
 
+typedef pair< unsigned int, unsigned int > PII;
+
+/**
+ * Generates the entries for the following mesh junction:
+ *
+ *                   meshB
+ *         0 1 2 3 4
+ *         ---
+ *         0 1|5 6 7
+ *            |
+ *         2 3|8 9 10
+ *             ---
+ *         4 5 6 7
+ * meshA
+ */
+void testMatchMeshEntries()
+{
+	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< int > dims( 1, 1 );
+	Id meshA = s->doCreate( "CubeMesh", Id(), "A", dims );
+	Id meshB = s->doCreate( "CubeMesh", Id(), "B", dims );
+	GslStoich self;
+	GslStoich other;
+
+	vector< double > coords( 9, 0.0 );
+	coords[3] = 4; // x1
+	coords[4] = 3; // y1
+	coords[5] = 1; // z1
+	coords[6] = 1; // dx
+	coords[7] = 1; // dy
+	coords[8] = 1; // dz
+
+	
+	Field< bool >::set( meshA, "preserveNumEntries", false );
+	Field< vector< double > >::set( meshA, "coords", coords );
+	vector< unsigned int > s2m( 12, ~0 );
+	s2m[0] = 0;
+	s2m[1] = 1;
+	s2m[4] = 2;
+	s2m[5] = 3;
+	s2m[8] = 4;
+	s2m[9] = 5;
+	s2m[10] = 6;
+	s2m[11] = 7;
+	Field< vector< unsigned int > >::set( meshA, "spaceToMesh", s2m );
+
+	vector< unsigned int > m2s( 8, 0 );
+	m2s[0] = 0;
+	m2s[1] = 1;
+	m2s[2] = 4;
+	m2s[3] = 5;
+	m2s[4] = 8;
+	m2s[5] = 9;
+	m2s[6] = 10;
+	m2s[7] = 11;
+	Field< vector< unsigned int > >::set( meshA, "meshToSpace", m2s );
+
+	//start with only the relevant. Later see how it handles the whole.
+	vector< unsigned int > surface( 5, 0 ); 
+	surface[0] = 0;
+	surface[1] = 1;
+	surface[2] = 5;
+	surface[3] = 10;
+	surface[4] = 11;
+	Field< vector< unsigned int > >::set( meshA, "surface", surface );
+	self.setCompartment( meshA );
+
+
+	coords[1] = -1; // y0. Using the upside-down y convention for this.
+	coords[3] = 5; // x1
+	coords[4] = 2; // y1
+	Field< bool >::set( meshB, "preserveNumEntries", false );
+	Field< vector< double > >::set( meshB, "coords", coords );
+	s2m.clear();
+	s2m.resize( 15, ~0 );
+	s2m[0] = 0;
+	s2m[1] = 1;
+	s2m[2] = 2;
+	s2m[3] = 3;
+	s2m[4] = 4;
+	s2m[7] = 5;
+	s2m[8] = 6;
+	s2m[9] = 7;
+	s2m[12] = 8;
+	s2m[13] = 9;
+	s2m[14] = 10;
+	Field< vector< unsigned int > >::set( meshB, "spaceToMesh", s2m );
+	m2s.clear();
+	m2s.resize( 11, 0 );
+	m2s[0] = 0;
+	m2s[1] = 1;
+	m2s[2] = 2;
+	m2s[3] = 3;
+	m2s[4] = 4;
+	m2s[5] = 7;
+	m2s[6] = 8;
+	m2s[7] = 9;
+	m2s[8] = 12;
+	m2s[9] = 13;
+	m2s[10] = 14;
+	Field< vector< unsigned int > >::set( meshB, "meshToSpace", m2s );
+
+	surface[0] = 0;
+	surface[1] = 1;
+	surface[2] = 7;
+	surface[3] = 12;
+	surface[4] = 13;
+	Field< vector< unsigned int > >::set( meshB, "surface", surface );
+	other.setCompartment( meshB );
+
+	vector< unsigned int > selfMeshIndex;
+	vector< unsigned int > otherMeshIndex;
+	vector< PII > selfMeshMap;
+	vector< PII > otherMeshMap;
+
+	self.matchMeshEntries( &other, 
+					selfMeshIndex, selfMeshMap,
+					otherMeshIndex, otherMeshMap );
+
+	assert( selfMeshIndex.size() == 5 );
+	assert( selfMeshIndex[0] == 0 );
+	assert( selfMeshIndex[1] == 1 );
+	assert( selfMeshIndex[2] == 3 );
+	assert( selfMeshIndex[3] == 6 );
+	assert( selfMeshIndex[4] == 7 );
+
+	// Much more to come.
+
+	cout << "." << flush;
+}
+
 void testKineticSolvers()
 {
 	testInterMeshReac();
 	testGslStoich();
 	testJunctionSetup();
+	testMatchMeshEntries();
 }
