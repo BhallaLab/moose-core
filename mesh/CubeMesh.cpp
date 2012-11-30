@@ -151,6 +151,19 @@ const Cinfo* CubeMesh::initCinfo()
 			&CubeMesh::getSpaceToMesh
 		);
 
+		static ValueFinfo< CubeMesh, vector< unsigned int > > surface(
+			"surface",
+			"Array specifying surface of arbitrary volume within the "
+			"CubeMesh. All entries must fall within the cuboid. "
+			"Each entry of the array is a spatial index obtained by "
+			"linearizing the ix, iy, iz coordinates within the cuboid. "
+			"So, each entry == ( iz * ny + iy ) * nx + ix"
+			"Note that the voxels listed on the surface are WITHIN the "
+			"volume of the CubeMesh object",
+			&CubeMesh::setSurface,
+			&CubeMesh::getSurface
+		);
+
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
@@ -184,6 +197,7 @@ const Cinfo* CubeMesh::initCinfo()
 		&coords,		// Value
 		&meshToSpace,	// Value
 		&spaceToMesh,	// Value
+		&surface,		// Value
 	};
 
 	static Cinfo cubeMeshCinfo (
@@ -585,6 +599,16 @@ void CubeMesh::setSpaceToMesh( vector< unsigned int > v )
 vector< unsigned int > CubeMesh::getSpaceToMesh() const
 {
 	return s2m_;
+}
+
+void CubeMesh::setSurface( vector< unsigned int > v )
+{
+	surface_ = v;
+}
+
+vector< unsigned int > CubeMesh::getSurface() const
+{
+	return surface_;
 }
 
 unsigned int CubeMesh::innerGetDimensions() const
@@ -1205,7 +1229,7 @@ void setIntersectVoxel(
  * require an in-line scan of neighbouring voxels.
  */
 void checkAbut( 
-		vector< PII >& intersect, 
+		const vector< PII >& intersect, 
 		unsigned int ix, unsigned int iy, unsigned int iz,
 		unsigned int nx, unsigned int ny, unsigned int nz,
 		unsigned int meshIndex,
@@ -1302,7 +1326,10 @@ void CubeMesh::matchCubeMeshEntries( const CubeMesh* other,
 			int iz = index % nz_ - oz;
 			assert( iz >= 0 );
 			unsigned int uiz = iz;
-			setIntersectVoxel( intersect, uix, uiy, uiz, nx, ny, nz, *i );
+			unsigned int meshIndex = s2m_[ *i ];
+
+			setIntersectVoxel( intersect, uix, uiy, uiz, nx, ny, nz, 
+							meshIndex );
 		}
 	}
 	
@@ -1317,7 +1344,8 @@ void CubeMesh::matchCubeMeshEntries( const CubeMesh* other,
 			unsigned int ix = ( x - xmin ) / dx_;
 			unsigned int iy = ( y - ymin ) / dy_;
 			unsigned int iz = ( z - zmin ) / dz_;
-			checkAbut( intersect, ix, iy, iz, nx, ny, nz, *i, ret );
+			unsigned int meshIndex = other->s2m_[ *i ];
+			checkAbut( intersect, ix, iy, iz, nx, ny, nz, meshIndex, ret );
 		}
 	}
 }

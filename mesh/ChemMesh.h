@@ -118,6 +118,20 @@ class ChemMesh
 		void setNumBoundary( unsigned int num );
 		unsigned int getNumBoundary( ) const;
 
+		/**
+		 * Returns the meshIndices (NOT spatial indices) of all adjacent
+		 * mesh entry pairs on ether side of the (self, other) junction.
+		 * meshIndices are the indices that look up entries in the vector
+		 * of pools.
+		 * spatialIndices are (iz * ny + iy) * nx + ix, that is, a linear
+		 * conversion of cartesian spatial indices.
+		 * So, for two touching cubes, the return vector is the paired 
+		 * meshIndices on either side of the plane of contact. If one mesh
+		 * has a finer mesh than the other, or if there are more than one
+		 * contact points from self to other (for example, at a corner),
+		 * then we just have multiple pairs using the same meshIndex of
+		 * the repeated voxel.
+		 */
 		virtual void matchMeshEntries( const ChemMesh* other, 
 			vector< pair< unsigned int, unsigned int > > & ret ) const = 0;
 
