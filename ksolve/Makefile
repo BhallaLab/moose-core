@@ -43,6 +43,7 @@ HEADERS = \
 	../basecode/header.h \
 	../basecode/SparseMatrix.h \
 	../basecode/ElementValueFinfo.h \
+	../mesh/VoxelJunction.h \
 	Port.h \
 	Stoich.h \
 	StoichCore.h \
@@ -89,7 +90,7 @@ ZEnz.o:	ZEnz.h
 ZombieMMenz.o:	ZombieMMenz.h
 ZMMenz.o:	ZMMenz.h
 ZombieSumFunc.o:	../kinetics/SumFunc.h ZombieSumFunc.h
-SolverJunction0:	SolverJunction.h
+SolverJunction.o:	../mesh/VoxelJunction.h SolverJunction.h
 testKsolve.o:	../kinetics/ReadKkit.h ../shell/Shell.h
 RateTerm.o:		RateTerm.h
 

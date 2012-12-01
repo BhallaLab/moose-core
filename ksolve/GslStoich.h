@@ -56,7 +56,7 @@ class GslStoich: public StoichPools
 				double dt );
 
 		void updateJunctionDiffusion( 
-				unsigned int meshIndex,
+				unsigned int meshIndex, double diffScale,
 				const vector< unsigned int >& diffTerms,
 				double* v );
 		
@@ -108,7 +108,8 @@ class GslStoich: public StoichPools
 				Id other ) const;
 
 		/// Returns map of diffusing pools and their names.
-		void vBuildDiffTerms( map< string, Id>& diffTerms ) const; 
+		void vBuildDiffTerms( map< string, unsigned int >& diffTerms ) 
+				const; 
 
 		/// Generates mapping of mesh entries between solvers.
 		void matchMeshEntries( const StoichPools* other,

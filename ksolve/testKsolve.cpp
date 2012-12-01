@@ -545,8 +545,149 @@ void testMatchMeshEntries()
 	assert( selfMeshIndex[3] == 6 );
 	assert( selfMeshIndex[4] == 7 );
 
-	// Much more to come.
+	assert( otherMeshIndex.size() == 5 );
+	assert( otherMeshIndex[0] == 0 );
+	assert( otherMeshIndex[1] == 1 );
+	assert( otherMeshIndex[2] == 5 );
+	assert( otherMeshIndex[3] == 8 );
+	assert( otherMeshIndex[4] == 9 );
 
+	assert ( selfMeshMap.size() ==  6);
+	vector< PII >::iterator i = selfMeshMap.begin();
+	assert( i->first == 0 && i->second == 0 ); ++i;
+	assert( i->first == 1 && i->second == 1 ); ++i;
+	assert( i->first == 2 && i->second == 1 ); ++i;
+	assert( i->first == 3 && i->second == 3 ); ++i;
+	assert( i->first == 3 && i->second == 6 ); ++i;
+	assert( i->first == 4 && i->second == 7 ); ++i;
+
+	assert ( otherMeshMap.size() ==  6);
+	i = otherMeshMap.begin();
+	assert( i->first == 0 && i->second == 0 ); ++i;
+	assert( i->first == 1 && i->second == 1 ); ++i;
+	assert( i->first == 1 && i->second == 5 ); ++i;
+	assert( i->first == 2 && i->second == 8 ); ++i;
+	assert( i->first == 3 && i->second == 8 ); ++i;
+	assert( i->first == 4 && i->second == 9 ); ++i;
+
+	cout << "." << flush;
+}
+
+pair< Id, Id > makeComptForDiffusion( Shell* s, Id model, unsigned int i )
+{
+	const double SIDE = 10e-6;
+	vector< int > dims( 1, 1 );
+	stringstream ss;
+	ss << "compt_" << i;
+	string comptName = ss.str();
+
+	Id compt = s->doCreate( "CubeMesh", model, comptName, dims );
+	Id comptMeshEntry = Neutral::child( compt.eref(), "mesh" );
+	Id poolA = s->doCreate( "Pool", compt, "A", dims );
+	Field< double >::set( poolA, "nInit", 0.0 );
+	Field< double >::set( poolA, "diffConst", 1e-12 );
+	MsgId mid = 
+		s->doAddMsg( "OneToOne", poolA, "mesh", comptMeshEntry, "mesh");
+	assert( mid != Msg::bad );
+	Id stoichA = s->doCreate( "GslStoich", compt, "stoichA", dims );
+	assert ( stoichA != Id() );
+	Id stoichCoreA = 
+			s->doCreate( "StoichCore", stoichA, "stoichCore", dims );
+	assert ( stoichCoreA != Id() );
+	string path = "/model/" + comptName + "/##";
+	Field< string >::set( stoichCoreA, "path", path );
+	Field< Id >::set( stoichA, "compartment", compt );
+	Field< string >::set( stoichA, "method", "rk5" );
+
+	mid = s->doAddMsg( "Single", comptMeshEntry, "remesh", stoichA, "remesh" );
+
+	vector< double > coords( 9, 0.0 );
+	coords[0] = SIDE * ( 5 * (i % 3) );
+	coords[1] = SIDE * ( 5 * (i / 3) );
+	coords[2] = 0;
+	coords[3] = coords[0] + SIDE * 5;
+	coords[4] = coords[1] + SIDE * 5;
+	coords[5] = coords[2] + SIDE;
+	coords[6] = coords[7] = coords[8] = SIDE;
+	Field< bool >::set( compt, "preserveNumEntries", false );
+	Field< vector< double > >::set( compt, "coords", coords );
+
+	s->doUseClock( "/model/" + comptName + "/stoichA", "process",  4 );
+
+	assert( mid != Msg::bad );
+
+	return pair< Id, Id >( compt, stoichA );
+}
+
+// Builds a 15x15 matrix and sets off diffusion in one corner. The
+// matrix is tiled as nine (3x3) GslStoich objects, each handling 5x5.
+void testDiffusionAcrossJunctions()
+{
+	const double DT = 0.1;
+	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	s->doSetClock( 4, DT );
+	s->doSetClock( 5, DT );
+	s->doSetClock( 6, DT );
+
+	vector< int > dims( 1, 1 );
+
+	Id model = s->doCreate( "Neutral", Id(), "model", dims );
+	vector< pair< Id, Id > > compt( 9 );
+	for ( unsigned int i = 0; i < 9; ++i )
+		compt[i] = makeComptForDiffusion( s, model, i );
+
+	for ( unsigned int k = 0; k < 9; ++k ) {
+		int ix = k % 3;
+		int iy = k / 3;
+		if ( ix < 2 )
+			SetGet1<Id>::set( compt[k].second, "addJunction", 
+							compt[k+1].second );
+		if ( iy < 2 )
+			SetGet1<Id>::set( compt[k].second, "addJunction", 
+							compt[k+3].second );
+	}
+	unsigned int nj;
+	nj = Field< unsigned int >::get( compt[2].second, "num_junction" );
+	assert( nj == 2 );
+	nj = Field< unsigned int >::get( compt[3].second, "num_junction" );
+	assert( nj == 3 );
+	nj = Field< unsigned int >::get( compt[4].second, "num_junction" );
+	assert( nj == 4 );
+	nj = Field< unsigned int >::get( compt[5].second, "num_junction" );
+	assert( nj == 3 );
+	nj = Field< unsigned int >::get( compt[6].second, "num_junction" );
+	assert( nj == 2 );
+
+	for ( unsigned int i = 0; i < 9; ++i ) {
+		stringstream ss;
+		ss << "/model/compt_" << i << "/stoichA/junction";
+		string jName = ss.str();
+		Id jn( jName );
+		assert( jn != Id() );
+		unsigned int m = Field< unsigned int >::get( jn, "numMeshEntries" );
+		assert( m == 5 );
+	}
+
+	Id poolA( "/model/compt_0/A" );
+	assert( poolA != Id() );
+	Id poolB( "/model/compt_4/A" );
+	assert( poolB != Id() );
+
+	Field< double >::set( poolA, "nInit", 100 );
+
+	s->doReinit();
+	s->doStart( 100 );
+
+	vector< double > nA;
+	Field< double >::getVec( poolA, "n", nA );
+	assert( nA.size() == 25 );
+	assert( nA[0] < 100 );
+	vector< double > nB;
+	Field< double >::getVec( poolB, "n", nB );
+	assert( nB.size() == 25 );
+	//assert( nB[12] > 1 ); // defer
+
+	s->doDelete( model );
 	cout << "." << flush;
 }
 
@@ -556,4 +697,9 @@ void testKineticSolvers()
 	testGslStoich();
 	testJunctionSetup();
 	testMatchMeshEntries();
+}
+
+void testKineticSolversProcess()
+{
+	testDiffusionAcrossJunctions();
 }

@@ -19866,6 +19866,22 @@ vector of the CubeMesh is not being set up properly.
 30 Nov
 Seems to report spaceIndex rather than meshIndex.
 Worked through, fixed it. Now clears unit tests, though I have lots more to put
-into testKsolve.cpp:testMatchMeshEntries.
+into testKsolve.cpp:testMatchMeshEntries. Checkin 4312.
+Put in additional unit tests into the same function, just sailed through.
+Next: set up diffusion across junctions
+
+This went smoothly till I started actual calculations. Then major issue 
+arose: I need to specify a scale factor for diffusion between every two
+coupled voxels. Currently no way to do so.
 
 ==========================================================================
+1 Dec
+To handle the diffusion scale factor, I need to 
+	- Figure out direction
+	- note h/2 for each of the meshes in the selected direction
+	- Decide smaller of two XAs
+
+Added in VoxelJunction for passing around the diffusion scale factor.
+Cascading changes in many files. Clears unit tests with the exception
+of the preliminary ones to test cross-junction diffusion.
+	

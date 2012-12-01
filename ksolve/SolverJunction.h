@@ -118,6 +118,11 @@ class SolverJunction
 		const vector< unsigned int >& meshIndex() const;
 
 		/**
+		 * The map of meshIndex and diffTerm to incoming vector index.
+		 */
+		const vector< VoxelJunction >& meshMap() const;
+
+		/**
 		 * Do the calculation as a simple sum onto the target vector.
 		 * Later plan a more sophisticated numerical approach than explicit
 		 * Euler.
@@ -163,6 +168,16 @@ class SolverJunction
 		vector< unsigned int > meshIndex_;
 
 		/**
+		 * diffScale_:
+		 * For each meshIndex on the junction, there is a scaling factor
+		 * by xa/(h * volume)
+		 * For now I assume this is common to all voxels abutting a given
+		 * meshIndex, but of course it may be selective for each one.
+		 * Deal with that case later.
+		 */
+		vector< double > diffScale_;
+
+		/**
 		 * The total number of transmitted datapoints is 
 		 * (crossTerms_.size() + diffTerms_.size() ) * meshIndex_.size().
 		 * Given the symmetry of this matrix, we do the following for the
@@ -183,9 +198,10 @@ class SolverJunction
  		/** 
 		 * The received vector maps onto meshEntries (voxels) as follows:
  		 * 	The targetMeshIndices_ vector::first = vecIndex / (nR + nD )
- 		 * 	The targetMeshIndices_ vector::second = meshIndex
+ 		 * 	The targetMeshIndices_ vector::second = meshIndex of target.
+ 		 * 	The targetMeshIndices_ vector::diffScale between src and tgt.
 		 */
-		vector< pair< unsigned int, unsigned int > > targetMeshIndices_;
+		vector< VoxelJunction > targetMeshIndices_;
 };
 
 extern SrcFinfo1< vector< double > >* updateJunctionFinfo();

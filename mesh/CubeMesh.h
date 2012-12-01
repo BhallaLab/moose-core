@@ -151,18 +151,20 @@ class CubeMesh: public ChemMesh
 		 * surfaces on a CubeMesh and another ChemMesh
 		 */
 		void matchMeshEntries( const ChemMesh* other,
-			vector< pair< unsigned int, unsigned int > >& ret ) const;
+			vector< VoxelJunction >& ret ) const;
 
 		/**
 		 * Specialization for cube-to-cube mesh matching. Return vector is
 		 * of pairs of meshIndices (not spatialIndices).
 		 */
 		void matchCubeMeshEntries( const CubeMesh* other,
-			vector< pair< unsigned int, unsigned int > >& ret ) const;
+			vector< VoxelJunction >& ret ) const;
 
+		/*
 		/// Utility function for special case in matchMeshEntries.
 		void matchSameSpacing( const CubeMesh* other,
 			vector< pair< unsigned int, unsigned int > >& ret ) const;
+			*/
 
 		/// Utility function for returning # of dimensions in mesh
 		unsigned int numDims() const;
@@ -219,6 +221,12 @@ class CubeMesh: public ChemMesh
 		unsigned int getStencil( unsigned int meshIndex,
 				const double** entry, const unsigned int** colIndex ) const;
 
+		void assignVoxels( 
+				vector< pair< unsigned int, unsigned int > >& intersect,
+				double xmin, double xmax, 
+				double ymin, double ymax, 
+				double zmin, double zmax
+		   	   ) const;
 		//////////////////////////////////////////////////////////////////
 
 		static const Cinfo* initCinfo();

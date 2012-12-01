@@ -148,8 +148,8 @@ class StoichPools
 		/**
 		 * Generate the map of varPools that diffuse. 
 		 */
-		virtual void vBuildDiffTerms( map< string, Id >& diffTerms )
-				const = 0;
+		virtual void vBuildDiffTerms( map< string, unsigned int >& 
+						diffTerms ) const = 0;
 
 		/**
 		 * Works out which meshEntries talk to each other. The outcome
