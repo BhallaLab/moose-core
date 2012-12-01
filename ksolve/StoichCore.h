@@ -96,6 +96,11 @@ class StoichCore
 		void installAndUnschedFunc( Id func, Id pool );
 
 		/**
+		 * This extracts the map of all pools that diffuse.
+		 */
+		void buildDiffTerms( map< string, unsigned int >& diffTerms ) const;
+		//////////////////////////////////////////////////////////////////
+		/**
 		 * Returns diffusion rate of specified pool
 		 */
 		double getDiffConst( unsigned int poolIndex ) const;

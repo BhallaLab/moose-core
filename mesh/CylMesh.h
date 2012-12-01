@@ -122,7 +122,7 @@ class CylMesh: public ChemMesh
 		//////////////////////////////////////////////////////////////////
 		
 		void matchMeshEntries( const ChemMesh* other, 
-			vector< pair< unsigned int, unsigned int > > & ret ) const;
+			vector< VoxelJunction > & ret ) const;
 
 		double nearest( double x, double y, double z, 
 						unsigned int& index ) const;

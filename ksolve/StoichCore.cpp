@@ -353,6 +353,29 @@ void StoichCore::installAndUnschedFunc( Id func, Id Pool )
 	// Somewhere I have to tie the output of the FuncTerm to the funcPool.
 }
 
+void StoichCore::buildDiffTerms( map< string, unsigned int >& diffTerms ) 
+		const
+{
+	assert( diffConst_.size() == numVarPools_ );
+	assert( diffConst_.size() <= idMap_.size() );
+	diffTerms.clear();
+	for ( unsigned int i = 0; i < diffConst_.size(); ++i )
+	{
+		if ( diffConst_[i] > 0 ) {
+			string name = idMap_[i].element()->getName();
+			map< string, unsigned int >::iterator old = 
+					diffTerms.find( name );
+			if ( old != diffTerms.end() ) {
+				cout << "Warning: StoichCore::buildDiffTerms: "
+						"multiple pools named '" <<
+						name << endl;
+				continue;
+			}
+			diffTerms[name] = i;
+		}
+	}
+}
+
 // e is the stoich Eref, elist is list of all Ids to zombify.
 void StoichCore::zombifyModel( const Eref& e, const vector< Id >& elist )
 {

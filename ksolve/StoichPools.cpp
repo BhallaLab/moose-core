@@ -7,6 +7,7 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 #include "header.h"
+#include "../mesh/VoxelJunction.h"
 #include "SolverJunction.h"
 #include "StoichPools.h"
 #include "../shell/Shell.h"
@@ -230,20 +231,21 @@ void StoichPools::findDiffusionTerms(
 				vector< unsigned int >& otherTerms
 	) const
 {
-	map< string, Id > selfDiffTerms;
+	selfTerms.resize( 0 );
+	otherTerms.resize( 0 );
+	map< string, unsigned int > selfDiffTerms;
 	this->vBuildDiffTerms( selfDiffTerms );
-	map< string, Id > otherDiffTerms;
+	map< string, unsigned int > otherDiffTerms;
 	otherSP->vBuildDiffTerms( otherDiffTerms );
-	vector< Id > selfDiffPools;
-	vector< Id > otherDiffPools;
-	map< string, Id >::iterator j;
-	for ( map< string, Id >::iterator i = selfDiffTerms.begin();
+	map< string, unsigned int >::iterator j;
+	for ( map< string, unsigned int >::iterator i = selfDiffTerms.begin();
 					i != selfDiffTerms.end(); ++i )
 	{
 		j = otherDiffTerms.find( i->first );
-		if ( j != otherDiffTerms.end() )
-			selfDiffPools.push_back( i->second );
-			otherDiffPools.push_back( j->second );
+		if ( j != otherDiffTerms.end() ) {
+			selfTerms.push_back( i->second );
+			otherTerms.push_back( j->second );
+		}
 	}
 }
 

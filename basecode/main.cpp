@@ -53,6 +53,7 @@ extern void testMsg();
 extern void testMpiMsg();
 extern void testKinetics();
 extern void testKineticSolvers();
+extern void	testKineticSolversProcess();
 extern void testBiophysics();
 extern void testBiophysicsProcess();
 extern void testHSolve();
@@ -315,6 +316,7 @@ void processTests( Shell* s )
 	testBuiltinsProcess();
 	testKineticsProcess();
 	testBiophysicsProcess();
+	testKineticSolversProcess();
 	testSimManager();
 	testSigNeurProcess();
 #endif

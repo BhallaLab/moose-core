@@ -811,7 +811,7 @@ const vector< NeuroNode >& NeuroMesh::getNodes() const
 //////////////////////////////////////////////////////////////////
 
 void NeuroMesh::matchMeshEntries( const ChemMesh* other,
-	   vector< pair< unsigned int, unsigned int > >& ret ) const
+	   vector< VoxelJunction >& ret ) const
 {
 }
 
