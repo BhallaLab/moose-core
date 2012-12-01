@@ -359,50 +359,21 @@ void GslStoich::stoich( const Eref& e, const Qinfo* q, Id stoichId )
 #endif // USE_GSL
 }
 
-/**
- * Here we want to give the integrator as long a timestep as possible,
- * or alternatively let _it_ decide the timestep. The former is done
- * by providing a long dt, typically that of the graphing process.
- * The latter is harder to manage and works best if there is only this
- * one integrator running the simulation. Here we do the former.
- */
-void GslStoich::process( const Eref& e, ProcPtr info )
-{
-	if ( !isInitialized_ )
-			return;
-#ifdef USE_GSL
-	
-	vector< vector< double > > lastS = y_;
-	double nextt = info->currTime + info->dt;
-	// Hack till we sort out threadData
-	for ( currMeshEntry_ = 0; 
-					currMeshEntry_ < numMeshEntries(); ++currMeshEntry_ ) {
-		double t = info->currTime;
-		while ( t < nextt ) {
-			int status = gsl_odeiv_evolve_apply ( 
-				gslEvolve_, gslControl_, gslStep_, &gslSys_, 
-				&t, nextt,
-				&internalStepSize_, &y_[currMeshEntry_][0] );
-			if ( status != GSL_SUCCESS )
-				break;
-
-		}
-	}
-	if ( diffusionMesh_ && diffusionMesh_->innerGetNumEntries() > 1 )
-		updateDiffusion( lastS, y_, info->dt );
-	if ( getNumJunctions() > 0 )
-		vUpdateJunction( e, info->threadIndexInGroup, info->dt );
-#endif // USE_GSL
-	// stoich_->clearFlux( e.index().value(), info->threadIndexInGroup );
-}
 
 ///////////////////////////////////////////////////////////////////////////
 // Junction operations
 ///////////////////////////////////////////////////////////////////////////
 
 void GslStoich::updateJunctionDiffusion( unsigned int meshIndex, 
-				const vector< unsigned int >& diffTerms, double* v )
-{;}
+	double diffScale, const vector< unsigned int >& diffTerms, double* v )
+{
+	unsigned int j = 0;
+	for ( vector< unsigned int >::const_iterator i = diffTerms.begin();
+					i != diffTerms.end(); ++i ) {
+		v[j++] += stoich_->getDiffConst( *i ) * S( meshIndex )[*i] * 
+				diffScale;
+	}
+}
 
 /**
  * This function calculates cross-junction rates and sends out as msgs.
@@ -420,15 +391,33 @@ void GslStoich::vUpdateJunction( const Eref& e,
 		unsigned int numReac = j->reacTerms().size();
 		unsigned int numDiff = j->diffTerms().size();
 		unsigned int numMesh = j->meshIndex().size();
-		vector< double > v( ( numReac + numDiff ) * numMesh, 0 );
+		vector< double > v( numReac * numMesh + numDiff * 
+						j->meshMap().size(), 0 );
 		double* yprime = &v[0];
+		for ( unsigned int k = 0; k < j->meshIndex().size(); ++k ) {
+			unsigned int meshIndex = j->meshIndex()[k];
+			stoich_->updateJunctionRates( 
+							S( meshIndex ), j->reacTerms(), yprime );
+			yprime += numReac;
+		}
+		for ( vector< VoxelJunction >::const_iterator k = 
+					j->meshMap().begin(); k != j->meshMap().end(); ++k )
+		{
+			unsigned int meshIndex = k->second;
+			double diffScale = k->diffScale;
+			updateJunctionDiffusion( 
+					meshIndex, diffScale, j->diffTerms(), yprime	);
+			yprime += numDiff;
+		}
+		/*
 		for ( vector< unsigned int >::const_iterator k = 
 						j->meshIndex().begin(); 
 						k != j->meshIndex().end(); ++k ) {
 			stoich_->updateJunctionRates( S( *k ), j->reacTerms(), yprime );
-			updateJunctionDiffusion( *k, j->diffTerms(), yprime + numReac );
+			updateJunctionDiffusion( *k, j, yprime + numReac );
 			yprime += numReac + numDiff;
 		}
+		*/
 
 		for ( vector< double >::iterator k = v.begin(); k != v.end(); ++k )
 			*k *= dt; // Simple Euler. Ugh.
@@ -487,9 +476,11 @@ void GslStoich::vBuildReacTerms( vector< unsigned int >& reacTerms,
 		;
 }
 
-void GslStoich::vBuildDiffTerms( map< string, Id>& diffTerms ) const
+void GslStoich::vBuildDiffTerms( map< string, unsigned int >& diffTerms ) 
+		const
 {
-		;
+	// Shouldn't have to redo, this call should happen once
+	stoich_->buildDiffTerms( diffTerms );
 }
 
 // Virtual func figures out which meshEntries line up, passes the job to
@@ -503,12 +494,13 @@ void GslStoich::matchMeshEntries(
 	) const
 {
 	// This vector is a map of meshIndices in this to other compartment.
-	vector< pair< unsigned int, unsigned int > > meshMatch;
+	vector< VoxelJunction > meshMatch;
 	assert( compartmentMesh() );
 	assert( other->compartmentMesh() );
 	diffusionMesh_->matchMeshEntries( other->compartmentMesh(), meshMatch );
 	// First, extract the meshIndices. Need to make sure they are unique.
-	for ( VPII::iterator i = meshMatch.begin(); i != meshMatch.end(); ++i ){
+	for ( vector< VoxelJunction>::iterator i = meshMatch.begin(); 
+					i != meshMatch.end(); ++i ){
 		selfMeshIndex.push_back( i->first );
 		otherMeshIndex.push_back( i->second );
 	}
@@ -528,7 +520,8 @@ void GslStoich::matchMeshEntries(
 		otherMeshLookup[ otherMeshIndex[i] ] = i;
 
 	// Now stuff values into the meshMaps.
-	for ( VPII::iterator i = meshMatch.begin(); i != meshMatch.end(); ++i ){
+	for ( vector< VoxelJunction>::iterator i = meshMatch.begin(); 
+					i != meshMatch.end(); ++i ){
 		map< unsigned int, unsigned int >::iterator k = 
 				otherMeshLookup.find( i->second );
 		assert( k != otherMeshLookup.end() );
@@ -593,6 +586,43 @@ void GslStoich::reinit( const Eref& e, ProcPtr info )
 	
 	}
 #endif // USE_GSL
+}
+
+/**
+ * Here we want to give the integrator as long a timestep as possible,
+ * or alternatively let _it_ decide the timestep. The former is done
+ * by providing a long dt, typically that of the graphing process.
+ * The latter is harder to manage and works best if there is only this
+ * one integrator running the simulation. Here we do the former.
+ */
+void GslStoich::process( const Eref& e, ProcPtr info )
+{
+	if ( !isInitialized_ )
+			return;
+#ifdef USE_GSL
+	
+	vector< vector< double > > lastS = y_;
+	double nextt = info->currTime + info->dt;
+	// Hack till we sort out threadData
+	for ( currMeshEntry_ = 0; 
+					currMeshEntry_ < numMeshEntries(); ++currMeshEntry_ ) {
+		double t = info->currTime;
+		while ( t < nextt ) {
+			int status = gsl_odeiv_evolve_apply ( 
+				gslEvolve_, gslControl_, gslStep_, &gslSys_, 
+				&t, nextt,
+				&internalStepSize_, &y_[currMeshEntry_][0] );
+			if ( status != GSL_SUCCESS )
+				break;
+
+		}
+	}
+	if ( diffusionMesh_ && diffusionMesh_->innerGetNumEntries() > 1 )
+		updateDiffusion( lastS, y_, info->dt );
+	if ( getNumJunctions() > 0 )
+		vUpdateJunction( e, info->threadIndexInGroup, info->dt );
+#endif // USE_GSL
+	// stoich_->clearFlux( e.index().value(), info->threadIndexInGroup );
 }
 
 void GslStoich::remesh( const Eref& e, const Qinfo* q,

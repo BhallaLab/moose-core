@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "../mesh/VoxelJunction.h"
 #include "SolverJunction.h"
 #include "StoichPools.h"
 #include "UpFunc.h"
@@ -150,6 +151,11 @@ const vector< unsigned int >& SolverJunction::meshIndex() const
 	return meshIndex_;
 }
 
+const vector< VoxelJunction >& SolverJunction::meshMap() const
+{
+	return targetMeshIndices_;
+}
+
 void SolverJunction::incrementTargets( 
 				vector< vector< double > >& y,
 				const vector< double >& v ) const
@@ -158,7 +164,8 @@ void SolverJunction::incrementTargets(
 	unsigned int numTerms = reacTerms_.size() + diffTerms_.size();
 	assert( v.size() == numTerms * meshIndex_.size() );
 
-	for ( VPI i = targetMeshIndices_.begin(); 
+	for ( vector< VoxelJunction >::const_iterator 
+					i = targetMeshIndices_.begin(); 
 					i != targetMeshIndices_.end(); ++i ) {
 		unsigned int k = numTerms * i->first;
 		assert( k < v.size() );
@@ -184,5 +191,9 @@ void SolverJunction::setMeshIndex( const vector< unsigned int >& meshIndex,
 	const vector< pair< unsigned int, unsigned int > >& meshMap )
 {
 	meshIndex_ = meshIndex;
-	targetMeshIndices_ = meshMap;
+	targetMeshIndices_.resize( meshMap.size() );
+	for ( unsigned int i = 0; i < meshMap.size(); ++i ) {
+		targetMeshIndices_[i].first = meshMap[i].first;
+		targetMeshIndices_[i].second = meshMap[i].second;
+	}
 }

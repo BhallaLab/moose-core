@@ -10,6 +10,8 @@
 #ifndef _CHEM_MESH_H
 #define _CHEM_MESH_H
 
+#include "VoxelJunction.h"
+
 /**
  * The ChemMesh represents a chemically identified compartment.
  * This may be spatially extended, and may even be discontinuous.
@@ -133,7 +135,7 @@ class ChemMesh
 		 * the repeated voxel.
 		 */
 		virtual void matchMeshEntries( const ChemMesh* other, 
-			vector< pair< unsigned int, unsigned int > > & ret ) const = 0;
+			vector< VoxelJunction > & ret ) const = 0;
 
 		virtual double nearest( double x, double y, double z, 
 						unsigned int& index ) const = 0;

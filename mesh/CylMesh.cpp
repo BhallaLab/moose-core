@@ -702,7 +702,7 @@ unsigned int CylMesh::getStencil( unsigned int meshIndex,
 //////////////////////////////////////////////////////////////////
 
 void CylMesh::matchMeshEntries( const ChemMesh* other,
-	   vector< pair< unsigned int, unsigned int > >& ret ) const
+	   vector< VoxelJunction >& ret ) const
 {
 }
 

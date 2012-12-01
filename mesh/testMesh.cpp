@@ -1009,7 +1009,7 @@ extern void checkAbut(
 		unsigned int ix, unsigned int iy, unsigned int iz,
 		unsigned int nx, unsigned int ny, unsigned int nz,
 		unsigned int meshIndex,
-		vector< PII >& ret );
+		vector< VoxelJunction >& ret );
 
 void testIntersectVoxel()
 {
@@ -1064,7 +1064,7 @@ void testIntersectVoxel()
 	assert( intersect[14].first == 6 && intersect[14].second == ABUT );
 
 	// Next: test out checkAbut.
-	vector< PII > ret;
+	vector< VoxelJunction > ret;
 	checkAbut( intersect, 0, 0, 0, nx, ny, nz, 1234, ret );
 	assert( ret.size() == 1 );
 	assert( ret[0].first == 0 && ret[0].second == 1234 );
@@ -1165,7 +1165,7 @@ void testCubeMeshJunctionTwoDimSurface()
 	const vector< unsigned int >& surface2 = cm2.surface();
 	assert( surface2.size() == 10 );
 
-	vector< pair< unsigned int, unsigned int > > ret;
+	vector< VoxelJunction > ret;
 	cm1.matchCubeMeshEntries( &cm2, ret );
 	assert( ret.size() == 3 ); 
 

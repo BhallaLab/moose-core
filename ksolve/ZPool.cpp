@@ -9,6 +9,7 @@
 
 // #include "StoichHeaders.h"
 #include "header.h"
+#include "../mesh/VoxelJunction.h"
 #include "SolverJunction.h"
 #include "StoichPools.h"
 #include "../kinetics/PoolBase.h"
