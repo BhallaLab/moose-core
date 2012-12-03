@@ -17,10 +17,13 @@
 #include "ChemMesh.h"
 #include "CubeMesh.h"
 
-static const unsigned int EMPTY = ~0;
-static const unsigned int SURFACE = ~1;
-static const unsigned int ABUT = ~2;
-static const unsigned int MULTI = ~3;
+const unsigned int CubeMesh::EMPTY = ~0;
+const unsigned int CubeMesh::SURFACE = ~1;
+const unsigned int CubeMesh::ABUTX = ~2;
+const unsigned int CubeMesh::ABUTY = ~3;
+const unsigned int CubeMesh::ABUTZ = ~4;
+const unsigned int CubeMesh::MULTI = ~5;
+
 typedef pair< unsigned int, unsigned int > PII;
 
 const Cinfo* CubeMesh::initCinfo()
@@ -1175,7 +1178,7 @@ void CubeMesh::defineIntersection( const CubeMesh* other,
  * the second. The flag can be: 
  * 	EMPTY: empty
  * 	SURFACE: on the surface
- * 	ABUT: One place removed from the surface, only one entry
+ * 	ABUT[X,Y,Z]: One place removed from the surface, only one entry
  * 	MULTI: Multiple surface voxels are only one place removed from here.
  * 	a number: Special case where 2 surface voxels abut. The number is the
  * 	meshIndex of the second surface voxel.
@@ -1184,16 +1187,14 @@ void CubeMesh::defineIntersection( const CubeMesh* other,
 /**
  * setAbut assigns the voxel flags based on what was already there
  */
-void setAbut( PII& voxel, unsigned int meshIndex )
+void setAbut( PII& voxel, unsigned int meshIndex, unsigned int axis )
 {
-	if ( voxel.second == SURFACE ) // Don't touch surface voxels.
+	if ( voxel.second == CubeMesh::SURFACE ) // Don't touch surface voxels.
 		return;
-	if ( voxel.second == EMPTY )
-			voxel = PII( meshIndex, ABUT );
-	else if ( voxel.second == ABUT )
-			voxel.second = meshIndex; // set up 2 index case
-	else // 2 or more indices are already here.
-			voxel.second = MULTI;
+	if ( voxel.second == CubeMesh::EMPTY )
+			voxel = PII( meshIndex, axis );
+	else // 1 or more indices are already here.
+			voxel.second = CubeMesh::MULTI;
 }
 
 void setIntersectVoxel( 
@@ -1205,21 +1206,27 @@ void setIntersectVoxel(
 	assert( ix < nx && iy < ny && iz < nz );
 	unsigned int index = ( iz * ny + iy ) * nx + ix;
 	assert( index < intersect.size() );
-	intersect[index] = PII( meshIndex, SURFACE );
-	if ( ix + 1 < nx )
-		setAbut( intersect[ (iz*ny + iy) * nx + ix+1 ], meshIndex);
+	intersect[index] = PII( meshIndex, CubeMesh::SURFACE );
 	if ( ix > 0 )
-		setAbut( intersect[ (iz*ny + iy) * nx + ix-1 ], meshIndex);
+		setAbut( intersect[ (iz*ny + iy) * nx + ix-1 ], meshIndex, 
+						CubeMesh::ABUTX );
+	if ( ix + 1 < nx )
+		setAbut( intersect[ (iz*ny + iy) * nx + ix+1 ], meshIndex, 
+						CubeMesh::ABUTX );
 
-	if ( iy + 1 < ny )
-		setAbut( intersect[ ( iz*ny + iy+1 ) * nx + ix ], meshIndex);
 	if ( iy > 0 )
-		setAbut( intersect[ ( iz*ny + iy-1 ) * nx + ix ], meshIndex);
+		setAbut( intersect[ ( iz*ny + iy-1 ) * nx + ix ], meshIndex,
+						CubeMesh::ABUTY);
+	if ( iy + 1 < ny )
+		setAbut( intersect[ ( iz*ny + iy+1 ) * nx + ix ], meshIndex,
+						CubeMesh::ABUTY);
 
-	if ( iz + 1 < nz )
-		setAbut( intersect[ ( (iz+1)*ny + iy ) * nx + ix ], meshIndex);
 	if ( iz > 0 )
-		setAbut( intersect[ ( (iz-1)*ny + iy ) * nx + ix ], meshIndex);
+		setAbut( intersect[ ( (iz-1)*ny + iy ) * nx + ix ], meshIndex,
+						CubeMesh::ABUTZ);
+	if ( iz + 1 < nz )
+		setAbut( intersect[ ( (iz+1)*ny + iy ) * nx + ix ], meshIndex,
+						CubeMesh::ABUTZ);
 }
 
 
@@ -1230,6 +1237,9 @@ void setIntersectVoxel(
  * a minor efficiency for one and two diffusion terms as they are
  * encoded within the intersect vector. Higher-order surface alignments
  * require an in-line scan of neighbouring voxels.
+ * In all casesl the function inserts a flag indicating surface direction
+ * into the diffScale
+ * field of the VoxelJunction. 0 = x; 1 = y; 2 = z.
  */
 void checkAbut( 
 		const vector< PII >& intersect, 
@@ -1242,52 +1252,54 @@ void checkAbut(
 	unsigned int index = ( iz * ny + iy ) * nx + ix;
 	unsigned int localFlag = intersect[index].second;
 
-	if ( localFlag == EMPTY || localFlag == SURFACE )
+	if ( localFlag == CubeMesh::EMPTY || localFlag == CubeMesh::SURFACE )
 			return; // Nothing to put into the ret vector
-	if ( localFlag == ABUT ) {
-		ret.push_back( VoxelJunction( intersect[index].first, meshIndex ));
-	} else if ( localFlag == MULTI ) { // grind through all 6 cases.
-		if ( ix + 1 < nx ) {
-			index = ( iz * ny + iy ) * nx + ix + 1;
-			if ( intersect[index].second == SURFACE )
-				ret.push_back( 
-					VoxelJunction( intersect[index].first, meshIndex ) );
-		}
+	if ( localFlag == CubeMesh::ABUTX ) {
+		ret.push_back( 
+				VoxelJunction( intersect[index].first, meshIndex, 0 ));
+	} else if ( localFlag == CubeMesh::ABUTY ) {
+		ret.push_back( 
+				VoxelJunction( intersect[index].first, meshIndex, 1 ));
+	} else if ( localFlag == CubeMesh::ABUTZ ) {
+		ret.push_back( 
+				VoxelJunction( intersect[index].first, meshIndex, 2 ));
+	} else if ( localFlag == CubeMesh::MULTI ) { // go through all 6 cases.
 		if ( ix > 0 ) {
 			index = ( iz * ny + iy ) * nx + ix - 1;
-			if ( intersect[index].second == SURFACE )
+			if ( intersect[index].second == CubeMesh::SURFACE )
 				ret.push_back( 
-					VoxelJunction( intersect[index].first, meshIndex ) );
+					VoxelJunction( intersect[index].first, meshIndex, 0 ));
 		}
-		if ( iy + 1 < ny ) {
-			index = ( iz * ny + iy + 1 ) * nx + ix;
-			if ( intersect[index].second == SURFACE )
+		if ( ix + 1 < nx ) {
+			index = ( iz * ny + iy ) * nx + ix + 1;
+			if ( intersect[index].second == CubeMesh::SURFACE )
 				ret.push_back( 
-					VoxelJunction( intersect[index].first, meshIndex ) );
+					VoxelJunction( intersect[index].first, meshIndex, 0 ));
 		}
 		if ( iy > 0 ) {
 			index = ( iz * ny + iy -1 ) * nx + ix;
-			if ( intersect[index].second == SURFACE )
+			if ( intersect[index].second == CubeMesh::SURFACE )
 				ret.push_back( 
-					VoxelJunction( intersect[index].first, meshIndex ) );
+					VoxelJunction( intersect[index].first, meshIndex, 1 ));
 		}
-		if ( iz + 1 < nz ) {
-			index = ( (iz+1) * ny + iy ) * nx + ix;
-			if ( intersect[index].second == SURFACE )
+		if ( iy + 1 < ny ) {
+			index = ( iz * ny + iy + 1 ) * nx + ix;
+			if ( intersect[index].second == CubeMesh::SURFACE )
 				ret.push_back( 
-					VoxelJunction( intersect[index].first, meshIndex ) );
+					VoxelJunction( intersect[index].first, meshIndex, 1 ));
 		}
 		if ( iz > 0 ) {
 			index = ( (iz-1) * ny + iy ) * nx + ix;
-			if ( intersect[index].second == SURFACE )
+			if ( intersect[index].second == CubeMesh::SURFACE )
 				ret.push_back( 
-					VoxelJunction( intersect[index].first, meshIndex ) );
+					VoxelJunction( intersect[index].first, meshIndex, 2 ));
 		}
-	} else { // Precisely two abutments, both encoded ahead of time.
-		ret.push_back( 
-			VoxelJunction( intersect[index].first, meshIndex ) );
-		ret.push_back( 
-			VoxelJunction( localFlag, meshIndex ) );
+		if ( iz + 1 < nz ) {
+			index = ( (iz+1) * ny + iy ) * nx + ix;
+			if ( intersect[index].second == CubeMesh::SURFACE )
+				ret.push_back( 
+					VoxelJunction( intersect[index].first, meshIndex, 2 ));
+		}
 	}
 }
 
@@ -1337,7 +1349,9 @@ void CubeMesh::assignVoxels( vector< PII >& intersect,
 void CubeMesh::matchCubeMeshEntries( const CubeMesh* other,
 	   vector< VoxelJunction >& ret ) const
 {
-		// Flip meshes if the other grid is coarser.
+		// Flip meshes if the current grid is finer.
+		// There are still problems here because a finer grid will end
+		// up with 2 levels deep defined as being abutting.
 	if ( compareMeshSpacing( other ) == -1 ) {
 			other->matchMeshEntries( this, ret );
 			flipRet( ret );
@@ -1368,6 +1382,43 @@ void CubeMesh::matchCubeMeshEntries( const CubeMesh* other,
 			unsigned int iz = ( z - zmin ) / dz_;
 			unsigned int meshIndex = other->s2m_[ *i ];
 			checkAbut( intersect, ix, iy, iz, nx, ny, nz, meshIndex, ret );
+		}
+	}
+
+	// Scan through the VoxelJunctions and populate their diffScale field
+	setDiffScale( other, ret );
+}
+
+void CubeMesh::setDiffScale( const CubeMesh* other,
+	   vector< VoxelJunction >& ret ) const
+{
+
+	for ( vector< VoxelJunction >::iterator i = ret.begin();
+					i != ret.end(); ++i )
+	{
+		if ( doubleEq( i->diffScale, 0 ) ) { // Junction across x plane
+			double selfXA = dy_ * dz_;
+			double otherXA = other->dy_ * other->dz_;
+			if ( selfXA <= otherXA )
+				i->diffScale = 2 * selfXA / ( dx_ + other->dx_ );
+			else
+				i->diffScale = 2 * otherXA / ( dx_ + other->dx_ );
+		} else if ( doubleEq( i->diffScale, 1 ) ) { // across y plane
+			double selfXA = dx_ * dz_;
+			double otherXA = other->dx_ * other->dz_;
+			if ( selfXA <= otherXA )
+				i->diffScale = 2 * selfXA / ( dy_ + other->dy_ );
+			else
+				i->diffScale = 2 * otherXA / ( dy_ + other->dy_ );
+		} else if ( doubleEq( i->diffScale, 2 ) ) { // across z plane
+			double selfXA = dx_ * dy_;
+			double otherXA = other->dx_ * other->dy_;
+			if ( selfXA <= otherXA )
+				i->diffScale = 2 * selfXA / ( dz_ + other->dz_ );
+			else
+				i->diffScale = 2 * otherXA / ( dz_ + other->dz_ );
+		} else {	
+			assert( 0 );
 		}
 	}
 }

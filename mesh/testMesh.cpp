@@ -1021,11 +1021,13 @@ void testIntersectVoxel()
 		 *			-***-
 		 *
 		 *
-		 *			1***1
-		 *			1*32-
-		 *			1***1
+		 *			x***x
+		 *			x*32-
+		 *			x***x
 		 *
-		 * 	1 is ABUT
+		 * 	x is ABUTX
+		 * 	y is ABUTY
+		 * 	z is ABUTZ
 		 * 	2 is 2 points
 		 * 	3 is MULTI
 		 *
@@ -1035,7 +1037,8 @@ void testIntersectVoxel()
 	unsigned int nx = 5;
 	unsigned int ny = 3;
 	unsigned int nz = 1;
-	vector< PII > intersect( nx * ny * nz, PII( EMPTY, EMPTY ) );
+	vector< PII > intersect( nx * ny * nz, PII( 
+							CubeMesh::EMPTY, CubeMesh::EMPTY ) );
 	unsigned int meshIndex = 0;
 	setIntersectVoxel( intersect, 1, 0, 0, nx, ny, nz, meshIndex++ );
 	setIntersectVoxel( intersect, 2, 0, 0, nx, ny, nz, meshIndex++ );
@@ -1045,23 +1048,38 @@ void testIntersectVoxel()
 	setIntersectVoxel( intersect, 2, 2, 0, nx, ny, nz, meshIndex++ );
 	setIntersectVoxel( intersect, 3, 2, 0, nx, ny, nz, meshIndex++ );
 
-	assert( intersect[0].first == 0 && intersect[0].second == ABUT );
-	assert( intersect[1].first == 0 && intersect[1].second == SURFACE );
-	assert( intersect[2].first == 1 && intersect[2].second == SURFACE );
-	assert( intersect[3].first == 2 && intersect[3].second == SURFACE );
-	assert( intersect[4].first == 2 && intersect[4].second == ABUT );
+	assert( intersect[0].first == 0 && 
+					intersect[0].second == CubeMesh::ABUTX );
+	assert( intersect[1].first == 0 && 
+					intersect[1].second == CubeMesh::SURFACE );
+	assert( intersect[2].first == 1 && 
+					intersect[2].second == CubeMesh::SURFACE );
+	assert( intersect[3].first == 2 && 
+					intersect[3].second == CubeMesh::SURFACE );
+	assert( intersect[4].first == 2 && 
+					intersect[4].second == CubeMesh::ABUTX );
 
-	assert( intersect[5].first == 3 && intersect[5].second == ABUT );
-	assert( intersect[6].first == 3 && intersect[6].second == SURFACE );
-	assert( intersect[7].first == 1 && intersect[7].second == MULTI );
-	assert( intersect[8].first == 2 && intersect[8].second == 6 );
-	assert( intersect[9].first == EMPTY && intersect[9].second == EMPTY );
+	assert( intersect[5].first == 3 && 
+					intersect[5].second == CubeMesh::ABUTX );
+	assert( intersect[6].first == 3 && 
+					intersect[6].second == CubeMesh::SURFACE );
+	assert( intersect[7].first == 1 && 
+					intersect[7].second == CubeMesh::MULTI );
+	assert( intersect[8].first == 2 && 
+					intersect[8].second == CubeMesh::MULTI );
+	assert( intersect[9].first == EMPTY && 
+					intersect[9].second == CubeMesh::EMPTY );
 
-	assert( intersect[10].first == 4 && intersect[10].second == ABUT );
-	assert( intersect[11].first == 4 && intersect[11].second == SURFACE );
-	assert( intersect[12].first == 5 && intersect[12].second == SURFACE );
-	assert( intersect[13].first == 6 && intersect[13].second == SURFACE );
-	assert( intersect[14].first == 6 && intersect[14].second == ABUT );
+	assert( intersect[10].first == 4 && 
+					intersect[10].second == CubeMesh::ABUTX );
+	assert( intersect[11].first == 4 && 
+					intersect[11].second == CubeMesh::SURFACE );
+	assert( intersect[12].first == 5 && 
+					intersect[12].second == CubeMesh::SURFACE );
+	assert( intersect[13].first == 6 && 
+					intersect[13].second == CubeMesh::SURFACE );
+	assert( intersect[14].first == 6 && 
+					intersect[14].second == CubeMesh::ABUTX );
 
 	// Next: test out checkAbut.
 	vector< VoxelJunction > ret;
@@ -1082,8 +1100,8 @@ void testIntersectVoxel()
 	checkAbut( intersect, 2, 1, 0, nx, ny, nz, 9999, ret );
 	assert( ret.size() == 3 );
 	assert( ret[0].first == 3 && ret[0].second == 9999 );
-	assert( ret[1].first == 5 && ret[1].second == 9999 );
-	assert( ret[2].first == 1 && ret[1].second == 9999 );
+	assert( ret[1].first == 1 && ret[1].second == 9999 );
+	assert( ret[2].first == 5 && ret[1].second == 9999 );
 	ret.clear();
 	checkAbut( intersect, 3, 1, 0, nx, ny, nz, 8888, ret );
 	assert( ret.size() == 2 );
@@ -1238,6 +1256,66 @@ void testCubeMeshJunctionTwoDimSurface()
 	cout << "." << flush;
 }
 
+void testCubeMeshJunctionDiffSizeMesh()
+{
+		/**					
+		 * 						14	15
+		 * 						12	13
+		 * 10	11	12	13	14	10	11
+		 *						8	9
+		 * 5	6	7	8	9	6	7
+		 *						4	5
+		 * 0	1	2	3	4	2	3
+		 * 						0	1
+		 *
+		 * So, junction should be (4,2)(4,4),(9,6),(9,8),(14,10),(14,12)
+		 */
+	CubeMesh cm1;
+	vector< double > coords( 9, 0.0 );
+	coords[3] = 5.0;
+	coords[4] = 3.0;
+	coords[5] = 1.0;
+	coords[6] = coords[7] = coords[8] = 1.0;
+	cm1.setPreserveNumEntries( false );
+	cm1.innerSetCoords( coords );
+	vector< unsigned int > surface = cm1.surface();
+	assert( surface.size() == 12 );
+
+	CubeMesh cm2;
+	coords[0] = 5.0;
+	coords[1] = -0.5;
+	coords[2] = 0.0;
+	coords[3] = 7.0;
+	coords[4] = 3.5;
+	coords[5] = 0.5;
+	coords[6] = 1.0;
+	coords[7] = 0.5;
+   	coords[8] = 0.5;
+	cm2.setPreserveNumEntries( false );
+	cm2.innerSetCoords( coords );
+	const vector< unsigned int >& surface2 = cm2.surface();
+	assert( surface2.size() == 16 );
+
+	vector< VoxelJunction > ret;
+	cm1.matchCubeMeshEntries( &cm2, ret );
+	assert( ret.size() == 6 ); 
+
+	assert( ret[0].first == 4 );
+	assert( ret[0].second == 2 );
+	assert( ret[1].first == 4 );
+	assert( ret[1].second == 4 );
+	assert( ret[2].first == 9 );
+	assert( ret[2].second == 6 );
+	assert( ret[3].first == 9 );
+	assert( ret[3].second == 8 );
+	assert( ret[4].first == 14 );
+	assert( ret[4].second == 10 );
+	assert( ret[5].first == 14 );
+	assert( ret[5].second == 12 );
+
+	cout << "." << flush;
+}
+
 void testCubeMeshJunctionThreeDimSurface()
 {
 	cout << "." << flush;
@@ -1260,4 +1338,5 @@ void testMesh()
 	testCubeMeshFillThreeDimSurface();
 	testCubeMeshJunctionTwoDimSurface();
 	testCubeMeshJunctionThreeDimSurface();
+	testCubeMeshJunctionDiffSizeMesh();
 }

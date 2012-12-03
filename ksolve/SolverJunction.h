@@ -137,7 +137,7 @@ class SolverJunction
 			const vector< pair< unsigned int, unsigned int > >& poolMap );
 		void setDiffTerms( const vector< unsigned int >& diffTerms );
 		void setMeshIndex( const vector< unsigned int >& meshIndex,
-			const vector< pair< unsigned int, unsigned int > >& meshMap );
+			const vector< VoxelJunction >& meshMap );
 
 		//////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
@@ -179,7 +179,8 @@ class SolverJunction
 
 		/**
 		 * The total number of transmitted datapoints is 
-		 * (crossTerms_.size() + diffTerms_.size() ) * meshIndex_.size().
+		 * 	(crossTerms_.size() * meshIndex_.size() + 
+		 * 	diffTerms_.size() ) * targetmeshIndices_.size().
 		 * Given the symmetry of this matrix, we do the following for the
 		 * targets: we specify the target molecules in one vector.
 		 * We separately specify the target meshIndices for each of the
@@ -190,7 +191,7 @@ class SolverJunction
 		 */
 		/**
  		 * The received vector maps onto Pools by SolverJunction as follows:
- 		 * 	The targetMols_ vector::first = vecIndex % (nR+nD)
+ 		 * 	The targetMols_ vector::first = vecIndex % (nR)
  		 * 	The targetMols_ vector::second = poolIndex 
  		 */
 		vector< pair< unsigned int, unsigned int > > targetMols_;
