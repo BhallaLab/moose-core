@@ -19884,4 +19884,17 @@ To handle the diffusion scale factor, I need to
 Added in VoxelJunction for passing around the diffusion scale factor.
 Cascading changes in many files. Clears unit tests with the exception
 of the preliminary ones to test cross-junction diffusion.
+Checkin 4316.
 	
+
+2 Dec.
+Stuck on compilation.
+Issues with varying mesh sizes, see testMesh.cpp:1285.
+Issue with the calculations.
+
+3 Dec: Now it seems like the sent message with the diff info isn't being
+received on the target SolverJunction.
+Fixed.
+After some effort, incorporated the n-dim analytic diffusion test from the 
+regression tests. Now it clears this, though not with stellar accuracy.
+Anyway, major step cleared. 

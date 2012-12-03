@@ -166,9 +166,9 @@ class StoichPools
 		 */
 		virtual void matchMeshEntries( const StoichPools* other,
 			vector< unsigned int >& selfMeshIndex, 
-			vector< pair< unsigned int, unsigned int > >& selfMeshMap,
+			vector< VoxelJunction >& selfMeshMap,
 			vector< unsigned int >& otherMeshIndex, 
-			vector< pair< unsigned int, unsigned int > >& otherMeshMap
+			vector< VoxelJunction >& otherMeshMap
 		) const = 0;
 
 		virtual const ChemMesh* compartmentMesh() const = 0;

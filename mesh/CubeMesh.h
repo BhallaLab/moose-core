@@ -227,7 +227,16 @@ class CubeMesh: public ChemMesh
 				double ymin, double ymax, 
 				double zmin, double zmax
 		   	   ) const;
+		
+		void setDiffScale( const CubeMesh* other,
+			vector< VoxelJunction >& ret ) const;
 		//////////////////////////////////////////////////////////////////
+		static const unsigned int EMPTY;
+		static const unsigned int SURFACE;
+		static const unsigned int ABUTX;
+		static const unsigned int ABUTY;
+		static const unsigned int ABUTZ;
+		static const unsigned int MULTI;
 
 		static const Cinfo* initCinfo();
 
