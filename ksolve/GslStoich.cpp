@@ -365,13 +365,17 @@ void GslStoich::stoich( const Eref& e, const Qinfo* q, Id stoichId )
 ///////////////////////////////////////////////////////////////////////////
 
 void GslStoich::updateJunctionDiffusion( unsigned int meshIndex, 
-	double diffScale, const vector< unsigned int >& diffTerms, double* v )
+	double diffScale, const vector< unsigned int >& diffTerms, double* v,
+    double dt	)
 {
 	unsigned int j = 0;
 	for ( vector< unsigned int >::const_iterator i = diffTerms.begin();
 					i != diffTerms.end(); ++i ) {
-		v[j++] += stoich_->getDiffConst( *i ) * S( meshIndex )[*i] * 
+		double temp = stoich_->getDiffConst( *i ) * S( meshIndex )[*i] * 
 				diffScale;
+		v[j++] += temp;
+		y_[meshIndex][*i] -= temp * dt;
+		// varS( meshIndex )[*i] -= temp * dt;
 	}
 }
 
@@ -404,25 +408,18 @@ void GslStoich::vUpdateJunction( const Eref& e,
 					j->meshMap().begin(); k != j->meshMap().end(); ++k )
 		{
 			unsigned int meshIndex = k->second;
-			double diffScale = k->diffScale;
+			double diffScale = k->diffScale / diffusionMesh_->getMeshEntrySize( meshIndex );
 			updateJunctionDiffusion( 
-					meshIndex, diffScale, j->diffTerms(), yprime	);
+					meshIndex, diffScale, j->diffTerms(), yprime, dt );
 			yprime += numDiff;
 		}
-		/*
-		for ( vector< unsigned int >::const_iterator k = 
-						j->meshIndex().begin(); 
-						k != j->meshIndex().end(); ++k ) {
-			stoich_->updateJunctionRates( S( *k ), j->reacTerms(), yprime );
-			updateJunctionDiffusion( *k, j, yprime + numReac );
-			yprime += numReac + numDiff;
-		}
-		*/
 
-		for ( vector< double >::iterator k = v.begin(); k != v.end(); ++k )
+		for ( vector< double >::iterator k = v.begin(); k != v.end(); ++k ){
 			*k *= dt; // Simple Euler. Ugh.
+			// cout << "junction=" << i << ",	*k = " << *k << endl;
+		}
 
-		Eref je( e.element(), i );
+		Eref je( junction.element(), i );
 		// Each Junction FieldElement connects up to precisely one target.
 		updateJunctionFinfo()->send( je, threadNum, v );
 	}
@@ -485,12 +482,12 @@ void GslStoich::vBuildDiffTerms( map< string, unsigned int >& diffTerms )
 
 // Virtual func figures out which meshEntries line up, passes the job to
 // the relevant ChemCompt.
-typedef pair< unsigned int, unsigned int > PII;
-typedef vector< pair< unsigned int, unsigned int > > VPII;
 void GslStoich::matchMeshEntries( 
 	const StoichPools* other,
-	vector< unsigned int >& selfMeshIndex, VPII& selfMeshMap, 
-	vector< unsigned int >& otherMeshIndex, VPII& otherMeshMap
+	vector< unsigned int >& selfMeshIndex, 
+	vector< VoxelJunction >& selfMeshMap, 
+	vector< unsigned int >& otherMeshIndex, 
+	vector< VoxelJunction >& otherMeshMap
 	) const
 {
 	// This vector is a map of meshIndices in this to other compartment.
@@ -525,12 +522,13 @@ void GslStoich::matchMeshEntries(
 		map< unsigned int, unsigned int >::iterator k = 
 				otherMeshLookup.find( i->second );
 		assert( k != otherMeshLookup.end() );
-		selfMeshMap.push_back( PII( k->second, i->first ) );
-
+		selfMeshMap.push_back( 
+					VoxelJunction( k->second, i->first, i->diffScale ) );
 
 		k =	selfMeshLookup.find( i->first );
 		assert( k != selfMeshLookup.end() );
-		otherMeshMap.push_back( PII( k->second, i->second ) );
+		otherMeshMap.push_back( 
+					VoxelJunction( k->second, i->second, i->diffScale ) );
 	}
 }
 

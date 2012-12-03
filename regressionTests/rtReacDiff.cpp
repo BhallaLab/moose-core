@@ -318,7 +318,7 @@ static void testDiff1D()
  * 		c(x,t) = ( c0 / 2 / sqrt(PI.D.t) ).exp(-x^2/(4Dt)
  */
 double checkNdimDiff( const vector< double >& conc, double D, double t, 
-		double dx, double n, unsigned int cubeSide )
+		double dx, double n, unsigned int cubeSide, bool doPrint = false )
 {
 	const double scaleFactor = pow( dx, n); 
 	double err = 0;
@@ -329,6 +329,8 @@ double checkNdimDiff( const vector< double >& conc, double D, double t,
 
 	double tot1 = 0.0;
 	double tot2 = 0.0;
+	if ( doPrint )
+		cout << endl << "time	(i,j,k)	r	analytic	sim\n";
 	for ( unsigned int i = 0; i < dimZ; ++i ) {
 		double z = 0.0; 
 		if ( n > 2.5 )
@@ -343,7 +345,11 @@ double checkNdimDiff( const vector< double >& conc, double D, double t,
 				unsigned int index = ( i * cubeSide + j ) * cubeSide + k;
 				double c = scaleFactor * pow( PI * D * t, -n/2 ) * 
 					exp( -rsq / ( 4 * D * t ) );
-				// cout << endl << t << "	(" << i << "," << j << "," << k  << "), r= " << rsq << "	" << c << "	" << conc[index];
+				if ( doPrint )
+					cout << endl << t << "	(" << 
+							i << "," << j << "," << k  << 
+							"), r= " << rsq << "	" << 
+							c << "	" << conc[index];
 				err += ( c - conc[index] ) * ( c - conc[index] );
 				tot1 += c;
 				tot2 += conc[index];

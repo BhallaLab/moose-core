@@ -312,8 +312,8 @@ void StoichPools::addJunction( const Eref& e, const Qinfo* q, Id other )
 	// the target meshIndex.
 	vector< unsigned int > selfMeshIndex; 
 	vector< unsigned int > otherMeshIndex; 
-	vector< pair< unsigned int, unsigned int > > selfMeshMap; 
-	vector< pair< unsigned int, unsigned int > > otherMeshMap; 
+	vector< VoxelJunction > selfMeshMap; 
+	vector< VoxelJunction > otherMeshMap; 
 	this->matchMeshEntries( otherSP, selfMeshIndex, selfMeshMap,
 					otherMeshIndex, otherMeshMap );
 	junctions_.back().setMeshIndex( selfMeshIndex, selfMeshMap );

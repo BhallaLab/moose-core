@@ -531,8 +531,8 @@ void testMatchMeshEntries()
 
 	vector< unsigned int > selfMeshIndex;
 	vector< unsigned int > otherMeshIndex;
-	vector< PII > selfMeshMap;
-	vector< PII > otherMeshMap;
+	vector< VoxelJunction > selfMeshMap;
+	vector< VoxelJunction > otherMeshMap;
 
 	self.matchMeshEntries( &other, 
 					selfMeshIndex, selfMeshMap,
@@ -553,7 +553,7 @@ void testMatchMeshEntries()
 	assert( otherMeshIndex[4] == 9 );
 
 	assert ( selfMeshMap.size() ==  6);
-	vector< PII >::iterator i = selfMeshMap.begin();
+	vector< VoxelJunction >::iterator i = selfMeshMap.begin();
 	assert( i->first == 0 && i->second == 0 ); ++i;
 	assert( i->first == 1 && i->second == 1 ); ++i;
 	assert( i->first == 2 && i->second == 1 ); ++i;
@@ -573,9 +573,11 @@ void testMatchMeshEntries()
 	cout << "." << flush;
 }
 
+// Returns the Ids for the compt and the responsible stoich object.
 pair< Id, Id > makeComptForDiffusion( Shell* s, Id model, unsigned int i )
 {
 	const double SIDE = 10e-6;
+	const double DIFFCONST = 1e-12;
 	vector< int > dims( 1, 1 );
 	stringstream ss;
 	ss << "compt_" << i;
@@ -585,7 +587,7 @@ pair< Id, Id > makeComptForDiffusion( Shell* s, Id model, unsigned int i )
 	Id comptMeshEntry = Neutral::child( compt.eref(), "mesh" );
 	Id poolA = s->doCreate( "Pool", compt, "A", dims );
 	Field< double >::set( poolA, "nInit", 0.0 );
-	Field< double >::set( poolA, "diffConst", 1e-12 );
+	Field< double >::set( poolA, "diffConst", DIFFCONST );
 	MsgId mid = 
 		s->doAddMsg( "OneToOne", poolA, "mesh", comptMeshEntry, "mesh");
 	assert( mid != Msg::bad );
@@ -619,11 +621,19 @@ pair< Id, Id > makeComptForDiffusion( Shell* s, Id model, unsigned int i )
 	return pair< Id, Id >( compt, stoichA );
 }
 
+// Defined in regressionTests/rtReacDiff.cpp
+extern double checkNdimDiff( const vector< double >& conc, 
+				double D, double t,
+				double dx, double n, unsigned int cubeSide, bool doPrint );
+
 // Builds a 15x15 matrix and sets off diffusion in one corner. The
 // matrix is tiled as nine (3x3) GslStoich objects, each handling 5x5.
 void testDiffusionAcrossJunctions()
 {
-	const double DT = 0.1;
+	const double DIFFCONST = 1e-12;
+	const double SIDE = 10e-6;
+	const double DT = 10;
+	const double RUNTIME = 500.0;
 	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
 	s->doSetClock( 4, DT );
 	s->doSetClock( 5, DT );
@@ -666,26 +676,52 @@ void testDiffusionAcrossJunctions()
 		assert( jn != Id() );
 		unsigned int m = Field< unsigned int >::get( jn, "numMeshEntries" );
 		assert( m == 5 );
+		SolverJunction* sj = 
+				reinterpret_cast< SolverJunction* >( jn.eref().data() );
+		assert( sj->meshIndex().size() == 5 );
+		assert( sj->meshMap().size() == 5 );
+		assert( doubleEq( sj->meshMap()[0].diffScale, SIDE ) );
 	}
 
-	Id poolA( "/model/compt_0/A" );
-	assert( poolA != Id() );
-	Id poolB( "/model/compt_4/A" );
-	assert( poolB != Id() );
-
-	Field< double >::set( poolA, "nInit", 100 );
+	Id pool0( "/model/compt_0/A" );
+	Field< double >::set( ObjId( pool0, 0 ), "nInit", 1.0 );
 
 	s->doReinit();
-	s->doStart( 100 );
+	s->doStart( RUNTIME );
 
-	vector< double > nA;
-	Field< double >::getVec( poolA, "n", nA );
-	assert( nA.size() == 25 );
-	assert( nA[0] < 100 );
-	vector< double > nB;
-	Field< double >::getVec( poolB, "n", nB );
-	assert( nB.size() == 25 );
-	//assert( nB[12] > 1 ); // defer
+	// Now do the comparison with the reference.
+	vector< Id > pools;
+	vector< double > val( 15 * 15 , -1.0 );
+	double tot = 0;
+	for ( unsigned int i = 0; i < 9; ++i ) {
+		stringstream ss;
+		ss << "/model/compt_" << i << "/A";
+		Id p( ss.str() );
+		assert( p != Id() );
+		pools.push_back( p );
+		vector< double > n;
+		Field< double >::getVec( p, "n", n );
+		unsigned int ix = ( i % 3 ) * 5;
+		unsigned int iy = ( i / 3 ) * 5;
+		for ( unsigned int jx = 0; jx < 5; ++jx ) {
+			for ( unsigned int jy = 0; jy < 5; ++jy ) {
+				unsigned int j = jx + jy * 5;
+				assert( j < 25 );
+				unsigned int k = ix + jx + 15 * ( iy + jy );
+				assert( k < 225 );
+				assert( val[k] < -0.99); // Should not have been filled yet.
+				val[k] = n[j];
+				tot += n[j];
+			}
+		}
+	}
+	assert( doubleApprox( tot, 1.0 ) );
+	// cout << "testDiffusionAcrossJunctions(): tot = " << tot << endl;
+
+	// The last arg is a flag to say if output should be printed.
+	double err = checkNdimDiff( val, DIFFCONST, RUNTIME, SIDE, 2, 15, 
+					false);
+	assert( err < 0.006 );
 
 	s->doDelete( model );
 	cout << "." << flush;

@@ -78,7 +78,7 @@ const Cinfo* SolverJunction::initCinfo()
 		sizeof( junctionShared ) / sizeof( const Finfo* )
 	);
 
-	static Finfo* synapseFinfos[] = {
+	static Finfo* solverJunctionFinfos[] = {
 		&numReacs,				// ReadOnly Fields
 		&numDiffMols,			// ReadOnly Fields
 		&numMeshEntries,		// ReadOnly Fields
@@ -86,18 +86,18 @@ const Cinfo* SolverJunction::initCinfo()
 		&junction, 				// SharedFinfo
 	};
 
-	static Cinfo synapseCinfo (
+	static Cinfo solverJunctionCinfo (
 		"SolverJunction",
 		Neutral::initCinfo(),
-		synapseFinfos,
-		sizeof( synapseFinfos ) / sizeof ( Finfo* ),
+		solverJunctionFinfos,
+		sizeof( solverJunctionFinfos ) / sizeof ( Finfo* ),
 		new Dinfo< SolverJunction >()
 	);
 
-	return &synapseCinfo;
+	return &solverJunctionCinfo;
 }
 
-static const Cinfo* synapseCinfo = SolverJunction::initCinfo();
+static const Cinfo* solverJunctionCinfo = SolverJunction::initCinfo();
 
 SolverJunction::SolverJunction()
 {
@@ -161,16 +161,24 @@ void SolverJunction::incrementTargets(
 				const vector< double >& v ) const
 {
 	typedef vector< pair< unsigned int, unsigned int> >::const_iterator VPI;
-	unsigned int numTerms = reacTerms_.size() + diffTerms_.size();
-	assert( v.size() == numTerms * meshIndex_.size() );
+
+	unsigned int numReacTerms = targetMols_.size() * meshIndex_.size();
+	assert( v.size() == numReacTerms + 
+		 targetMeshIndices_.size() * diffTerms_.size() );
+
+	for ( vector< unsigned int >::const_iterator i = 
+			meshIndex_.begin(); i != meshIndex_.end(); ++i ) {
+		for ( VPI j = targetMols_.begin(); j != targetMols_.end(); ++j ) {
+			y[ *i][ j->second ] += v[ *i * meshIndex_.size() + j->first ];
+		}
+	}
 
 	for ( vector< VoxelJunction >::const_iterator 
 					i = targetMeshIndices_.begin(); 
 					i != targetMeshIndices_.end(); ++i ) {
-		unsigned int k = numTerms * i->first;
-		assert( k < v.size() );
-		for ( VPI j = targetMols_.begin(); j != targetMols_.end(); ++j ) {
-			y[ i->second ][ j->second ] = v[ k + j->first];
+		for ( unsigned int j = 0; j < diffTerms_.size(); ++j ) {
+			y[ i->second ][ diffTerms_[j] ] += 
+				v[ i->first * diffTerms_.size() + j ];
 		}
 	}
 }
@@ -188,12 +196,8 @@ void SolverJunction::setDiffTerms( const vector< unsigned int >& diffTerms )
 }
 
 void SolverJunction::setMeshIndex( const vector< unsigned int >& meshIndex,
-	const vector< pair< unsigned int, unsigned int > >& meshMap )
+	const vector< VoxelJunction >& meshMap )
 {
 	meshIndex_ = meshIndex;
-	targetMeshIndices_.resize( meshMap.size() );
-	for ( unsigned int i = 0; i < meshMap.size(); ++i ) {
-		targetMeshIndices_[i].first = meshMap[i].first;
-		targetMeshIndices_[i].second = meshMap[i].second;
-	}
+	targetMeshIndices_ = meshMap;
 }

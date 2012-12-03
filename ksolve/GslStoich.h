@@ -58,7 +58,7 @@ class GslStoich: public StoichPools
 		void updateJunctionDiffusion( 
 				unsigned int meshIndex, double diffScale,
 				const vector< unsigned int >& diffTerms,
-				double* v );
+				double* v, double dt );
 		
 		/**
  		 * gslFunc is the function used by GSL to advance the simulation one
@@ -114,9 +114,9 @@ class GslStoich: public StoichPools
 		/// Generates mapping of mesh entries between solvers.
 		void matchMeshEntries( const StoichPools* other,
 			vector< unsigned int >& selfMeshIndex, 
-			vector< pair< unsigned int, unsigned int > >& selfMeshMap,
+			vector< VoxelJunction >& selfMeshMap,
 			vector< unsigned int >& otherMeshIndex, 
-			vector< pair< unsigned int, unsigned int > >& otherMeshMap
+			vector< VoxelJunction >& otherMeshMap
 		) const;
 
 		/// Returns pointer to ChemMesh entry for compartment.
