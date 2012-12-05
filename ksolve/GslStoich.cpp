@@ -18,16 +18,6 @@
 #include "../mesh/ChemMesh.h"
 #include "GslStoich.h"
 
-/*
-static SrcFinfo1< vector< double > >* updateJunction() {
-	static SrcFinfo1< vector< double > > updateJunction( 
-		"updateJunction", 
-		"Sends out vector of all mol # changes to cross junction."
-	);
-	return &updateJunction;
-}
-*/
-
 const Cinfo* GslStoich::initCinfo()
 {
 		///////////////////////////////////////////////////////
@@ -91,6 +81,13 @@ const Cinfo* GslStoich::initCinfo()
 			"Handles reinit call",
 			new ProcOpFunc< GslStoich >( &GslStoich::reinit ) );
 
+		static DestFinfo initProc( "initProc",
+			"Handles init call",
+			new ProcOpFunc< GslStoich >( &GslStoich::process ) );
+		static DestFinfo initReinit( "initReinit",
+			"Handles initReinit call",
+			new ProcOpFunc< GslStoich >( &GslStoich::reinit ) );
+
 		static DestFinfo remesh( "remesh",
 			"Handle commands to remesh the pool. This may involve changing "
 			"the number of pool entries, as well as changing their volumes",
@@ -111,6 +108,14 @@ const Cinfo* GslStoich::initCinfo()
 			"Shared message for process and reinit",
 			procShared, sizeof( procShared ) / sizeof( const Finfo* )
 		);
+		
+		static Finfo* initShared[] = {
+			&initProc, &initReinit
+		};
+		static SharedFinfo init( "init",
+			"Shared message for init and initReinit",
+			initShared, sizeof( initShared ) / sizeof( const Finfo* )
+		);
 
 	static Finfo* gslIntegratorFinfos[] =
 	{
@@ -122,6 +127,7 @@ const Cinfo* GslStoich::initCinfo()
 		&stoich,			// DestFinfo
 		&remesh,			// DestFinfo
 		&proc,				// SharedFinfo
+		&init,				// SharedFinfo
 	};
 	
 	static  Cinfo gslIntegratorCinfo(
@@ -383,7 +389,7 @@ void GslStoich::updateJunctionDiffusion( unsigned int meshIndex,
  * This function calculates cross-junction rates and sends out as msgs.
  * Since we need specific messages between solvers, we handle them through
  * FieldElements which are one per junction. The messages pass the 
- * updateJunction/handleJunction message both ways.
+ * junctionPoolDelta/handleJunctionPoolDelta message both ways.
  */
 void GslStoich::vUpdateJunction( const Eref& e, 
 				unsigned int threadNum, double dt )
@@ -421,7 +427,7 @@ void GslStoich::vUpdateJunction( const Eref& e,
 
 		Eref je( junction.element(), i );
 		// Each Junction FieldElement connects up to precisely one target.
-		updateJunctionFinfo()->send( je, threadNum, v );
+		junctionPoolDeltaFinfo()->send( je, threadNum, v );
 	}
 }
 
@@ -429,13 +435,37 @@ void GslStoich::vUpdateJunction( const Eref& e,
  * Handles incoming cross-border rates. Just adds onto y_ matrix, using
  * Forward Euler.
  */
-void GslStoich::vHandleJunction( unsigned int fieldIndex,
+void GslStoich::vHandleJunctionPoolDelta( unsigned int fieldIndex,
 	   	const vector< double >& v )
 {
 	assert( fieldIndex < getNumJunctions() );
 	const SolverJunction* j = getJunction( fieldIndex );
 	assert( j );
 	j->incrementTargets( y_, v );
+}
+
+void GslStoich::vHandleJunctionPoolNum( unsigned int fieldIndex,
+	   	const vector< double >& v )
+{
+	assert( fieldIndex < getNumJunctions() );
+	const SolverJunction* j = getJunction( fieldIndex );
+	assert( j );
+	unsigned int size = 
+			j->recvPoolIndex().size() * j->recvMeshIndex().size();
+	assert( v.size() == size );
+	vector< double >::const_iterator vptr = v.begin();
+	for ( vector< unsigned int >::const_iterator 
+			k = j->recvMeshIndex().begin(); 
+			k != j->recvMeshIndex().end(); 
+			++k ) {
+		double* s = varS( *k );
+		for ( vector< unsigned int >::const_iterator 
+				p = j->recvPoolIndex().begin(); 
+				p != j->recvPoolIndex().end(); 
+				++p )  {
+				s[*p] = *vptr++;
+		}
+	}
 }
 
 /**
@@ -621,6 +651,48 @@ void GslStoich::process( const Eref& e, ProcPtr info )
 		vUpdateJunction( e, info->threadIndexInGroup, info->dt );
 #endif // USE_GSL
 	// stoich_->clearFlux( e.index().value(), info->threadIndexInGroup );
+}
+
+/// Called on the init msg during reinit.
+void GslStoich::initReinit( const Eref& e, ProcPtr info )
+{
+}
+
+/**
+ * Here we just send out a set of pools to the other solver.
+ * Look up handlePools to see what happens when this arrives.
+ */
+void GslStoich::init( const Eref& e, ProcPtr info )
+{
+	if ( !isInitialized_ )
+			return;
+	Id junction( e.id().value() + 1 );
+	assert( junction.element()->cinfo()->isA( "SolverJunction" ) );
+	for ( unsigned int i = 0; i < getNumJunctions(); ++i ) {
+		SolverJunction* j = getJunction(i);
+		vector< double > v;
+		unsigned int size = 
+			j->sendPoolIndex().size() * j->sendMeshIndex().size();
+		v.reserve( size );
+		for ( vector< unsigned int >::const_iterator 
+				k = j->sendMeshIndex().begin(); 
+				k != j->sendMeshIndex().end(); 
+				++k )
+	   	{
+			const double* s = S( *k );
+			for ( vector< unsigned int >::const_iterator 
+					p = j->sendPoolIndex().begin(); 
+					p != j->sendPoolIndex().end(); 
+					++p ) 
+			{
+					v.push_back( s[*p] );
+			}
+		}
+		assert( v.size() == size );
+		Eref je( junction.element(), i );
+		// Each Junction FieldElement connects up to precisely one target.
+		junctionPoolNumFinfo()->send( je, info->threadIndexInGroup, v );
+	}
 }
 
 void GslStoich::remesh( const Eref& e, const Qinfo* q,

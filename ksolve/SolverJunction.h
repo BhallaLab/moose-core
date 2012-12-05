@@ -123,6 +123,26 @@ class SolverJunction
 		const vector< VoxelJunction >& meshMap() const;
 
 		/**
+		 * Pool indices of pools whose num will be sent across junction
+		 */
+		const vector< unsigned int >& sendPoolIndex() const;
+
+		/**
+		 * mesh indices of voxels whose pools will be sent across junction
+		 */
+		const vector< unsigned int >& sendMeshIndex() const;
+
+		/**
+		 * Pool indices of pools whose num will be recv across junction
+		 */
+		const vector< unsigned int >& recvPoolIndex() const;
+
+		/**
+		 * mesh indices of voxels whose pools will be recv across junction
+		 */
+		const vector< unsigned int >& recvMeshIndex() const;
+
+		/**
 		 * Do the calculation as a simple sum onto the target vector.
 		 * Later plan a more sophisticated numerical approach than explicit
 		 * Euler.
@@ -138,6 +158,16 @@ class SolverJunction
 		void setDiffTerms( const vector< unsigned int >& diffTerms );
 		void setMeshIndex( const vector< unsigned int >& meshIndex,
 			const vector< VoxelJunction >& meshMap );
+
+		void setSendPools( 
+						const vector< unsigned int >& meshIndex,
+						const vector< unsigned int >& poolIndex
+		);
+
+		void setRecvPools( 
+						const vector< unsigned int >& meshIndex,
+						const vector< unsigned int >& poolIndex
+		);
 
 		//////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
@@ -203,8 +233,43 @@ class SolverJunction
  		 * 	The targetMeshIndices_ vector::diffScale between src and tgt.
 		 */
 		vector< VoxelJunction > targetMeshIndices_;
+
+		///////////////////////////////////////////////////////////////
+
+		/**
+		 * Send vector varies faster by poolIndex, then by 
+		 * meshIndex. Likewise Recv vector.
+		 *
+		 */
+
+		/**
+		 * SendMolIndex_ are local poolIndices of pools  going out to 
+		 * other solver.  We assume that
+		 * the same set of pools are sent out by each abutting voxel.
+		 */
+		vector< unsigned int > sendPoolIndex_;
+
+		/**
+		 * MeshIndices (to lookup S_[meshIndex][poolIndex]) of outgoing
+		 * Pools.
+		 */
+		vector< unsigned int > sendMeshIndex_;
+
+		/**
+		 * RecvMolIndex is the local poolIndex of incoming pools, in order,
+		 * from the recvVector.
+		 */
+		vector< unsigned int > recvPoolIndex_;
+
+		/**
+		 * MeshIndices (to lookup S_[meshIndex][poolIndex]) of incoming
+		 * Pools.
+		 */
+		vector< unsigned int > recvMeshIndex_;
+
 };
 
-extern SrcFinfo1< vector< double > >* updateJunctionFinfo();
+extern SrcFinfo1< vector< double > >* junctionPoolDeltaFinfo();
+extern SrcFinfo1< vector< double > >* junctionPoolNumFinfo();
 
 #endif // _SOLVER_JUNCTION_H
