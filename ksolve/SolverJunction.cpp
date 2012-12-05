@@ -13,13 +13,22 @@
 #include "StoichPools.h"
 #include "UpFunc.h"
 
-SrcFinfo1< vector< double > >* updateJunctionFinfo()
+SrcFinfo1< vector< double > >* junctionPoolDeltaFinfo()
 {
-	static SrcFinfo1< vector< double > > updateJunction(
-		"updateJunction",
-		"Sends out vector of all mol # changes to cross junction."
+	static SrcFinfo1< vector< double > > junctionPoolDelta(
+		"junctionPoolDelta",
+		"Sends out vector of all mol # changes going across junction."
 	);
-	return &updateJunction;
+	return &junctionPoolDelta;
+}
+
+SrcFinfo1< vector< double > >* junctionPoolNumFinfo()
+{
+	static SrcFinfo1< vector< double > > junctionPoolNum(
+		"junctionPoolNum",
+		"Sends out vector of all mol #s needed to compute junction rates."
+	);
+	return &junctionPoolNum;
 }
 
 const Cinfo* SolverJunction::initCinfo()
@@ -57,18 +66,27 @@ const Cinfo* SolverJunction::initCinfo()
 	//////////////////////////////////////////////////////////////////
 	// DestFinfos
 	//////////////////////////////////////////////////////////////////
-	static DestFinfo handleJunction( "handleJunction",
-		"Handles arriving Junction messages, by redirecting up to"
+	static DestFinfo handleJunctionPoolDelta( "handleJunctionPoolDelta",
+		"Handles vector of doubles with pool num changes that arrive at"
+		" the Junction, by redirecting up to"
 	   	" parent StoichPools object",
 		new UpFunc1< StoichPools, vector< double > >( 
-				&StoichPools::handleJunction ) );
+				&StoichPools::handleJunctionPoolDelta ) );
+	static DestFinfo handleJunctionPoolNum( "handleJunctionPoolNum",
+		"Handles vector of doubles specifying pool num, that arrive at"
+		" the Junction, by redirecting up to"
+	   	" parent StoichPools object",
+		new UpFunc1< StoichPools, vector< double > >( 
+				&StoichPools::handleJunctionPoolNum ) );
 
 	//////////////////////////////////////////////////////////////////
 	// Shared Finfos
 	//////////////////////////////////////////////////////////////////
 	static Finfo* junctionShared[] = {
-			&handleJunction,
-			updateJunctionFinfo()
+			&handleJunctionPoolNum,
+			&handleJunctionPoolDelta,
+			junctionPoolNumFinfo(),
+			junctionPoolDeltaFinfo(),
 	};
 
 	static SharedFinfo junction( "junction",
@@ -156,6 +174,23 @@ const vector< VoxelJunction >& SolverJunction::meshMap() const
 	return targetMeshIndices_;
 }
 
+const vector< unsigned int >& SolverJunction::sendPoolIndex() const
+{
+	return sendPoolIndex_;
+}
+const vector< unsigned int >& SolverJunction::sendMeshIndex() const
+{
+	return sendMeshIndex_;
+}
+const vector< unsigned int >& SolverJunction::recvPoolIndex() const
+{
+	return recvPoolIndex_;
+}
+const vector< unsigned int >& SolverJunction::recvMeshIndex() const
+{
+	return recvMeshIndex_;
+}
+
 void SolverJunction::incrementTargets( 
 				vector< vector< double > >& y,
 				const vector< double >& v ) const
@@ -200,4 +235,21 @@ void SolverJunction::setMeshIndex( const vector< unsigned int >& meshIndex,
 {
 	meshIndex_ = meshIndex;
 	targetMeshIndices_ = meshMap;
+}
+
+
+void SolverJunction::setSendPools( 
+	const vector< unsigned int >& meshIndex,
+	const vector< unsigned int >& poolIndex )
+{
+	sendMeshIndex_ = meshIndex;
+	sendPoolIndex_ = poolIndex;
+}
+
+void SolverJunction::setRecvPools( 
+	const vector< unsigned int >& meshIndex,
+	const vector< unsigned int >& poolIndex)
+{
+	recvMeshIndex_ = meshIndex;
+	recvPoolIndex_ = poolIndex;
 }
