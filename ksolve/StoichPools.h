@@ -103,7 +103,10 @@ class StoichPools
 		//////////////////////////////////////////////////////////////////
 		//
 		/// Handles arriving messages through junction
-		void handleJunction( unsigned int fieldIndex, vector< double > v );
+		void handleJunctionPoolDelta( unsigned int poolIndex, 
+						vector< double > delta );
+		void handleJunctionPoolNum( unsigned int poolIndex, 
+						vector< double > num );
 
 		/// Create a junction between self and specified other StoichPool
 		void addJunction( const Eref& e, const Qinfo* q, Id other );
@@ -127,7 +130,9 @@ class StoichPools
 				unsigned int threadNum, double dt ) = 0;
 
 		/// Handles arriving messages through junction. Callsed 
-		virtual void vHandleJunction( unsigned int fieldIndex, 
+		virtual void vHandleJunctionPoolDelta( unsigned int poolIndex, 
+						const vector< double >& v ) = 0;
+		virtual void vHandleJunctionPoolNum( unsigned int poolIndex, 
 						const vector< double >& v ) = 0;
 
 		/// Create a junction between self and specified other StoichPool

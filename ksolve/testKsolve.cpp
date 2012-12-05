@@ -411,7 +411,7 @@ void testJunctionSetup()
 	assert ( junctionB != Id() );
 
 	vector< Id > tgts;
-	junctionA.element()->getNeighbours( tgts, updateJunctionFinfo() );
+	junctionA.element()->getNeighbours( tgts, junctionPoolDeltaFinfo() );
 	assert( tgts.size() == 1 );
 	assert( tgts[0] == junctionB );
 

@@ -19850,9 +19850,9 @@ between solvers.
 
 Wrapped up implementation for setting up the mesh-related arrays in the
 SolverJunction. Yet to compile. Now compiled.
-Next: Unit test for this setup.
-Next: set up diffusion across junctions
-Next: test diffusion across junctions
+*Next: Unit test for this setup.
+*Next: set up diffusion across junctions
+*Next: test diffusion across junctions
 Next: set up reactions across junctions
 Next: test reactions across junctions
 Next: Return to CubeMesh using a general voxel assignment routine and
@@ -19892,9 +19892,82 @@ Stuck on compilation.
 Issues with varying mesh sizes, see testMesh.cpp:1285.
 Issue with the calculations.
 
+==========================================================================
 3 Dec: Now it seems like the sent message with the diff info isn't being
 received on the target SolverJunction.
 Fixed.
 After some effort, incorporated the n-dim analytic diffusion test from the 
 regression tests. Now it clears this, though not with stellar accuracy.
-Anyway, major step cleared. 
+Takes a 15x15 diffusion calculation and splits it among 9 (that is, 3x3)
+solvers.
+Anyway, major step cleared.  Checkin 4321. See 25 Nov for next step, 
+reactions across junctions.
+
+Here the crux step is exemplified in ZReac::makeHalfReaction,
+where it calls stoich_->convertIdToPoolIndex.
+The Id is obtained through regular messaging, but the PoolIndex
+will be invalid because it isn't in the path of this Stoich.
+
+One option is to return a flag for the PoolIndex which tells us
+to put the reaction on a special temporary rates_ list.
+Furthermore we need to be able to encode the target stoich/solver that
+does handle the pool. This will be needed to decide which Junction should
+take it forward.
+
+==========================================================================
+4 Dec.
+
+A perspective view:
+1. I need to push mol# around in all cases, not just reacs. Currently 
+	diffusion calculations use the symmetry of the flux term, but for better
+	numerics and GSSA I need to use mol#. 
+
+2. I need to do calculations only on one side. Don't duplicate them. The
+	Pool transfer also becomes asymmetric.
+
+3. It is too messy to predefine any given pool, let alone a solver, as
+	being Leader or Follower in these calculations. Complicated meshing
+	and reactions will throw things out regardless, and any given pool may
+	be involved in multiple fluxes. So, all pools and
+	solvers have to be prepared to be involved in some calculations 
+	locally, and to have fluxes dictated to them by remote calculations.
+
+4. Do the calculations in the following sequence
+	Init: Send out current Pool values
+		Init_handle: recv current remote Pool values.
+	Process: Do all computations, local and cross. Send out fluxes.
+		Process_handle: recv fluxes. Update Pool values.
+
+
+Where to put the transferred mols?
+- In S_: 
+	Easy to incorporate with ongoing reac and diffn calculations
+		But how meaningful are ongoing reac calculations? Will the
+		S_ term be buffered?
+	S_ becomes bigger: nmols gets bigger with X reacs, and nmesh with diffn.
+		nmols: not a problem, only a few
+		nmesh: Will need to break S_ mesh indexing, or have lots of 
+			blanks. But possibly the sparse matrix stencil will
+			rescue this, so minimal number of extra mesh indices.
+		
+- Separate data struct:
+	Excruciating to incorporate.
+	Can employ distinct numerical methods.
+
+While there are possibly only a few junctions,
+	Need selective execution of the extra reac terms on junction voxels.
+	
+
+*1. Get data into S_ vector. Done skeleton for it.
+*2. Write up the messaging stuff and the Init phase.
+3. Extract setup info to pad out the S_ vector
+4. Use setup info to add terms to the stencil so that the regular diffusion 
+	calculations will see the transferred pools
+5. Modify the delta_V calculations to harvest instead from the changes in the
+	terms in the S_ vector.
+6. Check that it still works
+7. Get back to doing the reaction calculations.
+
+Successfully did 1 and 2, clears unit tests.
+
+==========================================================================

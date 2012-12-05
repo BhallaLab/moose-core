@@ -14,18 +14,6 @@
 
 extern const double NA;
 
-/*
-static SrcFinfo1< vector< double > >* updateJunction()
-{
-	static SrcFinfo1< vector< double > > updateJunction(
-		"updateJunction",
-		"Sends out vector of all mol # changes to cross junction."
-	);
-	return &updateJunction;
-}
-*/
-
-
 const Cinfo* StoichPools::initCinfo()
 {
 	static DestFinfo addJunction( "addJunction",
@@ -197,10 +185,16 @@ unsigned int StoichPools::getNumJunctions() const
 	return junctions_.size();
 }
 
-void StoichPools::handleJunction( unsigned int fieldIndex,
+void StoichPools::handleJunctionPoolDelta( unsigned int fieldIndex,
 		vector< double > v )
 {
-	vHandleJunction( fieldIndex, v );
+	vHandleJunctionPoolDelta( fieldIndex, v );
+}
+
+void StoichPools::handleJunctionPoolNum( unsigned int fieldIndex,
+		vector< double > v )
+{
+	vHandleJunctionPoolNum( fieldIndex, v );
 }
 
 bool validateJunction( Id me, Id other )
@@ -215,7 +209,7 @@ bool validateJunction( Id me, Id other )
 	Id myJunction( me.value() + 1);
 	Id otherJunction( other.value() + 1);
 	vector< Id > ret;
-	myJunction.element()->getNeighbours( ret, updateJunctionFinfo() );
+	myJunction.element()->getNeighbours( ret, junctionPoolDeltaFinfo() );
 	if ( find( ret.begin(), ret.end(), otherJunction ) != ret.end() ) {
 		cout << "Warning: StoichPools::validateJunction: junction " <<
 		" already present from " << 

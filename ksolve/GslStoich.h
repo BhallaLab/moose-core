@@ -37,6 +37,8 @@ class GslStoich: public StoichPools
 
 		void process( const Eref& e, ProcPtr info );
 		void reinit( const Eref& e, ProcPtr info );
+		void init( const Eref& e, ProcPtr info );
+		void initReinit( const Eref& e, ProcPtr info );
 
 		void stoich( const Eref& e, const Qinfo* q, Id stoichId );
 
@@ -94,7 +96,9 @@ class GslStoich: public StoichPools
 					double dt );
 
 		/// Handles arriving messages through junction. Callsed 
-		void vHandleJunction( unsigned int fieldIndex, 
+		void vHandleJunctionPoolDelta( unsigned int fieldIndex, 
+						const vector< double >& v );
+		void vHandleJunctionPoolNum( unsigned int fieldIndex, 
 						const vector< double >& v );
 
 		/// Create a junction between self and specified other StoichPool
