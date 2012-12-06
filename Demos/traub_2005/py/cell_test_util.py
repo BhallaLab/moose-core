@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Oct 15 15:03:09 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Nov  8 17:31:54 2012 (+0530)
+# Last-Updated: Thu Dec  6 16:13:13 2012 (+0530)
 #           By: subha
-#     Update #: 169
+#     Update #: 184
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -139,7 +139,8 @@ class SingleCellCurrentStepTest(unittest.TestCase):
             self.pulsegen.level[ii] = pulsearray[ii][2]
 
     def runsim(self, simtime, pulsearray=None):
-        """Run the simulation for `simtime`. Save the data at the end."""
+        """Run the simulation for `simtime`. Save the data at the
+        end."""
         if pulsearray is not None:            
             self.tweak_stimulus(pulsearray)
         moose.reinit()
@@ -149,7 +150,7 @@ class SingleCellCurrentStepTest(unittest.TestCase):
         delta = end - start
         print 'Simulation time with solver %s: %g s' % \
             (self.solver, 
-             delta.seconds + delta.microseconds * 1e-6)            
+             delta.seconds + delta.microseconds * 1e-6)
         self.tseries = np.linspace(0, simtime, len(self.somaVmTab.vec))
         # Now save the data
         for table_id in self.data_container.children:
@@ -172,7 +173,8 @@ class SingleCellCurrentStepTest(unittest.TestCase):
         try:
             nrn_data = np.loadtxt('../nrn/data/%s_soma_Vm.dat' % \
                                       (self.celltype))
-            pylab.plot(nrn_data[:,0], nrn_data[:,1],
+            nrn_indices = np.nonzero(nrn_data[:, 0] <= self.tseries[-1]*1e3)[0]                        
+            pylab.plot(nrn_data[nrn_indices,0], nrn_data[nrn_indices,1], 
                        label='Vm (mV) - neuron')
         except IOError:
             print 'No neuron data found.'
@@ -186,7 +188,8 @@ class SingleCellCurrentStepTest(unittest.TestCase):
         try:
             nrn_data = np.loadtxt('../nrn/data/%s_presynaptic_Vm.dat' % \
                                       (self.celltype))
-            pylab.plot(nrn_data[:,0], nrn_data[:,1], 
+            nrn_indices = np.nonzero(nrn_data[:, 0] <= self.tseries[-1]*1e3)[0]
+            pylab.plot(nrn_data[nrn_indices,0], nrn_data[nrn_indices,1], 
                        label='Vm (mV) - neuron')
         except IOError:
             print 'No neuron data found.'
