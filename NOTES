@@ -19968,6 +19968,95 @@ While there are possibly only a few junctions,
 6. Check that it still works
 7. Get back to doing the reaction calculations.
 
-Successfully did 1 and 2, clears unit tests.
+Successfully did 1 and 2, clears unit tests. Checkin 4324.
 
 ==========================================================================
+S_ along surface only, expands to handle additional mols for reacn interface.
+	These are nominally in the same voxels.
+S_ also expands by a few mesh entries but not having any reactions, to handle
+	abutting locations for diffusion interface.
+
+rates_ expands too, for the additional reacs. Invoked only at boundary.
+N_ expands to handle the stoichiometry of the additional reacs.
+
+
+Call chart for setup:
+StoichPools::addJunction( Id other )
+	-> DerivedClass::vAddJunction: doesn't do anything!
+	- Validates
+	- Sets up messages
+	- vBuildReacTerms: // Todo: Add to the N_ matrix and to rates_.
+	- SolverJunction::setReacTerms
+	- other->vBuildReacTerms
+	- other->SolverJunction::setReacTerms
+	- findDiffusionTerms: figures out which mols diffuse
+	- SolverJunction::setDiffTerms
+	- other->SolverJunction::setDiffTerms
+	- ChemMesh::matchMeshEntries: Figures out surface abutment
+	- SolverJunction::setMeshIndex: stores surface abut info
+	>- SolverJunction->setSendPools: stores info about pools to transfer.
+	>- SolverJunction->setRecvPools: stores info about pools to transfer.
+	- other->SolverJunction::setMeshIndex: stores surface abut info
+	- expandSForDiffusion: Add meshEntries to S_ for diff to abutting mesh
+	>- other->SolverJunction->setSendPools: See above
+	>- other->SolverJunction->setRecvPools: See above
+	Todo:
+		Add new reac terms in vBuildReacTerms
+			Expand S for new pools but only in surface voxels.
+			Add rows and cols to Stencil.
+		add xa term to diffusionMesh for junctions,or fill from Junction
+			No, it will have to be on the mesh. The stencil is 
+			there too
+
+	
+Call chart for runtime:
+	GslStoich::init
+		foreach Junction
+			harvest outgoing pools
+			send msg
+	StoichPools::handleJunctionPoolNum
+		GslStoich::vHandleJunctionPoolNum
+			// Assigns values. 
+
+	GslStoich::process
+		Advance sim using Gsl etc. // To be fixed to handle X reacs.
+		updateDiffusion // To be fixed to deal with more entries
+			foreach meshEntries // To fix to use bdry Entries too.
+					// Also to add rows&cols to Stencil.
+		SubClass::vUpdateJunction
+			foreach Junction
+				foreach meshIndex
+					stoich_->updateJunctionRates 
+					// (Reacs, to remove)
+				foreach Voxel on surface
+					GslStoich::updateJunctionDiffusion
+					// Perhaps to remove this too.
+				foreach transfer vector v
+					multiply by dt // Remove
+				Send msg to junctionPoolDelta
+					// Fix to send actual change in concs.
+				
+	StoichPools::handleJunctionPoolDelta
+		Junction::incrementTargets
+	
+
+The Stencil lives on the ChemMesh subclass. I can expand it so that it accounts
+for all junction diffusion terms as well. Or I can have each junction
+maintain its own little Stencil.
+- Single big stencil:
+	Easy and clean to compute
+	marginally faster
+	More opaque: can't easily check and alter any one junction.
+
+Related, will need to expand getMeshEntrySize to include junction voxels if
+	I have a monolithic Stencil, otherwise will have to partition.
+
+Overall, a single big stencil is far easier to subsequently fold into a better
+	numerical method than a bunch of separate calculations. So let's go
+	monolithic and hope for the best.
+
+Implemented the extended Stencil fillup. Yet to compile, let alone test.
+==========================================================================
+7 Dec. 
+Compiled and cleared unit tests on Stencil fillup. Yet to put in tests for it.
+

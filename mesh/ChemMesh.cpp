@@ -294,6 +294,29 @@ unsigned int ChemMesh::getNumBoundary() const
 }
 
 //////////////////////////////////////////////////////////////
+// Build the junction between this and another ChemMesh.
+// This one function does the work for both meshes.
+//////////////////////////////////////////////////////////////
+void ChemMesh::buildJunction( ChemMesh* other, vector< VoxelJunction >& ret)
+{
+	matchMeshEntries( other, ret );
+	extendStencil( other, ret );
+	flipRet( ret );
+	other->extendStencil( this, ret );
+	flipRet( ret );
+}
+
+void ChemMesh::flipRet( vector< VoxelJunction >& ret ) const
+{
+   vector< VoxelJunction >::iterator i;
+   for ( i = ret.begin(); i != ret.end(); ++i ) {
+		  unsigned int temp = i->first;
+		  i->first = i->second;
+		  i->second = temp;
+   }
+}
+
+//////////////////////////////////////////////////////////////
 // Orchestrate diffusion calculations in Stoich. This simply updates
 // the flux terms (du/dt due to diffusion). Virtual func, has to be
 // defined for every Mesh class if it differs from below.

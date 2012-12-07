@@ -126,6 +126,12 @@ class GslStoich: public StoichPools
 		/// Returns pointer to ChemMesh entry for compartment.
 		const ChemMesh* compartmentMesh() const;
 
+		/// Inherited virtual function, needed here to expand y_.
+		void expandSforDiffusion(
+			const vector< unsigned int > & otherMeshIndex,
+			const vector< unsigned int > & selfDiffPoolIndex,
+			SolverJunction& j );
+
 ///////////////////////////////////////////////////////////0
 		static const Cinfo* initCinfo();
 	private:
