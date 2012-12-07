@@ -63,9 +63,14 @@ class StoichPools
 		double* varSinit( unsigned int meshIndex );
 
 		/**
-		 * Returns size of S and Sinit vectors.
+		 * Returns size of S and Sinit vectors for local calculations
 		 */
 		unsigned int numMeshEntries() const;
+
+		/**
+		 * Returns size of S and Sinit vectors including boundaries.
+		 */
+		unsigned int numAllMeshEntries() const;
 
 		/**
 		 * Returns # of pools in S[meshEntry]. 0 if empty or out of range.
@@ -115,6 +120,12 @@ class StoichPools
 
 		void innerConnectJunctions( 
 						Id me, Id other, StoichPools* otherSP );
+
+
+		virtual void expandSforDiffusion( 
+			const vector< unsigned int > & otherMeshIndex,
+			const vector< unsigned int > & selfDiffPoolIndex,
+			SolverJunction& j );
 
 		void findDiffusionTerms(
 				const StoichPools* otherSP,

@@ -607,6 +607,18 @@ vector< double > NeuroMesh::getDiffusionScaling( unsigned int fid ) const
 	return vector< double >( 2, 1.0 );
 }
 
+/// Virtual function to return volume of mesh Entry, including
+/// for diffusively coupled voxels from other solvers.
+double NeuroMesh::extendedMeshEntrySize( unsigned int fid ) const
+{
+	if ( fid < nodeIndex_.size() ) {
+		return getMeshEntrySize( fid );
+	} else {
+		assert( 0 ); // Doesn't work yet.
+		return 0;
+	}
+}
+
 //////////////////////////////////////////////////////////////////
 // Dest funcsl
 //////////////////////////////////////////////////////////////////
@@ -799,6 +811,12 @@ unsigned int NeuroMesh::getStencil( unsigned int meshIndex,
 		const double** entry, const unsigned int** colIndex ) const
 {
 		return 0;
+}
+
+void NeuroMesh::extendStencil(
+	   	const ChemMesh* other, const vector< VoxelJunction >& vj )
+{
+	assert( 0 ); // doesn't work yet.
 }
 
 const vector< NeuroNode >& NeuroMesh::getNodes() const

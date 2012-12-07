@@ -535,6 +535,18 @@ vector< double > CylMesh::getDiffusionScaling( unsigned int fid ) const
 	return vector< double >( 2, 1.0 );
 }
 
+/// Virtual function to return volume of mesh Entry, including
+/// for diffusively coupled voxels from other solvers.
+double CylMesh::extendedMeshEntrySize( unsigned int fid ) const
+{
+	if ( fid < numEntries_ ) {
+		return getMeshEntrySize( fid );
+	} else {
+		assert( 0 ); // Doesn't work yet.
+		return 0;
+	}
+}
+
 //////////////////////////////////////////////////////////////////
 // Dest funcsl
 //////////////////////////////////////////////////////////////////
@@ -695,6 +707,12 @@ unsigned int CylMesh::getStencil( unsigned int meshIndex,
 	middleIndex[1] = meshIndex + 1;
 	*colIndex = middleIndex;
 	return 2;
+}
+
+void CylMesh::extendStencil( 
+	   	const ChemMesh* other, const vector< VoxelJunction >& vj )
+{
+	assert( 0 ); // doesn't work yet.
 }
 
 //////////////////////////////////////////////////////////////////

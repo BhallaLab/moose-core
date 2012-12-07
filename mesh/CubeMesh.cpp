@@ -748,6 +748,17 @@ double CubeMesh::getMeshEntrySize( unsigned int fid ) const
 	return dx_ * dy_ * dz_;
 }
 
+/// Virtual function to return volume of mesh Entry, including
+// for diffusively coupled voxels from other solvers.
+double CubeMesh::extendedMeshEntrySize( unsigned int fid ) const
+{
+	if ( fid >= m2s_.size() ) {
+		assert( fid - m2s_.size() < extendedMeshEntrySize_.size() );
+		return extendedMeshEntrySize_[ fid - m2s_.size() ];
+	}
+	return dx_ * dy_ * dz_;
+}
+
 /// Virtual function to return coords of mesh Entry.
 /// For Cuboid mesh, coords are x1y1z1 x2y2z2
 vector< double > CubeMesh::getCoordinates( unsigned int fid ) const
@@ -936,36 +947,90 @@ void CubeMesh::buildStencil()
 		vector< unsigned int > colIndex( 6, 0 );
 
 		if ( ix > 0 && s2m_[q-1] != flag ) {
-			entry[ne] = dx_;
+			entry[ne] = dy_ * dz_ / dx_;
 			colIndex[ne++] = s2m_[q-1];
 		}
 		if ( ( ix < nx_ - 1 ) && s2m_[q+1] != flag ) {
-			entry[ne] = dx_;
+			entry[ne] = dy_ * dz_ / dx_;
 			colIndex[ne++] = s2m_[q+1];
 		}
 		if ( iy > 0 && s2m_[ q-nx_ ] != flag ) {
 			assert( q >= nx_ );
-			entry[ne] = dy_;
+			entry[ne] = dx_ * dz_ / dy_;
 			colIndex[ne++] = s2m_[q-nx_];
 		}
 		if ( iy < ny_ - 1 && s2m_[ q+nx_ ] != flag ) {
 			assert( q+nx_ < s2m_.size() );
-			entry[ne] = dy_;
+			entry[ne] = dx_ * dz_ / dy_;
 			colIndex[ne++] = s2m_[q+nx_];
 		}
 		if ( iz > 0 && s2m_[ q - nx_*ny_ ] != flag ) {
 			assert( q >= nx_ * ny_ );
-			entry[ne] = dz_;
+			entry[ne] = dx_ * dy_ / dz_;
 			colIndex[ne++] = s2m_[ q - nx_*ny_ ];
 		}
 		if ( iz < nz_ - 1 && s2m_[ q + nx_*ny_ ] ) {
 			assert( q+nx_ < s2m_.size() );
-			entry[ne] = dz_;
+			entry[ne] = dx_ * dy_ / dz_;
 			colIndex[ne++] = s2m_[q + nx_*ny_ ];
 		}
 		entry.resize( ne );
 		colIndex.resize( ne );
 		m_.addRow( i, entry, colIndex );
+	}
+}
+
+/**
+ * extendStencil adds voxels to the core stencil, to build up a monolithic 
+ * stencil that also handles the entries just past all the boundaries.
+ */
+void CubeMesh::extendStencil( 
+	const ChemMesh* other, const vector< VoxelJunction >& vj ) 
+{
+	map< unsigned int, unsigned int > meshMap;
+	map< unsigned int, unsigned int >::iterator mmi;
+	
+	vector< unsigned int > meshBackMap;
+
+	unsigned int coreSize = m_.nRows();
+	unsigned int newSize = coreSize;
+	for ( vector< VoxelJunction >::const_iterator 
+					i = vj.begin(); i != vj.end(); ++i ) {
+		mmi = meshMap.find( i->second );
+		if ( mmi == meshMap.end() ) {
+			meshBackMap.push_back( i->second );
+			meshMap[i->second] = newSize++;
+		}
+	}
+	// Here we make a temporary data structure for the combined data
+	// of the sparse matrix with the voxelJunctions.
+	vector< vector< double > > diffScale( newSize );
+	vector< vector< unsigned int > > expandedMeshIndex( newSize );
+	for ( unsigned int i = 0; i < coreSize; ++i ) {
+		m_.getRow( i, diffScale[i], expandedMeshIndex[i] );
+	}
+	for ( vector< VoxelJunction >::const_iterator 
+					i = vj.begin(); i != vj.end(); ++i ) {
+		unsigned int row = i->first;
+		unsigned int col = meshMap[i->second];
+		diffScale[row].push_back( i->diffScale );
+		expandedMeshIndex[row].push_back( col );
+		// The diffusion matrix is symmetric.
+		diffScale[col].push_back( i->diffScale );
+		expandedMeshIndex[col].push_back( row );
+		// Note that the col indexing could be scrambled. Undesirable but
+		// I don't think it affects the functioning of the sparse matrix.
+	}
+	// Now we rebuild the sparse matrix.
+	m_.clear();
+	m_.setSize( newSize, newSize );
+	for ( unsigned int i = 0; i < newSize; ++i )
+		m_.addRow( i, diffScale[i], expandedMeshIndex[i] );
+
+	// Fill in the volumes of the external mesh entries
+	for ( vector< unsigned int>::const_iterator  
+			i = meshBackMap.begin(); i != meshBackMap.end(); ++i ) {
+		extendedMeshEntrySize_.push_back( other->getMeshEntrySize( *i ) );
 	}
 }
 
@@ -1001,39 +1066,6 @@ double distance( double x, double y, double z )
 {
 	return sqrt( x * x + y * y + z * z );
 }
-
-void flipRet( vector< VoxelJunction >& ret )
-{
-   vector< VoxelJunction >::iterator i;
-   for ( i = ret.begin(); i != ret.end(); ++i ) {
-		  unsigned int temp = i->first;
-		  i->first = i->second;
-		  i->second = temp;
-   }
-}
-
-/*
-void CubeMesh::matchSameSpacing( const CubeMesh* other,
-	   vector< pair< unsigned int, unsigned int > >& ret ) const
-{
-	if ( numDims() == 1 ) {
-		unsigned int index;
-		double dist = 
-			other->nearest( x0_ + dx_/2.0, y0_ + dy_/2.0, z0_ + dz_/2.0,
-				index );
-		// The meshes should not overlap, nor should they be apart.
-		if ( dist > dx_ * 0.95 && dist < dx_ * sqrt( 1.25 ) )
-			ret.push_back( PII( 0, index ) );
-	} else if ( other->numDims() == 1 ) {
-		other->matchSameSpacing( this, ret );
-		flipRet( ret );
-		return;
-	} 
-	// From here on we have multiple dims on both meshes, so we need to
-	// scan through the surface 
-	cout << "Multiple dims not yet implemented\n";
-}
-*/
 
 // For now: Just brute force through the surface list.
 // Surface list applies only if 2 or 3 D.
