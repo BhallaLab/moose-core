@@ -203,6 +203,32 @@ template < class T > class SparseMatrix
 		}
 
 		/**
+		 * getRow: vector version.
+		 * Used to get an entire row of entries. 
+		 * Returns # entries.
+		 */
+		unsigned int getRow( unsigned int row, 
+			vector< T >& e, vector< unsigned int >& c ) const
+		{
+			e.clear();
+			c.clear();
+			if ( row >= nrows_ ) {
+				return 0;
+			}
+			unsigned int rs = rowStart_[row];
+			if ( rs >= N_.size() ) {
+				return 0;			
+			}
+			unsigned int ret = rowStart_[row + 1] - rs;
+			e.insert( e.begin(), 
+							N_.begin() + rs, N_.begin() + rs + ret );
+			c.insert( c.begin(), 
+					colIndex_.begin() + rs, colIndex_.begin() + rs + ret );
+			return ret;
+		}
+
+
+		/**
 		 * This is an unnatural lookup here, across the grain of the
 		 * sparse matrix.
 		 * Ideally should use copy_if, but the C++ chaps forgot it.

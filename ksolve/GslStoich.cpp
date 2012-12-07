@@ -560,6 +560,10 @@ void GslStoich::matchMeshEntries(
 		otherMeshMap.push_back( 
 					VoxelJunction( k->second, i->second, i->diffScale ) );
 	}
+
+	// Now update the S_ and Sinit_ matrices to deal with the added 
+	// meshEntries.
+	
 }
 
 const ChemMesh* GslStoich::compartmentMesh() const
@@ -720,6 +724,18 @@ void GslStoich::remesh( const Eref& e, const Qinfo* q,
 	vector< double > temp( numPools, 0.0 );
 	y_.resize( vols.size(), temp );
 }
+
+// Inherited virtual function.
+void GslStoich::expandSforDiffusion(
+	const vector< unsigned int > & otherMeshIndex,
+	const vector< unsigned int > & selfDiffPoolIndex,
+	SolverJunction& j )
+{
+	StoichPools::expandSforDiffusion( otherMeshIndex, selfDiffPoolIndex, j);
+	vector< double > temp( numPoolEntries( 0 ), 0 );
+	y_.resize( numAllMeshEntries(), temp );
+}
+
 ///////////////////////////////////////////////////
 // Numerical function definitions
 ///////////////////////////////////////////////////
@@ -752,31 +768,38 @@ void GslStoich::updateDiffusion(
 	vector< vector< double > >& y,
 			   	double dt )
 {
-	const double *adx; 
+	const double *adx; // each entry is diffn_XA/diffn_length
 	const unsigned int* colIndex;
 
-	// Get value at midpoint.
-	for ( unsigned int me = 0; me < numMeshEntries(); ++me ) {
+	// Get value at midpoint in time.
+	for ( unsigned int me = 0; me < numAllMeshEntries(); ++me ) {
 		for ( unsigned int i = 0; i < stoich_->getNumVarPools(); ++i ) {
 			lastS[me][i] = ( lastS[me][i] + y[me][i] ) / 2.0;
 		}
 	}
 
-	// Simple forward Euler hack here. Later do a Crank Nicolson.
-	for ( unsigned int me = 0; me < numMeshEntries(); ++me ) {
+	// Simple forward Euler hack here. Later do a Crank Nicolson in
+	// alternating dimensions, as suggested by NumRec.
+	for ( unsigned int me = 0; me < numAllMeshEntries(); ++me ) {
 		unsigned int numInRow = 
 			diffusionMesh_->getStencil( me, &adx, &colIndex);
 		double vSelf = diffusionMesh_->getMeshEntrySize( me );
 		const double* sSelf = &(lastS[ me ][0]);
-		vector< double > xa = diffusionMesh_->getDiffusionArea( me);
+		/* Don't use xa anymore, it is folded into the stencil.
+		vector< double > xa;
+		if ( me < numMeshEntries() ) // Local ones
+			xa = diffusionMesh_->getDiffusionArea( me);
+		else
+			; // Fill from junction, later.
 		assert ( xa.size() == numInRow );
+			*/
 		for ( unsigned int i = 0; i < numInRow; ++i ) {
 			unsigned int other = colIndex[i];
 
 			// Get all concs at the other meshEntry
 			const double* sOther = &( lastS[other][0] ); 
-			double vOther = diffusionMesh_->getMeshEntrySize( other );
-			double scale = dt * xa[i] / adx[i] ;
+			double vOther = diffusionMesh_->extendedMeshEntrySize( other );
+			double scale = dt * adx[i] ;
 		
 			for ( unsigned int j = 0; j < stoich_->getNumVarPools(); ++j )
 				y[me][j] += stoich_->getDiffConst(j) * scale * 

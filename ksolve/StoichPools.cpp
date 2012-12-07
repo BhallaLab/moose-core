@@ -90,6 +90,7 @@ void StoichPools::resizeArrays( unsigned int totNumPools )
 	Sinit_[0].resize( totNumPools, 0.0);
 }
 
+// This function has to be updated to deal with changed boundaries. Ugh.
 void StoichPools::meshSplit( 
 				vector< double > initConcs,  // in milliMolar
 				vector< double > vols,		// in m^3
@@ -109,23 +110,8 @@ void StoichPools::meshSplit(
 		for ( unsigned int j = 0; j < initConcs.size(); ++j ) 
 			S_[i][j] = Sinit_[i][j] = initConcs[j] * v;
 	}
-	// localMeshEntries_ = localEntryList;
+	localMeshEntries_ = localEntryList;
 }
-
-/*
-void StoichPools::innerSetN( unsigned int meshIndex, 
-				unsigned int poolIndex, double v )
-{
-	assert( poolIndex < S_[meshIndex].size() );
-	S_[ meshIndex ][ poolIndex ] = v;
-}
-
-void StoichPools::innerSetNinit( unsigned int meshIndex, 
-				unsigned int poolIndex, double v )
-{
-	Sinit_[ meshIndex ][ poolIndex ] = v;
-}
-*/
 
 const double* StoichPools::S( unsigned int meshIndex ) const
 {
@@ -149,8 +135,14 @@ double* StoichPools::varSinit( unsigned int meshIndex )
 
 unsigned int StoichPools::numMeshEntries() const
 {
+	return localMeshEntries_.size();
+}
+
+unsigned int StoichPools::numAllMeshEntries() const
+{
 	return Sinit_.size();
 }
+
 
 unsigned int StoichPools::numPoolEntries( unsigned int i ) const
 {
@@ -261,6 +253,20 @@ void StoichPools::innerConnectJunctions(
 	otherSP->junctions_.resize( otherSP->junctions_.size() + 1 );
 }
 
+void StoichPools::expandSforDiffusion( 
+		const vector< unsigned int > & otherMeshIndex,
+		const vector< unsigned int > & selfDiffPoolIndex,
+		SolverJunction& j )
+{
+	vector< unsigned int > recvMeshIndex( otherMeshIndex.size(), 0 );
+	for ( unsigned int i = 0; i < otherMeshIndex.size(); ++i )
+		recvMeshIndex[i] = i + S_.size();
+	vector< double > temp( S_[0].size(), 0.0 );
+	S_.resize( S_.size() + recvMeshIndex.size(), temp );
+	Sinit_.resize( Sinit_.size() + recvMeshIndex.size(), temp );
+	j.setRecvPools( recvMeshIndex, selfDiffPoolIndex );
+}
+
 void StoichPools::addJunction( const Eref& e, const Qinfo* q, Id other )
 {
 	if ( !validateJunction( e.id(), other ) ) 
@@ -311,7 +317,14 @@ void StoichPools::addJunction( const Eref& e, const Qinfo* q, Id other )
 	this->matchMeshEntries( otherSP, selfMeshIndex, selfMeshMap,
 					otherMeshIndex, otherMeshMap );
 	junctions_.back().setMeshIndex( selfMeshIndex, selfMeshMap );
+	junctions_.back().setSendPools( selfMeshIndex, selfDiffPoolIndex );
+
+	// Here we have to expand the S matrix to include these points.
+	expandSforDiffusion( otherMeshIndex, selfDiffPoolIndex, junctions_.back() );
+
 	otherSP->junctions_.back().setMeshIndex( otherMeshIndex, otherMeshMap );
+	otherSP->junctions_.back().setSendPools( otherMeshIndex, otherDiffPoolIndex );
+	otherSP->junctions_.back().setRecvPools( otherMeshIndex, otherDiffPoolIndex );
 }
 
 

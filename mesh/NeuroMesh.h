@@ -107,6 +107,8 @@ class NeuroMesh: public ChemMesh
 		vector< double > getDiffusionArea( unsigned int fid ) const;
 		/// Virtual function to return scale factor for diffusion. 1 here.
 		vector< double > getDiffusionScaling( unsigned int fid ) const;
+		/// Vol of all mesh Entries including abutting diff-coupled voxels
+		double extendedMeshEntrySize( unsigned int fid ) const;
 
 		//////////////////////////////////////////////////////////////////
 
@@ -141,6 +143,9 @@ class NeuroMesh: public ChemMesh
 
 		unsigned int getStencil( unsigned int meshIndex,
 			const double** entry, const unsigned int** colIndex ) const;
+
+		void extendStencil( 
+			const ChemMesh* other, const vector< VoxelJunction >& vj );
 
 		//////////////////////////////////////////////////////////////////
 		// inherited virtual funcs for Boundary

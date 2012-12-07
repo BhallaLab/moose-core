@@ -95,6 +95,11 @@ class CubeMesh: public ChemMesh
 		vector< double > getDiffusionScaling( unsigned int fid ) const;
 
 		//////////////////////////////////////////////////////////////////
+		/**
+		 * Utility function to return volume of any voxel including those
+		 * diffusively coupled and aubtting the present volume.
+		 */
+		double extendedMeshEntrySize( unsigned int fid ) const;
 
 		/**
 		 * Inherited virtual func. Returns number of MeshEntry in array
@@ -221,6 +226,10 @@ class CubeMesh: public ChemMesh
 		unsigned int getStencil( unsigned int meshIndex,
 				const double** entry, const unsigned int** colIndex ) const;
 
+		/// Add boundary voxels to stencil for cross-solver junctions
+		void extendStencil(
+				const ChemMesh* other, const vector< VoxelJunction >& vj );
+
 		void assignVoxels( 
 				vector< pair< unsigned int, unsigned int > >& intersect,
 				double xmin, double xmax, 
@@ -293,6 +302,13 @@ class CubeMesh: public ChemMesh
 		 * CubeMesh.
 		 */
 		vector< unsigned int > surface_;
+
+		/**
+		 * vector of meshEntrySizes for abutting surfaces, needed to compute
+		 * diffusion rates across junctions.
+		 * Indexed from zero.
+		 */
+		vector< unsigned int > extendedMeshEntrySize_;
 };
 
 #endif	// _CUBE_MESH_H
