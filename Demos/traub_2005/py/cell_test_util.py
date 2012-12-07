@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Oct 15 15:03:09 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Dec  6 16:13:13 2012 (+0530)
+# Last-Updated: Fri Dec  7 14:58:16 2012 (+0530)
 #           By: subha
-#     Update #: 184
+#     Update #: 196
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -41,6 +41,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import pylab
 import moose
+from moose import utils as mutils
 import cells
 import testutils
 from testutils import compare_cell_dump, setup_clocks, assign_clocks, step_run
@@ -80,18 +81,12 @@ def setup_current_step_model(model_container, data_container,
     moose.connect(soma_vm, 'requestData', cell.soma, 'get_Vm')
     pulse_table = moose.Table('%s/injectCurrent' % (data_container.path))
     moose.connect(pulse_table, 'requestData', pulsegen, 'get_output')
-    hsolve = None
-    if solver == 'hsolve':
-        hsolve = moose.HSolve(model_container.path+'/hsolve')
-        print 'Created', hsolve.path
-        hsolve.dt = simdt
-        hsolve.target = cell.path
     return {'cell': cell,
             'stimulus': pulsegen,
             'presynVm': presyn_vm,
             'somaVm': soma_vm,
             'injectionCurrent': pulse_table,
-            'hsolve': hsolve
+            # 'hsolve': hsolve
             }
 
 
@@ -125,10 +120,7 @@ class SingleCellCurrentStepTest(unittest.TestCase):
         self.presynVmTab = params['presynVm']
         self.injectionTab = params['injectionCurrent']
         self.pulsegen = params['stimulus']
-        testutils.setup_clocks(testutils.SIMDT, testutils.PLOTDT)
-        testutils.assign_clocks(self.model_container, 
-                                self.data_container, 
-                                solver=self.solver)
+        mutils.resetSim([self.model_container.path, self.data_container.path], self.simdt, self.plotdt, simmethod=self.solver)
 
     def tweak_stimulus(self, pulsearray):
         """Update the pulsegen for this model with new (delay, width,
@@ -143,7 +135,6 @@ class SingleCellCurrentStepTest(unittest.TestCase):
         end."""
         if pulsearray is not None:            
             self.tweak_stimulus(pulsearray)
-        moose.reinit()
         start = datetime.now()
         step_run(simtime, 0.1)
         end = datetime.now()

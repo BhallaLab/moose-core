@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat May 26 10:41:37 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Nov  8 17:27:54 2012 (+0530)
+# Last-Updated: Fri Dec  7 15:00:55 2012 (+0530)
 #           By: subha
-#     Update #: 369
+#     Update #: 384
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -39,6 +39,7 @@ from matplotlib import pyplot as plt
 import unittest
 
 import moose
+from moose import utils as mutils
 import config
 import channelbase
 
@@ -64,6 +65,8 @@ def setup_clocks(simdt, plotdt):
     moose.setClock(LOOKUPCLOCK, simdt)
     moose.setClock(STIMCLOCK, simdt)
     moose.setClock(PLOTCLOCK, plotdt)
+    moose.le('/clock')
+    
 
 def assign_clocks(model_container, data_container, solver='euler'):
     """Assign clockticks to elements.
