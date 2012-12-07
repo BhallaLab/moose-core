@@ -1,14 +1,14 @@
-# trbcell.py --- 
+# cell.py --- 
 # 
-# Filename: trbcell.py
+# Filename: cell.py
 # Description: 
 # Author: Subhasis Ray
 # Maintainer: 
 # Created: Fri Mar  9 23:17:17 2012 (+0530)
 # Version: 
-# Last-Updated: Mon Aug 27 18:52:54 2012 (+0530)
+# Last-Updated: Fri Dec  7 14:52:03 2012 (+0530)
 #           By: subha
-#     Update #: 674
+#     Update #: 680
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -191,7 +191,7 @@ class CellMeta(type):
         return type.__new__(cls, name, bases, cdict)
 
     
-class CellBase(moose.Neutral):
+class CellBase(moose.Neuron):
     __metaclass__ = CellMeta
     annotation = {'cno': 'cno_0000020'}
     def __init__(self, path):
@@ -520,4 +520,4 @@ def init_prototypes():
 
 
 # 
-# trbcell.py ends here
+# cells.py ends here
