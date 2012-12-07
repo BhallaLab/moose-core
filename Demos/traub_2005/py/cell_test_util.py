@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Oct 15 15:03:09 2012 (+0530)
 # Version: 
-# Last-Updated: Fri Dec  7 14:58:16 2012 (+0530)
+# Last-Updated: Fri Dec  7 17:18:04 2012 (+0530)
 #           By: subha
-#     Update #: 196
+#     Update #: 218
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -120,6 +120,8 @@ class SingleCellCurrentStepTest(unittest.TestCase):
         self.presynVmTab = params['presynVm']
         self.injectionTab = params['injectionCurrent']
         self.pulsegen = params['stimulus']
+        # setup_clocks(self.simdt, self.plotdt)
+        # assign_clocks(self.model_container, self.data_container, self.solver)        
         mutils.resetSim([self.model_container.path, self.data_container.path], self.simdt, self.plotdt, simmethod=self.solver)
 
     def tweak_stimulus(self, pulsearray):
@@ -135,14 +137,17 @@ class SingleCellCurrentStepTest(unittest.TestCase):
         end."""
         if pulsearray is not None:            
             self.tweak_stimulus(pulsearray)
+        moose.reinit()
         start = datetime.now()
         step_run(simtime, 0.1)
         end = datetime.now()
+        while moose.isRunning():
+            time.sleep(0.1)
         delta = end - start
         print 'Simulation time with solver %s: %g s' % \
             (self.solver, 
              delta.seconds + delta.microseconds * 1e-6)
-        self.tseries = np.linspace(0, simtime, len(self.somaVmTab.vec))
+        self.tseries = np.arange(0, simtime+self.plotdt, self.plotdt)
         # Now save the data
         for table_id in self.data_container.children:
             data = np.vstack((self.tseries, table_id[0].vec))

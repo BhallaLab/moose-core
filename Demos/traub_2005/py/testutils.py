@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat May 26 10:41:37 2012 (+0530)
 # Version: 
-# Last-Updated: Fri Dec  7 15:00:55 2012 (+0530)
+# Last-Updated: Fri Dec  7 16:27:24 2012 (+0530)
 #           By: subha
-#     Update #: 384
+#     Update #: 400
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -107,6 +107,10 @@ def assign_clocks(model_container, data_container, solver='euler'):
                    data_container.path+'/##[TYPE=Table]',
                    'process')
     if solver == 'hsolve':
+        for neuron in moose.wildcardFind('%s/##[TYPE=Neuron]'):
+            solver = moose.HSolve(neuron.path+'/solve')
+            solver.dt = moose.element('/clock/tick[0]').dt
+            solver.target = neuron.path
         moose.useClock(INITCLOCK,
                        model_container.path+'/##[TYPE=HSolve]',
                        'process')
@@ -133,8 +137,10 @@ def step_run(simtime, steptime, verbose=True):
         moose.start(steptime)
         if verbose:
             print 'Simulated till', clock.currentTime, 's'
-    remaining = simtime % steptime
+    remaining = simtime - clock.currentTime
     if remaining > 0:
+        if verbose:
+            print 'Running the remaining', remaining, 's'
         moose.start(remaining)
     if verbose:
         print 'Finished simulation'
