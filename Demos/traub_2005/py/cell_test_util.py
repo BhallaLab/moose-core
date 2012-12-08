@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Oct 15 15:03:09 2012 (+0530)
 # Version: 
-# Last-Updated: Sat Dec  8 14:53:21 2012 (+0530)
+# Last-Updated: Sat Dec  8 16:44:18 2012 (+0530)
 #           By: subha
-#     Update #: 219
+#     Update #: 227
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -42,6 +42,7 @@ from matplotlib import pyplot as plt
 import pylab
 import moose
 from moose import utils as mutils
+import config
 import cells
 import testutils
 from testutils import compare_cell_dump, setup_clocks, assign_clocks, step_run
@@ -116,10 +117,11 @@ class SingleCellCurrentStepTest(unittest.TestCase):
             self.plotdt,
             solver=self.solver)
         self.cell = params['cell']       
-        print '******************************************', self.cell.soma.path
         for ch in moose.wildcardFind(self.cell.soma.path + '/##[ISA=ChanBase]'):
-            print ch.path, 'Ek =', ch[0].Ek, ch.class_
-
+            config.logger.debug('%s Ek = %g' % (ch.path, ch[0].Ek))
+        for ch in moose.wildcardFind(self.cell.soma.path + '/##[ISA=CaConc]'):
+            config.logger.debug('%s tau = %g' % (ch.path, ch[0].tau))
+                                
         self.somaVmTab = params['somaVm']
         self.presynVmTab = params['presynVm']
         self.injectionTab = params['injectionCurrent']
@@ -148,9 +150,9 @@ class SingleCellCurrentStepTest(unittest.TestCase):
         while moose.isRunning():
             time.sleep(0.1)
         delta = end - start
-        print 'Simulation time with solver %s: %g s' % \
+        config.logger.info('Simulation time with solver %s: %g s' % \
             (self.solver, 
-             delta.seconds + delta.microseconds * 1e-6)
+             delta.seconds + delta.microseconds * 1e-6))
         self.tseries = np.arange(0, simtime+self.plotdt, self.plotdt)
         # Now save the data
         for table_id in self.data_container.children:
