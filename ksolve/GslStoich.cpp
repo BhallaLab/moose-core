@@ -83,10 +83,10 @@ const Cinfo* GslStoich::initCinfo()
 
 		static DestFinfo initProc( "initProc",
 			"Handles init call",
-			new ProcOpFunc< GslStoich >( &GslStoich::process ) );
+			new ProcOpFunc< GslStoich >( &GslStoich::init ) );
 		static DestFinfo initReinit( "initReinit",
 			"Handles initReinit call",
-			new ProcOpFunc< GslStoich >( &GslStoich::reinit ) );
+			new ProcOpFunc< GslStoich >( &GslStoich::initReinit ) );
 
 		static DestFinfo remesh( "remesh",
 			"Handle commands to remesh the pool. This may involve changing "

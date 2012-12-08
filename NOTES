@@ -20059,4 +20059,33 @@ Implemented the extended Stencil fillup. Yet to compile, let alone test.
 ==========================================================================
 7 Dec. 
 Compiled and cleared unit tests on Stencil fillup. Yet to put in tests for it.
+Checkin 4335.
 
+To do the diffusion, should I buffer or float the external meshEntries?
+- Buffer: 
+	I won't be able to measure the change in conc. 
+	The fixed conc may be more consistent with actual behaviour. 
+	Same as computing the flux term using explicit Euler, if one only
+		does one timestep advance.
+
+Float: Only differs if the computation is done using multiple timesteps. Here
+	a second order option would be to compute values on both sides and
+	exchange estimates: effectively a trapezoidal approximation.
+
+Clearly, have to float it if I want to estimate how much it has changed during
+the timestep.
+
+Unit test: confirm that the correct number of S have been set up
+	Confirm that the correct entries get exchanged
+	Confirm that the extended stencil is right.
+
+Full test: clean out the old diffusion calculations, replace with the new
+	stencil form.
+
+
+==========================================================================
+8 Dec.
+Added unit test to confirm mesh data transfer of Pool #s. Works, data gets
+to the right place.
+
+==========================================================================

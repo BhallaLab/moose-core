@@ -621,6 +621,70 @@ pair< Id, Id > makeComptForDiffusion( Shell* s, Id model, unsigned int i )
 	return pair< Id, Id >( compt, stoichA );
 }
 
+void testMolTransferAcrossJunctions()
+{
+	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< int > dims( 1, 1 );
+
+	Id model = s->doCreate( "Neutral", Id(), "model", dims );
+	pair< Id, Id > compt0 = makeComptForDiffusion( s, model, 0 );
+	pair< Id, Id > compt1 = makeComptForDiffusion( s, model, 1 );
+	SetGet1<Id>::set( compt0.second, "addJunction", compt1.second );
+	unsigned int nj;
+	nj = Field< unsigned int >::get( compt0.second, "num_junction" );
+	assert( nj == 1 );
+	nj = Field< unsigned int >::get( compt1.second, "num_junction" );
+	assert( nj == 1 );
+	Id jn0( "/model/compt_0/stoichA/junction" );
+	assert( jn0 != Id() );
+	Id jn1( "/model/compt_1/stoichA/junction" );
+	assert( jn1 != Id() );
+	unsigned int m = Field< unsigned int >::get( jn0, "numMeshEntries" );
+	assert( m == 5 );
+	m = Field< unsigned int >::get( jn1, "numMeshEntries" );
+	assert( m == 5 );
+
+	// Look up mol transfer here.
+	vector< double > nInit( 25, -1.0 );
+	nInit[4]=0; nInit[9]=1; nInit[14]=2; nInit[19]=3; nInit[24]=4;
+	Id pool0( "/model/compt_0/A" );
+	Field< double >::setVec( pool0, "nInit", nInit );
+	nInit.clear();
+	nInit.resize( 25, -2.0 );
+	nInit[0] = 9; nInit[5] = 8; nInit[10] = 7; nInit[15] = 6; nInit[20] = 5;
+	Id pool1( "/model/compt_1/A" );
+	Field< double >::setVec( pool1, "nInit", nInit );
+
+	s->doUseClock( "/model/compt_#/stoichA", "init",  3 );
+	s->doSetClock( 3, 1.0 );
+	s->doSetClock( 4, 1.0 );
+	s->doReinit();
+	s->doStart( 1.0 );
+	StoichPools* sp0 = 
+			reinterpret_cast< StoichPools* >( compt0.second.eref().data() );
+	StoichPools* sp1 = 
+			reinterpret_cast< StoichPools* >( compt1.second.eref().data() );
+	assert( sp0->numMeshEntries() == 25 );
+	assert( sp0->numAllMeshEntries() == 30 );
+	assert( sp0->numPoolEntries( 0 ) == 1 );
+	assert( sp1->numMeshEntries() == 25 );
+	assert( sp1->numAllMeshEntries() == 30 );
+	assert( sp1->numPoolEntries( 0 ) == 1 );
+
+	for ( unsigned int i = 0 ; i < 5; ++i ) {
+		assert( doubleEq( sp0->S(i * 5 + 4)[0], i ) ); // original0
+		assert( doubleEq( sp1->S(i * 5 )[0], 9 - i ) ); // original1
+	}
+
+	for ( unsigned int i = 0 ; i < 5; ++i ) {
+		assert( doubleEq( sp1->S(i + 25)[0], i ) ); // diffused original0
+		assert( doubleEq( sp0->S(i + 25)[0], 9 - i ) ); //diffused original1
+	}
+
+	s->doDelete( model );
+	cout << "." << flush;
+}
+
 // Defined in regressionTests/rtReacDiff.cpp
 extern double checkNdimDiff( const vector< double >& conc, 
 				double D, double t,
@@ -737,5 +801,6 @@ void testKineticSolvers()
 
 void testKineticSolversProcess()
 {
+	testMolTransferAcrossJunctions();
 	testDiffusionAcrossJunctions();
 }
