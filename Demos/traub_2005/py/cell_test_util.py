@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Oct 15 15:03:09 2012 (+0530)
 # Version: 
-# Last-Updated: Fri Dec  7 17:18:04 2012 (+0530)
+# Last-Updated: Sat Dec  8 14:53:21 2012 (+0530)
 #           By: subha
-#     Update #: 218
+#     Update #: 219
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -116,6 +116,10 @@ class SingleCellCurrentStepTest(unittest.TestCase):
             self.plotdt,
             solver=self.solver)
         self.cell = params['cell']       
+        print '******************************************', self.cell.soma.path
+        for ch in moose.wildcardFind(self.cell.soma.path + '/##[ISA=ChanBase]'):
+            print ch.path, 'Ek =', ch[0].Ek, ch.class_
+
         self.somaVmTab = params['somaVm']
         self.presynVmTab = params['presynVm']
         self.injectionTab = params['injectionCurrent']

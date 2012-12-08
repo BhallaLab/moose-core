@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Apr 17 23:58:49 2009 (+0530)
 # Version: 
-# Last-Updated: Tue Aug 28 14:35:03 2012 (+0530)
+# Last-Updated: Sat Dec  8 15:52:42 2012 (+0530)
 #           By: subha
-#     Update #: 1054
+#     Update #: 1057
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -75,7 +75,7 @@ class KDR(KChannel):
     inf_x = 1.0 / (1.0 + exp((- v_array - 29.5e-3) / 10e-3))
 
     def __init__(self, path):
-        KChannel.__init__(self, path, xpower, ypower)
+        KChannel.__init__(self, path)
 
 
 class KDR_FS(KDR):
@@ -248,7 +248,7 @@ def initKChannelPrototypes(libpath='/library'):
                      'KAHP_DP',
                      'KC',
                      'KC_FAST']    
-    return dict([(key, prototypes[key]) for key in channel_names])
+    return dict([(key, eval('%s("%s")' % (key, prototypes[key].path))) for key in channel_names])
         
 
 # 

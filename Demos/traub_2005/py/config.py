@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed May 23 11:31:40 2012 (+0530)
 # Version: 
-# Last-Updated: Mon Jul 16 16:47:11 2012 (+0530)
+# Last-Updated: Sat Dec  8 15:12:50 2012 (+0530)
 #           By: subha
-#     Update #: 91
+#     Update #: 99
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -130,6 +130,15 @@ logging.basicConfig(filename=LOG_FILENAME, level=LOG_LEVEL, format='%(asctime)s 
 # logging.basicConfig(level=LOG_LEVEL, format='%(asctime)s %(levelname)s %(name)s %(filename)s %(funcName)s: %(message)s', filemode='w')
 
 logger = logging.getLogger('traub2005')
+
+# Add a logging handler to print messages to stderr
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+# create formatter and add it to the handlers
+formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(filename)s %(funcName)s: %(message)s')
+ch.setFormatter(formatter)
+# add the handlers to logger
+logger.addHandler(ch)
 
 import os
 os.environ['NUMPTHREADS'] = '1'
