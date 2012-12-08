@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Apr 17 23:58:13 2009 (+0530)
 # Version: 
-# Last-Updated: Thu Jul 19 17:19:28 2012 (+0530)
+# Last-Updated: Sat Dec  8 15:51:51 2012 (+0530)
 #           By: subha
-#     Update #: 397
+#     Update #: 402
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -79,7 +79,7 @@ class NaF_TCR(NaF):
     inf_x = 1.0 / (1.0 + exp(( - v_array - shift_x - 38e-3) / 10e-3))
 
     def __init__(self, path):
-        NaChannel.__init__(self)
+        NaChannel.__init__(self, path)
 
         
 class NaF2(NaF):
@@ -176,7 +176,11 @@ def initNaChannelPrototypes():
         'NaPF_TCR',
         'NaF_TCR',
         ]
-    return dict([(key, prototypes[key]) for key in channel_names])
+    _proto = {}
+    for name in channel_names:
+        chanclass = eval(name)
+        _proto[name] = chanclass(prototypes[name])
+    return _proto
 
 
 # 

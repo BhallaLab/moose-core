@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri May  4 14:55:52 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Aug 28 14:35:25 2012 (+0530)
+# Last-Updated: Sat Dec  8 15:37:18 2012 (+0530)
 #           By: subha
-#     Update #: 315
+#     Update #: 336
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -66,21 +66,19 @@ def setup_gate_tables(gate, param_dict, bases):
         gate.divs = ca_divs
     gate.useInterpolation = True
     keys = ['%s_%s' % (key, suffix) for key in ['tau', 'inf', 'alpha', 'beta', 'tableA', 'tableB']]
+    msg = ''
     if keys[0] in param_dict:
-        print 'Using tau/inf tables'
+        msg = 'Using tau/inf tables'
         gate.tableA = param_dict[keys[1]] / param_dict[keys[0]]
         gate.tableB = 1 / param_dict[keys[0]]
-        return True
     elif keys[2] in param_dict:
-        print 'Using alpha/beta tables'
+        msg = 'Using alpha/beta tables'
         gate.tableA = param_dict[keys[2]]
         gate.tableB = param_dict[keys[2]] + param_dict[keys[3]]
-        return True
     elif keys[4] in param_dict:
-        print 'Using A/B tables'
+        msg = 'Using A/B tables'
         gate.tableA = param_dict[keys[4]]
         gate.tableB = param_dict[keys[5]]
-        return True
     else:
         for base in bases:
             new_bases = base.mro()
@@ -88,12 +86,18 @@ def setup_gate_tables(gate, param_dict, bases):
             if new_bases:
                 new_bases = new_bases[1:]
             if setup_gate_tables(gate, new_param_dict, new_bases):
-                return True
-    return False
+                msg = 'Gate setup in baseclass: '+base.__class__.__name__
+                break
+    if msg:
+        config.logger.debug('%s: %s' % (gate.path, msg))
+        return True
+    else:
+        config.logger.debug('%s: nothing was setup for this gate' % (gate.path))
+        return False
             
 def get_class_field(name, cdict, bases, fieldname, default=None):
     if fieldname in cdict:
-        print name, fieldname, cdict[fieldname]
+        config.logger.debug('%s: %s=%s' % (name, fieldname, str(cdict[fieldname])))
         return cdict[fieldname]
     else:
         for base in bases:
@@ -136,7 +140,6 @@ class ChannelMeta(type):
         proto.Ek = get_class_field(name, cdict, bases, 'Ek', default=0.0)
         X = get_class_field(name, cdict, bases, 'X')
         if X is not None:
-            print name, 'setting', X
             proto.X = X
         Y = get_class_field(name, cdict, bases, 'Y')
         if Y is not None:
@@ -155,7 +158,7 @@ class ChannelMeta(type):
             print proto.path, info.notes
         cdict['prototype'] = proto
         prototypes[name] = proto
-        print 'Created prototype:', proto.path
+        config.logger.info('Created prototype: %s of class %s' % (proto.path, name))        
         return type.__new__(cls, name, bases, cdict)
 
 
