@@ -325,6 +325,7 @@ void StoichPools::addJunction( const Eref& e, const Qinfo* q, Id other )
 	otherSP->junctions_.back().setMeshIndex( otherMeshIndex, otherMeshMap );
 	otherSP->junctions_.back().setSendPools( otherMeshIndex, otherDiffPoolIndex );
 	otherSP->junctions_.back().setRecvPools( otherMeshIndex, otherDiffPoolIndex );
+	otherSP->expandSforDiffusion( selfMeshIndex, otherDiffPoolIndex, otherSP->junctions_.back() );
 }
 
 
