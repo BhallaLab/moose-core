@@ -1,11 +1,12 @@
 import moose as _moose
 
-_dt = 0.0
 _tick = 8
 _base = '/_utils'
 _path = _base + '/y{0}'
 _counter = 0
 _plots = []
+
+_moose.Neutral( _base )
 
 _defaultFields = {
 	_moose.Compartment : 'Vm',
@@ -17,6 +18,9 @@ _defaultFields = {
 	_moose.HHChannel2D: 'Gk',
 	
 	_moose.SynChan: 'Gk',
+	
+	_moose.CaConc: 'Ca',
+	_moose.ZombieCaConc: 'Ca',
 	
 	_moose.Pool: 'conc',
 	_moose.ZombiePool: 'conc',
@@ -30,15 +34,25 @@ _defaultFields = {
 	_moose.ZombieFuncPool: 'conc',
 	_moose.ZFuncPool: 'conc',
 }
+
 def _defaultField( obj ):
 	return _defaultFields[ type( obj ) ]
 
-_moose.Neutral( _base )
-
 def setDt( dt ):
-	global _dt
+	'''-----------
+	Description
+	-----------
+	Sets time-step for recording values.
 	
-	_dt = dt
+	---------
+	Arguments
+	---------
+	dt: Time-step for recording values.
+	
+	-------
+	Returns
+	-------
+	Nothing.'''
 	_moose.setClock( _tick, dt )
 
 class SetupError( Exception ):
@@ -87,6 +101,8 @@ class _Plot( _moose.Table ):
 		return iter( self.values )
 
 def record( obj, field = None, label = None ):
+	'''
+	'''
 	global _counter
 	
 	# Checking if object is an iterable like list or a tuple, but not a string.
@@ -110,7 +126,7 @@ def record( obj, field = None, label = None ):
 	
 	return p
 
-def _label( plot, labelFormat ):
+def _label( plot, labelFormat = '{path}.{field}' ):
 	# Over-ride label format if label has been given explicitly.
 	if plot.label:
 		labelFormat = plot.label
@@ -121,8 +137,10 @@ def _label( plot, labelFormat ):
 		field = plot.field 
 	)
 
-def _selected( selected ):
+def _selectedPlots( selected ):
 	if selected is None:
+		# Returning a copy of this list, instead of reference. The returned
+		# list will be manipulated later.
 		return _plots[ : ]
 	elif isinstance( selected, _Plot ):
 		return [ selected ]
@@ -212,8 +230,10 @@ def show(
 		if not combine:
 			plt.figure()
 		
-		plt.plot( plot.time, plot.values )
+		print _label( plot )
+		plt.plot( plot.time, plot.values, label = _label( plot ) )
 	
+	plt.legend()
 	plt.show()
 
 def HDF5():
