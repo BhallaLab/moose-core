@@ -347,13 +347,14 @@ m = moose.connect(pulse, 'outputOut', soma, 'injectMsg')
 #+begin_src python :tangle yes
 print m
 #+end_src
-  on my system gives[fn:: You can print any element and the string
-  representation will show you the class, two numbers(=id= and
-  =dataId=) uniquely identifying it among all elements, and its path.]
+  on my system gives:
 #+begin_example
 <moose.SingleMsg: id=5, dataId=733, path=/Msgs/singleMsg[733]>
 #+end_example
-  You can get some more information about a message:
+  You can print any element as above and the string representation
+  will show you the class, two numbers(=id= and =dataId=) uniquely
+  identifying it among all elements, and its path.  You can get some
+  more information about a message:
 #+begin_src python :tangle yes
 print m.e1.path, m.e2.path, m.srcFieldsOnE1, m.destFieldsOnE2
 #+end_src  
@@ -388,7 +389,15 @@ print soma.neighbours['injectMsg']
 #+begin_src python :tangle yes
 moose.connect(vmtab, 'requestData', soma, 'get_Vm')
 #+end_src
-  This finishes our model and recording setup.
+  This finishes our model and recording setup. You might be wondering
+  about the source-destination relationship above. It is natural to
+  think that =soma= is the source of =Vm= values which should be sent
+  to =vmtab=. But here =requestData= is a =srcFinfo= acting like a
+  reply card. This mode of one object getting data from another object
+  by request is called /pull/ mode in programming parlance .[fn:: This
+  apparently convoluted implementation is for performance reason. Can
+  you figure out why? /Hint: the table is driven by a slower clock
+  than the compartment./]
 
 * Scheduling and running the simulation
   With the model all set up, we have to schedule the simulation. MOOSE
@@ -410,7 +419,7 @@ moose.setClock(2, 0.25e-3)
   and 1 will be updated every 25 \mu s and those on tick # 2 every 250
   \mu s. We use the faster clocks for the model components where finer
   timescale is required for numerical accuracy and the slower clock to 
- sample the values of =Vm=.
+  sample the values of =Vm=.
   
   So to assign tick # 2 to the table for recording =Vm=, we pass its
   whole path to the =useClock= function.
