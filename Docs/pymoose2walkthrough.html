@@ -7,7 +7,7 @@
 <meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
 <meta name="title" content="Getting started with python scripting for MOOSE"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2012-10-04 14:46:46 IST"/>
+<meta name="generated" content="2012-12-12T11:23+0530"/>
 <meta name="author" content="Subhasis Ray"/>
 <meta name="description" content=""/>
 <meta name="keywords" content=""/>
@@ -61,6 +61,30 @@
   /*]]>*/-->
 </style>
 <script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012  Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
 <!--/*--><![CDATA[/*><!--*/
  function CodeHighlightOn(elem, id)
  {
@@ -93,10 +117,6 @@
 <div id="content">
 <h1 class="title">Getting started with python scripting for MOOSE</h1>
 
-<p>This document assumes that you have a working MOOSE installation. You
-can get details and further documentation regarding how to obtain and
-install it at <a href="http://moose.ncbs.res.in">MOOSE website</a>.
-</p>
 
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
@@ -151,12 +171,12 @@ install it at <a href="http://moose.ncbs.res.in">MOOSE website</a>.
 
 <p>
   This makes the <code>moose</code> module available for use in Python. You can
-  use Python's builtin <code>help</code> function to read the toplevel
+  use Python's built-in <code>help</code> function to read the top-level
   documentation for the moose module:
 </p>
 
 
-<pre class="src src-python"><span style="color: #7a378b;">help</span>(moose)
+<pre class="src src-python"><span style="color: #483d8b;">help</span>(moose)
 </pre>
 
 <p>
@@ -166,16 +186,16 @@ install it at <a href="http://moose.ncbs.res.in">MOOSE website</a>.
 </p>
 
 
-<pre class="src src-python"><span style="color: #7a378b;">help</span>(moose.connect)
+<pre class="src src-python"><span style="color: #483d8b;">help</span>(moose.connect)
 </pre>
 
 <p>
   To list the available functions and classes you can use <code>dir</code>
-  function<sup><a class="footref" name="fnr.1" href="#fn.1">1</a></sup>.
+  function<sup><a class="footref" name="fnr-.1" href="#fn-.1">1</a></sup>.
 </p>
 
 
-<pre class="src src-python"><span style="color: #7a378b;">dir</span>(moose)
+<pre class="src src-python"><span style="color: #483d8b;">dir</span>(moose)
 </pre>
 
 <p>
@@ -217,13 +237,13 @@ install it at <a href="http://moose.ncbs.res.in">MOOSE website</a>.
 <h2 id="sec-3"><span class="section-number-2">3</span> Creating objects and traversing the object hierarchy</h2>
 <div class="outline-text-2" id="text-3">
 
-<p>  Differebt types of biological entities like neurons, enzymes, etc
+<p>  Different types of biological entities like neurons, enzymes, etc
   are represented by classes and individual instances of those types
   are objects of those classes. Objects are the building-blocks of
   models in MOOSE. We call MOOSE objects `element` and use object and
-  element interchangably in the context of MOOSE. Elements are
+  element interchangeably in the context of MOOSE. Elements are
   conceptually laid out in a tree-like hierarchical structure. If you
-  are familiar with file system hieararchies in common operating
+  are familiar with file system hierarchies in common operating
   systems, this should be simple.
 </p>
 <p>
@@ -356,7 +376,7 @@ install it at <a href="http://moose.ncbs.res.in">MOOSE website</a>.
 </pre>
 
 <p>
-  And finally, we can create a <code>Table</code> to record the timeseries of the
+  And finally, we can create a <code>Table</code> to record the time series of the
   soma's membrane potential. It is good practice to organize the data
   separately from the model. So we do it as below:
 </p>
@@ -464,7 +484,7 @@ install it at <a href="http://moose.ncbs.res.in">MOOSE website</a>.
 
 <p>
   You can set the <code>Cm</code> and <code>Rm</code> fields to something realistic using
-  simple assignment (we follow SI unit)<sup><a class="footref" name="fnr.2" href="#fn.2">2</a></sup>.
+  simple assignment (we follow SI unit)<sup><a class="footref" name="fnr-.2" href="#fn-.2">2</a></sup>.
 </p>
 
 
@@ -639,7 +659,7 @@ pulse.delay[1] = 1e9
 </pre>
 
 <p>
-  on my system gives<sup><a class="footref" name="fnr.3" href="#fn.3">3</a></sup>
+  on my system gives:
 </p>
 
 
@@ -647,7 +667,10 @@ pulse.delay[1] = 1e9
 </pre>
 
 <p>
-  You can get some more information about a message:
+  You can print any element as above and the string representation
+  will show you the class, two numbers(<code>id</code> and <code>dataId</code>) uniquely
+  identifying it among all elements, and its path.  You can get some
+  more information about a message:
 </p>
 
 
@@ -703,7 +726,11 @@ pulse.delay[1] = 1e9
 </pre>
 
 <p>
-  This finishes our model and recording setup.
+  This finishes our model and recording setup. You might be wondering
+  about the source-destination relationship above. It is natural to
+  think that <code>soma</code> is the source of <code>Vm</code> values which should be sent
+  to <code>vmtab</code>. But here <code>requestData</code> is a <code>srcFinfo</code> acting like a
+  reply card. This mode of obtaining data is called <i>pull</i> mode.<sup><a class="footref" name="fnr-.3" href="#fn-.3">3</a></sup>
 </p>
 </div>
 
@@ -736,7 +763,7 @@ moose.setClock(2, 0.25e-3)
   and 1 will be updated every 25 &mu; s and those on tick # 2 every 250
   &mu; s. We use the faster clocks for the model components where finer
   timescale is required for numerical accuracy and the slower clock to 
- sample the values of <code>Vm</code>.
+  sample the values of <code>Vm</code>.
 </p>
 <p>  
   So to assign tick # 2 to the table for recording <code>Vm</code>, we pass its
@@ -754,7 +781,7 @@ moose.setClock(2, 0.25e-3)
   implements a <code>process</code> method. And in most cases that is the method
   we want the ticks to call at every time step. A less common method
   is <code>init</code>, which is implemented in some classes to interleave
-  actions or updates that must be executed in a specific order<sup><a class="footref" name="fnr.4" href="#fn.4">4</a></sup>. The <code>Compartment</code> class is one such case
+  actions or updates that must be executed in a specific order<sup><a class="footref" name="fnr-.4" href="#fn-.4">4</a></sup>. The <code>Compartment</code> class is one such case
   where a neuronal compartment has to know the <code>Vm</code> of its neighboring
   compartments before it can calculate its <code>Vm</code> for the next
   step. This is done with
@@ -769,7 +796,7 @@ moose.setClock(2, 0.25e-3)
   explicitly. 
 </p>
 <p>
-  Next we assign tick # 1 to process method of everthing under
+  Next we assign tick # 1 to process method of everything under
   <code>/model</code>.
 </p>
 
@@ -778,13 +805,13 @@ moose.setClock(2, 0.25e-3)
 </pre>
 
 <p>
-  Here the second argument is an example of wildcard path. The <code>##</code>
+  Here the second argument is an example of wild-card path. The <code>##</code>
   matches everything under the path preceding it at any depth. Thus if
   we had some other objects under <code>/model/soma</code>, <code>process</code> method of
   those would also have been scheduled on tick # 1. This is very
-  useful for complex models where it is tedius to scheduled each
+  useful for complex models where it is tedious to scheduled each
   element individually. In this case we could have used <code>/model/#</code> as
-  well for the path. This is a single level wildcard which matches
+  well for the path. This is a single level wild-card which matches
   only the children of <code>/model</code> but does not go farther down in the
   hierarchy. 
 </p>
@@ -828,7 +855,7 @@ moose.setClock(2, 0.25e-3)
 
 
 <pre class="src src-python"><span style="color: #a020f0;">import</span> pylab
-<span style="color: #a0522d;">t</span> = pylab.linspace(0, 300e-3, <span style="color: #7a378b;">len</span>(vmtab.vec))
+<span style="color: #a0522d;">t</span> = pylab.linspace(0, 300e-3, <span style="color: #483d8b;">len</span>(vmtab.vec))
 pylab.plot(t, vmtab.vec)
 pylab.show()
 </pre>
@@ -836,7 +863,7 @@ pylab.show()
 <p>
   The first line imports the pylab submodule from matplotlib. This
   useful for interactive plotting. The second line creates the time
-  points to match our somulation time and length of the recorded
+  points to match our simulation time and length of the recorded
   data. The third line plots the <code>Vm</code> and the fourth line makes it
   visible. Does the plot match your expectation?
 </p>
@@ -874,7 +901,7 @@ pylab.show()
 </p>
 
 
-<pre class="src src-python"><span style="color: #a020f0;">print</span> comp_array.path, <span style="color: #7a378b;">type</span>(comp_array)
+<pre class="src src-python"><span style="color: #a020f0;">print</span> comp_array.path, <span style="color: #483d8b;">type</span>(comp_array)
 </pre>
 
 <p>
@@ -884,7 +911,7 @@ pylab.show()
 
 
 <pre class="src src-python"><span style="color: #a020f0;">for</span> comp <span style="color: #a020f0;">in</span> comp_array:   
-    <span style="color: #a020f0;">print</span> comp.path, <span style="color: #7a378b;">type</span>(comp)
+    <span style="color: #a020f0;">print</span> comp.path, <span style="color: #483d8b;">type</span>(comp)
 </pre>
 
 <p>
@@ -985,23 +1012,22 @@ pylab.show()
 <div id="footnotes">
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
-<p class="footnote"><sup><a class="footnum" name="fn.1" href="#fnr.1">1</a></sup> To list the classes only, use <code>moose.le('/classes')</code>
+<p class="footnote"><sup><a class="footnum" name="fn-.1" href="#fnr-.1">1</a></sup> To list the classes only, use <code>moose.le('/classes')</code>
 </p>
 
 
-<p class="footnote"><sup><a class="footnum" name="fn.2" href="#fnr.2">2</a></sup> MOOSE is unit agnostic
+<p class="footnote"><sup><a class="footnum" name="fn-.2" href="#fnr-.2">2</a></sup> MOOSE is unit agnostic
   and things should work fine as long as you use values all converted
   to a consistent unit system.
 </p>
 
 
-<p class="footnote"><sup><a class="footnum" name="fn.3" href="#fnr.3">3</a></sup> You can print any element and the string
-  representation will show you the class, two numbers(<code>id</code> and
-  <code>dataId</code>) uniquely identifying it among all elements, and its path.
+<p class="footnote"><sup><a class="footnum" name="fn-.3" href="#fnr-.3">3</a></sup> This apparently convoluted implementation is for performance
+  reason. Can you figure out why? <i>Hint: the table is driven by a   slower clock than the compartment.</i>
 </p>
 
 
-<p class="footnote"><sup><a class="footnum" name="fn.4" href="#fnr.4">4</a></sup> In
+<p class="footnote"><sup><a class="footnum" name="fn-.4" href="#fnr-.4">4</a></sup> In
   principle any function available in a MOOSE class can be executed
   periodically this way as long as that class exposes the function for
   scheduling following the MOOSE API. So you have to consult the
@@ -1019,9 +1045,9 @@ pylab.show()
 </div>
 
 <div id="postamble">
-<p class="date">Date: 2012-10-04 14:46:46 IST</p>
+<p class="date">Date: 2012-12-12T11:23+0530</p>
 <p class="author">Author: Subhasis Ray</p>
-<p class="creator">Org version 7.8.11 with Emacs version 23</p>
+<p class="creator"><a href="http://orgmode.org">Org</a> version 7.9.2 with <a href="http://www.gnu.org/software/emacs/">Emacs</a> version 24</p>
 <a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a>
 
 </div>
