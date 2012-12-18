@@ -308,7 +308,7 @@ class CubeMesh: public ChemMesh
 		 * diffusion rates across junctions.
 		 * Indexed from zero.
 		 */
-		vector< unsigned int > extendedMeshEntrySize_;
+		vector< double > extendedMeshEntrySize_;
 };
 
 #endif	// _CUBE_MESH_H

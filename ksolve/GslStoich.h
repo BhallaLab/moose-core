@@ -92,8 +92,9 @@ class GslStoich: public StoichPools
 		// Junction operations.
 		//////////////////////////////////////////////////////////////////
 		/// Sends messages through junction. Called during Process.
-		void vUpdateJunction( const Eref& e, unsigned int threadNum,
-					double dt );
+		void vUpdateJunction( const Eref& e, 
+					const vector< vector< double > >& lastS,
+					unsigned int threadNum, double dt );
 
 		/// Handles arriving messages through junction. Callsed 
 		void vHandleJunctionPoolDelta( unsigned int fieldIndex, 
@@ -116,7 +117,7 @@ class GslStoich: public StoichPools
 				const; 
 
 		/// Generates mapping of mesh entries between solvers.
-		void matchMeshEntries( const StoichPools* other,
+		void matchMeshEntries( StoichPools* other,
 			vector< unsigned int >& selfMeshIndex, 
 			vector< VoxelJunction >& selfMeshMap,
 			vector< unsigned int >& otherMeshIndex, 
@@ -124,7 +125,7 @@ class GslStoich: public StoichPools
 		) const;
 
 		/// Returns pointer to ChemMesh entry for compartment.
-		const ChemMesh* compartmentMesh() const;
+		ChemMesh* compartmentMesh() const;
 
 		/// Inherited virtual function, needed here to expand y_.
 		void expandSforDiffusion(

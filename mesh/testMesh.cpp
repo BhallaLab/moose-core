@@ -628,8 +628,9 @@ void testCubeMesh()
 
 	neighbors = cm.getNeighbors( 63 );
 	assert( neighbors.size() == 3 );
-	assert( neighbors[0] == 62 );
+	assert( neighbors[0] == 47 );
 	assert( neighbors[1] == 59 );
+	assert( neighbors[2] == 62 );
 
 	neighbors = cm.getNeighbors( 2 );
 	assert( neighbors.size() == 4 );
@@ -640,19 +641,19 @@ void testCubeMesh()
 
 	neighbors = cm.getNeighbors( 6 );
 	assert( neighbors.size() == 5 );
-	assert( neighbors[0] == 5 );
-	assert( neighbors[1] == 7 );
-	assert( neighbors[2] == 2 );
+	assert( neighbors[0] == 2 );
+	assert( neighbors[1] == 5 );
+	assert( neighbors[2] == 7 );
 	assert( neighbors[3] == 10 );
 	assert( neighbors[4] == 22 );
 
 	neighbors = cm.getNeighbors( 22 );
 	assert( neighbors.size() == 6 );
-	assert( neighbors[0] == 21 );
-	assert( neighbors[1] == 23 );
-	assert( neighbors[2] == 18 );
-	assert( neighbors[3] == 26 );
-	assert( neighbors[4] == 6 );
+	assert( neighbors[0] == 6 );
+	assert( neighbors[1] == 18 );
+	assert( neighbors[2] == 21 );
+	assert( neighbors[3] == 23 );
+	assert( neighbors[4] == 26 );
 	assert( neighbors[5] == 38 );
 
 	cm.setPreserveNumEntries( 1 );
@@ -671,6 +672,69 @@ void testCubeMesh()
 	assert( doubleEq( cm.getDx(), 1.25 ) );
 	assert( doubleEq( cm.getDy(), 1.5 ) );
 	assert( doubleEq( cm.getDz(), 2.0 ) );
+
+	cout << "." << flush;
+}
+
+void testCubeMeshExtendStencil()
+{
+	CubeMesh cm0;
+	cm0.setPreserveNumEntries( 0 );
+	assert( cm0.getMeshType( 0 ) == CUBOID );
+	assert( cm0.getMeshDimensions( 0 ) == 3 );
+	assert( cm0.getDimensions() == 3 );
+	CubeMesh cm1 = cm0;
+
+	vector< double > coords( 9 );
+	coords[0] = 0; // X0
+	coords[1] = 0; // Y0
+	coords[2] = 0; // Z0
+
+	coords[3] = 2; // X1
+	coords[4] = 4; // Y1
+	coords[5] = 8; // Z1
+
+	coords[6] = 1; // DX
+	coords[7] = 1; // DY
+	coords[8] = 1; // DZ
+
+	cm0.innerSetCoords( coords );
+	coords[2] = 8; // 2x4 face abuts.
+	coords[5] = 16;
+	cm1.innerSetCoords( coords );
+
+	const double* entry;
+	const unsigned int* colIndex;
+	unsigned int num = cm0.getStencil( 0, &entry, &colIndex );
+	assert( num == 3 );
+	assert( colIndex[0] == 1 );
+	assert( colIndex[1] == 2 );
+	assert( colIndex[2] == 8 );
+
+	num = cm0.getStencil( 56, &entry, &colIndex );
+	assert( num == 3 );
+	assert( colIndex[0] == 48 );
+	assert( colIndex[1] == 57 );
+	assert( colIndex[2] == 58 );
+
+	vector< VoxelJunction > vj;
+	for ( unsigned int i = 0; i < 8; ++i ) {
+		vj.push_back( VoxelJunction( 56 + i, i ) );
+	}
+	cm0.extendStencil( &cm1, vj );
+
+	num = cm0.getStencil( 56, &entry, &colIndex );
+	assert( num == 4 );
+	assert( colIndex[0] == 48 );
+	assert( colIndex[1] == 57 );
+	assert( colIndex[2] == 58 );
+	assert( colIndex[3] == 64 );
+
+	for ( unsigned int i = 0; i < 8; ++i ) {
+		num = cm0.getStencil( 64 + i, &entry, &colIndex );
+		assert( num == 1 );
+		assert( colIndex[0] == 56 + i );
+	}
 
 	cout << "." << flush;
 }
@@ -1330,6 +1394,7 @@ void testMesh()
 	testCylMesh();
 	testMidLevelCylMesh();
 	testCubeMesh();
+	testCubeMeshExtendStencil();
 	testReMesh();
 	testNeuroMeshLinear();
 	testNeuroMeshBranching();

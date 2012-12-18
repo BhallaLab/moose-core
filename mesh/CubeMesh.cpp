@@ -932,9 +932,32 @@ void CubeMesh::fillSpaceToMeshLookup()
 // contents of the s2m_ and m2s_ vectors to do its job.
 // Assumes that entire volume is bounded by nx_, ny_, nz.
 //
+	// Helper class for setting up and sorting the row. I wanted to put it
+	// inside the function definition but it won't compile.
+	class Ecol {
+		public: 
+			Ecol( double e, unsigned int col )
+				: e_( e ), col_( col )
+			{;}
+
+			Ecol()
+				: e_( 0 ), col_( 0 )
+			{;}
+		
+			bool operator<( const Ecol& other ) const
+			{
+				return col_ < other.col_;
+			}
+	
+			double e_;
+			double col_;
+	};
+
 void CubeMesh::buildStencil()
 {
 	static const unsigned int flag = EMPTY;
+
+
 	fillSpaceToMeshLookup();
 	unsigned int num = m2s_.size();
 	for ( unsigned int i = 0; i < num; ++i ) {
@@ -942,40 +965,37 @@ void CubeMesh::buildStencil()
 		unsigned int ix = q % nx_;
 		unsigned int iy = ( q / nx_ ) % ny_;
 		unsigned int iz = ( q / ( nx_ * ny_ ) ) % nz_;
-		unsigned int ne = 0;
-		vector< double > entry( 6, 0 );
-		vector< unsigned int > colIndex( 6, 0 );
+		vector< double > entry;
+		vector< unsigned int > colIndex;
+		vector< Ecol > e;
 
 		if ( ix > 0 && s2m_[q-1] != flag ) {
-			entry[ne] = dy_ * dz_ / dx_;
-			colIndex[ne++] = s2m_[q-1];
+			e.push_back( Ecol( dy_ * dz_ / dx_, s2m_[q-1] ) );
 		}
 		if ( ( ix < nx_ - 1 ) && s2m_[q+1] != flag ) {
-			entry[ne] = dy_ * dz_ / dx_;
-			colIndex[ne++] = s2m_[q+1];
+			e.push_back( Ecol( dy_ * dz_ / dx_, s2m_[q+1] ) );
 		}
 		if ( iy > 0 && s2m_[ q-nx_ ] != flag ) {
 			assert( q >= nx_ );
-			entry[ne] = dx_ * dz_ / dy_;
-			colIndex[ne++] = s2m_[q-nx_];
+			e.push_back( Ecol( dx_ * dz_ / dy_, s2m_[q-nx_] ) );
 		}
 		if ( iy < ny_ - 1 && s2m_[ q+nx_ ] != flag ) {
 			assert( q+nx_ < s2m_.size() );
-			entry[ne] = dx_ * dz_ / dy_;
-			colIndex[ne++] = s2m_[q+nx_];
+			e.push_back( Ecol( dx_ * dz_ / dy_, s2m_[q+nx_] ) );
 		}
 		if ( iz > 0 && s2m_[ q - nx_*ny_ ] != flag ) {
 			assert( q >= nx_ * ny_ );
-			entry[ne] = dx_ * dy_ / dz_;
-			colIndex[ne++] = s2m_[ q - nx_*ny_ ];
+			e.push_back( Ecol( dx_ * dy_ / dz_, s2m_[q - nx_ * ny_] ) );
 		}
 		if ( iz < nz_ - 1 && s2m_[ q + nx_*ny_ ] ) {
 			assert( q+nx_ < s2m_.size() );
-			entry[ne] = dx_ * dy_ / dz_;
-			colIndex[ne++] = s2m_[q + nx_*ny_ ];
+			e.push_back( Ecol( dx_ * dy_ / dz_, s2m_[q + nx_ * ny_] ) );
 		}
-		entry.resize( ne );
-		colIndex.resize( ne );
+		sort( e.begin(), e.end() );
+		for ( vector< Ecol >::iterator j = e.begin(); j != e.end(); ++j ) {
+			entry.push_back( j->e_ );
+			colIndex.push_back( j->col_ );
+		}
 		m_.addRow( i, entry, colIndex );
 	}
 }
@@ -1419,6 +1439,7 @@ void CubeMesh::matchCubeMeshEntries( const CubeMesh* other,
 
 	// Scan through the VoxelJunctions and populate their diffScale field
 	setDiffScale( other, ret );
+	sort( ret.begin(), ret.end() );
 }
 
 void CubeMesh::setDiffScale( const CubeMesh* other,
