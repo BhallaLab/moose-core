@@ -138,6 +138,7 @@ class StoichPools
 		//////////////////////////////////////////////////////////////////
 		/// Sends messages through junction. Called during Process.
 		virtual void vUpdateJunction( const Eref& e, 
+				const vector< vector< double > >& lastS,
 				unsigned int threadNum, double dt ) = 0;
 
 		/// Handles arriving messages through junction. Callsed 
@@ -180,14 +181,14 @@ class StoichPools
 		 * that do not use a mesh (e.g., Smoldyn) will use a dummy 
 		 * ChemMesh to do the needful.
 		 */
-		virtual void matchMeshEntries( const StoichPools* other,
+		virtual void matchMeshEntries( StoichPools* other,
 			vector< unsigned int >& selfMeshIndex, 
 			vector< VoxelJunction >& selfMeshMap,
 			vector< unsigned int >& otherMeshIndex, 
 			vector< VoxelJunction >& otherMeshMap
 		) const = 0;
 
-		virtual const ChemMesh* compartmentMesh() const = 0;
+		virtual ChemMesh* compartmentMesh() const = 0;
 
 		//////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();

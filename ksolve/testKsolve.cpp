@@ -614,11 +614,125 @@ pair< Id, Id > makeComptForDiffusion( Shell* s, Id model, unsigned int i )
 	Field< bool >::set( compt, "preserveNumEntries", false );
 	Field< vector< double > >::set( compt, "coords", coords );
 
-	s->doUseClock( "/model/" + comptName + "/stoichA", "process",  4 );
+	s->doUseClock( "/model/" + comptName + "/stoichA", "init",  4 );
+	s->doUseClock( "/model/" + comptName + "/stoichA", "process",  5 );
 
 	assert( mid != Msg::bad );
 
 	return pair< Id, Id >( compt, stoichA );
+}
+
+// Returns the Ids for the compt and the responsible stoich object.
+pair< Id, Id > makeOneDimComptForDiffusion( Shell* s, Id model, unsigned int i )
+{
+	const double SIDE = 10e-6;
+	const double DIFFCONST = 1e-12;
+	vector< int > dims( 1, 1 );
+	stringstream ss;
+	ss << "compt_" << i;
+	string comptName = ss.str();
+
+	Id compt = s->doCreate( "CubeMesh", model, comptName, dims );
+	Id comptMeshEntry = Neutral::child( compt.eref(), "mesh" );
+	Id poolA = s->doCreate( "Pool", compt, "A", dims );
+	Field< double >::set( poolA, "nInit", 0.0 );
+	Field< double >::set( poolA, "diffConst", DIFFCONST );
+	MsgId mid = 
+		s->doAddMsg( "OneToOne", poolA, "mesh", comptMeshEntry, "mesh");
+	assert( mid != Msg::bad );
+	Id stoichA = s->doCreate( "GslStoich", compt, "stoichA", dims );
+	assert ( stoichA != Id() );
+	Id stoichCoreA = 
+			s->doCreate( "StoichCore", stoichA, "stoichCore", dims );
+	assert ( stoichCoreA != Id() );
+	string path = "/model/" + comptName + "/##";
+	Field< string >::set( stoichCoreA, "path", path );
+	Field< Id >::set( stoichA, "compartment", compt );
+	Field< string >::set( stoichA, "method", "rk5" );
+
+	mid = s->doAddMsg( "Single", comptMeshEntry, "remesh", stoichA, "remesh" );
+
+	vector< double > coords( 9, 0.0 );
+	coords[0] = SIDE * 5 * i;
+	coords[1] = 0;
+	coords[2] = 0;
+	coords[3] = coords[0] + SIDE * 5;
+	coords[4] = coords[1] + SIDE;
+	coords[5] = coords[2] + SIDE;
+	coords[6] = coords[7] = coords[8] = SIDE;
+	Field< bool >::set( compt, "preserveNumEntries", false );
+	Field< vector< double > >::set( compt, "coords", coords );
+
+	s->doUseClock( "/model/" + comptName + "/stoichA", "init",  4 );
+	s->doUseClock( "/model/" + comptName + "/stoichA", "process",  5 );
+
+	assert( mid != Msg::bad );
+
+	return pair< Id, Id >( compt, stoichA );
+}
+
+// Called from testMolTransferAcrossJunctions
+// Expects two 5x5 meshes, adjoining on the left-right side.
+void checkDiffusionStencil( const ChemMesh* cm0, const ChemMesh* cm1 )
+{
+	// const double SIDE = 10e-6;
+	const double *entry;
+	const unsigned int *colIndex;
+	unsigned int num;
+
+	num = cm0->getStencil( 4, &entry, &colIndex );
+	assert( num == 3 ); 
+	assert( colIndex[0] == 3 );
+	assert( colIndex[1] == 9 );
+	assert( colIndex[2] == 25 );
+
+	num = cm0->getStencil( 9, &entry, &colIndex );
+	assert( num == 4 ); 
+	/*
+	assert( colIndex[0] == 8 );
+	assert( colIndex[1] == 4 );
+	assert( colIndex[2] == 14 );
+	assert( colIndex[3] == 26 );
+	*/
+
+	num = cm0->getStencil( 14, &entry, &colIndex );
+	assert( num == 4 ); 
+	/*
+	assert( colIndex[0] == 9 );
+	assert( colIndex[1] == 13 );
+	assert( colIndex[2] == 19 );
+	assert( colIndex[3] == 27 );
+	*/
+
+	num = cm0->getStencil( 19, &entry, &colIndex );
+	assert( num == 4 ); 
+	/*
+	assert( colIndex[0] == 14 );
+	assert( colIndex[1] == 18 );
+	assert( colIndex[2] == 24 );
+	assert( colIndex[3] == 28 );
+	*/
+
+	num = cm0->getStencil( 24, &entry, &colIndex );
+	assert( num == 3 ); 
+	/*
+	assert( colIndex[0] == 19 );
+	assert( colIndex[1] == 23 );
+	assert( colIndex[2] == 29 );
+	*/
+
+	num = cm0->getStencil( 25, &entry, &colIndex );
+	assert( num == 1 );
+	// assert( doubleEq( entry[0], SIDE ) );
+	// assert( colIndex[0] == 4 );
+	num = cm0->getStencil( 26, &entry, &colIndex );
+	// assert( num == 1 ); assert( colIndex[0] == 9 );
+	num = cm0->getStencil( 27, &entry, &colIndex );
+	// assert( num == 1 ); assert( colIndex[0] == 14 );
+	num = cm0->getStencil( 28, &entry, &colIndex );
+	// assert( num == 1 ); assert( colIndex[0] == 19 );
+	num = cm0->getStencil( 29, &entry, &colIndex );
+	// assert( num == 1 ); assert( colIndex[0] == 24 );
 }
 
 void testMolTransferAcrossJunctions()
@@ -681,9 +795,18 @@ void testMolTransferAcrossJunctions()
 		assert( doubleEq( sp0->S(i + 25)[0], 9 - i ) ); //diffused original1
 	}
 
+	// Look up stencil here
+	ChemMesh* cm0 = 
+			reinterpret_cast< ChemMesh* >( compt0.first.eref().data() );
+	ChemMesh* cm1 = 
+			reinterpret_cast< ChemMesh* >( compt1.first.eref().data() );
+
+	checkDiffusionStencil( cm0, cm1 );
+
 	s->doDelete( model );
 	cout << "." << flush;
 }
+
 
 // Defined in regressionTests/rtReacDiff.cpp
 extern double checkNdimDiff( const vector< double >& conc, 
@@ -746,8 +869,246 @@ void testDiffusionAcrossJunctions()
 		assert( sj->meshMap().size() == 5 );
 		assert( doubleEq( sj->meshMap()[0].diffScale, SIDE ) );
 	}
+	/////////////////////////////////////////////////////////////
+	// Check stencils
+	GslStoich* gs0 = 
+		reinterpret_cast< GslStoich* >( compt[0].second.eref().data() );
+	const double* entry;
+	const unsigned int* colIndex;
+	unsigned int ns;
+	assert( gs0->compartmentMesh()->getNumEntries() == 25 );
+	ns = gs0->compartmentMesh()->getStencil( 0, &entry, &colIndex );
+	assert( ns == 2 );
+	assert( colIndex[0] == 1 );
+	assert( colIndex[1] == 5 );
+	ns = gs0->compartmentMesh()->getStencil( 4, &entry, &colIndex );
+	assert( ns == 3 );
+	assert( colIndex[0] == 3 );
+	assert( colIndex[1] == 9 );
+	assert( colIndex[2] == 25 );
+	ns = gs0->compartmentMesh()->getStencil( 9, &entry, &colIndex );
+	assert( ns == 4 );
+	assert( colIndex[0] == 4 );
+	assert( colIndex[1] == 8 );
+	assert( colIndex[2] == 14 );
+	assert( colIndex[3] == 26 );
+	ns = gs0->compartmentMesh()->getStencil( 24, &entry, &colIndex );
+	assert( ns == 4 );
+	assert( colIndex[0] == 19 );
+	assert( colIndex[1] == 23 );
+	assert( colIndex[2] == 29 );
+	assert( colIndex[3] == 34 );
 
+	for ( unsigned int i = 25; i < 35; ++i ) {
+		ns = gs0->compartmentMesh()->getStencil( i, &entry, &colIndex );
+		assert( ns == 1 );
+		assert( doubleEq( entry[0], SIDE ) );
+	}
+
+	ns = gs0->compartmentMesh()->getStencil( 25, &entry, &colIndex );
+	assert( colIndex[0] == 4 );
+	ns = gs0->compartmentMesh()->getStencil( 26, &entry, &colIndex );
+	assert( colIndex[0] == 9 );
+	ns = gs0->compartmentMesh()->getStencil( 27, &entry, &colIndex );
+	assert( colIndex[0] == 14 );
+	ns = gs0->compartmentMesh()->getStencil( 28, &entry, &colIndex );
+	assert( colIndex[0] == 19 );
+	ns = gs0->compartmentMesh()->getStencil( 29, &entry, &colIndex );
+	assert( colIndex[0] == 24 );
+	ns = gs0->compartmentMesh()->getStencil( 30, &entry, &colIndex );
+	assert( colIndex[0] == 20 );
+	ns = gs0->compartmentMesh()->getStencil( 31, &entry, &colIndex );
+	assert( colIndex[0] == 21 );
+	ns = gs0->compartmentMesh()->getStencil( 32, &entry, &colIndex );
+	assert( colIndex[0] == 22 );
+	ns = gs0->compartmentMesh()->getStencil( 33, &entry, &colIndex );
+	assert( colIndex[0] == 23 );
+	ns = gs0->compartmentMesh()->getStencil( 34, &entry, &colIndex );
+	assert( colIndex[0] == 24 );
+	
+	/////////////////////////////////////////////////////////////
+	// Check the solverJunction for gs0 and gs1.
+	GslStoich* gs1 = 
+		reinterpret_cast< GslStoich* >( compt[1].second.eref().data() );
+
+	assert( gs0->getNumJunctions() == 2 );
+	SolverJunction* sj = gs0->getJunction( 0 );
+	assert ( sj->recvMeshIndex().size() == 5 );
+	assert ( sj->recvMeshIndex()[0] == 25 );
+	assert ( sj->recvMeshIndex()[1] == 26 );
+	assert ( sj->recvMeshIndex()[2] == 27 );
+	assert ( sj->recvMeshIndex()[3] == 28 );
+	assert ( sj->recvMeshIndex()[4] == 29 );
+	assert ( sj->sendMeshIndex().size() == 5 );
+	assert ( sj->sendMeshIndex()[0] == 4 );
+	assert ( sj->sendMeshIndex()[1] == 9 );
+	assert ( sj->sendMeshIndex()[2] == 14 );
+	assert ( sj->sendMeshIndex()[3] == 19 );
+	assert ( sj->sendMeshIndex()[4] == 24 );
+
+	sj = gs0->getJunction( 1 );
+	assert ( sj->recvMeshIndex().size() == 5 );
+	assert ( sj->recvMeshIndex()[0] == 30 );
+	assert ( sj->recvMeshIndex()[1] == 31 );
+	assert ( sj->recvMeshIndex()[2] == 32 );
+	assert ( sj->recvMeshIndex()[3] == 33 );
+	assert ( sj->recvMeshIndex()[4] == 34 );
+	assert ( sj->sendMeshIndex().size() == 5 );
+	assert ( sj->sendMeshIndex()[0] == 20 );
+	assert ( sj->sendMeshIndex()[1] == 21 );
+	assert ( sj->sendMeshIndex()[2] == 22 );
+	assert ( sj->sendMeshIndex()[3] == 23 );
+	assert ( sj->sendMeshIndex()[4] == 24 );
+
+	assert( gs1->getNumJunctions() == 3 );
+	sj = gs1->getJunction( 0 );
+	assert ( sj->recvMeshIndex().size() == 5 );
+	assert ( sj->recvMeshIndex()[0] == 25 );
+	assert ( sj->recvMeshIndex()[1] == 26 );
+	assert ( sj->recvMeshIndex()[2] == 27 );
+	assert ( sj->recvMeshIndex()[3] == 28 );
+	assert ( sj->recvMeshIndex()[4] == 29 );
+	assert ( sj->sendMeshIndex().size() == 5 );
+	assert ( sj->sendMeshIndex()[0] == 0 );
+	assert ( sj->sendMeshIndex()[1] == 5 );
+	assert ( sj->sendMeshIndex()[2] == 10 );
+	assert ( sj->sendMeshIndex()[3] == 15 );
+	assert ( sj->sendMeshIndex()[4] == 20 );
+
+	/////////////////////////////////////////////////////////////
+	// Put in some reference starting values to see if data is 
+	// going across correctly.
 	Id pool0( "/model/compt_0/A" );
+	vector< double > temp( 25 );
+	for ( unsigned int i = 0; i < 25; ++i )
+		temp[i] = i + 100;
+	Field< double >::setVec( pool0, "nInit", temp );
+
+	Id pool1( "/model/compt_1/A" );
+	for ( unsigned int i = 0; i < 25; ++i )
+		temp[i] = i + 200;
+	Field< double >::setVec( pool1, "nInit", temp );
+
+	Id pool3( "/model/compt_3/A" );
+	for ( unsigned int i = 0; i < 25; ++i )
+		temp[i] = i + 300;
+	Field< double >::setVec( pool3, "nInit", temp );
+
+	assert( gs0->numAllMeshEntries() == 35 );
+	vector< double > svec( 35, 0 );
+
+	///////////////////////////////////////////////////////////////////
+	// Call the 'init' method to be sure that all the pool concs are being
+	// sent over to the expected locations. Messy, disable the 'process'
+	// clock.
+
+	s->doReinit();
+	s->doSetClock( 5, 0 );
+	s->doSetClock( 6, 0 );
+	for ( unsigned int i = 0; i < 25; ++i ) {
+		svec[i] = gs0->S(i)[0];
+		assert( doubleEq( svec[i], i + 100 ) );
+	}
+	s->doStart( DT * 0.5 );
+	
+	// ProcInfo info;
+	/*
+	for ( unsigned int i = 0; i < 9; ++i ) {
+		Eref e = compt[i].second.eref();
+		GslStoich* gs = reinterpret_cast< GslStoich* >( e.data());
+		gs->init( e, s->procInfo() );
+	}
+	Qinfo::clearQ( 0 );
+	Qinfo::clearQ( 0 );
+	*/
+	for ( unsigned int i = 0; i < 35; ++i )
+		svec[i] = gs0->S(i)[0];
+	assert( doubleEq( svec[0], 100 ) );
+	assert( doubleEq( svec[1], 101 ) );
+	assert( doubleEq( svec[2], 102 ) );
+	assert( doubleEq( svec[3], 103 ) );
+	assert( doubleEq( svec[4], 104 ) );
+	assert( doubleEq( svec[25], 200 ) );
+	assert( doubleEq( svec[26], 205 ) );
+	assert( doubleEq( svec[27], 210 ) );
+	assert( doubleEq( svec[28], 215 ) );
+	assert( doubleEq( svec[29], 220 ) );
+	assert( doubleEq( svec[30], 300 ) );
+	assert( doubleEq( svec[31], 301 ) );
+	assert( doubleEq( svec[32], 302 ) );
+	assert( doubleEq( svec[33], 303 ) );
+	assert( doubleEq( svec[34], 304 ) );
+
+	for ( unsigned int i = 0; i < 35; ++i )
+		svec[i] = gs1->S(i)[0];
+	assert( doubleEq( svec[25], 104 ) );
+	assert( doubleEq( svec[26], 109 ) );
+	assert( doubleEq( svec[27], 114 ) );
+	assert( doubleEq( svec[28], 119 ) );
+	assert( doubleEq( svec[29], 124 ) );
+
+	GslStoich* gs3 = 
+		reinterpret_cast< GslStoich* >( compt[3].second.eref().data() );
+	for ( unsigned int i = 0; i < 35; ++i )
+		svec[i] = gs3->S(i)[0];
+	assert( doubleEq( svec[25], 120 ) );
+	assert( doubleEq( svec[26], 121 ) );
+	assert( doubleEq( svec[27], 122 ) );
+	assert( doubleEq( svec[28], 123 ) );
+	assert( doubleEq( svec[29], 124 ) );
+
+	///////////////////////////////////////////////////////////////////
+	// Run it for 1 timestep to see that the calculations are going right.
+	
+	s->doSetClock( 5, DT );
+	s->doSetClock( 6, DT );
+	s->doReinit();
+	for ( unsigned int i = 0; i < 25; ++i ) {
+		svec[i] = gs0->S(i)[0];
+		assert( doubleEq( svec[i], i + 100 ) );
+	}
+
+	s->doStart( DT * 0.5 );
+	for ( unsigned int i = 0; i < 35; ++i )
+		svec[i] = gs0->S(i)[0];
+
+	assert( doubleEq( svec[0], 100 + 0.1 + 0.5 ) );
+	assert( doubleEq( svec[1], 101 + 0.5 ) );
+	assert( doubleEq( svec[2], 102 + 0.5 ) );
+	assert( doubleEq( svec[3], 103 + 0.5 ) );
+	assert( doubleEq( svec[4], 104 - 0.1 + 0.5 + 0.1 * ( 200 - 104) ) );
+	assert( doubleEq( svec[25], 200 - 0.1 * ( 200 - 104 ) ) );
+
+	assert( doubleEq( svec[5], 105 + 0.1 ) );
+	assert( doubleEq( svec[6], 106 ) );
+	assert( doubleEq( svec[7], 107 ) );
+	assert( doubleEq( svec[8], 108 ) );
+	assert( doubleEq( svec[9], 109 - 0.1 + 0.1 *( 205 - 109 ) ) );
+	assert( doubleEq( svec[26], 205 - 0.1 * ( 205 - 109 ) ) );
+
+	assert( doubleEq( svec[20], 120 + 0.1 - 0.5 + 0.1 * ( 300 - 120 ) ) );
+	assert( doubleEq( svec[21], 121 - 0.5 + 0.1 * ( 301 - 121  ) ) );
+	assert( doubleEq( svec[22], 122 - 0.5 + 0.1 * ( 302 - 122 ) ) );
+	assert( doubleEq( svec[23], 123 - 0.5 + 0.1 * ( 303 - 123 ) ) );
+	assert( doubleEq( svec[24], 
+					124 - 0.5 - 0.1 + 
+					0.1 * ( 220 - 124 ) +
+				    0.1 * ( 304 - 124 ) ) );
+	assert( doubleEq( svec[27], 210 - 0.1 * ( 210 - 114 ) ) );
+	assert( doubleEq( svec[28], 215 - 0.1 * ( 215 - 119 ) ) );
+	assert( doubleEq( svec[29], 220 - 0.1 * ( 220 - 124 ) ) );
+	assert( doubleEq( svec[34], 304 - 0.1 * ( 304 - 124 ) ) );
+	
+
+	/////////////////////////////////////////////////////////////
+	// Now do regular diffusion with a point source.
+	/////////////////////////////////////////////////////////////
+
+	temp.clear();
+	temp.resize( 25, 0.0 );
+	Field< double >::setVec( pool0, "nInit", temp );
+	Field< double >::setVec( pool1, "nInit", temp );
+	Field< double >::setVec( pool3, "nInit", temp );
 	Field< double >::set( ObjId( pool0, 0 ), "nInit", 1.0 );
 
 	s->doReinit();
@@ -767,8 +1128,8 @@ void testDiffusionAcrossJunctions()
 		Field< double >::getVec( p, "n", n );
 		unsigned int ix = ( i % 3 ) * 5;
 		unsigned int iy = ( i / 3 ) * 5;
-		for ( unsigned int jx = 0; jx < 5; ++jx ) {
-			for ( unsigned int jy = 0; jy < 5; ++jy ) {
+		for ( unsigned int jy = 0; jy < 5; ++jy ) {
+			for ( unsigned int jx = 0; jx < 5; ++jx ) {
 				unsigned int j = jx + jy * 5;
 				assert( j < 25 );
 				unsigned int k = ix + jx + 15 * ( iy + jy );
@@ -785,7 +1146,189 @@ void testDiffusionAcrossJunctions()
 	// The last arg is a flag to say if output should be printed.
 	double err = checkNdimDiff( val, DIFFCONST, RUNTIME, SIDE, 2, 15, 
 					false);
-	assert( err < 0.006 );
+	assert( err < 0.005 );
+
+	s->doDelete( model );
+	cout << "." << flush;
+}
+
+void fillVal( vector< double >& val, double expectedTot )
+{
+	// Now do the comparison with the reference.
+	vector< Id > pools;
+	val.clear();
+	val.resize( 10, -1.0 );
+	double tot = 0;
+	for ( unsigned int i = 0; i < 2; ++i ) {
+		stringstream ss;
+		ss << "/model/compt_" << i << "/A";
+		Id p( ss.str() );
+		assert( p != Id() );
+		pools.push_back( p );
+		vector< double > n;
+		Field< double >::getVec( p, "n", n );
+		for ( unsigned int j = 0; j < 5; ++j ) {
+			unsigned int k = i * 5 + j;
+			assert( val[k] < -0.99); // Should not have been filled yet.
+			val[k] = n[j];
+			tot += n[j];
+		}
+	}
+	assert( doubleApprox( tot, expectedTot ) );
+}
+
+// Builds a 1-Dim matrix with 10 elements total, split between two
+// GslStoich objects, each handling 5. 
+void testOneDimDiffusionAcrossJunctions()
+{
+	const double DIFFCONST = 1e-12;
+	const double SIDE = 10e-6;
+	const double DT = 10;
+	const double RUNTIME = 500.0;
+	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	s->doSetClock( 4, DT );
+	s->doSetClock( 5, DT );
+	s->doSetClock( 6, DT );
+
+	vector< int > dims( 1, 1 );
+
+	Id model = s->doCreate( "Neutral", Id(), "model", dims );
+	vector< pair< Id, Id > > compt( 9 );
+	compt[0] = makeOneDimComptForDiffusion( s, model, 0 );
+	compt[1] = makeOneDimComptForDiffusion( s, model, 1 );
+
+	SetGet1<Id>::set( compt[0].second, "addJunction", compt[1].second );
+	unsigned int nj;
+	nj = Field< unsigned int >::get( compt[0].second, "num_junction" );
+	assert( nj == 1 );
+	nj = Field< unsigned int >::get( compt[1].second, "num_junction" );
+	assert( nj == 1 );
+
+	Id jn0( "/model/compt_0/stoichA/junction" );
+	Id jn1( "/model/compt_1/stoichA/junction" );
+	unsigned int m = Field< unsigned int >::get( jn0, "numMeshEntries" );
+	assert( m == 1 );
+	SolverJunction* sj = 
+				reinterpret_cast< SolverJunction* >( jn0.eref().data() );
+	assert( sj->meshIndex().size() == 1 );
+	assert( sj->meshMap().size() == 1 );
+	assert( doubleEq( sj->meshMap()[0].first, 0 ) );
+	assert( doubleEq( sj->meshMap()[0].second, 4 ) );
+	assert( doubleEq( sj->meshMap()[0].diffScale, SIDE ) );
+
+	sj = reinterpret_cast< SolverJunction* >( jn1.eref().data() );
+	assert( sj->meshIndex().size() == 1 );
+	assert( sj->meshMap().size() == 1 );
+	assert( doubleEq( sj->meshMap()[0].first, 0 ) );
+	assert( doubleEq( sj->meshMap()[0].second, 0 ) );
+	assert( doubleEq( sj->meshMap()[0].diffScale, SIDE ) );
+
+	///////////////////////////////////////////////////////////////////
+	Id pool0( "/model/compt_0/A" );
+	vector< double > temp( 5 );
+	for ( unsigned int i = 0; i < 5; ++i )
+		temp[i] = i + 100;
+	Field< double >::setVec( pool0, "nInit", temp );
+
+	Id pool1( "/model/compt_1/A" );
+	for ( unsigned int i = 0; i < 5; ++i )
+		temp[i] = i + 105;
+	Field< double >::setVec( pool1, "nInit", temp );
+
+	GslStoich* gs0 = 
+		reinterpret_cast< GslStoich* >( compt[0].second.eref().data() );
+	assert( gs0->numAllMeshEntries() == 6 );
+	vector< double > svec( 6, 0 );
+
+	s->doReinit();
+	for ( unsigned int i = 0; i < 6; ++i ) {
+		svec[i] = gs0->S(i)[0];
+		if ( i != 5 )
+			assert( doubleEq( svec[i], i + 100 ) );
+	}
+
+	s->doStart( DT * 0.5 );
+	// s->doStart( RUNTIME );
+	//
+	for ( unsigned int i = 0; i < 6; ++i )
+		svec[i] = gs0->S(i)[0];
+
+	assert( doubleEq( svec[0], 100 + 0.1 ) );
+	assert( doubleEq( svec[1], 101 ) );
+	assert( doubleEq( svec[2], 102 ) );
+	assert( doubleEq( svec[3], 103 ) );
+	assert( doubleEq( svec[4], 104 ) );
+	assert( doubleEq( svec[5], 105 - 0.1 ) );
+
+	GslStoich* gs1 = 
+		reinterpret_cast< GslStoich* >( compt[1].second.eref().data() );
+	for ( unsigned int i = 0; i < 6; ++i )
+		svec[i] = gs1->S(i)[0];
+	assert( doubleEq( svec[0], 105 ) );
+	assert( doubleEq( svec[1], 106 ) );
+	assert( doubleEq( svec[2], 107 ) );
+	assert( doubleEq( svec[3], 108 ) );
+	assert( doubleEq( svec[4], 109 - 0.1 ) );
+	assert( doubleEq( svec[5], 104 + 0.1 ) );
+
+	vector< double > val;
+	fillVal( val, 1045.0 );
+	///////////////////////////////////////////////////////////////////
+	// Check the stencils
+	const double* entry;
+	const unsigned int* colIndex;
+	unsigned int ns;
+	assert( gs0->compartmentMesh()->getNumEntries() == 5 );
+	ns = gs0->compartmentMesh()->getStencil( 0, &entry, &colIndex );
+	assert( ns == 1 );
+	assert( colIndex[0] == 1 );
+	ns = gs0->compartmentMesh()->getStencil( 1, &entry, &colIndex );
+	assert( ns == 2 );
+	assert( colIndex[0] == 0 );
+	assert( colIndex[1] == 2 );
+	ns = gs0->compartmentMesh()->getStencil( 2, &entry, &colIndex );
+	assert( ns == 2 );
+	assert( colIndex[0] == 1 );
+	assert( colIndex[1] == 3 );
+	ns = gs0->compartmentMesh()->getStencil( 3, &entry, &colIndex );
+	assert( ns == 2 );
+	assert( colIndex[0] == 2 );
+	assert( colIndex[1] == 4 );
+	ns = gs0->compartmentMesh()->getStencil( 4, &entry, &colIndex );
+	assert( ns == 2 );
+	assert( colIndex[0] == 3 );
+	assert( colIndex[1] == 5 );
+	ns = gs0->compartmentMesh()->getStencil( 5, &entry, &colIndex );
+	assert( ns == 1 );
+	assert( colIndex[0] == 4 );
+
+	assert( gs1->numAllMeshEntries() == 6 );
+	assert( gs1->compartmentMesh()->getNumEntries() == 5 );
+	ns = gs1->compartmentMesh()->getStencil( 0, &entry, &colIndex );
+	assert( ns == 2 );
+	assert( colIndex[0] == 1 );
+	assert( colIndex[1] == 5 );
+	ns = gs1->compartmentMesh()->getStencil( 1, &entry, &colIndex );
+	assert( ns == 2 );
+	assert( colIndex[0] == 0 );
+	assert( colIndex[1] == 2 );
+	ns = gs1->compartmentMesh()->getStencil( 2, &entry, &colIndex );
+
+	///////////////////////////////////////////////////////////////////
+	// Now redo with proper diffusion.
+	temp.clear();
+	temp.resize( 5, 0 );
+	Field< double >::setVec( pool0, "nInit", temp );
+	Field< double >::setVec( pool1, "nInit", temp );
+	Field< double >::set( ObjId( pool0, 0 ), "nInit", 1.0 );
+	s->doReinit();
+	s->doStart( RUNTIME );
+	fillVal( val, 1.0 );
+
+	// The last arg is a flag to say if output should be printed.
+	double err = checkNdimDiff( val, DIFFCONST, RUNTIME, SIDE, 1, 10, 
+					false);
+	assert( err < 0.005 );
 
 	s->doDelete( model );
 	cout << "." << flush;
@@ -802,5 +1345,6 @@ void testKineticSolvers()
 void testKineticSolversProcess()
 {
 	testMolTransferAcrossJunctions();
+	testOneDimDiffusionAcrossJunctions();
 	testDiffusionAcrossJunctions();
 }

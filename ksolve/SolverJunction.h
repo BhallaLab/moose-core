@@ -251,7 +251,7 @@ class SolverJunction
 
 		/**
 		 * MeshIndices (to lookup S_[meshIndex][poolIndex]) of outgoing
-		 * Pools.
+		 * Pools from the core set handled by this solver.
 		 */
 		vector< unsigned int > sendMeshIndex_;
 
@@ -263,7 +263,7 @@ class SolverJunction
 
 		/**
 		 * MeshIndices (to lookup S_[meshIndex][poolIndex]) of incoming
-		 * Pools.
+		 * Pools, coming into the extra indices defined for abutments.
 		 */
 		vector< unsigned int > recvMeshIndex_;
 
