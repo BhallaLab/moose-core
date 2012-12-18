@@ -557,7 +557,7 @@ void rtReacDiff()
 {
 		/* This is currently not handled by the new GslStoich class. Soon.*/
 	rtReplicateModels();
-	testDiff1D();
+//	testDiff1D(); // Uses cylinder. Still to fix as of 18 Dec 2012.
 	testDiffNd( 1 );
 	testDiffNd( 2 );
 	testDiffNd( 3 );

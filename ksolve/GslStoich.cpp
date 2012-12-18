@@ -392,6 +392,72 @@ void GslStoich::updateJunctionDiffusion( unsigned int meshIndex,
  * junctionPoolDelta/handleJunctionPoolDelta message both ways.
  */
 void GslStoich::vUpdateJunction( const Eref& e, 
+				const vector< vector< double > > & lastS,
+				unsigned int threadNum, double dt )
+{
+	Id junction( e.id().value() + 1 );
+	assert( junction.element()->cinfo()->isA( "SolverJunction" ) );
+	for ( unsigned int i = 0; i < getNumJunctions(); ++i ) {
+		SolverJunction* j = getJunction(i);
+		unsigned int numReac = j->reacTerms().size();
+		unsigned int numDiff = j->diffTerms().size();
+		unsigned int numMesh = j->meshIndex().size();
+		vector< double > v( numReac * numMesh + numDiff * 
+						j->meshMap().size(), 0 );
+//		double* yprime = &v[0];
+
+		/*
+			// Here we put in a scan through all the affected reac terms.
+		for ( unsigned int k = 0; k < j->meshIndex().size(); ++k ) {
+			unsigned int meshIndex = j->meshIndex()[k];
+		}
+		*/
+		/*
+		for ( vector< VoxelJunction >::const_iterator k = 
+					j->meshMap().begin(); k != j->meshMap().end(); ++k )
+		{
+			unsigned int meshIndex = k->second;
+			for ( vector< unsigned int >::const_iterator 
+				q = j->diffTerms().begin(); q != j->diffTerms().end(); ++q )
+		   	{
+				assert( *q < stoich_->getNumVarPools() );
+				*yprime++ = y_[meshIndex][ *q ] - lastS[meshIndex][ *q ];
+			}
+		}
+		*/
+
+		// For the diffusion across junctions, we let the regular diffusion
+		// calculations figure new mol# for the abutting voxels. We send
+		// the change (delta) in mol# over to the corresponding core pools 
+		// of the abutting solver.
+		// Don't actually need to do this!
+		
+		/*
+		for ( vector< unsigned int >::const_iterator k = 
+			j->recvMeshIndex().begin(); k != j->recvMeshIndex().end(); ++k )
+		{
+			assert( *k < lastS.size() );
+			const vector< double >& ts = lastS[ *k ];
+			const vector< double >& ty = y_[ *k ];
+			for ( vector< unsigned int >::const_iterator 
+				q = j->diffTerms().begin(); q != j->diffTerms().end(); ++q )
+		   	{
+				assert( *q < stoich_->getNumVarPools() );
+				*yprime++ = ty[ *q ] - ts[ *q ];
+			}
+		}
+		
+
+		Eref je( junction.element(), i );
+		// Each Junction FieldElement connects up to precisely one target.
+		junctionPoolDeltaFinfo()->send( je, threadNum, v );
+		*/
+	}
+}
+
+/*
+/// Deprecated version
+void GslStoich::vUpdateJunction( const Eref& e, 
 				unsigned int threadNum, double dt )
 {
 	Id junction( e.id().value() + 1 );
@@ -430,6 +496,7 @@ void GslStoich::vUpdateJunction( const Eref& e,
 		junctionPoolDeltaFinfo()->send( je, threadNum, v );
 	}
 }
+*/
 
 /**
  * Handles incoming cross-border rates. Just adds onto y_ matrix, using
@@ -442,6 +509,13 @@ void GslStoich::vHandleJunctionPoolDelta( unsigned int fieldIndex,
 	const SolverJunction* j = getJunction( fieldIndex );
 	assert( j );
 	j->incrementTargets( y_, v );
+	// Just to check if it makes any difference
+	for ( unsigned int i = 0; i < y_.size(); ++i ) {
+		double* s = varS( i );
+		for ( vector< double >::const_iterator 
+				j = y_[i].begin(); j != y_[i].end(); ++j )
+			*s++ = *j;
+	}
 }
 
 void GslStoich::vHandleJunctionPoolNum( unsigned int fieldIndex,
@@ -463,6 +537,7 @@ void GslStoich::vHandleJunctionPoolNum( unsigned int fieldIndex,
 				p = j->recvPoolIndex().begin(); 
 				p != j->recvPoolIndex().end(); 
 				++p )  {
+				y_[*k][*p] = *vptr;
 				s[*p] = *vptr++;
 		}
 	}
@@ -513,7 +588,7 @@ void GslStoich::vBuildDiffTerms( map< string, unsigned int >& diffTerms )
 // Virtual func figures out which meshEntries line up, passes the job to
 // the relevant ChemCompt.
 void GslStoich::matchMeshEntries( 
-	const StoichPools* other,
+	StoichPools* other,
 	vector< unsigned int >& selfMeshIndex, 
 	vector< VoxelJunction >& selfMeshMap, 
 	vector< unsigned int >& otherMeshIndex, 
@@ -524,7 +599,7 @@ void GslStoich::matchMeshEntries(
 	vector< VoxelJunction > meshMatch;
 	assert( compartmentMesh() );
 	assert( other->compartmentMesh() );
-	diffusionMesh_->matchMeshEntries( other->compartmentMesh(), meshMatch );
+	diffusionMesh_->buildJunction( other->compartmentMesh(), meshMatch );
 	// First, extract the meshIndices. Need to make sure they are unique.
 	for ( vector< VoxelJunction>::iterator i = meshMatch.begin(); 
 					i != meshMatch.end(); ++i ){
@@ -566,7 +641,7 @@ void GslStoich::matchMeshEntries(
 	
 }
 
-const ChemMesh* GslStoich::compartmentMesh() const
+ChemMesh* GslStoich::compartmentMesh() const
 {
 	return diffusionMesh_;
 }
@@ -652,7 +727,7 @@ void GslStoich::process( const Eref& e, ProcPtr info )
 	if ( diffusionMesh_ && diffusionMesh_->innerGetNumEntries() > 1 )
 		updateDiffusion( lastS, y_, info->dt );
 	if ( getNumJunctions() > 0 )
-		vUpdateJunction( e, info->threadIndexInGroup, info->dt );
+		vUpdateJunction( e, lastS, info->threadIndexInGroup, info->dt );
 #endif // USE_GSL
 	// stoich_->clearFlux( e.index().value(), info->threadIndexInGroup );
 }
@@ -771,8 +846,13 @@ void GslStoich::updateDiffusion(
 	const double *adx; // each entry is diffn_XA/diffn_length
 	const unsigned int* colIndex;
 
+	assert( lastS.size() == y.size() );
+	assert( lastS.size() == numAllMeshEntries() );
+
 	// Get value at midpoint in time.
 	for ( unsigned int me = 0; me < numAllMeshEntries(); ++me ) {
+		assert( lastS[me].size() == stoich_->getNumVarPools() );
+		assert( y[me].size() == stoich_->getNumVarPools() );
 		for ( unsigned int i = 0; i < stoich_->getNumVarPools(); ++i ) {
 			lastS[me][i] = ( lastS[me][i] + y[me][i] ) / 2.0;
 		}
@@ -800,11 +880,15 @@ void GslStoich::updateDiffusion(
 			const double* sOther = &( lastS[other][0] ); 
 			double vOther = diffusionMesh_->extendedMeshEntrySize( other );
 			double scale = dt * adx[i] ;
+			assert( vOther > 0 );
+			assert( vSelf > 0 );
 		
 			for ( unsigned int j = 0; j < stoich_->getNumVarPools(); ++j )
 				y[me][j] += stoich_->getDiffConst(j) * scale * 
 						( sOther[j]/vOther - sSelf[j]/vSelf );
 		}
+		for ( unsigned int j = 0; j < stoich_->getNumVarPools(); ++j )
+			varS(me)[j] = y[me][j];
 	}
 }
 

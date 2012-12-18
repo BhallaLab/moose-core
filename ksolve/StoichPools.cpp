@@ -36,7 +36,7 @@ const Cinfo* StoichPools::initCinfo()
 		&StoichPools::getJunction,
 		&StoichPools::setNumJunctions,
 		&StoichPools::getNumJunctions,
-		2
+		16
 	);
 
 	static Finfo* stoichPoolsFinfos[] = {
@@ -262,6 +262,7 @@ void StoichPools::expandSforDiffusion(
 	for ( unsigned int i = 0; i < otherMeshIndex.size(); ++i )
 		recvMeshIndex[i] = i + S_.size();
 	vector< double > temp( S_[0].size(), 0.0 );
+	assert( S_.size() == Sinit_.size() );
 	S_.resize( S_.size() + recvMeshIndex.size(), temp );
 	Sinit_.resize( Sinit_.size() + recvMeshIndex.size(), temp );
 	j.setRecvPools( recvMeshIndex, selfDiffPoolIndex );
@@ -320,12 +321,14 @@ void StoichPools::addJunction( const Eref& e, const Qinfo* q, Id other )
 	junctions_.back().setSendPools( selfMeshIndex, selfDiffPoolIndex );
 
 	// Here we have to expand the S matrix to include these points.
-	expandSforDiffusion( otherMeshIndex, selfDiffPoolIndex, junctions_.back() );
+	this->expandSforDiffusion( 
+					otherMeshIndex, selfDiffPoolIndex, junctions_.back() );
 
 	otherSP->junctions_.back().setMeshIndex( otherMeshIndex, otherMeshMap );
 	otherSP->junctions_.back().setSendPools( otherMeshIndex, otherDiffPoolIndex );
 	otherSP->junctions_.back().setRecvPools( otherMeshIndex, otherDiffPoolIndex );
-	otherSP->expandSforDiffusion( selfMeshIndex, otherDiffPoolIndex, otherSP->junctions_.back() );
+	otherSP->expandSforDiffusion( 
+			selfMeshIndex, otherDiffPoolIndex, otherSP->junctions_.back() );
 }
 
 

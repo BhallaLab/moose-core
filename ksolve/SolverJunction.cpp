@@ -199,8 +199,9 @@ void SolverJunction::incrementTargets(
 
 	unsigned int numReacTerms = targetMols_.size() * meshIndex_.size();
 	assert( v.size() == numReacTerms + 
-		 targetMeshIndices_.size() * diffTerms_.size() );
+		sendMeshIndex_.size() * diffTerms_.size() );
 
+	// handle the chemical terms
 	for ( vector< unsigned int >::const_iterator i = 
 			meshIndex_.begin(); i != meshIndex_.end(); ++i ) {
 		for ( VPI j = targetMols_.begin(); j != targetMols_.end(); ++j ) {
@@ -208,12 +209,37 @@ void SolverJunction::incrementTargets(
 		}
 	}
 
+	vector< double >::const_iterator iv = v.begin() + numReacTerms;
+
+	// Handle the diffusion terms.
+	/*
+	 * This no longer applies, because we transfer the delta for each pool,
+	 * not for each possible voxelJunction.
 	for ( vector< VoxelJunction >::const_iterator 
 					i = targetMeshIndices_.begin(); 
 					i != targetMeshIndices_.end(); ++i ) {
 		for ( unsigned int j = 0; j < diffTerms_.size(); ++j ) {
 			y[ i->second ][ diffTerms_[j] ] += 
 				v[ i->first * diffTerms_.size() + j ];
+		}
+	}
+	*/
+	/*
+	for ( unsigned int i = 0; i < recvMeshIndex_.size(); ++i ) {
+		for ( unsigned int j = 0; j < diffTerms_.size(); ++j ) {
+			y[ recvMeshIndex_[i] ][ diffTerms_[j] ] += 
+				v[ i * diffTerms_.size() + j ];
+		}
+	}
+	*/
+
+	// Note this is the sendMeshIndex: for the core voxels on this solver,
+	// whose values have to be incremented based on what happened elsewhere.
+	for ( vector< unsigned int >::const_iterator i = 
+		sendMeshIndex_.begin(); i != sendMeshIndex_.end(); ++i ) {
+		for ( vector< unsigned int >::const_iterator j = 
+			diffTerms_.begin(); j != diffTerms_.end(); ++j ) {
+			y[ *i ][ *j ] += *iv++;
 		}
 	}
 }
