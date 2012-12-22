@@ -133,14 +133,16 @@ class SolverJunction
 		const vector< unsigned int >& sendMeshIndex() const;
 
 		/**
-		 * Pool indices of pools whose num will be recv across junction
+		 * Pool indices of pools whose num will be recv across junction.
+		 * These indices apply to the entries in the abutting voxels.
 		 */
-		const vector< unsigned int >& recvPoolIndex() const;
+		const vector< unsigned int >& abutPoolIndex() const;
 
 		/**
-		 * mesh indices of voxels whose pools will be recv across junction
+		 * mesh indices of voxels in extended S matrix, to represent
+		 * abutting voxels.
 		 */
-		const vector< unsigned int >& recvMeshIndex() const;
+		const vector< unsigned int >& abutMeshIndex() const;
 
 		/**
 		 * Do the calculation as a simple sum onto the target vector.
@@ -164,7 +166,7 @@ class SolverJunction
 						const vector< unsigned int >& poolIndex
 		);
 
-		void setRecvPools( 
+		void setAbutPools( 
 						const vector< unsigned int >& meshIndex,
 						const vector< unsigned int >& poolIndex
 		);
@@ -259,13 +261,13 @@ class SolverJunction
 		 * RecvMolIndex is the local poolIndex of incoming pools, in order,
 		 * from the recvVector.
 		 */
-		vector< unsigned int > recvPoolIndex_;
+		vector< unsigned int > abutPoolIndex_;
 
 		/**
 		 * MeshIndices (to lookup S_[meshIndex][poolIndex]) of incoming
 		 * Pools, coming into the extra indices defined for abutments.
 		 */
-		vector< unsigned int > recvMeshIndex_;
+		vector< unsigned int > abutMeshIndex_;
 
 };
 

@@ -301,9 +301,14 @@ void ChemMesh::buildJunction( ChemMesh* other, vector< VoxelJunction >& ret)
 {
 	matchMeshEntries( other, ret );
 	extendStencil( other, ret );
+	/*
+	 * No longer having diffusion to abutting voxels in the follower
+	 * compartment.
+	 *
 	flipRet( ret );
 	other->extendStencil( this, ret );
 	flipRet( ret );
+	*/
 }
 
 void ChemMesh::flipRet( vector< VoxelJunction >& ret ) const
