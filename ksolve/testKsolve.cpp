@@ -782,7 +782,7 @@ void testMolTransferAcrossJunctions()
 	assert( sp0->numAllMeshEntries() == 30 );
 	assert( sp0->numPoolEntries( 0 ) == 1 );
 	assert( sp1->numMeshEntries() == 25 );
-	assert( sp1->numAllMeshEntries() == 30 );
+	assert( sp1->numAllMeshEntries() == 25 );
 	assert( sp1->numPoolEntries( 0 ) == 1 );
 
 	for ( unsigned int i = 0 ; i < 5; ++i ) {
@@ -791,7 +791,9 @@ void testMolTransferAcrossJunctions()
 	}
 
 	for ( unsigned int i = 0 ; i < 5; ++i ) {
-		assert( doubleEq( sp1->S(i + 25)[0], i ) ); // diffused original0
+		// after checkin 4348, the diffusion coupling is asymmetric and
+		// the second StoichPool does not receive pool# info.
+		// assert( doubleEq( sp1->S(i + 25)[0], i ) ); // diffused original0
 		assert( doubleEq( sp0->S(i + 25)[0], 9 - i ) ); //diffused original1
 	}
 
@@ -933,12 +935,12 @@ void testDiffusionAcrossJunctions()
 
 	assert( gs0->getNumJunctions() == 2 );
 	SolverJunction* sj = gs0->getJunction( 0 );
-	assert ( sj->recvMeshIndex().size() == 5 );
-	assert ( sj->recvMeshIndex()[0] == 25 );
-	assert ( sj->recvMeshIndex()[1] == 26 );
-	assert ( sj->recvMeshIndex()[2] == 27 );
-	assert ( sj->recvMeshIndex()[3] == 28 );
-	assert ( sj->recvMeshIndex()[4] == 29 );
+	assert ( sj->abutMeshIndex().size() == 5 );
+	assert ( sj->abutMeshIndex()[0] == 25 );
+	assert ( sj->abutMeshIndex()[1] == 26 );
+	assert ( sj->abutMeshIndex()[2] == 27 );
+	assert ( sj->abutMeshIndex()[3] == 28 );
+	assert ( sj->abutMeshIndex()[4] == 29 );
 	assert ( sj->sendMeshIndex().size() == 5 );
 	assert ( sj->sendMeshIndex()[0] == 4 );
 	assert ( sj->sendMeshIndex()[1] == 9 );
@@ -947,12 +949,12 @@ void testDiffusionAcrossJunctions()
 	assert ( sj->sendMeshIndex()[4] == 24 );
 
 	sj = gs0->getJunction( 1 );
-	assert ( sj->recvMeshIndex().size() == 5 );
-	assert ( sj->recvMeshIndex()[0] == 30 );
-	assert ( sj->recvMeshIndex()[1] == 31 );
-	assert ( sj->recvMeshIndex()[2] == 32 );
-	assert ( sj->recvMeshIndex()[3] == 33 );
-	assert ( sj->recvMeshIndex()[4] == 34 );
+	assert ( sj->abutMeshIndex().size() == 5 );
+	assert ( sj->abutMeshIndex()[0] == 30 );
+	assert ( sj->abutMeshIndex()[1] == 31 );
+	assert ( sj->abutMeshIndex()[2] == 32 );
+	assert ( sj->abutMeshIndex()[3] == 33 );
+	assert ( sj->abutMeshIndex()[4] == 34 );
 	assert ( sj->sendMeshIndex().size() == 5 );
 	assert ( sj->sendMeshIndex()[0] == 20 );
 	assert ( sj->sendMeshIndex()[1] == 21 );
@@ -962,12 +964,7 @@ void testDiffusionAcrossJunctions()
 
 	assert( gs1->getNumJunctions() == 3 );
 	sj = gs1->getJunction( 0 );
-	assert ( sj->recvMeshIndex().size() == 5 );
-	assert ( sj->recvMeshIndex()[0] == 25 );
-	assert ( sj->recvMeshIndex()[1] == 26 );
-	assert ( sj->recvMeshIndex()[2] == 27 );
-	assert ( sj->recvMeshIndex()[3] == 28 );
-	assert ( sj->recvMeshIndex()[4] == 29 );
+	assert ( sj->abutMeshIndex().size() == 0 );
 	assert ( sj->sendMeshIndex().size() == 5 );
 	assert ( sj->sendMeshIndex()[0] == 0 );
 	assert ( sj->sendMeshIndex()[1] == 5 );
@@ -1041,21 +1038,21 @@ void testDiffusionAcrossJunctions()
 
 	for ( unsigned int i = 0; i < 35; ++i )
 		svec[i] = gs1->S(i)[0];
-	assert( doubleEq( svec[25], 104 ) );
-	assert( doubleEq( svec[26], 109 ) );
-	assert( doubleEq( svec[27], 114 ) );
-	assert( doubleEq( svec[28], 119 ) );
-	assert( doubleEq( svec[29], 124 ) );
+	assert( doubleEq( svec[25], 0 ) ); // Base conc for next compt is 0.
+	assert( doubleEq( svec[26], 0 ) );
+	assert( doubleEq( svec[27], 0 ) );
+	assert( doubleEq( svec[28], 0 ) );
+	assert( doubleEq( svec[29], 0 ) );
 
 	GslStoich* gs3 = 
 		reinterpret_cast< GslStoich* >( compt[3].second.eref().data() );
 	for ( unsigned int i = 0; i < 35; ++i )
 		svec[i] = gs3->S(i)[0];
-	assert( doubleEq( svec[25], 120 ) );
-	assert( doubleEq( svec[26], 121 ) );
-	assert( doubleEq( svec[27], 122 ) );
-	assert( doubleEq( svec[28], 123 ) );
-	assert( doubleEq( svec[29], 124 ) );
+	assert( doubleEq( svec[25], 0 ) );
+	assert( doubleEq( svec[26], 0 ) );
+	assert( doubleEq( svec[27], 0 ) );
+	assert( doubleEq( svec[28], 0 ) );
+	assert( doubleEq( svec[29], 0 ) );
 
 	///////////////////////////////////////////////////////////////////
 	// Run it for 1 timestep to see that the calculations are going right.
@@ -1262,14 +1259,13 @@ void testOneDimDiffusionAcrossJunctions()
 
 	GslStoich* gs1 = 
 		reinterpret_cast< GslStoich* >( compt[1].second.eref().data() );
-	for ( unsigned int i = 0; i < 6; ++i )
+	for ( unsigned int i = 0; i < 5; ++i )
 		svec[i] = gs1->S(i)[0];
 	assert( doubleEq( svec[0], 105 ) );
 	assert( doubleEq( svec[1], 106 ) );
 	assert( doubleEq( svec[2], 107 ) );
 	assert( doubleEq( svec[3], 108 ) );
 	assert( doubleEq( svec[4], 109 - 0.1 ) );
-	assert( doubleEq( svec[5], 104 + 0.1 ) );
 
 	vector< double > val;
 	fillVal( val, 1045.0 );
@@ -1302,17 +1298,19 @@ void testOneDimDiffusionAcrossJunctions()
 	assert( ns == 1 );
 	assert( colIndex[0] == 4 );
 
-	assert( gs1->numAllMeshEntries() == 6 );
+	assert( gs1->numAllMeshEntries() == 5 );
 	assert( gs1->compartmentMesh()->getNumEntries() == 5 );
 	ns = gs1->compartmentMesh()->getStencil( 0, &entry, &colIndex );
-	assert( ns == 2 );
+	assert( ns == 1 );
 	assert( colIndex[0] == 1 );
-	assert( colIndex[1] == 5 );
 	ns = gs1->compartmentMesh()->getStencil( 1, &entry, &colIndex );
 	assert( ns == 2 );
 	assert( colIndex[0] == 0 );
 	assert( colIndex[1] == 2 );
 	ns = gs1->compartmentMesh()->getStencil( 2, &entry, &colIndex );
+	assert( ns == 2 );
+	assert( colIndex[0] == 1 );
+	assert( colIndex[1] == 3 );
 
 	///////////////////////////////////////////////////////////////////
 	// Now redo with proper diffusion.

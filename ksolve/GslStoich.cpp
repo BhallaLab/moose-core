@@ -388,8 +388,13 @@ void GslStoich::updateJunctionDiffusion( unsigned int meshIndex,
 /**
  * This function calculates cross-junction rates and sends out as msgs.
  * Since we need specific messages between solvers, we handle them through
- * FieldElements which are one per junction. The messages pass the 
- * junctionPoolDelta/handleJunctionPoolDelta message both ways.
+ * FieldElements which are one per junction. 
+ *
+ * This function should only be called on the master solver.
+ *
+ * The message sends the Delta information to the follower solver,
+ * where it is handled by
+ * junctionPoolDelta/handleJunctionPoolDelta.
  */
 void GslStoich::vUpdateJunction( const Eref& e, 
 				const vector< vector< double > > & lastS,
@@ -403,8 +408,8 @@ void GslStoich::vUpdateJunction( const Eref& e,
 		unsigned int numDiff = j->diffTerms().size();
 		unsigned int numMesh = j->meshIndex().size();
 		vector< double > v( numReac * numMesh + numDiff * 
-						j->meshMap().size(), 0 );
-//		double* yprime = &v[0];
+						j->abutMeshIndex().size(), 0 );
+		double* yprime = &v[0];
 
 		/*
 			// Here we put in a scan through all the affected reac terms.
@@ -428,13 +433,12 @@ void GslStoich::vUpdateJunction( const Eref& e,
 
 		// For the diffusion across junctions, we let the regular diffusion
 		// calculations figure new mol# for the abutting voxels. We send
-		// the change (delta) in mol# over to the corresponding core pools 
+		// the change (delta) in mol# of these abutting voxels over to the 
+		// corresponding core pools 
 		// of the abutting solver.
-		// Don't actually need to do this!
 		
-		/*
 		for ( vector< unsigned int >::const_iterator k = 
-			j->recvMeshIndex().begin(); k != j->recvMeshIndex().end(); ++k )
+			j->abutMeshIndex().begin(); k != j->abutMeshIndex().end(); ++k )
 		{
 			assert( *k < lastS.size() );
 			const vector< double >& ts = lastS[ *k ];
@@ -451,7 +455,6 @@ void GslStoich::vUpdateJunction( const Eref& e,
 		Eref je( junction.element(), i );
 		// Each Junction FieldElement connects up to precisely one target.
 		junctionPoolDeltaFinfo()->send( je, threadNum, v );
-		*/
 	}
 }
 
@@ -525,17 +528,17 @@ void GslStoich::vHandleJunctionPoolNum( unsigned int fieldIndex,
 	const SolverJunction* j = getJunction( fieldIndex );
 	assert( j );
 	unsigned int size = 
-			j->recvPoolIndex().size() * j->recvMeshIndex().size();
+			j->abutPoolIndex().size() * j->abutMeshIndex().size();
 	assert( v.size() == size );
 	vector< double >::const_iterator vptr = v.begin();
 	for ( vector< unsigned int >::const_iterator 
-			k = j->recvMeshIndex().begin(); 
-			k != j->recvMeshIndex().end(); 
+			k = j->abutMeshIndex().begin(); 
+			k != j->abutMeshIndex().end(); 
 			++k ) {
 		double* s = varS( *k );
 		for ( vector< unsigned int >::const_iterator 
-				p = j->recvPoolIndex().begin(); 
-				p != j->recvPoolIndex().end(); 
+				p = j->abutPoolIndex().begin(); 
+				p != j->abutPoolIndex().end(); 
 				++p )  {
 				y_[*k][*p] = *vptr;
 				s[*p] = *vptr++;

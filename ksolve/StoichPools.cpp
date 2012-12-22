@@ -244,8 +244,8 @@ void StoichPools::innerConnectJunctions(
 	// Set up message
 	ObjId myOid( myJunction, getNumJunctions() );
 	ObjId otherOid( otherJunction, otherSP->getNumJunctions() );
-	MsgId mid = shell->doAddMsg( "single", myOid, "junction", 
-					otherOid, "junction" );
+	MsgId mid = shell->doAddMsg( "single", myOid, "masterJunction", 
+					otherOid, "followerJunction" );
 	assert( mid != Msg::bad );
 
 	// Make junction entries
@@ -258,16 +258,22 @@ void StoichPools::expandSforDiffusion(
 		const vector< unsigned int > & selfDiffPoolIndex,
 		SolverJunction& j )
 {
-	vector< unsigned int > recvMeshIndex( otherMeshIndex.size(), 0 );
+	vector< unsigned int > abutMeshIndex( otherMeshIndex.size(), 0 );
 	for ( unsigned int i = 0; i < otherMeshIndex.size(); ++i )
-		recvMeshIndex[i] = i + S_.size();
+		abutMeshIndex[i] = i + S_.size();
 	vector< double > temp( S_[0].size(), 0.0 );
 	assert( S_.size() == Sinit_.size() );
-	S_.resize( S_.size() + recvMeshIndex.size(), temp );
-	Sinit_.resize( Sinit_.size() + recvMeshIndex.size(), temp );
-	j.setRecvPools( recvMeshIndex, selfDiffPoolIndex );
+	S_.resize( S_.size() + abutMeshIndex.size(), temp );
+	Sinit_.resize( Sinit_.size() + abutMeshIndex.size(), temp );
+	j.setAbutPools( abutMeshIndex, selfDiffPoolIndex );
 }
 
+// This is called only on the master solver, the one which does the
+// diffusion calculations. To do so, this solver expands its own pool
+// matrices S and Sinit to include the abutting voxels.
+// The follower solver sends messages to put pool #s into the abutting
+// voxels, and gets back changes in these pool #s. Does not do the
+// diffusion calculations and does not expand.
 void StoichPools::addJunction( const Eref& e, const Qinfo* q, Id other )
 {
 	if ( !validateJunction( e.id(), other ) ) 
@@ -319,16 +325,14 @@ void StoichPools::addJunction( const Eref& e, const Qinfo* q, Id other )
 					otherMeshIndex, otherMeshMap );
 	junctions_.back().setMeshIndex( selfMeshIndex, selfMeshMap );
 	junctions_.back().setSendPools( selfMeshIndex, selfDiffPoolIndex );
-
 	// Here we have to expand the S matrix to include these points.
+	// This function also sets the abutRecvIndex vector.
 	this->expandSforDiffusion( 
 					otherMeshIndex, selfDiffPoolIndex, junctions_.back() );
 
 	otherSP->junctions_.back().setMeshIndex( otherMeshIndex, otherMeshMap );
 	otherSP->junctions_.back().setSendPools( otherMeshIndex, otherDiffPoolIndex );
-	otherSP->junctions_.back().setRecvPools( otherMeshIndex, otherDiffPoolIndex );
-	otherSP->expandSforDiffusion( 
-			selfMeshIndex, otherDiffPoolIndex, otherSP->junctions_.back() );
+	// The junction on the otherSP does not expand the S matrix.
 }
 
 
