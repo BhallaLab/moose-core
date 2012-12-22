@@ -82,18 +82,50 @@ const Cinfo* SolverJunction::initCinfo()
 	//////////////////////////////////////////////////////////////////
 	// Shared Finfos
 	//////////////////////////////////////////////////////////////////
-	static Finfo* junctionShared[] = {
+	static Finfo* symJunctionShared[] = {
 			&handleJunctionPoolNum,
-			&handleJunctionPoolDelta,
 			junctionPoolNumFinfo(),
-			junctionPoolDeltaFinfo(),
 	};
 
-	static SharedFinfo junction( "junction",
+	static SharedFinfo symJunction( "symJunction",
+		"Symmetric shared message between SolverJunctions to handle "
+		"cross-solver reactions and diffusion. This variant sends only "
+		"pool mol#s, and is symmetric.",
+		symJunctionShared,
+		sizeof( symJunctionShared ) / sizeof( const Finfo* )
+	);
+
+	static Finfo* masterJunctionShared[] = {
+			&handleJunctionPoolNum,
+			junctionPoolDeltaFinfo(),
+	};
+	static SharedFinfo masterJunction( "masterJunction",
 		"Shared message between SolverJunctions to handle cross-solver "
-		"reactions and diffusion.",
-		junctionShared,
-		sizeof( junctionShared ) / sizeof( const Finfo* )
+		"reactions and diffusion. This sends the change in pool #, "
+		"of abutting voxels, and receives the pool# of the same abutting "
+		"voxels. Thus it operates on the solver that is doing the "
+		"diffusion calculations. This will typically be the solver that "
+		"operates at a finer level of detail. The order of detail is "
+		"Smoldyn > Gillespie > deterministic. "
+		"For two identical solvers we would typically have one with the "
+		"finer grid size become the master Junction. ",
+		masterJunctionShared,
+		sizeof( masterJunctionShared ) / sizeof( const Finfo* )
+	);
+
+	static Finfo* followerJunctionShared[] = {
+			&handleJunctionPoolDelta,
+			junctionPoolNumFinfo(),
+	};
+	static SharedFinfo followerJunction( "followerJunction",
+		"Shared message between SolverJunctions to handle cross-solver "
+		"reactions and diffusion. This sends the pool #, "
+		"of its boundary voxels, and receives back changes in the pool# "
+	    "of the same boundary voxels "
+		"voxels. Thus it operates on the solver that is just tracking the "
+		"diffusion calculations that the other (master) solver is doing",
+		followerJunctionShared,
+		sizeof( followerJunctionShared ) / sizeof( const Finfo* )
 	);
 
 	static Finfo* solverJunctionFinfos[] = {
@@ -101,7 +133,9 @@ const Cinfo* SolverJunction::initCinfo()
 		&numDiffMols,			// ReadOnly Fields
 		&numMeshEntries,		// ReadOnly Fields
 		&otherCompartment,		// ReadOnly Fields
-		&junction, 				// SharedFinfo
+		&symJunction, 			// SharedFinfo
+		&masterJunction, 		// SharedFinfo
+		&followerJunction, 		// SharedFinfo
 	};
 
 	static Cinfo solverJunctionCinfo (
@@ -182,13 +216,13 @@ const vector< unsigned int >& SolverJunction::sendMeshIndex() const
 {
 	return sendMeshIndex_;
 }
-const vector< unsigned int >& SolverJunction::recvPoolIndex() const
+const vector< unsigned int >& SolverJunction::abutPoolIndex() const
 {
-	return recvPoolIndex_;
+	return abutPoolIndex_;
 }
-const vector< unsigned int >& SolverJunction::recvMeshIndex() const
+const vector< unsigned int >& SolverJunction::abutMeshIndex() const
 {
-	return recvMeshIndex_;
+	return abutMeshIndex_;
 }
 
 void SolverJunction::incrementTargets( 
@@ -272,10 +306,10 @@ void SolverJunction::setSendPools(
 	sendPoolIndex_ = poolIndex;
 }
 
-void SolverJunction::setRecvPools( 
+void SolverJunction::setAbutPools( 
 	const vector< unsigned int >& meshIndex,
 	const vector< unsigned int >& poolIndex)
 {
-	recvMeshIndex_ = meshIndex;
-	recvPoolIndex_ = poolIndex;
+	abutMeshIndex_ = meshIndex;
+	abutPoolIndex_ = poolIndex;
 }

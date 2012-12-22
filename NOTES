@@ -20238,6 +20238,9 @@ all unit tests. Fails in a regression test for cylinder diffusion, probably
 need to update the cylinder class.
 
 Since I have gone a very long time without a checkin, I'll put this in after
-commenting out the cylinder regression test.
+commenting out the cylinder regression test. Checkin 4348.
 
 ==========================================================================
+22 Dec.
+Some cleaning up later, we now have the unit and regression tests clear with
+the asymmetric calculations for diffusion.
