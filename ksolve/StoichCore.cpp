@@ -39,6 +39,9 @@
 
 #define EPSILON 1e-15
 
+static Id getCompt( Id id );
+const unsigned int StoichCore::PoolIsNotOnSolver = ~0;
+
 const Cinfo* StoichCore::initCinfo()
 {
 		//////////////////////////////////////////////////////////////
@@ -148,8 +151,13 @@ void StoichCore::setPath( const Eref& e, const Qinfo* q, string v )
 	}
 	path_ = v;
 	vector< Id > elist;
+	vector< Id > offSolverPools;
 	Shell::wildcard( path_, elist );
 
+	Id myCompt = getCompt( e.id() );
+
+	if ( myCompt != Id() ) // Off solver only happens if compt is defined.
+		locateOffSolverReacs( myCompt, elist );
 	allocateObjMap( elist );
 	allocateModel( elist );
 	ObjId pa = Neutral::parent( e );
@@ -183,19 +191,94 @@ unsigned int StoichCore::getNumAllPools() const
 //////////////////////////////////////////////////////////////
 // Model zombification functions
 //////////////////////////////////////////////////////////////
+//
+// Simply traverses the tree toward the root till it finds a
+// compartment. Pools use a special msg, but this works for reacs too.
+Id getCompt( Id id )
+{
+	const Element* e = id.element();
+	if ( e->cinfo()->isA( "PoolBase" ) ) {
+		vector< Id > neighbours;
+		if ( e->getNeighbours( neighbours, e->cinfo()->findFinfo( "requestSize" ) ) == 1 ) {
+			Id pa = Neutral::parent( neighbours[0].eref() ).id;
+			if ( pa.element()->cinfo()->isA( "ChemMesh" ) )
+				return pa;
+		}
+	}
+	Id pa = Neutral::parent( id.eref() ).id;
+	if ( pa == Id() )
+		return pa;
+	else if ( pa.element()->cinfo()->isA( "ChemMesh" ) )
+		return pa;
+	return getCompt( pa );
+}
+
+static bool isOffSolverReac( const Element* e, Id myCompt, 
+				vector< Id >& offSolverPools )
+{
+	assert( myCompt != Id() );
+	assert( myCompt.element()->cinfo()->isA( "ChemMesh" ) );
+	bool ret = false;
+	vector< Id > neighbours;
+	e->getNeighbours( neighbours, e->cinfo()->findFinfo( "toSub" ));
+	vector< Id > n2;
+	e->getNeighbours( n2, e->cinfo()->findFinfo( "toPrd" ));
+	neighbours.insert( neighbours.end(), n2.begin(), n2.end() );
+	for ( vector< Id >::const_iterator 
+			j = neighbours.begin(); j != neighbours.end(); ++j )
+	{
+		Id otherCompt = getCompt( *j );
+		if ( myCompt != otherCompt ) {
+			offSolverPools.push_back( *j );
+			ret = true;
+		}
+	}
+	return ret;
+}
+
+void StoichCore::locateOffSolverReacs( Id myCompt, vector< Id >& elist )
+{
+	offSolverPools_.clear();
+	offSolverReacs_.clear();
+
+	vector< Id > temp;
+	temp.reserve( elist.size() );
+	for ( vector< Id >::const_iterator 
+					i = elist.begin(); i != elist.end(); ++i )
+	{
+		const Element* e = i->element();
+		if ( e->cinfo()->isA( "ReacBase" ) || e->cinfo()->isA( "EnzBase" ) )
+	   	{
+			if ( isOffSolverReac( e, myCompt, offSolverPools_ )  )
+				offSolverReacs_.push_back( *i );
+			else 
+				temp.push_back( *i );
+		} else {
+			temp.push_back( *i );
+		}
+	}
+	elist = temp;
+}
+
 void StoichCore::allocateObjMap( const vector< Id >& elist )
 {
+	vector< Id > temp( elist );
+	temp.insert( temp.end(), offSolverPools_.begin(), 
+					offSolverPools_.end() );
+	temp.insert( temp.end(), offSolverReacs_.begin(), 
+					offSolverReacs_.end() );
 	objMapStart_ = ~0;
 	unsigned int maxId = 0;
-	for ( vector< Id >::const_iterator i = elist.begin(); i != elist.end(); ++i ){
+	for ( vector< Id >::const_iterator 
+					i = temp.begin(); i != temp.end(); ++i ) {
 		if ( objMapStart_ > i->value() )
 			objMapStart_ = i->value();
 		if ( maxId < i->value() )
 			maxId = i->value();
 	}
-	objMap_.resize(0);
+	objMap_.clear();
 	objMap_.resize( 1 + maxId - objMapStart_, 0 );
-	assert( objMap_.size() >= elist.size() );
+	assert( objMap_.size() >= temp.size() );
 }
 
 /// Identifies and allocates objects in the StoichCore.
@@ -256,13 +339,15 @@ void StoichCore::resizeArrays()
 	S_[0].resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0 );
 	Sinit_[0].resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0);
 	*/
+	assert( idMap_.size() == numVarPools_ + numBufPools_ + numFuncPools_ +
+					offSolverPools_.size() );
 
 	diffConst_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0.0 );
 	species_.resize( numVarPools_ + numBufPools_ + numFuncPools_, 0 );
 	rates_.resize( numReac_ );
 	// v_.resize( numReac_, 0.0 ); // v is now allocated dynamically
 	funcs_.resize( numFuncPools_ );
-	N_.setSize( numVarPools_ + numBufPools_ + numFuncPools_, numReac_ );
+	N_.setSize( idMap_.size(), numReac_ );
 }
 
 /// Calculate sizes of all arrays, and allocate them.
@@ -281,6 +366,11 @@ void StoichCore::allocateModel( const vector< Id >& elist )
 	for ( vector< Id >::const_iterator i = elist.begin(); 
 					i != elist.end(); ++i )
 			allocateModelObject( *i, bufPools, funcPools );
+	offSolverRatesOffset_ = numReac_;
+	offSolverPoolOffset_ = numVarPools_;
+	for ( vector< Id >::const_iterator i = offSolverReacs_.begin(); 
+					i != offSolverReacs_.end(); ++i )
+			allocateModelObject( *i, bufPools, funcPools );
 
 	numBufPools_ = 0;
 	for ( vector< Id >::const_iterator i = bufPools.begin(); i != bufPools.end(); ++i ){
@@ -295,7 +385,16 @@ void StoichCore::allocateModel( const vector< Id >& elist )
 		objMap_[ i->value() - objMapStart_ ] = numFuncPools_++;
 		idMap_.push_back( *i );
 	}
-	assert( idMap_.size() == numFuncPools_ );
+
+	unsigned int numOffSolverPools = idMap_.size();
+	for ( vector< Id >::const_iterator i = offSolverPools_.begin(); 
+					i != offSolverPools_.end(); ++i ) {
+		objMap_[ i->value() - objMapStart_ ] = numOffSolverPools++;
+		idMap_.push_back( *i );
+	}
+
+
+	assert( idMap_.size() == numOffSolverPools );
 	numFuncPools_ -= numVarPools_ + numBufPools_;
 	numVarPoolsBytes_ = numVarPools_ * sizeof( double );
 
@@ -462,7 +561,8 @@ void StoichCore::unZombifyFuncs()
 
 void StoichCore::unZombifyModel()
 {
-	assert (idMap_.size() == numVarPools_ + numBufPools_ + numFuncPools_);
+	assert (idMap_.size() == numVarPools_ + numBufPools_ + numFuncPools_ +
+					offSolverPools_.size() );
 
 	unZombifyPools();
 	unZombifyFuncs();
@@ -490,7 +590,9 @@ void StoichCore::unZombifyModel()
 			CplxEnzBase::zombify( e, Enz::initCinfo(), Id() );
 	}
 
-	s->addClockMsgs( idMap_, "proc", 4 );
+	vector< Id > temp( idMap_.begin(), 
+			idMap_.begin() + numVarPools_ + numBufPools_ + numFuncPools_ );
+	s->addClockMsgs( temp, "proc", 4 );
 }
 
 unsigned int StoichCore::convertIdToPoolIndex( Id id ) const
@@ -498,7 +600,7 @@ unsigned int StoichCore::convertIdToPoolIndex( Id id ) const
 	unsigned int i = id.value() - objMapStart_;
 	assert( i < objMap_.size() );
 	i = objMap_[i];
-	assert( i < numVarPools_ + numBufPools_ + numFuncPools_ );
+	assert( i < idMap_.size() );
 	return i;
 }
 
@@ -798,6 +900,11 @@ void StoichCore::print() const
 	N_.print();
 }
 
+/////////////////////////////////////////////////////////////////////
+const vector< Id >& StoichCore::getOffSolverPools() const
+{
+	return offSolverPools_;
+}
 
 /////////////////////////////////////////////////////////////////////
 // Numeric funcs. These are in StoichCore because the rate terms are here.
