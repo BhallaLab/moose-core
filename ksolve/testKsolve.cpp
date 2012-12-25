@@ -1332,10 +1332,51 @@ void testOneDimDiffusionAcrossJunctions()
 	cout << "." << flush;
 }
 
+/**
+ * Tests the assignment of pools and reacs to local and non-loncal
+ * compartments during setup. Also checks that an off-solver pool is
+ * correctly tracked down.
+ */
+void testStoichCoreCompartmentAssignment()
+{
+	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< int > dims( 1, 1 );
+	Id model = makeInterMeshReac( s );
+	// Create solvers for meshA and meshB.
+	Id meshA( "/model/meshA" );
+	assert ( meshA != Id() );
+	Id stoichA = s->doCreate( "GslStoich", meshA, "stoichA", dims );
+	assert ( stoichA != Id() );
+	Id stoichCoreA = 
+			s->doCreate( "StoichCore", stoichA, "stoichCore", dims );
+	assert ( stoichCoreA != Id() );
+	string path = "/model/meshA/##";
+	Field< string >::set( stoichCoreA, "path", path );
+
+	StoichCore* sc = 
+			reinterpret_cast< StoichCore* >( stoichCoreA.eref().data() );
+	const vector< Id >& pools =  sc->getOffSolverPools();
+	assert( pools.size() == 1 );
+	Id poolA( "/model/meshA/A" );
+	assert( poolA != Id() );
+	Id poolB( "/model/meshB/B" );
+	assert( poolB != Id() );
+	assert( poolB == pools[0] );
+	assert( sc->convertIdToPoolIndex( poolA ) == 0 );
+	assert( sc->convertIdToPoolIndex( poolB ) == 1 );
+
+	/// Need to check for reacs here.
+
+
+	s->doDelete( model );
+	cout << "." << flush;
+}
+
 void testKineticSolvers()
 {
 	testInterMeshReac();
 	testGslStoich();
+	testStoichCoreCompartmentAssignment();
 	testJunctionSetup();
 	testMatchMeshEntries();
 }

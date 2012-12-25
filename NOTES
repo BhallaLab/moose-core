@@ -20243,4 +20243,70 @@ commenting out the cylinder regression test. Checkin 4348.
 ==========================================================================
 22 Dec.
 Some cleaning up later, we now have the unit and regression tests clear with
-the asymmetric calculations for diffusion.
+the asymmetric calculations for diffusion. Checkin 4350.
+
+List of pending things here.
+- Implement cross-compartment reactions
+- Set up sim manager to handle coupled solvers
+- Extend to CylMesh and NeuroMesh
+- Write SpineMesh, extend to it.
+- Put in stuff for SigNeur.
+- Extend CubeMesh to figure out surfaces from Geom classes and bitmaps.
+- Convert GssaStoich to use new zombie classes
+- Derive GssaStoich from StoichPools
+- Get GssaStoich to talk to each other through diffusion
+- Get GssaStoich and GslStoich to talk to each other through diffusion
+- SBML read and write
+- Reorder KKit reader to put things more sensibly into compartments.
+
+==========================================================================
+
+24 Dec.
+Doing the cross-compartment reactions.
+1. Assume that the off-solver pools do not figure in the elist that is
+sent to StoichCore::allocateModel. 
+2. Put the offending pools in new poolIds.
+3. Put the offending reactions in a special subset that is not run
+	normally.
+
+Pools: separate voxel or same voxel? In other words, does it live in
+	the same S_ and Sinit_ as the other pools in the voxel?
+	- Hard to implement stoich calculations across voxels, the structure
+		is designed to be self-contained.
+	- The pool will be in a separate list anyway.
+	- The pool maintains its own volume anyway.
+	- This amounts to institutionalizing the idea that S and Sinit are
+		not simply the pools within a voxel, but the pools with a solver.
+		Usually the two overlap perfectly.
+
+The StoichCore for a compartment has to know about all reacs and pools,
+even if they are not used in a given compartment.
+
+Data structures:
+- Put all pools in S_ and Sinit_, including offSolverPools
+- Put all reacs/enz in rates_, including reacs going offSolver.
+- Record offSolverReacOffset_. Later reac terms are offSolver.
+- Record offSolverPoolOffset_. Later pools are offSolver.
+
+Functions:
+- in setPath, traverse the elist to find offSolverReacs and offSolverPools.
+	Trim the offSolverReacs off elist. This is in locateOffSolverReacs.
+- Do the allocation so that the offSolver entries are at the end of the 
+	respective portions.
+
+Runtime:
+- The extra reacTerms will run based on SolverJunction::reacTerms_ vector.
+	Each solver will go through its set of junctions to find the terms.
+- Ext solver pools are updated just as usual
+	- Input values come through targetMols_ * meshIndex for each junction.
+	- Delta values go through the same.
+
+==========================================================================
+25 Dec.
+Set up first pass code for cross-compartment reactions. Current StoichCore code 
+finds the reactions, finds any off-solver pools that they talk to, and puts 
+these pools into the idMap for the StoichCore. They also are put into the 
+S_ and Sinit_ matrices. 
+Clears a really simple new unit test that all this is done correctly.
+
+

@@ -22,7 +22,15 @@ class StoichCore
 
 		void setOneWay( bool v );
 		bool getOneWay() const;
+
+		/// Returns number of local pools that are updated by solver
 		unsigned int getNumVarPools() const;
+
+		/**
+		 *  Returns total number of local pools. Leaves out the pools whose
+		 *  actual calculations happen on another solver, but are given a
+		 *  proxy here in order to handle cross-compartment reactions.
+		 */
 		unsigned int getNumAllPools() const;
 
 		void setPath( const Eref& e, const Qinfo* q, string v );
@@ -34,6 +42,20 @@ class StoichCore
 		//////////////////////////////////////////////////////////////////
 		// Model traversal and building functions
 		//////////////////////////////////////////////////////////////////
+		/**
+		 * Scans through elist to find any reactions that connect to
+		 * pools not located on solver. Removes these reactions from the
+		 * elist and maintains Ids of the affected reactions, and their 
+		 * off-solver pools, in offSolverReacs_ and offSolverPools_.
+		 */
+		void locateOffSolverReacs( Id myCompt, vector< Id >& elist );
+
+		/**
+		 * Builds the objMap vector, which maps all Ids to 
+		 * the internal indices for pools and reacs that are used in the
+		 * solver. In addition to the elist, it also scans through the
+		 * offSolverPools and offSolverReacs to build the map.
+		 */
 		void allocateObjMap( const vector< Id >& elist );
 
 		/// Using the computed array sizes, now allocate space for them.
@@ -195,6 +217,12 @@ class StoichCore
 		void updateJunctionRates( const double* s,
 			   const vector< unsigned int >& reacTerms, double* yprime );
 		//////////////////////////////////////////////////////////////////
+		// Access functions for cross-node reactions.
+		//////////////////////////////////////////////////////////////////
+		const vector< Id >& getOffSolverPools() const;
+		
+		//////////////////////////////////////////////////////////////////
+		static const unsigned int PoolIsNotOnSolver;
 		static const Cinfo* initCinfo();
 	protected:
 		bool useOneWay_;
@@ -243,6 +271,28 @@ class StoichCore
 		 * them.
 		 */
 		unsigned int objMapStart_;
+
+		/**
+		 * Tracks the reactions that go off the current solver.
+		 */
+		vector< Id > offSolverReacs_;
+
+		/**
+		 * Offset of the first offSolverPool in the idMap_ vector.
+		 */
+		unsigned int offSolverPoolOffset_;
+
+		/**
+		 * These are pools that were not in the original scope of the 
+		 * solver, but have to be brought in because they are reactants
+		 * of one or more of the offSolverReacs.
+		 */
+		vector< Id > offSolverPools_;
+
+		/**
+		 * Offset of the first offSolverReac in the rates_ vector.
+		 */
+		unsigned int offSolverRatesOffset_;
 
 		/**
 		 * Map back from mol index to Id. Primarily for debugging.
