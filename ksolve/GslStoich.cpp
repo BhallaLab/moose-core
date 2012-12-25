@@ -579,6 +579,10 @@ void GslStoich::vBuildReacTerms( vector< unsigned int >& reacTerms,
 				Id other ) const
 {
 		;
+	// Identify which molecules that react
+		// Scan through all reactions and enzymes on self.
+		// Identify those that have a substrate or tgt in other
+		// Vice versa for other compt.
 }
 
 void GslStoich::vBuildDiffTerms( map< string, unsigned int >& diffTerms ) 
