@@ -51,16 +51,35 @@ class GslStoich: public StoichPools
 // Numerical functions
 ///////////////////////////////////////////////////////////0
 
-		// Does calculations for diffusion.
+		/// Does calculations for diffusion.
 		void updateDiffusion( 
 				vector< vector< double > >& lastS, 
 				vector< vector< double > >& y, 
 				double dt );
 
+		/// Calculations for diffusion across junctions.
 		void updateJunctionDiffusion( 
 				unsigned int meshIndex, double diffScale,
 				const vector< unsigned int >& diffTerms,
 				double* v, double dt );
+
+		/**
+		 * Computes change in pool #s following cross-solver reacn across
+		 * junction j, puts in yprime.
+		 */
+		void fillReactionDelta( 
+				const SolverJunction* j, 
+				const vector< vector< double > > & lastS, 
+				double* yprime ) const;
+
+		/**
+		 * Computes change in pool #s following diffusion across
+		 * junction j, puts in yprime.
+		 */
+		void fillDiffusionDelta( 
+				const SolverJunction* j, 
+				const vector< vector< double > > & lastS, 
+				double* yprime ) const;
 		
 		/**
  		 * gslFunc is the function used by GSL to advance the simulation one
@@ -132,6 +151,12 @@ class GslStoich: public StoichPools
 			const vector< unsigned int > & otherMeshIndex,
 			const vector< unsigned int > & selfDiffPoolIndex,
 			SolverJunction& j );
+
+		/// Inherited virtual func. Identifies cross-solver pools from other
+		void findPoolsOnOther( Id other, vector< Id >& pools );
+
+		/// Inherited, fills out pools involved in cross-solver reaction.
+		void setLocalCrossReactingPools( const vector< Id >& pools );
 
 ///////////////////////////////////////////////////////////0
 		static const Cinfo* initCinfo();

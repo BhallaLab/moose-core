@@ -339,4 +339,6 @@ class StoichCore
 		unsigned int numReac_;
 };
 
+Id getCompt( Id id );
+
 #endif	// _STOICH_CORE_H

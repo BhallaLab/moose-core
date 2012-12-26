@@ -77,6 +77,24 @@ class StoichPools
 		 */
 		unsigned int numPoolEntries( unsigned int meshEntry ) const;
 
+		
+		/**
+		 * Looks for the pools participating in cross-solver reactions,
+		 * where the reactions are on the current Solver, and the pool is
+		 * on the other solver. As a side-effect, sets up the local
+		 * PoolIndices of this set of pools as the remoteReacPools on the
+		 * current junction.
+		 */
+		virtual void findPoolsOnOther( Id other, vector< Id >& pools ) = 0;
+
+		/**
+		 * Takes the provided list of pools which go to a reaction on
+		 * the other solver participating in the latest junction. Figures
+		 * out poolIndices and assigns to junction.
+		 */
+		virtual void setLocalCrossReactingPools( 
+						const vector< Id >& pools ) = 0;
+
 		//////////////////////////////////////////////////////////////////
 		// Field assignment functions
 		//////////////////////////////////////////////////////////////////
@@ -151,16 +169,6 @@ class StoichPools
 		virtual void vAddJunction( const Eref& e, const Qinfo* q, Id other ) = 0;
 		/// Remove the junction between self and specified other StoichPool
 		virtual void vDropJunction( const Eref& e, const Qinfo* q, Id other ) = 0;
-
-		/**
-		 * Generate the vector of indices into the rates_ vector for
-		 * reaction rate terms.
-		 */
-		virtual void vBuildReacTerms( 
-			vector< unsigned int >& reacTerms,
-			vector< pair< unsigned int, unsigned int > >& reacPoolIndex,	
-			Id other 
-		) const = 0;
 
 		/**
 		 * Generate the map of varPools that diffuse. 

@@ -286,20 +286,13 @@ void StoichPools::addJunction( const Eref& e, const Qinfo* q, Id other )
 	innerConnectJunctions( e.id(), other, otherSP );
 
 	// Work out reaction terms.
-	//
-	// This is an index into the rates_ array on the parent Stoich.
-	vector< unsigned int > reacTerms;
+	vector< Id > pools;
+	this->findPoolsOnOther( other, pools );
+	otherSP->setLocalCrossReactingPools( pools );
 
-	// This identifies the poolIndex for each reacTermIndex.
-	// First of pair is reacTerm index, second is poolIndex.
-	vector< pair< unsigned int, unsigned int > > reacPoolIndex;
-	this->vBuildReacTerms( reacTerms, reacPoolIndex, other );
-	junctions_.back().setReacTerms( reacTerms, reacPoolIndex );
-
-	reacTerms.resize( 0 );
-	reacPoolIndex.resize( 0 );
-	otherSP->vBuildReacTerms( reacTerms, reacPoolIndex, e.id() );
-	otherSP->junctions_.back().setReacTerms( reacTerms, reacPoolIndex );
+	pools.clear();
+	otherSP->findPoolsOnOther( e.id(), pools );
+	this->setLocalCrossReactingPools( pools );
 
 	// Work out diffusion terms
 	// Here the vectors are just the PoolIndices (as used within the Stoichs
@@ -323,14 +316,14 @@ void StoichPools::addJunction( const Eref& e, const Qinfo* q, Id other )
 	vector< VoxelJunction > otherMeshMap; 
 	this->matchMeshEntries( otherSP, selfMeshIndex, selfMeshMap,
 					otherMeshIndex, otherMeshMap );
-	junctions_.back().setMeshIndex( selfMeshIndex, selfMeshMap );
+	junctions_.back().setMeshMap( selfMeshMap );
 	junctions_.back().setSendPools( selfMeshIndex, selfDiffPoolIndex );
 	// Here we have to expand the S matrix to include these points.
 	// This function also sets the abutRecvIndex vector.
 	this->expandSforDiffusion( 
 					otherMeshIndex, selfDiffPoolIndex, junctions_.back() );
 
-	otherSP->junctions_.back().setMeshIndex( otherMeshIndex, otherMeshMap );
+	otherSP->junctions_.back().setMeshMap( otherMeshMap );
 	otherSP->junctions_.back().setSendPools( otherMeshIndex, otherDiffPoolIndex );
 	// The junction on the otherSP does not expand the S matrix.
 }
