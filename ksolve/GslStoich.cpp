@@ -18,6 +18,8 @@
 #include "../mesh/ChemMesh.h"
 #include "GslStoich.h"
 
+typedef vector< unsigned int >::const_iterator VCI;
+
 const Cinfo* GslStoich::initCinfo()
 {
 		///////////////////////////////////////////////////////
@@ -385,6 +387,53 @@ void GslStoich::updateJunctionDiffusion( unsigned int meshIndex,
 	}
 }
 
+void GslStoich::fillReactionDelta( 
+		const SolverJunction* j, 
+		const vector< vector< double > > & lastS, 
+		double* yprime ) const
+{
+	// For reactions across junctions, we keep within the local
+	// sendMeshIndex. Send the delta from the proxy pool identified
+	// by remoteReacPools.
+	for ( VCI k = 
+		j->sendMeshIndex().begin(); k != j->sendMeshIndex().end(); ++k )
+	{
+		assert( *k < lastS.size() );
+		const vector< double >& ts = lastS[ *k ];
+		const vector< double >& ty = y_[ *k ];
+		for ( VCI q = j->remoteReacPools().begin(); 
+						q != j->remoteReacPools().end(); ++q )
+	   	{
+			assert( *q < stoich_->getNumVarPools() );
+			*yprime++ = ty[ *q ] - ts[ *q ];
+		}
+	}
+}
+
+void GslStoich::fillDiffusionDelta( 
+		const SolverJunction* j, 
+		const vector< vector< double > > & lastS, 
+		double* yprime ) const
+{
+	// For the diffusion across junctions, we let the regular diffusion
+	// calculations figure new mol# for the abutting voxels. We send
+	// the change (delta) in mol# of these abutting voxels over to the 
+	// corresponding core pools of the abutting solver.
+	for ( VCI k = 
+		j->abutMeshIndex().begin(); k != j->abutMeshIndex().end(); ++k )
+	{
+		assert( *k < lastS.size() );
+		const vector< double >& ts = lastS[ *k ];
+		const vector< double >& ty = y_[ *k ];
+		for ( VCI q = 
+			j->diffTerms().begin(); q != j->diffTerms().end(); ++q )
+	   	{
+			assert( *q < stoich_->getNumVarPools() );
+			*yprime++ = ty[ *q ] - ts[ *q ];
+		}
+	}
+}
+
 /**
  * This function calculates cross-junction rates and sends out as msgs.
  * Since we need specific messages between solvers, we handle them through
@@ -404,102 +453,22 @@ void GslStoich::vUpdateJunction( const Eref& e,
 	assert( junction.element()->cinfo()->isA( "SolverJunction" ) );
 	for ( unsigned int i = 0; i < getNumJunctions(); ++i ) {
 		SolverJunction* j = getJunction(i);
-		unsigned int numReac = j->reacTerms().size();
+		unsigned int numReac = j->remoteReacPools().size();
 		unsigned int numDiff = j->diffTerms().size();
-		unsigned int numMesh = j->meshIndex().size();
-		vector< double > v( numReac * numMesh + numDiff * 
-						j->abutMeshIndex().size(), 0 );
+		vector< double > v( 
+			numReac * j->sendMeshIndex().size() + 
+			numDiff * j->abutMeshIndex().size(), 
+			0 );
 		double* yprime = &v[0];
 
-		/*
-			// Here we put in a scan through all the affected reac terms.
-		for ( unsigned int k = 0; k < j->meshIndex().size(); ++k ) {
-			unsigned int meshIndex = j->meshIndex()[k];
-		}
-		*/
-		/*
-		for ( vector< VoxelJunction >::const_iterator k = 
-					j->meshMap().begin(); k != j->meshMap().end(); ++k )
-		{
-			unsigned int meshIndex = k->second;
-			for ( vector< unsigned int >::const_iterator 
-				q = j->diffTerms().begin(); q != j->diffTerms().end(); ++q )
-		   	{
-				assert( *q < stoich_->getNumVarPools() );
-				*yprime++ = y_[meshIndex][ *q ] - lastS[meshIndex][ *q ];
-			}
-		}
-		*/
-
-		// For the diffusion across junctions, we let the regular diffusion
-		// calculations figure new mol# for the abutting voxels. We send
-		// the change (delta) in mol# of these abutting voxels over to the 
-		// corresponding core pools 
-		// of the abutting solver.
-		
-		for ( vector< unsigned int >::const_iterator k = 
-			j->abutMeshIndex().begin(); k != j->abutMeshIndex().end(); ++k )
-		{
-			assert( *k < lastS.size() );
-			const vector< double >& ts = lastS[ *k ];
-			const vector< double >& ty = y_[ *k ];
-			for ( vector< unsigned int >::const_iterator 
-				q = j->diffTerms().begin(); q != j->diffTerms().end(); ++q )
-		   	{
-				assert( *q < stoich_->getNumVarPools() );
-				*yprime++ = ty[ *q ] - ts[ *q ];
-			}
-		}
-		
+		fillReactionDelta( j, lastS, yprime );
+		fillDiffusionDelta( j, lastS, yprime );
 
 		Eref je( junction.element(), i );
 		// Each Junction FieldElement connects up to precisely one target.
 		junctionPoolDeltaFinfo()->send( je, threadNum, v );
 	}
 }
-
-/*
-/// Deprecated version
-void GslStoich::vUpdateJunction( const Eref& e, 
-				unsigned int threadNum, double dt )
-{
-	Id junction( e.id().value() + 1 );
-	assert( junction.element()->cinfo()->isA( "SolverJunction" ) );
-	for ( unsigned int i = 0; i < getNumJunctions(); ++i ) {
-		SolverJunction* j = getJunction(i);
-		unsigned int numReac = j->reacTerms().size();
-		unsigned int numDiff = j->diffTerms().size();
-		unsigned int numMesh = j->meshIndex().size();
-		vector< double > v( numReac * numMesh + numDiff * 
-						j->meshMap().size(), 0 );
-		double* yprime = &v[0];
-		for ( unsigned int k = 0; k < j->meshIndex().size(); ++k ) {
-			unsigned int meshIndex = j->meshIndex()[k];
-			stoich_->updateJunctionRates( 
-							S( meshIndex ), j->reacTerms(), yprime );
-			yprime += numReac;
-		}
-		for ( vector< VoxelJunction >::const_iterator k = 
-					j->meshMap().begin(); k != j->meshMap().end(); ++k )
-		{
-			unsigned int meshIndex = k->second;
-			double diffScale = k->diffScale / diffusionMesh_->getMeshEntrySize( meshIndex );
-			updateJunctionDiffusion( 
-					meshIndex, diffScale, j->diffTerms(), yprime, dt );
-			yprime += numDiff;
-		}
-
-		for ( vector< double >::iterator k = v.begin(); k != v.end(); ++k ){
-			*k *= dt; // Simple Euler. Ugh.
-			// cout << "junction=" << i << ",	*k = " << *k << endl;
-		}
-
-		Eref je( junction.element(), i );
-		// Each Junction FieldElement connects up to precisely one target.
-		junctionPoolDeltaFinfo()->send( je, threadNum, v );
-	}
-}
-*/
 
 /**
  * Handles incoming cross-border rates. Just adds onto y_ matrix, using
@@ -531,15 +500,24 @@ void GslStoich::vHandleJunctionPoolNum( unsigned int fieldIndex,
 			j->abutPoolIndex().size() * j->abutMeshIndex().size();
 	assert( v.size() == size );
 	vector< double >::const_iterator vptr = v.begin();
-	for ( vector< unsigned int >::const_iterator 
-			k = j->abutMeshIndex().begin(); 
-			k != j->abutMeshIndex().end(); 
-			++k ) {
+	for ( VCI k = j->sendMeshIndex().begin(); 
+			k != j->sendMeshIndex().end(); ++k )
+	{
 		double* s = varS( *k );
-		for ( vector< unsigned int >::const_iterator 
-				p = j->abutPoolIndex().begin(); 
-				p != j->abutPoolIndex().end(); 
-				++p )  {
+		for ( VCI p = j->remoteReacPools().begin(); 
+				p != j->remoteReacPools().end(); ++p )
+	  	{
+				y_[*k][*p] = *vptr;
+				s[*p] = *vptr++;
+		}
+	}
+	for ( VCI k = j->abutMeshIndex().begin(); 
+			k != j->abutMeshIndex().end(); ++k )
+	{
+		double* s = varS( *k );
+		for ( VCI p = j->abutPoolIndex().begin(); 
+				p != j->abutPoolIndex().end(); ++p )
+	  	{
 				y_[*k][*p] = *vptr;
 				s[*p] = *vptr++;
 		}
@@ -553,36 +531,44 @@ void GslStoich::vHandleJunctionPoolNum( unsigned int fieldIndex,
  */
 void GslStoich::vAddJunction( const Eref& e, const Qinfo* q, Id other )
 {
-	// Identify which molecules that react
-		// Scan through all reactions and enzymes on self.
-		// Identify those that have a substrate or tgt in other
-		// Vice versa for other compt.
-	
-	// Identify which molecules that diffuse (D != 0)
-		// Scan through all molecules on self
-		// Scan through all molecules on other
-		// Build hash table on names of each.
-		// Scan through smaller hash table, find matches
-	
-	// Identify which meshEntries
-		// Send down to respective compartments to do this.
-
-	// Set up values.
 }
 
 void GslStoich::vDropJunction( const Eref& e, const Qinfo* q, Id other )
 {
 }
 
-void GslStoich::vBuildReacTerms( vector< unsigned int >& reacTerms, 
-	vector< pair< unsigned int, unsigned int > >& reacPoolIndex,
-				Id other ) const
+// Return elist of pools on Other solver that are reactants on this solver.
+void GslStoich::findPoolsOnOther( Id other, vector< Id >& pools ) 
 {
-		;
-	// Identify which molecules that react
-		// Scan through all reactions and enzymes on self.
-		// Identify those that have a substrate or tgt in other
-		// Vice versa for other compt.
+	unsigned int nj = getNumJunctions();
+	assert( nj > 0 );
+	pools.clear();
+	vector< unsigned int > poolIndex;
+	Id otherCompt = getCompt( other );
+	assert( otherCompt != Id() );
+	const vector< Id >& op = stoich_->getOffSolverPools();
+	for ( vector< Id >::const_iterator i = op.begin(); i != op.end(); ++i )
+	{
+		if ( getCompt( *i ) == otherCompt ) {
+			pools.push_back( *i );
+			poolIndex.push_back( stoich_->convertIdToPoolIndex( *i ) );
+		}
+	}
+	getJunction( nj - 1 )->setRemoteReacPools( poolIndex );
+}
+
+void GslStoich::setLocalCrossReactingPools( const vector< Id >& pools )
+{
+	unsigned int nj = getNumJunctions();
+	assert( nj > 0 );
+	// convert pools to local pool indices
+	
+	vector< unsigned int > poolIndex;
+	for ( vector< Id >::const_iterator 
+					i = pools.begin(); i != pools.end(); ++i )
+		poolIndex.push_back( stoich_->convertIdToPoolIndex( *i ) );
+
+	getJunction( nj - 1 )->setLocalReacPools( poolIndex );
 }
 
 void GslStoich::vBuildDiffTerms( map< string, unsigned int >& diffTerms ) 
@@ -750,6 +736,7 @@ void GslStoich::initReinit( const Eref& e, ProcPtr info )
  */
 void GslStoich::init( const Eref& e, ProcPtr info )
 {
+
 	if ( !isInitialized_ )
 			return;
 	Id junction( e.id().value() + 1 );
@@ -758,21 +745,26 @@ void GslStoich::init( const Eref& e, ProcPtr info )
 		SolverJunction* j = getJunction(i);
 		vector< double > v;
 		unsigned int size = 
-			j->sendPoolIndex().size() * j->sendMeshIndex().size();
+			( j->localReacPools().size() + j->sendPoolIndex().size() )
+		   	* j->sendMeshIndex().size();
 		v.reserve( size );
-		for ( vector< unsigned int >::const_iterator 
-				k = j->sendMeshIndex().begin(); 
-				k != j->sendMeshIndex().end(); 
-				++k )
+		// Fill in reaction pool nums.
+		for ( VCI k = j->sendMeshIndex().begin(); 
+				k != j->sendMeshIndex().end(); ++k )
 	   	{
 			const double* s = S( *k );
-			for ( vector< unsigned int >::const_iterator 
-					p = j->sendPoolIndex().begin(); 
-					p != j->sendPoolIndex().end(); 
-					++p ) 
-			{
-					v.push_back( s[*p] );
-			}
+			for ( VCI p = j->localReacPools().begin(); 
+					p != j->localReacPools().end(); ++p ) 
+				v.push_back( s[*p] );
+		}
+		// Fill in diffusion pool nums.
+		for ( VCI k = j->sendMeshIndex().begin(); 
+				k != j->sendMeshIndex().end(); ++k )
+	   	{
+			const double* s = S( *k );
+			for ( VCI p = j->sendPoolIndex().begin(); 
+					p != j->sendPoolIndex().end(); ++p ) 
+				v.push_back( s[*p] );
 		}
 		assert( v.size() == size );
 		Eref je( junction.element(), i );

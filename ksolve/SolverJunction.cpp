@@ -176,7 +176,7 @@ unsigned int SolverJunction::getNumDiffMols() const
 }
 unsigned int SolverJunction::getNumMeshIndex() const
 {
-		return meshIndex_.size();
+		return sendMeshIndex_.size();
 }
 
 Id SolverJunction::getOtherCompartment() const
@@ -198,14 +198,19 @@ const vector< unsigned int >& SolverJunction::diffTerms() const
 	return diffTerms_;
 }
 
-const vector< unsigned int >& SolverJunction::meshIndex() const
-{
-	return meshIndex_;
-}
-
 const vector< VoxelJunction >& SolverJunction::meshMap() const
 {
 	return targetMeshIndices_;
+}
+
+const vector< unsigned int >& SolverJunction::remoteReacPools() const
+{
+	return remoteReacPools_;
+}
+
+const vector< unsigned int >& SolverJunction::localReacPools() const
+{
+	return localReacPools_;
 }
 
 const vector< unsigned int >& SolverJunction::sendPoolIndex() const
@@ -231,10 +236,12 @@ void SolverJunction::incrementTargets(
 {
 	typedef vector< pair< unsigned int, unsigned int> >::const_iterator VPI;
 
-	unsigned int numReacTerms = targetMols_.size() * meshIndex_.size();
+	unsigned int numReacTerms = localReacPools_.size() * 
+			sendMeshIndex_.size();
 	assert( v.size() == numReacTerms + 
 		sendMeshIndex_.size() * diffTerms_.size() );
 
+	/*
 	// handle the chemical terms
 	for ( vector< unsigned int >::const_iterator i = 
 			meshIndex_.begin(); i != meshIndex_.end(); ++i ) {
@@ -242,33 +249,20 @@ void SolverJunction::incrementTargets(
 			y[ *i][ j->second ] += v[ *i * meshIndex_.size() + j->first ];
 		}
 	}
+	*/
 
 	vector< double >::const_iterator iv = v.begin() + numReacTerms;
 
-	// Handle the diffusion terms.
-	/*
-	 * This no longer applies, because we transfer the delta for each pool,
-	 * not for each possible voxelJunction.
-	for ( vector< VoxelJunction >::const_iterator 
-					i = targetMeshIndices_.begin(); 
-					i != targetMeshIndices_.end(); ++i ) {
-		for ( unsigned int j = 0; j < diffTerms_.size(); ++j ) {
-			y[ i->second ][ diffTerms_[j] ] += 
-				v[ i->first * diffTerms_.size() + j ];
-		}
-	}
-	*/
-	/*
-	for ( unsigned int i = 0; i < recvMeshIndex_.size(); ++i ) {
-		for ( unsigned int j = 0; j < diffTerms_.size(); ++j ) {
-			y[ recvMeshIndex_[i] ][ diffTerms_[j] ] += 
-				v[ i * diffTerms_.size() + j ];
-		}
-	}
-	*/
-
+	// Handle the chemical and diffusion terms.
 	// Note this is the sendMeshIndex: for the core voxels on this solver,
 	// whose values have to be incremented based on what happened elsewhere.
+	for ( vector< unsigned int >::const_iterator i = 
+		sendMeshIndex_.begin(); i != sendMeshIndex_.end(); ++i ) {
+		for ( vector< unsigned int >::const_iterator j = 
+			localReacPools_.begin(); j != localReacPools_.end(); ++j ) {
+			y[ *i ][ *j ] += *iv++;
+		}
+	}
 	for ( vector< unsigned int >::const_iterator i = 
 		sendMeshIndex_.begin(); i != sendMeshIndex_.end(); ++i ) {
 		for ( vector< unsigned int >::const_iterator j = 
@@ -278,22 +272,23 @@ void SolverJunction::incrementTargets(
 	}
 }
 
-void SolverJunction::setReacTerms( const vector< unsigned int >& reacTerms,
-	const vector< pair< unsigned int, unsigned int > >& poolMap )
-{
-	reacTerms_ = reacTerms;
-	targetMols_ = poolMap;
-}
-
 void SolverJunction::setDiffTerms( const vector< unsigned int >& diffTerms )
 {
 	diffTerms_ = diffTerms;
 }
 
-void SolverJunction::setMeshIndex( const vector< unsigned int >& meshIndex,
-	const vector< VoxelJunction >& meshMap )
+void SolverJunction::setLocalReacPools( const vector< unsigned int >& pools)
 {
-	meshIndex_ = meshIndex;
+	localReacPools_ = pools;
+}
+
+void SolverJunction::setRemoteReacPools( const vector< unsigned int >& pools)
+{
+	remoteReacPools_ = pools;
+}
+
+void SolverJunction::setMeshMap( const vector< VoxelJunction >& meshMap )
+{
 	targetMeshIndices_ = meshMap;
 }
 
