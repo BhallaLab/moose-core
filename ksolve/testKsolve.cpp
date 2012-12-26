@@ -371,7 +371,9 @@ void testJunctionSetup()
 	assert ( meshA != Id() );
 	Id meshB( "/model/meshB/mesh" );
 	assert ( meshB != Id() );
-	Id stoichA = s->doCreate( "GslStoich", model, "stoichA", dims );
+	Id comptA( "/model/meshA" );
+	Id comptB( "/model/meshB" );
+	Id stoichA = s->doCreate( "GslStoich", comptA, "stoichA", dims );
 	assert ( stoichA != Id() );
 	Id stoichCoreA = 
 			s->doCreate( "StoichCore", stoichA, "stoichCore", dims );
@@ -384,7 +386,7 @@ void testJunctionSetup()
 
 
 
-	Id stoichB = s->doCreate( "GslStoich", model, "stoichB", dims );
+	Id stoichB = s->doCreate( "GslStoich", comptB, "stoichB", dims );
 	assert ( stoichB != Id() );
 	Id stoichCoreB = 
 			s->doCreate( "StoichCore", stoichB, "stoichCore", dims );
@@ -405,8 +407,8 @@ void testJunctionSetup()
 	assert( Field< unsigned int >::get( stoichA, "num_junction" ) == 1 );
 	assert( Field< unsigned int >::get( stoichB, "num_junction" ) == 1 );
 
-	Id junctionA( "/model/stoichA/junction" );
-	Id junctionB( "/model/stoichB/junction" );
+	Id junctionA( "/model/meshA/stoichA/junction" );
+	Id junctionB( "/model/meshB/stoichB/junction" );
 	assert ( junctionA != Id() );
 	assert ( junctionB != Id() );
 
@@ -867,7 +869,7 @@ void testDiffusionAcrossJunctions()
 		assert( m == 5 );
 		SolverJunction* sj = 
 				reinterpret_cast< SolverJunction* >( jn.eref().data() );
-		assert( sj->meshIndex().size() == 5 );
+		assert( sj->sendMeshIndex().size() == 5 );
 		assert( sj->meshMap().size() == 5 );
 		assert( doubleEq( sj->meshMap()[0].diffScale, SIDE ) );
 	}
@@ -1207,14 +1209,14 @@ void testOneDimDiffusionAcrossJunctions()
 	assert( m == 1 );
 	SolverJunction* sj = 
 				reinterpret_cast< SolverJunction* >( jn0.eref().data() );
-	assert( sj->meshIndex().size() == 1 );
+	assert( sj->sendMeshIndex().size() == 1 );
 	assert( sj->meshMap().size() == 1 );
 	assert( doubleEq( sj->meshMap()[0].first, 0 ) );
 	assert( doubleEq( sj->meshMap()[0].second, 4 ) );
 	assert( doubleEq( sj->meshMap()[0].diffScale, SIDE ) );
 
 	sj = reinterpret_cast< SolverJunction* >( jn1.eref().data() );
-	assert( sj->meshIndex().size() == 1 );
+	assert( sj->sendMeshIndex().size() == 1 );
 	assert( sj->meshMap().size() == 1 );
 	assert( doubleEq( sj->meshMap()[0].first, 0 ) );
 	assert( doubleEq( sj->meshMap()[0].second, 0 ) );

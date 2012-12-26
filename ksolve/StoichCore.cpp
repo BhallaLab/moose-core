@@ -39,7 +39,6 @@
 
 #define EPSILON 1e-15
 
-static Id getCompt( Id id );
 const unsigned int StoichCore::PoolIsNotOnSolver = ~0;
 
 const Cinfo* StoichCore::initCinfo()

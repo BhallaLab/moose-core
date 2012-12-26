@@ -20308,5 +20308,14 @@ finds the reactions, finds any off-solver pools that they talk to, and puts
 these pools into the idMap for the StoichCore. They also are put into the 
 S_ and Sinit_ matrices. 
 Clears a really simple new unit test that all this is done correctly.
+Checkin 4351.
+
+Next: Set up Junctions to handle cross-solver terms.
 
 
+==========================================================================
+26 Dec.
+Did the setup for cross-solver terms. Yet to test it, but it does clear all the
+older unit tests. Cleaned up a lot of cruft in Junctions.
+
+==========================================================================

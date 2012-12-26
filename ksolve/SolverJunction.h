@@ -111,16 +111,23 @@ class SolverJunction
 		 */
 		const vector< unsigned int >& diffTerms() const;
 
-
-		/**
-		 * mesh indices to which the reac and diff terms apply
-		 */
-		const vector< unsigned int >& meshIndex() const;
-
 		/**
 		 * The map of meshIndex and diffTerm to incoming vector index.
 		 */
 		const vector< VoxelJunction >& meshMap() const;
+
+		/**
+		 * remoteReacPools are the local poolIndices for proxy pools for
+		 * pools which live on a remote solver, but which participate in a
+		 * reaction located on the current solver.
+		 */
+		const vector< unsigned int >& remoteReacPools() const;
+
+		/**
+		 * localReacPools are local poolIndices of pools which live on the
+		 * current solver, but have a cross-solver reaction. 
+		 */
+		const vector< unsigned int >& localReacPools() const;
 
 		/**
 		 * Pool indices of pools whose num will be sent across junction
@@ -155,11 +162,15 @@ class SolverJunction
 		//////////////////////////////////////////////////////////////////
 		// Setup functions
 		//////////////////////////////////////////////////////////////////
-		void setReacTerms( const vector< unsigned int >& reacTerms,
-			const vector< pair< unsigned int, unsigned int > >& poolMap );
+		/// Assigns list of pools which undergo diffusion
 		void setDiffTerms( const vector< unsigned int >& diffTerms );
-		void setMeshIndex( const vector< unsigned int >& meshIndex,
-			const vector< VoxelJunction >& meshMap );
+
+		/// Assigns the localReacPools vector.
+		void setLocalReacPools( const vector< unsigned int >& pools );
+		/// Assigns the remoteReacPools vector.
+		void setRemoteReacPools( const vector< unsigned int >& pools );
+		/// Assignes the meshMap.
+		void setMeshMap( const vector< VoxelJunction >& meshMap );
 
 		void setSendPools( 
 						const vector< unsigned int >& meshIndex,
@@ -191,15 +202,6 @@ class SolverJunction
 		vector< unsigned int > diffTerms_;
 
 		/**
-		 * meshIndex_:
-		 * For each crossTerm, we need a vector of meshIndices to which
-		 * the term is applied. However, we can safely assume that 
-		 * all crossTerms will use the same set of meshIndices as they
-		 * all apply to the same junction between compts.
-		 */
-		vector< unsigned int > meshIndex_;
-
-		/**
 		 * diffScale_:
 		 * For each meshIndex on the junction, there is a scaling factor
 		 * by xa/(h * volume)
@@ -208,25 +210,6 @@ class SolverJunction
 		 * Deal with that case later.
 		 */
 		vector< double > diffScale_;
-
-		/**
-		 * The total number of transmitted datapoints is 
-		 * 	(crossTerms_.size() * meshIndex_.size() + 
-		 * 	diffTerms_.size() ) * targetmeshIndices_.size().
-		 * Given the symmetry of this matrix, we do the following for the
-		 * targets: we specify the target molecules in one vector.
-		 * We separately specify the target meshIndices for each of the
-		 * meshIndices. 
-		 * A simple one-to-one map won't work, because a
-		 * given reac may have multiple targets, and a given meshIndex
-		 * may map onto multiple (or fractional) target meshIndices.
-		 */
-		/**
- 		 * The received vector maps onto Pools by SolverJunction as follows:
- 		 * 	The targetMols_ vector::first = vecIndex % (nR)
- 		 * 	The targetMols_ vector::second = poolIndex 
- 		 */
-		vector< pair< unsigned int, unsigned int > > targetMols_;
 
  		/** 
 		 * The received vector maps onto meshEntries (voxels) as follows:
@@ -243,27 +226,50 @@ class SolverJunction
 		 * meshIndex. Likewise Recv vector.
 		 *
 		 */
+		/**
+		 * localReacPools_ are local poolIndices of pools which live on the
+		 * current solver, but have a cross-solver reaction. So their
+		 * values have to be exported and their deltas have to be
+		 * imported.
+		 * These are indexed by the index of the outgoing # vector, or the
+		 * incoming delta vector, modulo total # of pools transmitted.
+		 */
+		vector< unsigned int > localReacPools_;
 
 		/**
-		 * SendMolIndex_ are local poolIndices of pools  going out to 
+		 * remoteReacPools_ are the special extended local poolIndices of
+		 * pools which live on a remote solver, but which participate in a
+		 * reaction located on the current solver. Their values are
+		 * imported from the remote solver, and their deltas are exported.
+		 * These are indexed by the index of the incoming # vector, or the
+		 * outgoing delta vector, modulo total # of pools transmitted.
+		 */
+		vector< unsigned int > remoteReacPools_;
+
+		/**
+		 * sendPoolIndex_ are local poolIndices of pools  going out to 
 		 * other solver.  We assume that
 		 * the same set of pools are sent out by each abutting voxel.
+		 * This set includes only diffusive pools.
 		 */
 		vector< unsigned int > sendPoolIndex_;
 
 		/**
 		 * MeshIndices (to lookup S_[meshIndex][poolIndex]) of outgoing
-		 * Pools from the core set handled by this solver.
+		 * Pools from the core set handled by this solver. The same
+		 * indices will be incremented by return messages.
+		 * This set of indices applies both to reactions and to diffusion.
 		 */
 		vector< unsigned int > sendMeshIndex_;
 
 		/**
-		 * RecvMolIndex is the local poolIndex of incoming pools, in order,
+		 * abutPoolIndex is the local poolIndex of incoming pools, in order,
 		 * from the recvVector.
 		 */
 		vector< unsigned int > abutPoolIndex_;
 
 		/**
+		 * abutMeshIndex_:
 		 * MeshIndices (to lookup S_[meshIndex][poolIndex]) of incoming
 		 * Pools, coming into the extra indices defined for abutments.
 		 */
