@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Sun Feb 28 18:17:56 2010 (+0530)
 // Version: 
-// Last-Updated: Sat Dec 29 09:36:46 2012 (+0530)
+// Last-Updated: Sat Dec 29 18:19:10 2012 (+0530)
 //           By: subha
-//     Update #: 566
+//     Update #: 607
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -54,6 +54,8 @@
 
 #include "SynInfo.h"
 #include "NMDAChan.h"
+
+const double NMDAChan::EPSILON = 1e-6; // this is to check X value
 
 const Cinfo* initNMDAChanCinfo()
 {
@@ -318,46 +320,48 @@ void NMDAChan::innerSynapseFunc( const Conn* c, double time )
 	assert( index < synapses_.size() );
 	pendingEvents_.push( synapses_[index].event( time ) );
         oldEvents_.push(synapses_[index].event(time + tau2_));
-	cout << "Event at: " << time << endl;
+	// cout << "Event at: " << time << " to " << c->target().name() << " from " << c->source().name() <<  endl;
 }
 
 void NMDAChan::processFunc(const Conn* conn, ProcInfo info)
 {
     static_cast<NMDAChan*>(conn->data())->innerProcessFunc(conn->target(), info);
 }
-
+    
 void NMDAChan::innerProcessFunc(Eref e, ProcInfo info)
 {
+    // cout << "t=" << info->currTime_ << ", " << e.name() << "\n";
     while (!oldEvents_.empty() &&
            oldEvents_.top().delay <= info->currTime_){
+        // the info->dt_ added above to compensate for off by 1 error for old events.
         SynInfo event = oldEvents_.top();
         oldEvents_.pop();
         activation_ -= event.weight / tau2_;
-	// Move the weight from ramp part (X) to decay part (Y).  The
-	// second part is for avoiding X < 0 because when activation
-	// becomes 0 above, X is still one step behind (weight -
-	// activation * dt/ tau).
-
-	// If each time step is of length dt, and the ramp length is T,
+        // Move the weight from ramp part (X) to decay part (Y).  The
+        // second part is for avoiding X < 0 because when activation
+        // becomes 0 above, X is still one step behind (weight -
+        // activation * dt/ tau).
+      
+        // If each time step is of length dt, and the ramp length is T,
 	// at step n
 	// X = n*dt*w/T while n * dt < T .
 	// if T <= (n+1)*dt,
 	// X = w * (n * dt - T)/T
 	// now if n * dt != T, X is never reset to 0 in the older scheme.
         X_ -= event.weight;
-	if (X_ < 0){
-	  X_ = 0.0;
+        if (fabs(X_/event.weight) < EPSILON){
+            X_ = 0.0;
 	}
         Y_ += event.weight;
-	cout << "Old event: X=" << X_ << ", Y=" << Y_ << ", activation=" << activation_ << endl;
+	// cout << "  old: X=" << X_ << ", Y=" << Y_ << ", activation=" << activation_ << endl;
     }
     while ( !pendingEvents_.empty() &&
             pendingEvents_.top().delay <= info->currTime_ ) {
         SynInfo event = pendingEvents_.top();
         pendingEvents_.pop();
-	// Activation summates the slopes due to each event
-        activation_ += event.weight / tau2_;
-	cout << "Pending event: activation=" << activation_ << endl;
+        // Activation summates the slopes due to each event
+        activation_ += event.weight / tau2_;        
+	// cout << "  pending: activation=" << activation_  << " weight=" << event.weight << endl;
     }
     // TODO: May need to optimize these exponentiations
     double a1_ = exp(-c0_ * Vm_ - c1_); // A1_ in traub_nmda.mod
@@ -368,22 +372,21 @@ void NMDAChan::innerProcessFunc(Eref e, ProcInfo info)
     // according to Forward Euler method:
     // x' = activation, i.e. X increases as a ramp with slope "activation"
     // y' = -y/tau2, i.e., Y decays exponentially
-    X_ += activation_ * info->dt_; 
+    X_ += activation_  * info->dt_;
     Y_ = Y_ * decayFactor_;
-    cout << "Integration: X=" << X_ << ", Y=" << Y_ << ", activation=" << activation_ << endl;
+    // cout << "  integrate:X=" << X_ << ", Y=" << Y_ << ", activation=" << activation_ << endl;
     unblocked_ = 1.0 / ( 1.0 + (a1_ + a2_) * (a1_ * B1_ + a2_ * B2_) / (A_ * (a1_ * (B1_ + b1_) + a2_ * (B2_ + b2_))));
-    cout << "Mg_unblocked: " << unblocked_ << endl;
-    cout << "Approx: " << 1/(1+exp(-62*Vm_)*Mg_/3.57) << endl;
-    cout << "X_: " << X_ << ", Y: " << Y_ << endl;
+    // cout << "  Mg_unblocked: " << unblocked_ << endl;
+    // cout << "  Approx: " << 1/(1+exp(-62*Vm_)*Mg_/3.57) << endl;
     Gk_ = X_ + Y_;
     if (Gk_ > saturation_ * Gbar_){
         Gk_ = saturation_ * Gbar_;
     }
     Gk_  *= unblocked_;
-    cout << "Gk: " << Gk_ << endl;
+    // cout << "  Gk: " << Gk_ << endl;
     Ik_ = ( Ek_ - Vm_ ) * Gk_;
     // activation_ = 0.0;
-    modulation_ = 1.0;
+    // modulation_ = 1.0;
     send2< double, double >( e, channelSlot, Gk_, Ek_ );
     send2< double, double >( e, origChannelSlot, Gk_, Ek_ );
     send1< double >( e, ikSlot, Ik_ );
@@ -404,7 +407,7 @@ void NMDAChan::innerReinitFunc(Eref e, ProcInfo info)
     Y_ = 0.0; // B in traub_nmda.mod
     unblocked_ = 1.0; // Mg_unblocked in traub_nmda.mod
     activation_ = 0.0; // equivalent to k in traub_nmda.mod
-    modulation_ = 1.0;
+    // modulation_ = 1.0;
     decayFactor_ = exp(-info->dt_ / tau1_);
     Ik_ = 0.0;
     updateNumSynapse( e );
