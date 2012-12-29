@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Sun Feb 28 18:17:56 2010 (+0530)
 // Version: 
-// Last-Updated: Sat Oct 15 19:05:21 2011 (+0530)
+// Last-Updated: Sat Dec 29 09:36:46 2012 (+0530)
 //           By: subha
-//     Update #: 538
+//     Update #: 566
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -108,7 +108,7 @@ const Cinfo* initNMDAChanCinfo()
                 "The channel conductance is defined as :"
                 " c * g(V, [Mg2+]o) * S(t) "
                 "where c is a scaling constant. "
-                "S(t) is the legand gated component of the conductance. It rises "
+                "S(t) is the ligand gated component of the conductance. It rises "
                 "linearly for t = tau2. Then decays exponentially with time constant "
                 "t = tau1. "
                 "g is a function of voltage and the extracellular [Mg2+] defined as: "
@@ -318,7 +318,7 @@ void NMDAChan::innerSynapseFunc( const Conn* c, double time )
 	assert( index < synapses_.size() );
 	pendingEvents_.push( synapses_[index].event( time ) );
         oldEvents_.push(synapses_[index].event(time + tau2_));
-
+	cout << "Event at: " << time << endl;
 }
 
 void NMDAChan::processFunc(const Conn* conn, ProcInfo info)
@@ -333,14 +333,31 @@ void NMDAChan::innerProcessFunc(Eref e, ProcInfo info)
         SynInfo event = oldEvents_.top();
         oldEvents_.pop();
         activation_ -= event.weight / tau2_;
-        X_ -= event.weight; 
+	// Move the weight from ramp part (X) to decay part (Y).  The
+	// second part is for avoiding X < 0 because when activation
+	// becomes 0 above, X is still one step behind (weight -
+	// activation * dt/ tau).
+
+	// If each time step is of length dt, and the ramp length is T,
+	// at step n
+	// X = n*dt*w/T while n * dt < T .
+	// if T <= (n+1)*dt,
+	// X = w * (n * dt - T)/T
+	// now if n * dt != T, X is never reset to 0 in the older scheme.
+        X_ -= event.weight;
+	if (X_ < 0){
+	  X_ = 0.0;
+	}
         Y_ += event.weight;
+	cout << "Old event: X=" << X_ << ", Y=" << Y_ << ", activation=" << activation_ << endl;
     }
     while ( !pendingEvents_.empty() &&
             pendingEvents_.top().delay <= info->currTime_ ) {
         SynInfo event = pendingEvents_.top();
         pendingEvents_.pop();
+	// Activation summates the slopes due to each event
         activation_ += event.weight / tau2_;
+	cout << "Pending event: activation=" << activation_ << endl;
     }
     // TODO: May need to optimize these exponentiations
     double a1_ = exp(-c0_ * Vm_ - c1_); // A1_ in traub_nmda.mod
@@ -349,16 +366,21 @@ void NMDAChan::innerProcessFunc(Eref e, ProcInfo info)
     double b2_ = exp(c6_ * Vm_ + c7_); // B2_ in traub_nmda.mod
     // The following two lines calculate next values of X_ and Y_
     // according to Forward Euler method:
-    // x' = activation
-    // y' = -y/tau2
+    // x' = activation, i.e. X increases as a ramp with slope "activation"
+    // y' = -y/tau2, i.e., Y decays exponentially
     X_ += activation_ * info->dt_; 
     Y_ = Y_ * decayFactor_;
+    cout << "Integration: X=" << X_ << ", Y=" << Y_ << ", activation=" << activation_ << endl;
     unblocked_ = 1.0 / ( 1.0 + (a1_ + a2_) * (a1_ * B1_ + a2_ * B2_) / (A_ * (a1_ * (B1_ + b1_) + a2_ * (B2_ + b2_))));
+    cout << "Mg_unblocked: " << unblocked_ << endl;
+    cout << "Approx: " << 1/(1+exp(-62*Vm_)*Mg_/3.57) << endl;
+    cout << "X_: " << X_ << ", Y: " << Y_ << endl;
     Gk_ = X_ + Y_;
     if (Gk_ > saturation_ * Gbar_){
         Gk_ = saturation_ * Gbar_;
     }
     Gk_  *= unblocked_;
+    cout << "Gk: " << Gk_ << endl;
     Ik_ = ( Ek_ - Vm_ ) * Gk_;
     // activation_ = 0.0;
     modulation_ = 1.0;
