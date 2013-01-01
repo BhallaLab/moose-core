@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Sun Feb 28 18:17:56 2010 (+0530)
 // Version: 
-// Last-Updated: Sat Dec 29 18:19:10 2012 (+0530)
+// Last-Updated: Tue Jan  1 18:24:44 2013 (+0530)
 //           By: subha
-//     Update #: 607
+//     Update #: 664
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -54,8 +54,6 @@
 
 #include "SynInfo.h"
 #include "NMDAChan.h"
-
-const double NMDAChan::EPSILON = 1e-6; // this is to check X value
 
 const Cinfo* initNMDAChanCinfo()
 {
@@ -349,9 +347,9 @@ void NMDAChan::innerProcessFunc(Eref e, ProcInfo info)
 	// X = w * (n * dt - T)/T
 	// now if n * dt != T, X is never reset to 0 in the older scheme.
         X_ -= event.weight;
-        if (fabs(X_/event.weight) < EPSILON){
+        if (X_ < 0.0){
             X_ = 0.0;
-	}
+        }
         Y_ += event.weight;
 	// cout << "  old: X=" << X_ << ", Y=" << Y_ << ", activation=" << activation_ << endl;
     }
