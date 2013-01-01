@@ -5,9 +5,9 @@
 // Maintainer: 
 // Created: Mon Mar  8 15:13:02 2010 (+0530)
 // Version: 
-// Last-Updated: Sat Dec 29 17:04:35 2012 (+0530)
+// Last-Updated: Tue Jan  1 18:17:51 2013 (+0530)
 //           By: subha
-//     Update #: 87
+//     Update #: 89
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -100,7 +100,6 @@ class NMDAChan: public SynChan
                                          // tau1
     double decayFactor_; // Intermediate variable for Exponential
                          // Euler method exp(-t/tau2)
-    static const double EPSILON;
 };
 
 #endif
