@@ -1,10 +1,12 @@
 This is the MOOSE documentation directory. The documentation is grouped into
-3 directories:
+the following directories:
 
     - user: This is for anyone wishing to learn/use MOOSE.
             This part of the documentation is encoded in Markdown format.
     - developer: If you wish to learn about MOOSE code, go here.
     - markdown: This contains a quick introduction to Markdown itself.
+    - images: These are images that are included in the user and developer
+              documentation.
 
 --------------------------------------------------------------------------------
 N.B.: This text file has Windows-style line endings (CR/LF) for easy

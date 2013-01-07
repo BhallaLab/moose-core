@@ -79,7 +79,7 @@ change parameters, and change the layout of the model. In the next
 MOOSE release you will also be able to add and remove molecules and
 reactions.
 
-![](../images/KkitModelWindow.png)
+![](../../images/KkitModelWindow.png)
 
 Resizing the model layout and icons:
 
@@ -127,7 +127,7 @@ This is the set of molecules of a given species within a
 compartment. Different chemical states of the same molecule are in
 different pools.
 
--   **Icon**: ![](../images/KkitPoolIcon.png) Colored rectangle
+-   **Icon**: ![](../../images/KkitPoolIcon.png) Colored rectangle
     with pool name in it.
 -   **Moving pools**: Click and drag.
 -   **Pool editable parameters**:
@@ -156,7 +156,7 @@ Some pools are set to a fixed `n`, that is number of molecules,
 and therefore a fixed concentration, throughout a simulation. These
 are buffered pools.
 
--   **Icon**: ![](../images/KkitPoolIcon.png) Colored rectangle
+-   **Icon**: ![](../../images/KkitPoolIcon.png) Colored rectangle
     with pool name in it.
 -   **Moving Buffered pools**: Click and drag.
 -   **Buffered Pool editable parameters**
@@ -184,9 +184,9 @@ irreversibility. In the illustration below, **`D`** and **`A`** are
 substrates, and **`B`** is the product of the reaction. This is
 indicated by the direction of the green arrow.
 
-![](../images/KkitReaction.png)
+![](../../images/KkitReaction.png)
 
--   **Icon**: ![](../images/KkitReacIcon.png) Reversible
+-   **Icon**: ![](../../images/KkitReacIcon.png) Reversible
     reaction arrow.
 -   **Moving Reactions**: Click and drag.
 -   **Reaction editable parameters**:
@@ -220,9 +220,9 @@ is named **`MassActionEnz`**, the substrate is **`C`**, and the product is
 **`E`**. The direction of the enzyme reaction is indicated by the red
 arrows.
 
-![](../images/MassActionEnzReac.png)
+![](../../images/MassActionEnzReac.png)
 
--   **Icon**: ![](../images/MassActionEnzIcon.png) Colored
+-   **Icon**: ![](../../images/MassActionEnzIcon.png) Colored
     ellipse atop a small square. The ellipse represents the enzyme. The
     small square represents **`E.S`**, the enzyme-substrate complex.
     The ellipse icon has the same color as the enzyme pool **`E`**. It is
@@ -296,9 +296,9 @@ example below, the enzyme pool is named **`MM_Enz`**, the substrate is **`E`**, 
 the product is **`F`**. The direction of the enzyme reaction is indicated by the 
 red arrows.
 
-![](../images/MM_EnzReac.png)
+![](../../images/MM_EnzReac.png)
 
--   **Icon**: ![](../images/MM_EnzIcon.png) Colored ellipse.
+-   **Icon**: ![](../../images/MM_EnzIcon.png) Colored ellipse.
     The ellipse represents the enzyme The ellipse icon has the same
     color as the enzyme **`MM_Enz`**. It is connected to the enzyme pool
     **`MM_Enz`** with a straight line of the same color. The ellipse icon sits
@@ -326,7 +326,7 @@ single enzyme activity to represent the whole lot.
 -   **Icon**: Colored rectangle with pool name. This is **`tot1`** in
     the example image below. The input pools **`A`** and **`B`** connect to the
     SumTotal with blue arrows.
-    ![](../images/KkitSumTotal.png)
+    ![](../../images/KkitSumTotal.png)
 -   **Moving SumTotals**: Click and drag.
 -   **SumTotal editable parameters**:
     -   **`name`**: Name of the pool

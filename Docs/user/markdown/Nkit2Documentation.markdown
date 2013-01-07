@@ -29,7 +29,7 @@ kinetics, in series with an electrochemical voltage drive (battery)
 
 ----
 
-![**Equivalent circuit of neuronal compartments**](../images/neuroncompartment.png)
+![**Equivalent circuit of neuronal compartments**](../../images/neuroncompartment.png)
 
 ----
 

@@ -254,7 +254,7 @@ with voltage `Em` is in series with the resistor, as shown below:
 
 ----
 
-![**Passive neuronal compartment**](../images/neuronalcompartment.jpg)
+![**Passive neuronal compartment**](../../images/neuronalcompartment.jpg)
 
 ----
 
