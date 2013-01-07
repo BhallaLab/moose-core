@@ -3190,8 +3190,10 @@ static struct module_state _state;
                  "Example\n"
                  "-------\n"
                  "List names of all the source fields in PulseGen class:\n"
+                 "~~~~\n"
                  ">>> moose.getFieldNames('PulseGen', 'srcFinfo')\n"
                  "('childMsg', 'outputOut')\n"
+                 "~~~~\n"
                  "\n");
     // 2011-03-23 15:28:26 (+0530)
     static PyObject * moose_ObjId_getFieldNames(_ObjId * self, PyObject *args)
@@ -3928,10 +3930,12 @@ static struct module_state _state;
                  "Connect the output of a pulse generator to the input of a spike\n"
                  "generator:\n"
                  "\n"
+                 "~~~~\n"
                  ">>> pulsegen = moose.PulseGen('pulsegen')\n"
                  ">>> spikegen = moose.SpikeGen('spikegen')\n"
                  ">>> moose.connect(pulsegen, 'outputOut', spikegen, 'Vm')\n"
                  "1\n"
+                 "~~~~\n"
                  "\n"
 
                  );
@@ -3982,8 +3986,10 @@ static struct module_state _state;
                  "Example\n"
                  "-------\n"
                  "List all the source fields on class Neutral:\n"
+                 "~~~~\n"
                  ">>> moose.getFieldDict('Neutral', 'srcFinfo')\n"
                  "{'childMsg': 'int'}\n"
+                 "~~~~\n"
                  "\n");
     static PyObject * moose_getFieldDict(PyObject * dummy, PyObject * args)
     {
@@ -4566,6 +4572,7 @@ static struct module_state _state;
                  "available as a superclass instance).\n"
                  "\n"
                  "Returns\n"
+                 "-------\n"
                  "An element of the moose builtin class the specified object belongs\n"
                  "to.\n"
                  "\n");
