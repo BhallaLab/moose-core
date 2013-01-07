@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Sun Feb 28 18:17:56 2010 (+0530)
 // Version: 
-// Last-Updated: Mon Jan  7 16:51:13 2013 (+0530)
+// Last-Updated: Mon Jan  7 18:03:58 2013 (+0530)
 //           By: subha
-//     Update #: 670
+//     Update #: 706
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -56,6 +56,7 @@
 #include "SynInfo.h"
 #include "NMDAChan.h"
 
+double NMDAChan::epsilon_ = (pow(2, 26) - 1) * DBL_EPSILON / 2;
 const Cinfo* initNMDAChanCinfo()
 {
     ///////////////////////////////////////////////////////
@@ -348,7 +349,7 @@ void NMDAChan::innerProcessFunc(Eref e, ProcInfo info)
 	// X = w * (n * dt - T)/T
 	// now if n * dt != T, X is never reset to 0 in the older scheme.
         X_ -= event.weight;
-        if (X_ < 0.0){
+        if (X_ < 0){
             X_ = 0.0;
         }
         Y_ += event.weight;
@@ -401,7 +402,11 @@ void NMDAChan::reinitFunc(const Conn* conn, ProcInfo info)
 
 void NMDAChan::innerReinitFunc(Eref e, ProcInfo info)
 {
-    NMDAChan::epsilon_ = (pow(2, 26) - 1) * DBL_EPSILON / 2;
+    int exponent;
+    double frac = frexp(info->dt_, &exponent);
+    // Let us get an epsilon to ignore 1/1000-th differences in values of dt.
+    exponent = 52 + exponent - 10; // beware of IEEE double precision specific code
+    NMDAChan::epsilon_ = (ldexp(double(1.0), exponent) - 1) * DBL_EPSILON / 2;
     Gk_ = 0.0;
     X_ = 0.0; // A in traub_nmda.mod
     Y_ = 0.0; // B in traub_nmda.mod
