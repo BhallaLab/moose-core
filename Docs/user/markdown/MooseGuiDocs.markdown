@@ -17,7 +17,7 @@ occupying most of the screen. To the right there is a panel with controls
 for viewing and editing model parameters, for configuring plots, and for 
 running the model.
 
-![](../images/MooseGuiImage.png)
+![](../../images/MooseGuiImage.png)
 
 # The menu bar
 
@@ -25,7 +25,7 @@ In Ubuntu 12.04, the menu bar appears only when the mouse is in the top menu
 strip of the screen. In other distributions it should appear over the top of 
 the interface.
 
-![](../images/MooseGuiMenuImage.png)
+![](../../images/MooseGuiMenuImage.png)
 
 The menu bar contains the following entries: **`File`**, **`Edit`**, **`View`**, 
 **`Solver`**, **`Help`**.
@@ -102,7 +102,7 @@ depending on the model type.
 
 ## 3-D display of neuronal models in Neurokit:
 
-![](../images/NkitModelWindow.png)
+![](../../images/NkitModelWindow.png)
 
 The individual compartments of the neuron model can be clicked to select, 
 and when selected, the compartment parameters and variables are displayed in 
@@ -142,7 +142,7 @@ and enzymes, and these are connected by arrows to set up the
 reaction scheme. Again, any icon can be clicked to select and its
 parameters and variables come up in the **`Property editor`**.
 
-![](../images/KkitModelWindow.png)
+![](../../images/KkitModelWindow.png)
 
 The chemical network is displayed only in 2 dimensions. The
 controls are correspondingly simpler:
@@ -165,43 +165,43 @@ The plot window displays time-series plots of the simulation. Plots are
 color-coded to distinguish them. In the case of the **kkit** interface the 
 plots take the same color as the molecule pool that they represent.
 
-![](../images/KkitPlotWindow.png)
+![](../../images/KkitPlotWindow.png)
 
 The plots are done using **MatPlotLib**, so the usual controls apply. Beneath 
 the plot window there is a little row of icons:
 
-![](../images/PlotWindowIcons.png)
+![](../../images/PlotWindowIcons.png)
 
 These are the plot controls. If you hover the mouse over them for a few 
 seconds, a function reminder box pops up. The functions as follows:
 
-![](../images/MatPlotLibHomeIcon.png)
+![](../../images/MatPlotLibHomeIcon.png)
 
 -   **Home**: Returns the plot display to its default position.
 
-![](../images/MatPlotLibDoUndo.png)
+![](../../images/MatPlotLibDoUndo.png)
 
 -   **Undo/Redo**: Undoes or re-does manipulations you have done to
 the display.
 
-![](../images/MatPlotLibPan.png)
+![](../../images/MatPlotLibPan.png)
 
 -   **Pan**: The plots will pan around with the mouse when you hold the left 
 button down. The plots will zoom with the mouse when you hold the right 
 button down.
 
-![](../images/MatPlotLibZoom.png)
+![](../../images/MatPlotLibZoom.png)
 
 -   **Zoom to rectangle**: With the **`left mouse button`**, this
     will zoom in to the specified rectangle so that the plots become
     bigger. With the **`right mouse button`**, the entire plot display
     will be shrunk to fit into the specified rectangle.
 
-![](../images/MatPlotLibConfigureSubplots.png)
+![](../../images/MatPlotLibConfigureSubplots.png)
 
 -   **Configure subplots**: You don't want to mess with these.
 
-![](../images/MatPlotLibSave.png)
+![](../../images/MatPlotLibSave.png)
 
 -   **Save**: Pops up a dialog box to save the plot. At this point
     it only saves into a `.png` file.
@@ -217,7 +217,7 @@ and the **`Run control`**.
 The **`Property editor`** displays parameters and variables of the
 selected model component (object).
 
-![](../images/PropertyEditor.png)
+![](../../images/PropertyEditor.png)
 
 The object many be a compartments of a neuronal model, or pools,
 reactions, or enzymes in a signaling model.
@@ -237,7 +237,7 @@ reactions, or enzymes in a signaling model.
 The **`Plot configuration`** panel lets one set up new plots based on
 selected objects and their fields.
 
-![](../images/PlotConfig.png)
+![](../../images/PlotConfig.png)
 
 -   **The top line**: has the name of the object whose field is to be plotted.
 -   **Plot Field**: Specifies field to be plotted.
@@ -253,7 +253,7 @@ selected objects and their fields.
 
 The **`Simulation control`** panel controls how the model is run.
 
-![](../images/SimulationControl.png)
+![](../../images/SimulationControl.png)
 
 -   **Run Time**: Determines duration for which simulation is to
     run. If simulation has already run, this runs for the specified
