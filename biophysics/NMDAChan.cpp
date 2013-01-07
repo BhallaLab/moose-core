@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Sun Feb 28 18:17:56 2010 (+0530)
 // Version: 
-// Last-Updated: Tue Jan  1 18:24:44 2013 (+0530)
+// Last-Updated: Mon Jan  7 16:51:13 2013 (+0530)
 //           By: subha
-//     Update #: 664
+//     Update #: 670
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -49,6 +49,7 @@
 #include <cmath>
 #include <cfloat>
 #include <queue>
+#include "gsl/gsl_math.h"
 #include "basecode/header.h"
 #include "basecode/moose.h"
 
@@ -330,7 +331,7 @@ void NMDAChan::innerProcessFunc(Eref e, ProcInfo info)
 {
     // cout << "t=" << info->currTime_ << ", " << e.name() << "\n";
     while (!oldEvents_.empty() &&
-           oldEvents_.top().delay <= info->currTime_){
+           gsl_fcmp(oldEvents_.top().delay, info->currTime_, NMDAChan::epsilon_) <= 0){
         // the info->dt_ added above to compensate for off by 1 error for old events.
         SynInfo event = oldEvents_.top();
         oldEvents_.pop();
@@ -354,7 +355,7 @@ void NMDAChan::innerProcessFunc(Eref e, ProcInfo info)
 	// cout << "  old: X=" << X_ << ", Y=" << Y_ << ", activation=" << activation_ << endl;
     }
     while ( !pendingEvents_.empty() &&
-            pendingEvents_.top().delay <= info->currTime_ ) {
+            gsl_fcmp(pendingEvents_.top().delay, info->currTime_, NMDAChan::epsilon_) <= 0) {
         SynInfo event = pendingEvents_.top();
         pendingEvents_.pop();
         // Activation summates the slopes due to each event
@@ -400,6 +401,7 @@ void NMDAChan::reinitFunc(const Conn* conn, ProcInfo info)
 
 void NMDAChan::innerReinitFunc(Eref e, ProcInfo info)
 {
+    NMDAChan::epsilon_ = (pow(2, 26) - 1) * DBL_EPSILON / 2;
     Gk_ = 0.0;
     X_ = 0.0; // A in traub_nmda.mod
     Y_ = 0.0; // B in traub_nmda.mod

@@ -5,9 +5,9 @@
 // Maintainer: 
 // Created: Mon Mar  8 15:13:02 2010 (+0530)
 // Version: 
-// Last-Updated: Tue Jan  1 18:17:51 2013 (+0530)
+// Last-Updated: Mon Jan  7 16:32:54 2013 (+0530)
 //           By: subha
-//     Update #: 89
+//     Update #: 91
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -100,6 +100,10 @@ class NMDAChan: public SynChan
                                          // tau1
     double decayFactor_; // Intermediate variable for Exponential
                          // Euler method exp(-t/tau2)
+    // This is for comparing time - the X_ calculation is sensitive to
+    // exact no. of time steps (which should be corrected in new moose
+    // with integers for step counts).
+    static double epsilon_; 
 };
 
 #endif
