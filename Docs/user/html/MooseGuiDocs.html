@@ -1,0 +1,738 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>MOOSEGUI: Graphical interface for MOOSE</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="author" content="H. Chaitanya" />
+  <meta name="author" content="Harsha Rani" />
+  <meta name="author" content="Subhasis Ray" />
+  <meta name="author" content="Upi Bhalla" />
+  <meta name="date" content="May 11, 2012" />
+  <link rel="stylesheet" href="css/moosedocs.css" type="text/css" />
+</head>
+<body>
+
+<h1 class="title">MOOSEGUI: Graphical interface for MOOSE</h1>
+
+<h2>
+    H. Chaitanya,
+    Harsha Rani,
+    Subhasis Ray,
+    Upi Bhalla
+</h2>
+
+<h2>May 11, 2012</h2>
+
+<div id="TOC"
+><ul
+  ><li
+    ><a href="#introduction"
+      >Introduction</a
+      ></li
+    ><li
+    ><a href="#layout-of-interface"
+      >Layout of interface</a
+      ></li
+    ><li
+    ><a href="#the-menu-bar"
+      >The menu bar</a
+      ><ul
+      ><li
+	><a href="#file"
+	  >File</a
+	  ></li
+	><li
+	><a href="#edit"
+	  >Edit</a
+	  ></li
+	><li
+	><a href="#view"
+	  >View</a
+	  ></li
+	><li
+	><a href="#solver"
+	  >Solver</a
+	  ></li
+	><li
+	><a href="#help"
+	  >Help</a
+	  ></li
+	></ul
+      ></li
+    ><li
+    ><a href="#the-model-window"
+      >The Model window</a
+      ><ul
+      ><li
+	><a href="#d-display-of-neuronal-models-in-neurokit:"
+	  >3-D display of neuronal models in Neurokit:</a
+	  ></li
+	><li
+	><a href="#d-display-of-chemical-kinetics-models-in-kinetikit:"
+	  >2-D display of chemical kinetics models in Kinetikit:</a
+	  ></li
+	></ul
+      ></li
+    ><li
+    ><a href="#the-plot-window"
+      >The plot window</a
+      ></li
+    ><li
+    ><a href="#the-side-panel"
+      >The side panel</a
+      ><ul
+      ><li
+	><a href="#property-editor"
+	  >Property editor</a
+	  ></li
+	><li
+	><a href="#plot-configuration"
+	  >Plot configuration</a
+	  ></li
+	><li
+	><a href="#simulation-control"
+	  >Simulation control</a
+	  ></li
+	></ul
+      ></li
+    ></ul
+  ></div
+>
+<div id="introduction"
+><h1
+  ><a href="#TOC"
+    >Introduction</a
+    ></h1
+  ><p
+  >The Moose GUI lets you work on <a href="Kkit12Documentation.html"
+    >chemical</a
+    > and <a href="Nkit2Documentation.html"
+    >compartmental neuronal</a
+    > models using a common interface framework. This document describes this common framework. In MOOSE 2.0.0, the interface lets you read, run, edit, and write chemical kinetic models, and to read, edit and run neuronal models.</p
+  ></div
+><div id="layout-of-interface"
+><h1
+  ><a href="#TOC"
+    >Layout of interface</a
+    ></h1
+  ><p
+  >The <strong
+    >MooseGui</strong
+    > interface consists of a model view window to the left, occupying most of the screen. To the right there is a panel with controls for viewing and editing model parameters, for configuring plots, and for running the model.</p
+  ><div class="figure"
+  ><img src="../images/MooseGuiImage.png"
+     /><p class="caption"
+    ></p
+    ></div
+  ></div
+><div id="the-menu-bar"
+><h1
+  ><a href="#TOC"
+    >The menu bar</a
+    ></h1
+  ><p
+  >In Ubuntu 12.04, the menu bar appears only when the mouse is in the top menu strip of the screen. In other distributions it should appear over the top of the interface.</p
+  ><div class="figure"
+  ><img src="../images/MooseGuiMenuImage.png"
+     /><p class="caption"
+    ></p
+    ></div
+  ><p
+  >The menu bar contains the following entries: <strong
+    ><code
+      >File</code
+      ></strong
+    >, <strong
+    ><code
+      >Edit</code
+      ></strong
+    >, <strong
+    ><code
+      >View</code
+      ></strong
+    >, <strong
+    ><code
+      >Solver</code
+      ></strong
+    >, <strong
+    ><code
+      >Help</code
+      ></strong
+    >.</p
+  ><div id="file"
+  ><h2
+    ><a href="#TOC"
+      >File</a
+      ></h2
+    ><ul
+    ><li
+      ><strong
+	>Load Model</strong
+	>: This leads to a file finder dialog. The default location should bring you to the <code
+	>Demos</code
+	> directory of MOOSE. Here you can go into the <code
+	>Genesis-files</code
+	> subdirectory, which contains legacy Kinetikit (<code
+	>*.g</code
+	>) format models. The <code
+	>neuroml</code
+	> subdirectory leads to a number of example neuronal and network models, each in their own subdirectory. The other demos are mostly standalone demos.</li
+      ><li
+      ><strong
+	>Save Model</strong
+	>: This currently works only for chemical kinetic models, and only works for the Kinetikit format.</li
+      ><li
+      ><strong
+	>Merge Models</strong
+	>: This allows one to load in a new chemical kinetic model on top of an already loaded model.</li
+      ><li
+      ><strong
+	>Save plots</strong
+	>: Dumps plot contents to disk in xplot (ascii) format.</li
+      ><li
+      ><strong
+	>Shell model</strong
+	>: Not yet operational.</li
+      ><li
+      ><strong
+	>Reset settings</strong
+	>: Restores interface settings to default.</li
+      ><li
+      ><strong
+	>Quit</strong
+	>: Quits the interface.</li
+      ></ul
+    ></div
+  ><div id="edit"
+  ><h2
+    ><a href="#TOC"
+      >Edit</a
+      ></h2
+    ><ul
+    ><li
+      ><strong
+	>Settings</strong
+	>: Provides for changing interface settings such as file locations.</li
+      ></ul
+    ></div
+  ><div id="view"
+  ><h2
+    ><a href="#TOC"
+      >View</a
+      ></h2
+    ><p
+    >This allows one to control display of various parts of the interface.</p
+    ><ul
+    ><li
+      ><strong
+	>Moose shell</strong
+	>: Currently inactive.</li
+      ><li
+      ><strong
+	>Property editor</strong
+	>: Toggles visibility of the panels for viewing and editing object parameters. This is to the upper right of the interface in the interface layout example figure above.</li
+      ><li
+      ><strong
+	>Simulation control</strong
+	>: Toggles visibility of the panels for controlling running of the simulation, at the bottom right of the interface layout.</li
+      ><li
+      ><strong
+	>Plot config</strong
+	>: Toggles visibility of panels for making plots. This is in the middle right of the interface layout.</li
+      ><li
+      ><strong
+	>Sub Windows</strong
+	>: This sets up the model view and the plot view panels into separate sub-windows of the screen. Useful when you want to watch plots at the same time as the cell display, or to select and edit different parts of the model while watching the simulation progress.</li
+      ><li
+      ><strong
+	>Tabs</strong
+	>: This sets up the model view and plot view panels into tabs on the screen, as in the example interface figure above. This is useful to dedicate a larger portion of screen area to each display.</li
+      ></ul
+    ></div
+  ><div id="solver"
+  ><h2
+    ><a href="#TOC"
+      >Solver</a
+      ></h2
+    ><p
+    >The Solver options currently only select between methods for kinetic models. Details are in the <a href="Kkit12Documentation.html"
+      >chemical kinetics documentation</a
+      >.</p
+    ><p
+    >Options are:</p
+    ><ul
+    ><li
+      ><strong
+	>Runge Kutta</strong
+	>: This is the default method for integration of ODE systems. It uses the Gnu Scientific Library 5-th order explicit variable-timestep Runge-Kutta-Fehlberg method.</li
+      ><li
+      ><strong
+	>Gillespie</strong
+	>: This is an implementation of Gillespies Stochastic Systems Algorithm, which computes reaction progress using a stochastic method.</li
+      ></ul
+    ></div
+  ><div id="help"
+  ><h2
+    ><a href="#TOC"
+      >Help</a
+      ></h2
+    ><ul
+    ><li
+      ><strong
+	>About</strong
+	>: Version and general information about MOOSE.</li
+      ><li
+      ><strong
+	>General documentation</strong
+	>: This file. How to use the common interface framework.</li
+      ><li
+      ><strong
+	>Kkit</strong
+	>: Documentation on the use of Kinetikit version 12.</li
+      ><li
+      ><strong
+	>Nkit</strong
+	>: Documentation on the use of Neurokit version 2.</li
+      ><li
+      ><strong
+	>Report a bug</strong
+	>: Takes you to the SourceForge bug tracker for Moose.</li
+      ></ul
+    ></div
+  ></div
+><div id="the-model-window"
+><h1
+  ><a href="#TOC"
+    >The Model window</a
+    ></h1
+  ><p
+  >The Model window displays a view of the model structure. These views vary depending on the model type.</p
+  ><div id="d-display-of-neuronal-models-in-neurokit:"
+  ><h2
+    ><a href="#TOC"
+      >3-D display of neuronal models in Neurokit:</a
+      ></h2
+    ><div class="figure"
+    ><img src="../images/NkitModelWindow.png"
+       /><p class="caption"
+      ></p
+      ></div
+    ><p
+    >The individual compartments of the neuron model can be clicked to select, and when selected, the compartment parameters and variables are displayed in the <strong
+      ><code
+	>Property editor</code
+	></strong
+      > described below. For a neuronal or neuronal network model, the window displays a 3-D view of the cell(s) in the model. It does so using <strong
+      >OpenGL</strong
+      >, which is a standard for displaying 3-D views. In addition, the display sets the color of each compartment based on some variable value, typically <code
+      >Vm</code
+      >, the membrane potential of the compartment. Note the 3-D axis indicators in the bottom left.</p
+    ><p
+    >The controls for moving the display are as follows:</p
+    ><ul
+    ><li
+      ><strong
+	>Zoom</strong
+	>: One can zoom in and out of the field of view in the OpenGL window using the comma and period keys (think in terms of the angle bracket symbols on the same keys). In addition, the scroll wheel or the vertical scroll line on the track pad will also cause the display to zoom in and out.</li
+      ><li
+      ><strong
+	>Pan</strong
+	>: The arrow keys will move the display left, right, up and down. Pan can also be done using the mouse if you hold down the <strong
+	><code
+	  >shift</code
+	  ></strong
+	> key and the <strong
+	><code
+	  >left mouse button</code
+	  ></strong
+	> at the same time.</li
+      ><li
+      ><strong
+	>Pitch</strong
+	>: For reasons entirely unknown to me, the keys <strong
+	><code
+	  >y</code
+	  ></strong
+	> and <strong
+	><code
+	  >u</code
+	  ></strong
+	> are assigned to rotate the display about the vertical axis, otherwise known as <em
+	>pitch</em
+	>.</li
+      ><li
+      ><strong
+	>Yaw</strong
+	>: The keys <strong
+	><code
+	  >q</code
+	  ></strong
+	> and <strong
+	><code
+	  >a</code
+	  ></strong
+	> control rotation around the horizontal axis, otherwise known as <em
+	>yaw</em
+	>.</li
+      ><li
+      ><strong
+	>Roll</strong
+	>: To complete the key binding hall of fame, the keys <strong
+	><code
+	  >z</code
+	  ></strong
+	> and <strong
+	><code
+	  >x</code
+	  ></strong
+	> rotate the display around the axis going into the display from your eyes.</li
+      ><li
+      ><strong
+	>Mouse controls</strong
+	>: One can also acheive a combination of <em
+	>pitch</em
+	>, <em
+	>roll</em
+	>, and <em
+	>yaw</em
+	> by holding the <strong
+	><code
+	  >left mouse button</code
+	  ></strong
+	> down and moving the mouse.</li
+      ></ul
+    ></div
+  ><div id="d-display-of-chemical-kinetics-models-in-kinetikit:"
+  ><h2
+    ><a href="#TOC"
+      >2-D display of chemical kinetics models in Kinetikit:</a
+      ></h2
+    ><p
+    >For a chemical kinetics network, the window displays a schematic of the chemical reaction system. This is in the tab labeled <strong
+      ><code
+	>Kkit Layout</code
+	></strong
+      >. There are distinct icons for molecules, reactions and enzymes, and these are connected by arrows to set up the reaction scheme. Again, any icon can be clicked to select and its parameters and variables come up in the <strong
+      ><code
+	>Property editor</code
+	></strong
+      >.</p
+    ><div class="figure"
+    ><img src="../images/KkitModelWindow.png"
+       /><p class="caption"
+      ></p
+      ></div
+    ><p
+    >The chemical network is displayed only in 2 dimensions. The controls are correspondingly simpler:</p
+    ><ul
+    ><li
+      ><strong
+	>Zoom</strong
+	>: Comma and period keys. Alternatively, the mouse scroll wheel or vertical scroll line on the track pad will cause the display to zoom in and out.</li
+      ><li
+      ><strong
+	>Pan</strong
+	>: The arrow keys move the display left, right, up, and down.</li
+      ><li
+      ><strong
+	>Entire Model View</strong
+	>: Pressing the <strong
+	><code
+	  >a</code
+	  ></strong
+	> key will fit the entire model into the entire field of view.</li
+      ><li
+      ><strong
+	>Resize Icons</strong
+	>: Angle bracket keys, that is, <strong
+	><code
+	  >&lt;</code
+	  ></strong
+	> and <strong
+	><code
+	  >&gt;</code
+	  ></strong
+	>. This resizes the icons while leaving their positions on the screen layout more or less the same.</li
+      ><li
+      ><strong
+	>Original Model View</strong
+	>: Presing the <strong
+	><code
+	  >A</code
+	  ></strong
+	> key (capital <code
+	>A</code
+	>) will revert to the original model view including the original icon scaling.</li
+      ></ul
+    ></div
+  ></div
+><div id="the-plot-window"
+><h1
+  ><a href="#TOC"
+    >The plot window</a
+    ></h1
+  ><p
+  >The plot window displays time-series plots of the simulation. Plots are color-coded to distinguish them. In the case of the <strong
+    >kkit</strong
+    > interface the plots take the same color as the molecule pool that they represent.</p
+  ><div class="figure"
+  ><img src="../images/KkitPlotWindow.png"
+     /><p class="caption"
+    ></p
+    ></div
+  ><p
+  >The plots are done using <strong
+    >MatPlotLib</strong
+    >, so the usual controls apply. Beneath the plot window there is a little row of icons:</p
+  ><div class="figure"
+  ><img src="../images/PlotWindowIcons.png"
+     /><p class="caption"
+    ></p
+    ></div
+  ><p
+  >These are the plot controls. If you hover the mouse over them for a few seconds, a function reminder box pops up. The functions as follows:</p
+  ><div class="figure"
+  ><img src="../images/MatPlotLibHomeIcon.png"
+     /><p class="caption"
+    ></p
+    ></div
+  ><ul
+  ><li
+    ><strong
+      >Home</strong
+      >: Returns the plot display to its default position.</li
+    ></ul
+  ><div class="figure"
+  ><img src="../images/MatPlotLibDoUndo.png"
+     /><p class="caption"
+    ></p
+    ></div
+  ><ul
+  ><li
+    ><strong
+      >Undo/Redo</strong
+      >: Undoes or re-does manipulations you have done to the display.</li
+    ></ul
+  ><div class="figure"
+  ><img src="../images/MatPlotLibPan.png"
+     /><p class="caption"
+    ></p
+    ></div
+  ><ul
+  ><li
+    ><strong
+      >Pan</strong
+      >: The plots will pan around with the mouse when you hold the left button down. The plots will zoom with the mouse when you hold the right button down.</li
+    ></ul
+  ><div class="figure"
+  ><img src="../images/MatPlotLibZoom.png"
+     /><p class="caption"
+    ></p
+    ></div
+  ><ul
+  ><li
+    ><strong
+      >Zoom to rectangle</strong
+      >: With the <strong
+      ><code
+	>left mouse button</code
+	></strong
+      >, this will zoom in to the specified rectangle so that the plots become bigger. With the <strong
+      ><code
+	>right mouse button</code
+	></strong
+      >, the entire plot display will be shrunk to fit into the specified rectangle.</li
+    ></ul
+  ><div class="figure"
+  ><img src="../images/MatPlotLibConfigureSubplots.png"
+     /><p class="caption"
+    ></p
+    ></div
+  ><ul
+  ><li
+    ><strong
+      >Configure subplots</strong
+      >: You don't want to mess with these.</li
+    ></ul
+  ><div class="figure"
+  ><img src="../images/MatPlotLibSave.png"
+     /><p class="caption"
+    ></p
+    ></div
+  ><ul
+  ><li
+    ><strong
+      >Save</strong
+      >: Pops up a dialog box to save the plot. At this point it only saves into a <code
+      >.png</code
+      > file.</li
+    ></ul
+  ></div
+><div id="the-side-panel"
+><h1
+  ><a href="#TOC"
+    >The side panel</a
+    ></h1
+  ><p
+  >The <strong
+    ><code
+      >side panel</code
+      ></strong
+    > is located on the right of the screen. It displays three controls: the <strong
+    ><code
+      >Property editor</code
+      ></strong
+    >, the <strong
+    ><code
+      >Plot configuration</code
+      ></strong
+    > and the <strong
+    ><code
+      >Run control</code
+      ></strong
+    >.</p
+  ><div id="property-editor"
+  ><h2
+    ><a href="#TOC"
+      >Property editor</a
+      ></h2
+    ><p
+    >The <strong
+      ><code
+	>Property editor</code
+	></strong
+      > displays parameters and variables of the selected model component (object).</p
+    ><div class="figure"
+    ><img src="../images/PropertyEditor.png"
+       /><p class="caption"
+      ></p
+      ></div
+    ><p
+    >The object many be a compartments of a neuronal model, or pools, reactions, or enzymes in a signaling model.</p
+    ><ul
+    ><li
+      ><strong
+	>The top of the property editor</strong
+	>: displays the class and path of the selected object.</li
+      ><li
+      ><strong
+	>See children</strong
+	>: opens a subsidiary table to navigate to child objects in the filesystem-like object tree.</li
+      ><li
+      ><strong
+	>Select Parent</strong
+	>: Navigates back up to the parent object in the element tree.</li
+      ><li
+      ><strong
+	>Properties</strong
+	>: This table displays field names in the first column, followed by field values in the second. If the field is editable one can click on the value in the second column and change it.</li
+      ></ul
+    ></div
+  ><div id="plot-configuration"
+  ><h2
+    ><a href="#TOC"
+      >Plot configuration</a
+      ></h2
+    ><p
+    >The <strong
+      ><code
+	>Plot configuration</code
+	></strong
+      > panel lets one set up new plots based on selected objects and their fields.</p
+    ><div class="figure"
+    ><img src="../images/PlotConfig.png"
+       /><p class="caption"
+      ></p
+      ></div
+    ><ul
+    ><li
+      ><strong
+	>The top line</strong
+	>: has the name of the object whose field is to be plotted.</li
+      ><li
+      ><strong
+	>Plot Field</strong
+	>: Specifies field to be plotted.</li
+      ><li
+      ><strong
+	>Plot Window</strong
+	>: Specifies which of the existing plot windows to use for the new plot.</li
+      ><li
+      ><strong
+	>New Plot Tab</strong
+	>: This button creates a new plot window as a tab.</li
+      ><li
+      ><strong
+	>Add Field</strong
+	>: Creates the plot as specified by the other options.</li
+      ><li
+      ><strong
+	>Overlay Plots</strong
+	>: When not checked, plots are cleared every time the <code
+	>Reset</code
+	> button is hit. When checked, this retains the plots from the previous run.</li
+      ></ul
+    ></div
+  ><div id="simulation-control"
+  ><h2
+    ><a href="#TOC"
+      >Simulation control</a
+      ></h2
+    ><p
+    >The <strong
+      ><code
+	>Simulation control</code
+	></strong
+      > panel controls how the model is run.</p
+    ><div class="figure"
+    ><img src="../images/SimulationControl.png"
+       /><p class="caption"
+      ></p
+      ></div
+    ><ul
+    ><li
+      ><strong
+	>Run Time</strong
+	>: Determines duration for which simulation is to run. If simulation has already run, this runs for the specified additional period.</li
+      ><li
+      ><strong
+	>Reset</strong
+	>: Restores simulation to its initial state; reinitializes all variables to t = 0.</li
+      ><li
+      ><strong
+	>Stop</strong
+	>: This button halts an ongoing simulation.</li
+      ><li
+      ><strong
+	>Current time</strong
+	>: This reports the current simulation time.</li
+      ><li
+      ><strong
+	>Advanced options</strong
+	>: This is available only after <code
+	>Reset</code
+	>. This sets:<ul
+	><li
+	  ><strong
+	    >Plotdt</strong
+	    >: Timestep to use for updating plots.</li
+	  ><li
+	  ><strong
+	    >Simdt</strong
+	    >: Timestep to use for internal simulation clocks. Edit only if you know what you are doing. For kinetic models, most of the numerical methods use variable timestep calculations, so this should be set to the same value as the <code
+	    >Plotdt</code
+	    > in most cases.</li
+	  ><li
+	  ><strong
+	    >Update Plotdt</strong
+	    >: How frequently should the screen refresh.</li
+	  ></ul
+	></li
+      ></ul
+    ></div
+  ></div
+>
+</body>
+</html>
+
