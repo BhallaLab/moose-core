@@ -14,8 +14,8 @@ pandoc                              \
 
 echo "index.markdown -> index.html"
 pandoc                              \
-	-c css/moosedocs.css            \
-	markdown/index.markdown -o html/index.html
+	-c html/css/moosedocs.css            \
+	markdown/index.markdown -o index.html
 
 echo "MooseGuiDocs.markdown -> MooseGuiDocs.html"
 pandoc                              \

@@ -7,7 +7,7 @@ format itself, go to the other 'markdown' directory one level up, in the
 main 'Docs' directory.
 
 Here are some of the important files:
-	- html/index.html:
+	- index.html:
 			If you just want to read the documentation, open this file in 
 			your browser, and start exploring! This file links to all the 
 			other user documents. All the user documents are listed below as
