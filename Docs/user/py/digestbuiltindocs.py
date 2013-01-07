@@ -50,8 +50,6 @@ import cStringIO
 import re
 import inspect
 from datetime import datetime
-
-sys.path.insert( 0, '../../python' )
 import moose
 
 # We assume any non-word-constituent character in the start of C++
