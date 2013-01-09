@@ -397,14 +397,14 @@ class  KineticsWidget(QtGui.QWidget):
         #If the item position changes, the corresponding arrow's are claculated
        if isinstance(element(mooseObject),PoolBase):
             pool = self.mooseId_GObj[mooseObject.getId()]
-            self.updatearrow(pool)
+            self.updateArrow(pool)
             for k, v in self.qGraCompt.items():
                 rectcompt = v.childrenBoundingRect()
                 v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
        else:
             if(isinstance(element(mooseObject),EnzBase) or isinstance(element(mooseObject),ReacBase) ):
                 refenz = self.mooseId_GObj[mooseObject.getId()]
-                self.updatearrow(refenz)
+                self.updateArrow(refenz)
                 for k, v in self.qGraCompt.items():
                     rectcompt = v.childrenBoundingRect()
                     v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
@@ -414,7 +414,7 @@ class  KineticsWidget(QtGui.QWidget):
                         mesh = mooseObject.path+'/mesh[0]'
                         if k.path == mesh:
                             for rectChilditem in v.childItems():
-                                self.updatearrow(rectChilditem)
+                                self.updateArrow(rectChilditem)
 
     def emitItemtoEditor(self,mooseObject):
         self.emit(QtCore.SIGNAL("itemDoubleClicked(PyQt_PyObject)"),mooseObject)
@@ -659,39 +659,15 @@ class  KineticsWidget(QtGui.QWidget):
                     #once the text is edited in editor, laydisplay gets updated in turn resize the length, positionChanged signal shd be emitted
                     self.positionChange(mooseObject)
  
-    def updatearrow(self,qGTextitem):
+    def updateArrow(self,qGTextitem):
         #if there is no arrow to update then return
         if qGTextitem not in self.object2line:
             return
         listItem = self.object2line[qGTextitem]
-        for ql, va in listItem:
+        for ql, va in self.object2line[qGTextitem]:
             srcdes = self.lineItem_dict[ql]
-            if(isinstance(srcdes[0],ReacItem) or isinstance(srcdes[0],EnzItem) ):
-                pItem = (next((k for k,v in self.mooseId_GObj.items() if v == srcdes[0]), None))
-                mooseObj = (next((k for k,v in self.mooseId_GObj.items() if v == srcdes[1]), None))
-                for l1 in self.srcdesConnection[pItem]:
-                    for k in l1:
-                        if ((k[0]) == mooseObj):   
-                            endtype = k[1]
-                        else:
-                            if ( isinstance(qGTextitem,ReacItem) or isinstance(qGTextitem,EnzItem) ):
-                                gItem = self.mooseId_GObj[k[0]]
-                                self.updatearrow(gItem)
-               
-            elif(isinstance(srcdes[1],ReacItem) or isinstance(srcdes[1],EnzItem) ):
-                pItem = (next((k for k,v in self.mooseId_GObj.items() if v == srcdes[1]), None))
-                mooseObject = (next((k for k,v in self.mooseId_GObj.items() if v == srcdes[0]), None))
-                for l1 in self.srcdesConnection[pItem]:
-                    for k in l1:
-                        if (k[0]) == mooseObj:
-                            endtype = k[1]
-            else:
-                pItem  =  (next((k for k,v in self.mooseId_GObj.items() if v == srcdes[0]), None))
-                pItem1 =  (next((k for k,v in self.mooseId_GObj.items() if v == srcdes[1]), None))
-                if(pItem.class_ == 'ZFuncPool' or pItem1.class_ == 'ZFuncPool'):
-                #if (isinstance(pItem,FuncBase) or isinstance(pItem1,FuncBase)):
-                    endtype = 'st'
-            arrow = self.calcArrow(srcdes[0],srcdes[1],endtype,itemignoreZooming)
+            # For calcArrow(src,des,endtype,itemignoreZooming) is to be provided
+            arrow = self.calcArrow(srcdes[0],srcdes[1],srcdes[2],itemignoreZooming)
             ql.setPolygon(arrow)
 
     def updateScale( self, scale, ):
@@ -758,8 +734,7 @@ if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     size = QtCore.QSize(1024 ,768)
     modelPath = 'Kholodenko'
-
-
+    
     itemignoreZooming = False
     try:
         filepath = '../Demos/Genesis_files/'+modelPath+'.g'
