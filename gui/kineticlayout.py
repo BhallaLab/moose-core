@@ -9,7 +9,7 @@ import math
 from collections import defaultdict
 sys.path.append('../python')
 
-from kineticsgraphics import PoolItem, ReacItem,EnzItem,CplxItem,ComptItem
+from kineticsgraphics import PoolItem, ReacItem,EnzItem,MMEnzItem,CplxItem,ComptItem
 
 from moose import *
 itemignoreZooming = False
@@ -298,11 +298,13 @@ class  KineticsWidget(QtGui.QWidget):
                     mobjItem = ReacItem(mre,comptRef)
 
                 elif isinstance(element(mre),EnzBase):
-                    mobjItem = EnzItem(mre,comptRef)
+                    if mre.class_ == 'ZEnz':
+                        mobjItem = EnzItem(mre,comptRef)
+                    else:
+                        mobjItem = MMEnzItem(mre,comptRef)
 
-                elif isinstance(element(mre),PoolBase):#' or mre.class_ == 'ZombieFuncPool' or mre.class_ == 'ZombieBufPool':
+                elif isinstance(element(mre),PoolBase):
                     if not isinstance(element(mre[0].parent),CplxEnzBase):
-                    #if mre[0].parent.class_ != 'ZEnz':
                         mobjItem = PoolItem(mre,comptRef)
 
                     else:
@@ -666,9 +668,28 @@ class  KineticsWidget(QtGui.QWidget):
         listItem = self.object2line[qGTextitem]
         for ql, va in self.object2line[qGTextitem]:
             srcdes = self.lineItem_dict[ql]
+            # Checking if src (srcdes[0]) or des (srcdes[1]) is ZombieEnz,
+            # if yes then need to check if cplx is connected to any mooseObject, 
+            # so that when Enzyme is moved, cplx connected arrow to other mooseObject should also be updated
+            if( type(srcdes[0]) == EnzItem):
+                self.cplxUpdatearrow(srcdes[0])
+            elif( type(srcdes[1]) == EnzItem):
+                self.cplxUpdatearrow(srcdes[1])
+
             # For calcArrow(src,des,endtype,itemignoreZooming) is to be provided
             arrow = self.calcArrow(srcdes[0],srcdes[1],srcdes[2],itemignoreZooming)
             ql.setPolygon(arrow)
+    
+    def cplxUpdatearrow(self,srcdes):
+        ''' srcdes which is 'EnzItem' from this,get ChildItems are retrived (b'cos cplx is child of zombieEnz)
+            And cplxItem is passed for updatearrow
+        '''
+        #Note: Here at this point enzItem has just one child which is cplxItem and childItems returns, PyQt4.QtGui.QGraphicsEllipseItem,CplxItem
+        #Assuming CplxItem is always[1], but still check if not[0], if something changes in structure one need to keep an eye.
+        if (srcdes.childItems()[1],CplxItem):
+            self.updateArrow(srcdes.childItems()[1])
+        else:
+            self.updateArrow(srcdes.childItems()[0])
 
     def updateScale( self, scale, ):
         for item in self.sceneContainer.items():
@@ -733,7 +754,7 @@ class  KineticsWidget(QtGui.QWidget):
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     size = QtCore.QSize(1024 ,768)
-    modelPath = 'Kholodenko'
+    modelPath = 'OSC_Cspace'
     
     itemignoreZooming = False
     try:
