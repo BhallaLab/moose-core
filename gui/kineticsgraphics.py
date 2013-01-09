@@ -142,6 +142,9 @@ class EnzItem(KineticsDisplayItem):
         defaultWidth = EnzItem.defaultWidth*scale
         defaultHeight = EnzItem.defaultHeight*scale
         self.gobj.setRect(0,0,defaultWidth,defaultHeight)
+class MMEnzItem(EnzItem):
+    def __init__(self,*args, **kwargs):
+        EnzItem.__init__(self,*args, **kwargs)
 
 class CplxItem(KineticsDisplayItem):
     defaultWidth = 10
