@@ -35,7 +35,6 @@ class GraphicalView(QtGui.QGraphicsView):
         
     def mousePressEvent(self, event):
         selectedItem = None
-        self.sceneContainerPt.clearSelection()
         if event.buttons() == QtCore.Qt.LeftButton:
             self.startingPos = event.pos()
             self.startScenepos = self.mapToScene(self.startingPos)
@@ -60,6 +59,9 @@ class GraphicalView(QtGui.QGraphicsView):
                     displayitem.parentItem().setZValue(1)
             elif not kkitItem and comptItem:
                 for cmpt in comptItem:
+                    for previouslySelected in self.sceneContainerPt.selectedItems():
+                        if previouslySelected.isSelected() == True:
+                            previouslySelected.setSelected(False)
                     xs = cmpt.mapToScene(cmpt.boundingRect().topLeft()).x()+self.border/2
                     ys = cmpt.mapToScene(cmpt.boundingRect().topLeft()).y()+self.border/2
                     xe = cmpt.mapToScene(cmpt.boundingRect().bottomRight()).x()-self.border/2
@@ -94,7 +96,10 @@ class GraphicalView(QtGui.QGraphicsView):
             self.rubberbandWidth = self.endingScenepos.x()-self.startScenepos.x()
             self.rubberbandHeight = self.endingScenepos.y()-self.startScenepos.y()
             self.customrubberBand.setGeometry(QtCore.QRect(self.startingPos, event.pos()).normalized())
-           
+            #unselecting any previosly selected item in scene
+            for preSelectedItem in self.sceneContainerPt.selectedItems():
+                #print "-------------------",preSelectedItem
+                preSelectedItem.setSelected(False)
             #since it custom rubberband I am checking if with in the selected area any textitem, if s then setselected to true
             rbandSelection = self.sceneContainerPt.items(self.startScenepos.x(),self.startScenepos.y(),self.rubberbandWidth,self.rubberbandHeight,Qt.Qt.IntersectsItemShape)
             for item in rbandSelection:
