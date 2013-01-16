@@ -20,7 +20,7 @@ class KineticsDisplayItem(QtGui.QGraphicsWidget):
       
     def paint(self, painter=None, option=None, widget = None):
         #If item is selected
-        if self.hasFocus():
+        if self.hasFocus() or self.isSelected():
             painter.setPen(QtGui.QPen(QtGui.QPen(QtCore.Qt.black, 1.8,Qt.Qt.DashLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin)))
             painter.drawRect(self.boundingRect())
       
@@ -41,6 +41,7 @@ class PoolItem(KineticsDisplayItem):
     font =QtGui.QFont("Helvetica")
     font.setPointSize(defaultFontsize)
     fontMetrics = QtGui.QFontMetrics(font)
+
     def __init__(self, *args, **kwargs):
         KineticsDisplayItem.__init__(self, *args, **kwargs)
         self.bg = QtGui.QGraphicsRectItem(self)
@@ -65,6 +66,7 @@ class PoolItem(KineticsDisplayItem):
         self.gobj.setPen(QtGui.QPen(QtGui.QBrush(textcolor)))
         self.gobj.setBrush(QtGui.QBrush(textcolor))
         self.bg.setBrush(QtGui.QBrush(bgcolor))
+
 
     def refresh(self,scale):
         fontsize = PoolItem.defaultFontsize*scale
