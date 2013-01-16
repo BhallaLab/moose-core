@@ -77,8 +77,8 @@ class GraphicalView(QtGui.QGraphicsView):
                         break
 
             if selectedItem == None:
-                #if mousepressed is not on kineticsDisplayitem or on compartment border, 
-                #then rubberband is madeactive
+                #if mousepressed is not on any kineticsDisplayitem or on compartment border, 
+                #then rubberband is made active
                 enableRubberband = False
                 self.customrubberBand = QtGui.QRubberBand(QtGui.QRubberBand.Rectangle,self)
                 self.customrubberBand.setGeometry(QtCore.QRect(self.startingPos,QtCore.QSize()))
@@ -98,9 +98,8 @@ class GraphicalView(QtGui.QGraphicsView):
             #since it custom rubberband I am checking if with in the selected area any textitem, if s then setselected to true
             rbandSelection = self.sceneContainerPt.items(self.startScenepos.x(),self.startScenepos.y(),self.rubberbandWidth,self.rubberbandHeight,Qt.Qt.IntersectsItemShape)
             for item in rbandSelection:
-                if(isinstance(item,KineticsDisplayItem)):
-                    if item.isSelected() == False:
-                        item.setSelected(1)
+                if isinstance(item,KineticsDisplayItem) and item.isSelected() == False:
+                        item.setSelected(True)
                         
     def mouseReleaseEvent(self, event):
         self.setCursor(Qt.Qt.ArrowCursor)
@@ -779,11 +778,9 @@ if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     size = QtCore.QSize(1024 ,768)
     modelPath = 'OSC_Cspace'
-    modelPath = 'acc64'
     itemignoreZooming = False
     try:
         filepath = '../Demos/Genesis_files/'+modelPath+'.g'
-        filepath = '/home/harsha/genesis_files/gfile/'+modelPath+'.g'
         f = open(filepath, "r")
         loadModel(filepath,'/'+modelPath)
         dt = KineticsWidget(size,'/'+modelPath)
