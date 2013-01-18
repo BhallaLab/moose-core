@@ -98,7 +98,6 @@ class GraphicalView(QtGui.QGraphicsView):
             self.customrubberBand.setGeometry(QtCore.QRect(self.startingPos, event.pos()).normalized())
             #unselecting any previosly selected item in scene
             for preSelectedItem in self.sceneContainerPt.selectedItems():
-                #print "-------------------",preSelectedItem
                 preSelectedItem.setSelected(False)
             #since it custom rubberband I am checking if with in the selected area any textitem, if s then setselected to true
             rbandSelection = self.sceneContainerPt.items(self.startScenepos.x(),self.startScenepos.y(),self.rubberbandWidth,self.rubberbandHeight,Qt.Qt.IntersectsItemShape)
@@ -424,27 +423,19 @@ class  KineticsWidget(QtGui.QWidget):
             return(QtGui.QColor("white"))
 
     def positionChange(self,mooseObject):
-        #If the item position changes, the corresponding arrow's are claculated
-       if isinstance(element(mooseObject),PoolBase):
-            pool = self.mooseId_GObj[mooseObject.getId()]
-            self.updateArrow(pool)
+        #If the item position changes, the corresponding arrow's are calculated
+        if isinstance (element(mooseObject),CubeMesh):
+            for k, v in self.qGraCompt.items():
+                mesh = mooseObject.path+'/mesh[0]'
+                if k.path == mesh:
+                    for rectChilditem in v.childItems():
+                        self.updateArrow(rectChilditem)
+        else:
+            mObject = self.mooseId_GObj[mooseObject.getId()]
+            self.updateArrow(mObject)
             for k, v in self.qGraCompt.items():
                 rectcompt = v.childrenBoundingRect()
                 v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
-       else:
-            if(isinstance(element(mooseObject),EnzBase) or isinstance(element(mooseObject),ReacBase) ):
-                refenz = self.mooseId_GObj[mooseObject.getId()]
-                self.updateArrow(refenz)
-                for k, v in self.qGraCompt.items():
-                    rectcompt = v.childrenBoundingRect()
-                    v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
-            else:
-                if isinstance(element(mooseObject),CubeMesh):
-                    for k, v in self.qGraCompt.items():
-                        mesh = mooseObject.path+'/mesh[0]'
-                        if k.path == mesh:
-                            for rectChilditem in v.childItems():
-                                self.updateArrow(rectChilditem)
 
     def emitItemtoEditor(self,mooseObject):
         self.emit(QtCore.SIGNAL("itemDoubleClicked(PyQt_PyObject)"),mooseObject)
