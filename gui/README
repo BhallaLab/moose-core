@@ -1,0 +1,23 @@
+File: README
+Author: Subhasis Ray
+Created: 2012-11-29
+
+This directory contains scripts for the MOOSE GUI.
+
+mgui.py : main driver for the gui. This provides a main window and
+basic menubar and toolbar.
+
+plugins/ : All plugins should be added to this directory.
+
+
+Each plugin should be derived from MoosePlugin in plugins/default.py.
+
+Each plugin provides three views: EditorView, PlotView and RunView.
+
+EditorView: the view for editing models 
+
+PlotView: this is for advanced users to select fine details of
+plotting.
+
+RunView: this view is for displaying dynamic updates when the
+simulation is executed.
