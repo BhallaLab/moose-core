@@ -11,6 +11,7 @@ from kkitUtil import *
 from kkitQGraphics import PoolItem, ReacItem,EnzItem,CplxItem,ComptItem
 from kkitViewcontrol import *
 from PyQt4 import QtGui, QtCore, Qt
+import math
 
 class KkitPlugin(MoosePlugin):
     """Default plugin for MOOSE GUI"""
@@ -72,9 +73,6 @@ class  KineticsWidget(DefaultEditorWidget):
         #QtGui.QWidget.__init__(self,parent)
 	DefaultEditorWidget.__init__(self, *args)
 
-        #print "KKIT plugin",self.modelRoot
-    def Checkthisfun(self):
-        print "Check if I can call this function"
     def updateModelView(self):
         """ maxmium and minimum coordinates of the objects specified in kkit file. """
         self.xmin = 0.0
@@ -118,7 +116,13 @@ class  KineticsWidget(DefaultEditorWidget):
         self.mooseId_GObj = {}
         self.srcdesConnection = {}
         self.border = 5
+        self.arrowsize = 2
+        self.iconScale = 1
+        self.itemignoreZooming = False
 
+        self.lineItem_dict = {}
+        
+        self.object2line = defaultdict(list)
         hLayout = QtGui.QGridLayout(self)
         self.setLayout(hLayout)
         self.sceneContainer = QtGui.QGraphicsScene(self)
@@ -128,12 +132,186 @@ class  KineticsWidget(DefaultEditorWidget):
         
         """ Compartment and its members are put on the qgraphicsscene """
         self.mooseObjOntoscene()
-        print "pat",self.modelRoot
         self.setupItem(self.modelRoot,self.srcdesConnection)
+        self.drawLine_arrow(itemignoreZooming=False)
+
         self.view = GraphicalView(self.sceneContainer,self.border,self)
         hLayout.addWidget(self.view)
         #self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
+
+
+    def drawLine_arrow(self, itemignoreZooming=False):
+        for inn,out in self.srcdesConnection.items():
+            ''' self.srcdesConnection is dictionary which contains key,value \
+                key is Enzyme or Reaction  and value [[list of substrate],[list of product]] (tuple)
+                key is FuncBase and value is [list of pool] (list)
+            '''
+            src = self.mooseId_GObj[inn]
+            if isinstance(out,tuple):
+                if len(out[0])== 0:
+                    print "Reaction or Enzyme doesn't input mssg"
+                else:
+                    for items in (items for items in out[0] ):
+                        des = self.mooseId_GObj[element(items[0]).getId()]
+                        self.lineCord(src,des,items[1],itemignoreZooming)
+                if len(out[1]) == 0:
+                    print "Reaction or Enzyme doesn't output mssg"
+                else:
+                    for items in (items for items in out[1] ):
+                        des = self.mooseId_GObj[element(items[0]).getId()]
+                        self.lineCord(src,des,items[1],itemignoreZooming)
+
+            elif isinstance(out,list):
+                if len(out) == 0:
+                    print "Func pool doesn't have sumtotal"
+                else:
+                    for items in (items for items in out ):
+                        des = self.mooseId_GObj[element(items[0]).getId()]
+                        self.lineCord(src,des,items[1],itemignoreZooming)
     
+    def lineCord(self,src,des,endtype,itemignoreZooming):
+        source = element(next((k for k,v in self.mooseId_GObj.items() if v == src), None))
+        desc = element(next((k for k,v in self.mooseId_GObj.items() if v == des), None))
+        line = 0
+        if (src == "") and (des == ""):
+            print "Source or destination is missing or incorrect"
+            return 
+        srcdes_list = [src,des,endtype]
+        arrow = self.calcArrow(src,des,endtype,itemignoreZooming)
+        for l,v in self.object2line[src]:
+            if v == des:
+                l.setPolygon(arrow)
+                arrowPen = l.pen()
+                arrowPenWidth = self.arrowsize*self.iconScale
+                arrowPen.setColor(l.pen().color())
+                arrowPen.setWidth(arrowPenWidth)
+                l.setPen(arrowPen)
+                return
+        qgLineitem = self.sceneContainer.addPolygon(arrow)
+        pen = QtGui.QPen(QtCore.Qt.green, 0, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin)
+        pen.setWidth(self.arrowsize)
+        #pen.setCosmetic(True)
+        # Green is default color moose.ReacBase and derivatives - already set above
+        if  isinstance(source, EnzBase):
+            if ( (endtype == 's') or (endtype == 'p')):
+                pen.setColor(QtCore.Qt.red)
+            elif(endtype != 'cplx'):
+                p1 = (next((k for k,v in self.mooseId_GObj.items() if v == src), None))
+                pinfo = p1.path+'/info'
+                color,bgcolor = getColor(pinfo,self.colorMap)
+                pen.setColor(color)
+        elif isinstance(source, moose.PoolBase):
+            pen.setColor(QtCore.Qt.blue)
+        self.lineItem_dict[qgLineitem] = srcdes_list
+        self.object2line[ src ].append( ( qgLineitem, des) )
+        self.object2line[ des ].append( ( qgLineitem, src ) )
+        qgLineitem.setPen(pen)
+        
+    def calcArrow(self,src,des,endtype,itemignoreZooming):
+        ''' if PoolItem then boundingrect should be background rather than graphicsobject '''
+        srcobj = src.gobj
+        desobj = des.gobj
+        if isinstance(src,PoolItem):
+            srcobj = src.bg
+        if isinstance(des,PoolItem):
+            desobj = des.bg
+        
+        if itemignoreZooming:
+            srcRect = self.recalcSceneBoundingRect(srcobj)
+            desRect = self.recalcSceneBoundingRect(desobj)
+        else:
+            srcRect = srcobj.sceneBoundingRect()
+            desRect = desobj.sceneBoundingRect()
+        arrow = QtGui.QPolygonF()
+        if srcRect.intersects(desRect):                
+            # This is created for getting a emptyline for reference b'cos 
+            # lineCord function add qgraphicsline to screen and also add's a ref for src and des
+            arrow.append(QtCore.QPointF(0,0))
+            arrow.append(QtCore.QPointF(0,0))
+            return arrow
+        tmpLine = QtCore.QLineF(srcRect.center().x(),
+                                    srcRect.center().y(),
+                                    desRect.center().x(),
+                                    desRect.center().y())
+        srcIntersects, lineSrcPoint = self.calcLineRectIntersection(srcRect, tmpLine)
+        destIntersects, lineDestPoint = self.calcLineRectIntersection(desRect, tmpLine)
+        if not srcIntersects:
+            print 'Source does not intersect line. Arrow points:', lineSrcPoint, src.mobj[0].name, src.mobj[0].class_
+        if not destIntersects:
+            print 'Dest does not intersect line. Arrow points:', lineDestPoint,  des.mobj[0].name, des.mobj[0].class_
+        # src and des are connected with line co-ordinates
+        # Arrow head is drawned if the distance between src and des line is >8 just for clean appeareance
+        if (abs(lineSrcPoint.x()-lineDestPoint.x()) > 8 or abs(lineSrcPoint.y()-lineDestPoint.y())>8):
+            srcAngle = tmpLine.angle()
+            if endtype == 'p':
+                #Arrow head for Destination is calculated
+                arrow.append(lineSrcPoint)
+                arrow.append(lineDestPoint)
+                degree = -60
+                srcXArr1,srcYArr1= self.arrowHead(srcAngle,degree,lineDestPoint)
+	        arrow.append(QtCore.QPointF(srcXArr1,srcYArr1))
+                arrow.append(QtCore.QPointF(lineDestPoint.x(),lineDestPoint.y()))
+                
+		degree = -120
+                srcXArr2,srcYArr2 = self.arrowHead(srcAngle,degree,lineDestPoint)
+                arrow.append(QtCore.QPointF(srcXArr2,srcYArr2))                    
+                arrow.append(QtCore.QPointF(lineDestPoint.x(),lineDestPoint.y()))
+ 
+            elif endtype == 'st':
+                #Arrow head for Source is calculated
+                arrow.append(lineDestPoint)
+                arrow.append(lineSrcPoint)
+                degree = 60
+                srcXArr2,srcYArr2 = self.arrowHead(srcAngle,degree,lineSrcPoint)
+                arrow.append(QtCore.QPointF(srcXArr2,srcYArr2))                    
+                arrow.append(QtCore.QPointF(lineSrcPoint.x(),lineSrcPoint.y()))
+
+                degree = 120
+                srcXArr1,srcYArr1= self.arrowHead(srcAngle,degree,lineSrcPoint)
+		arrow.append(QtCore.QPointF(srcXArr1,srcYArr1))
+                arrow.append(QtCore.QPointF(lineSrcPoint.x(),lineSrcPoint.y()))
+
+            else:
+                arrow.append(lineSrcPoint)
+                arrow.append(lineDestPoint)
+        return arrow
+
+    def calcLineRectIntersection(self, rect, centerLine):
+        '''      checking which side of rectangle intersect with other '''
+        """Here the 1. a. intersect point between center and 4 sides of src and 
+        
+                    b. intersect point between center and 4 sides of
+                    des and to draw a line connecting for src & des
+        
+                    2. angle for src for the arrow head calculation is returned"""
+        x = rect.x()
+        y = rect.y()
+        w = rect.width()
+        h = rect.height()
+        borders = [(x,y,x+w,y),
+                   (x+w,y,x+w,y+h),
+                   (x+w,y+h,x,y+h),
+                   (x,y+h,x,y)]
+        intersectionPoint = QtCore.QPointF()
+        intersects = False
+        for lineEnds in borders:
+            line = QtCore.QLineF(*lineEnds)
+            intersectType = centerLine.intersect(line, intersectionPoint)
+            if intersectType == centerLine.BoundedIntersection:
+                intersects = True
+                break
+        return (intersects, intersectionPoint)
+
+    def arrowHead(self,srcAngle,degree,lineSpoint):
+        '''  arrow head is calculated '''
+        r = 8*self.iconScale
+        delta = math.radians(srcAngle) + math.radians(degree)
+        width = math.sin(delta)*r
+        height = math.cos(delta)*r
+        srcXArr = (lineSpoint.x() + width)
+        srcYArr = (lineSpoint.y() + height)
+        return srcXArr,srcYArr
+
     def setupItem(self,modlePath,cntDict):
         ''' Reaction's and enzyme's substrate and product and sumtotal is collected '''
         zombieType = ['ReacBase','EnzBase','FuncBase']
@@ -156,37 +334,25 @@ class  KineticsWidget(DefaultEditorWidget):
                         for enzpar in items[0].getNeighbors('enzDest'):
                             sublist.append((enzpar,'t'))
                     cntDict[items] = sublist,prdlist
-                    #print "s and p",sublist,prdlist
             else:
                 #ZombieSumFunc adding inputs
-                print "path",path,wildcardFind(path)
                 for items in wildcardFind(path):
                     inputlist = []
                     outputlist = []
                     funplist = []
                     nfunplist = []
-                    print "!",items[0].getNeighbors('input')
                     for inpt in items[0].getNeighbors('input'):
                         inputlist.append((inpt,'st'))
-                    print "inputlist",inputlist
-                    for zfun in items[0].getNeighbors('output'): funplist.append(zfun)
-                    print "f",funplist
-                    for i in funplist: nfunplist.append(element(i).getId())
-                    print 'n',nfunplist
-                    nfunplist = list(set(nfunplist))
-                    print 'n1',nfunplist
-                    if(len(nfunplist) > 1): print "SumFunPool has multiple Funpool"
-                    else:
-                        for el in funplist:
-                            if(element(el).getId() == nfunplist[0]):
-                                cntDict[element(el)] = inputlist
-                                return
+                    for funcbase in items[0].getNeighbors('output'): 
+                        funplist.append(funcbase)
+                    if(len(funplist) > 1): print "SumFunPool has multiple Funpool"
+                    else:  cntDict[funplist[0]] = inputlist
+
 
     def mooseObjOntoscene(self):
         """  All the compartments are put first on to the scene \
              Need to do: Check With upi if empty compartments exist """
         for cmpt in sorted(self.meshEntry.iterkeys()):
-            print "cmpt",cmpt
             self.createCompt(cmpt)
             comptRef = self.qGraCompt[cmpt]
         
@@ -238,23 +404,50 @@ class  KineticsWidget(DefaultEditorWidget):
 
     def positionChange(self,mooseObject):
         #If the item position changes, the corresponding arrow's are calculated
-        print "position Changed"
         if isinstance(element(mooseObject),CubeMesh):
             for k, v in self.qGraCompt.items():
                 mesh = mooseObject.path+'/mesh[0]'
                 if k.path == mesh:
                     for rectChilditem in v.childItems():
-                        #self.updateArrow(rectChilditem)
+                        self.updateArrow(rectChilditem)
                         pass
         else:
             mobj = self.mooseId_GObj[mooseObject.getId()]
-            #self.updateArrow(pool)
+            self.updateArrow(mobj)
             for k, v in self.qGraCompt.items():
                 rectcompt = v.childrenBoundingRect()
                 v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
+    
+    def updateArrow(self,qGTextitem):
+        #if there is no arrow to update then return
+        if qGTextitem not in self.object2line:
+            return
+        listItem = self.object2line[qGTextitem]
+        for ql, va in self.object2line[qGTextitem]:
+            srcdes = self.lineItem_dict[ql]
+            # Checking if src (srcdes[0]) or des (srcdes[1]) is ZombieEnz,
+            # if yes then need to check if cplx is connected to any mooseObject, 
+            # so that when Enzyme is moved, cplx connected arrow to other mooseObject should also be updated
+            if( type(srcdes[0]) == EnzItem):
+                self.cplxUpdatearrow(srcdes[0])
+            elif( type(srcdes[1]) == EnzItem):
+                self.cplxUpdatearrow(srcdes[1])
+            # For calcArrow(src,des,endtype,itemignoreZooming) is to be provided
+            arrow = self.calcArrow(srcdes[0],srcdes[1],srcdes[2],self.itemignoreZooming)
+            ql.setPolygon(arrow)
+    
+    def cplxUpdatearrow(self,srcdes):
+        ''' srcdes which is 'EnzItem' from this,get ChildItems are retrived (b'cos cplx is child of zombieEnz)
+            And cplxItem is passed for updatearrow
+        '''
+        #Note: Here at this point enzItem has just one child which is cplxItem and childItems returns, PyQt4.QtGui.QGraphicsEllipseItem,CplxItem
+        #Assuming CplxItem is always[1], but still check if not[0], if something changes in structure one need to keep an eye.
+        if (srcdes.childItems()[1],CplxItem):
+            self.updateArrow(srcdes.childItems()[1])
+        else:
+            self.updateArrow(srcdes.childItems()[0])
 
     def emitItemtoEditor(self,mooseObject):
-        print "selected"
         self.emit(QtCore.SIGNAL("itemPressed(PyQt_PyObject)"),mooseObject)
 
     def setupDisplay(self,info,graphicalObj,objClass):
