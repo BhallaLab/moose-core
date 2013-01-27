@@ -29,6 +29,10 @@ class ChemMesh
 		// Field assignment stuff
 		//////////////////////////////////////////////////////////////////
 
+		/**
+		 * Returns volume, area, or length of compartment, depending on
+		 * dimensionality.
+		 */
 		double getEntireSize( const Eref& e, const Qinfo* q ) const;
 		/**
 		 * This is a little nasty. It calls buildDefaultMesh with the 
@@ -38,6 +42,10 @@ class ChemMesh
 		 */
 		void setEntireSize( const Eref& e, const Qinfo* q, double size );
 
+		/**
+		 * Returns # of dimensions of mesh. 
+		 * This is 3 for cube, and 1 for cylinder or neurons. 
+		 */
 		unsigned int getDimensions() const;
 		virtual unsigned int innerGetDimensions() const = 0;
 

@@ -125,14 +125,12 @@ static void rtReplicateModels()
 		assert( doubleEq( checkInit[i], 0 ) );
 
 	// Here we create the stoich
-	Id stoich( "/model/stoich/stoichCore" );
+	Id stoich( "/model/kinetics/stoich" );
 	unsigned int numVarMols = Field< unsigned int >::get( 
-		stoich, "nVarPools" );
+		stoich, "numVarPools" );
 	assert ( numVarMols == 4 ); // 2 mols + 2 enz
 
-	Id gsl( "/model/stoich" );
-	assert( gsl != Id() );
-	assert( gsl.element()->dataHandler()->localEntries() == 1 );
+	assert( stoich.element()->dataHandler()->localEntries() == 1 );
 
 	checkInit.resize( 0 );
 	Field< double >::getVec( Id( "/model/kinetics/b" ), "concInit",

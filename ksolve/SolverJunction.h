@@ -91,6 +91,7 @@ class SolverJunction
 		unsigned int getNumReacs() const;
 		unsigned int getNumDiffMols() const;
 		unsigned int getNumMeshIndex() const;
+		Id getMyCompartment() const;
 		Id getOtherCompartment() const;
 		//////////////////////////////////////////////////////////////////
 		// Utility functions
@@ -182,9 +183,14 @@ class SolverJunction
 						const vector< unsigned int >& poolIndex
 		);
 
+		void setCompartments( Id myCompt, Id otherCompt );
+
 		//////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
 	private:
+		Id otherCompartment_; /// Id of other compartment
+		Id myCompartment_; /// Id of self compartment.
+		
 		/**
 		 * crossTerms identifies cross-compartment reaction RateTerms.
 		 * It looks them up from the parent StoichCore's rates_ vector.

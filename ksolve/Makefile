@@ -13,7 +13,6 @@ OBJ = \
 	Port.o	\
 	Stoich.o	\
 	StoichCore.o	\
-	StoichPools.o	\
 	KinSparseMatrix.o	\
 	ZombiePool.o \
 	ZPool.o \
@@ -29,8 +28,14 @@ OBJ = \
 	ZMMenz.o \
 	ZombieSumFunc.o \
 	RateTerm.o \
+	SolverBase.o \
+	VoxelPools.o \
+	OdeSystem.o \
 	GssaStoich.o	\
 	GslStoich.o	\
+	GslStoichSetup.o	\
+	GslStoichNumerics.o	\
+	GslStoichZombies.o	\
 	EstimateDt.o	\
 	SolverJunction.o	\
 	testKsolve.o	\
@@ -44,10 +49,7 @@ HEADERS = \
 	../basecode/SparseMatrix.h \
 	../basecode/ElementValueFinfo.h \
 	../mesh/VoxelJunction.h \
-	Port.h \
-	Stoich.h \
-	StoichCore.h \
-	StoichPools.h \
+	SolverBase.h \
 	RateTerm.h \
 	KinSparseMatrix.h \
 	../kinetics/Pool.h \
@@ -72,10 +74,12 @@ default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
 Stoich.o:	../kinetics/PoolBase.h ZombiePool.h ../kinetics/ReacBase.h ZombieReac.h ZombieBufPool.h ../kinetics/EnzBase.h ZombieEnz.h ZombieMMenz.h ../kinetics/Pool.h ../kinetics/Reac.h ../kinetics/BufPool.h ../kinetics/FuncPool.h ../kinetics/Enz.h ../kinetics/MMenz.h ../mesh/Boundary.h ../mesh/ChemMesh.h ../mesh/Stencil.h
-StoichCore.o:	../kinetics/PoolBase.h ZombiePool.h ../kinetics/ReacBase.h ZombieReac.h ZombieBufPool.h ../kinetics/EnzBase.h ZombieEnz.h ZombieMMenz.h ../kinetics/Pool.h ../kinetics/Reac.h ../kinetics/BufPool.h ../kinetics/FuncPool.h ../kinetics/Enz.h ../kinetics/MMenz.h ../mesh/Boundary.h ../mesh/ChemMesh.h ../mesh/Stencil.h
-StoichPools.o: StoichPools.h
+StoichCore.o:	../kinetics/PoolBase.h ZPool.h ../kinetics/ReacBase.h ZReac.h ZBufPool.h ../kinetics/EnzBase.h ZEnz.h ZMMenz.h ../kinetics/Pool.h ../kinetics/Reac.h ../kinetics/BufPool.h ../kinetics/FuncPool.h ../kinetics/Enz.h ../kinetics/MMenz.h ../mesh/Boundary.h ../mesh/ChemMesh.h ../mesh/Stencil.h
+VoxelPools.o: VoxelPools.h
+SolverBase.o: SolverBase.h
 GssaStoich.o:	GssaStoich.h ../kinetics/PoolBase.h ZombiePool.h ../kinetics/ReacBase.h ZombieReac.h ZombieBufPool.h ../kinetics/EnzBase.h ZombieEnz.h ZombieMMenz.h ../kinetics/Pool.h ../kinetics/Reac.h ../kinetics/BufPool.h ../kinetics/FuncPool.h ../kinetics/Enz.h ../kinetics/MMenz.h ../mesh/Boundary.h ../mesh/ChemMesh.h ../randnum/randnum.h
-GslStoich.o:	GslStoich.h
+OdeSystem.o:	OdeSystem.h
+GslStoich.o:	GslStoich.h OdeSystem.h VoxelPools.h
 KinSparseMatrix.o:	KinSparseMatrix.h ../basecode/SparseMatrix.h
 ZombiePool.o:	../kinetics/PoolBase.h ZombiePool.h
 ZPool.o:	../kinetics/PoolBase.h ZPool.h

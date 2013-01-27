@@ -51,7 +51,7 @@ static const SrcFinfo2< double, double >* toSub =
 
 ZEnz::ZEnz( )
 		: 
-				stoich_( 0 ),
+				solver_( 0 ),
 				concK1_( 1.0 )
 { ; }
 
@@ -64,7 +64,7 @@ ZEnz::~ZEnz( )
 
 void ZEnz::vRemesh( const Eref& e, const Qinfo* q )
 {   
-	stoich_->setEnzK1( e, concK1_ );
+	solver_->setEnzK1( e, concK1_ );
 }   
 
 
@@ -72,47 +72,40 @@ void ZEnz::vRemesh( const Eref& e, const Qinfo* q )
 // Field Definitions
 //////////////////////////////////////////////////////////////
 
+// v is in number units.
 void ZEnz::vSetK1( const Eref& e, const Qinfo* q, double v )
 {
 	double volScale = 
 		convertConcToNumRateUsingMesh( e, toSub, 1 );
 
 	concK1_ = v / volScale;
-	stoich_->setEnzK1( e, concK1_ );
+	solver_->setEnzK1( e, concK1_ );
 }
 
+// v is In number units.
 double ZEnz::vGetK1( const Eref& e, const Qinfo* q ) const
 {
-	return stoich_->getR1( stoich_->convertIdToReacIndex( e.id() ), 0 );
+	return solver_->getEnzNumK1( e );
 }
 
 void ZEnz::vSetK2( const Eref& e, const Qinfo* q, double v )
 {
-	stoich_->setEnzK2( e, v );
+	solver_->setEnzK2( e, v );
 }
 
 double ZEnz::vGetK2( const Eref& e, const Qinfo* q ) const
 {
-	if ( stoich_->getOneWay() )
-		return stoich_->getR1( 
-			stoich_->convertIdToReacIndex( e.id() ) + 1, 0 );
-	else
-		return stoich_->getR2( stoich_->convertIdToReacIndex( e.id() ), 0 );
+	return solver_->getEnzK2( e );
 }
 
 void ZEnz::vSetKcat( const Eref& e, const Qinfo* q, double v )
 {
-	stoich_->setEnzK3( e, v );
+	solver_->setEnzK3( e, v );
 }
 
 double ZEnz::vGetKcat( const Eref& e, const Qinfo* q ) const
 {
-	if ( stoich_->getOneWay() )
-		return stoich_->getR1(
-			stoich_->convertIdToReacIndex( e.id() ) + 2, 0 );
-	else
-		return stoich_->getR1(
-			stoich_->convertIdToReacIndex( e.id() ) + 1, 0 );
+	return solver_->getEnzK3( e );
 }
 
 
@@ -121,7 +114,7 @@ void ZEnz::vSetKm( const Eref& e, const Qinfo* q, double v )
 	double k2 = getK2( e, q );
 	double k3 = getKcat( e, q );
 	concK1_ = ( k2 + k3 ) / v;
-	stoich_->setEnzK1( e, concK1_ );
+	solver_->setEnzK1( e, concK1_ );
 }
 
 double ZEnz::vGetKm( const Eref& e, const Qinfo* q ) const
@@ -140,7 +133,7 @@ void ZEnz::vSetNumKm( const Eref& e, const Qinfo* q, double v )
 		convertConcToNumRateUsingMesh( e, toSub, 1 );
 	concK1_ = volScale * ( k2 + k3 ) / v;
 
-	stoich_->setEnzK1( e, concK1_ );
+	solver_->setEnzK1( e, concK1_ );
 }
 
 double ZEnz::vGetNumKm( const Eref& e, const Qinfo* q ) const
@@ -161,7 +154,7 @@ void ZEnz::vSetRatio( const Eref& e, const Qinfo* q, double v )
 
 	k2 = v * k3;
 
-	stoich_->setEnzK2( e, k2 );
+	solver_->setEnzK2( e, k2 );
 	double k1 = ( k2 + k3 ) / Km;
 
 	setConcK1( e, q, k1 );
@@ -177,7 +170,7 @@ double ZEnz::vGetRatio( const Eref& e, const Qinfo* q ) const
 void ZEnz::vSetConcK1( const Eref& e, const Qinfo* q, double v )
 {
 	concK1_ = v;
-	stoich_->setEnzK1( e, v );
+	solver_->setEnzK1( e, v );
 }
 
 double ZEnz::vGetConcK1( const Eref& e, const Qinfo* q ) const
@@ -189,63 +182,37 @@ double ZEnz::vGetConcK1( const Eref& e, const Qinfo* q ) const
 // Utility function
 //////////////////////////////////////////////////////////////
 
-ZeroOrder* ZEnz::makeHalfReaction( 
-	Element* orig, double rate, const SrcFinfo* finfo, Id enz ) const
-{
-	vector< Id > pools;
-	unsigned int numReactants = orig->getNeighbours( pools, finfo ); 
-	if ( enz != Id() ) // Used to add the enz to the reactants.
-		pools.push_back( enz );
-	numReactants = pools.size();
-
-	ZeroOrder* rateTerm = 0;
-	if ( numReactants == 1 ) {
-		rateTerm = 
-			new FirstOrder( rate, stoich_->convertIdToPoolIndex( pools[0] ) );
-	} else if ( numReactants == 2 ) {
-		rateTerm = new SecondOrder( rate,
-				stoich_->convertIdToPoolIndex( pools[0] ), 
-				stoich_->convertIdToPoolIndex( pools[1] ) );
-	} else if ( numReactants > 2 ) {
-		vector< unsigned int > v;
-		for ( unsigned int i = 0; i < numReactants; ++i ) {
-			v.push_back( stoich_->convertIdToPoolIndex( pools[i] ) );
-		}
-		rateTerm = new NOrder( rate, v );
-	} else {
-		cout << "Error: ZEnz::makeHalfReaction: zero reactants\n";
-	}
-	return rateTerm;
-}
-
 // static func
-void ZEnz::setSolver( Id solver, Id orig )
+void ZEnz::setSolver( Id solver, Id enz )
 {
-	static const SrcFinfo* sub = dynamic_cast< const SrcFinfo* >(
+	static const SrcFinfo* subFinfo = dynamic_cast< const SrcFinfo* >(
 		Enz::initCinfo()->findFinfo( "toSub" ) );
-	static const SrcFinfo* prd = dynamic_cast< const SrcFinfo* >(
+	static const SrcFinfo* prdFinfo = dynamic_cast< const SrcFinfo* >(
 		Enz::initCinfo()->findFinfo( "toPrd" ) );
 	static const SrcFinfo* enzFinfo = dynamic_cast< const SrcFinfo* >(
 		Enz::initCinfo()->findFinfo( "toEnz" ) );
-	static const SrcFinfo* cplx = dynamic_cast< const SrcFinfo* >(
+	static const SrcFinfo* cplxFinfo = dynamic_cast< const SrcFinfo* >(
 		Enz::initCinfo()->findFinfo( "toCplx" ) );
 
-	assert( sub );
-	assert( prd );
+	assert( subFinfo );
+	assert( prdFinfo );
 	assert( enzFinfo );
-	assert( cplx );
-
-	stoich_ = reinterpret_cast< StoichCore* >( solver.eref().data() );
-
-	vector< Id > pools;
-	unsigned int numReactants = orig.element()->getNeighbours( pools, enzFinfo ); 
+	assert( cplxFinfo );
+	vector< Id > temp;
+	unsigned int numReactants;
+	numReactants = enz.element()->getNeighbours( temp, enzFinfo ); 
 	assert( numReactants == 1 );
-	Id enzMolId = pools[0];
-	ZeroOrder* r1 = makeHalfReaction( orig.element(), 1, sub, enzMolId );
-	ZeroOrder* r2 = makeHalfReaction( orig.element(), 1, cplx, Id() );
-	ZeroOrder* r3 = makeHalfReaction( orig.element(), 1, cplx, Id() );
+	Id enzMol = temp[0];
+	vector< Id > subs;
+	numReactants = enz.element()->getNeighbours( subs, subFinfo ); 
+	assert( numReactants > 0 );
+	numReactants = enz.element()->getNeighbours( temp, cplxFinfo ); 
+	assert( numReactants == 1 );
+	Id cplx = temp[0];
+	vector< Id > prds;
+	numReactants = enz.element()->getNeighbours( prds, prdFinfo ); 
+	assert( numReactants > 0 );
 
-	numReactants = orig.element()->getNeighbours( pools, prd ); 
-	stoich_->installEnzyme( r1, r2, r3, orig, enzMolId, pools );
-
+	solver_ = reinterpret_cast< SolverBase* >( solver.eref().data() );
+	solver_->installEnzyme( enz, enzMol, cplx, subs, prds );
 }

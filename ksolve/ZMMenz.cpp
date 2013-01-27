@@ -64,7 +64,7 @@ ZMMenz::ZMMenz( )
 void ZMMenz::vRemesh( const Eref& e, const Qinfo* q )
 {
 	// cout << "ZMMenz::remesh for " << e << endl;
-	stoich_->setMMenzKm( e, Km_ );
+	solver_->setMMenzKm( e, Km_ );
 }
 
 //////////////////////////////////////////////////////////////
@@ -74,7 +74,7 @@ void ZMMenz::vRemesh( const Eref& e, const Qinfo* q )
 void ZMMenz::vSetKm( const Eref& e, const Qinfo* q, double v )
 {
 	Km_ = v;
-	stoich_->setMMenzKm( e, v );
+	solver_->setMMenzKm( e, v );
 }
 
 double ZMMenz::vGetKm( const Eref& e, const Qinfo* q ) const
@@ -91,73 +91,46 @@ void ZMMenz::vSetNumKm( const Eref& e, const Qinfo* q, double v )
 
 double ZMMenz::vGetNumKm( const Eref& e, const Qinfo* q ) const
 {
-	double numKm = stoich_->getR1( stoich_->convertIdToPoolIndex( e.id() ), 0 );
-	
-	return numKm;
+	return solver_->getMMenzNumKm( e );
 }
 
 void ZMMenz::vSetKcat( const Eref& e, const Qinfo* q, double v )
 {
-	stoich_->setMMenzKcat( e, v );
+	solver_->setMMenzKcat( e, v );
 }
 
 double ZMMenz::vGetKcat( const Eref& e, const Qinfo* q ) const
 {
-	double kcat = stoich_->getR2( stoich_->convertIdToPoolIndex( e.id() ), 0 );
-	return kcat;
+	return solver_->getMMenzKcat( e );
 }
 
 //////////////////////////////////////////////////////////////
 // Utility function
 //////////////////////////////////////////////////////////////
 
-void ZMMenz::setSolver( Id solver, Id orig )
+void ZMMenz::setSolver( Id solver, Id enzId )
 {
-	static const DestFinfo* enz = dynamic_cast< const DestFinfo* >(
+	static const DestFinfo* enzFinfo = dynamic_cast< const DestFinfo* >(
 		EnzBase::initCinfo()->findFinfo( "enzDest" ) );
-	static const SrcFinfo* sub = dynamic_cast< const SrcFinfo* >(
+	static const SrcFinfo* subFinfo = dynamic_cast< const SrcFinfo* >(
 		EnzBase::initCinfo()->findFinfo( "toSub" ) );
-	static const SrcFinfo* prd = dynamic_cast< const SrcFinfo* >(
+	static const SrcFinfo* prdFinfo = dynamic_cast< const SrcFinfo* >(
 		EnzBase::initCinfo()->findFinfo( "toPrd" ) );
-	assert( enz );
-	assert( sub );
-	assert( prd );
+	assert( enzFinfo );
+	assert( subFinfo );
+	assert( prdFinfo );
 
-	stoich_ = reinterpret_cast< StoichCore* >( solver.eref().data() );
+	solver_ = reinterpret_cast< SolverBase* >( solver.eref().data() );
 
 	/// Now set up the RateTerm
+	vector< Id > enzvec;
 	vector< Id > subvec;
 	vector< Id > prdvec;
-	unsigned int rateIndex = stoich_->convertIdToReacIndex( orig );
-	unsigned int num = orig.element()->getNeighbours( subvec, enz );
-	unsigned int enzIndex = stoich_->convertIdToPoolIndex( subvec[0] );
-	MMEnzymeBase* meb;
-
-	double numKm = 1.0; // Dummy default initial values, later to be reset
-	double kcat = 1.0;
-	/*
-	double numKm = base->zGetNumKm( orig.eref(), 0 );
-	double kcat = base->zGetKcat( orig.eref(), 0 );
-	*/
-
-	num = orig.element()->getNeighbours( subvec, sub );
-	if ( num == 1 ) {
-		unsigned int subIndex = stoich_->convertIdToPoolIndex( subvec[0] );
-		meb = new MMEnzyme1( numKm, kcat, enzIndex, subIndex );
-	} else if ( num > 1 ) {
-		vector< unsigned int > v;
-		for ( unsigned int i = 0; i < num; ++i )
-			v.push_back( stoich_->convertIdToPoolIndex( subvec[i] ) );
-		ZeroOrder* rateTerm = new NOrder( 1.0, v );
-		meb = new MMEnzyme( numKm, kcat, enzIndex, rateTerm );
-	} else {
-		cout << "Error: ZMMenz::zombify: No substrates for "  <<
-			orig.path() << endl;
-		cout << "Will ignore and continue, but don't be surprised if "
-		"simulation fails.\n";
-		// assert( 0 );
-		return;
-	}
-	num = orig.element()->getNeighbours( prdvec, prd );
-	stoich_->installMMenz( meb, rateIndex, subvec, prdvec );
+	unsigned int num = enzId.element()->getNeighbours( enzvec, enzFinfo );
+	assert( num == 1 );
+	num = enzId.element()->getNeighbours( subvec, subFinfo );
+	assert( num > 0 );
+	num = enzId.element()->getNeighbours( prdvec, prdFinfo );
+	assert( num > 0 );
+	solver_->installMMenz( enzId, enzvec[0], subvec, prdvec );
 }

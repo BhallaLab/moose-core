@@ -369,9 +369,12 @@ void CubeMesh::updateCoords()
 
 	// Fill out surface vector
 	surface_.resize( 0 );
-	if ( numDims() == 1 ) {
+	if ( numDims() == 0 ) {
 		surface_.push_back( 0 );
-		surface_.push_back( size - 1 );
+	} else if ( numDims() == 1 ) {
+		surface_.push_back( 0 );
+		if ( size > 1 )
+			surface_.push_back( size - 1 );
 	} else if ( numDims() == 2 ) {
 		fillTwoDimSurface();
 	} else if ( numDims() == 3 ) {
