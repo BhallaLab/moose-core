@@ -63,13 +63,9 @@ void testRemeshing()
 	sm->build( mgr.eref(), &q, "gsl" );
 	// SetGet1< string >::set( mgr, "build", "gsl" );
 	
-	Id gslStoich( "/meshTest/stoich" );
-	Id stoichCore( "/meshTest/stoich/stoichCore" );
+	Id gslStoich( "/meshTest/kinetics/stoich" );
 	assert( gslStoich != Id() );
-	assert( stoichCore != Id() );
-	void* s = gslStoich.eref().data();
-	void* sc = stoichCore.eref().data();
-	assert( s != sc ); 
+	// void* s = gslStoich.eref().data();
 
 	shell->doReinit();
 

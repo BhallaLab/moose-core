@@ -25,4 +25,5 @@ class Stoich;
 #include "../mesh/VoxelJunction.h"
 #include "SolverJunction.h"
 #include "Stoich.h"
+#include "SolverBase.h"
 #include "StoichCore.h"

@@ -9,7 +9,8 @@
 
 #ifndef _GSL_STOICH_H
 #define _GSL_STOICH_H
-class GslStoich: public StoichPools
+
+class GslStoich: public SolverBase
 {
 	public:
 		GslStoich();
@@ -17,8 +18,45 @@ class GslStoich: public StoichPools
 		GslStoich& operator=( const GslStoich& other );
 
 ///////////////////////////////////////////////////
+// Zombie setup functions.
+///////////////////////////////////////////////////
+		/**
+		 * Returns the master StoichCore instance which is the basis
+		 * for spawning the compute Stoichs_ used in the ode_ array.
+		 */
+		const StoichCore* coreStoich() const;
+		// Inherited reaction installation functions
+		void installReaction( Id reacId, 
+				const vector< Id >& subs, const vector< Id >& prds );
+		void installMMenz( Id enzId, Id enzMolId, 
+				const vector< Id >& subs, const vector< Id >& prds );
+		void installEnzyme( Id enzId, Id enzMolId, Id cplxId,
+				const vector< Id >& subs, const vector< Id >& prds );
+
+///////////////////////////////////////////////////
+// Info functions
+///////////////////////////////////////////////////
+		/// Returns pools_ vector
+		const vector< VoxelPools >& pools();
+		/// Returns ode_ vector
+		const vector< OdeSystem >& ode();
+
+///////////////////////////////////////////////////
 // Field function definitions
 ///////////////////////////////////////////////////
+		unsigned int getNumVarPools() const;
+
+		/**
+		 *  Returns total number of local pools. Leaves out the pools whose
+		 *  actual calculations happen on another solver, but are given a
+		 *  proxy here in order to handle cross-compartment reactions.
+		 */
+		unsigned int getNumAllPools() const;
+		unsigned int getNumLocalVoxels() const;
+		unsigned int getNumAllVoxels() const;
+		string getPath( const Eref& e, const Qinfo* q ) const;
+		void setPath( const Eref& e, const Qinfo* q, string path );
+		double getEstimatedDt() const;
 		bool getIsInitialized() const;
 		string getMethod() const;
 		void setMethod( string method );
@@ -34,13 +72,12 @@ class GslStoich: public StoichPools
 ///////////////////////////////////////////////////
 // Dest function definitions
 ///////////////////////////////////////////////////
+		void allocatePools( unsigned int numPools );
 
 		void process( const Eref& e, ProcPtr info );
 		void reinit( const Eref& e, ProcPtr info );
 		void init( const Eref& e, ProcPtr info );
 		void initReinit( const Eref& e, ProcPtr info );
-
-		void stoich( const Eref& e, const Qinfo* q, Id stoichId );
 
 		void remesh( const Eref& e, const Qinfo* q,
 			double oldVol,
@@ -66,8 +103,9 @@ class GslStoich: public StoichPools
 		/**
 		 * Computes change in pool #s following cross-solver reacn across
 		 * junction j, puts in yprime.
+		 * Returns numberof terms computed.
 		 */
-		void fillReactionDelta( 
+		unsigned int fillReactionDelta( 
 				const SolverJunction* j, 
 				const vector< vector< double > > & lastS, 
 				double* yprime ) const;
@@ -95,7 +133,7 @@ class GslStoich: public StoichPools
 		/// This does the real work for GSL to advance.
 		int innerGslFunc( double t, const double* y, double* yprime );
 		//////////////////////////////////////////////////////////////////
-		// Field access functions, overriding virtual defns.
+		// Field access functions for pools, overriding virtual defns.
 		//////////////////////////////////////////////////////////////////
 
 		void setN( const Eref& e, double v );
@@ -106,6 +144,29 @@ class GslStoich: public StoichPools
 		unsigned int getSpecies( const Eref& e );
 		void setDiffConst( const Eref& e, double v );
 		double getDiffConst( const Eref& e ) const;
+
+		//////////////////////////////////////////////////////////////////
+		// Field access functions for reacs, overriding virtual defns.
+		//////////////////////////////////////////////////////////////////
+		// Assignment of Kf and Kb are in conc units.
+		void setReacKf( const Eref& e, double v ) const;
+		void setReacKb( const Eref& e, double v ) const;
+		double getReacNumKf( const Eref& e ) const;
+		double getReacNumKb( const Eref& e ) const;
+
+		// Assignment of Km is in conc units.
+		void setMMenzKm( const Eref& e, double v ) const;
+		void setMMenzKcat( const Eref& e, double v ) const;
+		double getMMenzNumKm( const Eref& e ) const;
+		double getMMenzKcat( const Eref& e ) const;
+
+		// Assignment of K1 is in conc units.
+		void setEnzK1( const Eref& e, double v ) const;
+		void setEnzK2( const Eref& e, double v ) const;
+		void setEnzK3( const Eref& e, double v ) const;
+		double getEnzNumK1( const Eref& e ) const;
+		double getEnzK2( const Eref& e ) const;
+		double getEnzK3( const Eref& e ) const;
 
 		//////////////////////////////////////////////////////////////////
 		// Junction operations.
@@ -126,6 +187,15 @@ class GslStoich: public StoichPools
 		/// Remove the junction between self and specified other StoichPool
 		void vDropJunction( const Eref& e, const Qinfo* q, Id other );
 
+		/// Find the odeSystem that matches the specified compartment sig
+		unsigned int selectOde( const vector< Id >& sig ) const;
+
+		/**
+ 		 * Virtual function to do any local updates to the stoich following
+ 		 * changes to the Junctions.
+ 		*/
+		void updateJunctionInterface( const Eref& e );
+
 		/// Returns indices of cross-compt reacs terms into rates_ vector.
 		void vBuildReacTerms( vector< unsigned int >& reacTerms, 
 				vector< pair< unsigned int, unsigned int > >& reacPoolIndex,
@@ -136,7 +206,7 @@ class GslStoich: public StoichPools
 				const; 
 
 		/// Generates mapping of mesh entries between solvers.
-		void matchMeshEntries( StoichPools* other,
+		void matchMeshEntries( SolverBase* other,
 			vector< unsigned int >& selfMeshIndex, 
 			vector< VoxelJunction >& selfMeshMap,
 			vector< unsigned int >& otherMeshIndex, 
@@ -158,29 +228,73 @@ class GslStoich: public StoichPools
 		/// Inherited, fills out pools involved in cross-solver reaction.
 		void setLocalCrossReactingPools( const vector< Id >& pools );
 
+		/// Inherited, returns internal solver index corresponding to poolId
+		unsigned int convertIdToPoolIndex( Id id ) const;
+
+		/// Handle calls for changing number of voxels.
+		void meshSplit( 
+				vector< double > initConcs,  // in milliMolar
+				vector< double > vols,		// in m^3
+				vector< unsigned int > localEntryList );
+
+		const double* S( unsigned int meshIndex ) const;
+
+		/**
+		 * Generates all possible groupings of OdeSystem entries based on
+		 * all possible sets of compartment signatures, starting from zero.
+		 */
+		unsigned int generateOdes();
+
 ///////////////////////////////////////////////////////////0
 		static const Cinfo* initCinfo();
 	private:
 		bool isInitialized_;
 		string method_;
+		string path_;
 		double absAccuracy_;
 		double relAccuracy_;
 		double internalStepSize_;
 		vector< vector < double > >  y_;
-		Id stoichId_;
-		StoichCore* stoich_;
+
+		/**
+		 * This is the master stoichCore of the system, handles all the
+		 * field access and setup stuff. Typically does not do calculations
+		 * itself, instead spawns compies into the ode_ vector.
+		 */
+		StoichCore coreStoich_;
+
+		/**
+		 * One OdeSystem for every combination of external
+		 * reactions. This includes the StoichCore and the Gsl structs.
+		 * The key guarantee is that the core reaction set, 
+		 * that is located on the local solver, is common to all the
+		 * OdeSystems. 
+		 * Thus it is safe to use this core portion of pools with the 
+		 * same indices for all the diffusion calculations. The
+		 * specialization of each of the OdeSystems is for different sets
+		 * of cross-compartment reactions, which may entail allocation of
+		 * proxy pools.
+		 * Note this is indexed by # of unique combinations, not by number
+		 * of meshEntries. Probably much smaller than # of mesh entries.
+		 */
+		vector< OdeSystem > ode_;
+
+		/// Handles set of reactant pools for each voxel.
+		vector< VoxelPools > pools_;
+
+		/**
+		 * vector of indices of the local set of Voxels/MeshEntries.
+		 * These may be a subset, even non-contiguous, of the entire
+		 * reac-diff system, depending on how boundaries and voxelization
+		 * are done.
+		 * GlobalMeshIndex = localMeshEntries_[localIndex]
+		 */
+		vector< unsigned int > localMeshEntries_;
 
 		Id compartmentId_;
 		ChemMesh* diffusionMesh_;
 
 		// Used to keep track of meshEntry when passing self into GSL.
 		unsigned int currMeshEntry_; 
-
-		// GSL stuff
-		const gsl_odeiv_step_type* gslStepType_;
-		gsl_odeiv_step* gslStep_;
-		gsl_odeiv_control* gslControl_;
-		gsl_odeiv_evolve* gslEvolve_;
-		gsl_odeiv_system gslSys_;
 };
 #endif // _GSL_STOICH_H

@@ -11,7 +11,7 @@
 #include "header.h"
 #include "../mesh/VoxelJunction.h"
 #include "SolverJunction.h"
-#include "StoichPools.h"
+#include "SolverBase.h"
 #include "../kinetics/PoolBase.h"
 #include "ZPool.h"
 #include "lookupSizeFromMesh.h"
@@ -61,7 +61,7 @@ static const SrcFinfo1< double >* requestSize =
     zombiePoolCinfo->findFinfo( "requestSize" ) );
 
 ZPool::ZPool()
-		: stoich_( 0 )
+		: solver_( 0 )
 {;}
 
 ZPool::~ZPool()
@@ -94,57 +94,57 @@ void ZPool::vRemesh( const Eref& e, const Qinfo* q,
 
 void ZPool::vSetN( const Eref& e, const Qinfo* q, double v )
 {
-	stoich_->setN( e, v );
+	solver_->setN( e, v );
 }
 
 double ZPool::vGetN( const Eref& e, const Qinfo* q ) const
 {
-	return stoich_->getN( e );
+	return solver_->getN( e );
 }
 
 void ZPool::vSetNinit( const Eref& e, const Qinfo* q, double v )
 {
-	stoich_->setNinit( e, v );
+	solver_->setNinit( e, v );
 }
 
 double ZPool::vGetNinit( const Eref& e, const Qinfo* q ) const
 {
-	return stoich_->getNinit( e );
+	return solver_->getNinit( e );
 }
 
 void ZPool::vSetConc( const Eref& e, const Qinfo* q, double conc )
 {
 	// unsigned int pool = convertIdToPoolIndex( e.id() );
 	double n = NA * conc * lookupSizeFromMesh( e, requestSize );
-	stoich_->setN( e, n );
+	solver_->setN( e, n );
 }
 
 double ZPool::vGetConc( const Eref& e, const Qinfo* q ) const
 {
-	return stoich_->getN( e ) / 
+	return solver_->getN( e ) / 
 			( NA * lookupSizeFromMesh( e, requestSize ) );
 }
 
 void ZPool::vSetConcInit( const Eref& e, const Qinfo* q, double conc )
 {
 	double n = NA * conc * lookupSizeFromMesh( e, requestSize );
-	stoich_->setNinit( e, n );
+	solver_->setNinit( e, n );
 }
 
 double ZPool::vGetConcInit( const Eref& e, const Qinfo* q ) const
 {
-	return stoich_->getNinit( e ) / 
+	return solver_->getNinit( e ) / 
 			( NA * lookupSizeFromMesh( e, requestSize ) );
 }
 
 void ZPool::vSetDiffConst( const Eref& e, const Qinfo* q, double v )
 {
-	stoich_->setDiffConst( e, v );
+	solver_->setDiffConst( e, v );
 }
 
 double ZPool::vGetDiffConst( const Eref& e, const Qinfo* q ) const
 {
-	return stoich_->getDiffConst( e );
+	return solver_->getDiffConst( e );
 }
 
 void ZPool::vSetSize( const Eref& e, const Qinfo* q, double v )
@@ -159,12 +159,12 @@ double ZPool::vGetSize( const Eref& e, const Qinfo* q ) const
 
 void ZPool::vSetSpecies( const Eref& e, const Qinfo* q, unsigned int v )
 {
-	stoich_->setSpecies( e, v );
+	solver_->setSpecies( e, v );
 }
 
 unsigned int ZPool::vGetSpecies( const Eref& e, const Qinfo* q ) const
 {
-	return stoich_->getSpecies( e );
+	return solver_->getSpecies( e );
 }
 
 //////////////////////////////////////////////////////////////
@@ -173,7 +173,7 @@ unsigned int ZPool::vGetSpecies( const Eref& e, const Qinfo* q ) const
 void ZPool::setSolver( Id solver )
 {
 	assert ( solver != Id() );
-	assert( solver.element()->cinfo()->isA( "StoichPools" ) );
-	stoich_ = reinterpret_cast< StoichPools* >( solver.eref().data() );
+	assert( solver.element()->cinfo()->isA( "SolverBase" ) );
+	solver_ = reinterpret_cast< SolverBase* >( solver.eref().data() );
 }
 

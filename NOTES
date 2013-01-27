@@ -20318,4 +20318,408 @@ Next: Set up Junctions to handle cross-solver terms.
 Did the setup for cross-solver terms. Yet to test it, but it does clear all the
 older unit tests. Cleaned up a lot of cruft in Junctions.
 
+Still need to activate the handling of the additional reactions only in
+the boundary voxels where the cross-solver reactions take place. Need to
+implement a serious unit test for this.
+- May need to do a 'unique' on the pools in case we have a higher-order 
+reaction.
+==========================================================================
+29 Dec.
+To check for cross reactions: just do single voxel reaction on each side.
+
+==========================================================================
+30 Dec.
+Setting up cross reaction computations. Failed simple test. Turns out there
+is a design oversight here. Both the reaction rate updates and the solver
+calculations differ depending on voxel. One size does not fit all.
+- Each voxel computes a different subset of reactions, depending on which 
+	cross-compartment reactions apply. In principle we need to track this
+	subset for every voxel.
+	- If many voxels, most voxels will have the local set only.
+	- Typically only a few groupings of reactions will be needed.
+	- The Junctions don't have the reaction subset data in a useful form. 
+		Instead they store the set of meshIndices to which they apply.
+	So I need to 'invert' the data representation, so that each voxel
+	knows which junctions apply to it. Then the voxel can find which 
+	reactions to solve.
+- I use a common stoichiometry matrix N_. This has info about all the
+	reactions that the compartment might choose to use, mapped to all the
+	pools including all proxy pools. 
+	- For 'core' voxels, the solver only calculates the core set of pools.
+		The proxy pools neither need to be updated, nor do they 
+		influence the calculations.
+	- For 'Junction' voxels, the solver has to calculate all pools including
+		proxies, even if those proxies are not used at this junction.
+		This is because the solver and stoich matrix want a single 
+		contiguous array.
+		In principle I could do a whole lot of copying to select only
+		the required pools for the solver.
+
+How about setting up each voxel to be much more ignorant of these housekeeping
+details. Precompute all the applicable combinations of N_, rates_, and  pools.
+Problem here is that the data transfer becomes more complicated. For every
+pairing of pool vectors across junctions, I need a separate set of 
+junction vectors. 
+ 
+Most models are likely to have just one or two kinds of cross-reaction terms.
+For example, the dendite compartment will typically interact with spines, 
+and with soma. Possibly with extracellular matrix.
+How many combinations? Small enough.
+
+GslStoich handles a set of StoichPools, one per voxel. Each StoichPool
+	keeps track of S, Sinit.
+GslStoich handles a set of StoichCores, one for each category of voxel. The
+	StoichCores keep track of all the reactions including cross-solver
+	reactions, on any given voxel.
+	The StoichCores all share a common subset of molecules and reacs
+GslStoich handles a set of Junctions, one per interface with any other Stoich.
+	Each voxel category has to provide a subset of data to the Junction.
+	I need to encapsulate this.
+
+
+Or: Eliminate cross-solver reacs from the purview of StoichCore altogether.
+Have them handled in a stupid way by the Junctions.
+Problem is that this won't deal well with different kinds of solvers. The
+solvers have to take responsibility for handling cross reactions and diffusion.
+
+Outcome: Keep the basic single-voxel solvers simpler, have more versions 
+of them managed by multi voxel solvers.
+SolverBase -> GslStoich
+StoichPools becomes VoxelPools and removes the junction stuff.
+
+Things to check:
+1. have the GslStoich, handle the setReacKf type calls, rather than
+the StoichCore. Reason is that there are multiple StoichCores to update.
+2. Calls to Gsl solver if the data is changed but the structure is the same.
+	I think a reset is needed somewhere. I'm concerned about internal
+	storage of some state variables or differentials.
+
+
+Setup sequence:
+- Reaction system and compartments and their meshes should already be defined.
+	Mesh should already have
+	spatial stuff set up, though it can be updated later.
+- Assign junction messages
+- Assign path.
+	- Use it to fill out the zeroth stoich. This is the one that does the
+  	  zombification.
+	- At this stage the StoichCore records, but does not build up the
+	  off-node reactions and molecules.
+	- This level is enough to do single-compartment calculations. Don't
+	  need further builder intervention.
+- Call the builder function. 
+	- Extract junction information
+	- Figure out how many stoichs are needed, based on path and junctions.
+	- Fill all Stoichs up using copies, not zombies.
+	- Assign Gsls
+
+
+Begun this huge refactoring operation. Split up the GslStoich.cpp file
+into GslStoich, GslStoichSetup, GslStoichNumerics, and GslStoichZombies.
+Still trying to compile Numerics.
+==========================================================================
+31 Dec.
+Grinding through refactored code. Compilation through till the testKsolve.cpp.
+
+Finally compiles. Crashes rather quickly in unit tests.
+==========================================================================
+1 Jan 2013. Shame to still be working on this tedious stuff.
+
+Refactored and fixed up compilation, various setup issues. Now sets up the 
+path of a test simulation but isn't handling assignment. But things are 
+coming together.
+
+==========================================================================
+2 Jan 2013. Finally some headway in unit tests. Does the basic setup and 
+single compt run stuff.
+
+==========================================================================
+10 Jan 2013
+in testKsolve.cpp:testInterMeshReac. Many fixes later. It is not doing a segv,
+but it isn't transferring molecules to compartment B.
+
+Seems like the GslStoich in compartment B is not being called for init
+or process. Fixed. Still isn't tranferring molecules. still the size
+of the transfer pools is zero, even though I've seen the values be assigned.
+
+==========================================================================
+11 Jan 2013.
+OK, I see what has happened. The reac pool info is indeed set up, but the
+sendMeshIndex stuff is not. So nothing is transmitted.
+
+I should write a separate unit test to make sure all the contents of the
+Junction are set up properly for 
+- reacs across junction
+- diff across junction
+- both reac and diff across junction.
+- Both reac and diff across multiple junctions.
+
+==========================================================================
+13 Jan 2013.
+Workin on testKsolve.cpp:testJunctionSetup.
+The junctions are not finding abutting points, possibly because of the size
+mismatch between the two meshes. For now state that they are identical on 
+the x=0 face, achieved by making the second mesh long and thin.
+
+The intersection defined in CubeMesh::matchCubeMeshEntries is wrong in two ways.
+	- It doesn't have any voxels included, though of course there should
+		be the volumes of the two compartments themselves.
+	- The corners are wrong: {0,-1,-1},{2,2,2}
+		Should be: {-1,-1,-1},{3,2,2}, or perhaps
+		{0,0,0}{2,1,1} to be really precise.
+
+The CubeMesh::surface_ vector is empty. Why? OK, fixed it. Turns out that there
+was no way to test for a zero-dimension (i.e., single point) CubeMesh. With
+that fixed the unit tests march along to testKsolve.cpp:testInterMeshReac.
+==========================================================================
+14 Jan.
+Further steps. Now there is a hiccup in GslStoich::fillReactionDelta.
+
+
+==========================================================================
+15 Jan.
+I need to write out a flowchart from the setPath call on downward, to be sure
+that things are set up correctly. Need to deal with cases where there is no
+compartmentalization and diffusion too.
+
+1. Create system
+2. Set up mesh
+3. Create stoichs
+4. Set path on each stoich
+5. Add remesh msg to the stoichs
+6. Add junction between stoichs.
+7. Set clocks and run.
+
+Issue: StoichA_->pools_.size = 2, {2, 1}
+Should have been 1, {2}
+
+
+Much marching through bad code later. The StoichCore::updateRates simply
+does not update the proxy pool, even though the reaction is called.
+
+Fundamental issue with StoichCore for the junction. Need to cleanly define
+what each does, and whether to incorporate the proxy pools and the
+cross reacs into numVarPools and rates_ respectively.
+
+I've been retrofitting to put in the extra reaction in.
+
+Cleaner:
+1. At time of setPath, the GslStoich and StoichCore can already work out which 
+combinations of StoichCores will be needed. This is because the set of 
+reacting compartment Ids are known to the StoichCores.
+1.1 The basal StoichCore should probably never be used for computation, since 
+	it contains the rateTerms_ for all the reactions including all 
+	cross-compartment reactions. These rateTerms will probably refer to 
+	empty or misaligned pool entries. Unless there is a single junction.
+1.2 The basal StoichCore should spawn off truncated versions applicable to
+	each compartment combination. For 3 compartments this will be:
+		bare, j1-2, j1-3, j2-3, j1-2-3.
+	the last being the basal StoichCore.
+	1.2.1 Doing this combinatorially is a Bad Idea unless we can guarantee
+	that there will never be more than, say, 4 compartments abutting any
+	other. Consider things near a dendrite: spine, membrane, NO/AA diffn,
+	mitochondria, soma...  So it won't work.
+	1.2.2 To generate the applicable combinations automatically is too
+	horrible. Simpler to have the user specify the list, otherwise use
+	brute-force combinatorics. This turns out not to bee too bad,
+	since it isn't all possible combinations, only sorted ones.
+	1.2.3. X-reacs will only go up to triplets. Most are just pairwise.
+		Can we enforce pairwise? It will eliminate MMenz type entities
+		such as ion channels, where a steady-state high-traffic
+		approximation holds and spans 3 compartments.
+1.3 When it spawns off versions, subsets of the rateTerms vector are removed.
+1.4 When it spawns off versions, subsets of the proxy poolEntries are retained.
+	This means that their poolIndices change.
+	This means that the corresponding reactant indices in the x-reaction 
+	rateTerms will need to change.
+
+2. The AddJunction has now to work with a set of pre-defined OdeSystems.
+	2.1 These have to specify which compartments they handle
+	2.2 Pairwise is easy.
+	2.3 Triplets and in fact all levels are generated simply by going
+		through all junctions and appending onto a signature for each
+		voxel. These are then compared against the signatures for the
+		odeSystems and thus assigned to entries in the pools_ vector.
+
+
+Working on StoichCore::spawn. Issue here: I can't really manage multiple
+RateTerm arrays, since it will mess up field access. In other words, if I
+have multiple such arrays, then any field change needs to update all of them.
+One way around this is to have all the spawned StoichCores use the pointers
+from the original.
+Similar problem does _not_ arise for the S_ and Sinit_ arrays: the only pools
+we can access are always aligned the same.
+
+==========================================================================
+17 Jan.
+Implemented code for spawn. If I am to reuse pointers from the master 
+StoichCore, then I cannot have different indices for the x-compartment 
+reac pools. Instead make a separate vector with the affected indices, used
+for transmission. This ends up wasting the numerical engine cycles as it
+will try to update unused pools. Which is one of the things that the separate
+StoichCores were intended to fix.
+Action: Since the API is unchanged, I'll get the simple form of this implmented
+	now and never mind the inefficiency. Later benchmark and see
+	if it matters.
+
+Set up spawn, compiles, croaks in tests.
+
+==========================================================================
+18 Jan,
+Much fixing later, now croaks about where it did earlier with setting up the
+interMeshReac. 
+
+Now gets much further. Need to now assign the correct ode to each pool_
+entry.
+==========================================================================
+20 Jan.
+Now back at the usual crash site, in testKsolve.cpp:testInterMeshReac.
+Still not seeing an increment in molecule b.
+
+Turns out that I still need to sort out data structures for the off solver
+(proxy) pools. The N_ assumes they follow right after the nVarPools, but 
+what of the bufPools and funcPools?
+
+Anyway, another minor fix and now we clear the testInterMeshReac(),
+but I'm not convinced that the values are right. Volumes were to be different.
+Key thing is that info is passing back and forth now, and the reaction is
+proceeding across the junction.
+
+==========================================================================
+21 Jan.
+Clears the testInterMeshReac. Currently stuck on StoichCore.cpp:unZombifyPools.
+
+==========================================================================
+22 Jan.
+Fixed that, and a minor fix with field naming. Now it clears unit tests
+but fails regression tests. There is something familar about the kind of
+problem here, where things seem mostly in place but the model doesn't give the
+right output. But I can't recall.
+
+
+==========================================================================
+23 Jan
+Issue with mixing up var pools with all pools.
+Related issue with mixing up reinit with setup for odeSystems.
+See GslStoichNumerics.cpp:GslStoich::reinit
+and GslStoichSetup.cpp:GslStoich::setPath.
+
+With a temporary bodge here, the regression tests advance to the
+previous point of problem, the Kholodenko model test in rtRunKkit().
+==========================================================================
+24 Jan
+Not much progress with the regression tests. Ran valgrind and it thinks that
+I'm copying from unallocated memory. Tried a little fix, no change.
+==========================================================================
+27 Jan.
+Despite fix, same error. I need to deal with allocation of N_ in Stoich,
+of S_ and Sinit_ in VoxelPools, and y_ in GslStoich in a much more tightly
+coordinated manner. Further, I have to explicitly put the proxy pools for 
+reactions right after the regular varPools and before FuncPools and BufPools.
+
+Let's tighten up design, now that we have most of the bits working.
+One key fix would be to do a special extra lookup for any reactions past the
+core set, in which there is an indirection in the computation of the rates v[i].
+Currently the index defined by the rateTerm is used directly.
+In the fix, any indices beyond the coreReacs would do an indirection so as to
+	point to the pool in the current system.
+Furthermore, the N_ vector will need to be updated to match.
+
+Suppose we have 4 reaction compartments, ABCD.
+
+	    A                           D
+	( M1, M2 ) <-----R4------> ( M1, M5 )
+	    ^
+	    |
+	    |\
+	    | \
+	    |  \
+	    R3	R3	
+	    |    \
+	    |     ------------------
+	    |                        \
+	    V                         V
+ 	( M1, M3, M6 ) <----R5---> ( M1, M4 )
+	   B                             C
+Where
+	R3 = M2 <---> M3 + M4	is on A
+	R4 = M2 <---> M5	is on A
+	R5 = M6 <---> M4	is on B
+
+and molecule M1 diffuses between them all.
+
+		--------------------------------------
+
+On compartment A we have the following ODE systems
+N Core:	    R1 R2 R3 R4 
+	M1[             ] [ v1 ]
+	M2[             ] [ v2 ]
+	M3[             ] [ v3 ]
+	M4[             ] [ v4 ]
+	M5[             ]
+
+N A (local mols only)
+	    R1 R2
+	M1[       ] [ v1 ]
+	M2[       ] [ v2 ]
+
+N ABC ( For R3 )
+	    R1 R2 R3
+	M1[          ] [ v1 ]
+	M2[          ] [ v2 ]
+	M3[          ] [ v3 ]
+	M4[          ]
+
+N AD ( for R4 )
+	    R1 R2 R4 
+	M1[          ] [ v1 ]
+	M2[          ] [ v2 ]
+	M5[          ] [ v4 ]
+
+		--------------------------------------
+On compartment B we have the following ODE systems
+N core: 
+	    R7 R5
+	M1[       ] [ v7 ]
+	M3[       ] [ v5 ]
+	M6[       ]
+	M4[       ]
+
+N B (local mols only ).
+	    R7
+	M1[    ] [ v7 ]
+	M3[    ]
+	M6[    ]
+
+N BC ( for R5 )  Note that this is the same as N core.
+	    R7 R5
+	M1[       ] [ v7 ]
+	M3[       ] [ v5 ]
+	M6[       ]
+	M4[       ]
+
+		--------------------------------------
+On compartment C we have the following ODE systems
+N core: This is the only system here.
+	    R8
+	M1[    ] [ v8 ]
+	M4[    ]
+
+		--------------------------------------
+On compartment D we have the following ODE systems
+N core: This is the only system here.
+	    R9
+	M1[    ] [ v9 ]
+	M5[    ]
+
+
+------------------------------------------------------------------------------
+Will come to this later. For now, I was able to move forward in regression
+tests. I created a standalone mmenz.g regression test and confirmed that it
+failed. Traced this back to the setup code on ZMMenz.cpp. Fixed. Now it
+clears the mmenz regression test, and also the Kholodenko test, but it
+croaks further on in rtRunCspace.
+
+Finally! Clears unit and regression tests, on a single thread only.
+
 ==========================================================================

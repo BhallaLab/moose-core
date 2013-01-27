@@ -47,7 +47,7 @@ class ZMMenz: public EnzBase
 
 		static const Cinfo* initCinfo();
 	private:
-		StoichCore* stoich_;
+		SolverBase* solver_;
 		double Km_; /// Km in conc units: millimolar
 };
 

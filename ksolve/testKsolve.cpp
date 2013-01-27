@@ -19,7 +19,10 @@
 #include <gsl/gsl_odeiv.h>
 #include "ElementValueFinfo.h"
 #include "GslIntegrator.h"
-#include "StoichPools.h"
+#include "SolverBase.h"
+#include "VoxelPools.h"
+#include "OdeSystem.h"
+#include "SolverJunction.h"
 #include "../mesh/Boundary.h"
 #include "../mesh/MeshEntry.h"
 #include "../mesh/ChemMesh.h"
@@ -216,6 +219,8 @@ Id makeInterMeshReac( Shell* s )
 	Id poolA = s->doCreate( "Pool", meshA, "A", dims );
 	Id poolB = s->doCreate( "Pool", meshB, "B", dims );
 	Id reac = s->doCreate( "Reac", meshA, "reac", dims );
+	Field< double >::set( reac, "Kf", 0.2 );
+	Field< double >::set( reac, "Kb", 0.1 );
 
 	Field< double >::set( poolA, "nInit", 100 );
 
@@ -232,49 +237,123 @@ Id makeInterMeshReac( Shell* s )
 	mid = s->doAddMsg( "Single", reac, "prd", poolB, "reac" );
 	assert( mid != Msg::bad );
 
-	Field< double >::set( meshA, "size", 1 );
-	Field< double >::set( meshB, "size", 10 );
+	vector< double > coords( 9, 0 );
+	coords[0] = 1; // x0 position
+	coords[3] = 2; // x1 position
+	coords[4] = 1; // y1 position
+	coords[5] = 1; // z1 position
+	coords[6] = 1; // dx
+	coords[7] = 1; // dy
+	coords[8] = 1; // dz
+	Field< vector< double > >::set( meshB, "coords", coords );
+	Field< double >::set( meshA, "size", 1 ); 
+	// Field< double >::set( meshB, "size", 8 );
 	double ret = Field< double >::get( poolA, "size" );
 	assert( doubleEq( ret, 1 ) );
 	ret = Field< double >::get( poolB, "size" );
-	assert( doubleEq( ret, 10 ) );
+	assert( doubleEq( ret, 1 ) );
+	ret = Field< double >::get( meshA, "dx" );
+	assert( doubleEq( ret, 1 ) );
+	ret = Field< double >::get( meshB, "dx" );
+	assert( doubleEq( ret, 1 ) );
+	unsigned int n = Field< unsigned int >::get( meshA, "nx" );
+	assert( n == 1 );
+	n = Field< unsigned int >::get( meshA, "nx" );
+	assert( n == 1 );
+	n = Field< unsigned int >::get( meshA, "num_mesh" );
+	assert( n == 1 );
+	n = Field< unsigned int >::get( meshB, "num_mesh" );
+	assert( n == 1 );
 
 	return model;
 }
 
 void testInterMeshReac()
 {
+	const double DT = 0.01;
+	const double RUNTIME = 50.0;
 	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	s->doSetClock( 4, DT );
+	s->doSetClock( 5, DT );
+	s->doSetClock( 6, DT );
 	vector< int > dims( 1, 1 );
 	Id model = makeInterMeshReac( s );
 	// Create solvers for meshA and meshB.
-	Id meshA( "/model/meshA" );
-	assert ( meshA != Id() );
-	Id meshB( "/model/meshA" );
-	assert ( meshB != Id() );
-	Id stoichA = s->doCreate( "Stoich", model, "stoichA", dims );
+	Id comptA( "/model/meshA" );
+	Id comptB( "/model/meshB" );
+	Id meshA( "/model/meshA/mesh" );
+	Id meshB( "/model/meshB/mesh" );
+	Id stoichA = s->doCreate( "GslStoich", comptA, "stoichA", dims );
 	assert ( stoichA != Id() );
-	Id stoichB = s->doCreate( "Stoich", model, "stoichB", dims );
+	Field< string >::set( stoichA, "path", "/model/meshA/##" );
+	Field< Id >::set( stoichA, "compartment", Id( "/model/meshA" ) );
+	Field< string >::set( stoichA, "method", "rk5" );
+
+	Id stoichB = s->doCreate( "GslStoich", comptB, "stoichB", dims );
 	assert ( stoichB != Id() );
+	Field< string >::set( stoichB, "path", "/model/meshB/##" );
+	Field< Id >::set( stoichB, "compartment", Id( "/model/meshB" ) );
+	Field< string >::set( stoichB, "method", "rk5" );
 
-	MsgId mid = s->doAddMsg( "Single", meshA, "meshSplit", stoichA, 
-					"meshSplit" );
+	MsgId mid = s->doAddMsg( "Single", meshA, "remesh", stoichA, 
+					"remesh" );
 	assert( mid != Msg::bad );
-	mid = s->doAddMsg( "Single", meshB, "meshSplit", stoichB, "meshSplit" );
+	mid = s->doAddMsg( "Single", meshB, "remesh", stoichB, "remesh" );
 	assert( mid != Msg::bad );
 
-	mid = s->doAddMsg( "Single", stoichA, "boundaryReacIn", 
-					stoichB, "boundaryReacOut" );
-	assert( mid != Msg::bad );
+	GslStoich* gsA = 
+			reinterpret_cast< GslStoich* >( stoichA.eref().data() );
+	assert( gsA->pools().size() == 1 );
+	assert( gsA->pools()[0].size() == 2 );
+	assert( gsA->ode().size() == 2 ); // One blank, one with a single jn.
 
-	// Should put in a flag or variant that sets up compartment-specific
-	// models.
-	/*
-	Field< string >::set( stoichA, "path", "/model/meshA/poolA,/model/meshA/reac" );
-	Field< string >::set( stoichB, "path", "/model/meshB/poolB" );
-	*/
+	GslStoich* gsB = 
+			reinterpret_cast< GslStoich* >( stoichB.eref().data() );
+	assert( gsB->pools().size() == 1 );
+	assert( gsB->pools()[0].size() == 1 );
+	assert( gsB->ode().size() == 1 );
 
-	// Set up messaging between solvers.
+	SetGet1<Id>::set( stoichA, "addJunction", stoichB );
+
+	//assert( gsA->pools().size() == 1 );
+	assert( gsA->pools()[0].size() == 2 );
+	assert( gsA->ode().size() == 2 );
+	assert( gsB->pools().size() == 1 );
+	assert( gsB->pools()[0].size() == 1 );
+	assert( gsB->ode().size() == 1 );
+
+	assert( gsA->ode()[0].stoich_->getNumRates() == 0 );
+	assert( gsA->ode()[1].stoich_->getNumRates() == 1 );
+	vector< unsigned int > molIndex;
+	unsigned int numSub = 
+			gsA->ode()[1].stoich_->rates(0)->getReactants( molIndex );
+	assert( numSub == 1 );
+	assert( molIndex.size() == 2 ); // 1 sub and 1 prd. 
+	assert( molIndex[0] == 0 );
+	assert( molIndex[1] == 1 );
+
+	s->doUseClock( "/model/meshA/stoichA,/model/meshB/stoichB", "init",  4 );
+	s->doUseClock( "/model/meshA/stoichA,/model/meshB/stoichB", "process",  5 );
+
+
+	Id poolA( "/model/meshA/A" );
+	Id poolB( "/model/meshB/B" );
+	assert( poolA != Id() );
+	assert( poolB != Id() );
+	Field< double >::set( ObjId( poolA, 0 ), "nInit", 1.0 );
+	s->doReinit();
+	s->doStart( RUNTIME );
+
+	double a = gsA->pools()[0].S()[0];
+	double b = gsA->pools()[0].S()[1];
+	assert( a < 1.0 );
+	assert( 0.0 < b && b < 1.0 );
+	assert( doubleEq( 2 * a, b ) );
+	a = Field< double >::get( ObjId( poolA, 0 ), "n" );
+	b = Field< double >::get( ObjId( poolB, 0 ), "n" );
+	assert( a < 1.0 );
+	assert( 0.0 < b && b < 1.0 );
+	assert( doubleEq( 2 * a, b ) );
 
 	s->doDelete( model );
 	cout << "." << flush;
@@ -322,11 +401,10 @@ void testGslStoich()
 	// use the converted model to allocate the arrays in the GslStoich,
 	// and when this is done we can complete zombification.
 	Id solver = s->doCreate( "GslStoich", model, "solver", dims );
-	Id stoichA = s->doCreate( "StoichCore", solver, "stoichA", dims );
-	assert ( stoichA != Id() );
-	Field< string >::set( stoichA, "path", "/model/meshA/##" );
+	assert ( solver != Id() );
+	Field< string >::set( solver, "path", "/model/meshA/##" );
 	unsigned int nVarPools = 
-			Field< unsigned int >::get( stoichA, "nVarPools" );
+			Field< unsigned int >::get( solver, "numVarPools" );
 	assert( nVarPools == 2 );
 	GslStoich* gs = reinterpret_cast< GslStoich* >( solver.eref().data() );
 	ProcInfo p;
@@ -375,23 +453,13 @@ void testJunctionSetup()
 	Id comptB( "/model/meshB" );
 	Id stoichA = s->doCreate( "GslStoich", comptA, "stoichA", dims );
 	assert ( stoichA != Id() );
-	Id stoichCoreA = 
-			s->doCreate( "StoichCore", stoichA, "stoichCore", dims );
-	assert ( stoichCoreA != Id() );
-	// Note that this funciton magically attaches the StoichCore to the
-	// Stoich as well. Unpleasant side-effect.
-	Field< string >::set( stoichCoreA, "path", "/model/meshA/##" );
+	Field< string >::set( stoichA, "path", "/model/meshA/##" );
 	Field< Id >::set( stoichA, "compartment", Id( "/model/meshA" ) );
 	Field< string >::set( stoichA, "method", "rk5" );
 
-
-
 	Id stoichB = s->doCreate( "GslStoich", comptB, "stoichB", dims );
 	assert ( stoichB != Id() );
-	Id stoichCoreB = 
-			s->doCreate( "StoichCore", stoichB, "stoichCore", dims );
-	assert ( stoichCoreB != Id() );
-	Field< string >::set( stoichCoreB, "path", "/model/meshB/##" );
+	Field< string >::set( stoichB, "path", "/model/meshB/##" );
 	Field< Id >::set( stoichB, "compartment", Id( "/model/meshB" ) );
 	Field< string >::set( stoichB, "method", "rk5" );
 
@@ -416,6 +484,48 @@ void testJunctionSetup()
 	junctionA.element()->getNeighbours( tgts, junctionPoolDeltaFinfo() );
 	assert( tgts.size() == 1 );
 	assert( tgts[0] == junctionB );
+
+	////////////////////////////////////////////////////////////////////
+	//
+	// OK, we've made the junction. This is what it should have:
+	// JunctionA (on A): 
+	// 		reacTerms_: deprecated
+	// 		diffTerms_: empty
+	// 		diffScale_: empty
+	// 		targetMeshIndices_, aka meshMap(): {0} ?
+	// 			as far as I can tell it isn't used except possibly at setup
+	//		localReacPools_: empty
+	//		remoteReacPools_: {1}
+	//		sendPoolIndex_: empty, this is only for diffusion
+	//		sendMeshIndex_: {0}. Specifies meshIndex involved in 
+	//				cross-reac as well as diffusion.
+	//		abutPoolIndex_: empty, used only for diffusion
+	//		abutMeshIndex_: empty, used only for diffusion
+	//
+	// JunctionB (on B): The reac-related ones are:
+	// 		targetMeshIndices_, aka meshMap(): {0} ?
+	// 			as far as I can tell it isn't used except possibly at setup
+	//		localReacPools_: {0}
+	//		remoteReacPools_: empty
+	//		sendMeshIndex_: {0}. Specifies meshIndex involved in 
+	//				cross-reac as well as diffusion.
+	//
+	////////////////////////////////////////////////////////////////////
+	const SolverJunction* jA = reinterpret_cast< const SolverJunction* >(
+			junctionA.eref().data() );
+	const SolverJunction* jB = reinterpret_cast< const SolverJunction* >(
+			junctionB.eref().data() );
+	assert( jA->localReacPools().size() == 0 );
+	assert( jA->remoteReacPools().size() == 1 );
+	assert( jA->remoteReacPools()[0] == 1 );
+	assert( jA->sendMeshIndex().size() == 1 );
+	assert( jA->sendMeshIndex()[0] == 0 );
+
+	assert( jB->localReacPools().size() == 1 );
+	assert( jB->localReacPools()[0] == 0 );
+	assert( jB->remoteReacPools().size() == 0 );
+	assert( jB->sendMeshIndex().size() == 1 );
+	assert( jB->sendMeshIndex()[0] == 0 );
 
 	s->doDelete( model );
 	cout << "." << flush;
@@ -595,11 +705,8 @@ pair< Id, Id > makeComptForDiffusion( Shell* s, Id model, unsigned int i )
 	assert( mid != Msg::bad );
 	Id stoichA = s->doCreate( "GslStoich", compt, "stoichA", dims );
 	assert ( stoichA != Id() );
-	Id stoichCoreA = 
-			s->doCreate( "StoichCore", stoichA, "stoichCore", dims );
-	assert ( stoichCoreA != Id() );
 	string path = "/model/" + comptName + "/##";
-	Field< string >::set( stoichCoreA, "path", path );
+	Field< string >::set( stoichA, "path", path );
 	Field< Id >::set( stoichA, "compartment", compt );
 	Field< string >::set( stoichA, "method", "rk5" );
 
@@ -644,11 +751,8 @@ pair< Id, Id > makeOneDimComptForDiffusion( Shell* s, Id model, unsigned int i )
 	assert( mid != Msg::bad );
 	Id stoichA = s->doCreate( "GslStoich", compt, "stoichA", dims );
 	assert ( stoichA != Id() );
-	Id stoichCoreA = 
-			s->doCreate( "StoichCore", stoichA, "stoichCore", dims );
-	assert ( stoichCoreA != Id() );
 	string path = "/model/" + comptName + "/##";
-	Field< string >::set( stoichCoreA, "path", path );
+	Field< string >::set( stoichA, "path", path );
 	Field< Id >::set( stoichA, "compartment", compt );
 	Field< string >::set( stoichA, "method", "rk5" );
 
@@ -776,27 +880,29 @@ void testMolTransferAcrossJunctions()
 	s->doSetClock( 4, 1.0 );
 	s->doReinit();
 	s->doStart( 1.0 );
-	StoichPools* sp0 = 
-			reinterpret_cast< StoichPools* >( compt0.second.eref().data() );
-	StoichPools* sp1 = 
-			reinterpret_cast< StoichPools* >( compt1.second.eref().data() );
-	assert( sp0->numMeshEntries() == 25 );
-	assert( sp0->numAllMeshEntries() == 30 );
-	assert( sp0->numPoolEntries( 0 ) == 1 );
-	assert( sp1->numMeshEntries() == 25 );
-	assert( sp1->numAllMeshEntries() == 25 );
-	assert( sp1->numPoolEntries( 0 ) == 1 );
+	GslStoich* gs0 = 
+			reinterpret_cast< GslStoich* >( compt0.second.eref().data() );
+	GslStoich* gs1 = 
+			reinterpret_cast< GslStoich* >( compt1.second.eref().data() );
+	assert( gs0->getNumLocalVoxels() == 25 );
+	assert( gs0->getNumAllVoxels() == 30 );
+	assert( gs0->getNumVarPools() == 1 );
+	assert( gs0->getNumAllPools() == 1 );
+	assert( gs1->getNumLocalVoxels() == 25 );
+	assert( gs1->getNumAllVoxels() == 25 );
+	assert( gs1->getNumVarPools() == 1 );
+	assert( gs1->getNumAllPools() == 1 );
 
 	for ( unsigned int i = 0 ; i < 5; ++i ) {
-		assert( doubleEq( sp0->S(i * 5 + 4)[0], i ) ); // original0
-		assert( doubleEq( sp1->S(i * 5 )[0], 9 - i ) ); // original1
+		assert( doubleEq( gs0->S(i * 5 + 4)[0], i ) ); // original0
+		assert( doubleEq( gs1->S(i * 5 )[0], 9 - i ) ); // original1
 	}
 
 	for ( unsigned int i = 0 ; i < 5; ++i ) {
 		// after checkin 4348, the diffusion coupling is asymmetric and
 		// the second StoichPool does not receive pool# info.
 		// assert( doubleEq( sp1->S(i + 25)[0], i ) ); // diffused original0
-		assert( doubleEq( sp0->S(i + 25)[0], 9 - i ) ); //diffused original1
+		assert( doubleEq( gs0->S(i + 25)[0], 9 - i ) ); //diffused original1
 	}
 
 	// Look up stencil here
@@ -993,7 +1099,7 @@ void testDiffusionAcrossJunctions()
 		temp[i] = i + 300;
 	Field< double >::setVec( pool3, "nInit", temp );
 
-	assert( gs0->numAllMeshEntries() == 35 );
+	assert( gs0->getNumAllVoxels() == 35 );
 	vector< double > svec( 35, 0 );
 
 	///////////////////////////////////////////////////////////////////
@@ -1236,7 +1342,7 @@ void testOneDimDiffusionAcrossJunctions()
 
 	GslStoich* gs0 = 
 		reinterpret_cast< GslStoich* >( compt[0].second.eref().data() );
-	assert( gs0->numAllMeshEntries() == 6 );
+	assert( gs0->getNumAllVoxels() == 6 );
 	vector< double > svec( 6, 0 );
 
 	s->doReinit();
@@ -1300,7 +1406,7 @@ void testOneDimDiffusionAcrossJunctions()
 	assert( ns == 1 );
 	assert( colIndex[0] == 4 );
 
-	assert( gs1->numAllMeshEntries() == 5 );
+	assert( gs1->getNumAllVoxels() == 5 );
 	assert( gs1->compartmentMesh()->getNumEntries() == 5 );
 	ns = gs1->compartmentMesh()->getStencil( 0, &entry, &colIndex );
 	assert( ns == 1 );
@@ -1349,14 +1455,13 @@ void testStoichCoreCompartmentAssignment()
 	assert ( meshA != Id() );
 	Id stoichA = s->doCreate( "GslStoich", meshA, "stoichA", dims );
 	assert ( stoichA != Id() );
-	Id stoichCoreA = 
-			s->doCreate( "StoichCore", stoichA, "stoichCore", dims );
-	assert ( stoichCoreA != Id() );
 	string path = "/model/meshA/##";
-	Field< string >::set( stoichCoreA, "path", path );
+	Field< string >::set( stoichA, "path", path );
 
-	StoichCore* sc = 
-			reinterpret_cast< StoichCore* >( stoichCoreA.eref().data() );
+	GslStoich* gs = 
+			reinterpret_cast< GslStoich* >( stoichA.eref().data() );
+
+	const StoichCore* sc = gs->coreStoich();
 	const vector< Id >& pools =  sc->getOffSolverPools();
 	assert( pools.size() == 1 );
 	Id poolA( "/model/meshA/A" );
@@ -1374,9 +1479,40 @@ void testStoichCoreCompartmentAssignment()
 	cout << "." << flush;
 }
 
+void testExtractCompts()
+{
+	pair< Id, Id > extractCompts( const vector< Id >& compts );
+
+	vector< Id >test;
+	pair< Id, Id > ret = extractCompts( test );
+	assert( ret.first == Id() && ret.second == Id() );
+
+	test.push_back( Id( 1 ) );
+	ret = extractCompts( test );
+	assert( ret.first == Id( 1 ) && ret.second == Id() );
+
+	test.push_back( Id( 1 ) );
+	ret = extractCompts( test );
+	assert( ret.first == Id( 1 ) && ret.second == Id() );
+
+	test.push_back( Id( 1 ) );
+	ret = extractCompts( test );
+	assert( ret.first == Id( 1 ) && ret.second == Id() );
+
+	test.push_back( Id( 2 ) );
+	ret = extractCompts( test );
+	assert( ret.first == Id( 1 ) && ret.second == Id( 2 ) );
+
+	test.push_back( Id( 1 ) );
+	ret = extractCompts( test );
+	assert( ret.first == Id( 1 ) && ret.second == Id( 2 ) );
+
+	cout << "." << flush;
+}
+
 void testKineticSolvers()
 {
-	testInterMeshReac();
+	testExtractCompts();
 	testGslStoich();
 	testStoichCoreCompartmentAssignment();
 	testJunctionSetup();
@@ -1388,4 +1524,5 @@ void testKineticSolversProcess()
 	testMolTransferAcrossJunctions();
 	testOneDimDiffusionAcrossJunctions();
 	testDiffusionAcrossJunctions();
+	testInterMeshReac();
 }

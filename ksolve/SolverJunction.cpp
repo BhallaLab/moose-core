@@ -10,7 +10,7 @@
 #include "header.h"
 #include "../mesh/VoxelJunction.h"
 #include "SolverJunction.h"
-#include "StoichPools.h"
+#include "SolverBase.h"
 #include "UpFunc.h"
 
 SrcFinfo1< vector< double > >* junctionPoolDeltaFinfo()
@@ -57,10 +57,15 @@ const Cinfo* SolverJunction::initCinfo()
 		&SolverJunction::getNumMeshIndex
 	);
 
+	static ReadOnlyValueFinfo< SolverJunction, Id > myCompartment( 
+		"myCompartment",
+		"Id of compartment containing this Junction. ",
+		&SolverJunction::getMyCompartment
+	);
+
 	static ReadOnlyValueFinfo< SolverJunction, Id > otherCompartment( 
 		"otherCompartment",
-		"Id of compartment on other side of this Junction. "
-		"Readily obtained by message traversal, just a utility field.",
+		"Id of compartment on other side of this Junction. ",
 		&SolverJunction::getOtherCompartment
 	);
 	//////////////////////////////////////////////////////////////////
@@ -70,14 +75,14 @@ const Cinfo* SolverJunction::initCinfo()
 		"Handles vector of doubles with pool num changes that arrive at"
 		" the Junction, by redirecting up to"
 	   	" parent StoichPools object",
-		new UpFunc1< StoichPools, vector< double > >( 
-				&StoichPools::handleJunctionPoolDelta ) );
+		new UpFunc1< SolverBase, vector< double > >( 
+				&SolverBase::handleJunctionPoolDelta ) );
 	static DestFinfo handleJunctionPoolNum( "handleJunctionPoolNum",
 		"Handles vector of doubles specifying pool num, that arrive at"
 		" the Junction, by redirecting up to"
 	   	" parent StoichPools object",
-		new UpFunc1< StoichPools, vector< double > >( 
-				&StoichPools::handleJunctionPoolNum ) );
+		new UpFunc1< SolverBase, vector< double > >( 
+				&SolverBase::handleJunctionPoolNum ) );
 
 	//////////////////////////////////////////////////////////////////
 	// Shared Finfos
@@ -132,6 +137,7 @@ const Cinfo* SolverJunction::initCinfo()
 		&numReacs,				// ReadOnly Fields
 		&numDiffMols,			// ReadOnly Fields
 		&numMeshEntries,		// ReadOnly Fields
+		&myCompartment,			// ReadOnly Fields
 		&otherCompartment,		// ReadOnly Fields
 		&symJunction, 			// SharedFinfo
 		&masterJunction, 		// SharedFinfo
@@ -181,7 +187,12 @@ unsigned int SolverJunction::getNumMeshIndex() const
 
 Id SolverJunction::getOtherCompartment() const
 {
-		return Id(); // Dummy for now.
+		return otherCompartment_;
+}
+
+Id SolverJunction::getMyCompartment() const
+{
+		return myCompartment_;
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -251,7 +262,7 @@ void SolverJunction::incrementTargets(
 	}
 	*/
 
-	vector< double >::const_iterator iv = v.begin() + numReacTerms;
+	vector< double >::const_iterator iv = v.begin();
 
 	// Handle the chemical and diffusion terms.
 	// Note this is the sendMeshIndex: for the core voxels on this solver,
@@ -263,6 +274,8 @@ void SolverJunction::incrementTargets(
 			y[ *i ][ *j ] += *iv++;
 		}
 	}
+
+	assert( iv == v.begin() + numReacTerms);
 	for ( vector< unsigned int >::const_iterator i = 
 		sendMeshIndex_.begin(); i != sendMeshIndex_.end(); ++i ) {
 		for ( vector< unsigned int >::const_iterator j = 
@@ -307,4 +320,10 @@ void SolverJunction::setAbutPools(
 {
 	abutMeshIndex_ = meshIndex;
 	abutPoolIndex_ = poolIndex;
+}
+
+void SolverJunction::setCompartments( Id myCompt, Id otherCompt )
+{
+	myCompartment_ = myCompt;
+	otherCompartment_ = otherCompt;
 }

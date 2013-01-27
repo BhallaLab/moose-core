@@ -59,7 +59,7 @@ class ZPool: public PoolBase
 
 		static const Cinfo* initCinfo();
 	protected:
-		StoichPools* stoich_;
+		SolverBase* solver_;
 };
 
 #endif	// _Z_POOL_H

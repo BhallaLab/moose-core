@@ -128,8 +128,8 @@ const Cinfo* Stoich::initCinfo()
 			&Stoich::getOneWay
 		);
 
-		static ReadOnlyValueFinfo< Stoich, unsigned int > nVarPools(
-			"nVarPools",
+		static ReadOnlyValueFinfo< Stoich, unsigned int > numVarPools(
+			"numVarPools",
 			"Number of variable molecule pools in the reac system",
 			&Stoich::getNumVarPools
 		);
@@ -293,7 +293,7 @@ const Cinfo* Stoich::initCinfo()
 
 	static Finfo* stoichFinfos[] = {
 		&useOneWay,		// Value
-		&nVarPools,		// Value
+		&numVarPools,		// Value
 		&numMeshEntries,		// Value
 		&estimatedDt,		// ReadOnlyValue
 		// &compartmentVolume,	//Value

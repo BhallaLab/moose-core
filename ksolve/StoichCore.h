@@ -13,7 +13,7 @@
 class StoichCore
 {
 	public: 
-		StoichCore();
+		StoichCore( bool isMaster = false );
 		~StoichCore();
 
 		//////////////////////////////////////////////////////////////////
@@ -33,11 +33,32 @@ class StoichCore
 		 */
 		unsigned int getNumAllPools() const;
 
-		void setPath( const Eref& e, const Qinfo* q, string v );
+		/**
+		 * Returns number of proxy pools here for
+		 * cross-compartment reactions
+		 */
+		unsigned int getNumProxyPools() const;
+
+		void setPath( const Eref& e, SolverBase* sb, string v );
 		string getPath( const Eref& e, const Qinfo* q ) const;
 
 		// unsigned int getNumMeshEntries() const;
 		double getEstimatedDt() const;
+
+		/**
+		 * Utility function to return # of rates_ entries. This includes
+		 * the cross-solver reactions.
+		 */
+		unsigned int getNumRates() const;
+
+		/**
+		 * Utility function to return # of core rates for reacs which are
+		 * entirely located on current compartment, including all reactants
+		 */
+		unsigned int getNumCoreRates() const;
+
+		/// Utility function to return a rates_ entry
+		const RateTerm* rates( unsigned int i ) const;
 
 		//////////////////////////////////////////////////////////////////
 		// Model traversal and building functions
@@ -190,16 +211,30 @@ class StoichCore
 
 		/**
 		 * Returns the internal rate in #/voxel, for R1, for the specified
-		 * reacIndex and voxel index.
+		 * Eref.
 		 */
-		double getR1( unsigned int reacIndex, unsigned int voxel ) const;
+		double getR1( const Eref& e ) const;
+		/**
+		 * Returns internal rate R1 in #/voxel, for the rate term 
+		 * following the one directly referred to by the Eref e. Enzymes
+		 * define multiple successive rate terms, so we look up the first,
+		 * and then select one after it.
+		 */
+		double getR1offset1( const Eref& e ) const;
+		/**
+		 * Returns internal rate R1 in #/voxel, for the rate term 
+		 * two after the one directly referred to by the Eref e. Enzymes
+		 * define multiple successive rate terms, so we look up the first,
+		 * and then select the second one after it.
+		 */
+		double getR1offset2( const Eref& e ) const;
 
 		/**
 		 * Returns the internal rate in #/voxel, for R2, for the specified
 		 * reacIndex and voxel index. In some cases R2 is undefined, and it
 		 * then returns 0.
 		 */
-		double getR2( unsigned int reacIndex, unsigned int voxel ) const;
+		double getR2( const Eref& e ) const;
 
 		/// Utility function, prints out N_, used for debugging
 		void print() const;
@@ -220,19 +255,41 @@ class StoichCore
 		// Access functions for cross-node reactions.
 		//////////////////////////////////////////////////////////////////
 		const vector< Id >& getOffSolverPools() const;
+
+		/**
+		 * List all the compartments to which the current compt is coupled,
+		 * by cross-compartment reactions. Self not included.
+		 */
+		vector< Id > getOffSolverCompts() const;
+
+		/**
+		 * Looks up the vector of pool Ids originating from the specified
+		 * compartment, that are represented on this compartment as proxies.
+		 */
+		const vector< Id >& offSolverPoolMap( Id compt ) const;
+
+		/**
+		 * Spawns a near-clone of the current StoichCore, with the rates_
+		 * vector trimmed to include only those reactions that apply to the
+		 * specified grouping of compartments. Used to generate the correct
+		 * reaction set for a voxel at a particular junction between 
+		 * compartments.
+		 */
+		StoichCore* spawn( const vector< Id >& compts ) const;
 		
 		//////////////////////////////////////////////////////////////////
 		static const unsigned int PoolIsNotOnSolver;
 		static const Cinfo* initCinfo();
 	protected:
+		bool isMaster_;
 		bool useOneWay_;
 		string path_;
 		Id stoichId_;
 
 		/**
 		 * vector of initial concentrations, one per Pool of any kind
-		 */
 		vector< double > initConcs_;
+		 */
 
 		/**
 		 * Vector of diffusion constants, one per VarPool.
@@ -278,6 +335,12 @@ class StoichCore
 		vector< Id > offSolverReacs_;
 
 		/**
+		 * Which compartment(s) does the off solver reac connect to?
+		 * Usually it is just one, in which case the second id is Id()
+		 */
+		vector< pair< Id, Id > > offSolverReacCompts_;
+
+		/**
 		 * Offset of the first offSolverPool in the idMap_ vector.
 		 */
 		unsigned int offSolverPoolOffset_;
@@ -290,9 +353,20 @@ class StoichCore
 		vector< Id > offSolverPools_;
 
 		/**
-		 * Offset of the first offSolverReac in the rates_ vector.
+		 * Map of vectors of Ids of offSolver pools. 
+		 * Each map entry contains the vector of Ids of proxy pools 
+		 * coming from the specified compartment.
+		 * In use, the junction will copy the pool indices over for 
+		 * data transfer.
 		 */
-		unsigned int offSolverRatesOffset_;
+		map< Id, vector< Id > > offSolverPoolMap_; 
+
+		/**
+		 * The number of core rates, that is, rates for reactions which
+		 * are entirely contained within the compartment. This is also the
+		 * offset of the first offSolverReac in the rates_ vector.
+		 */
+		unsigned int numCoreRates_;
 
 		/**
 		 * Map back from mol index to Id. Primarily for debugging.
@@ -338,7 +412,5 @@ class StoichCore
 		 */
 		unsigned int numReac_;
 };
-
-Id getCompt( Id id );
 
 #endif	// _STOICH_CORE_H
