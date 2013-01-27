@@ -7,7 +7,6 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 #include "StoichHeaders.h"
-#include "StoichPools.h"
 #include "ZPool.h"
 #include "ZBufPool.h"
 
@@ -51,8 +50,8 @@ ZBufPool::~ZBufPool()
 
 void ZBufPool::vSetN( const Eref& e, const Qinfo* q, double v )
 {
-	stoich_->setN( e, v );
-	stoich_->setNinit( e, v );
+	solver_->setN( e, v );
+	solver_->setNinit( e, v );
 }
 
 void ZBufPool::vSetNinit( const Eref& e, const Qinfo* q, double v )

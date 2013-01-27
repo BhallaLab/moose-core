@@ -7,7 +7,6 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 #include "StoichHeaders.h"
-#include "StoichPools.h"
 #include "ZPool.h"
 #include "ZFuncPool.h"
 // #include "ZSumFunc.h"

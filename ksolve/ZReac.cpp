@@ -51,7 +51,7 @@ static const SrcFinfo2< double, double >* toPrd =
 					zombieReacCinfo->findFinfo( "toPrd" ) );
 
 ZReac::ZReac()
-		: stoich_( 0 )
+		: solver_( 0 )
 {;}
 
 ZReac::~ZReac()
@@ -64,8 +64,8 @@ ZReac::~ZReac()
 
 void ZReac::vRemesh( const Eref& e, const Qinfo* q )
 {
-	stoich_->setReacKf( e, concKf_ );
-	stoich_->setReacKb( e, concKb_ );
+	solver_->setReacKf( e, concKf_ );
+	solver_->setReacKb( e, concKb_ );
 }
 
 //////////////////////////////////////////////////////////////
@@ -77,7 +77,7 @@ void ZReac::vSetNumKf( const Eref& e, const Qinfo* q, double v )
 {
 	double volScale = convertConcToNumRateUsingMesh( e, toSub, 0 );
 	concKf_ = v * volScale;
-	stoich_->setReacKf( e, concKf_ );
+	solver_->setReacKf( e, concKf_ );
 }
 
 double ZReac::vGetNumKf( const Eref& e, const Qinfo* q ) const
@@ -86,8 +86,7 @@ double ZReac::vGetNumKf( const Eref& e, const Qinfo* q ) const
 	// DataId part to specify which voxel to use, but that isn't in the
 	// current definition for Reacs as being a single entity for the entire
 	// compartment.
-	return stoich_->getR1( stoich_->convertIdToReacIndex( e.id() ), 0 );
-	// return rates_[ convertIdToReacIndex( e.id() ) ]->getR1();
+	return solver_->getReacNumKf( e );
 }
 
 // Deprecated, used for kkit conversion backward compatibility
@@ -95,22 +94,18 @@ void ZReac::vSetNumKb( const Eref& e, const Qinfo* q, double v )
 {
 	double volScale = convertConcToNumRateUsingMesh( e, toPrd, 0 );
 	concKb_ = v * volScale;
-	stoich_->setReacKb( e, concKb_ );
+	solver_->setReacKb( e, concKb_ );
 }
 
 double ZReac::vGetNumKb( const Eref& e, const Qinfo* q ) const
 {
-	if ( stoich_->getOneWay() ) {
-		return stoich_->getR1( stoich_->convertIdToReacIndex( e.id() ) + 1, 0 );
-	} else {
-		return stoich_->getR2( stoich_->convertIdToReacIndex( e.id() ), 0 );
-	}
+	return solver_->getReacNumKb( e );
 }
 
 void ZReac::vSetConcKf( const Eref& e, const Qinfo* q, double v )
 {
 	concKf_ = v;
-	stoich_->setReacKf( e, v );
+	solver_->setReacKf( e, v );
 }
 
 double ZReac::vGetConcKf( const Eref& e, const Qinfo* q ) const
@@ -121,7 +116,7 @@ double ZReac::vGetConcKf( const Eref& e, const Qinfo* q ) const
 void ZReac::vSetConcKb( const Eref& e, const Qinfo* q, double v )
 {
 	concKb_ = v;
-	stoich_->setReacKb( e, v );
+	solver_->setReacKb( e, v );
 }
 
 double ZReac::vGetConcKb( const Eref& e, const Qinfo* q ) const
@@ -133,57 +128,16 @@ double ZReac::vGetConcKb( const Eref& e, const Qinfo* q ) const
 // Utility function
 //////////////////////////////////////////////////////////////
 
-ZeroOrder* ZReac::makeHalfReaction( 
-	Element* orig, double rate, const SrcFinfo* finfo ) const
-{
-	vector< Id > mols;
-	unsigned int numReactants = orig->getNeighbours( mols, finfo ); 
-	ZeroOrder* rateTerm = 0;
-	if ( numReactants == 1 ) {
-		rateTerm = 
-			new FirstOrder( rate, stoich_->convertIdToPoolIndex( mols[0] ) );
-	} else if ( numReactants == 2 ) {
-		rateTerm = new SecondOrder( rate,
-				stoich_->convertIdToPoolIndex( mols[0] ), 
-				stoich_->convertIdToPoolIndex( mols[1] ) );
-	} else if ( numReactants > 2 ) {
-		vector< unsigned int > v;
-		for ( unsigned int i = 0; i < numReactants; ++i ) {
-			v.push_back( stoich_->convertIdToPoolIndex( mols[i] ) );
-		}
-		rateTerm = new NOrder( rate, v );
-	} else {
-		cout << "Error: ZReac::makeHalfReaction: zero reactants\n";
-	}
-	return rateTerm;
-}
-
 // Virtual func called in zombify before fields are assigned.
 void ZReac::setSolver( Id solver, Id orig )
 {
-		/*
-	static const SrcFinfo* sub = dynamic_cast< const SrcFinfo* >(
-		Reac::initCinfo()->findFinfo( "toSub" ) );
-	static const SrcFinfo* prd = dynamic_cast< const SrcFinfo* >(
-		Reac::initCinfo()->findFinfo( "toPrd" ) );
-	assert( sub );
-	assert( prd );
-	*/
 	assert( solver != Id() );
 
-	stoich_ = reinterpret_cast< StoichCore* >( solver.eref().data( ) );
-	/*
-	ReacBase* reac = reinterpret_cast< ReacBase* >( orig.eref()->data() );
+	solver_ = reinterpret_cast< SolverBase* >( solver.eref().data( ) );
+	vector< Id > sub;
+	vector< Id > prd;
+	orig.element()->getNeighbours( sub, toSub );
+	orig.element()->getNeighbours( prd, toPrd );
 
-	double concKf = reac->getConcKf( orig.eref(), 0 );
-	double concKb = reac->getConcKb( orig.eref(), 0 );
-	ZeroOrder* forward = makeHalfReaction( orig.element(), concKf, sub );
-	ZeroOrder* reverse = makeHalfReaction( orig.element(), concKb, prd );
-	*/
-	// Values will be filled in later by the zombify function.
-	ZeroOrder* forward = makeHalfReaction( orig.element(), 0, toSub );
-	ZeroOrder* reverse = makeHalfReaction( orig.element(), 0, toPrd );
-
-	stoich_->installReaction( forward, reverse, orig );
+	solver_->installReaction( orig, sub, prd );
 }
-

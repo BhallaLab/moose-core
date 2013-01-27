@@ -45,7 +45,7 @@ class ZReac: public ReacBase
 
 		static const Cinfo* initCinfo();
 	private:
-		StoichCore* stoich_;
+		SolverBase* solver_;
 };
 
 #endif	// _Z_REAC_H

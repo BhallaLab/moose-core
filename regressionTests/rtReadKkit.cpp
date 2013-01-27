@@ -389,12 +389,12 @@ void rtRunKkit()
 
 	Id modelId = shell->doLoadModel( "Kholodenko.g", "/rkktest", "rk5" );
 	assert( modelId != Id() );
-	Id stoichId( "/rkktest/stoich/stoichCore" );
+	Id stoichId( "/rkktest/kinetics/stoich" );
 	assert( stoichId != Id() );
 	Id comptId( "/rkktest/kinetics" );
 	assert( comptId != Id() );
 	unsigned int numVarMols = Field< unsigned int >::get( 
-		stoichId, "nVarPools" );
+		stoichId, "numVarPools" );
 	assert ( numVarMols == 15 );
 
 	checkKholodenkoModel( 1.0 );
@@ -582,9 +582,10 @@ void rtRunCspace()
 
 	Id base = shell->doLoadModel( "Osc.cspace", "/osc", "gsl" );
 	assert( base != Id() );
-	Id stoich( "/osc/stoich/stoichCore" );
+	Id stoich( "/osc/kinetics/stoich" );
+	assert( stoich != Id() );
 	unsigned int numVarMols = Field< unsigned int >::get( 
-		stoich, "nVarPools" );
+		stoich, "numVarPools" );
 	assert ( numVarMols == 10 ); // 6 mols + 4 enz
 
 	shell->doSetClock( 0, 10 );
@@ -651,12 +652,12 @@ void rtRunTabSumtot()
 
 	Id modelId = shell->doLoadModel( "tabsumtot.g", "/ts", "rk5" );
 	assert( modelId != Id() );
-	Id stoichId( "/ts/stoich/stoichCore" );
+	Id stoichId( "/ts/kinetics/stoich" );
 	assert( stoichId != Id() );
 	Id comptId( "/ts/kinetics" );
 	assert( comptId != Id() );
 	unsigned int numVarMols = Field< unsigned int >::get( 
-		stoichId, "nVarPools" );
+		stoichId, "numVarPools" );
 	assert ( numVarMols == 3 );
 
 	double n;
@@ -693,9 +694,8 @@ void rtRunTabSumtot()
 	// Now run it.
 	///////////////////////////////////////////////////////////////////////
 
-	shell->doSetClock( 0, 0.1 );
-	shell->doSetClock( 1, 0.1 );
-	shell->doSetClock( 2, 0.1 );
+	for ( unsigned int i = 0; i < 10; ++i )
+		shell->doSetClock( i, 0.1 );
 	shell->doReinit();
 	shell->doStart( 20.0 );
 
@@ -883,13 +883,16 @@ void rtTestChem()
 	static const double enzcplxvalue[] = { 1e-3, 0.1, 5e-3 };
 	rtReadKkitModels( "enzcplx.g", enzcplxpath, enzcplxfield, enzcplxvalue, 2 );
 
-	rtRunKkit();
 	const char* plots[] = {"conc1/S.Co", "conc1/E.Co", "conc1/P.Co", "conc2/kenz.CoComplex" };
 	rtRunKkitModels( "enzcplx.g", 1, 99, "enzcplx.plot", plots, 4 );
 
 
 	const char* plots2[] = {"conc1/X.Co", "conc2/tot1.Co", "conc1/kenz.CoComplex" };
 	rtRunKkitModels( "enzCplxInit.g", 0.1, 19.9, "enzCplxInit.plot", plots2, 3 );
+	const char* plots3[] = {"conc1/S.Co", "conc1/E.Co", "conc1/P.Co" };
+	rtRunKkitModels( "mmenz.g", 1, 99, "mmenz.plot", plots3, 3 );
+
+	rtRunKkit();
 	rtReadCspace();
 	rtRunCspace();
 	rtRunTabSumtot();

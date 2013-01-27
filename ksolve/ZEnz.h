@@ -59,7 +59,7 @@ class ZEnz: public CplxEnzBase
 
 		static const Cinfo* initCinfo();
 	private:
-		StoichCore* stoich_;
+		SolverBase* solver_;
 		double concK1_;
 };
 
