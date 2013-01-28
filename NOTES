@@ -20723,3 +20723,33 @@ croaks further on in rtRunCspace.
 Finally! Clears unit and regression tests, on a single thread only.
 
 ==========================================================================
+28 Jan 2013
+Dating back from 22 Dec:
+List of pending things here.
+* Implement cross-compartment reactions
+- Set up sim manager to handle coupled solvers
+- Extend to CylMesh and NeuroMesh
+- Write SpineMesh, extend to it.
+- Put in stuff for SigNeur.
+- Extend CubeMesh to figure out surfaces from Geom classes and bitmaps.
+- Convert GssaStoich to use new zombie classes
+- Derive GssaStoich from StoichPools
+- Get GssaStoich to talk to each other through diffusion
+- Get GssaStoich and GslStoich to talk to each other through diffusion
+- SBML read and write
+- Reorder KKit reader to put things more sensibly into compartments.
+Also:
+- Figure out pool composition and motors.
+
+
+First thing: run valgrind for unit tests. It reports a bad memory access 
+in the new stoich code, not surprising as I haven't cleaned it up. With 
+a fix valgrind is now completely happy.
+Also discovered that I hadn't checked in a fair number of new code files
+arising from the recent updates. But SourceForge is currently not responding.
+
+Sim manager and coupled solvers.
+	For now this is easy: put GSL on every compartment by default. 
+	Option to have a single solver of specified type.
+
+==========================================================================
