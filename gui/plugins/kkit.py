@@ -363,7 +363,10 @@ class  KineticsWidget(DefaultEditorWidget):
         for cmpt,memb in self.meshEntry.items():
             for enzObj in self.find_index(memb,'enzyme'):
                 enzinfo = enzObj.path+'/info'
-                enzItem = EnzItem(enzObj,self.qGraCompt[cmpt])
+                if enzObj.class_ == 'ZEnz':
+                    enzItem = EnzItem(enzObj,self.qGraCompt[cmpt])
+                else:
+                    enzItem = MMEnzItem(enzObj,self.qGraCompt[cmpt])
                 self.setupDisplay(enzinfo,enzItem,"enzyme")
                 self.setupSlot(enzObj,enzItem)
 
@@ -392,6 +395,8 @@ class  KineticsWidget(DefaultEditorWidget):
             rectcompt = v.childrenBoundingRect()
             v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
             v.setPen(QtGui.QPen(Qt.QColor(66,66,66,100), 5, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin))
+            v.cmptEmitter.connect(v.cmptEmitter,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
+            v.cmptEmitter.connect(v.cmptEmitter,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.emitItemtoEditor)
 
     def setupSlot(self,mooseObj,qgraphicItem):
         self.mooseId_GObj[element(mooseObj).getId()] = qgraphicItem
@@ -410,7 +415,6 @@ class  KineticsWidget(DefaultEditorWidget):
                 if k.path == mesh:
                     for rectChilditem in v.childItems():
                         self.updateArrow(rectChilditem)
-                        pass
         else:
             mobj = self.mooseId_GObj[mooseObject.getId()]
             self.updateArrow(mobj)
@@ -432,6 +436,7 @@ class  KineticsWidget(DefaultEditorWidget):
                 self.cplxUpdatearrow(srcdes[0])
             elif( type(srcdes[1]) == EnzItem):
                 self.cplxUpdatearrow(srcdes[1])
+            
             # For calcArrow(src,des,endtype,itemignoreZooming) is to be provided
             arrow = self.calcArrow(srcdes[0],srcdes[1],srcdes[2],self.itemignoreZooming)
             ql.setPolygon(arrow)
