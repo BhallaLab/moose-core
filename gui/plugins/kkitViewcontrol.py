@@ -5,7 +5,6 @@ from kkitQGraphics import *
 class GraphicalView(QtGui.QGraphicsView):
     def __init__(self,parent,border,layoutPt):
         QtGui.QGraphicsView.__init__(self,parent)
-        print "#@",GraphicalView
         self.setScene(parent)
         self.sceneContainerPt = parent
         self.setDragMode(QtGui.QGraphicsView.RubberBandDrag)
