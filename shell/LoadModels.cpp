@@ -37,8 +37,14 @@ ModelType findModelType( string filename, ifstream& fin, string& line )
 				return KKIT;
 		}
 	}
+	
+	unsigned long pos = line.find_first_of( ":" );
+	string copyLine= line;
+	if (pos != string::npos ){
+		copyLine = line.substr(pos+2);
+	}
 
-	if ( line.length() >= 6 && line[0] == '|' && line[5] == '|' )
+	if ( copyLine.length() >= 6 && copyLine[0] == '|' && copyLine[5] == '|' )
 		return CSPACE;
 
 	return UNKNOWN;
