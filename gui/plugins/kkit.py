@@ -10,6 +10,7 @@ from mplugin import *
 from kkitUtil import *
 from kkitQGraphics import PoolItem, ReacItem,EnzItem,CplxItem,ComptItem
 from kkitViewcontrol import *
+from kkitCalcArrow import *
 from PyQt4 import QtGui, QtCore, Qt
 import math
 
@@ -106,8 +107,8 @@ class  KineticsWidget(DefaultEditorWidget):
 
 
         if self.ymax-self.ymin:
-            self.yratio =- (self.size.height()-10)/(self.ymax-self.ymin)
-        else: self.yratio =- (self.size.height()-10)
+            self.yratio = (self.size.height()-10)/(self.ymax-self.ymin)
+        else: self.yratio = (self.size.height()-10)
 
         #A map b/w moose compartment key with QGraphicsObject
         self.qGraCompt = {}
@@ -118,7 +119,9 @@ class  KineticsWidget(DefaultEditorWidget):
         self.border = 5
         self.arrowsize = 2
         self.iconScale = 1
+        self.defaultComptsize = 5
         self.itemignoreZooming = False
+
 
         self.lineItem_dict = {}
         
@@ -138,7 +141,6 @@ class  KineticsWidget(DefaultEditorWidget):
         self.view = GraphicalView(self.sceneContainer,self.border,self)
         hLayout.addWidget(self.view)
         #self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
-
 
     def drawLine_arrow(self, itemignoreZooming=False):
         for inn,out in self.srcdesConnection.items():
@@ -177,7 +179,7 @@ class  KineticsWidget(DefaultEditorWidget):
             print "Source or destination is missing or incorrect"
             return 
         srcdes_list = [src,des,endtype]
-        arrow = self.calcArrow(src,des,endtype,itemignoreZooming)
+        arrow = calcArrow(src,des,endtype,itemignoreZooming,self.iconScale)
         for l,v in self.object2line[src]:
             if v == des:
                 l.setPolygon(arrow)
@@ -206,114 +208,13 @@ class  KineticsWidget(DefaultEditorWidget):
         self.object2line[ src ].append( ( qgLineitem, des) )
         self.object2line[ des ].append( ( qgLineitem, src ) )
         qgLineitem.setPen(pen)
-        
-    def calcArrow(self,src,des,endtype,itemignoreZooming):
-        ''' if PoolItem then boundingrect should be background rather than graphicsobject '''
-        srcobj = src.gobj
-        desobj = des.gobj
-        if isinstance(src,PoolItem):
-            srcobj = src.bg
-        if isinstance(des,PoolItem):
-            desobj = des.bg
-        
-        if itemignoreZooming:
-            srcRect = self.recalcSceneBoundingRect(srcobj)
-            desRect = self.recalcSceneBoundingRect(desobj)
-        else:
-            srcRect = srcobj.sceneBoundingRect()
-            desRect = desobj.sceneBoundingRect()
-        arrow = QtGui.QPolygonF()
-        if srcRect.intersects(desRect):                
-            # This is created for getting a emptyline for reference b'cos 
-            # lineCord function add qgraphicsline to screen and also add's a ref for src and des
-            arrow.append(QtCore.QPointF(0,0))
-            arrow.append(QtCore.QPointF(0,0))
-            return arrow
-        tmpLine = QtCore.QLineF(srcRect.center().x(),
-                                    srcRect.center().y(),
-                                    desRect.center().x(),
-                                    desRect.center().y())
-        srcIntersects, lineSrcPoint = self.calcLineRectIntersection(srcRect, tmpLine)
-        destIntersects, lineDestPoint = self.calcLineRectIntersection(desRect, tmpLine)
-        if not srcIntersects:
-            print 'Source does not intersect line. Arrow points:', lineSrcPoint, src.mobj[0].name, src.mobj[0].class_
-        if not destIntersects:
-            print 'Dest does not intersect line. Arrow points:', lineDestPoint,  des.mobj[0].name, des.mobj[0].class_
-        # src and des are connected with line co-ordinates
-        # Arrow head is drawned if the distance between src and des line is >8 just for clean appeareance
-        if (abs(lineSrcPoint.x()-lineDestPoint.x()) > 8 or abs(lineSrcPoint.y()-lineDestPoint.y())>8):
-            srcAngle = tmpLine.angle()
-            if endtype == 'p':
-                #Arrow head for Destination is calculated
-                arrow.append(lineSrcPoint)
-                arrow.append(lineDestPoint)
-                degree = -60
-                srcXArr1,srcYArr1= self.arrowHead(srcAngle,degree,lineDestPoint)
-	        arrow.append(QtCore.QPointF(srcXArr1,srcYArr1))
-                arrow.append(QtCore.QPointF(lineDestPoint.x(),lineDestPoint.y()))
-                
-		degree = -120
-                srcXArr2,srcYArr2 = self.arrowHead(srcAngle,degree,lineDestPoint)
-                arrow.append(QtCore.QPointF(srcXArr2,srcYArr2))                    
-                arrow.append(QtCore.QPointF(lineDestPoint.x(),lineDestPoint.y()))
- 
-            elif endtype == 'st':
-                #Arrow head for Source is calculated
-                arrow.append(lineDestPoint)
-                arrow.append(lineSrcPoint)
-                degree = 60
-                srcXArr2,srcYArr2 = self.arrowHead(srcAngle,degree,lineSrcPoint)
-                arrow.append(QtCore.QPointF(srcXArr2,srcYArr2))                    
-                arrow.append(QtCore.QPointF(lineSrcPoint.x(),lineSrcPoint.y()))
 
-                degree = 120
-                srcXArr1,srcYArr1= self.arrowHead(srcAngle,degree,lineSrcPoint)
-		arrow.append(QtCore.QPointF(srcXArr1,srcYArr1))
-                arrow.append(QtCore.QPointF(lineSrcPoint.x(),lineSrcPoint.y()))
-
-            else:
-                arrow.append(lineSrcPoint)
-                arrow.append(lineDestPoint)
-        return arrow
-
-    def calcLineRectIntersection(self, rect, centerLine):
-        '''      checking which side of rectangle intersect with other '''
-        """Here the 1. a. intersect point between center and 4 sides of src and 
-        
-                    b. intersect point between center and 4 sides of
-                    des and to draw a line connecting for src & des
-        
-                    2. angle for src for the arrow head calculation is returned"""
-        x = rect.x()
-        y = rect.y()
-        w = rect.width()
-        h = rect.height()
-        borders = [(x,y,x+w,y),
-                   (x+w,y,x+w,y+h),
-                   (x+w,y+h,x,y+h),
-                   (x,y+h,x,y)]
-        intersectionPoint = QtCore.QPointF()
-        intersects = False
-        for lineEnds in borders:
-            line = QtCore.QLineF(*lineEnds)
-            intersectType = centerLine.intersect(line, intersectionPoint)
-            if intersectType == centerLine.BoundedIntersection:
-                intersects = True
-                break
-        return (intersects, intersectionPoint)
-
-    def arrowHead(self,srcAngle,degree,lineSpoint):
-        '''  arrow head is calculated '''
-        r = 8*self.iconScale
-        delta = math.radians(srcAngle) + math.radians(degree)
-        width = math.sin(delta)*r
-        height = math.cos(delta)*r
-        srcXArr = (lineSpoint.x() + width)
-        srcYArr = (lineSpoint.y() + height)
-        return srcXArr,srcYArr
 
     def setupItem(self,modlePath,cntDict):
-        ''' Reaction's and enzyme's substrate and product and sumtotal is collected '''
+        '''This function collects information of what is connected to what. \
+           eg. substrate and product connectivity to reaction's and enzyme's \
+               sumtotal connectivity to its pool are collected '''
+
         zombieType = ['ReacBase','EnzBase','FuncBase']
         for baseObj in zombieType:
             path = modlePath+'/##[ISA='+baseObj+']'
@@ -431,14 +332,14 @@ class  KineticsWidget(DefaultEditorWidget):
             srcdes = self.lineItem_dict[ql]
             # Checking if src (srcdes[0]) or des (srcdes[1]) is ZombieEnz,
             # if yes then need to check if cplx is connected to any mooseObject, 
-            # so that when Enzyme is moved, cplx connected arrow to other mooseObject should also be updated
+            # so that when Enzyme is moved, cplx connected arrow to other mooseObject(poolItem) should also be updated
             if( type(srcdes[0]) == EnzItem):
                 self.cplxUpdatearrow(srcdes[0])
             elif( type(srcdes[1]) == EnzItem):
                 self.cplxUpdatearrow(srcdes[1])
             
             # For calcArrow(src,des,endtype,itemignoreZooming) is to be provided
-            arrow = self.calcArrow(srcdes[0],srcdes[1],srcdes[2],self.itemignoreZooming)
+            arrow = calcArrow(srcdes[0],srcdes[1],srcdes[2],self.itemignoreZooming,self.iconScale)
             ql.setPolygon(arrow)
     
     def cplxUpdatearrow(self,srcdes):
@@ -456,17 +357,13 @@ class  KineticsWidget(DefaultEditorWidget):
         self.emit(QtCore.SIGNAL("itemPressed(PyQt_PyObject)"),mooseObject)
 
     def setupDisplay(self,info,graphicalObj,objClass):
-        x = float(element(info).getField('x'))
-        y = float(element(info).getField('y'))
-        xpos = x*self.xratio
-        ypos = y*self.yratio
+        xpos,ypos = self.positioninfo(info)
         """ For Reaction and Complex object I have skipped the process to get the facecolor and background color as \
             we are not using these colors for displaying the object so just passing dummy color white """
         if( (objClass == "reaction" ) or (objClass == "cplx")):
             textcolor,bgcolor = "white","white"
         else:
             textcolor,bgcolor = getColor(info,self.colorMap)
-
         graphicalObj.setDisplayProperties(xpos,ypos,textcolor,bgcolor)
 
     
@@ -531,3 +428,65 @@ class  KineticsWidget(DefaultEditorWidget):
             self.noPositionInfo = len(np.nonzero(xcord)[0]) == 0 \
                                   and len(np.nonzero(ycord)[0]) == 0
             
+    def keyPressEvent(self,event):
+        # key1 = event.key() # key event does not distinguish between capital and non-capital letters
+        key = event.text().toAscii().toHex()
+        if key ==  '41': # 'A' fits the view to iconScale factor
+            itemignoreZooming = False
+            self.updateItemTransformationMode(itemignoreZooming)
+            self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
+            self.drawLine_arrow(itemignoreZooming=False)
+
+        elif (key == '2e'): # '.' key, lower case for '>' zooms in 
+            self.view.scale(1.1,1.1)
+
+        elif (key == '2c'): # ',' key, lower case for '<' zooms in
+            self.view.scale(1/1.1,1/1.1)
+
+        elif (key == '3c'): # '<' key. zooms-in to iconScale factor
+            self.iconScale *= 0.8
+            self.updateScale( self.iconScale )
+
+        elif (key == '3e'): # '>' key. zooms-out to iconScale factor
+            self.iconScale *= 1.25
+            self.updateScale( self.iconScale )
+
+        elif (key == '61'):  # 'a' fits the view to initial value where iconscale=1
+            self.iconScale = 1
+            self.updateScale( self.iconScale )
+            self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
+
+    def updateScale( self, scale ):
+        for item in self.sceneContainer.items():
+            if isinstance(item,KineticsDisplayItem):
+                xpos = item.scenePos().x()
+                ypos = item.scenePos().y()
+                item.refresh(scale)
+                if isinstance(item,ReacItem) or isinstance(item,EnzItem) or isinstance(item,MMEnzItem):
+                    item.setGeometry(xpos,ypos, 
+                                     item.gobj.boundingRect().width(), 
+                                     item.gobj.boundingRect().height())
+                elif isinstance(item,CplxItem):
+                    item.setGeometry(item.gobj.boundingRect().width()/2,item.gobj.boundingRect().height(), 
+                                     item.gobj.boundingRect().width(), 
+                                     item.gobj.boundingRect().height())
+                elif isinstance(item,PoolItem):
+                    item.setGeometry(xpos, ypos,item.gobj.boundingRect().width()
+                                     +PoolItem.fontMetrics.width('  '), 
+                                     item.gobj.boundingRect().height())
+                    item.bg.setRect(0, 0, item.gobj.boundingRect().width()+PoolItem.fontMetrics.width('  '), item.gobj.boundingRect().height())
+            self.drawLine_arrow(itemignoreZooming=False)
+            for k, v in self.qGraCompt.items():
+                rectcompt = v.childrenBoundingRect()
+                comptPen = v.pen()
+                comptWidth =  self.defaultComptsize*self.iconScale
+                comptPen.setWidth(comptWidth)
+                v.setPen(comptPen)
+                v.setRect(rectcompt.x()-comptWidth,rectcompt.y()-comptWidth,(rectcompt.width()+2*comptWidth),(rectcompt.height()+2*comptWidth))
+            
+    def positioninfo(self,iteminfo):
+        x =  float(element(iteminfo).getField('x'))
+        y = float(element(iteminfo).getField('y'))
+        xpos = (x-self.xmin)*self.xratio
+        ypos = -(y-self.ymin)*self.yratio
+        return(xpos,ypos)
