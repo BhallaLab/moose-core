@@ -20748,8 +20748,19 @@ a fix valgrind is now completely happy.
 Also discovered that I hadn't checked in a fair number of new code files
 arising from the recent updates. But SourceForge is currently not responding.
 
+Fixed settings. Checkin 4384.
+
+Ran valgrind for regression tests. Loses about 350 bytes, somewhere in 
+ReadKkit buildSumTotal.
+
 Sim manager and coupled solvers.
 	For now this is easy: put GSL on every compartment by default. 
 	Option to have a single solver of specified type.
+
+in buildGSL, need to traverse through all compts to make solvers.
+
+Set up traversal function for picking solvers upon which to build solvers.
+Unit test cleared for the traversal, but not yet tested for setting up the 
+solvers with it.
 
 ==========================================================================

@@ -520,6 +520,98 @@ void SimManager::buildGsl( const Eref& e, const Qinfo* q,
 	shell->doUseClock( basePath + "/kinetics/stoich", "process", 5);
 }
 
+/**
+ * Scans through all children, building up an elist of solvable descendants
+ * for each compartment. Each compartment solves everything below it,
+ * except for things below child compartments. Recursively applied.
+ * A further elaboration is that child compartments can specifically 
+ * abdicate responsibility for their offspring using the "inherit" flag in
+ * their 'method' field. In this case the parent
+ * compartment has to take the objects over.
+ */
+void generateComptElists( Id baseId, 
+	vector< pair< Id, vector< Id > > >& comptElists,
+	unsigned int depth	)
+{
+	if ( baseId.element()->cinfo()->isA( "ChemMesh" ) ) {
+		string method = Field< string >::get( baseId, "method" );
+		if ( method != "inherit" ) { // Start off a new tree
+			vector< Id > temp( 0 );
+			pair< Id, vector< Id > > entry( baseId, temp );
+			comptElists.push_back( entry );
+			depth = comptElists.size() - 1;
+		}
+	} else {
+		// Be sure we've hit a ChemMesh before we start building the elists.
+		if ( comptElists.size() > depth )
+			comptElists[depth].second.push_back( baseId );
+	}
+	vector< Id > kids;
+	Neutral::children( baseId.eref(), kids );
+	for ( vector< Id >::iterator i = kids.begin(); i != kids.end(); ++i ) {
+		generateComptElists( *i, comptElists, depth );
+	}
+}
+
+/**
+ * Makes solvers on every compartment, depending on the recommendation
+ * in the compartment iself. If none, then it uses the specified fallback
+ * method.
+ * Each compartment finds all descendants, but does not follow through
+ * child compartments unless they rule themselves out by stating their
+ * method as "inherit".
+ */
+void SimManager::buildAllComptSolvers( const Eref& e, const Qinfo* q,
+				string defaultMethod )
+{
+	vector< int > dims( 1, 1 );
+	baseId_ = e.id();
+
+	vector< pair< Id, vector< Id > > > comptElists;
+	generateComptElists( baseId_, comptElists, 0 );
+	for ( unsigned int i = 0; i < comptElists.size(); ++i ) {
+		buildSolverOnCompt( comptElists[i].first, comptElists[i].second,
+						defaultMethod );
+	}
+	// Here we need to figure out which compartments talk to each other
+	// and set up junctions. Problem is that we don't yet have a way to
+	// set this up.
+}
+
+void SimManager::buildSolverOnCompt( Id compt, const vector< Id >& elist,
+				const string& defaultMethod )
+{
+	assert( compt != Id() );
+	string basePath = compt.path();
+	Id mesh( compt.value() + 1 );
+	assert( mesh != Id() );
+
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< int > dims( 1, 1 );
+
+
+	Id stoich = shell->doCreate( "GslStoich", compt, "stoich", dims );
+	Field< vector< Id > >::set( stoich, "elist", elist );
+
+	MsgId mid = shell->doAddMsg( "OneToAll", mesh, "remesh", 
+		stoich, "remesh" );
+	assert( mid != Msg::bad );
+
+	string method = Field< string >::get( compt, "method" );
+	if ( method == "" || method == "inherit" || method == "default" )
+		method = defaultMethod;
+
+	bool ret = Field< string >::set( stoich, "method", method );
+	assert( ret );
+
+	for ( vector< Id >::const_iterator 
+					i = elist.begin(); i != elist.end(); ++i ) {
+		if ( i->element()->cinfo()->isA( "StimulusTable" ) )
+			shell->doUseClock( i->path(), "process", 4);
+	}
+	shell->doUseClock( stoich.path(), "process", 5);
+}
+
 void SimManager::buildFromKkitTree( const Eref& e, const Qinfo* q,
 	const string& method )
 {

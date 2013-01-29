@@ -77,6 +77,14 @@ const Cinfo* ChemMesh::initCinfo()
 			&ChemMesh::getDimensions
 		);
 
+		static ValueFinfo< ChemMesh, string > method(
+			"method",
+			"Advisory field for SimManager to check when assigning "
+			"solution methods. Doesn't do anything unless SimManager scans",
+			&ChemMesh::setMethod,
+			&ChemMesh::getMethod
+		);
+
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
@@ -166,8 +174,9 @@ const Cinfo* ChemMesh::initCinfo()
 		);
 
 	static Finfo* chemMeshFinfos[] = {
-		&size,			// ReadOnlyValue
+		&size,			// Value
 		&numDimensions,	// ReadOnlyValue
+		&method,		// Value
 		&buildDefaultMesh,	// DestFinfo
 		&nodeMeshing,	// SharedFinfo
 		&entryFinfo,	// FieldElementFinfo
@@ -247,6 +256,16 @@ void ChemMesh::setEntireSize( const Eref& e, const Qinfo* q, double size )
 unsigned int ChemMesh::getDimensions() const
 {
 	return this->innerGetDimensions();
+}
+
+string ChemMesh::getMethod() const
+{
+	return method_;
+}
+
+void ChemMesh::setMethod( string method )
+{
+	method_ = method;
 }
 
 //////////////////////////////////////////////////////////////
