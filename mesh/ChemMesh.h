@@ -49,6 +49,15 @@ class ChemMesh
 		unsigned int getDimensions() const;
 		virtual unsigned int innerGetDimensions() const = 0;
 
+		/**
+		 * Hint to system indicating method to be used on this compartment.
+		 * Defaults to blank, which then leaves the decision to the calling
+		 * function. Doesn't do anything unless the ChemMesh is parsed by
+		 * the SimManager.
+		 */
+		void setMethod( string method );
+		string getMethod() const;
+
 		//////////////////////////////////////////////////////////////////
 		// Dest Finfo
 		//////////////////////////////////////////////////////////////////
@@ -252,6 +261,13 @@ class ChemMesh
 		 * also contains a message to the adjacent compartment.
 		 */
 		vector< Boundary > boundaries_;
+
+		/**
+		 * Hint to system indicating method to be used on this compartment.
+		 * Defaults to blank, which then leaves the decision to the calling
+		 * function.
+		 */
+		string method_;
 };
 
 extern SrcFinfo5< 

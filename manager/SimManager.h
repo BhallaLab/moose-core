@@ -38,6 +38,16 @@ class SimManager
 		/// Destination function
 		void build( const Eref& e, const Qinfo* q, string method );
 
+		/**
+		 * Destination function to build solvers on every compartment,
+		 * depending on the recommendation in the compartment iself. If 
+		 * none, then it uses the specified fallback method. Each 
+		 * compartment finds all descendants, but does not follow through 
+		 * child compartments unless they rule themselves out by stating 
+		 * their method as "inherit".
+		 */
+		void buildAllComptSolvers( const Eref& e, const Qinfo* q, 
+						string defaultMethod );
 
 		/**
 		 * Builds standard kinetic model tree. It looks like:
@@ -75,7 +85,9 @@ class SimManager
 		void meshStats( const Eref& e, const Qinfo* q, 
 			unsigned int numMeshEntries, vector< double > voxelVols );
 
+		/////////////////////////////////////////////////////////////////
 		// Utility functions
+		/////////////////////////////////////////////////////////////////
 		//TreeType findTreeType( const Eref& e );
 		Id findChemMesh() const;
 		void buildFromBareKineticTree( const string& method );
@@ -85,6 +97,9 @@ class SimManager
 		void buildGsl( const Eref& e, const Qinfo* q, Shell* shell, const string& method );
 		void buildGssa( const Eref& e, const Qinfo* q, Shell* shell );
 		void buildSmoldyn( Shell* shell );
+
+		void buildSolverOnCompt( Id compt, const vector< Id >& elist,
+			const string& defaultMethod );
 
 		static const Cinfo* initCinfo();
 	private:

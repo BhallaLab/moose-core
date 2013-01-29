@@ -232,6 +232,71 @@ void testZombieTurnover()
 	shell->doDelete( mgr );
 }
 
+/**
+ * Tests function in SimManager.cpp, which scans through all children
+ * and builds an elist of solvable descendants.
+ * /model/compt1/e1, e2, e3
+ * /model/compt2/e4, e5, compt3, compt4
+ * /model/compt2/compt3/e6, e7
+ * /model/compt2/compt4/e8, e9
+ * We assign compt4 to be "inherited" This means that e8 and e9 go down to
+ * 	compt2 to solve.
+ */
+void testGenerateComptElists()
+{
+	extern void generateComptElists( Id baseId,
+		vector< pair< Id, vector< Id > > >& comptElists,
+		unsigned int depth );
+
+	vector< pair< Id, vector< Id > > > comptElists;
+
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< int > dims( 1, 1 );
+	Id model = shell->doCreate( "Neutral", Id(), "model", dims );
+	assert( model != Id() );
+	Id compt1 = shell->doCreate( "CubeMesh", model, "compt1", dims );
+	Id e1 = shell->doCreate( "Neutral", compt1, "e1", dims );
+	Id e2 = shell->doCreate( "Neutral", compt1, "e2", dims );
+	Id e3 = shell->doCreate( "Neutral", compt1, "e3", dims );
+
+	Id compt2 = shell->doCreate( "CubeMesh", model, "compt2", dims );
+	Id e4 = shell->doCreate( "Neutral", compt2, "e4", dims );
+	Id e5 = shell->doCreate( "Neutral", compt2, "e5", dims );
+	Id compt3 = shell->doCreate( "CubeMesh", compt2, "compt3", dims );
+	Id compt4 = shell->doCreate( "CubeMesh", compt2, "compt4", dims );
+	Field< string >::set( compt4, "method", "inherit" );
+	
+	Id e6 = shell->doCreate( "Neutral", compt3, "e6", dims );
+	Id e7 = shell->doCreate( "Neutral", compt3, "e7", dims );
+
+	Id e8 = shell->doCreate( "Neutral", compt4, "e8", dims );
+	Id e9 = shell->doCreate( "Neutral", compt4, "e9", dims );
+
+	generateComptElists( model, comptElists, 0 );
+
+	assert( comptElists.size() == 3 );
+	assert( comptElists[0].first == compt1 );
+	assert( comptElists[1].first == compt2 );
+	assert( comptElists[2].first == compt3 );
+	assert( comptElists[0].second.size() == 3 + 2 );
+	assert( comptElists[1].second.size() == 4 + 2 + 2 );
+	assert( comptElists[2].second.size() == 2 + 2 );
+
+	assert( comptElists[0].second[2] == e1 );
+	assert( comptElists[0].second[3] == e2 );
+	assert( comptElists[0].second[4] == e3 );
+
+	assert( comptElists[1].second[2] == e4 );
+	assert( comptElists[1].second[3] == e5 );
+	assert( comptElists[1].second[6] == e8 );
+	assert( comptElists[1].second[7] == e9 );
+
+	assert( comptElists[2].second[2] == e6 );
+	assert( comptElists[2].second[3] == e7 );
+
+	shell->doDelete( model );
+	cout << "." << flush;
+}
 
 void testSimManager()
 {
@@ -239,5 +304,6 @@ void testSimManager()
 	testBuildFromKkitTree();
 	testMakeStandardElements();
 	testRemeshing();
+	testGenerateComptElists();
 	testZombieTurnover(); 
 }
