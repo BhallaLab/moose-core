@@ -569,16 +569,52 @@ void SimManager::buildAllComptSolvers( const Eref& e, const Qinfo* q,
 
 	vector< pair< Id, vector< Id > > > comptElists;
 	generateComptElists( baseId_, comptElists, 0 );
+	vector< Id > stoich( comptElists.size() );
+	map< Id, unsigned int > comptIndex;
 	for ( unsigned int i = 0; i < comptElists.size(); ++i ) {
-		buildSolverOnCompt( comptElists[i].first, comptElists[i].second,
-						defaultMethod );
+		stoich[i] = buildSolverOnCompt( 
+			comptElists[i].first, comptElists[i].second, defaultMethod );
+		comptIndex[ comptElists[i].first] = i;
 	}
 	// Here we need to figure out which compartments talk to each other
 	// and set up junctions. Problem is that we don't yet have a way to
 	// set this up.
+	// One way is to query the cross-compt reactions. This won't give
+	// exclusively diffusion-coupled pairs.
+	// Another way is to set up special msgs between compts to identify
+	// coupled pairs.
+	// Another way is to query names, check for any identicals. These
+	// are coupled if the compts are adjacet.
+	// Another way is to check if compts are spatially adjacent.
+	// But in all cases user has to override. So lets begin with special 
+	// msgs
+	// 
+	// Here we fill up a matrix to indicate which junctions are present.
+	// This is a little messy because the junction info is asymmetric, but
+	// at the same time we want to avoid double coupling between any 
+	// pair of compartments.
+	vector< bool > temp( stoich.size(), false );
+	vector< vector< bool > > junctions( stoich.size(), temp );
+	for ( unsigned int i = 0; i < stoich.size(); ++i ) {
+		vector< Id > compts = 
+			Field< vector< Id > >::get( stoich[i], "coupledCompartments" );
+		for ( vector< Id >::iterator 
+						j = compts.begin(); j != compts.end(); ++j ) {
+			map< Id, unsigned int >::iterator k = comptIndex.find( *j );
+			assert( k != comptIndex.end() );
+			unsigned int ci = k->second;
+			junctions[i][ci] = true;
+		}
+	}
+	for ( unsigned int i = 0; i < stoich.size(); ++i ) {
+		for ( unsigned int j = i+1; j < stoich.size(); ++j ) {
+			if ( junctions[i][j] || junctions[j][i] )
+				SetGet1< Id >::set( stoich[i], "addJunction", stoich[j] );
+		}
+	}
 }
 
-void SimManager::buildSolverOnCompt( Id compt, const vector< Id >& elist,
+Id SimManager::buildSolverOnCompt( Id compt, const vector< Id >& elist,
 				const string& defaultMethod )
 {
 	assert( compt != Id() );
@@ -610,6 +646,7 @@ void SimManager::buildSolverOnCompt( Id compt, const vector< Id >& elist,
 			shell->doUseClock( i->path(), "process", 4);
 	}
 	shell->doUseClock( stoich.path(), "process", 5);
+	return stoich;
 }
 
 void SimManager::buildFromKkitTree( const Eref& e, const Qinfo* q,

@@ -68,6 +68,7 @@ class GslStoich: public SolverBase
 		void setInternalDt( double value );
 		Id getCompartment() const;
 		void setCompartment( Id value );
+		vector< Id > getCoupledCompartments() const;
 
 ///////////////////////////////////////////////////
 // Dest function definitions

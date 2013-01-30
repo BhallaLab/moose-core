@@ -98,7 +98,7 @@ class SimManager
 		void buildGssa( const Eref& e, const Qinfo* q, Shell* shell );
 		void buildSmoldyn( Shell* shell );
 
-		void buildSolverOnCompt( Id compt, const vector< Id >& elist,
+		Id buildSolverOnCompt( Id compt, const vector< Id >& elist,
 			const string& defaultMethod );
 
 		static const Cinfo* initCinfo();
