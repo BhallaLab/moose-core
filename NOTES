@@ -20761,6 +20761,9 @@ in buildGSL, need to traverse through all compts to make solvers.
 
 Set up traversal function for picking solvers upon which to build solvers.
 Unit test cleared for the traversal, but not yet tested for setting up the 
-solvers with it.
+solvers with it. Checkin 4388.
 
 ==========================================================================
+30 Jan 2013
+Put in the junction identification and adding code. Compiles, clears old
+unit tests but yet to test the new code.

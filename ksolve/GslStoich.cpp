@@ -105,6 +105,13 @@ const Cinfo* GslStoich::initCinfo()
 			&GslStoich::setCompartment,
 			&GslStoich::getCompartment
 		);
+		static ReadOnlyValueFinfo< GslStoich, vector< Id > > coupledCompartments( 
+			"coupledCompartments",
+			"This is the Id of all compartment coupled to the one in which"
+			"the GslStoich resides. This is found by checking for reactions"
+			"which span compartment boundaries.",
+			&GslStoich::getCoupledCompartments
+		);
 
 		///////////////////////////////////////////////////////
 		// DestFinfo definitions
@@ -166,6 +173,7 @@ const Cinfo* GslStoich::initCinfo()
 		&relativeAccuracy,	// Value
 		&absoluteAccuracy,	// Value
 		&compartment,		// Value
+		&coupledCompartments,	// ReadOnlyValue
 		&remesh,			// DestFinfo
 		&proc,				// SharedFinfo
 		&init,				// SharedFinfo
@@ -340,6 +348,12 @@ void GslStoich::setCompartment( Id value )
 		diffusionMesh_ = reinterpret_cast< ChemMesh* >(
 				compartmentId_.eref().data() );
 	}
+}
+
+// Checks coreStoich for coupled compartments
+vector< Id > GslStoich::getCoupledCompartments() const
+{
+	return coreStoich_.getOffSolverCompts();
 }
 
 const double* GslStoich::S( unsigned int meshIndex ) const
