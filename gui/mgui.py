@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Mon Dec  3 14:43:59 2012 (+0530)
+# Last-Updated: Thu Jan 31 21:56:50 2013 (+0530)
 #           By: subha
-#     Update #: 358
+#     Update #: 488
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -151,7 +151,7 @@ class MWindow(QtGui.QMainWindow):
                     return self._loadedPlugins[name]
         raise Exception('No plugin with name: %s' % (name))
 
-    def setPlugin(self, name, root):
+    def setPlugin(self, name, root='/'):
         """Set the current plugin to use.
 
         This -
@@ -163,9 +163,11 @@ class MWindow(QtGui.QMainWindow):
 
         3. sets the current view  to the plugins editor view.
         """
-        self.plugin = self.loadPluginClass(name)(root, self)
+        print 'Setting plugin'
+        self.plugin = self.loadPluginClass(str(name))(str(root), self)
         self.updateMenus()
         self.setCurrentView(self.plugin.getEditorView())
+        print self.plugin
 
     def updateExistingMenu(self, menu):
         """Check if a menu with same title
@@ -215,7 +217,10 @@ class MWindow(QtGui.QMainWindow):
             self.fileMenu = QtGui.QMenu('File')
         else:
             self.fileMenu.clear()
-        # self.fileMenu.addAction(self.plugin.getLoadAction())
+        if not hasattr(self, 'loadModelAction'):
+            self.loadModelAction = QtGui.QAction('Load model', self)
+            self.connect(self.loadModelAction, QtCore.SIGNAL('triggered()'), self.loadModelDialogSlot)
+        self.fileMenu.addAction(self.loadModelAction)
         # self.fileMenu.addAction(self.plugin.getSaveAction())
         self.fileMenu.addAction(self.quitAction)
         return self.fileMenu
@@ -233,11 +238,16 @@ class MWindow(QtGui.QMainWindow):
         if (not hasattr(self, 'pluginsMenu')) or (self.pluginsMenu is None):
             self.pluginsMenu = QtGui.QMenu('Plugins')
             mapper = QtCore.QSignalMapper(self)
-            for pluginName in self.getPluginNames():
+            pluginsGroup = QtGui.QActionGroup(self)
+            pluginsGroup.setExclusive(True)
+            for pluginName in self.getPluginNames():                
                 action = QtGui.QAction(pluginName, self)
-                self.connect(action, QtCore.SIGNAL('triggered()'), mapper.map)
+                action.setObjectName(pluginName)
+                action.setCheckable(True)
+                mapper.setMapping(action, QtCore.QString(pluginName))
+                self.connect(action, QtCore.SIGNAL('triggered()'), mapper, QtCore.SLOT('map()'))
                 self.pluginsMenu.addAction(action)
-                mapper.setMapping(action, pluginName)
+                pluginsGroup.addAction(action)
             self.connect(mapper, QtCore.SIGNAL('mapped(const QString &)'), self.setPlugin)
         return self.pluginsMenu
 
@@ -304,6 +314,49 @@ class MWindow(QtGui.QMainWindow):
 
     def showBuiltInDocumentation(self):
         self.showDocumentation('moosebuiltindocs.html')
+
+    def loadModelDialogSlot(self):
+        """Start a file dialog to choose a model file.
+
+        Once the dialog succeeds, we should hand-over the duty of
+        actual model loading to something else. Then refresh the
+        views. Things to check from the user:
+
+        1) The file type
+
+        2) Target element
+
+        3) Whether we should update the current window or start a new
+        window.
+
+        4) Plugin to use for displaying this model (can be automated
+        by looking into the model file for a regular expression)
+
+        """
+        activeWindow = None # This to be used later to refresh the current widget with newly loaded model
+        dialog = QtGui.QFileDialog(self, 
+                                   self.tr('Load model from file'), 
+                                   filter=self.tr('GENESIS (*.g);; GENESIS Prototype (*.p);; NeuroML/SBML (*.xml);; All files (*.*)'),
+                                   options=QtGui.QFileDialog.ReadOnly)
+        dialog.setNameFilterDetailsVisible(True)
+        dialog.setFileMode(QtGui.QFileDialog.ExistingFile)
+        targetPanel = QtGui.QFrame(dialog)
+        targetLabel = QtGui.QLabel('Create model under')
+        targetText = QtGui.QLineEdit('.')
+        layout = QtGui.QVBoxLayout()
+        layout.addWidget(targetLabel)
+        layout.addWidget(targetText)
+        targetPanel.setLayout(layout)
+        dialog.layout().addWidget(targetPanel)
+        self.connect(dialog, QtCore.SIGNAL('currentChanged(const QString &)'), 
+                     lambda path:(targetText.setText(os.path.basename(str(path)).rpartition('.')[0])))
+        if dialog.exec_():
+            fileNames = dialog.selectedFiles()
+            for fileName in fileNames:
+                print 'Current plugin', self.plugin
+                moose.loadModel(str(fileName), str(targetText.text()))
+                self.plugin.setCurrentView('editor')
+                self.plugin.getEditorView().setModelRoot(str(targetText.text()))
 
 if __name__ == '__main__':
     # create the GUI application
