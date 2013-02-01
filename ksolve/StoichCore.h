@@ -39,7 +39,11 @@ class StoichCore
 		 */
 		unsigned int getNumProxyPools() const;
 
-		void setPath( const Eref& e, SolverBase* sb, string v );
+		/**
+		 * Take the provided wildcard path to build the list of elements
+		 * managed by this solver.
+		 */
+		void setPath( const Eref& e, SolverBase* sb, string path );
 		string getPath( const Eref& e, const Qinfo* q ) const;
 
 		// unsigned int getNumMeshEntries() const;
@@ -63,6 +67,13 @@ class StoichCore
 		//////////////////////////////////////////////////////////////////
 		// Model traversal and building functions
 		//////////////////////////////////////////////////////////////////
+		/**
+		 * Internal function which sets up the model based on the provided
+		 * elist of all elements managed by this solver.
+		 */
+		void setElist( const Eref& e, SolverBase* sb, 
+						const vector< Id >& elist );
+
 		/**
 		 * Scans through elist to find any reactions that connect to
 		 * pools not located on solver. Removes these reactions from the

@@ -90,18 +90,25 @@ void StoichCore::setPath( const Eref& e, SolverBase* sb, string v )
 		cout << "StoichCore::setPath: need to clear old path.\n";
 		return;
 	}
-	path_ = v;
 	vector< Id > elist;
 	Shell::wildcard( path_, elist );
+	setElist( e, sb, elist );
+	path_ = v;
+}
 
+void StoichCore::setElist( const Eref& e, SolverBase* sb, 
+				const vector< Id >& elist )
+{
+	path_ = "elist";
 	Id myCompt = getCompt( e.id() );
+	vector< Id > temp = elist;
 
 	if ( myCompt != Id() ) // Off solver only happens if compt is defined.
-		locateOffSolverReacs( myCompt, elist );
-	allocateObjMap( elist );
-	allocateModel( elist );
+		locateOffSolverReacs( myCompt, temp );
+	allocateObjMap( temp );
+	allocateModel( temp );
 	sb->allocatePools( getNumAllPools() + getNumProxyPools() );
-	zombifyModel( e, elist );
+	zombifyModel( e, temp );
 }
 
 string StoichCore::getPath( const Eref& e, const Qinfo* q ) const
@@ -152,7 +159,7 @@ const RateTerm* StoichCore::rates( unsigned int i ) const
 //////////////////////////////////////////////////////////////
 
 /**
- * Checks if specifiec reac is off solver. As side-effect it compiles
+ * Checks if specified reac is off solver. As side-effect it compiles
  * a vector of the pools that are off-solver, and the corresponding 
  * compartments for those pools
  */
@@ -216,7 +223,7 @@ void StoichCore::locateOffSolverReacs( Id myCompt, vector< Id >& elist )
 	offSolverPools_.clear();
 	offSolverReacs_.clear();
 	offSolverReacCompts_.clear();
-	map< Id, Id > poolComptMap;
+	map< Id, Id > poolComptMap; // < pool, compt >
 
 	vector< Id > temp;
 	temp.reserve( elist.size() );
@@ -246,6 +253,16 @@ void StoichCore::locateOffSolverReacs( Id myCompt, vector< Id >& elist )
 		offSolverPoolMap_[i->second].push_back( i->first );
 	}
 
+	// Ensure we don't have repeats, and the pools are ordered by compt
+	offSolverPools_.clear();
+	for ( map< Id, vector< Id > >::iterator
+		i = offSolverPoolMap_.begin(); i != offSolverPoolMap_.end(); ++i ){
+			if ( i->first != myCompt ) {
+				offSolverPools_.insert( offSolverPools_.end(), 
+					i->second.begin(), i->second.end() );
+			}
+	}
+
 	elist = temp;
 }
 
@@ -267,6 +284,17 @@ void StoichCore::allocateObjMap( const vector< Id >& elist )
 	}
 	objMap_.clear();
 	objMap_.resize( 1 + maxId - objMapStart_, 0 );
+	/**
+	 * If this assertion fails it usually means that the elist passed to
+	 * the solver is not properly restricted to objects located on the
+	 * current compartment. As a result of this, traversal for finding
+	 * off-compartment pools generates repeats with the ones in the elist.
+	 * Note that pool compartment assignment is determined by following
+	 * the mesh message, and thus a tree-based elist construction for
+	 * compartments may be incompatible with the generation of the lists
+	 * of off-compartment pools. It is up to the upstream code to
+	 * ensure that this is done properly.
+	 */
 	assert( objMap_.size() >= temp.size() );
 }
 

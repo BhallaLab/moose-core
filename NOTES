@@ -20651,6 +20651,7 @@ and molecule M1 diffuses between them all.
 		--------------------------------------
 
 On compartment A we have the following ODE systems
+Vol = 1e-15
 N Core:	    R1 R2 R3 R4 
 	M1[             ] [ v1 ]
 	M2[             ] [ v2 ]
@@ -20678,28 +20679,33 @@ N AD ( for R4 )
 
 		--------------------------------------
 On compartment B we have the following ODE systems
+Vol = 3e-15
 N core: 
-	    R7 R5
-	M1[       ] [ v7 ]
-	M3[       ] [ v5 ]
-	M6[       ]
-	M4[       ]
+	    R6 R7 R5
+	M1[          ] [ v6 ]
+	M3[          ] [ v7 ]
+	M6[          ] [ v5 ]
+	cplx[        ]
+	M4[          ]
 
 N B (local mols only ).
-	    R7
-	M1[    ] [ v7 ]
-	M3[    ]
-	M6[    ]
+	    R6 R7
+	M1[       ] [ v6 ]
+	M3[       ] [ v7 ]
+	M6[       ]
+	cplx[     ]
 
 N BC ( for R5 )  Note that this is the same as N core.
-	    R7 R5
-	M1[       ] [ v7 ]
-	M3[       ] [ v5 ]
-	M6[       ]
-	M4[       ]
+	    R6 R7 R5
+	M1[          ] [ v6 ]
+	M3[          ] [ v7 ]
+	M6[          ] [ v5 ]
+	cplx[        ]
+	M4[          ]
 
 		--------------------------------------
 On compartment C we have the following ODE systems
+Vol = 5e-15
 N core: This is the only system here.
 	    R8
 	M1[    ] [ v8 ]
@@ -20707,6 +20713,7 @@ N core: This is the only system here.
 
 		--------------------------------------
 On compartment D we have the following ODE systems
+Vol = 2e-15
 N core: This is the only system here.
 	    R9
 	M1[    ] [ v9 ]
@@ -20727,7 +20734,7 @@ Finally! Clears unit and regression tests, on a single thread only.
 Dating back from 22 Dec:
 List of pending things here.
 * Implement cross-compartment reactions
-- Set up sim manager to handle coupled solvers
++ Set up sim manager to handle coupled solvers
 - Extend to CylMesh and NeuroMesh
 - Write SpineMesh, extend to it.
 - Put in stuff for SigNeur.
@@ -20766,4 +20773,39 @@ solvers with it. Checkin 4388.
 ==========================================================================
 30 Jan 2013
 Put in the junction identification and adding code. Compiles, clears old
-unit tests but yet to test the new code.
+unit tests but yet to test the new code. Checkin 4389.
+
+Next: a regression test for this. I'll set up a suitable model in kkit with
+multiple compartments. I'll set up the LoadModel to load in the model without
+actually completing the model building, so that script operations can fine-tune
+things like meshing and setting compartments to inherit stuff. Then test out 
+that the model is built and computes correctly.
+
+==========================================================================
+31 Jan 2013.
+Made regressionTests/multicompt_reac.g, a kkit script implementing the
+multicompartment reaction scheme of Dec 27. Let's load up and see if
+the correct setup is done.
+Made regression test in rtReadKkit.cpp:rtTestMultiCompartmentReaction().
+This is uncovering a lot of bugs. 
+Turns out all objects are being put into the first compartment.
+Turns out that graphs are also made under first compartment. Not sure why.
+Turns out that all objects have an 'info' object under them.
+This together accounts for the large number of objects (63) in the tree.
+
+So I need to have the kkit reader do something sensible with the objects
+and compartments, such as moving objects under the compartment that owns them.
+Will also need something to decide when compartments contain others. Not
+so easy from kkit.
+
+A bit stuck. Regression test fails because there are repeats in the list of
+pools sent to StoichCore::allocateObjMap. I've gone through to find where,
+and I have cleaned up some of the repeats, but they do remain.
+
+==========================================================================
+1 Feb 2013
+Able to complete regression tests, at this point not really testing the 
+multicompartment code other than loading it. I've cleaned up the interface a 
+bit too, the loadmodel call can handle it so far.
+
+==========================================================================

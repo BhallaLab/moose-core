@@ -120,6 +120,13 @@ const Cinfo* SimManager::initCinfo()
 			"hints in the ChemMesh compartments.",
 			new EpFunc1< SimManager, string >( &SimManager::build ) );
 
+		static DestFinfo buildMultiCompartment( "buildMultiCompartment",
+			"Sets up model in a multicompartment model, using separate "
+			"solvers in each compartment based on hints for the solution "
+			"method that is set up as a field within the compartment. "
+		    "Use the specified method if no hint given ",
+			new EpFunc1< SimManager, string >( &SimManager::buildAllComptSolvers ) );
+
 		static DestFinfo makeStandardElements( "makeStandardElements",
 			"Sets up the usual infrastructure for a model, with the"
 			"ChemMesh, Stoich, solver and suitable messaging."
@@ -171,6 +178,7 @@ const Cinfo* SimManager::initCinfo()
 		&version,		// Value
 		&modelFamily,	// Value
 		&build,			// DestFinfo
+		&buildMultiCompartment,			// DestFinfo
 		&makeStandardElements,			// DestFinfo
 		&nodeMeshing,	// SharedFinfo
 	};
@@ -345,6 +353,8 @@ double estimateHsolveLoad( Id hsolver )
 /**
  * This needs to be called only on the master node, and in shell
  * thread mode.
+ * If the method is prefixed by "multi" it tries to make a multicompartment,
+ * multi-solver system using as default method the suffix to the method.
  */
 void SimManager::build( const Eref& e, const Qinfo* q, string method )
 {
@@ -357,7 +367,12 @@ void SimManager::build( const Eref& e, const Qinfo* q, string method )
 		 cout << "SimManager::build: No chem mesh found, still need to sort this out\n";
 		 return;
 	}
-	buildFromKkitTree( e, q, method );
+	if ( method.substr( 0, 5 ) == "multi" ) {
+		buildFromKkitTree( e, q, "Neutral" );
+		buildAllComptSolvers( e, q, method.substr( 5 ) );
+	} else {
+		buildFromKkitTree( e, q, method );
+	}
 
 	// Apply heuristic for threads and nodes
 	// Replicate pools as per node decomp. Shell::handleReMesh
@@ -627,7 +642,7 @@ Id SimManager::buildSolverOnCompt( Id compt, const vector< Id >& elist,
 
 
 	Id stoich = shell->doCreate( "GslStoich", compt, "stoich", dims );
-	Field< vector< Id > >::set( stoich, "elist", elist );
+	SetGet1< vector< Id > >::set( stoich, "elist", elist );
 
 	MsgId mid = shell->doAddMsg( "OneToAll", mesh, "remesh", 
 		stoich, "remesh" );

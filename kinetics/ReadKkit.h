@@ -30,6 +30,8 @@ class ReadKkit
 		double getDefaultVol() const;
 		string getBasePath() const;
 		unsigned int getVersion() const;
+		bool getMoveOntoCompartment() const;
+		void setMoveOntoCompartment( bool v );
 
 		//////////////////////////////////////////////////////////////////
 		// Undump operations
@@ -178,6 +180,15 @@ class ReadKkit
 		double defaultVol_;		/// Default volume for new compartments.
 		unsigned int version_;	/// KKit version.
 		unsigned int initdumpVersion_;	/// Initdump too has a version.
+		/**
+		 * Normally ReadKkit puts things on the same tree as the kkit tree.
+		 * This flag tells the system to
+		 * reorganize the tree so that each pool or reac or enz is on
+		 * an appropriate compartment. Reacs are a bit arbitrary though,
+		 * just go onto same compt as substrate.
+		 * Defaults to false.
+		 */
+		bool moveOntoCompartment_;	
 
 		unsigned int numCompartments_;
 		unsigned int numPools_;

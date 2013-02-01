@@ -15,6 +15,7 @@
 #include "VoxelPools.h"
 #include "OdeSystem.h"
 #include "../shell/Shell.h"
+#include "../shell/Wildcard.h"
 #include "../mesh/MeshEntry.h"
 #include "../mesh/Boundary.h"
 #include "../mesh/ChemMesh.h"
@@ -68,11 +69,11 @@ unsigned int GslStoich::generateOdes()
 	return ode_.size();
 }
 
-void GslStoich::setPath( const Eref& e, const Qinfo* q, string path )
+void GslStoich::setElist( const Eref& e, const Qinfo* q, vector< Id > elist)
 {
-	if ( isInitialized_ && path_ == path )
+	if ( isInitialized_ )
 		return;
-	path_ = path;
+	path_ = "elist";
 	ode_.clear();
 	pools_.clear();
 	y_.clear();
@@ -89,7 +90,7 @@ void GslStoich::setPath( const Eref& e, const Qinfo* q, string path )
 	}
 	// Within the setPath function, the stoich calls the allocatePools 
 	// function below
-	coreStoich_.setPath( e, this, path );
+	coreStoich_.setElist( e, this, elist );
 
 	generateOdes();
 	assert( ode_.size() > 0 );
@@ -103,6 +104,16 @@ void GslStoich::setPath( const Eref& e, const Qinfo* q, string path )
 			numPools, absAccuracy_, relAccuracy_ );
 	}
 	isInitialized_ = ( pools_.size() > 0 );
+}
+
+void GslStoich::setPath( const Eref& e, const Qinfo* q, string path )
+{
+	if ( isInitialized_ && path_ == path )
+		return;
+	vector< Id > elist;
+	wildcardFind( path, elist );
+	setElist( e, q, elist );
+	path_ = path;
 }
 
 void GslStoich::allocatePools( unsigned int numPools )
