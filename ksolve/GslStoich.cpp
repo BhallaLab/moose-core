@@ -131,6 +131,13 @@ const Cinfo* GslStoich::initCinfo()
 			"Handles initReinit call",
 			new ProcOpFunc< GslStoich >( &GslStoich::initReinit ) );
 
+		static DestFinfo setElist( "elist", 
+			"Assign the list of Elements that this solver handles. "
+			"These are normally all children of the compartment on which "
+			"the current GslStoich object resides.",
+			new EpFunc1< GslStoich, vector< Id > >( &GslStoich::setElist ));
+
+
 		static DestFinfo remesh( "remesh",
 			"Handle commands to remesh the pool. This may involve changing "
 			"the number of pool entries, as well as changing their volumes",
@@ -174,6 +181,7 @@ const Cinfo* GslStoich::initCinfo()
 		&absoluteAccuracy,	// Value
 		&compartment,		// Value
 		&coupledCompartments,	// ReadOnlyValue
+		&setElist,			// DestFinfo
 		&remesh,			// DestFinfo
 		&proc,				// SharedFinfo
 		&init,				// SharedFinfo

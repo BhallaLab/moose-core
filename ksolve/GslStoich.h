@@ -55,7 +55,16 @@ class GslStoich: public SolverBase
 		unsigned int getNumLocalVoxels() const;
 		unsigned int getNumAllVoxels() const;
 		string getPath( const Eref& e, const Qinfo* q ) const;
+		/**
+		 * Set up the model based on the provided wildcard path which
+		 * specifies all elements managed by this solver.
+		 */
 		void setPath( const Eref& e, const Qinfo* q, string path );
+		/**
+		 * Set up the model based on the provided
+		 * elist of all elements managed by this solver.
+		 */
+		void setElist( const Eref& e, const Qinfo* q, vector< Id > elist );
 		double getEstimatedDt() const;
 		bool getIsInitialized() const;
 		string getMethod() const;

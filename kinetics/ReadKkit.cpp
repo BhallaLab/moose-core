@@ -52,6 +52,7 @@ ReadKkit::ReadKkit()
 	defaultVol_( 1 ),
 	version_( 11 ),
 	initdumpVersion_( 3 ),
+	moveOntoCompartment_( false ),
 	numCompartments_( 0 ),
 	numPools_( 0 ),
 	numReacs_( 0 ),
@@ -95,6 +96,16 @@ unsigned int ReadKkit::getVersion() const
 	return version_;
 }
 
+bool ReadKkit::getMoveOntoCompartment() const
+{
+	return moveOntoCompartment_;
+}
+
+void ReadKkit::setMoveOntoCompartment( bool v )
+{
+	moveOntoCompartment_ = v;
+}
+
 //////////////////////////////////////////////////////////////////
 // The read functions.
 //////////////////////////////////////////////////////////////////
@@ -114,6 +125,10 @@ Id ReadKkit::read(
 		cerr << "ReadKkit::read: could not open file " << filename << endl;
 		return Id();
     }
+
+	if ( method.substr(0, 5) == "multi" ) {
+		moveOntoCompartment_ = true;
+	}
 
 	Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
 	vector< int > dims( 1,1 );
@@ -529,6 +544,7 @@ void ReadKkit::assignPoolCompartments()
 	
 	// Field< double >::set( kinetics.eref(), "size", max );
 	vector< int > dims( 1, 1 );
+	unsigned int comptNum = 1;
 
 	for ( unsigned int i = 0 ; i < volCategories_.size(); ++i ) {
 		if ( vols_[i] < 0 ) // Special case for enz complexes: vol == -1.
@@ -537,11 +553,12 @@ void ReadKkit::assignPoolCompartments()
 		Id kinId = Neutral::child( baseId_.eref(), "kinetics" );
 		assert( kinId != Id() );
 		Id comptId;
-		if ( i == maxi ) {
+		// if ( i == maxi )
+		if ( i == 0 ) {
 			comptId = kinId;
 		} else {
 			stringstream ss;
-			ss << "compartment_" << i;
+			ss << "compartment_" << comptNum++;
 			name = ss.str();
 			comptId = shell_->doCreate( "CubeMesh", baseId_, name, dims, 
 				true );
@@ -561,10 +578,15 @@ void ReadKkit::assignPoolCompartments()
 				ObjId( *j, 0 ), "mesh",
 				ObjId( meshId, 0 ), "mesh" );
 			assert( ret != Msg::bad );
+			if ( moveOntoCompartment_ )
+				shell_->innerMove( *j, comptId );
 		}
 	}
 
 	// Patch up mesh entries for enz cplx molecules.
+	// Don't have to moveOntoCompartment: 
+	// They should already have moved to the correct place when the
+	// parent enzyme molecule was moved, above.
 	for ( unsigned int i = 0 ; i < enzCplxMols_.size(); ++i ) {
 		Id pa = enzCplxMols_[i].first;
 		const Finfo* meshMsgFinfo = 
@@ -632,6 +654,10 @@ void ReadKkit::assignReacCompartments()
 			ObjId( meshId, 0 ), "remeshReacs",
 			ObjId( i->second, 0 ), "remesh" );
 		assert( ret != Msg::bad );
+		if ( moveOntoCompartment_ ) {
+			Id compt = Neutral::parent( meshId );
+			shell_->innerMove( i->second, compt );
+		}
 	}
 }
 
@@ -655,8 +681,6 @@ Id findMeshOfEnz( Id enz )
 		unsigned int numEnz = 
 				enz.element()->getNeighbours( enzVec, enzFinfo );
 		assert( numEnz == 1 );
-		// For now just put the reac in the compt belonging to the 
-		// first substrate
 		vector< Id > meshEntries;
 		enzVec[0].element()->getNeighbours( meshEntries, meshEntryFinfo );
 		assert (meshEntries.size() > 0 );
@@ -692,6 +716,7 @@ void ReadKkit::assignEnzCompartments()
 			ObjId( meshId, 0 ), "remeshReacs",
 			ObjId( i->second, 0 ), "remesh" );
 		assert( ret != Msg::bad );
+		// Should not have to move compartments, the parent pool will move.
 	}
 }
 
