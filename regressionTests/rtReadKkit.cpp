@@ -940,3 +940,37 @@ void rtTestWriteKkit()
 
 	cout << "." << flush;
 }
+
+void rtTestMultiCompartmentReaction()
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< unsigned int > dims( 1, 1 );
+	Shell::cleanSimulation();
+
+	Id model = shell->doLoadModel( 
+					"multicompt_reac.g", "/model", "multigsl" );
+	// SetGet1< string >::set( model, "buildMultiCompartment", "rk5" );
+	Id A( "/model/kinetics" );
+	assert( A != Id() );
+	double sizeA = Field< double >::get( A, "size" );
+
+	Id B( "/model/compartment_1" );
+	assert( B != Id() );
+	double sizeB = Field< double >::get( B, "size" );
+
+	Id D( "/model/compartment_2" ); // order is scrambled.
+	assert( D != Id() );
+	double sizeD = Field< double >::get( D, "size" );
+
+	Id C( "/model/compartment_3" );
+	assert( C != Id() );
+	double sizeC = Field< double >::get( C, "size" );
+
+	assert( doubleEq( sizeA, 1e-15 ) );
+	assert( doubleEq( sizeB, 3e-15 ) );
+	assert( doubleEq( sizeC, 5e-15 ) );
+	assert( doubleEq( sizeD, 2e-15 ) );
+
+	shell->doDelete( model );
+	cout << "." << flush;
+}

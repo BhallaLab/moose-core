@@ -563,6 +563,7 @@ Id Neutral::child( const Eref& e, const string& name )
 // static function
 ObjId Neutral::parent( const Eref& e )
 {
+		/*
 	static const Finfo* pf = neutralCinfo->findFinfo( "parentMsg" );
 	static const DestFinfo* pf2 = dynamic_cast< const DestFinfo* >( pf );
 	static const FuncId pafid = pf2->getFid();
@@ -576,11 +577,31 @@ ObjId Neutral::parent( const Eref& e )
 	assert( mid != Msg::bad );
 
 	Id pa = Msg::getMsg( mid )->findOtherEnd( e.objId() ).id;
+	*/
 	vector< vector< unsigned int > > index = e.element()->dataHandler()->pathIndices( e.index() );
 	assert( index.size() > 0 );
 	index.pop_back();
+	Id pa = parent( e.id() );
 	DataId padi = pa.element()->dataHandler()->pathDataId( index );
 	return ObjId( pa, padi );
+}
+
+Id Neutral::parent( Id id )
+{
+	static const Finfo* pf = neutralCinfo->findFinfo( "parentMsg" );
+	static const DestFinfo* pf2 = dynamic_cast< const DestFinfo* >( pf );
+	static const FuncId pafid = pf2->getFid();
+
+	if ( id == Id() ) {
+		cout << "Warning: Neutral::parent: tried to take parent of root\n";
+		return Id();
+	}
+
+	MsgId mid = id.element()->findCaller( pafid );
+	assert( mid != Msg::bad );
+
+	Id pa = Msg::getMsg( mid )->findOtherEnd( id ).id;
+	return pa;
 }
 
 // Static function
