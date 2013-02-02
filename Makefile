@@ -260,7 +260,7 @@ endif
 
 ifeq ($(USE_HDF5),1)
 	CXXFLAGS+= -DUSE_HDF5  -DH5_NO_DEPRECATED_SYMBOLS -I/usr/local/hdf5/include
-	LIBS+= -lhdf5
+	LIBS+= -lhdf5 -L/usr/local/hdf5/lib
 endif
 
 LD = ld
