@@ -20806,6 +20806,7 @@ and I have cleaned up some of the repeats, but they do remain.
 1 Feb 2013
 Able to complete regression tests, at this point not really testing the 
 multicompartment code other than loading it. I've cleaned up the interface a 
-bit too, the loadmodel call can handle it so far.
+bit too, the loadmodel call can handle it so far. Earlier it needed a second
+call to the SimManager to build the model.
 
 ==========================================================================
