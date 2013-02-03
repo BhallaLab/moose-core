@@ -31,6 +31,9 @@ void GslStoich::setN( const Eref& e, double v )
 	assert( i < pools_.size() );
 	assert( j < pools_[i].size() );
 	pools_[i].varS()[j] = v;
+	assert( i < y_.size() );
+	assert( j < y_[i].size() );
+	y_[i][j] = v;
 }
 
 double GslStoich::getN( const Eref& e ) const
