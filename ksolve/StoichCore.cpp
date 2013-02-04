@@ -1032,10 +1032,6 @@ StoichCore* StoichCore::spawn( const vector< Id >& compts ) const
 		if ( matchReacCompts( offSolverReacCompts_[i], compts ) )
 			matchingReacs.push_back( i );
 	}
-	/*
-	if ( matchingReacs.size() == 0 )
-		return 0;
-		*/
 
 	StoichCore* ret = new StoichCore( *this );
 	ret->isMaster_ = false;
@@ -1063,6 +1059,17 @@ StoichCore* StoichCore::spawn( const vector< Id >& compts ) const
 	}
 	ret->rates_.resize( offSolverRateOffset );
 	ret->numReac_ = offSolverRateOffset;
+
+	// Redo the offSolverPools_ vector with the subset from compts
+	ret->offSolverPools_.clear();
+	for ( map< Id, vector< Id > >::const_iterator 
+		i = offSolverPoolMap_.begin(); i != offSolverPoolMap_.end(); ++i ){
+		vector< Id >::const_iterator j = 
+				find( compts.begin(), compts.end(), i->first );
+		if ( j != compts.end() )
+			ret->offSolverPools_.insert( ret->offSolverPools_.end(), 
+							i->second.begin(), i->second.end() );
+	}
 
 	return ret;
 }
