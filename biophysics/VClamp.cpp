@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Fri Feb  1 19:30:45 2013 (+0530)
 // Version: 
-// Last-Updated: Mon Feb  4 09:32:30 2013 (+0530)
+// Last-Updated: Mon Feb  4 19:06:29 2013 (+0530)
 //           By: subha
-//     Update #: 114
+//     Update #: 244
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -54,7 +54,9 @@ using namespace moose;
 SrcFinfo1< double >* VClamp::currentOut()
 {
     static SrcFinfo1< double > currentOut("currentOut",
-                                          "Sends out current output of the clamping circuit");
+                                          "Sends out current output of the clamping circuit. This should be"
+                                          " connected to the `injectMsg` field of a compartment to voltage clamp"
+                                          " it.");
     return &currentOut;
 }
 
@@ -69,24 +71,40 @@ const Cinfo * VClamp::initCinfo()
                             new ProcOpFunc< VClamp >( &VClamp::reinit));
     static Finfo * processShared[] = {
         &process,
-        &reinit};
+        &reinit
+    };
 
     static SharedFinfo proc("proc",
                             "Shared message to receive Process messages from the scheduler",
                             processShared, sizeof(processShared) / sizeof(Finfo*));
 
-    static DestFinfo voltageIn("voltageIn",
-                              "Handles membrane potential read from compartment",
-                                new OpFunc1< VClamp, double>( &VClamp::setVin));
-
     static ValueFinfo< VClamp, double> holdingPotential("holdingPotential",
                                                         "Holding potential of the clamp circuit.",
                                                         &VClamp::setHoldingPotential,
                                                         &VClamp::getHoldingPotential);
+    static ValueFinfo< VClamp, double> gain("gain",
+                                            "Access resistance of the clamp circuit. The amount of current injected"
+                                            " is scaled down by this value. The default small value should suffice"
+                                            " for normal cases. Setting this incorrectly may cause oscillations. A"
+                                            " good default is Compartment.Cm/dt where dt is the timestep of"
+                                            " integration for the compartment.",
+                                                        &VClamp::setGain,
+                                                        &VClamp::getGain);
+    static ReadOnlyValueFinfo< VClamp, double> current("current",
+                                            "The amount of current injected by the clamp into the membrane.",
+                                            &VClamp::getCurrent);
+
+
+    static DestFinfo voltageIn("voltageIn",
+                              "Handles membrane potential read from compartment. The `VmOut` message"
+                               " of the Compartment object should be connected to this.",
+                                new OpFunc1< VClamp, double>( &VClamp::setVin));
 
     static Finfo* vclampFinfos[] = {
         currentOut(),
         &holdingPotential,
+        &gain,
+        &current,
         &voltageIn,
         &proc
     };
@@ -94,7 +112,15 @@ const Cinfo * VClamp::initCinfo()
     static string doc[] = {
         "Name", "VClamp",
         "Author", "Subhasis Ray",
-        "Description", "Voltage clamp object for holding neuronal compartments at a specific voltage.",
+        "Description", "Voltage clamp object for holding neuronal compartments at a specific"
+        " voltage."
+        "\n"
+        "\nUsage: Connect the `currentOut` source of VClamp to `injectMsg` of"
+        "\ndest of Compartment. Connect the `VmOut` source of Compartment to"
+        "\n`voltageIn` dest of VClamp. Either set `holdingPotential` field to a"
+        "\nfixed value, or connect an appropriate source of command potential"
+        "\n(like the `outputOut` message of an appropriately configured"
+        "\nPulseGen) to `set_holdingPotential` dest.",
     };
     static Cinfo vclampCinfo(
         "VClamp",
@@ -110,7 +136,7 @@ const Cinfo * VClamp::initCinfo()
 
 static const Cinfo * vclampCinfo = VClamp::initCinfo();
 
-VClamp::VClamp():holding_(-60e-3), current_(0.0), Rm_(1.0), vIn_(0.0)
+VClamp::VClamp(): vIn_(0.0), holding_(0.0), current_(0.0), gain_(1.0)
 {
 }
 
@@ -129,6 +155,21 @@ double VClamp::getHoldingPotential() const
     return holding_;
 }
 
+void VClamp::setGain(double value)
+{
+    gain_ = value;
+}
+
+double VClamp::getGain() const
+{
+    return gain_;
+}
+
+double VClamp::getCurrent() const
+{
+    return current_;
+}
+
 void VClamp::setVin(double value)
 {
     vIn_ = value;
@@ -136,7 +177,7 @@ void VClamp::setVin(double value)
 
 void VClamp::process(const Eref& e, ProcPtr p)
 {
-    current_ = (holding_ - vIn_)/Rm_;
+    current_ = (holding_ - vIn_) * gain_;
     currentOut()->send(e, p->threadIndexInGroup, current_);
 }
 
@@ -144,50 +185,8 @@ void VClamp::reinit(const Eref& e, ProcPtr p)
 {
 
     vector<Id> compartments;
-    Field< Id >::getVec(e.id(), "voltageIn", compartments);
-    cout << "name: " << e.element()->getName() << endl;
-    for (int i = 0; i < compartments.size(); ++i){
-        cout << "neighbour: "  << compartments[i].path() << endl;
-    }
     vIn_ = 0.0;
 }
-
-#ifdef DO_UNIT_TESTS
-#ifdef DO_VCLAMP_TEST
-#include "../shell/Shell.h"
-
-void testVClampProcess()
-{
-    Shell * shell = reinterpret_cast<Shell*>(Id().eref().data());
-    unsigned int size = 1;
-    vector<int> dims(1, size);
-    double Rm = 1.0;
-    double Cm = 1.0;
-    double dt = 0.01;
-    double runtime = 10.0;
-    double lambda = sqrt(Rm/Ra);
-    
-
-    Id comptId = shell->doCreate("Compartment", Id(), "compt", dims);
-    assert(comptId != Id());
-    assert(comptId()->dataHandler()->totalEntries() == size);
-
-    Id clampId = shell->doCreate("VClamp", Id(), "vclamp", dims);
-    MsgId mid = shell->doAddMsg("OneToOneMsg",
-                                ObjId(comptId),
-                                "VmOut",
-                                ObjectId(clampId),
-                                "voltageIn");
-    assert(mid != Msg::bad);
-    mid = shell->doAddMsg("OneToOneMsg",
-                          ObjId(clampId),
-                          "current",
-                          ObjId(comptId),
-                          "injectMsg");
-    assert(mid != Msg::bad);    
-}
-#endif // DO_VCLAMP_TEST
-#endif // DO_UNIT_TEST
 
 // 
 // VClamp.cpp ends here
