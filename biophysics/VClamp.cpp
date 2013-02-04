@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Fri Feb  1 19:30:45 2013 (+0530)
 // Version: 
-// Last-Updated: Sat Feb  2 19:16:31 2013 (+0530)
+// Last-Updated: Mon Feb  4 09:32:30 2013 (+0530)
 //           By: subha
-//     Update #: 112
+//     Update #: 114
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -153,7 +153,7 @@ void VClamp::reinit(const Eref& e, ProcPtr p)
 }
 
 #ifdef DO_UNIT_TESTS
-
+#ifdef DO_VCLAMP_TEST
 #include "../shell/Shell.h"
 
 void testVClampProcess()
@@ -186,8 +186,8 @@ void testVClampProcess()
                           "injectMsg");
     assert(mid != Msg::bad);    
 }
-
-#endif
+#endif // DO_VCLAMP_TEST
+#endif // DO_UNIT_TEST
 
 // 
 // VClamp.cpp ends here
