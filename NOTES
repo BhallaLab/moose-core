@@ -20810,3 +20810,21 @@ bit too, the loadmodel call can handle it so far. Earlier it needed a second
 call to the SimManager to build the model.
 
 ==========================================================================
+3 Feb 2013
+Added snippet to show setup of kinetic solver in a model constructed
+explicitly using Python. This uncovered a bug in the 'n' field assignemnt
+in the solver, which I fixed. Also uncovered numerical inaccuracy in
+non-solver version of the snippet, which I also fixed using smaller dt.
+
+Starting to put in a serious unit test which checks out all sorts of
+things about the created multicompt model. See rtReadKkit.cpp.
+==========================================================================
+4 Feb 2013
+Working on the rtMultiCompartment.cpp unit test. It has been moved to a 
+separate file because of all the specialised headers.
+	assert( gs->ode()[0].stoich_->getNumProxyPools() == 0 )
+fails, it is 3 instead. I need to clear out proxy pools in the derived stoichs.
+
+Done it. Clears regression tests. Much more to put in the MultiCompartment test.
+
+==========================================================================

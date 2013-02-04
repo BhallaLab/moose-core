@@ -15,6 +15,7 @@ OBJ = \
 	rtReadKkit.o	\
 	rtHHnetwork.o	\
 	rtReacDiff.o	\
+	rtMultiCompartment.o	\
 	perfTestMarkovSolver.o \
 	benchmarkTests.o	\
 
@@ -27,6 +28,7 @@ default: $(TARGET)
 $(OBJ)	: $(HEADERS)
 rtReadKkit.o:	../kinetics/ReadKkit.h ../shell/LoadModels.h
 rReacDiff.o:	../kinetics/ReadCspace.h ../shell/LoadModels.h
+rtMultiCompartment.o:	../kinetics/ReadKkit.h ../shell/LoadModels.h ../kinetics/PoolBase.h ../ksolve/SolverJunction.h ../ksolve/SolverBase.h ../ksolve/VoxelPools.h ../ksolve/RateTerm.h ../ksolve/StoichCore.h ../ksolve/OdeSystem.h ../ksolve/GslStoich.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I. -I../basecode -I../msg -I../shell $< -c
