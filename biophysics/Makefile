@@ -39,6 +39,7 @@ OBJ = \
 	MarkovSolverBase.o	\
 	MarkovSolver.o	\
 	ReadCell.o	\
+	VClamp.o	\
 	testBiophysics.o	\
 
 # GSL_LIBS = -L/usr/lib -lgsl
@@ -80,6 +81,7 @@ MarkovSolverBase.o : MarkovSolver.h MatrixOps.h MarkovRateTable.h
 MarkovSolver.o : MarkovSolverBase.h MarkovSolver.h
 MarkovChannel.o : VectorTable.h ../builtins/Interpol2D.h MarkovRateTable.h ChanBase.h MarkovChannel.h 
 ReadCell.o: ReadCell.h ../shell/Shell.h ../utility/utility.h
+VClamp.o: VClamp.h
 testBiophysics.o: SynBase.h IntFire.h Synapse.h Compartment.h HHChannel.h HHGate.h 
 
 .cpp.o:
