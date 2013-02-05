@@ -36,4 +36,6 @@ some higher-level hand-written documents:
 \ref AppProgInterface
 
 \ref DesignDocument
+
+\ref HSolveDevOverview
 */
