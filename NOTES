@@ -20820,11 +20820,17 @@ Starting to put in a serious unit test which checks out all sorts of
 things about the created multicompt model. See rtReadKkit.cpp.
 ==========================================================================
 4 Feb 2013
-Working on the rtMultiCompartment.cpp unit test. It has been moved to a 
+Working on the rtMultiCompartment.cpp regression test. It has been moved to a 
 separate file because of all the specialised headers.
 	assert( gs->ode()[0].stoich_->getNumProxyPools() == 0 )
 fails, it is 3 instead. I need to clear out proxy pools in the derived stoichs.
 
 Done it. Clears regression tests. Much more to put in the MultiCompartment test.
+Checkin 4399.
+
+==========================================================================
+5 Feb 2013.
+Added more detail to MultiCompartment test. It is gratifying, the system has
+correctly split up the reaction system.
 
 ==========================================================================
