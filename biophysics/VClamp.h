@@ -6,9 +6,9 @@
  * Maintainer: 
  * Created: Fri Feb  1 19:22:19 2013 (+0530)
  * Version: 
- * Last-Updated: Wed Feb  6 12:06:33 2013 (+0530)
+ * Last-Updated: Wed Feb  6 17:20:48 2013 (+0530)
  *           By: subha
- *     Update #: 54
+ *     Update #: 55
  * URL: 
  * Keywords: 
  * Compatibility: 
@@ -58,6 +58,7 @@ namespace moose
         void setCommand(double v);
         double getCommand() const;
         void setVin(double v);
+        double getVin() const;
         double getCurrent() const;
         void setMode(unsigned int mode);
         unsigned int getMode() const;

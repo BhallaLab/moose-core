@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Fri Feb  1 19:30:45 2013 (+0530)
 // Version: 
-// Last-Updated: Wed Feb  6 12:06:18 2013 (+0530)
+// Last-Updated: Wed Feb  6 17:22:55 2013 (+0530)
 //           By: subha
-//     Update #: 268
+//     Update #: 281
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -83,9 +83,10 @@ const Cinfo * VClamp::initCinfo()
                             processShared, sizeof(processShared) / sizeof(Finfo*));
 
     static ValueFinfo< VClamp, double> command("command",
-                                                        "Command input of the clamp circuit.",
-                                                        &VClamp::setCommand,
-                                                        &VClamp::getCommand);
+                                               "Command input of the clamp circuit. The command voltage source should"
+                                               "\nbe connected to `set_command`.",
+                                               &VClamp::setCommand,
+                                               &VClamp::getCommand);
     static ValueFinfo< VClamp, unsigned int> mode("mode",
                                                   "Working mode of the PID controller."
                                                   "\nmode = 0, standard PID with proportional, integral and derivative"
@@ -121,10 +122,11 @@ const Cinfo * VClamp::initCinfo()
                                             &VClamp::getCurrent);
 
 
-    static DestFinfo sensed("sensed",
-                              "Handles membrane potential read from compartment. The `VmOut` message"
-                               " of the Compartment object should be connected to this.",
-                                new OpFunc1< VClamp, double>( &VClamp::setVin));
+    static ValueFinfo<VClamp, double> sensed("sensed",
+                              "Membrane potential read from compartment. The `VmOut` message"
+                               " of the Compartment object should be connected to `set_sensed`.",
+                             &VClamp::setVin,
+                             &VClamp::getVin);
 
     static Finfo* vclampFinfos[] = {
         currentOut(),
@@ -149,7 +151,7 @@ const Cinfo * VClamp::initCinfo()
         "\n"
         "\nUsage: Connect the `currentOut` source of VClamp to `injectMsg`"
         "\ndest of Compartment. Connect the `VmOut` source of Compartment to"
-        "\n`sensed` dest of VClamp. Either set `command` field to a"
+        "\n`set_sensed` dest of VClamp. Either set `command` field to a"
         "\nfixed value, or connect an appropriate source of command potential"
         "\n(like the `outputOut` message of an appropriately configured"
         "\nPulseGen) to `set_command` dest."
@@ -253,6 +255,12 @@ void VClamp::setVin(double value)
 {
     vIn_ = value;
 }
+
+double VClamp::getVin() const
+{
+    return vIn_;
+}
+
 
 void VClamp::setMode(unsigned int mode)
 {
