@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Fri Feb  1 19:30:45 2013 (+0530)
 // Version: 
-// Last-Updated: Mon Feb  4 19:06:29 2013 (+0530)
+// Last-Updated: Wed Feb  6 11:42:59 2013 (+0530)
 //           By: subha
-//     Update #: 244
+//     Update #: 260
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -51,6 +51,10 @@
 
 using namespace moose;
 
+const unsigned int VClamp::DERIVATIVE_ON_PV = 1;
+const unsigned int VClamp::PROPORTIONAL_ON_PV = 2;
+
+
 SrcFinfo1< double >* VClamp::currentOut()
 {
     static SrcFinfo1< double > currentOut("currentOut",
@@ -78,18 +82,40 @@ const Cinfo * VClamp::initCinfo()
                             "Shared message to receive Process messages from the scheduler",
                             processShared, sizeof(processShared) / sizeof(Finfo*));
 
-    static ValueFinfo< VClamp, double> holdingPotential("holdingPotential",
-                                                        "Holding potential of the clamp circuit.",
-                                                        &VClamp::setHoldingPotential,
-                                                        &VClamp::getHoldingPotential);
+    static ValueFinfo< VClamp, double> commandVoltage("commandVoltage",
+                                                        "Command voltage of the clamp circuit.",
+                                                        &VClamp::setCommandVoltage,
+                                                        &VClamp::getCommandVoltage);
+    static ValueFinfo< VClamp, unsigned int> mode("mode",
+                                                  "Working mode of the PID controller."
+                                                  "\nmode = 0, standard PID with proportional, integral and derivative"
+                                                  "\n\tall acting on the error."
+                                                  "\nmode = 1, derivative action based on command input"
+                                                  "\nmode = 2, proportional action and derivative action are based on"
+                                                  "\ncommand input.",
+                                                  &VClamp::setMode,
+                                                  &VClamp::getMode);
+    static ValueFinfo< VClamp, double> ti("ti",
+                                          "Integration time of the PID controller. Defaults to 1e9, i.e. integral"
+                                          "\naction is negligibly small.",
+                                          &VClamp::setTi,
+                                          &VClamp::getTi);
+    
+    static ValueFinfo< VClamp, double> td("td",
+                                          "Derivative time of the PID controller. This defaults to 0,"
+                                          "\ni.e. derivative action is unused.",
+                                          &VClamp::setTd,
+                                          &VClamp::getTd);
+    static ValueFinfo< VClamp, double> tau("tau",
+                                          "Time constant of the lowpass filter at input of the PID"
+                                           "\ncontroller. This smooths out abrupt changes in the input. Set it to "
+                                           "\n5 * dt or more to avoid overshoots.",
+                                          &VClamp::setTau,
+                                          &VClamp::getTau);
     static ValueFinfo< VClamp, double> gain("gain",
-                                            "Access resistance of the clamp circuit. The amount of current injected"
-                                            " is scaled down by this value. The default small value should suffice"
-                                            " for normal cases. Setting this incorrectly may cause oscillations. A"
-                                            " good default is Compartment.Cm/dt where dt is the timestep of"
-                                            " integration for the compartment.",
-                                                        &VClamp::setGain,
-                                                        &VClamp::getGain);
+                                          "Proportional gain of the PID controller.",
+                                          &VClamp::setGain,
+                                          &VClamp::getGain);    
     static ReadOnlyValueFinfo< VClamp, double> current("current",
                                             "The amount of current injected by the clamp into the membrane.",
                                             &VClamp::getCurrent);
@@ -102,10 +128,14 @@ const Cinfo * VClamp::initCinfo()
 
     static Finfo* vclampFinfos[] = {
         currentOut(),
-        &holdingPotential,
-        &gain,
+        &commandVoltage,
         &current,
         &voltageIn,
+        &mode,
+        &ti,
+        &td,
+        &tau,
+        &gain,
         &proc
     };
 
@@ -113,15 +143,26 @@ const Cinfo * VClamp::initCinfo()
         "Name", "VClamp",
         "Author", "Subhasis Ray",
         "Description", "Voltage clamp object for holding neuronal compartments at a specific"
-        " voltage."
+        " voltage. This implementation uses a builtin RC circuit to filter the"
+        "\ncommand input and then use a PID to bring the sensed voltage (Vm from"
+        "\ncompartment) to the filtered command potential."
         "\n"
-        "\nUsage: Connect the `currentOut` source of VClamp to `injectMsg` of"
+        "\nUsage: Connect the `currentOut` source of VClamp to `injectMsg`"
         "\ndest of Compartment. Connect the `VmOut` source of Compartment to"
-        "\n`voltageIn` dest of VClamp. Either set `holdingPotential` field to a"
+        "\n`voltageIn` dest of VClamp. Either set `command` field to a"
         "\nfixed value, or connect an appropriate source of command potential"
         "\n(like the `outputOut` message of an appropriately configured"
-        "\nPulseGen) to `set_holdingPotential` dest.",
+        "\nPulseGen) to `set_command` dest."
+        "\n The default settings for the RC filter and PID controller should be"
+        "\nfine. For step change in command voltage, good defaults with"
+        "integration time step dt are as follows:"
+        "\ntime constant of RC filter, tau = 5 * dt"
+        "\nproportional gain of PID, gain = Cm/dt where Cm is the membrane"
+        "\n\tcapacitance of the compartment"
+        "\nintegration time of PID, ti = dt"
+        "\nderivative time  of PID, td = 0",
     };
+    
     static Cinfo vclampCinfo(
         "VClamp",
         Neutral::initCinfo(),
@@ -136,7 +177,14 @@ const Cinfo * VClamp::initCinfo()
 
 static const Cinfo * vclampCinfo = VClamp::initCinfo();
 
-VClamp::VClamp(): vIn_(0.0), holding_(0.0), current_(0.0), gain_(1.0)
+VClamp::VClamp(): vIn_(0.0), command_(0.0), current_(0.0), mode_(0), ti_(0.0), td_(-1.0),
+                  Kp_(0.0),
+                  tau_(0.0),
+                  tdByDt_(1.0),
+                  dtByTi_(1.0),
+                  e_(0.0),
+                  e1_(0.0),
+                  e2_(0.0)
 {
 }
 
@@ -145,24 +193,55 @@ VClamp::~VClamp()
     ;
 }
 
-void VClamp::setHoldingPotential(double value)
+void VClamp::setCommandVoltage(double value)
 {
-    holding_ = value;
+    // e2_ = 0;
+    // e1_ = 0;
+    cmdIn_ = value;
 }
 
-double VClamp::getHoldingPotential() const
+double VClamp::getCommandVoltage() const
 {
-    return holding_;
+    return command_;
+}
+
+void VClamp::setTi(double value)
+{
+    ti_ = value;
+}
+
+double VClamp::getTi() const
+{
+    return ti_;
+}
+void VClamp::setTd(double value)
+{
+    td_ = value;
+}
+
+double VClamp::getTd() const
+{
+    return td_;
+}
+
+void VClamp::setTau(double value)
+{
+    tau_ = value;
+}
+
+double VClamp::getTau() const
+{
+    return tau_;
 }
 
 void VClamp::setGain(double value)
 {
-    gain_ = value;
+    Kp_ = value;
 }
 
 double VClamp::getGain() const
 {
-    return gain_;
+    return Kp_;
 }
 
 double VClamp::getCurrent() const
@@ -175,17 +254,73 @@ void VClamp::setVin(double value)
     vIn_ = value;
 }
 
+void VClamp::setMode(unsigned int mode)
+{
+    mode_ = mode;
+}
+
+unsigned int VClamp::getMode() const
+{
+    return mode_;
+}
+
 void VClamp::process(const Eref& e, ProcPtr p)
 {
-    current_ = (holding_ - vIn_) * gain_;
+    assert(ti_ > 0);
+    assert(td_ >= 0);
+    assert(tau_ > 0);
+    double dCmd = cmdIn_ - oldCmdIn_;
+    command_ = cmdIn_ + dCmd * ( 1 - tauByDt_) + (command_ - cmdIn_ + dCmd * tauByDt_) * expt_;
+    oldCmdIn_ = cmdIn_;                           
+    e_ = command_ - vIn_;
+    if (mode_ == 0){
+        current_ +=  Kp_ * ((1 + dtByTi_ + tdByDt_) * e_ - ( 1 + 2 * tdByDt_) * e1_ + tdByDt_ * e2_);
+        e2_ = e1_;
+        e1_ = e_;
+    } else if (mode_ == DERIVATIVE_ON_PV){ // Here the derivative error term is replaced by process variable
+        current_ +=  Kp_ * ((1 + dtByTi_) * e_ - e1_ + tdByDt_ * ( vIn_ - 2 * v1_ + e2_));
+        e2_ = v1_;
+        v1_ = vIn_;
+        e1_ = e_;        
+    } else if (mode_ == PROPORTIONAL_ON_PV){ // Here the proportional as well as the derivative error term is replaced by process variable
+        current_ +=  Kp_ * (vIn_ - v1_ + dtByTi_ * e_ + tdByDt_ * ( vIn_ - 2 * v1_ + e2_));
+        e2_ = v1_;
+        v1_ = vIn_;
+    }
     currentOut()->send(e, p->threadIndexInGroup, current_);
 }
 
 void VClamp::reinit(const Eref& e, ProcPtr p)
 {
 
-    vector<Id> compartments;
     vIn_ = 0.0;
+    v1_ = 0;
+    command_ = cmdIn_ = oldCmdIn_ = e_ = e1_ = e2_ = 0;
+    if (ti_ == 0){
+        ti_ = p->dt;
+    }
+    if (td_ < 0){
+        td_ = 0.0;
+    }
+    if (tau_ == 0.0){
+        tau_ = 5 * p->dt;
+    }
+    if (p->dt / tau_ > 1e-15){
+        expt_ = exp(-p->dt/tau_);
+    } else {
+        expt_ = 1 - p->dt/tau_;
+    }
+    tauByDt_ = tau_ / p->dt;
+    dtByTi_ = p->dt/ti_;
+    tdByDt_ = td_ / p->dt;
+    if (Kp_ == 0){
+        vector<Id> compartments;
+        unsigned int numComp = e.element()->getNeighbours(compartments, currentOut());
+        if (numComp > 0){
+            double Cm = Field<double>::get(compartments[0], "Cm");
+            Kp_ = Cm / p->dt;
+        }
+    }
 }
 
 // 
