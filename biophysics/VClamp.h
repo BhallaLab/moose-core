@@ -6,9 +6,9 @@
  * Maintainer: 
  * Created: Fri Feb  1 19:22:19 2013 (+0530)
  * Version: 
- * Last-Updated: Wed Feb  6 11:32:07 2013 (+0530)
+ * Last-Updated: Wed Feb  6 12:06:33 2013 (+0530)
  *           By: subha
- *     Update #: 53
+ *     Update #: 54
  * URL: 
  * Keywords: 
  * Compatibility: 
@@ -55,8 +55,8 @@ namespace moose
   public:
         VClamp();
         ~VClamp();
-        void setCommandVoltage(double v);
-        double getCommandVoltage() const;
+        void setCommand(double v);
+        double getCommand() const;
         void setVin(double v);
         double getCurrent() const;
         void setMode(unsigned int mode);

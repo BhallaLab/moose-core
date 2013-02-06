@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Jul 16 16:12:55 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Nov  8 17:32:09 2012 (+0530)
+# Last-Updated: Wed Feb  6 12:37:17 2013 (+0530)
 #           By: subha
-#     Update #: 487
+#     Update #: 496
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -33,6 +33,7 @@ import unittest
 from cell_test_util import setup_current_step_model, SingleCellCurrentStepTest
 import testutils
 import cells
+import moose
 from moose import utils
 
 simdt = 5e-6
@@ -64,6 +65,12 @@ class TestTCR(SingleCellCurrentStepTest):
     def testVmSeriesPlot(self):
         self.runsim(simtime, self.pulse_array)
         self.plot_vm()
+
+    def testVClamp(self):
+        clamp = moose.VClamp('%s/vclamp' % (self.model_container.path))
+        moose.connect(clamp, 'currentOut', self.cell.soma, 'injectMsg')
+        moose.connect(self.cell.soma, 'VmOut', clamp, 'sensed')
+        moose.connect(self.pulsegen, 'outputOut', clamp, 'command')
 
     def testChannelDensities(self):
         pass
