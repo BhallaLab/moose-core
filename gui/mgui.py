@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Jan 31 21:56:50 2013 (+0530)
+# Last-Updated: Thu Feb  7 14:24:47 2013 (+0530)
 #           By: subha
-#     Update #: 488
+#     Update #: 495
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -47,6 +47,7 @@
 import imp
 import inspect
 import sys
+sys.path.append('../python')
 import os
 from PyQt4 import QtGui,QtCore,Qt
 import config
@@ -354,9 +355,11 @@ class MWindow(QtGui.QMainWindow):
             fileNames = dialog.selectedFiles()
             for fileName in fileNames:
                 print 'Current plugin', self.plugin
-                moose.loadModel(str(fileName), str(targetText.text()))
+                modelRoot = str(targetText.text())
+                moose.loadModel(str(fileName), modelRoot)
                 self.plugin.setCurrentView('editor')
-                self.plugin.getEditorView().setModelRoot(str(targetText.text()))
+                self.plugin.modelRoot = modelRoot
+                self.plugin.getEditorView().getCentralWidget().setModelRoot(modelRoot)
 
 if __name__ == '__main__':
     # create the GUI application
