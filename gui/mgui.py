@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Feb  7 14:24:47 2013 (+0530)
+# Last-Updated: Fri Feb  8 15:14:00 2013 (+0530)
 #           By: subha
-#     Update #: 495
+#     Update #: 515
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -53,6 +53,14 @@ from PyQt4 import QtGui,QtCore,Qt
 import config
 import mplugin
 import moose
+from mload import loadFile
+
+# This maps model subtypes to corresponding plugin names. Should be
+# moved to a separate property file perhaps
+subtype_plugin_map = {
+    'genesis/kkit': 'kkit'
+}
+
 class MWindow(QtGui.QMainWindow):
     """The main window for MOOSE GUI.
 
@@ -100,6 +108,7 @@ class MWindow(QtGui.QMainWindow):
         self.connect(self.quitAction, QtCore.SIGNAL('triggered()'), self.quit)
         self.setPlugin('default', '/')        
 	#self.setPlugin('kkit','/kho')
+
     def quit(self):
         QtGui.qApp.closeAllWindows()        
     
@@ -356,10 +365,15 @@ class MWindow(QtGui.QMainWindow):
             for fileName in fileNames:
                 print 'Current plugin', self.plugin
                 modelRoot = str(targetText.text())
-                moose.loadModel(str(fileName), modelRoot)
+                print 'modelroot', modelRoot
+                ret = loadFile(str(fileName), modelRoot)
+                try:
+                    pluginName = subtype_plugin_map['%s/%s' % (ret['modeltype'], ret['subtype'])]
+                except KeyError:
+                    pluginName = 'default'
+                self.setPlugin(pluginName, ret['model'])
                 self.plugin.setCurrentView('editor')
-                self.plugin.modelRoot = modelRoot
-                self.plugin.getEditorView().getCentralWidget().setModelRoot(modelRoot)
+                # self.plugin.getEditorView().getCentralWidget().setModelRoot()
 
 if __name__ == '__main__':
     # create the GUI application
