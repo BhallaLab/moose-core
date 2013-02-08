@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Feb  6 16:25:52 2013 (+0530)
 # Version: 
-# Last-Updated: Wed Feb  6 17:45:01 2013 (+0530)
+# Last-Updated: Thu Feb  7 10:48:49 2013 (+0530)
 #           By: subha
-#     Update #: 140
+#     Update #: 146
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -47,15 +47,11 @@
 # Code:
 
 import numpy as np
-from matplotlib import pyplot as plt
-
 import sys
-sys.path.append('../../squid')
 sys.path.append('../../../python')
 import moose
 from moose import utils
 # import cells
-from squid import SquidAxon
 
 def vclamptest(compartment, vclamp, duration=50e-3, delay=150e-3, solver='ee', vhold=None, mc=None, dc=None, simdt=1e-5, plotdt=0.25e-3):
     """Do a series of voltage clamp experiemnts on compartment.
@@ -122,6 +118,11 @@ def vclamptest(compartment, vclamp, duration=50e-3, delay=150e-3, solver='ee', v
         "inject": ivec,
         "ts": ts,
         "injectArrays": iarrays}
+
+
+from matplotlib import pyplot as plt
+sys.path.append('../../squid')
+from squid import SquidAxon
 
 
 def test():
