@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Feb  8 11:29:36 2013 (+0530)
 # Version: 
-# Last-Updated: Fri Feb  8 13:16:20 2013 (+0530)
+# Last-Updated: Fri Feb  8 13:29:59 2013 (+0530)
 #           By: subha
-#     Update #: 105
+#     Update #: 136
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -163,37 +163,51 @@ def isKKIT(filename):
 # should take the filename as the single argument and return True or
 # False. Define new functions for new model type checks and add them
 # here.
-isTypeFunctions = {
+typeChecks = {
     'genesis': isGENESIS,
     'xml': isXML,
 }
 
-isSubtypeFunctions = {
+# These are "type/subtype": function maps for checking model subtype
+# New model types with subtypes should be added here with
+# corresponding checker function.
+subtypeChecks = {
     'genesis/kkit': isKKIT,
     'genesis/proto': isProto,
     'xml/neuroml': isNeuroML,
     'xml/sbml': isSBML,
 }
 
-# Mapping types to subtypes
+# Mapping types to list of subtypes.
 subtypes = {
     'genesis': ['kkit', 'proto'],
     'xml': ['neuroml', 'sbml'],
 }
 
-def getType(filename, mode=None):
+def getType(filename, mode='t'):
+    """Returns the type of the model in file `filename`. Returns None
+    if type is not known.
+
+    mode: 'b' for binary, 't' for text. Not used currently.
+
+    """    
     mtype = None
     msubtype = None
-    if mode == 'b':
-        return None
-    for typename, typefunc in isTypeFunctions.items():
-        if typefunc(filename):
-            return typename
+    if mode == 't':
+        for typename, typefunc in typeChecks.items():
+            if typefunc(filename):
+                return typename
+    return None
 
 def getSubtype(filename, typename):
-    for subtypefunc in isSubtypeFunctions[typename]:
+    """Returns what subtype of the specified `typename` is the model file.
+    None if could not resolve the subtype.
+    """
+    for subtype in subtypes[typename]:
+        subtypeFunc = subtypeChecks['%s/%s' % (typename, subtype)]
         if subtypefunc(filename):
-            return subtypefunc
+            return subtype
+    return None
     
 
 
