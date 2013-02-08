@@ -1,0 +1,201 @@
+# mtypes.py --- 
+# 
+# Filename: mtypes.py
+# Description: 
+# Author: 
+# Maintainer: 
+# Created: Fri Feb  8 11:29:36 2013 (+0530)
+# Version: 
+# Last-Updated: Fri Feb  8 12:57:25 2013 (+0530)
+#           By: subha
+#     Update #: 81
+# URL: 
+# Keywords: 
+# Compatibility: 
+# 
+# 
+
+# Commentary: 
+# 
+# Utility to detect the model type in a file
+# 
+# 
+
+# Change log:
+# 
+# 
+# 
+# 
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 3, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; see the file COPYING.  If not, write to
+# the Free Software Foundation, Inc., 51 Franklin Street, Fifth
+# Floor, Boston, MA 02110-1301, USA.
+# 
+# 
+
+# Code:
+
+import re
+import moose
+
+##!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+## !! This was stolen from
+## http://eli.thegreenplace.net/2011/10/19/perls-guess-if-file-is-text-or-binary-implemented-in-python/#id2
+
+import sys
+PY3 = sys.version_info[0] == 3
+
+# A function that takes an integer in the 8-bit range and returns
+# a single-character byte object in py3 / a single-character string
+# in py2.
+#
+int2byte = (lambda x: bytes((x,))) if PY3 else chr
+
+_text_characters = (
+        b''.join(int2byte(i) for i in range(32, 127)) +
+        b'\n\r\t\f\b')
+
+def istextfile(fileobj, blocksize=512):
+    """ Uses heuristics to guess whether the given file is text or binary,
+        by reading a single block of bytes from the file.
+        If more than 30% of the chars in the block are non-text, or there
+        are NUL ('\x00') bytes in the block, assume this is a binary file.
+
+        - Originally written by Eli Bendersky from the algorithm used
+          in Perl:
+          http://eli.thegreenplace.net/2011/10/19/perls-guess-if-file-is-text-or-binary-implemented-in-python/#id2
+    """
+    block = fileobj.read(blocksize)
+    if b'\x00' in block:
+        # Files with null bytes are binary
+        return False
+    elif not block:
+        # An empty file is considered a valid text file
+        return True
+
+    # Use translate's 'deletechars' argument to efficiently remove all
+    # occurrences of _text_characters from the block
+    nontext = block.translate(None, _text_characters)
+    return float(len(nontext)) / len(block) <= 0.30
+
+## Eli Bendersky till here !!
+##!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+# Dictionary of model description types and functions to detect them.
+# Fri Feb 8 11:07:41 IST 2013 - as of now we only recognize GENESIS .g
+# XML .xml extensions
+
+isGENESIS = lambda x: x.endswith('.g') or x.endswith('.p')
+isXML = lambda x: x.endswith('.xml')
+
+isProto = lambda x: x.endswith('.p')
+
+def isNeuroML(filename):
+    """TODO: implement"""
+    return  False
+
+def isSBML(filename):
+    """TODO: implement"""
+    return False
+
+def isKKIT(filename):
+    """Check if `filename` is a GENESIS/KINETIKIT file.
+    
+    """    
+    pattern = re.compile('include\s+kkit') # KKIT files must have "include kkit" statement somewhere    
+    with open(filename, 'r') as infile:
+        ccnt = 0 # Number of C-type comment starts - emulates a stack height
+        while True:
+            sentence = ''
+            contd = False # Flags if we are inside a multi-line entry
+            line = infile.readline()
+            if not line: # End of file
+                return False
+            line = line.strip()
+            # print '#', line
+            if line.find('//') == 0: # skip c++ style comment lines
+                # print 'c++ comment'
+                continue
+            # Skip C style multi-line comments
+            comment_start = line.find('/*')
+            if comment_start >= 0:
+                ccnt += 1
+            if ccnt == 1:
+                sentence = line[:comment_start]
+            while ccnt > 0 and line:
+                comment_end = line.find('*/')
+                if comment_end >= 0:
+                    ccnt -= 1
+                if ccnt == 0:
+                    line = line[comment_end+2:] # add the rest of the line to sentence
+                    break
+                line = infile.readline()
+            # Keep extending the sentence with next line if current
+            # line ends with continuation token '\'
+            contd = line.endswith('\\')
+            while line and contd:
+                sentence += ' ' + line[:-1].strip()
+                line = infile.readline()
+                if line:                    
+                    line = line.strip()
+                    contd = line.endswith('\\')
+            # if contd turned false, the last line came out of the
+            # while loop unprocessed
+            if line:
+                sentence += ' ' + line            
+            # print '>', sentence
+            if re.search(pattern, sentence):
+                return True
+    return False
+
+# Mapping model types to functions to check them.  These functions
+# should take the filename as the single argument and return True or
+# False. Define new functions for new model type checks and add them
+# here.
+isTypeFunctions = {
+    'genesis': isGENESIS,
+    'xml': isXML,
+}
+
+isSubtypeFunctions = {
+    'genesis/kkit': isKKIT,
+    'genesis/proto': isProto,
+    'xml/neuroml': isNeuroML,
+    'xml/sbml': isSBML,
+}
+
+# Mapping types to subtypes
+subtypes = {
+    'genesis': ['kkit', 'proto'],
+    'xml': ['neuroml', 'sbml'],
+}
+
+def getType(filename, mode=None):
+    mtype = None
+    msubtype = None
+    if mode == 'b':
+        return None
+    for typename, typefunc in isTypeFunctions.items():
+        if typefunc(filename):
+            return typename
+
+def getSubtype(filename, typename):
+    for subtypefunc in isSubtypeFunctions[typename]:
+        if subtypefunc(filename):
+            return subtypefunc
+    
+
+
+
+# 
+# mtypes.py ends here
