@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Feb  8 11:29:36 2013 (+0530)
 # Version: 
-# Last-Updated: Fri Feb  8 13:29:59 2013 (+0530)
+# Last-Updated: Fri Feb  8 14:43:43 2013 (+0530)
 #           By: subha
-#     Update #: 136
+#     Update #: 166
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -91,6 +91,32 @@ def istextfile(fileobj, blocksize=512):
 ## Eli Bendersky till here !!
 ##!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+
+def getType(filename, mode='t'):
+    """Returns the type of the model in file `filename`. Returns None
+    if type is not known.
+
+    mode: 'b' for binary, 't' for text. Not used currently.
+
+    """    
+    mtype = None
+    msubtype = None
+    if mode == 't':
+        for typename, typefunc in typeChecks.items():
+            if typefunc(filename):
+                return typename
+    return None
+
+def getSubtype(filename, typename):
+    """Returns what subtype of the specified `typename` is the model file.
+    None if could not resolve the subtype.
+    """
+    for subtype in subtypes[typename]:
+        subtypeFunc = subtypeChecks['%s/%s' % (typename, subtype)]
+        if subtypefunc(filename):
+            return subtype
+    return None
+    
 # Dictionary of model description types and functions to detect them.
 # Fri Feb 8 11:07:41 IST 2013 - as of now we only recognize GENESIS .g
 # XML .xml extensions
@@ -100,13 +126,32 @@ isXML = lambda x: x.endswith('.xml')
 
 isProto = lambda x: x.endswith('.p')
 
+import xml.dom.minidom as md
+
 def isNeuroML(filename):
-    """TODO: implement"""
+    """Check if a model is in neuroml format. An xml document is
+    considered a neuroml if the top level element is either
+    'networkml', morphml', 'channelml' or 'neuroml'.
+
+    """
+    doc = md.parse(filename)
+    for child in doc.documentElement.childNodes:
+        if child.nodeType == md.ELEMENT_NODE and \
+                (child.nodeName == 'networkml' or \
+                     child.nodeName == 'morphml' or \
+                     child.nodeName == 'channelml'or \
+                     child.nodeName == 'neuroml'):
+            return True
     return  False
 
 def isSBML(filename):
-    """TODO: implement"""
-    return False
+    """Check model in `filename` is in SBML format."""
+    doc = md.parse(filename)
+    for child in doc.documentElement.childNodes:
+        if child.nodeType == md.ELEMENT_NODE and \
+                child.nodeName == 'sbml':
+            return True
+    return  False
 
 def isKKIT(filename):
     """Check if `filename` is a GENESIS/KINETIKIT file.
@@ -183,32 +228,6 @@ subtypes = {
     'genesis': ['kkit', 'proto'],
     'xml': ['neuroml', 'sbml'],
 }
-
-def getType(filename, mode='t'):
-    """Returns the type of the model in file `filename`. Returns None
-    if type is not known.
-
-    mode: 'b' for binary, 't' for text. Not used currently.
-
-    """    
-    mtype = None
-    msubtype = None
-    if mode == 't':
-        for typename, typefunc in typeChecks.items():
-            if typefunc(filename):
-                return typename
-    return None
-
-def getSubtype(filename, typename):
-    """Returns what subtype of the specified `typename` is the model file.
-    None if could not resolve the subtype.
-    """
-    for subtype in subtypes[typename]:
-        subtypeFunc = subtypeChecks['%s/%s' % (typename, subtype)]
-        if subtypefunc(filename):
-            return subtype
-    return None
-    
 
 
 
