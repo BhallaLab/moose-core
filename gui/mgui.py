@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Fri Feb  8 15:14:00 2013 (+0530)
+# Last-Updated: Fri Feb  8 15:56:50 2013 (+0530)
 #           By: subha
-#     Update #: 515
+#     Update #: 516
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -371,7 +371,7 @@ class MWindow(QtGui.QMainWindow):
                     pluginName = subtype_plugin_map['%s/%s' % (ret['modeltype'], ret['subtype'])]
                 except KeyError:
                     pluginName = 'default'
-                self.setPlugin(pluginName, ret['model'])
+                self.setPlugin(pluginName, ret['model'].path)
                 self.plugin.setCurrentView('editor')
                 # self.plugin.getEditorView().getCentralWidget().setModelRoot()
 
