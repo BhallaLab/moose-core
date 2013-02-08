@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Feb  8 11:29:36 2013 (+0530)
 # Version: 
-# Last-Updated: Fri Feb  8 14:43:43 2013 (+0530)
+# Last-Updated: Fri Feb  8 15:14:36 2013 (+0530)
 #           By: subha
-#     Update #: 166
+#     Update #: 167
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -113,7 +113,7 @@ def getSubtype(filename, typename):
     """
     for subtype in subtypes[typename]:
         subtypeFunc = subtypeChecks['%s/%s' % (typename, subtype)]
-        if subtypefunc(filename):
+        if subtypeFunc(filename):
             return subtype
     return None
     
