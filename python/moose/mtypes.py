@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Feb  8 11:29:36 2013 (+0530)
 # Version: 
-# Last-Updated: Fri Feb  8 12:57:25 2013 (+0530)
+# Last-Updated: Fri Feb  8 13:16:20 2013 (+0530)
 #           By: subha
-#     Update #: 81
+#     Update #: 105
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -114,7 +114,6 @@ def isKKIT(filename):
     """    
     pattern = re.compile('include\s+kkit') # KKIT files must have "include kkit" statement somewhere    
     with open(filename, 'r') as infile:
-        ccnt = 0 # Number of C-type comment starts - emulates a stack height
         while True:
             sentence = ''
             contd = False # Flags if we are inside a multi-line entry
@@ -122,29 +121,31 @@ def isKKIT(filename):
             if not line: # End of file
                 return False
             line = line.strip()
-            # print '#', line
+            print 'read:', line
             if line.find('//') == 0: # skip c++ style comment lines
                 # print 'c++ comment'
                 continue
             # Skip C style multi-line comments
             comment_start = line.find('/*')
             if comment_start >= 0:
-                ccnt += 1
-            if ccnt == 1:
                 sentence = line[:comment_start]
-            while ccnt > 0 and line:
+                print 'cstart', comment_start, sentence
+            while comment_start >= 0 and line:
+                print '#', line
                 comment_end = line.find('*/')
                 if comment_end >= 0:
-                    ccnt -= 1
-                if ccnt == 0:
-                    line = line[comment_end+2:] # add the rest of the line to sentence
+                    comment_start = -1;
+                    line = line[comment_end+2:] # keep the rest of the line                    
                     break
                 line = infile.readline()
+                if line:
+                    line = line.strip()
             # Keep extending the sentence with next line if current
             # line ends with continuation token '\'
-            contd = line.endswith('\\')
+            if line:
+                contd = line.endswith('\\')
             while line and contd:
-                sentence += ' ' + line[:-1].strip()
+                sentence += ' ' + line[:-1]
                 line = infile.readline()
                 if line:                    
                     line = line.strip()
@@ -153,7 +154,7 @@ def isKKIT(filename):
             # while loop unprocessed
             if line:
                 sentence += ' ' + line            
-            # print '>', sentence
+            print '>', sentence
             if re.search(pattern, sentence):
                 return True
     return False
