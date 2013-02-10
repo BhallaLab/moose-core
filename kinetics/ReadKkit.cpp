@@ -503,8 +503,13 @@ Id ReadKkit::buildReac( const vector< string >& args )
 	Id reac = shell_->doCreate( "Reac", pa, tail, dim, true );
 	reacIds_[ clean.substr( 10 ) ] = reac; 
 
-	Field< double >::set( reac, "kf", kf );
-	Field< double >::set( reac, "kb", kb );
+	// Here is another hack: The native values stored in the reac are
+	// Kf and Kb, in conc units. However the 'clean' values from kkit
+	// are the number values kf and kb with a lower case. In the 
+	// function convertReacRatesToNumUnits we take the kf and kb and
+	// do proper conc scaling.
+	Field< double >::set( reac, "Kf", kf );
+	Field< double >::set( reac, "Kb", kb );
 
 	Id info = buildInfo( reac, reacMap_, args );
 
@@ -531,16 +536,18 @@ void ReadKkit::separateVols( Id pool, double vol )
 // This is not true in synapses, where they are adjacent.
 void ReadKkit::assignPoolCompartments()
 {
-	double max = 0.0;
-	unsigned int maxi = 0;
 	Id kinetics = Neutral::child( baseId_.eref(), "kinetics" );
 	assert( kinetics != Id() );
+	/*
+	double max = 0.0;
+	unsigned int maxi = 0;
 	for ( unsigned int i = 0 ; i < vols_.size(); ++i ) {
 		if ( max < vols_[i] ) {
 			max = vols_[i];
 			maxi = i;
 		}
 	}
+	*/
 	
 	// Field< double >::set( kinetics.eref(), "size", max );
 	vector< int > dims( 1, 1 );
