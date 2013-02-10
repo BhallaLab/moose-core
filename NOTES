@@ -20852,4 +20852,12 @@ Turns out quite a bit more fixing was needed to the
 SparseMatrix::reorderColumns. More recoding, more unit tests,
 now clears those and regression tests. The multicompartment reaction test
 is not crashing any more, but gives the wrong result. Checkin anyway to get 
-stuff on record.
+stuff on record. Checkin 4413.
+
+Tracked down an issue: the Kb for R3 is 300 rather than 0.1.
+But this is perhaps just a minor problem with the vol conversion calculations
+compared to kkit. I put in a whole lot of additional quantitative tests for
+parameter values, and they are ok especially reac rates in # terms where
+in doubt. So it may be the solver after all.
+
+==========================================================================
