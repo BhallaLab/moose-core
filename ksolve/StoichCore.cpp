@@ -1017,6 +1017,40 @@ bool matchReacCompts( pair< Id, Id > rc, const vector< Id >& compts )
 	return false;
 }
 
+void StoichCore::filterReacs( StoichCore* ret,
+		const vector< unsigned int >& matchingReacs	) const
+{
+	// Filter out reacs to be retained.
+	unsigned int offSolverRateOffset = numCoreRates_;
+	vector< unsigned int > mapOldToNewReacIndex( numCoreRates_ );
+	for ( unsigned int i = 0; i < numCoreRates_; ++i )
+		mapOldToNewReacIndex[i] = i;
+
+	for ( vector< unsigned int >::const_iterator 
+			i = matchingReacs.begin(); i != matchingReacs.end(); ++i ) {
+		Id reac = offSolverReacs_[ *i ];
+		unsigned int reacIndex = convertIdToReacIndex( reac );
+		unsigned int numRates = 1;
+		if ( reac.element()->cinfo()->isA( "ReacBase" ) ) {
+			if ( useOneWay_ )
+				numRates = 2;
+		} else if ( reac.element()->cinfo()->isA( "CplxEnzBase" ) ) {
+			if ( useOneWay_ )
+				numRates = 3;
+			else
+				numRates = 2;
+		}
+		for ( unsigned int j = 0; j < numRates; ++j ) {
+			ret->rates_[ offSolverRateOffset++ ] = rates_[ reacIndex + j ];
+			mapOldToNewReacIndex.push_back( reacIndex + j );
+		}
+	}
+	ret->rates_.resize( offSolverRateOffset );
+	ret->numReac_ = offSolverRateOffset;
+
+	ret->N_.reorderColumns( mapOldToNewReacIndex );
+}
+
 StoichCore* StoichCore::spawn( const vector< Id >& compts ) const
 {
 	assert( isMaster_ );
@@ -1036,29 +1070,7 @@ StoichCore* StoichCore::spawn( const vector< Id >& compts ) const
 	StoichCore* ret = new StoichCore( *this );
 	ret->isMaster_ = false;
 
-	// Filter out reacs to be retained.
-	unsigned int offSolverRateOffset = numCoreRates_;
-	for ( vector< unsigned int >::iterator 
-			i = matchingReacs.begin(); i != matchingReacs.end(); ++i ) {
-		Id reac = offSolverReacs_[ *i ];
-		unsigned int reacIndex = convertIdToReacIndex( reac );
-		unsigned int numRates = 1;
-		if ( reac.element()->cinfo()->isA( "ReacBase" ) ) {
-			if ( useOneWay_ )
-				numRates = 2;
-		} else if ( reac.element()->cinfo()->isA( "CplxEnzBase" ) ) {
-			if ( useOneWay_ )
-				numRates = 3;
-			else
-				numRates = 2;
-		}
-		for ( unsigned int j = 0; j < numRates; ++j ) {
-			ret->rates_[ offSolverRateOffset++ ] = 
-					rates_[ reacIndex + j ];
-		}
-	}
-	ret->rates_.resize( offSolverRateOffset );
-	ret->numReac_ = offSolverRateOffset;
+	filterReacs( ret, matchingReacs );
 
 	// Redo the offSolverPools_ vector with the subset from compts
 	ret->offSolverPools_.clear();

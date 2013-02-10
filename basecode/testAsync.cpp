@@ -1122,6 +1122,9 @@ void testSparseMatrix()
 	static unsigned int postN[] = { 1, 3, 4, 5, 6, 2, 7 };
 	static unsigned int preColIndex[] = { 0, 4, 0, 1, 2, 3, 4 };
 	static unsigned int postColIndex[] = { 0, 1, 1, 1, 2, 0, 2 };
+	
+	static unsigned int dropN[] = { 1, 6, 2, 7 };
+	static unsigned int dropColIndex[] = { 0, 1, 0, 1 };
 
 	SparseMatrix< unsigned int > m( 3, 5 );
 	unsigned int nRows = m.nRows();
@@ -1151,6 +1154,8 @@ void testSparseMatrix()
 	// printSparseMatrix( m );
 
 	m.transpose();
+	assert( m.nRows() == nCols );
+	assert( m.nColumns() == nRows );
 
 	k = 0;
 	for ( unsigned int i = 0; i < nCols; ++i ) {
@@ -1162,6 +1167,27 @@ void testSparseMatrix()
 		}
 	}
 	assert( k == 7 );
+
+	// Drop column 1.
+	vector< unsigned int > keepCols( 2 );
+	keepCols[0] = 0;
+	keepCols[1] = 2;
+	// cout << endl; m.print();
+	m.reorderColumns( keepCols );
+	// cout << endl; m.print();
+	assert( m.nRows() == nCols );
+	assert( m.nColumns() == 2 );
+
+	k = 0;
+	for ( unsigned int i = 0; i < nCols; ++i ) {
+		unsigned int num = m.getRow( i, &n, &c );
+		for ( unsigned int j = 0; j < num; ++j ) {
+			assert( n[j] == dropN[ k ] );
+			assert( c[j] == dropColIndex[ k ] );
+			k++;
+		}
+	}
+	assert( k == 4 );
 
 	cout << "." << flush;
 }
@@ -1200,6 +1226,20 @@ void testSparseMatrix2()
 	for ( unsigned int i = 0; i < 10; ++i )
 		for ( unsigned int j = 0; j < 10; ++j )
 			assert (n.get( i, j ) ==  m[i][j] );
+
+	///////////////////////////////////////////////////////////////
+	// Drop columns 2 and 7.
+	///////////////////////////////////////////////////////////////
+	static unsigned int init[] = {0, 1, 3, 4, 5, 6, 8, 9};
+	vector< unsigned int > keepCols( 
+					init, init + sizeof( init ) / sizeof( unsigned int ) );
+	n.reorderColumns( keepCols );
+	for ( unsigned int i = 0; i < 10; ++i ) {
+		for ( unsigned int j = 0; j < 8; ++j ) {
+			unsigned int k = keepCols[j];
+			assert (n.get( i, j ) ==  m[i][k] );
+		}
+	}
 	/*
 	n.printInternal();
 	cout << "before transpose\n";
@@ -1215,39 +1255,65 @@ void testSparseMatrix2()
 	cout << "." << flush;
 }
 
-/** 
- * Need to recast this for the intact version of sparse matrix 
- * balancing.
- */
-void testSparseMatrixBalance()
+void testSparseMatrixReorder()
 {
-/*
-	SparseMatrix< unsigned int > m( 3, 6 );
-	unsigned int nRows = m.nRows();
-	unsigned int nCols = m.nColumns();
+	SparseMatrix< int > n( 2, 1 );
+	n.set( 0, 0, -1 );
+	n.set( 1, 0, 1 );
+	vector< unsigned int > colOrder( 1, 0 ); // Keep the original as is
+	n.reorderColumns( colOrder ); // This case failed in an earlier version
+	assert( n.get( 0, 0 ) == -1 );
+	assert( n.get( 1, 0 ) == 1 );
 
-	for ( unsigned int i = 0; i < nRows; ++i ) {
-		for ( unsigned int j = 0; j < nCols; ++j ) {
-			m.set( i, j, 100 * i + j );
+	unsigned int nrows = 4;
+	unsigned int ncolumns = 5;
+
+	//////////////////////////////////////////////////////////////
+	// Test a reordering
+	//////////////////////////////////////////////////////////////
+	n.setSize( nrows, ncolumns );
+	for ( unsigned int i = 0; i < nrows; ++i ) {
+		for ( unsigned int j = 0; j < ncolumns; ++j ) {
+			int x = i * 10 + j;
+			n.set( i, j, x );
+		}
+	}
+	colOrder.resize( ncolumns );
+	colOrder[0] = 3;
+	colOrder[1] = 2;
+	colOrder[2] = 0;
+	colOrder[3] = 4;
+	colOrder[4] = 1;
+	n.reorderColumns( colOrder );
+	assert( n.nRows() == nrows );
+	assert( n.nColumns() == ncolumns );
+	for ( unsigned int i = 0; i < nrows; ++i ) {
+		for ( unsigned int j = 0; j < ncolumns; ++j ) {
+			int x = i * 10 + colOrder[j];
+			assert( n.get( i, j ) == x );
 		}
 	}
 
-	// printSparseMatrix( m );
-	sparseMatrixBalance( 2, m );
-	// printSparseMatrix( m );
-	
-	for ( unsigned int i = 0; i < nRows; ++i ) {
-		unsigned int threadNum = i % 2;
-		for ( unsigned int j = 0; j < nCols; ++j ) {
-			if ( ( 2 * j ) / nCols == threadNum )
-				assert( m.get( i, j ) ==  100 * ( i / 2 ) + j );
-			else
-				assert( m.get( i, j ) ==  0 );
+	//////////////////////////////////////////////////////////////
+	// Test reordering + eliminating some columns
+	//////////////////////////////////////////////////////////////
+	// Put back in original config
+	for ( unsigned int i = 0; i < nrows; ++i ) {
+		for ( unsigned int j = 0; j < ncolumns; ++j ) {
+			unsigned int x = i * 10 + j;
+			n.set( i, j, x );
 		}
 	}
-
-	cout << "." << flush;
-	*/
+	colOrder.resize( 2 );
+	colOrder[0] = 3;
+	colOrder[1] = 2;
+	n.reorderColumns( colOrder );
+	assert( n.nRows() == nrows );
+	assert( n.nColumns() == 2 );
+	for ( unsigned int i = 0; i < nrows; ++i ) {
+		assert( n.get( i, 0 ) == static_cast< int >( i * 10 + 3 ) );
+		assert( n.get( i, 1 ) == static_cast< int >( i * 10 + 2 ) );
+	}
 }
 
 void printGrid( Element* e, const string& field, double min, double max )
@@ -2938,7 +3004,7 @@ void testAsync( )
 	testSendSpike();
 	testSparseMatrix();
 	testSparseMatrix2();
-	// testSparseMatrixBalance();
+	testSparseMatrixReorder();
 	testSparseMsg();
 	testUpValue();
 	testSharedMsg();
