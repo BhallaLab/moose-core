@@ -287,6 +287,14 @@ class StoichCore
 		 * compartments.
 		 */
 		StoichCore* spawn( const vector< Id >& compts ) const;
+
+		/**
+		 * filterReacs: Helper function used in 'spawn'. Filters 
+		 * out the reacs to be retained in the new 'ret' instance 
+		 * of StoichCore. 
+		 */
+		void filterReacs( StoichCore* ret, 
+			const vector< unsigned int >& matchingReacs ) const;
 		
 		//////////////////////////////////////////////////////////////////
 		static const unsigned int PoolIsNotOnSolver;

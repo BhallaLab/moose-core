@@ -407,6 +407,14 @@ void testGslStoich()
 			Field< unsigned int >::get( solver, "numVarPools" );
 	assert( nVarPools == 2 );
 	GslStoich* gs = reinterpret_cast< GslStoich* >( solver.eref().data() );
+	// gs->coreStoich()->print();
+	assert( gs->coreStoich()->getNumRates() == 1 );
+	assert( gs->coreStoich()->getNumCoreRates() == 1 );
+	assert( gs->ode().size() == 1 );
+	assert( gs->ode()[0].stoich_->getNumRates() == 1 );
+	assert( gs->ode()[0].stoich_->getNumCoreRates() == 1 );
+	// gs->ode()[0].stoich_->print();
+
 	ProcInfo p;
 	p.dt = 1;
 	p.currTime = 0;
