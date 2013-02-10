@@ -27,6 +27,13 @@
 #include "../ksolve/OdeSystem.h"
 #include "../ksolve/GslStoich.h"
 
+void checkField( const string& path, const string& field, double value )
+{
+	Id id( path );
+	assert( id != Id() );
+	double x = Field< double >::get( id, field );
+	assert( doubleEq( x, value ) );
+}
 
 void rtTestMultiCompartmentReaction()
 {
@@ -87,7 +94,7 @@ void rtTestMultiCompartmentReaction()
 	assert( gs->ode()[2].stoich_->getNumVarPools() == 2 );
 	assert( gs->ode()[2].stoich_->getNumProxyPools() == 1 );
 	assert( gs->ode()[2].stoich_->getNumRates() == 3 );
-	/// Should set up and check diffusion stuff.
+
 	////////////////////////////////////////////////////////////////
 	Id gsB( "/model/compartment_1/stoich" );
 	assert( gsB != Id() );
@@ -145,6 +152,38 @@ void rtTestMultiCompartmentReaction()
 	assert( gs->ode()[0].stoich_->getNumRates() == 1 );
 
 	////////////////////////////////////////////////////////////////
+	// Check out rates
+	////////////////////////////////////////////////////////////////
+
+	checkField( "/model/kinetics/R1", "Kf", 0.1 ); 
+	checkField( "/model/kinetics/R1", "Kb", 0.1 ); 
+	checkField( "/model/kinetics/R2", "Kf", 0.1 ); 
+	checkField( "/model/kinetics/R2", "Kb", 0.1 ); 
+	checkField( "/model/kinetics/R3", "Kf", 0.1 ); 
+	checkField( "/model/kinetics/R3", "kb", 1.660572e-7 );
+	// checkField( "/model/kinetics/R3", "Kb", 0.1 ); 
+	checkField( "/model/kinetics/R4", "Kf", 0.1 ); 
+	checkField( "/model/kinetics/R4", "Kb", 0.1 ); 
+	checkField( "/model/compartment_1/R5", "Kf", 0.1 ); 
+	checkField( "/model/compartment_1/R5", "Kb", 0.1 ); 
+	checkField( "/model/compartment_3/R8", "Kf", 0.1 ); 
+	checkField( "/model/compartment_3/R8", "Kb", 0.1 ); 
+	checkField( "/model/compartment_2/R9", "Kf", 0.1 ); 
+	checkField( "/model/compartment_2/R9", "Kb", 0.1 ); 
+	checkField( "/model/compartment_1/M3/R6and7", "kcat", 0.1 ); 
+	checkField( "/model/compartment_1/M3/R6and7", "k1", 2.767587e-7 ); 
+	checkField( "/model/compartment_1/M3/R6and7", "k2", 0.4 );
+	checkField( "/model/compartment_1/M3/R6and7", "Km", 0.001 - 8e-9 ); 
+	////////////////////////////////////////////////////////////////
+	// Check out concs
+	////////////////////////////////////////////////////////////////
+	checkField( "/model/kinetics/M1", "concInit", 0.001 - 1.6666e-8 ); // mM
+	checkField( "/model/compartment_1/M1", "concInit", 0.001 ); // mM
+	checkField( "/model/compartment_2/M1", "concInit", 0.001 ); // mM
+	checkField( "/model/compartment_3/M1", "concInit", 0.001 ); // mM
+	
+	////////////////////////////////////////////////////////////////
+	/// Should set up and check diffusion stuff.
 	for ( unsigned int i = 0; i < 10; ++i )
 		shell->doSetClock( i, 1.0 );
 	shell->doReinit();
