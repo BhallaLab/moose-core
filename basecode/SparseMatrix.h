@@ -62,12 +62,13 @@ template < class T > class SparseMatrix
 		 */
 		void setSize( unsigned int nrows, unsigned int ncolumns ) {
 			if ( nrows < SM_MAX_ROWS && ncolumns < SM_MAX_COLUMNS ) {
-				N_.resize( 0 );
+				N_.clear();
 				N_.reserve( 2 * nrows );
 				nrows_ = nrows;
 				ncolumns_ = ncolumns;
+				rowStart_.clear();
 				rowStart_.resize( nrows + 1, 0 );
-				colIndex_.resize( 0 );
+				colIndex_.clear();
 				colIndex_.reserve( 2 * nrows );
 			} else {
 				cerr << "Error: SparseMatrix::setSize( " <<
@@ -290,6 +291,8 @@ template < class T > class SparseMatrix
 
 		/**
 		 * Adds a row to the sparse matrix, must go strictly in row order.
+		 * This is dangerous as there is a test for an empty entry ~0.
+		 * For many types, ~0 may actually be a perfectly legal entry.
 		 */
 		void addRow( unsigned int rowNum, const vector< T >& row ) {
 			assert( rowNum < nrows_ );
@@ -439,6 +442,54 @@ template < class T > class SparseMatrix
 			for ( unsigned int i = 0; i < N_.size(); ++i )
 				cout << N_[i] << "	";
 			cout << endl;
+		}
+
+		/**
+		 * Reorder columns from the matrix based on a map of old to new
+		 * column indices. 
+		 * newCols contains the indices of columns from the old matrix
+		 * that are to be retained, in the order that they will occupy 
+		 * in the new
+		 * matrix. It can have fewer or more indices than the original.
+		 */
+		void reorderColumns( const vector< unsigned int >& colMap )
+		{
+			unsigned int numNewColumns = colMap.size();;
+			SparseMatrix< T > old = *this;
+			setSize( nrows_, numNewColumns );
+			if ( numNewColumns == 0 )
+				return;
+			for ( unsigned int i = 0; i < old.nrows_; ++i ) {
+				const T* entry;
+			   	const unsigned int* colIndex;
+				unsigned int n = old.getRow( i, &entry, &colIndex );
+				// Make the full-length vectors of the new row.
+				vector< T > newEntry( numNewColumns );
+				vector< bool > isNewEntry( numNewColumns, false );
+				unsigned int numOccupiedEntries = 0;
+				for ( unsigned int j = 0; j < n; ++j ) {
+					assert( colIndex[j] < old.ncolumns_ );
+					for ( unsigned int q = 0; q < colMap.size(); ++q ) {
+						if ( colMap[q] == colIndex[j] ) {
+							isNewEntry[q] = true;
+							newEntry[q] = entry[j];
+							++numOccupiedEntries;
+						}
+					}
+				}
+				// Compress the full-length vector into the sparse form
+				vector< T > sparseEntry;
+				vector< unsigned int > sparseCols;
+				sparseEntry.reserve( numOccupiedEntries );
+				sparseCols.reserve( numOccupiedEntries );
+				for ( unsigned int q = 0; q < numNewColumns; ++q ) {
+					if ( isNewEntry[q] ) {
+						sparseEntry.push_back( newEntry[q] );
+						sparseCols.push_back( q );
+					}
+				}
+				addRow( i, sparseEntry, sparseCols );
+			}
 		}
 
 	protected:

@@ -144,6 +144,28 @@ void rtTestMultiCompartmentReaction()
 	assert( gs->ode()[0].stoich_->getNumProxyPools() == 0 );
 	assert( gs->ode()[0].stoich_->getNumRates() == 1 );
 
+	////////////////////////////////////////////////////////////////
+	for ( unsigned int i = 0; i < 10; ++i )
+		shell->doSetClock( i, 1.0 );
+	shell->doReinit();
+	shell->doStart( 100.0 );
+
+	bool ok = SetGet2< string, string >::set(
+		Id( "/model/graphs/conc1/M2.Co" ), "xplot", "check.plot", "M2.plot" );
+	assert( ok );
+	ok = SetGet2< string, string >::set(
+		Id( "/model/graphs/conc1/M3.Co" ), "xplot", "check.plot", "M3.plot" );
+	assert( ok );
+	ok = SetGet2< string, string >::set(
+		Id( "/model/graphs/conc1/M6.Co" ), "xplot", "check.plot", "M6.plot" );
+	assert( ok );
+	ok = SetGet2< string, string >::set(
+		Id( "/model/graphs/conc2/M4.Co" ), "xplot", "check.plot", "M4.plot" );
+	assert( ok );
+	ok = SetGet2< string, string >::set(
+		Id( "/model/graphs/conc2/M5.Co" ), "xplot", "check.plot", "M5.plot" );
+	assert( ok );
+	////////////////////////////////////////////////////////////////
 
 	shell->doDelete( model );
 	cout << "." << flush;

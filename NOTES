@@ -20833,4 +20833,23 @@ Checkin 4399.
 Added more detail to MultiCompartment test. It is gratifying, the system has
 correctly split up the reaction system.
 
+Next to run the calculations.
+
 ==========================================================================
+8 Feb
+Problem turns out to be that the StoichCore::spawn function does not
+clean out the appropriate columns (reacs) out of the N_ matrix.
+It should do so to match to the change in the reacs.
+
+Working on fixing the SparseMatrix::dropColumns function.
+==========================================================================
+9 Feb.
+Seems like I've fixed the SparseMatrix::reorderColumns. Clears unit test.
+
+==========================================================================
+10 Feb 2013
+Turns out quite a bit more fixing was needed to the 
+SparseMatrix::reorderColumns. More recoding, more unit tests,
+now clears those and regression tests. The multicompartment reaction test
+is not crashing any more, but gives the wrong result. Checkin anyway to get 
+stuff on record.
