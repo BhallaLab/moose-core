@@ -130,6 +130,17 @@ const Cinfo* CubeMesh::initCinfo()
 			&CubeMesh::getPreserveNumEntries
 		);
 
+		static ValueFinfo< CubeMesh, bool > alwaysDiffuse(
+			"alwaysDiffuse",
+			"Flag. When it is true, the mesh matches up sequential "
+			"mesh entries for diffusion and chmestry. This is regardless "
+		   	"of spatial location, and is guaranteed to set up at least "
+			"the home reaction system"
+			"Default is false",
+			&CubeMesh::setAlwaysDiffuse,
+			&CubeMesh::getAlwaysDiffuse
+		);
+
 		static ElementValueFinfo< CubeMesh, vector< double > > coords(
 			"coords",
 			"Set all the coords of the cuboid at once. Order is:"
@@ -186,6 +197,7 @@ const Cinfo* CubeMesh::initCinfo()
 	static Finfo* cubeMeshFinfos[] = {
 		&isToroid,		// Value
 		&preserveNumEntries,		// Value
+		&alwaysDiffuse,		// Value
 		&x0,			// Value
 		&y0,			// Value
 		&z0,			// Value
@@ -228,6 +240,7 @@ CubeMesh::CubeMesh()
 	:
 		isToroid_( 0 ),
 		preserveNumEntries_( 1 ),
+		alwaysDiffuse_( false ),
 		x0_( 0.0 ),
 		y0_( 0.0 ),
 		z0_( 0.0 ),
@@ -541,6 +554,17 @@ void CubeMesh::setPreserveNumEntries( bool v )
 bool CubeMesh::getPreserveNumEntries() const
 {
 	return preserveNumEntries_;
+}
+
+void CubeMesh::setAlwaysDiffuse( bool v )
+{
+	alwaysDiffuse_ = v;
+}
+
+bool CubeMesh::getAlwaysDiffuse() const
+{
+	// alwaysDiffuse is normally false.
+	return alwaysDiffuse_;
 }
 
 void CubeMesh::innerSetCoords( const vector< double >& v)
@@ -1098,7 +1122,10 @@ void CubeMesh::matchMeshEntries( const ChemMesh* other,
 	const CubeMesh* cm = dynamic_cast< const CubeMesh* >( other );
 
 	if ( cm ) {
-		matchCubeMeshEntries( cm, ret );
+		if ( alwaysDiffuse_ )
+			matchAllEntries( cm, ret );
+		else
+			matchCubeMeshEntries( cm, ret );
 		/*
 		if ( compareMeshSpacing( cm ) == 0 ) { // Equal spacing.
 				matchSameSpacing( cm, ret );
@@ -1443,6 +1470,23 @@ void CubeMesh::matchCubeMeshEntries( const CubeMesh* other,
 	// Scan through the VoxelJunctions and populate their diffScale field
 	setDiffScale( other, ret );
 	sort( ret.begin(), ret.end() );
+}
+
+/**
+ * Version that assumes all voxels are in contact and able to diffuse
+ * with matching voxels on other mesh
+ */
+void CubeMesh::matchAllEntries( const CubeMesh* other,
+	   vector< VoxelJunction >& ret ) const
+{
+	ret.clear();
+	unsigned int min = m2s_.size();
+	if ( min > other->m2s_.size() )
+		min = other->m2s_.size();
+	ret.resize( min );
+	for ( unsigned int i = 0; i < min; ++i ) {
+		ret[i] = VoxelJunction( i, i );
+	}
 }
 
 void CubeMesh::setDiffScale( const CubeMesh* other,

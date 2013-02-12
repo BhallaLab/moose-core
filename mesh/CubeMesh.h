@@ -75,6 +75,9 @@ class CubeMesh: public ChemMesh
 		void setPreserveNumEntries( bool v );
 		bool getPreserveNumEntries() const;
 
+		void setAlwaysDiffuse( bool v );
+		bool getAlwaysDiffuse() const;
+
 		//////////////////////////////////////////////////////////////////
 		// FieldElement assignment stuff for MeshEntries
 		//////////////////////////////////////////////////////////////////
@@ -165,6 +168,14 @@ class CubeMesh: public ChemMesh
 		void matchCubeMeshEntries( const CubeMesh* other,
 			vector< VoxelJunction >& ret ) const;
 
+		/**
+		 * Dumbed-down version that does mesh matching based only on index.
+		 * Useful for non-spatial matching and single-voxel systems.
+		 */
+		void matchAllEntries( const CubeMesh* other,
+			vector< VoxelJunction >& ret ) const;
+
+
 		/*
 		/// Utility function for special case in matchMeshEntries.
 		void matchSameSpacing( const CubeMesh* other,
@@ -252,6 +263,7 @@ class CubeMesh: public ChemMesh
 	private:
 		bool isToroid_; ///Flag: Should the ends loop around mathemagically?
 		bool preserveNumEntries_; ///Flag: Should dx change or nx, with vol?
+		bool alwaysDiffuse_; ///Flag: should all voxels diffuse to any tgt?
 
 		double x0_; /// coords
 		double y0_; /// coords
