@@ -641,6 +641,7 @@ Id SimManager::buildSolverOnCompt( Id compt, const vector< Id >& elist,
 	vector< int > dims( 1, 1 );
 
 
+	Field< bool >::set( compt, "alwaysDiffuse", true );
 	Id stoich = shell->doCreate( "GslStoich", compt, "stoich", dims );
 	SetGet1< vector< Id > >::set( stoich, "elist", elist );
 

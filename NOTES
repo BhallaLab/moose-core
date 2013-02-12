@@ -20860,4 +20860,46 @@ compared to kkit. I put in a whole lot of additional quantitative tests for
 parameter values, and they are ok especially reac rates in # terms where
 in doubt. So it may be the solver after all.
 
+M5 goes to 0.5 uM
+M4 goes to 0.5 uM
+M6 stays at 0.
+M3 stays at 0
+M2 goes to 0.5 uM.
+
+This is precisely what we get if there is no communication at all between
+the compartments.
+
+Turned out the pools were indeed referring to the local-only solver, 
+ode index 0. But when I hard-set them to the correct one, the 
+molecules are drained out of the first compartment without actually making it
+to the other compts.
+Need to work out exactly what the transfer ops should be, and make sure
+they happen. Need to follow process.
+
+==========================================================================
+11 Feb
+Did so. Zero size vectors are being sent out from compartment A to tell the
+others about the delta. As far as I could tell, there are no messages coming
+from the compartments having pools participating in reactions located in other
+compartments. Need to have the regression test explicitly check setup of
+all the messaging and Junction stuff.
+==========================================================================
+12 Feb
+Worked through the various steps of the setup. Turns out it is doing all OK,
+but the spatial criteria for junctions are failing, which is actually 
+the correct thing to do. 
+
+One option is to make a "PointMesh" or "WellStirredMesh" (the latter is more
+accurate) and have it able to diffuse and react with any other overlapping one.
+
+Another option is to have a flag on the CubeMesh to make it more forgiving
+of the overlapping cases.
+
+Now the cross-compt reacs occur, but rates are wrong. I've checked with
+a lower dt, still doesn't help.
+
+Simplified multicompt_reac.g model by reducing most reac rates to
+nearly zero, only R3 remains what it was. Now the GENESIS and MOOSE
+calculations match. From here, incrementally put back stuff.
+
 ==========================================================================

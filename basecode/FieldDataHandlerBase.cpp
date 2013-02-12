@@ -137,6 +137,8 @@ DataId FieldDataHandlerBase::pathDataId(
 {
 	if ( indices.size() != static_cast< unsigned int >( pathDepth_ ) + 1 )
 	  return DataId::bad();
+	if ( indices[pathDepth_].size() > 0 )
+		return DataId( indices[pathDepth_][0] );
 	return DataId( 0 );
 }
 
