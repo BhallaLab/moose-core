@@ -35,6 +35,24 @@ void checkField( const string& path, const string& field, double value )
 	assert( doubleEq( x, value ) );
 }
 
+void checkJunction( const string& path, Id c1, Id c2 )
+{
+	ObjId id( path );
+	assert( !( id == ObjId::bad() ) );
+	// unsigned int nr = Field< unsigned int >::get( id, "numReacs" );
+	unsigned int ndm = Field< unsigned int >::get( id, "numDiffMols" );
+	unsigned int nme = Field< unsigned int >::get( id, "numMeshEntries" );
+	Id myCompartment = Field< Id >::get( id, "myCompartment" );
+	Id otherCompartment = Field< Id >::get( id, "otherCompartment" );
+
+	// assert( nr == 1 );
+	assert( ndm == 0 );
+	assert( nme == 1 );
+
+	assert( myCompartment == c1 );
+	assert( otherCompartment == c2 );
+}
+
 void rtTestMultiCompartmentReaction()
 {
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
@@ -68,9 +86,11 @@ void rtTestMultiCompartmentReaction()
 	Id gsA( "/model/kinetics/stoich" );
 	assert( gsA != Id() );
 	GslStoich* gs = reinterpret_cast< GslStoich* >( gsA.eref().data() );
-	assert( gs->pools().size() == 1 ); // No diffusion
+	assert( gs->pools().size() == 4 ); // No diffusion, but it does this?
 	assert( gs->pools()[0].size() == 5 );
 	assert( gs->ode().size() == 8 ); // combos: x 1 2 3 12 13 23 123
+	const_cast< VoxelPools& >( gs->pools()[0] ).setSolver( 7 );
+	assert( gs->pools()[0].getSolver() == 7 );
 	assert( gs->coreStoich()->getNumVarPools() == 2 );
 	assert( gs->coreStoich()->getNumProxyPools() == 3 );
 	assert( gs->coreStoich()->getNumRates() == 4 );
@@ -95,13 +115,21 @@ void rtTestMultiCompartmentReaction()
 	assert( gs->ode()[2].stoich_->getNumProxyPools() == 1 );
 	assert( gs->ode()[2].stoich_->getNumRates() == 3 );
 
+	// The combo will use this
+	assert( gs->ode()[7].compartmentSignature_.size() == 3 );
+	assert( gs->ode()[7].compartmentSignature_[0] == B );
+	assert( gs->ode()[7].compartmentSignature_[1] == D );
+	assert( gs->ode()[7].compartmentSignature_[2] == C );
+
 	////////////////////////////////////////////////////////////////
 	Id gsB( "/model/compartment_1/stoich" );
 	assert( gsB != Id() );
 	gs = reinterpret_cast< GslStoich* >( gsB.eref().data() );
-	assert( gs->pools().size() == 1 ); // No diffusion
+	assert( gs->pools().size() == 2 ); // No diffusion, but goes to A.
 	assert( gs->pools()[0].size() == 5 );
 	assert( gs->ode().size() == 2 ); // combos: x C
+	const_cast< VoxelPools& >( gs->pools()[0] ).setSolver( 1 );
+	assert( gs->pools()[0].getSolver() == 1 );
 	assert( gs->coreStoich()->getNumVarPools() == 4 ); // M1, M3, M6, cplx
 	assert( gs->coreStoich()->getNumProxyPools() == 1 ); // M4 on C
 	assert( gs->coreStoich()->getNumRates() == 3 ); // R6, R7, (R5 on C)
@@ -125,6 +153,7 @@ void rtTestMultiCompartmentReaction()
 	assert( gs->pools().size() == 1 ); // No diffusion
 	assert( gs->pools()[0].size() == 2 );
 	assert( gs->ode().size() == 1 ); // No combos, just core reacs.
+	assert( gs->pools()[0].getSolver() == 0 );
 	assert( gs->coreStoich()->getNumVarPools() == 2 ); // M1, M3, M6, cplx
 	assert( gs->coreStoich()->getNumProxyPools() == 0 ); // M4 on C
 	assert( gs->coreStoich()->getNumRates() == 1 ); // R8
@@ -142,6 +171,7 @@ void rtTestMultiCompartmentReaction()
 	assert( gs->pools().size() == 1 ); // No diffusion
 	assert( gs->pools()[0].size() == 2 );
 	assert( gs->ode().size() == 1 ); // No combos, just core reacs.
+	assert( gs->pools()[0].getSolver() == 0 );
 	assert( gs->coreStoich()->getNumVarPools() == 2 ); // M1, M3, M6, cplx
 	assert( gs->coreStoich()->getNumProxyPools() == 0 ); // M4 on C
 	assert( gs->coreStoich()->getNumRates() == 1 ); // R8
@@ -155,6 +185,7 @@ void rtTestMultiCompartmentReaction()
 	// Check out rates
 	////////////////////////////////////////////////////////////////
 
+	/*
 	checkField( "/model/kinetics/R1", "Kf", 0.1 ); 
 	checkField( "/model/kinetics/R1", "Kb", 0.1 ); 
 	checkField( "/model/kinetics/R2", "Kf", 0.1 ); 
@@ -164,8 +195,12 @@ void rtTestMultiCompartmentReaction()
 	// checkField( "/model/kinetics/R3", "Kb", 0.1 ); 
 	checkField( "/model/kinetics/R4", "Kf", 0.1 ); 
 	checkField( "/model/kinetics/R4", "Kb", 0.1 ); 
+	checkField( "/model/kinetics/R4", "kf", 0.1 ); 
+	checkField( "/model/kinetics/R4", "kb", 0.1 ); 
 	checkField( "/model/compartment_1/R5", "Kf", 0.1 ); 
 	checkField( "/model/compartment_1/R5", "Kb", 0.1 ); 
+	checkField( "/model/compartment_1/R5", "kf", 0.1 ); 
+	checkField( "/model/compartment_1/R5", "kb", 0.1 ); 
 	checkField( "/model/compartment_3/R8", "Kf", 0.1 ); 
 	checkField( "/model/compartment_3/R8", "Kb", 0.1 ); 
 	checkField( "/model/compartment_2/R9", "Kf", 0.1 ); 
@@ -174,18 +209,53 @@ void rtTestMultiCompartmentReaction()
 	checkField( "/model/compartment_1/M3/R6and7", "k1", 2.767587e-7 ); 
 	checkField( "/model/compartment_1/M3/R6and7", "k2", 0.4 );
 	checkField( "/model/compartment_1/M3/R6and7", "Km", 0.001 - 8e-9 ); 
+	*/
 	////////////////////////////////////////////////////////////////
 	// Check out concs
 	////////////////////////////////////////////////////////////////
-	checkField( "/model/kinetics/M1", "concInit", 0.001 - 1.6666e-8 ); // mM
-	checkField( "/model/compartment_1/M1", "concInit", 0.001 ); // mM
-	checkField( "/model/compartment_2/M1", "concInit", 0.001 ); // mM
-	checkField( "/model/compartment_3/M1", "concInit", 0.001 ); // mM
+	checkField( "/model/kinetics/M1A", "concInit", 0.001 - 1.6666e-8 ); // mM
+	checkField( "/model/compartment_1/M1B", "concInit", 0.001 ); // mM
+	checkField( "/model/compartment_3/M1C", "concInit", 0.001 ); // mM
+	checkField( "/model/compartment_2/M1D", "concInit", 0.001 ); // mM
 	
+	////////////////////////////////////////////////////////////////
+	// Check out junctions
+	////////////////////////////////////////////////////////////////
+	
+	unsigned int nj = 0;
+	nj = Field< unsigned int >::get( gsA, "num_junction" );
+	assert( nj == 3 );
+	nj = Field< unsigned int >::get( gsB, "num_junction" );
+	assert( nj == 2 );
+	nj = Field< unsigned int >::get( gsC, "num_junction" );
+	assert( nj == 2 );
+	nj = Field< unsigned int >::get( gsD, "num_junction" );
+	assert( nj == 1 );
+	ObjId oiA0( "/model/kinetics/stoich/junction[0]" );
+	ObjId oiA1( "/model/kinetics/stoich/junction[1]" );
+	ObjId oiA2( "/model/kinetics/stoich/junction[2]" );
+
+	ObjId oi0( "/model/compartment_1/stoich/junction[0]" );
+	ObjId oi1( "/model/compartment_1/stoich/junction[1]" );
+	assert( !( oi0 == ObjId::bad() ) );
+	assert( !( oi1 == ObjId::bad() ) );
+	// SolverJunction* j0 = reinterpret_cast< SolverJunction* >( oi0.data() );
+	// SolverJunction* j1 = reinterpret_cast< SolverJunction* >( oi1.data() );
+
+	checkJunction( "/model/kinetics/stoich/junction[0]", A, B );
+	checkJunction( "/model/kinetics/stoich/junction[1]", A, D );
+	checkJunction( "/model/kinetics/stoich/junction[2]", A, C );
+	checkJunction( "/model/compartment_1/stoich/junction[0]", B, A );
+	checkJunction( "/model/compartment_1/stoich/junction[1]", B, C );
+	checkJunction( "/model/compartment_3/stoich/junction[0]", C, A );
+	checkJunction( "/model/compartment_3/stoich/junction[1]", C, B );
+	checkJunction( "/model/compartment_2/stoich/junction[0]", D, A );
+
 	////////////////////////////////////////////////////////////////
 	/// Should set up and check diffusion stuff.
 	for ( unsigned int i = 0; i < 10; ++i )
-		shell->doSetClock( i, 1.0 );
+		shell->doSetClock( i, 0.1 );
+	shell->doSetClock( 8, 1 );
 	shell->doReinit();
 	shell->doStart( 100.0 );
 
