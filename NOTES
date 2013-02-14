@@ -20936,3 +20936,10 @@ Turns out that I had forgotten to set up the INIT action for the GslStoich.
 Put this in and the model runs correctly.
 So let's wrap up this regression test and move on.
 Added in tests for graphs, clears them. 
+
+Added in minor test to confirm that the correct solver is selected in
+each compt for doing cross-compt reactions. 
+Also some cleanup of accumulating regression result files. Perhaps should
+add a flag so that they are deleted unless specially requested.
+
+==========================================================================
