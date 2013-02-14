@@ -53,6 +53,40 @@ void checkJunction( const string& path, Id c1, Id c2 )
 	assert( otherCompartment == c2 );
 }
 
+static void checkGraphs()
+{
+	vector< string > plotnames;
+	plotnames.push_back( "conc1/M2.Co" );
+	plotnames.push_back( "conc1/M3.Co" );
+	plotnames.push_back( "conc1/M6.Co" );
+	plotnames.push_back( "conc2/M4.Co" );
+	plotnames.push_back( "conc2/M5.Co" );
+	const double TOLERANCE = 2e-3;
+
+	for ( vector< string >::iterator 
+					i = plotnames.begin(); i != plotnames.end(); ++i )
+	{
+		string fullName = "/model/graphs/" + *i;
+		string molName = i->substr( 6, 8 );
+		string xplotName = molName + ".Co";
+		Id plotId( fullName );
+		assert( plotId != Id() );
+		bool ok = SetGet2< string, string >::set(
+			plotId, "xplot", "check.plot", xplotName );
+		assert( ok );
+		// Check the output values
+		ok = SetGet2< double, double >::set( 
+						plotId, "linearTransform", 1000, 0);
+		assert( ok );
+		ok = SetGet3< string, string, string >::set( 
+			plotId, "compareXplot", "multicompt.plot", 
+			"/graphs/" + *i, "rmsr" );
+		assert( ok );
+		double val = Field< double >::get( plotId, "outputValue" );
+		assert( val >= 0 && val < TOLERANCE );
+	}
+}
+
 void rtTestMultiCompartmentReaction()
 {
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
@@ -185,7 +219,6 @@ void rtTestMultiCompartmentReaction()
 	// Check out rates
 	////////////////////////////////////////////////////////////////
 
-	/*
 	checkField( "/model/kinetics/R1", "Kf", 0.1 ); 
 	checkField( "/model/kinetics/R1", "Kb", 0.1 ); 
 	checkField( "/model/kinetics/R2", "Kf", 0.1 ); 
@@ -193,6 +226,7 @@ void rtTestMultiCompartmentReaction()
 	checkField( "/model/kinetics/R3", "Kf", 0.1 ); 
 	checkField( "/model/kinetics/R3", "kb", 1.660572e-7 );
 	// checkField( "/model/kinetics/R3", "Kb", 0.1 ); 
+	// To fix: It comes to 300.  I don't see why.
 	checkField( "/model/kinetics/R4", "Kf", 0.1 ); 
 	checkField( "/model/kinetics/R4", "Kb", 0.1 ); 
 	checkField( "/model/kinetics/R4", "kf", 0.1 ); 
@@ -209,7 +243,6 @@ void rtTestMultiCompartmentReaction()
 	checkField( "/model/compartment_1/M3/R6and7", "k1", 2.767587e-7 ); 
 	checkField( "/model/compartment_1/M3/R6and7", "k2", 0.4 );
 	checkField( "/model/compartment_1/M3/R6and7", "Km", 0.001 - 8e-9 ); 
-	*/
 	////////////////////////////////////////////////////////////////
 	// Check out concs
 	////////////////////////////////////////////////////////////////
@@ -259,21 +292,7 @@ void rtTestMultiCompartmentReaction()
 	shell->doReinit();
 	shell->doStart( 100.0 );
 
-	bool ok = SetGet2< string, string >::set(
-		Id( "/model/graphs/conc1/M2.Co" ), "xplot", "check.plot", "M2.plot" );
-	assert( ok );
-	ok = SetGet2< string, string >::set(
-		Id( "/model/graphs/conc1/M3.Co" ), "xplot", "check.plot", "M3.plot" );
-	assert( ok );
-	ok = SetGet2< string, string >::set(
-		Id( "/model/graphs/conc1/M6.Co" ), "xplot", "check.plot", "M6.plot" );
-	assert( ok );
-	ok = SetGet2< string, string >::set(
-		Id( "/model/graphs/conc2/M4.Co" ), "xplot", "check.plot", "M4.plot" );
-	assert( ok );
-	ok = SetGet2< string, string >::set(
-		Id( "/model/graphs/conc2/M5.Co" ), "xplot", "check.plot", "M5.plot" );
-	assert( ok );
+	checkGraphs();
 	////////////////////////////////////////////////////////////////
 
 	shell->doDelete( model );
