@@ -20895,11 +20895,44 @@ accurate) and have it able to diffuse and react with any other overlapping one.
 Another option is to have a flag on the CubeMesh to make it more forgiving
 of the overlapping cases.
 
+Did the latter. Easier for now.
+
 Now the cross-compt reacs occur, but rates are wrong. I've checked with
 a lower dt, still doesn't help.
 
 Simplified multicompt_reac.g model by reducing most reac rates to
 nearly zero, only R3 remains what it was. Now the GENESIS and MOOSE
-calculations match. From here, incrementally put back stuff.
+calculations match. From here, incrementally put back stuff. Checkin 4416.
+
 
 ==========================================================================
+14 Feb: Put back R8 in compartment C.
+After a bit of analysis, it transpires that the outcome is identical to the
+run where R8 was stopped, with the exception of molecule R4 which now 
+builds up to a value about 5% higher than in kkit. Higher by almost
+precisely 0.45 uM to reach 0.55, actually.  0.55 is what one would get if
+one took the final value of M4 = 0.1 uM when R8 is off, and equilibrated with
+the 1 uM from M1C.
+
+What happens if we start M4 out at 1 uM, and turn R8 off again?
+At t= 60, M5 = 0.5; M4 = 1.1; M6=0; M3=0.1663; M2=0.2496
+Here again, all are identical, except now M4 is the sum of its initial value
+and the 0.1 coming from R3. Very odd.
+
+I think we might be able to get this effect if the proxies on compartment A
+were communicating changes out to B and C, but not getting any input back,
+and specifically, not being zeroed out each timestep.
+
+This predicts that I should be able to do a similar manipulation by
+starting M5 and M3 out at nonzero values.
+Put M5 at 5, M3 at 3. Predict should go to 5.5 and 3.1663 respectively.
+Fail. M5 = 3: not predicted; M3 = 3.165 as predicted.
+But M5 has M1D to exchange with at 1 uM. So 3 is actually OK for the system.
+
+Interpretation is therefore good, that the original counterparts of the 
+proxies don't send info back. Now to track it down.
+
+Turns out that I had forgotten to set up the INIT action for the GslStoich. 
+Put this in and the model runs correctly.
+So let's wrap up this regression test and move on.
+Added in tests for graphs, clears them. 
