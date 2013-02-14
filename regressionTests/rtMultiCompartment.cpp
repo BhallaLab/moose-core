@@ -123,8 +123,8 @@ void rtTestMultiCompartmentReaction()
 	assert( gs->pools().size() == 4 ); // No diffusion, but it does this?
 	assert( gs->pools()[0].size() == 5 );
 	assert( gs->ode().size() == 8 ); // combos: x 1 2 3 12 13 23 123
-	const_cast< VoxelPools& >( gs->pools()[0] ).setSolver( 7 );
 	assert( gs->pools()[0].getSolver() == 7 );
+	// const_cast< VoxelPools& >( gs->pools()[0] ).setSolver( 7 );
 	assert( gs->coreStoich()->getNumVarPools() == 2 );
 	assert( gs->coreStoich()->getNumProxyPools() == 3 );
 	assert( gs->coreStoich()->getNumRates() == 4 );
@@ -162,8 +162,8 @@ void rtTestMultiCompartmentReaction()
 	assert( gs->pools().size() == 2 ); // No diffusion, but goes to A.
 	assert( gs->pools()[0].size() == 5 );
 	assert( gs->ode().size() == 2 ); // combos: x C
-	const_cast< VoxelPools& >( gs->pools()[0] ).setSolver( 1 );
 	assert( gs->pools()[0].getSolver() == 1 );
+	// const_cast< VoxelPools& >( gs->pools()[0] ).setSolver( 1 );
 	assert( gs->coreStoich()->getNumVarPools() == 4 ); // M1, M3, M6, cplx
 	assert( gs->coreStoich()->getNumProxyPools() == 1 ); // M4 on C
 	assert( gs->coreStoich()->getNumRates() == 3 ); // R6, R7, (R5 on C)
@@ -227,6 +227,16 @@ void rtTestMultiCompartmentReaction()
 	checkField( "/model/kinetics/R3", "kb", 1.660572e-7 );
 	// checkField( "/model/kinetics/R3", "Kb", 0.1 ); 
 	// To fix: It comes to 300.  I don't see why.
+	// One target is 5x vol. Other is 3x vol. 
+	// The scaling for uM to mM is 1000. That would have given 100.
+	// Then we need to go 3x faster to balance the 3x vol case. I would
+	// have preferred to just stick to the 
+	// Or should I take kb as the starting point. 
+	// 1.66e-7 is the rate in 1/#.sec. 
+	// Convert to 1e-15 m^3 by multiplying by NA * vol = 6e8
+	// We get 100. That should have been it.
+	// Instead the vol that the system uses is 3e-15, from compt B.
+	//
 	checkField( "/model/kinetics/R4", "Kf", 0.1 ); 
 	checkField( "/model/kinetics/R4", "Kb", 0.1 ); 
 	checkField( "/model/kinetics/R4", "kf", 0.1 ); 

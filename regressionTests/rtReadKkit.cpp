@@ -925,18 +925,21 @@ void rtTestWriteKkit()
 
 	shell->doSaveModel( model, "writeK.g" );
 	shell->doDelete( model );
+	remove( "writeK.g" );
 
 	model = shell->doLoadModel( "tabsumtot.g", "/tabtest", "Neutral" );
 	assert( model != Id() );
 
 	shell->doSaveModel( model, "writeTabTest.g" );
 	shell->doDelete( model );
+	remove( "writeTabTest.g" );
 
 	model = shell->doLoadModel( "Osc_cspace_ref_model.g", "/model", "gsl" );
 	assert( model != Id() );
 
 	shell->doSaveModel( model, "oscTest.g" );
 	shell->doDelete( model );
+	remove( "oscTest.g" );
 
 	cout << "." << flush;
 }
