@@ -1,7 +1,7 @@
 //genesis
 // kkit Version 11 flat dumpfile
  
-// Saved on Tue Feb 12 23:05:07 2013
+// Saved on Thu Feb 14 17:08:02 2013
  
 include kkit {argv 1}
  
@@ -74,7 +74,7 @@ simundump kreac /kinetics/A/R3 0 0.1 1.6667e-07 "" white yellow 0 1 0
 simundump text /kinetics/A/R3/notes 0 ""
 call /kinetics/A/R3/notes LOAD \
 ""
-simundump kreac /kinetics/A/R4 0 0.0001 0.0001 "" white yellow 0 7 0
+simundump kreac /kinetics/A/R4 0 0.1 0.1 "" white yellow 0 7 0
 simundump text /kinetics/A/R4/notes 0 ""
 call /kinetics/A/R4/notes LOAD \
 ""
@@ -101,12 +101,12 @@ simundump kpool /kinetics/B/M3 0 0 0 0 0 0 0 0 1.8e+06 0 /kinetics/geometry \
 simundump text /kinetics/B/M3/notes 0 ""
 call /kinetics/B/M3/notes LOAD \
 ""
-simundump kenz /kinetics/B/M3/R6and7 0 0 0 0 0 6e+05 2.7778e-12 4e-06 1e-06 0 \
-  0 "" red blue "" -2 -5 0
+simundump kenz /kinetics/B/M3/R6and7 0 0 0 0 0 6e+05 2.7778e-07 0.4 0.1 0 0 \
+  "" red blue "" -2 -5 0
 simundump text /kinetics/B/M3/R6and7/notes 0 ""
 call /kinetics/B/M3/R6and7/notes LOAD \
 ""
-simundump kreac /kinetics/B/R5 0 1e-05 1e-05 "" white 52 0 -6 0
+simundump kreac /kinetics/B/R5 0 0.1 0.1 "" white 52 0 -6 0
 simundump text /kinetics/B/R5/notes 0 ""
 call /kinetics/B/R5/notes LOAD \
 ""
@@ -142,7 +142,7 @@ simundump kpool /kinetics/C/M4 0 0 0 0 0 0 0 0 3e+06 0 /kinetics/geometry 38 \
 simundump text /kinetics/C/M4/notes 0 ""
 call /kinetics/C/M4/notes LOAD \
 ""
-simundump kreac /kinetics/C/R8 0 1e-05 1e-05 "" white 62 5 -6 0
+simundump kreac /kinetics/C/R8 0 0.1 0.1 "" white 62 5 -6 0
 simundump text /kinetics/C/R8/notes 0 ""
 call /kinetics/C/R8/notes LOAD \
 ""
@@ -152,7 +152,7 @@ simundump text /kinetics/C/M1C/notes 0 ""
 call /kinetics/C/M1C/notes LOAD \
 ""
 simundump xgraph /graphs/conc1 0 0 100 0 1 0
-simundump xgraph /graphs/conc2 0 0 100 0 1 0
+simundump xgraph /graphs/conc2 0 0 100 1e-08 1 0
 simundump xplot /graphs/conc1/M2.Co 3 524288 \
   "delete_plot.w <s> <d>; edit_plot.D <w>" 1 0 0 1
 simundump xplot /graphs/conc1/M3.Co 3 524288 \
@@ -170,6 +170,8 @@ simundump xtree /edit/draw/tree 0 \
   /kinetics/#[],/kinetics/#[]/#[],/kinetics/#[]/#[]/#[][TYPE!=proto],/kinetics/#[]/#[]/#[][TYPE!=linkinfo]/##[] \
   "edit_elm.D <v>; drag_from_edit.w <d> <S> <x> <y> <z>" auto 0.6
 simundump xtext /file/notes 0 1
+xtextload /file/notes \
+""
 addmsg /kinetics/A/R1 /kinetics/A/M2 REAC B A 
 addmsg /kinetics/A/R4 /kinetics/A/M2 REAC A B 
 addmsg /kinetics/A/R2 /kinetics/A/M2 REAC A B 

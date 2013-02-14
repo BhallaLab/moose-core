@@ -661,6 +661,7 @@ Id SimManager::buildSolverOnCompt( Id compt, const vector< Id >& elist,
 		if ( i->element()->cinfo()->isA( "StimulusTable" ) )
 			shell->doUseClock( i->path(), "process", 4);
 	}
+	shell->doUseClock( stoich.path(), "init", 4);
 	shell->doUseClock( stoich.path(), "process", 5);
 	return stoich;
 }
