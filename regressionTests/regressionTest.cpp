@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include <stdio.h> // need Windows-specific stuff too.
 #include <unistd.h> // need Windows-specific stuff too.
 
 void rtTestChem();
@@ -33,6 +34,14 @@ void regressionTests()
 		cout << "\nNot in regression test directory, so skipping them\n";
 		return;
 	}
+
+	remove( "hhnet.plot" );
+	remove( "check.plot" );
+	remove( "stargazin_psd6.out" );
+	remove( "tabsumtot.out" );
+	remove( "AabXJacb.out" );
+	remove( "reac.out" );
+
 	cout << "\nRegression Tests:";
 	rtTable();
 	rtTestChem();
