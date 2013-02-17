@@ -117,6 +117,7 @@ void SolverBase::handleJunctionPoolNum( unsigned int fieldIndex,
 	vHandleJunctionPoolNum( fieldIndex, v );
 }
 
+// me is self compartment, other is other compartment.
 bool validateJunction( Id me, Id other )
 {
 	// Check that types match
@@ -191,24 +192,36 @@ void SolverBase::innerConnectJunctions(
 // The follower solver sends messages to put pool #s into the abutting
 // voxels, and gets back changes in these pool #s. Does not do the
 // diffusion calculations and does not expand.
-void SolverBase::addJunction( const Eref& e, const Qinfo* q, Id other )
+void SolverBase::addJunction( const Eref& e, const Qinfo* q, Id otherSolver)
 {
-	if ( !validateJunction( e.id(), other ) ) 
+	if ( !validateJunction( e.id(), otherSolver ) ) 
 			return;
 
 	SolverBase* otherSP = 
-			reinterpret_cast< SolverBase* >( other.eref().data() );
+			reinterpret_cast< SolverBase* >( otherSolver.eref().data() );
 	
 	// Set up message
-	innerConnectJunctions( e.id(), other, otherSP );
+	innerConnectJunctions( e.id(), otherSolver, otherSP );
 
+	configureJunction( e.id(), otherSolver,
+					junctions_.back(), otherSP->junctions_.back() );
+}
+
+
+// Should only be called on the master junction.
+void SolverBase::configureJunction( Id selfSolver, Id otherSolver, 
+		SolverJunction& junc, SolverJunction& otherJunc )
+{
+	SolverBase* otherSP = 
+		reinterpret_cast< SolverBase* >( otherSolver.eref().data() );
+	
 	// Work out reaction terms.
 	vector< Id > pools;
-	this->findPoolsOnOther( other, pools );
+	this->findPoolsOnOther( otherSolver, pools );
 	otherSP->setLocalCrossReactingPools( pools );
 
 	pools.clear();
-	otherSP->findPoolsOnOther( e.id(), pools );
+	otherSP->findPoolsOnOther( selfSolver, pools );
 	this->setLocalCrossReactingPools( pools );
 
 	// Work out diffusion terms
@@ -218,8 +231,8 @@ void SolverBase::addJunction( const Eref& e, const Qinfo* q, Id other )
 	vector< unsigned int > selfDiffPoolIndex;
 	vector< unsigned int > otherDiffPoolIndex;
 	findDiffusionTerms( otherSP, selfDiffPoolIndex, otherDiffPoolIndex );
-	junctions_.back().setDiffTerms( selfDiffPoolIndex );
-	otherSP->junctions_.back().setDiffTerms( otherDiffPoolIndex );
+	junc.setDiffTerms( selfDiffPoolIndex );
+	otherJunc.setDiffTerms( otherDiffPoolIndex );
 
 	// Work out matching meshEntries. Virtual func. Voxelized solvers 
 	// refer to their ChemMesh. Non-voxelized ones always have a single
@@ -233,22 +246,22 @@ void SolverBase::addJunction( const Eref& e, const Qinfo* q, Id other )
 	vector< VoxelJunction > otherMeshMap; 
 	this->matchMeshEntries( otherSP, selfMeshIndex, selfMeshMap,
 					otherMeshIndex, otherMeshMap );
-	junctions_.back().setMeshMap( selfMeshMap );
-	junctions_.back().setSendPools( selfMeshIndex, selfDiffPoolIndex );
+	junc.setMeshMap( selfMeshMap );
+	junc.setSendPools( selfMeshIndex, selfDiffPoolIndex );
 	// Here we have to expand the S matrix to include these points.
 	// This function also sets the abutRecvIndex vector.
 	this->expandSforDiffusion( 
-					otherMeshIndex, selfDiffPoolIndex, junctions_.back() );
+					otherMeshIndex, selfDiffPoolIndex, junc );
 
-	otherSP->junctions_.back().setMeshMap( otherMeshMap );
-	otherSP->junctions_.back().setSendPools( otherMeshIndex, otherDiffPoolIndex );
+	otherJunc.setMeshMap( otherMeshMap );
+	otherJunc.setSendPools( otherMeshIndex, otherDiffPoolIndex );
 	// The junction on the otherSP does not expand the S matrix.
 	
 	
 	// Here we tell the affected derived classes to update anything that
 	// depends on the Junctions, such as the GslStoich::ode_ array.
-	this->updateJunctionInterface( e );
-	otherSP->updateJunctionInterface( e );
+	this->updateJunctionInterface( selfSolver.eref() );
+	otherSP->updateJunctionInterface( otherSolver.eref() );
 }
 
 
@@ -278,4 +291,46 @@ Id getCompt( Id id )
 	else if ( pa.element()->cinfo()->isA( "ChemMesh" ) )
 		return pa;
 	return getCompt( pa );
+}
+
+/**
+ * Scans through all junctions and if they are master junctions, 
+ * reconfigures them. This is used whenever any part of the reac-diff
+ * system has been altered.
+ */
+void SolverBase::updateAllJunctions( const Eref& e, const Qinfo* q )
+{
+	Id selfSolver = e.id();
+	Id myJunction( selfSolver.value() + 1);
+	vector< Id > ret;
+	
+	// Go through msg list
+	// Get src and dest ObjId using the srcToDestPairs function.
+	// Identify the junction indices from this.
+	// Call configureJunction using this info.
+	
+	const vector < MsgFuncBinding >* mb = 
+			myJunction.element()->getMsgAndFunc( 
+							junctionPoolDeltaFinfo()->getBindIndex() );
+	assert( mb != 0 );
+	for ( vector< MsgFuncBinding >::const_iterator 
+					i = mb->begin(); i != mb->end(); ++i ) {
+		const Msg* m = Msg::getMsg( i->mid );
+		Element* selfE = m->e1();
+		Element* otherE = m->e2();
+		assert( selfE == myJunction.element() );
+		vector< DataId > src;
+		vector< DataId > dest;
+		unsigned int num = m->srcToDestPairs( src, dest );
+		assert( num == 1 );
+		SolverJunction* selfJ = reinterpret_cast< SolverJunction * >(
+				Eref( selfE, src[0] ).data() );
+		SolverJunction* otherJ = reinterpret_cast< SolverJunction * >(
+				Eref( otherE, dest[0] ).data() );
+		assert( selfJ->getMyCompartment() == otherJ->getOtherCompartment());
+		assert( selfJ->getOtherCompartment() == otherJ->getMyCompartment());
+		assert( selfJ->getMyCompartment() == getCompt( selfSolver ) );
+		Id otherSolver( otherE->id().value() - 1 );
+		configureJunction( selfSolver, otherSolver, *selfJ, *otherJ );
+	}
 }
