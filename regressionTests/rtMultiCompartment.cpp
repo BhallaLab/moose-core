@@ -35,7 +35,7 @@ void checkField( const string& path, const string& field, double value )
 	assert( doubleEq( x, value ) );
 }
 
-void checkJunction( const string& path, Id c1, Id c2 )
+void checkJunction( const string& path, Id c1, Id c2, bool isDiffusive )
 {
 	ObjId id( path );
 	assert( !( id == ObjId::bad() ) );
@@ -45,12 +45,61 @@ void checkJunction( const string& path, Id c1, Id c2 )
 	Id myCompartment = Field< Id >::get( id, "myCompartment" );
 	Id otherCompartment = Field< Id >::get( id, "otherCompartment" );
 
+	unsigned int myNumMesh = 
+			Field< unsigned int >::get( myCompartment, "num_mesh" );
+	unsigned int otherNumMesh = 
+			Field< unsigned int >::get( otherCompartment, "num_mesh" );
+	unsigned int refNumMesh = 
+			( myNumMesh < otherNumMesh ) ? myNumMesh : otherNumMesh;
+
 	// assert( nr == 1 );
-	assert( ndm == 0 );
-	assert( nme == 1 );
+	assert( ndm == static_cast< unsigned int >( isDiffusive ) );
+	assert( nme == refNumMesh );
 
 	assert( myCompartment == c1 );
 	assert( otherCompartment == c2 );
+}
+
+void checkAllJunctions( bool isDiffusive )
+{
+	Id A( "/model/kinetics" ); assert( A != Id() );
+	Id B( "/model/compartment_1" ); assert( B != Id() );
+	Id D( "/model/compartment_2" ); // order is scrambled.
+	assert( D != Id() );
+	Id C( "/model/compartment_3" ); assert( C != Id() );
+	Id gsA( "/model/kinetics/stoich" ); assert( gsA != Id() );
+	Id gsB( "/model/compartment_1/stoich" ); assert( gsB != Id() );
+	Id gsC( "/model/compartment_3/stoich" ); assert( gsC != Id() );
+	Id gsD( "/model/compartment_2/stoich" ); assert( gsD != Id() );
+
+	unsigned int nj = 0;
+	nj = Field< unsigned int >::get( gsA, "num_junction" );
+	assert( nj == 3 );
+	nj = Field< unsigned int >::get( gsB, "num_junction" );
+	assert( nj == 2 );
+	nj = Field< unsigned int >::get( gsC, "num_junction" );
+	assert( nj == 2 );
+	nj = Field< unsigned int >::get( gsD, "num_junction" );
+	assert( nj == 1 );
+	ObjId oiA0( "/model/kinetics/stoich/junction[0]" );
+	ObjId oiA1( "/model/kinetics/stoich/junction[1]" );
+	ObjId oiA2( "/model/kinetics/stoich/junction[2]" );
+
+	ObjId oi0( "/model/compartment_1/stoich/junction[0]" );
+	ObjId oi1( "/model/compartment_1/stoich/junction[1]" );
+	assert( !( oi0 == ObjId::bad() ) );
+	assert( !( oi1 == ObjId::bad() ) );
+	// SolverJunction* j0 = reinterpret_cast< SolverJunction* >( oi0.data() );
+	// SolverJunction* j1 = reinterpret_cast< SolverJunction* >( oi1.data() );
+
+	checkJunction( "/model/kinetics/stoich/junction[0]", A, B, isDiffusive );
+	checkJunction( "/model/kinetics/stoich/junction[1]", A, D, isDiffusive );
+	checkJunction( "/model/kinetics/stoich/junction[2]", A, C, isDiffusive );
+	checkJunction( "/model/compartment_1/stoich/junction[0]", B, A, isDiffusive );
+	checkJunction( "/model/compartment_1/stoich/junction[1]", B, C, isDiffusive );
+	checkJunction( "/model/compartment_3/stoich/junction[0]", C, A, isDiffusive );
+	checkJunction( "/model/compartment_3/stoich/junction[1]", C, B, isDiffusive );
+	checkJunction( "/model/compartment_2/stoich/junction[0]", D, A, isDiffusive );
 }
 
 static void checkGraphs()
@@ -120,7 +169,7 @@ void rtTestMultiCompartmentReaction()
 	Id gsA( "/model/kinetics/stoich" );
 	assert( gsA != Id() );
 	GslStoich* gs = reinterpret_cast< GslStoich* >( gsA.eref().data() );
-	assert( gs->pools().size() == 4 ); // No diffusion, but it does this?
+	assert( gs->pools().size() == 1 ); // No diffusion, but it does this?
 	assert( gs->pools()[0].size() == 5 );
 	assert( gs->ode().size() == 8 ); // combos: x 1 2 3 12 13 23 123
 	assert( gs->pools()[0].getSolver() == 7 );
@@ -159,7 +208,7 @@ void rtTestMultiCompartmentReaction()
 	Id gsB( "/model/compartment_1/stoich" );
 	assert( gsB != Id() );
 	gs = reinterpret_cast< GslStoich* >( gsB.eref().data() );
-	assert( gs->pools().size() == 2 ); // No diffusion, but goes to A.
+	assert( gs->pools().size() == 1 ); // No diffusion, but goes to A.
 	assert( gs->pools()[0].size() == 5 );
 	assert( gs->ode().size() == 2 ); // combos: x C
 	assert( gs->pools()[0].getSolver() == 1 );
@@ -264,35 +313,7 @@ void rtTestMultiCompartmentReaction()
 	////////////////////////////////////////////////////////////////
 	// Check out junctions
 	////////////////////////////////////////////////////////////////
-	
-	unsigned int nj = 0;
-	nj = Field< unsigned int >::get( gsA, "num_junction" );
-	assert( nj == 3 );
-	nj = Field< unsigned int >::get( gsB, "num_junction" );
-	assert( nj == 2 );
-	nj = Field< unsigned int >::get( gsC, "num_junction" );
-	assert( nj == 2 );
-	nj = Field< unsigned int >::get( gsD, "num_junction" );
-	assert( nj == 1 );
-	ObjId oiA0( "/model/kinetics/stoich/junction[0]" );
-	ObjId oiA1( "/model/kinetics/stoich/junction[1]" );
-	ObjId oiA2( "/model/kinetics/stoich/junction[2]" );
-
-	ObjId oi0( "/model/compartment_1/stoich/junction[0]" );
-	ObjId oi1( "/model/compartment_1/stoich/junction[1]" );
-	assert( !( oi0 == ObjId::bad() ) );
-	assert( !( oi1 == ObjId::bad() ) );
-	// SolverJunction* j0 = reinterpret_cast< SolverJunction* >( oi0.data() );
-	// SolverJunction* j1 = reinterpret_cast< SolverJunction* >( oi1.data() );
-
-	checkJunction( "/model/kinetics/stoich/junction[0]", A, B );
-	checkJunction( "/model/kinetics/stoich/junction[1]", A, D );
-	checkJunction( "/model/kinetics/stoich/junction[2]", A, C );
-	checkJunction( "/model/compartment_1/stoich/junction[0]", B, A );
-	checkJunction( "/model/compartment_1/stoich/junction[1]", B, C );
-	checkJunction( "/model/compartment_3/stoich/junction[0]", C, A );
-	checkJunction( "/model/compartment_3/stoich/junction[1]", C, B );
-	checkJunction( "/model/compartment_2/stoich/junction[0]", D, A );
+	checkAllJunctions( false );
 
 	////////////////////////////////////////////////////////////////
 	/// Should set up and check diffusion stuff.
@@ -333,6 +354,7 @@ void rtTestMultiCompartmentReacDiff()
 	Id A( "/model/kinetics" );
 	assert( A != Id() );
 	double sizeA = Field< double >::get( A, "size" );
+	unsigned int numA = Field< unsigned int >::get( A, "num_mesh" );
 
 	Id B( "/model/compartment_1" );
 	assert( B != Id() );
@@ -342,6 +364,7 @@ void rtTestMultiCompartmentReacDiff()
 	coords[6] = 		coords[7] = 		coords[8] = 10e-6;
 	Field< vector< double > >::set( B, "coords", coords );
 	double sizeB = Field< double >::get( B, "size" );
+	unsigned int numB = Field< unsigned int >::get( B, "num_mesh" );
 
 	Id D( "/model/compartment_2" ); // order is scrambled.
 	assert( D != Id() );
@@ -350,6 +373,7 @@ void rtTestMultiCompartmentReacDiff()
 	coords[6] = 		coords[7] = 		coords[8] = 10e-6;
 	Field< vector< double > >::set( D, "coords", coords );
 	double sizeD = Field< double >::get( D, "size" );
+	unsigned int numD = Field< unsigned int >::get( D, "num_mesh" );
 
 	Id C( "/model/compartment_3" );
 	assert( C != Id() );
@@ -358,11 +382,152 @@ void rtTestMultiCompartmentReacDiff()
 	coords[6] = 		coords[7] = 		coords[8] = 10e-6;
 	Field< vector< double > >::set( C, "coords", coords );
 	double sizeC = Field< double >::get( C, "size" );
+	unsigned int numC = Field< unsigned int >::get( C, "num_mesh" );
 
 	assert( doubleEq( sizeA, 1e-15 ) );
 	assert( doubleEq( sizeB, 3e-15 ) );
 	assert( doubleEq( sizeC, 5e-15 ) );
 	assert( doubleEq( sizeD, 2e-15 ) );
+	assert( numA == 1 );
+	assert( numB == 3 );
+	assert( numC == 5 );
+	assert( numD == 2 );
+
+	// This should get all the stoichs to reconfigure their junctions, 
+	// which was pending since the meshes have been redone.
+	for ( unsigned int i = 0; i < 10; ++i )
+		shell->doSetClock( i, 0.1 );
+	shell->doSetClock( 8, 1 );
+	shell->doReinit(); 
+	
+	////////////////////////////////////////////////////////////////
+	// Check out junctions
+	////////////////////////////////////////////////////////////////
+	checkAllJunctions( true );
+	ObjId jid0( "/model/kinetics/stoich/junction[0]" );
+	assert( !( jid0 == ObjId::bad() ) );
+	SolverJunction* j = reinterpret_cast< SolverJunction* >( jid0.data() );
+	assert( j->sendMeshIndex().size() == 1 ); // Sending data from 1 voxel
+	assert( j->sendMeshIndex()[0] == 0 );
+
+	ObjId jid1( "/model/kinetics/stoich/junction[1]" );
+	assert( !( jid1 == ObjId::bad() ) );
+	j = reinterpret_cast< SolverJunction* >( jid1.data() );
+	assert( j->sendMeshIndex().size() == 1 ); // Sending data from 1 voxel
+	assert( j->sendMeshIndex()[0] == 0 );
+
+	ObjId jid2( "/model/kinetics/stoich/junction[2]" );
+	assert( !( jid2 == ObjId::bad() ) );
+	j = reinterpret_cast< SolverJunction* >( jid2.data() );
+	assert( j->sendMeshIndex().size() == 1 ); // Sending data from 1 voxel
+	assert( j->sendMeshIndex()[0] == 0 );
+	////////////////////////////////////////////////////////////////
+	Id gsA( "/model/kinetics/stoich" );
+	assert( gsA != Id() );
+	GslStoich* gs = reinterpret_cast< GslStoich* >( gsA.eref().data() );
+	assert( gs->pools().size() == 2 ); // One for self, 1 for diffn.
+	assert( gs->pools()[0].size() == 5 ); // M1, M2 and proxies M3, M4, M5
+	assert( gs->pools()[1].size() == 2 ); // M1 and M2.
+	assert( gs->ode().size() == 8 ); // combos: x 1 2 3 12 13 23 123
+	assert( gs->pools()[0].getSolver() == 7 );
+	assert( gs->pools()[1].getSolver() == 0 ); // Should not even be calling
+	// const_cast< VoxelPools& >( gs->pools()[0] ).setSolver( 7 );
+	assert( gs->coreStoich()->getNumVarPools() == 2 );
+	assert( gs->coreStoich()->getNumProxyPools() == 3 );
+	assert( gs->coreStoich()->getNumRates() == 4 );
+	assert( gs->coreStoich()->getNumCoreRates() == 2 );
+	assert( gs->ode()[0].compartmentSignature_.size() == 0 );
+	assert( gs->ode()[0].stoich_->getNumVarPools() == 2 );
+	assert( gs->ode()[0].stoich_->getNumProxyPools() == 0 );
+	assert( gs->ode()[0].stoich_->getNumRates() == 2 );
+	// The combo will use this
+	assert( gs->ode()[7].compartmentSignature_.size() == 3 );
+	assert( gs->ode()[7].compartmentSignature_[0] == B );
+	assert( gs->ode()[7].compartmentSignature_[1] == D );
+	assert( gs->ode()[7].compartmentSignature_[2] == C );
+	////////////////////////////////////////////////////////////////
+	Id gsB( "/model/compartment_1/stoich" );
+	assert( gsB != Id() );
+	gs = reinterpret_cast< GslStoich* >( gsB.eref().data() );
+
+	// 3 diffusion compts plus 3 to connect to C plus 1 for A.
+	assert( gs->pools().size() == 6 ); 
+	assert( gs->pools()[0].size() == 5 ); // 4 molecules, one X reac to C
+	assert( gs->pools()[1].size() == 5 ); // 4 molecules, one X reac to C
+	assert( gs->pools()[2].size() == 5 ); // 4 molecules, one X reac to C
+	assert( gs->pools()[3].size() == 4 ); // 1 diff mol
+	assert( gs->pools()[4].size() == 4 ); // 1 diff mol
+	assert( gs->pools()[5].size() == 4 ); // 1 diff mol
+	assert( gs->ode().size() == 2 ); // combos: x C
+	assert( gs->pools()[0].getSolver() == 1 );
+	assert( gs->pools()[1].getSolver() == 1 );
+	assert( gs->pools()[2].getSolver() == 1 ); // Only case of X reac.
+	assert( gs->pools()[3].getSolver() == 0 );
+	assert( gs->pools()[4].getSolver() == 0 );
+	assert( gs->pools()[5].getSolver() == 0 );
+	// const_cast< VoxelPools& >( gs->pools()[0] ).setSolver( 1 );
+	assert( gs->coreStoich()->getNumVarPools() == 4 ); // M1, M3, M6, cplx
+	assert( gs->coreStoich()->getNumProxyPools() == 1 ); // M4 on C
+	assert( gs->coreStoich()->getNumRates() == 3 ); // R6, R7, (R5 on C)
+	assert( gs->coreStoich()->getNumCoreRates() == 2 ); // R6, R7
+	assert( gs->ode()[0].compartmentSignature_.size() == 0 );
+	assert( gs->ode()[0].stoich_->getNumVarPools() == 4 );
+	assert( gs->ode()[0].stoich_->getNumProxyPools() == 0 );
+	assert( gs->ode()[0].stoich_->getNumRates() == 2 );
+
+	// R5 uses this.
+	assert( gs->ode()[1].compartmentSignature_.size() == 1 );
+	assert( gs->ode()[1].compartmentSignature_[0] == C );
+	assert( gs->ode()[1].stoich_->getNumVarPools() == 4 );
+	assert( gs->ode()[1].stoich_->getNumProxyPools() == 1 );
+	assert( gs->ode()[1].stoich_->getNumRates() == 3 );
+
+	////////////////////////////////////////////////////////////////
+	Id gsC( "/model/compartment_3/stoich" );
+	assert( gsC != Id() );
+	gs = reinterpret_cast< GslStoich* >( gsC.eref().data() );
+	assert( gs->pools().size() == 5 ); // 5 voxels, plus 4 X-diff
+	// But I guess this is a follower on all the X-diffs.
+	assert( gs->pools()[0].size() == 2 ); // 2 mols, X reacs are followers
+	assert( gs->pools()[1].size() == 2 ); // 2 mols, X reacs are followers
+	assert( gs->pools()[2].size() == 2 ); // 2 mols, X reacs are followers
+	assert( gs->pools()[3].size() == 2 ); // 2 mols, X reacs are followers
+	assert( gs->pools()[4].size() == 2 ); // 2 mols, X reacs are followers
+	/*
+	assert( gs->pools()[5].size() == 2 ); // 1 xdiff
+	assert( gs->pools()[6].size() == 2 ); // 1 xdiff
+	assert( gs->pools()[7].size() == 2 ); // 1 xdiff
+	assert( gs->pools()[8].size() == 2 ); // 1 xdiff
+	*/
+	assert( gs->ode().size() == 1 ); // No combos, just core reacs.
+	assert( gs->pools()[0].getSolver() == 0 );
+	assert( gs->coreStoich()->getNumVarPools() == 2 ); // M1, M3, M6, cplx
+	assert( gs->coreStoich()->getNumProxyPools() == 0 ); // M4 on C
+	assert( gs->coreStoich()->getNumRates() == 1 ); // R8
+	assert( gs->coreStoich()->getNumCoreRates() == 1 ); // R8
+	assert( gs->ode()[0].compartmentSignature_.size() == 0 );
+	assert( gs->ode()[0].stoich_->getNumVarPools() == 2 );
+	assert( gs->ode()[0].stoich_->getNumProxyPools() == 0 );
+	assert( gs->ode()[0].stoich_->getNumRates() == 1 );
+
+
+	////////////////////////////////////////////////////////////////
+	Id gsD( "/model/compartment_2/stoich" );
+	assert( gsD != Id() );
+	gs = reinterpret_cast< GslStoich* >( gsD.eref().data() );
+	assert( gs->pools().size() == 2 ); // 2 voxels, X-diff follower with A.
+	assert( gs->pools()[0].size() == 2 ); // 2 mols, no X-reac
+	assert( gs->pools()[1].size() == 2 ); // 2 mols, no X-reac
+	assert( gs->ode().size() == 1 ); // No combos, just core reacs.
+	assert( gs->pools()[0].getSolver() == 0 );
+	assert( gs->coreStoich()->getNumVarPools() == 2 ); // M1, M3, M6, cplx
+	assert( gs->coreStoich()->getNumProxyPools() == 0 ); // M4 on C
+	assert( gs->coreStoich()->getNumRates() == 1 ); // R8
+	assert( gs->coreStoich()->getNumCoreRates() == 1 ); // R8
+	assert( gs->ode()[0].compartmentSignature_.size() == 0 );
+	assert( gs->ode()[0].stoich_->getNumVarPools() == 2 );
+	assert( gs->ode()[0].stoich_->getNumProxyPools() == 0 );
+	assert( gs->ode()[0].stoich_->getNumRates() == 1 );
 	////////////////////////////////////////////////////////////////
 
 	shell->doDelete( model );

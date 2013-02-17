@@ -259,6 +259,9 @@ class GslStoich: public SolverBase
 		static const Cinfo* initCinfo();
 	private:
 		bool isInitialized_;
+
+		/// Flag to warn that junctions need to be reconfigured.
+		bool junctionsNotReady_; 
 		string method_;
 		string path_;
 		double absAccuracy_;

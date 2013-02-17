@@ -1,7 +1,7 @@
 //genesis
 // kkit Version 11 flat dumpfile
  
-// Saved on Sat Feb 16 22:44:09 2013
+// Saved on Sun Feb 17 23:28:46 2013
  
 include kkit {argv 1}
  
@@ -82,8 +82,8 @@ simundump kreac /kinetics/A/R2 0 0.1 0.1 "" white yellow -2 2 0
 simundump text /kinetics/A/R2/notes 0 ""
 call /kinetics/A/R2/notes LOAD \
 ""
-simundump kpool /kinetics/A/M1 0 0 0.99998 0.99998 5.9999e+05 5.9999e+05 0 0 \
-  6e+05 0 /kinetics/geometry 9 yellow -4 4 0
+simundump kpool /kinetics/A/M1 0 1e-12 0.99998 0.99998 5.9999e+05 5.9999e+05 \
+  0 0 6e+05 0 /kinetics/geometry 9 yellow -4 4 0
 simundump text /kinetics/A/M1/notes 0 ""
 call /kinetics/A/M1/notes LOAD \
 ""
@@ -110,7 +110,7 @@ simundump kreac /kinetics/B/R5 0 0.1 0.1 "" white 52 0 -6 0
 simundump text /kinetics/B/R5/notes 0 ""
 call /kinetics/B/R5/notes LOAD \
 ""
-simundump kpool /kinetics/B/M1 0 0 1 1 1.8e+06 1.8e+06 0 0 1.8e+06 0 \
+simundump kpool /kinetics/B/M1 0 1e-12 1 1 1.8e+06 1.8e+06 0 0 1.8e+06 0 \
   /kinetics/geometry 7 52 -4 -3 0
 simundump text /kinetics/B/M1/notes 0 ""
 call /kinetics/B/M1/notes LOAD \
@@ -128,7 +128,7 @@ simundump kreac /kinetics/D/R9 0 0.1 0.1 "" white 57 5 2 0
 simundump text /kinetics/D/R9/notes 0 ""
 call /kinetics/D/R9/notes LOAD \
 ""
-simundump kpool /kinetics/D/M1 0 0 1 1 1.2e+06 1.2e+06 0 0 1.2e+06 0 \
+simundump kpool /kinetics/D/M1 0 1e-12 1 1 1.2e+06 1.2e+06 0 0 1.2e+06 0 \
   /kinetics/geometry 7 57 3 4 0
 simundump text /kinetics/D/M1/notes 0 ""
 call /kinetics/D/M1/notes LOAD \
@@ -146,7 +146,7 @@ simundump kreac /kinetics/C/R8 0 0.1 0.1 "" white 62 5 -6 0
 simundump text /kinetics/C/R8/notes 0 ""
 call /kinetics/C/R8/notes LOAD \
 ""
-simundump kpool /kinetics/C/M1 0 0 1 1 3e+06 3e+06 0 0 3e+06 0 \
+simundump kpool /kinetics/C/M1 0 1e-12 1 1 3e+06 3e+06 0 0 3e+06 0 \
   /kinetics/geometry 8 62 3 -3 0
 simundump text /kinetics/C/M1/notes 0 ""
 call /kinetics/C/M1/notes LOAD \

@@ -206,7 +206,8 @@ static const Cinfo* gslStoichCinfo = GslStoich::initCinfo();
 
 GslStoich::GslStoich()
 	: 
-	isInitialized_( 0 ),
+	isInitialized_( false ),
+	junctionsNotReady_( false ),
 	method_( "rk5" ),
 	path_( "" ),
 	absAccuracy_( 1.0e-9 ),

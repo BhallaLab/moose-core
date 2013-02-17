@@ -262,9 +262,18 @@ void GslStoich::updateJunctionInterface( const Eref& e )
 	}
 
  	// Go through all pools and assign ode_ entry.
+	assert( y_.size() >= sig.size() );
+	assert( pools_.size() >= sig.size() );
 	for ( unsigned int i = 0; i < sig.size(); ++i ) {
-		pools_[i].setSolver( selectOde( sig[i] ) );
+		unsigned int solver = selectOde( sig[i] );
+		pools_[i].setSolver( solver );
+		unsigned int np = 
+						ode_[solver].stoich_->getNumAllPools() + 
+						ode_[solver].stoich_->getNumProxyPools();
+		pools_[i].resizeArrays( np );
+		y_[i].resize( np );
 	}
+	junctionsNotReady_ = true;
 }
 
 // Return elist of pools on Other solver that are reactants on this solver.
@@ -436,9 +445,9 @@ void GslStoich::remesh( const Eref& e, const Qinfo* q,
 		initConcs[i] = pools_[0].Sinit()[i] / ( NA * oldVol );
 	}
 	meshSplit( initConcs, vols, localEntryList );
-	updateAllJunctions( e, q );
 	vector< double > temp( numPools, 0.0 );
 	y_.resize( vols.size(), temp );
+	junctionsNotReady_ = true;
 }
 
 // Inherited virtual function.
@@ -447,13 +456,18 @@ void GslStoich::expandSforDiffusion(
 	const vector< unsigned int > & selfDiffPoolIndex,
 	SolverJunction& j )
 {
+	if ( !diffusionMesh_ )
+		return;
 	vector< unsigned int > abutMeshIndex( otherMeshIndex.size(), 0 );
 	for ( unsigned int i = 0; i < otherMeshIndex.size(); ++i )
 		abutMeshIndex[i] = i + pools_.size();
 	unsigned int numCorePoolEntries = coreStoich()->getNumAllPools();
-	unsigned int numVoxels = pools_.size();
-	pools_.resize( numVoxels + abutMeshIndex.size() );
-	y_.resize( numVoxels + abutMeshIndex.size() );
+	unsigned int numVoxels = diffusionMesh_->getNumEntries();
+	unsigned int numPoolStructs = numVoxels;
+	if ( selfDiffPoolIndex.size() > 0 )
+		numPoolStructs += abutMeshIndex.size();
+	pools_.resize( numPoolStructs );
+	y_.resize( numPoolStructs );
 	for ( unsigned int i = numVoxels; i < pools_.size(); ++i ) {
 		pools_[i].resizeArrays( numCorePoolEntries );
 		y_[i].resize( numCorePoolEntries );
