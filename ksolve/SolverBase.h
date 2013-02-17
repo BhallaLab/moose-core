@@ -121,10 +121,24 @@ class SolverBase
 		void handleJunctionPoolNum( unsigned int poolIndex, 
 						vector< double > num );
 
-		/// Create a junction between self and specified other StoichPool
+		/// Create a junction between self and specified other SolverBase
 		void addJunction( const Eref& e, const Qinfo* q, Id other );
-		/// Remove the junction between self and specified other StoichPool
+		/// Remove the junction between self and specified other SolverBase
 		void dropJunction( const Eref& e, const Qinfo* q, Id other );
+
+		/**
+		 * Configures the two junctions. Used both by addJunction, and
+		 * by any function that has to rebuild junctions already in place.
+		 */
+		void configureJunction( Id selfSolver, Id otherSolver,
+					SolverJunction& selfJunc, SolverJunction& otherJunc );
+
+		/**
+		 * Scans through all junctions. If they are master junctions,
+		 * reconfigures them using the configureJunction call. 
+		 * Used whenever any part of the reac-diff system has been altered.
+		 */
+		void updateAllJunctions( const Eref& e, const Qinfo* q );
 
 		void innerConnectJunctions( 
 						Id me, Id other, SolverBase* otherSP );
