@@ -138,7 +138,7 @@ class SolverBase
 		 * reconfigures them using the configureJunction call. 
 		 * Used whenever any part of the reac-diff system has been altered.
 		 */
-		void updateAllJunctions( const Eref& e, const Qinfo* q );
+		void reconfigureAllJunctions( const Eref& e, const Qinfo* q );
 
 		void innerConnectJunctions( 
 						Id me, Id other, SolverBase* otherSP );

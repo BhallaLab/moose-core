@@ -581,8 +581,12 @@ void CubeMesh::innerSetCoords( const vector< double >& v)
 	dy_ = v[7];
 	dz_ = v[8];
 
+	bool temp = preserveNumEntries_;
+	preserveNumEntries_ = 0;
 	updateCoords();
+	preserveNumEntries_ = temp;
 }
+
 void CubeMesh::setCoords( const Eref& e, const Qinfo* q, vector< double > v)
 {
 	if ( v.size() < 9 ) {
