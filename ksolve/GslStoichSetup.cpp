@@ -436,6 +436,7 @@ void GslStoich::remesh( const Eref& e, const Qinfo* q,
 		initConcs[i] = pools_[0].Sinit()[i] / ( NA * oldVol );
 	}
 	meshSplit( initConcs, vols, localEntryList );
+	updateAllJunctions( e, q );
 	vector< double > temp( numPools, 0.0 );
 	y_.resize( vols.size(), temp );
 }

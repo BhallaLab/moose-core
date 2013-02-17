@@ -14,6 +14,7 @@
 void rtTestChem();
 void rtTestWriteKkit();
 void rtTestMultiCompartmentReaction();
+void rtTestMultiCompartmentReacDiff();
 
 void rtTable();
 void rtReacDiff();
@@ -47,6 +48,7 @@ void regressionTests()
 	rtTestChem();
 	rtTestWriteKkit();
 	rtTestMultiCompartmentReaction();
+	rtTestMultiCompartmentReacDiff();
 
 	rtReacDiff();
 	rtHHnetwork( 10 );

@@ -308,3 +308,63 @@ void rtTestMultiCompartmentReaction()
 	shell->doDelete( model );
 	cout << "." << flush;
 }
+
+
+/**
+ * The simulated geometry is:
+ *                    D
+ *                    D
+ *                 BBBA
+ *                 CCCCC
+ *  Here, A is at (0,0,0) to (10,10,10) microns.
+ *  B is then (-30,0,0) to (0,10,10) microns
+ *  C is (-30,-10,0) to (20,0,10) microns
+ *  D is (0,10,0) to (10,30,10) microns.
+ */
+void rtTestMultiCompartmentReacDiff()
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< unsigned int > dims( 1, 1 );
+	Shell::cleanSimulation();
+
+	Id model = shell->doLoadModel( 
+					"multicompt_reacdiff.g", "/model", "multigsl" );
+
+	Id A( "/model/kinetics" );
+	assert( A != Id() );
+	double sizeA = Field< double >::get( A, "size" );
+
+	Id B( "/model/compartment_1" );
+	assert( B != Id() );
+	vector< double > coords( 9, 0 );
+	coords[0] = -30e-6;	coords[1] = 0; 		coords[2] = 0;
+	coords[3] = 0; 		coords[4] = 10e-6;	coords[5] = 10e-6;
+	coords[6] = 		coords[7] = 		coords[8] = 10e-6;
+	Field< vector< double > >::set( B, "coords", coords );
+	double sizeB = Field< double >::get( B, "size" );
+
+	Id D( "/model/compartment_2" ); // order is scrambled.
+	assert( D != Id() );
+	coords[0] = 0;		coords[1] = 10e-6;	coords[2] = 0;
+	coords[3] = 10e-6; 	coords[4] = 30e-6;	coords[5] = 10e-6;
+	coords[6] = 		coords[7] = 		coords[8] = 10e-6;
+	Field< vector< double > >::set( D, "coords", coords );
+	double sizeD = Field< double >::get( D, "size" );
+
+	Id C( "/model/compartment_3" );
+	assert( C != Id() );
+	coords[0] = -30e-6;	coords[1] = -10e-6;	coords[2] = 0;
+	coords[3] = 20e-6;	coords[4] = 0;		coords[5] = 10e-6;
+	coords[6] = 		coords[7] = 		coords[8] = 10e-6;
+	Field< vector< double > >::set( C, "coords", coords );
+	double sizeC = Field< double >::get( C, "size" );
+
+	assert( doubleEq( sizeA, 1e-15 ) );
+	assert( doubleEq( sizeB, 3e-15 ) );
+	assert( doubleEq( sizeC, 5e-15 ) );
+	assert( doubleEq( sizeD, 2e-15 ) );
+	////////////////////////////////////////////////////////////////
+
+	shell->doDelete( model );
+	cout << "." << flush;
+}

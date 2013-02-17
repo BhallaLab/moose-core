@@ -20940,6 +20940,63 @@ Added in tests for graphs, clears them.
 Added in minor test to confirm that the correct solver is selected in
 each compt for doing cross-compt reactions. 
 Also some cleanup of accumulating regression result files. Perhaps should
-add a flag so that they are deleted unless specially requested.
+add a flag so that they are deleted unless specially requested. 
+Checkin 4419.
 
+Dating back from 22 Dec: Updated list of pending things here.
+* Implement cross-compartment reactions
++ Set up sim manager to handle coupled solvers
+- Regression test for calculations for cross-compartment reac-diff.
+- Extend to CylMesh and NeuroMesh
+- Write SpineMesh, extend to it.
+- Put in stuff for SigNeur.
+- Extend CubeMesh to figure out surfaces from Geom classes and bitmaps.
+- Convert GssaStoich to use new zombie classes
+- Derive GssaStoich from StoichPools
+- Get GssaStoich to talk to each other through diffusion
+- Get GssaStoich and GslStoich to talk to each other through diffusion
+- SBML read and write
+- Reorder KKit reader to put things more sensibly into compartments.
+- Figure out pool composition and motors.
+
+
+Now to do reac-diff test. Will need to set up something I can replicate in Kkit.
+If I base it on the multicompt_reac.g, then the geom is something like:
+
+                   D
+		   D
+		BBBA
+		CCCCC
+
+Or I could even try this in 3D. Avoid complexity for now.
+
+==========================================================================
+16 Feb.
+Two steps to take here:
+- Set up the code so that a volume change or remeshing rebuilds the junctions.
+	If I do this then I can set up the above model after loading in the
+	old multicompt_reac.g
+- Adapt the reader to separate the junction setup phase from the model loading
+	phase.
+
+Info: At model reading time, the 'addJunction' command is called by the 
+SimManager::buildAllComptSolvers from SimManager::build from ReadKkit::read
+from Shell::doLoadModel.
+
+The first half of SolverBase::addJunction is fine: it creates and puts basic
+info into the Junction. Some of it would have to be redone if the reaction set
+changed.
+The second half sets up the mesh abutment and decides which pools are sent
+around. The only tricky thing here is to know which junction to use.
+
+Did the refactoring to separate out the junction configuration from the
+junction creation. Minor hiccup to be resolved: I need to extract the exact 
+solver pair. Unfortunately the default messaging command getNeighbours gets
+the Id, not the ObjId. So I don't know which of the junctions it is.
+
+Implemented SolverBase::updateAllJunctions which uses rather grungy
+messaging code to get at the full Erefs of the junctions. Now to test.
+
+Set up rtMultiCompartment.cpp to also try out the reac-diff code. Currently
+clears setup but the test doesn't go any further.
 ==========================================================================
