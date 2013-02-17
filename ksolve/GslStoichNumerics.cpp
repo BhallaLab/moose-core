@@ -123,7 +123,9 @@ void GslStoich::vUpdateJunction( const Eref& e,
 		double* yprime = &v[0];
 
 		unsigned int offset = fillReactionDelta( j, lastS, yprime );
-		fillDiffusionDelta( j, lastS, yprime + offset );
+		if ( numDiff > 0 ) {
+			fillDiffusionDelta( j, lastS, yprime + offset );
+		}
 
 		Eref je( junction.element(), i );
 		// Each Junction FieldElement connects up to precisely one target.
@@ -194,6 +196,10 @@ void GslStoich::reinit( const Eref& e, ProcPtr info )
 {
 	if ( !isInitialized_ )
 			return;
+	if ( junctionsNotReady_ ) {
+		reconfigureAllJunctions( e, 0 );
+		junctionsNotReady_ = false;
+	}
 	// unsigned int nPools = coreStoich()->getNumVarPools() + coreStoich()->getNumProxyPools();
 	for ( unsigned int i = 0; i < pools_.size(); ++i ) {
 		VoxelPools& p = pools_[i];

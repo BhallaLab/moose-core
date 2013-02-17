@@ -26,6 +26,13 @@ const Cinfo* SolverBase::initCinfo()
 			new EpFunc1< SolverBase, Id >( &SolverBase::dropJunction )
 	);
 
+	static DestFinfo reconfigureJunctions( "reconfigureJunctions",
+		"Goes through all junctions and updates their interfaces. "
+		"Should be called whenever the reaction-diffusion system has "
+		"been changed, for example, by remeshing or adding reactions.",
+		new EpFunc0< SolverBase >( &SolverBase::reconfigureAllJunctions )
+	);
+
 	static FieldElementFinfo< SolverBase, SolverJunction > junction(
 		"junction",
 		"Handles how solvers communicate with each other in case of "
@@ -40,6 +47,7 @@ const Cinfo* SolverBase::initCinfo()
 	static Finfo* solverBaseFinfos[] = {
 		&addJunction,	// DestFinfo
 		&dropJunction,	// DestFinfo
+		&reconfigureJunctions,	// DestFinfo
 		&junction		// FieldElement
 	};
 
@@ -298,7 +306,7 @@ Id getCompt( Id id )
  * reconfigures them. This is used whenever any part of the reac-diff
  * system has been altered.
  */
-void SolverBase::updateAllJunctions( const Eref& e, const Qinfo* q )
+void SolverBase::reconfigureAllJunctions( const Eref& e, const Qinfo* q )
 {
 	Id selfSolver = e.id();
 	Id myJunction( selfSolver.value() + 1);

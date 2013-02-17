@@ -21000,3 +21000,16 @@ messaging code to get at the full Erefs of the junctions. Now to test.
 Set up rtMultiCompartment.cpp to also try out the reac-diff code. Currently
 clears setup but the test doesn't go any further.
 ==========================================================================
+17 Feb 2013
+Putting in tests for X-reac-diff.
+Seems that the remeshing has failed miserably.
+
+==========================================================================
+18 Feb 2013.
+Incrementally worked through components of cross-reac-diff system 
+multicompt_reacdiff.g as tested in 
+rtMultiCompartment.cpp:rtTestMultiCompartmentReacDiff()
+Clears setup part after many fixes. Now to run it and see. I will have
+to make an explicit spatial discretization in kkit to check the output values.
+
+==========================================================================
