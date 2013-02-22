@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Feb  8 11:29:36 2013 (+0530)
 # Version: 
-# Last-Updated: Fri Feb  8 15:14:36 2013 (+0530)
+# Last-Updated: Fri Feb 22 16:30:00 2013 (+0530)
 #           By: subha
-#     Update #: 167
+#     Update #: 179
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -118,13 +118,19 @@ def getSubtype(filename, typename):
     return None
     
 # Dictionary of model description types and functions to detect them.
+#
 # Fri Feb 8 11:07:41 IST 2013 - as of now we only recognize GENESIS .g
 # XML .xml extensions
+#
+# Fri Feb 22 16:29:43 IST 2013 - added .cspace
 
-isGENESIS = lambda x: x.endswith('.g') or x.endswith('.p')
-isXML = lambda x: x.endswith('.xml')
 
-isProto = lambda x: x.endswith('.p')
+
+isCSPACE = lambda x: x.lower().endswith('.cspace')
+isGENESIS = lambda x: x.lower().endswith('.g') or x.endswith('.p')
+isXML = lambda x: x.lower().endswith('.xml')
+
+isProto = lambda x: x.lower().endswith('.p')
 
 import xml.dom.minidom as md
 
@@ -166,7 +172,7 @@ def isKKIT(filename):
             if not line: # End of file
                 return False
             line = line.strip()
-            print 'read:', line
+            # print 'read:', line
             if line.find('//') == 0: # skip c++ style comment lines
                 # print 'c++ comment'
                 continue
@@ -174,9 +180,9 @@ def isKKIT(filename):
             comment_start = line.find('/*')
             if comment_start >= 0:
                 sentence = line[:comment_start]
-                print 'cstart', comment_start, sentence
+                # print 'cstart', comment_start, sentence
             while comment_start >= 0 and line:
-                print '#', line
+                # print '#', line
                 comment_end = line.find('*/')
                 if comment_end >= 0:
                     comment_start = -1;
@@ -199,7 +205,7 @@ def isKKIT(filename):
             # while loop unprocessed
             if line:
                 sentence += ' ' + line            
-            print '>', sentence
+            # print '>', sentence
             if re.search(pattern, sentence):
                 return True
     return False
@@ -209,6 +215,7 @@ def isKKIT(filename):
 # False. Define new functions for new model type checks and add them
 # here.
 typeChecks = {
+    'cspace': isCSPACE,
     'genesis': isGENESIS,
     'xml': isXML,
 }
@@ -220,11 +227,12 @@ subtypeChecks = {
     'genesis/kkit': isKKIT,
     'genesis/proto': isProto,
     'xml/neuroml': isNeuroML,
-    'xml/sbml': isSBML,
+    'xml/sbml': isSBML,    
 }
 
 # Mapping types to list of subtypes.
 subtypes = {
+    'cspace': [],
     'genesis': ['kkit', 'proto'],
     'xml': ['neuroml', 'sbml'],
 }

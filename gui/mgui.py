@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Fri Feb  8 15:56:50 2013 (+0530)
+# Last-Updated: Fri Feb 22 16:22:02 2013 (+0530)
 #           By: subha
-#     Update #: 516
+#     Update #: 524
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -49,6 +49,7 @@ import inspect
 import sys
 sys.path.append('../python')
 import os
+import posixpath # We use this to create MOOSE paths
 from PyQt4 import QtGui,QtCore,Qt
 import config
 import mplugin
@@ -346,20 +347,20 @@ class MWindow(QtGui.QMainWindow):
         activeWindow = None # This to be used later to refresh the current widget with newly loaded model
         dialog = QtGui.QFileDialog(self, 
                                    self.tr('Load model from file'), 
-                                   filter=self.tr('GENESIS (*.g);; GENESIS Prototype (*.p);; NeuroML/SBML (*.xml);; All files (*.*)'),
+                                   filter=self.tr('CSPACE (*.cspace);; GENESIS (*.g);; GENESIS Prototype (*.p);; NeuroML/SBML (*.xml);; All files (*.*)'),
                                    options=QtGui.QFileDialog.ReadOnly)
         dialog.setNameFilterDetailsVisible(True)
         dialog.setFileMode(QtGui.QFileDialog.ExistingFile)
         targetPanel = QtGui.QFrame(dialog)
         targetLabel = QtGui.QLabel('Create model under')
-        targetText = QtGui.QLineEdit('.')
+        targetText = QtGui.QLineEdit(moose.getCwe().path)
         layout = QtGui.QVBoxLayout()
         layout.addWidget(targetLabel)
         layout.addWidget(targetText)
         targetPanel.setLayout(layout)
         dialog.layout().addWidget(targetPanel)
         self.connect(dialog, QtCore.SIGNAL('currentChanged(const QString &)'), 
-                     lambda path:(targetText.setText(os.path.basename(str(path)).rpartition('.')[0])))
+                     lambda path:(targetText.setText(posixpath.join(moose.getCwe().path, os.path.basename(str(path)).rpartition('.')[0]))))
         if dialog.exec_():
             fileNames = dialog.selectedFiles()
             for fileName in fileNames:

@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Feb  8 09:38:40 2013 (+0530)
 # Version: 
-# Last-Updated: Fri Feb  8 15:15:06 2013 (+0530)
+# Last-Updated: Fri Feb 22 16:31:22 2013 (+0530)
 #           By: subha
-#     Update #: 162
+#     Update #: 174
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -71,13 +71,19 @@ def loadFile(filename, target):
         return None
     modeltype = mtypes.getType(filename)
     subtype = mtypes.getSubtype(filename, modeltype)
+    # pwe = moose.getCwe()
     if modeltype == 'genesis':
         if subtype == 'kkit' or subtype == 'prototype':
-            model = moose.loadModel(filename, target)
+            model = moose.loadModel(filename, target)            
         else:
             print 'Only kkit and prototype files can be loaded.'
+    elif modeltype == 'cspace':
+            model = moose.loadModel(filename, target)        
     elif modeltype == 'xml' and subtype == 'neuroml':
         model = neuroml.loadNeuroML_L123(filename)
+    else:
+        print 'Do not know how to handle this filetype:', filename
+    # moose.ce(pwe) # TODO: The MOOSE loadModel changes the current working element to newly loaded model. Should we revert that?
     # TODO: check with Aditya how to specify the target for
     # neuroml reader
     return {'modeltype': modeltype, 
