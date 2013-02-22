@@ -68,7 +68,7 @@ class KkitEditorView(MooseEditorView):
         if self._centralWidget is None:
             #self._centralWidget = EditorWidgetBase()
             self._centralWidget = KineticsWidget()
-            #print "getCentrelWidget",self.plugin.modelRoot
+            #print "1getCentrelWidget",self.plugin.modelRoot
             self._centralWidget.setModelRoot(self.plugin.modelRoot)
         return self._centralWidget
 
@@ -82,7 +82,7 @@ class  KineticsWidget(DefaultEditorWidget):
         self.sceneContainer = QtGui.QGraphicsScene(self)
         self.sceneContainer.setSceneRect(self.sceneContainer.itemsBoundingRect())
         self.sceneContainer.setBackgroundBrush(QtGui.QColor(230,220,219,120))
-        self.sceneContainer.clear()
+
     
     def updateModelView(self):
         """ maxmium and minimum coordinates of the objects specified in kkit file. """
@@ -90,17 +90,17 @@ class  KineticsWidget(DefaultEditorWidget):
         self.xmax = 1.0
         self.ymin = 0.0
         self.ymax = 1.0
-
+        self.sceneContainer.clear()
         """ TODO: size will be dummy at this point, but I need the availiable size from the Gui """
         self.size = QtCore.QSize(1024 ,768)
-
+        
         self.autocoordinates = False
 
         """ pickled the color map file """
         colormap_file = open(os.path.join(config.settings[config.KEY_COLORMAP_DIR], 'rainbow2.pkl'),'rb')
         self.colorMap = pickle.load(colormap_file)
         colormap_file.close()
-        
+        #print "3",self.modelRoot
         """ Compartment and its members are setup """
         self.meshEntry,self.xmin,self.xmax,self.ymin,self.ymax,self.noPositionInfo = setupMeshObj(self.modelRoot)
         #for mesh,obj in self.meshEntry.items():
@@ -199,6 +199,11 @@ class  KineticsWidget(DefaultEditorWidget):
                 self.setupDisplay(reainfo,reaItem,"reaction")
                 self.setupSlot(reaObj,reaItem)
 
+            for tabObj in find_index(memb,'table'):
+                tabinfo = tabObj.path+'/info'
+                tabItem = PoolItem(tabObj,self.qGraCompt[cmpt])
+                self.setupDisplay(tabinfo,tabItem,"tab")
+                self.setupSlot(tabObj,tabItem)
         ''' compartment's rectangle size is calculated depending on children '''
         for k, v in self.qGraCompt.items():
             rectcompt = v.childrenBoundingRect()
@@ -227,6 +232,8 @@ class  KineticsWidget(DefaultEditorWidget):
 
         if( (objClass == "reaction" ) or (objClass == "cplx")):
             textcolor,bgcolor = "white","white"
+        elif objClass == "tab":
+            textcolor,bgcolor = getColor(info,self.colorMap)
         else:
             textcolor,bgcolor = getColor(info,self.colorMap)
 
@@ -331,7 +338,8 @@ class  KineticsWidget(DefaultEditorWidget):
                 pen.setColor(color)
         elif isinstance(source, moose.PoolBase):
             pen.setColor(QtCore.Qt.blue)
-
+        elif isinstance(source,moose.StimulusTable):
+            pen.setColor(QtCore.Qt.yellow)
         self.lineItem_dict[qgLineitem] = srcdes_list
         self.object2line[ src ].append( ( qgLineitem, des) )
         self.object2line[ des ].append( ( qgLineitem, src ) )
