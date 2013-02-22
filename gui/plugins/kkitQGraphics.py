@@ -61,10 +61,11 @@ class PoolItem(KineticsDisplayItem):
         self.setGeometry(x, y,self.gobj.boundingRect().width()
                         +PoolItem.fontMetrics.width('  '), 
                         self.gobj.boundingRect().height())
-
         self.gobj.setPen(QtGui.QPen(QtGui.QBrush(textcolor)))
         self.gobj.setBrush(QtGui.QBrush(textcolor))
-        self.bg.setBrush(QtGui.QBrush(bgcolor))
+
+	if self.mobj.class_ != "StimulusTable":
+	        self.bg.setBrush(QtGui.QBrush(bgcolor))
 
     def refresh(self,scale):
         fontsize = PoolItem.defaultFontsize*scale
