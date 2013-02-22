@@ -51,11 +51,18 @@ def setupMeshObj(modelRoot):
             xcord.append(xyPosition(objInfo,'x'))
             ycord.append(xyPosition(objInfo,'y'))
        
+        compt = meshEnt.parent[0].path+'/##[TYPE=StimulusTable]'
+        for table in wildcardFind(compt):
+            tablist.append(table)
+            objInfo = table.path+'/info'
+            xcord.append(xyPosition(objInfo,'x'))
+            ycord.append(xyPosition(objInfo,'y'))
        
         meshEntry[meshEnt] = {'enzyme':enzlist,
                               'reaction':realist,
                               'pool':mollist,
-                              'cplx':cplxlist
+                              'cplx':cplxlist,
+                              'table':tablist
                               }
         xmin = min(xcord)
         xmax = max(xcord)
@@ -71,7 +78,7 @@ def setupItem(modlePath,cntDict):
     eg. substrate and product connectivity to reaction's and enzyme's \
     sumtotal connectivity to its pool are collected '''
 
-    zombieType = ['ReacBase','EnzBase','FuncBase']
+    zombieType = ['ReacBase','EnzBase','FuncBase','StimulusTable']
     for baseObj in zombieType:
         path = modlePath+'/##[ISA='+baseObj+']'
         if ( (baseObj == 'ReacBase') or (baseObj == 'EnzBase')):
@@ -104,6 +111,12 @@ def setupItem(modlePath,cntDict):
                     funplist.append(funcbase)
                 if(len(funplist) > 1): print "SumFunPool has multiple Funpool"
                 else:  cntDict[funplist[0]] = inputlist
+        else:
+            for tab in wildcardFind(path):
+                tablist = []
+                for tabconnect in tab[0].getNeighbors('output'):
+                    tablist.append((tabconnect,'tab'))
+                cntDict[tab] = tablist
 
 def autoCoordinates(G,meshEntry,srcdesConnection):
     #for cmpt,memb in meshEntry.items():
