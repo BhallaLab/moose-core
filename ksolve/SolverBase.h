@@ -143,6 +143,14 @@ class SolverBase
 		void innerConnectJunctions( 
 						Id me, Id other, SolverBase* otherSP );
 
+		/**
+		 * Cleans out and reallocates solver data structs based on latest
+		 * mesh and junction information. Need to call on all solvers
+		 * as prelude to
+		 * reconfigureAllJunctions.
+		 */
+		void reallocateSolver( const Eref& e, const Qinfo* q );
+		virtual void innerReallocateSolver( const Eref& e ) = 0;
 
 		virtual void expandSforDiffusion( 
 			const vector< unsigned int > & otherMeshIndex,

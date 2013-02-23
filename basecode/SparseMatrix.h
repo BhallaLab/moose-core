@@ -43,7 +43,7 @@ template < class T > class SparseMatrix
 {
 	public:
 		SparseMatrix()
-			: nrows_( 0 ), ncolumns_( 0 )
+			: nrows_( 0 ), ncolumns_( 0 ), rowStart_( 1, 0 )
 		{
 			N_.resize( 0 );
 			N_.reserve( SM_RESERVE );

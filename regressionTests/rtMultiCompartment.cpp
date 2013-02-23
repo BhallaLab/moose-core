@@ -15,6 +15,10 @@
 #include "Shell.h"
 #include "LoadModels.h"
 #include "../mesh/VoxelJunction.h"
+#include "../mesh/MeshEntry.h"
+#include "../mesh/Boundary.h"
+#include "../mesh/Stencil.h"
+#include "../mesh/ChemMesh.h"
 #include "../kinetics/PoolBase.h"
 #include "../ksolve/SolverJunction.h"
 #include "../ksolve/SolverBase.h"
@@ -26,6 +30,50 @@
 #include "../ksolve/StoichCore.h"
 #include "../ksolve/OdeSystem.h"
 #include "../ksolve/GslStoich.h"
+#include "../shell/Wildcard.h"
+
+
+static void makeReacDiffGraphs( const string& poolPath )
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< int > dims( 1, 1 );
+	
+	Id pool( poolPath );
+	assert( pool != Id() );
+	unsigned int n = Field< unsigned int >::get( pool, "linearSize" );
+	dims[0] = n;
+	Id conc1( "/model/graphs/conc1" );
+	assert( conc1 != Id() );
+	string tail = pool.element()->getName();
+	string temp = poolPath.substr( poolPath.length() - 4, 1 );
+	if ( temp == "s" ) tail = tail + "_A";
+	else if ( temp == "1" ) tail = tail + "_B";
+	else if ( temp == "3" ) tail = tail + "_C";
+	else if ( temp == "2" ) tail = tail + "_D";
+	else assert( false );
+	Id plot = shell->doCreate( "Table", conc1, tail + ".conc", dims );
+	assert( plot != Id() );
+	shell->doAddMsg( "OneToOne", plot, "requestData", pool, "get_conc" );
+}
+
+static void dumpReacDiffGraphs()
+{
+	vector< Id > plots;
+	wildcardFind( "/model/graphs/conc1/#.conc", plots );
+	assert( plots.size() == 9 );
+	for ( vector< Id >::iterator i = plots.begin(); i != plots.end(); ++i )
+	{
+		for ( unsigned int j = 0; 
+			j < i->element()->dataHandler()->localEntries(); ++j ) {
+			ObjId oi( *i, j );
+			stringstream ss;
+			ss << ( i->element()->getName() ) << "_" << j;	
+			bool ok = SetGet2< string, string >::set(
+				oi, "xplot", "check.plot", ss.str() );
+			assert( ok );
+		}
+	}
+}
 
 void checkField( const string& path, const string& field, double value )
 {
@@ -41,20 +89,21 @@ void checkJunction( const string& path, Id c1, Id c2, bool isDiffusive )
 	assert( !( id == ObjId::bad() ) );
 	// unsigned int nr = Field< unsigned int >::get( id, "numReacs" );
 	unsigned int ndm = Field< unsigned int >::get( id, "numDiffMols" );
-	unsigned int nme = Field< unsigned int >::get( id, "numMeshEntries" );
+	//unsigned int nme = Field< unsigned int >::get( id, "numMeshEntries" );
 	Id myCompartment = Field< Id >::get( id, "myCompartment" );
 	Id otherCompartment = Field< Id >::get( id, "otherCompartment" );
 
-	unsigned int myNumMesh = 
-			Field< unsigned int >::get( myCompartment, "num_mesh" );
+	/*
+	 unsigned int myNumMesh = Field< unsigned int >::get( myCompartment, "num_mesh" );
 	unsigned int otherNumMesh = 
 			Field< unsigned int >::get( otherCompartment, "num_mesh" );
 	unsigned int refNumMesh = 
 			( myNumMesh < otherNumMesh ) ? myNumMesh : otherNumMesh;
+			*/
 
 	// assert( nr == 1 );
 	assert( ndm == static_cast< unsigned int >( isDiffusive ) );
-	assert( nme == refNumMesh );
+	// assert( nme == refNumMesh );
 
 	assert( myCompartment == c1 );
 	assert( otherCompartment == c2 );
@@ -209,7 +258,7 @@ void rtTestMultiCompartmentReaction()
 	assert( gsB != Id() );
 	gs = reinterpret_cast< GslStoich* >( gsB.eref().data() );
 	assert( gs->pools().size() == 1 ); // No diffusion, but goes to A.
-	assert( gs->pools()[0].size() == 5 );
+	assert( gs->pools()[0].size() == 5 ); // 3 mols, 1 enz cplx, diff to C
 	assert( gs->ode().size() == 2 ); // combos: x C
 	assert( gs->pools()[0].getSolver() == 1 );
 	// const_cast< VoxelPools& >( gs->pools()[0] ).setSolver( 1 );
@@ -344,6 +393,7 @@ void rtTestMultiCompartmentReaction()
  */
 void rtTestMultiCompartmentReacDiff()
 {
+	double DT = 0.1;
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	vector< unsigned int > dims( 1, 1 );
 	Shell::cleanSimulation();
@@ -393,12 +443,13 @@ void rtTestMultiCompartmentReacDiff()
 	assert( numC == 5 );
 	assert( numD == 2 );
 
+	Field< bool >::set( A, "alwaysDiffuse", false );
+	Field< bool >::set( B, "alwaysDiffuse", false );
+	Field< bool >::set( C, "alwaysDiffuse", false );
+	Field< bool >::set( D, "alwaysDiffuse", false );
 	// This should get all the stoichs to reconfigure their junctions, 
 	// which was pending since the meshes have been redone.
-	for ( unsigned int i = 0; i < 10; ++i )
-		shell->doSetClock( i, 0.1 );
-	shell->doSetClock( 8, 1 );
-	shell->doReinit(); 
+	SetGet0::set( model, "rebuild" );
 	
 	////////////////////////////////////////////////////////////////
 	// Check out junctions
@@ -425,13 +476,16 @@ void rtTestMultiCompartmentReacDiff()
 	Id gsA( "/model/kinetics/stoich" );
 	assert( gsA != Id() );
 	GslStoich* gs = reinterpret_cast< GslStoich* >( gsA.eref().data() );
-	assert( gs->pools().size() == 2 ); // One for self, 1 for diffn.
+	assert( gs->pools().size() == 4 ); // One for self, 3 for diffn.
 	assert( gs->pools()[0].size() == 5 ); // M1, M2 and proxies M3, M4, M5
 	assert( gs->pools()[1].size() == 2 ); // M1 and M2.
+	assert( gs->pools()[2].size() == 2 ); // M1 and M2.
+	assert( gs->pools()[3].size() == 2 ); // M1 and M2.
 	assert( gs->ode().size() == 8 ); // combos: x 1 2 3 12 13 23 123
 	assert( gs->pools()[0].getSolver() == 7 );
 	assert( gs->pools()[1].getSolver() == 0 ); // Should not even be calling
-	// const_cast< VoxelPools& >( gs->pools()[0] ).setSolver( 7 );
+	assert( gs->pools()[2].getSolver() == 0 ); // Should not even be calling
+	assert( gs->pools()[3].getSolver() == 0 ); // Should not even be calling
 	assert( gs->coreStoich()->getNumVarPools() == 2 );
 	assert( gs->coreStoich()->getNumProxyPools() == 3 );
 	assert( gs->coreStoich()->getNumRates() == 4 );
@@ -445,12 +499,42 @@ void rtTestMultiCompartmentReacDiff()
 	assert( gs->ode()[7].compartmentSignature_[0] == B );
 	assert( gs->ode()[7].compartmentSignature_[1] == D );
 	assert( gs->ode()[7].compartmentSignature_[2] == C );
+
+	// Checking stencils.
+	// The stencil here should connect up to the proxy compts for B,C,D.
+	const double* entry;
+	const unsigned int* colIndex;
+	unsigned int numInRow;
+	// const double diffConst = 1e-12;
+	// DiffConst * length of voxel /area of voxel
+	const double adx = 1e-5; 
+	numInRow = gs->compartmentMesh()->getStencil( 0, &entry, &colIndex);
+	assert( numInRow  == 3 );
+	assert( colIndex[0] == 1 );
+	assert( colIndex[1] == 2 );
+	assert( colIndex[2] == 3 );
+	assert( doubleEq( entry[0], adx ) );
+	assert( doubleEq( entry[1], adx ) );
+	assert( doubleEq( entry[2], adx ) );
+	numInRow = gs->compartmentMesh()->getStencil( 1, &entry, &colIndex);
+	assert( numInRow == 1 );
+	assert( colIndex[0] == 0 );
+	assert( doubleEq( entry[0], adx ) );
+	numInRow = gs->compartmentMesh()->getStencil( 2, &entry, &colIndex);
+	assert( numInRow == 1 );
+	assert( colIndex[0] == 0 );
+	assert( doubleEq( entry[0], adx ) );
+	numInRow = gs->compartmentMesh()->getStencil( 3, &entry, &colIndex);
+	assert( numInRow == 1 );
+	assert( colIndex[0] == 0 );
+	assert( doubleEq( entry[0], adx ) );
+
 	////////////////////////////////////////////////////////////////
 	Id gsB( "/model/compartment_1/stoich" );
 	assert( gsB != Id() );
 	gs = reinterpret_cast< GslStoich* >( gsB.eref().data() );
 
-	// 3 diffusion compts plus 3 to connect to C plus 1 for A.
+	// 3 diffusion compts plus 3 to connect to C. A is handling the other.
 	assert( gs->pools().size() == 6 ); 
 	assert( gs->pools()[0].size() == 5 ); // 4 molecules, one X reac to C
 	assert( gs->pools()[1].size() == 5 ); // 4 molecules, one X reac to C
@@ -486,8 +570,8 @@ void rtTestMultiCompartmentReacDiff()
 	Id gsC( "/model/compartment_3/stoich" );
 	assert( gsC != Id() );
 	gs = reinterpret_cast< GslStoich* >( gsC.eref().data() );
-	assert( gs->pools().size() == 5 ); // 5 voxels, plus 4 X-diff
-	// But I guess this is a follower on all the X-diffs.
+	assert( gs->pools().size() == 5 ); // 5 voxels, diffn is handled by A&B.
+	// because C is the follower on all the X-diffs.
 	assert( gs->pools()[0].size() == 2 ); // 2 mols, X reacs are followers
 	assert( gs->pools()[1].size() == 2 ); // 2 mols, X reacs are followers
 	assert( gs->pools()[2].size() == 2 ); // 2 mols, X reacs are followers
@@ -529,6 +613,24 @@ void rtTestMultiCompartmentReacDiff()
 	assert( gs->ode()[0].stoich_->getNumProxyPools() == 0 );
 	assert( gs->ode()[0].stoich_->getNumRates() == 1 );
 	////////////////////////////////////////////////////////////////
+	makeReacDiffGraphs( "/model/kinetics/M1" );
+	makeReacDiffGraphs( "/model/kinetics/M2" );
+	makeReacDiffGraphs( "/model/compartment_1/M1" );
+	makeReacDiffGraphs( "/model/compartment_1/M3" );
+	makeReacDiffGraphs( "/model/compartment_1/M6" );
+	makeReacDiffGraphs( "/model/compartment_3/M1" );
+	makeReacDiffGraphs( "/model/compartment_3/M4" );
+	makeReacDiffGraphs( "/model/compartment_2/M1" );
+	makeReacDiffGraphs( "/model/compartment_2/M5" );
+	shell->doUseClock( "/model/graphs/conc1/#.conc", "process", 8 );
+
+	for ( unsigned int i = 0; i < 10; ++i )
+		shell->doSetClock( i, DT );
+	shell->doSetClock( 8, 1 );
+	shell->doReinit();
+	shell->doStart( 100.0 );
+
+	dumpReacDiffGraphs();
 
 	shell->doDelete( model );
 	cout << "." << flush;

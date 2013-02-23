@@ -88,6 +88,12 @@ class ChemMesh
 			const Eref& e, const Qinfo* q, 
 			unsigned int numNodes, unsigned int numThreads ) = 0;
 
+		/**
+		 * Reset stencil m_ to coreStencil_. This is needed as a prelude to
+		 * rebuilding the junctions using extendStencil.
+		 */
+		void resetStencil();
+		virtual void innerResetStencil() = 0;
 
 		//////////////////////////////////////////////////////////////////
 		// FieldElementFinfo stuff for MeshEntry lookup
@@ -231,6 +237,7 @@ class ChemMesh
 		 */
 		virtual void extendStencil( 
 			const ChemMesh* other, const vector< VoxelJunction >& vj ) = 0;
+
 		//////////////////////////////////////////////////////////////////
 
 		static const Cinfo* initCinfo();

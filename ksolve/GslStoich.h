@@ -232,6 +232,9 @@ class GslStoich: public SolverBase
 			const vector< unsigned int > & selfDiffPoolIndex,
 			SolverJunction& j );
 
+		/// Inherited virtual func. Must be called before doing reconfig.
+		void innerReallocateSolver( const Eref& e );
+
 		/// Inherited virtual func. Identifies cross-solver pools from other
 		void findPoolsOnOther( Id other, vector< Id >& pools );
 

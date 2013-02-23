@@ -121,6 +121,9 @@ class CubeMesh: public ChemMesh
 			const Eref& e, const Qinfo* q, 
 			unsigned int numNodes, unsigned int numThreads );
 
+		/// virtual func implemented here.
+		void innerResetStencil();
+
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
@@ -232,6 +235,20 @@ class CubeMesh: public ChemMesh
 		void buildStencil();
 		void fillSpaceToMeshLookup();
 
+		/** 
+		 * Updates the m2s_ vector after s2m_ has been changed, 
+		 * and rebuilds the Stencil too. Any earlier junction information
+		 * is lost.
+		 */
+		void deriveM2sFromS2m();
+
+		/** 
+		 * Updates the s2m_ vector after m2s_ has been changed, 
+		 * and rebuilds the Stencil too. Any earlier junction information
+		 * is lost.
+		 */
+		void deriveS2mFromM2s();
+
 		/// Derived function to return SparseMatrix-style row info for
 		/// specified mesh entry. 
 		unsigned int getStencil( unsigned int meshIndex,
@@ -250,6 +267,9 @@ class CubeMesh: public ChemMesh
 		
 		void setDiffScale( const CubeMesh* other,
 			vector< VoxelJunction >& ret ) const;
+
+		void updateM2s();
+		void updateS2m();
 		//////////////////////////////////////////////////////////////////
 		static const unsigned int EMPTY;
 		static const unsigned int SURFACE;
@@ -281,7 +301,11 @@ class CubeMesh: public ChemMesh
 		unsigned int ny_; /// # of entries in y in surround volume
 		unsigned int nz_; /// # of entries in z in surround volume
 
-		SparseMatrix< double > m_; /// Handles the stencil
+		/// Handles the core stencil for own vol
+		SparseMatrix< double > coreStencil_; 
+
+		/// Handles stencil for core + abutting voxels
+		SparseMatrix< double > m_; 
 
 		/**
 		 * For spherical mesh, coords are xyz r0 r1 theta0 theta1 phi0 phi1

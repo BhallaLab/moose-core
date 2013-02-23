@@ -21003,13 +21003,102 @@ clears setup but the test doesn't go any further.
 17 Feb 2013
 Putting in tests for X-reac-diff.
 Seems that the remeshing has failed miserably.
-
-==========================================================================
-18 Feb 2013.
 Incrementally worked through components of cross-reac-diff system 
 multicompt_reacdiff.g as tested in 
 rtMultiCompartment.cpp:rtTestMultiCompartmentReacDiff()
 Clears setup part after many fixes. Now to run it and see. I will have
 to make an explicit spatial discretization in kkit to check the output values.
+
+==========================================================================
+18 Feb 2013.
+Trying to run it, crashes. What should I use for dt?
+D = 1e-12 m^2/sec. mesh size = 10 microns.
+
+dist = sqrt( D * t ) = 1 micron per second. So a dt of 0.1 should be fine.
+
+stepping through calculations. The v vector is clearly building up into 
+oscilations and instability. Even after I reduced dt to 0.01 sec.
+
+I think I've found two errors in the diffusion calculations.
+1. GslStoich::updateDiffusion(): vOther comes to the entire volume of the
+	other compartment, rather than the volume of one of the voxels.
+2. There is a sparse matrix to define the stencil for diffusion. This
+	isn't right, one value is 1e-5 and the other 1.
+==========================================================================
+19 Feb 2013
+Working on fixing up the errors. Homed in to CubeMesh::extendStencil.
+This has been refactored. But its call order also needs to be fixed.
+
+Put the code in order, not beautiful but enough to try out.
+Now grinding through unit tests. A lot of those have been broken by these
+changes. Currently there is an issue because coreSize is given by 
+nx*ny*nz whereas m2s is given by whatever I put in it, in a test.
+==========================================================================
+20 Feb 2013
+Lots of cruft uncovered in the Cube mesh code, including some useful unit
+tests that were commented out. Basic issue is ranking of the mesh geometry,
+the m2s_ vector and the s2m_ vector. Here s is space and m is mesh, and the 
+two vectors map points in space to and from the mesh indices.
+s2m is always meant to be the size of the enclosing cuboid. But a lot of its
+entries will be EMPTY (~0) when they fall outside the included volume of the
+mesh.
+m2s is always meant to be just as many as included voxels.
+The coreStencil should only refer to included voxels. It is a square matrix
+and should be exactly m2s_.size() on each side.
+
+Currently we don't think much about the geometry, so for now continue to 
+ignore it.
+
+Ranking in order of assignment:
+s2m -> m2s ->coreStencil
+When the enclosing volume is filled in or resized, we have to
+rebuild s2m to include everything. Later could include geometry at this step.
+
+When s2m is changed, we rebuild m2s and the coreStencil
+
+When m2s is changed/assigned, we rebuild s2m and the coreStencil. But this is
+discouraged as one could end up with non-contiguous geometries.
+
+
+Did this and other cleanups. The unit tests go a lot further. Stuck now with  
+testKsolve.cpp:1068: void testDiffusionAcrossJunctions(): 
+Assertion `sj->abutMeshIndex()[0] == 30' failed.
+This seems to be an issue with how the abutMeshIndices are generated.
+I think expandSforDiffusion needs work here, to deal with more than one
+junction.
+I replaced numVoxels with pools_.size(), but this will fail if there is another
+round of resizing. Need to revisit. 
+But it clears unit tests. Fails verbosely on regression tests.
+
+==========================================================================
+21 Feb 2013
+Added substantial additional tests to the rtTestMultiCompartmentReacDiff()
+to be sure that the stencils are being set up correctly. Unfortunately
+some other cleanup has led to one of the junctions not finding any pools
+to send, though they are there. Trying to track. Twice I've gone through
+and when single-stepping the data does seem to fill in, but the thing
+fails anyway. Odd.
+
+It loses it in checkAbut with ix = 2, 0, 1  and meshIndex = 4.
+
+It loses it somewhere to do with setting the intersection volume, the
+surface, and setIntersect.
+==========================================================================
+23 Feb 2013
+Finally tracked this particular bug down. Turns out that the CubeMesh
+decided whether it was 1, 2 or 3 dimensions, and accordingly generated a
+Surface. This failed when I tried to connect sideways onto a bunch of pools,
+organized like this.
+
+                   D
+		   D
+		BBBA
+		CCCCC
+
+So here many of the pools would have been classified as 1-dim, even though the
+reactions of interest are along y.
+Anyway, with this fixed I now have the regression tests clearing and 
+generating some possible reac-diff plots. Yet to quantitatively test them.
+
 
 ==========================================================================

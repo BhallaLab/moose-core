@@ -26,6 +26,11 @@ const Cinfo* SolverBase::initCinfo()
 			new EpFunc1< SolverBase, Id >( &SolverBase::dropJunction )
 	);
 
+	static DestFinfo reallocateSolver( "reallocateSolver",
+		"Reallocates storage for solver. Needed when rebuilding. ",
+		new EpFunc0< SolverBase >( &SolverBase::reallocateSolver )
+	);
+
 	static DestFinfo reconfigureJunctions( "reconfigureJunctions",
 		"Goes through all junctions and updates their interfaces. "
 		"Should be called whenever the reaction-diffusion system has "
@@ -45,10 +50,11 @@ const Cinfo* SolverBase::initCinfo()
 	);
 
 	static Finfo* solverBaseFinfos[] = {
-		&addJunction,	// DestFinfo
-		&dropJunction,	// DestFinfo
+		&addJunction,		// DestFinfo
+		&dropJunction,		// DestFinfo
+		&reallocateSolver,	// DestFinfo
 		&reconfigureJunctions,	// DestFinfo
-		&junction		// FieldElement
+		&junction			// FieldElement
 	};
 
 	static string doc[] = 
@@ -312,6 +318,7 @@ void SolverBase::reconfigureAllJunctions( const Eref& e, const Qinfo* q )
 	Id myJunction( selfSolver.value() + 1);
 	vector< Id > ret;
 	
+	// Reallocate the pool vector from scratch.
 	// Go through msg list
 	// Get src and dest ObjId using the srcToDestPairs function.
 	// Identify the junction indices from this.
@@ -341,4 +348,9 @@ void SolverBase::reconfigureAllJunctions( const Eref& e, const Qinfo* q )
 		Id otherSolver( otherE->id().value() - 1 );
 		configureJunction( selfSolver, otherSolver, *selfJ, *otherJ );
 	}
+}
+
+void SolverBase::reallocateSolver( const Eref& e, const Qinfo* q )
+{
+	this->innerReallocateSolver( e );
 }

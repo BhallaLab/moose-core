@@ -124,6 +124,15 @@ const Cinfo* ChemMesh::initCinfo()
 				&ChemMesh::handleNodeInfo )
 		);
 
+		static DestFinfo resetStencil( "resetStencil",
+			"Resets the diffusion stencil to the core stencil that only "
+			"includes the within-mesh diffusion. This is needed prior to "
+			"building up the cross-mesh diffusion through junctions.",
+			new OpFunc0< ChemMesh >(
+				&ChemMesh::resetStencil )
+		);
+
+
 		//////////////////////////////////////////////////////////////
 		// SharedMsg Definitions
 		//////////////////////////////////////////////////////////////
@@ -178,6 +187,7 @@ const Cinfo* ChemMesh::initCinfo()
 		&numDimensions,	// ReadOnlyValue
 		&method,		// Value
 		&buildDefaultMesh,	// DestFinfo
+		&resetStencil,	// DestFinfo
 		&nodeMeshing,	// SharedFinfo
 		&entryFinfo,	// FieldElementFinfo
 		&boundaryFinfo,	// FieldElementFinfo
@@ -237,6 +247,11 @@ void ChemMesh::handleNodeInfo( const Eref& e, const Qinfo* q,
 {
 	// Pass it down to derived classes along with the SrcFinfo
 	innerHandleNodeInfo( e, q, numNodes, numThreads );
+}
+
+void ChemMesh::resetStencil()
+{
+	this->innerResetStencil();
 }
 
 //////////////////////////////////////////////////////////////
