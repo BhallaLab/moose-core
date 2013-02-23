@@ -196,10 +196,14 @@ void GslStoich::reinit( const Eref& e, ProcPtr info )
 {
 	if ( !isInitialized_ )
 			return;
+	/*
 	if ( junctionsNotReady_ ) {
+			// This is a little dangerous, as it relies on the stencils
+			// having been reset.
 		reconfigureAllJunctions( e, 0 );
 		junctionsNotReady_ = false;
 	}
+	*/
 	// unsigned int nPools = coreStoich()->getNumVarPools() + coreStoich()->getNumProxyPools();
 	for ( unsigned int i = 0; i < pools_.size(); ++i ) {
 		VoxelPools& p = pools_[i];
@@ -353,8 +357,8 @@ void GslStoich::updateDiffusion(
 
 	// Get value at midpoint in time.
 	for ( unsigned int me = 0; me < pools_.size(); ++me ) {
-		assert( lastS[me].size() == numCorePools );
-		assert( y[me].size() == numCorePools );
+		assert( lastS[me].size() >= numCorePools );
+		assert( y[me].size() >= numCorePools );
 		for ( unsigned int i = 0; i < numCorePools; ++i ) {
 			lastS[me][i] = ( lastS[me][i] + y[me][i] ) / 2.0;
 		}

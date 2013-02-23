@@ -1197,13 +1197,10 @@ void testCubeMeshFillTwoDimSurface()
 	cm.innerSetCoords( coords );
 	assert( cm.numDims() == 2 );
 	const vector< unsigned int >& surface = cm.surface();
-	assert( surface.size() == 12 );
-	for ( unsigned int i = 0; i < 5; ++i ) {
+	assert( surface.size() == 15 );
+	for ( unsigned int i = 0; i < 15; ++i ) {
 		assert( surface[i] == i );
-		assert( surface[i + 5] == i + 10 );
 	}
-	assert( surface[10] == 5 );
-	assert( surface[11] == 9 );
 	cout << "." << flush;
 }
 
@@ -1232,7 +1229,7 @@ void testCubeMeshJunctionTwoDimSurface()
 	cm1.setPreserveNumEntries( false );
 	cm1.innerSetCoords( coords );
 	vector< unsigned int > surface = cm1.surface();
-	assert( surface.size() == 12 );
+	assert( surface.size() == 15 );
 
 	CubeMesh cm2;
 	coords[0] = 5.0;
@@ -1343,7 +1340,7 @@ void testCubeMeshJunctionDiffSizeMesh()
 	cm1.setPreserveNumEntries( false );
 	cm1.innerSetCoords( coords );
 	vector< unsigned int > surface = cm1.surface();
-	assert( surface.size() == 12 );
+	assert( surface.size() == 15 );
 
 	CubeMesh cm2;
 	coords[0] = 5.0;
@@ -1385,6 +1382,72 @@ void testCubeMeshJunctionThreeDimSurface()
 	cout << "." << flush;
 }
 
+/**
+ * The simulated geometry is:
+ *                    D
+ *                    D
+ *                 BBBA
+ *                 CCCCC
+ *  Here, A is at (0,0,0) to (10,10,10) microns.
+ *  B is then (-30,0,0) to (0,10,10) microns
+ *  C is (-30,-10,0) to (20,0,10) microns
+ *  D is (0,10,0) to (10,30,10) microns.
+ */
+void testCubeMeshMultiJunctionTwoD()
+{
+	CubeMesh A;
+	vector< double > coords( 9, 0.0 );
+	coords[3] = 10e-6;
+	coords[4] = 10e-6;
+	coords[5] = 10e-6;
+	coords[6] = coords[7] = coords[8] = 10e-6;
+	A.setPreserveNumEntries( false );
+	A.innerSetCoords( coords );
+	vector< unsigned int > surface = A.surface();
+	assert( surface.size() == 1 );
+	assert( surface[0] == 0 );
+
+	CubeMesh B;
+	coords[0] = -30e-6;	coords[1] = 0; 		coords[2] = 0;
+	coords[3] = 0; 		coords[4] = 10e-6;	coords[5] = 10e-6;
+	coords[6] = 		coords[7] = 		coords[8] = 10e-6;
+	B.setPreserveNumEntries( false );
+	B.innerSetCoords( coords );
+	surface = B.surface();
+	assert( surface.size() == 3 );
+	assert( surface[0] == 0 );
+	assert( surface[1] == 1 );
+	assert( surface[2] == 2 );
+
+	CubeMesh D;
+	coords[0] = 0;		coords[1] = 10e-6;	coords[2] = 0;
+	coords[3] = 10e-6; 	coords[4] = 30e-6;	coords[5] = 10e-6;
+	coords[6] = 		coords[7] = 		coords[8] = 10e-6;
+	D.setPreserveNumEntries( false );
+	D.innerSetCoords( coords );
+	surface = D.surface();
+	assert( surface.size() == 2 );
+	assert( surface[0] == 0 );
+	assert( surface[1] == 1 );
+
+	CubeMesh C;
+	coords[0] = -30e-6;	coords[1] = -10e-6;	coords[2] = 0;
+	coords[3] = 20e-6;	coords[4] = 0;		coords[5] = 10e-6;
+	coords[6] = 		coords[7] = 		coords[8] = 10e-6;
+	C.setPreserveNumEntries( false );
+	C.innerSetCoords( coords );
+	surface = C.surface();
+	assert( surface.size() == 5 );
+	assert( surface[0] == 0 );
+	assert( surface[1] == 1 );
+	assert( surface[2] == 2 );
+	assert( surface[3] == 3 );
+	assert( surface[4] == 4 );
+
+
+	cout << "." << flush;
+}
+
 void testMesh()
 {
 	testCylBase();
@@ -1404,4 +1467,5 @@ void testMesh()
 	testCubeMeshJunctionTwoDimSurface();
 	testCubeMeshJunctionThreeDimSurface();
 	testCubeMeshJunctionDiffSizeMesh();
+	testCubeMeshMultiJunctionTwoD();
 }

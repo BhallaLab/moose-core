@@ -819,6 +819,11 @@ void NeuroMesh::extendStencil(
 	assert( 0 ); // doesn't work yet.
 }
 
+void NeuroMesh::innerResetStencil()
+{
+	assert( 0 ); // doesn't work yet.
+}
+
 const vector< NeuroNode >& NeuroMesh::getNodes() const
 {
 	return nodes_;

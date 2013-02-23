@@ -153,6 +153,12 @@ const Cinfo* SimManager::initCinfo()
 			 	&SimManager::meshStats )
 		);
 
+		static DestFinfo rebuild( "rebuild",
+			"Reconstructs model after some structural change, such as "
+			"adding new pools or changing mesh in reaction-diffusion "
+			"models. ",
+			new EpFunc0< SimManager >( &SimManager::rebuild ) );
+
 		//////////////////////////////////////////////////////////////
 		// Shared Finfos
 		//////////////////////////////////////////////////////////////
@@ -179,6 +185,7 @@ const Cinfo* SimManager::initCinfo()
 		&modelFamily,	// Value
 		&build,			// DestFinfo
 		&buildMultiCompartment,			// DestFinfo
+		&rebuild,			// DestFinfo
 		&makeStandardElements,			// DestFinfo
 		&nodeMeshing,	// SharedFinfo
 	};
@@ -712,3 +719,26 @@ void SimManager::buildFromKkitTree( const Eref& e, const Qinfo* q,
 	// shell->doReinit(); // Cannot use unless process is running.
 }
 
+void SimManager::rebuild( const Eref& e, const Qinfo* q )
+{
+	baseId_ = e.id();
+
+	vector< pair< Id, vector< Id > > > comptElists;
+	generateComptElists( baseId_, comptElists, 0 );
+	vector< Id > stoich( comptElists.size() );
+	map< Id, unsigned int > comptIndex;
+	for ( unsigned int i = 0; i < comptElists.size(); ++i ) {
+		Id solver = Neutral::child( comptElists[i].first.eref(), "stoich" );
+		assert( solver != Id() );
+		stoich.push_back( solver );
+		SetGet0::set( solver, "reallocateSolver" );
+	}
+	for ( unsigned int i = 0; i < comptElists.size(); ++i ) {
+		SetGet0::set( comptElists[i].first, "resetStencil" );
+	}
+	for ( unsigned int i = 0; i < comptElists.size(); ++i ) {
+		Id stoich = Neutral::child( comptElists[i].first.eref(), "stoich" );
+		assert( stoich != Id() );
+		SetGet0::set( stoich, "reconfigureJunctions" );
+	}
+}

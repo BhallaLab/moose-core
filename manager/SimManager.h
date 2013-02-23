@@ -38,6 +38,9 @@ class SimManager
 		/// Destination function
 		void build( const Eref& e, const Qinfo* q, string method );
 
+		/// Virtual function for rebuilding sim solvers after model change
+		void rebuild( const Eref& e, const Qinfo* q );
+
 		/**
 		 * Destination function to build solvers on every compartment,
 		 * depending on the recommendation in the compartment iself. If 

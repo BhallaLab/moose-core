@@ -787,6 +787,14 @@ pair< Id, Id > makeOneDimComptForDiffusion( Shell* s, Id model, unsigned int i )
 
 // Called from testMolTransferAcrossJunctions
 // Expects two 5x5 meshes, adjoining on the left-right side.
+//
+// 20 21 22 23 24 | 29
+// 15 16 17 18 19 | 27
+// 10 11 12 13 14 | 27
+//  5  6  7  8  9 | 26
+//  0  1  2  3  4 | 25
+//
+//
 void checkDiffusionStencil( const ChemMesh* cm0, const ChemMesh* cm1 )
 {
 	// const double SIDE = 10e-6;
@@ -802,38 +810,29 @@ void checkDiffusionStencil( const ChemMesh* cm0, const ChemMesh* cm1 )
 
 	num = cm0->getStencil( 9, &entry, &colIndex );
 	assert( num == 4 ); 
-	/*
-	assert( colIndex[0] == 8 );
-	assert( colIndex[1] == 4 );
+	assert( colIndex[0] == 4 );
+	assert( colIndex[1] == 8 );
 	assert( colIndex[2] == 14 );
 	assert( colIndex[3] == 26 );
-	*/
 
 	num = cm0->getStencil( 14, &entry, &colIndex );
 	assert( num == 4 ); 
-	/*
 	assert( colIndex[0] == 9 );
 	assert( colIndex[1] == 13 );
 	assert( colIndex[2] == 19 );
 	assert( colIndex[3] == 27 );
-	*/
-
 	num = cm0->getStencil( 19, &entry, &colIndex );
 	assert( num == 4 ); 
-	/*
 	assert( colIndex[0] == 14 );
 	assert( colIndex[1] == 18 );
 	assert( colIndex[2] == 24 );
 	assert( colIndex[3] == 28 );
-	*/
 
 	num = cm0->getStencil( 24, &entry, &colIndex );
 	assert( num == 3 ); 
-	/*
 	assert( colIndex[0] == 19 );
 	assert( colIndex[1] == 23 );
 	assert( colIndex[2] == 29 );
-	*/
 
 	num = cm0->getStencil( 25, &entry, &colIndex );
 	assert( num == 1 );
