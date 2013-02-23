@@ -144,7 +144,13 @@ const Cinfo* CubeMesh::initCinfo()
 		static ElementValueFinfo< CubeMesh, vector< double > > coords(
 			"coords",
 			"Set all the coords of the cuboid at once. Order is:"
-			"x0 y0 z0   x1 y1 z1   dx dy dz",
+			"x0 y0 z0   x1 y1 z1   dx dy dz"
+			"When this is done, it recalculates the numEntries since "
+			"dx, dy and dz are given explicitly."
+			"As a special hack, you can leave out dx, dy and dz and use "
+			"a vector of size 6. In this case the operation assumes that "
+			"nx, ny and nz are to be preserved and dx, dy and dz will "
+			"be recalculated. ",
 			&CubeMesh::setCoords,
 			&CubeMesh::getCoords
 		);
@@ -309,6 +315,10 @@ void CubeMesh::fillTwoDimSurface()
 		for ( unsigned int j = 1; j < ny_ - 1; ++j )
 			surface_.push_back( j * nx_ + nx_ - 1  );
 	}
+	// Ah, C++ STL. Look on my works, ye mighty, and despair.
+	sort( surface_.begin(), surface_.end() );
+	surface_.erase( unique( surface_.begin(), surface_.end() ), 
+					surface_.end() );
 }
 
 void CubeMesh::fillThreeDimSurface() // Need to fix duplicate points.
@@ -343,6 +353,10 @@ void CubeMesh::fillThreeDimSurface() // Need to fix duplicate points.
 	for ( unsigned int i = 0; i < nz_; ++i )
 		for ( unsigned int j = 0; j < ny_; ++j )
 			surface_.push_back( offset + ( i * ny_ + j ) * nx_ );
+
+	sort( surface_.begin(), surface_.end() );
+	surface_.erase( unique( surface_.begin(), surface_.end() ), 
+					surface_.end() );
 }
 
 /**
@@ -382,6 +396,7 @@ void CubeMesh::updateCoords()
 
 	// Fill out surface vector
 	surface_.resize( 0 );
+	/*
 	if ( numDims() == 0 ) {
 		surface_.push_back( 0 );
 	} else if ( numDims() == 1 ) {
@@ -393,6 +408,8 @@ void CubeMesh::updateCoords()
 	} else if ( numDims() == 3 ) {
 		fillThreeDimSurface();
 	}
+	*/
+	fillThreeDimSurface();
 
 	size_ = ( x1_ - x0_ ) * ( y1_ - y0_ ) * ( z1_ - z0_ );
 	assert( size >= 0 );
@@ -569,6 +586,9 @@ bool CubeMesh::getAlwaysDiffuse() const
 
 void CubeMesh::innerSetCoords( const vector< double >& v)
 {
+	if ( v.size() < 6 )
+		return;
+
 	x0_ = v[0];
 	y0_ = v[1];
 	z0_ = v[2];
@@ -577,21 +597,22 @@ void CubeMesh::innerSetCoords( const vector< double >& v)
 	y1_ = v[4];
 	z1_ = v[5];
 
-	dx_ = v[6];
-	dy_ = v[7];
-	dz_ = v[8];
-
 	bool temp = preserveNumEntries_;
-	preserveNumEntries_ = 0;
+	if ( v.size() >= 9 ) {
+		dx_ = v[6];
+		dy_ = v[7];
+		dz_ = v[8];
+		preserveNumEntries_ = 0;
+	} else {
+		preserveNumEntries_ = 1;
+	}
 	updateCoords();
 	preserveNumEntries_ = temp;
+
 }
 
 void CubeMesh::setCoords( const Eref& e, const Qinfo* q, vector< double > v)
 {
-	if ( v.size() < 9 ) {
-		// cout << "CubeMesh::setCoords: Warning: size of argument vec should be >= 9, was " << v.size() << endl;
-	}
 	double oldVol = getMeshEntrySize( 0 );
 	innerSetCoords( v );
 	transmitChange( e, q, oldVol );
@@ -619,6 +640,7 @@ vector< double > CubeMesh::getCoords( const Eref& e, const Qinfo* q ) const
 void CubeMesh::setMeshToSpace( vector< unsigned int > v )
 {
 	m2s_ = v;
+	deriveS2mFromM2s();
 }
 
 vector< unsigned int > CubeMesh::getMeshToSpace() const
@@ -629,6 +651,7 @@ vector< unsigned int > CubeMesh::getMeshToSpace() const
 void CubeMesh::setSpaceToMesh( vector< unsigned int > v )
 {
 	s2m_ = v;
+	deriveM2sFromS2m();
 }
 
 vector< unsigned int > CubeMesh::getSpaceToMesh() const
@@ -955,8 +978,30 @@ void CubeMesh::fillSpaceToMeshLookup()
 		}
 	}
 	assert( m2s_.size() == num );
-	m_.clear();
-	m_.setSize( num, num );
+}
+
+// Reads off s2m to build m2s.
+void CubeMesh::deriveM2sFromS2m()
+{
+	m2s_.clear();
+	assert( s2m_.size() == nx_ * ny_ * nz_ );
+	for ( unsigned int i = 0; i < s2m_.size(); ++i ) {
+		if ( s2m_[i] != EMPTY ) {
+			m2s_.push_back( i );
+			assert( m2s_.size() == s2m_[i] + 1 );
+		}
+	}
+	buildStencil();
+}
+
+void CubeMesh::deriveS2mFromM2s()
+{
+	s2m_.clear();
+	s2m_.resize( nx_ * ny_ * nz_, EMPTY );
+	for ( unsigned int i = 0; i < m2s_.size(); ++i ) {
+		s2m_[ m2s_[i] ] = i;
+	}
+	buildStencil();
 }
 
 // This is a general version of the function, just relies on the
@@ -989,8 +1034,10 @@ void CubeMesh::buildStencil()
 	static const unsigned int flag = EMPTY;
 
 
-	fillSpaceToMeshLookup();
+	// fillSpaceToMeshLookup();
 	unsigned int num = m2s_.size();
+	coreStencil_.clear();
+	coreStencil_.setSize( num, num );
 	for ( unsigned int i = 0; i < num; ++i ) {
 		unsigned int q = m2s_[i];
 		unsigned int ix = q % nx_;
@@ -1027,32 +1074,115 @@ void CubeMesh::buildStencil()
 			entry.push_back( j->e_ );
 			colIndex.push_back( j->col_ );
 		}
-		m_.addRow( i, entry, colIndex );
+		coreStencil_.addRow( i, entry, colIndex );
+		m_ = coreStencil_;
 	}
 }
 
+/// virtual func implemented here.
+void CubeMesh::innerResetStencil()
+{
+	m_ = coreStencil_;
+}
+
 /**
- * extendStencil adds voxels to the core stencil, to build up a monolithic 
- * stencil that also handles the entries just past all the boundaries.
+ * extendStencil adds voxels to the current stencil m_, to build up a 
+ * monolithic stencil that also handles the entries just past all the 
+ * boundaries.
+ * This function may be called many times to deal with the addition of
+ * multiple junctions. Before the first of these calls, the m_ matrix
+ * should be set to the coreStencil_.
  */
 void CubeMesh::extendStencil( 
 	const ChemMesh* other, const vector< VoxelJunction >& vj ) 
 {
+	// Maps from remote meshIndex (in vj) to local index of proxy voxel.
 	map< unsigned int, unsigned int > meshMap;
 	map< unsigned int, unsigned int >::iterator mmi;
 	
+	// Maps from local index of proxy voxel back to remote meshIndex.
 	vector< unsigned int > meshBackMap;
 
-	unsigned int coreSize = m_.nRows();
-	unsigned int newSize = coreSize;
+
+	unsigned int coreSize = coreStencil_.nRows();
+	assert( coreSize == m2s_.size() );
+	unsigned int oldSize = m_.nRows();
+	assert( oldSize == m_.nColumns() );
+	unsigned int newSize = oldSize;
+
+	/// Organizes vj by voxel, that is, by row.
+	vector< vector< VoxelJunction > > vvj( coreSize );
+
 	for ( vector< VoxelJunction >::const_iterator 
 					i = vj.begin(); i != vj.end(); ++i ) {
 		mmi = meshMap.find( i->second );
 		if ( mmi == meshMap.end() ) {
+			assert( i->first < coreSize );
 			meshBackMap.push_back( i->second );
 			meshMap[i->second] = newSize++;
+			vvj[i->first].push_back( *i );
 		}
 	}
+	vector< vector< VoxelJunction > > vvjCol( newSize );
+	SparseMatrix< double > oldM = m_;
+	m_.clear();
+	m_.setSize( newSize, newSize );
+	for ( unsigned int i = 0; i < newSize; ++i ) {
+		vector< VoxelJunction > temp;
+		if ( i < oldSize ) { // Copy over old matrix.
+			const double* entry;
+			const unsigned int* colIndex;
+			unsigned int num = oldM.getRow( i, &entry, &colIndex );
+			temp.resize( num );
+			for ( unsigned int j = 0; j < num; ++j ) {
+				temp[j].first = colIndex[j];
+				temp[j].diffScale = entry[j];
+			}
+		}
+		if ( i < coreSize ) { // Set up diffusion into proxy voxels.
+			for ( vector< VoxelJunction >::const_iterator
+				j = vvj[i].begin(); j != vvj[i].end(); ++j )
+			{
+				unsigned int row = j->first;
+				assert( row == i );
+				unsigned int col = meshMap[j->second];
+				assert( col >= oldSize );
+				temp.push_back( 
+						VoxelJunction( col, EMPTY, j->diffScale ) );
+				vvjCol[col].push_back(
+						VoxelJunction( row, EMPTY, j->diffScale ) );
+			}
+		}
+		if ( i >= oldSize ) { // Set up diffusion from proxy to old voxels
+			for ( vector< VoxelJunction >::const_iterator
+				j = vvjCol[i].begin(); j != vvjCol[i].end(); ++j )
+			{
+				temp.push_back( *j );
+			}
+		}
+		// Now we've filled in all the VoxelJunctions for the new row.
+		sort( temp.begin(), temp.end() );
+		vector< double > e( temp.size() );
+		vector< unsigned int > c( temp.size() );
+		for ( unsigned int j = 0; j < temp.size(); ++j ) {
+			e[j] = temp[j].diffScale;
+			c[j] = temp[j].first;
+		}
+		m_.addRow( i, e, c );
+	}
+
+	/*
+	vector< VoxelJunction > newRow;
+	for ( unsigned int i = 0; i < coreSize; ++i ) {
+		const double* entry;
+		const unsigned int& colIndex;
+		unsigned int num = coreStencil_.getRow( i, &entry, &colIndex );
+
+
+	}
+	*/
+
+	/*
 	// Here we make a temporary data structure for the combined data
 	// of the sparse matrix with the voxelJunctions.
 	vector< vector< double > > diffScale( newSize );
@@ -1077,6 +1207,7 @@ void CubeMesh::extendStencil(
 	m_.setSize( newSize, newSize );
 	for ( unsigned int i = 0; i < newSize; ++i )
 		m_.addRow( i, diffScale[i], expandedMeshIndex[i] );
+	*/
 
 	// Fill in the volumes of the external mesh entries
 	for ( vector< unsigned int>::const_iterator  

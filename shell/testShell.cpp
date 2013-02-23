@@ -1787,8 +1787,6 @@ void testShellMesh()
 	
 	ret = Field< vector< double > >::set( compt, "coords", meshCoords );
 	assert( ret );
-	// Can't do this at this stage because the reduceQ hasn't been set up.
-	// shell->doSyncDataHandler( mesh );
 
 	double testN = 123.0;
 	ret = Field< double >::set( pool, "n", testN );
@@ -1812,6 +1810,7 @@ void testShellMesh()
 	///////////////////////////////////////////////////////////////////
 	// Here we preserve the numEntries but change sizes to 1/1000 of orig.
 	///////////////////////////////////////////////////////////////////
+	meshCoords.resize( 6 );
 	ret = Field< bool >::set( compt, "preserveNumEntries", 1 );
 	meshCoords[3] = meshCoords[4] = meshCoords[5] = 1.0;
 	ret = Field< vector< double > >::set( compt, "coords", meshCoords );
@@ -1837,10 +1836,12 @@ void testShellMesh()
 		assert( doubleEq( numMols[i] , numShouldBe ) );
 
 	meshCoords[3] = meshCoords[4] = meshCoords[5] = 10.0;
+	meshCoords.resize( 6 ); // Make it preserveNumEntries.
 	ret = Field< vector< double > >::set( compt, "coords", meshCoords );
 	assert( ret );
 	vector< double > conc;
 	Field< double >::getVec( pool, "conc", conc );
+	assert( conc.size() == size );
 	// Here we make the size of the mesh 10x bigger. We've set the field
 	// 'preserveNumEntries', so making the whole volume bigger increases
 	// voxel size accordingly. Voxel size is now 1x1x1.

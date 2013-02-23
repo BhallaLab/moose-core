@@ -458,12 +458,12 @@ void GslStoich::expandSforDiffusion(
 {
 	if ( !diffusionMesh_ )
 		return;
+	unsigned int numVoxels = diffusionMesh_->getNumEntries();
+	unsigned int numCorePoolEntries = coreStoich()->getNumAllPools();
+	unsigned int numPoolStructs = pools_.size();
 	vector< unsigned int > abutMeshIndex( otherMeshIndex.size(), 0 );
 	for ( unsigned int i = 0; i < otherMeshIndex.size(); ++i )
-		abutMeshIndex[i] = i + pools_.size();
-	unsigned int numCorePoolEntries = coreStoich()->getNumAllPools();
-	unsigned int numVoxels = diffusionMesh_->getNumEntries();
-	unsigned int numPoolStructs = numVoxels;
+		abutMeshIndex[i] = i + numPoolStructs;
 	if ( selfDiffPoolIndex.size() > 0 )
 		numPoolStructs += abutMeshIndex.size();
 	pools_.resize( numPoolStructs );
@@ -473,4 +473,24 @@ void GslStoich::expandSforDiffusion(
 		y_[i].resize( numCorePoolEntries );
 	}
 	j.setAbutPools( abutMeshIndex, selfDiffPoolIndex );
+}
+
+/**
+ * This function reallocates the storage for the solver. It is typically
+ * called after a series of remeshing calls through the entire reaction
+ * system, which require it to flush the old allocations and rebuild.
+ */
+void GslStoich::innerReallocateSolver( const Eref& e )
+{
+	unsigned int numVoxels = 1;
+	if ( diffusionMesh_ )
+		numVoxels = diffusionMesh_->getNumEntries();
+
+	assert( numVoxels > 0 );
+	vector< double > vols( numVoxels );
+	for ( unsigned int i = 0; i < numVoxels; ++i ) {
+		vols[i] = diffusionMesh_->getMeshEntrySize( i );
+	}
+	double oldVol = vols[0];
+	remesh( e, 0, oldVol, 0, 0, localMeshEntries_, vols );
 }

@@ -121,6 +121,9 @@ class CylMesh: public ChemMesh
 
 		void extendStencil( 
 		   	const ChemMesh* other, const vector< VoxelJunction >& vj );
+
+		/// virtual func implemented here.
+		void innerResetStencil();
 		
 		//////////////////////////////////////////////////////////////////
 		// inherited virtual funcs for Boundary
