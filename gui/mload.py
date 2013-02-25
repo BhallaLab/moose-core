@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Feb  8 09:38:40 2013 (+0530)
 # Version: 
-# Last-Updated: Fri Feb 22 16:31:22 2013 (+0530)
+# Last-Updated: Mon Feb 25 21:17:23 2013 (+0530)
 #           By: subha
-#     Update #: 174
+#     Update #: 192
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -47,11 +47,15 @@
 
 import moose
 from moose import mtypes, neuroml
+import posixpath
 
-
-def loadFile(filename, target):
+def loadFile(filename, target, merge=True):
     """Try to load a model from specified `filename` under the element
     `target`.
+
+    if `merge` is True, the contents are just loaded at target. If
+    false, everything is deleted from the parent of target unless the
+    parent is root.
 
     Returns
     -------
@@ -69,6 +73,8 @@ def loadFile(filename, target):
     if not istext:
         print 'Cannot handle any binary formats yet'
         return None
+    if not merge:
+        cleanParent(target)
     modeltype = mtypes.getType(filename)
     subtype = mtypes.getSubtype(filename, modeltype)
     # pwe = moose.getCwe()
@@ -90,6 +96,15 @@ def loadFile(filename, target):
             'subtype': subtype, 
             'model': model}
 
+def cleanParent(target):
+    """Delete all the children of parent. Skip if parent is root"""
+    parent, child = posixpath.split(target)
+    moose.setCwe(parent)
+    if parent != '/':
+        p = moose.Neutral(parent)
+        for ch in p.children:
+            moose.delete(ch)
+    
 
 # 
 # mload.py ends here

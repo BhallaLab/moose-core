@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Feb 13 16:07:56 2010 (+0530)
 # Version: 
-# Last-Updated: Mon Nov 12 17:49:21 2012 (+0530)
+# Last-Updated: Mon Feb 25 16:15:49 2013 (+0530)
 #           By: subha
-#     Update #: 348
+#     Update #: 350
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -97,7 +97,8 @@ class MooseSetting(dict):
     This subclass of dict wraps a QSettings object and lets one set
     and get values as Python strings rather than QVariant.
     
-    This is supposed yo be a singleton in the whole application.
+    This is supposed to be a singleton in the whole application (all
+    QSettings are with same parameters).
     """
     _instance = None    
     def __new__(cls, *args, **kwargs):
