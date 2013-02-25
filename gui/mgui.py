@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Mon Feb 25 21:24:37 2013 (+0530)
+# Last-Updated: Mon Feb 25 22:32:53 2013 (+0530)
 #           By: subha
-#     Update #: 591
+#     Update #: 618
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -216,6 +216,7 @@ class MWindow(QtGui.QMainWindow):
         self.menuBar().addMenu(self.getEditMenu())
         self.menuBar().addMenu(self.getViewMenu())
         self.menuBar().addMenu(self.getPluginsMenu())
+        self.menuBar().addMenu(self.getRunMenu())
         self.menuBar().addMenu(self.getHelpMenu())
         for menu in self.plugin.getMenus():
             if not self.updateExistingMenu(menu):
@@ -291,6 +292,14 @@ class MWindow(QtGui.QMainWindow):
         self.viewMenu.addActions(self.getViewActions())
         return self.viewMenu
 
+    def getRunMenu(self):
+        if (not hasattr(self, 'runMenu')) or (self.runMenu is None):
+            self.runMenu = QtGui.QMenu('Run')
+        else:
+            self.runMenu.clear()
+        self.runMenu.addActions(self.getRunActions())
+        return self.runMenu
+
     def getEditActions(self):
         if (not hasattr(self, 'editActions')) or (self.editActions is None):
             self.editActions = [] # TODO placeholder
@@ -306,6 +315,19 @@ class MWindow(QtGui.QMainWindow):
             self.runViewAction.triggered.connect(self.openRunView)
             self.viewActions = [self.editorViewAction, self.plotViewAction, self.runViewAction]
         return self.viewActions
+
+    def getRunActions(self):
+        if (not hasattr(self, 'runActions')) or \
+                (self.runActions is None):
+            self.startAction = QtGui.QAction('Start', self)
+            self.startAction.triggered.connect(self.resetAndStartSimulation)
+            self.pauseAction = QtGui.QAction('Pause', self)
+            self.pauseAction.triggered.connect(self.pauseSimulation)
+            self.continueAction = QtGui.QAction('Continue', self)
+            self.continueAction.triggered.connect(self.continueSimulation)
+            self.runActions = [self.startAction, self.pauseAction, self.continueAction]
+        return self.runActions
+            
 
     def getHelpActions(self):
         if (not hasattr(self, 'helpActions')) or (self.helpActions is None):
@@ -377,6 +399,18 @@ class MWindow(QtGui.QMainWindow):
                 self.mdiArea.setActiveSubWindow(subwin)
                 return
         self.mdiArea.addSubWindow(widget)
+
+    def resetAndStartSimulation(self):
+        """TODO implement this somewhere else"""
+        pass
+
+    def pauseSimulation(self):
+        moose.stop()
+
+    def continueSimulation(self):
+        """TODO implement this somewhere else"""
+        pass
+        
 
     def loadModelDialogSlot(self):
         """Start a file dialog to choose a model file.
