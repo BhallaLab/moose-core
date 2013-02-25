@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Fri Feb 22 16:22:02 2013 (+0530)
+# Last-Updated: Mon Feb 25 21:24:37 2013 (+0530)
 #           By: subha
-#     Update #: 524
+#     Update #: 591
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -49,12 +49,14 @@ import inspect
 import sys
 sys.path.append('../python')
 import os
+from collections import defaultdict
 import posixpath # We use this to create MOOSE paths
 from PyQt4 import QtGui,QtCore,Qt
 import config
 import mplugin
 import moose
 from mload import loadFile
+from loaderdialog import LoaderDialog
 
 # This maps model subtypes to corresponding plugin names. Should be
 # moved to a separate property file perhaps
@@ -103,12 +105,13 @@ class MWindow(QtGui.QMainWindow):
         self.helpMenu = None
         self.helpActions = None
         self.viewActions = None
-        self.editActions = None                
+        self.editActions = None                    
         self._loadedPlugins = {}
+        self.mdiArea = QtGui.QMdiArea()
         self.quitAction = QtGui.QAction('Quit', self)
         self.connect(self.quitAction, QtCore.SIGNAL('triggered()'), self.quit)
-        self.setPlugin('default', '/')        
-	#self.setPlugin('kkit','/kho')
+        self.setCentralWidget(self.mdiArea)
+        self.setPlugin('default', '/')
 
     def quit(self):
         QtGui.qApp.closeAllWindows()        
@@ -173,12 +176,17 @@ class MWindow(QtGui.QMainWindow):
         anything provided by the plugin.
 
         3. sets the current view  to the plugins editor view.
+
         """
-        print 'Setting plugin'
         self.plugin = self.loadPluginClass(str(name))(str(root), self)
         self.updateMenus()
+        for action in self.pluginsMenu.actions():
+            if str(action.text()) == str(name):
+                action.setChecked(True)
+            elif action.isChecked():
+                action.setChecked(False)
         self.setCurrentView(self.plugin.getEditorView())
-        print self.plugin
+        return self.plugin
 
     def updateExistingMenu(self, menu):
         """Check if a menu with same title
@@ -218,7 +226,12 @@ class MWindow(QtGui.QMainWindow):
         'plot', 'run'. A plugin can provide more views if necessary.
         """
         self.plugin.setCurrentView(view)
-        self.setCentralWidget(self.plugin.getCurrentView().getCentralWidget())
+        targetView = None
+        for subwin in self.mdiArea.subWindowList():
+            if subwin.widget == self.plugin.getCurrentView().getCentralWidget():
+                self.mdiArea.setActiveSubWindow(subwin)
+                return
+        subwin = self.mdiArea.addSubWindow(self.plugin.getCurrentView().getCentralWidget())
         for menu in self.plugin.getCurrentView().getMenus():
             if not self.updateExistingMenu(menu):
                 self.menuBar().addMenu(menu)
@@ -285,7 +298,13 @@ class MWindow(QtGui.QMainWindow):
 
     def getViewActions(self):
         if (not hasattr(self, 'viewActions')) or (self.viewActions is None):
-            self.viewActions = [] # TODO placeholder
+            self.editorViewAction = QtGui.QAction('&Editor view', self)
+            self.editorViewAction.triggered.connect(self.openEditorView)
+            self.plotViewAction = QtGui.QAction('&Plot view', self)
+            self.plotViewAction.triggered.connect(self.openPlotView)
+            self.runViewAction = QtGui.QAction('&Run view', self)
+            self.runViewAction.triggered.connect(self.openRunView)
+            self.viewActions = [self.editorViewAction, self.plotViewAction, self.runViewAction]
         return self.viewActions
 
     def getHelpActions(self):
@@ -320,11 +339,44 @@ class MWindow(QtGui.QMainWindow):
         self.documentationViewer.setWindowTitle(source)
         self.documentationViewer.reload()
         self.documentationViewer.setVisible(True)
+
     def reportBug(self):
         QtGui.QDesktopServices.openUrl(QtCore.QUrl(config.MOOSE_REPORT_BUG_URL))
 
     def showBuiltInDocumentation(self):
         self.showDocumentation('moosebuiltindocs.html')
+
+    # openEditorView, openPlotView and openRunView are identical
+    # except the view they ask from the plugin. Consider using a
+    # mapper.
+    def openEditorView(self):
+        """Switch to the editor view of current plugin. If there is
+        already a subwindow for this, make that the active
+        one. Otherwise create a new one.
+
+        """
+        widget = self.plugin.getEditorView().getCentralWidget()
+        for subwin in self.mdiArea.subWindowList():
+            if subwin.widget() == widget:
+                self.mdiArea.setActiveSubWindow(subwin)
+                return
+        self.mdiArea.addSubWindow(widget)
+
+    def openPlotView(self):
+        widget = self.plugin.getPlotView().getCentralWidget()
+        for subwin in self.mdiArea.subWindowList():
+            if subwin.widget() == widget:
+                self.mdiArea.setActiveSubWindow(subwin)
+                return
+        self.mdiArea.addSubWindow(widget)
+        
+    def openRunView(self):
+        widget = self.plugin.getRunView().getCentralWidget()
+        for subwin in self.mdiArea.subWindowList():
+            if subwin.widget() == widget:
+                self.mdiArea.setActiveSubWindow(subwin)
+                return
+        self.mdiArea.addSubWindow(widget)
 
     def loadModelDialogSlot(self):
         """Start a file dialog to choose a model file.
@@ -345,29 +397,16 @@ class MWindow(QtGui.QMainWindow):
 
         """
         activeWindow = None # This to be used later to refresh the current widget with newly loaded model
-        dialog = QtGui.QFileDialog(self, 
-                                   self.tr('Load model from file'), 
-                                   filter=self.tr('CSPACE (*.cspace);; GENESIS (*.g);; GENESIS Prototype (*.p);; NeuroML/SBML (*.xml);; All files (*.*)'),
-                                   options=QtGui.QFileDialog.ReadOnly)
-        dialog.setNameFilterDetailsVisible(True)
-        dialog.setFileMode(QtGui.QFileDialog.ExistingFile)
-        targetPanel = QtGui.QFrame(dialog)
-        targetLabel = QtGui.QLabel('Create model under')
-        targetText = QtGui.QLineEdit(moose.getCwe().path)
-        layout = QtGui.QVBoxLayout()
-        layout.addWidget(targetLabel)
-        layout.addWidget(targetText)
-        targetPanel.setLayout(layout)
-        dialog.layout().addWidget(targetPanel)
-        self.connect(dialog, QtCore.SIGNAL('currentChanged(const QString &)'), 
-                     lambda path:(targetText.setText(posixpath.join(moose.getCwe().path, os.path.basename(str(path)).rpartition('.')[0]))))
+        dialog = LoaderDialog(self, 
+                              self.tr('Load model from file'))
+        
         if dialog.exec_():
             fileNames = dialog.selectedFiles()
             for fileName in fileNames:
                 print 'Current plugin', self.plugin
-                modelRoot = str(targetText.text())
+                modelRoot = dialog.getTargetPath()
                 print 'modelroot', modelRoot
-                ret = loadFile(str(fileName), modelRoot)
+                ret = loadFile(str(fileName), modelRoot, merge=dialog.isMerge())
                 try:
                     pluginName = subtype_plugin_map['%s/%s' % (ret['modeltype'], ret['subtype'])]
                 except KeyError:
