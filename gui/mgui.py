@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Mon Feb 25 22:32:53 2013 (+0530)
+# Last-Updated: Tue Feb 26 13:48:21 2013 (+0530)
 #           By: subha
-#     Update #: 618
+#     Update #: 843
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -55,6 +55,7 @@ from PyQt4 import QtGui,QtCore,Qt
 import config
 import mplugin
 import moose
+from moose import utils
 from mload import loadFile
 from loaderdialog import LoaderDialog
 
@@ -64,6 +65,7 @@ subtype_plugin_map = {
     'genesis/kkit': 'kkit'
 }
 
+    
 class MWindow(QtGui.QMainWindow):
     """The main window for MOOSE GUI.
 
@@ -108,6 +110,7 @@ class MWindow(QtGui.QMainWindow):
         self.editActions = None                    
         self._loadedPlugins = {}
         self.mdiArea = QtGui.QMdiArea()
+        self.addDockWidget(Qt.Qt.RightDockWidgetArea, self.getSchedulingWidget())
         self.quitAction = QtGui.QAction('Quit', self)
         self.connect(self.quitAction, QtCore.SIGNAL('triggered()'), self.quit)
         self.setCentralWidget(self.mdiArea)
@@ -185,6 +188,8 @@ class MWindow(QtGui.QMainWindow):
                 action.setChecked(True)
             elif action.isChecked():
                 action.setChecked(False)
+        for subwin in self.mdiArea.subWindowList():
+            subwin.close()
         self.setCurrentView(self.plugin.getEditorView())
         return self.plugin
 
@@ -227,15 +232,21 @@ class MWindow(QtGui.QMainWindow):
         'plot', 'run'. A plugin can provide more views if necessary.
         """
         self.plugin.setCurrentView(view)
-        targetView = None
-        for subwin in self.mdiArea.subWindowList():
-            if subwin.widget == self.plugin.getCurrentView().getCentralWidget():
-                self.mdiArea.setActiveSubWindow(subwin)
-                return
-        subwin = self.mdiArea.addSubWindow(self.plugin.getCurrentView().getCentralWidget())
         for menu in self.plugin.getCurrentView().getMenus():
             if not self.updateExistingMenu(menu):
                 self.menuBar().addMenu(menu)
+        targetView = None
+        for subwin in self.mdiArea.subWindowList():
+            if subwin.widget == self.plugin.getCurrentView().getCentralWidget():
+                print 'Using existing subwindow'
+                self.mdiArea.setActiveSubWindow(subwin)
+                return
+        widget = self.plugin.getCurrentView().getCentralWidget()
+        subwin = self.mdiArea.addSubWindow(widget)
+        subwin.setWindowTitle(widget.modelRoot)
+        subwin.setVisible(True)
+        print 'Adding new subwindow', subwin.windowTitle()
+        return subwin
 
     def getFileMenu(self):
         if self.fileMenu is None:
@@ -290,7 +301,27 @@ class MWindow(QtGui.QMainWindow):
         else:
             self.viewMenu.clear()
         self.viewMenu.addActions(self.getViewActions())
+        self.docksMenu = self.viewMenu.addMenu('Dock widgets')
+        self.docksMenu.addActions(self.getDockWidgetsToggleActions())
         return self.viewMenu
+
+    # def getSubWindowVisibilityActions(self):
+    #     if not hasattr(self, 'subwindowToToggles'):
+    #         self.subWindowToToggle = QtGui.QSignalMapper()
+    #         self.toggleToSubWindow = QtGui.QSignalMapper()
+    #     for subwindow in self.mdiArea.subWindowList():
+    #         if self.subWindowToToggle.mapping(subwindow) is None:
+    #             action = QtGui.QAction('Show: %s' % (subwindow.windowTitle), self)                
+    #             self.toggleToSubWindow.setMapping(action, subwindow)
+    #             self.connect(action, QtCore.SIGNAL('triggered()'),
+    #                          self.toggleToSubWindow,
+    #                          QtCore.SLOT('mapped(QWidget*)'))
+    #             self.subWindowToToggle.setMapping(subwindow, action)
+    #             self.connect(subwindow, QtCore.SIGNAL('closed()')
+            
+    #     self.subWindowVisibilityMenu = QtGui.Q
+    #     for subwin in self.mdiArea.subWindowList():
+            
 
     def getRunMenu(self):
         if (not hasattr(self, 'runMenu')) or (self.runMenu is None):
@@ -312,9 +343,31 @@ class MWindow(QtGui.QMainWindow):
             self.plotViewAction = QtGui.QAction('&Plot view', self)
             self.plotViewAction.triggered.connect(self.openPlotView)
             self.runViewAction = QtGui.QAction('&Run view', self)
-            self.runViewAction.triggered.connect(self.openRunView)
+            self.runViewAction.triggered.connect(self.openRunView)            
             self.viewActions = [self.editorViewAction, self.plotViewAction, self.runViewAction]
         return self.viewActions
+
+    def getDockWidgetsToggleActions(self):
+        """Get a list of actions for toggling visibility of dock
+        widgets
+
+        """
+        return [widget.toggleViewAction() for widget in self.findChildren(QtGui.QDockWidget)]
+
+    def dockWidgetToggledSlot(self, action):
+        print action
+        target = self.dockWidgetToToggleAction.mapping(action)
+        print target, target.isVisible()
+        action.setChecked(target.isVisible())
+
+    def toggleDockWidgetSlot(self, widget):
+        print widget
+        action = self.toggleActionToDockWidget.mapping(widget)
+        print '%%%', action
+        if action.isChecked():
+            self.removeDockWidget(widget)
+        else:
+            self.restoreDockWidget(widget)
 
     def getRunActions(self):
         if (not hasattr(self, 'runActions')) or \
@@ -382,7 +435,9 @@ class MWindow(QtGui.QMainWindow):
             if subwin.widget() == widget:
                 self.mdiArea.setActiveSubWindow(subwin)
                 return
-        self.mdiArea.addSubWindow(widget)
+        subwin = self.mdiArea.addSubWindow(widget)
+        subwin.setWindowTitle('Plot: %s' % (widget.modelRoot))
+        subwin.setVisible(True)
 
     def openPlotView(self):
         widget = self.plugin.getPlotView().getCentralWidget()
@@ -390,7 +445,9 @@ class MWindow(QtGui.QMainWindow):
             if subwin.widget() == widget:
                 self.mdiArea.setActiveSubWindow(subwin)
                 return
-        self.mdiArea.addSubWindow(widget)
+        subwin = self.mdiArea.addSubWindow(widget)
+        subwin.setWindowTitle('Plot: %s' % (widget.modelRoot))
+        subwin.setVisible(True)
         
     def openRunView(self):
         widget = self.plugin.getRunView().getCentralWidget()
@@ -398,19 +455,84 @@ class MWindow(QtGui.QMainWindow):
             if subwin.widget() == widget:
                 self.mdiArea.setActiveSubWindow(subwin)
                 return
-        self.mdiArea.addSubWindow(widget)
+        subwin = self.mdiArea.addSubWindow(widget)
+        subwin.setWindowTitle('Run: %s' % (widget.modelRoot))
+        subwin.setVisible(True)
 
     def resetAndStartSimulation(self):
-        """TODO implement this somewhere else"""
-        pass
+        """TODO this should provide a clean scheduling through all kinds
+        of simulation or default scheduling should be implemented in MOOSE
+        itself. We need to define a policy for handling scheduling. It can
+        be pushed to the plugin-developers who should have knowledge of
+        the scheduling criteria for their domain."""
+        settings = config.MooseSetting()
+        try:
+            simdt_kinetics = float(settings[config.KEY_KINETICS_SIMDT])
+        except ValueError:
+            simdt_kinetics = 0.1
+        try:
+            simdt_electrical = float(settings[config.KEY_ELECTRICAL_SIMDT])
+        except ValueError:
+            simdt_electrical = 0.25e-4
+        try:
+            plotdt_kinetics = float(settings[config.KEY_KINETICS_PLOTDT])
+        except ValueError:
+            plotdt_kinetics = 0.1
+        try:
+            plotdt_electrical = float(settings[config.KEY_ELECTRICAL_PLOTDT])
+        except ValueError:
+            plotdt_electrical = 0.25e-3
+        try:
+            simtime = float(settings[config.KEY_SIMTIME])
+        except ValueError:
+            simtime = 1.0
+        moose.reinit()
+        moose.start(simtime)
 
     def pauseSimulation(self):
         moose.stop()
 
     def continueSimulation(self):
         """TODO implement this somewhere else"""
-        pass
+        try:
+            simtime = float(config.MooseSetting()[config.KEY_SIMTIME])
+        except ValueError:
+            simtim = 1.0
+        moose.start(simtime)
         
+    def getSchedulingWidget(self):
+        if (not hasattr(self, 'schedulingWidget')) or (self.schedulingWidget is None):
+            self.schedulingWidget = QtGui.QDockWidget('Scheduling')
+            widget = QtGui.QWidget()
+            ticks = moose.ematrix('/clock/tick')
+            layout = QtGui.QGridLayout()
+            # Set up the column titles
+            layout.addWidget(QtGui.QLabel('Tick', self), 0, 0)
+            layout.addWidget(QtGui.QLabel('dt', self), 0, 1)
+            layout.addWidget(QtGui.QLabel('Targets (wildcard)', self), 0, 2, 1, 2)
+            layout.setRowStretch(0, 1)
+            # Create one row for each tick. Somehow ticks.shape is
+            # (16,) while only 10 valid ticks exist. The following is a hack
+            for ii in range(ticks[0].localNumField):
+                tt = ticks[ii]
+                layout.addWidget(QtGui.QLabel(tt.path, self), ii+1, 0)
+                layout.addWidget(QtGui.QLineEdit(str(tt.dt)), ii+1, 1)
+                layout.addWidget(QtGui.QLineEdit(''), ii+1, 2, 1, 2)
+                layout.setRowStretch(ii+1, 1)            
+            # We add spacer items to the last row so that expansion
+            # happens at bottom. All other rows have stretch = 1, and
+            # the last one has 0 (default) so that is the one that
+            # grows
+            rowcnt = layout.rowCount()
+            for ii in range(3):
+                layout.addItem(QtGui.QSpacerItem(1, 1), rowcnt, ii)
+            layout.setRowStretch(rowcnt, 10)
+            # layout.setColumnStretch(1, 1)
+            layout.setColumnStretch(2, 2)
+            widget.setLayout(layout)
+            self.schedulingWidget.setWidget(widget)
+        return self.schedulingWidget
+
 
     def loadModelDialogSlot(self):
         """Start a file dialog to choose a model file.
@@ -445,9 +567,8 @@ class MWindow(QtGui.QMainWindow):
                     pluginName = subtype_plugin_map['%s/%s' % (ret['modeltype'], ret['subtype'])]
                 except KeyError:
                     pluginName = 'default'
+                print 'Loaded model', ret['model'].path
                 self.setPlugin(pluginName, ret['model'].path)
-                self.plugin.setCurrentView('editor')
-                # self.plugin.getEditorView().getCentralWidget().setModelRoot()
 
 if __name__ == '__main__':
     # create the GUI application
