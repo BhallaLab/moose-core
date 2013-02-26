@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Feb 13 16:07:56 2010 (+0530)
 # Version: 
-# Last-Updated: Mon Feb 25 16:15:49 2013 (+0530)
+# Last-Updated: Tue Feb 26 10:04:29 2013 (+0530)
 #           By: subha
-#     Update #: 350
+#     Update #: 357
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -73,6 +73,15 @@ KEY_NUMPTHREADS = 'main/numpthreads'
 KEY_LOCAL_BUILD = 'main/localbuild'
 KEY_LAST_PLUGIN = 'main/lastplugin'
 
+# These are the keys for mode specific configuration.
+# Ideally the default values should be provided by the plugin.
+# We use the QSettings to remember the last values
+KEY_KINETICS_SIMDT = 'kinetics/simdt'
+KEY_KINETICS_PLOTDT = 'kinetics/plotdt'
+KEY_ELECTRICAL_SIMDT = 'electrical/simdt'
+KEY_ELECTRICAL_PLOTDT = 'electrical/plotdt'
+KEY_SIMTIME = 'main/simtime'
+
 QT_VERSION = str(QtCore.QT_VERSION_STR).split('.')
 QT_MAJOR_VERSION = int(QT_VERSION[0])
 QT_MINOR_VERSION = int(QT_VERSION[1])
@@ -87,6 +96,7 @@ MOOSE_PLUGIN_DIR = os.path.join(MOOSE_GUI_DIR, 'plugins')
 MOOSE_CFG_DIR = os.path.join(os.environ['HOME'], '.moose')
 MOOSE_LOCAL_DIR = os.path.join(os.environ['HOME'], 'moose')
 MOOSE_NUMPTHREADS = '1'
+
 MOOSE_ABOUT_FILE = os.path.join(MOOSE_GUI_DIR, 'about.html')
 LOCAL_BUILD = False
 
