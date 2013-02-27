@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Wed Feb 27 12:28:19 2013 (+0530)
+# Last-Updated: Wed Feb 27 16:50:27 2013 (+0530)
 #           By: subha
-#     Update #: 855
+#     Update #: 869
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -490,7 +490,6 @@ class MWindow(QtGui.QMainWindow):
         if (not hasattr(self, 'schedulingWidget')) or (self.schedulingWidget is None):
             self.schedulingWidget = QtGui.QDockWidget('Scheduling')
             widget = QtGui.QWidget()
-            ticks = moose.ematrix('/clock/tick')
             layout = QtGui.QGridLayout()
             # Set up the column titles
             layout.addWidget(QtGui.QLabel('Tick', self), 0, 0)
@@ -499,6 +498,7 @@ class MWindow(QtGui.QMainWindow):
             layout.setRowStretch(0, 1)
             # Create one row for each tick. Somehow ticks.shape is
             # (16,) while only 10 valid ticks exist. The following is a hack
+            ticks = moose.ematrix('/clock/tick')
             for ii in range(ticks[0].localNumField):
                 tt = ticks[ii]
                 layout.addWidget(QtGui.QLabel(tt.path, self), ii+1, 0)
@@ -519,6 +519,15 @@ class MWindow(QtGui.QMainWindow):
             self.schedulingWidget.setWidget(widget)
         return self.schedulingWidget
 
+    def updateSchedulingWidget(self):
+        """Update the tick dt from the tick objects"""
+        ticks = moose.ematrix('/clock/tick')
+        layout = self.schedulingWidget.widget().layout()
+        for ii in range(ticks[0].localNumField):
+            tt = ticks[ii]
+            widget = layout.itemAtPosition(ii, 1).widget()
+            if widget is not None and isinstance(widget, QtGui.QLineEdit):
+                widget.setText(str(tt.dt))
 
     def loadModelDialogSlot(self):
         """Start a file dialog to choose a model file.
@@ -555,6 +564,7 @@ class MWindow(QtGui.QMainWindow):
                     pluginName = 'default'
                 print 'Loaded model', ret['model'].path
                 self.setPlugin(pluginName, ret['model'].path)
+                self.updateSchedulingWidget()
 
 if __name__ == '__main__':
     # create the GUI application
