@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Feb 26 13:48:21 2013 (+0530)
+# Last-Updated: Wed Feb 27 12:15:51 2013 (+0530)
 #           By: subha
-#     Update #: 843
+#     Update #: 845
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -62,7 +62,8 @@ from loaderdialog import LoaderDialog
 # This maps model subtypes to corresponding plugin names. Should be
 # moved to a separate property file perhaps
 subtype_plugin_map = {
-    'genesis/kkit': 'kkit'
+    'genesis/kkit': 'kkit',
+    'cspace': 'kkit'
 }
 
     
