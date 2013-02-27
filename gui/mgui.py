@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Wed Feb 27 12:23:06 2013 (+0530)
+# Last-Updated: Wed Feb 27 12:28:19 2013 (+0530)
 #           By: subha
-#     Update #: 846
+#     Update #: 855
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -251,11 +251,11 @@ class MWindow(QtGui.QMainWindow):
 
     def getFileMenu(self):
         if self.fileMenu is None:
-            self.fileMenu = QtGui.QMenu('File')
+            self.fileMenu = QtGui.QMenu('&File')
         else:
             self.fileMenu.clear()
         if not hasattr(self, 'loadModelAction'):
-            self.loadModelAction = QtGui.QAction('Load model', self)
+            self.loadModelAction = QtGui.QAction('L&oad model', self)
             self.connect(self.loadModelAction, QtCore.SIGNAL('triggered()'), self.loadModelDialogSlot)
         self.fileMenu.addAction(self.loadModelAction)
         # self.fileMenu.addAction(self.plugin.getSaveAction())
@@ -264,7 +264,7 @@ class MWindow(QtGui.QMainWindow):
 
     def getEditMenu(self):
         if self.editMenu is None:
-            self.editMenu = QtGui.QMenu('Edit')
+            self.editMenu = QtGui.QMenu('&Edit')
         else:
             self.editMenu.clear()
         self.editMenu.addActions(self.getEditActions())
@@ -273,7 +273,7 @@ class MWindow(QtGui.QMainWindow):
     def getPluginsMenu(self):
         """Populate plugins menu if it does not exist already."""
         if (not hasattr(self, 'pluginsMenu')) or (self.pluginsMenu is None):
-            self.pluginsMenu = QtGui.QMenu('Plugins')
+            self.pluginsMenu = QtGui.QMenu('&Plugins')
             mapper = QtCore.QSignalMapper(self)
             pluginsGroup = QtGui.QActionGroup(self)
             pluginsGroup.setExclusive(True)
@@ -290,7 +290,7 @@ class MWindow(QtGui.QMainWindow):
 
     def getHelpMenu(self):
         if self.helpMenu is None:
-            self.helpMenu = QtGui.QMenu('Help')
+            self.helpMenu = QtGui.QMenu('&Help')
         else:
             self.helpMenu.clear()
         self.helpMenu.addActions(self.getHelpActions())        
@@ -298,11 +298,11 @@ class MWindow(QtGui.QMainWindow):
 
     def getViewMenu(self):
         if (not hasattr(self, 'viewMenu')) or (self.viewMenu is None):
-            self.viewMenu = QtGui.QMenu('View')
+            self.viewMenu = QtGui.QMenu('&View')
         else:
             self.viewMenu.clear()
         self.viewMenu.addActions(self.getViewActions())
-        self.docksMenu = self.viewMenu.addMenu('Dock widgets')
+        self.docksMenu = self.viewMenu.addMenu('&Dock widgets')
         self.docksMenu.addActions(self.getDockWidgetsToggleActions())
         return self.viewMenu
 
@@ -326,7 +326,7 @@ class MWindow(QtGui.QMainWindow):
 
     def getRunMenu(self):
         if (not hasattr(self, 'runMenu')) or (self.runMenu is None):
-            self.runMenu = QtGui.QMenu('Run')
+            self.runMenu = QtGui.QMenu('&Run')
         else:
             self.runMenu.clear()
         self.runMenu.addActions(self.getRunActions())
