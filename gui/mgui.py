@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Wed Feb 27 12:15:51 2013 (+0530)
+# Last-Updated: Wed Feb 27 12:23:06 2013 (+0530)
 #           By: subha
-#     Update #: 845
+#     Update #: 846
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -354,21 +354,6 @@ class MWindow(QtGui.QMainWindow):
 
         """
         return [widget.toggleViewAction() for widget in self.findChildren(QtGui.QDockWidget)]
-
-    def dockWidgetToggledSlot(self, action):
-        print action
-        target = self.dockWidgetToToggleAction.mapping(action)
-        print target, target.isVisible()
-        action.setChecked(target.isVisible())
-
-    def toggleDockWidgetSlot(self, widget):
-        print widget
-        action = self.toggleActionToDockWidget.mapping(widget)
-        print '%%%', action
-        if action.isChecked():
-            self.removeDockWidget(widget)
-        else:
-            self.restoreDockWidget(widget)
 
     def getRunActions(self):
         if (not hasattr(self, 'runActions')) or \
