@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Feb  8 09:38:40 2013 (+0530)
 # Version: 
-# Last-Updated: Mon Feb 25 21:17:23 2013 (+0530)
+# Last-Updated: Wed Feb 27 16:37:52 2013 (+0530)
 #           By: subha
-#     Update #: 192
+#     Update #: 208
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -73,11 +73,14 @@ def loadFile(filename, target, merge=True):
     if not istext:
         print 'Cannot handle any binary formats yet'
         return None
+    parent, child = posixpath.split(target)
+    p = moose.Neutral(parent)
     if not merge:
-        cleanParent(target)
+        for ch in p.children:
+            moose.delete(ch)
     modeltype = mtypes.getType(filename)
     subtype = mtypes.getSubtype(filename, modeltype)
-    # pwe = moose.getCwe()
+    pwe = moose.getCwe()
     if modeltype == 'genesis':
         if subtype == 'kkit' or subtype == 'prototype':
             model = moose.loadModel(filename, target)            
@@ -89,21 +92,13 @@ def loadFile(filename, target, merge=True):
         model = neuroml.loadNeuroML_L123(filename)
     else:
         print 'Do not know how to handle this filetype:', filename
-    # moose.ce(pwe) # TODO: The MOOSE loadModel changes the current working element to newly loaded model. Should we revert that?
+    moose.setCwe(pwe) # The MOOSE loadModel changes the current working element to newly loaded model. We revert that behaviour
     # TODO: check with Aditya how to specify the target for
     # neuroml reader
     return {'modeltype': modeltype, 
             'subtype': subtype, 
             'model': model}
 
-def cleanParent(target):
-    """Delete all the children of parent. Skip if parent is root"""
-    parent, child = posixpath.split(target)
-    moose.setCwe(parent)
-    if parent != '/':
-        p = moose.Neutral(parent)
-        for ch in p.children:
-            moose.delete(ch)
     
 
 # 
