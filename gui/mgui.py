@@ -256,6 +256,7 @@ class MWindow(QtGui.QMainWindow):
             self.fileMenu.clear()
         if not hasattr(self, 'loadModelAction'):
             self.loadModelAction = QtGui.QAction('L&oad model', self)
+            self.loadModelAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+L", None, QtGui.QApplication.UnicodeUTF8))
             self.connect(self.loadModelAction, QtCore.SIGNAL('triggered()'), self.loadModelDialogSlot)
         self.fileMenu.addAction(self.loadModelAction)
         # self.fileMenu.addAction(self.plugin.getSaveAction())
@@ -558,8 +559,15 @@ class MWindow(QtGui.QMainWindow):
                 modelRoot = dialog.getTargetPath()
                 print 'modelroot', modelRoot
                 ret = loadFile(str(fileName), modelRoot, merge=dialog.isMerge())
+                ''' Harsha: if subtype is None, in case of cspace then pluginLookup = /cspace/None 
+                    which will not call kkit plugin so cleaning to /cspace '''
+                if ret['subtype'] == None:
+                    pluginLookup = '%s' % (ret['modeltype'])
+                else:
+                    pluginLookup = '%s/%s' % (ret['modeltype'], ret['subtype'])
                 try:
-                    pluginName = subtype_plugin_map['%s/%s' % (ret['modeltype'], ret['subtype'])]
+                    pluginName = subtype_plugin_map[pluginLookup]
+                    #pluginName = subtype_plugin_map['%s/%s' % (ret['modeltype'], ret['subtype'])]
                 except KeyError:
                     pluginName = 'default'
                 print 'Loaded model', ret['model'].path
