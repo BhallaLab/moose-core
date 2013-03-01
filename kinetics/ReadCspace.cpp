@@ -106,7 +106,10 @@ Id ReadCspace::readModelString( const string& model,
 	SimManager* sm = reinterpret_cast< SimManager* >( 
 		base_.eref().data() );
 	sm->makeStandardElements( base_.eref(), 0, "CubeMesh" );
-	compt_ = Id( "/" + modelname + "/kinetics" );
+	// Harsha: / has replaced base_.path() so that model loads /model/modelname'''
+	//compt_ = Id( "/" + modelname + "/kinetics" );
+	string modelpath = base_.path();
+	compt_ = Id("/" + modelpath + "/kinetics");
 	assert( compt_ != Id() );
 	SetGet2< double, unsigned int >::set( compt_, "buildDefaultMesh",     1e-18, 1 );
 	mesh_ = Neutral::child( compt_.eref(), "mesh" );
