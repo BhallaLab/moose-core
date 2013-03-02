@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Wed Feb 27 16:50:27 2013 (+0530)
+# Last-Updated: Sat Mar  2 13:52:37 2013 (+0530)
 #           By: subha
-#     Update #: 869
+#     Update #: 871
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -63,7 +63,7 @@ from loaderdialog import LoaderDialog
 # moved to a separate property file perhaps
 subtype_plugin_map = {
     'genesis/kkit': 'kkit',
-    'cspace': 'kkit'
+    'cspace/': 'kkit'
 }
 
     
@@ -561,13 +561,9 @@ class MWindow(QtGui.QMainWindow):
                 ret = loadFile(str(fileName), modelRoot, merge=dialog.isMerge())
                 ''' Harsha: if subtype is None, in case of cspace then pluginLookup = /cspace/None 
                     which will not call kkit plugin so cleaning to /cspace '''
-                if ret['subtype'] == None:
-                    pluginLookup = '%s' % (ret['modeltype'])
-                else:
-                    pluginLookup = '%s/%s' % (ret['modeltype'], ret['subtype'])
+                pluginLookup = '%s/%s' % (ret['modeltype'], ret['subtype'])
                 try:
-                    pluginName = subtype_plugin_map[pluginLookup]
-                    #pluginName = subtype_plugin_map['%s/%s' % (ret['modeltype'], ret['subtype'])]
+                    pluginName = subtype_plugin_map['%s/%s' % (ret['modeltype'], ret['subtype'])]
                 except KeyError:
                     pluginName = 'default'
                 print 'Loaded model', ret['model'].path

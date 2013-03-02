@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Feb  8 11:29:36 2013 (+0530)
 # Version: 
-# Last-Updated: Fri Feb 22 16:30:00 2013 (+0530)
+# Last-Updated: Sat Mar  2 13:53:34 2013 (+0530)
 #           By: subha
-#     Update #: 179
+#     Update #: 180
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -115,7 +115,7 @@ def getSubtype(filename, typename):
         subtypeFunc = subtypeChecks['%s/%s' % (typename, subtype)]
         if subtypeFunc(filename):
             return subtype
-    return None
+    return ''
     
 # Dictionary of model description types and functions to detect them.
 #
