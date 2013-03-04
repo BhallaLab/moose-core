@@ -11,6 +11,7 @@
 #include "SolverJunction.h"
 #include "SolverBase.h"
 #include "../shell/Shell.h"
+#include "../kinetics/lookupSizeFromMesh.h"
 
 const Cinfo* SolverBase::initCinfo()
 {
@@ -284,6 +285,7 @@ void SolverBase::dropJunction( const Eref& e, const Qinfo* q, Id other )
 	vDropJunction( e, q, other );
 }
 
+/*
 // Utility function: return the compartment in which the specified
 // object is located.
 // Simply traverses the tree toward the root till it finds a
@@ -306,6 +308,7 @@ Id getCompt( Id id )
 		return pa;
 	return getCompt( pa );
 }
+*/
 
 /**
  * Scans through all junctions and if they are master junctions, 
