@@ -256,7 +256,8 @@ void GslStoich::process( const Eref& e, ProcPtr info )
 
 		}
 	}
-	if ( diffusionMesh_ && diffusionMesh_->innerGetNumEntries() > 1 )
+	// if ( diffusionMesh_ && diffusionMesh_->innerGetNumEntries() > 1 )
+	if ( diffusionMesh_ && pools_.size() > 1 )
 		updateDiffusion( lastS, y_, info->dt );
 	if ( getNumJunctions() > 0 )
 		vUpdateJunction( e, lastS, info->threadIndexInGroup, info->dt );

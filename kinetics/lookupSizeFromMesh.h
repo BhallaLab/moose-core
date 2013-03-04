@@ -80,4 +80,10 @@ double convertConcToNumRateUsingVol( const Eref& e, const SrcFinfo* pools,
 double convertConcToNumRateInTwoCompts( double v1, unsigned int n1, 
 	double v2, unsigned int n2, double scale );
 
+/**
+ * Returns the compartment in which the specified object is located.
+ * Traverses the tree toward the rood till it finds a compartment.
+ */
+Id getCompt( Id id );
+
 #endif	// _LOOKUP_SIZE_FROM_MESH_H

@@ -247,6 +247,13 @@ class StoichCore
 		 */
 		double getR2( const Eref& e ) const;
 
+		/**
+		 * This function scans all reacs and enzymes and recalculates the
+		 * internal rate terms depending on the reference terms stored in
+		 * the original chemical object.
+		 */
+		void updateRatesAfterRemesh();
+
 		/// Utility function, prints out N_, used for debugging
 		void print() const;
 		//////////////////////////////////////////////////////////////////

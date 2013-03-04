@@ -110,20 +110,28 @@ void Reac::vRemesh( const Eref& e, const Qinfo* q )
 void Reac::vSetNumKf( const Eref& e, const Qinfo* q, double v )
 {
 	sub_ = kf_ = v;
-	double volScale = convertConcToNumRateUsingMesh( e, toSub, 0 );
+	double volScale = convertConcToNumRateUsingMesh( e, toSub, false );
 	concKf_ = kf_ * volScale;
 }
 
 double Reac::vGetNumKf( const Eref& e, const Qinfo* q) const
 {
-	double kf = concKf_ / convertConcToNumRateUsingMesh( e, toSub, 0 );
+	double kf = concKf_ / convertConcToNumRateUsingMesh( e, toSub, false );
 	return kf;
 }
 
 void Reac::vSetNumKb( const Eref& e, const Qinfo* q, double v )
 {
 	prd_ = kb_ = v;
-	double volScale = convertConcToNumRateUsingMesh( e, toPrd, 0 );
+	/*
+	double volScale = convertConcToNumRateUsingMesh( e, toPrd, true );
+	vector< double > vols;
+	getReactantVols( e, toSub, vols );
+	assert( vols.size() > 0 );
+	volScale /= (vols[0] * NA);
+	*/
+
+	double volScale = convertConcToNumRateUsingMesh( e, toPrd, false );
 	concKb_ = kb_ * volScale;
 }
 

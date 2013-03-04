@@ -447,6 +447,8 @@ void GslStoich::remesh( const Eref& e, const Qinfo* q,
 	meshSplit( initConcs, vols, localEntryList );
 	vector< double > temp( numPools, 0.0 );
 	y_.resize( vols.size(), temp );
+
+	coreStoich_.updateRatesAfterRemesh();
 	junctionsNotReady_ = true;
 }
 
