@@ -80,7 +80,7 @@ void checkField( const string& path, const string& field, double value )
 	Id id( path );
 	assert( id != Id() );
 	double x = Field< double >::get( id, field );
-	assert( doubleEq( x, value ) );
+	assert( doubleApprox( x, value ) );
 }
 
 void checkJunction( const string& path, Id c1, Id c2, bool isDiffusive )
@@ -210,10 +210,13 @@ void rtTestMultiCompartmentReaction()
 	assert( C != Id() );
 	double sizeC = Field< double >::get( C, "size" );
 
+
 	assert( doubleEq( sizeA, 1e-15 ) );
 	assert( doubleEq( sizeB, 3e-15 ) );
 	assert( doubleEq( sizeC, 5e-15 ) );
 	assert( doubleEq( sizeD, 2e-15 ) );
+
+	checkField( "/model/kinetics/R3", "kb", 1.660572e-7 );
 
 	Id gsA( "/model/kinetics/stoich" );
 	assert( gsA != Id() );
@@ -323,7 +326,7 @@ void rtTestMultiCompartmentReaction()
 	checkField( "/model/kinetics/R2", "Kb", 0.1 ); 
 	checkField( "/model/kinetics/R3", "Kf", 0.1 ); 
 	checkField( "/model/kinetics/R3", "kb", 1.660572e-7 );
-	// checkField( "/model/kinetics/R3", "Kb", 0.1 ); 
+	checkField( "/model/kinetics/R3", "Kb", 0.1 * 5.0 * 3.0 * 1000.0 ); 
 	// To fix: It comes to 300.  I don't see why.
 	// One target is 5x vol. Other is 3x vol. 
 	// The scaling for uM to mM is 1000. That would have given 100.
@@ -335,14 +338,14 @@ void rtTestMultiCompartmentReaction()
 	// We get 100. That should have been it.
 	// Instead the vol that the system uses is 3e-15, from compt B.
 	//
-	checkField( "/model/kinetics/R4", "Kf", 0.1 ); 
-	checkField( "/model/kinetics/R4", "Kb", 0.1 ); 
 	checkField( "/model/kinetics/R4", "kf", 0.1 ); 
 	checkField( "/model/kinetics/R4", "kb", 0.1 ); 
-	checkField( "/model/compartment_1/R5", "Kf", 0.1 ); 
-	checkField( "/model/compartment_1/R5", "Kb", 0.1 ); 
+	checkField( "/model/kinetics/R4", "Kf", 0.1 ); 
+	checkField( "/model/kinetics/R4", "Kb", 0.2 ); 
 	checkField( "/model/compartment_1/R5", "kf", 0.1 ); 
 	checkField( "/model/compartment_1/R5", "kb", 0.1 ); 
+	checkField( "/model/compartment_1/R5", "Kf", 0.1 ); 
+	checkField( "/model/compartment_1/R5", "Kb", 0.1 * 5.0/3.0 ); 
 	checkField( "/model/compartment_3/R8", "Kf", 0.1 ); 
 	checkField( "/model/compartment_3/R8", "Kb", 0.1 ); 
 	checkField( "/model/compartment_2/R9", "Kf", 0.1 ); 
@@ -377,6 +380,49 @@ void rtTestMultiCompartmentReaction()
 
 	shell->doDelete( model );
 	cout << "." << flush;
+}
+
+void checkReac( const string& name, 
+				double Kf, double Kb, double kf, double kb )
+{
+	ObjId R( name );
+	assert( !( R == ObjId::bad() ) );
+	double Kf_ = Field< double >::get( R, "Kf" );
+	double Kb_ = Field< double >::get( R, "Kb" );
+	double kf_ = Field< double >::get( R, "kf" );
+	double kb_ = Field< double >::get( R, "kb" );
+	assert( doubleEq( Kf, Kf_ ) );
+	assert( doubleEq( Kb, Kb_) );
+	assert( doubleEq( kf, kf_ ) );
+	assert( doubleEq( kb, kb_ ) );
+}
+
+void checkScaledRates()
+{
+	checkReac( "/model/kinetics/R1", 0.1, 0.1, 0.1, 0.1 );
+	checkReac( "/model/kinetics/R2", 0.1, 0.1, 0.1, 0.1 );
+	checkReac( "/model/kinetics/R3", 0.1, 1500.03, 0.1, 
+					1500.03 / (NA * 1e-15) );
+	checkReac( "/model/kinetics/R4", 0.1, 0.2, 0.1, 0.2 );
+	checkReac( "/model/compartment_1/R5", 0.1, 0.1 * 5.0 / 3.0, 
+					0.1, 0.1 * 5.0 / 3.0 );
+	checkReac( "/model/compartment_3/R8", 0.1, 0.1, 0.1, 0.1 );
+	checkReac( "/model/compartment_2/R9", 0.1, 0.1, 0.1, 0.1 );
+
+	ObjId E( "/model/compartment_1/M3/R6and7" );
+	assert( !( E == ObjId::bad() ) );
+	double Km = Field< double >::get( E, "Km" );
+	double kcat = Field< double >::get( E, "kcat" );
+	double ratio = Field< double >::get( E, "ratio" );
+	double k1 = Field< double >::get( E, "k1" );
+	double k2 = Field< double >::get( E, "k2" );
+	double k3 = Field< double >::get( E, "k3" );
+	assert( doubleApprox( Km , 1.0e-3 ) );
+	assert( doubleEq( kcat , 0.1 ) );
+	assert( doubleEq( ratio , 4.0 ) );
+	assert( doubleApprox( k1 , 8.333333333333e-7 * 6e23/NA) );
+	assert( doubleEq( k2 , 0.4 ) );
+	assert( doubleEq( k3 , 0.1 ) );
 }
 
 
@@ -450,6 +496,10 @@ void rtTestMultiCompartmentReacDiff()
 	// This should get all the stoichs to reconfigure their junctions, 
 	// which was pending since the meshes have been redone.
 	SetGet0::set( model, "rebuild" );
+	////////////////////////////////////////////////////////////////
+	// Check out rates
+	////////////////////////////////////////////////////////////////
+	checkScaledRates();
 	
 	////////////////////////////////////////////////////////////////
 	// Check out junctions

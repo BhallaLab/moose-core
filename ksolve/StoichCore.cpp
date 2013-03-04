@@ -775,9 +775,9 @@ void StoichCore::setReacKf( const Eref& e, double v ) const
 {
 	static const SrcFinfo* toSub = dynamic_cast< const SrcFinfo* > (
 		ZReac::initCinfo()->findFinfo( "toSub" ) );
-
 	assert( toSub );
-	double volScale = convertConcToNumRateUsingMesh( e, toSub, 0 );
+
+	double volScale = convertConcToNumRateUsingMesh( e, toSub, false );
 
 	rates_[ convertIdToReacIndex( e.id() ) ]->setR1( v / volScale );
 }
@@ -789,10 +789,21 @@ void StoichCore::setReacKb( const Eref& e, double v ) const
 {
 	static const SrcFinfo* toPrd = static_cast< const SrcFinfo* > (
 		ZReac::initCinfo()->findFinfo( "toPrd" ) );
+	static const SrcFinfo* toSub = dynamic_cast< const SrcFinfo* > (
+		ZReac::initCinfo()->findFinfo( "toSub" ) );
 
 	assert( toPrd );
-	double volScale = convertConcToNumRateUsingMesh( e, toPrd, 0 );
-
+	assert( toSub );
+	double volScale = convertConcToNumRateUsingMesh( e, toPrd, false );
+	/*
+	 * This rescaling is now done in the convertConc func itself.
+	// Assume first substrate is the reference volume. Scale down by this.
+	vector< double > vols;
+	getReactantVols( e, toSub, vols );
+	assert( vols.size() > 0 );
+	assert( vols[0] > 0.0 );
+	volScale /= vols[0] * NA;
+	*/
 
 	if ( useOneWay_ )
 		 rates_[ convertIdToReacIndex( e.id() ) + 1 ]->setR1( v / volScale);
@@ -840,7 +851,7 @@ void StoichCore::setEnzK1( const Eref& e, double v ) const
 		ZEnz::initCinfo()->findFinfo( "toSub" ) );
 	assert( toSub );
 
-	double volScale = convertConcToNumRateUsingMesh( e, toSub, 1 );
+	double volScale = convertConcToNumRateUsingMesh( e, toSub, true );
 
 	rates_[ convertIdToReacIndex( e.id() ) ]->setR1( v / volScale );
 }
@@ -1085,3 +1096,26 @@ StoichCore* StoichCore::spawn( const vector< Id >& compts ) const
 
 	return ret;
 }
+
+void StoichCore::updateRatesAfterRemesh()
+{
+	for ( vector< Id >::iterator 
+					i = reacMap_.begin(); i != reacMap_.end(); ++i ) {
+		double Kf = Field< double >::get( *i, "Kf");
+		double Kb = Field< double >::get( *i, "Kb");
+		setReacKf( i->eref(), Kf );
+		setReacKb( i->eref(), Kb );
+	}
+	for ( vector< Id >::iterator 
+			i = offSolverReacs_.begin(); i != offSolverReacs_.end(); ++i ){
+		assert( i->element()->cinfo()->isA( "ReacBase" ) );
+		double Kf = Field< double >::get( *i, "Kf");
+		double Kb = Field< double >::get( *i, "Kb");
+		setReacKf( i->eref(), Kf );
+		setReacKb( i->eref(), Kb );
+	}
+
+	// Do the enzymes.
+}
+
+

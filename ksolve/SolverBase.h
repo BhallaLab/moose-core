@@ -231,7 +231,7 @@ class SolverBase
 /**
  * Returns Id of compartment in which specified object is located.
  * Returns Id() if no compartment found.
- */
 Id getCompt( Id id );
+ */
 
 #endif	// _SOLVER_BASE_H

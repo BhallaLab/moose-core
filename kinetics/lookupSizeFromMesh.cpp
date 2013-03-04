@@ -8,7 +8,37 @@
 **********************************************************************/
 
 #include "header.h"
+/*
+#include "../mesh/VoxelJunction.h"
+#include "../mesh/MeshEntry.h"
+#include "../mesh/Boundary.h"
+#include "../mesh/ChemMesh.h"
+*/
 #include "lookupSizeFromMesh.h"
+
+// Utility function: return the compartment in which the specified
+// object is located.
+// Simply traverses the tree toward the root till it finds a
+// compartment. Pools use a special msg, but this works for reacs too.
+Id getCompt( Id id )
+{
+	const Element* e = id.element();
+	if ( e->cinfo()->isA( "PoolBase" ) ) {
+		vector< Id > neighbours;
+		if ( e->getNeighbours( neighbours, e->cinfo()->findFinfo( "requestSize" ) ) == 1 ) {
+			Id pa = Neutral::parent( neighbours[0].eref() ).id;
+			if ( pa.element()->cinfo()->isA( "ChemMesh" ) )
+				return pa;
+		}
+	}
+	Id pa = Neutral::parent( id.eref() ).id;
+	if ( pa == Id() )
+		return pa;
+	else if ( pa.element()->cinfo()->isA( "ChemMesh" ) )
+		return pa;
+	return getCompt( pa );
+}
+
 
 /// Utility function to find the size of a pool.
 double lookupSizeFromMesh( const Eref& e, const SrcFinfo* sf )
@@ -18,6 +48,7 @@ double lookupSizeFromMesh( const Eref& e, const SrcFinfo* sf )
 	if ( !mfb ) return 1.0;
 	if ( mfb->size() == 0 ) return 1.0;
 
+	// Can replace with regular get if it is local.
 	double size = 
 		Field< double >::fastGet( e, (*mfb)[0].mid, (*mfb)[0].fid );
 
@@ -43,44 +74,28 @@ unsigned int getReactantVols( const Eref& reac, const SrcFinfo* pools,
 	vector< double >& vols )
 {
 	static const unsigned int meshIndex = 0;
-	static const Cinfo* poolCinfo = Cinfo::find( "Pool" );
-	static const Cinfo* zombiePoolCinfo = Cinfo::find( "ZombiePool" );
-	static const Cinfo* zPoolCinfo = Cinfo::find( "ZPool" );
-
+	static const Cinfo* poolCinfo = Cinfo::find( "PoolBase" );
 	static const Finfo* f1 = poolCinfo->findFinfo( "requestSize" );
 	static const SrcFinfo* poolRequestSize = 
 		dynamic_cast< const SrcFinfo* >( f1 );
 
-	static const Finfo* f2 = zombiePoolCinfo->findFinfo( "requestSize" );
-	static const SrcFinfo* zombiePoolRequestSize = 
-		dynamic_cast< const SrcFinfo* >( f2 );
-
-	static const Finfo* f3 = zPoolCinfo->findFinfo( "requestSize" );
-	static const SrcFinfo* zPoolRequestSize = 
-		dynamic_cast< const SrcFinfo* >( f3 );
-
 	const vector< MsgFuncBinding >* mfb = 
 		reac.element()->getMsgAndFunc( pools->getBindIndex() );
-
 	unsigned int smallIndex = 0;
 
 	vols.resize( 0 );
 	if ( mfb ) {
 		for ( unsigned int i = 0; i < mfb->size(); ++i ) {
 			double v = 1;
-			Element* pool = Msg::getMsg( (*mfb)[0].mid )->e2();
+			Element* pool = Msg::getMsg( (*mfb)[i].mid )->e2();
 			if ( pool == reac.element() )
-				pool = Msg::getMsg( (*mfb)[0].mid )->e1();
+				pool = Msg::getMsg( (*mfb)[i].mid )->e1();
 			assert( pool != reac.element() );
 			Eref pooler( pool, meshIndex );
-			if ( pool->cinfo()->isA( "Pool" ) ) {
+			if ( pool->cinfo()->isA( "PoolBase" ) ) {
 				v = lookupSizeFromMesh( pooler, poolRequestSize );
-			} else if ( pool->cinfo()->isA( "ZombiePool" ) ) {
-				v = lookupSizeFromMesh( pooler, zombiePoolRequestSize );
-			} else if ( pool->cinfo()->isA( "ZPool" ) ) {
-				v = lookupSizeFromMesh( pooler, zPoolRequestSize );
 			} else {
-				cout << "Error: getReactantVols: pool is neither regular nor zombie\n";
+				cout << "Error: getReactantVols: pool is of unknown type\n";
 				assert( 0 );
 			}
 			vols.push_back( v );
@@ -97,21 +112,44 @@ unsigned int getReactantVols( const Eref& reac, const SrcFinfo* pools,
  * Handles arbitrary combinations of volumes.
  * Assumes that the reference volume for computing rates is the 
  * smallest volume.
+ * 26 Feb 2013: This is now changed to use the volume of the first entry.
+ * Should only be used for substrates. For products need to find the
+ * first substrate, separately, and use that to scale down the conv factor.
  * Assumes all calculations are in SI: cubic metres and millimolar.
+ * 27 Feb 2013: This is changed to use the volume of a voxel of the 
+ * the home compartment of the reac.
  */
 
 double convertConcToNumRateUsingMesh( const Eref& e, const SrcFinfo* pools, 
 	bool doPartialConversion )
 {
 	vector< double > vols;
-	unsigned int smallest = getReactantVols( e, pools, vols );
-	double conv = 1;
-
+	// unsigned int smallest = getReactantVols( e, pools, vols );
+	double conv = 1.0;
+	getReactantVols( e, pools, vols );
 	for ( unsigned int i = 0; i < vols.size(); ++i ) {
-		if ( doPartialConversion || smallest != i ) {
+		conv *= vols[i] * NA;
+	}
+	if ( !doPartialConversion ) {
+		Id compt = getCompt( e.id() );
+		if ( compt != Id() ) {
+			Id mesh( compt.value() + 1 );
+			double meshVol = Field< double >::get( mesh, "size" );
+			/*
+			ChemMesh* cc = 
+					reinterpret_cast< ChemMesh* >( compt.eref().data() ):
+			meshVol = cc->getMeshEntrySize( 0 );
+			*/
+			conv /= meshVol * NA;
+		}
+	}
+	/*
+	for ( unsigned int i = 0; i < vols.size(); ++i ) {
+		if ( doPartialConversion || i != 0 ) {
 			conv *= vols[i] * NA;
 		}
 	}
+	*/
 	return conv;
 }
 
