@@ -75,6 +75,60 @@ static void dumpReacDiffGraphs()
 	}
 }
 
+static void checkReacDiffGraphs()
+{
+	typedef pair< string, string> PSS;
+	vector< PSS > plotnames;
+	// The ordering of indices is scrambled in the reference file.
+	plotnames.push_back( PSS( "conc1/M1_A0.Co", "M1_A.conc_0" ) );
+	plotnames.push_back( PSS( "conc1/M2_A0.Co", "M2_A.conc_0" ) );
+	plotnames.push_back( PSS( "conc1/M1_B0.Co", "M1_B.conc_2" ) );
+	plotnames.push_back( PSS( "conc1/M1_B1.Co", "M1_B.conc_1" ) );
+	plotnames.push_back( PSS( "conc1/M1_B2.Co", "M1_B.conc_0" ) );
+	plotnames.push_back( PSS( "conc1/M6_B0.Co", "M6_B.conc_2" ) );
+	plotnames.push_back( PSS( "conc1/M6_B1.Co", "M6_B.conc_1" ) );
+	plotnames.push_back( PSS( "conc1/M6_B2.Co", "M6_B.conc_0" ) );
+	plotnames.push_back( PSS( "conc2/M1_C0.Co", "M1_C.conc_4" ) );
+	plotnames.push_back( PSS( "conc2/M1_C1.Co", "M1_C.conc_3" ) );
+	plotnames.push_back( PSS( "conc2/M1_C2.Co", "M1_C.conc_2" ) );
+	plotnames.push_back( PSS( "conc2/M1_C3.Co", "M1_C.conc_1" ) );
+	plotnames.push_back( PSS( "conc2/M1_C4.Co", "M1_C.conc_0" ) );
+	plotnames.push_back( PSS( "conc2/M4_C0.Co", "M4_C.conc_4" ) );
+	plotnames.push_back( PSS( "conc2/M4_C1.Co", "M4_C.conc_3" ) );
+	plotnames.push_back( PSS( "conc2/M4_C2.Co", "M4_C.conc_2" ) );
+	plotnames.push_back( PSS( "conc2/M4_C3.Co", "M4_C.conc_1" ) );
+	plotnames.push_back( PSS( "conc2/M4_C4.Co", "M4_C.conc_0" ) );
+	plotnames.push_back( PSS( "conc2/M1_D0.Co", "M1_D.conc_0" ) );
+	plotnames.push_back( PSS( "conc2/M1_D1.Co", "M1_D.conc_1" ) );
+	plotnames.push_back( PSS( "conc2/M5_D0.Co", "M5_D.conc_0" ) );
+	plotnames.push_back( PSS( "conc2/M5_D1.Co", "M5_D.conc_1" ) );
+
+	const double TOLERANCE = 2e-3;
+
+	for ( vector< PSS >::iterator 
+					i = plotnames.begin(); i != plotnames.end(); ++i )
+	{
+		string xplotName = "/graphs/" + i->first;
+		string tabTail = i->second.substr( 0, 9 );
+		string tabIndex = i->second.substr( 10, 1 );
+		string tabName = "/model/graphs/conc1/" + 
+				tabTail + "[" + tabIndex + "]";
+
+		ObjId tab( tabName );
+		assert( !( tab == ObjId::bad() ) );
+		bool ok = SetGet2< double, double >::set( 
+						tab, "linearTransform", 1000, 0);
+		assert( ok );
+		ok = SetGet3< string, string, string >::set(
+			tab, "compareXplot", "discretized_reacdiff.plot", 
+			xplotName, "rmsr" );
+		assert( ok );
+		double val = Field< double >::get( tab, "outputValue" );
+		assert( val >= 0 && val < TOLERANCE );
+		// cout << "Tol[ " << i->second << " ] = " << val << endl;
+	}
+}
+
 void checkField( const string& path, const string& field, double value )
 {
 	Id id( path );
@@ -681,6 +735,7 @@ void rtTestMultiCompartmentReacDiff()
 	shell->doStart( 100.0 );
 
 	dumpReacDiffGraphs();
+	checkReacDiffGraphs();
 
 	shell->doDelete( model );
 	cout << "." << flush;
