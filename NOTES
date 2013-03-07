@@ -21305,6 +21305,9 @@ Fixed problem with vOther. The values were actually being calculated correctly,
 but were just being pushed back into the existing vector. It required that the 
 CubeMesh::extendedMeshEntrySize_ vector be cleaned out when rebuilding.
 The no-reac multicompt diffusion model now gives a nice flat line.
-Does it work with the full reacdiff model? Yes! Finally.
+Does it work with the full reacdiff model? Yes! Finally. Checkin 4437.
+
+Now to clean up a bit. The regression test that has given so much grief should
+do a proper quantitative comparison with the reference curves. Done.
 
 ==========================================================================
