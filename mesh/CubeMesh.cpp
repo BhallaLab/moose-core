@@ -813,6 +813,12 @@ double CubeMesh::extendedMeshEntrySize( unsigned int fid ) const
 	return dx_ * dy_ * dz_;
 }
 
+/// Inherited virtual function to clear the vector of MeshEntrySize
+void CubeMesh::clearExtendedMeshEntrySize()
+{
+	extendedMeshEntrySize_.clear();
+}
+
 /// Virtual function to return coords of mesh Entry.
 /// For Cuboid mesh, coords are x1y1z1 x2y2z2
 vector< double > CubeMesh::getCoordinates( unsigned int fid ) const

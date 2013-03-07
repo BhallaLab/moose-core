@@ -206,6 +206,9 @@ class ChemMesh
 		virtual double extendedMeshEntrySize( unsigned int fid ) 
 			const = 0;
 
+		/// clear out extended mesh entries for rebuilding.
+		virtual void clearExtendedMeshEntrySize() = 0;
+
 		/**
 		 * Function to look up scale factor derived from area and length
 		 * of compartment junction, for all the mesh entries connected to
