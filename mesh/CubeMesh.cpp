@@ -1081,8 +1081,8 @@ void CubeMesh::buildStencil()
 			colIndex.push_back( j->col_ );
 		}
 		coreStencil_.addRow( i, entry, colIndex );
-		m_ = coreStencil_;
 	}
+	m_ = coreStencil_;
 }
 
 /// virtual func implemented here.
@@ -1177,44 +1177,6 @@ void CubeMesh::extendStencil(
 		m_.addRow( i, e, c );
 	}
 
-	/*
-	vector< VoxelJunction > newRow;
-	for ( unsigned int i = 0; i < coreSize; ++i ) {
-		const double* entry;
-		const unsigned int& colIndex;
-		unsigned int num = coreStencil_.getRow( i, &entry, &colIndex );
-
-
-	}
-	*/
-
-	/*
-	// Here we make a temporary data structure for the combined data
-	// of the sparse matrix with the voxelJunctions.
-	vector< vector< double > > diffScale( newSize );
-	vector< vector< unsigned int > > expandedMeshIndex( newSize );
-	for ( unsigned int i = 0; i < coreSize; ++i ) {
-		m_.getRow( i, diffScale[i], expandedMeshIndex[i] );
-	}
-	for ( vector< VoxelJunction >::const_iterator 
-					i = vj.begin(); i != vj.end(); ++i ) {
-		unsigned int row = i->first;
-		unsigned int col = meshMap[i->second];
-		diffScale[row].push_back( i->diffScale );
-		expandedMeshIndex[row].push_back( col );
-		// The diffusion matrix is symmetric.
-		diffScale[col].push_back( i->diffScale );
-		expandedMeshIndex[col].push_back( row );
-		// Note that the col indexing could be scrambled. Undesirable but
-		// I don't think it affects the functioning of the sparse matrix.
-	}
-	// Now we rebuild the sparse matrix.
-	m_.clear();
-	m_.setSize( newSize, newSize );
-	for ( unsigned int i = 0; i < newSize; ++i )
-		m_.addRow( i, diffScale[i], expandedMeshIndex[i] );
-	*/
-
 	// Fill in the volumes of the external mesh entries
 	for ( vector< unsigned int>::const_iterator  
 			i = meshBackMap.begin(); i != meshBackMap.end(); ++i ) {
@@ -1229,18 +1191,6 @@ unsigned int CubeMesh::getStencil( unsigned int meshIndex,
 			const double** entry, const unsigned int** colIndex ) const
 {
 		return m_.getRow( meshIndex, entry, colIndex );
-		// A 1-D mesh has 3 kinds of rows: left, middle and right.
-		// Plus a pathological one where it is really a single point.
-		// A 2-D mesh has 9 kinds of rows: the 8 directions, middle.
-		// There are two pathological cases if the mesh is 1 entry wide or
-		// tall. So 11.
-		// A 3-D mesh has 27 kinds of rows plus 3 pathological ones.
-		//
-		// So the approach we take here is to predefine all the kinds of
-		// rows, it isn't a large number.
-		// This approach lets us pick out any arbitrary boundary by defining
-		// which kind of 'row' applies at each mesh entry.
-	// return rowSelect_[row]( entry, colIndex );
 }
 
 //////////////////////////////////////////////////////////////////
