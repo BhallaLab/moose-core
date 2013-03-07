@@ -168,24 +168,13 @@ class CylMesh: public ChemMesh
 		double rSlope_;	/// Utility value: dr/dx
 		double lenSlope_; /// Utility value: dlen/dx
 
-		double dx2_[2]; /// Used as stencil for 2 entries, each = lambda_.
+//		double dx2_[2]; /// Used as stencil for 2 entries, each = lambda_.
 
-		/**
-		 * For spherical mesh, coords are xyz r0 r1 theta0 theta1 phi0 phi1
-		 * For Cylindrical mesh, coords are x1y1z1 x2y2z2 r0 r1 phi0 phi1
-		 * For cuboid mesh, coords are x1y1z1 x2y2z2
-		 * For tetrahedral mesh, coords are x1y1z1 x2y2z2 x3y3z3 x4y4z4
-		 * Later worry about planar meshes. Those would be surfaces
-		vector< double > coords_;
-		 */
+		// Handles core stencil for self.
+		SparseMatrix< double > coreStencil_;
 
-		/// Indices of neighbours in the current mesh array.
-		// vector< unsigned int >neighbours; 
-
-		/*
-		mesh dimension:
-		mesh type (one for each dim): none, axial, radial, 
-		*/
+		// Handles extended stencil including core + abutting voxels.
+		SparseMatrix< double > m_;
 };
 
 #endif	// _CYL_MESH_H
