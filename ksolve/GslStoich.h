@@ -307,6 +307,12 @@ class GslStoich: public SolverBase
 		 */
 		vector< unsigned int > localMeshEntries_;
 
+		/**
+		 * vector of indices for pools with non-zero diffusion const.
+		 * Only applies to local pools.
+		 */
+		vector< unsigned int > diffusingPoolIndices_;
+
 		Id compartmentId_;
 		ChemMesh* diffusionMesh_;
 

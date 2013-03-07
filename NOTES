@@ -21173,8 +21173,8 @@ handled. Specifically,
 	Y does the system make multiple proxy diffusion mols, 
 		one for each direction?
 	Y Are the diffusion constants OK
-	N Is the return flow of mols going to the correct object
-	- Are non-diffusive molecules left alone?
+	Y Is the return flow of mols going to the correct object
+	Y Are non-diffusive molecules left alone?
 2. If this fails, then make another variant of the reacdiff model that has
 	only diffusion, no reac.
 
@@ -21212,5 +21212,99 @@ still does not match the GENESIS one with explicit discretization.
 ==========================================================================
 04 Mar 2013
 Checked it in anyway, since the code nominally clears unit and regression tests
-and I've done a lot of work on it.
+and I've done a lot of work on it. Checkin 4436.
 
+Check if the dt is dubious. Reduced it 10x in both. No change in
+Genesis outcome when dt went from 1 ms to 0.1 ms. 
+Very small change in MOOSE outcome when it went from 0.1 s to 0.01 s.
+So it isn't dt, it is model structure related.
+
+Item from  28 Feb:
+	- Is the return flow of mols going to the correct object?
+	I can say that different fluxes are going to different objects.
+	I can say that the reaction terms going from A to (B and C) are
+	identical, as they should be, and to D is different, as it should be.
+	From the code structure, the diffusion terms are sent off in the same
+	vector as the reaction terms. 
+	From previous tests, the reaction system on its own (no diffusion)
+	was OK. 
+	The diffTerms_ entry in all cases points to M1, as it should.
+	The sendMeshIndex_ entry in all cases is the correct voxel.
+	So, though I cannot vouch for the values, the flow of diffusing 
+	molecules seems to be between the correct objects.
+	- Are non-diffusive molecules left alone?
+	As far as I can see, there is no point at which they would be updated.
+
+With these tests, it seems that the data transfer is OK but I have not 
+tested the stencil-based diffusion calculations that occur within each solver.
+
+	To test stencil calculations:
+	Y Do the stencil entries refer to the correct mesh entries?
+	Y Are the scaling factors all correct? 
+
+With these tests, the next question is whether the correct entries are being
+transmitted from the remote solver to the local proxy.
+
+==========================================================================
+05 Mar 2013.
+A brief hope that the issue was simply a mismatch in the diffusion term 
+calculation. Turns out not.
+
+Now let's follow the entries being transmitted. First look at what arrives.
+That seems OK.
+Now look at what is transmitted.
+Something wrong here. This is what goes out:
+
+A: 	M1 to B, D, C  for diffusion 			???
+
+B: 	M3 to A for reac.
+	M1 to A for diffusion, 1 voxel.
+	M1 to C for diffusion, 3 voxels.		???
+
+C: 	M5 to A for reac
+	M1 to A for diff
+
+D: 	M4 to A for reac
+	M1 to A for diff
+	M4 to B for reac, 3 voxels
+	M1 to b for diff, 3 voxels.
+
+What comes into the vHandleJunctionPoolNum actually looks OK.
+
+The bad ones are not received. Looks like the junctions are made but not
+connected. So, an error but not one that should cause numerical issues.
+
+For now: Two fixes and then go on to doing the diffusion-only tests to
+track this down.
+Fix 1: Precompute nonzero diffusion molecules, scan only through those when
+building inter-solver transfer vector
+	Done. This was easy, but in due course I need to update the 
+	vector of non-diffusers when diff consts change.
+Fix 2: Figure out why the incorrect data is sent as described above. Fix.
+
+Diffusion-only tests:
+	1. Same system, zero out all reaction rates. Check that M1 stays flat.
+	2. As in 1, but now set M1 to zero except in compartment A.
+
+Implemented 
+Test 1 confirms and partly identifies problem. All the states of M1 go down.
+Some start flat and then accelerate down, others go down exponentially.
+
+So we need to look for some process which is losing molecules.
+Compt A loses them the most and fastest.
+
+I think I got it: vOther is not the 10 micron cube. It is the original
+size of the entire compartment.
+
+Working on getting the no-reac multicompt diffusion system in place.
+segvs.
+
+==========================================================================
+07 Mar 2013.
+Fixed problem with vOther. The values were actually being calculated correctly,
+but were just being pushed back into the existing vector. It required that the 
+CubeMesh::extendedMeshEntrySize_ vector be cleaned out when rebuilding.
+The no-reac multicompt diffusion model now gives a nice flat line.
+Does it work with the full reacdiff model? Yes! Finally.
+
+==========================================================================

@@ -391,9 +391,12 @@ void GslStoich::updateDiffusion(
 			assert( vOther > 0 );
 			assert( vSelf > 0 );
 		
-			for ( unsigned int j = 0; j < numCorePools; ++j )
-				y[me][j] += stoich->getDiffConst(j) * scale * 
-						( sOther[j]/vOther - sSelf[j]/vSelf );
+			// for ( unsigned int j = 0; j < numCorePools; ++j )
+			for ( vector< unsigned int >::iterator 
+				j = diffusingPoolIndices_.begin(); 
+				j != diffusingPoolIndices_.end(); ++j )
+				y[me][*j] += stoich->getDiffConst(*j) * scale * 
+						( sOther[*j]/vOther - sSelf[*j]/vSelf );
 		}
 		double* s = pools_[me].varS();
 		for ( unsigned int j = 0; j < numCorePools; ++j )
