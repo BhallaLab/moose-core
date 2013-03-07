@@ -8,6 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
+#include "SparseMatrix.h"
 #include "ElementValueFinfo.h"
 #include "Boundary.h"
 #include "MeshEntry.h"
@@ -198,8 +199,8 @@ void CylMesh::updateCoords()
 	rSlope_ = ( r1_ - r0_ ) / numEntries_;
 	lenSlope_ = lambda_ * rSlope_ * 2 / ( r0_ + r1_ );
 
-	dx2_[0] = lambda_;
-	dx2_[1] = lambda_;
+	// dx2_[0] = lambda_;
+	// dx2_[1] = lambda_;
 	buildStencil();
 }
 
@@ -466,6 +467,13 @@ vector< double > CylMesh::getCoordinates( unsigned int fid ) const
 /// Virtual function to return info on Entries connected to this one
 vector< unsigned int > CylMesh::getNeighbors( unsigned int fid ) const
 {
+	const double* entry;
+	const unsigned int *colIndex;
+	vector< unsigned int > ret;
+	unsigned int n = m_.getRow( fid, &entry, &colIndex );
+	ret.insert( ret.end(), colIndex, colIndex + n );
+	return ret;
+		/*
 	if ( numEntries_ <= 1 )
 		return vector< unsigned int >( 0 );
 	
@@ -485,6 +493,7 @@ vector< unsigned int > CylMesh::getNeighbors( unsigned int fid ) const
 	ret[0] = fid - 1;
 	ret[1] = fid + 1;
 	return ret;	
+	*/
 }
 
 /// Virtual function to return diffusion X-section area for each neighbor
@@ -684,37 +693,50 @@ void CylMesh::transmitChange( const Eref& e, const Qinfo* q )
 //////////////////////////////////////////////////////////////////
 void CylMesh::buildStencil()
 {
+	coreStencil_.clear();
+	coreStencil_.setSize( numEntries_, numEntries_ );
+	for ( unsigned int i = 0; i < numEntries_; ++i ) {
+		double rLow = r0_ + i * rSlope_;
+		double rHigh = r0_ + (i + 1.0) * rSlope_;
+		double aLow = rLow * rLow * PI;
+		double aHigh = rHigh * rHigh * PI;
+		vector< double > entry;
+		vector< unsigned int > colIndex;
+		if ( i == 0 ) {
+			colIndex.push_back( 1 );
+			entry.push_back( aHigh / lambda_ );
+			if ( isToroid_ ) {
+				colIndex.push_back( numEntries_ - 1 );
+				entry.push_back( aLow / lambda_ );
+			}
+		} else if ( i == numEntries_ - 1 ) {
+			if ( isToroid_ ) {
+				colIndex.push_back( 0 );
+				entry.push_back( r0_ * r0_ * PI / lambda_ );
+			}
+			colIndex.push_back( numEntries_ - 2 );
+			entry.push_back( aLow / lambda_ );
+		} else { // Mostly it is in the middle.
+			colIndex.push_back( i - 1 );
+			entry.push_back( aLow / lambda_ );
+			colIndex.push_back( i + 1 );
+			entry.push_back( aHigh / lambda_ );
+		}
+		coreStencil_.addRow( i, entry, colIndex );
+	}
+		/*
 	for ( unsigned int i = 0; i < stencil_.size(); ++i )
 		delete stencil_[i];
 	stencil_.resize( 1 );
 	stencil_[0] = new LineStencil( lambda_ );
-}	
+	*/
+	m_ = coreStencil_;
+}
 
 unsigned int CylMesh::getStencil( unsigned int meshIndex,
 			const double** entry, const unsigned int** colIndex ) const
 {
-	static unsigned int leftIndex;
-	static const unsigned int rightIndex = 1;
-	static unsigned int middleIndex[2];
-	assert ( numEntries_ > 1 );
-	// Should use try-catch?
-	if ( meshIndex == 0 ) {
-			*entry = &lambda_;
-			*colIndex = &rightIndex;
-			return 1;
-	} else if ( meshIndex == numEntries_ - 1 ) {
-			assert( meshIndex > 0 );
-			*entry = &lambda_;
-			leftIndex = meshIndex - 1;
-			*colIndex = &leftIndex;
-			return 1;
-	}
-	assert ( numEntries_ > 2 );
-	*entry = dx2_;
-	middleIndex[0] = meshIndex - 1;
-	middleIndex[1] = meshIndex + 1;
-	*colIndex = middleIndex;
-	return 2;
+	return m_.getRow( meshIndex, entry, colIndex );
 }
 
 void CylMesh::extendStencil( 
@@ -725,7 +747,7 @@ void CylMesh::extendStencil(
 
 void CylMesh::innerResetStencil()
 {
-	assert( 0 ); // doesn't work yet.
+	m_ = coreStencil_;
 }
 
 //////////////////////////////////////////////////////////////////

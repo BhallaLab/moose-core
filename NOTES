@@ -21310,4 +21310,32 @@ Does it work with the full reacdiff model? Yes! Finally. Checkin 4437.
 Now to clean up a bit. The regression test that has given so much grief should
 do a proper quantitative comparison with the reference curves. Done.
 
+Checkin 4439.
+
+Dating back from 22 Dec: Updated list of pending things here.
+* Implement cross-compartment reactions
+* Set up sim manager to handle coupled solvers
+* Regression test for calculations for cross-compartment reac-diff.
+- Extend to CylMesh 
+- Regression test for CylMesh
+- Extend to NeuroMesh
+- Regression test for NeuroMesh
+- Write SpineMesh, extend to it.
+- Extended regression test for cross-compartment reac-diff with patchy compts.
+- Put in stuff for SigNeur.
+- Extend CubeMesh to figure out surfaces from Geom classes and bitmaps.
+- Convert GssaStoich to use new zombie classes
+- Derive GssaStoich from StoichPools
+- Get GssaStoich to talk to each other through diffusion
+- Get GssaStoich and GslStoich to talk to each other through diffusion
+- SBML read and write
+- Reorder KKit reader to put things more sensibly into compartments.
+- Figure out pool composition and motors.
+
+
+Working on CylMesh, converting to stencil, need to put in areas.
+Did that too. Clears unit tests and regression tests, including one using
+the CylMesh that wasn't working earlier. But I haven't yet implemented
+any of the cros-solver calculations for CylMesh.
 ==========================================================================
+

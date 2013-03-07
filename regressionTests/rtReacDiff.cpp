@@ -288,10 +288,8 @@ static void testDiff1D()
 	Field< double >::setRepeat( a, "concInit", 0 );
 	Field< double >::set( ObjId( a, 0 ), "concInit", 1 );
 
-	Id gsl( "/diff/stoich" );
+	Id gsl( "/diff/kinetics/stoich" );
 	assert( gsl != Id() );
-	Id stoich( "/diff/stoich/stoichCore" );
-	assert( stoich != Id() );
 
     shell->doReinit();
 
@@ -302,7 +300,7 @@ static void testDiff1D()
 		assert( conc.size() == diffLength );
 		double ret = checkDiff( conc, D, i + 1, dx );
 //		cout << "root sqr Error on t = " << i + 1 << " = " << ret << endl;
-		assert ( ret < 0.01 );
+		assert ( ret < 0.02 );
 	}
 
 	shell->doDelete( mgr );
@@ -555,7 +553,7 @@ void rtReacDiff()
 {
 		/* This is currently not handled by the new GslStoich class. Soon.*/
 	rtReplicateModels();
-//	testDiff1D(); // Uses cylinder. Still to fix as of 18 Dec 2012.
+	testDiff1D(); // Uses cylinder. Still to fix as of 18 Dec 2012.
 	testDiffNd( 1 );
 	testDiffNd( 2 );
 	testDiffNd( 3 );
