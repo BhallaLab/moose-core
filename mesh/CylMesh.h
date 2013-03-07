@@ -86,6 +86,8 @@ class CylMesh: public ChemMesh
 		double extendedMeshEntrySize( unsigned int fid ) const;
 
 		//////////////////////////////////////////////////////////////////
+		/// Inherited virtual.
+		void clearExtendedMeshEntrySize();
 
 		/**
 		 * Inherited virtual func. Returns number of MeshEntry in array

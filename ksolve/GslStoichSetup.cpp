@@ -92,6 +92,14 @@ void GslStoich::setElist( const Eref& e, const Qinfo* q, vector< Id > elist)
 	// function below
 	coreStoich_.setElist( e, this, elist );
 
+	// Set up the vector of pools that diffuse.
+	diffusingPoolIndices_.clear();
+	for ( unsigned int i = 0; i < coreStoich_.getNumVarPools(); ++i ) {
+		if ( coreStoich_.getDiffConst( i ) > 0 ) {
+			diffusingPoolIndices_.push_back( i );
+		}
+	}
+
 	generateOdes();
 	assert( ode_.size() > 0 );
 
@@ -485,8 +493,10 @@ void GslStoich::expandSforDiffusion(
 void GslStoich::innerReallocateSolver( const Eref& e )
 {
 	unsigned int numVoxels = 1;
-	if ( diffusionMesh_ )
+	if ( diffusionMesh_ ) {
 		numVoxels = diffusionMesh_->getNumEntries();
+		diffusionMesh_->clearExtendedMeshEntrySize();
+	}
 
 	assert( numVoxels > 0 );
 	vector< double > vols( numVoxels );

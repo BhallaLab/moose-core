@@ -104,6 +104,9 @@ class CubeMesh: public ChemMesh
 		 */
 		double extendedMeshEntrySize( unsigned int fid ) const;
 
+		/// Inherited virtual function to clear the vector of MeshEntrySize
+		void clearExtendedMeshEntrySize();
+
 		/**
 		 * Inherited virtual func. Returns number of MeshEntry in array
 		 */

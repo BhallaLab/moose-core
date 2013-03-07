@@ -1,7 +1,7 @@
 //genesis
 // kkit Version 11 flat dumpfile
  
-// Saved on Sun Feb 17 23:28:46 2013
+// Saved on Thu Mar  7 10:03:04 2013
  
 include kkit {argv 1}
  
@@ -82,8 +82,8 @@ simundump kreac /kinetics/A/R2 0 0.1 0.1 "" white yellow -2 2 0
 simundump text /kinetics/A/R2/notes 0 ""
 call /kinetics/A/R2/notes LOAD \
 ""
-simundump kpool /kinetics/A/M1 0 1e-12 0.99998 0.99998 5.9999e+05 5.9999e+05 \
-  0 0 6e+05 0 /kinetics/geometry 9 yellow -4 4 0
+simundump kpool /kinetics/A/M1 0 1e-12 1 1 6e+05 6e+05 0 0 6e+05 0 \
+  /kinetics/geometry 9 yellow -4 4 0
 simundump text /kinetics/A/M1/notes 0 ""
 call /kinetics/A/M1/notes LOAD \
 ""
