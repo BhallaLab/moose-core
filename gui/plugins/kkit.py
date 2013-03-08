@@ -3,7 +3,9 @@ import os
 import math
 import re
 from PyQt4 import QtGui, QtCore, Qt
-import pygraphviz as pgv
+#import pygraphviz as pgv
+import networkx as nx
+#sys.path.insert(0, '/home/harsha/BuildQ/gui')
 import numpy as np
 import config
 import pickle 
@@ -16,6 +18,7 @@ from kkitQGraphics import PoolItem, ReacItem,EnzItem,CplxItem,ComptItem
 from kkitViewcontrol import *
 from kkitCalcArrow import *
 from kkitOrdinateUtil import *
+import posixpath
 
 class KkitPlugin(MoosePlugin):
     """Default plugin for MOOSE GUI"""
@@ -90,6 +93,7 @@ class  KineticsWidget(DefaultEditorWidget):
         self.xmax = 1.0
         self.ymin = 0.0
         self.ymax = 1.0
+        self.autoCordinatepos = {}
         self.sceneContainer.clear()
         """ TODO: size will be dummy at this point, but I need the availiable size from the Gui """
         self.size = QtCore.QSize(1024 ,768)
@@ -100,7 +104,7 @@ class  KineticsWidget(DefaultEditorWidget):
         colormap_file = open(os.path.join(config.settings[config.KEY_COLORMAP_DIR], 'rainbow2.pkl'),'rb')
         self.colorMap = pickle.load(colormap_file)
         colormap_file.close()
-        #print "3",self.modelRoot
+
         """ Compartment and its members are setup """
         self.meshEntry,self.xmin,self.xmax,self.ymin,self.ymax,self.noPositionInfo = setupMeshObj(self.modelRoot)
         #for mesh,obj in self.meshEntry.items():
@@ -112,28 +116,21 @@ class  KineticsWidget(DefaultEditorWidget):
         if self.noPositionInfo:
             self.autocoordinates = True
             QtGui.QMessageBox.warning(self, 
-                                      'No coordinates found', 
-                                      'Kinetic layout works only for models using kkit8 or later. \n Automatic layouting will be done')
+                                      'No coordinates found for the model', 
+                                      '\n Automatic layouting will be done')
             #raise Exception('Unsupported kkit version')
 
-            self.G = pgv.AGraph(fontname='Helvetica',fontsize=9,strict=False,directed=True)
-            autoCoordinates(self.G,self.meshEntry,self.srcdesConnection)
-            self.G.draw('/home/harsha/Trash/pygraphviz/'+self.modelRoot+'.png',prog='dot',format='png')
-            self.graphvizCord = {}
-            for n in self.G.nodes():
-                self.graphvizCord[n] = n.attr
-        else:
-            """Scale factor to translate the x -y position when read coordinates from kkit to Qt coordinates. \
-            Qt origin is at the top-left corner. The x values increase to the right and the y values increase downwards \
-            as compared to Genesis codinates where origin is center and y value is upwards """
-
-            if self.xmax-self.xmin != 0:
-                self.xratio = (self.size.width()-10)/(self.xmax-self.xmin)
-            else: self.xratio = self.size.width()-10
             
-            if self.ymax-self.ymin:
-                self.yratio = (self.size.height()-10)/(self.ymax-self.ymin)
-            else: self.yratio = (self.size.height()-10)
+            self.xmin,self.xmax,self.ymin,self.ymax,self.autoCordinatepos = autoCoordinates(self.meshEntry,self.srcdesConnection)
+
+        """ Scale factor to translate the x -y position to fit the Qt graphicalScene, scene width. """
+        if self.xmax-self.xmin != 0:
+            self.xratio = (self.size.width()-10)/(self.xmax-self.xmin)
+        else: self.xratio = self.size.width()-10
+            
+        if self.ymax-self.ymin:
+            self.yratio = (self.size.height()-10)/(self.ymax-self.ymin)
+        else: self.yratio = (self.size.height()-10)
 
         #A map b/w moose compartment key with QGraphicsObject
         self.qGraCompt = {}
@@ -219,14 +216,8 @@ class  KineticsWidget(DefaultEditorWidget):
         self.sceneContainer.addItem(self.new_Compt)
 
     def setupDisplay(self,info,graphicalObj,objClass):
-        if self.autocoordinates == False:
-            ''' x,y from genesis file '''
-            xpos,ypos = self.positioninfo(info)
-        else:
-            ''' x,y from pygraphviz '''
-            xpos = float(re.split(',',self.graphvizCord[graphicalObj.mobj.path]['pos'])[0])
-            ypos = -float(re.split(',',self.graphvizCord[graphicalObj.mobj.path]['pos'])[1])
-
+        xpos,ypos = self.positioninfo(info)
+        
         """ For Reaction and Complex object I have skipped the process to get the facecolor and background color as \
             we are not using these colors for displaying the object so just passing dummy color white """
 
@@ -240,13 +231,26 @@ class  KineticsWidget(DefaultEditorWidget):
         graphicalObj.setDisplayProperties(xpos,ypos,textcolor,bgcolor)
     
     def positioninfo(self,iteminfo):
-        #print "positioninfo",iteminfo
-        #iteminfo = iteminfo+'/info'
-        #print "positioninfo2",iteminfo
-        x =  float(element(iteminfo).getField('x'))
-        y = float(element(iteminfo).getField('y'))
+        if self.noPositionInfo:
+            
+            try:
+                """ kkit does exist item's/info which up querying for parent.path gives the information of item's parent """
+                x,y = self.autoCordinatepos[(element(iteminfo).parent).path]
+            except:
+                """ But in Cspace reader doesn't create item's/info, up on querying gives me the error which need to change\
+                 in ReadCspace.cpp, at present i am taking care b'cos i don't want to pass just the item where I need to check\
+                 type of the object (rea,pool,enz,cplx,tab) which I have already done. """
+                parent, child = posixpath.split(iteminfo)
+                x,y = self.autoCordinatepos[parent]
+            ypos = (y-self.ymin)*self.yratio
+        else:
+            x = float(element(iteminfo).getField('x'))
+            y = float(element(iteminfo).getField('y'))
+            """Qt origin is at the top-left corner. The x values increase to the right and the y values increase downwards \
+            as compared to Genesis codinates where origin is center and y value is upwards, that is why ypos is negated """
+            ypos = -(y-self.ymin)*self.yratio
         xpos = (x-self.xmin)*self.xratio
-        ypos = -(y-self.ymin)*self.yratio
+        
         return(xpos,ypos)
 
     def setupSlot(self,mooseObj,qgraphicItem):
@@ -273,7 +277,7 @@ class  KineticsWidget(DefaultEditorWidget):
         self.emit(QtCore.SIGNAL("itemPressed(PyQt_PyObject)"),mooseObject)
 
     def drawLine_arrow(self, itemignoreZooming=False):
-        #print "drawLine_arrow"
+ 
         for inn,out in self.srcdesConnection.items():
             ''' self.srcdesConnection is dictionary which contains key,value \
                 key is Enzyme or Reaction  and value [[list of substrate],[list of product]] (tuple)
@@ -401,7 +405,6 @@ class  KineticsWidget(DefaultEditorWidget):
         elif (key == '61'):  # 'a' fits the view to initial value where iconscale=1
             self.iconScale = 1
             self.updateScale( self.iconScale )
-            print "$",self.sceneContainer.itemsBoundingRect()
             self.view.fitInView(self.sceneContainer.itemsBoundingRect().x()-10,self.sceneContainer.itemsBoundingRect().y()-10,self.sceneContainer.itemsBoundingRect().width()+20,self.sceneContainer.itemsBoundingRect().height()+20,Qt.Qt.IgnoreAspectRatio)
                    
     def updateItemTransformationMode(self, on):
@@ -414,20 +417,14 @@ class  KineticsWidget(DefaultEditorWidget):
     def updateScale( self, scale ):
         for item in self.sceneContainer.items():
             if isinstance(item,KineticsDisplayItem):
-                #xpos = item.scenePos().x()
-                #ypos = item.scenePos().y()
                 item.refresh(scale)
+                #iteminfo = item.mobj.path+'/info'
+                #xpos,ypos = self.positioninfo(iteminfo)
+                xpos = item.scenePos().x()
+                ypos = item.scenePos().y()
+
                 if isinstance(item,ReacItem) or isinstance(item,EnzItem) or isinstance(item,MMEnzItem):
-                    if self.autocoordinates == False:
-                        ''' x,y from genesis file '''
-                        iteminfo = item.mobj.path+'/info'
-                        xpos,ypos = self.positioninfo(iteminfo )
-                    else:
-                        ''' x,y from pygraphviz '''
-                        xpos = float(re.split(',',self.graphvizCord[item.mobj.path]['pos'])[0])
-                        ypos = -float(re.split(',',self.graphvizCord[item.mobj.path]['pos'])[1])
-                    
-                    item.setGeometry(xpos,ypos, 
+                     item.setGeometry(xpos,ypos, 
                                      item.gobj.boundingRect().width(), 
                                      item.gobj.boundingRect().height())
                 elif isinstance(item,CplxItem):
@@ -435,19 +432,10 @@ class  KineticsWidget(DefaultEditorWidget):
                                      item.gobj.boundingRect().width(), 
                                      item.gobj.boundingRect().height())
                 elif isinstance(item,PoolItem):
-                    if self.autocoordinates == False:
-                        ''' x,y from genesis file '''
-                        iteminfo = item.mobj.path+'/info'
-                        xpos,ypos = self.positioninfo(iteminfo)
-                    else:
-                        ''' x,y from pygraphviz '''
-                        xpos = float(re.split(',',self.graphvizCord[item.mobj.path]['pos'])[0])
-                        ypos = -float(re.split(',',self.graphvizCord[item.mobj.path]['pos'])[1])
-
-                    item.setGeometry(xpos, ypos,item.gobj.boundingRect().width()
+                     item.setGeometry(xpos, ypos,item.gobj.boundingRect().width()
                                      +PoolItem.fontMetrics.width('  '), 
                                      item.gobj.boundingRect().height())
-                    item.bg.setRect(0, 0, item.gobj.boundingRect().width()+PoolItem.fontMetrics.width('  '), item.gobj.boundingRect().height())
+                     item.bg.setRect(0, 0, item.gobj.boundingRect().width()+PoolItem.fontMetrics.width('  '), item.gobj.boundingRect().height())
 
         self.drawLine_arrow(itemignoreZooming=False)
         for k, v in self.qGraCompt.items():
@@ -462,11 +450,17 @@ if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     size = QtCore.QSize(1024 ,768)
     modelPath = 'Kholodenko'
+    modelPath = 'acc61'
+    modelPath = 'acc8'
     itemignoreZooming = False
     try:
-        filepath = '../../Demos/Genesis_files/'+modelPath+'.g'
+        #filepath = '../../Demos/Genesis_files/'+modelPath+'.cspace'
+        filepath = '/home/harsha/genesis_files/gfile/'+modelPath+'.g'
+        print filepath
         f = open(filepath, "r")
         loadModel(filepath,'/'+modelPath)
+        
+        moose.le('/'+modelPath+'/kinetics')
         dt = KineticsWidget()
         dt.modelRoot ='/'+modelPath
         ''' Loading moose signalling model in python '''
