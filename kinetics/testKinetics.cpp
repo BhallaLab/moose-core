@@ -15,6 +15,8 @@
 #include "ReadCspace.h"
 #include "EnzBase.h"
 #include "MMenz.h"
+#include "ReacBase.h"
+#include "Reac.h"
 
 void testReadKkit()
 {
@@ -314,6 +316,51 @@ void testReacVolumeScaling()
 	cout << "." << flush;
 }
 
+// See what Element::getNeighbours does with 2 sub <----> prd.
+void testTwoReacGetNeighbours()
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< int > dims( 1, 1 );
+	Id comptId = shell->doCreate( "CubeMesh", Id(), "cube", dims );
+	Id meshId( comptId.value() + 1 );
+	Id subId = shell->doCreate( "Pool", comptId, "sub", dims );
+	Id prdId = shell->doCreate( "Pool", comptId, "prd", dims );
+	Id reacId = shell->doCreate( "Reac", comptId, "reac", dims );
+
+	MsgId mid = shell->doAddMsg( "OneToOne", 
+		subId, "requestSize", meshId, "get_size" );
+	assert( mid != Msg::bad );
+	mid = shell->doAddMsg( "OneToOne", 
+		prdId, "requestSize", meshId, "get_size" );
+	assert( mid != Msg::bad );
+
+	MsgId ret = shell->doAddMsg( "Single", reacId, "sub", subId, "reac" );
+	assert( ret != Msg::bad );
+	ret = shell->doAddMsg( "Single", reacId, "sub", subId, "reac" );
+	assert( ret != Msg::bad );
+
+	ret = shell->doAddMsg( "Single", reacId, "prd", prdId, "reac" );
+	assert( ret != Msg::bad );
+
+	vector< Id > pools;
+	unsigned int num = reacId.element()->getNeighbours( pools, 
+		Reac::initCinfo()->findFinfo( "toSub" ) );
+	assert( num == 2 );
+	assert( pools[0] == subId );
+	assert( pools[1] == subId );
+
+	pools.clear();
+	num = reacId.element()->getNeighbours( pools, 
+		Reac::initCinfo()->findFinfo( "sub" ) );
+	assert( num == 2 );
+	assert( pools[0] == subId );
+	assert( pools[1] == subId );
+
+	shell->doDelete( comptId );
+	cout << "." << flush;
+}
+
+
 
 void testReadCspace()
 {
@@ -420,6 +467,7 @@ void testWriteKkit( Id id )
 
 void testKinetics()
 {
+	testTwoReacGetNeighbours();
 	testMMenz();
 	testMathFunc();
 	testPoolVolumeScaling();
