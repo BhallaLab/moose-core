@@ -53,7 +53,7 @@ import posixpath
 
 class LoaderDialog(QtGui.QFileDialog):
     # Update ftypes to include new file types 
-    ftypes='CSPACE (*.cspace);; GENESIS (*.g);; GENESIS Prototype (*.p);; NeuroML/SBML (*.xml);; All files (*.*)'
+    ftypes='All files (*.*);; CSPACE (*.cspace);; GENESIS (*.g);; GENESIS Prototype (*.p);; NeuroML/SBML (*.xml)'
     target_default = '/model' # The default target when loading a model
     def __init__(self, *args):
         super(LoaderDialog, self).__init__(*args)
