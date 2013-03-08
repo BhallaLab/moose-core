@@ -1,7 +1,8 @@
-import pygraphviz as pgv
 from moose import *
 import numpy as np
-
+#import matplotlib.pyplot as plt
+#import pygraphviz as pgv
+import networkx as nx
 
 def xyPosition(objInfo,xory):
     try:
@@ -19,7 +20,6 @@ def setupMeshObj(modelRoot):
     xmax = 1.0
     ymin = 0.0
     ymax = 1.0
-    print "######",modelRoot,le('/'+modelRoot)
     meshEntry = {}
     xcord = []
     ycord = []
@@ -39,7 +39,6 @@ def setupMeshObj(modelRoot):
 
             xcord.append(xyPosition(objInfo,'x'))
             ycord.append(xyPosition(objInfo,'y'))
-            #print "###",reItem,xyPosition(objInfo,'x'),xyPosition(objInfo,'y')
         for mitem in Neutral(meshEnt).getNeighbors('remesh'):
             """ getNeighbors(remesh) has eliminating GSLStoich """
             if isinstance(element(mitem[0].parent),CplxEnzBase):
@@ -118,44 +117,57 @@ def setupItem(modlePath,cntDict):
                     tablist.append((tabconnect,'tab'))
                 cntDict[tab] = tablist
 
-def autoCoordinates(G,meshEntry,srcdesConnection):
+def autoCoordinates(meshEntry,srcdesConnection):
     #for cmpt,memb in meshEntry.items():
     #    print memb
+    xmin = 0.0
+    xmax = 1.0
+    ymin = 0.0
+    ymax = 1.0
+    G = nx.Graph()
     for cmpt,memb in meshEntry.items():
         for enzObj in find_index(memb,'enzyme'):
-            G.add_node(enzObj.path,label=element(enzObj).getField('name'),shape='ellipse',color='',style='filled',fontname='Helvetica',fontsize=12,fontcolor='blue')
+            G.add_node(enzObj.path)
     for cmpt,memb in meshEntry.items():
         for poolObj in find_index(memb,'pool'):
-            G.add_node(poolObj.path,label=element(poolObj).getField('name'),shape='box',color='yellow',style='filled',fontname='Helvetica',fontsize=12,fontcolor='blue')
+            G.add_node(poolObj.path)
         for cplxObj in find_index(memb,'cplx'):
-            G.add_node(cplxObj.path,label=element(cplxObj).getField('name'),shape='box',color='yellow',style='filled',fontname='Helvetica',fontsize=12,fontcolor='blue')
+            G.add_node(cplxObj.path)
+            G.add_edge((cplxObj[0].parent).path,cplxObj.path)
         for reaObj in find_index(memb,'reaction'):
-            G.add_node(reaObj.path,label=element(reaObj).getField('name'),shape='ellipse',color='',style='filled',fontname='Helvetica',fontsize=12,fontcolor='blue')
+            G.add_node(reaObj.path)
         
     for inn,out in srcdesConnection.items():
         if (inn.class_ =='ZombieReac'): arrowcolor = 'green'
         elif(inn.class_=='ZombieEnz'): arrowcolor = 'red'
         else: arrowcolor = 'blue'
-        #print "$",arrowcolor,inn
         if isinstance(out,tuple):
             if len(out[0])== 0:
                 print "Reaction or Enzyme doesn't input mssg"
             else:
                 for items in (items for items in out[0] ):
-                    G.add_edge(items[0].path,inn[0].path,color=arrowcolor,spline="spline",arrowhead="none")
+                    G.add_edge(element(items[0]).getField('path'),inn[0].path)
             if len(out[1]) == 0:
                 print "Reaction or Enzyme doesn't output mssg"
             else:
                 for items in (items for items in out[1] ):
-                    ge = G.add_edge(inn[0].path,items[0].path,color=arrowcolor,spline="spline",arrowhead="normal")
+                    G.add_edge(inn[0].path,element(items[0]).getField('path'))
         elif isinstance(out,list):
             if len(out) == 0:
                 print "Func pool doesn't have sumtotal"
             else:
                 for items in (items for items in out ):
-                    G.add_edge(items[0].path,inn[0].path,color=arrowcolor,spline="spline",arrowhead="normal")
-    G.layout(prog='dot')
-    #G.draw('/home/harsha/Trash/pygraphviz/77'+'.png',prog='dot',format='png')
+                    G.add_edge(element(items[0]).getField('path'),inn[0].path)
+    
+    nx.draw(G,pos=nx.spring_layout(G))
+    xcord = []
+    ycord = []
+    position = nx.spring_layout(G)
+    for y in position.values():
+        xcord.append(y[0])
+        ycord.append(y[1])
+    
+    return(min(xcord),max(xcord),min(ycord),max(ycord),position)
 
 def find_index(value, key):
     """ Value.get(key) to avoid expection which would raise if empty value in dictionary for a given key """
