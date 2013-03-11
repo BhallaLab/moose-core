@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Mar 11 20:24:26 2013 (+0530)
 # Version: 
-# Last-Updated: Mon Mar 11 22:07:48 2013 (+0530)
+# Last-Updated: Mon Mar 11 22:23:26 2013 (+0530)
 #           By: subha
-#     Update #: 189
+#     Update #: 210
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -45,6 +45,35 @@
 # 
 
 # Code:
+"""
+    *TODO*
+
+    1) Option for default colors, markers, etc.
+
+    2) Option for configuring number of rows and columns of
+    subplots. (I think matplotlib grids will be a bit too much to
+    implement). Problem is this has to be done before actual axes are
+    created (as far as I know). Idea: can we do something like movable
+    widgets example in Qt?
+
+    3) Option for selecting any line or set of lines and change its
+    configuration (as in dataviz).
+
+    4) Association between plots and the data source.
+
+    5) Lots and lots of scipy/numpy/scikits/statsmodels utilities can be added. To
+    start with, we should have 
+      a)digital filters
+      b) fft
+      c) curve fitting
+    
+    6) For (5), think of another layer of plugins. Think of this as a
+    standalone program. All these facilities should again be
+    pluggable. We do not want to overwhelm novice users with fancy
+    machine-learning stuff. They should be made available only on
+    request.
+    
+"""
 
 
 __author__ = "Subhasis Ray"
@@ -69,6 +98,7 @@ class CanvasWidget(FigureCanvas):
 
     current_id: Key for current axis (anu plotting will happen on
     this).
+
     """
     def __init__(self, *args, **kwargs):
         self.figure = Figure()
