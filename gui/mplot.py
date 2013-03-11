@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Mar 11 20:24:26 2013 (+0530)
 # Version: 
-# Last-Updated: Mon Mar 11 21:40:49 2013 (+0530)
+# Last-Updated: Mon Mar 11 22:03:26 2013 (+0530)
 #           By: subha
-#     Update #: 133
+#     Update #: 185
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -75,30 +75,55 @@ class CanvasWidget(FigureCanvas):
         FigureCanvas.__init__(self, self.figure, *args, **kwargs)
         self.axes = {}
         self.next_id = 0
-        self.current_id = 0
+        self.current_id = -1
 
-    def addSubplot(self, rows, cols, index):        
+    def addSubplot(self, rows, cols):        
         """Add a subplot to figure and set it as current axes."""
-        self.axes[self.next_id] = self.figure.add_subplot(rows, cols, index)
+        self.axes[self.next_id] = self.figure.add_subplot(rows, cols, self.next_id+1)
         self.axes[self.next_id].set_title(chr(self.next_id + ord('A')))
         self.current_id = self.next_id
         self.next_id += 1
         
     def plot(self, *args, **kwargs):
-        self.axes[self.current_id].plot(*args, **kwargs)
+        self.callAxesFn('plot', *args, **kwargs)
 
     def callAxesFn(self, fname, *args, **kwargs):
         """Call any arbitrary function of current axes object."""
+        if self.current_id < 0:
+            self.addSubplot(1,1)
         fn = eval('self.axes[self.current_id].%s' % (fname))
         fn(*args, **kwargs)
 
-class PlotWidget(PlotBase):
+
+class PlotView(PlotBase):
     """A default plotwidget implementation. This should be sufficient
-    for most common usage."""
+    for most common usage.
+    
+    canvas: widget for plotting
+
+    dataRoot: location of data tables
+
+    """
     def __init__(self, *args, **kwargs):
         PlotBase.__init__(*args, **kwargs)
         self.canvas = CanvasWidget()
+        self.dataRoot = '/data'
         
+    def setDataRoot(self, path):
+        self.dataRoot = path
+
+    def addTimeSeries(self, table):        
+        ts = np.linspace(0, moose.Clock('/clock').currentTime, len(table))
+        self.canvas.plot(ts, table)
+
+    def addRasterPlot(self, eventtable, yoffset=0, *args, **kwargs):
+        """Add raster plot of events in eventtable.
+
+        yoffset - offset along Y-axis.
+        """
+        y = np.ones(len(eventtable)) * yoffset
+        self.canvas.plot(eventtable, y, '|')
+
 
 import sys
 import os
@@ -120,12 +145,12 @@ class CanvasWidgetTests(unittest.TestCase):
 
     def testPlot(self):
         """Test plot function"""
-        self.cwidget.add_subplot(1,1,1)
+        self.cwidget.addSubplot(1,1)
         self.cwidget.plot(np.arange(1000), mlab.normpdf(np.arange(1000), 500, 150))
         
-    def testAnyplot(self):
-        self.cwidget.add_subplot(1,1,1)
-        self.cwidget.anyplot('scatter', np.random.randint(0, 100, 100), np.random.randint(0, 100,100))
+    def testCallAxesFn(self):
+        self.cwidget.addSubplot(1,1)
+        self.cwidget.callAxesFn('scatter', np.random.randint(0, 100, 100), np.random.randint(0, 100,100))
 
     def tearDown(self):
         self.app.exec_()
