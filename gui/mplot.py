@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Mar 11 20:24:26 2013 (+0530)
 # Version: 
-# Last-Updated: Mon Mar 11 22:03:26 2013 (+0530)
+# Last-Updated: Mon Mar 11 22:07:48 2013 (+0530)
 #           By: subha
-#     Update #: 185
+#     Update #: 189
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -123,6 +123,12 @@ class PlotView(PlotBase):
         """
         y = np.ones(len(eventtable)) * yoffset
         self.canvas.plot(eventtable, y, '|')
+
+    def getDataTablesPane(self):
+        """This should create a tree widget with dataRoot as the root
+        to allow visual selection of data tables for plotting."""
+        raise NotImplementedError()
+
 
 
 import sys
