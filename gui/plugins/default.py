@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Nov 13 15:58:31 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Mar 12 12:36:33 2013 (+0530)
+# Last-Updated: Tue Mar 12 16:49:45 2013 (+0530)
 #           By: subha
-#     Update #: 374
+#     Update #: 521
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -350,7 +350,6 @@ class RunView(RunBase):
         self.canvas.setModelRoot(self.modelRoot)
         self.canvas.setDataRoot(self.dataRoot)
 
-
     def getCentralWidget(self):
         """TODO: replace this with an option for multiple canvas
         tabs"""
@@ -370,6 +369,109 @@ class RunView(RunBase):
     def plotAllData(self):
         """This is wrapper over the same function in PlotWidget."""
         self.canvas.plotAllData()
+
+    def getToolPanes(self):
+        if not self._toolPanes:
+            self._toolPanes = [self.getSchedulingDockWidget()]
+        return self._toolPanes
+
+    def getSchedulingDockWidget(self):
+        """Create and/or return a widget for schduling"""
+        if hasattr(self, 'schedulingDockWidget')  and self.schedulingDockWidget is not None:
+            return self.schedulingDockWidget
+        self.schedulingDockWidget = QtGui.QDockWidget('Scheduling')
+        widget = SchedulingWidget()
+        self.schedulingDockWidget.setWidget(widget)
+        return self.schedulingDockWidget
+
+
+class SchedulingWidget(QtGui.QWidget):
+    """Widget for scheduling"""
+    def __init__(self, *args, **kwargs):
+        QtGui.QWidget.__init__(self, *args, **kwargs)        
+        layout = QtGui.QGridLayout()
+        layout.addWidget(self.__getSimtimeWidget(), 0, 0, 1, 3)
+        # Set up the column titles
+        layout.addWidget(QtGui.QLabel('Tick'), 1, 0)
+        layout.addWidget(QtGui.QLabel('dt'), 1, 1)
+        layout.addWidget(QtGui.QLabel('Targets (wildcard)'), 1, 2, 1, 2)
+        layout.setRowStretch(0, 1)
+        # Create one row for each tick. Somehow ticks.shape is
+        # (16,) while only 10 valid ticks exist. The following is a hack
+        ticks = moose.ematrix('/clock/tick')
+        for ii in range(ticks[0].localNumField):
+            tt = ticks[ii]
+            layout.addWidget(QtGui.QLabel(tt.path), ii+2, 0)
+            layout.addWidget(QtGui.QLineEdit(str(tt.dt)), ii+2, 1)
+            layout.addWidget(QtGui.QLineEdit(''), ii+2, 2, 1, 2)
+            layout.setRowStretch(ii+2, 1)            
+        # We add spacer items to the last row so that expansion
+        # happens at bottom. All other rows have stretch = 1, and
+        # the last one has 0 (default) so that is the one that
+        # grows
+        rowcnt = layout.rowCount()
+        for ii in range(3):
+            layout.addItem(QtGui.QSpacerItem(1, 1), rowcnt, ii)
+        layout.setRowStretch(rowcnt, 10)
+        # layout.setColumnStretch(1, 1)
+        layout.setColumnStretch(2, 2)
+        self.setLayout(layout)
+        self.updateFromMoose()
+
+    def __getSimtimeWidget(self):
+        layout = QtGui.QGridLayout()
+        simtimeWidget = QtGui.QWidget()
+        self.simtimeEdit = QtGui.QLineEdit('1')
+        self.currentTimeLabel = QtGui.QLabel('0')
+        layout.addWidget(QtGui.QLabel('Run for'), 0, 0)
+        layout.addWidget(self.simtimeEdit, 0, 1)
+        layout.addWidget(QtGui.QLabel('seconds'), 0, 2)        
+        layout.addWidget(QtGui.QLabel('Current time:'), 1, 0)
+        layout.addWidget(self.currentTimeLabel, 1, 1)
+        layout.addWidget(QtGui.QLabel('second'), 1, 2)        
+        simtimeWidget.setLayout(layout)
+        return simtimeWidget
+
+    def updateCurrentTime(self):
+        self.currentTimeLabel.setText('%f' % (moose.Clock('/clock').currentTime))
+
+    def updateTextFromTick(self, tickNo):
+        tick = moose.ematrix('/clock/tick')[tickNo]
+        widget = self.layout().itemAtPosition(tickNo + 1, 1).widget()
+        if widget is not None and isinstance(widget, QtGui.QLineEdit):
+            widget.setText(str(tick.dt))
+
+    def updateTickFromText(self, row):        
+        if row <= 0:
+            return
+        widget = self.layout().itemAtPosition(row).widget()
+        tick = moose.ematrix('/clock/tick')[row-1]
+        try:
+            tick.dt = float(str(self.simtimeEdit.text()))
+        except ValueError:
+            QtGui.QMessageBox.warning(self, 'Invalid value', 'Specified `dt` was meaningless.')
+            
+    def updateFromMoose(self):
+        """Update the tick dt from the tick objects"""
+        ticks = moose.ematrix('/clock/tick')
+        # Items at position 0 are the column headers, hence ii+1
+        for ii in range(ticks[0].localNumField):
+            self.updateTextFromTick(ii)
+        self.updateCurrentTime()
+
+    def getSimTime(self):
+        try:
+            time = float(str(self.simtimeEdit.text()))
+            return time
+        except ValueError, e:
+            QtGui.QMessageBox.warning(self, 'Invalid value', 'Specified runtime was meaningless.')
+        return 0
+        
+    def updateToMoose(self):
+        # Items at position 0 are the column headers, hence ii+1
+        for ii in range(1, self.layout().rowCount()+1):
+            self.updateToMoose(ii)
+                             
 
 from collections import namedtuple
 
@@ -420,15 +522,28 @@ class PlotWidget(CanvasWidget):
         if path is None:
             path = self.dataRoot        
         print '$$$ Plot all data', path
+        time = moose.Clock('/clock').currentTime
         for tabId in moose.wildcardFind('%s/##[TYPE=Table]' % (path)):
             print tabId.path
             tab = moose.Table(tabId)
             if len(tab.neighbours['requestData']) > 0:
-                line = self.addTimeSeries(tab, label=tab.name)
-                self.pathToLine[tab.path].add(line)
-                self.lineToPath[line] = PlotDataSource(x='/clock', y=tab.path, z='')
+                # This is the default case: we do not plot the same
+                # table twice. But in special cases we want to have
+                # multiple variations of the same table on different
+                # axes.
+                #
+                
+                lines = self.pathToLine[tab.path]
+                if not lines:
+                    line = self.addTimeSeries(tab, label=tab.name)
+                    self.pathToLine[tab.path].add(line)
+                    self.lineToPath[line] = PlotDataSource(x='/clock', y=tab.path, z='')
+                else:
+                    for line in lines:
+                        ts = np.linspace(0, time, len(tab.vec))
+                        line.set_data(ts, tab.vec)                        
         self.callAxesFn('legend')
-        # self.figure.canvas.draw()
+        self.figure.canvas.draw()
                 
     def addTimeSeries(self, table, *args, **kwargs):        
         print 'args:', args

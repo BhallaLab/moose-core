@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Oct  2 17:25:41 2012 (+0530)
 # Version: 
-# Last-Updated: Wed Dec  5 16:56:53 2012 (+0530)
+# Last-Updated: Tue Mar 12 16:46:29 2013 (+0530)
 #           By: subha
-#     Update #: 168
+#     Update #: 170
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -173,10 +173,8 @@ class EditorBase(ViewBase):
 
     def getToolPanes(self):
         if not self._toolPanes:
-            self._toolPanes = [
-                self.getLibraryPane(),
-                self.getSelectionPane(),
-                self.getOperationsPane()]
+            self._toolPanes = []
+        return self._toolPanes
 
     def getLibraryPane(self):
         """TODO: display everything under library as a tree"""
