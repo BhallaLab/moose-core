@@ -105,15 +105,55 @@ Sourceforge project page: https://sourceforge.net/projects/moose/
 
 *** Installation:
 
+    For system-wide installation you can run:
+
     sudo make install
 
-    Now you can import moose in a Python script or interpreter with the statement:
+    Now you can import moose in a Python script or interpreter with
+    the statement:
 
     import moose
+     
+    If you have installed the GUI dependencies below for running the
+    graphical user interface, then you can run the GUI by
+    double-clicking on the desktop icon or via the main-menu.  The
+    squid axon tutorial/demo is also accessible via these routes.
 
-    If you have installed the GUI dependencies below for running the graphical user interface,
-    then you can run the GUI by double-clicking on the desktop icon or via the main-menu.
-    The squid axon tutorial/demo is also accessible via these routes.
+
+**** Local-installation
+
+     If you do not have permission to install it in system directories,
+     you can let it be where it was built or copy the `python`
+     subdirectory of MOOSE source tree to a location of your choice and
+     add the path to your PYTHONPATH environment variable. Suppose you
+     have a ~/lib directory where you keep all your locally built
+     libraries, do:
+
+     cp -r {moose-source-directory}/python ~/lib/
+     
+     and add this to your .bashrc file (if you use bash shell):
+
+     export PYTHONPATH="$HOME/lib/python":"$PYTHONPATH"
+
+     For other shells, look up your shell's manual to find out how to
+     set environment variable in it.
+
+     To use the GUI, copy the `gui` subdirectory from MOOSE source
+     tree to a location of your choice, like this:
+
+     cp -r {moose-source-directory}}/gui ~/lib/python/moosegui
+
+     and make the MooseGUI.py executable:
+
+     chmod +x  ~/lib/python/moosegui/MooseGUI.py
+
+     and create a link somewhere in your PATH:
+
+     ln -s ~/lib/python/moosegui/MooseGUI.py ~/bin/moosegui
+
+     assuming you have ~/bin directory in your PATH environment
+     variable. After this you run the MOOSE GUI by the `moosegui`
+     command.
 
 ***** Recommended:
 
