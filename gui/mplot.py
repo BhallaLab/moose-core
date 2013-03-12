@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Mar 11 20:24:26 2013 (+0530)
 # Version: 
-# Last-Updated: Mon Mar 11 22:23:26 2013 (+0530)
+# Last-Updated: Tue Mar 12 10:31:31 2013 (+0530)
 #           By: subha
-#     Update #: 210
+#     Update #: 211
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -123,41 +123,6 @@ class CanvasWidget(FigureCanvas):
             self.addSubplot(1,1)
         fn = eval('self.axes[self.current_id].%s' % (fname))
         fn(*args, **kwargs)
-
-
-class PlotView(PlotBase):
-    """A default plotwidget implementation. This should be sufficient
-    for most common usage.
-    
-    canvas: widget for plotting
-
-    dataRoot: location of data tables
-
-    """
-    def __init__(self, *args, **kwargs):
-        PlotBase.__init__(*args, **kwargs)
-        self.canvas = CanvasWidget()
-        self.dataRoot = '/data'
-        
-    def setDataRoot(self, path):
-        self.dataRoot = path
-
-    def addTimeSeries(self, table):        
-        ts = np.linspace(0, moose.Clock('/clock').currentTime, len(table))
-        self.canvas.plot(ts, table)
-
-    def addRasterPlot(self, eventtable, yoffset=0, *args, **kwargs):
-        """Add raster plot of events in eventtable.
-
-        yoffset - offset along Y-axis.
-        """
-        y = np.ones(len(eventtable)) * yoffset
-        self.canvas.plot(eventtable, y, '|')
-
-    def getDataTablesPane(self):
-        """This should create a tree widget with dataRoot as the root
-        to allow visual selection of data tables for plotting."""
-        raise NotImplementedError()
 
 
 

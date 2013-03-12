@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Nov 13 15:58:31 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Dec  6 17:43:05 2012 (+0530)
+# Last-Updated: Tue Mar 12 11:00:02 2013 (+0530)
 #           By: subha
-#     Update #: 239
+#     Update #: 266
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -48,7 +48,7 @@
 from PyQt4 import QtGui, QtCore
 from PyQt4.Qt import Qt
 import moose
-from mplugin import MoosePluginBase, EditorBase, EditorWidgetBase
+from mplugin import MoosePluginBase, EditorBase, EditorWidgetBase, PlotBase
 
 class MoosePlugin(MoosePluginBase):
     """Default plugin for MOOSE GUI"""
@@ -75,6 +75,11 @@ class MoosePlugin(MoosePluginBase):
             self.editorView = MooseEditorView(self)
             self.currentView = self.editorView
         return self.editorView
+
+    def getPlotView(self):
+        if not hasattr(self, 'plotView') or self.plotView is None:
+            self.plotView = PlotView(self)
+        return self.plotView
 
 
 class MooseEditorView(EditorBase):
@@ -318,6 +323,64 @@ class MooseTreeWidget(QtGui.QTreeWidget):
     	for item in self.itemList:
     		if path==item.mooseObj_.path:
     			return item
+
+from mplot import CanvasWidget
+
+class PlotView(PlotBase):
+    """A default plotview implementation. This should be sufficient
+    for most common usage.
+    
+    canvas: widget for plotting
+
+    dataRoot: location of data tables
+
+    """
+    def __init__(self, *args, **kwargs):
+        PlotBase.__init__(self, *args, **kwargs)
+        self.canvas = PlotWidget()
+        self.modelRoot = self.plugin.modelRoot
+        self.dataRoot = '%s/data' % (self.modelRoot)
+
+    def getCentralWidget(self):
+        """TODO: replace this with an option for multiple canvas
+        tabs"""
+        return self.canvas
+        
+    def setDataRoot(self, path):
+        self.dataRoot = path
+
+    def setModelRoot(self, path):
+        self.modelRoot = path
+
+    def addTimeSeries(self, table):        
+        ts = np.linspace(0, moose.Clock('/clock').currentTime, len(table))
+        self.canvas.plot(ts, table)
+
+    def addRasterPlot(self, eventtable, yoffset=0, *args, **kwargs):
+        """Add raster plot of events in eventtable.
+
+        yoffset - offset along Y-axis.
+        """
+        y = np.ones(len(eventtable)) * yoffset
+        self.canvas.plot(eventtable, y, '|')
+
+    def getDataTablesPane(self):
+        """This should create a tree widget with dataRoot as the root
+        to allow visual selection of data tables for plotting."""
+        raise NotImplementedError()
+
+class PlotWidget(CanvasWidget):
+    def __init__(self, *args, **kwargs):
+        CanvasWidget.__init__(self, *args, **kwargs)
+        self.modelRoot = '/'
+
+    def setModelRoot(self, path):
+        self.modelRoot = path
+
+    def setDataRoot(self, path):
+        self.dataRoot = '%s/data' % (path)
+
+        
 
 # 
 # default.py ends here
