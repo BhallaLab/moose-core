@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Nov 13 15:58:31 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Mar 12 11:00:02 2013 (+0530)
+# Last-Updated: Tue Mar 12 12:10:07 2013 (+0530)
 #           By: subha
-#     Update #: 266
+#     Update #: 373
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -45,10 +45,13 @@
 
 # Code:
 
+from collections import defaultdict
+import numpy as np
+
 from PyQt4 import QtGui, QtCore
 from PyQt4.Qt import Qt
 import moose
-from mplugin import MoosePluginBase, EditorBase, EditorWidgetBase, PlotBase
+from mplugin import MoosePluginBase, EditorBase, EditorWidgetBase, PlotBase, RunBase
 
 class MoosePlugin(MoosePluginBase):
     """Default plugin for MOOSE GUI"""
@@ -76,10 +79,14 @@ class MoosePlugin(MoosePluginBase):
             self.currentView = self.editorView
         return self.editorView
 
-    def getPlotView(self):
-        if not hasattr(self, 'plotView') or self.plotView is None:
-            self.plotView = PlotView(self)
-        return self.plotView
+    def getRunView(self):
+        if not hasattr(self, 'runView') or self.plotView is None:
+            self.runView = RunView(self)
+        return self.runView
+
+    def getMenus(self):
+        """Create a custom set of menus."""
+        return []
 
 
 class MooseEditorView(EditorBase):
@@ -326,9 +333,9 @@ class MooseTreeWidget(QtGui.QTreeWidget):
 
 from mplot import CanvasWidget
 
-class PlotView(PlotBase):
-    """A default plotview implementation. This should be sufficient
-    for most common usage.
+class RunView(RunBase):
+    """A default runtime view implementation. This should be
+    sufficient for most common usage.
     
     canvas: widget for plotting
 
@@ -336,10 +343,13 @@ class PlotView(PlotBase):
 
     """
     def __init__(self, *args, **kwargs):
-        PlotBase.__init__(self, *args, **kwargs)
+        RunBase.__init__(self, *args, **kwargs)
         self.canvas = PlotWidget()
         self.modelRoot = self.plugin.modelRoot
         self.dataRoot = '%s/data' % (self.modelRoot)
+        self.canvas.setModelRoot(self.modelRoot)
+        self.canvas.setDataRoot(self.dataRoot)
+
 
     def getCentralWidget(self):
         """TODO: replace this with an option for multiple canvas
@@ -352,35 +362,88 @@ class PlotView(PlotBase):
     def setModelRoot(self, path):
         self.modelRoot = path
 
-    def addTimeSeries(self, table):        
-        ts = np.linspace(0, moose.Clock('/clock').currentTime, len(table))
-        self.canvas.plot(ts, table)
-
-    def addRasterPlot(self, eventtable, yoffset=0, *args, **kwargs):
-        """Add raster plot of events in eventtable.
-
-        yoffset - offset along Y-axis.
-        """
-        y = np.ones(len(eventtable)) * yoffset
-        self.canvas.plot(eventtable, y, '|')
-
     def getDataTablesPane(self):
         """This should create a tree widget with dataRoot as the root
         to allow visual selection of data tables for plotting."""
         raise NotImplementedError()
 
+    def plotAllData(self):
+        """This is wrapper over the same function in PlotWidget."""
+        self.canvas.plotAllData()
+
+from collections import namedtuple
+
+# Keeps track of data sources for a plot. 'x' can be a table path or
+# '/clock' to indicate time points from moose simulations (which will
+# be created from currentTime field of the `/clock` element and the
+# number of dat points in 'y'. 'y' should be a table. 'z' can be empty
+# string or another table or something else. Will not be used most of
+# the time (unless 3D or heatmap plotting).
+
+PlotDataSource = namedtuple('PlotDataSource', ['x', 'y', 'z'], verbose=False)
+
 class PlotWidget(CanvasWidget):
+    """A wrapper over CanvasWidget to handle additional MOOSE-specific
+    stuff.
+
+    modelRoot - path to the entire model our plugin is handling
+
+    dataRoot - path to the container of data tables.
+
+    TODO: do we really need this separation or should we go for
+    standardizing location of data with respect to model root.
+
+    pathToLine - map from moose path to Line2D objects in plot. Can
+    one moose table be plotted multiple times? Maybe yes (e.g., when
+    you want multiple other tables to be compared with the same data).
+
+    lineToPath - map from Line2D objects to moose paths
+
+    """
     def __init__(self, *args, **kwargs):
         CanvasWidget.__init__(self, *args, **kwargs)
         self.modelRoot = '/'
+        self.pathToLine = defaultdict(set)
+        self.lineToPath = {}
+
+    @property
+    def plotAll(self):
+        return len(self.pathToLine) == 0
 
     def setModelRoot(self, path):
         self.modelRoot = path
 
     def setDataRoot(self, path):
-        self.dataRoot = '%s/data' % (path)
+        self.dataRoot = path
 
+    def plotAllData(self, path=None):
+        if path is None:
+            path = self.dataRoot        
+        print '$$$ Plot all data', path
+        for tabId in moose.wildcardFind('%s/##[TYPE=Table]' % (path)):
+            print tabId.path
+            tab = moose.Table(tabId)
+            if len(tab.neighbours['requestData']) > 0:
+                line = self.addTimeSeries(tab, label=tab.name)
+                self.pathToLine[tab.path].add(line)
+                self.lineToPath[line] = PlotDataSource(x='/clock', y=tab.path, z='')
+        self.callAxesFn('legend')
+        # self.figure.canvas.draw()
+                
+    def addTimeSeries(self, table, *args, **kwargs):        
+        print 'args:', args
+        print 'kwargs', kwargs
+        ts = np.linspace(0, moose.Clock('/clock').currentTime, len(table.vec))
+        return self.plot(ts, table.vec, *args, **kwargs)
         
+    def addRasterPlot(self, eventtable, yoffset=0, *args, **kwargs):
+        """Add raster plot of events in eventtable.
+
+        yoffset - offset along Y-axis.
+        """
+        y = np.ones(len(eventtable.vec)) * yoffset
+        return self.plot(eventtable.vec, y, '|')
+
 
 # 
 # default.py ends here

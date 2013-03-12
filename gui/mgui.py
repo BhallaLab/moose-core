@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Sat Mar  2 13:52:37 2013 (+0530)
+# Last-Updated: Tue Mar 12 12:08:26 2013 (+0530)
 #           By: subha
-#     Update #: 871
+#     Update #: 884
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -332,7 +332,7 @@ class MWindow(QtGui.QMainWindow):
             self.runMenu.clear()
         self.runMenu.addActions(self.getRunActions())
         return self.runMenu
-
+    
     def getEditActions(self):
         if (not hasattr(self, 'editActions')) or (self.editActions is None):
             self.editActions = [] # TODO placeholder
@@ -434,6 +434,7 @@ class MWindow(QtGui.QMainWindow):
                 return
         subwin = self.mdiArea.addSubWindow(widget)
         subwin.setWindowTitle('Plot: %s' % (widget.modelRoot))
+        self.plugin.getPlotView().plotAllData()
         subwin.setVisible(True)
         
     def openRunView(self):
@@ -474,7 +475,12 @@ class MWindow(QtGui.QMainWindow):
         except ValueError:
             simtime = 1.0
         moose.reinit()
+        view = self.plugin.getRunView()
+        self.setCurrentView(view)        
         moose.start(simtime)
+        if view.getCentralWidget().plotAll:
+            view.getCentralWidget().plotAllData()
+        view.getCentralWidget().show()
 
     def pauseSimulation(self):
         moose.stop()
