@@ -47,7 +47,7 @@ class KkitPlugin(MoosePlugin):
             self.currentView = self.editorView
         return self.editorView
 
-    def getRunView(self):
+    def getRunView(self):        
         view = MoosePlugin.getRunView(self)
         view.setDataRoot(self.modelRoot)
         view.getCentralWidget().setDataRoot(self.modelRoot)

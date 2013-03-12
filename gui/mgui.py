@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Mar 12 12:08:26 2013 (+0530)
+# Last-Updated: Tue Mar 12 12:35:14 2013 (+0530)
 #           By: subha
-#     Update #: 884
+#     Update #: 890
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -191,7 +191,7 @@ class MWindow(QtGui.QMainWindow):
                 action.setChecked(False)
         for subwin in self.mdiArea.subWindowList():
             subwin.close()
-        self.setCurrentView(self.plugin.getEditorView())
+        self.setCurrentView('editor')
         return self.plugin
 
     def updateExistingMenu(self, menu):
@@ -232,6 +232,7 @@ class MWindow(QtGui.QMainWindow):
         """Set current view to a particular one: options are 'editor',
         'plot', 'run'. A plugin can provide more views if necessary.
         """
+        print '###', view
         self.plugin.setCurrentView(view)
         for menu in self.plugin.getCurrentView().getMenus():
             if not self.updateExistingMenu(menu):
@@ -244,7 +245,7 @@ class MWindow(QtGui.QMainWindow):
                 return
         widget = self.plugin.getCurrentView().getCentralWidget()
         subwin = self.mdiArea.addSubWindow(widget)
-        subwin.setWindowTitle(widget.modelRoot)
+        subwin.setWindowTitle('%s: %s' % (view, widget.modelRoot))
         subwin.setVisible(True)
         print 'Adding new subwindow', subwin.windowTitle()
         return subwin
@@ -476,11 +477,11 @@ class MWindow(QtGui.QMainWindow):
             simtime = 1.0
         moose.reinit()
         view = self.plugin.getRunView()
-        self.setCurrentView(view)        
         moose.start(simtime)
         if view.getCentralWidget().plotAll:
             view.getCentralWidget().plotAllData()
-        view.getCentralWidget().show()
+        self.setCurrentView('run')        
+        # view.getCentralWidget().show()
 
     def pauseSimulation(self):
         moose.stop()
