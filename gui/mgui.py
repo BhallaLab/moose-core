@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Mar 12 17:00:02 2013 (+0530)
+# Last-Updated: Tue Mar 12 17:46:45 2013 (+0530)
 #           By: subha
-#     Update #: 916
+#     Update #: 953
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -110,6 +110,7 @@ class MWindow(QtGui.QMainWindow):
         self.viewActions = None
         self.editActions = None                    
         self._loadedPlugins = {}
+        self.setDockOptions(self.AnimatedDocks and self.AllowNestedDocks and self.AllowTabbedDocks)
         self.mdiArea = QtGui.QMdiArea()
         self.quitAction = QtGui.QAction('Quit', self)
         self.connect(self.quitAction, QtCore.SIGNAL('triggered()'), self.quit)
@@ -231,31 +232,34 @@ class MWindow(QtGui.QMainWindow):
         """Set current view to a particular one: options are 'editor',
         'plot', 'run'. A plugin can provide more views if necessary.
         """
-        print '###', view
         self.plugin.setCurrentView(view)
         targetView = None
-        for subwin in self.mdiArea.subWindowList():
-            if subwin.widget == self.plugin.getCurrentView().getCentralWidget():
-                print 'Using existing subwindow'
-                self.mdiArea.setActiveSubWindow(subwin)
-                return
-        dockWidgets = set([widget for widget in self.findChildren(QtGui.QDockWidget)])
-        for widget in dockWidgets:
-            widget.setVisible(False)
-        for widget in self.plugin.getCurrentView().getToolPanes():
-            if widget not in dockWidgets:
-                self.addDockWidget(Qt.Qt.RightDockWidgetArea, widget)
-            else:
-                widget.setVisible(True)
+        newSubWindow = True
         widget = self.plugin.getCurrentView().getCentralWidget()
-        subwin = self.mdiArea.addSubWindow(widget)
-        subwin.setWindowTitle('%s: %s' % (view, widget.modelRoot))
+        for subwin in self.mdiArea.subWindowList():
+            if subwin.widget() == widget:
+                newSubWindow = False
+                break
+        if newSubWindow:
+            subwin = self.mdiArea.addSubWindow(widget)
+            subwin.setWindowTitle('%s: %s' % (view, widget.modelRoot))
+        # Make dockwidgets from other views invisible and make those
+        # from current view visible or add them if not already part of
+        # main window.
+        dockWidgets = set([dockWidget for dockWidget in self.findChildren(QtGui.QDockWidget)])
+        for dockWidget in dockWidgets:
+            dockWidget.setVisible(False)
+        for dockWidget in self.plugin.getCurrentView().getToolPanes():
+            if dockWidget not in dockWidgets:
+                self.addDockWidget(Qt.Qt.RightDockWidgetArea, dockWidget)
+            else:
+                dockWidget.setVisible(True)
         subwin.setVisible(True)
+        self.mdiArea.setActiveSubWindow(subwin)
         self.updateMenus()
         for menu in self.plugin.getCurrentView().getMenus():
             if not self.updateExistingMenu(menu):
                 self.menuBar().addMenu(menu)
-        print 'Adding new subwindow', subwin.windowTitle()
         return subwin
 
     def getFileMenu(self):
@@ -314,7 +318,6 @@ class MWindow(QtGui.QMainWindow):
         self.viewMenu.addActions(self.getViewActions())
         self.docksMenu = self.viewMenu.addMenu('&Dock widgets')
         self.docksMenu.addActions(self.getDockWidgetsToggleActions())
-        print 'Added dock menu'
         return self.viewMenu
 
     # def getSubWindowVisibilityActions(self):
@@ -448,14 +451,15 @@ class MWindow(QtGui.QMainWindow):
         subwin.setVisible(True)
         
     def openRunView(self):
-        widget = self.plugin.getRunView().getCentralWidget()
-        for subwin in self.mdiArea.subWindowList():
-            if subwin.widget() == widget:
-                self.mdiArea.setActiveSubWindow(subwin)
-                return
-        subwin = self.mdiArea.addSubWindow(widget)
-        subwin.setWindowTitle('Run: %s' % (widget.modelRoot))
-        subwin.setVisible(True)
+        # widget = self.plugin.getRunView().getCentralWidget()
+        # for subwin in self.mdiArea.subWindowList():
+        #     if subwin.widget() == widget:
+        #         self.mdiArea.setActiveSubWindow(subwin)
+        #         return
+        # subwin = self.mdiArea.addSubWindow(widget)
+        # subwin.setWindowTitle('Run: %s' % (widget.modelRoot))
+        # subwin.setVisible(True)
+        self.setCurrentView('run')
 
     def resetAndStartSimulation(self):
         """TODO this should provide a clean scheduling through all kinds

@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Nov 13 15:58:31 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Mar 12 16:49:45 2013 (+0530)
+# Last-Updated: Tue Mar 12 18:07:02 2013 (+0530)
 #           By: subha
-#     Update #: 521
+#     Update #: 569
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -344,6 +344,7 @@ class RunView(RunBase):
     """
     def __init__(self, *args, **kwargs):
         RunBase.__init__(self, *args, **kwargs)
+        print '$$ init RunView'
         self.canvas = PlotWidget()
         self.modelRoot = self.plugin.modelRoot
         self.dataRoot = '%s/data' % (self.modelRoot)
@@ -384,13 +385,39 @@ class RunView(RunBase):
         self.schedulingDockWidget.setWidget(widget)
         return self.schedulingDockWidget
 
+class RunControlWidget(QtGui.QWidget):
+    def __init__(self, *args, **kwargs):
+        QtGui.QWidget.__init__(self, *args, **kwargs)
+        layout = QtGui.QVBoxLayout()
+        self.runButton = QtGui.QPushButton('Run')
 
 class SchedulingWidget(QtGui.QWidget):
     """Widget for scheduling"""
     def __init__(self, *args, **kwargs):
-        QtGui.QWidget.__init__(self, *args, **kwargs)        
+        QtGui.QWidget.__init__(self, *args, **kwargs)
+        layout = QtGui.QVBoxLayout()
+        self.simtimeWidget = self.__getSimtimeWidget()
+        layout.addWidget(self.simtimeWidget)
+        self.tickListWidget = self.__getTickListWidget()
+        layout.addWidget(self.tickListWidget)
+        self.setLayout(layout)
+
+    def __getSimtimeWidget(self):
         layout = QtGui.QGridLayout()
-        layout.addWidget(self.__getSimtimeWidget(), 0, 0, 1, 3)
+        simtimeWidget = QtGui.QWidget()
+        self.simtimeEdit = QtGui.QLineEdit('1')
+        self.currentTimeLabel = QtGui.QLabel('0')
+        layout.addWidget(QtGui.QLabel('Run for'), 0, 0)
+        layout.addWidget(self.simtimeEdit, 0, 1)
+        layout.addWidget(QtGui.QLabel('seconds'), 0, 2)        
+        layout.addWidget(QtGui.QLabel('Current time:'), 1, 0)
+        layout.addWidget(self.currentTimeLabel, 1, 1)
+        layout.addWidget(QtGui.QLabel('second'), 1, 2)        
+        simtimeWidget.setLayout(layout)
+        return simtimeWidget
+
+    def __getTickListWidget(self):
+        layout = QtGui.QGridLayout()
         # Set up the column titles
         layout.addWidget(QtGui.QLabel('Tick'), 1, 0)
         layout.addWidget(QtGui.QLabel('dt'), 1, 1)
@@ -415,36 +442,23 @@ class SchedulingWidget(QtGui.QWidget):
         layout.setRowStretch(rowcnt, 10)
         # layout.setColumnStretch(1, 1)
         layout.setColumnStretch(2, 2)
-        self.setLayout(layout)
-        self.updateFromMoose()
-
-    def __getSimtimeWidget(self):
-        layout = QtGui.QGridLayout()
-        simtimeWidget = QtGui.QWidget()
-        self.simtimeEdit = QtGui.QLineEdit('1')
-        self.currentTimeLabel = QtGui.QLabel('0')
-        layout.addWidget(QtGui.QLabel('Run for'), 0, 0)
-        layout.addWidget(self.simtimeEdit, 0, 1)
-        layout.addWidget(QtGui.QLabel('seconds'), 0, 2)        
-        layout.addWidget(QtGui.QLabel('Current time:'), 1, 0)
-        layout.addWidget(self.currentTimeLabel, 1, 1)
-        layout.addWidget(QtGui.QLabel('second'), 1, 2)        
-        simtimeWidget.setLayout(layout)
-        return simtimeWidget
+        widget = QtGui.QWidget()
+        widget.setLayout(layout)
+        return widget
 
     def updateCurrentTime(self):
         self.currentTimeLabel.setText('%f' % (moose.Clock('/clock').currentTime))
 
     def updateTextFromTick(self, tickNo):
         tick = moose.ematrix('/clock/tick')[tickNo]
-        widget = self.layout().itemAtPosition(tickNo + 1, 1).widget()
+        widget = self.tickListWidget.layout().itemAtPosition(tickNo + 1, 1).widget()
         if widget is not None and isinstance(widget, QtGui.QLineEdit):
             widget.setText(str(tick.dt))
 
     def updateTickFromText(self, row):        
         if row <= 0:
             return
-        widget = self.layout().itemAtPosition(row).widget()
+        widget = self.tickListWidget.layout().itemAtPosition(row).widget()
         tick = moose.ematrix('/clock/tick')[row-1]
         try:
             tick.dt = float(str(self.simtimeEdit.text()))
@@ -469,8 +483,20 @@ class SchedulingWidget(QtGui.QWidget):
         
     def updateToMoose(self):
         # Items at position 0 are the column headers, hence ii+1
-        for ii in range(1, self.layout().rowCount()+1):
-            self.updateToMoose(ii)
+        for ii in range(1, self.tickListWidget.layout().rowCount()+1):
+            self.updateTickFromText(ii)
+
+    def getTickTargets(self):
+        """Return a dictionary containing tick nos mapped to the
+        target specified in tick list widget. If target is empty, the
+        tick is not included."""
+        ret = {}
+        for ii in range(1, self.tickListWidget.layout().rowCount()+1):
+            target = self.tickListWidget.layout().itemAtPosition(ii,2).widget().text()
+            target = str(target).strip()
+            if len(target) > 0:
+                ret[ii-1] = target
+        return ret
                              
 
 from collections import namedtuple
@@ -503,6 +529,7 @@ class PlotWidget(CanvasWidget):
 
     """
     def __init__(self, *args, **kwargs):
+        print '$$ init PlotWidget'
         CanvasWidget.__init__(self, *args, **kwargs)
         self.modelRoot = '/'
         self.pathToLine = defaultdict(set)
