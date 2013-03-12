@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Nov 13 15:58:31 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Mar 12 18:07:02 2013 (+0530)
+# Last-Updated: Tue Mar 12 23:43:30 2013 (+0530)
 #           By: subha
-#     Update #: 569
+#     Update #: 907
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -383,24 +383,140 @@ class RunView(RunBase):
         self.schedulingDockWidget = QtGui.QDockWidget('Scheduling')
         widget = SchedulingWidget()
         self.schedulingDockWidget.setWidget(widget)
+        QtCore.QObject.connect(widget.runner, QtCore.SIGNAL('update'), self.canvas.updatePlots)
+        QtCore.QObject.connect(widget.runner, QtCore.SIGNAL('finished'), self.canvas.rescalePlots)
+        widget.resetAndRunButton.clicked.connect(self.canvas.plotAllData) 
+        # TODO here is a problem - the simtimeExtended signal is
+        # received received before the button.clicked() signal. Hence
+        # initially there are no axes to extend. To avoid that explicitly calling addSubplot
+        self.canvas.addSubplot(1, 1)
+        QtCore.QObject.connect(widget, QtCore.SIGNAL('simtimeExtended'), self.canvas.extendXAxes)
         return self.schedulingDockWidget
 
-class RunControlWidget(QtGui.QWidget):
+
+class MooseRunner(QtCore.QObject):
+    """Helper class to control simulation execution
+
+    See: http://doc.qt.digia.com/qq/qq27-responsive-guis.html :
+    'Solving a Problem Step by Step' for design details.
+    """
     def __init__(self, *args, **kwargs):
-        QtGui.QWidget.__init__(self, *args, **kwargs)
-        layout = QtGui.QVBoxLayout()
-        self.runButton = QtGui.QPushButton('Run')
+        QtCore.QObject.__init__(self, *args, **kwargs)
+        self._updateInterval = 100e-3
+        self._simtime = 0.0        
+        self._clock = moose.Clock('/clock')
+        self._pause = False
+
+    def resetAndRun(self, tickDtMap, tickTargetMap, simtime, updateInterval):
+        self._pause = False
+        self._updateInterval = updateInterval
+        self._simtime = simtime
+        self.updateTicks(tickDtMap)
+        self.assignTicks(tickTargetMap)
+        QtCore.QTimer.singleShot(0, self.run)
+        
+    def run(self):
+        """Run simulation for a small interval."""
+        if self._clock.currentTime >= self._simtime:
+            self.emit(QtCore.SIGNAL('finished'))
+            return
+        if self._pause:
+            return
+        toRun = self._simtime - self._clock.currentTime
+        if toRun > self._updateInterval:
+            toRun = self._updateInterval
+        moose.start(toRun)
+        self.emit(QtCore.SIGNAL('update'))
+        QtCore.QTimer.singleShot(0, self.run)
+    
+    def continueRun(self, simtime, updateInterval):
+        """Continue running without reset for `simtime`."""
+        self._simtime = simtime
+        self._updateInterval = updateInterval
+        self._pause = False
+        QtCore.QTimer.singleShot(0, self.run)
+    
+    def unpause(self):
+        """Run for the rest of current simtime"""
+        self._pause = False
+        QtCore.QTimer.singleShot(0, self.run)
+
+    def stop(self):
+        """Pause simulation"""
+        self._pause = True
+
+    def updateTicks(self, tickDtMap):
+        for tickNo, dt in tickDtMap.items():
+            if tickNo >= 0 and dt > 0.0:
+                moose.setClock(tickNo, dt)
+
+    def assignTicks(self, tickTargetMap):
+        for tickNo, target in tickTargetMap.items():
+            moose.useClock(tickNo, target)
+
 
 class SchedulingWidget(QtGui.QWidget):
-    """Widget for scheduling"""
+    """Widget for scheduling.
+
+    Important member fields:
+
+    runner - object to run/pause/continue simulation. Whenevr an
+    `updateInterval` time has been simulated this object sends an
+    `update()` signal. This can be connected to other objects to
+    update their data.
+
+    """
     def __init__(self, *args, **kwargs):
         QtGui.QWidget.__init__(self, *args, **kwargs)
         layout = QtGui.QVBoxLayout()
         self.simtimeWidget = self.__getSimtimeWidget()
-        layout.addWidget(self.simtimeWidget)
         self.tickListWidget = self.__getTickListWidget()
+        self.runControlWidget = self.__getRunControlWidget()
+        layout.addWidget(self.runControlWidget)
+        layout.addWidget(self.simtimeWidget)
         layout.addWidget(self.tickListWidget)
         self.setLayout(layout)
+        self.updateInterval = 100e-3 # This will be made configurable with a textbox
+        self.runner = MooseRunner()
+        self.connect(self, QtCore.SIGNAL('resetAndRun'), self.runner.resetAndRun)
+        self.resetAndRunButton.clicked.connect(self.resetAndRun)
+        self.continueButton.clicked.connect(self.continueRun)
+        self.connect(self, QtCore.SIGNAL('continueRun'), self.runner.continueRun)
+        self.runTillEndButton.clicked.connect(self.runner.unpause)
+        self.stopButton.clicked.connect(self.runner.stop)        
+        self.connect(self.runner, QtCore.SIGNAL('update'), self.updateCurrentTime)
+
+    def __getRunControlWidget(self):
+        widget = QtGui.QWidget()
+        layout = QtGui.QVBoxLayout()
+        self.resetAndRunButton = QtGui.QPushButton('Reset and run')
+        self.stopButton = QtGui.QPushButton('Stop')
+        self.continueButton = QtGui.QPushButton('Continue')
+        self.runTillEndButton = QtGui.QPushButton('Run to end')
+        layout.addWidget(self.resetAndRunButton)
+        layout.addWidget(self.stopButton)
+        layout.addWidget(self.runTillEndButton)
+        layout.addWidget(self.continueButton)
+        widget.setLayout(layout)
+        return widget
+        
+    def resetAndRun(self):
+        """This is just for adding the arguments for the function
+        MooseRunner.resetAndRun"""
+        self.emit(QtCore.SIGNAL('simtimeExtended'), self.getSimTime())
+        self.emit(QtCore.SIGNAL('resetAndRun'), 
+                  self.getTickDtMap(), 
+                  self.getTickTargets(), 
+                  self.getSimTime(), 
+                  self.updateInterval)
+
+    def continueRun(self):
+        """Helper function to emit signal with arguments"""
+        self.emit(QtCore.SIGNAL('simtimeExtended'), 
+                  self.getSimTime() + moose.Clock('/clock').currentTime)
+        self.emit(QtCore.SIGNAL('continueRun'),
+                  self.getSimTime(),
+                  self.updateInterval)
 
     def __getSimtimeWidget(self):
         layout = QtGui.QGridLayout()
@@ -419,19 +535,19 @@ class SchedulingWidget(QtGui.QWidget):
     def __getTickListWidget(self):
         layout = QtGui.QGridLayout()
         # Set up the column titles
-        layout.addWidget(QtGui.QLabel('Tick'), 1, 0)
-        layout.addWidget(QtGui.QLabel('dt'), 1, 1)
-        layout.addWidget(QtGui.QLabel('Targets (wildcard)'), 1, 2, 1, 2)
+        layout.addWidget(QtGui.QLabel('Tick'), 0, 0)
+        layout.addWidget(QtGui.QLabel('dt'), 0, 1)
+        layout.addWidget(QtGui.QLabel('Targets (wildcard)'), 0, 2, 1, 2)
         layout.setRowStretch(0, 1)
         # Create one row for each tick. Somehow ticks.shape is
         # (16,) while only 10 valid ticks exist. The following is a hack
         ticks = moose.ematrix('/clock/tick')
         for ii in range(ticks[0].localNumField):
             tt = ticks[ii]
-            layout.addWidget(QtGui.QLabel(tt.path), ii+2, 0)
-            layout.addWidget(QtGui.QLineEdit(str(tt.dt)), ii+2, 1)
-            layout.addWidget(QtGui.QLineEdit(''), ii+2, 2, 1, 2)
-            layout.setRowStretch(ii+2, 1)            
+            layout.addWidget(QtGui.QLabel(tt.path), ii+1, 0)
+            layout.addWidget(QtGui.QLineEdit(str(tt.dt)), ii+1, 1)
+            layout.addWidget(QtGui.QLineEdit(''), ii+1, 2, 1, 2)
+            layout.setRowStretch(ii+1, 1)            
         # We add spacer items to the last row so that expansion
         # happens at bottom. All other rows have stretch = 1, and
         # the last one has 0 (default) so that is the one that
@@ -455,16 +571,6 @@ class SchedulingWidget(QtGui.QWidget):
         if widget is not None and isinstance(widget, QtGui.QLineEdit):
             widget.setText(str(tick.dt))
 
-    def updateTickFromText(self, row):        
-        if row <= 0:
-            return
-        widget = self.tickListWidget.layout().itemAtPosition(row).widget()
-        tick = moose.ematrix('/clock/tick')[row-1]
-        try:
-            tick.dt = float(str(self.simtimeEdit.text()))
-        except ValueError:
-            QtGui.QMessageBox.warning(self, 'Invalid value', 'Specified `dt` was meaningless.')
-            
     def updateFromMoose(self):
         """Update the tick dt from the tick objects"""
         ticks = moose.ematrix('/clock/tick')
@@ -480,22 +586,31 @@ class SchedulingWidget(QtGui.QWidget):
         except ValueError, e:
             QtGui.QMessageBox.warning(self, 'Invalid value', 'Specified runtime was meaningless.')
         return 0
-        
-    def updateToMoose(self):
-        # Items at position 0 are the column headers, hence ii+1
-        for ii in range(1, self.tickListWidget.layout().rowCount()+1):
-            self.updateTickFromText(ii)
 
     def getTickTargets(self):
         """Return a dictionary containing tick nos mapped to the
         target specified in tick list widget. If target is empty, the
         tick is not included."""
         ret = {}
-        for ii in range(1, self.tickListWidget.layout().rowCount()+1):
-            target = self.tickListWidget.layout().itemAtPosition(ii,2).widget().text()
-            target = str(target).strip()
-            if len(target) > 0:
-                ret[ii-1] = target
+        for ii in range(1, self.tickListWidget.layout().rowCount()):
+            widget = self.tickListWidget.layout().itemAtPosition(ii, 2).widget()
+            if widget is not None and isinstance(widget, QtGui.QLineEdit):
+                target = str(widget.text()).strip()
+                if len(target) > 0:
+                    ret[ii-1] = target
+        return ret
+
+    def getTickDtMap(self):
+        ret = {}
+        # Items at position 0 are the column headers, hence ii+1
+        for ii in range(1, self.tickListWidget.layout().rowCount()):
+            widget = self.tickListWidget.layout().itemAtPosition(ii, 1).widget()
+            if widget is not None and isinstance(widget, QtGui.QLineEdit):
+                try:
+                    print widget.text()
+                    ret[ii-1] = float(str(widget.text()))
+                except ValueError:
+                    QtGui.QMessageBox.warning(self, 'Invalid value', '`dt` for tick %d was meaningless.' % (ii-1))
         return ret
                              
 
@@ -545,10 +660,8 @@ class PlotWidget(CanvasWidget):
     def setDataRoot(self, path):
         self.dataRoot = path
 
-    def plotAllData(self, path=None):
-        if path is None:
-            path = self.dataRoot        
-        print '$$$ Plot all data', path
+    def plotAllData(self):
+        path = self.dataRoot        
         time = moose.Clock('/clock').currentTime
         for tabId in moose.wildcardFind('%s/##[TYPE=Table]' % (path)):
             print tabId.path
@@ -559,16 +672,18 @@ class PlotWidget(CanvasWidget):
                 # multiple variations of the same table on different
                 # axes.
                 #
-                
+                print 'Plotting', tab.path
                 lines = self.pathToLine[tab.path]
-                if not lines:
-                    line = self.addTimeSeries(tab, label=tab.name)
-                    self.pathToLine[tab.path].add(line)
-                    self.lineToPath[line] = PlotDataSource(x='/clock', y=tab.path, z='')
+                if len(lines) == 0:
+                    newLines = self.addTimeSeries(tab, label=tab.name)
+                    print newLines
+                    self.pathToLine[tab.path].update(newLines)
+                    for line in newLines:
+                        self.lineToPath[line] = PlotDataSource(x='/clock', y=tab.path, z='')
                 else:
                     for line in lines:
                         ts = np.linspace(0, time, len(tab.vec))
-                        line.set_data(ts, tab.vec)                        
+                        line.set_data(ts, tab.vec)                             
         self.callAxesFn('legend')
         self.figure.canvas.draw()
                 
@@ -586,6 +701,29 @@ class PlotWidget(CanvasWidget):
         y = np.ones(len(eventtable.vec)) * yoffset
         return self.plot(eventtable.vec, y, '|')
 
+    def updatePlots(self):
+        for path, lines in self.pathToLine.items():            
+            tab = moose.Table(path)
+            data = tab.vec
+            ts = np.linspace(0, moose.Clock('/clock').currentTime, len(data))
+            for line in lines:
+                line.set_data(ts, data)
+        self.figure.canvas.draw()
 
+    def extendXAxes(self, xlim):
+        for axes in self.axes.values():
+            print '**', axes
+            axes.set_xlim(left=0, right=xlim)
+        self.figure.canvas.draw()
+
+    def rescalePlots(self):
+        """This is to rescale plots at the end of simulation.
+        
+        TODO: ideally we should set xlim from simtime.
+        """
+        for axes in self.axes.values():
+            axes.relim()
+            axes.autoscale_view(True,True,True)
+        self.figure.canvas.draw()
 # 
 # default.py ends here
