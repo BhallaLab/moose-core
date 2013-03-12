@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Mar 11 20:24:26 2013 (+0530)
 # Version: 
-# Last-Updated: Tue Mar 12 10:31:31 2013 (+0530)
+# Last-Updated: Tue Mar 12 22:44:26 2013 (+0530)
 #           By: subha
-#     Update #: 211
+#     Update #: 217
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -109,20 +109,22 @@ class CanvasWidget(FigureCanvas):
 
     def addSubplot(self, rows, cols):        
         """Add a subplot to figure and set it as current axes."""
-        self.axes[self.next_id] = self.figure.add_subplot(rows, cols, self.next_id+1)
-        self.axes[self.next_id].set_title(chr(self.next_id + ord('A')))
+        axes = self.figure.add_subplot(rows, cols, self.next_id+1)
+        self.axes[self.next_id] = axes
+        axes.set_title(chr(self.next_id + ord('A')))
         self.current_id = self.next_id
         self.next_id += 1
-        
+        return axes
+
     def plot(self, *args, **kwargs):
-        self.callAxesFn('plot', *args, **kwargs)
+        return self.callAxesFn('plot', *args, **kwargs)
 
     def callAxesFn(self, fname, *args, **kwargs):
         """Call any arbitrary function of current axes object."""
         if self.current_id < 0:
             self.addSubplot(1,1)
         fn = eval('self.axes[self.current_id].%s' % (fname))
-        fn(*args, **kwargs)
+        return fn(*args, **kwargs)
 
 
 
