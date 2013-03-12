@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Mar 12 12:35:14 2013 (+0530)
+# Last-Updated: Tue Mar 12 17:00:02 2013 (+0530)
 #           By: subha
-#     Update #: 890
+#     Update #: 916
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -111,7 +111,6 @@ class MWindow(QtGui.QMainWindow):
         self.editActions = None                    
         self._loadedPlugins = {}
         self.mdiArea = QtGui.QMdiArea()
-        self.addDockWidget(Qt.Qt.RightDockWidgetArea, self.getSchedulingWidget())
         self.quitAction = QtGui.QAction('Quit', self)
         self.connect(self.quitAction, QtCore.SIGNAL('triggered()'), self.quit)
         self.setCentralWidget(self.mdiArea)
@@ -234,19 +233,28 @@ class MWindow(QtGui.QMainWindow):
         """
         print '###', view
         self.plugin.setCurrentView(view)
-        for menu in self.plugin.getCurrentView().getMenus():
-            if not self.updateExistingMenu(menu):
-                self.menuBar().addMenu(menu)
         targetView = None
         for subwin in self.mdiArea.subWindowList():
             if subwin.widget == self.plugin.getCurrentView().getCentralWidget():
                 print 'Using existing subwindow'
                 self.mdiArea.setActiveSubWindow(subwin)
                 return
+        dockWidgets = set([widget for widget in self.findChildren(QtGui.QDockWidget)])
+        for widget in dockWidgets:
+            widget.setVisible(False)
+        for widget in self.plugin.getCurrentView().getToolPanes():
+            if widget not in dockWidgets:
+                self.addDockWidget(Qt.Qt.RightDockWidgetArea, widget)
+            else:
+                widget.setVisible(True)
         widget = self.plugin.getCurrentView().getCentralWidget()
         subwin = self.mdiArea.addSubWindow(widget)
         subwin.setWindowTitle('%s: %s' % (view, widget.modelRoot))
         subwin.setVisible(True)
+        self.updateMenus()
+        for menu in self.plugin.getCurrentView().getMenus():
+            if not self.updateExistingMenu(menu):
+                self.menuBar().addMenu(menu)
         print 'Adding new subwindow', subwin.windowTitle()
         return subwin
 
@@ -306,6 +314,7 @@ class MWindow(QtGui.QMainWindow):
         self.viewMenu.addActions(self.getViewActions())
         self.docksMenu = self.viewMenu.addMenu('&Dock widgets')
         self.docksMenu.addActions(self.getDockWidgetsToggleActions())
+        print 'Added dock menu'
         return self.viewMenu
 
     # def getSubWindowVisibilityActions(self):
@@ -481,7 +490,6 @@ class MWindow(QtGui.QMainWindow):
         if view.getCentralWidget().plotAll:
             view.getCentralWidget().plotAllData()
         self.setCurrentView('run')        
-        # view.getCentralWidget().show()
 
     def pauseSimulation(self):
         moose.stop()
@@ -491,51 +499,8 @@ class MWindow(QtGui.QMainWindow):
         try:
             simtime = float(config.MooseSetting()[config.KEY_SIMTIME])
         except ValueError:
-            simtim = 1.0
-        moose.start(simtime)
-        
-    def getSchedulingWidget(self):
-        if (not hasattr(self, 'schedulingWidget')) or (self.schedulingWidget is None):
-            self.schedulingWidget = QtGui.QDockWidget('Scheduling')
-            widget = QtGui.QWidget()
-            layout = QtGui.QGridLayout()
-            # Set up the column titles
-            layout.addWidget(QtGui.QLabel('Tick', self), 0, 0)
-            layout.addWidget(QtGui.QLabel('dt', self), 0, 1)
-            layout.addWidget(QtGui.QLabel('Targets (wildcard)', self), 0, 2, 1, 2)
-            layout.setRowStretch(0, 1)
-            # Create one row for each tick. Somehow ticks.shape is
-            # (16,) while only 10 valid ticks exist. The following is a hack
-            ticks = moose.ematrix('/clock/tick')
-            for ii in range(ticks[0].localNumField):
-                tt = ticks[ii]
-                layout.addWidget(QtGui.QLabel(tt.path, self), ii+1, 0)
-                layout.addWidget(QtGui.QLineEdit(str(tt.dt)), ii+1, 1)
-                layout.addWidget(QtGui.QLineEdit(''), ii+1, 2, 1, 2)
-                layout.setRowStretch(ii+1, 1)            
-            # We add spacer items to the last row so that expansion
-            # happens at bottom. All other rows have stretch = 1, and
-            # the last one has 0 (default) so that is the one that
-            # grows
-            rowcnt = layout.rowCount()
-            for ii in range(3):
-                layout.addItem(QtGui.QSpacerItem(1, 1), rowcnt, ii)
-            layout.setRowStretch(rowcnt, 10)
-            # layout.setColumnStretch(1, 1)
-            layout.setColumnStretch(2, 2)
-            widget.setLayout(layout)
-            self.schedulingWidget.setWidget(widget)
-        return self.schedulingWidget
-
-    def updateSchedulingWidget(self):
-        """Update the tick dt from the tick objects"""
-        ticks = moose.ematrix('/clock/tick')
-        layout = self.schedulingWidget.widget().layout()
-        for ii in range(ticks[0].localNumField):
-            tt = ticks[ii]
-            widget = layout.itemAtPosition(ii, 1).widget()
-            if widget is not None and isinstance(widget, QtGui.QLineEdit):
-                widget.setText(str(tt.dt))
+            simtime = 1.0
+        moose.start(simtime)        
 
     def loadModelDialogSlot(self):
         """Start a file dialog to choose a model file.
@@ -575,7 +540,6 @@ class MWindow(QtGui.QMainWindow):
                     pluginName = 'default'
                 print 'Loaded model', ret['model'].path
                 self.setPlugin(pluginName, ret['model'].path)
-                self.updateSchedulingWidget()
 
 if __name__ == '__main__':
     # create the GUI application
