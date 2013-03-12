@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Nov 13 15:58:31 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Mar 12 12:10:07 2013 (+0530)
+# Last-Updated: Tue Mar 12 12:36:33 2013 (+0530)
 #           By: subha
-#     Update #: 373
+#     Update #: 374
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -80,7 +80,7 @@ class MoosePlugin(MoosePluginBase):
         return self.editorView
 
     def getRunView(self):
-        if not hasattr(self, 'runView') or self.plotView is None:
+        if not hasattr(self, 'runView') or self.runView is None:
             self.runView = RunView(self)
         return self.runView
 
