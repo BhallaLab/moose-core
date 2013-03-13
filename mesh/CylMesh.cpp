@@ -897,15 +897,15 @@ double CylMesh::nearest( double x, double y, double z,
 	// k = (r0 - r1).(r - r1) / (|r0-r1|^2)
 	//
 	
-	double dist = distance( x0_ - x1_, y0_ - y1_, z0_ - z1_ );
+	double dist = distance( x1_ - x0_, y1_ - y0_, z1_ - z0_ );
 	double k = dotprd( 
-		x0_ - x1_, y0_ - y1_, z0_ - z1_,
-		x - x1_, y - y1_, z - z1_ ) / ( dist * dist );
+		x1_ - x0_, y1_ - y0_, z1_ - z0_,
+		x - x0_, y - y0_, z - z0_ ) / ( dist * dist );
 
 	// x2, y2, z2 are the coords of the nearest point.
-	double x2 = k * (x0_ - x1_) + x1_;
-	double y2 = k * (y0_ - y1_) + x1_;
-	double z2 = k * (z0_ - z1_) + x1_;
+	double x2 = k * (x1_ - x0_) + x0_;
+	double y2 = k * (y1_ - y0_) + y0_;
+	double z2 = k * (z1_ - z0_) + z0_;
 
 	double ret = distance( x - x2, y - y2, z - z2 );
 	if ( k < 0.0 ) {
@@ -915,7 +915,7 @@ double CylMesh::nearest( double x, double y, double z,
 		ret = -ret;
 		index = numEntries_ - 1;
 	} else { // Inside length of cylinder, now is it inside radius?
-		index = k * numEntries_ + 0.5;
+		index = k * numEntries_;
 		double ri = r0_ + (index + 0.5) * rSlope_;
 		if ( ret > ri )
 			ret = -ret;
