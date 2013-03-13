@@ -11,6 +11,7 @@ TARGET = _mesh.o
 
 OBJ = \
 	ChemCompt.o	\
+	MeshCompt.o	\
 	MeshEntry.o	\
 	CylBase.o	\
 	CylMesh.o	\
@@ -32,6 +33,7 @@ $(OBJ)	: $(HEADERS)
 MeshEntry.o:	MeshEntry.h
 Boundary.o:	Boundary.h
 ChemCompt.o:	VoxelJunction.h ChemCompt.h MeshEntry.h Boundary.h ../ksolve/RateTerm.h ../kinetics/FuncTerm.h ../ksolve/KinSparseMatrix.h ../ksolve/Stoich.h
+MeshCompt.o:	VoxelJunction.h ChemCompt.h MeshCompt.h MeshEntry.h Boundary.h ../ksolve/RateTerm.h ../kinetics/FuncTerm.h ../basecode/SparseMatrix.h
 CylBase.o:	CylBase.h
 CylMesh.o:	VoxelJunction.h ChemCompt.h CylBase.h CylMesh.h MeshEntry.h Boundary.h
 CubeMesh.o:	VoxelJunction.h ChemCompt.h CubeMesh.h MeshEntry.h Boundary.h

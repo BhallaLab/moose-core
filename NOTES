@@ -21361,3 +21361,10 @@ Added unit test for setting up CylMeshes end-to-end.
 Next need to sort out CylMeshes  with CubeMeshes.
 
 Renamed ChemMesh to ChemCompt. Lots of files changed. Compiles, clears tests.
+Checkin 4458.
+
+Working on MeshCompt.
+NeuroMesh needs lots of fixing to use stencils properly. I thought this was
+already done.
+
+Compiled in MeshCompt class. Yet to fold into class hierarchy.
