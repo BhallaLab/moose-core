@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Nov 13 15:58:31 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Mar 12 23:43:30 2013 (+0530)
+# Last-Updated: Wed Mar 13 10:04:26 2013 (+0530)
 #           By: subha
-#     Update #: 907
+#     Update #: 950
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -475,8 +475,9 @@ class SchedulingWidget(QtGui.QWidget):
         layout.addWidget(self.runControlWidget)
         layout.addWidget(self.simtimeWidget)
         layout.addWidget(self.tickListWidget)
-        self.setLayout(layout)
         self.updateInterval = 100e-3 # This will be made configurable with a textbox
+        layout.addWidget(self.__getUpdateIntervalWidget())
+        self.setLayout(layout)
         self.runner = MooseRunner()
         self.connect(self, QtCore.SIGNAL('resetAndRun'), self.runner.resetAndRun)
         self.resetAndRunButton.clicked.connect(self.resetAndRun)
@@ -485,6 +486,19 @@ class SchedulingWidget(QtGui.QWidget):
         self.runTillEndButton.clicked.connect(self.runner.unpause)
         self.stopButton.clicked.connect(self.runner.stop)        
         self.connect(self.runner, QtCore.SIGNAL('update'), self.updateCurrentTime)
+
+    def __getUpdateIntervalWidget(self):
+        label = QtGui.QLabel('Plot update interval')
+        self.updateIntervalText = QtGui.QLineEdit(str(self.updateInterval))
+        label = QtGui.QLabel('Update plots after every')
+        ulabel = QtGui.QLabel('seconds of simulation')
+        layout = QtGui.QHBoxLayout()
+        layout.addWidget(label)
+        layout.addWidget(self.updateIntervalText)
+        layout.addWidget(ulabel)
+        widget = QtGui.QWidget()
+        widget.setLayout(layout)
+        return widget
 
     def __getRunControlWidget(self):
         widget = QtGui.QWidget()
@@ -499,10 +513,21 @@ class SchedulingWidget(QtGui.QWidget):
         layout.addWidget(self.continueButton)
         widget.setLayout(layout)
         return widget
+
+    def updateUpdateInterval(self):
+        try:
+            self.updateInterval = float(str(self.updateIntervalText.text()))
+        except ValueError:
+            QtGui.QMessageBox.warning(self, 'Invalid value', 'Specified plot update interval is meaningless.')
+        for dt in self.getTickDtMap().values():
+            if dt > self.updateInterval:
+                self.updateInterval = dt
+                self.updateIntervalText.setText(str(dt))
         
     def resetAndRun(self):
         """This is just for adding the arguments for the function
         MooseRunner.resetAndRun"""
+        self.updateUpdateInterval()
         self.emit(QtCore.SIGNAL('simtimeExtended'), self.getSimTime())
         self.emit(QtCore.SIGNAL('resetAndRun'), 
                   self.getTickDtMap(), 
@@ -512,6 +537,7 @@ class SchedulingWidget(QtGui.QWidget):
 
     def continueRun(self):
         """Helper function to emit signal with arguments"""
+        self.updateUpdateInterval()
         self.emit(QtCore.SIGNAL('simtimeExtended'), 
                   self.getSimTime() + moose.Clock('/clock').currentTime)
         self.emit(QtCore.SIGNAL('continueRun'),
