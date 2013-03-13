@@ -17,7 +17,7 @@
 #include "../shell/Shell.h"
 #include "../mesh/MeshEntry.h"
 #include "../mesh/Boundary.h"
-#include "../mesh/ChemMesh.h"
+#include "../mesh/ChemCompt.h"
 #include "GslStoich.h"
 
 typedef vector< unsigned int >::const_iterator VCI;

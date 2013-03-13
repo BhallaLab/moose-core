@@ -18,7 +18,7 @@
 #include "../mesh/MeshEntry.h"
 #include "../mesh/Boundary.h"
 #include "../mesh/Stencil.h"
-#include "../mesh/ChemMesh.h"
+#include "../mesh/ChemCompt.h"
 #include "../kinetics/PoolBase.h"
 #include "../ksolve/SolverJunction.h"
 #include "../ksolve/SolverBase.h"

@@ -26,7 +26,7 @@
 #include "MathFunc.h"
 #include "Boundary.h"
 #include "MeshEntry.h"
-#include "ChemMesh.h"
+#include "ChemCompt.h"
 #include "ZombiePool.h"
 #include "ZombieBufPool.h"
 #include "ZombieFuncPool.h"

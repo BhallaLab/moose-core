@@ -12,7 +12,7 @@
 #include "MeshEntry.h"
 #include "Boundary.h"
 #include "Stencil.h"
-#include "ChemMesh.h"
+#include "ChemCompt.h"
 
 static SrcFinfo5< double, unsigned int, unsigned int, vector< unsigned int>, vector< double > >  *remesh()
 {
@@ -179,7 +179,7 @@ MeshEntry::MeshEntry()
 	: parent_( 0 )
 {;}
 
-MeshEntry::MeshEntry( const ChemMesh* parent )
+MeshEntry::MeshEntry( const ChemCompt* parent )
 	: parent_( parent )
 {;}
 

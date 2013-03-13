@@ -168,7 +168,7 @@ static bool isOffSolverReac( const Element* e, Id myCompt,
 		map< Id, Id >& poolComptMap )
 {
 	assert( myCompt != Id() );
-	assert( myCompt.element()->cinfo()->isA( "ChemMesh" ) );
+	assert( myCompt.element()->cinfo()->isA( "ChemCompt" ) );
 	bool ret = false;
 	vector< Id > neighbours;
 	e->getNeighbours( neighbours, e->cinfo()->findFinfo( "toSub" ));

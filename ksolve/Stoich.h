@@ -150,7 +150,7 @@ class Stoich
 		/// unZombifies Funcs. Helper for unZombifyModel.
 		void unZombifyFuncs();
 
-		void zombifyChemMesh( Id compt );
+		void zombifyChemCompt( Id compt );
 
 		unsigned int convertIdToReacIndex( Id id ) const;
 		unsigned int convertIdToPoolIndex( Id id ) const;

@@ -7,24 +7,24 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
-#ifndef _CHEM_MESH_H
-#define _CHEM_MESH_H
+#ifndef _CHEM_COMPT_H
+#define _CHEM_COMPT_H
 
 #include "VoxelJunction.h"
 
 /**
- * The ChemMesh represents a chemically identified compartment.
+ * The ChemCompt represents a chemically identified compartment.
  * This may be spatially extended, and may even be discontinuous.
  * The same set of reactions and molecules populates any given compartment.
  * Examples of compartments might be: nucleus, cell membrane, 
  * early endosomes, spine heads.
  * Connects to one or more 'Geometry' elements to define its boundaries.
  */
-class ChemMesh
+class ChemCompt
 {
 	public: 
-		ChemMesh();
-		virtual ~ChemMesh();
+		ChemCompt();
+		virtual ~ChemCompt();
 		//////////////////////////////////////////////////////////////////
 		// Field assignment stuff
 		//////////////////////////////////////////////////////////////////
@@ -52,7 +52,7 @@ class ChemMesh
 		/**
 		 * Hint to system indicating method to be used on this compartment.
 		 * Defaults to blank, which then leaves the decision to the calling
-		 * function. Doesn't do anything unless the ChemMesh is parsed by
+		 * function. Doesn't do anything unless the ChemCompt is parsed by
 		 * the SimManager.
 		 */
 		void setMethod( string method );
@@ -63,7 +63,7 @@ class ChemMesh
 		//////////////////////////////////////////////////////////////////
 
 		/**
-		 * buildDefaultMesh tells the ChemMesh to make a standard mesh 
+		 * buildDefaultMesh tells the ChemCompt to make a standard mesh 
 		 * partitioning with the specified total size (typically volume)
 		 * and the specified number of subdivisions. For example, 
 		 * a CubeMesh of size 8 and subdivisions 8 would make a 2x2x2 mesh.
@@ -99,7 +99,7 @@ class ChemMesh
 		// FieldElementFinfo stuff for MeshEntry lookup
 		//////////////////////////////////////////////////////////////////
 		/**
-		 * Returns the number of MeshEntries on this ChemMesh
+		 * Returns the number of MeshEntries on this ChemCompt
 		 */
 		unsigned int getNumEntries() const;
 		virtual unsigned int innerGetNumEntries() const = 0;
@@ -131,7 +131,7 @@ class ChemMesh
 		 * to all attached Stoichs with the incorporation of the stencil
 		 * for the actual diffusion calculations.
 		 * In due course this should become a virtual function so that
-		 * we can have this handled by any ChemMesh class.
+		 * we can have this handled by any ChemCompt class.
 		 */
 		virtual void updateDiffusion( unsigned int meshIndex ) const;
 
@@ -153,7 +153,7 @@ class ChemMesh
 		 * extend the meshes so that their stencils also handle update to
 		 * the voxels abutting the boundary on the neighbour mesh.
 		 */
-		void buildJunction( ChemMesh* other, vector< VoxelJunction >& ret );
+		void buildJunction( ChemCompt* other, vector< VoxelJunction >& ret );
 
 		/**
 		 * Returns the meshIndices (NOT spatial indices) of all adjacent
@@ -169,7 +169,7 @@ class ChemMesh
 		 * then we just have multiple pairs using the same meshIndex of
 		 * the repeated voxel.
 		 */
-		virtual void matchMeshEntries( const ChemMesh* other, 
+		virtual void matchMeshEntries( const ChemCompt* other, 
 			vector< VoxelJunction > & ret ) const = 0;
 
 
@@ -254,7 +254,7 @@ class ChemMesh
 		 * multiple solvers and compartments.
 		 */
 		virtual void extendStencil( 
-			const ChemMesh* other, const vector< VoxelJunction >& vj ) = 0;
+			const ChemCompt* other, const vector< VoxelJunction >& vj ) = 0;
 
 		//////////////////////////////////////////////////////////////////
 
@@ -303,4 +303,4 @@ extern SrcFinfo5<
 	vector< vector< unsigned int > >
 	>* meshSplit();
 
-#endif	// _CHEM_MESH_H
+#endif	// _CHEM_COMPT_H

@@ -12,7 +12,7 @@
 #include "../mesh/VoxelJunction.h"
 #include "../mesh/MeshEntry.h"
 #include "../mesh/Boundary.h"
-#include "../mesh/ChemMesh.h"
+#include "../mesh/ChemCompt.h"
 */
 #include "lookupSizeFromMesh.h"
 
@@ -27,14 +27,14 @@ Id getCompt( Id id )
 		vector< Id > neighbours;
 		if ( e->getNeighbours( neighbours, e->cinfo()->findFinfo( "requestSize" ) ) == 1 ) {
 			Id pa = Neutral::parent( neighbours[0].eref() ).id;
-			if ( pa.element()->cinfo()->isA( "ChemMesh" ) )
+			if ( pa.element()->cinfo()->isA( "ChemCompt" ) )
 				return pa;
 		}
 	}
 	Id pa = Neutral::parent( id.eref() ).id;
 	if ( pa == Id() )
 		return pa;
-	else if ( pa.element()->cinfo()->isA( "ChemMesh" ) )
+	else if ( pa.element()->cinfo()->isA( "ChemCompt" ) )
 		return pa;
 	return getCompt( pa );
 }
@@ -136,8 +136,8 @@ double convertConcToNumRateUsingMesh( const Eref& e, const SrcFinfo* pools,
 			Id mesh( compt.value() + 1 );
 			double meshVol = Field< double >::get( mesh, "size" );
 			/*
-			ChemMesh* cc = 
-					reinterpret_cast< ChemMesh* >( compt.eref().data() ):
+			ChemCompt* cc = 
+					reinterpret_cast< ChemCompt* >( compt.eref().data() ):
 			meshVol = cc->getMeshEntrySize( 0 );
 			*/
 			conv /= meshVol * NA;
