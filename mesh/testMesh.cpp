@@ -480,6 +480,44 @@ void testCylMesh()
 	assert( doubleEq( coords[0], 2.4 * 2.4 * PI ) );
 	assert( doubleEq( coords[1], 2.6 * 2.6 * PI ) );
 
+	///////////////////////////////////////////////////////////////
+	coords = cm.getCoords( Id().eref(), 0 );
+	assert( coords.size() == 9 );
+
+	double x, y, z;
+	double ne = cm.getNumEntries();
+	double ux = ( coords[3] - coords[0] ) / ne;
+	double uy = ( coords[4] - coords[1] ) / ne;
+	double uz = ( coords[5] - coords[2] ) / ne;
+	cm.indexToSpace( 0, x, y, z );
+	assert( doubleEq( x, coords[0] + 0.5 * ux ) );
+	assert( doubleEq( y, coords[1] + 0.5 * uy ) );
+	assert( doubleEq( z, coords[2] + 0.5 * uz ) );
+	cm.indexToSpace( 4, x, y, z );
+	assert( doubleEq( x, coords[3] - 0.5 * ux ) );
+	assert( doubleEq( y, coords[4] - 0.5 * uy ) );
+	assert( doubleEq( z, coords[5] - 0.5 * uz ) );
+
+	///////////////////////////////////////////////////////////////
+
+	unsigned int index;
+	double dist = cm.nearest( x, y, z, index );
+	assert( doubleEq( dist, 0.0 ) );
+	assert( index == cm.innerGetNumEntries() - 1 );
+	x += 1; // Should be within R1
+	dist = cm.nearest( x, y, z, index );
+	assert( dist > 0.0 && dist < 1.0 );
+	assert( index == cm.innerGetNumEntries() - 1 );
+
+	x += 5; // Should now be outside R1
+	dist = cm.nearest( x, y, z, index );
+	assert( dist < 0.0 );
+	assert( index == cm.innerGetNumEntries() - 1 );
+
+	///////////////////////////////////////////////////////////////
+	
+
+
 	cout << "." << flush;
 }
 
