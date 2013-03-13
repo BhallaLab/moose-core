@@ -140,6 +140,15 @@ class CylMesh: public ChemMesh
 		void indexToSpace( unsigned int index, 
 						double& x, double& y, double& z ) const;
 		
+		//////////////////////////////////////////////////////////////////
+		// Inner specific functions needed by matchMeshEntries.
+		//////////////////////////////////////////////////////////////////
+		void matchCylMeshEntries( const CylMesh* other,
+			vector< VoxelJunction >& ret ) const;
+		void matchCubeMeshEntries( const CubeMesh* other,
+			vector< VoxelJunction >& ret ) const;
+		void matchNeuroMeshEntries( const NeuroMesh* other,
+			vector< VoxelJunction >& ret ) const;
 
 		//////////////////////////////////////////////////////////////////
 

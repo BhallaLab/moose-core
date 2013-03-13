@@ -115,6 +115,11 @@ class ChemMesh
 		 * Returns the matched lookupEntry
 		 */
 		MeshEntry* lookupEntry( unsigned int index );
+		
+		//////////////////////////////////////////////////////////////////
+		// Generic utility function
+		//////////////////////////////////////////////////////////////////
+		static double distance( double x, double y, double z );
 
 		//////////////////////////////////////////////////////////////////
 		// Utility function for diffusion handling
@@ -168,9 +173,19 @@ class ChemMesh
 			vector< VoxelJunction > & ret ) const = 0;
 
 
+		/**
+		 * Returns distance and index of nearest mesh entry. Computes
+		 * each mesh entry position as its geometric centre. 
+		 * If the current location is not inside a valid mesh entry, 
+		 * distance returned is negative.
+		 */
 		virtual double nearest( double x, double y, double z, 
 						unsigned int& index ) const = 0;
 	
+		/**
+		 * Converts specified index to xyz coords of middle of voxel
+		 * Values out of range return original xyz
+		 */
 		virtual void indexToSpace( unsigned int index, 
 						double& x, double& y, double& z ) const = 0;
 

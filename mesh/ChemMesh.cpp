@@ -380,3 +380,11 @@ void ChemMesh::updateDiffusion( unsigned int meshIndex ) const
 		s->updateDiffusion( meshIndex, stencil_ );
 	}
 }
+
+////////////////////////////////////////////////////////////////////////
+// Utility function
+
+double ChemMesh::distance( double x, double y, double z ) 
+{
+	return sqrt( x * x + y * y + z * z );
+}
