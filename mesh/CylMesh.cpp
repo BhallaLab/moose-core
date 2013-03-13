@@ -14,6 +14,12 @@
 #include "MeshEntry.h"
 #include "Stencil.h"
 #include "ChemMesh.h"
+#include "CubeMesh.h"
+#include "CylBase.h"
+#include "NeuroNode.h"
+#include "SparseMatrix.h"
+#include "NeuroStencil.h"
+#include "NeuroMesh.h"
 #include "CylMesh.h"
 #include "../utility/numutil.h"
 const Cinfo* CylMesh::initCinfo()
@@ -141,7 +147,7 @@ CylMesh::CylMesh()
 	:
 		numEntries_( 1 ),
 		useCaps_( 0 ),
-		isToroid_( 0 ),
+		isToroid_( false ),
 		x0_( 0.0 ),
 		y0_( 0.0 ),
 		z0_( 0.0 ),
@@ -616,6 +622,10 @@ void CylMesh::innerSetNumEntries( unsigned int n )
 	assert( n > 0 );
 	numEntries_ = n;
 	lambda_ = totLen_ / n;
+	rSlope_ = ( r1_ - r0_ ) / numEntries_;
+	lenSlope_ = lambda_ * rSlope_ * 2 / ( r0_ + r1_ );
+
+	buildStencil();
 }
 
 
@@ -712,7 +722,10 @@ void CylMesh::buildStencil()
 		} else if ( i == numEntries_ - 1 ) {
 			if ( isToroid_ ) {
 				colIndex.push_back( 0 );
-				entry.push_back( r0_ * r0_ * PI / lambda_ );
+				if ( r0_ < r1_ )
+					entry.push_back( r0_ * r0_ * PI / lambda_ );
+				else
+					entry.push_back( r1_ * r1_ * PI / lambda_ );
 			}
 			colIndex.push_back( numEntries_ - 2 );
 			entry.push_back( aLow / lambda_ );
@@ -757,15 +770,155 @@ void CylMesh::innerResetStencil()
 void CylMesh::matchMeshEntries( const ChemMesh* other,
 	   vector< VoxelJunction >& ret ) const
 {
+	// This is seriously ugly, and what virtual funcs were meant to handle.
+	// Dirty hack for now.
+	const CylMesh* cyl = dynamic_cast< const CylMesh* >( other );
+	if ( cyl ) {
+		matchCylMeshEntries( cyl, ret );
+	} else {
+		const CubeMesh* cube = dynamic_cast< const CubeMesh* >( other );
+		if ( cube ) {
+			matchCubeMeshEntries( cube, ret );
+		} else {
+			const NeuroMesh* nm = dynamic_cast< const NeuroMesh* >( other );
+			if ( nm ) {
+				matchNeuroMeshEntries( nm, ret );
+			} else {
+				cout << "Warning:CylMesh::matchMeshEntries: "  <<
+						" unknown mesh type\n";
+			}
+		}
+	}
+}
+
+// Look for end-to-end diffusion, not sideways for now.
+// Very straightforward but tedious because of the different permutations.
+// Could readily add cylinder side to other end.
+void CylMesh::matchCylMeshEntries( const CylMesh* other,
+vector< VoxelJunction >& ret ) const
+{
+	const double EPSILON = 1e-3;
+	ret.clear();
+	// Should really estimate the distance from the centre of the smaller 
+	// cylinder cap disk to the plane of the larger disk, provided it is
+	// within the radius of the disk. The subsequent calculations are the
+	// same though.
+	double dr1 = 
+			distance(x0_ - other->x0_, y0_ - other->y0_, z0_ - other->z0_ );
+	double dr2 = 
+			distance(x1_ - other->x1_, y1_ - other->y1_, z1_ - other->z1_ );
+	double dr3 = 
+			distance(x1_ - other->x0_, y1_ - other->y0_, z1_ - other->z0_ );
+	double dr4 = 
+			distance(x0_ - other->x1_, y0_ - other->y1_, z0_ - other->z1_ );
+
+	if ( dr1 <= dr2 && dr1 <= dr3 && dr1 <= dr4 ) {
+		if ( ( dr1/totLen_ < EPSILON && dr1/other->totLen_ < EPSILON ) ) {
+			double xda;
+			if ( r0_ < other->r0_ )
+				xda = 2 * r0_ * r0_ * PI / ( lambda_ + other->lambda_ );
+			else 
+				xda = 2 * other->r0_ * other->r0_ * PI / 
+						( lambda_ + other->lambda_ );
+			ret.push_back( VoxelJunction( 0, 0, xda ) );
+		}
+	} else if ( dr2 <= dr3 && dr2 <= dr4 ) {
+		if ( ( dr2/totLen_ < EPSILON && dr2/other->totLen_ < EPSILON ) ) {
+			double xda;
+			if ( r1_ < other->r1_ )
+				xda = 2 * r1_ * r1_ * PI / ( lambda_ + other->lambda_ );
+			else 
+				xda = 2 * other->r1_ * other->r1_ * PI / 
+						( lambda_ + other->lambda_ );
+			ret.push_back( VoxelJunction( numEntries_ - 1, 
+						other->numEntries_ - 1, xda ) );
+		}
+	} else if ( dr3 <= dr4 ) {
+		if ( ( dr3/totLen_ < EPSILON && dr3/other->totLen_ < EPSILON ) ) {
+			double xda;
+			if ( r1_ < other->r0_ )
+				xda = 2 * r1_ * r1_ * PI / ( lambda_ + other->lambda_ );
+			else 
+				xda = 2 * other->r0_ * other->r0_ * PI / 
+						( lambda_ + other->lambda_ );
+			ret.push_back( VoxelJunction( numEntries_ - 1, 0, xda ) );
+		}
+	} else {
+		if ( ( dr4/totLen_ < EPSILON && dr4/other->totLen_ < EPSILON ) ) {
+			double xda;
+			if ( r1_ < other->r0_ )
+				xda = 2 * r0_ * r0_ * PI / ( lambda_ + other->lambda_ );
+			else 
+				xda = 2 * other->r1_ * other->r1_ * PI / 
+						( lambda_ + other->lambda_ );
+			ret.push_back( VoxelJunction( 0, other->numEntries_ - 1, xda ));
+		}
+	}
+}
+
+void CylMesh::matchCubeMeshEntries( const CubeMesh* other,
+vector< VoxelJunction >& ret ) const
+{
+}
+
+
+void CylMesh::matchNeuroMeshEntries( const NeuroMesh* other,
+vector< VoxelJunction >& ret ) const
+{
 }
 
 void CylMesh::indexToSpace( unsigned int index,
 			double& x, double& y, double& z ) const 
 {
+	if ( index < numEntries_ ) { 
+		double k = ( index + 0.5 ) / static_cast< double >( numEntries_ );
+		x = ( x1_ - x0_ ) * k + x0_;
+		y = ( y1_ - y0_ ) * k + y0_;
+		z = ( z1_ - z0_ ) * k + z0_;
+	}
+}
+
+static double dotprd ( double x0, double y0, double z0, 
+				double x1, double y1, double z1 )
+{
+		return x0 * x1 + y0 * y1 + z0 * z1;
 }
 
 double CylMesh::nearest( double x, double y, double z, 
 				unsigned int& index ) const
 {
-	return 0;
+	// Consider r0 = x0,y0,z0 and r1 = x1, y1, z1, and r = x,y,z.
+	// Fraction along cylinder = k
+	//
+	// Then, point p along line from r0 to r1 is
+	// p = k( r0-r1) + r1.
+	//
+	// Solving,
+	// k = (r0 - r1).(r - r1) / (|r0-r1|^2)
+	//
+	
+	double dist = distance( x0_ - x1_, y0_ - y1_, z0_ - z1_ );
+	double k = dotprd( 
+		x0_ - x1_, y0_ - y1_, z0_ - z1_,
+		x - x1_, y - y1_, z - z1_ ) / ( dist * dist );
+
+	// x2, y2, z2 are the coords of the nearest point.
+	double x2 = k * (x0_ - x1_) + x1_;
+	double y2 = k * (y0_ - y1_) + x1_;
+	double z2 = k * (z0_ - z1_) + x1_;
+
+	double ret = distance( x - x2, y - y2, z - z2 );
+	if ( k < 0.0 ) {
+		ret = -ret;
+		index = 0;
+	} else if ( k > 1.0 ) {
+		ret = -ret;
+		index = numEntries_ - 1;
+	} else { // Inside length of cylinder, now is it inside radius?
+		index = k * numEntries_ + 0.5;
+		double ri = r0_ + (index + 0.5) * rSlope_;
+		if ( ret > ri )
+			ret = -ret;
+	}
+	return ret;
 }

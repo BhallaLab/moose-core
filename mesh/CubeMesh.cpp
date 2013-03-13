@@ -1200,11 +1200,6 @@ const vector< unsigned int >& CubeMesh::surface() const
 	return surface_;
 }
 
-double distance( double x, double y, double z )
-{
-	return sqrt( x * x + y * y + z * z );
-}
-
 // For now: Just brute force through the surface list.
 // Surface list applies only if 2 or 3 D.
 void CubeMesh::matchMeshEntries( const ChemMesh* other,
@@ -1263,32 +1258,32 @@ double CubeMesh::nearest( double x, double y, double z,
 		unsigned int iy = ( y - y0_ ) / dy_;
 		unsigned int iz = ( z - z0_ ) / dz_;
 		index = ( iz * ny_ + iy ) * nx_ + ix;
-		/*
-		unsigned int innerIndex = s2m_( index );
+		unsigned int innerIndex = s2m_[ index ];
 		if ( innerIndex != EMPTY ) { // Inside filled volume
 			index = innerIndex;
 			double tx = x0_ + ix * dx_ + dx_ * 0.5;
 			double ty = y0_ + iy * dy_ + dy_ * 0.5;
 			double tz = z0_ + iz * dz_ + dz_ * 0.5;
 			return distance( x - tx, y - ty, z - tz );
-		} else { // outside filled vol but inside cube zone.
+		} else { // Outside volume. Look over surface for nearest.
+			double rmin = 1e99;
+			for ( vector< unsigned int >::const_iterator 
+				i = surface_.begin(); i != surface_.end(); ++i )
+   			{
+				double tx, ty, tz;
+				indexToSpace( *i, tx, ty, tz );
+				double r = distance( tx - x, ty - y, tz - z );
+				if ( rmin > r ) {
+						rmin = r;
+						index = *i;
+				}
+			}
+			return -rmin; // Negative distance indicates xyz is outside vol
 		}
-		 */
 	}
-	// Brute force it. Look at entire surface for nearest point.
-	double rmin = 1e99;
-	for ( vector< unsigned int >::const_iterator i = surface_.begin(); 
-					i != surface_.end(); ++i )
-   	{
-		double tx, ty, tz;
-		indexToSpace( *i, tx, ty, tz );
-		double r = distance( tx - x, ty - y, tz - z );
-		if ( rmin > r ) {
-				rmin = r;
-				index = *i;
-		}
-	}
-	return rmin;
+	// Should really figure out nearest corner anyway.
+	index = 0;
+	return -1.0;
 }
 
 int CubeMesh::compareMeshSpacing( const CubeMesh* other ) const

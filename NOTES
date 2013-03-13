@@ -21336,6 +21336,19 @@ Dating back from 22 Dec: Updated list of pending things here.
 Working on CylMesh, converting to stencil, need to put in areas.
 Did that too. Clears unit tests and regression tests, including one using
 the CylMesh that wasn't working earlier. But I haven't yet implemented
-any of the cros-solver calculations for CylMesh.
+any of the cross-solver calculations for CylMesh.
 ==========================================================================
+
+12 Mar 2013
+To check: Can we move the extendStencil, clearStencil etc to a base
+class for all mesh-based meshes? I think they do the same thing.
+Also extendedMeshEntrySize including the vector for the extendees.
+
+Compiles.  Clears unit and regression tests.
+
+Should make a unit test for some of the new things in CylMesh.
+For that matter in CubeMesh too.
+Should also do renaming: ChemMesh: ChemCompt
+base class for meshed ChemCompts: MeshCompt
+
 
