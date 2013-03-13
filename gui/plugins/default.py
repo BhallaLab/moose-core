@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Nov 13 15:58:31 2012 (+0530)
 # Version: 
-# Last-Updated: Wed Mar 13 10:04:26 2013 (+0530)
+# Last-Updated: Wed Mar 13 10:55:59 2013 (+0530)
 #           By: subha
-#     Update #: 950
+#     Update #: 961
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -515,14 +515,19 @@ class SchedulingWidget(QtGui.QWidget):
         return widget
 
     def updateUpdateInterval(self):
+        """Read the updateInterval from text box.
+
+        If updateInterval is less than the smallest dt, then make it
+        equal.
+        """
         try:
             self.updateInterval = float(str(self.updateIntervalText.text()))
         except ValueError:
             QtGui.QMessageBox.warning(self, 'Invalid value', 'Specified plot update interval is meaningless.')
-        for dt in self.getTickDtMap().values():
-            if dt > self.updateInterval:
-                self.updateInterval = dt
-                self.updateIntervalText.setText(str(dt))
+        dt = min(self.getTickDtMap().values())
+        if dt > self.updateInterval:
+            self.updateInterval = dt
+            self.updateIntervalText.setText(str(dt))
         
     def resetAndRun(self):
         """This is just for adding the arguments for the function
