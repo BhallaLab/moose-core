@@ -14,7 +14,7 @@
 #include "MeshEntry.h"
 #include "VoxelJunction.h"
 #include "Stencil.h"
-#include "ChemMesh.h"
+#include "ChemCompt.h"
 #include "CubeMesh.h"
 
 const unsigned int CubeMesh::EMPTY = ~0;
@@ -224,7 +224,7 @@ const Cinfo* CubeMesh::initCinfo()
 
 	static Cinfo cubeMeshCinfo (
 		"CubeMesh",
-		ChemMesh::initCinfo(),
+		ChemCompt::initCinfo(),
 		cubeMeshFinfos,
 		sizeof( cubeMeshFinfos ) / sizeof ( Finfo* ),
 		new Dinfo< CubeMesh >()
@@ -1100,7 +1100,7 @@ void CubeMesh::innerResetStencil()
  * should be set to the coreStencil_.
  */
 void CubeMesh::extendStencil( 
-	const ChemMesh* other, const vector< VoxelJunction >& vj ) 
+	const ChemCompt* other, const vector< VoxelJunction >& vj ) 
 {
 	// Maps from remote meshIndex (in vj) to local index of proxy voxel.
 	map< unsigned int, unsigned int > meshMap;
@@ -1202,7 +1202,7 @@ const vector< unsigned int >& CubeMesh::surface() const
 
 // For now: Just brute force through the surface list.
 // Surface list applies only if 2 or 3 D.
-void CubeMesh::matchMeshEntries( const ChemMesh* other,
+void CubeMesh::matchMeshEntries( const ChemCompt* other,
 	   vector< VoxelJunction >& ret ) const
 {
 	const CubeMesh* cm = dynamic_cast< const CubeMesh* >( other );

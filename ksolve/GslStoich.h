@@ -223,8 +223,8 @@ class GslStoich: public SolverBase
 			vector< VoxelJunction >& otherMeshMap
 		) const;
 
-		/// Returns pointer to ChemMesh entry for compartment.
-		ChemMesh* compartmentMesh() const;
+		/// Returns pointer to ChemCompt entry for compartment.
+		ChemCompt* compartmentMesh() const;
 
 		/// Inherited virtual function, needed here to expand y_.
 		void expandSforDiffusion(
@@ -314,7 +314,7 @@ class GslStoich: public SolverBase
 		vector< unsigned int > diffusingPoolIndices_;
 
 		Id compartmentId_;
-		ChemMesh* diffusionMesh_;
+		ChemCompt* diffusionMesh_;
 
 		// Used to keep track of meshEntry when passing self into GSL.
 		unsigned int currMeshEntry_; 

@@ -250,8 +250,8 @@ void SolverBase::configureJunction( Id selfSolver, Id otherSolver,
 	otherJunc.setDiffTerms( otherDiffPoolIndex );
 
 	// Work out matching meshEntries. Virtual func. Voxelized solvers 
-	// refer to their ChemMesh. Non-voxelized ones always have a single
-	// meshEntry, and hold a dummy ChemMesh to do this calculation.
+	// refer to their ChemCompt. Non-voxelized ones always have a single
+	// meshEntry, and hold a dummy ChemCompt to do this calculation.
 	// In these vectors the first entry of the pair is the index in the 
 	// arriving // vector of rates modulo # of reacs, and the second is 
 	// the target meshIndex.
@@ -297,14 +297,14 @@ Id getCompt( Id id )
 		vector< Id > neighbours;
 		if ( e->getNeighbours( neighbours, e->cinfo()->findFinfo( "requestSize" ) ) == 1 ) {
 			Id pa = Neutral::parent( neighbours[0].eref() ).id;
-			if ( pa.element()->cinfo()->isA( "ChemMesh" ) )
+			if ( pa.element()->cinfo()->isA( "ChemCompt" ) )
 				return pa;
 		}
 	}
 	Id pa = Neutral::parent( id.eref() ).id;
 	if ( pa == Id() )
 		return pa;
-	else if ( pa.element()->cinfo()->isA( "ChemMesh" ) )
+	else if ( pa.element()->cinfo()->isA( "ChemCompt" ) )
 		return pa;
 	return getCompt( pa );
 }

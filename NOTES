@@ -21355,4 +21355,9 @@ base class for meshed ChemCompts: MeshCompt
 13 Mar 2013.
 Checkin 4454.
 
+Added unit tests. Checkin 4455.
 
+Added unit test for setting up CylMeshes end-to-end.
+Next need to sort out CylMeshes  with CubeMeshes.
+
+Renamed ChemMesh to ChemCompt. Lots of files changed. Compiles, clears tests.

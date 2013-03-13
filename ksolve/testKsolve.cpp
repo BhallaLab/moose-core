@@ -25,7 +25,7 @@
 #include "SolverJunction.h"
 #include "../mesh/Boundary.h"
 #include "../mesh/MeshEntry.h"
-#include "../mesh/ChemMesh.h"
+#include "../mesh/ChemCompt.h"
 #include "GslStoich.h"
 #include "../shell/Shell.h"
 #include "ReadKkit.h"
@@ -795,7 +795,7 @@ pair< Id, Id > makeOneDimComptForDiffusion( Shell* s, Id model, unsigned int i )
 //  0  1  2  3  4 | 25
 //
 //
-void checkDiffusionStencil( const ChemMesh* cm0, const ChemMesh* cm1 )
+void checkDiffusionStencil( const ChemCompt* cm0, const ChemCompt* cm1 )
 {
 	// const double SIDE = 10e-6;
 	const double *entry;
@@ -913,10 +913,10 @@ void testMolTransferAcrossJunctions()
 	}
 
 	// Look up stencil here
-	ChemMesh* cm0 = 
-			reinterpret_cast< ChemMesh* >( compt0.first.eref().data() );
-	ChemMesh* cm1 = 
-			reinterpret_cast< ChemMesh* >( compt1.first.eref().data() );
+	ChemCompt* cm0 = 
+			reinterpret_cast< ChemCompt* >( compt0.first.eref().data() );
+	ChemCompt* cm1 = 
+			reinterpret_cast< ChemCompt* >( compt1.first.eref().data() );
 
 	checkDiffusionStencil( cm0, cm1 );
 

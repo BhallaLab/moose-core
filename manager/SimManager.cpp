@@ -37,7 +37,7 @@ static SrcFinfo2< unsigned int, unsigned int >* nodeInfo()
 	static SrcFinfo2< unsigned int, unsigned int > nodeInfo(
 		"nodeInfo", 
 		"Sends out # of nodes to use for meshing, and # of threads to "
-		"use on each node, to the ChemMesh. These numbers sometimes"
+		"use on each node, to the ChemCompt. These numbers sometimes"
 		"differ from the total # of nodes and threads, because the "
 		"SimManager may have other portions of the model to allocate."
 	);
@@ -117,7 +117,7 @@ const Cinfo* SimManager::initCinfo()
 		static DestFinfo build( "build",
 			"Sets up model, with the specified method. The method may be"
 			"empty if the intention is that methods be set up through "
-			"hints in the ChemMesh compartments.",
+			"hints in the ChemCompt compartments.",
 			new EpFunc1< SimManager, string >( &SimManager::build ) );
 
 		static DestFinfo buildMultiCompartment( "buildMultiCompartment",
@@ -129,12 +129,12 @@ const Cinfo* SimManager::initCinfo()
 
 		static DestFinfo makeStandardElements( "makeStandardElements",
 			"Sets up the usual infrastructure for a model, with the"
-			"ChemMesh, Stoich, solver and suitable messaging."
+			"ChemCompt, Stoich, solver and suitable messaging."
 			"The argument is the MeshClass to use.",
 			new EpFunc1< SimManager, string >( &SimManager::makeStandardElements ) );
 
 		static DestFinfo meshSplit( "meshSplit",
-			"Handles message from ChemMesh that defines how"
+			"Handles message from ChemCompt that defines how"
 			"meshEntries communicate between nodes."
 			"First arg is oldvol, next is list of other nodes, third arg is list number of"
 			"meshEntries to be transferred for each of these nodes, "
@@ -167,7 +167,7 @@ const Cinfo* SimManager::initCinfo()
 		};  
 		
 		static SharedFinfo nodeMeshing( "nodeMeshing",
-			"Connects to ChemMesh to coordinate meshing with parallel"
+			"Connects to ChemCompt to coordinate meshing with parallel"
 			"decomposition and with the Stoich",
 			nodeMeshingShared, 
 			sizeof( nodeMeshingShared ) / sizeof( const Finfo* )
@@ -314,7 +314,7 @@ string SimManager::getMethod( const Eref& e, const Qinfo* q ) const
 
 string SimManager::getModelFamily( const Eref& e, const Qinfo* q ) const
 {
-	Id mesh = findChemMesh();
+	Id mesh = findChemCompt();
 	if ( mesh != Id() )
 			return "kinetic";
 	return "unknown";
@@ -324,12 +324,12 @@ string SimManager::getModelFamily( const Eref& e, const Qinfo* q ) const
 // MsgDest Definitions
 //////////////////////////////////////////////////////////////
 
-Id SimManager::findChemMesh() const
+Id SimManager::findChemCompt() const
 {
 	vector< Id > ret;
 	string basePath = baseId_.path();
 
-	int num = simpleWildcardFind( basePath + "/##[ISA=ChemMesh]", ret );
+	int num = simpleWildcardFind( basePath + "/##[ISA=ChemCompt]", ret );
 	if ( num == 0 )
 		return Id();
 	return ret[0];
@@ -365,10 +365,10 @@ double estimateHsolveLoad( Id hsolver )
  */
 void SimManager::build( const Eref& e, const Qinfo* q, string method )
 {
-	// First, check if the tree has a compartment/ChemMesh as the base
-	// of the chemical system. If not, put in a single-voxel ChemMesh.
+	// First, check if the tree has a compartment/ChemCompt as the base
+	// of the chemical system. If not, put in a single-voxel ChemCompt.
 	baseId_ = e.id();
-	Id mesh = findChemMesh();
+	Id mesh = findChemCompt();
 
 	if ( mesh == Id() ) {
 		 cout << "SimManager::build: No chem mesh found, still need to sort this out\n";
@@ -555,7 +555,7 @@ void generateComptElists( Id baseId,
 	vector< pair< Id, vector< Id > > >& comptElists,
 	unsigned int depth	)
 {
-	if ( baseId.element()->cinfo()->isA( "ChemMesh" ) ) {
+	if ( baseId.element()->cinfo()->isA( "ChemCompt" ) ) {
 		string method = Field< string >::get( baseId, "method" );
 		if ( method != "inherit" ) { // Start off a new tree
 			vector< Id > temp( 0 );
@@ -564,7 +564,7 @@ void generateComptElists( Id baseId,
 			depth = comptElists.size() - 1;
 		}
 	} else {
-		// Be sure we've hit a ChemMesh before we start building the elists.
+		// Be sure we've hit a ChemCompt before we start building the elists.
 		if ( comptElists.size() > depth )
 			comptElists[depth].second.push_back( baseId );
 	}

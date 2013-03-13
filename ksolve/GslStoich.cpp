@@ -17,7 +17,7 @@
 #include "../shell/Shell.h"
 #include "../mesh/MeshEntry.h"
 #include "../mesh/Boundary.h"
-#include "../mesh/ChemMesh.h"
+#include "../mesh/ChemCompt.h"
 */
 #include "OdeSystem.h"
 #include "GslStoich.h"
@@ -98,8 +98,8 @@ const Cinfo* GslStoich::initCinfo()
 		static ValueFinfo< GslStoich, Id > compartment( 
 			"compartment",
 			"This is the Id of the compartment, which must be derived from"
-			"the ChemMesh baseclass. The GslStoich needs"
-			"the ChemMesh Id only for diffusion, "
+			"the ChemCompt baseclass. The GslStoich needs"
+			"the ChemCompt Id only for diffusion, "
 			" and one can pass in Id() instead if there is no diffusion,"
 			" or just leave it unset.",
 			&GslStoich::setCompartment,
@@ -346,15 +346,15 @@ Id GslStoich::getCompartment() const
 }
 void GslStoich::setCompartment( Id value )
 {
-	if ( value == Id() || !value.element()->cinfo()->isA( "ChemMesh" ) )
+	if ( value == Id() || !value.element()->cinfo()->isA( "ChemCompt" ) )
    	{
 		cout << "Warning: GslStoich::setCompartment: "
-				"Value must be a ChemMesh subclass\n";
+				"Value must be a ChemCompt subclass\n";
 		compartmentId_ = Id();
 		diffusionMesh_ = 0;
 	} else {
 		compartmentId_ = value;
-		diffusionMesh_ = reinterpret_cast< ChemMesh* >(
+		diffusionMesh_ = reinterpret_cast< ChemCompt* >(
 				compartmentId_.eref().data() );
 	}
 }

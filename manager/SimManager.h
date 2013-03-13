@@ -92,7 +92,7 @@ class SimManager
 		// Utility functions
 		/////////////////////////////////////////////////////////////////
 		//TreeType findTreeType( const Eref& e );
-		Id findChemMesh() const;
+		Id findChemCompt() const;
 		void buildFromBareKineticTree( const string& method );
 		void buildFromKkitTree( const Eref& e, const Qinfo* q, const string& method );
 
