@@ -15,6 +15,7 @@
 #include "VoxelJunction.h"
 #include "Stencil.h"
 #include "ChemCompt.h"
+#include "MeshCompt.h"
 #include "CubeMesh.h"
 
 const unsigned int CubeMesh::EMPTY = ~0;
@@ -389,7 +390,6 @@ void CubeMesh::updateCoords()
 	unsigned int size = nx_ * ny_ * nz_;
 	m2s_.resize( size );
 	s2m_.resize( size );
-	m_.setSize( size, size );
 	for ( unsigned int i = 0; i < size; ++i ) {
 		m2s_[i] = s2m_[i] = i;
 	}
@@ -807,16 +807,9 @@ double CubeMesh::getMeshEntrySize( unsigned int fid ) const
 double CubeMesh::extendedMeshEntrySize( unsigned int fid ) const
 {
 	if ( fid >= m2s_.size() ) {
-		assert( fid - m2s_.size() < extendedMeshEntrySize_.size() );
-		return extendedMeshEntrySize_[ fid - m2s_.size() ];
+		return MeshCompt::extendedMeshEntrySize( fid - m2s_.size() );
 	}
 	return dx_ * dy_ * dz_;
-}
-
-/// Inherited virtual function to clear the vector of MeshEntrySize
-void CubeMesh::clearExtendedMeshEntrySize()
-{
-	extendedMeshEntrySize_.clear();
 }
 
 /// Virtual function to return coords of mesh Entry.
@@ -863,20 +856,6 @@ unsigned int CubeMesh::neighbor( unsigned int spaceIndex,
 	unsigned int nIndex = ( ( iz * ny_ ) + iy ) * nx_ + ix;
 
 	return s2m_[nIndex];
-}
-
-/// Virtual function to return info on Entries connected to this one
-vector< unsigned int > CubeMesh::getNeighbors( unsigned int fid ) const
-{
-	const double* entry;
-	const unsigned int *colIndex;
-
-	unsigned int n = m_.getRow( fid, &entry, &colIndex );
-
-	vector< unsigned int > ret;
-	ret.insert( ret.end(), colIndex, colIndex + n );
-
-	return ret;
 }
 
 /// Virtual function to return diffusion X-section area for each neighbor
@@ -1042,8 +1021,7 @@ void CubeMesh::buildStencil()
 
 	// fillSpaceToMeshLookup();
 	unsigned int num = m2s_.size();
-	coreStencil_.clear();
-	coreStencil_.setSize( num, num );
+	setStencilSize( num, num );
 	for ( unsigned int i = 0; i < num; ++i ) {
 		unsigned int q = m2s_[i];
 		unsigned int ix = q % nx_;
@@ -1080,117 +1058,9 @@ void CubeMesh::buildStencil()
 			entry.push_back( j->e_ );
 			colIndex.push_back( j->col_ );
 		}
-		coreStencil_.addRow( i, entry, colIndex );
+		addRow( i, entry, colIndex );
 	}
-	m_ = coreStencil_;
-}
-
-/// virtual func implemented here.
-void CubeMesh::innerResetStencil()
-{
-	m_ = coreStencil_;
-}
-
-/**
- * extendStencil adds voxels to the current stencil m_, to build up a 
- * monolithic stencil that also handles the entries just past all the 
- * boundaries.
- * This function may be called many times to deal with the addition of
- * multiple junctions. Before the first of these calls, the m_ matrix
- * should be set to the coreStencil_.
- */
-void CubeMesh::extendStencil( 
-	const ChemCompt* other, const vector< VoxelJunction >& vj ) 
-{
-	// Maps from remote meshIndex (in vj) to local index of proxy voxel.
-	map< unsigned int, unsigned int > meshMap;
-	map< unsigned int, unsigned int >::iterator mmi;
-	
-	// Maps from local index of proxy voxel back to remote meshIndex.
-	vector< unsigned int > meshBackMap;
-
-
-	unsigned int coreSize = coreStencil_.nRows();
-	assert( coreSize == m2s_.size() );
-	unsigned int oldSize = m_.nRows();
-	assert( oldSize == m_.nColumns() );
-	unsigned int newSize = oldSize;
-
-	/// Organizes vj by voxel, that is, by row.
-	vector< vector< VoxelJunction > > vvj( coreSize );
-
-	for ( vector< VoxelJunction >::const_iterator 
-					i = vj.begin(); i != vj.end(); ++i ) {
-		mmi = meshMap.find( i->second );
-		if ( mmi == meshMap.end() ) {
-			assert( i->first < coreSize );
-			meshBackMap.push_back( i->second );
-			meshMap[i->second] = newSize++;
-			vvj[i->first].push_back( *i );
-		}
-	}
-	vector< vector< VoxelJunction > > vvjCol( newSize );
-	SparseMatrix< double > oldM = m_;
-	m_.clear();
-	m_.setSize( newSize, newSize );
-	for ( unsigned int i = 0; i < newSize; ++i ) {
-		vector< VoxelJunction > temp;
-		if ( i < oldSize ) { // Copy over old matrix.
-			const double* entry;
-			const unsigned int* colIndex;
-			unsigned int num = oldM.getRow( i, &entry, &colIndex );
-			temp.resize( num );
-			for ( unsigned int j = 0; j < num; ++j ) {
-				temp[j].first = colIndex[j];
-				temp[j].diffScale = entry[j];
-			}
-		}
-		if ( i < coreSize ) { // Set up diffusion into proxy voxels.
-			for ( vector< VoxelJunction >::const_iterator
-				j = vvj[i].begin(); j != vvj[i].end(); ++j )
-			{
-				unsigned int row = j->first;
-				assert( row == i );
-				unsigned int col = meshMap[j->second];
-				assert( col >= oldSize );
-				temp.push_back( 
-						VoxelJunction( col, EMPTY, j->diffScale ) );
-				vvjCol[col].push_back(
-						VoxelJunction( row, EMPTY, j->diffScale ) );
-			}
-		}
-		if ( i >= oldSize ) { // Set up diffusion from proxy to old voxels
-			for ( vector< VoxelJunction >::const_iterator
-				j = vvjCol[i].begin(); j != vvjCol[i].end(); ++j )
-			{
-				temp.push_back( *j );
-			}
-		}
-		// Now we've filled in all the VoxelJunctions for the new row.
-		sort( temp.begin(), temp.end() );
-		vector< double > e( temp.size() );
-		vector< unsigned int > c( temp.size() );
-		for ( unsigned int j = 0; j < temp.size(); ++j ) {
-			e[j] = temp[j].diffScale;
-			c[j] = temp[j].first;
-		}
-		m_.addRow( i, e, c );
-	}
-
-	// Fill in the volumes of the external mesh entries
-	for ( vector< unsigned int>::const_iterator  
-			i = meshBackMap.begin(); i != meshBackMap.end(); ++i ) {
-		extendedMeshEntrySize_.push_back( other->getMeshEntrySize( *i ) );
-	}
-}
-
-//////////////////////////////////////////////////////////////////
-
-// Should really separate 1,2 and 3D meshes.
-unsigned int CubeMesh::getStencil( unsigned int meshIndex,
-			const double** entry, const unsigned int** colIndex ) const
-{
-		return m_.getRow( meshIndex, entry, colIndex );
+	innerResetStencil();
 }
 
 //////////////////////////////////////////////////////////////////

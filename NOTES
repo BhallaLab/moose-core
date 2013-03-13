@@ -21368,3 +21368,6 @@ NeuroMesh needs lots of fixing to use stencils properly. I thought this was
 already done.
 
 Compiled in MeshCompt class. Yet to fold into class hierarchy.
+
+Folded into class hierarchy, so far just CubeMesh. Clears unit and regression
+tests.

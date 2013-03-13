@@ -14,6 +14,7 @@
 #include "MeshEntry.h"
 #include "Stencil.h"
 #include "ChemCompt.h"
+#include "MeshCompt.h"
 #include "CubeMesh.h"
 #include "CylBase.h"
 #include "NeuroNode.h"
