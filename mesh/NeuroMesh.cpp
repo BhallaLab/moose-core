@@ -14,7 +14,7 @@
 #include "Boundary.h"
 #include "MeshEntry.h"
 #include "Stencil.h"
-#include "ChemMesh.h"
+#include "ChemCompt.h"
 #include "CylBase.h"
 #include "NeuroNode.h"
 #include "SparseMatrix.h"
@@ -166,7 +166,7 @@ const Cinfo* NeuroMesh::initCinfo()
 
 	static Cinfo neuroMeshCinfo (
 		"NeuroMesh",
-		ChemMesh::initCinfo(),
+		ChemCompt::initCinfo(),
 		neuroMeshFinfos,
 		sizeof( neuroMeshFinfos ) / sizeof ( Finfo* ),
 		new Dinfo< NeuroMesh >()
@@ -820,7 +820,7 @@ unsigned int NeuroMesh::getStencil( unsigned int meshIndex,
 }
 
 void NeuroMesh::extendStencil(
-	   	const ChemMesh* other, const vector< VoxelJunction >& vj )
+	   	const ChemCompt* other, const vector< VoxelJunction >& vj )
 {
 	assert( 0 ); // doesn't work yet.
 }
@@ -839,7 +839,7 @@ const vector< NeuroNode >& NeuroMesh::getNodes() const
 // Utility function for junctions
 //////////////////////////////////////////////////////////////////
 
-void NeuroMesh::matchMeshEntries( const ChemMesh* other,
+void NeuroMesh::matchMeshEntries( const ChemCompt* other,
 	   vector< VoxelJunction >& ret ) const
 {
 }

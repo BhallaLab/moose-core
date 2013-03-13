@@ -28,7 +28,7 @@
 
 #include "../mesh/MeshEntry.h"
 // #include "../mesh/Boundary.h"
-// #include "../mesh/ChemMesh.h"
+// #include "../mesh/ChemCompt.h"
 
 #ifdef USE_SBML
 #include "../sbml/SbmlWriter.h"
@@ -396,7 +396,7 @@ const Cinfo* Shell::initCinfo()
 	static DestFinfo handleReMesh( "handleReMesh", 
 			"handleReMesh( Id BaseMesh): "
 			"Deals with outcome of resizing the meshing in a cellular"
-			"compartment (the ChemMesh class). The mesh change has to"
+			"compartment (the ChemCompt class). The mesh change has to"
 			"propagate down to the molecules and reactions managed by this."
 			"Mesh. The ElementId is the mesh being synchronized.",
 			new OpFunc1< Shell, Id >( & Shell::handleReMesh ) );
@@ -1076,7 +1076,7 @@ void Shell::doReacDiffMesh( Id baseCompartment )
 {
 	Eref sheller( shelle_, 0 );
 	assert( baseCompartment()->dataHandler()->isGlobal() );
-	assert( baseCompartment()->cinfo()->isA( "ChemMesh" ) );
+	assert( baseCompartment()->cinfo()->isA( "ChemCompt" ) );
 	Id baseMesh( baseCompartment.value() + 1 );
 	doSyncDataHandler( baseMesh );
 
@@ -1089,7 +1089,7 @@ void Shell::doReacDiffMesh( Id baseCompartment )
 	Neutral::children( baseCompartment.eref(), kids );
 	for ( vector< Id >::iterator i = kids.begin(); i != kids.end(); ++i)
 	{
-		if ( i->operator()()->cinfo()->isA( "ChemMesh" ) ) {
+		if ( i->operator()()->cinfo()->isA( "ChemCompt" ) ) {
 			doReacDiffMesh( *i );
 		}
 	}

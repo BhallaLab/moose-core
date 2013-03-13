@@ -13,7 +13,7 @@
 #include "Boundary.h"
 #include "MeshEntry.h"
 #include "Stencil.h"
-#include "ChemMesh.h"
+#include "ChemCompt.h"
 #include "CubeMesh.h"
 #include "CylBase.h"
 #include "NeuroNode.h"
@@ -515,8 +515,28 @@ void testCylMesh()
 	assert( index == cm.innerGetNumEntries() - 1 );
 
 	///////////////////////////////////////////////////////////////
-	
-
+	// We're going to set up a new cylinder to abut the old one. The
+	// coords of x1 of the new cylinder are the same x0 of the old one, but
+	// the coords of the other end change.
+	coords = cm.getCoords( Id().eref(), 0 );
+	coords[3] = coords[0];
+	coords[4] = coords[1];
+	coords[5] = coords[2];
+	coords[2] -= 10; // x and y stay put, it is a vertical cylinder.
+	coords[6] = 1; // R0
+	coords[7] = 1; // R1
+	coords[8] = 1; // Lambda
+	CylMesh cm2;
+	cm2.innerSetCoords( coords );
+	assert( doubleEq( cm2.getLambda(), 1 ) );
+	assert( cm2.getNumEntries() == 10 );
+	vector< VoxelJunction > vj;
+	cm.matchMeshEntries( &cm2, vj );
+	assert( vj.size() == 1 );
+	assert( vj[0].first == 0 );
+	assert( vj[0].second == cm2.getNumEntries() - 1 );
+	double xda = 2.0 * 1 * 1 * PI / ( cm.getLambda() + cm2.getLambda() );
+	assert( doubleEq( vj[0].diffScale, xda ) );
 
 	cout << "." << flush;
 }

@@ -26,7 +26,7 @@
 #include "MathFunc.h"
 #include "Boundary.h"
 #include "MeshEntry.h"
-#include "ChemMesh.h"
+#include "ChemCompt.h"
 #include "ZombiePool.h"
 #include "ZombieBufPool.h"
 #include "ZombieFuncPool.h"
@@ -177,7 +177,7 @@ const Cinfo* Stoich::initCinfo()
 			*/
 
 		static DestFinfo meshSplit( "meshSplit",
-			"Handles message from ChemMesh that defines how "
+			"Handles message from ChemCompt that defines how "
 			"meshEntries are decomposed on this node, and how they "
 			"communicate between nodes."
 			"Args: (oldVol, volumeVectorForAllEntries, localEntryList, "

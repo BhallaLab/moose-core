@@ -28,7 +28,7 @@
  * dendrite compartment, obtained by treating the spine neck as a 
  * diffusion barrier with zero volume.
  */
-class NeuroMesh: public ChemMesh
+class NeuroMesh: public ChemCompt
 {
 	public: 
 		NeuroMesh();
@@ -146,7 +146,7 @@ class NeuroMesh: public ChemMesh
 			const double** entry, const unsigned int** colIndex ) const;
 
 		void extendStencil( 
-			const ChemMesh* other, const vector< VoxelJunction >& vj );
+			const ChemCompt* other, const vector< VoxelJunction >& vj );
 
 		/// virtual func implemented here.
 		void innerResetStencil();
@@ -155,7 +155,7 @@ class NeuroMesh: public ChemMesh
 		// inherited virtual funcs for Boundary
 		//////////////////////////////////////////////////////////////////
 		
-		void matchMeshEntries( const ChemMesh* other, 
+		void matchMeshEntries( const ChemCompt* other, 
 			vector< VoxelJunction > & ret ) const;
 
 		double nearest( double x, double y, double z, 

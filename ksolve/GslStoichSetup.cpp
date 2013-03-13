@@ -18,7 +18,7 @@
 #include "../shell/Wildcard.h"
 #include "../mesh/MeshEntry.h"
 #include "../mesh/Boundary.h"
-#include "../mesh/ChemMesh.h"
+#include "../mesh/ChemCompt.h"
 #include "GslStoich.h"
 
 
@@ -80,7 +80,7 @@ void GslStoich::setElist( const Eref& e, const Qinfo* q, vector< Id > elist)
 	isInitialized_ = 0;
 	compartmentId_ = getCompt( e.id() );
 	if ( compartmentId_ != Id() ) {
-		diffusionMesh_ = reinterpret_cast< ChemMesh* >( 
+		diffusionMesh_ = reinterpret_cast< ChemCompt* >( 
 						compartmentId_.eref().data() );
 		// localMeshEntries is really supposed to map the global indexing
 		// of meshEntries onto the local indices used in this object.
@@ -390,7 +390,7 @@ void GslStoich::matchMeshEntries(
 	
 }
 
-ChemMesh* GslStoich::compartmentMesh() const
+ChemCompt* GslStoich::compartmentMesh() const
 {
 	return diffusionMesh_;
 }

@@ -139,7 +139,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
   //Getting Compartment from moose
   vector< Id > chemCompt;
 
-  //wildcardFind(path+"/##[ISA=ChemMesh]",chemCompt);
+  //wildcardFind(path+"/##[ISA=ChemCompt]",chemCompt);
   wildcardFind(path+"/##[TYPE=MeshEntry]",chemCompt);
   //cout << "compts vector size  " << chemCompt.size()<<endl;
 

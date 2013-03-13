@@ -10,8 +10,8 @@
 #ifndef _STOICH_POOLS_H
 #define _STOICH_POOLS_H
 
-#ifndef _CHEM_MESH_H
-class ChemMesh;
+#ifndef _CHEM_COMPT_H
+class ChemCompt;
 #endif
 class StoichPools
 {
@@ -184,10 +184,10 @@ class StoichPools
 		 * - MeshMap vectors for self and other, to map from the index
 		 *   in the data transfer vector between solvers, to the meshIndex
 		 *   on the solver.
-		 * This function is expected to refer to a ChemMesh in order to
+		 * This function is expected to refer to a ChemCompt in order to
 		 * figure out the details. Even derived classes of StoichPools
 		 * that do not use a mesh (e.g., Smoldyn) will use a dummy 
-		 * ChemMesh to do the needful.
+		 * ChemCompt to do the needful.
 		 */
 		virtual void matchMeshEntries( StoichPools* other,
 			vector< unsigned int >& selfMeshIndex, 
@@ -196,7 +196,7 @@ class StoichPools
 			vector< VoxelJunction >& otherMeshMap
 		) const = 0;
 
-		virtual ChemMesh* compartmentMesh() const = 0;
+		virtual ChemCompt* compartmentMesh() const = 0;
 
 		//////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();

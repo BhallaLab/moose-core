@@ -22,19 +22,19 @@ enum MeshType {
 	TETRAHEDRON
 };
 
-class ChemMesh;
+class ChemCompt;
 
 /**
  * The MeshEntry is a single 'compartment' in the mathematical sense,
  * that is, all properties are assumed homogenous within it.
  * It is a FieldElement, so it gets all its values from the parent
- * ChemMesh.
+ * ChemCompt.
  */
 class MeshEntry
 {
 	public: 
 		MeshEntry();
-		MeshEntry( const ChemMesh* parent );
+		MeshEntry( const ChemCompt* parent );
 		//////////////////////////////////////////////////////////////////
 		// Field assignment stuff
 		//////////////////////////////////////////////////////////////////
@@ -64,7 +64,7 @@ class MeshEntry
 		/**
 		 * Coords that define current MeshEntry. Usually generated on 
 		 * the fly by passing the current Field Index to the parent
-		 * ChemMesh subclass, which will figure it out.
+		 * ChemCompt subclass, which will figure it out.
 		 */
 		vector< double > getCoordinates( const Eref& e, const Qinfo* q )
 			const;
@@ -123,7 +123,7 @@ class MeshEntry
 		static const Cinfo* initCinfo();
 	private:
 		double size_; /// Volume or area
-		const ChemMesh* parent_;
+		const ChemCompt* parent_;
 };
 
 #endif	// _MESH_ENTRY_H

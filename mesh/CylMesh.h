@@ -16,7 +16,7 @@
  * axial dimension is considered for diffusion and subdivisions.
  * Typically used in modelling small segments of dendrite
  */
-class CylMesh: public ChemMesh
+class CylMesh: public ChemCompt
 {
 	public: 
 		CylMesh();
@@ -122,7 +122,7 @@ class CylMesh: public ChemMesh
 			const double** entry, const unsigned int** colIndex ) const;
 
 		void extendStencil( 
-		   	const ChemMesh* other, const vector< VoxelJunction >& vj );
+		   	const ChemCompt* other, const vector< VoxelJunction >& vj );
 
 		/// virtual func implemented here.
 		void innerResetStencil();
@@ -131,7 +131,7 @@ class CylMesh: public ChemMesh
 		// inherited virtual funcs for Boundary
 		//////////////////////////////////////////////////////////////////
 		
-		void matchMeshEntries( const ChemMesh* other, 
+		void matchMeshEntries( const ChemCompt* other, 
 			vector< VoxelJunction > & ret ) const;
 
 		double nearest( double x, double y, double z, 

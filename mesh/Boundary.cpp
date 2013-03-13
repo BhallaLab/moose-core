@@ -11,7 +11,7 @@
 #include "Boundary.h"
 #include "MeshEntry.h"
 #include "Stencil.h"
-#include "ChemMesh.h"
+#include "ChemCompt.h"
 #include "UpFunc.h"
 
 const Cinfo* Boundary::initCinfo()
@@ -30,7 +30,7 @@ const Cinfo* Boundary::initCinfo()
 			"receiving function decides which it cares about."
 			"The originating geometry may return zero on some of the"
 			"dimensions if they do not apply",
-			new UpFunc3< ChemMesh, double, double, double >( &ChemMesh::extent ) );
+			new UpFunc3< ChemCompt, double, double, double >( &ChemCompt::extent ) );
 			*/
 
 		static DestFinfo adjacent( "adjacent",

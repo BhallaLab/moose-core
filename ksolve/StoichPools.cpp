@@ -305,8 +305,8 @@ void StoichPools::addJunction( const Eref& e, const Qinfo* q, Id other )
 	otherSP->junctions_.back().setDiffTerms( otherDiffPoolIndex );
 
 	// Work out matching meshEntries. Virtual func. Voxelized solvers 
-	// refer to their ChemMesh. Non-voxelized ones always have a single
-	// meshEntry, and hold a dummy ChemMesh to do this calculation.
+	// refer to their ChemCompt. Non-voxelized ones always have a single
+	// meshEntry, and hold a dummy ChemCompt to do this calculation.
 	// In these vectors the first entry of the pair is the index in the 
 	// arriving // vector of rates modulo # of reacs, and the second is 
 	// the target meshIndex.

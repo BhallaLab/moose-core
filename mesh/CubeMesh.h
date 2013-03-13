@@ -16,7 +16,7 @@
  * neurons because it would have to be rather finely subdivided to fit
  * a typical dendrite or soma volume, but it is general.
  */
-class CubeMesh: public ChemMesh
+class CubeMesh: public ChemCompt
 {
 	public: 
 		CubeMesh();
@@ -162,9 +162,9 @@ class CubeMesh: public ChemMesh
 
 		/**
 		 * Key virtual function for generating a map between facing
-		 * surfaces on a CubeMesh and another ChemMesh
+		 * surfaces on a CubeMesh and another ChemCompt
 		 */
-		void matchMeshEntries( const ChemMesh* other,
+		void matchMeshEntries( const ChemCompt* other,
 			vector< VoxelJunction >& ret ) const;
 
 		/**
@@ -259,7 +259,7 @@ class CubeMesh: public ChemMesh
 
 		/// Add boundary voxels to stencil for cross-solver junctions
 		void extendStencil(
-				const ChemMesh* other, const vector< VoxelJunction >& vj );
+				const ChemCompt* other, const vector< VoxelJunction >& vj );
 
 		void assignVoxels( 
 				vector< pair< unsigned int, unsigned int > >& intersect,

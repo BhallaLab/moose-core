@@ -10,8 +10,8 @@
 #ifndef _SOLVER_BASE_H
 #define _SOLVER_BASE_H
 
-#ifndef _CHEM_MESH_H
-class ChemMesh;
+#ifndef _CHEM_COMPT_H
+class ChemCompt;
 #endif
 class SolverBase
 {
@@ -202,10 +202,10 @@ class SolverBase
 		 * - MeshMap vectors for self and other, to map from the index
 		 *   in the data transfer vector between solvers, to the meshIndex
 		 *   on the solver.
-		 * This function is expected to refer to a ChemMesh in order to
+		 * This function is expected to refer to a ChemCompt in order to
 		 * figure out the details. Even derived classes of SolverBase
 		 * that do not use a mesh (e.g., Smoldyn) will use a dummy 
-		 * ChemMesh to do the needful.
+		 * ChemCompt to do the needful.
 		 */
 		virtual void matchMeshEntries( SolverBase* other,
 			vector< unsigned int >& selfMeshIndex, 
@@ -214,7 +214,7 @@ class SolverBase
 			vector< VoxelJunction >& otherMeshMap
 		) const = 0;
 
-		virtual ChemMesh* compartmentMesh() const = 0;
+		virtual ChemCompt* compartmentMesh() const = 0;
 
 		//////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();

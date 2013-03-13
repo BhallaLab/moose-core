@@ -580,7 +580,7 @@ double estimateDefaultVol( Id model )
 		double maxVol = 0;
 		for ( vector< Id >::iterator i = children.begin(); 
 						i != children.end(); ++i ) {
-				if ( i->element()->cinfo()->isA( "ChemMesh" ) ) {
+				if ( i->element()->cinfo()->isA( "ChemCompt" ) ) {
 						double v = Field< double >::get( *i, "size" );
 						if ( i->element()->getName() == "kinetics" )
 								return v;

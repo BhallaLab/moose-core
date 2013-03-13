@@ -13,7 +13,7 @@
 #include "Boundary.h"
 #include "MeshEntry.h"
 #include "Stencil.h"
-#include "ChemMesh.h"
+#include "ChemCompt.h"
 #include "CubeMesh.h"
 #include "CylBase.h"
 #include "NeuroNode.h"
@@ -125,7 +125,7 @@ const Cinfo* CylMesh::initCinfo()
 
 	static Cinfo cylMeshCinfo (
 		"CylMesh",
-		ChemMesh::initCinfo(),
+		ChemCompt::initCinfo(),
 		cylMeshFinfos,
 		sizeof( cylMeshFinfos ) / sizeof ( Finfo* ),
 		new Dinfo< CylMesh >()
@@ -753,7 +753,7 @@ unsigned int CylMesh::getStencil( unsigned int meshIndex,
 }
 
 void CylMesh::extendStencil( 
-	   	const ChemMesh* other, const vector< VoxelJunction >& vj )
+	   	const ChemCompt* other, const vector< VoxelJunction >& vj )
 {
 	assert( 0 ); // doesn't work yet.
 }
@@ -767,7 +767,7 @@ void CylMesh::innerResetStencil()
 // Utility function for junctions
 //////////////////////////////////////////////////////////////////
 
-void CylMesh::matchMeshEntries( const ChemMesh* other,
+void CylMesh::matchMeshEntries( const ChemCompt* other,
 	   vector< VoxelJunction >& ret ) const
 {
 	// This is seriously ugly, and what virtual funcs were meant to handle.
@@ -846,7 +846,7 @@ vector< VoxelJunction >& ret ) const
 	} else {
 		if ( ( dr4/totLen_ < EPSILON && dr4/other->totLen_ < EPSILON ) ) {
 			double xda;
-			if ( r1_ < other->r0_ )
+			if ( r0_ < other->r1_ )
 				xda = 2 * r0_ * r0_ * PI / ( lambda_ + other->lambda_ );
 			else 
 				xda = 2 * other->r1_ * other->r1_ * PI / 
