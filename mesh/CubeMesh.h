@@ -16,7 +16,7 @@
  * neurons because it would have to be rather finely subdivided to fit
  * a typical dendrite or soma volume, but it is general.
  */
-class CubeMesh: public ChemCompt
+class CubeMesh: public MeshCompt
 {
 	public: 
 		CubeMesh();
@@ -90,22 +90,18 @@ class CubeMesh: public ChemCompt
 		double getMeshEntrySize( unsigned int fid ) const;
 		/// Virtual function to return coords of mesh Entry.
 		vector< double > getCoordinates( unsigned int fid ) const;
-		/// Virtual function to return info on Entries connected to this one
-		vector< unsigned int > getNeighbors( unsigned int fid ) const;
 		/// Virtual function to return diffusion X-section area
 		vector< double > getDiffusionArea( unsigned int fid ) const;
 		/// Virtual function to return scale factor for diffusion. 1 here.
 		vector< double > getDiffusionScaling( unsigned int fid ) const;
 
 		//////////////////////////////////////////////////////////////////
+
 		/**
 		 * Utility function to return volume of any voxel including those
 		 * diffusively coupled and aubtting the present volume.
 		 */
 		double extendedMeshEntrySize( unsigned int fid ) const;
-
-		/// Inherited virtual function to clear the vector of MeshEntrySize
-		void clearExtendedMeshEntrySize();
 
 		/**
 		 * Inherited virtual func. Returns number of MeshEntry in array
@@ -123,9 +119,6 @@ class CubeMesh: public ChemCompt
 		void innerHandleNodeInfo(
 			const Eref& e, const Qinfo* q, 
 			unsigned int numNodes, unsigned int numThreads );
-
-		/// virtual func implemented here.
-		void innerResetStencil();
 
 		//////////////////////////////////////////////////////////////////
 		// Dest funcs
@@ -252,15 +245,6 @@ class CubeMesh: public ChemCompt
 		 */
 		void deriveS2mFromM2s();
 
-		/// Derived function to return SparseMatrix-style row info for
-		/// specified mesh entry. 
-		unsigned int getStencil( unsigned int meshIndex,
-				const double** entry, const unsigned int** colIndex ) const;
-
-		/// Add boundary voxels to stencil for cross-solver junctions
-		void extendStencil(
-				const ChemCompt* other, const vector< VoxelJunction >& vj );
-
 		void assignVoxels( 
 				vector< pair< unsigned int, unsigned int > >& intersect,
 				double xmin, double xmax, 
@@ -304,12 +288,6 @@ class CubeMesh: public ChemCompt
 		unsigned int ny_; /// # of entries in y in surround volume
 		unsigned int nz_; /// # of entries in z in surround volume
 
-		/// Handles the core stencil for own vol
-		SparseMatrix< double > coreStencil_; 
-
-		/// Handles stencil for core + abutting voxels
-		SparseMatrix< double > m_; 
-
 		/**
 		 * For spherical mesh, coords are xyz r0 r1 theta0 theta1 phi0 phi1
 		 * For Cylindrical mesh, coords are x1y1z1 x2y2z2 r0 r1 phi0 phi1
@@ -341,13 +319,6 @@ class CubeMesh: public ChemCompt
 		 * CubeMesh.
 		 */
 		vector< unsigned int > surface_;
-
-		/**
-		 * vector of meshEntrySizes for abutting surfaces, needed to compute
-		 * diffusion rates across junctions.
-		 * Indexed from zero.
-		 */
-		vector< double > extendedMeshEntrySize_;
 };
 
 #endif	// _CUBE_MESH_H
