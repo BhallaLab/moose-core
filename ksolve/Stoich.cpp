@@ -34,7 +34,7 @@
 #include "ZombieEnz.h"
 #include "ZombieMMenz.h"
 #include "ZombieSumFunc.h"
-#include "../mesh/Stencil.h"
+// #include "../mesh/Stencil.h"
 
 #include "../shell/Shell.h"
 
@@ -1232,12 +1232,13 @@ void Stoich::updateBorderV( unsigned int meshIndex, vector< double >& v,
 /////////////////////////////////////////////////////////////////
 // 
 /////////////////////////////////////////////////////////////////
-void Stoich::updateDiffusion( 
-	unsigned int meshIndex, const vector< const Stencil* >& stencil)
+void Stoich::updateDiffusion( unsigned int meshIndex )
 {
+		/*
 	for ( unsigned int i = 0; i < stencil.size(); ++i ) {
 		stencil[i]->addFlux( meshIndex, flux_[meshIndex], S_, diffConst_ );
 	}
+	*/
 }
 
 // void Stoich::clearFlux( unsigned int meshIndex )

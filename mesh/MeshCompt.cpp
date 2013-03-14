@@ -11,7 +11,7 @@
 #include "SparseMatrix.h"
 #include "VoxelJunction.h"
 #include "Boundary.h"
-#include "Stencil.h"
+// #include "Stencil.h"
 #include "MeshEntry.h"
 #include "ChemCompt.h"
 #include "MeshCompt.h"

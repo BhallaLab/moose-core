@@ -21370,4 +21370,19 @@ already done.
 Compiled in MeshCompt class. Yet to fold into class hierarchy.
 
 Folded into class hierarchy, so far just CubeMesh. Clears unit and regression
-tests.
+tests. Checkin 4460.
+
+
+Clearing out cruft from ChemCompt. Found a hard-coded stencil term there,
+probably obsolete now that I use the sparse matrix for it in the case of
+meshes. Certainly incorrect to have in case I have a Smoldyn compt.
+Somewhere a unit tests fais.
+
+
+==========================================================================
+14 Mar 2013.
+Cleaning out use of Stencil throughout the code. A bit tricky because the old
+Stoich used it, and GssaStoich depends on Stoich. Cleaning out Stoich is yet
+to come.
+
+==========================================================================

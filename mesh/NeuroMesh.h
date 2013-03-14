@@ -178,7 +178,7 @@ class NeuroMesh: public ChemCompt
 
 		//////////////////////////////////////////////////////////////////
 		// Utility functions for testing
-		const Stencil* getStencil() const;
+		// const Stencil* getStencil() const;
 		const vector< NeuroNode >& getNodes() const;
 
 		//////////////////////////////////////////////////////////////////
