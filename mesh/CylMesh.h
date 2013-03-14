@@ -16,7 +16,7 @@
  * axial dimension is considered for diffusion and subdivisions.
  * Typically used in modelling small segments of dendrite
  */
-class CylMesh: public ChemCompt
+class CylMesh: public MeshCompt
 {
 	public: 
 		CylMesh();
@@ -76,8 +76,6 @@ class CylMesh: public ChemCompt
 		double getMeshEntrySize( unsigned int fid ) const;
 		/// Virtual function to return coords of mesh Entry.
 		vector< double > getCoordinates( unsigned int fid ) const;
-		/// Virtual function to return info on Entries connected to this one
-		vector< unsigned int > getNeighbors( unsigned int fid ) const;
 		/// Virtual function to return diffusion X-section area
 		vector< double > getDiffusionArea( unsigned int fid ) const;
 		/// Virtual function to return scale factor for diffusion. 1 here.
@@ -86,8 +84,6 @@ class CylMesh: public ChemCompt
 		double extendedMeshEntrySize( unsigned int fid ) const;
 
 		//////////////////////////////////////////////////////////////////
-		/// Inherited virtual.
-		void clearExtendedMeshEntrySize();
 
 		/**
 		 * Inherited virtual func. Returns number of MeshEntry in array
@@ -117,15 +113,6 @@ class CylMesh: public ChemCompt
 		void transmitChange( const Eref& e, const Qinfo* q );
 
 		void buildStencil();
-
-		unsigned int getStencil( unsigned int meshIndex,
-			const double** entry, const unsigned int** colIndex ) const;
-
-		void extendStencil( 
-		   	const ChemCompt* other, const vector< VoxelJunction >& vj );
-
-		/// virtual func implemented here.
-		void innerResetStencil();
 		
 		//////////////////////////////////////////////////////////////////
 		// inherited virtual funcs for Boundary
@@ -176,14 +163,6 @@ class CylMesh: public ChemCompt
 		double totLen_;	/// Utility value: Total length of cylinder
 		double rSlope_;	/// Utility value: dr/dx
 		double lenSlope_; /// Utility value: dlen/dx
-
-//		double dx2_[2]; /// Used as stencil for 2 entries, each = lambda_.
-
-		// Handles core stencil for self.
-		SparseMatrix< double > coreStencil_;
-
-		// Handles extended stencil including core + abutting voxels.
-		SparseMatrix< double > m_;
 };
 
 #endif	// _CYL_MESH_H

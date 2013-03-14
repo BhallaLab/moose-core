@@ -21385,4 +21385,7 @@ Cleaning out use of Stencil throughout the code. A bit tricky because the old
 Stoich used it, and GssaStoich depends on Stoich. Cleaning out Stoich is yet
 to come.
 
+That was a bit of a diversion. Back to core track: Put the CylMesh now on
+the MeshCompt. Done. Went smoothly, clears all tests.
+
 ==========================================================================
