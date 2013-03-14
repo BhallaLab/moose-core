@@ -132,8 +132,8 @@ class ChemCompt
 		 * for the actual diffusion calculations.
 		 * In due course this should become a virtual function so that
 		 * we can have this handled by any ChemCompt class.
-		 */
 		virtual void updateDiffusion( unsigned int meshIndex ) const;
+		 */
 
 		/**
 		 * Looks up Id of the Stoich object to which this mesh should be
@@ -268,8 +268,8 @@ class ChemCompt
 		 * defines how to combine neighbouring
 		 * mesh elements to set up the diffusion du/dt term, using the
 		 * method of lines.
-		 */
 		vector< const Stencil* > stencil_;
+		 */
 	private:
 		MeshEntry entry_; /// Wrapper for self ptr
 

@@ -13,7 +13,7 @@
 #include "Boundary.h"
 #include "MeshEntry.h"
 #include "VoxelJunction.h"
-#include "Stencil.h"
+// #include "Stencil.h"
 #include "ChemCompt.h"
 #include "MeshCompt.h"
 #include "CubeMesh.h"

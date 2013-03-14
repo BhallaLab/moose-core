@@ -73,8 +73,8 @@ endif
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
-Stoich.o:	../kinetics/PoolBase.h ZombiePool.h ../kinetics/ReacBase.h ZombieReac.h ZombieBufPool.h ../kinetics/EnzBase.h ZombieEnz.h ZombieMMenz.h ../kinetics/Pool.h ../kinetics/Reac.h ../kinetics/BufPool.h ../kinetics/FuncPool.h ../kinetics/Enz.h ../kinetics/MMenz.h ../mesh/Boundary.h ../mesh/ChemCompt.h ../mesh/Stencil.h
-StoichCore.o:	../kinetics/PoolBase.h ZPool.h ../kinetics/ReacBase.h ZReac.h ZBufPool.h ../kinetics/EnzBase.h ZEnz.h ZMMenz.h ../kinetics/Pool.h ../kinetics/Reac.h ../kinetics/BufPool.h ../kinetics/FuncPool.h ../kinetics/Enz.h ../kinetics/MMenz.h ../mesh/Boundary.h ../mesh/ChemCompt.h ../mesh/Stencil.h
+Stoich.o:	../kinetics/PoolBase.h ZombiePool.h ../kinetics/ReacBase.h ZombieReac.h ZombieBufPool.h ../kinetics/EnzBase.h ZombieEnz.h ZombieMMenz.h ../kinetics/Pool.h ../kinetics/Reac.h ../kinetics/BufPool.h ../kinetics/FuncPool.h ../kinetics/Enz.h ../kinetics/MMenz.h ../mesh/Boundary.h ../mesh/ChemCompt.h
+StoichCore.o:	../kinetics/PoolBase.h ZPool.h ../kinetics/ReacBase.h ZReac.h ZBufPool.h ../kinetics/EnzBase.h ZEnz.h ZMMenz.h ../kinetics/Pool.h ../kinetics/Reac.h ../kinetics/BufPool.h ../kinetics/FuncPool.h ../kinetics/Enz.h ../kinetics/MMenz.h ../mesh/Boundary.h ../mesh/ChemCompt.h
 VoxelPools.o: VoxelPools.h
 SolverBase.o: SolverBase.h
 GssaStoich.o:	GssaStoich.h ../kinetics/PoolBase.h ZombiePool.h ../kinetics/ReacBase.h ZombieReac.h ZombieBufPool.h ../kinetics/EnzBase.h ZombieEnz.h ZombieMMenz.h ../kinetics/Pool.h ../kinetics/Reac.h ../kinetics/BufPool.h ../kinetics/FuncPool.h ../kinetics/Enz.h ../kinetics/MMenz.h ../mesh/Boundary.h ../mesh/ChemCompt.h ../randnum/randnum.h
