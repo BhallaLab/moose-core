@@ -11,7 +11,7 @@
 #include "ElementValueFinfo.h"
 #include "Boundary.h"
 #include "MeshEntry.h"
-#include "Stencil.h"
+// #include "Stencil.h"
 #include "ChemCompt.h"
 #include "../ksolve/StoichHeaders.h"
 
@@ -220,10 +220,12 @@ ChemCompt::ChemCompt()
 
 ChemCompt::~ChemCompt()
 { 
+		/*
 	for ( unsigned int i = 0; i < stencil_.size(); ++i ) {
 		if ( stencil_[i] )
 			delete stencil_[i];
 	}
+	*/
 }
 
 //////////////////////////////////////////////////////////////
@@ -372,6 +374,7 @@ void ChemCompt::lookupStoich( ObjId me ) const
 		cm->stoich_ = stoichVec[0];
 }
 
+/*
 void ChemCompt::updateDiffusion( unsigned int meshIndex ) const
 {
 	// Later we'll have provision for multiple stoich targets.
@@ -380,6 +383,7 @@ void ChemCompt::updateDiffusion( unsigned int meshIndex ) const
 		s->updateDiffusion( meshIndex, stencil_ );
 	}
 }
+*/
 
 ////////////////////////////////////////////////////////////////////////
 // Utility function

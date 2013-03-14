@@ -11,7 +11,7 @@
 #include "ElementValueFinfo.h"
 #include "MeshEntry.h"
 #include "Boundary.h"
-#include "Stencil.h"
+// #include "Stencil.h"
 #include "ChemCompt.h"
 
 static SrcFinfo5< double, unsigned int, unsigned int, vector< unsigned int>, vector< double > >  *remesh()
@@ -199,7 +199,7 @@ MeshEntry::MeshEntry( const ChemCompt* parent )
 void MeshEntry::process( const Eref& e, ProcPtr info )
 {
 	// cout << "updateDiffusion for " << e.fieldIndex() << ", at t = " << info->currTime << ", on thr = " << info->threadIndexInGroup << endl << flush;
-	parent_->updateDiffusion( e.fieldIndex() );
+	// parent_->updateDiffusion( e.fieldIndex() );
 }
 
 /**

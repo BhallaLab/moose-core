@@ -12,14 +12,14 @@
 #include "../shell/Shell.h"
 #include "Boundary.h"
 #include "MeshEntry.h"
-#include "Stencil.h"
+// #include "Stencil.h"
 #include "ChemCompt.h"
 #include "MeshCompt.h"
 #include "CubeMesh.h"
 #include "CylBase.h"
 #include "NeuroNode.h"
 #include "SparseMatrix.h"
-#include "NeuroStencil.h"
+// #include "NeuroStencil.h"
 #include "NeuroMesh.h"
 #include "CylMesh.h"
 
@@ -228,25 +228,6 @@ unsigned int buildNode( vector< NeuroNode >& nodes, unsigned int parent,
 	return startFid + numDivs;
 }
 
-void testNeuroStencilFlux()
-{
-	NeuroStencil ns;
-	vector< double > flux( 1, 0 );
-	vector< double > tminus( 1, 10.0 );
-	vector< double > t0( 1, 100.0 );
-	vector< double > tplus( 1, 1000.0 );
-	vector< double > diffConst( 1, 1.0 );
-
-	ns.addHalfFlux( 0, flux, t0, tminus, 1, 1, 1, 1, diffConst );
-	assert( doubleEq( flux[0], -90 * NA ) );
-
-	flux[0] = 0;
-	ns.addLinearFlux( 0, flux, tminus, t0, tplus, 1, 1, 1, 1, 1, 1, diffConst );
-	assert( doubleEq( flux[0], ( 1000 + 10 - 200 ) * NA ) );
-
-	cout << "." << flush;
-}
-
 void connectChildNodes( vector< NeuroNode >& nodes )
 {
 	assert( nodes.size() == 11 );
@@ -280,105 +261,6 @@ void connectChildNodes( vector< NeuroNode >& nodes )
 	assert( nodes[10].children().size() == 0 );
 }
 
-
-void testNeuroStencil()
-{
-	const unsigned int numNodes = 11;
-	const unsigned int numVoxels = 44; // 4 with 10 each, soma, 3 branch end
-	vector< NeuroNode > nodes;
-	vector< unsigned int> nodeIndex( numVoxels, 0 );
-	vector< double > vs( numVoxels, 1 );
-	vector< double > area( numVoxels, 1 );
-	double sq = 10.0 / sqrt( 2 );
-		
-	// CylBase( x, y, z, dia, len, numDivs )
-	// NeuroNode( cb, parent, children, startFid, elecCompt, isSphere )
-	// buildNode( nodes, pa, x, y, z, dia, numDivs, isDummy, startFid )
-	unsigned int startFid = 0;
-	////////////////////////////////////////////////////////////////////
-	// Build the nodes
-	////////////////////////////////////////////////////////////////////
-	startFid = buildNode( nodes, 0, 0, 0, 0, 10, 1, 0, startFid ); // soma
-	startFid = buildNode( nodes, 0, 0, -5, 0, 3, 0, 1, startFid ); // dummy1
-	startFid = buildNode( nodes, 1, 0, -15, 0, 2, 10, 0, startFid ); // B1
-	startFid = buildNode( nodes, 2, 0, -25, 0, 1, 10, 0, startFid ); // B2
-
-	startFid = buildNode( nodes, 0, 0, 5, 0, 2, 0, 1, startFid ); // dummy2
-	startFid = buildNode( nodes, 4, -sq, 5+sq, 0, 1, 10, 0, startFid ); // AL1
-	startFid = buildNode( nodes, 5, -sq*2, 5+sq*2, 0, 1, 1, 0, startFid ); // AL2
-	startFid = buildNode( nodes, 5, 0, 5+sq*2, 0, 1, 1, 0, startFid ); // AM
-	startFid = buildNode( nodes, 0, 0, 5, 0, 2, 0, 1, startFid ); // dummy3
-	startFid = buildNode( nodes, 8, sq, 5+sq, 0, 1, 10, 0, startFid ); //AR1
-	startFid = buildNode( nodes, 9, sq*2, 5+sq*2, 0, 1, 1, 0, startFid ); //AR2
-	assert( startFid == numVoxels );
-	assert( nodes.size() == numNodes );
-	connectChildNodes( nodes );
-
-	////////////////////////////////////////////////////////////////////
-	// Check lengths
-	for ( unsigned int i = 0; i < numNodes; ++i ) {
-		if ( !( nodes[i].isDummyNode() || nodes[i].isSphere() ) )
-			assert( doubleEq( nodes[i].getLength(), 10e-6 ) );
-	}
-	////////////////////////////////////////////////////////////////////
-	// Build nodeIndex vs and area arrays.
-	for ( unsigned int i = 0; i < numNodes; ++i ) {
-		assert( nodes[i].parent() < numNodes );
-		NeuroNode& parent = nodes[ nodes[i].parent() ];
-		unsigned int end = nodes[i].startFid() + nodes[i].getNumDivs();
-		for ( unsigned int j = nodes[i].startFid(); j < end; ++j ) {
-			assert( j < numVoxels );
-			nodeIndex[j] = i;
-			unsigned int k = j - nodes[i].startFid();
-			vs[j] = 0.001 * NA * nodes[i].voxelVolume( parent, k );
-			area[j] = nodes[i].getDiffusionArea( parent, k );
-		}
-	}
-	assert( doubleEq( vs[ numVoxels-1 ], NA * 0.001 * PI * 10e-6 * 0.25e-12 ) );
-	assert( doubleEq( area[ numVoxels-1 ], PI * 0.25e-12 ) );
-	////////////////////////////////////////////////////////////////////
-	// Setup done. Now build stencil and test it.
-	////////////////////////////////////////////////////////////////////
-	vector< double > diffConst( 1, 1e-12 );
-	vector< double > temp( 1, 0.0 );
-	vector< vector< double > > flux( numVoxels, temp );
-	vector< double > molNum( 1, 0 ); // We only have one pool
-
-	// S[meshIndex][poolIndex]
-	vector< vector< double > > S( numVoxels, molNum ); 
-
-	NeuroStencil ns( nodes, nodeIndex, vs, area );
-
-	zebraConcPattern( S );
-
-	for ( unsigned int i = 0; i < numVoxels; ++i ) {
-		ns.addFlux( i, flux[i], S, diffConst );
-	}
-	/*
-	for ( unsigned int i = 0; i < numVoxels; ++i ) {
-		cout << "S[" << i << "][0] = " << S[i][0] << 
-			", flux[" << i << "][0] = " << flux[i][0] << endl;
-	}
-	*/
-
-	uniformConcPattern( S, vs );
-
-	for ( unsigned int i = 0; i < numVoxels; ++i ) {
-		flux[i][0] = 0.0;
-		ns.addFlux( i, flux[i], S, diffConst );
-	}
-	for ( unsigned int i = 0; i < numVoxels; ++i ) {
-		assert( doubleEq( flux[i][0] / 1e12, 0.0 ) );
-		// Actually we could divide flux by NA: the roundoff error is
-		// due to differences in NA-type numbers.
-		/*
-		cout << "S[" << i << "][0] = " << S[i][0] << 
-			", flux[" << i << "][0] = " << flux[i][0] << endl;
-			*/
-	}
-	
-	cout << "." << flush;
-}
 
 /**
  * Low-level tests for the CylMesh object: No MOOSE calls involved.
@@ -972,6 +854,8 @@ void testNeuroMeshLinear()
 	vector< double > temp( 1, 0.0 );
 	vector< vector< double > > flux( ndc, temp );
 	
+	/*
+	 * March 2013: Deprecated, we're not using stencils this way now.
 	// Watch diffusion using stencil and direct calls to the flux 
 	// calculations rather than going through the ksolve.
 	const Stencil* stencil = 
@@ -1010,6 +894,7 @@ void testNeuroMeshLinear()
 	}
 	assert( doubleEq( tot1, totNum ) );
 	assert( doubleEq( tot2, totNum ) );
+	*/
 	
 	shell->doDelete( cell );
 	shell->doDelete( nm );
@@ -1064,6 +949,7 @@ void testNeuroMeshBranching()
 	vector< double > temp( 1, 0.0 );
 	vector< vector< double > > flux( ndc, temp );
 	
+	/*
 	// Watch diffusion using stencil and direct calls to the flux 
 	// calculations rather than going through the ksolve.
 	const Stencil* stencil = 
@@ -1109,6 +995,7 @@ void testNeuroMeshBranching()
 		tot += y;
 	}
 	assert( doubleEq( tot, totNum ) );
+	*/
 	
 	shell->doDelete( cell );
 	shell->doDelete( nm );
@@ -1511,8 +1398,6 @@ void testMesh()
 {
 	testCylBase();
 	testNeuroNode();
-	testNeuroStencilFlux();
-	testNeuroStencil();
 	testCylMesh();
 	testMidLevelCylMesh();
 	testCubeMesh();

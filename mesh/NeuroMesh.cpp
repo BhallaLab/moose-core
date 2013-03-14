@@ -13,12 +13,12 @@
 #include "ElementValueFinfo.h"
 #include "Boundary.h"
 #include "MeshEntry.h"
-#include "Stencil.h"
+// #include "Stencil.h"
 #include "ChemCompt.h"
 #include "CylBase.h"
 #include "NeuroNode.h"
 #include "SparseMatrix.h"
-#include "NeuroStencil.h"
+// #include "NeuroStencil.h"
 #include "NeuroMesh.h"
 #include "../utility/numutil.h"
 const Cinfo* NeuroMesh::initCinfo()
@@ -800,19 +800,23 @@ void NeuroMesh::transmitChange( const Eref& e, const Qinfo* q )
 //////////////////////////////////////////////////////////////////
 void NeuroMesh::buildStencil()
 {
+		/*
 	for ( unsigned int i = 0; i < stencil_.size(); ++i )
 		delete stencil_[i];
 	stencil_.resize( 1 );
 	stencil_[0] = new NeuroStencil( nodes_, nodeIndex_, vs_, area_);
+	*/
 }
 
 
+		/*
 const Stencil* NeuroMesh::getStencil() const
 {
 	if ( stencil_.size() > 0 )
 			return stencil_[0];
 	return 0;
 }
+			*/
 unsigned int NeuroMesh::getStencil( unsigned int meshIndex,
 		const double** entry, const unsigned int** colIndex ) const
 {

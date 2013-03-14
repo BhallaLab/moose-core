@@ -17,10 +17,8 @@ OBJ = \
 	CylMesh.o	\
 	CubeMesh.o	\
 	NeuroNode.o	\
-	NeuroStencil.o	\
 	NeuroMesh.o	\
 	Boundary.o	\
-	Stencil.o	\
 	testMesh.o	\
 
 HEADERS = \
@@ -38,10 +36,8 @@ CylBase.o:	CylBase.h
 CylMesh.o:	VoxelJunction.h ChemCompt.h CylBase.h CylMesh.h MeshEntry.h Boundary.h
 CubeMesh.o:	VoxelJunction.h ChemCompt.h CubeMesh.h MeshEntry.h Boundary.h
 NeuroNode.o: CylBase.h NeuroNode.h
-NeuroStencil.o: ../basecode/SparseMatrix.h CylBase.h NeuroNode.h NeuroStencil.h
-NeuroMesh.o: ../basecode/SparseMatrix.h ChemCompt.h CylBase.h NeuroNode.h NeuroStencil.h NeuroMesh.h
-Stencil.o:	Stencil.h
-testMesh.o:	../basecode/SparseMatrix.h CylBase.h NeuroNode.h NeuroStencil.h MeshEntry.h ChemCompt.h CylMesh.h Boundary.h
+NeuroMesh.o: ../basecode/SparseMatrix.h ChemCompt.h CylBase.h NeuroNode.h NeuroMesh.h
+testMesh.o:	../basecode/SparseMatrix.h CylBase.h NeuroNode.h MeshEntry.h ChemCompt.h CylMesh.h Boundary.h
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I.. -I../basecode $< -c

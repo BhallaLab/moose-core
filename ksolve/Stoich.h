@@ -348,8 +348,7 @@ class Stoich
 		 * The scale factor for u is then -2/dx^2. Index offset is 0.
 		 * The scale factor for u_+1 is then 1/dx^2. Index offset is +1.
 		 */
-		void updateDiffusion( unsigned int meshIndex, 
-			const vector< const Stencil* >& stencil);
+		void updateDiffusion( unsigned int meshIndex );
 
 		/**
 		 * Clear out the flux matrix, that is the matrix of all diffusive
