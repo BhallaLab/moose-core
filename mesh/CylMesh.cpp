@@ -471,37 +471,6 @@ vector< double > CylMesh::getCoordinates( unsigned int fid ) const
 	
 	return ret;
 }
-/// Virtual function to return info on Entries connected to this one
-vector< unsigned int > CylMesh::getNeighbors( unsigned int fid ) const
-{
-	const double* entry;
-	const unsigned int *colIndex;
-	vector< unsigned int > ret;
-	unsigned int n = m_.getRow( fid, &entry, &colIndex );
-	ret.insert( ret.end(), colIndex, colIndex + n );
-	return ret;
-		/*
-	if ( numEntries_ <= 1 )
-		return vector< unsigned int >( 0 );
-	
-	if ( isToroid_ ) {
-		vector< unsigned int > ret( 2, 0 );
-		ret[0] = ( fid == 0 ) ? numEntries_ - 1 : fid - 1;
-		ret[1] = ( fid == numEntries_ - 1 ) ? 0 : fid + 1;
-		return ret;
-	}
-
-	if ( fid == 0 )
-		return vector< unsigned int >( 1, 1 );
-	else if ( fid == numEntries_ - 1 )
-		return vector< unsigned int >( 1, numEntries_ - 2 );
-		
-	vector< unsigned int > ret( 2, 0 );
-	ret[0] = fid - 1;
-	ret[1] = fid + 1;
-	return ret;	
-	*/
-}
 
 /// Virtual function to return diffusion X-section area for each neighbor
 vector< double > CylMesh::getDiffusionArea( unsigned int fid ) const
@@ -558,18 +527,9 @@ double CylMesh::extendedMeshEntrySize( unsigned int fid ) const
 	if ( fid < numEntries_ ) {
 		return getMeshEntrySize( fid );
 	} else {
-		assert( 0 ); // Doesn't work yet.
-		return 0;
+		return MeshCompt::extendedMeshEntrySize( fid - numEntries_ );
 	}
 }
-
-// Not yet implemented.
-void CylMesh::clearExtendedMeshEntrySize()
-{
-	;
-}
-
-
 
 //////////////////////////////////////////////////////////////////
 // Dest funcsl
@@ -704,8 +664,7 @@ void CylMesh::transmitChange( const Eref& e, const Qinfo* q )
 //////////////////////////////////////////////////////////////////
 void CylMesh::buildStencil()
 {
-	coreStencil_.clear();
-	coreStencil_.setSize( numEntries_, numEntries_ );
+	setStencilSize( numEntries_, numEntries_ );
 	for ( unsigned int i = 0; i < numEntries_; ++i ) {
 		double rLow = r0_ + i * rSlope_;
 		double rHigh = r0_ + (i + 1.0) * rSlope_;
@@ -736,32 +695,9 @@ void CylMesh::buildStencil()
 			colIndex.push_back( i + 1 );
 			entry.push_back( aHigh / lambda_ );
 		}
-		coreStencil_.addRow( i, entry, colIndex );
+		addRow( i, entry, colIndex );
 	}
-		/*
-	for ( unsigned int i = 0; i < stencil_.size(); ++i )
-		delete stencil_[i];
-	stencil_.resize( 1 );
-	stencil_[0] = new LineStencil( lambda_ );
-	*/
-	m_ = coreStencil_;
-}
-
-unsigned int CylMesh::getStencil( unsigned int meshIndex,
-			const double** entry, const unsigned int** colIndex ) const
-{
-	return m_.getRow( meshIndex, entry, colIndex );
-}
-
-void CylMesh::extendStencil( 
-	   	const ChemCompt* other, const vector< VoxelJunction >& vj )
-{
-	assert( 0 ); // doesn't work yet.
-}
-
-void CylMesh::innerResetStencil()
-{
-	m_ = coreStencil_;
+	innerResetStencil();
 }
 
 //////////////////////////////////////////////////////////////////
