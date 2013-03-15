@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Mar 12 17:46:45 2013 (+0530)
+# Last-Updated: Fri Mar 15 15:29:44 2013 (+0530)
 #           By: subha
-#     Update #: 953
+#     Update #: 1006
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -46,6 +46,7 @@
 # Code:
 import imp
 import inspect
+import code
 import sys
 sys.path.append('../python')
 import os
@@ -58,6 +59,9 @@ import moose
 from moose import utils
 from mload import loadFile
 from loaderdialog import LoaderDialog
+from shell import get_shell_class
+
+__author__ = 'Subhasis Ray'
 
 # This maps model subtypes to corresponding plugin names. Should be
 # moved to a separate property file perhaps
@@ -112,6 +116,8 @@ class MWindow(QtGui.QMainWindow):
         self._loadedPlugins = {}
         self.setDockOptions(self.AnimatedDocks and self.AllowNestedDocks and self.AllowTabbedDocks)
         self.mdiArea = QtGui.QMdiArea()
+        for widget in self.getMyDockWidgets():
+            self.addDockWidget(Qt.Qt.BottomDockWidgetArea, widget)
         self.quitAction = QtGui.QAction('Quit', self)
         self.connect(self.quitAction, QtCore.SIGNAL('triggered()'), self.quit)
         self.setCentralWidget(self.mdiArea)
@@ -151,6 +157,29 @@ class MWindow(QtGui.QMainWindow):
             if fp:
                 fp.close()
         return module
+
+    def getMyDockWidgets(self):
+        """Return a list of dockwidgets that belong to the top
+        level. This is needed to keep them separate from those
+        provided by the plugins.
+
+        Currently we only have shell for this."""
+        if not hasattr(self, 'dockWidgets') or self.dockWidgets is None:
+            self.dockWidgets = {}
+            dockWidget = QtGui.QDockWidget('Python')
+            dockWidget.setWidget(self.getShellWidget())
+            self.dockWidgets[dockWidget] = True
+        return self.dockWidgets.keys()
+
+    def getShellWidget(self):
+        """Create an instance of shell widget. This can be either a
+        QSciQScintialla widget or a PyCute widget (extends QTextArea)
+        if the first is not available"""
+        if not hasattr(self, 'shellWidget') or self.shellWidget is None:            
+            self.shellWidget = get_shell_class()(code.InteractiveInterpreter(),
+                                                 message='\n\n MOOSE version %s \n\n' % (moose._moose.__version__))
+            self.shellWidget.interpreter.runsource('from __main__ import *')
+        return self.shellWidget
 
     def loadPluginClass(self, name, re=False):        
         """Load the plugin class from a plugin module.
@@ -248,7 +277,8 @@ class MWindow(QtGui.QMainWindow):
         # main window.
         dockWidgets = set([dockWidget for dockWidget in self.findChildren(QtGui.QDockWidget)])
         for dockWidget in dockWidgets:
-            dockWidget.setVisible(False)
+            if dockWidget not in self.dockWidgets:
+                dockWidget.setVisible(False)
         for dockWidget in self.plugin.getCurrentView().getToolPanes():
             if dockWidget not in dockWidgets:
                 self.addDockWidget(Qt.Qt.RightDockWidgetArea, dockWidget)
