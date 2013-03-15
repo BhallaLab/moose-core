@@ -198,4 +198,7 @@ elements under current working element
 
 """
 
+__version__ = '$Revision: 4454$'
+# $Source$
+
 from .moose import *
