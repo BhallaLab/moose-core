@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Fri Mar 15 15:29:44 2013 (+0530)
+# Last-Updated: Fri Mar 15 16:39:28 2013 (+0530)
 #           By: subha
-#     Update #: 1006
+#     Update #: 1011
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -177,8 +177,8 @@ class MWindow(QtGui.QMainWindow):
         if the first is not available"""
         if not hasattr(self, 'shellWidget') or self.shellWidget is None:            
             self.shellWidget = get_shell_class()(code.InteractiveInterpreter(),
-                                                 message='\n\n MOOSE version %s \n\n' % (moose._moose.__version__))
-            self.shellWidget.interpreter.runsource('from __main__ import *')
+                                                 message='MOOSE version %s' % (moose._moose.__version__))
+            self.shellWidget.interpreter.runsource('from moose import *')
         return self.shellWidget
 
     def loadPluginClass(self, name, re=False):        

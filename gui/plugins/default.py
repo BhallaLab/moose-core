@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Nov 13 15:58:31 2012 (+0530)
 # Version: 
-# Last-Updated: Wed Mar 13 10:55:59 2013 (+0530)
+# Last-Updated: Fri Mar 15 15:49:53 2013 (+0530)
 #           By: subha
-#     Update #: 961
+#     Update #: 972
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -159,10 +159,8 @@ class MooseTreeModel(QtCore.QAbstractItemModel):
 
     def setupModelData(self, root):
         self.rootItem = root        
-        print 'setupModelData', self.rootItem
     
     def index(self, row, column, parent):
-        print 'index', row, column, parent.internalPointer().path
         if not self.hasIndex(row, column, parent):
             return QtCore.QModelIndex()
         if not parent.isValid():
@@ -344,7 +342,6 @@ class RunView(RunBase):
     """
     def __init__(self, *args, **kwargs):
         RunBase.__init__(self, *args, **kwargs)
-        print '$$ init RunView'
         self.canvas = PlotWidget()
         self.modelRoot = self.plugin.modelRoot
         self.dataRoot = '%s/data' % (self.modelRoot)
@@ -386,10 +383,11 @@ class RunView(RunBase):
         QtCore.QObject.connect(widget.runner, QtCore.SIGNAL('update'), self.canvas.updatePlots)
         QtCore.QObject.connect(widget.runner, QtCore.SIGNAL('finished'), self.canvas.rescalePlots)
         widget.resetAndRunButton.clicked.connect(self.canvas.plotAllData) 
-        # TODO here is a problem - the simtimeExtended signal is
-        # received received before the button.clicked() signal. Hence
-        # initially there are no axes to extend. To avoid that explicitly calling addSubplot
-        self.canvas.addSubplot(1, 1)
+        # # TODO here is a problem - the simtimeExtended signal is
+        # # received received before the button.clicked() signal. Hence
+        # # initially there are no axes to extend. To avoid that explicitly calling addSubplot
+        # print '$$', self.canvas.next_id
+        # self.canvas.addSubplot(1, 1)
         QtCore.QObject.connect(widget, QtCore.SIGNAL('simtimeExtended'), self.canvas.extendXAxes)
         return self.schedulingDockWidget
 
@@ -675,7 +673,6 @@ class PlotWidget(CanvasWidget):
 
     """
     def __init__(self, *args, **kwargs):
-        print '$$ init PlotWidget'
         CanvasWidget.__init__(self, *args, **kwargs)
         self.modelRoot = '/'
         self.pathToLine = defaultdict(set)
@@ -695,7 +692,6 @@ class PlotWidget(CanvasWidget):
         path = self.dataRoot        
         time = moose.Clock('/clock').currentTime
         for tabId in moose.wildcardFind('%s/##[TYPE=Table]' % (path)):
-            print tabId.path
             tab = moose.Table(tabId)
             if len(tab.neighbours['requestData']) > 0:
                 # This is the default case: we do not plot the same
@@ -703,11 +699,9 @@ class PlotWidget(CanvasWidget):
                 # multiple variations of the same table on different
                 # axes.
                 #
-                print 'Plotting', tab.path
                 lines = self.pathToLine[tab.path]
                 if len(lines) == 0:
                     newLines = self.addTimeSeries(tab, label=tab.name)
-                    print newLines
                     self.pathToLine[tab.path].update(newLines)
                     for line in newLines:
                         self.lineToPath[line] = PlotDataSource(x='/clock', y=tab.path, z='')
@@ -719,8 +713,6 @@ class PlotWidget(CanvasWidget):
         self.figure.canvas.draw()
                 
     def addTimeSeries(self, table, *args, **kwargs):        
-        print 'args:', args
-        print 'kwargs', kwargs
         ts = np.linspace(0, moose.Clock('/clock').currentTime, len(table.vec))
         return self.plot(ts, table.vec, *args, **kwargs)
         
@@ -743,7 +735,6 @@ class PlotWidget(CanvasWidget):
 
     def extendXAxes(self, xlim):
         for axes in self.axes.values():
-            print '**', axes
             axes.set_xlim(left=0, right=xlim)
         self.figure.canvas.draw()
 
