@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Mar 11 20:24:26 2013 (+0530)
 # Version: 
-# Last-Updated: Tue Mar 12 22:44:26 2013 (+0530)
+# Last-Updated: Fri Mar 15 15:48:49 2013 (+0530)
 #           By: subha
-#     Update #: 217
+#     Update #: 227
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -109,6 +109,7 @@ class CanvasWidget(FigureCanvas):
 
     def addSubplot(self, rows, cols):        
         """Add a subplot to figure and set it as current axes."""
+        assert(self.next_id <= rows * cols)
         axes = self.figure.add_subplot(rows, cols, self.next_id+1)
         self.axes[self.next_id] = axes
         axes.set_title(chr(self.next_id + ord('A')))
