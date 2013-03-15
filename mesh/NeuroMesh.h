@@ -28,7 +28,7 @@
  * dendrite compartment, obtained by treating the spine neck as a 
  * diffusion barrier with zero volume.
  */
-class NeuroMesh: public ChemCompt
+class NeuroMesh: public MeshCompt
 {
 	public: 
 		NeuroMesh();
@@ -101,8 +101,6 @@ class NeuroMesh: public ChemCompt
 		double getMeshEntrySize( unsigned int fid ) const;
 		/// Virtual function to return coords of mesh Entry.
 		vector< double > getCoordinates( unsigned int fid ) const;
-		/// Virtual function to return info on Entries connected to this one
-		vector< unsigned int > getNeighbors( unsigned int fid ) const;
 		/// Virtual function to return diffusion X-section area
 		vector< double > getDiffusionArea( unsigned int fid ) const;
 		/// Virtual function to return scale factor for diffusion. 1 here.
@@ -111,8 +109,6 @@ class NeuroMesh: public ChemCompt
 		double extendedMeshEntrySize( unsigned int fid ) const;
 
 		//////////////////////////////////////////////////////////////////
-		void clearExtendedMeshEntrySize();
-
 		/**
 		 * Inherited virtual func. Returns number of MeshEntry in array
 		 */
@@ -141,15 +137,6 @@ class NeuroMesh: public ChemCompt
 		void transmitChange( const Eref& e, const Qinfo* q );
 
 		void buildStencil();
-
-		unsigned int getStencil( unsigned int meshIndex,
-			const double** entry, const unsigned int** colIndex ) const;
-
-		void extendStencil( 
-			const ChemCompt* other, const vector< VoxelJunction >& vj );
-
-		/// virtual func implemented here.
-		void innerResetStencil();
 
 		//////////////////////////////////////////////////////////////////
 		// inherited virtual funcs for Boundary

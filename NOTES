@@ -21316,8 +21316,8 @@ Dating back from 22 Dec: Updated list of pending things here.
 * Implement cross-compartment reactions
 * Set up sim manager to handle coupled solvers
 * Regression test for calculations for cross-compartment reac-diff.
-- Extend to CylMesh 
-- Regression test for CylMesh
++ Extend to CylMesh 
++ Regression test for CylMesh
 - Extend to NeuroMesh
 - Regression test for NeuroMesh
 - Write SpineMesh, extend to it.
@@ -21388,4 +21388,11 @@ to come.
 That was a bit of a diversion. Back to core track: Put the CylMesh now on
 the MeshCompt. Done. Went smoothly, clears all tests.
 
+Now converting the NeuroMesh. Implemented buildStencil and it compiles, but
+fails the unit tests.
+
+==========================================================================
+15 Mar 2013.
+Some fixes later. The code clears all tests but NeuroMesh isn't really being
+tested properly yet.
 ==========================================================================
