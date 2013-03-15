@@ -70,4 +70,24 @@ class MeshCompt: public ChemCompt
 		vector< double > extendedMeshEntrySize_;
 };
 
+// Helper class for setting up and sorting rows of matrix entries. 
+class Ecol {
+	public: 
+		Ecol( double e, unsigned int col )
+			: e_( e ), col_( col )
+		{;}
+
+		Ecol()
+			: e_( 0 ), col_( 0 )
+		{;}
+	
+		bool operator<( const Ecol& other ) const
+		{
+			return col_ < other.col_;
+		}
+
+		double e_;
+		double col_;
+};
+
 #endif	// _MESH_COMPT_H
