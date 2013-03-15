@@ -9,16 +9,15 @@
 
 #include <cctype>
 #include "header.h"
+#include "SparseMatrix.h"
 
 #include "ElementValueFinfo.h"
 #include "Boundary.h"
 #include "MeshEntry.h"
-// #include "Stencil.h"
 #include "ChemCompt.h"
+#include "MeshCompt.h"
 #include "CylBase.h"
 #include "NeuroNode.h"
-#include "SparseMatrix.h"
-// #include "NeuroStencil.h"
 #include "NeuroMesh.h"
 #include "../utility/numutil.h"
 const Cinfo* NeuroMesh::initCinfo()
@@ -537,42 +536,6 @@ vector< double > NeuroMesh::getCoordinates( unsigned int fid ) const
 
 	return node.getCoordinates( parent, fid - node.startFid() );
 }
-/// Virtual function to return info on Entries connected to this one
-vector< unsigned int > NeuroMesh::getNeighbors( unsigned int fid ) const
-{
-	vector< unsigned int > ret;
-	assert( fid < nodeIndex_.size() );
-	assert( nodeIndex_[fid] < nodes_.size() );
-	const NeuroNode& node = nodes_[ nodeIndex_[fid] ];
-	assert( fid >= node.startFid() );
-	assert( node.getNumDivs() > 0 );
-
-	// First, fill in fids closer to soma.
-	if ( fid == node.startFid() ) { // Check for parental fid.
-		assert ( node.parent() < nodes_.size() );
-		const NeuroNode* parent = &nodes_[ node.parent() ];
-		while ( !parent->isStartNode() ) {
-			if ( parent->isDummyNode() ) {
-				parent = &nodes_[ parent->parent() ];
-			} else {
-				ret.push_back( 
-					parent->startFid() + parent->getNumDivs() - 1 );
-				break;
-			}
-		}
-	} else {
-		ret.push_back( fid - 1 );
-	}
-
-	// Next, fill in nodes further away from soma.
-	if ( fid == node.startFid() + node.getNumDivs() - 1 ) { 
-		// TODO: check for child fids
-	} else {
-		ret.push_back( fid + 1 );
-	}
-
-	return ret;	
-}
 
 /// Virtual function to return diffusion X-section area for each neighbor
 vector< double > NeuroMesh::getDiffusionArea( unsigned int fid ) const
@@ -614,15 +577,10 @@ double NeuroMesh::extendedMeshEntrySize( unsigned int fid ) const
 	if ( fid < nodeIndex_.size() ) {
 		return getMeshEntrySize( fid );
 	} else {
-		assert( 0 ); // Doesn't work yet.
-		return 0;
+		return MeshCompt::extendedMeshEntrySize( fid - nodeIndex_.size() );
 	}
 }
 
-void NeuroMesh::clearExtendedMeshEntrySize()
-{
-		;
-}
 
 
 //////////////////////////////////////////////////////////////////
@@ -800,39 +758,55 @@ void NeuroMesh::transmitChange( const Eref& e, const Qinfo* q )
 //////////////////////////////////////////////////////////////////
 void NeuroMesh::buildStencil()
 {
-		/*
-	for ( unsigned int i = 0; i < stencil_.size(); ++i )
-		delete stencil_[i];
-	stencil_.resize( 1 );
-	stencil_[0] = new NeuroStencil( nodes_, nodeIndex_, vs_, area_);
-	*/
+// stencil_[0] = new NeuroStencil( nodes_, nodeIndex_, vs_, area_);
+	setStencilSize( nodeIndex_.size(), nodeIndex_.size() );
+	SparseMatrix< double > sm( nodeIndex_.size(), nodeIndex_.size() );
+	vector< vector< double > > paEntry( nodeIndex_.size() );
+	vector< vector< unsigned int > > paColIndex( nodeIndex_.size() );
+	// It is very easy to set up the matrix using the parent as there is 
+	// only one parent for every voxel.
+	for ( unsigned int i = 0; i < nodeIndex_.size(); ++i ) {
+		const NeuroNode &nn = nodes_[ nodeIndex_[i] ];
+		const NeuroNode *pa = &nodes_[ nn.parent() ];
+		if ( pa->isDummyNode() )
+				pa = &nodes_[ pa->parent() ];
+		assert( !pa->isDummyNode() );
+		const NeuroNode &parent = *pa;
+		if ( i == 0 ) { // Here we rely on other indices providing values
+			continue;
+		}
+		double L1 = nn.getLength() / nn.getNumDivs();
+		double L2 = parent.getLength() / parent.getNumDivs();
+		unsigned int parentFid = i - 1;
+		if ( i == nn.startFid() )
+			parentFid = parent.startFid() + parent.getNumDivs() - 1;
+		double length = 0.5 * (L1 + L2 );
+		double adx = nn.getDiffusionArea( *pa, i - nn.startFid() ) / length;
+		paEntry[ i ].push_back( adx );
+		paColIndex[ i ].push_back( parentFid );
+		// Now put in the symmetric entries.
+		paEntry[ parentFid ].push_back( adx );
+		paColIndex[ parentFid ].push_back( i );
+	}
+	for ( unsigned int i = 0; i < nodeIndex_.size(); ++i ) {
+		unsigned int num = paColIndex[i].size();
+		vector< Ecol > e( num );
+		vector< double > entry( num );
+		vector< unsigned int > colIndex( num );
+		for ( unsigned int j = 0; j < num; ++j ) {
+			e[j] = Ecol( paEntry[i][j], paColIndex[i][j] );
+		}
+		sort( e.begin(), e.end() );
+
+		for ( unsigned int j = 0; j < num; ++j ) {
+			entry[j] = e[j].e_;
+			colIndex[j] = e[j].col_;
+		}
+		addRow( i, entry, colIndex );
+	}
+	innerResetStencil();
 }
 
-
-		/*
-const Stencil* NeuroMesh::getStencil() const
-{
-	if ( stencil_.size() > 0 )
-			return stencil_[0];
-	return 0;
-}
-			*/
-unsigned int NeuroMesh::getStencil( unsigned int meshIndex,
-		const double** entry, const unsigned int** colIndex ) const
-{
-		return 0;
-}
-
-void NeuroMesh::extendStencil(
-	   	const ChemCompt* other, const vector< VoxelJunction >& vj )
-{
-	assert( 0 ); // doesn't work yet.
-}
-
-void NeuroMesh::innerResetStencil()
-{
-	assert( 0 ); // doesn't work yet.
-}
 
 const vector< NeuroNode >& NeuroMesh::getNodes() const
 {

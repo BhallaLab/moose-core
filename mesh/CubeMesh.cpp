@@ -992,27 +992,6 @@ void CubeMesh::deriveS2mFromM2s()
 // This is a general version of the function, just relies on the
 // contents of the s2m_ and m2s_ vectors to do its job.
 // Assumes that entire volume is bounded by nx_, ny_, nz.
-//
-	// Helper class for setting up and sorting the row. I wanted to put it
-	// inside the function definition but it won't compile.
-	class Ecol {
-		public: 
-			Ecol( double e, unsigned int col )
-				: e_( e ), col_( col )
-			{;}
-
-			Ecol()
-				: e_( 0 ), col_( 0 )
-			{;}
-		
-			bool operator<( const Ecol& other ) const
-			{
-				return col_ < other.col_;
-			}
-	
-			double e_;
-			double col_;
-	};
 
 void CubeMesh::buildStencil()
 {
