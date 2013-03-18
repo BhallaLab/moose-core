@@ -853,48 +853,30 @@ void testNeuroMeshLinear()
 	vector< double > diffConst( 1, D );
 	vector< double > temp( 1, 0.0 );
 	vector< vector< double > > flux( ndc, temp );
-	
-	/*
-	 * March 2013: Deprecated, we're not using stencils this way now.
-	// Watch diffusion using stencil and direct calls to the flux 
-	// calculations rather than going through the ksolve.
-	const Stencil* stencil = 
-			reinterpret_cast< NeuroMesh* >( nm.eref().data() )->
-			getStencil();
-	assert( stencil != 0 );	
-	for ( double t = 0; t < maxt; t += dt ) {
-		for ( unsigned int i = 0; i < ndc; ++i )
-			flux[i][0] = 0.0;
-		
-		for ( unsigned int i = 0; i < ndc; ++i ) {
-			stencil->addFlux( i, flux[i], S, diffConst );
-		}
-		for ( unsigned int i = 0; i < ndc; ++i )
-			S[i][0] += flux[i][0] * dt;
-	}
 
-	// Compare with analytic calculation
-	double tot1 = 0.0;
-	double tot2 = 0.0;
-	double dlBy2 = diffLength/2.0;
-	double x = dlBy2;
-	for ( unsigned int j = 0; j < numCompts; ++j ) {
-			// Factor of two because we compute a half-infinite cylinder.
-		double y = 2 * totNum * 
-			diffusionFunction( diffConst[0], diffLength, x, maxt );
-		unsigned int k = j + nodes[0].startFid();
-		//cout << "S[" << k << "][0] = " << S[k][0] << "	" << y << endl;
-		tot1 += S[k][0];
-		tot2 += y;
-		x += diffLength;
-		// Here we compare only half of the length because edge effects 
-		// mess up the flux calculation.
-		if ( j < numCompts/2 )
-			assert ( doubleApprox( y, S[k][0] ) ); 
+	MeshCompt* mc = reinterpret_cast< MeshCompt* >( nm.eref().data() );
+	assert( mc->getNumEntries() == numCompts );
+	const double adx = dia * dia * PI * 0.25 / diffLength;
+	for ( unsigned int i = 0; i < numCompts; ++i ) {
+		const double* entry; 
+		const unsigned int* colIndex; 
+		unsigned int numAbut =  mc->getStencil( i, &entry, &colIndex );
+		if ( i == 0 ) {
+			assert( numAbut == 1 );
+			assert( doubleEq( entry[0], adx ) );
+			assert( colIndex[0] == 1 );
+		} else if ( i == numCompts - 1 ) {
+			assert( numAbut == 1 );
+			assert( doubleEq( entry[0], adx ) );
+			assert( colIndex[0] == numCompts - 2  );
+		} else {
+			assert( numAbut == 2 );
+			assert( doubleEq( entry[0], adx ) );
+			assert( colIndex[0] == i - 1 );
+			assert( doubleEq( entry[1], adx ) );
+			assert( colIndex[1] == i + 1 );
+		}
 	}
-	assert( doubleEq( tot1, totNum ) );
-	assert( doubleEq( tot2, totNum ) );
-	*/
 	
 	shell->doDelete( cell );
 	shell->doDelete( nm );
