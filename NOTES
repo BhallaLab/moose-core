@@ -21318,7 +21318,7 @@ Dating back from 22 Dec: Updated list of pending things here.
 * Regression test for calculations for cross-compartment reac-diff.
 + Extend to CylMesh 
 + Regression test for CylMesh
-- Extend to NeuroMesh
++ Extend to NeuroMesh
 - Regression test for NeuroMesh
 - Write SpineMesh, extend to it.
 - Extended regression test for cross-compartment reac-diff with patchy compts.
@@ -21394,5 +21394,15 @@ fails the unit tests.
 ==========================================================================
 15 Mar 2013.
 Some fixes later. The code clears all tests but NeuroMesh isn't really being
-tested properly yet.
+tested properly yet. Checkin 4465.
+Next: Put in better NeuroMesh tests. 
+Then: Put in the cylinder and NeuroMesh interaction with CubeMesh
+Then: Regression test for NeuroMesh with a cell and chem model.
+Then: SpineMesh and interaction with NeuroMesh.
+Then: Regression test with combined Neuro and SpineMesh.
+Then: Talk to elec model for SigNeur functionality.
+==========================================================================
+18 Mar 2013
+Put in the first set of NeuroMesh tests, for a non-branching cell. Clears it.
+
 ==========================================================================
