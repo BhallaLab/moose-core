@@ -821,8 +821,6 @@ void testNeuroMeshLinear()
 	double dia = 1e-6; // metres
 	double diffLength = 0.2e-6; // metres
 	double len = diffLength * numCompts;
-	double maxt = 100.0;
-	double dt = 0.01;
 	double D = 1e-12;
 	double totNum = 1e6;
 
@@ -909,9 +907,8 @@ void testNeuroMeshBranching()
 	assert( ns == ret.first );
 	unsigned int ndc = Field< unsigned int >::get( nm, "numDiffCompts" );
 	assert( ndc == ret.second );
-	const vector< NeuroNode >& nodes = 
-			reinterpret_cast< NeuroMesh* >( nm.eref().data() )->
-			getNodes();
+	NeuroMesh* neuro = reinterpret_cast< NeuroMesh* >( nm.eref().data() );
+	const vector< NeuroNode >& nodes = neuro-> getNodes();
 	assert( nodes.size() == ns + 14 ); // 14 dummy nodes.
 	assert( nodes[0].children().size() == 2 );
 	assert( nodes[1].children().size() == 1 );
@@ -925,59 +922,58 @@ void testNeuroMeshBranching()
 	// Insert a molecule at soma
 	vector< double > molNum( 1, 0 ); // We only have one pool
 	// S[meshIndex][poolIndex]
-	vector< vector< double > > S( ndc, molNum ); 
-	S[0][0] = totNum;
-	vector< double > diffConst( 1, D );
-	vector< double > temp( 1, 0.0 );
-	vector< vector< double > > flux( ndc, temp );
-	
-	/*
+	vector< double > S( ndc, 0.0 ); 
+	S[0] = totNum;
+	vector< double > flux( ndc, 0.0 );
+	vector< double > vol( ndc, 0.0 );
+	for ( unsigned int i = 0; i < ndc; ++i )
+		vol[i] = neuro->getMeshEntrySize( i );
+
+	assert( doubleEq( vol[0], dia * dia * 0.25 * PI * diffLength ) );
+	assert( doubleEq( vol[1], dia * dia * 0.125 * PI * diffLength ) );
 	// Watch diffusion using stencil and direct calls to the flux 
 	// calculations rather than going through the ksolve.
-	const Stencil* stencil = 
-			reinterpret_cast< NeuroMesh* >( nm.eref().data() )->
-			getStencil();
-	assert( stencil != 0 );	
 	for ( double t = 0; t < maxt; t += dt ) {
-		for ( unsigned int i = 0; i < ndc; ++i )
-			flux[i][0] = 0.0;
+		flux.assign( ndc, 0.0 );
 		
 		for ( unsigned int i = 0; i < ndc; ++i ) {
-			stencil->addFlux( i, flux[i], S, diffConst );
+			const double* entry;
+			const unsigned int* colIndex;
+			unsigned int numEntries = 
+					neuro->getStencil( i, &entry, &colIndex);
+			for ( unsigned int j = 0; j < numEntries; ++j ) {
+				unsigned int k = colIndex[j];
+				double delta = ( S[k]/vol[k] - S[i]/vol[i] ) * entry[j];
+				flux[ k ] -= delta;
+				// flux[ i ] += delta; // Am I double counting?
+			}
 		}
 		for ( unsigned int i = 0; i < ndc; ++i )
-			S[i][0] += flux[i][0] * dt;
+			S[i] += flux[i] * D * dt;
 	}
 	double tot = 0.0;
-	for ( unsigned int i = 0; i < nodes.size(); ++i ) {
-		for ( unsigned int j = 0; j < nodes[i].getNumDivs(); ++j ) {
-			unsigned int k = j + nodes[i].startFid();
-			//cout << "S[" << k << "][0] = " << S[k][0] << endl;
-			tot += S[k][0];
-		}
+	for ( unsigned int i = 0; i < ndc; ++i ) {
+			tot += S[i];
 	}
 
 	// Compare with analytic solution.
 	assert( doubleEq( tot, totNum ) );
 	double x = 1.5 * diffLength;
 	for ( unsigned int i = 1; i < 11; ++i ) { // First segment of tree.
-		double y = totNum * diffusionFunction(
-				diffConst[0], diffLength, x, maxt );
-		assert( doubleApprox( y, S[i][0] ) );
-		// cout << "S[" << i << "][0] = " << S[i][0] << "	" << y << endl;
+		double y = totNum * diffusionFunction( D, diffLength, x, maxt );
+		// cout << "S[" << i << "] = " << S[i] << "	" << y << endl;
+		assert( doubleApprox( y, S[i] ) );
 		x += diffLength;
 	}
 	tot = 0;
 	for ( double x = diffLength / 2.0 ; x < 10 * len; x += diffLength ) {
 			// the 2x is needed because we add up only half of the 2-sided
 			// diffusion distribution.
-		double y = 2 * totNum * diffusionFunction( 
-				diffConst[0], diffLength, x, maxt );
+		double y = 2 * totNum * diffusionFunction( D, diffLength, x, maxt);
 		// cout << floor( x / diffLength ) << ": " << y << endl;
 		tot += y;
 	}
 	assert( doubleEq( tot, totNum ) );
-	*/
 	
 	shell->doDelete( cell );
 	shell->doDelete( nm );
