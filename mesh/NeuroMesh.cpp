@@ -300,6 +300,10 @@ void NeuroMesh::setGeometryPolicy( string v )
 	if ( v == geometryPolicy_ )
 			return;
 	geometryPolicy_ = v;
+   	bool isCylinder = ( v == "cylinder" );
+	for ( vector< NeuroNode >::iterator 
+			i = nodes_.begin(); i != nodes_.end(); ++i )
+			i->setIsCylinder( isCylinder );
 	if ( cell_ != Id() )
 		setCell( cell_ );
 }
@@ -424,6 +428,7 @@ void NeuroMesh::setCellPortion( Id cell, vector< Id > portion )
 		double maxDia = 0.0;
 		unsigned int maxDiaIndex = 0;
 		nodes_.resize( 0 );
+		bool isCylinder = ( geometryPolicy_ == "cylinder" );
 		for ( unsigned int i = 0; i < compts.size(); ++i ) {
 			if ( compts[i].element()->cinfo()->isA( "Compartment" ) ) {
 				comptMap[ compts[i] ] = nodes_.size();
@@ -432,6 +437,7 @@ void NeuroMesh::setCellPortion( Id cell, vector< Id > portion )
 					maxDia = nodes_.back().getDia();
 					maxDiaIndex = nodes_.size() -1;
 				}
+				nodes_.back().setIsCylinder( isCylinder );
 				string name = compts[i].element()->getName();
 				if ( strncasecmp( name.c_str(), "soma", 4 ) == 0 ) {
 					soma = compts[i];

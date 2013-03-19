@@ -21404,5 +21404,12 @@ Then: Talk to elec model for SigNeur functionality.
 ==========================================================================
 18 Mar 2013
 Put in the first set of NeuroMesh tests, for a non-branching cell. Clears it.
+Checkin 4466.
+Working on second set. Here I try to do a calculation for diffusion in the
+branched cell.
+
+==========================================================================
+19 Mar 2013.
+Managed to get neuromesh diffusion calculation to work.
 
 ==========================================================================
