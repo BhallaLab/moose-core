@@ -1098,6 +1098,20 @@ void CubeMesh::indexToSpace( unsigned int index,
 	z = z0_ + iz * dz_ + dz_ * 0.5;
 }
 
+unsigned int CubeMesh::spaceToIndex( double x, double y, double z ) const
+{
+	if ( x > x0_ && x < x1_ && y > y0_ && y < y1_ && z > z0_ && z < z1_ )
+	{
+		unsigned int ix = ( x - x0_ ) / dx_;
+		unsigned int iy = ( y - y0_ ) / dy_;
+		unsigned int iz = ( z - z0_ ) / dz_;
+		unsigned int index = ( iz * ny_ + iy ) * nx_ + ix;
+		unsigned int innerIndex = s2m_[ index ];
+		return innerIndex;
+	}
+	return EMPTY;
+}
+
 double CubeMesh::nearest( double x, double y, double z, 
 				unsigned int& index ) const
 {
@@ -1422,6 +1436,13 @@ void CubeMesh::matchAllEntries( const CubeMesh* other,
 	for ( unsigned int i = 0; i < min; ++i ) {
 		ret[i] = VoxelJunction( i, i );
 	}
+}
+
+void CubeMesh::matchCylMeshEntries( const ChemCompt* other,
+	   vector< VoxelJunction >& ret ) const
+{
+	other->matchMeshEntries( this, ret );
+	flipRet( ret );
 }
 
 void CubeMesh::setDiffScale( const CubeMesh* other,
