@@ -167,6 +167,10 @@ class CubeMesh: public MeshCompt
 		void matchCubeMeshEntries( const CubeMesh* other,
 			vector< VoxelJunction >& ret ) const;
 
+		// Some ugly stuff here for cyl meshes.
+		void matchCylMeshEntries( const ChemCompt* other,
+			vector< VoxelJunction >& ret ) const;
+
 		/**
 		 * Dumbed-down version that does mesh matching based only on index.
 		 * Useful for non-spatial matching and single-voxel systems.
@@ -187,6 +191,9 @@ class CubeMesh: public MeshCompt
 		/// Converts the integer meshIndex to spatial coords.
 		void indexToSpace( unsigned int index, 
 						double& x, double& y, double& z ) const;
+
+		/// Converts the 3-D coords to an index. EMPTY if out of range.
+		unsigned int spaceToIndex( double x, double y, double z ) const;
 
 		/**
 		 * Virtual function to return the distance and index of nearest

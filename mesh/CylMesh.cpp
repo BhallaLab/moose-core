@@ -10,6 +10,7 @@
 #include "header.h"
 #include "SparseMatrix.h"
 #include "ElementValueFinfo.h"
+#include "Vec.h"
 #include "Boundary.h"
 #include "MeshEntry.h"
 // #include "Stencil.h"
@@ -158,6 +159,7 @@ CylMesh::CylMesh()
 		r0_( 1.0 ),
 		r1_( 1.0 ),
 		lambda_( 1.0 ),
+		surfaceGranularity_( 0.1 ),
 		totLen_( 1.0 ),
 		rSlope_( 0.0 ),
 		lenSlope_( 0.0 )
@@ -793,11 +795,87 @@ vector< VoxelJunction >& ret ) const
 	}
 }
 
+// Select grid size. Ideally the meshes should be comparable.
+double CylMesh::selectGridSize( double h ) const
+{
+	if ( h > lambda_ )
+		h = lambda_;
+	if ( h > r0_ )
+		h = r0_;
+	if ( h > r1_ )
+		h = r1_;
+	h *= surfaceGranularity_;
+	unsigned int num = ceil( lambda_ / h );
+	h = lambda_ / num;
+
+	return h;
+}
+
+void fillPointsOnCircle( 
+				const Vec& u, const Vec& v, const Vec& q,
+				double h, double r, vector< double >& area,
+				const CubeMesh* other
+				)
+{
+	// fine-tune the h spacing so it is integral around circle.
+	// This will cause small errors in area estimate but they will
+	// be anisotropic. The alternative will have large errors toward
+	// 360 degrees, but not elsewhere.
+	unsigned int numAngle = floor( 2.0 * PI * r / h + 0.5 );
+	assert( numAngle > 0 );
+	double dtheta = 2.0 * PI / numAngle;
+	double dArea = h * dtheta * r;
+	// March along points on surface of circle centred at q.
+	for ( unsigned int j = 0; j < numAngle; ++j ) {
+		double theta = j * dtheta;
+		double c = cos( theta );
+		double s = sin( theta );
+		double p0 = q.a0() + r * ( u.a0() * c + v.a0() * s );
+		double p1 = q.a1() + r * ( u.a1() * c + v.a1() * s );
+		double p2 = q.a2() + r * ( u.a2() * c + v.a2() * s );
+		unsigned int index = other->spaceToIndex( p0, p1, p2 );
+		if ( index != CubeMesh::EMPTY )
+			area[index] += dArea;
+	}
+}
+
 void CylMesh::matchCubeMeshEntries( const CubeMesh* other,
 vector< VoxelJunction >& ret ) const
 {
-}
+	const double EPSILON = 1e-18;
+	Vec a( x1_ - x0_, y1_ - y0_, z1_ - z0_ );
+	Vec u;
+	Vec v;
+	a.orthogonalAxes( u, v );
 
+	double h = selectGridSize( other->getDx() );
+
+	unsigned int num = floor( 0.1 + lambda_ / h );
+	// March along axis of cylinder.
+	// q is the location of the point along axis.
+	for ( unsigned int i = 0; i < numEntries_; ++i ) {
+		vector< double >area( other->getNumEntries(), 0.0 );
+		for ( unsigned int j = 0; j < num; ++j ) {
+			unsigned int m = i * num + j;
+			double frac = ( m * h + h/2.0 ) / totLen_;
+			double q0 = x0_ + a.a0() * frac;
+			double q1 = y0_ + a.a1() * frac;
+			double q2 = z0_ + a.a2() * frac;
+			// get radius of cylinder at this point.
+			double r = r0_ + ( m * h + h / 2.0 ) * rSlope_;
+			fillPointsOnCircle( u, v, Vec( q0, q1, q2 ),
+						h, r, area, other );
+			}
+		// Go through all cubeMesh entries and compute diffusion 
+		// cross-section. Assume this is through a membrane, so the 
+		// only factor relevant is area. Not the distance.
+		for ( unsigned int k = 0; k < area.size(); ++k ) {
+			if ( area[k] > EPSILON ) {
+				ret.push_back( VoxelJunction( i, k, area[k] ) );
+			}
+		}
+	}
+}
 
 void CylMesh::matchNeuroMeshEntries( const NeuroMesh* other,
 vector< VoxelJunction >& ret ) const
@@ -821,8 +899,10 @@ static double dotprd ( double x0, double y0, double z0,
 		return x0 * x1 + y0 * y1 + z0 * z1;
 }
 
+
+// this is the function that does the actual calculation.
 double CylMesh::nearest( double x, double y, double z, 
-				unsigned int& index ) const
+				double& linePos, double& r ) const
 {
 	// Consider r0 = x0,y0,z0 and r1 = x1, y1, z1, and r = x,y,z.
 	// Fraction along cylinder = k
@@ -845,6 +925,18 @@ double CylMesh::nearest( double x, double y, double z,
 	double z2 = k * (z1_ - z0_) + z0_;
 
 	double ret = distance( x - x2, y - y2, z - z2 );
+	linePos = k;
+	r = r0_ + k * numEntries_ * rSlope_;
+	return ret;
+}
+
+// This function returns the index.
+double CylMesh::nearest( double x, double y, double z, 
+				unsigned int& index ) const
+{
+	double k = 0.0;
+	double r;
+	double ret = nearest( x, y, z, k, r );
 	if ( k < 0.0 ) {
 		ret = -ret;
 		index = 0;
@@ -859,3 +951,44 @@ double CylMesh::nearest( double x, double y, double z,
 	}
 	return ret;
 }
+
+
+/*
+bool isOnSurface( double x, double y, double z,
+					double dx, double dy, double dz,
+					unsigned int &index, double& adx )
+{
+	double len = distance( x1_ - x0_, y1_ - y0_, z1_ - z0_ );
+	double k = dotprd( 
+		x1_ - x0_, y1_ - y0_, z1_ - z0_,
+		x - x0_, y - y0_, z - z0_ ) / len;
+
+	// x2, y2, z2 are the coords of the nearest point.
+	double x2 = k * (x1_ - x0_) + x0_;
+	double y2 = k * (y1_ - y0_) + y0_;
+	double z2 = k * (z1_ - z0_) + z0_;
+
+	double ret = distance( x - x2, y - y2, z - z2 );
+
+	double cubeRange = sqrt(dx*dx + dy*dy + dz*dz);
+
+	// Now we check if the distance is definitely too far off for the
+	// passed in point
+	if ( k < -dx/2 || k > len + dx/2 ) // past the end.
+		return false;
+
+	double ri = k * rSlope_; // local cylinder radius.
+
+	if ( ret > ri + cubeRange || ret < ri - cubeRange )
+		return false;
+
+	// OK, now we need to find the plane of intersection of the cylinder
+	// with the cuboid. To make it easier, assume it is flat. We already
+	// know the vector from the middle of the cuboid to the nearest 
+	// cylinder point. Treat it as the normal to the intersection plane.
+	// We need: : is the plane inside the cube?
+	// What is the area of the plane till its intersection with the cube?
+
+}
+
+*/

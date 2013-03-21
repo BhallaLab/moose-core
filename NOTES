@@ -21410,6 +21410,53 @@ branched cell.
 
 ==========================================================================
 19 Mar 2013.
-Managed to get neuromesh diffusion calculation to work.
+Managed to get neuromesh diffusion calculation to work. Checkin 4467.
+
+Now looking at vector algebra to find an expression that will let me find
+z on a cylinder given x and y. 
+
+Another approach is to use given xyz from a systematic scan of the CubeMesh,
+and check distance from cylinder axis. Check if it is equal to radius. That may
+be better.
 
 ==========================================================================
+20 Mar 2013
+Getting there. 
+Define c = nearest point on cylinder axis.
+ccube = centre of cuboid voxel.
+px, py, pz: Coords of plane of intersection of cylinder with cuboid voxel.
+r: Point along c-Ccube at a distance equal to cylinder radius, from c.
+
+The key vector calculation is to find px, py, pz, and use them to 
+estimate the area of the intersection of the cylinder with the voxel.
+Alternatively I could find the points on each cuboid voxel axis, which are 
+a distance r from the axis of the cylinder.
+==========================================================================
+21 Mar 2013
+
+Simpler brute force approach, has the merit that it simultaneously does an
+approximation to the surface area. Also works directly for NeuroMesh. Also
+works for conics.
+
+1. March through a series of positions on the axis of the cylinder. 
+	- Do this at intervals of some fraction of dx, the CubeMesh voxel size,
+	but we also want to relate to lambda along cylinder as the cylinder
+	is also voxelized. dx/10 for starters. Let the interval be h. 
+	- position = r = x0 + k.( x1 - x0 )
+	- k goes from 0 to |x1-x0| in steps of h.
+	- Could also do the caps of the cylinder in similar manner.
+2. Obtain unit orthogonal vectors to the axis.
+	- Take x0. Check if 1,0,0 is parallel to axis, if so, use 0,0,1.
+	- Get cross product v0. Get cross product of v0 with axis, call it v1.
+	- Normalize v0 and v1.
+3. March through angles theta such that interval is the same distance h.
+	- dtheta = h/a (in radians)., where a is radius of cylinder/conic at 
+	that position along axis.
+	- p = v0.cos(theta) + v1.sin(theta) + r.
+4. Take each such point p and ask CubeMesh which voxel it is. 
+	- Sum up # of points on each voxel to establish intersection area.
+5. Would like to start with a filled cubic mesh and eliminate interior voxels
+	too. Need to do ahead of the above process.
+	Would also like to scale down volume of partially occluded voxels:
+	This would require to monitor each voxel volume individually.
+

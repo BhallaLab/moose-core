@@ -21,6 +21,7 @@
 #include "SparseMatrix.h"
 // #include "NeuroStencil.h"
 #include "NeuroMesh.h"
+#include "Vec.h"
 #include "CylMesh.h"
 
 /**
@@ -397,6 +398,42 @@ void testCylMesh()
 	assert( dist < 0.0 );
 	assert( index == cm.innerGetNumEntries() - 1 );
 
+	///////////////////////////////////////////////////////////////
+	dist = cm.selectGridSize( 10.0 );
+	assert( doubleEq( dist, 0.1 * cm.getLambda() ) ); 
+	dist = cm.selectGridSize( 0.1 );
+	assert( dist <= 0.01 );
+
+	///////////////////////////////////////////////////////////////
+	// Test CylMesh::fillPointsOnCircle
+	CubeMesh cube;
+	cube.setPreserveNumEntries( 0 );
+	coords[0] = 0; // X0
+	coords[1] = 0; // Y0
+	coords[2] = 0; // Z0
+
+	coords[3] = 100; // X1
+	coords[4] = 100; // Y1
+	coords[5] = 100; // Z1
+	coords[6] = 100; // DX
+	coords[7] = 100; // DY
+	coords[8] = 100; // DZ
+	cube.innerSetCoords( coords );
+	vector< VoxelJunction > ret;
+	cm.matchCubeMeshEntries( &cube, ret );
+	assert( ret.size() == cm.innerGetNumEntries() );
+	for ( unsigned int i = 0; i < ret.size(); ++i ) {
+		assert( ret[i].first == i );
+		assert( ret[i].second == 0 ); // Only one cube entry
+		double r = cm.getR0() + 
+				( cm.getR1() - cm.getR0() ) * 
+				cm.getLambda() * ( 0.5 + i ) / cm.getTotLength(); 
+		double a = r * cm.getLambda() * 2 * PI;
+		//assert( doubleApprox( ret[i].diffScale, a ) );
+		// cout << i << ". mesh: " << ret[i].diffScale << ", calc: " << a << endl;
+		assert( fabs( ret[i].diffScale - a ) < 0.5 );
+	}
+	
 	///////////////////////////////////////////////////////////////
 	// We're going to set up a new cylinder to abut the old one. The
 	// coords of x1 of the new cylinder are the same x0 of the old one, but
@@ -1372,8 +1409,29 @@ void testCubeMeshMultiJunctionTwoD()
 	cout << "." << flush;
 }
 
+void testVec()
+{
+	Vec i( 1, 0, 0 );
+	Vec j( 0, 1, 0 );
+	Vec k( 0, 0, 1 );
+
+	assert( doubleEq( i.dotProduct( j ), 0.0 ) );
+	assert( doubleEq( j.dotProduct( k ), 0.0 ) );
+	assert( doubleEq( j.dotProduct( j ), 1.0 ) );
+
+	assert( i.crossProduct( j ) == k );
+
+	Vec u, v;
+	i.orthogonalAxes( u, v );
+	assert( u == j );
+	assert( v == k );
+
+	cout << "." << flush;
+}
+
 void testMesh()
 {
+	testVec();
 	testCylBase();
 	testNeuroNode();
 	testCylMesh();

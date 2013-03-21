@@ -124,6 +124,9 @@ class CylMesh: public MeshCompt
 		double nearest( double x, double y, double z, 
 						unsigned int& index ) const;
 	
+		double nearest( double x, double y, double z, 
+						double& linePos, double& r ) const;
+	
 		void indexToSpace( unsigned int index, 
 						double& x, double& y, double& z ) const;
 		
@@ -136,6 +139,9 @@ class CylMesh: public MeshCompt
 			vector< VoxelJunction >& ret ) const;
 		void matchNeuroMeshEntries( const NeuroMesh* other,
 			vector< VoxelJunction >& ret ) const;
+
+		// Selects a grid size for generating intersection with CubeMesh.
+		double selectGridSize( double h ) const;
 
 		//////////////////////////////////////////////////////////////////
 
@@ -159,6 +165,13 @@ class CylMesh: public MeshCompt
 		double r1_; /// Radius at other end
 
 		double lambda_;	/// Length constant for diffusion. Equal to dx.
+
+		/**
+		 * surfaceGranularity_ decides how finely to subdivide lambda 
+		 * or cubic mesh side, when computing surface area of intersections
+		 * between them when diffusing. Defaults to 0.1
+		 */
+		double surfaceGranularity_; 
 
 		double totLen_;	/// Utility value: Total length of cylinder
 		double rSlope_;	/// Utility value: dr/dx
