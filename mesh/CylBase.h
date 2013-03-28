@@ -69,6 +69,27 @@ class CylBase
 		double getDiffusionArea( 
 			const CylBase& parent, unsigned int index ) const;
 
+		/**
+		 * Utility commands for building interface to cube mesh
+		 */
+		// Selects a grid size for generating intersection with CubeMesh.
+		double selectGridSize( double h, double dia1, double granularity ) 
+				const;
+
+		void matchCubeMeshEntries( const ChemCompt* other,
+			const CylBase& parent,
+			unsigned int startIndex,
+			double granularity,
+			vector< VoxelJunction >& ret ) const;
+
+		double nearest( double x, double y, double z,
+				const CylBase& parent,
+				double& linePos, double& r ) const;
+
+		double nearest( double x, double y, double z,
+				const CylBase& parent,
+				unsigned int& index ) const;
+
 	private:
 		/// end of the node. The start is given by parent coords.
 		double x_; 

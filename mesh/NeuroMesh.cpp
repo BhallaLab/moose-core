@@ -10,12 +10,14 @@
 #include <cctype>
 #include "header.h"
 #include "SparseMatrix.h"
+#include "Vec.h"
 
 #include "ElementValueFinfo.h"
 #include "Boundary.h"
 #include "MeshEntry.h"
 #include "ChemCompt.h"
 #include "MeshCompt.h"
+#include "CubeMesh.h"
 #include "CylBase.h"
 #include "NeuroNode.h"
 #include "NeuroMesh.h"
@@ -837,4 +839,28 @@ double NeuroMesh::nearest( double x, double y, double z,
 				unsigned int& index ) const
 {
 	return 0;
+}
+
+void NeuroMesh::matchSpineMeshEntries( const ChemCompt* other,
+	   vector< VoxelJunction >& ret ) const
+{
+}
+
+void NeuroMesh::matchCubeMeshEntries( const ChemCompt* other,
+	   vector< VoxelJunction >& ret ) const
+{
+	for( unsigned int i = 0; i < nodes_.size(); ++i ) {
+		const NeuroNode& nn = nodes_[i];
+		if ( !nn.isDummyNode() ) {
+			assert( nn.parent() < nodes_.size() );
+			const NeuroNode& pa = nodes_[ nn.parent() ];
+			nn.matchCubeMeshEntries( other, pa, nn.startFid(), 
+							surfaceGranularity_, ret );
+		}
+	}
+}
+
+void NeuroMesh::matchNeuroMeshEntries( const ChemCompt* other,
+	   vector< VoxelJunction >& ret ) const
+{
 }

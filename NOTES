@@ -21460,3 +21460,20 @@ works for conics.
 	Would also like to scale down volume of partially occluded voxels:
 	This would require to monitor each voxel volume individually.
 
+Did points 1 to 4, put in unit test. Answer is close (within a percent)
+but not precisely what I expected. Checkin 4469.
+
+New issue is that these area terms which are close but not precise, are not
+really what the diffusion calculations use. Nor are they used, as far as I
+can see, by the chemical reactions, though they should be.
+
+Deeper issue: There is no way now to handle reactions between voxels with
+different volumes. Or from a 2-D membrane surface.
+
+==========================================================================
+22 Mar 2013.
+Fortunately this is orthogonal to the implementation of these calculations.
+I'll set up the NeuroMesh to do the same calculation while I think about how
+best to set up something useful.
+
+==========================================================================

@@ -7,6 +7,9 @@
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
 
+#ifndef _VEC_H
+#define _VEC_H
+
 class Vec {
 	public:
 		Vec( double a0, double a1, double a2 );
@@ -15,6 +18,8 @@ class Vec {
 		{;}
 
 		double length() const;
+
+		double distance( const Vec& other ) const;
 
 		double dotProduct( const Vec& other ) const;
 
@@ -36,10 +41,21 @@ class Vec {
 				return a2_;
 		}
 
+		/**
+		 * Returns a point on the line from start to self, a fraction k
+		 * from the start.
+		 * r = start + k.(self - start)
+		 */
+		Vec pointOnLine( const Vec& start, double k );
+
 		bool operator==( const Vec& other ) const;
+
+		Vec operator-( const Vec& other ) const;
 
 	private:
 		double a0_; 
 		double a1_;
 	   	double a2_;
 };
+
+#endif // _VEC_H
