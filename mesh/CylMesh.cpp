@@ -19,7 +19,6 @@
 #include "CubeMesh.h"
 #include "CylBase.h"
 #include "NeuroNode.h"
-#include "SparseMatrix.h"
 // #include "NeuroStencil.h"
 #include "NeuroMesh.h"
 #include "CylMesh.h"
