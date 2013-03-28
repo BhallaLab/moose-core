@@ -6,10 +6,21 @@
 ** GNU Lesser General Public License version 2.1
 ** See the file COPYING.LIB for the full notice.
 **********************************************************************/
-#include <vector>
-#include <cassert>
-using namespace std;
+//#include <vector>
+//#include <cassert>
+//using namespace std;
+#include "header.h"
+#include "SparseMatrix.h"
+// #include "ElementValueFinfo.h"
+#include "Boundary.h"
+#include "MeshEntry.h"
+#include "VoxelJunction.h"
+#include "ChemCompt.h"
+#include "MeshCompt.h"
+#include "CubeMesh.h"
 #include "CylBase.h"
+#include "Vec.h"
+
 extern const double PI; // defined in consts.cpp
 
 CylBase::CylBase( double x, double y, double z, 
@@ -206,5 +217,150 @@ double CylBase::getDiffusionArea(
 				static_cast< double >( numDivs_ );
 	double r0 = 0.5 * ( parent.dia_ * ( 1.0 - frac0 ) + dia_ * frac0 );
 	return PI * r0 * r0;
+}
+
+
+
+// Select grid size. Ideally the meshes should be comparable.
+double CylBase::selectGridSize( double h, double dia1, 
+					double granularity ) const
+{
+	double lambda = length_ / numDivs_;
+	if ( h > lambda )
+		h = lambda;
+	if ( h > dia_ / 2.0 )
+		h = dia_ / 2.0;
+	if ( h > dia1/2.0 )
+		h = dia1/2.0;
+	h *= granularity;
+	unsigned int num = ceil( lambda / h );
+	h = lambda / num;
+
+	return h;
+}
+
+static void fillPointsOnCircle( 
+				const Vec& u, const Vec& v, const Vec& q,
+				double h, double r, vector< double >& area,
+				const CubeMesh* other
+				)
+{
+	// fine-tune the h spacing so it is integral around circle.
+	// This will cause small errors in area estimate but they will
+	// be anisotropic. The alternative will have large errors toward
+	// 360 degrees, but not elsewhere.
+	unsigned int numAngle = floor( 2.0 * PI * r / h + 0.5 );
+	assert( numAngle > 0 );
+	double dtheta = 2.0 * PI / numAngle;
+	double dArea = h * dtheta * r;
+	// March along points on surface of circle centred at q.
+	for ( unsigned int j = 0; j < numAngle; ++j ) {
+		double theta = j * dtheta;
+		double c = cos( theta );
+		double s = sin( theta );
+		double p0 = q.a0() + r * ( u.a0() * c + v.a0() * s );
+		double p1 = q.a1() + r * ( u.a1() * c + v.a1() * s );
+		double p2 = q.a2() + r * ( u.a2() * c + v.a2() * s );
+		unsigned int index = other->spaceToIndex( p0, p1, p2 );
+		if ( index != CubeMesh::EMPTY )
+			area[index] += dArea;
+	}
+}
+
+void CylBase::matchCubeMeshEntries( const ChemCompt* compt,
+	const CylBase& parent,
+	unsigned int startIndex,
+	double granularity,
+	vector< VoxelJunction >& ret ) const
+{
+	const CubeMesh* other = dynamic_cast< const CubeMesh* >( compt );
+	assert( other );
+	const double EPSILON = 1e-18;
+	Vec a( parent.x_ - x_, parent.y_ - y_, parent.z_ - z_ );
+	Vec u;
+	Vec v;
+	a.orthogonalAxes( u, v );
+
+	double h = selectGridSize( other->getDx(), parent.dia_/2, granularity );
+	double lambda = length_ / numDivs_;
+
+	unsigned int num = floor( 0.1 + lambda / h );
+	// March along axis of cylinder.
+	// q is the location of the point along axis.
+	double rSlope = ( parent.dia_ - dia_ ) * 0.5 / length_;
+	for ( unsigned int i = 0; i < numDivs_; ++i ) {
+		vector< double >area( other->getNumEntries(), 0.0 );
+		for ( unsigned int j = 0; j < num; ++j ) {
+			unsigned int m = i * num + j;
+			double frac = ( m * h + h/2.0 ) / length_;
+			double q0 = x_ + a.a0() * frac;
+			double q1 = y_ + a.a1() * frac;
+			double q2 = z_ + a.a2() * frac;
+			// get radius of cylinder at this point.
+			double r = dia_/2.0 + ( m * h + h / 2.0 ) * rSlope;
+			fillPointsOnCircle( u, v, Vec( q0, q1, q2 ),
+						h, r, area, other );
+			}
+		// Go through all cubeMesh entries and compute diffusion 
+		// cross-section. Assume this is through a membrane, so the 
+		// only factor relevant is area. Not the distance.
+		for ( unsigned int k = 0; k < area.size(); ++k ) {
+			if ( area[k] > EPSILON ) {
+				ret.push_back( VoxelJunction( i + startIndex, k, area[k] ));
+			}
+		}
+	}
+}
+
+// this is the function that does the actual calculation.
+double CylBase::nearest( double x, double y, double z, 
+				const CylBase& parent,
+				double& linePos, double& r ) const
+{
+	// Consider r0 = x0,y0,z0 and r1 = x1, y1, z1, and r = x,y,z.
+	// Fraction along cylinder = k
+	//
+	// Then, point p along line from r0 to r1 is
+	// p = k( r0-r1) + r1.
+	//
+	// Solving,
+	// k = (r0 - r1).(r - r1) / (|r0-r1|^2)
+	//
+	Vec a( x_, y_, z_ );
+	Vec b( parent.x_, parent.y_, parent.z_ );
+	Vec c( x, y, z );
+	
+	double dist = b.distance( a );
+	double k = ( b - a ).dotProduct( c - a ) / ( dist * dist );
+	Vec pt = a.pointOnLine( b, k );
+
+	double ret = c.distance(pt);
+	linePos = k;
+	double rSlope = ( dia_ - parent.dia_ ) / numDivs_;
+	r = dia_/2.0 + k * numDivs_ * rSlope;
+	return ret;
+}
+
+// This function returns the index.
+double CylBase::nearest( double x, double y, double z, 
+				const CylBase& parent,
+				unsigned int& index ) const
+{
+	double k = 0.0;
+	double r;
+	double ret = nearest( x, y, z, parent, k, r );
+	if ( k < 0.0 ) {
+		ret = -ret;
+		index = 0;
+	} else if ( k > 1.0 ) {
+		ret = -ret;
+		index = numDivs_ - 1;
+	} else { // Inside length of cylinder, now is it inside radius?
+		index = k * numDivs_;
+		// double ri = r0_ + (index + 0.5) * rSlope_;
+		if ( ret > r )
+			ret = -ret;
+	}
+	return ret;
 }
 

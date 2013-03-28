@@ -50,9 +50,26 @@ void Vec::orthogonalAxes( Vec& u, Vec& v ) const {
 	v.unitLength();
 }
 
+Vec Vec::pointOnLine( const Vec& start, double k )
+{
+	return Vec( 
+					start.a0_ + k * ( a0_ - start.a0_ ),
+					start.a1_ + k * ( a1_ - start.a1_ ),
+					start.a2_ + k * ( a2_ - start.a2_ ) );
+}
+
 bool Vec::operator==( const Vec& other ) const {
 	return 
 		doubleEq( a0_, other.a0_) && 
 		doubleEq( a1_, other.a1_) && 
 		doubleEq( a2_, other.a2_);
+}
+
+Vec Vec::operator-( const Vec& other ) const {
+	return Vec( a0_ - other.a0_, a1_ - other.a1_, a2_ - other.a2_ );
+}
+
+double Vec::distance( const Vec& other ) const
+{
+	return ( *this - other ).length();
 }

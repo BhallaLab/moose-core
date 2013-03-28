@@ -8,6 +8,14 @@
 **********************************************************************/
 
 #include "header.h"
+#include "SparseMatrix.h"
+#include "Boundary.h"
+#include "MeshEntry.h"
+#include "VoxelJunction.h"
+#include "ChemCompt.h"
+#include "MeshCompt.h"
+#include "CubeMesh.h"
+#include "Vec.h"
 #include "CylBase.h"
 #include "NeuroNode.h"
 

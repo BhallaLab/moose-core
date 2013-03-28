@@ -145,6 +145,15 @@ class NeuroMesh: public MeshCompt
 		void matchMeshEntries( const ChemCompt* other, 
 			vector< VoxelJunction > & ret ) const;
 
+		void matchSpineMeshEntries( const ChemCompt* other, 
+			vector< VoxelJunction > & ret ) const;
+
+		void matchCubeMeshEntries( const ChemCompt* other, 
+			vector< VoxelJunction > & ret ) const;
+
+		void matchNeuroMeshEntries( const ChemCompt* other, 
+			vector< VoxelJunction > & ret ) const;
+
 		double nearest( double x, double y, double z, 
 						unsigned int& index ) const;
 	
@@ -208,6 +217,13 @@ class NeuroMesh: public MeshCompt
 		bool skipSpines_; 
 
 		string geometryPolicy_;
+
+		/**
+		 * Decides how finely to subdivide diffLength_ or radius or cubic
+		 * mesh side when computing surfacearea of intersections with 
+		 * CubeMesh. Defaults to 0.1.
+		 */
+		double surfaceGranularity_;
 
 		/*
 		NeuroStencil ns_;

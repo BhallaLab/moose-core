@@ -34,7 +34,7 @@ MeshEntry.o:	MeshEntry.h
 Boundary.o:	Boundary.h
 ChemCompt.o:	VoxelJunction.h ChemCompt.h MeshEntry.h Boundary.h ../ksolve/RateTerm.h ../kinetics/FuncTerm.h ../ksolve/KinSparseMatrix.h ../ksolve/Stoich.h
 MeshCompt.o:	VoxelJunction.h ChemCompt.h MeshCompt.h MeshEntry.h Boundary.h ../ksolve/RateTerm.h ../kinetics/FuncTerm.h ../basecode/SparseMatrix.h
-CylBase.o:	CylBase.h
+CylBase.o:	Vec.h CylBase.h
 CylMesh.o:	Vec.h VoxelJunction.h ChemCompt.h CylBase.h CylMesh.h MeshEntry.h Boundary.h
 CubeMesh.o:	VoxelJunction.h ChemCompt.h CubeMesh.h MeshEntry.h Boundary.h
 NeuroNode.o: CylBase.h NeuroNode.h
