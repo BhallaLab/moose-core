@@ -5,7 +5,7 @@ import re
 from PyQt4 import QtGui, QtCore, Qt
 #import pygraphviz as pgv
 import networkx as nx
-#sys.path.insert(0, '/home/harsha/BuildQ/gui')
+sys.path.insert(0, '/home/harsha/BuildQ/gui')
 import numpy as np
 import config
 import pickle 
@@ -157,7 +157,6 @@ class  KineticsWidget(DefaultEditorWidget):
 
         """ All the moose Object are connected for visualization """
         self.drawLine_arrow(itemignoreZooming=False)
-
         self.view = GraphicalView(self.sceneContainer,self.border,self)
         self.hLayout.addWidget(self.view)
     
@@ -283,7 +282,6 @@ class  KineticsWidget(DefaultEditorWidget):
         self.emit(QtCore.SIGNAL("itemPressed(PyQt_PyObject)"),mooseObject)
 
     def drawLine_arrow(self, itemignoreZooming=False):
- 
         for inn,out in self.srcdesConnection.items():
             ''' self.srcdesConnection is dictionary which contains key,value \
                 key is Enzyme or Reaction  and value [[list of substrate],[list of product]] (tuple)
@@ -294,38 +292,51 @@ class  KineticsWidget(DefaultEditorWidget):
                 if len(out[0])== 0:
                     print inn.class_ + ':' +inn[0].name+ " doesn't output message"
                 else:
+                    src = self.mooseId_GObj[inn]
                     for items in (items for items in out[0] ):
-                        src = self.mooseId_GObj[inn]
                         des = self.mooseId_GObj[element(items[0]).getId()]
-                        self.lineCord(src,des,items[1],itemignoreZooming)
+                        
+                        self.lineCord(src,des,items,itemignoreZooming)
                 if len(out[1]) == 0:
                     print inn.class_ + ':' +inn[0].name+ " doesn't output message"
                 else:
-                    
                     for items in (items for items in out[1] ):
-                        src = self.mooseId_GObj[inn]
                         des = self.mooseId_GObj[element(items[0]).getId()]
-                        self.lineCord(src,des,items[1],itemignoreZooming)
+                        self.lineCord(src,des,items,itemignoreZooming)
 
             elif isinstance(out,list):
                 if len(out) == 0:
                     print "Func pool doesn't have sumtotal"
                 else:
+                    src = self.mooseId_GObj[element(inn).getId()]
                     for items in (items for items in out ):
-                        src = self.mooseId_GObj[element(inn).getId()]
                         des = self.mooseId_GObj[element(items[0]).getId()]
-                        self.lineCord(src,des,items[1],itemignoreZooming)
+                        self.lineCord(src,des,items,itemignoreZooming)
     
-    def lineCord(self,src,des,endtype,itemignoreZooming):
-        source = element(next((k for k,v in self.mooseId_GObj.items() if v == src), None))
+    def lineCord(self,src,des,type_no,itemignoreZooming):
+        endtype = type_no[1]
         line = 0
         if (src == "") and (des == ""):
             print "Source or destination is missing or incorrect"
             return 
-        srcdes_list = [src,des,endtype]
-        arrow = calcArrow(src,des,endtype,itemignoreZooming,self.iconScale)
-        for l,v in self.object2line[src]:
-            if v == des:
+        srcdes_list = [src,des,endtype,line]
+        arrow = calcArrow(srcdes_list,itemignoreZooming,self.iconScale)
+        self.drawLine(srcdes_list,arrow)
+        #line = line +1
+        while(type_no[2] > 1 and line != (type_no[2]-1)):
+            line = line +1
+            srcdes_list =[src,des,endtype,line]
+            arrow = calcArrow(srcdes_list,itemignoreZooming,self.iconScale)
+            self.drawLine(srcdes_list,arrow)
+
+    def drawLine(self,srcdes_list,arrow):
+        src = srcdes_list[0]
+        des = srcdes_list[1]
+        endtype = srcdes_list[2]
+        line = srcdes_list[3]
+        source = element(next((k for k,v in self.mooseId_GObj.items() if v == src), None))
+        for l,v,o in self.object2line[src]:
+            if v == des and o ==line:
                 l.setPolygon(arrow)
                 arrowPen = l.pen()
                 arrowPenWidth = self.arrowsize*self.iconScale
@@ -333,6 +344,7 @@ class  KineticsWidget(DefaultEditorWidget):
                 arrowPen.setWidth(arrowPenWidth)
                 l.setPen(arrowPen)
                 return
+        
         qgLineitem = self.sceneContainer.addPolygon(arrow)
         pen = QtGui.QPen(QtCore.Qt.green, 0, Qt.Qt.SolidLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin)
         pen.setWidth(self.arrowsize)
@@ -351,8 +363,8 @@ class  KineticsWidget(DefaultEditorWidget):
         elif isinstance(source,moose.StimulusTable):
             pen.setColor(QtCore.Qt.yellow)
         self.lineItem_dict[qgLineitem] = srcdes_list
-        self.object2line[ src ].append( ( qgLineitem, des) )
-        self.object2line[ des ].append( ( qgLineitem, src ) )
+        self.object2line[ src ].append( ( qgLineitem, des,line) )
+        self.object2line[ des ].append( ( qgLineitem, src,line ) )
         qgLineitem.setPen(pen)
 
     def updateArrow(self,qGTextitem):
@@ -360,7 +372,8 @@ class  KineticsWidget(DefaultEditorWidget):
         if qGTextitem not in self.object2line:
             return
         listItem = self.object2line[qGTextitem]
-        for ql, va in self.object2line[qGTextitem]:
+        for ql, va,order in self.object2line[qGTextitem]:
+            srcdes = []
             srcdes = self.lineItem_dict[ql]
             # Checking if src (srcdes[0]) or des (srcdes[1]) is ZombieEnz,
             # if yes then need to check if cplx is connected to any mooseObject, 
@@ -371,7 +384,7 @@ class  KineticsWidget(DefaultEditorWidget):
                 self.cplxUpdatearrow(srcdes[1])
             
             # For calcArrow(src,des,endtype,itemignoreZooming) is to be provided
-            arrow = calcArrow(srcdes[0],srcdes[1],srcdes[2],self.itemignoreZooming,self.iconScale)
+            arrow = calcArrow(srcdes,self.itemignoreZooming,self.iconScale)
             ql.setPolygon(arrow)
     
     def cplxUpdatearrow(self,srcdes):
@@ -456,12 +469,15 @@ if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     size = QtCore.QSize(1024 ,768)
     modelPath = 'Kholodenko'
-    modelPath = 'acc61'
-    modelPath = 'acc8'
+    #modelPath = 'acc61'
+    #modelPath = 'acc8'
+    modelPath = '3ARECB'
+    #modelPath = '3AreacB'
+    modelPath = '3Areac2B'
     itemignoreZooming = False
     try:
-        #filepath = '../../Demos/Genesis_files/'+modelPath+'.cspace'
-        filepath = '/home/harsha/genesis_files/gfile/'+modelPath+'.g'
+        filepath = '../../Demos/Genesis_files/'+modelPath+'.g'
+        #filepath = '/home/harsha/genesis_files/gfile/'+modelPath+'.g'
         print filepath
         f = open(filepath, "r")
         loadModel(filepath,'/'+modelPath)
