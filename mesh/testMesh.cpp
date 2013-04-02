@@ -802,11 +802,11 @@ Id makeCompt( Id parentCompt, Id parentObj,
 	Field< double >::set( ret, "x0", pax );
 	Field< double >::set( ret, "y0", pay );
 	Field< double >::set( ret, "z0", 0.0 );
-	double x = pax + len * sin( theta * PI / 360.0 );
-	double y = pay + len * cos( theta * PI / 360.0 );
+	double x = pay + len * cos( theta * PI / 360.0 );
+	double y = pax + len * sin( theta * PI / 360.0 );
 	Field< double >::set( ret, "x", x );
 	Field< double >::set( ret, "y", y );
-	Field< double >::set( ret, "y", 0.0 );
+	Field< double >::set( ret, "z", 0.0 );
 	Field< double >::set( ret, "diameter", dia );
 	Field< double >::set( ret, "length", len );
 
@@ -875,7 +875,7 @@ void testNeuroMeshLinear()
 	const vector< NeuroNode >& nodes = 
 			reinterpret_cast< NeuroMesh* >( nm.eref().data() )->
 			getNodes();
-	assert( nodes.size() == 1 );
+	assert( nodes.size() == 2 ); // Self plus dummy parent.
 	assert( nodes[0].children().size() == 0 );
 
 	// Insert a molecule at first subdivision of soma. I use a dummy 
@@ -912,6 +912,17 @@ void testNeuroMeshLinear()
 			assert( colIndex[1] == i + 1 );
 		}
 	}
+
+	///////////////////////////////////////////////////////////////////
+	// Test the 'nearest' function
+	unsigned int index;
+	double near = mc->nearest( diffLength * 27.5, diffLength / 10.0, 0, index );
+	assert( index == 27 );
+	assert( doubleEq( near, diffLength / 10.0 ) );
+
+	near = mc->nearest( -10, 0, 0, index );
+	assert( index == 0 );
+	assert( doubleEq( near, -1.0 ) );
 	
 	shell->doDelete( cell );
 	shell->doDelete( nm );
@@ -946,7 +957,7 @@ void testNeuroMeshBranching()
 	assert( ndc == ret.second );
 	NeuroMesh* neuro = reinterpret_cast< NeuroMesh* >( nm.eref().data() );
 	const vector< NeuroNode >& nodes = neuro-> getNodes();
-	assert( nodes.size() == ns + 14 ); // 14 dummy nodes.
+	assert( nodes.size() == ns + 15 ); // 15 dummy nodes.
 	assert( nodes[0].children().size() == 2 );
 	assert( nodes[1].children().size() == 1 );
 	assert( nodes[2].children().size() == 1 );

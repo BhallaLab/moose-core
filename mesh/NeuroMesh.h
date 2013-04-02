@@ -154,6 +154,14 @@ class NeuroMesh: public MeshCompt
 		void matchNeuroMeshEntries( const ChemCompt* other, 
 			vector< VoxelJunction > & ret ) const;
 
+		/**
+		 * This works a little different from other subclass versions of
+		 * the function. It finds the index of the
+		 * mesh entry whose centre is closest to the specified coords,
+		 * and returns the distance to the centre.
+		 * Doesn't worry about whether this distance is inside or outside
+		 * cell.
+		 */
 		double nearest( double x, double y, double z, 
 						unsigned int& index ) const;
 	

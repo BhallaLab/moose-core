@@ -364,8 +364,13 @@ Id NeuroMesh::putSomaAtStart( Id origSoma, unsigned int maxDiaIndex )
 
 void NeuroMesh::buildNodeTree( const map< Id, unsigned int >& comptMap )
 {
+	const double EPSILON = 1e-8;
 		// First pass: just build up the tree.
-	for ( unsigned int i = 0; i < nodes_.size(); ++i ) {
+	bool isCylinder = (geometryPolicy_ == "cylinder" );
+	unsigned int numOrigNodes = nodes_.size();
+	if ( numOrigNodes == 0 )
+		return;
+	for ( unsigned int i = 0; i < numOrigNodes; ++i ) {
 		// returns Id() if no parent found.
 		Id pa = getParentFromMsg( nodes_[i].elecCompt() ); 
 		if ( pa != Id() ) {
@@ -376,6 +381,31 @@ void NeuroMesh::buildNodeTree( const map< Id, unsigned int >& comptMap )
 			// unsigned int ipa = comptMap[pa];
 			nodes_[i].setParent( ipa );
 			nodes_[ipa].addChild( i );
+		} else { 
+			// Here we need to track the coords of the other end 
+			// 	of the parent-less compartment. It is typically a soma, 
+			// 	but not always. These coords get assigned to a dummy node.
+			NeuroNode dummy( nodes_[ i ] );
+			dummy.clearChildren();
+			dummy.setNumDivs( 0 ); // Identifies it as a dummy.
+			dummy.setIsCylinder( isCylinder );
+			Id elec = nodes_[i].elecCompt();
+			assert( elec.element()->cinfo()->isA( "Compartment" ) );
+			dummy.setX( Field< double >::get( elec, "x0" ) );
+			dummy.setY( Field< double >::get( elec, "y0" ) );
+			dummy.setZ( Field< double >::get( elec, "z0" ) );
+			// This dummy has no parent. Use self index for parent.
+			dummy.setParent( nodes_.size() );
+			dummy.addChild( i );
+			nodes_[i].setParent( nodes_.size() );
+			double length = nodes_[i].getLength();
+			// Idiot check for a bad dimensioned compartment.
+			if ( nodes_[i].calculateLength( dummy ) < EPSILON ) {
+				dummy.setX( -length );
+				double temp = nodes_[i].calculateLength( dummy );
+				assert( doubleEq( temp, length ) );
+			}
+			nodes_.push_back( dummy );
 		}
 	}
 	// Second pass: insert dummy nodes.
@@ -383,24 +413,22 @@ void NeuroMesh::buildNodeTree( const map< Id, unsigned int >& comptMap )
 	// them will need a dummyNode to connect to.
 	// In all the policies so far, the dummy nodes take the same diameter
 	// as the children that they host.
-	bool isCylinder = (geometryPolicy_ == "cylinder" );
 	for ( unsigned int i = 0; i < nodes_.size(); ++i ) {
 		vector< unsigned int > kids = nodes_[i].children();
-		if ( kids.size() > 1 ) {
+		if ( (!nodes_[i].isDummyNode()) && kids.size() > 1 ) {
 			for( unsigned int j = 0; j < kids.size(); ++j ) {
 				NeuroNode dummy( nodes_[ kids[j] ] );
 				dummy.clearChildren();
 				dummy.setNumDivs( 0 );
 				dummy.setIsCylinder( isCylinder );
-				// Don't worry about coords yet.
-				dummy.setX( nodes_[i].getX() );
+				dummy.setX( nodes_[i].getX() ); // Use coords of parent.
 				dummy.setY( nodes_[i].getY() );
 				dummy.setZ( nodes_[i].getZ() );
 				// Now insert the dummy as a surrogate parent.
 				dummy.setParent( i );
 				dummy.addChild( kids[j] );
 				nodes_[ kids[j] ].setParent( nodes_.size() );
-				kids[j] = nodes_.size();
+				kids[j] = nodes_.size(); // Replace the old kid entry with the dummy
 				nodes_.push_back( dummy );
 			}
 			// Connect up the parent to the dummy nodes.
@@ -776,19 +804,27 @@ void NeuroMesh::buildStencil()
 	for ( unsigned int i = 0; i < nodeIndex_.size(); ++i ) {
 		const NeuroNode &nn = nodes_[ nodeIndex_[i] ];
 		const NeuroNode *pa = &nodes_[ nn.parent() ];
-		if ( pa->isDummyNode() )
-				pa = &nodes_[ pa->parent() ];
-		assert( !pa->isDummyNode() );
-		const NeuroNode &parent = *pa;
-		if ( i == 0 ) { // Here we rely on other indices providing values
-			continue;
-		}
 		double L1 = nn.getLength() / nn.getNumDivs();
-		double L2 = parent.getLength() / parent.getNumDivs();
+		double L2 = L1;
 		unsigned int parentFid = i - 1;
-		if ( i == nn.startFid() )
-			parentFid = parent.startFid() + parent.getNumDivs() - 1;
+		if ( nn.startFid() == i ) { 
+			// We're at the start of the node, need to refer to parent for L
+			const NeuroNode* realParent = pa;
+			if ( pa->isDummyNode() ) {
+				realParent = &nodes_[ realParent->parent() ];
+				if ( realParent->isDummyNode() ) {
+					// Still dummy. So we're at a terminus. No diffusion
+					continue;
+				}
+			}
+			L2 = realParent->getLength() / realParent->getNumDivs();
+			parentFid = realParent->startFid() + 
+					realParent->getNumDivs() - 1;
+		}
+		assert( parentFid < nodeIndex_.size() );
 		double length = 0.5 * (L1 + L2 );
+		// Note that we use the parent node here even if it is a dummy.
+		// It has the correct diameter.
 		double adx = nn.getDiffusionArea( *pa, i - nn.startFid() ) / length;
 		paEntry[ i ].push_back( adx );
 		paColIndex[ i ].push_back( parentFid );
@@ -796,6 +832,11 @@ void NeuroMesh::buildStencil()
 		paEntry[ parentFid ].push_back( adx );
 		paColIndex[ parentFid ].push_back( i );
 	}
+
+	// Now go through the paEntry and paColIndex and build sparse matrix.
+	// We have to do this separately because the sparse matrix has to be
+	// build up in row order, and sorted, whereas the entries above 
+	// are random access.
 	for ( unsigned int i = 0; i < nodeIndex_.size(); ++i ) {
 		unsigned int num = paColIndex[i].size();
 		vector< Ecol > e( num );
@@ -828,6 +869,24 @@ const vector< NeuroNode >& NeuroMesh::getNodes() const
 void NeuroMesh::matchMeshEntries( const ChemCompt* other,
 	   vector< VoxelJunction >& ret ) const
 {
+	const CubeMesh* cm = dynamic_cast< const CubeMesh* >( other );
+	if ( cm ) {
+		matchCubeMeshEntries( other, ret );
+		return;
+	}
+	/*
+	const SpineMesh* sm = dynamic_cast< const SpineMesh* >( other );
+	if ( sm ) {
+		matchSpineMeshEntries( other, ret );
+		return;
+	}
+	*/
+	const NeuroMesh* nm = dynamic_cast< const NeuroMesh* >( other );
+	if ( nm ) {
+		matchNeuroMeshEntries( other, ret );
+		return;
+	}
+	cout << "Warning: NeuroMesh::matchMeshEntries: unknown class\n";
 }
 
 void NeuroMesh::indexToSpace( unsigned int index,
@@ -838,7 +897,27 @@ void NeuroMesh::indexToSpace( unsigned int index,
 double NeuroMesh::nearest( double x, double y, double z, 
 				unsigned int& index ) const
 {
-	return 0;
+	double best = 1e12;
+	index = 0;
+	for( unsigned int i = 0; i < nodes_.size(); ++i ) {
+		const NeuroNode& nn = nodes_[i];
+		if ( !nn.isDummyNode() ) {
+			assert( nn.parent() < nodes_.size() );
+			const NeuroNode& pa = nodes_[ nn.parent() ];
+			double linePos;
+			double r;
+			double near = nn.nearest( x, y, z, pa, linePos, r );
+			if ( linePos >= 0 && linePos < 1.0 ) {
+				if ( best > near ) {
+					best = near;
+					index = linePos * nn.getNumDivs() + nn.startFid();
+				}
+			}
+		}
+	}
+	if ( best == 1e12 )
+		return -1;
+	return best;
 }
 
 void NeuroMesh::matchSpineMeshEntries( const ChemCompt* other,
