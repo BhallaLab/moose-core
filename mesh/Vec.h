@@ -42,11 +42,11 @@ class Vec {
 		}
 
 		/**
-		 * Returns a point on the line from start to self, a fraction k
-		 * from the start.
-		 * r = start + k.(self - start)
+		 * Returns a point on the line from self to 'end', a fraction k
+		 * from the 'self'.
+		 * r = self + k.(end - self)
 		 */
-		Vec pointOnLine( const Vec& start, double k );
+		Vec pointOnLine( const Vec& end, double k );
 
 		bool operator==( const Vec& other ) const;
 
