@@ -50,12 +50,12 @@ void Vec::orthogonalAxes( Vec& u, Vec& v ) const {
 	v.unitLength();
 }
 
-Vec Vec::pointOnLine( const Vec& start, double k )
+Vec Vec::pointOnLine( const Vec& end, double k )
 {
 	return Vec( 
-					start.a0_ + k * ( a0_ - start.a0_ ),
-					start.a1_ + k * ( a1_ - start.a1_ ),
-					start.a2_ + k * ( a2_ - start.a2_ ) );
+					a0_ + k * ( end.a0_ - a0_ ),
+					a1_ + k * ( end.a1_ - a1_ ),
+					a2_ + k * ( end.a2_ - a2_ ) );
 }
 
 bool Vec::operator==( const Vec& other ) const {

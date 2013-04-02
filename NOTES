@@ -21477,3 +21477,15 @@ I'll set up the NeuroMesh to do the same calculation while I think about how
 best to set up something useful.
 
 ==========================================================================
+28 march 2013
+NeuroMesh now has the basic code set up. Now to test and tighten up.
+
+Test reveals all sorts of mess. Working on it.
+==========================================================================
+2 April 2013
+Finally got first unit test on 'nearest' to work for linear NeuroMesh.
+Further tests:
+'nearest' on branched NeuroMesh
+Area on branched NeuroMesh
+
+Then on to SpineMesh.

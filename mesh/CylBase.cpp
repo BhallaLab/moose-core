@@ -317,21 +317,26 @@ double CylBase::nearest( double x, double y, double z,
 				const CylBase& parent,
 				double& linePos, double& r ) const
 {
-	// Consider r0 = x0,y0,z0 and r1 = x1, y1, z1, and r = x,y,z.
-	// Fraction along cylinder = k
+	const double EPSILON = 1e-8; // 10 nm is too small for any compt.
+	// Consider a = parent and b = self, and c = x,y,z.
+	// Fraction along cylinder axis ab = k
+	// k = (c - a).(b - a)/((b-a).(b-a))
 	//
-	// Then, point p along line from r0 to r1 is
-	// p = k( r0-r1) + r1.
+	// Then, point p along line from parent to self is
+	// p = k( self-parent) + parent.
 	//
-	// Solving,
-	// k = (r0 - r1).(r - r1) / (|r0-r1|^2)
+	// So distance from c to p is what we want.
 	//
-	Vec a( x_, y_, z_ );
-	Vec b( parent.x_, parent.y_, parent.z_ );
+	// If k is 
+	//
+	Vec a( parent.x_, parent.y_, parent.z_ );
+	Vec b( x_, y_, z_ );
 	Vec c( x, y, z );
 	
 	double dist = b.distance( a );
-	double k = ( b - a ).dotProduct( c - a ) / ( dist * dist );
+	assert( dist > EPSILON );
+	double k = ( b - a ).dotProduct( c - a );
+	k /= dist * dist;
 	Vec pt = a.pointOnLine( b, k );
 
 	double ret = c.distance(pt);
