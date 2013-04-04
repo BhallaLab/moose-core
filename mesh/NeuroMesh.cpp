@@ -190,7 +190,8 @@ NeuroMesh::NeuroMesh()
 		size_( 0.0 ),
 		diffLength_( 0.5e-6 ),
 		skipSpines_( false ),
-		geometryPolicy_( "default" )
+		geometryPolicy_( "default" ),
+		surfaceGranularity_( 0.1 )
 {;}
 
 NeuroMesh::NeuroMesh( const NeuroMesh& other )
@@ -199,7 +200,8 @@ NeuroMesh::NeuroMesh( const NeuroMesh& other )
 		diffLength_( other.diffLength_ ),
 		cell_( other.cell_ ),
 		skipSpines_( other.skipSpines_ ),
-		geometryPolicy_( other.geometryPolicy_ )
+		geometryPolicy_( other.geometryPolicy_ ),
+		surfaceGranularity_( other.surfaceGranularity_ )
 {;}
 
 NeuroMesh& NeuroMesh::operator=( const NeuroMesh& other )

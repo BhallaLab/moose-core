@@ -21493,5 +21493,7 @@ Then on to SpineMesh.
 ==========================================================================
 4 April 2013
 Got the more complete unit tests for 'nearest' on branched NeuroMesh to work.
+Got the unit test for area calculation ( matchMeshEntries() ) on branched
+NeuroMesh to work.
 
 ==========================================================================

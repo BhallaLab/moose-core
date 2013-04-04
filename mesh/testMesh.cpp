@@ -1074,6 +1074,50 @@ void testNeuroMeshBranching()
 	}
 
 	///////////////////////////////////////////////////////////////////
+	// Test the area calculation
+	
+	CubeMesh cube;
+	cube.setPreserveNumEntries( 0 );
+	vector< double > coords( 9, 0.0 );
+	coords[0] = -10; // X0
+	coords[1] = -10; // Y0
+	coords[2] = -10; // Z0
+
+	coords[3] = 10; // X1
+	coords[4] = 10; // Y1
+	coords[5] = 10; // Z1
+	coords[6] = 20; // DX
+	coords[7] = 20; // DY
+	coords[8] = 20; // DZ
+	cube.innerSetCoords( coords );
+	vector< VoxelJunction > vj;
+	mc->matchMeshEntries( &cube, vj );
+	assert( vj.size() == mc->innerGetNumEntries() );
+	double area = 0.0;
+	for ( unsigned int i = 0; i < vj.size(); ++i ) {
+		assert( vj[i].first == i );
+		assert( vj[i].second == 0 ); // Only one cube entry
+		area += vj[i].diffScale;
+		/*
+		double r = cm.getR0() + 
+				( cm.getR1() - cm.getR0() ) * 
+				cm.getLambda() * ( 0.5 + i ) / cm.getTotLength(); 
+		double a = r * cm.getLambda() * 2 * PI;
+		//assert( doubleApprox( vj[i].diffScale, a ) );
+		// cout << i << ". mesh: " << vj[i].diffScale << ", calc: " << a << endl;
+		assert( fabs( vj[i].diffScale - a ) < 0.5 );
+		*/
+	}
+	double a2 = dia * dia * PI + 
+			4 * len * dia * PI / sqrt( 2.0 ) +
+			4 * len * dia * PI / 2.0 +
+			8 * len * dia * PI / (2.0 * sqrt( 2.0 ) );
+
+	// Scaling is needed otherwise doubleApprox treats both as zero.
+	assert( doubleApprox( area * 1e8, a2 * 1e8 ) );
+
+
+	///////////////////////////////////////////////////////////////////
 	
 	shell->doDelete( cell );
 	shell->doDelete( nm );
