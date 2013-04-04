@@ -802,8 +802,8 @@ Id makeCompt( Id parentCompt, Id parentObj,
 	Field< double >::set( ret, "x0", pax );
 	Field< double >::set( ret, "y0", pay );
 	Field< double >::set( ret, "z0", 0.0 );
-	double x = pay + len * cos( theta * PI / 360.0 );
-	double y = pax + len * sin( theta * PI / 360.0 );
+	double x = pay + len * cos( theta * PI / 180.0 );
+	double y = pax + len * sin( theta * PI / 180.0 );
 	Field< double >::set( ret, "x", x );
 	Field< double >::set( ret, "y", y );
 	Field< double >::set( ret, "z", 0.0 );
@@ -923,7 +923,15 @@ void testNeuroMeshLinear()
 	near = mc->nearest( -10, 0, 0, index );
 	assert( index == 0 );
 	assert( doubleEq( near, -1.0 ) );
+
+	// Test indexToSpace
+	double x, y, z;
+	mc->indexToSpace( 27, x, y, z );
+	assert( doubleEq( x, diffLength * 27.5 ) );
+	assert( doubleEq( y, 0.0 ) );
+	assert( doubleEq( z, 0.0 ) );
 	
+	///////////////////////////////////////////////////////////////////
 	shell->doDelete( cell );
 	shell->doDelete( nm );
 	cout << "." << flush;
@@ -1022,6 +1030,50 @@ void testNeuroMeshBranching()
 		tot += y;
 	}
 	assert( doubleEq( tot, totNum ) );
+
+	///////////////////////////////////////////////////////////////////
+	// Test the 'nearest' function
+	MeshCompt* mc = reinterpret_cast< MeshCompt* >( nm.eref().data() );
+	assert( mc->getNumEntries() == ndc );
+	unsigned int index;
+	double y, z;
+	mc->indexToSpace( 60, x, y, z );
+
+	double near = mc->nearest( x, y, z + diffLength/10.0, index );
+	assert( index == 60 );
+	assert( doubleEq( near, diffLength / 10.0 ) );
+
+	near = mc->nearest( -10, 0, 0, index );
+	assert( index == 0 );
+	assert( doubleEq( near, -1.0 ) );
+
+	vector< NeuroNode > nn = dynamic_cast< NeuroMesh* >( mc )->getNodes();
+	assert( nn.size() == 32 ); // 17 plus 15 dummies
+	/*
+	for ( unsigned int i = 0; i < nn.size(); ++i ) {
+		if ( !nn[i].isDummyNode() ) {
+			cout << i << "	(" << 
+				nn[i].getX() << ", " << nn[i].getY() << ", " << 
+				nn[i].getZ() << ") on " <<
+				nn[i].elecCompt().element()->getName() << 
+				"\n";
+		}
+	}
+	*/
+
+	mc->indexToSpace( 72, x, y, z );
+	near = mc->nearest( x, y, z, index );
+	assert( index == 72 );
+	assert( doubleEq( near, 0 ) );
+
+	for( unsigned int i = 0; i < ndc; ++i ) {
+		mc->indexToSpace( i, x, y, z );
+		near = mc->nearest( x, y, z + diffLength/10.0, index );
+		assert( index == i );
+		assert( near == diffLength / 10.0 );
+	}
+
+	///////////////////////////////////////////////////////////////////
 	
 	shell->doDelete( cell );
 	shell->doDelete( nm );

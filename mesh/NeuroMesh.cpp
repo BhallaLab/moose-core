@@ -892,6 +892,17 @@ void NeuroMesh::matchMeshEntries( const ChemCompt* other,
 void NeuroMesh::indexToSpace( unsigned int index,
 			double& x, double& y, double& z ) const 
 {
+	if ( index >= innerGetNumEntries() )
+		return;
+	const NeuroNode& nn = nodes_[ nodeIndex_[ index ] ];
+	const NeuroNode& pa = nodes_[ nn.parent() ];
+	Vec a( pa.getX(), pa.getY(), pa.getZ() );
+	Vec b( nn.getX(), nn.getY(), nn.getZ() );
+	double frac = ( ( index - nn.startFid() ) + 0.5 ) / nn.getNumDivs();
+	Vec pt = a.pointOnLine( b, frac );
+	x = pt.a0();
+	y = pt.a1();
+	z = pt.a2();
 }
 
 double NeuroMesh::nearest( double x, double y, double z, 
