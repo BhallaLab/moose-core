@@ -190,7 +190,7 @@ class NeuroMesh: public MeshCompt
 
 	private:
 		/**
-		 * Array of gemetry specifiers for each segment of the neuronal
+		 * Array of geometry specifiers for each segment of the neuronal
 		 * model. Includes information equivalent to
 		 * the CylMesh, as well as information to tie the node back to the
 		 * original 'compartment' from the neuronal model.

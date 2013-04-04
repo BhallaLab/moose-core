@@ -256,8 +256,8 @@ void GslStoich::process( const Eref& e, ProcPtr info )
 
 		}
 	}
-	// if ( diffusionMesh_ && diffusionMesh_->innerGetNumEntries() > 1 )
-	if ( diffusionMesh_ && pools_.size() > 1 )
+	// if ( compartment_ && compartment_->innerGetNumEntries() > 1 )
+	if ( compartment_ && pools_.size() > 1 )
 		updateDiffusion( lastS, y_, info->dt );
 	if ( getNumJunctions() > 0 )
 		vUpdateJunction( e, lastS, info->threadIndexInGroup, info->dt );
@@ -369,14 +369,14 @@ void GslStoich::updateDiffusion(
 	// alternating dimensions, as suggested by NumRec.
 	for ( unsigned int me = 0; me < pools_.size(); ++me ) {
 		unsigned int numInRow = 
-			diffusionMesh_->getStencil( me, &adx, &colIndex);
-		double vSelf = diffusionMesh_->getMeshEntrySize( me );
+			compartment_->getStencil( me, &adx, &colIndex);
+		double vSelf = compartment_->getMeshEntrySize( me );
 		const double* sSelf = &(lastS[ me ][0]);
 		StoichCore* stoich = ode_[ pools_[me].getSolver() ].stoich_;
 		/* Don't use xa anymore, it is folded into the stencil.
 		vector< double > xa;
 		if ( me < numMeshEntries() ) // Local ones
-			xa = diffusionMesh_->getDiffusionArea( me);
+			xa = compartment_->getDiffusionArea( me);
 		else
 			; // Fill from junction, later.
 		assert ( xa.size() == numInRow );
@@ -386,7 +386,7 @@ void GslStoich::updateDiffusion(
 
 			// Get all concs at the other meshEntry
 			const double* sOther = &( lastS[other][0] ); 
-			double vOther = diffusionMesh_->extendedMeshEntrySize( other );
+			double vOther = compartment_->extendedMeshEntrySize( other );
 			double scale = dt * adx[i] ;
 			assert( vOther > 0 );
 			assert( vSelf > 0 );
