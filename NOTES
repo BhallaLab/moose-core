@@ -21494,6 +21494,25 @@ Then on to SpineMesh.
 4 April 2013
 Got the more complete unit tests for 'nearest' on branched NeuroMesh to work.
 Got the unit test for area calculation ( matchMeshEntries() ) on branched
-NeuroMesh to work.
+NeuroMesh to work. Checkin 4474.
 
+Thoughts for spineMesh.
+Need a class of SpineEntry. Make general or make specific?
+General: Handle multicompt spines, spherical head, etc. Treat as multiple
+	CylBase, but have to do something special for head.
+Specific: A single cylindrical spine-head. Ignore shaft except as 
+	spatial position and diffusion barrier. Always assume a chem
+	compt for PSD at surface of spine head.
+	Derive from CylBase but need to add area for PSD/synaptic zone.
+	Stencil here is trivial, no diffusion internally. Instead have the
+	stencil handle diffusion via neck to dendrite, and separately to PSD.
+	No diffusion between spines.
+	The PSD solver will need to do the N-transfer to spine
+	The dendrite solver will need to do the N-transfer to spine, as well.
+	In both cases, the spine solver will do the calculations for diffusion
+	and usually use stochastic (integral) calculations.
+
+
+Minor cleanup: changed field name GslStoich::diffusionMesh_ to compartment_.
 ==========================================================================
+

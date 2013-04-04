@@ -314,7 +314,7 @@ class GslStoich: public SolverBase
 		vector< unsigned int > diffusingPoolIndices_;
 
 		Id compartmentId_;
-		ChemCompt* diffusionMesh_;
+		ChemCompt* compartment_;
 
 		// Used to keep track of meshEntry when passing self into GSL.
 		unsigned int currMeshEntry_; 
