@@ -21485,7 +21485,13 @@ Test reveals all sorts of mess. Working on it.
 2 April 2013
 Finally got first unit test on 'nearest' to work for linear NeuroMesh.
 Further tests:
-'nearest' on branched NeuroMesh
+'nearest' on branched NeuroMesh: Doing rigorously. Also added test for
+	indexToSpace.
 Area on branched NeuroMesh
 
 Then on to SpineMesh.
+==========================================================================
+4 April 2013
+Got the more complete unit tests for 'nearest' on branched NeuroMesh to work.
+
+==========================================================================
