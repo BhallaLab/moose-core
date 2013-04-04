@@ -218,7 +218,7 @@ GslStoich::GslStoich()
 	ode_(0), // 
 	pools_(0), // Don't need to set up compts or pools, setPath does it..
 	compartmentId_( 0 ),
-	diffusionMesh_( 0 )
+	compartment_( 0 )
 {
 		;
 }
@@ -351,10 +351,10 @@ void GslStoich::setCompartment( Id value )
 		cout << "Warning: GslStoich::setCompartment: "
 				"Value must be a ChemCompt subclass\n";
 		compartmentId_ = Id();
-		diffusionMesh_ = 0;
+		compartment_ = 0;
 	} else {
 		compartmentId_ = value;
-		diffusionMesh_ = reinterpret_cast< ChemCompt* >(
+		compartment_ = reinterpret_cast< ChemCompt* >(
 				compartmentId_.eref().data() );
 	}
 }

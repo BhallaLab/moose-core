@@ -80,11 +80,11 @@ void GslStoich::setElist( const Eref& e, const Qinfo* q, vector< Id > elist)
 	isInitialized_ = 0;
 	compartmentId_ = getCompt( e.id() );
 	if ( compartmentId_ != Id() ) {
-		diffusionMesh_ = reinterpret_cast< ChemCompt* >( 
+		compartment_ = reinterpret_cast< ChemCompt* >( 
 						compartmentId_.eref().data() );
 		// localMeshEntries is really supposed to map the global indexing
 		// of meshEntries onto the local indices used in this object.
-		localMeshEntries_.resize( diffusionMesh_->getNumEntries(), 0 );
+		localMeshEntries_.resize( compartment_->getNumEntries(), 0 );
 	} else {
 		localMeshEntries_.resize( 1, 0 );
 	}
@@ -348,7 +348,7 @@ void GslStoich::matchMeshEntries(
 	vector< VoxelJunction > meshMatch;
 	assert( compartmentMesh() );
 	assert( other->compartmentMesh() );
-	diffusionMesh_->buildJunction( other->compartmentMesh(), meshMatch );
+	compartment_->buildJunction( other->compartmentMesh(), meshMatch );
 	// First, extract the meshIndices. Need to make sure they are unique.
 	for ( vector< VoxelJunction>::iterator i = meshMatch.begin(); 
 					i != meshMatch.end(); ++i ){
@@ -392,7 +392,7 @@ void GslStoich::matchMeshEntries(
 
 ChemCompt* GslStoich::compartmentMesh() const
 {
-	return diffusionMesh_;
+	return compartment_;
 }
 ///////////////////////////////////////////////////
 // Remesh
@@ -466,9 +466,9 @@ void GslStoich::expandSforDiffusion(
 	const vector< unsigned int > & selfDiffPoolIndex,
 	SolverJunction& j )
 {
-	if ( !diffusionMesh_ )
+	if ( !compartment_ )
 		return;
-	unsigned int numVoxels = diffusionMesh_->getNumEntries();
+	unsigned int numVoxels = compartment_->getNumEntries();
 	unsigned int numCorePoolEntries = coreStoich()->getNumAllPools();
 	unsigned int numPoolStructs = pools_.size();
 	vector< unsigned int > abutMeshIndex( otherMeshIndex.size(), 0 );
@@ -493,15 +493,15 @@ void GslStoich::expandSforDiffusion(
 void GslStoich::innerReallocateSolver( const Eref& e )
 {
 	unsigned int numVoxels = 1;
-	if ( diffusionMesh_ ) {
-		numVoxels = diffusionMesh_->getNumEntries();
-		diffusionMesh_->clearExtendedMeshEntrySize();
+	if ( compartment_ ) {
+		numVoxels = compartment_->getNumEntries();
+		compartment_->clearExtendedMeshEntrySize();
 	}
 
 	assert( numVoxels > 0 );
 	vector< double > vols( numVoxels );
 	for ( unsigned int i = 0; i < numVoxels; ++i ) {
-		vols[i] = diffusionMesh_->getMeshEntrySize( i );
+		vols[i] = compartment_->getMeshEntrySize( i );
 	}
 	double oldVol = vols[0];
 	remesh( e, 0, oldVol, 0, 0, localMeshEntries_, vols );
