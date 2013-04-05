@@ -5,7 +5,7 @@ import re
 from PyQt4 import QtGui, QtCore, Qt
 #import pygraphviz as pgv
 import networkx as nx
-sys.path.insert(0, '/home/harsha/BuildQ/gui')
+#sys.path.insert(0, '/home/harsha/BuildQ/gui')
 import numpy as np
 import config
 import pickle 
@@ -322,12 +322,15 @@ class  KineticsWidget(DefaultEditorWidget):
         srcdes_list = [src,des,endtype,line]
         arrow = calcArrow(srcdes_list,itemignoreZooming,self.iconScale)
         self.drawLine(srcdes_list,arrow)
-        #line = line +1
-        while(type_no[2] > 1 and line != (type_no[2]-1)):
-            line = line +1
+
+        while(type_no[2] > 1 and line <= (type_no[2]-1)):
             srcdes_list =[src,des,endtype,line]
             arrow = calcArrow(srcdes_list,itemignoreZooming,self.iconScale)
             self.drawLine(srcdes_list,arrow)
+            line = line +1
+
+        if type_no[2] > 5:
+            print "Higher order reaction will not be displayed"
 
     def drawLine(self,srcdes_list,arrow):
         src = srcdes_list[0]
@@ -473,7 +476,7 @@ if __name__ == "__main__":
     #modelPath = 'acc8'
     modelPath = '3ARECB'
     #modelPath = '3AreacB'
-    modelPath = '3Areac2B'
+    modelPath = '5AreacB'
     itemignoreZooming = False
     try:
         filepath = '../../Demos/Genesis_files/'+modelPath+'.g'
