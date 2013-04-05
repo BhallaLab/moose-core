@@ -2,8 +2,9 @@ from PyQt4 import QtGui,QtCore,Qt
 import math
 from kkitQGraphics import PoolItem, ReacItem,EnzItem,CplxItem,ComptItem
 
-''' One to need to pass the source, destination and endtype for drawing the arrow between 2 object \
-    endtype is to check if needs arrow head (arrowhead for product and sumtotal)
+''' One to need to pass the source, destination,endtype and order for drawing the arrow between 2 object \
+    endtype is to check if needs arrow head (arrowhead for product and sumtotal) \
+    order for higher order reaction
 '''
 def calcArrow(srcdes_list,itemignoreZooming,iconScale):
     ''' if PoolItem then boundingrect should be background rather than graphicsobject '''
@@ -11,6 +12,7 @@ def calcArrow(srcdes_list,itemignoreZooming,iconScale):
     des = srcdes_list[1]
     endtype = srcdes_list[2]
     order = srcdes_list[3]
+    
     srcobj = src.gobj
     desobj = des.gobj
     if isinstance(src,PoolItem):
@@ -45,7 +47,13 @@ def calcArrow(srcdes_list,itemignoreZooming,iconScale):
         tetha1 = (math.atan2(dy0,dx0))
         a0 = 4 *(math.cos(tetha1))
         b0 = 4 *(math.sin(tetha1))
+        ''' Higher order ( > 4) connectivity will not be done'''
+        if ((order == 3) or (order == 4)):
+            a0 = a0*2
+            b0 = b0*2
+        
         if(order %2 == 0):
+            print "or",order
             srcCentera0 = srcRect.center().x()-a0
             srcCenterb0 = srcRect.center().y()-b0
             desCentera0 = desRect.center().x()-a0
