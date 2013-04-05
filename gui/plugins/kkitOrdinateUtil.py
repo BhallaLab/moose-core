@@ -3,7 +3,7 @@ import numpy as np
 #import matplotlib.pyplot as plt
 #import pygraphviz as pgv
 import networkx as nx
-
+from collections import Counter
 def xyPosition(objInfo,xory):
     try:
         return(float(element(objInfo).getField(xory)))
@@ -39,6 +39,7 @@ def setupMeshObj(modelRoot):
 
             xcord.append(xyPosition(objInfo,'x'))
             ycord.append(xyPosition(objInfo,'y'))
+        
         for mitem in Neutral(meshEnt).getNeighbors('remesh'):
             """ getNeighbors(remesh) has eliminating GSLStoich """
             if isinstance(element(mitem[0].parent),CplxEnzBase):
@@ -84,18 +85,27 @@ def setupItem(modlePath,cntDict):
             for items in wildcardFind(path):
                 sublist = []
                 prdlist = []
-                for sub in items[0].getNeighbors('sub'): 
-                    sublist.append((sub,'s'))
-                for prd in items[0].getNeighbors('prd'):
-                    prdlist.append((prd,'p'))
+                uniqItem,countuniqItem = countitems(items[0],'sub')
+                for sub in uniqItem: 
+                    sublist.append((sub,'s',countuniqItem[sub]))
+
+                uniqItem,countuniqItem = countitems(items[0],'prd')
+                for prd in uniqItem:
+                    prdlist.append((prd,'p',countuniqItem[prd]))
+                
                 if (baseObj == 'CplxEnzBase') :
-                    for enzpar in items[0].getNeighbors('toEnz'):
-                        sublist.append((enzpar,'t'))
-                    for cplx in items[0].getNeighbors('cplxDest'):
-                        prdlist.append((cplx,'cplx'))
+                    uniqItem,countuniqItem = countitems(items[0],'toEnz')
+                    for enzpar in uniqItem:
+                        sublist.append((enzpar,'t',countuniqItem[enzpar]))
+                    
+                    uniqItem,countuniqItem = countitems(items[0],'cplxDest')
+                    for cplx in uniqItem:
+                        prdlist.append((cplx,'cplx',countuniqItem[cplx]))
+
                 if (baseObj == 'EnzBase'):
-                    for enzpar in items[0].getNeighbors('enzDest'):
-                        sublist.append((enzpar,'t'))
+                    uniqItem,countuniqItem = countitems(items[0],'enzDest')
+                    for enzpar in uniqItem:
+                        sublist.append((enzpar,'t',countuniqItem[enzpar]))
                 cntDict[items] = sublist,prdlist
         elif baseObj == 'FuncBase':
             #ZombieSumFunc adding inputs
@@ -104,8 +114,9 @@ def setupItem(modlePath,cntDict):
                 outputlist = []
                 funplist = []
                 nfunplist = []
-                for inpt in items[0].getNeighbors('input'):
-                    inputlist.append((inpt,'st'))
+                uniqItem,countuniqItem = countitems(items[0],'input')
+                for inpt in uniqItem:
+                    inputlist.append((inpt,'st',countuniqItem[inpt]))
                 for funcbase in items[0].getNeighbors('output'): 
                     funplist.append(funcbase)
                 if(len(funplist) > 1): print "SumFunPool has multiple Funpool"
@@ -113,9 +124,16 @@ def setupItem(modlePath,cntDict):
         else:
             for tab in wildcardFind(path):
                 tablist = []
-                for tabconnect in tab[0].getNeighbors('output'):
-                    tablist.append((tabconnect,'tab'))
+                uniqItem,countuniqItem = countitems(tab[0],'output')
+                for tabconnect in uniqItem:
+                    tablist.append((tabconnect,'tab',countuniqItem[tabconnect]))
                 cntDict[tab] = tablist
+def countitems(mitems,objtype):
+    items = []
+    items = mitems.getNeighbors(objtype)
+    uniqItems = set(items)
+    countuniqItems = Counter(items)
+    return(uniqItems,countuniqItems)
 
 def autoCoordinates(meshEntry,srcdesConnection):
     #for cmpt,memb in meshEntry.items():
@@ -143,12 +161,12 @@ def autoCoordinates(meshEntry,srcdesConnection):
         else: arrowcolor = 'blue'
         if isinstance(out,tuple):
             if len(out[0])== 0:
-                print "Reaction or Enzyme doesn't input mssg"
+                print inn.class_ + ':' +inn[0].name + "  doesn't have input message"
             else:
                 for items in (items for items in out[0] ):
                     G.add_edge(element(items[0]).getField('path'),inn[0].path)
             if len(out[1]) == 0:
-                print "Reaction or Enzyme doesn't output mssg"
+                print inn.class_ + ':' + inn[0].name + "doesn't have output mssg"
             else:
                 for items in (items for items in out[1] ):
                     G.add_edge(inn[0].path,element(items[0]).getField('path'))
