@@ -73,14 +73,15 @@ class CylBase
 		 * Utility commands for building interface to cube mesh
 		 */
 		// Selects a grid size for generating intersection with CubeMesh.
-		double selectGridSize( double h, double dia1, double granularity ) 
+		double selectGridSize( double h, double dia1, double granularity )
 				const;
 
 		void matchCubeMeshEntries( const ChemCompt* other,
 			const CylBase& parent,
 			unsigned int startIndex,
 			double granularity,
-			vector< VoxelJunction >& ret ) const;
+			vector< VoxelJunction >& ret,
+		   bool useCylinderCurve, bool useCylinderCap ) const;
 
 		double nearest( double x, double y, double z,
 				const CylBase& parent,

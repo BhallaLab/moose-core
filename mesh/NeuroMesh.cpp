@@ -947,7 +947,7 @@ void NeuroMesh::matchCubeMeshEntries( const ChemCompt* other,
 			assert( nn.parent() < nodes_.size() );
 			const NeuroNode& pa = nodes_[ nn.parent() ];
 			nn.matchCubeMeshEntries( other, pa, nn.startFid(), 
-							surfaceGranularity_, ret );
+							surfaceGranularity_, ret, true, false );
 		}
 	}
 }

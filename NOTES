@@ -21511,8 +21511,29 @@ Specific: A single cylindrical spine-head. Ignore shaft except as
 	The dendrite solver will need to do the N-transfer to spine, as well.
 	In both cases, the spine solver will do the calculations for diffusion
 	and usually use stochastic (integral) calculations.
+	For this to work, I need to refer to the same data in the SpineMesh
+	from two different avatars, one to tell it to be the spine bulk, and
+	the other for the PSD.
 
+
+To construct: Update NeuroMesh::setCellPortion to extract out spine compts,
+	and to track which NeuroNode they are with. This should go into an
+	internal store.
+	Then we need a function to return a suitable data structure to the
+	SpineMesh to help set it up. Preferably by msg to ensure linkage.
+	Then we need a function from the constructed SpineMesh to make a 
+	PSDMesh. Preferably by msg to ensure linkage.
 
 Minor cleanup: changed field name GslStoich::diffusionMesh_ to compartment_.
 ==========================================================================
+5 April 2013
 
+Working on SpineEntry class. There is one SpineEntry for every dendritic spine.
+Here I'm trying to get it to matchCubeMeshEntries.
+This requires a way to match the disk on top of the cylinder. CylBase needs
+updating. Added this option to CylBase::matchCubeMeshEntries. Now
+to compile and test.
+
+==========================================================================
+6 April 2013
+Compiled without the SpineMesh stuff. Clears unit tests.

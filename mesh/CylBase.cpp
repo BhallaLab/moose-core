@@ -267,11 +267,41 @@ static void fillPointsOnCircle(
 	}
 }
 
+static void fillPointsOnDisc( 
+				const Vec& u, const Vec& v, const Vec& q,
+				double h, double r, vector< double >& area,
+				const CubeMesh* other
+				)
+{
+	unsigned int numRadial = floor( r / h + 0.5 );
+	double dRadial = r / numRadial;
+	for ( unsigned int i = 0; i < numRadial; ++i ) {
+		double a = ( i + 0.5 ) * dRadial;
+		unsigned int numAngle = floor( 2.0 * PI * a / h + 0.5 );
+		if ( i == 0 )
+			numAngle = 1;
+		double dtheta = 2.0 * PI / numAngle;
+		double dArea = dRadial * dtheta * a;
+		for ( unsigned int j = 0; j < numAngle; ++j ) {
+			double theta = j * dtheta;
+			double c = cos( theta );
+			double s = sin( theta );
+			double p0 = q.a0() + a * ( u.a0() * c + v.a0() * s );
+			double p1 = q.a1() + a * ( u.a1() * c + v.a1() * s );
+			double p2 = q.a2() + a * ( u.a2() * c + v.a2() * s );
+			unsigned int index = other->spaceToIndex( p0, p1, p2 );
+			if ( index != CubeMesh::EMPTY )
+				area[index] += dArea;
+		}
+	}
+}
+
 void CylBase::matchCubeMeshEntries( const ChemCompt* compt,
 	const CylBase& parent,
 	unsigned int startIndex,
 	double granularity,
-	vector< VoxelJunction >& ret ) const
+	vector< VoxelJunction >& ret, 
+	bool useCylinderCurve, bool useCylinderCap ) const
 {
 	const CubeMesh* other = dynamic_cast< const CubeMesh* >( compt );
 	assert( other );
@@ -290,17 +320,23 @@ void CylBase::matchCubeMeshEntries( const ChemCompt* compt,
 	double rSlope = ( parent.dia_ - dia_ ) * 0.5 / length_;
 	for ( unsigned int i = 0; i < numDivs_; ++i ) {
 		vector< double >area( other->getNumEntries(), 0.0 );
-		for ( unsigned int j = 0; j < num; ++j ) {
-			unsigned int m = i * num + j;
-			double frac = ( m * h + h/2.0 ) / length_;
-			double q0 = x_ + a.a0() * frac;
-			double q1 = y_ + a.a1() * frac;
-			double q2 = z_ + a.a2() * frac;
-			// get radius of cylinder at this point.
-			double r = dia_/2.0 + ( m * h + h / 2.0 ) * rSlope;
-			fillPointsOnCircle( u, v, Vec( q0, q1, q2 ),
-						h, r, area, other );
+		if ( useCylinderCurve ) {
+			for ( unsigned int j = 0; j < num; ++j ) {
+				unsigned int m = i * num + j;
+				double frac = ( m * h + h/2.0 ) / length_;
+				double q0 = x_ + a.a0() * frac;
+				double q1 = y_ + a.a1() * frac;
+				double q2 = z_ + a.a2() * frac;
+				// get radius of cylinder at this point.
+				double r = dia_/2.0 + ( m * h + h / 2.0 ) * rSlope;
+				fillPointsOnCircle( u, v, Vec( q0, q1, q2 ),
+							h, r, area, other );
 			}
+		}
+		if ( useCylinderCap && i == numDivs_ - 1 ) {
+			fillPointsOnDisc( u, v, Vec( x_, y_, z_ ), 
+							h, dia_, area, other );
+		}
 		// Go through all cubeMesh entries and compute diffusion 
 		// cross-section. Assume this is through a membrane, so the 
 		// only factor relevant is area. Not the distance.
