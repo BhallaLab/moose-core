@@ -21536,4 +21536,6 @@ to compile and test.
 
 ==========================================================================
 6 April 2013
-Compiled without the SpineMesh stuff. Clears unit tests.
+Compiled without the SpineMesh stuff. Clears unit tests. Checkin 4477.
+
+==========================================================================
