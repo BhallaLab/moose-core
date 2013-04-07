@@ -38,8 +38,8 @@ SpineEntry::SpineEntry( Id shaft, Id head, unsigned int parent )
 	double x2 = Field< double >::get( head, "x" );
 	double y2 = Field< double >::get( head, "y" );
 	double z2 = Field< double >::get( head, "z" );
-	double hdia = Field< double >::get( shaft, "diameter" );
-	double hlength = Field< double >::get( shaft, "length" );
+	double hdia = Field< double >::get( head, "diameter" );
+	double hlength = Field< double >::get( head, "length" );
 
 	root_.setX( x0 );
 	root_.setY( y0 );
@@ -54,12 +54,15 @@ SpineEntry::SpineEntry( Id shaft, Id head, unsigned int parent )
 	root_.setDia( dia );
 	root_.setLength( length );
 	root_.setNumDivs( 0 );
+	root_.setIsCylinder( true );
 	shaft_.setDia( dia );
 	shaft_.setLength( length );
 	shaft_.setNumDivs( 1 );
+	shaft_.setIsCylinder( true );
 	head_.setDia( hdia );
 	head_.setLength( hlength );
 	head_.setNumDivs( 1 );
+	head_.setIsCylinder( true );
 }
 
 

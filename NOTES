@@ -21537,5 +21537,16 @@ to compile and test.
 ==========================================================================
 6 April 2013
 Compiled without the SpineMesh stuff. Clears unit tests. Checkin 4477.
+Compiled with the SpineMesh stuff. No tests yet. Checkin 4478.
+Tests: 
+	Test SpineEntry setup.
+	Create the spines, check that they are made and where.
+	Check for coupling between NeuroMesh and SpineMesh
+	Check location of Spines
+	Check coupling between SpineMesh and enclosing CubeMesh.
 
+Then make PsdMesh from SpineMesh.
 ==========================================================================
+7 April 2013
+Tested and fixed up SpineEntry. MatchCubeMeshEntriesToHead and ToPSD.
+Still to do matchup to NeuroMesh.

@@ -23,6 +23,8 @@
 #include "NeuroMesh.h"
 #include "Vec.h"
 #include "CylMesh.h"
+#include "SpineEntry.h"
+#include "SpineMesh.h"
 
 /**
  * Low-level test for Cylbase, no MOOSE calls
@@ -802,8 +804,8 @@ Id makeCompt( Id parentCompt, Id parentObj,
 	Field< double >::set( ret, "x0", pax );
 	Field< double >::set( ret, "y0", pay );
 	Field< double >::set( ret, "z0", 0.0 );
-	double x = pay + len * cos( theta * PI / 180.0 );
-	double y = pax + len * sin( theta * PI / 180.0 );
+	double x = pax + len * cos( theta * PI / 180.0 );
+	double y = pay + len * sin( theta * PI / 180.0 );
 	Field< double >::set( ret, "x", x );
 	Field< double >::set( ret, "y", y );
 	Field< double >::set( ret, "z", 0.0 );
@@ -816,7 +818,7 @@ Id makeCompt( Id parentCompt, Id parentObj,
 pair< unsigned int, unsigned int > buildBranchingCell( 
 				Id cell, double len, double dia )
 {
-	Id soma = makeCompt( Id(), cell, "soma", dia, dia, 0 );
+	Id soma = makeCompt( Id(), cell, "soma", dia, dia, 90 );
 	dia /= sqrt( 2.0 );
 	Id d1 = makeCompt( soma, cell, "d1", len , dia, 0 );
 	Id d2 = makeCompt( soma, cell, "d2", len , dia, 180 );
@@ -1536,6 +1538,68 @@ void testVec()
 	cout << "." << flush;
 }
 
+void testSpineEntry()
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< int > dims( 1, 1 );
+	// Build a cell
+	Id cell = shell->doCreate( "Neutral", Id(), "cell", dims );
+// Id makeCompt( Id parentCompt, Id parentObj, string name, double len, double dia, double theta )
+	Id neck = makeCompt( Id(), cell, "neck", 1e-6, 1e-7, 0 );
+	Id head = makeCompt( neck, cell, "head", 1e-6, 1e-6, 0 );
+
+	SpineEntry se( neck, head, 1234 );
+
+	assert( se.parent() == 1234 );
+	assert( se.shaftId() == neck );
+	assert( se.headId() == head );
+	assert( doubleEq( se.volume(), 1e-18 * PI/4.0  ) );
+	double x, y, z;
+	se.mid( x, y, z );
+	assert( doubleEq( x, 1.5e-6 ) );
+	assert( doubleEq( y, 0.0 ) );
+	assert( doubleEq( z, 0.0 ) );
+
+	//////////////////////////////////////////////////
+	// Test matchCubeMeshEntries.
+	vector< VoxelJunction > vj;
+	CubeMesh cube;
+	cube.setPreserveNumEntries( 0 );
+	vector< double > coords( 9, 0.0 );
+	coords[0] = -10; // X0
+	coords[1] = -10; // Y0
+	coords[2] = -10; // Z0
+
+	coords[3] = 10; // X1
+	coords[4] = 10; // Y1
+	coords[5] = 10; // Z1
+	coords[6] = 20; // DX
+	coords[7] = 20; // DY
+	coords[8] = 20; // DZ
+	cube.innerSetCoords( coords );
+	se.matchCubeMeshEntriesToHead( &cube, 1234, 0.1, vj );
+	assert( vj.size() == 1 );
+	assert( vj[0].first == 1234 );
+	assert( vj[0].second == 0 );
+	assert( doubleApprox( vj[0].diffScale * 1e10, 1e-12 * PI * 1e10 ) );
+
+	vj.clear();
+	se.matchCubeMeshEntriesToPSD( &cube, 4321, 0.1, vj );
+	assert( vj.size() == 1 );
+	assert( vj[0].first == 4321 );
+	assert( vj[0].second == 0 );
+	assert( doubleApprox( vj[0].diffScale * 1e10, 1e-12 * PI * 0.25 * 1e10 ) );
+
+	/////////////////////////////////////////////////////////
+	shell->doDelete( cell );
+	cout << "." << flush;
+}
+
+void testSpineMesh()
+{
+		;
+}
+
 void testMesh()
 {
 	testVec();
@@ -1555,4 +1619,6 @@ void testMesh()
 	testCubeMeshJunctionThreeDimSurface();
 	testCubeMeshJunctionDiffSizeMesh();
 	testCubeMeshMultiJunctionTwoD();
+	testSpineEntry();
+	testSpineMesh();
 }
