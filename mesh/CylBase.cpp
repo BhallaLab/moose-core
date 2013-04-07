@@ -317,7 +317,7 @@ void CylBase::matchCubeMeshEntries( const ChemCompt* compt,
 	unsigned int num = floor( 0.1 + lambda / h );
 	// March along axis of cylinder.
 	// q is the location of the point along axis.
-	double rSlope = ( parent.dia_ - dia_ ) * 0.5 / length_;
+	double rSlope = ( dia_ - parent.dia_ ) * 0.5 / length_;
 	for ( unsigned int i = 0; i < numDivs_; ++i ) {
 		vector< double >area( other->getNumEntries(), 0.0 );
 		if ( useCylinderCurve ) {
@@ -328,14 +328,16 @@ void CylBase::matchCubeMeshEntries( const ChemCompt* compt,
 				double q1 = y_ + a.a1() * frac;
 				double q2 = z_ + a.a2() * frac;
 				// get radius of cylinder at this point.
-				double r = dia_/2.0 + ( m * h + h / 2.0 ) * rSlope;
+				double r = dia_/2.0;
+				if ( !isCylinder_ ) // Use the more complicated conic value
+				r = parent.dia_/2.0 + frac * rSlope;
 				fillPointsOnCircle( u, v, Vec( q0, q1, q2 ),
 							h, r, area, other );
 			}
 		}
 		if ( useCylinderCap && i == numDivs_ - 1 ) {
 			fillPointsOnDisc( u, v, Vec( x_, y_, z_ ), 
-							h, dia_, area, other );
+							h, dia_/2.0, area, other );
 		}
 		// Go through all cubeMesh entries and compute diffusion 
 		// cross-section. Assume this is through a membrane, so the 
