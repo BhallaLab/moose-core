@@ -815,6 +815,59 @@ Id makeCompt( Id parentCompt, Id parentObj,
 	return ret;
 }
 
+// Assumes parent dend is along x axis.
+Id makeSpine( Id parentCompt, Id parentObj, unsigned int index,
+		double frac, double len, double dia, double theta )
+{
+	assert( parentCompt != Id() );
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< int > dims( 1, 1 );
+	double pax0 = Field< double >::get( parentCompt, "x0" );
+	double pay0 = Field< double >::get( parentCompt, "y0" );
+	double paz0 = Field< double >::get( parentCompt, "z0" );
+	double pax1 = Field< double >::get( parentCompt, "x" );
+	double pay1 = Field< double >::get( parentCompt, "y" );
+	double paz1 = Field< double >::get( parentCompt, "z" );
+
+	stringstream ss;
+	ss << "shaft" << index;
+	string sname = ss.str();
+	stringstream ss2;
+	ss2 << "head" << index;
+	string hname = ss2.str();
+
+	Id shaft = shell->doCreate( "Compartment", parentObj, sname, dims );
+	shell->doAddMsg( "Single", parentCompt, "raxial", shaft, "axial" );
+	double x = pax0 + frac * ( pax1 - pax0 );
+	double y = pay0 + frac * ( pay1 - pay0 );
+	double z = paz0 + frac * ( paz1 - paz0 );
+	Field< double >::set( shaft, "x0", x );
+	Field< double >::set( shaft, "y0", y );
+	Field< double >::set( shaft, "z0", z );
+	double sy = y + len * cos( theta * PI / 180.0 );
+	double sz = z + len * sin( theta * PI / 180.0 );
+	Field< double >::set( shaft, "x", x );
+	Field< double >::set( shaft, "y", sy );
+	Field< double >::set( shaft, "z", sz );
+	Field< double >::set( shaft, "diameter", dia/10.0 );
+	Field< double >::set( shaft, "length", len );
+
+	Id head = shell->doCreate( "Compartment", parentObj, hname, dims );
+	shell->doAddMsg( "Single", shaft, "raxial", head, "axial" );
+	Field< double >::set( head, "x0", x );
+	Field< double >::set( head, "y0", sy );
+	Field< double >::set( head, "z0", sz );
+	double hy = sy + len * cos( theta * PI / 180.0 );
+	double hz = sz + len * sin( theta * PI / 180.0 );
+	Field< double >::set( head, "x", x );
+	Field< double >::set( head, "y", hy );
+	Field< double >::set( head, "z", hz );
+	Field< double >::set( head, "diameter", dia );
+	Field< double >::set( head, "length", len );
+
+	return head;
+}
+
 pair< unsigned int, unsigned int > buildBranchingCell( 
 				Id cell, double len, double dia )
 {
@@ -1597,7 +1650,44 @@ void testSpineEntry()
 
 void testSpineMesh()
 {
-		;
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< int > dims( 1, 1 );
+	// Build a linear cylindrical cell, no tapering.
+	Id cell = shell->doCreate( "Neutral", Id(), "cell", dims );
+	unsigned int numCompts = 500;
+	double dia = 20e-6; // metres
+	double diffLength = 0.5e-6; // metres
+	double len = diffLength * numCompts;
+	unsigned int numSpines = 10;
+	Id soma = makeCompt( Id(), cell, "soma", dia, dia, 90 );
+	Id dend = makeCompt( Id(), cell, "soma", len, dia, 0 );
+	for ( unsigned int i = 0; i < numSpines; ++i ) {
+		double frac = i / static_cast< double >( numSpines );
+		makeSpine( dend, cell, i, frac, 1.0e-6, 1.0e-6, i * 30.0 );
+	}
+
+	Id nm = shell->doCreate( "NeuroMesh", Id(), "neuromesh", dims );
+	Field< bool >::set( nm, "separateSpines", true );
+	Field< double >::set( nm, "diffLength", diffLength );
+	Field< string >::set( nm, "geometryPolicy", "cylinder" );
+	Id sm = shell->doCreate( "SpineMesh", Id(), "spinemesh", dims );
+	MsgId mid = shell->doAddMsg( 
+					"OneToOne", nm, "spineListOut", sm, "spineList" );
+	assert( mid != Msg::bad );
+	Field< Id >::set( nm, "cell", cell );
+	Qinfo::clearQ( 0 );
+	unsigned int ns = Field< unsigned int >::get( nm, "numSegments" );
+	assert( ns == 2 ); // soma and dend
+	unsigned int ndc = Field< unsigned int >::get( nm, "numDiffCompts" );
+	assert( ndc == numCompts + floor( dia / diffLength + 0.5 ) );
+	
+	unsigned int sdc = Field< unsigned int >::get( sm, "num_mesh" );
+	assert( sdc == numSpines );
+
+	// Make spinemesh object
+	// Set up msg from nm to spinemesh
+	// Build spinemesh: trigger ?
+	// Check numbers on spinemesh.
 }
 
 void testMesh()

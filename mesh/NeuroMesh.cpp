@@ -22,6 +22,21 @@
 #include "NeuroNode.h"
 #include "NeuroMesh.h"
 #include "../utility/numutil.h"
+
+static SrcFinfo3< vector< Id >, vector< Id >, vector< unsigned int > >* 
+	spineListOut()
+{
+	static SrcFinfo3< vector< Id >, vector< Id >, vector< unsigned int > >
+   		spineListOut(
+		"spineListOut",
+		"Request SpineMesh to construct self based on list of electrical "
+		"compartments that this NeuroMesh has determined are spine shaft "
+		"and spine head respectively. Also passes in the info about where "
+		"each spine is connected to the NeuroMesh. "
+	);
+	return &spineListOut;
+}
+
 const Cinfo* NeuroMesh::initCinfo()
 {
 		//////////////////////////////////////////////////////////////
@@ -44,7 +59,7 @@ const Cinfo* NeuroMesh::initCinfo()
 			&NeuroMesh::getCylCoords
 		);
 		*/
-		static ValueFinfo< NeuroMesh, Id > cell(
+		static ElementValueFinfo< NeuroMesh, Id > cell(
 			"cell",
 			"Id for base element of cell model. Uses this to traverse the"
 			"entire tree of the cell to build the mesh.",
@@ -60,15 +75,16 @@ const Cinfo* NeuroMesh::initCinfo()
 			&NeuroMesh::setSubTree,
 			&NeuroMesh::getSubTree
 		);
-		static ValueFinfo< NeuroMesh, bool > skipSpines(
-			"skipSpines",
-			"Flag: when skipSpines is true, the traversal does not include"
-			"any compartment with the string 'spine' or 'neck' in its name,"
-			"and also then skips compartments below this skipped one."
+		static ValueFinfo< NeuroMesh, bool > separateSpines(
+			"separateSpines",
+			"Flag: when separateSpines is true, the traversal separates "
+			"any compartment with the strings "
+			"'spine', 'head', 'shaft' or 'neck' in its name,"
 			"Allows to set up separate mesh for spines, based on the "
-			"same cell model.",
-			&NeuroMesh::setSkipSpines,
-			&NeuroMesh::getSkipSpines
+			"same cell model. Requires for the spineListOut message to"
+			"be sent to the target SpineMesh object.",
+			&NeuroMesh::setSeparateSpines,
+			&NeuroMesh::getSeparateSpines
 		);
 		static ReadOnlyValueFinfo< NeuroMesh, unsigned int > numSegments(
 			"numSegments",
@@ -157,12 +173,13 @@ const Cinfo* NeuroMesh::initCinfo()
 	static Finfo* neuroMeshFinfos[] = {
 		&cell,			// Value
 		&subTree,		// Value
-		&skipSpines,	// Value
+		&separateSpines,	// Value
 		&numSegments,		// ReadOnlyValue
 		&numDiffCompts,		// ReadOnlyValue
 		&diffLength,			// Value
 		&geometryPolicy,		// Value
 		&setCellPortion,			// DestFinfo
+		spineListOut(),			// SrcFinfo
 	};
 
 	static Cinfo neuroMeshCinfo (
@@ -189,7 +206,7 @@ NeuroMesh::NeuroMesh()
 	:
 		size_( 0.0 ),
 		diffLength_( 0.5e-6 ),
-		skipSpines_( false ),
+		separateSpines_( false ),
 		geometryPolicy_( "default" ),
 		surfaceGranularity_( 0.1 )
 {;}
@@ -199,7 +216,7 @@ NeuroMesh::NeuroMesh( const NeuroMesh& other )
 		size_( other.size_ ),
 		diffLength_( other.diffLength_ ),
 		cell_( other.cell_ ),
-		skipSpines_( other.skipSpines_ ),
+		separateSpines_( other.separateSpines_ ),
 		geometryPolicy_( other.geometryPolicy_ ),
 		surfaceGranularity_( other.surfaceGranularity_ )
 {;}
@@ -213,7 +230,7 @@ NeuroMesh& NeuroMesh::operator=( const NeuroMesh& other )
 	size_ = other.size_;
 	diffLength_ = other.diffLength_;
 	cell_ = other.cell_;
-	skipSpines_ = other.skipSpines_;
+	separateSpines_ = other.separateSpines_;
 	geometryPolicy_ = other.geometryPolicy_;
 	return *this;
 }
@@ -308,8 +325,10 @@ void NeuroMesh::setGeometryPolicy( string v )
 	for ( vector< NeuroNode >::iterator 
 			i = nodes_.begin(); i != nodes_.end(); ++i )
 			i->setIsCylinder( isCylinder );
+	/*
 	if ( cell_ != Id() )
 		setCell( cell_ );
+		*/
 }
 
 string NeuroMesh::getGeometryPolicy() const
@@ -441,12 +460,32 @@ void NeuroMesh::buildNodeTree( const map< Id, unsigned int >& comptMap )
 	}
 }
 
+bool NeuroMesh::filterSpines( Id compt )
+{
+	if ( compt.element()->getName().find( "shaft" ) != string::npos ||
+		compt.element()->getName().find( "neck" ) != string::npos ) {
+		shaft_.push_back( compt );
+		return true;
+	}
+	if ( compt.element()->getName().find( "spine" ) != string::npos ||
+		compt.element()->getName().find( "head" ) != string::npos ) {
+		head_.push_back( compt );
+		return true;
+	}
+	return false;
+}
+
 // I assume 'cell' is the parent of the compartment tree.
-void NeuroMesh::setCell( Id cell )
+void NeuroMesh::setCell( const Eref& e, const Qinfo* q, Id cell )
 {
 		vector< Id > compts = Field< vector< Id > >::get( cell, "children");
 		setCellPortion( cell, compts );
+		vector< unsigned int > parents( shaft_.size(), 0 );
+		if ( separateSpines_ )
+				spineListOut()->send( e, q->threadNum(),
+								shaft_, head_, parents );
 }
+
 
 // Here we set a portion of a cell, specified by a vector of Ids. We
 // also need to define the cell parent.
@@ -463,6 +502,8 @@ void NeuroMesh::setCellPortion( Id cell, vector< Id > portion )
 		bool isCylinder = ( geometryPolicy_ == "cylinder" );
 		for ( unsigned int i = 0; i < compts.size(); ++i ) {
 			if ( compts[i].element()->cinfo()->isA( "Compartment" ) ) {
+				if ( separateSpines_ && filterSpines( compts[i] ) )
+					continue;
 				comptMap[ compts[i] ] = nodes_.size();
 				nodes_.push_back( NeuroNode( compts[i] ) );
 				if ( nodes_.back().getDia() > maxDia ) {
@@ -482,10 +523,13 @@ void NeuroMesh::setCellPortion( Id cell, vector< Id > portion )
 		// Assign parent and child compts to node entries.
 		buildNodeTree( comptMap );
 
+		if ( separateSpines_ )
+			buildSpineList();
+
 		updateCoords();
 }
 
-Id NeuroMesh::getCell() const
+Id NeuroMesh::getCell( const Eref& e, const Qinfo* q ) const
 {
 		return cell_;
 }
@@ -501,17 +545,17 @@ vector< Id > NeuroMesh::getSubTree() const
 		return ret;
 }
 
-void NeuroMesh::setSkipSpines( bool v )
+void NeuroMesh::setSeparateSpines( bool v )
 {
-		if ( v != skipSpines_ ) {
-				skipSpines_ = v;
+		if ( v != separateSpines_ ) {
+				separateSpines_ = v;
 				updateCoords();
 		}
 }
 
-bool NeuroMesh::getSkipSpines() const
+bool NeuroMesh::getSeparateSpines() const
 {
-		return skipSpines_;
+		return separateSpines_;
 }
 
 unsigned int NeuroMesh::getNumSegments() const
@@ -526,6 +570,52 @@ unsigned int NeuroMesh::getNumSegments() const
 unsigned int NeuroMesh::getNumDiffCompts() const
 {
 	return nodeIndex_.size();
+}
+
+void NeuroMesh::buildSpineList()
+{
+	const Cinfo* ccinfo = Cinfo::find( "Compartment" );
+	const Finfo* axialFinfo = ccinfo->findFinfo( "axialOut" );
+	const Finfo* raxialFinfo = ccinfo->findFinfo( "raxialOut" );
+	assert( shaft_.size() == head_.size() );
+	map< Id, Id > spineMap;
+	for ( vector< Id >::iterator i = head_.begin(); i != head_.end(); ++i )
+	{
+		vector< Id > ret;
+		if ( i->element()->getNeighbours( ret, axialFinfo ) ) {
+			spineMap[ *i ] = ret[0];
+		} else if ( i->element()->getNeighbours( ret, raxialFinfo ) ) {
+			spineMap[ *i ] = ret[0];
+		} else {
+			assert( 0 );
+		}
+	}
+	vector< Id > temp;
+	for ( vector< Id >::iterator i = head_.begin(); i != head_.end(); ++i ){
+		temp.push_back( spineMap[ *i ] );
+	}
+	shaft_ = temp;
+	/*
+	vector< unsigned int > parent;
+	for ( unsigned int i = 0; i < shaft_.size(); ++i ) {
+		if ( shaft_[i].element()->getNeighbours( ret, axialFinfo ) ) {
+			if ( ret[0] == head_[i] ) {
+				if ( shaft_[i].element()->getNeighbours( ret, raxialFinfo ) ) {
+					assert( ret[0] != head_[i] );
+			// Need here to extract nearest index from coords. Otherwise
+			// we might as well bag this whole operation and do it from
+			// the matchToNeuroMesh.
+				}
+			} 
+			spineMap[ *i ] = ret[0];
+		} else if ( i->element()->getNeighbours( ret, raxialFinfo ) ) {
+			spineMap[ *i ] = ret[0];
+		} else {
+			assert( 0 );
+		}
+
+	}
+	*/
 }
 
 //////////////////////////////////////////////////////////////////

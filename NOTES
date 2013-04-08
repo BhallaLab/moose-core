@@ -21539,7 +21539,7 @@ to compile and test.
 Compiled without the SpineMesh stuff. Clears unit tests. Checkin 4477.
 Compiled with the SpineMesh stuff. No tests yet. Checkin 4478.
 Tests: 
-	Test SpineEntry setup.
+	*Test SpineEntry setup.
 	Create the spines, check that they are made and where.
 	Check for coupling between NeuroMesh and SpineMesh
 	Check location of Spines
@@ -21550,3 +21550,13 @@ Then make PsdMesh from SpineMesh.
 7 April 2013
 Tested and fixed up SpineEntry. MatchCubeMeshEntriesToHead and ToPSD.
 Still to do matchup to NeuroMesh.
+Working on it. Much additional code needed in NeuroMesh to generate the
+spineList.
+==========================================================================
+8 April 2013
+spineList message mostly done, and spineEntries are created. Yet to put in
+the calculation of the parent voxel of each spine, which may be a finer
+subdivision than the electrical compartment. Clears unit tests so far.
+
+==========================================================================
+

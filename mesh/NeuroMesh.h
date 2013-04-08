@@ -52,8 +52,8 @@ class NeuroMesh: public MeshCompt
 		/**
 		 * Assigns the parent of all the cell compartments.
 		 */
-		void setCell( Id cellmodel );
-		Id getCell() const;
+		void setCell( const Eref& e, const Qinfo* q, Id cellmodel );
+		Id getCell( const Eref& e, const Qinfo* q ) const;
 
 		/**
 		 * Assigns a group of compartments to be used for the mesh.
@@ -71,12 +71,13 @@ class NeuroMesh: public MeshCompt
 		vector< Id > getSubTree() const;
 
 		/**
-		 * Flag. When true, the mesh ignores any compartment with the 
-		 * string 'spine' or 'neck' in it. The spine head is below the neck
-		 * so it too gets dropped.
+		 * Flag. True if NeuroMesh should configure a separate SpineMesh.
+		 * The process is that both the NeuroMesh and SpineMesh should have
+		 * been created, and a spineList message sent from the NeuroMesh
+		 * to the SpineMesh. This may cascade down to PsdMesh.
 		 */
-		void setSkipSpines( bool v );
-		bool getSkipSpines() const;
+		void setSeparateSpines( bool v );
+		bool getSeparateSpines() const;
 
 		unsigned int getNumSegments() const;
 		unsigned int getNumDiffCompts() const;
@@ -138,6 +139,13 @@ class NeuroMesh: public MeshCompt
 
 		void buildStencil();
 
+		/**
+		 * Examines list of 'head' compartments and matches them to
+		 * 'shaft' or 'neck' compartments through messages.
+		 * Makes a one-to-one pair of vectors of head and neck for spines.
+		 */
+		void buildSpineList();
+
 		//////////////////////////////////////////////////////////////////
 		// inherited virtual funcs for Boundary
 		//////////////////////////////////////////////////////////////////
@@ -180,6 +188,15 @@ class NeuroMesh: public MeshCompt
 		 */
 		void buildNodeTree( const map< Id, unsigned int >& comptMap );
 
+		/**
+		 * Returns true if it finds a compartment name that looks like
+		 * it ought to be on a spine. It filters out the names
+		 * "neck", "shaft", "spine" and "head".
+		 * The latter two are classified into the head_ vector.
+		 * The first two are classified into the shaft_ vector.
+		 */
+		bool filterSpines( Id compt );
+
 		//////////////////////////////////////////////////////////////////
 		// Utility functions for testing
 		// const Stencil* getStencil() const;
@@ -221,8 +238,13 @@ class NeuroMesh: public MeshCompt
 		double diffLength_;	/// Max permitted length constant for diffusion
 		Id cell_; /// Base object for cell model.
 
-		/// Flag. True if mesh should ignore spines when scanning dend tree.
-		bool skipSpines_; 
+		/**
+		 * Flag. True if NeuroMesh should configure a separate SpineMesh.
+		 * The process is that both the NeuroMesh and SpineMesh should have
+		 * been created, and a spineList message sent from the NeuroMesh
+		 * to the SpineMesh.
+		 */
+		bool separateSpines_; 
 
 		string geometryPolicy_;
 
@@ -240,6 +262,12 @@ class NeuroMesh: public MeshCompt
 		double rSlope_;	/// Utility value: dr/dx
 		double lenSlope_; /// Utility value: dlen/dx
 		*/
+		/**
+		 * The shaft vector and the matching head vector track the dendritic
+		 * spines.
+		 */
+		vector< Id > shaft_;
+		vector< Id > head_;
 };
 
 
