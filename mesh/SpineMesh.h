@@ -132,6 +132,9 @@ class SpineMesh: public MeshCompt
 						double& x, double& y, double& z ) const;
 		
 		//////////////////////////////////////////////////////////////////
+		// Utility function for tests
+		const vector< SpineEntry >& spines() const;
+		//////////////////////////////////////////////////////////////////
 		static const Cinfo* initCinfo();
 
 	private:

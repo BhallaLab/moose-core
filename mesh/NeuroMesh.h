@@ -144,7 +144,7 @@ class NeuroMesh: public MeshCompt
 		 * 'shaft' or 'neck' compartments through messages.
 		 * Makes a one-to-one pair of vectors of head and neck for spines.
 		 */
-		void buildSpineList();
+		void buildSpineList( const map< Id, unsigned int >& comptMap );
 
 		//////////////////////////////////////////////////////////////////
 		// inherited virtual funcs for Boundary
@@ -264,10 +264,11 @@ class NeuroMesh: public MeshCompt
 		*/
 		/**
 		 * The shaft vector and the matching head vector track the dendritic
-		 * spines.
+		 * spines. The parent is the voxel to which the spine  is attached.
 		 */
-		vector< Id > shaft_;
-		vector< Id > head_;
+		vector< Id > shaft_; /// Id of shaft compartment.
+		vector< Id > head_;	/// Id of head compartment
+		vector< unsigned int > parent_; /// Index of parent voxel
 };
 
 
