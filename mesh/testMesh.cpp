@@ -1684,6 +1684,14 @@ void testSpineMesh()
 	unsigned int sdc = Field< unsigned int >::get( sm, "num_mesh" );
 	assert( sdc == numSpines );
 
+	// Should now iterate through the spines to find their 'nearest' on
+	// the dendrite.
+	SpineMesh* s = reinterpret_cast< SpineMesh* >( sm.eref().data() );
+	for ( unsigned int i = 0; i < sdc; ++i ) {
+		assert( s->spines()[i].parent() == 40 + i * numCompts/numSpines );
+		assert( doubleEq( s->spines()[i].volume(), PI * 0.25e-12 ) );
+	}
+
 	// Make spinemesh object
 	// Set up msg from nm to spinemesh
 	// Build spinemesh: trigger ?

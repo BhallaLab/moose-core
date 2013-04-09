@@ -480,10 +480,9 @@ void NeuroMesh::setCell( const Eref& e, const Qinfo* q, Id cell )
 {
 		vector< Id > compts = Field< vector< Id > >::get( cell, "children");
 		setCellPortion( cell, compts );
-		vector< unsigned int > parents( shaft_.size(), 0 );
 		if ( separateSpines_ )
 				spineListOut()->send( e, q->threadNum(),
-								shaft_, head_, parents );
+								shaft_, head_, parent_ );
 }
 
 
@@ -523,10 +522,10 @@ void NeuroMesh::setCellPortion( Id cell, vector< Id > portion )
 		// Assign parent and child compts to node entries.
 		buildNodeTree( comptMap );
 
-		if ( separateSpines_ )
-			buildSpineList();
-
 		updateCoords();
+
+		if ( separateSpines_ )
+			buildSpineList( comptMap );
 }
 
 Id NeuroMesh::getCell( const Eref& e, const Qinfo* q ) const
@@ -572,7 +571,7 @@ unsigned int NeuroMesh::getNumDiffCompts() const
 	return nodeIndex_.size();
 }
 
-void NeuroMesh::buildSpineList()
+void NeuroMesh::buildSpineList( const map< Id, unsigned int >& comptMap )
 {
 	const Cinfo* ccinfo = Cinfo::find( "Compartment" );
 	const Finfo* axialFinfo = ccinfo->findFinfo( "axialOut" );
@@ -595,27 +594,35 @@ void NeuroMesh::buildSpineList()
 		temp.push_back( spineMap[ *i ] );
 	}
 	shaft_ = temp;
-	/*
-	vector< unsigned int > parent;
+	parent_.resize( shaft_.size(), 0 );
 	for ( unsigned int i = 0; i < shaft_.size(); ++i ) {
-		if ( shaft_[i].element()->getNeighbours( ret, axialFinfo ) ) {
-			if ( ret[0] == head_[i] ) {
-				if ( shaft_[i].element()->getNeighbours( ret, raxialFinfo ) ) {
-					assert( ret[0] != head_[i] );
-			// Need here to extract nearest index from coords. Otherwise
-			// we might as well bag this whole operation and do it from
-			// the matchToNeuroMesh.
-				}
+		Id pa;
+		Element* se = shaft_[i].element();
+		vector< Id > ret;
+		if ( se->getNeighbours( ret, axialFinfo ) ) {
+			if ( ret[0] != head_[i] ) {
+				pa = ret[0];
+			} else if ( se->getNeighbours( ret, raxialFinfo ) ) {
+				assert( ret[0] != head_[i] );
+				pa = ret[0];
 			} 
-			spineMap[ *i ] = ret[0];
-		} else if ( i->element()->getNeighbours( ret, raxialFinfo ) ) {
-			spineMap[ *i ] = ret[0];
+		}
+		assert( pa != Id() );
+		map< Id, unsigned int >::const_iterator q = comptMap.find( pa );
+		assert( q != comptMap.end() );
+		NeuroNode& nn = nodes_[ q->second ];
+		double x0 = Field< double >::get( shaft_[i], "x0" );
+		double y0 = Field< double >::get( shaft_[i], "y0" );
+		double z0 = Field< double >::get( shaft_[i], "z0" );
+		NeuroNode& pn = nodes_[ nn.parent() ];
+		unsigned int index = 0;
+		double r = nn.nearest( x0, y0, z0, pn, index );
+		if ( r >= 0.0 ) {
+			parent_[i] = index + nn.startFid();
 		} else {
 			assert( 0 );
 		}
-
 	}
-	*/
 }
 
 //////////////////////////////////////////////////////////////////
