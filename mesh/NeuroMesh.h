@@ -54,6 +54,7 @@ class NeuroMesh: public MeshCompt
 		 */
 		void setCell( const Eref& e, const Qinfo* q, Id cellmodel );
 		Id getCell( const Eref& e, const Qinfo* q ) const;
+		Id getCell() const;
 
 		/**
 		 * Assigns a group of compartments to be used for the mesh.

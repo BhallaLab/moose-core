@@ -37,8 +37,9 @@ const Cinfo* SpineMesh::initCinfo()
 		static DestFinfo spineList( "spineList",
 			"Specifies the list of electrical compartments for the spine,"
 			"and the associated parent voxel"
-			"Arguments: shaft compts, head compts, parent voxel index ",
-			new EpFunc3< SpineMesh, vector< Id >, vector< Id >,
+			"Arguments: cell container, shaft compartments, "
+			"head compartments, parent voxel index ",
+			new EpFunc4< SpineMesh, Id, vector< Id >, vector< Id >,
 		   	vector< unsigned int > >(
 				&SpineMesh::handleSpineList )
 		);
@@ -101,6 +102,11 @@ void SpineMesh::updateCoords()
 	buildStencil();
 }
 
+Id SpineMesh::getCell() const
+{
+	return cell_;
+}
+
 unsigned int SpineMesh::innerGetDimensions() const
 {
 	return 3;
@@ -109,12 +115,14 @@ unsigned int SpineMesh::innerGetDimensions() const
 // Here we set up the spines. We don't permit heads without shafts.
 void SpineMesh::handleSpineList( 
 		const Eref& e, const Qinfo* q, 
+		Id cell,
 		vector< Id > shaft, vector< Id > head, 
 		vector< unsigned int > parentVoxel )
 {
 		assert( head.size() == parentVoxel.size() );
 		assert( head.size() == shaft.size() );
 		spines_.resize( head.size() );
+		cell_ = cell;
 
 		for ( unsigned int i = 0; i < head.size(); ++i ) {
 			spines_[i] = SpineEntry( shaft[i], head[i], parentVoxel[i] );
@@ -311,6 +319,17 @@ void SpineMesh::matchSpineMeshEntries( const ChemCompt* other,
 void SpineMesh::matchNeuroMeshEntries( const ChemCompt* other,
 	   vector< VoxelJunction >& ret ) const
 {
+	const NeuroMesh* nm = dynamic_cast< const NeuroMesh* >( other );
+	assert( nm );
+	// Check if NeuroMesh is parent of spines. If so, simple.
+	if ( nm->getCell() == getCell() ) {
+		for ( unsigned int i = 0; i < spines_.size(); ++i ) {
+			double xda = spines_[i].rootArea() / spines_[i].diffusionLength();
+			ret.push_back( VoxelJunction( i, spines_[i].parent(), xda ) );
+		}
+	} else {
+		assert( 0 ); // Don't know how to do this yet.
+	}
 }
 
 void SpineMesh::matchCubeMeshEntries( const ChemCompt* other,
