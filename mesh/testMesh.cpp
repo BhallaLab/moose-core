@@ -1708,6 +1708,39 @@ void testSpineMesh()
 	}
 
 	// Check coupling to CubeMesh.
+	CubeMesh cube;
+	cube.setPreserveNumEntries( 0 );
+	vector< double > coords( 9, 0.0 );
+	coords[0] = -len/2.0 - 1.2e-5; // X0
+	coords[1] = -1e-5; // Y0
+	coords[2] = -1e-5; // Z0
+
+	coords[3] = len * 2.0 - 1.2e-5; // X1
+	coords[4] = 1.5e-5; // Y1
+	coords[5] = 1.5e-5; // Z1
+	coords[6] = 2.5e-5; // DX
+	coords[7] = 2.5e-5; // DY
+	coords[8] = 2.5e-5; // DZ
+	cube.innerSetCoords( coords );
+	ret.clear();
+	s->matchMeshEntries( &cube, ret );
+	assert( ret.size() == numSpines );
+	for ( unsigned int i = 0; i < ret.size(); ++i ) {
+		assert( ret[i].first == i );
+		unsigned int cubeIndex = i + 5;
+		assert( ret[i].second == cubeIndex );
+		assert( doubleApprox( ret[i].diffScale * 1e10, PI * 1e-12 * 1e10 ) );
+		/*
+		cout << i << " cubeIndex=" << cubeIndex << ", (" << 
+				ret[i].first << ", " << ret[i].second << ") : " <<
+				ret[i].diffScale << "\n";
+				*/
+	}
+
+	shell->doDelete( cell );
+	shell->doDelete( nm );
+	shell->doDelete( sm );
+	cout << "." << flush;
 }
 
 void testMesh()

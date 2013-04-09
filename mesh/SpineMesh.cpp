@@ -337,6 +337,6 @@ void SpineMesh::matchCubeMeshEntries( const ChemCompt* other,
 {
 	for( unsigned int i = 0; i < spines_.size(); ++i ) {
 		const SpineEntry& se = spines_[i];
-		se.matchCubeMeshEntriesToHead( other, surfaceGranularity_, i, ret );
+		se.matchCubeMeshEntriesToHead( other, i, surfaceGranularity_, ret );
 	}
 }

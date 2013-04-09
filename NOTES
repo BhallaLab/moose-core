@@ -21564,6 +21564,7 @@ clear to set up the matchSpineMeshToNeuroMesh stuff.
 ==========================================================================
 9 April 2013.
 'parent' information checked.
-Coupling between Neuromesh and SpineMesh checked.
+Coupling between Neuromesh and SpineMesh checked. Checkin 4482.
+Coupling between Neuromesh and CubeMesh checked.
 
 ==========================================================================
