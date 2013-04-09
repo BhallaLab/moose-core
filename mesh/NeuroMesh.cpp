@@ -23,16 +23,18 @@
 #include "NeuroMesh.h"
 #include "../utility/numutil.h"
 
-static SrcFinfo3< vector< Id >, vector< Id >, vector< unsigned int > >* 
+static SrcFinfo4< Id, vector< Id >, vector< Id >, vector< unsigned int > >* 
 	spineListOut()
 {
-	static SrcFinfo3< vector< Id >, vector< Id >, vector< unsigned int > >
+	static SrcFinfo4< Id, vector< Id >, vector< Id >, vector< unsigned int > >
    		spineListOut(
 		"spineListOut",
 		"Request SpineMesh to construct self based on list of electrical "
 		"compartments that this NeuroMesh has determined are spine shaft "
 		"and spine head respectively. Also passes in the info about where "
 		"each spine is connected to the NeuroMesh. "
+		"Arguments: Cell Id, shaft compartment Ids, head compartment Ids,"
+		"index of matching parent voxels for each spine"
 	);
 	return &spineListOut;
 }
@@ -482,7 +484,7 @@ void NeuroMesh::setCell( const Eref& e, const Qinfo* q, Id cell )
 		setCellPortion( cell, compts );
 		if ( separateSpines_ )
 				spineListOut()->send( e, q->threadNum(),
-								shaft_, head_, parent_ );
+					cell_, shaft_, head_, parent_ );
 }
 
 
@@ -529,6 +531,11 @@ void NeuroMesh::setCellPortion( Id cell, vector< Id > portion )
 }
 
 Id NeuroMesh::getCell( const Eref& e, const Qinfo* q ) const
+{
+		return cell_;
+}
+
+Id NeuroMesh::getCell() const
 {
 		return cell_;
 }

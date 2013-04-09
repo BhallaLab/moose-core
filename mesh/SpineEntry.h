@@ -70,6 +70,9 @@ class SpineEntry
 			unsigned int myIndex,
 			double granularity, vector< VoxelJunction >& ret );
 
+		double rootArea() const;
+		double diffusionLength() const;
+
 	private:
 		CylBase root_; /// Anchor point on dendrite
 		CylBase shaft_; /// Shaft cylinder

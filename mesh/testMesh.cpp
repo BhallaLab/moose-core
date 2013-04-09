@@ -1690,12 +1690,24 @@ void testSpineMesh()
 	for ( unsigned int i = 0; i < sdc; ++i ) {
 		assert( s->spines()[i].parent() == 40 + i * numCompts/numSpines );
 		assert( doubleEq( s->spines()[i].volume(), PI * 0.25e-12 ) );
+		double x = i * diffLength * numCompts/numSpines;
+		unsigned int index = 0;
+		s->nearest( x, 0, 0, index );
+		assert( index == i );
 	}
 
-	// Make spinemesh object
-	// Set up msg from nm to spinemesh
-	// Build spinemesh: trigger ?
-	// Check numbers on spinemesh.
+	// Check coupling to Neuromesh.
+	vector< VoxelJunction > ret;
+	NeuroMesh* nmesh = reinterpret_cast< NeuroMesh* >( nm.eref().data() );
+	s->matchMeshEntries( nmesh, ret );
+	assert( ret.size() == numSpines );
+	for ( unsigned int i = 0; i < numSpines; ++i ) {
+		assert( ret[i].first == i );
+		assert( ret[i].second == s->spines()[i].parent() );
+		assert( doubleEq( ret[i].diffScale, PI * 0.25e-14 / 1.5e-6 ) );
+	}
+
+	// Check coupling to CubeMesh.
 }
 
 void testMesh()

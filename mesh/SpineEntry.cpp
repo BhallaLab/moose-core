@@ -132,7 +132,7 @@ void SpineEntry::matchCubeMeshEntriesToPSD( const ChemCompt* compt,
 }
 
 		/**
-		 * Find the matching matching NeuroMesh entry index to the 
+		 * Find the matching NeuroMesh entry index to the 
 		 * root of the shaft of this spine. Also compute the area and
 		 * diffusion length of the shaft.
 		 */
@@ -141,4 +141,14 @@ unsigned int SpineEntry::matchNeuroMeshEntriesToShaft(
   		double& area, double& length ) const
 {
 		return 0;
+}
+
+double SpineEntry::rootArea() const
+{
+	return root_.getDia() * root_.getDia() * PI * 0.25;
+}
+
+double SpineEntry::diffusionLength() const
+{
+	return shaft_.getLength() + 0.5 * head_.getLength();
 }
