@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Fri Mar 15 16:39:28 2013 (+0530)
+# Last-Updated: Wed Apr 10 22:20:53 2013 (+0530)
 #           By: subha
-#     Update #: 1011
+#     Update #: 1048
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -118,8 +118,9 @@ class MWindow(QtGui.QMainWindow):
         self.mdiArea = QtGui.QMdiArea()
         for widget in self.getMyDockWidgets():
             self.addDockWidget(Qt.Qt.BottomDockWidgetArea, widget)
-        self.quitAction = QtGui.QAction('Quit', self)
+        self.quitAction = QtGui.QAction('&Quit', self)
         self.connect(self.quitAction, QtCore.SIGNAL('triggered()'), self.quit)
+        self.quitAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Q", None, QtGui.QApplication.UnicodeUTF8))        
         self.setCentralWidget(self.mdiArea)
         self.setPlugin('default', '/')
 
@@ -181,7 +182,7 @@ class MWindow(QtGui.QMainWindow):
             self.shellWidget.interpreter.runsource('from moose import *')
         return self.shellWidget
 
-    def loadPluginClass(self, name, re=False):        
+    def loadPluginClass(self, name, re=False):
         """Load the plugin class from a plugin module.
         
         A plugin module should have only one subclass of
@@ -348,6 +349,8 @@ class MWindow(QtGui.QMainWindow):
         self.viewMenu.addActions(self.getViewActions())
         self.docksMenu = self.viewMenu.addMenu('&Dock widgets')
         self.docksMenu.addActions(self.getDockWidgetsToggleActions())
+        self.subWindowMenu = self.viewMenu.addMenu('&Subwindows')
+        self.subWindowMenu.addActions(self.getSubWindowActions())
         return self.viewMenu
 
     # def getSubWindowVisibilityActions(self):
@@ -388,9 +391,22 @@ class MWindow(QtGui.QMainWindow):
             self.plotViewAction = QtGui.QAction('&Plot view', self)
             self.plotViewAction.triggered.connect(self.openPlotView)
             self.runViewAction = QtGui.QAction('&Run view', self)
-            self.runViewAction.triggered.connect(self.openRunView)            
+            self.runViewAction.triggered.connect(self.openRunView)     
             self.viewActions = [self.editorViewAction, self.plotViewAction, self.runViewAction]
         return self.viewActions
+
+    def getSubWindowActions(self):
+        if not hasattr(self, 'subWindowActions') or self.subWindowActions is None:
+            self.tabbedViewAction = QtGui.QAction('&Tabbed view', self)
+            self.tabbedViewAction.triggered.connect(lambda : self.mdiArea.setViewMode(QtGui.QMdiArea.TabbedView))
+            self.subWindowViewAction = QtGui.QAction('&SubWindow view', self)
+            self.subWindowViewAction.triggered.connect(lambda : self.mdiArea.setViewMode(QtGui.QMdiArea.SubWindowView))
+            self.tileSubWindowsAction = QtGui.QAction('Ti&le subwindows', self)
+            self.tileSubWindowsAction.triggered.connect(self.mdiArea.tileSubWindows)
+            self.cascadeSubWindowsAction = QtGui.QAction('&Cascade subwindows', self)
+            self.cascadeSubWindowsAction.triggered.connect(self.mdiArea.cascadeSubWindows)
+            self.subWindowActions = [self.tabbedViewAction, self.subWindowViewAction, self.tileSubWindowsAction, self.cascadeSubWindowsAction]
+        return self.subWindowActions
 
     def getDockWidgetsToggleActions(self):
         """Get a list of actions for toggling visibility of dock
