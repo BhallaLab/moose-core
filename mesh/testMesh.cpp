@@ -1674,7 +1674,12 @@ void testSpineMesh()
 	MsgId mid = shell->doAddMsg( 
 					"OneToOne", nm, "spineListOut", sm, "spineList" );
 	assert( mid != Msg::bad );
+	Id pm = shell->doCreate( "PsdMesh", Id(), "psdmesh", dims );
+	mid = shell->doAddMsg( 
+					"OneToOne", sm, "psdListOut", pm, "psdList" );
+	assert( mid != Msg::bad );
 	Field< Id >::set( nm, "cell", cell );
+	Qinfo::clearQ( 0 );
 	Qinfo::clearQ( 0 );
 	unsigned int ns = Field< unsigned int >::get( nm, "numSegments" );
 	assert( ns == 2 ); // soma and dend
@@ -1740,6 +1745,7 @@ void testSpineMesh()
 	shell->doDelete( cell );
 	shell->doDelete( nm );
 	shell->doDelete( sm );
+	shell->doDelete( pm );
 	cout << "." << flush;
 }
 

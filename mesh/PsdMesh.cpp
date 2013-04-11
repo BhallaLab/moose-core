@@ -121,7 +121,7 @@ void PsdMesh::handlePsdList(
 		vector< double > diskCoords, //ctr(xyz), dir(xyz), dia, diffDist
 		vector< unsigned int > parentVoxel )
 {
-		assert( diskCoords.size() == 7 * parentVoxel.size() );
+		assert( diskCoords.size() == 8 * parentVoxel.size() );
 		psd_.resize( parentVoxel.size() );
 		pa_.resize( parentVoxel.size() );
 		cell_ = cell;
