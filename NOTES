@@ -21319,8 +21319,8 @@ Dating back from 22 Dec: Updated list of pending things here.
 + Extend to CylMesh 
 + Regression test for CylMesh
 + Extend to NeuroMesh
-- Regression test for NeuroMesh
-- Write SpineMesh, extend to it.
+* Regression test for NeuroMesh
+* Write SpineMesh, extend to it.
 - Extended regression test for cross-compartment reac-diff with patchy compts.
 - Put in stuff for SigNeur.
 - Extend CubeMesh to figure out surfaces from Geom classes and bitmaps.
@@ -21542,8 +21542,8 @@ Tests:
 	*Test SpineEntry setup.
 	*Test creation of Spines.
 	*Check location of Spines
-	Check for coupling between NeuroMesh and SpineMesh
-	Check coupling between SpineMesh and enclosing CubeMesh.
+	*Check for coupling between NeuroMesh and SpineMesh
+	*Check coupling between SpineMesh and enclosing CubeMesh.
 
 Then make PsdMesh from SpineMesh.
 ==========================================================================
@@ -21564,7 +21564,21 @@ clear to set up the matchSpineMeshToNeuroMesh stuff.
 ==========================================================================
 9 April 2013.
 'parent' information checked.
-Coupling between Neuromesh and SpineMesh checked. Checkin 4482.
-Coupling between Neuromesh and CubeMesh checked.
+Coupling between NeuroMesh and SpineMesh checked. Checkin 4482.
+Coupling between SpineMesh and CubeMesh checked. Checkin 4483.
+
+Next: make a PsdMesh. Slight extension of SpineMesh where the 
+	SpineEntries are duplicated. Begun on it.
+Then:
+	SigNeur
+	Regression Test of whole mess with kkit and .p file loading
+	SBML reader/writer.
+	GSSA update for meshes, eliminate old code.
+	GSSA interface with GSL
+	SigNeurML startup.
+	Smoldyn interface
+	Pool composition and motors.
 
 ==========================================================================
+10 April 2013
+Skeleton PsdMesh done. Yet to compile or test.

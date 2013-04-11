@@ -22,6 +22,7 @@ OBJ = \
 	Boundary.o	\
 	SpineEntry.o	\
 	SpineMesh.o	\
+	PsdMesh.o	\
 	testMesh.o	\
 
 HEADERS = \
@@ -43,6 +44,7 @@ NeuroNode.o: CylBase.h NeuroNode.h
 NeuroMesh.o: ../basecode/SparseMatrix.h ChemCompt.h CylBase.h NeuroNode.h NeuroMesh.h
 SpineMesh.o: ../basecode/SparseMatrix.h VoxelJunction.h ChemCompt.h CylBase.h NeuroNode.h NeuroMesh.h Vec.h SpineEntry.h SpineMesh.h
 SpineEntry.o: VoxelJunction.h ChemCompt.h CylBase.h Vec.h SpineEntry.h
+PsdMesh.o: ../basecode/SparseMatrix.h VoxelJunction.h ChemCompt.h CylBase.h Vec.h SpineEntry.h SpineMesh.h
 testMesh.o:	../basecode/SparseMatrix.h CylBase.h NeuroNode.h MeshEntry.h ChemCompt.h CylMesh.h Boundary.h
 
 .cpp.o:

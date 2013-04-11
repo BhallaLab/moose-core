@@ -64,13 +64,18 @@ class SpineEntry
 		/// Return volume of spine. Ignores shaft volume. Virtual func.
 		double volume() const;
 
+		/// Return coords of centre of spine head.
 		void mid( double& x, double& y, double& z ) const;
+
+		/// Return coords of middle of PSD.
+		void apex( double& x, double& y, double& z ) const;
 
 		void matchCubeMeshEntries( const ChemCompt* other, 
 			unsigned int myIndex,
 			double granularity, vector< VoxelJunction >& ret );
 
 		double rootArea() const;
+		double headArea() const;
 		double diffusionLength() const;
 
 	private:
