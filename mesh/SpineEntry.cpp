@@ -152,3 +152,20 @@ double SpineEntry::diffusionLength() const
 {
 	return shaft_.getLength() + 0.5 * head_.getLength();
 }
+
+vector< double > SpineEntry::psdCoords() const
+{
+	vector< double > ret( 8, 0.0 );
+	ret[0] = head_.getX();
+	ret[1] = head_.getY();
+	ret[2] = head_.getZ();
+	double m0, m1, m2;
+	mid( m0, m1, m2 );
+	ret[3] = ret[0] - m0;
+	ret[4] = ret[1] - m1;
+	ret[5] = ret[2] - m2;
+	ret[6] = head_.getDia();
+	ret[7] = sqrt( ret[3] * ret[3] + ret[4] * ret[4] + ret[5] * ret[5] );
+
+	return ret;
+}

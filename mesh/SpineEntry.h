@@ -78,6 +78,16 @@ class SpineEntry
 		double headArea() const;
 		double diffusionLength() const;
 
+		/**
+		 * psdCoords is used to build the PsdMesh. The function returns 8
+		 * coords to define the psd: 
+		 * 	centre xyz
+		 * 	direction xyz
+		 * 	dia, 
+		 * 	diffusion distance to middle of spine Head.
+		 */
+		vector< double > psdCoords() const;
+
 	private:
 		CylBase root_; /// Anchor point on dendrite
 		CylBase shaft_; /// Shaft cylinder

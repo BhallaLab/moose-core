@@ -21582,3 +21582,9 @@ Then:
 ==========================================================================
 10 April 2013
 Skeleton PsdMesh done. Yet to compile or test.
+==========================================================================
+11 April 2013
+Skeleton PsdMesh compiled. Yet to test. Checkin 4485.
+Added in bare-bones test for PsdMesh. Clears. Need to add further tests.
+
+==========================================================================
