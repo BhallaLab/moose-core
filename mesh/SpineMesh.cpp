@@ -24,6 +24,24 @@
 #include "SpineEntry.h"
 #include "SpineMesh.h"
 #include "../utility/numutil.h"
+
+static SrcFinfo3< Id, vector< double >, vector< unsigned int > >* 
+	psdListOut()
+{
+	static SrcFinfo3< Id, vector< double >, vector< unsigned int > >
+   		psdListOut(
+		"psdListOut",
+		"Tells PsdMesh to build a mesh. "
+		"Arguments: Cell Id, Coordinates of each psd, "
+		"index of matching parent voxels for each spine"
+		"The coordinates each have 8 entries:"
+		"xyz of centre of psd, xyz of vector perpendicular to psd, "
+		"psd diameter, "
+		" diffusion distance from parent compartment to PSD"
+	);
+	return &psdListOut;
+}
+
 const Cinfo* SpineMesh::initCinfo()
 {
 		//////////////////////////////////////////////////////////////
@@ -50,6 +68,7 @@ const Cinfo* SpineMesh::initCinfo()
 
 	static Finfo* spineMeshFinfos[] = {
 		&spineList,			// DestFinfo
+		psdListOut(),		// SrcFinfo
 	};
 
 	static Cinfo spineMeshCinfo (
@@ -124,9 +143,17 @@ void SpineMesh::handleSpineList(
 		spines_.resize( head.size() );
 		cell_ = cell;
 
+		vector< double > ret;
+		vector< double > psdCoords;
+		vector< unsigned int > index( head.size(), 0 );
 		for ( unsigned int i = 0; i < head.size(); ++i ) {
 			spines_[i] = SpineEntry( shaft[i], head[i], parentVoxel[i] );
+			ret = spines_[i].psdCoords();
+			assert( ret.size() == 8 );
+			psdCoords.insert( psdCoords.end(), ret.begin(), ret.end() );
+			index[i] = i;
 		}
+		psdListOut()->send( e, q->threadNum(), cell_, psdCoords, index );
 
 		updateCoords();
 }
