@@ -151,8 +151,13 @@ endif
 ifndef SVN
 SVN?=1
 endif
+empty :=
+space := $(empty) $(empty)
 ifneq ($(SVN),0)
-SVN_REVISION=$(shell svnversion)
+# Some versions of svnrevision return "Unversioned directory" which causes confusion to gcc
+SVN_REVISION := $(shell svnversion)
+SVN_REVISION := $(subst space,_,$(SVN_REVISION))
+# SVN_REVISION := $(subst :,_,$(SVN_REVISION))
 ifneq ($(SVN_REVISION),export)
 CXXFLAGS+=-DSVN_REVISION=\"$(SVN_REVISION)\"
 endif
@@ -422,12 +427,12 @@ install:
 	python -c "import compileall; compileall.compile_dir('$(DESTDIR)$(install_prefix)/share/moose/gui',force=1)"
 	python -c "import compileall; compileall.compile_dir('$(DESTDIR)$(install_prefix)/share/moose/Demos',force=1)"
 
-	## see standards.freedesktop.org for specifications for where to put menu entries and icons
-	## copy the .desktop files to /usr/share/applications for link to show up in main menu
+        ## see standards.freedesktop.org for specifications for where to put menu entries and icons
+        ## copy the .desktop files to /usr/share/applications for link to show up in main menu
 	mkdir -p $(DESTDIR)$(install_prefix)/share/applications
 	cp gui/MooseGUI.desktop $(DESTDIR)$(install_prefix)/share/applications/
 	cp gui/MooseSquidAxon.desktop $(DESTDIR)$(install_prefix)/share/applications/
-	## copy the .desktop files to the desktop too to get icons
+        ## copy the .desktop files to the desktop too to get icons
 	cp gui/MooseGUI.desktop $$HOME/Desktop/
 	chmod a+x $$HOME/Desktop/MooseGUI.desktop
 	chown $(username) $(HOME)/Desktop/MooseGUI.desktop
@@ -436,11 +441,11 @@ install:
 	chmod a+x $$HOME/Desktop/MooseSquidAxon.desktop
 	chgrp $(username) $(HOME)/Desktop/MooseSquidAxon.desktop
 	chown $(username) $(HOME)/Desktop/MooseSquidAxon.desktop
-	## copy icon to /usr/share/icons/hicolor/<size>/apps (hicolor is the fallback theme)
+        ## copy icon to /usr/share/icons/hicolor/<size>/apps (hicolor is the fallback theme)
 	mkdir -p $(DESTDIR)$(install_prefix)/share/icons/hicolor/scalable/apps
 	cp gui/icons/moose_icon.png $(DESTDIR)$(install_prefix)/share/icons/hicolor/scalable/apps/
 	cp gui/icons/squid.png $(DESTDIR)$(install_prefix)/share/icons/hicolor/scalable/apps/
-	## need to update the icon cache to show the icon
+        ## need to update the icon cache to show the icon
 	update-icon-caches $(DESTDIR)$(install_prefix)/share/icons/hicolor/
-	
+
 .PHONY: install
