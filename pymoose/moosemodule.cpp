@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Sat Sep 29 17:54:57 2012 (+0530)
+// Last-Updated: Thu Apr 18 20:50:04 2013 (+0530)
 //           By: subha
-//     Update #: 10119
+//     Update #: 10120
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -2115,7 +2115,7 @@ static struct module_state _state;
     
     static PyObject * moose_ObjId_getFieldType(_ObjId * self, PyObject * args)
     {
-        if (Id::isValid(self->oid_.id)){
+        if (!Id::isValid(self->oid_.id)){
             RAISE_INVALID_ID(NULL, "moose_ObjId_getFieldType");
         }
         char * fieldName = NULL;
