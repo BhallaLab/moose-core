@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Feb 13 16:07:56 2010 (+0530)
 # Version: 
-# Last-Updated: Tue Feb 26 10:04:29 2013 (+0530)
+# Last-Updated: Thu Apr 18 19:56:03 2013 (+0530)
 #           By: subha
-#     Update #: 357
+#     Update #: 361
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -59,6 +59,7 @@ TEMPDIR = tempfile.gettempdir()
 KEY_FIRSTTIME = 'firsttime'
 # KEY_STATE_FILE = 'statefile'
 
+KEY_UNDO_LENGTH = 'main/undolength'
 KEY_WINDOW_GEOMETRY = 'main/geometry'
 KEY_WINDOW_LAYOUT = 'main/layout'
 KEY_RUNTIME_AUTOHIDE = 'main/rtautohide'
@@ -98,6 +99,7 @@ MOOSE_LOCAL_DIR = os.path.join(os.environ['HOME'], 'moose')
 MOOSE_NUMPTHREADS = '1'
 
 MOOSE_ABOUT_FILE = os.path.join(MOOSE_GUI_DIR, 'about.html')
+MOOSE_UNDO_LENGTH = 128 # Arbitrary undo length
 LOCAL_BUILD = False
 
 class MooseSetting(dict):
@@ -130,6 +132,7 @@ class MooseSetting(dict):
                 cls._instance.qsettings.setValue(KEY_COLORMAP_DIR, os.path.join(MOOSE_GUI_DIR, 'colormaps'))
                 cls._instance.qsettings.setValue(KEY_ICON_DIR, os.path.join(MOOSE_GUI_DIR, 'icons'))
                 cls._instance.qsettings.setValue(KEY_NUMPTHREADS, '1')
+                cls._instance.qsettings.setValue(KEY_UNDO_LENGTH, str(MOOSE_UNDO_LENGTH))
             else:
                 cls._instance.qsettings.setValue(KEY_FIRSTTIME, False)
             # These are to be checked at every run

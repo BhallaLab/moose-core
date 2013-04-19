@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Wed Apr 10 22:20:53 2013 (+0530)
+# Last-Updated: Fri Apr 19 14:55:50 2013 (+0530)
 #           By: subha
-#     Update #: 1048
+#     Update #: 1073
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -47,6 +47,7 @@
 import imp
 import inspect
 import code
+import traceback
 import sys
 sys.path.append('../python')
 import os
@@ -56,6 +57,7 @@ from PyQt4 import QtGui,QtCore,Qt
 import config
 import mplugin
 import moose
+import mexception
 from moose import utils
 from mload import loadFile
 from loaderdialog import LoaderDialog
@@ -105,6 +107,7 @@ class MWindow(QtGui.QMainWindow):
     """
     def __init__(self, *args):
         QtGui.QMainWindow.__init__(self, *args)
+        self.setWindowTitle('MOOSE')
         self.pluginNames = None
         self.plugin = None
         self.fileMenu = None
@@ -125,7 +128,27 @@ class MWindow(QtGui.QMainWindow):
         self.setPlugin('default', '/')
 
     def quit(self):
-        QtGui.qApp.closeAllWindows()        
+        QtGui.qApp.closeAllWindows()
+
+    def handleException(self, t, v, s):
+        """This handler will show warning messages for errors
+        exceptions. Show info at status bar for non-error
+        exceptions. It will replace sys.excepthook and has the same
+        signature (except being bound to this object).
+
+        t : exception type
+
+        v : exception value
+
+        s: traceback object.
+        
+        """
+        title = ''.join(traceback.format_exception_only(t, v))
+        trace = ''.join(traceback.format_exception(t, v, s))
+        if isinstance(v, StandardError):
+            QtGui.QMessageBox.warning(self, title, '\n'.join((title, trace)))
+        elif isinstance(v, mexception.Info):
+            self.statusBar().showMessage(title, 5000)
     
     def getPluginNames(self):
         """Return pluginNames attribute or create it by retrieving
@@ -581,8 +604,8 @@ class MWindow(QtGui.QMainWindow):
                 modelRoot = dialog.getTargetPath()
                 print 'modelroot', modelRoot
                 ret = loadFile(str(fileName), modelRoot, merge=dialog.isMerge())
-                ''' Harsha: if subtype is None, in case of cspace then pluginLookup = /cspace/None 
-                    which will not call kkit plugin so cleaning to /cspace '''
+                # Harsha: if subtype is None, in case of cspace then pluginLookup = /cspace/None 
+                #     which will not call kkit plugin so cleaning to /cspace 
                 pluginLookup = '%s/%s' % (ret['modeltype'], ret['subtype'])
                 try:
                     pluginName = subtype_plugin_map['%s/%s' % (ret['modeltype'], ret['subtype'])]
@@ -601,6 +624,7 @@ if __name__ == '__main__':
     #moose.loadModel('../Demos/Genesis_files/Kholodenko.g','/kho')
     mWindow =  MWindow()
     mWindow.setWindowState(QtCore.Qt.WindowMaximized)
+    sys.excepthook = mWindow.handleException
     # show it
     mWindow.show()
     # start the Qt main loop execution, exiting from this script

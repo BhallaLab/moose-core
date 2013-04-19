@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Feb  8 09:38:40 2013 (+0530)
 # Version: 
-# Last-Updated: Wed Feb 27 16:37:52 2013 (+0530)
+# Last-Updated: Fri Apr 19 14:52:52 2013 (+0530)
 #           By: subha
-#     Update #: 208
+#     Update #: 211
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -47,6 +47,7 @@
 
 import moose
 from moose import mtypes, neuroml
+from mexception import FileLoadError
 import posixpath
 
 def loadFile(filename, target, merge=True):
@@ -78,8 +79,11 @@ def loadFile(filename, target, merge=True):
     if not merge:
         for ch in p.children:
             moose.delete(ch)
-    modeltype = mtypes.getType(filename)
-    subtype = mtypes.getSubtype(filename, modeltype)
+    try:
+        modeltype = mtypes.getType(filename)
+        subtype = mtypes.getSubtype(filename, modeltype)
+    except KeyError:
+        raise FileLoadError('Do not know how to handle this filetype: %s' % (filename))
     pwe = moose.getCwe()
     if modeltype == 'genesis':
         if subtype == 'kkit' or subtype == 'prototype':
@@ -91,7 +95,7 @@ def loadFile(filename, target, merge=True):
     elif modeltype == 'xml' and subtype == 'neuroml':
         model = neuroml.loadNeuroML_L123(filename)
     else:
-        print 'Do not know how to handle this filetype:', filename
+        raise FileLoadError('Do not know how to handle this filetype: %s' % (filename))
     moose.setCwe(pwe) # The MOOSE loadModel changes the current working element to newly loaded model. We revert that behaviour
     # TODO: check with Aditya how to specify the target for
     # neuroml reader
