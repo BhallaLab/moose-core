@@ -6,9 +6,9 @@
 # Maintainer:
 # Created: Wed Jun 30 11:18:34 2010 (+0530) 
 # Version:
-# Last-Updated: Fri Apr 19 15:03:22 2013 (+0530)
+# Last-Updated: Fri Apr 19 15:14:56 2013 (+0530)
 #           By: subha
-#     Update #: 803
+#     Update #: 820
 # URL:
 # Keywords:
 # Compatibility:
@@ -35,6 +35,11 @@
 #
 # Thu Apr 18 18:37:31 IST 2013 - Reintroduced into multiscale GUI by
 # Subhasis
+#
+# Fri Apr 19 15:05:53 IST 2013 - Subhasis added undo redo
+# feature. Create ObjectEditModel as part of ObjectEditView.
+#
+
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -112,6 +117,11 @@ extra_fields = ['this',
         
 
 class ObjectEditModel(QtCore.QAbstractTableModel):
+    """Model class for editing MOOSE elements. This is not to be used
+    directly, except that its undo and redo slots should be connected
+    to by the GUI actions for the same.
+
+    """
     def __init__(self, datain, headerdata=['Field','Value'], undolen=100, parent=None, *args):
         QtCore.QAbstractTableModel.__init__(self, parent, *args)
         self.fieldFlags = {}
@@ -152,12 +162,8 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
         field = self.fields[index.row()]
         oldValue = self.mooseObject.getField(field)
         value = type(oldValue)(value)
-        try:
-            self.mooseObject.setField(field, value)
-            self.undoStack.append((index, oldValue))
-        except ValueError as e:
-            QtGui.QMessageBox.warning('Error setting field value: %s', e)
-            return False
+        self.mooseObject.setField(field, value)
+        self.undoStack.append((index, oldValue))
         if field == 'name':
             self.emit(QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'), self.mooseObject)
         self.emit(QtCore.SIGNAL('dataChanged(const QModelIndex&, const QModelIndex&)'), index, index)
@@ -221,7 +227,19 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
         return QtCore.QVariant()
 
 class ObjectEditView(QtGui.QTableView):
-    def __init__(self, mobject, undolen=defaults.UNDO_LENGTH, parent=None):
+    """View class for object editor. 
+
+    This class creates an instance of ObjectEditModel using the moose
+    element passed as its first argument.
+    
+    undolen - specifies the size of the undo stack. By default set to
+    OBJECT_EDIT_UNDO_LENGTH constant in defaults.py. Specify something smaller if
+    large number of objects are likely to be edited.
+
+    To enable undo/redo conect the corresponding actions from the gui
+    to view.model().undo and view.model().redo slots.
+    """
+    def __init__(self, mobject, undolen=defaults.OBJECT_EDIT_UNDO_LENGTH, parent=None):
         QtGui.QTableView.__init__(self, parent)
         #self.setEditTriggers(self.DoubleClicked | self.SelectedClicked | self.EditKeyPressed)
         vh = self.verticalHeader()
