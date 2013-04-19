@@ -6,9 +6,9 @@
 # Maintainer:
 # Created: Wed Jun 30 11:18:34 2010 (+0530) 
 # Version:
-# Last-Updated: Thu Apr 18 19:18:46 2013 (+0530)
+# Last-Updated: Fri Apr 19 15:03:22 2013 (+0530)
 #           By: subha
-#     Update #: 589
+#     Update #: 803
 # URL:
 # Keywords:
 # Compatibility:
@@ -55,12 +55,17 @@
   
 # Code:
 
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+from PyQt4 import QtCore 
+from PyQt4 import QtGui
 import sys
+from collections import deque
+import traceback
+
 sys.path.append('../python')
 import moose
 import defaults
+import config
+from mexception import Info
 
 #these fields will be ignored
 extra_fields = ['this',
@@ -102,22 +107,25 @@ extra_fields = ['this',
                 'preserveNumEntries',
                 'numKm',
                 'numSubstrates',
-                'concK1']
+                'concK1',
+                ]
+        
 
-class ObjectEditModel(QAbstractTableModel):
-    def __init__(self, datain, headerdata=['Field','Value'], parent=None, *args):
-        QAbstractTableModel.__init__(self, parent, *args)
+class ObjectEditModel(QtCore.QAbstractTableModel):
+    def __init__(self, datain, headerdata=['Field','Value'], undolen=100, parent=None, *args):
+        QtCore.QAbstractTableModel.__init__(self, parent, *args)
         self.fieldFlags = {}
         self.fields = []
         self.mooseObject = datain
         self.headerdata = headerdata
-        self.undoStack = []        
-        for fieldName in self.mooseObject.getFieldNames('valueFinfo'):            
+        self.undoStack = deque(maxlen=undolen)
+        self.redoStack = deque(maxlen=undolen)
+        for fieldName in self.mooseObject.getFieldNames('valueFinfo'):
             if fieldName in extra_fields :
                 continue
             value = self.mooseObject.getField(fieldName)
             self.fields.append(fieldName)
-        flag = Qt.ItemIsEnabled | Qt.ItemIsSelectable
+        flag = QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
         # !! This is outrageous !! - Subha
         # searchField = 'set_'+fieldName
         # try:	
@@ -135,90 +143,117 @@ class ObjectEditModel(QAbstractTableModel):
     def columnCount(self, parent):
         return len(self.headerdata)
 
-    def setData(self, index, value, role=Qt.EditRole):
-        oldValue = str(index.data().toString())        
-        if not index.isValid() and index.row () >= len(self.fields):
+    def setData(self, index, value, role=QtCore.Qt.EditRole):        
+        if not index.isValid() or index.row () >= len(self.fields) or index.column() != 1:
             return False
-        ret = True
-        value = str(value.toString()) # convert Qt datastructure to Python string
-        if value =='':
-            value = oldValue
-        field = self.fields[index.row()]        
-        if index.column() == 0: # This is the fieldname
-            ret = False
-        elif index.column() == 1: # This is the value column
-            if field == 'name':
-                self.mooseObject.setField(field,str(value))
-                self.emit(SIGNAL('objectNameChanged(PyQt_PyObject)'), self.mooseObject)
-            else:    
-                try: 
-                    self.mooseObject.setField(field,float(value))
-                except ValueError: #folks entering text instead of numerals here!
-                    print "Numeric value should be entered";
-                    pass            
-        if ret:
-            self.emit(SIGNAL('dataChanged(const QModelIndex&, const QModelIndex&)'), index, index)
-        return ret
+        value = str(value.toString()).strip() # convert Qt datastructure to Python string
+        if len(value) == 0:
+            return False
+        field = self.fields[index.row()]
+        oldValue = self.mooseObject.getField(field)
+        value = type(oldValue)(value)
+        try:
+            self.mooseObject.setField(field, value)
+            self.undoStack.append((index, oldValue))
+        except ValueError as e:
+            QtGui.QMessageBox.warning('Error setting field value: %s', e)
+            return False
+        if field == 'name':
+            self.emit(QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'), self.mooseObject)
+        self.emit(QtCore.SIGNAL('dataChanged(const QModelIndex&, const QModelIndex&)'), index, index)
+        return True
+    
+    def undo(self):
+        print 'Undo'
+        if len(self.undoStack) == 0:
+            raise Info('No more undo information')
+        index, oldvalue, = self.undoStack.pop()
+        field = self.fields[index.row()]
+        currentvalue = self.mooseObject.getField(field)
+        oldvalue = type(currentvalue)(oldvalue)
+        self.redoStack.append((index, str(currentvalue)))
+        self.mooseObject.setField(field, oldvalue)
+        if field == 'name':
+            self.emit(QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'), self.mooseObject)
+        self.emit(QtCore.SIGNAL('dataChanged(const QModelIndex&, const QModelIndex&)'), index, index)
+
+    def redo(self):
+        if len(self.redoStack) ==0:
+            raise Info('No more redo information')
+        index, oldvalue, = self.redoStack.pop()
+        currentvalue = self.mooseObject.getField(self.fields[index.row()])
+        self.undoStack.append((index, str(currentvalue)))
+        self.mooseObject.setField(self.fields[index.row()], type(currentvalue)(oldvalue))
+        if field == 'name':
+            self.emit(QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'), self.mooseObject)
+        self.emit(QtCore.SIGNAL('dataChanged(const QModelIndex&, const QModelIndex&)'), index, index)
 
     def flags(self, index):
-        flag =  Qt.ItemIsEnabled | Qt.ItemIsSelectable
+        flag =  QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
         if not index.isValid():
             return None
         # Replacing the `outrageous` up stuff with something sensible
         setter = 'set_%s' % (self.fields[index.row()])
         if index.column() == 1 and setter in self.mooseObject.getFieldNames('destFinfo'):
-            flag |= Qt.ItemIsEditable
+            flag |= QtCore.Qt.ItemIsEditable
         # !! Replaced till here
         return flag
 
     def data(self, index, role):
         ret = None
         field = self.fields[index.row()]
-        if index.column() == 0 and role == Qt.DisplayRole:
+        if index.column() == 0 and role == QtCore.Qt.DisplayRole:
             try:
-                ret = QVariant(QString(field)+' ('+defaults.FIELD_UNITS[field]+')')
+                ret = QtCore.QVariant(QtCore.QString(field)+' ('+defaults.FIELD_UNITS[field]+')')
             except KeyError:
-                ret = QVariant(QString(field))
-        elif index.column() == 1 and (role == Qt.DisplayRole or role == Qt.EditRole):
+                ret = QtCore.QVariant(QtCore.QString(field))
+        elif index.column() == 1 and (role == QtCore.Qt.DisplayRole or role == QtCore.Qt.EditRole):
             try:
                 ret = self.mooseObject.getField(str(field))
-                ret = QVariant(QString(str(ret)))
+                ret = QtCore.QVariant(QtCore.QString(str(ret)))
             except ValueError:
                 ret = None
         return ret 
 
     def headerData(self, col, orientation, role):
-        if orientation == Qt.Horizontal and role == Qt.DisplayRole:
-            return QVariant(self.headerdata[col])
-        return QVariant()
+        if orientation == QtCore.Qt.Horizontal and role == QtCore.Qt.DisplayRole:
+            return QtCore.QVariant(self.headerdata[col])
+        return QtCore.QVariant()
 
-class ObjectEditView(QTableView):
-    def __init__(self, *args):
-        QTableView.__init__(self, *args)
+class ObjectEditView(QtGui.QTableView):
+    def __init__(self, mobject, undolen=defaults.UNDO_LENGTH, parent=None):
+        QtGui.QTableView.__init__(self, parent)
         #self.setEditTriggers(self.DoubleClicked | self.SelectedClicked | self.EditKeyPressed)
         vh = self.verticalHeader()
         vh.setVisible(False)
-
         hh = self.horizontalHeader()
         hh.setStretchLastSection(True)
-
         self.setAlternatingRowColors(True)
         self.resizeColumnsToContents()
+        self.setModel(ObjectEditModel(mobject, undolen=undolen))
 
     def dataChanged(self, tl, br):
-        QTableView.dataChanged(self, tl, br)
+        QtGui.QTableView.dataChanged(self, tl, br)
         self.viewport().update()
 
 def main():
-    app = QApplication(sys.argv)
+    app = QtGui.QApplication(sys.argv)
+    mainwin = QtGui.QMainWindow()
     c = moose.Compartment('test_compartment')
-    model = ObjectEditModel(c)
-    view = ObjectEditView()
-    view.setModel(model)
-    view.show()
+    view = ObjectEditView(c, undolen=3)
+    mainwin.setCentralWidget(view)
+    action = QtGui.QAction('Undo', mainwin)
+    action.setShortcut('Ctrl+z')
+    action.triggered.connect(view.model().undo)
+    mainwin.menuBar().addAction(action)
+    action = QtGui.QAction('Redo', mainwin)
+    action.setShortcut('Ctrl+y')
+    action.triggered.connect(view.model().redo)
+    mainwin.menuBar().addAction(action)
+    mainwin.show()
     sys.exit(app.exec_())
 
 
 if __name__ == "__main__":
     main()
-#
+# ojectedit.py ends here
