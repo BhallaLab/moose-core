@@ -32,4 +32,4 @@ FIELD_UNITS={
     'floor':'mM'
 }
 
-UNDO_LENGTH = 128
+OBJECT_EDIT_UNDO_LENGTH = 16
