@@ -32,3 +32,4 @@ FIELD_UNITS={
     'floor':'mM'
 }
 
+UNDO_LENGTH = 128
