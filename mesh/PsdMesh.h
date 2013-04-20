@@ -43,6 +43,9 @@ class PsdMesh: public MeshCompt
 
 		Id getCell() const; /// Return Id of parent cell.
 
+		/// Return voxel# on parent compartment on spine or dendrite.
+		unsigned int parent( unsigned int index ) const;
+
 		//////////////////////////////////////////////////////////////////
 		// Field assignment stuff
 		//////////////////////////////////////////////////////////////////

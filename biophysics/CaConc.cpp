@@ -172,8 +172,8 @@ CaConc::CaConc()
 		tau_( 1.0 ),
 		B_( 1.0 ),
 		thickness_( 0.0 ),
-		ceiling_( 1e9 ),
-		floor_( -1e9 )
+		ceiling_( 1.0e9 ),
+		floor_( 0.0 )
 {;}
 
 ///////////////////////////////////////////////////
@@ -240,7 +240,6 @@ double CaConc::getFloor() const
 {
 	return floor_;
 }
-
 
 ///////////////////////////////////////////////////
 // Dest function definitions

@@ -65,6 +65,7 @@ typedef unsigned short ThreadId;
 extern const ThreadId ScriptThreadNum; // Defined in Shell.cpp
 extern const double PI;	// Defined in consts.cpp
 extern const double NA; // Defined in consts.cpp
+extern const double FaradayConst; // Defined in consts.cpp
 
 class Element;
 class Eref;
