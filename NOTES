@@ -21586,5 +21586,111 @@ Skeleton PsdMesh done. Yet to compile or test.
 11 April 2013
 Skeleton PsdMesh compiled. Yet to test. Checkin 4485.
 Added in bare-bones test for PsdMesh. Clears. Need to add further tests.
+Checkin 4486.
+
+==========================================================================
+14 April 2013
+First set of unit tests for PsdMesh cleared, quite painlessly.
+Second set of unit tests was nasty. Tracked down to the following ambiguity:
+
+psd_.push_back( CylBase( *x++, *x++, *x++, 1, 0, 1 ));
+In what order do the arguments get taken and incremented? Turns out not 
+defined. So replaced it with the form
+psd_.push_back( CylBase( *x, *(x+1), *(x+2), 1, 0, 1 )); x += 3;
+With this fixed, all unit tests clear.
+
+On to SigNeur. Most of its capabilities have been subsumed into the
+various meshes and associated solvers for reacdiff. Key remaining
+role is mapping of fields and objects. This was a simple linear
+transform with slope and offset, plus the capability to sum over
+diffusion compartments as well as over time. Adaptor.h from moose-g3.
+We already have a version in the signeur directory. 
+
+Other aspect of it is to set up the entire model, including meshes and solvers
+and adaptors. Should this be in SimManager or in Shell::LoadModel?
+
+LoadModel should do stuff from files.
+SimManager should take existing model definitions in memory as objects, and 
+build up the full model with solvers. It needs assorted specification fields,
+many of which are already there. Also needs to know which path to use,
+currently assumes a certain object tree based on self.
+
+Some mappings needed:
+- Neuro, spine and PSD details (need for each):
+	Which chem model (Id?) is base of each.
+	Subset of elec model to use
+	Solver to use
+	Timestep to use
+- Adaptors
+	- ( Model, object, field) pairs, 
+	- input offset, output offset and scale.
+- Globals: 
+	- Sync timestep.
+	- Neuro model (Or is it just a predefined child path?)
+	- Lambda to use for main neuro model
+
+
+Options:
+1. Have the entire definition set up through objects and msgs, just
+	parse through them to set up solver
+	- Allows set up through Python
+	- Any XML spec would only have to set up the objects and msgs.
+	- At present I don't have flexibility for spines and PSDs. The
+		meshes will just set up whatever is there in the cell defn.
+2. Make a master SigNeur object with various FieldElements to set up these 
+	mappings
+	- Set up again through Pthyon, but would feed into the SigNeur object.
+	- Likewise XML spec. 
+	- Would probably end up setting up the messaging anyway, so this is
+		really just another layer.
+3. Make a dedicated file loader that does all this.
+	- Not really an option.
+	- Instead feed through 1.
+
+So option 1 it is. 
+
+
+==========================================================================
+17 Apr 2013.
+Next step is a test model with all elements in place. Problem is how to make
+it numerically testable. For the test let's just go for getting the model
+set up and behaving phenomenologically. If possible let's define the model
+entirely in code. Later we should have a regression test model that matches
+my Neural Networks paper.
+
+Model:
+Elec:
+Single elec compt soma with HH channels. 5 spines on it. GluR on spines. Ca
+	pool in spine head fed by GluR.
+Chem:
+	PSD: GluR pool.
+	Head: Ca pool. GluR pool. 'Enz' to take to PSD. Reac balances with PSD.
+	Dend: Ca pool binds to 'kinase'. Kinase phosph K chan. Dephosph by reac.
+		Ca is pumped out into a buffered non-reactive pool
+	
+Diffusion:
+	Ca from spine head goes to dend
+
+Adaptors:
+	Electrical Ca in spine head -> Ca pool in spine head
+	Chem GluR in PSD -> Electrical GluR Gbar
+	Chem K in soma -> Electrical K Gbar.
+
+	
+==========================================================================
+18 Apr 2013. 
+Building test.
+Set up skeleton cell model including Ca and spiking synaptic input to spines.
+Trying to plot and schedule it.
+
+Some issues with synapses.
+
+Finally got the system responding to snaptic input.
+Now to check on the calcium.
+A little tweaking and this now works too.
+Onward to setting up the chemical system. After that, the various solvers.
+Here I could do a relatively simple reference, just compare solver outcomes
+with the regular messaging/exp Euler calculations.
+Ca levels are currently unrealistic, need to scale down to account for buffer.
 
 ==========================================================================

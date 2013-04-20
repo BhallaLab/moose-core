@@ -130,8 +130,10 @@ void PsdMesh::handlePsdList(
 		pa_.clear();
 		vector< double >::const_iterator x = diskCoords.begin();
 		for ( unsigned int i = 0; i < parentVoxel.size(); ++i ) {
-			psd_.push_back( CylBase( *x++, *x++, *x++, 1, 0, 1 ));
-			pa_.push_back( CylBase( *x++, *x++, *x++, 1, 0, 1 ));
+			psd_.push_back( CylBase( *x, *(x+1), *(x+2), 1, 0, 1 ));
+			x += 3;
+			pa_.push_back( CylBase( *x, *(x+1), *(x+2), 1, 0, 1 ));
+			x += 3;
 			psd_.back().setDia( *x++ );
 			psd_.back().setIsCylinder( true );
 			parentDist_.push_back( *x++ );
@@ -230,6 +232,15 @@ void PsdMesh::innerHandleNodeInfo(
 {
 }
 //////////////////////////////////////////////////////////////////
+
+unsigned int PsdMesh::parent( unsigned int i ) const
+{
+	if ( i < parent_.size() )
+		return parent_[i];
+	cout << "Error: PsdMesh::parent: Index " << i << " out of range: " <<
+				parent_.size() << "\n";
+	return 0;
+}
 
 /**
  * Inherited virtual func. Returns number of MeshEntry in array
