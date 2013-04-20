@@ -303,7 +303,9 @@ void testHHGateSetup()
 	////////////////////////////////////////////////////////////////
 	// Check construction and result of HH squid simulation
 	////////////////////////////////////////////////////////////////
-void testHHChannel()
+
+/// Returns Id of parent neutral for squid model
+Id makeSquid()
 {
 	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
 	vector< int > dims( 1, 1 );
@@ -317,10 +319,6 @@ void testHHChannel()
 	mid = shell->doAddMsg( "Single", ObjId( comptId ), "channel", 
 		ObjId( kId ), "channel" );
 	assert( mid != Msg::bad );
-
-	Id tabId = shell->doCreate( "Table", nid, "tab", dims );
-	mid = shell->doAddMsg( "Single", ObjId( tabId, 0 ), "requestData",
-		ObjId( comptId, 0 ), "get_Vm" );
 	
 	//////////////////////////////////////////////////////////////////////
 	// set up compartment properties
@@ -461,7 +459,21 @@ void testHHChannel()
 		}
 		x += dx;
 	}
+	return nid;
+}
 
+void testHHChannel()
+{
+	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
+	vector< int > dims( 1, 1 );
+
+	Id nid = makeSquid();
+	Id comptId( "/n/compt" );
+
+	Id tabId = shell->doCreate( "Table", nid, "tab", dims );
+	MsgId mid = shell->doAddMsg( "Single", ObjId( tabId, 0 ), 
+					"requestData", ObjId( comptId, 0 ), "get_Vm" );
+	assert( mid != Msg::bad );
 	//////////////////////////////////////////////////////////////////////
 	// Schedule, Reset, and run.
 	//////////////////////////////////////////////////////////////////////

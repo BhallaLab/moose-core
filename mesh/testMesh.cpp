@@ -25,6 +25,7 @@
 #include "CylMesh.h"
 #include "SpineEntry.h"
 #include "SpineMesh.h"
+#include "PsdMesh.h"
 
 /**
  * Low-level test for Cylbase, no MOOSE calls
@@ -819,6 +820,9 @@ Id makeCompt( Id parentCompt, Id parentObj,
 Id makeSpine( Id parentCompt, Id parentObj, unsigned int index,
 		double frac, double len, double dia, double theta )
 {
+	const double RA = 1;
+	const double RM = 1;
+	const double CM = 0.01;
 	assert( parentCompt != Id() );
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	vector< int > dims( 1, 1 );
@@ -837,7 +841,9 @@ Id makeSpine( Id parentCompt, Id parentObj, unsigned int index,
 	string hname = ss2.str();
 
 	Id shaft = shell->doCreate( "Compartment", parentObj, sname, dims );
-	shell->doAddMsg( "Single", parentCompt, "raxial", shaft, "axial" );
+	MsgId mid = 
+		shell->doAddMsg( "Single", parentCompt, "raxial", shaft, "axial" );
+	assert( mid != Msg::bad );
 	double x = pax0 + frac * ( pax1 - pax0 );
 	double y = pay0 + frac * ( pay1 - pay0 );
 	double z = paz0 + frac * ( paz1 - paz0 );
@@ -851,9 +857,15 @@ Id makeSpine( Id parentCompt, Id parentObj, unsigned int index,
 	Field< double >::set( shaft, "z", sz );
 	Field< double >::set( shaft, "diameter", dia/10.0 );
 	Field< double >::set( shaft, "length", len );
+	double xa = PI * dia * dia / 400.0;
+	double circumference = PI * dia / 10.0;
+	Field< double >::set( shaft, "Ra", RA * len / xa );
+	Field< double >::set( shaft, "Rm", RM / ( len * circumference ) );
+	Field< double >::set( shaft, "Cm", CM * len * circumference );
 
 	Id head = shell->doCreate( "Compartment", parentObj, hname, dims );
-	shell->doAddMsg( "Single", shaft, "raxial", head, "axial" );
+	mid = shell->doAddMsg( "Single", shaft, "raxial", head, "axial" );
+	assert( mid != Msg::bad );
 	Field< double >::set( head, "x0", x );
 	Field< double >::set( head, "y0", sy );
 	Field< double >::set( head, "z0", sz );
@@ -864,6 +876,11 @@ Id makeSpine( Id parentCompt, Id parentObj, unsigned int index,
 	Field< double >::set( head, "z", hz );
 	Field< double >::set( head, "diameter", dia );
 	Field< double >::set( head, "length", len );
+	xa = PI * dia * dia / 4.0;
+	circumference = PI * dia;
+	Field< double >::set( head, "Ra", RA * len / xa );
+	Field< double >::set( head, "Rm", RM / ( len * circumference ) );
+	Field< double >::set( head, "Cm", CM * len * circumference );
 
 	return head;
 }
@@ -1648,7 +1665,7 @@ void testSpineEntry()
 	cout << "." << flush;
 }
 
-void testSpineMesh()
+void testSpineAndPsdMesh()
 {
 	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
 	vector< int > dims( 1, 1 );
@@ -1741,6 +1758,43 @@ void testSpineMesh()
 				ret[i].diffScale << "\n";
 				*/
 	}
+	////////////////////////////////////////////////////////////
+	// Check PSD mesh
+	unsigned int pdc = Field< unsigned int >::get( pm, "num_mesh" );
+	Id pe( pm.value() + 1 );
+	assert( pdc == numSpines );
+	PsdMesh* p = reinterpret_cast< PsdMesh* >( pm.eref().data() );
+	for ( unsigned int i = 0; i < pdc; ++i ) {
+		assert( p->parent( i ) == i );
+		ObjId oi( pe, i );
+		double area = Field< double >::get( oi, "size" );
+		assert( doubleEq( area, 1e-12 * 0.25 * PI ) );
+		unsigned int dim = Field< unsigned int >::get( oi, "dimensions" );
+		assert( dim == 2 );
+		double x = i * diffLength * numCompts/numSpines;
+		unsigned int index = 0;
+		s->nearest( x, 0, 0, index );
+		assert( index == i );
+	}
+	ret.clear();
+	p->matchMeshEntries( s, ret );
+	assert( ret.size() == numSpines );
+	for ( unsigned int i = 0; i < ret.size(); ++i ) {
+		assert( ret[i].first == i );
+		assert( ret[i].second == i );
+		assert( doubleApprox( ret[i].diffScale * 1e10, 
+								1e10 * 0.25 * PI * 1e-12 / 0.5e-6 ) );
+	}
+	ret.clear();
+	p->matchMeshEntries( &cube, ret );
+	assert( ret.size() == numSpines );
+	for ( unsigned int i = 0; i < ret.size(); ++i ) {
+		assert( ret[i].first == i );
+		unsigned int cubeIndex = i + 5;
+		assert( ret[i].second == cubeIndex );
+		assert( doubleApprox( ret[i].diffScale * 1e10, 0.25 * PI * 1e-12 * 1e10 ) );
+	}
+	
 
 	shell->doDelete( cell );
 	shell->doDelete( nm );
@@ -1769,5 +1823,5 @@ void testMesh()
 	testCubeMeshJunctionDiffSizeMesh();
 	testCubeMeshMultiJunctionTwoD();
 	testSpineEntry();
-	testSpineMesh();
+	testSpineAndPsdMesh();
 }

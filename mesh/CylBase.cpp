@@ -225,6 +225,10 @@ double CylBase::getDiffusionArea(
 double CylBase::selectGridSize( double h, double dia1, 
 					double granularity ) const
 {
+	if ( length_ < 1e-7 && numDivs_ == 1 ) { // It is a disc, not a cylinder
+		return granularity * dia_ / 2.0;
+	}
+
 	double lambda = length_ / numDivs_;
 	if ( h > lambda )
 		h = lambda;
