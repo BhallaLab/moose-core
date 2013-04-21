@@ -178,6 +178,8 @@ unsigned int SpineMesh::getMeshDimensions( unsigned int fid ) const
 /// Virtual function to return volume of mesh Entry.
 double SpineMesh::getMeshEntrySize( unsigned int fid ) const
 {
+	if ( spines_.size() == 0 )
+		return 1.0;
 	assert( fid < spines_.size() );
 	return spines_[ fid ].volume();
 }

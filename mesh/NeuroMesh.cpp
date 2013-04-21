@@ -656,6 +656,8 @@ unsigned int NeuroMesh::getMeshDimensions( unsigned int fid ) const
 /// Virtual function to return volume of mesh Entry.
 double NeuroMesh::getMeshEntrySize( unsigned int fid ) const
 {
+	if ( nodeIndex_.size() == 0 ) 
+		return 1.0; // A default value to use before init
 	assert( fid < nodeIndex_.size() );
 	assert( nodeIndex_[fid] < nodes_.size() );
 	const NeuroNode& node = nodes_[ nodeIndex_[fid] ];

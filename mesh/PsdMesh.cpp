@@ -163,6 +163,8 @@ unsigned int PsdMesh::getMeshDimensions( unsigned int fid ) const
 /// Virtual function to return volume of mesh Entry.
 double PsdMesh::getMeshEntrySize( unsigned int fid ) const
 {
+	if ( psd_.size() == 0 ) // Default for meshes before init.
+		return 1.0;
 	assert( fid < psd_.size() );
 	return psd_[ fid ].getDiffusionArea( pa_[fid], 0 );
 }
