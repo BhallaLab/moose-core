@@ -90,6 +90,7 @@ Id makeSpineWithReceptor( Id compt, Id cell, unsigned int index,
 	Field< double >::set( caPool, "tau", 0.01 ); // seconds
 	double B = 1.0 / ( 
 		FaradayConst *  spineLength * spineDia * spineDia * 0.25 * PI );
+	B = B / 20.0;
 	Field< double >::set( caPool, "B", B ); // Convert from current to conc
 	mid = shell->doAddMsg( "Single", ObjId( gluR ), "IkOut",
 					ObjId( caPool ), "current" );
@@ -98,7 +99,7 @@ Id makeSpineWithReceptor( Id compt, Id cell, unsigned int index,
 	return spineCompt;
 }
 
-Id buildSigNeurElec()
+Id buildSigNeurElec( vector< Id >& spines )
 {
 	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
 	vector< int > dims( 1, 1 );
@@ -125,7 +126,7 @@ Id buildSigNeurElec()
 	Field< bool >::set( synInput, "edgeTriggered", false );
 	SetGet1< double >::set( synInput, "Vm", 0.0 );
 
-	vector< Id > spines( numSpines );
+	spines.resize( numSpines );
 
 	for ( unsigned int i = 0; i < numSpines; ++i ) {
 		double frac = ( 0.5 + i ) / numSpines;
@@ -144,7 +145,128 @@ Id buildSigNeurElec()
 		Field< double >::set( syn, "weight", 1 );
 		Field< double >::set( syn, "delay", i * 1.0e-3 );
 	}
-	
+
+	return nid;
+}
+
+void buildSigNeurChem( Id nid )
+{
+	const double diffLength = 1e-6;
+	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
+	vector< int > dims( 1, 1 );
+
+	Id neuroMesh = shell->doCreate( "NeuroMesh", nid, "neuroMesh", dims );
+	Field< bool >::set( neuroMesh, "separateSpines", true );
+	Field< double >::set( neuroMesh, "diffLength", diffLength );
+	Field< string >::set( neuroMesh, "geometryPolicy", "cylinder" );
+	Id spineMesh = shell->doCreate( "SpineMesh", nid, "spineMesh", dims );
+	MsgId mid = shell->doAddMsg(
+		"OneToOne", neuroMesh, "spineListOut", spineMesh, "spineList" );
+	assert( mid != Msg::bad );
+	Id psdMesh = shell->doCreate( "PsdMesh", Id(), "psdMesh", dims );
+	mid = shell->doAddMsg(
+		"OneToOne", spineMesh, "psdListOut", psdMesh, "psdList" );
+	assert( mid != Msg::bad );
+
+	///////////////////////////////////////////////////////////////////
+	// Stuff in PSD
+	///////////////////////////////////////////////////////////////////
+	Id psdGluR = shell->doCreate( "Pool", psdMesh, "psdGluR" );
+	Field< double >::set( psdGluR, "nInit", 100 );
+	///////////////////////////////////////////////////////////////////
+	// Stuff in spine head
+	///////////////////////////////////////////////////////////////////
+
+	Id headGluR = shell->doCreate( "Pool", spineMesh, "headGluR" );
+	Field< double >::set( headGluR, "nInit", 100 ); // Add to 200
+	Id toPsd = shell->doCreate( "Pool", spineMesh, "toPsd" );
+	Field< double >::set( toPsd, "concInit", 1e-3 );
+	Id toPsdEnz = shell->doCreate( "Enz", toPsd, "enz" );
+	mid = shell->doAddMsg( "OneToOne", toPsdEnz, "enz", toPsd, "reac" );
+	assert( mid != Msg::bad );
+	mid = shell->doAddMsg( "OneToOne", toPsdEnz, "sub", headGluR, "reac" );
+	assert( mid != Msg::bad );
+	mid = shell->doAddMsg( "OneToOne", toPsdEnz, "prd", psdGluR, "reac" );
+	assert( mid != Msg::bad );
+	Field< double >::set( toPsdEnz, "Km", 1e-3 ); 	// 1 uM
+	Field< double >::set( toPsdEnz, "kcat", 1 );	// 1/sec.
+
+	Id fromPsd = shell->doCreate( "Reac", spineMesh, "fromPsd" );
+	Id headCa = shell->doCreate( "Pool", spineMesh, "Ca" );
+	Field< double >::set( headCa, "concInit", 1e-4 );
+
+	mid = shell->doAddMsg( "OneToOne", fromPsd, "sub", psdGluR, "reac" );
+	assert( mid != Msg::bad );
+	mid = shell->doAddMsg( "OneToOne", fromPsd, "prd", headGluR, "reac" );
+	assert( mid != Msg::bad );
+	Field< double >::set( fromPsd, "Kf", 0.02 );
+	Field< double >::set( fromPsd, "Kb", 0.0 );
+
+	///////////////////////////////////////////////////////////////////
+	// Stuff in dendrite
+	///////////////////////////////////////////////////////////////////
+
+	Id dendCa = shell->doCreate( "Pool", neuroMesh, "Ca" );
+	Field< double >::set( dendCa, "concInit", 1e-4 ); // 0.1 uM.
+	Id bufCa = shell->doCreate( "BufPool", neuroMesh, "bufCa" );
+	Field< double >::set( bufCa, "concInit", 1e-4 ); // 0.1 uM.
+	Id pumpCa = shell->doCreate( "Reac", neuroMesh, "pumpCa" );
+	mid = shell->doAddMsg( "OneToOne", pumpCa, "sub", dendCa, "reac" );
+	assert( mid != Msg::bad );
+	mid = shell->doAddMsg( "OneToOne", pumpCa, "prd", bufCa, "reac" );
+	assert( mid != Msg::bad );
+	Field< double >::set( pumpCa, "Kf", 0.1 );
+	Field< double >::set( pumpCa, "Kb", 0.1 );
+
+	Id dendKinase = shell->doCreate( "Pool", neuroMesh, "kinase" );
+	Field< double >::set( dendKinase, "concInit", 1e-3 ); // 1 uM.
+	Id dendKinaseEnz = shell->doCreate( "Enz", dendKinase, "enz" );
+	Id kChan = shell->doCreate( "Pool", neuroMesh, "kChan");
+	Field< double >::set( kChan, "concInit", 1e-3 ); // 1 uM.
+	Id kChan_p = shell->doCreate( "Pool", neuroMesh, "kChan_p");
+	Field< double >::set( kChan_p, "concInit", 0 ); // 0 uM.
+	mid = shell->doAddMsg( 
+					"OneToOne", dendKinaseEnz, "enz", dendKinase, "reac" );
+	assert( mid != Msg::bad );
+	mid = shell->doAddMsg( 
+					"OneToOne", dendKinaseEnz, "sub", kChan, "reac" );
+	assert( mid != Msg::bad );
+	mid = shell->doAddMsg( 
+					"OneToOne", dendKinaseEnz, "prd", kChan_p, "reac" );
+	assert( mid != Msg::bad );
+	Field< double >::set( dendKinaseEnz, "Km", 1e-3 ); 	// 1 uM
+	Field< double >::set( dendKinaseEnz, "kcat", 1 );	// 1/sec.
+
+	Id dendPhosphatase = shell->doCreate( "Reac", neuroMesh, "phosphatase");
+	mid = shell->doAddMsg( 
+					"OneToOne", dendPhosphatase, "sub", kChan_p, "reac" );
+	assert( mid != Msg::bad );
+	mid = shell->doAddMsg( 
+					"OneToOne", dendPhosphatase, "prd", kChan, "reac" );
+	assert( mid != Msg::bad );
+	Field< double >::set( dendPhosphatase, "Kf", 0.02 );
+	Field< double >::set( dendPhosphatase, "Kb", 0.0 );
+
+	///////////////////////////////////////////////////////////////////
+	// Make NeuroMesh
+	///////////////////////////////////////////////////////////////////
+	Field< Id >::set( neuroMesh, "cell", nid );
+	Qinfo::clearQ( 0 );
+	Qinfo::clearQ( 0 );
+}
+
+void testSigNeurElec()
+{
+	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
+	vector< int > dims( 1, 1 );
+
+	vector< Id > spines;
+	Id nid = buildSigNeurElec( spines );
+	buildSigNeurChem( nid );
+	Id compt( "/n/compt" );
+	//////////////////////////////////////////////////////////////////////
+	// Graph
+	//////////////////////////////////////////////////////////////////////
 	/*
 	vector< Id > ret;
 	simpleWildcardFind( "/n/##[ISA=Compartment]", ret );
@@ -173,7 +295,6 @@ Id buildSigNeurElec()
 		"requestData", ObjId( ca2, 0 ), "get_Ca" );
 	assert( mid != Msg::bad );
 
-
 	//////////////////////////////////////////////////////////////////////
 	// Schedule, Reset, and run.
 	//////////////////////////////////////////////////////////////////////
@@ -201,7 +322,6 @@ Id buildSigNeurElec()
 	shell->doDelete( nid );
 
 	cout << "." << flush;
-	return nid;
 }
 
 // This tests stuff without using the messaging.
@@ -213,7 +333,7 @@ void testSigNeur()
 // This is applicable to tests that use the messaging and scheduling.
 void testSigNeurProcess()
 {
-	buildSigNeurElec();
+	testSigNeurElec();
 }
 
 
