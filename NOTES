@@ -21692,5 +21692,12 @@ Onward to setting up the chemical system. After that, the various solvers.
 Here I could do a relatively simple reference, just compare solver outcomes
 with the regular messaging/exp Euler calculations.
 Ca levels are currently unrealistic, need to scale down to account for buffer.
+Checkin 4492.
+
+==========================================================================
+21 Apr 2013.
+Put in the chemical portion of the SigNeur model. Had to incorporate default
+return values for NeuroMesh, SpineMesh and PsdMesh to return even before the
+cell is defined. Seems to go through the construction process fine.
 
 ==========================================================================
