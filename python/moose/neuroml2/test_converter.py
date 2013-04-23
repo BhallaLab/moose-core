@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Apr 23 18:51:58 2013 (+0530)
 # Version: 
-# Last-Updated: Tue Apr 23 19:06:45 2013 (+0530)
+# Last-Updated: Tue Apr 23 21:59:24 2013 (+0530)
 #           By: subha
-#     Update #: 37
+#     Update #: 42
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -52,6 +52,7 @@ import unittest
 import moose
 import converter
 import neuroml
+from neuroml.writers import NeuroMLWriter
 
 class TestConvertMorphology(unittest.TestCase):
     def setUp(self):
@@ -81,7 +82,7 @@ class TestConvertMorphology(unittest.TestCase):
         doc.cells.append(cell)
         doc.id = 'TestNeuroMLDocument'
         fname = './tmp/test_morphology_conversion.xml'
-        neuroml.writers.NeuroMLWriter.write(doc, fname)
+        NeuroMLWriter.write(doc, fname)
 
 if __name__ == '__main__':
     unittest.main()

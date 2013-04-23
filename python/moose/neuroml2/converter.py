@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Apr 22 12:15:23 2013 (+0530)
 # Version: 
-# Last-Updated: Tue Apr 23 21:56:19 2013 (+0530)
+# Last-Updated: Tue Apr 23 22:00:40 2013 (+0530)
 #           By: subha
-#     Update #: 292
+#     Update #: 294
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -104,7 +104,6 @@ def convert_morphology(root, positions='auto'):
         try:            
             parent = neuroml.SegmentParent(segments=comp_seg[moose.element(plist[0])].id)
         except (KeyError, IndexError) as e:
-            print compartment.name, 'has no parent'
             parent = None
         segment = neuroml.Segment(proximal=proximal, distal=distal, parent=parent)        
         # TODO: For the time being using numerical value of the moose
@@ -121,7 +120,7 @@ def convert_morphology(root, positions='auto'):
     
 def convert_hhchannel(channel):
     """Convert a moose HHChannel object into a neuroml element."""
-    pass
+    
 
 
 # 

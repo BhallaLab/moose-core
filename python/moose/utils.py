@@ -293,8 +293,6 @@ def autoposition(root):
             # for spherical compartments x0, y0, z0 are centre
             # position nad x,y,z are on the surface
             comp.x, comp.y, comp.z, = comp.x0, comp.y0, comp.z0 + comp.diameter/2.0 
-        print comp.name, comp.x0, comp.y0, comp.z0
-        print comp.name, comp.x, comp.y, comp.z
         # We take z == 0 as an indicator that this compartment has not
         # been processed before - saves against inadvertent loops.
         stack.extend([childcomp for childcomp in map(_moose.element, comp.neighbours['raxial']) if childcomp.z == 0])    
