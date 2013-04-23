@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Apr 22 12:15:23 2013 (+0530)
 # Version: 
-# Last-Updated: Tue Apr 23 19:19:04 2013 (+0530)
+# Last-Updated: Tue Apr 23 21:56:19 2013 (+0530)
 #           By: subha
-#     Update #: 271
+#     Update #: 292
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -46,23 +46,18 @@
 
 # Code:
 
-from collections import defaultdict, deque
-import numpy
+from collections import deque
 import moose
 from moose.utils import autoposition
 import neuroml 
-from neuroml import writers
-
-def position0(comp):    
-    return (comp.x0, comp.y0, comp.z0)
-
-def position1(comp):
-    return (comp.x, comp.y, comp.z)
 
 
 def convert_morphology(root, positions='auto'):
     """Convert moose neuron morphology contained under `root` into a
-    NeuroML object
+    NeuroML object. The id of the return object is
+    {root.name}_morphology. Each segment object gets the numeric value
+    of the moose id of the object. The name of the segments are same
+    as the corresponding moose compartment.
 
     Parameters
     ----------
@@ -80,11 +75,9 @@ def convert_morphology(root, positions='auto'):
 
     Return
     ------
-    a neuroml.Cell instance.
+    a neuroml.Morphology instance.
 
     """
-    pcmap = defaultdict(list)
-    cpmap = {}
     if positions == 'auto':
         queue = deque([autoposition(root)])
     elif positions == 'explicit':
@@ -126,7 +119,9 @@ def convert_morphology(root, positions='auto'):
     morph.id = '%s_morphology' % (root.name)
     return morph
     
-    
+def convert_hhchannel(channel):
+    """Convert a moose HHChannel object into a neuroml element."""
+    pass
 
 
 # 
