@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Apr 22 12:15:23 2013 (+0530)
 # Version: 
-# Last-Updated: Tue Apr 23 22:00:40 2013 (+0530)
+# Last-Updated: Tue Apr 23 22:02:14 2013 (+0530)
 #           By: subha
-#     Update #: 294
+#     Update #: 296
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -120,7 +120,7 @@ def convert_morphology(root, positions='auto'):
     
 def convert_hhchannel(channel):
     """Convert a moose HHChannel object into a neuroml element."""
-    
+    pass
 
 
 # 
