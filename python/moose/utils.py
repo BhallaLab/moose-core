@@ -259,6 +259,48 @@ def df_traverse(root, operation, *args):
         df_traverse(childNode, operation, *args)
     root._visited = True
 
+def autoposition(root):
+    """Automatically set the positions of the endpoints of all the
+    compartments under `root`.
+
+    This keeps x and y constant and extends the positions in
+    z-direction only. This of course puts everything in a single line
+    but suffices for keeping electrical properties intact.
+
+    TODO: in future we may want to create the positions for nice
+    visual layout as well. My last attempt resulted in some
+    compartments overlapping in space.
+
+    """
+    compartments = _moose.wildcardFind('%s/##[TYPE=Compartment]' % (root.path))
+    stack = [compartment for compartment in map(_moose.element, compartments)
+              if len(compartment.neighbours['axial']) == 0]
+    if len(stack) != 1:
+        raise Exception('There must be one and only one top level compartment. Found %d' % (len(topcomp_list)))
+    ret = stack[0]
+    while len(stack) > 0:
+        comp = stack.pop()        
+        parentlist = comp.neighbours['axial']
+        parent = None
+        if len(parentlist) > 0:
+            parent = parentlist[0]
+            comp.x0, comp.y0, comp.z0, = parent.x, parent.y, parent.z
+        else:
+            comp.x0, comp.y0, comp.z0, = (0, 0, 0)
+        if comp.length > 0:
+            comp.x, comp.y, comp.z, = comp.x0, comp.y0, comp.z0 + comp.length
+        else:
+            # for spherical compartments x0, y0, z0 are centre
+            # position nad x,y,z are on the surface
+            comp.x, comp.y, comp.z, = comp.x0, comp.y0, comp.z0 + comp.diameter/2.0 
+        print comp.name, comp.x0, comp.y0, comp.z0
+        print comp.name, comp.x, comp.y, comp.z
+        # We take z == 0 as an indicator that this compartment has not
+        # been processed before - saves against inadvertent loops.
+        stack.extend([childcomp for childcomp in map(_moose.element, comp.neighbours['raxial']) if childcomp.z == 0])    
+    return ret
+
+
 def readcell_scrambled(filename, target):
     """A special version for handling cases where a .p file has a line
     with specified parent yet to be defined.
@@ -578,7 +620,7 @@ def connect_CaConc(compartment_list):
                                 print 'Connected concOut of',caconc.path,'to concen of',channel.path
 
 ############# added by Aditya Gilra -- end ################
-
+import uuid
 import unittest
 import sys
 from cStringIO import StringIO as _sio
@@ -642,6 +684,50 @@ cell1
       |__ c6
 """
         self.assertEqual(sys.stdout.getvalue(), expected1)
+
+    def test_autoposition(self):
+        """Simple check for automatic generation of positions.
+        
+        A spherical soma is created with 20 um diameter. A 100
+        compartment cable is created attached to it with each
+        compartment of length 100 um.
+
+        """
+        testid = 'test%s' % (uuid.uuid4())
+        container = _moose.Neutral('/test')
+        model = _moose.Neuron('/test/%s' % (testid))
+        soma = _moose.Compartment('%s/soma' % (model.path))
+        soma.diameter = 20e-6
+        soma.length = 0.0
+        parent = soma
+        comps = []
+        for ii in range(100):
+            comp = _moose.Compartment('%s/comp_%d' % (model.path, ii))
+            comp.diameter = 10e-6
+            comp.length = 100e-6
+            _moose.connect(parent, 'raxial', comp, 'axial')
+            comps.append(comp)
+            parent = comp
+        soma = autoposition(model)
+        sigfig = 8
+        self.assertAlmostEqual(soma.x0, 0.0, sigfig)
+        self.assertAlmostEqual(soma.y0, 0.0, sigfig)
+        self.assertAlmostEqual(soma.z0, 0.0, sigfig)
+        self.assertAlmostEqual(soma.x, 0.0, sigfig)
+        self.assertAlmostEqual(soma.y, 0.0, sigfig)
+        self.assertAlmostEqual(soma.z, soma.diameter/2.0, sigfig)
+        for ii, comp in enumerate(comps):
+            print comp.path, ii
+            self.assertAlmostEqual(comp.x0, 0, sigfig)
+            self.assertAlmostEqual(comp.y0, 0.0, sigfig)
+            self.assertAlmostEqual(comp.z0, soma.diameter/2.0 + ii * 100e-6, sigfig)
+            self.assertAlmostEqual(comp.x, 0.0, sigfig)
+            self.assertAlmostEqual(comp.y, 0.0, sigfig)
+            self.assertAlmostEqual(comp.z, soma.diameter/2.0 + (ii + 1) * 100e-6, sigfig)
+        
+            
+            
+        
         
 
 if __name__ == "__main__": # test printtree
