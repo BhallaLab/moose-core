@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Apr 23 18:51:58 2013 (+0530)
 # Version: 
-# Last-Updated: Tue Apr 23 21:59:24 2013 (+0530)
+# Last-Updated: Wed Apr 24 17:27:20 2013 (+0530)
 #           By: subha
-#     Update #: 42
+#     Update #: 63
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -46,7 +46,7 @@
 # Code:
 
 import os
-
+import numpy as np
 import uuid
 import unittest
 import moose
@@ -83,6 +83,21 @@ class TestConvertMorphology(unittest.TestCase):
         doc.id = 'TestNeuroMLDocument'
         fname = './tmp/test_morphology_conversion.xml'
         NeuroMLWriter.write(doc, fname)
+
+class TestFindRateFn(unittest.TestCase):
+    def test_sigmoid(self):
+        vmin = -120e-3
+        vmax = 40e-3
+        vdivs = 640
+        v_array = np.linspace(vmin, vmax, vdivs+1)
+        shift = -3.5e-3
+        inf_x = 1.0 / (1.0 + np.exp(( - v_array - shift - 38e-3) / 10e-3))
+        fn, params = converter.find_ratefn(v_array, inf_x)
+        # print params, type(params)
+        self.assertEqual(converter.sigmoid, fn)
+        errors = params - np.array([-(shift + 38e-3), -1/10e-3, 1.0])
+        for err in errors:
+            self.assertAlmostEqual(err, 0.0)
 
 if __name__ == '__main__':
     unittest.main()
