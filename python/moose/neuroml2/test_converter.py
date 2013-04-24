@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Apr 23 18:51:58 2013 (+0530)
 # Version: 
-# Last-Updated: Wed Apr 24 17:27:20 2013 (+0530)
+# Last-Updated: Wed Apr 24 21:50:03 2013 (+0530)
 #           By: subha
-#     Update #: 63
+#     Update #: 75
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -54,6 +54,11 @@ import converter
 import neuroml
 from neuroml.writers import NeuroMLWriter
 
+outdir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tmp')
+if not os.access(outdir, os.F_OK):
+    print 'Creating output directory', outdir
+    os.mkdir(outdir)
+
 class TestConvertMorphology(unittest.TestCase):
     def setUp(self):
         self.test_id = uuid.uuid4()
@@ -81,8 +86,9 @@ class TestConvertMorphology(unittest.TestCase):
         doc = neuroml.NeuroMLDocument()
         doc.cells.append(cell)
         doc.id = 'TestNeuroMLDocument'
-        fname = './tmp/test_morphology_conversion.xml'
+        fname = os.path.join(outdir, 'test_morphology_conversion.nml')        
         NeuroMLWriter.write(doc, fname)
+        print 'Wrote', fname
 
 class TestFindRateFn(unittest.TestCase):
     def test_sigmoid(self):
