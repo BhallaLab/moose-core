@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Apr 22 12:15:23 2013 (+0530)
 # Version: 
-# Last-Updated: Tue Apr 23 22:02:14 2013 (+0530)
+# Last-Updated: Wed Apr 24 17:27:12 2013 (+0530)
 #           By: subha
-#     Update #: 296
+#     Update #: 391
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -47,6 +47,9 @@
 # Code:
 
 from collections import deque
+import numpy as np
+from scipy.optimize import curve_fit
+
 import moose
 from moose.utils import autoposition
 import neuroml 
@@ -117,11 +120,68 @@ def convert_morphology(root, positions='auto'):
     morph.segments.extend(comp_seg.values())
     morph.id = '%s_morphology' % (root.name)
     return morph
+
+###########################################
+# function defs for curve fitting H-H-Gates
+def exponential(x, x0, k, a):
+    return a * np.exp(k * (x-x0))
+
+def sigmoid(x, x0, k, a):
+    return a / (np.exp(k * (x - x0)) + 1.0)
+
+def linoid(x, x0, k, a):
+    """The so called linoid function. Called explinear in neurml.""" 
+    return a * (x - x0) / (np.exp(k * (x - x0)) - 1.0)
+# end: function defs for curve fitting H-H-Gates
+###########################################
+
+# import pylab
+
+def find_ratefn(x, y):
+    """Find the function that fits the rate function best. This will try
+    exponential, sigmoid and linoid and return the best fit.
+
+    Needed until NeuroML2 supports tables or MOOSE supports
+    functions.
+
+    Parameters
+    ----------
+    x: 1D array
+    independent variable
+
+    y: 1D array
+    function values
+
+    """
+    functions = [exponential, sigmoid, linoid]
+    rms_error = 1.0 # arbitrarily setting this
+    best_fn = None
+    best_p = None
+    for fn in functions:
+        popt, pcov = curve_fit(fn, x, y)
+        error = y - fn(x, *popt)
+        erms = np.sqrt(np.mean(error**2))
+        # print erms, rms_error, fn
+        # pylab.plot(x, y, 'b-')
+        # pylab.plot(x, fn(x, *popt), 'r-.')
+        # pylab.show()
+        if erms < rms_error:
+            rms_error = erms
+            best_fn = fn
+            best_p = popt
+    return (best_fn, best_p)
     
 def convert_hhchannel(channel):
     """Convert a moose HHChannel object into a neuroml element."""
-    pass
-
+    nml_channel = neuroml.IonChannel()
+    nml_channel.name = channel.name
+    nml_channel.id = channel.id_.value
+    nml_channel.conductance = channel.Gbar
+    if channel.Xpower > 0:
+        gate_hh_rate = neuroml.GateHHRates()
+        gate_hh_rate.name = channel.gateX[0].name
+        gate_hh_rate.instances = channel.Xpower
+    # TODO: this is to be completed ...
 
 # 
 # converter.py ends here
