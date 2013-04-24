@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Apr 24 11:15:13 2013 (+0530)
+// Last-Updated: Wed Apr 24 11:43:28 2013 (+0530)
 //           By: subha
-//     Update #: 10124
+//     Update #: 10125
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -900,7 +900,9 @@ static struct module_state _state;
 
     PyDoc_STRVAR(moose_ElementField_documentation,
                  "ElementField represents fields that are themselves elements. For\n"
-                 "example, synapse in an IntFire neuron. Element fields can be traversed like a sequence. You can check the number of \n");
+                 "example, synapse in an IntFire neuron. Element fields can be traversed
+like a sequence. Additionally, you can set the number of entries by
+setting the `num` attribute to a desired value.\n");
 
     PyDoc_STRVAR(moose_ElementField_num_documentation,
                  "Return number of entries in the field.");
