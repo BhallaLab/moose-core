@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Apr 18 20:50:04 2013 (+0530)
+// Last-Updated: Wed Apr 24 11:15:13 2013 (+0530)
 //           By: subha
-//     Update #: 10120
+//     Update #: 10124
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -900,7 +900,7 @@ static struct module_state _state;
 
     PyDoc_STRVAR(moose_ElementField_documentation,
                  "ElementField represents fields that are themselves elements. For\n"
-                 "example, synapse in an IntFire neuron.\n");
+                 "example, synapse in an IntFire neuron. Element fields can be traversed like a sequence. You can check the number of \n");
 
     PyDoc_STRVAR(moose_ElementField_num_documentation,
                  "Return number of entries in the field.");
@@ -4706,13 +4706,13 @@ static struct module_state _state;
         return 1;
     }
 
-    PyObject * moose_ElementField_getNum(_Field * self, void * closure)
+    Py_ssize_t moose_ElementField_getNum(_Field * self, void * closure)
     {
         if (!Id::isValid(self->owner.id)){
             RAISE_INVALID_ID(NULL, "moose_ElementField_getNum");
         }
         unsigned int num = Field<unsigned int>::get(self->owner, "num_" + string(self->name));
-        return Py_BuildValue("I", num);
+        return Py_ssize_t(num);
     }
 
     int moose_ElementField_setNum(_Field * self, PyObject * args, void * closure)
