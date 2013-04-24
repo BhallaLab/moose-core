@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Apr 22 12:15:23 2013 (+0530)
 # Version: 
-# Last-Updated: Wed Apr 24 17:27:12 2013 (+0530)
+# Last-Updated: Wed Apr 24 21:43:17 2013 (+0530)
 #           By: subha
-#     Update #: 391
+#     Update #: 468
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -45,6 +45,8 @@
 # 
 
 # Code:
+
+#!!!!! TODO: unit conversion !!!!
 
 from collections import deque
 import numpy as np
@@ -108,17 +110,18 @@ def convert_morphology(root, positions='auto'):
             parent = neuroml.SegmentParent(segments=comp_seg[moose.element(plist[0])].id)
         except (KeyError, IndexError) as e:
             parent = None
-        segment = neuroml.Segment(proximal=proximal, distal=distal, parent=parent)        
+        segment = neuroml.Segment(id=compartment.id_.value,
+                                  proximal=proximal, 
+                                  distal=distal, 
+                                  parent=parent)        
         # TODO: For the time being using numerical value of the moose
         # id for neuroml id.This needs to be updated for handling
         # array elements
-        segment.id = compartment.id_.value
         segment.name = compartment.name
         comp_seg[compartment] = segment
         queue.extend([comp for comp in map(moose.element, compartment.neighbours['raxial'])])
-    morph = neuroml.Morphology()
+    morph = neuroml.Morphology(id='%s_morphology' % (root.name))
     morph.segments.extend(comp_seg.values())
-    morph.id = '%s_morphology' % (root.name)
     return morph
 
 ###########################################
@@ -132,6 +135,14 @@ def sigmoid(x, x0, k, a):
 def linoid(x, x0, k, a):
     """The so called linoid function. Called explinear in neurml.""" 
     return a * (x - x0) / (np.exp(k * (x - x0)) - 1.0)
+
+# Map from the above functions to corresponding neuroml class
+fn_rate_map = {
+    exponential: 'HHExpRate',
+    sigmoid: 'HHSigmoidRate',
+    linoid: 'HHExpLinearRate',
+}
+
 # end: function defs for curve fitting H-H-Gates
 ###########################################
 
@@ -169,19 +180,46 @@ def find_ratefn(x, y):
             rms_error = erms
             best_fn = fn
             best_p = popt
-    return (best_fn, best_p)
+    return (best_fn, best_p)    
+
+def convert_hhgate(gate):
+    """Convert a MOOSE gate into GateHHRates in NeuroML"""
+    hh_rates = neuroml.GateHHRates(id=gate.id_.value, name=gate.name)
+    alpha = gate.tableA.copy()
+    beta = gate.tableB - alpha
+    vrange = np.linspace(gate.min, gate.max, len(alpha))
+    afn, ap = find_ratefn(vrange, alpha)
+    bfn, bp = find_ratefn(vrange, beta)
+    if afn is None:
+        raise Exception('could not find a fitting function for `alpha`')
+    if bfn is  None:
+        raise Exception('could not find a fitting function for `alpha`')
+    hh_rates.forward_rate = neuroml.HHRate(type=fn_rate_map[afn], 
+                                           midpoint='%gmV' % (ap[0]),
+                                           scale='%gmV' % (ap[1]),
+                                           rate='%gper_ms' % (ap[2]))
+    hh_rates.reverse_rate = neuroml.HHRate(type=fn_rate_map[bfn], 
+                                           midpoint='%gmV' % (bp[0]),
+                                           scale='%gmV' % (bp[1]),
+                                           rate='%gper_ms' % (bp[2]))
+    return hh_rates
+                                           
     
 def convert_hhchannel(channel):
     """Convert a moose HHChannel object into a neuroml element."""
-    nml_channel = neuroml.IonChannel()
-    nml_channel.name = channel.name
-    nml_channel.id = channel.id_.value
-    nml_channel.conductance = channel.Gbar
+    nml_channel = neuroml.IonChannel(id=channel.id_.value,
+                                     name=channel.name,
+                                     type='ionChannelHH',
+                                     conductance = channel.Gbar)
     if channel.Xpower > 0:
-        gate_hh_rate = neuroml.GateHHRates()
-        gate_hh_rate.name = channel.gateX[0].name
-        gate_hh_rate.instances = channel.Xpower
-    # TODO: this is to be completed ...
+        hh_rate_x = convert_hhgate(channel.gateX[0])
+        hh_rate_x.instances = channel.Xpower
+        nml_channel.gate.append(hh_rate_x)
+    if channel.Ypower > 0:
+        hh_rate_y = convert_hhgate(channel.gateY[0])
+        hh_rate_y.instances = channel.Ypower
+        nml_channel.gate.append(hh_rate_y)
+    return nml_channel
 
 # 
 # converter.py ends here
