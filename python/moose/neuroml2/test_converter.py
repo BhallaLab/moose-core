@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Apr 23 18:51:58 2013 (+0530)
 # Version: 
-# Last-Updated: Wed Apr 24 21:50:03 2013 (+0530)
+# Last-Updated: Thu Apr 25 12:24:59 2013 (+0530)
 #           By: subha
-#     Update #: 75
+#     Update #: 117
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -91,17 +91,35 @@ class TestConvertMorphology(unittest.TestCase):
         print 'Wrote', fname
 
 class TestFindRateFn(unittest.TestCase):
+    def setUp(self):
+        self.vmin = -120e-3
+        self.vmax = 40e-3
+        self.vdivs = 640
+        self.v_array = np.linspace(self.vmin, self.vmax, self.vdivs+1)
+        self.v0_sigmoid = -38e-3
+        self.k_sigmoid = 1/(-10e-3)
+        self.a_sigmoid = 1.0
+        self.v0_exp = -53.5e-3
+        self.k_exp = 1/(-27e-3)
+        self.a_exp = 2e3
+        # A sigmoid function - from traub2005, NaF->m_inf
+        self.sigmoid = self.a_sigmoid / (1.0 + np.exp((self.v_array - self.v0_sigmoid) * self.k_sigmoid))
+        # An exponential function - from traub2005, KC->n_inf
+        self.exp = self.a_exp * np.exp((self.v_array - self.v0_exp) * self.k_exp)        
+
     def test_sigmoid(self):
-        vmin = -120e-3
-        vmax = 40e-3
-        vdivs = 640
-        v_array = np.linspace(vmin, vmax, vdivs+1)
-        shift = -3.5e-3
-        inf_x = 1.0 / (1.0 + np.exp(( - v_array - shift - 38e-3) / 10e-3))
-        fn, params = converter.find_ratefn(v_array, inf_x)
-        # print params, type(params)
+        fn, params = converter.find_ratefn(self.v_array, self.sigmoid)
+        print params
         self.assertEqual(converter.sigmoid, fn)
-        errors = params - np.array([-(shift + 38e-3), -1/10e-3, 1.0])
+        errors = params - np.array([self.v0_sigmoid, self.k_sigmoid, self.a_sigmoid])
+        for err in errors:
+            self.assertAlmostEqual(err, 0.0)
+
+    def test_exponential(self):
+        fn, params = converter.find_ratefn(self.v_array, self.exp)
+        print params
+        self.assertEqual(converter.exponential, fn)
+        errors = params - np.array([self.v0_exp, self.k_exp, self.a_exp])
         for err in errors:
             self.assertAlmostEqual(err, 0.0)
 

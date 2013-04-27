@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Apr 22 12:15:23 2013 (+0530)
 # Version: 
-# Last-Updated: Wed Apr 24 21:43:17 2013 (+0530)
+# Last-Updated: Sat Apr 27 19:20:44 2013 (+0530)
 #           By: subha
-#     Update #: 468
+#     Update #: 483
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -127,7 +127,7 @@ def convert_morphology(root, positions='auto'):
 ###########################################
 # function defs for curve fitting H-H-Gates
 def exponential(x, x0, k, a):
-    return a * np.exp(k * (x-x0))
+    return a * np.exp(k * (x - x0))
 
 def sigmoid(x, x0, k, a):
     return a / (np.exp(k * (x - x0)) + 1.0)
@@ -169,7 +169,11 @@ def find_ratefn(x, y):
     best_fn = None
     best_p = None
     for fn in functions:
-        popt, pcov = curve_fit(fn, x, y)
+        try:
+            popt, pcov = curve_fit(fn, x, y)
+        except RuntimeError as e:
+            # This can be reached in case maxfev is reached
+            continue
         error = y - fn(x, *popt)
         erms = np.sqrt(np.mean(error**2))
         # print erms, rms_error, fn
@@ -206,7 +210,12 @@ def convert_hhgate(gate):
                                            
     
 def convert_hhchannel(channel):
-    """Convert a moose HHChannel object into a neuroml element."""
+    """Convert a moose HHChannel object into a neuroml element.
+
+    TODO: need to check useConcentration option for Ca2+ and V
+    dependent gates. How to handle generic expressions???
+
+    """
     nml_channel = neuroml.IonChannel(id=channel.id_.value,
                                      name=channel.name,
                                      type='ionChannelHH',
@@ -219,7 +228,11 @@ def convert_hhchannel(channel):
         hh_rate_y = convert_hhgate(channel.gateY[0])
         hh_rate_y.instances = channel.Ypower
         nml_channel.gate.append(hh_rate_y)
-    return nml_channel
+    if channel.Zpower > 0:
+        hh_rate_z = convert_hhgate(channel.gateZ[0])
+        hh_rate_y.instances = channel.Zpower
+        nml_channel.gate.append(hh_rate_z)
+   return nml_channel
 
 # 
 # converter.py ends here
