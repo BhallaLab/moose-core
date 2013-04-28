@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Apr 23 18:51:58 2013 (+0530)
 # Version: 
-# Last-Updated: Thu Apr 25 12:24:59 2013 (+0530)
+# Last-Updated: Sun Apr 28 22:21:56 2013 (+0530)
 #           By: subha
-#     Update #: 117
+#     Update #: 165
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -49,6 +49,7 @@ import os
 import numpy as np
 import uuid
 import unittest
+import pylab
 import moose
 import converter
 import neuroml
@@ -106,20 +107,36 @@ class TestFindRateFn(unittest.TestCase):
         self.sigmoid = self.a_sigmoid / (1.0 + np.exp((self.v_array - self.v0_sigmoid) * self.k_sigmoid))
         # An exponential function - from traub2005, KC->n_inf
         self.exp = self.a_exp * np.exp((self.v_array - self.v0_exp) * self.k_exp)        
+        # A linoid function
+        self.a_linoid, self.k_linoid, self.v0_linoid = -0.01, 10e-3, -10e-3
+        # This is alpha_n from original Hodgkin-Huxley K channel.
+        self.linoid = converter.linoid(self.v_array, self.a_linoid, self.k_linoid, self.v0_linoid)
 
     def test_sigmoid(self):
         fn, params = converter.find_ratefn(self.v_array, self.sigmoid)
-        print params
+        print 'Sigmoid params:', params
         self.assertEqual(converter.sigmoid, fn)
-        errors = params - np.array([self.v0_sigmoid, self.k_sigmoid, self.a_sigmoid])
+        errors = params - np.array([self.a_sigmoid, self.k_sigmoid, self.v0_sigmoid])
         for err in errors:
             self.assertAlmostEqual(err, 0.0)
 
     def test_exponential(self):
         fn, params = converter.find_ratefn(self.v_array, self.exp)
-        print params
+        print 'Exponential params:', params
+        fnval = converter.exponential(self.v_array, *params)
         self.assertEqual(converter.exponential, fn)
-        errors = params - np.array([self.v0_exp, self.k_exp, self.a_exp])
+        rms_error = np.sqrt(np.sum((self.exp - fnval)**2))
+        # pylab.plot(self.v_array, self.exp, 'b-')
+        # pylab.plot(self.v_array, fnval, 'r-.') 
+        # pylab.show()
+        print rms_error, rms_error/max(self.exp)
+        self.assertAlmostEqual(rms_error/max(self.exp), 0.0)
+
+    def test_linoid(self):
+        fn, params = converter.find_ratefn(self.v_array, self.linoid)
+        print 'Linoid params:', params
+        self.assertEqual(converter.linoid, fn)
+        errors = params - np.array((self.a_linoid, self.k_linoid, self.v0_linoid))
         for err in errors:
             self.assertAlmostEqual(err, 0.0)
 

@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Apr 22 12:15:23 2013 (+0530)
 # Version: 
-# Last-Updated: Sat Apr 27 19:20:44 2013 (+0530)
+# Last-Updated: Sun Apr 28 22:25:35 2013 (+0530)
 #           By: subha
-#     Update #: 483
+#     Update #: 543
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -126,15 +126,42 @@ def convert_morphology(root, positions='auto'):
 
 ###########################################
 # function defs for curve fitting H-H-Gates
-def exponential(x, x0, k, a):
+def exponential(x, a, k, x0):
     return a * np.exp(k * (x - x0))
 
-def sigmoid(x, x0, k, a):
+def sigmoid(x, a, k, x0):
     return a / (np.exp(k * (x - x0)) + 1.0)
 
-def linoid(x, x0, k, a):
+def linoid(x, a, k, x0):
     """The so called linoid function. Called explinear in neurml.""" 
-    return a * (x - x0) / (np.exp(k * (x - x0)) - 1.0)
+    denominator = np.exp(k * (x - x0)) - 1.0
+    # Linoid often includes a zero denominator
+    zero_idx = np.flatnonzero(denominator == 0)
+    print 'Zeroidx', zero_idx
+    # Do something to avoid zero div
+    # if len(zero_idx) > 0:
+    #     for ii in zero_idx:
+    #         denominator[ii] = 1e-10
+    ret = a * (x - x0) / denominator
+    infidx = np.flatnonzero(ret == np.inf)
+    print 'infindex', infidx
+    if len(infidx) > 0:
+        for ii in infidx:
+            if ii == 0:
+                ret[ii] = ret[ii+1] - (ret[ii+2] - ret[ii+1])
+            elif ii == len(ret):
+                ret[ii] = ret[ii-1] + (ret[ii-1] - ret[ii-2])
+            else:
+                ret[ii] = (ret[ii+1] + ret[ii+2]) * 0.5
+    return ret
+
+def double_exp(x, a,  k1, x1, k2, x2):
+    """For functions of the form:
+
+    a / (exp(k1 * (x - x1)) + exp(k2 * (x - x2)))
+
+    """
+    return a / (np.exp(k1 * (x - x1)) + np.exp(k2 * (x - x2)))
 
 # Map from the above functions to corresponding neuroml class
 fn_rate_map = {
@@ -172,6 +199,7 @@ def find_ratefn(x, y):
         try:
             popt, pcov = curve_fit(fn, x, y)
         except RuntimeError as e:
+            print fn, e
             # This can be reached in case maxfev is reached
             continue
         error = y - fn(x, *popt)
@@ -199,13 +227,13 @@ def convert_hhgate(gate):
     if bfn is  None:
         raise Exception('could not find a fitting function for `alpha`')
     hh_rates.forward_rate = neuroml.HHRate(type=fn_rate_map[afn], 
-                                           midpoint='%gmV' % (ap[0]),
+                                           midpoint='%gmV' % (ap[2]),
                                            scale='%gmV' % (ap[1]),
-                                           rate='%gper_ms' % (ap[2]))
+                                           rate='%gper_ms' % (ap[0]))
     hh_rates.reverse_rate = neuroml.HHRate(type=fn_rate_map[bfn], 
-                                           midpoint='%gmV' % (bp[0]),
+                                           midpoint='%gmV' % (bp[2]),
                                            scale='%gmV' % (bp[1]),
-                                           rate='%gper_ms' % (bp[2]))
+                                           rate='%gper_ms' % (bp[0]))
     return hh_rates
                                            
     
@@ -232,7 +260,7 @@ def convert_hhchannel(channel):
         hh_rate_z = convert_hhgate(channel.gateZ[0])
         hh_rate_y.instances = channel.Zpower
         nml_channel.gate.append(hh_rate_z)
-   return nml_channel
+    return nml_channel
 
 # 
 # converter.py ends here
