@@ -318,7 +318,11 @@ void SolverJunction::setAbutPools(
 	const vector< unsigned int >& meshIndex,
 	const vector< unsigned int >& poolIndex)
 {
-	abutMeshIndex_ = meshIndex;
+	if ( poolIndex.size() > 0 ) {
+		abutMeshIndex_ = meshIndex;
+	} else {
+		abutMeshIndex_.resize( 0 );
+	}
 	abutPoolIndex_ = poolIndex;
 }
 
