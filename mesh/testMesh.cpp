@@ -1693,7 +1693,7 @@ void testSpineAndPsdMesh()
 	assert( mid != Msg::bad );
 	Id pm = shell->doCreate( "PsdMesh", Id(), "psdmesh", dims );
 	mid = shell->doAddMsg( 
-					"OneToOne", sm, "psdListOut", pm, "psdList" );
+					"OneToOne", nm, "psdListOut", pm, "psdList" );
 	assert( mid != Msg::bad );
 	Field< Id >::set( nm, "cell", cell );
 	Qinfo::clearQ( 0 );

@@ -149,30 +149,24 @@ Id buildSigNeurElec( vector< Id >& spines )
 	return nid;
 }
 
-void buildSigNeurChem( Id nid )
+
+void buildSigNeurChem( Id nid, Id neuroMesh, Id spineMesh, Id psdMesh )
 {
-	const double diffLength = 1e-6;
 	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
 	vector< int > dims( 1, 1 );
 
-	Id neuroMesh = shell->doCreate( "NeuroMesh", nid, "neuroMesh", dims );
-	Field< bool >::set( neuroMesh, "separateSpines", true );
-	Field< double >::set( neuroMesh, "diffLength", diffLength );
-	Field< string >::set( neuroMesh, "geometryPolicy", "cylinder" );
-	Id spineMesh = shell->doCreate( "SpineMesh", nid, "spineMesh", dims );
-	MsgId mid = shell->doAddMsg(
-		"OneToOne", neuroMesh, "spineListOut", spineMesh, "spineList" );
-	assert( mid != Msg::bad );
-	Id psdMesh = shell->doCreate( "PsdMesh", Id(), "psdMesh", dims );
-	mid = shell->doAddMsg(
-		"OneToOne", spineMesh, "psdListOut", psdMesh, "psdList" );
-	assert( mid != Msg::bad );
-
+	Id spineMeshEntries( "/n/spineMesh/mesh" );
 	///////////////////////////////////////////////////////////////////
 	// Stuff in PSD
 	///////////////////////////////////////////////////////////////////
+	Id psdMeshEntries( "/n/psdMesh/mesh" );
+	assert( psdMeshEntries != Id() );
 	Id psdGluR = shell->doCreate( "Pool", psdMesh, "psdGluR" );
 	Field< double >::set( psdGluR, "nInit", 100 );
+	MsgId mid = shell->doAddMsg( "OneToOne", psdGluR, "mesh", psdMeshEntries, "mesh" );
+	assert( mid != Msg::bad );
+	mid = shell->doAddMsg( "Single", psdMeshEntries, "mesh", psdGluR, "mesh" );
+	assert( mid != Msg::bad );
 	///////////////////////////////////////////////////////////////////
 	// Stuff in spine head
 	///////////////////////////////////////////////////////////////////
@@ -182,11 +176,14 @@ void buildSigNeurChem( Id nid )
 	Id toPsd = shell->doCreate( "Pool", spineMesh, "toPsd" );
 	Field< double >::set( toPsd, "concInit", 1e-3 );
 	Id toPsdEnz = shell->doCreate( "Enz", toPsd, "enz" );
+	Id toPsdEnzCplx = shell->doCreate( "Pool", toPsdEnz, "cplx" );
 	mid = shell->doAddMsg( "OneToOne", toPsdEnz, "enz", toPsd, "reac" );
 	assert( mid != Msg::bad );
 	mid = shell->doAddMsg( "OneToOne", toPsdEnz, "sub", headGluR, "reac" );
 	assert( mid != Msg::bad );
 	mid = shell->doAddMsg( "OneToOne", toPsdEnz, "prd", psdGluR, "reac" );
+	assert( mid != Msg::bad );
+	mid = shell->doAddMsg( "OneToOne", toPsdEnz, "cplx", toPsdEnzCplx, "reac" );
 	assert( mid != Msg::bad );
 	Field< double >::set( toPsdEnz, "Km", 1e-3 ); 	// 1 uM
 	Field< double >::set( toPsdEnz, "kcat", 1 );	// 1/sec.
@@ -201,6 +198,20 @@ void buildSigNeurChem( Id nid )
 	assert( mid != Msg::bad );
 	Field< double >::set( fromPsd, "Kf", 0.02 );
 	Field< double >::set( fromPsd, "Kb", 0.0 );
+
+	mid = shell->doAddMsg( "Single", spineMeshEntries, "mesh", headGluR, "mesh" );
+	assert( mid != Msg::bad );
+	mid = shell->doAddMsg( "Single", spineMeshEntries, "mesh", toPsd, "mesh" );
+	assert( mid != Msg::bad );
+	mid = shell->doAddMsg( "Single", spineMeshEntries, "mesh", headCa, "mesh" );
+	assert( mid != Msg::bad );
+	mid = shell->doAddMsg( "Single", spineMeshEntries, "mesh", toPsd, "mesh" );
+	assert( mid != Msg::bad );
+	// Id toPsdEnzCplx( toPsdEnz.value() + 1 );
+	Id foo( "/n/spineMesh/toPsd/enz/cplx" );
+	assert( toPsdEnzCplx != Id() );
+	assert( toPsdEnzCplx == foo );
+	shell->doAddMsg( "Single", spineMeshEntries, "mesh", toPsdEnzCplx, "mesh" );
 
 	///////////////////////////////////////////////////////////////////
 	// Stuff in dendrite
@@ -221,6 +232,7 @@ void buildSigNeurChem( Id nid )
 	Id dendKinase = shell->doCreate( "Pool", neuroMesh, "kinase" );
 	Field< double >::set( dendKinase, "concInit", 1e-3 ); // 1 uM.
 	Id dendKinaseEnz = shell->doCreate( "Enz", dendKinase, "enz" );
+	Id dendKinaseEnzCplx = shell->doCreate( "Pool", dendKinaseEnz, "cplx" );
 	Id kChan = shell->doCreate( "Pool", neuroMesh, "kChan");
 	Field< double >::set( kChan, "concInit", 1e-3 ); // 1 uM.
 	Id kChan_p = shell->doCreate( "Pool", neuroMesh, "kChan_p");
@@ -233,6 +245,9 @@ void buildSigNeurChem( Id nid )
 	assert( mid != Msg::bad );
 	mid = shell->doAddMsg( 
 					"OneToOne", dendKinaseEnz, "prd", kChan_p, "reac" );
+	assert( mid != Msg::bad );
+	mid = shell->doAddMsg( 
+			"OneToOne", dendKinaseEnz, "cplx", dendKinaseEnzCplx, "reac" );
 	assert( mid != Msg::bad );
 	Field< double >::set( dendKinaseEnz, "Km", 1e-3 ); 	// 1 uM
 	Field< double >::set( dendKinaseEnz, "kcat", 1 );	// 1/sec.
@@ -247,12 +262,105 @@ void buildSigNeurChem( Id nid )
 	Field< double >::set( dendPhosphatase, "Kf", 0.02 );
 	Field< double >::set( dendPhosphatase, "Kb", 0.0 );
 
+	Id dendMeshEntries( "/n/neuroMesh/mesh" );
+
+	mid = shell->doAddMsg( "Single", dendMeshEntries, "mesh", dendCa, "mesh" );
+	assert( mid != Msg::bad );
+	mid = shell->doAddMsg( "Single", dendMeshEntries, "mesh", bufCa, "mesh" );
+	assert( mid != Msg::bad );
+	mid = shell->doAddMsg( "Single", dendMeshEntries, "mesh", dendKinase, "mesh" );
+	assert( mid != Msg::bad );
+	mid = shell->doAddMsg( "Single", dendMeshEntries, "mesh", dendKinaseEnzCplx, "mesh" );
+	assert( mid != Msg::bad );
+	mid = shell->doAddMsg( "Single", dendMeshEntries, "mesh", kChan, "mesh" );
+	assert( mid != Msg::bad );
+	mid = shell->doAddMsg( "Single", dendMeshEntries, "mesh", kChan_p, "mesh" );
+	assert( mid != Msg::bad );
+
+	Id bar( "/n/neuroMesh/kinase/enz/cplx" );
+	assert( dendKinaseEnzCplx != Id() );
+	assert( dendKinaseEnzCplx == bar );
+	shell->doAddMsg( "Single", spineMeshEntries, "mesh", dendKinaseEnzCplx, "mesh" );
+}
+
+void buildSigNeurNeuroMesh( Id nid, Id& neuroMesh, Id& spineMesh, Id& psdMesh )
+{
+	const double diffLength = 1e-6;
+	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
+	vector< int > dims( 1, 1 );
+
+	neuroMesh = shell->doCreate( "NeuroMesh", nid, "neuroMesh", dims );
+	Field< bool >::set( neuroMesh, "separateSpines", true );
+	Field< double >::set( neuroMesh, "diffLength", diffLength );
+	Field< string >::set( neuroMesh, "geometryPolicy", "cylinder" );
+	spineMesh = shell->doCreate( "SpineMesh", nid, "spineMesh", dims );
+	MsgId mid;
+	mid = shell->doAddMsg( "OneToOne", neuroMesh, "spineListOut", spineMesh, "spineList" );
+	assert( mid != Msg::bad );
+	psdMesh = shell->doCreate( "PsdMesh", nid, "psdMesh", dims );
+	mid = shell->doAddMsg( "OneToOne", neuroMesh, "psdListOut", psdMesh, "psdList" );
+	assert( mid != Msg::bad );
+}
+
+void makeChemInNeuroMesh()
+{
+	vector< Id > spines;
+	Id nid = buildSigNeurElec( spines );
+	Id neuroMesh, spineMesh, psdMesh;
+	buildSigNeurNeuroMesh( nid, neuroMesh, spineMesh, psdMesh );
+	buildSigNeurChem( nid, neuroMesh, spineMesh, psdMesh );
 	///////////////////////////////////////////////////////////////////
 	// Make NeuroMesh
 	///////////////////////////////////////////////////////////////////
 	Field< Id >::set( neuroMesh, "cell", nid );
-	Qinfo::clearQ( 0 );
-	Qinfo::clearQ( 0 );
+	// shell->doReinit();
+	// Qinfo::clearQ( 0 );
+	// Qinfo::clearQ( 0 );
+	// Deprecated. Qinfo::waitProcCycles( 4 );
+
+	///////////////////////////////////////////////////////////////////
+	// Check that stuff has been built
+	///////////////////////////////////////////////////////////////////
+	const unsigned int numComptsInDend = 100;
+	const unsigned int numSpines = 5;
+	unsigned int size;
+	
+	// 25 Apr 2013: this doesn't work, though it should. Need to clean up.
+	//size = psdMeshEntries.element()->dataHandler()->totalEntries();
+	
+	Id psdMeshEntries( "/n/psdMesh/mesh" );
+	size = Id( "/n/spineMesh/mesh" ).element()->dataHandler()->localEntries();
+	assert( size == numSpines );
+	size = Id( "/n/psdMesh/mesh" ).element()->dataHandler()->localEntries();
+	assert( size == numSpines );
+
+	size = Id( "/n/spineMesh/headGluR" ).element()->dataHandler()->localEntries();
+	// size = Field< unsigned int >::get( headGluR, "linearSize");
+	assert( size == numSpines );
+	size = Id( "/n/spineMesh/toPsd" ).element()->dataHandler()->localEntries();
+	// size = Field< unsigned int >::get( toPsdEnz, "linearSize");
+	assert( size == numSpines );
+	size = Id( "/n/spineMesh/fromPsd" ).element()->dataHandler()->localEntries();
+	// size = Field< unsigned int >::get( fromPsd, "linearSize");
+	assert( size == 1 ); // It is a reac.
+
+	size = Id( "/n/psdMesh/psdGluR" ).element()->dataHandler()->localEntries();
+	// size = Field< unsigned int >::get( psdGluR, "linearSize");
+	assert( size == numSpines );
+
+	size = Id( "/n/neuroMesh/Ca" ).element()->dataHandler()->localEntries();
+	// size = Field< unsigned int >::get( dendCa, "linearSize");
+	assert( size == numComptsInDend );
+	size = Id( "/n/neuroMesh/pumpCa" ).element()->dataHandler()->localEntries();
+	// size = Field< unsigned int >::get( pumpCa, "linearSize");
+	assert( size == 1 );
+	size = Id( "/n/neuroMesh/dendKinaseEnz" ).element()->dataHandler()->localEntries();
+	// size = Field< unsigned int >::get( dendKinaseEnz, "linearSize");
+	assert( size == 1 );
+
+	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
+	shell->doDelete( nid );
+	cout << "." << flush;
 }
 
 void testSigNeurElec()
@@ -262,7 +370,6 @@ void testSigNeurElec()
 
 	vector< Id > spines;
 	Id nid = buildSigNeurElec( spines );
-	buildSigNeurChem( nid );
 	Id compt( "/n/compt" );
 	//////////////////////////////////////////////////////////////////////
 	// Graph
@@ -334,6 +441,7 @@ void testSigNeur()
 void testSigNeurProcess()
 {
 	testSigNeurElec();
+	makeChemInNeuroMesh();
 }
 
 

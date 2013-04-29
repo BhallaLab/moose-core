@@ -25,6 +25,7 @@
 #include "SpineMesh.h"
 #include "../utility/numutil.h"
 
+/*
 static SrcFinfo3< Id, vector< double >, vector< unsigned int > >* 
 	psdListOut()
 {
@@ -41,6 +42,7 @@ static SrcFinfo3< Id, vector< double >, vector< unsigned int > >*
 	);
 	return &psdListOut;
 }
+*/
 
 const Cinfo* SpineMesh::initCinfo()
 {
@@ -68,7 +70,7 @@ const Cinfo* SpineMesh::initCinfo()
 
 	static Finfo* spineMeshFinfos[] = {
 		&spineList,			// DestFinfo
-		psdListOut(),		// SrcFinfo
+		// psdListOut(),		// SrcFinfo
 	};
 
 	static Cinfo spineMeshCinfo (
@@ -148,14 +150,29 @@ void SpineMesh::handleSpineList(
 		vector< unsigned int > index( head.size(), 0 );
 		for ( unsigned int i = 0; i < head.size(); ++i ) {
 			spines_[i] = SpineEntry( shaft[i], head[i], parentVoxel[i] );
-			ret = spines_[i].psdCoords();
-			assert( ret.size() == 8 );
-			psdCoords.insert( psdCoords.end(), ret.begin(), ret.end() );
-			index[i] = i;
+			// ret = spines_[i].psdCoords();
+			// assert( ret.size() == 8 );
+			// psdCoords.insert( psdCoords.end(), ret.begin(), ret.end() );
+			// index[i] = i;
 		}
-		psdListOut()->send( e, q->threadNum(), cell_, psdCoords, index );
+		// psdListOut()->send( e, q->threadNum(), cell_, psdCoords, index );
 
 		updateCoords();
+		Id meshEntry( e.id().value() + 1 );
+		double oldVol = getMeshEntrySize( 0 );
+		
+		vector< unsigned int > localIndices( head.size() );
+		vector< double > vols( head.size() );
+		for ( unsigned int i = 0; i < head.size(); ++i ) {
+			localIndices[i] = i;
+			vols[i] = spines_[i].volume();
+		}
+		vector< vector< unsigned int > > outgoingEntries;
+		vector< vector< unsigned int > > incomingEntries;
+		meshSplit()->fastSend( e, q->threadNum(), oldVol, vols,
+						localIndices, outgoingEntries, incomingEntries );
+		lookupEntry( 0 )->triggerRemesh( meshEntry.eref(), q->threadNum(),
+						oldVol, 0, localIndices, vols );
 }
 
 //////////////////////////////////////////////////////////////////
