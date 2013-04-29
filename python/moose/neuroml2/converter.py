@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Apr 22 12:15:23 2013 (+0530)
 # Version: 
-# Last-Updated: Sun Apr 28 22:25:35 2013 (+0530)
+# Last-Updated: Mon Apr 29 09:51:27 2013 (+0530)
 #           By: subha
-#     Update #: 543
+#     Update #: 544
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -143,7 +143,7 @@ def linoid(x, a, k, x0):
     #     for ii in zero_idx:
     #         denominator[ii] = 1e-10
     ret = a * (x - x0) / denominator
-    infidx = np.flatnonzero(ret == np.inf)
+    infidx = np.flatnonzero((ret == np.inf) | (ret == -np.inf))
     print 'infindex', infidx
     if len(infidx) > 0:
         for ii in infidx:

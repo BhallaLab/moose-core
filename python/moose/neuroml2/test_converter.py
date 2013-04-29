@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Apr 23 18:51:58 2013 (+0530)
 # Version: 
-# Last-Updated: Sun Apr 28 22:21:56 2013 (+0530)
+# Last-Updated: Mon Apr 29 10:45:20 2013 (+0530)
 #           By: subha
-#     Update #: 165
+#     Update #: 187
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -108,13 +108,13 @@ class TestFindRateFn(unittest.TestCase):
         # An exponential function - from traub2005, KC->n_inf
         self.exp = self.a_exp * np.exp((self.v_array - self.v0_exp) * self.k_exp)        
         # A linoid function
-        self.a_linoid, self.k_linoid, self.v0_linoid = -0.01, 10e-3, -10e-3
+        self.a_linoid, self.k_linoid, self.v0_linoid = -0.01*1e3, -1/10e-3, 10e-3
         # This is alpha_n from original Hodgkin-Huxley K channel.
         self.linoid = converter.linoid(self.v_array, self.a_linoid, self.k_linoid, self.v0_linoid)
 
     def test_sigmoid(self):
         fn, params = converter.find_ratefn(self.v_array, self.sigmoid)
-        print 'Sigmoid params:', params
+        print 'Sigmoid params original:', self.a_sigmoid, self.k_sigmoid, self.v0_sigmoid, 'detected:', params
         self.assertEqual(converter.sigmoid, fn)
         errors = params - np.array([self.a_sigmoid, self.k_sigmoid, self.v0_sigmoid])
         for err in errors:
@@ -122,7 +122,7 @@ class TestFindRateFn(unittest.TestCase):
 
     def test_exponential(self):
         fn, params = converter.find_ratefn(self.v_array, self.exp)
-        print 'Exponential params:', params
+        print 'Exponential params original:', self.a_exp, self.k_exp, self.v0_exp, 'detected:', params
         fnval = converter.exponential(self.v_array, *params)
         self.assertEqual(converter.exponential, fn)
         rms_error = np.sqrt(np.sum((self.exp - fnval)**2))
@@ -134,11 +134,14 @@ class TestFindRateFn(unittest.TestCase):
 
     def test_linoid(self):
         fn, params = converter.find_ratefn(self.v_array, self.linoid)
-        print 'Linoid params:', params
+        print 'Linoid params original:', self.a_linoid, self.k_linoid, self.v0_linoid, 'detected:', params
+        pylab.plot(self.v_array, self.linoid, 'r-')
+        pylab.plot(self.v_array, fn(self.v_array, *params), 'k-.')
+        pylab.show()
         self.assertEqual(converter.linoid, fn)
         errors = params - np.array((self.a_linoid, self.k_linoid, self.v0_linoid))
-        for err in errors:
-            self.assertAlmostEqual(err, 0.0)
+        for orig, err in zip((self.a_linoid, self.k_linoid, self.v0_linoid), errors):
+            self.assertAlmostEqual(abs(err/orig), 0.0, places=2)
 
 if __name__ == '__main__':
     unittest.main()
