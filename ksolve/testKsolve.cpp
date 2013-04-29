@@ -207,6 +207,11 @@ void testGsolver(string modelName, string plotName, double plotDt, double simTim
  * This makes *meshA* and *meshB*, and puts *poolA* and *poolB* in it.
  * There is
  * a reversible conversion reaction *reac* also in meshA.
+ * Reaction is A<===>B, with A in MeshA and B in MeshB.
+ * meshA is the unit cube starting at (0,0,0). 
+ * meshA is the unit cube starting at (1,0,0). 
+ * So they share one face through which the reaction will happen.
+ * No diffusion happens in this model.
  */
 Id makeInterMeshReac( Shell* s )
 {
@@ -315,10 +320,10 @@ void testInterMeshReac()
 
 	SetGet1<Id>::set( stoichA, "addJunction", stoichB );
 
-	//assert( gsA->pools().size() == 1 );
+	assert( gsA->pools().size() == 1 );
 	assert( gsA->pools()[0].size() == 2 );
 	assert( gsA->ode().size() == 2 );
-	assert( gsB->pools().size() == 1 );
+	assert( gsB->pools().size() == 1 ); // One of A or B should be 2.
 	assert( gsB->pools()[0].size() == 1 );
 	assert( gsB->ode().size() == 1 );
 

@@ -167,10 +167,13 @@ void GslStoich::vHandleJunctionPoolNum( unsigned int fieldIndex,
 	for ( VCI k = j->sendMeshIndex().begin(); 
 			k != j->sendMeshIndex().end(); ++k )
 	{
+		assert( *k < pools_.size() );
 		double* s = pools_[*k].varS();
 		for ( VCI p = j->remoteReacPools().begin(); 
 				p != j->remoteReacPools().end(); ++p )
 	  	{
+				assert( *p < y_[*k].size() );
+				assert( *p < pools_[*k].size() );
 				y_[*k][*p] = *vptr;
 				s[*p] = *vptr++;
 		}
@@ -178,10 +181,13 @@ void GslStoich::vHandleJunctionPoolNum( unsigned int fieldIndex,
 	for ( VCI k = j->abutMeshIndex().begin(); 
 			k != j->abutMeshIndex().end(); ++k )
 	{
+		assert( *k < pools_.size() );
 		double* s = pools_[*k].varS();
 		for ( VCI p = j->abutPoolIndex().begin(); 
 				p != j->abutPoolIndex().end(); ++p )
 	  	{
+				assert( *p < y_[*k].size() );
+				assert( *p < pools_[*k].size() );
 				y_[*k][*p] = *vptr;
 				s[*p] = *vptr++;
 		}

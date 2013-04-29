@@ -21699,5 +21699,153 @@ Checkin 4492.
 Put in the chemical portion of the SigNeur model. Had to incorporate default
 return values for NeuroMesh, SpineMesh and PsdMesh to return even before the
 cell is defined. Seems to go through the construction process fine.
+Checkin 4493.
+
+Doing this, it fails to scale with volume. I need to take a call about whether
+to have the mesh ownership defined simply by object tree structure, so that
+the first 'parent' mesh class of a pool, enz or reac is its mesh. Key
+problem with this is that then changes in volume are propagated by traversal
+of tree, rather than messaging.
+
+Tried to put in one. Doesn't seem to change things.
+==========================================================================
+22 Apr 2013.
+Tried to figure out failure of scaling. Odd, unreliable behaviour. Finally
+threw valgrind at it, and there is a problem. After a fair amount of 
+elimination turns out that an earlier unit test using meshes already sets 
+up a memory error at simtime. 
+This was in ksolve/testKsolve::testInterMeshReac().
 
 ==========================================================================
+23 Apr 2013.
+Finally tracked it down using assertions in the location indicated
+by valgrind. abutMeshIndex has invalid values.
+
+Much messy tracking later: 
+in GslStoich::expandSforDiffusion, the abutMeshIndex is set to an invalid
+value. Should check if there are any diffusion pools at all.
+Made the change, now clears unit tests.
+
+Uncommented out the SigNeur tests that had been the original problem.
+Still not finding the correct numSpines at testSigNeur.cpp:270.
+
+Should redo valgrind just to be sure that it isn't any silly memory problem.
+
+==========================================================================
+24 Apr 2013
+Valgrind is happy now, till the assertion fails with numSpines. This is where
+we were a couple of days ago. Now is the message going out?
+
+The message goes out but perhaps one problem is that within the message another
+goes out. The system should handle this cleanly but...
+Unfortunately I can't just comment it out because another test uses it,
+suprisingly without ill effect.
+
+Try to have the request emanate from the NeuroMesh rather than the
+SpineMesh.
+
+Did this. Probably a worthwhile excercise anyway, but the problem isn't
+fixed.
+
+==========================================================================
+25 Apr 2013
+Basically any messages I send bomb. Let's see if a direct call hack works.
+
+Well, it sends the info to the correct place. But the # spines returned is
+still incorrect. With gdb confirmed that the entry array is correctly set
+in the SpineMesh and PsdMesh.
+==========================================================================
+26 Apr
+Horrible mess cleaning up neuroMesh, spineMesh, and PsdMesh and their
+contacts and updating of pools. Finally set it up and the correct number
+of assignments occur, clears unit and regression tests.
+
+Next: Better separate out chem mesh system so I can run as a simple single
+solver model (or even non-solver model) to check it works reasonably. 
+To do this have dummy meshes with the right volumes but no subdivisions.
+
+Then: Add in adaptors to the simple single solver version.
+
+Then: Put in chem solvers
+
+Then: Put in elec solver.
+
+Then: regression test with equivalent model loaded from kkit model 
+	definition files.
+
+From 9 April, the following steps:
+	SigNeur
+	Regression Test of whole mess with kkit and .p file loading
+	SBML reader/writer.
+	GSSA update for meshes, eliminate old code.
+	GSSA interface with GSL
+	SigNeurML startup.
+	Smoldyn interface
+	Pool composition and motors.
+
+
+Separately, thinking about redoing the messaging yet again, with the idea of
+single-thread operation within each core, and just a common Charm++ or MPI
+type interface between cores.
+Various options for messaging: 
+- Message delivery
+	- Instantaneous: go through the Msg dispersal upon call
+		- Avoids a data copy (except the args passing itself)
+		- Breaks the semantics of messaging: 
+			- Targets may change before end of cycle.
+			- Execution ordering hard to figure out.
+			- Off-node messages get messy to deal with
+				instantaneously, if we want to keep the 
+				behaviour consistent regardless of nodes.
+		- Cascading messages work right away.
+		- Infinite loops possible: system will hang.
+	- Scheduled: Put the data into a buffer and go through on schedule.
+		- This requires that a SrcFinfo be allocated for every outgoing
+			msg. Or that it somehow set up an available buffer.
+		- If the data are stable, could use pointers rather than buffer.
+		- Cascading messages will need multiple cycles to complete.
+
+- SrcFinfo::send
+	- Send command doesn't convert args.
+		- if Instantaneous: The args are now only available as separate
+			variables, so we have to ask the Msg for an iterator
+			and march through it. It was messy last time we did
+			this, but most of the mess is now contained in the way
+			Elements deal with Msgs. Different targets are always
+			on different MsgFuncBinding entries, which are easy
+			to iterate through.
+			The iteration through the targets may be eliminated if
+			we permit only 3 kinds of target mappings: one, all or 
+			sparse. Then the job can be done by the 'send'
+		- if Scheduled: The SrcFinfo with its internally buffered
+			args is passed to the Msg, and the Msg does its
+			iteration, passing the dest objIds and
+			destFuncs to the SrcFinfo to operate on.
+		- In both cases: SrcFinfo typecasts the OpFunc and executes 
+			with the args it holds.
+
+- SetGet::set
+	- Does not convert args.
+		- Does the appropriate typecasting on the destFinfo, just
+			passes the args directly in.
+- SetGet::get
+	- Already doesn't convert arg, and directly returns value from a func.
+
+- OpFunc/EpFunc/UpFunc
+	- 'op' just executes the stored function with suitable args.
+
+- Conv: 
+	This is pretty hideous right now, but I need something like this
+	for the 'serialize' class below.
+	For this version I only need the conversion to and from a provided 
+	buffer, rather than the various access functions used now.
+
+- SerializeArgs:
+	- Converts an arglist into a buffer. 
+	- Converts a buffer back into an arglist and calls an OpFunc with it.
+
+This version should be called brisc.
+
+==========================================================================
+27 Apr
+Separated out chem, elec, mesh etc for the unit test. Clears.

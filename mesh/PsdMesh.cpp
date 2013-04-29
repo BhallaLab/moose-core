@@ -141,6 +141,23 @@ void PsdMesh::handlePsdList(
 		parent_ = parentVoxel;
 
 		updateCoords();
+
+		Id meshEntry( e.id().value() + 1 );
+		double oldVol = getMeshEntrySize( 0 );
+		
+		vector< unsigned int > localIndices( psd_.size() );
+		vector< double > vols( psd_.size() );
+		for ( unsigned int i = 0; i < psd_.size(); ++i ) {
+			localIndices[i] = i;
+			vols[i] = psd_[i].getDiffusionArea( pa_[i], 0 );
+		}
+		vector< vector< unsigned int > > outgoingEntries;
+		vector< vector< unsigned int > > incomingEntries;
+		meshSplit()->fastSend( e, q->threadNum(), oldVol, vols,
+						localIndices, outgoingEntries, incomingEntries );
+		lookupEntry( 0 )->triggerRemesh( meshEntry.eref(), q->threadNum(),
+						oldVol, 0, localIndices, vols );
+
 }
 
 //////////////////////////////////////////////////////////////////

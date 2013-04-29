@@ -21,6 +21,7 @@
 #include "CylBase.h"
 #include "NeuroNode.h"
 #include "NeuroMesh.h"
+#include "SpineEntry.h"
 #include "../utility/numutil.h"
 
 static SrcFinfo4< Id, vector< Id >, vector< Id >, vector< unsigned int > >* 
@@ -37,6 +38,23 @@ static SrcFinfo4< Id, vector< Id >, vector< Id >, vector< unsigned int > >*
 		"index of matching parent voxels for each spine"
 	);
 	return &spineListOut;
+}
+
+static SrcFinfo3< Id, vector< double >, vector< unsigned int > >* 
+	psdListOut()
+{
+	static SrcFinfo3< Id, vector< double >, vector< unsigned int > >
+   		psdListOut(
+		"psdListOut",
+		"Tells PsdMesh to build a mesh. "
+		"Arguments: Cell Id, Coordinates of each psd, "
+		"index of matching parent voxels for each spine"
+		"The coordinates each have 8 entries:"
+		"xyz of centre of psd, xyz of vector perpendicular to psd, "
+		"psd diameter, "
+		" diffusion distance from parent compartment to PSD"
+	);
+	return &psdListOut;
 }
 
 const Cinfo* NeuroMesh::initCinfo()
@@ -182,6 +200,7 @@ const Cinfo* NeuroMesh::initCinfo()
 		&geometryPolicy,		// Value
 		&setCellPortion,			// DestFinfo
 		spineListOut(),			// SrcFinfo
+		psdListOut(),			// SrcFinfo
 	};
 
 	static Cinfo neuroMeshCinfo (
@@ -480,11 +499,40 @@ bool NeuroMesh::filterSpines( Id compt )
 // I assume 'cell' is the parent of the compartment tree.
 void NeuroMesh::setCell( const Eref& e, const Qinfo* q, Id cell )
 {
-		vector< Id > compts = Field< vector< Id > >::get( cell, "children");
-		setCellPortion( cell, compts );
-		if ( separateSpines_ )
-				spineListOut()->send( e, q->threadNum(),
-					cell_, shaft_, head_, parent_ );
+	vector< Id > compts = Field< vector< Id > >::get( cell, "children");
+	setCellPortion( cell, compts );
+	transmitChange( e, q );
+	if ( separateSpines_ ) {
+		// unsigned int thread = q->threadNum();
+		// Hack to send data directly, bypassing queueueue
+		vector< Id > ids;
+		e.element()->getNeighbours( ids, spineListOut() );
+		if ( ids.size() > 0 ) {
+			SetGet4< Id, vector< Id >, vector< Id >, 
+					vector< unsigned int > >::set( 
+					ids[0], "spineList", cell_, shaft_, head_, parent_ );
+		}
+		// spineListOut()->send( e, thread, cell_, shaft_, head_, parent_ );
+		vector< double > ret;
+		vector< double > psdCoords;
+		vector< unsigned int > index( head_.size(), 0 );
+		if ( e.element()->hasMsgs( psdListOut()->getBindIndex() ) ) {
+			// Later can refine to deal with spineless PSDs.
+			for ( unsigned int i = 0; i < head_.size(); ++i ) {
+				SpineEntry se = 
+						SpineEntry( shaft_[i], head_[i], parent_[i] );
+				ret = se.psdCoords();
+				assert( ret.size() == 8 );
+				psdCoords.insert( psdCoords.end(), ret.begin(), ret.end() );
+				index[i] = i;
+			}
+			ids.clear();
+			e.element()->getNeighbours( ids, psdListOut() );
+			// psdListOut()->send( e, thread, cell_, psdCoords, index );
+			SetGet3< Id, vector< double >, vector< unsigned int > >::set( 
+					ids[0], "psdList", cell_, psdCoords, index );
+		}
+	}
 }
 
 
