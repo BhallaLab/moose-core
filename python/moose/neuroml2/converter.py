@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Apr 22 12:15:23 2013 (+0530)
 # Version: 
-# Last-Updated: Mon Apr 29 09:51:27 2013 (+0530)
+# Last-Updated: Mon Apr 29 10:49:18 2013 (+0530)
 #           By: subha
-#     Update #: 544
+#     Update #: 551
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -135,16 +135,11 @@ def sigmoid(x, a, k, x0):
 def linoid(x, a, k, x0):
     """The so called linoid function. Called explinear in neurml.""" 
     denominator = np.exp(k * (x - x0)) - 1.0
-    # Linoid often includes a zero denominator
-    zero_idx = np.flatnonzero(denominator == 0)
-    print 'Zeroidx', zero_idx
-    # Do something to avoid zero div
-    # if len(zero_idx) > 0:
-    #     for ii in zero_idx:
-    #         denominator[ii] = 1e-10
+    # Linoid often includes a zero denominator - we need to fill those
+    # points with interpolated values (interpolation is simpler than
+    # finding limits).
     ret = a * (x - x0) / denominator
     infidx = np.flatnonzero((ret == np.inf) | (ret == -np.inf))
-    print 'infindex', infidx
     if len(infidx) > 0:
         for ii in infidx:
             if ii == 0:
