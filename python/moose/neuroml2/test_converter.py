@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Apr 23 18:51:58 2013 (+0530)
 # Version: 
-# Last-Updated: Mon Apr 29 10:45:20 2013 (+0530)
+# Last-Updated: Mon Apr 29 10:48:01 2013 (+0530)
 #           By: subha
-#     Update #: 187
+#     Update #: 189
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -125,6 +125,9 @@ class TestFindRateFn(unittest.TestCase):
         print 'Exponential params original:', self.a_exp, self.k_exp, self.v0_exp, 'detected:', params
         fnval = converter.exponential(self.v_array, *params)
         self.assertEqual(converter.exponential, fn)
+        # The same exponential can be satisfied by an infinite number
+        # of parameter values. Hence we cannot compare the parameters,
+        # but only the fit
         rms_error = np.sqrt(np.sum((self.exp - fnval)**2))
         # pylab.plot(self.v_array, self.exp, 'b-')
         # pylab.plot(self.v_array, fnval, 'r-.') 
@@ -135,9 +138,9 @@ class TestFindRateFn(unittest.TestCase):
     def test_linoid(self):
         fn, params = converter.find_ratefn(self.v_array, self.linoid)
         print 'Linoid params original:', self.a_linoid, self.k_linoid, self.v0_linoid, 'detected:', params
-        pylab.plot(self.v_array, self.linoid, 'r-')
-        pylab.plot(self.v_array, fn(self.v_array, *params), 'k-.')
-        pylab.show()
+        # pylab.plot(self.v_array, self.linoid, 'r-')
+        # pylab.plot(self.v_array, fn(self.v_array, *params), 'k-.')
+        # pylab.show()
         self.assertEqual(converter.linoid, fn)
         errors = params - np.array((self.a_linoid, self.k_linoid, self.v0_linoid))
         for orig, err in zip((self.a_linoid, self.k_linoid, self.v0_linoid), errors):
