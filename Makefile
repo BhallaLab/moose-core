@@ -337,11 +337,11 @@ libmoose.so: libs
 ifneq ($(OSTYPE),win32)
 ifeq ($(PYTHON),3)
 PYTHON_VERSION := $(subst ., ,$(lastword $(shell python3 --version 2>&1)))
-PYTHON_INCLUDES := $(shell python3-config --includes)
+PYTHON_CFLAGS := $(shell python3-config --cflags)
 PYTHON_LDFLAGS := $(shell python3-config --ldflags)
 else
 PYTHON_VERSION := $(subst ., ,$(lastword $(shell python --version 2>&1)))
-PYTHON_INCLUDES := $(shell python-config --includes)
+PYTHON_CFLAGS := $(shell python-config --cflags)
 PYTHON_LDFLAGS := $(shell python-config --ldflags)
 endif
 PYTHON_VERSION_MAJOR := $(word 1,${PYTHON_VERSION})
@@ -349,13 +349,13 @@ PYTHON_VERSION_MINOR := $(word 2,${PYTHON_VERSION})
 INSTALLED_PYTHON := python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}
 endif
 
-ifndef PYTHON_INCLUDES
-	PYTHON_INCLUDES := -I/usr/include/$(INSTALLED_PYTHON)
-	PYTHON_LDFLAGS := -L/usr/lib/$(INSTALLED_PYTHON)
+ifndef PYTHON_CFLAGS
+	PYTHON_CFLAGS := -I/usr/include/$(INSTALLED_PYTHON) -fno-strict-aliasing -fwrapv -Wstrict-prototypes -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -Werror=format-security
+	PYTHON_LDFLAGS := -L/usr/lib/$(INSTALLED_PYTHON)  -Xlinker -export-dynamic -Wl,-O1 -Wl,-Bsymbolic-functions
 endif
 # There are some unix/gcc specific paths here. Should be cleaned up in future.
 pymoose: python/moose/_moose.so
-pymoose: CXXFLAGS += -DPYMOOSE $(PYTHON_INCLUDES)
+pymoose: CXXFLAGS += -DPYMOOSE $(PYTHON_CFLAGS)
 pymoose: OBJLIBS += pymoose/_pymoose.o basecode/_basecode_pymoose.o
 pymoose: OBJLIBS := $(filter-out basecode/_basecode.o,$(OBJLIBS))
 pymoose: LDFLAGS += $(PYTHON_LDFLAGS)

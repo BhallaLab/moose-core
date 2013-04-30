@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Sun Apr 28 18:49:58 2013 (+0530)
+// Last-Updated: Tue Apr 30 22:58:03 2013 (+0530)
 //           By: subha
-//     Update #: 10128
+//     Update #: 10193
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -4329,9 +4329,8 @@ static struct module_state _state;
         }
         PyTypeObject * new_class =
                 (PyTypeObject*)PyType_Type.tp_alloc(&PyType_Type, 0);
-        Py_TYPE(new_class) = &PyType_Type;
-        new_class->tp_flags = Py_TPFLAGS_DEFAULT |
-                Py_TPFLAGS_BASETYPE;
+        // Py_TYPE(new_class) = &PyType_Type;
+        new_class->tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
         // should we avoid Py_TPFLAGS_HEAPTYPE as it imposes certain
         // limitations:
         // http://mail.python.org/pipermail/python-dev/2009-July/090921.html
@@ -4348,13 +4347,14 @@ static struct module_state _state;
         // segmentation fault as it tries to convert the class object
         // to a heaptype object (resulting in an invalid pointer). If
         // heaptype is not set it uses tp_name to print the help.
-        Py_SIZE(new_class) = sizeof(_ObjId);        
+        // Py_SIZE(new_class) = sizeof(_ObjId);        
         string str = "moose." + class_name;
         new_class->tp_name = (char *)calloc(str.length()+1,
                                             sizeof(char));
         strncpy(const_cast<char*>(new_class->tp_name), str.c_str(),
                 str.length());
         new_class->tp_doc = moose_Class_documentation;
+        // strncpy(new_class->tp_doc, moose_Class_documentation, strlen(moose_Class_documentation));
         map<string, PyTypeObject *>::iterator base_iter =
                 get_moose_classes().find(cinfo->getBaseClass());
         if (base_iter == get_moose_classes().end()){
@@ -4403,10 +4403,10 @@ static struct module_state _state;
         }
         get_moose_classes().insert(pair<string, PyTypeObject*> (class_name, new_class));
         Py_INCREF(new_class);
-        PyDict_SetItemString(new_class->tp_dict, "__module__", PyString_FromString("moose"));
-        string doc = const_cast<Cinfo*>(cinfo)->getDocs();
-        PyDict_SetItemString(new_class->tp_dict, "__doc__", PyString_FromString(doc.c_str()));
-        PyDict_SetItemString(module_dict, class_name.c_str(), (PyObject *)new_class);
+        // PyDict_SetItemString(new_class->tp_dict, "__module__", PyString_FromString("moose"));
+        // string doc = const_cast<Cinfo*>(cinfo)->getDocs();
+        // PyDict_SetItemString(new_class->tp_dict, "__doc__", PyString_FromString(" \0"));
+        // PyDict_SetItemString(module_dict, class_name.c_str(), (PyObject *)new_class);
         return 1;                
     }
     
@@ -4481,7 +4481,7 @@ static struct module_state _state;
             strncpy(vec[curr_index].name,
                     const_cast<char*>(destFinfo_name.c_str()),
                     destFinfo_name.size());
-            // vec[curr_index].doc = ;
+            vec[curr_index].doc = moose_DestField_documentation;
             vec[curr_index].get = (getter)moose_ObjId_get_destField_attr;
             PyObject * args = PyTuple_New(1);
             
@@ -4628,7 +4628,7 @@ static struct module_state _state;
             get_getsetdefs()[class_name].push_back(getset);
             get_getsetdefs()[class_name][curr_index].name = (char*)calloc(lookupFinfo_name.size() + 1, sizeof(char));
             strncpy(get_getsetdefs()[class_name][curr_index].name, const_cast<char*>(lookupFinfo_name.c_str()), lookupFinfo_name.size());
-            // get_getsetdefs()[class_name][curr_index].doc = "";
+            get_getsetdefs()[class_name][curr_index].doc = moose_LookupField_documentation;
             get_getsetdefs()[class_name][curr_index].get = (getter)moose_ObjId_get_lookupField_attr;
             PyObject * args = PyTuple_New(1);
             PyTuple_SetItem(args, 0, PyString_FromString(lookupFinfo_name.c_str()));
@@ -4698,7 +4698,7 @@ static struct module_state _state;
             get_getsetdefs()[class_name].push_back(getset);
             get_getsetdefs()[class_name][curr_index].name = (char*)calloc(finfo_name.size() + 1, sizeof(char));
             strncpy(get_getsetdefs()[class_name][curr_index].name, const_cast<char*>(finfo_name.c_str()), finfo_name.size());
-            // get_getsetdefs()[class_name][curr_index].doc = EMPTY_STRING;
+            get_getsetdefs()[class_name][curr_index].doc = moose_ElementField_documentation;
             get_getsetdefs()[class_name][curr_index].get = (getter)moose_ObjId_get_elementField_attr;
             PyObject * args = PyTuple_New(1);
             PyTuple_SetItem(args, 0, PyString_FromString(finfo_name.c_str()));
@@ -4953,6 +4953,11 @@ static struct PyModuleDef MooseModuleDef = {
             PyErr_Print();
             exit(-1);
         }
+        for (map <string, PyTypeObject * >::iterator ii = get_moose_classes().begin();
+             ii != get_moose_classes().end(); ++ii){
+            PyModule_AddObject(moose_module, ii->first.c_str(), (PyObject*)(ii->second));
+        }
+             
         clock_t defclasses_end = clock();
         cout << "Info: Time to define moose classes:" << (defclasses_end - defclasses_start) * 1.0 /CLOCKS_PER_SEC << endl;
         PyGILState_Release(gstate);
