@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Aug 11 14:30:21 2012 (+0530)
 # Version: 
-# Last-Updated: Wed May  1 18:54:41 2013 (+0530)
+# Last-Updated: Wed May  1 19:01:01 2013 (+0530)
 #           By: subha
-#     Update #: 746
+#     Update #: 748
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -227,11 +227,9 @@ def create_population(container, size):
             'spikegen': spikegens,
             'synchan': synchans}
 
-def make_synapses(spikegen, synchan, connprob=1.0, delay=5e-3):
+def make_synapses(spikegen, synchan, delay=5e-3):
     """Create synapses from spikegens to synchans in a manner similar to
     OneToAll connection.
-
-    connprob: connection probability.
 
     delay: mean delay of synaptic transmission. Individual delays are
     normally distributed with sd=0.1*mean.
