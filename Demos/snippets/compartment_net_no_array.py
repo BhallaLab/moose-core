@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Aug 11 14:30:21 2012 (+0530)
 # Version: 
-# Last-Updated: Wed May  1 17:02:08 2013 (+0530)
+# Last-Updated: Wed May  1 18:04:31 2013 (+0530)
 #           By: subha
-#     Update #: 609
+#     Update #: 727
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -217,7 +217,7 @@ def create_population(container, size):
         synchan.tau2 = 2e-3        
         m = moose.connect(comp, 'channel', synchan, 'channel')
         synchans.append(synchan)
-        spikegen = moose.SpikeGen(path + '/spikegen')
+        spikegen = moose.SpikeGen(comp.path + '/spikegen')
         spikegen.threshold = 0.0
         m = moose.connect(comp, 'VmOut', spikegen, 'Vm')
         spikegens.append(spikegen)
@@ -236,70 +236,139 @@ def make_synapses(spikegen, synchan, connprob=1.0, delay=5e-3):
     normally distributed with sd=0.1*mean.
 
     """
-    scount = len(spikegen) - 1
+    scount = len(spikegen)
     for ii, sid in enumerate(synchan): 
         s = moose.SynChan(sid)
         s.synapse.num = scount
+        print '####', s.path, s.synapse.num
         delay_list = np.random.normal(delay, delay*0.1, scount)
+        print delay_list
         for jj in range(scount): 
             s.synapse[jj].delay = delay_list[jj]
             # Connect all spikegens to this synchan except that from
-            # same compartment
-            if ii != jj:
+            # same compartment - we assume if parents are same the two belong to the same compartment
+            print '$$$$', spikegen[jj].path
+            print '>>>', s.parent, spikegen[jj].parent
+            print '<<<', s.parent == spikegen[jj].parent
+            if s.parent.path != spikegen[jj].parent.path:
+                print '%%%%%', s.path, 'to', spikegen[jj].path
                 m = moose.connect(spikegen[jj], 'event', moose.element(s.path + '/synapse'),  'addSpike')
             
-            
+def two_populations(size=2):
+    """An example with two population connected via synapses."""
+    net = moose.Neutral('network2')
+    pop_a = create_population(moose.Neutral('/network2/pop_A'), size)
+    pop_b = create_population(moose.Neutral('/network2/pop_B'), size)
+    make_synapses(pop_a['spikegen'], pop_b['synchan'])
+    pulse = moose.PulseGen('net2_pulse')
+    pulse.firstLevel = 1e-6
+    pulse.firstDelay = 0.05 # disable the pulsegen
+    pulse.firstWidth = 0.02
+    moose.connect(pulse, 'outputOut', pop_a['compartment'][0], 'injectMsg')
+    data = moose.Neutral('/data')
+    vm_a = [moose.Table('/data/net2_Vm_A_%d' % (ii)) for ii in range(size)]
+    for tab, comp in zip(vm_a, pop_a['compartment']):
+        moose.connect(tab, 'requestData', comp, 'get_Vm')
+    vm_b = [moose.Table('/data/net2_Vm_B_%d' % (ii)) for ii in range(size)]
+    for tab, comp in zip(vm_b, pop_b['compartment']):
+        moose.connect(tab, 'requestData', comp, 'get_Vm')
+    gksyn_a = [moose.Table('/data/net2_Gk_syn_b_%d' % (ii)) for ii in range(size)]
+    for tab, synchan in zip(gksyn_a, pop_a['synchan']):
+        moose.connect(tab, 'requestData', synchan, 'get_Gk')
+    gksyn_b = [moose.Table('/data/net2_Gk_syn_b_%d' % (ii)) for ii in range(size)]
+    for tab, synchan in zip(gksyn_b, pop_b['synchan']):
+        moose.connect(tab, 'requestData', synchan, 'get_Gk')
+    pulsetable = moose.Table('/data/net2_pulse')
+    pulsetable.connect('requestData', pulse, 'get_output')
+    return {'vm_a': vm_a,
+            'vm_b': vm_b,
+            'gksyn_a': gksyn_a,
+            'gksyn_b': gksyn_b,
+            'pulse': pulsetable,}
+
+def single_population(size=2):
+    """Example of a single population where each cell is connected to
+    every other cell."""
+    net = moose.Neutral('network1')
+    pop = create_population(moose.Neutral('/network1'), size)
+    make_synapses(pop['spikegen'], pop['synchan'])
+    pulse = moose.PulseGen('net1_pulse')
+    pulse.firstLevel = 1e-6
+    pulse.firstDelay = 0.05
+    pulse.firstWidth = 0.02
+    moose.connect(pulse, 'outputOut', pop['compartment'][0], 'injectMsg')
+    data = moose.Neutral('/data')
+    vm = [moose.Table('/data/net1_Vm_%d' % (ii)) for ii in range(size)]
+    for tab, comp in zip(vm, pop['compartment']):
+        moose.connect(tab, 'requestData', comp, 'get_Vm')
+    gksyn = [moose.Table('/data/net1_Gk_syn_%d' % (ii)) for ii in range(size)]
+    for tab, synchan in zip(gksyn, pop['synchan']):
+        moose.connect(tab, 'requestData', synchan, 'get_Gk')
+    pulsetable = moose.Table('/data/net1_pulse')
+    pulsetable.connect('requestData', pulse, 'get_output')
+    return {'vm': vm,
+            'gksyn': gksyn,
+            'pulse': pulsetable,}
+
+def assign_clocks(model_container_list):
+    for path in model_container_list:
+        moose.useClock(0, '%s/##[TYPE=Compartment]' % (path), 'init')
+        moose.useClock(1, '%s/##[TYPE=Compartment]' % (path), 'process')
+        moose.useClock(2, '%s/##[TYPE=SynChan]' % (path), 'process')
+        moose.useClock(2, '%s/##[TYPE=HHChannel]' % (path), 'process')
+        moose.useClock(3, '%s/##[TYPE=SpikeGen],/#[TYPE=PulseGen]' % (path), 'process')    
+    moose.useClock(4, '/data/##[TYPE=Table]', 'process')
 
 if __name__ == '__main__':
     simtime = 0.1
     simdt = 0.25e-5
     plotdt = 0.25e-3
     size = 2
-    net = moose.Neutral('network')
-    pop_a = create_population(moose.Neutral('/network/pop_A'), size)
-    pop_b = create_population(moose.Neutral('/network/pop_B'), size)
-    make_synapses(pop_a['spikegen'], pop_b['synchan'])
-    pulse = moose.PulseGen('pulse')
-    pulse.firstLevel = 1e-9
-    pulse.firstDelay = 0.05e10 # disable the pulsegen
-    pulse.firstWidth = 1e9
-    moose.connect(pulse, 'outputOut', pop_a['compartment'][0], 'injectMsg')
-    data = moose.Neutral('/data')
-    vm_a = [moose.Table('/data/Vm_A_%d' % (ii)) for ii in range(size)]
-    for tab, comp in zip(vm_a, pop_a['compartment']):
-        moose.connect(tab, 'requestData', comp, 'get_Vm')
-    vm_b = [moose.Table('/data/Vm_B_%d' % (ii)) for ii in range(size)]
-    for tab, comp in zip(vm_b, pop_b['compartment']):
-        moose.connect(tab, 'requestData', comp, 'get_Vm')
-    gksyn_b = [moose.Table('/data/Gk_syn_b_%d' % (ii)) for ii in range(size)]
-    for tab, synchan in zip(gksyn_b, pop_b['synchan']):
-        moose.connect(tab, 'requestData', synchan, 'get_Gk')
-    pulsetable = moose.Table('/data/pulse')
-    pulsetable.connect('requestData', pulse, 'get_output')
+    data1 = single_population(size=size)
+    data2 = two_populations(size=size)
     moose.setClock(0, simdt)
     moose.setClock(1, simdt)
     moose.setClock(2, simdt)
     moose.setClock(3, simdt)
     moose.setClock(4, plotdt)
-    moose.useClock(0, '/network/##[TYPE=Compartment]', 'init')
-    moose.useClock(1, '/network/##[TYPE=Compartment]', 'process')
-    moose.useClock(2, '/network/##[TYPE=SynChan]', 'process')
-    moose.useClock(2, '/network/##[TYPE=HHChannel]', 'process')
-    moose.useClock(3, '/network/##[TYPE=SpikeGen],/#[TYPE=PulseGen]', 'process')    
-    moose.useClock(4, '/data/#[TYPE=Table]', 'process')
+    assign_clocks(['/network1', '/network2'])
     moose.reinit()
     moose.start(simtime)
+    plt.figure(1)
+    plt.suptitle('Single population')
+    plt.subplot(211)
+    for vm in data1['vm']:
+        t = np.linspace(0, simtime, len(vm.vec))
+        plt.plot(t, vm.vec, label=vm.path)
+    plt.plot(np.linspace(0, simtime, len(data1['pulse'].vec)), data1['pulse'].vec * 1e6, label='Inject(uA)')
+    plt.legend()
+    plt.subplot(212)    
+    for gk in data1['gksyn']:
+        t = np.linspace(0, simtime, len(gk.vec))
+        plt.plot(t, gk.vec, label=gk.path)
+    plt.legend()
+    plt.figure(2)
+    plt.suptitle('Two populations')
     plt.subplot(221)
-    for oid in vm_a:
-        plt.plot(oid.vec, label=oid.path)
+    for vm in data2['vm_a']:
+        t = np.linspace(0, simtime, len(vm.vec))
+        plt.plot(t, vm.vec, label=vm.path)
+    plt.plot(np.linspace(0, simtime, len(data2['pulse'].vec)), data2['pulse'].vec*1e6, label='Inject(uA)')
     plt.legend()
     plt.subplot(223)
-    for oid in vm_b:
-        plt.plot(oid.vec, label=oid.path)
+    for vm in data2['vm_b']:
+        t = np.linspace(0, simtime, len(vm.vec))
+        plt.plot(t, vm.vec, label=vm.path)
+    plt.legend()
+    plt.subplot(222)
+    for gk in data2['gksyn_a']:
+        t = np.linspace(0, simtime, len(gk.vec))
+        plt.plot(t, gk.vec, label=gk.path)
     plt.legend()
     plt.subplot(224)
-    for ii in gksyn_b:
-        plt.plot(ii.vec, label=ii.path)
+    for gk in data2['gksyn_b']:
+        t = np.linspace(0, simtime, len(gk.vec))
+        plt.plot(t, gk.vec, label=gk.path)
     plt.legend()
     plt.show()
     
