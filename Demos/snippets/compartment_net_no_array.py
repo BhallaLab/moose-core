@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Aug 11 14:30:21 2012 (+0530)
 # Version: 
-# Last-Updated: Wed May  1 19:01:01 2013 (+0530)
+# Last-Updated: Wed May  1 19:03:37 2013 (+0530)
 #           By: subha
-#     Update #: 748
+#     Update #: 752
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -230,6 +230,12 @@ def create_population(container, size):
 def make_synapses(spikegen, synchan, delay=5e-3):
     """Create synapses from spikegens to synchans in a manner similar to
     OneToAll connection.
+
+    spikegen: list of spikegen objects - these are sources of synaptic
+    event messages.
+
+    synchan: list of synchan objects - these are the targets of the
+    synaptic event messages.
 
     delay: mean delay of synaptic transmission. Individual delays are
     normally distributed with sd=0.1*mean.
