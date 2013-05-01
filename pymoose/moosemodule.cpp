@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Tue Apr 30 22:58:03 2013 (+0530)
+// Last-Updated: Wed May  1 18:26:21 2013 (+0530)
 //           By: subha
-//     Update #: 10193
+//     Update #: 10226
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -917,7 +917,7 @@ static struct module_state _state;
     };
     
     static PySequenceMethods ElementFieldSequenceMethods = {
-        (lenfunc)moose_ElementField_getNum, // sq_length
+        (lenfunc)moose_ElementField_getLen, // sq_length
         0, //sq_concat
         0, //sq_repeat
         (ssizeargfunc)moose_ElementField_getItem, //sq_item
@@ -1497,25 +1497,24 @@ static struct module_state _state;
     static PyObject * moose_Id_richCompare(_Id * self, PyObject * other, int op)
     {
         extern PyTypeObject IdType;
-        bool ret;
+        bool ret = false;
+        Id other_id = ((_Id*)other)->id_;
         if (!self || !other){
             ret = false;
         } else if (!PyObject_IsInstance(other, (PyObject*)&IdType)){
             ret = false;
         } else if (op == Py_EQ){
-            ret = (self->id_ == ((_Id*)other)->id_);
+            ret = self->id_ == other_id;
         } else if (op == Py_NE) {
-            ret = (self->id_ != ((_Id*)other)->id_);
+            ret = self->id_ != other_id;
         } else if (op == Py_LT){
-            ret = (self->id_ < ((_Id*)other)->id_);
+            ret = self->id_ < other_id;
         } else if (op == Py_GT) {
-            ret = (((_Id*)other)->id_ < self->id_);
+            ret = other_id < self->id_;
         } else if (op == Py_LE){
-            ret = ((self->id_ < ((_Id*)other)->id_) || (self->id_ == ((_Id*)other)->id_));
+            ret = (self->id_ < other_id) || (self->id_ == other_id);
         } else if (op == Py_GE){
-            ret = ((((_Id*)other)->id_ < self->id_) || (self->id_ == ((_Id*)other)->id_));
-        } else {
-            ret = false;
+            ret = (other_id < self->id_) || (self->id_ == other_id);
         }
         if (ret){
           Py_RETURN_TRUE;
@@ -3389,12 +3388,12 @@ static struct module_state _state;
           }
           Py_RETURN_FALSE;
         } else if (result < 0){
-          if (op == Py_LT || op == Py_LE){
+          if (op == Py_LT || op == Py_LE || op == Py_NE){
             Py_RETURN_TRUE;
           }
           Py_RETURN_FALSE;
         } else {
-          if (op == Py_GT || op == Py_GE){
+          if (op == Py_GT || op == Py_GE || op == Py_NE){
             Py_RETURN_TRUE;
           }
           Py_RETURN_FALSE;
@@ -4585,6 +4584,7 @@ static struct module_state _state;
         ObjId oid;
         if (PyArg_ParseTuple(args, "s", &path)){
             oid = ObjId(path);
+            //            cout << "Original Path " << path << ", Element Path: " << oid.path() << endl;
             if (ObjId::bad() == oid){
                 PyErr_SetString(PyExc_ValueError, "moose_element: path does not exist");
                 return NULL;
@@ -4658,6 +4658,7 @@ static struct module_state _state;
         }
         // If the ElementField already exists, return it
         string full_name = obj->oid_.path() + "." + string(name);
+        //        cout << "ElementField fullname: " << full_name << endl;
         map<string, PyObject * >::iterator it = get_inited_elementfields().find(full_name);
         if (it != get_inited_elementfields().end()){
             Py_XINCREF(it->second);
@@ -4708,10 +4709,20 @@ static struct module_state _state;
         return 1;
     }
 
-    Py_ssize_t moose_ElementField_getNum(_Field * self, void * closure)
+
+    PyObject * moose_ElementField_getNum(_Field * self, void * closure)
     {
         if (!Id::isValid(self->owner.id)){
             RAISE_INVALID_ID(NULL, "moose_ElementField_getNum");
+        }
+        unsigned int num = Field<unsigned int>::get(self->owner, "num_" + string(self->name));
+        return Py_BuildValue("I", num);
+    }
+
+    Py_ssize_t moose_ElementField_getLen(_Field * self, void * closure)
+    {
+        if (!Id::isValid(self->owner.id)){
+            RAISE_INVALID_ID(NULL, "moose_ElementField_getLen");
         }
         unsigned int num = Field<unsigned int>::get(self->owner, "num_" + string(self->name));
         return Py_ssize_t(num);
@@ -4753,6 +4764,7 @@ static struct module_state _state;
             return NULL;
         }
         _ObjId * oid = PyObject_New(_ObjId, &ObjIdType);
+//        cout << "Element field: " << self->name << ", owner: " << self->owner.path() << endl;
         oid->oid_ = ObjId(Id(self->owner.path() + "/" + self->name), DataId(index));
         return (PyObject*)oid;
     }
@@ -4918,7 +4930,7 @@ static struct PyModuleDef MooseModuleDef = {
             exit(-1);
         }        
         Py_INCREF(&moose_LookupField);
-        PyModule_AddObject(moose_module, "ElementField", (PyObject*)&moose_ElementField);
+        PyModule_AddObject(moose_module, "LookupField", (PyObject*)&moose_ElementField);
 
         if (PyType_Ready(&moose_ElementField) < 0){
             PyErr_Print();
