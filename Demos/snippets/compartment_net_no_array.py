@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Aug 11 14:30:21 2012 (+0530)
 # Version: 
-# Last-Updated: Wed May  1 18:04:31 2013 (+0530)
+# Last-Updated: Wed May  1 18:54:41 2013 (+0530)
 #           By: subha
-#     Update #: 727
+#     Update #: 746
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -140,14 +140,14 @@ def gate_params(channel):
     y_inf = []
     tau_y = []
     varray = []
-    print '>>', channel.path, channel.Xpower, channel.Ypower
+    # print '>>', channel.path, channel.Xpower, channel.Ypower
     if channel.Xpower > 0:
         xGate = moose.element(channel.path + '/gateX')
         vmin = xGate.min
         vmax = xGate.max
         vdivs = xGate.divs
         varray = linspace(vmin, vmax, vdivs+1)
-        print channel.path, vmin, vmax, vdivs
+        # print channel.path, vmin, vmax, vdivs
         ax = array([xGate.A[v] for v in varray])
         bx = array([xGate.B[v] for v in varray])
         x_inf = ax/bx
@@ -215,6 +215,7 @@ def create_population(container, size):
         synchan.Gbar = 1e-8
         synchan.tau1 = 2e-3
         synchan.tau2 = 2e-3        
+        synchan.Ek = 0.0
         m = moose.connect(comp, 'channel', synchan, 'channel')
         synchans.append(synchan)
         spikegen = moose.SpikeGen(comp.path + '/spikegen')
@@ -240,18 +241,13 @@ def make_synapses(spikegen, synchan, connprob=1.0, delay=5e-3):
     for ii, sid in enumerate(synchan): 
         s = moose.SynChan(sid)
         s.synapse.num = scount
-        print '####', s.path, s.synapse.num
         delay_list = np.random.normal(delay, delay*0.1, scount)
-        print delay_list
+        # print delay_list
         for jj in range(scount): 
             s.synapse[jj].delay = delay_list[jj]
             # Connect all spikegens to this synchan except that from
             # same compartment - we assume if parents are same the two belong to the same compartment
-            print '$$$$', spikegen[jj].path
-            print '>>>', s.parent, spikegen[jj].parent
-            print '<<<', s.parent == spikegen[jj].parent
             if s.parent.path != spikegen[jj].parent.path:
-                print '%%%%%', s.path, 'to', spikegen[jj].path
                 m = moose.connect(spikegen[jj], 'event', moose.element(s.path + '/synapse'),  'addSpike')
             
 def two_populations(size=2):
@@ -260,6 +256,7 @@ def two_populations(size=2):
     pop_a = create_population(moose.Neutral('/network2/pop_A'), size)
     pop_b = create_population(moose.Neutral('/network2/pop_B'), size)
     make_synapses(pop_a['spikegen'], pop_b['synchan'])
+    make_synapses(pop_b['spikegen'], pop_a['synchan'])
     pulse = moose.PulseGen('net2_pulse')
     pulse.firstLevel = 1e-6
     pulse.firstDelay = 0.05 # disable the pulsegen
@@ -272,7 +269,7 @@ def two_populations(size=2):
     vm_b = [moose.Table('/data/net2_Vm_B_%d' % (ii)) for ii in range(size)]
     for tab, comp in zip(vm_b, pop_b['compartment']):
         moose.connect(tab, 'requestData', comp, 'get_Vm')
-    gksyn_a = [moose.Table('/data/net2_Gk_syn_b_%d' % (ii)) for ii in range(size)]
+    gksyn_a = [moose.Table('/data/net2_Gk_syn_a_%d' % (ii)) for ii in range(size)]
     for tab, synchan in zip(gksyn_a, pop_a['synchan']):
         moose.connect(tab, 'requestData', synchan, 'get_Gk')
     gksyn_b = [moose.Table('/data/net2_Gk_syn_b_%d' % (ii)) for ii in range(size)]
@@ -311,12 +308,13 @@ def single_population(size=2):
             'pulse': pulsetable,}
 
 def assign_clocks(model_container_list):
+    """Assign clocks to elements under the listed paths."""
     for path in model_container_list:
         moose.useClock(0, '%s/##[TYPE=Compartment]' % (path), 'init')
         moose.useClock(1, '%s/##[TYPE=Compartment]' % (path), 'process')
         moose.useClock(2, '%s/##[TYPE=SynChan]' % (path), 'process')
         moose.useClock(2, '%s/##[TYPE=HHChannel]' % (path), 'process')
-        moose.useClock(3, '%s/##[TYPE=SpikeGen],/#[TYPE=PulseGen]' % (path), 'process')    
+        moose.useClock(3, '%s/##[TYPE=SpikeGen],/#[TYPE=PulseGen]' % (path), 'process')
     moose.useClock(4, '/data/##[TYPE=Table]', 'process')
 
 if __name__ == '__main__':
