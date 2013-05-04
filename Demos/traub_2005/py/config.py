@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed May 23 11:31:40 2012 (+0530)
 # Version: 
-# Last-Updated: Sat Dec  8 15:12:50 2012 (+0530)
+# Last-Updated: Fri May  3 11:45:36 2013 (+0530)
 #           By: subha
-#     Update #: 99
+#     Update #: 100
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -133,7 +133,7 @@ logger = logging.getLogger('traub2005')
 
 # Add a logging handler to print messages to stderr
 ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
+ch.setLevel(logging.ERROR)
 # create formatter and add it to the handlers
 formatter = logging.Formatter('%(asctime)s %(name)s %(levelname)s %(filename)s %(funcName)s: %(message)s')
 ch.setFormatter(formatter)
