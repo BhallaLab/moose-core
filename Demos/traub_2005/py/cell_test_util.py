@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Oct 15 15:03:09 2012 (+0530)
 # Version: 
-# Last-Updated: Sat Dec  8 16:44:18 2012 (+0530)
+# Last-Updated: Fri May  3 11:53:10 2013 (+0530)
 #           By: subha
-#     Update #: 227
+#     Update #: 235
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -128,7 +128,6 @@ class SingleCellCurrentStepTest(unittest.TestCase):
         self.pulsegen = params['stimulus']
         # setup_clocks(self.simdt, self.plotdt)
         # assign_clocks(self.model_container, self.data_container, self.solver)        
-        mutils.resetSim([self.model_container.path, self.data_container.path], self.simdt, self.plotdt, simmethod=self.solver)
 
     def tweak_stimulus(self, pulsearray):
         """Update the pulsegen for this model with new (delay, width,
@@ -138,15 +137,17 @@ class SingleCellCurrentStepTest(unittest.TestCase):
             self.pulsegen.width[ii] = pulsearray[ii][1]
             self.pulsegen.level[ii] = pulsearray[ii][2]
 
-    def runsim(self, simtime, pulsearray=None):
+    def runsim(self, simtime, stepsize=0.1, pulsearray=None):
         """Run the simulation for `simtime`. Save the data at the
         end."""
+        mutils.resetSim([self.model_container.path, self.data_container.path], self.simdt, self.plotdt, simmethod=self.solver)
         if pulsearray is not None:            
             self.tweak_stimulus(pulsearray)
         moose.reinit()
         start = datetime.now()
-        step_run(simtime, 0.1)
+        step_run(simtime, stepsize)
         end = datetime.now()
+        # The sleep is required to get all threads to end 
         while moose.isRunning():
             time.sleep(0.1)
         delta = end - start
@@ -156,7 +157,11 @@ class SingleCellCurrentStepTest(unittest.TestCase):
         self.tseries = np.arange(0, simtime+self.plotdt, self.plotdt)
         # Now save the data
         for table_id in self.data_container.children:
-            data = np.vstack((self.tseries, table_id[0].vec))
+            try:
+                data = np.vstack((self.tseries, table_id[0].vec))
+            except ValueError as e:
+                self.tseries = np.linspace(0, simtime, len(table_id[0].vec))
+                data = np.vstack((self.tseries, table_id[0].vec))
             fname = 'data/%s_%s_%s.dat' % (self.celltype, 
                                            table_id[0].name,
                                            self.solver)
