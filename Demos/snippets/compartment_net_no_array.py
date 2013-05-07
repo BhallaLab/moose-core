@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Aug 11 14:30:21 2012 (+0530)
 # Version: 
-# Last-Updated: Wed May  1 19:03:37 2013 (+0530)
+# Last-Updated: Tue May  7 17:53:15 2013 (+0530)
 #           By: subha
-#     Update #: 752
+#     Update #: 967
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -51,11 +51,11 @@ import sys
 sys.path.append('../../python')
 import os
 os.environ['NUMPTHREADS'] = '1'
-from pylab import *
 import numpy as np
 import matplotlib.pyplot as plt
 
 import moose
+from moose import utils
 
 EREST_ACT = -70e-3
 
@@ -99,13 +99,14 @@ K_n_params = [ 1e4 * (10e-3 + EREST_ACT),   #  'A_A':
                0.0 - EREST_ACT,            #  'B_D':
                80e-3                       #  'B_F':  
                ]
-VMIN = -30e-3 + EREST_ACT
+VMIN = -40e-3 + EREST_ACT
 VMAX = 120e-3 + EREST_ACT
-VDIVS = 3000
+VDIVS = 30000
 
-def create_na_proto():
-    lib = moose.Neutral('/library')
-    na = moose.HHChannel('/library/na')
+soma_dia = 30e-6
+
+def create_na_chan(path):
+    na = moose.HHChannel('%s/na' % (path))
     na.Xpower = 3
     xGate = moose.HHGate(na.path + '/gateX')    
     xGate.setupAlpha(Na_m_params +
@@ -114,74 +115,98 @@ def create_na_proto():
     yGate = moose.HHGate(na.path + '/gateY')
     yGate.setupAlpha(Na_h_params + 
                       [VDIVS, VMIN, VMAX])
+    na.Ek = 115e-3 + EREST_ACT
     return na
 
-def create_k_proto():
-    lib = moose.Neutral('/library')
-    k = moose.HHChannel('/library/k')
+def create_k_chan(path):
+    k = moose.HHChannel('%s/k' % (path))
     k.Xpower = 4.0
     xGate = moose.HHGate(k.path + '/gateX')    
     xGate.setupAlpha(K_n_params +
                       [VDIVS, VMIN, VMAX])
+    k.Ek = -12e-3 + EREST_ACT
     return k
 
-def gate_params(channel):
-    """Return a dictionary containing x_inf, y_inf, tau_x, tau_y of
-    the specified `channel`.
+def create_compartment(path):
+    comp = moose.Compartment(path)
+    comp.diameter = soma_dia
+    comp.Em = EREST_ACT + 10.613e-3
+    comp.initVm = EREST_ACT
+    sarea = np.pi * soma_dia * soma_dia
+    comp.Rm = 1/(0.3e-3 * 1e4 * sarea)
+    comp.Cm = 1e-6 * 1e4 * sarea
+    if moose.exists('/library/na'):
+        nachan = moose.element(moose.copy('/library/na', comp, 'na'))
+    else:
+        nachan = create_na_chan(comp.path)
+    nachan.Gbar = 120e-3 * sarea * 1e4
+    moose.connect(nachan, 'channel', comp, 'channel')
+    if moose.exists('/library/k'):
+        kchan = moose.element(moose.copy('/library/k', comp, 'k'))
+    else:
+        kchan = create_k_chan(comp.path)
+    kchan.Gbar = 36e-3 * sarea * 1e4
+    moose.connect(kchan, 'channel', comp, 'channel')
+    synchan = moose.SynChan(comp.path + '/synchan')
+    synchan.Gbar = 1e-8
+    synchan.tau1 = 2e-3
+    synchan.tau2 = 2e-3        
+    synchan.Ek = 0.0
+    m = moose.connect(comp, 'channel', synchan, 'channel')
+    spikegen = moose.SpikeGen(comp.path + '/spikegen')
+    spikegen.threshold = 0.0
+    m = moose.connect(comp, 'VmOut', spikegen, 'Vm')
+    return comp
 
-    If either gate is absent, the corresponding entries in the
-    dictionary are empty lists.
-    
-    """
-    xGate = None
-    x_inf = []
-    tau_x = []
-    yGate = None
-    y_inf = []
-    tau_y = []
-    varray = []
-    # print '>>', channel.path, channel.Xpower, channel.Ypower
-    if channel.Xpower > 0:
-        xGate = moose.element(channel.path + '/gateX')
-        vmin = xGate.min
-        vmax = xGate.max
-        vdivs = xGate.divs
-        varray = linspace(vmin, vmax, vdivs+1)
-        # print channel.path, vmin, vmax, vdivs
-        ax = array([xGate.A[v] for v in varray])
-        bx = array([xGate.B[v] for v in varray])
-        x_inf = ax/bx
-        tau_x = 1/bx
-    if channel.Ypower > 0:
-        yGate = moose.element(channel.path + '/gateY')
-        vmin = yGate.min
-        vmay = yGate.max
-        vdivs = yGate.divs
-        varray = linspace(vmin, vmax, vdivs+1)
-        ay = array([yGate.A[v] for v in varray])
-        by = array([yGate.B[v] for v in varray])
-        y_inf = ay/by
-        tau_y = 1/by
-    return {'x_inf': x_inf,
-            'tau_x': tau_x,
-            'y_inf': y_inf,
-            'tau_y': tau_y,
-            'v_array': varray}
-
-def plot_gate_params(chan):
-    """Plot the gate parameters like m and h of the channel."""
-    params = gate_params(moose.HHChannel(chan))    
-    subplot(2,1,1)    
-    plot(params['v_array'], na_params['x_inf'], label='m_inf')
-    if len(params['y_inf']) == len(params['v_array']):
-        plot(params['v_array'], na_params['y_inf'], label='h_inf')
-    legend()
-    subplot(212)
-    plot(params['v_array'], params['tau_x'], label='tau_m')
-    if len(params['y_inf']) == len(params['v_array']):
-        plot(params['v_array'], params['tau_y'], label='tau_h')
-    legend()
-    show()
+def test_compartment():
+    n = moose.Neutral('/model')
+    lib = moose.Neutral('/library')
+    create_na_chan(lib.path)
+    create_k_chan(lib.path)
+    comp = create_compartment('/model/soma')
+    pg = moose.PulseGen('/model/pulse')
+    pg.firstDelay = 50e-3
+    pg.firstWidth = 40e-3
+    pg.firstLevel = 1e-9
+    moose.connect(pg, 'outputOut', comp, 'injectMsg')
+    d = moose.Neutral('/data')
+    vm = moose.Table('/data/Vm')
+    moose.connect(vm, 'requestData', comp, 'get_Vm')
+    gK = moose.Table('/data/gK')
+    moose.connect(gK, 'requestData', moose.element('%s/k' % (comp.path)), 'get_Gk')
+    gNa = moose.Table('/data/gNa')
+    moose.connect(gNa, 'requestData', moose.element('%s/na' % (comp.path)), 'get_Gk')
+    # utils.resetSim(['/model', '/data'], 1e-6, 1e-4, simmethod='ee')
+    assign_clocks(['/model'], 1e-6, 1e-4)
+    simtime = 100e-3
+    moose.start(simtime)
+    t = np.linspace(0, simtime, len(vm.vec))
+    plt.subplot(221)
+    plt.title('Vm')
+    plt.plot(t, vm.vec)
+    plt.subplot(222)
+    plt.title('Conductance')
+    plt.plot(t, gK.vec, label='GK')
+    plt.plot(t, gNa.vec, label='GNa')
+    plt.legend()
+    plt.subplot(223)
+    ma = moose.element('%s/na/gateX' % (comp.path)).tableA
+    mb = moose.element('%s/na/gateX' % (comp.path)).tableB
+    ha = moose.element('%s/na/gateY' % (comp.path)).tableA
+    hb = moose.element('%s/na/gateY' % (comp.path)).tableB
+    na = moose.element('%s/k/gateX' % (comp.path)).tableA
+    nb = moose.element('%s/k/gateX' % (comp.path)).tableB
+    plt.plot(1/mb, label='tau_m')
+    plt.plot(1/hb, label='tau_h')
+    plt.plot(1/nb, label='tau_n')
+    plt.legend()
+    plt.subplot(224)
+    plt.plot(ma/mb, label='m_inf')
+    plt.plot(ha/hb, label='h_inf')
+    plt.plot(na/nb, label='n_inf')
+    plt.legend()
+    plt.show()
+    plt.close()
     
 def create_population(container, size):
     """Create a population of `size` single compartmental neurons with
@@ -191,36 +216,18 @@ def create_population(container, size):
     path = container.path
     # Contrast this with     
     # comps = moose.ematrix(path+'/soma', size, 'Compartment')    
-    comps = [moose.Compartment(path+'/soma_%d' % (ii)) for ii in range(size)]
+    comps = [create_compartment(path+'/soma_%d' % (ii)) for ii in range(size)]
     spikegens = []
     synchans = []
-    Em = EREST_ACT+10.613e-3
     initVm_array = np.random.normal(EREST_ACT, np.abs(EREST_ACT) * 0.1, size)
+    Em = EREST_ACT + 10.613e-3
     Em_array = np.random.normal(Em, np.abs(Em) * 0.1, size)
     for comp, initVm, Em in zip(comps, initVm_array, Em_array):
         comp.Em = Em
         comp.initVm = initVm
-        comp.Cm = 7.85e-9
-        comp.Rm = 4.2e5
-        comp.Ra = 190.98
-        nachan = moose.copy(create_na_proto(), comp, 'na')
-        nachan.Gbar = 0.942e-3
-        nachan.Ek = 115e-3+EREST_ACT
-        moose.connect(nachan, 'channel', comp, 'channel')
-        kchan = moose.copy(create_k_proto(), comp, 'k')
-        kchan.Gbar = 0.2836e-4
-        kchan.Ek = -12e-3+EREST_ACT
-        moose.connect(kchan, 'channel', comp, 'channel')
-        synchan = moose.SynChan(comp.path + '/synchan')
-        synchan.Gbar = 1e-8
-        synchan.tau1 = 2e-3
-        synchan.tau2 = 2e-3        
-        synchan.Ek = 0.0
-        m = moose.connect(comp, 'channel', synchan, 'channel')
+        synchan = moose.element(comp.path + '/synchan')
         synchans.append(synchan)
-        spikegen = moose.SpikeGen(comp.path + '/spikegen')
-        spikegen.threshold = 0.0
-        m = moose.connect(comp, 'VmOut', spikegen, 'Vm')
+        spikegen = moose.element(comp.path + '/spikegen')
         spikegens.append(spikegen)
     
     return {'compartment': comps,
@@ -262,7 +269,7 @@ def two_populations(size=2):
     make_synapses(pop_a['spikegen'], pop_b['synchan'])
     make_synapses(pop_b['spikegen'], pop_a['synchan'])
     pulse = moose.PulseGen('net2_pulse')
-    pulse.firstLevel = 1e-6
+    pulse.firstLevel = 1e-9
     pulse.firstDelay = 0.05 # disable the pulsegen
     pulse.firstWidth = 0.02
     moose.connect(pulse, 'outputOut', pop_a['compartment'][0], 'injectMsg')
@@ -289,12 +296,16 @@ def two_populations(size=2):
 
 def single_population(size=2):
     """Example of a single population where each cell is connected to
-    every other cell."""
+    every other cell.
+
+    Creates a network of single compartmental cells under /network1 and a pulse generaor
+
+    """
     net = moose.Neutral('network1')
     pop = create_population(moose.Neutral('/network1'), size)
     make_synapses(pop['spikegen'], pop['synchan'])
-    pulse = moose.PulseGen('net1_pulse')
-    pulse.firstLevel = 1e-6
+    pulse = moose.PulseGen('/network1/net1_pulse')
+    pulse.firstLevel = 1e-9
     pulse.firstDelay = 0.05
     pulse.firstWidth = 0.02
     moose.connect(pulse, 'outputOut', pop['compartment'][0], 'injectMsg')
@@ -311,30 +322,43 @@ def single_population(size=2):
             'gksyn': gksyn,
             'pulse': pulsetable,}
 
-def assign_clocks(model_container_list):
-    """Assign clocks to elements under the listed paths."""
-    for path in model_container_list:
-        moose.useClock(0, '%s/##[TYPE=Compartment]' % (path), 'init')
-        moose.useClock(1, '%s/##[TYPE=Compartment]' % (path), 'process')
-        moose.useClock(2, '%s/##[TYPE=SynChan]' % (path), 'process')
-        moose.useClock(2, '%s/##[TYPE=HHChannel]' % (path), 'process')
-        moose.useClock(3, '%s/##[TYPE=SpikeGen],/#[TYPE=PulseGen]' % (path), 'process')
-    moose.useClock(4, '/data/##[TYPE=Table]', 'process')
+inited = False
+def assign_clocks(model_container_list, simdt, plotdt):
+    """Assign clocks to elements under the listed paths.
+    
+    This should be called only after all model components have been
+    created. Anything created after this will not be scheduled.
+
+    """
+    global inited
+    # `inited` is for avoiding double scheduling of the same object
+    if not inited:
+        print 'SimDt=%g, PlotDt=%g' % (simdt, plotdt)
+        moose.setClock(0, simdt)
+        moose.setClock(1, simdt)
+        moose.setClock(2, simdt)
+        moose.setClock(3, simdt)
+        moose.setClock(4, plotdt)
+        for path in model_container_list:
+            print 'Scheduling elements under:', path
+            moose.useClock(0, '%s/##[TYPE=Compartment]' % (path), 'init')
+            moose.useClock(1, '%s/##[TYPE=Compartment]' % (path), 'process')
+            moose.useClock(2, '%s/##[TYPE=SynChan],%s/##[TYPE=HHChannel]' % (path, path), 'process')
+            moose.useClock(3, '%s/##[TYPE=SpikeGen],%s/##[TYPE=PulseGen]' % (path, path), 'process')
+        moose.useClock(4, '/data/##[TYPE=Table]', 'process')
+        inited = True
+    moose.reinit()
 
 if __name__ == '__main__':
+    # test_compartment() # this calls assign_clocks - after which nothing else will be scheduled.
     simtime = 0.1
     simdt = 0.25e-5
     plotdt = 0.25e-3
     size = 2
     data1 = single_population(size=size)
     data2 = two_populations(size=size)
-    moose.setClock(0, simdt)
-    moose.setClock(1, simdt)
-    moose.setClock(2, simdt)
-    moose.setClock(3, simdt)
-    moose.setClock(4, plotdt)
-    assign_clocks(['/network1', '/network2'])
-    moose.reinit()
+    assign_clocks(['/network1', '/network2'], simdt, plotdt)
+    # assign_clocks(['/network1'], simdt, plotdt)
     moose.start(simtime)
     plt.figure(1)
     plt.suptitle('Single population')
@@ -342,7 +366,7 @@ if __name__ == '__main__':
     for vm in data1['vm']:
         t = np.linspace(0, simtime, len(vm.vec))
         plt.plot(t, vm.vec, label=vm.path)
-    plt.plot(np.linspace(0, simtime, len(data1['pulse'].vec)), data1['pulse'].vec * 1e6, label='Inject(uA)')
+    # plt.plot(np.linspace(0, simtime, len(data1['pulse'].vec)), data1['pulse'].vec * 1e6, label='Inject(uA)')
     plt.legend()
     plt.subplot(212)    
     for gk in data1['gksyn']:
