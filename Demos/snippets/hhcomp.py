@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue May  7 12:11:22 2013 (+0530)
 # Version: 
-# Last-Updated: Tue May  7 16:29:19 2013 (+0530)
+# Last-Updated: Tue May  7 19:21:43 2013 (+0530)
 #           By: subha
-#     Update #: 291
+#     Update #: 309
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -60,6 +60,11 @@ EREST_ACT = -70e-3
 per_ms = 1e3
 
 def create_na_chan(parent='/library', name='na', vmin=-110e-3, vmax=50e-3, vdivs=3000):
+    """Create a Hodhkin-Huxley Na channel under `parent`.
+    
+    vmin, vmax, vdivs: voltage range and number of divisions for gate tables
+    
+    """
     na = moose.HHChannel('%s/%s' % (parent, name))
     na.Xpower = 3
     na.Ypower = 1
@@ -93,6 +98,11 @@ def create_na_chan(parent='/library', name='na', vmin=-110e-3, vmax=50e-3, vdivs
     return na
 
 def create_k_chan(parent='/library', name='k', vmin=-120e-3, vmax=40e-3, vdivs=3000):
+    """Create a Hodhkin-Huxley K channel under `parent`.
+    
+    vmin, vmax, vdivs: voltage range and number of divisions for gate tables
+    
+    """
     k = moose.HHChannel('%s/%s' % (parent, name))
     k.Xpower = 4
     v = np.linspace(vmin, vmax, vdivs+1) - EREST_ACT
@@ -113,6 +123,13 @@ def create_k_chan(parent='/library', name='k', vmin=-120e-3, vmax=40e-3, vdivs=3
     return k
 
 def test_channel_gates():
+    """Creates prototype channels under `/library` and plots the time
+    constants (tau) and activation (minf, hinf, ninf) parameters for the
+    channel gates.
+
+    Does not execute any simulation.
+
+    """
     lib = moose.Neutral('/library')
     na_proto = create_na_chan()
     k_proto = create_k_chan()
@@ -149,6 +166,12 @@ def create_passive_comp(parent='/library', name='comp', diameter=30e-6, length=0
     return comp, sarea
     
 def create_hhcomp(parent='/library', name='hhcomp', diameter=-30e-6, length=0.0):
+    """Create a compartment with Hodgkin-Huxley type ion channels (Na and
+    K).
+
+    Returns a 3-tuple: (compartment, nachannel, kchannel)
+
+    """
     comp, sarea = create_passive_comp(parent, name, diameter, length)
     if moose.exists('/library/na'):
         moose.copy('/library/na', comp.path, 'na')
@@ -171,6 +194,12 @@ def create_hhcomp(parent='/library', name='hhcomp', diameter=-30e-6, length=0.0)
     return comp, na, k
 
 def test_hhcomp():
+    """Create and simulate a single spherical compartment with
+    Hodgkin-Huxley Na and K channel.
+
+    Plots Vm, injected current, channel conductances.
+
+    """
     model = moose.Neutral('/model')
     data = moose.Neutral('/data')    
     comp, na, k = create_hhcomp(parent=model.path)
@@ -207,6 +236,9 @@ def test_hhcomp():
     plt.legend()
     plt.show()
     plt.close()
+    # moose.showfield(comp)
+    # moose.showfield(na)
+    # moose.showfield(k)
     
 
 if __name__ == '__main__':
