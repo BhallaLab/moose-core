@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Wed May  1 18:26:21 2013 (+0530)
+// Last-Updated: Tue May  7 21:06:40 2013 (+0530)
 //           By: subha
-//     Update #: 10226
+//     Update #: 10265
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -1526,7 +1526,7 @@ static struct module_state _state;
     {
         extern PyTypeObject ObjIdType;
         int ret = 0;
-        if (ObjId_Check(obj)){
+        if (ObjId_SubtypeCheck(obj)){
             ret = (((_ObjId*)obj)->oid_.id == self->id_);
         }
         return ret;
@@ -3850,9 +3850,9 @@ static struct module_state _state;
                 return NULL;
             }
             model = Id(string(srcPath));
-        } else if (Id_Check(source)){
+        } else if (Id_SubtypeCheck(source)){
             model = ((_Id*)source)->id_;
-        } else if (ObjId_Check(source)){
+        } else if (ObjId_SubtypeCheck(source)){
             model = ((_ObjId*)source)->oid_.id;
         } else {
             PyErr_SetString(PyExc_TypeError, "moose_saveModel: need an ematrix, element or string for first argument.");
@@ -3908,12 +3908,12 @@ static struct module_state _state;
                  "\n"
                  "Parameters\n"
                  "----------\n"
-                 "src : element\n"
+                 "src : element, ematrix or string\n"
                  "\tthe source object\n"
                  "src_field : str\n"
                  "\tthe source field name. Fields listed under `srcFinfo` and\n"
                  "`sharedFinfo` qualify for this.\n"
-                 "dest : element\n"
+                 "dest : element, ematrix or string/\n"
                  "\tthe destination object.\n"
                  "dest_field : str\n"
                  "\tthe destination field name. Fields listed under `destFinfo`\n"
@@ -3952,14 +3952,39 @@ static struct module_state _state;
         if (msgType == NULL){
             msgType = default_msg_type;
         }
-        _ObjId * dest = reinterpret_cast<_ObjId*>(destPtr);
-        _ObjId * src = reinterpret_cast<_ObjId*>(srcPtr);
-        if (!Id::isValid(dest->oid_.id) || !Id::isValid(src->oid_.id)){
+        ObjId dest, src;
+        if (ObjId_SubtypeCheck(srcPtr)){
+            _ObjId * _src = reinterpret_cast<_ObjId*>(srcPtr);
+            src = _src->oid_;            
+        } else if (Id_SubtypeCheck(srcPtr)){
+            _Id * _src = reinterpret_cast<_Id*>(srcPtr);
+            src = ObjId(_src->id_);
+        } else if (PyString_Check(srcPtr)){
+            char * _src = PyString_AsString(srcPtr);
+            src = ObjId(string(_src));
+        } else {
+            PyErr_SetString(PyExc_TypeError, "source does not resolve to an element.");
+            return NULL;
+        }
+        if (ObjId_SubtypeCheck(destPtr)){
+            _ObjId * _dest = reinterpret_cast<_ObjId*>(destPtr);
+            dest = _dest->oid_;            
+        } else if (Id_SubtypeCheck(destPtr)){
+            _Id * _dest = reinterpret_cast<_Id*>(destPtr);
+            dest = ObjId(_dest->id_);
+        } else if (PyString_Check(destPtr)){
+            char * _dest = PyString_AsString(destPtr);
+            dest = ObjId(string(_dest));
+        } else {
+            PyErr_SetString(PyExc_TypeError, "target does not resolve to an element.");
+            return NULL;
+        }
+        if (!Id::isValid(dest.id) || !Id::isValid(src.id)){
             RAISE_INVALID_ID(NULL, "moose_connect");
         }
-        MsgId mid = SHELLPTR->doAddMsg(msgType, src->oid_, string(srcField), dest->oid_, string(destField));
+        MsgId mid = SHELLPTR->doAddMsg(msgType, src, string(srcField), dest, string(destField));
         if (mid == Msg::bad){
-            PyErr_SetString(PyExc_NameError, "connect failed: check field names and type compatibility.");
+            PyErr_SetString(PyExc_NameError, "check field names and type compatibility.");
             return NULL;
         }
         const Msg* msg = Msg::getMsg(mid);
