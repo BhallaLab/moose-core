@@ -21849,3 +21849,18 @@ This version should be called brisc.
 ==========================================================================
 27 Apr
 Separated out chem, elec, mesh etc for the unit test. Clears.
+
+==========================================================================
+29 April. 
+Checkin 4507. Also ran unit tests through valgrind, all clear.
+
+==========================================================================
+06 May
+Working on makeChemInCubeMesh for testSigNeuro.
+==========================================================================
+07 May
+Got skeleton of makeChemInCubeMesh to work.
+
+Next: Set up diffusion equivalent reacs between compts and run to be sure
+that the chem system is working.
+==========================================================================
