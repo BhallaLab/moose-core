@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue May  7 12:11:22 2013 (+0530)
 # Version: 
-# Last-Updated: Tue May  7 15:51:08 2013 (+0530)
+# Last-Updated: Tue May  7 16:29:19 2013 (+0530)
 #           By: subha
-#     Update #: 260
+#     Update #: 291
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -116,7 +116,6 @@ def test_channel_gates():
     lib = moose.Neutral('/library')
     na_proto = create_na_chan()
     k_proto = create_k_chan()
-    plt.subplot(211)
     m = moose.element('%s/gateX' % (na_proto.path))
     h = moose.element('%s/gateY' % (na_proto.path))
     n = moose.element('%s/gateX' % (k_proto.path))
@@ -151,17 +150,19 @@ def create_passive_comp(parent='/library', name='comp', diameter=30e-6, length=0
     
 def create_hhcomp(parent='/library', name='hhcomp', diameter=-30e-6, length=0.0):
     comp, sarea = create_passive_comp(parent, name, diameter, length)
-    if not moose.exists('/library/na'):
-        create_na_chan()
-    moose.copy('/library/na', comp.path, 'na')
+    if moose.exists('/library/na'):
+        moose.copy('/library/na', comp.path, 'na')
+    else:
+        create_na_chan(parent=comp.path)
     na = moose.element('%s/na' % (comp.path))
     # Na-conductance 120 mS/cm^2
     na.Gbar = 120e-3 * sarea * 1e4 
     na.Ek = 115e-3 + EREST_ACT
     moose.connect(comp, 'channel', na, 'channel')
     if moose.exists('/library/k'):
-        create_k_chan()
-    moose.copy('/library/k', comp.path, 'k')
+        moose.copy('/library/k', comp.path, 'k')
+    else:
+        create_k_chan(parent=comp.path)
     k = moose.element('%s/k' % (comp.path))
     # K-conductance 36 mS/cm^2
     k.Gbar = 36e-3 * sarea * 1e4 
