@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Aug 11 14:30:21 2012 (+0530)
 # Version: 
-# Last-Updated: Tue May  7 17:53:15 2013 (+0530)
+# Last-Updated: Tue May  7 18:26:26 2013 (+0530)
 #           By: subha
-#     Update #: 967
+#     Update #: 974
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -140,6 +140,7 @@ def create_compartment(path):
     else:
         nachan = create_na_chan(comp.path)
     nachan.Gbar = 120e-3 * sarea * 1e4
+    moose.showfield(nachan)
     moose.connect(nachan, 'channel', comp, 'channel')
     if moose.exists('/library/k'):
         kchan = moose.element(moose.copy('/library/k', comp, 'k'))
@@ -219,9 +220,11 @@ def create_population(container, size):
     comps = [create_compartment(path+'/soma_%d' % (ii)) for ii in range(size)]
     spikegens = []
     synchans = []
-    initVm_array = np.random.normal(EREST_ACT, np.abs(EREST_ACT) * 0.1, size)
     Em = EREST_ACT + 10.613e-3
-    Em_array = np.random.normal(Em, np.abs(Em) * 0.1, size)
+    initVm_array = [EREST_ACT] * size
+    Em_array = [Em] * size
+    # initVm_array = np.random.normal(EREST_ACT, np.abs(EREST_ACT) * 0.1, size)
+    # Em_array = np.random.normal(Em, np.abs(Em) * 0.1, size)
     for comp, initVm, Em in zip(comps, initVm_array, Em_array):
         comp.Em = Em
         comp.initVm = initVm
@@ -268,7 +271,7 @@ def two_populations(size=2):
     pop_b = create_population(moose.Neutral('/network2/pop_B'), size)
     make_synapses(pop_a['spikegen'], pop_b['synchan'])
     make_synapses(pop_b['spikegen'], pop_a['synchan'])
-    pulse = moose.PulseGen('net2_pulse')
+    pulse = moose.PulseGen('/network2/net2_pulse')
     pulse.firstLevel = 1e-9
     pulse.firstDelay = 0.05 # disable the pulsegen
     pulse.firstWidth = 0.02
@@ -366,7 +369,7 @@ if __name__ == '__main__':
     for vm in data1['vm']:
         t = np.linspace(0, simtime, len(vm.vec))
         plt.plot(t, vm.vec, label=vm.path)
-    # plt.plot(np.linspace(0, simtime, len(data1['pulse'].vec)), data1['pulse'].vec * 1e6, label='Inject(uA)')
+    plt.plot(np.linspace(0, simtime, len(data1['pulse'].vec)), data1['pulse'].vec * 1e6, label='Inject(uA)')
     plt.legend()
     plt.subplot(212)    
     for gk in data1['gksyn']:
