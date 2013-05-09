@@ -143,9 +143,9 @@ class PyCutExt(QTextEdit):
         # flag: readline() is being used for e.g. raw_input() and input()
         self.reading = 0
         # history
-        self.maxHistoryEntries = 1000				# Added by yr
-        self.H = History("%s/.ghist"%os.environ['HOME']) 	# Added by yr
-        self.history = self.H.load(self.maxHistoryEntries) 	# Added by yr	
+        self.maxHistoryEntries = 1000                # Added by yr
+        self.H = History("%s/.ghist"%os.environ['HOME'])     # Added by yr
+        self.history = self.H.load(self.maxHistoryEntries)     # Added by yr    
         #self.history = []
         self.pointer = 0
         self.cursor_pos   = 0
@@ -292,7 +292,7 @@ class PyCutExt(QTextEdit):
         """
         self.pointer = 0
         self.history.append(QtCore.QString(self.line))
-	self.H.append(QtCore.QString(self.line)) # Added by yr
+        self.H.append(QtCore.QString(self.line)) # Added by yr
         try:
             self.lines.append(str(self.line))
         except Exception,e:
@@ -323,7 +323,7 @@ class PyCutExt(QTextEdit):
         """
         self.line.insert(self.point, text)
         #self.point += text.length()
-	self.point += len(text)			#Added by yr
+        self.point += len(text)                 #Added by yr
 
         cursor = self.textCursor()
         cursor.insertText(text)
