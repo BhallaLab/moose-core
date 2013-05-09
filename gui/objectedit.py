@@ -6,9 +6,9 @@
 # Maintainer:
 # Created: Wed Jun 30 11:18:34 2010 (+0530) 
 # Version:
-# Last-Updated: Fri Apr 19 15:14:56 2013 (+0530)
+# Last-Updated: Thu May  9 16:04:47 2013 (+0530)
 #           By: subha
-#     Update #: 820
+#     Update #: 821
 # URL:
 # Keywords:
 # Compatibility:
@@ -138,7 +138,7 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
         flag = QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
         # !! This is outrageous !! - Subha
         # searchField = 'set_'+fieldName
-        # try:	
+        # try:
         #     for fn in (fn for fn in moose.getFieldDict(self.mooseObject.class_,'destFinfo').keys() if fn.startswith(srchField)):
         #         flag = flag | Qt.ItemIsEditable
         #         value = self.mooseObject.getField(fieldName)

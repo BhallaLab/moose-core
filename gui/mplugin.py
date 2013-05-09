@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Oct  2 17:25:41 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Mar 12 16:46:29 2013 (+0530)
+# Last-Updated: Thu May  9 16:01:38 2013 (+0530)
 #           By: subha
-#     Update #: 170
+#     Update #: 171
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -65,26 +65,26 @@ class MoosePluginBase(object):
         self.modelRoot = root
 
     def getPreviousPlugin(self):
-	"""Returns the plugin object that the gui is supposed to
-	switch to when going to a smaller scale."""
-	raise NotImplementedError('method must be reimplemented in subclass')
+        """Returns the plugin object that the gui is supposed to
+        switch to when going to a smaller scale."""
+        raise NotImplementedError('method must be reimplemented in subclass')
 
     def getNextPlugin(self):
-	"""Returns the plugin object that the gui is supposed to
-	switch to when going to a larger scale."""
-	raise NotImplementedError('method must be reimplemented in subclass')
+        """Returns the plugin object that the gui is supposed to
+        switch to when going to a larger scale."""
+        raise NotImplementedError('method must be reimplemented in subclass')
 
     def getAdjacentPlugins(self):
-	"""Return a list of plugins that are valid transitions from this plugin"""
-	raise NotImplementedError('method must be reimplemented in subclass')
+        """Return a list of plugins that are valid transitions from this plugin"""
+        raise NotImplementedError('method must be reimplemented in subclass')
 
     def getViews(self):
-	"""Return the view widgets available from this plugin."""        
-	raise NotImplementedError('method must be reimplemented in subclass')
+        """Return the view widgets available from this plugin."""        
+        raise NotImplementedError('method must be reimplemented in subclass')
 
     def getCurrentView(self):
-	"""Return the current view of this plugin."""
-	raise NotImplementedError('method must be reimplemented in subclass')    
+        """Return the current view of this plugin."""
+        raise NotImplementedError('method must be reimplemented in subclass')    
 
     def setCurrentView(self, view):
         """Set current view (e.g., editor/plot/run).
@@ -140,11 +140,11 @@ class ViewBase(object):
 
     def getToolPanes(self):
         """Return a list of widgets to be displayed as dock widgets."""
-	raise NotImplementedError('method must be reimplemented in subclass')
+        raise NotImplementedError('method must be reimplemented in subclass')
 
     def getToolBars(self):
         """Return list of toolbars for this view."""
-	raise NotImplementedError('method must be reimplemented in subclass')
+        raise NotImplementedError('method must be reimplemented in subclass')
 
     def getMenus(self):
         """Return the menus for this view."""
@@ -232,7 +232,7 @@ class EditorWidgetBase(QtGui.QWidget):
     def __init__(self, *args):
         QtGui.QWidget.__init__(self, *args)
         self.modelRoot = '/'
-	
+        
     def setModelRoot(self, path):
         """Set the root of the model tree to be displayed.
 
