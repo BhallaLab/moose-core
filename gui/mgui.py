@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Fri Apr 19 14:55:50 2013 (+0530)
+# Last-Updated: Fri May 10 00:20:09 2013 (+0530)
 #           By: subha
-#     Update #: 1073
+#     Update #: 1097
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -62,6 +62,7 @@ from moose import utils
 from mload import loadFile
 from loaderdialog import LoaderDialog
 from shell import get_shell_class
+from objectedit import ObjectEditDockWidget
 
 __author__ = 'Subhasis Ray'
 
@@ -119,11 +120,10 @@ class MWindow(QtGui.QMainWindow):
         self._loadedPlugins = {}
         self.setDockOptions(self.AnimatedDocks and self.AllowNestedDocks and self.AllowTabbedDocks)
         self.mdiArea = QtGui.QMdiArea()
-        for widget in self.getMyDockWidgets():
-            self.addDockWidget(Qt.Qt.BottomDockWidgetArea, widget)
         self.quitAction = QtGui.QAction('&Quit', self)
         self.connect(self.quitAction, QtCore.SIGNAL('triggered()'), self.quit)
         self.quitAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Q", None, QtGui.QApplication.UnicodeUTF8))        
+        self.getMyDockWidgets()       
         self.setCentralWidget(self.mdiArea)
         self.setPlugin('default', '/')
 
@@ -193,6 +193,13 @@ class MWindow(QtGui.QMainWindow):
             dockWidget = QtGui.QDockWidget('Python')
             dockWidget.setWidget(self.getShellWidget())
             self.dockWidgets[dockWidget] = True
+            self.addDockWidget(Qt.Qt.BottomDockWidgetArea, dockWidget)
+            # TODO this should become visible in edit view only
+            dockWidget = ObjectEditDockWidget('/')
+            self.dockWidgets[dockWidget] = True
+            self.objectEditDockWidget = dockWidget
+            self.addDockWidget(Qt.Qt.RightDockWidgetArea, dockWidget)
+            dockWidget.setVisible(False)
         return self.dockWidgets.keys()
 
     def getShellWidget(self):
@@ -203,6 +210,7 @@ class MWindow(QtGui.QMainWindow):
             self.shellWidget = get_shell_class()(code.InteractiveInterpreter(),
                                                  message='MOOSE version %s' % (moose._moose.__version__))
             self.shellWidget.interpreter.runsource('from moose import *')
+            self.shellWidget.setVisible(False)
         return self.shellWidget
 
     def loadPluginClass(self, name, re=False):
@@ -573,7 +581,12 @@ class MWindow(QtGui.QMainWindow):
             simtime = float(config.MooseSetting()[config.KEY_SIMTIME])
         except ValueError:
             simtime = 1.0
-        moose.start(simtime)        
+        moose.start(simtime)      
+
+    def objectEditSlot(self, mobj):
+        """Slot for switching the current object in object editor."""
+        self.objectEditDockWidget.setObject(mobj)
+        self.objectEditDockWidget.setVisible(True)
 
     def loadModelDialogSlot(self):
         """Start a file dialog to choose a model file.

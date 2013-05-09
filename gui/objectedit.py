@@ -6,9 +6,9 @@
 # Maintainer:
 # Created: Wed Jun 30 11:18:34 2010 (+0530) 
 # Version:
-# Last-Updated: Thu May  9 16:04:47 2013 (+0530)
+# Last-Updated: Thu May  9 23:12:18 2013 (+0530)
 #           By: subha
-#     Update #: 821
+#     Update #: 864
 # URL:
 # Keywords:
 # Compatibility:
@@ -253,6 +253,36 @@ class ObjectEditView(QtGui.QTableView):
     def dataChanged(self, tl, br):
         QtGui.QTableView.dataChanged(self, tl, br)
         self.viewport().update()
+
+class ObjectEditDockWidget(QtGui.QDockWidget):
+    """A dock widget whose title is set by the current moose
+    object. Allows switching the moose object. It stores the created
+    view in a dict for future use.
+
+    TODO possible performance issue: storing the views (along with
+    their models) ensures the undo history for each object is
+    retained. But without a limit on the number of views stored, it
+    will be wasteful on memory.
+
+    """
+    def __init__(self, mobj='/', parent=None, flags=None):
+        QtGui.QDockWidget.__init__(self, parent=parent)
+        mobj = moose.element(mobj)
+        view = ObjectEditView(mobj)
+        self.view_dict = {mobj: view}
+        self.setWidget(view)
+        self.setWindowTitle('Edit: %s' % (mobj.path))
+
+    def setObject(self, mobj):
+        mobj = moose.element(mobj)
+        try:
+            view = self.view_dict[mobj]
+        except KeyError:
+            view = ObjectEditView(mobj)
+            self.view_dict[mobj] = view
+        self.setWidget(view)
+        self.setWindowTitle('Edit: %s' % (mobj.path))
+        
 
 def main():
     app = QtGui.QApplication(sys.argv)
