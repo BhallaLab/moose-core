@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Oct  2 17:25:41 2012 (+0530)
 # Version: 
-# Last-Updated: Thu May  9 16:01:38 2013 (+0530)
+# Last-Updated: Fri May 10 17:15:26 2013 (+0530)
 #           By: subha
-#     Update #: 171
+#     Update #: 177
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -46,6 +46,7 @@
 # Code:
 
 from PyQt4 import QtGui,QtCore,Qt
+import moose
 
 class MoosePluginBase(object):
     """Moose GUI plugin base class.
@@ -116,6 +117,10 @@ class MoosePluginBase(object):
 
     def getRunView(self):
         raise NotImplementedError('method must be implemented in derived class')
+
+    def setModelRoot(self, root):
+        self.modelRoot = root
+        self.getEditorView().getCentralWidget().setModelRoot(self.modelRoot)
 
 
 class ViewBase(object):
