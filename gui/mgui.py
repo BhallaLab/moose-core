@@ -259,7 +259,6 @@ class MWindow(QtGui.QMainWindow):
         """Check if a menu with same title
         already exists. If so, update the same and return
         True. Otherwise return False.
-
         """
         for existingMenu in self.menuBar().children():
             if isinstance(existingMenu, QtGui.QMenu) and \
@@ -413,8 +412,18 @@ class MWindow(QtGui.QMainWindow):
     
     def getEditActions(self):
         if (not hasattr(self, 'editActions')) or (self.editActions is None):
-            self.editActions = [] # TODO placeholder
+            self.addRootAction = QtGui.QAction('&Set Model Root', self)
+            self.addRootAction.triggered.connect(self.showSetModelRootDialog)
+            self.editActions = [ self.addRootAction
+                               ]
         return self.editActions
+
+    def showSetModelRootDialog(self):
+        rootName, ok = QtGui.QInputDialog.getText(self, 'Model Root', 'Enter the model root name:')
+        rootName = str(rootName) #convert from QString to python str
+        print(rootName, ok)
+        if ok:
+            self.plugin.setModelRoot(rootName)
 
     def getViewActions(self):
         if (not hasattr(self, 'viewActions')) or (self.viewActions is None):
@@ -458,7 +467,6 @@ class MWindow(QtGui.QMainWindow):
             self.continueAction.triggered.connect(self.continueSimulation)
             self.runActions = [self.startAction, self.pauseAction, self.continueAction]
         return self.runActions
-            
 
     def getHelpActions(self):
         if (not hasattr(self, 'helpActions')) or (self.helpActions is None):
