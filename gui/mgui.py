@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Fri May 10 00:20:09 2013 (+0530)
+# Last-Updated: Fri May 10 13:34:41 2013 (+0530)
 #           By: subha
-#     Update #: 1097
+#     Update #: 1099
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -262,7 +262,8 @@ class MWindow(QtGui.QMainWindow):
 
         """
         for existingMenu in self.menuBar().children():
-            if menu.title() == existingMenu.title():
+            if isinstance(existingMenu, QtGui.QMenu) and \
+               menu.title() == existingMenu.title():
                 existingMenu.addSeparator()
                 existingMenu.addActions(menu.actions())
                 return True
