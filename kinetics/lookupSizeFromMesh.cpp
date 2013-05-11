@@ -118,6 +118,10 @@ unsigned int getReactantVols( const Eref& reac, const SrcFinfo* pools,
  * Assumes all calculations are in SI: cubic metres and millimolar.
  * 27 Feb 2013: This is changed to use the volume of a voxel of the 
  * the home compartment of the reac.
+ * Be warned: this can cause unexpected problems if the home compartment
+ * isn't according to convention. For example, if there is a single 
+ * substrate and the home compartment is elsewhere, you will get very odd
+ * Kf:kf values.
  */
 
 double convertConcToNumRateUsingMesh( const Eref& e, const SrcFinfo* pools, 

@@ -21859,8 +21859,28 @@ Checkin 4507. Also ran unit tests through valgrind, all clear.
 Working on makeChemInCubeMesh for testSigNeuro.
 ==========================================================================
 07 May
-Got skeleton of makeChemInCubeMesh to work.
+Got skeleton of makeChemInCubeMesh to work.  Checkin 4522.
 
 Next: Set up diffusion equivalent reacs between compts and run to be sure
 that the chem system is working.
+Trying, setup done but it generates many Nans.
+
+Put in sompe printf debugging of mol and reac pars. 
+Mols have a problem, haven;t found yet.
 ==========================================================================
+11 May
+Fixed up a lot of conversion errors in the SigNeur test, one reaching into
+Enz. But it still doesn't work. There is a possible memory assignment
+error since the kf_ of one of the reacs gets set to a substrate value.
+May need to valgrind this. Did. No leaks or errors. Some other unpleasant
+thing is happening.
+
+Found one mor bug, I was multiplying by the volscal factor rather than 
+dividing during reinit to set kf_ and sub_ etc.. No more nans but numbers
+still odd.
+
+Further cleanup, yet more bugs found, another in the enz. Now MOOSE and
+GENESIS match. This exercise has been painful but highly productive of 
+bugs (fixes) for the default kinetic classes.
+
+
