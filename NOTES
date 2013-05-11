@@ -21882,5 +21882,9 @@ still odd.
 Further cleanup, yet more bugs found, another in the enz. Now MOOSE and
 GENESIS match. This exercise has been painful but highly productive of 
 bugs (fixes) for the default kinetic classes.
+Checkin 4537.
 
+Removed ChemCompt from kinetics directory. It wasn't doing anything there.
+Harsha had pointed this out.
 
+==========================================================================
