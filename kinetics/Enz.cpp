@@ -129,7 +129,8 @@ double Enz::vGetK1( const Eref& e, const Qinfo* q ) const
 
 void Enz::vSetK2( const Eref& e, const Qinfo* q, double v )
 {
-	k2_ = v;
+	k2_ = v; // Assume this overrides the default ratio.
+	vSetKm( e, q, Km_ ); // Update k1_ here as well.
 }
 
 double Enz::vGetK2( const Eref& e, const Qinfo* q ) const
@@ -139,7 +140,10 @@ double Enz::vGetK2( const Eref& e, const Qinfo* q ) const
 
 void Enz::vSetKcat( const Eref& e, const Qinfo* q, double v )
 {
+	double ratio = k2_ / k3_;
 	k3_ = v;
+	k2_ = v * ratio;
+	vSetKm( e, q, Km_ ); // Update k1_ here as well.
 }
 
 double Enz::vGetKcat( const Eref& e, const Qinfo* q ) const
