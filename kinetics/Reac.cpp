@@ -91,9 +91,9 @@ void Reac::vProcess( const Eref& e, ProcPtr p )
 
 void Reac::vReinit( const Eref& e, ProcPtr p )
 {
-	sub_ = kf_ = concKf_ *
+	sub_ = kf_ = concKf_ /
 		convertConcToNumRateUsingMesh( e, toSub, 0 );
-	prd_ = kb_ = concKb_ * 
+	prd_ = kb_ = concKb_ / 
 		convertConcToNumRateUsingMesh( e, toPrd, 0 );
 }
 
