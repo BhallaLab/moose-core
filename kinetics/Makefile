@@ -35,10 +35,6 @@ OBJ = \
 HEADERS = \
 	../basecode/header.h \
 
-
-#	Boundary.o	\
-#	ChemCompt.o	\
-
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
@@ -52,7 +48,6 @@ CplxEnzBase.o:	EnzBase.h CplxEnzBase.h lookupSizeFromMesh.h
 Enz.o:	EnzBase.h CplxEnzBase.h Enz.h lookupSizeFromMesh.h
 MMenz.o:	EnzBase.h MMenz.h  lookupSizeFromMesh.h
 Boundary.o:	Boundary.h
-ChemCompt.o:	ChemCompt.h
 Species.o:	Species.h
 ReadKkit.o:	lookupSizeFromMesh.h ReadKkit.h PoolBase.h Pool.h FuncPool.h ../shell/Shell.h 
 WriteKkit.o:	lookupSizeFromMesh.h PoolBase.h
