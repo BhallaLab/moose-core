@@ -21875,7 +21875,7 @@ error since the kf_ of one of the reacs gets set to a substrate value.
 May need to valgrind this. Did. No leaks or errors. Some other unpleasant
 thing is happening.
 
-Found one mor bug, I was multiplying by the volscal factor rather than 
+Found one more bug, I was multiplying by the volscale factor rather than 
 dividing during reinit to set kf_ and sub_ etc.. No more nans but numbers
 still odd.
 
@@ -21885,6 +21885,25 @@ bugs (fixes) for the default kinetic classes.
 Checkin 4537.
 
 Removed ChemCompt from kinetics directory. It wasn't doing anything there.
-Harsha had pointed this out.
+Harsha had pointed this out. Checkin 4538.
+
+==========================================================================
+12 May
+
+A bit of rearrangement. Ran the model again with a solver. Worked.
+Next: 
+	- Run elec model with solver standalone.
+	- Run combined model with adaptors, no solvers, cubeMesh
+	- Run combined model with solvers in cubeMesh
+	- Run chem model with solvers in NeuroMesh including diffusion.
+	- Run combined model with solvers in NeuroMesh including diffusion.
+	- regression test with equivalent model loaded from kkit and
+		.p model definition files.
+	- regression test with NeurNetworks paper model loaded from kkit and
+		.p model definition files.
+
+
+Added solver to elec model. It runs but gives divergent output for Ca and 
+	spineVm. Will take up this concern later.
 
 ==========================================================================
