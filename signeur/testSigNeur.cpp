@@ -420,7 +420,7 @@ void makeChemInNeuroMesh()
 	cout << "." << flush;
 } 
 
-void makeChemInCubeMesh()
+Id makeChemInCubeMesh()
 {
 	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
 	vector< int > dims( 1, 1 );
@@ -545,8 +545,14 @@ void makeChemInCubeMesh()
 	assert( doubleEq( numK, 4 ) );
 	numK = Field< double >::get( Id( "/n/spineMesh/toPsd/enz" ), "k3");
 	assert( doubleEq( numK, 1 ) );
+	return nid;
+}
 
-
+void testChemInCubeMesh()
+{
+	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
+	vector< int > dims( 1, 1 );
+	Id nid = makeChemInCubeMesh();
 
 	/*
 	vector< Id > ids;
@@ -623,6 +629,25 @@ void makeChemInCubeMesh()
 	SetGet2< string, string >::set( tab2, "xplot", "SigNeurChem.plot", "kChan_p" );
 	SetGet2< string, string >::set( tab3, "xplot", "SigNeurChem.plot", "toPsd" );
 
+	//////////////////////////////////////////////////////////////////////
+	// Build a solver, reset and run
+	//////////////////////////////////////////////////////////////////////
+	
+	Id solver = shell->doCreate( "GslStoich", nid, "solver", dims );
+	assert( solver != Id() );
+	Field< string >::set( solver, "path", "/n/##" );
+	Field< string >::set( solver, "method", "rk5" );
+	shell->doSetClock( 5, 1.0 );
+	shell->doSetClock( 6, 1.0 );
+	shell->doUseClock( "/n/solver", "process", 5 );
+	shell->doReinit();
+	shell->doStart( 100.0 );
+
+	SetGet2< string, string >::set( tabCa, "xplot", "SigNeurChem.plot", "spineCa2" );
+	SetGet2< string, string >::set( tab, "xplot", "SigNeurChem.plot", "psdGluR_N2" );
+	SetGet2< string, string >::set( tab2, "xplot", "SigNeurChem.plot", "kChan_p2" );
+	SetGet2< string, string >::set( tab3, "xplot", "SigNeurChem.plot", "toPsd2" );
+
 	shell->doDelete( nid );
 	cout << "." << flush;
 }
@@ -690,8 +715,27 @@ void testSigNeurElec()
 	SetGet2< string, string >::set( tab2, "xplot", "SigNeur.plot", "comptVm" );
 	SetGet2< string, string >::set( tabCa, "xplot", "SigNeur.plot", "headCa" );
 
-	shell->doDelete( nid );
+	//////////////////////////////////////////////////////////////////////
+	// Build solver, Schedule, Reset, and run.
+	//////////////////////////////////////////////////////////////////////
+	Id hsolve = shell->doCreate( "HSolve", nid, "hsolve", dims );
+	shell->doUseClock( "/n/hsolve", "process", 1 );
+	Field< double >::set( hsolve, "dt", 5.0e-5 );
+	Field< string >::set( hsolve, "target", "/n/compt" );
+	shell->doSetClock( 0, 5.0e-5 );
+	shell->doSetClock( 1, 5.0e-5 );
+	shell->doSetClock( 2, 5.0e-5 );
+	shell->doSetClock( 3, 1.0e-4 );
 
+
+	shell->doReinit();
+	shell->doStart( 0.1 );
+
+	SetGet2< string, string >::set( tab, "xplot", "SigNeur.plot", "spineVm2" );
+	SetGet2< string, string >::set( tab2, "xplot", "SigNeur.plot", "comptVm2" );
+	SetGet2< string, string >::set( tabCa, "xplot", "SigNeur.plot", "headCa2" );
+
+	shell->doDelete( nid );
 	cout << "." << flush;
 }
 
@@ -706,7 +750,7 @@ void testSigNeurProcess()
 {
 	testSigNeurElec();
 	makeChemInNeuroMesh();
-	makeChemInCubeMesh();
+	testChemInCubeMesh();
 }
 
 
