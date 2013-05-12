@@ -34,6 +34,23 @@ static SrcFinfo0 *requestInput()
 	return &requestInput;
 }
 
+static SrcFinfo1< FuncId >  *requestField()
+{
+	static SrcFinfo1< FuncId > requestField( "requestField", 
+			"Sends out a request to a generic double field. "
+			"Issued from the process call."
+	);
+	return &requestField;
+}
+
+static DestFinfo* handleInput() {
+	static DestFinfo handleInput( "handleInput", 
+			"Handle the returned value.",
+			new OpFunc1< Adaptor, double >( &Adaptor::input )
+	);
+	return &handleInput;
+}
+
 const Cinfo* Adaptor::initCinfo()
 {
 	///////////////////////////////////////////////////////
@@ -114,15 +131,17 @@ const Cinfo* Adaptor::initCinfo()
 		processShared, sizeof( processShared ) / sizeof( Finfo* )
 	);
 
+	/*
 	static DestFinfo handleInput( "handleInput", 
 			"Handle the returned value.",
 			new OpFunc1< Adaptor, double >( &Adaptor::input )
 	);
+	*/
 
 	static Finfo* inputRequestShared[] =
 	{
 		requestInput(),
-		&handleInput
+		handleInput()
 	};
 	static SharedFinfo inputRequest( "inputRequest",
 		"This is a shared message to request and handle value "
@@ -142,6 +161,7 @@ const Cinfo* Adaptor::initCinfo()
 		&output,					// ReadOnlyValue
 		&input,						// DestFinfo
 		outputSrc(),				// SrcFinfo
+		requestField(),				// SrcFinfo
 		&proc,						// SharedFinfo
 		&inputRequest,				// SharedFinfo
 	};
@@ -245,7 +265,9 @@ void Adaptor::innerProcess()
 
 void Adaptor::process( const Eref& e, ProcPtr p )
 {
+	static FuncId fid = handleInput()->getFid(); 
 	requestInput()->send( e, p->threadIndexInGroup );
+	requestField()->send( e, p->threadIndexInGroup, fid );
 	innerProcess();
 	outputSrc()->send( e, p->threadIndexInGroup, output_ );
 }

@@ -21892,7 +21892,7 @@ Harsha had pointed this out. Checkin 4538.
 
 A bit of rearrangement. Ran the model again with a solver. Worked.
 Next: 
-	- Run elec model with solver standalone.
+	+ Run elec model with solver standalone.
 	- Run combined model with adaptors, no solvers, cubeMesh
 	- Run combined model with solvers in cubeMesh
 	- Run chem model with solvers in NeuroMesh including diffusion.
@@ -21905,5 +21905,8 @@ Next:
 
 Added solver to elec model. It runs but gives divergent output for Ca and 
 	spineVm. Will take up this concern later.
+Checkin 4539.
 
+Set up cubeMesh model with adaptors. Turned out I had to update the Adaptor
+code to handle field requests.
 ==========================================================================

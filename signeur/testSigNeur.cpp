@@ -430,7 +430,9 @@ Id makeChemInCubeMesh()
 			// diameter. Assume thickness of 0.01 micron, since area not 
 			// comparable otherwise.
 
-	Id nid = shell->doCreate( "Neutral", Id(), "n" );
+	Id nid( "/n" );
+	if ( nid == Id() )
+		nid = shell->doCreate( "Neutral", Id(), "n" );
 	Id neuroMesh = shell->doCreate( "CubeMesh", nid, "neuroMesh" );
 	Id spineMesh = shell->doCreate( "CubeMesh", nid, "spineMesh" );
 	Id psdMesh = shell->doCreate( "CubeMesh", nid, "psdMesh" );
@@ -739,6 +741,51 @@ void testSigNeurElec()
 	cout << "." << flush;
 }
 
+void testAdaptorsInCubeMesh()
+{
+	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
+	vector< int > dims( 1, 1 );
+
+	vector< Id > spines;
+	Id nid = buildSigNeurElec( spines );
+	makeChemInCubeMesh();
+	Id elecCa( "/n/head2/ca" );
+	Id chemCa( "/n/spineMesh/Ca" );
+
+	Id elecGluR( "/n/head2/gluR" );
+	Id chemGluR( "/n/psdMesh/psdGluR" );
+
+	Id elecK( "/n/compt/K" );
+	Id chemK( "/n/neuroMesh/kChan" );
+
+	Id adaptCa = shell->doCreate( "Adaptor", nid, "adaptCa", dims );
+	MsgId mid = shell->doAddMsg( "OneToAll", 
+					adaptCa, "requestField", elecCa, "get_Ca" );
+	assert( mid != Msg::bad );
+	mid = shell->doAddMsg( "OneToAll", 
+					adaptCa, "outputSrc", chemCa, "set_n" );
+	assert( mid != Msg::bad );
+
+	Id adaptGluR = shell->doCreate( "Adaptor", nid, "adaptGluR", dims );
+	mid = shell->doAddMsg( "OneToAll", 
+					adaptGluR, "requestField", chemGluR, "get_n" );
+	assert( mid != Msg::bad );
+	mid = shell->doAddMsg( "OneToAll", 
+					adaptGluR, "outputSrc", elecGluR, "set_Gbar" );
+	assert( mid != Msg::bad );
+
+	Id adaptK = shell->doCreate( "Adaptor", nid, "adaptK", dims );
+	mid = shell->doAddMsg( "OneToAll", 
+					adaptK, "requestField", chemK, "get_n" );
+	assert( mid != Msg::bad );
+	mid = shell->doAddMsg( "OneToAll", 
+					adaptK, "outputSrc", elecK, "set_Gbar" );
+	assert( mid != Msg::bad );
+
+	shell->doDelete( nid );
+	cout << "." << flush;
+}
+
 // This tests stuff without using the messaging.
 void testSigNeur()
 {
@@ -751,8 +798,7 @@ void testSigNeurProcess()
 	testSigNeurElec();
 	makeChemInNeuroMesh();
 	testChemInCubeMesh();
+	testAdaptorsInCubeMesh(); // Does a chem+elec model with adaptors
 }
-
-
 
 #endif
