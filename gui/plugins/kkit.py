@@ -44,7 +44,6 @@ class KkitPlugin(MoosePlugin):
     def getEditorView(self):
         if not hasattr(self, 'editorView'):
             self.editorView = KkitEditorView(self)
-            self.currentView = self.editorView
         return self.editorView
 
     def getRunView(self):        
@@ -157,6 +156,8 @@ class  KineticsWidget(DefaultEditorWidget):
 
         """ All the moose Object are connected for visualization """
         self.drawLine_arrow(itemignoreZooming=False)
+        if hasattr(self, 'view') and isinstance(self.view, QtGui.QWidget):
+            self.hLayout.removeWidget(self.view)
         self.view = GraphicalView(self.sceneContainer,self.border,self)
         self.hLayout.addWidget(self.view)
     
