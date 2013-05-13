@@ -23,7 +23,10 @@ def setupMeshObj(modelRoot):
     meshEntry = {}
     xcord = []
     ycord = []
-    meshEntryWildcard = modelRoot+'/##[TYPE=MeshEntry]'
+    meshEntryWildcard = '/##[TYPE=MeshEntry]'
+    if modelRoot != '/':
+        meshEntryWildcard = modelRoot+meshEntryWildcard
+
     for meshEnt in wildcardFind(meshEntryWildcard):
         mollist = []
         realist = []
@@ -73,14 +76,16 @@ def setupMeshObj(modelRoot):
             and len(np.nonzero(ycord)[0]) == 0
     return(meshEntry,xmin,xmax,ymin,ymax,noPositionInfo)
 
-def setupItem(modlePath,cntDict):
+def setupItem(modelPath,cntDict):
     '''This function collects information of what is connected to what. \
     eg. substrate and product connectivity to reaction's and enzyme's \
     sumtotal connectivity to its pool are collected '''
 
     zombieType = ['ReacBase','EnzBase','FuncBase','StimulusTable']
     for baseObj in zombieType:
-        path = modlePath+'/##[ISA='+baseObj+']'
+        path = '/##[ISA='+baseObj+']'
+        if modelPath != '/':
+            path = modelPath+path
         if ( (baseObj == 'ReacBase') or (baseObj == 'EnzBase')):
             for items in wildcardFind(path):
                 sublist = []
