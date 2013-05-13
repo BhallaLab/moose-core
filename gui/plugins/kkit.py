@@ -81,7 +81,7 @@ class KkitEditorView(MooseEditorView):
         return self._centralWidget
 
 class  KineticsWidget(DefaultEditorWidget):
-    def __init__(self, *args):
+    def __init__(self, *args): 
         #QtGui.QWidget.__init__(self,parent)
 	DefaultEditorWidget.__init__(self, *args)
         self.border = 10
@@ -93,73 +93,85 @@ class  KineticsWidget(DefaultEditorWidget):
 
     
     def updateModelView(self):
-        """ maxmium and minimum coordinates of the objects specified in kkit file. """
-        self.xmin = 0.0
-        self.xmax = 1.0
-        self.ymin = 0.0
-        self.ymax = 1.0
-        self.autoCordinatepos = {}
-        self.sceneContainer.clear()
-        """ TODO: size will be dummy at this point, but I need the availiable size from the Gui """
-        self.size = QtCore.QSize(1024 ,768)
-        
-        self.autocoordinates = False
 
-        """ pickled the color map file """
-        colormap_file = open(os.path.join(config.settings[config.KEY_COLORMAP_DIR], 'rainbow2.pkl'),'rb')
-        self.colorMap = pickle.load(colormap_file)
-        colormap_file.close()
+        if self.modelRoot == '/':
+            m = wildcardFind('/##[ISA=ChemCompt]')
+        else:
+            m = wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
 
-        """ Compartment and its members are setup """
-        self.meshEntry,self.xmin,self.xmax,self.ymin,self.ymax,self.noPositionInfo = setupMeshObj(self.modelRoot)
+        if not m:
+            if hasattr(self, 'view') and isinstance(self.view, QtGui.QWidget):
+                self.hLayout.removeWidget(self.view)
+            self.view = GraphicalView(self.sceneContainer,self.border,self)
+            self.hLayout.addWidget(self.view)
+        else:
+            """ maxmium and minimum coordinates of the objects specified in kkit file. """
+            self.xmin = 0.0
+            self.xmax = 1.0
+            self.ymin = 0.0
+            self.ymax = 1.0
+            self.autoCordinatepos = {}
+            self.sceneContainer.clear()
+            """ TODO: size will be dummy at this point, but I need the availiable size from the Gui """
+            self.size = QtCore.QSize(1024 ,768)
+            
+            self.autocoordinates = False
+            
+            """ pickled the color map file """
+            colormap_file = open(os.path.join(config.settings[config.KEY_COLORMAP_DIR], 'rainbow2.pkl'),'rb')
+            self.colorMap = pickle.load(colormap_file)
+            colormap_file.close()
+            
+            """ Compartment and its members are setup """
+            self.meshEntry,self.xmin,self.xmax,self.ymin,self.ymax,self.noPositionInfo = setupMeshObj(self.modelRoot)
         #for mesh,obj in self.meshEntry.items():
         #    print "mesh",mesh, obj
-        """ srcdesConnection dictonary will have connection information between src and des """
+            """ srcdesConnection dictonary will have connection information between src and des """
 
-        self.srcdesConnection = {}
-        setupItem(self.modelRoot,self.srcdesConnection)
-        if self.noPositionInfo:
-            self.autocoordinates = True
-            QtGui.QMessageBox.warning(self, 
-                                      'No coordinates found for the model', 
-                                      '\n Automatic layouting will be done')
+            self.srcdesConnection = {}
+            setupItem(self.modelRoot,self.srcdesConnection)
+            if self.noPositionInfo:
+                self.autocoordinates = True
+                QtGui.QMessageBox.warning(self, 
+                                          'No coordinates found for the model', 
+                                          '\n Automatic layouting will be done')
             #raise Exception('Unsupported kkit version')
+                
+                
+                self.xmin,self.xmax,self.ymin,self.ymax,self.autoCordinatepos = autoCoordinates(self.meshEntry,self.srcdesConnection)
 
+            """ Scale factor to translate the x -y position to fit the Qt graphicalScene, scene width. """
+            if self.xmax-self.xmin != 0:
+                self.xratio = (self.size.width()-10)/(self.xmax-self.xmin)
+            else: self.xratio = self.size.width()-10
             
-            self.xmin,self.xmax,self.ymin,self.ymax,self.autoCordinatepos = autoCoordinates(self.meshEntry,self.srcdesConnection)
-
-        """ Scale factor to translate the x -y position to fit the Qt graphicalScene, scene width. """
-        if self.xmax-self.xmin != 0:
-            self.xratio = (self.size.width()-10)/(self.xmax-self.xmin)
-        else: self.xratio = self.size.width()-10
-            
-        if self.ymax-self.ymin:
-            self.yratio = (self.size.height()-10)/(self.ymax-self.ymin)
-        else: self.yratio = (self.size.height()-10)
+            if self.ymax-self.ymin:
+                self.yratio = (self.size.height()-10)/(self.ymax-self.ymin)
+            else: self.yratio = (self.size.height()-10)
 
         #A map b/w moose compartment key with QGraphicsObject
-        self.qGraCompt = {}
+            self.qGraCompt = {}
         
         #A map between mooseId of all the mooseObject (except compartment) with QGraphicsObject
-        self.mooseId_GObj = {}
+            self.mooseId_GObj = {}
         
-        self.border = 5
-        self.arrowsize = 2
-        self.iconScale = 1
-        self.defaultComptsize = 5
-        self.itemignoreZooming = False
-        self.lineItem_dict = {}
-        self.object2line = defaultdict(list)
-
-        """ Compartment and its members are put on the qgraphicsscene """
-        self.mooseObjOntoscene()
-
-        """ All the moose Object are connected for visualization """
-        self.drawLine_arrow(itemignoreZooming=False)
-        if hasattr(self, 'view') and isinstance(self.view, QtGui.QWidget):
-            self.hLayout.removeWidget(self.view)
-        self.view = GraphicalView(self.sceneContainer,self.border,self)
-        self.hLayout.addWidget(self.view)
+            self.border = 5
+            self.arrowsize = 2
+            self.iconScale = 1
+            self.defaultComptsize = 5
+            self.itemignoreZooming = False
+            self.lineItem_dict = {}
+            self.object2line = defaultdict(list)
+            
+            """ Compartment and its members are put on the qgraphicsscene """
+            self.mooseObjOntoscene()
+            
+            """ All the moose Object are connected for visualization """
+            self.drawLine_arrow(itemignoreZooming=False)
+            if hasattr(self, 'view') and isinstance(self.view, QtGui.QWidget):
+                self.hLayout.removeWidget(self.view)
+            self.view = GraphicalView(self.sceneContainer,self.border,self)
+            self.hLayout.addWidget(self.view)
     
         
     def mooseObjOntoscene(self):
