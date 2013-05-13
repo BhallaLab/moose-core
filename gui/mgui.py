@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Fri May 10 13:34:41 2013 (+0530)
+# Last-Updated: Mon May 13 16:00:44 2013 (+0530)
 #           By: subha
-#     Update #: 1099
+#     Update #: 1104
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -244,6 +244,7 @@ class MWindow(QtGui.QMainWindow):
 
         """
         self.plugin = self.loadPluginClass(str(name))(str(root), self)
+        print 'Plugin:', self.plugin
         self.updateMenus()
         for action in self.pluginsMenu.actions():
             if str(action.text()) == str(name):
@@ -424,6 +425,9 @@ class MWindow(QtGui.QMainWindow):
         print(rootName, ok)
         if ok:
             self.plugin.setModelRoot(rootName)
+            for subwin in self.mdiArea.subWindowList():
+                if hasattr(subwin.widget(), 'modelRoot'):
+                    subwin.setWindowTitle(subwin.widget().modelRoot)
 
     def getViewActions(self):
         if (not hasattr(self, 'viewActions')) or (self.viewActions is None):
@@ -635,6 +639,7 @@ class MWindow(QtGui.QMainWindow):
                     pluginName = 'default'
                 print 'Loaded model', ret['model'].path
                 self.setPlugin(pluginName, ret['model'].path)
+                print 'Plugin ===', self.plugin
 
 if __name__ == '__main__':
     # create the GUI application

@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Feb 25 15:59:54 2013 (+0530)
 # Version: 
-# Last-Updated: Mon Feb 25 21:16:00 2013 (+0530)
+# Last-Updated: Mon May 13 16:09:24 2013 (+0530)
 #           By: subha
-#     Update #: 95
+#     Update #: 96
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -68,7 +68,7 @@ class LoaderDialog(QtGui.QFileDialog):
         form.addRow(self.targetLabel, self.targetText)
         self.modelChoiceBox = QtGui.QGroupBox('Load model to')
         self.replaceExistingButton = QtGui.QRadioButton('&Replace current model')
-        self.mergeExistingButton = QtGui.QRadioButton('&Merge with current model')
+        self.mergeExistingButton = QtGui.QRadioButton('&Keep current model')
         self.replaceExistingButton.setChecked(True)
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(self.replaceExistingButton)
