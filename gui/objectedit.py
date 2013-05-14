@@ -6,9 +6,9 @@
 # Maintainer:
 # Created: Wed Jun 30 11:18:34 2010 (+0530) 
 # Version:
-# Last-Updated: Thu May  9 23:12:18 2013 (+0530)
+# Last-Updated: Tue May 14 17:32:52 2013 (+0530)
 #           By: subha
-#     Update #: 864
+#     Update #: 916
 # URL:
 # Keywords:
 # Compatibility:
@@ -121,7 +121,17 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
     directly, except that its undo and redo slots should be connected
     to by the GUI actions for the same.
 
+    SIGNALS:
+
+    objectNameChanged(PyQt_PyObject): when a moose object's name is
+    changed, this signal is emitted with the object as argument. This
+    can be captured by widgets that display the object name.
+
+    dataChanged: emitted when any data is changed in the moose object
+
     """
+    objectNameChanged = QtCore.pyqtSignal('PyQt_PyObject')
+    # dataChanged = QtCore.pyqtSignal('PyQt_PyObject')
     def __init__(self, datain, headerdata=['Field','Value'], undolen=100, parent=None, *args):
         QtCore.QAbstractTableModel.__init__(self, parent, *args)
         self.fieldFlags = {}
@@ -136,15 +146,6 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
             value = self.mooseObject.getField(fieldName)
             self.fields.append(fieldName)
         flag = QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
-        # !! This is outrageous !! - Subha
-        # searchField = 'set_'+fieldName
-        # try:
-        #     for fn in (fn for fn in moose.getFieldDict(self.mooseObject.class_,'destFinfo').keys() if fn.startswith(srchField)):
-        #         flag = flag | Qt.ItemIsEditable
-        #         value = self.mooseObject.getField(fieldName)
-        # except Exception, e:
-        #     pass
-        # !! end outrageous !!
         self.fieldFlags[fieldName] = flag
 
     def rowCount(self, parent):
@@ -180,7 +181,7 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
         self.redoStack.append((index, str(currentvalue)))
         self.mooseObject.setField(field, oldvalue)
         if field == 'name':
-            self.emit(QtCore.SIGNAL('objectNameChanged(PyQt_PyObject)'), self.mooseObject)
+            self.objectNameChanged.emit(self.mooseObject)
         self.emit(QtCore.SIGNAL('dataChanged(const QModelIndex&, const QModelIndex&)'), index, index)
 
     def redo(self):
@@ -249,6 +250,7 @@ class ObjectEditView(QtGui.QTableView):
         self.setAlternatingRowColors(True)
         self.resizeColumnsToContents()
         self.setModel(ObjectEditModel(mobject, undolen=undolen))
+        print 'Created view with', mobject
 
     def dataChanged(self, tl, br):
         QtGui.QTableView.dataChanged(self, tl, br)
@@ -265,6 +267,7 @@ class ObjectEditDockWidget(QtGui.QDockWidget):
     will be wasteful on memory.
 
     """
+    objectNameChanged = QtCore.pyqtSignal('PyQt_PyObject')
     def __init__(self, mobj='/', parent=None, flags=None):
         QtGui.QDockWidget.__init__(self, parent=parent)
         mobj = moose.element(mobj)
@@ -274,14 +277,22 @@ class ObjectEditDockWidget(QtGui.QDockWidget):
         self.setWindowTitle('Edit: %s' % (mobj.path))
 
     def setObject(self, mobj):
-        mobj = moose.element(mobj)
+        element = moose.element(mobj)
         try:
-            view = self.view_dict[mobj]
+            view = self.view_dict[element]
         except KeyError:
-            view = ObjectEditView(mobj)
-            self.view_dict[mobj] = view
+            print '####', element
+            view = ObjectEditView(element)
+            self.view_dict[element] = view
+            view.model().objectNameChanged.connect(
+                         self.emitObjectNameChanged)
         self.setWidget(view)
-        self.setWindowTitle('Edit: %s' % (mobj.path))
+        self.setWindowTitle('Edit: %s' % (element.path))
+        print view.model().mooseObject
+        view.update()
+    
+    def emitObjectNameChanged(self, mobj):
+        self.objectNameChanged.emit(mobj)
         
 
 def main():
