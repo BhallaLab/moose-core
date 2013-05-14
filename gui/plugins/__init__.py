@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Nov 29 12:26:34 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Nov 29 12:26:44 2012 (+0530)
+# Last-Updated: Mon May 13 16:14:32 2013 (+0530)
 #           By: subha
-#     Update #: 1
+#     Update #: 2
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -45,7 +45,7 @@
 
 # Code:
 
-all = ['default']
+all = ['default', 'kkit']
 
 
 # 

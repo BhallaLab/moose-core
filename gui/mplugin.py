@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Oct  2 17:25:41 2012 (+0530)
 # Version: 
-# Last-Updated: Mon May 13 15:55:27 2013 (+0530)
+# Last-Updated: Tue May 14 16:02:48 2013 (+0530)
 #           By: subha
-#     Update #: 179
+#     Update #: 180
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -62,7 +62,7 @@ class MoosePluginBase(object):
         """
         self._views = []
         self._menus = []
-        self.mWindow = mainwindow
+        self.mainWindow = mainwindow
         self.modelRoot = root
 
     def getPreviousPlugin(self):
