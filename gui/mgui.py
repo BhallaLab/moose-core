@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Mon May 13 16:00:44 2013 (+0530)
+# Last-Updated: Tue May 14 17:16:01 2013 (+0530)
 #           By: subha
-#     Update #: 1104
+#     Update #: 1127
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -194,7 +194,7 @@ class MWindow(QtGui.QMainWindow):
             dockWidget.setWidget(self.getShellWidget())
             self.dockWidgets[dockWidget] = True
             self.addDockWidget(Qt.Qt.BottomDockWidgetArea, dockWidget)
-            # TODO this should become visible in edit view only
+            dockWidget.setVisible(False)
             dockWidget = ObjectEditDockWidget('/')
             self.dockWidgets[dockWidget] = True
             self.objectEditDockWidget = dockWidget
@@ -244,7 +244,6 @@ class MWindow(QtGui.QMainWindow):
 
         """
         self.plugin = self.loadPluginClass(str(name))(str(root), self)
-        print 'Plugin:', self.plugin
         self.updateMenus()
         for action in self.pluginsMenu.actions():
             if str(action.text()) == str(name):
@@ -254,6 +253,8 @@ class MWindow(QtGui.QMainWindow):
         for subwin in self.mdiArea.subWindowList():
             subwin.close()
         self.setCurrentView('editor')
+        self.objectEditDockWidget.objectNameChanged.connect(
+            self.plugin.getEditorView().getCentralWidget().updateItemSlot)
         return self.plugin
 
     def updateExistingMenu(self, menu):
@@ -305,6 +306,7 @@ class MWindow(QtGui.QMainWindow):
         if newSubWindow:
             subwin = self.mdiArea.addSubWindow(widget)
             subwin.setWindowTitle('%s: %s' % (view, widget.modelRoot))
+            subwin.setSizePolicy(QtGui.QSizePolicy.Minimum | QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum | QtGui.QSizePolicy.Expanding)
         # Make dockwidgets from other views invisible and make those
         # from current view visible or add them if not already part of
         # main window.
@@ -598,7 +600,7 @@ class MWindow(QtGui.QMainWindow):
 
     def objectEditSlot(self, mobj):
         """Slot for switching the current object in object editor."""
-        self.objectEditDockWidget.setObject(mobj)
+        self.objectEditDockWidget.setObject(mobj)        
         self.objectEditDockWidget.setVisible(True)
 
     def loadModelDialogSlot(self):
