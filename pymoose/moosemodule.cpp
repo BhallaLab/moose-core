@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Tue May  7 21:06:40 2013 (+0530)
+// Last-Updated: Tue May 14 19:21:46 2013 (+0530)
 //           By: subha
-//     Update #: 10265
+//     Update #: 10318
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -135,6 +135,20 @@ extern int getNumCores();
 
 // C-wrapper to be used by Python
 extern "C" {
+
+    // The endianness check is from:
+    // http://stackoverflow.com/questions/2100331/c-macro-definition-to-determine-big-endian-or-little-endian-machine
+    enum
+    {
+        O32_LITTLE_ENDIAN = 0x03020100ul,
+        O32_BIG_ENDIAN = 0x00010203ul,
+        O32_PDP_ENDIAN = 0x01000302ul
+    };
+
+    static const union { unsigned char bytes[4]; uint32_t value; } o32_host_order =  { { 0, 1, 2, 3 } };
+
+#define O32_HOST_ORDER (o32_host_order.value)
+    
     /////////////////////////////////////////////////////////////////
     // Module globals 
     /////////////////////////////////////////////////////////////////
@@ -704,7 +718,13 @@ static struct module_state _state;
     PyDoc_STRVAR(moose_Field_documentation,
                  "Base class for MOOSE fields.\n"
                  "\n"
-                 "Instances contain the field name and a pointer to the owner object.");
+                 "Instances contain the field name and a pointer to the owner\n"
+                 "object. Note on hash: the Field class is hashable but the hash is\n"
+                 "constructed from the path of the container element and the field\n"
+                 "name. Hence changing the name of the container element will cause the\n"
+                 "hash to change. This is rather unusual in a moose script, but if you\n"
+                 "are putting fields as dictionary keys, you should do that after names\n"
+                 "of all elements have been finalized.");
 
 
   static PyTypeObject moose_Field = {
@@ -2065,9 +2085,10 @@ static struct module_state _state;
         if (!Id::isValid(self->oid_.id)){
             RAISE_INVALID_ID(-1, "moose_ObjId_hash");
         }
-        PyObject * path = Py_BuildValue("s", self->oid_.path().c_str());        
-        long ret = PyObject_Hash(path);
-        Py_XDECREF(path);
+        long ret = (long)(self->oid_.id.value());
+        ret |= (O32_HOST_ORDER == O32_BIG_ENDIAN)? \
+                ((long)(self->oid_.dataId.value() >> 32))    \
+                :((long)(self->oid_.dataId.value() << 32));
         return ret;
     }
     
@@ -3462,6 +3483,13 @@ static struct module_state _state;
     ///////////////////////////////////////////////
     // Type defs for PyObject of ObjId
     ///////////////////////////////////////////////
+    PyDoc_STRVAR(moose_ObjId_documentation,
+                 "Individual moose element contained in an array-type object\n"
+                 "(ematrix). Each element has a unique path, possibly with its index in\n"
+                 "the ematrix. These are identified by three components: id_ and\n"
+                 "dindex. id_ is the Id of the containing ematrix, it has a unique\n"
+                 "numerical value (field `value`). `dindex` is the index of the current\n"
+                 "item in the containing ematrix. `dindex` is 0 for single elements.");
     PyTypeObject ObjIdType = { 
       PyVarObject_HEAD_INIT(NULL, 0)            /* tp_head */
         "moose.melement",                      /* tp_name */
@@ -3483,7 +3511,7 @@ static struct module_state _state;
         (setattrofunc)moose_ObjId_setattro, /* tp_setattro */
         0,                                  /* tp_as_buffer */
         Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
-        "Individual moose object contained in an array-type object.",
+              moose_ObjId_documentation,
         0,                                  /* tp_traverse */
         0,                                  /* tp_clear */
       (richcmpfunc)moose_ObjId_richcompare, /* tp_richcompare */

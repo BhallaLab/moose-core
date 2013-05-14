@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Nov 13 15:58:31 2012 (+0530)
 # Version: 
-# Last-Updated: Tue May 14 17:09:27 2013 (+0530)
+# Last-Updated: Tue May 14 19:46:44 2013 (+0530)
 #           By: subha
-#     Update #: 1076
+#     Update #: 1082
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -158,7 +158,7 @@ class DefaultEditorWidget(EditorWidgetBase):
         for mclass in moose.element('/classes').children:
             action = QtGui.QAction(mclass.name[0], self.insertMenu)
             self.insertMenu.addAction(action)
-            # NOTE: The stuff about mapper is sensitive to data types
+            # NOTE: Signal mapping is sensitive to data types
             # in Python. It HAS TO BE OLD STYLE connect in PyQT. You
             # cannot get away with:
             #
@@ -169,6 +169,7 @@ class DefaultEditorWidget(EditorWidgetBase):
         self.connect(self.insertMapper, QtCore.SIGNAL('mapped(const QString&)'), self.tree.insertElementSlot)
         self.editAction = QtGui.QAction('Edit', self.treeMenu)
         self.editAction.triggered.connect(self.objectEditSlot)
+        self.tree.elementInserted.connect(self.elementInsertedSlot)
         self.treeMenu.addAction(self.editAction)
         return self.treeMenu
     
@@ -188,6 +189,9 @@ class DefaultEditorWidget(EditorWidgetBase):
         argument"""
         mobj = self.tree.currentItem().mobj
         self.editObject.emit(mobj.path)
+
+    def elementInsertedSlot(self, mobj):
+        self.editObject.emit(mobj.path)        
 
     def sizeHint(self):
         return QtCore.QSize(400, 300)

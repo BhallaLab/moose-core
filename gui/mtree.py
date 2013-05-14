@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue May 14 11:51:35 2013 (+0530)
 # Version: 
-# Last-Updated: Tue May 14 17:07:05 2013 (+0530)
+# Last-Updated: Tue May 14 19:45:00 2013 (+0530)
 #           By: subha
-#     Update #: 129
+#     Update #: 138
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -155,7 +155,7 @@ class MooseTreeWidget(QtGui.QTreeWidget):
 
     # Ignored are elements to be ignored when building the tree
     ignored = ['/Msgs', '/classes']
-
+    elementInserted = QtCore.pyqtSignal('PyQt_PyObject')
     def __init__(self, *args):
         """A tree widget to display model tree in MOOSE.
 
@@ -163,6 +163,10 @@ class MooseTreeWidget(QtGui.QTreeWidget):
         
         rootElement: melement
                     root element for the tree.
+
+        SIGNAL:
+
+        elementInserted(melement) emitted when a new element is inserted.
 
         """
 	QtGui.QTreeWidget.__init__(self, *args)
@@ -193,8 +197,11 @@ class MooseTreeWidget(QtGui.QTreeWidget):
 	item = MooseTreeItem(parent)
 	item.setObject(obj)
 	odict[obj] = item
-	for child in obj.children:
-            for elm in child:
+	for child in obj.children:    
+            ch = child
+            if child[0].name in obj.getFieldNames('fieldElementFinfo'):
+                ch = obj.getField(child[0].name)
+            for elm in ch:
                 self.setupTree(moose.element(elm), item, odict)      
 	return item
 
@@ -229,7 +236,7 @@ class MooseTreeWidget(QtGui.QTreeWidget):
         new_item.setObject(new_obj)
         current.addChild(new_item)
         self.odict[new_obj] = new_item
-        self.emit(QtCore.SIGNAL('elementInserted(PyQt_PyObject)'), new_obj)
+        self.elementInserted.emit(new_obj)
 
     def setCurrentItem(self, item):
         """Overloaded version of QTreeWidget.setCurrentItem
