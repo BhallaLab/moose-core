@@ -44,6 +44,8 @@ class KkitPlugin(MoosePlugin):
     def getEditorView(self):
         if not hasattr(self, 'editorView'):
             self.editorView = KkitEditorView(self)
+            self.editorView.getCentralWidget().editObject.connect(self.mainWindow.objectEditSlot)
+            self.currentView = self.editorView
         return self.editorView
 
     def getRunView(self):        
@@ -76,17 +78,14 @@ class KkitEditorView(MooseEditorView):
         if self._centralWidget is None:
             #self._centralWidget = EditorWidgetBase()
             self._centralWidget = KineticsWidget()
-            #print "1getCentrelWidget",self.plugin.modelRoot
+            #print "getCentrelWidget",self.plugin.modelRoot
             self._centralWidget.setModelRoot(self.plugin.modelRoot)
         return self._centralWidget
 
 class  KineticsWidget(DefaultEditorWidget):
     def __init__(self, *args): 
-        #QtGui.QWidget.__init__(self,parent)
 	DefaultEditorWidget.__init__(self, *args)
-        self.border = 10
-        self.hLayout = QtGui.QGridLayout(self)
-        self.setLayout(self.hLayout)
+        self.border = 10        
         self.sceneContainer = QtGui.QGraphicsScene(self)
         self.sceneContainer.setSceneRect(self.sceneContainer.itemsBoundingRect())
         self.sceneContainer.setBackgroundBrush(QtGui.QColor(230,220,219,120))
@@ -101,9 +100,9 @@ class  KineticsWidget(DefaultEditorWidget):
 
         if not m:
             if hasattr(self, 'view') and isinstance(self.view, QtGui.QWidget):
-                self.hLayout.removeWidget(self.view)
+                self.layout().removeWidget(self.view)
             self.view = GraphicalView(self.sceneContainer,self.border,self)
-            self.hLayout.addWidget(self.view)
+            self.layout().addWidget(self.view)
         else:
             """ maxmium and minimum coordinates of the objects specified in kkit file. """
             self.xmin = 0.0
@@ -169,11 +168,10 @@ class  KineticsWidget(DefaultEditorWidget):
             """ All the moose Object are connected for visualization """
             self.drawLine_arrow(itemignoreZooming=False)
             if hasattr(self, 'view') and isinstance(self.view, QtGui.QWidget):
-                self.hLayout.removeWidget(self.view)
+                self.layout().removeWidget(self.view)
             self.view = GraphicalView(self.sceneContainer,self.border,self)
-            self.hLayout.addWidget(self.view)
+            self.layout().addWidget(self.view)
     
-        
     def mooseObjOntoscene(self):
         """  All the compartments are put first on to the scene \
              Need to do: Check With upi if empty compartments exist """
@@ -276,6 +274,18 @@ class  KineticsWidget(DefaultEditorWidget):
         qgraphicItem.connect(qgraphicItem,QtCore.SIGNAL("qgtextPositionChange(PyQt_PyObject)"),self.positionChange)
         qgraphicItem.connect(qgraphicItem,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.emitItemtoEditor)
 
+    def updateItemSlot(self, mooseObject):
+        """This is overridden by derived classes to connect appropriate
+        slot for updating the display item."""
+        #In this case if the name is updated from the keyboard both in mooseobj and gui gets updation
+        changedItem = ''
+        for item in self.sceneContainer.items():
+            if isinstance(item,PoolItem):
+                if mooseObject.getId() == element(item.mobj).getId():
+                    item.updateSlot()
+                    #once the text is edited in editor, laydisplay gets updated in turn resize the length, positionChanged signal shd be emitted
+                    self.positionChange(mooseObject)
+
     def positionChange(self,mooseObject):
         #If the item position changes, the corresponding arrow's are calculated
         if isinstance(element(mooseObject),CubeMesh):
@@ -292,7 +302,8 @@ class  KineticsWidget(DefaultEditorWidget):
                 v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
 
     def emitItemtoEditor(self,mooseObject):
-        self.emit(QtCore.SIGNAL("itemPressed(PyQt_PyObject)"),mooseObject)
+        #self.emit(QtCore.SIGNAL("itemPressed(PyQt_PyObject)"),mooseObject)
+        self.editObject.emit(mooseObject.path)
 
     def drawLine_arrow(self, itemignoreZooming=False):
         for inn,out in self.srcdesConnection.items():
