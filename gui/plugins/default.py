@@ -2,13 +2,13 @@
 # 
 # Filename: default.py
 # Description: 
-# Author: 
+# Author: Subhasis Ray
 # Maintainer: 
 # Created: Tue Nov 13 15:58:31 2012 (+0530)
 # Version: 
-# Last-Updated: Tue May 14 19:46:44 2013 (+0530)
+# Last-Updated: Wed May 15 11:59:46 2013 (+0530)
 #           By: subha
-#     Update #: 1082
+#     Update #: 1092
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -122,6 +122,8 @@ class MooseEditorView(EditorBase):
         """
         if self._centralWidget is None:
             self._centralWidget = DefaultEditorWidget()
+            if hasattr(self._centralWidget, 'init'):
+                self._centralWidget.init()
             self._centralWidget.setModelRoot(self.plugin.modelRoot)
         return self._centralWidget
 
@@ -140,10 +142,14 @@ class DefaultEditorWidget(EditorWidgetBase):
     def __init__(self, *args):
         EditorWidgetBase.__init__(self, *args)
         layout = QtGui.QHBoxLayout()
+        self.setLayout(layout)
+
+    def init(self):
+        if hasattr(self, 'tree'):
+            return
         self.tree = mtree.MooseTreeWidget()
         self.getTreeMenu()
-        layout.addWidget(self.tree)
-        self.setLayout(layout)
+        self.layout().addWidget(self.tree)
 
     def getTreeMenu(self):
         if hasattr(self, 'treeMenu'):
