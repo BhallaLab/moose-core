@@ -89,8 +89,10 @@ class  KineticsWidget(DefaultEditorWidget):
         self.sceneContainer = QtGui.QGraphicsScene(self)
         self.sceneContainer.setSceneRect(self.sceneContainer.itemsBoundingRect())
         self.sceneContainer.setBackgroundBrush(QtGui.QColor(230,220,219,120))
-
     
+    def sizeHint(self):
+        return QtCore.QSize(800,400)
+
     def updateModelView(self):
 
         if self.modelRoot == '/':
@@ -113,7 +115,7 @@ class  KineticsWidget(DefaultEditorWidget):
             self.sceneContainer.clear()
             """ TODO: size will be dummy at this point, but I need the availiable size from the Gui """
             self.size = QtCore.QSize(1024 ,768)
-            
+            #self.size = QtCore.QSize(300,400)
             self.autocoordinates = False
             
             """ pickled the color map file """
