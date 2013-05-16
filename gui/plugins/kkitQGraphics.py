@@ -23,7 +23,7 @@ class KineticsDisplayItem(QtGui.QGraphicsWidget):
         if self.hasFocus() or self.isSelected():
             painter.setPen(QtGui.QPen(QtGui.QPen(QtCore.Qt.black, 1.8,Qt.Qt.DashLine, Qt.Qt.RoundCap, Qt.Qt.RoundJoin)))
             painter.drawRect(self.boundingRect())
-      
+            
 
     def itemChange(self,change,value):
         if change == QtGui.QGraphicsItem.ItemPositionChange:
@@ -72,6 +72,10 @@ class PoolItem(KineticsDisplayItem):
         font =QtGui.QFont("Helvetica")
         font.setPointSize(fontsize)
         self.gobj.setFont(font)
+
+    def boundingRect(self):
+        ''' reimplimenting boundingRect for redrawning '''
+        return QtCore.QRectF(0,0,self.gobj.boundingRect().width()+PoolItem.fontMetrics.width('  '),self.gobj.boundingRect().height())
 
     def updateSlot(self):
         self.gobj.setText(self.mobj[0].name)
