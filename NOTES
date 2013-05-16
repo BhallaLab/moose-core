@@ -21910,3 +21910,10 @@ Checkin 4539.
 Set up cubeMesh model with adaptors. Turned out I had to update the Adaptor
 code to handle field requests.
 ==========================================================================
+13 May Working on putting more reasonable numbers in the adaptors.
+Compiles and runs, look at adapt.c.
+==========================================================================
+16 May
+Bugfix on array indexing for synapses, reported by Subha. Still to figure out
+if it works in the PyMoose context.
+==========================================================================
