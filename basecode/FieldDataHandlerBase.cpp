@@ -137,8 +137,15 @@ DataId FieldDataHandlerBase::pathDataId(
 {
 	if ( indices.size() != static_cast< unsigned int >( pathDepth_ ) + 1 )
 	  return DataId::bad();
-	if ( indices[pathDepth_].size() > 0 )
-		return DataId( indices[pathDepth_][0] );
+	if ( indices[pathDepth_].size() > 0 ) {
+		// return DataId( indices[pathDepth_][0] );
+		if ( pathDepth_ > 0 ) {
+				// Deal with parent indices, in a half-baked way but better than nothing.
+			if ( indices[pathDepth_-1].size() > 0 )
+				return DataId( indices[pathDepth_-1][0], indices[pathDepth_][0], numFieldBits_ );
+		}
+		return DataId( indices[pathDepth_][0] ); // fallback option.
+	}
 	return DataId( 0 );
 }
 

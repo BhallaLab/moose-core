@@ -30,6 +30,7 @@ class Adaptor
 		// Here are the Destination functions
 		////////////////////////////////////////////////////////////
 		void input( double val );
+		void handleBufInput( PrepackedBuffer pb );
 		void innerProcess();
 		void process( const Eref& e, ProcPtr p );
 		void reinit( const Eref& e, ProcPtr p );
