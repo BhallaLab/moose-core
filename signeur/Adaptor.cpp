@@ -45,8 +45,8 @@ static SrcFinfo1< FuncId >  *requestField()
 
 static DestFinfo* handleInput() {
 	static DestFinfo handleInput( "handleInput", 
-			"Handle the returned value.",
-			new OpFunc1< Adaptor, double >( &Adaptor::input )
+			"Handle the returned value, which is in a prepacked buffer.",
+			new OpFunc1< Adaptor, PrepackedBuffer >( &Adaptor::handleBufInput )
 	);
 	return &handleInput;
 }
@@ -246,6 +246,14 @@ double Adaptor::getOutput() const
 
 void Adaptor::input( double v )
 {
+	sum_ += v;
+	++counter_;
+}
+
+void Adaptor::handleBufInput( PrepackedBuffer pb )
+{
+	assert( pb.dataSize() == 1 );
+	double v = *reinterpret_cast< const double* >( pb.data() );
 	sum_ += v;
 	++counter_;
 }

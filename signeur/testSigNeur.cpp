@@ -741,6 +741,22 @@ void testSigNeurElec()
 	cout << "." << flush;
 }
 
+Id addPlot( const string& objPath, const string& field, 
+				const string& plotname )
+{
+	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
+	vector< int > dims( 1, 1 );
+
+	Id nid( "/n" );
+	assert( nid != Id() );
+	Id obj( objPath );
+	assert( obj != Id() );
+	Id tab = shell->doCreate( "Table", nid, plotname, dims );
+	MsgId mid = shell->doAddMsg( "Single", tab, "requestData", obj, field );
+	assert( mid != Msg::bad );
+	return tab;
+}
+
 void testAdaptorsInCubeMesh()
 {
 	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
@@ -762,9 +778,11 @@ void testAdaptorsInCubeMesh()
 	MsgId mid = shell->doAddMsg( "OneToAll", 
 					adaptCa, "requestField", elecCa, "get_Ca" );
 	assert( mid != Msg::bad );
+
 	mid = shell->doAddMsg( "OneToAll", 
-					adaptCa, "outputSrc", chemCa, "set_n" );
+					adaptCa, "outputSrc", chemCa, "set_conc" );
 	assert( mid != Msg::bad );
+	Field< double >::set( adaptCa, "scale", 0.001 ); // from uM to mM
 
 	Id adaptGluR = shell->doCreate( "Adaptor", nid, "adaptGluR", dims );
 	mid = shell->doAddMsg( "OneToAll", 
@@ -773,14 +791,60 @@ void testAdaptorsInCubeMesh()
 	mid = shell->doAddMsg( "OneToAll", 
 					adaptGluR, "outputSrc", elecGluR, "set_Gbar" );
 	assert( mid != Msg::bad );
+	// max n = 100, max Gar = 
+	Field< double >::set( adaptGluR, "scale", 1e-5/100 ); // from n to pS
 
 	Id adaptK = shell->doCreate( "Adaptor", nid, "adaptK", dims );
 	mid = shell->doAddMsg( "OneToAll", 
-					adaptK, "requestField", chemK, "get_n" );
+					adaptK, "requestField", chemK, "get_conc" );
 	assert( mid != Msg::bad );
 	mid = shell->doAddMsg( "OneToAll", 
 					adaptK, "outputSrc", elecK, "set_Gbar" );
 	assert( mid != Msg::bad );
+	Field< double >::set( adaptK, "scale", 0.00001 ); // from mM to Siemens
+
+	////////////////////////////////////////////////////////////////////
+	// Set up the plots, both elec and chem.
+	////////////////////////////////////////////////////////////////////
+	vector< Id > plots;
+	plots.push_back( addPlot( "/n/head2", "get_Vm", "spineVm" ) );
+	plots.push_back( addPlot( "/n/compt", "get_Vm", "dendVm" ) );
+	plots.push_back( addPlot( "/n/head2/ca", "get_Ca", "spineElecCa" ) );
+	plots.push_back( addPlot( "/n/spineMesh/Ca", "get_conc", "spineChemCa") );
+	plots.push_back( addPlot( "/n/psdMesh/psdGluR", "get_n", "psdGluR_N" ));
+	plots.push_back( addPlot( "/n/head2/gluR", "get_Gbar", "elecGluR_Gbar" ) );
+	plots.push_back( addPlot( "/n/neuroMesh/kChan", "get_conc", "kChan_conc" ) );
+	plots.push_back( addPlot( "/n/compt/K", "get_Gbar", "kChan_Gbar" ) );
+
+	//////////////////////////////////////////////////////////////////////
+	// Schedule, Reset, and run.
+	//////////////////////////////////////////////////////////////////////
+
+	shell->doSetClock( 0, 5.0e-5 );
+	shell->doSetClock( 1, 5.0e-5 );
+	shell->doSetClock( 2, 5.0e-5 );
+	shell->doSetClock( 5, 1.0e-2 );
+	shell->doSetClock( 6, 1.0e-3 );
+	shell->doSetClock( 8, 1.0e-2 );
+
+	shell->doUseClock( "/n/compt,/n/shaft#,/n/head#", "init", 0 );
+	shell->doUseClock( "/n/compt,/n/shaft#,/n/head#", "process", 1 );
+	shell->doUseClock( "/n/synInput", "process", 1 );
+	shell->doUseClock( "/n/compt/Na,/n/compt/K", "process", 2 );
+	shell->doUseClock( "/n/head#/#", "process", 2 );
+	shell->doUseClock( "/n/#Mesh/#", "process", 5 );
+	shell->doUseClock( "/n/adapt#", "process", 6 );
+	shell->doUseClock( "/n/#[ISA=Table]", "process", 8 );
+
+	shell->doReinit();
+	shell->doReinit();
+	shell->doStart( 10 );
+
+	for ( vector< Id >::iterator i = plots.begin(); i != plots.end(); ++i )
+	{
+		SetGet2< string, string >::set( *i, "xplot", "adapt.plot",
+						i->element()->getName() );
+	}
 
 	shell->doDelete( nid );
 	cout << "." << flush;
