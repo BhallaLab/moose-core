@@ -21916,4 +21916,9 @@ Compiles and runs, look at adapt.c.
 16 May
 Bugfix on array indexing for synapses, reported by Subha. Still to figure out
 if it works in the PyMoose context.
+
+Seems not to, though it is correctly reporting the indexing if we put brackets
+for indexing the synapse. Tried another thing. Still doesn't work in
+python.
+
 ==========================================================================

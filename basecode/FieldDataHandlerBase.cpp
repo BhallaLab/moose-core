@@ -145,6 +145,8 @@ DataId FieldDataHandlerBase::pathDataId(
 				return DataId( indices[pathDepth_-1][0], indices[pathDepth_][0], numFieldBits_ );
 		}
 		return DataId( indices[pathDepth_][0] ); // fallback option.
+	} else if ( pathDepth_ > 0 && indices[pathDepth_-1].size() > 0 ) {
+		return DataId( indices[pathDepth_-1][0], 0, numFieldBits_ );
 	}
 	return DataId( 0 );
 }
