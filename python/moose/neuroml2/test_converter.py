@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Apr 23 18:51:58 2013 (+0530)
 # Version: 
-# Last-Updated: Mon May 20 17:35:20 2013 (+0530)
+# Last-Updated: Mon May 20 23:03:21 2013 (+0530)
 #           By: subha
-#     Update #: 300
+#     Update #: 310
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -125,7 +125,7 @@ class TestFindRateFn(unittest.TestCase):
         pylab.plot(self.v_array, self.sigmoid, 'y-', 
                    self.v_array, converter.sigmoid(self.v_array, *self.p_sigmoid), 'b--', 
                    self.v_array, fn(self.v_array, *params), 'r-.')
-        pylab.legend(('original', 'computed', 'fitted %s' % (fn)))
+        pylab.legend(('original sigmoid', 'computed', 'fitted %s' % (fn)))
         pylab.show()
         self.assertEqual(converter.sigmoid, fn)
         errors = params - np.array(self.p_sigmoid)
@@ -140,7 +140,7 @@ class TestFindRateFn(unittest.TestCase):
         pylab.plot(self.v_array, self.exp, 'y-',
                    self.v_array, converter.exponential(self.v_array, *self.p_exp), 'b--',
                    self.v_array, fnval, 'r-.')
-        pylab.legend(('original', 'computed', 'fitted %s' % (fn)))
+        pylab.legend(('original exp', 'computed', 'fitted %s' % (fn)))
         pylab.show()
         self.assertEqual(converter.exponential, fn)
         # The same exponential can be satisfied by an infinite number
@@ -160,12 +160,15 @@ class TestFindRateFn(unittest.TestCase):
         pylab.plot(self.v_array, self.linoid, 'y-', 
                    self.v_array, converter.linoid(self.v_array, *self.p_linoid), 'b--',
                    self.v_array, fn(self.v_array, *params), 'r-.')
-        pylab.legend(('original', 'computed', 'fitted %s' % (fn)))
+        pylab.legend(('original linoid', 'computed', 'fitted %s' % (fn)))
         pylab.show()
         self.assertEqual(converter.linoid, fn)
-        errors = params - np.array(self.p_linoid)
-        for orig, err in zip(self.p_linoid, errors):
-            self.assertAlmostEqual(abs(err/orig), 0.0, places=2)
+        fnval = fn(self.v_array, *params)
+        rms_error = np.sqrt(np.mean((self.linoid - fnval)**2))
+        self.assertAlmostEqual(rms_error/max(self.linoid), 0.0, places=2)
+        # errors = params - np.array(self.p_linoid)
+        # for orig, err in zip(self.p_linoid, errors):
+        #     self.assertAlmostEqual(abs(err/orig), 0.0, places=2)
 
     def test_dblexponential(self):
         print 'Testing double exponential'
@@ -174,7 +177,7 @@ class TestFindRateFn(unittest.TestCase):
         pylab.plot(self.v_array, self.dblexp, 'y-', 
                    self.v_array, converter.double_exp(self.v_array, *self.p_dblexp), 'b--',
                    self.v_array, fnval, 'r-.')
-        pylab.legend(('original', 'computed', 'fitted %s' % (fn)))
+        pylab.legend(('original dblexp', 'computed', 'fitted %s' % (fn)))
         pylab.show()
         self.assertEqual(converter.double_exp, fn)
         rms_error = np.sqrt(np.sum((self.dblexp - fnval)**2))

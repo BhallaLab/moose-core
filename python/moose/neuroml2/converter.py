@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Apr 22 12:15:23 2013 (+0530)
 # Version: 
-# Last-Updated: Mon May 20 17:38:14 2013 (+0530)
+# Last-Updated: Mon May 20 23:06:36 2013 (+0530)
 #           By: subha
-#     Update #: 636
+#     Update #: 700
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -188,6 +188,81 @@ fn_p0_map = {
 
 # import pylab
 
+def randomized_curve_fit(fn, x, y, maxiter=100, best=False):
+    """Repeatedly search for a good fit with randomly generated initial
+    parameter set. This function first tries with default p0 for
+    fn. If that fails to find a good fit, (correlation coeff returned
+    by curve_fit being inf is an indication of this), it goes on to
+    generate random p0 arrays and try scipy.optimize.curve_fit using
+    this p0 until it finds a good fit or the number of iterations
+    reaches maxiter.
+
+    Ideally we should be doing something like stochastic gradient
+    descent, but I don't know if that might have performance issue in
+    pure python. uniform random is good enough for now.
+
+    Parameters
+    ----------
+    x: ndarray
+    values of the independent variable
+
+    y: ndarray
+    sample values of the dependent variable
+
+    maxiter: int
+    maximum number of iterations
+
+    best: bool
+    if true, repeat curve_fit for maxiter and return the case of least
+    rms error.
+
+    Returns
+    -------
+    The return value of scipy.optimize.curve_fit which succeed, or the
+    last call to it if maxiter iterations is reached..
+
+    """
+    good = True
+    p = None
+    try:
+        p = curve_fit(fn, x, y,  p0=fn_p0_map[fn], full_output=True)
+    except (RuntimeError, RuntimeWarning) as e:
+        good = False
+    # The last entry returned by scipy.optimize.leastsq used by
+    # curve_fit is 1, 2, 3 or 4 if it succeeds.
+    if (p is None) or np.any(p[1] == np.inf) or (p[-1] not in [1, 2, 3, 4]):
+        good = False
+    min_err = 1e10
+    p_best = None
+    if good: 
+        if best:
+            min_err = sum((y - fn(x, *tuple(p[0])))**2)
+            p_best = p
+        else:
+            return p
+    for ii in range(maxiter):
+        good = True
+        p0 = np.random.uniform(low=min(x), high=max(x), size=len(fn_p0_map[fn]))
+        try:
+            p = curve_fit(fn, x, y,  p0=p0, full_output=True)
+        except (RuntimeError, RuntimeWarning) as e:
+            good = False
+        if (p is None) or (p[-1] not in [1, 2, 3, 4]) or np.any(p[1] == np.inf):
+            good = False
+        if good:
+            if best:
+                err = sum((y - fn(x, *tuple(p[0])))**2)
+                if err < min_err:
+                    min_err = err 
+                    p_best = p
+            else:
+                print 'Found good', fn.func_name, p[0], p[1]
+                break
+    if ii == maxiter:
+        print fn.func_name, 'reached maxiter'
+    return p_best
+
+
 def find_ratefn(x, y):
     """Find the function that fits the rate function best. This will try
     exponential, sigmoid and linoid and return the best fit.
@@ -208,12 +283,11 @@ def find_ratefn(x, y):
     best_fn = None
     best_p = None
     for fn in fn_rate_map.keys():
-        try:
-            popt, pcov = curve_fit(fn, x, y, p0=fn_p0_map[fn], maxfev=300000)
-        except RuntimeError as e:
-            print fn, e
-            # This can be reached in case maxfev is reached
+        p = randomized_curve_fit(fn, x, y, best=True)
+        if p is None:
             continue
+        popt = p[0]
+        pcov = p[1]        
         error = y - fn(x, *popt)
         erms = np.sqrt(np.mean(error**2))
         print fn, 'e_rms', erms
@@ -223,11 +297,11 @@ def find_ratefn(x, y):
         # pylab.plot(x, y, 'b-')
         # pylab.plot(x, fn(x, *popt), 'r-.')
         # pylab.show()
+        print fn.func_name, 'rms error:', erms, 'pcov:', pcov
         if erms < rms_error:
             rms_error = erms
             best_fn = fn
             best_p = popt
-            print 'selected', fn, erms
     # plt.plot(x, y, label='original')
     # plt.legend()
     # plt.show()
