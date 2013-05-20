@@ -158,6 +158,7 @@ void ChanBase::setGbar( double Gbar )
 {
 	Gbar_ = Gbar;
 }
+
 double ChanBase::getGbar() const
 {
 	return Gbar_;

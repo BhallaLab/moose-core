@@ -128,6 +128,12 @@ SynChan::~SynChan()
 ///////////////////////////////////////////////////
 // Field function definitions
 ///////////////////////////////////////////////////
+//
+void SynChan::innerSetGbar( double Gbar )
+{
+	SynChanBase::innerSetGbar( Gbar );
+	normalizeGbar();
+}
 
 void SynChan::setTau1( double tau1 )
 {
@@ -157,6 +163,27 @@ void SynChan::setNormalizeWeights( bool value )
 bool SynChan::getNormalizeWeights() const
 {
 	return normalizeWeights_;
+}
+
+void SynChan::normalizeGbar()
+{
+        if ( doubleEq( tau2_, 0.0 ) ) {
+                // norm_ = 1.0;
+                norm_ = SynChanBase::getGbar();
+        } else {
+                if ( doubleEq( tau1_, tau2_ ) ) {
+                    norm_ = SynChanBase::getGbar() * SynE() / tau1_;
+                } else {
+                    double tpeak = tau1_ * tau2_ * log( tau1_ / tau2_ ) / 
+                            ( tau1_ - tau2_ );
+                    norm_ = SynChanBase::getGbar() * ( tau1_ - tau2_ ) / 
+                            ( tau1_ * tau2_ * ( 
+                            exp( -tpeak / tau1_ ) - exp( -tpeak / tau2_ )
+                                                ));
+                }
+        }
+	if ( normalizeWeights_ && getNumSynapses() > 0 )
+		norm_ /= static_cast< double >( getNumSynapses() );
 }
 
 ///////////////////////////////////////////////////
@@ -194,6 +221,16 @@ void SynChan::reinit( const Eref& e, ProcPtr info )
 	Y_ = 0.0;
 	xconst1_ = tau1_ * ( 1.0 - exp( -dt / tau1_ ) );
 	xconst2_ = exp( -dt / tau1_ );
+
+        if ( doubleEq( tau2_, 0.0 ) ) {
+                yconst1_ = 1.0;
+                yconst2_ = 0.0;
+        } else {
+                yconst1_ = tau2_ * ( 1.0 - exp( -dt / tau2_ ) );
+                yconst2_ = exp( -dt / tau2_ );
+        }
+	normalizeGbar();
+	/*
         if ( doubleEq( tau2_, 0.0 ) ) {
                 yconst1_ = 1.0;
                 yconst2_ = 0.0;
@@ -216,6 +253,7 @@ void SynChan::reinit( const Eref& e, ProcPtr info )
 	// updateNumSynapse( e );
 	if ( normalizeWeights_ && getNumSynapses() > 0 )
 		norm_ /= static_cast< double >( getNumSynapses() );
+	*/
 	while ( !pendingEvents_.empty() )
 		pendingEvents_.pop();
 }
