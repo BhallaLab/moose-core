@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Apr 23 18:51:58 2013 (+0530)
 # Version: 
-# Last-Updated: Mon Apr 29 10:48:01 2013 (+0530)
+# Last-Updated: Mon May 20 17:35:20 2013 (+0530)
 #           By: subha
-#     Update #: 189
+#     Update #: 300
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -97,33 +97,51 @@ class TestFindRateFn(unittest.TestCase):
         self.vmax = 40e-3
         self.vdivs = 640
         self.v_array = np.linspace(self.vmin, self.vmax, self.vdivs+1)
-        self.v0_sigmoid = -38e-3
-        self.k_sigmoid = 1/(-10e-3)
-        self.a_sigmoid = 1.0
-        self.v0_exp = -53.5e-3
-        self.k_exp = 1/(-27e-3)
-        self.a_exp = 2e3
-        # A sigmoid function - from traub2005, NaF->m_inf
-        self.sigmoid = self.a_sigmoid / (1.0 + np.exp((self.v_array - self.v0_sigmoid) * self.k_sigmoid))
-        # An exponential function - from traub2005, KC->n_inf
-        self.exp = self.a_exp * np.exp((self.v_array - self.v0_exp) * self.k_exp)        
-        # A linoid function
-        self.a_linoid, self.k_linoid, self.v0_linoid = -0.01*1e3, -1/10e-3, 10e-3
-        # This is alpha_n from original Hodgkin-Huxley K channel.
-        self.linoid = converter.linoid(self.v_array, self.a_linoid, self.k_linoid, self.v0_linoid)
+        # Parameters for sigmoid function - from traub2005, NaF->m_inf
+        p_sigmoid = (1.0, 1/-10e-3, -38e-3, 0.0)
+        self.sigmoid = p_sigmoid[0] / (1.0 + np.exp(p_sigmoid[1] * (self.v_array - p_sigmoid[2]))) + p_sigmoid[3]
+        self.p_sigmoid = p_sigmoid
+        # Parameters for exponential function - from traub2005, KC->n_inf
+        p_exp = (2e3, 1/-27e-3, -53.5e-3, 0.0)
+        self.exp = p_exp[0] * np.exp(p_exp[1] * (self.v_array - p_exp[2])) + p_exp[3]
+        self.p_exp = p_exp
+        # Parameters for linoid function: alpha_n from original Hodgkin-Huxley K channel.
+        p_linoid = (-0.01*1e3, -1/10e-3, 10e-3, 0.0)
+        self.linoid = p_linoid[3] + p_linoid[0] * (self.v_array - p_linoid[2]) / (np.exp(p_linoid[1] * (self.v_array - p_linoid[2])) - 1)
+        self.p_linoid = p_linoid
+        # This is tau_m of transient Ca2+ current (eq. 7) from
+        # Huguenard and McCormick, J Neurophysiol, 68:1373-1383,
+        # 1992.;
+        #1e-3 * (0.612 + 1 / (np.exp((self.v_array*1e3 + 132)/-16.7) + np.exp((self.v_array*1e3 + 16.8)/18.2)))
+        p_dblexp = (1e-3, -1/16.7e-3, -132e-3, 1/18.2e-3, -16.8e-3, 0.612e-3)
+        self.dblexp = p_dblexp[5] + p_dblexp[0] / (np.exp(p_dblexp[1] * (self.v_array - p_dblexp[2])) + 
+                                                        np.exp(p_dblexp[3] * (self.v_array - p_dblexp[4])))
+        self.p_dblexp = p_dblexp
 
     def test_sigmoid(self):
+        print 'Testing sigmoid'
         fn, params = converter.find_ratefn(self.v_array, self.sigmoid)
-        print 'Sigmoid params original:', self.a_sigmoid, self.k_sigmoid, self.v0_sigmoid, 'detected:', params
+        print 'Sigmoid params original:', self.p_sigmoid, 'detected:', params
+        pylab.plot(self.v_array, self.sigmoid, 'y-', 
+                   self.v_array, converter.sigmoid(self.v_array, *self.p_sigmoid), 'b--', 
+                   self.v_array, fn(self.v_array, *params), 'r-.')
+        pylab.legend(('original', 'computed', 'fitted %s' % (fn)))
+        pylab.show()
         self.assertEqual(converter.sigmoid, fn)
-        errors = params - np.array([self.a_sigmoid, self.k_sigmoid, self.v0_sigmoid])
+        errors = params - np.array(self.p_sigmoid)
         for err in errors:
             self.assertAlmostEqual(err, 0.0)
 
     def test_exponential(self):
+        print 'Testing exponential'
         fn, params = converter.find_ratefn(self.v_array, self.exp)
-        print 'Exponential params original:', self.a_exp, self.k_exp, self.v0_exp, 'detected:', params
+        print 'Exponential params original:', self.p_exp, 'detected:', params
         fnval = converter.exponential(self.v_array, *params)
+        pylab.plot(self.v_array, self.exp, 'y-',
+                   self.v_array, converter.exponential(self.v_array, *self.p_exp), 'b--',
+                   self.v_array, fnval, 'r-.')
+        pylab.legend(('original', 'computed', 'fitted %s' % (fn)))
+        pylab.show()
         self.assertEqual(converter.exponential, fn)
         # The same exponential can be satisfied by an infinite number
         # of parameter values. Hence we cannot compare the parameters,
@@ -136,15 +154,32 @@ class TestFindRateFn(unittest.TestCase):
         self.assertAlmostEqual(rms_error/max(self.exp), 0.0)
 
     def test_linoid(self):
+        print 'Testing linoid'
         fn, params = converter.find_ratefn(self.v_array, self.linoid)
-        print 'Linoid params original:', self.a_linoid, self.k_linoid, self.v0_linoid, 'detected:', params
-        # pylab.plot(self.v_array, self.linoid, 'r-')
-        # pylab.plot(self.v_array, fn(self.v_array, *params), 'k-.')
-        # pylab.show()
+        print 'Linoid params original:', self.p_linoid, 'detected:', params
+        pylab.plot(self.v_array, self.linoid, 'y-', 
+                   self.v_array, converter.linoid(self.v_array, *self.p_linoid), 'b--',
+                   self.v_array, fn(self.v_array, *params), 'r-.')
+        pylab.legend(('original', 'computed', 'fitted %s' % (fn)))
+        pylab.show()
         self.assertEqual(converter.linoid, fn)
-        errors = params - np.array((self.a_linoid, self.k_linoid, self.v0_linoid))
-        for orig, err in zip((self.a_linoid, self.k_linoid, self.v0_linoid), errors):
+        errors = params - np.array(self.p_linoid)
+        for orig, err in zip(self.p_linoid, errors):
             self.assertAlmostEqual(abs(err/orig), 0.0, places=2)
+
+    def test_dblexponential(self):
+        print 'Testing double exponential'
+        fn, params = converter.find_ratefn(self.v_array, self.dblexp)
+        fnval = fn(self.v_array, *params)
+        pylab.plot(self.v_array, self.dblexp, 'y-', 
+                   self.v_array, converter.double_exp(self.v_array, *self.p_dblexp), 'b--',
+                   self.v_array, fnval, 'r-.')
+        pylab.legend(('original', 'computed', 'fitted %s' % (fn)))
+        pylab.show()
+        self.assertEqual(converter.double_exp, fn)
+        rms_error = np.sqrt(np.sum((self.dblexp - fnval)**2))
+        print params, rms_error
+        self.assertAlmostEqual(rms_error/max(self.dblexp), 0.0)
 
 if __name__ == '__main__':
     unittest.main()

@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Apr 22 12:15:23 2013 (+0530)
 # Version: 
-# Last-Updated: Mon Apr 29 10:49:18 2013 (+0530)
+# Last-Updated: Mon May 20 17:38:14 2013 (+0530)
 #           By: subha
-#     Update #: 551
+#     Update #: 636
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -51,6 +51,7 @@
 from collections import deque
 import numpy as np
 from scipy.optimize import curve_fit
+from matplotlib import pyplot as plt
 
 import moose
 from moose.utils import autoposition
@@ -126,13 +127,13 @@ def convert_morphology(root, positions='auto'):
 
 ###########################################
 # function defs for curve fitting H-H-Gates
-def exponential(x, a, k, x0):
-    return a * np.exp(k * (x - x0))
+def exponential(x, a, k, x0, y0=0):
+    return a * np.exp(k * (x - x0)) + y0
 
-def sigmoid(x, a, k, x0):
-    return a / (np.exp(k * (x - x0)) + 1.0)
+def sigmoid(x, a, k, x0, y0=0):
+    return a / (np.exp(k * (x - x0)) + 1.0) + y0
 
-def linoid(x, a, k, x0):
+def linoid(x, a, k, x0, y0=0):
     """The so called linoid function. Called explinear in neurml.""" 
     denominator = np.exp(k * (x - x0)) - 1.0
     # Linoid often includes a zero denominator - we need to fill those
@@ -148,22 +149,39 @@ def linoid(x, a, k, x0):
                 ret[ii] = ret[ii-1] + (ret[ii-1] - ret[ii-2])
             else:
                 ret[ii] = (ret[ii+1] + ret[ii+2]) * 0.5
-    return ret
+    return ret + y0
 
-def double_exp(x, a,  k1, x1, k2, x2):
+def double_exp(x, a, k1, x1, k2, x2, y0=0):
     """For functions of the form:
 
     a / (exp(k1 * (x - x1)) + exp(k2 * (x - x2)))
 
     """
-    return a / (np.exp(k1 * (x - x1)) + np.exp(k2 * (x - x2)))
+    ret = np.zeros(len(x))
+    try:
+        ret = a / (np.exp(k1 * (x - x1)) + np.exp(k2 * (x - x2))) + y0
+    except RuntimeWaring as e:
+        print 'Double exponential:', e
+        print 'params:', a, k1, x1, k2, x2, y0
+    # plt.plot(x, ret, label='%g, %g, %g, %g, %g, %g' % (a, k1, x1, k2, x2, y0))
+    return ret
 
 # Map from the above functions to corresponding neuroml class
 fn_rate_map = {
     exponential: 'HHExpRate',
     sigmoid: 'HHSigmoidRate',
     linoid: 'HHExpLinearRate',
+    double_exp: None,    
 }
+
+# These are default starting parameter values
+fn_p0_map = {
+    exponential: (1.0, -100, 20e-3, 0.0),
+    sigmoid: (1.0, 1.0, 0.0, 0.0),
+    linoid: (1.0, 1.0, 0.0, 0.0),
+    double_exp: (1e-3, -1.0, 0.0, -1.0, 0.0, 0.0),
+}
+
 
 # end: function defs for curve fitting H-H-Gates
 ###########################################
@@ -186,19 +204,21 @@ def find_ratefn(x, y):
     function values
 
     """
-    functions = [exponential, sigmoid, linoid]
-    rms_error = 1.0 # arbitrarily setting this
+    rms_error = 1e10 # arbitrarily setting this
     best_fn = None
     best_p = None
-    for fn in functions:
+    for fn in fn_rate_map.keys():
         try:
-            popt, pcov = curve_fit(fn, x, y)
+            popt, pcov = curve_fit(fn, x, y, p0=fn_p0_map[fn], maxfev=300000)
         except RuntimeError as e:
             print fn, e
             # This can be reached in case maxfev is reached
             continue
         error = y - fn(x, *popt)
         erms = np.sqrt(np.mean(error**2))
+        print fn, 'e_rms', erms
+        # if fn == double_exp:
+        #     plt.plot(x, fn(x, *popt), label='%s' % (fn))
         # print erms, rms_error, fn
         # pylab.plot(x, y, 'b-')
         # pylab.plot(x, fn(x, *popt), 'r-.')
@@ -207,8 +227,22 @@ def find_ratefn(x, y):
             rms_error = erms
             best_fn = fn
             best_p = popt
+            print 'selected', fn, erms
+    # plt.plot(x, y, label='original')
+    # plt.legend()
+    # plt.show()
     return (best_fn, best_p)    
 
+def define_vdep_rate(fn, name):
+    """Define new component type with generic expressions for voltage
+    dependent rate.
+
+    """
+    ctype = neuroml.ComponentType(name)
+    # This is going to be ugly ...
+    
+    
+    
 def convert_hhgate(gate):
     """Convert a MOOSE gate into GateHHRates in NeuroML"""
     hh_rates = neuroml.GateHHRates(id=gate.id_.value, name=gate.name)
@@ -221,15 +255,23 @@ def convert_hhgate(gate):
         raise Exception('could not find a fitting function for `alpha`')
     if bfn is  None:
         raise Exception('could not find a fitting function for `alpha`')
-    hh_rates.forward_rate = neuroml.HHRate(type=fn_rate_map[afn], 
+    afn_type = fn_rate_map[afn]
+    afn_component_type = None
+    if afn_type is None:
+        afn_type, afn_component_type = define_component_type(afn)
+    hh_rates.forward_rate = neuroml.HHRate(type=afn_type, 
                                            midpoint='%gmV' % (ap[2]),
                                            scale='%gmV' % (ap[1]),
                                            rate='%gper_ms' % (ap[0]))
-    hh_rates.reverse_rate = neuroml.HHRate(type=fn_rate_map[bfn], 
+    bfn_type = fn_rate_map[bfn]
+    bfn_component_type = None
+    if bfn_type is None:
+        bfn_type, bfn_component_type = define_component_type(bfn)
+    hh_rates.reverse_rate = neuroml.HHRate(type=bfn_type, 
                                            midpoint='%gmV' % (bp[2]),
                                            scale='%gmV' % (bp[1]),
                                            rate='%gper_ms' % (bp[0]))
-    return hh_rates
+    return hh_rates, afn_component_type, bfn_component_type
                                            
     
 def convert_hhchannel(channel):
