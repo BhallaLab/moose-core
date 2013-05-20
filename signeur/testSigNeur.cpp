@@ -121,7 +121,7 @@ Id buildSigNeurElec( vector< Id >& spines )
 
 	// Make a SpikeGen as a synaptic input to the spines.
 	Id synInput = shell->doCreate( "SpikeGen", nid, "synInput", dims );
-	Field< double >::set( synInput, "refractT", 17e-3 );
+	Field< double >::set( synInput, "refractT", 47e-3 );
 	Field< double >::set( synInput, "threshold", -1.0 );
 	Field< bool >::set( synInput, "edgeTriggered", false );
 	SetGet1< double >::set( synInput, "Vm", 0.0 );
@@ -142,8 +142,8 @@ Id buildSigNeurElec( vector< Id >& spines )
 		MsgId mid = shell->doAddMsg( "Single", ObjId( synInput ), "event",
 					ObjId( syn ), "addSpike" );
 		assert( mid != Msg::bad );
-		Field< double >::set( syn, "weight", 1 );
-		Field< double >::set( syn, "delay", i * 1.0e-3 );
+		Field< double >::set( syn, "weight", 0.2 );
+		Field< double >::set( syn, "delay", i * 1.0e-4 );
 	}
 
 	return nid;
@@ -764,6 +764,15 @@ void testAdaptorsInCubeMesh()
 
 	vector< Id > spines;
 	Id nid = buildSigNeurElec( spines );
+
+	Id compt( "/n/compt" );
+	Field< double >::set( compt, "inject", 0.0e-8 );
+	Id synInput( "/n/synInput" );
+	Field< double >::set( synInput, "refractT", 87e-3 );
+	Id Na( "/n/compt/Na" );
+	double gbar = Field< double >::get( Na, "Gbar" );
+	Field< double >::set( Na, "Gbar", gbar * 1.5 );
+
 	makeChemInCubeMesh();
 	Id elecCa( "/n/head2/ca" );
 	Id chemCa( "/n/spineMesh/Ca" );
@@ -774,15 +783,34 @@ void testAdaptorsInCubeMesh()
 	Id elecK( "/n/compt/K" );
 	Id chemK( "/n/neuroMesh/kChan" );
 
+	///////////////////////////////////////////////////////////////////
+	// Fake diffusion between spines and dend
+	///////////////////////////////////////////////////////////////////
+	Id dendCa( "/n/neuroMesh/Ca" );
+	Id spineMesh( "/n/spineMesh" );
+	Id diffReac = shell->doCreate( "Reac", spineMesh, "diff" );
+	MsgId mid = shell->doAddMsg( "Single", diffReac, "sub", chemCa, "reac");
+	assert( mid != Msg::bad );
+	mid = shell->doAddMsg( "Single", diffReac, "prd", dendCa, "reac");
+	assert( mid != Msg::bad );
+	double dendVol = Field< double >::get( dendCa, "size" );
+	double spineVol = Field< double >::get( chemCa, "size" );
+	Field< double >::set( diffReac, "Kf", 1 ); // from spine to dend
+	Field< double >::set( diffReac, "Kb", spineVol / dendVol );
+
+	///////////////////////////////////////////////////////////////////
+	// Adaptors
+	///////////////////////////////////////////////////////////////////
 	Id adaptCa = shell->doCreate( "Adaptor", nid, "adaptCa", dims );
-	MsgId mid = shell->doAddMsg( "OneToAll", 
+	mid = shell->doAddMsg( "OneToAll", 
 					adaptCa, "requestField", elecCa, "get_Ca" );
 	assert( mid != Msg::bad );
 
 	mid = shell->doAddMsg( "OneToAll", 
 					adaptCa, "outputSrc", chemCa, "set_conc" );
 	assert( mid != Msg::bad );
-	Field< double >::set( adaptCa, "scale", 0.001 ); // from uM to mM
+	Field< double >::set( adaptCa, "outputOffset", 0.0001 ); // 100 nM
+	Field< double >::set( adaptCa, "scale", 0.05 ); // .06 to .003 mM
 
 	Id adaptGluR = shell->doCreate( "Adaptor", nid, "adaptGluR", dims );
 	mid = shell->doAddMsg( "OneToAll", 
@@ -792,7 +820,7 @@ void testAdaptorsInCubeMesh()
 					adaptGluR, "outputSrc", elecGluR, "set_Gbar" );
 	assert( mid != Msg::bad );
 	// max n = 100, max Gar = 
-	Field< double >::set( adaptGluR, "scale", 1e-5/100 ); // from n to pS
+	Field< double >::set( adaptGluR, "scale", 1e-4/100 ); // from n to pS
 
 	Id adaptK = shell->doCreate( "Adaptor", nid, "adaptK", dims );
 	mid = shell->doAddMsg( "OneToAll", 
@@ -801,7 +829,8 @@ void testAdaptorsInCubeMesh()
 	mid = shell->doAddMsg( "OneToAll", 
 					adaptK, "outputSrc", elecK, "set_Gbar" );
 	assert( mid != Msg::bad );
-	Field< double >::set( adaptK, "scale", 0.00001 ); // from mM to Siemens
+	Field< double >::set( adaptK, "scale", 0.3 ); // from mM to Siemens
+		// The starting Gbar is 0.0002827.
 
 	////////////////////////////////////////////////////////////////////
 	// Set up the plots, both elec and chem.
@@ -811,10 +840,12 @@ void testAdaptorsInCubeMesh()
 	plots.push_back( addPlot( "/n/compt", "get_Vm", "dendVm" ) );
 	plots.push_back( addPlot( "/n/head2/ca", "get_Ca", "spineElecCa" ) );
 	plots.push_back( addPlot( "/n/spineMesh/Ca", "get_conc", "spineChemCa") );
+	plots.push_back( addPlot( "/n/neuroMesh/Ca", "get_conc", "dendChemCa"));
 	plots.push_back( addPlot( "/n/psdMesh/psdGluR", "get_n", "psdGluR_N" ));
 	plots.push_back( addPlot( "/n/head2/gluR", "get_Gbar", "elecGluR_Gbar" ) );
 	plots.push_back( addPlot( "/n/neuroMesh/kChan", "get_conc", "kChan_conc" ) );
 	plots.push_back( addPlot( "/n/compt/K", "get_Gbar", "kChan_Gbar" ) );
+	plots.push_back( addPlot( "/n/spineMesh/toPsd", "get_conc", "toPsd") );
 
 	//////////////////////////////////////////////////////////////////////
 	// Schedule, Reset, and run.
@@ -825,14 +856,14 @@ void testAdaptorsInCubeMesh()
 	shell->doSetClock( 2, 5.0e-5 );
 	shell->doSetClock( 5, 1.0e-2 );
 	shell->doSetClock( 6, 1.0e-3 );
-	shell->doSetClock( 8, 1.0e-2 );
+	shell->doSetClock( 8, 1.0e-3 );
 
 	shell->doUseClock( "/n/compt,/n/shaft#,/n/head#", "init", 0 );
 	shell->doUseClock( "/n/compt,/n/shaft#,/n/head#", "process", 1 );
 	shell->doUseClock( "/n/synInput", "process", 1 );
 	shell->doUseClock( "/n/compt/Na,/n/compt/K", "process", 2 );
 	shell->doUseClock( "/n/head#/#", "process", 2 );
-	shell->doUseClock( "/n/#Mesh/#", "process", 5 );
+	shell->doUseClock( "/n/#Mesh/##", "process", 5 );
 	shell->doUseClock( "/n/adapt#", "process", 6 );
 	shell->doUseClock( "/n/#[ISA=Table]", "process", 8 );
 

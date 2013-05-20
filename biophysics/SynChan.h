@@ -29,6 +29,13 @@ class SynChan: public SynChanBase
 		void setNormalizeWeights( bool value );
 		bool getNormalizeWeights() const;
 
+		// override virtual func from ChanBase
+		void innerSetGbar( double Gbar );
+
+		/////////////////////////////////////////////////////////////////
+		// Utility function for any time Gbar changes
+		void normalizeGbar();
+
 		/////////////////////////////////////////////////////////////////
 		// ElementFinfo access function definitions
 		/////////////////////////////////////////////////////////////////

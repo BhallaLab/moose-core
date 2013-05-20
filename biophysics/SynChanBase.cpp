@@ -163,6 +163,10 @@ SynChanBase::~SynChanBase()
 
 void SynChanBase::setGbar( double Gbar )
 {
+	innerSetGbar( Gbar );
+}
+void SynChanBase::innerSetGbar( double Gbar ) // Virtual func
+{
 	cb.setGbar( Gbar );
 }
 double SynChanBase::getGbar() const
