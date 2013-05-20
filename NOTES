@@ -21922,3 +21922,15 @@ for indexing the synapse. Tried another thing. Still doesn't work in
 python.
 
 ==========================================================================
+20 May
+Tested the scaling by adaptors. Works. But the simulation isn't responding
+to these changes.
+OK, fixed: minor scheduling typo.
+
+Now it is doing interesting stuff, but could do more.
+Setting up a diffusion reaction between spine and dend.
+That helps.
+Issue with SynChan: Does not change when you assign Gbar. Turns out that there
+is a normalization calculation that was only being done at reinit. I have now
+set it to renormalize every time Gbar is altered. Now it seems to work.
+
