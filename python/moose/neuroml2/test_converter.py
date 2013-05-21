@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Apr 23 18:51:58 2013 (+0530)
 # Version: 
-# Last-Updated: Mon May 20 23:03:21 2013 (+0530)
+# Last-Updated: Tue May 21 11:59:00 2013 (+0530)
 #           By: subha
-#     Update #: 310
+#     Update #: 325
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -128,9 +128,8 @@ class TestFindRateFn(unittest.TestCase):
         pylab.legend(('original sigmoid', 'computed', 'fitted %s' % (fn)))
         pylab.show()
         self.assertEqual(converter.sigmoid, fn)
-        errors = params - np.array(self.p_sigmoid)
-        for err in errors:
-            self.assertAlmostEqual(err, 0.0)
+        rms_error = np.sqrt(np.mean((self.sigmoid - fn(self.v_array, *params))**2))
+        self.assertAlmostEqual(rms_error/max(abs(self.sigmoid)), 0.0, places=3)
 
     def test_exponential(self):
         print 'Testing exponential'
@@ -151,7 +150,7 @@ class TestFindRateFn(unittest.TestCase):
         # pylab.plot(self.v_array, fnval, 'r-.') 
         # pylab.show()
         print rms_error, rms_error/max(self.exp)
-        self.assertAlmostEqual(rms_error/max(self.exp), 0.0)
+        self.assertAlmostEqual(rms_error/max(self.exp), 0.0, places=3)
 
     def test_linoid(self):
         print 'Testing linoid'
@@ -165,7 +164,7 @@ class TestFindRateFn(unittest.TestCase):
         self.assertEqual(converter.linoid, fn)
         fnval = fn(self.v_array, *params)
         rms_error = np.sqrt(np.mean((self.linoid - fnval)**2))
-        self.assertAlmostEqual(rms_error/max(self.linoid), 0.0, places=2)
+        self.assertAlmostEqual(rms_error/max(self.linoid), 0.0, places=3)
         # errors = params - np.array(self.p_linoid)
         # for orig, err in zip(self.p_linoid, errors):
         #     self.assertAlmostEqual(abs(err/orig), 0.0, places=2)
@@ -180,9 +179,9 @@ class TestFindRateFn(unittest.TestCase):
         pylab.legend(('original dblexp', 'computed', 'fitted %s' % (fn)))
         pylab.show()
         self.assertEqual(converter.double_exp, fn)
-        rms_error = np.sqrt(np.sum((self.dblexp - fnval)**2))
+        rms_error = np.sqrt(np.mean((self.dblexp - fnval)**2))
         print params, rms_error
-        self.assertAlmostEqual(rms_error/max(self.dblexp), 0.0)
+        self.assertAlmostEqual(rms_error/max(self.dblexp), 0.0, places=3)
 
 if __name__ == '__main__':
     unittest.main()
