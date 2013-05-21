@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Tue May 14 17:16:01 2013 (+0530)
+# Last-Updated: Tue May 21 14:52:00 2013 (+0530)
 #           By: subha
-#     Update #: 1127
+#     Update #: 1202
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -262,11 +262,11 @@ class MWindow(QtGui.QMainWindow):
         already exists. If so, update the same and return
         True. Otherwise return False.
         """
-        for existingMenu in self.menuBar().children():
-            if isinstance(existingMenu, QtGui.QMenu) and \
-               menu.title() == existingMenu.title():
-                existingMenu.addSeparator()
-                existingMenu.addActions(menu.actions())
+        for action in self.menuBar().actions():
+            print '22222', action.text()
+            if menu.title() == action.text():
+                action.menu().addSeparator()
+                action.menu().addActions(menu.actions())
                 return True
         return False
         
@@ -281,12 +281,14 @@ class MWindow(QtGui.QMainWindow):
 
         """
         self.menuBar().clear()
-        self.menuBar().addMenu(self.getFileMenu())
-        self.menuBar().addMenu(self.getEditMenu())
-        self.menuBar().addMenu(self.getViewMenu())
-        self.menuBar().addMenu(self.getPluginsMenu())
-        self.menuBar().addMenu(self.getRunMenu())
-        self.menuBar().addMenu(self.getHelpMenu())
+        menus = [self.getFileMenu(),
+                 self.getEditMenu(),
+                 self.getViewMenu(),
+                 self.getPluginsMenu(),
+                 self.getRunMenu(),
+                 self.getHelpMenu()]
+        for menu in menus:
+            self.menuBar().addMenu(menu)
         for menu in self.plugin.getMenus():
             if not self.updateExistingMenu(menu):
                 self.menuBar().addMenu(menu)
@@ -295,6 +297,7 @@ class MWindow(QtGui.QMainWindow):
         """Set current view to a particular one: options are 'editor',
         'plot', 'run'. A plugin can provide more views if necessary.
         """
+        print '11111', view
         self.plugin.setCurrentView(view)
         targetView = None
         newSubWindow = True
@@ -306,7 +309,10 @@ class MWindow(QtGui.QMainWindow):
         if newSubWindow:
             subwin = self.mdiArea.addSubWindow(widget)
             subwin.setWindowTitle('%s: %s' % (view, widget.modelRoot))
-            subwin.setSizePolicy(QtGui.QSizePolicy.Minimum | QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum | QtGui.QSizePolicy.Expanding)
+            subwin.setSizePolicy(QtGui.QSizePolicy.Minimum |
+                                 QtGui.QSizePolicy.Expanding, 
+                                 QtGui.QSizePolicy.Minimum | 
+                                 QtGui.QSizePolicy.Expanding)
         # Make dockwidgets from other views invisible and make those
         # from current view visible or add them if not already part of
         # main window.
@@ -415,16 +421,14 @@ class MWindow(QtGui.QMainWindow):
     
     def getEditActions(self):
         if (not hasattr(self, 'editActions')) or (self.editActions is None):
-            self.addRootAction = QtGui.QAction('&Set Model Root', self)
+            self.addRootAction = QtGui.QAction('&Set model root', self)
             self.addRootAction.triggered.connect(self.showSetModelRootDialog)
-            self.editActions = [ self.addRootAction
-                               ]
+            self.editActions = [self.addRootAction]
         return self.editActions
 
     def showSetModelRootDialog(self):
         rootName, ok = QtGui.QInputDialog.getText(self, 'Model Root', 'Enter the model root name:')
         rootName = str(rootName) #convert from QString to python str
-        print(rootName, ok)
         if ok:
             self.plugin.setModelRoot(rootName)
             for subwin in self.mdiArea.subWindowList():
@@ -440,6 +444,8 @@ class MWindow(QtGui.QMainWindow):
             self.runViewAction = QtGui.QAction('&Run view', self)
             self.runViewAction.triggered.connect(self.openRunView)     
             self.viewActions = [self.editorViewAction, self.plotViewAction, self.runViewAction]
+        for action in self.viewActions:
+            print action.text()
         return self.viewActions
 
     def getSubWindowActions(self):
@@ -522,35 +528,12 @@ class MWindow(QtGui.QMainWindow):
         one. Otherwise create a new one.
 
         """
-        widget = self.plugin.getEditorView().getCentralWidget()
-        for subwin in self.mdiArea.subWindowList():
-            if subwin.widget() == widget:
-                self.mdiArea.setActiveSubWindow(subwin)
-                return
-        subwin = self.mdiArea.addSubWindow(widget)
-        subwin.setWindowTitle('Plot: %s' % (widget.modelRoot))
-        subwin.setVisible(True)
+        self.setCurrentView('editor')
 
     def openPlotView(self):
-        widget = self.plugin.getPlotView().getCentralWidget()
-        for subwin in self.mdiArea.subWindowList():
-            if subwin.widget() == widget:
-                self.mdiArea.setActiveSubWindow(subwin)
-                return
-        subwin = self.mdiArea.addSubWindow(widget)
-        subwin.setWindowTitle('Plot: %s' % (widget.modelRoot))
-        self.plugin.getPlotView().plotAllData()
-        subwin.setVisible(True)
+        self.setCurrentView('plot')
         
     def openRunView(self):
-        # widget = self.plugin.getRunView().getCentralWidget()
-        # for subwin in self.mdiArea.subWindowList():
-        #     if subwin.widget() == widget:
-        #         self.mdiArea.setActiveSubWindow(subwin)
-        #         return
-        # subwin = self.mdiArea.addSubWindow(widget)
-        # subwin.setWindowTitle('Run: %s' % (widget.modelRoot))
-        # subwin.setVisible(True)
         self.setCurrentView('run')
 
     def resetAndStartSimulation(self):
@@ -628,9 +611,9 @@ class MWindow(QtGui.QMainWindow):
         if dialog.exec_():
             fileNames = dialog.selectedFiles()
             for fileName in fileNames:
-                print 'Current plugin', self.plugin
+                # print 'Current plugin', self.plugin
                 modelRoot = dialog.getTargetPath()
-                print 'modelroot', modelRoot
+                # print 'modelroot', modelRoot
                 ret = loadFile(str(fileName), modelRoot, merge=dialog.isMerge())
                 # Harsha: if subtype is None, in case of cspace then pluginLookup = /cspace/None 
                 #     which will not call kkit plugin so cleaning to /cspace 
@@ -641,7 +624,7 @@ class MWindow(QtGui.QMainWindow):
                     pluginName = 'default'
                 print 'Loaded model', ret['model'].path
                 self.setPlugin(pluginName, ret['model'].path)
-                print 'Plugin ===', self.plugin
+                # print 'Plugin ===', self.plugin
 
 if __name__ == '__main__':
     # create the GUI application
