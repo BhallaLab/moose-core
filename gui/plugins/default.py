@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Nov 13 15:58:31 2012 (+0530)
 # Version: 
-# Last-Updated: Tue May 21 14:54:37 2013 (+0530)
+# Last-Updated: Tue May 21 18:05:55 2013 (+0530)
 #           By: subha
-#     Update #: 1136
+#     Update #: 1154
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -98,6 +98,18 @@ class MooseEditorView(EditorBase):
     """
     def __init__(self, plugin):
         EditorBase.__init__(self, plugin)
+        self.__initMenus()
+        self.__initToolBars()
+
+    def __initMenus(self):
+        editMenu = QtGui.QMenu('&Edit')
+        for menu in self.getCentralWidget().getMenus():
+            editMenu.addMenu(menu)
+        self._menus.append(editMenu)
+
+    def __initToolBars(self):
+        for toolbar in self.getCentralWidget().getToolBars():
+            self._toolBars.append(toolbar)
 
     def getToolPanes(self):
         return super(MooseEditorView, self).getToolPanes()
@@ -127,15 +139,6 @@ class MooseEditorView(EditorBase):
             self._centralWidget.setModelRoot(self.plugin.modelRoot)
         return self._centralWidget
 
-    def getMenus(self):
-        if not hasattr(self, 'editMenu'):
-            self.editMenu = QtGui.QMenu('&Edit')
-            for menu in self.getCentralWidget().getMenus():
-                self.editMenu.addMenu(menu)
-            self._menus.append(self.editMenu)
-        return self._menus
-    
-
 
 class DefaultEditorWidget(EditorWidgetBase):
     """Editor widget for default plugin. 
@@ -159,7 +162,10 @@ class DefaultEditorWidget(EditorWidgetBase):
             return
         self.tree = mtree.MooseTreeWidget()
         self.getTreeMenu()
-        self.layout().addWidget(self.tree)
+        self._toolBars.append(QtGui.QToolBar('Insert'))
+        for action in self.insertMenu.actions():
+            self._toolBars[-1].addAction(action)
+        self.layout().addWidget(self.tree)        
 
     def getTreeMenu(self):
         if hasattr(self, 'treeMenu'):
@@ -190,8 +196,8 @@ class DefaultEditorWidget(EditorWidgetBase):
         self.treeMenu.addAction(self.editAction)
         return self.treeMenu
 
-    def getMenus(self):
-        return self._menus
+    # def getMenus(self):
+    #     return self._menus
 
     def updateModelView(self):
         current = self.tree.currentItem().mobj

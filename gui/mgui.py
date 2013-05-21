@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Tue May 21 14:52:00 2013 (+0530)
+# Last-Updated: Tue May 21 18:03:22 2013 (+0530)
 #           By: subha
-#     Update #: 1202
+#     Update #: 1212
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -116,7 +116,8 @@ class MWindow(QtGui.QMainWindow):
         self.helpMenu = None
         self.helpActions = None
         self.viewActions = None
-        self.editActions = None                    
+        self.editActions = None        
+        self.toolBars = []
         self._loadedPlugins = {}
         self.setDockOptions(self.AnimatedDocks and self.AllowNestedDocks and self.AllowTabbedDocks)
         self.mdiArea = QtGui.QMdiArea()
@@ -293,6 +294,19 @@ class MWindow(QtGui.QMainWindow):
             if not self.updateExistingMenu(menu):
                 self.menuBar().addMenu(menu)
 
+    def updateToolbars(self):
+        for toolbar in self.toolBars:
+            self.removeToolBar(toolbar)
+        self.toolBars = []
+        for toolbar in self.getMyToolBars():
+            self.toolBars.append(toolbar)
+        for toolbar in self.plugin.getToolBars():
+            self.toolBars.append(toolbar)
+        for toolbar in self.plugin.getCurrentView().getToolBars():
+            self.toolBars.append(toolbar)
+        for toolbar in self.toolBars:
+            self.addToolBar(toolbar)
+
     def setCurrentView(self, view):
         """Set current view to a particular one: options are 'editor',
         'plot', 'run'. A plugin can provide more views if necessary.
@@ -331,7 +345,11 @@ class MWindow(QtGui.QMainWindow):
         for menu in self.plugin.getCurrentView().getMenus():
             if not self.updateExistingMenu(menu):
                 self.menuBar().addMenu(menu)
+        self.updateToolbars()
         return subwin
+
+    def getMyToolBars(self):
+        return []
 
     def getFileMenu(self):
         if self.fileMenu is None:
