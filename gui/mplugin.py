@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Oct  2 17:25:41 2012 (+0530)
 # Version: 
-# Last-Updated: Tue May 21 14:54:08 2013 (+0530)
+# Last-Updated: Tue May 21 18:05:19 2013 (+0530)
 #           By: subha
-#     Update #: 181
+#     Update #: 193
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -54,6 +54,14 @@ class MoosePluginBase(object):
     A GUI plugin for MOOSE should extend MoosePlugin class. It has to
     implement the methods described here.
 
+    We keep _toolBars, _menus and _views as protected member
+    variables. Derived classes should populate/update these according
+    to their needs. The idea is that if a base class is populating any
+    of these, those entries are generic enough for the derived classes
+    to use. So a derived class should append their specific entries to
+    these lists in stead of overriding the getToolBars(), getMenus()
+    and getViews() functions.
+
     """
     def __init__(self, root='/', mainwindow=None):
         """Create a plugin object whose model is the tree rooted at
@@ -62,6 +70,7 @@ class MoosePluginBase(object):
         """
         self._views = []
         self._menus = []
+        self._toolBars = []
         self.mainWindow = mainwindow
         self.modelRoot = root
 
@@ -85,7 +94,7 @@ class MoosePluginBase(object):
 
     def getCurrentView(self):
         """Return the current view of this plugin."""
-        raise NotImplementedError('method must be reimplemented in subclass')    
+        raise NotImplementedError('method must be reimplemented in subclass')
 
     def setCurrentView(self, view):
         """Set current view (e.g., editor/plot/run).
@@ -104,6 +113,9 @@ class MoosePluginBase(object):
 
     def getMenus(self):
         return self._menus
+
+    def getToolBars(self):
+        return self._toolBars
 
     # def close(self):
     #     for view in self._views:
@@ -140,6 +152,7 @@ class ViewBase(object):
     def __init__(self, plugin):
         self._menus = []
         self._toolPanes = []
+        self._toolBars = []
         self._centralWidget = None
         self.plugin = plugin
 
@@ -149,7 +162,8 @@ class ViewBase(object):
 
     def getToolBars(self):
         """Return list of toolbars for this view."""
-        raise NotImplementedError('method must be reimplemented in subclass')
+        print '11111', self._toolBars
+        return self._toolBars
 
     def getMenus(self):
         """Return the menus for this view."""
@@ -177,8 +191,6 @@ class EditorBase(ViewBase):
         ViewBase.__init__(self, plugin)        
 
     def getToolPanes(self):
-        if not self._toolPanes:
-            self._toolPanes = []
         return self._toolPanes
 
     def getLibraryPane(self):
@@ -238,6 +250,7 @@ class EditorWidgetBase(QtGui.QWidget):
         QtGui.QWidget.__init__(self, *args)
         self.modelRoot = '/'
         self._menus = []
+        self._toolBars = []
         
     def setModelRoot(self, path):
         """Set the root of the model tree to be displayed.
@@ -261,6 +274,12 @@ class EditorWidgetBase(QtGui.QWidget):
 
         """
         raise NotImplementedError('must be implemented in derived class.')
+
+    def getMenus(self):
+        return self._menus
+
+    def getToolBars(self):
+        return self._toolBars
     
     
 # 
