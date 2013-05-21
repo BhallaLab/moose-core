@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue May 14 11:51:35 2013 (+0530)
 # Version: 
-# Last-Updated: Tue May 14 19:45:00 2013 (+0530)
+# Last-Updated: Tue May 21 13:30:05 2013 (+0530)
 #           By: subha
-#     Update #: 138
+#     Update #: 139
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -81,39 +81,29 @@ class MooseTreeModel(QtCore.QAbstractItemModel):
         if not index.isValid():
             return QtCore.QModelIndex()
         childItem = index.internalPointer()
-        print 'parent():', childItem.path
         parentItem = childItem.parent()
         if parentItem == self.rootItem:
             return QtCore.QModelIndex()
         return self.createIndex(parentItem.parent.children.index(parentItem), parentItem.getDataIndex(), parentItem)
 
     def rowCount(self, parent):
-        print 'Row count', parent
         if not parent.isValid():
             parentItem = self.rootItem
         else:
             parentItem = parent.internalPointer()
         ret = len(parentItem.children)
-        print 'rowCount()', ret
         return ret
 
     def columnCount(self, parent):
-        print 'Column count', parent,
         if parent.isValid():
-            print '\t',parent.internalPointer().path
             return len(parent.internalPointer())
-        else:
-            print '\tInvalid parent',
         ret = len(self.rootItem)
-        print '\t', ret
         return ret
 
     def data(self, index, role):
-        print 'data', index
         if not index.isValid():
             return None
         item = index.internalPointer()
-        print '\t', item.name, role
         return QtCore.QVariant(item[index.column()].name)
 
     def headerData(self, section, orientation, role=Qt.DisplayRole):
@@ -193,7 +183,6 @@ class MooseTreeWidget(QtGui.QTreeWidget):
         for ii in MooseTreeWidget.ignored:
             if obj.path.startswith(ii):
                 return None
-        print 'setupTree: object:', obj.path
 	item = MooseTreeItem(parent)
 	item.setObject(obj)
 	odict[obj] = item
@@ -226,7 +215,7 @@ class MooseTreeWidget(QtGui.QTreeWidget):
     def insertElementSlot(self, class_name):
         """Creates an instance of the class class_name and inserts it
         under currently selected element in the model tree."""
-        print 'Inserting element ...', class_name
+        # print 'Inserting element ...', class_name
         class_name = str(class_name)
         class_obj = eval('moose.' + class_name)
         current = self.currentItem()

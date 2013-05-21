@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Nov 13 15:58:31 2012 (+0530)
 # Version: 
-# Last-Updated: Wed May 15 11:59:46 2013 (+0530)
+# Last-Updated: Tue May 21 14:54:37 2013 (+0530)
 #           By: subha
-#     Update #: 1092
+#     Update #: 1136
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -89,7 +89,7 @@ class MoosePlugin(MoosePluginBase):
 
     def getMenus(self):
         """Create a custom set of menus."""
-        return []
+        return self._menus
 
 
 class MooseEditorView(EditorBase):
@@ -127,6 +127,16 @@ class MooseEditorView(EditorBase):
             self._centralWidget.setModelRoot(self.plugin.modelRoot)
         return self._centralWidget
 
+    def getMenus(self):
+        if not hasattr(self, 'editMenu'):
+            self.editMenu = QtGui.QMenu('&Edit')
+            for menu in self.getCentralWidget().getMenus():
+                self.editMenu.addMenu(menu)
+            self._menus.append(self.editMenu)
+        return self._menus
+    
+
+
 class DefaultEditorWidget(EditorWidgetBase):
     """Editor widget for default plugin. 
     
@@ -158,7 +168,8 @@ class DefaultEditorWidget(EditorWidgetBase):
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tree.customContextMenuRequested.connect(self.treeMenu.exec_)
         # Inserting a child element
-        self.insertMenu = QtGui.QMenu('Insert child')
+        self.insertMenu = QtGui.QMenu('Insert')
+        self._menus.append(self.insertMenu)
         self.treeMenu.addMenu(self.insertMenu)
         self.insertMapper = QtCore.QSignalMapper(self)
         for mclass in moose.element('/classes').children:
@@ -178,7 +189,10 @@ class DefaultEditorWidget(EditorWidgetBase):
         self.tree.elementInserted.connect(self.elementInsertedSlot)
         self.treeMenu.addAction(self.editAction)
         return self.treeMenu
-    
+
+    def getMenus(self):
+        return self._menus
+
     def updateModelView(self):
         current = self.tree.currentItem().mobj
         self.tree.recreateTree(root=self.modelRoot)
@@ -187,7 +201,6 @@ class DefaultEditorWidget(EditorWidgetBase):
     def updateItemSlot(self, mobj):
         """This should be overridden by derived classes to connect appropriate
         slot for updating the display item."""
-        print '***** update item slot'
         self.tree.updateItemSlot(mobj)
 
     def objectEditSlot(self):
@@ -506,7 +519,6 @@ class SchedulingWidget(QtGui.QWidget):
             widget = self.tickListWidget.layout().itemAtPosition(ii, 1).widget()
             if widget is not None and isinstance(widget, QtGui.QLineEdit):
                 try:
-                    print widget.text()
                     ret[ii-1] = float(str(widget.text()))
                 except ValueError:
                     QtGui.QMessageBox.warning(self, 'Invalid value', '`dt` for tick %d was meaningless.' % (ii-1))
