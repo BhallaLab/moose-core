@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Oct  2 17:25:41 2012 (+0530)
 # Version: 
-# Last-Updated: Tue May 14 16:02:48 2013 (+0530)
+# Last-Updated: Tue May 21 14:54:08 2013 (+0530)
 #           By: subha
-#     Update #: 180
+#     Update #: 181
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -237,6 +237,7 @@ class EditorWidgetBase(QtGui.QWidget):
     def __init__(self, *args):
         QtGui.QWidget.__init__(self, *args)
         self.modelRoot = '/'
+        self._menus = []
         
     def setModelRoot(self, path):
         """Set the root of the model tree to be displayed.
