@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Apr 22 12:15:23 2013 (+0530)
 # Version: 
-# Last-Updated: Mon May 20 23:06:36 2013 (+0530)
+# Last-Updated: Tue May 21 12:12:26 2013 (+0530)
 #           By: subha
-#     Update #: 700
+#     Update #: 812
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -48,6 +48,8 @@
 
 #!!!!! TODO: unit conversion !!!!
 
+import traceback
+import warnings
 from collections import deque
 import numpy as np
 from scipy.optimize import curve_fit
@@ -161,9 +163,7 @@ def double_exp(x, a, k1, x1, k2, x2, y0=0):
     try:
         ret = a / (np.exp(k1 * (x - x1)) + np.exp(k2 * (x - x2))) + y0
     except RuntimeWaring as e:
-        print 'Double exponential:', e
-        print 'params:', a, k1, x1, k2, x2, y0
-    # plt.plot(x, ret, label='%g, %g, %g, %g, %g, %g' % (a, k1, x1, k2, x2, y0))
+        traceback.print_exc()
     return ret
 
 # Map from the above functions to corresponding neuroml class
@@ -179,7 +179,7 @@ fn_p0_map = {
     exponential: (1.0, -100, 20e-3, 0.0),
     sigmoid: (1.0, 1.0, 0.0, 0.0),
     linoid: (1.0, 1.0, 0.0, 0.0),
-    double_exp: (1e-3, -1.0, 0.0, -1.0, 0.0, 0.0),
+    double_exp: (1e-3, -1.0, 0.0, 1.0, 0.0, 0.0),
 }
 
 
@@ -188,18 +188,27 @@ fn_p0_map = {
 
 # import pylab
 
-def randomized_curve_fit(fn, x, y, maxiter=100, best=False):
-    """Repeatedly search for a good fit with randomly generated initial
-    parameter set. This function first tries with default p0 for
-    fn. If that fails to find a good fit, (correlation coeff returned
-    by curve_fit being inf is an indication of this), it goes on to
-    generate random p0 arrays and try scipy.optimize.curve_fit using
-    this p0 until it finds a good fit or the number of iterations
-    reaches maxiter.
+def randomized_curve_fit(fn, x, y, maxiter=10, best=True):
+    """Repeatedly search for a good fit for common gate functions for
+    HHtype channels with randomly generated initial parameter
+    set. This function first tries with default p0 for fn. If that
+    fails to find a good fit, (correlation coeff returned by curve_fit
+    being inf is an indication of this), it goes on to generate random
+    p0 arrays and try scipy.optimize.curve_fit using this p0 until it
+    finds a good fit or the number of iterations reaches maxiter.
 
     Ideally we should be doing something like stochastic gradient
     descent, but I don't know if that might have performance issue in
-    pure python. uniform random is good enough for now.
+    pure python. The random parameterization in the present function
+    uses uniformly distributed random numbers within the half-open
+    interval [min(x), max(x)). The reason for choosing this: the
+    offset used in the exponential parts of Boltzman-type/HH-type
+    equations are usually within the domain of x. I also invert the
+    second entry (p0[1], because it is always (one of) the scale
+    factor(s) and usually 1/v for some v in the domain of x. I have
+    not tested the utility of this inversion. Even without this
+    inversion, with maxiter=100 this function is successful for the
+    test cases.
 
     Parameters
     ----------
@@ -214,7 +223,7 @@ def randomized_curve_fit(fn, x, y, maxiter=100, best=False):
 
     best: bool
     if true, repeat curve_fit for maxiter and return the case of least
-    rms error.
+    squared error.
 
     Returns
     -------
@@ -222,48 +231,38 @@ def randomized_curve_fit(fn, x, y, maxiter=100, best=False):
     last call to it if maxiter iterations is reached..
 
     """
-    good = True
+    bad = True
+    p0 = fn_p0_map[fn]
     p = None
-    try:
-        p = curve_fit(fn, x, y,  p0=fn_p0_map[fn], full_output=True)
-    except (RuntimeError, RuntimeWarning) as e:
-        good = False
-    # The last entry returned by scipy.optimize.leastsq used by
-    # curve_fit is 1, 2, 3 or 4 if it succeeds.
-    if (p is None) or np.any(p[1] == np.inf) or (p[-1] not in [1, 2, 3, 4]):
-        good = False
-    min_err = 1e10
     p_best = None
-    if good: 
-        if best:
-            min_err = sum((y - fn(x, *tuple(p[0])))**2)
-            p_best = p
-        else:
-            return p
+    min_err = 1e10 # A large value as placeholder
     for ii in range(maxiter):
-        good = True
-        p0 = np.random.uniform(low=min(x), high=max(x), size=len(fn_p0_map[fn]))
         try:
             p = curve_fit(fn, x, y,  p0=p0, full_output=True)
         except (RuntimeError, RuntimeWarning) as e:
-            good = False
-        if (p is None) or (p[-1] not in [1, 2, 3, 4]) or np.any(p[1] == np.inf):
-            good = False
-        if good:
-            if best:
-                err = sum((y - fn(x, *tuple(p[0])))**2)
-                if err < min_err:
-                    min_err = err 
-                    p_best = p
-            else:
-                print 'Found good', fn.func_name, p[0], p[1]
-                break
-    if ii == maxiter:
-        print fn.func_name, 'reached maxiter'
+            p = None
+        # The last entry returned by scipy.optimize.leastsq used by
+        # curve_fit is 1, 2, 3 or 4 if it succeeds.
+        bad = (p is None) or np.any(p[1] == np.inf) or (p[-1] not in [1, 2, 3, 4])
+        if not bad:
+            if not best:
+                return p
+            err = sum((y - fn(x, *tuple(p[0])))**2)
+            if err < min_err:
+                min_err = err
+                p_best = p
+        p0 = np.random.uniform(low=min(x), high=max(x), size=len(fn_p0_map[fn]))
+        if p0[1] != 0.0:
+            p0[1] = 1 / p0[1] # k = 1/v_scale - could help faster convergence
+    if p_best is None:
+        if p is not None:
+            msg = p[-2]
+        else:
+            msg = ''
+        warnings.warn('Maximum iteration %d reached. Could not find a decent fit. %s' % (maxiter, msg), RuntimeWarning)
     return p_best
 
-
-def find_ratefn(x, y):
+def find_ratefn(x, y, **kwargs):
     """Find the function that fits the rate function best. This will try
     exponential, sigmoid and linoid and return the best fit.
 
@@ -273,31 +272,42 @@ def find_ratefn(x, y):
     Parameters
     ----------
     x: 1D array
-    independent variable
+    independent variable.
 
     y: 1D array
-    function values
+    function values.
+    
+    **kwargs: keyword arguments 
+    passed to randomized_curve_fit.
+
+    Returns
+    -------
+    best_fn: function
+    the best fit function.
+
+    best_p: tuple
+    the optimal parameter values for the best fit function.
 
     """
     rms_error = 1e10 # arbitrarily setting this
     best_fn = None
     best_p = None
     for fn in fn_rate_map.keys():
-        p = randomized_curve_fit(fn, x, y, best=True)
+        p = randomized_curve_fit(fn, x, y, **kwargs)
         if p is None:
             continue
         popt = p[0]
         pcov = p[1]        
         error = y - fn(x, *popt)
         erms = np.sqrt(np.mean(error**2))
-        print fn, 'e_rms', erms
+        # print fn, 'e_rms', erms
         # if fn == double_exp:
         #     plt.plot(x, fn(x, *popt), label='%s' % (fn))
         # print erms, rms_error, fn
         # pylab.plot(x, y, 'b-')
         # pylab.plot(x, fn(x, *popt), 'r-.')
         # pylab.show()
-        print fn.func_name, 'rms error:', erms, 'pcov:', pcov
+        # print fn.func_name, 'rms error:', erms, 'pcov:', pcov
         if erms < rms_error:
             rms_error = erms
             best_fn = fn
@@ -305,7 +315,7 @@ def find_ratefn(x, y):
     # plt.plot(x, y, label='original')
     # plt.legend()
     # plt.show()
-    return (best_fn, best_p)    
+    return (best_fn, tuple(best_p))
 
 def define_vdep_rate(fn, name):
     """Define new component type with generic expressions for voltage
