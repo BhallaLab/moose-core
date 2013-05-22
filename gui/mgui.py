@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Wed May 22 12:37:31 2013 (+0530)
+# Last-Updated: Wed May 22 14:28:34 2013 (+0530)
 #           By: subha
-#     Update #: 1231
+#     Update #: 1241
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -132,24 +132,27 @@ class MWindow(QtGui.QMainWindow):
         QtGui.qApp.closeAllWindows()
 
     def handleException(self, t, v, s):
-        """This handler will show warning messages for errors
-        exceptions. Show info at status bar for non-error
-        exceptions. It will replace sys.excepthook and has the same
-        signature (except being bound to this object).
+        """This handler will show warning messages for error exceptions. Show
+        info at status bar for non-error exceptions. It will replace
+        sys.excepthook and has the same signature (except being bound
+        to this object).
 
         t : exception type
 
         v : exception value
 
         s: traceback object.
-        
+
         """
+        traceback.print_exception(t, v, s)
         title = ''.join(traceback.format_exception_only(t, v))
         trace = ''.join(traceback.format_exception(t, v, s))
-        if isinstance(v, StandardError):
-            QtGui.QMessageBox.warning(self, title, '\n'.join((title, trace)))
-        elif isinstance(v, mexception.Info):
+        if isinstance(v, mexception.MooseInfo):
             self.statusBar().showMessage(title, 5000)
+        elif isinstance(v, mexception.MooseWarning):
+            QtGui.QMessageBox.warning(self, title, '\n'.join((title, trace)))
+        else:
+            QtGui.QMessageBox.critical(self, title, '\n'.join((title, trace)))
     
     def getPluginNames(self):
         """Return pluginNames attribute or create it by retrieving
