@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Feb  8 09:38:40 2013 (+0530)
 # Version: 
-# Last-Updated: Fri Apr 19 14:52:52 2013 (+0530)
+# Last-Updated: Wed May 22 12:16:35 2013 (+0530)
 #           By: subha
-#     Update #: 211
+#     Update #: 213
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -76,7 +76,7 @@ def loadFile(filename, target, merge=True):
         return None
     parent, child = posixpath.split(target)
     p = moose.Neutral(parent)
-    if not merge:
+    if not merge and p.path != '/':
         for ch in p.children:
             moose.delete(ch)
     try:
