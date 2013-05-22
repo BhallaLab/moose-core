@@ -63,6 +63,7 @@ from mload import loadFile
 from loaderdialog import LoaderDialog
 from shell import get_shell_class
 from objectedit import ObjectEditDockWidget
+from dialog import DialogWidget
 
 __author__ = 'Subhasis Ray'
 
@@ -359,6 +360,11 @@ class MWindow(QtGui.QMainWindow):
             self.fileMenu = QtGui.QMenu('&File')
         else:
             self.fileMenu.clear()
+        if not hasattr(self, 'newModelAction'):
+            self.newModelAction = QtGui.QAction('New', self)
+            self.newModelAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+N", None, QtGui.QApplication.UnicodeUTF8))
+            self.connect(self.newModelAction, QtCore.SIGNAL('triggered()'), self.newModelDialogSlot)
+        self.fileMenu.addAction(self.newModelAction)
         if not hasattr(self, 'loadModelAction'):
             self.loadModelAction = QtGui.QAction('L&oad model', self)
             self.loadModelAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+L", None, QtGui.QApplication.UnicodeUTF8))
@@ -634,10 +640,11 @@ class MWindow(QtGui.QMainWindow):
             for fileName in fileNames:
                 # print 'Current plugin', self.plugin
                 modelName = dialog.getTargetPath()
+                
                 if '/' in modelName:
                     print 'Raising exception'
                     raise mexception.ElementNameError('Model name cannot contain `/`')
-                # print 'modelroot', modelRoot
+                print '\t \t -------modelroot', modelName
                 ret = loadFile(str(fileName), '/model/%s' % (modelName), merge=False)
                 print '11111'
                 # Harsha: if subtype is None, in case of cspace then pluginLookup = /cspace/None 
@@ -648,8 +655,33 @@ class MWindow(QtGui.QMainWindow):
                 except KeyError:
                     pluginName = 'default'
                 print 'Loaded model', ret['model'].path
+                
                 self.setPlugin(pluginName, ret['model'].path)
                 # print 'Plugin ===', self.plugin
+    def newModelDialogSlot(self):
+        #Harsha: Create a new dialog widget for model building
+        newModeldialog = DialogWidget()
+        
+        if newModeldialog.exec_():
+            modelPath = str(newModeldialog.modelPathEdit.text())
+            if '/' in modelPath:
+                raise mexception.ElementNameError('Model path cannot contain `/`')
+            
+            plugin = newModeldialog.submenu.currentText()
+            #Harsha: Kkit model will be loaded under /model, 
+            # while create new kkit model everything under /model has to be deleted.
+            #TODO: Same has to be done for Neuronal for now I am pass as its
+            if plugin == 'kkit':
+                modelRoot = '/model'
+                p = moose.Neutral(modelRoot)
+                for ch in p.children:
+                    moose.delete(ch)
+                    if modelPath:
+                        modelPath = modelRoot+'/'+modelPath
+                    else:
+                        modelPath = modelRoot
+            
+            self.setPlugin(plugin, modelPath)
 
 if __name__ == '__main__':
     # create the GUI application
