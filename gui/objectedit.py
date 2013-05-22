@@ -6,9 +6,9 @@
 # Maintainer:
 # Created: Wed Jun 30 11:18:34 2010 (+0530) 
 # Version:
-# Last-Updated: Tue May 14 17:32:52 2013 (+0530)
+# Last-Updated: Wed May 22 14:26:59 2013 (+0530)
 #           By: subha
-#     Update #: 916
+#     Update #: 917
 # URL:
 # Keywords:
 # Compatibility:
@@ -70,7 +70,6 @@ sys.path.append('../python')
 import moose
 import defaults
 import config
-from mexception import Info
 
 #these fields will be ignored
 extra_fields = ['this',
