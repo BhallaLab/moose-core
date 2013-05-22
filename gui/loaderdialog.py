@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Feb 25 15:59:54 2013 (+0530)
 # Version: 
-# Last-Updated: Mon May 13 16:09:24 2013 (+0530)
+# Last-Updated: Wed May 22 12:30:14 2013 (+0530)
 #           By: subha
-#     Update #: 96
+#     Update #: 106
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -54,7 +54,7 @@ import posixpath
 class LoaderDialog(QtGui.QFileDialog):
     # Update ftypes to include new file types 
     ftypes='All files (*.*);; CSPACE (*.cspace);; GENESIS (*.g);; GENESIS Prototype (*.p);; NeuroML/SBML (*.xml)'
-    target_default = '/model' # The default target when loading a model
+    target_default = '' # The default target when loading a model
     def __init__(self, *args):
         super(LoaderDialog, self).__init__(*args)
         self.setNameFilter(self.tr(self.ftypes))
@@ -62,21 +62,21 @@ class LoaderDialog(QtGui.QFileDialog):
         self.setReadOnly(True)
         self.setFileMode(self.ExistingFile)
         self.targetPanel = QtGui.QFrame()
-        self.targetLabel = QtGui.QLabel('Create model under')
+        self.targetLabel = QtGui.QLabel('Model name')
         self.targetText = QtGui.QLineEdit(self.target_default)
         form = QtGui.QFormLayout()
         form.addRow(self.targetLabel, self.targetText)
-        self.modelChoiceBox = QtGui.QGroupBox('Load model to')
-        self.replaceExistingButton = QtGui.QRadioButton('&Replace current model')
-        self.mergeExistingButton = QtGui.QRadioButton('&Keep current model')
-        self.replaceExistingButton.setChecked(True)
+        # self.modelChoiceBox = QtGui.QGroupBox('Model name')
+        # self.replaceExistingButton = QtGui.QRadioButton('&Replace current model')
+        # self.mergeExistingButton = QtGui.QRadioButton('&Keep current model')
+        # self.replaceExistingButton.setChecked(True)
         vbox = QtGui.QVBoxLayout()
-        vbox.addWidget(self.replaceExistingButton)
-        vbox.addWidget(self.mergeExistingButton)
-        self.modelChoiceBox.setLayout(vbox)
+        # vbox.addWidget(self.replaceExistingButton)
+        # vbox.addWidget(self.mergeExistingButton)
+        # self.modelChoiceBox.setLayout(vbox)
         self.targetPanel.setLayout(form)
         self.layout().addWidget(self.targetPanel)
-        self.layout().addWidget(self.modelChoiceBox)
+        # self.layout().addWidget(self.modelChoiceBox)
         self.currentChanged.connect(self.fileSelectedSlot)
         
     def fileSelectedSlot(self, fpath):
@@ -89,11 +89,11 @@ class LoaderDialog(QtGui.QFileDialog):
                 self.target_default,
                 os.path.basename(str(fpath)).rpartition('.')[0]))
                                   
-    def isReplace(self):
-        return self.replaceExistingButton.isChecked()
+    # def isReplace(self):
+    #     return self.replaceExistingButton.isChecked()
 
-    def isMerge(self):
-        return self.mergeExistingButton.isChecked()
+    # def isMerge(self):
+    #     return self.mergeExistingButton.isChecked()
 
     def getTargetPath(self):
         return str(self.targetText.text())

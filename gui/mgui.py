@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Tue May 21 18:03:22 2013 (+0530)
+# Last-Updated: Wed May 22 12:37:31 2013 (+0530)
 #           By: subha
-#     Update #: 1212
+#     Update #: 1231
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -630,9 +630,13 @@ class MWindow(QtGui.QMainWindow):
             fileNames = dialog.selectedFiles()
             for fileName in fileNames:
                 # print 'Current plugin', self.plugin
-                modelRoot = dialog.getTargetPath()
+                modelName = dialog.getTargetPath()
+                if '/' in modelName:
+                    print 'Raising exception'
+                    raise mexception.ElementNameError('Model name cannot contain `/`')
                 # print 'modelroot', modelRoot
-                ret = loadFile(str(fileName), modelRoot, merge=dialog.isMerge())
+                ret = loadFile(str(fileName), '/model/%s' % (modelName), merge=False)
+                print '11111'
                 # Harsha: if subtype is None, in case of cspace then pluginLookup = /cspace/None 
                 #     which will not call kkit plugin so cleaning to /cspace 
                 pluginLookup = '%s/%s' % (ret['modeltype'], ret['subtype'])
