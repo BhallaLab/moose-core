@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Apr 19 14:34:51 2013 (+0530)
 # Version: 
-# Last-Updated: Fri Apr 19 14:50:48 2013 (+0530)
+# Last-Updated: Wed May 22 12:37:09 2013 (+0530)
 #           By: subha
-#     Update #: 7
+#     Update #: 8
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -53,6 +53,9 @@ class FileLoadError(StandardError):
     def __init__(self, *args, **kwargs):
         StandardError.__init__(self, *args, **kwargs)
     
+class ElementNameError(StandardError):
+    def __init__(self, *args, **kwargs):
+        StandardError.__init__(self, *args, **kwargs)
 
 # 
 # mexception.py ends here
