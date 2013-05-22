@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Apr 19 14:34:51 2013 (+0530)
 # Version: 
-# Last-Updated: Wed May 22 12:37:09 2013 (+0530)
+# Last-Updated: Wed May 22 14:25:18 2013 (+0530)
 #           By: subha
-#     Update #: 8
+#     Update #: 22
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -44,16 +44,28 @@
 # 
 
 # Code:
+"""Exception for MOOSE. All error-level exceptions must be derived
+from MooseError. Otherwise they will not be handled by system error
+handler which displays a message box.
 
-class Info(Exception):
+"""
+class MooseInfo(Exception):
     def __init__(self, *args, **kwargs):
         Exception.__init__(self, *args, **kwargs)
 
-class FileLoadError(StandardError):
+class MooseWarning(Warning):
+    def __init__(self, *args, **kwargs):
+        Warning.__init__(self, *args, **kwargs)
+
+class MooseError(StandardError):
     def __init__(self, *args, **kwargs):
         StandardError.__init__(self, *args, **kwargs)
     
-class ElementNameError(StandardError):
+class FileLoadError(MooseError):
+    def __init__(self, *args, **kwargs):
+        StandardError.__init__(self, *args, **kwargs)
+    
+class ElementNameError(MooseError):
     def __init__(self, *args, **kwargs):
         StandardError.__init__(self, *args, **kwargs)
 
