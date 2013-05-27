@@ -14,6 +14,7 @@ OBJ = \
 	Group.o	\
 	Mdouble.o	\
 	Mstring.o	\
+	Calc.o \
 	TableBase.o	\
 	TableEntry.o	\
 	Table.o	\
@@ -35,6 +36,7 @@ Arith.o:	Arith.h
 Group.o:	Group.h
 Mdouble.o:		Mdouble.h
 Mstring.o:		Mstring.h
+Calc.o:	Calc.h
 TableEntry.o:		TableEntry.h
 TableBase.o:		TableBase.h TableEntry.h
 Table.o:		TableBase.h Table.h TableEntry.h
@@ -46,7 +48,7 @@ HDF5DataWriter.o: HDF5WriterBase.h HDF5DataWriter.h
 testBuiltins.o:	Group.h Arith.h Stats.h ../msg/DiagonalMsg.h ../basecode/SetGet.h
 
 .cpp.o:
-	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I. -I../basecode -I../msg $< -c
+	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I. -I../basecode -I../msg -I../external/muparser $< -c
 
 $(TARGET):		$(OBJ) $(SMOLDYN_OBJ) $(HEADERS)
 	$(LD) -r -o $(TARGET) $(OBJ) $(SMOLDYN_OBJ) $(SMOLDYN_LIB_PATH) $(SMOLDYN_LIBS) 
