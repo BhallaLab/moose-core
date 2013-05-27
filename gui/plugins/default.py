@@ -54,6 +54,7 @@ import moose
 import mtree
 
 from mplugin import MoosePluginBase, EditorBase, EditorWidgetBase, PlotBase, RunBase
+from defaultToolPanel import DefaultToolPanel
 
 class MoosePlugin(MoosePluginBase):
     """Default plugin for MOOSE GUI"""
@@ -178,7 +179,13 @@ class DefaultEditorWidget(EditorWidgetBase):
         self._menus.append(self.insertMenu)
         self.treeMenu.addMenu(self.insertMenu)
         self.insertMapper = QtCore.QSignalMapper(self)
-        for mclass in moose.element('/classes').children:
+
+        #Harsha: default Tool Panel list is provieded in defaultToolPanel.py
+        # instead of all classes in moose
+
+	dToolPanel = DefaultToolPanel()
+        #for mclass in moose.element('/classes').children:
+	for mclass in dToolPanel.defaultToolPanellist:
             action = QtGui.QAction(mclass.name[0], self.insertMenu)
             self.insertMenu.addAction(action)
             # NOTE: Signal mapping is sensitive to data types
