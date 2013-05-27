@@ -718,24 +718,24 @@ void testSigNeurElec()
 	SetGet2< string, string >::set( tabCa, "xplot", "SigNeur.plot", "headCa" );
 
 	//////////////////////////////////////////////////////////////////////
-	// Build solver, Schedule, Reset, and run.
+	// Build hsolver, Schedule, Reset, and run.
 	//////////////////////////////////////////////////////////////////////
 	Id hsolve = shell->doCreate( "HSolve", nid, "hsolve", dims );
 	shell->doUseClock( "/n/hsolve", "process", 1 );
-	Field< double >::set( hsolve, "dt", 5.0e-5 );
+	Field< double >::set( hsolve, "dt", 2.0e-5 );
 	Field< string >::set( hsolve, "target", "/n/compt" );
-	shell->doSetClock( 0, 5.0e-5 );
-	shell->doSetClock( 1, 5.0e-5 );
-	shell->doSetClock( 2, 5.0e-5 );
+	shell->doSetClock( 0, 2.0e-5 );
+	shell->doSetClock( 1, 2.0e-5 );
+	shell->doSetClock( 2, 2.0e-5 );
 	shell->doSetClock( 3, 1.0e-4 );
 
 
 	shell->doReinit();
 	shell->doStart( 0.1 );
 
-	SetGet2< string, string >::set( tab, "xplot", "SigNeur.plot", "spineVm2" );
-	SetGet2< string, string >::set( tab2, "xplot", "SigNeur.plot", "comptVm2" );
-	SetGet2< string, string >::set( tabCa, "xplot", "SigNeur.plot", "headCa2" );
+	SetGet2< string, string >::set( tab, "xplot", "SigNeur.plot", "spineVm_hsolve" );
+	SetGet2< string, string >::set( tab2, "xplot", "SigNeur.plot", "comptVm_hsolve" );
+	SetGet2< string, string >::set( tabCa, "xplot", "SigNeur.plot", "headCa_hsolve" );
 
 	shell->doDelete( nid );
 	cout << "." << flush;
@@ -757,10 +757,11 @@ Id addPlot( const string& objPath, const string& field,
 	return tab;
 }
 
-void testAdaptorsInCubeMesh()
+Id buildAdaptorsInCubeMesh( vector< Id >& plots )
 {
 	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
 	vector< int > dims( 1, 1 );
+	plots.clear();
 
 	vector< Id > spines;
 	Id nid = buildSigNeurElec( spines );
@@ -803,8 +804,13 @@ void testAdaptorsInCubeMesh()
 	///////////////////////////////////////////////////////////////////
 	Id adaptCa = shell->doCreate( "Adaptor", nid, "adaptCa", dims );
 	mid = shell->doAddMsg( "OneToAll", 
+					elecCa, "concOut", adaptCa, "input" );
+	assert( mid != Msg::bad );
+	/*
+	mid = shell->doAddMsg( "OneToAll", 
 					adaptCa, "requestField", elecCa, "get_Ca" );
 	assert( mid != Msg::bad );
+	*/
 
 	mid = shell->doAddMsg( "OneToAll", 
 					adaptCa, "outputSrc", chemCa, "set_conc" );
@@ -835,7 +841,6 @@ void testAdaptorsInCubeMesh()
 	////////////////////////////////////////////////////////////////////
 	// Set up the plots, both elec and chem.
 	////////////////////////////////////////////////////////////////////
-	vector< Id > plots;
 	plots.push_back( addPlot( "/n/head2", "get_Vm", "spineVm" ) );
 	plots.push_back( addPlot( "/n/compt", "get_Vm", "dendVm" ) );
 	plots.push_back( addPlot( "/n/head2/ca", "get_Ca", "spineElecCa" ) );
@@ -847,14 +852,25 @@ void testAdaptorsInCubeMesh()
 	plots.push_back( addPlot( "/n/compt/K", "get_Gbar", "kChan_Gbar" ) );
 	plots.push_back( addPlot( "/n/spineMesh/toPsd", "get_conc", "toPsd") );
 
+	////////////////////////////////////////////////////////////////////
+	return nid;
+}
+
+void testAdaptorsInCubeMesh()
+{
+	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
+	vector< int > dims( 1, 1 );
+	vector< Id > plots;
+	Id nid = buildAdaptorsInCubeMesh( plots );
+
 	//////////////////////////////////////////////////////////////////////
 	// Schedule, Reset, and run.
 	//////////////////////////////////////////////////////////////////////
 
-	shell->doSetClock( 0, 5.0e-5 );
-	shell->doSetClock( 1, 5.0e-5 );
-	shell->doSetClock( 2, 5.0e-5 );
-	shell->doSetClock( 5, 1.0e-2 );
+	shell->doSetClock( 0, 20.0e-6 );
+	shell->doSetClock( 1, 20.0e-6 );
+	shell->doSetClock( 2, 20.0e-6 );
+	shell->doSetClock( 5, 1.0e-3 );
 	shell->doSetClock( 6, 1.0e-3 );
 	shell->doSetClock( 8, 1.0e-3 );
 
@@ -876,6 +892,40 @@ void testAdaptorsInCubeMesh()
 		SetGet2< string, string >::set( *i, "xplot", "adapt.plot",
 						i->element()->getName() );
 	}
+	//////////////////////////////////////////////////////////////////////
+	// Now put in a chemical solver to do the whole chem model
+	//////////////////////////////////////////////////////////////////////
+	Id solver = shell->doCreate( "GslStoich", nid, "solver", dims );
+	assert( solver != Id() );
+	Field< string >::set( solver, "path", "/n/##" );
+	Field< string >::set( solver, "method", "rk5" );
+	shell->doSetClock( 5, 1.0e-3 );
+	shell->doSetClock( 6, 1.0e-3 );
+	shell->doUseClock( "/n/solver", "process", 5 );
+	shell->doReinit();
+	shell->doStart( 10.0 );
+
+	for ( vector< Id >::iterator i = plots.begin(); i != plots.end(); ++i )
+	{
+		SetGet2< string, string >::set( *i, "xplot", "k_adapt.plot",
+						i->element()->getName() );
+	}
+	//////////////////////////////////////////////////////////////////////
+	// Build hsolver too.
+	//////////////////////////////////////////////////////////////////////
+	Id hsolve = shell->doCreate( "HSolve", nid, "hsolve", dims );
+	shell->doUseClock( "/n/hsolve", "process", 1 );
+	Field< double >::set( hsolve, "dt", 20.0e-6 );
+	Field< string >::set( hsolve, "target", "/n/compt" );
+	shell->doReinit();
+	shell->doStart( 10.0 );
+
+	for ( vector< Id >::iterator i = plots.begin(); i != plots.end(); ++i )
+	{
+		SetGet2< string, string >::set( *i, "xplot", "hk_adapt.plot",
+						i->element()->getName() );
+	}
+	//////////////////////////////////////////////////////////////////////
 
 	shell->doDelete( nid );
 	cout << "." << flush;
