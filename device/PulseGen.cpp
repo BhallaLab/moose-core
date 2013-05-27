@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Mon Feb 20 01:41:12 2012 (+0530)
 // Version: 
-// Last-Updated: Tue Jul 10 10:21:42 2012 (+0530)
+// Last-Updated: Mon May 27 11:49:31 2013 (+0530)
 //           By: subha
-//     Update #: 168
+//     Update #: 170
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -173,7 +173,9 @@ const Cinfo* PulseGen::initCinfo()
                                Neutral::initCinfo(),
                                pulseGenFinfos,
                                sizeof(pulseGenFinfos)/sizeof(Finfo*),
-                               new Dinfo<PulseGen>());
+                               new Dinfo<PulseGen>(),
+                               doc,
+                               sizeof(doc)/sizeof(string));
     return & pulseGenCinfo;    
     
 }
