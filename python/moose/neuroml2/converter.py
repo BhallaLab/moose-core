@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Apr 22 12:15:23 2013 (+0530)
 # Version: 
-# Last-Updated: Tue May 21 16:58:42 2013 (+0530)
+# Last-Updated: Tue May 21 17:03:02 2013 (+0530)
 #           By: subha
-#     Update #: 815
+#     Update #: 818
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -60,6 +60,7 @@ from matplotlib import pyplot as plt
 import moose
 from moose.utils import autoposition
 import neuroml 
+import hhfit
 
 
 def convert_morphology(root, positions='auto'):
@@ -146,8 +147,8 @@ def convert_hhgate(gate):
     alpha = gate.tableA.copy()
     beta = gate.tableB - alpha
     vrange = np.linspace(gate.min, gate.max, len(alpha))
-    afn, ap = find_ratefn(vrange, alpha)
-    bfn, bp = find_ratefn(vrange, beta)
+    afn, ap = hhfit.find_ratefn(vrange, alpha)
+    bfn, bp = hhfit.find_ratefn(vrange, beta)
     if afn is None:
         raise Exception('could not find a fitting function for `alpha`')
     if bfn is  None:
