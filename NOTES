@@ -21969,5 +21969,65 @@ The hsolver is in the right general range, but does not match the Ca
 
 No, turns out that the Gbar isn't being changed in the hsolver when I
 alter it in the synchan object. Unclear if it works for the hhchan.
+Checkin 4561.
+
+Did some gdb tracing. Looks like the specified SynChan is indeed getting the
+Gbar message and is indeed doing the right thing in its calculations.
+
+Two possibilities come to mind: The hsolver is sending the plots for the wrong
+spine, or there is a mess-up in the messages it handles.
+
+I'm plotting the Ik of the affected SynChan in a new run.
+Turns out that there is something very wrong here. It goes up to 100x of the
+expected value.
+
+- If we give only one axonal stimulus (by changing refractory period of
+spikegen) then the response matches closely.
+
+- Even at 87 ms stim interval the problems with spine Vm kickin
+Added other printf deubgging. 
+
+
+==========================================================================
+28 May
+
+Lowered plotdt to 1e-4.
+Turns out the problem with huge Ik is actually due to wild oscillations in the
+Crank-Nicolson calculations of the solver. Once these settle the value is 
+actually almost identical to that of the EE method. What I don't understand is 
+why these oscillate at the frequency of the plotdt.
+
+I suspect a numerical issue here in how the C-N method talks to synchans.
+Cranking back the plotdt further to 2e-5, same as simdt.
+
+Oscillations are still hugely evident. Now let's go back to the original high
+stimulus rate, to see if the oscillations explain the discrepancy.
+
+Result: Only partially. I think the rest is a matter of subtle differences in
+the basal excitability. Let's test.
+
+Turns out the basal differences are not so subtle. I needed to pump in 
+-10 nA to get the system to start out a bit like the EE model, but then it
+doesn't go bursty towards the end. So the hsolve makes quite a bit of
+difference here too.
+
+In a side calculation, I ascertained that the very rapid spike of synaptic
+current would indeed cause a rather drastic voltage swing even at the
+slow onset of the synaptic channel opening.
+Conductance:: 2e-7 mho
+driving potential: 80 mV
+So, Current: 160e-10 A.
+Cm = 6e-13 F
+I = C dV/dt, so dV/dt = 160e-10/6e-13 = 26 mV in 1 usec. Quite enough to make
+the solver unhappy.
+
+So I need to proceed on two tracks.
+1. Work with Niraj to clean up solver.
+	This needs for me to make a python implementation of this
+	model, with all its instabilities and parameter sensitivities,
+	as a good test case for the hsolver.
+2. Make this model a bit more robust, so I can use the solver anyway.
+
+Then I can go on to setting up the model in a neuronal geometry.
 
 ==========================================================================
