@@ -6,9 +6,9 @@
 # Maintainer: Subhasis Ray
 # Created: Mon May 27 17:45:05 2013 (+0530)
 # Version: 
-# Last-Updated: Tue May 28 09:50:01 2013 (+0530)
+# Last-Updated: Tue May 28 12:39:45 2013 (+0530)
 #           By: subha
-#     Update #: 232
+#     Update #: 247
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -67,13 +67,13 @@ def test_calc_nosim():
     print 'Variables:', [v for v in calc_0.vars]
     for ii in range(num):
         var = 'x_%d' % (ii)
-        print 'Setting:', var
-        print 'value:', calc_0.var[var]
+        print 'Setting:', var, '=', calc_0.var[var]
         calc_0.var[var] = float(ii)
     print 'Expression:', calc_0.expr
-    print 'Variables:', ['%s = %g,' % (v, calc_0.var[v]) for v in calc_0.vars]
-    print 'Value:', calc_0.value
-    print '\n'
+    print 'Variables after assignment:'
+    for v in calc_0.vars:
+        print '  %s = %g' % (v, calc_0.var[v])
+    print 'value %g\n' % (calc_0.value)
 
 def test_calc():
     """This function creates a Calc object evaluating a function of a
@@ -129,11 +129,9 @@ def test_calc():
     moose.useClock(2, '%s/##[TYPE=DiffAmp]' % (model.path), 'process')    
     moose.useClock(3, '%s/##' % (data.path), 'process')
     moose.reinit()
-    print 'A'
     t = xarr[-1] - xarr[0]
     print 'Run for', t
     moose.start(t)
-    print 'B'
     y = np.asarray(y_tab.vec)
     yp = np.asarray(yprime_tab.vec)
     pylab.plot(x_tab.vec, y, 'r-.', label='f(x)')
@@ -143,7 +141,7 @@ def test_calc():
 
 if __name__ == '__main__':
     test_calc_nosim()
-    # test_calc()
+    test_calc()
 
 
 # 

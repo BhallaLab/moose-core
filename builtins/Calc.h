@@ -6,9 +6,9 @@
  * Maintainer: 
  * Created: Sat May 25 16:14:13 2013 (+0530)
  * Version: 
- * Last-Updated: Tue May 28 11:29:17 2013 (+0530)
+ * Last-Updated: Tue May 28 12:12:14 2013 (+0530)
  *           By: subha
- *     Update #: 109
+ *     Update #: 111
  * URL: 
  * Keywords: 
  * Compatibility: 
@@ -58,6 +58,7 @@ double *_addVar(const char *name, void *data);
 class Calc
 {
   public:
+    static const int VARMAX;
     Calc();
     ~Calc();
     void setExpr(string expr);
