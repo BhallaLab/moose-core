@@ -766,8 +766,10 @@ Id buildAdaptorsInCubeMesh( vector< Id >& plots )
 	vector< Id > spines;
 	Id nid = buildSigNeurElec( spines );
 
+	cout << "Cm = " << Field< double >::get( Id( "/n/head2" ), "Cm" ) << endl;
+
 	Id compt( "/n/compt" );
-	Field< double >::set( compt, "inject", 0.0e-8 );
+	Field< double >::set( compt, "inject", 0.0e-9 );
 	Id synInput( "/n/synInput" );
 	Field< double >::set( synInput, "refractT", 87e-3 );
 	Id Na( "/n/compt/Na" );
@@ -841,16 +843,26 @@ Id buildAdaptorsInCubeMesh( vector< Id >& plots )
 	////////////////////////////////////////////////////////////////////
 	// Set up the plots, both elec and chem.
 	////////////////////////////////////////////////////////////////////
-	plots.push_back( addPlot( "/n/head2", "get_Vm", "spineVm" ) );
+	// plots.push_back( addPlot( "/n/head0", "get_Vm", "spineVm0" ) );
+	plots.push_back( addPlot( "/n/head1", "get_Vm", "spineVm1" ) );
+	plots.push_back( addPlot( "/n/head2", "get_Vm", "spineVm2" ) );
+	// plots.push_back( addPlot( "/n/head3", "get_Vm", "spineVm3" ) );
+	// plots.push_back( addPlot( "/n/head4", "get_Vm", "spineVm4" ) );
 	plots.push_back( addPlot( "/n/compt", "get_Vm", "dendVm" ) );
 	plots.push_back( addPlot( "/n/head2/ca", "get_Ca", "spineElecCa" ) );
-	plots.push_back( addPlot( "/n/spineMesh/Ca", "get_conc", "spineChemCa") );
-	plots.push_back( addPlot( "/n/neuroMesh/Ca", "get_conc", "dendChemCa"));
-	plots.push_back( addPlot( "/n/psdMesh/psdGluR", "get_n", "psdGluR_N" ));
-	plots.push_back( addPlot( "/n/head2/gluR", "get_Gbar", "elecGluR_Gbar" ) );
-	plots.push_back( addPlot( "/n/neuroMesh/kChan", "get_conc", "kChan_conc" ) );
-	plots.push_back( addPlot( "/n/compt/K", "get_Gbar", "kChan_Gbar" ) );
-	plots.push_back( addPlot( "/n/spineMesh/toPsd", "get_conc", "toPsd") );
+	// plots.push_back( addPlot( "/n/spineMesh/Ca", "get_conc", "spineChemCa") );
+	// plots.push_back( addPlot( "/n/neuroMesh/Ca", "get_conc", "dendChemCa"));
+	// plots.push_back( addPlot( "/n/psdMesh/psdGluR", "get_n", "psdGluR_N" ));
+	// plots.push_back( addPlot( "/n/head2/gluR", "get_Gbar", "elecGluR_Gbar" ) );
+	plots.push_back( addPlot( "/n/head2/gluR", "get_Ik", "elecGluR_Ik2" ) );
+	// plots.push_back( addPlot( "/n/head0/gluR", "get_Gk", "elecGluR_Gk0" ) );
+	// plots.push_back( addPlot( "/n/head1/gluR", "get_Gk", "elecGluR_Gk1" ) );
+	plots.push_back( addPlot( "/n/head2/gluR", "get_Gk", "elecGluR_Gk2" ) );
+	// plots.push_back( addPlot( "/n/head3/gluR", "get_Gk", "elecGluR_Gk3" ) );
+	// plots.push_back( addPlot( "/n/head4/gluR", "get_Gk", "elecGluR_Gk4" ) );
+	// plots.push_back( addPlot( "/n/neuroMesh/kChan", "get_conc", "kChan_conc" ) );
+	// plots.push_back( addPlot( "/n/compt/K", "get_Gbar", "kChan_Gbar" ) );
+	// plots.push_back( addPlot( "/n/spineMesh/toPsd", "get_conc", "toPsd") );
 
 	////////////////////////////////////////////////////////////////////
 	return nid;
@@ -872,7 +884,7 @@ void testAdaptorsInCubeMesh()
 	shell->doSetClock( 2, 20.0e-6 );
 	shell->doSetClock( 5, 1.0e-3 );
 	shell->doSetClock( 6, 1.0e-3 );
-	shell->doSetClock( 8, 1.0e-3 );
+	shell->doSetClock( 8, 1.0e-4 );
 
 	shell->doUseClock( "/n/compt,/n/shaft#,/n/head#", "init", 0 );
 	shell->doUseClock( "/n/compt,/n/shaft#,/n/head#", "process", 1 );
