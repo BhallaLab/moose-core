@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Nov 13 15:58:31 2012 (+0530)
 # Version: 
-# Last-Updated: Tue May 21 18:05:55 2013 (+0530)
+# Last-Updated: Tue May 28 18:30:42 2013 (+0530)
 #           By: subha
-#     Update #: 1154
+#     Update #: 1155
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -209,7 +209,8 @@ class DefaultEditorWidget(EditorWidgetBase):
     def updateModelView(self):
         current = self.tree.currentItem().mobj
         self.tree.recreateTree(root=self.modelRoot)
-        self.tree.setCurrentItem(current)
+        if current in self.tree.odict:
+            self.tree.setCurrentItem(current)
 
     def updateItemSlot(self, mobj):
         """This should be overridden by derived classes to connect appropriate
