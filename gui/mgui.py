@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Wed May 22 14:28:34 2013 (+0530)
+# Last-Updated: Tue May 28 18:24:29 2013 (+0530)
 #           By: subha
-#     Update #: 1241
+#     Update #: 1258
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -664,31 +664,33 @@ class MWindow(QtGui.QMainWindow):
 
     def newModelDialogSlot(self):
         #Harsha: Create a new dialog widget for model building
-        newModeldialog = DialogWidget()
-        if newModeldialog.exec_():
-            modelPath = str(newModeldialog.modelPathEdit.text())
-
-            if bool(not modelPath.isalnum() or not modelPath or modelPath.isspace()):
-                raise mexception.ElementNameError('Model path cannot be empty or should not contain any special char')
-
-            plugin = newModeldialog.submenu.currentText()
+        newModelDialog = DialogWidget()
+        if newModelDialog.exec_():
+            modelPath = str(newModelDialog.modelPathEdit.text()).strip()
+            if len(modelPath) == 0:
+                raise mexception.ElementNameError('Model path cannot be empty')
+            plugin = str(newModelDialog.submenu.currentText())
             #Harsha: Kkit model will be loaded under /model, 
-            if plugin == 'kkit':
-                modelRoot = '/model'
-                if moose.exists(modelRoot):
-                    # If previously model is loaded,while create new kkit model everything under /model has to be deleted.
-                    p = moose.Neutral(modelRoot)
-                    for ch in p.children:
-                        moose.delete(ch)
-                modelPath = modelRoot+'/'+modelPath
-            else:
-                modelPath = modelPath
-                #print moose.exists('/')
-                #print "QWQ",modelPath
-                #moose.Neutral(modelPath)
-            self.setPlugin(plugin, modelPath)
-            #Harsha: This will clear out object editor's objectpath and make it invisible
-            self.objectEditSlot('/',False)
+            modelContainer = moose.Neutral('/model')
+            modelRoot = moose.Neutral('%s/%s' % (modelContainer.path, modelPath))
+            print 'Created ', modelRoot
+            self.setPlugin(plugin, modelRoot.path)
+            # if plugin == 'kkit':
+            #     modelRoot = '/model'
+            #     if moose.exists(modelRoot):
+            #         # If previously model is loaded,while create new kkit model everything under /model has to be deleted.
+            #         p = moose.Neutral(modelRoot)
+            #         for ch in p.children:
+            #             moose.delete(ch)
+            #     modelPath = modelRoot+'/'+modelPath
+            # else:
+            #     modelPath = modelPath
+            #     #print moose.exists('/')
+            #     #print "QWQ",modelPath
+            #     moose.Neutral(modelPath)
+            # self.setPlugin(plugin, modelPath)
+            # #Harsha: This will clear out object editor's objectpath and make it invisible
+            # self.objectEditSlot('/',False)
 
 if __name__ == '__main__':
     # create the GUI application
