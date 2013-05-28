@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed May  8 18:51:07 2013 (+0530)
 # Version: 
-# Last-Updated: Wed May  8 22:45:25 2013 (+0530)
+# Last-Updated: Mon May 27 21:15:36 2013 (+0530)
 #           By: subha
-#     Update #: 123
+#     Update #: 124
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -62,12 +62,8 @@ def stimulus_table_demo():
     data = moose.Neutral('/data')
     # This is the stimulus generator
     stimtable = moose.StimulusTable('/model/stim')
-    # DiffAmp for making the `output` of the StimulusTable recordable
-    # by Table object.
-    buf = moose.DiffAmp('/model/buffer')
-    moose.connect(stimtable, 'output', buf, 'plusIn')
     recorded = moose.Table('/data/stim')
-    moose.connect(recorded, 'requestData', buf, 'get_output')
+    moose.connect(recorded, 'requestData', stimtable, 'get_outputValue')
     simtime = 100
     simdt = 1e-3
     # Inter-stimulus-intervals with rate=20/s
