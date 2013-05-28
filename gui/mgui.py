@@ -268,7 +268,7 @@ class MWindow(QtGui.QMainWindow):
         True. Otherwise return False.
         """
         for action in self.menuBar().actions():
-            print '22222', action.text()
+            #print '22222', action.text()
             if menu.title() == action.text():
                 action.menu().addSeparator()
                 action.menu().addActions(menu.actions())
@@ -315,7 +315,7 @@ class MWindow(QtGui.QMainWindow):
         """Set current view to a particular one: options are 'editor',
         'plot', 'run'. A plugin can provide more views if necessary.
         """
-        print '11111', view
+        #print '11111', view
         self.plugin.setCurrentView(view)
         targetView = None
         newSubWindow = True
@@ -472,7 +472,8 @@ class MWindow(QtGui.QMainWindow):
             self.runViewAction.triggered.connect(self.openRunView)     
             self.viewActions = [self.editorViewAction, self.plotViewAction, self.runViewAction]
         for action in self.viewActions:
-            print action.text()
+            #print action.text()
+            pass
         return self.viewActions
 
     def getSubWindowActions(self):
@@ -607,11 +608,12 @@ class MWindow(QtGui.QMainWindow):
         except ValueError:
             simtime = 1.0
         moose.start(simtime)      
-
-    def objectEditSlot(self, mobj):
+    #Harsha: added visible=True so that loadModelDialogSlot and NewModelDialogSlot call this function
+    #        to clear out object path
+    def objectEditSlot(self, mobj,visible=True):
         """Slot for switching the current object in object editor."""
         self.objectEditDockWidget.setObject(mobj)        
-        self.objectEditDockWidget.setVisible(True)
+        self.objectEditDockWidget.setVisible(visible)
 
     def loadModelDialogSlot(self):
         """Start a file dialog to choose a model file.
@@ -644,9 +646,9 @@ class MWindow(QtGui.QMainWindow):
                 if '/' in modelName:
                     print 'Raising exception'
                     raise mexception.ElementNameError('Model name cannot contain `/`')
-                print '\t \t -------modelroot', modelName
+                #print '\t \t -------modelroot', modelName
                 ret = loadFile(str(fileName), '/model/%s' % (modelName), merge=False)
-                print '11111'
+                #print '11111'
                 # Harsha: if subtype is None, in case of cspace then pluginLookup = /cspace/None 
                 #     which will not call kkit plugin so cleaning to /cspace 
                 pluginLookup = '%s/%s' % (ret['modeltype'], ret['subtype'])
@@ -657,31 +659,36 @@ class MWindow(QtGui.QMainWindow):
                 print 'Loaded model', ret['model'].path
                 
                 self.setPlugin(pluginName, ret['model'].path)
-                # print 'Plugin ===', self.plugin
+                #Harsha: This will clear out object editor's objectpath and make it invisible
+                self.objectEditSlot('/',False)
+
     def newModelDialogSlot(self):
         #Harsha: Create a new dialog widget for model building
         newModeldialog = DialogWidget()
-        
         if newModeldialog.exec_():
             modelPath = str(newModeldialog.modelPathEdit.text())
-            if '/' in modelPath:
-                raise mexception.ElementNameError('Model path cannot contain `/`')
-            
+
+            if bool(not modelPath.isalnum() or not modelPath or modelPath.isspace()):
+                raise mexception.ElementNameError('Model path cannot be empty or should not contain any special char')
+
             plugin = newModeldialog.submenu.currentText()
             #Harsha: Kkit model will be loaded under /model, 
-            # while create new kkit model everything under /model has to be deleted.
-            #TODO: Same has to be done for Neuronal for now I am pass as its
             if plugin == 'kkit':
                 modelRoot = '/model'
-                p = moose.Neutral(modelRoot)
-                for ch in p.children:
-                    moose.delete(ch)
-                    if modelPath:
-                        modelPath = modelRoot+'/'+modelPath
-                    else:
-                        modelPath = modelRoot
-            
+                if moose.exists(modelRoot):
+                    # If previously model is loaded,while create new kkit model everything under /model has to be deleted.
+                    p = moose.Neutral(modelRoot)
+                    for ch in p.children:
+                        moose.delete(ch)
+                modelPath = modelRoot+'/'+modelPath
+            else:
+                modelPath = modelPath
+                #print moose.exists('/')
+                #print "QWQ",modelPath
+                #moose.Neutral(modelPath)
             self.setPlugin(plugin, modelPath)
+            #Harsha: This will clear out object editor's objectpath and make it invisible
+            self.objectEditSlot('/',False)
 
 if __name__ == '__main__':
     # create the GUI application
