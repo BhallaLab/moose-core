@@ -288,6 +288,7 @@ SUBDIR = \
 	mesh \
 	manager \
 	signeur \
+	external/muparser \
 	$(SMOLDYN_DIR) \
 	$(SBML_DIR) \
 
@@ -313,6 +314,7 @@ OBJLIBS =	\
 	mesh/_mesh.o \
 	manager/_manager.o \
 	signeur/_signeur.o \
+	external/muparser/_muparser.o \
 	$(SMOLDYN_LIB) \
 	$(SBML_LIB) \
 
