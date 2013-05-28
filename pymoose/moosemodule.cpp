@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Tue May 14 19:21:46 2013 (+0530)
+// Last-Updated: Mon May 27 16:30:54 2013 (+0530)
 //           By: subha
-//     Update #: 10318
+//     Update #: 10324
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -2954,6 +2954,10 @@ static struct module_state _state;
                 ret = set_lookup_value <ObjId> (target, string(fieldName), value_type_code, key_type_code, key, value);
                 break;
             }
+            case 's': {
+                ret = set_lookup_value <string> (target, string(fieldName), value_type_code, key_type_code, key, value);
+                break;
+            }
             default:
                 ostringstream error;
                 error << "setLookupField: invalid key type " << type_vec[0];
@@ -3109,7 +3113,7 @@ static struct module_state _state;
                     }
                     break;
                     ////////////////////////////////////////////////////
-                    // We do handle multiple vectors. Use the argument
+                    // We do NOT handle multiple vectors. Use the argument
                     // list as a single vector argument.
                     ////////////////////////////////////////////////////
                 case 'v': 
