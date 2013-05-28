@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Mon Dec 29 16:01:22 2008 (+0530)
 // Version: 
-// Last-Updated: Wed Feb 22 03:07:46 2012 (+0530)
-//           By: Subhasis Ray
-//     Update #: 279
+// Last-Updated: Mon May 27 21:14:24 2013 (+0530)
+//           By: subha
+//     Update #: 287
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -199,6 +199,7 @@ void DiffAmp::process(const Eref& e, ProcPtr p)
 
 void DiffAmp::reinit(const Eref& e, ProcPtr p)
 {
+    // What is the right thing to do?? Should we actually do a process step??
     output_ = 0.0;
     plus_ = 0.0;
     minus_ = 0.0;
