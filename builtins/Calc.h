@@ -6,9 +6,9 @@
  * Maintainer: 
  * Created: Sat May 25 16:14:13 2013 (+0530)
  * Version: 
- * Last-Updated: Mon May 27 16:04:44 2013 (+0530)
+ * Last-Updated: Tue May 28 11:29:17 2013 (+0530)
  *           By: subha
- *     Update #: 98
+ *     Update #: 109
  * URL: 
  * Keywords: 
  * Compatibility: 
@@ -59,7 +59,7 @@ class Calc
 {
   public:
     Calc();
-
+    ~Calc();
     void setExpr(string expr);
     string getExpr() const;
     
@@ -99,14 +99,14 @@ class Calc
     void reinit(const Eref& e, ProcPtr p);
 
     static const Cinfo * initCinfo();
-    
-  private:
+
+protected:
+    friend double * _addVar(const char * name, void *data);
     vector< double > _varbuf;
     mu::Parser _parser;
     double *_x, *_y, *_z;
     unsigned int _mode;
-
-    friend double * _addVar(const char * name, void *data);
+    mutable bool _valid;
 };
 #endif
 
