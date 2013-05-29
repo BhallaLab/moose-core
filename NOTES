@@ -22030,4 +22030,14 @@ So I need to proceed on two tracks.
 
 Then I can go on to setting up the model in a neuronal geometry.
 
+Checkin 4568.
+
+Working on HsolveInstability.py
+Currently about to fill in the spines.
+
+Did that. The output is nearly identical to the EE plot from SigNeur.plot.
+Now to throw in a solver.
+Did. Replicates even the small discrepancy between hsolve and the EE method 
+from the unit test.
+
 ==========================================================================
