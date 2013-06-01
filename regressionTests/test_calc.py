@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue May 28 09:28:13 2013 (+0530)
 # Version: 
-# Last-Updated: Tue May 28 09:33:24 2013 (+0530)
+# Last-Updated: Sat Jun  1 18:50:30 2013 (+0530)
 #           By: subha
-#     Update #: 18
+#     Update #: 100
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -47,6 +47,7 @@
 
 import unittest
 import moose
+from datetime import datetime
 
 class TestCalc(unittest.TestCase):
     def setUp(self):
@@ -55,14 +56,49 @@ class TestCalc(unittest.TestCase):
     def testMultiVarAvg(self):
         n = 5
         expr = 'avg('
-        for ii in range(n-1):
-            expr += ' x_%d,' % (ii)
-        expr += 'x_%d )' % (ii)
-        self.calc.expr = expr
-        self.calc.mode = 3
         for ii in range(n):
-            self.calc.var['x_%d' % (n)] = 1.0
-        self.assertAlmostEqual(self.calc.value, 1.0)
+            expr += ' x_%d,' % (ii)        
+        expr += 'x_%d )' % (n)
+        print expr
+        self.calc.expr = expr
+        print self.calc.expr
+        # self.calc.mode = 3
+        for ii in range(n+1):
+            self.calc.var['x_%d' % (ii)] = 1.0
+        v = self.calc.value
+        self.assertAlmostEqual(v, 1.0)
+
+    def testParseSpeed(self):
+        n = 100
+        nv = 1000
+        expr = ''
+        for ii in range(nv):
+            expr += 'x_%d * x_%d + ' % (ii, ii+1)
+        expr += 'x_%d' % (nv)
+        ts = datetime.now()
+        for ii in range(n):
+            self.calc.expr = expr
+        te = datetime.now()
+        td = te - ts
+        print 'Time to parse %d-variable expression: %g s' % (nv, (td.seconds + 1e-6 * td.microseconds) / n)
+
+    def testEvalSpeed(self):
+        n = 1000
+        nv = 100
+        expr = ''
+        for ii in range(nv):
+            expr += 'x_%d * x_%d + ' % (ii, ii+1)
+        expr += 'x_%d' % (nv)
+        self.calc.expr = expr
+        for ii in range(nv+1):
+            self.calc.var['x_%d' % (ii)] = 1
+        ts = datetime.now()
+        for ii in range(n):
+            v = self.calc.value        
+        te = datetime.now()
+        td = te - ts
+        print 'Time to evaluate %d multiplications and %d additions: %g s' % (nv, nv+1, (td.seconds + 1e-6 * td.microseconds)/n)
+        
 
 if __name__ == '__main__':
     unittest.main()
