@@ -1,14 +1,14 @@
-/* Calc.h --- 
+/* Func.h --- 
  * 
- * Filename: Calc.h
- * Description: A simple calculator class for MOOSE. 
+ * Filename: Func.h
+ * Description: A simple function parser and evaluator class for MOOSE. 
  * Author: Subhasis Ray
  * Maintainer: 
  * Created: Sat May 25 16:14:13 2013 (+0530)
  * Version: 
- * Last-Updated: Sat Jun  1 17:52:05 2013 (+0530)
+ * Last-Updated: Sat Jun  1 19:04:31 2013 (+0530)
  *           By: subha
- *     Update #: 116
+ *     Update #: 117
  * URL: 
  * Keywords: 
  * Compatibility: 
@@ -44,23 +44,23 @@
 
 /* Code: */
 
-#ifndef _CALC_H
-#define _CALC_H
+#ifndef _FUNC_H
+#define _FUNC_H
 
 #include "muParser.h"
 /**
-   Simple calculator for MOOSE. This can take a mathematical
+   Simple function parser and evaluator for MOOSE. This can take a mathematical
    expression in standard C form and a list of variables values and
    evaluate the results.
  */
 double *_addVar(const char *name, void *data);
 
-class Calc
+class Func
 {
   public:
     static const int VARMAX;
-    Calc();
-    ~Calc();
+    Func();
+    ~Func();
     void setExpr(string expr);
     string getExpr() const;
     
@@ -115,4 +115,4 @@ protected:
 
 
 
-/* Calc.h ends here */
+/* Func.h ends here */
