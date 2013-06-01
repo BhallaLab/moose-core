@@ -1,4 +1,4 @@
-// Calc.cpp --- 
+// Func.cpp --- 
 // 
 // Filename: Calc.cpp
 // Description: Implementation of a wrapper around GNU libmatheval to calculate arbitrary functions.
@@ -6,9 +6,9 @@
 // Maintainer: Subhasis Ray
 // Created: Sat May 25 16:35:17 2013 (+0530)
 // Version: 
-// Last-Updated: Sat Jun  1 18:46:40 2013 (+0530)
+// Last-Updated: Sat Jun  1 19:05:53 2013 (+0530)
 //           By: subha
-//     Update #: 615
+//     Update #: 616
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -63,25 +63,25 @@ static SrcFinfo1< double > *derivativeOut()
     return &derivativeOut;
 }
 
-const Cinfo * Calc::initCinfo()
+const Cinfo * Func::initCinfo()
 {
     ////////////////////////////////////////////////////////////
     // Value fields    
     ////////////////////////////////////////////////////////////
-    static  ReadOnlyValueFinfo< Calc, double > value("value",
+    static  ReadOnlyValueFinfo< Func, double > value("value",
                                                      "Result of the function evaluation with current variable values.",
-                                                     &Calc::getValue);
-    static ReadOnlyValueFinfo< Calc, double > derivative("derivative",
+                                                     &Func::getValue);
+    static ReadOnlyValueFinfo< Func, double > derivative("derivative",
                                                          "Derivative of the function at given variable values.",
-                                                         &Calc::getDerivative);
-    static ValueFinfo< Calc, unsigned int > mode("mode",
+                                                         &Func::getDerivative);
+    static ValueFinfo< Func, unsigned int > mode("mode",
                                                  "Mode of operation: \n"
-                                                 " 1: only the function value will be calculated\n"
-                                                 " 2: only the derivative will be calculated\n"
-                                                 " 3: both function value and derivative at current variable values will be calculated.",
-                                                 &Calc::setMode,
-                                                 &Calc::getMode);
-    static ValueFinfo< Calc, string > expr("expr",
+                                                 " 1: only the function value will be funculated\n"
+                                                 " 2: only the derivative will be funculated\n"
+                                                 " 3: both function value and derivative at current variable values will be funculated.",
+                                                 &Func::setMode,
+                                                 &Func::getMode);
+    static ValueFinfo< Func, string > expr("expr",
                                            "Mathematical expression defining the function. The underlying parser\n"
                                            "is muParser. Hence the available functions and operators are (from\n"
                                            "muParser docs):\n"
@@ -130,71 +130,71 @@ const Cinfo * Calc::initCinfo()
                                            "^   raise x to the power of y       7\n"
                                            "\n"
                                            "?:  if then else operator   C++ style syntax\n",
-                                           &Calc::setExpr,
-                                           &Calc::getExpr);
-    static LookupValueFinfo < Calc, string, double > var("var",
+                                           &Func::setExpr,
+                                           &Func::getExpr);
+    static LookupValueFinfo < Func, string, double > var("var",
                                                          "Lookup table for variable values.",
-                                                         &Calc::setVar,
-                                                         &Calc::getVar);
-    static ReadOnlyValueFinfo< Calc, vector<string> > vars("vars",
+                                                         &Func::setVar,
+                                                         &Func::getVar);
+    static ReadOnlyValueFinfo< Func, vector<string> > vars("vars",
                                                            "Variable names in the expression",
-                                                           &Calc::getVars);
-    static ValueFinfo< Calc, double > x("x",
+                                                           &Func::getVars);
+    static ValueFinfo< Func, double > x("x",
                                         "Value for variable named x. This is a shorthand. If the\n"
                                         "expression does not have any variable named x, this the first variable\n"
                                         "in the sequence `vars`.",
-                                        &Calc::setX,
-                                        &Calc::getX);
-    static ValueFinfo< Calc, double > y("y",
+                                        &Func::setX,
+                                        &Func::getX);
+    static ValueFinfo< Func, double > y("y",
                                         "Value for variable named y. This is a utility for two/three\n"
                                         " variable functions where the y value comes from a source separate\n"
                                         " from that of x. This is a shorthand. If the\n"
                                         "expression does not have any variable named y, this the second\n"
                                         "variable in the sequence `vars`.",
-                                        &Calc::setY,
-                                        &Calc::getY);
-    static ValueFinfo< Calc, double > z("z",
+                                        &Func::setY,
+                                        &Func::getY);
+    static ValueFinfo< Func, double > z("z",
                                         "Value for variable named z. This is a utility for three\n"
                                         " variable functions where the z value comes from a source separate\n"
                                         " from that of x or z. This is a shorthand. If the expression does not\n"
                                         " have any variable named z, this the third variable in the sequence `vars`.",
-                                        &Calc::setZ,
-                                        &Calc::getZ);
+                                        &Func::setZ,
+                                        &Func::getZ);
     ////////////////////////////////////////////////////////////
     // DestFinfos
     ////////////////////////////////////////////////////////////
     static DestFinfo varIn("varIn",
                            "Handle value for specified variable coming from other objects",
-                           new OpFunc2< Calc, string, double > (&Calc::setVar));
+                           new OpFunc2< Func, string, double > (&Func::setVar));
     static DestFinfo xIn("xIn",
                          "Handle value for variable named x. This is a shorthand. If the\n"
                          "expression does not have any variable named x, this the first variable\n"
                          "in the sequence `vars`.",
-                         new OpFunc1< Calc, double > (&Calc::setX));
+                         new OpFunc1< Func, double > (&Func::setX));
     static DestFinfo yIn("yIn",
                          "Handle value for variable named y. This is a utility for two/three\n"
                          " variable functions where the y value comes from a source separate\n"
                          " from that of x. This is a shorthand. If the\n"
                          "expression does not have any variable named y, this the second\n"
                          "variable in the sequence `vars`.",
-                         new OpFunc1< Calc, double > (&Calc::setY));
+                         new OpFunc1< Func, double > (&Func::setY));
     static DestFinfo zIn("zIn",
                          "Handle value for variable named z. This is a utility for three\n"
                          " variable functions where the z value comes from a source separate\n"
                          " from that of x or y. This is a shorthand. If the expression does not\n"
                          " have any variable named y, this the second variable in the sequence `vars`.",
-                         new OpFunc1< Calc, double > (&Calc::setZ));
+                         new OpFunc1< Func, double > (&Func::setZ));
     static DestFinfo xyIn("xyIn",
                           "Handle value for variables x and y for two-variable function",
-                          new OpFunc2< Calc, double, double > (&Calc::setXY));
+                          new OpFunc2< Func, double, double > (&Func::setXY));
     static DestFinfo xyzIn("xyzIn",
                            "Handle value for variables x, y and z for three-variable function",
-                           new OpFunc3< Calc, double, double, double > (&Calc::setXYZ));
+                           new OpFunc3< Func, double, double, double > (&Func::setXYZ));
 
     static DestFinfo setVars("setVars",
                              "Utility function to assign the variable values of the function.\n"
                              "Takes a list of variable names and a list of corresponding values.",
-                             new OpFunc2< Calc, vector< string >, vector< double > > (&Calc::setVarValues));
+                             new OpFunc2< Func, vector< string >, vector< double > > (&Func::setVarValues));
     
     // TODO - a way to allow connect a source to a specific variable without the source knowing the variable name
     // simple case of x, [y, [z]] variables
@@ -204,10 +204,10 @@ const Cinfo * Calc::initCinfo()
     ///////////////////////////////////////////////////////////////////
     static DestFinfo process( "process",
                               "Handles process call, updates internal time stamp.",
-                              new ProcOpFunc< Calc >( &Calc::process ) );
+                              new ProcOpFunc< Func >( &Func::process ) );
     static DestFinfo reinit( "reinit",
                              "Handles reinit call.",
-                             new ProcOpFunc< Calc >( &Calc::reinit ) );
+                             new ProcOpFunc< Func >( &Func::reinit ) );
     static Finfo* processShared[] =
             {
 		&process, &reinit
@@ -224,7 +224,7 @@ const Cinfo * Calc::initCinfo()
                              processShared, sizeof( processShared ) / sizeof( Finfo* )
                              );
 
-    static Finfo *calcFinfos[] =
+    static Finfo *funcFinfos[] =
             {
                 &value,
                 &derivative,
@@ -248,10 +248,10 @@ const Cinfo * Calc::initCinfo()
     
     static string doc[] =
             {
-                "Name", "Calc",
+                "Name", "Func",
                 "Author", "Subhasis Ray",
                 "Description",
-                "Calc: general purpose function calculator using real numbers. It can\n"
+                "Func: general purpose function funculator using real numbers. It can\n"
                 "parse mathematical expression defining a function and evaluate it\n"                
                 "and/or its derivative for specified variable values.\n"
                 "The variables can be input from other moose objects. In case of\n"
@@ -263,22 +263,22 @@ const Cinfo * Calc::initCinfo()
                 "e=2.718281... \n"
             };
     
-    static Cinfo calcCinfo("Calc",
+    static Cinfo funcCinfo("Func",
                             Neutral::initCinfo(),
-                            calcFinfos,
-                            sizeof(calcFinfos) / sizeof(Finfo*),
-                            new Dinfo<Calc>(),
+                            funcFinfos,
+                            sizeof(funcFinfos) / sizeof(Finfo*),
+                            new Dinfo<Func>(),
                             doc,
                             sizeof(doc)/sizeof(string));
-    return &calcCinfo;
+    return &funcCinfo;
                                                     
 }
 
-static const Cinfo * calcCinfo = Calc::initCinfo();
+static const Cinfo * funcCinfo = Func::initCinfo();
 
-const int Calc::VARMAX = 10;
+const int Func::VARMAX = 10;
 
-Calc::Calc():_x(NULL), _y(NULL), _z(NULL), _mode(1), _valid(false)
+Func::Func():_x(NULL), _y(NULL), _z(NULL), _mode(1), _valid(false)
 {
     _varbuf.reserve(VARMAX);
     _parser.SetVarFactory(_addVar, this);
@@ -287,13 +287,13 @@ Calc::Calc():_x(NULL), _y(NULL), _z(NULL), _mode(1), _valid(false)
     _parser.DefineConst(_T("e"), (mu::value_type)M_E);
 }
 
-Calc::~Calc()
+Func::~Func()
 {
 
     _clearBuffer();
 }
 
-void Calc::_clearBuffer()
+void Func::_clearBuffer()
 {
     _parser.ClearVar();
     for (unsigned int ii = 0; ii < _varbuf.size(); ++ii){
@@ -302,7 +302,7 @@ void Calc::_clearBuffer()
     _varbuf.clear();
 }
 
-void Calc::_showError(mu::Parser::exception_type &e) const
+void Func::_showError(mu::Parser::exception_type &e) const
 {
     cout << "Error occurred in parser.\n" 
          << "Message:  " << e.GetMsg() << "\n"
@@ -316,14 +316,14 @@ void Calc::_showError(mu::Parser::exception_type &e) const
  */
 double * _addVar(const char *name, void *data)
 {
-    Calc* calc = reinterpret_cast< Calc * >(data);
+    Func* func = reinterpret_cast< Func * >(data);
     double *ret = new double;
     *ret = 0.0;
-    calc->_varbuf.push_back(ret);
+    func->_varbuf.push_back(ret);
     return ret;
 }
 
-void Calc::setExpr(string expr)
+void Func::setExpr(string expr)
 {
     _valid = false;
     _x = NULL;
@@ -364,10 +364,10 @@ void Calc::setExpr(string expr)
     _valid = true;
 }
 
-string Calc::getExpr() const
+string Func::getExpr() const
 {
     if (!_valid){
-        cout << "Error: Calc::getExpr() - invalid parser state" << endl;
+        cout << "Error: Func::getExpr() - invalid parser state" << endl;
         return "";
     }
     return _parser.GetExpr();
@@ -376,10 +376,10 @@ string Calc::getExpr() const
 /**
    Set value of variable `name`
 */
-void Calc::setVar(string name, double value)
+void Func::setVar(string name, double value)
 {
     if (!_valid){
-        cout << "Error: Calc::setVar() - invalid parser state" << endl;
+        cout << "Error: Func::setVar() - invalid parser state" << endl;
         return;
     }
     mu::varmap_type vars;
@@ -401,10 +401,10 @@ void Calc::setVar(string name, double value)
 /**
    Get value of variable `name`
 */
-double Calc::getVar(string name) const
+double Func::getVar(string name) const
 {
     if (!_valid){
-        cout << "Error: Calc::getVar() - invalid parser state" << endl;
+        cout << "Error: Func::getVar() - invalid parser state" << endl;
         return 0.0;
     }
     try{
@@ -422,14 +422,14 @@ double Calc::getVar(string name) const
     }
 }
 
-void Calc::setX(double x) 
+void Func::setX(double x) 
 {
     if (_x != NULL){
         *_x = x;
     }
 }
 
-double Calc::getX() const
+double Func::getX() const
 {
     if (_x != NULL){
         return *_x;
@@ -437,28 +437,28 @@ double Calc::getX() const
     return 0.0;
 }
 
-void Calc::setY(double y) 
+void Func::setY(double y) 
 {
     if (_y != NULL){
         *_y = y;
     }
 }
 
-double Calc::getY() const
+double Func::getY() const
 {
     if (_y != NULL){
         return *_y;
     }
     return 0.0;
 }
-void Calc::setZ(double z) 
+void Func::setZ(double z) 
 {
     if (_z != NULL){
         *_z = z;
     }
 }
 
-double Calc::getZ() const
+double Func::getZ() const
 {
     if (_z != NULL){
         return *_z;
@@ -466,7 +466,7 @@ double Calc::getZ() const
     return 0.0;
 }
 
-void Calc::setXY(double x, double y) 
+void Func::setXY(double x, double y) 
 {
     if (_x != NULL){
         *_x = x;
@@ -476,7 +476,7 @@ void Calc::setXY(double x, double y)
     }
 }
 
-void Calc::setXYZ(double x, double y, double z) 
+void Func::setXYZ(double x, double y, double z) 
 {
     if (_x != NULL){
         *_x = x;
@@ -489,21 +489,21 @@ void Calc::setXYZ(double x, double y, double z)
     }
 }                           
 
-void Calc::setMode(unsigned int mode)
+void Func::setMode(unsigned int mode)
 {
     _mode = mode;
 }
 
-unsigned int Calc::getMode() const
+unsigned int Func::getMode() const
 {
     return _mode;
 }
 
-double Calc::getValue() const
+double Func::getValue() const
 {
     double value = 0.0;
     if (!_valid){
-        cout << "Error: Calc::getValue() - invalid state" << endl;        
+        cout << "Error: Func::getValue() - invalid state" << endl;        
         return value;
     }
     try{
@@ -514,11 +514,11 @@ double Calc::getValue() const
     return value;
 }
 
-double Calc::getDerivative() const
+double Func::getDerivative() const
 {
     double value = 0.0;    
     if (!_valid){
-        cout << "Error: Calc::getDerivative() - invalid state" << endl;        
+        cout << "Error: Func::getDerivative() - invalid state" << endl;        
         return value;
     }
     if (_x != NULL){
@@ -532,11 +532,11 @@ double Calc::getDerivative() const
 }
 
 
-vector<string> Calc::getVars() const
+vector<string> Func::getVars() const
 {
     vector< string > ret;
     if (!_valid){
-        cout << "Error: Calc::getVars() - invalid parser state" << endl;        
+        cout << "Error: Func::getVars() - invalid parser state" << endl;        
         return ret;
     }
     mu::varmap_type vars;
@@ -552,7 +552,7 @@ vector<string> Calc::getVars() const
     return ret;
 }
 
-void Calc::setVarValues(vector<string> vars, vector<double> vals)
+void Func::setVarValues(vector<string> vars, vector<double> vals)
 {
     
     if (vars.size() > vals.size() || !_valid){
@@ -567,7 +567,7 @@ void Calc::setVarValues(vector<string> vars, vector<double> vals)
     }
 }
 
-void Calc::process(const Eref &e, ProcPtr p)
+void Func::process(const Eref &e, ProcPtr p)
 {
     if (!_valid){
         return;
@@ -580,10 +580,10 @@ void Calc::process(const Eref &e, ProcPtr p)
     }
 }
 
-void Calc::reinit(const Eref &e, ProcPtr p)
+void Func::reinit(const Eref &e, ProcPtr p)
 {
     if (!_valid){
-        cout << "Error: Calc::reinit() - invalid parser state. Will do nothing." << endl;
+        cout << "Error: Func::reinit() - invalid parser state. Will do nothing." << endl;
         return;
     }
     if (trim(_parser.GetExpr(), " \t\n\r").length() == 0){
