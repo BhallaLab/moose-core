@@ -1,14 +1,14 @@
-# test_calc.py --- 
+# test_func.py --- 
 # 
-# Filename: test_calc.py
+# Filename: test_func.py
 # Description: 
 # Author: 
 # Maintainer: 
 # Created: Tue May 28 09:28:13 2013 (+0530)
 # Version: 
-# Last-Updated: Sat Jun  1 18:50:30 2013 (+0530)
+# Last-Updated: Sat Jun  1 19:06:54 2013 (+0530)
 #           By: subha
-#     Update #: 100
+#     Update #: 102
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -49,9 +49,9 @@ import unittest
 import moose
 from datetime import datetime
 
-class TestCalc(unittest.TestCase):
+class TestFunc(unittest.TestCase):
     def setUp(self):
-        self.calc = moose.Calc('/test_calc')
+        self.func = moose.Func('/test_func')
 
     def testMultiVarAvg(self):
         n = 5
@@ -60,12 +60,12 @@ class TestCalc(unittest.TestCase):
             expr += ' x_%d,' % (ii)        
         expr += 'x_%d )' % (n)
         print expr
-        self.calc.expr = expr
-        print self.calc.expr
-        # self.calc.mode = 3
+        self.func.expr = expr
+        print self.func.expr
+        # self.func.mode = 3
         for ii in range(n+1):
-            self.calc.var['x_%d' % (ii)] = 1.0
-        v = self.calc.value
+            self.func.var['x_%d' % (ii)] = 1.0
+        v = self.func.value
         self.assertAlmostEqual(v, 1.0)
 
     def testParseSpeed(self):
@@ -77,7 +77,7 @@ class TestCalc(unittest.TestCase):
         expr += 'x_%d' % (nv)
         ts = datetime.now()
         for ii in range(n):
-            self.calc.expr = expr
+            self.func.expr = expr
         te = datetime.now()
         td = te - ts
         print 'Time to parse %d-variable expression: %g s' % (nv, (td.seconds + 1e-6 * td.microseconds) / n)
@@ -89,12 +89,12 @@ class TestCalc(unittest.TestCase):
         for ii in range(nv):
             expr += 'x_%d * x_%d + ' % (ii, ii+1)
         expr += 'x_%d' % (nv)
-        self.calc.expr = expr
+        self.func.expr = expr
         for ii in range(nv+1):
-            self.calc.var['x_%d' % (ii)] = 1
+            self.func.var['x_%d' % (ii)] = 1
         ts = datetime.now()
         for ii in range(n):
-            v = self.calc.value        
+            v = self.func.value        
         te = datetime.now()
         td = te - ts
         print 'Time to evaluate %d multiplications and %d additions: %g s' % (nv, nv+1, (td.seconds + 1e-6 * td.microseconds)/n)
@@ -104,4 +104,4 @@ if __name__ == '__main__':
     unittest.main()
 
 # 
-# test_calc.py ends here
+# test_func.py ends here
