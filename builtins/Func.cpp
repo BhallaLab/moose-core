@@ -1,14 +1,14 @@
 // Func.cpp --- 
 // 
-// Filename: Calc.cpp
+// Filename: Func.cpp
 // Description: Implementation of a wrapper around GNU libmatheval to calculate arbitrary functions.
 // Author: Subhasis Ray
 // Maintainer: Subhasis Ray
 // Created: Sat May 25 16:35:17 2013 (+0530)
 // Version: 
-// Last-Updated: Sat Jun  1 19:05:53 2013 (+0530)
+// Last-Updated: Sat Jun  1 19:11:45 2013 (+0530)
 //           By: subha
-//     Update #: 616
+//     Update #: 618
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -47,7 +47,7 @@
 
 #include "header.h"
 #include "../utility/utility.h"
-#include "Calc.h"
+#include "Func.h"
 
 static SrcFinfo1<double> *valueOut()
 {
@@ -593,4 +593,4 @@ void Func::reinit(const Eref &e, ProcPtr p)
     }
 }
 // 
-// Calc.cpp ends here
+// Func.cpp ends here
