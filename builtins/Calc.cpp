@@ -6,9 +6,9 @@
 // Maintainer: Subhasis Ray
 // Created: Sat May 25 16:35:17 2013 (+0530)
 // Version: 
-// Last-Updated: Tue May 28 12:38:18 2013 (+0530)
+// Last-Updated: Sat Jun  1 18:46:40 2013 (+0530)
 //           By: subha
-//     Update #: 532
+//     Update #: 615
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -280,7 +280,7 @@ const int Calc::VARMAX = 10;
 
 Calc::Calc():_x(NULL), _y(NULL), _z(NULL), _mode(1), _valid(false)
 {
-    _varbuf.reserve(VARMAX+1);
+    _varbuf.reserve(VARMAX);
     _parser.SetVarFactory(_addVar, this);
     // Adding pi and e, the defaults are `_pi` and `_e`
     _parser.DefineConst(_T("pi"), (mu::value_type)M_PI);
@@ -289,8 +289,27 @@ Calc::Calc():_x(NULL), _y(NULL), _z(NULL), _mode(1), _valid(false)
 
 Calc::~Calc()
 {
-    _parser.ClearConst();
+
+    _clearBuffer();
+}
+
+void Calc::_clearBuffer()
+{
     _parser.ClearVar();
+    for (unsigned int ii = 0; ii < _varbuf.size(); ++ii){
+        delete _varbuf[ii];
+    }
+    _varbuf.clear();
+}
+
+void Calc::_showError(mu::Parser::exception_type &e) const
+{
+    cout << "Error occurred in parser.\n" 
+         << "Message:  " << e.GetMsg() << "\n"
+         << "Formula:  " << e.GetExpr() << "\n"
+         << "Token:    " << e.GetToken() << "\n"
+         << "Position: " << e.GetPos() << "\n"
+         << "Error code:     " << e.GetCode() << endl;
 }
 /**
    Call-back to add variables to parser automatically. 
@@ -298,48 +317,25 @@ Calc::~Calc()
 double * _addVar(const char *name, void *data)
 {
     Calc* calc = reinterpret_cast< Calc * >(data);
-    calc->_varbuf.push_back(0.0);
-    if (calc->_varbuf.size() >= calc->_varbuf.capacity()){
-        calc->_valid = false;
-        throw mu::Parser::exception_type("Variable buffer overflow.");
-    } 
-    double *ret = &(*calc->_varbuf.rbegin());
+    double *ret = new double;
+    *ret = 0.0;
+    calc->_varbuf.push_back(ret);
     return ret;
 }
 
 void Calc::setExpr(string expr)
 {
-    _varbuf.clear();
+    _valid = false;
     _x = NULL;
     _y = NULL;
     _z = NULL;
-    try{
-        _parser.SetExpr(expr);
-        _valid = true;
-    } catch (mu::Parser::exception_type &e) {
-        cout << "Error setting expression" << "\n"
-             << "Message:  " << e.GetMsg() << "\n"
-             << "Formula:  " << e.GetExpr() << "\n"
-             << "Token:    " << e.GetToken() << "\n"
-             << "Position: " << e.GetPos() << "\n"
-             << "Error code:     " << e.GetCode() << endl;
-        _valid = false;
-        _varbuf.clear();
-        _parser.SetExpr("0.0");
-        return;
-    }
     mu::varmap_type vars;
     try{
+        _parser.SetExpr(expr);
         vars = _parser.GetUsedVar();
     } catch (mu::Parser::exception_type &e) {
-        cout << "Message:  " << e.GetMsg() << "\n"
-             << "Formula:  " << e.GetExpr() << "\n"
-             << "Token:    " << e.GetToken() << "\n"
-             << "Position: " << e.GetPos() << "\n"
-             << "Error code:     " << e.GetCode() << endl;
-        _valid = false;
-        _varbuf.clear();
-        _parser.SetExpr("0.0");
+        _showError(e);
+        _clearBuffer();
         return;
     }
     mu::varmap_type::iterator v = vars.find("x");
@@ -365,6 +361,7 @@ void Calc::setExpr(string expr)
         v++; v++;
         _z = v->second;
     }
+    _valid = true;
 }
 
 string Calc::getExpr() const
@@ -387,17 +384,10 @@ void Calc::setVar(string name, double value)
     }
     mu::varmap_type vars;
     try{
-        vars = _parser.GetUsedVar();
-        _valid = true;
+        vars = _parser.GetVar();
     } catch (mu::Parser::exception_type &e) {
         _valid = false;
-        cout << "Message:  " << e.GetMsg() << "\n";
-        cout << "Formula:  " << e.GetExpr() << "\n";
-        cout << "Token:    " << e.GetToken() << "\n";
-        cout << "Position: " << e.GetPos() << "\n";
-        cout << "Error code:     " << e.GetCode() << "\n";
-        _parser.SetExpr("0.0");
-        _varbuf.clear();
+        _showError(e);
         return;
     }
     mu::varmap_type::iterator v = vars.find(name);
@@ -418,7 +408,7 @@ double Calc::getVar(string name) const
         return 0.0;
     }
     try{
-        const mu::varmap_type &vars = _parser.GetUsedVar();
+        const mu::varmap_type &vars = _parser.GetVar();
         mu::varmap_type::const_iterator v = vars.find(name);
         if (v != vars.end()){
             return *v->second;
@@ -427,13 +417,7 @@ double Calc::getVar(string name) const
             return 0.0;
         }
     } catch (mu::Parser::exception_type &e) {
-        _valid = false;
-        cout << "Message:  " << e.GetMsg() << "\n"
-             << "Formula:  " << e.GetExpr() << "\n"
-             << "Token:    " << e.GetToken() << "\n"
-             << "Position: " << e.GetPos() << "\n"
-             << "Error code:     " << e.GetCode() << endl;
-        _valid = false;
+        _showError(e);
         return 0.0;
     }
 }
@@ -525,13 +509,7 @@ double Calc::getValue() const
     try{
         value = _parser.Eval();
     } catch (mu::Parser::exception_type &e){
-        cout << "Error evaluating function\n"
-             << "Message:  " << e.GetMsg() << "\n"
-             << "Formula:  " << e.GetExpr() << "\n"
-             << "Token:    " << e.GetToken() << "\n"
-             << "Position: " << e.GetPos() << "\n"
-             << "Error code:     " << e.GetCode() << endl;
-
+        _showError(e);
     }
     return value;
 }
@@ -547,13 +525,7 @@ double Calc::getDerivative() const
         try{
             value = _parser.Diff(_x, *_x);
         } catch (mu::Parser::exception_type &e){
-            _valid = false;
-            cout << "Error evaluating derivative\n"
-                 << "Message:  " << e.GetMsg() << "\n"
-                 << "Formula:  " << e.GetExpr() << "\n"
-                 << "Token:    " << e.GetToken() << "\n"
-                 << "Position: " << e.GetPos() << "\n"
-                 << "Error code:     " << e.GetCode() << endl;
+            _showError(e);
         }
     }
     return value;
@@ -569,21 +541,15 @@ vector<string> Calc::getVars() const
     }
     mu::varmap_type vars;
     try{
-        vars = _parser.GetUsedVar();
+        vars = _parser.GetVar();
+        for (mu::varmap_type::iterator ii = vars.begin();
+             ii != vars.end(); ++ii){
+            ret.push_back(ii->first);
+        }
     } catch (mu::Parser::exception_type &e){
-        _valid = false;
-        cout << "Error getting variables\n"
-             << "Message:  " << e.GetMsg() << "\n"
-             << "Formula:  " << e.GetExpr() << "\n"
-             << "Token:    " << e.GetToken() << "\n"
-             << "Position: " << e.GetPos() << "\n"
-             << "Error code:     " << e.GetCode() << endl;
+        _showError(e);
     }
-    for (mu::varmap_type::iterator ii = vars.begin();
-         ii != vars.end(); ++ii){
-        ret.push_back(ii->first);
-    }
-    return ret;                   
+    return ret;
 }
 
 void Calc::setVarValues(vector<string> vars, vector<double> vals)
@@ -592,7 +558,7 @@ void Calc::setVarValues(vector<string> vars, vector<double> vals)
     if (vars.size() > vals.size() || !_valid){
         return;
     }
-    mu::varmap_type varmap = _parser.GetUsedVar();
+    mu::varmap_type varmap = _parser.GetVar();
     for (unsigned int ii = 0; ii < vars.size(); ++ii){
         mu::varmap_type::iterator v = varmap.find(vars[ii]);
         if ( v != varmap.end()){
@@ -622,7 +588,7 @@ void Calc::reinit(const Eref &e, ProcPtr p)
     }
     if (trim(_parser.GetExpr(), " \t\n\r").length() == 0){
         cout << "Error: no expression set. Will do nothing." << endl;
-        _parser.SetExpr("0.0");
+        setExpr("0.0");
         _valid = false;
     }
 }

@@ -6,9 +6,9 @@
  * Maintainer: 
  * Created: Sat May 25 16:14:13 2013 (+0530)
  * Version: 
- * Last-Updated: Tue May 28 12:12:14 2013 (+0530)
+ * Last-Updated: Sat Jun  1 17:52:05 2013 (+0530)
  *           By: subha
- *     Update #: 111
+ *     Update #: 116
  * URL: 
  * Keywords: 
  * Compatibility: 
@@ -103,11 +103,13 @@ class Calc
 
 protected:
     friend double * _addVar(const char * name, void *data);
-    vector< double > _varbuf;
+    vector< double *> _varbuf;
     mu::Parser _parser;
     double *_x, *_y, *_z;
     unsigned int _mode;
     mutable bool _valid;
+    void _clearBuffer();
+    void _showError(mu::Parser::exception_type &e) const;
 };
 #endif
 
