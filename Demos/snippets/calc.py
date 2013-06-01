@@ -6,9 +6,9 @@
 # Maintainer: Subhasis Ray
 # Created: Mon May 27 17:45:05 2013 (+0530)
 # Version: 
-# Last-Updated: Tue May 28 12:39:45 2013 (+0530)
+# Last-Updated: Sat Jun  1 15:43:04 2013 (+0530)
 #           By: subha
-#     Update #: 247
+#     Update #: 252
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -57,14 +57,13 @@ def test_calc_nosim():
     lib = moose.Neutral('/library')
     calc_0 = moose.Calc('%s/calc_0' % (lib.path))
     calc_0.mode = 1
-    num = 10
+    num = 5
     expr = 'avg('
     for ii in range(num-1):
         expr += 'x_%d, ' % (ii)
     expr += 'x_%d)' % (num-1)
-    print 'Expression:', expr
+    print 'Expression:', expr    
     calc_0.expr = expr
-    print 'Variables:', [v for v in calc_0.vars]
     for ii in range(num):
         var = 'x_%d' % (ii)
         print 'Setting:', var, '=', calc_0.var[var]
