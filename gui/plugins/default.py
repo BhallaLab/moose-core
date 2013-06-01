@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Nov 13 15:58:31 2012 (+0530)
 # Version: 
-# Last-Updated: Tue May 28 18:30:42 2013 (+0530)
+# Last-Updated: Sat Jun  1 14:32:15 2013 (+0530)
 #           By: subha
-#     Update #: 1155
+#     Update #: 1189
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -183,20 +183,24 @@ class DefaultEditorWidget(EditorWidgetBase):
         #Harsha: default Tool Panel list is provieded in defaultToolPanel.py
         # instead of all classes in moose
 
-	dToolPanel = DefaultToolPanel()
-        #for mclass in moose.element('/classes').children:
-	for mclass in dToolPanel.defaultToolPanellist:
-            action = QtGui.QAction(mclass.name[0], self.insertMenu)
+	# dToolPanel = DefaultToolPanel() 
+
+        # Subha: Commenting out DefaultToolPanel above because it is
+        # not doing the right thing. It ignores classes with Neutral
+        # as base class, but all moose classes derive from
+        # Neutral. btw, panel is a wrong term for this.
+        ignored_bases = ['ZPool', 'Msg', 'Panel', 'SolverBase', 'none']
+        ignored_classes = ['ZPool','ZReac','ZMMenz','ZEnz','CplxEnzBase']
+        classlist = [ch[0].name for ch in moose.element('/classes').children
+                     if (ch[0].baseClass not in ignored_bases)
+                     and (ch[0].name not in (ignored_bases + ignored_classes))
+                     and not ch[0].name.startswith('Zombie')
+                     and not ch[0].name.endswith('Base')                     
+                 ]
+        insertMapper, actions = self.getInsertActions(classlist)
+        for action in actions:
             self.insertMenu.addAction(action)
-            # NOTE: Signal mapping is sensitive to data types
-            # in Python. It HAS TO BE OLD STYLE connect in PyQT. You
-            # cannot get away with:
-            #
-            # action.triggered.connect(self.insertMapper.map)
-            # or self.insertMapper.mapped.connect(self.tree.insertElementSlot)
-            self.insertMapper.setMapping(action, QtCore.QString(mclass.name[0]))
-            self.connect(action, QtCore.SIGNAL('triggered()'), self.insertMapper, QtCore.SLOT('map()'))
-        self.connect(self.insertMapper, QtCore.SIGNAL('mapped(const QString&)'), self.tree.insertElementSlot)
+        self.connect(insertMapper, QtCore.SIGNAL('mapped(const QString&)'), self.tree.insertElementSlot)
         self.editAction = QtGui.QAction('Edit', self.treeMenu)
         self.editAction.triggered.connect(self.objectEditSlot)
         self.tree.elementInserted.connect(self.elementInsertedSlot)

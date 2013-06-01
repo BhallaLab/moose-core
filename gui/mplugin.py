@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Oct  2 17:25:41 2012 (+0530)
 # Version: 
-# Last-Updated: Tue May 21 18:05:19 2013 (+0530)
+# Last-Updated: Sat Jun  1 14:37:04 2013 (+0530)
 #           By: subha
-#     Update #: 193
+#     Update #: 245
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -251,6 +251,38 @@ class EditorWidgetBase(QtGui.QWidget):
         self.modelRoot = '/'
         self._menus = []
         self._toolBars = []
+        self._insertActions = []
+        self._insertMapper = None
+
+    def getInsertActions(self, classlist):
+        """Create actions to be used in menus/toolbars for inserting class
+        instances. This function needs to be called only once. This
+        also creates the signal mapping from the insert actions.
+        
+        Returns: (mapper, actions)
+        
+        mapper is a QSignalMapper and actions is a list of QAction
+        objects. The triggering of any action in `actions` list causes
+        the `mapper` to emit a mapped(action-name) signal. This can be
+        connected to a slot in the editor's slot for inserting
+        elements. For MooseTreeWidget, this is the insertElement slot
+        (see default.py and mtree.py).
+
+        """
+        if len(self._insertActions) == 0:
+            self._insertMapper = QtCore.QSignalMapper(self)
+            for classname in classlist:
+                action = QtGui.QAction(classname, self)
+                self._insertMapper.setMapping(action, QtCore.QString(classname))
+                self.connect(action, 
+                             QtCore.SIGNAL('triggered()'),
+                             self._insertMapper, 
+                             QtCore.SLOT('map()'))
+                doc = moose.element('/classes/%s' % (classname)).docs
+                doc = doc.split('Description:')[-1].split('Name:')[0].strip()
+                action.setToolTip(doc)
+                self._insertActions.append(action)
+        return self._insertMapper, self._insertActions
         
     def setModelRoot(self, path):
         """Set the root of the model tree to be displayed.
