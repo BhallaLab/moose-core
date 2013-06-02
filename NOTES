@@ -22053,10 +22053,11 @@ working on putting in the chem signaling model in testSigNeur.py.
 Got the test chem model to work, lots of little bugs in setup in Python.
 Added a test to Shell::doCreate to avoid creating duplicate objects with
 the same name.
+Checkin 4578.
 
 Next: 
-	- confirm python chem model works with solver.
-	- Set up adaptors, confirm python model matches unit test model.
+	* confirm python chem model works with solver.
+	* Set up adaptors, confirm python model matches unit test model.
 	- remove unit test model. Too slow to have it in there.
 	- tweak Python test model to run much much faster while still
 		exercising multiscale features.
@@ -22064,5 +22065,9 @@ Next:
 	- Get the neuroMesh version working in EE and with solvers.
 	- Make regression test to compare against published multiscale model.
 	- Hand over to XML model builder.
+
+At this point the python model with adaptors matches that from the unit test.
+There is still a small numerical divergence, but I won't pursue that here.
+
 
 ==========================================================================

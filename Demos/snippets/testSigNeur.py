@@ -206,22 +206,23 @@ def create_spine_with_receptor( compt, cell, index, frac ):
     return gluR
 
 def add_plot( objpath, field, plot ):
-    if moose.exists( objpath ):
-        tab = moose.Table( '/graphs/' + plot )
-        obj = moose.element( objpath )
-        moose.connect( tab, 'requestData', obj, field )
-        return tab
+    assert moose.exists( objpath )
+    tab = moose.Table( '/graphs/' + plot )
+    obj = moose.element( objpath )
+    moose.connect( tab, 'requestData', obj, field )
+    return tab
 
-def make_plots():
+def make_elec_plots():
     graphs = moose.Neutral( '/graphs' )
-    add_plot( '/n/compt', 'get_Vm', 'dendVm' )
-    add_plot( '/n/head2', 'get_Vm', 'head2Vm' )
-    add_plot( '/n/head2/ca', 'get_Ca', 'head2Ca' )
+    elec = moose.Neutral( '/graphs/elec' )
+    add_plot( '/n/compt', 'get_Vm', 'elec/dendVm' )
+    add_plot( '/n/head2', 'get_Vm', 'elec/head2Vm' )
+    add_plot( '/n/head2/ca', 'get_Ca', 'elec/head2Ca' )
 
 def dump_plots( fname ):
     if ( os.path.exists( fname ) ):
         os.remove( fname )
-    for x in moose.wildcardFind( '/graphs/#' ):
+    for x in moose.wildcardFind( '/graphs/##[ISA=Table]' ):
         moose.element( x[0] ).xplot( fname, x[0].name )
 
 def make_spiny_compt():
@@ -370,6 +371,44 @@ def make_chem_in_cube_mesh():
 
     return parent
 
+def make_cube_multiscale():
+    make_spiny_compt()
+    synInput = moose.element( '/n/compt/synInput' )
+    synInput.refractT = 87e-3
+    Na = moose.element( '/n/compt/Na' )
+    Na.Gbar *= 1.5
+    make_chem_in_cube_mesh()
+    # set up diffusion between compts.
+    headCa = moose.element( '/n/spineMesh/Ca' )
+    dendCa = moose.element( '/n/neuroMesh/Ca' )
+    diffReac = moose.Reac( '/n/spineMesh/diff' )
+    moose.connect( diffReac, 'sub', headCa, 'reac' )
+    moose.connect( diffReac, 'prd', dendCa, 'reac' )
+    diffReac.Kf = 1
+    diffReac.Kb = headCa.size / dendCa.size
+    # set up adaptors
+    adaptCa = moose.Adaptor( '/n/adaptCa' )
+    elecCa = moose.element( '/n/head2/ca' )
+    moose.connect( elecCa, 'concOut', adaptCa, 'input', 'OneToAll' )
+    moose.connect( adaptCa, 'outputSrc', headCa, 'set_conc' )
+    adaptCa.outputOffset = 0.0001    # 100 nM offset in chem.
+    adaptCa.scale = 0.05             # 0.06 to 0.003 mM
+
+    adaptGluR = moose.Adaptor( '/n/adaptGluR' )
+    chemR = moose.element( '/n/psdMesh/psdGluR' )
+    elecR = moose.element( '/n/head2/gluR' )
+    moose.connect( adaptGluR, 'requestField', chemR, 'get_n', 'OneToAll' )
+    moose.connect( adaptGluR, 'outputSrc', elecR, 'set_Gbar', 'OneToAll' )
+    adaptGluR.scale = 1e-4 / 100     # from n to pS
+
+    adaptK = moose.Adaptor( '/n/adaptK' )
+    chemK = moose.element( '/n/neuroMesh/kChan' )
+    elecK = moose.element( '/n/compt/K' )
+    moose.connect( adaptK, 'requestField', chemK, 'get_conc', 'OneToAll' )
+    moose.connect( adaptK, 'outputSrc', elecK, 'set_Gbar', 'OneToAll' )
+    adaptK.scale = 0.3               # from mM to Siemens
+
+
 def make_chem_plots():
     graphs = moose.Neutral( '/graphs' )
     add_plot( '/n/spineMesh/Ca', 'get_conc', 'spineCa' )
@@ -396,18 +435,32 @@ def test_chem_alone():
     moose.reinit()
     moose.start( 100 )
     dump_plots( 'chem.plot' )
+    # Make ksolver and rerun.
+    ksolve = moose.GslStoich( '/n/solver' )
+    ksolve.path = '/n/##'
+    ksolve.method = 'rk5'
+    moose.useClock( 5, '/n/solver', 'process' )
+    moose.setClock( 5, 1 )
+    moose.setClock( 6, 1 )
+    moose.reinit()
+    moose.start( 100 )
+    dump_plots( 'kchem.plot' )
 
 def test_elec_alone():
     make_spiny_compt()
-    make_plots()
+    make_elec_plots()
     moose.setClock( 0, 1e-5 )
     moose.setClock( 1, 1e-5 )
     moose.setClock( 2, 1e-5 )
     moose.setClock( 8, 0.1e-3 )
-    moose.useClock( 0, '/n/#', 'init' )
-    moose.useClock( 1, '/n/#', 'process' )
-    moose.useClock( 2, '/n/#/#', 'process' )
-    moose.useClock( 8, '/graphs/#', 'process' )
+    #moose.useClock( 0, '/n/#', 'init' )
+    #moose.useClock( 1, '/n/#', 'process' )
+    #moose.useClock( 2, '/n/#/#', 'process' )
+    #print moose.wildcardFind( '/n/##[ISA=SpikeGen]' )
+    moose.useClock( 0, '/n/##[ISA=Compartment]', 'init' )
+    moose.useClock( 1, '/n/##[ISA=Compartment]', 'process' )
+    moose.useClock( 2, '/n/##[ISA=ChanBase],/n/##[ISA=SynBase],/n/##[ISA=CaConc],/n/##[ISA=SpikeGen]','process')
+    moose.useClock( 8, '/graphs/elec/#', 'process' )
     moose.reinit()
     moose.start( 0.1 )
     dump_plots( 'instab.plot' )
@@ -423,8 +476,32 @@ def test_elec_alone():
     moose.start( 0.1 )
     dump_plots( 'h_instab.plot' )
 
+def test_cube_multiscale():
+    make_cube_multiscale()
+    make_chem_plots()
+    make_elec_plots()
+    moose.setClock( 0, 2e-5 )
+    moose.setClock( 1, 2e-5 )
+    moose.setClock( 2, 2e-5 )
+    moose.setClock( 5, 1e-3 )
+    moose.setClock( 6, 1e-3 )
+    moose.setClock( 7, 1e-4 )
+    moose.setClock( 8, 1e-4 )
+    moose.useClock( 0, '/n/##[ISA=Compartment]', 'init' )
+    moose.useClock( 1, '/n/##[ISA=Compartment],/n/##[ISA=SpikeGen]', 'process' )
+    moose.useClock( 2, '/n/##[ISA=ChanBase],/n/##[ISA=SynBase],/n/##[ISA=CaConc]','process')
+    moose.useClock( 5, '/n/##[ISA=PoolBase],/n/##[ISA=ReacBase],/n/##[ISA=EnzBase]', 'process' )
+    moose.useClock( 6, '/n/##[ISA=Adaptor]', 'process' )
+    moose.useClock( 7, '/graphs/#', 'process' )
+    moose.useClock( 8, '/graphs/elec/#', 'process' )
+    #moose.le( '/graphs/elec' )
+    moose.reinit()
+    moose.start( 10 )
+    dump_plots( 'cm.plot' )
+
 def main():
-    test_chem_alone()
+    test_cube_multiscale()
+	#test_elec_alone()
 
 if __name__ == '__main__':
     main()
