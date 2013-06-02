@@ -1243,6 +1243,13 @@ void Shell::innerCreate( string type, Id parent, Id newElm, string name,
 			warning( ss.str() );
 			return;
 		}
+		if ( Neutral::child( parent.eref(), name ) != Id() ) {
+			stringstream ss;
+			ss << "innerCreate: Object with same name already present: '"
+				   	<< parent.path() << "/" << name << "'. No Element created";
+			warning( ss.str() );
+			return;
+		}
 		vector< int > dims( dimensions );
 		bool isGlobal = dims.back();
 		dims.pop_back();

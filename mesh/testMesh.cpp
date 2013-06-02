@@ -1677,7 +1677,7 @@ void testSpineAndPsdMesh()
 	double len = diffLength * numCompts;
 	unsigned int numSpines = 10;
 	Id soma = makeCompt( Id(), cell, "soma", dia, dia, 90 );
-	Id dend = makeCompt( Id(), cell, "soma", len, dia, 0 );
+	Id dend = makeCompt( Id(), cell, "dend", len, dia, 0 );
 	for ( unsigned int i = 0; i < numSpines; ++i ) {
 		double frac = i / static_cast< double >( numSpines );
 		makeSpine( dend, cell, i, frac, 1.0e-6, 1.0e-6, i * 30.0 );

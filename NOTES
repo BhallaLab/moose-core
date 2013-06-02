@@ -21894,7 +21894,7 @@ A bit of rearrangement. Ran the model again with a solver. Worked.
 Next: 
 	+ Run elec model with solver standalone.
 	+ Run combined model with adaptors, no solvers, cubeMesh
-	- Run combined model with solvers in cubeMesh
+	+ Run combined model with solvers in cubeMesh
 	- Run chem model with solvers in NeuroMesh including diffusion.
 	- Run combined model with solvers in NeuroMesh including diffusion.
 	- regression test with equivalent model loaded from kkit and
@@ -22039,5 +22039,30 @@ Did that. The output is nearly identical to the EE plot from SigNeur.plot.
 Now to throw in a solver.
 Did. Replicates even the small discrepancy between hsolve and the EE method 
 from the unit test.
+Checkin 4573.
+
+==========================================================================
+29 May
+Confirmed that the Ca discrepancy between solver and EE continues even at a
+much smaller dt: 1 usec for the EE and 10 usec for hsolver.
+
+working on putting in the chem signaling model in testSigNeur.py.
+
+==========================================================================
+2 June 2013
+Got the test chem model to work, lots of little bugs in setup in Python.
+Added a test to Shell::doCreate to avoid creating duplicate objects with
+the same name.
+
+Next: 
+	- confirm python chem model works with solver.
+	- Set up adaptors, confirm python model matches unit test model.
+	- remove unit test model. Too slow to have it in there.
+	- tweak Python test model to run much much faster while still
+		exercising multiscale features.
+	- Get all solvers on board, make sure it is reasonably close
+	- Get the neuroMesh version working in EE and with solvers.
+	- Make regression test to compare against published multiscale model.
+	- Hand over to XML model builder.
 
 ==========================================================================
