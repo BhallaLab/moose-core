@@ -858,7 +858,7 @@ Id buildAdaptorsInCubeMesh( vector< Id >& plots )
 	plots.push_back( addPlot( "/n/head2/ca", "get_Ca", "spineElecCa" ) );
 	// plots.push_back( addPlot( "/n/spineMesh/Ca", "get_conc", "spineChemCa") );
 	// plots.push_back( addPlot( "/n/neuroMesh/Ca", "get_conc", "dendChemCa"));
-	// plots.push_back( addPlot( "/n/psdMesh/psdGluR", "get_n", "psdGluR_N" ));
+	plots.push_back( addPlot( "/n/psdMesh/psdGluR", "get_n", "psdGluR_N" ));
 	// plots.push_back( addPlot( "/n/head2/gluR", "get_Gbar", "elecGluR_Gbar" ) );
 	plots.push_back( addPlot( "/n/head2/gluR", "get_Ik", "elecGluR_Ik2" ) );
 	// plots.push_back( addPlot( "/n/head0/gluR", "get_Gk", "elecGluR_Gk0" ) );
@@ -868,7 +868,7 @@ Id buildAdaptorsInCubeMesh( vector< Id >& plots )
 	// plots.push_back( addPlot( "/n/head4/gluR", "get_Gk", "elecGluR_Gk4" ) );
 	// plots.push_back( addPlot( "/n/neuroMesh/kChan", "get_conc", "kChan_conc" ) );
 	// plots.push_back( addPlot( "/n/compt/K", "get_Gbar", "kChan_Gbar" ) );
-	// plots.push_back( addPlot( "/n/spineMesh/toPsd", "get_conc", "toPsd") );
+	plots.push_back( addPlot( "/n/spineMesh/toPsd", "get_conc", "toPsd") );
 
 	////////////////////////////////////////////////////////////////////
 	return nid;
