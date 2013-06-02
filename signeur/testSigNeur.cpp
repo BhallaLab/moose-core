@@ -306,8 +306,8 @@ void buildSigNeurChem( Id nid, Id neuroMesh, Id spineMesh, Id psdMesh )
 	mid = shell->doAddMsg( 
 			"OneToOne", dendKinaseEnz, "cplx", dendKinaseEnzCplx, "reac" );
 	assert( mid != Msg::bad );
-	Field< double >::set( dendKinaseEnz, "Km", 5e-3 ); 	// 1 uM
-	Field< double >::set( dendKinaseEnz, "kcat", 0.1 );	// 1/sec.
+	Field< double >::set( dendKinaseEnz, "Km", 5e-3 ); 	// 5 uM
+	Field< double >::set( dendKinaseEnz, "kcat", 0.1 );	// 0.1/sec.
 
 	Id dendPhosphatase = shell->doCreate( "Reac", neuroMesh, "phosphatase");
 	mid = shell->doAddMsg( 
@@ -606,6 +606,11 @@ void testChemInCubeMesh()
 		Id( "/n/neuroMesh/kChan_p" ), "get_conc" );
 	assert( mid != Msg::bad );
 
+	Id tab4 = shell->doCreate( "Table", nid, "tab4", dims );
+	mid = shell->doAddMsg( "Single", tab4, "requestData", 
+		Id( "/n/neuroMesh/Ca.kinase" ), "get_conc" );
+	assert( mid != Msg::bad );
+
 	Id tab3 = shell->doCreate( "Table", nid, "tab3", dims );
 	mid = shell->doAddMsg( "Single", tab3, "requestData", 
 		Id( "/n/spineMesh/toPsd" ), "get_conc" );
@@ -629,6 +634,7 @@ void testChemInCubeMesh()
 	SetGet2< string, string >::set( tabCa, "xplot", "SigNeurChem.plot", "spineCa" );
 	SetGet2< string, string >::set( tab, "xplot", "SigNeurChem.plot", "psdGluR_N" );
 	SetGet2< string, string >::set( tab2, "xplot", "SigNeurChem.plot", "kChan_p" );
+	SetGet2< string, string >::set( tab4, "xplot", "SigNeurChem.plot", "dendKinase" );
 	SetGet2< string, string >::set( tab3, "xplot", "SigNeurChem.plot", "toPsd" );
 
 	//////////////////////////////////////////////////////////////////////
