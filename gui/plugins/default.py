@@ -179,16 +179,6 @@ class DefaultEditorWidget(EditorWidgetBase):
         self._menus.append(self.insertMenu)
         self.treeMenu.addMenu(self.insertMenu)
         self.insertMapper = QtCore.QSignalMapper(self)
-
-        #Harsha: default Tool Panel list is provieded in defaultToolPanel.py
-        # instead of all classes in moose
-
-	# dToolPanel = DefaultToolPanel() 
-
-        # Subha: Commenting out DefaultToolPanel above because it is
-        # not doing the right thing. It ignores classes with Neutral
-        # as base class, but all moose classes derive from
-        # Neutral. btw, panel is a wrong term for this.
         ignored_bases = ['ZPool', 'Msg', 'Panel', 'SolverBase', 'none']
         ignored_classes = ['ZPool','ZReac','ZMMenz','ZEnz','CplxEnzBase']
         classlist = [ch[0].name for ch in moose.element('/classes').children

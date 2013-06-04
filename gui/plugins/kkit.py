@@ -64,7 +64,13 @@ class KkitEditorView(MooseEditorView):
     """
     def __init__(self, plugin):
         MooseEditorView.__init__(self, plugin)
-
+        '''
+        self.insertMenu = QtGui.QMenu('Insert')
+        sortList = ['CubeMesh','CylMesh','Pool','FuncPool','SumFunc','Reac','Enz','MMenz','StimulusTable','Table']
+        for slist in sortList:
+            action = QtGui.QAction(moose.element('/classes/'+slist).name, self.insertMenu)
+            self._toolBars.append(action)
+        '''
     def getToolPanes(self):
         return super(KkitEditorView, self).getToolPanes()
 
@@ -73,7 +79,7 @@ class KkitEditorView(MooseEditorView):
 
     def getOperationsWidget(self):
         return super(KkitEditorView, self).getOperationsPane()
-
+    
     def getCentralWidget(self):
         if self._centralWidget is None:
             #self._centralWidget = EditorWidgetBase()
@@ -89,7 +95,19 @@ class  KineticsWidget(DefaultEditorWidget):
         self.sceneContainer = QtGui.QGraphicsScene(self)
         self.sceneContainer.setSceneRect(self.sceneContainer.itemsBoundingRect())
         self.sceneContainer.setBackgroundBrush(QtGui.QColor(230,220,219,120))
-    
+        
+        self.insertMenu = QtGui.QMenu('&Insert')
+        self._menus.append(self.insertMenu)
+
+        self.insertMapper = QtCore.QSignalMapper(self)
+        classlist = ['CubeMesh','CylMesh','Pool','FuncPool','SumFunc','Reac','Enz','MMenz','StimulusTable','Table']
+        insertMapper, actions = self.getInsertActions(classlist)
+        for action in actions:
+            self.insertMenu.addAction(action)
+        self._toolBars.append(QtGui.QToolBar('Insert'))
+        for action in self.insertMenu.actions():
+            self._toolBars[-1].addAction(action)
+
     def sizeHint(self):
         return QtCore.QSize(800,400)
 
