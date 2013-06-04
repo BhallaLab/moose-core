@@ -63,8 +63,8 @@ from mload import loadFile
 from loaderdialog import LoaderDialog
 from shell import get_shell_class
 from objectedit import ObjectEditDockWidget
-from dialog import DialogWidget
-
+from qdialog import DialogWidget
+import re
 __author__ = 'Subhasis Ray'
 
 # This maps model subtypes to corresponding plugin names. Should be
@@ -315,7 +315,7 @@ class MWindow(QtGui.QMainWindow):
         """Set current view to a particular one: options are 'editor',
         'plot', 'run'. A plugin can provide more views if necessary.
         """
-        #print '11111', view
+        #print '11111', view,self.plugin
         self.plugin.setCurrentView(view)
         targetView = None
         newSubWindow = True
@@ -642,11 +642,8 @@ class MWindow(QtGui.QMainWindow):
             for fileName in fileNames:
                 # print 'Current plugin', self.plugin
                 modelName = dialog.getTargetPath()
-                
                 if '/' in modelName:
-                    print 'Raising exception'
                     raise mexception.ElementNameError('Model name cannot contain `/`')
-                #print '\t \t -------modelroot', modelName
                 ret = loadFile(str(fileName), '/model/%s' % (modelName), merge=False)
                 #print '11111'
                 # Harsha: if subtype is None, in case of cspace then pluginLookup = /cspace/None 
@@ -657,7 +654,6 @@ class MWindow(QtGui.QMainWindow):
                 except KeyError:
                     pluginName = 'default'
                 print 'Loaded model', ret['model'].path
-                
                 self.setPlugin(pluginName, ret['model'].path)
                 #Harsha: This will clear out object editor's objectpath and make it invisible
                 self.objectEditSlot('/',False)
@@ -667,30 +663,18 @@ class MWindow(QtGui.QMainWindow):
         newModelDialog = DialogWidget()
         if newModelDialog.exec_():
             modelPath = str(newModelDialog.modelPathEdit.text()).strip()
+            print "modelPath",modelPath
             if len(modelPath) == 0:
                 raise mexception.ElementNameError('Model path cannot be empty')
+            if re.search('[ /]',modelPath) is not None:
+                raise mexception.ElementNameError('Model path should not containe / or whitespace')
             plugin = str(newModelDialog.submenu.currentText())
-            #Harsha: Kkit model will be loaded under /model, 
+            #Harsha: All model will be forced to load/build under /model, 
             modelContainer = moose.Neutral('/model')
             modelRoot = moose.Neutral('%s/%s' % (modelContainer.path, modelPath))
-            print 'Created ', modelRoot
             self.setPlugin(plugin, modelRoot.path)
-            # if plugin == 'kkit':
-            #     modelRoot = '/model'
-            #     if moose.exists(modelRoot):
-            #         # If previously model is loaded,while create new kkit model everything under /model has to be deleted.
-            #         p = moose.Neutral(modelRoot)
-            #         for ch in p.children:
-            #             moose.delete(ch)
-            #     modelPath = modelRoot+'/'+modelPath
-            # else:
-            #     modelPath = modelPath
-            #     #print moose.exists('/')
-            #     #print "QWQ",modelPath
-            #     moose.Neutral(modelPath)
-            # self.setPlugin(plugin, modelPath)
-            # #Harsha: This will clear out object editor's objectpath and make it invisible
-            # self.objectEditSlot('/',False)
+            #Harsha: This will clear out object editor's objectpath and make it invisible
+            self.objectEditSlot('/',False)
 
 if __name__ == '__main__':
     # create the GUI application
