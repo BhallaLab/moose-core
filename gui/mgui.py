@@ -63,7 +63,7 @@ from mload import loadFile
 from loaderdialog import LoaderDialog
 from shell import get_shell_class
 from objectedit import ObjectEditDockWidget
-from dialog import DialogWidget
+from newmodeldialog import DialogWidget
 import re
 __author__ = 'Subhasis Ray'
 
