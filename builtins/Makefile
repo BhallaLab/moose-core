@@ -14,7 +14,7 @@ OBJ = \
 	Group.o	\
 	Mdouble.o	\
 	Mstring.o	\
-	Calc.o \
+	Func.o \
 	TableBase.o	\
 	TableEntry.o	\
 	Table.o	\
@@ -36,7 +36,7 @@ Arith.o:	Arith.h
 Group.o:	Group.h
 Mdouble.o:		Mdouble.h
 Mstring.o:		Mstring.h
-Calc.o:	Calc.h
+Func.o:	Func.h
 TableEntry.o:		TableEntry.h
 TableBase.o:		TableBase.h TableEntry.h
 Table.o:		TableBase.h Table.h TableEntry.h
