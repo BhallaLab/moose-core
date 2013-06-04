@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Nov 13 15:58:31 2012 (+0530)
 # Version: 
-# Last-Updated: Sat Jun  1 14:32:15 2013 (+0530)
+# Last-Updated: Tue Jun  4 16:28:07 2013 (+0530)
 #           By: subha
-#     Update #: 1189
+#     Update #: 1190
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -52,6 +52,7 @@ from PyQt4 import QtGui, QtCore
 from PyQt4.Qt import Qt
 import moose
 import mtree
+from msearch import SearchWidget
 
 from mplugin import MoosePluginBase, EditorBase, EditorWidgetBase, PlotBase, RunBase
 #from defaultToolPanel import DefaultToolPanel
@@ -82,6 +83,11 @@ class MoosePlugin(MoosePluginBase):
             self.editorView.getCentralWidget().editObject.connect(self.mainWindow.objectEditSlot)
             self.currentView = self.editorView
         return self.editorView
+
+    def getPlotView(self):
+        if not hasattr(self, 'plotView'):
+            self.plotView = PlotView(self)
+        return self.plotView
 
     def getRunView(self):
         if not hasattr(self, 'runView') or self.runView is None:
@@ -223,6 +229,12 @@ class DefaultEditorWidget(EditorWidgetBase):
     def sizeHint(self):
         return QtCore.QSize(400, 300)
 
+
+############################################################
+#
+# View for running a simulation and runtime visualization
+#
+############################################################
 
 
 from mplot import CanvasWidget
@@ -637,5 +649,55 @@ class PlotWidget(CanvasWidget):
             axes.relim()
             axes.autoscale_view(True,True,True)
         self.figure.canvas.draw()
+
+
+###################################################
+#
+# Plot view - select fields to record
+#
+###################################################
+
+class PlotView(PlotBase):
+    """View for selecting fields on elements to plot."""
+    def __init__(self, *args):
+        PlotBase.__init__(self, *args)
+        self._centralWidget = PlotSelectionWidget()
+        self._fieldSelectionDock = QtGui.QDockWidget()
+        self._fieldSelectionWidget = QtGui.QWidget()
+        layout = QtGui.QVBoxLayout()
+        self._fieldSelectionWidget.setLayout(layout)
+        layout.addWidget(self.getSelectionPane())
+        layout.addWidget(self.getOperationsPane())
+        self._fieldSelectionDock.setWidget(self._fieldSelectionWidget)
+
+    def getToolPanes(self):
+        return (self._fieldSelectionDock, )
+
+    def getSelectionPane(self):
+        """Creates a widget to select elements and fields for plotting.
+        search-root, field-name, comparison operator , value
+        """
+        if not hasattr(self, 'selectionPane'):
+            self.selectionPane = SearchWidget()
+        return self.selectionPane
+        
+
+    def getOperationsPane(self):
+        """TODO: complete this"""
+        if hasattr(self, 'operationsPane'):
+            return self.operationsPane
+        self.operationsPane = QtGui.QWidget()
+        return self.operationsPane
+
+    def getCentralWidget(self):
+        return self._centralWidget
+
+
+class PlotSelectionWidget(mtree.MooseTreeWidget):
+    def __init__(self, *args):
+        mtree.MooseTreeWidget.__init__(self, *args)        
+        model = moose.Neutral('/model')
+        self.modelRoot = model.path
+
 # 
 # default.py ends here
