@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun  4 15:10:16 2013 (+0530)
 # Version: 
-# Last-Updated: Tue Jun  4 16:21:01 2013 (+0530)
+# Last-Updated: Tue Jun  4 19:08:29 2013 (+0530)
 #           By: subha
-#     Update #: 141
+#     Update #: 149
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -72,7 +72,6 @@ class SearchWidget(QtGui.QWidget):
         self.searchButton = QtGui.QPushButton('Search')
         self.searchButton.clicked.connect(self.searchSlot)
         layout.addWidget(self.searchButton)
-        layout.addStretch(2)
         self.__results = []
 
     def switchModeSlot(self, text):
@@ -105,7 +104,7 @@ class SearchWidget(QtGui.QWidget):
             self.recurseButton = QtGui.QRadioButton('Search inside children recursively')
             self.recurseButton.setChecked(True)
             layout = QtGui.QGridLayout()
-            layout.setVerticalSpacing(2)
+            # layout.setVerticalSpacing(2)
             self._basicPanel.setLayout(layout)
             layout.addWidget(self.searchRootLabel, 0, 0, 1, 2)
             layout.addWidget(self.searchRootEdit, 1, 0, 1, 2)
@@ -117,7 +116,7 @@ class SearchWidget(QtGui.QWidget):
             layout.addWidget(self.comparisonCombo, 1, 4, 1, 1)
             layout.addWidget(self.valueEdit, 1, 5, 1, 2)
             layout.addWidget(self.recurseButton, 2, 0, 1, 1)
-            layout.addItem(QtGui.QSpacerItem(1,1), 3, 0, 1, 7)
+            # layout.addItem(QtGui.QSpacerItem(1,1), 3, 0, 1, 7)
         return self._basicPanel
 
     def getAdvancedPanel(self):
