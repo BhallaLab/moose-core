@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Tue May 28 18:24:29 2013 (+0530)
+# Last-Updated: Tue Jun  4 16:35:08 2013 (+0530)
 #           By: subha
-#     Update #: 1258
+#     Update #: 1259
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -63,7 +63,7 @@ from mload import loadFile
 from loaderdialog import LoaderDialog
 from shell import get_shell_class
 from objectedit import ObjectEditDockWidget
-from qdialog import DialogWidget
+from dialog import DialogWidget
 import re
 __author__ = 'Subhasis Ray'
 

@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun  4 15:10:16 2013 (+0530)
 # Version: 
-# Last-Updated: Tue Jun  4 16:10:17 2013 (+0530)
+# Last-Updated: Tue Jun  4 16:21:01 2013 (+0530)
 #           By: subha
-#     Update #: 135
+#     Update #: 141
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -72,6 +72,7 @@ class SearchWidget(QtGui.QWidget):
         self.searchButton = QtGui.QPushButton('Search')
         self.searchButton.clicked.connect(self.searchSlot)
         layout.addWidget(self.searchButton)
+        layout.addStretch(2)
         self.__results = []
 
     def switchModeSlot(self, text):
@@ -117,7 +118,6 @@ class SearchWidget(QtGui.QWidget):
             layout.addWidget(self.valueEdit, 1, 5, 1, 2)
             layout.addWidget(self.recurseButton, 2, 0, 1, 1)
             layout.addItem(QtGui.QSpacerItem(1,1), 3, 0, 1, 7)
-            layout.setRowStretch(3, 10)
         return self._basicPanel
 
     def getAdvancedPanel(self):
@@ -161,10 +161,10 @@ class SearchWidget(QtGui.QWidget):
             search_str = str(self._searchEdit.text()).strip()
         ids = moose.wildcardFind(search_str)
         self.__results = [el.path for el in ids]
-        # print 'Search string:', search_str, type(search_str)
-        # print 'Search result'
-        # for ii in self.__results:
-        #     print ii
+        print 'Search string:', search_str, type(search_str)
+        print 'Search result'
+        for ii in self.__results:
+            print ii
 
     def getResults(self):
         return list(self.__results)
