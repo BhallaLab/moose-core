@@ -162,7 +162,7 @@ class ViewBase(object):
 
     def getToolBars(self):
         """Return list of toolbars for this view."""
-        print '11111', self._toolBars
+        #print '11111', self._toolBars
         return self._toolBars
 
     def getMenus(self):
@@ -308,6 +308,7 @@ class EditorWidgetBase(QtGui.QWidget):
         raise NotImplementedError('must be implemented in derived class.')
 
     def getMenus(self):
+        
         return self._menus
 
     def getToolBars(self):
