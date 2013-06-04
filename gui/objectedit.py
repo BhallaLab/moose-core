@@ -196,6 +196,7 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
 
     def flags(self, index):
         flag =  QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
+        
         if not index.isValid():
             return None
         # Replacing the `outrageous` up stuff with something sensible
