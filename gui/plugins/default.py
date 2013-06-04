@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Nov 13 15:58:31 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Jun  4 16:28:07 2013 (+0530)
+# Last-Updated: Tue Jun  4 19:09:54 2013 (+0530)
 #           By: subha
-#     Update #: 1190
+#     Update #: 1235
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -661,26 +661,26 @@ class PlotView(PlotBase):
     """View for selecting fields on elements to plot."""
     def __init__(self, *args):
         PlotBase.__init__(self, *args)
-        self._centralWidget = PlotSelectionWidget()
-        self._fieldSelectionDock = QtGui.QDockWidget()
-        self._fieldSelectionWidget = QtGui.QWidget()
-        layout = QtGui.QVBoxLayout()
-        self._fieldSelectionWidget.setLayout(layout)
-        layout.addWidget(self.getSelectionPane())
-        layout.addWidget(self.getOperationsPane())
-        self._fieldSelectionDock.setWidget(self._fieldSelectionWidget)
 
     def getToolPanes(self):
-        return (self._fieldSelectionDock, )
+        return (self.getFieldSelectionDock(), )
 
     def getSelectionPane(self):
         """Creates a widget to select elements and fields for plotting.
         search-root, field-name, comparison operator , value
         """
-        if not hasattr(self, 'selectionPane'):
-            self.selectionPane = SearchWidget()
-        return self.selectionPane
-        
+        if not hasattr(self, '_selectionPane'):
+            self._searchWidget = SearchWidget()
+            self._fieldLabel = QtGui.QLabel('Field to plot')
+            self._fieldEdit = QtGui.QLineEdit()
+            self._selectionPane = QtGui.QWidget()
+            layout = QtGui.QHBoxLayout()
+            layout.addWidget(self._fieldLabel)
+            layout.addWidget(self._fieldEdit)
+            self._searchWidget.layout().addLayout(layout)
+            self._selectionPane = self._searchWidget
+            self._selectionPane.layout().addStretch(1)
+        return self._selectionPane
 
     def getOperationsPane(self):
         """TODO: complete this"""
@@ -689,15 +689,32 @@ class PlotView(PlotBase):
         self.operationsPane = QtGui.QWidget()
         return self.operationsPane
 
+    def getFieldSelectionDock(self):
+        if not hasattr(self, '_fieldSelectionDock'):
+            self._fieldSelectionDock = QtGui.QDockWidget()
+            self._fieldSelectionWidget = QtGui.QWidget()
+            layout = QtGui.QVBoxLayout()
+            self._fieldSelectionWidget.setLayout(layout)
+            layout.addWidget(self.getSelectionPane())
+            layout.addWidget(self.getOperationsPane())
+            self._fieldSelectionDock.setWidget(self._fieldSelectionWidget)
+        return self._fieldSelectionDock
+
     def getCentralWidget(self):
+        if not hasattr(self, '_centralWidget') or self._centralWidget is None:
+            self._centralWidget = PlotSelectionWidget()
+        print self._centralWidget
         return self._centralWidget
 
 
-class PlotSelectionWidget(mtree.MooseTreeWidget):
+class PlotSelectionWidget(QtGui.QWidget):
     def __init__(self, *args):
-        mtree.MooseTreeWidget.__init__(self, *args)        
+        QtGui.QWidget.__init__(self, *args)        
         model = moose.Neutral('/model')
         self.modelRoot = model.path
+    
+
+
 
 # 
 # default.py ends here
