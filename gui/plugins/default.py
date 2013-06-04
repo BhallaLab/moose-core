@@ -54,7 +54,7 @@ import moose
 import mtree
 
 from mplugin import MoosePluginBase, EditorBase, EditorWidgetBase, PlotBase, RunBase
-from defaultToolPanel import DefaultToolPanel
+#from defaultToolPanel import DefaultToolPanel
 
 class MoosePlugin(MoosePluginBase):
     """Default plugin for MOOSE GUI"""
