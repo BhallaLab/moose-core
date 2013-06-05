@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Wed Jun  5 11:25:55 2013 (+0530)
+# Last-Updated: Wed Jun  5 14:53:55 2013 (+0530)
 #           By: subha
-#     Update #: 1261
+#     Update #: 1266
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -311,6 +311,7 @@ class MWindow(QtGui.QMainWindow):
             self.toolBars.append(toolbar)
         for toolbar in self.toolBars:
             self.addToolBar(toolbar)
+            toolbar.setVisible(True)
 
     def setCurrentView(self, view):
         """Set current view to a particular one: options are 'editor',
