@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun  4 15:10:16 2013 (+0530)
 # Version: 
-# Last-Updated: Tue Jun  4 19:08:29 2013 (+0530)
+# Last-Updated: Wed Jun  5 11:24:36 2013 (+0530)
 #           By: subha
-#     Update #: 149
+#     Update #: 170
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -56,6 +56,15 @@ from PyQt4.Qt import Qt
 import moose
 
 class SearchWidget(QtGui.QWidget):
+    """Widget to search MOOSE model tree using wildcards.
+    
+    SIGNALS:
+
+    executed(list of elements matching search criterion).
+
+    """
+    executed = QtCore.pyqtSignal(list, name='executed')
+
     def __init__(self, *args):
         QtGui.QWidget.__init__(self, *args)
         layout = QtGui.QVBoxLayout()
@@ -106,16 +115,15 @@ class SearchWidget(QtGui.QWidget):
             layout = QtGui.QGridLayout()
             # layout.setVerticalSpacing(2)
             self._basicPanel.setLayout(layout)
-            layout.addWidget(self.searchRootLabel, 0, 0, 1, 2)
-            layout.addWidget(self.searchRootEdit, 1, 0, 1, 2)
-            layout.setColumnStretch(0, 2)
-            layout.addWidget(self.typeLabel, 0, 1, 1, 1)
-            layout.addWidget(self.typeEdit, 1, 1, 1, 1)
-            layout.addWidget(self.fieldLabel, 0, 3, 1, 1)
-            layout.addWidget(self.fieldEdit, 1, 3, 1, 1)
-            layout.addWidget(self.comparisonCombo, 1, 4, 1, 1)
-            layout.addWidget(self.valueEdit, 1, 5, 1, 2)
-            layout.addWidget(self.recurseButton, 2, 0, 1, 1)
+            layout.addWidget(self.searchRootLabel, 0, 0, 1, 1)
+            layout.addWidget(self.searchRootEdit, 0, 1, 1, 4)
+            layout.addWidget(self.typeLabel, 1, 0, 1, 1)
+            layout.addWidget(self.typeEdit, 1, 1, 1, 4)
+            layout.addWidget(self.fieldLabel, 2, 0, 1, 1)
+            layout.addWidget(self.fieldEdit, 2, 1, 1, 1)
+            layout.addWidget(self.comparisonCombo, 2, 2, 1, 1)
+            layout.addWidget(self.valueEdit, 2, 3, 1, 2)
+            layout.addWidget(self.recurseButton, 3, 0, 1, 1)
             # layout.addItem(QtGui.QSpacerItem(1,1), 3, 0, 1, 7)
         return self._basicPanel
 
@@ -164,6 +172,7 @@ class SearchWidget(QtGui.QWidget):
         print 'Search result'
         for ii in self.__results:
             print ii
+        self.executed.emit(list(self.__results))
 
     def getResults(self):
         return list(self.__results)

@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Nov 13 15:58:31 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Jun  4 19:09:54 2013 (+0530)
+# Last-Updated: Wed Jun  5 11:30:27 2013 (+0530)
 #           By: subha
-#     Update #: 1235
+#     Update #: 1305
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -691,7 +691,7 @@ class PlotView(PlotBase):
 
     def getFieldSelectionDock(self):
         if not hasattr(self, '_fieldSelectionDock'):
-            self._fieldSelectionDock = QtGui.QDockWidget()
+            self._fieldSelectionDock = QtGui.QDockWidget('Search and select elements')
             self._fieldSelectionWidget = QtGui.QWidget()
             layout = QtGui.QVBoxLayout()
             self._fieldSelectionWidget.setLayout(layout)
@@ -703,16 +703,44 @@ class PlotView(PlotBase):
     def getCentralWidget(self):
         if not hasattr(self, '_centralWidget') or self._centralWidget is None:
             self._centralWidget = PlotSelectionWidget()
-        print self._centralWidget
+            self.getSelectionPane().executed.connect(self._centralWidget.setSelectedElements)
         return self._centralWidget
 
 
-class PlotSelectionWidget(QtGui.QWidget):
+class PlotSelectionWidget(QtGui.QScrollArea):
     def __init__(self, *args):
         QtGui.QWidget.__init__(self, *args)        
         model = moose.Neutral('/model')
         self.modelRoot = model.path
+        layout = QtGui.QGridLayout(self)
+        self.setLayout(layout)        
+        self.layout().addWidget(QtGui.QLabel('<h1>Elements matching search criterion will be listed here</h1>'), 0, 0)
     
+    def setSelectedElements(self, elementlist):
+        for ii in range(self.layout().count()):
+            item = self.layout().itemAt(ii)
+            self.layout().removeItem(item)
+            w = item.widget()
+            w.hide()
+            del w
+            del item
+        for ii, entry in enumerate(elementlist):
+            el = moose.element(entry)
+            plottableFields = []
+            for field, dtype in  moose.getFieldDict(el.class_, 'valueFinfo').items():
+                if dtype == 'double':
+                    plottableFields.append(field)
+            if len(plottableFields) == 0:
+                continue
+            elementLabel = QtGui.QLabel(el.path)
+            fieldsCombo = QtGui.QComboBox()
+            for item in plottableFields:
+                fieldsCombo.addItem(item)
+            self.layout().addWidget(elementLabel, ii, 0, 1, 2)
+            self.layout().addWidget(fieldsCombo, ii, 2, 1, 1)
+                
+                
+            
 
 
 
