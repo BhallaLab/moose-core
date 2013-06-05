@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun  4 15:10:16 2013 (+0530)
 # Version: 
-# Last-Updated: Wed Jun  5 18:50:26 2013 (+0530)
+# Last-Updated: Wed Jun  5 22:44:18 2013 (+0530)
 #           By: subha
-#     Update #: 173
+#     Update #: 174
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -168,10 +168,6 @@ class SearchWidget(QtGui.QWidget):
             search_str = str(self._searchEdit.text()).strip()
         ids = moose.wildcardFind(search_str)
         self.__results = [el.path for el in ids]
-        print 'Search string:', search_str, type(search_str)
-        print 'Search result'
-        for ii in self.__results:
-            print ii
         self.executed.emit(list(self.__results))
 
     def getResults(self):

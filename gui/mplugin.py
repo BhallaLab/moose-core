@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Oct  2 17:25:41 2012 (+0530)
 # Version: 
-# Last-Updated: Wed Jun  5 19:30:40 2013 (+0530)
+# Last-Updated: Wed Jun  5 22:43:47 2013 (+0530)
 #           By: subha
-#     Update #: 269
+#     Update #: 273
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -167,7 +167,6 @@ class ViewBase(QtCore.QObject):
 
     def getToolBars(self):
         """Return list of toolbars for this view."""
-        #print '11111', self._toolBars
         return self._toolBars
 
     def getMenus(self):
@@ -242,7 +241,7 @@ class RunBase(ViewBase):
         ViewBase.__init__(self, *args)
 
 
-class EditorWidgetBase(QtGui.QWidget):
+class EditorWidgetBase(QtGui.QScrollArea):
     """Base class for central widget displayed in editor view.
 
     The widget should display the model components in the tree rooted
@@ -253,7 +252,7 @@ class EditorWidgetBase(QtGui.QWidget):
 
     """
     def __init__(self, *args):
-        QtGui.QWidget.__init__(self, *args)
+        QtGui.QScrollArea.__init__(self, *args)
         self.modelRoot = '/'
         self._menus = []
         self._toolBars = []
@@ -313,8 +312,7 @@ class EditorWidgetBase(QtGui.QWidget):
         """
         raise NotImplementedError('must be implemented in derived class.')
 
-    def getMenus(self):
-        
+    def getMenus(self):        
         return self._menus
 
     def getToolBars(self):

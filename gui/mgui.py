@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Wed Jun  5 19:31:24 2013 (+0530)
+# Last-Updated: Wed Jun  5 22:31:07 2013 (+0530)
 #           By: subha
-#     Update #: 1267
+#     Update #: 1273
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -356,7 +356,10 @@ class MWindow(QtGui.QMainWindow):
         return subwin
 
     def getMyToolBars(self):
-        return []
+        if not hasattr(self, 'viewToolBar'):
+            self.viewToolBar = QtGui.QToolBar('View')
+            self.viewToolBar.addActions(self.getViewActions())
+        return [self.viewToolBar]
 
     def getFileMenu(self):
         if self.fileMenu is None:
@@ -474,9 +477,6 @@ class MWindow(QtGui.QMainWindow):
             self.runViewAction = QtGui.QAction('&Run view', self)
             self.runViewAction.triggered.connect(self.openRunView)     
             self.viewActions = [self.editorViewAction, self.plotViewAction, self.runViewAction]
-        for action in self.viewActions:
-            #print action.text()
-            pass
         return self.viewActions
 
     def getSubWindowActions(self):
