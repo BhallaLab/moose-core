@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Wed Jun  5 14:53:55 2013 (+0530)
+# Last-Updated: Wed Jun  5 19:31:24 2013 (+0530)
 #           By: subha
-#     Update #: 1266
+#     Update #: 1267
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -463,7 +463,7 @@ class MWindow(QtGui.QMainWindow):
             self.plugin.setModelRoot(rootName)
             for subwin in self.mdiArea.subWindowList():
                 if hasattr(subwin.widget(), 'modelRoot'):
-                    subwin.setWindowTitle(subwin.widget().modelRoot)
+                    subwin.setWindowTitle(moose.element(subwin.widget().modelRoot).path)
 
     def getViewActions(self):
         if (not hasattr(self, 'viewActions')) or (self.viewActions is None):

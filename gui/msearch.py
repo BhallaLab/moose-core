@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun  4 15:10:16 2013 (+0530)
 # Version: 
-# Last-Updated: Wed Jun  5 11:24:36 2013 (+0530)
+# Last-Updated: Wed Jun  5 18:50:26 2013 (+0530)
 #           By: subha
-#     Update #: 170
+#     Update #: 173
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -176,6 +176,9 @@ class SearchWidget(QtGui.QWidget):
 
     def getResults(self):
         return list(self.__results)
+
+    def setSearchRoot(self, root):
+        self.searchRootEdit.setText(moose.element(root).path)
 
 def main():
     """Test main"""
