@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Nov 13 15:58:31 2012 (+0530)
 # Version: 
-# Last-Updated: Wed Jun  5 19:32:59 2013 (+0530)
+# Last-Updated: Wed Jun  5 22:48:02 2013 (+0530)
 #           By: subha
-#     Update #: 1394
+#     Update #: 1593
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -51,6 +51,7 @@ import numpy as np
 from PyQt4 import QtGui, QtCore
 from PyQt4.Qt import Qt
 import moose
+from moose import utils
 import mtree
 from msearch import SearchWidget
 from checkcombobox import CheckComboBox
@@ -252,18 +253,28 @@ class RunView(RunBase):
     def __init__(self, *args, **kwargs):
         RunBase.__init__(self, *args, **kwargs)
         self.canvas = PlotWidget()
-        self.modelRoot = self.plugin.modelRoot
-        self.dataRoot = '%s/data' % (self.modelRoot)
-        self.canvas.setModelRoot(self.modelRoot)
-        self.canvas.setDataRoot(self.dataRoot)
+        self.setDataRoot(moose.Neutral('/data'))
+        self.setModelRoot(moose.Neutral(self.plugin.modelRoot))
+        self.canvas.setModelRoot(self.plugin.modelRoot)
+        self._menus += self.getCentralWidget().getMenus()
+        self.setDataRootAction = QtGui.QAction('Set data root', self)     
+        self.setDataRootAction.triggered.connect(self.setDataRootSlot)
+        self._menus.append(QtGui.QMenu('&Edit'))
+        self._menus[-1].addAction(self.setDataRootAction)
 
     def getCentralWidget(self):
         """TODO: replace this with an option for multiple canvas
         tabs"""
         return self.canvas
         
+    def setDataRootSlot(self):
+        path, ok = QtGui.QInputDialog.getText(self.getCentralWidget(), 'Set data root', 'Enter path to data root')
+        if ok:
+            self.setDataRoot(str(path))
+        
     def setDataRoot(self, path):
         self.dataRoot = path
+        self.canvas.setDataRoot(path)
 
     def setModelRoot(self, path):
         self.modelRoot = path
@@ -348,14 +359,23 @@ class MooseRunner(QtCore.QObject):
         self._pause = True
 
     def updateTicks(self, tickDtMap):
+        """TODO: coordinate with Aditya about good way to schedule"""
         for tickNo, dt in tickDtMap.items():
             if tickNo >= 0 and dt > 0.0:
                 moose.setClock(tickNo, dt)
-
+            
     def assignTicks(self, tickTargetMap):
+        """TODO: coordinate with Aditya about good way to schedule"""
         for tickNo, target in tickTargetMap.items():
-            moose.useClock(tickNo, target)
-
+                moose.useClock(tickNo, target, 'process')
+        # This is a hack, we need saner way of scheduling
+        ticks = moose.ematrix('/clock/tick')
+        valid = []
+        for ii in range(ticks[0].localNumField):
+            if ticks[ii].dt > 0:
+                valid.append(ii)
+        if len(valid) == 0:
+            utils.resetSim(['/model', '/data'], 1e-6, 1e-4)
 
 class SchedulingWidget(QtGui.QWidget):
     """Widget for scheduling.
@@ -592,7 +612,8 @@ class PlotWidget(CanvasWidget):
         self.dataRoot = path
 
     def plotAllData(self):
-        path = self.dataRoot        
+        """Plot data from all tables under dataRoot"""
+        path = self.dataRoot
         time = moose.Clock('/clock').currentTime
         for tabId in moose.wildcardFind('%s/##[TYPE=Table]' % (path)):
             tab = moose.Table(tabId)
@@ -611,7 +632,7 @@ class PlotWidget(CanvasWidget):
                 else:
                     for line in lines:
                         ts = np.linspace(0, time, len(tab.vec))
-                        line.set_data(ts, tab.vec)                             
+                        line.set_data(ts, tab.vec)
         self.callAxesFn('legend')
         self.figure.canvas.draw()
                 
@@ -650,6 +671,16 @@ class PlotWidget(CanvasWidget):
             axes.relim()
             axes.autoscale_view(True,True,True)
         self.figure.canvas.draw()
+
+    def getMenus(self):
+        if not hasattr(self, '_menus'):
+            self._menus = []
+            self.plotAllAction = QtGui.QAction('Plot all data', self)
+            self.plotAllAction.triggered.connect(self.plotAllData)
+            self.plotMenu = QtGui.QMenu('Plot')
+            self.plotMenu.addAction(self.plotAllAction)
+            self._menus.append(self.plotMenu)
+        return self._menus
 
 
 ###################################################
@@ -710,16 +741,28 @@ class PlotView(PlotBase):
         return self._centralWidget
 
 
-            
-
 class PlotSelectionWidget(QtGui.QScrollArea):
     def __init__(self, *args):
-        QtGui.QWidget.__init__(self, *args)        
+        QtGui.QScrollArea.__init__(self, *args)        
         model = moose.Neutral('/model')
         self.modelRoot = model.path
-        layout = QtGui.QGridLayout(self)
-        self.setLayout(layout)        
-        self.layout().addWidget(QtGui.QLabel('<h1>Elements matching search criterion will be listed here</h1>'), 0, 0)
+        self.setLayout(QtGui.QVBoxLayout(self))
+        self.layout().addWidget(self.getPlotListWidget())
+        self._createTablesButton = QtGui.QPushButton('Create tables for recording selected fields', self)
+        self._createTablesButton.clicked.connect(self.createRecordingTables)
+        self.layout().addWidget(self._createTablesButton)
+        self._recordingDict = {}
+        self._reverseDict = {}
+        self.dataRoot = moose.Neutral('/data')
+
+    def getPlotListWidget(self):
+        if not hasattr(self, '_plotListWidget'):
+            self._plotListWidget = QtGui.QWidget(self)
+            layout = QtGui.QGridLayout(self._plotListWidget)
+            self._plotListWidget.setLayout(layout)        
+            layout.addWidget(QtGui.QLabel('<h1>Elements matching search criterion will be listed here</h1>'), 0, 0)            
+        return self._plotListWidget
+            
     
     def setSelectedElements(self, elementlist):
         """Create a grid of widgets displaying paths of elements in
@@ -729,19 +772,19 @@ class PlotSelectionWidget(QtGui.QScrollArea):
         plotting by the user.
 
         """
-        for ii in range(self.layout().count()):
-            item = self.layout().itemAt(ii)
+        for ii in range(self.getPlotListWidget().layout().count()):
+            item = self.getPlotListWidget().layout().itemAt(ii)
             if item is None:
                 continue
-            self.layout().removeItem(item)            
+            self.getPlotListWidget().layout().removeItem(item)            
             w = item.widget()
             w.hide()
             del w
             del item
         label = QtGui.QLabel('Element')
         label.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-        self.layout().addWidget(label, 0, 0, 1, 2)
-        self.layout().addWidget(QtGui.QLabel('Fields to plot'), 0, 2, 1, 1)
+        self.getPlotListWidget().layout().addWidget(label, 0, 0, 1, 2)
+        self.getPlotListWidget().layout().addWidget(QtGui.QLabel('Fields to plot'), 0, 2, 1, 1)
         for ii, entry in enumerate(elementlist):
             el = moose.element(entry)
             plottableFields = []
@@ -754,14 +797,57 @@ class PlotSelectionWidget(QtGui.QScrollArea):
             fieldsCombo = CheckComboBox(self) #QtGui.QComboBox()
             for item in plottableFields:
                 fieldsCombo.addItem(item)
-            self.layout().addWidget(elementLabel, ii+1, 0, 1, 2)
-            self.layout().addWidget(fieldsCombo, ii+1, 2, 1, 1)
+            self.getPlotListWidget().layout().addWidget(elementLabel, ii+1, 0, 1, 2)
+            self.getPlotListWidget().layout().addWidget(fieldsCombo, ii+1, 2, 1, 1)
                 
     def setModelRoot(self, root):
         pass
+
+    def setDataRoot(self, path):
+        self.dataRoot = moose.element(path)
             
+    def createRecordingTables(self):
+        """Create the tables for recording selected data and connect them."""
+        layout = self.getPlotListWidget().layout()
+        for ii in range(layout.rowCount()-1):
+            elementPath = None
+            item = layout.itemAtPosition(ii+1, 0)
+            widget = item.widget()
+            if not isinstance(widget, QtGui.QLabel):
+                raise Exception('Expected item (%d, 0) to be QLabel, found %s' % (ii+1, widget.__class__.__name__))
+            elementPath = str(widget.text())
+            item = layout.itemAtPosition(ii+1, 2)
+            widget = item.widget()
+            if not isinstance(widget, CheckComboBox):
+                raise Exception('Expected item (%d, 1) to be CheckComboBox, found %s' % (ii+1, widget.__class__.__name__))
+            for ii in range(widget.count()):
+                field = str(widget.itemText(ii)).strip()
+                if len(field) == 0:
+                    continue
+                checked, success = widget.itemData(ii, Qt.CheckStateRole).toInt()
+                if success and checked == Qt.Checked:
+                    self.checkPathAndCreateTable(elementPath, field)
+        # self._createTablesButton.setEnabled(False)
 
-
+    def checkPathAndCreateTable(self, elementPath, field):
+        path = '%s.%s' % (elementPath, field)
+        # The table path is not foolproof - conflict is
+        # possible: e.g. /model/test_object and
+        # /model/test/object will map to same table. So we
+        # check for existing table without element field
+        # path in recording dict.
+        relativePath = elementPath.partition('/model/')[-1]
+        data = moose.Neutral('/data')
+        tablePath = self.dataRoot.path + '/' + relativePath.replace('/', '_') + '.' + field
+        if path not in self._recordingDict and moose.exists(tablePath):
+            tablePath = '%s_%d' % (tablePath, moose.element(elementPath).id_.value)
+        if not moose.exists(tablePath):            
+            table = moose.Table(tablePath)
+            print 'Created', table.path
+            moose.connect(table, 'requestData', moose.element(elementPath), 'get_%s' % (field))
+            self._recordingDict[path] = table
+            self._reverseDict[table] = path
+        
 
 # 
 # default.py ends here
