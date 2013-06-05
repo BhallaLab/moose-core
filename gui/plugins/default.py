@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Nov 13 15:58:31 2012 (+0530)
 # Version: 
-# Last-Updated: Wed Jun  5 11:30:27 2013 (+0530)
+# Last-Updated: Wed Jun  5 19:32:59 2013 (+0530)
 #           By: subha
-#     Update #: 1305
+#     Update #: 1394
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -53,6 +53,7 @@ from PyQt4.Qt import Qt
 import moose
 import mtree
 from msearch import SearchWidget
+from checkcombobox import CheckComboBox
 
 from mplugin import MoosePluginBase, EditorBase, EditorWidgetBase, PlotBase, RunBase
 #from defaultToolPanel import DefaultToolPanel
@@ -661,6 +662,7 @@ class PlotView(PlotBase):
     """View for selecting fields on elements to plot."""
     def __init__(self, *args):
         PlotBase.__init__(self, *args)
+        self.plugin.modelRootChanged.connect(self.getSelectionPane().setSearchRoot)
 
     def getToolPanes(self):
         return (self.getFieldSelectionDock(), )
@@ -671,6 +673,7 @@ class PlotView(PlotBase):
         """
         if not hasattr(self, '_selectionPane'):
             self._searchWidget = SearchWidget()
+            self._searchWidget.setSearchRoot(self.plugin.modelRoot)
             self._fieldLabel = QtGui.QLabel('Field to plot')
             self._fieldEdit = QtGui.QLineEdit()
             self._selectionPane = QtGui.QWidget()
@@ -707,6 +710,8 @@ class PlotView(PlotBase):
         return self._centralWidget
 
 
+            
+
 class PlotSelectionWidget(QtGui.QScrollArea):
     def __init__(self, *args):
         QtGui.QWidget.__init__(self, *args)        
@@ -717,13 +722,26 @@ class PlotSelectionWidget(QtGui.QScrollArea):
         self.layout().addWidget(QtGui.QLabel('<h1>Elements matching search criterion will be listed here</h1>'), 0, 0)
     
     def setSelectedElements(self, elementlist):
+        """Create a grid of widgets displaying paths of elements in
+        `elementlist` if it has at least one plottable field (a field
+        with a numeric value). The numeric fields are listed in a
+        combobox next to the element path and can be selected for
+        plotting by the user.
+
+        """
         for ii in range(self.layout().count()):
             item = self.layout().itemAt(ii)
-            self.layout().removeItem(item)
+            if item is None:
+                continue
+            self.layout().removeItem(item)            
             w = item.widget()
             w.hide()
             del w
             del item
+        label = QtGui.QLabel('Element')
+        label.setSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        self.layout().addWidget(label, 0, 0, 1, 2)
+        self.layout().addWidget(QtGui.QLabel('Fields to plot'), 0, 2, 1, 1)
         for ii, entry in enumerate(elementlist):
             el = moose.element(entry)
             plottableFields = []
@@ -733,13 +751,14 @@ class PlotSelectionWidget(QtGui.QScrollArea):
             if len(plottableFields) == 0:
                 continue
             elementLabel = QtGui.QLabel(el.path)
-            fieldsCombo = QtGui.QComboBox()
+            fieldsCombo = CheckComboBox(self) #QtGui.QComboBox()
             for item in plottableFields:
                 fieldsCombo.addItem(item)
-            self.layout().addWidget(elementLabel, ii, 0, 1, 2)
-            self.layout().addWidget(fieldsCombo, ii, 2, 1, 1)
+            self.layout().addWidget(elementLabel, ii+1, 0, 1, 2)
+            self.layout().addWidget(fieldsCombo, ii+1, 2, 1, 1)
                 
-                
+    def setModelRoot(self, root):
+        pass
             
 
 
