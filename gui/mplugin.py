@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Oct  2 17:25:41 2012 (+0530)
 # Version: 
-# Last-Updated: Sat Jun  1 14:37:04 2013 (+0530)
+# Last-Updated: Wed Jun  5 19:30:40 2013 (+0530)
 #           By: subha
-#     Update #: 245
+#     Update #: 269
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -48,7 +48,7 @@
 from PyQt4 import QtGui,QtCore,Qt
 import moose
 
-class MoosePluginBase(object):
+class MoosePluginBase(QtCore.QObject):
     """Moose GUI plugin base class.
 
     A GUI plugin for MOOSE should extend MoosePlugin class. It has to
@@ -63,11 +63,13 @@ class MoosePluginBase(object):
     and getViews() functions.
 
     """
+    modelRootChanged = QtCore.pyqtSignal(object, name='modelRootChanged')
     def __init__(self, root='/', mainwindow=None):
         """Create a plugin object whose model is the tree rooted at
         `root` and whose widgets will be displayed in `mainwindow`.
         
         """
+        QtCore.QObject.__init__(self, mainwindow)
         self._views = []
         self._menus = []
         self._toolBars = []
@@ -131,11 +133,13 @@ class MoosePluginBase(object):
         raise NotImplementedError('method must be implemented in derived class')
 
     def setModelRoot(self, root):
-        self.modelRoot = root
+        self.modelRoot = moose.element(root)
         self.getEditorView().getCentralWidget().setModelRoot(self.modelRoot)
+        self.getPlotView().getCentralWidget().setModelRoot(self.modelRoot)    
+        self.modelRootChanged.emit(self.modelRoot)
 
 
-class ViewBase(object):
+class ViewBase(QtCore.QObject):
     """Base class for each view: Editor, Plot, Run.
 
     A view is a mode in a of a plugin. Each view provides 
@@ -150,6 +154,7 @@ class ViewBase(object):
 
     """
     def __init__(self, plugin):
+        QtCore.QObject.__init__(self, plugin)
         self._menus = []
         self._toolPanes = []
         self._toolBars = []
@@ -176,6 +181,7 @@ class ViewBase(object):
     def getCentralWidget(self):
         """Return a widget for central widget of mainwindow."""
         raise NotImplementedError('method must be reimplemented in subclass')
+
 
 class EditorBase(ViewBase):
     """Base class for editor view.
