@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Jun  4 16:35:08 2013 (+0530)
+# Last-Updated: Wed Jun  5 11:25:55 2013 (+0530)
 #           By: subha
-#     Update #: 1259
+#     Update #: 1261
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -127,6 +127,7 @@ class MWindow(QtGui.QMainWindow):
         self.quitAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Q", None, QtGui.QApplication.UnicodeUTF8))        
         self.getMyDockWidgets()       
         self.setCentralWidget(self.mdiArea)
+        self.mdiArea.setViewMode(QtGui.QMdiArea.TabbedView)
         self.setPlugin('default', '/')
 
     def quit(self):
@@ -331,6 +332,7 @@ class MWindow(QtGui.QMainWindow):
                                  QtGui.QSizePolicy.Expanding, 
                                  QtGui.QSizePolicy.Minimum | 
                                  QtGui.QSizePolicy.Expanding)
+            subwin.resize(600, 400)
         # Make dockwidgets from other views invisible and make those
         # from current view visible or add them if not already part of
         # main window.
