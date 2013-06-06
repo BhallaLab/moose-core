@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun  4 15:10:16 2013 (+0530)
 # Version: 
-# Last-Updated: Thu Jun  6 14:16:54 2013 (+0530)
+# Last-Updated: Thu Jun  6 18:26:02 2013 (+0530)
 #           By: subha
-#     Update #: 175
+#     Update #: 181
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -94,13 +94,13 @@ class SearchWidget(QtGui.QWidget):
             self._basicPanel = QtGui.QWidget()
             self.searchRootEdit = QtGui.QLineEdit()
             self.searchRootEdit.returnPressed.connect(self.searchSlot)
-            self.searchRootLabel = QtGui.QLabel('In')
+            self.searchRootLabel = QtGui.QLabel('Search under')
             self.typeEdit = QtGui.QLineEdit()
             self.typeEdit.returnPressed.connect(self.searchSlot)            
-            self.typeLabel = QtGui.QLabel('Type')
+            self.typeLabel = QtGui.QLabel('for elements of type')
             self.fieldEdit = QtGui.QLineEdit()
             self.fieldEdit.returnPressed.connect(self.searchSlot)            
-            self.fieldLabel = QtGui.QLabel('Field')
+            self.fieldLabel = QtGui.QLabel('or elements with field')
             self.comparisonCombo = QtGui.QComboBox()
             self.comparisonCombo.addItem('=', QtCore.QVariant(QtCore.QString('=')))
             self.comparisonCombo.addItem('<', QtCore.QVariant(QtCore.QString('<')))

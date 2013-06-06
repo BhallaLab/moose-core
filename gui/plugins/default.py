@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Nov 13 15:58:31 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Jun  6 17:46:41 2013 (+0530)
+# Last-Updated: Thu Jun  6 18:20:47 2013 (+0530)
 #           By: subha
-#     Update #: 2015
+#     Update #: 2037
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -256,7 +256,9 @@ class RunView(RunBase):
         self.canvas = PlotWidget()
         self.dataRoot = moose.Neutral('/data')
         self.modelRoot = moose.Neutral(self.plugin.modelRoot)
-        self.canvas.setModelRoot(self.plugin.modelRoot)
+        self.canvas.setModelRoot(self.plugin.modelRoot)       
+        self.plugin.modelRootChanged.connect(self.setModelRoot)
+        self.plugin.dataRootChanged.connect(self.setDataRoot)        
         self._menus += self.getCentralWidget().getMenus()
 
     def getCentralWidget(self):
@@ -691,8 +693,9 @@ class PlotWidget(CanvasWidget):
 
     def plotAllData(self):
         """Plot data from all tables under dataRoot"""        
-        path = self.dataRoot
+        path = moose.element(self.dataRoot).path
         time = moose.Clock('/clock').currentTime
+        tabList = []
         for tabId in moose.wildcardFind('%s/##[TYPE=Table]' % (path)):
             tab = moose.Table(tabId)
             if len(tab.neighbours['requestData']) > 0:
@@ -711,7 +714,9 @@ class PlotWidget(CanvasWidget):
                     for line in lines:
                         ts = np.linspace(0, time, len(tab.vec))
                         line.set_data(ts, tab.vec)
-        self.callAxesFn('legend')
+                tabList.append(tab)
+        if len(tabList) > 0:
+            self.callAxesFn('legend')
         self.draw()
                 
     def addTimeSeries(self, table, *args, **kwargs):        
@@ -737,7 +742,7 @@ class PlotWidget(CanvasWidget):
 
     def extendXAxes(self, xlim):
         for axes in self.axes.values():
-            axes.autoscale(False, axis='x', tight=True)
+            # axes.autoscale(False, axis='x', tight=True)
             axes.set_xlim(right=xlim)
             axes.autoscale_view(tight=True, scalex=True, scaley=True)
         self.draw()
@@ -876,9 +881,8 @@ class PlotView(PlotBase):
         appended to the name.
 
         """
-        if len(field) == 0:
+        if len(field) == 0 or ((element, field) in self._recordingDict):            
             return
-        path = '%s.%s' % (element.path, field)
         # The table path is not foolproof - conflict is
         # possible: e.g. /model/test_object and
         # /model/test/object will map to same table. So we
@@ -887,13 +891,12 @@ class PlotView(PlotBase):
         relativePath = element.path.partition('/model/')[-1]
         if relativePath.startswith('/'):
             relativePath = relativePath[1:]
-        data = moose.Neutral('/data')
         tablePath = self.dataRoot.path + '/' + relativePath.replace('/', '_') + '.' + field
-        if path not in self._recordingDict and moose.exists(tablePath):
+        if moose.exists(tablePath):
             tablePath = '%s_%d' % (tablePath, element.id_.value)
         if not moose.exists(tablePath):            
             table = moose.Table(tablePath)
-            print 'Created', table.path
+            print 'Created', table.path, 'for plotting', '%s.%s' % (element.path, field)
             target = element
             moose.connect(table, 'requestData', target, 'get_%s' % (field))
             self._recordingDict[(target, field)] = table
