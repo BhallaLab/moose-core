@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jun  4 15:10:16 2013 (+0530)
 # Version: 
-# Last-Updated: Wed Jun  5 22:44:18 2013 (+0530)
+# Last-Updated: Thu Jun  6 14:16:54 2013 (+0530)
 #           By: subha
-#     Update #: 174
+#     Update #: 175
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -133,6 +133,7 @@ class SearchWidget(QtGui.QWidget):
         if not hasattr(self, '_advancedPanel'):
             self._advancedPanel = QtGui.QWidget(self)
             self._searchEdit = QtGui.QLineEdit()
+            self._searchEdit.returnPressed.connect(self.searchSlot)
             self._searchLabel = QtGui.QLabel('Search string:')
             layout = QtGui.QHBoxLayout()
             self._advancedPanel.setLayout(layout)
