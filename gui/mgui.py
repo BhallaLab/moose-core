@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Wed Jun  5 22:31:07 2013 (+0530)
+# Last-Updated: Thu Jun  6 11:16:24 2013 (+0530)
 #           By: subha
-#     Update #: 1273
+#     Update #: 1303
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -454,19 +454,32 @@ class MWindow(QtGui.QMainWindow):
     
     def getEditActions(self):
         if (not hasattr(self, 'editActions')) or (self.editActions is None):
-            self.addRootAction = QtGui.QAction('&Set model root', self)
-            self.addRootAction.triggered.connect(self.showSetModelRootDialog)
-            self.editActions = [self.addRootAction]
+            self.setModelRootAction = QtGui.QAction('&Set model root', self)
+            self.setModelRootAction.triggered.connect(self.showSetModelRootDialog)
+            self.setDataRootAction = QtGui.QAction('Set &data root', self)
+            self.setDataRootAction.triggered.connect(self.showSetDataRootDialog)
+            self.editActions = [self.setModelRootAction, self.setDataRootAction]
         return self.editActions
 
     def showSetModelRootDialog(self):
-        rootName, ok = QtGui.QInputDialog.getText(self, 'Model Root', 'Enter the model root name:')
-        rootName = str(rootName) #convert from QString to python str
-        if ok:
-            self.plugin.setModelRoot(rootName)
-            for subwin in self.mdiArea.subWindowList():
-                if hasattr(subwin.widget(), 'modelRoot'):
-                    subwin.setWindowTitle(moose.element(subwin.widget().modelRoot).path)
+        root, ok = QtGui.QInputDialog.getText(self, 'Model Root', 'Enter the model root path:', text=self.plugin.modelRoot.path)
+        if not ok:
+            return
+        root = str(root) #convert from QString to python str
+        self.plugin.setModelRoot(root)
+        for subwin in self.mdiArea.subWindowList():
+            if hasattr(subwin.widget(), 'modelRoot'):
+                subwin.setWindowTitle(root)
+
+    def showSetDataRootDialog(self):
+        root, ok = QtGui.QInputDialog.getText(self, 'Data Root', 'Enter the data root path:', text=self.plugin.dataRoot.path)
+        if not ok:
+            return
+        root = str(root) #convert from QString to python str
+        self.plugin.setDataRoot(root)
+        for subwin in self.mdiArea.subWindowList():
+            if hasattr(subwin.widget(), 'dataRoot'):
+                subwin.setWindowTitle(root)
 
     def getViewActions(self):
         if (not hasattr(self, 'viewActions')) or (self.viewActions is None):

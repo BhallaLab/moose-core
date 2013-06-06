@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Oct  2 17:25:41 2012 (+0530)
 # Version: 
-# Last-Updated: Wed Jun  5 22:43:47 2013 (+0530)
+# Last-Updated: Thu Jun  6 11:06:28 2013 (+0530)
 #           By: subha
-#     Update #: 273
+#     Update #: 278
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -64,6 +64,7 @@ class MoosePluginBase(QtCore.QObject):
 
     """
     modelRootChanged = QtCore.pyqtSignal(object, name='modelRootChanged')
+    dataRootChanged = QtCore.pyqtSignal(object, name='dataRootChanged')
     def __init__(self, root='/', mainwindow=None):
         """Create a plugin object whose model is the tree rooted at
         `root` and whose widgets will be displayed in `mainwindow`.
@@ -75,6 +76,7 @@ class MoosePluginBase(QtCore.QObject):
         self._toolBars = []
         self.mainWindow = mainwindow
         self.modelRoot = root
+        self.dataRoot = moose.Neutral('/data')
 
     def getPreviousPlugin(self):
         """Returns the plugin object that the gui is supposed to
@@ -137,6 +139,11 @@ class MoosePluginBase(QtCore.QObject):
         self.getEditorView().getCentralWidget().setModelRoot(self.modelRoot)
         self.getPlotView().getCentralWidget().setModelRoot(self.modelRoot)    
         self.modelRootChanged.emit(self.modelRoot)
+
+    def setDataRoot(self, root):
+        self.dataRoot = moose.Neutral(root)
+        self.getPlotView().setDataRoot(self.dataRoot)
+        self.dataRootChanged.emit(self.dataRoot)
 
 
 class ViewBase(QtCore.QObject):
