@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Nov 13 15:58:31 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Jun  6 14:15:06 2013 (+0530)
+# Last-Updated: Thu Jun  6 17:24:50 2013 (+0530)
 #           By: subha
-#     Update #: 1860
+#     Update #: 2006
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -45,6 +45,7 @@
 
 # Code:
 
+import sys
 from collections import defaultdict
 import numpy as np
 
@@ -304,11 +305,10 @@ class RunView(RunBase):
         widget.setDataRoot(self.dataRoot)
         widget.setModelRoot(self.modelRoot)
         self.schedulingDockWidget.setWidget(widget)
-        QtCore.QObject.connect(widget.runner, QtCore.SIGNAL('update'), self.canvas.updatePlots)
-        QtCore.QObject.connect(widget.runner, QtCore.SIGNAL('finished'), self.canvas.rescalePlots)
-        QtCore.QObject.connect(widget.runner, QtCore.SIGNAL('finished'), widget.disableButtons)        
-        widget.resetAndRunButton.clicked.connect(self.canvas.plotAllData) 
-        QtCore.QObject.connect(widget, QtCore.SIGNAL('simtimeExtended'), self.canvas.extendXAxes)
+        widget.runner.update.connect(self.canvas.updatePlots)
+        # widget.runner.finished.connect(self.canvas.rescalePlots)
+        widget.simtimeExtended.connect(self.canvas.extendXAxes)
+        widget.runner.resetAndRun.connect(self.canvas.plotAllData)
         return self.schedulingDockWidget
     
 
@@ -318,6 +318,9 @@ class MooseRunner(QtCore.QObject):
     See: http://doc.qt.digia.com/qq/qq27-responsive-guis.html :
     'Solving a Problem Step by Step' for design details.
     """
+    resetAndRun = QtCore.pyqtSignal(name='resetAndRun')
+    update = QtCore.pyqtSignal(name='update')
+    finished = QtCore.pyqtSignal(name='finished')
     def __init__(self, *args, **kwargs):
         QtCore.QObject.__init__(self, *args, **kwargs)
         self._updateInterval = 100e-3
@@ -327,18 +330,20 @@ class MooseRunner(QtCore.QObject):
         self.dataRoot = moose.Neutral('/data')
         self.modelRoot = moose.Neutral('/model')
 
-    def resetAndRun(self, tickDtMap, tickTargetMap, simtime, updateInterval):
+    def doResetAndRun(self, tickDtMap, tickTargetMap, simtime, updateInterval):
         self._pause = False
         self._updateInterval = updateInterval
         self._simtime = simtime
         self.updateTicks(tickDtMap)
         self.assignTicks(tickTargetMap)
+        self.resetAndRun.emit()
+        moose.reinit()
         QtCore.QTimer.singleShot(0, self.run)
         
     def run(self):
         """Run simulation for a small interval."""
         if self._clock.currentTime >= self._simtime:
-            self.emit(QtCore.SIGNAL('finished'))
+            self.finished.emit()
             return
         if self._pause:
             return
@@ -346,7 +351,7 @@ class MooseRunner(QtCore.QObject):
         if toRun > self._updateInterval:
             toRun = self._updateInterval
         moose.start(toRun)
-        self.emit(QtCore.SIGNAL('update'))
+        self.update.emit()
         QtCore.QTimer.singleShot(0, self.run)
     
     def continueRun(self, simtime, updateInterval):
@@ -430,7 +435,22 @@ class SchedulingWidget(QtGui.QWidget):
     `update()` signal. This can be connected to other objects to
     update their data.
 
-    """
+    SIGNALS:
+    resetAndRun(tickDt, tickTargets, simtime, updateInterval)
+
+        tickDt: dict mapping tick nos to dt
+        tickTargets: dict mapping ticks to target paths
+        simtime: total simulation runtime
+        updateInterval: interval between update signals are to be emitted.
+
+    simtimeExtended(simtime)
+        emitted when simulation time is increased by user.
+    
+
+    """    
+    resetAndRun = QtCore.pyqtSignal(dict, dict, float, float, name='resetAndRun')
+    simtimeExtended = QtCore.pyqtSignal(float, name='simtimeExtended')
+    continueRun = QtCore.pyqtSignal(float, float, name='continueRun')
     def __init__(self, *args, **kwargs):
         QtGui.QWidget.__init__(self, *args, **kwargs)
         layout = QtGui.QVBoxLayout()
@@ -444,17 +464,14 @@ class SchedulingWidget(QtGui.QWidget):
         layout.addWidget(self.__getUpdateIntervalWidget())
         self.setLayout(layout)
         self.runner = MooseRunner()
-        self.connect(self, QtCore.SIGNAL('resetAndRun'), self.runner.resetAndRun)
-        self.resetAndRunButton.clicked.connect(self.resetAndRun)
-        self.resetAndRunButton.clicked.connect(self.disableButton)
-        self.continueButton.clicked.connect(self.continueRun)
-        self.continueButton.clicked.connect(self.disableButton)
-        self.connect(self, QtCore.SIGNAL('continueRun'), self.runner.continueRun)
+        self.resetAndRunButton.clicked.connect(self.resetAndRunSlot)
+        self.continueButton.clicked.connect(self.doContinueRun)
+        self.continueRun.connect(self.runner.continueRun)
         self.runTillEndButton.clicked.connect(self.runner.unpause)
         self.runTillEndButton.clicked.connect(self.disableButton)
         self.stopButton.clicked.connect(self.runner.stop)
         self.stopButton.clicked.connect(self.enableButton)
-        self.connect(self.runner, QtCore.SIGNAL('update'), self.updateCurrentTime)
+        self.runner.update.connect(self.updateCurrentTime)
 
     def __getUpdateIntervalWidget(self):
         label = QtGui.QLabel('Plot update interval')
@@ -512,27 +529,28 @@ class SchedulingWidget(QtGui.QWidget):
         self.continueButton.setEnabled(Enabled)
         self.runTillEndButton.setEnabled(Enabled)
 
-    def resetAndRun(self):
+    def resetAndRunSlot(self):
         """This is just for adding the arguments for the function
         MooseRunner.resetAndRun"""
         self.updateUpdateInterval()
         tickDtMap = self.getTickDtMap()
         tickTargetsMap = self.getTickTargets()
-        self.emit(QtCore.SIGNAL('simtimeExtended'), self.getSimTime())
-        self.emit(QtCore.SIGNAL('resetAndRun'), 
-                  self.getTickDtMap(), 
-                  self.getTickTargets(), 
-                  self.getSimTime(), 
-                  self.updateInterval)
+        simtime = self.getSimTime()
+        self.simtimeExtended.emit(simtime)
+        self.runner.doResetAndRun(
+            self.getTickDtMap(), 
+            self.getTickTargets(), 
+            self.getSimTime(), 
+            self.updateInterval)
 
-    def continueRun(self):
+    def doContinueRun(self):
         """Helper function to emit signal with arguments"""
+        
         self.updateUpdateInterval()
-        self.emit(QtCore.SIGNAL('simtimeExtended'), 
-                  self.getSimTime() + moose.Clock('/clock').currentTime)
-        self.emit(QtCore.SIGNAL('continueRun'),
-                  self.getSimTime(),
-                  self.updateInterval)
+        simtime = self.getSimTime() + moose.Clock('/clock').currentTime
+        self.simtimeExtended.emit(simtime)
+        self.continueRun.emit( self.getSimTime(),
+                               self.updateInterval)
     
     def __getSimtimeWidget(self):
         runtime = moose.Clock('/clock').runTime
@@ -581,6 +599,7 @@ class SchedulingWidget(QtGui.QWidget):
         return widget
 
     def updateCurrentTime(self):
+        sys.stdout.flush()
         self.currentTimeLabel.setText('%f' % (moose.Clock('/clock').currentTime))
 
     def updateTextFromTick(self, tickNo):
@@ -671,6 +690,8 @@ class PlotWidget(CanvasWidget):
         self.modelRoot = '/'
         self.pathToLine = defaultdict(set)
         self.lineToPath = {}
+        self.addSubplot(1, 1)
+
 
     @property
     def plotAll(self):
@@ -683,7 +704,7 @@ class PlotWidget(CanvasWidget):
         self.dataRoot = path
 
     def plotAllData(self):
-        """Plot data from all tables under dataRoot"""
+        """Plot data from all tables under dataRoot"""        
         path = self.dataRoot
         time = moose.Clock('/clock').currentTime
         for tabId in moose.wildcardFind('%s/##[TYPE=Table]' % (path)):
@@ -705,7 +726,7 @@ class PlotWidget(CanvasWidget):
                         ts = np.linspace(0, time, len(tab.vec))
                         line.set_data(ts, tab.vec)
         self.callAxesFn('legend')
-        self.figure.canvas.draw()
+        self.draw()
                 
     def addTimeSeries(self, table, *args, **kwargs):        
         ts = np.linspace(0, moose.Clock('/clock').currentTime, len(table.vec))
@@ -726,21 +747,24 @@ class PlotWidget(CanvasWidget):
             ts = np.linspace(0, moose.Clock('/clock').currentTime, len(data))
             for line in lines:
                 line.set_data(ts, data)
-        self.figure.canvas.draw()
+        self.draw()
 
     def extendXAxes(self, xlim):
         for axes in self.axes.values():
-            axes.set_xlim(left=0, right=xlim)
-        self.figure.canvas.draw()
+            axes.autoscale(False, axis='x', tight=True)
+            axes.set_xlim(right=xlim)
+            axes.autoscale_view(tight=True, scalex=True, scaley=True)
+        self.draw()
 
     def rescalePlots(self):
         """This is to rescale plots at the end of simulation.
         
-        TODO: ideally we should set xlim from simtime.
+        ideally we should set xlim from simtime.
         """
         for axes in self.axes.values():
+            self.axes_autoscale(True, tight=True)
             axes.relim()
-            axes.autoscale_view(True,True,True)
+            axes.autoscale_view(tight=True,scalex=True,scaley=True)
         self.figure.canvas.draw()
 
     def getMenus(self):
@@ -833,14 +857,12 @@ class PlotView(PlotBase):
 
         """
         field = str(self._fieldEdit.text()).strip()
-        print '11111', field, '#'
         if len(field) == 0:
             self.getCentralWidget().setSelectedElements(elements)
             return
         classElementDict = defaultdict(list)        
         for epath in elements:
             el = moose.element(epath)
-            print '22222', el
             classElementDict[el.class_].append(el)
         refinedList = []
         elementFieldList = []
@@ -850,7 +872,6 @@ class PlotView(PlotBase):
                 elementFieldList += [(el, field) for el in elist]
         self.getCentralWidget().setSelectedElements(refinedList)
         self.getCentralWidget().setSelectedFields(elementFieldList)
-        print '33333', refinedList
         
 
     def setupRecording(self):

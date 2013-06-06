@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Mar 11 20:24:26 2013 (+0530)
 # Version: 
-# Last-Updated: Wed Jun  5 22:43:34 2013 (+0530)
+# Last-Updated: Thu Jun  6 16:52:43 2013 (+0530)
 #           By: subha
-#     Update #: 230
+#     Update #: 241
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -103,6 +103,11 @@ class CanvasWidget(FigureCanvas):
     def __init__(self, *args, **kwargs):
         self.figure = Figure()
         FigureCanvas.__init__(self, self.figure, *args, **kwargs)
+        if len(args) > 0 and isinstance(args[0], QtGui.QWidget):
+            self.reparent(args[0])
+        elif (kwargs is not None) and ('parent' in kwargs):
+            self.reparent(kwargs['parent'])
+        FigureCanvas.updateGeometry(self)
         self.axes = {}
         self.next_id = 0
         self.current_id = -1

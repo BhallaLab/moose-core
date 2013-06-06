@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Jun  6 11:16:24 2013 (+0530)
+# Last-Updated: Thu Jun  6 17:16:40 2013 (+0530)
 #           By: subha
-#     Update #: 1303
+#     Update #: 1305
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -462,7 +462,7 @@ class MWindow(QtGui.QMainWindow):
         return self.editActions
 
     def showSetModelRootDialog(self):
-        root, ok = QtGui.QInputDialog.getText(self, 'Model Root', 'Enter the model root path:', text=self.plugin.modelRoot.path)
+        root, ok = QtGui.QInputDialog.getText(self, 'Model Root', 'Enter the model root path:', text=moose.element(self.plugin.modelRoot).path)
         if not ok:
             return
         root = str(root) #convert from QString to python str
@@ -472,7 +472,7 @@ class MWindow(QtGui.QMainWindow):
                 subwin.setWindowTitle(root)
 
     def showSetDataRootDialog(self):
-        root, ok = QtGui.QInputDialog.getText(self, 'Data Root', 'Enter the data root path:', text=self.plugin.dataRoot.path)
+        root, ok = QtGui.QInputDialog.getText(self, 'Data Root', 'Enter the data root path:', text=moose.element(self.plugin.dataRoot).path)
         if not ok:
             return
         root = str(root) #convert from QString to python str
