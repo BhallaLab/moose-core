@@ -306,10 +306,11 @@ class RunView(RunBase):
         self.schedulingDockWidget.setWidget(widget)
         QtCore.QObject.connect(widget.runner, QtCore.SIGNAL('update'), self.canvas.updatePlots)
         QtCore.QObject.connect(widget.runner, QtCore.SIGNAL('finished'), self.canvas.rescalePlots)
+        QtCore.QObject.connect(widget.runner, QtCore.SIGNAL('finished'), widget.disableButtons)        
         widget.resetAndRunButton.clicked.connect(self.canvas.plotAllData) 
         QtCore.QObject.connect(widget, QtCore.SIGNAL('simtimeExtended'), self.canvas.extendXAxes)
         return self.schedulingDockWidget
-
+    
 
 class MooseRunner(QtCore.QObject):
     """Helper class to control simulation execution
@@ -445,10 +446,14 @@ class SchedulingWidget(QtGui.QWidget):
         self.runner = MooseRunner()
         self.connect(self, QtCore.SIGNAL('resetAndRun'), self.runner.resetAndRun)
         self.resetAndRunButton.clicked.connect(self.resetAndRun)
+        self.resetAndRunButton.clicked.connect(self.disableButton)
         self.continueButton.clicked.connect(self.continueRun)
+        self.continueButton.clicked.connect(self.disableButton)
         self.connect(self, QtCore.SIGNAL('continueRun'), self.runner.continueRun)
         self.runTillEndButton.clicked.connect(self.runner.unpause)
-        self.stopButton.clicked.connect(self.runner.stop)        
+        self.runTillEndButton.clicked.connect(self.disableButton)
+        self.stopButton.clicked.connect(self.runner.stop)
+        self.stopButton.clicked.connect(self.enableButton)
         self.connect(self.runner, QtCore.SIGNAL('update'), self.updateCurrentTime)
 
     def __getUpdateIntervalWidget(self):
@@ -492,7 +497,21 @@ class SchedulingWidget(QtGui.QWidget):
         if dt > self.updateInterval:
             self.updateInterval = dt
             self.updateIntervalText.setText(str(dt))
-        
+
+    def disableButton(self):
+        """ When RunAndResetButton,continueButton,RunTillEndButton are clicked then disabling these buttons
+        for further clicks"""
+        self.disableButtons(False)
+
+    def enableButton(self):
+        """ Enabling RunAndResetButton,continueButton,RunTillEndButton after stop button """
+        self.disableButtons()
+
+    def disableButtons(self,Enabled=True):
+        self.resetAndRunButton.setEnabled(Enabled)
+        self.continueButton.setEnabled(Enabled)
+        self.runTillEndButton.setEnabled(Enabled)
+
     def resetAndRun(self):
         """This is just for adding the arguments for the function
         MooseRunner.resetAndRun"""
@@ -514,11 +533,13 @@ class SchedulingWidget(QtGui.QWidget):
         self.emit(QtCore.SIGNAL('continueRun'),
                   self.getSimTime(),
                   self.updateInterval)
-
+    
     def __getSimtimeWidget(self):
+        runtime = moose.Clock('/clock').runTime
         layout = QtGui.QGridLayout()
         simtimeWidget = QtGui.QWidget()
         self.simtimeEdit = QtGui.QLineEdit('1')
+        self.simtimeEdit.setText(str(runtime))
         self.currentTimeLabel = QtGui.QLabel('0')
         layout.addWidget(QtGui.QLabel('Run for'), 0, 0)
         layout.addWidget(self.simtimeEdit, 0, 1)
