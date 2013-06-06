@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Nov 13 15:58:31 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Jun  6 17:24:50 2013 (+0530)
+# Last-Updated: Thu Jun  6 17:46:41 2013 (+0530)
 #           By: subha
-#     Update #: 2006
+#     Update #: 2015
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -258,20 +258,16 @@ class RunView(RunBase):
         self.modelRoot = moose.Neutral(self.plugin.modelRoot)
         self.canvas.setModelRoot(self.plugin.modelRoot)
         self._menus += self.getCentralWidget().getMenus()
-        self.setDataRootAction = QtGui.QAction('Set data root', self)     
-        self.setDataRootAction.triggered.connect(self.setDataRootSlot)
-        self._menus.append(QtGui.QMenu('&Edit'))
-        self._menus[-1].addAction(self.setDataRootAction)
 
     def getCentralWidget(self):
         """TODO: replace this with an option for multiple canvas
         tabs"""
         return self.canvas
         
-    def setDataRootSlot(self):
-        path, ok = QtGui.QInputDialog.getText(self.getCentralWidget(), 'Set data root', 'Enter path to data root')
-        if ok:
-            self.setDataRoot(str(path))
+    # def setDataRootSlot(self):
+    #     path, ok = QtGui.QInputDialog.getText(self.getCentralWidget(), 'Set data root', 'Enter path to data root')
+    #     if ok:
+    #         self.setDataRoot(str(path))
         
     def setDataRoot(self, path):
         self.dataRoot = path
@@ -306,7 +302,7 @@ class RunView(RunBase):
         widget.setModelRoot(self.modelRoot)
         self.schedulingDockWidget.setWidget(widget)
         widget.runner.update.connect(self.canvas.updatePlots)
-        # widget.runner.finished.connect(self.canvas.rescalePlots)
+        widget.runner.finished.connect(self.canvas.rescalePlots)
         widget.simtimeExtended.connect(self.canvas.extendXAxes)
         widget.runner.resetAndRun.connect(self.canvas.plotAllData)
         return self.schedulingDockWidget
@@ -361,11 +357,6 @@ class MooseRunner(QtCore.QObject):
         self._pause = False
         QtCore.QTimer.singleShot(0, self.run)
     
-    def unpause(self):
-        """Run for the rest of current simtime"""
-        self._pause = False
-        QtCore.QTimer.singleShot(0, self.run)
-
     def stop(self):
         """Pause simulation"""
         self._pause = True
@@ -467,10 +458,7 @@ class SchedulingWidget(QtGui.QWidget):
         self.resetAndRunButton.clicked.connect(self.resetAndRunSlot)
         self.continueButton.clicked.connect(self.doContinueRun)
         self.continueRun.connect(self.runner.continueRun)
-        self.runTillEndButton.clicked.connect(self.runner.unpause)
-        self.runTillEndButton.clicked.connect(self.disableButton)
         self.stopButton.clicked.connect(self.runner.stop)
-        self.stopButton.clicked.connect(self.enableButton)
         self.runner.update.connect(self.updateCurrentTime)
 
     def __getUpdateIntervalWidget(self):
@@ -492,10 +480,8 @@ class SchedulingWidget(QtGui.QWidget):
         self.resetAndRunButton = QtGui.QPushButton('Reset and run')
         self.stopButton = QtGui.QPushButton('Stop')
         self.continueButton = QtGui.QPushButton('Continue')
-        self.runTillEndButton = QtGui.QPushButton('Run to end')
         layout.addWidget(self.resetAndRunButton)
         layout.addWidget(self.stopButton)
-        layout.addWidget(self.runTillEndButton)
         layout.addWidget(self.continueButton)
         widget.setLayout(layout)
         return widget
@@ -515,19 +501,19 @@ class SchedulingWidget(QtGui.QWidget):
             self.updateInterval = dt
             self.updateIntervalText.setText(str(dt))
 
-    def disableButton(self):
-        """ When RunAndResetButton,continueButton,RunTillEndButton are clicked then disabling these buttons
-        for further clicks"""
-        self.disableButtons(False)
+    # def disableButton(self):
+    #     """ When RunAndResetButton,continueButton,RunTillEndButton are clicked then disabling these buttons
+    #     for further clicks"""
+    #     self.disableButtons(False)
 
-    def enableButton(self):
-        """ Enabling RunAndResetButton,continueButton,RunTillEndButton after stop button """
-        self.disableButtons()
+    # def enableButton(self):
+    #     """ Enabling RunAndResetButton,continueButton,RunTillEndButton after stop button """
+    #     self.disableButtons()
 
-    def disableButtons(self,Enabled=True):
-        self.resetAndRunButton.setEnabled(Enabled)
-        self.continueButton.setEnabled(Enabled)
-        self.runTillEndButton.setEnabled(Enabled)
+    # def disableButtons(self,Enabled=True):
+    #     self.resetAndRunButton.setEnabled(Enabled)
+    #     self.continueButton.setEnabled(Enabled)
+    #     self.runTillEndButton.setEnabled(Enabled)
 
     def resetAndRunSlot(self):
         """This is just for adding the arguments for the function
@@ -547,9 +533,9 @@ class SchedulingWidget(QtGui.QWidget):
         """Helper function to emit signal with arguments"""
         
         self.updateUpdateInterval()
-        simtime = self.getSimTime() + moose.Clock('/clock').currentTime
+        simtime = self.getSimTime()
         self.simtimeExtended.emit(simtime)
-        self.continueRun.emit( self.getSimTime(),
+        self.continueRun.emit(simtime,
                                self.updateInterval)
     
     def __getSimtimeWidget(self):
@@ -762,7 +748,7 @@ class PlotWidget(CanvasWidget):
         ideally we should set xlim from simtime.
         """
         for axes in self.axes.values():
-            self.axes_autoscale(True, tight=True)
+            axes.autoscale(True, tight=True)
             axes.relim()
             axes.autoscale_view(tight=True,scalex=True,scaley=True)
         self.figure.canvas.draw()
