@@ -225,6 +225,7 @@ void SymCompartment::innerProcessFunc( Element* e, ProcInfo p )
 // Alternates with the 'process' message
 void SymCompartment::innerInitProc( const Eref& e, ProcPtr p )
 {
+	// cout << "SymCompartment " << e.id().path() << ":: innerInitProc: A = " << A_ << ", B = " << B_ << endl;
 	raxialOut()->send( e, p->threadIndexInGroup, Ra_, Vm_ ); // to kids
 	raxial2Out()->send( e, p->threadIndexInGroup, Ra_, Vm_ ); // to parent and sibs.
 }
@@ -233,21 +234,22 @@ void SymCompartment::innerInitProc( const Eref& e, ProcPtr p )
 void SymCompartment::innerReinit( const Eref& e, ProcPtr p )
 {
 	moose::Compartment::innerReinit( e, p );
+	// cout << "SymCompartment " << e.id().path() << ":: innerReinit: coeff = " << coeff_ << ", coeff2 = " << coeff2_ << endl;
 
-	coeff_ *= Ra_;
-	coeff_ = ( 1 + coeff_ ) / 2.0;
-
-	coeff2_ *= Ra_;
-	coeff2_ = ( 1 + coeff2_ ) / 2.0;
+	// coeff_ = ( 1 + coeff_ ) / 2.0;
+	// coeff2_ = ( 1 + coeff2_ ) / 2.0;
 }
 
 // The Compartment and Symcompartment go through an 'init' and then a 'proc'
 // during each clock tick. Same sequence applies during reinit.
-// This funciton is called during 'init' phase to send Raxial info around.
+// This function is called during 'init' phase to send Raxial info around.
 void SymCompartment::innerInitReinit( const Eref& e, ProcPtr p )
 {
+	// cout << "SymCompartment " << e.id().path() << ":: innerInitReinit: coeff = " << coeff_ << ", coeff2 = " << coeff2_ << endl;
 	coeff_ = 0.0;
 	coeff2_ = 0.0;
+	RaSum_ = 0.0;
+	RaSum2_ = 0.0;
 	requestSumAxial()->send( e, p->threadIndexInGroup );
 	requestSumAxial2()->send( e, p->threadIndexInGroup );
 }
@@ -264,28 +266,46 @@ void SymCompartment::handleSumRaxial2Request( const Eref& e, const Qinfo* q)
 
 void SymCompartment::sumRaxial( double Ra )
 {
-	coeff_ += 1.0 / Ra;
+	RaSum_ += Ra_/Ra;
+	coeff_ = ( 1 + RaSum_ ) / 2.0;
+	// cout << "SymCompartment::sumRaxial: coeff = " << coeff_ << endl;
 }
 
 void SymCompartment::sumRaxial2( double Ra )
 {
-	coeff2_ += 1.0 / Ra;
+	RaSum2_ += Ra_/Ra;
+	coeff2_ = ( 1 + RaSum2_ ) / 2.0;
+	// cout << "SymCompartment::sumRaxial: coeff2 = " << coeff2_ << endl;
 }
 
 void SymCompartment::raxialSym( double Ra, double Vm)
 {
+	// cout << "SymCompartment " << ":: raxialSym: Ra = " << Ra << ", Vm = " << Vm << endl;
+		/*
 	Ra *= coeff_;
 	A_ += Vm / Ra;
 	B_ += 1.0 / Ra;
 	Im_ += ( Vm - Vm_ ) / Ra;
+	*/
+	double invR = 2.0 / ( Ra + Ra_ );
+	A_ += Vm * invR;
+	B_ += invR;
+	Im_ += ( Vm - Vm_ ) * invR;
 }
 
 void SymCompartment::raxial2Sym( double Ra, double Vm)
 {
+	// cout << "SymCompartment " << ":: raxialSym2: Ra = " << Ra << ", Vm = " << Vm << endl;
+		/*
 	Ra *= coeff2_;
 	A_ += Vm / Ra;
 	B_ += 1.0 / Ra;
 	Im_ += ( Vm - Vm_ ) / Ra;
+	*/
+	double invR = 2.0 / ( Ra + Ra_ );
+	A_ += Vm * invR;
+	B_ += invR;
+	Im_ += ( Vm - Vm_ ) * invR;
 }
 
 /////////////////////////////////////////////////////////////////////
