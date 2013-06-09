@@ -205,8 +205,11 @@ def make_elec_plots():
     #add_plot( '/n/compt/K', 'get_Ik', 'elec/KIk' )
     #add_plot( '/n/compt/Na', 'get_Ek', 'elec/NaEk' )
     #add_plot( '/n/compt/K', 'get_Ek', 'elec/KEk' )
+    add_plot( '/n/head0', 'get_Vm', 'elec/head0Vm' )
+    add_plot( '/n/head0', 'get_Im', 'elec/head0Im' )
     add_plot( '/n/head2', 'get_Vm', 'elec/head2Vm' )
-    add_plot( '/n/head2/ca', 'get_Ca', 'elec/head2Ca' )
+    add_plot( '/n/head2', 'get_Im', 'elec/head2Im' )
+    #add_plot( '/n/head2/ca', 'get_Ca', 'elec/head2Ca' )
 
 
 
