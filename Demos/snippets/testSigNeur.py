@@ -116,6 +116,7 @@ def create_spine( parentCompt, parentObj, index, frac, length, dia, theta ):
     RA = 1.0
     RM = 1.0
     CM = 0.01
+    shaftDia = dia / 5.0
     sname = 'shaft' + str(index)
     hname = 'head' + str(index)
     shaft = moose.SymCompartment( parentObj.path + '/' + sname )
@@ -133,8 +134,8 @@ def create_spine( parentCompt, parentObj, index, frac, length, dia, theta ):
     shaft.z = sz
     shaft.diameter = dia / 2.0
     shaft.length = length
-    xa = math.pi * dia * dia / 400.0
-    circumference = math.pi * dia / 10.0
+    xa = math.pi * shaftDia * shaftDia / 4
+    circumference = math.pi * shaftDia
     shaft.Ra = RA * length / xa
     shaft.Rm = RM / ( length * circumference )
     shaft.Cm = CM * length * circumference
@@ -204,16 +205,14 @@ def make_elec_plots():
     #add_plot( '/n/compt/Na', 'get_Ek', 'elec/NaEk' )
     #add_plot( '/n/compt/K', 'get_Ek', 'elec/KEk' )
     add_plot( '/n/head0', 'get_Vm', 'elec/head0Vm' )
-    #add_plot( '/n/head0', 'get_Im', 'elec/head0Im' )
     add_plot( '/n/head2', 'get_Vm', 'elec/head2Vm' )
     #add_plot( '/n/head2', 'get_Im', 'elec/head2Im' )
     add_plot( '/n/head2/ca', 'get_Ca', 'elec/head2Ca' )
-
-
-
-    #add_plot( '/n/head2/gluR', 'get_Ik', 'elec/head2Ik' )
+    add_plot( '/n/head0/gluR', 'get_Ik', 'elec/head0Ik' )
+    add_plot( '/n/head2/gluR', 'get_Ik', 'elec/head2Ik' )
     #add_plot( '/n/head0/gluR', 'get_Gk', 'elec/head0Gk' )
     #add_plot( '/n/head2/gluR', 'get_Gk', 'elec/head2Gk' )
+    #add_plot( '/n/head2/gluR', 'get_Gbar', 'elec/head2Gbar' )
 
 def dump_plots( fname ):
     if ( os.path.exists( fname ) ):
@@ -235,6 +234,8 @@ def make_spiny_compt():
     compt.z = 0
     compt.length = comptLength
     compt.diameter = comptDia
+    #kchan = moose.element( '/n/compt/K' )
+    #kchan.Gbar = 0.2e-3
     synInput = moose.SpikeGen( '/n/compt/synInput' )
     synInput.refractT = 47e-3
     synInput.threshold = -1.0
@@ -452,6 +453,7 @@ def test_elec_alone():
     make_spiny_compt()
     make_elec_plots()
     head2 = moose.element( '/n/head2' )
+    kchan = moose.element( '/n/compt/K' )
     moose.setClock( 0, 2e-6 )
     moose.setClock( 1, 2e-6 )
     moose.setClock( 2, 2e-6 )
@@ -476,17 +478,20 @@ def test_elec_alone():
     hsolve.dt = 2e-5
     hsolve.target = '/n/compt'
     moose.reinit()
+    #print kchan, ', Gbar = ', kchan.Gbar
+    #kchan.Gbar = 0.1e-3
+    #print 'Gbar = ', kchan.Gbar
     moose.start( 0.11 )
     dump_plots( 'h_instab.plot' )
 
 def test_cube_multiscale( useSolver ):
     elecDt = 10e-6
     chemDt = 1e-4
-    plotDt = 1e-4
+    plotDt = 5e-4
     plotName = 'symcm.plot'
     if ( useSolver ):
-        elecDt = 10e-6
-        chemDt = 1e-3
+        elecDt = 50e-6
+        chemDt = 2e-3
         plotName = 'solve_cm.plot'
 
     make_cube_multiscale()
@@ -510,14 +515,13 @@ def test_cube_multiscale( useSolver ):
     moose.useClock( 5, '/n/##[ISA=PoolBase],/n/##[ISA=ReacBase],/n/##[ISA=EnzBase]', 'process' )
     if ( useSolver ):
         # Put in the solvers, see how they fare.
-        ksolve = moose.GslStoich( '/n/solver' )
+        ksolve = moose.GslStoich( '/n/ksolve' )
         ksolve.path = '/n/##'
         ksolve.method = 'rk5'
-        moose.useClock( 5, '/n/solver', 'process' )
+        moose.useClock( 5, '/n/ksolve', 'process' )
         hsolve = moose.HSolve( '/n/hsolve' )
         moose.useClock( 1, '/n/hsolve', 'process' )
         hsolve.dt = elecDt
-        moose.le( '/n' )
         hsolve.target = '/n/compt'
     moose.reinit()
     moose.start( 1 )
@@ -525,9 +529,8 @@ def test_cube_multiscale( useSolver ):
 
 
 def main():
-    #test_cube_multiscale( 0 )
-    #test_cube_multiscale( 1 )
-    test_elec_alone()
+    test_cube_multiscale( 1 )
+    #test_elec_alone()
 
 if __name__ == '__main__':
     main()
