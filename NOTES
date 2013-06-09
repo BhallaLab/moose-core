@@ -22058,7 +22058,7 @@ Checkin 4578.
 Next: 
 	* confirm python chem model works with solver.
 	* Set up adaptors, confirm python model matches unit test model.
-	- remove unit test model. Too slow to have it in there.
+	* remove unit test model. Too slow to have it in there.
 	- tweak Python test model to run much much faster while still
 		exercising multiscale features.
 	- Get all solvers on board, make sure it is reasonably close
@@ -22068,6 +22068,58 @@ Next:
 
 At this point the python model with adaptors matches that from the unit test.
 There is still a small numerical divergence, but I won't pursue that here.
+Checkin 4579.
 
+Removed unit test runs with the models, but I do create them and check
+some aspects of sizing.
+
+==========================================================================
+4 June 2013.
+Fiddling with testSigNeur.py to try to get interesting multiscale effs within
+1 second.
+==========================================================================
+5 June 2013.
+Made an interesting looking testSigNeur. Generates the most complicated
+patterns. Testing if it is robust to longer timesteps.
+
+Here is the grid
+
+Elec Dt ChemDt		Notes
+1 usec	10 usec		Reference.
+1 usec	100 usec	Slight cumulative offset in DendVm but shapes match 
+			fine., probably due to small chem difference in kChan_p
+1 usec	1msec		One extra non-continuous firing cycle in DendVm. 
+			About 15% difference in dendKinase and thus kChan_p
+			would account for it. toPSD differs by much less, <5%.
+10 usec	10 usec		Nearly perfect match, very slight cumulative offset
+			in DendVm. Less than in 1usecX100usec case.
+10 usec	100 usec	Again excellent match, slight cumulative offset.
+10 usec	1 msec		Essentially the same as the 1usecX1msec case.
+100 usec 100 usec	Very close to reference. Some cumulative offset.
+100 usec 200 usec	Reasonably close, a fair cumulative offset.
+100 usec 500 usec	Adds extra non-continuous firing cycle.
+
+Outcome of this:
+The elec model is pretty robust now, EE handles it well even out to 100 usec.
+The chem model isn't so clean. EE handles it out to about 200 usec. The
+	qualitiative behaviour isn't too bad out to 1 msec.
+The 1usecX10usec case has converged, and is a good reference also for solvers.
+
+Setting off solvers. Ksolve is happy, hsolve not.
+
+The discrepancy in chem stuff is mostly very small.
+At spineCa differs a lot (> 10%) with reference. Thus toPSD is very different.
+
+So this is down to the hsolver.
+Let's look at init conditions
+
+Niraj suggests trying symcompartments.
+
+==========================================================================
+
+9 June 2013
+Much fiddling to get symcompartments to work. Several fixes needed to the
+hsolve: it was odd because it only knew how to parse regular compartments,
+but solved them internally as symcompartments. Still doesn't match with EE.
 
 ==========================================================================

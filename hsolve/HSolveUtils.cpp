@@ -42,12 +42,15 @@ int HSolveUtils::adjacent( Id compartment, vector< Id >& ret )
 	int size = 0;
 	size += targets( compartment, "axial", ret, "Compartment" );
 	size += targets( compartment, "raxial", ret, "Compartment" );
+	size += targets( compartment, "raxial1", ret, "SymCompartment" );
+	size += targets( compartment, "raxial2", ret, "SymCompartment" );
 	return size;
 }
 
 int HSolveUtils::children( Id compartment, vector< Id >& ret )
 {
-	return targets( compartment, "axial", ret, "Compartment" );
+	targets( compartment, "axial", ret, "Compartment" );
+	return targets( compartment, "raxial1", ret, "SymCompartment" );
 }
 
 /**
