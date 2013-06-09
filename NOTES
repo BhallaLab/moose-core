@@ -22180,6 +22180,19 @@ SymCompartment calculations using a very simple bit of my own code.
 I won't be surprised if it is inaccurate at branches, but for the present
 calculations it has the merit of actually working. Still some issue with
 the reported value of Im which is 1e-9 here but something close to zero in
-the hsolve. Won't worry about it.
+the hsolve. Won't worry about it. Checkin 4603.
+
+Now to get back to doing the rest of the model.
+Put back the ion channels. It works! The Hsolver is almost identical to the
+EE version with SymCompartments. Even the Ca matches.
+
+Next: separate out into a snippet showing how to set up a SymCompartment
+model. We haven't had this yet.
+Then go on with the chem part of the model, and push to see where the 
+approximations go.
+After than we can finally begin work on the NeuroMesh.
+
+Implemented testHsolve.py. This reveals issues with changing dt in the
+Hsolve, which Niraj should address. It is a useful little snippet anyway.
 
 ==========================================================================
