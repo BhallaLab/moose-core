@@ -76,7 +76,7 @@ K_n_params = [ 1e4 * (10e-3 + EREST_ACT),   #  'A_A':
                ]
 VMIN = -30e-3 + EREST_ACT
 VMAX = 120e-3 + EREST_ACT
-VDIVS = 3000
+VDIVS = 3001
 
 def create_na_proto():
     lib = moose.Neutral('/library')
@@ -213,6 +213,12 @@ def make_elec_plots():
     graphs = moose.Neutral( '/graphs' )
     elec = moose.Neutral( '/graphs/elec' )
     add_plot( '/n/compt', 'get_Vm', 'elec/dendVm' )
+    add_plot( '/n/compt/Na', 'get_Gbar', 'elec/NaGbar' )
+    add_plot( '/n/compt/K', 'get_Gbar', 'elec/KGbar' )
+    add_plot( '/n/compt/Na', 'get_Ik', 'elec/NaIk' )
+    add_plot( '/n/compt/K', 'get_Ik', 'elec/KIk' )
+    add_plot( '/n/compt/Na', 'get_Ek', 'elec/NaEk' )
+    add_plot( '/n/compt/K', 'get_Ek', 'elec/KEk' )
     #add_plot( '/n/head2', 'get_Vm', 'elec/head2Vm' )
     #add_plot( '/n/head2/ca', 'get_Ca', 'elec/head2Ca' )
 
@@ -231,7 +237,7 @@ def dump_plots( fname ):
 def make_spiny_compt():
     comptLength = 100e-6
     comptDia = 4e-6
-    numSpines = 5
+    numSpines = 0
     compt = create_squid()
     compt.inject = 0
     compt.x0 = 0
@@ -531,9 +537,9 @@ def test_cube_multiscale( useSolver ):
 
 
 def main():
-    test_cube_multiscale( 0 )
+    #test_cube_multiscale( 0 )
     #test_cube_multiscale( 1 )
-    #test_elec_alone()
+    test_elec_alone()
 
 if __name__ == '__main__':
     main()
