@@ -231,7 +231,7 @@ def dump_plots( fname ):
 def make_spiny_compt():
     comptLength = 100e-6
     comptDia = 4e-6
-    numSpines = 0
+    numSpines = 5
     compt = create_squid()
     compt.inject = 0
     compt.x0 = 0
