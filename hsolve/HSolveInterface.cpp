@@ -274,6 +274,7 @@ void HSolve::setHHChannelGbar( Id id, double value )
 	unsigned int index = localIndex( id );
 	assert( index < channel_.size() );
 	channel_[ index ].Gbar_ = value;
+	// cout << "HSolve::setHHChannelGbar( " << id.path() << ", " << value << " ), index = " << index << endl;
 }
 
 double HSolve::getEk( Id id ) const

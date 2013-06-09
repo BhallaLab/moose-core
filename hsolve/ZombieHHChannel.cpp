@@ -164,6 +164,10 @@ const Cinfo* ZombieHHChannel::initCinfo()
 	static Finfo* zombieHHChannelFinfos[] =
 	{
 		&proc,				// Shared
+		&Gbar,				// Value
+		&Ek,				// Value
+		&Gk,				// Value
+		&Ik,				// Value
 		&Xpower,			// Value
 		&Ypower,			// Value
 		&Zpower,			// Value
@@ -278,6 +282,7 @@ double ZombieHHChannel::getZpower( const Eref& e, const Qinfo* q ) const
 
 void ZombieHHChannel::setGbar( const Eref& e, const Qinfo* q, double Gbar )
 {
+	// cout << "in ZombieHHChannel::setGbar( " << e.id().path() << ", " << Gbar << " )\n";
 	hsolve_->setHHChannelGbar( e.id(), Gbar );
 }
 
