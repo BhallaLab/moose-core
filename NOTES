@@ -22121,5 +22121,6 @@ Niraj suggests trying symcompartments.
 Much fiddling to get symcompartments to work. Several fixes needed to the
 hsolve: it was odd because it only knew how to parse regular compartments,
 but solved them internally as symcompartments. Still doesn't match with EE.
+Checkin 4599.
 
 ==========================================================================
