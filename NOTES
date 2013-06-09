@@ -22138,5 +22138,15 @@ This is a 50e-6V step.
 The stepsize in the table is precisely 150e-3/3000 = 50e-6.
 Why should this happen in EE and not hsolve code? Does the hsolve interpolate?
 Anyway, I've saved this version of the testSigNeur for reference.
+Yes, the hsolve interpolates. Good thing too.
 
+OK, that little discrepancy seems cleaned up by the use if useInterpolate
+flag on the HHGates in the testSigNeur.py file. We still have a substantial
+discrepancy in responses to the stimuli. This is presumably what Niraj
+is trying to track down.
+
+Turns out there is a substantial discrepancy just with the current injection
+into a passive compartment.
+Went back to Asym compartments to check if those work properly. Yes, they do,
+after yet another a fix to the Hsolver set up code.
 ==========================================================================
