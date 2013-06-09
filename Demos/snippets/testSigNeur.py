@@ -99,7 +99,6 @@ def create_squid():
     yGate.useInterpolation = 1
     nachan.Gbar = 0.942e-3
     nachan.Ek = 115e-3+EREST_ACT
-    nachan.Gbar = 0.0
     moose.connect(nachan, 'channel', compt, 'channel', 'OneToOne')
 
     kchan = moose.HHChannel( '/n/compt/K' )
@@ -109,7 +108,6 @@ def create_squid():
     xGate.useInterpolation = 1
     kchan.Gbar = 0.2836e-3
     kchan.Ek = -12e-3+EREST_ACT
-    kchan.Gbar = 0.0
     moose.connect(kchan, 'channel', compt, 'channel', 'OneToOne')
     return compt
 
@@ -162,8 +160,8 @@ def create_spine( parentCompt, parentObj, index, frac, length, dia, theta ):
     head.Cm = CM * length * circumference
     head.Em = EREST_ACT
     head.initVm = EREST_ACT
-    print head.Rm, head.Ra, head.Cm, head.diameter, head.length
-    print shaft.Rm, shaft.Ra, shaft.Cm, shaft.diameter, shaft.length
+    #print head.Rm, head.Ra, head.Cm, head.diameter, head.length
+    #print shaft.Rm, shaft.Ra, shaft.Cm, shaft.diameter, shaft.length
     return head
 
 def create_spine_with_receptor( compt, cell, index, frac ):
@@ -206,10 +204,10 @@ def make_elec_plots():
     #add_plot( '/n/compt/Na', 'get_Ek', 'elec/NaEk' )
     #add_plot( '/n/compt/K', 'get_Ek', 'elec/KEk' )
     add_plot( '/n/head0', 'get_Vm', 'elec/head0Vm' )
-    add_plot( '/n/head0', 'get_Im', 'elec/head0Im' )
+    #add_plot( '/n/head0', 'get_Im', 'elec/head0Im' )
     add_plot( '/n/head2', 'get_Vm', 'elec/head2Vm' )
-    add_plot( '/n/head2', 'get_Im', 'elec/head2Im' )
-    #add_plot( '/n/head2/ca', 'get_Ca', 'elec/head2Ca' )
+    #add_plot( '/n/head2', 'get_Im', 'elec/head2Im' )
+    add_plot( '/n/head2/ca', 'get_Ca', 'elec/head2Ca' )
 
 
 
@@ -238,7 +236,7 @@ def make_spiny_compt():
     compt.length = comptLength
     compt.diameter = comptDia
     synInput = moose.SpikeGen( '/n/compt/synInput' )
-    synInput.refractT = 87e-3
+    synInput.refractT = 47e-3
     synInput.threshold = -1.0
     synInput.edgeTriggered = 0
     synInput.Vm( 0 )
@@ -247,7 +245,7 @@ def make_spiny_compt():
         r = create_spine_with_receptor( compt, cell, i, i/float(numSpines) )
         r.synapse.num = 1
         syn = moose.element( r.path + '/synapse' )
-        #moose.connect( synInput, 'event', syn, 'addSpike', 'Single' )
+        moose.connect( synInput, 'event', syn, 'addSpike', 'Single' )
         syn.weight = 0.2
         syn.delay = i * 1.0e-4
 
@@ -372,7 +370,7 @@ def make_chem_in_cube_mesh():
 def make_cube_multiscale():
     make_spiny_compt()
     synInput = moose.element( '/n/compt/synInput' )
-    synInput.refractT = 87e-3
+    synInput.refractT = 47e-3
     #Na = moose.element( '/n/compt/Na' )
     #Na.Gbar *= 1.5
     make_chem_in_cube_mesh()
@@ -454,7 +452,6 @@ def test_elec_alone():
     make_spiny_compt()
     make_elec_plots()
     head2 = moose.element( '/n/head2' )
-    head2.inject = 1e-9
     moose.setClock( 0, 2e-6 )
     moose.setClock( 1, 2e-6 )
     moose.setClock( 2, 2e-6 )
