@@ -78,8 +78,8 @@ const Cinfo* SymCompartment::initCinfo()
 
 	static SharedFinfo raxial1( "raxial1",
 		"This is a raxial shared message between symmetric compartments."
-		"It goes from the tail of the current compartment to one "
-		"closer to the soma.",
+		"It goes from the tail of the current compartment to the head "
+		" of the compartment closer to the soma, into an raxial2 message.",
 		raxial1Shared, sizeof( raxial1Shared ) / sizeof( Finfo* )
 	);
 	static SharedFinfo connecttail( "CONNECTTAIL", 
@@ -117,14 +117,15 @@ const Cinfo* SymCompartment::initCinfo()
 	static SharedFinfo raxial2( "raxial2", 
 		"This is a raxial2 shared message between symmetric compartments."
 		"It goes from the head of the current compartment to "
-		"a compartment further away from the soma",
+		"the raxial1 message of a compartment further away from the soma",
 		raxial2Shared, sizeof( raxial2Shared ) / sizeof( Finfo* )
 	);
 
 	static SharedFinfo connecthead( "CONNECTHEAD", 
 		"This is a raxial2 shared message between symmetric compartments."
 		"It is an alias for raxial2."
-		"It goes from the current compartment to one further from the soma",
+		"It goes from the current compartment to the raxial1 message of "
+		"one further from the soma",
 		raxial2Shared, sizeof( raxial2Shared ) / sizeof( Finfo* )
 	);
 
