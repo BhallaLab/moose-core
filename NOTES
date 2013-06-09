@@ -22148,5 +22148,38 @@ is trying to track down.
 Turns out there is a substantial discrepancy just with the current injection
 into a passive compartment.
 Went back to Asym compartments to check if those work properly. Yes, they do,
-after yet another a fix to the Hsolver set up code.
+after yet another a fix to the Hsolver set up code. Checkin 4602.
+
+Looking at compartment Im. 
+In EE, it is almost 1e-9, that is almost the entire injected current.
+In hsolve, it is 3.5e-12, that is, a tiny fraction of the injected current.
+The deltaV is about 0.4 V implying an input res of 400Meg. Nothing on the
+list matches:
+	Rm		Ra		Cm	
+Head 15915494309.2 397887.35773 6.28318530718e-13 4e-06 5e-06
+Shaft 1.59154943092e+11 39788735.773 6.28318530718e-14 2e-06 5e-06
+
+There was a bug in execution order of the code, established through 
+printf debugging. Fixed, some improvement in values, but not right by a long
+way.
+
+Im in head2 in EE: 0.99e-9
+Im in head2 in hsolve: 3.5e-12 Same as before.
+The values of Ra are all reasonable, and the biggest is 4e7.
+deltaV is better, at 0.12V , which implies an input res of 120 Meg. 
+The closest value here is the Ra, which is about 1/3 this.
+
+Values in head2:
+		Im	Vm	deltaV	inputRes	Notes
+EE		1e-9	0.066	0.12	120e6
+Hsolve		3.5e-12	-0.0137	0.043	44e6		Close to shaft Ra.
+
+
+Finally I gave up trying to match the GENESIS code, and redid the MOOSE
+SymCompartment calculations using a very simple bit of my own code. 
+I won't be surprised if it is inaccurate at branches, but for the present
+calculations it has the merit of actually working. Still some issue with
+the reported value of Im which is 1e-9 here but something close to zero in
+the hsolve. Won't worry about it.
+
 ==========================================================================

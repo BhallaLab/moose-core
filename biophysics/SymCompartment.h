@@ -47,6 +47,8 @@ class SymCompartment: public moose::Compartment
 
 			double coeff_;
 			double coeff2_;
+			double RaSum_;
+			double RaSum2_;
 };
 
 #endif // _SYM_COMPARTMENT_H
