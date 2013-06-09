@@ -197,6 +197,7 @@ void HSolve::process( const Eref& hsolve, ProcPtr p )
 
 void HSolve::reinit( const Eref& hsolve, ProcPtr p )
 {
+	dt_ = p->dt;
 	this->HSolveActive::reinit( p );
 }
 
@@ -229,9 +230,9 @@ void HSolve::setup( Eref hsolve )
 
 void HSolve::setSeed( Id seed )
 {
-	if ( seed()->cinfo()->name() != "Compartment" ) {
+	if ( !seed()->cinfo()->isA( "Compartment" ) ) {
 		cerr << "Error: HSolve::setSeed(): Seed object '" << seed.path()
-		     << "' is not of type 'Compartment'." << endl;
+		     << "' is not derived from type 'Compartment'." << endl;
 		return;
 	}
 	
@@ -256,7 +257,7 @@ void HSolve::setPath( const Eref& hsolve, const Qinfo* q, string path )
 		cerr << "Warning: HSolve::setPath(): No compartments found at or below '"
 		     << path << "'.\n";
 	else {
-		cout << "HSolve: Seed compartment found at '" << seed_.path() << "'.\n";
+		// cout << "HSolve: Seed compartment found at '" << seed_.path() << "'.\n";
 		path_ = path;
 		setup( hsolve );
 	}
@@ -308,7 +309,9 @@ Id HSolve::deepSearchForCompartment( Id base )
 		} else {
 			current = cstack.back().back();
 			
-			if ( current()->cinfo() == moose::Compartment::initCinfo() ) {
+			// if ( current()->cinfo() == moose::Compartment::initCinfo() )
+			// Compartment is base class for SymCompartment.
+			if ( current()->cinfo()->isA( "Compartment" ) ) {
 				result = current;
 				break;
 			}
@@ -429,6 +432,7 @@ const set<string>& HSolve::handledClasses()
         classes.insert("HHChannel");
         classes.insert("ZombieHHChannel");
         classes.insert("Compartment");
+        classes.insert("SymCompartment");
         classes.insert("ZombieCompartment");
     }
     return classes;

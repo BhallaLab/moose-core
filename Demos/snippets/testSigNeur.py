@@ -103,22 +103,20 @@ def create_k_proto():
 def create_squid():
     """Create a single compartment squid model."""
     parent = moose.Neutral ('/n' )
-    compt = moose.Compartment( '/n/compt' )
+    compt = moose.SymCompartment( '/n/compt' )
     Em = EREST_ACT + 10.613e-3
     compt.Em = Em
     compt.initVm = EREST_ACT
-    compt.Cm = 7.85e-9
-    compt.Rm = 4.2e5
+    compt.Cm = 7.85e-9 * 0.5
+    compt.Rm = 4.2e5 * 5.0
     compt.Ra = 7639.44e3
     nachan = moose.HHChannel( '/n/compt/Na' )
     nachan.Xpower = 3
     xGate = moose.HHGate(nachan.path + '/gateX')    
-    xGate.setupAlpha(Na_m_params +
-                      [VDIVS, VMIN, VMAX])
+    xGate.setupAlpha(Na_m_params + [VDIVS, VMIN, VMAX])
     nachan.Ypower = 1
     yGate = moose.HHGate(nachan.path + '/gateY')
-    yGate.setupAlpha(Na_h_params + 
-                      [VDIVS, VMIN, VMAX])
+    yGate.setupAlpha(Na_h_params + [VDIVS, VMIN, VMAX])
     nachan.Gbar = 0.942e-3
     nachan.Ek = 115e-3+EREST_ACT
     moose.connect(nachan, 'channel', compt, 'channel', 'OneToOne')
@@ -126,8 +124,7 @@ def create_squid():
     kchan = moose.HHChannel( '/n/compt/K' )
     kchan.Xpower = 4.0
     xGate = moose.HHGate(kchan.path + '/gateX')    
-    xGate.setupAlpha(K_n_params +
-                      [VDIVS, VMIN, VMAX])
+    xGate.setupAlpha(K_n_params + [VDIVS, VMIN, VMAX])
     kchan.Gbar = 0.2836e-3
     kchan.Ek = -12e-3+EREST_ACT
     moose.connect(kchan, 'channel', compt, 'channel', 'OneToOne')
@@ -140,8 +137,8 @@ def create_spine( parentCompt, parentObj, index, frac, length, dia, theta ):
     CM = 0.01
     sname = 'shaft' + str(index)
     hname = 'head' + str(index)
-    shaft = moose.Compartment( parentObj.path + '/' + sname )
-    moose.connect( parentCompt, 'raxial', shaft, 'axial', 'single' )
+    shaft = moose.SymCompartment( parentObj.path + '/' + sname )
+    moose.connect( parentCompt, 'raxial2', shaft, 'raxial1', 'Single' )
     x = parentCompt.x0 + frac * ( parentCompt.x - parentCompt.x0 )
     y = parentCompt.y0 + frac * ( parentCompt.y - parentCompt.y0 )
     z = parentCompt.z0 + frac * ( parentCompt.z - parentCompt.z0 )
@@ -153,7 +150,7 @@ def create_spine( parentCompt, parentObj, index, frac, length, dia, theta ):
     shaft.x = x
     shaft.y = sy
     shaft.z = sz
-    shaft.diameter = dia / 10.0
+    shaft.diameter = dia / 2.0
     shaft.length = length
     xa = math.pi * dia * dia / 400.0
     circumference = math.pi * dia / 10.0
@@ -163,8 +160,8 @@ def create_spine( parentCompt, parentObj, index, frac, length, dia, theta ):
     shaft.Em = EREST_ACT
     shaft.initVm = EREST_ACT
 
-    head = moose.Compartment( parentObj.path + '/' + hname )
-    moose.connect( shaft, 'raxial', head, 'axial', 'single' )
+    head = moose.SymCompartment( parentObj.path + '/' + hname )
+    moose.connect( shaft, 'raxial2', head, 'raxial1', 'Single' )
     head.x0 = x
     head.y0 = sy
     head.z0 = sz
@@ -185,24 +182,24 @@ def create_spine( parentCompt, parentObj, index, frac, length, dia, theta ):
     return head
 
 def create_spine_with_receptor( compt, cell, index, frac ):
-    FaradayConst = 96485.3415			# s A / mol
+    FaradayConst = 96485.3415    # s A / mol
     spineLength = 5.0e-6
     spineDia = 4.0e-6
     head = create_spine( compt, cell, index, frac, spineLength, spineDia, 0.0 )
     gluR = moose.SynChan( head.path + '/gluR' )
-    gluR.tau1 = 1e-3
-    gluR.tau2 = 1e-3
-    gluR.Gbar = 1e-5
+    gluR.tau1 = 4e-3
+    gluR.tau2 = 4e-3
+    gluR.Gbar = 1e-6
     gluR.Ek= 10.0e-3
-    moose.connect( head, 'channel', gluR, 'channel', 'single' )
+    moose.connect( head, 'channel', gluR, 'channel', 'Single' )
 
     caPool = moose.CaConc( head.path + '/ca' )
-    caPool.CaBasal = 1e-4 		# 0.1 micromolar
+    caPool.CaBasal = 1e-4       # 0.1 micromolar
     caPool.tau = 0.01
     B = 1.0 / ( FaradayConst * spineLength * spineDia * spineDia *math.pi/4)
-    B = B / 20.0 				# scaling factor for Ca buffering
+    B = B / 20.0                # scaling factor for Ca buffering
     caPool.B = B
-    moose.connect( gluR, 'IkOut', caPool, 'current', 'single' )
+    moose.connect( gluR, 'IkOut', caPool, 'current', 'Single' )
     return gluR
 
 def add_plot( objpath, field, plot ):
@@ -216,8 +213,14 @@ def make_elec_plots():
     graphs = moose.Neutral( '/graphs' )
     elec = moose.Neutral( '/graphs/elec' )
     add_plot( '/n/compt', 'get_Vm', 'elec/dendVm' )
-    add_plot( '/n/head2', 'get_Vm', 'elec/head2Vm' )
-    add_plot( '/n/head2/ca', 'get_Ca', 'elec/head2Ca' )
+    #add_plot( '/n/head2', 'get_Vm', 'elec/head2Vm' )
+    #add_plot( '/n/head2/ca', 'get_Ca', 'elec/head2Ca' )
+
+
+
+    #add_plot( '/n/head2/gluR', 'get_Ik', 'elec/head2Ik' )
+    #add_plot( '/n/head0/gluR', 'get_Gk', 'elec/head0Gk' )
+    #add_plot( '/n/head2/gluR', 'get_Gk', 'elec/head2Gk' )
 
 def dump_plots( fname ):
     if ( os.path.exists( fname ) ):
@@ -228,7 +231,7 @@ def dump_plots( fname ):
 def make_spiny_compt():
     comptLength = 100e-6
     comptDia = 4e-6
-    numSpines = 5
+    numSpines = 0
     compt = create_squid()
     compt.inject = 0
     compt.x0 = 0
@@ -249,14 +252,14 @@ def make_spiny_compt():
         r = create_spine_with_receptor( compt, cell, i, i/float(numSpines) )
         r.synapse.num = 1
         syn = moose.element( r.path + '/synapse' )
-        moose.connect( synInput, 'event', syn, 'addSpike', 'single' )
+        moose.connect( synInput, 'event', syn, 'addSpike', 'Single' )
         syn.weight = 0.2
         syn.delay = i * 1.0e-4
 
 def create_pool( compt, name, concInit ):
     meshEntries = moose.element( compt.path + '/mesh' )
     pool = moose.Pool( compt.path + '/' + name )
-    moose.connect( pool, 'mesh', meshEntries, 'mesh', 'single' )
+    moose.connect( pool, 'mesh', meshEntries, 'mesh', 'Single' )
     pool.concInit = concInit
     return pool
 
@@ -273,8 +276,8 @@ def create_chem_model( nid, neuroCompt, spineCompt, psdCompt ):
     moose.connect( turnOnPsd, 'sub', headCa, 'reac', 'OneToOne' )
     moose.connect( turnOnPsd, 'sub', toPsdInact, 'reac', 'OneToOne' )
     moose.connect( turnOnPsd, 'prd', toPsd, 'reac', 'OneToOne' )
-    turnOnPsd.Kf = 0.1e3
-    turnOnPsd.Kb = 0.1
+    turnOnPsd.Kf = 1e3
+    turnOnPsd.Kb = 1
     toPsdEnz = moose.Enz( toPsd.path + '/enz' )
     toPsdEnzCplx = moose.Pool( toPsdEnz.path + '/cplx' )
     mesh = moose.element( spineCompt.path + '/mesh' )
@@ -285,31 +288,31 @@ def create_chem_model( nid, neuroCompt, spineCompt, psdCompt ):
     moose.connect( toPsdEnz, 'prd', psdGluR, 'reac', 'OneToOne' )
     moose.connect( toPsdEnz, 'cplx', toPsdEnzCplx, 'reac', 'OneToOne' )
     toPsdEnz.Km = 1.0e-3
-    toPsdEnz.kcat = 1.0
+    toPsdEnz.kcat = 10.0
     fromPsd = moose.Reac( psdCompt.path + '/fromPsd' )
     moose.connect( fromPsd, 'sub', psdGluR, 'reac', 'OneToOne' )
     moose.connect( fromPsd, 'prd', headGluR, 'reac', 'OneToOne' )
-    fromPsd.Kf = 0.05
+    fromPsd.Kf = 0.5
     fromPsd.Kb = 0.0
     # Stuff in dendrite
     dendCa = create_pool( neuroCompt, 'Ca', 1e-4 )
     bufCa = moose.BufPool( neuroCompt.path + '/bufCa' )
     mesh = moose.element( neuroCompt.path + '/mesh' )
-    moose.connect( mesh, 'mesh', bufCa, 'mesh', 'single' )
+    moose.connect( mesh, 'mesh', bufCa, 'mesh', 'Single' )
     bufCa.concInit = 1e-4
     pumpCa = moose.Reac( neuroCompt.path + '/pumpCa' )
     moose.connect( pumpCa, 'sub', dendCa, 'reac', 'OneToOne' )
     moose.connect( pumpCa, 'prd', bufCa, 'reac', 'OneToOne' )
-    pumpCa.Kf = 0.1
-    pumpCa.Kb = 0.1
-    dendKinaseInact = create_pool( neuroCompt, 'inact_kinase', 1e-3 )
+    pumpCa.Kf = 1
+    pumpCa.Kb = 1
+    dendKinaseInact = create_pool( neuroCompt, 'inact_kinase', 1e-4 )
     dendKinase = create_pool( neuroCompt, 'Ca.kinase', 0.0 )
     dendTurnOnKinase = moose.Reac( neuroCompt.path + '/turnOnKinase' )
     moose.connect( dendTurnOnKinase, 'sub', dendCa, 'reac' )
     moose.connect( dendTurnOnKinase, 'sub', dendKinaseInact, 'reac' )
     moose.connect( dendTurnOnKinase, 'prd', dendKinase, 'reac' )
-    dendTurnOnKinase.Kf = 500
-    dendTurnOnKinase.Kb = 0.1
+    dendTurnOnKinase.Kf = 50000
+    dendTurnOnKinase.Kb = 1
     dendKinaseEnz = moose.Enz( dendKinase.path + '/enz' )
     dendKinaseEnzCplx = moose.Pool( dendKinase.path + '/enz/cplx' )
     moose.connect( dendKinaseEnzCplx, 'mesh', mesh, 'mesh' )
@@ -319,12 +322,12 @@ def create_chem_model( nid, neuroCompt, spineCompt, psdCompt ):
     moose.connect( dendKinaseEnz, 'sub', kChan, 'reac', 'OneToOne' )
     moose.connect( dendKinaseEnz, 'prd', kChan_p, 'reac', 'OneToOne' )
     moose.connect( dendKinaseEnz, 'cplx', dendKinaseEnzCplx, 'reac', 'OneToOne' )
-    dendKinaseEnz.Km = 5e-3
-    dendKinaseEnz.kcat = 0.1
+    dendKinaseEnz.Km = 1e-4
+    dendKinaseEnz.kcat = 20
     dendPhosphatase = moose.Reac( neuroCompt.path + '/phosphatase' )
     moose.connect( dendPhosphatase, 'sub', kChan_p, 'reac' )
     moose.connect( dendPhosphatase, 'prd', kChan, 'reac' )
-    dendPhosphatase.Kf = 0.1
+    dendPhosphatase.Kf = 1
     dendPhosphatase.Kb = 0.0
 
 
@@ -375,8 +378,8 @@ def make_cube_multiscale():
     make_spiny_compt()
     synInput = moose.element( '/n/compt/synInput' )
     synInput.refractT = 87e-3
-    Na = moose.element( '/n/compt/Na' )
-    Na.Gbar *= 1.5
+    #Na = moose.element( '/n/compt/Na' )
+    #Na.Gbar *= 1.5
     make_chem_in_cube_mesh()
     # set up diffusion between compts.
     headCa = moose.element( '/n/spineMesh/Ca' )
@@ -396,10 +399,14 @@ def make_cube_multiscale():
 
     adaptGluR = moose.Adaptor( '/n/adaptGluR' )
     chemR = moose.element( '/n/psdMesh/psdGluR' )
-    elecR = moose.element( '/n/head2/gluR' )
+    elec1R = moose.element( '/n/head1/gluR' )
+    elec2R = moose.element( '/n/head2/gluR' )
+    elec3R = moose.element( '/n/head3/gluR' )
     moose.connect( adaptGluR, 'requestField', chemR, 'get_n', 'OneToAll' )
-    moose.connect( adaptGluR, 'outputSrc', elecR, 'set_Gbar', 'OneToAll' )
-    adaptGluR.scale = 1e-4 / 100     # from n to pS
+    moose.connect( adaptGluR, 'outputSrc', elec1R, 'set_Gbar', 'OneToAll' )
+    moose.connect( adaptGluR, 'outputSrc', elec2R, 'set_Gbar', 'OneToAll' )
+    moose.connect( adaptGluR, 'outputSrc', elec3R, 'set_Gbar', 'OneToAll' )
+    adaptGluR.scale = 1e-6 / 100     # from n to pS
 
     adaptK = moose.Adaptor( '/n/adaptK' )
     chemK = moose.element( '/n/neuroMesh/kChan' )
@@ -412,12 +419,14 @@ def make_cube_multiscale():
 def make_chem_plots():
     graphs = moose.Neutral( '/graphs' )
     add_plot( '/n/spineMesh/Ca', 'get_conc', 'spineCa' )
+    add_plot( '/n/neuroMesh/Ca', 'get_conc', 'dendCa' )
     add_plot( '/n/neuroMesh/kChan_p', 'get_conc', 'kChan_p' )
+    add_plot( '/n/neuroMesh/kChan', 'get_conc', 'kChan' )
     add_plot( '/n/neuroMesh/Ca.kinase', 'get_conc', 'dendKinase' )
     add_plot( '/n/spineMesh/toPsd', 'get_conc', 'toPsd' )
     #add_plot( '/n/neuroMesh/Ca', 'get_conc', 'dendCa' )
     #add_plot( '/n/neuroMesh/inact_kinase', 'get_conc', 'inactDendKinase' )
-    add_plot( '/n/psdMesh/psdGluR', 'get_n', 'psdGluR' )
+    #add_plot( '/n/psdMesh/psdGluR', 'get_n', 'psdGluR' )
 
 def test_chem_alone():
     nid = make_chem_in_cube_mesh()
@@ -449,9 +458,9 @@ def test_chem_alone():
 def test_elec_alone():
     make_spiny_compt()
     make_elec_plots()
-    moose.setClock( 0, 1e-5 )
-    moose.setClock( 1, 1e-5 )
-    moose.setClock( 2, 1e-5 )
+    moose.setClock( 0, 2e-6 )
+    moose.setClock( 1, 2e-6 )
+    moose.setClock( 2, 2e-6 )
     moose.setClock( 8, 0.1e-3 )
     #moose.useClock( 0, '/n/#', 'init' )
     #moose.useClock( 1, '/n/#', 'process' )
@@ -473,35 +482,58 @@ def test_elec_alone():
     hsolve.dt = 2e-5
     hsolve.target = '/n/compt'
     moose.reinit()
-    moose.start( 0.1 )
+    moose.start( 0.11 )
     dump_plots( 'h_instab.plot' )
 
-def test_cube_multiscale():
+def test_cube_multiscale( useSolver ):
+    elecDt = 10e-6
+    chemDt = 1e-4
+    plotDt = 1e-4
+    plotName = 'symcm.plot'
+    if ( useSolver ):
+        elecDt = 10e-6
+        chemDt = 1e-3
+        plotName = 'solve_cm.plot'
+
     make_cube_multiscale()
     make_chem_plots()
     make_elec_plots()
-    moose.setClock( 0, 2e-5 )
-    moose.setClock( 1, 2e-5 )
-    moose.setClock( 2, 2e-5 )
-    moose.setClock( 5, 1e-3 )
-    moose.setClock( 6, 1e-3 )
-    moose.setClock( 7, 1e-4 )
-    moose.setClock( 8, 1e-4 )
-    moose.useClock( 0, '/n/##[ISA=Compartment]', 'init' )
-    moose.useClock( 1, '/n/##[ISA=Compartment],/n/##[ISA=SpikeGen]', 'process' )
-    moose.useClock( 2, '/n/##[ISA=ChanBase],/n/##[ISA=SynBase],/n/##[ISA=CaConc]','process')
-    moose.useClock( 5, '/n/##[ISA=PoolBase],/n/##[ISA=ReacBase],/n/##[ISA=EnzBase]', 'process' )
+    moose.setClock( 0, elecDt )
+    moose.setClock( 1, elecDt )
+    moose.setClock( 2, elecDt )
+    moose.setClock( 5, chemDt )
+    moose.setClock( 6, chemDt )
+    moose.setClock( 7, plotDt )
+    moose.setClock( 8, plotDt )
+    moose.useClock( 1, '/n/##[ISA=SpikeGen]', 'process' )
+    moose.useClock( 2, '/n/##[ISA=SynBase]','process')
     moose.useClock( 6, '/n/##[ISA=Adaptor]', 'process' )
     moose.useClock( 7, '/graphs/#', 'process' )
     moose.useClock( 8, '/graphs/elec/#', 'process' )
-    #moose.le( '/graphs/elec' )
+    moose.useClock( 0, '/n/##[ISA=Compartment]', 'init' )
+    moose.useClock( 1, '/n/##[ISA=Compartment]', 'process' )
+    moose.useClock( 2, '/n/##[ISA=ChanBase],/n/##[ISA=SynBase],/n/##[ISA=CaConc]','process')
+    moose.useClock( 5, '/n/##[ISA=PoolBase],/n/##[ISA=ReacBase],/n/##[ISA=EnzBase]', 'process' )
+    if ( useSolver ):
+        # Put in the solvers, see how they fare.
+        ksolve = moose.GslStoich( '/n/solver' )
+        ksolve.path = '/n/##'
+        ksolve.method = 'rk5'
+        moose.useClock( 5, '/n/solver', 'process' )
+        hsolve = moose.HSolve( '/n/hsolve' )
+        moose.useClock( 1, '/n/hsolve', 'process' )
+        hsolve.dt = elecDt
+        moose.le( '/n' )
+        hsolve.target = '/n/compt'
     moose.reinit()
-    moose.start( 10 )
-    dump_plots( 'cm.plot' )
+    moose.start( 1 )
+    dump_plots( plotName )
+
 
 def main():
-    test_cube_multiscale()
-	#test_elec_alone()
+    test_cube_multiscale( 0 )
+    #test_cube_multiscale( 1 )
+    #test_elec_alone()
 
 if __name__ == '__main__':
     main()

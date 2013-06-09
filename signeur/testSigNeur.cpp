@@ -958,10 +958,19 @@ void testSigNeur()
 // This is applicable to tests that use the messaging and scheduling.
 void testSigNeurProcess()
 {
-	testSigNeurElec();
+	// After 2 June 2013, checkin 4579, the tests in 
+	// testSigNeurElec
+	// testChemInCubeMesh 
+	// testAdaptorsInCubeMesh() // Does a chem+elec model with adaptors
+	// have been moved to a 
+	// separate Python snippet called testSigNeur.py. These tests take
+	// too long to run in unit tests and anyway it does not test as much
+	// as generate an output that I can compare with the expected one.
 	makeChemInNeuroMesh();
-	testChemInCubeMesh();
-	testAdaptorsInCubeMesh(); // Does a chem+elec model with adaptors
+	Id nid = makeChemInCubeMesh();
+	Shell* shell = reinterpret_cast< Shell* >( ObjId( Id(), 0 ).data() );
+	shell->doDelete( nid );
+	cout << "." << flush;
 }
 
 #endif

@@ -282,8 +282,7 @@ void Adaptor::process( const Eref& e, ProcPtr p )
 
 void Adaptor::reinit( const Eref& e, ProcPtr p )
 {
-	sum_ = 0.0;
-	counter_ = 0;
+	process( e, p );
 }
 
 /*
