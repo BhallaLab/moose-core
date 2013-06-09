@@ -22123,4 +22123,20 @@ hsolve: it was odd because it only knew how to parse regular compartments,
 but solved them internally as symcompartments. Still doesn't match with EE.
 Checkin 4599.
 
+Discovered a granularity in table lookup not in the solver, but in the
+EE. Shows up in the Na channel. 
+
+t	Ike-9	Vm
+172	2.988	-0.07384
+184	2.936	-0.07389
+192	2.885	-0.07394
+201	2.834	-0.07399
+211	2.785	-0.07404
+222	2.737	-0.07409
+
+This is a 50e-6V step.
+The stepsize in the table is precisely 150e-3/3000 = 50e-6.
+Why should this happen in EE and not hsolve code? Does the hsolve interpolate?
+Anyway, I've saved this version of the testSigNeur for reference.
+
 ==========================================================================
