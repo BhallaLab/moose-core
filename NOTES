@@ -22186,13 +22186,54 @@ Now to get back to doing the rest of the model.
 Put back the ion channels. It works! The Hsolver is almost identical to the
 EE version with SymCompartments. Even the Ca matches.
 
-Next: separate out into a snippet showing how to set up a SymCompartment
-model. We haven't had this yet.
-Then go on with the chem part of the model, and push to see where the 
-approximations go.
+* Next: separate out into a snippet showing how to set up a SymCompartment
+	model. We haven't had this yet.
+* Then go on with the chem part of the model, and push to see where the 
+	approximations go.
 After than we can finally begin work on the NeuroMesh.
 
 Implemented testHsolve.py. This reveals issues with changing dt in the
 Hsolve, which Niraj should address. It is a useful little snippet anyway.
+Checkin 4604.
+
+Went on to include the chem part of the model. Unfortunately differences
+persist. These have to do with the electrical part of the model, specifically,
+how the potential builds up over multiple stimuli. I am inclined to suspect
+the SymCompartment. 
+Ran with smaller plot timestep to see if we're running into instabilities.
+Seems not. Is it a SynChan issue? So let's just go on with the model.
+I may need to rebuild the whole mess in GENESIS to track down.
+
+Another clue: I reduced KchanGbar at setup, by a relatively small amount.
+It led to wild firing. Perhaps the adaptor that controls this doesn't work with
+the Hsolve????
+Confirmed. Gbar isn't controlling anything. Home in now on this....
+
+Tracked it down. The functions and everything were defined, but not registered
+as fields on the ZombieHHChannel. Now there is a close match between
+EE and solvers, but not perfect. Ca trace in particular has some differences,
+and these do not seem to converge with smaller dt.
+
+Anyway, with this we are set to go on.
+Timesteps: 
+1. Holding elecDt fixed at 50 usec.
+ChemDt	
+	1e-4 (reference)
+	1e-3	Pretty close
+	2e-3	Adequate. A single extra spike at start due to issues with 
+		Adaptor update.
+	5e-3	Ugly but OK: the very long time causes the plots to be blocky.
+			Here the plotDt is finer than the adaptors or chem.
+			But every Ca spike is followed, even unto the 
+			amplitudes.
+
+2. Holding chemDt fixed at 1 msec.
+elecDt
+	10e-6	Pretty close.
+	50e-6	(reference)
+	100e-6	Pretty close. But Ik has ugly oscillations at spikes.
+
+In summary, one could probably run it at 100e-6, 5e-3, but the
+convergence is not great.  Lower timesteps are fine.
 
 ==========================================================================
