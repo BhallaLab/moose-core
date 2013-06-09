@@ -294,6 +294,13 @@ int HSolveUtils::targets(
 	return targets( object, msg, target, filter_v, include );
 }
 
+/**
+ * Appends to 'target' any destination objects of messages of the 
+ * 	specified name found on the object. 
+ *	The filter restricts the returns to those objects of the specified class
+ *	include is a flag, when false it flips the returns to objects _not_ of
+ *	the specified class.
+ */
 int HSolveUtils::targets(
 	Id object,
 	string msg,
@@ -309,6 +316,8 @@ int HSolveUtils::targets(
 	vector< Id > all;
 	Element* e = object.element();
 	const Finfo* f = e->cinfo()->findFinfo( msg );
+	if ( !f ) // Might not find SymCompartment Finfos if it is a Compartment
+		return 0;
 	e->getNeighbours( all, f );
 	
 	vector< Id >::iterator ia;
