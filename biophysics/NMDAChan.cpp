@@ -1,9 +1,9 @@
 /**********************************************************************
 ** This program is part of 'MOOSE', the
 ** Messaging Object Oriented Simulation Environment.
-**           Copyright (C) 2003-2010 Upinder S. Bhalla. and NCBS
+**           Copyright (C) 2003-2013 Upinder S. Bhalla. and NCBS
 ** This program is free software; you can redistribute it and/or
-** modify it under the terms of the GNU General Public License as
+** modify it under the terms of the GNU Lesser General Public License as
 ** published by the Free Software Foundation; either version 3, or
 ** (at your option) any later version.
 ** 
@@ -12,7 +12,7 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 ** General Public License for more details.
 ** 
-** You should have received a copy of the GNU General Public License
+** You should have received a copy of the GNU Lesser General Public License
 ** along with this program; see the file COPYING.  If not, write to
 ** the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 ** Floor, Boston, MA 02110-1301, USA.
@@ -25,9 +25,9 @@
 // Maintainer: 
 // Created: Sun Feb 28 18:17:56 2010 (+0530)
 // Version: 
-// Last-Updated: Mon Nov  5 16:59:58 2012 (+0530)
+// Last-Updated: Tue Jun 11 16:59:29 2013 (+0530)
 //           By: subha
-//     Update #: 530
+//     Update #: 532
 // URL: 
 // Keywords: 
 // Compatibility: 
