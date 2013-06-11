@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Jul 16 16:12:55 2012 (+0530)
 # Version: 
-# Last-Updated: Wed Feb  6 12:37:17 2013 (+0530)
+# Last-Updated: Tue Jun 11 17:29:14 2013 (+0530)
 #           By: subha
-#     Update #: 496
+#     Update #: 527
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -35,10 +35,11 @@ import testutils
 import cells
 import moose
 from moose import utils
+import pylab
 
 simdt = 5e-6
 plotdt = 0.25e-3
-simtime = 1.0
+simtime = 300e-3
     
 
 # pulsearray = [[1.0, 100e-3, 1e-9],
@@ -62,18 +63,31 @@ class TestTCR(SingleCellCurrentStepTest):
     def setUp(self):
         SingleCellCurrentStepTest.setUp(self)
 
-    def testVmSeriesPlot(self):
-        self.runsim(simtime, self.pulse_array)
-        self.plot_vm()
+    # def testVmSeriesPlot(self):
+    #     self.runsim(simtime, self.pulse_array)
+    #     self.plot_vm()
 
     def testVClamp(self):
         clamp = moose.VClamp('%s/vclamp' % (self.model_container.path))
         moose.connect(clamp, 'currentOut', self.cell.soma, 'injectMsg')
-        moose.connect(self.cell.soma, 'VmOut', clamp, 'sensed')
-        moose.connect(self.pulsegen, 'outputOut', clamp, 'command')
+        moose.connect(self.cell.soma, 'VmOut', clamp, 'sensedIn')
+        self.pulsegen.delay[0] = 1e9 # disable current clamp
+        self.pulsegen = moose.PulseGen('%s/vclampCommand' % (self.model_container.path))
+        self.pulsegen.delay[0] = 100e-3
+        self.pulsegen.width[0] = 100e-3
+        self.pulsegen.level[0] = -10e-3
+        moose.connect(self.pulsegen, 'outputOut', clamp, 'set_command')
+        tab = moose.Table('%s/command' % (self.data_container.path))
+        moose.connect(tab, 'requestData', clamp, 'get_command')
+        for ii in moose.wildcardFind('/##[TYPE=VClamp]'):
+            print ii.path
+        self.runsim(simtime)
+        print tab, len(tab.vec)
+        pylab.plot(pylab.linspace(0, simtime, len(tab.vec)), tab.vec, 'kx')
+        self.plot_vm()
 
-    def testChannelDensities(self):
-        pass
+    # def testChannelDensities(self):
+    #     pass
         # equal = compare_cell_dump(self.dump_file, '../nrn/'+self.dump_file)
         # self.assertTrue(equal)
 

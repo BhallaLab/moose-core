@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Feb  2 19:16:54 2013 (+0530)
 # Version: 
-# Last-Updated: Wed Feb  6 17:23:26 2013 (+0530)
+# Last-Updated: Tue Jun 11 17:35:20 2013 (+0530)
 #           By: subha
-#     Update #: 177
+#     Update #: 178
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -72,10 +72,10 @@ def vclamp_demo(simtime=50.0, dt=1e-2):
     command.width[0] = 20.0
     command.level[0] = 50.0
     command.delay[1] = 1e9
-    moose.connect(command, 'outputOut', clamp, 'set_command')
+    moose.connect(command, 'outputOut', clamp, 'commandIn')
     ## Connect the Voltage Clamp to the compartemnt
     moose.connect(clamp, 'currentOut', comp, 'injectMsg')
-    moose.connect(comp, 'VmOut', clamp, 'set_sensed')
+    moose.connect(comp, 'VmOut', clamp, 'sensedIn')
     ## setup stimulus recroding - this is the command pulse
     stimtab = moose.Table('/vClampDemo/vclamp_command')
     moose.connect(stimtab, 'requestData', command, 'get_output')
