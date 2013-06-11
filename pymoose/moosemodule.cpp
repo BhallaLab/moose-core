@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Mon May 27 16:30:54 2013 (+0530)
+// Last-Updated: Tue Jun 11 11:45:20 2013 (+0530)
 //           By: subha
-//     Update #: 10324
+//     Update #: 10351
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -3112,6 +3112,56 @@ static struct module_state _state;
                         argstream << string(param) << ",";
                     }
                     break;
+                case 'x':
+                    {
+                        Id param;
+                        if (Id_SubtypeCheck(arg)){
+                            _Id * id = (_Id*)(arg);
+                            if (id == NULL){
+                                error << "argument should be an ematrix or an melement";
+                                PyErr_SetString(PyExc_TypeError, error.str().c_str());
+                                return NULL;                                
+                            }
+                            param = id->id_;
+                        } else if (ObjId_SubtypeCheck(arg)){
+                            _ObjId * oid = (_ObjId*)(arg);
+                            if (oid == NULL){
+                                error << "argument should be an ematrix or an melement";
+                                PyErr_SetString(PyExc_TypeError, error.str().c_str());
+                                return NULL;                                
+                            }
+                            param = oid->oid_.id;
+                        }
+                        if ( SetGet1<Id>::set(oid, string(fieldName), param)){
+                            return Py_True;
+                        }
+                        return Py_False;
+                    }
+                case 'y':
+                    {
+                        ObjId param;
+                        if (Id_SubtypeCheck(arg)){
+                            _Id * id = (_Id*)(arg);
+                            if (id == NULL){
+                                error << "argument should be an ematrix or an melement";
+                                PyErr_SetString(PyExc_TypeError, error.str().c_str());
+                                return NULL;                                
+                            }
+                            param = ObjId(id->id_);
+                        } else if (ObjId_SubtypeCheck(arg)){
+                            _ObjId * oid = (_ObjId*)(arg);
+                            if (oid == NULL){
+                                error << "argument should be an ematrix or an melement";
+                                PyErr_SetString(PyExc_TypeError, error.str().c_str());
+                                return NULL;                                
+                            }
+                            param = oid->oid_;
+                        }
+                        if ( SetGet1<ObjId>::set(oid, string(fieldName), param)){
+                            return Py_True;
+                        }
+                        return Py_False;
+                    }
                     ////////////////////////////////////////////////////
                     // We do NOT handle multiple vectors. Use the argument
                     // list as a single vector argument.
