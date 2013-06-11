@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue May 21 16:31:56 2013 (+0530)
 # Version: 
-# Last-Updated: Tue May 21 16:57:52 2013 (+0530)
+# Last-Updated: Tue Jun 11 16:57:30 2013 (+0530)
 #           By: subha
-#     Update #: 33
+#     Update #: 34
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -32,7 +32,7 @@
 # 
 # 
 # This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License as
+# modify it under the terms of the GNU Lesser General Public License as
 # published by the Free Software Foundation; either version 3, or
 # (at your option) any later version.
 # 
@@ -41,7 +41,7 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 # General Public License for more details.
 # 
-# You should have received a copy of the GNU General Public License
+# You should have received a copy of the GNU Lesser General Public License
 # along with this program; see the file COPYING.  If not, write to
 # the Free Software Foundation, Inc., 51 Franklin Street, Fifth
 # Floor, Boston, MA 02110-1301, USA.
