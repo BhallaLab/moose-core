@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Feb  6 16:25:52 2013 (+0530)
 # Version: 
-# Last-Updated: Thu Feb  7 10:48:49 2013 (+0530)
+# Last-Updated: Tue Jun 11 17:30:34 2013 (+0530)
 #           By: subha
-#     Update #: 146
+#     Update #: 148
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -84,8 +84,8 @@ def vclamptest(compartment, vclamp, duration=50e-3, delay=150e-3, solver='ee', v
     electronics = moose.Neutral('%s/electronics' % (mc.path))
     command = moose.PulseGen('%s/command_source' % (electronics.path))
     clamp = moose.VClamp('%s/vclamp' % (electronics.path))
-    moose.connect(command, 'outputOut', clamp, 'set_command')
-    moose.connect(compartment, 'VmOut', clamp, 'set_sensed')
+    moose.connect(command, 'outputOut', clamp, 'commandIn')
+    moose.connect(compartment, 'VmOut', clamp, 'sensedIn')
     moose.connect(clamp, 'currentOut', compartment, 'injectMsg')
     simtime = 0
     command.count = len(vclamp)
