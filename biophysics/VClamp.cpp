@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Fri Feb  1 19:30:45 2013 (+0530)
 // Version: 
-// Last-Updated: Tue Jun 11 16:49:34 2013 (+0530)
+// Last-Updated: Tue Jun 11 17:33:16 2013 (+0530)
 //           By: subha
-//     Update #: 283
+//     Update #: 297
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -82,10 +82,8 @@ const Cinfo * VClamp::initCinfo()
                             "Shared message to receive Process messages from the scheduler",
                             processShared, sizeof(processShared) / sizeof(Finfo*));
 
-    static ValueFinfo< VClamp, double> command("command",
-                                               "Command input of the clamp circuit. The command voltage source should"
-                                               "\nbe connected to `set_command`.",
-                                               &VClamp::setCommand,
+    static ReadOnlyValueFinfo< VClamp, double> command("command",
+                                               "Command input received by the clamp circuit.",
                                                &VClamp::getCommand);
     static ValueFinfo< VClamp, unsigned int> mode("mode",
                                                   "Working mode of the PID controller."
@@ -122,11 +120,17 @@ const Cinfo * VClamp::initCinfo()
                                             &VClamp::getCurrent);
 
 
-    static ValueFinfo<VClamp, double> sensed("sensed",
-                              "Membrane potential read from compartment. The `VmOut` message"
-                               " of the Compartment object should be connected to `set_sensed`.",
-                             &VClamp::setVin,
-                             &VClamp::getVin);
+    static ReadOnlyValueFinfo<VClamp, double> sensed("sensed",
+                                                     "Membrane potential read from compartment.",
+                                                     &VClamp::getVin);
+    static DestFinfo sensedIn("sensedIn",
+                              " The `VmOut` message of the Compartment object should be connected"
+                              "\n here.",
+                              new OpFunc1<VClamp, double>( &VClamp::setVin));
+                                              
+    static DestFinfo commandIn("commandIn",
+                              "  The command voltage source should be connected to this.",
+                              new OpFunc1<VClamp, double>( &VClamp::setCommand));
 
     static Finfo* vclampFinfos[] = {
         currentOut(),
@@ -138,6 +142,8 @@ const Cinfo * VClamp::initCinfo()
         &td,
         &tau,
         &gain,
+        &sensedIn,
+        &commandIn,
         &proc
     };
 
