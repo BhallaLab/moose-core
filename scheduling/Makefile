@@ -3,7 +3,7 @@
 #** Messaging Object Oriented Simulation Environment.
 #**           copyright (C) 2009 Upinder S. Bhalla. and NCBS
 #** It is made available under the terms of the
-#** GNU General Public License version 2
+#** GNU Lesser General Public License version 2.1
 #** See the file COPYING.LIB for the full notice.
 #**********************************************************************/
 

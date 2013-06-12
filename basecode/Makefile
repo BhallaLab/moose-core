@@ -4,7 +4,7 @@
 #** also known as GENESIS 3 base code.
 #**           copyright (C) 2004 Upinder S. Bhalla. and NCBS
 #** It is made available under the terms of the
-#** GNU General Public License version 2
+#** GNU Lesser General Public License version 2.1
 #** See the file COPYING.LIB for the full notice.
 #**********************************************************************/
 # $Id: $
