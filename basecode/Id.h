@@ -36,6 +36,11 @@ class Id
 		Id( const std::string& path, const std::string& separator = "/" );
 
 		/**
+		 * Downconverts an OjbId to an Id
+		 */
+		Id( const ObjId& oi );
+
+		/**
 		 * Destroys an Id. Doesn't do anything much.
 		 */
 		~Id(){}

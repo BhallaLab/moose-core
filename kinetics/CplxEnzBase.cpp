@@ -53,7 +53,17 @@ const Cinfo* CplxEnzBase::initCinfo()
 		//////////////////////////////////////////////////////////////
 		static ElementValueFinfo< CplxEnzBase, double > k1(
 			"k1",
-			"Forward reaction from enz + sub to complex",
+			"Forward reaction from enz + sub to complex, in # units."
+			"This parameter is subordinate to the Km. This means that"
+			"when Km is changed, this changes. It also means that when"
+			"k2 or k3 (aka kcat) are changed, we assume that Km remains"
+			"fixed, and as a result k1 must change. It is only when"
+			"k1 is assigned directly that we assume that the user knows"
+			"what they are doing, and we adjust Km accordingly."
+			"k1 is also subordinate to the 'ratio' field, since setting "
+			"the ratio reassigns k2."
+			"Should you wish to assign the elementary rates k1, k2, k3,"
+		    "of an enzyme directly, always assign k1 last.",
 			&CplxEnzBase::setK1,
 			&CplxEnzBase::getK1
 		);
@@ -81,7 +91,17 @@ const Cinfo* CplxEnzBase::initCinfo()
 
 		static ElementValueFinfo< CplxEnzBase, double > concK1(
 			"concK1",
-			"K1 expressed in concentration (1/millimolar.sec) units",
+			"K1 expressed in concentration (1/millimolar.sec) units"
+			"This parameter is subordinate to the Km. This means that"
+			"when Km is changed, this changes. It also means that when"
+			"k2 or k3 (aka kcat) are changed, we assume that Km remains"
+			"fixed, and as a result concK1 must change. It is only when"
+			"concK1 is assigned directly that we assume that the user knows"
+			"what they are doing, and we adjust Km accordingly."
+			"concK1 is also subordinate to the 'ratio' field, since"
+			"setting the ratio reassigns k2."
+			"Should you wish to assign the elementary rates concK1, k2, k3,"
+		    "of an enzyme directly, always assign concK1 last.",
 			&CplxEnzBase::setConcK1,
 			&CplxEnzBase::getConcK1
 		);

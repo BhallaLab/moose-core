@@ -31,6 +31,10 @@ Id::Id( const string& path, const string& separator )
 	id_ = shell->doFind( path ).id.id_;
 }
 
+Id::Id( const ObjId& oi )
+	: id_( oi.id.id_ )
+{;}
+
 /**
  * Static func to extract an id from a string. We need to accept ids
  * out of the existing range, but it would be nice to have a heuristic
