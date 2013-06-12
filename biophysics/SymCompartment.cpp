@@ -31,7 +31,7 @@ static SrcFinfo0 *requestSumAxial() {
 }
 
 static SrcFinfo2< double, double > *raxial2Out() {
-	static SrcFinfo2< double, double > raxial2Out( "Raxial2Out", 
+	static SrcFinfo2< double, double > raxial2Out( "raxial2Out", 
 			"Sends out Ra and Vm");
 	return &raxial2Out;
 }

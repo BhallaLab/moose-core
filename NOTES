@@ -22212,7 +22212,7 @@ Confirmed. Gbar isn't controlling anything. Home in now on this....
 Tracked it down. The functions and everything were defined, but not registered
 as fields on the ZombieHHChannel. Now there is a close match between
 EE and solvers, but not perfect. Ca trace in particular has some differences,
-and these do not seem to converge with smaller dt.
+(about 10% on spike peaks) and these do not seem to converge with smaller dt.
 
 Anyway, with this we are set to go on.
 Timesteps: 
@@ -22234,6 +22234,23 @@ elecDt
 	100e-6	Pretty close. But Ik has ugly oscillations at spikes.
 
 In summary, one could probably run it at 100e-6, 5e-3, but the
-convergence is not great.  Lower timesteps are fine.
+trace shape is not great and the elec model is prone to oscillate. 
+ Lower timesteps are fine.
+Checkin 4605.
+
+Started off on the neuroMesh version. 
+==========================================================================
+10 June
+Half done with the neuroMesh version in testSigNeur.py.
+
+Need to fix GslStoich/neuroMesh handling of BufPools. For now I've changed
+it to a regular pool.
+
+The setup seems to get most of the way, but it dies when running, in
+StoichCore::updateRates. Various Nans and infs in there.
 
 ==========================================================================
+12 June
+
+Some additional documentation about behaviour of k1 in CplxEnzBase.
+
