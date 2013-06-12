@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Nov 13 15:58:31 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Jun  6 18:20:47 2013 (+0530)
+# Last-Updated: Wed Jun 12 11:46:39 2013 (+0530)
 #           By: subha
-#     Update #: 2037
+#     Update #: 2040
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -332,8 +332,8 @@ class MooseRunner(QtCore.QObject):
         self._pause = False
         self._updateInterval = updateInterval
         self._simtime = simtime
-        self.updateTicks(tickDtMap)
-        self.assignTicks(tickTargetMap)
+        utils.updateTicks(tickDtMap)
+        utils.assignTicks(tickTargetMap)
         self.resetAndRun.emit()
         moose.reinit()
         QtCore.QTimer.singleShot(0, self.run)
@@ -363,59 +363,6 @@ class MooseRunner(QtCore.QObject):
         """Pause simulation"""
         self._pause = True
 
-    def updateTicks(self, tickDtMap):
-        """TODO: coordinate with Aditya about good way to schedule"""
-        for tickNo, dt in tickDtMap.items():
-            if tickNo >= 0 and dt > 0.0:
-                moose.setClock(tickNo, dt)
-        if np.all(np.array(tickDtMap.values()) == 0.0):
-            self.setDefaultDt()
-            
-    def assignTicks(self, tickTargetMap):
-        """TODO: coordinate with Aditya about good way to schedule"""
-        for tickNo, target in tickTargetMap.items():
-                moose.useClock(tickNo, target, 'process')
-        # This is a hack, we need saner way of scheduling
-        ticks = moose.ematrix('/clock/tick')
-        valid = []
-        for ii in range(ticks[0].localNumField):
-            if ticks[ii].dt > 0:
-                valid.append(ii)
-        if len(valid) == 0:
-            self.assignDefaultTicks()
-
-    def setDefaultDt(self, edt=1e-5, kdt=0.01, ldt=1e-5, plotdt1=1.0, plotdt2=1e-3):
-        moose.setClock(0, edt)
-        moose.setClock(1, edt)
-        moose.setClock(2, edt)
-        moose.setClock(3, edt)
-        moose.setClock(4, kdt)
-        moose.setClock(5, kdt)
-        moose.setClock(6, ldt)
-        moose.setClock(7, edt)        
-        moose.setClock(8, plotdt1) # kinetics sim
-        moose.setClock(9, plotdt2) # electrical sim
-
-    def assignDefaultTicks(self):
-        moose.useClock(0, '%s/##[ISA=Compartment]' % (self.modelRoot), 'init')
-        moose.useClock(1, '%s/##[ISA=LeakyIaF]'  % (self.modelRoot), 'process')
-        moose.useClock(1, '%s/##[ISA=IntFire]'  % (self.modelRoot), 'process')
-        moose.useClock(1, '%s/##[ISA=Compartment]'  % (self.modelRoot), 'process')
-        moose.useClock(2, '%s/##[ISA=ChanBase]'  % (self.modelRoot), 'process')
-        moose.useClock(2, '%s/##[ISA=MgBlock]'  % (self.modelRoot), 'process')
-        moose.useClock(3, '%s/##[ISA=CaPool]'  % (self.modelRoot), 'process')
-        moose.useClock(7, '%s/##[ISA=DiffAmp]'  % (self.modelRoot), 'process')
-        moose.useClock(7, '%s/##[ISA=VClamp]' % (self.modelRoot), 'process')
-        moose.useClock(7, '%s/##[ISA=PIDController]' % (self.modelRoot), 'process')
-        moose.useClock(7, '%s/##[ISA=RC]' % (self.modelRoot), 'process')
-        kinetics = moose.wildcardFind('%s/##[FIELD(name)=kinetics]' % self.modelRoot)
-        if len(kinetics) > 0:
-            moose.useClock(4, '%s/##[ISA!=PoolBase]' % (kinetics[0].path), 'process')
-            moose.useClock(5, '%s/##[ISA==PoolBase]' % (kinetics[0].path), 'process')
-            moose.useClock(8, '%s/##[ISA=Table]' % (self.dataRoot), 'process')
-        else:
-            moose.useClock(9, '%s/##[ISA=Table]' % (self.dataRoot), 'process')
-        
 
 
 class SchedulingWidget(QtGui.QWidget):

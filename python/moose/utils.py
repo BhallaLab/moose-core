@@ -343,11 +343,107 @@ def readcell_scrambled(filename, target):
     _moose.readCell(tmpfilename, target)
     return _moose.Cell(target)
 
+## Subha: In many scenarios resetSim is too rigid and focussed on
+## neuronal simulation.  The setDefaultDt and
+## assignTicks/assignDefaultTicks keep the process of assigning dt to
+## ticks and assigning ticks to objects separate. reinit() should be
+## explicitly called by user just before running a simulation, and not
+## when setting it up.
+def updateTicks(tickDtMap):
+    """Try to assign dt values to ticks.
+
+    Parameters
+    ----------
+    tickDtMap: dict
+    map from tick-no. to dt value. if it is empty, then default dt
+    values are assigned to the ticks.
+
+    """
+    for tickNo, dt in tickDtMap.items():
+        if tickNo >= 0 and dt > 0.0:
+            _moose.setClock(tickNo, dt)
+    if all([(v == 0) for v in tickDtMap.values()]):
+        setDefaultDt()
+
+def assignTicks(tickTargetMap):
+    """
+    Assign ticks to target elements.
+
+    Parameters
+    ----------
+    tickTargetMap: dict
+    Map from tick no. to target path. The path can be wildcard expression also.
+    """
+    if len(tickTargetMap) == 0:
+        assignDefaultTicks()
+    for tickNo, target in tickTargetMap.items():
+            _moose.useClock(tickNo, target, 'process')
+    # # This is a hack, we need saner way of scheduling
+    # ticks = _moose.ematrix('/clock/tick')
+    # valid = []
+    # for ii in range(ticks[0].localNumField):
+    #     if ticks[ii].dt > 0:
+    #         valid.append(ii)
+    # if len(valid) == 0:
+    #     assignDefaultTicks()
+
+def setDefaultDt(elecdt=1e-5, chemdt=0.01, tabdt=1e-5, plotdt1=1.0, plotdt2=0.25e-3):
+    """Setup the ticks with dt values.
+
+    Parameters
+    ----------
+
+    elecdt: dt for ticks used in computing electrical biophysics, like
+    neuronal compartments, ion channels, synapses, etc.
+
+    chemdt: dt for chemical computations like enzymatic reactions.
+
+    tabdt: dt for lookup tables
+
+    plotdt1: dt for chemical kinetics plotting
+
+    plotdt2: dt for electrical simulations
+
+    """
+    _moose.setClock(0, edt)
+    _moose.setClock(1, edt)
+    _moose.setClock(2, edt)
+    _moose.setClock(3, edt)
+    _moose.setClock(4, kdt)
+    _moose.setClock(5, kdt)
+    _moose.setClock(6, ldt)
+    _moose.setClock(7, edt)        
+    _moose.setClock(8, plotdt1) # kinetics sim
+    _moose.setClock(9, plotdt2) # electrical sim
+
+def assignDefaultTicks(modelRoot='/model', dataRoot='/data'):
+    _moose.useClock(0, '%s/##[ISA=Compartment]' % (modelRoot), 'init')
+    _moose.useClock(1, '%s/##[ISA=LeakyIaF]'  % (modelRoot), 'process')
+    _moose.useClock(1, '%s/##[ISA=IntFire]'  % (modelRoot), 'process')
+    _moose.useClock(1, '%s/##[ISA=Compartment]'  % (modelRoot), 'process')
+    _moose.useClock(2, '%s/##[ISA=ChanBase]'  % (modelRoot), 'process')
+    _moose.useClock(2, '%s/##[ISA=MgBlock]'  % (modelRoot), 'process')
+    _moose.useClock(3, '%s/##[ISA=CaPool]'  % (modelRoot), 'process')
+    _moose.useClock(7, '%s/##[ISA=DiffAmp]'  % (modelRoot), 'process')
+    _moose.useClock(7, '%s/##[ISA=VClamp]' % (modelRoot), 'process')
+    _moose.useClock(7, '%s/##[ISA=PIDController]' % (modelRoot), 'process')
+    _moose.useClock(7, '%s/##[ISA=RC]' % (modelRoot), 'process')
+    # Special case for kinetics models
+    kinetics = _moose.wildcardFind('%s/##[FIELD(name)=kinetics]' % modelRoot)
+    if len(kinetics) > 0:
+        _moose.useClock(4, '%s/##[ISA!=PoolBase]' % (kinetics[0].path), 'process')
+        _moose.useClock(5, '%s/##[ISA==PoolBase]' % (kinetics[0].path), 'process')
+        _moose.useClock(8, '%s/##[ISA=Table]' % (dataRoot), 'process')
+    else:
+        _moose.useClock(9, '%s/##[ISA=Table]' % (dataRoot), 'process')
+
+
 ############# added by Aditya Gilra -- begin ################
 
 def resetSim(simpaths, simdt, plotdt, simmethod='hsolve'):
     """ For each of the MOOSE paths in simpaths, this sets the clocks and finally resets MOOSE.
     If simmethod=='hsolve', it sets up hsolve-s for each Neuron under simpaths, and clocks for hsolve-s too. """
+    print 'Solver:', simmethod
     _moose.setClock(INITCLOCK, simdt)
     _moose.setClock(ELECCLOCK, simdt) # The hsolve and ee methods use clock 1
     _moose.setClock(CHANCLOCK, simdt) # hsolve uses clock 2 for mg_block, nmdachan and others.
@@ -369,11 +465,13 @@ def resetSim(simpaths, simdt, plotdt, simmethod='hsolve'):
         ## else just put a clock on the hsolve:
         ## hsolve takes care of the clocks for the biophysics
         if 'hsolve' not in simmethod.lower():
+            print 'Using exp euler'
             _moose.useClock(INITCLOCK, simpath+'/##[TYPE=Compartment]', 'init')
             _moose.useClock(ELECCLOCK, simpath+'/##[TYPE=Compartment]', 'process')
             _moose.useClock(CHANCLOCK, simpath+'/##[TYPE=HHChannel]', 'process')
             _moose.useClock(POOLCLOCK, simpath+'/##[TYPE=CaConc]', 'process')
         else: # use hsolve, one hsolve for each Neuron
+            print 'Using hsolve'
             element = _moose.Neutral(simpath)
             for childid in element.children: 
                 childobj = _moose.Neutral(childid)
