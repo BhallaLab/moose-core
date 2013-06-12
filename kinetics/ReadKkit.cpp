@@ -800,9 +800,9 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 
 		// Need to figure out what to do about these. Perhaps it is OK
 		// to do this assignments in raw #/cell units.
-		Field< double >::set( enz, "k1", k1 );
-		Field< double >::set( enz, "k2", k2 );
 		Field< double >::set( enz, "k3", k3 );
+		Field< double >::set( enz, "k2", k2 );
+		Field< double >::set( enz, "k1", k1 );
 
 		string cplxName = tail + "_cplx";
 		string cplxPath = enzPath + "/" + cplxName;
