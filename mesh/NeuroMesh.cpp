@@ -626,42 +626,87 @@ unsigned int NeuroMesh::getNumDiffCompts() const
 	return nodeIndex_.size();
 }
 
-void NeuroMesh::buildSpineList( const map< Id, unsigned int >& comptMap )
+vector< Id > spineVec( const vector< Id >& head )
 {
 	const Cinfo* ccinfo = Cinfo::find( "Compartment" );
-	const Finfo* axialFinfo = ccinfo->findFinfo( "axialOut" );
-	const Finfo* raxialFinfo = ccinfo->findFinfo( "raxialOut" );
-	assert( shaft_.size() == head_.size() );
+	const Finfo* axialFinfo = ccinfo->findFinfo( "axialOut" ); // to pa
+	const Finfo* raxialFinfo = ccinfo->findFinfo( "raxialOut" ); // to kids
+	const Cinfo* scinfo = Cinfo::find( "SymCompartment" );
+	const Finfo* r1Finfo = scinfo->findFinfo( "raxialOut" ); // to kids
+	const Finfo* r2Finfo = scinfo->findFinfo( "raxial2Out" ); // to pa/sibs
 	map< Id, Id > spineMap;
-	for ( vector< Id >::iterator i = head_.begin(); i != head_.end(); ++i )
+	for ( vector< Id >::const_iterator i = head.begin(); i != head.end(); ++i )
 	{
 		vector< Id > ret;
-		if ( i->element()->getNeighbours( ret, axialFinfo ) ) {
-			spineMap[ *i ] = ret[0];
-		} else if ( i->element()->getNeighbours( ret, raxialFinfo ) ) {
-			spineMap[ *i ] = ret[0];
+		const Element* e = i->element();
+		if ( e->cinfo() == ccinfo ) {
+			if ( e->getNeighbours( ret, axialFinfo ) ) {
+				spineMap[ *i ] = ret[0];
+			} else if ( e->getNeighbours( ret, raxialFinfo ) ) {
+				spineMap[ *i ] = ret[0];
+			} else {
+				assert( 0 );
+			}
+		} else if ( e->cinfo() == scinfo ) {
+			if ( e->getNeighbours( ret, r2Finfo ) ) {
+				spineMap[ *i ] = ret[0];
+			} else if ( e->getNeighbours( ret, r1Finfo ) ) {
+				spineMap[ *i ] = ret[0];
+			} else {
+				assert( 0 );
+			}
 		} else {
 			assert( 0 );
 		}
 	}
 	vector< Id > temp;
-	for ( vector< Id >::iterator i = head_.begin(); i != head_.end(); ++i ){
+	for ( vector< Id >::const_iterator i = head.begin(); i != head.end(); ++i){
 		temp.push_back( spineMap[ *i ] );
 	}
-	shaft_ = temp;
-	parent_.resize( shaft_.size(), 0 );
-	for ( unsigned int i = 0; i < shaft_.size(); ++i ) {
-		Id pa;
-		Element* se = shaft_[i].element();
-		vector< Id > ret;
+	return temp;
+}
+
+Id getSpineParent( Id spine, Id head )
+{
+	const Cinfo* ccinfo = Cinfo::find( "Compartment" );
+	const Finfo* axialFinfo = ccinfo->findFinfo( "axialOut" ); // to pa
+	const Finfo* raxialFinfo = ccinfo->findFinfo( "raxialOut" ); // to kids
+	const Cinfo* scinfo = Cinfo::find( "SymCompartment" );
+	const Finfo* r1Finfo = scinfo->findFinfo( "raxialOut" ); // to kids
+	const Finfo* r2Finfo = scinfo->findFinfo( "raxial2Out" ); // to pa/sibs
+	Id pa;
+	Element* se = spine.element();
+	vector< Id > ret;
+	if ( se->cinfo() == ccinfo ) {
 		if ( se->getNeighbours( ret, axialFinfo ) ) {
-			if ( ret[0] != head_[i] ) {
+			if ( ret[0] != head ) {
 				pa = ret[0];
 			} else if ( se->getNeighbours( ret, raxialFinfo ) ) {
-				assert( ret[0] != head_[i] );
+				assert( ret[0] != head );
 				pa = ret[0];
 			} 
 		}
+	} else if ( se->cinfo() == scinfo ) {
+		if ( se->getNeighbours( ret, r2Finfo ) ) {
+			if ( ret[0] != head ) {
+				pa = ret[0];
+			} else if ( se->getNeighbours( ret, r1Finfo ) ) {
+				assert( ret[0] != head );
+				pa = ret[0];
+			} 
+		}
+	}
+
+	return pa;
+}
+
+void NeuroMesh::buildSpineList( const map< Id, unsigned int >& comptMap )
+{
+	assert( shaft_.size() == head_.size() );
+	shaft_ = spineVec( head_ );
+	parent_.resize( shaft_.size(), 0 );
+	for ( unsigned int i = 0; i < shaft_.size(); ++i ) {
+		Id pa = getSpineParent( shaft_[i], head_[i] );
 		assert( pa != Id() );
 		map< Id, unsigned int >::const_iterator q = comptMap.find( pa );
 		assert( q != comptMap.end() );
