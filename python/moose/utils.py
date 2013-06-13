@@ -371,13 +371,20 @@ def assignTicks(tickTargetMap):
 
     Parameters
     ----------
-    tickTargetMap: dict
-    Map from tick no. to target path. The path can be wildcard expression also.
+    tickTargetMap: 
+    Map from tick no. to target path and method. The path can be wildcard expression also.
     """
     if len(tickTargetMap) == 0:
         assignDefaultTicks()
     for tickNo, target in tickTargetMap.items():
+        if not isinstance(target, basestring):
+            if len(target) == 1:
+                _moose.useClock(tickNo, target[0], 'process')
+            elif len(target) == 2:
+                _moose.useClock(tickNo, target[0], target[1])
+        else:
             _moose.useClock(tickNo, target, 'process')
+
     # # This is a hack, we need saner way of scheduling
     # ticks = _moose.ematrix('/clock/tick')
     # valid = []
@@ -405,14 +412,14 @@ def setDefaultDt(elecdt=1e-5, chemdt=0.01, tabdt=1e-5, plotdt1=1.0, plotdt2=0.25
     plotdt2: dt for electrical simulations
 
     """
-    _moose.setClock(0, edt)
-    _moose.setClock(1, edt)
-    _moose.setClock(2, edt)
-    _moose.setClock(3, edt)
-    _moose.setClock(4, kdt)
-    _moose.setClock(5, kdt)
-    _moose.setClock(6, ldt)
-    _moose.setClock(7, edt)        
+    _moose.setClock(0, elecdt)
+    _moose.setClock(1, elecdt)
+    _moose.setClock(2, elecdt)
+    _moose.setClock(3, elecdt)
+    _moose.setClock(4, chemdt)
+    _moose.setClock(5, chemdt)
+    _moose.setClock(6, tabdt)
+    _moose.setClock(7, tabdt)        
     _moose.setClock(8, plotdt1) # kinetics sim
     _moose.setClock(9, plotdt2) # electrical sim
 
@@ -421,9 +428,10 @@ def assignDefaultTicks(modelRoot='/model', dataRoot='/data'):
     _moose.useClock(1, '%s/##[ISA=LeakyIaF]'  % (modelRoot), 'process')
     _moose.useClock(1, '%s/##[ISA=IntFire]'  % (modelRoot), 'process')
     _moose.useClock(1, '%s/##[ISA=Compartment]'  % (modelRoot), 'process')
+    _moose.useClock(1, '%s/##[ISA=PulseGen]'  % (modelRoot), 'process')
     _moose.useClock(2, '%s/##[ISA=ChanBase]'  % (modelRoot), 'process')
     _moose.useClock(2, '%s/##[ISA=MgBlock]'  % (modelRoot), 'process')
-    _moose.useClock(3, '%s/##[ISA=CaPool]'  % (modelRoot), 'process')
+    _moose.useClock(3, '%s/##[ISA=CaConc]'  % (modelRoot), 'process')
     _moose.useClock(7, '%s/##[ISA=DiffAmp]'  % (modelRoot), 'process')
     _moose.useClock(7, '%s/##[ISA=VClamp]' % (modelRoot), 'process')
     _moose.useClock(7, '%s/##[ISA=PIDController]' % (modelRoot), 'process')
