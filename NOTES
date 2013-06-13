@@ -22254,3 +22254,8 @@ StoichCore::updateRates. Various Nans and infs in there.
 
 Some additional documentation about behaviour of k1 in CplxEnzBase.
 
+==========================================================================
+13 June
+There is a failure of one of the Hsolve unit tests, oops.
+Tracked down, easily fixed.
+==========================================================================
