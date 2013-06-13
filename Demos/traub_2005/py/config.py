@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed May 23 11:31:40 2012 (+0530)
 # Version: 
-# Last-Updated: Fri May  3 11:45:36 2013 (+0530)
+# Last-Updated: Wed Jun 12 15:33:57 2013 (+0530)
 #           By: subha
-#     Update #: 100
+#     Update #: 128
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -113,11 +113,15 @@ import logging
 
 timestamp = datetime.now()
 mypid = os.getpid()
-data_dir = os.path.join('data', timestamp.strftime('%Y_%m_%d'))
-
+data_dir_prefix = 'data'
+if not os.access(data_dir_prefix, os.W_OK):
+    data_dir_prefix = '/tmp/traub2005_data'
+if not os.access(data_dir_prefix, os.F_OK):
+    os.mkdir(data_dir_prefix)
+data_dir = os.path.join(data_dir_prefix, timestamp.strftime('%Y_%m_%d'))
 if not os.access(data_dir, os.F_OK):
     os.mkdir(data_dir)
-
+print 'data_dir =', data_dir
 filename_suffix = '_%s_%d' % (timestamp.strftime('%Y%m%d_%H%M%S'), mypid)
 
 def handleError(self, record):
