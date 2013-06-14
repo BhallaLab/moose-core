@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Nov 13 15:58:31 2012 (+0530)
 # Version: 
-# Last-Updated: Wed Jun 12 11:46:39 2013 (+0530)
+# Last-Updated: Fri Jun 14 16:28:30 2013 (+0530)
 #           By: subha
-#     Update #: 2040
+#     Update #: 2106
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -54,6 +54,7 @@ from PyQt4.Qt import Qt
 import moose
 from moose import utils
 import mtree
+from mtoolbutton import MToolButton
 from msearch import SearchWidget
 from checkcombobox import CheckComboBox
 
@@ -150,11 +151,45 @@ class MooseEditorView(EditorBase):
         return self._centralWidget
 
 
+class MooseTreeEditor(mtree.MooseTreeWidget):
+    """Subclass of MooseTreeWidget to implement drag and drop events. It
+    creates an element under the drop location using the dropped mime
+    data as class name.
+
+    """
+    def __init__(self, *args):
+        mtree.MooseTreeWidget.__init__(self, *args)
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasFormat('text/plain'):
+            event.acceptProposedAction()
+
+    def dragMoveEvent(self, event):
+        if event.mimeData().hasFormat('text/plain'):
+            event.acceptProposedAction()
+
+    def dropEvent(self, event):
+        """Insert an element of the specified class in drop location"""
+        if not event.mimeData().hasFormat('text/plain'):
+            return
+        pos = event.pos()
+        item = self.itemAt(pos)
+        print item.mobj.path
+        try:
+            self.insertChildElement(item, str(event.mimeData().text()))
+            event.acceptProposedAction()
+        except NameError:
+            return            
+
+
 class DefaultEditorWidget(EditorWidgetBase):
     """Editor widget for default plugin. 
     
     Plugin-writers should code there own editor widgets derived from
     EditorWidgetBase.
+
+    It adds a toolbar for inserting moose objects into the element
+    tree. The toolbar contains MToolButtons for moose classes.
 
     Signals: editObject - emitted with currently selected element's
     path as argument. Should be connected to whatever slot is
@@ -170,11 +205,14 @@ class DefaultEditorWidget(EditorWidgetBase):
     def init(self):
         if hasattr(self, 'tree'):
             return
-        self.tree = mtree.MooseTreeWidget()
+        self.tree = MooseTreeEditor()
+        self.tree.setAcceptDrops(True)
         self.getTreeMenu()
         self._toolBars.append(QtGui.QToolBar('Insert'))
         for action in self.insertMenu.actions():
-            self._toolBars[-1].addAction(action)
+            button = MToolButton()
+            button.setDefaultAction(action)
+            self._toolBars[-1].addWidget(button)
         self.layout().addWidget(self.tree)        
 
     def getTreeMenu(self):
@@ -205,9 +243,6 @@ class DefaultEditorWidget(EditorWidgetBase):
         self.tree.elementInserted.connect(self.elementInsertedSlot)
         self.treeMenu.addAction(self.editAction)
         return self.treeMenu
-
-    # def getMenus(self):
-    #     return self._menus
 
     def updateModelView(self):
         current = self.tree.currentItem().mobj
