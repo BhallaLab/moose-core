@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue May 14 11:51:35 2013 (+0530)
 # Version: 
-# Last-Updated: Tue May 21 13:30:05 2013 (+0530)
+# Last-Updated: Fri Jun 14 16:13:08 2013 (+0530)
 #           By: subha
-#     Update #: 139
+#     Update #: 154
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -216,16 +216,21 @@ class MooseTreeWidget(QtGui.QTreeWidget):
         """Creates an instance of the class class_name and inserts it
         under currently selected element in the model tree."""
         # print 'Inserting element ...', class_name
-        class_name = str(class_name)
-        class_obj = eval('moose.' + class_name)
         current = self.currentItem()
-        new_item = MooseTreeItem(current)
-        parent = current.mobj
-        new_obj = class_obj(class_name, parent)
-        new_item.setObject(new_obj)
-        current.addChild(new_item)
-        self.odict[new_obj] = new_item
-        self.elementInserted.emit(new_obj)
+        self.insertChildElement(current, class_name)
+
+    def insertChildElement(self, item, class_name, name=''):
+        if len(name) == 0:
+            name = class_name
+        path = '%s/%s' % (item.mobj.path, name)
+        mclass = eval('moose.'+class_name)
+        obj = mclass(path)
+        newitem = MooseTreeItem(item)
+        newitem.setObject(obj)
+        item.addChild(newitem)
+        self.odict[obj] = newitem
+        self.elementInserted.emit(obj)
+        
 
     def setCurrentItem(self, item):
         """Overloaded version of QTreeWidget.setCurrentItem
