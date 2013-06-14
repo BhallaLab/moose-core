@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Tue Jun 11 11:45:20 2013 (+0530)
+// Last-Updated: Fri Jun 14 14:13:18 2013 (+0530)
 //           By: subha
-//     Update #: 10351
+//     Update #: 10352
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -5061,6 +5061,7 @@ static struct PyModuleDef MooseModuleDef = {
         PyModule_AddIntConstant(moose_module, "SINGLETHREADED", isSingleThreaded);
         PyModule_AddIntConstant(moose_module, "NUMCORES", numCores);
         PyModule_AddIntConstant(moose_module, "NUMNODES", numNodes);
+        PyModule_AddIntConstant(moose_module, "NUMPTHREADS", numProcessThreads);
         PyModule_AddIntConstant(moose_module, "MYNODE", myNode);
         PyModule_AddIntConstant(moose_module, "INFINITE", isInfinite);
         PyModule_AddStringConstant(moose_module, "__version__", SHELLPTR->doVersion().c_str());
