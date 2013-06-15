@@ -17,6 +17,7 @@ class GraphicalView(QtGui.QGraphicsView):
         self.border = 6
         self.setRenderHints(QtGui.QPainter.Antialiasing)
         self.layoutPt = layoutPt        
+        self.setAcceptDrops(True)
         # All the object which are stacked on the scene are listed
         self.stackOrder = self.sceneContainerPt.items(Qt.Qt.DescendingOrder)
         #From stackOrder selecting only compartment
@@ -159,3 +160,29 @@ class GraphicalView(QtGui.QGraphicsView):
     def wheelEvent(self,event):
         factor = 1.41 ** (event.delta() / 240.0)
         self.scale(factor, factor)
+        
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasFormat('text/plain'):
+            event.acceptProposedAction()
+
+    def dragMoveEvent(self, event):
+        if event.mimeData().hasFormat('text/plain'):
+            event.acceptProposedAction()
+
+    def dropEvent(self, event):
+        """Insert an element of the specified class in drop location"""
+        if not event.mimeData().hasFormat('text/plain'):
+            return
+        pos = event.pos()
+        item = self.itemAt(pos)
+        teststring = str(event.mimeData().text())
+        coordinates1 = self.mapToScene(event.pos())
+        if not self.sceneContainerPt.itemAt(self.mapToScene(event.pos())) == None:
+            print "^^^",self.sceneContainerPt.itemAt(self.mapToScene(event.pos())),self.sceneContainerPt.itemAt(self.mapToScene(event.pos())).mooseObj_.name
+            x = coordinates1.x()-20
+            y = coordinates1.y()-20
+            self.sceneContainerPt.addText(teststring).setPos(x,y)
+        else:
+            self.sceneContainerPt.addText(teststring).setPos(coordinates1)
+

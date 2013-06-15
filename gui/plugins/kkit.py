@@ -19,6 +19,7 @@ from kkitViewcontrol import *
 from kkitCalcArrow import *
 from kkitOrdinateUtil import *
 import posixpath
+from mtoolbutton import MToolButton
 
 class KkitPlugin(MoosePlugin):
     """Default plugin for MOOSE GUI"""
@@ -79,7 +80,10 @@ class KkitEditorView(MooseEditorView):
 
     def getOperationsWidget(self):
         return super(KkitEditorView, self).getOperationsPane()
-    
+
+    def getToolBars(self):
+        return self._toolBars
+
     def getCentralWidget(self):
         if self._centralWidget is None:
             #self._centralWidget = EditorWidgetBase()
@@ -91,22 +95,27 @@ class KkitEditorView(MooseEditorView):
 class  KineticsWidget(DefaultEditorWidget):
     def __init__(self, *args): 
 	DefaultEditorWidget.__init__(self, *args)
+        self.setAcceptDrops(True)
         self.border = 10        
         self.sceneContainer = QtGui.QGraphicsScene(self)
         self.sceneContainer.setSceneRect(self.sceneContainer.itemsBoundingRect())
         self.sceneContainer.setBackgroundBrush(QtGui.QColor(230,220,219,120))
-        
+
         self.insertMenu = QtGui.QMenu('&Insert')
         self._menus.append(self.insertMenu)
-
+        self._toolBars.append(QtGui.QToolBar('Insert'))
         self.insertMapper = QtCore.QSignalMapper(self)
+
         classlist = ['CubeMesh','CylMesh','Pool','FuncPool','SumFunc','Reac','Enz','MMenz','StimulusTable','Table']
         insertMapper, actions = self.getInsertActions(classlist)
+
         for action in actions:
             self.insertMenu.addAction(action)
-        self._toolBars.append(QtGui.QToolBar('Insert'))
         for action in self.insertMenu.actions():
-            self._toolBars[-1].addAction(action)
+            #self._toolBars[-1].addAction(action)
+            button = MToolButton()
+            button.setDefaultAction(action)
+            self._toolBars[-1].addWidget(button)
 
     def sizeHint(self):
         return QtCore.QSize(800,400)
