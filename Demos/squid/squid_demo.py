@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+ # -*- coding: utf-8 -*-
 # squidgui.py --- 
 # 
 # Filename: squidgui.py
@@ -7,9 +8,9 @@
 # Maintainer: 
 # Created: Mon Jul  9 18:23:55 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Sep 27 17:56:12 2012 (+0530)
+# Last-Updated: Tue Jun 18 15:46:37 2013 (+0530)
 #           By: subha
-#     Update #: 824
+#     Update #: 1018
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -65,6 +66,87 @@ import moose
 from squid import *
 from squid_setup import SquidSetup
 from electronics import ClampCircuit
+
+
+tooltip_Nernst = """<h3>Ionic equilibrium potential</h3>
+<p/>
+The equilibrium potential for ion C is given by Nernst equation:
+<p>
+E<sub>C</sub> = (RT/zF) * ln([C]<sub>out</sub> / [C]<sub>in</sub>)
+</p>
+where R is the ideal gas constant (8.3145 J/mol K),<br>
+      T is absolute temperature,<br>
+      z is the valence of the ion,<br>
+      F is Faraday's constant 96480 C/mol,<br>
+      [C]<sub>out</sub> is concentration of C outside the membrane,<br>
+      [C]<sub>in</sub> is concentration of C inside the membrane."""
+
+tooltip_Erest = """<h3>Resting membrane potential</h3>
+<p/>
+The resting membrane potential is determined by the ionic
+concentrations inside and outside the cell membrane and is given by
+the Goldman-Hodgkin-Katz equation:
+
+V = (RT/F) * ln((P<sub>K</sub>[K<sup>+</sup>]<sub>out</sub> + P<sub>Na</sub>[Na<sup>+</sup>]<sub>out</sub> + P<sub>Cl</sub>[Cl<sup>-</sup>]<sub>in</sub>) / (P<sub>K</sub>[K<sup>+</sup>]in + P<sub>Na</sub>[Na<sup>+</sup>]<sub>in</sub> + P<sub>Cl</sub>[Cl<sup>-</sup>]<sub>out</sub>))
+
+where P<sub>C</sub> is the permeability of the membrane to ion C.
+
+"""
+
+tooltip_NaChan = u"""<h3>Na+ channel conductance</h3>
+<p/>
+The Na<sup>+</sup> channel conductance in squid giant axon is given by:
+
+<p> G<sub>Na</sub> = Ḡ<sub>Na</sub> * m<sup>3</sup> * h </p>
+
+where Ḡ<sub>Na</sub> is the peak conductance of Na<sup>+</sup> channel, m is
+the fraction of activation gates open and h is the fraction of
+deactivation gates open. The transition from open to closed state has
+first order kinetics: <p> dm/dt = α<sub>m</sub> * ( 1 - m) -
+β<sub>m</sub> * m </p> and similarly for h.
+
+The steady state values are:
+<p>
+m<sub>∞</sub> = α<sub>m</sub>/(α<sub>m</sub> + β<sub>m</sub>)
+</p>
+and time constant for steady state is:
+<p>
+τ<sub>m</sub> = 1/ (α<sub>m</sub> + β<sub>m</sub>)
+
+</p>
+and similarly for h.
+"""
+tooltip_KChan = u"""<h3>K+ channel conductance</h3>
+<p/>The K+ channel conductance in squid giant axon is given by:
+
+<p> G<sub>K</sub> = Ḡ<sub>K</sub> * n<sup>4</sup></p>
+
+where Ḡ<sub>K</sub> is the peak conductance of K<sup>+</sup> channel,
+n is the fraction of activation gates open. The transition from open
+to closed state has first order kinetics: <p> dn/dt = α<sub>n</sub> *
+( 1 - n) - β<sub>n</sub> * n </p>.
+
+The steady state values are:
+<p>
+n<sub>∞</sub> = α<sub>n</sub>/(α<sub>n</sub> + β<sub>n</sub>)
+</p>
+and time constant for steady state is:
+<p>
+τ<sub>n</sub> = 1/ (α<sub>n</sub> + β<sub>n</sub>)
+
+</p>
+and similarly for h.
+"""
+
+tooltip_Im = """<h3>Membrane current</h3>
+<p/>
+The current through the membrane is given by:
+<p>
+I<sub>m</sub> = C<sub>m</sub> dV/dt + G<sub>K</sub>(V, t) * (V - E<sub>K</sub>) + G<sub>Na</sub> * (V - E<sub>Na</sub>) + G<sub>L</sub> * (V - E<sub>L</sub>)
+</p>
+where G<sub>L</sub> is the leak current and E<sub>L</sub> is the leak reversal potential.
+
+"""
 
 default_line_edit_size = QtCore.QSize(80, 25)
 def set_default_line_edit_size(widget):
@@ -228,24 +310,31 @@ class SquidGui(QtGui.QMainWindow):
         self._channelControlDock = QtGui.QDockWidget('Channels', self)
         self._channelCtrlBox = QtGui.QGroupBox(self)
         self._naConductanceToggle = QtGui.QCheckBox('Block Na+ channel', self._channelCtrlBox)
+        self._naConductanceToggle.setToolTip('<html>%s</html>' % (tooltip_NaChan))
         self._kConductanceToggle = QtGui.QCheckBox('Block K+ channel', self._channelCtrlBox)
+        self._kConductanceToggle.setToolTip('<html>%s</html>' % (tooltip_KChan))
         self._kOutLabel = QtGui.QLabel('[K+]out (mM)', self._channelCtrlBox)
         self._kOutEdit = QtGui.QLineEdit('%g' % (self.squid_setup.squid_axon.K_out), 
                                          self._channelCtrlBox)
+        self._kOutEdit.setToolTip('<html>%s</html>' % (tooltip_Nernst))
         set_default_line_edit_size(self._kOutEdit)
         self._naOutLabel = QtGui.QLabel('[Na+]out (mM)', self._channelCtrlBox)
         self._naOutEdit = QtGui.QLineEdit('%g' % (self.squid_setup.squid_axon.Na_out), 
                                          self._channelCtrlBox)
+        self._naOutEdit.setToolTip('<html>%s</html>' % (tooltip_Nernst))
         set_default_line_edit_size(self._naOutEdit)
         self._kInLabel = QtGui.QLabel('[K+]in (mM)', self._channelCtrlBox)
         self._kInEdit = QtGui.QLabel('%g' % (self.squid_setup.squid_axon.K_in), 
                                          self._channelCtrlBox)
+        self._kInEdit.setToolTip(tooltip_Nernst)
         self._naInLabel = QtGui.QLabel('[Na+]in (mM)', self._channelCtrlBox)
         self._naInEdit = QtGui.QLabel('%g' % (self.squid_setup.squid_axon.Na_in), 
                                          self._channelCtrlBox)
+        self._naInEdit.setToolTip('<html>%s</html>' % (tooltip_Nernst))
         self._temperatureLabel = QtGui.QLabel('Temperature (C)', self._channelCtrlBox)
         self._temperatureEdit = QtGui.QLineEdit('%g' % (self.defaults['temperature'] - CELSIUS_TO_KELVIN),
                                                 self._channelCtrlBox)
+        self._temperatureEdit.setToolTip('<html>%s</html>' % (tooltip_Nernst))
         set_default_line_edit_size(self._temperatureEdit)
         for child in self._channelCtrlBox.children():
             if isinstance(child, QtGui.QLineEdit):
@@ -609,9 +698,6 @@ class SquidGui(QtGui.QMainWindow):
         self.connect(self._dockAction, QtCore.SIGNAL('toggled(bool)'), self._toggleDocking)
         self._restoreDocksAction = QtGui.QAction('Show all', self)
         self.connect(self._restoreDocksAction, QtCore.SIGNAL('triggered()'), self._restoreDocks)
-        self._helpAction = QtGui.QAction('Help', self)
-        self._helpAction.setCheckable(True)        
-        self.connect(self._helpAction, QtCore.SIGNAL('toggled(bool)'), self._helpWindow.setVisible)
         self._quitAction = QtGui.QAction(self.tr('&Quit'), self)
         self._quitAction.setShortcut(self.tr('Ctrl+Q'))
         self.connect(self._quitAction, QtCore.SIGNAL('triggered()'), QtGui.qApp.closeAllWindows)
@@ -633,6 +719,7 @@ class SquidGui(QtGui.QMainWindow):
         self._plotToolBar.addAction(self._overlayAction)
         self._plotToolBar.addAction(self._showStatePlotAction)
         self._plotToolBar.addAction(self._helpAction)
+        self._plotToolBar.addAction(self._helpBiophysicsAction)
 
     def _showLegend(self, on):
         if on:
@@ -701,6 +788,22 @@ class SquidGui(QtGui.QMainWindow):
     def closeEvent(self, event):
         QtGui.qApp.closeAllWindows()
 
+    def _showBioPhysicsHelp(self):
+        print '11111'
+        self._createHelpMessage()
+        self._helpMessageText.setText('<html><p>%s</p><p>%s</p><p>%s</p><p>%s</p><p>%s</p></html>' % 
+                                      (tooltip_Nernst, 
+                                       tooltip_Erest,
+                                       tooltip_KChan,
+                                       tooltip_NaChan,
+                                       tooltip_Im))
+        self._helpWindow.setVisible(True)
+
+    def _showRunningHelp(self):
+        self._createHelpMessage()
+        self._helpMessageText.setSource(QtCore.QUrl(self._helpBaseURL))
+        self._helpWindow.setVisible(True)
+
     def _createHelpMessage(self):
         if hasattr(self, '_helpWindow'):
             return
@@ -724,8 +827,8 @@ class SquidGui(QtGui.QMainWindow):
         # Setting the close event so that the ``Help`` button is
         # unchecked when the help window is closed
         self._helpWindow.closeEvent = lambda event: self._helpAction.setChecked(False)
-        self._helpTOCAction = QtGui.QAction('Table of Contents', self)
-        self.connect(self._helpTOCAction, QtCore.SIGNAL('triggered()'), self._jumpToHelpTOC)        
+        self._helpTOCAction = QtGui.QAction('Help running demo', self)
+        self.connect(self._helpTOCAction, QtCore.SIGNAL('triggered()'), self._jumpToHelpTOC)                
         # This panel is for putting two buttons using horizontal
         # layout
         panel = QtGui.QFrame()
@@ -733,9 +836,16 @@ class SquidGui(QtGui.QMainWindow):
         layout.addWidget(panel)
         layout = QtGui.QHBoxLayout()
         panel.setLayout(layout)
+        self._helpAction = QtGui.QAction('Help running', self)
+        self.connect(self._helpAction, QtCore.SIGNAL('triggered()'), self._showRunningHelp)
+        self._helpBiophysicsAction = QtGui.QAction('Help biophysics', self)
+        self.connect(self._helpBiophysicsAction, QtCore.SIGNAL('triggered()'), self._showBioPhysicsHelp)
         self._helpTOCButton = QtGui.QToolButton()
         self._helpTOCButton.setDefaultAction(self._helpTOCAction)
+        self._helpBiophysicsButton = QtGui.QToolButton()
+        self._helpBiophysicsButton.setDefaultAction(self._helpBiophysicsAction)
         layout.addWidget(self._helpTOCButton)
+        layout.addWidget(self._helpBiophysicsButton)
         self._closeHelpButton = QtGui.QToolButton()
         self._closeHelpButton.setDefaultAction(self._closeHelpAction)
         layout.addWidget(self._closeHelpButton)
