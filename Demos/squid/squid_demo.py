@@ -8,9 +8,9 @@
 # Maintainer: 
 # Created: Mon Jul  9 18:23:55 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Jun 18 15:46:37 2013 (+0530)
+# Last-Updated: Tue Jun 18 17:55:49 2013 (+0530)
 #           By: subha
-#     Update #: 1018
+#     Update #: 1037
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -86,9 +86,11 @@ tooltip_Erest = """<h3>Resting membrane potential</h3>
 The resting membrane potential is determined by the ionic
 concentrations inside and outside the cell membrane and is given by
 the Goldman-Hodgkin-Katz equation:
+<p>
 
 V = (RT/F) * ln((P<sub>K</sub>[K<sup>+</sup>]<sub>out</sub> + P<sub>Na</sub>[Na<sup>+</sup>]<sub>out</sub> + P<sub>Cl</sub>[Cl<sup>-</sup>]<sub>in</sub>) / (P<sub>K</sub>[K<sup>+</sup>]in + P<sub>Na</sub>[Na<sup>+</sup>]<sub>in</sub> + P<sub>Cl</sub>[Cl<sup>-</sup>]<sub>out</sub>))
 
+</p>
 where P<sub>C</sub> is the permeability of the membrane to ion C.
 
 """
@@ -99,28 +101,34 @@ The Na<sup>+</sup> channel conductance in squid giant axon is given by:
 
 <p> G<sub>Na</sub> = Ḡ<sub>Na</sub> * m<sup>3</sup> * h </p>
 
+and the current through this channel is:
+<p>
+I<sub>Na</sub> = G<sub>Na</sub> * (V - E<sub>Na</sub>) = Ḡ<sub>Na</sub> * m<sup>3</sup> * h * (V - E<sub>Na</sub>)
+</p>
+
 where Ḡ<sub>Na</sub> is the peak conductance of Na<sup>+</sup> channel, m is
 the fraction of activation gates open and h is the fraction of
 deactivation gates open. The transition from open to closed state has
-first order kinetics: <p> dm/dt = α<sub>m</sub> * ( 1 - m) -
-β<sub>m</sub> * m </p> and similarly for h.
+first order kinetics: 
+<p> dm/dt = α<sub>m</sub> * ( 1 - m) - β<sub>m</sub> * m </p> 
+and similarly for h.
 
 The steady state values are:
-<p>
-m<sub>∞</sub> = α<sub>m</sub>/(α<sub>m</sub> + β<sub>m</sub>)
-</p>
+<p> m<sub>∞</sub> = α<sub>m</sub>/(α<sub>m</sub> + β<sub>m</sub>) </p>
 and time constant for steady state is:
-<p>
-τ<sub>m</sub> = 1/ (α<sub>m</sub> + β<sub>m</sub>)
-
-</p>
+<p>τ<sub>m</sub> = 1/ (α<sub>m</sub> + β<sub>m</sub>) </p>
 and similarly for h.
 """
+
 tooltip_KChan = u"""<h3>K+ channel conductance</h3>
 <p/>The K+ channel conductance in squid giant axon is given by:
 
 <p> G<sub>K</sub> = Ḡ<sub>K</sub> * n<sup>4</sup></p>
 
+and the current through this channel is:
+<p>
+I<sub>K</sub> = G<sub>K</sub> * (V - E<sub>K</sub>) = Ḡ<sub>K</sub> * n<sup>4</sup> * (V - E<sub>K</sub>) 
+</p>
 where Ḡ<sub>K</sub> is the peak conductance of K<sup>+</sup> channel,
 n is the fraction of activation gates open. The transition from open
 to closed state has first order kinetics: <p> dn/dt = α<sub>n</sub> *
@@ -142,7 +150,9 @@ tooltip_Im = """<h3>Membrane current</h3>
 <p/>
 The current through the membrane is given by:
 <p>
-I<sub>m</sub> = C<sub>m</sub> dV/dt + G<sub>K</sub>(V, t) * (V - E<sub>K</sub>) + G<sub>Na</sub> * (V - E<sub>Na</sub>) + G<sub>L</sub> * (V - E<sub>L</sub>)
+I<sub>m</sub> = C<sub>m</sub> dV/dt + I<sub>K</sub> + I<sub>Na</sub> + I<sub>L</sub>
+</p><p>
+ = C<sub>m</sub> dV/dt + G<sub>K</sub>(V, t) * (V - E<sub>K</sub>) + G<sub>Na</sub> * (V - E<sub>Na</sub>) + G<sub>L</sub> * (V - E<sub>L</sub>)
 </p>
 where G<sub>L</sub> is the leak current and E<sub>L</sub> is the leak reversal potential.
 
@@ -316,11 +326,13 @@ class SquidGui(QtGui.QMainWindow):
         self._kOutLabel = QtGui.QLabel('[K+]out (mM)', self._channelCtrlBox)
         self._kOutEdit = QtGui.QLineEdit('%g' % (self.squid_setup.squid_axon.K_out), 
                                          self._channelCtrlBox)
+        self._kOutLabel.setToolTip('<html>%s</html>' % (tooltip_Nernst))
         self._kOutEdit.setToolTip('<html>%s</html>' % (tooltip_Nernst))
         set_default_line_edit_size(self._kOutEdit)
         self._naOutLabel = QtGui.QLabel('[Na+]out (mM)', self._channelCtrlBox)
         self._naOutEdit = QtGui.QLineEdit('%g' % (self.squid_setup.squid_axon.Na_out), 
                                          self._channelCtrlBox)
+        self._naOutLabel.setToolTip('<html>%s</html>' % (tooltip_Nernst))
         self._naOutEdit.setToolTip('<html>%s</html>' % (tooltip_Nernst))
         set_default_line_edit_size(self._naOutEdit)
         self._kInLabel = QtGui.QLabel('[K+]in (mM)', self._channelCtrlBox)
