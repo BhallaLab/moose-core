@@ -325,6 +325,18 @@ def createChemModel( neuroCompt, spineCompt, psdCompt ):
     dendPhosphatase.Kb = 0.0
 
 
+# Just for printf debugging
+def printMolVecs( title ):
+    nCa = moose.ematrix( '/model/chem/neuroMesh/Ca' )
+    sCa = moose.ematrix( '/model/chem/spineMesh/Ca' )
+    sR = moose.ematrix( '/model/chem/spineMesh/headGluR' )
+    pR = moose.ematrix( '/model/chem/psdMesh/psdGluR' )
+    print title
+    print 'sizes: nCa, sCa, sR, pR = ', len(nCa), len(sCa), len(sR), len(pR) 
+    #print 'nCa=', nCa.conc, ', sCa=', sCa.conc, ', sR=', sR.n, ', pR=', pR.n
+    print 'nCaConcInit=', nCa.concInit, ', sCa=', sCa.concInit, ', sR=', sR.nInit, ', pR=', pR.nInit
+    #print 'nCaSize=', nCa.size, ', sCa=', sCa.size, ', sR=', sR.n, ', pR=', pR.n
+
 def makeChemInCubeMesh():
     dendSide = 10.8e-6
     spineSide = 6.8e-6
@@ -430,6 +442,7 @@ def makeNeuroMeshModel():
     moose.connect( neuroCompt, 'psdListOut', psdCompt, 'psdList', 'OneToOne' )
 
     createChemModel( neuroCompt, spineCompt, psdCompt )
+    printMolVecs( 'before model setup ' )
     # Now to set up the model.
     neuroCompt.cell = elec
     ns = neuroCompt.numSegments
@@ -443,15 +456,18 @@ def makeNeuroMeshModel():
     pdc = psdCompt.mesh.num
     assert( pdc == 5 )
 
-	# oddly, numLocalFields does not work.
+    # oddly, numLocalFields does not work.
     ca = moose.element( '/model/chem/neuroMesh/Ca' )
     assert( ca.lastDimension == ndc )
+
+    printMolVecs( 'after setup, before addJunction' )
 
     #print ca
     #print "ns=", ns, ", ndc = ", ndc, ", sdc = ", sdc, ", pdc = ", pdc
     #print "nca=", ca.localNumField, ",lastDim = ", ca.lastDimension
 
     # set up adaptors
+    """
     adaptCa = moose.Adaptor( '/model/chem/neuroMesh/adaptCa' )
     chemCa = moose.element( '/model/chem/neuroMesh/Ca' )
     elecCa = moose.element( '/model/elec/head2/ca' )
@@ -474,6 +490,7 @@ def makeNeuroMeshModel():
     moose.connect( adaptGluR, 'outputSrc', elec3R, 'set_Gbar', 'OneToAll' )
     moose.connect( adaptGluR, 'outputSrc', elec4R, 'set_Gbar', 'OneToAll' )
     adaptGluR.scale = 1e-6 / 100     # from n to pS
+    """
 
     """
     adaptK = moose.Adaptor( '/n/adaptK' )
@@ -638,6 +655,7 @@ def testNeuroMeshMultiscale():
     nmksolve.method = 'rk5'
     nm = moose.element( '/model/chem/neuroMesh/mesh' )
     moose.connect( nm, 'remesh', nmksolve, 'remesh' )
+    print "neuron: nv=", nmksolve.numLocalVoxels, ", nav=", nmksolve.numAllVoxels, nmksolve.numVarPools, nmksolve.numAllPools
     #
     smksolve = moose.GslStoich( '/model/chem/spineMesh/ksolve' )
     smksolve.path = '/model/chem/spineMesh/##'
@@ -645,6 +663,7 @@ def testNeuroMeshMultiscale():
     smksolve.method = 'rk5'
     sm = moose.element( '/model/chem/spineMesh/mesh' )
     moose.connect( sm, 'remesh', smksolve, 'remesh' )
+    print "spine: nv=", smksolve.numLocalVoxels, ", nav=", smksolve.numAllVoxels, smksolve.numVarPools, smksolve.numAllPools
     #
     pmksolve = moose.GslStoich( '/model/chem/psdMesh/ksolve' )
     pmksolve.path = '/model/chem/psdMesh/##'
@@ -653,24 +672,24 @@ def testNeuroMeshMultiscale():
     pm = moose.element( '/model/chem/psdMesh/mesh' )
     moose.connect( pm, 'remesh', pmksolve, 'remesh' )
     #
-    print 'foo', smksolve, smksolve.id_
-    smksolve.addJunction( nmksolve.id_ )
-    #nmksolve.addJunction( smksolve[0] )
-    #nmksolve.addJunction( '/model/chem/neuroMesh/ksolve' )
-    print 'bar'
-    pmksolve.addJunction( smksolve.id_ )
-    print 'zod'
+    #
+    smksolve.addJunction( nmksolve )
+    printMolVecs( 'after addJunction neuron-spine' )
+    print "spine: nv=", smksolve.numLocalVoxels, ", nav=", smksolve.numAllVoxels, smksolve.numVarPools, smksolve.numAllPools
+    pmksolve.addJunction( smksolve )
+    printMolVecs( 'after addJunction spine-psd' )
+    print "psd: nv=", pmksolve.numLocalVoxels, ", nav=", pmksolve.numAllVoxels, pmksolve.numVarPools, pmksolve.numAllPools
     # Have to pass a message between the various solvers.
-    moose.useClock( 5, '/model/chem/#Mesh/ksolve', 'process' )
+    moose.useClock( 5, '/model/chem/#Mesh/ksolve', 'init' )
+    moose.useClock( 6, '/model/chem/#Mesh/ksolve', 'process' )
     hsolve = moose.HSolve( '/model/elec/hsolve' )
     moose.useClock( 1, '/model/elec/hsolve', 'process' )
     hsolve.dt = elecDt
-    print 'abc'
     hsolve.target = '/model/elec/compt'
-    print 'xyz'
     moose.reinit()
-    print 'reinited'
-    moose.start( 1 )
+    printMolVecs( 'after reinit' )
+
+    moose.start( 0.005 )
     dumpPlots( plotName )
 
 

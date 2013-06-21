@@ -499,9 +499,10 @@ bool NeuroMesh::filterSpines( Id compt )
 // I assume 'cell' is the parent of the compartment tree.
 void NeuroMesh::setCell( const Eref& e, const Qinfo* q, Id cell )
 {
+	double oldVol = getMeshEntrySize( 0 );
 	vector< Id > compts = Field< vector< Id > >::get( cell, "children");
 	setCellPortion( cell, compts );
-	transmitChange( e, q );
+	transmitChange( e, q, oldVol );
 	if ( separateSpines_ ) {
 		// unsigned int thread = q->threadNum();
 		// Hack to send data directly, bypassing queueueue
@@ -951,7 +952,7 @@ void NeuroMesh::innerBuildDefaultMesh( const Eref& e, const Qinfo* q,
 // Utility function to transmit any changes to target nodes.
 //////////////////////////////////////////////////////////////////
 
-void NeuroMesh::transmitChange( const Eref& e, const Qinfo* q )
+void NeuroMesh::transmitChange( const Eref& e, const Qinfo* q, double oldVol )
 {
 	Id meshEntry( e.id().value() + 1 );
 	assert( 
@@ -966,7 +967,6 @@ void NeuroMesh::transmitChange( const Eref& e, const Qinfo* q )
 	vector< double > vols( localNumEntries, 0.0 );
 	vector< vector< unsigned int > > outgoingEntries; // [node#][Entry#]
 	vector< vector< unsigned int > > incomingEntries; // [node#][Entry#]
-	double oldVol = getMeshEntrySize( 0 );
 
 	// This function updates the size of the FieldDataHandler for the 
 	// MeshEntries.
@@ -975,6 +975,10 @@ void NeuroMesh::transmitChange( const Eref& e, const Qinfo* q )
 	assert( fdh );
 	if ( totalNumEntries > fdh->getMaxFieldEntries() ) {
 		fdh->setMaxFieldEntries( localNumEntries );
+	}
+	assert( vols.size() == nodeIndex_.size() );
+	for ( unsigned int i = 0; i < vols.size(); ++i ) {
+		vols[i] = getMeshEntrySize( i );
 	}
 
 	// This message tells the Stoich about the new mesh, and also about
