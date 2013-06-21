@@ -28,13 +28,14 @@ class SymCompartment: public moose::Compartment
 			~SymCompartment() {;}
 
 			// Dest function definitions.
-			void raxialSym(double Ra, double Vm);
+                        void raxialSphere( double Ra, double Vm );
+			void raxialSym( double Ra, double Vm );
 			void sumRaxial( double Ra );
-			void handleSumRaxialRequest( const Eref& e, const Qinfo* q );
+			/* void handleSumRaxialRequest( const Eref& e, const Qinfo* q ); */
 
 			void raxial2Sym(double Ra, double Vm);
 			void sumRaxial2( double Ra );
-			void handleSumRaxial2Request( const Eref& e, const Qinfo* q );
+			/* void handleSumRaxial2Request( const Eref& e, const Qinfo* q ); */
 
 			static const Cinfo* initCinfo();
 
@@ -43,6 +44,7 @@ class SymCompartment: public moose::Compartment
 			void innerReinit( const Eref& e, ProcPtr p );
 			void innerInitProc( const Eref& e, ProcPtr p );
 			void innerInitReinit( const Eref& e, ProcPtr p );
+                        /* void process( const Eref& e, ProcPtr p ); */
 	private:
 
 			double coeff_;
