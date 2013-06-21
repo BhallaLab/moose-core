@@ -1,5 +1,4 @@
-"""
-MOOSE = Multiscale Object Oriented Simulation Environment.
+"""MOOSE = Multiscale Object Oriented Simulation Environment.
 =========================================================
 
 How to use the documentation
@@ -115,11 +114,47 @@ above is used and all the fields are returned.
 connect(srcField, destObj, destField, msgType) -- connect srcField of
 this element to destField of destObj.
 
-element is something like an abstract base class in C++. The concrete
+melement is something like an abstract base class in C++. The concrete
 base class is Neutral. However you do not need to cast objects down to
 access their fields. The PyMOOSE interface will automatically do the
 check for you and raise an exception if the specified field does not
 exist for the current element.
+
+Creating melements
+------------------
+
+To create the objects of concrete subclasses of melement, the class
+can be called as follows:
+
+melement(path, dims, dtype, parent)
+
+path: This is like unix filesystem path and is the concatenation of
+name of the element to be created and that of all its ancestors
+spearated by `/`. For example, path=`/a/b` will create the element
+named `b` under element `a`. Note that if `a` does not exist, this
+will raise an error. However, if `parent` is specified, `path` should
+contain only the name of the element.
+
+dims: (optional) tuple specifying the dimension of the containing melement to be
+created. It is (1,) by default.
+
+dtype: string specifying the class name of the element to be created.
+
+parent: (optional) string specifying the path of the parent element or
+the Id or the ObjId of the parent element or a reference to the parent
+element. If this is specified, the first argument `path` is treated as
+the name of the element to be created.
+
+All arguments can be passed as keyword arguments.
+
+For concrete subclasses of melement, you do not need to pass the class
+argument because the class name is passed automatically to `melement`
+__init__ method.
+
+a = Neutral('alpha') # Creates element named `alpha` under current working element
+b = Neutral('alpha/beta') # Creates the element named `beta` under `alpha`
+c = Cell('charlie', parent=a) # creates element `charlie` under `alpha`
+d = DiffAmp('delta', parent='alpha/beta') # creates element `delta` under `beta`
 
 
 module functions
