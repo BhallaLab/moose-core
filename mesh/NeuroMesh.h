@@ -136,7 +136,7 @@ class NeuroMesh: public MeshCompt
 			const Eref& e, const Qinfo* q, 
 			unsigned int numNodes, unsigned int numThreads );
 
-		void transmitChange( const Eref& e, const Qinfo* q );
+		void transmitChange( const Eref& e, const Qinfo* q, double oldVol );
 
 		void buildStencil();
 

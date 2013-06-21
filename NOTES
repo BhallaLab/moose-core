@@ -22257,5 +22257,62 @@ Some additional documentation about behaviour of k1 in CplxEnzBase.
 ==========================================================================
 13 June
 There is a failure of one of the Hsolve unit tests, oops.
-Tracked down, easily fixed.
+Tracked down, easily fixed. Checkin 4615.
 ==========================================================================
+14 June
+back to testSigNeur:
+doing printf debugging in python to find the problem with the sim.
+All the reset etc goes fine.
+Perhaps run it very briefly and see if we can catch things going
+wrong.
+==========================================================================
+20 June.
+1. Do one more comparison of model with the one in testMesh.cpp.
+2. Examine model setup
+	Here there is a breakthrough. The initial conditions are fried.
+3. Do runtime checks.
+
+
+==========================================================================
+21 June.
+Tracking down progress of the funny initial conditions.
+
+Before we do addJunction, everything is in a single compartment and the 
+concs are all fine.
+	Size: all 1.
+	neuroMesh Ca concInit: 0.0001
+	spineMesh Ca concInit: 0.0001
+	Spine GluR nInit:	100
+	Psd GluR nInit:		0
+	
+Following mesh setup: compartments created
+	Size: 10, 5, 5, 5
+	neuroMesh Ca concInit: all zero
+	spineMesh Ca concInit: all 1.59e12
+	Spine GluR nInit:	all 100
+	Psd GluR nInit:		all 0
+
+Following addJunction (both sets) and also reinit: 
+	Size: 10, 5, 5, 5
+	neuroMesh Ca concInit: all zero
+	spineMesh Ca concInit: only first is 1.59e12
+	Spine GluR nInit:	only first is 100
+	Psd GluR nInit:		all 0
+
+So we have two bad things happening.
+- Ca concInit goes bizarre during mesh setup
+	This is because the oldVol is obtained from the old mesh volume,
+	but for some reason the pool has been created assuming a different
+	volume of 1.
+	OK, tracked down further. There is a bug in how NeuroMesh does 
+	rescaling. Its orignal vol is the default vol of CylBase, which
+	isn't 1, but a cylinder of size 1 so close. But the update function
+	is called after changes have alredy been applied to the NeuroMesh
+	geometry. So this original volume isn't properly accounted for.
+- These funny values lose all but their first entry following addJunction.
+
+
+Many bugs coming out.
+- Fixed nasty bugs with NeuroMesh, the vols sent to the pools for resizing
+were all wrong. So was the oldvol. This fixes the neuroMeshConcInits 
+	following mesh setup, but not later.
