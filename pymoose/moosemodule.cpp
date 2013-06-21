@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Fri Jun 14 14:13:18 2013 (+0530)
+// Last-Updated: Fri Jun 21 20:19:47 2013 (+0530)
 //           By: subha
-//     Update #: 10352
+//     Update #: 10453
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -1237,43 +1237,76 @@ static struct module_state _state;
         char _path[] = "path";
         char _dtype[] = "dtype";
         char _dims[] = "dims";
-        static char * kwlist[] = {_path, _dims, _dtype, NULL};
+        char _parent[] = "parent";
+        static char * kwlist[] = {_path, _dims, _dtype, _parent, NULL};
         char * path = NULL;
         char _default_type[] = "Neutral";
         char *type = _default_type;
         PyObject * dims = NULL;
+        PyObject * parent = NULL;
         bool parse_success = false;
         if (kwargs == NULL){
             if(PyArg_ParseTuple(args,
                                 "s|Os:moose_Id_init",
                                 &path,
                                 &dims,
-                                &type)){
+                                &type) ||
+               PyArg_ParseTuple(args,
+                               "s|OsO:moose_Id_init",
+                               &path,
+                               &dims,
+                               &type,
+                               &parent)){
                 parse_success = true;
             }
         } else if (PyArg_ParseTupleAndKeywords(args,
                                                kwargs,
-                                               "s|Os:moose_Id_init",
+                                               "s|OsO:moose_Id_init",
                                                kwlist,
                                                &path,
                                                &dims,
-                                               &type)){
+                                               &type,
+                                               &parent)){
             parse_success = true;
         }
         // Parsing args successful, if any error happens now,
         // different argument processing will not help. Return error
+        string parent_path = "";
         if (parse_success){
-            string trimmed_path(path);
-            trimmed_path = trim(trimmed_path);
-            size_t length = trimmed_path.length();
-            if (length <= 0){
-                PyErr_SetString(PyExc_ValueError,
-                                "path must be non-empty string.");
+            PyErr_Clear();
+            if (parent != NULL) {
+                if (Id_SubtypeCheck(parent)){
+                    parent_path = ((_Id*)(parent))->id_.path();
+                } else if (PyString_Check(parent)){
+                    char * pp = PyString_AsString(parent);
+                    if (pp == NULL){
+                        PyErr_SetString(PyExc_ValueError, "Invalid parent path");
+                        Py_XDECREF(self);
+                        return -1;
+                    }
+                    parent_path = string(pp);
+                }
+            }
+            parent_path = trim(parent_path);
+            if (parent_path.length() > 0 && string(path).find('/') != string::npos){
+                PyErr_SetString(PyExc_ValueError, "if parent is specified, first argument must be object name, not a path.");
                 Py_XDECREF(self);
                 return -1;
             }
+            if (parent_path.length() > 0 && parent_path[parent_path.length()-1] != '/'){
+                parent_path += "/";
+            }
+            string trimmed_path(path);
+            trimmed_path = trim(trimmed_path);
+            if (trimmed_path.length() == 0){
+                PyErr_SetString(PyExc_ValueError,
+                                "name/path must be non-empty string.");
+                Py_XDECREF(self);
+                return -1;
+            }
+            trimmed_path = parent_path + trimmed_path;
             self->id_ = Id(trimmed_path);
-            // Return already existing object
+            // Return if path refers to already existing object
             if (self->id_ != Id() ||
                 trimmed_path == "/" ||
                 trimmed_path == "/root"){
@@ -1284,14 +1317,14 @@ static struct module_state _state;
                 Py_XDECREF(self);
                 return -1;
             }
-            self->id_ = create_Id_from_path(path, vec_dims, type);
+            self->id_ = create_Id_from_path(trimmed_path, vec_dims, type);
             if (self->id_ == Id() && PyErr_Occurred()){
                 Py_XDECREF(self);
                 return -1;
             }
             return 0;
         }
-        // The arguments could not be parsed as (path, dims, class),
+        // The arguments could not be parsed as (path, [dims, [class, [parent]]]),
         // try to parse it as an existing Id
         PyErr_Clear();        
         if (PyArg_ParseTuple(args, "O:moose_Id_init", &src) && Id_Check(src)){
@@ -1976,12 +2009,14 @@ static struct module_state _state;
                                           PyObject * kwargs)
     {
         PyObject * dims = NULL;
+        PyObject * parent = NULL;
         char * path = NULL;
         char * type = NULL;
         char _path[] = "path";
         char _dtype[] = "dtype";
         char _dims[] = "dims";
-        static char * kwlist [] = {_path, _dims, _dtype, NULL};
+        char _parent[] = "parent";
+        static char * kwlist [] = {_path, _dims, _dtype, _parent, NULL};
         _ObjId * instance = (_ObjId*)self;
         instance->oid_ = ObjId::bad();
 
@@ -1989,27 +2024,68 @@ static struct module_state _state;
         bool parse_success = false;
         if (kwargs == NULL){
             if (PyArg_ParseTuple(args,
-                                  "s|Os:moose_ObjId_init_from_path",
-                                  &path,
-                                  &dims,
-                                  &type)){
+                                 "s|OsO:moose_ObjId_init_from_path",
+                                 &path,
+                                 &dims,
+                                 &type,
+                                 &parent)){
                 parse_success = true;
             }
         } else if (PyArg_ParseTupleAndKeywords(args,
-                                                kwargs,
-                                                "s|Os:moose_ObjId_init_from_path",
-                                                kwlist,
-                                                &path,
-                                                &dims,
-                                                &type)){\
+                                               kwargs,
+                                               "s|OsO:moose_ObjId_init_from_path",
+                                               kwlist,
+                                               &path,
+                                               &dims,
+                                               &type,
+                                               &parent)){
             parse_success = true;
         }
         PyErr_Clear();
         if (!parse_success){
             return -2;
-        }    
+        }
+        string parent_path = "";
+        if (parent != NULL){
+            if (ObjId_SubtypeCheck(parent)){
+                parent_path = ((_ObjId*)parent)->oid_.path();
+            } else if (Id_SubtypeCheck(parent)){
+                parent_path = ((_Id*)parent)->id_.path();
+            } else if (PyString_Check(parent)){
+                char * pp = PyString_AsString(parent);
+                if (pp == NULL){
+                    PyErr_SetString(PyExc_ValueError, "Invalid parent path");
+                    // Py_XDECREF(self);
+                    return -1;
+                }
+                parent_path = string(pp);
+            } else {
+                PyErr_SetString(PyExc_TypeError, "parent must be a path string or an Id or an ObjId.");
+                // Py_XDECREF(self);
+                return -1;
+            }
+        }
+        parent_path = trim(parent_path);
+        if (parent_path.length() > 0){
+            ObjId parent_oid(parent_path);
+            if (ObjId::bad() == parent_oid){
+                PyErr_SetString(PyExc_ValueError, "parent does not exist");
+                return -1;
+            }
+            if (parent_path[parent_path.length()-1] != '/'){
+                parent_path += "/";
+            }
+        }
+        string trimmed_path(path);
+        trimmed_path = trim(trimmed_path);
+        // if (parent_path.length() > 0 && trimmed_path.find('/') != string::npos){
+        //     PyErr_SetString(PyExc_ValueError, "name must not contain '/'");
+        //     // Py_XDECREF(self);
+        //     return -1;
+        // }
+        trimmed_path = parent_path + trimmed_path;
         // First see if there is an existing object with at path
-        instance->oid_ = ObjId(path);
+        instance->oid_ = ObjId(trimmed_path);
         if (!(ObjId::bad() == instance->oid_)){
             return 0;
         }
@@ -2025,7 +2101,7 @@ static struct module_state _state;
             return -1;
         }
         
-        Id new_id = create_Id_from_path(path, pysequence_to_dimvec(dims), basetype_str);
+        Id new_id = create_Id_from_path(trimmed_path, pysequence_to_dimvec(dims), basetype_str);
         if (new_id == Id() && PyErr_Occurred()){
           // Py_XDECREF(self);
             return -1;
@@ -2054,13 +2130,15 @@ static struct module_state _state;
     static int moose_ObjId_init(PyObject * self, PyObject * args,
                                 PyObject * kwargs)
     {
-        if (self && !PyObject_IsInstance(self, (PyObject*)Py_TYPE(self))){
-            ostringstream error;
-            error << "Expected an melement or subclass. Found "
-                  << Py_TYPE(self)->tp_name;
-            PyErr_SetString(PyExc_TypeError, error.str().c_str());
-            return -1;
-        }
+        //Fri Jun 21 17:11:28 IST 2013 - the following seems redundant: Subha
+
+        // if (self && !PyObject_IsInstance(self, (PyObject*)Py_TYPE(self))){
+        //     ostringstream error;
+        //     error << "Expected an melement or subclass. Found "
+        //           << Py_TYPE(self)->tp_name;
+        //     PyErr_SetString(PyExc_TypeError, error.str().c_str());
+        //     return -1;
+        // }
         int ret = moose_ObjId_init_from_path(self, args, kwargs);
         if (ret >= -1){
             return ret;
@@ -4829,7 +4907,7 @@ static struct module_state _state;
     Py_ssize_t moose_ElementField_getLen(_Field * self, void * closure)
     {
         if (!Id::isValid(self->owner.id)){
-            RAISE_INVALID_ID(NULL, "moose_ElementField_getLen");
+            RAISE_INVALID_ID(0, "moose_ElementField_getLen");
         }
         unsigned int num = Field<unsigned int>::get(self->owner, "num_" + string(self->name));
         return Py_ssize_t(num);
