@@ -24,11 +24,11 @@ static SrcFinfo1< double > *sumRaxialOut() {
 	return &sumRaxialOut;
 }
 
-static SrcFinfo0 *requestSumAxial() {
-	static SrcFinfo0 requestSumAxial( "requestSumAxial",
-			"Sends out request for Ra." );
-	return &requestSumAxial;
-}
+// static SrcFinfo0 *requestSumAxial() {
+// 	static SrcFinfo0 requestSumAxial( "requestSumAxial",
+// 			"Sends out request for Ra." );
+// 	return &requestSumAxial;
+// }
 
 static SrcFinfo2< double, double > *raxial2Out() {
 	static SrcFinfo2< double, double > raxial2Out( "raxial2Out", 
@@ -42,15 +42,45 @@ static SrcFinfo1< double > *sumRaxial2Out() {
 	return &sumRaxial2Out;
 }
 
-static SrcFinfo0 *requestSumAxial2() {
-	static SrcFinfo0 requestSumAxial2( "requestSumAxial2",
-			"Sends out request for Ra." );
-	return &requestSumAxial2;
-}
+// static SrcFinfo0 *requestSumAxial2() {
+// 	static SrcFinfo0 requestSumAxial2( "requestSumAxial2",
+// 			"Sends out request for Ra." );
+// 	return &requestSumAxial2;
+// }
 
 const Cinfo* SymCompartment::initCinfo()
 {
 	/////////////////////////////////////////////////////////////////////
+    // static DestFinfo process( "process",
+    //                   "Handle process call",
+    //                   new ProcOpFunc< SymCompartment >( &SymCompartment::process ));
+    // static DestFinfo reinit( "reinit",
+    //                          "Handles reinit call",
+    //                          new ProcOpFunc< SymCompartment >( &Compartment::reinit ));
+    // static Finfo * processShared[] =
+    // {
+    //     &process,
+    //     &reinit
+    // };
+    
+    //     static SharedFinfo proc( "proc",
+    //     	"This is a shared message to receive Process messages "
+    //     	"from the scheduler objects. The Process should be called "
+    //     	"_second_ in each clock tick, after the Init message."
+    //     	"The first entry in the shared msg is a MsgDest "
+    //     	"for the Process operation. It has a single argument, "
+    //     	"ProcInfo, which holds lots of information about current "
+    //     	"time, thread, dt and so on. The second entry is a MsgDest "
+    //     	"for the Reinit operation. It also uses ProcInfo. ",
+    //     	processShared, sizeof( processShared ) / sizeof( Finfo* )
+    //     );
+                                                        
+        static DestFinfo raxialSphere( "raxialSphere",
+                "Expects Ra and Vm from other compartment. This is a special case when\n"
+                "other compartments are evenly distributed on a spherical compartment.",
+                new OpFunc2< SymCompartment, double, double >(
+                &SymCompartment::raxialSphere)
+        );    
 	static DestFinfo raxialSym( "raxialSym", 
 		"Expects Ra and Vm from other compartment.",
 		new OpFunc2< SymCompartment, double, double >( 
@@ -61,19 +91,19 @@ const Cinfo* SymCompartment::initCinfo()
 		new OpFunc1< SymCompartment, double >( 
 		&SymCompartment::sumRaxial )
 	);
-	static DestFinfo handleSumRaxialRequest( "handleSumRaxialRequest",
-		"Handle request to send back Ra to originating compartment.",
-		new EpFunc0< SymCompartment >( 
-		&SymCompartment::handleSumRaxialRequest )
-	);
+	// static DestFinfo handleSumRaxialRequest( "handleSumRaxialRequest",
+	// 	"Handle request to send back Ra to originating compartment.",
+	// 	new EpFunc0< SymCompartment >( 
+	// 	&SymCompartment::handleSumRaxialRequest )
+	// );
 
 	// The SrcFinfos raxialOut, sumRaxialOut and requestSumAxial
 	// are defined above to get them into file-wide scope.
 
 	static Finfo* raxial1Shared[] =
 	{
-		&raxialSym, &sumRaxial, &handleSumRaxialRequest, 
-		raxialOut(), sumRaxialOut(), requestSumAxial()
+            &raxialSym, &sumRaxial,// &handleSumRaxialRequest, 
+            raxialOut(), sumRaxialOut(), //requestSumAxial()
 	};
 
 	static SharedFinfo raxial1( "raxial1",
@@ -99,18 +129,18 @@ const Cinfo* SymCompartment::initCinfo()
 			new OpFunc1< SymCompartment, double >( 
 			&SymCompartment::sumRaxial2 )
 	);
-	static DestFinfo handleSumRaxial2Request( "handleSumRaxial2Request",
-			"Handles a request to send back Ra to originating compartment.",
-			new EpFunc0< SymCompartment >(
-				&SymCompartment::handleSumRaxial2Request )
-	);
+	// static DestFinfo handleSumRaxial2Request( "handleSumRaxial2Request",
+	// 		"Handles a request to send back Ra to originating compartment.",
+	// 		new EpFunc0< SymCompartment >(
+	// 			&SymCompartment::handleSumRaxial2Request )
+	// );
 	// The SrcFinfos raxial2Out, sumRaxial2Out and requestSumAxial2
 	// are defined above to get them into file-wide scope.
 
 	static Finfo* raxial2Shared[] =
 	{
-		&raxial2sym, &sumRaxial2, &handleSumRaxial2Request,
-		raxial2Out(), sumRaxial2Out(), requestSumAxial2()
+            &raxial2sym, &sumRaxial2, //&handleSumRaxial2Request,
+            raxial2Out(), sumRaxial2Out(), //requestSumAxial2()
 		
 	};
 
@@ -139,6 +169,19 @@ const Cinfo* SymCompartment::initCinfo()
 		raxial2Shared, sizeof( raxial2Shared ) / sizeof( Finfo* )
 	);
 
+        static Finfo* raxialSphereShared[] = {
+            &raxialSphere,
+            raxialOut(),
+        };
+        
+        static SharedFinfo connectsphere( "CONNECTSPHERE",
+                "This is a shared message between cylindrical and a spherical\n"
+                "compartment. It assumes all dendrites are distributed evenly over the\n"
+                "soma/sphere. Using CONNECTHEAD/CONNECTTAIL instead connects all\n"
+                "dendrites to one point on the soma/sphere.",
+                raxialSphereShared, sizeof( raxialSphereShared )/sizeof( Finfo* )
+        );
+
 	//////////////////////////////////////////////////////////////////
 	static Finfo* symCompartmentFinfos[] = 
 	{
@@ -148,12 +191,14 @@ const Cinfo* SymCompartment::initCinfo()
 	//////////////////////////////////////////////////////////////////
 	    // The inherited process and init messages do not need to be
 		// overridden.
+                // &proc,
 		&raxial1,
 		&connecttail,
 		&raxial2,
 		&connecthead,
-		&connectcross
-
+		&connectcross,
+                &connectsphere,
+                
 	///////////////////////////////////////////////////////
 	// MsgSrc definitions
 	///////////////////////////////////////////////////////
@@ -188,7 +233,11 @@ static const Cinfo* symCompartmentCinfo = SymCompartment::initCinfo();
 // Here we put the SymCompartment class functions.
 //////////////////////////////////////////////////////////////////
 
-SymCompartment::SymCompartment()
+SymCompartment::SymCompartment():
+        coeff_(0.0),
+        coeff2_(0.0),
+        RaSum_(0.0),
+        RaSum2_(0.0)
 {
 	;
 }
@@ -197,30 +246,16 @@ SymCompartment::SymCompartment()
 // Compartment::Dest function definitions.
 //////////////////////////////////////////////////////////////////
 
-/*
-void SymCompartment::innerProcessFunc( Element* e, ProcInfo p )
-{
-	A_ += Inject_ + sumInject_ + Em_ * invRm_; 
-	if ( B_ > EPSILON ) {
-		double x = exp( -B_ * p->dt_ / Cm_ );
-		Vm_ = Vm_ * x + ( A_ / B_ )  * ( 1.0 - x );
-	} else {
-		Vm_ += ( A_ - Vm_ * B_ ) * p->dt_ / Cm_;
-	}
-	A_ = 0.0;
-	B_ = invRm_; 
-	Im_ = 0.0;
-	sumInject_ = 0.0;
-	// Send out the channel messages
-	send1< double >( e, channelSlot, Vm_ );
-	// Send out the message to any SpikeGens.
-	send1< double >( e, VmSlot, Vm_ );
-	// Send out the axial messages
-	// send1< double >( e, axialSlot, Vm_ );
-	// Send out the raxial messages
-	// send2< double >( e, raxialSlot, Ra_, Vm_ );
-}
-*/
+
+// void SymCompartment::process( const Eref& e, ProcPtr p )
+// {
+//     cout << "SymCompartment " << e.id().path() << "::process:  coeff_=" << coeff_ << ", coeff2_=" << coeff2_ << endl;
+//     Compartment::process( e, p );
+//     // coeff_ = 0.0;
+//     // coeff2_ = 0.0;
+//     // RaSum_ = 0.0;
+//     // RaSum2_ = 0.0;
+// }
 
 // Alternates with the 'process' message
 void SymCompartment::innerInitProc( const Eref& e, ProcPtr p )
@@ -234,10 +269,13 @@ void SymCompartment::innerInitProc( const Eref& e, ProcPtr p )
 void SymCompartment::innerReinit( const Eref& e, ProcPtr p )
 {
 	moose::Compartment::innerReinit( e, p );
-	// cout << "SymCompartment " << e.id().path() << ":: innerReinit: coeff = " << coeff_ << ", coeff2 = " << coeff2_ << endl;
+        // We don't want to recalculate these every time step - the request... methods are not required
+        // requestSumAxial()->send( e, p->threadIndexInGroup );
+        // requestSumAxial2()->send( e, p->threadIndexInGroup );
+	sumRaxialOut()->send( e, p->threadIndexInGroup, Ra_ );
+	sumRaxial2Out()->send( e, p->threadIndexInGroup, Ra_ );
 
-	// coeff_ = ( 1 + coeff_ ) / 2.0;
-	// coeff2_ = ( 1 + coeff2_ ) / 2.0;
+	// cout << "SymCompartment " << e.id().path() << ":: innerReinit: coeff = " << coeff_ << ", coeff2 = " << coeff2_ << endl;
 }
 
 // The Compartment and Symcompartment go through an 'init' and then a 'proc'
@@ -246,23 +284,25 @@ void SymCompartment::innerReinit( const Eref& e, ProcPtr p )
 void SymCompartment::innerInitReinit( const Eref& e, ProcPtr p )
 {
 	// cout << "SymCompartment " << e.id().path() << ":: innerInitReinit: coeff = " << coeff_ << ", coeff2 = " << coeff2_ << endl;
-	coeff_ = 0.0;
-	coeff2_ = 0.0;
-	RaSum_ = 0.0;
-	RaSum2_ = 0.0;
-	requestSumAxial()->send( e, p->threadIndexInGroup );
-	requestSumAxial2()->send( e, p->threadIndexInGroup );
+	// coeff_ = 0.0;
+	// coeff2_ = 0.0;
+	// RaSum_ = 0.0;
+	// RaSum2_ = 0.0;
+	// requestSumAxial()->send( e, p->threadIndexInGroup );
+	// requestSumAxial2()->send( e, p->threadIndexInGroup );
 }
 
-void SymCompartment::handleSumRaxialRequest( const Eref& e, const Qinfo* q )
-{
-	sumRaxialOut()->send( e, q->threadNum(), Ra_ );
-}
+// void SymCompartment::handleSumRaxialRequest( const Eref& e, const Qinfo* q )
+// {
+//     cout << "SymCompartment " << e.id().path() << "::handleSumRaxialRequest: Ra_ = " << Ra_ << endl;
+// 	sumRaxialOut()->send( e, q->threadNum(), Ra_ );
+// }
 
-void SymCompartment::handleSumRaxial2Request( const Eref& e, const Qinfo* q)
-{
-	sumRaxial2Out()->send( e, q->threadNum(), Ra_ );
-}
+// void SymCompartment::handleSumRaxial2Request( const Eref& e, const Qinfo* q)
+// {
+//     cout << "SymCompartment " << e.id().path() << "::handleSumRaxial2Request: Ra_ = " << Ra_ << endl;
+// 	sumRaxial2Out()->send( e, q->threadNum(), Ra_ );
+// }
 
 void SymCompartment::sumRaxial( double Ra )
 {
@@ -273,9 +313,11 @@ void SymCompartment::sumRaxial( double Ra )
 
 void SymCompartment::sumRaxial2( double Ra )
 {
+    static int call = 1;
 	RaSum2_ += Ra_/Ra;
 	coeff2_ = ( 1 + RaSum2_ ) / 2.0;
-	// cout << "SymCompartment::sumRaxial: coeff2 = " << coeff2_ << endl;
+	// cout << "SymCompartment::sumRaxial " << call << ": coeff2 = " << coeff2_ << "Ra = " << Ra << endl;
+        ++call;
 }
 
 void SymCompartment::raxialSym( double Ra, double Vm)
@@ -287,10 +329,16 @@ void SymCompartment::raxialSym( double Ra, double Vm)
 	B_ += 1.0 / Ra;
 	Im_ += ( Vm - Vm_ ) / Ra;
 	*/
-	double invR = 2.0 / ( Ra + Ra_ );
-	A_ += Vm * invR;
-	B_ += invR;
-	Im_ += ( Vm - Vm_ ) * invR;
+    
+    double R = Ra * coeff_;
+    // cout << "raxialSym:R=" << R << endl;
+    A_ += Vm / R;
+    B_ += 1.0 / R;
+    Im_ += (Vm - Vm_) / R;
+	// double invR = 2.0 / ( Ra + Ra_ );
+	// A_ += Vm * invR;
+	// B_ += invR;
+	// Im_ += ( Vm - Vm_ ) * invR;
 }
 
 void SymCompartment::raxial2Sym( double Ra, double Vm)
@@ -302,6 +350,19 @@ void SymCompartment::raxial2Sym( double Ra, double Vm)
 	B_ += 1.0 / Ra;
 	Im_ += ( Vm - Vm_ ) / Ra;
 	*/
+    double R = Ra * coeff2_;
+    // cout << "raxial2Sym:R=" << R << endl;
+    A_ += Vm / R;
+    B_ += 1 / R;
+    Im_ += (Vm - Vm_) / R;
+	// double invR = 2.0 / ( Ra + Ra_ );
+	// A_ += Vm * invR;
+	// B_ += invR;
+	// Im_ += ( Vm - Vm_ ) * invR;
+}
+
+void SymCompartment::raxialSphere( double Ra, double Vm)
+{
 	double invR = 2.0 / ( Ra + Ra_ );
 	A_ += Vm * invR;
 	B_ += invR;
