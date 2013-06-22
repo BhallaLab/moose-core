@@ -1,12 +1,12 @@
-/**
- * Copyright 1993-2012 NVIDIA Corporation.  All rights reserved.
- *
- * Please refer to the NVIDIA end user license agreement (EULA) associated
- * with this source code for terms and conditions that govern your use of
- * this software. Any use, reproduction, disclosure, or distribution of
- * this software and related documentation outside the terms of the EULA
- * is strictly prohibited.
- */
+/**********************************************************************
+ ** This program is part of 'MOOSE', the
+ ** Multiscale Object Oriented Simulation Environment.
+ **   copyright (C) 2003-2011 Upinder S. Bhalla, Niraj Dudani and NCBS
+ ** It is made available under the terms of the
+ ** GNU Lesser General Public License version 2.1
+ ** See the file COPYING.LIB for the full notice.
+ **********************************************************************/
+
 #include "CudaModule.h"
 
 #include <stdio.h>
