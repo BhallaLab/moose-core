@@ -22316,3 +22316,18 @@ Many bugs coming out.
 - Fixed nasty bugs with NeuroMesh, the vols sent to the pools for resizing
 were all wrong. So was the oldvol. This fixes the neuroMeshConcInits 
 	following mesh setup, but not later.
+- Fixed one bug in SpineMesh, but the # of gluRs in the spine  head is
+	wrong.
+==========================================================================
+22 June.
+The # of gluRs is OK. I was setting the #, but when I resize the compartments 
+the conc is held constant. Since the 100 molecules is in a unit volume, when
+the vol is scaled down so is n. I'll have to reassign them when the thing is
+in its final size. This is OK.
+Now it turns out psdMesh also has a resizing problem: nInit remains unchanged
+after scaling vols.
+Fixed.
+
+
+Next set of bugs: Only the first entry remains nonzero after addJunction.
+
