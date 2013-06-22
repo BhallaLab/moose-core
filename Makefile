@@ -62,6 +62,7 @@
 # variable is not already defined.
 USE_SBML?=0
 USE_HDF5?=1
+USE_CUDA?=0
 PYTHON?=2
 # BUILD (= debug, release)
 ifndef BUILD
@@ -226,6 +227,14 @@ SBML_DIR = sbml
 SBML_LIB = sbml/_sbml.o 
 endif
 
+#Saeed
+# To use CUDA, pass USE_CUDA=1 in make command line
+ifeq ($(USE_CUDA),1)
+LIBS+= -L/usr/local/cuda/lib64 -LhsolveCuda/cudaLibrary  -lcuda -lcudart -lm -lmooseCudaLibrary
+HCUDA_DIR = hsolveCuda
+HCUDA_LIB = hsolveCuda/_hsolveCuda.o 
+endif
+
 # To use Smoldyn, pass USE_SMOLDYN=true ( anything on the right will do) in make command line
 ifdef USE_SMOLDYN
 #LIBS+= -L/usr/local/lib -lsmoldyn
@@ -291,6 +300,7 @@ SUBDIR = \
 	external/muparser \
 	$(SMOLDYN_DIR) \
 	$(SBML_DIR) \
+	$(HCUDA_DIR) \
 
 
 # Used for 'make clean'
@@ -317,6 +327,7 @@ OBJLIBS =	\
 	external/muparser/_muparser.o \
 	$(SMOLDYN_LIB) \
 	$(SBML_LIB) \
+	$(HCUDA_LIB) \
 
 export CXX
 export CXXFLAGS
