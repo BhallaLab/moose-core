@@ -140,6 +140,7 @@ void SpineMesh::handleSpineList(
 		vector< Id > shaft, vector< Id > head, 
 		vector< unsigned int > parentVoxel )
 {
+		double oldVol = getMeshEntrySize( 0 );
 		assert( head.size() == parentVoxel.size() );
 		assert( head.size() == shaft.size() );
 		spines_.resize( head.size() );
@@ -159,7 +160,6 @@ void SpineMesh::handleSpineList(
 
 		updateCoords();
 		Id meshEntry( e.id().value() + 1 );
-		double oldVol = getMeshEntrySize( 0 );
 		
 		vector< unsigned int > localIndices( head.size() );
 		vector< double > vols( head.size() );

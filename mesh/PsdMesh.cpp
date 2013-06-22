@@ -121,6 +121,7 @@ void PsdMesh::handlePsdList(
 		vector< double > diskCoords, //ctr(xyz), dir(xyz), dia, diffDist
 		vector< unsigned int > parentVoxel )
 {
+		double oldVol = getMeshEntrySize( 0 );
 		assert( diskCoords.size() == 8 * parentVoxel.size() );
 		psd_.resize( parentVoxel.size() );
 		pa_.resize( parentVoxel.size() );
@@ -143,7 +144,6 @@ void PsdMesh::handlePsdList(
 		updateCoords();
 
 		Id meshEntry( e.id().value() + 1 );
-		double oldVol = getMeshEntrySize( 0 );
 		
 		vector< unsigned int > localIndices( psd_.size() );
 		vector< double > vols( psd_.size() );
