@@ -457,9 +457,10 @@ def stepRun(simtime, steptime, verbose=True, logger=None):
             logger.info(msg)
     ts = datetime.now()
     while clock.currentTime < simtime - steptime:
+        ts1 = datetime.now()
         _moose.start(steptime)
         te = datetime.now()
-        td = te - ts
+        td = te - ts1
         if verbose:
             msg = 'Simulated till %g. Left: %g. %g of simulation took: %g s' % (clock.currentTime, simtime - clock.currentTime, steptime, td.days * 86400 + td.seconds + 1e-6 * td.microseconds)
             if logger is None:
