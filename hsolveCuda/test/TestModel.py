@@ -1,8 +1,11 @@
-'''
-Created on Apr 30, 2013
-
-@author: saeed
-'''
+# /**********************************************************************
+#  ** This program is part of 'MOOSE', the
+#  ** Multiscale Object Oriented Simulation Environment.
+#  **   copyright (C) 2003-2011 Upinder S. Bhalla, Niraj Dudani and NCBS
+#  ** It is made available under the terms of the
+#  ** GNU Lesser General Public License version 2.1
+#  ** See the file COPYING.LIB for the full notice.
+#  **********************************************************************/
 
 import sys
 sys.path.append('../../python')
