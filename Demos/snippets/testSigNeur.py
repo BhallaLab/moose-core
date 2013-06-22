@@ -260,10 +260,9 @@ def createPool( compt, name, concInit ):
 
 def createChemModel( neuroCompt, spineCompt, psdCompt ):
     # Stuff in spine + psd
-    psdGluR = createPool( psdCompt, 'psdGluR', 0 )
+    psdGluR = createPool( psdCompt, 'psdGluR', 1 )
     headCa = createPool( spineCompt, 'Ca', 1e-4 )
-    headGluR = createPool( spineCompt, 'headGluR', 0 )
-    headGluR.nInit = 100
+    headGluR = createPool( spineCompt, 'headGluR', 2 )
     toPsd = createPool( spineCompt, 'toPsd', 0 )
     toPsdInact = createPool( spineCompt, 'toPsdInact', 1e-3 )
     turnOnPsd = moose.Reac( spineCompt.path +  '/turnOnPsd' )
@@ -334,7 +333,10 @@ def printMolVecs( title ):
     print title
     print 'sizes: nCa, sCa, sR, pR = ', len(nCa), len(sCa), len(sR), len(pR) 
     #print 'nCa=', nCa.conc, ', sCa=', sCa.conc, ', sR=', sR.n, ', pR=', pR.n
-    print 'nCaConcInit=', nCa.concInit, ', sCa=', sCa.concInit, ', sR=', sR.nInit, ', pR=', pR.nInit
+    print 'nCaConcInit=', nCa.concInit, ', sCa=', sCa.concInit
+    #print 'sRnInit=', sR.nInit, ', pR=', pR.nInit
+    print 'sRconcInit=', sR.concInit, ', pR=', pR.concInit
+
     #print 'nCaSize=', nCa.size, ', sCa=', sCa.size, ', sR=', sR.n, ', pR=', pR.n
 
 def makeChemInCubeMesh():
@@ -442,6 +444,7 @@ def makeNeuroMeshModel():
     moose.connect( neuroCompt, 'psdListOut', psdCompt, 'psdList', 'OneToOne' )
 
     createChemModel( neuroCompt, spineCompt, psdCompt )
+    foo = moose.ematrix( '/model/chem/spineMesh/headGluR' )
     printMolVecs( 'before model setup ' )
     # Now to set up the model.
     neuroCompt.cell = elec
@@ -460,6 +463,8 @@ def makeNeuroMeshModel():
     ca = moose.element( '/model/chem/neuroMesh/Ca' )
     assert( ca.lastDimension == ndc )
 
+    #moose.ematrix( '/model/chem/spineMesh/headGluR' ).nInit = 100
+    #moose.ematrix( '/model/chem/psdMesh/psdGluR' ).nInit = 200
     printMolVecs( 'after setup, before addJunction' )
 
     #print ca
