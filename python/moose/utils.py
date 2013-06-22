@@ -5,6 +5,7 @@ __author__ = 'Subhasis Ray and Aditya Gilra, NCBS'
 __date__ = '21 November 2012'
 
 import types, parser, token, symbol, string, os, math
+from datetime import datetime
 import _moose
 
 ## for Ca Pool
@@ -444,6 +445,46 @@ def assignDefaultTicks(modelRoot='/model', dataRoot='/data'):
         _moose.useClock(8, '%s/##[ISA=Table]' % (dataRoot), 'process')
     else:
         _moose.useClock(9, '%s/##[ISA=Table]' % (dataRoot), 'process')
+
+def stepRun(simtime, steptime, verbose=True, logger=None):
+    """Run the simulation in steps of `steptime` for `simtime`."""
+    clock = _moose.Clock('/clock')
+    if verbose:
+        msg = 'Starting simulation for %g' % (simtime)
+        if logger is None:
+            print msg
+        else:
+            logger.info(msg)
+    ts = datetime.now()
+    while clock.currentTime < simtime - steptime:
+        _moose.start(steptime)
+        te = datetime.now()
+        td = te - ts
+        if verbose:
+            msg = 'Simulated till %g. Left: %g. %g of simulation took: %g s' % (clock.currentTime, simtime - clock.currentTime, steptime, td.days * 86400 + td.seconds + 1e-6 * td.microseconds)
+            if logger is None:
+                print msg
+            else:
+                logger.info(msg)
+            
+    remaining = simtime - clock.currentTime
+    if remaining > 0:
+        if verbose:
+            msg = 'Running the remaining %g.' % (remaining)
+            if logger is None:
+                print msg
+            else:
+                logger.info(msg)
+        _moose.start(remaining)
+    te = datetime.now()
+    td = te - ts
+    if verbose:
+        msg = 'Finished simulation of %g in %g s' % (simtime, td.days * 86400 + td.seconds + 1e-6 * td.microseconds)
+        if logger is None:
+            print msg
+        else:
+            logger.info(msg)
+
 
 
 ############# added by Aditya Gilra -- begin ################
