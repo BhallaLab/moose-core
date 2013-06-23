@@ -22326,8 +22326,23 @@ the vol is scaled down so is n. I'll have to reassign them when the thing is
 in its final size. This is OK.
 Now it turns out psdMesh also has a resizing problem: nInit remains unchanged
 after scaling vols.
-Fixed.
-
+Fixed. Checkin 4631
 
 Next set of bugs: Only the first entry remains nonzero after addJunction.
 
+Turns out that it isn't the addJunction, but the creation of the ksolves
+that loses the concInits for all except index 0.
+The zombification code is not geared to handle array zombies.
+Seems I need to put the model on the compartments, create the solvers, and only
+then remesh. Untidy.
+
+Tried that, fails.
+
+Possibly I need to have non-zero sizes for all the default meshes. I've
+fixed up NeuroMesh, but need to do Spine and Psd mesh as well.
+==========================================================================
+23 June
+Finally it runs through without barfing. Very slow, though. Takes over 10
+minutes, still doesn't complete 1 second . This is without adaptors. Still need a sensible way to decide how to hook them up.
+Reduced concs of gluR to better levels, now it finishes in about 35 seconds.
+Output isn't very interesting.

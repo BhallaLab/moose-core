@@ -65,8 +65,10 @@ double GslStoich::getNinit( const Eref& e ) const
 
 void GslStoich::setSpecies( const Eref& e, unsigned int v )
 {
+	unsigned int i = e.index().value();
 	unsigned int j = coreStoich()->convertIdToPoolIndex( e.id() );
-	assert( j < pools_[ e.index().value() ].size() );
+	assert( i < pools_.size() );
+	assert( j < pools_[ i ].size() );
 	coreStoich_.setSpecies( j, v );
 }
 

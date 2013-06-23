@@ -95,6 +95,7 @@ static const Cinfo* spineMeshCinfo = SpineMesh::initCinfo();
 //////////////////////////////////////////////////////////////////
 SpineMesh::SpineMesh()
 	:
+		spines_( 1 ),
 		surfaceGranularity_( 0.1 )
 {;}
 

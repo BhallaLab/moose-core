@@ -71,7 +71,31 @@ SpineEntry::SpineEntry()
 				parent_( 0 ),
 				shaftId_( Id() ),
 				headId_( Id() )
-{;}
+{
+	const double defaultLength = 1e-6;
+	root_.setX( 0 );
+	root_.setY( 0 );
+	root_.setZ( 0 );
+	shaft_.setX( defaultLength );
+	shaft_.setY( 0 );
+	shaft_.setZ( 0 );
+	head_.setX( defaultLength * 2 );
+	head_.setY( 0 );
+	head_.setZ( 0 );
+
+	root_.setDia( defaultLength );
+	root_.setLength( defaultLength );
+	root_.setNumDivs( 0 );
+	root_.setIsCylinder( true );
+	shaft_.setDia( defaultLength );
+	shaft_.setLength( defaultLength );
+	shaft_.setNumDivs( 1 );
+	shaft_.setIsCylinder( true );
+	head_.setDia( defaultLength );
+	head_.setLength( defaultLength );
+	head_.setNumDivs( 1 );
+	head_.setIsCylinder( true );
+}
 
 unsigned int SpineEntry::parent() const
 {
