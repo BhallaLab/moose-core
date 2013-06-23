@@ -1108,14 +1108,25 @@ void StoichCore::updateRatesAfterRemesh()
 	}
 	for ( vector< Id >::iterator 
 			i = offSolverReacs_.begin(); i != offSolverReacs_.end(); ++i ){
-		assert( i->element()->cinfo()->isA( "ReacBase" ) );
-		double Kf = Field< double >::get( *i, "Kf");
-		double Kb = Field< double >::get( *i, "Kb");
-		setReacKf( i->eref(), Kf );
-		setReacKb( i->eref(), Kb );
+		if ( i->element()->cinfo()->isA( "ReacBase" ) ) {
+			double Kf = Field< double >::get( *i, "Kf");
+			double Kb = Field< double >::get( *i, "Kb");
+			setReacKf( i->eref(), Kf );
+			setReacKb( i->eref(), Kb );
+		} else if ( i->element()->cinfo()->isA( "CplxEnzBase" ) ) {
+			double concK1 = Field< double >::get( *i, "concK1");
+			double k3 = Field< double >::get( *i, "k3");
+			double k2 = Field< double >::get( *i, "k2");
+			setEnzK3( i->eref(), k3 );
+			setEnzK2( i->eref(), k2 );
+			setEnzK1( i->eref(), concK1 );
+		} else if ( i->element()->cinfo()->isA( "MMEnzBase" ) ) {
+			double Km = Field< double >::get( *i, "Km");
+			double kcat = Field< double >::get( *i, "kcat");
+			setMMenzKm( i->eref(), Km );
+			setMMenzKcat( i->eref(), kcat );
+		}
 	}
-
-	// Do the enzymes.
 }
 
 
