@@ -225,12 +225,20 @@ static const Cinfo* neuroMeshCinfo = NeuroMesh::initCinfo();
 //////////////////////////////////////////////////////////////////
 NeuroMesh::NeuroMesh()
 	:
-		size_( 0.0 ),
+		nodes_(1),
+		nodeIndex_(1, 0 ),
+		vs_( 1, NA * 1e-9 ),
+		area_( 1, 1.0e-12 ),
+		size_( 1.0e-18 ),
 		diffLength_( 0.5e-6 ),
 		separateSpines_( false ),
 		geometryPolicy_( "default" ),
 		surfaceGranularity_( 0.1 )
-{;}
+{
+	nodes_[0].setLength( diffLength_ );
+	nodes_[0].setDia( diffLength_ );
+	nodes_[0].setNumDivs( 1 );
+}
 
 NeuroMesh::NeuroMesh( const NeuroMesh& other )
 	:

@@ -76,8 +76,18 @@ static const Cinfo* psdMeshCinfo = PsdMesh::initCinfo();
 //////////////////////////////////////////////////////////////////
 PsdMesh::PsdMesh()
 	:
+		psd_( 1 ),
+		pa_( 1 ),
+		parentDist_( 1, 1e-6 ),
+		parent_( 1, 0 ),
 		surfaceGranularity_( 0.1 )
-{;}
+{
+	const double defaultLength = 1e-6;
+	psd_[0].setDia( defaultLength );
+	psd_[0].setLength( defaultLength );
+	psd_[0].setNumDivs( 1 );
+	psd_[0].setIsCylinder( true );
+}
 
 PsdMesh::PsdMesh( const PsdMesh& other )
 	: 

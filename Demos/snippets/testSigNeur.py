@@ -444,8 +444,38 @@ def makeNeuroMeshModel():
     moose.connect( neuroCompt, 'psdListOut', psdCompt, 'psdList', 'OneToOne' )
 
     createChemModel( neuroCompt, spineCompt, psdCompt )
-    foo = moose.ematrix( '/model/chem/spineMesh/headGluR' )
-    printMolVecs( 'before model setup ' )
+
+    # Put in the solvers, see how they fare.
+    nmksolve = moose.GslStoich( '/model/chem/neuroMesh/ksolve' )
+    print 'setting up nmksolve'
+    nmksolve.path = '/model/chem/neuroMesh/##'
+    print 'finished setting up nmksolve'
+    nmksolve.compartment = moose.element( '/model/chem/neuroMesh' )
+    nmksolve.method = 'rk5'
+    nm = moose.element( '/model/chem/neuroMesh/mesh' )
+    moose.connect( nm, 'remesh', nmksolve, 'remesh' )
+    print "neuron: nv=", nmksolve.numLocalVoxels, ", nav=", nmksolve.numAllVoxels, nmksolve.numVarPools, nmksolve.numAllPools
+    #
+    printMolVecs( 'before addJunction neuron-spine' )
+
+    print 'setting up smksolve'
+    smksolve = moose.GslStoich( '/model/chem/spineMesh/ksolve' )
+    smksolve.path = '/model/chem/spineMesh/##'
+    smksolve.compartment = moose.element( '/model/chem/spineMesh' )
+    smksolve.method = 'rk5'
+    sm = moose.element( '/model/chem/spineMesh/mesh' )
+    moose.connect( sm, 'remesh', smksolve, 'remesh' )
+    print "spine: nv=", smksolve.numLocalVoxels, ", nav=", smksolve.numAllVoxels, smksolve.numVarPools, smksolve.numAllPools
+    #
+    print 'setting up pmksolve'
+    pmksolve = moose.GslStoich( '/model/chem/psdMesh/ksolve' )
+    pmksolve.path = '/model/chem/psdMesh/##'
+    pmksolve.compartment = moose.element( '/model/chem/psdMesh' )
+    pmksolve.method = 'rk5'
+    pm = moose.element( '/model/chem/psdMesh/mesh' )
+    moose.connect( pm, 'remesh', pmksolve, 'remesh' )
+
+    print 'Assigning the cell model'
     # Now to set up the model.
     neuroCompt.cell = elec
     ns = neuroCompt.numSegments
@@ -458,13 +488,25 @@ def makeNeuroMeshModel():
     assert( sdc == 5 )
     pdc = psdCompt.mesh.num
     assert( pdc == 5 )
+    #
+    #
+    printMolVecs( 'before addJunction neuron-spine' )
+    smksolve.addJunction( nmksolve )
+    printMolVecs( 'after addJunction neuron-spine' )
+    print "spine: nv=", smksolve.numLocalVoxels, ", nav=", smksolve.numAllVoxels, smksolve.numVarPools, smksolve.numAllPools
+    pmksolve.addJunction( smksolve )
+    printMolVecs( 'after addJunction spine-psd' )
+    print "psd: nv=", pmksolve.numLocalVoxels, ", nav=", pmksolve.numAllVoxels, pmksolve.numVarPools, pmksolve.numAllPools
+    # Have to pass a message between the various solvers.
+    foo = moose.ematrix( '/model/chem/spineMesh/headGluR' )
+    printMolVecs( 'before model setup ' )
 
     # oddly, numLocalFields does not work.
     ca = moose.element( '/model/chem/neuroMesh/Ca' )
     assert( ca.lastDimension == ndc )
 
-    #moose.ematrix( '/model/chem/spineMesh/headGluR' ).nInit = 100
-    #moose.ematrix( '/model/chem/psdMesh/psdGluR' ).nInit = 200
+    moose.ematrix( '/model/chem/spineMesh/headGluR' ).nInit = 100
+    moose.ematrix( '/model/chem/psdMesh/psdGluR' ).nInit = 200
     printMolVecs( 'after setup, before addJunction' )
 
     #print ca
@@ -653,38 +695,6 @@ def testNeuroMeshMultiscale():
     moose.useClock( 6, '/model/chem/##[ISA=Adaptor]', 'process' )
     moose.useClock( 7, '/graphs/#', 'process' )
     moose.useClock( 8, '/graphs/elec/#', 'process' )
-    # Put in the solvers, see how they fare.
-    nmksolve = moose.GslStoich( '/model/chem/neuroMesh/ksolve' )
-    nmksolve.path = '/model/chem/neuroMesh/##'
-    nmksolve.compartment = moose.element( '/model/chem/neuroMesh' )
-    nmksolve.method = 'rk5'
-    nm = moose.element( '/model/chem/neuroMesh/mesh' )
-    moose.connect( nm, 'remesh', nmksolve, 'remesh' )
-    print "neuron: nv=", nmksolve.numLocalVoxels, ", nav=", nmksolve.numAllVoxels, nmksolve.numVarPools, nmksolve.numAllPools
-    #
-    smksolve = moose.GslStoich( '/model/chem/spineMesh/ksolve' )
-    smksolve.path = '/model/chem/spineMesh/##'
-    smksolve.compartment = moose.element( '/model/chem/spineMesh' )
-    smksolve.method = 'rk5'
-    sm = moose.element( '/model/chem/spineMesh/mesh' )
-    moose.connect( sm, 'remesh', smksolve, 'remesh' )
-    print "spine: nv=", smksolve.numLocalVoxels, ", nav=", smksolve.numAllVoxels, smksolve.numVarPools, smksolve.numAllPools
-    #
-    pmksolve = moose.GslStoich( '/model/chem/psdMesh/ksolve' )
-    pmksolve.path = '/model/chem/psdMesh/##'
-    pmksolve.compartment = moose.element( '/model/chem/psdMesh' )
-    pmksolve.method = 'rk5'
-    pm = moose.element( '/model/chem/psdMesh/mesh' )
-    moose.connect( pm, 'remesh', pmksolve, 'remesh' )
-    #
-    #
-    smksolve.addJunction( nmksolve )
-    printMolVecs( 'after addJunction neuron-spine' )
-    print "spine: nv=", smksolve.numLocalVoxels, ", nav=", smksolve.numAllVoxels, smksolve.numVarPools, smksolve.numAllPools
-    pmksolve.addJunction( smksolve )
-    printMolVecs( 'after addJunction spine-psd' )
-    print "psd: nv=", pmksolve.numLocalVoxels, ", nav=", pmksolve.numAllVoxels, pmksolve.numVarPools, pmksolve.numAllPools
-    # Have to pass a message between the various solvers.
     moose.useClock( 5, '/model/chem/#Mesh/ksolve', 'init' )
     moose.useClock( 6, '/model/chem/#Mesh/ksolve', 'process' )
     hsolve = moose.HSolve( '/model/elec/hsolve' )
@@ -694,7 +704,7 @@ def testNeuroMeshMultiscale():
     moose.reinit()
     printMolVecs( 'after reinit' )
 
-    moose.start( 0.005 )
+    moose.start( 1.0 )
     dumpPlots( plotName )
 
 
