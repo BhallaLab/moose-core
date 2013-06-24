@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Mar  8 11:26:13 2013 (+0530)
 # Version: 
-# Last-Updated: Mon Jun 24 18:11:26 2013 (+0530)
+# Last-Updated: Mon Jun 24 18:41:19 2013 (+0530)
 #           By: subha
-#     Update #: 309
+#     Update #: 351
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -29,6 +29,15 @@
 
 # Code:
 
+"""
+Display/save the topology of one or all cells in traub_2005 demo.
+
+command line options (all are optional):
+-c celltype    : display topology of cell type 'celltype'. If unspecified, all cell types are displayed
+-p filename    : save output to fiel specified by 'filename'
+-l             : show labels of the compartments
+-h,--help      : show this help
+"""
 import sys
 import os
 import numpy as np
@@ -53,7 +62,7 @@ def node_sizes(g):
     sizes[soma_i] *= np.pi/4 # for soma, length=diameter. So area is dimater^2 * pi / 4
     return sizes / max(sizes)
     
-def cell_to_graph(cell):
+def cell_to_graph(cell, label=False):
     """Convert a MOOSE compartmental neuron into a graph describing
     the topology of the compartments
 
@@ -63,6 +72,9 @@ def cell_to_graph(cell):
               for c2 in moose.Compartment(c1).neighbours['raxial']]
     g = nx.Graph()
     g.add_edges_from(es)
+    if label:
+        for v in g.nodes():
+            g.node[v]['label'] = v.rpartition('/')[-1]
     return g
 
 def axon_dendrites(g):
@@ -81,8 +93,8 @@ def axon_dendrites(g):
             axon.append(n)
     return (axon, soma_dendrites)
 
-def plot_cell_topology(cell):
-    g = cell_to_graph(cell)
+def plot_cell_topology(cell, label=False):
+    g = cell_to_graph(cell, label=label)
     axon, sd = axon_dendrites(g)
     node_size = node_sizes(g)
     weights = np.array([g.edge[e[0]][e[1]]['weight'] for e in g.edges()])
@@ -90,7 +102,14 @@ def plot_cell_topology(cell):
     pos = nx.graphviz_layout(g,prog='twopi',root=cell.path + '/comp_1')
     # pos = nx.spring_layout(g)
     nx.draw_networkx_edges(g, pos, width=10*weights/max(weights), edge_color='gray', alpha=0.8)
-    nx.draw_networkx_nodes(g, pos, with_labels=False, node_size=node_size * 500, node_color=map(lambda x: 'k' if x in axon else 'gray', g.nodes()), linewidths=[1 if n.endswith('comp_1') else 0 for n in g.nodes()], alpha=0.8)
+    nx.draw_networkx_nodes(g, pos, with_labels=False,
+                           nnode_size=node_size * 500, 
+                           node_color=map(lambda x: 'k' if x in axon else 'gray', g.nodes()), 
+                           linewidths=[1 if n.endswith('comp_1') else 0 for n in g.nodes()], 
+                           alpha=0.8)
+    if label:
+        labels = dict([(n, g.node[n]['label']) for n in g.nodes()])
+        nx.draw_networkx_labels(g, pos, labels=labels)
     plt.title(cell.__class__.__name__)
 
 from matplotlib.backends.backend_pdf import PdfPages
@@ -100,29 +119,35 @@ from getopt import getopt
 
 if __name__ == '__main__':
     print sys.argv
-    optlist, args = getopt(sys.argv[0], 'hpc:', ['help'])
+    optlist, args = getopt(sys.argv[1:], 'lhp:c:', ['help'])
     celltype = ''
     pdf = ''
+    label = False
     for arg in optlist:
         if arg[0] == '-c':
             celltype = arg[1]
         elif arg[0] == '-p':
             pdf = arg[1]
+        elif arg[0] == '-l':
+            label = True
         elif arg[0] == '-h' or arg[0] == '--help':
             print 'Usage: %s [-c CellType [-p filename]]' % (sys.argv[0])
             print 'Display/save the morphology of cell type "CellType".'
             print 'Options:'
             print '-c celltype (optional) display only an instance of the specified cell type. If CellType is empty or not specified, all prototype cells are displayed.'
+            print '-l label the compartments'
             print '-p  filename (optional) save outputin a pdf file named "filename".'
             print '-h,--help print this help'
             sys.exit(0)
+    print 'args', optlist, args
     figures = []
     if len(celltype) > 0:
         try:
             fig = plt.figure()
             figures.append(fig)
-            cell = cells.init_prototypes()[celtype]
-            plot_cell_topology(cell)
+            cell = cells.init_prototypes()[celltype]
+            print 'Label', label
+            plot_cell_topology(cell, label=label)
         except KeyError:
             print '%s: no such cell type. Available are:' % (celltype)
             for ii in cells.init_prototypes().keys():
@@ -132,7 +157,7 @@ if __name__ == '__main__':
     else:
         for cell, proto in cells.init_prototypes().items():
             figures.append(plt.figure())
-            plot_cell_topology(proto)
+            plot_cell_topology(proto, label=label)
     plt.axis('off')
     if len(pdf) > 0:
         pdfout = PdfPages(pdf)
