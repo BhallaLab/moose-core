@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jun 12 11:10:44 2013 (+0530)
 # Version: 
-# Last-Updated: Fri Jun 14 14:21:36 2013 (+0530)
+# Last-Updated: Sat Jun 22 16:02:37 2013 (+0530)
 #           By: subha
-#     Update #: 178
+#     Update #: 179
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -109,19 +109,19 @@ class TestHSolveTCR(unittest.TestCase):
             for n in tick.neighbours[field]:
                 print '\t', n
         ts = datetime.now()
-        moose.start(simtime)
+        utils.stepRun(simtime, 10000*simdt, verbose=True, logger=config.logger)
         te = datetime.now()
         td = te - ts
         t1 = np.linspace(0, simtime, len(self.p1['somaVm'].vec))
         t2 = np.linspace(0, simtime, len(self.p2['somaVm'].vec))
-        pylab.plot(t1, self.p1['somaVm'].vec, label='hsolve')
-        pylab.plot(t2, self.p2['somaVm'].vec, label='euler')
-        config.logger.info('Finished simulation of %g s with %d process threads in %g s' % (simtime, moose.NUMPTHREADS, td.seconds + 1e-6 * td.microseconds))
+        config.logger.info('Finished simulation of %g s with %d process threads and dt=%d s in %g s' % (simtime, moose.NUMPTHREADS, simdt, td.seconds + 1e-6 * td.microseconds))
         hsolve_data_file = os.path.join(config.data_dir, 'hsolve_tcr_%s.csv' % (config.filename_suffix))
         eeuler_data_file = os.path.join(config.data_dir, 'ee_tcr_%s.csv' % (config.filename_suffix))        
         np.savetxt(hsolve_data_file, np.vstack((t1, self.p1['somaVm'].vec)).transpose())
         np.savetxt(eeuler_data_file, np.vstack((t2, self.p2['somaVm'].vec)).transpose())
-        print 'Saved Exp Euler data in %s\nHSolve data in %s' % (hsolve_data_file, eeuler_data_file)
+        config.logger.info('Saved Exp Euler data in %s\nHSolve data in %s' % (hsolve_data_file, eeuler_data_file))
+        pylab.plot(t1, self.p1['somaVm'].vec, label='hsolve')
+        pylab.plot(t2, self.p2['somaVm'].vec, label='euler')
         pylab.legend()
         pylab.show()
                            
