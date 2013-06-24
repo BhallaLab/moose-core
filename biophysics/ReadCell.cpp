@@ -374,7 +374,7 @@ Id ReadCell::buildCompartment(
 	vector< string >& argv )
 {
 	static const Finfo* raxial2OutFinfo =
-			SymCompartment::initCinfo()->findFinfo( "raxial2Out" );
+			SymCompartment::initCinfo()->findFinfo( "raxialOut" );
 	/*
 	 * This section determines the parent compartment, to connect up with axial
 	 * messages. Here 'parent' refers to the biophysical relationship within 
