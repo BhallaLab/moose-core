@@ -33,8 +33,8 @@ class SymCompartment: public moose::Compartment
 			void sumRaxial( double Ra );
 			/* void handleSumRaxialRequest( const Eref& e, const Qinfo* q ); */
 
-			void raxial2Sym(double Ra, double Vm);
-			void sumRaxial2( double Ra );
+			/* void raxial2Sym(double Ra, double Vm); */
+			/* void sumRaxial2( double Ra ); */
 			/* void handleSumRaxial2Request( const Eref& e, const Qinfo* q ); */
 
 			static const Cinfo* initCinfo();
@@ -46,11 +46,11 @@ class SymCompartment: public moose::Compartment
 			void innerInitReinit( const Eref& e, ProcPtr p );
                         /* void process( const Eref& e, ProcPtr p ); */
 	private:
-
+                        // used for storing multiplicative coefficient computed from adjacent nodes in star-mesh transformation
 			double coeff_;
-			double coeff2_;
+			/* double coeff2_; */
 			double RaSum_;
-			double RaSum2_;
+			/* double RaSum2_; */
 };
 
 #endif // _SYM_COMPARTMENT_H
