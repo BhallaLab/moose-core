@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Oct 15 15:03:09 2012 (+0530)
 # Version: 
-# Last-Updated: Fri May  3 11:53:10 2013 (+0530)
+# Last-Updated: Mon Jun 24 17:31:14 2013 (+0530)
 #           By: subha
-#     Update #: 235
+#     Update #: 241
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -144,16 +144,19 @@ class SingleCellCurrentStepTest(unittest.TestCase):
         if pulsearray is not None:            
             self.tweak_stimulus(pulsearray)
         moose.reinit()
-        start = datetime.now()
-        step_run(simtime, stepsize)
-        end = datetime.now()
-        # The sleep is required to get all threads to end 
-        while moose.isRunning():
-            time.sleep(0.1)
-        delta = end - start
-        config.logger.info('Simulation time with solver %s: %g s' % \
-            (self.solver, 
-             delta.seconds + delta.microseconds * 1e-6))
+        # start = datetime.now()
+        # step_run(simtime, stepsize)
+        # end = datetime.now()
+        # # The sleep is required to get all threads to end 
+        # while moose.isRunning():
+        #     time.sleep(0.1)
+        # delta = end - start
+        # config.logger.info('Simulation time with solver %s: %g s' % \
+        #     (self.solver, 
+        #      delta.seconds + delta.microseconds * 1e-6))
+        print '1111', simtime
+        print '2222', stepsize
+        mutils.stepRun(simtime, stepsize, logger=config.logger)
         self.tseries = np.arange(0, simtime+self.plotdt, self.plotdt)
         # Now save the data
         for table_id in self.data_container.children:

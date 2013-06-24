@@ -479,8 +479,10 @@ def stepRun(simtime, steptime, verbose=True, logger=None):
         _moose.start(remaining)
     te = datetime.now()
     td = te - ts
+    dt = _moose.ematrix('/clock/tick').dt
+    dt = min([t for t in dt if t > 0.0])
     if verbose:
-        msg = 'Finished simulation of %g in %g s' % (simtime, td.days * 86400 + td.seconds + 1e-6 * td.microseconds)
+        msg = 'Finished simulation of %g with minimum dt=%g in %g s' % (simtime, dt, td.days * 86400 + td.seconds + 1e-6 * td.microseconds)
         if logger is None:
             print msg
         else:
