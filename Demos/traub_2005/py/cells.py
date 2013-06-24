@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Mar  9 23:17:17 2012 (+0530)
 # Version: 
-# Last-Updated: Sat Dec  8 15:08:16 2012 (+0530)
+# Last-Updated: Mon Jun 24 18:02:15 2013 (+0530)
 #           By: subha
-#     Update #: 688
+#     Update #: 689
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -503,20 +503,20 @@ def init_prototypes():
     if _cellprototypes:
         return _cellprototypes
     _cellprototypes = {
-        'SupPyrRS': SupPyrRS(SupPyrRS.prototype),
-        'SupPyrFRB': SupPyrFRB(SupPyrFRB.prototype),
-        'SupLTS': SupLTS(SupLTS.prototype),
-        'SupAxoaxonic': SupAxoaxonic(SupAxoaxonic.prototype),
-        'SupBasket': SupBasket(SupBasket.prototype),
-        'SpinyStellate': SpinyStellate(SpinyStellate.prototype),
-        'NontuftedRS': NontuftedRS(NontuftedRS.prototype),
-        'TuftedIB': TuftedIB(TuftedIB.prototype),
-        'TuftedRS': TuftedRS(TuftedRS.prototype),
-        'DeepLTS':  DeepLTS(DeepLTS.prototype),
-        'DeepAxoaxonic': DeepAxoaxonic(DeepAxoaxonic.prototype),
-        'DeepBasket': DeepBasket(DeepBasket.prototype),
-        'TCR': TCR(TCR.prototype),
-        'nRT': nRT(nRT.prototype),
+        'SupPyrRS': SupPyrRS(SupPyrRS.prototype.path),
+        'SupPyrFRB': SupPyrFRB(SupPyrFRB.prototype.path),
+        'SupLTS': SupLTS(SupLTS.prototype.path),
+        'SupAxoaxonic': SupAxoaxonic(SupAxoaxonic.prototype.path),
+        'SupBasket': SupBasket(SupBasket.prototype.path),
+        'SpinyStellate': SpinyStellate(SpinyStellate.prototype.path),
+        'NontuftedRS': NontuftedRS(NontuftedRS.prototype.path),
+        'TuftedIB': TuftedIB(TuftedIB.prototype.path),
+        'TuftedRS': TuftedRS(TuftedRS.prototype.path),
+        'DeepLTS':  DeepLTS(DeepLTS.prototype.path),
+        'DeepAxoaxonic': DeepAxoaxonic(DeepAxoaxonic.prototype.path),
+        'DeepBasket': DeepBasket(DeepBasket.prototype.path),
+        'TCR': TCR(TCR.prototype.path),
+        'nRT': nRT(nRT.prototype.path),
     }
     return _cellprototypes
 
