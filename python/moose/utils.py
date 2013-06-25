@@ -430,6 +430,8 @@ def assignDefaultTicks(modelRoot='/model', dataRoot='/data'):
     _moose.useClock(1, '%s/##[ISA=IntFire]'  % (modelRoot), 'process')
     _moose.useClock(1, '%s/##[ISA=Compartment]'  % (modelRoot), 'process')
     _moose.useClock(1, '%s/##[ISA=PulseGen]'  % (modelRoot), 'process')
+    _moose.useClock(1, '%s/##[ISA=StimulusTable]'  % (modelRoot), 'process')
+    _moose.useClock(1, '%s/##[ISA=TimeTable]'  % (modelRoot), 'process')
     _moose.useClock(2, '%s/##[ISA=ChanBase]'  % (modelRoot), 'process')
     _moose.useClock(2, '%s/##[ISA=MgBlock]'  % (modelRoot), 'process')
     _moose.useClock(3, '%s/##[ISA=CaConc]'  % (modelRoot), 'process')

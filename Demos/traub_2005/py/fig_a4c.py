@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Jun 24 18:43:47 2013 (+0530)
 # Version: 
-# Last-Updated: Mon Jun 24 23:39:18 2013 (+0530)
+# Last-Updated: Tue Jun 25 15:05:10 2013 (+0530)
 #           By: subha
-#     Update #: 70
+#     Update #: 161
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -66,10 +66,14 @@ d2 = 'comp_40'
 scale_x = 20e-3/150.0 # 150 pixels = 20 ms scalebar
 scale_y = 0.5e-9 / 40 # 40 pixels = 0.5 nA scalebar
 
+# These are the computed parameters for the stimulus current in fig A4C
+params = np.array([ -2.95506969e-01,   1.88994285e-01,  -1.00969140e-02,
+         2.22528805e-04,  -1.82993456e-06])
+
 def poly4(x, a, b, c, d, e):
     return a + x * (b + x * ( c + x * (d + x * e)))
 
-def get_stimulus_fit(filename='curve.txt'):
+def get_stimulus_fit(filename='curve_toscale.txt', scale_x=1.0, scale_y=1.0):
     data = np.loadtxt(filename)
     popt, pcov = curve_fit(poly4, data[:, 0]*scale_x, data[:, 1]*scale_y)
     return popt
@@ -84,15 +88,35 @@ def get_stimulus(path, start=10e-3, end=40e-3, dt=simdt):
     stim.vec = y
     return stim
 
+def create_stim(stimpath, starttime, stoptime, dt):
+    stim = moose.StimulusTable(stimpath)
+    # stim_data = np.loadtxt(filepath)
+    # y = stim_data[:, 1]*1e-9
+    y = poly4(np.arange(0, stoptime-starttime, dt)*1e3, *params)*1e-9
+    # The paper says the soma was held at -0.2 nA, assume that means a -0.2 nA current was being injected beforehand
+    y = y - y.min()
+    y[0] = -0.2e-9
+    y[-1] = -0.2e-9
+    # The data columns are in ms and nA units respectively.
+    stim.vec = y
+    stim.startTime = starttime
+    # stim.stopTime = starttime + (stim_data[:,0][-1] - stim_data[:,0][0])*1e-3
+    stim.stopTime = stoptime
+    stim.stepSize = dt
+    return stim
+    
+
 def run_model():
     model = moose.Neutral('/model')
+    data = moose.Neutral('/data')
     cell = TuftedIB('/model/TuftedIB')
-    stim = get_stimulus('/model/stim')
+    # stim = get_stimulus('/model/stim')
+    # The following, though loading the ImageJ fitted curve in scale, does not reproduce spiking in soma.
+    stim = create_stim('/model/stim', 2e-3, 42e-3, simdt)
     comp_d1 = moose.element('%s/%s' % (cell.path, d1))
     comp_d2 = moose.element('%s/%s' % (cell.path, d2))
     comp_soma = moose.element('%s/%s' % (cell.path, 'comp_1'))
     moose.connect(stim, 'output', comp_d1, 'injectMsg')
-    data = moose.Neutral('/data')
     tab_d1 = moose.Table('%s/d1_Vm' % (data.path))
     tab_d2 = moose.Table('%s/d2_Vm' % (data.path))
     tab_soma = moose.Table('%s/soma_Vm' % (data.path))
@@ -105,9 +129,14 @@ def run_model():
     utils.assignDefaultTicks()
     moose.reinit()
     utils.stepRun(simtime, 1e5*simdt, logger=config.logger)
-    for tab in moose.wildcardFind('/data/##[ISA=Table]'):
-        vm = moose.element(tab).vec
-        pylab.plot(np.linspace(0, simtime, len(vm)), vm, label=tab[0].name)
+    pylab.subplot(211)
+    pylab.plot(np.linspace(0, simtime, len(tab_d1.vec)), tab_d1.vec * 1e3, label='D1 Vm (mV)')
+    pylab.plot(np.linspace(0, simtime, len(tab_d2.vec)), tab_d2.vec * 1e3, label='D2 Vm (mV)')
+    pylab.plot(np.linspace(0, simtime, len(tab_soma.vec)), tab_soma.vec * 1e3, label='SOMA Vm (mV)')
+    pylab.legend()
+    pylab.subplot(212)
+    pylab.plot(np.linspace(0, simtime, len(tab_stim.vec)), tab_stim.vec * 1e9, label='Stimulus (nA)')
+    pylab.legend()
     pylab.show()
 
 if __name__ == '__main__':
