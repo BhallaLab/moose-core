@@ -1364,6 +1364,8 @@ void testOneDimDiffusionAcrossJunctions()
 			assert( doubleEq( svec[i], i + 100 ) );
 	}
 
+	GslStoich* gs1 = 
+		reinterpret_cast< GslStoich* >( compt[1].second.eref().data() );
 	s->doStart( DT * 0.5 );
 	// s->doStart( RUNTIME );
 	//
@@ -1377,8 +1379,6 @@ void testOneDimDiffusionAcrossJunctions()
 	assert( doubleEq( svec[4], 104 ) );
 	assert( doubleEq( svec[5], 105 - 0.1 ) );
 
-	GslStoich* gs1 = 
-		reinterpret_cast< GslStoich* >( compt[1].second.eref().data() );
 	for ( unsigned int i = 0; i < 5; ++i )
 		svec[i] = gs1->S(i)[0];
 	assert( doubleEq( svec[0], 105 ) );
