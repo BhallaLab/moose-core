@@ -373,6 +373,7 @@ void GslStoich::updateDiffusion(
 
 	// Simple forward Euler hack here. Later do a Crank Nicolson in
 	// alternating dimensions, as suggested by NumRec.
+	//for ( unsigned int me = 0; me < localMeshEntries_.size(); ++me ) {
 	for ( unsigned int me = 0; me < pools_.size(); ++me ) {
 		unsigned int numInRow = 
 			compartment_->getStencil( me, &adx, &colIndex);

@@ -139,6 +139,8 @@ void PsdMesh::handlePsdList(
 
 		psd_.clear();
 		pa_.clear();
+		parentDist_.clear();
+		parent_.clear();
 		vector< double >::const_iterator x = diskCoords.begin();
 		for ( unsigned int i = 0; i < parentVoxel.size(); ++i ) {
 			psd_.push_back( CylBase( *x, *(x+1), *(x+2), 1, 0, 1 ));

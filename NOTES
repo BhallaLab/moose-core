@@ -22345,4 +22345,30 @@ fixed up NeuroMesh, but need to do Spine and Psd mesh as well.
 Finally it runs through without barfing. Very slow, though. Takes over 10
 minutes, still doesn't complete 1 second . This is without adaptors. Still need a sensible way to decide how to hook them up.
 Reduced concs of gluR to better levels, now it finishes in about 35 seconds.
-Output isn't very interesting.
+Output isn't very interesting. No electrical activity. Checkin 4632.
+
+Made a small change in setup so that there is a gradient of Ca in the 
+NeuroMesh. Diffusion is not happening.
+
+Set diffConst nonzero, now the setup clears but the system fails at runtime.
+
+Fixed an indexing issue, another one crops up. Now the
+colIndex returned by the stencil is larger than the number of local
+mesh entries.
+Also the unit tests now fail. My last fix seems to have broken something.
+
+==========================================================================
+24 June.
+Actually the fix in GslStoichNumerics::updateDiffusion is not the cause of
+the failure of unit tests. Something else is, possibly from setting up the
+default nonzero compartments for NeuroMesh, SpineMesh and PsdMesh.
+
+==========================================================================
+25 June.
+Fixed that, it was indeed the defaults that were runing over. Now another
+bug revealed in testKsolve: testOneDimDiffusionAcrossJunctions,
+where the junction doesn't seem to be connected up.
+I wonder if this is the pools-size issue I ran into in updateDiffusion?
+Yes, that did it. I've reverted the change for now so that I can check it in.
+Will need to sort the logic out here and find why it fails in testSigNeur.
+
