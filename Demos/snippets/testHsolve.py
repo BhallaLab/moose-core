@@ -128,7 +128,7 @@ def create_spine( parentCompt, parentObj, index, frac, length, dia, theta ):
     sname = 'shaft' + str(index)
     hname = 'head' + str(index)
     shaft = moose.SymCompartment( parentObj.path + '/' + sname )
-    moose.connect( parentCompt, 'raxial2', shaft, 'raxial1', 'Single' )
+    moose.connect( parentCompt, 'cylinder', shaft, 'proximalOnly','Single' )
     x = parentCompt.x0 + frac * ( parentCompt.x - parentCompt.x0 )
     y = parentCompt.y0 + frac * ( parentCompt.y - parentCompt.y0 )
     z = parentCompt.z0 + frac * ( parentCompt.z - parentCompt.z0 )
@@ -151,7 +151,7 @@ def create_spine( parentCompt, parentObj, index, frac, length, dia, theta ):
     shaft.initVm = EREST_ACT
 
     head = moose.SymCompartment( parentObj.path + '/' + hname )
-    moose.connect( shaft, 'raxial2', head, 'raxial1', 'Single' )
+    moose.connect( shaft, 'distal', head, 'proximal', 'Single' )
     head.x0 = x
     head.y0 = sy
     head.z0 = sz

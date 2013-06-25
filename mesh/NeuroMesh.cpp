@@ -375,7 +375,7 @@ Id getParentFromMsg( Id id )
 	const Element* e = id.element();
 	const Finfo* finfo = id.element()->cinfo()->findFinfo( "axialOut" );
 	if ( e->cinfo()->isA( "SymCompartment" ) )
-		finfo = id.element()->cinfo()->findFinfo( "raxialOut" );
+		finfo = id.element()->cinfo()->findFinfo( "CONNECTTAIL" );
 	assert( finfo );
 	vector< Id > ret;
 	id.element()->getNeighbours( ret, finfo );
