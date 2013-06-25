@@ -490,17 +490,18 @@ Id ReadCell::buildCompartment(
 		length = sqrt( dx * dx + dy * dy + dz * dz );
 		if ( symmetricFlag_ ) {
 			// Now find all sibling compartments on the same parent.
-			// They must be connected up using CONNECTCROSS.
+			// They must be connected up using 'sibling'.
 			vector< Id > sibs;
 			parentId.element()->getNeighbours( sibs, raxial2OutFinfo );
 
+			// Later put in the soma as a sphere, with its special msgs.
 			shell_->doAddMsg( "Single",
-				parentId, "CONNECTHEAD", compt, "CONNECTTAIL" );
+				parentId, "distal", compt, "proximal" );
 
 			for ( vector< Id >::iterator i = sibs.begin(); 
 				i != sibs.end(); ++i ) {
 				shell_->doAddMsg( "Single",
-					compt, "CONNECTCROSS", *i, "CONNECTCROSS" );
+					compt, "sibling", *i, "sibling" );
 			}
 
 		} else {

@@ -22371,4 +22371,4 @@ where the junction doesn't seem to be connected up.
 I wonder if this is the pools-size issue I ran into in updateDiffusion?
 Yes, that did it. I've reverted the change for now so that I can check it in.
 Will need to sort the logic out here and find why it fails in testSigNeur.
-
+Checkin 4642.
