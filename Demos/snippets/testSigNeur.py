@@ -255,6 +255,7 @@ def createPool( compt, name, concInit ):
     pool = moose.Pool( compt.path + '/' + name )
     moose.connect( pool, 'mesh', meshEntries, 'mesh', 'Single' )
     pool.concInit = concInit
+    pool.diffConst = 1e-12
     return pool
 
 
@@ -506,7 +507,8 @@ def makeNeuroMeshModel():
     assert( ca.lastDimension == ndc )
 
     moose.ematrix( '/model/chem/spineMesh/headGluR' ).nInit = 100
-    moose.ematrix( '/model/chem/psdMesh/psdGluR' ).nInit = 200
+    moose.ematrix( '/model/chem/psdMesh/psdGluR' ).nInit = 0
+    #moose.ematrix( '/model/chem/psdMesh/psdGluR' ).nInit = 200
     printMolVecs( 'after setup, before addJunction' )
 
     #print ca
@@ -679,6 +681,8 @@ def testNeuroMeshMultiscale():
     plotName = 'nm.plot'
 
     makeNeuroMeshModel()
+    chemCa = moose.element( '/model/chem/neuroMesh/Ca[0]' )
+    chemCa.concInit = 0.001
     makeChemPlots()
     makeElecPlots()
     moose.setClock( 0, elecDt )
