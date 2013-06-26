@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Jun 24 18:43:47 2013 (+0530)
 # Version: 
-# Last-Updated: Tue Jun 25 15:05:10 2013 (+0530)
+# Last-Updated: Tue Jun 25 18:29:26 2013 (+0530)
 #           By: subha
-#     Update #: 161
+#     Update #: 194
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -104,6 +104,23 @@ def create_stim(stimpath, starttime, stoptime, dt):
     stim.stopTime = stoptime
     stim.stepSize = dt
     return stim
+
+def alpha_stimulus(stimpath, peak, peaktime, starttime, simtime, dt):
+    """Creates a stimulus in the alpha-function form with peak at
+    peaktime"""
+    t = np.arange(0, simtime, dt)
+    y = peak * t * np.exp(1 - t/peaktime) / peaktime
+    y1 = np.zeros(len(t))
+    indices = np.flatnonzero(t>starttime)
+    y1[indices[0]:] = y[:len(t)-indices[0]]
+    pylab.plot(t, y1)
+    pylab.show()
+    stim = moose.StimulusTable(stimpath)
+    stim.vec = y1
+    stim.startTime = 0
+    stim.stopTime = simtime
+    stim.stepSize = dt
+    return stim
     
 
 def run_model():
@@ -112,7 +129,8 @@ def run_model():
     cell = TuftedIB('/model/TuftedIB')
     # stim = get_stimulus('/model/stim')
     # The following, though loading the ImageJ fitted curve in scale, does not reproduce spiking in soma.
-    stim = create_stim('/model/stim', 2e-3, 42e-3, simdt)
+    # stim = create_stim('/model/stim', 2e-3, 42e-3, simdt)
+    stim = alpha_stimulus('/model/stim', 1.0e-9, 15e-3, 2e-3, simtime, simdt)
     comp_d1 = moose.element('%s/%s' % (cell.path, d1))
     comp_d2 = moose.element('%s/%s' % (cell.path, d2))
     comp_soma = moose.element('%s/%s' % (cell.path, 'comp_1'))
