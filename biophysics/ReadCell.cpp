@@ -374,7 +374,7 @@ Id ReadCell::buildCompartment(
 	vector< string >& argv )
 {
 	static const Finfo* raxial2OutFinfo =
-			SymCompartment::initCinfo()->findFinfo( "raxialOut" );
+			SymCompartment::initCinfo()->findFinfo( "distalOut" );
 	/*
 	 * This section determines the parent compartment, to connect up with axial
 	 * messages. Here 'parent' refers to the biophysical relationship within 
@@ -493,11 +493,9 @@ Id ReadCell::buildCompartment(
 			// They must be connected up using 'sibling'.
 			vector< Id > sibs;
 			parentId.element()->getNeighbours( sibs, raxial2OutFinfo );
-
 			// Later put in the soma as a sphere, with its special msgs.
 			shell_->doAddMsg( "Single",
 				parentId, "distal", compt, "proximal" );
-
 			for ( vector< Id >::iterator i = sibs.begin(); 
 				i != sibs.end(); ++i ) {
 				shell_->doAddMsg( "Single",
