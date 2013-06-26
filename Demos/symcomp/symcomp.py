@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jun 20 17:47:10 2013 (+0530)
 # Version: 
-# Last-Updated: Fri Jun 21 15:12:04 2013 (+0530)
+# Last-Updated: Wed Jun 26 11:43:47 2013 (+0530)
 #           By: subha
-#     Update #: 87
+#     Update #: 90
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -68,9 +68,9 @@ def test_symcompartment():
     d2.Rm = 1e8
     d2.Cm = 1e-10
     d2.Ra = 2e7
-    moose.connect(d1, 'CONNECTHEAD', soma, 'CONNECTTAIL')
-    moose.connect(d2, 'CONNECTHEAD', soma, 'CONNECTTAIL')
-    moose.connect(d1, 'CONNECTCROSS', d2, 'CONNECTCROSS')
+    moose.connect(d1, 'proximal', soma, 'distal')
+    moose.connect(d2, 'proximal', soma, 'distal')
+    moose.connect(d1, 'sibling', d2, 'sibling')
     pg = moose.PulseGen('/model/pulse')
     pg.delay[0] = 10e-3
     pg.width[0] = 20e-3

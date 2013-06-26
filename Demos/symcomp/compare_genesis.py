@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Jun 21 15:31:01 2013 (+0530)
 # Version: 
-# Last-Updated: Fri Jun 21 15:32:36 2013 (+0530)
+# Last-Updated: Wed Jun 26 14:38:58 2013 (+0530)
 #           By: subha
-#     Update #: 8
+#     Update #: 30
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -48,23 +48,28 @@
 from pylab import *
 
 moose_soma = loadtxt('symcompartment.txt')
-plot(moose_soma[:,0], moose_soma[:,1], 'r-', label='moose-soma')
-plot(moose_soma[:,0], moose_soma[:,2], 'g-', label='moose-d1')
-plot(moose_soma[:,0], moose_soma[:,3], 'b-', label='moose-d2')
+plot(moose_soma[:,0], moose_soma[:,1], color='#114477', ls='', marker='o', label='moose-soma', alpha=0.5)
+plot(moose_soma[:,0], moose_soma[:,2], color='#4477AA', ls='', marker='o', label='moose-d1', alpha=0.5)
+plot(moose_soma[:,0], moose_soma[:,3], color='#77AADD', ls='', marker='o', label='moose-d2', alpha=0.5)
+
+moose_soma = loadtxt('symcompartment_readcell.txt')
+plot(moose_soma[:,0], moose_soma[:,1], color='#117744', ls='', marker='x', label='moose-readcell-soma', alpha=0.5)
+plot(moose_soma[:,0], moose_soma[:,2], color='#44AAAA', ls='', marker='x', label='moose-readcell-d1', alpha=0.5)
+plot(moose_soma[:,0], moose_soma[:,3], color='#77CCCC', ls='', marker='x', label='moose-readcell-d2', alpha=0.5)
 
 gen_d1 = loadtxt('genesis_d1_Vm.txt')
 gen_soma = loadtxt('genesis_soma_Vm.txt')
 gen_d2 = loadtxt('genesis_d2_Vm.txt')
-plot(gen_soma[:, 0], gen_soma[:, 1], 'm-.', label='gen-soma')
-plot(gen_d1[:,0], gen_d1[:,1], 'c-.', label='gen-d1')
-plot(gen_d2[:,0], gen_d2[:,1], 'k-.', label='gen-d2')
+plot(gen_soma[:, 0], gen_soma[:, 1], color='#771122', ls='', marker='x', label='gen-soma', alpha=0.5)
+plot(gen_d1[:,0], gen_d1[:,1], color='#AA4455', ls='', marker='x', label='gen-d1', alpha=0.5)
+plot(gen_d2[:,0], gen_d2[:,1], color='#771155', ls='', marker='x', label='gen-d2', alpha=0.5)
 
 gen_d1 = loadtxt('genesis_readcell_d1_Vm.txt')
 gen_soma = loadtxt('genesis_readcell_soma_Vm.txt')
 gen_d2 = loadtxt('genesis_readcell_d2_Vm.txt')
-plot(gen_soma[:, 0], gen_soma[:, 1], 'm--', label='gen-readcell-soma')
-plot(gen_d1[:,0], gen_d1[:,1], 'c--', label='gen-readcell-d1')
-plot(gen_d2[:,0], gen_d2[:,1], 'k--', label='gen-readcell-d2')
+plot(gen_soma[:, 0], gen_soma[:, 1], color='#774411', ls='--', label='gen-readcell-soma', alpha=0.5)
+plot(gen_d1[:,0], gen_d1[:,1], color='#AA7744', ls='--', label='gen-readcell-d1', alpha=0.5)
+plot(gen_d2[:,0], gen_d2[:,1], color='#DDAA77', ls='--', label='gen-readcell-d2', alpha=0.5)
 
 legend()
 show()
