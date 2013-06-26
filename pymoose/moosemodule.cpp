@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Fri Jun 21 20:19:47 2013 (+0530)
+// Last-Updated: Wed Jun 26 22:33:46 2013 (+0530)
 //           By: subha
-//     Update #: 10453
+//     Update #: 10477
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -2041,9 +2041,19 @@ static struct module_state _state;
                                                &parent)){
             parse_success = true;
         }
-        PyErr_Clear();
         if (!parse_success){
             return -2;
+        }
+        PyErr_Clear();
+        // Sanity check of the arguments
+        if (dims != NULL){
+            if (!PyInt_Check(dims) && !PySequence_Check(dims)){
+                PyErr_SetString(PyExc_TypeError, "dimensions must be positive integer or a sequence of positive integers.");
+                return -1;
+            } else if (PyInt_Check(dims) && PyInt_AsLong(dims) < 0){
+                PyErr_SetString(PyExc_ValueError, "dimensions cannot be negative.");
+                return NULL;
+            }
         }
         string parent_path = "";
         if (parent != NULL){
