@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Thu Jun 27 12:06:52 2013 (+0530)
 # Version: 
-# Last-Updated: Thu Jun 27 12:31:21 2013 (+0530)
+# Last-Updated: Thu Jun 27 12:36:17 2013 (+0530)
 #           By: subha
-#     Update #: 27
+#     Update #: 29
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -112,6 +112,7 @@ def main():
     pylab.plot((t[stim_boundary[0]]), (vm.min()), 'r^', label='stimulus start')       
     pylab.plot((t[stim_boundary[-1]]), (vm.min()), 'gv', label='stimulus end')        
     pylab.legend()    
+    pylab.savefig('fig_a2_fs.png')
     pylab.show()
 
 if __name__ == '__main__':

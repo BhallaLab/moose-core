@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Jun 24 18:43:47 2013 (+0530)
 # Version: 
-# Last-Updated: Tue Jun 25 18:29:26 2013 (+0530)
+# Last-Updated: Thu Jun 27 14:43:22 2013 (+0530)
 #           By: subha
-#     Update #: 194
+#     Update #: 201
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -95,8 +95,8 @@ def create_stim(stimpath, starttime, stoptime, dt):
     y = poly4(np.arange(0, stoptime-starttime, dt)*1e3, *params)*1e-9
     # The paper says the soma was held at -0.2 nA, assume that means a -0.2 nA current was being injected beforehand
     y = y - y.min()
-    y[0] = -0.2e-9
-    y[-1] = -0.2e-9
+    # y[0] = -0.2e-9
+    # y[-1] = -0.2e-9
     # The data columns are in ms and nA units respectively.
     stim.vec = y
     stim.startTime = starttime
@@ -143,6 +143,9 @@ def run_model():
     moose.connect(tab_d2, 'requestData', comp_d2, 'get_Vm')
     moose.connect(tab_soma, 'requestData', comp_soma, 'get_Vm')
     moose.connect(stim, 'output', tab_stim, 'input')
+    # solver = moose.HSolve('%s/solver' % (cell.path))
+    # solver.dt = simdt
+    # solver.target = cell.path
     utils.setDefaultDt(elecdt=simdt,plotdt2=plotdt)
     utils.assignDefaultTicks()
     moose.reinit()
@@ -155,6 +158,7 @@ def run_model():
     pylab.subplot(212)
     pylab.plot(np.linspace(0, simtime, len(tab_stim.vec)), tab_stim.vec * 1e9, label='Stimulus (nA)')
     pylab.legend()
+    pylab.savefig('fig_a4c.png')
     pylab.show()
 
 if __name__ == '__main__':
