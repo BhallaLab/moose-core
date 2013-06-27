@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Jul 16 16:12:55 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Nov  8 18:44:00 2012 (+0530)
+# Last-Updated: Wed Jun 26 09:58:42 2013 (+0530)
 #           By: subha
-#     Update #: 518
+#     Update #: 522
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -62,7 +62,7 @@ class TestTuftedIB(SingleCellCurrentStepTest):
         SingleCellCurrentStepTest.setUp(self)
 
     def testVmSeriesPlot(self):
-        self.runsim(simtime, self.pulse_array)
+        self.runsim(simtime, 1000*plotdt, pulsearray=self.pulse_array)
         self.plot_vm()
 
     def testChannelDensities(self):
