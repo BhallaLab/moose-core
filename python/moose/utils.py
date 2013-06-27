@@ -429,7 +429,7 @@ def assignDefaultTicks(modelRoot='/model', dataRoot='/data', solver='hsolve'):
         modelRoot = modelRoot.path
     if isinstance(dataRoot, _moose.melement) or isinstance(dataRoot, _moose.ematrix):
         dataRoot = dataRoot.path
-    if solver != 'hsolve':
+    if solver != 'hsolve' or len(_moose.wildcardFind('%s/##[ISA=HSolve]' % (modelRoot))) == 0:
         _moose.useClock(0, '%s/##[ISA=Compartment]' % (modelRoot), 'init')
         _moose.useClock(1, '%s/##[ISA=Compartment]'  % (modelRoot), 'process')
         _moose.useClock(2, '%s/##[ISA=HHChannel]'  % (modelRoot), 'process')

@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jun 26 17:07:59 2013 (+0530)
 # Version: 
-# Last-Updated: Thu Jun 27 10:11:00 2013 (+0530)
+# Last-Updated: Thu Jun 27 12:38:46 2013 (+0530)
 #           By: subha
-#     Update #: 155
+#     Update #: 158
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -110,10 +110,10 @@ def main():
         pylab.title('%g nA' % (a*1e9))
         pylab.plot(t, vm, label='soma-Vm (mV)')
         stim_boundary = np.flatnonzero(np.diff(inject))
-        pylab.plot((t[stim_boundary[0]]), (vm.min()), 'r^', label='stimulus start')        
-                   
+        pylab.plot((t[stim_boundary[0]]), (vm.min()), 'r^', label='stimulus start')                           
         pylab.plot((t[stim_boundary[-1]]), (vm.min()), 'gv', label='stimulus end')        
         pylab.legend()    
+    pylab.savefig('fig_a3.png')
     pylab.show()
 
 if __name__ == '__main__':
