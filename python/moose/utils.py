@@ -424,15 +424,23 @@ def setDefaultDt(elecdt=1e-5, chemdt=0.01, tabdt=1e-5, plotdt1=1.0, plotdt2=0.25
     _moose.setClock(8, plotdt1) # kinetics sim
     _moose.setClock(9, plotdt2) # electrical sim
 
-def assignDefaultTicks(modelRoot='/model', dataRoot='/data'):
-    _moose.useClock(0, '%s/##[ISA=Compartment]' % (modelRoot), 'init')
+def assignDefaultTicks(modelRoot='/model', dataRoot='/data', solver='hsolve'):
+    if isinstance(modelRoot, _moose.melement) or isinstance(modelRoot, _moose.ematrix):
+        modelRoot = modelRoot.path
+    if isinstance(dataRoot, _moose.melement) or isinstance(dataRoot, _moose.ematrix):
+        dataRoot = dataRoot.path
+    if solver != 'hsolve':
+        _moose.useClock(0, '%s/##[ISA=Compartment]' % (modelRoot), 'init')
+        _moose.useClock(1, '%s/##[ISA=Compartment]'  % (modelRoot), 'process')
+        _moose.useClock(2, '%s/##[ISA=HHChannel]'  % (modelRoot), 'process')
+    _moose.useClock(0, '%s/##[ISA=HSolve]'  % (modelRoot), 'process')
     _moose.useClock(1, '%s/##[ISA=LeakyIaF]'  % (modelRoot), 'process')
     _moose.useClock(1, '%s/##[ISA=IntFire]'  % (modelRoot), 'process')
-    _moose.useClock(1, '%s/##[ISA=Compartment]'  % (modelRoot), 'process')
     _moose.useClock(1, '%s/##[ISA=PulseGen]'  % (modelRoot), 'process')
     _moose.useClock(1, '%s/##[ISA=StimulusTable]'  % (modelRoot), 'process')
     _moose.useClock(1, '%s/##[ISA=TimeTable]'  % (modelRoot), 'process')
-    _moose.useClock(2, '%s/##[ISA=ChanBase]'  % (modelRoot), 'process')
+    _moose.useClock(2, '%s/##[ISA=HHChannel2D]'  % (modelRoot), 'process')
+    _moose.useClock(2, '%s/##[ISA=SynChan]'  % (modelRoot), 'process')
     _moose.useClock(2, '%s/##[ISA=MgBlock]'  % (modelRoot), 'process')
     _moose.useClock(3, '%s/##[ISA=CaConc]'  % (modelRoot), 'process')
     _moose.useClock(7, '%s/##[ISA=DiffAmp]'  % (modelRoot), 'process')
