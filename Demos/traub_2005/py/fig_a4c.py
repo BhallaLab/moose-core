@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Jun 24 18:43:47 2013 (+0530)
 # Version: 
-# Last-Updated: Thu Jun 27 14:43:22 2013 (+0530)
+# Last-Updated: Fri Jun 28 12:12:51 2013 (+0530)
 #           By: subha
-#     Update #: 201
+#     Update #: 256
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -57,7 +57,7 @@ from cells import TuftedIB
 import config
 
 simtime = 100e-3
-simdt = 1e-6
+simdt = 2e-5
 plotdt=1e-4
 
 d1 = 'comp_44'
@@ -73,14 +73,18 @@ params = np.array([ -2.95506969e-01,   1.88994285e-01,  -1.00969140e-02,
 def poly4(x, a, b, c, d, e):
     return a + x * (b + x * ( c + x * (d + x * e)))
 
-def get_stimulus_fit(filename='curve_toscale.txt', scale_x=1.0, scale_y=1.0):
+def alpha(x, peak, tpeak):
+    return peak * x * np.exp(1 - x/tpeak)/tpeak
+
+def get_stimulus_fit(filename='a4c_stim_data.txt', scale_x=1.0, scale_y=1.0):
     data = np.loadtxt(filename)
-    popt, pcov = curve_fit(poly4, data[:, 0]*scale_x, data[:, 1]*scale_y)
+    # popt, pcov = curve_fit(poly4, data[:, 0]*scale_x, data[:, 1]*scale_y)
+    popt, pcov = curve_fit(alpha, data[:, 0]*scale_x, data[:, 1]*scale_y)    
     return popt
 
 def get_stimulus(path, start=10e-3, end=40e-3, dt=simdt):
     x = np.arange(start, end, dt)
-    y = poly4(x, *get_stimulus_fit())
+    y = alpha(x, *get_stimulus_fit())
     stim = moose.StimulusTable(path)
     stim.startTime = start
     stim.stopTime = end
@@ -88,11 +92,12 @@ def get_stimulus(path, start=10e-3, end=40e-3, dt=simdt):
     stim.vec = y
     return stim
 
-def create_stim(stimpath, starttime, stoptime, dt):
+def create_stim(stimpath, starttime, stoptime, dt, filename=None):
+    """if filename is specified, load stimulus data from file."""
     stim = moose.StimulusTable(stimpath)
     # stim_data = np.loadtxt(filepath)
     # y = stim_data[:, 1]*1e-9
-    y = poly4(np.arange(0, stoptime-starttime, dt)*1e3, *params)*1e-9
+    y = alpha(np.arange(0, stoptime-starttime, dt), *params)
     # The paper says the soma was held at -0.2 nA, assume that means a -0.2 nA current was being injected beforehand
     y = y - y.min()
     # y[0] = -0.2e-9
@@ -112,28 +117,26 @@ def alpha_stimulus(stimpath, peak, peaktime, starttime, simtime, dt):
     y = peak * t * np.exp(1 - t/peaktime) / peaktime
     y1 = np.zeros(len(t))
     indices = np.flatnonzero(t>starttime)
-    y1[indices[0]:] = y[:len(t)-indices[0]]
-    pylab.plot(t, y1)
-    pylab.show()
+    y1[indices[0]:] = y[:len(t)-indices[0]]    
+    # pylab.plot(t, y1)
+    # pylab.show()
     stim = moose.StimulusTable(stimpath)
     stim.vec = y1
-    stim.startTime = 0
+    stim.startTime = starttime
     stim.stopTime = simtime
     stim.stepSize = dt
     return stim
-    
 
 def run_model():
     model = moose.Neutral('/model')
     data = moose.Neutral('/data')
     cell = TuftedIB('/model/TuftedIB')
-    # stim = get_stimulus('/model/stim')
-    # The following, though loading the ImageJ fitted curve in scale, does not reproduce spiking in soma.
-    # stim = create_stim('/model/stim', 2e-3, 42e-3, simdt)
-    stim = alpha_stimulus('/model/stim', 1.0e-9, 15e-3, 2e-3, simtime, simdt)
+    stim = alpha_stimulus('/model/stim', 1.0e-9, 15e-3, 20e-3, simtime, simdt)
+    stim.startTime = 1e9
     comp_d1 = moose.element('%s/%s' % (cell.path, d1))
     comp_d2 = moose.element('%s/%s' % (cell.path, d2))
     comp_soma = moose.element('%s/%s' % (cell.path, 'comp_1'))
+    comp_soma.inject = -0.2e-9
     moose.connect(stim, 'output', comp_d1, 'injectMsg')
     tab_d1 = moose.Table('%s/d1_Vm' % (data.path))
     tab_d2 = moose.Table('%s/d2_Vm' % (data.path))
@@ -143,9 +146,9 @@ def run_model():
     moose.connect(tab_d2, 'requestData', comp_d2, 'get_Vm')
     moose.connect(tab_soma, 'requestData', comp_soma, 'get_Vm')
     moose.connect(stim, 'output', tab_stim, 'input')
-    # solver = moose.HSolve('%s/solver' % (cell.path))
-    # solver.dt = simdt
-    # solver.target = cell.path
+    solver = moose.HSolve('%s/solver' % (cell.path))
+    solver.dt = simdt
+    solver.target = cell.path
     utils.setDefaultDt(elecdt=simdt,plotdt2=plotdt)
     utils.assignDefaultTicks()
     moose.reinit()
