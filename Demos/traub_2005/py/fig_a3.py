@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jun 26 17:07:59 2013 (+0530)
 # Version: 
-# Last-Updated: Thu Jun 27 12:38:46 2013 (+0530)
+# Last-Updated: Fri Jun 28 16:05:19 2013 (+0530)
 #           By: subha
-#     Update #: 158
+#     Update #: 160
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -97,7 +97,7 @@ def main():
     for ii, a in enumerate(amps):
         do_sim(model_dict['stimulus'], a)   
         config.logger.info('##### %d' % (model_dict['tab_vm'].size))
-        vm = model_dict['tab_vm'].vec * 1e3
+        vm = model_dict['tab_vm'].vec
         inject = model_dict['tab_stim'].vec.copy()
         t = np.linspace(0, simtime, len(vm))
         fname = 'data_fig_a3_%s.txt' % (chr(ord('A')+ii))
