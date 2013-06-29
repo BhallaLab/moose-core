@@ -7,19 +7,18 @@
 # ** See the file COPYING.LIB for the full notice.
 # **********************************************************************/
  
-CXXFLAGS =	-g -lm -I/usr/include/python2.7
-
 OBJS =	\
- 	testMooseCuda.o \
+ 	launchHines.o \
 
-TARGET = testMooseCuda
+TARGET = testHines
 
 $(TARGET):	$(OBJS)
-		g++ -o $(TARGET) $(OBJS) $(LIBS) -lm -lpython2.7 -L/usr/lib/python2.7/config -L../cudaLibrary 
+		g++ -Wall -Wl,-rpath,../cudaLibrary -o $(TARGET) $(OBJS) ../cudaLibrary/libmooseCudaLibrary.so -lpthread 
 
 default: $(TARGET)
 
 %.o: %.cpp
 	g++ $(CXXFLAGS) -c -o "$@" "$<"
+	
 clean:
 	rm -f $(OBJS) $(TARGET)
