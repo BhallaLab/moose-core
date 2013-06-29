@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Jun 29 11:32:29 2013 (+0530)
 # Version: 
-# Last-Updated: Sat Jun 29 11:59:46 2013 (+0530)
+# Last-Updated: Sat Jun 29 12:11:04 2013 (+0530)
 #           By: subha
-#     Update #: 50
+#     Update #: 65
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -44,6 +44,7 @@
 # 
 
 # Code:
+import moose
 
 def many_ematrix_to_one_element():
     """This is an example of event messages from multiple SpikeGen objects
@@ -63,17 +64,26 @@ def many_ematrix_to_one_element():
     model = moose.Neutral('/model')
     # data = moose.Neutral('/data')
     synchan = moose.SynChan('/model/synchan')
+    # We MUST allocate the synapse elements first.
     synchan.synapse.num = 2
+    # Now we can access the individual synapse elements and their
+    # fields
+    synchan.synapse[0].delay = 1e-3
+    synchan.synapse[1].delay = 3e-3
+    synchan.synapse[0].weight = 0.5
+    synchan.synapse[1].weight = 2.0
     num_spikegen = 5
     spikegens = []
-    for ii in range(num_spikesource):
+    for ii in range(num_spikegen):
         spike = moose.SpikeGen('/model/spikegen_%d' % (ii))
-        msg = moose.connect(spike, 'event', synchan.synapse, 'addSpike', 'Sparse')
+        msg = moose.connect(spike, 'event', synchan.synapse[0], 'addSpike', 'Sparse')
         # This will create sparse_matrix[0][0] = synapse_index.
         # if ii is even, synapse_index=0, 1 otherwise
         msg.setEntry(0, 0, ii%2)
+    moose.showmsg(synchan.synapse)
     
-
+if __name__ == '__main__':
+    many_ematrix_to_one_element()
 
 # 
 # synapse.py ends here
