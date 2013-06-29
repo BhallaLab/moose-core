@@ -2,6 +2,7 @@
 ## Version 1.0 by Aditya Gilra, NCBS, Bangalore, India, 2011 for serial MOOSE
 ## Version 1.5 by Niraj Dudani, NCBS, Bangalore, India, 2012, ported to parallel MOOSE
 ## Version 1.6 by Aditya Gilra, NCBS, Bangalore, India, 2012, minor changes for parallel MOOSE
+## Version 1.7 by Aditya Gilra, NCBS, Bangalore, India, 2013, further support for NeuroML 1.8.1
 
 """
 NeuroML.py is the preferred interface. Use this only if NeuroML L1,L2,L3 files are misnamed/scattered.
@@ -60,8 +61,10 @@ class ChannelML():
         moosesynapse.tau2 = float(doub_exp_syn.attrib['decay_time'])*Tfactor # seconds
         ### The delay and weight can be set only after connecting a spike event generator.
         ### delay and weight are arrays: multiple event messages can be connected to a single synapse
-        moosesynapse.graded = False
-        moosesynapse.mgblock = False
+        moosesynapse_graded = moose.Mstring(moosesynapse.path+'/graded')
+        moosesynapse_graded.value = 'False'
+        moosesynapse_mgblock = moose.Mstring(moosesynapse.path+'/mgblock')
+        moosesynapse_mgblock.value = 'False'
       
     def readChannelML(self,channelElement,params={},units="SI units"):
         ## I first calculate all functions assuming a consistent system of units.
@@ -98,6 +101,15 @@ class ChannelML():
             if concdep is not None:
                 moosechannelIonDependency = moose.Mstring(moosechannel.path+'/ionDependency')
                 moosechannelIonDependency.value = concdep.attrib['ion']
+
+        nernstnote = IVrelation.find('./{'+utils.meta_ns+'}notes')
+        if nernstnote is not None:
+            ## the text in nernstnote is "Nernst,Cout=<float>,z=<int>"
+            nernst_params = string.split(nernstnote.text,',')
+            if nernst_params[0] == 'Nernst':
+                nernstMstring = moose.Mstring(moosechannel.path+'/nernst_str')
+                nernstMstring.value = str( float(string.split(nernst_params[1],'=')[1]) * concfactor ) + \
+                                        ',' + str( int(string.split(nernst_params[2],'=')[1]) )
         
         gates = IVrelation.findall('./{'+self.cml+'}gate')
         if len(gates)>3:
@@ -174,6 +186,7 @@ class ChannelML():
             else:
                 moosegate = moose.HHGate2D( gate_path )
                         
+            ##### If alpha and beta functions exist, make them here
             for transition in gate.findall('./{'+self.cml+'}transition'):
                 ## make python functions with names of transitions...
                 fn_name = transition.attrib['name']
@@ -184,26 +197,32 @@ class ChannelML():
                 else:
                     print "Unsupported transition ", name
                     sys.exit()
+            
+            time_course = gate.find('./{'+self.cml+'}time_course')
+            ## tau is divided by self.q10factor in make_function()
+            ## thus, it gets divided irrespective of <time_course> tag present or not.
+            if time_course is not None:
+                self.make_cml_function(time_course, 'tau', concdep)
+            steady_state = gate.find('./{'+self.cml+'}steady_state')
+            if steady_state is not None:
+                self.make_cml_function(steady_state, 'inf', concdep)
+
+            if concdep is None: ca_name = ''                        # no Ca dependence
+            else: ca_name = ','+concdep.attrib['variable_name']     # Ca dependence
+            
+            ## Create tau() and inf() if not present, from alpha() and beta()
+            for fn_element,fn_name,fn_expr in [(time_course,'tau',"1/(alpha+beta)"),\
+                                                (steady_state,'inf',"alpha/(alpha+beta)")]:
+                ## put in args for alpha and beta, could be v and Ca dep.
+                expr_string = self.replace(fn_expr, 'alpha', 'self.alpha(v'+ca_name+')')
+                expr_string = self.replace(expr_string, 'beta', 'self.beta(v'+ca_name+')')                
+                ## if time_course/steady_state are not present,
+                ## then alpha annd beta transition elements should be present, and fns created.
+                if fn_element is None:
+                        self.make_function(fn_name,'generic',expr_string=expr_string,concdep=concdep)
 
             ## non Ca dependent channel
             if concdep is None:
-                time_course = gate.find('./{'+self.cml+'}time_course')
-                ## tau is divided by self.q10factor in make_function()
-                ## thus, it gets divided irrespective of <time_course> tag present or not.
-                if time_course is None:     # if time_course element is not present,
-                                            # there have to be alpha and beta transition elements
-                    self.make_function('tau','generic',\
-                        expr_string="1/(self.alpha(v)+self.beta(v))")
-                else:
-                    self.make_cml_function(time_course, 'tau')
-                steady_state = gate.find('./{'+self.cml+'}steady_state')
-                if steady_state is None:    # if steady_state element is not present,
-                                            # there have to be alpha and beta transition elements
-                    self.make_function('inf','generic',\
-                        expr_string="self.alpha(v)/(self.alpha(v)+self.beta(v))")
-                else:
-                    self.make_cml_function(steady_state, 'inf')
-
                 ## while calculating, use the units used in xml defn,
                 ## while filling in table, I convert to SI units.
                 v0 = VMIN_here - vNegOffset
@@ -214,9 +233,9 @@ class ChannelML():
                     v = v0 + i * dv_here
                     
                     inf = self.inf(v)
-                    tau = self.tau(v)
-                    
+                    tau = self.tau(v)                    
                     ## convert to SI before writing to table
+                    ## qfactor is already in inf and tau
                     tableA[i] = inf/tau / Tfactor
                     tableB[i] = 1.0/tau / Tfactor
                 
@@ -227,6 +246,8 @@ class ChannelML():
             else:
                 ## UNITS: while calculating, use the units used in xml defn,
                 ##        while filling in table, I convert to SI units.
+                ##        Note here Ca units do not enter, but
+                ##         units of CaMIN, CaMAX and ca_conc in fn expr should match.
                 v = VMIN_here - vNegOffset
                 CaMIN = float(concdep.attrib['min_conc'])
                 CaMAX = float(concdep.attrib['max_conc'])
@@ -240,13 +261,12 @@ class ChannelML():
                 for i in range(NDIVS_here+1):
                     Ca = CaMIN
                     for j in range(CaNDIVS+1):
+                        inf = self.inf(v,Ca)
+                        tau = self.tau(v,Ca)
                         ## convert to SI (Tfactor) before writing to table
-                        ## in non-Ca channels, I put in q10factor into tau,
-                        ## which percolated to A and B
-                        ## Here, I do not calculate tau, so put q10factor directly into A and B.
-                        alpha = self.alpha(v,Ca)*self.q10factor/Tfactor
-                        tableA[i][j] = alpha
-                        tableB[i][j] = alpha+self.beta(v,Ca)*self.q10factor/Tfactor
+                        ## qfactor is already in inf and tau
+                        tableA[i][j] = inf/tau / Tfactor
+                        tableB[i][j] = 1.0/tau / Tfactor
                         Ca += dCa
                     v += dv_here
 
@@ -294,12 +314,14 @@ class ChannelML():
             Gfactor = 1e1 # S/m^2 from mS/cm^2
             concfactor = 1e6 # mol/m^3 from mol/cm^3
             Lfactor = 1e-2 # m from cm
+            Ifactor = 1e-6 # A from microA
         else:
             Vfactor = 1.0
             Tfactor = 1.0
             Gfactor = 1.0
             concfactor = 1.0
             Lfactor = 1.0
+            Ifactor = 1.0
         moose.Neutral('/library') # creates /library in MOOSE tree; elif present, wraps
         ionSpecies = ionConcElement.find('./{'+self.cml+'}ion_species')
         if ionSpecies is not None:
@@ -312,9 +334,20 @@ class ChannelML():
         poolModel = ionConcElement.find('./{'+self.cml+'}decaying_pool_model')
         caPool.CaBasal = float(poolModel.attrib['resting_conc']) * concfactor
         caPool.Ca_base = float(poolModel.attrib['resting_conc']) * concfactor
-        caPool.tau = float(poolModel.attrib['decay_constant']) * Tfactor
+        if 'decay_constant' in poolModel.attrib:
+            caPool.tau = float(poolModel.attrib['decay_constant']) * Tfactor
+        elif 'inv_decay_constant' in poolModel.attrib:
+            caPool.tau = 1.0/float(poolModel.attrib['inv_decay_constant']) * Tfactor
+        ## Only one of pool_volume_info or fixed_pool_info should be present, but not checking
         volInfo = poolModel.find('./{'+self.cml+'}pool_volume_info')
-        caPool.thick = float(volInfo.attrib['shell_thickness']) * Lfactor
+        if volInfo is not None:
+            caPool.thick = float(volInfo.attrib['shell_thickness']) * Lfactor
+        fixedPoolInfo = poolModel.find('./{'+self.cml+'}fixed_pool_info')
+        if fixedPoolInfo is not None:
+            ## Put in phi under the caPool, so that it can 
+            ## be used instead of thickness to set B (see section 19.2 in Book of Genesis)
+            caPool_phi = moose.Mstring(caPool.path+'/phi')
+            caPool_phi.value = str( float(fixedPoolInfo.attrib['phi']) * concfactor/Ifactor/Tfactor )
         ## Put a high ceiling and floor for the Ca conc
         #~ self.context.runG('setfield ' + caPool.path + ' ceiling 1e6')
         #~ self.context.runG('setfield ' + caPool.path + ' floor 0.0')
@@ -328,6 +361,8 @@ class ChannelML():
             ## OOPS! These expressions should be in SI units, since I converted to SI
             ## Ideally I should not convert to SI and have the user consistently use one or the other
             ## Or convert constants in these expressions to SI, only voltage and ca_conc appear!
+            ## NO! SEE ABOVE, for calculating values for tables, I use units specified in xml file,
+            ## then I convert to SI while writing to MOOSE internal tables.
             expr_string = element.attrib['expr']
             if concdep is None: ca_name = ''                        # no Ca dependence
             else: ca_name = ','+concdep.attrib['variable_name']     # Ca dependence
