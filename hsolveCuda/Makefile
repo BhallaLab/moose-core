@@ -6,16 +6,24 @@
 # ** GNU Lesser General Public License version 2.1
 # ** See the file COPYING.LIB for the full notice.
 # **********************************************************************/
- 
- SUBDIR = \
+
+#TODO: imported from main Makefile for test, after we can remove it
+BUILD=debug
+ifeq ($(BUILD),debug)
+CXXFLAGS = -g -pthread -fpermissive -fno-strict-aliasing -fPIC -fno-inline-functions -Wall -Wno-long-long -pedantic -DDO_UNIT_TESTS -DUSE_GENESIS_PARSER
+USE_GSL = 1
+endif
+####################################################################
+
+SUBDIR = \
 	cudaLibrary \
-	test	\
+	testMoose	\
+	testHines	\
 
 TARGET = _hsolveCuda.o
 
 OBJ = \
-	HSolveCuda.o 	\
-	testHSolveCuda.o \
+	HSolveCuda.o 	
 
 HEADERS = \
 	../basecode/header.h
@@ -25,7 +33,6 @@ default: $(TARGET)
 $(OBJ)	: $(HEADERS)
 testHSolveCuda.o: testHSolveCuda.cpp
 HSolveCuda.o: HSolveCuda.cpp HSolveCuda.h
-test.o: test.cpp
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) $(SMOLDYN_FLAGS) -I/usr/local/cuda/include -I. -I../basecode -I../msg $< -c 
