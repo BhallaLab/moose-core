@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Wed Jun 26 23:23:38 2013 (+0530)
+// Last-Updated: Sat Jun 29 10:57:56 2013 (+0530)
 //           By: subha
-//     Update #: 10353
+//     Update #: 10367
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -1368,6 +1368,7 @@ static struct module_state _state;
         PyObject * ret = Py_BuildValue("I", id);
         return ret;
     }
+    
     /**
        Not to be redone. 2011-03-23 14:42:48 (+0530)
     */
@@ -1380,6 +1381,7 @@ static struct module_state _state;
         PyObject * ret = Py_BuildValue("s", path.c_str());
         return ret;
     }
+    
     ////////////////////////////////////////////
     // Subset of sequence protocol functions
     ////////////////////////////////////////////
@@ -1395,6 +1397,7 @@ static struct module_state _state;
             return (Py_ssize_t)dims[0];
         }
     }
+    
     static PyObject * moose_Id_getShape(_Id * self)
     {
         vector< unsigned int> dims = Field< vector <unsigned int> >::get(self->id_, "objectDimensions");
@@ -1414,6 +1417,7 @@ static struct module_state _state;
         }
         return ret;
     }
+    
     static PyObject * moose_Id_getItem(_Id * self, Py_ssize_t index)
     {
         if (!Id::isValid(self->id_)){
@@ -1431,6 +1435,7 @@ static struct module_state _state;
         ret->oid_ = ObjId(self->id_, index);
         return (PyObject*)ret;
     }
+    
     static PyObject * moose_Id_getSlice(_Id * self, PyObject * args)
     {
         if (!Id::isValid(self->id_)){
@@ -4748,24 +4753,24 @@ static struct module_state _state;
     static PyObject * moose_ObjId_get_elementField_attr(PyObject * self,
                                                        void * closure)
     {
-      if (!PyObject_IsInstance(self, (PyObject*)&ObjIdType)){
-            PyErr_SetString(PyExc_TypeError,
-                            "First argument must be an instance of element");
-            return NULL;
-        }
+      // if (!PyObject_IsInstance(self, (PyObject*)&ObjIdType)){
+      //       PyErr_SetString(PyExc_TypeError,
+      //                       "First argument must be an instance of element");
+      //       return NULL;
+      //   }
         _ObjId * obj = (_ObjId*)self;
         if (!Id::isValid(obj->oid_.id)){
             RAISE_INVALID_ID(NULL, "moose_ObjId_get_elementField_attr");
         }
         char * name = NULL;
         if (!PyArg_ParseTuple((PyObject *)closure,
-                              "s:moose_ObjId_get_lookupField_attr: expected a string in getter closure.",
+                              "s:moose_ObjId_get_elementField_attr: expected a string in getter closure.",
                               &name)){
             return NULL;
         }
         // If the ElementField already exists, return it
         string full_name = obj->oid_.path() + "." + string(name);
-        //        cout << "ElementField fullname: " << full_name << endl;
+        // cout << "ElementField fullname: " << full_name << endl;
         map<string, PyObject * >::iterator it = get_inited_elementfields().find(full_name);
         if (it != get_inited_elementfields().end()){
             Py_XINCREF(it->second);
@@ -4871,8 +4876,11 @@ static struct module_state _state;
             return NULL;
         }
         _ObjId * oid = PyObject_New(_ObjId, &ObjIdType);
-//        cout << "Element field: " << self->name << ", owner: " << self->owner.path() << endl;
-        oid->oid_ = ObjId(Id(self->owner.path() + "/" + self->name), DataId(index));
+        // cout << "Element field: " << self->name << ", owner: " << self->owner.path() << endl;
+        stringstream path;
+        path << self->owner.path() << "/" << self->name << "[" << index << "]";
+        // cout << "moose_ElementField_getItem:: path=" << path.str();
+        oid->oid_ = ObjId(path.str());
         return (PyObject*)oid;
     }
 
