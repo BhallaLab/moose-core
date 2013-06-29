@@ -53,6 +53,7 @@ slowET._namespace_map[xsi_ns] = 'xsi'
 #ET.register_namespace('xsi',xsi_ns)
 
 CELSIUS_default = 32.0 # deg C # default temperature if meta:property tag for temperature is not present
+ZeroCKelvin = 273.15 # zero dec C in Kelvin
 VMIN = -0.1 # Volts
 VMAX = 0.1 # Volts
 NDIVS = 200 # number
