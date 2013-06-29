@@ -2,6 +2,7 @@
 ## Version 1.0 by Aditya Gilra, NCBS, Bangalore, India, 2011 for serial MOOSE
 ## Version 1.5 by Niraj Dudani, NCBS, Bangalore, India, 2012, ported to parallel MOOSE
 ## Version 1.6 by Aditya Gilra, NCBS, Bangalore, India, 2012, further changes for parallel MOOSE
+## Version 1.7 by Aditya Gilra, NCBS, Bangalore, India, 2013, further support for NeuroML 1.8.1
 
 """
 NeuroML.py is the preferred interface. Use this only if NeuroML L1,L2,L3 files are misnamed/scattered.
@@ -18,8 +19,8 @@ import sys
 import math
 from os import path
 import moose
-from moose import utils
-from moose.neuroml.utils import neuroml_debug, find_first_file
+from moose import utils as moose_utils
+from moose.neuroml import utils as neuroml_utils
 from ChannelML import ChannelML
 
 class MorphML():
@@ -34,6 +35,7 @@ class MorphML():
         self.cellDictByCableId={}
         self.nml_params = nml_params
         self.model_dir = nml_params['model_dir']
+        self.temperature = nml_params['temperature']
 
     def readMorphMLFromFile(self,filename,params={}):
         """
@@ -178,7 +180,7 @@ class MorphML():
                 ## with the potential synapses on this segment, in function set_compartment_param(..)
                 self.segDict[running_segid] = [running_comp.name,(running_comp.x0,running_comp.y0,running_comp.z0),\
                     (running_comp.x,running_comp.y,running_comp.z),running_comp.diameter,running_comp.length,[]]
-                if neuroml_debug: print 'Set up compartment/section', running_comp.name
+                if neuroml_utils.neuroml_debug: print 'Set up compartment/section', running_comp.name
 
         ###############################################
         #### load cablegroups into a dictionary
@@ -320,7 +322,8 @@ class MorphML():
                 #### Connect the Ca pools and channels
                 #### Am connecting these at the very end so that all channels and pools have been created
                 #### Note: this function is in moose.utils not moose.neuroml.utils !
-                utils.connect_CaConc(self.cellDictByCableId[cellname][1].values())
+                moose_utils.connect_CaConc(self.cellDictByCableId[cellname][1].values(),\
+                    self.temperature+neuroml_utils.ZeroCKelvin) # temperature should be in Kelvin for Nernst
         
         ##########################################################
         #### load connectivity / synapses into the compartments
@@ -391,7 +394,7 @@ class MorphML():
                 if not moose.exists("/library/"+mechanismname):
                     cmlR = ChannelML(self.nml_params)
                     model_filename = mechanismname+'.xml'
-                    model_path = find_first_file(model_filename,self.model_dir)
+                    model_path = neuroml_utils.find_first_file(model_filename,self.model_dir)
                     if model_path is not None:
                         cmlR.readChannelMLFromFile(model_path)
                     else:
@@ -405,11 +408,13 @@ class MorphML():
                 if 'CaConc' == neutralObj.class_: # Ion concentration pool
                     libcaconc = moose.CaConc("/library/"+mechanismname)
                     ## deep copies the library caconc under the compartment
-                    channel = moose.copy(libcaconc,compartment,mechanismname)
-                    channel = moose.CaConc(channel)
+                    caconc = moose.copy(libcaconc,compartment,mechanismname)
+                    caconc = moose.CaConc(caconc)
                     ## CaConc connections are made later using connect_CaConc()
                     ## Later, when calling connect_CaConc,
-                    ## B is set for caconc based on thickness of Ca shell and compartment l and dia.
+                    ## B is set for caconc based on thickness of Ca shell and compartment l and dia
+                    ## OR based on the Mstring phi under CaConc path.
+                    channel = None
                 elif 'HHChannel2D' == neutralObj.class_ : ## HHChannel2D
                     libchannel = moose.HHChannel2D("/library/"+mechanismname)
                     ## deep copies the library channel under the compartment
@@ -427,16 +432,31 @@ class MorphML():
                 neutralObj = moose.Neutral(compartment.path+'/'+mechanismname)
                 if 'CaConc' == neutralObj.class_: # Ion concentration pool
                     caconc = moose.CaConc(compartment.path+'/'+mechanismname) # wraps existing channel
+                    channel = None
                 elif 'HHChannel2D' == neutralObj.class_ : ## HHChannel2D
                     channel = moose.HHChannel2D(compartment.path+'/'+mechanismname) # wraps existing channel
                 elif 'HHChannel' == neutralObj.class_ : ## HHChannel
                     channel = moose.HHChannel(compartment.path+'/'+mechanismname) # wraps existing channel
             if name == 'Gbar':
-                channel.Gbar = value*math.pi*compartment.diameter*compartment.length
+                if channel is None: # if CaConc, neuroConstruct uses gbar for thickness or phi
+                    ## If child Mstring 'phi' is present, set gbar as phi
+                    ## BUT, value has been multiplied by Gfactor as a Gbar,
+                    ## SI or physiological not known here,
+                    ## ignoring Gbar for CaConc, instead of passing units here
+                    child = moose_utils.get_child_Mstring(caconc,'phi')
+                    if child is not None:
+                        #child.value = value
+                        pass
+                    else:
+                        #caconc.thick = value
+                        pass
+                else: # if ion channel, usual Gbar
+                    channel.Gbar = value*math.pi*compartment.diameter*compartment.length
             elif name == 'Ek':
                 channel.Ek = value
-            elif name == 'thick':
+            elif name == 'thick': # thick seems to be NEURON's extension to NeuroML level 2.
                 caconc.thick = value ## JUST THIS WILL NOT DO - HAVE TO SET B based on this thick!
                 ## Later, when calling connect_CaConc,
                 ## B is set for caconc based on thickness of Ca shell and compartment l and dia.
-        if neuroml_debug: print "Setting ",name," for ",compartment.path," value ",value
+                ## OR based on the Mstring phi under CaConc path.
+        if neuroml_utils.neuroml_debug: print "Setting ",name," for ",compartment.path," value ",value
