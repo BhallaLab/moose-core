@@ -736,7 +736,15 @@ def blockChannels(cell, channel_list):
                     if channame in chan.name:
                         chan.Gbar = 0.0
 
-def connect_CaConc(compartment_list):
+def get_child_Mstring(mooseobject,mstring):
+    for childid in mooseobject.children:
+        child = _moose.Neutral(childid)
+        if child.class_=='Mstring' and child.name==mstring:
+            child = _moose.Mstring(child)
+            return child
+    return None
+
+def connect_CaConc(compartment_list, temperature=None):
     """ Connect the Ca pools and channels within each of the compartments in compartment_list
      Ca channels should have a child Mstring named 'ion' with value set in MOOSE.
      Ca dependent channels like KCa should have a child Mstring called 'ionDependency' with value set in MOOSE.
@@ -749,11 +757,16 @@ def connect_CaConc(compartment_list):
                 caconc = _moose.CaConc(child)
                 break
         if caconc is not None:
-            ## B has to be set for caconc based on thickness of Ca shell and compartment l and dia.
-            ## I am using a translation from Neuron, hence this method.
-            ## In Genesis, gmax / (surfacearea*thick) is set as value of B!
-            caconc.B = 1 / (2*FARADAY) / \
-                (math.pi*compartment.diameter*compartment.length * caconc.thick)
+            child = get_child_Mstring(caconc,'phi')
+            if child is not None:
+                caconc.B = float(child.value) # B = phi by definition -- see neuroml 1.8.1 defn
+            else:
+                ## B has to be set for caconc based on thickness of Ca shell and compartment l and dia,
+                ## OR based on the Mstring phi under CaConc path.
+                ## I am using a translation from Neuron for mitral cell, hence this method.
+                ## In Genesis, gmax / (surfacearea*thick) is set as value of B!
+                caconc.B = 1 / (2*FARADAY) / \
+                    (math.pi*compartment.diameter*compartment.length * caconc.thick)
             for child in compartment.children:
                 neutralwrap = _moose.Neutral(child)
                 if neutralwrap.class_ == 'HHChannel':
@@ -761,11 +774,23 @@ def connect_CaConc(compartment_list):
                     ## If child Mstring 'ion' is present and is Ca, connect channel current to caconc
                     for childid in channel.children:
                         child = _moose.Neutral(childid)
-                        if child.class_=='Mstring' and child.name=='ion':
+                        if child.class_=='Mstring':
                             child = _moose.Mstring(child)
-                            if child.value in ['Ca','ca']:
-                                _moose.connect(channel,'IkOut',caconc,'current')
-                                print 'Connected IkOut of',channel.path,'to current of',caconc.path
+                            if child.name=='ion':
+                                if child.value in ['Ca','ca']:
+                                    _moose.connect(channel,'IkOut',caconc,'current')
+                                    print 'Connected IkOut of',channel.path,'to current of',caconc.path
+                            ## temperature is used only by Nernst part here...
+                            if child.name=='nernst_str':
+                                nernst = _moose.Nernst(channel.path+'/nernst')
+                                nernst_params = string.split(child.value,',')
+                                nernst.Cout = float(nernst_params[0])
+                                nernst.valence = float(nernst_params[1])
+                                nernst.Temperature = temperature
+                                _moose.connect(nernst,'Eout',channel,'set_Ek')
+                                _moose.connect(caconc,'concOut',nernst,'ci')
+                                print 'Connected Nernst',nernst.path
+                            
                 if neutralwrap.class_ == 'HHChannel2D':
                     channel = _moose.HHChannel2D(child)
                     ## If child Mstring 'ionDependency' is present, connect caconc Ca conc to channel
