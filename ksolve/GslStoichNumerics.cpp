@@ -390,6 +390,7 @@ void GslStoich::updateDiffusion(
 			*/
 		for ( unsigned int i = 0; i < numInRow; ++i ) {
 			unsigned int other = colIndex[i];
+			assert( other < lastS.size() );
 
 			// Get all concs at the other meshEntry
 			const double* sOther = &( lastS[other][0] ); 

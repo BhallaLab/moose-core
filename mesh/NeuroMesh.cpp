@@ -370,20 +370,26 @@ unsigned int NeuroMesh::innerGetDimensions() const
 	return 3;
 }
 
-Id getParentFromMsg( Id id )
+Id tryParent( Id id, const string& msgName )
 {
-	const Element* e = id.element();
-	const Finfo* finfo = id.element()->cinfo()->findFinfo( "axialOut" );
-	if ( e->cinfo()->isA( "SymCompartment" ) )
-		finfo = id.element()->cinfo()->findFinfo( "CONNECTTAIL" );
-	assert( finfo );
+	const Finfo* finfo = id.element()->cinfo()->findFinfo( msgName );
+	if ( !finfo )
+		return Id();
 	vector< Id > ret;
 	id.element()->getNeighbours( ret, finfo );
 	assert( ret.size() <= 1 );
 	if ( ret.size() == 1 )
-			return ret[0];
-	else 
-			return Id();
+		return ret[0];
+	return Id();
+}
+
+Id getParentFromMsg( Id id )
+{
+	if ( id.element()->cinfo()->isA( "Compartment" ) )
+		return tryParent( id, "axialOut" );
+	if ( id.element()->cinfo()->isA( "SymCompartment" ) )
+		return tryParent( id, "proximalOut" );
+	return Id();
 }
 
 Id NeuroMesh::putSomaAtStart( Id origSoma, unsigned int maxDiaIndex )
@@ -641,8 +647,10 @@ vector< Id > spineVec( const vector< Id >& head )
 	const Finfo* axialFinfo = ccinfo->findFinfo( "axialOut" ); // to pa
 	const Finfo* raxialFinfo = ccinfo->findFinfo( "raxialOut" ); // to kids
 	const Cinfo* scinfo = Cinfo::find( "SymCompartment" );
-	const Finfo* r1Finfo = scinfo->findFinfo( "raxialOut" ); // to kids
-	const Finfo* r2Finfo = scinfo->findFinfo( "raxial2Out" ); // to pa/sibs
+	const Finfo* r1Finfo = scinfo->findFinfo( "distalOut" ); // to kids
+	const Finfo* r2Finfo = scinfo->findFinfo( "proximalOut" ); // to pa
+	assert( r1Finfo );
+	assert( r2Finfo );
 	map< Id, Id > spineMap;
 	for ( vector< Id >::const_iterator i = head.begin(); i != head.end(); ++i )
 	{
@@ -681,8 +689,10 @@ Id getSpineParent( Id spine, Id head )
 	const Finfo* axialFinfo = ccinfo->findFinfo( "axialOut" ); // to pa
 	const Finfo* raxialFinfo = ccinfo->findFinfo( "raxialOut" ); // to kids
 	const Cinfo* scinfo = Cinfo::find( "SymCompartment" );
-	const Finfo* r1Finfo = scinfo->findFinfo( "raxialOut" ); // to kids
-	const Finfo* r2Finfo = scinfo->findFinfo( "raxial2Out" ); // to pa/sibs
+	const Finfo* r1Finfo = scinfo->findFinfo( "distalOut" ); // to kids
+	const Finfo* r2Finfo = scinfo->findFinfo( "proximalOut" ); // to pa
+	assert( r1Finfo );
+	assert( r2Finfo );
 	Id pa;
 	Element* se = spine.element();
 	vector< Id > ret;
