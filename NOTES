@@ -22376,5 +22376,68 @@ Checkin 4642.
 Some more fixes to HSolveUtils and thereabouts. This gets it to run, but
 it doesn't seem to be finding all the compartments:
 Warning: HSolve::setPath(): No compartments found at or below '/n/compt'
+Turns out that it is OK, the first time round it converts all compartments
+to zombies, and subsequently setPath can't find them. Should actually have a
+common base class for compartments.
+Checkin 4645.
 
 ==========================================================================
+26 June
+The psdMesh may need a way to expand its array for doing the data transfer.
+I thought this is not needed, but needs checking.
+
+==========================================================================
+29 June
+Did a test for diffusion along the NeuroMesh. Raised diffConst to 5e-11 since
+the sim only runs for 1 sec. This is looking good. 
+The diffusion to the spine-head also looks promising.
+I should do a test model with something that diffuses between all compartments,
+just to be sure that the diffusion calculations are OK.
+
+There is a crash on exit with the testSigNeur.py.
+No problem when doing unit tests.
+No problem when doing regression tests.
+The error is in one of the Ca elements.
+
+Added a PSD Ca pool. It fails to diffuse.
+I should report the messaging from the SpineMesh. Actually from the ksolve.
+	OK. It has the right junctions
+I should report the # of compts in each of the meshes.
+
+I need to spawn off a number of snippets
+- Single compartment SigNeur
+- CubeMesh 3 compartment SigNeur
+
+==========================================================================
+30 June.
+Reporting # of compts in the meshes: SpineMesh is only 10, is not seeing
+the psd mesh.
+
+MECS
+scemm
+chelm
+scema
+ecs
+Multiscale
+Electrical
+Chemical/Kinetic/mass action/reaction-diffusion
+Compartmental
+Spatial/anatomically detailed/anatomically realistic/morphological
+	geometrical
+ckielm
+mecks
+meck
+elecks erdimm
+crems
+gderd
+mdeck
+eculture edish eplay ecell neuro physion decsign designeur 
+	detailed electrical signaling interface to geometrical neurons
+rdesigneur: reaction-diffusion and electrical signaling interface for generating neurons
+schema spatial chemical electrical multiscale analysis
+
+Implemented a single-compartment SigNeur model in 
+	cubeMeshSigNeur.py.
+
+==========================================================================
+

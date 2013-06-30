@@ -121,7 +121,16 @@ class SolverBase
 		void handleJunctionPoolNum( unsigned int poolIndex, 
 						vector< double > num );
 
-		/// Create a junction between self and specified other SolverBase
+		/**
+		 * addJunction:
+		 * Create a junction between self and specified other SolverBase
+		 * This is called only on the master solver, the one which does 
+		 * the diffusion calculations. To do so, this solver expands its 
+		 * own pool matrices S and Sinit to include the abutting voxels. 
+		 * The follower solver sends messages to put pool #s into the 
+		 * abutting voxels, and gets back changes in these pool #s. 
+		 * Does not do the diffusion calculations and does not expand.
+		 */
 		void addJunction( const Eref& e, const Qinfo* q, Id other );
 		/// Remove the junction between self and specified other SolverBase
 		void dropJunction( const Eref& e, const Qinfo* q, Id other );

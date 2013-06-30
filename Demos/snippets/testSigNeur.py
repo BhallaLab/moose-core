@@ -120,7 +120,7 @@ def createSpine( parentCompt, parentObj, index, frac, length, dia, theta ):
     sname = 'shaft' + str(index)
     hname = 'head' + str(index)
     shaft = moose.SymCompartment( parentObj.path + '/' + sname )
-    moose.connect( parentCompt, 'CONNECTSPHERE', shaft, 'CONNECTSPHERE', 'Single' )
+    moose.connect( parentCompt, 'cylinder', shaft, 'proximalOnly','Single' )
     x = parentCompt.x0 + frac * ( parentCompt.x - parentCompt.x0 )
     y = parentCompt.y0 + frac * ( parentCompt.y - parentCompt.y0 )
     z = parentCompt.z0 + frac * ( parentCompt.z - parentCompt.z0 )
@@ -143,7 +143,7 @@ def createSpine( parentCompt, parentObj, index, frac, length, dia, theta ):
     shaft.initVm = EREST_ACT
 
     head = moose.SymCompartment( parentObj.path + '/' + hname )
-    moose.connect( shaft, 'CONNECTHEAD', head, 'CONNECTTAIL', 'Single' )
+    moose.connect( shaft, 'distal', head, 'proximal', 'Single' )
     head.x0 = x
     head.y0 = sy
     head.z0 = sz
@@ -255,12 +255,13 @@ def createPool( compt, name, concInit ):
     pool = moose.Pool( compt.path + '/' + name )
     moose.connect( pool, 'mesh', meshEntries, 'mesh', 'Single' )
     pool.concInit = concInit
-    pool.diffConst = 1e-12
+    pool.diffConst = 5e-11
     return pool
 
 
 def createChemModel( neuroCompt, spineCompt, psdCompt ):
     # Stuff in spine + psd
+    psdCa = createPool( psdCompt, 'Ca', 0 ) # dummy, to test diffusion
     psdGluR = createPool( psdCompt, 'psdGluR', 1 )
     headCa = createPool( spineCompt, 'Ca', 1e-4 )
     headGluR = createPool( spineCompt, 'headGluR', 2 )
@@ -475,6 +476,8 @@ def makeNeuroMeshModel():
     pmksolve.method = 'rk5'
     pm = moose.element( '/model/chem/psdMesh/mesh' )
     moose.connect( pm, 'remesh', pmksolve, 'remesh' )
+    print "psd: nv=", pmksolve.numLocalVoxels, ", nav=", pmksolve.numAllVoxels, pmksolve.numVarPools, pmksolve.numAllPools
+    #
 
     print 'Assigning the cell model'
     # Now to set up the model.
@@ -490,12 +493,14 @@ def makeNeuroMeshModel():
     pdc = psdCompt.mesh.num
     assert( pdc == 5 )
     #
-    #
+    # We need to use the spine solver as the master for the purposes of
+	# these calculations. This will handle the diffusion calculations
+	# between head and dendrite, and between head and PSD.
     printMolVecs( 'before addJunction neuron-spine' )
     smksolve.addJunction( nmksolve )
     printMolVecs( 'after addJunction neuron-spine' )
     print "spine: nv=", smksolve.numLocalVoxels, ", nav=", smksolve.numAllVoxels, smksolve.numVarPools, smksolve.numAllPools
-    pmksolve.addJunction( smksolve )
+    smksolve.addJunction( pmksolve )
     printMolVecs( 'after addJunction spine-psd' )
     print "psd: nv=", pmksolve.numLocalVoxels, ", nav=", pmksolve.numAllVoxels, pmksolve.numVarPools, pmksolve.numAllPools
     # Have to pass a message between the various solvers.
@@ -553,9 +558,15 @@ def makeNeuroMeshModel():
 
 def makeChemPlots():
     graphs = moose.Neutral( '/graphs' )
+    addPlot( '/model/chem/psdMesh/Ca[0]', 'get_conc', 'psd0Ca' )
+    addPlot( '/model/chem/psdMesh/Ca[1]', 'get_conc', 'psd1Ca' )
+    addPlot( '/model/chem/psdMesh/Ca[2]', 'get_conc', 'psd2Ca' )
     addPlot( '/model/chem/spineMesh/Ca[0]', 'get_conc', 'spine0Ca' )
+    addPlot( '/model/chem/spineMesh/Ca[1]', 'get_conc', 'spine1Ca' )
     addPlot( '/model/chem/spineMesh/Ca[2]', 'get_conc', 'spine2Ca' )
     addPlot( '/model/chem/neuroMesh/Ca[0]', 'get_conc', 'dend0Ca' )
+    addPlot( '/model/chem/neuroMesh/Ca[1]', 'get_conc', 'dend1Ca' )
+    addPlot( '/model/chem/neuroMesh/Ca[2]', 'get_conc', 'dend2Ca' )
     addPlot( '/model/chem/neuroMesh/Ca[3]', 'get_conc', 'dend3Ca' )
     addPlot( '/model/chem/neuroMesh/Ca[6]', 'get_conc', 'dend6Ca' )
     addPlot( '/model/chem/neuroMesh/Ca[9]', 'get_conc', 'dend9Ca' )
@@ -682,6 +693,14 @@ def testNeuroMeshMultiscale():
 
     makeNeuroMeshModel()
     chemCa = moose.element( '/model/chem/neuroMesh/Ca[0]' )
+    moose.le( '/model/chem/spineMesh/ksolve' )
+    print 'Neighbours:'
+    for t in moose.element( '/model/chem/spineMesh/ksolve/junction' ).neighbours['masterJunction']:
+        print 'masterJunction <-', t.path
+    for t in moose.wildcardFind( '/model/chem/#Mesh/ksolve' ):
+        k = moose.element( t[0] )
+        print k.path + ' localVoxels=', k.numLocalVoxels, ', allVoxels= ', k.numAllVoxels
+    printMolVecs( 'after all is done' )
     chemCa.concInit = 0.001
     makeChemPlots()
     makeElecPlots()
