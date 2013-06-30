@@ -48,7 +48,7 @@ const Cinfo* GslStoich::initCinfo()
 			"numAllVoxels",
 			"Number of voxels in the entire reac-diff system, "
 			"including proxy voxels to represent abutting compartments.",
-			&GslStoich::getNumLocalVoxels
+			&GslStoich::getNumAllVoxels
 		);
 
 		static ElementValueFinfo< GslStoich, string > path(
