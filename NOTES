@@ -22413,31 +22413,34 @@ I need to spawn off a number of snippets
 Reporting # of compts in the meshes: SpineMesh is only 10, is not seeing
 the psd mesh.
 
-MECS
-scemm
-chelm
-scema
-ecs
+Some nomenclature ideas:
 Multiscale
 Electrical
 Chemical/Kinetic/mass action/reaction-diffusion
 Compartmental
 Spatial/anatomically detailed/anatomically realistic/morphological
 	geometrical
-ckielm
-mecks
-meck
-elecks erdimm
-crems
-gderd
-mdeck
 eculture edish eplay ecell neuro physion decsign designeur 
 	detailed electrical signaling interface to geometrical neurons
 rdesigneur: reaction-diffusion and electrical signaling interface for generating neurons
 schema spatial chemical electrical multiscale analysis
 
 Implemented a single-compartment SigNeur model in 
-	cubeMeshSigNeur.py.
+	cubeMeshSigNeur.py. 
+Checkin 4660
 
 ==========================================================================
+1 July
+A bit of fiddling around trying to track down the discrepancy in testHsolve.py.
+Seems to be most likely due to problems in HSolve setup.
+Similar issues present in testSigNeur.py, running the testElecAlone.
 
+Fixed the problem with the AddJunction command not recognizing PsdMesh. Turned
+out that I had to implement the capability for SpineMesh::matchMeshEntries
+to talk to PsdMesh. I had already implemented the reverse capability, so
+I just called the reverse function on PsdMesh and then flipped the 
+return vector. Now the PSD test calcium trace looks OK, just 1e5 fold too
+small. There is an issue here with volumes vs. surface.
+
+
+==========================================================================
