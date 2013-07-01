@@ -328,11 +328,12 @@ def createChemModel( neuroCompt, spineCompt, psdCompt ):
 
 # Just for printf debugging
 def printMolVecs( title ):
+    print title
+    """	
     nCa = moose.ematrix( '/model/chem/neuroMesh/Ca' )
     sCa = moose.ematrix( '/model/chem/spineMesh/Ca' )
     sR = moose.ematrix( '/model/chem/spineMesh/headGluR' )
     pR = moose.ematrix( '/model/chem/psdMesh/psdGluR' )
-    print title
     print 'sizes: nCa, sCa, sR, pR = ', len(nCa), len(sCa), len(sR), len(pR) 
     #print 'nCa=', nCa.conc, ', sCa=', sCa.conc, ', sR=', sR.n, ', pR=', pR.n
     print 'nCaConcInit=', nCa.concInit, ', sCa=', sCa.concInit
@@ -340,6 +341,7 @@ def printMolVecs( title ):
     print 'sRconcInit=', sR.concInit, ', pR=', pR.concInit
 
     #print 'nCaSize=', nCa.size, ', sCa=', sCa.size, ', sR=', sR.n, ', pR=', pR.n
+    """	
 
 def makeChemInCubeMesh():
     dendSide = 10.8e-6
@@ -570,12 +572,12 @@ def makeChemPlots():
     addPlot( '/model/chem/neuroMesh/Ca[3]', 'get_conc', 'dend3Ca' )
     addPlot( '/model/chem/neuroMesh/Ca[6]', 'get_conc', 'dend6Ca' )
     addPlot( '/model/chem/neuroMesh/Ca[9]', 'get_conc', 'dend9Ca' )
-    addPlot( '/model/chem/neuroMesh/kChan_p[4]', 'get_conc', 'kChan_p' )
-    addPlot( '/model/chem/neuroMesh/kChan[4]', 'get_conc', 'kChan' )
-    addPlot( '/model/chem/neuroMesh/Ca.kinase[4]', 'get_conc', 'dendKinase' )
-    addPlot( '/model/chem/spineMesh/toPsd[0]', 'get_conc', 'toPsd' )
-    addPlot( '/model/chem/spineMesh/toPsd[2]', 'get_conc', 'toPsd' )
-    addPlot( '/model/chem/spineMesh/toPsd[4]', 'get_conc', 'toPsd' )
+    addPlot( '/model/chem/neuroMesh/kChan_p[4]', 'get_conc', 'kChan_p4' )
+    addPlot( '/model/chem/neuroMesh/kChan[4]', 'get_conc', 'kChan4' )
+    addPlot( '/model/chem/neuroMesh/Ca.kinase[4]', 'get_conc', 'dendKinase4' )
+    addPlot( '/model/chem/spineMesh/toPsd[0]', 'get_conc', 'toPsd0' )
+    addPlot( '/model/chem/spineMesh/toPsd[2]', 'get_conc', 'toPsd2' )
+    addPlot( '/model/chem/spineMesh/toPsd[4]', 'get_conc', 'toPsd4' )
     #addPlot( '/n/neuroMesh/Ca', 'get_conc', 'dendCa' )
     #addPlot( '/n/neuroMesh/inact_kinase', 'get_conc', 'inactDendKinase' )
     #addPlot( '/n/psdMesh/psdGluR', 'get_n', 'psdGluR' )
@@ -609,9 +611,13 @@ def testChemAlone():
 
 def testElecAlone():
     makeSpinyCompt()
+    elec = moose.element( '/n' )
+    elec.name = 'elec'
+    model = moose.Neutral( '/model' )
+    moose.move( elec, model )
     makeElecPlots()
-    head2 = moose.element( '/n/head2' )
-    kchan = moose.element( '/n/compt/K' )
+    head2 = moose.element( '/model/elec/head2' )
+    kchan = moose.element( '/model/elec/compt/K' )
     moose.setClock( 0, 2e-6 )
     moose.setClock( 1, 2e-6 )
     moose.setClock( 2, 2e-6 )
@@ -619,22 +625,22 @@ def testElecAlone():
     #moose.useClock( 0, '/n/#', 'init' )
     #moose.useClock( 1, '/n/#', 'process' )
     #moose.useClock( 2, '/n/#/#', 'process' )
-    #print moose.wildcardFind( '/n/##[ISA=SpikeGen]' )
-    moose.useClock( 0, '/n/##[ISA=Compartment]', 'init' )
-    moose.useClock( 1, '/n/##[ISA=Compartment]', 'process' )
-    moose.useClock( 2, '/n/##[ISA=ChanBase],/n/##[ISA=SynBase],/n/##[ISA=CaConc],/n/##[ISA=SpikeGen]','process')
+    print moose.wildcardFind( '/model/elec/##[ISA=SpikeGen]' )
+    moose.useClock( 0, '/model/elec/##[ISA=Compartment]', 'init' )
+    moose.useClock( 1, '/model/elec/##[ISA=Compartment]', 'process' )
+    moose.useClock( 2, '/model/elec/##[ISA=ChanBase],/model/##[ISA=SynBase],/model/##[ISA=CaConc],/model/##[ISA=SpikeGen]','process')
     moose.useClock( 8, '/graphs/elec/#', 'process' )
     moose.reinit()
     moose.start( 0.1 )
     dumpPlots( 'instab.plot' )
     # make Hsolver and rerun
-    hsolve = moose.HSolve( '/n/hsolve' )
-    moose.useClock( 1, '/n/hsolve', 'process' )
+    hsolve = moose.HSolve( '/model/elec/hsolve' )
+    moose.useClock( 1, '/model/elec/hsolve', 'process' )
     moose.setClock( 0, 2e-5 )
     moose.setClock( 1, 2e-5 )
     moose.setClock( 2, 2e-5 )
     hsolve.dt = 2e-5
-    hsolve.target = '/n/compt'
+    hsolve.target = '/model/elec/compt'
     moose.reinit()
     #print kchan, ', Gbar = ', kchan.Gbar
     #kchan.Gbar = 0.1e-3
@@ -713,8 +719,8 @@ def testNeuroMeshMultiscale():
     moose.setClock( 8, plotDt )
     moose.useClock( 0, '/model/elec/##[ISA=Compartment]', 'init' )
     moose.useClock( 1, '/model/elec/##[ISA=SpikeGen]', 'process' )
-    moose.useClock( 2, '/model/elec/##[ISA=ChanBase],/n/##[ISA=SynBase],/n/##[ISA=CaConc]','process')
-    moose.useClock( 5, '/model/chem/##[ISA=PoolBase],/n/##[ISA=ReacBase],/n/##[ISA=EnzBase]', 'process' )
+    moose.useClock( 2, '/model/elec/##[ISA=ChanBase],/model/##[ISA=SynBase],/model/##[ISA=CaConc]','process')
+    moose.useClock( 5, '/model/chem/##[ISA=PoolBase],/model/##[ISA=ReacBase],/model/##[ISA=EnzBase]', 'process' )
     moose.useClock( 6, '/model/chem/##[ISA=Adaptor]', 'process' )
     moose.useClock( 7, '/graphs/#', 'process' )
     moose.useClock( 8, '/graphs/elec/#', 'process' )

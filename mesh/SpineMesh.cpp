@@ -23,6 +23,7 @@
 #include "NeuroMesh.h"
 #include "SpineEntry.h"
 #include "SpineMesh.h"
+#include "PsdMesh.h"
 #include "../utility/numutil.h"
 
 /*
@@ -323,6 +324,12 @@ void SpineMesh::matchMeshEntries( const ChemCompt* other,
 	const NeuroMesh* nm = dynamic_cast< const NeuroMesh* >( other );
 	if ( nm ) {
 		matchNeuroMeshEntries( other, ret );
+		return;
+	}
+	const PsdMesh* pm = dynamic_cast< const PsdMesh* >( other );
+	if ( pm ) {
+		pm->matchSpineMeshEntries( this, ret );
+		flipRet( ret );
 		return;
 	}
 	cout << "Warning: SpineMesh::matchMeshEntries: unknown class\n";

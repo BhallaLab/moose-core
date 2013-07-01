@@ -128,7 +128,9 @@ def create_spine( parentCompt, parentObj, index, frac, length, dia, theta ):
     sname = 'shaft' + str(index)
     hname = 'head' + str(index)
     shaft = moose.SymCompartment( parentObj.path + '/' + sname )
-    moose.connect( parentCompt, 'cylinder', shaft, 'proximalOnly','Single' )
+    #moose.connect( parentCompt, 'cylinder', shaft, 'proximalOnly','Single')
+    #moose.connect( parentCompt, 'distal', shaft, 'proximal','Single' )
+    moose.connect( parentCompt, 'sphere', shaft, 'proximalOnly','Single' )
     x = parentCompt.x0 + frac * ( parentCompt.x - parentCompt.x0 )
     y = parentCompt.y0 + frac * ( parentCompt.y - parentCompt.y0 )
     z = parentCompt.z0 + frac * ( parentCompt.z - parentCompt.z0 )
@@ -241,6 +243,13 @@ def make_spiny_compt():
         moose.connect( synInput, 'event', syn, 'addSpike', 'Single' )
         syn.weight = 0.2
         syn.delay = i * 1.0e-4
+        """
+        path = '/n/head' + str(i)
+        sib1 = moose.element( path )
+        for j in range( i - 1 ):
+             sib2 = moose.element( '/n/head' + str(j) )
+             moose.connect( sib1, 'sibling', sib2, 'sibling', 'Single' )
+        """
 
 def create_pool( compt, name, concInit ):
     meshEntries = moose.element( compt.path + '/mesh' )
