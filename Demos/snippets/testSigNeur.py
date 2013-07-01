@@ -207,9 +207,14 @@ def makeElecPlots():
     addPlot( '/model/elec/head0', 'get_Vm', 'elec/head0Vm' )
     addPlot( '/model/elec/head2', 'get_Vm', 'elec/head2Vm' )
     #addPlot( '/n/head2', 'get_Im', 'elec/head2Im' )
+    addPlot( '/model/elec/head0/ca', 'get_Ca', 'elec/head0Ca' )
+    addPlot( '/model/elec/head1/ca', 'get_Ca', 'elec/head1Ca' )
     addPlot( '/model/elec/head2/ca', 'get_Ca', 'elec/head2Ca' )
     addPlot( '/model/elec/head0/gluR', 'get_Ik', 'elec/head0Ik' )
+    addPlot( '/model/elec/head1/gluR', 'get_Ik', 'elec/head1Ik' )
     addPlot( '/model/elec/head2/gluR', 'get_Ik', 'elec/head2Ik' )
+    addPlot( '/model/elec/head1/gluR', 'get_Gbar', 'elec/head1Gbar' )
+    addPlot( '/model/elec/head2/gluR', 'get_Gbar', 'elec/head2Gbar' )
     #addPlot( '/n/head0/gluR', 'get_Gk', 'elec/head0Gk' )
     #addPlot( '/n/head2/gluR', 'get_Gk', 'elec/head2Gk' )
     #addPlot( '/n/head2/gluR', 'get_Gbar', 'elec/head2Gbar' )
@@ -247,8 +252,8 @@ def makeSpinyCompt():
         r.synapse.num = 1
         syn = moose.element( r.path + '/synapse' )
         moose.connect( synInput, 'event', syn, 'addSpike', 'Single' )
-        syn.weight = 0.2
-        syn.delay = i * 1.0e-4
+        syn.weight = 0.2 * i * ( 4 - i )
+        syn.delay = i * 1.0e-3
 
 def createPool( compt, name, concInit ):
     meshEntries = moose.element( compt.path + '/mesh' )
@@ -523,38 +528,40 @@ def makeNeuroMeshModel():
     #print "nca=", ca.localNumField, ",lastDim = ", ca.lastDimension
 
     # set up adaptors
-    """
-    adaptCa = moose.Adaptor( '/model/chem/neuroMesh/adaptCa' )
-    chemCa = moose.element( '/model/chem/neuroMesh/Ca' )
-    elecCa = moose.element( '/model/elec/head2/ca' )
-    moose.connect( elecCa, 'concOut', adaptCa, 'input', 'OneToOne' )
+    aCa = moose.Adaptor( '/model/chem/spineMesh/adaptCa', 5 )
+    adaptCa = moose.ematrix( '/model/chem/spineMesh/adaptCa' )
+    chemCa = moose.ematrix( '/model/chem/spineMesh/Ca' )
+    assert( len( adaptCa ) == 5 )
+    for i in range( 5 ):
+        path = '/model/elec/head' + str( i ) + '/ca'
+        elecCa = moose.element( path )
+        moose.connect( elecCa, 'concOut', adaptCa[i], 'input', 'Single' )
+        #moose.connect( adaptCa[i], 'outputSrc', chemCa[i], 'set_conc', 'Single' )
     moose.connect( adaptCa, 'outputSrc', chemCa, 'set_conc', 'OneToOne' )
     adaptCa.outputOffset = 0.0001    # 100 nM offset in chem.
     adaptCa.scale = 0.05             # 0.06 to 0.003 mM
 
-    adaptGluR = moose.Adaptor( '/model/chem/psdMesh/adaptGluR' )
-    chemR = moose.element( '/model/chem/psdMesh/psdGluR' )
-    elec0R = moose.element( '/model/elec/head0/gluR' )
-    elec1R = moose.element( '/model/elec/head1/gluR' )
-    elec2R = moose.element( '/model/elec/head2/gluR' )
-    elec3R = moose.element( '/model/elec/head3/gluR' )
-    elec4R = moose.element( '/model/elec/head4/gluR' )
-    moose.connect( adaptGluR, 'requestField', chemR, 'get_n', 'OneToAll' )
-    moose.connect( adaptGluR, 'outputSrc', elec0R, 'set_Gbar', 'OneToAll' )
-    moose.connect( adaptGluR, 'outputSrc', elec1R, 'set_Gbar', 'OneToAll' )
-    moose.connect( adaptGluR, 'outputSrc', elec2R, 'set_Gbar', 'OneToAll' )
-    moose.connect( adaptGluR, 'outputSrc', elec3R, 'set_Gbar', 'OneToAll' )
-    moose.connect( adaptGluR, 'outputSrc', elec4R, 'set_Gbar', 'OneToAll' )
+    aGluR = moose.Adaptor( '/model/chem/psdMesh/adaptGluR', 5 )
+    adaptGluR = moose.ematrix( '/model/chem/psdMesh/adaptGluR' )
+    chemR = moose.ematrix( '/model/chem/psdMesh/psdGluR' )
+    assert( len( adaptGluR ) == 5 )
+    for i in range( 5 ):
+        path = '/model/elec/head' + str( i ) + '/gluR'
+        elecR = moose.element( path )
+        moose.connect( adaptGluR[i], 'outputSrc', elecR, 'set_Gbar', 'Single' )
+    #moose.connect( chemR, 'nOut', adaptGluR, 'input', 'OneToOne' )
+	# Ksolve isn't sending nOut. Not good.
+    moose.connect( adaptGluR, 'requestField', chemR, 'get_n', 'OneToOne' )
+    adaptGluR.outputOffset = 1e-7    # pS
     adaptGluR.scale = 1e-6 / 100     # from n to pS
-    """
 
-    """
-    adaptK = moose.Adaptor( '/n/adaptK' )
-    chemK = moose.element( '/n/neuroMesh/kChan' )
-    elecK = moose.element( '/n/compt/K' )
+    adaptK = moose.Adaptor( '/model/chem/neuroMesh/adaptK' )
+    chemK = moose.element( '/model/chem/neuroMesh/kChan' )
+    elecK = moose.element( '/model/elec/compt/K' )
     moose.connect( adaptK, 'requestField', chemK, 'get_conc', 'OneToAll' )
-    moose.connect( adaptK, 'outputSrc', elecK, 'set_Gbar', 'OneToAll' )
+    moose.connect( adaptK, 'outputSrc', elecK, 'set_Gbar', 'Single' )
     adaptK.scale = 0.3               # from mM to Siemens
+    """
     """
 
 
@@ -563,6 +570,9 @@ def makeChemPlots():
     addPlot( '/model/chem/psdMesh/Ca[0]', 'get_conc', 'psd0Ca' )
     addPlot( '/model/chem/psdMesh/Ca[1]', 'get_conc', 'psd1Ca' )
     addPlot( '/model/chem/psdMesh/Ca[2]', 'get_conc', 'psd2Ca' )
+    addPlot( '/model/chem/psdMesh/psdGluR[0]', 'get_n', 'psd0R' )
+    addPlot( '/model/chem/psdMesh/psdGluR[1]', 'get_n', 'psd1R' )
+    addPlot( '/model/chem/psdMesh/psdGluR[2]', 'get_n', 'psd2R' )
     addPlot( '/model/chem/spineMesh/Ca[0]', 'get_conc', 'spine0Ca' )
     addPlot( '/model/chem/spineMesh/Ca[1]', 'get_conc', 'spine1Ca' )
     addPlot( '/model/chem/spineMesh/Ca[2]', 'get_conc', 'spine2Ca' )
@@ -730,6 +740,7 @@ def testNeuroMeshMultiscale():
     moose.useClock( 1, '/model/elec/hsolve', 'process' )
     hsolve.dt = elecDt
     hsolve.target = '/model/elec/compt'
+    moose.reinit()
     moose.reinit()
     printMolVecs( 'after reinit' )
 
