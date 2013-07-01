@@ -22442,5 +22442,21 @@ I just called the reverse function on PsdMesh and then flipped the
 return vector. Now the PSD test calcium trace looks OK, just 1e5 fold too
 small. There is an issue here with volumes vs. surface.
 
+For adaptors now: I need to query the Meshes (or possibly the ksolves) to get 
+the pairwise list of matching meshEntries. Possibly the SparseMatrix would
+be a good way to get this in a concise form.
+For now, set up explicitly. This is now done
+
+There are a few issues:
+- First reinit leaves the ksolved pools with some default n that does not 
+	match volume. Need to do a second reinit, klutzy.
+- The ksolve is not sending out nOut or concOut messages. 
+	For now the adaptor is using requestField to work around this.
+- Messaging AllToAll isn't working. For now OneToAll will suffice.
+- There is a glitch somewhere in the model, all the K channels get 
+	phosphorylated.
+	
+But, at the end of it, the system is working together and all portions seem to
+	do their thing.
 
 ==========================================================================
