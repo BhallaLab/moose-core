@@ -433,6 +433,7 @@ def assignDefaultTicks(modelRoot='/model', dataRoot='/data', solver='hsolve'):
         _moose.useClock(0, '%s/##[ISA=Compartment]' % (modelRoot), 'init')
         _moose.useClock(1, '%s/##[ISA=Compartment]'  % (modelRoot), 'process')
         _moose.useClock(2, '%s/##[ISA=HHChannel]'  % (modelRoot), 'process')
+    _moose.useClock(0, '%s/##[ISA=GapJunction]' % (modelRoot), 'process')
     _moose.useClock(0, '%s/##[ISA=HSolve]'  % (modelRoot), 'process')
     _moose.useClock(1, '%s/##[ISA=LeakyIaF]'  % (modelRoot), 'process')
     _moose.useClock(1, '%s/##[ISA=IntFire]'  % (modelRoot), 'process')

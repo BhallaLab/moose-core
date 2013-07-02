@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Sat Jun 29 10:57:56 2013 (+0530)
+// Last-Updated: Sat Jun 29 15:20:09 2013 (+0530)
 //           By: subha
-//     Update #: 10367
+//     Update #: 10396
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -925,13 +925,30 @@ static struct module_state _state;
                  "setting the `num` attribute to a desired value.\n");
 
     PyDoc_STRVAR(moose_ElementField_num_documentation,
-                 "Return number of entries in the field.");
+                 "Number of entries in the field.");
+
+    PyDoc_STRVAR(moose_ElementField_path_documentation,
+                 "Path of the field element.");
+    PyDoc_STRVAR(moose_ElementField_id_documentation,
+                 "Id of the field element.");
     static char numfield[] = "num";
+    static char path[] = "path";
+    static char id[] = "id_";
     static PyGetSetDef ElementFieldGetSetters[] = {
         {numfield,
          (getter)moose_ElementField_getNum,
          (setter)moose_ElementField_setNum,
          moose_ElementField_num_documentation,
+         NULL},
+        {path,
+         (getter)moose_ElementField_getPath,
+         NULL,
+         moose_ElementField_path_documentation,
+         NULL},
+        {id,
+         (getter)moose_ElementField_getId,
+         NULL,
+         moose_ElementField_id_documentation,
          NULL},
         {NULL}, /* sentinel */
     };
@@ -4856,6 +4873,26 @@ static struct module_state _state;
             return -1;
         }
         return 0;
+    }
+
+    PyObject * moose_ElementField_getPath(_Field * self, void * closure)
+    {
+        if (!Id::isValid(self->owner.id)){
+            RAISE_INVALID_ID(NULL, "moose_ElementField_setNum");
+        }
+        string path = Id(self->owner.path() + "/" + string(self->name)).path();
+        return Py_BuildValue("s", path.c_str());
+    }
+
+    PyObject * moose_ElementField_getId(_Field * self, void * closure)
+    {
+        if (!Id::isValid(self->owner.id)){
+            RAISE_INVALID_ID(NULL, "moose_ElementField_setNum");
+        }
+        Id myId(self->owner.path() + "/" + string(self->name));
+        _Id * new_id = PyObject_New(_Id, &IdType);
+        new_id->id_ = myId;
+        return (PyObject*)new_id;
     }
 
     PyObject * moose_ElementField_getItem(_Field * self, Py_ssize_t index)
