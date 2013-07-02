@@ -5,7 +5,11 @@ import moose
 import defaults
 #these will go to defaults.py
 #these fields will be ignored
-extra_fields = ['this','me','parent','path','class','children','linearSize','objectDimensions','lastDimension','localNumField','pathIndices','msgOut','msgIn','diffConst','speciesId','Coordinates','neighbors','DiffusionArea','DiffusionScaling','x','x0','x1','dx','nx','y','y0','y1','dy','ny','z','z0','z1','dz','nz','coords','isToroid','preserveNumEntries','numKm','numSubstrates','concK1']
+extra_fields = ['this','me','parent','path','class','children','linearSize','objectDimensions','lastDimension',\
+    'localNumField','pathIndices','msgOut','msgIn','diffConst','speciesId','Coordinates',\
+    'neighbors','DiffusionArea','DiffusionScaling',\
+    'x','x0','x1','dx','nx','y','y0','y1','dy','ny','z','z0','z1','dz','nz','coords','isToroid',\
+    'preserveNumEntries','numKm','numSubstrates','concK1']
 #these fields denote the units of the field
 
 def main():
@@ -50,6 +54,10 @@ class ObjectFieldsModel(QAbstractTableModel):
         self.mooseObject = datain
         self.headerdata = headerdata
 
+        ## Added by Aditya, if gate power is zero, moose crashes on getField() below,
+        ## hence don't show its fields, in any case, editing is not allowed for those.
+        if self.mooseObject.class_ in ['HHGate','HHGate2D','Interpol2D']: return
+        
         for fieldName in self.mooseObject.getFieldNames('valueFinfo'):
             
             if(fieldName in extra_fields):
