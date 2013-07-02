@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Mar 11 20:24:26 2013 (+0530)
 # Version: 
-# Last-Updated: Thu Jun  6 16:52:43 2013 (+0530)
+# Last-Updated: Tue Jul  2 18:35:27 2013 (+0530)
 #           By: subha
-#     Update #: 241
+#     Update #: 275
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -118,6 +118,8 @@ class CanvasWidget(FigureCanvas):
         axes = self.figure.add_subplot(rows, cols, self.next_id+1)
         self.axes[self.next_id] = axes
         axes.set_title(chr(self.next_id + ord('A')))
+        self.mpl_connect('motion_notify_event', self.displayCursorPos)
+        axes.cursorpos = axes.text(0,0, '')
         self.current_id = self.next_id
         self.next_id += 1
         return axes
@@ -132,7 +134,16 @@ class CanvasWidget(FigureCanvas):
         fn = eval('self.axes[self.current_id].%s' % (fname))
         return fn(*args, **kwargs)
 
-
+    def displayCursorPos(self, event):
+        """Callback given to matplotlib for displaying cursor position"""
+        if not event.inaxes:
+            return
+        cpos = event.inaxes.cursorpos
+        cpos.set_text('%g, %g' % (event.xdata, event.ydata))
+        cpos.set_position((event.xdata, event.ydata))
+        self.draw()
+        
+    
 
 import sys
 import os
