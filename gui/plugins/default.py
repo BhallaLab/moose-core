@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Nov 13 15:58:31 2012 (+0530)
 # Version: 
-# Last-Updated: Fri Jun 14 16:28:30 2013 (+0530)
+# Last-Updated: Tue Jul  2 18:36:50 2013 (+0530)
 #           By: subha
-#     Update #: 2106
+#     Update #: 2120
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -51,6 +51,8 @@ import numpy as np
 
 from PyQt4 import QtGui, QtCore
 from PyQt4.Qt import Qt
+from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+
 import moose
 from moose import utils
 import mtree
@@ -326,7 +328,10 @@ class RunView(RunBase):
 
     def getToolPanes(self):
         if not self._toolPanes:
-            self._toolPanes = [self.getSchedulingDockWidget()]
+            self.navToolbar = NavigationToolbar(self.getCentralWidget(), self.plugin.mainWindow, )
+            self.navDock = QtGui.QDockWidget()
+            self.navDock.setWidget(self.navToolbar)
+            self._toolPanes = [self.getSchedulingDockWidget(), self.navDock]
         return self._toolPanes
 
     def getSchedulingDockWidget(self):
@@ -661,7 +666,6 @@ class PlotWidget(CanvasWidget):
         self.pathToLine = defaultdict(set)
         self.lineToPath = {}
         self.addSubplot(1, 1)
-
 
     @property
     def plotAll(self):
