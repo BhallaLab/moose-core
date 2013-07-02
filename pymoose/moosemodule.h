@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 17:11:06 2011 (+0530)
 // Version: 
-// Last-Updated: Wed May  1 14:57:32 2013 (+0530)
+// Last-Updated: Sat Jun 29 15:21:13 2013 (+0530)
 //           By: subha
-//     Update #: 1127
+//     Update #: 1129
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -85,6 +85,8 @@ extern "C" {
     static PyObject* moose_ElementField_getNum(_Field * self, void * closure);
     static Py_ssize_t moose_ElementField_getLen(_Field * self, void * closure);
     static PyObject * moose_ElementField_getItem(_Field * self, Py_ssize_t index);
+    static PyObject * moose_ElementField_getPath(_Field * self, void * closure);
+    static PyObject * moose_ElementField_getId(_Field * self, void * closure);
     
     //////////////////////////////////////////
     // Methods for Id class

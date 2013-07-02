@@ -22,6 +22,7 @@ OBJ = \
 	HHChannel.o	\
 	HHGate.o	\
 	SynChan.o	\
+	GapJunction.o	\
 	SpikeGen.o	\
 	CaConc.o	\
 	Nernst.o	\
@@ -64,6 +65,7 @@ HHChannel.o: ChanBase.h HHChannel.h HHGate.h
 HHGate.o: HHGate.h
 SynChanBase.o: Synapse.h SynBase.h ChanBase.h
 SynChan.o: SynBase.h ChanBase.h Synapse.h SynChan.h
+GapJunction.o: GapJunction.h
 NMDAChan.o: NMDAChan.h SynBase.h ChanBase.h Synapse.h SynChan.h
 SpikeGen.o: SpikeGen.h
 CaConc.o:	CaConc.h
