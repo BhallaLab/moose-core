@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Nov 13 15:58:31 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Jul  2 18:36:50 2013 (+0530)
+# Last-Updated: Tue Jul  2 19:09:14 2013 (+0530)
 #           By: subha
-#     Update #: 2120
+#     Update #: 2126
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -290,7 +290,9 @@ class RunView(RunBase):
     """
     def __init__(self, *args, **kwargs):
         RunBase.__init__(self, *args, **kwargs)
+        self.centralWidget = QtGui.QWidget()
         self.canvas = PlotWidget()
+        self.canvas.setParent(self.centralWidget)
         self.dataRoot = moose.Neutral('/data')
         self.modelRoot = moose.Neutral(self.plugin.modelRoot)
         self.canvas.setModelRoot(self.plugin.modelRoot)       
@@ -328,7 +330,7 @@ class RunView(RunBase):
 
     def getToolPanes(self):
         if not self._toolPanes:
-            self.navToolbar = NavigationToolbar(self.getCentralWidget(), self.plugin.mainWindow, )
+            self.navToolbar = NavigationToolbar(self.getCentralWidget(), self.getCentralWidget())
             self.navDock = QtGui.QDockWidget()
             self.navDock.setWidget(self.navToolbar)
             self._toolPanes = [self.getSchedulingDockWidget(), self.navDock]
