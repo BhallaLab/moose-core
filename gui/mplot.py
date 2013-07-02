@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Mar 11 20:24:26 2013 (+0530)
 # Version: 
-# Last-Updated: Tue Jul  2 18:35:27 2013 (+0530)
+# Last-Updated: Tue Jul  2 19:12:01 2013 (+0530)
 #           By: subha
-#     Update #: 275
+#     Update #: 306
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -103,6 +103,7 @@ class CanvasWidget(FigureCanvas):
     def __init__(self, *args, **kwargs):
         self.figure = Figure()
         FigureCanvas.__init__(self, self.figure, *args, **kwargs)
+        self.figure.set_canvas(self)
         if len(args) > 0 and isinstance(args[0], QtGui.QWidget):
             self.reparent(args[0])
         elif (kwargs is not None) and ('parent' in kwargs):
@@ -119,6 +120,7 @@ class CanvasWidget(FigureCanvas):
         self.axes[self.next_id] = axes
         axes.set_title(chr(self.next_id + ord('A')))
         self.mpl_connect('motion_notify_event', self.displayCursorPos)
+        # self.mpl_connect('figure_enter_event', self.changeCursor)
         axes.cursorpos = axes.text(0,0, '')
         self.current_id = self.next_id
         self.next_id += 1
@@ -143,7 +145,18 @@ class CanvasWidget(FigureCanvas):
         cpos.set_position((event.xdata, event.ydata))
         self.draw()
         
-    
+    # The Qt event handlers interfere with drawing of rubberband when
+    # using NavigationToolbar to zoom. Hence not using them
+
+    # def mouseMoveEvent(self, event):
+    #     QtGui.QToolTip.showText(event.globalPos(),
+    #                             '%g, %g' % (event.pos().x(), event.pos().y()), self)
+    #     QtGui.QWidget.mouseMoveEvent(self, event)
+
+    # def changeCursor(self, event):
+    #     """This is to turn the cursor into crosshair"""
+    #     QtGui.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.CrossCursor))
+
 
 import sys
 import os
