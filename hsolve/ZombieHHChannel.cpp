@@ -237,12 +237,12 @@ ZombieHHChannel::ZombieHHChannel()
 
 void ZombieHHChannel::copyFields( Id chanId, HSolve* hsolve_ )
 {
-	Xpower_           = Field< double >::get( chanId, "Xpower" );
-	Ypower_           = Field< double >::get( chanId, "Ypower" );
-	Zpower_           = Field< double >::get( chanId, "Zpower" );
-	useConcentration_ = Field< double >::get( chanId, "useConcentration" );
-	
-	hsolve_->setPowers( chanId, Xpower_, Ypower_, Zpower_ );
+	//~ Xpower_           = Field< double >::get( chanId, "Xpower" );
+	//~ Ypower_           = Field< double >::get( chanId, "Ypower" );
+	//~ Zpower_           = Field< double >::get( chanId, "Zpower" );
+	//~ useConcentration_ = Field< double >::get( chanId, "useConcentration" );
+	//~ 
+	//~ hsolve_->setPowers( chanId, Xpower_, Ypower_, Zpower_ );
 }
 
 ///////////////////////////////////////////////////
