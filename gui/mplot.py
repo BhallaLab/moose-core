@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Mar 11 20:24:26 2013 (+0530)
 # Version: 
-# Last-Updated: Tue Jul  2 19:12:01 2013 (+0530)
+# Last-Updated: Wed Jul  3 10:32:35 2013 (+0530)
 #           By: subha
-#     Update #: 306
+#     Update #: 309
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -72,6 +72,7 @@
     pluggable. We do not want to overwhelm novice users with fancy
     machine-learning stuff. They should be made available only on
     request.
+        - There is a proposal for data analysis library by Andrew Davison ...
     
 """
 
@@ -119,9 +120,6 @@ class CanvasWidget(FigureCanvas):
         axes = self.figure.add_subplot(rows, cols, self.next_id+1)
         self.axes[self.next_id] = axes
         axes.set_title(chr(self.next_id + ord('A')))
-        self.mpl_connect('motion_notify_event', self.displayCursorPos)
-        # self.mpl_connect('figure_enter_event', self.changeCursor)
-        axes.cursorpos = axes.text(0,0, '')
         self.current_id = self.next_id
         self.next_id += 1
         return axes
@@ -135,27 +133,6 @@ class CanvasWidget(FigureCanvas):
             self.addSubplot(1,1)
         fn = eval('self.axes[self.current_id].%s' % (fname))
         return fn(*args, **kwargs)
-
-    def displayCursorPos(self, event):
-        """Callback given to matplotlib for displaying cursor position"""
-        if not event.inaxes:
-            return
-        cpos = event.inaxes.cursorpos
-        cpos.set_text('%g, %g' % (event.xdata, event.ydata))
-        cpos.set_position((event.xdata, event.ydata))
-        self.draw()
-        
-    # The Qt event handlers interfere with drawing of rubberband when
-    # using NavigationToolbar to zoom. Hence not using them
-
-    # def mouseMoveEvent(self, event):
-    #     QtGui.QToolTip.showText(event.globalPos(),
-    #                             '%g, %g' % (event.pos().x(), event.pos().y()), self)
-    #     QtGui.QWidget.mouseMoveEvent(self, event)
-
-    # def changeCursor(self, event):
-    #     """This is to turn the cursor into crosshair"""
-    #     QtGui.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.CrossCursor))
 
 
 import sys
