@@ -38,4 +38,7 @@ some higher-level hand-written documents:
 \ref DesignDocument
 
 \ref HSolveDevOverview
+
+\ref HSolveImplementation
+
 */
