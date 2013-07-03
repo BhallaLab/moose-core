@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Jun  6 17:16:40 2013 (+0530)
+# Last-Updated: Wed Jul  3 11:35:33 2013 (+0530)
 #           By: subha
-#     Update #: 1305
+#     Update #: 1331
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -53,7 +53,7 @@ sys.path.append('../python')
 import os
 from collections import defaultdict
 import posixpath # We use this to create MOOSE paths
-from PyQt4 import QtGui,QtCore,Qt
+from PyQt4 import QtGui, QtCore, Qt
 import config
 import mplugin
 import moose
@@ -120,6 +120,7 @@ class MWindow(QtGui.QMainWindow):
         self.editActions = None        
         self.toolBars = []
         self._loadedPlugins = {}
+        self._plugins = {}
         self.setDockOptions(self.AnimatedDocks and self.AllowNestedDocks and self.AllowTabbedDocks)
         self.mdiArea = QtGui.QMdiArea()
         self.quitAction = QtGui.QAction('&Quit', self)
@@ -233,6 +234,7 @@ class MWindow(QtGui.QMainWindow):
             for classname, classobj in inspect.getmembers(pluginModule, inspect.isclass):
                 if issubclass(classobj, mplugin.MoosePluginBase):
                     self._loadedPlugins[name] = classobj
+                    # classobj.getEditorView().getCentralWidget().editObject.connect(self.objectEditSlot)                        
                     return self._loadedPlugins[name]
         raise Exception('No plugin with name: %s' % (name))
 
@@ -249,7 +251,12 @@ class MWindow(QtGui.QMainWindow):
         3. sets the current view  to the plugins editor view.
 
         """
-        self.plugin = self.loadPluginClass(str(name))(str(root), self)
+        try:
+            self.plugin = self._plugins[str(name)]
+        except KeyError:
+            self.plugin = self.loadPluginClass(str(name))(str(root), self)
+            self._plugins[str(name)] = self.plugin
+        self.plugin.getEditorView().getCentralWidget().editObject.connect(self.objectEditSlot, QtCore.Qt.UniqueConnection)
         self.updateMenus()
         for action in self.pluginsMenu.actions():
             if str(action.text()) == str(name):
@@ -268,8 +275,9 @@ class MWindow(QtGui.QMainWindow):
         already exists. If so, update the same and return
         True. Otherwise return False.
         """
+        if not isinstance(menu, QtGui.QMenu):
+            return False
         for action in self.menuBar().actions():
-            #print '22222', action.text()
             if menu.title() == action.text():
                 action.menu().addSeparator()
                 action.menu().addActions(menu.actions())
@@ -317,7 +325,6 @@ class MWindow(QtGui.QMainWindow):
         """Set current view to a particular one: options are 'editor',
         'plot', 'run'. A plugin can provide more views if necessary.
         """
-        #print '11111', view,self.plugin
         self.plugin.setCurrentView(view)
         targetView = None
         newSubWindow = True
@@ -624,9 +631,10 @@ class MWindow(QtGui.QMainWindow):
         except ValueError:
             simtime = 1.0
         moose.start(simtime)      
+
     #Harsha: added visible=True so that loadModelDialogSlot and NewModelDialogSlot call this function
     #        to clear out object path
-    def objectEditSlot(self, mobj,visible=True):
+    def objectEditSlot(self, mobj, visible=True):
         """Slot for switching the current object in object editor."""
         self.objectEditDockWidget.setObject(mobj)        
         self.objectEditDockWidget.setVisible(visible)
@@ -679,7 +687,6 @@ class MWindow(QtGui.QMainWindow):
         newModelDialog = DialogWidget()
         if newModelDialog.exec_():
             modelPath = str(newModelDialog.modelPathEdit.text()).strip()
-            print "modelPath",modelPath
             if len(modelPath) == 0:
                 raise mexception.ElementNameError('Model path cannot be empty')
             if re.search('[ /]',modelPath) is not None:
@@ -690,7 +697,8 @@ class MWindow(QtGui.QMainWindow):
             modelRoot = moose.Neutral('%s/%s' % (modelContainer.path, modelPath))
             self.setPlugin(plugin, modelRoot.path)
             #Harsha: This will clear out object editor's objectpath and make it invisible
-            self.objectEditSlot('/',False)
+            self.objectEditSlot('/', False)
+
 
 if __name__ == '__main__':
     # create the GUI application
