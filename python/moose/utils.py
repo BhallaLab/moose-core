@@ -375,6 +375,7 @@ def assignTicks(tickTargetMap):
     tickTargetMap: 
     Map from tick no. to target path and method. The path can be wildcard expression also.
     """
+    print 'assignTicks', tickTargetMap
     if len(tickTargetMap) == 0:
         assignDefaultTicks()
     for tickNo, target in tickTargetMap.items():
@@ -425,6 +426,7 @@ def setDefaultDt(elecdt=1e-5, chemdt=0.01, tabdt=1e-5, plotdt1=1.0, plotdt2=0.25
     _moose.setClock(9, plotdt2) # electrical sim
 
 def assignDefaultTicks(modelRoot='/model', dataRoot='/data', solver='hsolve'):
+    print 'assignDefaultTicks'
     if isinstance(modelRoot, _moose.melement) or isinstance(modelRoot, _moose.ematrix):
         modelRoot = modelRoot.path
     if isinstance(dataRoot, _moose.melement) or isinstance(dataRoot, _moose.ematrix):
@@ -451,9 +453,11 @@ def assignDefaultTicks(modelRoot='/model', dataRoot='/data', solver='hsolve'):
     # Special case for kinetics models
     kinetics = _moose.wildcardFind('%s/##[FIELD(name)=kinetics]' % modelRoot)
     if len(kinetics) > 0:
-        _moose.useClock(4, '%s/##[ISA!=PoolBase]' % (kinetics[0].path), 'process')
-        _moose.useClock(5, '%s/##[ISA==PoolBase]' % (kinetics[0].path), 'process')
-        _moose.useClock(8, '%s/##[ISA=Table]' % (dataRoot), 'process')
+        # Do nothing for kinetics models - until multiple scheduling issue is fixed.
+        pass
+        # _moose.useClock(4, '%s/##[ISA!=PoolBase]' % (kinetics[0].path), 'process')
+        # _moose.useClock(5, '%s/##[ISA==PoolBase]' % (kinetics[0].path), 'process')
+        # _moose.useClock(8, '%s/##[ISA=Table]' % (dataRoot), 'process')
     else:
         _moose.useClock(9, '%s/##[ISA=Table]' % (dataRoot), 'process')
 
