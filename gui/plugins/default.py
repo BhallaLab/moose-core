@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Nov 13 15:58:31 2012 (+0530)
 # Version: 
-# Last-Updated: Wed Jul  3 10:31:37 2013 (+0530)
+# Last-Updated: Wed Jul  3 12:18:55 2013 (+0530)
 #           By: subha
-#     Update #: 2165
+#     Update #: 2213
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -86,7 +86,7 @@ class MoosePlugin(MoosePluginBase):
     def getEditorView(self):
         if not hasattr(self, 'editorView'):
             self.editorView = MooseEditorView(self)
-            self.editorView.getCentralWidget().editObject.connect(self.mainWindow.objectEditSlot)
+            # self.editorView.getCentralWidget().editObject.connect(self.mainWindow.objectEditSlot)
             self.currentView = self.editorView
         return self.editorView
 
@@ -607,6 +607,7 @@ class SchedulingWidget(QtGui.QWidget):
                 target = str(widget.text()).strip()
                 if len(target) > 0:
                     ret[ii-1] = target
+        print '77777', ret
         return ret
 
     def getTickDtMap(self):
@@ -619,6 +620,7 @@ class SchedulingWidget(QtGui.QWidget):
                     ret[ii-1] = float(str(widget.text()))
                 except ValueError:
                     QtGui.QMessageBox.warning(self, 'Invalid value', '`dt` for tick %d was meaningless.' % (ii-1))
+        print '66666', ret
         return ret
 
     def setDataRoot(self, root='/data'):
@@ -654,7 +656,7 @@ class PlotWidget(QtGui.QWidget):
     one moose table be plotted multiple times? Maybe yes (e.g., when
     you want multiple other tables to be compared with the same data).
 
-    lineToPath - map from Line2D objects to moose paths
+    lineToDataSource - map from Line2D objects to moose paths
 
     """
     def __init__(self, *args, **kwargs):
@@ -668,7 +670,7 @@ class PlotWidget(QtGui.QWidget):
         self.setLayout(layout)
         self.modelRoot = '/'
         self.pathToLine = defaultdict(set)
-        self.lineToPath = {}
+        self.lineToDataSource = {}
         self.canvas.addSubplot(1, 1)
 
     @property
@@ -699,11 +701,17 @@ class PlotWidget(QtGui.QWidget):
                     newLines = self.addTimeSeries(tab, label=tab.name)
                     self.pathToLine[tab.path].update(newLines)
                     for line in newLines:
-                        self.lineToPath[line] = PlotDataSource(x='/clock', y=tab.path, z='')
+                        self.lineToDataSource[line] = PlotDataSource(x='/clock', y=tab.path, z='')
                 else:
                     for line in lines:
-                        ts = np.linspace(0, time, len(tab.vec))
-                        line.set_data(ts, tab.vec)
+                        dataSrc = self.lineToDataSource[line]
+                        xSrc = moose.element(dataSrc.x)
+                        ySrc = moose.element(dataSrc.y)
+                        if isinstance(xSrc, moose.Clock):
+                            ts = np.linspace(0, time, len(tab.vec))
+                        elif isinstance(xSrc, moose.Table):
+                            ts = xSrc.vec.copy()
+                        line.set_data(ts, tab.vec.copy())
                 tabList.append(tab)
         if len(tabList) > 0:
             self.canvas.callAxesFn('legend')
@@ -748,6 +756,25 @@ class PlotWidget(QtGui.QWidget):
             axes.autoscale_view(tight=True,scalex=True,scaley=True)
         self.canvas.draw()
 
+    def saveCsv(self, line):
+        """Save selected plot data in CSV file"""
+        src = self.lineToDataSource[line]
+        xSrc = moose.element(src.x)
+        ySrc = moose.element(src.y)
+        y = ySrc.vec.copy()
+        if isinstance(xSrc, moose.Clock):
+            x = np.linspace(0, xSrc.currentTime, len(y))
+        elif isinstance(xSrc, moose.Table):
+            x = xSrc.vec.copy()
+        filename = '%s.csv' % (ySrc.name)
+        np.savetxt(filename, np.vstack((x, y)).transpose())
+        print 'Saved data from %s and %s in %s' % (xSrc.path, ySrc.path, filename)
+
+    def saveAllCsv(self):
+        """Save data for all currently plotted lines"""
+        for line in self.lineToDataSource.keys():
+            self.saveCsv(line)
+
     def getMenus(self):
         if not hasattr(self, '_menus'):
             self._menus = []
@@ -755,6 +782,9 @@ class PlotWidget(QtGui.QWidget):
             self.plotAllAction.triggered.connect(self.plotAllData)
             self.plotMenu = QtGui.QMenu('Plot')
             self.plotMenu.addAction(self.plotAllAction)
+            self.saveAllCsvAction = QtGui.QAction('Save all data in CSV files', self)
+            self.saveAllCsvAction.triggered.connect(self.saveAllCsv)
+            self.plotMenu.addAction(self.saveAllCsvAction)
             self._menus.append(self.plotMenu)
         return self._menus
 
