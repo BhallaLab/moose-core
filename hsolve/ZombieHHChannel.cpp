@@ -235,12 +235,14 @@ ZombieHHChannel::ZombieHHChannel()
 	//~ zGate_( 0 )
 { ; }
 
-void ZombieHHChannel::copyFields( Id chanId )
+void ZombieHHChannel::copyFields( Id chanId, HSolve* hsolve_ )
 {
-	//~ Xpower_           = Field< double >::get( chanId, "Xpower" );
-	//~ Ypower_           = Field< double >::get( chanId, "Ypower" );
-	//~ Zpower_           = Field< double >::get( chanId, "Zpower" );
-	//~ useConcentration_ = Field< double >::get( chanId, "useConcentration" );
+	Xpower_           = Field< double >::get( chanId, "Xpower" );
+	Ypower_           = Field< double >::get( chanId, "Ypower" );
+	Zpower_           = Field< double >::get( chanId, "Zpower" );
+	useConcentration_ = Field< double >::get( chanId, "useConcentration" );
+	
+	hsolve_->setPowers( chanId, Xpower_, Ypower_, Zpower_ );
 }
 
 ///////////////////////////////////////////////////
@@ -458,7 +460,7 @@ void ZombieHHChannel::zombify( Element* solver, Element* orig )
 	//~ HHChannel* od = reinterpret_cast< HHChannel* >( oer.data() );
 	HSolve* sd = reinterpret_cast< HSolve* >( ser.data() );
 	zd->hsolve_ = sd;
-	zd->copyFields( oer.id() );
+	zd->copyFields( oer.id(), sd );
 	orig->zombieSwap( zombieHHChannelCinfo, dh );
 }
 
