@@ -117,9 +117,9 @@ class ZombieHHChannel
 		double Zpower_;
 		
 		/// Flag for use of conc for input to Z gate calculations.
-		bool useConcentration_;	
+		bool useConcentration_;
 		
-		void copyFields( Id chanId );
+		void copyFields( Id chanId, HSolve* hsolve_ );
 		
 		
 		// Not sure if the Zombie should hold these. Keeping them out for now.
