@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Nov 13 15:58:31 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Jul  2 19:09:14 2013 (+0530)
+# Last-Updated: Wed Jul  3 10:31:37 2013 (+0530)
 #           By: subha
-#     Update #: 2126
+#     Update #: 2165
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -290,12 +290,10 @@ class RunView(RunBase):
     """
     def __init__(self, *args, **kwargs):
         RunBase.__init__(self, *args, **kwargs)
-        self.centralWidget = QtGui.QWidget()
-        self.canvas = PlotWidget()
-        self.canvas.setParent(self.centralWidget)
+        self.centralWidget = PlotWidget()
         self.dataRoot = moose.Neutral('/data')
         self.modelRoot = moose.Neutral(self.plugin.modelRoot)
-        self.canvas.setModelRoot(self.plugin.modelRoot)       
+        self.centralWidget.setModelRoot(self.plugin.modelRoot)       
         self.plugin.modelRootChanged.connect(self.setModelRoot)
         self.plugin.dataRootChanged.connect(self.setDataRoot)        
         self._menus += self.getCentralWidget().getMenus()
@@ -303,7 +301,7 @@ class RunView(RunBase):
     def getCentralWidget(self):
         """TODO: replace this with an option for multiple canvas
         tabs"""
-        return self.canvas
+        return self.centralWidget
         
     # def setDataRootSlot(self):
     #     path, ok = QtGui.QInputDialog.getText(self.getCentralWidget(), 'Set data root', 'Enter path to data root')
@@ -312,7 +310,7 @@ class RunView(RunBase):
         
     def setDataRoot(self, path):
         self.dataRoot = path
-        self.canvas.setDataRoot(path)
+        self.centralWidget.setDataRoot(path)
         self.getSchedulingDockWidget().widget().setDataRoot(path)
 
     def setModelRoot(self, path):
@@ -326,14 +324,11 @@ class RunView(RunBase):
 
     def plotAllData(self):
         """This is wrapper over the same function in PlotWidget."""
-        self.canvas.plotAllData()
+        self.centralWidget.plotAllData()
 
     def getToolPanes(self):
         if not self._toolPanes:
-            self.navToolbar = NavigationToolbar(self.getCentralWidget(), self.getCentralWidget())
-            self.navDock = QtGui.QDockWidget()
-            self.navDock.setWidget(self.navToolbar)
-            self._toolPanes = [self.getSchedulingDockWidget(), self.navDock]
+            self._toolPanes = [self.getSchedulingDockWidget()]
         return self._toolPanes
 
     def getSchedulingDockWidget(self):
@@ -345,10 +340,10 @@ class RunView(RunBase):
         widget.setDataRoot(self.dataRoot)
         widget.setModelRoot(self.modelRoot)
         self.schedulingDockWidget.setWidget(widget)
-        widget.runner.update.connect(self.canvas.updatePlots)
-        widget.runner.finished.connect(self.canvas.rescalePlots)
-        widget.simtimeExtended.connect(self.canvas.extendXAxes)
-        widget.runner.resetAndRun.connect(self.canvas.plotAllData)
+        widget.runner.update.connect(self.centralWidget.updatePlots)
+        widget.runner.finished.connect(self.centralWidget.rescalePlots)
+        widget.simtimeExtended.connect(self.centralWidget.extendXAxes)
+        widget.runner.resetAndRun.connect(self.centralWidget.plotAllData)
         return self.schedulingDockWidget
     
 
@@ -644,7 +639,7 @@ from collections import namedtuple
 
 PlotDataSource = namedtuple('PlotDataSource', ['x', 'y', 'z'], verbose=False)
 
-class PlotWidget(CanvasWidget):
+class PlotWidget(QtGui.QWidget):
     """A wrapper over CanvasWidget to handle additional MOOSE-specific
     stuff.
 
@@ -663,11 +658,18 @@ class PlotWidget(CanvasWidget):
 
     """
     def __init__(self, *args, **kwargs):
-        CanvasWidget.__init__(self, *args, **kwargs)
+        QtGui.QWidget.__init__(self, *args)
+        self.canvas = CanvasWidget()
+        self.canvas.setParent(self)
+        self.navToolbar = NavigationToolbar(self.canvas, self)
+        layout = QtGui.QVBoxLayout()
+        layout.addWidget(self.canvas)
+        layout.addWidget(self.navToolbar)
+        self.setLayout(layout)
         self.modelRoot = '/'
         self.pathToLine = defaultdict(set)
         self.lineToPath = {}
-        self.addSubplot(1, 1)
+        self.canvas.addSubplot(1, 1)
 
     @property
     def plotAll(self):
@@ -704,12 +706,12 @@ class PlotWidget(CanvasWidget):
                         line.set_data(ts, tab.vec)
                 tabList.append(tab)
         if len(tabList) > 0:
-            self.callAxesFn('legend')
-        self.draw()
+            self.canvas.callAxesFn('legend')
+        self.canvas.draw()
                 
     def addTimeSeries(self, table, *args, **kwargs):        
         ts = np.linspace(0, moose.Clock('/clock').currentTime, len(table.vec))
-        return self.plot(ts, table.vec, *args, **kwargs)
+        return self.canvas.plot(ts, table.vec, *args, **kwargs)
         
     def addRasterPlot(self, eventtable, yoffset=0, *args, **kwargs):
         """Add raster plot of events in eventtable.
@@ -717,7 +719,7 @@ class PlotWidget(CanvasWidget):
         yoffset - offset along Y-axis.
         """
         y = np.ones(len(eventtable.vec)) * yoffset
-        return self.plot(eventtable.vec, y, '|')
+        return self.canvas.plot(eventtable.vec, y, '|')
 
     def updatePlots(self):
         for path, lines in self.pathToLine.items():            
@@ -726,25 +728,25 @@ class PlotWidget(CanvasWidget):
             ts = np.linspace(0, moose.Clock('/clock').currentTime, len(data))
             for line in lines:
                 line.set_data(ts, data)
-        self.draw()
+        self.canvas.draw()
 
     def extendXAxes(self, xlim):
-        for axes in self.axes.values():
+        for axes in self.canvas.axes.values():
             # axes.autoscale(False, axis='x', tight=True)
             axes.set_xlim(right=xlim)
             axes.autoscale_view(tight=True, scalex=True, scaley=True)
-        self.draw()
+        self.canvas.draw()
 
     def rescalePlots(self):
         """This is to rescale plots at the end of simulation.
         
         ideally we should set xlim from simtime.
         """
-        for axes in self.axes.values():
+        for axes in self.canvas.axes.values():
             axes.autoscale(True, tight=True)
             axes.relim()
             axes.autoscale_view(tight=True,scalex=True,scaley=True)
-        self.figure.canvas.draw()
+        self.canvas.draw()
 
     def getMenus(self):
         if not hasattr(self, '_menus'):
