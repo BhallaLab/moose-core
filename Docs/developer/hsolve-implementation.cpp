@@ -60,9 +60,9 @@ For setup, I'm going to take a bottom-up approach, and start with the Hines Matr
   Therefore, a Y branch contributes three elements to each of the upper and lower halves of the triangle, 6 elements in total. In this example, these elements are (2,6) and (6,2); (2,7) and (7,2); (6,7) and (7,6). Note that because of the Hines indexing scheme, at least one of these elements will always be a part of the tridiagonal itself. Also, if we designate "parents" and "children" in the process of performing the DFS, then parents will always have a Hines index that is one more than its that of its greatest child.
 
 - The admittances produced by each compartment due to itself and its linear neighbours is stored in the HinesMatrix::HS_ vector. HS_ is a vector of doubles, consisting of the flattened diagonal and the values against which the Hines matrix is to be inverted (i.e., the external currents). HS_ can be regarded as the flattened version of an Nx4 matrix "Hines", where N is the number of compartments in the neuron.
-  - Hines[i][0] (or HS_[ 4*i + 0 ]) contains the diagonal element.
-  - Hines[i][1] contains the element to the right of Hines[i][0] in the matrix: element (i,i+1).
-  - Hines[i][2] contains element (i+1,i).
+  - Hines[i][0] (or HS_[ 4*i + 0 ]) contains the diagonal element, after including the effects of external currents.
+  - Hines[i][1] contains the element to the right and bottom of Hines[i][0] in the symmetric matrix: element (i,i+1) = element (i+1,i).
+  - Hines[i][2] contains the diagonal element due to passive effects alone.
   - Hines[i][3] contains the total external current injected into this compartment.
 
 - The admittances produced at junctions are stored in the HinesMatrix::HJ_ vector. HJ_ is a flattened vector comprising of elements produced by Wyes converted to Deltas. So, in the previous example, HJ_ would store (in that order) Hines[2][6], Hines[6][2], Hines[2][7], Hines[7][2], Hines[6][7], Hines[7][6]. However, the HJ_ vector itself does not store any information regarding the location of its elements within the Hines matrix.
