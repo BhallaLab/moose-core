@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Wed Mar 23 10:10:45 2011 (+0530)
 // Version: 
-// Last-Updated: Tue Jun 19 16:52:07 2012 (+0530)
+// Last-Updated: Fri Jul  5 19:18:37 2013 (+0530)
 //           By: subha
-//     Update #: 61
+//     Update #: 77
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -44,31 +44,34 @@ char shortType(string name)
     if (typemap.empty()){
         typemap.insert(pair<string, char>("bool", 'b'));
         typemap.insert(pair<string, char>("char", 'c'));
-        typemap.insert(pair<string, char>("int", 'i'));
-        typemap.insert(pair<string, char>("short", 'h'));
-        typemap.insert(pair<string, char>("long", 'l'));
-        typemap.insert(pair<string, char>("unsigned int", 'I'));
-        typemap.insert(pair<string, char>("unsigned long", 'k'));        
-        typemap.insert(pair<string, char>("float", 'f'));
-        typemap.insert(pair<string, char>("double", 'd'));
-        typemap.insert(pair<string, char>("string", 's'));
-        typemap.insert(pair<string, char>("Id", 'x'));
-        typemap.insert(pair<string, char>("ObjId", 'y'));
-        typemap.insert(pair<string, char>("DataId", 'z'));
-        typemap.insert(pair<string, char>("vector<char>", 'C'));
-        typemap.insert(pair<string, char>("vector<int>", 'v'));
-        typemap.insert(pair<string, char>("vector<short>", 'w'));
-        typemap.insert(pair<string, char>("vector<long>", 'L'));
-        typemap.insert(pair<string, char>("vector<unsigned int>", 'U'));
-        typemap.insert(pair<string, char>("vector<unsigned long>", 'K'));        
-        typemap.insert(pair<string, char>("vector<float>", 'F'));
-        typemap.insert(pair<string, char>("vector<double>", 'D'));
-        typemap.insert(pair<string, char>("vector<string>", 'S'));
-        typemap.insert(pair<string, char>("vector<Id>", 'X'));
-        typemap.insert(pair<string, char>("vector<ObjId>", 'Y'));
-        typemap.insert(pair<string, char>("vector<DataId", 'Z'));
-        typemap.insert(pair<string, char>("void", '_'));
-        typemap.insert(pair<string, char>("vector< vector<unsigned int> >", 'P'));
+        typemap.insert(pair<string, char>("int", 'i')); // python
+        typemap.insert(pair<string, char>("short", 'h')); // python
+        typemap.insert(pair<string, char>("short", 'H')); // python
+        typemap.insert(pair<string, char>("long", 'l')); // python
+        typemap.insert(pair<string, char>("long long", 'L')); // python
+        typemap.insert(pair<string, char>("unsigned int", 'I')); // python
+        typemap.insert(pair<string, char>("unsigned long", 'k')); // python
+        typemap.insert(pair<string, char>("unsigned long long", 'K')); // python
+        typemap.insert(pair<string, char>("float", 'f')); // python
+        typemap.insert(pair<string, char>("double", 'd')); // python
+        typemap.insert(pair<string, char>("string", 's')); // python
+        typemap.insert(pair<string, char>("Id", 'x')); // moose
+        typemap.insert(pair<string, char>("ObjId", 'y')); // moose
+        typemap.insert(pair<string, char>("DataId", 'z')); // moose
+        typemap.insert(pair<string, char>("vector<char>", 'C')); // moose
+        typemap.insert(pair<string, char>("vector<int>", 'v')); // moose
+        typemap.insert(pair<string, char>("vector<short>", 'w')); // moose
+        typemap.insert(pair<string, char>("vector<long>", 'M')); // moose
+        typemap.insert(pair<string, char>("vector<unsigned int>", 'N')); // moose
+        typemap.insert(pair<string, char>("vector<unsigned long>", 'P')); // moose       
+        typemap.insert(pair<string, char>("vector<float>", 'F')); // moose
+        typemap.insert(pair<string, char>("vector<double>", 'D')); // moose
+        typemap.insert(pair<string, char>("vector<string>", 'S')); // moose
+        typemap.insert(pair<string, char>("vector<Id>", 'X')); // moose
+        typemap.insert(pair<string, char>("vector<ObjId>", 'Y')); // moose
+        typemap.insert(pair<string, char>("vector<DataId", 'Z')); //moose
+        typemap.insert(pair<string, char>("void", '_')); // moose
+        typemap.insert(pair<string, char>("vector< vector<unsigned int> >", 'T'));
         typemap.insert(pair<string, char>("vector< vector<int> >", 'Q'));
         typemap.insert(pair<string, char>("vector< vector<double> >", 'R'));
     }
