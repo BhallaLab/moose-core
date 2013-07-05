@@ -245,6 +245,10 @@ vector< string > Msg::getDestFieldsOnE1() const
 	return ret;
 }
 
+ObjId Msg::getAdjacent(ObjId obj) const
+{
+    return findOtherEnd(obj);
+}
 
 ///////////////////////////////////////////////////////////////////////////
 // Here we set up the Element related stuff for Msgs.
@@ -291,6 +295,11 @@ const Cinfo* Msg::initCinfo()
 		&Msg::getDestFieldsOnE1
 	);
 
+        static ReadOnlyLookupValueFinfo< Msg, ObjId, ObjId > adjacent(
+            "adjacent",
+            "The element adjacent to the specified element",
+            &Msg::getAdjacent);
+
 	static Finfo* msgFinfos[] = {
 		&e1,		// readonly value
 		&e2,		// readonly value
@@ -298,6 +307,7 @@ const Cinfo* Msg::initCinfo()
 		&destFieldsOnE2,	// readonly value
 		&srcFieldsOnE2,	// readonly value
 		&destFieldsOnE1,	// readonly value
+                &adjacent, // readonly lookup value
 	};
 
 	static Cinfo msgCinfo (

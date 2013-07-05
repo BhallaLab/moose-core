@@ -138,6 +138,13 @@ class Msg
 		 */
 		virtual ObjId findOtherEnd( ObjId ) const = 0;
 
+
+                /**
+                 * Wrapper for findOtherEnd - to expose it as a LookupFinfo.
+                 */
+                ObjId getAdjacent( ObjId ) const;
+
+                
 		/**
 		 * Make a copy of this Msg. The original msg was on
 		 * origSrc. The new Msg should go from newSrc to newTgt,
