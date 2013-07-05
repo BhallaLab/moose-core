@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Sat Jun 29 15:20:09 2013 (+0530)
+// Last-Updated: Fri Jul  5 19:23:38 2013 (+0530)
 //           By: subha
-//     Update #: 10396
+//     Update #: 10450
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -1736,6 +1736,90 @@ static struct module_state _state;
             return -1;
         }
         switch(ftype){
+            case 'd': {//SET_VECFIELD(double, d)
+                vector<double> _value;
+                if (is_seq){
+                    for (unsigned int ii = 0; ii < length; ++ii){
+                        double v = PyFloat_AsDouble(PySequence_GetItem(value, ii));
+                        _value.push_back(v);
+                    }
+                } else {
+                    double v = PyFloat_AsDouble(value);
+                    _value.assign(length, v);
+                }
+                ret = Field<double>::setVec(self->id_, string(fieldname), _value);
+                break;
+            }                
+            case 's': {
+                vector<string> _value;
+                if (is_seq){
+                    for (unsigned int ii = 0; ii < length; ++ii){
+                        char * v = PyString_AsString(PySequence_GetItem(value, ii));
+                        _value.push_back(string(v));
+                    }
+                } else {
+                    char * v = PyString_AsString(value);
+                    _value.assign(length, string(v));
+                }                    
+                ret = Field<string>::setVec(self->id_, string(fieldname), _value);
+                break;
+            }
+            case 'i': {
+                vector<int> _value;
+                if (is_seq){
+                    for (unsigned int ii = 0; ii < length; ++ii){
+                        int v = PyInt_AsLong(PySequence_GetItem(value, ii));
+                        _value.push_back(v);
+                    }
+                } else {
+                    int v = PyInt_AsLong(value);
+                    _value.assign(length, v);
+                }
+                ret = Field< int >::setVec(self->id_, string(fieldname), _value);
+                break;
+            }
+            case 'I': {//SET_VECFIELD(unsigned int, I)
+                vector<unsigned int> _value;
+                if (is_seq){
+                    for (unsigned int ii = 0; ii < length; ++ii){
+                        unsigned int v = PyInt_AsUnsignedLongMask(PySequence_GetItem(value, ii));
+                        _value.push_back(v);
+                    }
+                } else {
+                    unsigned int v = PyInt_AsUnsignedLongMask(value);
+                    _value.assign(length, v);
+                }
+                ret = Field< unsigned int >::setVec(self->id_, string(fieldname), _value);                
+                break;
+            }
+            case 'l': {//SET_VECFIELD(long, l)
+                vector<long> _value;
+                if (is_seq){
+                    for (unsigned int ii = 0; ii < length; ++ii){
+                        long v = PyInt_AsLong(PySequence_GetItem(value, ii));
+                        _value.push_back(v);
+                    }
+                } else {
+                    long v = PyInt_AsLong(value);
+                    _value.assign(length, v);                    
+                }
+                ret = Field<long>::setVec(self->id_, string(fieldname), _value);
+                break;
+            }
+            case 'k': {//SET_VECFIELD(unsigned long, k)
+                vector<unsigned long> _value;
+                if (is_seq){
+                    for (unsigned int ii = 0; ii < length; ++ii){
+                        unsigned long v = PyInt_AsUnsignedLongMask(PySequence_GetItem(value, ii));
+                        _value.push_back(v);
+                    }
+                } else {
+                    unsigned long v = PyInt_AsUnsignedLongMask(value);
+                    _value.assign(length, v);
+                }
+                ret = Field< unsigned long >::setVec(self->id_, string(fieldname), _value);                
+                break;
+            }
             case 'b': {
                 vector<bool> _value;
                 if (is_seq){
@@ -1778,20 +1862,6 @@ static struct module_state _state;
                 ret = Field< char >::setVec(self->id_, string(fieldname), _value);
                 break;
             }
-            case 'i': {
-                vector<int> _value;
-                if (is_seq){
-                    for (unsigned int ii = 0; ii < length; ++ii){
-                        int v = PyInt_AsLong(PySequence_GetItem(value, ii));
-                        _value.push_back(v);
-                    }
-                } else {
-                    int v = PyInt_AsLong(value);
-                    _value.assign(length, v);
-                }
-                ret = Field< int >::setVec(self->id_, string(fieldname), _value);
-                break;
-            }
             case 'h': {
                 vector<short> _value;
                 if (is_seq){
@@ -1806,48 +1876,6 @@ static struct module_state _state;
                 ret = Field< short >::setVec(self->id_, string(fieldname), _value);
                 break;
             }
-            case 'l': {//SET_VECFIELD(long, l)
-                vector<long> _value;
-                if (is_seq){
-                    for (unsigned int ii = 0; ii < length; ++ii){
-                        long v = PyInt_AsLong(PySequence_GetItem(value, ii));
-                        _value.push_back(v);
-                    }
-                } else {
-                    long v = PyInt_AsLong(value);
-                    _value.assign(length, v);                    
-                }
-                ret = Field<long>::setVec(self->id_, string(fieldname), _value);
-                break;
-            }
-            case 'u': {//SET_VECFIELD(unsigned int, I)
-                vector<unsigned int> _value;
-                if (is_seq){
-                    for (unsigned int ii = 0; ii < length; ++ii){
-                        unsigned int v = PyInt_AsUnsignedLongMask(PySequence_GetItem(value, ii));
-                        _value.push_back(v);
-                    }
-                } else {
-                    unsigned int v = PyInt_AsUnsignedLongMask(value);
-                    _value.assign(length, v);
-                }
-                ret = Field< unsigned int >::setVec(self->id_, string(fieldname), _value);                
-                break;
-            }
-            case 'I': {//SET_VECFIELD(unsigned long, k)
-                vector<unsigned long> _value;
-                if (is_seq){
-                    for (unsigned int ii = 0; ii < length; ++ii){
-                        unsigned long v = PyInt_AsUnsignedLongMask(PySequence_GetItem(value, ii));
-                        _value.push_back(v);
-                    }
-                } else {
-                    unsigned long v = PyInt_AsUnsignedLongMask(value);
-                    _value.assign(length, v);
-                }
-                ret = Field< unsigned long >::setVec(self->id_, string(fieldname), _value);                
-                break;
-            }
             case 'f': {//SET_VECFIELD(float, f)
                 vector<float> _value;
                 if (is_seq){
@@ -1860,34 +1888,6 @@ static struct module_state _state;
                     _value.assign(length, v);
                 }
                 ret = Field<float>::setVec(self->id_, string(fieldname), _value);
-                break;
-            }
-            case 'd': {//SET_VECFIELD(double, d)
-                vector<double> _value;
-                if (is_seq){
-                    for (unsigned int ii = 0; ii < length; ++ii){
-                        double v = PyFloat_AsDouble(PySequence_GetItem(value, ii));
-                        _value.push_back(v);
-                    }
-                } else {
-                    double v = PyFloat_AsDouble(value);
-                    _value.assign(length, v);
-                }
-                ret = Field<double>::setVec(self->id_, string(fieldname), _value);
-                break;
-            }                
-            case 's': {
-                vector<string> _value;
-                if (is_seq){
-                    for (unsigned int ii = 0; ii < length; ++ii){
-                        char * v = PyString_AsString(PySequence_GetItem(value, ii));
-                        _value.push_back(string(v));
-                    }
-                } else {
-                    char * v = PyString_AsString(value);
-                    _value.assign(length, string(v));
-                }                    
-                ret = Field<string>::setVec(self->id_, string(fieldname), _value);
                 break;
             }
             default:                
@@ -2327,18 +2327,18 @@ static struct module_state _state;
                     Py_RETURN_FALSE;
                 }
             }
-            case 'c': GET_FIELD(char, c)
-            case 'i': GET_FIELD(int, i)
-            case 'h': GET_FIELD(short, h)
-            case 'l': GET_FIELD(long, l)        
-            case 'I': GET_FIELD(unsigned int, I)
-            case 'k': GET_FIELD(unsigned long, k)
-            case 'f': GET_FIELD(float, f)
-            case 'd': GET_FIELD(double, d)
             case 's': {
                 string _s = Field<string>::get(self->oid_, string(field));
                 return Py_BuildValue("s", _s.c_str());
             }
+            case 'd': GET_FIELD(double, d)
+            case 'i': GET_FIELD(int, i)
+            case 'I': GET_FIELD(unsigned int, I)
+            case 'l': GET_FIELD(long, l)        
+            case 'k': GET_FIELD(unsigned long, k)
+            case 'f': GET_FIELD(float, f)
+            case 'c': GET_FIELD(char, c)
+            case 'h': GET_FIELD(short, h)
             case 'x':
                 {                    
                     Id value = Field<Id>::get(self->oid_, string(field));
@@ -2420,7 +2420,7 @@ static struct module_state _state;
                     }
                     return ret;
                 }
-            case 'P': // vector < vector < unsigned > >
+            case 'T': // vector < vector < unsigned > >
                 {
                     GET_VECVEC(unsigned int, I);
                     break;
@@ -2505,30 +2505,9 @@ static struct module_state _state;
         char ftype = shortType(fieldtype);
         int ret = 0;
         switch(ftype){
-            case 'b': {
-                bool _value = (Py_True == value) || (PyInt_AsLong(value) != 0);
-                ret = Field<bool>::set(self->oid_, string(field), _value);
-                break;
-            }
-            case 'c': {
-                char * _value = PyString_AsString(value);
-                if (_value && _value[0]){
-                    ret = Field<char>::set(self->oid_, string(field), _value[0]);
-                }
-                break;
-            }
-            case 'i': {
-                int _value = PyInt_AsLong(value);
-                if ((_value != -1) || (!PyErr_Occurred())){
-                    ret = Field<int>::set(self->oid_, string(field), _value);
-                }
-                break;
-            }
-            case 'h':{
-                short _value = (short)PyInt_AsLong(value);
-                if ((_value != -1) || (!PyErr_Occurred())){
-                    ret = Field<short>::set(self->oid_, string(field), _value);
-                }
+            case 'd': {
+                double _value = PyFloat_AsDouble(value);
+                ret = Field<double>::set(self->oid_, string(field), _value);
                 break;
             }
             case 'l': {
@@ -2553,11 +2532,6 @@ static struct module_state _state;
                 ret = Field<float>::set(self->oid_, string(field), _value);
                 break;
             }
-            case 'd': {
-                double _value = PyFloat_AsDouble(value);
-                ret = Field<double>::set(self->oid_, string(field), _value);
-                break;
-            }
             case 's': {
                 char * _value = PyString_AsString(value);
                 if (_value){
@@ -2580,6 +2554,46 @@ static struct module_state _state;
                 } else {
                     PyErr_SetString(PyExc_ValueError, "Null pointer passed as ematrix Id value.");
                     return -1;
+                }
+                break;
+            }
+            case 'D': {//SET_VECFIELD(double, d)
+                if (!PySequence_Check(value)){
+                    PyErr_SetString(PyExc_TypeError, "For setting vector<double> field, specified value must be a sequence." );
+                } else {
+                    Py_ssize_t length = PySequence_Length(value);
+                    vector<double> _value;
+                    for (unsigned int ii = 0; ii < length; ++ii){
+                        double v = PyFloat_AsDouble(PySequence_GetItem(value, ii));
+                        _value.push_back(v);
+                    }
+                    ret = Field< vector < double > >::set(self->oid_, string(field), _value);
+                }
+                break;
+            }
+            case 'b': {
+                bool _value = (Py_True == value) || (PyInt_AsLong(value) != 0);
+                ret = Field<bool>::set(self->oid_, string(field), _value);
+                break;
+            }
+            case 'c': {
+                char * _value = PyString_AsString(value);
+                if (_value && _value[0]){
+                    ret = Field<char>::set(self->oid_, string(field), _value[0]);
+                }
+                break;
+            }
+            case 'i': {
+                int _value = PyInt_AsLong(value);
+                if ((_value != -1) || (!PyErr_Occurred())){
+                    ret = Field<int>::set(self->oid_, string(field), _value);
+                }
+                break;
+            }
+            case 'h':{
+                short _value = (short)PyInt_AsLong(value);
+                if ((_value != -1) || (!PyErr_Occurred())){
+                    ret = Field<short>::set(self->oid_, string(field), _value);
                 }
                 break;
             }
@@ -2629,7 +2643,7 @@ static struct module_state _state;
                 }
                 break;
             }
-            case 'U': {//SET_VECFIELD(unsigned int, I)
+            case 'N': {//SET_VECFIELD(unsigned int, I)
                 if (!PySequence_Check(value)){
                     PyErr_SetString(PyExc_TypeError, "For setting vector<unsigned int> field, specified value must be a sequence." );
                 } else {
@@ -2670,21 +2684,7 @@ static struct module_state _state;
                     ret = Field< vector < float > >::set(self->oid_, string(field), _value);
                 }
                 break;
-            }
-            case 'D': {//SET_VECFIELD(double, d)
-                if (!PySequence_Check(value)){
-                    PyErr_SetString(PyExc_TypeError, "For setting vector<double> field, specified value must be a sequence." );
-                } else {
-                    Py_ssize_t length = PySequence_Length(value);
-                    vector<double> _value;
-                    for (unsigned int ii = 0; ii < length; ++ii){
-                        double v = PyFloat_AsDouble(PySequence_GetItem(value, ii));
-                        _value.push_back(v);
-                    }
-                    ret = Field< vector < double > >::set(self->oid_, string(field), _value);
-                }
-                break;
-            }                
+            }              
             case 'S': {
                 if (!PySequence_Check(value)){
                     PyErr_SetString(PyExc_TypeError, "For setting vector<string> field, specified value must be a sequence." );
@@ -2699,7 +2699,7 @@ static struct module_state _state;
                 }
                 break;
             }
-            case 'P': {// vector< vector<unsigned int> >
+            case 'T': {// vector< vector<unsigned int> >
                 vector < vector <unsigned> > * _value = (vector < vector <unsigned> > *)to_cpp< vector < vector <unsigned> > >(value);
                 if (!PyErr_Occurred()){
                     ret = Field < vector < vector <unsigned> > >::set(self->oid_, string(field), *_value);
@@ -2763,113 +2763,111 @@ static struct module_state _state;
         PyObject * ret = NULL;
         char key_type_code = shortType(type_vec[0]);
         char value_type_code = shortType(type_vec[1]);
-        void * value_ptr = NULL;
-        switch (value_type_code){
-            case 'x': {
-                value_ptr = PyObject_New(_Id, &IdType);
-                break;
-            }
-            case 'y': {
-                value_ptr = PyObject_New(_ObjId, &ObjIdType);
-                break;
-            }
-            case 'C': case 'v': case 'w': case 'L': case 'U': case 'K': case 'F': case 'D': case 'S':  case 'X': case 'Y': {
-                value_ptr = PyList_New(0);
-                break;
-            }
-        } //! switch( value_type_code )
         switch(key_type_code){
             case 'b': {
-                ret = lookup_value <bool> (target, string(fieldName), value_type_code, key_type_code, key, value_ptr);
+                ret = lookup_value <bool> (target, string(fieldName), value_type_code, key_type_code, key);
                 break;
             }
             case 'c': {
-                ret = lookup_value <char> (target, string(fieldName), value_type_code, key_type_code, key, value_ptr);
+                ret = lookup_value <char> (target, string(fieldName), value_type_code, key_type_code, key);
                 break;
             }
             case 'h': {
-                ret = lookup_value <short> (target, string(fieldName), value_type_code, key_type_code, key, value_ptr);
+                ret = lookup_value <short> (target, string(fieldName), value_type_code, key_type_code, key);
                 break;
             }            
             case 'H': {
-                ret = lookup_value <unsigned short> (target, string(fieldName), value_type_code, key_type_code, key, value_ptr);
+                ret = lookup_value <unsigned short> (target, string(fieldName), value_type_code, key_type_code, key);
                 break;
             }            
             case 'i': {
-                ret = lookup_value <int> (target, string(fieldName), value_type_code, key_type_code, key, value_ptr);
+                ret = lookup_value <int> (target, string(fieldName), value_type_code, key_type_code, key);
                 break;
             }            
             case 'I': {
-                ret = lookup_value <unsigned int> (target, string(fieldName), value_type_code, key_type_code, key, value_ptr);
+                ret = lookup_value <unsigned int> (target, string(fieldName), value_type_code, key_type_code, key);
                 break;
             }            
             case 'l': {
-                ret = lookup_value <long> (target, string(fieldName), value_type_code, key_type_code, key, value_ptr);
+                ret = lookup_value <long> (target, string(fieldName), value_type_code, key_type_code, key);
                 break;
             }                        
             case 'k': {
-                ret = lookup_value <unsigned long> (target, string(fieldName), value_type_code, key_type_code, key, value_ptr);
+                ret = lookup_value <unsigned long> (target, string(fieldName), value_type_code, key_type_code, key);
                 break;
             }                        
             case 'L': {
-                ret = lookup_value <long long> (target, string(fieldName), value_type_code, key_type_code, key, value_ptr);
+                ret = lookup_value <long long> (target, string(fieldName), value_type_code, key_type_code, key);
                 break;
             }                        
             case 'K': {
-                ret = lookup_value <unsigned long long> (target, string(fieldName), value_type_code, key_type_code, key, value_ptr);
+                ret = lookup_value <unsigned long long> (target, string(fieldName), value_type_code, key_type_code, key);
                 break;
             }                        
             case 'd': {
-                ret = lookup_value <double> (target, string(fieldName), value_type_code, key_type_code, key, value_ptr);
+                ret = lookup_value <double> (target, string(fieldName), value_type_code, key_type_code, key);
                 break;
             }                        
             case 'f': {
-                ret = lookup_value <float> (target, string(fieldName), value_type_code, key_type_code, key, value_ptr);
+                ret = lookup_value <float> (target, string(fieldName), value_type_code, key_type_code, key);
                 break;
             }
             case 's': {
-                ret = lookup_value <string> (target, string(fieldName), value_type_code, key_type_code, key, value_ptr);
+                ret = lookup_value <string> (target, string(fieldName), value_type_code, key_type_code, key);
                 break;
             }
             case 'x': {
-                ret = lookup_value <Id> (target, string(fieldName), value_type_code, key_type_code, key, value_ptr);
+                ret = lookup_value <Id> (target, string(fieldName), value_type_code, key_type_code, key);
                 break;
             }
             case 'y': {
-                ret = lookup_value <ObjId> (target, string(fieldName), value_type_code, key_type_code, key, value_ptr);
+                ret = lookup_value <ObjId> (target, string(fieldName), value_type_code, key_type_code, key);
                 break;
             }
-            case 'v': {
-                ret = lookup_value < vector <int> >(target, string(fieldName), value_type_code, key_type_code, key, value_ptr);
-                break;
-            }
-            case 'w': {
-                ret = lookup_value < vector <short> >(target, string(fieldName), value_type_code, key_type_code, key, value_ptr);
-                break;
-            }   
-            case 'U': {
-                ret = lookup_value < vector <unsigned int> >(target, string(fieldName), value_type_code, key_type_code, key, value_ptr);
-                break;
-            }
-            case 'F': {
-                ret = lookup_value < vector <float> >(target, string(fieldName), value_type_code, key_type_code, key, value_ptr);
-                break;
-            }                
             case 'D': {
-                ret = lookup_value < vector <double> >(target, string(fieldName), value_type_code, key_type_code, key, value_ptr);
+                ret = lookup_value < vector <double> >(target, string(fieldName), value_type_code, key_type_code, key);
                 break;
             }                
             case 'S': {
-                ret = lookup_value < vector <string> >(target, string(fieldName), value_type_code, key_type_code, key, value_ptr);
+                ret = lookup_value < vector <string> >(target, string(fieldName), value_type_code, key_type_code, key);
+                break;
+            }
+            case 'X': {
+                ret = lookup_value < vector <Id> >(target, string(fieldName), value_type_code, key_type_code, key);
+                break;
+            }
+            case 'Y': {
+                ret = lookup_value < vector <ObjId> >(target, string(fieldName), value_type_code, key_type_code, key);
+                break;
+            }
+            case 'v': {
+                ret = lookup_value < vector <int> >(target, string(fieldName), value_type_code, key_type_code, key);
+                break;
+            }
+            case 'N': {
+                ret = lookup_value < vector <unsigned int> >(target, string(fieldName), value_type_code, key_type_code, key);
+                break;
+            }
+            case 'P': {
+                ret = lookup_value < vector <unsigned long> >(target, string(fieldName), value_type_code, key_type_code, key);
+                break;
+            }
+            case 'F': {
+                ret = lookup_value < vector <float> >(target, string(fieldName), value_type_code, key_type_code, key);
                 break;
             }                
+            case 'w': {
+                ret = lookup_value < vector <short> >(target, string(fieldName), value_type_code, key_type_code, key);
+                break;
+            }   
+            case 'C': {
+                ret = lookup_value < vector <char> >(target, string(fieldName), value_type_code, key_type_code, key);
+                break;
+            }
             default:
                 ostringstream error;
                 error << "Unhandled key type `" << type_vec[0] << "` for " << Field<string>::get(target, "class") << "." << fieldName;
                 PyErr_SetString(PyExc_TypeError, error.str().c_str());
-        }
-        if (ret == NULL && value_ptr != NULL){
-            Py_XDECREF(value_ptr);
         }
         return ret;
     }
@@ -2920,6 +2918,34 @@ static struct module_state _state;
         char value_type_code = shortType(type_vec[1]);
         int ret = -1;
         switch(key_type_code){
+            case 'I': {
+                ret = set_lookup_value <unsigned int> (target, string(fieldName), value_type_code, key_type_code, key, value);
+                break;
+            }            
+            case 'k': {
+                ret = set_lookup_value <unsigned long> (target, string(fieldName), value_type_code, key_type_code, key, value);
+                break;
+            }                        
+            case 's': {
+                ret = set_lookup_value <string> (target, string(fieldName), value_type_code, key_type_code, key, value);
+                break;
+            }
+            case 'i': {
+                ret = set_lookup_value <int> (target, string(fieldName), value_type_code, key_type_code, key, value);
+                break;
+            }            
+            case 'l': {
+                ret = set_lookup_value <long> (target, string(fieldName), value_type_code, key_type_code, key, value);
+                break;
+            }                        
+            case 'L': {
+                ret = set_lookup_value <long long> (target, string(fieldName), value_type_code, key_type_code, key, value);
+                break;
+            }                        
+            case 'K': {
+                ret = set_lookup_value <unsigned long long> (target, string(fieldName), value_type_code, key_type_code, key, value);
+                break;
+            }                        
             case 'b': {
                 ret = set_lookup_value <bool> (target, string(fieldName), value_type_code, key_type_code, key, value);
                 break;
@@ -2936,30 +2962,6 @@ static struct module_state _state;
                 ret = set_lookup_value <unsigned short> (target, string(fieldName), value_type_code, key_type_code, key, value);
                 break;
             }            
-            case 'i': {
-                ret = set_lookup_value <int> (target, string(fieldName), value_type_code, key_type_code, key, value);
-                break;
-            }            
-            case 'I': {
-                ret = set_lookup_value <unsigned int> (target, string(fieldName), value_type_code, key_type_code, key, value);
-                break;
-            }            
-            case 'l': {
-                ret = set_lookup_value <long> (target, string(fieldName), value_type_code, key_type_code, key, value);
-                break;
-            }                        
-            case 'k': {
-                ret = set_lookup_value <unsigned long> (target, string(fieldName), value_type_code, key_type_code, key, value);
-                break;
-            }                        
-            case 'L': {
-                ret = set_lookup_value <long long> (target, string(fieldName), value_type_code, key_type_code, key, value);
-                break;
-            }                        
-            case 'K': {
-                ret = set_lookup_value <unsigned long long> (target, string(fieldName), value_type_code, key_type_code, key, value);
-                break;
-            }                        
             case 'd': {
                 ret = set_lookup_value <double> (target, string(fieldName), value_type_code, key_type_code, key, value);
                 break;
@@ -2974,10 +2976,6 @@ static struct module_state _state;
             }
             case 'y': {
                 ret = set_lookup_value <ObjId> (target, string(fieldName), value_type_code, key_type_code, key, value);
-                break;
-            }
-            case 's': {
-                ret = set_lookup_value <string> (target, string(fieldName), value_type_code, key_type_code, key, value);
                 break;
             }
             default:
@@ -3089,160 +3087,142 @@ static struct module_state _state;
                 }
             }
             switch (shortType(argType[ii])){                    
-                case 'c':
-                    {
-                        char * param = PyString_AsString(arg);
-                        if (!param){
-                            error << ii << "-th expected of type char/string";
+                case 'f': case 'd': {
+                    double param = PyFloat_AsDouble(arg);
+                    argstream << param << ",";
+                }
+                    break;
+                case 's': {
+                    char * param = PyString_AsString(arg);
+                    argstream << string(param) << ",";
+                }
+                    break;
+                case 'i': case 'l': {
+                    long param = PyInt_AsLong(arg);
+                    if (param == -1 && PyErr_Occurred()){
+                        return NULL;
+                    }
+                    argstream << param << ",";
+                }
+                    break;
+                case 'I': case 'k':{
+                    unsigned long param =PyLong_AsUnsignedLong(arg);
+                    if (PyErr_Occurred()){
+                        return NULL;
+                    }
+                    argstream << param << ",";                            
+                }
+                    break;
+                case 'x': {
+                    Id param;
+                    if (Id_SubtypeCheck(arg)){
+                        _Id * id = (_Id*)(arg);
+                        if (id == NULL){
+                            error << "argument should be an ematrix or an melement";
                             PyErr_SetString(PyExc_TypeError, error.str().c_str());
-                            return NULL;
-                        } else if (strlen(param) == 0){
-                            error << "Empty string not allowed.";
-                            PyErr_SetString(PyExc_ValueError, error.str().c_str());
-                            return NULL;
+                            return NULL;                                
                         }
-                        argstream << param[0] << ",";
+                        param = id->id_;
+                    } else if (ObjId_SubtypeCheck(arg)){
+                        _ObjId * oid = (_ObjId*)(arg);
+                        if (oid == NULL){
+                            error << "argument should be an ematrix or an melement";
+                            PyErr_SetString(PyExc_TypeError, error.str().c_str());
+                            return NULL;                                
+                        }
+                        param = oid->oid_.id;
                     }
+                    if ( SetGet1<Id>::set(oid, string(fieldName), param)){
+                        return Py_True;
+                    }
+                    return Py_False;
+                }
+                case 'y': {
+                    ObjId param;
+                    if (Id_SubtypeCheck(arg)){
+                        _Id * id = (_Id*)(arg);
+                        if (id == NULL){
+                            error << "argument should be an ematrix or an melement";
+                            PyErr_SetString(PyExc_TypeError, error.str().c_str());
+                            return NULL;                                
+                        }
+                        param = ObjId(id->id_);
+                    } else if (ObjId_SubtypeCheck(arg)){
+                        _ObjId * oid = (_ObjId*)(arg);
+                        if (oid == NULL){
+                            error << "argument should be an ematrix or an melement";
+                            PyErr_SetString(PyExc_TypeError, error.str().c_str());
+                            return NULL;                                
+                        }
+                        param = oid->oid_;
+                    }
+                    if ( SetGet1<ObjId>::set(oid, string(fieldName), param)){
+                        return Py_True;
+                    }
+                    return Py_False;
+                }
+                case 'c': {
+                    char * param = PyString_AsString(arg);
+                    if (!param){
+                        error << ii << "-th expected of type char/string";
+                        PyErr_SetString(PyExc_TypeError, error.str().c_str());
+                        return NULL;
+                    } else if (strlen(param) == 0){
+                        error << "Empty string not allowed.";
+                        PyErr_SetString(PyExc_ValueError, error.str().c_str());
+                        return NULL;
+                    }
+                    argstream << param[0] << ",";
+                }
                     break;
-                case 'i': case 'l':
-                    {
-                        long param = PyInt_AsLong(arg);
-                        if (param == -1 && PyErr_Occurred()){
-                            return NULL;
-                        }
-                        argstream << param << ",";
-                    }
-                    break;
-                case 'I': case 'k':
-                    {
-                        unsigned long param =PyLong_AsUnsignedLong(arg);
-                        if (PyErr_Occurred()){
-                            return NULL;
-                        }
-                        argstream << param << ",";                            
-                    }
-                    break;
-                case 'f': case 'd':
-                    {
-                        double param = PyFloat_AsDouble(arg);
-                        argstream << param << ",";
-                    }
-                    break;
-                case 's':
-                    {
-                        char * param = PyString_AsString(arg);
-                        argstream << string(param) << ",";
-                    }
-                    break;
-                case 'x':
-                    {
-                        Id param;
-                        if (Id_SubtypeCheck(arg)){
-                            _Id * id = (_Id*)(arg);
-                            if (id == NULL){
-                                error << "argument should be an ematrix or an melement";
-                                PyErr_SetString(PyExc_TypeError, error.str().c_str());
-                                return NULL;                                
-                            }
-                            param = id->id_;
-                        } else if (ObjId_SubtypeCheck(arg)){
-                            _ObjId * oid = (_ObjId*)(arg);
-                            if (oid == NULL){
-                                error << "argument should be an ematrix or an melement";
-                                PyErr_SetString(PyExc_TypeError, error.str().c_str());
-                                return NULL;                                
-                            }
-                            param = oid->oid_.id;
-                        }
-                        if ( SetGet1<Id>::set(oid, string(fieldName), param)){
-                            return Py_True;
-                        }
-                        return Py_False;
-                    }
-                case 'y':
-                    {
-                        ObjId param;
-                        if (Id_SubtypeCheck(arg)){
-                            _Id * id = (_Id*)(arg);
-                            if (id == NULL){
-                                error << "argument should be an ematrix or an melement";
-                                PyErr_SetString(PyExc_TypeError, error.str().c_str());
-                                return NULL;                                
-                            }
-                            param = ObjId(id->id_);
-                        } else if (ObjId_SubtypeCheck(arg)){
-                            _ObjId * oid = (_ObjId*)(arg);
-                            if (oid == NULL){
-                                error << "argument should be an ematrix or an melement";
-                                PyErr_SetString(PyExc_TypeError, error.str().c_str());
-                                return NULL;                                
-                            }
-                            param = oid->oid_;
-                        }
-                        if ( SetGet1<ObjId>::set(oid, string(fieldName), param)){
-                            return Py_True;
-                        }
-                        return Py_False;
-                    }
                     ////////////////////////////////////////////////////
                     // We do NOT handle multiple vectors. Use the argument
                     // list as a single vector argument.
                     ////////////////////////////////////////////////////
-                case 'v': 
-                    {
-                        return _set_vector_destFinfo<int>(oid, string(fieldName), ii, arg);
-                        break;
-                    }
-                case 'w': 
-                    {
-                        return _set_vector_destFinfo<short>(oid, string(fieldName), ii, arg);
-                        break;
-                    }
-                case 'L': //SET_VECFIELD(long, l)
-                    {
-                        return _set_vector_destFinfo<long>(oid, string(fieldName), ii, arg);
-                        break;
-                    }
-                case 'U'://SET_VECFIELD(unsigned int, I)
-                    {
-                        return _set_vector_destFinfo<unsigned int>(oid, string(fieldName), ii, arg);
-                        break;
-                    }
-                case 'K': //SET_VECFIELD(unsigned long, k)
-                    {
-                        return _set_vector_destFinfo<unsigned long>(oid, string(fieldName), ii, arg);
-                        break;
-                    }
-                case 'F': //SET_VECFIELD(float, f)
-                    {
-                        return _set_vector_destFinfo<float>(oid, string(fieldName), ii, arg);
-                        break;
-                    }
-                case 'D': //SET_VECFIELD(double, d)
-                    {
-                        return _set_vector_destFinfo<double>(oid, string(fieldName), ii, arg);
-                        break;
-                    }                
-                case 'S':
-                    {
-                        return _set_vector_destFinfo<string>(oid, string(fieldName), ii, arg);
-                        break;
-                    }
-                case 'X':
-                    {
-                        return _set_vector_destFinfo<Id>(oid, string(fieldName), ii, arg);
-                        break;
-                    }
-                case 'Y':
-                    {
-                        return _set_vector_destFinfo<ObjId>(oid, string(fieldName), ii, arg);
-                    }
-                default:
-                    {
-                        error << "Cannot handle argument type: " << argType[ii];
-                        PyErr_SetString(PyExc_TypeError, error.str().c_str());
-                        return NULL;
-                    }
+                case 'v': {
+                    return _set_vector_destFinfo<int>(oid, string(fieldName), ii, arg);
+                    break;
+                }
+                case 'w': {
+                    return _set_vector_destFinfo<short>(oid, string(fieldName), ii, arg);
+                    break;
+                }
+                case 'L': {//SET_VECFIELD(long, l) {
+                    return _set_vector_destFinfo<long>(oid, string(fieldName), ii, arg);
+                    break;
+                }            
+                case 'N': { //SET_VECFIELD(unsigned int, I)
+                    return _set_vector_destFinfo<unsigned int>(oid, string(fieldName), ii, arg);
+                    break;
+                }
+                case 'K': {//SET_VECFIELD(unsigned long, k)
+                    return _set_vector_destFinfo<unsigned long>(oid, string(fieldName), ii, arg);
+                    break;
+                }
+                case 'F': {//SET_VECFIELD(float, f)
+                    return _set_vector_destFinfo<float>(oid, string(fieldName), ii, arg);
+                    break;
+                }
+                case 'D': {//SET_VECFIELD(double, d)
+                    return _set_vector_destFinfo<double>(oid, string(fieldName), ii, arg);
+                    break;
+                }                
+                case 'S': {
+                    return _set_vector_destFinfo<string>(oid, string(fieldName), ii, arg);
+                    break;
+                }
+                case 'X': {
+                    return _set_vector_destFinfo<Id>(oid, string(fieldName), ii, arg);
+                    break;
+                }
+                case 'Y': {
+                    return _set_vector_destFinfo<ObjId>(oid, string(fieldName), ii, arg);
+                }
+                default: {
+                    error << "Cannot handle argument type: " << argType[ii];
+                    PyErr_SetString(PyExc_TypeError, error.str().c_str());
+                    return NULL;
+                }
             } // switch (shortType(argType[ii])
         } // for (size_t ii = 0; ...
         // TODO: handle vector args and void functions properly
