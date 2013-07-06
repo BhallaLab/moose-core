@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Sat Jun 29 11:32:29 2013 (+0530)
 # Version: 
-# Last-Updated: Fri Jul  5 19:26:11 2013 (+0530)
+# Last-Updated: Sat Jul  6 14:19:34 2013 (+0530)
 #           By: subha
-#     Update #: 113
+#     Update #: 143
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -63,22 +63,18 @@ def many_ematrix_to_one_element():
     """
     model = moose.Neutral('/model')
     # data = moose.Neutral('/data')
-    synchan = moose.SynChan('/model/synchan', 2)
+    synchan = moose.SynChan('/model/synchan')
+    synchan.synapse.num = 2
     num_spikegen = 5
-    spikegens = []
-    tab = moose.Table('tab')
-    tab.vec = [1, 2, 3]    
-    print '%%%%'
-    c = tab.y[1]
-    print '%*%*%*'
+    spikegens = [moose.SpikeGen('/model/spikegen_%d' % (ii)) for ii in range(num_spikegen)]
     for ii in range(num_spikegen):
-        spike = moose.ematrix('/model/spikegen_%d' % (ii), dtype='SpikeGen', dims=2)
-        print 'SpikeId:', spike.value, spike.path,
-        synchan.synapse.num += 1
-        msg = moose.connect(spike, 'event', synchan.synapse[ii], 'addSpike')
-        print '->', moose.element(msg).adjacent[spike[0]].path
-        synchan.synapse[ii].delay = ii  * 1e-3
-        synchan.synapse[ii].weight = (ii+1) * 0.1
+        msg = moose.connect(spikegens[ii], 'event', synchan.synapse[ii%2], 'addSpike')
+        # synchan.synapse[ii].delay = ii  * 1e-3
+        # synchan.synapse[ii].weight = (ii+1) * 0.1
+    for sg in spikegens:
+        print sg.path, '-->',
+        for m in sg.msgOut:
+            print moose.element(m).adjacent[sg].path
     
 if __name__ == '__main__':
     many_ematrix_to_one_element()
