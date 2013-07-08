@@ -103,7 +103,9 @@ void StoichCore::setElist( const Eref& e, SolverBase* sb,
 	Id myCompt = getCompt( e.id() );
 	vector< Id > temp = elist;
 
-	if ( myCompt != Id() ) // Off solver only happens if compt is defined.
+	// if ( myCompt != Id() ) // Off solver only happens if compt is defined.
+   	// Avoid if kkit or unit test.
+	if ( myCompt.path() != "/model/kinetics" && myCompt != Id() )
 		locateOffSolverReacs( myCompt, temp );
 	allocateObjMap( temp );
 	allocateModel( temp );
