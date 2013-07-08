@@ -22423,7 +22423,10 @@ Spatial/anatomically detailed/anatomically realistic/morphological
 eculture edish eplay ecell neuro physion decsign designeur 
 	detailed electrical signaling interface to geometrical neurons
 rdesigneur: reaction-diffusion and electrical signaling interface for generating neurons
+Reaction-diffusion and electrical signaling in neurons.
 schema spatial chemical electrical multiscale analysis
+musckess multiscale simulation of chemical and electrical spatial signaling.
+wiserd 
 
 Implemented a single-compartment SigNeur model in 
 	cubeMeshSigNeur.py. 
@@ -22458,5 +22461,41 @@ There are a few issues:
 	
 But, at the end of it, the system is working together and all portions seem to
 	do their thing.
+Checkin 4662.
+
+==========================================================================
+3 July
+Oddly, after removing the Ca from the PSD, I now have a new bug:
+python: GslStoichNumerics.cpp:393: void GslStoich::updateDiffusion(std::vector<std::vector<double> >&, std::vector<std::vector<double> >&, double): Assertion `other < lastS.size()' failed.
+
+The number of voxels on SpineMesh has fallen back to 10 from 15. In other 
+words, the contact between Spine and Psd isn't going through voxels?
+
+==========================================================================
+5 July
+Confirmed. Replacing the Ca fixes it. Some questions:
+- Does the numerical code need the extra voxel for reactions without diffusion?
+- If so, how do we make it so that the presence of the cross-compartment 
+	reaction causes the creation of the extra voxel?
+==========================================================================
+7 July
+Implemented a stargazin bistable model with toy Ca regulation in
+	snippets/stargazin_synapse6.g
+
+This has to be loaded into a single-compartment neuronal model where the 
+synaptic input causes Ca influx and the synaptic weight changes with the 
+amount of R.
+Also it will be fun to run on its own, through moosekkit.
+
+==========================================================================
+8 July.
+Recurring bug with solver. Indexing of diffConst_ vector fails.
+
+Did some patching with how the model-loading deals with kkit files, to avoid
+them running into the process of creating separate pools for diffusion.
+
+With this was able to set up the snippet for bidirectional synaptic plasticity,
+bidirectionalPlasticity.py
+using stargazin_synapse.g
 
 ==========================================================================

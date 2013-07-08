@@ -226,8 +226,8 @@ def dumpPlots( fname ):
         moose.element( x[0] ).xplot( fname, x[0].name )
 
 def makeSpinyCompt():
-    comptLength = 100e-6
-    comptDia = 4e-6
+    comptLength = 30e-6
+    comptDia = 6e-6
     numSpines = 5
     compt = createSquid()
     compt.inject = 0
@@ -260,13 +260,13 @@ def createPool( compt, name, concInit ):
     pool = moose.Pool( compt.path + '/' + name )
     moose.connect( pool, 'mesh', meshEntries, 'mesh', 'Single' )
     pool.concInit = concInit
-    pool.diffConst = 5e-11
+    pool.diffConst = 1e-11
     return pool
 
 
 def createChemModel( neuroCompt, spineCompt, psdCompt ):
     # Stuff in spine + psd
-    psdCa = createPool( psdCompt, 'Ca', 0 ) # dummy, to test diffusion
+    psdCa = createPool( psdCompt, 'Ca', 0.0001 )
     psdGluR = createPool( psdCompt, 'psdGluR', 1 )
     headCa = createPool( spineCompt, 'Ca', 1e-4 )
     headGluR = createPool( spineCompt, 'headGluR', 2 )
@@ -433,8 +433,9 @@ def makeCubeMultiscale():
     adaptK.scale = 0.3               # from mM to Siemens
 
 def makeNeuroMeshModel():
-    diffLength = 10e-6
     makeSpinyCompt()
+    diffLength = moose.element( '/n/compt' ).length
+    diffLength = diffLength / 10.0
     elec = moose.element( '/n' )
     elec.name = 'elec'
     model = moose.Neutral( '/model' )
@@ -567,9 +568,6 @@ def makeNeuroMeshModel():
 
 def makeChemPlots():
     graphs = moose.Neutral( '/graphs' )
-    addPlot( '/model/chem/psdMesh/Ca[0]', 'get_conc', 'psd0Ca' )
-    addPlot( '/model/chem/psdMesh/Ca[1]', 'get_conc', 'psd1Ca' )
-    addPlot( '/model/chem/psdMesh/Ca[2]', 'get_conc', 'psd2Ca' )
     addPlot( '/model/chem/psdMesh/psdGluR[0]', 'get_n', 'psd0R' )
     addPlot( '/model/chem/psdMesh/psdGluR[1]', 'get_n', 'psd1R' )
     addPlot( '/model/chem/psdMesh/psdGluR[2]', 'get_n', 'psd2R' )
@@ -708,7 +706,6 @@ def testNeuroMeshMultiscale():
     plotName = 'nm.plot'
 
     makeNeuroMeshModel()
-    chemCa = moose.element( '/model/chem/neuroMesh/Ca[0]' )
     moose.le( '/model/chem/spineMesh/ksolve' )
     print 'Neighbours:'
     for t in moose.element( '/model/chem/spineMesh/ksolve/junction' ).neighbours['masterJunction']:
@@ -716,8 +713,9 @@ def testNeuroMeshMultiscale():
     for t in moose.wildcardFind( '/model/chem/#Mesh/ksolve' ):
         k = moose.element( t[0] )
         print k.path + ' localVoxels=', k.numLocalVoxels, ', allVoxels= ', k.numAllVoxels
+    #chemCa = moose.element( '/model/chem/neuroMesh/Ca[0]' )
+    #chemCa.concInit = 0.001
     printMolVecs( 'after all is done' )
-    chemCa.concInit = 0.001
     makeChemPlots()
     makeElecPlots()
     moose.setClock( 0, elecDt )
