@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Oct 15 15:03:09 2012 (+0530)
 # Version: 
-# Last-Updated: Mon Jun 24 17:31:14 2013 (+0530)
+# Last-Updated: Tue Jul  9 18:36:28 2013 (+0530)
 #           By: subha
-#     Update #: 241
+#     Update #: 271
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -48,13 +48,16 @@ import testutils
 from testutils import compare_cell_dump, setup_clocks, assign_clocks, step_run
 
 
-def setup_current_step_model(model_container, data_container, 
-                                        celltype, 
-                                        pulsearray, 
-                                        simdt, plotdt, solver='euler'):
+def setup_current_step_model(model_container, 
+                             data_container, 
+                             celltype, 
+                             pulsearray):
     """Setup a single cell simulation.
 
-    testId: integer - identifying the model
+    model_container: element to hold the model
+
+    data_container: element to hold data
+    
 
     celltype: str - cell type
     
@@ -86,9 +89,7 @@ def setup_current_step_model(model_container, data_container,
             'stimulus': pulsegen,
             'presynVm': presyn_vm,
             'somaVm': soma_vm,
-            'injectionCurrent': pulse_table,
-            # 'hsolve': hsolve
-            }
+            'injectionCurrent': pulse_table, }
 
 
 class SingleCellCurrentStepTest(unittest.TestCase):
@@ -112,10 +113,7 @@ class SingleCellCurrentStepTest(unittest.TestCase):
             self.model_container, 
             self.data_container, 
             self.celltype, 
-            self.pulse_array, 
-            self.simdt, 
-            self.plotdt,
-            solver=self.solver)
+            self.pulse_array)
         self.cell = params['cell']       
         for ch in moose.wildcardFind(self.cell.soma.path + '/##[ISA=ChanBase]'):
             config.logger.debug('%s Ek = %g' % (ch.path, ch[0].Ek))
@@ -137,39 +135,50 @@ class SingleCellCurrentStepTest(unittest.TestCase):
             self.pulsegen.width[ii] = pulsearray[ii][1]
             self.pulsegen.level[ii] = pulsearray[ii][2]
 
+    def schedule(self, simdt, plotdt, solver):
+        self.simdt = simdt
+        self.plotdt = plotdt
+        if solver == 'hsolve':
+            self.hsolve = moose.HSolve('%s/solver' % (self.cell.path))
+            self.hsolve.dt = simdt
+            self.hsolve.target = self.cell.path
+        mutils.setDefaultDt(elecdt=simdt, plotdt2=plotdt)
+        mutils.assignDefaultTicks(modelRoot=self.model_container.path, 
+                                 dataRoot=self.data_container.path, 
+                                 solver=solver)        
+
     def runsim(self, simtime, stepsize=0.1, pulsearray=None):
         """Run the simulation for `simtime`. Save the data at the
         end."""
-        mutils.resetSim([self.model_container.path, self.data_container.path], self.simdt, self.plotdt, simmethod=self.solver)
+        self.simtime = simtime
         if pulsearray is not None:            
             self.tweak_stimulus(pulsearray)
+        config.logger.info('Start reinit')
         moose.reinit()
-        # start = datetime.now()
-        # step_run(simtime, stepsize)
-        # end = datetime.now()
-        # # The sleep is required to get all threads to end 
-        # while moose.isRunning():
-        #     time.sleep(0.1)
-        # delta = end - start
-        # config.logger.info('Simulation time with solver %s: %g s' % \
-        #     (self.solver, 
-        #      delta.seconds + delta.microseconds * 1e-6))
-        print '1111', simtime
-        print '2222', stepsize
-        mutils.stepRun(simtime, stepsize, logger=config.logger)
-        self.tseries = np.arange(0, simtime+self.plotdt, self.plotdt)
+        config.logger.info('Finished reinit')
+        ts = datetime.now()
+        mutils.stepRun(simtime, simtime/10.0, verbose=True, logger=config.logger)
+        # The sleep is required to get all threads to end 
+        while moose.isRunning():
+            time.sleep(0.1)
+        te = datetime.now()
+        td = te - ts
+        config.logger.info('Simulation time of %g s at simdt=%g with solver %s: %g s' % \
+            (simtime, self.simdt, self.solver, 
+             td.seconds + td.microseconds * 1e-6))
+
+    def savedata(self):
         # Now save the data
         for table_id in self.data_container.children:
-            try:
-                data = np.vstack((self.tseries, table_id[0].vec))
-            except ValueError as e:
-                self.tseries = np.linspace(0, simtime, len(table_id[0].vec))
-                data = np.vstack((self.tseries, table_id[0].vec))
-            fname = 'data/%s_%s_%s.dat' % (self.celltype, 
-                                           table_id[0].name,
-                                           self.solver)
+            ts = np.linspace(0, self.simtime, len(table_id[0].vec))
+            data = np.vstack((ts, table_id[0].vec))
+            fname = os.path.join(config.data_dir, 
+                                 '%s_%s_%s_%s.dat' % (self.celltype, 
+                                                      table_id[0].name,
+                                                      self.solver, 
+                                                      config.filename_suffix))
             np.savetxt(fname, np.transpose(data))
-            print 'Saved', table_id[0].name, 'in', fname
+            config.logger.info('Saved %s in %s' % (table_id[0].name, fname))
         
     def plot_vm(self):
         """Plot Vm for presynaptic compartment and soma - along with
