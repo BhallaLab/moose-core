@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Oct 15 15:03:09 2012 (+0530)
 # Version: 
-# Last-Updated: Tue Jul  9 18:36:28 2013 (+0530)
+# Last-Updated: Wed Jul 10 10:01:20 2013 (+0530)
 #           By: subha
-#     Update #: 271
+#     Update #: 282
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -99,10 +99,10 @@ class SingleCellCurrentStepTest(unittest.TestCase):
         unittest.TestCase.__init__(self, *args, **kwargs)        
         self.pulse_array =  [[100e-3, 100e-3, 1e-9],
                              [1e9, 0, 0]]
-        self.solver = 'hsolve'
-        self.simdt = testutils.SIMDT
-        self.plotdt = testutils.PLOTDT
-        self.tseries = [0.0]
+        self.solver = None
+        self.simdt = None
+        self.plotdt = None
+        self.tseries = []
     
     def setUp(self):
         self.test_id = uuid.uuid4().int
@@ -136,23 +136,28 @@ class SingleCellCurrentStepTest(unittest.TestCase):
             self.pulsegen.level[ii] = pulsearray[ii][2]
 
     def schedule(self, simdt, plotdt, solver):
+        config.logger.info('Scheduling: simdt=%g, plotdt=%g, solver=%s' % (simdt, plotdt, solver))
         self.simdt = simdt
         self.plotdt = plotdt
-        if solver == 'hsolve':
+        self.solver = solver
+        if self.solver == 'hsolve':
             self.hsolve = moose.HSolve('%s/solver' % (self.cell.path))
             self.hsolve.dt = simdt
             self.hsolve.target = self.cell.path
         mutils.setDefaultDt(elecdt=simdt, plotdt2=plotdt)
         mutils.assignDefaultTicks(modelRoot=self.model_container.path, 
                                  dataRoot=self.data_container.path, 
-                                 solver=solver)        
+                                 solver=self.solver)        
 
     def runsim(self, simtime, stepsize=0.1, pulsearray=None):
         """Run the simulation for `simtime`. Save the data at the
         end."""
+        config.logger.info('running: simtime=%g, stepsize=%g, pulsearray=%s' % (simtime, stepsize, str(pulsearray)))
         self.simtime = simtime
         if pulsearray is not None:            
             self.tweak_stimulus(pulsearray)
+        for ii in range(self.pulsegen.count):
+            config.logger.info('pulse[%d]: delay=%g, width=%g, level=%g' % (ii, self.pulsegen.delay[ii], self.pulsegen.width[ii], self.pulsegen.level[ii]))
         config.logger.info('Start reinit')
         moose.reinit()
         config.logger.info('Finished reinit')
