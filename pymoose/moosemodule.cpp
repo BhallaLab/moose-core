@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Tue Jul  9 10:43:03 2013 (+0530)
+// Last-Updated: Thu Jul 11 19:10:38 2013 (+0530)
 //           By: subha
-//     Update #: 10611
+//     Update #: 10625
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -5179,31 +5179,31 @@ extern "C" {
                 }
             }
             case 'v':
-                return PySequenceToVector< int >(object, typecode);
+                return PySequenceToVector< int >(object, 'i');
             case 'N':
-                return PySequenceToVector < unsigned int > (object, typecode);
+                return PySequenceToVector < unsigned int > (object, 'I');
             case 'w':
-                return PySequenceToVector < short > (object, typecode);
+                return PySequenceToVector < short > (object, 'h');
             case 'M':
-                return PySequenceToVector < long > (object, typecode);
+                return PySequenceToVector < long > (object, 'l');
             case 'P':
-                return PySequenceToVector < unsigned long > (object, typecode);
+                return PySequenceToVector < unsigned long > (object, 'k');
             case 'F':
-                return PySequenceToVector < float > (object, typecode);
+                return PySequenceToVector < float > (object, 'f');
             case 'D':
-                return PySequenceToVector < double > (object, typecode);
+                return PySequenceToVector < double > (object, 'd');
             case 'S':
-                return PySequenceToVector < string > (object, typecode);
+                return PySequenceToVector < string > (object, 's');
             case 'Y':
-                return PySequenceToVector < ObjId > (object, typecode);      
+                return PySequenceToVector < ObjId > (object, 'y');      
             case 'X':
-                return PySequenceToVector < Id > (object, typecode);
+                return PySequenceToVector < Id > (object, 'x');
             case 'R':
-                return PySequenceToVectorOfVectors< double >(object, typecode);
+                return PySequenceToVectorOfVectors< double >(object, 'd');
             case 'Q':
-                return PySequenceToVectorOfVectors< int >(object, typecode);
+                return PySequenceToVectorOfVectors< int >(object, 'i');
             case 'T':
-                return PySequenceToVectorOfVectors< unsigned int > (object, typecode);
+                return PySequenceToVectorOfVectors< unsigned int > (object, 'I');
         }
         return NULL;
     }
