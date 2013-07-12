@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Jul 12 11:53:50 2013 (+0530)
 # Version: 
-# Last-Updated: Fri Jul 12 15:38:48 2013 (+0530)
+# Last-Updated: Fri Jul 12 15:50:56 2013 (+0530)
 #           By: subha
-#     Update #: 174
+#     Update #: 189
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -117,6 +117,7 @@ class HHChanView(QtGui.QWidget):
         v = np.linspace(gate.min, gate.max, len(m))
         self.mhaxes.plot(v, m, label='%s %s' % (gate.path, mlabel))
         self.tauaxes.plot(v, tau, label='%s %s' % (gate.path, taulabel))
+        print 'Plotted', gate.path, 'vmin=', gate.min, 'vmax=', gate.max, 'm[0]=', m[0], 'm[last]=', m[-1], 'tau[0]=', tau[0], 'tau[last]=', tau[-1]
         
     def plotActInact(self):
         """Plot the activation and inactivation variables of the selected channels"""
@@ -125,6 +126,12 @@ class HHChanView(QtGui.QWidget):
         except AttributeError:
             self.figure = Figure()
             self.canvas = FigureCanvas(self.figure)
+            self.nav = NavigationToolbar(self.canvas, self)
+            self.plotWidget = QtGui.QWidget()
+            layout = QtGui.QVBoxLayout()
+            self.plotWidget.setLayout(layout)
+            layout.addWidget(self.canvas)
+            layout.addWidget(self.nav)
         self.mhaxes = self.figure.add_subplot(2, 1, 1)
         self.mhaxes.set_title('Activation/Inactivation')
         self.tauaxes = self.figure.add_subplot(2, 1, 2)
@@ -140,7 +147,7 @@ class HHChanView(QtGui.QWidget):
         self.mhaxes.legend()
         self.tauaxes.legend()
         self.canvas.draw()
-        return self.canvas
+        return self.plotWidget
 
 import sys
 from cells import *
