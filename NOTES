@@ -22499,3 +22499,72 @@ bidirectionalPlasticity.py
 using stargazin_synapse.g
 
 ==========================================================================
+12 July.
+The way to deal with this is to have a way to reversibly flip the solver
+between single-solver form and one-solver-per-compartment form.
+
+==========================================================================
+13 July. Stepping back to the 3 July issue of the reaction not triggering
+formation of the proxy voxel.
+
+Turns out that the stencil for diffusion is identical in the case where there
+is and isn't Ca in the PSD. Instead the stencil should be considerably smaller
+when no Ca is in the PSD, since that part of the diffusion isn't happening.
+
+SolverBase::addJunction
+	configureJunction
+
+SolverBase::configureJunction
+	GslStoich::matchMeshEntries: lines up mesh entries
+		ChemCompt::buildJunction
+			NeuroMesh etc::matchMeshEntries
+			MeshCompt::extendStencil <- Should not be done unless
+				the vols share a diffusing molecule.
+	expandSforDiffusion
+	GslStoich::updateJunctionInterface: sets up x-compt reacs
+
+
+Can't do a runtime check for diffusing pools, because they are present.
+Just not any between head and psd.  So I need to prevent the stencil from 
+expanding to the non-diffusively-coupled pairs.
+
+Unfortunately the code is still more problematic than that. The assumption in
+the numerical part of the calculations is that if a molecule can diffuse, 
+it can diffuse to all compartments in model.  No way to have subsets of the
+molecules allowed into specific compartments.
+	This will fail badly with in-membrane diffusion, which has a subset
+of diffusing molecules that do not go into the volume compartments.
+So I cannot simply require that diffusion extend to all compartments.
+
+The upshot of this is that some more refinement is needed for the calculations
+and hence for the setup of the diffusing solvers. This will probably involve
+the creation of a 2D vector indexed by all possible compartment combinations,
+listing all the molecules that diffuse between those compartments.
+
+Significant fixing is also needed on setup so that a non-compartmental
+solver can be set up, and transformed into a compartmental one.
+
+Additionally, need API to access the list of compartments nearest any given
+point, so that I can set up the adaptors.
+
+So, three items to fix:
+- Subsets of molecules in diffusion calculations. Setup thereof
+- Transformation of non-compartmental solver to compartmental one
+- API to find nearest compartments, for setting up adaptors.
+
+For now, have to proceed with Ca in the PSD.
+
+Implemented a 3-chemical compartment multiscale model, talking to the 
+5-spine dendrite electrical model. In snippets/multiComptSigNeur.py.
+Still not quite behaving.
+There was a numerical instability. This was cured after putting the
+Pools on a separate clock from the reacs and enz.
+
+Now somewhat better match between solved and deterministic runs, but still
+not good enough. In multiComptSigNeur.py
+
+Next clean out testSigNeur.py
+Then try to condense the loading process into a single function.
+Then try it out on the NeuralNetworks paper I did.
+
+==========================================================================
