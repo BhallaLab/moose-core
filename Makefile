@@ -103,6 +103,12 @@ ifeq ($(BUILD),profile)
 CXXFLAGS  = -O3 -pg  -pthread -fpermissive -fno-strict-aliasing -fPIC -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER  
 USE_GSL = 1
 endif
+# Profiling mode with gperftoools
+ifeq ($(BUILD),gperf)
+CXXFLAGS  = -O3 -pthread -fpermissive -fno-strict-aliasing -fPIC -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER  
+LDFLAGS += -lprofiler -ltcmalloc
+USE_GSL = 1
+endif
 # Threading mode:
 ifeq ($(BUILD),thread)
 CXXFLAGS  = -O3 -pthread -Wall -Wno-long-long -pedantic -DNDEBUG -DUSE_GENESIS_PARSER  
