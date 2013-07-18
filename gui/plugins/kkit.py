@@ -121,40 +121,40 @@ class  KineticsWidget(DefaultEditorWidget):
         return QtCore.QSize(800,400)
 
     def updateModelView(self):
-
+        print "update model view",self.modelRoot
         if self.modelRoot == '/':
             m = wildcardFind('/##[ISA=ChemCompt]')
         else:
             m = wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
-
+        print "111",self.modelRoot,m
         if not m:
+            # when we want an empty GraphicView while creating new model,
+            # then remove all the view and add an empty view
             if hasattr(self, 'view') and isinstance(self.view, QtGui.QWidget):
                 self.layout().removeWidget(self.view)
             self.view = GraphicalView(self.sceneContainer,self.border,self)
             self.layout().addWidget(self.view)
         else:
-            """ maxmium and minimum coordinates of the objects specified in kkit file. """
+            # maxmium and minimum coordinates of the objects specified in kkit file. 
             self.xmin = 0.0
             self.xmax = 1.0
             self.ymin = 0.0
             self.ymax = 1.0
             self.autoCordinatepos = {}
             self.sceneContainer.clear()
-            """ TODO: size will be dummy at this point, but I need the availiable size from the Gui """
+            # TODO: size will be dummy at this point, but I need the availiable size from the Gui
             self.size = QtCore.QSize(1024 ,768)
             #self.size = QtCore.QSize(300,400)
             self.autocoordinates = False
             
-            """ pickled the color map file """
+            # pickled the color map file """
             colormap_file = open(os.path.join(config.settings[config.KEY_COLORMAP_DIR], 'rainbow2.pkl'),'rb')
             self.colorMap = pickle.load(colormap_file)
             colormap_file.close()
             
-            """ Compartment and its members are setup """
+            # Compartment and its members are setup """
             self.meshEntry,self.xmin,self.xmax,self.ymin,self.ymax,self.noPositionInfo = setupMeshObj(self.modelRoot)
-        #for mesh,obj in self.meshEntry.items():
-        #    print "mesh",mesh, obj
-            """ srcdesConnection dictonary will have connection information between src and des """
+            # srcdesConnection dictonary will have connection information between src and des """
 
             self.srcdesConnection = {}
             setupItem(self.modelRoot,self.srcdesConnection)
@@ -168,7 +168,7 @@ class  KineticsWidget(DefaultEditorWidget):
                 
                 self.xmin,self.xmax,self.ymin,self.ymax,self.autoCordinatepos = autoCoordinates(self.meshEntry,self.srcdesConnection)
 
-            """ Scale factor to translate the x -y position to fit the Qt graphicalScene, scene width. """
+            # Scale factor to translate the x -y position to fit the Qt graphicalScene, scene width. """
             if self.xmax-self.xmin != 0:
                 self.xratio = (self.size.width()-10)/(self.xmax-self.xmin)
             else: self.xratio = self.size.width()-10
@@ -191,10 +191,10 @@ class  KineticsWidget(DefaultEditorWidget):
             self.lineItem_dict = {}
             self.object2line = defaultdict(list)
             
-            """ Compartment and its members are put on the qgraphicsscene """
+            # Compartment and its members are put on the qgraphicsscene
             self.mooseObjOntoscene()
             
-            """ All the moose Object are connected for visualization """
+            # All the moose Object are connected for visualization 
             self.drawLine_arrow(itemignoreZooming=False)
             if hasattr(self, 'view') and isinstance(self.view, QtGui.QWidget):
                 self.layout().removeWidget(self.view)
@@ -202,15 +202,16 @@ class  KineticsWidget(DefaultEditorWidget):
             self.layout().addWidget(self.view)
     
     def mooseObjOntoscene(self):
-        """  All the compartments are put first on to the scene \
-             Need to do: Check With upi if empty compartments exist """
+        #  All the compartments are put first on to the scene \
+        #  Need to do: Check With upi if empty compartments exist 
         for cmpt in sorted(self.meshEntry.iterkeys()):
             self.createCompt(cmpt)
-            comptRef = self.qGraCompt[cmpt]
+            self.qGraCompt[cmpt]
+            #comptRef = self.qGraCompt[cmpt]
         
-        """ Enzymes of all the compartments are placed first, \
-             so that when cplx (which is pool object) queries for its parent, it gets its \
-             parent enz co-ordinates with respect to QGraphicsscene """
+        #Enzymes of all the compartments are placed first, \
+        #     so that when cplx (which is pool object) queries for its parent, it gets its \
+        #     parent enz co-ordinates with respect to QGraphicsscene """
         
         for cmpt,memb in self.meshEntry.items():
             for enzObj in find_index(memb,'enzyme'):
@@ -246,7 +247,7 @@ class  KineticsWidget(DefaultEditorWidget):
                 tabItem = PoolItem(tabObj,self.qGraCompt[cmpt])
                 self.setupDisplay(tabinfo,tabItem,"tab")
                 self.setupSlot(tabObj,tabItem)
-        ''' compartment's rectangle size is calculated depending on children '''
+        # compartment's rectangle size is calculated depending on children 
         for k, v in self.qGraCompt.items():
             rectcompt = v.childrenBoundingRect()
             v.setRect(rectcompt.x()-10,rectcompt.y()-10,(rectcompt.width()+20),(rectcompt.height()+20))
@@ -263,8 +264,8 @@ class  KineticsWidget(DefaultEditorWidget):
     def setupDisplay(self,info,graphicalObj,objClass):
         xpos,ypos = self.positioninfo(info)
         
-        """ For Reaction and Complex object I have skipped the process to get the facecolor and background color as \
-            we are not using these colors for displaying the object so just passing dummy color white """
+        # For Reaction and Complex object I have skipped the process to get the facecolor and background color as \
+        #    we are not using these colors for displaying the object so just passing dummy color white 
 
         if( (objClass == "reaction" ) or (objClass == "cplx")):
             textcolor,bgcolor = "white","white"
@@ -279,20 +280,20 @@ class  KineticsWidget(DefaultEditorWidget):
         if self.noPositionInfo:
             
             try:
-                """ kkit does exist item's/info which up querying for parent.path gives the information of item's parent """
+                # kkit does exist item's/info which up querying for parent.path gives the information of item's parent 
                 x,y = self.autoCordinatepos[(element(iteminfo).parent).path]
             except:
-                """ But in Cspace reader doesn't create item's/info, up on querying gives me the error which need to change\
-                 in ReadCspace.cpp, at present i am taking care b'cos i don't want to pass just the item where I need to check\
-                 type of the object (rea,pool,enz,cplx,tab) which I have already done. """
+                # But in Cspace reader doesn't create item's/info, up on querying gives me the error which need to change\
+                # in ReadCspace.cpp, at present i am taking care b'cos i don't want to pass just the item where I need to check\
+                # type of the object (rea,pool,enz,cplx,tab) which I have already done. 
                 parent, child = posixpath.split(iteminfo)
                 x,y = self.autoCordinatepos[parent]
             ypos = (y-self.ymin)*self.yratio
         else:
             x = float(element(iteminfo).getField('x'))
             y = float(element(iteminfo).getField('y'))
-            """Qt origin is at the top-left corner. The x values increase to the right and the y values increase downwards \
-            as compared to Genesis codinates where origin is center and y value is upwards, that is why ypos is negated """
+            #Qt origin is at the top-left corner. The x values increase to the right and the y values increase downwards \
+            #as compared to Genesis codinates where origin is center and y value is upwards, that is why ypos is negated 
             ypos = -(y-self.ymin)*self.yratio
         xpos = (x-self.xmin)*self.xratio
         
@@ -304,8 +305,8 @@ class  KineticsWidget(DefaultEditorWidget):
         qgraphicItem.connect(qgraphicItem,QtCore.SIGNAL("qgtextItemSelectedChange(PyQt_PyObject)"),self.emitItemtoEditor)
 
     def updateItemSlot(self, mooseObject):
-        """This is overridden by derived classes to connect appropriate
-        slot for updating the display item."""
+        #This is overridden by derived classes to connect appropriate
+        #slot for updating the display item.
         #In this case if the name is updated from the keyboard both in mooseobj and gui gets updation
         changedItem = ''
         for item in self.sceneContainer.items():
@@ -336,10 +337,10 @@ class  KineticsWidget(DefaultEditorWidget):
 
     def drawLine_arrow(self, itemignoreZooming=False):
         for inn,out in self.srcdesConnection.items():
-            ''' self.srcdesConnection is dictionary which contains key,value \
-                key is Enzyme or Reaction  and value [[list of substrate],[list of product]] (tuple)
-                key is FuncBase and value is [list of pool] (list)
-            '''
+            # self.srcdesConnection is dictionary which contains key,value \
+            #    key is Enzyme or Reaction  and value [[list of substrate],[list of product]] (tuple)
+            #    key is FuncBase and value is [list of pool] (list)
+
             #src = self.mooseId_GObj[inn]
             if isinstance(out,tuple):
                 if len(out[0])== 0:
@@ -444,9 +445,9 @@ class  KineticsWidget(DefaultEditorWidget):
             ql.setPolygon(arrow)
     
     def cplxUpdatearrow(self,srcdes):
-        ''' srcdes which is 'EnzItem' from this,get ChildItems are retrived (b'cos cplx is child of zombieEnz)
-        And cplxItem is passed for updatearrow
-        '''
+        # srcdes which is 'EnzItem' from this,get ChildItems are retrived (b'cos cplx is child of zombieEnz)
+        #And cplxItem is passed for updatearrow
+
         #Note: Here at this point enzItem has just one child which is cplxItem and childItems returns, PyQt4.QtGui.QGraphicsEllipseItem,CplxItem
         #Assuming CplxItem is always[1], but still check if not[0], if something changes in structure one need to keep an eye.
         if (srcdes.childItems()[1],CplxItem):
