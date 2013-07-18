@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Jul 12 11:53:50 2013 (+0530)
 # Version: 
-# Last-Updated: Wed Jul 17 22:39:53 2013 (+0530)
+# Last-Updated: Thu Jul 18 12:42:02 2013 (+0530)
 #           By: subha
-#     Update #: 551
+#     Update #: 660
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -56,7 +56,7 @@ from matplotlib import mlab
 # see: https://groups.google.com/forum/#!msg/networkx-discuss/lTVyrmFoURQ/SZNnTY1bSf8J
 # but does not help after the first instance when displaying cell
 from matplotlib.figure import Figure
-
+from matplotlib import patches
 
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
@@ -185,25 +185,57 @@ class NetworkXWidget(QtGui.QWidget):
 
     # TODO: bypass networkx draw as it uses pylab directly.
     def displayGraph(self, g, label=False):
+        print g
         axon, sd = axon_dendrites(g)
-        sizes = node_sizes(g) * 500.0
+        sizes = node_sizes(g) * 50
         weights = np.array([g.edge[e[0]][e[1]]['weight'] for e in g.edges()])
         pos = nx.graphviz_layout(g, prog='twopi')
+        xmin, ymin, xmax, ymax = 1e9, 1e9, -1e9, -1e9
+        for p in pos.values():
+            if xmin > p[0]:
+                xmin = p[0]
+            if xmax < p[0]:
+                xmax = p[0]
+            if ymin > p[1]:
+                ymin = p[1]
+            if ymax < p[1]:
+                ymax = p[1]        
         edge_widths = 10.0 * weights / max(weights)
         node_colors = ['k' if x in axon else 'gray' for x in g.nodes()]
         lw = [1 if n.endswith('comp_1') else 0 for n in g.nodes()]
         self.axes.clear()
-        print 'Cleared axes'
-        nx.draw_networkx_edges(g, pos, width=edge_widths, edge_color='gray', alpha=0.8, ax=self.axes)
-        nx.draw_networkx_nodes(g, pos, with_labels=False,
-                               nnode_size=sizes,
-                               node_color=node_colors,
-                               linewidths=lw, 
-                               alpha=0.8 ,
-                               ax=self.axes)
-        if label:
-            labels = dict([(n, g.node[n]['label']) for n in g.nodes()])
-            nx.draw_networkx_labels(g, pos, labels=labels, ax=self.axes)
+        self.axes.set_xlim((xmin-10, xmax+10))
+        self.axes.set_ylim((ymin-10, ymax+10))
+        # print 'Cleared axes'
+        for ii, e in enumerate(g.edges()):
+            p0 = pos[e[0]]
+            p1 = pos[e[1]]
+            # print p0, p1
+            a = patches.FancyArrow(p0[0], p0[1], p1[0] - p0[0], p1[1] - p0[1], width=edge_widths[ii], head_width=0.0, axes=self.axes, ec='none', fc='black')
+            # self.axes.plot(p0, p1)
+            self.axes.add_patch(a)
+            
+            # a = self.axes.arrow(p0[0], p0[1], p1[0] - p0[0], p1[1] - p0[1], transform=self.figure.transFigure)
+        # nx.draw_networkx_edges(g, pos, width=edge_widths, edge_color='gray', alpha=0.8, ax=self.axes)
+        for ii, n in enumerate(g.nodes()):
+            if n in axon:
+                ec = 'black'
+            elif n.endswith('comp_1'):
+                ec = 'red'
+            else:
+                ec = 'none'
+                
+            c = patches.Circle(pos[n], radius=sizes[ii], axes=self.axes, ec=ec, fc='gray', alpha=0.8)
+            self.axes.add_patch(c)
+        # nx.draw_networkx_nodes(g, pos, with_labels=False,
+        #                        nnode_size=sizes,
+        #                        node_color=node_colors,
+        #                        linewidths=lw, 
+        #                        alpha=0.8 ,
+        #                        ax=self.axes)
+        # if label:
+        #     labels = dict([(n, g.node[n]['label']) for n in g.nodes()])
+        #     nx.draw_networkx_labels(g, pos, labels=labels, ax=self.axes)
         self.canvas.draw()
 
 
@@ -244,7 +276,7 @@ class CellView(QtGui.QWidget):
         if isinstance(root, str):
             root = moose.element(root)
         cells = []
-        for cell in moose.wildcardFind('%s/##[ISA=Neuron]' % (root.path)):
+        for cell in moose.wildcardFind('%s/#[ISA=Neuron]' % (root.path)):
             cells.append(cell[0].path.rpartition('/')[-1])
         print cells
         return cells
