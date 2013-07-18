@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Jul 12 11:53:50 2013 (+0530)
 # Version: 
-# Last-Updated: Thu Jul 18 12:42:02 2013 (+0530)
+# Last-Updated: Thu Jul 18 15:28:46 2013 (+0530)
 #           By: subha
-#     Update #: 660
+#     Update #: 691
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -49,6 +49,7 @@
 Display channel properties graphically
 """
 
+from datetime import datetime
 from PyQt4 import QtCore, QtGui
 from matplotlib import mlab
 # in stead of "from matplotlib.figure import Figure" do -
@@ -185,9 +186,11 @@ class NetworkXWidget(QtGui.QWidget):
 
     # TODO: bypass networkx draw as it uses pylab directly.
     def displayGraph(self, g, label=False):
-        print g
         axon, sd = axon_dendrites(g)
         sizes = node_sizes(g) * 50
+        if len(sizes) == 0:
+            print 'Empty graph for cell. Make sure proto file has `*asymmetric` on top. I cannot handle symmetric compartmental connections'
+            return
         weights = np.array([g.edge[e[0]][e[1]]['weight'] for e in g.edges()])
         pos = nx.graphviz_layout(g, prog='twopi')
         xmin, ymin, xmax, ymax = 1e9, 1e9, -1e9, -1e9
@@ -206,39 +209,21 @@ class NetworkXWidget(QtGui.QWidget):
         self.axes.clear()
         self.axes.set_xlim((xmin-10, xmax+10))
         self.axes.set_ylim((ymin-10, ymax+10))
-        # print 'Cleared axes'
         for ii, e in enumerate(g.edges()):
             p0 = pos[e[0]]
             p1 = pos[e[1]]
-            # print p0, p1
             a = patches.FancyArrow(p0[0], p0[1], p1[0] - p0[0], p1[1] - p0[1], width=edge_widths[ii], head_width=0.0, axes=self.axes, ec='none', fc='black')
-            # self.axes.plot(p0, p1)
             self.axes.add_patch(a)
-            
-            # a = self.axes.arrow(p0[0], p0[1], p1[0] - p0[0], p1[1] - p0[1], transform=self.figure.transFigure)
-        # nx.draw_networkx_edges(g, pos, width=edge_widths, edge_color='gray', alpha=0.8, ax=self.axes)
         for ii, n in enumerate(g.nodes()):
             if n in axon:
                 ec = 'black'
             elif n.endswith('comp_1'):
                 ec = 'red'
             else:
-                ec = 'none'
-                
+                ec = 'none'                
             c = patches.Circle(pos[n], radius=sizes[ii], axes=self.axes, ec=ec, fc='gray', alpha=0.8)
             self.axes.add_patch(c)
-        # nx.draw_networkx_nodes(g, pos, with_labels=False,
-        #                        nnode_size=sizes,
-        #                        node_color=node_colors,
-        #                        linewidths=lw, 
-        #                        alpha=0.8 ,
-        #                        ax=self.axes)
-        # if label:
-        #     labels = dict([(n, g.node[n]['label']) for n in g.nodes()])
-        #     nx.draw_networkx_labels(g, pos, labels=labels, ax=self.axes)
         self.canvas.draw()
-
-
 
 
 class CellView(QtGui.QWidget):
@@ -258,14 +243,11 @@ class CellView(QtGui.QWidget):
             self.controlPanel = QtGui.QWidget()
             layout = QtGui.QGridLayout()
             self.controlPanel.setLayout(layout)
-            # self.rootEdit = QtGui.QLineEdit('/library')        
-            # self.rootEdit.returnPressed.connect(self.getUpdatedCellListWidget)
             self.simtimeLabel = QtGui.QLabel('Simulate for (ms)')
             self.simtimeEdit = QtGui.QLineEdit('100')
             self.plotButton = QtGui.QPushButton('Simulate selected cell model')
             self.plotButton.clicked.connect(self.simulateSelected)
             layout.addWidget(self.getCellListWidget(), 0, 0, 1, 2)
-            # layout.addWidget(self.rootEdit, 1, 0, 1, 1)
             layout.addWidget(self.getCurrentClampWidget(), 1, 0, 1, 2)
             layout.addWidget(self.simtimeLabel, 2, 0, 1, 1)
             layout.addWidget(self.simtimeEdit, 2, 1, 1, 1)
@@ -278,7 +260,6 @@ class CellView(QtGui.QWidget):
         cells = []
         for cell in moose.wildcardFind('%s/#[ISA=Neuron]' % (root.path)):
             cells.append(cell[0].path.rpartition('/')[-1])
-        print cells
         return cells
         
     def getUpdatedCellListWidget(self):
@@ -340,46 +321,42 @@ class CellView(QtGui.QWidget):
 
     def createCell(self, name):
         try:
-            params = self.cells[name]
-        except KeyError:
-            model_container = moose.Neutral('/model_%s' % (name))
-            data_container = moose.Neutral('/data_%s' % (name))
-            params = setup_current_step_model(model_container,
-                                              data_container,
-                                              name,
-                                              [[0, 0, 0],
-                                               [1e9, 0, 0]])
-            params['modelRoot'] = model_container.path
-            params['dataRoot'] = data_container.path
-            self.cells[name] = params
+            moose.delete(moose.element('/model').id_)
+            moose.delete(moose.element('/data').id_)
+        except Exception, e:
+            print e
+        model_container = moose.Neutral('/model')
+        data_container = moose.Neutral('/data')        
+        params = setup_current_step_model(model_container,
+                                          data_container,
+                                          name,
+                                          [[0, 0, 0],
+                                           [1e9, 0, 0]])
+        params['modelRoot'] = model_container.path
+        params['dataRoot'] = data_container.path
+        # self.cells[name] = params
         return params
 
     def displaySelected(self):
         cellnames = [str(c.text()) for c in self.cellListWidget.selectedItems()]
         assert(len(cellnames) == 1)        
         name = cellnames[0]
-        print 'Display', name
-        params = self.createCell(name)
-        # print params
-        cell = params['cell']
-        self.displayCellMorphology(cell.path)
+        # params = self.createCell(name)
+        # cell = params['cell']
+        self.displayCellMorphology('library/%s' % (name))
 
     def simulateSelected(self):
         cellnames = [str(c.text()) for c in self.cellListWidget.selectedItems()]
         assert(len(cellnames) == 1)        
         name = cellnames[0]
-        params = self.cells[name]
-        try:
-            scheduled = params['scheduled']
-        except KeyError:
-            hsolve = moose.HSolve('%s/solver' % (params['cell'].path))
-            hsolve.dt = simdt
-            hsolve.target = params['cell'].path
-            mutils.setDefaultDt(elecdt=simdt, plotdt2=plotdt)
-            mutils.assignDefaultTicks(modelRoot=params['modelRoot'],
-                                      dataRoot=params['dataRoot'],
-                                      solver='hsolve')
-            params['scheduled'] = True
+        params = self.createCell(name)
+        hsolve = moose.HSolve('%s/solver' % (params['cell'].path))
+        hsolve.dt = simdt
+        hsolve.target = params['cell'].path
+        mutils.setDefaultDt(elecdt=simdt, plotdt2=plotdt)
+        mutils.assignDefaultTicks(modelRoot=params['modelRoot'],
+                                  dataRoot=params['dataRoot'],
+                                  solver='hsolve')
         delay = float(str(self.delayText.text()))
         width =  float(str(self.widthText.text()))
         level =  float(str(self.ampText.text()))
@@ -388,7 +365,11 @@ class CellView(QtGui.QWidget):
         params['stimulus'].level[0] = level * 1e-12
         moose.reinit()
         simtime = float(str(self.simtimeEdit.text()))*1e-3
-        moose.start(simtime)         
+        ts = datetime.now()
+        moose.start(simtime)
+        te = datetime.now()
+        td = te - ts
+        print 'Simulating %g s took %g s of computer time' % (simtime, td.days * 86400 + td.seconds + td.microseconds * 1e-6)
         ts = np.linspace(0, simtime, len(params['somaVm'].vec))
         vm = params['somaVm'].vec
         stim = params['injectionCurrent'].vec
