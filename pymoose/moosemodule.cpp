@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Jul 11 19:10:38 2013 (+0530)
+// Last-Updated: Thu Jul 18 22:56:58 2013 (+0530)
 //           By: subha
-//     Update #: 10625
+//     Update #: 10651
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -1347,6 +1347,43 @@ extern "C" {
         }
         if (!Id::isValid(self->id_)){
             RAISE_INVALID_ID(NULL, "moose_Id_delete");
+        }
+        // clean up the maps containing initialized lookup/dest/element fields
+        for (unsigned int ii = 0; ii < moose_Id_getLength(self); ++ii){
+            ObjId el(self->id_, ii);
+            map<string, PyObject *>::iterator it = get_inited_lookupfields().begin();
+            while( it != get_inited_lookupfields().end()){
+                if (it->first.find(el.path() + ".") == 0){
+                    map< string, PyObject * >::iterator toErase = it;
+                    ++it;
+                    Py_XDECREF(toErase->second);
+                    get_inited_lookupfields().erase(toErase);                    
+                } else {
+                    ++it;
+                }
+            }
+            it = get_inited_destfields().begin();
+            while( it != get_inited_destfields().end()){
+                if (it->first.find(el.path() + ".") == 0){
+                    map< string, PyObject * >::iterator toErase = it;
+                    ++it;
+                    Py_XDECREF(toErase->second);
+                    get_inited_destfields().erase(toErase);                    
+                } else {
+                    ++it;
+                }
+            }
+            it = get_inited_elementfields().begin();
+            while( it != get_inited_elementfields().end()){
+                if (it->first.find(el.path() + ".") == 0){
+                    map< string, PyObject * >::iterator toErase = it;
+                    ++it;
+                    Py_XDECREF(toErase->second);
+                    get_inited_elementfields().erase(toErase);                    
+                } else {
+                    ++it;
+                }
+            }            
         }
         SHELLPTR->doDelete(self->id_);
         self->id_ = Id();
@@ -3734,7 +3771,8 @@ extern "C" {
         if (!Id::isValid(((_Id*)obj)->id_)){
             RAISE_INVALID_ID(NULL, "moose_delete");
         }
-        SHELLPTR->doDelete(((_Id*)obj)->id_);
+        moose_Id_delete((_Id*)obj);
+        // SHELLPTR->doDelete(((_Id*)obj)->id_);
         Py_RETURN_NONE;
     }
 
