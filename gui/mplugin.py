@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Oct  2 17:25:41 2012 (+0530)
 # Version: 
-# Last-Updated: Thu Jun  6 17:57:24 2013 (+0530)
+# Last-Updated: Thu Jul 18 10:51:48 2013 (+0530)
 #           By: subha
-#     Update #: 289
+#     Update #: 297
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -76,7 +76,7 @@ class MoosePluginBase(QtCore.QObject):
         self._toolBars = []
         self.mainWindow = mainwindow
         self.modelRoot = root
-        self.dataRoot = moose.Neutral('/data')
+        self.dataRoot = moose.Neutral('/data').path
 
     def getPreviousPlugin(self):
         """Returns the plugin object that the gui is supposed to
@@ -135,13 +135,13 @@ class MoosePluginBase(QtCore.QObject):
         raise NotImplementedError('method must be implemented in derived class')
 
     def setModelRoot(self, root):
-        self.modelRoot = moose.element(root)
+        self.modelRoot = moose.element(root).path
         self.getEditorView().getCentralWidget().setModelRoot(self.modelRoot)
         self.getPlotView().getCentralWidget().setModelRoot(self.modelRoot)    
         self.modelRootChanged.emit(self.modelRoot)
 
     def setDataRoot(self, root):
-        self.dataRoot = moose.Neutral(root)
+        self.dataRoot = moose.Neutral(root).path
         self.getPlotView().setDataRoot(self.dataRoot)
         self.dataRootChanged.emit(self.dataRoot)
 
@@ -217,6 +217,7 @@ class EditorBase(ViewBase):
         """TODO: provide a widget to apply operations on selected
         elements."""
         raise NotImplementedError('method must be reimplemented in subclass')
+
 
 class PlotBase(ViewBase):
     """Base class for plot configuration view.

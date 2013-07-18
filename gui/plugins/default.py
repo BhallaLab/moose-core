@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Nov 13 15:58:31 2012 (+0530)
 # Version: 
-# Last-Updated: Wed Jul  3 12:18:55 2013 (+0530)
+# Last-Updated: Thu Jul 18 10:35:00 2013 (+0530)
 #           By: subha
-#     Update #: 2213
+#     Update #: 2244
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -203,10 +203,6 @@ class DefaultEditorWidget(EditorWidgetBase):
         EditorWidgetBase.__init__(self, *args)
         layout = QtGui.QHBoxLayout()
         self.setLayout(layout)
-
-    def init(self):
-        if hasattr(self, 'tree'):
-            return
         self.tree = MooseTreeEditor()
         self.tree.setAcceptDrops(True)
         self.getTreeMenu()
@@ -218,9 +214,10 @@ class DefaultEditorWidget(EditorWidgetBase):
         self.layout().addWidget(self.tree)        
 
     def getTreeMenu(self):
-        if hasattr(self, 'treeMenu'):
+        try:
             return self.treeMenu
-        self.treeMenu = QtGui.QMenu()
+        except AttributeError:
+            self.treeMenu = QtGui.QMenu()
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tree.customContextMenuRequested.connect(self.treeMenu.exec_)
         # Inserting a child element
@@ -247,10 +244,9 @@ class DefaultEditorWidget(EditorWidgetBase):
         return self.treeMenu
 
     def updateModelView(self):
-        current = self.tree.currentItem().mobj
         self.tree.recreateTree(root=self.modelRoot)
-        if current in self.tree.odict:
-            self.tree.setCurrentItem(current)
+        # if current in self.tree.odict:
+        #     self.tree.setCurrentItem(current)
 
     def updateItemSlot(self, mobj):
         """This should be overridden by derived classes to connect appropriate
@@ -290,10 +286,9 @@ class RunView(RunBase):
     """
     def __init__(self, *args, **kwargs):
         RunBase.__init__(self, *args, **kwargs)
-        self.centralWidget = PlotWidget()
-        self.dataRoot = moose.Neutral('/data')
-        self.modelRoot = moose.Neutral(self.plugin.modelRoot)
-        self.centralWidget.setModelRoot(self.plugin.modelRoot)       
+        self.getCentralWidget()
+        self.setDataRoot(moose.Neutral('/data').path)
+        self.setModelRoot(moose.Neutral(self.plugin.modelRoot).path)
         self.plugin.modelRootChanged.connect(self.setModelRoot)
         self.plugin.dataRootChanged.connect(self.setDataRoot)        
         self._menus += self.getCentralWidget().getMenus()
@@ -301,21 +296,24 @@ class RunView(RunBase):
     def getCentralWidget(self):
         """TODO: replace this with an option for multiple canvas
         tabs"""
-        return self.centralWidget
+        if self._centralWidget is None:
+            self._centralWidget = PlotWidget()
+        return self._centralWidget
         
     # def setDataRootSlot(self):
     #     path, ok = QtGui.QInputDialog.getText(self.getCentralWidget(), 'Set data root', 'Enter path to data root')
     #     if ok:
     #         self.setDataRoot(str(path))
         
-    def setDataRoot(self, path):
+    def setDataRoot(self, path):        
         self.dataRoot = path
-        self.centralWidget.setDataRoot(path)
+        self.getCentralWidget().setDataRoot(path)
         self.getSchedulingDockWidget().widget().setDataRoot(path)
 
     def setModelRoot(self, path):
         self.modelRoot = path
-        self.schedulingDockWidget.setModelRoot(path)
+        self.getSchedulingDockWidget().setModelRoot(path)
+        self.getCentralWidget().setModelRoot(path)
 
     def getDataTablesPane(self):
         """This should create a tree widget with dataRoot as the root
@@ -362,8 +360,8 @@ class MooseRunner(QtCore.QObject):
         self._simtime = 0.0        
         self._clock = moose.Clock('/clock')
         self._pause = False
-        self.dataRoot = moose.Neutral('/data')
-        self.modelRoot = moose.Neutral('/model')
+        self.dataRoot = moose.Neutral('/data').path
+        self.modelRoot = moose.Neutral('/model').path
 
     def doResetAndRun(self, tickDtMap, tickTargetMap, simtime, updateInterval):
         self._pause = False
@@ -624,10 +622,10 @@ class SchedulingWidget(QtGui.QWidget):
         return ret
 
     def setDataRoot(self, root='/data'):
-        self.runner.dataRoot = moose.element(root)
+        self.runner.dataRoot = moose.element(root).path
 
     def setModelRoot(self, root='/model'):
-        self.runner.modelRoot = moose.element(root)
+        self.runner.modelRoot = moose.element(root).path
         
 
 from collections import namedtuple
@@ -806,7 +804,7 @@ class PlotView(PlotBase):
         self.dataRoot = self.plugin.dataRoot
 
     def setDataRoot(self, root):
-        self.dataRoot = moose.element(root)
+        self.dataRoot = moose.element(root).path
 
     def getToolPanes(self):
         return (self.getFieldSelectionDock(), )
@@ -911,7 +909,7 @@ class PlotView(PlotBase):
         relativePath = element.path.partition('/model/')[-1]
         if relativePath.startswith('/'):
             relativePath = relativePath[1:]
-        tablePath = self.dataRoot.path + '/' + relativePath.replace('/', '_') + '.' + field
+        tablePath = self.dataRoot + '/' + relativePath.replace('/', '_') + '.' + field
         if moose.exists(tablePath):
             tablePath = '%s_%d' % (tablePath, element.id_.value)
         if not moose.exists(tablePath):            
@@ -995,7 +993,7 @@ class PlotSelectionWidget(QtGui.QScrollArea):
 
     def setDataRoot(self, path):
         """The tables will be created under dataRoot"""
-        self.dataRoot = moose.element(path)
+        self.dataRoot = path
 
     def getSelectedFields(self):
         """Returns a list containing (element, field) for all selected fields"""
