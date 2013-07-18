@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Nov 12 09:38:09 2012 (+0530)
 # Version: 
-# Last-Updated: Wed Jul  3 11:35:33 2013 (+0530)
+# Last-Updated: Thu Jul 18 10:54:33 2013 (+0530)
 #           By: subha
-#     Update #: 1331
+#     Update #: 1338
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -251,11 +251,14 @@ class MWindow(QtGui.QMainWindow):
         3. sets the current view  to the plugins editor view.
 
         """
-        try:
-            self.plugin = self._plugins[str(name)]
-        except KeyError:
-            self.plugin = self.loadPluginClass(str(name))(str(root), self)
-            self._plugins[str(name)] = self.plugin
+        self.plugin = self.loadPluginClass(str(name))(str(root), self)
+        # try:
+        #     self.plugin = self._plugins[str(name)]
+        #     print 'PLUGIN', self.plugin
+        #     self.plugin.setModelRoot(root)
+        # except KeyError:
+        #     self.plugin = self.loadPluginClass(str(name))(str(root), self)
+        #     self._plugins[str(name)] = self.plugin
         self.plugin.getEditorView().getCentralWidget().editObject.connect(self.objectEditSlot, QtCore.Qt.UniqueConnection)
         self.updateMenus()
         for action in self.pluginsMenu.actions():
