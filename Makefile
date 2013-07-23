@@ -163,7 +163,7 @@ space := $(empty) $(empty)
 ifneq ($(SVN),0)
 # Some versions of svnrevision return "Unversioned directory" which causes confusion to gcc
 SVN_REVISION := $(shell svnversion)
-SVN_REVISION := $(subst space,_,$(SVN_REVISION))
+SVN_REVISION := $(subst $(space),_,$(SVN_REVISION))
 # SVN_REVISION := $(subst :,_,$(SVN_REVISION))
 ifneq ($(SVN_REVISION),export)
 CXXFLAGS+=-DSVN_REVISION=\"$(SVN_REVISION)\"
