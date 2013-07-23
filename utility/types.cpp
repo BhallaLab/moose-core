@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Wed Mar 23 10:10:45 2011 (+0530)
 // Version: 
-// Last-Updated: Fri Jul  5 19:18:37 2013 (+0530)
+// Last-Updated: Tue Jul 23 12:47:59 2013 (+0530)
 //           By: subha
-//     Update #: 77
+//     Update #: 93
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -46,7 +46,7 @@ char shortType(string name)
         typemap.insert(pair<string, char>("char", 'c'));
         typemap.insert(pair<string, char>("int", 'i')); // python
         typemap.insert(pair<string, char>("short", 'h')); // python
-        typemap.insert(pair<string, char>("short", 'H')); // python
+        typemap.insert(pair<string, char>("unsigned short", 'H')); // python
         typemap.insert(pair<string, char>("long", 'l')); // python
         typemap.insert(pair<string, char>("long long", 'L')); // python
         typemap.insert(pair<string, char>("unsigned int", 'I')); // python
@@ -98,6 +98,32 @@ char shortFinfo(string finfoType)
     }
     return iter->second;
 }
+
+char innerType(char typecode){
+    static map<char, char> innerTypeMap;
+    if (innerTypeMap.empty()){
+        innerTypeMap.insert(pair<char, char>('D', 'd')); // vector<double>
+        innerTypeMap.insert(pair<char, char>('v', 'i')); // vector<int>
+        innerTypeMap.insert(pair<char, char>('M', 'l')); // vector<long>
+        innerTypeMap.insert(pair<char, char>('X', 'x')); // vector<Id>
+        innerTypeMap.insert(pair<char, char>('Y', 'y')); // vector<ObjId>
+        innerTypeMap.insert(pair<char, char>('C', 'c')); // vector<char>
+        innerTypeMap.insert(pair<char, char>('w', 'h')); // vector<short>
+        innerTypeMap.insert(pair<char, char>('N', 'I')); // vector<unsigned int>
+        innerTypeMap.insert(pair<char, char>('P', 'k')); // vector<unsigned long>
+        innerTypeMap.insert(pair<char, char>('F', 'f')); // vector<float>
+        innerTypeMap.insert(pair<char, char>('S', 's')); // vector<string>
+        innerTypeMap.insert(pair<char, char>('T', 'N')); // vector<vector<unsigned>>
+        innerTypeMap.insert(pair<char, char>('Q', 'v')); // vector<vector<int>>
+        innerTypeMap.insert(pair<char, char>('R', 'D')); // vector<vector<double>>
+    }
+    map<char, char>::iterator iter = innerTypeMap.find(typecode);
+    if (iter == innerTypeMap.end()){
+        return 0;
+    }
+    return iter->second;
+}
+        
 
 // 
 // types.cpp ends here
