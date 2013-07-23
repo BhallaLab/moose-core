@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 11:26:00 2011 (+0530)
 // Version: 
-// Last-Updated: Thu Jul 18 22:56:58 2013 (+0530)
+// Last-Updated: Tue Jul 23 20:27:30 2013 (+0530)
 //           By: subha
-//     Update #: 10651
+//     Update #: 11006
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -123,6 +123,10 @@ extern void testKinetics();
 extern void nonMpiTests(Shell *);
 extern void mpiTests();
 extern void processTests( Shell* );
+extern void test_moosemodule();
+    
+
+
 extern Id init(int argc, char ** argv, bool& doUnitTests, bool& doRegressionTests);
 
 extern void initMsgManagers();
@@ -133,21 +137,16 @@ extern void regressionTests();
 extern bool benchmarkTests( int argc, char** argv );
 extern int getNumCores();
 
+
 // C-wrapper to be used by Python
 extern "C" {
-
-    // The endianness check is from:
-    // http://stackoverflow.com/questions/2100331/c-macro-definition-to-determine-big-endian-or-little-endian-machine
-    enum
-    {
-        O32_LITTLE_ENDIAN = 0x03020100ul,
-        O32_BIG_ENDIAN = 0x00010203ul,
-        O32_PDP_ENDIAN = 0x01000302ul
-    };
-
-    static const union { unsigned char bytes[4]; uint32_t value; } o32_host_order =  { { 0, 1, 2, 3 } };
-
-#define O32_HOST_ORDER (o32_host_order.value)
+    // IdType and ObjIdType are defined in ematrix.cpp and
+    // melement.cpp respectively.
+    extern PyTypeObject IdType;
+    extern PyTypeObject ObjIdType;
+    extern PyTypeObject moose_DestField;
+    extern PyTypeObject moose_LookupField;
+    extern PyTypeObject moose_ElementField;
     
     /////////////////////////////////////////////////////////////////
     // Module globals 
@@ -163,95 +162,508 @@ extern "C" {
     static int doRegressionTests = 0;
     static int quitFlag = 0;
 
-    // This had to be defined for py3k, but does not harm 2.
-    struct module_state {
-        PyObject *error;
-    };
-
-#if PY_MAJOR_VERSION >= 3
-#define PY3K
-    // Python 3 does not like global module state
-#define GETSTATE(m) ((struct module_state*)PyModule_GetState(m))
-#else // Python 2
-#define GETSTATE(m) (&_state)
-    static struct module_state _state;
-#endif // PY_MAJOR_VERSION
-
-#define RAISE_INVALID_ID(ret, msg) {                            \
-        PyErr_SetString(PyExc_ValueError, msg": invalid Id");   \
-        return ret;                                             \
-    }
-    
-    static PyObject* get_Id_attr(_Id * id, string attribute)
+    /**
+       Return numpy typenum for specified type.
+    */
+    int get_npy_typenum(const type_info& ctype)
     {
-        if (attribute == "path"){
-            return moose_Id_getPath(id);
-        } else if (attribute == "value"){
-            return moose_Id_getValue(id);
-        } else if (attribute == "shape"){
-            return moose_Id_getShape(id);
-        } else if (attribute == "class_" || attribute == "class"){
-            // !NOTE: Subha: 2012-08-20 19:52:21 (+0530) - the second
-            // !check is to catch a strange bug where the field passed
-            // !to moose_Id_getattro is 'class' in stead of
-            // !'class_'. Need to figure out how it is happening.
-            // !Subha: 2012-08-21 13:25:06 (+0530) It turned out to be
-            // !a GCC optimization issue. GCC was optimizing the call
-            // !to get_field_alias by directly replacing `class_` with
-            // !`class`. This optimized run-path was somehow being
-            // !used only when therewas access to
-            // !obj.parent.class_. Possibly some form of cache
-            // !optimization.
-            // class is a common attribute to all ObjIds under this
-            // Id. Expect it to be a single value in stead of a list
-            // of class names.
-            
-            string classname = Field<string>::get(id->id_, "class");
-            return Py_BuildValue("s", classname.c_str());
-        }        
-        return NULL;
+        if (ctype == typeid(float)){
+            return NPY_FLOAT;
+        } else if (ctype == typeid(double)){
+            return NPY_DOUBLE;
+        } else if (ctype == typeid(int)){
+            return NPY_INT;
+        } else if (ctype == typeid(unsigned int)){
+            return NPY_UINT;
+        } else if (ctype == typeid(long)){
+            return NPY_LONG;
+        } else if (ctype == typeid(unsigned long)){
+            return NPY_ULONG;
+        } else if (ctype == typeid(short)){
+            return NPY_SHORT;
+        } else if (ctype == typeid(unsigned short)){
+            return NPY_USHORT;
+        } else if (ctype == typeid(char)){
+            return NPY_CHAR;
+        } else if (ctype == typeid(bool)){
+            return NPY_BOOL;
+        } else if (ctype == typeid(Id) || ctype == typeid(ObjId)){
+            return NPY_OBJECT;
+        } else {
+            cerr << "Cannot handle type: " << ctype.name() << endl;
+            return -1;
+        }
     }
 
-    static PyObject * get_ObjId_attr(_ObjId * oid, string attribute)
+
+    /**
+       Utility function to convert an Python integer or a sequence
+       object into a vector of dimensions
+    */
+    vector<int> pysequence_to_dimvec(PyObject * dims)
     {
-        if (attribute == "id_"){
-            return moose_ObjId_getId(oid);
-        } else if (attribute == "dindex"){
-            return moose_ObjId_getDataIndex(oid);
-        } else if (attribute == "findex"){
-            return moose_ObjId_getFieldIndex(oid);
+        vector <int> vec_dims;
+        Py_ssize_t num_dims = 1;
+        long dim_value = 1;
+        if (dims){
+            // First try to use it as a tuple of dimensions
+            if (PySequence_Check(dims)){
+                num_dims = PySequence_Length(dims);
+                for (Py_ssize_t ii = 0; ii < num_dims; ++ ii){
+                    PyObject* dim = PySequence_GetItem(dims, ii);
+                    dim_value = PyInt_AsLong(dim);
+                    Py_XDECREF(dim);                    
+                    if ((dim_value == -1) && PyErr_Occurred()){
+                        return vec_dims;
+                    }
+                    vec_dims.push_back((unsigned int)dim_value);
+                }
+            } else if (PyInt_Check(dims)){ // 1D array
+                dim_value = PyInt_AsLong(dims);
+                if (dim_value <= 0){
+                    dim_value = 1;
+                }
+                vec_dims.push_back(dim_value);
+            }
+        } else {
+            vec_dims.push_back(dim_value);
+        }
+        return vec_dims;
+    }
+
+    /**
+       Convert Python object into C++ data structure. The data
+       structure is allocated here and it is the responsibility of the
+       caller to free that memory.
+    */
+    void * to_cpp(PyObject * object, char typecode)
+    {
+        switch(typecode){
+            case 'i': {
+                int * ret = new int();
+                * ret = PyInt_AsLong(object);
+                return (void*)ret;
+            }
+            case 'l': {
+                long v = PyInt_AsLong(object);
+                long * ret = new long();
+                *ret = v;
+                return (void*)ret;
+            }
+            case 'h': {
+                short v = PyInt_AsLong(object);
+                short * ret = new short();
+                *ret = v;
+                return (void*)ret;
+            }
+            case 'f': {
+                float v = (float)PyFloat_AsDouble(object);
+                if ( v == -1.0 && PyErr_Occurred()){
+                    PyErr_SetString(PyExc_TypeError, "Expected a sequence of floating point numbers.");
+                } else {
+                    float * ret = new float();
+                    *ret = v;
+                    return (void*)ret;
+                }
+            }
+            case 'd': {
+                double v = PyFloat_AsDouble(object);
+                if ( v == -1.0 && PyErr_Occurred()){
+                    PyErr_SetString(PyExc_TypeError, "Expected a sequence of floating point numbers.");
+                } else {
+                    double * ret = new double();
+                    *ret = v;
+                    return (void*)ret;
+                }
+            }
+            case 's': {
+                char* tmp = PyString_AsString(object);
+                if (tmp == NULL){
+                    return NULL;
+                }        
+                string * ret = new string(tmp);
+                return (void*)ret;
+            }
+            case 'I': {
+                unsigned int v = PyInt_AsUnsignedLongMask(object);
+                unsigned int * ret = new unsigned int();
+                *ret = v;
+                return (void*)ret;
+            }
+            case 'k': {
+                unsigned long v = PyInt_AsUnsignedLongMask(object);
+                unsigned long * ret = new unsigned long();
+                *ret = v;
+                return (void*)ret;
+            }
+            case 'x': {
+                _Id * value = (_Id*)object;
+                if (value != NULL){
+                    Id * ret = new Id();
+                    * ret = value->id_;
+                    return (void*)ret;
+                }
+            }
+            case 'y': {
+                _ObjId * value = (_ObjId*)object;
+                if (value != NULL){
+                    ObjId * ret = new ObjId();
+                    * ret = value->oid_;
+                    return (void*)ret;
+                }
+            }
+            case 'v':
+                return PySequenceToVector< int >(object, 'i');
+            case 'N':
+                return PySequenceToVector < unsigned int > (object, 'I');
+            case 'w':
+                return PySequenceToVector < short > (object, 'h');
+            case 'M':
+                return PySequenceToVector < long > (object, 'l');
+            case 'P':
+                return PySequenceToVector < unsigned long > (object, 'k');
+            case 'F':
+                return PySequenceToVector < float > (object, 'f');
+            case 'D':
+                return PySequenceToVector < double > (object, 'd');
+            case 'S':
+                return PySequenceToVector < string > (object, 's');
+            case 'Y':
+                return PySequenceToVector < ObjId > (object, 'y');      
+            case 'X':
+                return PySequenceToVector < Id > (object, 'x');
+            case 'R':
+                return PySequenceToVectorOfVectors< double >(object, 'd');
+            case 'Q':
+                return PySequenceToVectorOfVectors< int >(object, 'i');
+            case 'T':
+                return PySequenceToVectorOfVectors< unsigned int > (object, 'I');
         }
         return NULL;
     }
-                
+
+
+    /**
+       Utility function to convert C++ object into Python object.
+    */
+    PyObject * to_py(void * obj, char typecode)
+    {
+        switch(typecode){
+            case 'd': {
+                double * ptr = static_cast<double *>(obj);
+                assert(ptr != NULL);
+                return PyFloat_FromDouble(*ptr);
+            }
+            case 's': { // handle only C++ string and NOT C char array because static cast cannot differentiate the two
+                string * ptr = static_cast< string * >(obj);
+                assert (ptr != NULL);
+                return PyString_FromString(ptr->c_str());
+            }
+            case 'x': {
+                Id * ptr = static_cast< Id * >(obj);
+                assert(ptr != NULL);
+                _Id * id = PyObject_New(_Id, &IdType);
+                id->id_ = *ptr;
+                return (PyObject *)(id);
+            }
+            case 'y': {
+                ObjId * ptr = static_cast< ObjId * >(obj);
+                assert(ptr != NULL);
+                _ObjId * oid = PyObject_New(_ObjId, &ObjIdType);
+                oid->oid_ = *ptr;
+                return (PyObject*)oid;
+            }
+            case 'l': {
+                long * ptr = static_cast< long * >(obj);
+                assert(ptr != NULL);
+                return PyLong_FromLong(*ptr);
+            }
+            case 'k': {
+                unsigned long * ptr = static_cast< unsigned long * >(obj);
+                assert(ptr != NULL);
+                return PyLong_FromUnsignedLong(*ptr);
+            }
+            case 'i': {// integer
+                int * ptr = static_cast< int * >(obj);
+                assert(ptr != NULL);
+                return PyInt_FromLong(*ptr);
+            }
+            case 'I': { // unsigned int
+                unsigned int * ptr = static_cast< unsigned int * >(obj);
+                assert(ptr != NULL);
+                return PyLong_FromUnsignedLong(*ptr);
+            }
+            case 'b': {//bool
+                bool * ptr = static_cast< bool * >(obj);
+                assert(ptr != NULL);
+                if (*ptr){
+                    Py_RETURN_TRUE;
+                } else {
+                    Py_RETURN_FALSE;
+                }
+            }
+#ifdef HAVE_LONG_LONG                
+            case 'L': { //long long
+                long long * ptr = static_cast< long long * > (obj);
+                assert(ptr != NULL);
+                return PyLong_FromLongLong(*ptr);
+            }
+            case 'K': { // unsigned long long
+                unsigned long long * ptr = static_cast< unsigned long long * >(obj);
+                assert(ptr != NULL);
+                return PyLong_FromUnsignedLongLong(*ptr);
+            }
+#endif // HAVE_LONG_LONG
+            case 'f': { // float
+                float * ptr = static_cast< float* >(obj);
+                assert(ptr != NULL);
+                return PyFloat_FromDouble(*ptr);
+            }
+            case 'c': { // char
+                char * ptr = static_cast< char * >(obj);
+                assert(ptr != NULL);
+                return Py_BuildValue("c", *ptr);
+            }
+            case 'h': { //short
+                short * ptr = static_cast< short* >(obj);
+                assert(ptr != NULL);
+                return Py_BuildValue("h", *ptr);
+            }
+            case 'H': { // unsigned short
+                unsigned short * ptr = static_cast< unsigned short * >(obj);
+                assert(ptr != NULL);
+                return Py_BuildValue("H", *ptr);
+            }
+            case 'D': case 'v': case 'M': case 'X': case 'Y': case 'C': case 'w': case 'N': case 'P': case 'F': case 'S': case 'T': case 'Q': case 'R': {
+                return to_pytuple(obj, innerType(typecode));
+            }
+            default: {
+                PyErr_SetString(PyExc_TypeError, "unhandled data type");
+                return NULL;
+            }                
+        } // switch(typecode)
+    } // to_py
+
+    /**
+       Inner function to convert C++ object at vptr and set tuple
+       entry ii to the created PyObject. typecode is passed to to_cpp
+       for conversion.  If error occurs while setting tuple antry, it
+       decrements the refcount of the tuple and returns NULL. Returns
+       the tuple on success.
+    */
+    PyObject * convert_and_set_tuple_entry(PyObject * tuple, unsigned int index, void * vptr, char typecode)
+    {
+        PyObject * item = to_py(vptr, typecode);
+        if (item == NULL){
+            return NULL; // the error message would have been populated by to_cpp
+        }
+        if (PyTuple_SetItem(tuple, (Py_ssize_t)index, item) != 0){
+            PyErr_SetString(PyExc_RuntimeError, "convert_and_set_tuple_entry: could not set tuple entry.");
+            Py_XDECREF(tuple);
+            return NULL;
+        }
+        return tuple;
+    }
+    
+    /**
+       Convert a C++ vector to Python tuple
+    */
+    PyObject * to_pytuple(void * obj, char typecode)
+    {
+        PyObject * ret;
+        switch (typecode){
+            case 'd': { // vector<double>
+                vector< double > * vec = static_cast< vector < double >* >(obj);
+                assert(vec != NULL);
+                npy_intp size = (npy_intp)(vec->size());
+                ret = PyArray_SimpleNew(1, &size, NPY_DOUBLE);
+                assert(ret != NULL);
+                char * ptr = PyArray_BYTES((PyArrayObject*)ret);
+                memcpy(ptr, &(*vec)[0], size * sizeof(double));
+                return ret;
+            }
+            case 'i': { // vector<int>
+                vector< int > * vec = static_cast< vector < int >* >(obj);
+                assert(vec != NULL);
+                npy_intp size = (npy_intp)(vec->size());
+                ret = PyArray_SimpleNew(1, &size, NPY_INT);
+                assert(ret != NULL);
+                char * ptr = PyArray_BYTES((PyArrayObject*)ret);
+                memcpy(ptr, &(*vec)[0], size * sizeof(int));
+                return ret;
+            }
+            case 'l': { // vector<long>
+                vector< long > * vec = static_cast< vector < long >* >(obj);
+                assert(vec != NULL);
+                npy_intp size = (npy_intp)(vec->size());
+                ret = PyArray_SimpleNew(1, &size, NPY_INT);
+                assert(ret != NULL);
+                char * ptr = PyArray_BYTES((PyArrayObject*)ret);
+                memcpy(ptr, &(*vec)[0], size * sizeof(long));
+                return ret;
+            }
+            case 'x': { // vector<Id>
+                vector< Id > * vec = static_cast< vector < Id >* >(obj);
+                assert(vec != NULL);
+                ret = PyTuple_New((Py_ssize_t)vec->size());
+                assert(ret != NULL);
+                for (unsigned int ii = 0; ii < vec->size(); ++ii){
+                    if (convert_and_set_tuple_entry(ret, ii, (void*)&vec->at(ii), typecode) == NULL){
+                        return NULL;
+                    }
+                }
+                break;
+            }
+            case 'y': { // vector<ObjId>
+                vector< ObjId > * vec = static_cast< vector < ObjId >* >(obj);
+                assert(vec != NULL);
+                ret = PyTuple_New((Py_ssize_t)vec->size());
+                assert(ret != NULL);
+                for (unsigned int ii = 0; ii < vec->size(); ++ii){
+                    if (convert_and_set_tuple_entry(ret, ii, (void*)&vec->at(ii), typecode) == NULL){
+                        return NULL;
+                    }
+                }
+                break;
+            }
+            case 'c': { // vector<char>
+                vector< char > * vec = static_cast< vector < char >* >(obj);
+                assert(vec != NULL);
+                ret = PyTuple_New((Py_ssize_t)vec->size());
+                assert(ret != NULL);
+                for (unsigned int ii = 0; ii < vec->size(); ++ii){
+                    if (convert_and_set_tuple_entry(ret, ii, (void*)&vec->at(ii), typecode) == NULL){
+                        return NULL;
+                    }
+                }
+                break;
+            }
+            case 'h': { // vector<short>
+                vector< short > * vec = static_cast< vector < short >* >(obj);
+                assert(vec != NULL);
+                ret = PyTuple_New((Py_ssize_t)vec->size());
+                assert(ret != NULL);
+                for (unsigned int ii = 0; ii < vec->size(); ++ii){
+                    if (convert_and_set_tuple_entry(ret, ii, (void*)&vec->at(ii), typecode) == NULL){
+                        return NULL;
+                    }
+                }
+                break;
+            }
+            case 'k': { // vector<unsigned int>
+                vector< unsigned int > * vec = static_cast< vector < unsigned int >* >(obj);
+                assert(vec != NULL);
+                npy_intp size = (npy_intp)(vec->size());
+                ret = PyArray_SimpleNew(1, &size, NPY_UINT);
+                assert(ret != NULL);
+                char * ptr = PyArray_BYTES((PyArrayObject*)ret);
+                memcpy(ptr, &(*vec)[0], size * sizeof(unsigned int));
+                return ret;
+            }
+            case 'K': { // vector<unsigned long>
+                vector< unsigned long > * vec = static_cast< vector < unsigned long >* >(obj);
+                assert(vec != NULL);
+                npy_intp size = (npy_intp)(vec->size());
+                ret = PyArray_SimpleNew(1, &size, NPY_ULONG);
+                assert(ret != NULL);
+                char * ptr = PyArray_BYTES((PyArrayObject*)ret);
+                memcpy(ptr, &(*vec)[0], size * sizeof(unsigned long));
+                return ret;
+            }
+            case 'F': { // vector<float>
+                vector< float > * vec = static_cast< vector < float >* >(obj);
+                assert(vec != NULL);
+                npy_intp size = (npy_intp)(vec->size());
+                ret = PyArray_SimpleNew(1, &size, NPY_FLOAT);
+                assert(ret != NULL);
+                char * ptr = PyArray_BYTES((PyArrayObject*)ret);
+                memcpy(ptr, &(*vec)[0], size * sizeof(float));
+                return ret;
+            }
+            case 's': { // vector<string>
+                vector< string > * vec = static_cast< vector < string >* >(obj);
+                assert(vec != NULL);
+                ret = PyTuple_New((Py_ssize_t)vec->size());
+                assert(ret != NULL);
+                for (unsigned int ii = 0; ii < vec->size(); ++ii){
+                    string v = vec->at(ii);
+                    if (convert_and_set_tuple_entry(ret, ii, (void*)&v, typecode) == NULL){
+                        return NULL;
+                    }
+                }
+                break;
+            }
+            case 'N': { // vector< vector <unsigned int > >
+                vector< vector< unsigned int > > * vec = static_cast< vector < vector< unsigned int > >* >(obj);
+                assert(vec != NULL);
+                ret = PyTuple_New((Py_ssize_t)vec->size());
+                assert(ret != NULL);
+                for (unsigned int ii = 0; ii < vec->size(); ++ii){
+                    if (convert_and_set_tuple_entry(ret, ii, (void*)&vec->at(ii), typecode) == NULL){
+                        return NULL;
+                    }
+                }
+                break;
+            }
+            case 'v': { // vector< vector < int > >
+                vector< vector< int > > * vec = static_cast< vector < vector< int > >* >(obj);
+                assert(vec != NULL);
+                ret = PyTuple_New((Py_ssize_t)vec->size());
+                assert(ret != NULL);
+                for (unsigned int ii = 0; ii < vec->size(); ++ii){
+                    if (convert_and_set_tuple_entry(ret, ii, (void*)&vec->at(ii), typecode) == NULL){
+                        return NULL;
+                    }
+                }
+                break;
+            }
+            case 'D': { // vector< vector <double > >
+                vector< vector< double > > * vec = static_cast< vector < vector< double > >* >(obj);
+                assert(vec != NULL);
+                ret = PyTuple_New((Py_ssize_t)vec->size());
+                assert(ret != NULL);
+                for (unsigned int ii = 0; ii < vec->size(); ++ii){
+                    if (convert_and_set_tuple_entry(ret, ii, (void*)&vec->at(ii), typecode) == NULL){
+                        return NULL;
+                    }
+                }
+                break;
+            }
+            default:
+                PyErr_SetString(PyExc_TypeError, "unhandled type");
+                return NULL;
+        }
+            return ret;
+    }
+    
     // Global store of defined MOOSE classes.
-    static map<string, PyTypeObject *>& get_moose_classes()
+    map<string, PyTypeObject *>& get_moose_classes()
     {
         static map<string, PyTypeObject *> defined_classes;
         return defined_classes;
     }
     
     // Global storage for PyGetSetDef structs for LookupFields.
-    static map<string, vector <PyGetSetDef> >& get_getsetdefs()
+    map<string, vector <PyGetSetDef> >& get_getsetdefs()
     {
         static map<string, vector <PyGetSetDef>  > getset_defs;
         return getset_defs;
     }
     
     // Global storage for every LookupField we create.
-    static map<string, PyObject *>& get_inited_lookupfields()
+    map<string, PyObject *>& get_inited_lookupfields()
     {
         static map<string, PyObject *> inited_lookupfields;
         return inited_lookupfields;
     }
     
-    static map< string, PyObject * >& get_inited_destfields()
+    map< string, PyObject * >& get_inited_destfields()
     {
         static map<string, PyObject * > inited_destfields;
         return inited_destfields;
     }
 
-    static map< string, PyObject *>& get_inited_elementfields()
+    map< string, PyObject *>& get_inited_elementfields()
     {
         static map< string, PyObject *> inited_elementfields;
         return inited_elementfields;
@@ -261,7 +673,7 @@ extern "C" {
        map of fields which are aliased in Python to avoid collision
        with Python keywords.
     */
-    static const map<string, string>& get_field_alias()
+    const map<string, string>& get_field_alias()
     {
         static map<string, string> alias;
         if (alias.empty()){
@@ -274,26 +686,13 @@ extern "C" {
 
     // Minimum number of arguments for setting destFinfo - 1-st
     // the finfo name.
-    static Py_ssize_t minArgs = 1;
+    // Py_ssize_t minArgs = 1;
     
-    // Arbitrarily setting maximum on variable argument list. Read:
-    // http://www.swig.org/Doc1.3/Varargs.html to understand why
-    static Py_ssize_t maxArgs = 10;
+    // // Arbitrarily setting maximum on variable argument list. Read:
+    // // http://www.swig.org/Doc1.3/Varargs.html to understand why
+    // Py_ssize_t maxArgs = 10;
 
     
-    ///////////////////////////////////
-    // Python datatype checking macros
-    ///////////////////////////////////
-    
-#define Id_Check(v) (Py_TYPE(v) == &IdType)
-#define Id_SubtypeCheck(v) (PyType_IsSubtype(Py_TYPE(v),&IdType))
-#define ObjId_Check(v) (Py_TYPE(v) == &ObjIdType)
-#define ObjId_SubtypeCheck(v) (PyType_IsSubtype(Py_TYPE(v), &ObjIdType))
-#define LookupField_Check(v) (Py_TYPE(v) == &LookupFieldType)
-    
-    // Macro to create the Shell * out of shellId
-#define SHELLPTR reinterpret_cast<Shell*>(get_shell(0, NULL).eref().data())    
-
     ///////////////////////////////////////////////////////////////////////////
     // Helper routines
     ///////////////////////////////////////////////////////////////////////////
@@ -465,38 +864,6 @@ extern "C" {
 
 
     /**
-       Return numpy typenum for specified type.
-    */
-    int get_npy_typenum(const type_info& ctype)
-    {
-        if (ctype == typeid(float)){
-            return NPY_FLOAT;
-        } else if (ctype == typeid(double)){
-            return NPY_DOUBLE;
-        } else if (ctype == typeid(int)){
-            return NPY_INT;
-        } else if (ctype == typeid(unsigned int)){
-            return NPY_UINT;
-        } else if (ctype == typeid(long)){
-            return NPY_LONG;
-        } else if (ctype == typeid(unsigned long)){
-            return NPY_ULONG;
-        } else if (ctype == typeid(short)){
-            return NPY_SHORT;
-        } else if (ctype == typeid(unsigned short)){
-            return NPY_USHORT;
-        } else if (ctype == typeid(char)){
-            return NPY_CHAR;
-        } else if (ctype == typeid(bool)){
-            return NPY_BOOL;
-        } else if (ctype == typeid(Id) || ctype == typeid(ObjId)){
-            return NPY_OBJECT;
-        } else {
-            cerr << "Cannot handle type: " << ctype.name() << endl;
-            return -1;
-        }
-    }
-    /**
        Return list of available Finfo types.
        Place holder for static const to avoid static initialization issues.
     */
@@ -635,1382 +1002,16 @@ extern "C" {
     //////////////////////////
     // Field Type definition
     //////////////////////////
-    // Does not get called at all by PyObject_New. See:
-    // http://www.velocityreviews.com/forums/t344033-pyobject_new-not-running-tp_new-for-iterators.html
-    // static PyObject * moose_Field_new(PyTypeObject *type,
-    //                                   PyObject *args, PyObject *kwds)
-    // {
-    //     _Field *self = NULL;
-    //     self = (_Field*)type->tp_alloc(type, 0);
-    //     if (self != NULL){            
-    //         self->name = NULL;
-    //         self->owner = ObjId::bad;
-    //     }        
-    //     return (PyObject*)self;
-    // }
-    /**
-       Initialize field with ObjId and fieldName.
-    */
-    static int moose_Field_init(_Field * self, PyObject * args, PyObject * kwargs)
-    {
-        extern PyTypeObject ObjIdType;
-        PyObject * owner;
-        char * fieldName;
-        if (!PyArg_ParseTuple(args, "Os:moose_Field_init", &owner, &fieldName)){
-            return -1;
-        }
-        if (fieldName == NULL){
-            PyErr_SetString(PyExc_ValueError, "fieldName cannot be NULL");
-            return -1;
-        }
-        if (owner == NULL){
-            PyErr_SetString(PyExc_ValueError, "owner cannot be NULL");
-            return -1;
-        }
-        if (!PyObject_IsInstance(owner, (PyObject*)&ObjIdType)){
-            PyErr_SetString(PyExc_TypeError, "Owner must be subtype of ObjId");
-            return -1;
-        }
-        self->owner = ((_ObjId*)owner)->oid_;
-        if (!Id::isValid(self->owner.id)){
-            Py_XDECREF(owner);
-            Py_XDECREF(self);
-            RAISE_INVALID_ID(-1, "moose_Field_init");
-        }
-        size_t size = strlen(fieldName);
-        char * name = (char*)calloc(size+1, sizeof(char));
-        strncpy(name, fieldName, size);
-        self->name = name;
-        // In earlier version I tried to deallocate the existing
-        // self->name if it is not NULL. But it turns out that it
-        // causes a SIGABRT. In any case it should not be an issue as
-        // we can safely assume __init__ will be called only once in
-        // this case. The Fields are created only internally at
-        // initialization of the MOOSE module.
-        return 0;
-    }
-
-    /// Return the hash of the string `{objectpath}.{fieldName}`
-    static long moose_Field_hash(_Field * self)
-    {
-        if (!Id::isValid(self->owner.id)){
-            RAISE_INVALID_ID(-1, "moose_Field_hash");
-        }
-        string fieldPath = self->owner.path() + "." + self->name;
-        PyObject * path = PyString_FromString(fieldPath.c_str());
-        long hash = PyObject_Hash(path);
-        Py_XDECREF(path);
-        return hash;    
-    }
-
-    /// String representation of fields is `{objectpath}.{fieldName}`
-    static PyObject * moose_Field_repr(_Field * self)
-    {
-        if (!Id::isValid(self->owner.id)){
-            RAISE_INVALID_ID(NULL, "moose_Field_repr");
-        }
-        ostringstream fieldPath;
-        fieldPath << self->owner.path() << "." << self->name;
-        return PyString_FromString(fieldPath.str().c_str());
-    }
-
-    
-    PyDoc_STRVAR(moose_Field_documentation,
-                 "Base class for MOOSE fields.\n"
-                 "\n"
-                 "Instances contain the field name and a pointer to the owner\n"
-                 "object. Note on hash: the Field class is hashable but the hash is\n"
-                 "constructed from the path of the container element and the field\n"
-                 "name. Hence changing the name of the container element will cause the\n"
-                 "hash to change. This is rather unusual in a moose script, but if you\n"
-                 "are putting fields as dictionary keys, you should do that after names\n"
-                 "of all elements have been finalized.");
-
-
-    static PyTypeObject moose_Field = {
-        PyVarObject_HEAD_INIT(NULL, 0)
-        "moose.Field",                                  /* tp_name */
-        sizeof(_Field),                                 /* tp_basicsize */
-        0,                                              /* tp_itemsize */
-        0,// (destructor)moose_Field_dealloc,                /* tp_dealloc */
-        0,                                              /* tp_print */
-        0,                                              /* tp_getattr */
-        0,                                              /* tp_setattr */
-        0,                                              /* tp_compare */
-        (reprfunc)moose_Field_repr,                     /* tp_repr */
-        0,                                              /* tp_as_number */
-        0,                                              /* tp_as_sequence */
-        0,                                              /* tp_as_mapping */
-        (hashfunc)moose_Field_hash,                     /* tp_hash */
-        0,                                              /* tp_call */
-        (reprfunc)moose_Field_repr,                     /* tp_str */
-        0,                  /* tp_getattro */
-        PyObject_GenericSetAttr,                        /* tp_setattro */
-        0,                                              /* tp_as_buffer */
-        Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
-        moose_Field_documentation,
-        0,                                              /* tp_traverse */
-        0,                                              /* tp_clear */
-        0,                                              /* tp_richcompare */
-        0,                                              /* tp_weaklistoffset */
-        0,                                              /* tp_iter */
-        0,                                              /* tp_iternext */
-        0,                                              /* tp_methods */
-        0,                                              /* tp_members */
-        0,                                              /* tp_getset */
-        0,                                              /* tp_base */
-        0,                                              /* tp_dict */
-        0,                                              /* tp_descr_get */
-        0,                                              /* tp_descr_set */
-        0,                                              /* tp_dictoffset */
-        (initproc)moose_Field_init,                     /* tp_init */
-        0,                                              /* tp_alloc */
-        0,                                              /* tp_new */
-        0,                                              /* tp_free */
-    };
-
-    static PyObject * moose_LookupField_getItem(_Field * self, PyObject * key)
-    {
-        return getLookupField(self->owner, self->name, key);
-    }
-
-    static int moose_LookupField_setItem(_Field * self, PyObject * key,
-                                         PyObject * value)
-    {
-        return setLookupField(self->owner,
-                              self->name, key, value);
-    }
-
-    /**
-       The mapping methods make it act like a Python dictionary.
-    */
-    static PyMappingMethods LookupFieldMappingMethods = {
-        0,
-        (binaryfunc)moose_LookupField_getItem,
-        (objobjargproc)moose_LookupField_setItem,
-    };
-
-    PyDoc_STRVAR(moose_LookupField_documentation,
-                 "LookupField is dictionary-like fields that map keys to values.\n"
-                 "The keys need not be fixed, as in case of interpolation tables,\n"
-                 "keys can be any number and the corresponding value is dynamically\n"
-                 "computed by the method of interpolation.\n"
-                 "Use moose.doc('classname.fieldname') to display builtin\n"
-                 "documentation for `field` in class `classname`.\n");
-    static PyTypeObject moose_LookupField = {
-        PyVarObject_HEAD_INIT(NULL, 0)
-        "moose.LookupField",                                  /* tp_name */
-        sizeof(_Field),                                 /* tp_basicsize */
-        0,                                              /* tp_itemsize */
-        0,                /* tp_dealloc */
-        0,                                              /* tp_print */
-        0,                                              /* tp_getattr */
-        0,                                              /* tp_setattr */
-        0,                                              /* tp_compare */
-        (reprfunc)moose_Field_repr,                     /* tp_repr */
-        0,                                              /* tp_as_number */
-        0,                                              /* tp_as_sequence */
-        &LookupFieldMappingMethods,                      /* tp_as_mapping */
-        (hashfunc)moose_Field_hash,                     /* tp_hash */
-        0,                                              /* tp_call */
-        (reprfunc)moose_Field_repr,                     /* tp_str */
-        0,                  /* tp_getattro */
-        PyObject_GenericSetAttr,                        /* tp_setattro */
-        0,                                              /* tp_as_buffer */
-        Py_TPFLAGS_DEFAULT,
-        moose_LookupField_documentation,
-        0,                                              /* tp_traverse */
-        0,                                              /* tp_clear */
-        0,                                              /* tp_richcompare */
-        0,                                              /* tp_weaklistoffset */
-        0,                                              /* tp_iter */
-        0,                                              /* tp_iternext */
-        0,                                              /* tp_methods */
-        0,                                              /* tp_members */
-        0,                                              /* tp_getset */
-        &moose_Field,                                              /* tp_base */
-        0,                                              /* tp_dict */
-        0,                                              /* tp_descr_get */
-        0,                                              /* tp_descr_set */
-        0,                                              /* tp_dictoffset */
-        (initproc)moose_Field_init,                     /* tp_init */
-        0,                                              /* tp_alloc */
-        0,                       /* tp_new */
-        0,                                              /* tp_free */
-    };
-
-
-    static PyObject * moose_DestField_call(PyObject * self, PyObject * args,
-                                           PyObject * kw)
-    {
-        // We copy the name as the first argument into a new argument tuple. 
-        PyObject * newargs = PyTuple_New(PyTuple_Size(args)+1); // one extra for the field name
-        PyObject * name = PyString_FromString(((_Field*)self)->name);
-        if (name == NULL){
-            Py_XDECREF(newargs);
-            return NULL;
-        }
-        if (PyTuple_SetItem(newargs, 0, name) != 0){
-            Py_XDECREF(newargs);
-            return NULL;
-        }
-        // We copy the arguments in `args` into the new argument tuple
-        Py_ssize_t argc =  PyTuple_Size(args);
-        for (Py_ssize_t ii = 0; ii < argc; ++ii){
-            PyObject * arg = PyTuple_GetItem(args, ii);
-            if (arg != NULL){
-                PyTuple_SetItem(newargs, ii+1, arg);
-            } else {
-                Py_XDECREF(newargs);
-                return NULL;
-            }
-        }
-        // Call ObjId._setDestField with the new arguments
-        return _setDestField(((_Field*)self)->owner,
-                             newargs);
-    }
-
-    PyDoc_STRVAR(moose_DestField_documentation,
-                 "DestField is a method field, i.e. it can be called like a function.\n"
-                 "Use moose.doc('classname.fieldname') to display builtin\n"
-                 "documentation for `field` in class `classname`.\n");
-                 
-
-    static PyTypeObject moose_DestField = {
-        PyVarObject_HEAD_INIT(NULL, 0)
-        "moose.DestField",                              /* tp_name */
-        sizeof(_Field),                                 /* tp_basicsize */
-        0,                                              /* tp_itemsize */
-        0,                /* tp_dealloc */
-        0,                                              /* tp_print */
-        0,                                              /* tp_getattr */
-        0,                                              /* tp_setattr */
-        0,                                              /* tp_compare */
-        (reprfunc)moose_Field_repr,                     /* tp_repr */
-        0,                                              /* tp_as_number */
-        0,                                              /* tp_as_sequence */
-        0,                                              /* tp_as_mapping */
-        (hashfunc)moose_Field_hash,                     /* tp_hash */
-        moose_DestField_call,                           /* tp_call */
-        (reprfunc)moose_Field_repr,                     /* tp_str */
-        0,                                              /* tp_getattro */
-        PyObject_GenericSetAttr,                        /* tp_setattro */
-        0,                                              /* tp_as_buffer */
-        Py_TPFLAGS_DEFAULT,
-        moose_DestField_documentation,
-        0,                                              /* tp_traverse */
-        0,                                              /* tp_clear */
-        0,                                              /* tp_richcompare */
-        0,                                              /* tp_weaklistoffset */
-        0,                                              /* tp_iter */
-        0,                                              /* tp_iternext */
-        0,                                              /* tp_methods */
-        0,                                              /* tp_members */
-        0,                                              /* tp_getset */
-        &moose_Field,                                              /* tp_base */
-        0,                                              /* tp_dict */
-        0,                                              /* tp_descr_get */
-        0,                                              /* tp_descr_set */
-        0,                                              /* tp_dictoffset */
-        (initproc)moose_Field_init,                     /* tp_init */
-        0,                                              /* tp_alloc */
-        0,                       /* tp_new */
-        0,                                              /* tp_free */
-    };
-
-    PyDoc_STRVAR(moose_ElementField_documentation,
-                 "ElementField represents fields that are themselves elements. For\n"
-                 "example, synapse in an IntFire neuron. Element fields can be traversed\n"
-                 "like a sequence. Additionally, you can set the number of entries by\n"
-                 "setting the `num` attribute to a desired value.\n");
-
-    PyDoc_STRVAR(moose_ElementField_num_documentation,
-                 "Number of entries in the field.");
-
-    PyDoc_STRVAR(moose_ElementField_path_documentation,
-                 "Path of the field element.");
-    PyDoc_STRVAR(moose_ElementField_id_documentation,
-                 "Id of the field element.");
-    static char numfield[] = "num";
-    static char path[] = "path";
-    static char id[] = "id_";
-    static PyGetSetDef ElementFieldGetSetters[] = {
-        {numfield,
-         (getter)moose_ElementField_getNum,
-         (setter)moose_ElementField_setNum,
-         moose_ElementField_num_documentation,
-         NULL},
-        {path,
-         (getter)moose_ElementField_getPath,
-         NULL,
-         moose_ElementField_path_documentation,
-         NULL},
-        {id,
-         (getter)moose_ElementField_getId,
-         NULL,
-         moose_ElementField_id_documentation,
-         NULL},
-        {NULL}, /* sentinel */
-    };
-    
-    static PySequenceMethods ElementFieldSequenceMethods = {
-        (lenfunc)moose_ElementField_getLen, // sq_length
-        0, //sq_concat
-        0, //sq_repeat
-        (ssizeargfunc)moose_ElementField_getItem, //sq_item
-        0, // getslice
-        0, //sq_ass_item
-        0, // setslice
-        0, // sq_contains
-        0, // sq_inplace_concat
-        0 // sq_inplace_repeat
-    };
-
-    static PyTypeObject moose_ElementField = {
-        PyVarObject_HEAD_INIT(NULL, 0)
-        "moose.ElementField",                              /* tp_name */
-        sizeof(_Field),                                 /* tp_basicsize */
-        0,                                              /* tp_itemsize */
-        0,                                              /* tp_dealloc */
-        0,                                              /* tp_print */
-        0,                                              /* tp_getattr */
-        0,                                              /* tp_setattr */
-        0,                                              /* tp_compare */
-        (reprfunc)moose_Field_repr,                     /* tp_repr */
-        0,                                              /* tp_as_number */
-        &ElementFieldSequenceMethods,                   /* tp_as_sequence */
-        0,                                              /* tp_as_mapping */
-        (hashfunc)moose_Field_hash,                     /* tp_hash */
-        0,                                              /* tp_call */
-        (reprfunc)moose_Field_repr,                     /* tp_str */
-        0,                                              /* tp_getattro */
-        PyObject_GenericSetAttr,                        /* tp_setattro */
-        0,                                              /* tp_as_buffer */
-        Py_TPFLAGS_DEFAULT,
-        moose_ElementField_documentation,
-        0,                                              /* tp_traverse */
-        0,                                              /* tp_clear */
-        0,                                              /* tp_richcompare */
-        0,                                              /* tp_weaklistoffset */
-        0,                                              /* tp_iter */
-        0,                                              /* tp_iternext */
-        0,                           /* tp_methods */
-        0,                                              /* tp_members */
-        ElementFieldGetSetters,                                              /* tp_getset */
-        &moose_Field,                                              /* tp_base */
-        0,                                              /* tp_dict */
-        0,                                              /* tp_descr_get */
-        0,                                              /* tp_descr_set */
-        0,                                              /* tp_dictoffset */
-        (initproc)moose_Field_init,                     /* tp_init */
-        0,                                              /* tp_alloc */
-        0,                       /* tp_new */
-        0,                                              /* tp_free */        
-    };
-
-    ///////////////////////////////////////////////
-    // Python method lists for PyObject of Id
-    ///////////////////////////////////////////////
-    PyDoc_STRVAR(moose_Id_delete_doc,
-                 "ematrix.delete()"
-                 "\n"
-                 "\nDelete the underlying moose object. This will invalidate all"
-                 "\nreferences to this object and any attempt to access it will raise a"
-                 "\nValueError."
-                 "\n");
-
-    PyDoc_STRVAR(moose_Id_setField_doc,
-                 "setField(fieldname, value_vector)\n"
-                 "\n"
-                 "Set the value of `fieldname` in all elements under this ematrix.\n"
-                 "\n"
-                 "Parameters\n"
-                 "----------\n"
-                 "fieldname: str\n"
-                 "\tfield to be set.\n"
-                 "value: sequence of values\n"
-                 "\tsequence of values corresponding to individual elements under this\n"
-                 "ematrix.\n"
-                 "\n"
-                 "NOTE: This is an interface to SetGet::setVec\n"
-                 );
-    
-    static PyMethodDef IdMethods[] = {
-        // {"init", (PyCFunction)moose_Id_init, METH_VARARGS,
-        //  "Initialize a Id object."},
-        {"delete", (PyCFunction)moose_Id_delete, METH_NOARGS,
-         moose_Id_delete_doc},
-        {"getValue", (PyCFunction)moose_Id_getValue, METH_NOARGS,
-         "Return integer representation of the id of the element."},
-        {"getPath", (PyCFunction)moose_Id_getPath, METH_NOARGS,
-         "Return the path of this ematrix object."},
-        {"getShape", (PyCFunction)moose_Id_getShape, METH_NOARGS,
-         "Get the shape of the ematrix object as a tuple."},
-        {"setField", (PyCFunction)moose_Id_setField, METH_VARARGS,
-         moose_Id_setField_doc},
-        {NULL, NULL, 0, NULL},        /* Sentinel */        
-    };
-
-    static PySequenceMethods IdSequenceMethods = {
-        (lenfunc)moose_Id_getLength, // sq_length
-        0, //sq_concat
-        0, //sq_repeat
-        (ssizeargfunc)moose_Id_getItem, //sq_item
-#ifndef PY3K
-        (ssizessizeargfunc)moose_Id_getSlice, // getslice
-#endif
-        0, //sq_ass_item
-#ifndef PY3K
-        0, // setslice
-#endif
-        (objobjproc)moose_Id_contains, // sq_contains
-        0, // sq_inplace_concat
-        0 // sq_inplace_repeat
-    };
-
-    static PyMappingMethods IdMappingMethods = {
-        (lenfunc)moose_Id_getLength, //mp_length
-        (binaryfunc)moose_Id_subscript, // mp_subscript
-        0 // mp_ass_subscript
-    };
-
-    ///////////////////////////////////////////////
-    // Type defs for PyObject of Id
-    ///////////////////////////////////////////////
-
-    PyDoc_STRVAR(moose_Id_doc,
-                 "An object uniquely identifying a moose element. moose elements are"
-                 "\narray-like objects which can have one or more single-objects within"
-                 "\nthem. ematrix can be traversed like a Python sequence and is item is an"
-                 "\nelement identifying single-objects contained in the array element."
-                 "\n"
-                 "\nField access to ematrices are vectorized. For example, ematrix.name returns a"
-                 "\ntuple containing the names of all the single-elements in this"
-                 "\nematrix. There are a few special fields that are unique for ematrix and are not"
-                 "\nvectorized. These are `path`, `value`, `shape` and `class_`."
-                 "\nThere are two ways an ematrix can be initialized, (1) create a new array"
-                 "\nelement or (2) create a reference to an existing object."
-                 "\n"
-                 "\n__init__(self, path=path, dims=dimesions, dtype=className)"
-                 "\n"
-                 "\nParameters"
-                 "\n----------"                 
-                 "\npath : str "
-                 "\nPath of an existing array element or for creating a new one. This has"
-                 "\nthe same format as unix file path: /{element1}/{element2} ... If there"
-                 "\nis no object with the specified path, moose attempts to create a new"
-                 "\narray element. For that to succeed everything until the last `/`"
-                 "\ncharacter must exist or an error is raised"
-                 "\n"
-                 "\ndims : int/tuple of ints"
-                 "\nThis is a tuple of integers specifying the size of the array element"
-                 "\nto be created along each dimension. Thus dims=(2,3) will create an"
-                 "\narray element with 2 rows and 3 columns. If a single integer is"
-                 "\nspecified, a one dimensional array element of that length is created."
-                 "\n"
-                 "\n__init__(self, id)"
-                 "\n"
-                 "\nCreate a reference to an existing array object."
-                 "\n"
-                 "\nParameters"
-                 "\n----------"
-                 "\nid : ematrix/int"
-                 "\nematrix of an existing array object. The new object will be another"
-                 "\nreference to this object."
-                 "\n"
-                 );
-    
-    PyTypeObject IdType = { 
-        PyVarObject_HEAD_INIT(NULL, 0)               /* tp_head */
-        "moose.ematrix",                  /* tp_name */
-        sizeof(_Id),                    /* tp_basicsize */
-        0,                                  /* tp_itemsize */
-        0,                    /* tp_dealloc */
-        0,                                  /* tp_print */
-        0,                                  /* tp_getattr */
-        0,                                  /* tp_setattr */
-        0,                                  /* tp_compare */
-        (reprfunc)moose_Id_repr,                        /* tp_repr */
-        0,                                  /* tp_as_number */
-        &IdSequenceMethods,             /* tp_as_sequence */
-        &IdMappingMethods,              /* tp_as_mapping */
-        (hashfunc)moose_Id_hash,                                  /* tp_hash */
-        0,                                  /* tp_call */
-        (reprfunc)moose_Id_str,               /* tp_str */
-        (getattrofunc)moose_Id_getattro,            /* tp_getattro */
-        (setattrofunc)moose_Id_setattro,            /* tp_setattro */
-        0,                                  /* tp_as_buffer */
-        Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
-        moose_Id_doc,
-        0,                                  /* tp_traverse */
-        0,                                  /* tp_clear */
-        (richcmpfunc)moose_Id_richCompare,       /* tp_richcompare */
-        0,                                  /* tp_weaklistoffset */
-        0,                                  /* tp_iter */
-        0,                                  /* tp_iternext */
-        IdMethods,                     /* tp_methods */
-        0,                    /* tp_members */
-        0,                                  /* tp_getset */
-        0,                                 /* tp_base */
-        0,                                  /* tp_dict */
-        0,                                  /* tp_descr_get */
-        0,                                  /* tp_descr_set */
-        0,                                  /* tp_dictoffset */
-        (initproc) moose_Id_init,   /* tp_init */
-        0,                /* tp_alloc */
-        0,                  /* tp_new */
-        0,                      /* tp_free */
-    };
-
-    
-
-
-    //////////////////////////////////////////////////
-    // Id functions
-    //////////////////////////////////////////////////
-
-    /**
-       Utility function to convert an Python integer or a sequence
-       object into a vector of dimensions
-    */
-    static vector<int> pysequence_to_dimvec(PyObject * dims)
-    {
-        vector <int> vec_dims;
-        Py_ssize_t num_dims = 1;
-        long dim_value = 1;
-        if (dims){
-            // First try to use it as a tuple of dimensions
-            if (PySequence_Check(dims)){
-                num_dims = PySequence_Length(dims);
-                for (Py_ssize_t ii = 0; ii < num_dims; ++ ii){
-                    PyObject* dim = PySequence_GetItem(dims, ii);
-                    dim_value = PyInt_AsLong(dim);
-                    Py_XDECREF(dim);                    
-                    if ((dim_value == -1) && PyErr_Occurred()){
-                        return vec_dims;
-                    }
-                    vec_dims.push_back((unsigned int)dim_value);
-                }
-            } else if (PyInt_Check(dims)){ // 1D array
-                dim_value = PyInt_AsLong(dims);
-                if (dim_value <= 0){
-                    dim_value = 1;
-                }
-                vec_dims.push_back(dim_value);
-            }
-        } else {
-            vec_dims.push_back(dim_value);
-        }
-        return vec_dims;
-    }
-
-    /**
-       Utility function to create objects from full path, dimensions
-       and classname.
-    */
-    static Id create_Id_from_path(string path, vector<int> dims, string type)
-    {
-        string parent_path;
-        string name;
-        string trimmed_path = trim(path);
-        size_t pos = trimmed_path.rfind("/");
-        if (pos != string::npos){
-            name = trimmed_path.substr(pos+1);
-            parent_path = trimmed_path.substr(0, pos);
-        } else {
-            name = trimmed_path;
-        }
-        // handle relative path
-        if (trimmed_path[0] != '/'){
-            string current_path = SHELLPTR->getCwe().path();
-            if (current_path != "/"){
-                parent_path = current_path + "/" + parent_path;
-            } else {
-                parent_path = current_path + parent_path;
-            }
-        } else if (parent_path.empty()){
-            parent_path = "/";
-        }
-        Id parent_id(parent_path);
-        if (parent_id == Id() && parent_path != "/" && parent_path != "/root") {
-            string message = "Parent element does not exist: ";
-            message += parent_path;
-            PyErr_SetString(PyExc_ValueError, message.c_str());
-            return Id();
-        }
-        return SHELLPTR->doCreate(type,
-                                  parent_id,
-                                  string(name),
-                                  vector<int>(dims));
-        
-    }
-    
-    static int moose_Id_init(_Id * self, PyObject * args, PyObject * kwargs)
-    {
-        extern PyTypeObject IdType;
-        PyObject * src = NULL;
-        unsigned int id = 0;
-        // first try parsing the arguments as (path, dimes, classname)
-        char _path[] = "path";
-        char _dtype[] = "dtype";
-        char _dims[] = "dims";
-        static char * kwlist[] = {_path, _dims, _dtype, NULL};
-        char * path = NULL;
-        char _default_type[] = "Neutral";
-        char *type = _default_type;
-        PyObject * dims = NULL;
-        bool parse_success = false;
-        if (kwargs == NULL){
-            if(PyArg_ParseTuple(args,
-                                "s|Os:moose_Id_init",
-                                &path,
-                                &dims,
-                                &type)){
-                parse_success = true;
-            }
-        } else if (PyArg_ParseTupleAndKeywords(args,
-                                               kwargs,
-                                               "s|Os:moose_Id_init",
-                                               kwlist,
-                                               &path,
-                                               &dims,
-                                               &type)){
-            parse_success = true;
-        }
-        // Parsing args successful, if any error happens now,
-        // different argument processing will not help. Return error
-        if (parse_success){
-            string trimmed_path(path);
-            trimmed_path = trim(trimmed_path);
-            size_t length = trimmed_path.length();
-            if (length <= 0){
-                PyErr_SetString(PyExc_ValueError,
-                                "path must be non-empty string.");
-                Py_XDECREF(self);
-                return -1;
-            }
-            self->id_ = Id(trimmed_path);
-            // Return already existing object
-            if (self->id_ != Id() ||
-                trimmed_path == "/" ||
-                trimmed_path == "/root"){
-                return 0;
-            }
-            vector<int> vec_dims = pysequence_to_dimvec(dims);
-            if (vec_dims.size() == 0 && PyErr_Occurred()){
-                Py_XDECREF(self);
-                return -1;
-            }
-            self->id_ = create_Id_from_path(path, vec_dims, type);
-            if (self->id_ == Id() && PyErr_Occurred()){
-                Py_XDECREF(self);
-                return -1;
-            }
-            return 0;
-        }
-        // The arguments could not be parsed as (path, dims, class),
-        // try to parse it as an existing Id
-        PyErr_Clear();        
-        if (PyArg_ParseTuple(args, "O:moose_Id_init", &src) && Id_Check(src)){
-            self->id_ = ((_Id*)src)->id_;
-            return 0;
-        }
-        // Next try to parse it as an integer value for an existing Id
-        PyErr_Clear(); // clear the error from parsing error
-        if (PyArg_ParseTuple(args, "I:moose_Id_init", &id)){
-            self->id_ = Id(id);
-            return 0;
-        }
-        Py_XDECREF(self);
-        return -1;
-    }// ! moose_Id_init
-
-    static long moose_Id_hash(_Id * self)
-    {
-        return self->id_.value(); // hash is the same as the Id value
-    }
-
-    
-    // 2011-03-23 15:14:11 (+0530)
-    // 2011-03-26 17:02:19 (+0530)
-    //
-    // 2011-03-26 19:14:34 (+0530) - This IS UGLY! Destroying one
-    // ObjId will destroy the containing element and invalidate all
-    // the other ObjId with the same Id.
-    // 2011-03-28 13:44:49 (+0530)
-
-    static PyObject * moose_Id_delete(_Id * self)
-    {
-        if (self->id_ == Id()){
-            PyErr_SetString(PyExc_ValueError, "Cannot delete moose shell.");
-            return NULL;
-        }
-        if (!Id::isValid(self->id_)){
-            RAISE_INVALID_ID(NULL, "moose_Id_delete");
-        }
-        // clean up the maps containing initialized lookup/dest/element fields
-        for (unsigned int ii = 0; ii < moose_Id_getLength(self); ++ii){
-            ObjId el(self->id_, ii);
-            map<string, PyObject *>::iterator it = get_inited_lookupfields().begin();
-            while( it != get_inited_lookupfields().end()){
-                if (it->first.find(el.path() + ".") == 0){
-                    map< string, PyObject * >::iterator toErase = it;
-                    ++it;
-                    Py_XDECREF(toErase->second);
-                    get_inited_lookupfields().erase(toErase);                    
-                } else {
-                    ++it;
-                }
-            }
-            it = get_inited_destfields().begin();
-            while( it != get_inited_destfields().end()){
-                if (it->first.find(el.path() + ".") == 0){
-                    map< string, PyObject * >::iterator toErase = it;
-                    ++it;
-                    Py_XDECREF(toErase->second);
-                    get_inited_destfields().erase(toErase);                    
-                } else {
-                    ++it;
-                }
-            }
-            it = get_inited_elementfields().begin();
-            while( it != get_inited_elementfields().end()){
-                if (it->first.find(el.path() + ".") == 0){
-                    map< string, PyObject * >::iterator toErase = it;
-                    ++it;
-                    Py_XDECREF(toErase->second);
-                    get_inited_elementfields().erase(toErase);                    
-                } else {
-                    ++it;
-                }
-            }            
-        }
-        SHELLPTR->doDelete(self->id_);
-        self->id_ = Id();
-        Py_CLEAR(self);
-        Py_RETURN_NONE;
-    }
-    
-    static PyObject * moose_Id_repr(_Id * self)
-    {
-        if (!Id::isValid(self->id_)){
-            RAISE_INVALID_ID(NULL, "moose_Id_repr");
-        }
-        ostringstream repr;
-        repr << "<moose.ematrix: class="
-             << Field<string>::get(self->id_, "class") << ", "
-             << "id=" << self->id_.value() << ","
-             << "path=" << self->id_.path() << ">";
-        return PyString_FromString(repr.str().c_str());
-    } // !  moose_Id_repr
-
-    // The string representation is unused. repr is used everywhere.
-    static PyObject * moose_Id_str(_Id * self)
-    {
-        if (!Id::isValid(self->id_)){
-            RAISE_INVALID_ID(NULL, "moose_Id_str");
-        }        
-        return PyString_FromFormat("<moose.ematrix: class=%s, id=%u, path=%s>",
-                                   Field<string>::get(self->id_, "class").c_str(),
-                                   self->id_.value(), self->id_.path().c_str());
-    } // !  moose_Id_str
-
-    // 2011-03-23 15:09:19 (+0530)
-    static PyObject* moose_Id_getValue(_Id * self)
-    {
-        unsigned int id = self->id_.value();        
-        PyObject * ret = Py_BuildValue("I", id);
-        return ret;
-    }
-    
-    /**
-       Not to be redone. 2011-03-23 14:42:48 (+0530)
-    */
-    static PyObject * moose_Id_getPath(_Id * self)
-    {
-        if (!Id::isValid(self->id_)){
-            RAISE_INVALID_ID(NULL, "moose_Id_getPath");
-        }        
-        string path = self->id_.path();
-        PyObject * ret = Py_BuildValue("s", path.c_str());
-        return ret;
-    }
-    
-    ////////////////////////////////////////////
-    // Subset of sequence protocol functions
-    ////////////////////////////////////////////
-    static Py_ssize_t moose_Id_getLength(_Id * self)
-    {
-        if (!Id::isValid(self->id_)){
-            RAISE_INVALID_ID(-1, "moose_Id_getLength");
-        }        
-        vector< unsigned int> dims = Field< vector <unsigned int> >::get(ObjId(self->id_), "objectDimensions");
-        if (dims.empty()){
-            return (Py_ssize_t)1; // this is a bug in basecode - dimension 1 is returned as an empty vector
-        } else {
-            return (Py_ssize_t)dims[0];
-        }
-    }
-    
-    static PyObject * moose_Id_getShape(_Id * self)
-    {
-        vector< unsigned int> dims = Field< vector <unsigned int> >::get(self->id_, "objectDimensions");
-        if (!Id::isValid(self->id_)){
-            RAISE_INVALID_ID(NULL, "moose_Id_getShape");
-        }        
-        if (dims.empty()){
-            dims.push_back(1);
-        }
-        PyObject * ret = PyTuple_New((Py_ssize_t)dims.size());
-        
-        for (unsigned int ii = 0; ii < dims.size(); ++ii){
-            if (PyTuple_SetItem(ret, (Py_ssize_t)ii, Py_BuildValue("I", dims[ii]))){
-                Py_XDECREF(ret);
-                return NULL;
-            }
-        }
-        return ret;
-    }
-    
-    static PyObject * moose_Id_getItem(_Id * self, Py_ssize_t index)
-    {
-        if (!Id::isValid(self->id_)){
-            RAISE_INVALID_ID(NULL, "moose_Id_getItem");
-        }        
-        extern PyTypeObject ObjIdType;
-        if (index < 0){
-            index += moose_Id_getLength(self);
-        }
-        if ((index < 0) || (index >= moose_Id_getLength(self))){
-            PyErr_SetString(PyExc_IndexError, "Index out of bounds.");
-            return NULL;
-        }
-        _ObjId * ret = PyObject_New(_ObjId, &ObjIdType);
-        ret->oid_ = ObjId(self->id_, index);
-        return (PyObject*)ret;
-    }
-    
-    static PyObject * moose_Id_getSlice(_Id * self, PyObject * args)
-    {
-        if (!Id::isValid(self->id_)){
-            RAISE_INVALID_ID(NULL, "moose_Id_getSlice");
-        }        
-        extern PyTypeObject ObjIdType;
-        Py_ssize_t start, end;
-        if (!PyArg_ParseTuple(args, "ii:moose_Id_getSlice", &start, &end)){
-            return NULL;
-        }
-        Py_ssize_t len = moose_Id_getLength(self);
-        while (start < 0){
-            start += len;
-        }
-        while (end < 0){
-            end += len;
-        }
-        if (start > end){
-            PyErr_SetString(PyExc_IndexError, "Start index must be less than end.");
-            return NULL;
-        }
-        PyObject * ret = PyTuple_New((Py_ssize_t)(end - start));
-        
-        // Py_XINCREF(ret);        
-        for (unsigned int ii = start; ii < end; ++ii){
-            _ObjId * value = PyObject_New(_ObjId, &ObjIdType);
-            value->oid_ = ObjId(self->id_, ii);
-            if (PyTuple_SetItem(ret, (Py_ssize_t)ii, (PyObject*)value)){
-                Py_XDECREF(ret);
-                Py_XDECREF(value);
-                return NULL;
-            }
-        }
-        return ret;
-    }
-
-    ///////////////////////////////////////////////////
-    // Mapping protocol
-    ///////////////////////////////////////////////////
-    static PyObject * moose_Id_subscript(_Id * self, PyObject *op)
-    {
-        if (PyInt_Check(op) || PyLong_Check(op)){
-            Py_ssize_t value = PyInt_AsLong(op);
-            return moose_Id_getItem(self, value);
-        }
-        vector< unsigned int> dims = Field< vector <unsigned int> >::get(self->id_, "objectDimensions");
-        if (dims.size() > 1 &&
-            PyTuple_Check(op) && PyTuple_Size(op) == dims.size()){
-            ostringstream path;
-            path << self->id_.path();
-            for (Py_ssize_t ii = 0; ii < dims.size(); ++ii){
-                PyObject * index = PyTuple_GetItem(op, ii);
-                if (!PyInt_Check(index)){
-                    PyErr_SetString(PyExc_TypeError, "subscript must be integer.");
-                    return NULL;
-                }
-                unsigned int ix = PyInt_AsUnsignedLongMask(index);
-                if (ix >= dims[ii]){
-                    PyErr_SetString(PyExc_IndexError, "subscript out of range.");
-                    return NULL;
-                }
-                path << "[" << ix << "]";
-            }
-            ObjId oid(path.str());
-            if (oid == ObjId::bad()){
-                PyErr_SetString(PyExc_SystemError, "bad ObjId at specified index.");
-                return NULL;
-            }
-            string class_name = Field<string>::get(oid, "class");
-            map<string, PyTypeObject*>::iterator it = get_moose_classes().find(class_name);
-            if (it == get_moose_classes().end()){
-                PyErr_SetString(PyExc_SystemError, "moose_Id_subscript: unknown class");
-                return NULL;
-            }
-            PyObject * ret = (PyObject*)PyObject_New(_ObjId, it->second);
-            Py_XINCREF(ret);
-            return ret;
-        } else {
-            PyErr_SetString(PyExc_IndexError, "invalid subscript");
-            return NULL;
-        }    
-    }
-    
-    static PyObject * moose_Id_richCompare(_Id * self, PyObject * other, int op)
-    {
-        extern PyTypeObject IdType;
-        bool ret = false;
-        Id other_id = ((_Id*)other)->id_;
-        if (!self || !other){
-            ret = false;
-        } else if (!PyObject_IsInstance(other, (PyObject*)&IdType)){
-            ret = false;
-        } else if (op == Py_EQ){
-            ret = self->id_ == other_id;
-        } else if (op == Py_NE) {
-            ret = self->id_ != other_id;
-        } else if (op == Py_LT){
-            ret = self->id_ < other_id;
-        } else if (op == Py_GT) {
-            ret = other_id < self->id_;
-        } else if (op == Py_LE){
-            ret = (self->id_ < other_id) || (self->id_ == other_id);
-        } else if (op == Py_GE){
-            ret = (other_id < self->id_) || (self->id_ == other_id);
-        }
-        if (ret){
-            Py_RETURN_TRUE;
-        }
-        Py_RETURN_FALSE;
-    }
-    
-    static int moose_Id_contains(_Id * self, PyObject * obj)
-    {
-        extern PyTypeObject ObjIdType;
-        int ret = 0;
-        if (ObjId_SubtypeCheck(obj)){
-            ret = (((_ObjId*)obj)->oid_.id == self->id_);
-        }
-        return ret;
-    }
-    
-    static PyObject * moose_Id_getattro(_Id * self, PyObject * attr)
-    {
-        extern PyTypeObject ObjIdType;
-        if (!Id::isValid(self->id_)){
-            RAISE_INVALID_ID(NULL, "moose_Id_getattro");
-        }        
-        char * field = PyString_AsString(attr);
-        PyObject * _ret = get_Id_attr(self, field);
-        if (_ret != NULL){
-            return _ret;
-        }
-        string class_name = Field<string>::get(self->id_, "class");
-        string type = getFieldType(class_name, string(field), "valueFinfo");
-        if (type.empty()){
-            // Check if this field name is aliased and update fieldname and type if so.
-            map<string, string>::const_iterator it = get_field_alias().find(string(field));
-            if (it != get_field_alias().end()){
-                field = const_cast<char*>((it->second).c_str());
-                type = getFieldType(Field<string>::get(self->id_, "class"), it->second, "valueFinfo");
-                // Update attr for next level (PyObject_GenericGetAttr) in case.
-                Py_XDECREF(attr);
-                attr = PyString_FromString(field);
-            }
-        }
-        if (type.empty()){
-            return PyObject_GenericGetAttr((PyObject*)self, attr);            
-        }
-        char ftype = shortType(type);
-        if (!ftype){
-            return PyObject_GenericGetAttr((PyObject*)self, attr);
-        }
-
-#define ID_GETVEC(TYPE)                                                 \
-        {                                                               \
-            vector<TYPE> val;                                           \
-            Field< TYPE >::getVec(self->id_, string(field), val);       \
-            npy_intp dims = val.size();                                 \
-            PyArrayObject * ret = (PyArrayObject*)PyArray_SimpleNew(1, &dims, get_npy_typenum(typeid(TYPE))); \
-            char * ptr = PyArray_BYTES(ret);                            \
-            memcpy(ptr, &val[0], val.size() * sizeof(TYPE));            \
-            return PyArray_Return(ret);                                 \
-        } // ID_GETVEC
-        
-        switch (ftype){
-            case 'b':         {                                                               
-                vector<bool> val;                                           
-                Field< bool >::getVec(self->id_, string(field), val);
-                npy_intp dims = val.size();
-                PyArrayObject * ret = (PyArrayObject*)PyArray_SimpleNew(1, &dims, get_npy_typenum(typeid(bool))); 
-                char * ptr = PyArray_BYTES(ret);                            
-                memcpy(ptr, &(val[0]), val.size() * sizeof(bool));            
-                return PyArray_Return(ret);                                 
-            } // ID_GETVEC
-
-            case 'c': ID_GETVEC(char);
-            case 'i': ID_GETVEC(int);
-            case 'h': ID_GETVEC(short);
-            case 'l': ID_GETVEC(long)
-            case 'I': ID_GETVEC(unsigned int);
-            case 'k': ID_GETVEC(unsigned long);
-            case 'f': ID_GETVEC(float);
-            case 'd': ID_GETVEC(double);
-            case 's': {
-                vector<string> val;
-                Field<string>::getVec(self->id_, string(field), val);
-                PyObject * ret = PyTuple_New(val.size());
-                for (unsigned int ii = 0; ii < val.size(); ++ii){
-                    PyTuple_SetItem(ret, (Py_ssize_t)ii, Py_BuildValue("s", val[ii].c_str()));
-                }
-                return ret;
-            }
-            case 'x': {
-                vector<Id> val;
-                Field<Id>::getVec(self->id_, string(field), val);
-                PyObject * ret = PyTuple_New(val.size());
-                for (unsigned int ii = 0; ii < val.size(); ++ii){
-                    _Id * v = PyObject_New(_Id, &IdType);
-                    v->id_ = val[ii];
-                    PyTuple_SetItem(ret, (Py_ssize_t)ii, (PyObject*)v);
-                }
-                return ret;
-            }
-            case 'y': {
-                vector<ObjId> val;
-                Field<ObjId>::getVec(self->id_, string(field), val);
-                PyObject * ret = PyTuple_New(val.size());
-                for (unsigned int ii = 0; ii < val.size(); ++ii){
-                    _ObjId * v = PyObject_New(_ObjId, &ObjIdType);
-                    v->oid_ = val[ii];
-                    PyTuple_SetItem(ret, (Py_ssize_t)ii, (PyObject*)v);
-                }
-                return ret;
-            }
-            case 'z': {
-                PyErr_SetString(PyExc_NotImplementedError, "DataId handling not implemented yet.");
-                return NULL;
-            }
-            default:
-                PyErr_SetString(PyExc_ValueError, "unhandled field type.");
-                return NULL;                
-        }
-    }
-    
-    static PyObject * moose_Id_setField(_Id * self, PyObject * args)
-    {
-        if (!Id::isValid(self->id_)){
-            RAISE_INVALID_ID(NULL, "moose_Id_setField");
-        }        
-        PyObject * field = NULL;
-        PyObject * value = NULL;
-        if (!PyArg_ParseTuple(args, "OO:moose_Id_setField", &field, &value)){
-            return NULL;
-        }
-        if (moose_Id_setattro(self, field, value) == -1){
-            return NULL;
-        }
-        Py_RETURN_NONE;
-    }
-
-    static int moose_Id_setattro(_Id * self, PyObject * attr, PyObject *value)
-    {
-        if (!Id::isValid(self->id_)){
-            RAISE_INVALID_ID(-1, "moose_Id_setattro");
-        }
-        char * fieldname = NULL;
-        int ret = -1;
-        if (PyString_Check(attr)){
-            fieldname = PyString_AsString(attr);
-        } else {
-            PyErr_SetString(PyExc_TypeError, "Attribute name must be a string");
-            return -1;
-        }
-        string moose_class = Field<string>::get(self->id_, "class");
-        string fieldtype = getFieldType(moose_class, string(fieldname), "valueFinfo");
-        if (fieldtype.length() == 0){
-            // If it is instance of a MOOSE Id then throw
-            // error (to avoid silently creating new attributes due to
-            // typos). Otherwise, it must have been subclassed in
-            // Python. Then we allow normal Pythonic behaviour and
-            // consider such mistakes user's responsibility.
-            string class_name = ((PyTypeObject*)PyObject_Type((PyObject*)self))->tp_name;
-            if (class_name != "ematrix"){
-                Py_INCREF(attr);
-                ret = PyObject_GenericSetAttr((PyObject*)self, attr, value);
-                Py_DECREF(attr);
-                return ret;
-            }
-            ostringstream msg;
-            msg << "'" << moose_class << "' class has no field '" << fieldname << "'" << endl;
-            PyErr_SetString(PyExc_AttributeError, msg.str().c_str());
-            return -1;
-        }
-        char ftype = shortType(fieldtype);
-        Py_ssize_t length = moose_Id_getLength(self);
-        bool is_seq = true;
-        if (!PySequence_Check(value)){
-            is_seq = false;
-        } else if (length != PySequence_Length(value)){
-            PyErr_SetString(PyExc_IndexError, "Length of the sequence on the right hand side does not match Id size.");
-            return -1;
-        }
-        switch(ftype){
-            case 'd': {//SET_VECFIELD(double, d)
-                vector<double> _value;
-                if (is_seq){
-                    for (unsigned int ii = 0; ii < length; ++ii){
-                        double v = PyFloat_AsDouble(PySequence_GetItem(value, ii));
-                        _value.push_back(v);
-                    }
-                } else {
-                    double v = PyFloat_AsDouble(value);
-                    _value.assign(length, v);
-                }
-                ret = Field<double>::setVec(self->id_, string(fieldname), _value);
-                break;
-            }                
-            case 's': {
-                vector<string> _value;
-                if (is_seq){
-                    for (unsigned int ii = 0; ii < length; ++ii){
-                        char * v = PyString_AsString(PySequence_GetItem(value, ii));
-                        _value.push_back(string(v));
-                    }
-                } else {
-                    char * v = PyString_AsString(value);
-                    _value.assign(length, string(v));
-                }                    
-                ret = Field<string>::setVec(self->id_, string(fieldname), _value);
-                break;
-            }
-            case 'i': {
-                vector<int> _value;
-                if (is_seq){
-                    for (unsigned int ii = 0; ii < length; ++ii){
-                        int v = PyInt_AsLong(PySequence_GetItem(value, ii));
-                        _value.push_back(v);
-                    }
-                } else {
-                    int v = PyInt_AsLong(value);
-                    _value.assign(length, v);
-                }
-                ret = Field< int >::setVec(self->id_, string(fieldname), _value);
-                break;
-            }
-            case 'I': {//SET_VECFIELD(unsigned int, I)
-                vector<unsigned int> _value;
-                if (is_seq){
-                    for (unsigned int ii = 0; ii < length; ++ii){
-                        unsigned int v = PyInt_AsUnsignedLongMask(PySequence_GetItem(value, ii));
-                        _value.push_back(v);
-                    }
-                } else {
-                    unsigned int v = PyInt_AsUnsignedLongMask(value);
-                    _value.assign(length, v);
-                }
-                ret = Field< unsigned int >::setVec(self->id_, string(fieldname), _value);                
-                break;
-            }
-            case 'l': {//SET_VECFIELD(long, l)
-                vector<long> _value;
-                if (is_seq){
-                    for (unsigned int ii = 0; ii < length; ++ii){
-                        long v = PyInt_AsLong(PySequence_GetItem(value, ii));
-                        _value.push_back(v);
-                    }
-                } else {
-                    long v = PyInt_AsLong(value);
-                    _value.assign(length, v);                    
-                }
-                ret = Field<long>::setVec(self->id_, string(fieldname), _value);
-                break;
-            }
-            case 'k': {//SET_VECFIELD(unsigned long, k)
-                vector<unsigned long> _value;
-                if (is_seq){
-                    for (unsigned int ii = 0; ii < length; ++ii){
-                        unsigned long v = PyInt_AsUnsignedLongMask(PySequence_GetItem(value, ii));
-                        _value.push_back(v);
-                    }
-                } else {
-                    unsigned long v = PyInt_AsUnsignedLongMask(value);
-                    _value.assign(length, v);
-                }
-                ret = Field< unsigned long >::setVec(self->id_, string(fieldname), _value);                
-                break;
-            }
-            case 'b': {
-                vector<bool> _value;
-                if (is_seq){
-                    for (unsigned int ii = 0; ii < length; ++ii){
-                        PyObject * _v = PySequence_GetItem(value, ii);
-                        bool v = (Py_True ==_v) || (PyInt_AsLong(_v) != 0);
-                        _value.push_back(v);
-                    }
-                } else {
-                    bool v = (Py_True ==value) || (PyInt_AsLong(value) != 0);
-                    _value.assign(length, v);
-                }
-                ret = Field< bool >::setVec(self->id_, string(fieldname), _value);
-                break;
-            }
-            case 'c': {
-                vector<char> _value;
-                if (is_seq){
-                    for (unsigned int ii = 0; ii < length; ++ii){
-                        PyObject * _v = PySequence_GetItem(value, ii);
-                        char * v = PyString_AsString(_v);
-                        if (v && v[0]){
-                            _value.push_back(v[0]);
-                        } else {
-                            ostringstream err;
-                            err << ii << "-th element is NUL";
-                            PyErr_SetString(PyExc_ValueError, err.str().c_str());
-                            return -1;
-                        }
-                    }
-                } else {
-                    char * v = PyString_AsString(value);
-                    if (v && v[0]){
-                        _value.assign(length, v[0]);
-                    } else {
-                        PyErr_SetString(PyExc_ValueError,  "value is an empty string");
-                        return -1;
-                    }
-                }                    
-                ret = Field< char >::setVec(self->id_, string(fieldname), _value);
-                break;
-            }
-            case 'h': {
-                vector<short> _value;
-                if (is_seq){
-                    for (unsigned int ii = 0; ii < length; ++ii){
-                        short v = PyInt_AsLong(PySequence_GetItem(value, ii));
-                        _value.push_back(v);
-                    }
-                } else {
-                    short v = PyInt_AsLong(value);
-                    _value.assign(length, v);
-                }
-                ret = Field< short >::setVec(self->id_, string(fieldname), _value);
-                break;
-            }
-            case 'f': {//SET_VECFIELD(float, f)
-                vector<float> _value;
-                if (is_seq){
-                    for (unsigned int ii = 0; ii < length; ++ii){
-                        float v = PyFloat_AsDouble(PySequence_GetItem(value, ii));
-                        _value.push_back(v);
-                    }
-                } else {
-                    float v = PyFloat_AsDouble(value);                    
-                    _value.assign(length, v);
-                }
-                ret = Field<float>::setVec(self->id_, string(fieldname), _value);
-                break;
-            }
-            default:                
-                break;
-        }
-        // MOOSE Field::set returns 1 for success 0 for
-        // failure. Python treats return value 0 from setters as
-        // success, anything else failure.
-        if (ret || (PyErr_Occurred() == NULL)){
-            return 0;
-        } else {
-            return -1;
-        }
-        
-    }
-    
     /////////////////////////////////////////////////////
     // ObjId functions.
     /////////////////////////////////////////////////////
 
 
-    static int moose_ObjId_init_from_id(PyObject * self, PyObject * args, PyObject * kwargs)
-    {
-        extern PyTypeObject ObjIdType;
-        // The char arrays are to avoid deprecation warning
-        char _id[] = "id";
-        char _dataIndex[] = "dataIndex";
-        char _fieldIndex[] = "fieldIndex";
-        char _numFieldBits[] = "numFieldBits";
-        static char * kwlist[] = {_id, _dataIndex, _fieldIndex, _numFieldBits, NULL};
-        _ObjId * instance = (_ObjId*)self;
-        unsigned int id = 0, data = 0, field = 0, numFieldBits = 0;
-        PyObject * obj = NULL;
-        if ((kwargs && PyArg_ParseTupleAndKeywords(args, kwargs,
-                                                   "I|III:moose_ObjId_init",
-                                                   kwlist,
-                                                   &id, &data, &field, &numFieldBits))
-            || (!kwargs && PyArg_ParseTuple(args, "I|III:moose_ObjId_init_from_id",
-                                            &id, &data, &field, &numFieldBits))){
-            PyErr_Clear();
-            if (!Id::isValid(id)){
-                RAISE_INVALID_ID(-1, "moose_ObjId_init_from_id");
-            }
-            instance->oid_ = ObjId(Id(id), DataId(data, field, numFieldBits));
-            return 0;
-        }
-        PyErr_Clear();
-        if ((kwargs && PyArg_ParseTupleAndKeywords(args,
-                                                   kwargs,
-                                                   "O|III:moose_ObjId_init_from_id",
-                                                   kwlist,
-                                                   &obj,
-                                                   &data,
-                                                   &field,
-                                                   &numFieldBits)) ||
-            (!kwargs && PyArg_ParseTuple(args,
-                                         "O|III:moose_ObjId_init_from_id",
-                                         &obj,
-                                         &data,
-                                         &field,
-                                         &numFieldBits))){
-            PyErr_Clear();
-            // If first argument is an Id object, construct an ObjId out of it
-            if (Id_Check(obj)){
-                if (!Id::isValid(((_Id*)obj)->id_)){
-                    RAISE_INVALID_ID(-1, "moose_ObjId_init_from_id");
-                }                    
-                instance->oid_ = ObjId(((_Id*)obj)->id_,
-                                       DataId(data, field, numFieldBits));
-                return 0;
-            } else if (PyObject_IsInstance(obj, (PyObject*)&ObjIdType)){
-                if (!Id::isValid(((_ObjId*)obj)->oid_.id)){
-                    RAISE_INVALID_ID(-1, "moose_ObjId_init_from_id");
-                }                    
-                instance->oid_ = ((_ObjId*)obj)->oid_;
-                return 0;
-            }
-        }
-        return -1;
-    }
-
     /**
        Utility function to traverse python class hierarchy to reach closest base class.
        Ideally we should go via mro
     */
-    static string get_baseclass_name(PyObject * self)
+ string get_baseclass_name(PyObject * self)
     {
         extern PyTypeObject ObjIdType;
         string basetype_str = "";
@@ -2031,1591 +1032,6 @@ extern "C" {
         return basetype_str;
     }
     
-    static int moose_ObjId_init_from_path(PyObject * self, PyObject * args,
-                                          PyObject * kwargs)
-    {
-        PyObject * dims = NULL;
-        char * path = NULL;
-        char * type = NULL;
-        char _path[] = "path";
-        char _dtype[] = "dtype";
-        char _dims[] = "dims";
-        static char * kwlist [] = {_path, _dims, _dtype, NULL};
-        _ObjId * instance = (_ObjId*)self;
-        instance->oid_ = ObjId::bad();
-
-        // First try to parse the arguments as (path, dims, class)
-        bool parse_success = false;
-        if (kwargs == NULL){
-            if (PyArg_ParseTuple(args,
-                                 "s|Os:moose_ObjId_init_from_path",
-                                 &path,
-                                 &dims,
-                                 &type)){
-                parse_success = true;
-            }
-        } else if (PyArg_ParseTupleAndKeywords(args,
-                                               kwargs,
-                                               "s|Os:moose_ObjId_init_from_path",
-                                               kwlist,
-                                               &path,
-                                               &dims,
-                                               &type)){\
-            parse_success = true;
-        }
-        PyErr_Clear();
-        if (!parse_success){
-            return -2;
-        }    
-        // First see if there is an existing object with at path
-        instance->oid_ = ObjId(path);
-        if (!(ObjId::bad() == instance->oid_)){
-            return 0;
-        }
-        string basetype_str;
-        if (type == NULL){
-            basetype_str = get_baseclass_name(self);
-        } else {
-            basetype_str = string(type);
-        }
-        if (basetype_str.length() == 0){
-            PyErr_SetString(PyExc_TypeError, "Unknown class. Need a valid MOOSE class or subclass thereof.");
-            // Py_XDECREF(self);
-            return -1;
-        }
-        
-        Id new_id = create_Id_from_path(path, pysequence_to_dimvec(dims), basetype_str);
-        if (new_id == Id() && PyErr_Occurred()){
-            // Py_XDECREF(self);
-            return -1;
-        }
-        instance->oid_ = ObjId(new_id);
-        return 0;
-    }
-        
-    PyDoc_STRVAR(moose_ObjId_init_documentation,
-                 "__init__(path, dims, dtype) or"
-                 " __init__(id, dataIndex, fieldIndex, numFieldBits)\n"
-                 "Initialize moose object\n"
-                 "Parameters\n"
-                 "----------\n"
-                 "path : string\n"
-                 "Target element path.\n"
-                 "dims : tuple or int\n"
-                 "dimensions along each axis (can be"
-                 " an integer for 1D objects). Default: (1,)\n"
-                 "dtype : string\n"
-                 "the MOOSE class name to be created.\n"
-                 "id : ematrix or integer\n"
-                 "id of an existing element.\n"
-                 "\n");
-        
-    static int moose_ObjId_init(PyObject * self, PyObject * args,
-                                PyObject * kwargs)
-    {
-        if (self && !PyObject_IsInstance(self, (PyObject*)Py_TYPE(self))){
-            ostringstream error;
-            error << "Expected an melement or subclass. Found "
-                  << Py_TYPE(self)->tp_name;
-            PyErr_SetString(PyExc_TypeError, error.str().c_str());
-            return -1;
-        }
-        int ret = moose_ObjId_init_from_path(self, args, kwargs);
-        if (ret >= -1){
-            return ret;
-        }
-        // parsing arguments as (path, dims, classname) failed. See if it is existing Id or ObjId.
-        if (moose_ObjId_init_from_id(self, args, kwargs) == 0){
-            return 0;
-        }
-        PyErr_SetString(PyExc_ValueError,
-                        "Could not parse arguments. "
-                        " Call __init__(path, dims, dtype, parent) or"
-                        " __init__(id, dataIndex, fieldIndex, numFieldBits)");        
-        return -1;
-    }
-
-    /**
-       This function simple returns the python hash of the unique path
-       of this object.
-    */
-    static long moose_ObjId_hash(_ObjId * self)
-    {
-        if (!Id::isValid(self->oid_.id)){
-            RAISE_INVALID_ID(-1, "moose_ObjId_hash");
-        }
-        long ret = (long)(self->oid_.id.value());
-        ret |= (O32_HOST_ORDER == O32_BIG_ENDIAN)? \
-                ((long)(self->oid_.dataId.value() >> 32))    \
-                :((long)(self->oid_.dataId.value() << 32));
-        return ret;
-    }
-    
-    static PyObject * moose_ObjId_repr(_ObjId * self)
-    {
-        if (!Id::isValid(self->oid_.id)){
-            RAISE_INVALID_ID(NULL, "moose_ObjId_repr");
-        }
-        ostringstream repr;
-        repr << "<moose." << Field<string>::get(self->oid_, "class") << ": "
-             << "id=" << self->oid_.id.value() << ", "
-             << "dataId=" << self->oid_.dataId.value() << ", "
-             << "path=" << self->oid_.path() << ">";
-        return PyString_FromString(repr.str().c_str());
-    } // !  moose_ObjId_repr
-
-    PyDoc_STRVAR(moose_ObjId_getId_documentation,
-                 "getId()\n"
-                 "\n"
-                 "Get the ematrix of this object\n"
-                 "\n");
-    static PyObject* moose_ObjId_getId(_ObjId * self)
-    {
-        if (!Id::isValid(self->oid_.id)){
-            RAISE_INVALID_ID(NULL, "moose_ObjId_getId");
-        }
-        extern PyTypeObject IdType;        
-        _Id * ret = PyObject_New(_Id, &IdType);
-        ret->id_ = self->oid_.id;
-        return (PyObject*)ret;
-    }
-
-    PyDoc_STRVAR(moose_ObjId_getFieldType_documentation,
-                 "getFieldType(fieldName, finfoType='valueFinfo')\n"
-                 "\n"
-                 "Get the string representation of the type of this field.\n"
-                 "\n"
-                 "Parameters\n"
-                 "----------\n"
-                 "fieldName : string\n"
-                 "\tName of the field to be queried.\n"
-                 "finfoType : string\n"
-                 "\tFinfotype the field should be looked in for (can be \n"
-                 "valueFinfo, srcFinfo, destFinfo, lookupFinfo)\n"
-                 "\n");
-    
-    static PyObject * moose_ObjId_getFieldType(_ObjId * self, PyObject * args)
-    {
-        if (!Id::isValid(self->oid_.id)){
-            RAISE_INVALID_ID(NULL, "moose_ObjId_getFieldType");
-        }
-        char * fieldName = NULL;
-        char * finfoType = NULL;
-        if (!PyArg_ParseTuple(args, "s|s:moose_ObjId_getFieldType", &fieldName,
-                              &finfoType)){
-            return NULL;
-        }
-        string finfoTypeStr = "";
-        if (finfoType != NULL){
-            finfoTypeStr = finfoType;
-        } else {
-            finfoTypeStr = "valueFinfo";
-        }
-        string typeStr = getFieldType(Field<string>::get(self->oid_, "class"),
-                                      string(fieldName), finfoTypeStr);
-        if (typeStr.length() <= 0){
-            PyErr_SetString(PyExc_ValueError,
-                            "Empty string for field type. "
-                            "Field name may be incorrect.");
-            return NULL;
-        }
-        PyObject * type = PyString_FromString(typeStr.c_str());
-        return type;
-    }  // ! moose_Id_getFieldType
-
-    /**
-       Wrapper over getattro to allow direct access as a function with variable argument list
-    */
-    
-    PyDoc_STRVAR(moose_ObjId_getField_documentation,
-                 "getField(fieldName)\n"
-                 "\n"
-                 "Get the value of the field.\n"
-                 "\n"
-                 "Parameters\n"
-                 "----------\n"
-                 "fieldName : string\n"
-                 "\tName of the field.");
-    static PyObject * moose_ObjId_getField(_ObjId * self, PyObject * args)
-    {
-        if (!Id::isValid(self->oid_.id)){
-            RAISE_INVALID_ID(NULL, "moose_ObjId_getField");
-        }
-        PyObject * attr;        
-        if (!PyArg_ParseTuple(args, "O:moose_ObjId_getField", &attr)){
-            return NULL;
-        }
-        return moose_ObjId_getattro(self, attr);
-    }
-
-    /**
-       2011-03-28 13:59:41 (+0530)
-       
-       Get a specified field. Re-done on: 2011-03-23 14:42:03 (+0530)
-
-       I wonder how to cleanly do this. The Id - ObjId dichotomy is
-       really ugly. When you don't pass an index, it is just treated
-       as 0. Then what is the point of having Id separately? ObjId
-       would been just fine!
-    */
-    static PyObject * moose_ObjId_getattro(_ObjId * self, PyObject * attr)
-    {
-        if (!Id::isValid(self->oid_.id)){
-            RAISE_INVALID_ID(NULL, "moose_ObjId_getattro");
-        }
-        extern PyTypeObject IdType;
-        extern PyTypeObject ObjIdType;
-        const char * field;
-        char ftype;
-        if (PyString_Check(attr)){
-            field = PyString_AsString(attr);
-        } else {
-            return PyObject_GenericGetAttr((PyObject*)self, attr);
-        }
-        PyObject * _ret = get_ObjId_attr(self, field);
-        if (_ret != NULL){
-            return _ret;
-        }
-        // The GET_FIELD macro is just a short-cut to reduce typing
-        // TYPE is the full type string for the field. TYPEC is the corresponding Python Py_BuildValue format character.
-#define GET_FIELD(TYPE, TYPEC)                                          \
-        {                                                               \
-            TYPE value = Field<TYPE>::get(self->oid_, string(field));   \
-            PyObject * ret = Py_BuildValue(#TYPEC, value);              \
-            return ret;                                                 \
-        }                                                               \
-
-
-#define GET_VECFIELD(TYPE)                                              \
-        {                                                               \
-            vector<TYPE> val = Field< vector<TYPE> >::get(self->oid_, string(field)); \
-            npy_intp dims = val.size();                                 \
-            PyArrayObject * ret = (PyArrayObject*)PyArray_SimpleNew(1, &dims, get_npy_typenum(typeid(TYPE))); \
-            char * ptr = PyArray_BYTES(ret);                            \
-            memcpy(ptr, &(val[0]), val.size() * sizeof(TYPE));          \
-            return PyArray_Return(ret);                                 \
-        }                                                               \
-
-        
-#define GET_VECVEC(TYPE, TYPEC){                                        \
-            vector < vector <TYPE> > val = Field< vector < vector < TYPE > > >::get(self->oid_, string(field)); \
-            Py_ssize_t length1 = val.size();                            \
-            PyObject * ret = PyList_New(length1);                       \
-            ostringstream error;                                        \
-            error << "moose_ObjId_getattro: ";                          \
-            for (Py_ssize_t ii = 0; ii < length1; ++ii){                \
-        Py_ssize_t length2 = val[ii].size();                            \
-        PyObject * subseq = PyList_New(length2);                        \
-        if ( PyList_SetItem(ret, ii, subseq) != 0 ){                    \
-        Py_DECREF(ret);                                                 \
-        error << "Failed to set subsequence " << ii;                    \
-        PyErr_SetString(PyExc_RuntimeError, error.str().c_str());       \
-    }                                                                   \
-        for (Py_ssize_t jj = 0; jj < length2; ++jj){                    \
-        PyObject * value = Py_BuildValue(#TYPEC, val[ii][jj]);          \
-        if (value == NULL){                                             \
-        Py_DECREF(ret);                                                 \
-        error << "failed to convert "                                   \
-              << field << "[" << ii << "][" << jj << "]";               \
-        PyErr_SetString(PyExc_RuntimeError, error.str().c_str());       \
-        return NULL;                                                    \
-    }                                                                   \
-        if (PyList_SetItem(subseq, jj, value) != 0){                    \
-        Py_DECREF(ret);                                                 \
-        error << "could not set item [" << ii << "][" << jj << "]";     \
-        PyErr_SetString(PyExc_RuntimeError, error.str().c_str());       \
-        return NULL;                                                    \
-    }                                                                   \
-    }                                                                   \
-    }                                                                   \
-            return ret;                                                 \
-    } // GET_VECVEC
-
-	if (self->oid_ == ObjId::bad()){
-            PyErr_SetString(PyExc_RuntimeError, "bad ObjId.");
-            return NULL;
-	}
-        string class_name = Field<string>::get(self->oid_, "class");
-        string type = getFieldType(class_name, string(field), "valueFinfo");
-        if (type.empty()){
-            // Check if this field name is aliased and update fieldname and type if so.
-            map<string, string>::const_iterator it = get_field_alias().find(string(field));
-            if (it != get_field_alias().end()){
-                field = (it->second).c_str();
-                type = getFieldType(Field<string>::get(self->oid_, "class"), it->second, "valueFinfo");
-                // Update attr for next level (PyObject_GenericGetAttr) in case.
-                Py_XDECREF(attr);
-                attr = PyString_FromString(field);
-            }
-        }
-        if (type.empty()){
-            return PyObject_GenericGetAttr((PyObject*)self, attr);            
-        }
-        ftype = shortType(type);
-        if (!ftype){
-            return PyObject_GenericGetAttr((PyObject*)self, attr);
-        }
-        switch(ftype){
-            case 'b': {
-                bool value = Field<bool>::get(self->oid_, string(field));
-                if (value){
-                    Py_RETURN_TRUE;
-                } else {
-                    Py_RETURN_FALSE;
-                }
-            }
-            case 's': {
-                string _s = Field<string>::get(self->oid_, string(field));
-                return Py_BuildValue("s", _s.c_str());
-            }
-            case 'd': GET_FIELD(double, d)
-            case 'i': GET_FIELD(int, i)
-            case 'I': GET_FIELD(unsigned int, I)
-            case 'l': GET_FIELD(long, l)        
-            case 'k': GET_FIELD(unsigned long, k)
-            case 'f': GET_FIELD(float, f)
-            case 'c': GET_FIELD(char, c)
-            case 'h': GET_FIELD(short, h)
-            case 'x':
-                {                    
-                    Id value = Field<Id>::get(self->oid_, string(field));
-                    _Id * ret = PyObject_New(_Id, &IdType);
-                    ret->id_ = value;
-                    return (PyObject*)ret;
-                }
-            case 'y':
-                {
-                    ObjId value = Field<ObjId>::get(self->oid_, string(field));
-                    _ObjId * ret = PyObject_New(_ObjId, &ObjIdType);
-                    ret->oid_ = value;
-                    return (PyObject*)ret;
-                }
-            case 'z':
-                {
-                    PyErr_SetString(PyExc_NotImplementedError, "DataId handling not implemented yet.");
-                    return NULL;
-                }
-            case 'D': GET_VECFIELD(double)
-            case 'F': GET_VECFIELD(float)
-            case 'v': GET_VECFIELD(int)
-            case 'L': GET_VECFIELD(long)
-            case 'K': GET_VECFIELD(unsigned long)
-            case 'U': GET_VECFIELD(unsigned int)
-            case 'w': GET_VECFIELD(short)
-            case 'C': GET_VECFIELD(char)
-            case 'S': {                                                 
-                vector<string> val = Field< vector<string> >::get(self->oid_, string(field)); 
-                PyObject * ret = PyTuple_New((Py_ssize_t)val.size());
-                
-                for (unsigned int ii = 0; ii < val.size(); ++ ii ){     
-                    PyObject * entry = Py_BuildValue("s", val[ii].c_str()); 
-                    if (!entry || PyTuple_SetItem(ret, (Py_ssize_t)ii, entry)){
-                        Py_XDECREF(entry);
-                        Py_XDECREF(ret);                                  
-                        return NULL;                                
-                    }                                               
-                }                                                       
-                return ret;                                                  
-            }
-            case 'X': // vector<Id>
-                {
-                    vector<Id> value = Field< vector <Id> >::get(self->oid_, string(field));
-                    PyObject * ret = PyTuple_New((Py_ssize_t)value.size());
-                
-                    for (unsigned int ii = 0; ii < value.size(); ++ii){
-                        _Id * entry = PyObject_New(_Id, &IdType);
-                        if (!entry){
-                            Py_XDECREF(ret);
-                            return NULL;
-                        }
-                        entry->id_ = value[ii];
-                        if (PyTuple_SetItem(ret, (Py_ssize_t)ii, (PyObject*)entry)){
-                            Py_XDECREF(entry);
-                            Py_XDECREF(ret);
-                            return NULL;
-                        }
-                    }
-                    return ret;
-                }
-            case 'Y': // vector<ObjId>
-                {
-                    vector<ObjId> value = Field< vector <ObjId> >::get(self->oid_, string(field));
-                    PyObject * ret = PyTuple_New(value.size());
-                
-                    for (unsigned int ii = 0; ii < value.size(); ++ii){
-                        _ObjId * entry = PyObject_New(_ObjId, &ObjIdType);                       
-                        if (!entry){
-                            Py_XDECREF(ret);
-                            return NULL;
-                        }
-                        entry->oid_ = value[ii];
-                        if (PyTuple_SetItem(ret, (Py_ssize_t)ii, (PyObject*)entry)){
-                            Py_XDECREF(entry);
-                            Py_XDECREF(ret);
-                            return NULL;
-                        }
-                    }
-                    return ret;
-                }
-            case 'T': // vector < vector < unsigned > >
-                {
-                    GET_VECVEC(unsigned int, I);
-                    break;
-                }
-            case 'Q': // vector < vector < int > >
-                {
-                    GET_VECVEC(int, i);                
-                    break;
-                }
-            case 'R': // vector < vector <double> >
-                {
-                    GET_VECVEC(double, d);
-                    break;
-                }
-            default:
-                return PyObject_GenericGetAttr((PyObject*)self, attr);
-        }
-#undef GET_FIELD    
-#undef GET_VECFIELD
-        return NULL;        
-    }
-
-    /**
-       Wrapper over setattro to make METHOD_VARARG
-    */
-    PyDoc_STRVAR(moose_ObjId_setField_documentation,
-                 "setField(fieldName, value)\n"
-                 "\n"
-                 "Set the value of specified field.\n"
-                 "\n"
-                 "Parameters\n"
-                 "----------\n"
-                 "fieldName : string\n"
-                 "\tField to be assigned value to.\n"
-                 "value : python datatype compatible with the type of the field\n"
-                 "\tThe value to be assigned to the field.");
-    
-    static PyObject * moose_ObjId_setField(_ObjId * self, PyObject * args)
-    {
-        PyObject * field;
-        PyObject * value;
-        if (!PyArg_ParseTuple(args, "OO:moose_ObjId_setField", &field, &value)){
-            return NULL;
-        }
-        if (moose_ObjId_setattro(self, field, value) == -1){
-            return NULL;
-        }
-        Py_RETURN_NONE;
-    }
-    
-    /**
-       Set a specified field. Redone on 2011-03-23 14:41:45 (+0530)
-    */
-    static int  moose_ObjId_setattro(_ObjId * self, PyObject * attr, PyObject * value)
-    {
-        if (!Id::isValid(self->oid_.id)){
-            RAISE_INVALID_ID(-1, "moose_ObjId_setattro");
-        }
-        const char * field;
-        if (PyString_Check(attr)){
-            field = PyString_AsString(attr);
-        } else {
-            PyErr_SetString(PyExc_TypeError, "Attribute name must be a string");
-            return -1;
-        }
-        string fieldtype = getFieldType(Field<string>::get(self->oid_, "class"), string(field), "valueFinfo");
-        if (fieldtype.length() == 0){
-            // If it is instance of a MOOSE built-in class then throw
-            // error (to avoid silently creating new attributes due to
-            // typos). Otherwise, it must have been subclassed in
-            // Python. Then we allow normal Pythonic behaviour and
-            // consider such mistakes user's responsibility.
-            string class_name = ((PyTypeObject*)PyObject_Type((PyObject*)self))->tp_name;            
-            if (get_moose_classes().find(class_name) == get_moose_classes().end()){
-                return PyObject_GenericSetAttr((PyObject*)self, PyString_FromString(field), value);
-            }
-            ostringstream msg;
-            msg << "'" << class_name << "' class has no field '" << field << "'" << endl;
-            PyErr_SetString(PyExc_AttributeError, msg.str().c_str());
-            return -1;
-        }
-        char ftype = shortType(fieldtype);
-        int ret = 0;
-        switch(ftype){
-            case 'd': {
-                double _value = PyFloat_AsDouble(value);
-                ret = Field<double>::set(self->oid_, string(field), _value);
-                break;
-            }
-            case 'l': {
-                long _value = PyInt_AsLong(value);
-                if ((_value != -1) || (!PyErr_Occurred())){
-                    ret = Field<long>::set(self->oid_, string(field), _value);
-                }
-                break;
-            }
-            case 'I': {
-                unsigned long _value = PyInt_AsUnsignedLongMask(value);
-                ret = Field<unsigned int>::set(self->oid_, string(field), (unsigned int)_value);
-                break;
-            }
-            case 'k': {
-                unsigned long _value = PyInt_AsUnsignedLongMask(value);
-                ret = Field<unsigned long>::set(self->oid_, string(field), _value);
-                break;
-            }                
-            case 'f': {
-                float _value = PyFloat_AsDouble(value);
-                ret = Field<float>::set(self->oid_, string(field), _value);
-                break;
-            }
-            case 's': {
-                char * _value = PyString_AsString(value);
-                if (_value){
-                    ret = Field<string>::set(self->oid_, string(field), string(_value));
-                }
-                break;
-            }
-            case 'x': {// Id
-                if (value){
-                    ret = Field<Id>::set(self->oid_, string(field), ((_Id*)value)->id_);
-                } else {
-                    PyErr_SetString(PyExc_ValueError, "Null pointer passed as ematrix Id value.");
-                    return -1;
-                }
-                break;
-            }
-            case 'y': {// ObjId
-                if (value){
-                    ret = Field<ObjId>::set(self->oid_, string(field), ((_ObjId*)value)->oid_);
-                } else {
-                    PyErr_SetString(PyExc_ValueError, "Null pointer passed as ematrix Id value.");
-                    return -1;
-                }
-                break;
-            }
-            case 'D': {//SET_VECFIELD(double, d)
-                if (!PySequence_Check(value)){
-                    PyErr_SetString(PyExc_TypeError, "For setting vector<double> field, specified value must be a sequence." );
-                } else {
-                    Py_ssize_t length = PySequence_Length(value);
-                    vector<double> _value;
-                    for (unsigned int ii = 0; ii < length; ++ii){
-                        double v = PyFloat_AsDouble(PySequence_GetItem(value, ii));
-                        _value.push_back(v);
-                    }
-                    ret = Field< vector < double > >::set(self->oid_, string(field), _value);
-                }
-                break;
-            }
-            case 'b': {
-                bool _value = (Py_True == value) || (PyInt_AsLong(value) != 0);
-                ret = Field<bool>::set(self->oid_, string(field), _value);
-                break;
-            }
-            case 'c': {
-                char * _value = PyString_AsString(value);
-                if (_value && _value[0]){
-                    ret = Field<char>::set(self->oid_, string(field), _value[0]);
-                }
-                break;
-            }
-            case 'i': {
-                int _value = PyInt_AsLong(value);
-                if ((_value != -1) || (!PyErr_Occurred())){
-                    ret = Field<int>::set(self->oid_, string(field), _value);
-                }
-                break;
-            }
-            case 'h':{
-                short _value = (short)PyInt_AsLong(value);
-                if ((_value != -1) || (!PyErr_Occurred())){
-                    ret = Field<short>::set(self->oid_, string(field), _value);
-                }
-                break;
-            }
-            case 'z': {// DataId
-                PyErr_SetString(PyExc_NotImplementedError, "DataId handling not implemented yet.");
-                return -1;
-            }
-            case 'v': {
-                if (!PySequence_Check(value)){
-                    PyErr_SetString(PyExc_TypeError, "For setting vector<int> field, specified value must be a sequence." );
-                }
-                Py_ssize_t length = PySequence_Length(value);
-                vector<int> _value;
-                for (unsigned int ii = 0; ii < length; ++ii){
-                    int v = PyInt_AsLong(PySequence_GetItem(value, ii));
-                    _value.push_back(v);
-                }
-                ret = Field< vector < int > >::set(self->oid_, string(field), _value);
-                break;
-            }
-            case 'w': {
-                if (!PySequence_Check(value)){
-                    PyErr_SetString(PyExc_TypeError, "For setting vector<short> field, specified value must be a sequence." );
-                } else {
-                    Py_ssize_t length = PySequence_Length(value);
-                    vector<short> _value;
-                    for (unsigned int ii = 0; ii < length; ++ii){
-                        short v = PyInt_AsLong(PySequence_GetItem(value, ii));
-                        _value.push_back(v);
-                    }
-                    ret = Field< vector < short > >::set(self->oid_, string(field), _value);
-                }
-                break;
-            }
-            case 'L': {//SET_VECFIELD(long, l)
-                if (!PySequence_Check(value)){
-                    PyErr_SetString(PyExc_TypeError,
-                                    "For setting vector<long> field, specified value must be a sequence." );
-                } else {
-                    Py_ssize_t length = PySequence_Length(value);
-                    vector<long> _value;
-                    for (unsigned int ii = 0; ii < length; ++ii){
-                        long v = PyInt_AsLong(PySequence_GetItem(value, ii));
-                        _value.push_back(v);
-                    }
-                    ret = Field< vector < long > >::set(self->oid_, string(field), _value);
-                }
-                break;
-            }
-            case 'N': {//SET_VECFIELD(unsigned int, I)
-                if (!PySequence_Check(value)){
-                    PyErr_SetString(PyExc_TypeError, "For setting vector<unsigned int> field, specified value must be a sequence." );
-                } else {
-                    Py_ssize_t length = PySequence_Length(value);
-                    vector<unsigned int> _value;
-                    for (unsigned int ii = 0; ii < length; ++ii){
-                        unsigned int v = PyInt_AsUnsignedLongMask(PySequence_GetItem(value, ii));
-                        _value.push_back(v);
-                    }
-                    ret = Field< vector < unsigned int > >::set(self->oid_, string(field), _value);
-                }
-                break;
-            }
-            case 'K': {//SET_VECFIELD(unsigned long, k)
-                if (!PySequence_Check(value)){
-                    PyErr_SetString(PyExc_TypeError, "For setting vector<unsigned long> field, specified value must be a sequence." );
-                } else {
-                    Py_ssize_t length = PySequence_Length(value);
-                    vector<unsigned long> _value;
-                    for (unsigned int ii = 0; ii < length; ++ii){
-                        unsigned long v = PyInt_AsUnsignedLongMask(PySequence_GetItem(value, ii));
-                        _value.push_back(v);
-                    }
-                    ret = Field< vector < unsigned long > >::set(self->oid_, string(field), _value);
-                }
-                break;
-            }
-            case 'F': {//SET_VECFIELD(float, f)
-                if (!PySequence_Check(value)){
-                    PyErr_SetString(PyExc_TypeError, "For setting vector<float> field, specified value must be a sequence." );
-                } else {
-                    Py_ssize_t length = PySequence_Length(value);
-                    vector<float> _value;
-                    for (unsigned int ii = 0; ii < length; ++ii){
-                        float v = PyFloat_AsDouble(PySequence_GetItem(value, ii));
-                        _value.push_back(v);
-                    }
-                    ret = Field< vector < float > >::set(self->oid_, string(field), _value);
-                }
-                break;
-            }              
-            case 'S': {
-                if (!PySequence_Check(value)){
-                    PyErr_SetString(PyExc_TypeError, "For setting vector<string> field, specified value must be a sequence." );
-                } else {
-                    Py_ssize_t length = PySequence_Length(value);
-                    vector<string> _value;
-                    for (unsigned int ii = 0; ii < length; ++ii){
-                        char * v = PyString_AsString(PySequence_GetItem(value, ii));
-                        _value.push_back(string(v));
-                    }
-                    ret = Field< vector < string > >::set(self->oid_, string(field), _value);
-                }
-                break;
-            }
-            case 'T': {// vector< vector<unsigned int> >
-                vector < vector <unsigned> > * _value = (vector < vector <unsigned> > *)to_cpp(value, ftype);
-                if (!PyErr_Occurred()){
-                    ret = Field < vector < vector <unsigned> > >::set(self->oid_, string(field), *_value);
-                }
-                delete _value;
-                break;
-            }
-            case 'Q': {// vector< vector<int> >
-                vector < vector <int> > * _value = (vector < vector <int> > *)to_cpp(value, ftype);
-                if (!PyErr_Occurred()){
-                    ret = Field < vector < vector <int> > >::set(self->oid_, string(field), *_value);
-                }
-                delete _value;
-                break;
-            }
-            case 'R': {// vector< vector<double> >
-                vector < vector <double> > * _value = (vector < vector <double> > *)to_cpp(value, ftype);
-                if (!PyErr_Occurred()){
-                    ret = Field < vector < vector <double> > >::set(self->oid_, string(field), *_value);
-                }
-                delete _value;
-                break;
-            }
-            default:                
-                break;
-        }
-        // MOOSE Field::set returns 1 for success 0 for
-        // failure. Python treats return value 0 from stters as
-        // success, anything else failure.
-        if (ret){
-            return 0;
-        } else {
-            ostringstream msg;
-            msg <<  "Failed to set field '"  << field << "'";
-            PyErr_SetString(PyExc_AttributeError,msg.str().c_str());
-            return -1;
-        }
-    } // moose_ObjId_setattro
-
-    /// Inner function for looking up value from LookupField on object
-    /// with ObjId target.
-    ///
-    /// args should be a tuple (lookupFieldName, key)
-    PyObject * getLookupField(ObjId target, char * fieldName, PyObject * key)
-    {
-        extern PyTypeObject ObjIdType;
-        vector<string> type_vec;
-        if (parse_Finfo_type(Field<string>::get(target, "class"), "lookupFinfo", string(fieldName), type_vec) < 0){
-            ostringstream error;
-            error << "Cannot handle key type for LookupField `" << Field<string>::get(target, "class") << "." << fieldName << "`.";
-            PyErr_SetString(PyExc_TypeError, error.str().c_str());
-            return NULL;
-        }
-        if (type_vec.size() != 2){
-            ostringstream error;
-            error << "LookupField type signature should be <keytype>, <valuetype>. But for `"
-                  << Field<string>::get(target, "class") << "." << fieldName << "` got " << type_vec.size() << " components." ;
-            PyErr_SetString(PyExc_AssertionError, error.str().c_str());
-            return NULL;
-        }
-        PyObject * ret = NULL;
-        char key_type_code = shortType(type_vec[0]);
-        char value_type_code = shortType(type_vec[1]);
-        switch(key_type_code){
-            case 'b': {
-                ret = lookup_value <bool> (target, string(fieldName), value_type_code, key_type_code, key);
-                break;
-            }
-            case 'c': {
-                ret = lookup_value <char> (target, string(fieldName), value_type_code, key_type_code, key);
-                break;
-            }
-            case 'h': {
-                ret = lookup_value <short> (target, string(fieldName), value_type_code, key_type_code, key);
-                break;
-            }            
-            case 'H': {
-                ret = lookup_value <unsigned short> (target, string(fieldName), value_type_code, key_type_code, key);
-                break;
-            }            
-            case 'i': {
-                ret = lookup_value <int> (target, string(fieldName), value_type_code, key_type_code, key);
-                break;
-            }            
-            case 'I': {
-                ret = lookup_value <unsigned int> (target, string(fieldName), value_type_code, key_type_code, key);
-                break;
-            }            
-            case 'l': {
-                ret = lookup_value <long> (target, string(fieldName), value_type_code, key_type_code, key);
-                break;
-            }                        
-            case 'k': {
-                ret = lookup_value <unsigned long> (target, string(fieldName), value_type_code, key_type_code, key);
-                break;
-            }                        
-            case 'L': {
-                ret = lookup_value <long long> (target, string(fieldName), value_type_code, key_type_code, key);
-                break;
-            }                        
-            case 'K': {
-                ret = lookup_value <unsigned long long> (target, string(fieldName), value_type_code, key_type_code, key);
-                break;
-            }                        
-            case 'd': {
-                ret = lookup_value <double> (target, string(fieldName), value_type_code, key_type_code, key);
-                break;
-            }                        
-            case 'f': {
-                ret = lookup_value <float> (target, string(fieldName), value_type_code, key_type_code, key);
-                break;
-            }
-            case 's': {
-                ret = lookup_value <string> (target, string(fieldName), value_type_code, key_type_code, key);
-                break;
-            }
-            case 'x': {
-                ret = lookup_value <Id> (target, string(fieldName), value_type_code, key_type_code, key);
-                break;
-            }
-            case 'y': {
-                ret = lookup_value <ObjId> (target, string(fieldName), value_type_code, key_type_code, key);
-                break;
-            }
-            case 'D': {
-                ret = lookup_value < vector <double> >(target, string(fieldName), value_type_code, key_type_code, key);
-                break;
-            }                
-            case 'S': {
-                ret = lookup_value < vector <string> >(target, string(fieldName), value_type_code, key_type_code, key);
-                break;
-            }
-            case 'X': {
-                ret = lookup_value < vector <Id> >(target, string(fieldName), value_type_code, key_type_code, key);
-                break;
-            }
-            case 'Y': {
-                ret = lookup_value < vector <ObjId> >(target, string(fieldName), value_type_code, key_type_code, key);
-                break;
-            }
-            case 'v': {
-                ret = lookup_value < vector <int> >(target, string(fieldName), value_type_code, key_type_code, key);
-                break;
-            }
-            case 'N': {
-                ret = lookup_value < vector <unsigned int> >(target, string(fieldName), value_type_code, key_type_code, key);
-                break;
-            }
-            case 'P': {
-                ret = lookup_value < vector <unsigned long> >(target, string(fieldName), value_type_code, key_type_code, key);
-                break;
-            }
-            case 'F': {
-                ret = lookup_value < vector <float> >(target, string(fieldName), value_type_code, key_type_code, key);
-                break;
-            }                
-            case 'w': {
-                ret = lookup_value < vector <short> >(target, string(fieldName), value_type_code, key_type_code, key);
-                break;
-            }   
-            case 'C': {
-                ret = lookup_value < vector <char> >(target, string(fieldName), value_type_code, key_type_code, key);
-                break;
-            }
-            default:
-                ostringstream error;
-                error << "Unhandled key type `" << type_vec[0] << "` for " << Field<string>::get(target, "class") << "." << fieldName;
-                PyErr_SetString(PyExc_TypeError, error.str().c_str());
-        }
-        return ret;
-    }
-
-    PyDoc_STRVAR(moose_ObjId_getLookupField_documentation,
-                 "getLookupField(fieldName, key)\n"
-                 "\n"
-                 "Lookup entry for `key` in `fieldName`\n"
-                 "\n"
-                 "Parameters\n"
-                 "----------\n"
-                 "fieldName : string\n"
-                 "\tName of the lookupfield.\n"
-                 "key : appropriate type for key of the lookupfield (as in the dict"
-                 " getFieldDict).\n"
-                 "\tKey for the look-up.");
-
-    static PyObject * moose_ObjId_getLookupField(_ObjId * self, PyObject * args)
-    {
-        if (!Id::isValid(self->oid_.id)){
-            RAISE_INVALID_ID(NULL, "moose_ObjId_getLookupField");
-        }
-        char * fieldName = NULL;
-        PyObject * key = NULL;
-        if (!PyArg_ParseTuple(args, "sO:moose_ObjId_getLookupField", &fieldName,  &key)){
-            return NULL;
-        }
-        return getLookupField(self->oid_, fieldName, key);
-    } // moose_ObjId_getLookupField
-
-    int setLookupField(ObjId target, char * fieldName, PyObject * key, PyObject * value)
-    {
-        vector<string> type_vec;
-        if (parse_Finfo_type(Field<string>::get(target, "class"), "lookupFinfo", string(fieldName), type_vec) < 0){
-            ostringstream error;
-            error << "Cannot handle key type for LookupField `" << Field<string>::get(target, "class") << "." << fieldName << "`.";
-            PyErr_SetString(PyExc_TypeError, error.str().c_str());
-            return -1;
-        }
-        if (type_vec.size() != 2){
-            ostringstream error;
-            error << "LookupField type signature should be <keytype>, <valuetype>. But for `"
-                  << Field<string>::get(target, "class") << "." << fieldName << "` got " << type_vec.size() << " components." ;
-            PyErr_SetString(PyExc_AssertionError, error.str().c_str());
-            return -1;
-        }
-        char key_type_code = shortType(type_vec[0]);
-        char value_type_code = shortType(type_vec[1]);
-        int ret = -1;
-        switch(key_type_code){
-            case 'I': {
-                ret = set_lookup_value <unsigned int> (target, string(fieldName), value_type_code, key_type_code, key, value);
-                break;
-            }            
-            case 'k': {
-                ret = set_lookup_value <unsigned long> (target, string(fieldName), value_type_code, key_type_code, key, value);
-                break;
-            }                        
-            case 's': {
-                ret = set_lookup_value <string> (target, string(fieldName), value_type_code, key_type_code, key, value);
-                break;
-            }
-            case 'i': {
-                ret = set_lookup_value <int> (target, string(fieldName), value_type_code, key_type_code, key, value);
-                break;
-            }            
-            case 'l': {
-                ret = set_lookup_value <long> (target, string(fieldName), value_type_code, key_type_code, key, value);
-                break;
-            }                        
-            case 'L': {
-                ret = set_lookup_value <long long> (target, string(fieldName), value_type_code, key_type_code, key, value);
-                break;
-            }                        
-            case 'K': {
-                ret = set_lookup_value <unsigned long long> (target, string(fieldName), value_type_code, key_type_code, key, value);
-                break;
-            }                        
-            case 'b': {
-                ret = set_lookup_value <bool> (target, string(fieldName), value_type_code, key_type_code, key, value);
-                break;
-            }
-            case 'c': {
-                ret = set_lookup_value <char> (target, string(fieldName), value_type_code, key_type_code, key, value);
-                break;
-            }
-            case 'h': {
-                ret = set_lookup_value <short> (target, string(fieldName), value_type_code, key_type_code, key, value);
-                break;
-            }            
-            case 'H': {
-                ret = set_lookup_value <unsigned short> (target, string(fieldName), value_type_code, key_type_code, key, value);
-                break;
-            }            
-            case 'd': {
-                ret = set_lookup_value <double> (target, string(fieldName), value_type_code, key_type_code, key, value);
-                break;
-            }                        
-            case 'f': {
-                ret = set_lookup_value <float> (target, string(fieldName), value_type_code, key_type_code, key, value);
-                break;
-            }
-            case 'x': {
-                ret = set_lookup_value <Id> (target, string(fieldName), value_type_code, key_type_code, key, value);
-                break;
-            }
-            case 'y': {
-                ret = set_lookup_value <ObjId> (target, string(fieldName), value_type_code, key_type_code, key, value);
-                break;
-            }
-            default:
-                ostringstream error;
-                error << "setLookupField: invalid key type " << type_vec[0];
-                PyErr_SetString(PyExc_TypeError, error.str().c_str());
-        }
-        return ret;        
-    }// setLookupField
-
-    PyDoc_STRVAR(moose_ObjId_setLookupField_documentation,
-                 "setLookupField(field, key, value)\n"
-                 "Set a lookup field entry.\n"
-                 "Parameters\n"
-                 "----------\n"
-                 "field : string\n"
-                 "\tname of the field to be set\n"
-                 "key : key type\n"
-                 "\tkey in the lookup field for which the value is to be set.\n"
-                 "value : value type\n"
-                 "\tvalue to be set for `key` in the lookkup field.");
-    
-    static PyObject * moose_ObjId_setLookupField(_ObjId * self, PyObject * args)
-    {
-        if (!Id::isValid(self->oid_.id)){
-            return NULL;
-        }
-        PyObject * key;
-        PyObject * value;
-        char * field;
-        if (!PyArg_ParseTuple(args, "sOO:moose_ObjId_setLookupField", &field,  &key, &value)){
-            return NULL;
-        }
-        if ( setLookupField(self->oid_, field, key, value) == 0){
-            Py_RETURN_NONE;
-        }
-        return NULL;
-    }// moose_ObjId_setLookupField
-
-    PyDoc_STRVAR(moose_ObjId_setDestField_documentation,
-                 "setDestField(arg0, arg1, ...)\n"
-                 "Set a destination field. This is for advanced uses. destFields can\n"
-                 "(and should) be directly called like functions as\n"
-                 "`element.fieldname(arg0, ...)`\n"
-                 "\n"
-                 "Parameters\n"
-                 "----------\n"
-                 "The number and type of paramateres depend on the destFinfo to be\n"
-                 "set. Use moose.doc('{classname}.{fieldname}') to get builtin\n"
-                 "documentation on the destFinfo `fieldname`\n"
-                 );
-    
-    static PyObject * moose_ObjId_setDestField(_ObjId * self, PyObject * args)
-    {
-        if (!Id::isValid(self->oid_.id)){
-            RAISE_INVALID_ID(NULL, "moose_ObjId_setDestField");
-        }
-        return _setDestField(((_ObjId*)self)->oid_, args);        
-    }
-
-    
-    static PyObject * _setDestField(ObjId oid, PyObject *args)
-    {
-        PyObject * arglist[10] = {NULL, NULL, NULL, NULL, NULL,
-                                  NULL, NULL, NULL, NULL, NULL};
-        ostringstream error;
-        error << "moose.setDestField: ";
-        // Unpack the arguments
-        if (!PyArg_UnpackTuple(args, "setDestField", minArgs, maxArgs,
-                               &arglist[0], &arglist[1], &arglist[2],
-                               &arglist[3], &arglist[4], &arglist[5],
-                               &arglist[6], &arglist[7], &arglist[8],
-                               &arglist[9])){
-            error << "At most " << maxArgs - 1 << " arguments can be handled.";
-            PyErr_SetString(PyExc_ValueError, error.str().c_str());
-            return NULL;
-        }
-        
-        // Get the destFinfo name
-        char * fieldName = PyString_AsString(arglist[0]);
-        if (!fieldName){ // not a string, raises TypeError
-            error << "first argument must be a string specifying field name.";
-            PyErr_SetString(PyExc_TypeError, error.str().c_str());
-            return NULL;
-        }
-        
-        // Try to parse the arguments.
-        vector< string > argType;
-        if (parse_Finfo_type(Field<string>::get(oid, "class"),
-                             "destFinfo", string(fieldName), argType) < 0){
-            error << "Arguments not handled: " << fieldName << "(";
-            for (unsigned int ii = 0; ii < argType.size(); ++ii){
-                error << argType[ii] << ",";
-            }
-            error << ")";
-            PyErr_SetString(PyExc_TypeError, error.str().c_str());
-            return NULL;
-        }
-        // Construct the argument list
-        ostringstream argstream;
-        for (size_t ii = 0; ii < argType.size(); ++ii){
-            PyObject * arg = arglist[ii+1];
-            if ( arg == NULL && argType[ii] == "void"){
-                bool ret = SetGet0::set(oid, string(fieldName));
-                if (ret){
-                    Py_RETURN_TRUE;
-                } else {
-                    Py_RETURN_FALSE;
-                }
-            }
-            char vtypecode = shortType(argType[ii]);
-            switch (vtypecode){                    
-                case 'f': case 'd': {
-                    double param = PyFloat_AsDouble(arg);
-                    argstream << param << ",";
-                }
-                    break;
-                case 's': {
-                    char * param = PyString_AsString(arg);
-                    argstream << string(param) << ",";
-                }
-                    break;
-                case 'i': case 'l': {
-                    long param = PyInt_AsLong(arg);
-                    if (param == -1 && PyErr_Occurred()){
-                        return NULL;
-                    }
-                    argstream << param << ",";
-                }
-                    break;
-                case 'I': case 'k':{
-                    unsigned long param =PyLong_AsUnsignedLong(arg);
-                    if (PyErr_Occurred()){
-                        return NULL;
-                    }
-                    argstream << param << ",";                            
-                }
-                    break;
-                case 'x': {
-                    Id param;
-                    if (Id_SubtypeCheck(arg)){
-                        _Id * id = (_Id*)(arg);
-                        if (id == NULL){
-                            error << "argument should be an ematrix or an melement";
-                            PyErr_SetString(PyExc_TypeError, error.str().c_str());
-                            return NULL;                                
-                        }
-                        param = id->id_;
-                    } else if (ObjId_SubtypeCheck(arg)){
-                        _ObjId * oid = (_ObjId*)(arg);
-                        if (oid == NULL){
-                            error << "argument should be an ematrix or an melement";
-                            PyErr_SetString(PyExc_TypeError, error.str().c_str());
-                            return NULL;                                
-                        }
-                        param = oid->oid_.id;
-                    }
-                    if ( SetGet1<Id>::set(oid, string(fieldName), param)){
-                        return Py_True;
-                    }
-                    return Py_False;
-                }
-                case 'y': {
-                    ObjId param;
-                    if (Id_SubtypeCheck(arg)){
-                        _Id * id = (_Id*)(arg);
-                        if (id == NULL){
-                            error << "argument should be an ematrix or an melement";
-                            PyErr_SetString(PyExc_TypeError, error.str().c_str());
-                            return NULL;                                
-                        }
-                        param = ObjId(id->id_);
-                    } else if (ObjId_SubtypeCheck(arg)){
-                        _ObjId * oid = (_ObjId*)(arg);
-                        if (oid == NULL){
-                            error << "argument should be an ematrix or an melement";
-                            PyErr_SetString(PyExc_TypeError, error.str().c_str());
-                            return NULL;                                
-                        }
-                        param = oid->oid_;
-                    }
-                    if ( SetGet1<ObjId>::set(oid, string(fieldName), param)){
-                        return Py_True;
-                    }
-                    return Py_False;
-                }
-                case 'c': {
-                    char * param = PyString_AsString(arg);
-                    if (!param){
-                        error << ii << "-th expected of type char/string";
-                        PyErr_SetString(PyExc_TypeError, error.str().c_str());
-                        return NULL;
-                    } else if (strlen(param) == 0){
-                        error << "Empty string not allowed.";
-                        PyErr_SetString(PyExc_ValueError, error.str().c_str());
-                        return NULL;
-                    }
-                    argstream << param[0] << ",";
-                }
-                    break;
-                    
-                    ////////////////////////////////////////////////////
-                    // We do NOT handle multiple vectors. Use the argument
-                    // list as a single vector argument.
-                    ////////////////////////////////////////////////////
-                case 'v': {
-                    return _set_vector_destFinfo<int>(oid, string(fieldName), ii, arg, vtypecode);
-                }
-                case 'w': {
-                    return _set_vector_destFinfo<short>(oid, string(fieldName), ii, arg, vtypecode);
-                }
-                case 'L': {//SET_VECFIELD(long, l) {
-                    return _set_vector_destFinfo<long>(oid, string(fieldName), ii, arg, vtypecode);
-                }            
-                case 'N': { //SET_VECFIELD(unsigned int, I)
-                    return _set_vector_destFinfo<unsigned int>(oid, string(fieldName), ii, arg, vtypecode);
-                }
-                case 'K': {//SET_VECFIELD(unsigned long, k)
-                    return _set_vector_destFinfo<unsigned long>(oid, string(fieldName), ii, arg, vtypecode);
-                }
-                case 'F': {//SET_VECFIELD(float, f)
-                    return _set_vector_destFinfo<float>(oid, string(fieldName), ii, arg, vtypecode);
-                }
-                case 'D': {//SET_VECFIELD(double, d)
-                    return _set_vector_destFinfo<double>(oid, string(fieldName), ii, arg, vtypecode);
-                }                
-                case 'S': {
-                    return _set_vector_destFinfo<string>(oid, string(fieldName), ii, arg, vtypecode);
-                }
-                case 'X': {
-                    return _set_vector_destFinfo<Id>(oid, string(fieldName), ii, arg, vtypecode);
-                }
-                case 'Y': {
-                    return _set_vector_destFinfo<ObjId>(oid, string(fieldName), ii, arg, vtypecode);
-                }
-                default: {
-                    error << "Cannot handle argument type: " << argType[ii];
-                    PyErr_SetString(PyExc_TypeError, error.str().c_str());
-                    return NULL;
-                }
-            } // switch (shortType(argType[ii])
-        } // for (size_t ii = 0; ...
-        // TODO: handle vector args and void functions properly
-        string argstring = argstream.str();
-        if (argstring.length() < 2 ){
-            error << "Could not find any valid argument. Giving up.";
-            PyErr_SetString(PyExc_TypeError, error.str().c_str());
-            return NULL;
-        }
-        
-        argstring = argstring.substr(0, argstring.length() - 1);        
-        bool ret = SetGet::strSet(oid, string(fieldName), argstring);
-        if (ret){
-            Py_RETURN_TRUE;
-        } else {
-            ostringstream err;
-            err << fieldName << " takes arguments (";
-            for (unsigned int ii = 0; ii < argType.size(); ++ii){
-                error << argType[ii] << ",";
-            }
-            error << ")";                    
-            PyErr_SetString(PyExc_TypeError, err.str().c_str());
-            return NULL;
-        }
-    } // moose_ObjId_setDestField
-
-    PyDoc_STRVAR(moose_ObjId_getFieldNames_documenation,
-                 "getFieldNames(fieldType='')\n"
-                 "\n"
-                 "Get the names of fields on this element.\n"
-                 "\n"
-                 "Parameters\n"
-                 "----------\n"
-                 "fieldType : str\n"
-                 "\tField type to retrieve. Can be `valueFinfo`, `srcFinfo`,\n"
-                 "\t`destFinfo`, `lookupFinfo`, etc. If an empty string is specified,\n"
-                 "\tnames of all avaialable fields are returned.\n"
-                 "\n"
-                 "Returns\n"
-                 "-------\n"
-                 "\tout : tuple of strings.\n"
-                 "\n"
-                 "Example\n"
-                 "-------\n"
-                 "List names of all the source fields in PulseGen class:\n"
-                 "~~~~\n"
-                 ">>> moose.getFieldNames('PulseGen', 'srcFinfo')\n"
-                 "('childMsg', 'outputOut')\n"
-                 "~~~~\n"
-                 "\n");
-    // 2011-03-23 15:28:26 (+0530)
-    static PyObject * moose_ObjId_getFieldNames(_ObjId * self, PyObject *args)
-    {
-        if (!Id::isValid(self->oid_.id)){
-            RAISE_INVALID_ID(NULL, "moose_ObjId_getFieldNames");
-        }
-        char * ftype = NULL;
-        if (!PyArg_ParseTuple(args, "|s:moose_ObjId_getFieldNames", &ftype)){
-            return NULL;
-        }
-        string ftype_str = (ftype != NULL)? string(ftype): "";
-        vector<string> ret;
-        string className = Field<string>::get(self->oid_, "class");
-        if (ftype_str == ""){
-            for (const char **a = getFinfoTypes(); *a; ++a){
-                vector<string> fields = getFieldNames(className, string(*a));
-                ret.insert(ret.end(), fields.begin(), fields.end());
-            }            
-        } else {
-            ret = getFieldNames(className, ftype_str);
-        }
-        
-        PyObject * pyret = PyTuple_New((Py_ssize_t)ret.size());
-                
-        for (unsigned int ii = 0; ii < ret.size(); ++ ii ){
-            PyObject * fname = Py_BuildValue("s", ret[ii].c_str());
-            if (!fname){
-                Py_XDECREF(pyret);
-                pyret = NULL;
-                break;
-            }
-            if (PyTuple_SetItem(pyret, (Py_ssize_t)ii, fname)){
-                Py_XDECREF(pyret);
-                pyret = NULL;
-                break;
-            }
-        }
-        return pyret;             
-    }
-
-    PyDoc_STRVAR(moose_ObjId_getNeighbors_documentation,
-                 "getNeighbours(fieldName)\n"
-                 "\n"
-                 "Get the objects connected to this element by a message on specified\n"
-                 "field.\n"
-                 "\n"
-                 "Parameters\n"
-                 "----------\n"
-                 "fieldName : str\n"
-                 "\tname of the connection field (a destFinfo or srcFinfo)\n"
-                 "\n"
-                 "Returns\n"
-                 "-------\n"
-                 "out: tuple of ematrices.\n"
-                 "\n");
-                 
-    static PyObject * moose_ObjId_getNeighbors(_ObjId * self, PyObject * args)
-    {
-        if (!Id::isValid(self->oid_.id)){
-            RAISE_INVALID_ID(NULL, "moose_ObjId_getNeighbors");
-        }
-        char * field = NULL;
-        if (!PyArg_ParseTuple(args, "s:moose_ObjId_getNeighbors", &field)){
-            return NULL;
-        }
-        vector< Id > val = LookupField< string, vector< Id > >::get(self->oid_, "neighbours", string(field));
-    
-        PyObject * ret = PyTuple_New((Py_ssize_t)val.size());
-                
-        for (unsigned int ii = 0; ii < val.size(); ++ ii ){            
-            _Id * entry = PyObject_New(_Id, &IdType);
-            if (!entry || PyTuple_SetItem(ret, (Py_ssize_t)ii, (PyObject*)entry)){
-                Py_XDECREF(ret);                                  
-                ret = NULL;                                 
-                break;                                      
-            }
-            entry->id_ = val[ii];
-        }
-        return ret;
-    }
-
-    // 2011-03-28 10:10:19 (+0530)
-    // 2011-03-23 15:13:29 (+0530)
-    // getChildren is not required as it can be accessed as getField("children")
-
-    // 2011-03-28 10:51:52 (+0530)
-    PyDoc_STRVAR(moose_ObjId_connect_documentation,
-                 "connect(srcfield, destobj, destfield, msgtype) -> bool\n"
-                 "Connect another object via a message.\n"
-                 "Parameters\n"
-                 "----------\n"
-                 "srcfield : str\n"
-                 "\tsource field on self.\n"
-                 "destobj : element\n"
-                 "\tDestination object to connect to.\n"
-                 "destfield : str\n"
-                 "\tfield to connect to on `destobj`.\n"
-                 "msgtype : str\n"
-                 "\ttype of the message. Can be `Single`, `OneToAll`, `AllToOne`,\n"
-                 " `OneToOne`, `Reduce`, `Sparse`. Default: `Single`."
-                 "\n"
-                 "Returns\n"
-                 "-------\n"
-                 "element of the created message.\n"
-                 "\n"
-                 "See also\n"
-                 "--------\n"
-                 "moose.connect\n"
-                 "\n"
-                 );
-    static PyObject * moose_ObjId_connect(_ObjId * self, PyObject * args)
-    {
-        if (!Id::isValid(self->oid_.id)){
-            RAISE_INVALID_ID(NULL, "moose_ObjId_connect");
-        }
-        extern PyTypeObject ObjIdType;        
-        PyObject * destPtr = NULL;
-        char * srcField = NULL, * destField = NULL, * msgType = NULL;
-        static char default_msg_type[] = "Single";
-        if(!PyArg_ParseTuple(args,
-                             "sOs|s:moose_ObjId_connect",
-                             &srcField,
-                             &destPtr,
-                             &destField,
-                             &msgType)){
-            return NULL;
-        }
-        if (msgType == NULL){
-            msgType = default_msg_type;
-        }
-        _ObjId * dest = reinterpret_cast<_ObjId*>(destPtr);
-        MsgId mid = SHELLPTR->doAddMsg(msgType,
-                                       self->oid_,
-                                       string(srcField),
-                                       dest->oid_,
-                                       string(destField));
-        if (mid == Msg::bad){
-            PyErr_SetString(PyExc_NameError,
-                            "connect failed: check field names and type compatibility.");
-            return NULL;
-        }
-        const Msg* msg = Msg::getMsg(mid);
-        Eref mer = msg->manager();
-        _ObjId* msgMgrId = (_ObjId*)PyObject_New(_ObjId, &ObjIdType);        
-        msgMgrId->oid_ = mer.objId();
-        return (PyObject*)msgMgrId;
-    }
-
-    PyDoc_STRVAR(moose_ObjId_richcompare_documentation,
-                 "Compare two element instances. This just does a string comparison of\n"
-                 "the paths of the element instances. This function exists only to\n"
-                 "facilitate certain operations requiring sorting/comparison, like\n"
-                 "using elements for dict keys. Conceptually only equality comparison is\n"
-                 "meaningful for elements.\n"); 
-    static PyObject* moose_ObjId_richcompare(_ObjId * self, PyObject * other, int op)
-    {
-        if (!Id::isValid(self->oid_.id)){
-            RAISE_INVALID_ID(NULL, "moose_ObjId_richcompare");
-        }
-        extern PyTypeObject ObjIdType;
-        if ((self != NULL && other == NULL) || (self == NULL && other != NULL)){
-            if (op == Py_EQ){
-                Py_RETURN_FALSE;
-            } else if (op == Py_NE){
-                Py_RETURN_TRUE;
-            } else {
-                PyErr_SetString(PyExc_TypeError, "Cannot compare NULL with non-NULL");
-                return NULL;
-            }
-        }
-        if (!PyObject_IsInstance(other, (PyObject*)&ObjIdType)){
-            ostringstream error;
-            error << "Cannot compare ObjId with "
-                  << Py_TYPE(other)->tp_name;
-            PyErr_SetString(PyExc_TypeError, error.str().c_str());
-            return NULL;
-        }
-        if (!Id::isValid(((_ObjId*)other)->oid_.id)){
-            RAISE_INVALID_ID(NULL, "moose_ObjId_richcompare");
-        }
-
-        string l_path = self->oid_.path();
-        string r_path = ((_ObjId*)other)->oid_.path();
-        int result = l_path.compare(r_path);
-        if (result == 0){
-            if (op == Py_EQ || op == Py_LE || op == Py_GE){
-                Py_RETURN_TRUE;
-            }
-            Py_RETURN_FALSE;
-        } else if (result < 0){
-            if (op == Py_LT || op == Py_LE || op == Py_NE){
-                Py_RETURN_TRUE;
-            }
-            Py_RETURN_FALSE;
-        } else {
-            if (op == Py_GT || op == Py_GE || op == Py_NE){
-                Py_RETURN_TRUE;
-            }
-            Py_RETURN_FALSE;
-        }
-    }
-
-    PyDoc_STRVAR(moose_ObjId_getDataIndex_documentation,
-                 "getDataIndex()\n"
-                 "\n"
-                 "Return the dataIndex of this object.\n");
-    static PyObject * moose_ObjId_getDataIndex(_ObjId * self)
-    {
-        if (!Id::isValid(self->oid_.id)){
-            RAISE_INVALID_ID(NULL, "moose_ObjId_getDataIndex");
-        }        
-        PyObject * ret = Py_BuildValue("I", self->oid_.dataId.value());
-        return ret;
-    }
-
-    // WARNING: fieldIndex has been deprecated in dh_branch. This
-    // needs to be updated accordingly.  The current code is just
-    // place-holer to avoid compilation errors.
-    static PyObject * moose_ObjId_getFieldIndex(_ObjId * self)
-    {
-        if (!Id::isValid(self->oid_.id)){
-            RAISE_INVALID_ID(NULL, "moose_ObjId_getFieldIndex");
-        }
-        PyObject * ret = Py_BuildValue("I", self->oid_.dataId.value());
-        return ret;
-    }
-    
-    ///////////////////////////////////////////////
-    // Python method lists for PyObject of ObjId
-    ///////////////////////////////////////////////
-
-    static PyMethodDef ObjIdMethods[] = {
-        {"getFieldType", (PyCFunction)moose_ObjId_getFieldType, METH_VARARGS,
-         moose_ObjId_getFieldType_documentation},        
-        {"getField", (PyCFunction)moose_ObjId_getField, METH_VARARGS,
-         moose_ObjId_getField_documentation},
-        {"setField", (PyCFunction)moose_ObjId_setField, METH_VARARGS,
-         moose_ObjId_setField_documentation},
-        {"getLookupField", (PyCFunction)moose_ObjId_getLookupField, METH_VARARGS,
-         moose_ObjId_getLookupField_documentation},
-        {"setLookupField", (PyCFunction)moose_ObjId_setLookupField, METH_VARARGS,
-         moose_ObjId_setLookupField_documentation},
-        {"getId", (PyCFunction)moose_ObjId_getId, METH_NOARGS,
-         moose_ObjId_getId_documentation},
-        {"ematrix", (PyCFunction)moose_ObjId_getId, METH_NOARGS,
-         "Return the ematrix this element belongs to."},
-        {"getFieldNames", (PyCFunction)moose_ObjId_getFieldNames, METH_VARARGS,
-         moose_ObjId_getFieldNames_documenation},
-        {"getNeighbors", (PyCFunction)moose_ObjId_getNeighbors, METH_VARARGS,
-         moose_ObjId_getNeighbors_documentation},
-        {"connect", (PyCFunction)moose_ObjId_connect, METH_VARARGS,
-         moose_ObjId_connect_documentation},
-        {"getDataIndex", (PyCFunction)moose_ObjId_getDataIndex, METH_NOARGS,
-         moose_ObjId_getDataIndex_documentation},
-        {"getFieldIndex", (PyCFunction)moose_ObjId_getFieldIndex, METH_NOARGS,
-         "Get the index of this object as a field."},
-        {"setDestField", (PyCFunction)moose_ObjId_setDestField, METH_VARARGS,
-         moose_ObjId_setDestField_documentation},
-        {NULL, NULL, 0, NULL},        /* Sentinel */        
-    };
-
-    ///////////////////////////////////////////////
-    // Type defs for PyObject of ObjId
-    ///////////////////////////////////////////////
-    PyDoc_STRVAR(moose_ObjId_documentation,
-                 "Individual moose element contained in an array-type object\n"
-                 "(ematrix). Each element has a unique path, possibly with its index in\n"
-                 "the ematrix. These are identified by three components: id_ and\n"
-                 "dindex. id_ is the Id of the containing ematrix, it has a unique\n"
-                 "numerical value (field `value`). `dindex` is the index of the current\n"
-                 "item in the containing ematrix. `dindex` is 0 for single elements.");
-    PyTypeObject ObjIdType = { 
-        PyVarObject_HEAD_INIT(NULL, 0)            /* tp_head */
-        "moose.melement",                      /* tp_name */
-        sizeof(_ObjId),                     /* tp_basicsize */
-        0,                                  /* tp_itemsize */
-        0,                                  /* tp_dealloc */
-        0,                                  /* tp_print */
-        0,                                  /* tp_getattr */
-        0,                                  /* tp_setattr */
-        0,       /* tp_compare */
-        (reprfunc)moose_ObjId_repr,         /* tp_repr */
-        0,                                  /* tp_as_number */
-        0,                                  /* tp_as_sequence */
-        0,                                  /* tp_as_mapping */
-        (hashfunc)moose_ObjId_hash,         /* tp_hash */
-        0,                                  /* tp_call */
-        (reprfunc)moose_ObjId_repr,         /* tp_str */
-        (getattrofunc)moose_ObjId_getattro, /* tp_getattro */
-        (setattrofunc)moose_ObjId_setattro, /* tp_setattro */
-        0,                                  /* tp_as_buffer */
-        Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
-        moose_ObjId_documentation,
-        0,                                  /* tp_traverse */
-        0,                                  /* tp_clear */
-        (richcmpfunc)moose_ObjId_richcompare, /* tp_richcompare */
-        0,                                  /* tp_weaklistoffset */
-        0,                                  /* tp_iter */
-        0,                                  /* tp_iternext */
-        ObjIdMethods,                       /* tp_methods */
-        0,                                  /* tp_members */
-        0,                                  /* tp_getset */
-        0,                                  /* tp_base */
-        0,                                  /* tp_dict */
-        0,                                  /* tp_descr_get */
-        0,                                  /* tp_descr_set */
-        0,                                  /* tp_dictoffset */
-        (initproc) moose_ObjId_init,        /* tp_init */
-        0,                                  /* tp_alloc */
-        0,                                  /* tp_new */
-        0,                                  /* tp_free */
-    };
-
     ////////////////////////////////////////////
     // Module functions
     ////////////////////////////////////////////
@@ -3633,7 +1049,7 @@ extern "C" {
                  "\tThe kind of field (`valueFinfo`, `srcFinfo`, `destFinfo`,\n"
                  "`lookupFinfo`, `fieldElementFinfo`.).\n");
 
-    static PyObject * moose_getFieldNames(PyObject * dummy, PyObject * args)
+    PyObject * moose_getFieldNames(PyObject * dummy, PyObject * args)
     {
         char * className = NULL;
         char _finfoType[] = "valueFinfo";
@@ -3676,7 +1092,7 @@ extern "C" {
                  "-------\n"
                  "ematrix of the copied object\n"
                  );
-    static PyObject * moose_copy(PyObject * dummy, PyObject * args, PyObject * kwargs)
+    PyObject * moose_copy(PyObject * dummy, PyObject * args, PyObject * kwargs)
     {
         PyObject * src = NULL, * dest = NULL;
         char * newName = NULL;
@@ -3728,7 +1144,7 @@ extern "C" {
 
     // Not sure what this function should return... ideally the Id of the
     // moved object - does it change though?
-    static PyObject * moose_move(PyObject * dummy, PyObject * args)
+    PyObject * moose_move(PyObject * dummy, PyObject * args)
     {
         PyObject * src, * dest;
         if (!PyArg_ParseTuple(args, "OO:moose_move", &src, &dest)){
@@ -3754,7 +1170,7 @@ extern "C" {
                  "\nid : ematrix"
                  "\n\tematrix of the object to be deleted."
                  "\n");
-    static PyObject * moose_delete(PyObject * dummy, PyObject * args)
+    PyObject * moose_delete(PyObject * dummy, PyObject * args)
     {
         PyObject * obj;
         if (!PyArg_ParseTuple(args, "O:moose.delete", &obj)){
@@ -3771,12 +1187,12 @@ extern "C" {
         if (!Id::isValid(((_Id*)obj)->id_)){
             RAISE_INVALID_ID(NULL, "moose_delete");
         }
-        moose_Id_delete((_Id*)obj);
+        deleteId((_Id*)obj);
         // SHELLPTR->doDelete(((_Id*)obj)->id_);
         Py_RETURN_NONE;
     }
 
-    static PyObject * moose_useClock(PyObject * dummy, PyObject * args)
+    PyObject * moose_useClock(PyObject * dummy, PyObject * args)
     {
         char * path, * field;
         unsigned int tick;
@@ -3786,7 +1202,7 @@ extern "C" {
         SHELLPTR->doUseClock(string(path), string(field), tick);
         Py_RETURN_NONE;
     }
-    static PyObject * moose_setClock(PyObject * dummy, PyObject * args)
+    PyObject * moose_setClock(PyObject * dummy, PyObject * args)
     {
         unsigned int tick;
         double dt;
@@ -3827,7 +1243,7 @@ extern "C" {
                  "moose.reinit : (Re)initialize simulation\n"
                  "\n"
                  );
-    static PyObject * moose_start(PyObject * dummy, PyObject * args)
+    PyObject * moose_start(PyObject * dummy, PyObject * args)
     {
         double runtime;
         if(!PyArg_ParseTuple(args, "d:moose_start", &runtime)){
@@ -3856,22 +1272,22 @@ extern "C" {
                  "(like clear out all data recording tables, set state variables to\n"
                  "their initial values, etc.\n"
                  "\n");
-    static PyObject * moose_reinit(PyObject * dummy, PyObject * args)
+    PyObject * moose_reinit(PyObject * dummy, PyObject * args)
     {
         SHELLPTR->doReinit();
         Py_RETURN_NONE;
     }
-    static PyObject * moose_stop(PyObject * dummy, PyObject * args)
+    PyObject * moose_stop(PyObject * dummy, PyObject * args)
     {
         SHELLPTR->doStop();
         Py_RETURN_NONE;
     }
-    static PyObject * moose_isRunning(PyObject * dummy, PyObject * args)
+    PyObject * moose_isRunning(PyObject * dummy, PyObject * args)
     {
         return Py_BuildValue("i", SHELLPTR->isRunning());
     }
 
-    static PyObject * moose_exists(PyObject * dummy, PyObject * args)
+    PyObject * moose_exists(PyObject * dummy, PyObject * args)
     {
         char * path;
         if (!PyArg_ParseTuple(args, "s", &path)){
@@ -3881,7 +1297,7 @@ extern "C" {
     }
 
     //Harsha : For writing genesis file to sbml
-    static PyObject * moose_writeSBML(PyObject * dummy, PyObject * args)
+    PyObject * moose_writeSBML(PyObject * dummy, PyObject * args)
     {
         char * fname = NULL, * modelpath = NULL;
         if(!PyArg_ParseTuple(args, "ss:moose_writeSBML", &fname, &modelpath)){
@@ -3910,7 +1326,7 @@ extern "C" {
                  "ematrix instance refering to the loaded model container.\n"
                  );
     
-    static PyObject * moose_loadModel(PyObject * dummy, PyObject * args)
+    PyObject * moose_loadModel(PyObject * dummy, PyObject * args)
     {
         char * fname = NULL, * modelpath = NULL, * solverclass = NULL;
         if(!PyArg_ParseTuple(args, "ss|s:moose_loadModel", &fname, &modelpath, &solverclass)){
@@ -3949,7 +1365,7 @@ extern "C" {
                  "None\n"
                  "\n");
 
-    static PyObject * moose_saveModel(PyObject * dummy, PyObject * args)
+    PyObject * moose_saveModel(PyObject * dummy, PyObject * args)
     {
         char * filename = NULL;
         PyObject * source = NULL;
@@ -3975,7 +1391,7 @@ extern "C" {
         Py_RETURN_NONE;
     }
     
-    static PyObject * moose_setCwe(PyObject * dummy, PyObject * args)
+    PyObject * moose_setCwe(PyObject * dummy, PyObject * args)
     {
         PyObject * element = NULL;
         const char * path = "/";
@@ -4002,7 +1418,7 @@ extern "C" {
         Py_RETURN_NONE;
     }
 
-    static PyObject * moose_getCwe(PyObject * dummy, PyObject * args)
+    PyObject * moose_getCwe(PyObject * dummy, PyObject * args)
     {
         if (!PyArg_ParseTuple(args, ":moose_getCwe")){
             return NULL;
@@ -4054,7 +1470,7 @@ extern "C" {
 
                  );
     
-    static PyObject * moose_connect(PyObject * dummy, PyObject * args)
+    PyObject * moose_connect(PyObject * dummy, PyObject * args)
     {
         PyObject * srcPtr = NULL, * destPtr = NULL;
         char * srcField = NULL, * destField = NULL, * msgType = NULL;
@@ -4130,7 +1546,7 @@ extern "C" {
                  "{'childMsg': 'int'}\n"
                  "~~~~\n"
                  "\n");
-    static PyObject * moose_getFieldDict(PyObject * dummy, PyObject * args)
+    PyObject * moose_getFieldDict(PyObject * dummy, PyObject * args)
     {
         char * className = NULL;
         char * fieldType = NULL;
@@ -4182,7 +1598,7 @@ extern "C" {
         return ret;
     }
 
-    static PyObject * moose_getField(PyObject * dummy, PyObject * args)
+    PyObject * moose_getField(PyObject * dummy, PyObject * args)
     {
         PyObject * pyobj;
         const char * field;
@@ -4308,7 +1724,7 @@ extern "C" {
         return NULL;
     }
 
-    static PyObject * moose_syncDataHandler(PyObject * dummy, PyObject * args)
+    PyObject * moose_syncDataHandler(PyObject * dummy, PyObject * args)
     {
         PyObject * obj = NULL;
         if (!PyArg_ParseTuple(args, "O:moose.syncDataHandler", &obj)){
@@ -4335,7 +1751,7 @@ extern "C" {
                  "\n\tinformation. If not specified, it defaults to 0."
                  "\n");
     
-    static PyObject * moose_seed(PyObject * dummy, PyObject * args)
+    PyObject * moose_seed(PyObject * dummy, PyObject * args)
     {
         long seed = 0;
         if (!PyArg_ParseTuple(args, "|l", &seed)){
@@ -4372,7 +1788,7 @@ extern "C" {
                  "\tFor example, /mymodel/##[FIELD(Vm)>=-65] will return a list of all\n"
                  "\tthe objects under /mymodel whose Vm field is >= -65.\n"
                  "\n");
-    static PyObject * moose_wildcardFind(PyObject * dummy, PyObject * args)
+    PyObject * moose_wildcardFind(PyObject * dummy, PyObject * args)
     {
         vector <Id> objects;
         char * wildcard_path = NULL;
@@ -4404,7 +1820,7 @@ extern "C" {
     }
     // This should not be required or accessible to the user. Put here
     // for debugging threading issue.
-    static PyObject * moose_quit(PyObject * dummy)
+    PyObject * moose_quit(PyObject * dummy)
     {
         finalize();
         cout << "Quitting MOOSE." << endl;
@@ -4413,7 +1829,7 @@ extern "C" {
 
     /// Go through all elements under /classes and ask for defining a
     /// Python class for it.
-    static int defineAllClasses(PyObject * module_dict)
+    int defineAllClasses(PyObject * module_dict)
     {
         static vector <Id> classes(Field< vector<Id> >::get(ObjId("/classes"),
                                                             "children"));
@@ -4446,7 +1862,7 @@ extern "C" {
                  "*-----------------------------------------------------------------*\n"
                  );
 
-    static int define_class(PyObject * module_dict, const Cinfo * cinfo)
+    int define_class(PyObject * module_dict, const Cinfo * cinfo)
     {
         const string& class_name = cinfo->name();
         map <string, PyTypeObject * >::iterator existing =
@@ -4541,7 +1957,7 @@ extern "C" {
         return 1;                
     }
     
-    static PyObject * moose_ObjId_get_destField_attr(PyObject * self, void * closure)
+    PyObject * moose_ObjId_get_destField_attr(PyObject * self, void * closure)
     {
         if (!PyObject_IsInstance(self, (PyObject*)&ObjIdType)){
             PyErr_SetString(PyExc_TypeError, "First argument must be an instance of element");
@@ -4586,8 +2002,9 @@ extern "C" {
     }
     
     
-    static int define_destFinfos(const Cinfo * cinfo)
+    int define_destFinfos(const Cinfo * cinfo)
     {
+        static char * doc = "Destination field";
         const string& class_name = cinfo->name();
         // Create methods for destFinfos. The tp_dict is initialized by
         // PyType_Ready. So we insert the dynamically generated
@@ -4612,7 +2029,7 @@ extern "C" {
             strncpy(vec[curr_index].name,
                     const_cast<char*>(destFinfo_name.c_str()),
                     destFinfo_name.size());
-            vec[curr_index].doc = moose_DestField_documentation;
+            vec[curr_index].doc = doc;
             vec[curr_index].get = (getter)moose_ObjId_get_destField_attr;
             PyObject * args = PyTuple_New(1);
             
@@ -4628,7 +2045,18 @@ extern "C" {
         return 1;
     }
 
-    static PyObject * moose_ObjId_get_lookupField_attr(PyObject * self,
+    /**
+       Try to obtain a LookupField object for a specified
+       lookupFinfo. The first item in `closure` must be the name of
+       the LookupFinfo - {fieldname}. The LookupField is identified by
+       {path}.{fieldname} where {path} is the unique path of the moose
+       element `self`. We look for an already initialized LookupField
+       object for this identifier and return if one is
+       found. Otherwise, we create a new LookupField object and buffer
+       it in a map before returning.
+       
+     */
+    PyObject * moose_ObjId_get_lookupField_attr(PyObject * self,
                                                        void * closure)
     {
         if (!PyObject_IsInstance(self, (PyObject*)&ObjIdType)){
@@ -4679,7 +2107,7 @@ extern "C" {
         return NULL;
     }
 
-    static PyObject * oid_to_element(ObjId oid)
+    PyObject * oid_to_element(ObjId oid)
     {
         string classname = Field<string>::get(oid, "class");
         map<string, PyTypeObject *>::iterator it = get_moose_classes().find(classname);
@@ -4709,7 +2137,7 @@ extern "C" {
                  "An element of the moose builtin class the specified object belongs\n"
                  "to.\n"
                  "\n");
-    static PyObject * moose_element(PyObject* dummy, PyObject * args)
+    PyObject * moose_element(PyObject* dummy, PyObject * args)
     {
         char * path = NULL;
         PyObject * obj = NULL;
@@ -4749,8 +2177,9 @@ extern "C" {
         return new_obj;
     }
     
-    static int define_lookupFinfos(const Cinfo * cinfo)
+    int define_lookupFinfos(const Cinfo * cinfo)
     {
+        static char * doc = "Lookup field";
         const string & class_name = cinfo->name();
         unsigned int num_lookupFinfos = cinfo->getNumLookupFinfo();
         unsigned int curr_index = get_getsetdefs()[class_name].size();
@@ -4760,7 +2189,7 @@ extern "C" {
             get_getsetdefs()[class_name].push_back(getset);
             get_getsetdefs()[class_name][curr_index].name = (char*)calloc(lookupFinfo_name.size() + 1, sizeof(char));
             strncpy(get_getsetdefs()[class_name][curr_index].name, const_cast<char*>(lookupFinfo_name.c_str()), lookupFinfo_name.size());
-            get_getsetdefs()[class_name][curr_index].doc = moose_LookupField_documentation;
+            get_getsetdefs()[class_name][curr_index].doc = doc; //moose_LookupField_documentation;
             get_getsetdefs()[class_name][curr_index].get = (getter)moose_ObjId_get_lookupField_attr;
             PyObject * args = PyTuple_New(1);
             PyTuple_SetItem(args, 0, PyString_FromString(lookupFinfo_name.c_str()));
@@ -4770,7 +2199,7 @@ extern "C" {
         return 1;
     }
 
-    static PyObject * moose_ObjId_get_elementField_attr(PyObject * self,
+    PyObject * moose_ObjId_get_elementField_attr(PyObject * self,
                                                         void * closure)
     {
         // if (!PyObject_IsInstance(self, (PyObject*)&ObjIdType)){
@@ -4820,8 +2249,9 @@ extern "C" {
         return NULL;
     }
 
-    static int define_elementFinfos(const Cinfo * cinfo)
+    int define_elementFinfos(const Cinfo * cinfo)
     {
+        static char * doc = "Element field\0";
         const string & class_name = cinfo->name();
         unsigned int num_fieldElementFinfo = cinfo->getNumFieldElementFinfo();
         unsigned int curr_index = get_getsetdefs()[class_name].size();
@@ -4831,7 +2261,7 @@ extern "C" {
             get_getsetdefs()[class_name].push_back(getset);
             get_getsetdefs()[class_name][curr_index].name = (char*)calloc(finfo_name.size() + 1, sizeof(char));
             strncpy(get_getsetdefs()[class_name][curr_index].name, const_cast<char*>(finfo_name.c_str()), finfo_name.size());
-            get_getsetdefs()[class_name][curr_index].doc = moose_ElementField_documentation;
+            get_getsetdefs()[class_name][curr_index].doc = doc;
             get_getsetdefs()[class_name][curr_index].get = (getter)moose_ObjId_get_elementField_attr;
             PyObject * args = PyTuple_New(1);
             PyTuple_SetItem(args, 0, PyString_FromString(finfo_name.c_str()));
@@ -4841,88 +2271,6 @@ extern "C" {
         return 1;
     }
 
-
-    PyObject * moose_ElementField_getNum(_Field * self, void * closure)
-    {
-        if (!Id::isValid(self->owner.id)){
-            RAISE_INVALID_ID(NULL, "moose_ElementField_getNum");
-        }
-        unsigned int num = Field<unsigned int>::get(self->owner, "num_" + string(self->name));
-        return Py_BuildValue("I", num);
-    }
-
-    Py_ssize_t moose_ElementField_getLen(_Field * self, void * closure)
-    {
-        if (!Id::isValid(self->owner.id)){
-            RAISE_INVALID_ID(-1, "moose_ElementField_getLen");
-        }
-        unsigned int num = Field<unsigned int>::get(self->owner, "num_" + string(self->name));
-        return Py_ssize_t(num);
-    }
-
-    int moose_ElementField_setNum(_Field * self, PyObject * args, void * closure)
-    {
-        if (!Id::isValid(self->owner.id)){
-            RAISE_INVALID_ID(-1, "moose_ElementField_setNum");
-        }
-        unsigned int num;
-        if (!PyInt_Check(args)){
-            PyErr_SetString(PyExc_TypeError, "moose.ElementField.setNum - needes an integer.");
-            return -1;
-        }
-        num = PyInt_AsUnsignedLongMask(args);
-        if (!Field<unsigned int>::set(self->owner, "num_" + string(self->name), num)){
-            PyErr_SetString(PyExc_RuntimeError, "moose.ElementField.setNum : Field::set returned False.");
-            return -1;
-        }
-        return 0;
-    }
-
-    PyObject * moose_ElementField_getPath(_Field * self, void * closure)
-    {
-        if (!Id::isValid(self->owner.id)){
-            RAISE_INVALID_ID(NULL, "moose_ElementField_setNum");
-        }
-        string path = Id(self->owner.path() + "/" + string(self->name)).path();
-        return Py_BuildValue("s", path.c_str());
-    }
-
-    PyObject * moose_ElementField_getId(_Field * self, void * closure)
-    {
-        if (!Id::isValid(self->owner.id)){
-            RAISE_INVALID_ID(NULL, "moose_ElementField_setNum");
-        }
-        Id myId(self->owner.path() + "/" + string(self->name));
-        _Id * new_id = PyObject_New(_Id, &IdType);
-        new_id->id_ = myId;
-        return (PyObject*)new_id;
-    }
-
-    PyObject * moose_ElementField_getItem(_Field * self, Py_ssize_t index)
-    {
-        if (!Id::isValid(self->owner.id)){
-            RAISE_INVALID_ID(NULL, "moose_ElementField_getItem");
-        }
-        unsigned int len = Field<unsigned int>::get(self->owner, "num_" + string(self->name));
-        if (index >= len){
-            PyErr_SetString(PyExc_IndexError, "moose.ElementField.getItem: index out of bounds.");
-            return NULL;
-        }
-        if (index < 0){
-            index += len;
-        }
-        if (index < 0){
-            PyErr_SetString(PyExc_IndexError, "moose.ElementField.getItem: invalid index.");
-            return NULL;
-        }
-        _ObjId * oid = PyObject_New(_ObjId, &ObjIdType);
-        // cout << "Element field: " << self->name << ", owner: " << self->owner.path() << endl;
-        stringstream path;
-        path << self->owner.path() << "/" << self->name << "[" << index << "]";
-        // cout << "moose_ElementField_getItem:: path=" << path.str();
-        oid->oid_ = ObjId(path.str());
-        return (PyObject*)oid;
-    }
 
 
     /////////////////////////////////////////////////////////////////////
@@ -4981,12 +2329,12 @@ extern "C" {
 
 #ifdef PY3K
 
-    static int moose_traverse(PyObject *m, visitproc visit, void *arg) {
+    int moose_traverse(PyObject *m, visitproc visit, void *arg) {
         Py_VISIT(GETSTATE(m)->error);
         return 0;
     }
 
-    static int moose_clear(PyObject *m) {
+    int moose_clear(PyObject *m) {
         Py_CLEAR(GETSTATE(m)->error);
         // I did get a segmentation fault at exit (without running a reinit() or start()) after creating a compartment. After putting the finalize here it went away. But did not reoccur even after commenting it out. Will need closer debugging.
         // - Subha 2012-08-18, 00:36    
@@ -5131,122 +2479,14 @@ extern "C" {
         PyGILState_Release(gstate);
         clock_t modinit_end = clock();
         cout << "Info: Time to initialize module:" << (modinit_end - modinit_start) * 1.0 /CLOCKS_PER_SEC << endl;
+        if (doUnitTests){
+            test_moosemodule();
+        }
 #ifdef PY3K
 	return moose_module;
 #endif
     } //! init_moose
 
-/**
-   Utility functions
-*/
-
-    void * to_cpp(PyObject * object, char typecode)
-    {
-        switch(typecode){
-            case 'i': {
-                int * ret = new int();
-                * ret = PyInt_AsLong(object);
-                return (void*)ret;
-            }
-            case 'l': {
-                long v = PyInt_AsLong(object);
-                long * ret = new long();
-                *ret = v;
-                return (void*)ret;
-            }
-            case 'h': {
-                short v = PyInt_AsLong(object);
-                short * ret = new short();
-                *ret = v;
-                return (void*)ret;
-            }
-            case 'f': {
-                float v = (float)PyFloat_AsDouble(object);
-                if ( v == -1.0 && PyErr_Occurred()){
-                    PyErr_SetString(PyExc_TypeError, "Expected a sequence of floating point numbers.");
-                } else {
-                    float * ret = new float();
-                    *ret = v;
-                    return (void*)ret;
-                }
-            }
-            case 'd': {
-                double v = PyFloat_AsDouble(object);
-                if ( v == -1.0 && PyErr_Occurred()){
-                    PyErr_SetString(PyExc_TypeError, "Expected a sequence of floating point numbers.");
-                } else {
-                    double * ret = new double();
-                    *ret = v;
-                    return (void*)ret;
-                }
-            }
-            case 's': {
-                char* tmp = PyString_AsString(object);
-                if (tmp == NULL){
-                    return NULL;
-                }        
-                string * ret = new string(tmp);
-                return (void*)ret;
-            }
-            case 'I': {
-                unsigned int v = PyInt_AsUnsignedLongMask(object);
-                unsigned int * ret = new unsigned int();
-                *ret = v;
-                return (void*)ret;
-            }
-            case 'k': {
-                unsigned long v = PyInt_AsUnsignedLongMask(object);
-                unsigned long * ret = new unsigned long();
-                *ret = v;
-                return (void*)ret;
-            }
-            case 'x': {
-                _Id * value = (_Id*)object;
-                if (value != NULL){
-                    Id * ret = new Id();
-                    * ret = value->id_;
-                    return (void*)ret;
-                }
-            }
-            case 'y': {
-                _ObjId * value = (_ObjId*)object;
-                if (value != NULL){
-                    ObjId * ret = new ObjId();
-                    * ret = value->oid_;
-                    return (void*)ret;
-                }
-            }
-            case 'v':
-                return PySequenceToVector< int >(object, 'i');
-            case 'N':
-                return PySequenceToVector < unsigned int > (object, 'I');
-            case 'w':
-                return PySequenceToVector < short > (object, 'h');
-            case 'M':
-                return PySequenceToVector < long > (object, 'l');
-            case 'P':
-                return PySequenceToVector < unsigned long > (object, 'k');
-            case 'F':
-                return PySequenceToVector < float > (object, 'f');
-            case 'D':
-                return PySequenceToVector < double > (object, 'd');
-            case 'S':
-                return PySequenceToVector < string > (object, 's');
-            case 'Y':
-                return PySequenceToVector < ObjId > (object, 'y');      
-            case 'X':
-                return PySequenceToVector < Id > (object, 'x');
-            case 'R':
-                return PySequenceToVectorOfVectors< double >(object, 'd');
-            case 'Q':
-                return PySequenceToVectorOfVectors< int >(object, 'i');
-            case 'T':
-                return PySequenceToVectorOfVectors< unsigned int > (object, 'I');
-        }
-        return NULL;
-    }
-
-    
 } // end extern "C"
 
 //////////////////////////////////////////////

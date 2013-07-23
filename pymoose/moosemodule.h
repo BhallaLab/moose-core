@@ -7,9 +7,9 @@
 // Copyright (C) 2010 Subhasis Ray, all rights reserved.
 // Created: Thu Mar 10 17:11:06 2011 (+0530)
 // Version: 
-// Last-Updated: Tue Jul  9 11:05:14 2013 (+0530)
+// Last-Updated: Tue Jul 23 19:31:10 2013 (+0530)
 //           By: subha
-//     Update #: 1314
+//     Update #: 1410
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -31,22 +31,87 @@
 #ifndef _MOOSEMODULE_H
 #define _MOOSEMODULE_H
 
+
 #include <string>
 #include "../basecode/Id.h"
 extern "C" {
+
+    // This had to be defined for py3k, but does not harm 2.
+    struct module_state {
+        PyObject *error;
+    };
+    
+    // The endianness check is from:
+    // http://stackoverflow.com/questions/2100331/c-macro-definition-to-determine-big-endian-or-little-endian-machine
+    enum
+    {
+        O32_LITTLE_ENDIAN = 0x03020100ul,
+        O32_BIG_ENDIAN = 0x00010203ul,
+        O32_PDP_ENDIAN = 0x01000302ul
+    };
+
+    const union { unsigned char bytes[4]; uint32_t value; } o32_host_order =  { { 0, 1, 2, 3 } };
+
+#define O32_HOST_ORDER (o32_host_order.value)
+
+
 #if PY_MAJOR_VERSION >= 3
+#define PY3K
+    PyMODINIT_FUNC PyInit_moose();
     // int has been replaced by long
 #define PyInt_Check PyLong_Check
 #define PyInt_AsLong PyLong_AsLong
 #define PyInt_AsUnsignedLongMask PyLong_AsUnsignedLongMask
 #define PyInt_FromLong PyLong_FromLong
-  // string has been replaced by unicode
+    // string has been replaced by unicode
 #define PyString_Check PyUnicode_Check
 #define PyString_FromString PyUnicode_FromString
 #define PyString_FromFormat PyUnicode_FromFormat
-#define PyString_AsString(str)\
-  PyBytes_AS_STRING(PyUnicode_AsEncodedString(str, "utf-8", "Error~"))
-#endif
+#define PyString_AsString(str)                                          \
+    PyBytes_AS_STRING(PyUnicode_AsEncodedString(str, "utf-8", "Error~"))
+    // Python 3 does not like global module state
+#define GETSTATE(m) ((struct module_state*)PyModule_GetState(m))
+#else // Python 2
+    PyMODINIT_FUNC init_moose();    
+    static struct module_state _state;    
+#define GETSTATE(m) (&_state)
+#endif // if PY_MAJOR_VERSION
+
+    /* Shortcut to raise an exception when a bad Id is encountered */
+#define RAISE_INVALID_ID(ret, msg) {                            \
+        PyErr_SetString(PyExc_ValueError, msg": invalid Id");   \
+        return ret;                                             \
+    } // RAISE_INVALID_ID
+
+#define RAISE_TYPE_ERROR(ret, type) {                           \
+        PyErr_SetString(PyExc_TypeError, "require " #type);     \
+        return ret;                                             \
+    }
+            
+
+    // Minimum number of arguments for setting destFinfo - 1-st
+    // the finfo name.
+#define minArgs 1
+    
+    // Arbitrarily setting maximum on variable argument list. Read:
+    // http://www.swig.org/Doc1.3/Varargs.html to understand why
+#define maxArgs 10
+    
+    
+    ///////////////////////////////////
+    // Python datatype checking macros
+    ///////////////////////////////////
+    
+#define Id_Check(v) (Py_TYPE(v) == &IdType)
+#define Id_SubtypeCheck(v) (PyType_IsSubtype(Py_TYPE(v),&IdType))
+#define ObjId_Check(v) (Py_TYPE(v) == &ObjIdType)
+#define ObjId_SubtypeCheck(v) (PyType_IsSubtype(Py_TYPE(v), &ObjIdType))
+#define LookupField_Check(v) (Py_TYPE(v) == &LookupFieldType)
+    
+    // Macro to create the Shell * out of shellId
+#define SHELLPTR (reinterpret_cast<Shell*>(get_shell(0, NULL).eref().data()))
+
+    
     /**
        _Id wraps the Id class - where each element is identified by Id
     */
@@ -81,121 +146,132 @@ extern "C" {
     //////////////////////////////////////////
     // Methods for ElementField class
     //////////////////////////////////////////
-    static int moose_ElementField_setNum(_Field * self, PyObject * num, void * closure);
-    static PyObject* moose_ElementField_getNum(_Field * self, void * closure);
-    static Py_ssize_t moose_ElementField_getLen(_Field * self, void * closure);
-    static PyObject * moose_ElementField_getItem(_Field * self, Py_ssize_t index);
-    static PyObject * moose_ElementField_getPath(_Field * self, void * closure);
-    static PyObject * moose_ElementField_getId(_Field * self, void * closure);
+    int moose_ElementField_setNum(_Field * self, PyObject * num, void * closure);
+    PyObject* moose_ElementField_getNum(_Field * self, void * closure);
+    Py_ssize_t moose_ElementField_getLen(_Field * self, void * closure);
+    PyObject * moose_ElementField_getItem(_Field * self, Py_ssize_t index);
+    PyObject * moose_ElementField_getPath(_Field * self, void * closure);
+    PyObject * moose_ElementField_getId(_Field * self, void * closure);
     
     //////////////////////////////////////////
     // Methods for Id class
     //////////////////////////////////////////
-    static int moose_Id_init(_Id * self, PyObject * args, PyObject * kwargs);
-    static long moose_Id_hash(_Id * self);
+    int moose_Id_init(_Id * self, PyObject * args, PyObject * kwargs);
+    Id create_Id_from_path(string path, vector<int> dims, string type); // inner function
+    long moose_Id_hash(_Id * self);
     
-    static PyObject * moose_Id_repr(_Id * self);
-    static PyObject * moose_Id_str(_Id * self);
-    static PyObject * moose_Id_delete(_Id * self);
-    static PyObject * moose_Id_getValue(_Id * self);
-    static PyObject * moose_Id_getPath(_Id * self);
+    PyObject * moose_Id_repr(_Id * self);
+    PyObject * moose_Id_str(_Id * self);
+    PyObject * deleteId(_Id * obj); // inner function
+    PyObject * moose_Id_delete(_Id * self);
+    PyObject * moose_Id_getValue(_Id * self);
+    PyObject * moose_Id_getPath(_Id * self);
     /* Id functions to allow part of sequence protocol */
-    static Py_ssize_t moose_Id_getLength(_Id * self);
-    static PyObject * moose_Id_getItem(_Id * self, Py_ssize_t index);
-    static PyObject * moose_Id_getSlice(_Id * self, PyObject * args);    
-    static PyObject * moose_Id_getShape(_Id * self);
-    static PyObject * moose_Id_subscript(_Id * self, PyObject * op);
-    static PyObject * moose_Id_richCompare(_Id * self, PyObject * args, int op);
-    static int moose_Id_contains(_Id * self, PyObject * args);
-    static PyObject * moose_Id_getattro(_Id * self, PyObject * attr);
-    static int moose_Id_setattro(_Id * self, PyObject * attr, PyObject * value);
-    static PyObject * moose_Id_setField(_Id * self, PyObject *args);
+    Py_ssize_t moose_Id_getLength(_Id * self);
+    PyObject * moose_Id_getItem(_Id * self, Py_ssize_t index);
+    PyObject * moose_Id_getSlice(_Id * self, PyObject * args);    
+    PyObject * moose_Id_getShape(_Id * self);
+    PyObject * moose_Id_subscript(_Id * self, PyObject * op);
+    PyObject * moose_Id_richCompare(_Id * self, PyObject * args, int op);
+    int moose_Id_contains(_Id * self, PyObject * args);
+    PyObject * moose_Id_getattro(_Id * self, PyObject * attr);
+    int moose_Id_setattro(_Id * self, PyObject * attr, PyObject * value);
+    PyObject * moose_Id_setField(_Id * self, PyObject *args);
     ///////////////////////////////////////////
     // Methods for ObjId class
     ///////////////////////////////////////////
-    static int moose_ObjId_init(PyObject * self, PyObject * args, PyObject * kwargs);
-    static long moose_ObjId_hash(_ObjId * self);
-    static PyObject * moose_ObjId_repr(_ObjId * self);
-    static PyObject * moose_ObjId_getattro(_ObjId * self, PyObject * attr);
-    static PyObject * moose_ObjId_getField(_ObjId * self, PyObject * args);
-    static int moose_ObjId_setattro(_ObjId * self, PyObject * attr, PyObject * value);
-    static PyObject * moose_ObjId_setField(_ObjId * self, PyObject * args);
-    static PyObject * moose_ObjId_getLookupField(_ObjId * self, PyObject * args);
-    static PyObject * moose_ObjId_setLookupField(_ObjId * self, PyObject * args);
-    static PyObject * moose_ObjId_setDestField(_ObjId * self, PyObject * args);
-    static PyObject * moose_ObjId_getFieldNames(_ObjId * self, PyObject * args);
-    static PyObject * moose_ObjId_getFieldType(_ObjId * self, PyObject * args);
-    static PyObject * moose_ObjId_getDataIndex(_ObjId * self);
-    static PyObject * moose_ObjId_getFieldIndex(_ObjId * self);
-    static PyObject * moose_ObjId_getNeighbors(_ObjId * self, PyObject * args);
-    static PyObject * moose_ObjId_getId(_ObjId * self);
-    static PyObject * moose_ObjId_connect(_ObjId * self, PyObject * args);
-    static PyObject * moose_ObjId_richcompare(_ObjId * self, PyObject * args, int op);
+    int moose_ObjId_init(PyObject * self, PyObject * args, PyObject * kwargs);
+    long moose_ObjId_hash(_ObjId * self);
+    PyObject * moose_ObjId_repr(_ObjId * self);
+    PyObject * moose_ObjId_getattro(_ObjId * self, PyObject * attr);
+    PyObject * moose_ObjId_getField(_ObjId * self, PyObject * args);
+    int moose_ObjId_setattro(_ObjId * self, PyObject * attr, PyObject * value);
+    PyObject * moose_ObjId_setField(_ObjId * self, PyObject * args);
+    PyObject * moose_ObjId_getLookupField(_ObjId * self, PyObject * args);
+    PyObject * moose_ObjId_setLookupField(_ObjId * self, PyObject * args);
+    PyObject * moose_ObjId_setDestField(_ObjId * self, PyObject * args);
+    PyObject * moose_ObjId_getFieldNames(_ObjId * self, PyObject * args);
+    PyObject * moose_ObjId_getFieldType(_ObjId * self, PyObject * args);
+    PyObject * moose_ObjId_getDataIndex(_ObjId * self);
+    PyObject * moose_ObjId_getFieldIndex(_ObjId * self);
+    PyObject * moose_ObjId_getNeighbors(_ObjId * self, PyObject * args);
+    PyObject * moose_ObjId_getId(_ObjId * self);
+    PyObject * moose_ObjId_connect(_ObjId * self, PyObject * args);
+    PyObject * moose_ObjId_richcompare(_ObjId * self, PyObject * args, int op);
 
     ////////////////////////////////////////////
     // Methods for LookupField
     ////////////////////////////////////////////
-    static int moose_Field_init(_Field * self, PyObject * args, PyObject * kwds);
-    static long moose_Field_hash(_Field * self);
-    static PyObject * moose_Field_repr(_Field * self);
-    static PyObject * moose_LookupField_getItem(_Field * self, PyObject * key);
-    static int moose_LookupField_setItem(_Field * self, PyObject * key, PyObject * value);
+    int moose_Field_init(_Field * self, PyObject * args, PyObject * kwds);
+    long moose_Field_hash(_Field * self);
+    PyObject * moose_Field_repr(_Field * self);
+    PyObject * moose_LookupField_getItem(_Field * self, PyObject * key);
+    int moose_LookupField_setItem(_Field * self, PyObject * key, PyObject * value);
     
     
     ////////////////////////////////////////////////
-    // static functions to be accessed from Python
+    //  functions to be accessed from Python
     ////////////////////////////////////////////////
 
 
     // The following are global functions
-    static PyObject * oid_to_element(ObjId oid);
-    static PyObject * moose_element(PyObject * dummy, PyObject * args);
-    static PyObject * moose_useClock(PyObject * dummy, PyObject * args);
-    static PyObject * moose_setClock(PyObject * dummy, PyObject * args);
-    static PyObject * moose_start(PyObject * dummy, PyObject * args);
-    static PyObject * moose_reinit(PyObject * dummy, PyObject * args);
-    static PyObject * moose_stop(PyObject * dummy, PyObject * args);
-    static PyObject * moose_isRunning(PyObject * dummy, PyObject * args);
-    static PyObject * moose_exists(PyObject * dummy, PyObject * args);
-    static PyObject * moose_loadModel(PyObject * dummy, PyObject * args);
-    static PyObject * moose_saveModel(PyObject * dummy, PyObject * args);
-    static PyObject * moose_writeSBML(PyObject * dummy, PyObject * args);
-    static PyObject * moose_setCwe(PyObject * dummy, PyObject * args);
-    static PyObject * moose_getCwe(PyObject * dummy, PyObject * args);
-    static PyObject * moose_copy(PyObject * dummy, PyObject * args, PyObject * kwargs);
-    static PyObject * moose_move(PyObject * dummy, PyObject * args);
-    static PyObject * moose_delete(PyObject * dummy, PyObject * args);
-    static PyObject * moose_connect(PyObject * dummy, PyObject * args);
-    static PyObject * moose_getFieldDict(PyObject * dummy, PyObject * args);
-    static PyObject * moose_getField(PyObject * dummy, PyObject * args);
-    static PyObject * moose_syncDataHandler(PyObject * dummy, PyObject * target);
-    static PyObject * moose_seed(PyObject * dummy, PyObject * args);
-    static PyObject * moose_wildcardFind(PyObject * dummy, PyObject * args);
+    PyObject * oid_to_element(ObjId oid);
+    PyObject * moose_element(PyObject * dummy, PyObject * args);
+    PyObject * moose_useClock(PyObject * dummy, PyObject * args);
+    PyObject * moose_setClock(PyObject * dummy, PyObject * args);
+    PyObject * moose_start(PyObject * dummy, PyObject * args);
+    PyObject * moose_reinit(PyObject * dummy, PyObject * args);
+    PyObject * moose_stop(PyObject * dummy, PyObject * args);
+    PyObject * moose_isRunning(PyObject * dummy, PyObject * args);
+    PyObject * moose_exists(PyObject * dummy, PyObject * args);
+    PyObject * moose_loadModel(PyObject * dummy, PyObject * args);
+    PyObject * moose_saveModel(PyObject * dummy, PyObject * args);
+    PyObject * moose_writeSBML(PyObject * dummy, PyObject * args);
+    PyObject * moose_setCwe(PyObject * dummy, PyObject * args);
+    PyObject * moose_getCwe(PyObject * dummy, PyObject * args);
+    PyObject * moose_copy(PyObject * dummy, PyObject * args, PyObject * kwargs);
+    PyObject * moose_move(PyObject * dummy, PyObject * args);
+    PyObject * moose_delete(PyObject * dummy, PyObject * args);
+    PyObject * moose_connect(PyObject * dummy, PyObject * args);
+    PyObject * moose_getFieldDict(PyObject * dummy, PyObject * args);
+    PyObject * moose_getField(PyObject * dummy, PyObject * args);
+    PyObject * moose_syncDataHandler(PyObject * dummy, PyObject * target);
+    PyObject * moose_seed(PyObject * dummy, PyObject * args);
+    PyObject * moose_wildcardFind(PyObject * dummy, PyObject * args);
     // This should not be required or accessible to the user. Put here
     // for debugging threading issue.
-    static PyObject * moose_quit(PyObject * dummy);
+    PyObject * moose_quit(PyObject * dummy);
     
     //////////////////////////////////////////////////////////////
     // These are internal functions and not exposed in Python
     //////////////////////////////////////////////////////////////
-    static PyObject * getLookupField(ObjId oid, char * fieldName, PyObject * key);
-    static int setLookupField(ObjId oid, char * fieldName, PyObject * key, PyObject * value);
-    static int define_class(PyObject * module_dict, const Cinfo * cinfo);
-    static int define_destFinfos(const Cinfo * cinfo);
-    static int defineAllClasses(PyObject* module_dict);
-    static int define_lookupFinfos(const Cinfo * cinfo);
-    static int define_elementFinfos(const Cinfo * cinfo);
-    static PyObject * moose_ObjId_get_lookupField_attr(PyObject * self, void * closure);
-    static PyObject * moose_ObjId_get_elementField_attr(PyObject * self, void * closure);
-    static PyObject * moose_ObjId_get_destField_attr(PyObject * self, void * closure);
-    static PyObject * _setDestField(ObjId oid, PyObject * args);
-#if PY_MAJOR_VERSION >= 3
-    PyMODINIT_FUNC PyInit_moose();
-#else
-    PyMODINIT_FUNC init_moose();
-#endif
+    PyObject * getLookupField(ObjId oid, char * fieldName, PyObject * key);
+    int setLookupField(ObjId oid, char * fieldName, PyObject * key, PyObject * value);
+    int define_class(PyObject * module_dict, const Cinfo * cinfo);
+    int define_destFinfos(const Cinfo * cinfo);
+    int defineAllClasses(PyObject* module_dict);
+    int define_lookupFinfos(const Cinfo * cinfo);
+    int define_elementFinfos(const Cinfo * cinfo);
+    PyObject * moose_ObjId_get_lookupField_attr(PyObject * self, void * closure);
+    PyObject * moose_ObjId_get_elementField_attr(PyObject * self, void * closure);
+    PyObject * moose_ObjId_get_destField_attr(PyObject * self, void * closure);
+    PyObject * _setDestField(ObjId oid, PyObject * args);
 
-
+    Id get_shell(int argc, char **argv);
+    vector<int> pysequence_to_dimvec(PyObject * dims);
+    map<string, PyObject *>& get_inited_lookupfields();
+    map< string, PyObject * >& get_inited_destfields();
+    map<string, vector <PyGetSetDef> >& get_getsetdefs();
+    map<string, PyTypeObject *>& get_moose_classes();
+    map< string, PyObject *>& get_inited_elementfields();
+    int get_npy_typenum(const type_info& ctype);
+    string getFieldType(string className, string fieldName, string finfoType);
+    const map<string, string>& get_field_alias();
+    string get_baseclass_name(PyObject * self);
+    int parse_Finfo_type(string className, string finfoType, string fieldName, vector<string> & typeVec);
+    vector<string> getFieldNames(string className, string finfoType);
+    PyObject * get_ObjId_attr(_ObjId * oid, string attribute);
+    const char ** getFinfoTypes();
     int inner_getFieldDict(Id classId, string finfoType, vector<string>& fields, vector<string>& types); 
 
     /**
@@ -205,154 +281,20 @@ extern "C" {
     void * to_cpp(PyObject * object, char typecode);
     
     /**
-       Convert simple C++ data `v` of type A into Python object.
+       Convert C++ object to Python.
     */
-extern PyTypeObject ObjIdType;
-extern PyTypeObject IdType;
-
+    PyObject * to_py(void * obj, char typecode);
+    /**
+       Convert C++ vector to Python tuple
+    */
+    PyObject * to_pytuple(void * obj, char typecode);
+    
+    /* inner fn for use in to_pytuple */
+    PyObject * convert_and_set_tuple_entry(PyObject * tuple, unsigned int index, void * vptr, char typecode);
+    
     
 } //!extern "C"
 
-// // Convert C++ data to python object
-// template <typename T>
-// PyObject * to_py(const void* v);
-
-
-
-
-// // convert a Python sequence to a C++ vector
-// template <typename T> vector< T > * PySequenceToVector(PyObject * seq, char typecode);
-
-// template <typename T> vector< vector < T > > * PySequenceToVectorOfVectors(PyObject * seq, char typecode);
-
-// /// Set a destinfo that takes a vector argument
-// template <class A> inline PyObject* _set_vector_destFinfo(ObjId obj, string fieldName, int argIndex, PyObject * value, char vtypecode);
-
-// /**
-//    Convert C++ vector `value` into a Python tuple.
-//  */
-// template<typename T>
-// PyObject * to_pytuple(const vector< T >& value, char typecode);
-
-// /**
-//    Return vector value for `key` from LookupField `fieldname` of ObjId
-//    `oid`.
-   
-//    Side effect: ret is populated with Python objects for individual
-//    entries in the vector value.
-   
-//    Returns NULL on failure, `ret` otherwise.  */
-// template < typename KeyType, typename ValueType >
-//         PyObject * get_vec_lookupfield(ObjId oid, string fieldname, KeyType key, char vtypecode);
-
-// /**
-//    Lookup entry for `key` from lookup field `fieldname` of object
-//    `oid`.  Here the lookup field must have primitive data types or
-//    ObjId or Id as the value. No vectors or other fancy datastructures
-//    are handled.  */
-// template <typename KeyType, typename ValueType>
-// PyObject * get_simple_lookupfield(
-//     ObjId oid,
-//     string fieldname,
-//     KeyType key,
-//     char vtypecode);
-// /**
-//    Get the value for key from LookupField fname.
-//  */
-
-// template <class KeyType> inline
-// PyObject * lookup_value(
-//     const ObjId& oid,
-//     string fname,
-//     char value_type_code,
-//     char key_type_code,
-//     PyObject * key);
-
-// template <class KeyType> inline
-// int set_lookup_value(
-//     const ObjId& oid,
-//     string fname,
-//     char value_type_code,
-//     char key_type_code,
-//     PyObject * key,
-//     PyObject * value_obj);
-
-///////////////////////////////////////////////////////////////////
-// Developers' Note:
-//
-// It is better to keep the templated function definition in the
-// header: g++ produces more informative error messages
-///////////////////////////////////////////////////////////////////
-
-
-// Developers' Note: to_py
-//
-// We have to explicitly cast the argument to the template
-// argument. Otherwise, all the conditionals except the one for the
-// typeid of the argument (v) produce compilation error due to
-// incompatible type.
-template <typename A> 
-PyObject * to_py(const A* v)
-{
-    if (typeid(A) == typeid(double)){
-        return PyFloat_FromDouble(*((double*)v));
-    } else if (typeid(A) == typeid(string)){
-        return PyString_FromString((*((string*)v)).c_str());
-    } else if (typeid(A) == typeid(ObjId)){
-        _ObjId * obj = PyObject_New(_ObjId, &ObjIdType);
-        obj->oid_ = *((ObjId*)v);
-        return (PyObject*)obj;
-    } else if (typeid(A) == typeid(Id)){
-        _Id * obj = PyObject_New(_Id, &IdType);
-        obj->id_ = *((Id*)v);
-        return (PyObject*)obj;
-    } else if (typeid(A) == typeid(long)){
-        return PyLong_FromLong(*((long*)v));
-    } else if (typeid(A) == typeid(unsigned long)){
-        return PyLong_FromUnsignedLong(*((unsigned long*)v));
-    }
-#ifdef HAVE_LONG_LONG
-    else if (typeid(A) == typeid(long long)) {
-        return PyLong_FromLongLong(*((long long *)v));
-    } else if (typeid(A) == typeid(unsigned long long)){
-        return PyLong_FromUnsignedLongLong(*((unsigned long long*)v));
-    }
-#endif
-    else if (typeid(A) == typeid(int)){
-        return PyInt_FromLong(*((int*)v));
-    } else if (typeid(A) == typeid(float)){
-        return PyFloat_FromDouble(*((float*)v));
-    } else if (typeid(A) == typeid(unsigned int)){
-        return PyLong_FromUnsignedLong(*((unsigned int*)v));
-    } else if (typeid(A) == typeid(bool)){
-        if (*((bool*)v)){
-            Py_RETURN_TRUE;
-        } else {
-            Py_RETURN_FALSE;
-        }
-    } else if ( typeid(A) == typeid(short)){
-        return PyInt_FromLong(*((short*)v));
-    }
-    return NULL;
-} 
-
-template <typename T> 
-PyObject * to_pytuple(const vector<T>& value)
-{
-    PyObject * ret = PyTuple_New((Py_ssize_t)value.size());
-    for (unsigned int ii = 0; ii < value.size(); ++ii){
-        PyObject * v = to_py< T >(&value[ii]);
-        if (v == NULL || PyTuple_SetItem(ret,(Py_ssize_t)ii, v) < 0){
-            ostringstream error;
-            error << "to_pytuple: error setting item " << ii;
-            cerr << error.str() << '\n' << value[ii] << endl;
-            PyErr_SetString(PyExc_RuntimeError, error.str().c_str());
-            Py_XDECREF(ret);
-            return NULL;
-        }
-    }
-    return ret;    
-}
 
 template <typename T>
 vector< T > * PySequenceToVector(PyObject * seq, char typecode)
@@ -384,7 +326,7 @@ vector< T > * PySequenceToVector(PyObject * seq, char typecode)
 }
 
 template <typename T>
-        vector < vector < T > > * PySequenceToVectorOfVectors(PyObject * seq, char typecode)
+vector < vector < T > > * PySequenceToVectorOfVectors(PyObject * seq, char typecode)
 {
     Py_ssize_t outerLength = PySequence_Length(seq);
     vector < vector <T> > * ret = new vector < vector < T > >((unsigned int) outerLength);
@@ -409,24 +351,22 @@ template <typename T>
     return ret;
 }
 
-    
-
-template <typename KeyType, typename ValueType> inline
-PyObject * get_vec_lookupfield(ObjId oid, string fieldname, KeyType key, char vtypecode)
+template <typename KeyType, typename ValueType> 
+        PyObject * get_vec_lookupfield(ObjId oid, string fieldname, KeyType key, char vtypecode)
 {
     vector<ValueType> value = LookupField<KeyType, vector<ValueType> >::get(oid, fieldname, key);
-    return to_pytuple< ValueType >(value);
+    return to_pytuple((void*)&value, innerType(vtypecode));
 }
 
-template <typename KeyType, typename ValueType> inline
-PyObject * get_simple_lookupfield(ObjId oid, string fieldname, KeyType key, char vtypecode)
+template <typename KeyType, typename ValueType> 
+        PyObject * get_simple_lookupfield(ObjId oid, string fieldname, KeyType key, char vtypecode)
 {
     ValueType value = LookupField<KeyType, ValueType>::get(oid, fieldname, key);
-    PyObject * v = to_py< ValueType >(&value);
+    PyObject * v = to_py(&value, vtypecode);
     return v;
 }
 
-template <class KeyType> inline PyObject *
+template <class KeyType> PyObject *
 lookup_value(const ObjId& oid,
              string fname,
              char value_type_code,
@@ -524,7 +464,7 @@ lookup_value(const ObjId& oid,
     return ret;
 }
 
-template <class KeyType> inline
+template <class KeyType> 
 int set_lookup_value(const ObjId& oid, string fname, char value_type_code, char key_type_code, PyObject * key, PyObject * value_obj)
 {
     bool success = false;
@@ -534,7 +474,7 @@ int set_lookup_value(const ObjId& oid, string fname, char value_type_code, char 
     }
 #define SET_LOOKUP_VALUE( TYPE )                                        \
     {                                                                   \
-        TYPE * value = (TYPE*)to_cpp(value_obj, value_type_code);                       \
+        TYPE * value = (TYPE*)to_cpp(value_obj, value_type_code);       \
         if (value){                                                     \
             success = LookupField < KeyType, TYPE > ::set(oid, fname, *cpp_key, *value); \
             delete value;                                               \
@@ -544,51 +484,51 @@ int set_lookup_value(const ObjId& oid, string fname, char value_type_code, char 
     }
     
     switch (value_type_code){
-    case 'b':
-        SET_LOOKUP_VALUE(bool)        
-    case 'c':
-        SET_LOOKUP_VALUE(char)
-    case 'h':
-        SET_LOOKUP_VALUE(short)
-    case 'H':
-        SET_LOOKUP_VALUE(unsigned short)
-    case 'i':
-        SET_LOOKUP_VALUE(int)
-    case 'I':
-        SET_LOOKUP_VALUE(unsigned int)
-    case 'l':
-        SET_LOOKUP_VALUE(long)
+        case 'b':
+            SET_LOOKUP_VALUE(bool)        
+        case 'c':
+            SET_LOOKUP_VALUE(char)
+        case 'h':
+            SET_LOOKUP_VALUE(short)
+        case 'H':
+            SET_LOOKUP_VALUE(unsigned short)
+        case 'i':
+            SET_LOOKUP_VALUE(int)
+        case 'I':
+            SET_LOOKUP_VALUE(unsigned int)
+        case 'l':
+            SET_LOOKUP_VALUE(long)
                     
-    case 'k': 
-        SET_LOOKUP_VALUE(unsigned long)
+        case 'k': 
+            SET_LOOKUP_VALUE(unsigned long)
 #ifdef HAVE_LONG_LONG
-    case 'L':
-        SET_LOOKUP_VALUE(long long)
-    case 'K': 
-        SET_LOOKUP_VALUE(unsigned long long);
+        case 'L':
+            SET_LOOKUP_VALUE(long long)
+        case 'K': 
+            SET_LOOKUP_VALUE(unsigned long long);
 #endif
-    case 'd':
-        SET_LOOKUP_VALUE(double)
-    case 'f': 
-        SET_LOOKUP_VALUE(float)
-    case 's':
-        SET_LOOKUP_VALUE(string)
-    case 'x':
-        SET_LOOKUP_VALUE(Id)
-    case 'y':
-        SET_LOOKUP_VALUE(ObjId)
-    default:
-        PyErr_SetString(PyExc_TypeError, "invalid value type");
-}
+        case 'd':
+            SET_LOOKUP_VALUE(double)
+        case 'f': 
+            SET_LOOKUP_VALUE(float)
+        case 's':
+            SET_LOOKUP_VALUE(string)
+        case 'x':
+            SET_LOOKUP_VALUE(Id)
+        case 'y':
+            SET_LOOKUP_VALUE(ObjId)
+        default:
+            PyErr_SetString(PyExc_TypeError, "invalid value type");
+    }
     if (success){
-    return 0;
-} else {
-    return -1;
-}
+        return 0;
+    } else {
+        return -1;
+    }
 }
 
     
-template <class A> inline
+template <class A> 
 PyObject* _set_vector_destFinfo(ObjId obj, string fieldName, int argIndex, PyObject * value, char vtypecode)
 {
     ostringstream error;
@@ -607,10 +547,10 @@ PyObject* _set_vector_destFinfo(ObjId obj, string fieldName, int argIndex, PyObj
     bool ret = SetGet1< vector < A > >::set(obj, fieldName, *_value);
     delete _value;
     if (ret){
-    Py_RETURN_TRUE;
-} else {
-    Py_RETURN_FALSE;
-}
+        Py_RETURN_TRUE;
+    } else {
+        Py_RETURN_FALSE;
+    }
 }
 
 
