@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Tue Jul  2 14:28:35 2013 (+0530)
 # Version: 
-# Last-Updated: Tue Jul  2 15:37:54 2013 (+0530)
+# Last-Updated: Tue Jul 23 21:28:45 2013 (+0530)
 #           By: subha
-#     Update #: 56
+#     Update #: 57
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -86,10 +86,10 @@ def gapjunction_demo():
     utils.setDefaultDt(elecdt=simdt, plotdt2=simdt)
     utils.assignDefaultTicks()
     utils.stepRun(simtime, 10000*simdt)
-    print len(vm1_tab.vec), len(vm2_tab.vec), len(pulse_tab.vec)
-    moose.showmsg(comp1)
-    moose.showmsg(comp2)
-    moose.showmsg(pulse)
+    # print len(vm1_tab.vec), len(vm2_tab.vec), len(pulse_tab.vec)
+    # moose.showmsg(comp1)
+    # moose.showmsg(comp2)
+    # moose.showmsg(pulse)
     t = pylab.linspace(0, simtime, len(vm1_tab.vec))
     pylab.plot(t, vm1_tab.vec*1000, label='Vm1 (mV)')
     pylab.plot(t, vm2_tab.vec*1000, label='Vm2 (mV)')
