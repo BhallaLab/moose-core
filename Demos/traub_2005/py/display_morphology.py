@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Mar  8 11:26:13 2013 (+0530)
 # Version: 
-# Last-Updated: Mon Jun 24 18:41:19 2013 (+0530)
+# Last-Updated: Thu Jul 18 15:12:01 2013 (+0530)
 #           By: subha
-#     Update #: 351
+#     Update #: 366
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -67,9 +67,16 @@ def cell_to_graph(cell, label=False):
     the topology of the compartments
 
     """        
+    soma = moose.element('%s/comp_1' % (cell.path))
+    if len(soma.neighbours['axial']) > 0:
+        msg = 'raxial'
+    elif len(soma.neighbours['distal']) > 0:
+        msg = 'distal'
+    else:
+        raise Exception('No neighbours on raxial or distal')
     es = [(c1.path, c2.path, {'weight': 2/ (moose.Compartment(c1).Ra + moose.Compartment(c2).Ra)}) \
               for c1 in moose.wildcardFind('%s/##[ISA=Compartment]' % (cell.path)) \
-              for c2 in moose.Compartment(c1).neighbours['raxial']]
+              for c2 in moose.Compartment(c1).neighbours[msg]]
     g = nx.Graph()
     g.add_edges_from(es)
     if label:

@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Fri Jul 12 11:53:50 2013 (+0530)
 # Version: 
-# Last-Updated: Thu Jul 18 15:28:46 2013 (+0530)
+# Last-Updated: Thu Jul 18 18:27:43 2013 (+0530)
 #           By: subha
-#     Update #: 691
+#     Update #: 717
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -71,7 +71,7 @@ import matplotlib.gridspec as gridspec
 import moose
 from moose import utils as mutils
 
-simdt = 1e-6
+simdt = 0.025e-3
 plotdt = 1e-4
 
 class HHChanView(QtGui.QWidget):
@@ -316,25 +316,31 @@ class CellView(QtGui.QWidget):
 
     def displayCellMorphology(self, cellpath):
         cell = moose.element(cellpath)
+        print 'HERE'
         graph = cell_to_graph(cell)
         self.getCellMorphologyWidget().displayGraph(graph)
 
     def createCell(self, name):
-        try:
-            moose.delete(moose.element('/model').id_)
-            moose.delete(moose.element('/data').id_)
-        except Exception, e:
-            print e
         model_container = moose.Neutral('/model')
         data_container = moose.Neutral('/data')        
+        moose.le(model_container)
+        moose.le(data_container)
+        for ch in model_container.children:            
+            moose.delete(ch)
+        for ch in data_container.children:
+            moose.delete(ch)
         params = setup_current_step_model(model_container,
                                           data_container,
                                           name,
                                           [[0, 0, 0],
                                            [1e9, 0, 0]])
+        # moose.le(model_container)
+        # moose.le(data_container)
+        print '11111'
+        print model_container.path, data_container.path
         params['modelRoot'] = model_container.path
         params['dataRoot'] = data_container.path
-        # self.cells[name] = params
+        print 'here'
         return params
 
     def displaySelected(self):
@@ -343,13 +349,15 @@ class CellView(QtGui.QWidget):
         name = cellnames[0]
         # params = self.createCell(name)
         # cell = params['cell']
-        self.displayCellMorphology('library/%s' % (name))
+        protopath = '/library/%s' % (name)
+        self.displayCellMorphology(protopath)
 
     def simulateSelected(self):
         cellnames = [str(c.text()) for c in self.cellListWidget.selectedItems()]
         assert(len(cellnames) == 1)        
         name = cellnames[0]
         params = self.createCell(name)
+        print 'Here ......'
         hsolve = moose.HSolve('%s/solver' % (params['cell'].path))
         hsolve.dt = simdt
         hsolve.target = params['cell'].path
