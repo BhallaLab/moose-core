@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jul 24 16:02:21 2013 (+0530)
 # Version: 
-# Last-Updated: Wed Jul 24 17:35:37 2013 (+0530)
+# Last-Updated: Thu Jul 25 08:36:53 2013 (+0530)
 #           By: subha
-#     Update #: 40
+#     Update #: 60
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -45,6 +45,7 @@
 
 # Code:
 
+import moose
 import unittest
 from reader import NML2Reader
 
@@ -59,9 +60,27 @@ class TestReader(unittest.TestCase):
         self.assertEqual(self.reader.filename, self.filename, 'filename was not set')
         self.assertIsNotNone(self.reader.doc, 'doc is None')
 
+class TestMorphologyReading(unittest.TestCase):
+    def setUp(self):
+        self.reader = NML2Reader()
+        self.lib = moose.Neutral('/library')
+        self.filename = 'test_files/Purk2M9s.nml'
+        self.reader.read(self.filename)
+        self.ncell, self.mcell = self.reader.createCellPrototype(0, symmetric=False)
+
     def test_createCellPrototype(self):
-        cell = self.reader.createCellPrototype(0)
-        print dir(cell)
+        self.assertIsInstance(self.cell, moose.Neuron)
+
+    def test_createMorphology(self):
+        for comp_id in moose.wildcardFind(self.cell.path + '/##[ISA=Compartment]'):
+            comp = moose.element(comp_id)
+            self.assertAlmostEqual(comp.x0, float(self.reader.moose_to_nml[comp].proximal.x))
+            self.assertAlmostEqual(comp.y0, float(self.reader.moose_to_nml[comp].proximal.y))
+            self.assertAlmostEqual(comp.z0, float(self.reader.moose_to_nml[comp].proximal.z))
+            self.assertAlmostEqual(comp.x, float(self.reader.moose_to_nml[comp].distal.x))
+            self.assertAlmostEqual(comp.y, float(self.reader.moose_to_nml[comp].distal.y))
+            self.assertAlmostEqual(comp.z, float(self.reader.moose_to_nml[comp].distal.z))
+                                   
         
 
 if __name__ == '__main__':
