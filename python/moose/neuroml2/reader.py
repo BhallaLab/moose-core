@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jul 24 15:55:54 2013 (+0530)
 # Version: 
-# Last-Updated: Thu Jul 25 08:35:48 2013 (+0530)
+# Last-Updated: Thu Jul 25 10:02:30 2013 (+0530)
 #           By: subha
-#     Update #: 110
+#     Update #: 113
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -64,12 +64,10 @@ class NML2Reader(object):
     def read(self, filename):
         self.doc = loaders.NeuroMLLoader.load(filename)
         self.filename = filename
-        print 'Loaded file from', filename
 
     def createCellPrototype(self, index, symmetric=False):
         """To be completed - create the morphology, channels in prototype"""
         cell = self.doc.cells[index]
-        print dir(cell)
         nrn = moose.Neuron('%s/%s' % (self.lib.path, cell.id))
         self.proto_cells[cell.id] = nrn
         self.nml_to_moose[cell] = nrn
@@ -109,9 +107,9 @@ class NML2Reader(object):
             self.moose_to_nml[comp] = segment
             self.nml_to_moose[segment] = comp
             p0 = segment.proximal
-            comp.x0, comp.y0, comp.z0 = apply(float, (p0.x, p0.y, p0.z))
+            comp.x0, comp.y0, comp.z0 = map(float, (p0.x, p0.y, p0.z))
             p1 = segment.distal
-            comp.x, comp.y, comp.z = apply(float, (p1.x, p1.y, p1.z))
+            comp.x, comp.y, comp.z = map(float, (p1.x, p1.y, p1.z))
             try:
                 parent = id_to_comp[segment.parent.segment]
                 moose.connect(comp, src, parent, dst)

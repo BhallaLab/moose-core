@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Wed Jul 24 16:02:21 2013 (+0530)
 # Version: 
-# Last-Updated: Thu Jul 25 08:36:53 2013 (+0530)
+# Last-Updated: Thu Jul 25 10:02:10 2013 (+0530)
 #           By: subha
-#     Update #: 60
+#     Update #: 64
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -69,10 +69,10 @@ class TestMorphologyReading(unittest.TestCase):
         self.ncell, self.mcell = self.reader.createCellPrototype(0, symmetric=False)
 
     def test_createCellPrototype(self):
-        self.assertIsInstance(self.cell, moose.Neuron)
+        self.assertIsInstance(self.mcell, moose.Neuron)
 
     def test_createMorphology(self):
-        for comp_id in moose.wildcardFind(self.cell.path + '/##[ISA=Compartment]'):
+        for comp_id in moose.wildcardFind(self.mcell.path + '/##[ISA=Compartment]'):
             comp = moose.element(comp_id)
             self.assertAlmostEqual(comp.x0, float(self.reader.moose_to_nml[comp].proximal.x))
             self.assertAlmostEqual(comp.y0, float(self.reader.moose_to_nml[comp].proximal.y))
