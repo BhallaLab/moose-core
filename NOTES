@@ -22716,3 +22716,8 @@ Implemented and tested at least as a first level test. Need to give it
 nastier symcompartment cases with dodgy messaging.
 
 ==========================================================================
+26 July 2013
+Checkin 4702. Now a few nastier tests and then merge the traversal routines
+into the NeuroMesh code.
+Added a couple more nasty tests. Handles them with aplomb.
+
