@@ -1849,6 +1849,67 @@ void testNeuroNodeTree()
 		makeSpine( dend, cell, i, frac, 1.0e-6, 1.0e-6, i * 30.0 );
 	}
 	*/
+	// Now to make a totally random cell, with a complete mash of 
+	// messaging, having circular linkage even.
+	shell->doDelete( cell );
+	cell = shell->doCreate( "Neutral", Id(), "cell", dims );
+	vector< Id > compt( 10 );
+	for ( unsigned int i = 0; i < compt.size(); ++i ) {
+		stringstream ss;
+		ss << "compt" << i;
+		string name = ss.str();
+		compt[i] = shell->doCreate( "SymCompartment", cell, name, dims );
+		double dia = 50.0 - (i - 3) * (i - 3 );
+		Field< double >::set( compt[i], "diameter", dia );
+	}
+	shell->doAddMsg( "Single", compt[0], "proximal", compt[1], "distal" );
+	shell->doAddMsg( "Single", compt[1], "proximal", compt[2], "distal" );
+	shell->doAddMsg( "Single", compt[2], "distal", compt[3], "proximal" );
+	shell->doAddMsg( "Single", compt[3], "sibling", compt[2], "sibling" );
+	shell->doAddMsg( "Single", compt[3], "sphere", compt[4], "proximalOnly" );
+	shell->doAddMsg( "Single", compt[4], "distal", compt[5], "proximal" );
+	shell->doAddMsg( "Single", compt[4], "distal", compt[6], "proximal" );
+	shell->doAddMsg( "Single", compt[4], "axial", compt[7], "raxial" );
+	shell->doAddMsg( "Single", compt[7], "cylinder", compt[8], "proximalOnly" );
+	shell->doAddMsg( "Single", compt[7], "cylinder", compt[9], "proximalOnly" );
+	shell->doAddMsg( "Single", compt[9], "proximal", compt[0], "distal" );
+
+	nodes.clear();
+	elist.clear();
+	wildcardFind( "/cell/##", elist );
+	NeuroNode::buildTree( nodes, elist );
+	assert( nodes.size() == 10 );
+	i = 0;
+	// The fallback for the soma is the compt with biggest diameter.
+	assert( nodes[i++].elecCompt().element()->getName() == "compt3" );
+	assert( nodes[i++].elecCompt().element()->getName() == "compt2" );
+	assert( nodes[i++].elecCompt().element()->getName() == "compt1" );
+	assert( nodes[i++].elecCompt().element()->getName() == "compt0" );
+	assert( nodes[i++].elecCompt().element()->getName() == "compt9" );
+	assert( nodes[i++].elecCompt().element()->getName() == "compt7" );
+	assert( nodes[i++].elecCompt().element()->getName() == "compt8" );
+	assert( nodes[i++].elecCompt().element()->getName() == "compt4" );
+	assert( nodes[i++].elecCompt().element()->getName() == "compt5" );
+	assert( nodes[i++].elecCompt().element()->getName() == "compt6" );
+
+	// Now I change the biggest compartment to compartment 5.
+	Field< double >::set( compt[5], "diameter", 51.0 );
+	nodes.clear();
+	elist.clear();
+	wildcardFind( "/cell/##", elist );
+	NeuroNode::buildTree( nodes, elist );
+	assert( nodes.size() == 10 );
+	i = 0;
+	assert( nodes[i++].elecCompt().element()->getName() == "compt5" );
+	assert( nodes[i++].elecCompt().element()->getName() == "compt4" );
+	assert( nodes[i++].elecCompt().element()->getName() == "compt3" );
+	assert( nodes[i++].elecCompt().element()->getName() == "compt2" );
+	assert( nodes[i++].elecCompt().element()->getName() == "compt1" );
+	assert( nodes[i++].elecCompt().element()->getName() == "compt0" );
+	assert( nodes[i++].elecCompt().element()->getName() == "compt9" );
+	assert( nodes[i++].elecCompt().element()->getName() == "compt7" );
+	assert( nodes[i++].elecCompt().element()->getName() == "compt8" );
+	assert( nodes[i++].elecCompt().element()->getName() == "compt6" );
 
 	shell->doDelete( cell );
 	cout << "." << flush;
