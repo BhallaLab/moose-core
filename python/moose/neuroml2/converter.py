@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Apr 22 12:15:23 2013 (+0530)
 # Version: 
-# Last-Updated: Tue May 21 17:03:02 2013 (+0530)
+# Last-Updated: Wed Jul 10 16:36:14 2013 (+0530)
 #           By: subha
-#     Update #: 818
+#     Update #: 819
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -182,7 +182,7 @@ def convert_hhchannel(channel):
     nml_channel = neuroml.IonChannel(id=channel.id_.value,
                                      name=channel.name,
                                      type='ionChannelHH',
-                                     conductance = channel.Gbar)
+                                     conductance=channel.Gbar)
     if channel.Xpower > 0:
         hh_rate_x = convert_hhgate(channel.gateX[0])
         hh_rate_x.instances = channel.Xpower

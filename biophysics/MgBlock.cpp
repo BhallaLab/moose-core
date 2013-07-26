@@ -76,7 +76,7 @@ const Cinfo* MgBlock::initCinfo()
 	/////////////////////////////////////////////////////////////////////
 	static Finfo* MgBlockFinfos[] =
 	{
-		&process,		// Shared
+		&proc,		// Shared
 		&origChannel,	// Dest
 		&KMg_A,			// Value
 		&KMg_B,			// Value
@@ -172,7 +172,8 @@ void MgBlock::setZk( double Zk )
 void MgBlock::process( const Eref& e, ProcPtr info )
 {
 	double KMg = KMg_A_ * exp(Vm_/KMg_B_);
-	ChanBase::setGk( ChanBase::getGk() * KMg / ( KMg + CMg_ ) );
+	ChanBase::setGk( origGk_ * KMg / ( KMg + CMg_ ) );
+	// ChanBase::setGk( ChanBase::getGk() * KMg / ( KMg + CMg_ ) );
 	// Gk_ = Gk_ * KMg / (KMg + CMg_);
 
 	ChanBase::updateIk();
@@ -197,7 +198,8 @@ void MgBlock::reinit( const Eref& e, ProcPtr info )
 ///////////////////////////////////////////////////
 void MgBlock::origChannel( double Gk, double Ek )
 {
-	setGk( Gk );
+	// setGk( Gk );
+        origGk_ = Gk;
 	setEk( Ek );
 }
 
