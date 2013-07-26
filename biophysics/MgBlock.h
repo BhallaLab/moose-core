@@ -73,6 +73,11 @@ class MgBlock: public ChanBase
 		double KMg_B_;
 		/// [Mg] in mM
 		double CMg_;
+                /// Original Gk passed by NMDA channel, we keep this
+                /// separate from Gk so that the computed Gk can be
+                /// recorded without being overwritten by origChannel
+                /// message.
+                double origGk_;
 };
 
 

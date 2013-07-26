@@ -446,6 +446,7 @@ def assignDefaultTicks(modelRoot='/model', dataRoot='/data', solver='hsolve'):
     _moose.useClock(2, '%s/##[ISA=SynChan]'  % (modelRoot), 'process')
     _moose.useClock(2, '%s/##[ISA=MgBlock]'  % (modelRoot), 'process')
     _moose.useClock(3, '%s/##[ISA=CaConc]'  % (modelRoot), 'process')
+    _moose.useClock(3, '%s/##[ISA=Func]' % (modelRoot), 'process')
     _moose.useClock(7, '%s/##[ISA=DiffAmp]'  % (modelRoot), 'process')
     _moose.useClock(7, '%s/##[ISA=VClamp]' % (modelRoot), 'process')
     _moose.useClock(7, '%s/##[ISA=PIDController]' % (modelRoot), 'process')
