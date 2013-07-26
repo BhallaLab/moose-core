@@ -454,7 +454,9 @@ void HSolve::deleteIncomingMessages( Element * orig, const string finfo)
         Element * otherEl = other.id.element();
         if (otherEl &&  HSolve::handledClasses().find(otherEl->cinfo()->name()) != HSolve::handledClasses().end()){
             Msg::deleteMsg(mid);
-        }
+        } else { 
+			break; // Have to do this otherwise it is an infinite loop
+		}
         mid = orig->findCaller(concenDest->getFid());
     }
 }

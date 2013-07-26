@@ -84,6 +84,88 @@ class NeuroNode: public CylBase
 		 */
 		double calculateLength( const CylBase& parent );
 
+		//////////////////////////////////////////////////////////////
+		// A set of calls for safely generating a tree by traversing
+		// compartment messages. Designed to be somewhat resilient, even
+		// when given a badly set up neuron.
+		//////////////////////////////////////////////////////////////
+		/**
+ 		 * Finds all the compartments connected to current node, put them 
+ 		 * all into the 'children' vector even if they may be 'parent' by
+		 * the messaging. This is because this function has to be robust
+		 * enough to sort this out
+ 		 */
+		void findConnectedCompartments( map< Id, unsigned int >& nodeMap);
+
+		/**
+ 		 * Go through nodes vector and eliminate entries that have zero
+		 * children, that is, are not connected to any others.
+ 		 * Need to clean up 'children_' list after this is called.
+ 		 */
+		static unsigned int removeDisconnectedNodes( 
+						vector< NeuroNode >& nodes );
+
+		/**
+		 * Find the start node, typically the soma, of a model. In terms of
+		 * the solution, this should be the node at the root of the tree.
+		 * Returns index in nodes vector.
+		 * Technically the matrix solution could begin from any terminal 
+		 * branch, but it helps to keep the soma identical to the root of
+		 * the tree.
+		 *
+		 * Uses two heuristics to locate the start node: Looks for the 
+		 * node with the largest diameter, and also looks for node(s) 
+		 * with 'soma' in their name. If these disagree then it goes 
+		 * with the 'soma' node. If there are
+		 * many of the soma nodes, it goes with the fattest.
+		 */
+		static unsigned int findStartNode( 
+						const vector< NeuroNode >& nodes );
+
+		/**
+		 * Traverses the nodes list starting from the 'start' node, and 
+		 * sets up correct parent-child information. This involves removing
+		 * the identified 'parent' node from the 'children_' vector and 
+		 * assigning it to the parent_ field.
+		 * Then it redoes the entire nodes vector (with due care for 
+		 * indexing of children and parents)
+		 * so that it is in the correct order for a depth-first traversal.
+		 * This means that you can take any entry in the list, and the 
+		 * immediately following entries will be all the descendants, 
+		 * if any.
+		 */
+		static void traverse( 
+						vector< NeuroNode >& nodes, unsigned int start );
+
+		/**
+		 * Helper recursive function for traversing nodes to build tree.
+		 */
+		void innerTraverse( 
+				vector< NeuroNode >& tree, 
+				const vector< NeuroNode >& nodes,
+				vector< unsigned int >& seen
+				) const;
+
+		/**
+ 		* This function takes a list of elements that include connected
+ 		* compartments, and constructs a tree of nodes out of them. The 
+ 		* generated nodes vector starts with the soma, and is a depth-first
+ 		* sequence of nodes. This is meant to be insensitive to vagaries
+ 		* in how the user has set up the compartment messaging, provided 
+		* that there is at least one recognized message between connected 
+		* compartments.
+ 		*/
+		static void buildTree( vector< NeuroNode >& nodes, 
+						vector< Id > elist );
+
+		/**
+		 * Trims off all spines from tree. Does so by identifying a set of
+		 * reasonable names: shaft, head, spine, and variants in capitals.
+		 * Having done this it builds two matching vectors of vector of 
+		 * shafts and heads, which is a hack that assumes that there are 
+		 * no sub-branches in spines. Not yet implemented.
+		 */
+		void filterSpines();
 	private:
 		/**
 		 * Index of parent NeuroNode, typically a diffusive compartment. 

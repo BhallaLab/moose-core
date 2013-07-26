@@ -22561,10 +22561,158 @@ There was a numerical instability. This was cured after putting the
 Pools on a separate clock from the reacs and enz.
 
 Now somewhat better match between solved and deterministic runs, but still
-not good enough. In multiComptSigNeur.py
+not good enough. In multiComptSigNeur.py. Checkin 4686.
 
-Next clean out testSigNeur.py
+*Next clean out testSigNeur.py
 Then try to condense the loading process into a single function.
 Then try it out on the NeuralNetworks paper I did.
+
+==========================================================================
+14 July 2013.
+Trying out Traub-similar model with its channels. Won't load in 
+Hsolve. There is an infinite loop in 
+HSolve::deleteIncomingMessages( Element * orig, const string finfo)
+
+==========================================================================
+16 July 2013.
+Running in /home/bhalla/homework/SPATPAT/jul14_2013_cellmode
+This now clears but ReadCell is very unhappy:
+...
+ReadCell::addChannelMessage( /cell/lat_15_2/Ca): addmsg2 .      IkOut   ../NMDA_Ca_conc current: Bad src 2079 or dest 0[4294967295]
+ReadCell::addChannelMessage( /cell/spine_head_14_1/Ca): addmsg1 .       IkOut  ../Ca_conc       current: Bad src 2129 or dest 0[4294967295]
+...
+
+Also the run segvs after completion.
+The non-hsolve version produces nice action potentials and calcium
+transients. Hsolve gives a flat line at resting potential.
+Oops, hadn't scheduled hsolve. Now plots match reasonably closely, with 
+a time offset.
+Currently both dts are 10 usec.
+
+Now to play with dts.
+Went down to 2 usec.  This isn't so encouraging. The Hsolve is almost identical
+at 2 and 10 usec. But it is actually closer to the 10 usec EE form than to the
+2 usec EE form.
+
+Went up to 50 usec. The hsolve solutions are still almost indistinguishable 
+from each other. In the EE solutions, the ordering of action potential times 
+is consistent, gets shorter with smaller dt. And hence further away from the
+AP times from hsolve. Will just have to live with this till Niraj fixes the
+solver or I do.
+
+Now to investigate what ails ReadCell.
+Turns out it is OK, just the thing being picky about objects not there. For
+completeness I had set up the Ca channel to connect to two possible Ca_conc
+pools, the Ca_conc in the dendrites or the NMDA_Ca_conc in the spines.
+If it doesn't find one, it complains but carries on.
+
+
+==========================================================================
+19 July 2013.
+Trying to load in a kkit model to use for a sigNeur model.
+Problem: the system assigns CubeMeshes to all the volumes by default.
+Simplest thing is to delete these CubeMeshes and replace with
+NeuroMeshes. Issue is volume change.
+One way to do it is to create the NeuroMeshes, assign the CubeMeshes to 
+the matching volumes, then replace them. Hideous. But perhaps needed because
+of how the volume comes in from the kkit reader.
+Problem with current implementation of NeuroMesh is that the call to 
+build the mesh structure comes after the reaction system is installed.
+Perhaps I can put in a temporary volume in the neuro, spine and psd meshes
+at the time the molecules are attached.
+This call goes down to innerBuildDefaultMesh for the respective cases.
+NeuroMesh grudgingly builds a ball-and-stick model. SpineMesh and PsdMesh just
+refuse. The concept of setting the global size of a complicated mesh is a bit
+odd.
+
+==========================================================================
+21 July 2013
+The way out of this is to have a sensible default when there is no mesh.
+Always go into this default when replacing meshes. The default just uses
+a volscale of 1.0, so that n = conc.
+Suggest to define all values in terms of conc. Will need modification of
+PoolBase for saving concInit.
+
+But there is another layer to this. What happens to the array sizes?
+
+A long-deferred issue is that of the messages from the parent compartment.
+This is messy, but so is the alternative: traversal to the parent. 
+If I am going to enforce the rule that the chemical entities are 'in' a
+compartment by virtue of being children of it, then I should NOT have the 
+messaging. And vice versa. Two rules on this can lead to messy situations
+such as the current headache with object children.
+
+Zombie pools currently use a pointer to their solver. I could well use a
+pointer to the mesh for extracting volumes, but this won't help when the
+mesh wants to assign values.
+
+Summary of constraints:
+- Without a mesh, pools and reacs should have the correct values in conc units.
+	Options:
+		- Unity scaling in conversion: n = conc.
+		- Unity volume assumption: n = conc * NA * 1e3
+	Prefer unity volume. Ugly but avoid rounding of n.
+- messages vs parentage for compartment spec. Avoid two masters.
+	Options:
+		- Message: faster, already there, but tedious.
+		- Parentage: Enforce obj tree. Simple. Slower, new code.
+	Prefer parentage.
+	- Will need to intercept 'move' calls to children. 
+		(Note that msg transfer option would need something similar)
+	- Will need explicit traversal to children if mesh changes.
+	- Will need explicit traversal to parent for all conversions. Slow.
+- Moving reac systems off or between mesh requires substantial recalculations.
+	- assign conc term to mols and reacs as you move off mesh
+		- Problem here with any system which stores info as 'n'.
+			- Zpool will need to recompute n (on solver).
+			- What about stochastic cases where n is integral?
+				How to recompute n? Will need to avoid rounding.
+				But not a problem if unity volume assumption.
+		- Put a conc and concInit term in PoolBase, and we're set.
+		- But could stick with current format if clean stepwise
+			reassign to unity vol, then to new vol.
+	- Use current conc values and assign it back to update 'n' if needed
+		when moving onto new mesh
+- Moving systems off mesh may require array cleaning up. 
+	- Leave array size as is when moving off
+	- Use whatever resize algo is forthcoming when moving on.
+- Insist on a reinit if we move meshes or resize existing one? Not needed.
+	This means that the conc term has to be saved as well as concInit.
+- Put a vol term on pools? Again, issue with duplicate info.
+	Avoid.
+
+All these are doable, only unknown now is how to intercept 'move' call.
+Here is a bad case: Suppose we have mesh1/foo/bar/pool
+	where foo and bar are neutrals.
+	How do we intercept: move mesh1/foo/bar mesh2/zod		
+	Here neither foo nor bar cares about the move operation,
+	and neither mesh1 nor pool would know it had happened.
+
+Now for something completely different: Assume this kind of tricky move is
+	a reaction-system specific operation.
+	- Implement a python-based moveMesh() call that deals with all
+	these steps within the current framework, without any code changes.
+		- Actually, will need a way to set global size of any mesh.
+		- Actually, the global size of neuro, spine and PSD meshes 
+			defaults to 1. Good way to start.
+	- If it is needed, convert this to a C++ equivalent.
+
+Summary: Working on /home/bhalla/moose/buildQ/Demos/snippets/MULTI/loadMulti.py
+tryng to get the transfer or kkit model to compartments.
+==========================================================================
+23 July 2013
+Debugging snippets/MULTI/loadMulti.py.
+Crashes in NeuroMesh.cpp::380.
+Basically if the traversal of the children is out of order, the system
+thinks it has found two parents for each child. Need to do a more
+intelligent traversal.
+==========================================================================
+25 July 2013
+Goal for the day: Implement a reliable tree-traversal routine for neurons
+that is able to handle even ill-formed messaging structures.
+If possible: Apply this to the HSolve too.
+Doing this on class NeuroNode.
+Implemented and tested at least as a first level test. Need to give it
+nastier symcompartment cases with dodgy messaging.
 
 ==========================================================================
