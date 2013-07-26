@@ -22,10 +22,12 @@ public:
 	void reinit( const Eref& hsolve, ProcPtr p );
 	
 	void setSeed( Id seed );
-	Id getSeed() const;
+	Id getSeed() const; 		/**< For searching for compartments:
+								 *   seed is the starting compt.     */
 	
 	void setPath( const Eref& e, const Qinfo* q, string path );
 	string getPath( const Eref& e, const Qinfo* q ) const;
+								/**< Path to the compartments */
 	
 	void setDt( double dt );
 	double getDt() const;
@@ -140,8 +142,10 @@ public:
 	static const Cinfo* initCinfo();
 
     static const std::set<string>& handledClasses();
-    
+						/**< Returns the set of classes "handled" by HSolve */
     static void deleteIncomingMessages( Element * orig, const string finfo);
+						/**< Delete messages coming into this particular
+						 *   element if its class that is handled by HSolve */
 	
 private:
 	static vector< Id > children( Id obj );
