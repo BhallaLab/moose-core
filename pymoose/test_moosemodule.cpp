@@ -6,9 +6,9 @@
 // Maintainer: 
 // Created: Tue Jul 23 11:37:57 2013 (+0530)
 // Version: 
-// Last-Updated: Tue Jul 23 21:08:34 2013 (+0530)
+// Last-Updated: Thu Jul 25 21:54:10 2013 (+0530)
 //           By: subha
-//     Update #: 83
+//     Update #: 85
 // URL: 
 // Keywords: 
 // Compatibility: 
@@ -44,7 +44,6 @@
 // 
 
 // Code:
-#ifdef DO_UNIT_TESTS
 #include <iostream>
 #include <cstring>
 #include "Python.h"
@@ -61,6 +60,7 @@ extern "C" {
 
     void test_to_py()
     {
+#ifdef DO_UNIT_TESTS
         // conversion of double 
         PyObject * pv;
         double dv = 10.0;
@@ -128,6 +128,8 @@ extern "C" {
         PyErr_Clear();
         cout << "." << flush;
         shell->doDelete(id);
+
+#endif
     }
     
 } // extern "C"
@@ -136,8 +138,6 @@ void test_moosemodule()
 {
     test_to_py();
 }
-
-#endif
 
 // 
 // test_moosemodule.cpp ends here
