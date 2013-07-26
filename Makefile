@@ -241,6 +241,12 @@ HCUDA_DIR = hsolveCuda
 HCUDA_LIB = hsolveCuda/_hsolveCuda.o 
 endif
 
+# To compile examples, pass EXAMPLES=true ( anything on the right will do) in make command line
+ifdef EXAMPLES
+EXAMPLES_DIR = examples/trials
+EXAMPLES_LIB = examples/trials/_trials.o
+endif
+
 # To use Smoldyn, pass USE_SMOLDYN=true ( anything on the right will do) in make command line
 ifdef USE_SMOLDYN
 #LIBS+= -L/usr/local/lib -lsmoldyn
@@ -307,7 +313,7 @@ SUBDIR = \
 	$(SMOLDYN_DIR) \
 	$(SBML_DIR) \
 	$(HCUDA_DIR) \
-
+	$(EXAMPLES_DIR) \
 
 # Used for 'make clean'
 CLEANSUBDIR = $(SUBDIR) $(PARALLEL_DIR) pymoose
@@ -334,6 +340,7 @@ OBJLIBS =	\
 	$(SMOLDYN_LIB) \
 	$(SBML_LIB) \
 	$(HCUDA_LIB) \
+	$(EXAMPLES_LIB) \
 
 export CXX
 export CXXFLAGS
