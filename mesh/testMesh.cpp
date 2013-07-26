@@ -1803,6 +1803,57 @@ void testSpineAndPsdMesh()
 	cout << "." << flush;
 }
 
+#include "../shell/Wildcard.h"
+void testNeuroNodeTree()
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< int > dims( 1, 1 );
+	// Build a cell
+	Id cell = shell->doCreate( "Neutral", Id(), "cell", dims );
+	double len = 10e-6; // metres
+	double dia = 1e-6; // metres
+
+	buildBranchingCell( cell, len, dia );
+
+	vector< NeuroNode > nodes;
+	vector< Id > elist;
+	wildcardFind( "/cell/##", elist );
+	NeuroNode::buildTree( nodes, elist );
+	assert( nodes.size() == 17 );
+	unsigned int i = 0;
+	// Here we want the function to generate a depth-first tree.
+	assert( nodes[i++].elecCompt().element()->getName() == "soma" );
+	assert( nodes[i++].elecCompt().element()->getName() == "d1" );
+	assert( nodes[i++].elecCompt().element()->getName() == "d1a" );
+	assert( nodes[i++].elecCompt().element()->getName() == "d11" );
+	assert( nodes[i++].elecCompt().element()->getName() == "d111" );
+	assert( nodes[i++].elecCompt().element()->getName() == "d112" );
+	assert( nodes[i++].elecCompt().element()->getName() == "d12" );
+	assert( nodes[i++].elecCompt().element()->getName() == "d121" );
+	assert( nodes[i++].elecCompt().element()->getName() == "d122" );
+
+	assert( nodes[i++].elecCompt().element()->getName() == "d2" );
+	assert( nodes[i++].elecCompt().element()->getName() == "d2a" );
+	assert( nodes[i++].elecCompt().element()->getName() == "d21" );
+	assert( nodes[i++].elecCompt().element()->getName() == "d211" );
+	assert( nodes[i++].elecCompt().element()->getName() == "d212" );
+	assert( nodes[i++].elecCompt().element()->getName() == "d22" );
+	assert( nodes[i++].elecCompt().element()->getName() == "d221" );
+	assert( nodes[i++].elecCompt().element()->getName() == "d222" );
+
+	/*
+	Id soma = makeCompt( Id(), cell, "soma", dia, dia, 90 );
+	Id dend = makeCompt( Id(), cell, "dend", len, dia, 0 );
+	for ( unsigned int i = 0; i < numSpines; ++i ) {
+		double frac = i / static_cast< double >( numSpines );
+		makeSpine( dend, cell, i, frac, 1.0e-6, 1.0e-6, i * 30.0 );
+	}
+	*/
+
+	shell->doDelete( cell );
+	cout << "." << flush;
+}
+
 void testMesh()
 {
 	testVec();
@@ -1824,4 +1875,5 @@ void testMesh()
 	testCubeMeshMultiJunctionTwoD();
 	testSpineEntry();
 	testSpineAndPsdMesh();
+	testNeuroNodeTree();
 }
