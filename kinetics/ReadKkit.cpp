@@ -365,15 +365,27 @@ string ReadKkit::pathTail( const string& path, string& head ) const
 string ReadKkit::cleanPath( const string& path ) const
 {
 	// Could surely do this better with STL. But harder to understand.
+	// Harsha: Cleaned up this function
+	// minus was getting replaced with underscore, but in some genesis model
+	// pool and reaction/Enzyme has same string name with 
+	// difference of minus and underscore like eIF4G_A-clx and eIF4G_A_clx,
+	// which later created a problem as the same name exist in moose when minus
+	// was replaced with underscore.
+	//So replacing minus with _minus_ like I do in SBML 
 	string ret = path;
+	string cleanString;
 	for ( unsigned int i = 0; i < path.length(); ++i ) {
 		char c = ret[i];
 		if ( c == '*' )
-			ret[i] = 'p';
-		else if ( c == '[' || c == ']' || c == '-' || c == '@' || c == ' ')
-			ret[i] = '_';
+			cleanString += 'p';
+		else if ( c == '[' || c == ']' || c == '@' || c == ' ')
+			cleanString += '_';
+		else if (c == '-')
+			cleanString += "_minus_";
+		else
+			cleanString += c;
 	}
-	return ret;
+	return cleanString;
 }
 
 void assignArgs( map< string, int >& argConv, const vector< string >& args )
@@ -407,7 +419,9 @@ void ReadKkit::call( const vector< string >& args)
 			args[2] == "LOAD" ) {
 			if ( args[3].length() == 0 )
 				return;
-			string objName = args[1].substr( 0, len - 5 );
+			//HARSHA: Added CleanPath.
+			string objName = cleanPath(args[1].substr( 0, len - 5 ));
+		        Id test(basePath_+objName);
 			Id obj( basePath_ + objName + "info" );
 			if ( obj != Id() ) {
 				string notes = "";
@@ -502,7 +516,6 @@ Id ReadKkit::buildReac( const vector< string >& args )
 
 	Id reac = shell_->doCreate( "Reac", pa, tail, dim, true );
 	reacIds_[ clean.substr( 10 ) ] = reac; 
-
 	// Here is another hack: The native values stored in the reac are
 	// Kf and Kb, in conc units. However the 'clean' values from kkit
 	// are the number values kf and kb with a lower case. In the 
@@ -512,7 +525,6 @@ Id ReadKkit::buildReac( const vector< string >& args )
 	Field< double >::set( reac, "Kb", kb );
 
 	Id info = buildInfo( reac, reacMap_, args );
-
 	numReacs_++;
 	return reac;
 }
