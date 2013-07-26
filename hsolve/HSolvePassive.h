@@ -28,9 +28,16 @@ protected:
 	
 	vector< CompartmentStruct >       compartment_;
 	vector< Id >                      compartmentId_;
-	vector< double >                  V_;
-	vector< TreeNodeStruct >          tree_;
-	map< unsigned int, InjectStruct > inject_;
+	vector< double >                  V_;				/**< Compartment Vm.
+		* V_ is addressed using a compartment index. V_ stores the Vm value
+		* of each compartment. */
+	vector< TreeNodeStruct >          tree_;			/**< Tree info.
+		* The tree is used to acquire various values during setup. It contains
+		* the user-defined original values of all compartment parameters.
+		* Therefore, it is also used during reinit. */
+	map< unsigned int, InjectStruct > inject_;			/**< inject map.
+		* contains the list of compartments that have current injections into
+		* them. */
 	
 private:
 	// Setting up of data structures

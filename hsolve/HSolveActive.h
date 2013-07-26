@@ -18,7 +18,7 @@ public:
 	HSolveActive();
 	
 	void setup( Id seed, double dt );
-	void step( ProcPtr info );
+	void step( ProcPtr info );			///< Equivalent to process
 	void reinit( ProcPtr info );
 	
 protected:
@@ -54,35 +54,67 @@ protected:
 	/**
 	 * Internal data structures. Will also be accessed in derived class HSolve.
 	 */
-	vector< CurrentStruct >   current_;
-	vector< double >          state_;
+	vector< CurrentStruct >   current_;			///< Channel current
+	vector< double >          state_;			///< Fraction of gates open
 	//~ vector< int >             instant_;
-	vector< ChannelStruct >   channel_;
+	vector< ChannelStruct >   channel_;			///< Vector of channels. Link
+												///< to compartment: chan2compt
 	vector< SpikeGenStruct >  spikegen_;
 	vector< SynChanStruct >   synchan_;
-	vector< CaConcStruct >    caConc_;
-	vector< double >          ca_;
-	vector< double >          caActivation_;
-	vector< double* >         caTarget_;
+	vector< CaConcStruct >    caConc_;			///< Ca pool info
+	vector< double >          ca_;				///< Ca conc in each pool
+	vector< double >          caActivation_;	///< Ca current entering each
+												///< calcium pool
+	vector< double* >         caTarget_;		///< For each channel, which
+												///< calcium pool is being fed?
+												///< Points into caActivation.
 	LookupTable               vTable_;
 	LookupTable               caTable_;
-	vector< bool >            gCaDepend_;
-	vector< unsigned int >    caCount_;
-	vector< int >             caDependIndex_;
-	vector< LookupColumn >    column_;
-	vector< LookupRow >       caRowCompt_;
-	vector< LookupRow* >      caRow_;
-	vector< int >             channelCount_;
-	vector< currentVecIter >  currentBoundary_;
-	vector< unsigned int >    chan2compt_;
-	vector< unsigned int >    chan2state_;
-	vector< double >          externalCurrent_;
-	vector< Id >              caConcId_;
-	vector< Id >              channelId_;
-	vector< Id >              gateId_;
+	vector< bool >            gCaDepend_;		///< Does the conductance
+												///< depend on Ca conc?
+	vector< unsigned int >    caCount_;			///< Number of calcium pools in
+												///< each compartment
+	vector< int >             caDependIndex_;	///< Which pool does each Ca
+												///< depdt channel depend upon?
+	vector< LookupColumn >    column_;			///< Which column in the table
+												///< to lookup for this species
+	vector< LookupRow >       caRowCompt_;      /**< Lookup row buffer.
+		*   For each compartment, the lookup rows for calcium dependent
+		*   channels are loaded into this vector before being used. The vector
+		*   is then reused for the next compartment. This vector therefore has
+		*   a size equal to the maximum number of calcium pools across all
+		*   compartments. This is done in HSolveActive::advanceChannels */
+
+	vector< LookupRow* >      caRow_;			/**< Points into caRowCompt.
+		*   For each channel, points to the appropriate pool's LookupRow in the
+		*   caRowCompt vector. This value is then used by the channel. Also
+		*   happens in HSolveActive::advanceChannels */
+
+	vector< int >             channelCount_;	///< Number of channels in each
+												///< compartment
+	vector< currentVecIter >  currentBoundary_;	///< Used to designate compt
+												///< boundaries in the current_
+												///< vector.
+	vector< unsigned int >    chan2compt_;		///< Index of the compt to
+												///< which a given (index)
+												///< channel belongs.
+	vector< unsigned int >    chan2state_;		///< Converts a chnnel index to
+												///< a state index
+	vector< double >          externalCurrent_; ///< External currents from
+												///< channels that HSolve
+												///< cannot internalize.
+	vector< Id >              caConcId_;		///< Used for localIndex-ing.
+	vector< Id >              channelId_;		///< Used for localIndex-ing.
+	vector< Id >              gateId_;			///< Used for localIndex-ing.
 	//~ vector< vector< Id > >    externalChannelId_;
-	vector< unsigned int >    outVm_;
-	vector< unsigned int >    outCa_;
+	vector< unsigned int >    outVm_;			/**< VmOut info.
+		*   Tells you which compartments have external voltage-dependent
+		*   channels (if any), so that you can send out Vm values only in those
+		*   places */
+	vector< unsigned int >    outCa_;			/**< concOut info.
+		*   Tells you which compartments have external calcium-dependent
+		*   channels so that you can send out Calcium concentrations in only
+		*   those compartments. */
 	
 private:
 	/**
