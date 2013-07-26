@@ -33,6 +33,7 @@ class SbmlWriter
 	private:
 		Model* cremodel_;	
 		string nameString( string str );
+		string nameString1( string str );
 		string changeName( string parent,string child );
 		string idBeginWith(string name );
 		string cleanNameId( Id itrid,int index);
