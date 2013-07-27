@@ -51,6 +51,45 @@ import moose
 import generated_neuroml as nml
 from units import SI
 
+def sarea(comp):
+    """Calculate the surface area of compartment from length and
+    diameter"""
+    if comp.length > 0:
+        return comp.length * comp.diameter * np.pi
+    else:
+        return comp.diameter * comp.diameter * np.pi
+
+def xarea(comp):
+    """Calculate the cross sectional area from diameter of the
+    compartment. How to do it for spherical compartment?"""
+    return comp.diameter * comp.diameter * np.pi / 4.0
+
+def setRa(comp, resistivity):
+    """Calculate total raxial from specific value `resistivity`"""
+    if comp.length > 0:
+        comp.Ra = resistivity * comp.length / xarea(comp)
+    else:
+        comp.Ra = resistivity * 8.0 / (comp.diameter * np.pi)
+
+def setRm(comp, resistivity):
+    """Set membrane resistance"""
+    comp.Rm = resistivity / sarea(comp)
+    
+
+def getSegments(nmlcell, component, sg_to_segments):
+    """Get the list of segments the `component` is applied to"""
+    sg = segment.segmentGroup
+    seg = segment.segment
+    if sg is None:
+        if seg:
+            segments = [seg]
+        else:
+            segments = nmlcell.morphology.segment
+    else:
+        segments = sg_to_segments[sg]
+    return segments
+    
+
 class NML2Reader(object):
     """Reads NeuroML2 and creates MOOSE model"""
     def __init__(self):
@@ -157,32 +196,44 @@ class NML2Reader(object):
             cm = SI(specific_cm.value)
             for seg in sg_to_segments[specific_cm.segmentGroup]:
                 comp = self.nml_to_moose[seg]
-                if comp.length > 0:
-                    comp.Cm = np.pi * comp.diameter * comp.length * cm
-                else:
-                    comp.Cm = np.pi * comp.diameter * comp.diameter * cm
-        
+                comp.Cm = np.pi * sarea(comp) 
 
-    def importChannels(self, nmlcell, moosecell):
+    def importIntracellularProperties(self, nmlcell, moosecell, membraneProperties):
+        self.importAxialResistance(nmlcell, membraneProperties.intraCellularProperties)
+        # TODO CaConc
+
+    def importAxialResistance(self, nmlcell, intraCellularProperties):
         sg_to_segments = self._cell_to_sg[nmlcell]
-        for chdens in nmlcell.biophysicalProperties.membraneProperties.channelDensity:
-            channel = self.proto_chans[chdens.ionChannel]
-            for seg in sg_to_segments[channel.segmentGroup]:
-                self.copyChannel(channel, self.nml_to_moose[seg], SI(chdens.condDensity))
-        
-        
+        for r in intraCellularProperties.resistivity:
+            segments = get_segments(nmlcell, r, sg_to_segments)
+            for seg in segments:
+                comp = self.nml_to_moose[seg]
+                setRa(comp, SI(r.value))                    
+
+    def importChannels(self, nmlcell, moosecell, membraneProperties):
+        sg_to_segments = self._cell_to_sg[nmlcell]
+        for chdens in membraneProperties.channelDensity:
+            segments = get_segments(nmlcell, chdens, sg_to_segments)
+            condDensity = SI(chdens.condDensity)
+            if self.id_to_ionChannel[chdens.ionChannel].type == 'ionChannelPassive':
+                for seg in segments:
+                    self.setRm(self.nml_to_moose[seg], condDensity)
+            else:
+                for seg in segments:
+                    self.copyChannel(chdens, self.nml_to_moose[seg], condDensity)
                 
-    def copyChannel(self, proto_chan, comp, condDensity):
-        """Copy `proto_chan` channel to `comp` compartment.
+    def copyChannel(self, chdens, comp, condDensity):
+        """Copy moose prototype for `chdens` condutcance density to `comp`
+        compartment.
+
         """
+        proto_chan = self.proto_chans[chdens.ionChannel]
         chid = moose.copy(proto_chan, comp)
         chan = moose.element(chid)
+        chan.Gbar = sarea(comp) * condDensity
         moose.connect(chan, 'channel', comp, 'channel')
-        # Not handling spherical compartment right now.
-        if comp.length > 0:
-            chan.Gbar = np.pi * comp.diameter * comp.length * condDensity
-        else:
-            chan.Gbar = np.pi * comp.diameter * comp.diameter * condDensity
+
+
 
 # 
 # reader.py ends here
