@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #
-# Generated Wed Jul 10 17:02:17 2013 by generateDS.py version 2.10a.
+# Generated Sun Jul 28 10:18:38 2013 by generateDS.py version 2.10a.
 #
 
 import sys
@@ -123,18 +123,18 @@ supermod.HHTime.subclass = HHTimeSub
 # end class HHTimeSub
 
 
-class VoltageConcDepBlockSub(supermod.VoltageConcDepBlock):
+class BlockMechanismSub(supermod.BlockMechanism):
     def __init__(self, blockConcentration=None, scalingConc=None, type_=None, species=None, scalingVolt=None):
-        super(VoltageConcDepBlockSub, self).__init__(blockConcentration, scalingConc, type_, species, scalingVolt, )
-supermod.VoltageConcDepBlock.subclass = VoltageConcDepBlockSub
-# end class VoltageConcDepBlockSub
+        super(BlockMechanismSub, self).__init__(blockConcentration, scalingConc, type_, species, scalingVolt, )
+supermod.BlockMechanism.subclass = BlockMechanismSub
+# end class BlockMechanismSub
 
 
-class StpMechanismSub(supermod.StpMechanism):
-    def __init__(self, tauRec=None, tauFac=None, initReleaseProb=None):
-        super(StpMechanismSub, self).__init__(tauRec, tauFac, initReleaseProb, )
-supermod.StpMechanism.subclass = StpMechanismSub
-# end class StpMechanismSub
+class PlasticityMechanismSub(supermod.PlasticityMechanism):
+    def __init__(self, type_=None, tauFac=None, tauRec=None, initReleaseProb=None):
+        super(PlasticityMechanismSub, self).__init__(type_, tauFac, tauRec, initReleaseProb, )
+supermod.PlasticityMechanism.subclass = PlasticityMechanismSub
+# end class PlasticityMechanismSub
 
 
 class SegmentParentSub(supermod.SegmentParent):
@@ -403,6 +403,62 @@ supermod.Network.subclass = NetworkSub
 # end class NetworkSub
 
 
+class SpikeGeneratorPoissonSub(supermod.SpikeGeneratorPoisson):
+    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, averageRate=None):
+        super(SpikeGeneratorPoissonSub, self).__init__(id, neuroLexId, name, metaid, notes, annotation, averageRate, )
+supermod.SpikeGeneratorPoisson.subclass = SpikeGeneratorPoissonSub
+# end class SpikeGeneratorPoissonSub
+
+
+class SpikeGeneratorRandomSub(supermod.SpikeGeneratorRandom):
+    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, minISI=None, maxISI=None):
+        super(SpikeGeneratorRandomSub, self).__init__(id, neuroLexId, name, metaid, notes, annotation, minISI, maxISI, )
+supermod.SpikeGeneratorRandom.subclass = SpikeGeneratorRandomSub
+# end class SpikeGeneratorRandomSub
+
+
+class SpikeGeneratorSub(supermod.SpikeGenerator):
+    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, period=None):
+        super(SpikeGeneratorSub, self).__init__(id, neuroLexId, name, metaid, notes, annotation, period, )
+supermod.SpikeGenerator.subclass = SpikeGeneratorSub
+# end class SpikeGeneratorSub
+
+
+class SpikeArraySub(supermod.SpikeArray):
+    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, spike=None):
+        super(SpikeArraySub, self).__init__(id, neuroLexId, name, metaid, notes, annotation, spike, )
+supermod.SpikeArray.subclass = SpikeArraySub
+# end class SpikeArraySub
+
+
+class SpikeSub(supermod.Spike):
+    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, time=None):
+        super(SpikeSub, self).__init__(id, neuroLexId, name, metaid, notes, annotation, time, )
+supermod.Spike.subclass = SpikeSub
+# end class SpikeSub
+
+
+class VoltageClampSub(supermod.VoltageClamp):
+    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, delay=None, duration=None, seriesResistance=None, targetVoltage=None):
+        super(VoltageClampSub, self).__init__(id, neuroLexId, name, metaid, notes, annotation, delay, duration, seriesResistance, targetVoltage, )
+supermod.VoltageClamp.subclass = VoltageClampSub
+# end class VoltageClampSub
+
+
+class RampGeneratorSub(supermod.RampGenerator):
+    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, delay=None, duration=None, baselineAmplitude=None, startAmplitude=None, finishAmplitude=None):
+        super(RampGeneratorSub, self).__init__(id, neuroLexId, name, metaid, notes, annotation, delay, duration, baselineAmplitude, startAmplitude, finishAmplitude, )
+supermod.RampGenerator.subclass = RampGeneratorSub
+# end class RampGeneratorSub
+
+
+class SineGeneratorSub(supermod.SineGenerator):
+    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, delay=None, phase=None, duration=None, period=None, amplitude=None):
+        super(SineGeneratorSub, self).__init__(id, neuroLexId, name, metaid, notes, annotation, delay, phase, duration, period, amplitude, )
+supermod.SineGenerator.subclass = SineGeneratorSub
+# end class SineGeneratorSub
+
+
 class PulseGeneratorSub(supermod.PulseGenerator):
     def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, delay=None, duration=None, amplitude=None):
         super(PulseGeneratorSub, self).__init__(id, neuroLexId, name, metaid, notes, annotation, delay, duration, amplitude, )
@@ -537,8 +593,8 @@ supermod.IonChannel.subclass = IonChannelSub
 
 
 class NeuroMLDocumentSub(supermod.NeuroMLDocument):
-    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, include=None, extracellularProperties=None, intracellularProperties=None, morphology=None, ionChannel=None, decayingPoolConcentrationModel=None, expOneSynapse=None, expTwoSynapse=None, nmdaSynapse=None, stpSynapse=None, biophysicalProperties=None, cell=None, baseCell=None, iafTauCell=None, iafCell=None, izhikevichCell=None, adExIaFCell=None, IF_curr_alpha=None, IF_curr_exp=None, IF_cond_alpha=None, IF_cond_exp=None, EIF_cond_exp_isfa_ista=None, EIF_cond_alpha_isfa_ista=None, HH_cond_exp=None, expCondSynapse=None, alphaCondSynapse=None, expCurrSynapse=None, alphaCurrSynapse=None, SpikeSourcePoisson=None, pulseGenerator=None, network=None, ComponentType=None):
-        super(NeuroMLDocumentSub, self).__init__(id, neuroLexId, name, metaid, notes, annotation, include, extracellularProperties, intracellularProperties, morphology, ionChannel, decayingPoolConcentrationModel, expOneSynapse, expTwoSynapse, nmdaSynapse, stpSynapse, biophysicalProperties, cell, baseCell, iafTauCell, iafCell, izhikevichCell, adExIaFCell, IF_curr_alpha, IF_curr_exp, IF_cond_alpha, IF_cond_exp, EIF_cond_exp_isfa_ista, EIF_cond_alpha_isfa_ista, HH_cond_exp, expCondSynapse, alphaCondSynapse, expCurrSynapse, alphaCurrSynapse, SpikeSourcePoisson, pulseGenerator, network, ComponentType, )
+    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, include=None, extracellularProperties=None, intracellularProperties=None, morphology=None, ionChannel=None, decayingPoolConcentrationModel=None, expOneSynapse=None, expTwoSynapse=None, blockingPlasticSynapse=None, biophysicalProperties=None, cell=None, baseCell=None, iafTauCell=None, iafTauRefCell=None, iafCell=None, iafRefCell=None, izhikevichCell=None, adExIaFCell=None, pulseGenerator=None, sineGenerator=None, rampGenerator=None, voltageClamp=None, spikeArray=None, spikeGenerator=None, spikeGeneratorRandom=None, spikeGeneratorPoisson=None, IF_curr_alpha=None, IF_curr_exp=None, IF_cond_alpha=None, IF_cond_exp=None, EIF_cond_exp_isfa_ista=None, EIF_cond_alpha_isfa_ista=None, HH_cond_exp=None, expCondSynapse=None, alphaCondSynapse=None, expCurrSynapse=None, alphaCurrSynapse=None, SpikeSourcePoisson=None, network=None, ComponentType=None):
+        super(NeuroMLDocumentSub, self).__init__(id, neuroLexId, name, metaid, notes, annotation, include, extracellularProperties, intracellularProperties, morphology, ionChannel, decayingPoolConcentrationModel, expOneSynapse, expTwoSynapse, blockingPlasticSynapse, biophysicalProperties, cell, baseCell, iafTauCell, iafTauRefCell, iafCell, iafRefCell, izhikevichCell, adExIaFCell, pulseGenerator, sineGenerator, rampGenerator, voltageClamp, spikeArray, spikeGenerator, spikeGeneratorRandom, spikeGeneratorPoisson, IF_curr_alpha, IF_curr_exp, IF_cond_alpha, IF_cond_exp, EIF_cond_exp_isfa_ista, EIF_cond_alpha_isfa_ista, HH_cond_exp, expCondSynapse, alphaCondSynapse, expCurrSynapse, alphaCurrSynapse, SpikeSourcePoisson, network, ComponentType, )
 supermod.NeuroMLDocument.subclass = NeuroMLDocumentSub
 # end class NeuroMLDocumentSub
 
@@ -586,15 +642,15 @@ supermod.IzhikevichCell.subclass = IzhikevichCellSub
 
 
 class IaFCellSub(supermod.IaFCell):
-    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, reset=None, C=None, thresh=None, leakConductance=None, leakReversal=None):
-        super(IaFCellSub, self).__init__(id, neuroLexId, name, metaid, notes, annotation, reset, C, thresh, leakConductance, leakReversal, )
+    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, reset=None, C=None, thresh=None, leakConductance=None, leakReversal=None, extensiontype_=None):
+        super(IaFCellSub, self).__init__(id, neuroLexId, name, metaid, notes, annotation, reset, C, thresh, leakConductance, leakReversal, extensiontype_, )
 supermod.IaFCell.subclass = IaFCellSub
 # end class IaFCellSub
 
 
 class IaFTauCellSub(supermod.IaFTauCell):
-    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, reset=None, tau=None, thresh=None, leakReversal=None):
-        super(IaFTauCellSub, self).__init__(id, neuroLexId, name, metaid, notes, annotation, reset, tau, thresh, leakReversal, )
+    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, reset=None, tau=None, thresh=None, leakReversal=None, extensiontype_=None):
+        super(IaFTauCellSub, self).__init__(id, neuroLexId, name, metaid, notes, annotation, reset, tau, thresh, leakReversal, extensiontype_, )
 supermod.IaFTauCell.subclass = IaFTauCellSub
 # end class IaFTauCellSub
 
@@ -648,6 +704,20 @@ supermod.basePyNNIaFCell.subclass = basePyNNIaFCellSub
 # end class basePyNNIaFCellSub
 
 
+class IaFRefCellSub(supermod.IaFRefCell):
+    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, reset=None, C=None, thresh=None, leakConductance=None, leakReversal=None, refract=None):
+        super(IaFRefCellSub, self).__init__(id, neuroLexId, name, metaid, notes, annotation, reset, C, thresh, leakConductance, leakReversal, refract, )
+supermod.IaFRefCell.subclass = IaFRefCellSub
+# end class IaFRefCellSub
+
+
+class IaFTauRefCellSub(supermod.IaFTauRefCell):
+    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, reset=None, tau=None, thresh=None, leakReversal=None, refract=None):
+        super(IaFTauRefCellSub, self).__init__(id, neuroLexId, name, metaid, notes, annotation, reset, tau, thresh, leakReversal, refract, )
+supermod.IaFTauRefCell.subclass = IaFTauRefCellSub
+# end class IaFTauRefCellSub
+
+
 class ExpTwoSynapseSub(supermod.ExpTwoSynapse):
     def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, erev=None, gbase=None, tauDecay=None, tauRise=None, extensiontype_=None):
         super(ExpTwoSynapseSub, self).__init__(id, neuroLexId, name, metaid, notes, annotation, erev, gbase, tauDecay, tauRise, extensiontype_, )
@@ -683,18 +753,11 @@ supermod.basePyNNIaFCondCell.subclass = basePyNNIaFCondCellSub
 # end class basePyNNIaFCondCellSub
 
 
-class StpSynapseSub(supermod.StpSynapse):
-    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, erev=None, gbase=None, tauDecay=None, tauRise=None, stpMechanism=None):
-        super(StpSynapseSub, self).__init__(id, neuroLexId, name, metaid, notes, annotation, erev, gbase, tauDecay, tauRise, stpMechanism, )
-supermod.StpSynapse.subclass = StpSynapseSub
-# end class StpSynapseSub
-
-
-class NmdaSynapseSub(supermod.NmdaSynapse):
-    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, erev=None, gbase=None, tauDecay=None, tauRise=None, voltageConcDepBlock=None):
-        super(NmdaSynapseSub, self).__init__(id, neuroLexId, name, metaid, notes, annotation, erev, gbase, tauDecay, tauRise, voltageConcDepBlock, )
-supermod.NmdaSynapse.subclass = NmdaSynapseSub
-# end class NmdaSynapseSub
+class BlockingPlasticSynapseSub(supermod.BlockingPlasticSynapse):
+    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, erev=None, gbase=None, tauDecay=None, tauRise=None, plasticityMechanism=None, blockMechanism=None):
+        super(BlockingPlasticSynapseSub, self).__init__(id, neuroLexId, name, metaid, notes, annotation, erev, gbase, tauDecay, tauRise, plasticityMechanism, blockMechanism, )
+supermod.BlockingPlasticSynapse.subclass = BlockingPlasticSynapseSub
+# end class BlockingPlasticSynapseSub
 
 
 class EIF_cond_alpha_isfa_istaSub(supermod.EIF_cond_alpha_isfa_ista):
@@ -745,11 +808,11 @@ def parse(inFilename):
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
-    sys.stdout.write('<?xml version="1.0" ?>\n')
-    rootObj.export(
-        sys.stdout, 0, name_=rootTag,
-        namespacedef_='',
-        pretty_print=True)
+##     sys.stdout.write('<?xml version="1.0" ?>\n')
+##     rootObj.export(
+##         sys.stdout, 0, name_=rootTag,
+##         namespacedef_='',
+##         pretty_print=True)
     return rootObj
 
 
@@ -767,11 +830,11 @@ def parseEtree(inFilename):
     mapping = {}
     rootElement = rootObj.to_etree(None, name_=rootTag, mapping_=mapping)
     reverse_mapping = rootObj.gds_reverse_node_mapping(mapping)
-    content = etree_.tostring(
-        rootElement, pretty_print=True,
-        xml_declaration=True, encoding="utf-8")
-    sys.stdout.write(content)
-    sys.stdout.write('\n')
+##     content = etree_.tostring(
+##         rootElement, pretty_print=True,
+##         xml_declaration=True, encoding="utf-8")
+##     sys.stdout.write(content)
+##     sys.stdout.write('\n')
     return rootObj, rootElement, mapping, reverse_mapping
 
 
@@ -787,10 +850,10 @@ def parseString(inString):
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
-    sys.stdout.write('<?xml version="1.0" ?>\n')
-    rootObj.export(
-        sys.stdout, 0, name_=rootTag,
-        namespacedef_='')
+##     sys.stdout.write('<?xml version="1.0" ?>\n')
+##     rootObj.export(
+##         sys.stdout, 0, name_=rootTag,
+##         namespacedef_='')
     return rootObj
 
 
@@ -805,11 +868,11 @@ def parseLiteral(inFilename):
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
-    sys.stdout.write('#from ??? import *\n\n')
-    sys.stdout.write('import ??? as model_\n\n')
-    sys.stdout.write('rootObj = model_.Annotation(\n')
-    rootObj.exportLiteral(sys.stdout, 0, name_="Annotation")
-    sys.stdout.write(')\n')
+##     sys.stdout.write('#from ??? import *\n\n')
+##     sys.stdout.write('import ??? as model_\n\n')
+##     sys.stdout.write('rootObj = model_.Annotation(\n')
+##     rootObj.exportLiteral(sys.stdout, 0, name_="Annotation")
+##     sys.stdout.write(')\n')
     return rootObj
 
 

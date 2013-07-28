@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #
-# Generated Wed Jul 10 17:02:17 2013 by generateDS.py version 2.10a.
+# Generated Sun Jul 28 10:18:38 2013 by generateDS.py version 2.10a.
 #
 
 import sys
@@ -716,13 +716,10 @@ class ComponentType(GeneratedsSuper):
     def insert_anytypeobjs_(self, index, value): self._anytypeobjs_[index] = value
     def get_extends(self): return self.extends
     def set_extends(self, extends): self.extends = extends
-    extendsProp = property(get_extends, set_extends)
     def get_name(self): return self.name
     def set_name(self, name): self.name = name
-    nameProp = property(get_name, set_name)
     def get_description(self): return self.description
     def set_description(self, description): self.description = description
-    descriptionProp = property(get_description, set_description)
     def hasContent_(self):
         if (
             self.anytypeobjs_
@@ -840,7 +837,6 @@ class IncludeType(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_href(self): return self.href
     def set_href(self, href): self.href = href
-    hrefProp = property(get_href, set_href)
     def get_valueOf_(self): return self.valueOf_
     def set_valueOf_(self, valueOf_): self.valueOf_ = valueOf_
     def hasContent_(self):
@@ -925,25 +921,21 @@ class Q10Settings(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_fixedQ10(self): return self.fixedQ10
     def set_fixedQ10(self, fixedQ10): self.fixedQ10 = fixedQ10
-    fixedQ10Prop = property(get_fixedQ10, set_fixedQ10)
     def validate_Nml2Quantity_none(self, value):
         # Validate type Nml2Quantity_none, a restriction on xs:string.
         pass
     def get_experimentalTemp(self): return self.experimentalTemp
     def set_experimentalTemp(self, experimentalTemp): self.experimentalTemp = experimentalTemp
-    experimentalTempProp = property(get_experimentalTemp, set_experimentalTemp)
     def validate_Nml2Quantity_temperature(self, value):
         # Validate type Nml2Quantity_temperature, a restriction on xs:string.
         pass
     def get_type(self): return self.type_
     def set_type(self, type_): self.type_ = type_
-    typeProp = property(get_type, set_type)
     def validate_NmlId(self, value):
         # Validate type NmlId, a restriction on xs:string.
         pass
     def get_q10Factor(self): return self.q10Factor
     def set_q10Factor(self, q10Factor): self.q10Factor = q10Factor
-    q10FactorProp = property(get_q10Factor, set_q10Factor)
     def hasContent_(self):
         if (
 
@@ -1055,22 +1047,18 @@ class HHRate(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_midpoint(self): return self.midpoint
     def set_midpoint(self, midpoint): self.midpoint = midpoint
-    midpointProp = property(get_midpoint, set_midpoint)
     def validate_Nml2Quantity_voltage(self, value):
         # Validate type Nml2Quantity_voltage, a restriction on xs:string.
         pass
     def get_rate(self): return self.rate
     def set_rate(self, rate): self.rate = rate
-    rateProp = property(get_rate, set_rate)
     def validate_Nml2Quantity_pertime(self, value):
         # Validate type Nml2Quantity_pertime, a restriction on xs:string.
         pass
     def get_scale(self): return self.scale
     def set_scale(self, scale): self.scale = scale
-    scaleProp = property(get_scale, set_scale)
     def get_type(self): return self.type_
     def set_type(self, type_): self.type_ = type_
-    typeProp = property(get_type, set_type)
     def validate_NmlId(self, value):
         # Validate type NmlId, a restriction on xs:string.
         pass
@@ -1185,19 +1173,15 @@ class HHVariable(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_midpoint(self): return self.midpoint
     def set_midpoint(self, midpoint): self.midpoint = midpoint
-    midpointProp = property(get_midpoint, set_midpoint)
     def validate_Nml2Quantity_voltage(self, value):
         # Validate type Nml2Quantity_voltage, a restriction on xs:string.
         pass
     def get_rate(self): return self.rate
     def set_rate(self, rate): self.rate = rate
-    rateProp = property(get_rate, set_rate)
     def get_scale(self): return self.scale
     def set_scale(self, scale): self.scale = scale
-    scaleProp = property(get_scale, set_scale)
     def get_type(self): return self.type_
     def set_type(self, type_): self.type_ = type_
-    typeProp = property(get_type, set_type)
     def validate_NmlId(self, value):
         # Validate type NmlId, a restriction on xs:string.
         pass
@@ -1315,28 +1299,23 @@ class HHTime(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_midpoint(self): return self.midpoint
     def set_midpoint(self, midpoint): self.midpoint = midpoint
-    midpointProp = property(get_midpoint, set_midpoint)
     def validate_Nml2Quantity_voltage(self, value):
         # Validate type Nml2Quantity_voltage, a restriction on xs:string.
         pass
     def get_rate(self): return self.rate
     def set_rate(self, rate): self.rate = rate
-    rateProp = property(get_rate, set_rate)
     def validate_Nml2Quantity_time(self, value):
         # Validate type Nml2Quantity_time, a restriction on xs:string.
         pass
     def get_scale(self): return self.scale
     def set_scale(self, scale): self.scale = scale
-    scaleProp = property(get_scale, set_scale)
     def get_type(self): return self.type_
     def set_type(self, type_): self.type_ = type_
-    typeProp = property(get_type, set_type)
     def validate_NmlId(self, value):
         # Validate type NmlId, a restriction on xs:string.
         pass
     def get_tau(self): return self.tau
     def set_tau(self, tau): self.tau = tau
-    tauProp = property(get_tau, set_tau)
     def hasContent_(self):
         if (
 
@@ -1443,7 +1422,7 @@ class HHTime(GeneratedsSuper):
 # end class HHTime
 
 
-class VoltageConcDepBlock(GeneratedsSuper):
+class BlockMechanism(GeneratedsSuper):
     subclass = None
     superclass = None
     def __init__(self, blockConcentration=None, scalingConc=None, type_=None, species=None, scalingVolt=None):
@@ -1454,32 +1433,30 @@ class VoltageConcDepBlock(GeneratedsSuper):
         self.scalingVolt = _cast(None, scalingVolt)
         pass
     def factory(*args_, **kwargs_):
-        if VoltageConcDepBlock.subclass:
-            return VoltageConcDepBlock.subclass(*args_, **kwargs_)
+        if BlockMechanism.subclass:
+            return BlockMechanism.subclass(*args_, **kwargs_)
         else:
-            return VoltageConcDepBlock(*args_, **kwargs_)
+            return BlockMechanism(*args_, **kwargs_)
     factory = staticmethod(factory)
     def get_blockConcentration(self): return self.blockConcentration
     def set_blockConcentration(self, blockConcentration): self.blockConcentration = blockConcentration
-    blockConcentrationProp = property(get_blockConcentration, set_blockConcentration)
     def validate_Nml2Quantity_concentration(self, value):
         # Validate type Nml2Quantity_concentration, a restriction on xs:string.
         pass
     def get_scalingConc(self): return self.scalingConc
     def set_scalingConc(self, scalingConc): self.scalingConc = scalingConc
-    scalingConcProp = property(get_scalingConc, set_scalingConc)
     def get_type(self): return self.type_
     def set_type(self, type_): self.type_ = type_
-    typeProp = property(get_type, set_type)
+    def validate_BlockTypes(self, value):
+        # Validate type BlockTypes, a restriction on xs:string.
+        pass
     def get_species(self): return self.species
     def set_species(self, species): self.species = species
-    speciesProp = property(get_species, set_species)
     def validate_NmlId(self, value):
         # Validate type NmlId, a restriction on xs:string.
         pass
     def get_scalingVolt(self): return self.scalingVolt
     def set_scalingVolt(self, scalingVolt): self.scalingVolt = scalingVolt
-    scalingVoltProp = property(get_scalingVolt, set_scalingVolt)
     def validate_Nml2Quantity_voltage(self, value):
         # Validate type Nml2Quantity_voltage, a restriction on xs:string.
         pass
@@ -1490,7 +1467,7 @@ class VoltageConcDepBlock(GeneratedsSuper):
             return True
         else:
             return False
-    def export(self, outfile, level, namespace_='', name_='VoltageConcDepBlock', namespacedef_='', pretty_print=True):
+    def export(self, outfile, level, namespace_='', name_='BlockMechanism', namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
         else:
@@ -1498,14 +1475,14 @@ class VoltageConcDepBlock(GeneratedsSuper):
         showIndent(outfile, level, pretty_print)
         outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         already_processed = set()
-        self.exportAttributes(outfile, level, already_processed, namespace_, name_='VoltageConcDepBlock')
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='BlockMechanism')
         if self.hasContent_():
             outfile.write('>%s' % (eol_, ))
             self.exportChildren(outfile, level + 1, namespace_, name_, pretty_print=pretty_print)
             outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
         else:
             outfile.write('/>%s' % (eol_, ))
-    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='VoltageConcDepBlock'):
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='BlockMechanism'):
         if self.blockConcentration is not None and 'blockConcentration' not in already_processed:
             already_processed.add('blockConcentration')
             outfile.write(' blockConcentration=%s' % (quote_attrib(self.blockConcentration), ))
@@ -1514,16 +1491,16 @@ class VoltageConcDepBlock(GeneratedsSuper):
             outfile.write(' scalingConc=%s' % (quote_attrib(self.scalingConc), ))
         if self.type_ is not None and 'type_' not in already_processed:
             already_processed.add('type_')
-            outfile.write(' type=%s' % (self.gds_format_string(quote_attrib(self.type_).encode(ExternalEncoding), input_name='type'), ))
+            outfile.write(' type=%s' % (quote_attrib(self.type_), ))
         if self.species is not None and 'species' not in already_processed:
             already_processed.add('species')
             outfile.write(' species=%s' % (quote_attrib(self.species), ))
         if self.scalingVolt is not None and 'scalingVolt' not in already_processed:
             already_processed.add('scalingVolt')
             outfile.write(' scalingVolt=%s' % (quote_attrib(self.scalingVolt), ))
-    def exportChildren(self, outfile, level, namespace_='', name_='VoltageConcDepBlock', fromsubclass_=False, pretty_print=True):
+    def exportChildren(self, outfile, level, namespace_='', name_='BlockMechanism', fromsubclass_=False, pretty_print=True):
         pass
-    def exportLiteral(self, outfile, level, name_='VoltageConcDepBlock'):
+    def exportLiteral(self, outfile, level, name_='BlockMechanism'):
         level += 1
         already_processed = set()
         self.exportLiteralAttributes(outfile, level, already_processed, name_)
@@ -1573,6 +1550,7 @@ class VoltageConcDepBlock(GeneratedsSuper):
         if value is not None and 'type' not in already_processed:
             already_processed.add('type')
             self.type_ = value
+            self.validate_BlockTypes(self.type_)    # validate type BlockTypes
         value = find_attr_value_('species', node)
         if value is not None and 'species' not in already_processed:
             already_processed.add('species')
@@ -1585,35 +1563,38 @@ class VoltageConcDepBlock(GeneratedsSuper):
             self.validate_Nml2Quantity_voltage(self.scalingVolt)    # validate type Nml2Quantity_voltage
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         pass
-# end class VoltageConcDepBlock
+# end class BlockMechanism
 
 
-class StpMechanism(GeneratedsSuper):
+class PlasticityMechanism(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, tauRec=None, tauFac=None, initReleaseProb=None):
-        self.tauRec = _cast(None, tauRec)
+    def __init__(self, type_=None, tauFac=None, tauRec=None, initReleaseProb=None):
+        self.type_ = _cast(None, type_)
         self.tauFac = _cast(None, tauFac)
+        self.tauRec = _cast(None, tauRec)
         self.initReleaseProb = _cast(None, initReleaseProb)
         pass
     def factory(*args_, **kwargs_):
-        if StpMechanism.subclass:
-            return StpMechanism.subclass(*args_, **kwargs_)
+        if PlasticityMechanism.subclass:
+            return PlasticityMechanism.subclass(*args_, **kwargs_)
         else:
-            return StpMechanism(*args_, **kwargs_)
+            return PlasticityMechanism(*args_, **kwargs_)
     factory = staticmethod(factory)
-    def get_tauRec(self): return self.tauRec
-    def set_tauRec(self, tauRec): self.tauRec = tauRec
-    tauRecProp = property(get_tauRec, set_tauRec)
-    def validate_Nml2Quantity_time(self, value):
-        # Validate type Nml2Quantity_time, a restriction on xs:string.
+    def get_type(self): return self.type_
+    def set_type(self, type_): self.type_ = type_
+    def validate_PlasticityTypes(self, value):
+        # Validate type PlasticityTypes, a restriction on xs:string.
         pass
     def get_tauFac(self): return self.tauFac
     def set_tauFac(self, tauFac): self.tauFac = tauFac
-    tauFacProp = property(get_tauFac, set_tauFac)
+    def validate_Nml2Quantity_time(self, value):
+        # Validate type Nml2Quantity_time, a restriction on xs:string.
+        pass
+    def get_tauRec(self): return self.tauRec
+    def set_tauRec(self, tauRec): self.tauRec = tauRec
     def get_initReleaseProb(self): return self.initReleaseProb
     def set_initReleaseProb(self, initReleaseProb): self.initReleaseProb = initReleaseProb
-    initReleaseProbProp = property(get_initReleaseProb, set_initReleaseProb)
     def validate_ZeroToOne(self, value):
         # Validate type ZeroToOne, a restriction on xs:double.
         pass
@@ -1624,7 +1605,7 @@ class StpMechanism(GeneratedsSuper):
             return True
         else:
             return False
-    def export(self, outfile, level, namespace_='', name_='StpMechanism', namespacedef_='', pretty_print=True):
+    def export(self, outfile, level, namespace_='', name_='PlasticityMechanism', namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
         else:
@@ -1632,40 +1613,47 @@ class StpMechanism(GeneratedsSuper):
         showIndent(outfile, level, pretty_print)
         outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         already_processed = set()
-        self.exportAttributes(outfile, level, already_processed, namespace_, name_='StpMechanism')
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='PlasticityMechanism')
         if self.hasContent_():
             outfile.write('>%s' % (eol_, ))
             self.exportChildren(outfile, level + 1, namespace_, name_, pretty_print=pretty_print)
             outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
         else:
             outfile.write('/>%s' % (eol_, ))
-    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='StpMechanism'):
-        if self.tauRec is not None and 'tauRec' not in already_processed:
-            already_processed.add('tauRec')
-            outfile.write(' tauRec=%s' % (quote_attrib(self.tauRec), ))
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='PlasticityMechanism'):
+        if self.type_ is not None and 'type_' not in already_processed:
+            already_processed.add('type_')
+            outfile.write(' type=%s' % (quote_attrib(self.type_), ))
         if self.tauFac is not None and 'tauFac' not in already_processed:
             already_processed.add('tauFac')
             outfile.write(' tauFac=%s' % (quote_attrib(self.tauFac), ))
+        if self.tauRec is not None and 'tauRec' not in already_processed:
+            already_processed.add('tauRec')
+            outfile.write(' tauRec=%s' % (quote_attrib(self.tauRec), ))
         if self.initReleaseProb is not None and 'initReleaseProb' not in already_processed:
             already_processed.add('initReleaseProb')
             outfile.write(' initReleaseProb=%s' % (quote_attrib(self.initReleaseProb), ))
-    def exportChildren(self, outfile, level, namespace_='', name_='StpMechanism', fromsubclass_=False, pretty_print=True):
+    def exportChildren(self, outfile, level, namespace_='', name_='PlasticityMechanism', fromsubclass_=False, pretty_print=True):
         pass
-    def exportLiteral(self, outfile, level, name_='StpMechanism'):
+    def exportLiteral(self, outfile, level, name_='PlasticityMechanism'):
         level += 1
         already_processed = set()
         self.exportLiteralAttributes(outfile, level, already_processed, name_)
         if self.hasContent_():
             self.exportLiteralChildren(outfile, level, name_)
     def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        if self.tauRec is not None and 'tauRec' not in already_processed:
-            already_processed.add('tauRec')
+        if self.type_ is not None and 'type_' not in already_processed:
+            already_processed.add('type_')
             showIndent(outfile, level)
-            outfile.write('tauRec="%s",\n' % (self.tauRec,))
+            outfile.write('type_="%s",\n' % (self.type_,))
         if self.tauFac is not None and 'tauFac' not in already_processed:
             already_processed.add('tauFac')
             showIndent(outfile, level)
             outfile.write('tauFac="%s",\n' % (self.tauFac,))
+        if self.tauRec is not None and 'tauRec' not in already_processed:
+            already_processed.add('tauRec')
+            showIndent(outfile, level)
+            outfile.write('tauRec="%s",\n' % (self.tauRec,))
         if self.initReleaseProb is not None and 'initReleaseProb' not in already_processed:
             already_processed.add('initReleaseProb')
             showIndent(outfile, level)
@@ -1679,16 +1667,21 @@ class StpMechanism(GeneratedsSuper):
             nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
             self.buildChildren(child, node, nodeName_)
     def buildAttributes(self, node, attrs, already_processed):
-        value = find_attr_value_('tauRec', node)
-        if value is not None and 'tauRec' not in already_processed:
-            already_processed.add('tauRec')
-            self.tauRec = value
-            self.validate_Nml2Quantity_time(self.tauRec)    # validate type Nml2Quantity_time
+        value = find_attr_value_('type', node)
+        if value is not None and 'type' not in already_processed:
+            already_processed.add('type')
+            self.type_ = value
+            self.validate_PlasticityTypes(self.type_)    # validate type PlasticityTypes
         value = find_attr_value_('tauFac', node)
         if value is not None and 'tauFac' not in already_processed:
             already_processed.add('tauFac')
             self.tauFac = value
             self.validate_Nml2Quantity_time(self.tauFac)    # validate type Nml2Quantity_time
+        value = find_attr_value_('tauRec', node)
+        if value is not None and 'tauRec' not in already_processed:
+            already_processed.add('tauRec')
+            self.tauRec = value
+            self.validate_Nml2Quantity_time(self.tauRec)    # validate type Nml2Quantity_time
         value = find_attr_value_('initReleaseProb', node)
         if value is not None and 'initReleaseProb' not in already_processed:
             already_processed.add('initReleaseProb')
@@ -1699,7 +1692,7 @@ class StpMechanism(GeneratedsSuper):
             self.validate_ZeroToOne(self.initReleaseProb)    # validate type ZeroToOne
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         pass
-# end class StpMechanism
+# end class PlasticityMechanism
 
 
 class SegmentParent(GeneratedsSuper):
@@ -1717,13 +1710,11 @@ class SegmentParent(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_fractionAlong(self): return self.fractionAlong
     def set_fractionAlong(self, fractionAlong): self.fractionAlong = fractionAlong
-    fractionAlongProp = property(get_fractionAlong, set_fractionAlong)
     def validate_ZeroToOne(self, value):
         # Validate type ZeroToOne, a restriction on xs:double.
         pass
     def get_segment(self): return self.segment
     def set_segment(self, segment): self.segment = segment
-    segmentProp = property(get_segment, set_segment)
     def validate_SegmentId(self, value):
         # Validate type SegmentId, a restriction on xs:nonNegativeInteger.
         pass
@@ -1823,16 +1814,12 @@ class Point3DWithDiam(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_y(self): return self.y
     def set_y(self, y): self.y = y
-    yProp = property(get_y, set_y)
     def get_x(self): return self.x
     def set_x(self, x): self.x = x
-    xProp = property(get_x, set_x)
     def get_z(self): return self.z
     def set_z(self, z): self.z = z
-    zProp = property(get_z, set_z)
     def get_diameter(self): return self.diameter
     def set_diameter(self, diameter): self.diameter = diameter
-    diameterProp = property(get_diameter, set_diameter)
     def hasContent_(self):
         if (
 
@@ -1949,7 +1936,6 @@ class ProximalDetails(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_translationStart(self): return self.translationStart
     def set_translationStart(self, translationStart): self.translationStart = translationStart
-    translationStartProp = property(get_translationStart, set_translationStart)
     def hasContent_(self):
         if (
 
@@ -2024,7 +2010,6 @@ class DistalDetails(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_normalizationEnd(self): return self.normalizationEnd
     def set_normalizationEnd(self, normalizationEnd): self.normalizationEnd = normalizationEnd
-    normalizationEndProp = property(get_normalizationEnd, set_normalizationEnd)
     def hasContent_(self):
         if (
 
@@ -2099,7 +2084,6 @@ class Member(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_segment(self): return self.segment
     def set_segment(self, segment): self.segment = segment
-    segmentProp = property(get_segment, set_segment)
     def validate_SegmentId(self, value):
         # Validate type SegmentId, a restriction on xs:nonNegativeInteger.
         pass
@@ -2180,7 +2164,6 @@ class Include(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_segmentGroup(self): return self.segmentGroup
     def set_segmentGroup(self, segmentGroup): self.segmentGroup = segmentGroup
-    segmentGroupProp = property(get_segmentGroup, set_segmentGroup)
     def validate_NmlId(self, value):
         # Validate type NmlId, a restriction on xs:string.
         pass
@@ -2256,10 +2239,8 @@ class Path(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_from(self): return self.fromxx
     def set_from(self, fromxx): self.fromxx = fromxx
-    fromProp = property(get_from, set_from)
     def get_to(self): return self.to
     def set_to(self, to): self.to = to
-    toProp = property(get_to, set_to)
     def hasContent_(self):
         if (
             self.fromxx is not None or
@@ -2350,10 +2331,8 @@ class SubTree(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_from(self): return self.fromxx
     def set_from(self, fromxx): self.fromxx = fromxx
-    fromProp = property(get_from, set_from)
     def get_to(self): return self.to
     def set_to(self, to): self.to = to
-    toProp = property(get_to, set_to)
     def hasContent_(self):
         if (
             self.fromxx is not None or
@@ -2444,7 +2423,6 @@ class SegmentEndPoint(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_segment(self): return self.segment
     def set_segment(self, segment): self.segment = segment
-    segmentProp = property(get_segment, set_segment)
     def validate_SegmentId(self, value):
         # Validate type SegmentId, a restriction on xs:nonNegativeInteger.
         pass
@@ -2549,32 +2527,26 @@ class MembraneProperties(GeneratedsSuper):
     def set_channelPopulation(self, channelPopulation): self.channelPopulation = channelPopulation
     def add_channelPopulation(self, value): self.channelPopulation.append(value)
     def insert_channelPopulation(self, index, value): self.channelPopulation[index] = value
-    channelPopulationProp = property(get_channelPopulation, set_channelPopulation)
     def get_channelDensity(self): return self.channelDensity
     def set_channelDensity(self, channelDensity): self.channelDensity = channelDensity
     def add_channelDensity(self, value): self.channelDensity.append(value)
     def insert_channelDensity(self, index, value): self.channelDensity[index] = value
-    channelDensityProp = property(get_channelDensity, set_channelDensity)
     def get_spikeThresh(self): return self.spikeThresh
     def set_spikeThresh(self, spikeThresh): self.spikeThresh = spikeThresh
     def add_spikeThresh(self, value): self.spikeThresh.append(value)
     def insert_spikeThresh(self, index, value): self.spikeThresh[index] = value
-    spikeThreshProp = property(get_spikeThresh, set_spikeThresh)
     def get_specificCapacitance(self): return self.specificCapacitance
     def set_specificCapacitance(self, specificCapacitance): self.specificCapacitance = specificCapacitance
     def add_specificCapacitance(self, value): self.specificCapacitance.append(value)
     def insert_specificCapacitance(self, index, value): self.specificCapacitance[index] = value
-    specificCapacitanceProp = property(get_specificCapacitance, set_specificCapacitance)
     def get_initMembPotential(self): return self.initMembPotential
     def set_initMembPotential(self, initMembPotential): self.initMembPotential = initMembPotential
     def add_initMembPotential(self, value): self.initMembPotential.append(value)
     def insert_initMembPotential(self, index, value): self.initMembPotential[index] = value
-    initMembPotentialProp = property(get_initMembPotential, set_initMembPotential)
     def get_reversalPotential(self): return self.reversalPotential
     def set_reversalPotential(self, reversalPotential): self.reversalPotential = reversalPotential
     def add_reversalPotential(self, value): self.reversalPotential.append(value)
     def insert_reversalPotential(self, index, value): self.reversalPotential[index] = value
-    reversalPotentialProp = property(get_reversalPotential, set_reversalPotential)
     def hasContent_(self):
         if (
             self.channelPopulation or
@@ -2758,16 +2730,13 @@ class ValueAcrossSegOrSegGroup(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_segment(self): return self.segment
     def set_segment(self, segment): self.segment = segment
-    segmentProp = property(get_segment, set_segment)
     def validate_NmlId(self, value):
         # Validate type NmlId, a restriction on xs:string.
         pass
     def get_segmentGroup(self): return self.segmentGroup
     def set_segmentGroup(self, segmentGroup): self.segmentGroup = segmentGroup
-    segmentGroupProp = property(get_segmentGroup, set_segmentGroup)
     def get_value(self): return self.value
     def set_value(self, value): self.value = value
-    valueProp = property(get_value, set_value)
     def validate_Nml2Quantity(self, value):
         # Validate type Nml2Quantity, a restriction on xs:string.
         pass
@@ -2878,13 +2847,10 @@ class VariableParameter(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_inhomogeneousValue(self): return self.inhomogeneousValue
     def set_inhomogeneousValue(self, inhomogeneousValue): self.inhomogeneousValue = inhomogeneousValue
-    inhomogeneousValueProp = property(get_inhomogeneousValue, set_inhomogeneousValue)
     def get_segmentGroup(self): return self.segmentGroup
     def set_segmentGroup(self, segmentGroup): self.segmentGroup = segmentGroup
-    segmentGroupProp = property(get_segmentGroup, set_segmentGroup)
     def get_parameter(self): return self.parameter
     def set_parameter(self, parameter): self.parameter = parameter
-    parameterProp = property(get_parameter, set_parameter)
     def hasContent_(self):
         if (
             self.inhomogeneousValue is not None
@@ -2982,10 +2948,8 @@ class InhomogeneousValue(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_inhomogeneousParam(self): return self.inhomogeneousParam
     def set_inhomogeneousParam(self, inhomogeneousParam): self.inhomogeneousParam = inhomogeneousParam
-    inhomogeneousParamProp = property(get_inhomogeneousParam, set_inhomogeneousParam)
     def get_value(self): return self.value
     def set_value(self, value): self.value = value
-    valueProp = property(get_value, set_value)
     def hasContent_(self):
         if (
 
@@ -3069,7 +3033,6 @@ class ReversalPotential(ValueAcrossSegOrSegGroup):
     factory = staticmethod(factory)
     def get_species(self): return self.species
     def set_species(self, species): self.species = species
-    speciesProp = property(get_species, set_species)
     def validate_NmlId(self, value):
         # Validate type NmlId, a restriction on xs:string.
         pass
@@ -3159,25 +3122,20 @@ class Species(ValueAcrossSegOrSegGroup):
     factory = staticmethod(factory)
     def get_ion(self): return self.ion
     def set_ion(self, ion): self.ion = ion
-    ionProp = property(get_ion, set_ion)
     def validate_NmlId(self, value):
         # Validate type NmlId, a restriction on xs:string.
         pass
     def get_initialExtConcentration(self): return self.initialExtConcentration
     def set_initialExtConcentration(self, initialExtConcentration): self.initialExtConcentration = initialExtConcentration
-    initialExtConcentrationProp = property(get_initialExtConcentration, set_initialExtConcentration)
     def validate_Nml2Quantity_concentration(self, value):
         # Validate type Nml2Quantity_concentration, a restriction on xs:string.
         pass
     def get_concentrationModel(self): return self.concentrationModel
     def set_concentrationModel(self, concentrationModel): self.concentrationModel = concentrationModel
-    concentrationModelProp = property(get_concentrationModel, set_concentrationModel)
     def get_id(self): return self.id
     def set_id(self, id): self.id = id
-    idProp = property(get_id, set_id)
     def get_initialConcentration(self): return self.initialConcentration
     def set_initialConcentration(self, initialConcentration): self.initialConcentration = initialConcentration
-    initialConcentrationProp = property(get_initialConcentration, set_initialConcentration)
     def hasContent_(self):
         if (
             super(Species, self).hasContent_()
@@ -3312,12 +3270,10 @@ class IntracellularProperties(GeneratedsSuper):
     def set_species(self, species): self.species = species
     def add_species(self, value): self.species.append(value)
     def insert_species(self, index, value): self.species[index] = value
-    speciesProp = property(get_species, set_species)
     def get_resistivity(self): return self.resistivity
     def set_resistivity(self, resistivity): self.resistivity = resistivity
     def add_resistivity(self, value): self.resistivity.append(value)
     def insert_resistivity(self, index, value): self.resistivity[index] = value
-    resistivityProp = property(get_resistivity, set_resistivity)
     def hasContent_(self):
         if (
             self.species or
@@ -3426,10 +3382,8 @@ class ExtracellularPropertiesLocal(GeneratedsSuper):
     def set_species(self, species): self.species = species
     def add_species(self, value): self.species.append(value)
     def insert_species(self, index, value): self.species[index] = value
-    speciesProp = property(get_species, set_species)
     def get_temperature(self): return self.temperature
     def set_temperature(self, temperature): self.temperature = temperature
-    temperatureProp = property(get_temperature, set_temperature)
     def validate_Nml2Quantity_temperature(self, value):
         # Validate type Nml2Quantity_temperature, a restriction on xs:string.
         pass
@@ -3530,22 +3484,16 @@ class SpaceStructure(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_ySpacing(self): return self.ySpacing
     def set_ySpacing(self, ySpacing): self.ySpacing = ySpacing
-    ySpacingProp = property(get_ySpacing, set_ySpacing)
     def get_zStart(self): return self.zStart
     def set_zStart(self, zStart): self.zStart = zStart
-    zStartProp = property(get_zStart, set_zStart)
     def get_yStart(self): return self.yStart
     def set_yStart(self, yStart): self.yStart = yStart
-    yStartProp = property(get_yStart, set_yStart)
     def get_zSpacing(self): return self.zSpacing
     def set_zSpacing(self, zSpacing): self.zSpacing = zSpacing
-    zSpacingProp = property(get_zSpacing, set_zSpacing)
     def get_xStart(self): return self.xStart
     def set_xStart(self, xStart): self.xStart = xStart
-    xStartProp = property(get_xStart, set_xStart)
     def get_xSpacing(self): return self.xSpacing
     def set_xSpacing(self, xSpacing): self.xSpacing = xSpacing
-    xSpacingProp = property(get_xSpacing, set_xSpacing)
     def hasContent_(self):
         if (
 
@@ -3692,16 +3640,12 @@ class Layout(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_random(self): return self.random
     def set_random(self, random): self.random = random
-    randomProp = property(get_random, set_random)
     def get_grid(self): return self.grid
     def set_grid(self, grid): self.grid = grid
-    gridProp = property(get_grid, set_grid)
     def get_unstructured(self): return self.unstructured
     def set_unstructured(self, unstructured): self.unstructured = unstructured
-    unstructuredProp = property(get_unstructured, set_unstructured)
     def get_space(self): return self.space
     def set_space(self, space): self.space = space
-    spaceProp = property(get_space, set_space)
     def validate_NmlId(self, value):
         # Validate type NmlId, a restriction on xs:string.
         pass
@@ -3817,7 +3761,6 @@ class UnstructuredLayout(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_number(self): return self.number
     def set_number(self, number): self.number = number
-    numberProp = property(get_number, set_number)
     def hasContent_(self):
         if (
 
@@ -3895,13 +3838,11 @@ class RandomLayout(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_region(self): return self.region
     def set_region(self, region): self.region = region
-    regionProp = property(get_region, set_region)
     def validate_NmlId(self, value):
         # Validate type NmlId, a restriction on xs:string.
         pass
     def get_number(self): return self.number
     def set_number(self, number): self.number = number
-    numberProp = property(get_number, set_number)
     def hasContent_(self):
         if (
 
@@ -3992,13 +3933,10 @@ class GridLayout(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_zSize(self): return self.zSize
     def set_zSize(self, zSize): self.zSize = zSize
-    zSizeProp = property(get_zSize, set_zSize)
     def get_ySize(self): return self.ySize
     def set_ySize(self, ySize): self.ySize = ySize
-    ySizeProp = property(get_ySize, set_ySize)
     def get_xSize(self): return self.xSize
     def set_xSize(self, xSize): self.xSize = xSize
-    xSizeProp = property(get_xSize, set_xSize)
     def hasContent_(self):
         if (
 
@@ -4110,19 +4048,14 @@ class Instance(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_location(self): return self.location
     def set_location(self, location): self.location = location
-    locationProp = property(get_location, set_location)
     def get_i(self): return self.i
     def set_i(self, i): self.i = i
-    iProp = property(get_i, set_i)
     def get_k(self): return self.k
     def set_k(self, k): self.k = k
-    kProp = property(get_k, set_k)
     def get_j(self): return self.j
     def set_j(self, j): self.j = j
-    jProp = property(get_j, set_j)
     def get_id(self): return self.id
     def set_id(self, id): self.id = id
-    idProp = property(get_id, set_id)
     def hasContent_(self):
         if (
             self.location is not None
@@ -4263,13 +4196,10 @@ class Location(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_y(self): return self.y
     def set_y(self, y): self.y = y
-    yProp = property(get_y, set_y)
     def get_x(self): return self.x
     def set_x(self, x): self.x = x
-    xProp = property(get_x, set_x)
     def get_z(self): return self.z
     def set_z(self, z): self.z = z
-    zProp = property(get_z, set_z)
     def hasContent_(self):
         if (
 
@@ -4377,13 +4307,10 @@ class SynapticConnection(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_to(self): return self.to
     def set_to(self, to): self.to = to
-    toProp = property(get_to, set_to)
     def get_synapse(self): return self.synapse
     def set_synapse(self, synapse): self.synapse = synapse
-    synapseProp = property(get_synapse, set_synapse)
     def get_from(self): return self.fromxx
     def set_from(self, fromxx): self.fromxx = fromxx
-    fromProp = property(get_from, set_from)
     def hasContent_(self):
         if (
 
@@ -4480,13 +4407,10 @@ class Connection(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_postCellId(self): return self.postCellId
     def set_postCellId(self, postCellId): self.postCellId = postCellId
-    postCellIdProp = property(get_postCellId, set_postCellId)
     def get_id(self): return self.id
     def set_id(self, id): self.id = id
-    idProp = property(get_id, set_id)
     def get_preCellId(self): return self.preCellId
     def set_preCellId(self, preCellId): self.preCellId = preCellId
-    preCellIdProp = property(get_preCellId, set_preCellId)
     def hasContent_(self):
         if (
 
@@ -4590,13 +4514,10 @@ class ExplicitInput(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_input(self): return self.input
     def set_input(self, input): self.input = input
-    inputProp = property(get_input, set_input)
     def get_destination(self): return self.destination
     def set_destination(self, destination): self.destination = destination
-    destinationProp = property(get_destination, set_destination)
     def get_target(self): return self.target
     def set_target(self, target): self.target = target
-    targetProp = property(get_target, set_target)
     def hasContent_(self):
         if (
 
@@ -4693,16 +4614,13 @@ class Input(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_destination(self): return self.destination
     def set_destination(self, destination): self.destination = destination
-    destinationProp = property(get_destination, set_destination)
     def validate_NmlId(self, value):
         # Validate type NmlId, a restriction on xs:string.
         pass
     def get_id(self): return self.id
     def set_id(self, id): self.id = id
-    idProp = property(get_id, set_id)
     def get_target(self): return self.target
     def set_target(self, target): self.target = target
-    targetProp = property(get_target, set_target)
     def hasContent_(self):
         if (
 
@@ -4805,13 +4723,11 @@ class Base(GeneratedsSuper):
     factory = staticmethod(factory)
     def get_id(self): return self.id
     def set_id(self, id): self.id = id
-    idProp = property(get_id, set_id)
     def validate_NmlId(self, value):
         # Validate type NmlId, a restriction on xs:string.
         pass
     def get_neuroLexId(self): return self.neuroLexId
     def set_neuroLexId(self, neuroLexId): self.neuroLexId = neuroLexId
-    neuroLexIdProp = property(get_neuroLexId, set_neuroLexId)
     def validate_NeuroLexId(self, value):
         # Validate type NeuroLexId, a restriction on xs:string.
         pass
@@ -4916,19 +4832,15 @@ class Standalone(Base):
     factory = staticmethod(factory)
     def get_notes(self): return self.notes
     def set_notes(self, notes): self.notes = notes
-    notesProp = property(get_notes, set_notes)
     def validate_Notes(self, value):
         # Validate type Notes, a restriction on xs:string.
         pass
     def get_annotation(self): return self.annotation
     def set_annotation(self, annotation): self.annotation = annotation
-    annotationProp = property(get_annotation, set_annotation)
     def get_name(self): return self.name
     def set_name(self, name): self.name = name
-    nameProp = property(get_name, set_name)
     def get_metaid(self): return self.metaid
     def set_metaid(self, metaid): self.metaid = metaid
-    metaidProp = property(get_metaid, set_metaid)
     def validate_MetaId(self, value):
         # Validate type MetaId, a restriction on xs:string.
         pass
@@ -5061,16 +4973,13 @@ class SpikeSourcePoisson(Standalone):
     factory = staticmethod(factory)
     def get_duration(self): return self.duration
     def set_duration(self, duration): self.duration = duration
-    durationProp = property(get_duration, set_duration)
     def validate_Nml2Quantity_time(self, value):
         # Validate type Nml2Quantity_time, a restriction on xs:string.
         pass
     def get_start(self): return self.start
     def set_start(self, start): self.start = start
-    startProp = property(get_start, set_start)
     def get_rate(self): return self.rate
     def set_rate(self, rate): self.rate = rate
-    rateProp = property(get_rate, set_rate)
     def validate_Nml2Quantity_pertime(self, value):
         # Validate type Nml2Quantity_pertime, a restriction on xs:string.
         pass
@@ -5183,16 +5092,13 @@ class InputList(Base):
     def set_input(self, input): self.input = input
     def add_input(self, value): self.input.append(value)
     def insert_input(self, index, value): self.input[index] = value
-    inputProp = property(get_input, set_input)
     def get_component(self): return self.component
     def set_component(self, component): self.component = component
-    componentProp = property(get_component, set_component)
     def validate_NmlId(self, value):
         # Validate type NmlId, a restriction on xs:string.
         pass
     def get_population(self): return self.population
     def set_population(self, population): self.population = population
-    populationProp = property(get_population, set_population)
     def hasContent_(self):
         if (
             self.input or
@@ -5313,19 +5219,15 @@ class Projection(Base):
     def set_connection(self, connection): self.connection = connection
     def add_connection(self, value): self.connection.append(value)
     def insert_connection(self, index, value): self.connection[index] = value
-    connectionProp = property(get_connection, set_connection)
     def get_postsynapticPopulation(self): return self.postsynapticPopulation
     def set_postsynapticPopulation(self, postsynapticPopulation): self.postsynapticPopulation = postsynapticPopulation
-    postsynapticPopulationProp = property(get_postsynapticPopulation, set_postsynapticPopulation)
     def validate_NmlId(self, value):
         # Validate type NmlId, a restriction on xs:string.
         pass
     def get_presynapticPopulation(self): return self.presynapticPopulation
     def set_presynapticPopulation(self, presynapticPopulation): self.presynapticPopulation = presynapticPopulation
-    presynapticPopulationProp = property(get_presynapticPopulation, set_presynapticPopulation)
     def get_synapse(self): return self.synapse
     def set_synapse(self, synapse): self.synapse = synapse
-    synapseProp = property(get_synapse, set_synapse)
     def hasContent_(self):
         if (
             self.connection or
@@ -5457,7 +5359,6 @@ class CellSet(Base):
     def insert_anytypeobjs_(self, index, value): self._anytypeobjs_[index] = value
     def get_select(self): return self.select
     def set_select(self, select): self.select = select
-    selectProp = property(get_select, set_select)
     def hasContent_(self):
         if (
             self.anytypeobjs_ or
@@ -5561,36 +5462,28 @@ class Population(Standalone):
     factory = staticmethod(factory)
     def get_layout(self): return self.layout
     def set_layout(self, layout): self.layout = layout
-    layoutProp = property(get_layout, set_layout)
     def get_instance(self): return self.instance
     def set_instance(self, instance): self.instance = instance
     def add_instance(self, value): self.instance.append(value)
     def insert_instance(self, index, value): self.instance[index] = value
-    instanceProp = property(get_instance, set_instance)
     def get_extracellularProperties(self): return self.extracellularProperties
     def set_extracellularProperties(self, extracellularProperties): self.extracellularProperties = extracellularProperties
-    extracellularPropertiesProp = property(get_extracellularProperties, set_extracellularProperties)
     def validate_NmlId(self, value):
         # Validate type NmlId, a restriction on xs:string.
         pass
     def get_network(self): return self.network
     def set_network(self, network): self.network = network
-    networkProp = property(get_network, set_network)
     def get_component(self): return self.component
     def set_component(self, component): self.component = component
-    componentProp = property(get_component, set_component)
     def get_cell(self): return self.cell
     def set_cell(self, cell): self.cell = cell
-    cellProp = property(get_cell, set_cell)
     def get_type(self): return self.type_
     def set_type(self, type_): self.type_ = type_
-    typeProp = property(get_type, set_type)
     def validate_populationTypes(self, value):
         # Validate type populationTypes, a restriction on xs:string.
         pass
     def get_size(self): return self.size
     def set_size(self, size): self.size = size
-    sizeProp = property(get_size, set_size)
     def hasContent_(self):
         if (
             self.layout is not None or
@@ -5773,7 +5666,6 @@ class Region(Base):
     def insert_anytypeobjs_(self, index, value): self._anytypeobjs_[index] = value
     def get_space(self): return self.space
     def set_space(self, space): self.space = space
-    spaceProp = property(get_space, set_space)
     def validate_NmlId(self, value):
         # Validate type NmlId, a restriction on xs:string.
         pass
@@ -5872,10 +5764,8 @@ class Space(Base):
     factory = staticmethod(factory)
     def get_structure(self): return self.structure
     def set_structure(self, structure): self.structure = structure
-    structureProp = property(get_structure, set_structure)
     def get_basedOn(self): return self.basedOn
     def set_basedOn(self, basedOn): self.basedOn = basedOn
-    basedOnProp = property(get_basedOn, set_basedOn)
     def validate_allowedSpaces(self, value):
         # Validate type allowedSpaces, a restriction on xs:string.
         pass
@@ -6009,47 +5899,38 @@ class Network(Standalone):
     def set_space(self, space): self.space = space
     def add_space(self, value): self.space.append(value)
     def insert_space(self, index, value): self.space[index] = value
-    spaceProp = property(get_space, set_space)
     def get_region(self): return self.region
     def set_region(self, region): self.region = region
     def add_region(self, value): self.region.append(value)
     def insert_region(self, index, value): self.region[index] = value
-    regionProp = property(get_region, set_region)
     def get_extracellularProperties(self): return self.extracellularProperties
     def set_extracellularProperties(self, extracellularProperties): self.extracellularProperties = extracellularProperties
     def add_extracellularProperties(self, value): self.extracellularProperties.append(value)
     def insert_extracellularProperties(self, index, value): self.extracellularProperties[index] = value
-    extracellularPropertiesProp = property(get_extracellularProperties, set_extracellularProperties)
     def get_population(self): return self.population
     def set_population(self, population): self.population = population
     def add_population(self, value): self.population.append(value)
     def insert_population(self, index, value): self.population[index] = value
-    populationProp = property(get_population, set_population)
     def get_cellSet(self): return self.cellSet
     def set_cellSet(self, cellSet): self.cellSet = cellSet
     def add_cellSet(self, value): self.cellSet.append(value)
     def insert_cellSet(self, index, value): self.cellSet[index] = value
-    cellSetProp = property(get_cellSet, set_cellSet)
     def get_synapticConnection(self): return self.synapticConnection
     def set_synapticConnection(self, synapticConnection): self.synapticConnection = synapticConnection
     def add_synapticConnection(self, value): self.synapticConnection.append(value)
     def insert_synapticConnection(self, index, value): self.synapticConnection[index] = value
-    synapticConnectionProp = property(get_synapticConnection, set_synapticConnection)
     def get_projection(self): return self.projection
     def set_projection(self, projection): self.projection = projection
     def add_projection(self, value): self.projection.append(value)
     def insert_projection(self, index, value): self.projection[index] = value
-    projectionProp = property(get_projection, set_projection)
     def get_explicitInput(self): return self.explicitInput
     def set_explicitInput(self, explicitInput): self.explicitInput = explicitInput
     def add_explicitInput(self, value): self.explicitInput.append(value)
     def insert_explicitInput(self, index, value): self.explicitInput[index] = value
-    explicitInputProp = property(get_explicitInput, set_explicitInput)
     def get_inputList(self): return self.inputList
     def set_inputList(self, inputList): self.inputList = inputList
     def add_inputList(self, value): self.inputList.append(value)
     def insert_inputList(self, index, value): self.inputList[index] = value
-    inputListProp = property(get_inputList, set_inputList)
     def hasContent_(self):
         if (
             self.space or
@@ -6275,6 +6156,860 @@ class Network(Standalone):
 # end class Network
 
 
+class SpikeGeneratorPoisson(Standalone):
+    subclass = None
+    superclass = Standalone
+    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, averageRate=None):
+        super(SpikeGeneratorPoisson, self).__init__(id, neuroLexId, name, metaid, notes, annotation, )
+        self.averageRate = _cast(None, averageRate)
+        pass
+    def factory(*args_, **kwargs_):
+        if SpikeGeneratorPoisson.subclass:
+            return SpikeGeneratorPoisson.subclass(*args_, **kwargs_)
+        else:
+            return SpikeGeneratorPoisson(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_averageRate(self): return self.averageRate
+    def set_averageRate(self, averageRate): self.averageRate = averageRate
+    def validate_Nml2Quantity_pertime(self, value):
+        # Validate type Nml2Quantity_pertime, a restriction on xs:string.
+        pass
+    def hasContent_(self):
+        if (
+            super(SpikeGeneratorPoisson, self).hasContent_()
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespace_='', name_='SpikeGeneratorPoisson', namespacedef_='', pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='SpikeGeneratorPoisson')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespace_, name_, pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='SpikeGeneratorPoisson'):
+        super(SpikeGeneratorPoisson, self).exportAttributes(outfile, level, already_processed, namespace_, name_='SpikeGeneratorPoisson')
+        if self.averageRate is not None and 'averageRate' not in already_processed:
+            already_processed.add('averageRate')
+            outfile.write(' averageRate=%s' % (quote_attrib(self.averageRate), ))
+    def exportChildren(self, outfile, level, namespace_='', name_='SpikeGeneratorPoisson', fromsubclass_=False, pretty_print=True):
+        super(SpikeGeneratorPoisson, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
+    def exportLiteral(self, outfile, level, name_='SpikeGeneratorPoisson'):
+        level += 1
+        already_processed = set()
+        self.exportLiteralAttributes(outfile, level, already_processed, name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
+        if self.averageRate is not None and 'averageRate' not in already_processed:
+            already_processed.add('averageRate')
+            showIndent(outfile, level)
+            outfile.write('averageRate="%s",\n' % (self.averageRate,))
+        super(SpikeGeneratorPoisson, self).exportLiteralAttributes(outfile, level, already_processed, name_)
+    def exportLiteralChildren(self, outfile, level, name_):
+        super(SpikeGeneratorPoisson, self).exportLiteralChildren(outfile, level, name_)
+    def build(self, node):
+        already_processed = set()
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_)
+    def buildAttributes(self, node, attrs, already_processed):
+        value = find_attr_value_('averageRate', node)
+        if value is not None and 'averageRate' not in already_processed:
+            already_processed.add('averageRate')
+            self.averageRate = value
+            self.validate_Nml2Quantity_pertime(self.averageRate)    # validate type Nml2Quantity_pertime
+        super(SpikeGeneratorPoisson, self).buildAttributes(node, attrs, already_processed)
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
+        super(SpikeGeneratorPoisson, self).buildChildren(child_, node, nodeName_, True)
+        pass
+# end class SpikeGeneratorPoisson
+
+
+class SpikeGeneratorRandom(Standalone):
+    subclass = None
+    superclass = Standalone
+    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, minISI=None, maxISI=None):
+        super(SpikeGeneratorRandom, self).__init__(id, neuroLexId, name, metaid, notes, annotation, )
+        self.minISI = _cast(None, minISI)
+        self.maxISI = _cast(None, maxISI)
+        pass
+    def factory(*args_, **kwargs_):
+        if SpikeGeneratorRandom.subclass:
+            return SpikeGeneratorRandom.subclass(*args_, **kwargs_)
+        else:
+            return SpikeGeneratorRandom(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_minISI(self): return self.minISI
+    def set_minISI(self, minISI): self.minISI = minISI
+    def validate_Nml2Quantity_time(self, value):
+        # Validate type Nml2Quantity_time, a restriction on xs:string.
+        pass
+    def get_maxISI(self): return self.maxISI
+    def set_maxISI(self, maxISI): self.maxISI = maxISI
+    def hasContent_(self):
+        if (
+            super(SpikeGeneratorRandom, self).hasContent_()
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespace_='', name_='SpikeGeneratorRandom', namespacedef_='', pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='SpikeGeneratorRandom')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespace_, name_, pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='SpikeGeneratorRandom'):
+        super(SpikeGeneratorRandom, self).exportAttributes(outfile, level, already_processed, namespace_, name_='SpikeGeneratorRandom')
+        if self.minISI is not None and 'minISI' not in already_processed:
+            already_processed.add('minISI')
+            outfile.write(' minISI=%s' % (quote_attrib(self.minISI), ))
+        if self.maxISI is not None and 'maxISI' not in already_processed:
+            already_processed.add('maxISI')
+            outfile.write(' maxISI=%s' % (quote_attrib(self.maxISI), ))
+    def exportChildren(self, outfile, level, namespace_='', name_='SpikeGeneratorRandom', fromsubclass_=False, pretty_print=True):
+        super(SpikeGeneratorRandom, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
+    def exportLiteral(self, outfile, level, name_='SpikeGeneratorRandom'):
+        level += 1
+        already_processed = set()
+        self.exportLiteralAttributes(outfile, level, already_processed, name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
+        if self.minISI is not None and 'minISI' not in already_processed:
+            already_processed.add('minISI')
+            showIndent(outfile, level)
+            outfile.write('minISI="%s",\n' % (self.minISI,))
+        if self.maxISI is not None and 'maxISI' not in already_processed:
+            already_processed.add('maxISI')
+            showIndent(outfile, level)
+            outfile.write('maxISI="%s",\n' % (self.maxISI,))
+        super(SpikeGeneratorRandom, self).exportLiteralAttributes(outfile, level, already_processed, name_)
+    def exportLiteralChildren(self, outfile, level, name_):
+        super(SpikeGeneratorRandom, self).exportLiteralChildren(outfile, level, name_)
+    def build(self, node):
+        already_processed = set()
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_)
+    def buildAttributes(self, node, attrs, already_processed):
+        value = find_attr_value_('minISI', node)
+        if value is not None and 'minISI' not in already_processed:
+            already_processed.add('minISI')
+            self.minISI = value
+            self.validate_Nml2Quantity_time(self.minISI)    # validate type Nml2Quantity_time
+        value = find_attr_value_('maxISI', node)
+        if value is not None and 'maxISI' not in already_processed:
+            already_processed.add('maxISI')
+            self.maxISI = value
+            self.validate_Nml2Quantity_time(self.maxISI)    # validate type Nml2Quantity_time
+        super(SpikeGeneratorRandom, self).buildAttributes(node, attrs, already_processed)
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
+        super(SpikeGeneratorRandom, self).buildChildren(child_, node, nodeName_, True)
+        pass
+# end class SpikeGeneratorRandom
+
+
+class SpikeGenerator(Standalone):
+    subclass = None
+    superclass = Standalone
+    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, period=None):
+        super(SpikeGenerator, self).__init__(id, neuroLexId, name, metaid, notes, annotation, )
+        self.period = _cast(None, period)
+        pass
+    def factory(*args_, **kwargs_):
+        if SpikeGenerator.subclass:
+            return SpikeGenerator.subclass(*args_, **kwargs_)
+        else:
+            return SpikeGenerator(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_period(self): return self.period
+    def set_period(self, period): self.period = period
+    def validate_Nml2Quantity_time(self, value):
+        # Validate type Nml2Quantity_time, a restriction on xs:string.
+        pass
+    def hasContent_(self):
+        if (
+            super(SpikeGenerator, self).hasContent_()
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespace_='', name_='SpikeGenerator', namespacedef_='', pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='SpikeGenerator')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespace_, name_, pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='SpikeGenerator'):
+        super(SpikeGenerator, self).exportAttributes(outfile, level, already_processed, namespace_, name_='SpikeGenerator')
+        if self.period is not None and 'period' not in already_processed:
+            already_processed.add('period')
+            outfile.write(' period=%s' % (quote_attrib(self.period), ))
+    def exportChildren(self, outfile, level, namespace_='', name_='SpikeGenerator', fromsubclass_=False, pretty_print=True):
+        super(SpikeGenerator, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
+    def exportLiteral(self, outfile, level, name_='SpikeGenerator'):
+        level += 1
+        already_processed = set()
+        self.exportLiteralAttributes(outfile, level, already_processed, name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
+        if self.period is not None and 'period' not in already_processed:
+            already_processed.add('period')
+            showIndent(outfile, level)
+            outfile.write('period="%s",\n' % (self.period,))
+        super(SpikeGenerator, self).exportLiteralAttributes(outfile, level, already_processed, name_)
+    def exportLiteralChildren(self, outfile, level, name_):
+        super(SpikeGenerator, self).exportLiteralChildren(outfile, level, name_)
+    def build(self, node):
+        already_processed = set()
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_)
+    def buildAttributes(self, node, attrs, already_processed):
+        value = find_attr_value_('period', node)
+        if value is not None and 'period' not in already_processed:
+            already_processed.add('period')
+            self.period = value
+            self.validate_Nml2Quantity_time(self.period)    # validate type Nml2Quantity_time
+        super(SpikeGenerator, self).buildAttributes(node, attrs, already_processed)
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
+        super(SpikeGenerator, self).buildChildren(child_, node, nodeName_, True)
+        pass
+# end class SpikeGenerator
+
+
+class SpikeArray(Standalone):
+    subclass = None
+    superclass = Standalone
+    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, spike=None):
+        super(SpikeArray, self).__init__(id, neuroLexId, name, metaid, notes, annotation, )
+        if spike is None:
+            self.spike = []
+        else:
+            self.spike = spike
+    def factory(*args_, **kwargs_):
+        if SpikeArray.subclass:
+            return SpikeArray.subclass(*args_, **kwargs_)
+        else:
+            return SpikeArray(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_spike(self): return self.spike
+    def set_spike(self, spike): self.spike = spike
+    def add_spike(self, value): self.spike.append(value)
+    def insert_spike(self, index, value): self.spike[index] = value
+    def hasContent_(self):
+        if (
+            self.spike or
+            super(SpikeArray, self).hasContent_()
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespace_='', name_='SpikeArray', namespacedef_='', pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='SpikeArray')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespace_, name_, pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='SpikeArray'):
+        super(SpikeArray, self).exportAttributes(outfile, level, already_processed, namespace_, name_='SpikeArray')
+    def exportChildren(self, outfile, level, namespace_='', name_='SpikeArray', fromsubclass_=False, pretty_print=True):
+        super(SpikeArray, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        for spike_ in self.spike:
+            spike_.export(outfile, level, namespace_, name_='spike', pretty_print=pretty_print)
+    def exportLiteral(self, outfile, level, name_='SpikeArray'):
+        level += 1
+        already_processed = set()
+        self.exportLiteralAttributes(outfile, level, already_processed, name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
+        super(SpikeArray, self).exportLiteralAttributes(outfile, level, already_processed, name_)
+    def exportLiteralChildren(self, outfile, level, name_):
+        super(SpikeArray, self).exportLiteralChildren(outfile, level, name_)
+        showIndent(outfile, level)
+        outfile.write('spike=[\n')
+        level += 1
+        for spike_ in self.spike:
+            showIndent(outfile, level)
+            outfile.write('model_.Spike(\n')
+            spike_.exportLiteral(outfile, level, name_='Spike')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        level -= 1
+        showIndent(outfile, level)
+        outfile.write('],\n')
+    def build(self, node):
+        already_processed = set()
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_)
+    def buildAttributes(self, node, attrs, already_processed):
+        super(SpikeArray, self).buildAttributes(node, attrs, already_processed)
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
+        if nodeName_ == 'spike':
+            obj_ = Spike.factory()
+            obj_.build(child_)
+            self.spike.append(obj_)
+        super(SpikeArray, self).buildChildren(child_, node, nodeName_, True)
+# end class SpikeArray
+
+
+class Spike(Standalone):
+    subclass = None
+    superclass = Standalone
+    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, time=None):
+        super(Spike, self).__init__(id, neuroLexId, name, metaid, notes, annotation, )
+        self.time = _cast(None, time)
+        pass
+    def factory(*args_, **kwargs_):
+        if Spike.subclass:
+            return Spike.subclass(*args_, **kwargs_)
+        else:
+            return Spike(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_time(self): return self.time
+    def set_time(self, time): self.time = time
+    def validate_Nml2Quantity_time(self, value):
+        # Validate type Nml2Quantity_time, a restriction on xs:string.
+        pass
+    def hasContent_(self):
+        if (
+            super(Spike, self).hasContent_()
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespace_='', name_='Spike', namespacedef_='', pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='Spike')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespace_, name_, pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='Spike'):
+        super(Spike, self).exportAttributes(outfile, level, already_processed, namespace_, name_='Spike')
+        if self.time is not None and 'time' not in already_processed:
+            already_processed.add('time')
+            outfile.write(' time=%s' % (quote_attrib(self.time), ))
+    def exportChildren(self, outfile, level, namespace_='', name_='Spike', fromsubclass_=False, pretty_print=True):
+        super(Spike, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
+    def exportLiteral(self, outfile, level, name_='Spike'):
+        level += 1
+        already_processed = set()
+        self.exportLiteralAttributes(outfile, level, already_processed, name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
+        if self.time is not None and 'time' not in already_processed:
+            already_processed.add('time')
+            showIndent(outfile, level)
+            outfile.write('time="%s",\n' % (self.time,))
+        super(Spike, self).exportLiteralAttributes(outfile, level, already_processed, name_)
+    def exportLiteralChildren(self, outfile, level, name_):
+        super(Spike, self).exportLiteralChildren(outfile, level, name_)
+    def build(self, node):
+        already_processed = set()
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_)
+    def buildAttributes(self, node, attrs, already_processed):
+        value = find_attr_value_('time', node)
+        if value is not None and 'time' not in already_processed:
+            already_processed.add('time')
+            self.time = value
+            self.validate_Nml2Quantity_time(self.time)    # validate type Nml2Quantity_time
+        super(Spike, self).buildAttributes(node, attrs, already_processed)
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
+        super(Spike, self).buildChildren(child_, node, nodeName_, True)
+        pass
+# end class Spike
+
+
+class VoltageClamp(Standalone):
+    subclass = None
+    superclass = Standalone
+    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, delay=None, duration=None, seriesResistance=None, targetVoltage=None):
+        super(VoltageClamp, self).__init__(id, neuroLexId, name, metaid, notes, annotation, )
+        self.delay = _cast(None, delay)
+        self.duration = _cast(None, duration)
+        self.seriesResistance = _cast(None, seriesResistance)
+        self.targetVoltage = _cast(None, targetVoltage)
+        pass
+    def factory(*args_, **kwargs_):
+        if VoltageClamp.subclass:
+            return VoltageClamp.subclass(*args_, **kwargs_)
+        else:
+            return VoltageClamp(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_delay(self): return self.delay
+    def set_delay(self, delay): self.delay = delay
+    def validate_Nml2Quantity_time(self, value):
+        # Validate type Nml2Quantity_time, a restriction on xs:string.
+        pass
+    def get_duration(self): return self.duration
+    def set_duration(self, duration): self.duration = duration
+    def get_seriesResistance(self): return self.seriesResistance
+    def set_seriesResistance(self, seriesResistance): self.seriesResistance = seriesResistance
+    def validate_Nml2Quantity_resistance(self, value):
+        # Validate type Nml2Quantity_resistance, a restriction on xs:string.
+        pass
+    def get_targetVoltage(self): return self.targetVoltage
+    def set_targetVoltage(self, targetVoltage): self.targetVoltage = targetVoltage
+    def validate_Nml2Quantity_voltage(self, value):
+        # Validate type Nml2Quantity_voltage, a restriction on xs:string.
+        pass
+    def hasContent_(self):
+        if (
+            super(VoltageClamp, self).hasContent_()
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespace_='', name_='VoltageClamp', namespacedef_='', pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='VoltageClamp')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespace_, name_, pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='VoltageClamp'):
+        super(VoltageClamp, self).exportAttributes(outfile, level, already_processed, namespace_, name_='VoltageClamp')
+        if self.delay is not None and 'delay' not in already_processed:
+            already_processed.add('delay')
+            outfile.write(' delay=%s' % (quote_attrib(self.delay), ))
+        if self.duration is not None and 'duration' not in already_processed:
+            already_processed.add('duration')
+            outfile.write(' duration=%s' % (quote_attrib(self.duration), ))
+        if self.seriesResistance is not None and 'seriesResistance' not in already_processed:
+            already_processed.add('seriesResistance')
+            outfile.write(' seriesResistance=%s' % (quote_attrib(self.seriesResistance), ))
+        if self.targetVoltage is not None and 'targetVoltage' not in already_processed:
+            already_processed.add('targetVoltage')
+            outfile.write(' targetVoltage=%s' % (quote_attrib(self.targetVoltage), ))
+    def exportChildren(self, outfile, level, namespace_='', name_='VoltageClamp', fromsubclass_=False, pretty_print=True):
+        super(VoltageClamp, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
+    def exportLiteral(self, outfile, level, name_='VoltageClamp'):
+        level += 1
+        already_processed = set()
+        self.exportLiteralAttributes(outfile, level, already_processed, name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
+        if self.delay is not None and 'delay' not in already_processed:
+            already_processed.add('delay')
+            showIndent(outfile, level)
+            outfile.write('delay="%s",\n' % (self.delay,))
+        if self.duration is not None and 'duration' not in already_processed:
+            already_processed.add('duration')
+            showIndent(outfile, level)
+            outfile.write('duration="%s",\n' % (self.duration,))
+        if self.seriesResistance is not None and 'seriesResistance' not in already_processed:
+            already_processed.add('seriesResistance')
+            showIndent(outfile, level)
+            outfile.write('seriesResistance="%s",\n' % (self.seriesResistance,))
+        if self.targetVoltage is not None and 'targetVoltage' not in already_processed:
+            already_processed.add('targetVoltage')
+            showIndent(outfile, level)
+            outfile.write('targetVoltage="%s",\n' % (self.targetVoltage,))
+        super(VoltageClamp, self).exportLiteralAttributes(outfile, level, already_processed, name_)
+    def exportLiteralChildren(self, outfile, level, name_):
+        super(VoltageClamp, self).exportLiteralChildren(outfile, level, name_)
+    def build(self, node):
+        already_processed = set()
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_)
+    def buildAttributes(self, node, attrs, already_processed):
+        value = find_attr_value_('delay', node)
+        if value is not None and 'delay' not in already_processed:
+            already_processed.add('delay')
+            self.delay = value
+            self.validate_Nml2Quantity_time(self.delay)    # validate type Nml2Quantity_time
+        value = find_attr_value_('duration', node)
+        if value is not None and 'duration' not in already_processed:
+            already_processed.add('duration')
+            self.duration = value
+            self.validate_Nml2Quantity_time(self.duration)    # validate type Nml2Quantity_time
+        value = find_attr_value_('seriesResistance', node)
+        if value is not None and 'seriesResistance' not in already_processed:
+            already_processed.add('seriesResistance')
+            self.seriesResistance = value
+            self.validate_Nml2Quantity_resistance(self.seriesResistance)    # validate type Nml2Quantity_resistance
+        value = find_attr_value_('targetVoltage', node)
+        if value is not None and 'targetVoltage' not in already_processed:
+            already_processed.add('targetVoltage')
+            self.targetVoltage = value
+            self.validate_Nml2Quantity_voltage(self.targetVoltage)    # validate type Nml2Quantity_voltage
+        super(VoltageClamp, self).buildAttributes(node, attrs, already_processed)
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
+        super(VoltageClamp, self).buildChildren(child_, node, nodeName_, True)
+        pass
+# end class VoltageClamp
+
+
+class RampGenerator(Standalone):
+    subclass = None
+    superclass = Standalone
+    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, delay=None, duration=None, baselineAmplitude=None, startAmplitude=None, finishAmplitude=None):
+        super(RampGenerator, self).__init__(id, neuroLexId, name, metaid, notes, annotation, )
+        self.delay = _cast(None, delay)
+        self.duration = _cast(None, duration)
+        self.baselineAmplitude = _cast(None, baselineAmplitude)
+        self.startAmplitude = _cast(None, startAmplitude)
+        self.finishAmplitude = _cast(None, finishAmplitude)
+        pass
+    def factory(*args_, **kwargs_):
+        if RampGenerator.subclass:
+            return RampGenerator.subclass(*args_, **kwargs_)
+        else:
+            return RampGenerator(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_delay(self): return self.delay
+    def set_delay(self, delay): self.delay = delay
+    def validate_Nml2Quantity_time(self, value):
+        # Validate type Nml2Quantity_time, a restriction on xs:string.
+        pass
+    def get_duration(self): return self.duration
+    def set_duration(self, duration): self.duration = duration
+    def get_baselineAmplitude(self): return self.baselineAmplitude
+    def set_baselineAmplitude(self, baselineAmplitude): self.baselineAmplitude = baselineAmplitude
+    def validate_Nml2Quantity_current(self, value):
+        # Validate type Nml2Quantity_current, a restriction on xs:string.
+        pass
+    def get_startAmplitude(self): return self.startAmplitude
+    def set_startAmplitude(self, startAmplitude): self.startAmplitude = startAmplitude
+    def get_finishAmplitude(self): return self.finishAmplitude
+    def set_finishAmplitude(self, finishAmplitude): self.finishAmplitude = finishAmplitude
+    def hasContent_(self):
+        if (
+            super(RampGenerator, self).hasContent_()
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespace_='', name_='RampGenerator', namespacedef_='', pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='RampGenerator')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespace_, name_, pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='RampGenerator'):
+        super(RampGenerator, self).exportAttributes(outfile, level, already_processed, namespace_, name_='RampGenerator')
+        if self.delay is not None and 'delay' not in already_processed:
+            already_processed.add('delay')
+            outfile.write(' delay=%s' % (quote_attrib(self.delay), ))
+        if self.duration is not None and 'duration' not in already_processed:
+            already_processed.add('duration')
+            outfile.write(' duration=%s' % (quote_attrib(self.duration), ))
+        if self.baselineAmplitude is not None and 'baselineAmplitude' not in already_processed:
+            already_processed.add('baselineAmplitude')
+            outfile.write(' baselineAmplitude=%s' % (quote_attrib(self.baselineAmplitude), ))
+        if self.startAmplitude is not None and 'startAmplitude' not in already_processed:
+            already_processed.add('startAmplitude')
+            outfile.write(' startAmplitude=%s' % (quote_attrib(self.startAmplitude), ))
+        if self.finishAmplitude is not None and 'finishAmplitude' not in already_processed:
+            already_processed.add('finishAmplitude')
+            outfile.write(' finishAmplitude=%s' % (quote_attrib(self.finishAmplitude), ))
+    def exportChildren(self, outfile, level, namespace_='', name_='RampGenerator', fromsubclass_=False, pretty_print=True):
+        super(RampGenerator, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
+    def exportLiteral(self, outfile, level, name_='RampGenerator'):
+        level += 1
+        already_processed = set()
+        self.exportLiteralAttributes(outfile, level, already_processed, name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
+        if self.delay is not None and 'delay' not in already_processed:
+            already_processed.add('delay')
+            showIndent(outfile, level)
+            outfile.write('delay="%s",\n' % (self.delay,))
+        if self.duration is not None and 'duration' not in already_processed:
+            already_processed.add('duration')
+            showIndent(outfile, level)
+            outfile.write('duration="%s",\n' % (self.duration,))
+        if self.baselineAmplitude is not None and 'baselineAmplitude' not in already_processed:
+            already_processed.add('baselineAmplitude')
+            showIndent(outfile, level)
+            outfile.write('baselineAmplitude="%s",\n' % (self.baselineAmplitude,))
+        if self.startAmplitude is not None and 'startAmplitude' not in already_processed:
+            already_processed.add('startAmplitude')
+            showIndent(outfile, level)
+            outfile.write('startAmplitude="%s",\n' % (self.startAmplitude,))
+        if self.finishAmplitude is not None and 'finishAmplitude' not in already_processed:
+            already_processed.add('finishAmplitude')
+            showIndent(outfile, level)
+            outfile.write('finishAmplitude="%s",\n' % (self.finishAmplitude,))
+        super(RampGenerator, self).exportLiteralAttributes(outfile, level, already_processed, name_)
+    def exportLiteralChildren(self, outfile, level, name_):
+        super(RampGenerator, self).exportLiteralChildren(outfile, level, name_)
+    def build(self, node):
+        already_processed = set()
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_)
+    def buildAttributes(self, node, attrs, already_processed):
+        value = find_attr_value_('delay', node)
+        if value is not None and 'delay' not in already_processed:
+            already_processed.add('delay')
+            self.delay = value
+            self.validate_Nml2Quantity_time(self.delay)    # validate type Nml2Quantity_time
+        value = find_attr_value_('duration', node)
+        if value is not None and 'duration' not in already_processed:
+            already_processed.add('duration')
+            self.duration = value
+            self.validate_Nml2Quantity_time(self.duration)    # validate type Nml2Quantity_time
+        value = find_attr_value_('baselineAmplitude', node)
+        if value is not None and 'baselineAmplitude' not in already_processed:
+            already_processed.add('baselineAmplitude')
+            self.baselineAmplitude = value
+            self.validate_Nml2Quantity_current(self.baselineAmplitude)    # validate type Nml2Quantity_current
+        value = find_attr_value_('startAmplitude', node)
+        if value is not None and 'startAmplitude' not in already_processed:
+            already_processed.add('startAmplitude')
+            self.startAmplitude = value
+            self.validate_Nml2Quantity_current(self.startAmplitude)    # validate type Nml2Quantity_current
+        value = find_attr_value_('finishAmplitude', node)
+        if value is not None and 'finishAmplitude' not in already_processed:
+            already_processed.add('finishAmplitude')
+            self.finishAmplitude = value
+            self.validate_Nml2Quantity_current(self.finishAmplitude)    # validate type Nml2Quantity_current
+        super(RampGenerator, self).buildAttributes(node, attrs, already_processed)
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
+        super(RampGenerator, self).buildChildren(child_, node, nodeName_, True)
+        pass
+# end class RampGenerator
+
+
+class SineGenerator(Standalone):
+    subclass = None
+    superclass = Standalone
+    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, delay=None, phase=None, duration=None, period=None, amplitude=None):
+        super(SineGenerator, self).__init__(id, neuroLexId, name, metaid, notes, annotation, )
+        self.delay = _cast(None, delay)
+        self.phase = _cast(None, phase)
+        self.duration = _cast(None, duration)
+        self.period = _cast(None, period)
+        self.amplitude = _cast(None, amplitude)
+        pass
+    def factory(*args_, **kwargs_):
+        if SineGenerator.subclass:
+            return SineGenerator.subclass(*args_, **kwargs_)
+        else:
+            return SineGenerator(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_delay(self): return self.delay
+    def set_delay(self, delay): self.delay = delay
+    def validate_Nml2Quantity_time(self, value):
+        # Validate type Nml2Quantity_time, a restriction on xs:string.
+        pass
+    def get_phase(self): return self.phase
+    def set_phase(self, phase): self.phase = phase
+    def validate_Nml2Quantity_none(self, value):
+        # Validate type Nml2Quantity_none, a restriction on xs:string.
+        pass
+    def get_duration(self): return self.duration
+    def set_duration(self, duration): self.duration = duration
+    def get_period(self): return self.period
+    def set_period(self, period): self.period = period
+    def get_amplitude(self): return self.amplitude
+    def set_amplitude(self, amplitude): self.amplitude = amplitude
+    def validate_Nml2Quantity_current(self, value):
+        # Validate type Nml2Quantity_current, a restriction on xs:string.
+        pass
+    def hasContent_(self):
+        if (
+            super(SineGenerator, self).hasContent_()
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespace_='', name_='SineGenerator', namespacedef_='', pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='SineGenerator')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespace_, name_, pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='SineGenerator'):
+        super(SineGenerator, self).exportAttributes(outfile, level, already_processed, namespace_, name_='SineGenerator')
+        if self.delay is not None and 'delay' not in already_processed:
+            already_processed.add('delay')
+            outfile.write(' delay=%s' % (quote_attrib(self.delay), ))
+        if self.phase is not None and 'phase' not in already_processed:
+            already_processed.add('phase')
+            outfile.write(' phase=%s' % (quote_attrib(self.phase), ))
+        if self.duration is not None and 'duration' not in already_processed:
+            already_processed.add('duration')
+            outfile.write(' duration=%s' % (quote_attrib(self.duration), ))
+        if self.period is not None and 'period' not in already_processed:
+            already_processed.add('period')
+            outfile.write(' period=%s' % (quote_attrib(self.period), ))
+        if self.amplitude is not None and 'amplitude' not in already_processed:
+            already_processed.add('amplitude')
+            outfile.write(' amplitude=%s' % (quote_attrib(self.amplitude), ))
+    def exportChildren(self, outfile, level, namespace_='', name_='SineGenerator', fromsubclass_=False, pretty_print=True):
+        super(SineGenerator, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
+    def exportLiteral(self, outfile, level, name_='SineGenerator'):
+        level += 1
+        already_processed = set()
+        self.exportLiteralAttributes(outfile, level, already_processed, name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
+        if self.delay is not None and 'delay' not in already_processed:
+            already_processed.add('delay')
+            showIndent(outfile, level)
+            outfile.write('delay="%s",\n' % (self.delay,))
+        if self.phase is not None and 'phase' not in already_processed:
+            already_processed.add('phase')
+            showIndent(outfile, level)
+            outfile.write('phase="%s",\n' % (self.phase,))
+        if self.duration is not None and 'duration' not in already_processed:
+            already_processed.add('duration')
+            showIndent(outfile, level)
+            outfile.write('duration="%s",\n' % (self.duration,))
+        if self.period is not None and 'period' not in already_processed:
+            already_processed.add('period')
+            showIndent(outfile, level)
+            outfile.write('period="%s",\n' % (self.period,))
+        if self.amplitude is not None and 'amplitude' not in already_processed:
+            already_processed.add('amplitude')
+            showIndent(outfile, level)
+            outfile.write('amplitude="%s",\n' % (self.amplitude,))
+        super(SineGenerator, self).exportLiteralAttributes(outfile, level, already_processed, name_)
+    def exportLiteralChildren(self, outfile, level, name_):
+        super(SineGenerator, self).exportLiteralChildren(outfile, level, name_)
+    def build(self, node):
+        already_processed = set()
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_)
+    def buildAttributes(self, node, attrs, already_processed):
+        value = find_attr_value_('delay', node)
+        if value is not None and 'delay' not in already_processed:
+            already_processed.add('delay')
+            self.delay = value
+            self.validate_Nml2Quantity_time(self.delay)    # validate type Nml2Quantity_time
+        value = find_attr_value_('phase', node)
+        if value is not None and 'phase' not in already_processed:
+            already_processed.add('phase')
+            self.phase = value
+            self.validate_Nml2Quantity_none(self.phase)    # validate type Nml2Quantity_none
+        value = find_attr_value_('duration', node)
+        if value is not None and 'duration' not in already_processed:
+            already_processed.add('duration')
+            self.duration = value
+            self.validate_Nml2Quantity_time(self.duration)    # validate type Nml2Quantity_time
+        value = find_attr_value_('period', node)
+        if value is not None and 'period' not in already_processed:
+            already_processed.add('period')
+            self.period = value
+            self.validate_Nml2Quantity_time(self.period)    # validate type Nml2Quantity_time
+        value = find_attr_value_('amplitude', node)
+        if value is not None and 'amplitude' not in already_processed:
+            already_processed.add('amplitude')
+            self.amplitude = value
+            self.validate_Nml2Quantity_current(self.amplitude)    # validate type Nml2Quantity_current
+        super(SineGenerator, self).buildAttributes(node, attrs, already_processed)
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
+        super(SineGenerator, self).buildChildren(child_, node, nodeName_, True)
+        pass
+# end class SineGenerator
+
+
 class PulseGenerator(Standalone):
     subclass = None
     superclass = Standalone
@@ -6292,16 +7027,13 @@ class PulseGenerator(Standalone):
     factory = staticmethod(factory)
     def get_delay(self): return self.delay
     def set_delay(self, delay): self.delay = delay
-    delayProp = property(get_delay, set_delay)
     def validate_Nml2Quantity_time(self, value):
         # Validate type Nml2Quantity_time, a restriction on xs:string.
         pass
     def get_duration(self): return self.duration
     def set_duration(self, duration): self.duration = duration
-    durationProp = property(get_duration, set_duration)
     def get_amplitude(self): return self.amplitude
     def set_amplitude(self, amplitude): self.amplitude = amplitude
-    amplitudeProp = property(get_amplitude, set_amplitude)
     def validate_Nml2Quantity_current(self, value):
         # Validate type Nml2Quantity_current, a restriction on xs:string.
         pass
@@ -6415,10 +7147,8 @@ class ReactionScheme(Base):
     def insert_anytypeobjs_(self, index, value): self._anytypeobjs_[index] = value
     def get_source(self): return self.source
     def set_source(self, source): self.source = source
-    sourceProp = property(get_source, set_source)
     def get_type(self): return self.type_
     def set_type(self, type_): self.type_ = type_
-    typeProp = property(get_type, set_type)
     def hasContent_(self):
         if (
             self.anytypeobjs_ or
@@ -6529,10 +7259,8 @@ class ExtracellularProperties(Base):
     def set_species(self, species): self.species = species
     def add_species(self, value): self.species.append(value)
     def insert_species(self, index, value): self.species[index] = value
-    speciesProp = property(get_species, set_species)
     def get_temperature(self): return self.temperature
     def set_temperature(self, temperature): self.temperature = temperature
-    temperatureProp = property(get_temperature, set_temperature)
     def validate_Nml2Quantity_temperature(self, value):
         # Validate type Nml2Quantity_temperature, a restriction on xs:string.
         pass
@@ -6652,34 +7380,27 @@ class ChannelDensity(Base):
     def set_variableParameter(self, variableParameter): self.variableParameter = variableParameter
     def add_variableParameter(self, value): self.variableParameter.append(value)
     def insert_variableParameter(self, index, value): self.variableParameter[index] = value
-    variableParameterProp = property(get_variableParameter, set_variableParameter)
     def get_segmentGroup(self): return self.segmentGroup
     def set_segmentGroup(self, segmentGroup): self.segmentGroup = segmentGroup
-    segmentGroupProp = property(get_segmentGroup, set_segmentGroup)
     def validate_NmlId(self, value):
         # Validate type NmlId, a restriction on xs:string.
         pass
     def get_ion(self): return self.ion
     def set_ion(self, ion): self.ion = ion
-    ionProp = property(get_ion, set_ion)
     def get_ionChannel(self): return self.ionChannel
     def set_ionChannel(self, ionChannel): self.ionChannel = ionChannel
-    ionChannelProp = property(get_ionChannel, set_ionChannel)
     def get_erev(self): return self.erev
     def set_erev(self, erev): self.erev = erev
-    erevProp = property(get_erev, set_erev)
     def validate_Nml2Quantity_voltage(self, value):
         # Validate type Nml2Quantity_voltage, a restriction on xs:string.
         pass
     def get_condDensity(self): return self.condDensity
     def set_condDensity(self, condDensity): self.condDensity = condDensity
-    condDensityProp = property(get_condDensity, set_condDensity)
     def validate_Nml2Quantity_conductanceDensity(self, value):
         # Validate type Nml2Quantity_conductanceDensity, a restriction on xs:string.
         pass
     def get_segment(self): return self.segment
     def set_segment(self, segment): self.segment = segment
-    segmentProp = property(get_segment, set_segment)
     def hasContent_(self):
         if (
             self.variableParameter or
@@ -6856,31 +7577,24 @@ class ChannelPopulation(Base):
     def set_variableParameter(self, variableParameter): self.variableParameter = variableParameter
     def add_variableParameter(self, value): self.variableParameter.append(value)
     def insert_variableParameter(self, index, value): self.variableParameter[index] = value
-    variableParameterProp = property(get_variableParameter, set_variableParameter)
     def get_segmentGroup(self): return self.segmentGroup
     def set_segmentGroup(self, segmentGroup): self.segmentGroup = segmentGroup
-    segmentGroupProp = property(get_segmentGroup, set_segmentGroup)
     def validate_NmlId(self, value):
         # Validate type NmlId, a restriction on xs:string.
         pass
     def get_ion(self): return self.ion
     def set_ion(self, ion): self.ion = ion
-    ionProp = property(get_ion, set_ion)
     def get_number(self): return self.number
     def set_number(self, number): self.number = number
-    numberProp = property(get_number, set_number)
     def get_ionChannel(self): return self.ionChannel
     def set_ionChannel(self, ionChannel): self.ionChannel = ionChannel
-    ionChannelProp = property(get_ionChannel, set_ionChannel)
     def get_erev(self): return self.erev
     def set_erev(self, erev): self.erev = erev
-    erevProp = property(get_erev, set_erev)
     def validate_Nml2Quantity_voltage(self, value):
         # Validate type Nml2Quantity_voltage, a restriction on xs:string.
         pass
     def get_segment(self): return self.segment
     def set_segment(self, segment): self.segment = segment
-    segmentProp = property(get_segment, set_segment)
     def hasContent_(self):
         if (
             self.variableParameter or
@@ -7048,13 +7762,10 @@ class BiophysicalProperties(Standalone):
     factory = staticmethod(factory)
     def get_membraneProperties(self): return self.membraneProperties
     def set_membraneProperties(self, membraneProperties): self.membraneProperties = membraneProperties
-    membranePropertiesProp = property(get_membraneProperties, set_membraneProperties)
     def get_intracellularProperties(self): return self.intracellularProperties
     def set_intracellularProperties(self, intracellularProperties): self.intracellularProperties = intracellularProperties
-    intracellularPropertiesProp = property(get_intracellularProperties, set_intracellularProperties)
     def get_extracellularProperties(self): return self.extracellularProperties
     def set_extracellularProperties(self, extracellularProperties): self.extracellularProperties = extracellularProperties
-    extracellularPropertiesProp = property(get_extracellularProperties, set_extracellularProperties)
     def hasContent_(self):
         if (
             self.membraneProperties is not None or
@@ -7165,16 +7876,12 @@ class InhomogeneousParam(Base):
     factory = staticmethod(factory)
     def get_proximal(self): return self.proximal
     def set_proximal(self, proximal): self.proximal = proximal
-    proximalProp = property(get_proximal, set_proximal)
     def get_distal(self): return self.distal
     def set_distal(self, distal): self.distal = distal
-    distalProp = property(get_distal, set_distal)
     def get_variable(self): return self.variable
     def set_variable(self, variable): self.variable = variable
-    variableProp = property(get_variable, set_variable)
     def get_metric(self): return self.metric
     def set_metric(self, metric): self.metric = metric
-    metricProp = property(get_metric, set_metric)
     def validate_Metric(self, value):
         # Validate type Metric, a restriction on xs:string.
         pass
@@ -7316,27 +8023,22 @@ class SegmentGroup(Base):
     def set_member(self, member): self.member = member
     def add_member(self, value): self.member.append(value)
     def insert_member(self, index, value): self.member[index] = value
-    memberProp = property(get_member, set_member)
     def get_include(self): return self.include
     def set_include(self, include): self.include = include
     def add_include(self, value): self.include.append(value)
     def insert_include(self, index, value): self.include[index] = value
-    includeProp = property(get_include, set_include)
     def get_path(self): return self.path
     def set_path(self, path): self.path = path
     def add_path(self, value): self.path.append(value)
     def insert_path(self, index, value): self.path[index] = value
-    pathProp = property(get_path, set_path)
     def get_subTree(self): return self.subTree
     def set_subTree(self, subTree): self.subTree = subTree
     def add_subTree(self, value): self.subTree.append(value)
     def insert_subTree(self, index, value): self.subTree[index] = value
-    subTreeProp = property(get_subTree, set_subTree)
     def get_inhomogeneousParam(self): return self.inhomogeneousParam
     def set_inhomogeneousParam(self, inhomogeneousParam): self.inhomogeneousParam = inhomogeneousParam
     def add_inhomogeneousParam(self, value): self.inhomogeneousParam.append(value)
     def insert_inhomogeneousParam(self, index, value): self.inhomogeneousParam[index] = value
-    inhomogeneousParamProp = property(get_inhomogeneousParam, set_inhomogeneousParam)
     def hasContent_(self):
         if (
             self.member or
@@ -7503,16 +8205,12 @@ class Segment(Base):
     factory = staticmethod(factory)
     def get_parent(self): return self.parent
     def set_parent(self, parent): self.parent = parent
-    parentProp = property(get_parent, set_parent)
     def get_proximal(self): return self.proximal
     def set_proximal(self, proximal): self.proximal = proximal
-    proximalProp = property(get_proximal, set_proximal)
     def get_distal(self): return self.distal
     def set_distal(self, distal): self.distal = distal
-    distalProp = property(get_distal, set_distal)
     def get_name(self): return self.name
     def set_name(self, name): self.name = name
-    nameProp = property(get_name, set_name)
     def hasContent_(self):
         if (
             self.parent is not None or
@@ -7642,12 +8340,10 @@ class Morphology(Standalone):
     def set_segment(self, segment): self.segment = segment
     def add_segment(self, value): self.segment.append(value)
     def insert_segment(self, index, value): self.segment[index] = value
-    segmentProp = property(get_segment, set_segment)
     def get_segmentGroup(self): return self.segmentGroup
     def set_segmentGroup(self, segmentGroup): self.segmentGroup = segmentGroup
     def add_segmentGroup(self, value): self.segmentGroup.append(value)
     def insert_segmentGroup(self, index, value): self.segmentGroup[index] = value
-    segmentGroupProp = property(get_segmentGroup, set_segmentGroup)
     def hasContent_(self):
         if (
             self.segment or
@@ -7905,25 +8601,21 @@ class DecayingPoolConcentrationModel(Standalone):
     factory = staticmethod(factory)
     def get_ion(self): return self.ion
     def set_ion(self, ion): self.ion = ion
-    ionProp = property(get_ion, set_ion)
     def validate_NmlId(self, value):
         # Validate type NmlId, a restriction on xs:string.
         pass
     def get_shellThickness(self): return self.shellThickness
     def set_shellThickness(self, shellThickness): self.shellThickness = shellThickness
-    shellThicknessProp = property(get_shellThickness, set_shellThickness)
     def validate_Nml2Quantity_length(self, value):
         # Validate type Nml2Quantity_length, a restriction on xs:string.
         pass
     def get_restingConc(self): return self.restingConc
     def set_restingConc(self, restingConc): self.restingConc = restingConc
-    restingConcProp = property(get_restingConc, set_restingConc)
     def validate_Nml2Quantity_concentration(self, value):
         # Validate type Nml2Quantity_concentration, a restriction on xs:string.
         pass
     def get_decayConstant(self): return self.decayConstant
     def set_decayConstant(self, decayConstant): self.decayConstant = decayConstant
-    decayConstantProp = property(get_decayConstant, set_decayConstant)
     def validate_Nml2Quantity_time(self, value):
         # Validate type Nml2Quantity_time, a restriction on xs:string.
         pass
@@ -8056,28 +8748,21 @@ class GateHHRatesInf(Base):
     factory = staticmethod(factory)
     def get_notes(self): return self.notes
     def set_notes(self, notes): self.notes = notes
-    notesProp = property(get_notes, set_notes)
     def validate_Notes(self, value):
         # Validate type Notes, a restriction on xs:string.
         pass
     def get_q10Settings(self): return self.q10Settings
     def set_q10Settings(self, q10Settings): self.q10Settings = q10Settings
-    q10SettingsProp = property(get_q10Settings, set_q10Settings)
     def get_forwardRate(self): return self.forwardRate
     def set_forwardRate(self, forwardRate): self.forwardRate = forwardRate
-    forwardRateProp = property(get_forwardRate, set_forwardRate)
     def get_reverseRate(self): return self.reverseRate
     def set_reverseRate(self, reverseRate): self.reverseRate = reverseRate
-    reverseRateProp = property(get_reverseRate, set_reverseRate)
     def get_steadyState(self): return self.steadyState
     def set_steadyState(self, steadyState): self.steadyState = steadyState
-    steadyStateProp = property(get_steadyState, set_steadyState)
     def get_instances(self): return self.instances
     def set_instances(self, instances): self.instances = instances
-    instancesProp = property(get_instances, set_instances)
     def get_type(self): return self.type_
     def set_type(self, type_): self.type_ = type_
-    typeProp = property(get_type, set_type)
     def validate_gateTypes(self, value):
         # Validate type gateTypes, a restriction on xs:string.
         pass
@@ -8245,28 +8930,21 @@ class GateHHRatesTau(Base):
     factory = staticmethod(factory)
     def get_notes(self): return self.notes
     def set_notes(self, notes): self.notes = notes
-    notesProp = property(get_notes, set_notes)
     def validate_Notes(self, value):
         # Validate type Notes, a restriction on xs:string.
         pass
     def get_q10Settings(self): return self.q10Settings
     def set_q10Settings(self, q10Settings): self.q10Settings = q10Settings
-    q10SettingsProp = property(get_q10Settings, set_q10Settings)
     def get_forwardRate(self): return self.forwardRate
     def set_forwardRate(self, forwardRate): self.forwardRate = forwardRate
-    forwardRateProp = property(get_forwardRate, set_forwardRate)
     def get_reverseRate(self): return self.reverseRate
     def set_reverseRate(self, reverseRate): self.reverseRate = reverseRate
-    reverseRateProp = property(get_reverseRate, set_reverseRate)
     def get_timeCourse(self): return self.timeCourse
     def set_timeCourse(self, timeCourse): self.timeCourse = timeCourse
-    timeCourseProp = property(get_timeCourse, set_timeCourse)
     def get_instances(self): return self.instances
     def set_instances(self, instances): self.instances = instances
-    instancesProp = property(get_instances, set_instances)
     def get_type(self): return self.type_
     def set_type(self, type_): self.type_ = type_
-    typeProp = property(get_type, set_type)
     def validate_gateTypes(self, value):
         # Validate type gateTypes, a restriction on xs:string.
         pass
@@ -8433,25 +9111,19 @@ class GateHHTauInf(Base):
     factory = staticmethod(factory)
     def get_notes(self): return self.notes
     def set_notes(self, notes): self.notes = notes
-    notesProp = property(get_notes, set_notes)
     def validate_Notes(self, value):
         # Validate type Notes, a restriction on xs:string.
         pass
     def get_q10Settings(self): return self.q10Settings
     def set_q10Settings(self, q10Settings): self.q10Settings = q10Settings
-    q10SettingsProp = property(get_q10Settings, set_q10Settings)
     def get_timeCourse(self): return self.timeCourse
     def set_timeCourse(self, timeCourse): self.timeCourse = timeCourse
-    timeCourseProp = property(get_timeCourse, set_timeCourse)
     def get_steadyState(self): return self.steadyState
     def set_steadyState(self, steadyState): self.steadyState = steadyState
-    steadyStateProp = property(get_steadyState, set_steadyState)
     def get_instances(self): return self.instances
     def set_instances(self, instances): self.instances = instances
-    instancesProp = property(get_instances, set_instances)
     def get_type(self): return self.type_
     def set_type(self, type_): self.type_ = type_
-    typeProp = property(get_type, set_type)
     def validate_gateTypes(self, value):
         # Validate type gateTypes, a restriction on xs:string.
         pass
@@ -8605,25 +9277,19 @@ class GateHHRates(Base):
     factory = staticmethod(factory)
     def get_notes(self): return self.notes
     def set_notes(self, notes): self.notes = notes
-    notesProp = property(get_notes, set_notes)
     def validate_Notes(self, value):
         # Validate type Notes, a restriction on xs:string.
         pass
     def get_q10Settings(self): return self.q10Settings
     def set_q10Settings(self, q10Settings): self.q10Settings = q10Settings
-    q10SettingsProp = property(get_q10Settings, set_q10Settings)
     def get_forwardRate(self): return self.forwardRate
     def set_forwardRate(self, forwardRate): self.forwardRate = forwardRate
-    forwardRateProp = property(get_forwardRate, set_forwardRate)
     def get_reverseRate(self): return self.reverseRate
     def set_reverseRate(self, reverseRate): self.reverseRate = reverseRate
-    reverseRateProp = property(get_reverseRate, set_reverseRate)
     def get_instances(self): return self.instances
     def set_instances(self, instances): self.instances = instances
-    instancesProp = property(get_instances, set_instances)
     def get_type(self): return self.type_
     def set_type(self, type_): self.type_ = type_
-    typeProp = property(get_type, set_type)
     def validate_gateTypes(self, value):
         # Validate type gateTypes, a restriction on xs:string.
         pass
@@ -8779,31 +9445,23 @@ class GateHHUndetermined(Base):
     factory = staticmethod(factory)
     def get_notes(self): return self.notes
     def set_notes(self, notes): self.notes = notes
-    notesProp = property(get_notes, set_notes)
     def validate_Notes(self, value):
         # Validate type Notes, a restriction on xs:string.
         pass
     def get_q10Settings(self): return self.q10Settings
     def set_q10Settings(self, q10Settings): self.q10Settings = q10Settings
-    q10SettingsProp = property(get_q10Settings, set_q10Settings)
     def get_forwardRate(self): return self.forwardRate
     def set_forwardRate(self, forwardRate): self.forwardRate = forwardRate
-    forwardRateProp = property(get_forwardRate, set_forwardRate)
     def get_reverseRate(self): return self.reverseRate
     def set_reverseRate(self, reverseRate): self.reverseRate = reverseRate
-    reverseRateProp = property(get_reverseRate, set_reverseRate)
     def get_timeCourse(self): return self.timeCourse
     def set_timeCourse(self, timeCourse): self.timeCourse = timeCourse
-    timeCourseProp = property(get_timeCourse, set_timeCourse)
     def get_steadyState(self): return self.steadyState
     def set_steadyState(self, steadyState): self.steadyState = steadyState
-    steadyStateProp = property(get_steadyState, set_steadyState)
     def get_instances(self): return self.instances
     def set_instances(self, instances): self.instances = instances
-    instancesProp = property(get_instances, set_instances)
     def get_type(self): return self.type_
     def set_type(self, type_): self.type_ = type_
-    typeProp = property(get_type, set_type)
     def validate_gateTypes(self, value):
         # Validate type gateTypes, a restriction on xs:string.
         pass
@@ -9002,42 +9660,34 @@ class IonChannel(Standalone):
     def set_gate(self, gate): self.gate = gate
     def add_gate(self, value): self.gate.append(value)
     def insert_gate(self, index, value): self.gate[index] = value
-    gateProp = property(get_gate, set_gate)
     def get_gateHHrates(self): return self.gateHHrates
     def set_gateHHrates(self, gateHHrates): self.gateHHrates = gateHHrates
     def add_gateHHrates(self, value): self.gateHHrates.append(value)
     def insert_gateHHrates(self, index, value): self.gateHHrates[index] = value
-    gateHHratesProp = property(get_gateHHrates, set_gateHHrates)
     def get_gateHHratesTau(self): return self.gateHHratesTau
     def set_gateHHratesTau(self, gateHHratesTau): self.gateHHratesTau = gateHHratesTau
     def add_gateHHratesTau(self, value): self.gateHHratesTau.append(value)
     def insert_gateHHratesTau(self, index, value): self.gateHHratesTau[index] = value
-    gateHHratesTauProp = property(get_gateHHratesTau, set_gateHHratesTau)
     def get_gateHHtauInf(self): return self.gateHHtauInf
     def set_gateHHtauInf(self, gateHHtauInf): self.gateHHtauInf = gateHHtauInf
     def add_gateHHtauInf(self, value): self.gateHHtauInf.append(value)
     def insert_gateHHtauInf(self, index, value): self.gateHHtauInf[index] = value
-    gateHHtauInfProp = property(get_gateHHtauInf, set_gateHHtauInf)
     def get_gateHHratesInf(self): return self.gateHHratesInf
     def set_gateHHratesInf(self, gateHHratesInf): self.gateHHratesInf = gateHHratesInf
     def add_gateHHratesInf(self, value): self.gateHHratesInf.append(value)
     def insert_gateHHratesInf(self, index, value): self.gateHHratesInf[index] = value
-    gateHHratesInfProp = property(get_gateHHratesInf, set_gateHHratesInf)
     def get_conductance(self): return self.conductance
     def set_conductance(self, conductance): self.conductance = conductance
-    conductanceProp = property(get_conductance, set_conductance)
     def validate_Nml2Quantity_conductance(self, value):
         # Validate type Nml2Quantity_conductance, a restriction on xs:string.
         pass
     def get_type(self): return self.type_
     def set_type(self, type_): self.type_ = type_
-    typeProp = property(get_type, set_type)
     def validate_channelTypes(self, value):
         # Validate type channelTypes, a restriction on xs:string.
         pass
     def get_species(self): return self.species
     def set_species(self, species): self.species = species
-    speciesProp = property(get_species, set_species)
     def validate_NmlId(self, value):
         # Validate type NmlId, a restriction on xs:string.
         pass
@@ -9229,7 +9879,7 @@ class IonChannel(Standalone):
 class NeuroMLDocument(Standalone):
     subclass = None
     superclass = Standalone
-    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, include=None, extracellularProperties=None, intracellularProperties=None, morphology=None, ionChannel=None, decayingPoolConcentrationModel=None, expOneSynapse=None, expTwoSynapse=None, nmdaSynapse=None, stpSynapse=None, biophysicalProperties=None, cell=None, baseCell=None, iafTauCell=None, iafCell=None, izhikevichCell=None, adExIaFCell=None, IF_curr_alpha=None, IF_curr_exp=None, IF_cond_alpha=None, IF_cond_exp=None, EIF_cond_exp_isfa_ista=None, EIF_cond_alpha_isfa_ista=None, HH_cond_exp=None, expCondSynapse=None, alphaCondSynapse=None, expCurrSynapse=None, alphaCurrSynapse=None, SpikeSourcePoisson=None, pulseGenerator=None, network=None, ComponentType=None):
+    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, include=None, extracellularProperties=None, intracellularProperties=None, morphology=None, ionChannel=None, decayingPoolConcentrationModel=None, expOneSynapse=None, expTwoSynapse=None, blockingPlasticSynapse=None, biophysicalProperties=None, cell=None, baseCell=None, iafTauCell=None, iafTauRefCell=None, iafCell=None, iafRefCell=None, izhikevichCell=None, adExIaFCell=None, pulseGenerator=None, sineGenerator=None, rampGenerator=None, voltageClamp=None, spikeArray=None, spikeGenerator=None, spikeGeneratorRandom=None, spikeGeneratorPoisson=None, IF_curr_alpha=None, IF_curr_exp=None, IF_cond_alpha=None, IF_cond_exp=None, EIF_cond_exp_isfa_ista=None, EIF_cond_alpha_isfa_ista=None, HH_cond_exp=None, expCondSynapse=None, alphaCondSynapse=None, expCurrSynapse=None, alphaCurrSynapse=None, SpikeSourcePoisson=None, network=None, ComponentType=None):
         super(NeuroMLDocument, self).__init__(id, neuroLexId, name, metaid, notes, annotation, )
         if include is None:
             self.include = []
@@ -9263,14 +9913,10 @@ class NeuroMLDocument(Standalone):
             self.expTwoSynapse = []
         else:
             self.expTwoSynapse = expTwoSynapse
-        if nmdaSynapse is None:
-            self.nmdaSynapse = []
+        if blockingPlasticSynapse is None:
+            self.blockingPlasticSynapse = []
         else:
-            self.nmdaSynapse = nmdaSynapse
-        if stpSynapse is None:
-            self.stpSynapse = []
-        else:
-            self.stpSynapse = stpSynapse
+            self.blockingPlasticSynapse = blockingPlasticSynapse
         if biophysicalProperties is None:
             self.biophysicalProperties = []
         else:
@@ -9287,10 +9933,18 @@ class NeuroMLDocument(Standalone):
             self.iafTauCell = []
         else:
             self.iafTauCell = iafTauCell
+        if iafTauRefCell is None:
+            self.iafTauRefCell = []
+        else:
+            self.iafTauRefCell = iafTauRefCell
         if iafCell is None:
             self.iafCell = []
         else:
             self.iafCell = iafCell
+        if iafRefCell is None:
+            self.iafRefCell = []
+        else:
+            self.iafRefCell = iafRefCell
         if izhikevichCell is None:
             self.izhikevichCell = []
         else:
@@ -9299,6 +9953,38 @@ class NeuroMLDocument(Standalone):
             self.adExIaFCell = []
         else:
             self.adExIaFCell = adExIaFCell
+        if pulseGenerator is None:
+            self.pulseGenerator = []
+        else:
+            self.pulseGenerator = pulseGenerator
+        if sineGenerator is None:
+            self.sineGenerator = []
+        else:
+            self.sineGenerator = sineGenerator
+        if rampGenerator is None:
+            self.rampGenerator = []
+        else:
+            self.rampGenerator = rampGenerator
+        if voltageClamp is None:
+            self.voltageClamp = []
+        else:
+            self.voltageClamp = voltageClamp
+        if spikeArray is None:
+            self.spikeArray = []
+        else:
+            self.spikeArray = spikeArray
+        if spikeGenerator is None:
+            self.spikeGenerator = []
+        else:
+            self.spikeGenerator = spikeGenerator
+        if spikeGeneratorRandom is None:
+            self.spikeGeneratorRandom = []
+        else:
+            self.spikeGeneratorRandom = spikeGeneratorRandom
+        if spikeGeneratorPoisson is None:
+            self.spikeGeneratorPoisson = []
+        else:
+            self.spikeGeneratorPoisson = spikeGeneratorPoisson
         if IF_curr_alpha is None:
             self.IF_curr_alpha = []
         else:
@@ -9347,10 +10033,6 @@ class NeuroMLDocument(Standalone):
             self.SpikeSourcePoisson = []
         else:
             self.SpikeSourcePoisson = SpikeSourcePoisson
-        if pulseGenerator is None:
-            self.pulseGenerator = []
-        else:
-            self.pulseGenerator = pulseGenerator
         if network is None:
             self.network = []
         else:
@@ -9369,162 +10051,162 @@ class NeuroMLDocument(Standalone):
     def set_include(self, include): self.include = include
     def add_include(self, value): self.include.append(value)
     def insert_include(self, index, value): self.include[index] = value
-    includeProp = property(get_include, set_include)
     def get_extracellularProperties(self): return self.extracellularProperties
     def set_extracellularProperties(self, extracellularProperties): self.extracellularProperties = extracellularProperties
     def add_extracellularProperties(self, value): self.extracellularProperties.append(value)
     def insert_extracellularProperties(self, index, value): self.extracellularProperties[index] = value
-    extracellularPropertiesProp = property(get_extracellularProperties, set_extracellularProperties)
     def get_intracellularProperties(self): return self.intracellularProperties
     def set_intracellularProperties(self, intracellularProperties): self.intracellularProperties = intracellularProperties
     def add_intracellularProperties(self, value): self.intracellularProperties.append(value)
     def insert_intracellularProperties(self, index, value): self.intracellularProperties[index] = value
-    intracellularPropertiesProp = property(get_intracellularProperties, set_intracellularProperties)
     def get_morphology(self): return self.morphology
     def set_morphology(self, morphology): self.morphology = morphology
     def add_morphology(self, value): self.morphology.append(value)
     def insert_morphology(self, index, value): self.morphology[index] = value
-    morphologyProp = property(get_morphology, set_morphology)
     def get_ionChannel(self): return self.ionChannel
     def set_ionChannel(self, ionChannel): self.ionChannel = ionChannel
     def add_ionChannel(self, value): self.ionChannel.append(value)
     def insert_ionChannel(self, index, value): self.ionChannel[index] = value
-    ionChannelProp = property(get_ionChannel, set_ionChannel)
     def get_decayingPoolConcentrationModel(self): return self.decayingPoolConcentrationModel
     def set_decayingPoolConcentrationModel(self, decayingPoolConcentrationModel): self.decayingPoolConcentrationModel = decayingPoolConcentrationModel
     def add_decayingPoolConcentrationModel(self, value): self.decayingPoolConcentrationModel.append(value)
     def insert_decayingPoolConcentrationModel(self, index, value): self.decayingPoolConcentrationModel[index] = value
-    decayingPoolConcentrationModelProp = property(get_decayingPoolConcentrationModel, set_decayingPoolConcentrationModel)
     def get_expOneSynapse(self): return self.expOneSynapse
     def set_expOneSynapse(self, expOneSynapse): self.expOneSynapse = expOneSynapse
     def add_expOneSynapse(self, value): self.expOneSynapse.append(value)
     def insert_expOneSynapse(self, index, value): self.expOneSynapse[index] = value
-    expOneSynapseProp = property(get_expOneSynapse, set_expOneSynapse)
     def get_expTwoSynapse(self): return self.expTwoSynapse
     def set_expTwoSynapse(self, expTwoSynapse): self.expTwoSynapse = expTwoSynapse
     def add_expTwoSynapse(self, value): self.expTwoSynapse.append(value)
     def insert_expTwoSynapse(self, index, value): self.expTwoSynapse[index] = value
-    expTwoSynapseProp = property(get_expTwoSynapse, set_expTwoSynapse)
-    def get_nmdaSynapse(self): return self.nmdaSynapse
-    def set_nmdaSynapse(self, nmdaSynapse): self.nmdaSynapse = nmdaSynapse
-    def add_nmdaSynapse(self, value): self.nmdaSynapse.append(value)
-    def insert_nmdaSynapse(self, index, value): self.nmdaSynapse[index] = value
-    nmdaSynapseProp = property(get_nmdaSynapse, set_nmdaSynapse)
-    def get_stpSynapse(self): return self.stpSynapse
-    def set_stpSynapse(self, stpSynapse): self.stpSynapse = stpSynapse
-    def add_stpSynapse(self, value): self.stpSynapse.append(value)
-    def insert_stpSynapse(self, index, value): self.stpSynapse[index] = value
-    stpSynapseProp = property(get_stpSynapse, set_stpSynapse)
+    def get_blockingPlasticSynapse(self): return self.blockingPlasticSynapse
+    def set_blockingPlasticSynapse(self, blockingPlasticSynapse): self.blockingPlasticSynapse = blockingPlasticSynapse
+    def add_blockingPlasticSynapse(self, value): self.blockingPlasticSynapse.append(value)
+    def insert_blockingPlasticSynapse(self, index, value): self.blockingPlasticSynapse[index] = value
     def get_biophysicalProperties(self): return self.biophysicalProperties
     def set_biophysicalProperties(self, biophysicalProperties): self.biophysicalProperties = biophysicalProperties
     def add_biophysicalProperties(self, value): self.biophysicalProperties.append(value)
     def insert_biophysicalProperties(self, index, value): self.biophysicalProperties[index] = value
-    biophysicalPropertiesProp = property(get_biophysicalProperties, set_biophysicalProperties)
     def get_cell(self): return self.cell
     def set_cell(self, cell): self.cell = cell
     def add_cell(self, value): self.cell.append(value)
     def insert_cell(self, index, value): self.cell[index] = value
-    cellProp = property(get_cell, set_cell)
     def get_baseCell(self): return self.baseCell
     def set_baseCell(self, baseCell): self.baseCell = baseCell
     def add_baseCell(self, value): self.baseCell.append(value)
     def insert_baseCell(self, index, value): self.baseCell[index] = value
-    baseCellProp = property(get_baseCell, set_baseCell)
     def get_iafTauCell(self): return self.iafTauCell
     def set_iafTauCell(self, iafTauCell): self.iafTauCell = iafTauCell
     def add_iafTauCell(self, value): self.iafTauCell.append(value)
     def insert_iafTauCell(self, index, value): self.iafTauCell[index] = value
-    iafTauCellProp = property(get_iafTauCell, set_iafTauCell)
+    def get_iafTauRefCell(self): return self.iafTauRefCell
+    def set_iafTauRefCell(self, iafTauRefCell): self.iafTauRefCell = iafTauRefCell
+    def add_iafTauRefCell(self, value): self.iafTauRefCell.append(value)
+    def insert_iafTauRefCell(self, index, value): self.iafTauRefCell[index] = value
     def get_iafCell(self): return self.iafCell
     def set_iafCell(self, iafCell): self.iafCell = iafCell
     def add_iafCell(self, value): self.iafCell.append(value)
     def insert_iafCell(self, index, value): self.iafCell[index] = value
-    iafCellProp = property(get_iafCell, set_iafCell)
+    def get_iafRefCell(self): return self.iafRefCell
+    def set_iafRefCell(self, iafRefCell): self.iafRefCell = iafRefCell
+    def add_iafRefCell(self, value): self.iafRefCell.append(value)
+    def insert_iafRefCell(self, index, value): self.iafRefCell[index] = value
     def get_izhikevichCell(self): return self.izhikevichCell
     def set_izhikevichCell(self, izhikevichCell): self.izhikevichCell = izhikevichCell
     def add_izhikevichCell(self, value): self.izhikevichCell.append(value)
     def insert_izhikevichCell(self, index, value): self.izhikevichCell[index] = value
-    izhikevichCellProp = property(get_izhikevichCell, set_izhikevichCell)
     def get_adExIaFCell(self): return self.adExIaFCell
     def set_adExIaFCell(self, adExIaFCell): self.adExIaFCell = adExIaFCell
     def add_adExIaFCell(self, value): self.adExIaFCell.append(value)
     def insert_adExIaFCell(self, index, value): self.adExIaFCell[index] = value
-    adExIaFCellProp = property(get_adExIaFCell, set_adExIaFCell)
-    def get_IF_curr_alpha(self): return self.IF_curr_alpha
-    def set_IF_curr_alpha(self, IF_curr_alpha): self.IF_curr_alpha = IF_curr_alpha
-    def add_IF_curr_alpha(self, value): self.IF_curr_alpha.append(value)
-    def insert_IF_curr_alpha(self, index, value): self.IF_curr_alpha[index] = value
-    IF_curr_alphaProp = property(get_IF_curr_alpha, set_IF_curr_alpha)
-    def get_IF_curr_exp(self): return self.IF_curr_exp
-    def set_IF_curr_exp(self, IF_curr_exp): self.IF_curr_exp = IF_curr_exp
-    def add_IF_curr_exp(self, value): self.IF_curr_exp.append(value)
-    def insert_IF_curr_exp(self, index, value): self.IF_curr_exp[index] = value
-    IF_curr_expProp = property(get_IF_curr_exp, set_IF_curr_exp)
-    def get_IF_cond_alpha(self): return self.IF_cond_alpha
-    def set_IF_cond_alpha(self, IF_cond_alpha): self.IF_cond_alpha = IF_cond_alpha
-    def add_IF_cond_alpha(self, value): self.IF_cond_alpha.append(value)
-    def insert_IF_cond_alpha(self, index, value): self.IF_cond_alpha[index] = value
-    IF_cond_alphaProp = property(get_IF_cond_alpha, set_IF_cond_alpha)
-    def get_IF_cond_exp(self): return self.IF_cond_exp
-    def set_IF_cond_exp(self, IF_cond_exp): self.IF_cond_exp = IF_cond_exp
-    def add_IF_cond_exp(self, value): self.IF_cond_exp.append(value)
-    def insert_IF_cond_exp(self, index, value): self.IF_cond_exp[index] = value
-    IF_cond_expProp = property(get_IF_cond_exp, set_IF_cond_exp)
-    def get_EIF_cond_exp_isfa_ista(self): return self.EIF_cond_exp_isfa_ista
-    def set_EIF_cond_exp_isfa_ista(self, EIF_cond_exp_isfa_ista): self.EIF_cond_exp_isfa_ista = EIF_cond_exp_isfa_ista
-    def add_EIF_cond_exp_isfa_ista(self, value): self.EIF_cond_exp_isfa_ista.append(value)
-    def insert_EIF_cond_exp_isfa_ista(self, index, value): self.EIF_cond_exp_isfa_ista[index] = value
-    EIF_cond_exp_isfa_istaProp = property(get_EIF_cond_exp_isfa_ista, set_EIF_cond_exp_isfa_ista)
-    def get_EIF_cond_alpha_isfa_ista(self): return self.EIF_cond_alpha_isfa_ista
-    def set_EIF_cond_alpha_isfa_ista(self, EIF_cond_alpha_isfa_ista): self.EIF_cond_alpha_isfa_ista = EIF_cond_alpha_isfa_ista
-    def add_EIF_cond_alpha_isfa_ista(self, value): self.EIF_cond_alpha_isfa_ista.append(value)
-    def insert_EIF_cond_alpha_isfa_ista(self, index, value): self.EIF_cond_alpha_isfa_ista[index] = value
-    EIF_cond_alpha_isfa_istaProp = property(get_EIF_cond_alpha_isfa_ista, set_EIF_cond_alpha_isfa_ista)
-    def get_HH_cond_exp(self): return self.HH_cond_exp
-    def set_HH_cond_exp(self, HH_cond_exp): self.HH_cond_exp = HH_cond_exp
-    def add_HH_cond_exp(self, value): self.HH_cond_exp.append(value)
-    def insert_HH_cond_exp(self, index, value): self.HH_cond_exp[index] = value
-    HH_cond_expProp = property(get_HH_cond_exp, set_HH_cond_exp)
-    def get_expCondSynapse(self): return self.expCondSynapse
-    def set_expCondSynapse(self, expCondSynapse): self.expCondSynapse = expCondSynapse
-    def add_expCondSynapse(self, value): self.expCondSynapse.append(value)
-    def insert_expCondSynapse(self, index, value): self.expCondSynapse[index] = value
-    expCondSynapseProp = property(get_expCondSynapse, set_expCondSynapse)
-    def get_alphaCondSynapse(self): return self.alphaCondSynapse
-    def set_alphaCondSynapse(self, alphaCondSynapse): self.alphaCondSynapse = alphaCondSynapse
-    def add_alphaCondSynapse(self, value): self.alphaCondSynapse.append(value)
-    def insert_alphaCondSynapse(self, index, value): self.alphaCondSynapse[index] = value
-    alphaCondSynapseProp = property(get_alphaCondSynapse, set_alphaCondSynapse)
-    def get_expCurrSynapse(self): return self.expCurrSynapse
-    def set_expCurrSynapse(self, expCurrSynapse): self.expCurrSynapse = expCurrSynapse
-    def add_expCurrSynapse(self, value): self.expCurrSynapse.append(value)
-    def insert_expCurrSynapse(self, index, value): self.expCurrSynapse[index] = value
-    expCurrSynapseProp = property(get_expCurrSynapse, set_expCurrSynapse)
-    def get_alphaCurrSynapse(self): return self.alphaCurrSynapse
-    def set_alphaCurrSynapse(self, alphaCurrSynapse): self.alphaCurrSynapse = alphaCurrSynapse
-    def add_alphaCurrSynapse(self, value): self.alphaCurrSynapse.append(value)
-    def insert_alphaCurrSynapse(self, index, value): self.alphaCurrSynapse[index] = value
-    alphaCurrSynapseProp = property(get_alphaCurrSynapse, set_alphaCurrSynapse)
-    def get_SpikeSourcePoisson(self): return self.SpikeSourcePoisson
-    def set_SpikeSourcePoisson(self, SpikeSourcePoisson): self.SpikeSourcePoisson = SpikeSourcePoisson
-    def add_SpikeSourcePoisson(self, value): self.SpikeSourcePoisson.append(value)
-    def insert_SpikeSourcePoisson(self, index, value): self.SpikeSourcePoisson[index] = value
-    SpikeSourcePoissonProp = property(get_SpikeSourcePoisson, set_SpikeSourcePoisson)
     def get_pulseGenerator(self): return self.pulseGenerator
     def set_pulseGenerator(self, pulseGenerator): self.pulseGenerator = pulseGenerator
     def add_pulseGenerator(self, value): self.pulseGenerator.append(value)
     def insert_pulseGenerator(self, index, value): self.pulseGenerator[index] = value
-    pulseGeneratorProp = property(get_pulseGenerator, set_pulseGenerator)
+    def get_sineGenerator(self): return self.sineGenerator
+    def set_sineGenerator(self, sineGenerator): self.sineGenerator = sineGenerator
+    def add_sineGenerator(self, value): self.sineGenerator.append(value)
+    def insert_sineGenerator(self, index, value): self.sineGenerator[index] = value
+    def get_rampGenerator(self): return self.rampGenerator
+    def set_rampGenerator(self, rampGenerator): self.rampGenerator = rampGenerator
+    def add_rampGenerator(self, value): self.rampGenerator.append(value)
+    def insert_rampGenerator(self, index, value): self.rampGenerator[index] = value
+    def get_voltageClamp(self): return self.voltageClamp
+    def set_voltageClamp(self, voltageClamp): self.voltageClamp = voltageClamp
+    def add_voltageClamp(self, value): self.voltageClamp.append(value)
+    def insert_voltageClamp(self, index, value): self.voltageClamp[index] = value
+    def get_spikeArray(self): return self.spikeArray
+    def set_spikeArray(self, spikeArray): self.spikeArray = spikeArray
+    def add_spikeArray(self, value): self.spikeArray.append(value)
+    def insert_spikeArray(self, index, value): self.spikeArray[index] = value
+    def get_spikeGenerator(self): return self.spikeGenerator
+    def set_spikeGenerator(self, spikeGenerator): self.spikeGenerator = spikeGenerator
+    def add_spikeGenerator(self, value): self.spikeGenerator.append(value)
+    def insert_spikeGenerator(self, index, value): self.spikeGenerator[index] = value
+    def get_spikeGeneratorRandom(self): return self.spikeGeneratorRandom
+    def set_spikeGeneratorRandom(self, spikeGeneratorRandom): self.spikeGeneratorRandom = spikeGeneratorRandom
+    def add_spikeGeneratorRandom(self, value): self.spikeGeneratorRandom.append(value)
+    def insert_spikeGeneratorRandom(self, index, value): self.spikeGeneratorRandom[index] = value
+    def get_spikeGeneratorPoisson(self): return self.spikeGeneratorPoisson
+    def set_spikeGeneratorPoisson(self, spikeGeneratorPoisson): self.spikeGeneratorPoisson = spikeGeneratorPoisson
+    def add_spikeGeneratorPoisson(self, value): self.spikeGeneratorPoisson.append(value)
+    def insert_spikeGeneratorPoisson(self, index, value): self.spikeGeneratorPoisson[index] = value
+    def get_IF_curr_alpha(self): return self.IF_curr_alpha
+    def set_IF_curr_alpha(self, IF_curr_alpha): self.IF_curr_alpha = IF_curr_alpha
+    def add_IF_curr_alpha(self, value): self.IF_curr_alpha.append(value)
+    def insert_IF_curr_alpha(self, index, value): self.IF_curr_alpha[index] = value
+    def get_IF_curr_exp(self): return self.IF_curr_exp
+    def set_IF_curr_exp(self, IF_curr_exp): self.IF_curr_exp = IF_curr_exp
+    def add_IF_curr_exp(self, value): self.IF_curr_exp.append(value)
+    def insert_IF_curr_exp(self, index, value): self.IF_curr_exp[index] = value
+    def get_IF_cond_alpha(self): return self.IF_cond_alpha
+    def set_IF_cond_alpha(self, IF_cond_alpha): self.IF_cond_alpha = IF_cond_alpha
+    def add_IF_cond_alpha(self, value): self.IF_cond_alpha.append(value)
+    def insert_IF_cond_alpha(self, index, value): self.IF_cond_alpha[index] = value
+    def get_IF_cond_exp(self): return self.IF_cond_exp
+    def set_IF_cond_exp(self, IF_cond_exp): self.IF_cond_exp = IF_cond_exp
+    def add_IF_cond_exp(self, value): self.IF_cond_exp.append(value)
+    def insert_IF_cond_exp(self, index, value): self.IF_cond_exp[index] = value
+    def get_EIF_cond_exp_isfa_ista(self): return self.EIF_cond_exp_isfa_ista
+    def set_EIF_cond_exp_isfa_ista(self, EIF_cond_exp_isfa_ista): self.EIF_cond_exp_isfa_ista = EIF_cond_exp_isfa_ista
+    def add_EIF_cond_exp_isfa_ista(self, value): self.EIF_cond_exp_isfa_ista.append(value)
+    def insert_EIF_cond_exp_isfa_ista(self, index, value): self.EIF_cond_exp_isfa_ista[index] = value
+    def get_EIF_cond_alpha_isfa_ista(self): return self.EIF_cond_alpha_isfa_ista
+    def set_EIF_cond_alpha_isfa_ista(self, EIF_cond_alpha_isfa_ista): self.EIF_cond_alpha_isfa_ista = EIF_cond_alpha_isfa_ista
+    def add_EIF_cond_alpha_isfa_ista(self, value): self.EIF_cond_alpha_isfa_ista.append(value)
+    def insert_EIF_cond_alpha_isfa_ista(self, index, value): self.EIF_cond_alpha_isfa_ista[index] = value
+    def get_HH_cond_exp(self): return self.HH_cond_exp
+    def set_HH_cond_exp(self, HH_cond_exp): self.HH_cond_exp = HH_cond_exp
+    def add_HH_cond_exp(self, value): self.HH_cond_exp.append(value)
+    def insert_HH_cond_exp(self, index, value): self.HH_cond_exp[index] = value
+    def get_expCondSynapse(self): return self.expCondSynapse
+    def set_expCondSynapse(self, expCondSynapse): self.expCondSynapse = expCondSynapse
+    def add_expCondSynapse(self, value): self.expCondSynapse.append(value)
+    def insert_expCondSynapse(self, index, value): self.expCondSynapse[index] = value
+    def get_alphaCondSynapse(self): return self.alphaCondSynapse
+    def set_alphaCondSynapse(self, alphaCondSynapse): self.alphaCondSynapse = alphaCondSynapse
+    def add_alphaCondSynapse(self, value): self.alphaCondSynapse.append(value)
+    def insert_alphaCondSynapse(self, index, value): self.alphaCondSynapse[index] = value
+    def get_expCurrSynapse(self): return self.expCurrSynapse
+    def set_expCurrSynapse(self, expCurrSynapse): self.expCurrSynapse = expCurrSynapse
+    def add_expCurrSynapse(self, value): self.expCurrSynapse.append(value)
+    def insert_expCurrSynapse(self, index, value): self.expCurrSynapse[index] = value
+    def get_alphaCurrSynapse(self): return self.alphaCurrSynapse
+    def set_alphaCurrSynapse(self, alphaCurrSynapse): self.alphaCurrSynapse = alphaCurrSynapse
+    def add_alphaCurrSynapse(self, value): self.alphaCurrSynapse.append(value)
+    def insert_alphaCurrSynapse(self, index, value): self.alphaCurrSynapse[index] = value
+    def get_SpikeSourcePoisson(self): return self.SpikeSourcePoisson
+    def set_SpikeSourcePoisson(self, SpikeSourcePoisson): self.SpikeSourcePoisson = SpikeSourcePoisson
+    def add_SpikeSourcePoisson(self, value): self.SpikeSourcePoisson.append(value)
+    def insert_SpikeSourcePoisson(self, index, value): self.SpikeSourcePoisson[index] = value
     def get_network(self): return self.network
     def set_network(self, network): self.network = network
     def add_network(self, value): self.network.append(value)
     def insert_network(self, index, value): self.network[index] = value
-    networkProp = property(get_network, set_network)
     def get_ComponentType(self): return self.ComponentType
     def set_ComponentType(self, ComponentType): self.ComponentType = ComponentType
     def add_ComponentType(self, value): self.ComponentType.append(value)
     def insert_ComponentType(self, index, value): self.ComponentType[index] = value
-    ComponentTypeProp = property(get_ComponentType, set_ComponentType)
     def hasContent_(self):
         if (
             self.include or
@@ -9535,15 +10217,24 @@ class NeuroMLDocument(Standalone):
             self.decayingPoolConcentrationModel or
             self.expOneSynapse or
             self.expTwoSynapse or
-            self.nmdaSynapse or
-            self.stpSynapse or
+            self.blockingPlasticSynapse or
             self.biophysicalProperties or
             self.cell or
             self.baseCell or
             self.iafTauCell or
+            self.iafTauRefCell or
             self.iafCell or
+            self.iafRefCell or
             self.izhikevichCell or
             self.adExIaFCell or
+            self.pulseGenerator or
+            self.sineGenerator or
+            self.rampGenerator or
+            self.voltageClamp or
+            self.spikeArray or
+            self.spikeGenerator or
+            self.spikeGeneratorRandom or
+            self.spikeGeneratorPoisson or
             self.IF_curr_alpha or
             self.IF_curr_exp or
             self.IF_cond_alpha or
@@ -9556,7 +10247,6 @@ class NeuroMLDocument(Standalone):
             self.expCurrSynapse or
             self.alphaCurrSynapse or
             self.SpikeSourcePoisson or
-            self.pulseGenerator or
             self.network or
             self.ComponentType or
             super(NeuroMLDocument, self).hasContent_()
@@ -9604,10 +10294,8 @@ class NeuroMLDocument(Standalone):
             expOneSynapse_.export(outfile, level, namespace_, name_='expOneSynapse', pretty_print=pretty_print)
         for expTwoSynapse_ in self.expTwoSynapse:
             expTwoSynapse_.export(outfile, level, namespace_, name_='expTwoSynapse', pretty_print=pretty_print)
-        for nmdaSynapse_ in self.nmdaSynapse:
-            nmdaSynapse_.export(outfile, level, namespace_, name_='nmdaSynapse', pretty_print=pretty_print)
-        for stpSynapse_ in self.stpSynapse:
-            stpSynapse_.export(outfile, level, namespace_, name_='stpSynapse', pretty_print=pretty_print)
+        for blockingPlasticSynapse_ in self.blockingPlasticSynapse:
+            blockingPlasticSynapse_.export(outfile, level, namespace_, name_='blockingPlasticSynapse', pretty_print=pretty_print)
         for biophysicalProperties_ in self.biophysicalProperties:
             biophysicalProperties_.export(outfile, level, namespace_, name_='biophysicalProperties', pretty_print=pretty_print)
         for cell_ in self.cell:
@@ -9616,12 +10304,32 @@ class NeuroMLDocument(Standalone):
             baseCell_.export(outfile, level, namespace_, name_='baseCell', pretty_print=pretty_print)
         for iafTauCell_ in self.iafTauCell:
             iafTauCell_.export(outfile, level, namespace_, name_='iafTauCell', pretty_print=pretty_print)
+        for iafTauRefCell_ in self.iafTauRefCell:
+            iafTauRefCell_.export(outfile, level, namespace_, name_='iafTauRefCell', pretty_print=pretty_print)
         for iafCell_ in self.iafCell:
             iafCell_.export(outfile, level, namespace_, name_='iafCell', pretty_print=pretty_print)
+        for iafRefCell_ in self.iafRefCell:
+            iafRefCell_.export(outfile, level, namespace_, name_='iafRefCell', pretty_print=pretty_print)
         for izhikevichCell_ in self.izhikevichCell:
             izhikevichCell_.export(outfile, level, namespace_, name_='izhikevichCell', pretty_print=pretty_print)
         for adExIaFCell_ in self.adExIaFCell:
             adExIaFCell_.export(outfile, level, namespace_, name_='adExIaFCell', pretty_print=pretty_print)
+        for pulseGenerator_ in self.pulseGenerator:
+            pulseGenerator_.export(outfile, level, namespace_, name_='pulseGenerator', pretty_print=pretty_print)
+        for sineGenerator_ in self.sineGenerator:
+            sineGenerator_.export(outfile, level, namespace_, name_='sineGenerator', pretty_print=pretty_print)
+        for rampGenerator_ in self.rampGenerator:
+            rampGenerator_.export(outfile, level, namespace_, name_='rampGenerator', pretty_print=pretty_print)
+        for voltageClamp_ in self.voltageClamp:
+            voltageClamp_.export(outfile, level, namespace_, name_='voltageClamp', pretty_print=pretty_print)
+        for spikeArray_ in self.spikeArray:
+            spikeArray_.export(outfile, level, namespace_, name_='spikeArray', pretty_print=pretty_print)
+        for spikeGenerator_ in self.spikeGenerator:
+            spikeGenerator_.export(outfile, level, namespace_, name_='spikeGenerator', pretty_print=pretty_print)
+        for spikeGeneratorRandom_ in self.spikeGeneratorRandom:
+            spikeGeneratorRandom_.export(outfile, level, namespace_, name_='spikeGeneratorRandom', pretty_print=pretty_print)
+        for spikeGeneratorPoisson_ in self.spikeGeneratorPoisson:
+            spikeGeneratorPoisson_.export(outfile, level, namespace_, name_='spikeGeneratorPoisson', pretty_print=pretty_print)
         for IF_curr_alpha_ in self.IF_curr_alpha:
             IF_curr_alpha_.export(outfile, level, namespace_, name_='IF_curr_alpha', pretty_print=pretty_print)
         for IF_curr_exp_ in self.IF_curr_exp:
@@ -9646,8 +10354,6 @@ class NeuroMLDocument(Standalone):
             alphaCurrSynapse_.export(outfile, level, namespace_, name_='alphaCurrSynapse', pretty_print=pretty_print)
         for SpikeSourcePoisson_ in self.SpikeSourcePoisson:
             SpikeSourcePoisson_.export(outfile, level, namespace_, name_='SpikeSourcePoisson', pretty_print=pretty_print)
-        for pulseGenerator_ in self.pulseGenerator:
-            pulseGenerator_.export(outfile, level, namespace_, name_='pulseGenerator', pretty_print=pretty_print)
         for network_ in self.network:
             network_.export(outfile, level, namespace_, name_='network', pretty_print=pretty_print)
         for ComponentType_ in self.ComponentType:
@@ -9759,24 +10465,12 @@ class NeuroMLDocument(Standalone):
         showIndent(outfile, level)
         outfile.write('],\n')
         showIndent(outfile, level)
-        outfile.write('nmdaSynapse=[\n')
+        outfile.write('blockingPlasticSynapse=[\n')
         level += 1
-        for nmdaSynapse_ in self.nmdaSynapse:
+        for blockingPlasticSynapse_ in self.blockingPlasticSynapse:
             showIndent(outfile, level)
-            outfile.write('model_.NmdaSynapse(\n')
-            nmdaSynapse_.exportLiteral(outfile, level, name_='NmdaSynapse')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        level -= 1
-        showIndent(outfile, level)
-        outfile.write('],\n')
-        showIndent(outfile, level)
-        outfile.write('stpSynapse=[\n')
-        level += 1
-        for stpSynapse_ in self.stpSynapse:
-            showIndent(outfile, level)
-            outfile.write('model_.StpSynapse(\n')
-            stpSynapse_.exportLiteral(outfile, level, name_='StpSynapse')
+            outfile.write('model_.BlockingPlasticSynapse(\n')
+            blockingPlasticSynapse_.exportLiteral(outfile, level, name_='BlockingPlasticSynapse')
             showIndent(outfile, level)
             outfile.write('),\n')
         level -= 1
@@ -9831,12 +10525,36 @@ class NeuroMLDocument(Standalone):
         showIndent(outfile, level)
         outfile.write('],\n')
         showIndent(outfile, level)
+        outfile.write('iafTauRefCell=[\n')
+        level += 1
+        for iafTauRefCell_ in self.iafTauRefCell:
+            showIndent(outfile, level)
+            outfile.write('model_.IaFTauRefCell(\n')
+            iafTauRefCell_.exportLiteral(outfile, level, name_='IaFTauRefCell')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        level -= 1
+        showIndent(outfile, level)
+        outfile.write('],\n')
+        showIndent(outfile, level)
         outfile.write('iafCell=[\n')
         level += 1
         for iafCell_ in self.iafCell:
             showIndent(outfile, level)
             outfile.write('model_.IaFCell(\n')
             iafCell_.exportLiteral(outfile, level, name_='IaFCell')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        level -= 1
+        showIndent(outfile, level)
+        outfile.write('],\n')
+        showIndent(outfile, level)
+        outfile.write('iafRefCell=[\n')
+        level += 1
+        for iafRefCell_ in self.iafRefCell:
+            showIndent(outfile, level)
+            outfile.write('model_.IaFRefCell(\n')
+            iafRefCell_.exportLiteral(outfile, level, name_='IaFRefCell')
             showIndent(outfile, level)
             outfile.write('),\n')
         level -= 1
@@ -9861,6 +10579,102 @@ class NeuroMLDocument(Standalone):
             showIndent(outfile, level)
             outfile.write('model_.AdExIaFCell(\n')
             adExIaFCell_.exportLiteral(outfile, level, name_='AdExIaFCell')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        level -= 1
+        showIndent(outfile, level)
+        outfile.write('],\n')
+        showIndent(outfile, level)
+        outfile.write('pulseGenerator=[\n')
+        level += 1
+        for pulseGenerator_ in self.pulseGenerator:
+            showIndent(outfile, level)
+            outfile.write('model_.PulseGenerator(\n')
+            pulseGenerator_.exportLiteral(outfile, level, name_='PulseGenerator')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        level -= 1
+        showIndent(outfile, level)
+        outfile.write('],\n')
+        showIndent(outfile, level)
+        outfile.write('sineGenerator=[\n')
+        level += 1
+        for sineGenerator_ in self.sineGenerator:
+            showIndent(outfile, level)
+            outfile.write('model_.SineGenerator(\n')
+            sineGenerator_.exportLiteral(outfile, level, name_='SineGenerator')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        level -= 1
+        showIndent(outfile, level)
+        outfile.write('],\n')
+        showIndent(outfile, level)
+        outfile.write('rampGenerator=[\n')
+        level += 1
+        for rampGenerator_ in self.rampGenerator:
+            showIndent(outfile, level)
+            outfile.write('model_.RampGenerator(\n')
+            rampGenerator_.exportLiteral(outfile, level, name_='RampGenerator')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        level -= 1
+        showIndent(outfile, level)
+        outfile.write('],\n')
+        showIndent(outfile, level)
+        outfile.write('voltageClamp=[\n')
+        level += 1
+        for voltageClamp_ in self.voltageClamp:
+            showIndent(outfile, level)
+            outfile.write('model_.VoltageClamp(\n')
+            voltageClamp_.exportLiteral(outfile, level, name_='VoltageClamp')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        level -= 1
+        showIndent(outfile, level)
+        outfile.write('],\n')
+        showIndent(outfile, level)
+        outfile.write('spikeArray=[\n')
+        level += 1
+        for spikeArray_ in self.spikeArray:
+            showIndent(outfile, level)
+            outfile.write('model_.SpikeArray(\n')
+            spikeArray_.exportLiteral(outfile, level, name_='SpikeArray')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        level -= 1
+        showIndent(outfile, level)
+        outfile.write('],\n')
+        showIndent(outfile, level)
+        outfile.write('spikeGenerator=[\n')
+        level += 1
+        for spikeGenerator_ in self.spikeGenerator:
+            showIndent(outfile, level)
+            outfile.write('model_.SpikeGenerator(\n')
+            spikeGenerator_.exportLiteral(outfile, level, name_='SpikeGenerator')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        level -= 1
+        showIndent(outfile, level)
+        outfile.write('],\n')
+        showIndent(outfile, level)
+        outfile.write('spikeGeneratorRandom=[\n')
+        level += 1
+        for spikeGeneratorRandom_ in self.spikeGeneratorRandom:
+            showIndent(outfile, level)
+            outfile.write('model_.SpikeGeneratorRandom(\n')
+            spikeGeneratorRandom_.exportLiteral(outfile, level, name_='SpikeGeneratorRandom')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        level -= 1
+        showIndent(outfile, level)
+        outfile.write('],\n')
+        showIndent(outfile, level)
+        outfile.write('spikeGeneratorPoisson=[\n')
+        level += 1
+        for spikeGeneratorPoisson_ in self.spikeGeneratorPoisson:
+            showIndent(outfile, level)
+            outfile.write('model_.SpikeGeneratorPoisson(\n')
+            spikeGeneratorPoisson_.exportLiteral(outfile, level, name_='SpikeGeneratorPoisson')
             showIndent(outfile, level)
             outfile.write('),\n')
         level -= 1
@@ -10011,18 +10825,6 @@ class NeuroMLDocument(Standalone):
         showIndent(outfile, level)
         outfile.write('],\n')
         showIndent(outfile, level)
-        outfile.write('pulseGenerator=[\n')
-        level += 1
-        for pulseGenerator_ in self.pulseGenerator:
-            showIndent(outfile, level)
-            outfile.write('model_.PulseGenerator(\n')
-            pulseGenerator_.exportLiteral(outfile, level, name_='PulseGenerator')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        level -= 1
-        showIndent(outfile, level)
-        outfile.write('],\n')
-        showIndent(outfile, level)
         outfile.write('network=[\n')
         level += 1
         for network_ in self.network:
@@ -10089,14 +10891,10 @@ class NeuroMLDocument(Standalone):
             obj_ = class_obj_.factory()
             obj_.build(child_)
             self.expTwoSynapse.append(obj_)
-        elif nodeName_ == 'nmdaSynapse':
-            obj_ = NmdaSynapse.factory()
+        elif nodeName_ == 'blockingPlasticSynapse':
+            obj_ = BlockingPlasticSynapse.factory()
             obj_.build(child_)
-            self.nmdaSynapse.append(obj_)
-        elif nodeName_ == 'stpSynapse':
-            obj_ = StpSynapse.factory()
-            obj_.build(child_)
-            self.stpSynapse.append(obj_)
+            self.blockingPlasticSynapse.append(obj_)
         elif nodeName_ == 'biophysicalProperties':
             obj_ = BiophysicalProperties.factory()
             obj_.build(child_)
@@ -10111,13 +10909,23 @@ class NeuroMLDocument(Standalone):
             obj_.build(child_)
             self.baseCell.append(obj_)
         elif nodeName_ == 'iafTauCell':
-            obj_ = IaFTauCell.factory()
+            class_obj_ = self.get_class_obj_(child_, IaFTauCell)
+            obj_ = class_obj_.factory()
             obj_.build(child_)
             self.iafTauCell.append(obj_)
+        elif nodeName_ == 'iafTauRefCell':
+            obj_ = IaFTauRefCell.factory()
+            obj_.build(child_)
+            self.iafTauRefCell.append(obj_)
         elif nodeName_ == 'iafCell':
-            obj_ = IaFCell.factory()
+            class_obj_ = self.get_class_obj_(child_, IaFCell)
+            obj_ = class_obj_.factory()
             obj_.build(child_)
             self.iafCell.append(obj_)
+        elif nodeName_ == 'iafRefCell':
+            obj_ = IaFRefCell.factory()
+            obj_.build(child_)
+            self.iafRefCell.append(obj_)
         elif nodeName_ == 'izhikevichCell':
             obj_ = IzhikevichCell.factory()
             obj_.build(child_)
@@ -10126,6 +10934,38 @@ class NeuroMLDocument(Standalone):
             obj_ = AdExIaFCell.factory()
             obj_.build(child_)
             self.adExIaFCell.append(obj_)
+        elif nodeName_ == 'pulseGenerator':
+            obj_ = PulseGenerator.factory()
+            obj_.build(child_)
+            self.pulseGenerator.append(obj_)
+        elif nodeName_ == 'sineGenerator':
+            obj_ = SineGenerator.factory()
+            obj_.build(child_)
+            self.sineGenerator.append(obj_)
+        elif nodeName_ == 'rampGenerator':
+            obj_ = RampGenerator.factory()
+            obj_.build(child_)
+            self.rampGenerator.append(obj_)
+        elif nodeName_ == 'voltageClamp':
+            obj_ = VoltageClamp.factory()
+            obj_.build(child_)
+            self.voltageClamp.append(obj_)
+        elif nodeName_ == 'spikeArray':
+            obj_ = SpikeArray.factory()
+            obj_.build(child_)
+            self.spikeArray.append(obj_)
+        elif nodeName_ == 'spikeGenerator':
+            obj_ = SpikeGenerator.factory()
+            obj_.build(child_)
+            self.spikeGenerator.append(obj_)
+        elif nodeName_ == 'spikeGeneratorRandom':
+            obj_ = SpikeGeneratorRandom.factory()
+            obj_.build(child_)
+            self.spikeGeneratorRandom.append(obj_)
+        elif nodeName_ == 'spikeGeneratorPoisson':
+            obj_ = SpikeGeneratorPoisson.factory()
+            obj_.build(child_)
+            self.spikeGeneratorPoisson.append(obj_)
         elif nodeName_ == 'IF_curr_alpha':
             obj_ = IF_curr_alpha.factory()
             obj_.build(child_)
@@ -10174,10 +11014,6 @@ class NeuroMLDocument(Standalone):
             obj_ = SpikeSourcePoisson.factory()
             obj_.build(child_)
             self.SpikeSourcePoisson.append(obj_)
-        elif nodeName_ == 'pulseGenerator':
-            obj_ = PulseGenerator.factory()
-            obj_.build(child_)
-            self.pulseGenerator.append(obj_)
         elif nodeName_ == 'network':
             obj_ = Network.factory()
             obj_.build(child_)
@@ -10205,7 +11041,6 @@ class BasePynnSynapse(BaseSynapse):
     factory = staticmethod(factory)
     def get_tau_syn(self): return self.tau_syn
     def set_tau_syn(self, tau_syn): self.tau_syn = tau_syn
-    tau_synProp = property(get_tau_syn, set_tau_syn)
     def get_extensiontype_(self): return self.extensiontype_
     def set_extensiontype_(self, extensiontype_): self.extensiontype_ = extensiontype_
     def hasContent_(self):
@@ -10300,19 +11135,14 @@ class basePyNNCell(BaseCell):
     factory = staticmethod(factory)
     def get_tau_syn_I(self): return self.tau_syn_I
     def set_tau_syn_I(self, tau_syn_I): self.tau_syn_I = tau_syn_I
-    tau_syn_IProp = property(get_tau_syn_I, set_tau_syn_I)
     def get_tau_syn_E(self): return self.tau_syn_E
     def set_tau_syn_E(self, tau_syn_E): self.tau_syn_E = tau_syn_E
-    tau_syn_EProp = property(get_tau_syn_E, set_tau_syn_E)
     def get_i_offset(self): return self.i_offset
     def set_i_offset(self, i_offset): self.i_offset = i_offset
-    i_offsetProp = property(get_i_offset, set_i_offset)
     def get_cm(self): return self.cm
     def set_cm(self, cm): self.cm = cm
-    cmProp = property(get_cm, set_cm)
     def get_v_init(self): return self.v_init
     def set_v_init(self, v_init): self.v_init = v_init
-    v_initProp = property(get_v_init, set_v_init)
     def get_extensiontype_(self): return self.extensiontype_
     def set_extensiontype_(self, extensiontype_): self.extensiontype_ = extensiontype_
     def hasContent_(self):
@@ -10459,7 +11289,6 @@ class ConcentrationModel_D(DecayingPoolConcentrationModel):
     factory = staticmethod(factory)
     def get_type(self): return self.type_
     def set_type(self, type_): self.type_ = type_
-    typeProp = property(get_type, set_type)
     def hasContent_(self):
         if (
             super(ConcentrationModel_D, self).hasContent_()
@@ -10543,16 +11372,12 @@ class Cell(BaseCell):
     factory = staticmethod(factory)
     def get_morphology(self): return self.morphology
     def set_morphology(self, morphology): self.morphology = morphology
-    morphologyProp = property(get_morphology, set_morphology)
     def get_biophysicalProperties(self): return self.biophysicalProperties
     def set_biophysicalProperties(self, biophysicalProperties): self.biophysicalProperties = biophysicalProperties
-    biophysicalPropertiesProp = property(get_biophysicalProperties, set_biophysicalProperties)
     def get_biophysicalProperties_attr(self): return self.biophysicalProperties_attr
     def set_biophysicalProperties_attr(self, biophysicalProperties_attr): self.biophysicalProperties_attr = biophysicalProperties_attr
-    biophysicalProperties_attrProp = property(get_biophysicalProperties_attr, set_biophysicalProperties_attr)
     def get_morphology_attr(self): return self.morphology_attr
     def set_morphology_attr(self, morphology_attr): self.morphology_attr = morphology_attr
-    morphology_attrProp = property(get_morphology_attr, set_morphology_attr)
     def hasContent_(self):
         if (
             self.morphology is not None or
@@ -10680,52 +11505,41 @@ class AdExIaFCell(BaseCell):
     factory = staticmethod(factory)
     def get_reset(self): return self.reset
     def set_reset(self, reset): self.reset = reset
-    resetProp = property(get_reset, set_reset)
     def validate_Nml2Quantity_voltage(self, value):
         # Validate type Nml2Quantity_voltage, a restriction on xs:string.
         pass
     def get_EL(self): return self.EL
     def set_EL(self, EL): self.EL = EL
-    ELProp = property(get_EL, set_EL)
     def get_C(self): return self.C
     def set_C(self, C): self.C = C
-    CProp = property(get_C, set_C)
     def validate_Nml2Quantity_capacitance(self, value):
         # Validate type Nml2Quantity_capacitance, a restriction on xs:string.
         pass
     def get_b(self): return self.b
     def set_b(self, b): self.b = b
-    bProp = property(get_b, set_b)
     def validate_Nml2Quantity_current(self, value):
         # Validate type Nml2Quantity_current, a restriction on xs:string.
         pass
     def get_refract(self): return self.refract
     def set_refract(self, refract): self.refract = refract
-    refractProp = property(get_refract, set_refract)
     def validate_Nml2Quantity_time(self, value):
         # Validate type Nml2Quantity_time, a restriction on xs:string.
         pass
     def get_VT(self): return self.VT
     def set_VT(self, VT): self.VT = VT
-    VTProp = property(get_VT, set_VT)
     def get_delT(self): return self.delT
     def set_delT(self, delT): self.delT = delT
-    delTProp = property(get_delT, set_delT)
     def get_a(self): return self.a
     def set_a(self, a): self.a = a
-    aProp = property(get_a, set_a)
     def validate_Nml2Quantity_conductance(self, value):
         # Validate type Nml2Quantity_conductance, a restriction on xs:string.
         pass
     def get_thresh(self): return self.thresh
     def set_thresh(self, thresh): self.thresh = thresh
-    threshProp = property(get_thresh, set_thresh)
     def get_gL(self): return self.gL
     def set_gL(self, gL): self.gL = gL
-    gLProp = property(get_gL, set_gL)
     def get_tauw(self): return self.tauw
     def set_tauw(self, tauw): self.tauw = tauw
-    tauwProp = property(get_tauw, set_tauw)
     def hasContent_(self):
         if (
             super(AdExIaFCell, self).hasContent_()
@@ -10929,28 +11743,22 @@ class IzhikevichCell(BaseCell):
     factory = staticmethod(factory)
     def get_a(self): return self.a
     def set_a(self, a): self.a = a
-    aProp = property(get_a, set_a)
     def validate_Nml2Quantity_none(self, value):
         # Validate type Nml2Quantity_none, a restriction on xs:string.
         pass
     def get_c(self): return self.c
     def set_c(self, c): self.c = c
-    cProp = property(get_c, set_c)
     def get_b(self): return self.b
     def set_b(self, b): self.b = b
-    bProp = property(get_b, set_b)
     def get_d(self): return self.d
     def set_d(self, d): self.d = d
-    dProp = property(get_d, set_d)
     def get_v0(self): return self.v0
     def set_v0(self, v0): self.v0 = v0
-    v0Prop = property(get_v0, set_v0)
     def validate_Nml2Quantity_voltage(self, value):
         # Validate type Nml2Quantity_voltage, a restriction on xs:string.
         pass
     def get_thresh(self): return self.thresh
     def set_thresh(self, thresh): self.thresh = thresh
-    threshProp = property(get_thresh, set_thresh)
     def hasContent_(self):
         if (
             super(IzhikevichCell, self).hasContent_()
@@ -11077,14 +11885,14 @@ class IzhikevichCell(BaseCell):
 class IaFCell(BaseCell):
     subclass = None
     superclass = BaseCell
-    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, reset=None, C=None, thresh=None, leakConductance=None, leakReversal=None):
-        super(IaFCell, self).__init__(id, neuroLexId, name, metaid, notes, annotation, )
+    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, reset=None, C=None, thresh=None, leakConductance=None, leakReversal=None, extensiontype_=None):
+        super(IaFCell, self).__init__(id, neuroLexId, name, metaid, notes, annotation, extensiontype_, )
         self.reset = _cast(None, reset)
         self.C = _cast(None, C)
         self.thresh = _cast(None, thresh)
         self.leakConductance = _cast(None, leakConductance)
         self.leakReversal = _cast(None, leakReversal)
-        pass
+        self.extensiontype_ = extensiontype_
     def factory(*args_, **kwargs_):
         if IaFCell.subclass:
             return IaFCell.subclass(*args_, **kwargs_)
@@ -11093,28 +11901,25 @@ class IaFCell(BaseCell):
     factory = staticmethod(factory)
     def get_reset(self): return self.reset
     def set_reset(self, reset): self.reset = reset
-    resetProp = property(get_reset, set_reset)
     def validate_Nml2Quantity_voltage(self, value):
         # Validate type Nml2Quantity_voltage, a restriction on xs:string.
         pass
     def get_C(self): return self.C
     def set_C(self, C): self.C = C
-    CProp = property(get_C, set_C)
     def validate_Nml2Quantity_capacitance(self, value):
         # Validate type Nml2Quantity_capacitance, a restriction on xs:string.
         pass
     def get_thresh(self): return self.thresh
     def set_thresh(self, thresh): self.thresh = thresh
-    threshProp = property(get_thresh, set_thresh)
     def get_leakConductance(self): return self.leakConductance
     def set_leakConductance(self, leakConductance): self.leakConductance = leakConductance
-    leakConductanceProp = property(get_leakConductance, set_leakConductance)
     def validate_Nml2Quantity_conductance(self, value):
         # Validate type Nml2Quantity_conductance, a restriction on xs:string.
         pass
     def get_leakReversal(self): return self.leakReversal
     def set_leakReversal(self, leakReversal): self.leakReversal = leakReversal
-    leakReversalProp = property(get_leakReversal, set_leakReversal)
+    def get_extensiontype_(self): return self.extensiontype_
+    def set_extensiontype_(self, extensiontype_): self.extensiontype_ = extensiontype_
     def hasContent_(self):
         if (
             super(IaFCell, self).hasContent_()
@@ -11155,6 +11960,10 @@ class IaFCell(BaseCell):
         if self.leakReversal is not None and 'leakReversal' not in already_processed:
             already_processed.add('leakReversal')
             outfile.write(' leakReversal=%s' % (quote_attrib(self.leakReversal), ))
+        if self.extensiontype_ is not None and 'xsi:type' not in already_processed:
+            already_processed.add('xsi:type')
+            outfile.write(' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"')
+            outfile.write(' xsi:type="%s"' % self.extensiontype_)
     def exportChildren(self, outfile, level, namespace_='', name_='IaFCell', fromsubclass_=False, pretty_print=True):
         super(IaFCell, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
     def exportLiteral(self, outfile, level, name_='IaFCell'):
@@ -11219,6 +12028,10 @@ class IaFCell(BaseCell):
             already_processed.add('leakReversal')
             self.leakReversal = value
             self.validate_Nml2Quantity_voltage(self.leakReversal)    # validate type Nml2Quantity_voltage
+        value = find_attr_value_('xsi:type', node)
+        if value is not None and 'xsi:type' not in already_processed:
+            already_processed.add('xsi:type')
+            self.extensiontype_ = value
         super(IaFCell, self).buildAttributes(node, attrs, already_processed)
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         super(IaFCell, self).buildChildren(child_, node, nodeName_, True)
@@ -11229,13 +12042,13 @@ class IaFCell(BaseCell):
 class IaFTauCell(BaseCell):
     subclass = None
     superclass = BaseCell
-    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, reset=None, tau=None, thresh=None, leakReversal=None):
-        super(IaFTauCell, self).__init__(id, neuroLexId, name, metaid, notes, annotation, )
+    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, reset=None, tau=None, thresh=None, leakReversal=None, extensiontype_=None):
+        super(IaFTauCell, self).__init__(id, neuroLexId, name, metaid, notes, annotation, extensiontype_, )
         self.reset = _cast(None, reset)
         self.tau = _cast(None, tau)
         self.thresh = _cast(None, thresh)
         self.leakReversal = _cast(None, leakReversal)
-        pass
+        self.extensiontype_ = extensiontype_
     def factory(*args_, **kwargs_):
         if IaFTauCell.subclass:
             return IaFTauCell.subclass(*args_, **kwargs_)
@@ -11244,22 +12057,20 @@ class IaFTauCell(BaseCell):
     factory = staticmethod(factory)
     def get_reset(self): return self.reset
     def set_reset(self, reset): self.reset = reset
-    resetProp = property(get_reset, set_reset)
     def validate_Nml2Quantity_voltage(self, value):
         # Validate type Nml2Quantity_voltage, a restriction on xs:string.
         pass
     def get_tau(self): return self.tau
     def set_tau(self, tau): self.tau = tau
-    tauProp = property(get_tau, set_tau)
     def validate_Nml2Quantity_time(self, value):
         # Validate type Nml2Quantity_time, a restriction on xs:string.
         pass
     def get_thresh(self): return self.thresh
     def set_thresh(self, thresh): self.thresh = thresh
-    threshProp = property(get_thresh, set_thresh)
     def get_leakReversal(self): return self.leakReversal
     def set_leakReversal(self, leakReversal): self.leakReversal = leakReversal
-    leakReversalProp = property(get_leakReversal, set_leakReversal)
+    def get_extensiontype_(self): return self.extensiontype_
+    def set_extensiontype_(self, extensiontype_): self.extensiontype_ = extensiontype_
     def hasContent_(self):
         if (
             super(IaFTauCell, self).hasContent_()
@@ -11297,6 +12108,10 @@ class IaFTauCell(BaseCell):
         if self.leakReversal is not None and 'leakReversal' not in already_processed:
             already_processed.add('leakReversal')
             outfile.write(' leakReversal=%s' % (quote_attrib(self.leakReversal), ))
+        if self.extensiontype_ is not None and 'xsi:type' not in already_processed:
+            already_processed.add('xsi:type')
+            outfile.write(' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"')
+            outfile.write(' xsi:type="%s"' % self.extensiontype_)
     def exportChildren(self, outfile, level, namespace_='', name_='IaFTauCell', fromsubclass_=False, pretty_print=True):
         super(IaFTauCell, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
     def exportLiteral(self, outfile, level, name_='IaFTauCell'):
@@ -11352,6 +12167,10 @@ class IaFTauCell(BaseCell):
             already_processed.add('leakReversal')
             self.leakReversal = value
             self.validate_Nml2Quantity_voltage(self.leakReversal)    # validate type Nml2Quantity_voltage
+        value = find_attr_value_('xsi:type', node)
+        if value is not None and 'xsi:type' not in already_processed:
+            already_processed.add('xsi:type')
+            self.extensiontype_ = value
         super(IaFTauCell, self).buildAttributes(node, attrs, already_processed)
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         super(IaFTauCell, self).buildChildren(child_, node, nodeName_, True)
@@ -11375,13 +12194,11 @@ class BaseConductanceBasedSynapse(BaseSynapse):
     factory = staticmethod(factory)
     def get_erev(self): return self.erev
     def set_erev(self, erev): self.erev = erev
-    erevProp = property(get_erev, set_erev)
     def validate_Nml2Quantity_voltage(self, value):
         # Validate type Nml2Quantity_voltage, a restriction on xs:string.
         pass
     def get_gbase(self): return self.gbase
     def set_gbase(self, gbase): self.gbase = gbase
-    gbaseProp = property(get_gbase, set_gbase)
     def validate_Nml2Quantity_conductance(self, value):
         # Validate type Nml2Quantity_conductance, a restriction on xs:string.
         pass
@@ -11611,7 +12428,6 @@ class AlphaCondSynapse(BasePynnSynapse):
     factory = staticmethod(factory)
     def get_e_rev(self): return self.e_rev
     def set_e_rev(self, e_rev): self.e_rev = e_rev
-    e_revProp = property(get_e_rev, set_e_rev)
     def hasContent_(self):
         if (
             super(AlphaCondSynapse, self).hasContent_()
@@ -11692,7 +12508,6 @@ class ExpCondSynapse(BasePynnSynapse):
     factory = staticmethod(factory)
     def get_e_rev(self): return self.e_rev
     def set_e_rev(self, e_rev): self.e_rev = e_rev
-    e_revProp = property(get_e_rev, set_e_rev)
     def hasContent_(self):
         if (
             super(ExpCondSynapse, self).hasContent_()
@@ -11781,31 +12596,22 @@ class HH_cond_exp(basePyNNCell):
     factory = staticmethod(factory)
     def get_gbar_K(self): return self.gbar_K
     def set_gbar_K(self, gbar_K): self.gbar_K = gbar_K
-    gbar_KProp = property(get_gbar_K, set_gbar_K)
     def get_e_rev_E(self): return self.e_rev_E
     def set_e_rev_E(self, e_rev_E): self.e_rev_E = e_rev_E
-    e_rev_EProp = property(get_e_rev_E, set_e_rev_E)
     def get_g_leak(self): return self.g_leak
     def set_g_leak(self, g_leak): self.g_leak = g_leak
-    g_leakProp = property(get_g_leak, set_g_leak)
     def get_e_rev_Na(self): return self.e_rev_Na
     def set_e_rev_Na(self, e_rev_Na): self.e_rev_Na = e_rev_Na
-    e_rev_NaProp = property(get_e_rev_Na, set_e_rev_Na)
     def get_e_rev_I(self): return self.e_rev_I
     def set_e_rev_I(self, e_rev_I): self.e_rev_I = e_rev_I
-    e_rev_IProp = property(get_e_rev_I, set_e_rev_I)
     def get_e_rev_K(self): return self.e_rev_K
     def set_e_rev_K(self, e_rev_K): self.e_rev_K = e_rev_K
-    e_rev_KProp = property(get_e_rev_K, set_e_rev_K)
     def get_e_rev_leak(self): return self.e_rev_leak
     def set_e_rev_leak(self, e_rev_leak): self.e_rev_leak = e_rev_leak
-    e_rev_leakProp = property(get_e_rev_leak, set_e_rev_leak)
     def get_v_offset(self): return self.v_offset
     def set_v_offset(self, v_offset): self.v_offset = v_offset
-    v_offsetProp = property(get_v_offset, set_v_offset)
     def get_gbar_Na(self): return self.gbar_Na
     def set_gbar_Na(self, gbar_Na): self.gbar_Na = gbar_Na
-    gbar_NaProp = property(get_gbar_Na, set_gbar_Na)
     def hasContent_(self):
         if (
             super(HH_cond_exp, self).hasContent_()
@@ -12002,19 +12808,14 @@ class basePyNNIaFCell(basePyNNCell):
     factory = staticmethod(factory)
     def get_tau_refrac(self): return self.tau_refrac
     def set_tau_refrac(self, tau_refrac): self.tau_refrac = tau_refrac
-    tau_refracProp = property(get_tau_refrac, set_tau_refrac)
     def get_v_thresh(self): return self.v_thresh
     def set_v_thresh(self, v_thresh): self.v_thresh = v_thresh
-    v_threshProp = property(get_v_thresh, set_v_thresh)
     def get_tau_m(self): return self.tau_m
     def set_tau_m(self, tau_m): self.tau_m = tau_m
-    tau_mProp = property(get_tau_m, set_tau_m)
     def get_v_reset(self): return self.v_reset
     def set_v_reset(self, v_reset): self.v_reset = v_reset
-    v_resetProp = property(get_v_reset, set_v_reset)
     def get_v_rest(self): return self.v_rest
     def set_v_rest(self, v_rest): self.v_rest = v_rest
-    v_restProp = property(get_v_rest, set_v_rest)
     def get_extensiontype_(self): return self.extensiontype_
     def set_extensiontype_(self, extensiontype_): self.extensiontype_ = extensiontype_
     def hasContent_(self):
@@ -12146,6 +12947,168 @@ class basePyNNIaFCell(basePyNNCell):
 # end class basePyNNIaFCell
 
 
+class IaFRefCell(IaFCell):
+    subclass = None
+    superclass = IaFCell
+    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, reset=None, C=None, thresh=None, leakConductance=None, leakReversal=None, refract=None):
+        super(IaFRefCell, self).__init__(id, neuroLexId, name, metaid, notes, annotation, reset, C, thresh, leakConductance, leakReversal, )
+        self.refract = _cast(None, refract)
+        pass
+    def factory(*args_, **kwargs_):
+        if IaFRefCell.subclass:
+            return IaFRefCell.subclass(*args_, **kwargs_)
+        else:
+            return IaFRefCell(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_refract(self): return self.refract
+    def set_refract(self, refract): self.refract = refract
+    def validate_Nml2Quantity_time(self, value):
+        # Validate type Nml2Quantity_time, a restriction on xs:string.
+        pass
+    def hasContent_(self):
+        if (
+            super(IaFRefCell, self).hasContent_()
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespace_='', name_='IaFRefCell', namespacedef_='', pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='IaFRefCell')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespace_, name_, pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='IaFRefCell'):
+        super(IaFRefCell, self).exportAttributes(outfile, level, already_processed, namespace_, name_='IaFRefCell')
+        if self.refract is not None and 'refract' not in already_processed:
+            already_processed.add('refract')
+            outfile.write(' refract=%s' % (quote_attrib(self.refract), ))
+    def exportChildren(self, outfile, level, namespace_='', name_='IaFRefCell', fromsubclass_=False, pretty_print=True):
+        super(IaFRefCell, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
+    def exportLiteral(self, outfile, level, name_='IaFRefCell'):
+        level += 1
+        already_processed = set()
+        self.exportLiteralAttributes(outfile, level, already_processed, name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
+        if self.refract is not None and 'refract' not in already_processed:
+            already_processed.add('refract')
+            showIndent(outfile, level)
+            outfile.write('refract="%s",\n' % (self.refract,))
+        super(IaFRefCell, self).exportLiteralAttributes(outfile, level, already_processed, name_)
+    def exportLiteralChildren(self, outfile, level, name_):
+        super(IaFRefCell, self).exportLiteralChildren(outfile, level, name_)
+    def build(self, node):
+        already_processed = set()
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_)
+    def buildAttributes(self, node, attrs, already_processed):
+        value = find_attr_value_('refract', node)
+        if value is not None and 'refract' not in already_processed:
+            already_processed.add('refract')
+            self.refract = value
+            self.validate_Nml2Quantity_time(self.refract)    # validate type Nml2Quantity_time
+        super(IaFRefCell, self).buildAttributes(node, attrs, already_processed)
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
+        super(IaFRefCell, self).buildChildren(child_, node, nodeName_, True)
+        pass
+# end class IaFRefCell
+
+
+class IaFTauRefCell(IaFTauCell):
+    subclass = None
+    superclass = IaFTauCell
+    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, reset=None, tau=None, thresh=None, leakReversal=None, refract=None):
+        super(IaFTauRefCell, self).__init__(id, neuroLexId, name, metaid, notes, annotation, reset, tau, thresh, leakReversal, )
+        self.refract = _cast(None, refract)
+        pass
+    def factory(*args_, **kwargs_):
+        if IaFTauRefCell.subclass:
+            return IaFTauRefCell.subclass(*args_, **kwargs_)
+        else:
+            return IaFTauRefCell(*args_, **kwargs_)
+    factory = staticmethod(factory)
+    def get_refract(self): return self.refract
+    def set_refract(self, refract): self.refract = refract
+    def validate_Nml2Quantity_time(self, value):
+        # Validate type Nml2Quantity_time, a restriction on xs:string.
+        pass
+    def hasContent_(self):
+        if (
+            super(IaFTauRefCell, self).hasContent_()
+        ):
+            return True
+        else:
+            return False
+    def export(self, outfile, level, namespace_='', name_='IaFTauRefCell', namespacedef_='', pretty_print=True):
+        if pretty_print:
+            eol_ = '\n'
+        else:
+            eol_ = ''
+        showIndent(outfile, level, pretty_print)
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        already_processed = set()
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='IaFTauRefCell')
+        if self.hasContent_():
+            outfile.write('>%s' % (eol_, ))
+            self.exportChildren(outfile, level + 1, namespace_, name_, pretty_print=pretty_print)
+            showIndent(outfile, level, pretty_print)
+            outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
+        else:
+            outfile.write('/>%s' % (eol_, ))
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='IaFTauRefCell'):
+        super(IaFTauRefCell, self).exportAttributes(outfile, level, already_processed, namespace_, name_='IaFTauRefCell')
+        if self.refract is not None and 'refract' not in already_processed:
+            already_processed.add('refract')
+            outfile.write(' refract=%s' % (quote_attrib(self.refract), ))
+    def exportChildren(self, outfile, level, namespace_='', name_='IaFTauRefCell', fromsubclass_=False, pretty_print=True):
+        super(IaFTauRefCell, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
+    def exportLiteral(self, outfile, level, name_='IaFTauRefCell'):
+        level += 1
+        already_processed = set()
+        self.exportLiteralAttributes(outfile, level, already_processed, name_)
+        if self.hasContent_():
+            self.exportLiteralChildren(outfile, level, name_)
+    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
+        if self.refract is not None and 'refract' not in already_processed:
+            already_processed.add('refract')
+            showIndent(outfile, level)
+            outfile.write('refract="%s",\n' % (self.refract,))
+        super(IaFTauRefCell, self).exportLiteralAttributes(outfile, level, already_processed, name_)
+    def exportLiteralChildren(self, outfile, level, name_):
+        super(IaFTauRefCell, self).exportLiteralChildren(outfile, level, name_)
+    def build(self, node):
+        already_processed = set()
+        self.buildAttributes(node, node.attrib, already_processed)
+        for child in node:
+            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
+            self.buildChildren(child, node, nodeName_)
+    def buildAttributes(self, node, attrs, already_processed):
+        value = find_attr_value_('refract', node)
+        if value is not None and 'refract' not in already_processed:
+            already_processed.add('refract')
+            self.refract = value
+            self.validate_Nml2Quantity_time(self.refract)    # validate type Nml2Quantity_time
+        super(IaFTauRefCell, self).buildAttributes(node, attrs, already_processed)
+    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
+        super(IaFTauRefCell, self).buildChildren(child_, node, nodeName_, True)
+        pass
+# end class IaFTauRefCell
+
+
 class ExpTwoSynapse(BaseConductanceBasedSynapse):
     subclass = None
     superclass = BaseConductanceBasedSynapse
@@ -12162,13 +13125,11 @@ class ExpTwoSynapse(BaseConductanceBasedSynapse):
     factory = staticmethod(factory)
     def get_tauDecay(self): return self.tauDecay
     def set_tauDecay(self, tauDecay): self.tauDecay = tauDecay
-    tauDecayProp = property(get_tauDecay, set_tauDecay)
     def validate_Nml2Quantity_time(self, value):
         # Validate type Nml2Quantity_time, a restriction on xs:string.
         pass
     def get_tauRise(self): return self.tauRise
     def set_tauRise(self, tauRise): self.tauRise = tauRise
-    tauRiseProp = property(get_tauRise, set_tauRise)
     def get_extensiontype_(self): return self.extensiontype_
     def set_extensiontype_(self, extensiontype_): self.extensiontype_ = extensiontype_
     def hasContent_(self):
@@ -12269,7 +13230,6 @@ class ExpOneSynapse(BaseConductanceBasedSynapse):
     factory = staticmethod(factory)
     def get_tauDecay(self): return self.tauDecay
     def set_tauDecay(self, tauDecay): self.tauDecay = tauDecay
-    tauDecayProp = property(get_tauDecay, set_tauDecay)
     def validate_Nml2Quantity_time(self, value):
         # Validate type Nml2Quantity_time, a restriction on xs:string.
         pass
@@ -12478,10 +13438,8 @@ class basePyNNIaFCondCell(basePyNNIaFCell):
     factory = staticmethod(factory)
     def get_e_rev_I(self): return self.e_rev_I
     def set_e_rev_I(self, e_rev_I): self.e_rev_I = e_rev_I
-    e_rev_IProp = property(get_e_rev_I, set_e_rev_I)
     def get_e_rev_E(self): return self.e_rev_E
     def set_e_rev_E(self, e_rev_E): self.e_rev_E = e_rev_E
-    e_rev_EProp = property(get_e_rev_E, set_e_rev_E)
     def get_extensiontype_(self): return self.extensiontype_
     def set_extensiontype_(self, extensiontype_): self.extensiontype_ = extensiontype_
     def hasContent_(self):
@@ -12571,30 +13529,33 @@ class basePyNNIaFCondCell(basePyNNIaFCell):
 # end class basePyNNIaFCondCell
 
 
-class StpSynapse(ExpTwoSynapse):
+class BlockingPlasticSynapse(ExpTwoSynapse):
     subclass = None
     superclass = ExpTwoSynapse
-    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, erev=None, gbase=None, tauDecay=None, tauRise=None, stpMechanism=None):
-        super(StpSynapse, self).__init__(id, neuroLexId, name, metaid, notes, annotation, erev, gbase, tauDecay, tauRise, )
-        self.stpMechanism = stpMechanism
+    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, erev=None, gbase=None, tauDecay=None, tauRise=None, plasticityMechanism=None, blockMechanism=None):
+        super(BlockingPlasticSynapse, self).__init__(id, neuroLexId, name, metaid, notes, annotation, erev, gbase, tauDecay, tauRise, )
+        self.plasticityMechanism = plasticityMechanism
+        self.blockMechanism = blockMechanism
     def factory(*args_, **kwargs_):
-        if StpSynapse.subclass:
-            return StpSynapse.subclass(*args_, **kwargs_)
+        if BlockingPlasticSynapse.subclass:
+            return BlockingPlasticSynapse.subclass(*args_, **kwargs_)
         else:
-            return StpSynapse(*args_, **kwargs_)
+            return BlockingPlasticSynapse(*args_, **kwargs_)
     factory = staticmethod(factory)
-    def get_stpMechanism(self): return self.stpMechanism
-    def set_stpMechanism(self, stpMechanism): self.stpMechanism = stpMechanism
-    stpMechanismProp = property(get_stpMechanism, set_stpMechanism)
+    def get_plasticityMechanism(self): return self.plasticityMechanism
+    def set_plasticityMechanism(self, plasticityMechanism): self.plasticityMechanism = plasticityMechanism
+    def get_blockMechanism(self): return self.blockMechanism
+    def set_blockMechanism(self, blockMechanism): self.blockMechanism = blockMechanism
     def hasContent_(self):
         if (
-            self.stpMechanism is not None or
-            super(StpSynapse, self).hasContent_()
+            self.plasticityMechanism is not None or
+            self.blockMechanism is not None or
+            super(BlockingPlasticSynapse, self).hasContent_()
         ):
             return True
         else:
             return False
-    def export(self, outfile, level, namespace_='', name_='StpSynapse', namespacedef_='', pretty_print=True):
+    def export(self, outfile, level, namespace_='', name_='BlockingPlasticSynapse', namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
         else:
@@ -12602,7 +13563,7 @@ class StpSynapse(ExpTwoSynapse):
         showIndent(outfile, level, pretty_print)
         outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
         already_processed = set()
-        self.exportAttributes(outfile, level, already_processed, namespace_, name_='StpSynapse')
+        self.exportAttributes(outfile, level, already_processed, namespace_, name_='BlockingPlasticSynapse')
         if self.hasContent_():
             outfile.write('>%s' % (eol_, ))
             self.exportChildren(outfile, level + 1, namespace_, name_, pretty_print=pretty_print)
@@ -12610,30 +13571,38 @@ class StpSynapse(ExpTwoSynapse):
             outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
         else:
             outfile.write('/>%s' % (eol_, ))
-    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='StpSynapse'):
-        super(StpSynapse, self).exportAttributes(outfile, level, already_processed, namespace_, name_='StpSynapse')
-    def exportChildren(self, outfile, level, namespace_='', name_='StpSynapse', fromsubclass_=False, pretty_print=True):
-        super(StpSynapse, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
+    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='BlockingPlasticSynapse'):
+        super(BlockingPlasticSynapse, self).exportAttributes(outfile, level, already_processed, namespace_, name_='BlockingPlasticSynapse')
+    def exportChildren(self, outfile, level, namespace_='', name_='BlockingPlasticSynapse', fromsubclass_=False, pretty_print=True):
+        super(BlockingPlasticSynapse, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
         if pretty_print:
             eol_ = '\n'
         else:
             eol_ = ''
-        if self.stpMechanism is not None:
-            self.stpMechanism.export(outfile, level, namespace_, name_='stpMechanism', pretty_print=pretty_print)
-    def exportLiteral(self, outfile, level, name_='StpSynapse'):
+        if self.plasticityMechanism is not None:
+            self.plasticityMechanism.export(outfile, level, namespace_, name_='plasticityMechanism', pretty_print=pretty_print)
+        if self.blockMechanism is not None:
+            self.blockMechanism.export(outfile, level, namespace_, name_='blockMechanism', pretty_print=pretty_print)
+    def exportLiteral(self, outfile, level, name_='BlockingPlasticSynapse'):
         level += 1
         already_processed = set()
         self.exportLiteralAttributes(outfile, level, already_processed, name_)
         if self.hasContent_():
             self.exportLiteralChildren(outfile, level, name_)
     def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        super(StpSynapse, self).exportLiteralAttributes(outfile, level, already_processed, name_)
+        super(BlockingPlasticSynapse, self).exportLiteralAttributes(outfile, level, already_processed, name_)
     def exportLiteralChildren(self, outfile, level, name_):
-        super(StpSynapse, self).exportLiteralChildren(outfile, level, name_)
-        if self.stpMechanism is not None:
+        super(BlockingPlasticSynapse, self).exportLiteralChildren(outfile, level, name_)
+        if self.plasticityMechanism is not None:
             showIndent(outfile, level)
-            outfile.write('stpMechanism=model_.StpMechanism(\n')
-            self.stpMechanism.exportLiteral(outfile, level, name_='stpMechanism')
+            outfile.write('plasticityMechanism=model_.PlasticityMechanism(\n')
+            self.plasticityMechanism.exportLiteral(outfile, level, name_='plasticityMechanism')
+            showIndent(outfile, level)
+            outfile.write('),\n')
+        if self.blockMechanism is not None:
+            showIndent(outfile, level)
+            outfile.write('blockMechanism=model_.BlockMechanism(\n')
+            self.blockMechanism.exportLiteral(outfile, level, name_='blockMechanism')
             showIndent(outfile, level)
             outfile.write('),\n')
     def build(self, node):
@@ -12643,96 +13612,18 @@ class StpSynapse(ExpTwoSynapse):
             nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
             self.buildChildren(child, node, nodeName_)
     def buildAttributes(self, node, attrs, already_processed):
-        super(StpSynapse, self).buildAttributes(node, attrs, already_processed)
+        super(BlockingPlasticSynapse, self).buildAttributes(node, attrs, already_processed)
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
-        if nodeName_ == 'stpMechanism':
-            obj_ = StpMechanism.factory()
+        if nodeName_ == 'plasticityMechanism':
+            obj_ = PlasticityMechanism.factory()
             obj_.build(child_)
-            self.set_stpMechanism(obj_)
-        super(StpSynapse, self).buildChildren(child_, node, nodeName_, True)
-# end class StpSynapse
-
-
-class NmdaSynapse(ExpTwoSynapse):
-    subclass = None
-    superclass = ExpTwoSynapse
-    def __init__(self, id=None, neuroLexId=None, name=None, metaid=None, notes=None, annotation=None, erev=None, gbase=None, tauDecay=None, tauRise=None, voltageConcDepBlock=None):
-        super(NmdaSynapse, self).__init__(id, neuroLexId, name, metaid, notes, annotation, erev, gbase, tauDecay, tauRise, )
-        self.voltageConcDepBlock = voltageConcDepBlock
-    def factory(*args_, **kwargs_):
-        if NmdaSynapse.subclass:
-            return NmdaSynapse.subclass(*args_, **kwargs_)
-        else:
-            return NmdaSynapse(*args_, **kwargs_)
-    factory = staticmethod(factory)
-    def get_voltageConcDepBlock(self): return self.voltageConcDepBlock
-    def set_voltageConcDepBlock(self, voltageConcDepBlock): self.voltageConcDepBlock = voltageConcDepBlock
-    voltageConcDepBlockProp = property(get_voltageConcDepBlock, set_voltageConcDepBlock)
-    def hasContent_(self):
-        if (
-            self.voltageConcDepBlock is not None or
-            super(NmdaSynapse, self).hasContent_()
-        ):
-            return True
-        else:
-            return False
-    def export(self, outfile, level, namespace_='', name_='NmdaSynapse', namespacedef_='', pretty_print=True):
-        if pretty_print:
-            eol_ = '\n'
-        else:
-            eol_ = ''
-        showIndent(outfile, level, pretty_print)
-        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
-        already_processed = set()
-        self.exportAttributes(outfile, level, already_processed, namespace_, name_='NmdaSynapse')
-        if self.hasContent_():
-            outfile.write('>%s' % (eol_, ))
-            self.exportChildren(outfile, level + 1, namespace_, name_, pretty_print=pretty_print)
-            showIndent(outfile, level, pretty_print)
-            outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
-        else:
-            outfile.write('/>%s' % (eol_, ))
-    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='NmdaSynapse'):
-        super(NmdaSynapse, self).exportAttributes(outfile, level, already_processed, namespace_, name_='NmdaSynapse')
-    def exportChildren(self, outfile, level, namespace_='', name_='NmdaSynapse', fromsubclass_=False, pretty_print=True):
-        super(NmdaSynapse, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
-        if pretty_print:
-            eol_ = '\n'
-        else:
-            eol_ = ''
-        if self.voltageConcDepBlock is not None:
-            self.voltageConcDepBlock.export(outfile, level, namespace_, name_='voltageConcDepBlock', pretty_print=pretty_print)
-    def exportLiteral(self, outfile, level, name_='NmdaSynapse'):
-        level += 1
-        already_processed = set()
-        self.exportLiteralAttributes(outfile, level, already_processed, name_)
-        if self.hasContent_():
-            self.exportLiteralChildren(outfile, level, name_)
-    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        super(NmdaSynapse, self).exportLiteralAttributes(outfile, level, already_processed, name_)
-    def exportLiteralChildren(self, outfile, level, name_):
-        super(NmdaSynapse, self).exportLiteralChildren(outfile, level, name_)
-        if self.voltageConcDepBlock is not None:
-            showIndent(outfile, level)
-            outfile.write('voltageConcDepBlock=model_.VoltageConcDepBlock(\n')
-            self.voltageConcDepBlock.exportLiteral(outfile, level, name_='voltageConcDepBlock')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-    def build(self, node):
-        already_processed = set()
-        self.buildAttributes(node, node.attrib, already_processed)
-        for child in node:
-            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
-            self.buildChildren(child, node, nodeName_)
-    def buildAttributes(self, node, attrs, already_processed):
-        super(NmdaSynapse, self).buildAttributes(node, attrs, already_processed)
-    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
-        if nodeName_ == 'voltageConcDepBlock':
-            obj_ = VoltageConcDepBlock.factory()
+            self.set_plasticityMechanism(obj_)
+        elif nodeName_ == 'blockMechanism':
+            obj_ = BlockMechanism.factory()
             obj_.build(child_)
-            self.set_voltageConcDepBlock(obj_)
-        super(NmdaSynapse, self).buildChildren(child_, node, nodeName_, True)
-# end class NmdaSynapse
+            self.set_blockMechanism(obj_)
+        super(BlockingPlasticSynapse, self).buildChildren(child_, node, nodeName_, True)
+# end class BlockingPlasticSynapse
 
 
 class EIF_cond_alpha_isfa_ista(basePyNNIaFCondCell):
@@ -12754,19 +13645,14 @@ class EIF_cond_alpha_isfa_ista(basePyNNIaFCondCell):
     factory = staticmethod(factory)
     def get_a(self): return self.a
     def set_a(self, a): self.a = a
-    aProp = property(get_a, set_a)
     def get_delta_T(self): return self.delta_T
     def set_delta_T(self, delta_T): self.delta_T = delta_T
-    delta_TProp = property(get_delta_T, set_delta_T)
     def get_b(self): return self.b
     def set_b(self, b): self.b = b
-    bProp = property(get_b, set_b)
     def get_v_spike(self): return self.v_spike
     def set_v_spike(self, v_spike): self.v_spike = v_spike
-    v_spikeProp = property(get_v_spike, set_v_spike)
     def get_tau_w(self): return self.tau_w
     def set_tau_w(self, tau_w): self.tau_w = tau_w
-    tau_wProp = property(get_tau_w, set_tau_w)
     def hasContent_(self):
         if (
             super(EIF_cond_alpha_isfa_ista, self).hasContent_()
@@ -12907,19 +13793,14 @@ class EIF_cond_exp_isfa_ista(basePyNNIaFCondCell):
     factory = staticmethod(factory)
     def get_a(self): return self.a
     def set_a(self, a): self.a = a
-    aProp = property(get_a, set_a)
     def get_delta_T(self): return self.delta_T
     def set_delta_T(self, delta_T): self.delta_T = delta_T
-    delta_TProp = property(get_delta_T, set_delta_T)
     def get_b(self): return self.b
     def set_b(self, b): self.b = b
-    bProp = property(get_b, set_b)
     def get_v_spike(self): return self.v_spike
     def set_v_spike(self, v_spike): self.v_spike = v_spike
-    v_spikeProp = property(get_v_spike, set_v_spike)
     def get_tau_w(self): return self.tau_w
     def set_tau_w(self, tau_w): self.tau_w = tau_w
-    tau_wProp = property(get_tau_w, set_tau_w)
     def hasContent_(self):
         if (
             super(EIF_cond_exp_isfa_ista, self).hasContent_()
@@ -13171,7 +14052,7 @@ GDSClassesMapping = {
     'intracellularProperties': IntracellularProperties,
     'inhomogeneousParam': InhomogeneousParam,
     'q10Settings': Q10Settings,
-    'from': SegmentEndPoint,
+    'spikeGenerator': SpikeGenerator,
     'distal': DistalDetails,
     'random': RandomLayout,
     'variableParameter': VariableParameter,
@@ -13187,23 +14068,27 @@ GDSClassesMapping = {
     'path': Path,
     'morphology': Morphology,
     'iafCell': IaFCell,
+    'iafTauRefCell': IaFTauRefCell,
     'species': Species,
     'resistivity': ValueAcrossSegOrSegGroup,
     'member': Member,
     'inhomogeneousValue': InhomogeneousValue,
-    'voltageConcDepBlock': VoltageConcDepBlock,
+    'spikeGeneratorRandom': SpikeGeneratorRandom,
+    'sineGenerator': SineGenerator,
     'expCondSynapse': ExpCondSynapse,
     'network': Network,
     'reverseRate': HHRate,
     'decayingPoolConcentrationModel': DecayingPoolConcentrationModel,
     'segment': Segment,
+    'rampGenerator': RampGenerator,
     'cellSet': CellSet,
-    'annotation': Annotation,
+    'gateHHrates': GateHHRates,
     'cell': Cell,
     'to': SegmentEndPoint,
-    'stpSynapse': StpSynapse,
-    'layout': Layout,
+    'voltageClamp': VoltageClamp,
+    'initMembPotential': ValueAcrossSegOrSegGroup,
     'projection': Projection,
+    'spike': Spike,
     'gate': GateHHUndetermined,
     'steadyState': HHVariable,
     'include': Include,
@@ -13211,25 +14096,28 @@ GDSClassesMapping = {
     'location': Location,
     'synapticConnection': SynapticConnection,
     'neuroml': NeuroMLDocument,
+    'from': SegmentEndPoint,
+    'blockMechanism': BlockMechanism,
     'gateHHratesInf': GateHHRatesInf,
     'parent': SegmentParent,
-    'initMembPotential': ValueAcrossSegOrSegGroup,
+    'plasticityMechanism': PlasticityMechanism,
+    'spikeThresh': ValueAcrossSegOrSegGroup,
+    'annotation': Annotation,
     'instance': Instance,
     'adExIaFCell': AdExIaFCell,
     'grid': GridLayout,
     'alphaCondSynapse': AlphaCondSynapse,
     'izhikevichCell': IzhikevichCell,
-    'structure': SpaceStructure,
     'input': Input,
     'iafTauCell': IaFTauCell,
     'segmentGroup': SegmentGroup,
     'expTwoSynapse': ExpTwoSynapse,
     'pulseGenerator': PulseGenerator,
-    'gateHHrates': GateHHRates,
-    'stpMechanism': StpMechanism,
-    'spikeThresh': ValueAcrossSegOrSegGroup,
+    'iafRefCell': IaFRefCell,
+    'structure': SpaceStructure,
+    'spikeArray': SpikeArray,
     'unstructured': UnstructuredLayout,
-    'nmdaSynapse': NmdaSynapse,
+    'blockingPlasticSynapse': BlockingPlasticSynapse,
     'reversalPotential': ReversalPotential,
     'channelPopulation': ChannelPopulation,
     'alphaCurrSynapse': AlphaCurrSynapse,
@@ -13241,8 +14129,10 @@ GDSClassesMapping = {
     'explicitInput': ExplicitInput,
     'extracellularProperties': ExtracellularPropertiesLocal,
     'connection': Connection,
+    'spikeGeneratorPoisson': SpikeGeneratorPoisson,
     'channelDensity': ChannelDensity,
     'expOneSynapse': ExpOneSynapse,
+    'layout': Layout,
     'baseCell': BaseCell,
 }
 
@@ -13276,11 +14166,11 @@ def parse(inFileName):
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
-    sys.stdout.write('<?xml version="1.0" ?>\n')
-    rootObj.export(
-        sys.stdout, 0, name_=rootTag,
-        namespacedef_='',
-        pretty_print=True)
+##     sys.stdout.write('<?xml version="1.0" ?>\n')
+##     rootObj.export(
+##         sys.stdout, 0, name_=rootTag,
+##         namespacedef_='',
+##         pretty_print=True)
     return rootObj
 
 
@@ -13298,11 +14188,11 @@ def parseEtree(inFileName):
     mapping = {}
     rootElement = rootObj.to_etree(None, name_=rootTag, mapping_=mapping)
     reverse_mapping = rootObj.gds_reverse_node_mapping(mapping)
-    content = etree_.tostring(
-        rootElement, pretty_print=True,
-        xml_declaration=True, encoding="utf-8")
-    sys.stdout.write(content)
-    sys.stdout.write('\n')
+##     content = etree_.tostring(
+##         rootElement, pretty_print=True,
+##         xml_declaration=True, encoding="utf-8")
+##     sys.stdout.write(content)
+##     sys.stdout.write('\n')
     return rootObj, rootElement, mapping, reverse_mapping
 
 
@@ -13318,10 +14208,10 @@ def parseString(inString):
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
-    sys.stdout.write('<?xml version="1.0" ?>\n')
-    rootObj.export(
-        sys.stdout, 0, name_="Annotation",
-        namespacedef_='')
+##     sys.stdout.write('<?xml version="1.0" ?>\n')
+##     rootObj.export(
+##         sys.stdout, 0, name_="Annotation",
+##         namespacedef_='')
     return rootObj
 
 
@@ -13336,11 +14226,11 @@ def parseLiteral(inFileName):
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
     doc = None
-    sys.stdout.write('#from generated_neuroml import *\n\n')
-    sys.stdout.write('import generated_neuroml as model_\n\n')
-    sys.stdout.write('rootObj = model_.rootTag(\n')
-    rootObj.exportLiteral(sys.stdout, 0, name_=rootTag)
-    sys.stdout.write(')\n')
+##     sys.stdout.write('#from generated_neuroml import *\n\n')
+##     sys.stdout.write('import generated_neuroml as model_\n\n')
+##     sys.stdout.write('rootObj = model_.rootTag(\n')
+##     rootObj.exportLiteral(sys.stdout, 0, name_=rootTag)
+##     sys.stdout.write(')\n')
     return rootObj
 
 
@@ -13368,6 +14258,8 @@ __all__ = [
     "BasePynnSynapse",
     "BaseSynapse",
     "BiophysicalProperties",
+    "BlockMechanism",
+    "BlockingPlasticSynapse",
     "Cell",
     "CellSet",
     "ChannelDensity",
@@ -13401,7 +14293,9 @@ __all__ = [
     "IF_curr_alpha",
     "IF_curr_exp",
     "IaFCell",
+    "IaFRefCell",
     "IaFTauCell",
+    "IaFTauRefCell",
     "Include",
     "IncludeType",
     "InhomogeneousParam",
@@ -13419,14 +14313,15 @@ __all__ = [
     "Morphology",
     "Network",
     "NeuroMLDocument",
-    "NmdaSynapse",
     "Path",
+    "PlasticityMechanism",
     "Point3DWithDiam",
     "Population",
     "Projection",
     "ProximalDetails",
     "PulseGenerator",
     "Q10Settings",
+    "RampGenerator",
     "RandomLayout",
     "ReactionScheme",
     "Region",
@@ -13435,19 +14330,23 @@ __all__ = [
     "SegmentEndPoint",
     "SegmentGroup",
     "SegmentParent",
+    "SineGenerator",
     "Space",
     "SpaceStructure",
     "Species",
+    "Spike",
+    "SpikeArray",
+    "SpikeGenerator",
+    "SpikeGeneratorPoisson",
+    "SpikeGeneratorRandom",
     "SpikeSourcePoisson",
     "Standalone",
-    "StpMechanism",
-    "StpSynapse",
     "SubTree",
     "SynapticConnection",
     "UnstructuredLayout",
     "ValueAcrossSegOrSegGroup",
     "VariableParameter",
-    "VoltageConcDepBlock",
+    "VoltageClamp",
     "basePyNNCell",
     "basePyNNIaFCell",
     "basePyNNIaFCondCell"
