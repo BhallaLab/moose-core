@@ -51,11 +51,15 @@ TODO: handle include statements (start with simple ion channel
 prototype includes.
 
 """
-
+import sys, os
+from itertools import izip
+from urllib2 import urlopen
 import numpy as np
 import moose
 import generated_neuroml as nml
 from units import SI
+import hhfit
+
 
 def sarea(comp):
     """Calculate the surface area of compartment from length and
@@ -94,7 +98,17 @@ def getSegments(nmlcell, component, sg_to_segments):
     else:
         segments = sg_to_segments[sg]
     return segments
+
+rate_fn_map = {
+    'HHExpRate': hhfit.exponential,
+    'HHSigmoidRate': hhfit.sigmoid,
+    'HHExpLinearRate': hhfit.linoid }
     
+def calculateRateFn(ratefn, vmin, vmax, tablen=3000):
+    """Returns A / B table from ngate."""
+    midpoint, rate, scale = map(SI, (ratefn.midpoint, ratefn.rate, ratefn.scale))
+    tab = np.linspace(vmin, vmax, tablen)
+    return rate_fn_map[ratefn.type_](tab, rate, scale, midpoint)
 
 class NML2Reader(object):
     """Reads NeuroML2 and creates MOOSE model"""
@@ -113,6 +127,8 @@ class NML2Reader(object):
     def read(self, filename):
         self.doc = nml.parse(filename)
         self.filename = filename
+        self.importIncludes(self.doc)
+        self.importIonChannels(self.doc)
         for cell in self.doc.cell:
             self.createCellPrototype(cell)
 
@@ -220,12 +236,12 @@ class NML2Reader(object):
                 comp = self.nml_to_moose[seg]
                 setRa(comp, SI(r.value))                    
 
-    def importChannels(self, nmlcell, moosecell, membraneProperties):
+    def importChannelsToCell(self, nmlcell, moosecell, membraneProperties):
         sg_to_segments = self._cell_to_sg[nmlcell]
         for chdens in membraneProperties.channelDensity:
             segments = get_segments(nmlcell, chdens, sg_to_segments)
             condDensity = SI(chdens.condDensity)
-            if self.id_to_ionChannel[chdens.ionChannel].type == 'ionChannelPassive':
+            if self.id_to_ionChannel[chdens.ionChannel].type_ == 'ionChannelPassive':
                 for seg in segments:
                     self.setRm(self.nml_to_moose[seg], condDensity)
             else:
@@ -254,10 +270,69 @@ class NML2Reader(object):
 
     def importIncludes(self, doc):
         for include in doc.include:
-            url = urlopen(include.href)
+            error = None
             inner = NML2Reader()
-            inner.read(url)
-            self.includes[include.href] = inner
+            paths = [include.href, os.path.join(os.path.dirname(self.filename), include.href)]
+            for path in paths:
+                try:
+                    inner.read(path)                    
+                except IOError, e:
+                    error = e
+                else:
+                    self.includes[include.href] = inner
+                    error = None
+                    break
+            if error:
+                print 'Last exception:', error
+                raise IOError('Could not read any of the locations: %s' % (paths))
+
+    def importIonChannels(self, doc, vmin=-120e-3, vmax=40e-3, vdivs=3000):
+        for chan in doc.ionChannel:
+            # print dir(chan)
+            if chan.type_ == 'ionChannelHH':
+                mchan = moose.HHChannel('%s/%s' % (self.lib.path, chan.id))
+                mgates = map(moose.element, (mchan.gateX.path, mchan.gateY.path, mchan.gateZ.path))
+                assert(len(chan.gate) <= 3) # We handle only up to 3 gates in HHCHannel
+                for ngate, mgate in izip(chan.gate, mgates):
+                    if mgate.name.endswith('X'):
+                        mchan.Xpower = ngate.instances
+                    elif mgate.name.endswith('Y'):
+                        mchan.Ypower = ngate.instances
+                    elif mgate.name.endswith('Z'):
+                        mchan.Zpower = ngate.instance
+                    mgate.min = vmin
+                    mgate.max = vmax
+                    mgate.divs = vdivs
+                    
+                    # I saw only examples of GateHHRates in
+                    # HH-channels, the meaning of forwardRate and
+                    # reverseRate and steadyState are not clear in the
+                    # classes GateHHRatesInf, GateHHRatesTau and in
+                    # FateHHTauInf the meaning of timeCourse and
+                    # steady state is not obvious. Is the last one
+                    # refering to tau_inf and m_inf??
+                    fwd = ngate.forwardRate
+                    rev = ngate.reverseRate
+                    if (fwd is not None) and (rev is not None):
+                        beta = calculateRateFn(fwd, vmin, vmax, vdivs)
+                        alpha = calculateRateFn(rev, vmin, vmax, vdivs)
+                        mgate.tableA = alpha
+                        mgate.tableB = alpha + beta
+                        break
+                    # Assuming the meaning of the elements in GateHHTauInf ...
+                    tau = ngate.timeCourse
+                    inf = ngate.steadyState
+                    if (tau is not None) and (inf is not None):
+                        tau = calculateRateFn(tau, vmin, vmax, vdivs)
+                        inf = calculateRateFn(inf, vmin, vmax, vdivs)
+                        mgate.tableA = inf / tau
+                        mgate.tableB = 1 / tau
+                        break
+                    
+    
+        
+        
+                    
             
 
 # 
