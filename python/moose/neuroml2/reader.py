@@ -44,7 +44,13 @@
 # 
 
 # Code:
-"""Implementation of reader for NeuroML 2 models"""
+"""Implementation of reader for NeuroML 2 models.
+
+
+TODO: handle include statements (start with simple ion channel
+prototype includes.
+
+"""
 
 import numpy as np
 import moose
@@ -100,16 +106,18 @@ class NML2Reader(object):
         self.moose_to_nml = {} # Moose object to NeuroML object
         self.proto_cells = {} # map id to prototype cell in moose
         self.proto_chans = {} # map id to prototype channels in moose
+        self.includes = {} # Included files mapped to other readers
         self.lib = moose.Neutral('/library')
         self._cell_to_sg = {} # nml cell to dict - the dict maps segment groups to segments
         
     def read(self, filename):
         self.doc = nml.parse(filename)
         self.filename = filename
+        for cell in self.doc.cell:
+            self.createCellPrototype(cell)
 
-    def createCellPrototype(self, index, symmetric=False):
+    def createCellPrototype(self, cell, symmetric=False):
         """To be completed - create the morphology, channels in prototype"""
-        cell = self.doc.cell[index]
         nrn = moose.Neuron('%s/%s' % (self.lib.path, cell.id))
         self.proto_cells[cell.id] = nrn
         self.nml_to_moose[cell] = nrn
@@ -182,12 +190,14 @@ class NML2Reader(object):
         """Create the biophysical components in moose Neuron `moosecell`
         according to NeuroML2 cell `nmlcell`."""
         bp = nmlcell.biophysicalProperties
-        self.importMembraneProperties(nmlcell, moosecell)
+        if bp is None:
+            print 'Warning: %s in %s has no biophysical properties' % (nmlcell.id, self.filename)
+            return
+        self.importMembraneProperties(nmlcell, moosecell, bp.membraneProperties)
         # self.createIntracellularProperties(nmlcell, moosecell)
 
-    def importMembraneProperties(self, nmlcell, moosecell):
+    def importMembraneProperties(self, nmlcell, moosecell, mp):
         """Create the membrane properties from nmlcell in moosecell"""
-        mp = nmlcell.biophysicalProperties.membraneProperties
         self.importCapacitances(nmlcell, moosecell, mp.specificCapacitance)
 
     def importCapacitances(self, nmlcell, moosecell, specificCapacitances):
@@ -227,13 +237,28 @@ class NML2Reader(object):
         compartment.
 
         """
-        proto_chan = self.proto_chans[chdens.ionChannel]
+        proto_chan = None
+        if chdens.ionChannel in self.proto_chans:
+            proto_chan = self.proto_chans[chdens.ionChannel]
+        else:
+            for innerReader in self.includes.values():
+                if chdens.ionChannel in innerReader.proto_chans:
+                    proto_chan = innerReader[chdens.ionChannel]
+                    break
+        if not proto_chan:
+            raise Exception('No prototype channel for %s referred to by %s' % (chdens.ionChannel, chdens.id))
         chid = moose.copy(proto_chan, comp)
         chan = moose.element(chid)
         chan.Gbar = sarea(comp) * condDensity
         moose.connect(chan, 'channel', comp, 'channel')
 
-
+    def importIncludes(self, doc):
+        for include in doc.include:
+            url = urlopen(include.href)
+            inner = NML2Reader()
+            inner.read(url)
+            self.includes[include.href] = inner
+            
 
 # 
 # reader.py ends here
