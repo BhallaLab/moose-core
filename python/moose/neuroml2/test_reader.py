@@ -53,20 +53,16 @@ class TestReader(unittest.TestCase):
     def setUp(self):
         self.reader = NML2Reader()
         self.lib = moose.Neutral('/library')
-        self.filename = 'test_files/Purk2M9s.nml'
+        self.filename = 'test_files/NML2_FullCell.nml'
         self.reader.read(self.filename)
+        for ncell, mcell in self.reader.nml_to_moose.items():
+            if isinstance(mcell, moose.Neuron):
+                self.ncell, self.mcell = (ncell, mcell)
+                break
 
     def test_basic_loading(self):
         self.assertEqual(self.reader.filename, self.filename, 'filename was not set')
         self.assertIsNotNone(self.reader.doc, 'doc is None')
-
-class TestMorphologyReading(unittest.TestCase):
-    def setUp(self):
-        self.reader = NML2Reader()
-        self.lib = moose.Neutral('/library')
-        self.filename = 'test_files/NML2_FullCell.nml'
-        self.reader.read(self.filename)
-        self.ncell, self.mcell = self.reader.createCellPrototype(0, symmetric=False)
 
     def test_createCellPrototype(self):
         self.assertIsInstance(self.mcell, moose.Neuron)
@@ -103,6 +99,14 @@ class TestMorphologyReading(unittest.TestCase):
             comp = moose.element(comp_id)
             # We know that a few um^2 compartment with uF/cm^2 specific capacitance must be around a pico Farad.
             self.assertTrue((comp.Cm > 0) and (comp.Cm < 1e-6))
+
+    def test_protochans(self):
+        """TODO: verify the prototype cahnnel."""
+        pass
+    
+    def test_HHChannels(self):
+        """TODO verify copied channel in membrane properties."""
+        pass
 
 if __name__ == '__main__':
     unittest.main()
