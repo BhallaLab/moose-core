@@ -23,6 +23,7 @@
 #include "NeuroMesh.h"
 #include "SpineEntry.h"
 #include "../utility/numutil.h"
+#include "../shell/Wildcard.h"
 
 static SrcFinfo4< Id, vector< Id >, vector< Id >, vector< unsigned int > >* 
 	spineListOut()
@@ -418,6 +419,67 @@ Id NeuroMesh::putSomaAtStart( Id origSoma, unsigned int maxDiaIndex )
 	return soma;
 }
 
+void NeuroMesh::insertSingleDummy( 
+				unsigned int parent, unsigned int self,
+			   double x, double y, double z	)
+{
+	static const double EPSILON = 1e-8;
+	NeuroNode dummy( nodes_[ self ] );
+	dummy.clearChildren();
+	dummy.setNumDivs( 0 );
+	bool isCylinder = (geometryPolicy_ == "cylinder" );
+	dummy.setIsCylinder( isCylinder );
+	dummy.setX( x );
+	dummy.setY( y );
+	dummy.setZ( z );
+	// Now insert the dummy as a surrogate parent.
+	dummy.setParent( parent );
+	dummy.addChild( self );
+	nodes_[ self ].setParent( nodes_.size() );
+	// Idiot check for a bad dimensioned compartment.
+	if ( nodes_[self].calculateLength( dummy ) < EPSILON ) {
+		double length = nodes_[self].getLength();
+		dummy.setX( x - length );
+		double temp = nodes_[self].calculateLength( dummy );
+		assert( doubleEq( temp, length ) );
+	}
+	nodes_.push_back( dummy );
+}
+
+void NeuroMesh::insertDummyNodes()
+{
+	// First deal with the soma, always positioned at node 0.
+	Id elec = nodes_[0].elecCompt();
+	double x = Field< double >::get( elec, "x0" );
+	double y = Field< double >::get( elec, "y0" );
+	double z = Field< double >::get( elec, "z0" );
+	insertSingleDummy( ~0U, 0, x, y, z );
+
+	// Second pass: insert dummy nodes for children.
+	// Need to know if parent has multiple children, because each of
+	// them will need a dummyNode to connect to.
+	// In all the policies so far, the dummy nodes take the same diameter
+	// as the children that they host.
+	for ( unsigned int i = 0; i < nodes_.size(); ++i ) {
+		vector< unsigned int > kids = nodes_[i].children();
+		if ( (!nodes_[i].isDummyNode()) && kids.size() > 1 ) {
+			for( unsigned int j = 0; j < kids.size(); ++j ) {
+				x = nodes_[i].getX(); // use coords of parent.
+				y = nodes_[i].getY();
+				z = nodes_[i].getZ();
+				insertSingleDummy( i, kids[j], x, y, z );
+				// Replace the old kid entry with the dummy
+				kids[j] = nodes_.size() - 1; 
+			}
+			// Connect up the parent to the dummy nodes.
+			nodes_[i].clearChildren();
+			for( unsigned int j = 0; j < kids.size(); ++j )
+				nodes_[i].addChild( kids[j] );
+		}
+	}
+}
+
+/*
 void NeuroMesh::buildNodeTree( const map< Id, unsigned int >& comptMap )
 {
 	const double EPSILON = 1e-8;
@@ -494,6 +556,7 @@ void NeuroMesh::buildNodeTree( const map< Id, unsigned int >& comptMap )
 		}
 	}
 }
+*/
 
 bool NeuroMesh::filterSpines( Id compt )
 {
@@ -514,7 +577,8 @@ bool NeuroMesh::filterSpines( Id compt )
 void NeuroMesh::setCell( const Eref& e, const Qinfo* q, Id cell )
 {
 	double oldVol = getMeshEntrySize( 0 );
-	vector< Id > compts = Field< vector< Id > >::get( cell, "children");
+	vector< Id > compts;
+	wildcardFind( cell.path() + "/##", compts );
 	setCellPortion( cell, compts );
 	transmitChange( e, q, oldVol );
 	if ( separateSpines_ ) {
@@ -556,6 +620,10 @@ void NeuroMesh::setCell( const Eref& e, const Qinfo* q, Id cell )
 void NeuroMesh::setCellPortion( Id cell, vector< Id > portion )
 {
 		cell_ = cell;
+		NeuroNode::buildTree( nodes_, portion );
+		if ( separateSpines_ )
+			NeuroNode::filterSpines( nodes_, shaft_, head_, parent_ );
+		/*
 		vector< Id >& compts = portion;
 		map< Id, unsigned int > comptMap;
 
@@ -586,11 +654,44 @@ void NeuroMesh::setCellPortion( Id cell, vector< Id > portion )
 
 		// Assign parent and child compts to node entries.
 		buildNodeTree( comptMap );
+		*/
+		insertDummyNodes();
 
 		updateCoords();
 
 		if ( separateSpines_ )
+			updateShaftParents();
+
+	
+
+		/* Need to fill in: July 2013.
+		if ( separateSpines_ )
 			buildSpineList( comptMap );
+			*/
+}
+
+/** 
+ * converts the parents_ vector from identifying the parent NeuroNode
+ * to identifying the parent voxel, for each shaft entry.
+ */
+void NeuroMesh::updateShaftParents()
+{
+	assert( shaft_.size() == parent_.size() );
+	vector< unsigned int > pa = parent_;
+	for ( unsigned int i = 0; i < shaft_.size(); ++i ) {
+		const NeuroNode& nn = nodes_[ pa[i] ];
+		double x0 = Field< double >::get( shaft_[i], "x0" );
+		double y0 = Field< double >::get( shaft_[i], "y0" );
+		double z0 = Field< double >::get( shaft_[i], "z0" );
+		const NeuroNode& pn = nodes_[ nn.parent() ];
+		unsigned int index = 0;
+		double r = nn.nearest( x0, y0, z0, pn, index );
+		if ( r >= 0.0 ) {
+			parent_[i] = index + nn.startFid();
+		} else {
+			assert( 0 );
+		}
+	}
 }
 
 Id NeuroMesh::getCell( const Eref& e, const Qinfo* q ) const
@@ -641,6 +742,7 @@ unsigned int NeuroMesh::getNumDiffCompts() const
 	return nodeIndex_.size();
 }
 
+// Deprecated
 vector< Id > spineVec( const vector< Id >& head )
 {
 	const Cinfo* ccinfo = Cinfo::find( "Compartment" );
@@ -683,6 +785,7 @@ vector< Id > spineVec( const vector< Id >& head )
 	return temp;
 }
 
+/// Deprecated. I don't trust the message traversal.
 Id getSpineParent( Id spine, Id head )
 {
 	const Cinfo* ccinfo = Cinfo::find( "Compartment" );
@@ -719,6 +822,7 @@ Id getSpineParent( Id spine, Id head )
 	return pa;
 }
 
+// Deprecated: Jul 2013.
 void NeuroMesh::buildSpineList( const map< Id, unsigned int >& comptMap )
 {
 	assert( shaft_.size() == head_.size() );
@@ -1015,6 +1119,39 @@ void NeuroMesh::transmitChange( const Eref& e, const Qinfo* q, double oldVol )
 //////////////////////////////////////////////////////////////////
 // Utility function to set up Stencil for diffusion
 //////////////////////////////////////////////////////////////////
+
+double NeuroMesh::getAdx( unsigned int i, unsigned int& parentFid ) const
+{
+	const NeuroNode &nn = nodes_[ nodeIndex_[i] ];
+	const NeuroNode *pa = &nodes_[ nn.parent() ];
+	double L1 = nn.getLength() / nn.getNumDivs();
+	double L2 = L1;
+	parentFid = i - 1;
+	if ( nn.startFid() == i ) { 
+		// We're at the start of the node, need to refer to parent for L
+		const NeuroNode* realParent = pa;
+		if ( pa->isDummyNode() ) {
+			if ( pa->parent() == ~0U )
+				return -1; // No diffusion, bail out.
+			assert( pa->parent() < nodes_.size() );
+			realParent = &nodes_[ realParent->parent() ];
+			if ( realParent->isDummyNode() ) {
+				// Still dummy. So we're at a terminus. No diffusion
+				return -1;
+			}
+		}
+		L2 = realParent->getLength() / realParent->getNumDivs();
+		parentFid = realParent->startFid() + 
+				realParent->getNumDivs() - 1;
+	}
+	assert( parentFid < nodeIndex_.size() );
+	double length = 0.5 * (L1 + L2 );
+	// Note that we use the parent node here even if it is a dummy.
+	// It has the correct diameter.
+	double adx = nn.getDiffusionArea( *pa, i - nn.startFid() ) / length;
+	return adx;
+}
+
 void NeuroMesh::buildStencil()
 {
 // stencil_[0] = new NeuroStencil( nodes_, nodeIndex_, vs_, area_);
@@ -1025,6 +1162,11 @@ void NeuroMesh::buildStencil()
 	// It is very easy to set up the matrix using the parent as there is 
 	// only one parent for every voxel.
 	for ( unsigned int i = 0; i < nodeIndex_.size(); ++i ) {
+		unsigned int parentFid;
+		double adx = getAdx( i, parentFid );
+		if ( adx < 0.0 ) // No diffusion, so don't put in any entry.
+				continue;
+		/*
 		const NeuroNode &nn = nodes_[ nodeIndex_[i] ];
 		const NeuroNode *pa = &nodes_[ nn.parent() ];
 		double L1 = nn.getLength() / nn.getNumDivs();
@@ -1049,6 +1191,7 @@ void NeuroMesh::buildStencil()
 		// Note that we use the parent node here even if it is a dummy.
 		// It has the correct diameter.
 		double adx = nn.getDiffusionArea( *pa, i - nn.startFid() ) / length;
+		*/
 		paEntry[ i ].push_back( adx );
 		paColIndex[ i ].push_back( parentFid );
 		// Now put in the symmetric entries.
