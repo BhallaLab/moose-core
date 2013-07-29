@@ -45,8 +45,10 @@
 
 # Code:
 
-import moose
 import unittest
+import numpy as np
+import moose
+import generated_neuroml as nml
 from reader import NML2Reader
 
 class TestReader(unittest.TestCase):
@@ -55,12 +57,17 @@ class TestReader(unittest.TestCase):
         self.lib = moose.Neutral('/library')
         self.filename = 'test_files/NML2_FullCell.nml'
         self.reader.read(self.filename)
-        for ncell, mcell in self.reader.nml_to_moose.items():
-            if isinstance(mcell, moose.Neuron):
-                self.ncell, self.mcell = (ncell, mcell)
+        for ncell in self.reader.nml_to_moose:
+            if isinstance(ncell, nml.Cell):
+                self.ncell = ncell
                 break
+        self.mcell = moose.element('/library/SpikingCell')
+        self.soma = moose.element(self.mcell.path + '/Soma')
+        self.dendrite1 = moose.element(self.mcell.path + '/Dendrite1')
+        self.dendrite2 = moose.element(self.mcell.path + '/Dendrite2')
+        self.spine1 = moose.element(self.mcell.path + '/Spine1')
 
-    def test_basic_loading(self):
+    def test_basicLoading(self):
         self.assertEqual(self.reader.filename, self.filename, 'filename was not set')
         self.assertIsNotNone(self.reader.doc, 'doc is None')
 
@@ -102,12 +109,17 @@ class TestReader(unittest.TestCase):
 
     def test_protochans(self):
         """TODO: verify the prototype cahnnel."""
-        pass
+        for chan_id in moose.wildcardFind('/library/##[ISA=HHChannel]'):
+            print moose.element(chan_id)
     
     def test_HHChannels(self):
-        """TODO verify copied channel in membrane properties."""
-        pass
-
+        """Verify copied channel in membrane properties."""
+        self.assertTrue(moose.exists(self.soma.path + '/naChansSoma'))
+        soma_na = moose.element(self.soma.path+'/naChansSoma')
+        chans = moose.wildcardFind(self.mcell.path + '/##[ISA=HHChannel]')
+        self.assertTrue(len(chans) < 3) # Only soma and dendrite2 have the channels
+        self.assertAlmostEqual(soma_na.Gbar, 120e-2 * self.soma.diameter * self.soma.diameter * np.pi)
+        
 if __name__ == '__main__':
     unittest.main()
 

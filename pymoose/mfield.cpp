@@ -445,7 +445,7 @@ extern "C" {
         0,                                              /* tp_free */        
     };
 
-        PyObject * moose_ElementField_getNum(_Field * self, void * closure)
+    PyObject * moose_ElementField_getNum(_Field * self, void * closure)
     {
         if (!Id::isValid(self->owner.id)){
             RAISE_INVALID_ID(NULL, "moose_ElementField_getNum");

@@ -2165,6 +2165,8 @@ extern "C" {
             oid = ((_ObjId*)obj)->oid_;
         } else if (PyObject_IsInstance(obj, (PyObject*)&IdType)){
             oid = ObjId(((_Id*)obj)->id_);
+        } else if (ElementField_SubtypeCheck(obj)){
+            oid = ObjId(((_Id*)moose_ElementField_getId((_Field*)obj, NULL))->id_);
         }
         if (oid == ObjId::bad()){
             PyErr_SetString(PyExc_TypeError, "moose_element: cannot convert to moose element.");

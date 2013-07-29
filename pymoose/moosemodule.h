@@ -106,7 +106,10 @@ extern "C" {
 #define Id_SubtypeCheck(v) (PyType_IsSubtype(Py_TYPE(v),&IdType))
 #define ObjId_Check(v) (Py_TYPE(v) == &ObjIdType)
 #define ObjId_SubtypeCheck(v) (PyType_IsSubtype(Py_TYPE(v), &ObjIdType))
-#define LookupField_Check(v) (Py_TYPE(v) == &LookupFieldType)
+#define LookupField_Check(v) (Py_TYPE(v) == &moose_LookupField)
+#define ElementField_Check(v) (Py_TYPE(v) == &moose_ElementField)
+#define ElementField_SubtypeCheck(v) (PyType_IsSubtype(Py_TYPE(v), &moose_ElementField))
+    
     
     // Macro to create the Shell * out of shellId
 #define SHELLPTR (reinterpret_cast<Shell*>(get_shell(0, NULL).eref().data()))
