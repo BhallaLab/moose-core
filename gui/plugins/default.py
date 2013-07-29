@@ -287,8 +287,11 @@ class RunView(RunBase):
     def __init__(self, *args, **kwargs):
         RunBase.__init__(self, *args, **kwargs)
         self.getCentralWidget()
-        self.setDataRoot(moose.Neutral('/data').path)
+        self.modelRoot = '/model'
+        self.dataRoot = '/data'
+        self.getCentralWidget()
         self.setModelRoot(moose.Neutral(self.plugin.modelRoot).path)
+        self.setDataRoot(moose.Neutral('/data').path)
         self.plugin.modelRootChanged.connect(self.setModelRoot)
         self.plugin.dataRootChanged.connect(self.setDataRoot)        
         self._menus += self.getCentralWidget().getMenus()
@@ -312,7 +315,7 @@ class RunView(RunBase):
 
     def setModelRoot(self, path):
         self.modelRoot = path
-        self.getSchedulingDockWidget().setModelRoot(path)
+        self.getSchedulingDockWidget().widget().setModelRoot(path)
         self.getCentralWidget().setModelRoot(path)
 
     def getDataTablesPane(self):
@@ -338,10 +341,10 @@ class RunView(RunBase):
         widget.setDataRoot(self.dataRoot)
         widget.setModelRoot(self.modelRoot)
         self.schedulingDockWidget.setWidget(widget)
-        widget.runner.update.connect(self.centralWidget.updatePlots)
-        widget.runner.finished.connect(self.centralWidget.rescalePlots)
-        widget.simtimeExtended.connect(self.centralWidget.extendXAxes)
-        widget.runner.resetAndRun.connect(self.centralWidget.plotAllData)
+        widget.runner.update.connect(self._centralWidget.updatePlots)
+        widget.runner.finished.connect(self._centralWidget.rescalePlots)
+        widget.simtimeExtended.connect(self._centralWidget.extendXAxes)
+        widget.runner.resetAndRun.connect(self._centralWidget.plotAllData)
         return self.schedulingDockWidget
     
 
