@@ -340,13 +340,79 @@ void NeuroNode::buildTree(
 	traverse( nodes, start );
 }
 
+// Utility function to clean up node indices for parents and children.
+void reassignNodeIndices( vector< NeuroNode >& temp, 
+				const vector< unsigned int >& nodeToTempMap )
+{
+	for ( vector< NeuroNode >::iterator 
+			i = temp.begin(); i != temp.end(); ++i ) {
+		unsigned int pa = i->parent();
+		if ( pa != ~0U ) {
+			assert( nodeToTempMap[ pa ] != ~0U );
+			i->setParent( nodeToTempMap[ pa ] );
+		}
+
+	 	vector< unsigned int > kids = i->children();
+		i->clearChildren();
+		for ( unsigned int j = 0; j < kids.size(); ++j ) {
+			unsigned int newKid = nodeToTempMap[ kids[j] ];
+			if ( newKid != ~0U ) // Some may be spine shafts, no longer here
+				i->addChild( newKid );
+		}
+	}
+}
+
 /**
  * Trims off all spines from tree. Does so by identifying a set of
  * reasonable names: shaft, head, spine, and variants in capitals.
  * Having done this it builds two matching vectors of vector of shafts 
  * and heads, which is a hack that assumes that there are no sub-branches
- * in spines.
+ * in spines. Then there is an index for parent NeuroNode entry.
+ * Static function
  */
-void NeuroNode::filterSpines()
+void NeuroNode::filterSpines( vector< NeuroNode >& nodes, 
+				vector< Id >& shaftId, vector< Id >& headId,
+				vector< unsigned int >& parent )
 {
+	headId.clear();
+	shaftId.clear();
+	parent.clear();
+	vector< NeuroNode > temp;
+	temp.reserve( nodes.size() );
+	vector< unsigned int > nodeToTempMap( nodes.size(), ~0U );
+	vector< unsigned int > shaft;
+	vector< unsigned int > reverseShaft( nodes.size(), ~0U );
+	vector< unsigned int > head;
+	for ( unsigned int i = 0; i < nodes.size(); ++i ) {
+		const NeuroNode& n = nodes[i];
+		const char* name = n.elecCompt_.element()->getName().c_str();
+		if ( strncasecmp( name, "shaft", 5 ) == 0 ||
+			strncasecmp( name, "neck", 4 ) == 0 ||
+			strncasecmp( name, "stalk", 5 ) == 0 ) {
+			reverseShaft[i] = shaft.size();
+			shaft.push_back( i );
+			// Remove from nodes vector by simply not copying.
+		} else if ( strncasecmp( name, "spine", 5 ) == 0 ||
+			strncasecmp( name, "head", 4 ) == 0 ) {
+			head.push_back( i );
+			// Remove from nodes vector by simply not copying.
+		} else {
+			nodeToTempMap[i] = temp.size();
+			temp.push_back( n );
+		}
+	}
+	// Now go through finding spine shafts.
+	for ( unsigned int i = 0; i < head.size(); ++i ) {
+		const NeuroNode& n = nodes[ head[i] ];
+		headId.push_back( n.elecCompt() );
+		assert( reverseShaft[ n.parent() ] != ~0U );
+		const NeuroNode& pa = nodes[ n.parent() ];
+		shaftId.push_back( pa.elecCompt() );
+		assert( nodeToTempMap[ pa.parent() ] != ~0U );
+		parent.push_back( nodeToTempMap[ pa.parent() ] );
+	}
+	assert( shaftId.size() == headId.size() );
+
+	reassignNodeIndices( temp, nodeToTempMap );
+	nodes = temp;
 }

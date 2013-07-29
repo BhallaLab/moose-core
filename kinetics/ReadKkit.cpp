@@ -377,7 +377,7 @@ string ReadKkit::cleanPath( const string& path ) const
 	for ( unsigned int i = 0; i < path.length(); ++i ) {
 		char c = ret[i];
 		if ( c == '*' )
-			cleanString += 'p';
+			cleanString += "_p";
 		else if ( c == '[' || c == ']' || c == '@' || c == ' ')
 			cleanString += '_';
 		else if (c == '-')

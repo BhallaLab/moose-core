@@ -163,9 +163,18 @@ class NeuroNode: public CylBase
 		 * reasonable names: shaft, head, spine, and variants in capitals.
 		 * Having done this it builds two matching vectors of vector of 
 		 * shafts and heads, which is a hack that assumes that there are 
-		 * no sub-branches in spines. Not yet implemented.
+		 * no sub-branches in spines.
+		 * The returned nodes vector has non spine/shaft compartments only.
+		 * The returned shaftId vector has all the shaft compartments.
+		 * The returned headId vector has all the shaft compartments.
+		 * The returned parent vector has the indices of the parent
+		 * node for each shaft.
+		 * There should be exactly the same number of entries in the 
+		 * shaftId, headId and parent vectors.
 		 */
-		void filterSpines();
+		static void filterSpines( vector< NeuroNode >& nodes, 
+				vector< Id >& shaftId, vector< Id >& headId,
+				vector< unsigned int >& parent );
 	private:
 		/**
 		 * Index of parent NeuroNode, typically a diffusive compartment. 
