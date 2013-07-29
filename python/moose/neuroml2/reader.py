@@ -88,13 +88,15 @@ def setRm(comp, resistivity):
 
 def getSegments(nmlcell, component, sg_to_segments):
     """Get the list of segments the `component` is applied to"""
-    sg = segment.segmentGroup
-    seg = segment.segment
+    sg = component.segmentGroup
+    seg = component.segment
     if sg is None:
         if seg:
             segments = [seg]
         else:
             segments = nmlcell.morphology.segment
+    elif sg == 'all': # Special case
+        segments = [seg for seglist in sg_to_segments.values() for seg in seglist]
     else:
         segments = sg_to_segments[sg]
     return segments
@@ -122,6 +124,7 @@ class NML2Reader(object):
         self.proto_chans = {} # map id to prototype channels in moose
         self.includes = {} # Included files mapped to other readers
         self.lib = moose.Neutral('/library')
+        self.id_to_ionChannel = {}
         self._cell_to_sg = {} # nml cell to dict - the dict maps segment groups to segments
         
     def read(self, filename):
@@ -210,11 +213,12 @@ class NML2Reader(object):
             print 'Warning: %s in %s has no biophysical properties' % (nmlcell.id, self.filename)
             return
         self.importMembraneProperties(nmlcell, moosecell, bp.membraneProperties)
-        # self.createIntracellularProperties(nmlcell, moosecell)
+        self.importIntracellularProperties(nmlcell, moosecell, bp.intracellularProperties)
 
     def importMembraneProperties(self, nmlcell, moosecell, mp):
         """Create the membrane properties from nmlcell in moosecell"""
         self.importCapacitances(nmlcell, moosecell, mp.specificCapacitance)
+        self.importChannelsToCell(nmlcell, moosecell, mp)
 
     def importCapacitances(self, nmlcell, moosecell, specificCapacitances):
         sg_to_segments = self._cell_to_sg[nmlcell]
@@ -224,14 +228,14 @@ class NML2Reader(object):
                 comp = self.nml_to_moose[seg]
                 comp.Cm = np.pi * sarea(comp) 
 
-    def importIntracellularProperties(self, nmlcell, moosecell, membraneProperties):
-        self.importAxialResistance(nmlcell, membraneProperties.intraCellularProperties)
+    def importIntracellularProperties(self, nmlcell, moosecell, properties):
+        self.importAxialResistance(nmlcell, properties)
         # TODO CaConc
 
-    def importAxialResistance(self, nmlcell, intraCellularProperties):
+    def importAxialResistance(self, nmlcell, intracellularProperties):
         sg_to_segments = self._cell_to_sg[nmlcell]
-        for r in intraCellularProperties.resistivity:
-            segments = get_segments(nmlcell, r, sg_to_segments)
+        for r in intracellularProperties.resistivity:
+            segments = getSegments(nmlcell, r, sg_to_segments)
             for seg in segments:
                 comp = self.nml_to_moose[seg]
                 setRa(comp, SI(r.value))                    
@@ -239,9 +243,14 @@ class NML2Reader(object):
     def importChannelsToCell(self, nmlcell, moosecell, membraneProperties):
         sg_to_segments = self._cell_to_sg[nmlcell]
         for chdens in membraneProperties.channelDensity:
-            segments = get_segments(nmlcell, chdens, sg_to_segments)
+            segments = getSegments(nmlcell, chdens, sg_to_segments)
             condDensity = SI(chdens.condDensity)
-            if self.id_to_ionChannel[chdens.ionChannel].type_ == 'ionChannelPassive':
+            try:
+                ionChannel = self.id_to_ionChannel[chdens.ionChannel]
+            except KeyError:
+                print 'No channel with id', chdens.ionChannel
+                continue
+            if ionChannel.type_ == 'ionChannelPassive':
                 for seg in segments:
                     self.setRm(self.nml_to_moose[seg], condDensity)
             else:
@@ -259,11 +268,11 @@ class NML2Reader(object):
         else:
             for innerReader in self.includes.values():
                 if chdens.ionChannel in innerReader.proto_chans:
-                    proto_chan = innerReader[chdens.ionChannel]
+                    proto_chan = innerReader.proto_chans[chdens.ionChannel]
                     break
         if not proto_chan:
             raise Exception('No prototype channel for %s referred to by %s' % (chdens.ionChannel, chdens.id))
-        chid = moose.copy(proto_chan, comp)
+        chid = moose.copy(proto_chan, comp, chdens.id)
         chan = moose.element(chid)
         chan.Gbar = sarea(comp) * condDensity
         moose.connect(chan, 'channel', comp, 'channel')
@@ -280,6 +289,9 @@ class NML2Reader(object):
                     error = e
                 else:
                     self.includes[include.href] = inner
+                    self.id_to_ionChannel.update(inner.id_to_ionChannel)
+                    self.nml_to_moose.update(inner.nml_to_moose)
+                    self.moose_to_nml.update(inner.moose_to_nml)
                     error = None
                     break
             if error:
@@ -328,7 +340,9 @@ class NML2Reader(object):
                         mgate.tableA = inf / tau
                         mgate.tableB = 1 / tau
                         break
-                    
+                self.id_to_ionChannel[chan.id] = chan
+                self.nml_to_moose[chan] = mchan
+                self.proto_chans[chan.id] = mchan
     
         
         
