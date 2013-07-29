@@ -138,12 +138,21 @@ class NeuroMesh: public MeshCompt
 
 		void transmitChange( const Eref& e, const Qinfo* q, double oldVol );
 
+		/**
+		 * Helper function for buildStencil, calculates diffusion term
+		 * adx for rate between current compartment curr, and parent.
+		 * By product: also passes back parent compartment index.
+		 */
+		double getAdx( unsigned int curr, unsigned int& parentFid ) const;
+
+		/// Utility function to set up Stencil for diffusion in NeuroMesh
 		void buildStencil();
 
 		/**
 		 * Examines list of 'head' compartments and matches them to
 		 * 'shaft' or 'neck' compartments through messages.
 		 * Makes a one-to-one pair of vectors of head and neck for spines.
+		 * Deprecated.: Jul 2013.
 		 */
 		void buildSpineList( const map< Id, unsigned int >& comptMap );
 
@@ -180,6 +189,20 @@ class NeuroMesh: public MeshCompt
 
 		//////////////////////////////////////////////////////////////////
 		// Utility functions for building tree.
+		//////////////////////////////////////////////////////////////////
+
+		/**
+		 * Puts in a dummy node between parent and self. Used to
+		 * set up the correct size of proximal compartments.
+		 */
+		void insertSingleDummy( unsigned int parent, unsigned int self,
+			   double x, double y, double z	);
+
+		/**
+		 * Puts in all the required dummy nodes for the tree.
+		 */
+		void insertDummyNodes();
+
 		/// This shuffles the nodes_ vector to put soma node at the start
 		Id putSomaAtStart( Id origSoma, unsigned int maxDiaIndex );
 
@@ -197,6 +220,11 @@ class NeuroMesh: public MeshCompt
 		 * The first two are classified into the shaft_ vector.
 		 */
 		bool filterSpines( Id compt );
+		/** 
+		 * converts the parents_ vector from identifying the parent 
+		 * NeuroNode to identifying the parent voxel, for each shaft entry.
+ 		 */
+		void updateShaftParents();
 
 		//////////////////////////////////////////////////////////////////
 		// Utility functions for testing

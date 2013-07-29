@@ -885,6 +885,20 @@ Id makeSpine( Id parentCompt, Id parentObj, unsigned int index,
 	return head;
 }
 
+/**
+ * soma---->d1---->d1a---->d11---->d111
+ *  |               |       +----->d112
+ *  |               |
+ *  |               +----->d12---->d121       
+ *  |                       +----->d122
+ *  |
+ *  +------>d2----->d2a---->d21---->d211
+ *                  |        +----->d212
+ *                  |
+ *                  +------>d22---->d221       
+ *                           +----->d222
+ *
+ */
 pair< unsigned int, unsigned int > buildBranchingCell( 
 				Id cell, double len, double dia )
 {
@@ -1038,14 +1052,39 @@ void testNeuroMeshBranching()
 	NeuroMesh* neuro = reinterpret_cast< NeuroMesh* >( nm.eref().data() );
 	const vector< NeuroNode >& nodes = neuro-> getNodes();
 	assert( nodes.size() == ns + 15 ); // 15 dummy nodes.
-	assert( nodes[0].children().size() == 2 );
-	assert( nodes[1].children().size() == 1 );
-	assert( nodes[2].children().size() == 1 );
-	assert( nodes[3].children().size() == 2 );
-	assert( nodes[4].children().size() == 2 );
-	assert( nodes[5].children().size() == 2 );
-	assert( nodes[6].children().size() == 2 );
+	// We have depth-first ordering in the nodes vector.
+    /**
+     * soma---->d1---->d1a---->d11---->d111
+     *  |               |       +----->d112
+     *  |               |
+     *  |               +----->d12---->d121       
+     *  |                       +----->d122
+     *  |
+     *  +------>d2----->d2a---->d21---->d211
+     *                  |        +----->d212
+     *                  |
+     *                  +------>d22---->d221       
+     *                           +----->d222
+     *
+     */
+	assert( nodes[0].children().size() == 2 );	// soma
+	assert( nodes[1].children().size() == 1 );	// d1
+	assert( nodes[2].children().size() == 2 );	// d1a
+	assert( nodes[3].children().size() == 2 );	// d11
+	assert( nodes[4].children().size() == 0 );	// d111
+	assert( nodes[5].children().size() == 0 );	// d112
+	assert( nodes[6].children().size() == 2 );	// d12
+	assert( nodes[7].children().size() == 0 );	// d121
+	assert( nodes[8].children().size() == 0 );	// d122
 
+	assert( nodes[9].children().size() == 1 );	// d2
+	assert( nodes[10].children().size() == 2 );	// d2a
+	assert( nodes[11].children().size() == 2 );	// d21
+	assert( nodes[12].children().size() == 0 );	// d211
+	assert( nodes[13].children().size() == 0 );	// d212
+	assert( nodes[14].children().size() == 2 );	// d22
+	assert( nodes[15].children().size() == 0 );	// d221
+	assert( nodes[16].children().size() == 0 );	// d222
 
 	// Insert a molecule at soma
 	vector< double > molNum( 1, 0 ); // We only have one pool
@@ -1677,7 +1716,10 @@ void testSpineAndPsdMesh()
 	double len = diffLength * numCompts;
 	unsigned int numSpines = 10;
 	Id soma = makeCompt( Id(), cell, "soma", dia, dia, 90 );
-	Id dend = makeCompt( Id(), cell, "dend", len, dia, 0 );
+	Field< double >::set( soma, "y0", -dia );
+	Field< double >::set( soma, "y", 0 );
+	Id dend = makeCompt( soma, cell, "dend", len, dia, 0 );
+
 	for ( unsigned int i = 0; i < numSpines; ++i ) {
 		double frac = i / static_cast< double >( numSpines );
 		makeSpine( dend, cell, i, frac, 1.0e-6, 1.0e-6, i * 30.0 );
@@ -1849,8 +1891,10 @@ void testNeuroNodeTree()
 		makeSpine( dend, cell, i, frac, 1.0e-6, 1.0e-6, i * 30.0 );
 	}
 	*/
+	//////////////////////////////////////////////////////////////////////
 	// Now to make a totally random cell, with a complete mash of 
 	// messaging, having circular linkage even.
+	//////////////////////////////////////////////////////////////////////
 	shell->doDelete( cell );
 	cell = shell->doCreate( "Neutral", Id(), "cell", dims );
 	vector< Id > compt( 10 );
@@ -1910,6 +1954,71 @@ void testNeuroNodeTree()
 	assert( nodes[i++].elecCompt().element()->getName() == "compt7" );
 	assert( nodes[i++].elecCompt().element()->getName() == "compt8" );
 	assert( nodes[i++].elecCompt().element()->getName() == "compt6" );
+	//////////////////////////////////////////////////////////////////////
+	// Now to make a dendrite with lots of spines and filter them off.
+	//////////////////////////////////////////////////////////////////////
+	shell->doDelete( cell );
+	cell = shell->doCreate( "Neutral", Id(), "cell", dims );
+	vector< Id > dend( 10 );
+	vector< Id > neck( 10 );
+	vector< Id > head( 10 );
+	for ( unsigned int i = 0; i < neck.size(); ++i ) {
+		stringstream ss;
+		ss << "dend" << i;
+		string name = ss.str();
+		dend[i] = shell->doCreate( "SymCompartment", cell, name, dims );
+		Field< double >::set( dend[i], "diameter", 2.0e-6 );
+		stringstream ss1;
+		ss1 << "neck" << i;
+		name = ss1.str();
+		neck[i] = shell->doCreate( "SymCompartment", cell, name, dims );
+		Field< double >::set( neck[i], "diameter", 0.2e-6 );
+		stringstream ss2;
+		ss2 << "head" << i;
+		name = ss2.str();
+		head[i] = shell->doCreate( "SymCompartment", cell, name, dims );
+		Field< double >::set( head[i], "diameter", 1.0e-6 );
+	}
+	for ( unsigned int i = 0; i < neck.size(); ++i ) {
+	// Just to make things interesting, add the messages staggered.
+		if ( i > 0 )
+			shell->doAddMsg( "Single", dend[i], "proximal", 
+						dend[ (i-1)], "distal" );
+		shell->doAddMsg( "Single", neck[i], "proximalOnly", 
+						dend[ (i+7) % head.size()], "cylinder" );
+		shell->doAddMsg( "Single", neck[i], "distal", 
+						head[ (i+4) % neck.size() ], "proximal" );
+	}
+	nodes.clear();
+	elist.clear();
+	wildcardFind( "/cell/##", elist );
+	NeuroNode::buildTree( nodes, elist );
+	assert( nodes.size() == 30 );
+	vector< NeuroNode > orig = nodes;
+	vector< Id > shaftId;
+	vector< Id > headId;
+	vector< unsigned int > parent;
+	NeuroNode::filterSpines( nodes, shaftId, headId, parent );
+	assert( nodes.size() == 10 );
+	/*
+	cout << endl;
+	for ( unsigned int i = 0; i < 10; ++i ) {
+		cout << "nodes[" << i << "].pa = " << nodes[i].parent() << 
+				", Id = " << nodes[i].elecCompt() << endl;
+	}
+	for ( unsigned int i = 0; i < 30; ++i ) {
+		cout << "orig[" << i << "].pa = " << orig[i].parent() << 
+				", Id = " << orig[i].elecCompt() << endl;
+	}
+	*/
+	// Check that the correct dend is parent of each shaft, and
+	// correct shaft is parent of each head.
+	for ( unsigned int i = 0; i < parent.size(); ++i ) {
+		unsigned int j = (shaftId[i].value() - neck[0].value())/3;
+		assert( parent[i] == (j+7) % 10 );
+		unsigned int k = (headId[i].value() - head[0].value())/3;
+		assert( k == (j+4) % 10 );
+	}
 
 	shell->doDelete( cell );
 	cout << "." << flush;
@@ -1920,6 +2029,7 @@ void testMesh()
 	testVec();
 	testCylBase();
 	testNeuroNode();
+	testNeuroNodeTree();
 	testCylMesh();
 	testMidLevelCylMesh();
 	testCubeMesh();
@@ -1936,5 +2046,4 @@ void testMesh()
 	testCubeMeshMultiJunctionTwoD();
 	testSpineEntry();
 	testSpineAndPsdMesh();
-	testNeuroNodeTree();
 }

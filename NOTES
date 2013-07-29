@@ -22721,3 +22721,33 @@ Checkin 4702. Now a few nastier tests and then merge the traversal routines
 into the NeuroMesh code.
 Added a couple more nasty tests. Handles them with aplomb.
 
+Working now on incorporating into NeuroMesh. Unpleasant due to
+dummy nodes.
+
+Implementing NeuroNode::filterSpines.
+
+
+==========================================================================
+28 July 2013
+Did it. Surprisingly nasty, and the unit test for it was also unpleasant to
+sort out. 
+
+Now filterSpines also works, but I need to rebuild the nodes vector to put
+in dummy nodes for the spine bases and various branches. Lacking this it
+fails a subsequent unit test on testNeuroMeshLinear().
+
+I've put in the function to insert dummy nodes, but there is still a bug.
+Later.
+
+==========================================================================
+29 July.
+Worked through cleaning up bugs with the spine handling revealed by unit tests.
+Currently stuck on testSpineAndPsdMesh at an odd point, line 1789. It has
+cleared a lot of the tests about the setup of the spines, but doesn't like
+how they talk to cube mesh. This is odd because I can't see where I have
+affected this in the code changes.
+Turned out to be that the coordinates of the spines were shifted due to my
+having attached the dendrite to the soma. It was dangling earlier, but the
+new NeuroNode tree parser caught that error. Now clears unit tests.
+Lots of fixes to regression tests due to changes in ReadKkit. Still fails
+in rtTestMultCompartmentReaction.
