@@ -69,8 +69,13 @@ known_types = ['void',
     
 def pwe():
     """Print present working element. Convenience function for GENESIS
-    users."""
-    print _moose.getCwe().getPath()
+    users. If you want to retrieve the element in stead of printing
+    the path, use moose.getCwe()
+
+    """
+    pwe_ = _moose.getCwe()
+    print pwe_.getPath()
+    return pwe_
     
 def le(el=None):
     """List elements. 
