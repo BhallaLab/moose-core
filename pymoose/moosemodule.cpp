@@ -1394,15 +1394,17 @@ extern "C" {
     PyObject * moose_setCwe(PyObject * dummy, PyObject * args)
     {
         PyObject * element = NULL;
-        char * path  = NULL;
+        char * path = NULL;
         Id id;
-        if (PyTuple_Size(args) == 0 || PyArg_ParseTuple(args, "s:moose_setCwe", &path)){
+        if (PyTuple_Size(args) == 0){
+            id = Id("/");
+        } else if(PyArg_ParseTuple(args, "s:moose_setCwe", &path)){
             id = Id(string(path));
         } else if (PyArg_ParseTuple(args, "O:moose_setCwe", &element)){
             PyErr_Clear();
-            if (Id_SubtypeCheck(element)){
+            if (PyObject_IsInstance(element, (PyObject*)&IdType)){
                 id = (reinterpret_cast<_Id*>(element))->id_;
-            } else if (ObjId_SubtypeCheck(element)){
+            } else if (PyObject_IsInstance(element, (PyObject*)&ObjIdType)){
                 id = (reinterpret_cast<_ObjId*>(element))->oid_.id;                    
             } else {
                 PyErr_SetString(PyExc_NameError, "setCwe: Argument must be an ematrix or element");
@@ -2004,7 +2006,7 @@ extern "C" {
     
     int define_destFinfos(const Cinfo * cinfo)
     {
-        static const char * doc = "Destination field";
+        static char * doc = "Destination field";
         const string& class_name = cinfo->name();
         // Create methods for destFinfos. The tp_dict is initialized by
         // PyType_Ready. So we insert the dynamically generated
@@ -2029,7 +2031,7 @@ extern "C" {
             strncpy(vec[curr_index].name,
                     const_cast<char*>(destFinfo_name.c_str()),
                     destFinfo_name.size());
-            strcpy(vec[curr_index].doc, doc);
+            vec[curr_index].doc = doc;
             vec[curr_index].get = (getter)moose_ObjId_get_destField_attr;
             PyObject * args = PyTuple_New(1);
             
@@ -2181,7 +2183,7 @@ extern "C" {
     
     int define_lookupFinfos(const Cinfo * cinfo)
     {
-        static const char * doc = "Lookup field";
+        static char * doc = "Lookup field";
         const string & class_name = cinfo->name();
         unsigned int num_lookupFinfos = cinfo->getNumLookupFinfo();
         unsigned int curr_index = get_getsetdefs()[class_name].size();
@@ -2191,7 +2193,7 @@ extern "C" {
             get_getsetdefs()[class_name].push_back(getset);
             get_getsetdefs()[class_name][curr_index].name = (char*)calloc(lookupFinfo_name.size() + 1, sizeof(char));
             strncpy(get_getsetdefs()[class_name][curr_index].name, const_cast<char*>(lookupFinfo_name.c_str()), lookupFinfo_name.size());
-            strcpy(get_getsetdefs()[class_name][curr_index].doc, doc); //moose_LookupField_documentation;
+            get_getsetdefs()[class_name][curr_index].doc = doc; //moose_LookupField_documentation;
             get_getsetdefs()[class_name][curr_index].get = (getter)moose_ObjId_get_lookupField_attr;
             PyObject * args = PyTuple_New(1);
             PyTuple_SetItem(args, 0, PyString_FromString(lookupFinfo_name.c_str()));
@@ -2253,7 +2255,7 @@ extern "C" {
 
     int define_elementFinfos(const Cinfo * cinfo)
     {
-        static const char * doc = "Element field";
+        static char * doc = "Element field\0";
         const string & class_name = cinfo->name();
         unsigned int num_fieldElementFinfo = cinfo->getNumFieldElementFinfo();
         unsigned int curr_index = get_getsetdefs()[class_name].size();
@@ -2263,7 +2265,7 @@ extern "C" {
             get_getsetdefs()[class_name].push_back(getset);
             get_getsetdefs()[class_name][curr_index].name = (char*)calloc(finfo_name.size() + 1, sizeof(char));
             strncpy(get_getsetdefs()[class_name][curr_index].name, const_cast<char*>(finfo_name.c_str()), finfo_name.size());
-            strcpy(get_getsetdefs()[class_name][curr_index].doc, doc);
+            get_getsetdefs()[class_name][curr_index].doc = doc;
             get_getsetdefs()[class_name][curr_index].get = (getter)moose_ObjId_get_elementField_attr;
             PyObject * args = PyTuple_New(1);
             PyTuple_SetItem(args, 0, PyString_FromString(finfo_name.c_str()));
