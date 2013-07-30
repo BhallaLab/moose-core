@@ -303,7 +303,7 @@ class NML2Reader(object):
             # print dir(chan)
             if chan.type_ == 'ionChannelHH':
                 mchan = moose.HHChannel('%s/%s' % (self.lib.path, chan.id))
-                mgates = map(moose.element, (mchan.gateX.path, mchan.gateY.path, mchan.gateZ.path))
+                mgates = map(moose.element, (mchan.gateX, mchan.gateY, mchan.gateZ))
                 assert(len(chan.gate) <= 3) # We handle only up to 3 gates in HHCHannel
                 for ngate, mgate in izip(chan.gate, mgates):
                     if mgate.name.endswith('X'):
