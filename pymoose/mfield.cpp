@@ -89,7 +89,7 @@ extern "C" {
     /**
        Initialize field with ObjId and fieldName.
     */
-    static int moose_Field_init(_Field * self, PyObject * args, PyObject * kwargs)
+    int moose_Field_init(_Field * self, PyObject * args, PyObject * kwargs)
     {
         PyObject * owner;
         char * fieldName;
@@ -128,7 +128,7 @@ extern "C" {
     }
 
     /// Return the hash of the string `{objectpath}.{fieldName}`
-    static long moose_Field_hash(_Field * self)
+    long moose_Field_hash(_Field * self)
     {
         if (!Id::isValid(self->owner.id)){
             RAISE_INVALID_ID(-1, "moose_Field_hash");
@@ -141,7 +141,7 @@ extern "C" {
     }
 
     /// String representation of fields is `{objectpath}.{fieldName}`
-    static PyObject * moose_Field_repr(_Field * self)
+    PyObject * moose_Field_repr(_Field * self)
     {
         if (!Id::isValid(self->owner.id)){
             RAISE_INVALID_ID(NULL, "moose_Field_repr");
@@ -206,12 +206,12 @@ extern "C" {
         0,                                              /* tp_free */
     };
 
-    static PyObject * moose_LookupField_getItem(_Field * self, PyObject * key)
+    PyObject * moose_LookupField_getItem(_Field * self, PyObject * key)
     {
         return getLookupField(self->owner, self->name, key);
     }
 
-    static int moose_LookupField_setItem(_Field * self, PyObject * key,
+    int moose_LookupField_setItem(_Field * self, PyObject * key,
                                          PyObject * value)
     {
         return setLookupField(self->owner,
@@ -277,7 +277,7 @@ extern "C" {
     };
 
 
-    static PyObject * moose_DestField_call(PyObject * self, PyObject * args,
+    PyObject * moose_DestField_call(PyObject * self, PyObject * args,
                                            PyObject * kw)
     {
         // We copy the name as the first argument into a new argument tuple. 
