@@ -207,11 +207,6 @@ class DefaultEditorWidget(EditorWidgetBase):
         self.tree = MooseTreeEditor()
         self.tree.setAcceptDrops(True)
         self.getTreeMenu()
-        self._toolBars.append(QtGui.QToolBar('Insert'))
-        for action in self.insertMenu.actions():
-            button = MToolButton()
-            button.setDefaultAction(action)
-            self._toolBars[-1].addWidget(button)
         self.layout().addWidget(self.tree)        
 
     def getTreeMenu(self):
@@ -265,6 +260,17 @@ class DefaultEditorWidget(EditorWidgetBase):
 
     def sizeHint(self):
         return QtCore.QSize(400, 300)
+
+    def getToolBars(self):
+        if not hasattr(self, '_insertToolBar'):
+            self._insertToolBar = QtGui.QToolBar('Insert')
+            for action in self.insertMenu.actions():
+                button = MToolButton()
+                button.setDefaultAction(action)
+                self._insertToolBar.addWidget(button)
+            self._toolBars.append(self._insertToolBar)
+        return self._toolBars
+
 
 
 ############################################################

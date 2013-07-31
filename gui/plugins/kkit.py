@@ -103,19 +103,23 @@ class  KineticsWidget(DefaultEditorWidget):
 
         self.insertMenu = QtGui.QMenu('&Insert')
         self._menus.append(self.insertMenu)
-        self._toolBars.append(QtGui.QToolBar('Insert'))
         self.insertMapper = QtCore.QSignalMapper(self)
 
         classlist = ['CubeMesh','CylMesh','Pool','FuncPool','SumFunc','Reac','Enz','MMenz','StimulusTable','Table']
         insertMapper, actions = self.getInsertActions(classlist)
 
         for action in actions:
-            self.insertMenu.addAction(action)
-        for action in self.insertMenu.actions():
-            #self._toolBars[-1].addAction(action)
-            button = MToolButton()
-            button.setDefaultAction(action)
-            self._toolBars[-1].addWidget(button)
+            self.insertMenu.addAction(action)        
+
+    def getToolBars(self):
+        if not hasattr(self, '_insertToolBar'):
+            self._insertToolBar = QtGui.QToolBar('Insert')
+            self._toolBars.append(self._insertToolBar)
+            for action in self.insertMenu.actions():
+                button = MToolButton()
+                button.setDefaultAction(action)
+                self._insertToolBar.addWidget(button)
+        return self._toolBars
 
     def sizeHint(self):
         return QtCore.QSize(800,400)
