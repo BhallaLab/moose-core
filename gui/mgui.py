@@ -314,12 +314,9 @@ class MWindow(QtGui.QMainWindow):
         for toolbar in self.toolBars:
             self.removeToolBar(toolbar)
         self.toolBars = []
-        for toolbar in self.getMyToolBars():
-            self.toolBars.append(toolbar)
-        for toolbar in self.plugin.getToolBars():
-            self.toolBars.append(toolbar)
-        for toolbar in self.plugin.getCurrentView().getToolBars():
-            self.toolBars.append(toolbar)
+        self.toolBars.extend(self.getMyToolBars())
+        self.toolBars.extend(self.plugin.getToolBars())
+        self.toolBars.extend(self.plugin.getCurrentView().getToolBars())
         for toolbar in self.toolBars:
             self.addToolBar(toolbar)
             toolbar.setVisible(True)
