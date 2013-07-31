@@ -492,6 +492,16 @@ extern "C" {
                 memcpy(ptr, &(*vec)[0], size * sizeof(int));
                 return ret;
             }
+            case 'I': { // vector<unsigned int>
+                vector< int > * vec = static_cast< vector < int >* >(obj);
+                assert(vec != NULL);
+                npy_intp size = (npy_intp)(vec->size());
+                ret = PyArray_SimpleNew(1, &size, NPY_UINT);
+                assert(ret != NULL);
+                char * ptr = PyArray_BYTES((PyArrayObject*)ret);
+                memcpy(ptr, &(*vec)[0], size * sizeof(unsigned int));
+                return ret;
+            }
             case 'l': { // vector<long>
                 vector< long > * vec = static_cast< vector < long >* >(obj);
                 assert(vec != NULL);
@@ -550,7 +560,7 @@ extern "C" {
                 }
                 break;
             }
-            case 'k': { // vector<unsigned int>
+            case 'k': { // vector<unsigned long>
                 vector< unsigned int > * vec = static_cast< vector < unsigned int >* >(obj);
                 assert(vec != NULL);
                 npy_intp size = (npy_intp)(vec->size());
@@ -560,14 +570,24 @@ extern "C" {
                 memcpy(ptr, &(*vec)[0], size * sizeof(unsigned int));
                 return ret;
             }
-            case 'K': { // vector<unsigned long>
-                vector< unsigned long > * vec = static_cast< vector < unsigned long >* >(obj);
+            case 'L': { // vector<long long> - this is not used at present
+                vector< long long> * vec = static_cast< vector < long long>* >(obj);
                 assert(vec != NULL);
                 npy_intp size = (npy_intp)(vec->size());
-                ret = PyArray_SimpleNew(1, &size, NPY_ULONG);
+                ret = PyArray_SimpleNew(1, &size, NPY_LONGLONG);
                 assert(ret != NULL);
                 char * ptr = PyArray_BYTES((PyArrayObject*)ret);
-                memcpy(ptr, &(*vec)[0], size * sizeof(unsigned long));
+                memcpy(ptr, &(*vec)[0], size * sizeof(long long));
+                return ret;
+            }
+            case 'K': { // vector<unsigned long long> - this is not used at present
+                vector< unsigned long long> * vec = static_cast< vector < unsigned long long>* >(obj);
+                assert(vec != NULL);
+                npy_intp size = (npy_intp)(vec->size());
+                ret = PyArray_SimpleNew(1, &size, NPY_ULONGLONG);
+                assert(ret != NULL);
+                char * ptr = PyArray_BYTES((PyArrayObject*)ret);
+                memcpy(ptr, &(*vec)[0], size * sizeof(unsigned long long));
                 return ret;
             }
             case 'F': { // vector<float>

@@ -62,6 +62,8 @@ char shortType(string name)
         typemap.insert(pair<string, char>("vector<int>", 'v')); // moose
         typemap.insert(pair<string, char>("vector<short>", 'w')); // moose
         typemap.insert(pair<string, char>("vector<long>", 'M')); // moose
+        typemap.insert(pair<string, char>("vector<long long>", 'A')); // moose
+        typemap.insert(pair<string, char>("vector<unsigned long long>", 'B')); // moose
         typemap.insert(pair<string, char>("vector<unsigned int>", 'N')); // moose
         typemap.insert(pair<string, char>("vector<unsigned long>", 'P')); // moose       
         typemap.insert(pair<string, char>("vector<float>", 'F')); // moose
@@ -71,9 +73,9 @@ char shortType(string name)
         typemap.insert(pair<string, char>("vector<ObjId>", 'Y')); // moose
         typemap.insert(pair<string, char>("vector<DataId", 'Z')); //moose
         typemap.insert(pair<string, char>("void", '_')); // moose
-        typemap.insert(pair<string, char>("vector< vector<unsigned int> >", 'T'));
-        typemap.insert(pair<string, char>("vector< vector<int> >", 'Q'));
-        typemap.insert(pair<string, char>("vector< vector<double> >", 'R'));
+        typemap.insert(pair<string, char>("vector<vector<unsigned int>>", 'T'));
+        typemap.insert(pair<string, char>("vector<vector<int>>", 'Q'));
+        typemap.insert(pair<string, char>("vector<vector<double>>", 'R'));
     }
     map<string, char>::iterator iter = typemap.find(name);
     if (iter == typemap.end()){
@@ -111,6 +113,8 @@ char innerType(char typecode){
         innerTypeMap.insert(pair<char, char>('w', 'h')); // vector<short>
         innerTypeMap.insert(pair<char, char>('N', 'I')); // vector<unsigned int>
         innerTypeMap.insert(pair<char, char>('P', 'k')); // vector<unsigned long>
+        innerTypeMap.insert(pair<char, char>('A', 'L')); // vector<long long>
+        innerTypeMap.insert(pair<char, char>('B', 'K')); // vector<unsigned long long>
         innerTypeMap.insert(pair<char, char>('F', 'f')); // vector<float>
         innerTypeMap.insert(pair<char, char>('S', 's')); // vector<string>
         innerTypeMap.insert(pair<char, char>('T', 'N')); // vector<vector<unsigned>>
