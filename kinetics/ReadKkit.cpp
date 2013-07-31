@@ -381,7 +381,7 @@ string ReadKkit::cleanPath( const string& path ) const
 		else if ( c == '[' || c == ']' || c == '@' || c == ' ')
 			cleanString += '_';
 		else if (c == '-')
-			cleanString += "_minus_";
+			cleanString += "_dash_";
 		else
 			cleanString += c;
 	}

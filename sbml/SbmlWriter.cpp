@@ -536,7 +536,7 @@ string SbmlWriter::nameString( string str )
       switch( str.at(i) )
 	{
 	case '-':
-	  str1 = "_minus_";
+	  str1 = "_dash_";
 	  str.replace( i,1,str1 );
 	  len += str1.length()-1;
 	  break;

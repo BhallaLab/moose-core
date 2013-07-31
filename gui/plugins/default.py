@@ -176,6 +176,7 @@ class MooseTreeEditor(mtree.MooseTreeWidget):
             return
         pos = event.pos()
         item = self.itemAt(pos)
+        print "dropEvent",item
         print item.mobj.path
         try:
             self.insertChildElement(item, str(event.mimeData().text()))
@@ -756,8 +757,8 @@ class PlotWidget(QtGui.QWidget):
             axes.relim()
             axes.autoscale_view(tight=True,scalex=True,scaley=True)
         self.canvas.draw()
-
-    def saveCsv(self, line):
+    #Harsha: Passing directory path to save plots
+    def saveCsv(self, line,directory):
         """Save selected plot data in CSV file"""
         src = self.lineToDataSource[line]
         xSrc = moose.element(src.x)
@@ -767,14 +768,27 @@ class PlotWidget(QtGui.QWidget):
             x = np.linspace(0, xSrc.currentTime, len(y))
         elif isinstance(xSrc, moose.Table):
             x = xSrc.vec.copy()
-        filename = '%s.csv' % (ySrc.name)
+        filename = str(directory)+'/'+'%s.csv' % (ySrc.name)
         np.savetxt(filename, np.vstack((x, y)).transpose())
         print 'Saved data from %s and %s in %s' % (xSrc.path, ySrc.path, filename)
 
     def saveAllCsv(self):
         """Save data for all currently plotted lines"""
-        for line in self.lineToDataSource.keys():
-            self.saveCsv(line)
+        #Harsha: Plots were saved in GUI folder instead provided QFileDialog box to save to
+        #user choose
+        fileDialog2 = QtGui.QFileDialog(self)
+        fileDialog2.setFileMode(QtGui.QFileDialog.Directory)
+        fileDialog2.setWindowTitle('Select Directory to save plots')
+        fileDialog2.setOptions(QtGui.QFileDialog.ShowDirsOnly)
+        fileDialog2.setLabelText(QtGui.QFileDialog.Accept, self.tr("Save"))
+        targetPanel = QtGui.QFrame(fileDialog2)
+        targetPanel.setLayout(QtGui.QVBoxLayout())
+        layout = fileDialog2.layout()
+        layout.addWidget(targetPanel)
+        if fileDialog2.exec_():
+            directory = fileDialog2.directory().path()
+            for line in self.lineToDataSource.keys():
+                self.saveCsv(line,directory)
 
     def getMenus(self):
         if not hasattr(self, '_menus'):
@@ -889,6 +903,7 @@ class PlotView(PlotBase):
     def setupRecording(self):
         """Create the tables for recording selected data and connect them."""
         for element, field in self.getCentralWidget().getSelectedFields():
+	    print "element and filed",element,field
             self.createRecordingTable(element, field)
 
 
@@ -915,10 +930,12 @@ class PlotView(PlotBase):
         tablePath = self.dataRoot + '/' + relativePath.replace('/', '_') + '.' + field
         if moose.exists(tablePath):
             tablePath = '%s_%d' % (tablePath, element.id_.value)
-        if not moose.exists(tablePath):            
+        if not moose.exists(tablePath):
+	    print "tablePath",tablePath            
             table = moose.Table(tablePath)
             print 'Created', table.path, 'for plotting', '%s.%s' % (element.path, field)
             target = element
+	    print "\t \t target",target,"type",type(target),"field",field		
             moose.connect(table, 'requestData', target, 'get_%s' % (field))
             self._recordingDict[(target, field)] = table
             self._reverseDict[table] = (target, field)
