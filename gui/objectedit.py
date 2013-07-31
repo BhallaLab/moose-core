@@ -112,6 +112,11 @@ extra_fields = ['this',
                 'numKm',
                 'numSubstrates',
                 'concK1',
+                'meshToSpace',
+                'spaceToMesh',
+                'surface',
+                'method',
+                'alwaysDiffuse'
                 ]
         
 
@@ -142,6 +147,7 @@ class ObjectEditModel(QtCore.QAbstractTableModel):
         for fieldName in self.mooseObject.getFieldNames('valueFinfo'):
             if fieldName in extra_fields :
                 continue
+
             value = self.mooseObject.getField(fieldName)
             self.fields.append(fieldName)
         flag = QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
