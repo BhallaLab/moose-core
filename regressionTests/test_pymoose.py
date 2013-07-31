@@ -23,6 +23,8 @@ class TestNeutral(unittest.TestCase):
         self.b = moose.Neutral(self.b_path)
         self.c = moose.Neutral(self.c_path, self.c_len)
         self.d = moose.Neutral(self.d_path, self.d_dim)
+        print self.a_path, self.b_path
+        print self.a.path, self.b.path
                 
     def testNew(self):
         self.assertTrue(moose.exists(self.a_path))
@@ -155,6 +157,18 @@ class TestDelete(unittest.TestCase):
     def testGetField(self):
         with self.assertRaises(ValueError):
             print(self.oid.name)
+
+class TestValueFieldTypes(unittest.TestCase):
+    def setUp(self):
+        self.id_ = uuid.uuid4().int
+        self.container = moose.Neutral('/test%d' % (self.id_))
+        cwe = moose.getCwe()
+        self.model = moose.loadModel('../Demos/Genesis_files/Kholodenko.g', '%s/kholodenko' % (self.container.path))
+        moose.setCwe(cwe)
+    
+    def testVecUnsigned(self):
+        x = moose.element('%s/kinetics' % (self.model.path))
+        self.assertTrue(len(x.meshToSpace) > 0)
         
 if __name__ == '__main__':
     print 'PyMOOSE Regression Tests:'
