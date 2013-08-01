@@ -152,7 +152,7 @@ const Cinfo* GHK::initCinfo()
 	/////////////////////////////////////////////////////////////////////
   static Finfo* GHKFinfos[] =
     {
-      &process,			// Shared
+          &proc,			// Shared
 	  &channel,			// Shared
 	  &ghk,				// Shared
 	  &Ik,				// ReadOnlyValue
