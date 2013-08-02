@@ -1,8 +1,8 @@
 /*******************************************************************
  * File:            SbmlReader.h
  * Description:      
- * Author:          Siji P George
- * E-mail:          siji.suresh@gmail.com
+ * Author:          
+ * E-mail:          
  ********************************************************************/
 /**********************************************************************
 ** This program is part of 'MOOSE', the
@@ -17,6 +17,8 @@
 #ifndef _SBMLREADER_H
 #define _SBMLREADER_H
 #include <sbml/SBMLTypes.h>
+
+
 class SbmlReader
 {
 	struct EnzymeInfo;
@@ -24,13 +26,11 @@ class SbmlReader
 	public:
 		SbmlReader() {errorFlag_ = false;}
 		~SbmlReader() {;}
-		void  read(string filename,Id location);
+		int read(string filename,string location);
 #ifdef USE_SBML
-		map< string,Id > createCompartment(Id location);
-		map< string,Id > createMolecule(map<string,Id> &);
-		void  getGlobalParameter();
-		//void  printUnit(Model* model);
-		void  createReaction(map<string,Id> &);
+		map< string, string > createCompartment(string location);
+		map< string,string > createMolecule(map<string,string> &);
+		void  createReaction(map<string,string> &);
 		
 #endif	// USE_SBML			
 	private:
@@ -39,39 +39,11 @@ bool errorFlag_;
 		Model* model_;		
 		SBMLDocument* document_;
 		SBMLReader reader_;
-		Element* comptEl_;
-		Element* molecule_;
-		Element* reaction_;
-		map<string,Eref>elmtMap_;
-		
 		void getRules();
-		void printMembers( const ASTNode* p,vector <string> & ruleMembers );
-		void pushParmstoVector( const ASTNode* p,vector <string> & parameters );
-		void getParameters( const ASTNode* node,vector <string> & parameters );
-		double transformUnits( double msize,UnitDefinition * ud );
-		string getAnnotation( Reaction* reaction,map<string,EnzymeInfo> & );
-		//string printNotes(SBase *sb);
-		void setupEnzymaticReaction( const EnzymeInfo & einfo,string name );
-		void setupMMEnzymeReaction( Reaction * reac,string id );
-		void getKLaw( KineticLaw * klaw,bool rev,vector< double > & rate );
-		void checkErrors();
-		struct EnzymeInfo
-		{
-			Id enzyme;
-			Id complex;
-			vector<Id> substrates;
-			vector<Id> products;
-			double k1;
-			double k2;
-			double k3;
-			int stage;
-		};
+
 #endif
 		
 };
-extern const Cinfo* initKinComptCinfo();
-extern const Cinfo* initMoleculeCinfo();
-extern const Cinfo* initReactionCinfo();
-extern const Cinfo* initEnzymeCinfo();
+
 #endif // _SBMLREADER_H
 

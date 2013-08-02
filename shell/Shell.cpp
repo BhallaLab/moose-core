@@ -32,6 +32,7 @@
 
 #ifdef USE_SBML
 #include "../sbml/SbmlWriter.h"
+#include "../sbml/SbmlReader.h"
 #endif
 
 const unsigned int Shell::OkStatus = ~0;
@@ -780,6 +781,21 @@ int Shell::doWriteSBML( const string& fname, const string& modelpath,
 	return 0;
 #endif
 }
+/**
+ * read given SBML model to moose. Returns success value.
+ */
+int Shell::doReadSBML( const string& fname, const string& modelpath,
+	bool qFlag )
+{
+#ifdef USE_SBML
+	SbmlReader sr;
+	return sr.read( fname, modelpath );
+#else
+    cerr << "Shell::ReadSBML: This copy of MOOSE has not been compiled with SBML reading support.\n";
+	return 0;
+#endif
+}
+
 
 ////////////////////////////////////////////////////////////////////////
 
