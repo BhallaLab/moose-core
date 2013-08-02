@@ -230,6 +230,7 @@ extern "C" {
     PyObject * moose_loadModel(PyObject * dummy, PyObject * args);
     PyObject * moose_saveModel(PyObject * dummy, PyObject * args);
     PyObject * moose_writeSBML(PyObject * dummy, PyObject * args);
+    PyObject * moose_readSBML(PyObject * dummy, PyObject * args);
     PyObject * moose_setCwe(PyObject * dummy, PyObject * args);
     PyObject * moose_getCwe(PyObject * dummy, PyObject * args);
     PyObject * moose_copy(PyObject * dummy, PyObject * args, PyObject * kwargs);
