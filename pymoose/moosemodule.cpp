@@ -1326,7 +1326,17 @@ extern "C" {
         int ret = SHELLPTR->doWriteSBML(string(fname), string(modelpath));
         return Py_BuildValue("i", ret);
     }
-    
+
+    PyObject * moose_readSBML(PyObject * dummy, PyObject * args)
+    {
+        char * fname = NULL, * modelpath = NULL;
+        if(!PyArg_ParseTuple(args, "ss:moose_readSBML", &fname, &modelpath)){
+            return NULL;
+        }        
+        int ret = SHELLPTR->doReadSBML(string(fname), string(modelpath));
+        return Py_BuildValue("i", ret);
+    }
+
     PyDoc_STRVAR(moose_loadModel_documentation,
                  "loadModel(filename, modelpath, solverclass) -> moose.ematrix\n"
                  "\n"
@@ -2313,7 +2323,8 @@ extern "C" {
         {"stop", (PyCFunction)moose_stop, METH_VARARGS, "Stop simulation"},
         {"isRunning", (PyCFunction)moose_isRunning, METH_VARARGS, "True if the simulation is currently running."},
         {"exists", (PyCFunction)moose_exists, METH_VARARGS, "True if there is an object with specified path."},
-        {"writeSBML", (PyCFunction)moose_writeSBML, METH_VARARGS, "Export biochemical model to an SBML file."},    
+        {"writeSBML", (PyCFunction)moose_writeSBML, METH_VARARGS, "Export biochemical model to an SBML file."},
+	{"readSBML",  (PyCFunction)moose_readSBML,  METH_VARARGS, "Import SBML model to Moose."},
         {"loadModel", (PyCFunction)moose_loadModel, METH_VARARGS, moose_loadModel_documentation},
         {"saveModel", (PyCFunction)moose_saveModel, METH_VARARGS, moose_saveModel_documentation},
         {"connect", (PyCFunction)moose_connect, METH_VARARGS, moose_connect_documentation},        

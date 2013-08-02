@@ -31,7 +31,7 @@ HEADERS = \
 default: $(TARGET)
 
 $(OBJ)	: $(HEADERS)
-Shell.o:	Shell.h Neutral.h ../scheduling/Clock.h ../sbml/SbmlWriter.h
+Shell.o:	Shell.h Neutral.h ../scheduling/Clock.h ../sbml/SbmlWriter.h ../sbml/SbmlReader.h
 ShellCopy.o:	Shell.h Neutral.h
 ShellSetGet.o:	Shell.h
 ShellThreads.o:	Shell.h Neutral.h ../scheduling/Clock.h
