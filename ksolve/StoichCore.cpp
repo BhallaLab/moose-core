@@ -474,7 +474,7 @@ void StoichCore::installAndUnschedFunc( Id func, Id Pool )
 void StoichCore::buildDiffTerms( map< string, unsigned int >& diffTerms ) 
 		const
 {
-	assert( diffConst_.size() == numVarPools_ );
+	assert( diffConst_.size() == numVarPools_ + numBufPools_ + numFuncPools_ );
 	assert( diffConst_.size() <= idMap_.size() );
 	diffTerms.clear();
 	for ( unsigned int i = 0; i < diffConst_.size(); ++i )

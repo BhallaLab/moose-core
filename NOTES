@@ -22751,3 +22751,20 @@ having attached the dendrite to the soma. It was dangling earlier, but the
 new NeuroNode tree parser caught that error. Now clears unit tests.
 Lots of fixes to regression tests due to changes in ReadKkit. Still fails
 in rtTestMultCompartmentReaction.
+
+After all this, on its first real-world test the NeuroNode parser fails. 
+Can't handle filterSpines for a Traub-derived model.
+Turns out the names were spine_head and spine_neck. OK, put these in the
+options. Checkin
+
+Now going through the loadMulti.py model that I was working on. Loads model
+and clears a number of assertions after fixing for model size.
+Croaks in smksolve.addJunction.
+
+Turns out to be the pending issue of # of pools: diffConst.size, or is it
+numVarPools? See StoichCore.cpp:477.
+==========================================================================
+03 Aug. That was fixed. Now it is mundane errors in the script.
+Finally it is now loading the model, only croaking at runtime with a nan.
+
+==========================================================================
