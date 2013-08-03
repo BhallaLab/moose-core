@@ -388,6 +388,8 @@ void NeuroNode::filterSpines( vector< NeuroNode >& nodes,
 		const char* name = n.elecCompt_.element()->getName().c_str();
 		if ( strncasecmp( name, "shaft", 5 ) == 0 ||
 			strncasecmp( name, "neck", 4 ) == 0 ||
+			strncasecmp( name, "spine_neck", 10 ) == 0 ||
+			strncasecmp( name, "spine_shaft", 11 ) == 0 ||
 			strncasecmp( name, "stalk", 5 ) == 0 ) {
 			reverseShaft[i] = shaft.size();
 			shaft.push_back( i );
