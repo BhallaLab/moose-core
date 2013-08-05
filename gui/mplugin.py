@@ -258,7 +258,14 @@ class EditorWidgetBase(QtGui.QScrollArea):
     `updateModelView` function should do the actual creation and laying
     out of the visual objects.
 
+    Signals: editObject - emitted
+    with currently selected element's path as argument. Should be
+    connected to whatever slot is responsible for firing the object
+    editor in top level.
+
+
     """
+    editObject = QtCore.pyqtSignal('PyQt_PyObject')
     def __init__(self, *args):
         QtGui.QScrollArea.__init__(self, *args)
         self.modelRoot = '/'
@@ -325,6 +332,18 @@ class EditorWidgetBase(QtGui.QScrollArea):
 
     def getToolBars(self):
         return self._toolBars
+
+    def elementInsertedSlot(self, mobj):
+        self.editObject.emit(mobj.path)        
+
+    def objectEditSlot(self, mobj):
+        """Emits an `editObject(str)` signal with moose element path of currently selected tree item as
+        argument"""        
+        self.editObject.emit(moose.element(mobj).path)
+
+    def getCurrentMobj(self):
+        raise NotImplementedError('should be reimplemented in subclass')
+
     
     
 # 
