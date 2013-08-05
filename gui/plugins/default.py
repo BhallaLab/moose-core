@@ -194,12 +194,12 @@ class DefaultEditorWidget(EditorWidgetBase):
     It adds a toolbar for inserting moose objects into the element
     tree. The toolbar contains MToolButtons for moose classes.
 
-    Signals: editObject - emitted with currently selected element's
-    path as argument. Should be connected to whatever slot is
-    responsible for firing the object editor in top level.
+    Signals: editObject - inherited from EditorWidgetBase , emitted
+    with currently selected element's path as argument. Should be
+    connected to whatever slot is responsible for firing the object
+    editor in top level.
 
     """
-    editObject = QtCore.pyqtSignal('PyQt_PyObject')
     def __init__(self, *args):
         EditorWidgetBase.__init__(self, *args)
         layout = QtGui.QHBoxLayout()
@@ -234,7 +234,7 @@ class DefaultEditorWidget(EditorWidgetBase):
             self.insertMenu.addAction(action)
         self.connect(insertMapper, QtCore.SIGNAL('mapped(const QString&)'), self.tree.insertElementSlot)
         self.editAction = QtGui.QAction('Edit', self.treeMenu)
-        self.editAction.triggered.connect(self.objectEditSlot)
+        self.editAction.triggered.connect(self.editCurrentObjectSlot)
         self.tree.elementInserted.connect(self.elementInsertedSlot)
         self.treeMenu.addAction(self.editAction)
         return self.treeMenu
@@ -246,17 +246,18 @@ class DefaultEditorWidget(EditorWidgetBase):
 
     def updateItemSlot(self, mobj):
         """This should be overridden by derived classes to connect appropriate
-        slot for updating the display item."""
+        slot for updating the display item.
+
+        """
         self.tree.updateItemSlot(mobj)
 
-    def objectEditSlot(self):
-        """Emits an `editObject(str)` signal with moose element path of currently selected tree item as
-        argument"""
+    def editCurrentObjectSlot(self):
+        """Emits an `editObject(str)` signal with moose element path of
+        currently selected tree item as argument
+
+        """
         mobj = self.tree.currentItem().mobj
         self.editObject.emit(mobj.path)
-
-    def elementInsertedSlot(self, mobj):
-        self.editObject.emit(mobj.path)        
 
     def sizeHint(self):
         return QtCore.QSize(400, 300)
