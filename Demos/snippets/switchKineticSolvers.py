@@ -20,7 +20,7 @@ def main():
 		# switch methods
 		modelId[0].method = 'gssa'
 		for vol in ( 1e-20, 1e-19, 1e-18, 1e-17 ):
-			moose.element( '/model/kinetics' ).size = vol
+			moose.element( '/model/kinetics' ).volume = vol
 			moose.reinit() # Start over from time zero
 			moose.start( 100.0 ) # Run the model for 100 seconds.
 

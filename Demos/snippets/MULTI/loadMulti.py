@@ -93,21 +93,25 @@ def moveCompt( path, oldParent, newParent ):
 def loadChem( neuroCompt, spineCompt, psdCompt ):
 	# We need the compartments to come in with a volume of 1 to match the
 	# original CubeMesh.
-	assert( neuroCompt.size == 1.0 )
-	assert( spineCompt.size == 1.0 )
-	assert( psdCompt.size == 1.0 )
+	assert( neuroCompt.volume == 1.0 )
+	assert( spineCompt.volume == 1.0 )
+	assert( psdCompt.volume == 1.0 )
 	assert( neuroCompt.mesh.num == 1 )
-	print 'size = ', neuroCompt.mesh[0].size
-	assert( neuroCompt.mesh[0].size == 1.0 )
+	print 'volume = ', neuroCompt.mesh[0].volume
+	#assert( neuroCompt.mesh[0].volume == 1.0 ) 
+	#an unfortunate mismatch
+	# So we'll have to resize the volumes of the current compartments to the
+	# new ones.
+
 	modelId = moose.loadModel( 'psd_merged30.g', '/model', 'ee' )
 	chem = moose.element( '/model/model' )
 	chem.name = 'chem'
 	oldN = moose.element( '/model/chem/compartment_1' )
 	oldS = moose.element( '/model/chem/compartment_2' )
 	oldP = moose.element( '/model/chem/kinetics' )
-	oldN.size = 1
-	oldS.size = 1
-	oldP.size = 1
+	oldN.volume = neuroCompt.mesh[0].volume
+	oldS.volume = spineCompt.mesh[0].volume
+	oldP.volume = psdCompt.mesh[0].volume
 	moveCompt( '/model/chem/kinetics/DEND', oldN, neuroCompt )
 	moveCompt( '/model/chem/kinetics/SPINE', oldS, spineCompt )
 	moveCompt( '/model/chem/kinetics/PSD', oldP, psdCompt )
@@ -124,15 +128,15 @@ def makeNeuroMeshModel():
 	synInput.refractT = 47e-3
 
 	neuroCompt = moose.NeuroMesh( '/model/neuroMesh' )
-	print 'neuroMeshSize = ', neuroCompt.mesh[0].size
+	print 'neuroMeshvolume = ', neuroCompt.mesh[0].volume
 	neuroCompt.separateSpines = 1
 	neuroCompt.diffLength = diffLength
 	neuroCompt.geometryPolicy = 'cylinder'
 	spineCompt = moose.SpineMesh( '/model/spineMesh' )
-	print 'spineMeshSize = ', spineCompt.mesh[0].size
+	print 'spineMeshvolume = ', spineCompt.mesh[0].volume
 	moose.connect( neuroCompt, 'spineListOut', spineCompt, 'spineList', 'OneToOne' )
 	psdCompt = moose.PsdMesh( '/model/psdMesh' )
-	print 'psdMeshSize = ', psdCompt.mesh[0].size
+	print 'psdMeshvolume = ', psdCompt.mesh[0].volume
 	moose.connect( neuroCompt, 'psdListOut', psdCompt, 'psdList', 'OneToOne' )
 	loadChem( neuroCompt, spineCompt, psdCompt )
 	moose.le( '/model/chem' )
@@ -164,7 +168,7 @@ def makeNeuroMeshModel():
 	moose.connect( pm, 'remesh', pmksolve, 'remesh' )
 	#print "psd: nv=", pmksolve.numLocalVoxels, ", nav=", pmksolve.numAllVoxels, pmksolve.numVarPools, pmksolve.numAllPools
 	#
-	print 'neuroMeshSize = ', neuroCompt.mesh[0].size
+	print 'neuroMeshvolume = ', neuroCompt.mesh[0].volume
 
 	#print 'Assigning the cell model'
 	# Now to set up the model.
@@ -187,18 +191,18 @@ def makeNeuroMeshModel():
 
 	mesh = moose.ematrix( '/model/chem/neuroMesh/mesh' )
 	#for i in range( ndc ):
-	#	print 's[', i, '] = ', mesh[i].size
+	#	print 's[', i, '] = ', mesh[i].volume
 	mesh2 = moose.ematrix( '/model/chem/spineMesh/mesh' )
 	print 'numMainCompt = ', moose.element( '/model/chem/neuroMesh' ).mesh.num
 	print 'numSpines = ', moose.element( '/model/chem/spineMesh/mesh' ).localNumField
-	print 'spine mesh.size = ', mesh2.size
+	print 'spine mesh.volume = ', mesh2.volume
 #	for i in range( sdc ):
-#		print 's[', i, '] = ', mesh2[i].size
+#		print 's[', i, '] = ', mesh2[i].volume
 	print 'numPSD = ', moose.element( '/model/chem/psdMesh/mesh' ).localNumField
 	mesh = moose.ematrix( '/model/chem/psdMesh/mesh' )
-	print 'psd mesh.size = ', mesh.size
+	print 'psd mesh.volume = ', mesh.volume
 	#for i in range( pdc ):
-	#	print 's[', i, '] = ', mesh[i].size
+	#	print 's[', i, '] = ', mesh[i].volume
 	#
 	# We need to use the spine solver as the master for the purposes of
 	# these calculations. This will handle the diffusion calculations
