@@ -22767,4 +22767,41 @@ numVarPools? See StoichCore.cpp:477.
 03 Aug. That was fixed. Now it is mundane errors in the script.
 Finally it is now loading the model, only croaking at runtime with a nan.
 
+After some dredging, seems like Sinit has values in the 1e20 range.
+Should check what the system is doing at the Python level. C++ is too
+convoluted.
+
+The dend compartment seems reasonable.
+The spine compartment is crashing. I thought volumes were failing but
+when I go and check in gdb they are all set correctly.
+
+Looked further. PSD volume is unreasonable. Ah. It is an area. Problem
+here for # scaling and diffusion. Should I rescale the area to 5 nm to make
+it the thickness of a membrane? Still won't give 1e20 for Sinit, though.
+That needs a volume of 1.
+
+
+==========================================================================
+05 Aug
+Unsure if this recurring problem is a pymoose interface one or a real
+problem with lookups. Need to work around.
+
+==========================================================================
+06 Aug
+Tracked down issue of # of molecules
+A. The mesh entries in NeuroMesh and SpineMesh and PsdMesh have default volumes 
+	of the order of 8e-19. Neuromesh is 8 times smaller, actually. 
+	CubeMesh has a default volume of 1.
+B. The NeuroMesh as a whole has an incompatible total default volume of 1. 
+	Likewise spine and psd mesh.
+C. PoolBase stores nInit, not concs
+D. When I moved the molecules from the original CubeMesh to the other meshes
+	I did not rescale concs. This would not be needed if pools stored
+	concInit.
+
+Went through and renamed all the 'size' fields of pools, meshes and 
+compartments to volume, to remove a major ambiguity. This was a massive
+refactoring.
+Now clears unit tests but stuck in regression tests.
+
 ==========================================================================

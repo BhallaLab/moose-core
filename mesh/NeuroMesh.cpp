@@ -230,8 +230,7 @@ NeuroMesh::NeuroMesh()
 		nodeIndex_(1, 0 ),
 		vs_( 1, NA * 1e-9 ),
 		area_( 1, 1.0e-12 ),
-		size_( 1.0e-18 ),
-		diffLength_( 0.5e-6 ),
+		diffLength_( 1.0e-6 ),
 		separateSpines_( false ),
 		geometryPolicy_( "default" ),
 		surfaceGranularity_( 0.1 )
@@ -243,7 +242,6 @@ NeuroMesh::NeuroMesh()
 
 NeuroMesh::NeuroMesh( const NeuroMesh& other )
 	:
-		size_( other.size_ ),
 		diffLength_( other.diffLength_ ),
 		cell_( other.cell_ ),
 		separateSpines_( other.separateSpines_ ),
@@ -257,7 +255,7 @@ NeuroMesh& NeuroMesh::operator=( const NeuroMesh& other )
 	nodeIndex_ = other.nodeIndex_;
 	vs_ = other.vs_;
 	area_ = other.area_;
-	size_ = other.size_;
+	volume_ = other.volume_;
 	diffLength_ = other.diffLength_;
 	cell_ = other.cell_;
 	separateSpines_ = other.separateSpines_;
@@ -576,7 +574,7 @@ bool NeuroMesh::filterSpines( Id compt )
 // I assume 'cell' is the parent of the compartment tree.
 void NeuroMesh::setCell( const Eref& e, const Qinfo* q, Id cell )
 {
-	double oldVol = getMeshEntrySize( 0 );
+	double oldVol = getMeshEntryVolume( 0 );
 	vector< Id > compts;
 	wildcardFind( cell.path() + "/##", compts );
 	setCellPortion( cell, compts );
@@ -870,7 +868,7 @@ unsigned int NeuroMesh::getMeshDimensions( unsigned int fid ) const
 }
 
 /// Virtual function to return volume of mesh Entry.
-double NeuroMesh::getMeshEntrySize( unsigned int fid ) const
+double NeuroMesh::getMeshEntryVolume( unsigned int fid ) const
 {
 	if ( nodeIndex_.size() == 0 ) 
 		return 1.0; // A default value to use before init
@@ -932,12 +930,12 @@ vector< double > NeuroMesh::getDiffusionScaling( unsigned int fid ) const
 
 /// Virtual function to return volume of mesh Entry, including
 /// for diffusively coupled voxels from other solvers.
-double NeuroMesh::extendedMeshEntrySize( unsigned int fid ) const
+double NeuroMesh::extendedMeshEntryVolume( unsigned int fid ) const
 {
 	if ( fid < nodeIndex_.size() ) {
-		return getMeshEntrySize( fid );
+		return getMeshEntryVolume( fid );
 	} else {
-		return MeshCompt::extendedMeshEntrySize( fid - nodeIndex_.size() );
+		return MeshCompt::extendedMeshEntryVolume( fid - nodeIndex_.size() );
 	}
 }
 
@@ -953,7 +951,7 @@ void NeuroMesh::innerHandleRequestMeshStats( const Eref& e, const Qinfo* q,
 		const SrcFinfo2< unsigned int, vector< double > >* meshStatsFinfo
 	)
 {
-	vector< double > ret( size_ / nodeIndex_.size() ,1 );
+	vector< double > ret( volume_ / nodeIndex_.size() ,1 );
 	meshStatsFinfo->send( e, q->threadNum(), 1, ret );
 }
 
@@ -963,7 +961,7 @@ void NeuroMesh::innerHandleNodeInfo(
 {
 	unsigned int numEntries = nodeIndex_.size();
 	vector< double > vols( numEntries, 0.0 );
-	double oldVol = getMeshEntrySize( 0 );
+	double oldVol = getMeshEntryVolume( 0 );
 	for ( unsigned int i = 0; i < numEntries; ++i ) {
 		assert( nodeIndex_[i] < nodes_.size() );
 		NeuroNode& node = nodes_[ nodeIndex_[i] ];
@@ -1100,7 +1098,7 @@ void NeuroMesh::transmitChange( const Eref& e, const Qinfo* q, double oldVol )
 	}
 	assert( vols.size() == nodeIndex_.size() );
 	for ( unsigned int i = 0; i < vols.size(); ++i ) {
-		vols[i] = getMeshEntrySize( i );
+		vols[i] = getMeshEntryVolume( i );
 	}
 
 	// This message tells the Stoich about the new mesh, and also about

@@ -330,7 +330,7 @@ void testCylMesh()
 	assert( doubleEq( cm.getLambda(), totLen / 5 ) );
 
 	///////////////////////////////////////////////////////////////
-	assert( doubleEq( cm.getMeshEntrySize( 2 ), 2.5 * 2.5 * PI * totLen / 5 ) );
+	assert( doubleEq( cm.getMeshEntryVolume( 2 ), 2.5 * 2.5 * PI * totLen / 5 ) );
 
 	///////////////////////////////////////////////////////////////
 	// LenSlope/totLen = 0.016 = 
@@ -402,9 +402,9 @@ void testCylMesh()
 	assert( index == cm.innerGetNumEntries() - 1 );
 
 	///////////////////////////////////////////////////////////////
-	dist = cm.selectGridSize( 10.0 );
+	dist = cm.selectGridVolume( 10.0 );
 	assert( doubleEq( dist, 0.1 * cm.getLambda() ) ); 
-	dist = cm.selectGridSize( 0.1 );
+	dist = cm.selectGridVolume( 0.1 );
 	assert( dist <= 0.01 );
 
 	///////////////////////////////////////////////////////////////
@@ -514,7 +514,7 @@ void testMidLevelCylMesh()
 	ObjId oid( meshId, DataId( 2 ) );
 
 	double totLen = sqrt( 29.0 );
-	assert( doubleEq( Field< double >::get( oid, "size" ),
+	assert( doubleEq( Field< double >::get( oid, "volume" ),
 		1.5 * 1.5 * PI * totLen / 5 ) );
 
 	vector< unsigned int > neighbors = 
@@ -1094,7 +1094,7 @@ void testNeuroMeshBranching()
 	vector< double > flux( ndc, 0.0 );
 	vector< double > vol( ndc, 0.0 );
 	for ( unsigned int i = 0; i < ndc; ++i )
-		vol[i] = neuro->getMeshEntrySize( i );
+		vol[i] = neuro->getMeshEntryVolume( i );
 
 	assert( doubleEq( vol[0], dia * dia * 0.25 * PI * diffLength ) );
 	assert( doubleEq( vol[1], dia * dia * 0.125 * PI * diffLength ) );
@@ -1809,7 +1809,7 @@ void testSpineAndPsdMesh()
 	for ( unsigned int i = 0; i < pdc; ++i ) {
 		assert( p->parent( i ) == i );
 		ObjId oi( pe, i );
-		double area = Field< double >::get( oi, "size" );
+		double area = Field< double >::get( oi, "volume" );
 		assert( doubleEq( area, 1e-12 * 0.25 * PI ) );
 		unsigned int dim = Field< unsigned int >::get( oi, "dimensions" );
 		assert( dim == 2 );

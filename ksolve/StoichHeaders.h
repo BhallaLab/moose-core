@@ -19,7 +19,7 @@ class MathFunc;
 
 class Stoich;
 #include "../kinetics/PoolBase.h"
-#include "../kinetics/lookupSizeFromMesh.h"
+#include "../kinetics/lookupVolumeFromMesh.h"
 #include "Port.h"
 #include "../mesh/VoxelJunction.h"
 #include "SolverJunction.h"

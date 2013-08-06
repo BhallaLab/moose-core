@@ -8,7 +8,7 @@
 **********************************************************************/
 
 #include "header.h"
-#include "lookupSizeFromMesh.h"
+#include "lookupVolumeFromMesh.h"
 #include "PoolBase.h"
 #include "Pool.h"
 
@@ -63,9 +63,9 @@ const SrcFinfo1< double >& nOut =
 	*dynamic_cast< const SrcFinfo1< double >* >( 
 	poolCinfo->findFinfo( "nOut" ) );
 
-const SrcFinfo1< double >* requestSize = 
+const SrcFinfo1< double >* requestVolume = 
 	dynamic_cast< const SrcFinfo1< double >* >( 
-	poolCinfo->findFinfo( "requestSize" ) );
+	poolCinfo->findFinfo( "requestVolume" ) );
 
 Pool::Pool()
 	: n_( 0.0 ), nInit_( 0.0 ), diffConst_( 0.0 ),
@@ -171,14 +171,14 @@ void Pool::vHandleMolWt( const Eref& e, const Qinfo* q, double v )
 
 void Pool::vSetN( const Eref& e, const Qinfo* q, double v )
 {
-//	conc_ =  v /  ( NA * lookupSizeFromMesh( e, requestSize() ) );
+//	conc_ =  v /  ( NA * lookupVolumeFromMesh( e, requestVolume() ) );
 	n_ = v;
 }
 
 double Pool::vGetN( const Eref& e, const Qinfo*q ) const
 {
 	return n_;
-// 	return NA * conc_ * lookupSizeFromMesh( e, requestSize() );
+// 	return NA * conc_ * lookupVolumeFromMesh( e, requestVolume() );
 }
 
 void Pool::vSetNinit( const Eref& e, const Qinfo* q, double v )
@@ -191,26 +191,26 @@ double Pool::vGetNinit( const Eref& e, const Qinfo* q ) const
 	return nInit_;
 }
 
-// Conc is given in millimolar. Size is in m^3
+// Conc is given in millimolar. Volume is in m^3
 void Pool::vSetConc( const Eref& e, const Qinfo* q, double c ) 
 {
-	n_ = NA * c * lookupSizeFromMesh( e, requestSize );
+	n_ = NA * c * lookupVolumeFromMesh( e, requestVolume );
 }
 
 // Returns conc in millimolar.
 double Pool::vGetConc( const Eref& e, const Qinfo* q ) const
 {
-	return (n_ / NA) / lookupSizeFromMesh( e, requestSize );
+	return (n_ / NA) / lookupVolumeFromMesh( e, requestVolume );
 }
 
 void Pool::vSetConcInit( const Eref& e, const Qinfo* q, double c )
 {
-	nInit_ = NA * c * lookupSizeFromMesh( e, requestSize );
+	nInit_ = NA * c * lookupVolumeFromMesh( e, requestVolume );
 }
 
 double Pool::vGetConcInit( const Eref& e, const Qinfo* q ) const
 {
-	return ( nInit_ / NA ) / lookupSizeFromMesh( e, requestSize );
+	return ( nInit_ / NA ) / lookupVolumeFromMesh( e, requestVolume );
 }
 
 void Pool::vSetDiffConst( const Eref& e, const Qinfo* q, double v )
@@ -223,14 +223,14 @@ double Pool::vGetDiffConst( const Eref& e, const Qinfo* q ) const
 	return diffConst_;
 }
 
-void Pool::vSetSize( const Eref& e, const Qinfo* q,  double v )
+void Pool::vSetVolume( const Eref& e, const Qinfo* q,  double v )
 {
 	assert( 0 ); // Don't currently know how to do this.
 }
 
-double Pool::vGetSize( const Eref& e, const Qinfo* q ) const
+double Pool::vGetVolume( const Eref& e, const Qinfo* q ) const
 {
-	return lookupSizeFromMesh( e, requestSize );
+	return lookupVolumeFromMesh( e, requestVolume );
 }
 
 void Pool::vSetSpecies( const Eref& e, const Qinfo* q,  SpeciesId v )

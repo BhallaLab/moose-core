@@ -15,12 +15,12 @@
 
 const SpeciesId DefaultSpeciesId = 0;
 
-static SrcFinfo1< double >* requestSize() {
-	static SrcFinfo1< double > requestSize( 
-		"requestSize", 
-		"Requests Size of pool from matching mesh entry"
+static SrcFinfo1< double >* requestVolume() {
+	static SrcFinfo1< double > requestVolume( 
+		"requestVolume", 
+		"Requests Volume of pool from matching mesh entry"
 	);
-	return &requestSize;
+	return &requestVolume;
 }
 
 const Cinfo* PoolBase::initCinfo()
@@ -63,15 +63,15 @@ const Cinfo* PoolBase::initCinfo()
 			&PoolBase::getConcInit
 		);
 
-		static ElementValueFinfo< PoolBase, double > size(
-			"size",
-			"Size of compartment. Units are SI. "
-			"Utility field, the actual size info is "
+		static ElementValueFinfo< PoolBase, double > volume(
+			"volume",
+			"Volume of compartment. Units are SI. "
+			"Utility field, the actual volume info is "
 			"stored on a volume mesh entry in the parent compartment."
 			"This is hooked up by a message. If the message isn't"
-			"available size is just taken as 1",
-			&PoolBase::setSize,
-			&PoolBase::getSize
+			"available volume is just taken as 1",
+			&PoolBase::setVolume,
+			&PoolBase::getVolume
 		);
 
 		static ElementValueFinfo< PoolBase, unsigned int > speciesId(
@@ -154,7 +154,7 @@ const Cinfo* PoolBase::initCinfo()
 		);
 
 		static Finfo* meshShared[] = {
-			&remesh, requestSize()
+			&remesh, requestVolume()
 		};
 
 		static SharedFinfo mesh( "mesh",
@@ -168,7 +168,7 @@ const Cinfo* PoolBase::initCinfo()
 		&diffConst,	// Value
 		&conc,		// Value
 		&concInit,	// Value
-		&size,		// Readonly Value
+		&volume,	// Readonly Value
 		&speciesId,	// Value
 		&group,			// DestFinfo
 		&reac,				// SharedFinfo
@@ -274,7 +274,7 @@ double PoolBase::getNinit( const Eref& e, const Qinfo* q ) const
 	return vGetNinit( e, q );
 }
 
-// Conc is given in millimolar. Size is in m^3
+// Conc is given in millimolar. Volume is in m^3
 void PoolBase::setConc( const Eref& e, const Qinfo* q, double c ) 
 {
 	vSetConc( e, q, c );
@@ -306,14 +306,14 @@ double PoolBase::getDiffConst(const Eref& e, const Qinfo* q ) const
 	return vGetDiffConst( e, q );
 }
 
-void PoolBase::setSize( const Eref& e, const Qinfo* q, double v )
+void PoolBase::setVolume( const Eref& e, const Qinfo* q, double v )
 {
-	vSetSize( e, q, v );
+	vSetVolume( e, q, v );
 }
 
-double PoolBase::getSize( const Eref& e, const Qinfo* q ) const
+double PoolBase::getVolume( const Eref& e, const Qinfo* q ) const
 {
-	return vGetSize( e, q );
+	return vGetVolume( e, q );
 }
 
 void PoolBase::setSpecies( const Eref& e, const Qinfo* q, unsigned int v )

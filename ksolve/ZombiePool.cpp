@@ -10,7 +10,7 @@
 #include "StoichHeaders.h"
 #include "ZombiePool.h"
 // #include "Pool.h"
-#include "lookupSizeFromMesh.h"
+#include "lookupVolumeFromMesh.h"
 #include "ElementValueFinfo.h"
 // #include "ZombieHandler.h"
 
@@ -53,9 +53,9 @@ const Cinfo* ZombiePool::initCinfo()
 //////////////////////////////////////////////////////////////
 static const Cinfo* zombiePoolCinfo = ZombiePool::initCinfo();
 
-static const SrcFinfo1< double >* requestSize = 
+static const SrcFinfo1< double >* requestVolume = 
     dynamic_cast< const SrcFinfo1< double >* >(  
-    zombiePoolCinfo->findFinfo( "requestSize" ) );
+    zombiePoolCinfo->findFinfo( "requestVolume" ) );
 
 ZombiePool::ZombiePool()
 {;}
@@ -114,7 +114,7 @@ void ZombiePool::vSetNinit( const Eref& e, const Qinfo* q, double v )
 	unsigned int i = e.index().value();
 	stoich_->innerSetNinit( i, e.id(), v );
 	if ( i == 0 ) {
-		double conc = v / ( NA * lookupSizeFromMesh( e, requestSize ) );
+		double conc = v / ( NA * lookupVolumeFromMesh( e, requestVolume ) );
 		stoich_->setConcInit( stoich_->convertIdToPoolIndex( e.id() ), 
 			conc );
 	}
@@ -129,7 +129,7 @@ double ZombiePool::vGetNinit( const Eref& e, const Qinfo* q ) const
 void ZombiePool::vSetConc( const Eref& e, const Qinfo* q, double conc )
 {
 	// unsigned int pool = convertIdToPoolIndex( e.id() );
-	double n = NA * conc * lookupSizeFromMesh( e, requestSize );
+	double n = NA * conc * lookupVolumeFromMesh( e, requestVolume );
 	stoich_->innerSetN( e.index().value(), e.id(), n );
 }
 
@@ -137,12 +137,12 @@ double ZombiePool::vGetConc( const Eref& e, const Qinfo* q ) const
 {
 	unsigned int pool = stoich_->convertIdToPoolIndex( e.id() );
 	return stoich_->S( e.index().value() )[ pool ] / 
-		( NA * lookupSizeFromMesh( e, requestSize ) );
+		( NA * lookupVolumeFromMesh( e, requestVolume ) );
 }
 
 void ZombiePool::vSetConcInit( const Eref& e, const Qinfo* q, double conc )
 {
-	double n = NA * conc * lookupSizeFromMesh( e, requestSize );
+	double n = NA * conc * lookupVolumeFromMesh( e, requestVolume );
 	unsigned int i = e.index().value();
 	stoich_->innerSetNinit( i, e.id(), n );
 	if ( i == 0 )
@@ -153,7 +153,7 @@ void ZombiePool::vSetConcInit( const Eref& e, const Qinfo* q, double conc )
 double ZombiePool::vGetConcInit( const Eref& e, const Qinfo* q ) const
 {
 	unsigned int pool = stoich_->convertIdToPoolIndex( e.id() );
-	return stoich_->Sinit( e.index().value() )[ pool ] / ( NA * lookupSizeFromMesh( e, requestSize ) );
+	return stoich_->Sinit( e.index().value() )[ pool ] / ( NA * lookupVolumeFromMesh( e, requestVolume ) );
 }
 
 void ZombiePool::vSetDiffConst( const Eref& e, const Qinfo* q, double v )
@@ -166,14 +166,14 @@ double ZombiePool::vGetDiffConst( const Eref& e, const Qinfo* q ) const
 	return stoich_->getDiffConst( stoich_->convertIdToPoolIndex( e.id() ) );
 }
 
-void ZombiePool::vSetSize( const Eref& e, const Qinfo* q, double v )
+void ZombiePool::vSetVolume( const Eref& e, const Qinfo* q, double v )
 {
 	// Illegal operation.
 }
 
-double ZombiePool::vGetSize( const Eref& e, const Qinfo* q ) const
+double ZombiePool::vGetVolume( const Eref& e, const Qinfo* q ) const
 {
-	return lookupSizeFromMesh( e, requestSize );
+	return lookupVolumeFromMesh( e, requestVolume );
 }
 
 void ZombiePool::vSetSpecies( const Eref& e, const Qinfo* q, unsigned int v )

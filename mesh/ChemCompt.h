@@ -33,14 +33,14 @@ class ChemCompt
 		 * Returns volume, area, or length of compartment, depending on
 		 * dimensionality.
 		 */
-		double getEntireSize( const Eref& e, const Qinfo* q ) const;
+		double getEntireVolume( const Eref& e, const Qinfo* q ) const;
 		/**
 		 * This is a little nasty. It calls buildDefaultMesh with the 
 		 * current numEntries. Should not be used if the mesh has been
 		 * changed to something more interesting.
 		 * Perhaps I need to do something like changeVolOfExistingMesh.
 		 */
-		void setEntireSize( const Eref& e, const Qinfo* q, double size );
+		void setEntireVolume( const Eref& e, const Qinfo* q, double volume);
 
 		/**
 		 * Returns # of dimensions of mesh. 
@@ -64,16 +64,16 @@ class ChemCompt
 
 		/**
 		 * buildDefaultMesh tells the ChemCompt to make a standard mesh 
-		 * partitioning with the specified total size (typically volume)
-		 * and the specified number of subdivisions. For example, 
-		 * a CubeMesh of size 8 and subdivisions 8 would make a 2x2x2 mesh.
+		 * partitioning with the specified total volume
+		 * and the specified number of subdivisions. For example, a
+		 * CubeMesh of volume 8 and subdivisions 8 would make a 2x2x2 mesh.
 		 * This function is specialized in each derived class.
 		 */
 		void buildDefaultMesh( const Eref& e, const Qinfo* q,
-			double size, unsigned int numEntries );
+			double volume, unsigned int numEntries );
 		virtual void innerBuildDefaultMesh(
 			const Eref& e, const Qinfo* q,
-			double size, unsigned int numEntries ) = 0;
+			double volume, unsigned int numEntries ) = 0;
 
 		void handleRequestMeshStats( const Eref& e, const Qinfo* q );
 		virtual void innerHandleRequestMeshStats(
@@ -202,7 +202,7 @@ class ChemCompt
 		virtual unsigned int getMeshDimensions( unsigned int fid )
 			const = 0;
 		/// Virtual function to return volume of mesh Entry.
-		virtual double getMeshEntrySize( unsigned int fid ) 
+		virtual double getMeshEntryVolume( unsigned int fid ) 
 			const = 0;
 		/// Virtual function to return coords of mesh Entry.
 		virtual vector< double > getCoordinates( unsigned int fid ) 
@@ -218,11 +218,11 @@ class ChemCompt
 			const = 0;
 
 		/// Volume of mesh Entry including abutting diff-coupled voxels
-		virtual double extendedMeshEntrySize( unsigned int fid ) 
+		virtual double extendedMeshEntryVolume( unsigned int fid ) 
 			const = 0;
 
 		/// clear out extended mesh entries for rebuilding.
-		virtual void clearExtendedMeshEntrySize() = 0;
+		virtual void clearExtendedMeshEntryVolume() = 0;
 
 		/**
 		 * Function to look up scale factor derived from area and length
@@ -261,7 +261,7 @@ class ChemCompt
 		static const Cinfo* initCinfo();
 
 	protected:
-		double size_; /// Volume or area
+		double volume_; /// Volume or area
 		Id stoich_; /// Identifier for stoich object doing diffusion.
 
 		/**

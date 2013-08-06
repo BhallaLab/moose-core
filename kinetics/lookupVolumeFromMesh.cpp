@@ -14,7 +14,7 @@
 #include "../mesh/Boundary.h"
 #include "../mesh/ChemCompt.h"
 */
-#include "lookupSizeFromMesh.h"
+#include "lookupVolumeFromMesh.h"
 
 // Utility function: return the compartment in which the specified
 // object is located.
@@ -25,7 +25,7 @@ Id getCompt( Id id )
 	const Element* e = id.element();
 	if ( e->cinfo()->isA( "PoolBase" ) ) {
 		vector< Id > neighbours;
-		if ( e->getNeighbours( neighbours, e->cinfo()->findFinfo( "requestSize" ) ) == 1 ) {
+		if ( e->getNeighbours( neighbours, e->cinfo()->findFinfo( "requestVolume" ) ) == 1 ) {
 			Id pa = Neutral::parent( neighbours[0].eref() ).id;
 			if ( pa.element()->cinfo()->isA( "ChemCompt" ) )
 				return pa;
@@ -41,7 +41,7 @@ Id getCompt( Id id )
 
 
 /// Utility function to find the size of a pool.
-double lookupSizeFromMesh( const Eref& e, const SrcFinfo* sf )
+double lookupVolumeFromMesh( const Eref& e, const SrcFinfo* sf )
 {
 	const vector< MsgFuncBinding >* mfb = 
 		e.element()->getMsgAndFunc( sf->getBindIndex() );
@@ -75,8 +75,8 @@ unsigned int getReactantVols( const Eref& reac, const SrcFinfo* pools,
 {
 	static const unsigned int meshIndex = 0;
 	static const Cinfo* poolCinfo = Cinfo::find( "PoolBase" );
-	static const Finfo* f1 = poolCinfo->findFinfo( "requestSize" );
-	static const SrcFinfo* poolRequestSize = 
+	static const Finfo* f1 = poolCinfo->findFinfo( "requestVolume" );
+	static const SrcFinfo* poolRequestVolume = 
 		dynamic_cast< const SrcFinfo* >( f1 );
 
 	const vector< MsgFuncBinding >* mfb = 
@@ -93,7 +93,7 @@ unsigned int getReactantVols( const Eref& reac, const SrcFinfo* pools,
 			assert( pool != reac.element() );
 			Eref pooler( pool, meshIndex );
 			if ( pool->cinfo()->isA( "PoolBase" ) ) {
-				v = lookupSizeFromMesh( pooler, poolRequestSize );
+				v = lookupVolumeFromMesh( pooler, poolRequestVolume );
 			} else {
 				cout << "Error: getReactantVols: pool is of unknown type\n";
 				assert( 0 );
@@ -138,11 +138,11 @@ double convertConcToNumRateUsingMesh( const Eref& e, const SrcFinfo* pools,
 		Id compt = getCompt( e.id() );
 		if ( compt != Id() ) {
 			Id mesh( compt.value() + 1 );
-			double meshVol = Field< double >::get( mesh, "size" );
+			double meshVol = Field< double >::get( mesh, "volume" );
 			/*
 			ChemCompt* cc = 
 					reinterpret_cast< ChemCompt* >( compt.eref().data() ):
-			meshVol = cc->getMeshEntrySize( 0 );
+			meshVol = cc->getMeshEntryVolume( 0 );
 			*/
 			conv /= meshVol * NA;
 		}
@@ -157,55 +157,6 @@ double convertConcToNumRateUsingMesh( const Eref& e, const SrcFinfo* pools,
 	return conv;
 }
 
-
-/**
- * Generates conversion factor for rates from concentration to mol# units.
- * Assumes that all reactant pools (substrate and product) are within the
- * same mesh entry and therefore have the same volume.
- */
-/*
-double convertConcToNumRateUsingMesh( const Eref& e, const SrcFinfo* pools, 
-	unsigned int meshIndex, double scale, bool doPartialConversion )
-{
-	static const Cinfo* poolCinfo = Cinfo::find( "Pool" );
-	static const Cinfo* zombiePoolCinfo = Cinfo::find( "ZombiePool" );
-
-	static const Finfo* f1 = poolCinfo->findFinfo( "requestSize" );
-	static const SrcFinfo* poolRequestSize = 
-		dynamic_cast< const SrcFinfo* >( f1 );
-
-	static const Finfo* f2 = zombiePoolCinfo->findFinfo( "requestSize" );
-	static const SrcFinfo* zombiePoolRequestSize = 
-		dynamic_cast< const SrcFinfo* >( f2 );
-
-	const vector< MsgFuncBinding >* mfb = 
-		e.element()->getMsgAndFunc( pools->getBindIndex() );
-	double conversion = 1.0;
-	if ( mfb && mfb->size() > 0 ) {
-		if ( doPartialConversion || mfb->size() > 1 ) {
-			Element* pool = Msg::getMsg( (*mfb)[0].mid )->e2();
-			if ( pool == e.element() )
-				pool = Msg::getMsg( (*mfb)[0].mid )->e1();
-			assert( pool != e.element() );
-			Eref pooler( pool, meshIndex );
-			if ( pool->cinfo() == poolCinfo ) {
-				conversion = lookupSizeFromMesh( pooler, poolRequestSize );
-			} else if ( pool->cinfo()->isA( "ZombiePool" ) ) {
-				conversion = lookupSizeFromMesh( pooler, zombiePoolRequestSize );
-			}
-			conversion *= scale * NA;
-			double power = doPartialConversion + mfb->size() - 1;
-			if ( power > 1.0 ) {
-				conversion = pow( conversion, power );
-			}
-		}
-		if ( conversion <= 0 ) 
-			conversion = 1.0;
-	}
-
-	return conversion;
-}
-*/
 
 /**
  * Generates conversion factor for rates from concentration to mol# units.

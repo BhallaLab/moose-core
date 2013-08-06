@@ -87,7 +87,7 @@ class CubeMesh: public MeshCompt
 		/// Virtual function to return dimensions of specified entry.
 		unsigned int getMeshDimensions( unsigned int fid ) const;
 		/// Virtual function to return volume of mesh Entry.
-		double getMeshEntrySize( unsigned int fid ) const;
+		double getMeshEntryVolume( unsigned int fid ) const;
 		/// Virtual function to return coords of mesh Entry.
 		vector< double > getCoordinates( unsigned int fid ) const;
 		/// Virtual function to return diffusion X-section area
@@ -101,7 +101,7 @@ class CubeMesh: public MeshCompt
 		 * Utility function to return volume of any voxel including those
 		 * diffusively coupled and aubtting the present volume.
 		 */
-		double extendedMeshEntrySize( unsigned int fid ) const;
+		double extendedMeshEntryVolume( unsigned int fid ) const;
 
 		/**
 		 * Inherited virtual func. Returns number of MeshEntry in array
@@ -128,9 +128,9 @@ class CubeMesh: public MeshCompt
 
 		void addStoich( Id stoich );
 
-		/// Virtual func to make a mesh with specified size and numEntries
+		/// Virtual func to make a mesh with specified Volume and numEntries
 		void innerBuildDefaultMesh( const Eref& e, const Qinfo* q,
-			double size, unsigned int numEntries );
+			double volume, unsigned int numEntries );
 
 		//////////////////////////////////////////////////////////////////
 		//  Utility func
