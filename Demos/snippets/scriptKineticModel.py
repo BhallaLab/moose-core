@@ -21,7 +21,7 @@ def makeModel():
 		# create container for model
 		model = moose.Neutral( 'model' )
 		compartment = moose.CubeMesh( '/model/compartment' )
-		compartment.size = 1e-15
+		compartment.volume = 1e-15
 		# the mesh is created automatically by the compartment
 		mesh = moose.element( '/model/compartment/mesh' ) 
 
