@@ -61,14 +61,14 @@ const Cinfo* ChemCompt::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// Field Definitions
 		//////////////////////////////////////////////////////////////
-		static ElementValueFinfo< ChemCompt, double > size(
-			"size",
-			"Size of entire chemical domain."
+		static ElementValueFinfo< ChemCompt, double > volume(
+			"volume",
+			"Volume of entire chemical domain."
 			"Assigning this assumes that the geometry is that of the "
 			"default mesh, which may not be what you want. If so, use"
 			"a more specific mesh assignment function.",
-			&ChemCompt::setEntireSize,
-			&ChemCompt::getEntireSize
+			&ChemCompt::setEntireVolume,
+			&ChemCompt::getEntireVolume
 		);
 
 		static ReadOnlyValueFinfo< ChemCompt, unsigned int > numDimensions(
@@ -105,7 +105,7 @@ const Cinfo* ChemCompt::initCinfo()
 
 		static DestFinfo buildDefaultMesh( "buildDefaultMesh",
 			"Tells ChemCompt derived class to build a default mesh with the"
-			"specified size and number of meshEntries.",
+			"specified volume and number of meshEntries.",
 			new EpFunc2< ChemCompt, double, unsigned int >( 
 				&ChemCompt::buildDefaultMesh )
 		);
@@ -183,7 +183,7 @@ const Cinfo* ChemCompt::initCinfo()
 		);
 
 	static Finfo* chemMeshFinfos[] = {
-		&size,			// Value
+		&volume,			// Value
 		&numDimensions,	// ReadOnlyValue
 		&method,		// Value
 		&buildDefaultMesh,	// DestFinfo
@@ -212,7 +212,7 @@ static const Cinfo* chemMeshCinfo = ChemCompt::initCinfo();
 
 ChemCompt::ChemCompt()
 	: 
-		size_( 1.0 ),
+		volume_( 1.0 ),
 		entry_( this )
 {
 	;
@@ -233,9 +233,9 @@ ChemCompt::~ChemCompt()
 //////////////////////////////////////////////////////////////
 
 void ChemCompt::buildDefaultMesh( const Eref& e, const Qinfo* q,
-	double size, unsigned int numEntries )
+	double volume, unsigned int numEntries )
 {
-	this->innerBuildDefaultMesh( e, q, size, numEntries );
+	this->innerBuildDefaultMesh( e, q, volume, numEntries );
 }
 
 void ChemCompt::handleRequestMeshStats( const Eref& e, const Qinfo* q )
@@ -260,14 +260,14 @@ void ChemCompt::resetStencil()
 // Field Definitions
 //////////////////////////////////////////////////////////////
 
-double ChemCompt::getEntireSize( const Eref& e, const Qinfo* q ) const
+double ChemCompt::getEntireVolume( const Eref& e, const Qinfo* q ) const
 {
-	return size_;
+	return volume_;
 }
 
-void ChemCompt::setEntireSize( const Eref& e, const Qinfo* q, double size )
+void ChemCompt::setEntireVolume( const Eref& e, const Qinfo* q, double volume )
 {
-	buildDefaultMesh( e, q, size, getNumEntries() );
+	buildDefaultMesh( e, q, volume, getNumEntries() );
 }
 
 unsigned int ChemCompt::getDimensions() const

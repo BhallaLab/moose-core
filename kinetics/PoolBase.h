@@ -56,13 +56,13 @@ class PoolBase
 		double getConcInit( const Eref& e, const Qinfo* q ) const;
 
 		/**
-		 * Size is usually volume, but we also permit areal density
+		 * Volume is usually volume, but we also permit areal density
 		 * This is obtained by looking up the corresponding spatial mesh
 		 * entry in the parent compartment. If the message isn't set then
 		 * it defaults to 1.0.
 		 */
-		void setSize( const Eref& e, const Qinfo* q, double v );
-		double getSize( const Eref& e, const Qinfo* q ) const;
+		void setVolume( const Eref& e, const Qinfo* q, double v );
+		double getVolume( const Eref& e, const Qinfo* q ) const;
 
 		void setSpecies( const Eref& e, const Qinfo* q, SpeciesId v );
 		SpeciesId getSpecies( const Eref& e, const Qinfo* q ) const;
@@ -83,8 +83,8 @@ class PoolBase
 		virtual double vGetConc( const Eref& e, const Qinfo* q ) const = 0;
 		virtual void vSetConcInit( const Eref& e, const Qinfo* q, double v ) = 0;
 		virtual double vGetConcInit( const Eref& e, const Qinfo* q ) const = 0;
-		virtual double vGetSize( const Eref& e, const Qinfo* q ) const = 0;
-		virtual void vSetSize( const Eref& e, const Qinfo* q, double v ) = 0;
+		virtual double vGetVolume( const Eref& e, const Qinfo* q ) const = 0;
+		virtual void vSetVolume( const Eref& e, const Qinfo* q, double v ) = 0;
 		virtual void vSetSpecies( const Eref& e, const Qinfo* q, SpeciesId v ) = 0;
 		virtual SpeciesId vGetSpecies( const Eref& e, const Qinfo* q ) const = 0;
 		

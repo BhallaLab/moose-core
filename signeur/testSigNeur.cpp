@@ -385,7 +385,7 @@ void makeChemInNeuroMesh()
 	// size = Field< unsigned int >::get( headGluR, "linearSize");
 	assert( size == numSpines );
 	double vol;
-	vol = Field< double >::get( Id( "/n/spineMesh/headGluR" ), "size" );
+	vol = Field< double >::get( Id( "/n/spineMesh/headGluR" ), "volume" );
 	assert( doubleEq( vol, spineLength * spineDia * spineDia * PI / 4.0 ) );
 
 	size = Id( "/n/spineMesh/toPsd" ).element()->dataHandler()->localEntries();
@@ -398,13 +398,13 @@ void makeChemInNeuroMesh()
 	size = Id( "/n/psdMesh/psdGluR" ).element()->dataHandler()->localEntries();
 	// size = Field< unsigned int >::get( psdGluR, "linearSize");
 	assert( size == numSpines );
-	vol = Field< double >::get( Id( "/n/psdMesh/psdGluR" ), "size" );
+	vol = Field< double >::get( Id( "/n/psdMesh/psdGluR" ), "volume" );
 	assert( doubleEq( vol, spineDia * spineDia * PI / 4.0 ) );
 
 	size = Id( "/n/neuroMesh/Ca" ).element()->dataHandler()->localEntries();
 	// size = Field< unsigned int >::get( dendCa, "linearSize");
 	assert( size == numComptsInDend );
-	vol = Field< double >::get( Id( "/n/neuroMesh/Ca" ), "size" );
+	vol = Field< double >::get( Id( "/n/neuroMesh/Ca" ), "volume" );
 	assert( doubleEq( vol, comptLength * comptDia * comptDia * PI / (4.0 * numComptsInDend ) ) );
 
 	size = Id( "/n/neuroMesh/pumpCa" ).element()->dataHandler()->localEntries();
@@ -478,7 +478,7 @@ Id makeChemInCubeMesh()
 	size = Id( "/n/spineMesh/headGluR" ).element()->dataHandler()->localEntries();
 	assert( size == 1 );
 	double vol;
-	vol = Field< double >::get( Id( "/n/spineMesh/headGluR" ), "size" );
+	vol = Field< double >::get( Id( "/n/spineMesh/headGluR" ), "volume" );
 	assert( doubleEq( vol, pow( spineSide, 3.0 ) ) );
 
 	size = Id( "/n/spineMesh/toPsd" ).element()->dataHandler()->localEntries();
@@ -488,12 +488,12 @@ Id makeChemInCubeMesh()
 
 	size = Id( "/n/psdMesh/psdGluR" ).element()->dataHandler()->localEntries();
 	assert( size == 1 );
-	vol = Field< double >::get( Id( "/n/psdMesh/psdGluR" ), "size" );
+	vol = Field< double >::get( Id( "/n/psdMesh/psdGluR" ), "volume" );
 	assert( doubleEq( vol, pow( psdSide, 3.0 ) ) );
 
 	size = Id( "/n/neuroMesh/Ca" ).element()->dataHandler()->localEntries();
 	assert( size == 1 );
-	vol = Field< double >::get( Id( "/n/neuroMesh/Ca" ), "size" );
+	vol = Field< double >::get( Id( "/n/neuroMesh/Ca" ), "volume" );
 	assert( doubleEq( vol, pow( dendSide, 3.0 ) ) );
 
 	size = Id( "/n/neuroMesh/pumpCa" ).element()->dataHandler()->localEntries();
@@ -563,7 +563,7 @@ void testChemInCubeMesh()
 		cout << i->path() << 
 			" :	concInit = " << Field< double >::get( *i, "concInit" ) <<
 			";	nInit = " << Field< double >::get( *i, "nInit" ) <<
-			";	size = " << Field< double >::get( *i, "size" )
+			";	volume = " << Field< double >::get( *i, "volume" )
 				<< endl;
 	}
 	ids.clear();
@@ -802,8 +802,8 @@ Id buildAdaptorsInCubeMesh( vector< Id >& plots )
 	assert( mid != Msg::bad );
 	mid = shell->doAddMsg( "Single", diffReac, "prd", dendCa, "reac");
 	assert( mid != Msg::bad );
-	double dendVol = Field< double >::get( dendCa, "size" );
-	double spineVol = Field< double >::get( chemCa, "size" );
+	double dendVol = Field< double >::get( dendCa, "volume" );
+	double spineVol = Field< double >::get( chemCa, "volume" );
 	Field< double >::set( diffReac, "Kf", 1 ); // from spine to dend
 	Field< double >::set( diffReac, "Kb", spineVol / dendVol );
 

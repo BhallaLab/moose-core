@@ -251,11 +251,11 @@ Id makeInterMeshReac( Shell* s )
 	coords[7] = 1; // dy
 	coords[8] = 1; // dz
 	Field< vector< double > >::set( meshB, "coords", coords );
-	Field< double >::set( meshA, "size", 1 ); 
-	// Field< double >::set( meshB, "size", 8 );
-	double ret = Field< double >::get( poolA, "size" );
+	Field< double >::set( meshA, "volume", 1 ); 
+	// Field< double >::set( meshB, "volume", 8 );
+	double ret = Field< double >::get( poolA, "volume" );
 	assert( doubleEq( ret, 1 ) );
-	ret = Field< double >::get( poolB, "size" );
+	ret = Field< double >::get( poolB, "volume" );
 	assert( doubleEq( ret, 1 ) );
 	ret = Field< double >::get( meshA, "dx" );
 	assert( doubleEq( ret, 1 ) );

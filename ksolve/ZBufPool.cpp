@@ -33,9 +33,9 @@ const Cinfo* ZBufPool::initCinfo()
 //////////////////////////////////////////////////////////////
 static const Cinfo* zombieBufPoolCinfo = ZBufPool::initCinfo();
 
-static const SrcFinfo1< double >* requestSize =
+static const SrcFinfo1< double >* requestVolume =
 	dynamic_cast< const SrcFinfo1< double >* >(
-	zombieBufPoolCinfo->findFinfo( "requestSize" ) );
+	zombieBufPoolCinfo->findFinfo( "requestVolume" ) );
 
 
 ZBufPool::ZBufPool()
@@ -61,7 +61,7 @@ void ZBufPool::vSetNinit( const Eref& e, const Qinfo* q, double v )
 
 void ZBufPool::vSetConc( const Eref& e, const Qinfo* q, double conc )
 {
-	double n = NA * conc * lookupSizeFromMesh( e, requestSize );
+	double n = NA * conc * lookupVolumeFromMesh( e, requestVolume );
 	vSetN( e, q, n );
 }
 

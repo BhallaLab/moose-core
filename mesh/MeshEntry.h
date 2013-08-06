@@ -40,7 +40,7 @@ class MeshEntry
 		//////////////////////////////////////////////////////////////////
 
 		// volume of this MeshEntry
-		double getSize( const Eref& e, const Qinfo* q ) const; 
+		double getVolume( const Eref& e, const Qinfo* q ) const; 
 
 		/**
 		 * returns number of dimension
@@ -122,7 +122,7 @@ class MeshEntry
 
 		static const Cinfo* initCinfo();
 	private:
-		double size_; /// Volume or area
+		double volume_; /// Volume or area
 		const ChemCompt* parent_;
 };
 

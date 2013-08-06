@@ -73,7 +73,7 @@ class CylMesh: public MeshCompt
 		/// Virtual function to return dimensions of specified entry.
 		unsigned int getMeshDimensions( unsigned int fid ) const;
 		/// Virtual function to return volume of mesh Entry.
-		double getMeshEntrySize( unsigned int fid ) const;
+		double getMeshEntryVolume( unsigned int fid ) const;
 		/// Virtual function to return coords of mesh Entry.
 		vector< double > getCoordinates( unsigned int fid ) const;
 		/// Virtual function to return diffusion X-section area
@@ -81,7 +81,7 @@ class CylMesh: public MeshCompt
 		/// Virtual function to return scale factor for diffusion. 1 here.
 		vector< double > getDiffusionScaling( unsigned int fid ) const;
 		/// Volume of mesh Entry including abutting diff-coupled voxels
-		double extendedMeshEntrySize( unsigned int fid ) const;
+		double extendedMeshEntryVolume( unsigned int fid ) const;
 
 		//////////////////////////////////////////////////////////////////
 
@@ -96,9 +96,9 @@ class CylMesh: public MeshCompt
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
 
-		/// Virtual func to make a mesh with specified size and numEntries
+		/// Virtual func to make a mesh with specified Volume and numEntries
 		void innerBuildDefaultMesh( const Eref& e, const Qinfo* q,
-			double size, unsigned int numEntries );
+			double volume, unsigned int numEntries );
 
 		void innerHandleRequestMeshStats(
 			const Eref& e, const Qinfo* q,
@@ -140,15 +140,14 @@ class CylMesh: public MeshCompt
 		void matchNeuroMeshEntries( const NeuroMesh* other,
 			vector< VoxelJunction >& ret ) const;
 
-		// Selects a grid size for generating intersection with CubeMesh.
-		double selectGridSize( double h ) const;
+		// Selects a grid volume for generating intersection with CubeMesh.
+		double selectGridVolume( double h ) const;
 
 		//////////////////////////////////////////////////////////////////
 
 		static const Cinfo* initCinfo();
 
 	private:
-		double size_; /// Total Volume
 		unsigned int numEntries_; // Number of subdivisions to use
 		bool useCaps_; // Flag: Should the ends have hemispherical caps?
 		bool isToroid_; // Flag: Should the ends loop around mathemagically?

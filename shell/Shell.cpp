@@ -1061,7 +1061,7 @@ void Shell::doSyncDataHandler( Id tgt )
  */
 void Shell::handleReMesh( Id baseMesh )
 {
-	static const Finfo* finfo = MeshEntry::initCinfo()->findFinfo( "get_size" );
+	static const Finfo* finfo = MeshEntry::initCinfo()->findFinfo( "get_volume" );
 	static const DestFinfo* df = dynamic_cast< const DestFinfo* >( finfo );
 	assert( df );
 	vector< Id > tgts;

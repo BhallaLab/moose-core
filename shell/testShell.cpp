@@ -1775,8 +1775,8 @@ void testShellMesh()
 	Id mesh( compt.value() + 1 );
 	Id pool = shell->doCreate( "Pool", compt, "pool", dimensions );
 	shell->doAddMsg( "OneToOne",
-		ObjId( pool, 0 ), "requestSize",
-		ObjId( mesh, 0 ), "get_size" );
+		ObjId( pool, 0 ), "requestVolume",
+		ObjId( mesh, 0 ), "get_volume" );
 
 	vector< double > meshCoords( 9, 0.0 );
 	meshCoords[3] = meshCoords[4] = meshCoords[5] = 10.0;

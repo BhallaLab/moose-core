@@ -106,7 +106,7 @@ PsdMesh::~PsdMesh()
 
 /**
  * This assumes that lambda is the quantity to preserve, over numEntries.
- * So when the compartment changes size, so does numEntries.
+ * So when the compartment changes volume, numEntries changes too.
  * Assumes that the soma node is at index 0.
  */
 void PsdMesh::updateCoords()
@@ -131,7 +131,7 @@ void PsdMesh::handlePsdList(
 		vector< double > diskCoords, //ctr(xyz), dir(xyz), dia, diffDist
 		vector< unsigned int > parentVoxel )
 {
-		double oldVol = getMeshEntrySize( 0 );
+		double oldVol = getMeshEntryVolume( 0 );
 		assert( diskCoords.size() == 8 * parentVoxel.size() );
 		psd_.resize( parentVoxel.size() );
 		pa_.resize( parentVoxel.size() );
@@ -190,7 +190,7 @@ unsigned int PsdMesh::getMeshDimensions( unsigned int fid ) const
 }
 
 /// Virtual function to return volume of mesh Entry.
-double PsdMesh::getMeshEntrySize( unsigned int fid ) const
+double PsdMesh::getMeshEntryVolume( unsigned int fid ) const
 {
 	if ( psd_.size() == 0 ) // Default for meshes before init.
 		return 1.0;
@@ -233,12 +233,12 @@ vector< double > PsdMesh::getDiffusionScaling( unsigned int fid ) const
 
 /// Virtual function to return volume of mesh Entry, including
 /// for diffusively coupled voxels from other solvers.
-double PsdMesh::extendedMeshEntrySize( unsigned int fid ) const
+double PsdMesh::extendedMeshEntryVolume( unsigned int fid ) const
 {
 	if ( fid < psd_.size() ) {
-		return getMeshEntrySize( fid );
+		return getMeshEntryVolume( fid );
 	} else {
-		return MeshCompt::extendedMeshEntrySize( fid - psd_.size() );
+		return MeshCompt::extendedMeshEntryVolume( fid - psd_.size() );
 	}
 }
 
@@ -291,18 +291,10 @@ void PsdMesh::innerSetNumEntries( unsigned int n )
 
 
 /**
- * This is a bit odd, effectively asks to build an imaginary neuron and
- * then subdivide it. I'll make do with a ball-and-stick model: Soma with
- * a single apical dendrite with reasonable diameter. I will interpret
- * size as total length of neuron, not as volume. 
- * Soma will have a diameter of up to 20 microns, anything bigger than
- * this is treated as soma of 20 microns + 
- * dendrite of (specified length - 10 microns) for radius of soma.
- * This means we avoid having miniscule dendrites protruding from soma,
- * the shortest one will be 10 microns.
+ * Not permitted
  */
 void PsdMesh::innerBuildDefaultMesh( const Eref& e, const Qinfo* q,
-	double size, unsigned int numEntries )
+	double volume, unsigned int numEntries )
 {
 	cout << "Warning: attempt to build a default psd: not permitted\n";
 }

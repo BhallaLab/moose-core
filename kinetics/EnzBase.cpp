@@ -9,7 +9,7 @@
 
 #include "header.h"
 #include "ElementValueFinfo.h"
-#include "lookupSizeFromMesh.h"
+#include "lookupVolumeFromMesh.h"
 #include "EnzBase.h"
 
 #define EPSILON 1e-15

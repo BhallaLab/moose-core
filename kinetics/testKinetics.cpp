@@ -217,8 +217,8 @@ void testPoolVolumeScaling()
 	Id poolId = shell->doCreate( "Pool", comptId, "pool", dims );
 
 	MsgId mid = shell->doAddMsg( "OneToOne", 
-		ObjId( poolId, 0 ), "requestSize",
-		ObjId( meshId, 0 ), "get_size" );
+		ObjId( poolId, 0 ), "requestVolume",
+		ObjId( meshId, 0 ), "get_volume" );
 
 	assert( mid != Msg::bad );
 
@@ -234,11 +234,11 @@ void testPoolVolumeScaling()
 
 	Field< vector< double > >::set( comptId, "coords", coords );
 
-	double size = Field< double >::get( poolId, "size" );
-	assert( doubleEq( size, PI * x1 * (r0+r1) * (r0+r1) / 4.0 ) );
+	double volume = Field< double >::get( poolId, "volume" );
+	assert( doubleEq( volume, PI * x1 * (r0+r1) * (r0+r1) / 4.0 ) );
 
 	Field< double >::set( poolId, "n", 400 );
-	double volscale = 1 / ( NA * size );
+	double volscale = 1 / ( NA * volume );
 	double conc = Field< double >::get( poolId, "conc" );
 	assert( doubleEq( conc, 400 * volscale ) );
 	Field< double >::set( poolId, "conc", 500 * volscale );
@@ -269,10 +269,10 @@ void testReacVolumeScaling()
 	double vol1 = 1e-15;
 
 	MsgId mid = shell->doAddMsg( "OneToOne", 
-		subId, "requestSize", meshId, "get_size" );
+		subId, "requestVolume", meshId, "get_volume" );
 	assert( mid != Msg::bad );
 	mid = shell->doAddMsg( "OneToOne", 
-		prdId, "requestSize", meshId, "get_size" );
+		prdId, "requestVolume", meshId, "get_volume" );
 	assert( mid != Msg::bad );
 
 	vector< double > coords( 9, 10.0e-6 );
@@ -280,8 +280,8 @@ void testReacVolumeScaling()
 
 	Field< vector< double > >::set( comptId, "coords", coords );
 
-	double size = Field< double >::get( comptId, "size" );
-	assert( doubleEq( size, vol1 ) );
+	double volume = Field< double >::get( comptId, "volume" );
+	assert( doubleEq( volume, vol1 ) );
 
 	MsgId ret = shell->doAddMsg( "Single", reacId, "sub", subId, "reac" );
 	assert( ret != Msg::bad );
@@ -328,10 +328,10 @@ void testTwoReacGetNeighbours()
 	Id reacId = shell->doCreate( "Reac", comptId, "reac", dims );
 
 	MsgId mid = shell->doAddMsg( "OneToOne", 
-		subId, "requestSize", meshId, "get_size" );
+		subId, "requestVolume", meshId, "get_volume" );
 	assert( mid != Msg::bad );
 	mid = shell->doAddMsg( "OneToOne", 
-		prdId, "requestSize", meshId, "get_size" );
+		prdId, "requestVolume", meshId, "get_volume" );
 	assert( mid != Msg::bad );
 
 	MsgId ret = shell->doAddMsg( "Single", reacId, "sub", subId, "reac" );

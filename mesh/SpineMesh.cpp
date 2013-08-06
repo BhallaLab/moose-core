@@ -117,7 +117,7 @@ SpineMesh::~SpineMesh()
 
 /**
  * This assumes that lambda is the quantity to preserve, over numEntries.
- * So when the compartment changes size, so does numEntries.
+ * So when the compartment changes volume, numEntries changes too.
  * Assumes that the soma node is at index 0.
  */
 void SpineMesh::updateCoords()
@@ -142,7 +142,7 @@ void SpineMesh::handleSpineList(
 		vector< Id > shaft, vector< Id > head, 
 		vector< unsigned int > parentVoxel )
 {
-		double oldVol = getMeshEntrySize( 0 );
+		double oldVol = getMeshEntryVolume( 0 );
 		assert( head.size() == parentVoxel.size() );
 		assert( head.size() == shaft.size() );
 		spines_.resize( head.size() );
@@ -195,7 +195,7 @@ unsigned int SpineMesh::getMeshDimensions( unsigned int fid ) const
 }
 
 /// Virtual function to return volume of mesh Entry.
-double SpineMesh::getMeshEntrySize( unsigned int fid ) const
+double SpineMesh::getMeshEntryVolume( unsigned int fid ) const
 {
 	if ( spines_.size() == 0 )
 		return 1.0;
@@ -228,12 +228,12 @@ vector< double > SpineMesh::getDiffusionScaling( unsigned int fid ) const
 
 /// Virtual function to return volume of mesh Entry, including
 /// for diffusively coupled voxels from other solvers.
-double SpineMesh::extendedMeshEntrySize( unsigned int fid ) const
+double SpineMesh::extendedMeshEntryVolume( unsigned int fid ) const
 {
 	if ( fid < spines_.size() ) {
-		return getMeshEntrySize( fid );
+		return getMeshEntryVolume( fid );
 	} else {
-		return MeshCompt::extendedMeshEntrySize( fid - spines_.size() );
+		return MeshCompt::extendedMeshEntryVolume( fid - spines_.size() );
 	}
 }
 
@@ -277,18 +277,10 @@ void SpineMesh::innerSetNumEntries( unsigned int n )
 
 
 /**
- * This is a bit odd, effectively asks to build an imaginary neuron and
- * then subdivide it. I'll make do with a ball-and-stick model: Soma with
- * a single apical dendrite with reasonable diameter. I will interpret
- * size as total length of neuron, not as volume. 
- * Soma will have a diameter of up to 20 microns, anything bigger than
- * this is treated as soma of 20 microns + 
- * dendrite of (specified length - 10 microns) for radius of soma.
- * This means we avoid having miniscule dendrites protruding from soma,
- * the shortest one will be 10 microns.
+ * Not allowed.
  */
 void SpineMesh::innerBuildDefaultMesh( const Eref& e, const Qinfo* q,
-	double size, unsigned int numEntries )
+	double volume, unsigned int numEntries )
 {
 	cout << "Warning: attempt to build a default spine: not permitted\n";
 }

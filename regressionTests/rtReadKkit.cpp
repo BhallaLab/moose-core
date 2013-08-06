@@ -47,7 +47,7 @@ void checkVolN( double v )
 	double volscale = v / VOL;
 	double n;
 	assert( Id( "/rkktest/kinetics/MAPK/MKKK" ) != Id() );
-	double vol = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MKKK" ), "size" );
+	double vol = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MKKK" ), "volume" );
 	assert( doubleEq( vol, v ) );
 	n = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MKKK" ), "n" );
 	assert( doubleEq( n, volscale * 0.1 / NA_RATIO ) );
@@ -58,7 +58,7 @@ void checkVolN( double v )
 	n = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MAPK" ), "n" );
 	assert( doubleEq( n, volscale * 0.3 / NA_RATIO ) );
 
-	n = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Ras_minus_MKKKK" ), "n" );
+	n = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Ras_dash_MKKKK" ), "n" );
 	assert( doubleEq( n, volscale * 0.001 / NA_RATIO ) );
 
 	n = Field< double >::get( Id( "/rkktest/kinetics/MAPK/int1" ), "n" );
@@ -88,7 +88,7 @@ void checkConc()
 	conc = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MAPK" ), "conc" );
 	assert( doubleEq( conc, 0.3 * CONC_RATIO ) );
 
-	conc = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Ras_minus_MKKKK" ), "conc" );
+	conc = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Ras_dash_MKKKK" ), "conc" );
 	assert( doubleEq( conc, 0.001 * CONC_RATIO ) );
 
 	conc = Field< double >::get( Id( "/rkktest/kinetics/MAPK/int1" ), "conc" );
@@ -135,14 +135,14 @@ void checkEnzRates( double v )
 	// MMEnz
 	////////////////////////////////////////////////////////////////////
 	// NumRates
-	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Ras_minus_MKKKK/1" ), "numKm" );
+	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Ras_dash_MKKKK/1" ), "numKm" );
 	assert( doubleEq( rate, volscale * 0.01 / NA_RATIO ) );
 
 	// ConcRates
-	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Ras_minus_MKKKK/1" ), "Km" );
+	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Ras_dash_MKKKK/1" ), "Km" );
 	assert( doubleEq( rate, 1e-5 ) );
 
-	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Ras_minus_MKKKK/1" ), "kcat");
+	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Ras_dash_MKKKK/1" ), "kcat");
 	assert( doubleEq( rate, 2.5 ) );
 
 	// NumRates
@@ -156,13 +156,13 @@ void checkEnzRates( double v )
 	assert( doubleEq( rate, 0.25 ) );
 
 	// NumRates
-	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MKKK_minus_P/3" ), "numKm" );
+	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MKKK_dash_P/3" ), "numKm" );
 	assert( doubleEq( rate, volscale * ( ( 0.1 + 0.025 ) / 8.3333 ) / NA_RATIO ) );
 
 	// ConcRates
-	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MKKK_minus_P/3" ), "Km" );
+	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MKKK_dash_P/3" ), "Km" );
 	assert( doubleEq( rate, ( ( 0.1 + 0.025 ) / 8.3333 ) * 1e-3 ) );
-	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MKKK_minus_P/3" ), "kcat" );
+	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MKKK_dash_P/3" ), "kcat" );
 	assert( doubleEq( rate, 0.025 ) );
 }
 
@@ -216,7 +216,7 @@ void rtReadKkit()
 	// Now change the volume and do it again.
 	/////////////////////////////////////////////////////////////////////
 	Id parentCompartment( "/rkktest/kinetics" );
-	double vol = Field< double >::get( parentCompartment, "size" );
+	double vol = Field< double >::get( parentCompartment, "volume" );
 	vol *= 0.1;
 	bool ok = SetGet2< double, unsigned int >::set( parentCompartment,
 		"buildDefaultMesh", vol, 1 );
@@ -321,7 +321,7 @@ void checkKholodenkoModel( double volScaleFactor )
 	n = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MAPK" ), "n" );
 	assert( doubleEq( n / volScaleFactor, 0.3 / NA_RATIO ) );
 
-	n = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Ras_minus_MKKKK" ), "n" );
+	n = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Ras_dash_MKKKK" ), "n" );
 	assert( doubleEq( n / volScaleFactor, 0.001 / NA_RATIO ) );
 
 	n = Field< double >::get( Id( "/rkktest/kinetics/MAPK/int1" ), "n" );
@@ -362,9 +362,9 @@ void checkKholodenkoModel( double volScaleFactor )
 	// Now on to the enzymes.
 	///////////////////////////////////////////////////////////////////////
 
-	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Ras_minus_MKKKK/1" ), "Km" );
+	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Ras_dash_MKKKK/1" ), "Km" );
 	assert( doubleEq( rate, 0.01 * 1e-3 ) ); // Convert from uM to mM
-	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Ras_minus_MKKKK/1" ), "kcat");
+	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/Ras_dash_MKKKK/1" ), "kcat");
 	assert( doubleEq( rate, 2.5 ) );
 
 	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/int1/2" ), "Km" );
@@ -372,9 +372,9 @@ void checkKholodenkoModel( double volScaleFactor )
 	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/int1/2" ), "kcat" );
 	assert( doubleEq( rate, 0.25 ) );
 
-	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MKKK_minus_P/3" ), "Km" );
+	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MKKK_dash_P/3" ), "Km" );
 	assert( doubleEq( rate, ( ( 0.1 + 0.025 ) / 8.3333 ) * 1e-3 ) );
-	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MKKK_minus_P/3" ), "kcat" );
+	rate = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MKKK_dash_P/3" ), "kcat" );
 	assert( doubleEq( rate, 0.025 ) );
 }
 
@@ -407,11 +407,11 @@ void rtRunKkit()
 	n = Field< double >::get( Id( "/rkktest/kinetics/MAPK/MKK" ), "n" );
 	assert( !doubleEq( n, 0.3 / NA_RATIO ) );
 
-	Id plotId( "/rkktest/graphs/conc1/MAPK_minus_PP.Co" );
+	Id plotId( "/rkktest/graphs/conc1/MAPK_dash_PP.Co" );
 	vector< Id > ret = LookupField< string, vector< Id > >::get( 
 		plotId, "neighbours", "requestData" );
 	assert( ret.size() == 1 );
-	assert( ret[0] == Id( "/rkktest/kinetics/MAPK/MAPK_minus_PP" ) );
+	assert( ret[0] == Id( "/rkktest/kinetics/MAPK/MAPK_dash_PP" ) );
 
 	assert( plotId != Id() );
 	unsigned int size = Field< unsigned int >::get( plotId, "size" );
@@ -440,11 +440,11 @@ void rtRunKkit()
 	// Change volume and run it again.
 	/////////////////////////////////////////////////////////////////////
 	Id parentCompartment( "/rkktest/kinetics" );
-	double vol = Field< double >::get( parentCompartment, "size" );
+	double vol = Field< double >::get( parentCompartment, "volume" );
 	ok = SetGet2< double, unsigned int >::set( parentCompartment,
 		"buildDefaultMesh", vol * 0.1, 1 );
 	double actualVol = 
-		Field< double >::get( Id( "/rkktest/kinetics/mesh" ), "size" );
+		Field< double >::get( Id( "/rkktest/kinetics/mesh" ), "volume" );
 	assert( doubleEq( actualVol, vol ) );
 
 	shell->doReinit();
@@ -782,13 +782,13 @@ void checkAabXrates( double scale )
 	Id enz( "/vol/kinetics/c/kenz" );
 	assert( enz != Id() );
 
-	double v = Field< double >::get( a, "size" );
+	double v = Field< double >::get( a, "volume" );
 	assert( doubleEq( v, origVol * scale ) );
-	v = Field< double >::get( b, "size" );
+	v = Field< double >::get( b, "volume" );
 	assert( doubleEq( v, origVol * scale ) );
-	v = Field< double >::get( c, "size" );
+	v = Field< double >::get( c, "volume" );
 	assert( doubleEq( v, origVol * scale ) );
-	v = Field< double >::get( cplx, "size" );
+	v = Field< double >::get( cplx, "volume" );
 	assert( doubleEq( v, origVol * scale ) );
 
 	v = Field< double >::get( reac, "Kf" );
@@ -832,7 +832,7 @@ void testKkitVolScaling()
 	Id mesh1( "/vol/kinetics/mesh" );
 	assert( mesh1 != Id() );
 
-	double v1 = Field< double >::get( Id( "/vol/kinetics" ), "size" );
+	double v1 = Field< double >::get( Id( "/vol/kinetics" ), "volume" );
 	vector< Id > n1 = LookupField< string, vector< Id > >::get(
 		mesh1, "neighbours", "remesh" );
 
@@ -858,14 +858,14 @@ void rtTestChem()
 
 	static const char* acc8path[] = { 
 		"/kkit/kinetics/Ca", 
-		"/kkit/kinetics/PLA2/PIP2_minus_PLA2_p/kenz"
+		"/kkit/kinetics/PLA2/PIP2_dash_PLA2_p/kenz"
 	};
 	static const char* field[] = { "concInit", "Km" };
 	static const double value[] = { 0.08e-3, 20e-3 };
 	rtReadKkitModels( "acc8.g", acc8path, field, value, 2 );
 	rtReadKkitModels( "Anno_acc8.g", acc8path, field, value, 2 );
 	static const char* acc20path[] = { 
-		"/kkit/kinetics/CaM_minus_Ca4", 
+		"/kkit/kinetics/CaM_dash_Ca4", 
 		"/kkit/kinetics/NOSphos/nNOS",
 		"/kkit/kinetics/CaMKIIalpha/kenz"
 	};

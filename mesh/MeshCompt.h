@@ -28,10 +28,10 @@ class MeshCompt: public ChemCompt
 		 * Utility function to return volume of any voxel including those
 		 * diffusively coupled and aubtting the present volume.
 		 */
-		double extendedMeshEntrySize( unsigned int fid ) const;
+		double extendedMeshEntryVolume( unsigned int fid ) const;
 
-		/// Inherited virtual function to clear the vector of MeshEntrySize
-		void clearExtendedMeshEntrySize();
+		/// Inherited virtual function to clear the vector of MeshEntryVolume
+		void clearExtendedMeshEntryVolume();
 
 		/// virtual func implemented here.
 		void innerResetStencil();
@@ -63,11 +63,12 @@ class MeshCompt: public ChemCompt
 		SparseMatrix< double > m_; 
 
 		/**
-		 * vector of meshEntrySizes for abutting surfaces, needed to compute
+		 * vector of meshEntryVolumes for abutting surfaces, 
+		 * needed to compute
 		 * diffusion rates across junctions.
 		 * Indexed from zero.
 		 */
-		vector< double > extendedMeshEntrySize_;
+		vector< double > extendedMeshEntryVolume_;
 };
 
 // Helper class for setting up and sorting rows of matrix entries. 

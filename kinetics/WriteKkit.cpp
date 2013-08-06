@@ -131,7 +131,7 @@ void writePool( ofstream& fout, Id id,
 	double conc = Field< double >::get( id, "conc" );
 	double nInit = Field< double >::get( id, "nInit" );
 	double n = Field< double >::get( id, "n" );
-	double size = Field< double >::get( id, "size" );
+	double volume = Field< double >::get( id, "volume" );
 	unsigned int slave_enable = getSlaveEnable( id );
 
 	fout << "simundump kpool " << path << " 0 " << 
@@ -141,7 +141,7 @@ void writePool( ofstream& fout, Id id,
 			n << " " <<
 			nInit << " " <<
 			0 << " " << 0 << " " << // mwt, nMin
-			size * NA * 1e-3  << " " << // volscale
+			volume * NA * 1e-3  << " " << // volscale
 			slave_enable << // GENEISIS field here.
 			" /kinetics/geometry " << 
 			colour << " " << textcolour << " " << x << " " << y << " 0\n";
@@ -183,7 +183,7 @@ void writeEnz( ofstream& fout, Id id,
 	double conc = 0;
 	Id enzMol = getEnzMol( id );
 	assert( enzMol != Id() );
-	double vol = Field< double >::get( enzMol, "size" ) * NA * 1e-3; 
+	double vol = Field< double >::get( enzMol, "volume" ) * NA * 1e-3; 
 	unsigned int isMichaelisMenten = 0;
 	if ( id.element()->cinfo()->isA( "CplxEnzBase" ) ) {
 		k1 = Field< double >::get( id, "k1" );
@@ -581,7 +581,7 @@ double estimateDefaultVol( Id model )
 		for ( vector< Id >::iterator i = children.begin(); 
 						i != children.end(); ++i ) {
 				if ( i->element()->cinfo()->isA( "ChemCompt" ) ) {
-						double v = Field< double >::get( *i, "size" );
+						double v = Field< double >::get( *i, "volume" );
 						if ( i->element()->getName() == "kinetics" )
 								return v;
 						vols.push_back( v );
