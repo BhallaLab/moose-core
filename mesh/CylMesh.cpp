@@ -177,7 +177,7 @@ CylMesh::~CylMesh()
 
 /**
  * This assumes that lambda is the quantity to preserve, over numEntries.
- * So when the compartment changes size, so does numEntries. Lambda will
+ * So when the compartment changes volume, numEntries changes. Lambda will
  * be fine-tuned to be a clean multiple.
  */
 void CylMesh::updateCoords()
@@ -431,7 +431,7 @@ unsigned int CylMesh::getMeshDimensions( unsigned int fid ) const
  */
 
 /// Virtual function to return volume of mesh Entry.
-double CylMesh::getMeshEntrySize( unsigned int fid ) const
+double CylMesh::getMeshEntryVolume( unsigned int fid ) const
 {
  	double len0 = lambda_ * 2 * r0_ / ( r0_ + r1_ );
 
@@ -523,12 +523,12 @@ vector< double > CylMesh::getDiffusionScaling( unsigned int fid ) const
 
 /// Virtual function to return volume of mesh Entry, including
 /// for diffusively coupled voxels from other solvers.
-double CylMesh::extendedMeshEntrySize( unsigned int fid ) const
+double CylMesh::extendedMeshEntryVolume( unsigned int fid ) const
 {
 	if ( fid < numEntries_ ) {
-		return getMeshEntrySize( fid );
+		return getMeshEntryVolume( fid );
 	} else {
-		return MeshCompt::extendedMeshEntrySize( fid - numEntries_ );
+		return MeshCompt::extendedMeshEntryVolume( fid - numEntries_ );
 	}
 }
 
@@ -541,7 +541,7 @@ void CylMesh::innerHandleRequestMeshStats( const Eref& e, const Qinfo* q,
 		const SrcFinfo2< unsigned int, vector< double > >* meshStatsFinfo
 	)
 {
-	vector< double > ret( size_ / numEntries_ ,1 );
+	vector< double > ret( volume_ / numEntries_ ,1 );
 	meshStatsFinfo->send( e, q->threadNum(), 1, ret );
 }
 
@@ -550,11 +550,11 @@ void CylMesh::innerHandleNodeInfo(
 			unsigned int numNodes, unsigned int numThreads )
 {
 	unsigned int numEntries = numEntries_;
-	vector< double > vols( numEntries, size_ / numEntries );
+	vector< double > vols( numEntries, volume_ / numEntries );
 	vector< unsigned int > localEntries( numEntries );
 	vector< vector< unsigned int > > outgoingEntries;
 	vector< vector< unsigned int > > incomingEntries;
-	double oldvol = getMeshEntrySize( 0 );
+	double oldvol = getMeshEntryVolume( 0 );
 	meshSplit()->send( e, q->threadNum(), 
 		oldvol,
 		vols, localEntries,
@@ -592,12 +592,12 @@ void CylMesh::innerSetNumEntries( unsigned int n )
 
 
 void CylMesh::innerBuildDefaultMesh( const Eref& e, const Qinfo* q,
-	double size, unsigned int numEntries )
+	double volume, unsigned int numEntries )
 {
 	/// Cylinder with diameter = length.
-	/// vol = size = pi.r^2.len. 
-	/// So len = 2r, size = pi*r^2*2r = 2pi*r^3 so r = (size/2pi)^(1/3)
-	double r = pow( ( size / ( PI * 2 ) ), 1.0 / 3 );
+	/// vol = volume = pi.r^2.len. 
+	/// So len = 2r, volume = pi*r^2*2r = 2pi*r^3 so r = (volume/2pi)^(1/3)
+	double r = pow( ( volume / ( PI * 2 ) ), 1.0 / 3 );
 	vector< double > coords( 9, 0 );
 	coords[3] = 2 * r;
 	coords[6] = r;
@@ -611,7 +611,7 @@ void CylMesh::innerBuildDefaultMesh( const Eref& e, const Qinfo* q,
 		meshEntry.eref().data() == reinterpret_cast< char* >( lookupEntry( 0 ) )
 	);
 	vector< unsigned int > localIndices; // empty
-	vector< double > vols( numEntries_, size_/numEntries_ );
+	vector< double > vols( numEntries_, volume_/numEntries_ );
 	lookupEntry( 0 )->triggerRemesh( meshEntry.eref(), q->threadNum(), 
 		0, localIndices, vols );
 	*/
@@ -627,14 +627,14 @@ void CylMesh::transmitChange( const Eref& e, const Qinfo* q )
 	assert( 
 		meshEntry.eref().data() == reinterpret_cast< char* >( lookupEntry( 0 ) )
 	);
-	double oldvol = getMeshEntrySize( 0 );
+	double oldvol = getMeshEntryVolume( 0 );
 	unsigned int totalNumEntries = numEntries_;
 	unsigned int localNumEntries = totalNumEntries;
 	unsigned int startEntry = 0;
 	vector< unsigned int > localIndices( localNumEntries ); // empty
 	for ( unsigned int i = 0; i < localNumEntries; ++i )
 		localIndices[i] = i;
-	vector< double > vols( localNumEntries, size_ / numEntries_ );
+	vector< double > vols( localNumEntries, volume_ / numEntries_ );
 	vector< vector< unsigned int > > outgoingEntries; // [node#][Entry#]
 	vector< vector< unsigned int > > incomingEntries; // [node#][Entry#]
 
@@ -794,8 +794,8 @@ vector< VoxelJunction >& ret ) const
 	}
 }
 
-// Select grid size. Ideally the meshes should be comparable.
-double CylMesh::selectGridSize( double h ) const
+// Select grid volume. Ideally the meshes should be comparable.
+double CylMesh::selectGridVolume( double h ) const
 {
 	if ( h > lambda_ )
 		h = lambda_;
@@ -847,7 +847,7 @@ vector< VoxelJunction >& ret ) const
 	Vec v;
 	a.orthogonalAxes( u, v );
 
-	double h = selectGridSize( other->getDx() );
+	double h = selectGridVolume( other->getDx() );
 
 	unsigned int num = floor( 0.1 + lambda_ / h );
 	// March along axis of cylinder.

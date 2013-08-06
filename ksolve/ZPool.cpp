@@ -14,7 +14,7 @@
 #include "SolverBase.h"
 #include "../kinetics/PoolBase.h"
 #include "ZPool.h"
-#include "lookupSizeFromMesh.h"
+#include "lookupVolumeFromMesh.h"
 // #include "ElementValueFinfo.h"
 
 #define EPSILON 1e-15
@@ -56,9 +56,9 @@ const Cinfo* ZPool::initCinfo()
 //////////////////////////////////////////////////////////////
 static const Cinfo* zombiePoolCinfo = ZPool::initCinfo();
 
-static const SrcFinfo1< double >* requestSize = 
+static const SrcFinfo1< double >* requestVolume = 
     dynamic_cast< const SrcFinfo1< double >* >(  
-    zombiePoolCinfo->findFinfo( "requestSize" ) );
+    zombiePoolCinfo->findFinfo( "requestVolume" ) );
 
 ZPool::ZPool()
 		: solver_( 0 )
@@ -115,26 +115,26 @@ double ZPool::vGetNinit( const Eref& e, const Qinfo* q ) const
 void ZPool::vSetConc( const Eref& e, const Qinfo* q, double conc )
 {
 	// unsigned int pool = convertIdToPoolIndex( e.id() );
-	double n = NA * conc * lookupSizeFromMesh( e, requestSize );
+	double n = NA * conc * lookupVolumeFromMesh( e, requestVolume );
 	solver_->setN( e, n );
 }
 
 double ZPool::vGetConc( const Eref& e, const Qinfo* q ) const
 {
 	return solver_->getN( e ) / 
-			( NA * lookupSizeFromMesh( e, requestSize ) );
+			( NA * lookupVolumeFromMesh( e, requestVolume ) );
 }
 
 void ZPool::vSetConcInit( const Eref& e, const Qinfo* q, double conc )
 {
-	double n = NA * conc * lookupSizeFromMesh( e, requestSize );
+	double n = NA * conc * lookupVolumeFromMesh( e, requestVolume );
 	solver_->setNinit( e, n );
 }
 
 double ZPool::vGetConcInit( const Eref& e, const Qinfo* q ) const
 {
 	return solver_->getNinit( e ) / 
-			( NA * lookupSizeFromMesh( e, requestSize ) );
+			( NA * lookupVolumeFromMesh( e, requestVolume ) );
 }
 
 void ZPool::vSetDiffConst( const Eref& e, const Qinfo* q, double v )
@@ -147,14 +147,14 @@ double ZPool::vGetDiffConst( const Eref& e, const Qinfo* q ) const
 	return solver_->getDiffConst( e );
 }
 
-void ZPool::vSetSize( const Eref& e, const Qinfo* q, double v )
+void ZPool::vSetVolume( const Eref& e, const Qinfo* q, double v )
 {
 	// Illegal operation.
 }
 
-double ZPool::vGetSize( const Eref& e, const Qinfo* q ) const
+double ZPool::vGetVolume( const Eref& e, const Qinfo* q ) const
 {
-	return lookupSizeFromMesh( e, requestSize );
+	return lookupVolumeFromMesh( e, requestVolume );
 }
 
 void ZPool::vSetSpecies( const Eref& e, const Qinfo* q, unsigned int v )

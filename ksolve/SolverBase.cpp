@@ -11,7 +11,7 @@
 #include "SolverJunction.h"
 #include "SolverBase.h"
 #include "../shell/Shell.h"
-#include "../kinetics/lookupSizeFromMesh.h"
+#include "../kinetics/lookupVolumeFromMesh.h"
 
 const Cinfo* SolverBase::initCinfo()
 {
@@ -295,7 +295,7 @@ Id getCompt( Id id )
 	const Element* e = id.element();
 	if ( e->cinfo()->isA( "PoolBase" ) ) {
 		vector< Id > neighbours;
-		if ( e->getNeighbours( neighbours, e->cinfo()->findFinfo( "requestSize" ) ) == 1 ) {
+		if ( e->getNeighbours( neighbours, e->cinfo()->findFinfo( "requestVolume" ) ) == 1 ) {
 			Id pa = Neutral::parent( neighbours[0].eref() ).id;
 			if ( pa.element()->cinfo()->isA( "ChemCompt" ) )
 				return pa;

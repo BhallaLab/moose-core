@@ -587,7 +587,7 @@ void ReadKkit::assignPoolCompartments()
 		double side = pow( vols_[i], 1.0 / 3.0 );
 		vector< double > coords( 9, side );
 		coords[0] = coords[1] = coords[2] = 0;
-		// Field< double >::set( comptId, "size", vols_[i] );
+		// Field< double >::set( comptId, "volume", vols_[i] );
 		Field< vector< double > >::set( comptId, "coords", coords );
 		// compartments_.push_back( comptId );
 		for ( vector< Id >::iterator j = volCategories_[i].begin();
@@ -609,7 +609,7 @@ void ReadKkit::assignPoolCompartments()
 	for ( unsigned int i = 0 ; i < enzCplxMols_.size(); ++i ) {
 		Id pa = enzCplxMols_[i].first;
 		const Finfo* meshMsgFinfo = 
-			pa.element()->cinfo()->findFinfo( "requestSize" );
+			pa.element()->cinfo()->findFinfo( "requestVolume" );
 		vector< Id > meshVec;
 		unsigned int numMesh = pa.element()->getNeighbours( meshVec,
 			meshMsgFinfo );
@@ -629,7 +629,7 @@ Id findMeshOfReac( Id reac )
 	assert( subFinfo );
 
 	static const Finfo* meshEntryFinfo =
-		   	PoolBase::initCinfo()->findFinfo( "requestSize" );
+		   	PoolBase::initCinfo()->findFinfo( "requestVolume" );
 	assert( meshEntryFinfo );
 
 		vector< Id > subVec;
@@ -693,7 +693,7 @@ Id findMeshOfEnz( Id enz )
 	assert( enzFinfo );
 
 	static const Finfo* meshEntryFinfo =
-		   	PoolBase::initCinfo()->findFinfo( "requestSize" );
+		   	PoolBase::initCinfo()->findFinfo( "requestVolume" );
 	assert( meshEntryFinfo );
 
 		vector< Id > enzVec;
@@ -805,7 +805,7 @@ Id ReadKkit::buildEnz( const vector< string >& args )
 		return enz;
 	} else {
 		Id enz = shell_->doCreate( "Enz", pa, tail, dim, true );
-		// double parentVol = Field< double >::get( pa, "size" );
+		// double parentVol = Field< double >::get( pa, "volume" );
 		assert( enz != Id () );
 		string enzPath = clean.substr( 10 );
 		enzIds_[ enzPath ] = enz; 
@@ -940,7 +940,7 @@ Id ReadKkit::buildPool( const vector< string >& args )
 
 	Field< double >::set( pool, "nInit", nInit );
 	Field< double >::set( pool, "diffConst", diffConst );
-	// SetGet1< double >::set( pool, "setSize", vol );
+	// SetGet1< double >::set( pool, "setVolume", vol );
 	separateVols( pool, vol );
 	poolVols_[pool] = vol;
 

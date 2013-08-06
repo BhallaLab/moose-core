@@ -53,7 +53,7 @@ HEADERS = \
 	RateTerm.h \
 	KinSparseMatrix.h \
 	../kinetics/Pool.h \
-	../kinetics/lookupSizeFromMesh.h \
+	../kinetics/lookupVolumeFromMesh.h \
 
 
 # The GSL library (GNU Scientific Library) provides a range of

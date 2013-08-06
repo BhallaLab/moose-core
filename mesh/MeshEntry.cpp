@@ -49,10 +49,10 @@ const Cinfo* MeshEntry::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// Field Definitions
 		//////////////////////////////////////////////////////////////
-		static ReadOnlyElementValueFinfo< MeshEntry, double > size(
-			"size",
+		static ReadOnlyElementValueFinfo< MeshEntry, double > volume(
+			"volume",
 			"Volume of this MeshEntry",
-			&MeshEntry::getSize
+			&MeshEntry::getVolume
 		);
 
 		static ReadOnlyElementValueFinfo< MeshEntry, unsigned int > 
@@ -131,12 +131,12 @@ const Cinfo* MeshEntry::initCinfo()
 		);
 
 		static Finfo* meshShared[] = {
-			remesh(), size.getFinfo()
+			remesh(), volume.getFinfo()
 		};
 
 		static SharedFinfo mesh( "mesh",
 			"Shared message for updating mesh volumes and subdivisions,"
-			"typically controls pool sizes",
+			"typically controls pool volumes",
 			meshShared, sizeof( meshShared ) / sizeof( const Finfo* )
 		);
 
@@ -146,7 +146,7 @@ const Cinfo* MeshEntry::initCinfo()
 		//////////////////////////////////////////////////////////////
 
 	static Finfo* meshFinfos[] = {
-		&size,			// Readonly Value
+		&volume,		// Readonly Value
 		&dimensions,	// Readonly Value
 		&meshType,		// Readonly Value
 		&coordinates,	// Readonly Value
@@ -218,9 +218,9 @@ void MeshEntry::reinit( const Eref& e, ProcPtr info )
 // Field Definitions
 //////////////////////////////////////////////////////////////
 
-double MeshEntry::getSize( const Eref& e, const Qinfo* q ) const
+double MeshEntry::getVolume( const Eref& e, const Qinfo* q ) const
 {
-	return parent_->getMeshEntrySize( e.fieldIndex() );
+	return parent_->getMeshEntryVolume( e.fieldIndex() );
 }
 
 unsigned int MeshEntry::getDimensions( const Eref& e, const Qinfo* q ) const

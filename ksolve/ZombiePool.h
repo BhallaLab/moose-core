@@ -32,8 +32,8 @@ class ZombiePool: public PoolBase
 		void vSetConcInit( const Eref& e, const Qinfo* q, double v );
 		double vGetConcInit( const Eref& e, const Qinfo* q ) const;
 
-		void vSetSize( const Eref& e, const Qinfo* q, double v );
-		double vGetSize( const Eref& e, const Qinfo* q ) const;
+		void vSetVolume( const Eref& e, const Qinfo* q, double v );
+		double vGetVolume( const Eref& e, const Qinfo* q ) const;
 
 		void vSetSpecies( const Eref& e, const Qinfo* q, unsigned int v );
 		unsigned int vGetSpecies( const Eref& e, const Qinfo* q ) const;

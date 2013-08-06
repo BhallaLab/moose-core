@@ -40,13 +40,13 @@ class Pool: public PoolBase
 		double vGetConcInit( const Eref& e, const Qinfo* q ) const;
 
 		/**
-		 * Size is usually volume, but we also permit areal density
+		 * Volume is usually volume, but we also permit areal density
 		 * This is obtained by looking up the corresponding spatial mesh
 		 * entry in the parent compartment. If the message isn't set then
 		 * it defaults to 1.0.
 		 */
-		void vSetSize( const Eref& e, const Qinfo* q, double v );
-		double vGetSize( const Eref& e, const Qinfo* q ) const;
+		void vSetVolume( const Eref& e, const Qinfo* q, double v );
+		double vGetVolume( const Eref& e, const Qinfo* q ) const;
 
 		void vSetSpecies( const Eref& e, const Qinfo* q, SpeciesId v );
 		SpeciesId vGetSpecies( const Eref& e, const Qinfo* q ) const;
@@ -80,7 +80,6 @@ class Pool: public PoolBase
 		double diffConst_;	/// Diffusion constant
 		double A_; /// Internal state variables, used only in explict mode
 		double B_;
-		double prevSize_; /// Keeps track of volumes, specially for remesh.
 
 		/**
 		 * System wide identifier for all mol pools that are chemically

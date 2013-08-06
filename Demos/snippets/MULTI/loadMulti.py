@@ -64,7 +64,6 @@ def addPlot( objpath, field, plot ):
 def makeElecPlots():
     graphs = moose.Neutral( '/graphs' )
     elec = moose.Neutral( '/graphs/elec' )
-    moose.le( '/model/elec' )
     addPlot( '/model/elec/soma', 'get_Vm', 'elec/somaVm' )
     addPlot( '/model/elec/soma/Ca_conc', 'get_Ca', 'elec/somaCa' )
     addPlot( '/model/elec/basal_3', 'get_Vm', 'elec/basal3Vm' )
@@ -92,9 +91,14 @@ def moveCompt( path, oldParent, newParent ):
 	moose.move( newParent, chem )
 
 def loadChem( neuroCompt, spineCompt, psdCompt ):
+	# We need the compartments to come in with a volume of 1 to match the
+	# original CubeMesh.
 	assert( neuroCompt.size == 1.0 )
 	assert( spineCompt.size == 1.0 )
 	assert( psdCompt.size == 1.0 )
+	assert( neuroCompt.mesh.num == 1 )
+	print 'size = ', neuroCompt.mesh[0].size
+	assert( neuroCompt.mesh[0].size == 1.0 )
 	modelId = moose.loadModel( 'psd_merged30.g', '/model', 'ee' )
 	chem = moose.element( '/model/model' )
 	chem.name = 'chem'
@@ -120,12 +124,15 @@ def makeNeuroMeshModel():
 	synInput.refractT = 47e-3
 
 	neuroCompt = moose.NeuroMesh( '/model/neuroMesh' )
+	print 'neuroMeshSize = ', neuroCompt.mesh[0].size
 	neuroCompt.separateSpines = 1
 	neuroCompt.diffLength = diffLength
 	neuroCompt.geometryPolicy = 'cylinder'
 	spineCompt = moose.SpineMesh( '/model/spineMesh' )
+	print 'spineMeshSize = ', spineCompt.mesh[0].size
 	moose.connect( neuroCompt, 'spineListOut', spineCompt, 'spineList', 'OneToOne' )
 	psdCompt = moose.PsdMesh( '/model/psdMesh' )
+	print 'psdMeshSize = ', psdCompt.mesh[0].size
 	moose.connect( neuroCompt, 'psdListOut', psdCompt, 'psdList', 'OneToOne' )
 	loadChem( neuroCompt, spineCompt, psdCompt )
 	moose.le( '/model/chem' )
@@ -157,6 +164,7 @@ def makeNeuroMeshModel():
 	moose.connect( pm, 'remesh', pmksolve, 'remesh' )
 	#print "psd: nv=", pmksolve.numLocalVoxels, ", nav=", pmksolve.numAllVoxels, pmksolve.numVarPools, pmksolve.numAllPools
 	#
+	print 'neuroMeshSize = ', neuroCompt.mesh[0].size
 
 	#print 'Assigning the cell model'
 	# Now to set up the model.
@@ -166,15 +174,31 @@ def makeNeuroMeshModel():
 	ndc = neuroCompt.numDiffCompts
 	print 'numDiffCompts = ', ndc
 	assert( ndc == 145 )
-	print 'NeuroMeshNum = ', ndc
 	ndc = neuroCompt.mesh.num
+	print 'NeuroMeshNum = ', ndc
 	assert( ndc == 145 )
+
 	sdc = spineCompt.mesh.num
 	print 'SpineMeshNum = ', sdc
 	assert( sdc == 13 )
 	pdc = psdCompt.mesh.num
 	print 'PsdMeshNum = ', pdc
 	assert( pdc == 13 )
+
+	mesh = moose.ematrix( '/model/chem/neuroMesh/mesh' )
+	#for i in range( ndc ):
+	#	print 's[', i, '] = ', mesh[i].size
+	mesh2 = moose.ematrix( '/model/chem/spineMesh/mesh' )
+	print 'numMainCompt = ', moose.element( '/model/chem/neuroMesh' ).mesh.num
+	print 'numSpines = ', moose.element( '/model/chem/spineMesh/mesh' ).localNumField
+	print 'spine mesh.size = ', mesh2.size
+#	for i in range( sdc ):
+#		print 's[', i, '] = ', mesh2[i].size
+	print 'numPSD = ', moose.element( '/model/chem/psdMesh/mesh' ).localNumField
+	mesh = moose.ematrix( '/model/chem/psdMesh/mesh' )
+	print 'psd mesh.size = ', mesh.size
+	#for i in range( pdc ):
+	#	print 's[', i, '] = ', mesh[i].size
 	#
 	# We need to use the spine solver as the master for the purposes of
 	# these calculations. This will handle the diffusion calculations

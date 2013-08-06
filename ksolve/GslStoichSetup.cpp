@@ -495,13 +495,13 @@ void GslStoich::innerReallocateSolver( const Eref& e )
 	unsigned int numVoxels = 1;
 	if ( compartment_ ) {
 		numVoxels = compartment_->getNumEntries();
-		compartment_->clearExtendedMeshEntrySize();
+		compartment_->clearExtendedMeshEntryVolume();
 	}
 
 	assert( numVoxels > 0 );
 	vector< double > vols( numVoxels );
 	for ( unsigned int i = 0; i < numVoxels; ++i ) {
-		vols[i] = compartment_->getMeshEntrySize( i );
+		vols[i] = compartment_->getMeshEntryVolume( i );
 	}
 	double oldVol = vols[0];
 	remesh( e, 0, oldVol, 0, 0, localMeshEntries_, vols );

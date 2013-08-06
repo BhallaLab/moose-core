@@ -363,7 +363,7 @@ void CubeMesh::fillThreeDimSurface() // Need to fix duplicate points.
 /**
  * This assumes that dx, dy, dz are the quantities to preserve, over 
  * numEntries.
- * So when the compartment changes size, so does numEntries. dx, dy, dz
+ * So when the compartment changes volume, so does numEntries. dx, dy, dz
  * do not change, some of the sub-cuboids will partially be outside.
  */
 void CubeMesh::updateCoords()
@@ -411,7 +411,7 @@ void CubeMesh::updateCoords()
 	*/
 	fillThreeDimSurface();
 
-	size_ = ( x1_ - x0_ ) * ( y1_ - y0_ ) * ( z1_ - z0_ );
+	volume_ = ( x1_ - x0_ ) * ( y1_ - y0_ ) * ( z1_ - z0_ );
 	assert( size >= 0 );
 
 	buildStencil();
@@ -613,7 +613,7 @@ void CubeMesh::innerSetCoords( const vector< double >& v)
 
 void CubeMesh::setCoords( const Eref& e, const Qinfo* q, vector< double > v)
 {
-	double oldVol = getMeshEntrySize( 0 );
+	double oldVol = getMeshEntryVolume( 0 );
 	innerSetCoords( v );
 	transmitChange( e, q, oldVol );
 }
@@ -690,7 +690,7 @@ void CubeMesh::buildMesh( Id geom, double x, double y, double z )
  * the nearest cube
  */
 void CubeMesh::innerBuildDefaultMesh( const Eref& e, const Qinfo* q,
-	double size, unsigned int numEntries )
+	double volume, unsigned int numEntries )
 {
 	double approxN = numEntries;
 	approxN = pow( approxN, 1.0 / 3.0 );
@@ -707,7 +707,7 @@ void CubeMesh::innerBuildDefaultMesh( const Eref& e, const Qinfo* q,
 		else
 			numSide = bigger;
 	}
-	double side = pow( size, 1.0 / 3.0 );
+	double side = pow( volume, 1.0 / 3.0 );
 	vector< double > coords( 9, side );
 	coords[0] = coords[1] = coords[2] = 0;
 	coords[6] = coords[7] = coords[8] = side / numSide;
@@ -719,8 +719,8 @@ void CubeMesh::innerBuildDefaultMesh( const Eref& e, const Qinfo* q,
 void CubeMesh::innerHandleRequestMeshStats( const Eref& e, const Qinfo* q, 
 		const SrcFinfo2< unsigned int, vector< double > >* meshStatsFinfo )
 {
-	vector< double > meshSizes( 1, dx_ * dy_ * dz_ );
-	meshStatsFinfo->send( e, q->threadNum(), nx_ * ny_ * nz_, meshSizes );
+	vector< double > meshVolumes( 1, dx_ * dy_ * dz_ );
+	meshStatsFinfo->send( e, q->threadNum(), nx_ * ny_ * nz_, meshVolumes);
 }
 
 /// Generate node decomposition of mesh, send it out along 
@@ -734,7 +734,7 @@ void CubeMesh::innerHandleNodeInfo(
 	vector< unsigned int > localEntries( numEntries );
 	vector< vector< unsigned int > > outgoingEntries;
 	vector< vector< unsigned int > > incomingEntries;
-	double oldvol = getMeshEntrySize( 0 );
+	double oldvol = getMeshEntryVolume( 0 );
 	meshSplit()->send( e, q->threadNum(), 
 		oldvol,
 		vols, localEntries,
@@ -797,17 +797,17 @@ unsigned int CubeMesh::getMeshDimensions( unsigned int fid ) const
 }
 
 /// Virtual function to return volume of mesh Entry.
-double CubeMesh::getMeshEntrySize( unsigned int fid ) const
+double CubeMesh::getMeshEntryVolume( unsigned int fid ) const
 {
 	return dx_ * dy_ * dz_;
 }
 
 /// Virtual function to return volume of mesh Entry, including
 // for diffusively coupled voxels from other solvers.
-double CubeMesh::extendedMeshEntrySize( unsigned int fid ) const
+double CubeMesh::extendedMeshEntryVolume( unsigned int fid ) const
 {
 	if ( fid >= m2s_.size() ) {
-		return MeshCompt::extendedMeshEntrySize( fid - m2s_.size() );
+		return MeshCompt::extendedMeshEntryVolume( fid - m2s_.size() );
 	}
 	return dx_ * dy_ * dz_;
 }

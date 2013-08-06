@@ -250,25 +250,25 @@ void rtTestMultiCompartmentReaction()
 	// SetGet1< string >::set( model, "buildMultiCompartment", "rk5" );
 	Id A( "/model/kinetics" );
 	assert( A != Id() );
-	double sizeA = Field< double >::get( A, "size" );
+	double volumeA = Field< double >::get( A, "volume" );
 
 	Id B( "/model/compartment_1" );
 	assert( B != Id() );
-	double sizeB = Field< double >::get( B, "size" );
+	double volumeB = Field< double >::get( B, "volume" );
 
 	Id D( "/model/compartment_2" ); // order is scrambled.
 	assert( D != Id() );
-	double sizeD = Field< double >::get( D, "size" );
+	double volumeD = Field< double >::get( D, "volume" );
 
 	Id C( "/model/compartment_3" );
 	assert( C != Id() );
-	double sizeC = Field< double >::get( C, "size" );
+	double volumeC = Field< double >::get( C, "volume" );
 
 
-	assert( doubleEq( sizeA, 1e-15 ) );
-	assert( doubleEq( sizeB, 3e-15 ) );
-	assert( doubleEq( sizeC, 5e-15 ) );
-	assert( doubleEq( sizeD, 2e-15 ) );
+	assert( doubleEq( volumeA, 1e-15 ) );
+	assert( doubleEq( volumeB, 3e-15 ) );
+	assert( doubleEq( volumeC, 5e-15 ) );
+	assert( doubleEq( volumeD, 2e-15 ) );
 
 	checkField( "/model/kinetics/R3", "kb", 1.660572e-7 );
 
@@ -503,7 +503,7 @@ void rtTestMultiCompartmentReacDiff()
 
 	Id A( "/model/kinetics" );
 	assert( A != Id() );
-	double sizeA = Field< double >::get( A, "size" );
+	double volumeA = Field< double >::get( A, "volume" );
 	unsigned int numA = Field< unsigned int >::get( A, "num_mesh" );
 
 	Id B( "/model/compartment_1" );
@@ -513,7 +513,7 @@ void rtTestMultiCompartmentReacDiff()
 	coords[3] = 0; 		coords[4] = 10e-6;	coords[5] = 10e-6;
 	coords[6] = 		coords[7] = 		coords[8] = 10e-6;
 	Field< vector< double > >::set( B, "coords", coords );
-	double sizeB = Field< double >::get( B, "size" );
+	double volumeB = Field< double >::get( B, "volume" );
 	unsigned int numB = Field< unsigned int >::get( B, "num_mesh" );
 
 	Id D( "/model/compartment_2" ); // order is scrambled.
@@ -522,7 +522,7 @@ void rtTestMultiCompartmentReacDiff()
 	coords[3] = 10e-6; 	coords[4] = 30e-6;	coords[5] = 10e-6;
 	coords[6] = 		coords[7] = 		coords[8] = 10e-6;
 	Field< vector< double > >::set( D, "coords", coords );
-	double sizeD = Field< double >::get( D, "size" );
+	double volumeD = Field< double >::get( D, "volume" );
 	unsigned int numD = Field< unsigned int >::get( D, "num_mesh" );
 
 	Id C( "/model/compartment_3" );
@@ -531,13 +531,13 @@ void rtTestMultiCompartmentReacDiff()
 	coords[3] = 20e-6;	coords[4] = 0;		coords[5] = 10e-6;
 	coords[6] = 		coords[7] = 		coords[8] = 10e-6;
 	Field< vector< double > >::set( C, "coords", coords );
-	double sizeC = Field< double >::get( C, "size" );
+	double volumeC = Field< double >::get( C, "volume" );
 	unsigned int numC = Field< unsigned int >::get( C, "num_mesh" );
 
-	assert( doubleEq( sizeA, 1e-15 ) );
-	assert( doubleEq( sizeB, 3e-15 ) );
-	assert( doubleEq( sizeC, 5e-15 ) );
-	assert( doubleEq( sizeD, 2e-15 ) );
+	assert( doubleEq( volumeA, 1e-15 ) );
+	assert( doubleEq( volumeB, 3e-15 ) );
+	assert( doubleEq( volumeC, 5e-15 ) );
+	assert( doubleEq( volumeD, 2e-15 ) );
 	assert( numA == 1 );
 	assert( numB == 3 );
 	assert( numC == 5 );

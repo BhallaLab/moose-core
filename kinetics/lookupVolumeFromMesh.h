@@ -19,7 +19,7 @@ extern const double CONC_UNIT_CONV;
  * Utility function for kinetics classes to find their volume from
  * the attached mesh. Works for Pools and subclasses.
  */
-double lookupSizeFromMesh( const Eref& e, const SrcFinfo* sf );
+double lookupVolumeFromMesh( const Eref& e, const SrcFinfo* sf );
 
 /**
  * Utility function to get volumes for all reactants (substrates or

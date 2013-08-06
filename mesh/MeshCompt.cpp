@@ -33,16 +33,16 @@ MeshCompt::~MeshCompt()
 
 /// Virtual function to return volume of mesh Entry, including
 // for diffusively coupled voxels from other solvers.
-double MeshCompt::extendedMeshEntrySize( unsigned int index ) const
+double MeshCompt::extendedMeshEntryVolume( unsigned int index ) const
 {
-	assert( index < extendedMeshEntrySize_.size() );
-	return extendedMeshEntrySize_[ index ];
+	assert( index < extendedMeshEntryVolume_.size() );
+	return extendedMeshEntryVolume_[ index ];
 }
 
-/// Inherited virtual function to clear the vector of MeshEntrySize
-void MeshCompt::clearExtendedMeshEntrySize()
+/// Inherited virtual function to clear the vector of MeshEntryVolume
+void MeshCompt::clearExtendedMeshEntryVolume()
 {
-	extendedMeshEntrySize_.clear();
+	extendedMeshEntryVolume_.clear();
 }
 
 /// virtual func implemented here.
@@ -176,7 +176,7 @@ void MeshCompt::extendStencil(
 	// Fill in the volumes of the external mesh entries
 	for ( vector< unsigned int>::const_iterator  
 			i = meshBackMap.begin(); i != meshBackMap.end(); ++i ) {
-		extendedMeshEntrySize_.push_back( other->getMeshEntrySize( *i ) );
+		extendedMeshEntryVolume_.push_back( other->getMeshEntryVolume( *i ) );
 	}
 }
 

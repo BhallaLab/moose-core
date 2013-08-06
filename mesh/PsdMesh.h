@@ -60,7 +60,7 @@ class PsdMesh: public MeshCompt
 		/// Virtual function to return dimensions of specified entry.
 		unsigned int getMeshDimensions( unsigned int fid ) const;
 		/// Virtual function to return volume of mesh Entry.
-		double getMeshEntrySize( unsigned int fid ) const;
+		double getMeshEntryVolume( unsigned int fid ) const;
 		/// Virtual function to return coords of mesh Entry.
 		vector< double > getCoordinates( unsigned int fid ) const;
 		/// Virtual function to return diffusion X-section area
@@ -68,7 +68,7 @@ class PsdMesh: public MeshCompt
 		/// Virtual function to return scale factor for diffusion. 1 here.
 		vector< double > getDiffusionScaling( unsigned int fid ) const;
 		/// Vol of all mesh Entries including abutting diff-coupled voxels
-		double extendedMeshEntrySize( unsigned int fid ) const;
+		double extendedMeshEntryVolume( unsigned int fid ) const;
 
 		//////////////////////////////////////////////////////////////////
 		/**
@@ -85,9 +85,9 @@ class PsdMesh: public MeshCompt
 		// Dest funcs
 		//////////////////////////////////////////////////////////////////
 
-		/// Virtual func to make a mesh with specified size and numEntries
+		/// Virtual func to make a mesh with specified Volume and numEntries
 		void innerBuildDefaultMesh( const Eref& e, const Qinfo* q,
-			double size, unsigned int numEntries );
+			double volume, unsigned int numEntries );
 
 		void innerHandleRequestMeshStats(
 			const Eref& e, const Qinfo* q,
