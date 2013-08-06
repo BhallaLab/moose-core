@@ -200,9 +200,9 @@ def makeModelInCubeMesh():
     neuroMesh.preserveNumEntries = 1
     createChemModel( neuroMesh )
     dendCa = moose.element( '/n/chem/neuroMesh/Ca' )
-    assert dendCa.size == compt.length * compt.diameter * compt.diameter
+    assert dendCa.volume == compt.length * compt.diameter * compt.diameter
     dendKinaseEnzCplx = moose.element( '/n/chem/neuroMesh/Ca.kinase/enz/cplx' )
-    assert dendKinaseEnzCplx.size == dendCa.size
+    assert dendKinaseEnzCplx.volume == dendCa.volume
     # Make adaptors
     # Note that we can do this two ways: We can use an existing output
     # msg from the object, which will come whenever the object processes,
