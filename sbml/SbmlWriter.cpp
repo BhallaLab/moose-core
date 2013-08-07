@@ -141,7 +141,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	  //changeName(comptname,cid.str());
 	  string clean_comptname = idBeginWith(comptname_id);
 
-	  double size = Field<double>::get(ObjId(*itr,index),"size");
+	  double size = Field<double>::get(ObjId(*itr,index),"volume");
 	  unsigned int ndim = Field<unsigned int>::get(ObjId(*itr,index),"dimensions");
 	  
 	  ::Compartment* compt = cremodel_->createCompartment();
@@ -314,7 +314,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		  double k2 = Field<double>::get(ObjId(*itrRE),"k2");
 		  double k3 = Field<double>::get(ObjId(*itrRE),"k3");
 		  ostringstream rate_law;
-		  double rct_order = 0.0,rvalue =0.0,prd_order=0.0,pvalue=0.0;
+		  double rct_order = 0.0,prd_order=0.0;
 		  rate_law << "k1";
 		  getSubPrd(reaction,"toEnz","sub",*itrRE,index,rate_law,rct_order,true);
 		  getSubPrd(reaction,"sub","",*itrRE,index,rate_law,rct_order,true);
@@ -324,7 +324,6 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		  getSubPrd(reaction,"cplxDest","prd",*itrRE,index,rate_law,prd_order,true);
 		  kl = reaction->createKineticLaw();
 		  kl->setFormula( rate_law.str() );
-		  rvalue = k1;
 		  string unit=parmUnit( rct_order-1 );
 		  printParameters( kl,"k1",k1,unit ); 
 		  string punit=parmUnit( prd_order-1 );
