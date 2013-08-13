@@ -73,9 +73,9 @@ char shortType(string name)
         typemap.insert(pair<string, char>("vector<ObjId>", 'Y')); // moose
         typemap.insert(pair<string, char>("vector<DataId", 'Z')); //moose
         typemap.insert(pair<string, char>("void", '_')); // moose
-        typemap.insert(pair<string, char>("vector<vector<unsigned int>>", 'T'));
-        typemap.insert(pair<string, char>("vector<vector<int>>", 'Q'));
-        typemap.insert(pair<string, char>("vector<vector<double>>", 'R'));
+        typemap.insert(pair<string, char>("vector< vector<unsigned int> >", 'T'));
+        typemap.insert(pair<string, char>("vector< vector<int> >", 'Q'));
+        typemap.insert(pair<string, char>("vector< vector<double> >", 'R'));
     }
     map<string, char>::iterator iter = typemap.find(name);
     if (iter == typemap.end()){

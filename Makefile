@@ -365,19 +365,24 @@ ifeq ($(PYTHON),3)
 PYTHON_VERSION := $(subst ., ,$(lastword $(shell python3 --version 2>&1)))
 PYTHON_CFLAGS := $(shell python3-config --cflags)
 PYTHON_LDFLAGS := $(shell python3-config --ldflags)
-else
+else # Python 2.x
 PYTHON_VERSION := $(subst ., ,$(lastword $(shell python --version 2>&1)))
+ifneq ($(BUILD),debug)
 PYTHON_CFLAGS := $(shell python-config --cflags)
 PYTHON_LDFLAGS := $(shell python-config --ldflags)
-endif
+else 
+PYTHON_CFLAGS := $(shell python-config --includes) -fno-strict-aliasing -fwrapv -Wstrict-prototypes -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -Werror=format-security
+PYTHON_LDFLAGS := -L/usr/lib/$(INSTALLED_PYTHON)  -Xlinker -export-dynamic -Wl,-O1 -Wl,-Bsymbolic-functions
+endif # ifneq ($(BUILD),debug)
+endif # ifeq ($(PYTHON),3)
 PYTHON_VERSION_MAJOR := $(word 1,${PYTHON_VERSION})
 PYTHON_VERSION_MINOR := $(word 2,${PYTHON_VERSION})
 INSTALLED_PYTHON := python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}
 endif
 
 ifndef PYTHON_CFLAGS
-	PYTHON_CFLAGS := -I/usr/include/$(INSTALLED_PYTHON) -fno-strict-aliasing -fwrapv -Wstrict-prototypes -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -Werror=format-security
-	PYTHON_LDFLAGS := -L/usr/lib/$(INSTALLED_PYTHON)  -Xlinker -export-dynamic -Wl,-O1 -Wl,-Bsymbolic-functions
+PYTHON_CFLAGS := -I/usr/include/$(INSTALLED_PYTHON) -fno-strict-aliasing -fwrapv -Wstrict-prototypes -fstack-protector --param=ssp-buffer-size=4 -Wformat -Wformat-security -Werror=format-security
+PYTHON_LDFLAGS := -L/usr/lib/$(INSTALLED_PYTHON)  -Xlinker -export-dynamic -Wl,-O1 -Wl,-Bsymbolic-functions
 endif
 # There are some unix/gcc specific paths here. Should be cleaned up in future.
 pymoose: python/moose/_moose.so
