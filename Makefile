@@ -434,7 +434,7 @@ install:
 	mkdir -p $(DESTDIR)$(install_prefix)/share/moose
 	## copy filtering out the .svn (hidden) files
 	rsync -r --exclude=.svn Demos/* $(DESTDIR)$(install_prefix)/share/moose/Demos
-	rsync -r --exclude=.svn gui/* $(DESTDIR)$(install_prefix)/share/moose/gui
+	rsync -r --exclude=.svn old_gui/* $(DESTDIR)$(install_prefix)/share/moose/gui
 	test -d $(DESTDIR)$(install_prefix)/share/doc || mkdir -p $(DESTDIR)$(install_prefix)/share/doc
 	rsync -r --exclude=.svn Docs/* $(DESTDIR)$(install_prefix)/share/doc/moose
 
@@ -461,21 +461,21 @@ install:
         ## see standards.freedesktop.org for specifications for where to put menu entries and icons
         ## copy the .desktop files to /usr/share/applications for link to show up in main menu
 	mkdir -p $(DESTDIR)$(install_prefix)/share/applications
-	cp gui/MooseGUI.desktop $(DESTDIR)$(install_prefix)/share/applications/
-	cp gui/MooseSquidAxon.desktop $(DESTDIR)$(install_prefix)/share/applications/
+	cp old_gui/MooseGUI.desktop $(DESTDIR)$(install_prefix)/share/applications/
+	cp old_gui/MooseSquidAxon.desktop $(DESTDIR)$(install_prefix)/share/applications/
         ## copy the .desktop files to the desktop too to get icons
-	cp gui/MooseGUI.desktop $$HOME/Desktop/
+	cp old_gui/MooseGUI.desktop $$HOME/Desktop/
 	chmod a+x $$HOME/Desktop/MooseGUI.desktop
 	chown $(username) $(HOME)/Desktop/MooseGUI.desktop
 	chgrp $(username) $(HOME)/Desktop/MooseGUI.desktop
-	cp gui/MooseSquidAxon.desktop $$HOME/Desktop/
+	cp old_gui/MooseSquidAxon.desktop $$HOME/Desktop/
 	chmod a+x $$HOME/Desktop/MooseSquidAxon.desktop
 	chgrp $(username) $(HOME)/Desktop/MooseSquidAxon.desktop
 	chown $(username) $(HOME)/Desktop/MooseSquidAxon.desktop
         ## copy icon to /usr/share/icons/hicolor/<size>/apps (hicolor is the fallback theme)
 	mkdir -p $(DESTDIR)$(install_prefix)/share/icons/hicolor/scalable/apps
-	cp gui/icons/moose_icon.png $(DESTDIR)$(install_prefix)/share/icons/hicolor/scalable/apps/
-	cp gui/icons/squid.png $(DESTDIR)$(install_prefix)/share/icons/hicolor/scalable/apps/
+	cp old_gui/icons/moose_icon.png $(DESTDIR)$(install_prefix)/share/icons/hicolor/scalable/apps/
+	cp old_gui/icons/squid.png $(DESTDIR)$(install_prefix)/share/icons/hicolor/scalable/apps/
         ## need to update the icon cache to show the icon
 	update-icon-caches $(DESTDIR)$(install_prefix)/share/icons/hicolor/
 
