@@ -1,10 +1,13 @@
-# loadMulti.py --- 
+# minimal.py --- 
 # Upi Bhalla, NCBS Bangalore 2013.
 #
 # Commentary: 
 # 
 # Testing system for loading in arbirary multiscale models based on
 # model definition files.
+# This version has a minimal model with Ca in all 3 compartments,
+# and a binding reaction of Ca to CaM (just one step) in SPINE and PSD.
+# Incoming Ca from synaptic events comes to the PSD.
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -94,7 +97,7 @@ def loadChem( neuroCompt, spineCompt, psdCompt ):
 	# So we'll have to resize the volumes of the current compartments to the
 	# new ones.
 
-	modelId = moose.loadModel( 'psd_merged30b.g', '/model', 'ee' )
+	modelId = moose.loadModel( 'minimal.g', '/model', 'ee' )
 	chem = moose.element( '/model/model' )
 	chem.name = 'chem'
 	oldN = moose.element( '/model/chem/compartment_1' )
@@ -224,7 +227,7 @@ def makeNeuroMeshModel():
 	# set up adaptors
 	aCa = moose.Adaptor( '/model/chem/psdMesh/adaptCa', pdc )
 	adaptCa = moose.ematrix( '/model/chem/psdMesh/adaptCa' )
-	chemCa = moose.ematrix( '/model/chem/psdMesh/PSD/CaM/Ca' )
+	chemCa = moose.ematrix( '/model/chem/psdMesh/PSD/Ca' )
 	assert( len( adaptCa ) == pdc )
 	assert( len( chemCa ) == pdc )
 	for i in range( pdc ):
@@ -237,29 +240,6 @@ def makeNeuroMeshModel():
    	adaptCa.scale = 1e-5	# 520 to 0.0052 mM
 	print adaptCa.outputOffset
 	print adaptCa.scale
-
-	"""
-	aGluR = moose.Adaptor( '/model/chem/psdMesh/adaptGluR', 5 )
-    adaptGluR = moose.ematrix( '/model/chem/psdMesh/adaptGluR' )
-	chemR = moose.ematrix( '/model/chem/psdMesh/psdGluR' )
-	assert( len( adaptGluR ) == 5 )
-	for i in range( 5 ):
-    	path = '/model/elec/head' + str( i ) + '/gluR'
-		elecR = moose.element( path )
-			moose.connect( adaptGluR[i], 'outputSrc', elecR, 'set_Gbar', 'Single' )
-    #moose.connect( chemR, 'nOut', adaptGluR, 'input', 'OneToOne' )
-	# Ksolve isn't sending nOut. Not good. So have to use requestField.
-    moose.connect( adaptGluR, 'requestField', chemR, 'get_n', 'OneToOne' )
-    adaptGluR.outputOffset = 1e-7    # pS
-    adaptGluR.scale = 1e-6 / 100     # from n to pS
-
-    adaptK = moose.Adaptor( '/model/chem/neuroMesh/adaptK' )
-    chemK = moose.element( '/model/chem/neuroMesh/kChan' )
-    elecK = moose.element( '/model/elec/compt/K' )
-	moose.connect( adaptK, 'requestField', chemK, 'get_conc', 'OneToAll' )
-	moose.connect( adaptK, 'outputSrc', elecK, 'set_Gbar', 'Single' )
-	adaptK.scale = 0.3               # from mM to Siemens
-	"""
 
 def makeElecPlots():
     graphs = moose.Neutral( '/graphs' )
@@ -275,41 +255,39 @@ def makeElecPlots():
 
 def makeChemPlots():
     graphs = moose.Neutral( '/graphs' )
-    #moose.le( '/model/chem/psdMesh/PSD' )
-    addPlot( '/model/chem/psdMesh/PSD/tot_PSD_R[0]', 'get_n', 'psd0R' )
-    addPlot( '/model/chem/psdMesh/PSD/tot_PSD_R[1]', 'get_n', 'psd1R' )
-    addPlot( '/model/chem/psdMesh/PSD/tot_PSD_R[2]', 'get_n', 'psd2R' )
-    addPlot( '/model/chem/psdMesh/PSD/CaM/CaM_dash_Ca4[0]', 'get_conc', 'CaM' )
-    addPlot( '/model/chem/psdMesh/PSD/CaM_CaN[0]', 'get_conc', 'CaM_CaN' )
-    addPlot( '/model/chem/psdMesh/PSD/PP1_PSD/PP1_dash_active[0]', 'get_conc', 'PP1_active' )
-    #moose.le( '/model/chem/spineMesh/SPINE' )
-    #moose.le( '/model/chem/neuroMesh/DEND' )
-    addPlot( '/model/chem/psdMesh/PSD/CaM/Ca[0]', 'get_conc', 'psd0Ca' )
-    addPlot( '/model/chem/psdMesh/PSD/CaM/Ca[6]', 'get_conc', 'psd6Ca' )
-    addPlot( '/model/chem/psdMesh/PSD/CaM/Ca[12]', 'get_conc', 'psd12Ca' )
+    addPlot( '/model/chem/psdMesh/PSD/Ca[0]', 'get_conc', 'pCa0' )
+    addPlot( '/model/chem/psdMesh/PSD/Ca[6]', 'get_conc', 'pCa6' )
+    addPlot( '/model/chem/psdMesh/PSD/Ca[12]', 'get_conc', 'pCa12' )
 
-    addPlot( '/model/chem/spineMesh/SPINE/CaM/Ca[0]', 'get_conc', 'spine0Ca' )
-    addPlot( '/model/chem/spineMesh/SPINE/CaM/Ca[6]', 'get_conc', 'spine6Ca' )
-    addPlot( '/model/chem/spineMesh/SPINE/CaM/Ca[12]', 'get_conc', 'spine12Ca' )
+    addPlot( '/model/chem/spineMesh/SPINE/Ca[0]', 'get_conc', 'sCa0' )
+    addPlot( '/model/chem/spineMesh/SPINE/Ca[6]', 'get_conc', 'sCa6' )
+    addPlot( '/model/chem/spineMesh/SPINE/Ca[12]', 'get_conc', 'sCa12' )
 
     addPlot( '/model/chem/neuroMesh/DEND/Ca[0]', 'get_conc', 'dend0Ca' )
-    addPlot( '/model/chem/neuroMesh/DEND/Ca[30]', 'get_conc', 'dend30Ca' )
     addPlot( '/model/chem/neuroMesh/DEND/Ca[60]', 'get_conc', 'dend60Ca' )
-    addPlot( '/model/chem/neuroMesh/DEND/Ca[90]', 'get_conc', 'dend90Ca' )
-    addPlot( '/model/chem/neuroMesh/DEND/Ca[120]', 'get_conc', 'dend120Ca' )
     addPlot( '/model/chem/neuroMesh/DEND/Ca[144]', 'get_conc', 'dend144Ca' )
 
-    addPlot( '/model/chem/psdMesh/PSD/actCaMKII[6]', 'get_conc', 'psdCaMKII6' )
-    addPlot( '/model/chem/spineMesh/SPINE/actCaMKII[6]', 'get_conc', 'spineCaMKII6' )
-    #addPlot( '/n/neuroMesh/Ca', 'get_conc', 'dendCa' )
-    #addPlot( '/n/neuroMesh/inact_kinase', 'get_conc', 'inactDendKinase' )
-    #addPlot( '/n/psdMesh/psdGluR', 'get_n', 'psdGluR' )
+    addPlot( '/model/chem/psdMesh/PSD/CaM[0]', 'get_conc', 'pCaM0' )
+    addPlot( '/model/chem/psdMesh/PSD/CaM[6]', 'get_conc', 'pCaM6' )
+    addPlot( '/model/chem/psdMesh/PSD/CaM[12]', 'get_conc', 'pCaM12' )
+
+    addPlot( '/model/chem/spineMesh/SPINE/CaM[0]', 'get_conc', 'sCaM0' )
+    addPlot( '/model/chem/spineMesh/SPINE/CaM[6]', 'get_conc', 'sCaM6' )
+    addPlot( '/model/chem/spineMesh/SPINE/CaM[12]', 'get_conc', 'sCaM12' )
+
+    addPlot( '/model/chem/psdMesh/PSD/Ca_CaM[0]', 'get_conc', 'pCaCaM0' )
+    addPlot( '/model/chem/psdMesh/PSD/Ca_CaM[6]', 'get_conc', 'pCaCaM6' )
+    addPlot( '/model/chem/psdMesh/PSD/Ca_CaM[12]', 'get_conc', 'pCaCaM12' )
+
+    addPlot( '/model/chem/spineMesh/SPINE/Ca_CaM[0]', 'get_conc', 'sCaCaM0' )
+    addPlot( '/model/chem/spineMesh/SPINE/Ca_CaM[6]', 'get_conc', 'sCaCaM6' )
+    addPlot( '/model/chem/spineMesh/SPINE/Ca_CaM[12]', 'get_conc', 'sCaCaM12' )
 
 def testNeuroMeshMultiscale():
 	elecDt = 50e-6
-	chemDt = 2e-4
+	chemDt = 1e-4
 	plotDt = 5e-4
-	plotName = 'nm.plot'
+	plotName = 'min.plot'
 
 	makeNeuroMeshModel()
 	for i in moose.wildcardFind( '/model/chem/##[ISA=PoolBase]' ):

@@ -22891,4 +22891,104 @@ OK, now let's try to run it again and flush out a few more bugs.
 	fast and distance small.
 3. PsdCaMKII starts at 6 uM and plummets to 0 at the first sync time.
 
+
 ==========================================================================
+15 Aug.
+Checkin 4734
+Checking settling of Psd6Ca. Even with very long interval between spikes it
+is still not settling further below 0.5 uM.
+
+The ratio between Ca at spine and PSD is roughly the same for the 
+spines 0, 6 and 12,
+at 1.66 or so. Possibly a bug in diffusion rates?
+
+Another odd thing. Why isn't the adaptor assigning the correct value to the
+Ca in the spine?
+
+Experiment: reduce Ca diffConst to 1e-20. Outcome: 
+	- the psdCa is now correctly matched to the Ca from the ion channels.
+	- SpineCa settles to reasonable values except for spine 6 which is
+		about 50% too high at 0.12 uM.
+	- DendCa is steady at 0.08 uM.
+
+If I set diffConst for Ca = 1e-12 I get
+diffConst	psdCa (uM)	spineCa		dendCa
+1e-12		0.022		0.13		0.08
+1e-20		0		0.12		0.08
+
+So, something is happening with spineCa.
+
+If I just run the original kkit file psd_merged30b.g in GENESIS I end up
+with a very small steady-state level of Ca, 0.0038 uM.
+
+Tried setting up with no reactions in the model.
+Turns out that now we have numerical problems with the diffusion const.
+Reduced dt to 5e-4. SpineCa is now quite big.
+Reduced dt again to 2e-4. The plots have not yet converged.
+Reduced dt again to 1e-4. The plots seem to have converged.
+With this model point the spineCa settles to zero after the influx.
+Fails to settle with a 1e-3 sec dt.
+Let's see if it is better (and if spineCa is reasonable) with 
+diffusion const = 1e-12.
+Outcome: the settling of the spineCa is slow (tau > 100 ms) with 
+D = 1e-12.
+Turns out that the numerics are resonable
+From the literature, D of Ca ions in myxicola axoplasm is around 5e-10 m^2/s
+(Cell Calcium Volume 8, Issue 6, December 1987, Pages 437–448)
+
+But see
+Biophys J. 1977 October; 20(1): 113–136.  PMCID: PMC1473340
+Calcium diffusion in transient and steady states in muscle.
+R E Safford and J B Bassingthwaighte
+who estimate 1.65e-10 m^2/s.
+
+Hemoglobin is about 7e-11 m^2/s.
+Looks like I'll need to revisit diffusion numerics.
+
+For now small dt and use 1e-11 for Ca diff const.
+Really want to separate diffusion now. Think about it. Also look at a
+Gaussian elimination algorithm.
+
+We're just about OK with D = 0.5e-11 and dt = 1 ms
+or D = 1e-11 and dt = 0.5 ms.
+
+Now to put these times and diff consts back into the main model.
+Still doesn't work. Somewhere there is a discrepancy. All I have to do
+is to remove the reactions, and the values become reasonable. I guess I
+now need to systematically remove individual reactions.
+
+- All the reacs in CaMKII_PSD, which includes transloc reacs: 	no effect
+- All the reacs in PP1_PSD					no effect
+- All the reacs in CaM: 					Halves spine Ca
+- just PSD/CaM/CaM_dash_Ca3_dash_bind_dash_Ca: 			no effect
+- just PSD/CaM/CaM_dash_Ca2_dash_bind_dash_Ca: 			no effect
+- just PSD/CaM/CaM_dash_Ca_dash_bind_dash_Ca: 			little effect
+- just PSD/CaM/CaM_dash_bind_dash_Ca: 				Halves spine Ca
+
+OK, so is it due to diffusion of Ca-bound CaM? 
+	Reduced diffConst in PSD to 1e-20.  		Absolutely no effect!
+	Reduced diffConst in spine to 1e-20.  		Partial effect
+	Reduced diffConst in both to 1e-20.  		Same as in spine alone.
+
+Is it that the adaptor assignment comes in the process cycle after lots of 
+	chemical activity that causes values to jump back up? 
+	No, this would have been dt dependent.
+
+Possibly assigning 'n' doesn't assign the y vector?
+	No, code says otherwise.
+
+Does this all just work through the buffer releasing Ca very slowly, and
+the buffers diffusing back and forth between spine and PSD?
+	No. When run for 0.5 sec the spineCa settles to 0.18 uM.
+	I never did sort out why spine12Ca and spine0Ca settled lower than 
+	spine6Ca. They do get a lower stim. Probably related.
+
+I should redo this with a simple model having just Ca binding to another mol,
+in PSD and in spine. All mols diffuse.
+
+Made minimal.g and minimal.py. 
+Ran it, there is an unreasonable build-up. Independent of dt, so it may
+be a flaw in the computations. 
+Check in this model.
+
+
