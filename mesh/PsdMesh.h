@@ -49,7 +49,13 @@ class PsdMesh: public MeshCompt
 		//////////////////////////////////////////////////////////////////
 		// Field assignment stuff
 		//////////////////////////////////////////////////////////////////
-
+		/** 
+		 * An assumed thickness for PSD. The volume is computed as the
+		 * PSD area passed in to each PSD, times this value. 
+		 * Defaults to 50 nanometres. For reference, membranes are 5 nm.
+		 */
+		double getThickness() const;
+		void setThickness( double v );
 
 		//////////////////////////////////////////////////////////////////
 		// FieldElement assignment stuff for MeshEntries
@@ -143,6 +149,9 @@ class PsdMesh: public MeshCompt
 		static const Cinfo* initCinfo();
 
 	private:
+		/// Thickness of PSD
+		double thickness_;
+
 		/// Id of parent cell_ container.
 		Id cell_;
 		/**

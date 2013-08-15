@@ -22804,4 +22804,91 @@ compartments to volume, to remove a major ambiguity. This was a massive
 refactoring.
 Now clears unit tests but stuck in regression tests.
 
+In the meantime, bodged through the multiscale model in MULTI and it finally
+loads and runs. Added an adaptor just to get things going. Output is still 
+garbage, but things are now moving. 
+
+Some more cleanup, starting to generate reasonably-looking output
+
+==========================================================================
+11 Aug
+Sorting out Ca stimuli. The conversion from elec (520) to chem was way off,
+put in a 1e-5 conversion factor.
+PSD now gets reasonable Ca levels, but the spine levels are really low.
+Unclear why. Is the diffusion there too slow?
+
+psdCaMKII is completely unreasonable. First vast oscillations, then zero.
+
+Plotted conc instead of n. Now psdCaMKII starts reasonable (6 uM) and then drops
+straight to zero and never comes back.
+CaM_CaN and CaM are unreasonably small, 1e-7 mM
+==========================================================================
+12 Aug
+Sped up diffusion for Ca by 10x, in psd_merged30b.g.
+Still have the wrong Ca values. I think it is that the initial conc of 
+Ca isn't being set correctly. This may then be the problem with other
+pools too.
+Printout after inits. Something is very peculiar. Plan to do more.
+
+==========================================================================
+13 Aug
+Multiple bugs emerge.
+1. volume lookup in pool arrays (ematrix) is incorrect.
+2. Different values for conc/concInit in neuroMesh pools. Suspect same vol issue.
+3. Mismatch between concInit and conc following reinit for pools in PSD.
+	nInit and n have equivalent mismatch.
+
+Working on 1.
+Turns out MeshEntry::getVolume and other get calls use Eref::fieldIndex. This is
+going to use a lookup of 0 for all but fieldElements. Probably an error.
+
+About to fix this. But turns out the unit tests already fail. Fixing. I had
+made a change in how PSD mesh volume was computed, hadn't propagated to
+one of the unit tests. Fixed.
+
+Tackled 1. Traced back to the 'single' message used in the attachment of mesh
+to pools in the python script. This meant that tracing the message back to find
+volumes lost the index.
+
+Tackled 2. Fixed by above.
+
+Tackled 3. Traced through the reinit, it actually seems to be doing the
+right thing. Why would subsequent values be wrong?
+
+
+FieldIndex headaches: The volume lookup uses Eref::fieldIndex().
+This takes a fieldMask. All very ugly. Should simply have a predefined mask
+size for the field and for the object lookups respectively.
+Reasoning is that we just have a linear array lookup for every object.
+Within any object we may have a fieldElement (like a synapse) so we need
+a linear lookup for that. No more nesting.
+The alternative would be to have a unique Id for every object. Problem here
+with resizing arrays: the ids of successive objects in an array might not be 
+contiguous.
+The GENESIS approach lets us do arbitrary nesting by having unique elements 
+for everything, even if it is in a nominal array.
+In MOOSE, for fast lookup and for memory economy, we have arrays. Elements have
+a large overhead.
+Option 1: Unique Ids for every object, even if members of an array end up with
+non-contiguous Ids. 
+	Or when resizing, eliminate old Ids and put in new ones. Causes all
+	sorts of problems with current rather higher-level messaging, which
+	can work even when resizing is done.
+Or Permit arbitrary nesting. Use single messages to permit this. 
+
+
+
+==========================================================================
+14 Aug
+
+Tracked point 3. The reinit was calling the adaptor, which has an
+outputOffset of 0.0001. This was setting the conc. Confirmed by changing 
+the value of the outputOffset.
+
+OK, now let's try to run it again and flush out a few more bugs.
+1. The adapted value of Psd6Ca has a baseline of 0.5 uM, way too high.
+2. The diffusion into the Spine6Ca loses too much Ca. Why? Diff is already
+	fast and distance small.
+3. PsdCaMKII starts at 6 uM and plummets to 0 at the first sync time.
+
 ==========================================================================

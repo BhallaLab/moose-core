@@ -399,7 +399,8 @@ void makeChemInNeuroMesh()
 	// size = Field< unsigned int >::get( psdGluR, "linearSize");
 	assert( size == numSpines );
 	vol = Field< double >::get( Id( "/n/psdMesh/psdGluR" ), "volume" );
-	assert( doubleEq( vol, spineDia * spineDia * PI / 4.0 ) );
+	double thick = Field< double >::get( Id( "/n/psdMesh" ), "thickness" );
+	assert( doubleEq( vol, thick * spineDia * spineDia * PI / 4.0 ) );
 
 	size = Id( "/n/neuroMesh/Ca" ).element()->dataHandler()->localEntries();
 	// size = Field< unsigned int >::get( dendCa, "linearSize");
