@@ -55,10 +55,20 @@ const Cinfo* Neutral::initCinfo()
 		"text path for object", 
 			&Neutral::getPath );
 
+	/*
+			*/
 	static ReadOnlyElementValueFinfo< Neutral, string > className( 
 		"class",
 		"Class Name of object", 
 			&Neutral::getClass );
+
+	// Add this because of namespace collision with python 'class'.
+	/*
+	static ReadOnlyElementValueFinfo< Neutral, string > className( 
+		"className",
+		"Class Name of object", 
+			&Neutral::getClass );
+			*/
 
 	static ReadOnlyElementValueFinfo< Neutral, unsigned int > linearSize( 
 		"linearSize",
