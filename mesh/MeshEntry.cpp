@@ -220,7 +220,8 @@ void MeshEntry::reinit( const Eref& e, ProcPtr info )
 
 double MeshEntry::getVolume( const Eref& e, const Qinfo* q ) const
 {
-	return parent_->getMeshEntryVolume( e.fieldIndex() );
+	return parent_->getMeshEntryVolume( e.index().value() );
+	// return parent_->getMeshEntryVolume( e.fieldIndex() );
 }
 
 unsigned int MeshEntry::getDimensions( const Eref& e, const Qinfo* q ) const

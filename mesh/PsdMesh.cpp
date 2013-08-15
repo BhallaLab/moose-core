@@ -30,6 +30,14 @@ const Cinfo* PsdMesh::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// Field Definitions
 		//////////////////////////////////////////////////////////////
+		static ValueFinfo< PsdMesh, double > thickness(
+			"thickness",
+			"An assumed thickness for PSD. The volume is computed as the"
+			"PSD area passed in to each PSD, times this value."
+			"defaults to 50 nanometres. For reference, membranes are 5 nm.",
+			&PsdMesh::setThickness,
+			&PsdMesh::getThickness
+		);
 
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
@@ -51,6 +59,7 @@ const Cinfo* PsdMesh::initCinfo()
 		//////////////////////////////////////////////////////////////
 
 	static Finfo* psdMeshFinfos[] = {
+		&thickness,			// ValueFinfo
 		&psdList,			// DestFinfo
 	};
 
@@ -76,6 +85,7 @@ static const Cinfo* psdMeshCinfo = PsdMesh::initCinfo();
 //////////////////////////////////////////////////////////////////
 PsdMesh::PsdMesh()
 	:
+		thickness_( 50.0e-9 ),
 		psd_( 1 ),
 		pa_( 1 ),
 		parentDist_( 1, 1e-6 ),
@@ -84,7 +94,7 @@ PsdMesh::PsdMesh()
 {
 	const double defaultLength = 1e-6;
 	psd_[0].setDia( defaultLength );
-	psd_[0].setLength( defaultLength );
+	psd_[0].setLength( thickness_ );
 	psd_[0].setNumDivs( 1 );
 	psd_[0].setIsCylinder( true );
 }
@@ -103,6 +113,14 @@ PsdMesh::~PsdMesh()
 //////////////////////////////////////////////////////////////////
 // Field assignment stuff
 //////////////////////////////////////////////////////////////////
+double PsdMesh::getThickness() const
+{
+	return thickness_;
+}
+void PsdMesh::setThickness( double v )
+{
+	thickness_ = v;
+}
 
 /**
  * This assumes that lambda is the quantity to preserve, over numEntries.
@@ -161,7 +179,7 @@ void PsdMesh::handlePsdList(
 		vector< double > vols( psd_.size() );
 		for ( unsigned int i = 0; i < psd_.size(); ++i ) {
 			localIndices[i] = i;
-			vols[i] = psd_[i].getDiffusionArea( pa_[i], 0 );
+			vols[i] = thickness_ * psd_[i].getDiffusionArea( pa_[i], 0 );
 		}
 		vector< vector< unsigned int > > outgoingEntries;
 		vector< vector< unsigned int > > incomingEntries;
@@ -175,6 +193,7 @@ void PsdMesh::handlePsdList(
 //////////////////////////////////////////////////////////////////
 // FieldElement assignment stuff for MeshEntries
 //////////////////////////////////////////////////////////////////
+
 
 /// Virtual function to return MeshType of specified entry.
 unsigned int PsdMesh::getMeshType( unsigned int fid ) const
@@ -195,7 +214,7 @@ double PsdMesh::getMeshEntryVolume( unsigned int fid ) const
 	if ( psd_.size() == 0 ) // Default for meshes before init.
 		return 1.0;
 	assert( fid < psd_.size() );
-	return psd_[ fid ].getDiffusionArea( pa_[fid], 0 );
+	return thickness_ * psd_[ fid ].getDiffusionArea( pa_[fid], 0 );
 }
 
 /// Virtual function to return coords of mesh Entry.
