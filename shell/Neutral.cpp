@@ -58,7 +58,7 @@ const Cinfo* Neutral::initCinfo()
 	/*
 			*/
 	static ReadOnlyElementValueFinfo< Neutral, string > className( 
-		"class",
+		"className",
 		"Class Name of object", 
 			&Neutral::getClass );
 

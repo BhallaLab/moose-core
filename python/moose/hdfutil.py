@@ -115,11 +115,11 @@ def get_rec_dtype(em):
     bad_fields = []
     # Check if already have data type information for this class.
     # Create it otherwise.    
-    if em.class_ in dtype_table:
-        dtype = dtype_table[em.class_]
+    if em.className in dtype_table:
+        dtype = dtype_table[em.className]
     else:
-        print 'Creating entries for class:', obj.class_
-        fielddict = moose__.getFieldDict(obj.class_, 'valueFinfo')
+        print 'Creating entries for class:', obj.className
+        fielddict = moose__.getFieldDict(obj.className, 'valueFinfo')
         print fielddict
         keys = sorted(list(fielddict.keys()))
         fields = [] # [('path', 'S1024')]
@@ -134,8 +134,8 @@ def get_rec_dtype(em):
             # in all elements.
             if ftype in cpptonp:
                 fields.append((fieldname, cpptonp[ftype]))
-        dtype_table[obj.class_] = np.dtype(fields)
-        return dtype_table[obj.class_]
+        dtype_table[obj.className] = np.dtype(fields)
+        return dtype_table[obj.className]
             
 def save_dataset(classname, rec, dtype, hdfnode):
     """Saves the data from rec into dataset"""
@@ -168,7 +168,7 @@ def savetree(moosenode, hdfnode):
     hdfnode.attr['path'] = moosenode.path
     elements = hdfnode.create_group('elements')
     for em in moose.wildcardFind(moosenode.path+'/##'):        
-        em_rec.append((em.path, em.class_, em.shape))
+        em_rec.append((em.path, em.className, em.shape))
         dtype = get_rec_dtype(em)
         for obj in em:            
             fields = []
@@ -178,11 +178,11 @@ def savetree(moosenode, hdfnode):
                     fields.append(f.path)
                 else:
                     fields.append(f)
-            obj_rec[em.class_].append(fields)
-            obj_count[em.class_] += 1
-            if obj_count[em.class_] % size_step == 0:
-                save_dataset(em.class_, obj_rec[em.class_], dtype, elements)
-                obj_rec[em.class_][:] = [] # clear the records after saving
+            obj_rec[em.className].append(fields)
+            obj_count[em.className] += 1
+            if obj_count[em.className] % size_step == 0:
+                save_dataset(em.className, obj_rec[em.className], dtype, elements)
+                obj_rec[em.className][:] = [] # clear the records after saving
     # now save the remaining records (length < size_step)
     for classname, rec in obj_rec.items():
         save_dataset(classname, rec, dtype_table[classname], hdfnode)
@@ -217,7 +217,7 @@ def loadtree(hdfnode, moosenode):
             fieldnames = dset.dtype.names
             for ii in range(len(dset)):
                 obj = moose__.element(dset['path'][ii][len(basepath):])
-                for f in wfields[obj.class_]:
+                for f in wfields[obj.className]:
                     obj.setField(f, dset[f][ii])
         
         
@@ -242,19 +242,19 @@ def savestate(filename=None):
         class_array_dict = {}
         objcount = 0
         for obj in moose__.wildcardFind("/##"):
-            if obj.path.startswith('/Msg') or obj.path.startswith('/class') or obj.class_ == 'Table' or obj.class_ == 'TableEntry':
+            if obj.path.startswith('/Msg') or obj.path.startswith('/class') or obj.className == 'Table' or obj.className == 'TableEntry':
                 continue
-            print 'Processing:', obj.path, obj.class_
-            typeinfo.append((obj.path, obj.class_, str(obj.shape), obj[0].parent.path))
+            print 'Processing:', obj.path, obj.className
+            typeinfo.append((obj.path, obj.className, str(obj.shape), obj[0].parent.path))
             objcount += 1
             if len(typeinfo) == size_step:
                 typeinfo_dataset.resize(objcount)
                 typeinfo_dataset[objcount - size_step: objcount] = np.rec.array(typeinfo, typeinfo_dataset.dtype)
                 typeinfo = []
             # If we do not yet have dataset for this class, create one and keep it in dict
-            if obj.class_ not in class_dataset_dict:
-                print 'Creating entries for class:', obj.class_
-                fielddict = moose__.getFieldDict(obj.class_, 'valueFinfo')
+            if obj.className not in class_dataset_dict:
+                print 'Creating entries for class:', obj.className
+                fielddict = moose__.getFieldDict(obj.className, 'valueFinfo')
                 print fielddict
                 keys = sorted(list(fielddict.keys()))
                 fields = [] # [('path', 'S1024')]
@@ -265,12 +265,12 @@ def savestate(filename=None):
                     elif ftype == 'Id' or ftype == 'ObjId':
                         fields.append((fieldname, 'S1024'))
                 # print fields
-                ds = root.create_dataset(obj.class_, shape=(size_step,), dtype=fields, compression='gzip', compression_opts=6)
-                class_dataset_dict[obj.class_] = ds
-                class_array_dict[obj.class_] = []
-                class_count_dict[obj.class_] = 0
+                ds = root.create_dataset(obj.className, shape=(size_step,), dtype=fields, compression='gzip', compression_opts=6)
+                class_dataset_dict[obj.className] = ds
+                class_array_dict[obj.className] = []
+                class_count_dict[obj.className] = 0
             # Lookup the dataset for the class this object belongs to
-            ds = class_dataset_dict[obj.class_]
+            ds = class_dataset_dict[obj.className]
             for entry in obj:
                 fields = []
                 print entry.path,
@@ -278,17 +278,17 @@ def savestate(filename=None):
                     print 'getting field:', f
                     entry.getField(f)
                 fields = [f.path if isinstance(f, moose__.ematrix) or isinstance(f, moose__.element) else f for f in fields]
-                class_array_dict[obj.class_].append(fields)
+                class_array_dict[obj.className].append(fields)
                 # print 'fields:'
                 # print fields
-                # print 'length:', len(class_array_dict[obj.class_])
-                class_count_dict[obj.class_] += 1
-                if class_count_dict[obj.class_] == size_step:
+                # print 'length:', len(class_array_dict[obj.className])
+                class_count_dict[obj.className] += 1
+                if class_count_dict[obj.className] == size_step:
                     oldlen = ds.len()
-                    if oldlen <= class_count_dict[obj.class_]:
-                        ds.resize((class_count_dict[obj.class_]))
-                    ds[oldlen: class_count_dict[obj.class_]] = np.rec.array(class_array_dict[obj.class_], dtype=ds.dtype)
-                    class_array_dict[obj.class_] = []
+                    if oldlen <= class_count_dict[obj.className]:
+                        ds.resize((class_count_dict[obj.className]))
+                    ds[oldlen: class_count_dict[obj.className]] = np.rec.array(class_array_dict[obj.className], dtype=ds.dtype)
+                    class_array_dict[obj.className] = []
         for classname in class_array_dict:
             ds = class_dataset_dict[classname]
             ds.resize((class_count_dict[classname], ))
@@ -321,7 +321,7 @@ def restorestate(filename):
             fieldnames = dset.dtype.names
             for ii in range(len(dset)):
                 obj = moose__.element(dset['path'][ii])
-                for f in wfields[obj.class_]:
+                for f in wfields[obj.className]:
                     obj.setField(f, dset[f][ii])
 
 # 

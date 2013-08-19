@@ -242,7 +242,7 @@ extern "C" {
             return moose_Id_getValue(id);
         } else if (attribute == "shape"){
             return moose_Id_getShape(id);
-        } else if (attribute == "class_" || attribute == "class"){
+        } else if (attribute == "class_" || attribute == "className"){
             // !NOTE: Subha: 2012-08-20 19:52:21 (+0530) - the second
             // !check is to catch a strange bug where the field passed
             // !to moose_Id_getattro is 'class' in stead of
@@ -258,7 +258,7 @@ extern "C" {
             // Id. Expect it to be a single value in stead of a list
             // of class names.
             
-            string classname = Field<string>::get(id->id_, "class");
+            string classname = Field<string>::get(id->id_, "className");
             return Py_BuildValue("s", classname.c_str());
         }        
         return NULL;
@@ -470,7 +470,7 @@ extern "C" {
         }
         ostringstream repr;
         repr << "<moose.ematrix: class="
-             << Field<string>::get(self->id_, "class") << ", "
+             << Field<string>::get(self->id_, "className") << ", "
              << "id=" << self->id_.value() << ","
              << "path=" << self->id_.path() << ">";
         return PyString_FromString(repr.str().c_str());
@@ -483,7 +483,7 @@ extern "C" {
             RAISE_INVALID_ID(NULL, "moose_Id_str");
         }        
         return PyString_FromFormat("<moose.ematrix: class=%s, id=%u, path=%s>",
-                                   Field<string>::get(self->id_, "class").c_str(),
+                                   Field<string>::get(self->id_, "className").c_str(),
                                    self->id_.value(), self->id_.path().c_str());
     } // !  moose_Id_str
 
@@ -630,7 +630,7 @@ extern "C" {
                 PyErr_SetString(PyExc_SystemError, "bad ObjId at specified index.");
                 return NULL;
             }
-            string class_name = Field<string>::get(oid, "class");
+            string class_name = Field<string>::get(oid, "className");
             map<string, PyTypeObject*>::iterator it = get_moose_classes().find(class_name);
             if (it == get_moose_classes().end()){
                 PyErr_SetString(PyExc_SystemError, "moose_Id_subscript: unknown class");
@@ -694,14 +694,14 @@ extern "C" {
         if (_ret != NULL){
             return _ret;
         }
-        string class_name = Field<string>::get(self->id_, "class");
+        string class_name = Field<string>::get(self->id_, "className");
         string type = getFieldType(class_name, string(field), "valueFinfo");
         if (type.empty()){
             // Check if this field name is aliased and update fieldname and type if so.
             map<string, string>::const_iterator it = get_field_alias().find(string(field));
             if (it != get_field_alias().end()){
                 field = const_cast<char*>((it->second).c_str());
-                type = getFieldType(Field<string>::get(self->id_, "class"), it->second, "valueFinfo");
+                type = getFieldType(Field<string>::get(self->id_, "className"), it->second, "valueFinfo");
                 // Update attr for next level (PyObject_GenericGetAttr) in case.
                 Py_XDECREF(attr);
                 attr = PyString_FromString(field);
@@ -815,7 +815,7 @@ extern "C" {
             PyErr_SetString(PyExc_TypeError, "Attribute name must be a string");
             return -1;
         }
-        string moose_class = Field<string>::get(self->id_, "class");
+        string moose_class = Field<string>::get(self->id_, "className");
         string fieldtype = getFieldType(moose_class, string(fieldname), "valueFinfo");
         if (fieldtype.length() == 0){
             // If it is instance of a MOOSE Id then throw

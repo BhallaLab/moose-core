@@ -405,7 +405,7 @@ class MorphML():
                         )
 
                 neutralObj = moose.Neutral("/library/"+mechanismname)
-                if 'CaConc' == neutralObj.class_: # Ion concentration pool
+                if 'CaConc' == neutralObj.className: # Ion concentration pool
                     libcaconc = moose.CaConc("/library/"+mechanismname)
                     ## deep copies the library caconc under the compartment
                     caconc = moose.copy(libcaconc,compartment,mechanismname)
@@ -415,13 +415,13 @@ class MorphML():
                     ## B is set for caconc based on thickness of Ca shell and compartment l and dia
                     ## OR based on the Mstring phi under CaConc path.
                     channel = None
-                elif 'HHChannel2D' == neutralObj.class_ : ## HHChannel2D
+                elif 'HHChannel2D' == neutralObj.className : ## HHChannel2D
                     libchannel = moose.HHChannel2D("/library/"+mechanismname)
                     ## deep copies the library channel under the compartment
                     channel = moose.copy(libchannel,compartment,mechanismname)
                     channel = moose.HHChannel2D(channel)
                     moose.connect(channel,'channel',compartment,'channel')
-                elif 'HHChannel' == neutralObj.class_ : ## HHChannel
+                elif 'HHChannel' == neutralObj.className : ## HHChannel
                     libchannel = moose.HHChannel("/library/"+mechanismname)
                     ## deep copies the library channel under the compartment
                     channel = moose.copy(libchannel,compartment,mechanismname)
@@ -430,12 +430,12 @@ class MorphML():
             ## if mechanism is present in compartment, just wrap it
             else:
                 neutralObj = moose.Neutral(compartment.path+'/'+mechanismname)
-                if 'CaConc' == neutralObj.class_: # Ion concentration pool
+                if 'CaConc' == neutralObj.className: # Ion concentration pool
                     caconc = moose.CaConc(compartment.path+'/'+mechanismname) # wraps existing channel
                     channel = None
-                elif 'HHChannel2D' == neutralObj.class_ : ## HHChannel2D
+                elif 'HHChannel2D' == neutralObj.className : ## HHChannel2D
                     channel = moose.HHChannel2D(compartment.path+'/'+mechanismname) # wraps existing channel
-                elif 'HHChannel' == neutralObj.class_ : ## HHChannel
+                elif 'HHChannel' == neutralObj.className : ## HHChannel
                     channel = moose.HHChannel(compartment.path+'/'+mechanismname) # wraps existing channel
             if name == 'Gbar':
                 if channel is None: # if CaConc, neuroConstruct uses gbar for thickness or phi

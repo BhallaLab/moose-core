@@ -142,13 +142,13 @@ def apply_to_tree(moose_wildcard, python_filter=None, value=None):
     if isinstance(python_filter, types.LambdaType):
         id_list = [moose_id for moose_id in id_list if python_filter(moose_id)]
     elif isinstance(python_filter, str):
-        id_list = [moose_id for moose_id in id_list if hasattr(eval('_moose.%s(moose_id)' % (_moose.Neutral(moose_id).class_)), python_filter)]
+        id_list = [moose_id for moose_id in id_list if hasattr(eval('_moose.%s(moose_id)' % (_moose.Neutral(moose_id).className)), python_filter)]
     else:
         pass
     if isinstance(value, types.LambdaType):
         if isinstance(python_filter, str):
             for moose_id in id_list:
-                moose_obj = eval('_moose.%s(moose_id)' % (_moose.Neutral(moose_id).class_))
+                moose_obj = eval('_moose.%s(moose_id)' % (_moose.Neutral(moose_id).className))
                 setattr(moose_obj, python_filter, value(moose_id))
         else:
             for moose_id in id_list:
@@ -156,7 +156,7 @@ def apply_to_tree(moose_wildcard, python_filter=None, value=None):
     else:
         if isinstance(python_filter, str):
             for moose_id in id_list:
-                moose_obj = eval('_moose.%s(moose_id)' % (_moose.Neutral(moose_id).class_))
+                moose_obj = eval('_moose.%s(moose_id)' % (_moose.Neutral(moose_id).className))
                 setattr(moose_obj, python_filter, value)
         else:
             raise TypeError('Second argument must be a string specifying a field to assign to when third argument is a value')
@@ -196,7 +196,7 @@ def tweak_field(moose_wildcard, field, assignment_string):
     new_expr = parser.sequence2st(tmp)
     code = new_expr.compile()
     for moose_id in id_list:
-        moose_obj = eval('_moose.%s(moose_id)' % (_moose.Neutral(moose_id).class_))
+        moose_obj = eval('_moose.%s(moose_id)' % (_moose.Neutral(moose_id).className))
         value = eval(code)
         _moose.setField(moose_id, field, str(value))
         
@@ -448,10 +448,12 @@ def assignDefaultTicks(modelRoot='/model', dataRoot='/data', solver='hsolve'):
     _moose.useClock(2, '%s/##[ISA=MgBlock]'  % (modelRoot), 'process')
     _moose.useClock(3, '%s/##[ISA=CaConc]'  % (modelRoot), 'process')
     _moose.useClock(3, '%s/##[ISA=Func]' % (modelRoot), 'process')
-    _moose.useClock(7, '%s/##[ISA=DiffAmp]'  % (modelRoot), 'process')
-    _moose.useClock(7, '%s/##[ISA=VClamp]' % (modelRoot), 'process')
-    _moose.useClock(7, '%s/##[ISA=PIDController]' % (modelRoot), 'process')
-    _moose.useClock(7, '%s/##[ISA=RC]' % (modelRoot), 'process')
+    # The voltage clamp circuit depends critically on the dt used for
+    # computing soma Vm and need to be on a clock with dt=elecdt.
+    _moose.useClock(0, '%s/##[ISA=DiffAmp]'  % (modelRoot), 'process') 
+    _moose.useClock(0, '%s/##[ISA=VClamp]' % (modelRoot), 'process')
+    _moose.useClock(0, '%s/##[ISA=PIDController]' % (modelRoot), 'process')
+    _moose.useClock(0, '%s/##[ISA=RC]' % (modelRoot), 'process')
     # Special case for kinetics models
     kinetics = _moose.wildcardFind('%s/##[FIELD(name)=kinetics]' % modelRoot)
     if len(kinetics) > 0:
@@ -544,7 +546,7 @@ def resetSim(simpaths, simdt, plotdt, simmethod='hsolve'):
             element = _moose.Neutral(simpath)
             for childid in element.children: 
                 childobj = _moose.Neutral(childid)
-                classname = childobj.class_
+                classname = childobj.className
                 if classname in ['Neuron']:
                     neuronpath = childobj.path
                     h = _moose.HSolve( neuronpath+'/solve' )
@@ -586,7 +588,7 @@ def printNetTree():
     """ Prints all the cells under /, and recursive prints the cell tree for each cell. """
     root = _moose.Neutral('/')
     for id in root.children: # all subelements of 'root'
-        if _moose.Neutral(id).class_ == 'Cell':
+        if _moose.Neutral(id).className == 'Cell':
             cell = _moose.Cell(id)
             print "-------------------- CELL : ",cell.name," ---------------------------"
             printCellTree(cell)
@@ -616,19 +618,19 @@ def printRecursiveTree(elementid, level):
     element = _moose.Neutral(elementid)
     for childid in element.children: 
         childobj = _moose.Neutral(childid)
-        classname = childobj.class_
+        classname = childobj.className
         if classname in ['SynChan','KinSynChan']:
             childobj = _moose.SynChan(childid)
-            print spacefill+"|--", childobj.name, childobj.class_, 'Gbar=',childobj.Gbar
+            print spacefill+"|--", childobj.name, childobj.className, 'Gbar=',childobj.Gbar
         elif classname in ['HHChannel', 'HHChannel2D']:
             childobj = _moose.HHChannel(childid)
-            print spacefill+"|--", childobj.name, childobj.class_, 'Gbar=',childobj.Gbar, 'Ek=',childobj.Ek
+            print spacefill+"|--", childobj.name, childobj.className, 'Gbar=',childobj.Gbar, 'Ek=',childobj.Ek
         elif classname in ['CaConc']:
             childobj = _moose.CaConc(childid)
-            print spacefill+"|--", childobj.name, childobj.class_, 'thick=',childobj.thick, 'B=',childobj.B
+            print spacefill+"|--", childobj.name, childobj.className, 'thick=',childobj.thick, 'B=',childobj.B
         elif classname in ['Mg_block']:
             childobj = _moose.Mg_block(childid)
-            print spacefill+"|--", childobj.name, childobj.class_, 'CMg',childobj.CMg, 'KMg_A',childobj.KMg_A, 'KMg_B',childobj.KMg_B
+            print spacefill+"|--", childobj.name, childobj.className, 'CMg',childobj.CMg, 'KMg_A',childobj.KMg_A, 'KMg_B',childobj.KMg_B
         elif classname in ['Table']: # Table gives segfault if printRecursiveTree is called on it
             return # so go no deeper
         #for inmsg in childobj.inMessages():
@@ -737,7 +739,7 @@ def blockChannels(cell, channel_list):
         comp = _moose.Compartment(compartmentid)
         for childid in comp.children:
             child = _moose.Neutral(childid)
-            if child.class_ in ['HHChannel', 'HHChannel2D']:
+            if child.className in ['HHChannel', 'HHChannel2D']:
                 chan = _moose.HHChannel(childid)
                 for channame in channel_list:
                     if channame in chan.name:
@@ -746,7 +748,7 @@ def blockChannels(cell, channel_list):
 def get_child_Mstring(mooseobject,mstring):
     for childid in mooseobject.children:
         child = _moose.Neutral(childid)
-        if child.class_=='Mstring' and child.name==mstring:
+        if child.className=='Mstring' and child.name==mstring:
             child = _moose.Mstring(child)
             return child
     return None
@@ -760,7 +762,7 @@ def connect_CaConc(compartment_list, temperature=None):
         caconc = None
         for child in compartment.children:
             neutralwrap = _moose.Neutral(child)
-            if neutralwrap.class_ == 'CaConc':
+            if neutralwrap.className == 'CaConc':
                 caconc = _moose.CaConc(child)
                 break
         if caconc is not None:
@@ -776,12 +778,12 @@ def connect_CaConc(compartment_list, temperature=None):
                     (math.pi*compartment.diameter*compartment.length * caconc.thick)
             for child in compartment.children:
                 neutralwrap = _moose.Neutral(child)
-                if neutralwrap.class_ == 'HHChannel':
+                if neutralwrap.className == 'HHChannel':
                     channel = _moose.HHChannel(child)
                     ## If child Mstring 'ion' is present and is Ca, connect channel current to caconc
                     for childid in channel.children:
                         child = _moose.Neutral(childid)
-                        if child.class_=='Mstring':
+                        if child.className=='Mstring':
                             child = _moose.Mstring(child)
                             if child.name=='ion':
                                 if child.value in ['Ca','ca']:
@@ -798,12 +800,12 @@ def connect_CaConc(compartment_list, temperature=None):
                                 _moose.connect(caconc,'concOut',nernst,'ci')
                                 print 'Connected Nernst',nernst.path
                             
-                if neutralwrap.class_ == 'HHChannel2D':
+                if neutralwrap.className == 'HHChannel2D':
                     channel = _moose.HHChannel2D(child)
                     ## If child Mstring 'ionDependency' is present, connect caconc Ca conc to channel
                     for childid in channel.children:
                         child = _moose.Neutral(childid)
-                        if child.class_=='Mstring' and child.name=='ionDependency':
+                        if child.className=='Mstring' and child.name=='ionDependency':
                             child = _moose.Mstring(child)
                             if child.value in ['Ca','ca']:
                                 _moose.connect(caconc,'concOut',channel,'concen')
