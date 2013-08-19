@@ -135,7 +135,7 @@ def showfield(elem, field='*', showtype=False):
             raise ValueError('no such element')
         elem = element(elem)
     if field == '*':        
-        value_field_dict = getFieldDict(elem.class_, 'valueFinfo')
+        value_field_dict = getFieldDict(elem.className, 'valueFinfo')
         max_type_len = max([len(dtype) for dtype in list(value_field_dict.values())])
         max_field_len = max([len(dtype) for dtype in list(value_field_dict.keys())])
         print '\n[', elem.path, ']'
@@ -294,8 +294,8 @@ def doc(arg, paged=False):
     elif isinstance(arg, type):
         tokens = [arg.__name__]
     elif isinstance(arg, melement) or isinstance(arg, ematrix):
-        text = '%s: %s\n\n' % (arg.path, arg.class_)
-        tokens = [arg.class_]
+        text = '%s: %s\n\n' % (arg.path, arg.className)
+        tokens = [arg.className]
     if tokens:
         text += getmoosedoc(tokens)
     else:

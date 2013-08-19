@@ -277,7 +277,7 @@ extern "C" {
             RAISE_INVALID_ID(NULL, "moose_ObjId_repr");
         }
         ostringstream repr;
-        repr << "<moose." << Field<string>::get(self->oid_, "class") << ": "
+        repr << "<moose." << Field<string>::get(self->oid_, "className") << ": "
              << "id=" << self->oid_.id.value() << ", "
              << "dataId=" << self->oid_.dataId.value() << ", "
              << "path=" << self->oid_.path() << ">";
@@ -331,7 +331,7 @@ extern "C" {
         } else {
             finfoTypeStr = "valueFinfo";
         }
-        string typeStr = getFieldType(Field<string>::get(self->oid_, "class"),
+        string typeStr = getFieldType(Field<string>::get(self->oid_, "className"),
                                       string(fieldName), finfoTypeStr);
         if (typeStr.length() <= 0){
             PyErr_SetString(PyExc_ValueError,
@@ -401,14 +401,14 @@ extern "C" {
             PyErr_SetString(PyExc_RuntimeError, "bad ObjId.");
             return NULL;
 	}
-        string class_name = Field<string>::get(self->oid_, "class");
+        string class_name = Field<string>::get(self->oid_, "className");
         string type = getFieldType(class_name, string(field), "valueFinfo");
         if (type.empty()){
             // Check if this field name is aliased and update fieldname and type if so.
             map<string, string>::const_iterator it = get_field_alias().find(string(field));
             if (it != get_field_alias().end()){
                 field = (it->second).c_str();
-                type = getFieldType(Field<string>::get(self->oid_, "class"), it->second, "valueFinfo");
+                type = getFieldType(Field<string>::get(self->oid_, "className"), it->second, "valueFinfo");
                 // Update attr for next level (PyObject_GenericGetAttr) in case.
                 Py_XDECREF(attr);
                 attr = PyString_FromString(field);
@@ -598,7 +598,7 @@ extern "C" {
             PyErr_SetString(PyExc_TypeError, "Attribute name must be a string");
             return -1;
         }
-        string fieldtype = getFieldType(Field<string>::get(self->oid_, "class"), string(field), "valueFinfo");
+        string fieldtype = getFieldType(Field<string>::get(self->oid_, "className"), string(field), "valueFinfo");
         if (fieldtype.length() == 0){
             // If it is instance of a MOOSE built-in class then throw
             // error (to avoid silently creating new attributes due to
@@ -860,16 +860,16 @@ extern "C" {
     {
         extern PyTypeObject ObjIdType;
         vector<string> type_vec;
-        if (parse_Finfo_type(Field<string>::get(target, "class"), "lookupFinfo", string(fieldName), type_vec) < 0){
+        if (parse_Finfo_type(Field<string>::get(target, "className"), "lookupFinfo", string(fieldName), type_vec) < 0){
             ostringstream error;
-            error << "Cannot handle key type for LookupField `" << Field<string>::get(target, "class") << "." << fieldName << "`.";
+            error << "Cannot handle key type for LookupField `" << Field<string>::get(target, "className") << "." << fieldName << "`.";
             PyErr_SetString(PyExc_TypeError, error.str().c_str());
             return NULL;
         }
         if (type_vec.size() != 2){
             ostringstream error;
             error << "LookupField type signature should be <keytype>, <valuetype>. But for `"
-                  << Field<string>::get(target, "class") << "." << fieldName << "` got " << type_vec.size() << " components." ;
+                  << Field<string>::get(target, "className") << "." << fieldName << "` got " << type_vec.size() << " components." ;
             PyErr_SetString(PyExc_AssertionError, error.str().c_str());
             return NULL;
         }
@@ -979,7 +979,7 @@ extern "C" {
             }
             default:
                 ostringstream error;
-                error << "Unhandled key type `" << type_vec[0] << "` for " << Field<string>::get(target, "class") << "." << fieldName;
+                error << "Unhandled key type `" << type_vec[0] << "` for " << Field<string>::get(target, "className") << "." << fieldName;
                 PyErr_SetString(PyExc_TypeError, error.str().c_str());
         }
         return ret;
@@ -1014,16 +1014,16 @@ extern "C" {
     int setLookupField(ObjId target, char * fieldName, PyObject * key, PyObject * value)
     {
         vector<string> type_vec;
-        if (parse_Finfo_type(Field<string>::get(target, "class"), "lookupFinfo", string(fieldName), type_vec) < 0){
+        if (parse_Finfo_type(Field<string>::get(target, "className"), "lookupFinfo", string(fieldName), type_vec) < 0){
             ostringstream error;
-            error << "Cannot handle key type for LookupField `" << Field<string>::get(target, "class") << "." << fieldName << "`.";
+            error << "Cannot handle key type for LookupField `" << Field<string>::get(target, "className") << "." << fieldName << "`.";
             PyErr_SetString(PyExc_TypeError, error.str().c_str());
             return -1;
         }
         if (type_vec.size() != 2){
             ostringstream error;
             error << "LookupField type signature should be <keytype>, <valuetype>. But for `"
-                  << Field<string>::get(target, "class") << "." << fieldName << "` got " << type_vec.size() << " components." ;
+                  << Field<string>::get(target, "className") << "." << fieldName << "` got " << type_vec.size() << " components." ;
             PyErr_SetString(PyExc_AssertionError, error.str().c_str());
             return -1;
         }
@@ -1177,7 +1177,7 @@ extern "C" {
         
         // Try to parse the arguments.
         vector< string > argType;
-        if (parse_Finfo_type(Field<string>::get(oid, "class"),
+        if (parse_Finfo_type(Field<string>::get(oid, "className"),
                              "destFinfo", string(fieldName), argType) < 0){
             error << "Arguments not handled: " << fieldName << "(";
             for (unsigned int ii = 0; ii < argType.size(); ++ii){
@@ -1391,7 +1391,7 @@ extern "C" {
         }
         string ftype_str = (ftype != NULL)? string(ftype): "";
         vector<string> ret;
-        string className = Field<string>::get(self->oid_, "class");
+        string className = Field<string>::get(self->oid_, "className");
         if (ftype_str == ""){
             for (const char **a = getFinfoTypes(); *a; ++a){
                 vector<string> fields = getFieldNames(className, string(*a));

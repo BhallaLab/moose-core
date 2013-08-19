@@ -75,12 +75,12 @@ def to_el(path):
 
     ematrix or element can be provided in stead of path"""
     if isinstance(path, ematrix) or isinstance(path, element):
-        classObj = eval(path.class_)
+        classObj = eval(path.className)
     elif isinstance(path, str):
         if not _moose.exists(path):
             raise NameError('Object %s not defined' % (path))
         oid = _moose.element(path)
-        classObj = eval(oid.class_)
+        classObj = eval(oid.className)
     else:
         raise TypeError('expected argument: ematrix/element/str')
     return classObj(path)
@@ -154,7 +154,7 @@ def showfield(elem, field='*', showtype=False):
             raise ValueError('no such element')
         elem = element(elem)
     if field == '*':        
-        value_field_dict = getFieldDict(elem.class_, 'valueFinfo')
+        value_field_dict = getFieldDict(elem.className, 'valueFinfo')
         max_type_len = max([len(dtype) for dtype in list(value_field_dict.values())])
         max_field_len = max([len(dtype) for dtype in list(value_field_dict.keys())])
         print('\n[', elem.path, ']')
