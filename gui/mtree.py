@@ -125,7 +125,7 @@ class MooseTreeItem(QtGui.QTreeWidgetItem):
     def setObject(self, element):
         self.mobj = moose.element(element)
 	self.setText(0, QtCore.QString(self.mobj.path.rpartition('/')[-1]))
-	self.setText(1, QtCore.QString(self.mobj.class_))
+	self.setText(1, QtCore.QString(self.mobj.className))
 	#self.setToolTip(0, QtCore.QString('class:' + self.mooseObj_.className))
 
     def updateSlot(self):

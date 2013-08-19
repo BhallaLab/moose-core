@@ -697,7 +697,7 @@ extern "C" {
     {
         static map<string, string> alias;
         if (alias.empty()){
-            alias["class_"] = "class";
+            // alias["class_"] = "class";
             alias["lambda_"] = "lambda";
         }
         return alias;
@@ -2141,7 +2141,7 @@ extern "C" {
 
     PyObject * oid_to_element(ObjId oid)
     {
-        string classname = Field<string>::get(oid, "class");
+        string classname = Field<string>::get(oid, "className");
         map<string, PyTypeObject *>::iterator it = get_moose_classes().find(classname);
         if (it == get_moose_classes().end()){
             return NULL;

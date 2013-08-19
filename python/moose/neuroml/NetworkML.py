@@ -184,7 +184,7 @@ class NetworkML():
         for childId in obj.children:
             childobj = moose.Neutral(childId)
             ## if childobj is a compartment or symcompartment translate, else skip it
-            if childobj.class_ in ['Compartment','SymCompartment']:
+            if childobj.className in ['Compartment','SymCompartment']:
                 ## SymCompartment inherits from Compartment,
                 ## so below wrapping by Compartment() is fine for both Compartment and SymCompartment
                 child = moose.Compartment(childId)
@@ -294,7 +294,7 @@ class NetworkML():
         ## as KinSynChan is not meant to represent multiple synapses
         libsyn = moose.SynChan('/library/'+syn_name)
         gradedchild = utils.get_child_Mstring(libsyn,'graded')
-        if libsyn.class_ == 'KinSynChan' or gradedchild.value == 'True': # create a new synapse
+        if libsyn.className == 'KinSynChan' or gradedchild.value == 'True': # create a new synapse
             syn_name_full = syn_name+'_'+utils.underscorize(pre_path)
             self.make_new_synapse(syn_name, postcomp, syn_name_full)
         else:
@@ -389,7 +389,7 @@ class NetworkML():
             #### delay and weight are arrays: multiple event messages can be connected to a single synapse
             ## first argument below is the array index, we connect to the latest synapse created above
             ## But KinSynChan ignores weight of the synapse, so set the Gbar for it
-            if libsyn.class_ == 'KinSynChan':
+            if libsyn.className == 'KinSynChan':
                 syn.Gbar = weight*syn.Gbar
             else:
                 ## note that you need to use Synapse (auto-created) under SynChan
