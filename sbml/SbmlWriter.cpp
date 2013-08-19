@@ -161,7 +161,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	  vector< Id > Compt_spe = LookupField< string, vector< Id > >::get(*itr, "neighbours", "remesh" );
 	  int species_size = 1;
 	  for (vector <Id> :: iterator itrp = Compt_spe.begin();itrp != Compt_spe.end();itrp++)
-	    { string objclass = Field<string> :: get(ObjId(*itrp),"class");
+	    { string objclass = Field<string> :: get(ObjId(*itrp),"className");
 	      if (objclass != "GslStoich")
 		{ 
 		  string clean_poolname = cleanNameId(*itrp,index);
@@ -180,7 +180,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		  sp->setInitialAmount( initAmt ); 
 		  string path = Field<string> :: get(ObjId(*itrp),"path");
 		  Id annotaId( path+"/info");
-		  string noteClass = Field<string> :: get(ObjId(annotaId),"class");
+		  string noteClass = Field<string> :: get(ObjId(annotaId),"className");
 		  string notes;
 		  if (noteClass =="Annotator")
 		    { string notes = Field <string> :: get(ObjId(annotaId),"notes");
@@ -209,7 +209,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		      vector< Id > funpoolChildren = Field< vector< Id > >::get( *itrp, "children" );
 		      for ( vector< Id >::iterator itrfunpoolchild = funpoolChildren.begin();  itrfunpoolchild != funpoolChildren.end(); ++itrfunpoolchild )
 			{ 
-			  string funpoolclass = Field<string> :: get(ObjId(*itrfunpoolchild),"class");
+			  string funpoolclass = Field<string> :: get(ObjId(*itrfunpoolchild),"className");
 			  if (funpoolclass == "SumFunc")
 			    {vector < Id > sumfunpool = LookupField <string,vector < Id> >::get(*itrfunpoolchild, "neighbours","input");
 			      int sumtot_count = sumfunpool.size();
@@ -242,13 +242,13 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	  vector< Id > Compt_ReacEnz = LookupField< string, vector< Id > >::get(*itr, "neighbours", "remeshReacs" );
 	  for (vector <Id> :: iterator itrRE= Compt_ReacEnz.begin();itrRE != Compt_ReacEnz.end();itrRE++)
 	    {string clean_reacname = cleanNameId(*itrRE,index);
-	      string re_enClass = Field<string> :: get(ObjId(*itrRE),"class");
+	      string re_enClass = Field<string> :: get(ObjId(*itrRE),"className");
 	      Reaction* reaction;
 	      reaction = cremodel_->createReaction(); 
 	      reaction->setId( clean_reacname);
 	      string pathRE = Field<string> :: get(ObjId(*itrRE),"path");
 	      Id annotaIdRE( pathRE+"/info");
-	      string noteClassRE = Field<string> :: get(ObjId(annotaIdRE),"class");
+	      string noteClassRE = Field<string> :: get(ObjId(annotaIdRE),"className");
 	      string notesRE;
 	      if (noteClassRE =="Annotator")
 		{
@@ -411,7 +411,7 @@ bool SbmlWriter::writeModel( const SBMLDocument* sbmlDoc, const string& filename
 
 string SbmlWriter::cleanNameId(Id itrid,int  index)
 { string objname = Field<string> :: get(ObjId(itrid),"name");
-  string objclass = Field<string> :: get(ObjId(itrid),"class");
+  string objclass = Field<string> :: get(ObjId(itrid),"className");
   ostringstream Objid;
   Objid << (itrid) <<"_"<<index;
   objname = nameString(objname);
@@ -664,7 +664,7 @@ void SbmlWriter::printParameters( KineticLaw* kl,string k,double kvalue,string u
 string SbmlWriter::findNotes(Id itr)
 { string path = Field<string> :: get(ObjId(itr),"path");
   Id annotaId( path+"/info");
-  string noteClass = Field<string> :: get(ObjId(annotaId),"class");
+  string noteClass = Field<string> :: get(ObjId(annotaId),"className");
   string notes;
   if (noteClass =="Annotator")
     string notes = Field <string> :: get(ObjId(annotaId),"notes");
