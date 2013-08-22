@@ -58,6 +58,23 @@ class ChemCompt
 		void setMethod( string method );
 		string getMethod() const;
 
+		/**
+		 * Function to return the stencil values used in the
+		 * diffusion calculations for voxelized compartments.
+		 */
+		vector< double > getStencilRate( unsigned int row ) const;
+
+		/// Virtual func for getting stencil rates for the derived classes.
+		virtual vector< double > innerGetStencilRate( unsigned int row ) const = 0;
+
+		/**
+		 * Function to return the stencil indices used in the
+		 * diffusion calculations for voxelized compartments.
+		 * Refers to the getNeighbors virtual function.
+		 */
+		vector< unsigned int > getStencilIndex( unsigned int row ) const;
+
+
 		//////////////////////////////////////////////////////////////////
 		// Dest Finfo
 		//////////////////////////////////////////////////////////////////

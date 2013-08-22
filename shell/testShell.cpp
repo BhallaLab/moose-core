@@ -1638,11 +1638,11 @@ void testGetMsgs()
 	for ( unsigned int i = 0; i < 5; ++i )
 		assert( Field< Id >::get( msgMgrs[i], "e1" ) == a1 );
 
-	assert( Field< string >::get( msgMgrs[0], "class" ) == "SingleMsg" );
-	assert( Field< string >::get( msgMgrs[1], "class" ) == "OneToAllMsg" );
-	assert( Field< string >::get( msgMgrs[2], "class" ) == "OneToOneMsg" );
-	assert( Field< string >::get( msgMgrs[3], "class" ) == "DiagonalMsg" );
-	assert( Field< string >::get( msgMgrs[4], "class" ) == "SparseMsg" );
+	assert( Field< string >::get( msgMgrs[0], "className" ) == "SingleMsg" );
+	assert( Field< string >::get( msgMgrs[1], "className" ) == "OneToAllMsg" );
+	assert( Field< string >::get( msgMgrs[2], "className" ) == "OneToOneMsg" );
+	assert( Field< string >::get( msgMgrs[3], "className" ) == "DiagonalMsg" );
+	assert( Field< string >::get( msgMgrs[4], "className" ) == "SparseMsg" );
 
 	assert( Field< Id >::get( msgMgrs[0], "e2" ) == a2 );
 	assert( Field< Id >::get( msgMgrs[1], "e2" ) == b2 );

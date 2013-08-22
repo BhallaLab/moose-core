@@ -22989,6 +22989,40 @@ in PSD and in spine. All mols diffuse.
 Made minimal.g and minimal.py. 
 Ran it, there is an unreasonable build-up. Independent of dt, so it may
 be a flaw in the computations. 
-Check in this model.
+Check in this model. 4735.
 
 
+==========================================================================
+19 Aug.
+Made diffusionOnly.py which strips out the reactions from minimal.g and runs it.
+This turns out to have the buildup for CaM, more in the PSD than spine. No 
+buildup for anything else.
+Is this dependent on a non-zero initial value? 
+Test: Set CaCaM to nonzero initially. Result: Yes, they blow up too.
+Test: rerun at 2x dt. Result: Blows up almost identically.
+
+So there is another diffusion error to track down.
+
+==========================================================================
+20 Aug.
+What if there is zero CaCaM in the PSD? 	A: Still get buildup.
+What if there is zero CaCaM in the spine? 	A: Still get buildup
+
+What happens if I delete CaM from the PSD. Does the error happen
+at the spine too?				A: Yes
+What happens if I delete CaM from the spine. Does the error happen
+at the PSD too?					A: No
+
+What happens if there is CaM in the Dend as well? Does the error propagate
+	into the dend?				A: not apparent.
+	
+==========================================================================
+21 Aug
+Should look closely at SpineMesh to figure out how it sets up its stencil.
+Specifically, SpineMesh::buildStencil is almost empty.
+==========================================================================
+22 Aug
+Added fields to ChemCompt base class to report diffusion stencils.
+Fixed testShell.cpp to handle conversion of 'class' field to 'className'.
+
+==========================================================================

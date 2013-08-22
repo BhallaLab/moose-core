@@ -41,7 +41,14 @@ class MeshCompt: public ChemCompt
 		unsigned int getStencil( unsigned int meshIndex,
 				const double** entry, const unsigned int** colIndex ) const;
 
+		/// Looks up stencil to return vector of indices of coupled voxels.
 		vector< unsigned int > getNeighbors( unsigned int fid ) const;
+
+		/**
+		 * Looks up stencil to return vector of diffusion coupling to 
+		 * neighbor voxels.
+		 */
+		vector< double > innerGetStencilRate( unsigned int row ) const;
 
 		void addRow( unsigned int index, const vector< double >& entry,
 			const vector< unsigned int >& colIndex );

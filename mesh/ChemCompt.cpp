@@ -85,6 +85,24 @@ const Cinfo* ChemCompt::initCinfo()
 			&ChemCompt::getMethod
 		);
 
+		static ReadOnlyLookupValueFinfo< ChemCompt, unsigned int, vector< double > > stencilRate(
+			"stencilRate",
+			"vector of diffusion rates in the stencil for specified voxel."
+			"The identity of the coupled voxels is given by the partner "
+			"field 'stencilIndex'."
+			"Returns an empty vector for non-voxelized compartments.",
+			&ChemCompt::getStencilRate
+		);
+
+		static ReadOnlyLookupValueFinfo< ChemCompt, unsigned int, vector< unsigned int > > stencilIndex(
+			"stencilIndex",
+			"vector of voxels diffusively coupled to the specified voxel."
+			"The diffusion rates into the coupled voxels is given by the "
+			"partner field 'stencilRate'."
+			"Returns an empty vector for non-voxelized compartments.",
+			&ChemCompt::getStencilIndex 
+		);
+
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
@@ -186,6 +204,8 @@ const Cinfo* ChemCompt::initCinfo()
 		&volume,			// Value
 		&numDimensions,	// ReadOnlyValue
 		&method,		// Value
+		&stencilRate,	// ReadOnlyLookupValue
+		&stencilIndex,	// ReadOnlyLookupValue
 		&buildDefaultMesh,	// DestFinfo
 		&resetStencil,	// DestFinfo
 		&nodeMeshing,	// SharedFinfo
@@ -284,6 +304,17 @@ void ChemCompt::setMethod( string method )
 {
 	method_ = method;
 }
+
+vector< double > ChemCompt::getStencilRate( unsigned int row ) const
+{
+	return this->innerGetStencilRate( row );
+}
+
+vector< unsigned int > ChemCompt::getStencilIndex( unsigned int row ) const
+{
+	return this->getNeighbors( row );
+}
+
 
 //////////////////////////////////////////////////////////////
 // Element Field Definitions
