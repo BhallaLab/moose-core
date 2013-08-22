@@ -61,15 +61,31 @@ unsigned int MeshCompt::getStencil( unsigned int meshIndex,
 //////////////////////////////////////////////////////////////////
 
 /// Virtual function to return info on Entries connected to this one
-vector< unsigned int > MeshCompt::getNeighbors( unsigned int fid ) const
+vector< unsigned int > MeshCompt::getNeighbors( unsigned int row ) const
 {
 	const double* entry;
 	const unsigned int *colIndex;
 
-	unsigned int n = m_.getRow( fid, &entry, &colIndex );
+	unsigned int n = m_.getRow( row, &entry, &colIndex );
 
 	vector< unsigned int > ret;
 	ret.insert( ret.end(), colIndex, colIndex + n );
+
+	return ret;
+}
+
+//////////////////////////////////////////////////////////////////
+// Inherited virtual funcs for field access
+//////////////////////////////////////////////////////////////////
+vector< double > MeshCompt::innerGetStencilRate( unsigned int row ) const
+{
+	const double* entry;
+	const unsigned int *colIndex;
+
+	unsigned int n = m_.getRow( row, &entry, &colIndex );
+
+	vector< double > ret;
+	ret.insert( ret.end(), entry, entry + n );
 
 	return ret;
 }
