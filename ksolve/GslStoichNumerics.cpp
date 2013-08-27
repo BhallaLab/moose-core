@@ -377,7 +377,7 @@ void GslStoich::updateDiffusion(
 	for ( unsigned int me = 0; me < pools_.size(); ++me ) {
 		unsigned int numInRow = 
 			compartment_->getStencil( me, &adx, &colIndex);
-		double vSelf = compartment_->getMeshEntryVolume( me );
+		double vSelf = compartment_->extendedMeshEntryVolume( me );
 		const double* sSelf = &(lastS[ me ][0]);
 		StoichCore* stoich = ode_[ pools_[me].getSolver() ].stoich_;
 		/* Don't use xa anymore, it is folded into the stencil.
