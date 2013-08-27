@@ -23025,4 +23025,55 @@ Specifically, SpineMesh::buildStencil is almost empty.
 Added fields to ChemCompt base class to report diffusion stencils.
 Fixed testShell.cpp to handle conversion of 'class' field to 'className'.
 
+Trying to figure out where the mesh gets expanded, and how this ties into
+the changes in the stencil. Should look at the regression/unit test where this
+is done.
+
+Confirmed that the SpineMesh stencil gets set up correctly for the 
+indexing, and looks reasonable for the diffusion rates.
+
+Do we just have numerical instability after all?
+Set off with chemDt = 50e-6, same as elecDt. This is 4 times smaller
+than the previous run. No apparent difference.
+Set off with chemDt = 10e-6. This is 20 times smaller
+than the previous run. Still no apparent difference.
+
+So it doesn't look like this.
+
+Next, check the numerics stage for the diffusion calculations of the 
+SpineMesh.
+
 ==========================================================================
+26 Aug.
+- What is the conc equalization tau in the spine?
+	dist = 0.5 microns.
+	D = 1e-11 m^2/sec = 10 microns^2/sec
+	dist ~ sqrt(D.t)
+	so t ~ dist^2/D ~0.5microns^2 / 10 = 0.25/10 = 0.025
+	So it isn't all that fast. 25 msec.
+	For Calcium it would be problematic: D ~5e-10 m^2/sec, we'd have 0.5ms
+
+Clue: the vOther:vSelf values in GslStoich::updateDiffusion are not right
+when in the extended compartments.
+
+Fixed. Used vSelf = extendedMeshEntryVolume since the 'self' might be one of
+the appended voxels. With that the runaway buildup of psd and spine values
+is averted. Also they converge to each other. But the value of the bulk
+conc is still too low. Should be 1 uM, same as PSD.
+
+Checked. The operation of resizing the old compartments works fine, but 
+in moveCompt to the new compts the concInits both change from 1 uM to 20.
+Which in turn differs from the values I get in the sim (0.05, 0, 20)
+Found issue: the mapping from the readKkit compartments to the MOOSE elements
+for the compartments was wrong. With that the concInits look good, but
+now there is an odd failure on line 85, failing to find the object
+/model/chemk/kinetics/SPINE.
+
+==========================================================================
+27 Aug 2013.
+Turned out it was just a matter of ordering of shuffling around of compartments.
+The DEND compartment was assigned to /kinetics, and was being done first, so
+/kinetics was deleted before some of the other child compartments were handled.
+
+With this I should be able to move back to parameterizing the model.
+
