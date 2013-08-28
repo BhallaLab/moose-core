@@ -122,6 +122,7 @@ class NML2Reader(object):
         self.moose_to_nml = {} # Moose object to NeuroML object
         self.proto_cells = {} # map id to prototype cell in moose
         self.proto_chans = {} # map id to prototype channels in moose
+        self.proto_pools = {} # map id to prototype pools (Ca2+, Mg2+)
         self.includes = {} # Included files mapped to other readers
         self.lib = moose.Neutral('/library')
         self.id_to_ionChannel = {}
@@ -230,8 +231,18 @@ class NML2Reader(object):
 
     def importIntracellularProperties(self, nmlcell, moosecell, properties):
         self.importAxialResistance(nmlcell, properties)
-        # TODO CaConc
+        self.importSpecies(nmlcell, properties)
 
+    def importSpecies(self, nmlcell, properties):
+        sg_to_segments = self._cell_to_sg[nmlcell]
+        for species in properties.species:
+            if species.concentrationModel  not in self.proto_pools:
+                continue
+            segments = getSegments(nmlcell, species, sg_to_segments)
+            for seg in segments:
+                comp = self.nml_to_moose[seg]                
+                moose.copy(self.proto_pools[species.id], comp)       
+        
     def importAxialResistance(self, nmlcell, intracellularProperties):
         sg_to_segments = self._cell_to_sg[nmlcell]
         for r in intracellularProperties.resistivity:
@@ -343,8 +354,18 @@ class NML2Reader(object):
                 self.id_to_ionChannel[chan.id] = chan
                 self.nml_to_moose[chan] = mchan
                 self.proto_chans[chan.id] = mchan
-    
-        
+
+    def createDecayingPoolConcentrationModel(self, concModel):
+        """Create prototype for concentration model"""
+        if concModel.name is not None:
+            name = concModel.name
+        else:
+            name = concModel.id
+        ca = moose.CaConc('%s/%s' % (self.library.path, id))
+        ca.CaBasal = SI(concModel.restingConc.value)
+        ca.tau = SI(concModel.decayConstant.value)
+        ca.thick = SI(concModel.decayConstant.shellThickness)
+        self.proto_pools[concModel.id] = ca
         
                     
             
