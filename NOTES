@@ -23076,4 +23076,21 @@ The DEND compartment was assigned to /kinetics, and was being done first, so
 /kinetics was deleted before some of the other child compartments were handled.
 
 With this I should be able to move back to parameterizing the model.
+Checkin 4739.
 
+Steps:
+* find which neuroCompt is connected to which spine: 
+	Implemented and used field to provide this info.
+* Use higher (more physiological) values of DiffConst: 
+	Raised Ca to 1e-10 and others to 1e-11
+* find the longest ChemDt that works:	1e-4
+- Incorporate chem system in specified portion of model.
+- Incorporate fractional X-section
+- Use non-adaptive RungeKutta for these really tiny timesteps.
+
+
+==========================================================================
+28 Aug
+Checked in diffusionOnly.py and diffonly.g which show the diffusion calculations
+without any reactions in the system.
+==========================================================================

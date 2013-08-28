@@ -50,6 +50,14 @@ const Cinfo* SpineMesh::initCinfo()
 		//////////////////////////////////////////////////////////////
 		// Field Definitions
 		//////////////////////////////////////////////////////////////
+		static ReadOnlyValueFinfo< SpineMesh, vector< unsigned int > >
+			parentVoxel 
+		(
+		 	"parentVoxel",
+			"Vector of indices of voxels on parent NeuroMesh, from which "
+			"the respective spines emerge.",
+			&SpineMesh::getParentVoxel
+		);
 
 		//////////////////////////////////////////////////////////////
 		// MsgDest Definitions
@@ -70,6 +78,7 @@ const Cinfo* SpineMesh::initCinfo()
 		//////////////////////////////////////////////////////////////
 
 	static Finfo* spineMeshFinfos[] = {
+		&parentVoxel,		// ReadOnlyValueFinfo
 		&spineList,			// DestFinfo
 		// psdListOut(),		// SrcFinfo
 	};
@@ -114,6 +123,14 @@ SpineMesh::~SpineMesh()
 //////////////////////////////////////////////////////////////////
 // Field assignment stuff
 //////////////////////////////////////////////////////////////////
+
+vector< unsigned int > SpineMesh::getParentVoxel() const
+{
+	vector< unsigned int > ret( spines_.size() );
+	for ( unsigned int i = 0; i < spines_.size(); ++i )
+		ret[i] = spines_[i].parent();
+	return ret;
+}
 
 /**
  * This assumes that lambda is the quantity to preserve, over numEntries.
