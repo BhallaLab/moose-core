@@ -59,7 +59,14 @@ import moose
 import generated_neuroml as nml
 from units import SI
 import hhfit
+import logging
 
+loglevel = logging.DEBUG
+logstream = logging.StreamHandler()
+logstream.setLevel(loglevel)
+logstream.setFormatter(logging.Formatter('%s(asctime)s %(name)s %(filename)s %(funcName)s: %(message)s'))
+logger = logging.getLogger('nml2_reader')
+logger.addHandler(logstream)
 
 def sarea(comp):
     """Calculate the surface area of compartment from length and
@@ -133,6 +140,7 @@ class NML2Reader(object):
         self.filename = filename
         self.importIncludes(self.doc)
         self.importIonChannels(self.doc)
+        self.importConcentrationModels(self.doc)
         for cell in self.doc.cell:
             self.createCellPrototype(cell)
 
@@ -236,12 +244,31 @@ class NML2Reader(object):
     def importSpecies(self, nmlcell, properties):
         sg_to_segments = self._cell_to_sg[nmlcell]
         for species in properties.species:
-            if species.concentrationModel  not in self.proto_pools:
+            if (species.concentrationModel is not None) and \
+               (species.concentrationModel.id  not in self.proto_pools):
                 continue
             segments = getSegments(nmlcell, species, sg_to_segments)
             for seg in segments:
-                comp = self.nml_to_moose[seg]                
-                moose.copy(self.proto_pools[species.id], comp)       
+                comp = self.nml_to_moose[seg]    
+                self.copySpecies(species, comp)
+
+    def copySpecies(self, species, compartment):
+        """Copy the prototype pool `species` to compartment. Currently only
+        decaying pool of Ca2+ supported"""
+        proto_pool = None
+        if species.concentrationModel in self.proto_pools:
+            proto_pool = self.proto_pools[species.concentrationModel]
+        else:
+            for innerReader in self.includes.values():
+                if species.concentrationModel in innerReader.proto_pools:
+                    proto_pool = innerReader.proto_pools[species.concentrationModel]
+                    break
+        if not proto_pool:
+            raise Exception('No prototype pool for %s referred to by %s' % (species.concentrationModel, species.id))
+        pool_id = moose.copy(proto_pool, comp, species.id)
+        pool = moose.element(pool_id)
+        pool.B = pool.B / (np.pi * compartment.length * (0.5 * compartment.diameter + pool.thickness) * (0.5 * compartment.diameter - pool.thickness))        
+        return pool
         
     def importAxialResistance(self, nmlcell, intracellularProperties):
         sg_to_segments = self._cell_to_sg[nmlcell]
@@ -287,6 +314,8 @@ class NML2Reader(object):
         chan = moose.element(chid)
         chan.Gbar = sarea(comp) * condDensity
         moose.connect(chan, 'channel', comp, 'channel')
+        return chan
+    
 
     def importIncludes(self, doc):
         for include in doc.include:
@@ -355,17 +384,29 @@ class NML2Reader(object):
                 self.nml_to_moose[chan] = mchan
                 self.proto_chans[chan.id] = mchan
 
+    def importConcentrationModels(self, doc):
+        for concModel in doc.decayingPoolConcentrationModel:
+            proto = self.createDecayingPoolConcentrationModel(concModel)
+
     def createDecayingPoolConcentrationModel(self, concModel):
-        """Create prototype for concentration model"""
+        """Create prototype for concentration model"""        
         if concModel.name is not None:
             name = concModel.name
         else:
             name = concModel.id
-        ca = moose.CaConc('%s/%s' % (self.library.path, id))
-        ca.CaBasal = SI(concModel.restingConc.value)
-        ca.tau = SI(concModel.decayConstant.value)
-        ca.thick = SI(concModel.decayConstant.shellThickness)
+        ca = moose.CaConc('%s/%s' % (self.lib.path, id))
+        print '11111', concModel.restingConc
+        print '2222', concModel.decayConstant
+        print '33333', concModel.shellThickness
+
+        ca.CaBasal = SI(concModel.restingConc)
+        ca.tau = SI(concModel.decayConstant)
+        ca.thick = SI(concModel.shellThickness)
+        ca.B = 5.2e-6 # B = 5.2e-6/(Ad) where A is the area of the shell and d is thickness - must divide by shell volume when copying
         self.proto_pools[concModel.id] = ca
+        self.nml_to_moose[concModel.id] = ca
+        self.moose_to_nml[ca] = concModel
+        logger.debug('Created moose element: %s for nml conc %s' % (ca.path, concModel.id))
         
                     
             

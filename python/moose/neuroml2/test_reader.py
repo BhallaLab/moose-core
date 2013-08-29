@@ -51,7 +51,7 @@ import moose
 import generated_neuroml as nml
 from reader import NML2Reader
 
-class TestReader(unittest.TestCase):
+class TestFullCell(unittest.TestCase):
     def setUp(self):
         self.reader = NML2Reader()
         self.lib = moose.Neutral('/library')
@@ -119,6 +119,22 @@ class TestReader(unittest.TestCase):
         chans = moose.wildcardFind(self.mcell.path + '/##[ISA=HHChannel]')
         self.assertTrue(len(chans) < 3) # Only soma and dendrite2 have the channels
         self.assertAlmostEqual(soma_na.Gbar, 120e-2 * self.soma.diameter * self.soma.diameter * np.pi)
+
+
+class TestGran98(unittest.TestCase):
+    def setUp(self):
+        self.reader = NML2Reader()
+        self.lib = moose.Neutral('/library')
+        self.filename = 'test_files/Granule_98/Granule_98.nml'
+        self.reader.read(self.filename)
+        for ncell in self.reader.nml_to_moose:
+            if isinstance(ncell, nml.Cell):
+                self.ncell = ncell
+                break
+        self.mcell = moose.element(moose.wildcardFind('/##[ISA=Cell]')[0])
+
+    def test_CaPool(self):
+        pass
         
 if __name__ == '__main__':
     unittest.main()
