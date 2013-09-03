@@ -56,10 +56,30 @@ class NeuroMesh: public MeshCompt
 		Id getCell( const Eref& e, const Qinfo* q ) const;
 		Id getCell() const;
 
+		/** 
+		 * This overloaded function sets up a presumed contiguous set of
+ 		 * compartments, complains if they are not contiguous due to the 
+		 * check in NeuroNode::traverse.
+ 		 * 
+		 * I assume 'cell' is the parent of the compartment tree.
+		 * The 'path' argument specifies a wildcard list of compartments, 
+		 * which can be also a comma-separated explicit list. Does not 
+		 * have to be in any particular order.
+		 * The 'path' argument is based off the cell path.
+ 		 */
+		void setCellPortion( const Eref& e, const Qinfo* q, Id cell,
+			string path	);
 		/**
 		 * Assigns a group of compartments to be used for the mesh.
 		 */
-		void setCellPortion( Id cell, vector< Id > portion );
+		void setCellPortion( const Eref& e, const Qinfo* q, 
+							Id cell, vector< Id > portion );
+
+		/**
+		 * Separates out the spines attached to the selected groups of
+		 * compartments. Fills out spine, and if needed, psd list.
+		 */
+		void separateOutSpines( const Eref& e );
 
 		/**
 		 * The SubTree is a contiguous set of compartments to model.
@@ -147,14 +167,6 @@ class NeuroMesh: public MeshCompt
 
 		/// Utility function to set up Stencil for diffusion in NeuroMesh
 		void buildStencil();
-
-		/**
-		 * Examines list of 'head' compartments and matches them to
-		 * 'shaft' or 'neck' compartments through messages.
-		 * Makes a one-to-one pair of vectors of head and neck for spines.
-		 * Deprecated.: Jul 2013.
-		 */
-		void buildSpineList( const map< Id, unsigned int >& comptMap );
 
 		//////////////////////////////////////////////////////////////////
 		// inherited virtual funcs for Boundary

@@ -134,7 +134,8 @@ double NeuroNode::calculateLength( const CylBase& parent )
  * the 'children' vector even if they may be 'parent' by the messaging.
  * This is because this function has to be robust enough to sort this out
  */
-void NeuroNode::findConnectedCompartments( map< Id, unsigned int >& nodeMap)
+void NeuroNode::findConnectedCompartments( 
+				const map< Id, unsigned int >& nodeMap)
 {
 	static const Finfo* axialOut = Cinfo::find( "Compartment" )->findFinfo( "axialOut" );
 	static const Finfo* raxialOut = Cinfo::find( "Compartment" )->findFinfo( "raxialOut" );
@@ -174,11 +175,13 @@ void NeuroNode::findConnectedCompartments( map< Id, unsigned int >& nodeMap)
 	// Now we have a list of all compartments connected to the current one.
 	// Convert to node indices.
 	children_.resize( all.size() );
-	unsigned int sanity = nodeMap.size();
+	// Note that the nodeMap only includes compts on list, which may be a
+	// subset of compts in entire model. So we only want to explore those.
 	for ( unsigned int i = 0; i < all.size(); ++i ) {
-		children_[i] = nodeMap[ all[i] ];
+		map< Id, unsigned int >::const_iterator k = nodeMap.find( all[i] );
+		if ( k != nodeMap.end() )
+			children_[i] = k->second;
 	}
-	assert( sanity == nodeMap.size() );
 }
 
 

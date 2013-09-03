@@ -2024,6 +2024,62 @@ void testNeuroNodeTree()
 	cout << "." << flush;
 }
 
+void testCellPortion()
+{
+	Shell* shell = reinterpret_cast< Shell* >( Id().eref().data() );
+	vector< int > dims( 1, 1 );
+	// Build a linear cylindrical cell, no tapering.
+	Id cell = shell->doCreate( "Neutral", Id(), "cell", dims );
+	unsigned int numCompts = 50;
+	double dia = 20e-6; // metres
+	double diffLength = 0.5e-6; // metres
+	double len = diffLength * numCompts;
+	unsigned int numSpines = 10;
+	unsigned int numSpines2 = 25;
+	Id soma = makeCompt( Id(), cell, "soma", dia, dia, 90 );
+	Field< double >::set( soma, "y0", -dia );
+	Field< double >::set( soma, "y", 0 );
+	Id dend0 = makeCompt( soma, cell, "dend0", len, dia, 0 );
+	Id dend1 = makeCompt( dend0, cell, "dend1", len, dia, 0 );
+	Id dend2 = makeCompt( dend1, cell, "dend2", len, dia, 0 );
+
+	for ( unsigned int i = 0; i < numSpines; ++i ) {
+		double frac = i / static_cast< double >( numSpines );
+		makeSpine( dend1, cell, i, frac, 1.0e-6, 1.0e-6, i * 30.0 );
+	}
+	for ( unsigned int i = 0; i < numSpines2; ++i ) {
+		double frac = i / static_cast< double >( numSpines2 );
+		makeSpine( dend2, cell, i + numSpines, frac, 1.0e-6, 1.0e-6, i * 30.0 );
+	}
+
+	Id nm = shell->doCreate( "NeuroMesh", Id(), "neuromesh", dims );
+	Field< bool >::set( nm, "separateSpines", true );
+	Field< double >::set( nm, "diffLength", diffLength );
+	Field< string >::set( nm, "geometryPolicy", "cylinder" );
+	Id sm = shell->doCreate( "SpineMesh", Id(), "spinemesh", dims );
+	MsgId mid = shell->doAddMsg( 
+					"OneToOne", nm, "spineListOut", sm, "spineList" );
+	assert( mid != Msg::bad );
+	Id pm = shell->doCreate( "PsdMesh", Id(), "psdmesh", dims );
+	mid = shell->doAddMsg( 
+					"OneToOne", nm, "psdListOut", pm, "psdList" );
+	assert( mid != Msg::bad );
+	// SetGet2< Id, string >::set( nm, "cellPortion", cell, "/cell/dend2,/cell/shaft#,/cell/head#" );
+	SetGet2< Id, string >::set( nm, "cellPortion", cell, "/cell/dend1,/cell/dend2,/cell/shaft1?,/cell/head1?,/cell/shaft3,cell/head3" );
+	Qinfo::clearQ( 0 );
+	Qinfo::clearQ( 0 );
+	unsigned int ns = Field< unsigned int >::get( nm, "numSegments" );
+	assert( ns == 2 ); // dend1 + dend2 only
+	unsigned int ndc = Field< unsigned int >::get( nm, "numDiffCompts" );
+	assert( ndc == numCompts * 2 );
+	
+	unsigned int sdc = Field< unsigned int >::get( sm, "num_mesh" );
+	assert( sdc == 11 ); // I've selected only those in the teens plus #3
+
+	shell->doDelete( cell );
+	cout << "." << flush;
+}
+
 void testMesh()
 {
 	testVec();
@@ -2046,4 +2102,5 @@ void testMesh()
 	testCubeMeshMultiJunctionTwoD();
 	testSpineEntry();
 	testSpineAndPsdMesh();
+	testCellPortion();
 }
