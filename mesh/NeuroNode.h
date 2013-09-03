@@ -95,7 +95,8 @@ class NeuroNode: public CylBase
 		 * the messaging. This is because this function has to be robust
 		 * enough to sort this out
  		 */
-		void findConnectedCompartments( map< Id, unsigned int >& nodeMap);
+		void findConnectedCompartments( 
+							const map< Id, unsigned int >& nodeMap);
 
 		/**
  		 * Go through nodes vector and eliminate entries that have zero

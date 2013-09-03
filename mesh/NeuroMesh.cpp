@@ -178,12 +178,12 @@ const Cinfo* NeuroMesh::initCinfo()
 		// MsgDest Definitions
 		//////////////////////////////////////////////////////////////
 
-		static DestFinfo setCellPortion( "setCellPortion",
+		static DestFinfo setCellPortion( "cellPortion",
 			"Tells NeuroMesh to mesh up a subpart of a cell. For now"
 			"assumed contiguous."
-			"The first argument is the cell Id. The second is the vector"
-			"of Ids to consider in meshing up the subpart.",
-			new OpFunc2< NeuroMesh, Id, vector< Id > >(
+			"The first argument is the cell Id. The second is the wildcard"
+			"path of compartments to use for the subpart.",
+			new EpFunc2< NeuroMesh, Id, string >(
 				&NeuroMesh::setCellPortion )
 		);
 
@@ -477,85 +477,6 @@ void NeuroMesh::insertDummyNodes()
 	}
 }
 
-/*
-void NeuroMesh::buildNodeTree( const map< Id, unsigned int >& comptMap )
-{
-	const double EPSILON = 1e-8;
-		// First pass: just build up the tree.
-	bool isCylinder = (geometryPolicy_ == "cylinder" );
-	unsigned int numOrigNodes = nodes_.size();
-	if ( numOrigNodes == 0 )
-		return;
-	for ( unsigned int i = 0; i < numOrigNodes; ++i ) {
-		// returns Id() if no parent found.
-		Id pa = getParentFromMsg( nodes_[i].elecCompt() ); 
-		if ( pa != Id() ) {
-			map< Id, unsigned int >::const_iterator mapEntry = 
-					comptMap.find( pa );
-			assert( mapEntry != comptMap.end() );
-			unsigned int ipa = mapEntry->second;
-			// unsigned int ipa = comptMap[pa];
-			nodes_[i].setParent( ipa );
-			nodes_[ipa].addChild( i );
-		} else { 
-			// Here we need to track the coords of the other end 
-			// 	of the parent-less compartment. It is typically a soma, 
-			// 	but not always. These coords get assigned to a dummy node.
-			NeuroNode dummy( nodes_[ i ] );
-			dummy.clearChildren();
-			dummy.setNumDivs( 0 ); // Identifies it as a dummy.
-			dummy.setIsCylinder( isCylinder );
-			Id elec = nodes_[i].elecCompt();
-			assert( elec.element()->cinfo()->isA( "Compartment" ) );
-			dummy.setX( Field< double >::get( elec, "x0" ) );
-			dummy.setY( Field< double >::get( elec, "y0" ) );
-			dummy.setZ( Field< double >::get( elec, "z0" ) );
-			// This dummy has no parent. Use self index for parent.
-			dummy.setParent( nodes_.size() );
-			dummy.addChild( i );
-			nodes_[i].setParent( nodes_.size() );
-			double length = nodes_[i].getLength();
-			// Idiot check for a bad dimensioned compartment.
-			if ( nodes_[i].calculateLength( dummy ) < EPSILON ) {
-				dummy.setX( -length );
-				double temp = nodes_[i].calculateLength( dummy );
-				assert( doubleEq( temp, length ) );
-			}
-			nodes_.push_back( dummy );
-		}
-	}
-	// Second pass: insert dummy nodes.
-	// Need to know if parent has multiple children, because each of
-	// them will need a dummyNode to connect to.
-	// In all the policies so far, the dummy nodes take the same diameter
-	// as the children that they host.
-	for ( unsigned int i = 0; i < nodes_.size(); ++i ) {
-		vector< unsigned int > kids = nodes_[i].children();
-		if ( (!nodes_[i].isDummyNode()) && kids.size() > 1 ) {
-			for( unsigned int j = 0; j < kids.size(); ++j ) {
-				NeuroNode dummy( nodes_[ kids[j] ] );
-				dummy.clearChildren();
-				dummy.setNumDivs( 0 );
-				dummy.setIsCylinder( isCylinder );
-				dummy.setX( nodes_[i].getX() ); // Use coords of parent.
-				dummy.setY( nodes_[i].getY() );
-				dummy.setZ( nodes_[i].getZ() );
-				// Now insert the dummy as a surrogate parent.
-				dummy.setParent( i );
-				dummy.addChild( kids[j] );
-				nodes_[ kids[j] ].setParent( nodes_.size() );
-				kids[j] = nodes_.size(); // Replace the old kid entry with the dummy
-				nodes_.push_back( dummy );
-			}
-			// Connect up the parent to the dummy nodes.
-			nodes_[i].clearChildren();
-			for( unsigned int j = 0; j < kids.size(); ++j )
-				nodes_[i].addChild( kids[j] );
-		}
-	}
-}
-*/
-
 bool NeuroMesh::filterSpines( Id compt )
 {
 	if ( compt.element()->getName().find( "shaft" ) != string::npos ||
@@ -574,12 +495,56 @@ bool NeuroMesh::filterSpines( Id compt )
 // I assume 'cell' is the parent of the compartment tree.
 void NeuroMesh::setCell( const Eref& e, const Qinfo* q, Id cell )
 {
-	double oldVol = getMeshEntryVolume( 0 );
 	vector< Id > compts;
 	wildcardFind( cell.path() + "/##", compts );
-	setCellPortion( cell, compts );
+	setCellPortion( e, q, cell, compts );
+}
+
+/** 
+ * This overloaded function sets up a presumed contiguous set of
+ * compartments, complains if they are not contiguous due to the check in
+ * NeuroNode::traverse.
+ * 
+ * I assume 'cell' is the parent of the compartment tree.
+ * The 'path' argument specifies a wildcard list of compartments, which
+ * can be also a comma-separated explicit list. Does not have to be
+ * in any particular order.
+ * The 'path' argument is based off root.
+ */
+void NeuroMesh::setCellPortion( const Eref& e, const Qinfo* q, Id cell,
+	string path	)
+{
+	vector< Id > compts;
+	wildcardFind( path, compts );
+	setCellPortion( e, q, cell, compts );
+}
+
+
+// Here we set a portion of a cell, specified by a vector of Ids. We
+// also need to define the cell parent.
+void NeuroMesh::setCellPortion( const Eref& e, const Qinfo* q, 
+					Id cell, vector< Id > portion )
+{
+	double oldVol = getMeshEntryVolume( 0 );
+	cell_ = cell;
+	NeuroNode::buildTree( nodes_, portion );
+	if ( separateSpines_ )
+		NeuroNode::filterSpines( nodes_, shaft_, head_, parent_ );
+	insertDummyNodes();
+
+	updateCoords();
+
+	if ( separateSpines_ )
+		updateShaftParents();
+
 	transmitChange( e, q, oldVol );
 	if ( separateSpines_ ) {
+		separateOutSpines( e );
+	}
+}
+
+void NeuroMesh::separateOutSpines( const Eref& e )
+{
 		// unsigned int thread = q->threadNum();
 		// Hack to send data directly, bypassing queueueue
 		vector< Id > ids;
@@ -609,63 +574,6 @@ void NeuroMesh::setCell( const Eref& e, const Qinfo* q, Id cell )
 			SetGet3< Id, vector< double >, vector< unsigned int > >::set( 
 					ids[0], "psdList", cell_, psdCoords, index );
 		}
-	}
-}
-
-
-// Here we set a portion of a cell, specified by a vector of Ids. We
-// also need to define the cell parent.
-void NeuroMesh::setCellPortion( Id cell, vector< Id > portion )
-{
-		cell_ = cell;
-		NeuroNode::buildTree( nodes_, portion );
-		if ( separateSpines_ )
-			NeuroNode::filterSpines( nodes_, shaft_, head_, parent_ );
-		/*
-		vector< Id >& compts = portion;
-		map< Id, unsigned int > comptMap;
-
-		Id soma;
-		double maxDia = 0.0;
-		unsigned int maxDiaIndex = 0;
-		nodes_.resize( 0 );
-		bool isCylinder = ( geometryPolicy_ == "cylinder" );
-		for ( unsigned int i = 0; i < compts.size(); ++i ) {
-			if ( compts[i].element()->cinfo()->isA( "Compartment" ) ) {
-				if ( separateSpines_ && filterSpines( compts[i] ) )
-					continue;
-				comptMap[ compts[i] ] = nodes_.size();
-				nodes_.push_back( NeuroNode( compts[i] ) );
-				if ( nodes_.back().getDia() > maxDia ) {
-					maxDia = nodes_.back().getDia();
-					maxDiaIndex = nodes_.size() -1;
-				}
-				nodes_.back().setIsCylinder( isCylinder );
-				string name = compts[i].element()->getName();
-				if ( strncasecmp( name.c_str(), "soma", 4 ) == 0 ) {
-					soma = compts[i];
-				}
-			}
-		}
-		// Figure out soma compartment.
-		soma = putSomaAtStart( soma, maxDiaIndex );
-
-		// Assign parent and child compts to node entries.
-		buildNodeTree( comptMap );
-		*/
-		insertDummyNodes();
-
-		updateCoords();
-
-		if ( separateSpines_ )
-			updateShaftParents();
-
-	
-
-		/* Need to fill in: July 2013.
-		if ( separateSpines_ )
-			buildSpineList( comptMap );
-			*/
 }
 
 /** 
@@ -818,32 +726,6 @@ Id getSpineParent( Id spine, Id head )
 	}
 
 	return pa;
-}
-
-// Deprecated: Jul 2013.
-void NeuroMesh::buildSpineList( const map< Id, unsigned int >& comptMap )
-{
-	assert( shaft_.size() == head_.size() );
-	shaft_ = spineVec( head_ );
-	parent_.resize( shaft_.size(), 0 );
-	for ( unsigned int i = 0; i < shaft_.size(); ++i ) {
-		Id pa = getSpineParent( shaft_[i], head_[i] );
-		assert( pa != Id() );
-		map< Id, unsigned int >::const_iterator q = comptMap.find( pa );
-		assert( q != comptMap.end() );
-		NeuroNode& nn = nodes_[ q->second ];
-		double x0 = Field< double >::get( shaft_[i], "x0" );
-		double y0 = Field< double >::get( shaft_[i], "y0" );
-		double z0 = Field< double >::get( shaft_[i], "z0" );
-		NeuroNode& pn = nodes_[ nn.parent() ];
-		unsigned int index = 0;
-		double r = nn.nearest( x0, y0, z0, pn, index );
-		if ( r >= 0.0 ) {
-			parent_[i] = index + nn.startFid();
-		} else {
-			assert( 0 );
-		}
-	}
 }
 
 //////////////////////////////////////////////////////////////////
