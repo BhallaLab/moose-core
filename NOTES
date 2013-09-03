@@ -23092,5 +23092,18 @@ Steps:
 ==========================================================================
 28 Aug
 Checked in diffusionOnly.py and diffonly.g which show the diffusion calculations
-without any reactions in the system.
+without any reactions in the system. Checkin 4741.
+
 ==========================================================================
+29 Aug
+
+Working on setting up specified portion of model.
+==========================================================================
+30 Aug
+For starters, just pass in a wildcard path of a single contiguous set of 
+compartments. Check for contiguity. Later may have to handle non-contigs.
+==========================================================================
+3 Sep 2013
+Added in a unit test in testMesh.cpp for setting a portion of a cell. Select
+a subset of dendrites and a subset of spines upon those dendrites. Seems
+to work.
