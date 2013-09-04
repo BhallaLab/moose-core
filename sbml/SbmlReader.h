@@ -16,31 +16,51 @@
 
 #ifndef _SBMLREADER_H
 #define _SBMLREADER_H
+#ifdef USE_SBML
+
 #include <sbml/SBMLTypes.h>
 
+#include "../basecode/Id.h"
+//class Id;
+typedef struct
+{
+  Id enzyme;
+  Id complex;
+  vector<Id> substrates;
+  vector<Id> products;
+  double k1;
+  double k2;
+  double k3;
+  int stage;
+} EnzymeInfo;
 
 class SbmlReader
 {
-	struct EnzymeInfo;
-
 	public:
 		SbmlReader() {errorFlag_ = false;}
 		~SbmlReader() {;}
 		int read(string filename,string location);
-#ifdef USE_SBML
-		map< string, string > createCompartment(string location);
-		map< string,string > createMolecule(map<string,string> &);
-		void  createReaction(map<string,string> &);
+		map< string, Id> createCompartment(string location);
+		map< string, Id> createMolecule(map<string,Id>&);
+		void  createReaction(map<string,Id> &);
 		
-#endif	// USE_SBML			
 	private:
-bool errorFlag_;
-#ifdef USE_SBML
+		bool errorFlag_;
+ 
 		Model* model_;		
 		SBMLDocument* document_;
 		SBMLReader reader_;
+		map< string, Id >elmtMolMap_;
+		double transformUnits( double msize,UnitDefinition * ud,string type,bool hasonlySubUnit );
 		void getRules();
-
+		void printMembers( const ASTNode* p,vector <string> & ruleMembers );
+		void addSubPrd(Reaction * reac,Id reaction_,string type);
+		void getKLaw( KineticLaw * klaw,bool rev,vector< double > & rate );
+		void pushParmstoVector( const ASTNode* p,vector <string> & parameters );
+		void getParameters( const ASTNode* node,vector <string> & parameters );
+		void setupMMEnzymeReaction( Reaction * reac,string id ,map<string,Id> &);
+		string getAnnotation( Reaction* reaction,map<string,EnzymeInfo> & );
+		void setupEnzymaticReaction( const EnzymeInfo & einfo,string name,map< string, Id > & );
 #endif
 		
 };
