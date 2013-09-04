@@ -93,7 +93,13 @@ def loadFile(filename, target, merge=True):
     elif modeltype == 'cspace':
             model = moose.loadModel(filename, target)        
     elif modeltype == 'xml' and subtype == 'neuroml':
-        model = neuroml.loadNeuroML_L123(filename)
+        popdict, projdict = neuroml.loadNeuroML_L123(filename)
+        # Circus to get the container of populations from loaded neuroml
+        for popinfo in popdict.values():
+            for cell in popinfo[1].values():
+                model = cell.parent
+                break
+            break
     else:
         raise FileLoadError('Do not know how to handle this filetype: %s' % (filename))
     moose.setCwe(pwe) # The MOOSE loadModel changes the current working element to newly loaded model. We revert that behaviour
