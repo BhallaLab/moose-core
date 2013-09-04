@@ -303,8 +303,9 @@ extern "C" {
             }
         }
         // Call ObjId._setDestField with the new arguments
-        return _setDestField(((_Field*)self)->owner,
-                             newargs);
+        _ObjId * obj = PyObject_New(_ObjId, &ObjIdType);
+        obj->oid_ = ((_Field*)self)->owner;
+        return moose_ObjId_setDestField(obj, newargs);
     }
 
     PyDoc_STRVAR(moose_DestField_documentation,

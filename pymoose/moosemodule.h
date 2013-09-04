@@ -34,6 +34,7 @@
 
 #include <string>
 #include "../basecode/Id.h"
+extern char shortType(string);
 extern "C" {
 
     // This had to be defined for py3k, but does not harm 2.
@@ -259,8 +260,9 @@ extern "C" {
     PyObject * moose_ObjId_get_lookupField_attr(PyObject * self, void * closure);
     PyObject * moose_ObjId_get_elementField_attr(PyObject * self, void * closure);
     PyObject * moose_ObjId_get_destField_attr(PyObject * self, void * closure);
-    PyObject * _setDestField(ObjId oid, PyObject * args);
-
+    // PyObject * _setDestField(ObjId oid, PyObject * args);
+    PyObject * set_destFinfo(ObjId obj, string fieldName, PyObject *arg, string argType);
+    PyObject * set_destFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type1, PyObject * arg2, char type2);
     Id get_shell(int argc, char **argv);
     vector<int> pysequence_to_dimvec(PyObject * dims);
     map<string, PyObject *>& get_inited_lookupfields();
@@ -356,14 +358,14 @@ vector < vector < T > > * PySequenceToVectorOfVectors(PyObject * seq, char typec
 }
 
 template <typename KeyType, typename ValueType> 
-        PyObject * get_vec_lookupfield(ObjId oid, string fieldname, KeyType key, char vtypecode)
+PyObject * get_vec_lookupfield(ObjId oid, string fieldname, KeyType key, char vtypecode)
 {
     vector<ValueType> value = LookupField<KeyType, vector<ValueType> >::get(oid, fieldname, key);
     return to_pytuple((void*)&value, innerType(vtypecode));
 }
 
 template <typename KeyType, typename ValueType> 
-        PyObject * get_simple_lookupfield(ObjId oid, string fieldname, KeyType key, char vtypecode)
+PyObject * get_simple_lookupfield(ObjId oid, string fieldname, KeyType key, char vtypecode)
 {
     ValueType value = LookupField<KeyType, ValueType>::get(oid, fieldname, key);
     PyObject * v = to_py(&value, vtypecode);
@@ -533,15 +535,11 @@ int set_lookup_value(const ObjId& oid, string fname, char value_type_code, char 
 
     
 template <class A> 
-PyObject* _set_vector_destFinfo(ObjId obj, string fieldName, int argIndex, PyObject * value, char vtypecode)
+PyObject* _set_vector_destFinfo(ObjId obj, string fieldName, PyObject * value, char vtypecode)
 {
     ostringstream error;
     if (!PySequence_Check(value)){                                  
         PyErr_SetString(PyExc_TypeError, "For setting vector field, specified value must be a sequence." );
-        return NULL;
-    }
-    if (argIndex > 0){
-        PyErr_SetString(PyExc_TypeError, "Can handle only single-argument functions with vector argument." );
         return NULL;
     }
     vector<A> * _value = (vector < A > *)to_cpp(value, vtypecode);
@@ -557,6 +555,123 @@ PyObject* _set_vector_destFinfo(ObjId obj, string fieldName, int argIndex, PyObj
     }
 }
 
+/**
+   Set destFinfo for 2 argument destination field functions.
+*/
+template <class A>
+PyObject* set_destFinfo1(ObjId obj, string fieldName, PyObject* arg1, char type1, A arg2)
+{
+    bool ret;
+    ostringstream error;
+    error << "moose.set_destFinfo1: ";
+    switch (type1){
+        case 'f': case 'd': {
+            double param = PyFloat_AsDouble(arg1);
+            if (type1 == 'f'){
+                ret = SetGet2<float, A>::set(obj, fieldName, (float)param, arg2);
+            } else {
+                ret = SetGet2<double, A>::set(obj, fieldName, param, arg2);
+            }
+        }
+            break;
+        case 's': {
+            char * param = PyString_AsString(arg1);
+            ret = SetGet2<string, A>::set(obj, fieldName, string(param), arg2);
+        }
+            break;
+        case 'i': case 'l': {
+            long param = PyInt_AsLong(arg1);
+            if (param == -1 && PyErr_Occurred()){
+                return NULL;
+            }
+            if (type1 == 'i'){
+                ret = SetGet2<int, A>::set(obj, fieldName, (int)param, arg2);
+            } else {
+                ret = SetGet2<long, A>::set(obj, fieldName, param, arg2);
+            }
+        }
+            break;
+        case 'I': case 'k':{
+            unsigned long param =PyLong_AsUnsignedLong(arg1);
+            if (PyErr_Occurred()){
+                return NULL;
+            }
+            if (type1 == 'I'){
+                ret = SetGet2< unsigned int, A>::set(obj, fieldName, (unsigned int)param, arg2);
+            } else {
+                ret = SetGet2<unsigned long, A>::set(obj, fieldName, param, arg2);
+            }
+        }
+            break;
+        case 'x': {
+            Id param;
+            // if (Id_SubtypeCheck(arg1)){
+                _Id * id = (_Id*)(arg1);
+                if (id == NULL){
+                    error << "argument should be an ematrix or an melement";
+                    PyErr_SetString(PyExc_TypeError, error.str().c_str());
+                    return NULL;                                
+                }
+                param = id->id_;
+            // } else if (ObjId_SubtypeCheck(arg)){
+            //     _ObjId * oid = (_ObjId*)(arg);
+            //     if (oid == NULL){
+            //         error << "argument should be an ematrix or an melement";
+            //         PyErr_SetString(PyExc_TypeError, error.str().c_str());
+            //         return NULL;                                
+            //     }
+            //     param = oid->oid_.id;
+            // }
+            ret = SetGet2<Id, A>::set(obj, fieldName, param, arg2);
+        }
+            break;
+        case 'y': {
+            ObjId param;
+            // if (Id_SubtypeCheck(arg)){
+            //     _Id * id = (_Id*)(arg);
+            //     if (id == NULL){
+            //         error << "argument should be an ematrix or an melement";
+            //         PyErr_SetString(PyExc_TypeError, error.str().c_str());
+            //         return NULL;                                
+            //     }
+            //     param = ObjId(id->id_);
+            // } else if (ObjId_SubtypeCheck(arg)){
+                _ObjId * oid = (_ObjId*)(arg1);
+                if (oid == NULL){
+                    error << "argument should be an ematrix or an melement";
+                    PyErr_SetString(PyExc_TypeError, error.str().c_str());
+                    return NULL;                                
+                }
+                param = oid->oid_;
+            // }
+            ret = SetGet2<ObjId, A>::set(obj, fieldName, param, arg2);
+        }
+            break;
+        case 'c': {
+            char * param = PyString_AsString(arg1);
+            if (!param){
+                error << "expected argument of type char/string";
+                PyErr_SetString(PyExc_TypeError, error.str().c_str());
+                return NULL;
+            } else if (strlen(param) == 0){
+                error << "Empty string not allowed.";
+                PyErr_SetString(PyExc_ValueError, error.str().c_str());
+                return NULL;
+            }
+            ret = SetGet2<char, A>::set(obj, fieldName, param[0], arg2);
+        }
+        default: {
+            error << "Unhandled argument 1 type (shortType=" << type1 << ")";
+            PyErr_SetString(PyExc_TypeError, error.str().c_str());                    
+            return NULL;
+        }
+    }   
+    if (ret){
+        Py_RETURN_TRUE;
+    } else {
+        Py_RETURN_FALSE;
+    }
+}
 
 
 
