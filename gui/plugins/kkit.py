@@ -92,9 +92,9 @@ class KkitEditorView(MooseEditorView):
             self._centralWidget.setModelRoot(self.plugin.modelRoot)
         return self._centralWidget
 
-class  KineticsWidget(DefaultEditorWidget):
+class  KineticsWidget(EditorWidgetBase):
     def __init__(self, *args): 
-	DefaultEditorWidget.__init__(self, *args)
+	EditorWidgetBase.__init__(self, *args)
         self.setAcceptDrops(True)
         self.border = 10        
         self.sceneContainer = QtGui.QGraphicsScene(self)
@@ -125,12 +125,12 @@ class  KineticsWidget(DefaultEditorWidget):
         return QtCore.QSize(800,400)
 
     def updateModelView(self):
-        print "update model view",self.modelRoot
+        #print "update model view",self.modelRoot
         if self.modelRoot == '/':
             m = wildcardFind('/##[ISA=ChemCompt]')
         else:
             m = wildcardFind(self.modelRoot+'/##[ISA=ChemCompt]')
-        print "111",self.modelRoot,m
+        #print "111",self.modelRoot,m
         if not m:
             # when we want an empty GraphicView while creating new model,
             # then remove all the view and add an empty view
@@ -203,7 +203,10 @@ class  KineticsWidget(DefaultEditorWidget):
             if hasattr(self, 'view') and isinstance(self.view, QtGui.QWidget):
                 self.layout().removeWidget(self.view)
             self.view = GraphicalView(self.sceneContainer,self.border,self)
-            self.layout().addWidget(self.view)
+            hLayout = QtGui.QGridLayout(self)
+	    self.setLayout(hLayout)
+            hLayout.addWidget(self.view)
+            #self.layout().addWidget(self.view)
     
     def mooseObjOntoscene(self):
         #  All the compartments are put first on to the scene \
