@@ -1146,15 +1146,11 @@ extern "C" {
         if (!Id::isValid(self->oid_.id)){
             RAISE_INVALID_ID(NULL, "moose_ObjId_setDestField");
         }
-        return _setDestField(((_ObjId*)self)->oid_, args);        
-    }
-
-    
-    PyObject * _setDestField(ObjId oid, PyObject *args)
-    {
         PyObject * arglist[10] = {NULL, NULL, NULL, NULL, NULL,
                                   NULL, NULL, NULL, NULL, NULL};
         ostringstream error;
+        ObjId oid = ((_ObjId*)self)->oid_;
+
         error << "moose.setDestField: ";
         // Unpack the arguments
         if (!PyArg_UnpackTuple(args, "setDestField", minArgs, maxArgs,
@@ -1187,11 +1183,8 @@ extern "C" {
             PyErr_SetString(PyExc_TypeError, error.str().c_str());
             return NULL;
         }
-        // Construct the argument list
-        ostringstream argstream;
-        for (size_t ii = 0; ii < argType.size(); ++ii){
-            PyObject * arg = arglist[ii+1];
-            if ( arg == NULL && argType[ii] == "void"){
+        if (argType.size() == 1){
+            if ( arglist[1] == NULL && argType[0] == "void"){
                 bool ret = SetGet0::set(oid, string(fieldName));
                 if (ret){
                     Py_RETURN_TRUE;
@@ -1199,161 +1192,273 @@ extern "C" {
                     Py_RETURN_FALSE;
                 }
             }
-            char vtypecode = shortType(argType[ii]);
-            switch (vtypecode){                    
-                case 'f': case 'd': {
-                    double param = PyFloat_AsDouble(arg);
-                    argstream << param << ",";
-                }
-                    break;
-                case 's': {
-                    char * param = PyString_AsString(arg);
-                    argstream << string(param) << ",";
-                }
-                    break;
-                case 'i': case 'l': {
-                    long param = PyInt_AsLong(arg);
-                    if (param == -1 && PyErr_Occurred()){
-                        return NULL;
-                    }
-                    argstream << param << ",";
-                }
-                    break;
-                case 'I': case 'k':{
-                    unsigned long param =PyLong_AsUnsignedLong(arg);
-                    if (PyErr_Occurred()){
-                        return NULL;
-                    }
-                    argstream << param << ",";                            
-                }
-                    break;
-                case 'x': {
-                    Id param;
-                    if (Id_SubtypeCheck(arg)){
-                        _Id * id = (_Id*)(arg);
-                        if (id == NULL){
-                            error << "argument should be an ematrix or an melement";
-                            PyErr_SetString(PyExc_TypeError, error.str().c_str());
-                            return NULL;                                
-                        }
-                        param = id->id_;
-                    } else if (ObjId_SubtypeCheck(arg)){
-                        _ObjId * oid = (_ObjId*)(arg);
-                        if (oid == NULL){
-                            error << "argument should be an ematrix or an melement";
-                            PyErr_SetString(PyExc_TypeError, error.str().c_str());
-                            return NULL;                                
-                        }
-                        param = oid->oid_.id;
-                    }
-                    if ( SetGet1<Id>::set(oid, string(fieldName), param)){
-                        return Py_True;
-                    }
-                    return Py_False;
-                }
-                case 'y': {
-                    ObjId param;
-                    if (Id_SubtypeCheck(arg)){
-                        _Id * id = (_Id*)(arg);
-                        if (id == NULL){
-                            error << "argument should be an ematrix or an melement";
-                            PyErr_SetString(PyExc_TypeError, error.str().c_str());
-                            return NULL;                                
-                        }
-                        param = ObjId(id->id_);
-                    } else if (ObjId_SubtypeCheck(arg)){
-                        _ObjId * oid = (_ObjId*)(arg);
-                        if (oid == NULL){
-                            error << "argument should be an ematrix or an melement";
-                            PyErr_SetString(PyExc_TypeError, error.str().c_str());
-                            return NULL;                                
-                        }
-                        param = oid->oid_;
-                    }
-                    if ( SetGet1<ObjId>::set(oid, string(fieldName), param)){
-                        return Py_True;
-                    }
-                    return Py_False;
-                }
-                case 'c': {
-                    char * param = PyString_AsString(arg);
-                    if (!param){
-                        error << ii << "-th expected of type char/string";
-                        PyErr_SetString(PyExc_TypeError, error.str().c_str());
-                        return NULL;
-                    } else if (strlen(param) == 0){
-                        error << "Empty string not allowed.";
-                        PyErr_SetString(PyExc_ValueError, error.str().c_str());
-                        return NULL;
-                    }
-                    argstream << param[0] << ",";
-                }
-                    break;
-                    
-                    ////////////////////////////////////////////////////
-                    // We do NOT handle multiple vectors. Use the argument
-                    // list as a single vector argument.
-                    ////////////////////////////////////////////////////
-                case 'v': {
-                    return _set_vector_destFinfo<int>(oid, string(fieldName), ii, arg, vtypecode);
-                }
-                case 'w': {
-                    return _set_vector_destFinfo<short>(oid, string(fieldName), ii, arg, vtypecode);
-                }
-                case 'L': {//SET_VECFIELD(long, l) {
-                    return _set_vector_destFinfo<long>(oid, string(fieldName), ii, arg, vtypecode);
-                }            
-                case 'N': { //SET_VECFIELD(unsigned int, I)
-                    return _set_vector_destFinfo<unsigned int>(oid, string(fieldName), ii, arg, vtypecode);
-                }
-                case 'K': {//SET_VECFIELD(unsigned long, k)
-                    return _set_vector_destFinfo<unsigned long>(oid, string(fieldName), ii, arg, vtypecode);
-                }
-                case 'F': {//SET_VECFIELD(float, f)
-                    return _set_vector_destFinfo<float>(oid, string(fieldName), ii, arg, vtypecode);
-                }
-                case 'D': {//SET_VECFIELD(double, d)
-                    return _set_vector_destFinfo<double>(oid, string(fieldName), ii, arg, vtypecode);
-                }                
-                case 'S': {
-                    return _set_vector_destFinfo<string>(oid, string(fieldName), ii, arg, vtypecode);
-                }
-                case 'X': {
-                    return _set_vector_destFinfo<Id>(oid, string(fieldName), ii, arg, vtypecode);
-                }
-                case 'Y': {
-                    return _set_vector_destFinfo<ObjId>(oid, string(fieldName), ii, arg, vtypecode);
-                }
-                default: {
-                    error << "Cannot handle argument type: " << argType[ii];
-                    PyErr_SetString(PyExc_TypeError, error.str().c_str());
-                    return NULL;
-                }
-            } // switch (shortType(argType[ii])
-        } // for (size_t ii = 0; ...
-        // TODO: handle vector args and void functions properly
-        string argstring = argstream.str();
-        if (argstring.length() < 2 ){
-            error << "Could not find any valid argument. Giving up.";
-            PyErr_SetString(PyExc_TypeError, error.str().c_str());
-            return NULL;
-        }
-        
-        argstring = argstring.substr(0, argstring.length() - 1);        
-        bool ret = SetGet::strSet(oid, string(fieldName), argstring);
-        if (ret){
-            Py_RETURN_TRUE;
+            return set_destFinfo(oid, string(fieldName), arglist[1], argType[0]);
+        } else if (argType.size() == 2){
+            return set_destFinfo2(oid, string(fieldName), arglist[1], shortType(argType[0]), arglist[2], shortType(argType[1]));
         } else {
-            ostringstream err;
-            err << fieldName << " takes arguments (";
-            for (unsigned int ii = 0; ii < argType.size(); ++ii){
-                error << argType[ii] << ",";
-            }
-            error << ")";                    
-            PyErr_SetString(PyExc_TypeError, err.str().c_str());
+            error << "Can handle only up to 2 arguments" << endl;
             return NULL;
         }
     } // moose_ObjId_setDestField
+
+    PyObject * set_destFinfo(ObjId obj, string fieldName, PyObject *arg, string argType)
+    {
+        char typecode = shortType(argType);
+        bool ret;
+        ostringstream error;
+        error << "moose.set_destFinfo: ";
+
+    switch (typecode){                    
+        case 'f': case 'd': {
+            double param = PyFloat_AsDouble(arg);
+            if (typecode == 'f'){
+                ret = SetGet1<float>::set(obj, fieldName, (float)param);
+            } else {
+                ret = SetGet1<double>::set(obj, fieldName, param);
+            }
+        }
+            break;
+        case 's': {
+            char * param = PyString_AsString(arg);
+            ret = SetGet1<string>::set(obj, fieldName, string(param));
+        }
+            break;
+        case 'i': case 'l': {
+            long param = PyInt_AsLong(arg);
+            if (param == -1 && PyErr_Occurred()){
+                return NULL;
+            }
+            if (typecode == 'i'){
+                ret = SetGet1<int>::set(obj, fieldName, (int)param);
+            } else {
+                ret = SetGet1<long>::set(obj, fieldName, param);
+            }
+        }
+            break;
+        case 'I': case 'k':{
+            unsigned long param =PyLong_AsUnsignedLong(arg);
+            if (PyErr_Occurred()){
+                return NULL;
+            }
+            if (typecode == 'I'){
+                ret = SetGet1< unsigned int>::set(obj, fieldName, (unsigned int)param);
+            } else {
+                ret = SetGet1<unsigned long>::set(obj, fieldName, param);
+            }
+        }
+            break;
+        case 'x': {
+            Id param;
+            // if (Id_SubtypeCheck(arg)){
+                _Id * id = (_Id*)(arg);
+                if (id == NULL){
+                    error << "argument should be an ematrix or an melement";
+                    PyErr_SetString(PyExc_TypeError, error.str().c_str());
+                    return NULL;                                
+                }
+                param = id->id_;
+            // } else if (ObjId_SubtypeCheck(arg)){
+            //     _ObjId * oid = (_ObjId*)(arg);
+            //     if (oid == NULL){
+            //         error << "argument should be an ematrix or an melement";
+            //         PyErr_SetString(PyExc_TypeError, error.str().c_str());
+            //         return NULL;                                
+            //     }
+            //     param = oid->oid_.id;
+            // }
+            ret = SetGet1<Id>::set(obj, fieldName, param);
+        }
+            break;
+        case 'y': {
+            ObjId param;
+            // if (Id_SubtypeCheck(arg)){
+            //     _Id * id = (_Id*)(arg);
+            //     if (id == NULL){
+            //         error << "argument should be an ematrix or an melement";
+            //         PyErr_SetString(PyExc_TypeError, error.str().c_str());
+            //         return NULL;                                
+            //     }
+            //     param = ObjId(id->id_);
+            // } else if (ObjId_SubtypeCheck(arg)){
+                _ObjId * oid = (_ObjId*)(arg);
+                if (oid == NULL){
+                    error << "argument should be an ematrix or an melement";
+                    PyErr_SetString(PyExc_TypeError, error.str().c_str());
+                    return NULL;                                
+                // }
+                param = oid->oid_;
+            }
+            ret = SetGet1<ObjId>::set(obj, fieldName, param);
+        }
+            break;
+        case 'c': {
+            char * param = PyString_AsString(arg);
+            if (!param){
+                error << "expected argument of type char/string";
+                PyErr_SetString(PyExc_TypeError, error.str().c_str());
+                return NULL;
+            } else if (strlen(param) == 0){
+                error << "Empty string not allowed.";
+                PyErr_SetString(PyExc_ValueError, error.str().c_str());
+                return NULL;
+            }
+            ret = SetGet1<char>::set(obj, fieldName, param[0]);
+        }
+            break;
+            ////////////////////////////////////////////////////
+            // We do NOT handle multiple vectors. Use the argument
+            // list as a single vector argument.
+            ////////////////////////////////////////////////////
+        case 'v': {
+            return _set_vector_destFinfo<int>(obj, string(fieldName), arg, typecode);
+        }
+        case 'w': {
+            return _set_vector_destFinfo<short>(obj, string(fieldName), arg, typecode);
+        }
+        case 'L': {//SET_VECFIELD(long, l) {
+            return _set_vector_destFinfo<long>(obj, string(fieldName), arg, typecode);
+        }            
+        case 'N': { //SET_VECFIELD(unsigned int, I)
+            return _set_vector_destFinfo<unsigned int>(obj, string(fieldName), arg, typecode);
+        }
+        case 'K': {//SET_VECFIELD(unsigned long, k)
+            return _set_vector_destFinfo<unsigned long>(obj, string(fieldName), arg, typecode);
+        }
+        case 'F': {//SET_VECFIELD(float, f)
+            return _set_vector_destFinfo<float>(obj, string(fieldName), arg, typecode);
+        }
+        case 'D': {//SET_VECFIELD(double, d)
+            return _set_vector_destFinfo<double>(obj, string(fieldName), arg, typecode);
+        }                
+        case 'S': {
+            return _set_vector_destFinfo<string>(obj, string(fieldName), arg, typecode);
+        }
+        case 'X': {
+            return _set_vector_destFinfo<Id>(obj, string(fieldName), arg, typecode);
+        }
+        case 'Y': {
+            return _set_vector_destFinfo<ObjId>(obj, string(fieldName), arg, typecode);
+        }
+        default: {
+            error << "Cannot handle argument type: " << argType;
+            PyErr_SetString(PyExc_TypeError, error.str().c_str());
+            return NULL;
+        }
+    } // switch (shortType(argType[ii])
+    if (ret){
+        Py_RETURN_TRUE;
+    } else {
+        Py_RETURN_FALSE;
+    }
+    
+}
+
+/**
+   Set destFinfo for 2 argument destination field functions.
+*/
+// template <class A>
+PyObject* set_destFinfo2(ObjId obj, string fieldName, PyObject * arg1, char type1, PyObject * arg2, char type2)
+{
+    ostringstream error;
+    error << "moose.set_destFinfo2: ";
+    switch (type2){
+        case 'f': case 'd': {
+            double param = PyFloat_AsDouble(arg2);
+            if (type2 == 'f'){
+                return set_destFinfo1<float>(obj, fieldName, arg1, type1, (float)param);
+            } else {
+                return set_destFinfo1<double>(obj, fieldName, arg1, type1, param);
+            }
+        }
+        case 's': {
+            char * param = PyString_AsString(arg2);
+            return set_destFinfo1<string>(obj, fieldName, arg1, type1, string(param));
+        }
+        case 'i': case 'l': {
+            long param = PyInt_AsLong(arg2);
+            if (param == -1 && PyErr_Occurred()){
+                return NULL;
+            }
+            if (type2 == 'i'){
+                return set_destFinfo1< int>(obj, fieldName, arg1, type1, (int)param);
+            } else {
+                return set_destFinfo1< long>(obj, fieldName, arg1, type1, param);
+            }
+        }
+        case 'I': case 'k':{
+            unsigned long param =PyLong_AsUnsignedLong(arg2);
+            if (PyErr_Occurred()){
+                return NULL;
+            }
+            if (type2 == 'I'){
+                return set_destFinfo1< unsigned int>(obj, fieldName, arg1, type1, (unsigned int)param);
+            } else {
+                return set_destFinfo1< unsigned long>(obj, fieldName, arg1, type1, param);
+            }
+        }
+        case 'x': {
+            Id param;
+            // if (Id_SubtypeCheck(arg)){
+                _Id * id = (_Id*)(arg2);
+                if (id == NULL){
+                    error << "argument should be an ematrix or an melement";
+                    PyErr_SetString(PyExc_TypeError, error.str().c_str());
+                    return NULL;                                
+                }
+                param = id->id_;
+            // } else if (ObjId_SubtypeCheck(arg)){
+            //     _ObjId * oid = (_ObjId*)(arg);
+            //     if (oid == NULL){
+            //         error << "argument should be an ematrix or an melement";
+            //         PyErr_SetString(PyExc_TypeError, error.str().c_str());
+            //         return NULL;                                
+            //     }
+            //     param = oid->oid_.id;
+            // }
+            return set_destFinfo1< Id>(obj, fieldName, arg1, type1, param);
+        }
+        case 'y': {
+            ObjId param;
+            // if (Id_SubtypeCheck(arg)){
+            //     _Id * id = (_Id*)(arg);
+            //     if (id == NULL){
+            //         error << "argument should be an ematrix or an melement";
+            //         PyErr_SetString(PyExc_TypeError, error.str().c_str());
+            //         return NULL;                                
+            //     }
+            //     param = ObjId(id->id_);
+            // } else if (ObjId_SubtypeCheck(arg)){
+                _ObjId * oid = (_ObjId*)(arg2);
+                if (oid == NULL){
+                    error << "argument should be an ematrix or an melement";
+                    PyErr_SetString(PyExc_TypeError, error.str().c_str());
+                    return NULL;                                
+                }
+                param = oid->oid_;
+            // }
+            return set_destFinfo1< ObjId>(obj, fieldName, arg1, type1, param);
+        }
+        case 'c': {
+            char * param = PyString_AsString(arg2);
+            if (!param){
+                error << "expected argument of type char/string";
+                PyErr_SetString(PyExc_TypeError, error.str().c_str());
+                return NULL;
+            } else if (strlen(param) == 0){
+                error << "Empty string not allowed.";
+                PyErr_SetString(PyExc_ValueError, error.str().c_str());
+                return NULL;
+            }
+            return set_destFinfo1< char>(obj, fieldName, arg1, type1, param[0]);
+        }
+        default: {
+            error << "Unhandled argument 2 type (shortType=" << type2 << ")";
+            PyErr_SetString(PyExc_TypeError, error.str().c_str());
+            return NULL;
+        }
+    }
+}
+
 
     PyDoc_STRVAR(moose_ObjId_getFieldNames_documenation,
                  "getFieldNames(fieldType='')\n"
