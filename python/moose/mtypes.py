@@ -141,8 +141,9 @@ def isNeuroML(filename):
 
     """
     doc = md.parse(filename)
-    for child in doc.documentElement.childNodes:
-        if child.nodeType == md.ELEMENT_NODE and \
+    for child in doc.childNodes:
+        print child.nodeName, child.nodeType == child.ELEMENT_NODE
+        if child.nodeType == child.ELEMENT_NODE and \
                 (child.nodeName == 'networkml' or \
                      child.nodeName == 'morphml' or \
                      child.nodeName == 'channelml'or \
@@ -153,8 +154,8 @@ def isNeuroML(filename):
 def isSBML(filename):
     """Check model in `filename` is in SBML format."""
     doc = md.parse(filename)
-    for child in doc.documentElement.childNodes:
-        if child.nodeType == md.ELEMENT_NODE and \
+    for child in doc.childNodes:
+        if child.nodeType == child.ELEMENT_NODE and \
                 child.nodeName == 'sbml':
             return True
     return  False
