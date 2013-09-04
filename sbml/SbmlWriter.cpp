@@ -24,7 +24,8 @@
 /**
 *  write a Model after validation
 */
-
+/* ToDo: Tables should be implemented
+ */
 int SbmlWriter::write( string filepath,string target )
 {
 	cout << "Sbml Writer: " << filepath << " ---- " << target << endl;
@@ -168,6 +169,9 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		  double initAmt = Field<double> :: get(ObjId(*itrp),"nInit");
 		  Species *sp = cremodel_->createSpecies();
 		  sp->setId( clean_poolname );
+		  string objname = Field<string> :: get(ObjId(*itrp),"name");
+		  objname = nameString(objname);
+		  sp->setName( objname);
 		  sp->setCompartment( clean_comptname );
 		  /* AS of 12-6-2013
 		     Units in moose for  pool : is milli molar,    In sbml for pool: default unit is mole.
