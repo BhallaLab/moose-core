@@ -24,15 +24,15 @@ prefix = dict(
     )
 
 def colored(msg, label) :
-  """
-  Return a colored string. Formatting is optional.
-  """
-  global prefix
-  if label in prefix :
-    color = prefix[label]
-  else :
-    color = ""
-  return "[{0}] {1} {2}".format(label, color+msg, ENDC)
+    """
+    Return a colored string. Formatting is optional.
+    """
+    global prefix
+    if label in prefix :
+        color = prefix[label]
+    else :
+        color = ""
+    return "[{0}] {1} {2}".format(label, color+msg, ENDC)
 
 def printDebug(label, msg):
-  print(colored(msg, label))
+    print(colored(msg, label))
