@@ -31,6 +31,7 @@ class SbmlWriter
 		bool writeModel( const SBMLDocument* sbmlDoc, const string& filename );
 		 
 	private:
+		vector < string >nameList_;
 		Model* cremodel_;	
 		string nameString( string str );
 		string nameString1( string str );
@@ -38,7 +39,7 @@ class SbmlWriter
 		string idBeginWith(string name );
 		string cleanNameId( Id itrid,int index);
 		string parmUnit( double rct_order );
-		void getSubPrd(Reaction* rec,string type,string enztype,Id itrRE, int index,ostringstream& rate_law,double &rct_order,bool w);
+		void getSubPrd(Reaction* rec,string type,string enztype,Id itrRE, int index,ostringstream& rate_law,double &rct_order,bool w, string re_enClass);
 		void getModifier(ModifierSpeciesReference* mspr,vector < Id> mod, int index,ostringstream& rate_law,double &rct_order,bool w);
 		void printParameters( KineticLaw* kl,string k,double kvalue,string unit );
 		string findNotes(Id itr);
