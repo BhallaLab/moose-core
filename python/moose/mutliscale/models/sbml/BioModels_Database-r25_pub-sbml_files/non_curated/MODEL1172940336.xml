@@ -1,0 +1,356 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version3" level="2" metaid="_163149" version="3">
+  <model id="DePaor1986_CirculatoryAutoregulation" name="DePaor1986_CirculatoryAutoregulation" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>A feedback oscillator model for circulatory autoregulation</strong>
+                <br/>
+          Annraoi M. De Paor, Patrick Timmons      <em>International Journal of Control</em>
+          1986 43(2):679-688      <a href="http://dx.doi.org/10.1080/00207178608933494 ">doi:10.1080/00207178608933494</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          Circulatory autregulation is the phenomenon whereby an isolated organ can maintain a constant or almost-constant blood flow rate over a range of perfusion pressures. A mathematical model is developed, based on work reported in the physiological literature, and tuned to show that autoregulation can be accomplished by pressure-induced oscillations in arteriolar radius. Various features known lo be exhibited by skeletal muscle and by stretch receptors are incorporated in the model of smooth muscle surrounding the arterioles.      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://www.cellml.org/models/depaor_timmons_1986_version03">        <strong>Annraoi M. De Paor, Patrick Timmons, (1986) - version03</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>Lloyd, Catherine, May</strong>
+                <br/>
+          c.lloyd@aukland.ac.nz      <br/>
+          The University of Auckland      <br/>
+          The Bioengineering Institute      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/doi/10.1080/00207178608933494"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1172940336"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/doi/10.1080/00207178608933494"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="substance" name="normalised" metaid="_163161">
+        <listOfUnits>
+          <unit metaid="_163173" kind="dimensionless"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="pertime" name="pertime" metaid="_163185">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_163197" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="COMpartment" metaid="_721612" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="time_environment" name="time" metaid="_721637" units="dimensionless"/>
+      <parameter id="f" constant="false" name="f" metaid="_721638" units="dimensionless"/>
+      <parameter id="a" name="a" metaid="_721639" value="1" units="dimensionless"/>
+      <parameter id="r" constant="false" name="r" metaid="_721640" value="0.5" units="dimensionless"/>
+      <parameter id="beta" name="beta" metaid="_721641" value="1" units="pertime"/>
+      <parameter id="alpha" name="alpha" metaid="_721642" value="1" units="dimensionless"/>
+      <parameter id="y" constant="false" name="y" metaid="_721645" units="dimensionless"/>
+      <parameter id="z" constant="false" name="z" metaid="_721646" units="pertime"/>
+      <parameter id="x1" constant="false" name="x1" metaid="_721647" value="0" units="dimensionless"/>
+      <parameter id="q" constant="false" name="q" metaid="_721650" units="dimensionless"/>
+      <parameter id="d" name="d" metaid="_721651" value="5" units="dimensionless"/>
+      <parameter id="k" name="k" metaid="_721652" value="10.5" units="dimensionless"/>
+      <parameter id="x2" constant="false" name="x2" metaid="_721655" value="0" units="dimensionless"/>
+      <parameter id="x3" constant="false" name="x3" metaid="_721656" value="0" units="dimensionless"/>
+      <parameter id="m" constant="false" name="m" metaid="_721657" units="dimensionless"/>
+      <parameter id="phi" constant="false" name="phi" metaid="_721660" units="dimensionless"/>
+      <parameter id="ur0" constant="false" name="ur0" metaid="_721661" units="dimensionless"/>
+      <parameter id="ur1" constant="false" name="ur1" metaid="_721662" units="dimensionless"/>
+      <parameter id="uz" constant="false" name="uz" metaid="_721665" units="dimensionless"/>
+      <parameter id="h" constant="false" name="h" metaid="_721666" value="0" units="dimensionless"/>
+      <parameter id="r0" name="r0" metaid="_721667" value="0.5" units="dimensionless"/>
+      <parameter id="r1" name="r1" metaid="_721670" value="1.2" units="dimensionless"/>
+      <parameter id="t1" name="t1" metaid="_721671" value="0.1" units="time"/>
+      <parameter id="t2" name="t2" metaid="_721672" value="0.5" units="time"/>
+      <parameter id="t4" name="t4" metaid="_721675" value="20" units="time"/>
+      <parameter id="p" name="p" metaid="_721676" value="1.05" units="dimensionless"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_721616" variable="r">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> beta </ci>
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> p </ci>
+                <ci> r </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <apply>
+                  <times/>
+                  <ci> alpha </ci>
+                  <apply>
+                    <power/>
+                    <apply>
+                      <minus/>
+                      <ci> r </ci>
+                      <ci> r0 </ci>
+                    </apply>
+                    <cn> 2 </cn>
+                  </apply>
+                  <ci> ur0 </ci>
+                </apply>
+                <ci> m </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_721617" variable="x1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <ci> y </ci>
+              <ci> x1 </ci>
+            </apply>
+            <ci> t1 </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_721618" variable="x2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <ci> q </ci>
+              <ci> x2 </ci>
+            </apply>
+            <ci> t2 </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_721619" variable="x3">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <ci> x2 </ci>
+              <ci> x3 </ci>
+            </apply>
+            <ci> t2 </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_721620" variable="h">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <ci> f </ci>
+              <ci> h </ci>
+            </apply>
+            <ci> t4 </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="_721621" variable="f">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> a </ci>
+            <ci> p </ci>
+            <apply>
+              <power/>
+              <ci> r </ci>
+              <cn> 4 </cn>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_721624" variable="y">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <apply>
+              <minus/>
+              <ci> r </ci>
+              <ci> r1 </ci>
+            </apply>
+            <ci> ur1 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_721625" variable="z">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <ci> y </ci>
+              <ci> x1 </ci>
+            </apply>
+            <ci> t1 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_721626" variable="q">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> k </ci>
+            <apply>
+              <minus/>
+              <cn> 1 </cn>
+              <apply>
+                <exp/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> d </ci>
+                    <ci> z </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+            <ci> uz </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_721629" variable="m">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> x3 </ci>
+            <ci> phi </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_721630" variable="phi">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <cn> 0 </cn>
+              <apply>
+                <lt/>
+                <ci> r </ci>
+                <cn> 0.25 </cn>
+              </apply>
+            </piece>
+            <piece>
+              <cn> 0 </cn>
+              <apply>
+                <gt/>
+                <ci> r </ci>
+                <cn> 2 </cn>
+              </apply>
+            </piece>
+            <otherwise>
+              <apply>
+                <minus/>
+                <cn> 1 </cn>
+                <apply>
+                  <times/>
+                  <cn> 1.3061225 </cn>
+                  <apply>
+                    <minus/>
+                    <ci> r </ci>
+                    <cn> 1.125 </cn>
+                  </apply>
+                  <apply>
+                    <minus/>
+                    <ci> r </ci>
+                    <cn> 1.125 </cn>
+                  </apply>
+                </apply>
+              </apply>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_721631" variable="ur0">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <cn> 1 </cn>
+              <apply>
+                <gt/>
+                <ci> r </ci>
+                <ci> r0 </ci>
+              </apply>
+            </piece>
+            <otherwise>
+              <cn> 0 </cn>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_721634" variable="ur1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <cn> 1 </cn>
+              <apply>
+                <gt/>
+                <ci> r </ci>
+                <ci> r1 </ci>
+              </apply>
+            </piece>
+            <otherwise>
+              <cn> 0 </cn>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_721635" variable="uz">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <cn> 1 </cn>
+              <apply>
+                <gt/>
+                <ci> z </ci>
+                <cn> 0 </cn>
+              </apply>
+            </piece>
+            <otherwise>
+              <cn> 0 </cn>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+  </model>
+</sbml>

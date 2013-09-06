@@ -1,0 +1,1083 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2" level="2" metaid="metaid_0000001" version="1">
+  <model name="Schuetz2007_ecoli_FBA" metaid="metaid_0000002">
+    <notes>
+      <p xmlns="http://www.w3.org/1999/xhtml">
+    This is a stoichiometric map from the supplement of the publication:    <br/>
+            <b>Systematic evaluation of objective functions for predicting intracellular fluxes in Escherichia coli</b>
+            <br/>
+        Robert Schuetz, Lars Kuepfer and Uwe Sauer:    <i>Molecular Systems Biology</i>
+            <b>3</b>
+        Article number:    <i>119, 10 July 2007</i>
+            <a href="http://dx.doi.org/10.1038/msb4100162">doi:10.1038/msb4100162</a>
+            <br/>
+            </p>
+      <p xmlns="http://www.w3.org/1999/xhtml">
+    This model originates from BioModels Database: A Database of Annotated Published Models. It is copyright (c) 2005-2011 The BioModels.net Team.    <br/>
+        To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to    <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+        for more information.    </p>
+      <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..    <br/>
+            <br/>
+        To cite BioModels Database, please use:    <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+            </p>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Endler</vCard:Family>
+                  <vCard:Given>Lukas</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>lukas@ebi.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>EMBL-EBI</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Sauer</vCard:Family>
+                  <vCard:Given>Uwe</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>sauer@imsb.biol.ethz.ch</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>Institute of Molecular Systems Biology, ETH Zurich</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Endler</vCard:Family>
+                  <vCard:Given>Lukas</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>lukas@ebi.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>EMBL-EBI</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Sauer</vCard:Family>
+                  <vCard:Given>Uwe</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>sauer@imsb.biol.ethz.ch</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>Institute of Molecular Systems Biology, ETH Zurich</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Endler</vCard:Family>
+                  <vCard:Given>Lukas</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>lukas@ebi.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>EMBL-EBI</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Sauer</vCard:Family>
+                  <vCard:Given>Uwe</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>sauer@imsb.biol.ethz.ch</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>Institute of Molecular Systems Biology, ETH Zurich</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2008-07-16T10:02:19Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-08-23T15:34:33Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-08-23T15:34:33Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-08-23T15:34:33Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL4665428627"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/17625511"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfCompartments>
+      <compartment id="cell" name="cell" metaid="metaid_0000003" size="0"/>
+      <compartment id="external" name="external" metaid="metaid_0000004" size="0"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="GLC" initialConcentration="1" name="GLC" metaid="metaid_0000005" compartment="cell"/>
+      <species id="ATP" initialConcentration="1" name="ATP" metaid="metaid_0000006" compartment="cell"/>
+      <species id="G6P" initialConcentration="1" name="G6P" metaid="metaid_0000007" compartment="cell"/>
+      <species id="F6P" initialConcentration="1" name="F6P" metaid="metaid_0000008" compartment="cell"/>
+      <species id="FDP" initialConcentration="1" name="FDP" metaid="metaid_0000009" compartment="cell"/>
+      <species id="DHAP" initialConcentration="1" name="DHAP" metaid="metaid_0000010" compartment="cell"/>
+      <species id="GA3P" initialConcentration="1" name="GA3P" metaid="metaid_0000011" compartment="cell"/>
+      <species id="NADH" initialConcentration="1" name="NADH" metaid="metaid_0000012" compartment="cell"/>
+      <species id="_13DPG" initialConcentration="1" name="13DPG" metaid="metaid_0000013" compartment="cell"/>
+      <species id="_3PG" initialConcentration="1" name="3PG" metaid="metaid_0000014" compartment="cell"/>
+      <species id="_2PG" initialConcentration="1" name="2PG" metaid="metaid_0000015" compartment="cell"/>
+      <species id="PEP" initialConcentration="1" name="PEP" metaid="metaid_0000016" compartment="cell"/>
+      <species id="PYR" initialConcentration="1" name="PYR" metaid="metaid_0000017" compartment="cell"/>
+      <species id="COA" initialConcentration="1" name="COA" metaid="metaid_0000018" compartment="cell"/>
+      <species id="ACCOA" initialConcentration="1" name="ACCOA" metaid="metaid_0000019" compartment="cell"/>
+      <species id="CO2" initialConcentration="1" name="CO2" metaid="metaid_0000020" compartment="cell"/>
+      <species id="MAL" initialConcentration="1" name="MAL" metaid="metaid_0000021" compartment="cell"/>
+      <species id="NADPH" initialConcentration="1" name="NADPH" metaid="metaid_0000022" compartment="cell"/>
+      <species id="OA" initialConcentration="1" name="OA" metaid="metaid_0000023" compartment="cell"/>
+      <species id="D6PGL" initialConcentration="1" name="D6PGL" metaid="metaid_0000024" compartment="cell"/>
+      <species id="_6PGC" initialConcentration="1" name="6PGC" metaid="metaid_0000025" compartment="cell"/>
+      <species id="RL5P" initialConcentration="1" name="RL5P" metaid="metaid_0000026" compartment="cell"/>
+      <species id="R5P" initialConcentration="1" name="R5P" metaid="metaid_0000027" compartment="cell"/>
+      <species id="X5P" initialConcentration="1" name="X5P" metaid="metaid_0000028" compartment="cell"/>
+      <species id="S7P" initialConcentration="1" name="S7P" metaid="metaid_0000029" compartment="cell"/>
+      <species id="E4P" initialConcentration="1" name="E4P" metaid="metaid_0000030" compartment="cell"/>
+      <species id="CIT" initialConcentration="1" name="CIT" metaid="metaid_0000031" compartment="cell"/>
+      <species id="CAC" initialConcentration="1" name="CAC" metaid="metaid_0000032" compartment="cell"/>
+      <species id="ICIT" initialConcentration="1" name="ICIT" metaid="metaid_0000033" compartment="cell"/>
+      <species id="AKG" initialConcentration="1" name="AKG" metaid="metaid_0000034" compartment="cell"/>
+      <species id="SUCCOA" initialConcentration="1" name="SUCCOA" metaid="metaid_0000035" compartment="cell"/>
+      <species id="SUCC" initialConcentration="1" name="SUCC" metaid="metaid_0000036" compartment="cell"/>
+      <species id="FUM" initialConcentration="1" name="FUM" metaid="metaid_0000037" compartment="cell"/>
+      <species id="FADH" initialConcentration="1" name="FADH" metaid="metaid_0000038" compartment="cell"/>
+      <species id="Q" initialConcentration="1" name="Q" metaid="metaid_0000039" compartment="cell"/>
+      <species id="QH2" initialConcentration="1" name="QH2" metaid="metaid_0000040" compartment="cell"/>
+      <species id="GLX" initialConcentration="1" name="GLX" metaid="metaid_0000041" compartment="cell"/>
+      <species id="Hxt" initialConcentration="1" name="Hxt" metaid="metaid_0000042" boundaryCondition="true" compartment="external"/>
+      <species id="O2" initialConcentration="1" name="O2" metaid="metaid_0000043" compartment="cell"/>
+      <species id="NO3" initialConcentration="1" name="NO3" metaid="metaid_0000044" compartment="cell"/>
+      <species id="NO2" initialConcentration="1" name="NO2" metaid="metaid_0000045" compartment="cell"/>
+      <species id="AC" initialConcentration="1" name="AC" metaid="metaid_0000046" compartment="cell"/>
+      <species id="FOR" initialConcentration="1" name="FOR" metaid="metaid_0000047" compartment="cell"/>
+      <species id="ACAL" initialConcentration="1" name="ACAL" metaid="metaid_0000048" compartment="cell"/>
+      <species id="ETH" initialConcentration="1" name="ETH" metaid="metaid_0000049" compartment="cell"/>
+      <species id="ACTP" initialConcentration="1" name="ACTP" metaid="metaid_0000050" compartment="cell"/>
+      <species id="LAC" initialConcentration="1" name="LAC" metaid="metaid_0000051" compartment="cell"/>
+      <species id="_2KD6PG" initialConcentration="1" name="2KD6PG" metaid="metaid_0000052" compartment="cell"/>
+      <species id="GLCxt" initialConcentration="1" name="GLCxt" metaid="metaid_0000053" boundaryCondition="true" compartment="external"/>
+      <species id="CO2xt" initialConcentration="1" name="CO2xt" metaid="metaid_0000054" boundaryCondition="true" compartment="external"/>
+      <species id="O2xt" initialConcentration="1" name="O2xt" metaid="metaid_0000055" boundaryCondition="true" compartment="external"/>
+      <species id="NO3xt" initialConcentration="1" name="NO3xt" metaid="metaid_0000056" boundaryCondition="true" compartment="external"/>
+      <species id="NO2xt" initialConcentration="1" name="NO2xt" metaid="metaid_0000057" boundaryCondition="true" compartment="external"/>
+      <species id="ETHxt" initialConcentration="1" name="ETHxt" metaid="metaid_0000058" boundaryCondition="true" compartment="external"/>
+      <species id="Acxt" initialConcentration="1" name="Acxt" metaid="metaid_0000059" boundaryCondition="true" compartment="external"/>
+      <species id="SUCCxt" initialConcentration="1" name="SUCCxt" metaid="metaid_0000060" boundaryCondition="true" compartment="external"/>
+      <species id="LACxt" initialConcentration="1" name="LACxt" metaid="metaid_0000061" boundaryCondition="true" compartment="external"/>
+      <species id="PYRxt" initialConcentration="1" name="PYRxt" metaid="metaid_0000062" boundaryCondition="true" compartment="external"/>
+      <species id="FORxt" initialConcentration="1" name="FORxt" metaid="metaid_0000063" boundaryCondition="true" compartment="external"/>
+      <species id="BM" initialConcentration="1" name="BM" metaid="metaid_0000064" compartment="cell"/>
+      <species id="external_ATP" initialConcentration="1" name="external_ATP" metaid="metaid_0000065" boundaryCondition="true" compartment="external"/>
+    </listOfSpecies>
+    <listOfReactions>
+      <reaction id="glk" name="glk" metaid="metaid_0000066" reversible="false">
+        <listOfReactants>
+          <speciesReference species="GLC" metaid="_051952"/>
+          <speciesReference species="ATP" metaid="_051964"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="G6P" metaid="_051976"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="pgi" name="pgi" metaid="metaid_0000067">
+        <listOfReactants>
+          <speciesReference species="G6P" metaid="_051988"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="F6P" metaid="_052000"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="pfkA" name="pfkA" metaid="metaid_0000068" reversible="false">
+        <listOfReactants>
+          <speciesReference species="F6P" metaid="_052012"/>
+          <speciesReference species="ATP" metaid="_052024"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="FDP" metaid="_052036"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="pfkB" name="pfkB" metaid="metaid_0000069" reversible="false">
+        <listOfReactants>
+          <speciesReference species="F6P" metaid="_052048"/>
+          <speciesReference species="ATP" metaid="_052060"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="FDP" metaid="_052072"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="fbaA" name="fbaA" metaid="metaid_0000070">
+        <listOfReactants>
+          <speciesReference species="FDP" metaid="_052084"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="DHAP" metaid="_052096"/>
+          <speciesReference species="GA3P" metaid="_052108"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="fbaB" name="fbaB" metaid="metaid_0000071">
+        <listOfReactants>
+          <speciesReference species="FDP" metaid="_052120"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="DHAP" metaid="_052133"/>
+          <speciesReference species="GA3P" metaid="_052145"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="tpiA" name="tpiA" metaid="metaid_0000072">
+        <listOfReactants>
+          <speciesReference species="DHAP" metaid="_052157"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="GA3P" metaid="_052169"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="gapA" name="gapA" metaid="metaid_0000073">
+        <listOfReactants>
+          <speciesReference species="GA3P" metaid="_052181"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="NADH" metaid="_052194"/>
+          <speciesReference species="_13DPG" metaid="_052206"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="pgk" name="pgk" metaid="metaid_0000074">
+        <listOfReactants>
+          <speciesReference species="_13DPG" metaid="_052218"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_3PG" metaid="_052230"/>
+          <speciesReference species="ATP" metaid="_052242"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="gpmA" name="gpmA" metaid="metaid_0000075">
+        <listOfReactants>
+          <speciesReference species="_3PG" metaid="_052254"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_2PG" metaid="_052266"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="gpmB" name="gpmB" metaid="metaid_0000076">
+        <listOfReactants>
+          <speciesReference species="_3PG" metaid="_052278"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_2PG" metaid="_052290"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="eno" name="eno" metaid="metaid_0000077">
+        <listOfReactants>
+          <speciesReference species="_2PG" metaid="_052302"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PEP" metaid="_052315"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="pykF" name="pykF" metaid="metaid_0000078" reversible="false">
+        <listOfReactants>
+          <speciesReference species="PEP" metaid="_052327"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PYR" metaid="_052339"/>
+          <speciesReference species="ATP" metaid="_052351"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="pykA" name="pykA" metaid="metaid_0000079" reversible="false">
+        <listOfReactants>
+          <speciesReference species="PEP" metaid="_052363"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PYR" metaid="_052375"/>
+          <speciesReference species="ATP" metaid="_052388"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="aceEF" name="aceEF" metaid="metaid_0000080" reversible="false">
+        <listOfReactants>
+          <speciesReference species="PYR" metaid="_052401"/>
+          <speciesReference species="COA" metaid="_052414"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ACCOA" metaid="_052427"/>
+          <speciesReference species="CO2" metaid="_052440"/>
+          <speciesReference species="NADH" metaid="_052453"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="maeB" name="maeB" metaid="metaid_0000081" reversible="false">
+        <listOfReactants>
+          <speciesReference species="MAL" metaid="_052466"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PYR" metaid="_052479"/>
+          <speciesReference species="NADPH" metaid="_052491"/>
+          <speciesReference species="CO2" metaid="_052504"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="maeA" name="maeA" metaid="metaid_0000082" reversible="false">
+        <listOfReactants>
+          <speciesReference species="MAL" metaid="_052516"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PYR" metaid="_052528"/>
+          <speciesReference species="NADH" metaid="_052540"/>
+          <speciesReference species="CO2" metaid="_052552"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="pck" name="pck" metaid="metaid_0000083" reversible="false">
+        <listOfReactants>
+          <speciesReference species="OA" metaid="_052564"/>
+          <speciesReference species="ATP" metaid="_052576"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PEP" metaid="_052588"/>
+          <speciesReference species="CO2" metaid="_052600"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="fbp" name="fbp" metaid="metaid_0000084" reversible="false">
+        <listOfReactants>
+          <speciesReference species="FDP" metaid="_052612"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="F6P" metaid="_052624"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="glpX" name="glpX" metaid="metaid_0000085" reversible="false">
+        <listOfReactants>
+          <speciesReference species="FDP" metaid="_052637"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="F6P" metaid="_052649"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="pps" name="pps" metaid="metaid_0000086" reversible="false">
+        <listOfReactants>
+          <speciesReference species="PYR" metaid="_052661"/>
+          <speciesReference species="ATP" metaid="_052673" stoichiometry="2"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PEP" metaid="_052685"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="zwf" name="zwf" metaid="metaid_0000087">
+        <listOfReactants>
+          <speciesReference species="G6P" metaid="_052697"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="D6PGL" metaid="_052710"/>
+          <speciesReference species="NADPH" metaid="_052722"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="pgl" name="pgl" metaid="metaid_0000088" reversible="false">
+        <listOfReactants>
+          <speciesReference species="D6PGL" metaid="_052734"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_6PGC" metaid="_052746"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="gnd" name="gnd" metaid="metaid_0000089" reversible="false">
+        <listOfReactants>
+          <speciesReference species="_6PGC" metaid="_052758"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="NADPH" metaid="_052770"/>
+          <speciesReference species="CO2" metaid="_052782"/>
+          <speciesReference species="RL5P" metaid="_052794"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="rpiA" name="rpiA" metaid="metaid_0000090">
+        <listOfReactants>
+          <speciesReference species="RL5P" metaid="_052806"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="R5P" metaid="_052818"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="rpiB" name="rpiB" metaid="metaid_0000091">
+        <listOfReactants>
+          <speciesReference species="RL5P" metaid="_052830"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="R5P" metaid="_052842"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="rpe" name="rpe" metaid="metaid_0000092">
+        <listOfReactants>
+          <speciesReference species="RL5P" metaid="_052854"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="X5P" metaid="_052866"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="tktA" name="tktA" metaid="metaid_0000093">
+        <listOfReactants>
+          <speciesReference species="R5P" metaid="_052878"/>
+          <speciesReference species="X5P" metaid="_052890"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="GA3P" metaid="_052902"/>
+          <speciesReference species="S7P" metaid="_052915"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="tktB" name="tktB" metaid="metaid_0000094">
+        <listOfReactants>
+          <speciesReference species="R5P" metaid="_052927"/>
+          <speciesReference species="X5P" metaid="_052939"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="GA3P" metaid="_052952"/>
+          <speciesReference species="S7P" metaid="_052964"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="tktA_r2" name="tktA_r2" metaid="metaid_0000095">
+        <listOfReactants>
+          <speciesReference species="X5P" metaid="_052976"/>
+          <speciesReference species="E4P" metaid="_052988"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="F6P" metaid="_053000"/>
+          <speciesReference species="GA3P" metaid="_053012"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="tktB_r2" name="tktB_r2" metaid="metaid_0000096">
+        <listOfReactants>
+          <speciesReference species="X5P" metaid="_053024"/>
+          <speciesReference species="E4P" metaid="_053036"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="F6P" metaid="_053048"/>
+          <speciesReference species="GA3P" metaid="_053060"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="talA" name="talA" metaid="metaid_0000097">
+        <listOfReactants>
+          <speciesReference species="GA3P" metaid="_053073"/>
+          <speciesReference species="S7P" metaid="_053085"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="E4P" metaid="_053097"/>
+          <speciesReference species="F6P" metaid="_053109"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="talB" name="talB" metaid="metaid_0000098">
+        <listOfReactants>
+          <speciesReference species="GA3P" metaid="_053121"/>
+          <speciesReference species="S7P" metaid="_053133"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="E4P" metaid="_053145"/>
+          <speciesReference species="F6P" metaid="_053157"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="gltA" name="gltA" metaid="metaid_0000099" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ACCOA" metaid="_053169"/>
+          <speciesReference species="OA" metaid="_053181"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="COA" metaid="_053193"/>
+          <speciesReference species="CIT" metaid="_053205"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="prpC" name="prpC" metaid="metaid_0000100" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ACCOA" metaid="_053217"/>
+          <speciesReference species="OA" metaid="_053229"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="COA" metaid="_053241"/>
+          <speciesReference species="CIT" metaid="_053253"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="acnA" name="acnA" metaid="metaid_0000101">
+        <listOfReactants>
+          <speciesReference species="CIT" metaid="_053265"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="CAC" metaid="_053277"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="acnA_r2" name="acnA_r2" metaid="metaid_0000102">
+        <listOfReactants>
+          <speciesReference species="CAC" metaid="_053289"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ICIT" metaid="_053301"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="acnB" name="acnB" metaid="metaid_0000103">
+        <listOfReactants>
+          <speciesReference species="CIT" metaid="_053314"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="CAC" metaid="_053326"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="acnB_r2" name="acnB_r2" metaid="metaid_0000104">
+        <listOfReactants>
+          <speciesReference species="CAC" metaid="_053338"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ICIT" metaid="_053351"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="icd" name="icd" metaid="metaid_0000105">
+        <listOfReactants>
+          <speciesReference species="ICIT" metaid="_053363"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="CO2" metaid="_053375"/>
+          <speciesReference species="NADPH" metaid="_053387"/>
+          <speciesReference species="AKG" metaid="_053399"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="sucAB" name="sucAB" metaid="metaid_0000106" reversible="false">
+        <listOfReactants>
+          <speciesReference species="AKG" metaid="_053412"/>
+          <speciesReference species="COA" metaid="_053424"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="CO2" metaid="_053436"/>
+          <speciesReference species="NADH" metaid="_053448"/>
+          <speciesReference species="SUCCOA" metaid="_053460"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="sucCD" name="sucCD" metaid="metaid_0000107">
+        <listOfReactants>
+          <speciesReference species="SUCCOA" metaid="_053472"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ATP" metaid="_053484"/>
+          <speciesReference species="COA" metaid="_053496"/>
+          <speciesReference species="SUCC" metaid="_053508"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="frdABCD" name="frdABCD" metaid="metaid_0000108">
+        <listOfReactants>
+          <speciesReference species="SUCC" metaid="_053520"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="FUM" metaid="_053532"/>
+          <speciesReference species="FADH" metaid="_053544"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="sdhAB" name="sdhAB" metaid="metaid_0000109">
+        <listOfReactants>
+          <speciesReference species="SUCC" metaid="_053556"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="FUM" metaid="_053568"/>
+          <speciesReference species="FADH" metaid="_053580"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="fumA" name="fumA" metaid="metaid_0000110">
+        <listOfReactants>
+          <speciesReference species="FUM" metaid="_053592"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="MAL" metaid="_053604"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="fumB" name="fumB" metaid="metaid_0000111">
+        <listOfReactants>
+          <speciesReference species="FUM" metaid="_053616"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="MAL" metaid="_053628"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="fumC" name="fumC" metaid="metaid_0000112">
+        <listOfReactants>
+          <speciesReference species="FUM" metaid="_053640"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="MAL" metaid="_053652"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="mdh" name="mdh" metaid="metaid_0000113">
+        <listOfReactants>
+          <speciesReference species="MAL" metaid="_053664"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="NADH" metaid="_053676"/>
+          <speciesReference species="OA" metaid="_053689"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="mqo" name="mqo" metaid="metaid_0000114" reversible="false">
+        <listOfReactants>
+          <speciesReference species="MAL" metaid="_053701"/>
+          <speciesReference species="Q" metaid="_053713"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="QH2" metaid="_053725"/>
+          <speciesReference species="OA" metaid="_053737"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="aceA" name="aceA" metaid="metaid_0000115">
+        <listOfReactants>
+          <speciesReference species="ICIT" metaid="_053749"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="GLX" metaid="_053761"/>
+          <speciesReference species="SUCC" metaid="_053773"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="aceB" name="aceB" metaid="metaid_0000116" reversible="false">
+        <listOfReactants>
+          <speciesReference species="GLX" metaid="_053785"/>
+          <speciesReference species="ACCOA" metaid="_053797"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="MAL" metaid="_053809"/>
+          <speciesReference species="COA" metaid="_053821"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="ppc" name="ppc" metaid="metaid_0000117" reversible="false">
+        <listOfReactants>
+          <speciesReference species="PEP" metaid="_053833"/>
+          <speciesReference species="CO2" metaid="_053845"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="OA" metaid="_053857"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="pntAB" name="pntAB" metaid="metaid_0000118" reversible="false">
+        <listOfReactants>
+          <speciesReference species="NADH" metaid="_053869"/>
+          <speciesReference species="Hxt" metaid="_053881"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="NADPH" metaid="_053893"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="udhA" name="udhA" metaid="metaid_0000119" reversible="false">
+        <listOfReactants>
+          <speciesReference species="NADPH" metaid="_053905"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="NADH" metaid="_053917"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="atp" name="atp" metaid="metaid_0000120" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Hxt" metaid="_053929" stoichiometry="4"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ATP" metaid="_053941"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="nuo" name="nuo" metaid="metaid_0000121" reversible="false">
+        <listOfReactants>
+          <speciesReference species="NADH" metaid="_053953"/>
+          <speciesReference species="Q" metaid="_053965"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="QH2" metaid="_053977"/>
+          <speciesReference species="Hxt" metaid="_053989" stoichiometry="4"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="ndh" name="ndh" metaid="metaid_0000122" reversible="false">
+        <listOfReactants>
+          <speciesReference species="NADH" metaid="_054002"/>
+          <speciesReference species="Q" metaid="_054014"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="QH2" metaid="_054026"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="cyoABCD" name="cyoABCD" metaid="metaid_0000123" reversible="false">
+        <listOfReactants>
+          <speciesReference species="QH2" metaid="_054039"/>
+          <speciesReference species="O2" metaid="_054051" stoichiometry="0.5"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Q" metaid="_054063"/>
+          <speciesReference species="Hxt" metaid="_054075" stoichiometry="4"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="cydAB" name="cydAB" metaid="metaid_0000124" reversible="false">
+        <listOfReactants>
+          <speciesReference species="QH2" metaid="_054087"/>
+          <speciesReference species="O2" metaid="_054100" stoichiometry="0.5"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Q" metaid="_054112"/>
+          <speciesReference species="Hxt" metaid="_054124" stoichiometry="2"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="narGHI" name="narGHI" metaid="metaid_0000125" reversible="false">
+        <listOfReactants>
+          <speciesReference species="QH2" metaid="_054137"/>
+          <speciesReference species="NO3" metaid="_054149"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Q" metaid="_054161"/>
+          <speciesReference species="NO2" metaid="_054173"/>
+          <speciesReference species="Hxt" metaid="_054185" stoichiometry="2"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="poxB" name="poxB" metaid="metaid_0000126" reversible="false">
+        <listOfReactants>
+          <speciesReference species="PYR" metaid="_054197"/>
+          <speciesReference species="Q" metaid="_054209"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="AC" metaid="_054221"/>
+          <speciesReference species="QH2" metaid="_054233"/>
+          <speciesReference species="CO2" metaid="_054245"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="sdhABCD" name="sdhABCD" metaid="metaid_0000127">
+        <listOfReactants>
+          <speciesReference species="SUCC" metaid="_054257"/>
+          <speciesReference species="Q" metaid="_054270"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="FUM" metaid="_054282"/>
+          <speciesReference species="QH2" metaid="_054294"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="sdhABCD_r2" name="sdhABCD_r2" metaid="metaid_0000128">
+        <listOfReactants>
+          <speciesReference species="FADH" metaid="_054306"/>
+          <speciesReference species="Q" metaid="_054318"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="QH2" metaid="_054330"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="pflB" name="pflB" metaid="metaid_0000129">
+        <listOfReactants>
+          <speciesReference species="PYR" metaid="_054342"/>
+          <speciesReference species="COA" metaid="_054354"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ACCOA" metaid="_054366"/>
+          <speciesReference species="FOR" metaid="_054378"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="tdcE" name="tdcE" metaid="metaid_0000130">
+        <listOfReactants>
+          <speciesReference species="PYR" metaid="_054390"/>
+          <speciesReference species="COA" metaid="_054402"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ACCOA" metaid="_054414"/>
+          <speciesReference species="FOR" metaid="_054426"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="fdhF" name="fdhF" metaid="metaid_0000131" reversible="false">
+        <listOfReactants>
+          <speciesReference species="FOR" metaid="_054439"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="CO2" metaid="_054451"/>
+          <speciesReference species="NADH" metaid="_054463"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="fdoGHI" name="fdoGHI" metaid="metaid_0000132" reversible="false">
+        <listOfReactants>
+          <speciesReference species="FOR" metaid="_054475"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="CO2" metaid="_054487"/>
+          <speciesReference species="NADH" metaid="_054499"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="fdnGHI_r2" name="fdnGHI_r2" metaid="metaid_0000133" reversible="false">
+        <listOfReactants>
+          <speciesReference species="FOR" metaid="_054511"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="CO2" metaid="_054523"/>
+          <speciesReference species="NADH" metaid="_054535"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="adhE" name="adhE" metaid="metaid_0000134">
+        <listOfReactants>
+          <speciesReference species="ACCOA" metaid="_054547"/>
+          <speciesReference species="NADH" metaid="_054559"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ACAL" metaid="_054571"/>
+          <speciesReference species="COA" metaid="_054596"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="mhpF" name="mhpF" metaid="metaid_0000135">
+        <listOfReactants>
+          <speciesReference species="ACCOA" metaid="_054608"/>
+          <speciesReference species="NADH" metaid="_054620"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ACAL" metaid="_054632"/>
+          <speciesReference species="COA" metaid="_054644"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="adhE_r2" name="adhE_r2" metaid="metaid_0000136">
+        <listOfReactants>
+          <speciesReference species="ACAL" metaid="_054656"/>
+          <speciesReference species="NADH" metaid="_054668"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ETH" metaid="_054680"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="adhP" name="adhP" metaid="metaid_0000137">
+        <listOfReactants>
+          <speciesReference species="ACAL" metaid="_054692"/>
+          <speciesReference species="NADH" metaid="_054704"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ETH" metaid="_054716"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="adhC" name="adhC" metaid="metaid_0000138">
+        <listOfReactants>
+          <speciesReference species="ACAL" metaid="_054728"/>
+          <speciesReference species="NADH" metaid="_054740"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ETH" metaid="_054752"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="pta" name="pta" metaid="metaid_0000139" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ACCOA" metaid="_054764"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ACTP" metaid="_054776"/>
+          <speciesReference species="COA" metaid="_054788"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="ackA" name="ackA" metaid="metaid_0000140">
+        <listOfReactants>
+          <speciesReference species="ACTP" metaid="_054800"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ATP" metaid="_054812"/>
+          <speciesReference species="AC" metaid="_054824"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="ackB" name="ackB" metaid="metaid_0000141">
+        <listOfReactants>
+          <speciesReference species="ACTP" metaid="_054836"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ATP" metaid="_054848"/>
+          <speciesReference species="AC" metaid="_054860"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="tdcD" name="tdcD" metaid="metaid_0000142">
+        <listOfReactants>
+          <speciesReference species="ACTP" metaid="_054872"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ATP" metaid="_054884"/>
+          <speciesReference species="AC" metaid="_054896"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="purT" name="purT" metaid="metaid_0000143">
+        <listOfReactants>
+          <speciesReference species="ACTP" metaid="_054908"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ATP" metaid="_054920"/>
+          <speciesReference species="AC" metaid="_054932"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="acs" name="acs" metaid="metaid_0000144" reversible="false">
+        <listOfReactants>
+          <speciesReference species="AC" metaid="_054944"/>
+          <speciesReference species="ATP" metaid="_054956" stoichiometry="2"/>
+          <speciesReference species="COA" metaid="_054968"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ACCOA" metaid="_054980"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="dld" name="dld" metaid="metaid_0000145" reversible="false">
+        <listOfReactants>
+          <speciesReference species="LAC" metaid="_054992"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="FADH" metaid="_055004"/>
+          <speciesReference species="PYR" metaid="_055016"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="ldhA" name="ldhA" metaid="metaid_0000146">
+        <listOfReactants>
+          <speciesReference species="LAC" metaid="_055028"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PYR" metaid="_055041"/>
+          <speciesReference species="NADH" metaid="_055054"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="edd" name="edd" metaid="metaid_0000147" reversible="false">
+        <listOfReactants>
+          <speciesReference species="_6PGC" metaid="_055066"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_2KD6PG" metaid="_055078"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="eda" name="eda" metaid="metaid_0000148" reversible="false">
+        <listOfReactants>
+          <speciesReference species="_2KD6PG" metaid="_055090"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="GA3P" metaid="_055102"/>
+          <speciesReference species="PYR" metaid="_055114"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="mgsA" name="mgsA" metaid="metaid_0000149" reversible="false">
+        <listOfReactants>
+          <speciesReference species="DHAP" metaid="_055126"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="LAC" metaid="_055138"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="ptsGHI" name="ptsGHI" metaid="metaid_0000150" reversible="false">
+        <listOfReactants>
+          <speciesReference species="GLCxt" metaid="_055150"/>
+          <speciesReference species="PEP" metaid="_055162"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="G6P" metaid="_055174"/>
+          <speciesReference species="PYR" metaid="_055186"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="co2" name="co2" metaid="metaid_0000151" reversible="false">
+        <listOfReactants>
+          <speciesReference species="CO2" metaid="_055198"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="CO2xt" metaid="_055210"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="o2" name="o2" metaid="metaid_0000152" reversible="false">
+        <listOfReactants>
+          <speciesReference species="O2xt" metaid="_055222"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="O2" metaid="_055234"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="no3" name="no3" metaid="metaid_0000153" reversible="false">
+        <listOfReactants>
+          <speciesReference species="NO3xt" metaid="_055246"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="NO3" metaid="_055258"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="no2" name="no2" metaid="metaid_0000154" reversible="false">
+        <listOfReactants>
+          <speciesReference species="NO2" metaid="_055270"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="NO2xt" metaid="_055282"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="eth" name="eth" metaid="metaid_0000155">
+        <listOfReactants>
+          <speciesReference species="ETH" metaid="_055294"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ETHxt" metaid="_055306"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="ac" name="ac" metaid="metaid_0000156">
+        <listOfReactants>
+          <speciesReference species="AC" metaid="_055318"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Acxt" metaid="_055330"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="succ" name="succ" metaid="metaid_0000157" reversible="false">
+        <listOfReactants>
+          <speciesReference species="SUCC" metaid="_055343"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="SUCCxt" metaid="_055356"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="lac" name="lac" metaid="metaid_0000158" reversible="false">
+        <listOfReactants>
+          <speciesReference species="LAC" metaid="_055368"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="LACxt" metaid="_055380"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="pyr" name="pyr" metaid="metaid_0000159" reversible="false">
+        <listOfReactants>
+          <speciesReference species="PYR" metaid="_055392"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PYRxt" metaid="_055404"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="focA" name="focA" metaid="metaid_0000160" reversible="false">
+        <listOfReactants>
+          <speciesReference species="FOR" metaid="_055416"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="FORxt" metaid="_055428"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="mglABC" name="mglABC" metaid="metaid_0000161" reversible="false">
+        <listOfReactants>
+          <speciesReference species="GLCxt" metaid="_055440"/>
+          <speciesReference species="Hxt" metaid="_055452"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="GLC" metaid="_055464"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="maint" name="maint" metaid="metaid_0000162" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ATP" metaid="_055476"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="external_ATP" metaid="_055489"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="biomass" name="biomass" metaid="metaid_0000163" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ATP" metaid="_055501" stoichiometry="40.2"/>
+          <speciesReference species="NADPH" metaid="_055513" stoichiometry="15.7"/>
+          <speciesReference species="G6P" metaid="_055525" stoichiometry="0.33"/>
+          <speciesReference species="F6P" metaid="_055537" stoichiometry="0.07"/>
+          <speciesReference species="R5P" metaid="_055549" stoichiometry="0.96"/>
+          <speciesReference species="E4P" metaid="_055561" stoichiometry="0.36"/>
+          <speciesReference species="GA3P" metaid="_055573" stoichiometry="0.12"/>
+          <speciesReference species="_3PG" metaid="_055585" stoichiometry="0.86"/>
+          <speciesReference species="PEP" metaid="_055597" stoichiometry="0.77"/>
+          <speciesReference species="PYR" metaid="_055609" stoichiometry="2.94"/>
+          <speciesReference species="ACCOA" metaid="_055621" stoichiometry="2.41"/>
+          <speciesReference species="OA" metaid="_055633" stoichiometry="1.65"/>
+          <speciesReference species="AKG" metaid="_055645" stoichiometry="1.28"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="BM" metaid="_055657"/>
+          <speciesReference species="NADH" metaid="_055669" stoichiometry="3"/>
+          <speciesReference species="COA" metaid="_055681" stoichiometry="2.41"/>
+        </listOfProducts>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

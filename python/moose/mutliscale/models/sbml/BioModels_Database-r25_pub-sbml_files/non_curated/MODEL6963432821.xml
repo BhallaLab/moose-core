@@ -1,0 +1,871 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version3" level="2" metaid="_753874" version="3">
+  <model id="zager_schlosser_tran_model_2007_version03" name="Zager2007_Genistein_Biliary_Excretion" metaid="_015880">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This the model from the article without the time delays:      <br/>
+                <strong>A Delayed Nonlinear PBPK Model for Genistein Dosimetry in Rats.</strong>
+                <br/>
+          Zager MG, Schlosser PM, Tran HT.      <em>Bull Math Biol.</em>
+          2007 Jan;69(1):93-117. Pubmed ID:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/17024552">17024552</a>
+          , 
+      doi:      <a href="http://dx.doi.org/10.1007/s11538-006-9068-x">0.1007/s11538-006-9068-x</a>
+          .      <br/>
+                <strong>Abstract:</strong>
+          Genistein is an endocrine-active compound (EAC) found in soy products. It has been linked to beneficial effects such as mammary tumor growth suppression and adverse endocrine-related effects such as reduced birth weight in rats and humans. In its conjugated form, genistein is excreted in the bile, which is a significant factor in its pharmacokinetics. Experimental data suggest that genistein induces a concentration-dependent suppression of biliary excretion. In this article, we describe a physiologically based pharmacokinetic (PBPK) model that focuses on biliary excretion with the goal of accurately simulating the observed suppression. The mathematical model is a system of nonlinear differential equations with state-dependent delay to describe biliary excretion. The model was analyzed to examine local existence and uniqueness of a solution to the equations. Furthermore, unknown parameters were estimated, and the mathematical model was compared against published experimental data.      <br/>
+                </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          Both the CellML version and the converted SBML version do not contain the time dalays of the original model.      <br/>
+          The original model was:      <a href="http://www.cellml.org/models/zager_schlosser_tran_2007_version03">        <strong>Zager, Schlosser, Tran, 2007 version03</strong>
+                    </a>
+                <br/>
+          The original CellML model was created and curated by:      <br/>
+                <strong>Lloyd, Catherine, May</strong>
+                <br/>
+          c.lloyd(at)auckland.ac.nz      <br/>
+          The University of Auckland, Bioengineering Institute      </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#_015880">
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL6963432821"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/17024552"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="hour" name="hour" metaid="_753887">
+        <listOfUnits>
+          <unit metaid="_753899" multiplier="3600" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="micromole" name="micromole" metaid="_753911">
+        <listOfUnits>
+          <unit scale="-6" metaid="_753924" kind="mole"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="micromolar" name="micromolar" metaid="_753936">
+        <listOfUnits>
+          <unit scale="-6" metaid="_753948" kind="mole"/>
+          <unit exponent="-1" metaid="_753960" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="micromole_per_hour" name="micromole_per_hour" metaid="_753972">
+        <listOfUnits>
+          <unit scale="-6" metaid="_753984" kind="mole"/>
+          <unit exponent="-1" metaid="_753997" multiplier="3600" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="micromolar_per_hour" name="micromolar_per_hour" metaid="_754009">
+        <listOfUnits>
+          <unit scale="-6" metaid="_754021" kind="mole"/>
+          <unit exponent="-1" metaid="_754033" kind="litre"/>
+          <unit exponent="-1" metaid="_754045" multiplier="3600" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="litre_per_hour" name="litre_per_hour" metaid="_754057">
+        <listOfUnits>
+          <unit metaid="_754069" kind="litre"/>
+          <unit exponent="-1" metaid="_754081" multiplier="3600" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="litre_per_hour_per_micromole" name="litre_per_hour_per_micromole" metaid="_754093">
+        <listOfUnits>
+          <unit metaid="_754105" kind="litre"/>
+          <unit metaid="_754118" multiplier="3600" kind="second"/>
+          <unit scale="-6" exponent="-1" metaid="_754130" kind="mole"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="first_order_rate_constant" name="first_order_rate_constant" metaid="_754142">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_754155" multiplier="3600" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time" name="time" metaid="_754168">
+        <listOfUnits>
+          <unit metaid="_754181" multiplier="3600" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="Compartment" metaid="_015882" units="litre" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="Cgen_pp" constant="false" name="Cgen_pp" metaid="_015936" value="0" units="micromolar"/>
+      <parameter id="Qpp" constant="false" name="Qpp" metaid="_015938" units="litre_per_hour"/>
+      <parameter id="Ppp" name="Ppp" metaid="_015940" value="0.59" units="dimensionless"/>
+      <parameter id="H_Cgen_pp" constant="false" name="H_Cgen_pp" metaid="_015942" units="dimensionless"/>
+      <parameter id="Vpp" name="Vpp" metaid="_015944" value="0.188" units="litre"/>
+      <parameter id="Cgen_rp" constant="false" name="Cgen_rp" metaid="_015946" value="0" units="micromolar"/>
+      <parameter id="Prp" name="Prp" metaid="_015948" value="1.94" units="dimensionless"/>
+      <parameter id="Qrp" constant="false" name="Qrp" metaid="_015950" units="litre_per_hour"/>
+      <parameter id="H_Cgen_rp" constant="false" name="H_Cgen_rp" metaid="_015952" units="dimensionless"/>
+      <parameter id="Vrp" name="Vrp" metaid="_015954" value="0.012" units="litre"/>
+      <parameter id="kgen_urine" name="kgen_urine" metaid="_015956" value="9.5" units="first_order_rate_constant"/>
+      <parameter id="Cgen_l" constant="false" name="Cgen_l" metaid="_015958" value="0" units="micromolar"/>
+      <parameter id="Ql" constant="false" name="Ql" metaid="_015960" units="litre_per_hour"/>
+      <parameter id="H_Cgen_l" constant="false" name="H_Cgen_l" metaid="_015962" units="dimensionless"/>
+      <parameter id="Vl" name="Vl" metaid="_015964" value="0.0092" units="litre"/>
+      <parameter id="Pl" name="Pl" metaid="_015966" value="3.61" units="dimensionless"/>
+      <parameter id="Cgen_GI" constant="false" name="Cgen_GI" metaid="_015968" value="0" units="micromolar"/>
+      <parameter id="H_Cgen_GI" constant="false" name="H_Cgen_GI" metaid="_015970" units="dimensionless"/>
+      <parameter id="QGI" constant="false" name="QGI" metaid="_015972" units="litre_per_hour"/>
+      <parameter id="VGI" name="VGI" metaid="_015974" value="0.011" units="litre"/>
+      <parameter id="Ccon_l" constant="false" name="Ccon_l" metaid="_015976" value="0" units="micromolar"/>
+      <parameter id="H_Ccon_l" constant="false" name="H_Ccon_l" metaid="_015978" units="dimensionless"/>
+      <parameter id="Ccon_ROB" constant="false" name="Ccon_ROB" metaid="_015980" value="0" units="micromolar"/>
+      <parameter id="H_Ccon_ROB" constant="false" name="H_Ccon_ROB" metaid="_015982" units="dimensionless"/>
+      <parameter id="VROB" name="VROB" metaid="_015984" value="0.2408" units="litre"/>
+      <parameter id="kcon_urine" name="kcon_urine" metaid="_015986" value="0" units="first_order_rate_constant"/>
+      <parameter id="Acon_b" constant="false" name="Acon_b" metaid="_015988" value="0" units="micromole"/>
+      <parameter id="d_t_Cgen_l" constant="false" name="d_t_Cgen_l" metaid="_015990" units="hour"/>
+      <parameter id="tbasal" name="tbasal" metaid="_015992" value="0.0865" units="hour"/>
+      <parameter id="ct" name="ct" metaid="_015994" value="1.0107" units="hour"/>
+      <parameter id="cgen" name="cgen" metaid="_015996" value="0.06561" units="litre_per_hour_per_micromole"/>
+      <parameter id="Cgen_B" constant="false" name="Cgen_B" metaid="_015998" units="micromolar"/>
+      <parameter id="H_Cgen_B" constant="false" name="H_Cgen_B" metaid="_016000" units="dimensionless"/>
+      <parameter id="vinf" constant="false" name="vinf" metaid="_016002" units="micromole_per_hour"/>
+      <parameter id="Qt" constant="false" name="Qt" metaid="_016004" units="litre_per_hour"/>
+      <parameter id="Vmax" name="Vmax" metaid="_016006" value="25.25" units="micromolar_per_hour"/>
+      <parameter id="Km" name="Km" metaid="_016008" value="0.6231" units="micromolar"/>
+      <parameter id="kbile" name="kbile" metaid="_016010" value="111.72" units="first_order_rate_constant"/>
+      <parameter id="cv" name="cv" metaid="_016012" value="1" units="micromole_per_hour"/>
+      <parameter id="F" constant="false" name="F" metaid="_016014" units="dimensionless"/>
+      <parameter id="G" constant="false" name="G" metaid="_016016" units="dimensionless"/>
+      <parameter id="H" constant="false" name="H" metaid="_016018" units="dimensionless"/>
+      <parameter id="I" constant="false" name="I" metaid="_016020" units="dimensionless"/>
+      <parameter id="epsilon" name="epsilon" metaid="_016022" value="0.1" units="hour"/>
+      <parameter id="m_rat" name="m_rat" metaid="_016024" value="0.25" units="dimensionless"/>
+    </listOfParameters>
+    <listOfRules>
+      <assignmentRule metaid="_015884" variable="Qt">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <cn> 14.1 </cn>
+            <apply>
+              <power/>
+              <ci> m_rat </ci>
+              <cn> 0.75 </cn>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <rateRule metaid="_015886" variable="Cgen_pp">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> Qpp </ci>
+                <ci> H_Cgen_B </ci>
+                <ci> Cgen_B </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Qpp </ci>
+                  <ci> H_Cgen_pp </ci>
+                  <ci> Cgen_pp </ci>
+                </apply>
+                <ci> Ppp </ci>
+              </apply>
+            </apply>
+            <ci> Vpp </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_015888" variable="Cgen_rp">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <divide/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> Qrp </ci>
+                  <ci> H_Cgen_B </ci>
+                  <ci> Cgen_B </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> Qrp </ci>
+                    <ci> H_Cgen_rp </ci>
+                    <ci> Cgen_rp </ci>
+                  </apply>
+                  <ci> Prp </ci>
+                </apply>
+              </apply>
+              <ci> Vrp </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> kgen_urine </ci>
+              <ci> H_Cgen_rp </ci>
+              <ci> Cgen_rp </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_015890" variable="Cgen_l">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <divide/>
+              <apply>
+                <plus/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> Ql </ci>
+                    <ci> H_Cgen_B </ci>
+                    <ci> Cgen_B </ci>
+                  </apply>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <times/>
+                      <apply>
+                        <plus/>
+                        <ci> Ql </ci>
+                        <ci> QGI </ci>
+                      </apply>
+                      <ci> H_Cgen_l </ci>
+                      <ci> Cgen_l </ci>
+                    </apply>
+                    <ci> Pl </ci>
+                  </apply>
+                </apply>
+                <ci> vinf </ci>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> QGI </ci>
+                    <ci> H_Cgen_GI </ci>
+                    <ci> Cgen_GI </ci>
+                  </apply>
+                  <ci> Prp </ci>
+                </apply>
+              </apply>
+              <ci> Vl </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> Vmax </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> H_Cgen_l </ci>
+                  <ci> Cgen_l </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km </ci>
+                  <apply>
+                    <times/>
+                    <ci> H_Cgen_l </ci>
+                    <ci> Cgen_l </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_015892" variable="Cgen_GI">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> QGI </ci>
+                <ci> H_Cgen_B </ci>
+                <ci> Cgen_B </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> QGI </ci>
+                  <ci> H_Cgen_GI </ci>
+                  <ci> Cgen_GI </ci>
+                </apply>
+                <ci> Prp </ci>
+              </apply>
+            </apply>
+            <ci> VGI </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_015894" variable="Ccon_l">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> Vmax </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> H_Cgen_l </ci>
+                  <ci> Cgen_l </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km </ci>
+                  <apply>
+                    <times/>
+                    <ci> H_Cgen_l </ci>
+                    <ci> Cgen_l </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> kbile </ci>
+                <ci> H_Ccon_l </ci>
+                <ci> Ccon_l </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <apply>
+                    <plus/>
+                    <ci> Ql </ci>
+                    <ci> QGI </ci>
+                  </apply>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> H_Ccon_l </ci>
+                      <ci> Ccon_l </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> H_Ccon_ROB </ci>
+                      <ci> Ccon_ROB </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> Vl </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_015896" variable="Ccon_ROB">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <apply>
+                  <plus/>
+                  <ci> Ql </ci>
+                  <ci> QGI </ci>
+                </apply>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> H_Ccon_l </ci>
+                    <ci> Ccon_l </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> H_Ccon_ROB </ci>
+                    <ci> Ccon_ROB </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <ci> VROB </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> kcon_urine </ci>
+              <ci> H_Ccon_ROB </ci>
+              <ci> Ccon_ROB </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_015898" variable="Acon_b">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> kbile </ci>
+            <ci> H_Ccon_l </ci>
+            <ci> Ccon_l </ci>
+            <ci> Vl </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="_015900" variable="H_Cgen_pp">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <cn> 0 </cn>
+              <apply>
+                <lt/>
+                <ci> Cgen_pp </ci>
+                <cn> 0 </cn>
+              </apply>
+            </piece>
+            <otherwise>
+              <cn> 1 </cn>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_015902" variable="Qpp">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <cn> 0.528 </cn>
+            <ci> Qt </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_015904" variable="H_Cgen_rp">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <cn> 0 </cn>
+              <apply>
+                <lt/>
+                <ci> Cgen_rp </ci>
+                <cn> 0 </cn>
+              </apply>
+            </piece>
+            <otherwise>
+              <cn> 1 </cn>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_015906" variable="Qrp">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <cn> 0.289 </cn>
+            <ci> Qt </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_015908" variable="H_Cgen_l">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <cn> 0 </cn>
+              <apply>
+                <lt/>
+                <ci> Cgen_l </ci>
+                <cn> 0 </cn>
+              </apply>
+            </piece>
+            <otherwise>
+              <cn> 1 </cn>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_015910" variable="Ql">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <cn> 0.03 </cn>
+            <ci> Qt </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_015912" variable="H_Cgen_GI">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <cn> 0 </cn>
+              <apply>
+                <lt/>
+                <ci> Cgen_GI </ci>
+                <cn> 0 </cn>
+              </apply>
+            </piece>
+            <otherwise>
+              <cn> 1 </cn>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_015914" variable="QGI">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <cn> 0.153 </cn>
+            <ci> Qt </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_015916" variable="H_Ccon_l">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <cn> 0 </cn>
+              <apply>
+                <lt/>
+                <ci> Ccon_l </ci>
+                <cn> 0 </cn>
+              </apply>
+            </piece>
+            <otherwise>
+              <cn> 1 </cn>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_015918" variable="H_Ccon_ROB">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <cn> 0 </cn>
+              <apply>
+                <lt/>
+                <ci> Ccon_ROB </ci>
+                <cn> 0 </cn>
+              </apply>
+            </piece>
+            <otherwise>
+              <cn> 1 </cn>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_015920" variable="d_t_Cgen_l">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> tbasal </ci>
+            <apply>
+              <times/>
+              <ci> cgen </ci>
+              <ci> H_Cgen_l </ci>
+              <ci> Cgen_l </ci>
+              <apply>
+                <exp/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <divide/>
+                    <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                    <ci> ct </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_015922" variable="Cgen_B">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Qrp </ci>
+                  <ci> H_Cgen_rp </ci>
+                  <ci> Cgen_rp </ci>
+                </apply>
+                <ci> Prp </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Qpp </ci>
+                  <ci> H_Cgen_pp </ci>
+                  <ci> Cgen_pp </ci>
+                </apply>
+                <ci> Ppp </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <apply>
+                    <plus/>
+                    <ci> Ql </ci>
+                    <ci> QGI </ci>
+                  </apply>
+                  <ci> H_Cgen_l </ci>
+                  <ci> Cgen_l </ci>
+                </apply>
+                <ci> Pl </ci>
+              </apply>
+            </apply>
+            <ci> Qt </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_015924" variable="H_Cgen_B">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <cn> 0 </cn>
+              <apply>
+                <lt/>
+                <ci> Cgen_B </ci>
+                <cn> 0 </cn>
+              </apply>
+            </piece>
+            <otherwise>
+              <cn> 1 </cn>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_015926" variable="vinf">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <apply>
+                <times/>
+                <ci> cv </ci>
+                <ci> F </ci>
+              </apply>
+              <apply>
+                <and/>
+                <apply>
+                  <lt/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <ci> epsilon </ci>
+                </apply>
+                <apply>
+                  <geq/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <cn> 0 </cn>
+                </apply>
+              </apply>
+            </piece>
+            <piece>
+              <apply>
+                <times/>
+                <ci> cv </ci>
+                <ci> G </ci>
+              </apply>
+              <apply>
+                <and/>
+                <apply>
+                  <leq/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <apply>
+                    <minus/>
+                    <cn> 1 </cn>
+                    <ci> epsilon </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <geq/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <ci> epsilon </ci>
+                </apply>
+              </apply>
+            </piece>
+            <piece>
+              <apply>
+                <times/>
+                <ci> cv </ci>
+                <ci> H </ci>
+              </apply>
+              <apply>
+                <and/>
+                <apply>
+                  <leq/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <cn> 1 </cn>
+                </apply>
+                <apply>
+                  <gt/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <apply>
+                    <minus/>
+                    <cn> 1 </cn>
+                    <ci> epsilon </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </piece>
+            <piece>
+              <apply>
+                <times/>
+                <ci> cv </ci>
+                <ci> I </ci>
+              </apply>
+              <apply>
+                <and/>
+                <apply>
+                  <leq/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <apply>
+                    <plus/>
+                    <cn> 1 </cn>
+                    <apply>
+                      <divide/>
+                      <cn> 5 </cn>
+                      <cn> 60 </cn>
+                    </apply>
+                  </apply>
+                </apply>
+                <apply>
+                  <gt/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <cn> 1 </cn>
+                </apply>
+              </apply>
+            </piece>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_015928" variable="F">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <cn> -2 </cn>
+                <apply>
+                  <power/>
+                  <ci> epsilon </ci>
+                  <cn> 3 </cn>
+                </apply>
+              </apply>
+              <apply>
+                <power/>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                <cn> 3 </cn>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <cn> 3 </cn>
+                <apply>
+                  <power/>
+                  <ci> epsilon </ci>
+                  <cn> 2 </cn>
+                </apply>
+              </apply>
+              <apply>
+                <power/>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                <cn> 2 </cn>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_015930" variable="G">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <cn> 1 </cn>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_015932" variable="H">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <cn> 3 </cn>
+                <apply>
+                  <power/>
+                  <apply>
+                    <minus/>
+                    <cn> 1 </cn>
+                    <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  </apply>
+                  <cn> 2 </cn>
+                </apply>
+              </apply>
+              <apply>
+                <power/>
+                <ci> epsilon </ci>
+                <cn> 2 </cn>
+              </apply>
+            </apply>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <cn> 2 </cn>
+                <apply>
+                  <power/>
+                  <apply>
+                    <minus/>
+                    <cn> 1 </cn>
+                    <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  </apply>
+                  <cn> 3 </cn>
+                </apply>
+              </apply>
+              <apply>
+                <power/>
+                <ci> epsilon </ci>
+                <cn> 3 </cn>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_015934" variable="I">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <cn> 0 </cn>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+  </model>
+</sbml>

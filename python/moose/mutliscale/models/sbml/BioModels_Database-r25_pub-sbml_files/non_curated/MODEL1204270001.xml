@@ -1,0 +1,2831 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="_167019" version="4">
+  <model id="Koenig2012_HepaticGlucoseMetabolism" metaid="_167031">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>      <h1>Quantifying the Contribution of the Liver to Glucose Homeostasis: A Detailed Kinetic
+Model of Human Hepatic Glucose Metabolism</h1>
+                <h2>Kinetic Model of Human Hepatic Glucose Metabolism</h2>
+                <table>        <tr>          <td>            <b>Authors</b>
+                            </td>
+                        <td>Matthias Koenig, Sascha Bulik and Hermann-Georg Holzhuetter</td>
+                        </tr>
+                    <tr>          <td>            <b>Corresponding Author</b>
+                            </td>
+                        <td>Matthias Koenig            <br/>
+                matthias.koenig@charite.de            <br/>
+                Charite Berlin, Computational Systems Biochemistry, Germany            </td>
+                        </tr>
+                    <tr>          <td>            <b>Keywords</b>
+                            </td>
+                        <td>hepatic glucose metabolism; kinetic model; glucose homeostasis; liver</td>
+                        </tr>
+                    </table>
+                <br/>
+          Despite the crucial role of the liver in glucose homeostasis, a detailed mathematical
+model of human hepatic glucose metabolism is lacking so far. Here we present, a
+detailed kinetic model of glycolysis, gluconeogenesis and glycogen metabolism in
+human hepatocytes integrated with the hormonal control of these pathways by insulin,
+glucagon and epinephrine. Model simulations are in excellent agreement with
+experimental data on (i) the quantitative contributions of glycolysis, gluconeogenesis,
+and glycogen metabolism to hepatic glucose production and hepatic glucose utilization
+under varying physiological states. (ii) the time courses of postprandial glycogen
+storage as well as glycogen depletion in overnight fasting and short term fasting (iii) the
+switch from hepatic glucose production under hypoglycemia to hepatic glucose
+utilization under hyperglycemia essential for glucose homeostasis. Response analysis
+reveals an extra high capacity of the liver to counteract changes of plasma glucose
+level below 5 mM (hypoglycemia) and above 7.5 mM (hyperglycemia). Our model may
+serve as an important module of a whole-body model of human glucose metabolism
+and as a valuable tool for understanding the role of the liver in glucose homeostasis
+under normal conditions and in diseases like diabetes or glycogen storage diseases.      </p>
+            <p>      <h2>Compartments</h2>
+                <table border="1">        <tr>          <td>            <b>Id</b>
+                            </td>
+                        <td>            <b>Name</b>
+                            </td>
+                        <td>            <b>Dimension</b>
+                            </td>
+                        <td>            <b>Constant</b>
+                            </td>
+                        <td>            <b>SBO</b>
+                            </td>
+                        <td>            <b>GO</b>
+                            </td>
+                        </tr>
+                    <tr>          <td>cyto</td>
+                        <td>cytosol</td>
+                        <td>3</td>
+                        <td>Y</td>
+                        <td>SBO:0000290 physical compartment</td>
+                        <td>GO:0005829 cytosol</td>
+                        </tr>
+                    <tr>          <td>blood</td>
+                        <td>blood</td>
+                        <td>3</td>
+                        <td>Y</td>
+                        <td>SBO:0000290 physical compartment</td>
+                        <td>GO:0005615 extracellular space</td>
+                        </tr>
+                    <tr>          <td>mito</td>
+                        <td>mitochondrion</td>
+                        <td>3</td>
+                        <td>Y</td>
+                        <td>SBO:0000290 physical compartment</td>
+                        <td>GO:0005739 mitochondrion</td>
+                        </tr>
+                    <tr>          <td>mm</td>
+                        <td>mitochondrial membrane</td>
+                        <td>2</td>
+                        <td>Y</td>
+                        <td>SBO:0000290 physical compartment</td>
+                        <td>GO:0031966 mitochondrial membrane</td>
+                        </tr>
+                    <tr>          <td>pm</td>
+                        <td>plasma membrane</td>
+                        <td>2</td>
+                        <td>Y</td>
+                        <td>SBO:0000290 physical compartment</td>
+                        <td>GO:0005886 plasma membrane</td>
+                        </tr>
+                    </table>
+                </p>
+            <p>      <h2>Species</h2>
+                <table border="1">        <tr>          <td>            <b>Id</b>
+                            </td>
+                        <td>            <b>Name</b>
+                            </td>
+                        <td>            <b>Compartment</b>
+                            </td>
+                        <td>            <b>Constant</b>
+                            </td>
+                        <td>            <b>Init [mM]</b>
+                            </td>
+                        <td>            <b>KEGG</b>
+                            </td>
+                        <td>            <b>CHEBI</b>
+                            </td>
+                        <td>            <b>UNIPROT</b>
+                            </td>
+                        <td>            <b>SBO</b>
+                            </td>
+                        </tr>
+                    <tr>          <td>atp</td>
+                        <td>ATP</td>
+                        <td>cyto</td>
+                        <td>Y</td>
+                        <td>2.8</td>
+                        <td>KEGG:C00002</td>
+                        <td>CHEBI:15422</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>adp</td>
+                        <td>ADP</td>
+                        <td>cyto</td>
+                        <td>Y</td>
+                        <td>0.8</td>
+                        <td>KEGG:C00008</td>
+                        <td>CHEBI:16761</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>amp</td>
+                        <td>AMP</td>
+                        <td>cyto</td>
+                        <td>Y</td>
+                        <td>0.16</td>
+                        <td>KEGG:C00020</td>
+                        <td>CHEBI:16027</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>utp</td>
+                        <td>UTP</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>0.27</td>
+                        <td>KEGG:C00075</td>
+                        <td>CHEBI:15713</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>udp</td>
+                        <td>UDP</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>0.09</td>
+                        <td>KEGG:C00015</td>
+                        <td>CHEBI:17659</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>gtp</td>
+                        <td>GTP</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>0.29</td>
+                        <td>KEGG:C00044</td>
+                        <td>CHEBI:15996</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>gdp</td>
+                        <td>GDP</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>0.10</td>
+                        <td>KEGG:C00035</td>
+                        <td>CHEBI:17552</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>nad</td>
+                        <td>NAD+</td>
+                        <td>cyto</td>
+                        <td>Y</td>
+                        <td>1.22</td>
+                        <td>KEGG:C00003</td>
+                        <td>CHEBI:15846</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>nadh</td>
+                        <td>NADH</td>
+                        <td>cyto</td>
+                        <td>Y</td>
+                        <td>5.60E-004</td>
+                        <td>KEGG:C00004</td>
+                        <td>CHEBI:16908</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>p</td>
+                        <td>phosphate</td>
+                        <td>cyto</td>
+                        <td>Y</td>
+                        <td>5</td>
+                        <td>KEGG:C00009</td>
+                        <td/>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>pp</td>
+                        <td>pyrophosphate</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>0.008</td>
+                        <td>KEGG:C00013</td>
+                        <td/>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>h2o</td>
+                        <td>H2O</td>
+                        <td>cyto</td>
+                        <td>Y</td>
+                        <td>55000</td>
+                        <td>KEGG:C00001</td>
+                        <td>CHEBI:15377</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>co2</td>
+                        <td>CO2</td>
+                        <td>cyto</td>
+                        <td>Y</td>
+                        <td>5</td>
+                        <td>KEGG:C00011</td>
+                        <td>CHEBI:16526</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>h</td>
+                        <td>H+</td>
+                        <td>cyto</td>
+                        <td>Y</td>
+                        <td>5.00E-008</td>
+                        <td>KEGG:C00080</td>
+                        <td>CHEBI:24636</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>glc1p</td>
+                        <td>glucose-1-phosphate</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>0.012</td>
+                        <td>KEGG:C00103</td>
+                        <td>CHEBI:16077</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>udpglc</td>
+                        <td>UDP-glucose</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>0.38</td>
+                        <td>KEGG:C00029</td>
+                        <td>CHEBI:18066</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>glc</td>
+                        <td>glucose</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>5</td>
+                        <td>KEGG:C00031</td>
+                        <td>CHEBI:4167</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>glyglc</td>
+                        <td>glycogen</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>250</td>
+                        <td>KEGG:C00182</td>
+                        <td>CHEBI:28087</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>fru6p</td>
+                        <td>fructose-6-phosphate</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>0.05</td>
+                        <td>KEGG:C00085</td>
+                        <td>CHEBI:15946</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>glc6p</td>
+                        <td>glucose-6-phosphate</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>0.12</td>
+                        <td>KEGG:C00092</td>
+                        <td>CHEBI:4170</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>fru26bp</td>
+                        <td>fructose-2,6-bisphospate</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>0.004</td>
+                        <td>KEGG:C00665</td>
+                        <td>CHEBI:28602</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>fru16bp</td>
+                        <td>fructose-1,6-bisphospate</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>0.02</td>
+                        <td>KEGG:C00354</td>
+                        <td>CHEBI:16905</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>dhap</td>
+                        <td>dihydroxyacetone phosphate</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>0.03</td>
+                        <td>KEGG:C00111</td>
+                        <td>CHEBI:16108</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>grap</td>
+                        <td>glyceraldehyde 3-phosphate</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>0.1</td>
+                        <td>KEGG:C00118</td>
+                        <td>CHEBI:29052</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>pg3</td>
+                        <td>3-phosphoglycerate</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>0.27</td>
+                        <td>KEGG:C00197</td>
+                        <td>CHEBI:17794</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>bpg13</td>
+                        <td>1,3-bisphospho-glycerate</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>0.3</td>
+                        <td>KEGG:C00236</td>
+                        <td>CHEBI:16001</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>pep</td>
+                        <td>phosphoenolpyruvate</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>0.15</td>
+                        <td>KEGG:C00074</td>
+                        <td>CHEBI:44897</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>pg2</td>
+                        <td>2-phosphoglycerate</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>0.03</td>
+                        <td>KEGG:C00631</td>
+                        <td>CHEBI:17835</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>oaa</td>
+                        <td>oxaloacetate</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>0.01</td>
+                        <td>KEGG:C00036</td>
+                        <td>CHEBI:30744</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>pyr</td>
+                        <td>pyruvate</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>0.1</td>
+                        <td>KEGG:C00022</td>
+                        <td>CHEBI:32816</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>glc_blood</td>
+                        <td>glucose</td>
+                        <td>blood</td>
+                        <td>Y</td>
+                        <td>5</td>
+                        <td>KEGG:C00031</td>
+                        <td>CHEBI:4167</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>lac</td>
+                        <td>lactate</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>0.5</td>
+                        <td>KEGG:C00186</td>
+                        <td>CHEBI:422</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>p_mito</td>
+                        <td>phosphate</td>
+                        <td>mito</td>
+                        <td>Y</td>
+                        <td>5</td>
+                        <td>KEGG:C00009</td>
+                        <td/>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>oaa_mito</td>
+                        <td>oxaloacetate</td>
+                        <td>mito</td>
+                        <td>N</td>
+                        <td>0.01</td>
+                        <td>KEGG:C00036</td>
+                        <td>CHEBI:30744</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>lac_blood</td>
+                        <td>lactate</td>
+                        <td>blood</td>
+                        <td>Y</td>
+                        <td>1.2</td>
+                        <td>KEGG:C00186</td>
+                        <td>CHEBI:422</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>co2_mito</td>
+                        <td>CO2</td>
+                        <td>mito</td>
+                        <td>Y</td>
+                        <td>5</td>
+                        <td>KEGG:C00011</td>
+                        <td>CHEBI:16526</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>pyr_mito</td>
+                        <td>pyruvate</td>
+                        <td>mito</td>
+                        <td>N</td>
+                        <td>0.1</td>
+                        <td>KEGG:C00022</td>
+                        <td>CHEBI:32816</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>cit_mito</td>
+                        <td>citrate</td>
+                        <td>mito</td>
+                        <td>Y</td>
+                        <td>0.32</td>
+                        <td>KEGG:C00158</td>
+                        <td>CHEBI:30769</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>pep_mito</td>
+                        <td>pep</td>
+                        <td>mito</td>
+                        <td>N</td>
+                        <td>0.15</td>
+                        <td>KEGG:C00074</td>
+                        <td>CHEBI:44897</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>acoa_mito</td>
+                        <td>acetyl-coenzyme A</td>
+                        <td>mito</td>
+                        <td>Y</td>
+                        <td>0.04</td>
+                        <td>KEGG:C00024</td>
+                        <td>CHEBI:15351</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>gtp_mito</td>
+                        <td>GTP</td>
+                        <td>mito</td>
+                        <td>N</td>
+                        <td>0.29</td>
+                        <td>KEGG:C00044</td>
+                        <td>CHEBI:15996</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>gdp_mito</td>
+                        <td>GDP</td>
+                        <td>mito</td>
+                        <td>N</td>
+                        <td>0.10</td>
+                        <td>KEGG:C00035</td>
+                        <td>CHEBI:17552</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>atp_mito</td>
+                        <td>ATP</td>
+                        <td>mito</td>
+                        <td>Y</td>
+                        <td>2.8</td>
+                        <td>KEGG:C00002</td>
+                        <td>CHEBI:15422</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>adp_mito</td>
+                        <td>ADP</td>
+                        <td>mito</td>
+                        <td>Y</td>
+                        <td>0.8</td>
+                        <td>KEGG:C00008</td>
+                        <td>CHEBI:16761</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>nad_mito</td>
+                        <td>NAD+</td>
+                        <td>mito</td>
+                        <td>Y</td>
+                        <td>0.98</td>
+                        <td>KEGG:C00003</td>
+                        <td>CHEBI:15846</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>h_mito</td>
+                        <td>H+</td>
+                        <td>mito</td>
+                        <td>Y</td>
+                        <td>1.00E-008</td>
+                        <td>KEGG:C00011</td>
+                        <td>CHEBI:24636</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>coa_mito</td>
+                        <td>coenzymeA</td>
+                        <td>mito</td>
+                        <td>Y</td>
+                        <td>0.055</td>
+                        <td>KEGG:C00010</td>
+                        <td>CHEBI:15346</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>nadh_mito</td>
+                        <td>NADH</td>
+                        <td>mito</td>
+                        <td>Y</td>
+                        <td>0.24</td>
+                        <td>KEGG:C00004</td>
+                        <td>CHEBI:16908</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>epinephrine_blood</td>
+                        <td>epinephrine</td>
+                        <td>blood</td>
+                        <td>N</td>
+                        <td>206.11</td>
+                        <td>KEGG:C00547</td>
+                        <td>CHEBI:18357</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>glucagon_blood</td>
+                        <td>glucagon</td>
+                        <td>blood</td>
+                        <td>N</td>
+                        <td>4.36E-008</td>
+                        <td>KEGG:C01501</td>
+                        <td/>
+                        <td>UNIPROT:P01275</td>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>insulin_blood</td>
+                        <td>insulin</td>
+                        <td>blood</td>
+                        <td>N</td>
+                        <td>7.61E-008</td>
+                        <td>KEGG:C00723</td>
+                        <td/>
+                        <td>UNIPROT:P01308</td>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    <tr>          <td>h20_mito</td>
+                        <td>H2O</td>
+                        <td>mito</td>
+                        <td>Y</td>
+                        <td>55000</td>
+                        <td>KEGG:C00080</td>
+                        <td>CHEBI:15377</td>
+                        <td/>
+                        <td>SBO:0000299 metabolite</td>
+                        </tr>
+                    </table>
+                </p>
+            <p>      <h2>Reactions</h2>
+                <table border="1">        <tr>          <td>            <b>Id</b>
+                            </td>
+                        <td>            <b>Name</b>
+                            </td>
+                        <td>            <b>Compartment</b>
+                            </td>
+                        <td>            <b>Irreversible</b>
+                            </td>
+                        <td>            <b>Vmax [µmol/kg/min]</b>
+                            </td>
+                        <td>            <b>EC</b>
+                            </td>
+                        <td>            <b>KEGG</b>
+                            </td>
+                        <td>            <b>UNIPROT</b>
+                            </td>
+                        <td>            <b>SBO</b>
+                            </td>
+                        </tr>
+                    <tr>          <td>GLUT2</td>
+                        <td>GLUT2 glucose transporter (facilitated diffusion)</td>
+                        <td>pm</td>
+                        <td>N</td>
+                        <td>420</td>
+                        <td/>
+                        <td/>
+                        <td>UNIPROT:P11168</td>
+                        <td>SBO:0000284 transporter</td>
+                        </tr>
+                    <tr>          <td>GK</td>
+                        <td>Glucokinase, hexokinase IV</td>
+                        <td>cyto</td>
+                        <td>Y</td>
+                        <td>25.2</td>
+                        <td>EC:2.7.1.2</td>
+                        <td>KEGG:R00299</td>
+                        <td>UNIPROT:P35557</td>
+                        <td>SBO:0000014 enzyme</td>
+                        </tr>
+                    <tr>          <td>G6PASE</td>
+                        <td>Glucose-6-phosphatase</td>
+                        <td>cyto</td>
+                        <td>Y</td>
+                        <td>18.9</td>
+                        <td>EC:3.1.3.9</td>
+                        <td>KEGG:R00303</td>
+                        <td>UNIPROT:P35575</td>
+                        <td>SBO:0000014 enzyme</td>
+                        </tr>
+                    <tr>          <td>GPI</td>
+                        <td>Glucose-6-phosphate isomerase</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>420</td>
+                        <td>EC:5.3.1.9</td>
+                        <td>KEGG:R00771</td>
+                        <td>UNIPROT:P06744</td>
+                        <td>SBO:0000014 enzyme</td>
+                        </tr>
+                    <tr>          <td>G16PI</td>
+                        <td>glucose-1-phosphate 1,6-phosphomutase</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>100</td>
+                        <td>EC:5.4.2.2</td>
+                        <td>KEGG:R00959</td>
+                        <td>UNIPROT:P36871, UNIPROT:Q96G03</td>
+                        <td>SBO:0000014 enzyme</td>
+                        </tr>
+                    <tr>          <td>UPGASE</td>
+                        <td>UTP:Glucose-1-phosphate uridylyltransferase</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>80</td>
+                        <td>EC:2.7.7.9</td>
+                        <td>KEGG:R00289</td>
+                        <td>UNIPROT:Q16851</td>
+                        <td>SBO:0000014 enzyme</td>
+                        </tr>
+                    <tr>          <td>PPASE</td>
+                        <td>Pyrophosphate phosphohydrolase</td>
+                        <td>cyto</td>
+                        <td>Y</td>
+                        <td>2.4</td>
+                        <td>EC:3.6.1.1</td>
+                        <td>KEGG:R00004</td>
+                        <td>UNIPROT:Q15181</td>
+                        <td>SBO:0000014 enzyme</td>
+                        </tr>
+                    <tr>          <td>GS</td>
+                        <td>Glycogen synthase</td>
+                        <td>cyto</td>
+                        <td>Y</td>
+                        <td>13.2</td>
+                        <td/>
+                        <td/>
+                        <td>UNIPROT:P54840</td>
+                        <td>SBO:0000014 enzyme</td>
+                        </tr>
+                    <tr>          <td>GP</td>
+                        <td>Glycogen phosphorylase</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>6.8</td>
+                        <td/>
+                        <td/>
+                        <td>UNIPROT:P06737</td>
+                        <td>SBO:0000014 enzyme</td>
+                        </tr>
+                    <tr>          <td>NTKGTP</td>
+                        <td>Nucleosid diphosphate kinase (GTP)</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>0</td>
+                        <td>EC:2.7.4.6</td>
+                        <td>KEGG:R00330</td>
+                        <td/>
+                        <td>SBO:0000014 enzyme</td>
+                        </tr>
+                    <tr>          <td>NTKUTP</td>
+                        <td>Nucleosid diphosphate kinase (UTP)</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>2940</td>
+                        <td>EC:2.7.4.6</td>
+                        <td>KEGG:R00156</td>
+                        <td/>
+                        <td>SBO:0000014 enzyme</td>
+                        </tr>
+                    <tr>          <td>AK</td>
+                        <td>Adenylat kinase</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>0</td>
+                        <td>EC:2.7.4.3</td>
+                        <td>KEGG:R00127</td>
+                        <td/>
+                        <td>SBO:0000014 enzyme</td>
+                        </tr>
+                    <tr>          <td>PFK2</td>
+                        <td>Phosphofructo kinase 2</td>
+                        <td>cyto</td>
+                        <td>Y</td>
+                        <td>0.0042</td>
+                        <td>EC:2.7.1.105</td>
+                        <td>KEGG:R02732</td>
+                        <td>UNIPROT:P16118</td>
+                        <td>SBO:0000014 enzyme</td>
+                        </tr>
+                    <tr>          <td>FBP2</td>
+                        <td>Fructose-2,6-bisphosphatase</td>
+                        <td>cyto</td>
+                        <td>Y</td>
+                        <td>0.126</td>
+                        <td>EC:3.1.3.46</td>
+                        <td>KEGG:R02731</td>
+                        <td>UNIPROT:P16118</td>
+                        <td>SBO:0000014 enzyme</td>
+                        </tr>
+                    <tr>          <td>PFK1</td>
+                        <td>Phosphofructo kinase 1</td>
+                        <td>cyto</td>
+                        <td>Y</td>
+                        <td>7.182</td>
+                        <td>EC:2.7.1.11</td>
+                        <td>KEGG:R00756</td>
+                        <td>UNIPROT:P17858</td>
+                        <td>SBO:0000014 enzyme</td>
+                        </tr>
+                    <tr>          <td>FBP1</td>
+                        <td>Fructose-1,6-bisphosphatase</td>
+                        <td>cyto</td>
+                        <td>Y</td>
+                        <td>4.326</td>
+                        <td>EC:3.1.3.11</td>
+                        <td>KEGG:R00762</td>
+                        <td>UNIPROT:O00757, UNIPROT:P09467</td>
+                        <td>SBO:0000014 enzyme</td>
+                        </tr>
+                    <tr>          <td>TPI</td>
+                        <td>Triosephosphate isomerase</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>420</td>
+                        <td>EC:5.3.1.1</td>
+                        <td>KEGG:R01015</td>
+                        <td>UNIPROT:P60174</td>
+                        <td>SBO:0000014 enzyme</td>
+                        </tr>
+                    <tr>          <td>ALD</td>
+                        <td>Aldolase</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>420</td>
+                        <td>EC:4.1.2.13</td>
+                        <td>KEGG:R01068</td>
+                        <td>UNIPROT:P05062</td>
+                        <td>SBO:0000014 enzyme</td>
+                        </tr>
+                    <tr>          <td>PGK</td>
+                        <td>Phosphoglycerate kinase</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>420</td>
+                        <td>EC:2.7.2.3</td>
+                        <td>KEGG:R01512</td>
+                        <td>UNIPROT:P00558</td>
+                        <td>SBO:0000014 enzyme</td>
+                        </tr>
+                    <tr>          <td>GAPDH</td>
+                        <td>Glyceraldehydephosphate dehydrogenase</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>420</td>
+                        <td>EC:1.2.1.12</td>
+                        <td>KEGG:R01061</td>
+                        <td>UNIPROT:P04406</td>
+                        <td>SBO:0000014 enzyme</td>
+                        </tr>
+                    <tr>          <td>EN</td>
+                        <td>Enolase</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>35.994</td>
+                        <td>EC:4.2.1.11</td>
+                        <td>KEGG:R00658</td>
+                        <td>UNIPROT:P06733, UNIPROT:P09104, UNIPROT:P13929</td>
+                        <td>SBO:0000014 enzyme</td>
+                        </tr>
+                    <tr>          <td>PGAM</td>
+                        <td>3-Phosphoglycerate mutase</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>420</td>
+                        <td>EC:5.4.2.1</td>
+                        <td>KEGG:R01518</td>
+                        <td>UNIPROT:P18669</td>
+                        <td>SBO:0000014 enzyme</td>
+                        </tr>
+                    <tr>          <td>PEPCK</td>
+                        <td>Phosphoenolpyruvate carboxykinase</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>0</td>
+                        <td>EC:4.1.1.32</td>
+                        <td>KEGG:R00431</td>
+                        <td>UNIPROT:P35558</td>
+                        <td>SBO:0000014 enzyme</td>
+                        </tr>
+                    <tr>          <td>PK</td>
+                        <td>Pyruvate kinase</td>
+                        <td>cyto</td>
+                        <td>Y</td>
+                        <td>46.2</td>
+                        <td>EC:2.7.1.40</td>
+                        <td>KEGG:R00200</td>
+                        <td>UNIPROT:P30613</td>
+                        <td>SBO:0000014 enzyme</td>
+                        </tr>
+                    <tr>          <td>PC</td>
+                        <td>Pyruvate Carboxylase</td>
+                        <td>mito</td>
+                        <td>Y</td>
+                        <td>168</td>
+                        <td>EC:6.4.1.1</td>
+                        <td>KEGG:R00344</td>
+                        <td>UNIPROT:P11498</td>
+                        <td>SBO:0000014 enzyme</td>
+                        </tr>
+                    <tr>          <td>PEPCK_mito</td>
+                        <td>Phosphoenolpyruvate carboxykinase</td>
+                        <td>mito</td>
+                        <td>N</td>
+                        <td>546</td>
+                        <td>EC:4.1.1.32</td>
+                        <td>KEGG:R00431</td>
+                        <td>UNIPROT:Q16822</td>
+                        <td>SBO:0000014 enzyme</td>
+                        </tr>
+                    <tr>          <td>LACT</td>
+                        <td>Lactate transporter</td>
+                        <td>pm</td>
+                        <td>N</td>
+                        <td>5.418</td>
+                        <td/>
+                        <td/>
+                        <td/>
+                        <td>SBO:0000284 transporter</td>
+                        </tr>
+                    <tr>          <td>LDH</td>
+                        <td>Lactate dehydrogenase</td>
+                        <td>cyto</td>
+                        <td>N</td>
+                        <td>12.6</td>
+                        <td>EC:1.1.1.27</td>
+                        <td>-KEGG:R00703</td>
+                        <td>UNIPROT:P00338, UNIPROT:P07195, UNIPROT:P07864</td>
+                        <td>SBO:0000014 enzyme</td>
+                        </tr>
+                    <tr>          <td>PEPT</td>
+                        <td>PEP transporter</td>
+                        <td>mm</td>
+                        <td>N</td>
+                        <td>33.6</td>
+                        <td/>
+                        <td/>
+                        <td/>
+                        <td>SBO:0000284 transporter</td>
+                        </tr>
+                    <tr>          <td>PYRT</td>
+                        <td>Pyruvate transporter</td>
+                        <td>mm</td>
+                        <td>N</td>
+                        <td>42</td>
+                        <td/>
+                        <td/>
+                        <td/>
+                        <td>SBO:0000284 transporter</td>
+                        </tr>
+                    <tr>          <td>CS</td>
+                        <td>Citrate synthase</td>
+                        <td>mito</td>
+                        <td>N</td>
+                        <td>4.2</td>
+                        <td>EC:2.3.3.1</td>
+                        <td>-KEGG:R00351</td>
+                        <td>UNIPROT:O75390</td>
+                        <td>SBO:0000014 enzyme</td>
+                        </tr>
+                    <tr>          <td>PDH</td>
+                        <td>Pyruvate dehydrogenase</td>
+                        <td>mito</td>
+                        <td>Y</td>
+                        <td>13.44</td>
+                        <td>EC:1.2.4.1</td>
+                        <td>KEGG:R00209</td>
+                        <td>UNIPROT:P08559, UNIPROT:P11177, UNIPROT:P10515, UNIPROT:P09622, O00330</td>
+                        <td>SBO:0000014 enzyme</td>
+                        </tr>
+                    <tr>          <td>ACOAFLX</td>
+                        <td>Acetyl-CoA flux</td>
+                        <td>mito</td>
+                        <td>N</td>
+                        <td>0</td>
+                        <td/>
+                        <td/>
+                        <td/>
+                        <td>SBO:0000014 enzyme</td>
+                        </tr>
+                    <tr>          <td>VCITFLX</td>
+                        <td>Citrate flux</td>
+                        <td>mito</td>
+                        <td>N</td>
+                        <td>0</td>
+                        <td/>
+                        <td/>
+                        <td/>
+                        <td>SBO:0000014 enzyme</td>
+                        </tr>
+                    <tr>          <td>NDK_mito</td>
+                        <td>Nucleosid diphosphate kinase (GTP)</td>
+                        <td>mito</td>
+                        <td>N</td>
+                        <td>420</td>
+                        <td>EC:2.7.4.6</td>
+                        <td>KEGG:R00330</td>
+                        <td/>
+                        <td>SBO:0000014 enzyme</td>
+                        </tr>
+                    <tr>          <td>OAAFLX</td>
+                        <td>Oxalacetate flux</td>
+                        <td>mito</td>
+                        <td>N</td>
+                        <td>0</td>
+                        <td/>
+                        <td/>
+                        <td/>
+                        <td>SBO:0000014 enzyme</td>
+                        </tr>
+                    </table>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+       <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+        <rdf:Description rdf:about="#COPASI1">
+         <dcterms:created>
+          <rdf:Description>
+           <dcterms:W3CDTF>2012-04-23T14:54:11Z</dcterms:W3CDTF>
+            </rdf:Description>
+             </dcterms:created>
+              </rdf:Description>
+              </rdf:RDF>
+               </COPASI>
+                                                                           <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#_167031">
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1204270001"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/22761565"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="mM" name="mM" metaid="_167043">
+        <listOfUnits>
+          <unit scale="-3" exponent="1" metaid="_167055" kind="mole"/>
+          <unit exponent="-1" metaid="_167067" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="cyto" constant="true" spatialDimensions="3" name="cyto" metaid="_836137" sboTerm="SBO:0000290" size="5">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836137">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0005829"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </compartment>
+      <compartment id="blood" constant="true" spatialDimensions="3" name="blood" metaid="_836149" sboTerm="SBO:0000290" size="10000">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836149">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0005615"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </compartment>
+      <compartment id="mito" constant="true" spatialDimensions="3" name="mito" metaid="_836161" sboTerm="SBO:0000290" size="1">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836161">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0005739"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </compartment>
+      <compartment id="mm" constant="true" spatialDimensions="2" name="mm" metaid="_836173" sboTerm="SBO:0000290" size="0">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836173">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0031966"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </compartment>
+      <compartment id="pm" constant="true" spatialDimensions="2" name="pm" metaid="_836185" sboTerm="SBO:0000290" size="0">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836185">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0005886"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </compartment>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="atp" initialConcentration="2.8" name="atp" metaid="_836197" sboTerm="SBO:0000299" substanceUnits="mM" compartment="cyto">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836197">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00002"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:15422"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="adp" initialConcentration="0.8" name="adp" metaid="_836209" sboTerm="SBO:0000299" substanceUnits="mM" compartment="cyto">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836209">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00008"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:16761"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="amp" initialConcentration="0.16" name="amp" metaid="_836221" sboTerm="SBO:0000299" substanceUnits="mM" compartment="cyto">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836221">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00020"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:16027"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="utp" initialConcentration="0.27" name="utp" metaid="_836233" sboTerm="SBO:0000299" substanceUnits="mM" compartment="cyto">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836233">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00075"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:15713"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="udp" initialConcentration="0.09" name="udp" metaid="_836245" sboTerm="SBO:0000299" substanceUnits="mM" compartment="cyto">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836245">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00015"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:17659"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="gtp" initialConcentration="0.29" name="gtp" metaid="_836257" sboTerm="SBO:0000299" substanceUnits="mM" compartment="cyto">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836257">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00044"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:15996"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="gdp" initialConcentration="0.1" name="gdp" metaid="_836269" sboTerm="SBO:0000299" substanceUnits="mM" compartment="cyto">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836269">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00035"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:17552"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="nad" initialConcentration="1.22" name="nad" metaid="_836281" sboTerm="SBO:0000299" substanceUnits="mM" compartment="cyto">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836281">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00003"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:15846"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="nadh" initialConcentration="0.00056" name="nadh" metaid="_836293" sboTerm="SBO:0000299" substanceUnits="mM" compartment="cyto">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836293">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00004"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:16908"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="p" initialConcentration="5" name="p" metaid="_836305" sboTerm="SBO:0000299" substanceUnits="mM" compartment="cyto">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836305">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00009"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="pp" initialConcentration="0.008" name="pp" metaid="_836317" sboTerm="SBO:0000299" substanceUnits="mM" compartment="cyto">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836317">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00013"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="h2o" initialConcentration="55000" name="h2o" metaid="_836329" sboTerm="SBO:0000299" substanceUnits="mM" compartment="cyto">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836329">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00001"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:15377"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="co2" initialConcentration="5" name="co2" metaid="_836341" sboTerm="SBO:0000299" substanceUnits="mM" compartment="cyto">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836341">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00011"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:16526"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="h" initialConcentration="5E-8" name="h" metaid="_836353" sboTerm="SBO:0000299" substanceUnits="mM" compartment="cyto">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836353">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00080"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:24636"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="glc1p" initialConcentration="0.012" name="glc1p" metaid="_836365" sboTerm="SBO:0000299" substanceUnits="mM" compartment="cyto">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836365">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00103"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:16077"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="udpglc" initialConcentration="0.38" name="udpglc" metaid="_836377" sboTerm="SBO:0000299" substanceUnits="mM" compartment="cyto">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836377">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00029"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:18066"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="glc" initialConcentration="5" name="glc" metaid="_836389" sboTerm="SBO:0000299" substanceUnits="mM" compartment="cyto">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836389">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00031"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:4167"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="glyglc" initialConcentration="250" name="glyglc" metaid="_836401" sboTerm="SBO:0000299" substanceUnits="mM" compartment="cyto">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836401">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00182"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:28087"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="fru6p" initialConcentration="0.05" name="fru6p" metaid="_836413" sboTerm="SBO:0000299" substanceUnits="mM" compartment="cyto">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836413">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00085"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:15946"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="glc6p" initialConcentration="0.12" name="glc6p" metaid="_836425" sboTerm="SBO:0000299" substanceUnits="mM" compartment="cyto">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836425">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00092"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:4170"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="fru26bp" initialConcentration="0.004" name="fru26bp" metaid="_836437" sboTerm="SBO:0000299" substanceUnits="mM" compartment="cyto">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836437">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00665"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:28602"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="fru16bp" initialConcentration="0.02" name="fru16bp" metaid="_836449" sboTerm="SBO:0000299" substanceUnits="mM" compartment="cyto">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836449">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00354"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:16905"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="dhap" initialConcentration="0.03" name="dhap" metaid="_836461" sboTerm="SBO:0000299" substanceUnits="mM" compartment="cyto">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836461">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00111"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:16108"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="grap" initialConcentration="0.1" name="grap" metaid="_836473" sboTerm="SBO:0000299" substanceUnits="mM" compartment="cyto">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836473">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00118"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:29052"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="pg3" initialConcentration="0.27" name="pg3" metaid="_836485" sboTerm="SBO:0000299" substanceUnits="mM" compartment="cyto">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836485">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00197"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:17794"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="bpg13" initialConcentration="0.3" name="bpg13" metaid="_836497" sboTerm="SBO:0000299" substanceUnits="mM" compartment="cyto">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836497">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00236"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:16001"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="pep" initialConcentration="0.15" name="pep" metaid="_836509" sboTerm="SBO:0000299" substanceUnits="mM" compartment="cyto">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836509">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00074"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:44897"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="pg2" initialConcentration="0.03" name="pg2" metaid="_836521" sboTerm="SBO:0000299" substanceUnits="mM" compartment="cyto">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836521">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00631"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:17835"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="oaa" initialConcentration="0.01" name="oaa" metaid="_836533" sboTerm="SBO:0000299" substanceUnits="mM" compartment="cyto">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836533">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00036"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:30744"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="pyr" initialConcentration="0.1" name="pyr" metaid="_836545" sboTerm="SBO:0000299" substanceUnits="mM" compartment="cyto">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836545">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00022"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:32816"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="glc_blood" initialConcentration="5" name="glc_blood" metaid="_836557" sboTerm="SBO:0000299" substanceUnits="mM" compartment="blood">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836557">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00031"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:4167"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="lac" initialConcentration="0.5" name="lac" metaid="_836569" sboTerm="SBO:0000299" substanceUnits="mM" compartment="cyto">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836569">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00186"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:422"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="p_mito" initialConcentration="5" name="p_mito" metaid="_836581" sboTerm="SBO:0000299" substanceUnits="mM" compartment="mito">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836581">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00009"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="oaa_mito" initialConcentration="0.01" name="oaa_mito" metaid="_836593" sboTerm="SBO:0000299" substanceUnits="mM" compartment="mito">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836593">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00036"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:30744"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="lac_blood" initialConcentration="1.2" name="lac_blood" metaid="_836605" sboTerm="SBO:0000299" substanceUnits="mM" compartment="blood">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836605">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00186"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:422"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="co2_mito" initialConcentration="5" name="co2_mito" metaid="_836617" sboTerm="SBO:0000299" substanceUnits="mM" compartment="mito">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836617">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00011"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:16526"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="pyr_mito" initialConcentration="0.1" name="pyr_mito" metaid="_836629" sboTerm="SBO:0000299" substanceUnits="mM" compartment="mito">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836629">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00022"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:32816"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="cit_mito" initialConcentration="0.32" name="cit_mito" metaid="_836641" sboTerm="SBO:0000299" substanceUnits="mM" compartment="mito">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836641">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00158"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:30769"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="pep_mito" initialConcentration="0.15" name="pep_mito" metaid="_836653" sboTerm="SBO:0000299" substanceUnits="mM" compartment="mito">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836653">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00074"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:44897"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="acoa_mito" initialConcentration="0.04" name="acoa_mito" metaid="_836665" sboTerm="SBO:0000299" substanceUnits="mM" compartment="mito">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836665">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00024"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:15351"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="gtp_mito" initialConcentration="0.29" name="gtp_mito" metaid="_836677" sboTerm="SBO:0000299" substanceUnits="mM" compartment="mito">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836677">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00044"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:15996"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="gdp_mito" initialConcentration="0.1" name="gdp_mito" metaid="_836689" sboTerm="SBO:0000299" substanceUnits="mM" compartment="mito">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836689">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00035"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:17552"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="atp_mito" initialConcentration="2.8" name="atp_mito" metaid="_836701" sboTerm="SBO:0000299" substanceUnits="mM" compartment="mito">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836701">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00002"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:15422"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="adp_mito" initialConcentration="0.8" name="adp_mito" metaid="_836713" sboTerm="SBO:0000299" substanceUnits="mM" compartment="mito">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836713">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00008"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:16761"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="nad_mito" initialConcentration="0.98" name="nad_mito" metaid="_836725" sboTerm="SBO:0000299" substanceUnits="mM" compartment="mito">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836725">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00003"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:15846"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="h_mito" initialConcentration="1E-8" name="h_mito" metaid="_836737" sboTerm="SBO:0000299" substanceUnits="mM" compartment="mito">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836737">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00011"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:24636"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="coa_mito" initialConcentration="0.055" name="coa_mito" metaid="_836749" sboTerm="SBO:0000299" substanceUnits="mM" compartment="mito">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836749">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00010"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:15346"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="nadh_mito" initialConcentration="0.24" name="nadh_mito" metaid="_836761" sboTerm="SBO:0000299" substanceUnits="mM" compartment="mito">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836761">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00004"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:16908"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="epinephrine_blood" initialConcentration="206.11" name="epinephrine_blood" metaid="_836773" sboTerm="SBO:0000299" substanceUnits="mM" compartment="blood">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836773">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00547"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:18357"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="glucagon_blood" initialConcentration="4.36E-8" name="glucagon_blood" metaid="_836785" sboTerm="SBO:0000299" substanceUnits="mM" compartment="blood">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836785">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C01501"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P01275"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="insulin_blood" initialConcentration="7.61E-8" name="insulin_blood" metaid="_836797" sboTerm="SBO:0000299" substanceUnits="mM" compartment="blood">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836797">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00723"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P01308"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="h20_mito" initialConcentration="55000" name="h20_mito" metaid="_836809" sboTerm="SBO:0000299" substanceUnits="mM" compartment="mito">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836809">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.compound/C00080"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:obo.chebi:CHEBI%3A:15377"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+    </listOfSpecies>
+    <listOfReactions>
+      <reaction id="GLUT2" name="GLUT2" metaid="_836821" sboTerm="SBO:0000284">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836821">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P11168"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="glc_blood" metaid="_167079" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="glc" metaid="_167091" sboTerm="SBO:0000011" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="GK" name="GK" metaid="_836833" reversible="false" sboTerm="SBO:0000014">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836833">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.reaction/R00299"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P35557"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="atp" metaid="_167103" sboTerm="SBO:0000015" stoichiometry="1"/>
+          <speciesReference species="glc" metaid="_167115" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="adp" metaid="_167127" sboTerm="SBO:0000011" stoichiometry="1"/>
+          <speciesReference species="glc6p" metaid="_167139" sboTerm="SBO:0000011" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="G6PASE" name="G6PASE" metaid="_836845" reversible="false" sboTerm="SBO:0000014">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836845">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.reaction/R00303"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P35575"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="h2o" metaid="_167151" sboTerm="SBO:0000015" stoichiometry="1"/>
+          <speciesReference species="glc6p" metaid="_167163" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="p" metaid="_167175" sboTerm="SBO:0000011" stoichiometry="1"/>
+          <speciesReference species="glc" metaid="_167187" sboTerm="SBO:0000011" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="GPI" name="GPI" metaid="_836857" sboTerm="SBO:0000014">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836857">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.reaction/R00771"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P06744"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="glc6p" metaid="_167199" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="fru6p" metaid="_167211" sboTerm="SBO:0000011" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="G16PI" name="G16PI" metaid="_836869" sboTerm="SBO:0000014">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836869">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.reaction/R00959"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P36871"/>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/Q96G03"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="glc1p" metaid="_167223" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="glc6p" metaid="_167235" sboTerm="SBO:0000011" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="UPGASE" name="UPGASE" metaid="_836881" sboTerm="SBO:0000014">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836881">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.reaction/R00289"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/Q16851"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="utp" metaid="_167247" sboTerm="SBO:0000015" stoichiometry="1"/>
+          <speciesReference species="glc1p" metaid="_167259" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pp" metaid="_167271" sboTerm="SBO:0000011" stoichiometry="1"/>
+          <speciesReference species="udpglc" metaid="_167283" sboTerm="SBO:0000011" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="PPASE" name="PPASE" metaid="_836893" reversible="false" sboTerm="SBO:0000014">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836893">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.reaction/R00004"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/Q15181"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="pp" metaid="_167295" sboTerm="SBO:0000015" stoichiometry="1"/>
+          <speciesReference species="h2o" metaid="_167307" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="p" metaid="_167319" sboTerm="SBO:0000011" stoichiometry="2"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="GS" name="GS" metaid="_836905" reversible="false" sboTerm="SBO:0000014">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836905">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P54840"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="udpglc" metaid="_167331" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="udp" metaid="_167343" sboTerm="SBO:0000011" stoichiometry="1"/>
+          <speciesReference species="glyglc" metaid="_167355" sboTerm="SBO:0000011" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="GP" name="GP" metaid="_836917" sboTerm="SBO:0000014">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836917">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P06737"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="p" metaid="_167367" sboTerm="SBO:0000015" stoichiometry="1"/>
+          <speciesReference species="glyglc" metaid="_167379" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="glc1p" metaid="_167391" sboTerm="SBO:0000011" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="NTKGTP" name="NTKGTP" metaid="_836929" sboTerm="SBO:0000014">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836929">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.reaction/R00330"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="atp" metaid="_167403" sboTerm="SBO:0000015" stoichiometry="1"/>
+          <speciesReference species="gdp" metaid="_167415" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="adp" metaid="_167427" sboTerm="SBO:0000011" stoichiometry="1"/>
+          <speciesReference species="gtp" metaid="_167439" sboTerm="SBO:0000011" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="NTKUTP" name="NTKUTP" metaid="_836941" sboTerm="SBO:0000014">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836941">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.reaction/R00156"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="atp" metaid="_167451" sboTerm="SBO:0000015" stoichiometry="1"/>
+          <speciesReference species="udp" metaid="_167463" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="adp" metaid="_167475" sboTerm="SBO:0000011" stoichiometry="1"/>
+          <speciesReference species="utp" metaid="_167487" sboTerm="SBO:0000011" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="AK" name="AK" metaid="_836953" sboTerm="SBO:0000014">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836953">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.reaction/R00127"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="atp" metaid="_167499" sboTerm="SBO:0000015" stoichiometry="1"/>
+          <speciesReference species="amp" metaid="_167511" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="adp" metaid="_167523" sboTerm="SBO:0000011" stoichiometry="2"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="PFK2" name="PFK2" metaid="_836965" reversible="false" sboTerm="SBO:0000014">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836965">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.reaction/R02732"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P16118"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="atp" metaid="_167535" sboTerm="SBO:0000015" stoichiometry="1"/>
+          <speciesReference species="fru6p" metaid="_167547" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="adp" metaid="_167559" sboTerm="SBO:0000011" stoichiometry="1"/>
+          <speciesReference species="fru26bp" metaid="_167571" sboTerm="SBO:0000011" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="FBP2" name="FBP2" metaid="_836977" reversible="false" sboTerm="SBO:0000014">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836977">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.reaction/R02731"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P16118"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="h2o" metaid="_167583" sboTerm="SBO:0000015" stoichiometry="1"/>
+          <speciesReference species="fru26bp" metaid="_167595" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="p" metaid="_167607" sboTerm="SBO:0000011" stoichiometry="1"/>
+          <speciesReference species="fru6p" metaid="_167619" sboTerm="SBO:0000011" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="PFK1" name="PFK1" metaid="_836989" reversible="false" sboTerm="SBO:0000014">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_836989">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.reaction/R00756"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P17858"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="atp" metaid="_167631" sboTerm="SBO:0000015" stoichiometry="1"/>
+          <speciesReference species="fru6p" metaid="_167643" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="adp" metaid="_167655" sboTerm="SBO:0000011" stoichiometry="1"/>
+          <speciesReference species="fru16bp" metaid="_167667" sboTerm="SBO:0000011" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="FBP1" name="FBP1" metaid="_837001" reversible="false" sboTerm="SBO:0000014">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_837001">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.reaction/R00762"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/O00757"/>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P09467"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="h2o" metaid="_167679" sboTerm="SBO:0000015" stoichiometry="1"/>
+          <speciesReference species="fru16bp" metaid="_167691" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="p" metaid="_167703" sboTerm="SBO:0000011" stoichiometry="1"/>
+          <speciesReference species="fru6p" metaid="_167715" sboTerm="SBO:0000011" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="ALD" name="ALD" metaid="_837013" sboTerm="SBO:0000014">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_837013">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.reaction/R01068"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P05062"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="fru16bp" metaid="_167727" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="grap" metaid="_167739" sboTerm="SBO:0000011" stoichiometry="1"/>
+          <speciesReference species="dhap" metaid="_167751" sboTerm="SBO:0000011" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="TPI" name="TPI" metaid="_837025" sboTerm="SBO:0000014">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_837025">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.reaction/R01015"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P60174"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="dhap" metaid="_167763" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="grap" metaid="_167775" sboTerm="SBO:0000011" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="GAPDH" name="GAPDH" metaid="_837038" sboTerm="SBO:0000014">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_837038">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.reaction/R01061"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P04406"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="nad" metaid="_167787" sboTerm="SBO:0000015" stoichiometry="1"/>
+          <speciesReference species="p" metaid="_167799" sboTerm="SBO:0000015" stoichiometry="1"/>
+          <speciesReference species="grap" metaid="_167811" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="nadh" metaid="_167823" sboTerm="SBO:0000011" stoichiometry="1"/>
+          <speciesReference species="h" metaid="_167835" sboTerm="SBO:0000011" stoichiometry="1"/>
+          <speciesReference species="bpg13" metaid="_167847" sboTerm="SBO:0000011" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="PGK" name="PGK" metaid="_837050" sboTerm="SBO:0000014">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_837050">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.reaction/R01512"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P00558"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="adp" metaid="_167859" sboTerm="SBO:0000015" stoichiometry="1"/>
+          <speciesReference species="bpg13" metaid="_167871" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="atp" metaid="_167883" sboTerm="SBO:0000011" stoichiometry="1"/>
+          <speciesReference species="pg3" metaid="_167895" sboTerm="SBO:0000011" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="PGAM" name="PGAM" metaid="_837062" sboTerm="SBO:0000014">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_837062">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.reaction/R01518"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P18669"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="pg3" metaid="_167907" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pg2" metaid="_167919" sboTerm="SBO:0000011" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="EN" name="EN" metaid="_837074" sboTerm="SBO:0000014">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_837074">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.reaction/R00658"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P06733"/>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P09104"/>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P13929"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="pg2" metaid="_167931" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="h2o" metaid="_167943" sboTerm="SBO:0000011" stoichiometry="1"/>
+          <speciesReference species="pep" metaid="_167955" sboTerm="SBO:0000011" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="PK" name="PK" metaid="_837086" reversible="false" sboTerm="SBO:0000014">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_837086">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.reaction/R00200"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P30613"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="adp" metaid="_167967" sboTerm="SBO:0000015" stoichiometry="1"/>
+          <speciesReference species="pep" metaid="_167979" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="atp" metaid="_167991" sboTerm="SBO:0000011" stoichiometry="1"/>
+          <speciesReference species="pyr" metaid="_168003" sboTerm="SBO:0000011" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="PEPCK" name="PEPCK" metaid="_837098" sboTerm="SBO:0000014">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_837098">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.reaction/R00431"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P35558"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="gtp" metaid="_168015" sboTerm="SBO:0000015" stoichiometry="1"/>
+          <speciesReference species="oaa" metaid="_168027" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="gdp" metaid="_168039" sboTerm="SBO:0000011" stoichiometry="1"/>
+          <speciesReference species="co2" metaid="_168051" sboTerm="SBO:0000011" stoichiometry="1"/>
+          <speciesReference species="pep" metaid="_168063" sboTerm="SBO:0000011" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="PEPCK_mito" name="PEPCK_mito" metaid="_837110" sboTerm="SBO:0000014">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_837110">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.reaction/R00431"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/Q16822"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="oaa_mito" metaid="_168075" sboTerm="SBO:0000015" stoichiometry="1"/>
+          <speciesReference species="gtp_mito" metaid="_168087" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="co2_mito" metaid="_168099" sboTerm="SBO:0000011" stoichiometry="1"/>
+          <speciesReference species="pep_mito" metaid="_168111" sboTerm="SBO:0000011" stoichiometry="1"/>
+          <speciesReference species="gdp_mito" metaid="_168123" sboTerm="SBO:0000011" stoichiometry="1"/>
+          <speciesReference species="nadh_mito" metaid="_168135" sboTerm="SBO:0000011" stoichiometry="1"/>
+          <speciesReference species="nad_mito" metaid="_168147" sboTerm="SBO:0000011" stoichiometry="1"/>
+          <speciesReference species="h_mito" metaid="_168159" sboTerm="SBO:0000011" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="PC" name="PC" metaid="_837122" reversible="false" sboTerm="SBO:0000014">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_837122">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.reaction/R00344"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P11498"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="co2_mito" metaid="_168171" sboTerm="SBO:0000015" stoichiometry="1"/>
+          <speciesReference species="pyr_mito" metaid="_168183" sboTerm="SBO:0000015" stoichiometry="1"/>
+          <speciesReference species="atp_mito" metaid="_168195" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="p_mito" metaid="_168207" sboTerm="SBO:0000011" stoichiometry="1"/>
+          <speciesReference species="oaa_mito" metaid="_168219" sboTerm="SBO:0000011" stoichiometry="1"/>
+          <speciesReference species="adp_mito" metaid="_168231" sboTerm="SBO:0000011" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="LDH" name="LDH" metaid="_837134" sboTerm="SBO:0000014">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_837134">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:kegg.reaction::R00703"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P00338"/>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P07195"/>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P07864"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="nadh" metaid="_168243" sboTerm="SBO:0000015" stoichiometry="1"/>
+          <speciesReference species="h" metaid="_168255" sboTerm="SBO:0000015" stoichiometry="1"/>
+          <speciesReference species="pyr" metaid="_168267" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="nad" metaid="_168279" sboTerm="SBO:0000011" stoichiometry="1"/>
+          <speciesReference species="lac" metaid="_168291" sboTerm="SBO:0000011" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="LACT" name="LACT" metaid="_168303" sboTerm="SBO:0000284">
+        <listOfReactants>
+          <speciesReference species="lac_blood" metaid="_168315" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="lac" metaid="_168327" sboTerm="SBO:0000011" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="PYRT" name="PYRT" metaid="_168339" sboTerm="SBO:0000284">
+        <listOfReactants>
+          <speciesReference species="pep_mito" metaid="_168351" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pep" metaid="_168363" sboTerm="SBO:0000011" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="PDH" name="PDH" metaid="_837146" reversible="false" sboTerm="SBO:0000014">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_837146">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.reaction/R00209"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P08559"/>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P11177"/>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P10515"/>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P09622"/>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/O00330"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="pyr_mito" metaid="_168375" sboTerm="SBO:0000015" stoichiometry="1"/>
+          <speciesReference species="coa_mito" metaid="_168387" sboTerm="SBO:0000015" stoichiometry="1"/>
+          <speciesReference species="nad_mito" metaid="_168399" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="co2_mito" metaid="_168411" sboTerm="SBO:0000011" stoichiometry="1"/>
+          <speciesReference species="acoa_mito" metaid="_168423" sboTerm="SBO:0000011" stoichiometry="1"/>
+          <speciesReference species="nadh_mito" metaid="_168435" sboTerm="SBO:0000011" stoichiometry="1"/>
+          <speciesReference species="h_mito" metaid="_168447" sboTerm="SBO:0000011" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="CS" name="CS" metaid="_837158" sboTerm="SBO:0000014">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_837158">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="urn:miriam:kegg.reaction::R00351"/>
+                </rdf:Bag>
+              </bqbiol:is>
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/O75390"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="oaa_mito" metaid="_168459" sboTerm="SBO:0000015" stoichiometry="1"/>
+          <speciesReference species="acoa_mito" metaid="_168471" sboTerm="SBO:0000015" stoichiometry="1"/>
+          <speciesReference species="h20_mito" metaid="_168483" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="cit_mito" metaid="_168495" sboTerm="SBO:0000011" stoichiometry="1"/>
+          <speciesReference species="coa_mito" metaid="_168507" sboTerm="SBO:0000011" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="NDK_mito" name="NDK_mito" metaid="_837170" sboTerm="SBO:0000014">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_837170">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/kegg.reaction/R00330"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="atp_mito" metaid="_168519" sboTerm="SBO:0000015" stoichiometry="1"/>
+          <speciesReference species="gdp_mito" metaid="_168531" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="adp_mito" metaid="_168543" sboTerm="SBO:0000011" stoichiometry="1"/>
+          <speciesReference species="gtp_mito" metaid="_168555" sboTerm="SBO:0000011" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="OAAFLX" name="OAAFLX" metaid="_168567" sboTerm="SBO:0000014">
+        <listOfProducts>
+          <speciesReference species="oaa_mito" metaid="_168579" sboTerm="SBO:0000011" stoichiometry="1"/>
+        </listOfProducts>
+      </reaction>
+      <reaction id="ACOAFLX" name="ACOAFLX" metaid="_168591" sboTerm="SBO:0000014">
+        <listOfReactants>
+          <speciesReference species="acoa_mito" metaid="_168603" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+      </reaction>
+      <reaction id="VCITFLX" name="VCITFLX" metaid="_168615" sboTerm="SBO:0000014">
+        <listOfReactants>
+          <speciesReference species="cit_mito" metaid="_168627" sboTerm="SBO:0000015" stoichiometry="1"/>
+        </listOfReactants>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

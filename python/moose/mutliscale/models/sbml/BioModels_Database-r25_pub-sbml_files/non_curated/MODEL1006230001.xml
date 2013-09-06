@@ -1,0 +1,540 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="_204771" version="4">
+  <model id="Fallon2000_IL2dynamics" name="Fallon2000_IL2dynamics" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>Computational model for effects of ligand/receptor binding properties on
+interleukin-2 trafficking dynamics and T cell proliferation response.</strong>
+                <br/>
+          Fallon EM, Lauffenburger DA.      <em>Biotechnol Prog</em>
+          2000 Sep-Oct;16(5):905-16      <a href="http://www.ncbi.nlm.nih.gov/pubmed/11027188">11027188</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          Multisubunit cytokine receptors such as the heterotrimeric receptor for
+interleukin-2 (IL-2) are ubiquitous in hematopoeitic cell types of importance in
+biotechnology and are crucial regulators of cell proliferation and
+differentiation behavior. Dynamics of cytokine/receptor endocytic trafficking
+can significantly impact cell responses through effects of receptor
+down-regulation and ligand depletion, and in turn are governed by
+ligand/receptor binding properties. We describe here a computational model for
+trafficking dynamics of the IL-2 receptor (IL-2R) system, which is able to
+predict T cell proliferation responses to IL-2. This model comprises kinetic
+equations describing binding, internalization, and postendocytic sorting of IL-2
+and IL-2R, including an experimentally derived dependence of cell proliferation
+rate on these properties. Computational results from this model predict that
+IL-2 depletion can be reduced by decreasing its binding affinity for the IL-2R
+betagamma subunit relative to the alpha subunit at endosomal pH, as a result of
+enhanced ligand sorting to recycling vis-a-vis degradation, and that an IL-2
+analogue with such altered binding properties should exhibit increased potency
+for stimulating the T cell proliferation response. These results are in
+agreement with our recent experimental findings for the IL-2 analogue termed 2D1
+[Fallon, E. M. et al. J. Biol. Chem. 2000, 275, 6790-6797]. Thus, this type of
+model may enable prediction of beneficial cytokine/receptor binding properties
+to aid development of molecular design criteria for improvements in applications
+such as in vivo cytokine therapies and in vitro hematopoietic cell bioreactors.      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://models.cellml.org/exposure/eac0440dc434d67337eb835402f5ab5f">        <strong>Fallon EM, Lauffenburger DA. (2000) - version=1.0</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>Catherine Lloyd</strong>
+                <br/>
+          c.lloyd@auckland.ac.nz      <br/>
+          The University of Auckland      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T12:00:33Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T12:00:33Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T12:00:33Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T12:00:33Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1006230001"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/11027188"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="picomolar" name="picomolar" metaid="_204783">
+        <listOfUnits>
+          <unit scale="-12" metaid="_204795" kind="mole"/>
+          <unit exponent="-1" metaid="_204807" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="minute" name="minute" metaid="_204819">
+        <listOfUnits>
+          <unit metaid="_204831" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="flux" name="flux" metaid="_204843">
+        <listOfUnits>
+          <unit scale="-12" metaid="_204855" kind="mole"/>
+          <unit exponent="-1" metaid="_204867" kind="litre"/>
+          <unit exponent="-1" metaid="_204879" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="first_order_rate_constant" name="first_order_rate_constant" metaid="_204891">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_204903" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="second_order_rate_constant" name="second_order_rate_constant" metaid="_204915">
+        <listOfUnits>
+          <unit scale="-12" exponent="-1" metaid="_204927" kind="mole"/>
+          <unit metaid="_204939" kind="litre"/>
+          <unit exponent="-1" metaid="_204951" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="number_per_picomole" name="number_per_picomole" metaid="_204963">
+        <listOfUnits>
+          <unit scale="-12" exponent="-1" metaid="_204975" kind="mole"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="number_per_cell_minute" name="number_per_cell_minute" metaid="_204987">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_204999" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="L_per_cell" name="L_per_cell" metaid="_205011">
+        <listOfUnits>
+          <unit metaid="_205023" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="cell_per_L_minute" name="cell_per_L_minute" metaid="_205036">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_205048" kind="litre"/>
+          <unit exponent="-1" metaid="_205060" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="cell_per_L" name="cell_per_L" metaid="_205072">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_205084" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time" name="time" metaid="_205096">
+        <listOfUnits>
+          <unit metaid="_205108" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="COMpartment" metaid="_630254" units="litre" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="time_environment" name="time" metaid="_630278" units="minute"/>
+      <parameter id="Rs" constant="false" name="Rs" metaid="_630279" value="1500"/>
+      <parameter id="Cs" constant="false" name="Cs" metaid="_630280" value="1"/>
+      <parameter id="Ri" constant="false" name="Ri" metaid="_630281" value="300"/>
+      <parameter id="Ci" constant="false" name="Ci" metaid="_630282" value="1"/>
+      <parameter id="Li" constant="false" name="Li" metaid="_630284" value="0.01"/>
+      <parameter id="Ld" constant="false" name="Ld" metaid="_630285" value="1"/>
+      <parameter id="L" constant="false" name="L" metaid="_630287" value="10" units="picomolar"/>
+      <parameter id="Y" constant="false" name="Y" metaid="_630288" value="250000000" units="cell_per_L"/>
+      <parameter id="kr" name="kr" metaid="_630290" value="0.0138" units="first_order_rate_constant"/>
+      <parameter id="kf" constant="false" name="kf" metaid="_630291" units="second_order_rate_constant"/>
+      <parameter id="kre" constant="false" name="kre" metaid="_630293" units="first_order_rate_constant"/>
+      <parameter id="kfe" constant="false" name="kfe" metaid="_630294" units="second_order_rate_constant"/>
+      <parameter id="kt" name="kt" metaid="_630296" value="0.007" units="first_order_rate_constant"/>
+      <parameter id="Vs" name="Vs" metaid="_630297" value="11" units="number_per_cell_minute"/>
+      <parameter id="ksyn" name="ksyn" metaid="_630299" value="0.0011" units="first_order_rate_constant"/>
+      <parameter id="ke" name="ke" metaid="_630300" value="0.04" units="first_order_rate_constant"/>
+      <parameter id="kx" name="kx" metaid="_630302" value="0.15" units="first_order_rate_constant"/>
+      <parameter id="kh" name="kh" metaid="_630303" value="0.035" units="first_order_rate_constant"/>
+      <parameter id="Ve" name="Ve" metaid="_630305" value="1E-14" units="L_per_cell"/>
+      <parameter id="NA" name="NA" metaid="_630306" value="6.022E11" units="number_per_picomole"/>
+      <parameter id="IL2" name="IL2" metaid="_630308" value="1" units="dimensionless"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_630262" variable="Rs">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <apply>
+                  <plus/>
+                  <ci> kr </ci>
+                  <ci> ksyn </ci>
+                </apply>
+                <ci> Cs </ci>
+              </apply>
+              <ci> Vs </ci>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> kf </ci>
+                <ci> L </ci>
+                <ci> Rs </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kt </ci>
+                <ci> Rs </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_630263" variable="Cs">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> kf </ci>
+              <ci> L </ci>
+              <ci> Rs </ci>
+            </apply>
+            <apply>
+              <times/>
+              <apply>
+                <plus/>
+                <ci> kr </ci>
+                <ci> ke </ci>
+              </apply>
+              <ci> Cs </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_630264" variable="Ri">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> kre </ci>
+                <ci> Ci </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kt </ci>
+                <ci> Rs </ci>
+              </apply>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> kfe </ci>
+                <ci> Li </ci>
+                <ci> Ri </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kh </ci>
+                <ci> Ri </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_630265" variable="Ci">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> kfe </ci>
+                <ci> Li </ci>
+                <ci> Ri </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> ke </ci>
+                <ci> Cs </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <apply>
+                <plus/>
+                <ci> kre </ci>
+                <ci> kh </ci>
+              </apply>
+              <ci> Ci </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_630266" variable="Li">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <divide/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> kre </ci>
+                  <ci> Ci </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> kfe </ci>
+                  <ci> Li </ci>
+                  <ci> Ri </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> Ve </ci>
+                <ci> NA </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> kx </ci>
+              <ci> Li </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_630269" variable="Ld">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> kh </ci>
+            <ci> Ci </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_630270" variable="L">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> kr </ci>
+                    <ci> Cs </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> kx </ci>
+                    <ci> Li </ci>
+                    <ci> Ve </ci>
+                    <ci> NA </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> kf </ci>
+                  <ci> L </ci>
+                  <ci> Rs </ci>
+                </apply>
+              </apply>
+              <ci> Y </ci>
+            </apply>
+            <ci> NA </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_630271" variable="Y">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <apply>
+                <times/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <times/>
+                      <cn> 600 </cn>
+                      <ci> Cs </ci>
+                    </apply>
+                    <apply>
+                      <plus/>
+                      <cn> 250 </cn>
+                      <ci> Cs </ci>
+                    </apply>
+                  </apply>
+                  <cn> 200 </cn>
+                </apply>
+                <cn> 1 </cn>
+              </apply>
+              <apply>
+                <gt/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <times/>
+                      <cn> 600 </cn>
+                      <ci> Cs </ci>
+                    </apply>
+                    <apply>
+                      <plus/>
+                      <cn> 250 </cn>
+                      <ci> Cs </ci>
+                    </apply>
+                  </apply>
+                  <cn> 200 </cn>
+                </apply>
+                <cn> 0 </cn>
+              </apply>
+            </piece>
+            <otherwise>
+              <cn> 0 </cn>
+            </otherwise>
+          </piecewise>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="_630272" variable="kf">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <apply>
+                <divide/>
+                <ci> kr </ci>
+                <cn> 11.1 </cn>
+              </apply>
+              <apply>
+                <eq/>
+                <ci> IL2 </ci>
+                <cn> 1 </cn>
+              </apply>
+            </piece>
+            <otherwise>
+              <apply>
+                <divide/>
+                <ci> kr </ci>
+                <cn> 8.2 </cn>
+              </apply>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_630273" variable="kre">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <apply>
+                <times/>
+                <ci> kr </ci>
+                <cn> 8 </cn>
+              </apply>
+              <apply>
+                <eq/>
+                <ci> IL2 </ci>
+                <cn> 1 </cn>
+              </apply>
+            </piece>
+            <otherwise>
+              <apply>
+                <times/>
+                <ci> kr </ci>
+                <cn> 5 </cn>
+              </apply>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_630275" variable="kfe">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <apply>
+                <divide/>
+                <ci> kre </ci>
+                <cn> 1000 </cn>
+              </apply>
+              <apply>
+                <eq/>
+                <ci> IL2 </ci>
+                <cn> 1 </cn>
+              </apply>
+            </piece>
+            <otherwise>
+              <apply>
+                <divide/>
+                <ci> kre </ci>
+                <cn> 3000 </cn>
+              </apply>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+  </model>
+</sbml>

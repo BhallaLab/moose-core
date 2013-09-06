@@ -1,0 +1,268 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="_648914" version="4">
+  <model id="Guyton1972_Electrolytes" name="Guyton1972_Electrolytes" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>Circulation: overall regulation.</strong>
+                <br/>
+          Guyton AC, Coleman TG, Granger HJ.      <em>Annu Rev Physiol</em>
+          1972;34:13-46      <a href="http://www.ncbi.nlm.nih.gov/pubmed/4334846">4334846</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          This article is an experiment, one undertaken primarily because of the
+long-term belief of Dr. Victor Hall, Editor of the Annual Review of Physiology fo
+r many years, that physiology is, or at least should be, an analytical subject,
+and that a method not utilized to its fullest advantage for organizing
+review material is the systems analysis. Furthermore, one of the most likely
+areas in physiology for which a systems analysis could be of value would be
+in a discussion of circulatory regulation. Therefore, this article was undertaken
+directly at the request of the editors of the A ogy to attempt the welding togeth
+er of a systemsn annuaally Rsiesv ioewf coifr cPuhlaytsoiorlyregulation
+with a review of the current literature in this field.
+The systems analysis of circulatory regulation developed for this article
+is based on earlier, much less extensive analyses (Guyton and Coleman 1, 2); it i
+s illustrated in Figure 1. This analysis is comprised of 354 blocks, each of
+which represents one or more mathematical equations describing some
+physiological facet of circulatory function. In general, each of the functional
+blocks has been the subject of research investigation by one or many investigator
+s,
+but the analysis is based on cumulative knowledge of the circulation
+rather than simply on current literature. Therefore, the analysis presented
+here is not a review of the current literature but is a framework to show how
+the different regulations operate together in the overall system. Later in this
+review we will attempt to show some of the voids still present in our knowledge
+of circulatory regulation (which is perhaps the most important value
+of performing systems analyses), and we will discuss the current research
+that is attempting to fill these voids.
+A criticism that has often been made against systems analyses, and very
+justly so, is that they are usually designed to explain specific phenomena.
+Therefore, they too often are based on such bizarre concepts of function that
+they not only fail to give correct predictions (other than the specific ones
+for which they are designed) but, indeed, often give exactly reverse
+predictions. Therefore, the analysis of Figure 1 was based almost entirely on act
+ual
+experimental data, and it has been tested in computer simulations to see
+whether or not it can predict the animal or human results of many different
+types of circulatory stresses induced either experimentally or as the result
+of clinical abnormalities. Figures 2 through 5 present simulations of some of
+these experiments or clinical conditions. They will be described later in the
+article.      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://www.cellml.org/models/guyton_electrolytes_2008_version02">        <strong>Guyton AC, Coleman TG, Granger HJ. (2008) - version02</strong>
+                    </a>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL0912160001"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/4334846"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfCompartments>
+      <compartment id="Compartment" metaid="_514770" units="litre" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="AMK" name="AMK" metaid="_514804" value="1.037" units="dimensionless"/>
+      <parameter id="TVD" name="TVD" metaid="_514807" value="0.000980838" units="dimensionless"/>
+      <parameter id="NOD" name="NOD" metaid="_514808" value="0.0959449" units="dimensionless"/>
+      <parameter id="STH" name="STH" metaid="_514811" value="0.977181" units="dimensionless"/>
+      <parameter id="KOD" name="KOD" metaid="_514812" value="0.0804374" units="dimensionless"/>
+      <parameter id="VUD" name="VUD" metaid="_514815" value="0.000989" units="dimensionless"/>
+      <parameter id="CNA" constant="false" name="CNA" metaid="_514816" units="dimensionless"/>
+      <parameter id="NED" constant="false" name="NED" metaid="_514819" units="dimensionless"/>
+      <parameter id="NAE" constant="false" name="NAE" metaid="_514820" value="2109.91" units="dimensionless"/>
+      <parameter id="AMK1" constant="false" name="AMK1" metaid="_514823" units="dimensionless"/>
+      <parameter id="CKE" constant="false" name="CKE" metaid="_514824" units="dimensionless"/>
+      <parameter id="KE" constant="false" name="KE" metaid="_514827" units="dimensionless"/>
+      <parameter id="KTOT" constant="false" name="KTOT" metaid="_514828" value="3622.54" units="dimensionless"/>
+      <parameter id="KTOTD" constant="false" name="KTOTD" metaid="_514831" units="dimensionless"/>
+      <parameter id="CKI" constant="false" name="CKI" metaid="_514832" units="dimensionless"/>
+      <parameter id="KI" constant="false" name="KI" metaid="_514835" units="dimensionless"/>
+      <parameter id="VIC" constant="false" name="VIC" metaid="_514836" value="25.0404" units="dimensionless"/>
+      <parameter id="VID" constant="false" name="VID" metaid="_514839" units="dimensionless"/>
+      <parameter id="CCD" constant="false" name="CCD" metaid="_514840" units="dimensionless"/>
+      <parameter id="VTW" constant="false" name="VTW" metaid="_514843" value="39.8952" units="dimensionless"/>
+      <parameter id="VEC" constant="false" name="VEC" metaid="_514844" units="dimensionless"/>
+      <parameter id="TRPL" name="TRPL" metaid="_514847" value="0" units="dimensionless"/>
+      <parameter id="NID" name="NID" metaid="_514848" value="0.1" units="dimensionless"/>
+      <parameter id="ALCLK" name="ALCLK" metaid="_514851" value="0.3" units="dimensionless"/>
+      <parameter id="KID" name="KID" metaid="_514852" value="0.08" units="dimensionless"/>
+      <parameter id="VIDML" name="VIDML" metaid="_514855" value="0.01" units="dimensionless"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_514774" variable="NAE">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <ci> NED </ci>
+        </math>
+      </rateRule>
+      <rateRule metaid="_514777" variable="KTOT">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <ci> KTOTD </ci>
+        </math>
+      </rateRule>
+      <rateRule metaid="_514778" variable="VIC">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <ci> VID </ci>
+        </math>
+      </rateRule>
+      <rateRule metaid="_514781" variable="VTW">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <ci> TVD </ci>
+            <ci> VUD </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="_514782" variable="NED">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> NID </ci>
+                <ci> STH </ci>
+              </apply>
+              <ci> NOD </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> TRPL </ci>
+              <cn> 142 </cn>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_514785" variable="CNA">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <ci> NAE </ci>
+            <ci> VEC </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_514786" variable="AMK1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <ci> AMK </ci>
+                <cn> 1 </cn>
+              </apply>
+              <ci> ALCLK </ci>
+            </apply>
+            <cn> 1 </cn>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_514789" variable="KTOTD">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <ci> KID </ci>
+            <ci> KOD </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_514790" variable="KE">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <ci> KTOT </ci>
+              <cn> 3000 </cn>
+            </apply>
+            <apply>
+              <times/>
+              <ci> AMK1 </ci>
+              <cn> 9.3333 </cn>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_514793" variable="CKE">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <ci> KE </ci>
+            <ci> VEC </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_514794" variable="KI">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <ci> KTOT </ci>
+            <ci> KE </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_514797" variable="CKI">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <ci> KI </ci>
+            <ci> VIC </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_514798" variable="CCD">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <ci> CKI </ci>
+            <ci> CNA </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_514801" variable="VID">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> CCD </ci>
+            <ci> VIDML </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_514802" variable="VEC">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <ci> VTW </ci>
+            <ci> VIC </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+  </model>
+</sbml>

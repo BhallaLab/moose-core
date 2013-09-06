@@ -1,0 +1,1403 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version3" level="2" metaid="_455916" version="3">
+  <model id="Kyrylov2005_HPAaxis" name="Kyrylov2005_HPAaxis" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>Modeling robust oscillatory behavior of the hypothalamic-pituitary-adrenal axis.</strong>
+                <br/>
+          Kyrylov V, Severyanova LA, Vieira A.      <em>IEEE Trans Biomed Eng.</em>
+          2005 Dec;52(12):1977-83.      <a href="http://www.ncbi.nlm.nih.gov/pubmed/16366221">16366221</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          A mathematical model of the hypothalamic-pituitary-adrenal (HPA) axis of the human endocrine system is proposed. This new model provides an improvement over previous models by introducing two nonlinear factors with physiological relevance: 1) a limit to gland size; 2) rejection of negative hormone concentrations. The result is that the new model is by far the most robust; e.g., it can tolerate at least -50% and +100% perturbations to any of its parameters. This high degree of robustness allows one, for the first time, to model features of the system such as circadian rhythm and response to hormone injections. In addition, relative to its closest predecessor, the model is simpler; it contains only about half of the parameters, and yet achieves more functions. The new model provides opportunities for teaching endocrinology within a biological or medical school context; it may also have applications in modeling and studying HPA axis disorders, for example, related to gland size dynamics, abnormal hormone levels, or stress influences.      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://www.cellml.org/models/kyrylov_severyanova_vieira_2005_version02">        <strong>Kyrylov V, Severyanova LA, Vieira A. (2005) - version02</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>Lloyd, Catherine, May</strong>
+                <br/>
+          c.lloyd@aukland.ac.nz      <br/>
+          The University of Auckland      <br/>
+          The Bioengineering Institute      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL0478740924"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/16366221"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="minute" name="minute" metaid="_455928">
+        <listOfUnits>
+          <unit metaid="_455940" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="hour" name="hour" metaid="_455952">
+        <listOfUnits>
+          <unit metaid="_455964" multiplier="3600" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="microg_l" name="microg_l" metaid="_455976">
+        <listOfUnits>
+          <unit scale="-6" metaid="_455988" kind="gram"/>
+          <unit exponent="-1" metaid="_456000" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="microg_l_min" name="microg_l_min" metaid="_456012">
+        <listOfUnits>
+          <unit scale="-6" metaid="_456024" kind="gram"/>
+          <unit exponent="-1" metaid="_456037" kind="litre"/>
+          <unit exponent="-1" metaid="_456049" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="first_order_rate_constant" name="first_order_rate_constant" metaid="_456061">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_456073" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time" name="minute" metaid="_456085">
+        <listOfUnits>
+          <unit metaid="_456097" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="Compartment" metaid="_242341" units="litre" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="y0" constant="false" name="y0" metaid="_242373" value="0.4" units="microg_l"/>
+      <parameter id="g0" constant="false" name="g0" metaid="_242374" units="microg_l_min"/>
+      <parameter id="r0" constant="false" name="r0" metaid="_242376" units="dimensionless"/>
+      <parameter id="h0" constant="false" name="h0" metaid="_242377" units="microg_l_min"/>
+      <parameter id="S0" name="S0" metaid="_242379" value="0.01" units="dimensionless"/>
+      <parameter id="y1" constant="false" name="y1" metaid="_242380" value="1.4" units="microg_l"/>
+      <parameter id="g1" constant="false" name="g1" metaid="_242382" units="microg_l_min"/>
+      <parameter id="r1" constant="false" name="r1" metaid="_242383" units="dimensionless"/>
+      <parameter id="h1" constant="false" name="h1" metaid="_242385" units="microg_l_min"/>
+      <parameter id="S1" name="S1" metaid="_242386" value="0.01" units="dimensionless"/>
+      <parameter id="y2" constant="false" name="y2" metaid="_242388" value="1.17" units="microg_l"/>
+      <parameter id="g2" constant="false" name="g2" metaid="_242389" units="microg_l_min"/>
+      <parameter id="r2" constant="false" name="r2" metaid="_242391" units="dimensionless"/>
+      <parameter id="h2" constant="false" name="h2" metaid="_242392" units="microg_l_min"/>
+      <parameter id="S2" name="S2" metaid="_242394" value="0.01" units="dimensionless"/>
+      <parameter id="y3" constant="false" name="y3" metaid="_242395" value="0.95" units="microg_l"/>
+      <parameter id="g3" constant="false" name="g3" metaid="_242397" units="microg_l_min"/>
+      <parameter id="r3" constant="false" name="r3" metaid="_242398" units="dimensionless"/>
+      <parameter id="h3" constant="false" name="h3" metaid="_242400" units="microg_l_min"/>
+      <parameter id="S3" name="S3" metaid="_242401" value="0.01" units="dimensionless"/>
+      <parameter id="y4" constant="false" name="y4" metaid="_242403" value="0.65" units="microg_l"/>
+      <parameter id="g4" constant="false" name="g4" metaid="_242404" units="microg_l_min"/>
+      <parameter id="r4" constant="false" name="r4" metaid="_242406" units="dimensionless"/>
+      <parameter id="h4" constant="false" name="h4" metaid="_242407" units="microg_l_min"/>
+      <parameter id="S4" name="S4" metaid="_242409" value="0.01" units="dimensionless"/>
+      <parameter id="a00" name="a00" metaid="_242410" value="-0.00843" units="first_order_rate_constant"/>
+      <parameter id="a02" name="a02" metaid="_242412" value="-0.44" units="first_order_rate_constant"/>
+      <parameter id="a10" name="a10" metaid="_242413" value="0.082" units="first_order_rate_constant"/>
+      <parameter id="a11" name="a11" metaid="_242415" value="-0.004" units="first_order_rate_constant"/>
+      <parameter id="a12" name="a12" metaid="_242416" value="-0.0668" units="first_order_rate_constant"/>
+      <parameter id="a20" name="a20" metaid="_242418" value="0" units="first_order_rate_constant"/>
+      <parameter id="a21" name="a21" metaid="_242419" value="0.031" units="first_order_rate_constant"/>
+      <parameter id="a22" name="a22" metaid="_242421" value="-0.0957" units="first_order_rate_constant"/>
+      <parameter id="a23" name="a23" metaid="_242422" value="0.0576" units="first_order_rate_constant"/>
+      <parameter id="a24" name="a24" metaid="_242424" value="0.000325" units="first_order_rate_constant"/>
+      <parameter id="a32" name="a32" metaid="_242425" value="0.00869" units="first_order_rate_constant"/>
+      <parameter id="a33" name="a33" metaid="_242427" value="-0.00857" units="first_order_rate_constant"/>
+      <parameter id="a42" name="a42" metaid="_242428" value="0.000139" units="first_order_rate_constant"/>
+      <parameter id="a44" name="a44" metaid="_242430" value="-0.000143" units="first_order_rate_constant"/>
+      <parameter id="c0" name="c0" metaid="_242431" value="0.443" units="microg_l_min"/>
+      <parameter id="e0" name="e0" metaid="_242433" value="0" units="microg_l_min"/>
+      <parameter id="e1" name="e1" metaid="_242434" value="0" units="microg_l_min"/>
+      <parameter id="e2" name="e2" metaid="_242436" value="0" units="microg_l_min"/>
+      <parameter id="epsilon" name="epsilon" metaid="_242437" value="0.5" units="microg_l"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_242343" variable="y0">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> g0 </ci>
+            <ci> c0 </ci>
+            <ci> e0 </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_242345" variable="y1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> g1 </ci>
+            <ci> e1 </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_242346" variable="y2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> g2 </ci>
+            <ci> e2 </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_242348" variable="y3">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <ci> g3 </ci>
+        </math>
+      </rateRule>
+      <rateRule metaid="_242349" variable="y4">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <ci> g4 </ci>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="_242351" variable="g0">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> h0 </ci>
+            <ci> r0 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_242352" variable="h0">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <apply>
+                <divide/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> a00 </ci>
+                    <ci> y0 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a02 </ci>
+                    <ci> y2 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <plus/>
+                  <cn> 1 </cn>
+                  <apply>
+                    <times/>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <plus/>
+                        <apply>
+                          <times/>
+                          <ci> a00 </ci>
+                          <ci> y0 </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> a02 </ci>
+                          <ci> y2 </ci>
+                        </apply>
+                      </apply>
+                      <ci> S0 </ci>
+                    </apply>
+                    <apply>
+                      <minus/>
+                      <cn> 1 </cn>
+                      <apply>
+                        <exp/>
+                        <apply>
+                          <minus/>
+                          <apply>
+                            <divide/>
+                            <apply>
+                              <plus/>
+                              <apply>
+                                <times/>
+                                <ci> a00 </ci>
+                                <ci> y0 </ci>
+                              </apply>
+                              <apply>
+                                <times/>
+                                <ci> a02 </ci>
+                                <ci> y2 </ci>
+                              </apply>
+                            </apply>
+                            <ci> S0 </ci>
+                          </apply>
+                        </apply>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <gt/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> a00 </ci>
+                    <ci> y0 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a02 </ci>
+                    <ci> y2 </ci>
+                  </apply>
+                </apply>
+                <cn> 0 </cn>
+              </apply>
+            </piece>
+            <piece>
+              <apply>
+                <plus/>
+                <apply>
+                  <times/>
+                  <ci> a00 </ci>
+                  <ci> y0 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> a02 </ci>
+                  <ci> y2 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <leq/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> a00 </ci>
+                    <ci> y0 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a02 </ci>
+                    <ci> y2 </ci>
+                  </apply>
+                </apply>
+                <cn> 0 </cn>
+              </apply>
+            </piece>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_242354" variable="r0">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <apply>
+                <minus/>
+                <cn> 1 </cn>
+                <apply>
+                  <exp/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <times/>
+                      <ci> S0 </ci>
+                      <apply>
+                        <power/>
+                        <ci> y0 </ci>
+                        <cn> 2 </cn>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <apply>
+                        <plus/>
+                        <apply>
+                          <times/>
+                          <ci> a00 </ci>
+                          <ci> y0 </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> a02 </ci>
+                          <ci> y2 </ci>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <power/>
+                        <apply>
+                          <minus/>
+                          <ci> epsilon </ci>
+                          <ci> y0 </ci>
+                        </apply>
+                        <cn> 2 </cn>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <and/>
+                <apply>
+                  <lt/>
+                  <ci> y0 </ci>
+                  <ci> epsilon </ci>
+                </apply>
+                <apply>
+                  <lt/>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <ci> a00 </ci>
+                      <ci> y0 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> a02 </ci>
+                      <ci> y2 </ci>
+                    </apply>
+                  </apply>
+                  <cn> 0 </cn>
+                </apply>
+              </apply>
+            </piece>
+            <otherwise>
+              <cn> 1 </cn>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_242355" variable="g1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> h1 </ci>
+            <ci> r1 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_242357" variable="h1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <apply>
+                <divide/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> a10 </ci>
+                    <ci> y0 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a11 </ci>
+                    <ci> y1 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a12 </ci>
+                    <ci> y2 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <plus/>
+                  <cn> 1 </cn>
+                  <apply>
+                    <times/>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <plus/>
+                        <apply>
+                          <times/>
+                          <ci> a10 </ci>
+                          <ci> y0 </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> a11 </ci>
+                          <ci> y1 </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> a12 </ci>
+                          <ci> y2 </ci>
+                        </apply>
+                      </apply>
+                      <ci> S1 </ci>
+                    </apply>
+                    <apply>
+                      <minus/>
+                      <cn> 1 </cn>
+                      <apply>
+                        <exp/>
+                        <apply>
+                          <minus/>
+                          <apply>
+                            <divide/>
+                            <apply>
+                              <plus/>
+                              <apply>
+                                <times/>
+                                <ci> a10 </ci>
+                                <ci> y0 </ci>
+                              </apply>
+                              <apply>
+                                <times/>
+                                <ci> a11 </ci>
+                                <ci> y1 </ci>
+                              </apply>
+                              <apply>
+                                <times/>
+                                <ci> a12 </ci>
+                                <ci> y2 </ci>
+                              </apply>
+                            </apply>
+                            <ci> S1 </ci>
+                          </apply>
+                        </apply>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <gt/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> a10 </ci>
+                    <ci> y0 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a11 </ci>
+                    <ci> y1 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a12 </ci>
+                    <ci> y2 </ci>
+                  </apply>
+                </apply>
+                <cn> 0 </cn>
+              </apply>
+            </piece>
+            <piece>
+              <apply>
+                <plus/>
+                <apply>
+                  <times/>
+                  <ci> a10 </ci>
+                  <ci> y0 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> a11 </ci>
+                  <ci> y1 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> a12 </ci>
+                  <ci> y2 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <leq/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> a10 </ci>
+                    <ci> y0 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a11 </ci>
+                    <ci> y1 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a12 </ci>
+                    <ci> y2 </ci>
+                  </apply>
+                </apply>
+                <cn> 0 </cn>
+              </apply>
+            </piece>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_242358" variable="r1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <apply>
+                <minus/>
+                <cn> 1 </cn>
+                <apply>
+                  <exp/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <times/>
+                      <ci> S1 </ci>
+                      <apply>
+                        <power/>
+                        <ci> y1 </ci>
+                        <cn> 2 </cn>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <apply>
+                        <plus/>
+                        <apply>
+                          <times/>
+                          <ci> a10 </ci>
+                          <ci> y0 </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> a11 </ci>
+                          <ci> y1 </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> a12 </ci>
+                          <ci> y2 </ci>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <power/>
+                        <apply>
+                          <minus/>
+                          <ci> epsilon </ci>
+                          <ci> y1 </ci>
+                        </apply>
+                        <cn> 2 </cn>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <and/>
+                <apply>
+                  <lt/>
+                  <ci> y1 </ci>
+                  <ci> epsilon </ci>
+                </apply>
+                <apply>
+                  <lt/>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <ci> a10 </ci>
+                      <ci> y0 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> a11 </ci>
+                      <ci> y1 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> a12 </ci>
+                      <ci> y2 </ci>
+                    </apply>
+                  </apply>
+                  <cn> 0 </cn>
+                </apply>
+              </apply>
+            </piece>
+            <otherwise>
+              <cn> 1 </cn>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_242360" variable="g2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> h2 </ci>
+            <ci> r2 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_242361" variable="h2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <apply>
+                <divide/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> a20 </ci>
+                    <ci> y0 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a21 </ci>
+                    <ci> y1 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a22 </ci>
+                    <ci> y2 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a23 </ci>
+                    <ci> y3 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a24 </ci>
+                    <ci> y4 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <plus/>
+                  <cn> 1 </cn>
+                  <apply>
+                    <times/>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <plus/>
+                        <apply>
+                          <times/>
+                          <ci> a20 </ci>
+                          <ci> y0 </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> a21 </ci>
+                          <ci> y1 </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> a22 </ci>
+                          <ci> y2 </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> a23 </ci>
+                          <ci> y3 </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> a24 </ci>
+                          <ci> y4 </ci>
+                        </apply>
+                      </apply>
+                      <ci> S2 </ci>
+                    </apply>
+                    <apply>
+                      <minus/>
+                      <cn> 1 </cn>
+                      <apply>
+                        <exp/>
+                        <apply>
+                          <minus/>
+                          <apply>
+                            <divide/>
+                            <apply>
+                              <plus/>
+                              <apply>
+                                <times/>
+                                <ci> a20 </ci>
+                                <ci> y0 </ci>
+                              </apply>
+                              <apply>
+                                <times/>
+                                <ci> a21 </ci>
+                                <ci> y1 </ci>
+                              </apply>
+                              <apply>
+                                <times/>
+                                <ci> a22 </ci>
+                                <ci> y2 </ci>
+                              </apply>
+                              <apply>
+                                <times/>
+                                <ci> a23 </ci>
+                                <ci> y3 </ci>
+                              </apply>
+                              <apply>
+                                <times/>
+                                <ci> a24 </ci>
+                                <ci> y4 </ci>
+                              </apply>
+                            </apply>
+                            <ci> S2 </ci>
+                          </apply>
+                        </apply>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <gt/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> a20 </ci>
+                    <ci> y0 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a21 </ci>
+                    <ci> y1 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a22 </ci>
+                    <ci> y2 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a23 </ci>
+                    <ci> y3 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a24 </ci>
+                    <ci> y4 </ci>
+                  </apply>
+                </apply>
+                <cn> 0 </cn>
+              </apply>
+            </piece>
+            <piece>
+              <apply>
+                <plus/>
+                <apply>
+                  <times/>
+                  <ci> a20 </ci>
+                  <ci> y0 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> a21 </ci>
+                  <ci> y1 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> a22 </ci>
+                  <ci> y2 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> a23 </ci>
+                  <ci> y3 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> a24 </ci>
+                  <ci> y4 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <leq/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> a20 </ci>
+                    <ci> y0 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a21 </ci>
+                    <ci> y1 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a22 </ci>
+                    <ci> y2 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a23 </ci>
+                    <ci> y3 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a24 </ci>
+                    <ci> y4 </ci>
+                  </apply>
+                </apply>
+                <cn> 0 </cn>
+              </apply>
+            </piece>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_242363" variable="r2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <apply>
+                <minus/>
+                <cn> 1 </cn>
+                <apply>
+                  <exp/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <times/>
+                      <ci> S2 </ci>
+                      <apply>
+                        <power/>
+                        <ci> y2 </ci>
+                        <cn> 2 </cn>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <apply>
+                        <plus/>
+                        <apply>
+                          <times/>
+                          <ci> a20 </ci>
+                          <ci> y0 </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> a21 </ci>
+                          <ci> y1 </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> a22 </ci>
+                          <ci> y2 </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> a23 </ci>
+                          <ci> y3 </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> a24 </ci>
+                          <ci> y4 </ci>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <power/>
+                        <apply>
+                          <minus/>
+                          <ci> epsilon </ci>
+                          <ci> y2 </ci>
+                        </apply>
+                        <cn> 2 </cn>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <and/>
+                <apply>
+                  <lt/>
+                  <ci> y2 </ci>
+                  <ci> epsilon </ci>
+                </apply>
+                <apply>
+                  <lt/>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <ci> a20 </ci>
+                      <ci> y0 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> a21 </ci>
+                      <ci> y1 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> a22 </ci>
+                      <ci> y2 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> a23 </ci>
+                      <ci> y3 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> a24 </ci>
+                      <ci> y4 </ci>
+                    </apply>
+                  </apply>
+                  <cn> 0 </cn>
+                </apply>
+              </apply>
+            </piece>
+            <otherwise>
+              <cn> 1 </cn>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_242364" variable="g3">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> h3 </ci>
+            <ci> r3 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_242366" variable="h3">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <apply>
+                <divide/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> a32 </ci>
+                    <ci> y2 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a33 </ci>
+                    <ci> y3 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <plus/>
+                  <cn> 1 </cn>
+                  <apply>
+                    <times/>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <plus/>
+                        <apply>
+                          <times/>
+                          <ci> a32 </ci>
+                          <ci> y2 </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> a33 </ci>
+                          <ci> y3 </ci>
+                        </apply>
+                      </apply>
+                      <ci> S3 </ci>
+                    </apply>
+                    <apply>
+                      <minus/>
+                      <cn> 1 </cn>
+                      <apply>
+                        <exp/>
+                        <apply>
+                          <minus/>
+                          <apply>
+                            <divide/>
+                            <apply>
+                              <plus/>
+                              <apply>
+                                <times/>
+                                <ci> a32 </ci>
+                                <ci> y2 </ci>
+                              </apply>
+                              <apply>
+                                <times/>
+                                <ci> a33 </ci>
+                                <ci> y3 </ci>
+                              </apply>
+                            </apply>
+                            <ci> S3 </ci>
+                          </apply>
+                        </apply>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <gt/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> a32 </ci>
+                    <ci> y2 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a33 </ci>
+                    <ci> y3 </ci>
+                  </apply>
+                </apply>
+                <cn> 0 </cn>
+              </apply>
+            </piece>
+            <piece>
+              <apply>
+                <plus/>
+                <apply>
+                  <times/>
+                  <ci> a32 </ci>
+                  <ci> y2 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> a33 </ci>
+                  <ci> y3 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <leq/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> a32 </ci>
+                    <ci> y2 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a33 </ci>
+                    <ci> y3 </ci>
+                  </apply>
+                </apply>
+                <cn> 0 </cn>
+              </apply>
+            </piece>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_242367" variable="r3">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <apply>
+                <minus/>
+                <cn> 1 </cn>
+                <apply>
+                  <exp/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <times/>
+                      <ci> S3 </ci>
+                      <apply>
+                        <power/>
+                        <ci> y3 </ci>
+                        <cn> 2 </cn>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <apply>
+                        <plus/>
+                        <apply>
+                          <times/>
+                          <ci> a32 </ci>
+                          <ci> y2 </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> a33 </ci>
+                          <ci> y3 </ci>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <power/>
+                        <apply>
+                          <minus/>
+                          <ci> epsilon </ci>
+                          <ci> y3 </ci>
+                        </apply>
+                        <cn> 2 </cn>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <and/>
+                <apply>
+                  <lt/>
+                  <ci> y3 </ci>
+                  <ci> epsilon </ci>
+                </apply>
+                <apply>
+                  <lt/>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <ci> a32 </ci>
+                      <ci> y2 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> a33 </ci>
+                      <ci> y3 </ci>
+                    </apply>
+                  </apply>
+                  <cn> 0 </cn>
+                </apply>
+              </apply>
+            </piece>
+            <otherwise>
+              <cn> 1 </cn>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_242369" variable="g4">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> h4 </ci>
+            <ci> r4 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_242370" variable="h4">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <apply>
+                <divide/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> a42 </ci>
+                    <ci> y2 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a44 </ci>
+                    <ci> y4 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <plus/>
+                  <cn> 1 </cn>
+                  <apply>
+                    <times/>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <plus/>
+                        <apply>
+                          <times/>
+                          <ci> a42 </ci>
+                          <ci> y2 </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> a44 </ci>
+                          <ci> y4 </ci>
+                        </apply>
+                      </apply>
+                      <ci> S4 </ci>
+                    </apply>
+                    <apply>
+                      <minus/>
+                      <cn> 1 </cn>
+                      <apply>
+                        <exp/>
+                        <apply>
+                          <minus/>
+                          <apply>
+                            <divide/>
+                            <apply>
+                              <plus/>
+                              <apply>
+                                <times/>
+                                <ci> a42 </ci>
+                                <ci> y2 </ci>
+                              </apply>
+                              <apply>
+                                <times/>
+                                <ci> a44 </ci>
+                                <ci> y4 </ci>
+                              </apply>
+                            </apply>
+                            <ci> S4 </ci>
+                          </apply>
+                        </apply>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <gt/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> a42 </ci>
+                    <ci> y2 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a44 </ci>
+                    <ci> y4 </ci>
+                  </apply>
+                </apply>
+                <cn> 0 </cn>
+              </apply>
+            </piece>
+            <piece>
+              <apply>
+                <plus/>
+                <apply>
+                  <times/>
+                  <ci> a42 </ci>
+                  <ci> y2 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> a44 </ci>
+                  <ci> y4 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <leq/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> a42 </ci>
+                    <ci> y2 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a44 </ci>
+                    <ci> y4 </ci>
+                  </apply>
+                </apply>
+                <cn> 0 </cn>
+              </apply>
+            </piece>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_242372" variable="r4">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <apply>
+                <minus/>
+                <cn> 1 </cn>
+                <apply>
+                  <exp/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <times/>
+                      <ci> S4 </ci>
+                      <apply>
+                        <power/>
+                        <ci> y4 </ci>
+                        <cn> 2 </cn>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <apply>
+                        <plus/>
+                        <apply>
+                          <times/>
+                          <ci> a42 </ci>
+                          <ci> y2 </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> a44 </ci>
+                          <ci> y4 </ci>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <power/>
+                        <apply>
+                          <minus/>
+                          <ci> epsilon </ci>
+                          <ci> y4 </ci>
+                        </apply>
+                        <cn> 2 </cn>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <and/>
+                <apply>
+                  <lt/>
+                  <ci> y4 </ci>
+                  <ci> epsilon </ci>
+                </apply>
+                <apply>
+                  <lt/>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <ci> a42 </ci>
+                      <ci> y2 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> a44 </ci>
+                      <ci> y4 </ci>
+                    </apply>
+                  </apply>
+                  <cn> 0 </cn>
+                </apply>
+              </apply>
+            </piece>
+            <otherwise>
+              <cn> 1 </cn>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+  </model>
+</sbml>

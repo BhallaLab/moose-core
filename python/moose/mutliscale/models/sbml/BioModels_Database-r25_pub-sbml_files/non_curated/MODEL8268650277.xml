@@ -1,0 +1,308 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="metaid_0000001" version="4">
+  <model id="model_0000001" name="Nelson2000_HIV-1_general_model" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This is the general model without delay described by the equation system (1) in:      <b>A model of HIV-1 pathogenesis that includes an intracellular delay.</b>
+                <br/>
+          Nelson PW, Murray JD, Perelson AS;      <em>Math Biosci.</em>
+          2000 Feb;163(2):201-15. PMID:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/10701304">10701304</a>
+          ; doi:      <a href="http://dx.doi.org/10.1016/S0025-5564(99)00055-3">10.1016/S0025-5564(99)00055-3</a>
+                <br/>
+                <b>Abstract:</b>
+                <br/>
+          Mathematical modeling combined with experimental measurements have yielded important insights into HIV-1 pathogenesis. For example, data from experiments in which HIV-infected patients are given potent antiretroviral drugs that perturb the infection process have been used to estimate kinetic parameters underlying HIV infection. Many of the models used to analyze data have assumed drug treatments to be completely efficacious and that upon infection a cell instantly begins producing virus. We consider a model that allows for less then perfect drug effects and which includes a delay in the initiation of virus production. We present detailed analysis of this delay differential equation model and compare the results to a model without delay. Our analysis shows that when drug efficacy is less than 100%, as may be the case in vivo, the predicted rate of decline in plasma virus concentration depends on three factors: the death rate of virus producing cells, the efficacy of therapy, and the length of the delay. Thus, previous estimates of infected cell loss rates can be improved upon by considering more realistic models of viral infection.      <br/>
+                <b>Author Keywords:</b>
+          HIV; Delay; Viral life cycle; T-cells      </p>
+            <p>As there are no results given for this model in the article it cannot be checked for MIRIAM compliance. The SBML file should be equivalent to the described ODE file though.</p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models. It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL8268650277"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/10701304"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="time" name="day" metaid="metaid_0000005">
+        <listOfUnits>
+          <unit metaid="_041100" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="substance" name="items" metaid="metaid_0000006">
+        <listOfUnits>
+          <unit metaid="_041112" kind="item"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="perday" name="per day" metaid="metaid_0000013">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_041124" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="volume" name="ml" metaid="metaid_0000015">
+        <listOfUnits>
+          <unit scale="-3" metaid="_041136" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="items_per_ml" name="items per ml" metaid="metaid_0000016">
+        <listOfUnits>
+          <unit metaid="_041148" kind="item"/>
+          <unit scale="-3" exponent="-1" metaid="_041161" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="ml_per_item_day" name="ml per (item*day)" metaid="metaid_0000017">
+        <listOfUnits>
+          <unit scale="-3" metaid="_041173" kind="litre"/>
+          <unit exponent="-1" metaid="_041185" multiplier="86400" kind="second"/>
+          <unit exponent="-1" metaid="_041197" kind="item"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="virions_per_cell" name="virions_per_cell" metaid="metaid_0000021">
+        <listOfUnits>
+          <unit metaid="_041209" kind="dimensionless"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="items_perml_d" name="items per (ml*day)" metaid="metaid_0000036">
+        <listOfUnits>
+          <unit metaid="_041221" kind="item"/>
+          <unit scale="-3" exponent="-1" metaid="_041234" kind="litre"/>
+          <unit exponent="-1" metaid="_041246" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="plasma" name="plasma" metaid="metaid_0000003" size="1"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="T" initialConcentration="180000" name="T" metaid="metaid_0000007" compartment="plasma">
+        <notes>
+          <p xmlns="http://www.w3.org/1999/xhtml">
+        uninfected T-cells</p>
+          
+        </notes>
+</species>
+      <species id="T_i" initialConcentration="1675" name="T*" metaid="metaid_0000008" compartment="plasma">
+        <notes>
+          <p xmlns="http://www.w3.org/1999/xhtml">
+        infected T-cells</p>
+          
+        </notes>
+</species>
+      <species id="V_I" initialConcentration="134000" name="V_I" metaid="metaid_0000009" compartment="plasma">
+        <notes>
+          <p xmlns="http://www.w3.org/1999/xhtml">
+        infectious virius (V        <sub>I</sub>
+            )        </p>
+          
+        </notes>
+</species>
+      <species id="V_NI" initialConcentration="0" name="V_NI" metaid="metaid_0000010" compartment="plasma">
+        <notes>
+          <p xmlns="http://www.w3.org/1999/xhtml">
+        non-infectious virus (V        <sub>NI</sub>
+            )        </p>
+          
+        </notes>
+</species>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="k" name="k" metaid="metaid_0000012" value="3.43E-8" units="ml_per_item_day"/>
+      <parameter id="delta" name="delta" metaid="metaid_0000019" value="0.5" units="perday"/>
+      <parameter id="N" name="N" metaid="metaid_0000020" value="480" units="virions_per_cell">
+        <notes>
+          <p xmlns="http://www.w3.org/1999/xhtml">
+        virions released per cell upon lysis</p>
+          
+        </notes>
+</parameter>
+      <parameter id="c" name="c" metaid="metaid_0000022" value="3" units="perday"/>
+      <parameter id="np" name="np" metaid="metaid_0000027" value="0.1" units="dimensionless">
+        <notes>
+          <p xmlns="http://www.w3.org/1999/xhtml">
+        protease inhibitor efficacy</p>
+          
+        </notes>
+</parameter>
+      <parameter id="HIV" constant="false" name="HIV" metaid="metaid_0000032" units="items_per_ml">
+        <notes>
+          <p xmlns="http://www.w3.org/1999/xhtml">
+        number of both infectious and non-infectous virions per ml</p>
+          
+        </notes>
+</parameter>
+      <parameter id="lambda" metaid="metaid_0000035" value="10" units="items_perml_d"/>
+      <parameter id="delta1" metaid="metaid_0000037" value="0.03" units="perday"/>
+    </listOfParameters>
+    <listOfRules>
+      <assignmentRule metaid="metaid_0000033" variable="HIV">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> V_I </ci>
+            <ci> V_NI </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+    <listOfReactions>
+      <reaction id="T_cell_source" name="creation of T-cells" metaid="metaid_0000034" reversible="false">
+        <listOfProducts>
+          <speciesReference species="T" metaid="_041258"/>
+        </listOfProducts>
+        <kineticLaw metaid="_041270">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> lambda </ci>
+              <ci> plasma </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="T_cell_loss" name="loss of uninfected T-cell" metaid="metaid_0000038" reversible="false">
+        <listOfReactants>
+          <speciesReference species="T" metaid="_041282"/>
+        </listOfReactants>
+        <kineticLaw metaid="_041294">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> delta1 </ci>
+              <ci> T </ci>
+              <ci> plasma </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="infection" name="T-cell infection" metaid="metaid_0000023" reversible="false">
+        <listOfReactants>
+          <speciesReference species="T" metaid="_041306"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="T_i" metaid="_041318"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="V_I" metaid="_041330"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_041342">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k </ci>
+              <ci> V_I </ci>
+              <ci> T </ci>
+              <ci> plasma </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="T_i_lysis" name="infected T-cell lysis" metaid="metaid_0000031" reversible="false">
+        <listOfReactants>
+          <speciesReference species="T_i" metaid="_041354"/>
+        </listOfReactants>
+        <kineticLaw metaid="_041366">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> delta </ci>
+              <ci> T_i </ci>
+              <ci> plasma </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="T_lysis_infect" name="release of infectious virions on lysis" metaid="metaid_0000026" reversible="false">
+        <listOfProducts>
+          <speciesReference species="V_I" metaid="_041378"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="T_i" metaid="_041391"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_041403">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <cn type="integer"> 1 </cn>
+                <ci> np </ci>
+              </apply>
+              <ci> N </ci>
+              <ci> delta </ci>
+              <ci> T_i </ci>
+              <ci> plasma </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="T_lysis_noninf" name="release of non infectious virions on lysis" metaid="metaid_0000028" reversible="false">
+        <listOfProducts>
+          <speciesReference species="V_NI" metaid="_041415"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="T_i" metaid="_041427"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_041439">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> np </ci>
+              <ci> N </ci>
+              <ci> delta </ci>
+              <ci> T_i </ci>
+              <ci> plasma </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="V_I_clearance" name="clearance of infectious virions" metaid="metaid_0000029">
+        <listOfReactants>
+          <speciesReference species="V_I" metaid="_041451"/>
+        </listOfReactants>
+        <kineticLaw metaid="_041463">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> c </ci>
+              <ci> V_I </ci>
+              <ci> plasma </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="V_NI_clearance" name="non-infect. virion clearance" metaid="metaid_0000030" reversible="false">
+        <listOfReactants>
+          <speciesReference species="V_NI" metaid="_041475"/>
+        </listOfReactants>
+        <kineticLaw metaid="_041487">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> c </ci>
+              <ci> V_NI </ci>
+              <ci> plasma </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

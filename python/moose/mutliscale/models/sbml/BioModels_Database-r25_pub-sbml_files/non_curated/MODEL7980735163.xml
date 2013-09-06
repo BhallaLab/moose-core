@@ -1,0 +1,1285 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version3" level="2" metaid="_993773" version="3">
+  <model id="Purvis2005_IonicCurrentModel" name="Purvis2005_IonicCurrentModel" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>Ionic current model of a hypoglossal motoneuron.</strong>
+                <br/>
+          Purvis LK, Butera RJ.      <em>J Neurophysiol.</em>
+          2005:93(2):723-33.      <a href="http://www.ncbi.nlm.nih.gov/pubmed/18068197">18068197</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          We have developed a single-compartment, electrophysiological, hypoglossal motoneuron (HM) model based primarily on experimental data from neonatal rat HMs. The model is able to reproduce the fine features of the HM action potential: the fast afterhyperpolarization, the afterdepolarization, and the medium-duration afterhyperpolarization (mAHP). The model also reproduces the repetitive firing properties seen in neonatal HMs and replicates the neuron's response to pharmacological experiments. The model was used to study the role of specific ionic currents in HM firing and how variations in the densities of these currents may account for age-dependent changes in excitability seen in HMs. By varying the density of a fast inactivating calcium current, the model alternates between accelerating and adapting firing patterns. Modeling the age-dependent increase in H current density accounts for the decrease in mAHP duration observed experimentally, but does not fully account for the decrease in input resistance. An increase in the density of the voltage-dependent potassium currents and the H current is required to account for the decrease in input resistance. These changes also account for the age-dependent decrease in action potential duration.      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://www.cellml.org/models/purvis_butera_2005_version03">        <strong>purvis, butera, (2005) - version03</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>Nunns, Geoffrey, Rogan</strong>
+                <br/>
+          gnunns1@jhem.jhu.edu      <br/>
+          The University of Auckland      <br/>
+          Auckland Bioengineering Institute      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL7980735163"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/15653786"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="millisecond" name="millisecond" metaid="_993785">
+        <listOfUnits>
+          <unit scale="-3" metaid="_993797" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="millivolt" name="millivolt" metaid="_993809">
+        <listOfUnits>
+          <unit scale="-3" metaid="_993821" kind="volt"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="nanoA" name="nanoA" metaid="_993833">
+        <listOfUnits>
+          <unit scale="-9" metaid="_993845" kind="ampere"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="uS" name="uS" metaid="_993858">
+        <listOfUnits>
+          <unit scale="-6" metaid="_993870" kind="siemens"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="uF" name="uF" metaid="_993882">
+        <listOfUnits>
+          <unit scale="-9" metaid="_993894" kind="farad"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="uM" name="uM" metaid="_993906">
+        <listOfUnits>
+          <unit scale="-6" metaid="_993918" kind="mole"/>
+          <unit exponent="-1" metaid="_993931" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_ms" name="per_ms" metaid="_993943">
+        <listOfUnits>
+          <unit scale="-3" exponent="-1" metaid="_993955" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="uM_per_nanocoulomb" name="uM_per_nanocoulomb" metaid="_993967">
+        <listOfUnits>
+          <unit scale="-6" metaid="_993979" kind="mole"/>
+          <unit exponent="-1" metaid="_993991" kind="litre"/>
+          <unit scale="-9" exponent="-1" metaid="_994004" kind="coulomb"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time" name="time" metaid="_994016">
+        <listOfUnits>
+          <unit scale="-3" metaid="_994028" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="Compartment" metaid="_467620" units="litre" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="V_membrane" constant="false" name="V" metaid="_467693" value="-71.847" units="millivolt"/>
+      <parameter id="C" name="C" metaid="_467695" value="0.04" units="uF"/>
+      <parameter id="i_Na" constant="false" name="i_Na" metaid="_467696" units="nanoA"/>
+      <parameter id="g_Na" name="g_Na" metaid="_467698" value="0.7" units="uS"/>
+      <parameter id="E_Na" name="E_Na" metaid="_467699" value="60" units="millivolt"/>
+      <parameter id="V_sodium_current_h_gate" name="V" metaid="_467701" units="millivolt"/>
+      <parameter id="time_sodium_current_h_gate" name="time" metaid="_467702" units="millisecond"/>
+      <parameter id="h_sodium_current_h_gate" constant="false" name="h" metaid="_467704" value="0.981" units="dimensionless"/>
+      <parameter id="theta_h_sodium_current_h_gate" name="theta_h" metaid="_467705" value="44.1" units="millivolt"/>
+      <parameter id="sigma_h_sodium_current_h_gate" name="sigma_h" metaid="_467707" value="7" units="millivolt"/>
+      <parameter id="theta_1_sodium_current_h_gate" name="theta_1" metaid="_467708" value="35" units="millivolt"/>
+      <parameter id="sigma_1_sodium_current_h_gate" name="sigma_1" metaid="_467710" value="4" units="millivolt"/>
+      <parameter id="sigma_2_sodium_current_h_gate" name="sigma_2" metaid="_467711" value="25" units="millivolt"/>
+      <parameter id="tau_h_sodium_current_h_gate" constant="false" name="tau_h" metaid="_467713" units="millisecond"/>
+      <parameter id="h_infinity_sodium_current_h_gate" constant="false" name="h_infinity" metaid="_467714" units="dimensionless"/>
+      <parameter id="V_sodium_current_m_gate" name="V" metaid="_467716" units="millivolt"/>
+      <parameter id="time_sodium_current_m_gate" name="time" metaid="_467717" units="millisecond"/>
+      <parameter id="m_sodium_current_m_gate" constant="false" name="m" metaid="_467719" value="0.015" units="dimensionless"/>
+      <parameter id="theta_m_sodium_current_m_gate" name="theta_m" metaid="_467720" value="36" units="millivolt"/>
+      <parameter id="sigma_m_sodium_current_m_gate" name="sigma_m" metaid="_467722" value="8.5" units="millivolt"/>
+      <parameter id="tau_m_sodium_current_m_gate" name="tau_m" metaid="_467723" value="0.1" units="millisecond"/>
+      <parameter id="m_infinity_sodium_current_m_gate" constant="false" name="m_infinity" metaid="_467725" units="dimensionless"/>
+      <parameter id="i_NaP" constant="false" name="i_NaP" metaid="_467726" units="nanoA"/>
+      <parameter id="g_NaP" name="g_NaP" metaid="_467728" value="0.05" units="uS"/>
+      <parameter id="V_persistent_sodium_current_h_gate" name="V" metaid="_467729" units="millivolt"/>
+      <parameter id="time_persistent_sodium_current_h_gate" name="time" metaid="_467731" units="millisecond"/>
+      <parameter id="h_persistent_sodium_current_h_gate" constant="false" name="h" metaid="_467732" value="0.797" units="dimensionless"/>
+      <parameter id="theta_h_persistent_sodium_current_h_gate" name="theta_h" metaid="_467734" value="65" units="millivolt"/>
+      <parameter id="sigma_h_persistent_sodium_current_h_gate" name="sigma_h" metaid="_467735" value="5" units="millivolt"/>
+      <parameter id="tau_h_persistent_sodium_current_h_gate" name="tau_h" metaid="_467737" value="150" units="millisecond"/>
+      <parameter id="h_infinity_persistent_sodium_current_h_gate" constant="false" name="h_infinity" metaid="_467738" units="dimensionless"/>
+      <parameter id="V_persistent_sodium_current_m_gate" name="V" metaid="_467740" units="millivolt"/>
+      <parameter id="time_persistent_sodium_current_m_gate" name="time" metaid="_467741" units="millisecond"/>
+      <parameter id="m_persistent_sodium_current_m_gate" constant="false" name="m" metaid="_467743" value="0.002" units="dimensionless"/>
+      <parameter id="theta_m_persistent_sodium_current_m_gate" name="theta_m" metaid="_467744" value="47.1" units="millivolt"/>
+      <parameter id="sigma_m_persistent_sodium_current_m_gate" name="sigma_m" metaid="_467746" value="4.1" units="millivolt"/>
+      <parameter id="tau_m_persistent_sodium_current_m_gate" name="tau_m" metaid="_467747" value="0.1" units="millisecond"/>
+      <parameter id="m_infinity_persistent_sodium_current_m_gate" constant="false" name="m_infinity" metaid="_467749" units="dimensionless"/>
+      <parameter id="i_K" constant="false" name="i_K" metaid="_467750" units="nanoA"/>
+      <parameter id="g_K" name="g_K" metaid="_467752" value="1.3" units="uS"/>
+      <parameter id="E_K" name="E_K" metaid="_467753" value="-80" units="millivolt"/>
+      <parameter id="V_delayed_rectifier_current_n_gate" name="V" metaid="_467755" units="millivolt"/>
+      <parameter id="time_delayed_rectifier_current_n_gate" name="time" metaid="_467756" units="millisecond"/>
+      <parameter id="n" constant="false" name="n" metaid="_467758" value="0.158" units="dimensionless"/>
+      <parameter id="theta_n" name="theta_n" metaid="_467759" value="30" units="millivolt"/>
+      <parameter id="sigma_n" name="sigma_n" metaid="_467761" value="25" units="millivolt"/>
+      <parameter id="theta_1_delayed_rectifier_current_n_gate" name="theta_1" metaid="_467762" value="30" units="millivolt"/>
+      <parameter id="sigma_1_delayed_rectifier_current_n_gate" name="sigma_1" metaid="_467764" value="40" units="millivolt"/>
+      <parameter id="sigma_2_delayed_rectifier_current_n_gate" name="sigma_2" metaid="_467765" value="50" units="millivolt"/>
+      <parameter id="tau_n" constant="false" name="tau_n" metaid="_467767" units="millisecond"/>
+      <parameter id="n_infinity" constant="false" name="n_infinity" metaid="_467768" units="dimensionless"/>
+      <parameter id="i_leak" constant="false" name="i_leak" metaid="_467770" units="nanoA"/>
+      <parameter id="g_leak" name="g_leak" metaid="_467771" value="0.005" units="uS"/>
+      <parameter id="E_leak" name="E_leak" metaid="_467773" value="-50" units="millivolt"/>
+      <parameter id="i_T_LVA_calcium_current" constant="false" name="i_T" metaid="_467774" units="nanoA"/>
+      <parameter id="g_T" name="g_T" metaid="_467776" value="0.1" units="uS"/>
+      <parameter id="E_Ca" name="E_Ca" metaid="_467777" value="40" units="millivolt"/>
+      <parameter id="V_LVA_calcium_current_m_gate" name="V" metaid="_467779" units="millivolt"/>
+      <parameter id="time_LVA_calcium_current_m_gate" name="time" metaid="_467780" units="millisecond"/>
+      <parameter id="m_LVA_calcium_current_m_gate" constant="false" name="m" metaid="_467782" value="0.001" units="dimensionless"/>
+      <parameter id="theta_m_LVA_calcium_current_m_gate" name="theta_m" metaid="_467783" value="38" units="millivolt"/>
+      <parameter id="sigma_m_LVA_calcium_current_m_gate" name="sigma_m" metaid="_467785" value="5" units="millivolt"/>
+      <parameter id="theta_1_LVA_calcium_current_m_gate" name="theta_1" metaid="_467786" value="28" units="millivolt"/>
+      <parameter id="sigma_1_LVA_calcium_current_m_gate" name="sigma_1" metaid="_467788" value="25" units="millivolt"/>
+      <parameter id="sigma_2_LVA_calcium_current_m_gate" name="sigma_2" metaid="_467789" value="70" units="millivolt"/>
+      <parameter id="tau_m_LVA_calcium_current_m_gate" constant="false" name="tau_m" metaid="_467791" units="millisecond"/>
+      <parameter id="m_infinity_LVA_calcium_current_m_gate" constant="false" name="m_infinity" metaid="_467792" units="dimensionless"/>
+      <parameter id="V_LVA_calcium_current_h_gate" name="V" metaid="_467794" units="millivolt"/>
+      <parameter id="time_LVA_calcium_current_h_gate" name="time" metaid="_467795" units="millisecond"/>
+      <parameter id="h_LVA_calcium_current_h_gate" constant="false" name="h" metaid="_467797" value="0.562" units="dimensionless"/>
+      <parameter id="theta_h_LVA_calcium_current_h_gate" name="theta_h" metaid="_467798" value="70.1" units="millivolt"/>
+      <parameter id="sigma_h_LVA_calcium_current_h_gate" name="sigma_h" metaid="_467800" value="7" units="millivolt"/>
+      <parameter id="theta_1_LVA_calcium_current_h_gate" name="theta_1" metaid="_467801" value="70" units="millivolt"/>
+      <parameter id="sigma_1_LVA_calcium_current_h_gate" name="sigma_1" metaid="_467803" value="65" units="millivolt"/>
+      <parameter id="tau_h_LVA_calcium_current_h_gate" constant="false" name="tau_h" metaid="_467804" units="millisecond"/>
+      <parameter id="h_infinity_LVA_calcium_current_h_gate" constant="false" name="h_infinity" metaid="_467806" units="dimensionless"/>
+      <parameter id="i_N_N_HVA_calcium_current" constant="false" name="i_N" metaid="_467807" units="nanoA"/>
+      <parameter id="g_N" name="g_N" metaid="_467809" value="0.05" units="uS"/>
+      <parameter id="V_N_HVA_calcium_current_m_gate" name="V" metaid="_467810" units="millivolt"/>
+      <parameter id="time_N_HVA_calcium_current_m_gate" name="time" metaid="_467812" units="millisecond"/>
+      <parameter id="m_N_HVA_calcium_current_m_gate" constant="false" name="m" metaid="_467813" value="0.001" units="dimensionless"/>
+      <parameter id="theta_m_N_HVA_calcium_current_m_gate" name="theta_m" metaid="_467815" value="30" units="millivolt"/>
+      <parameter id="sigma_m_N_HVA_calcium_current_m_gate" name="sigma_m" metaid="_467816" value="6" units="millivolt"/>
+      <parameter id="tau_m_N_HVA_calcium_current_m_gate" name="tau_m" metaid="_467818" value="5" units="millisecond"/>
+      <parameter id="m_infinity_N_HVA_calcium_current_m_gate" constant="false" name="m_infinity" metaid="_467819" units="dimensionless"/>
+      <parameter id="V_N_HVA_calcium_current_h_gate" name="V" metaid="_467821" units="millivolt"/>
+      <parameter id="time_N_HVA_calcium_current_h_gate" name="time" metaid="_467822" units="millisecond"/>
+      <parameter id="h_N_HVA_calcium_current_h_gate" constant="false" name="h" metaid="_467824" value="0.649" units="dimensionless"/>
+      <parameter id="theta_h_N_HVA_calcium_current_h_gate" name="theta_h" metaid="_467825" value="70" units="millivolt"/>
+      <parameter id="sigma_h_N_HVA_calcium_current_h_gate" name="sigma_h" metaid="_467827" value="3" units="millivolt"/>
+      <parameter id="tau_h_N_HVA_calcium_current_h_gate" name="tau_h" metaid="_467828" value="25" units="millisecond"/>
+      <parameter id="h_infinity_N_HVA_calcium_current_h_gate" constant="false" name="h_infinity" metaid="_467830" units="dimensionless"/>
+      <parameter id="i_P_P_HVA_calcium_current" constant="false" name="i_P" metaid="_467831" units="nanoA"/>
+      <parameter id="g_P" name="g_P" metaid="_467833" value="0.05" units="uS"/>
+      <parameter id="V_P_HVA_calcium_current_m_gate" name="V" metaid="_467834" units="millivolt"/>
+      <parameter id="time_P_HVA_calcium_current_m_gate" name="time" metaid="_467836" units="millisecond"/>
+      <parameter id="m_P_HVA_calcium_current_m_gate" constant="false" name="m" metaid="_467837" value="0" units="dimensionless"/>
+      <parameter id="theta_m_P_HVA_calcium_current_m_gate" name="theta_m" metaid="_467839" value="17" units="millivolt"/>
+      <parameter id="sigma_m_P_HVA_calcium_current_m_gate" name="sigma_m" metaid="_467840" value="3" units="millivolt"/>
+      <parameter id="tau_m_P_HVA_calcium_current_m_gate" name="tau_m" metaid="_467842" value="10" units="millisecond"/>
+      <parameter id="m_infinity_P_HVA_calcium_current_m_gate" constant="false" name="m_infinity" metaid="_467843" units="dimensionless"/>
+      <parameter id="i_SK" constant="false" name="i_SK" metaid="_467845" units="nanoA"/>
+      <parameter id="g_SK" name="g_SK" metaid="_467846" value="0.3" units="uS"/>
+      <parameter id="V_calcium_dependent_potassium_current_z_gate" name="V" metaid="_467848" units="millivolt"/>
+      <parameter id="time_calcium_dependent_potassium_current_z_gate" name="time" metaid="_467849" units="millisecond"/>
+      <parameter id="i_T_calcium_dependent_potassium_current_z_gate" name="i_T" metaid="_467851" units="nanoA"/>
+      <parameter id="i_N_calcium_dependent_potassium_current_z_gate" name="i_N" metaid="_467852" units="nanoA"/>
+      <parameter id="i_P_calcium_dependent_potassium_current_z_gate" name="i_P" metaid="_467854" units="nanoA"/>
+      <parameter id="z" constant="false" name="z" metaid="_467855" value="0" units="dimensionless"/>
+      <parameter id="K1" name="K1" metaid="_467857" value="-500" units="uM_per_nanocoulomb"/>
+      <parameter id="K2" name="K2" metaid="_467858" value="0.04" units="per_ms"/>
+      <parameter id="Ca_conc" constant="false" name="Ca_conc" metaid="_467860" value="0.0604" units="uM"/>
+      <parameter id="tau_z" name="tau_z" metaid="_467861" value="1" units="millisecond"/>
+      <parameter id="z_infinity" constant="false" name="z_infinity" metaid="_467863" units="dimensionless"/>
+      <parameter id="i_A" constant="false" name="i_A" metaid="_467864" units="nanoA"/>
+      <parameter id="g_A" name="g_A" metaid="_467866" value="1" units="uS"/>
+      <parameter id="V_fast_transient_potassium_current_m_gate" name="V" metaid="_467867" units="millivolt"/>
+      <parameter id="time_fast_transient_potassium_current_m_gate" name="time" metaid="_467869" units="millisecond"/>
+      <parameter id="m_fast_transient_potassium_current_m_gate" constant="false" name="m" metaid="_467870" value="0.057" units="dimensionless"/>
+      <parameter id="theta_m_fast_transient_potassium_current_m_gate" name="theta_m" metaid="_467877" value="27" units="millivolt"/>
+      <parameter id="sigma_m_fast_transient_potassium_current_m_gate" name="sigma_m" metaid="_467878" value="16" units="millivolt"/>
+      <parameter id="theta_1_fast_transient_potassium_current_m_gate" name="theta_1" metaid="_467880" value="40" units="millivolt"/>
+      <parameter id="theta_2" name="theta_2" metaid="_467881" value="74" units="millivolt"/>
+      <parameter id="sigma_1_fast_transient_potassium_current_m_gate" name="sigma_1" metaid="_467883" value="5" units="millivolt"/>
+      <parameter id="sigma_2_fast_transient_potassium_current_m_gate" name="sigma_2" metaid="_467884" value="7.5" units="millivolt"/>
+      <parameter id="tau_m_fast_transient_potassium_current_m_gate" constant="false" name="tau_m" metaid="_467886" units="millisecond"/>
+      <parameter id="m_infinity_fast_transient_potassium_current_m_gate" constant="false" name="m_infinity" metaid="_467887" units="dimensionless"/>
+      <parameter id="V_fast_transient_potassium_current_h_gate" name="V" metaid="_467889" units="millivolt"/>
+      <parameter id="time_fast_transient_potassium_current_h_gate" name="time" metaid="_467890" units="millisecond"/>
+      <parameter id="h_fast_transient_potassium_current_h_gate" constant="false" name="h" metaid="_467892" value="0.287" units="dimensionless"/>
+      <parameter id="theta_h_fast_transient_potassium_current_h_gate" name="theta_h" metaid="_467893" value="80" units="millivolt"/>
+      <parameter id="sigma_h_fast_transient_potassium_current_h_gate" name="sigma_h" metaid="_467895" value="11" units="millivolt"/>
+      <parameter id="tau_h_fast_transient_potassium_current_h_gate" name="tau_h" metaid="_467896" value="20" units="millisecond"/>
+      <parameter id="h_infinity_fast_transient_potassium_current_h_gate" constant="false" name="h_infinity" metaid="_467898" units="dimensionless"/>
+      <parameter id="i_H" constant="false" name="i_H" metaid="_467899" units="nanoA"/>
+      <parameter id="g_H" name="g_H" metaid="_467901" value="0.005" units="uS"/>
+      <parameter id="E_H" name="E_H" metaid="_467902" value="-38.8" units="millivolt"/>
+      <parameter id="V_hyperpolarization_activated_current_m_gate" name="V" metaid="_467904" units="millivolt"/>
+      <parameter id="time_hyperpolarization_activated_current_m_gate" name="time" metaid="_467905" units="millisecond"/>
+      <parameter id="m_hyperpolarization_activated_current_m_gate" constant="false" name="m" metaid="_467907" value="0.182" units="dimensionless"/>
+      <parameter id="theta_m_hyperpolarization_activated_current_m_gate" name="theta_m" metaid="_467908" value="79.8" units="millivolt"/>
+      <parameter id="sigma_m_hyperpolarization_activated_current_m_gate" name="sigma_m" metaid="_467910" value="5.3" units="millivolt"/>
+      <parameter id="theta_1_hyperpolarization_activated_current_m_gate" name="theta_1" metaid="_467911" value="70" units="millivolt"/>
+      <parameter id="sigma_1_hyperpolarization_activated_current_m_gate" name="sigma_1" metaid="_467913" value="11" units="millivolt"/>
+      <parameter id="tau_m_hyperpolarization_activated_current_m_gate" constant="false" name="tau_m" metaid="_467914" units="millisecond"/>
+      <parameter id="m_infinity_hyperpolarization_activated_current_m_gate" constant="false" name="m_infinity" metaid="_467916" units="dimensionless"/>
+      <parameter id="i_app" constant="false" name="i_app" metaid="_467917" units="nanoA"/>
+      <parameter id="i_stimStart" name="i_stimStart" metaid="_467919" value="10" units="millisecond"/>
+      <parameter id="i_stimEnd" name="i_stimEnd" metaid="_467920" value="11" units="millisecond"/>
+      <parameter id="i_stimAmplitude" name="i_stimAmplitude" metaid="_467922" value="10" units="nanoA"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_467623" variable="V_membrane">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <plus/>
+              <apply>
+                <minus/>
+                <apply>
+                  <plus/>
+                  <ci> i_Na </ci>
+                  <ci> i_NaP </ci>
+                  <ci> i_K </ci>
+                  <ci> i_leak </ci>
+                  <ci> i_T_LVA_calcium_current </ci>
+                  <ci> i_N_N_HVA_calcium_current </ci>
+                  <ci> i_P_P_HVA_calcium_current </ci>
+                  <ci> i_SK </ci>
+                  <ci> i_A </ci>
+                  <ci> i_H </ci>
+                </apply>
+              </apply>
+              <ci> i_app </ci>
+            </apply>
+            <ci> C </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_467625" variable="h_sodium_current_h_gate">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <ci> h_infinity_sodium_current_h_gate </ci>
+              <ci> h_sodium_current_h_gate </ci>
+            </apply>
+            <ci> tau_h_sodium_current_h_gate </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_467626" variable="m_sodium_current_m_gate">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <ci> m_infinity_sodium_current_m_gate </ci>
+              <ci> m_sodium_current_m_gate </ci>
+            </apply>
+            <ci> tau_m_sodium_current_m_gate </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_467628" variable="h_persistent_sodium_current_h_gate">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <ci> h_infinity_persistent_sodium_current_h_gate </ci>
+              <ci> h_persistent_sodium_current_h_gate </ci>
+            </apply>
+            <ci> tau_h_persistent_sodium_current_h_gate </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_467629" variable="m_persistent_sodium_current_m_gate">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <ci> m_infinity_persistent_sodium_current_m_gate </ci>
+              <ci> m_persistent_sodium_current_m_gate </ci>
+            </apply>
+            <ci> tau_m_persistent_sodium_current_m_gate </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_467631" variable="n">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <ci> n_infinity </ci>
+              <ci> n </ci>
+            </apply>
+            <ci> tau_n </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_467632" variable="m_LVA_calcium_current_m_gate">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <ci> m_infinity_LVA_calcium_current_m_gate </ci>
+              <ci> m_LVA_calcium_current_m_gate </ci>
+            </apply>
+            <ci> tau_m_LVA_calcium_current_m_gate </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_467634" variable="h_LVA_calcium_current_h_gate">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <ci> h_infinity_LVA_calcium_current_h_gate </ci>
+              <ci> h_LVA_calcium_current_h_gate </ci>
+            </apply>
+            <ci> tau_h_LVA_calcium_current_h_gate </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_467635" variable="m_N_HVA_calcium_current_m_gate">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <ci> m_infinity_N_HVA_calcium_current_m_gate </ci>
+              <ci> m_N_HVA_calcium_current_m_gate </ci>
+            </apply>
+            <ci> tau_m_N_HVA_calcium_current_m_gate </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_467637" variable="h_N_HVA_calcium_current_h_gate">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <ci> h_infinity_N_HVA_calcium_current_h_gate </ci>
+              <ci> h_N_HVA_calcium_current_h_gate </ci>
+            </apply>
+            <ci> tau_h_N_HVA_calcium_current_h_gate </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_467638" variable="m_P_HVA_calcium_current_m_gate">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <ci> m_infinity_P_HVA_calcium_current_m_gate </ci>
+              <ci> m_P_HVA_calcium_current_m_gate </ci>
+            </apply>
+            <ci> tau_m_P_HVA_calcium_current_m_gate </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_467640" variable="Ca_conc">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <cn> 1000 </cn>
+              </apply>
+              <ci> K1 </ci>
+              <apply>
+                <plus/>
+                <ci> i_T_calcium_dependent_potassium_current_z_gate </ci>
+                <ci> i_N_calcium_dependent_potassium_current_z_gate </ci>
+                <ci> i_P_calcium_dependent_potassium_current_z_gate </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> K2 </ci>
+              <ci> Ca_conc </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_467641" variable="z">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <ci> z_infinity </ci>
+              <ci> z </ci>
+            </apply>
+            <ci> tau_z </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_467643" variable="m_fast_transient_potassium_current_m_gate">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <ci> m_infinity_fast_transient_potassium_current_m_gate </ci>
+              <ci> m_fast_transient_potassium_current_m_gate </ci>
+            </apply>
+            <ci> tau_m_fast_transient_potassium_current_m_gate </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_467644" variable="h_fast_transient_potassium_current_h_gate">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <ci> h_infinity_fast_transient_potassium_current_h_gate </ci>
+              <ci> h_fast_transient_potassium_current_h_gate </ci>
+            </apply>
+            <ci> tau_h_fast_transient_potassium_current_h_gate </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_467646" variable="m_hyperpolarization_activated_current_m_gate">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <ci> m_infinity_hyperpolarization_activated_current_m_gate </ci>
+              <ci> m_hyperpolarization_activated_current_m_gate </ci>
+            </apply>
+            <ci> tau_m_hyperpolarization_activated_current_m_gate </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="_467647" variable="i_Na">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> g_Na </ci>
+            <apply>
+              <power/>
+              <ci> m_sodium_current_m_gate </ci>
+              <cn> 3 </cn>
+            </apply>
+            <ci> h_sodium_current_h_gate </ci>
+            <apply>
+              <minus/>
+              <ci> V_membrane </ci>
+              <ci> E_Na </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_467649" variable="tau_h_sodium_current_h_gate">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <divide/>
+              <cn> 3.5 </cn>
+              <apply>
+                <plus/>
+                <apply>
+                  <exp/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <plus/>
+                      <ci> V_sodium_current_h_gate </ci>
+                      <ci> theta_1_sodium_current_h_gate </ci>
+                    </apply>
+                    <ci> sigma_1_sodium_current_h_gate </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <exp/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <plus/>
+                        <ci> V_sodium_current_h_gate </ci>
+                        <ci> theta_1_sodium_current_h_gate </ci>
+                      </apply>
+                    </apply>
+                    <ci> sigma_2_sodium_current_h_gate </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+            <cn> 1 </cn>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_467650" variable="h_infinity_sodium_current_h_gate">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn> 1 </cn>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <exp/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <plus/>
+                    <ci> V_sodium_current_h_gate </ci>
+                    <ci> theta_h_sodium_current_h_gate </ci>
+                  </apply>
+                  <ci> sigma_h_sodium_current_h_gate </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_467652" variable="m_infinity_sodium_current_m_gate">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn> 1 </cn>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <exp/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <plus/>
+                    <ci> V_sodium_current_m_gate </ci>
+                    <ci> theta_m_sodium_current_m_gate </ci>
+                  </apply>
+                  <apply>
+                    <minus/>
+                    <ci> sigma_m_sodium_current_m_gate </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_467653" variable="i_NaP">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> g_NaP </ci>
+            <ci> m_persistent_sodium_current_m_gate </ci>
+            <ci> h_persistent_sodium_current_h_gate </ci>
+            <apply>
+              <minus/>
+              <ci> V_membrane </ci>
+              <ci> E_Na </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_467655" variable="h_infinity_persistent_sodium_current_h_gate">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn> 1 </cn>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <exp/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <plus/>
+                    <ci> V_persistent_sodium_current_h_gate </ci>
+                    <ci> theta_h_persistent_sodium_current_h_gate </ci>
+                  </apply>
+                  <ci> sigma_h_persistent_sodium_current_h_gate </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_467656" variable="m_infinity_persistent_sodium_current_m_gate">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn> 1 </cn>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <exp/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <plus/>
+                      <ci> V_persistent_sodium_current_m_gate </ci>
+                      <ci> theta_m_persistent_sodium_current_m_gate </ci>
+                    </apply>
+                  </apply>
+                  <ci> sigma_m_persistent_sodium_current_m_gate </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_467658" variable="i_K">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> g_K </ci>
+            <apply>
+              <power/>
+              <ci> n </ci>
+              <cn> 4 </cn>
+            </apply>
+            <apply>
+              <minus/>
+              <ci> V_membrane </ci>
+              <ci> E_K </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_467659" variable="tau_n">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <divide/>
+              <cn> 2.5 </cn>
+              <apply>
+                <plus/>
+                <apply>
+                  <exp/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <plus/>
+                      <ci> V_delayed_rectifier_current_n_gate </ci>
+                      <ci> theta_1_delayed_rectifier_current_n_gate </ci>
+                    </apply>
+                    <ci> sigma_1_delayed_rectifier_current_n_gate </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <exp/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <plus/>
+                        <ci> V_delayed_rectifier_current_n_gate </ci>
+                        <ci> theta_1_delayed_rectifier_current_n_gate </ci>
+                      </apply>
+                    </apply>
+                    <ci> sigma_2_delayed_rectifier_current_n_gate </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+            <cn> 0.01 </cn>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_467661" variable="n_infinity">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn> 1 </cn>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <exp/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <plus/>
+                      <ci> V_delayed_rectifier_current_n_gate </ci>
+                      <ci> theta_n </ci>
+                    </apply>
+                  </apply>
+                  <ci> sigma_n </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_467662" variable="i_leak">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> g_leak </ci>
+            <apply>
+              <minus/>
+              <ci> V_membrane </ci>
+              <ci> E_leak </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_467664" variable="i_T_LVA_calcium_current">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> g_T </ci>
+            <ci> m_LVA_calcium_current_m_gate </ci>
+            <ci> h_LVA_calcium_current_h_gate </ci>
+            <apply>
+              <minus/>
+              <ci> V_membrane </ci>
+              <ci> E_Ca </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_467665" variable="tau_m_LVA_calcium_current_m_gate">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <divide/>
+              <cn> 5 </cn>
+              <apply>
+                <plus/>
+                <apply>
+                  <exp/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <plus/>
+                      <ci> V_LVA_calcium_current_m_gate </ci>
+                      <ci> theta_1_LVA_calcium_current_m_gate </ci>
+                    </apply>
+                    <ci> sigma_1_LVA_calcium_current_m_gate </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <exp/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <plus/>
+                        <ci> V_LVA_calcium_current_m_gate </ci>
+                        <ci> theta_1_LVA_calcium_current_m_gate </ci>
+                      </apply>
+                    </apply>
+                    <ci> sigma_2_LVA_calcium_current_m_gate </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+            <cn> 2 </cn>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_467667" variable="m_infinity_LVA_calcium_current_m_gate">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn> 1 </cn>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <exp/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <plus/>
+                      <ci> V_LVA_calcium_current_m_gate </ci>
+                      <ci> theta_m_LVA_calcium_current_m_gate </ci>
+                    </apply>
+                  </apply>
+                  <ci> sigma_m_LVA_calcium_current_m_gate </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_467668" variable="tau_h_LVA_calcium_current_h_gate">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <divide/>
+              <cn> 20 </cn>
+              <apply>
+                <plus/>
+                <apply>
+                  <exp/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <plus/>
+                      <ci> V_LVA_calcium_current_h_gate </ci>
+                      <ci> theta_1_LVA_calcium_current_h_gate </ci>
+                    </apply>
+                    <ci> sigma_1_LVA_calcium_current_h_gate </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <exp/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <plus/>
+                        <ci> V_LVA_calcium_current_h_gate </ci>
+                        <ci> theta_1_LVA_calcium_current_h_gate </ci>
+                      </apply>
+                    </apply>
+                    <ci> sigma_1_LVA_calcium_current_h_gate </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+            <cn> 1 </cn>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_467670" variable="h_infinity_LVA_calcium_current_h_gate">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn> 1 </cn>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <exp/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <plus/>
+                    <ci> V_LVA_calcium_current_h_gate </ci>
+                    <ci> theta_h_LVA_calcium_current_h_gate </ci>
+                  </apply>
+                  <ci> sigma_h_LVA_calcium_current_h_gate </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_467671" variable="i_N_N_HVA_calcium_current">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> g_N </ci>
+            <ci> m_N_HVA_calcium_current_m_gate </ci>
+            <ci> h_N_HVA_calcium_current_h_gate </ci>
+            <apply>
+              <minus/>
+              <ci> V_membrane </ci>
+              <ci> E_Ca </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_467673" variable="m_infinity_N_HVA_calcium_current_m_gate">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn> 1 </cn>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <exp/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <plus/>
+                      <ci> V_N_HVA_calcium_current_m_gate </ci>
+                      <ci> theta_m_N_HVA_calcium_current_m_gate </ci>
+                    </apply>
+                  </apply>
+                  <ci> sigma_m_N_HVA_calcium_current_m_gate </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_467674" variable="h_infinity_N_HVA_calcium_current_h_gate">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn> 1 </cn>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <exp/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <plus/>
+                    <ci> V_N_HVA_calcium_current_h_gate </ci>
+                    <ci> theta_h_N_HVA_calcium_current_h_gate </ci>
+                  </apply>
+                  <ci> sigma_h_N_HVA_calcium_current_h_gate </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_467676" variable="i_P_P_HVA_calcium_current">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> g_P </ci>
+            <ci> m_P_HVA_calcium_current_m_gate </ci>
+            <apply>
+              <minus/>
+              <ci> V_membrane </ci>
+              <ci> E_Ca </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_467677" variable="m_infinity_P_HVA_calcium_current_m_gate">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn> 1 </cn>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <exp/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <plus/>
+                      <ci> V_P_HVA_calcium_current_m_gate </ci>
+                      <ci> theta_m_P_HVA_calcium_current_m_gate </ci>
+                    </apply>
+                  </apply>
+                  <ci> sigma_m_P_HVA_calcium_current_m_gate </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_467679" variable="i_SK">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> g_SK </ci>
+            <apply>
+              <power/>
+              <ci> z </ci>
+              <cn> 2 </cn>
+            </apply>
+            <apply>
+              <minus/>
+              <ci> V_membrane </ci>
+              <ci> E_K </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_467680" variable="z_infinity">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn> 1 </cn>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <power/>
+                <apply>
+                  <divide/>
+                  <cn> 0.003 </cn>
+                  <ci> Ca_conc </ci>
+                </apply>
+                <cn> 2 </cn>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_467682" variable="i_A">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> g_A </ci>
+            <ci> m_fast_transient_potassium_current_m_gate </ci>
+            <ci> h_fast_transient_potassium_current_h_gate </ci>
+            <apply>
+              <minus/>
+              <ci> V_membrane </ci>
+              <ci> E_K </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_467683" variable="tau_m_fast_transient_potassium_current_m_gate">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <divide/>
+              <cn> 1 </cn>
+              <apply>
+                <plus/>
+                <apply>
+                  <exp/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <plus/>
+                      <ci> V_fast_transient_potassium_current_m_gate </ci>
+                      <ci> theta_1_fast_transient_potassium_current_m_gate </ci>
+                    </apply>
+                    <ci> sigma_1_fast_transient_potassium_current_m_gate </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <exp/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <plus/>
+                        <ci> V_fast_transient_potassium_current_m_gate </ci>
+                        <ci> theta_2 </ci>
+                      </apply>
+                    </apply>
+                    <ci> sigma_2_fast_transient_potassium_current_m_gate </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+            <cn> 0.37 </cn>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_467685" variable="m_infinity_fast_transient_potassium_current_m_gate">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn> 1 </cn>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <exp/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <plus/>
+                      <ci> V_fast_transient_potassium_current_m_gate </ci>
+                      <ci> theta_m_fast_transient_potassium_current_m_gate </ci>
+                    </apply>
+                  </apply>
+                  <ci> sigma_m_fast_transient_potassium_current_m_gate </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_467686" variable="h_infinity_fast_transient_potassium_current_h_gate">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn> 1 </cn>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <exp/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <plus/>
+                    <ci> V_fast_transient_potassium_current_h_gate </ci>
+                    <ci> theta_h_fast_transient_potassium_current_h_gate </ci>
+                  </apply>
+                  <ci> sigma_h_fast_transient_potassium_current_h_gate </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_467688" variable="i_H">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> g_H </ci>
+            <ci> m_hyperpolarization_activated_current_m_gate </ci>
+            <apply>
+              <minus/>
+              <ci> V_membrane </ci>
+              <ci> E_H </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_467689" variable="tau_m_hyperpolarization_activated_current_m_gate">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <divide/>
+              <cn> 1 </cn>
+              <apply>
+                <plus/>
+                <apply>
+                  <exp/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <plus/>
+                      <ci> V_hyperpolarization_activated_current_m_gate </ci>
+                      <ci> theta_1_hyperpolarization_activated_current_m_gate </ci>
+                    </apply>
+                    <ci> sigma_1_hyperpolarization_activated_current_m_gate </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <exp/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <plus/>
+                        <ci> V_hyperpolarization_activated_current_m_gate </ci>
+                        <ci> theta_1_hyperpolarization_activated_current_m_gate </ci>
+                      </apply>
+                    </apply>
+                    <ci> sigma_1_hyperpolarization_activated_current_m_gate </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+            <cn> 50 </cn>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_467691" variable="m_infinity_hyperpolarization_activated_current_m_gate">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn> 1 </cn>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <exp/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <plus/>
+                    <ci> V_hyperpolarization_activated_current_m_gate </ci>
+                    <ci> theta_m_hyperpolarization_activated_current_m_gate </ci>
+                  </apply>
+                  <ci> sigma_m_hyperpolarization_activated_current_m_gate </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_467692" variable="i_app">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <ci> i_stimAmplitude </ci>
+              <apply>
+                <and/>
+                <apply>
+                  <geq/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <ci> i_stimStart </ci>
+                </apply>
+                <apply>
+                  <leq/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <ci> i_stimEnd </ci>
+                </apply>
+              </apply>
+            </piece>
+            <otherwise>
+              <cn> 0 </cn>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+  </model>
+</sbml>

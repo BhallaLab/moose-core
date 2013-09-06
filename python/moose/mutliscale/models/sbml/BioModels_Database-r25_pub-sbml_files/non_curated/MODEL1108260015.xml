@@ -1,0 +1,300 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="metaid_0000001" version="4">
+  <model id="model01" name="Qiao2004_ThrombinGeneration" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Schubert</vCard:Family>
+                  <vCard:Given>Michael</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>schubert@ebi.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>EBI</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Schubert</vCard:Family>
+                  <vCard:Given>Michael</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>schubert@ebi.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>EBI</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Schubert</vCard:Family>
+                  <vCard:Given>Michael</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>schubert@ebi.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>EBI</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2011-06-14T09:37:25Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2011-08-26T16:58:57Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2011-08-26T16:58:57Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2011-08-26T16:58:57Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1108260015"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/15121060"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfCompartments>
+      <compartment id="compartment_1" metaid="metaid_0000003"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="IXa" initialConcentration="0.01" name="IXa" metaid="metaid_0000004" compartment="compartment_1"/>
+      <species id="VIIIa" initialConcentration="0.01" name="VIIIa" metaid="metaid_0000005" compartment="compartment_1"/>
+      <species id="Xa" initialConcentration="0.01" name="Xa" metaid="metaid_0000006" compartment="compartment_1"/>
+      <species id="Va" initialConcentration="0.01" name="Va" metaid="metaid_0000007" compartment="compartment_1"/>
+      <species id="APC" initialConcentration="0.01" name="APC" metaid="metaid_0000008" compartment="compartment_1"/>
+      <species id="IIa" initialConcentration="0.01" name="IIa" metaid="metaid_0000009" compartment="compartment_1"/>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="k1" name="k1" metaid="metaid_0000011" value="15"/>
+      <parameter id="k2" name="k2" metaid="metaid_0000012" value="2.3"/>
+      <parameter id="k3" name="k3" metaid="metaid_0000013" value="1.4"/>
+      <parameter id="k4" name="k4" metaid="metaid_0000014" value="4"/>
+      <parameter id="k5" name="k5" metaid="metaid_0000015" value="221"/>
+      <parameter id="k6" name="k6" metaid="metaid_0000016" value="2.6"/>
+      <parameter id="k7" name="k7" metaid="metaid_0000017" value="0.5"/>
+      <parameter id="k8" name="k8" metaid="metaid_0000018" value="0.87"/>
+      <parameter id="k9" name="k9" metaid="metaid_0000019" value="1900"/>
+      <parameter id="h1" name="h1" metaid="metaid_0000020" value="0.01"/>
+      <parameter id="h2" name="h2" metaid="metaid_0000021" value="0.35"/>
+      <parameter id="h3" name="h3" metaid="metaid_0000022" value="0.33"/>
+      <parameter id="h4" name="h4" metaid="metaid_0000023" value="0.4"/>
+      <parameter id="h5" name="h5" metaid="metaid_0000024" value="0.34"/>
+      <parameter id="h6" name="h6" metaid="metaid_0000025" value="0.35"/>
+      <parameter id="b1" name="b1" metaid="metaid_0000026" value="11"/>
+      <parameter id="b2" name="b2" metaid="metaid_0000027" value="23"/>
+      <parameter id="b3" name="b3" metaid="metaid_0000029" value="6.1"/>
+      <parameter id="b4" name="b4" metaid="metaid_0000030" value="250"/>
+      <parameter id="beta" name="beta" metaid="metaid_0000031" value="0"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="metaid_0000034" variable="IXa">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> compartment_1 </ci>
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> beta </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> h1 </ci>
+                <ci> IXa </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000035" variable="VIIIa">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> compartment_1 </ci>
+            <apply>
+              <minus/>
+              <apply>
+                <minus/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> k2 </ci>
+                    <ci> IIa </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> k3 </ci>
+                    <ci> Xa </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> k4 </ci>
+                    <ci> APC </ci>
+                    <ci> VIIIa </ci>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <ci> b1 </ci>
+                    <ci> VIIIa </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> h2 </ci>
+                <ci> VIIIa </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000036" variable="Xa">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> compartment_1 </ci>
+            <apply>
+              <minus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> k5 </ci>
+                  <ci> IXa </ci>
+                  <ci> VIIIa </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> b2 </ci>
+                  <ci> VIIIa </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> h3 </ci>
+                <ci> Xa </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000037" variable="Va">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> compartment_1 </ci>
+            <apply>
+              <minus/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k6 </ci>
+                  <ci> IIa </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> k7 </ci>
+                    <ci> APC </ci>
+                    <ci> Va </ci>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <ci> b3 </ci>
+                    <ci> Va </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> h4 </ci>
+                <ci> Va </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000038" variable="APC">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> compartment_1 </ci>
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k8 </ci>
+                <ci> IIa </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> h5 </ci>
+                <ci> APC </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000039" variable="IIa">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> compartment_1 </ci>
+            <apply>
+              <minus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> k9 </ci>
+                  <ci> Xa </ci>
+                  <ci> Va </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> b4 </ci>
+                  <ci> Va </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> h6 </ci>
+                <ci> IIa </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+    </listOfRules>
+  </model>
+</sbml>

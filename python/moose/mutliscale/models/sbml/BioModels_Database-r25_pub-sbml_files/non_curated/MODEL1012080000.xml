@@ -1,0 +1,665 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="_812612" version="4">
+  <model id="Heitzler2012_GPCRsignalling" name="Heitzler2012_GPCRsignalling" metaid="_812624">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This model is from the article:      <br/>
+                <strong>Competing G protein-coupled receptor kinases balance G protein and β-arrestin signaling</strong>
+                <br/>
+          Heitzler D, Durand G, Gallay N, Rizk A, Ahn S, Kim J, Violin JD, Dupuy L, Gauthier C, Piketty V, Crépieux P, Poupon A, Clément F, Fages F, Lefkowitz RJ, Reiter E.      <em>Mol Syst Biol.</em>
+          2012; 8: 590.      <a href="http://www.ncbi.nlm.nih.gov/pubmed/22735336">22735336</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          Seven-transmembrane receptors (7TMRs) are involved in nearly all aspects of chemical communications and represent major drug targets. 7TMRs transmit their signals not only via heterotrimeric G proteins but also through β-arrestins, whose recruitment to the activated receptor is regulated by G protein-coupled receptor kinases (GRKs). In this paper, we combined experimental approaches with computational modeling to decipher the molecular mechanisms as well as the hidden dynamics governing extracellular signal-regulated kinase (ERK) activation by the angiotensin II type 1A receptor (AT(1A)R) in human embryonic kidney (HEK)293 cells. We built an abstracted ordinary differential equations (ODE)-based model that captured the available knowledge and experimental data. We inferred the unknown parameters by simultaneously fitting experimental data generated in both control and perturbed conditions. We demonstrate that, in addition to its well-established function in the desensitization of G-protein activation, GRK2 exerts a strong negative effect on β-arrestin-dependent signaling through its competition with GRK5 and 6 for receptor phosphorylation. Importantly, we experimentally confirmed the validity of this novel GRK2-dependent mechanism in both primary vascular smooth muscle cells naturally expressing the AT(1A)R, and HEK293 cells expressing other 7TMRs.      </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#_812624">
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1012080000"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/22735336"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfCompartments>
+      <compartment id="compartmentOne" metaid="_812636" size="1"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="HR" initialConcentration="0.08" name="H-R" metaid="_812648" compartment="compartmentOne"/>
+      <species id="G" initialConcentration="56.99" name="G" metaid="_812660" compartment="compartmentOne"/>
+      <species id="ERK" initialConcentration="4.243" name="ERK" metaid="_812672" compartment="compartmentOne"/>
+      <species id="PIP2" initialConcentration="0.997" name="PIP2" metaid="_812684" compartment="compartmentOne"/>
+      <species id="DAG" initialConcentration="0.009" name="DAG" metaid="_812696" compartment="compartmentOne"/>
+      <species id="PKC" initialConcentration="8.842" name="PKC" metaid="_812708" compartment="compartmentOne"/>
+      <species id="PKC_a" initialConcentration="0.002" name="PKC_a" metaid="_812720" compartment="compartmentOne"/>
+      <species id="GpERK" initialConcentration="0.015" name="GpERK" metaid="_812732" compartment="compartmentOne"/>
+      <species id="bpERK" initialConcentration="0.015" name="bpERK" metaid="_812745" compartment="compartmentOne"/>
+      <species id="barr1" initialConcentration="0.858" name="barr1" metaid="_812758" compartment="compartmentOne"/>
+      <species id="barr2" initialConcentration="0.483" name="barr2" metaid="_812771" compartment="compartmentOne"/>
+      <species id="G_a" initialConcentration="0" name="G_a" metaid="_812784" compartment="compartmentOne"/>
+      <species id="HRP1" initialConcentration="0" name="H-R~{P1}" metaid="_812797" compartment="compartmentOne"/>
+      <species id="Hbarr1RP1" initialConcentration="0" name="H-barr1-R~{P1}" metaid="_812810" compartment="compartmentOne"/>
+      <species id="Hbarr2RP1" initialConcentration="0" name="H-barr2-R~{P1}" metaid="_812823" compartment="compartmentOne"/>
+      <species id="HRP2" initialConcentration="0" name="H-R~{P2}" metaid="_812836" compartment="compartmentOne"/>
+      <species id="HRbarr2" initialConcentration="0" name="H-R-barr2" metaid="_812849" compartment="compartmentOne"/>
+      <species id="Hbarr2RP2" initialConcentration="0" name="H-barr2-R~{P2}" metaid="_812862" compartment="compartmentOne"/>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="k0" constant="false" name="k0" metaid="_812875" value="0.000311"/>
+      <parameter id="k1" constant="false" name="k1" metaid="_812888" value="0.0178"/>
+      <parameter id="k2" constant="false" name="k2" metaid="_812900" value="7.6"/>
+      <parameter id="k3" constant="false" name="k3" metaid="_812912" value="4.63"/>
+      <parameter id="k4" constant="false" name="k4" metaid="_812925" value="0.0787"/>
+      <parameter id="k5" constant="false" name="k5" metaid="_812937" value="2.65"/>
+      <parameter id="k6" constant="false" name="k6" metaid="_812949" value="5.0985"/>
+      <parameter id="k7" constant="false" name="k7" metaid="_812961" value="0.461"/>
+      <parameter id="k8" constant="false" name="k8" metaid="_812973" value="1.77"/>
+      <parameter id="k9" constant="false" name="k9" metaid="_812985" value="3.04"/>
+      <parameter id="k10" constant="false" name="k10" metaid="_812997" value="2.27"/>
+      <parameter id="k11" constant="false" name="k11" metaid="_813009" value="2.61"/>
+      <parameter id="k12" constant="false" name="k12" metaid="_813021" value="2.59"/>
+      <parameter id="k13" constant="false" name="k13" metaid="_813033" value="0.00619"/>
+      <parameter id="k14" constant="false" name="k14" metaid="_813045" value="0.0311"/>
+      <parameter id="k15" constant="false" name="k15" metaid="_813057" value="6.54E-5"/>
+      <parameter id="k16" constant="false" name="k16" metaid="_813069" value="0.0723"/>
+      <parameter id="k17" constant="false" name="k17" metaid="_813081" value="0.0665"/>
+      <parameter id="k18" constant="false" name="k18" metaid="_813093" value="0.59"/>
+      <parameter id="k19" constant="false" name="k19" metaid="_813105" value="0.205"/>
+      <parameter id="k20" constant="false" name="k20" metaid="_813117" value="1.04"/>
+      <parameter id="k21" constant="false" name="k21" metaid="_813129" value="0.00042"/>
+      <parameter id="k22" constant="false" name="k22" metaid="_813141" value="14.44"/>
+      <parameter id="k23" constant="false" name="k23" metaid="_813153" value="1.05"/>
+      <parameter id="k24" constant="false" name="k24" metaid="_813165" value="0.347"/>
+      <parameter id="k25" constant="false" name="k25" metaid="_813177" value="0.762"/>
+      <parameter id="GRK23" constant="false" name="GRK23" metaid="_813189" value="0.899447579"/>
+      <parameter id="GRK56" constant="false" name="GRK56" metaid="_813201" value="1.5180818"/>
+      <parameter id="GRK23_si" constant="false" name="GRK23_si" metaid="_813213" value="0.478865092"/>
+      <parameter id="GRK56_si" constant="false" name="GRK56_si" metaid="_813225" value="0.00103512491"/>
+      <parameter id="P0_Ro" constant="false" name="P0_Ro" metaid="_813237" value="0.00173556731"/>
+      <parameter id="P0_a_Ro" constant="false" name="P0_a_Ro" metaid="_813249" value="2.09075206E-5"/>
+      <parameter id="barr2_0_si" constant="false" name="barr2_0_si" metaid="_813261" value="0.000112306963"/>
+      <parameter id="nDAG" constant="false" name="nDAG" metaid="_813273" value="4.11974423"/>
+      <parameter id="nPKC" constant="false" name="nPKC" metaid="_813285" value="7.20901786"/>
+    </listOfParameters>
+    <listOfReactions>
+      <reaction id="R_1" metaid="_813297" reversible="false">
+        <listOfReactants>
+          <speciesReference species="G" metaid="_813309" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="G_a" metaid="_813321" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="G" metaid="_947102"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_813333">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k0 </ci>
+              <ci> G </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_2" metaid="_813345" reversible="false">
+        <listOfReactants>
+          <speciesReference species="G" metaid="_813357" stoichiometry="1"/>
+          <speciesReference species="HRP1" metaid="_813369" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="G_a" metaid="_813381" stoichiometry="1"/>
+          <speciesReference species="HRP1" metaid="_813393" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="G" metaid="_947114"/>
+          <modifierSpeciesReference species="HRP1" metaid="_947126"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_813405">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k1 </ci>
+              <ci> G </ci>
+              <ci> HRP1 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_3" metaid="_813417" reversible="false">
+        <listOfReactants>
+          <speciesReference species="G" metaid="_813429" stoichiometry="1"/>
+          <speciesReference species="HR" metaid="_813441" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="G_a" metaid="_813453" stoichiometry="1"/>
+          <speciesReference species="HR" metaid="_813465" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="G" metaid="_947138"/>
+          <modifierSpeciesReference species="HR" metaid="_947150"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_813477">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k2 </ci>
+              <ci> G </ci>
+              <ci> HR </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_4" metaid="_813489" reversible="false">
+        <listOfReactants>
+          <speciesReference species="G_a" metaid="_813501" stoichiometry="1"/>
+          <speciesReference species="PIP2" metaid="_813513" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="DAG" metaid="_813525" stoichiometry="1"/>
+          <speciesReference species="G_a" metaid="_813537" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="G_a" metaid="_947162"/>
+          <modifierSpeciesReference species="PIP2" metaid="_947174"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_813549">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> G_a </ci>
+              <ci> PIP2 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_5" metaid="_813561" reversible="false">
+        <listOfReactants>
+          <speciesReference species="DAG" metaid="_813573" stoichiometry="1"/>
+          <speciesReference species="PKC" metaid="_813585" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="DAG" metaid="_813597" stoichiometry="1"/>
+          <speciesReference species="PKC_a" metaid="_813609" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="DAG" metaid="_947186"/>
+          <modifierSpeciesReference species="PKC" metaid="_947199"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_813621">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k4 </ci>
+              <ci> DAG </ci>
+              <ci> PKC </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_6" metaid="_813633" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ERK" metaid="_813645" stoichiometry="1"/>
+          <speciesReference species="PKC_a" metaid="_813657" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="GpERK" metaid="_813669" stoichiometry="1"/>
+          <speciesReference species="PKC_a" metaid="_813681" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="ERK" metaid="_947211"/>
+          <modifierSpeciesReference species="PKC_a" metaid="_947223"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_813693">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k5 </ci>
+              <ci> ERK </ci>
+              <ci> PKC_a </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_7" metaid="_813705" reversible="false">
+        <listOfReactants>
+          <speciesReference species="G_a" metaid="_813717" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="G" metaid="_813729" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="G_a" metaid="_947235"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_813741">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k6 </ci>
+              <ci> G_a </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_8" metaid="_813753" reversible="false">
+        <listOfReactants>
+          <speciesReference species="DAG" metaid="_813765" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PIP2" metaid="_813777" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="DAG" metaid="_947248"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_813789">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k7 </ci>
+              <ci> DAG </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_9" metaid="_813801" reversible="false">
+        <listOfReactants>
+          <speciesReference species="PKC_a" metaid="_813813" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PKC" metaid="_813825" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="PKC_a" metaid="_947260"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_813837">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k8 </ci>
+              <ci> PKC_a </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_10" metaid="_813849" reversible="false">
+        <listOfReactants>
+          <speciesReference species="GpERK" metaid="_813861" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ERK" metaid="_813873" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="GpERK" metaid="_947272"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_813885">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k9 </ci>
+              <ci> GpERK </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_11" metaid="_813897" reversible="false">
+        <listOfReactants>
+          <speciesReference species="HR" metaid="_813909" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="HRP1" metaid="_813921" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="HR" metaid="_947284"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_813933">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k10 </ci>
+              <ci> GRK23 </ci>
+              <ci> HR </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_12" metaid="_813945" reversible="false">
+        <listOfReactants>
+          <speciesReference species="barr1" metaid="_813957" stoichiometry="1"/>
+          <speciesReference species="HRP1" metaid="_813969" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Hbarr1RP1" metaid="_813981" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="barr1" metaid="_947296"/>
+          <modifierSpeciesReference species="HRP1" metaid="_947308"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_813993">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k11 </ci>
+              <ci> barr1 </ci>
+              <ci> HRP1 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_13" metaid="_814005" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Hbarr1RP1" metaid="_814017" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="barr1" metaid="_814029" stoichiometry="1"/>
+          <speciesReference species="HRP1" metaid="_814041" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Hbarr1RP1" metaid="_947320"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_814053">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k13 </ci>
+              <ci> Hbarr1RP1 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_14" metaid="_814065" reversible="false">
+        <listOfReactants>
+          <speciesReference species="barr2" metaid="_814077" stoichiometry="1"/>
+          <speciesReference species="HRP1" metaid="_814089" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Hbarr2RP1" metaid="_814101" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="barr2" metaid="_947332"/>
+          <modifierSpeciesReference species="HRP1" metaid="_947344"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_814113">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k12 </ci>
+              <ci> barr2 </ci>
+              <ci> HRP1 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_15" metaid="_814125" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Hbarr2RP1" metaid="_814137" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="barr2" metaid="_814149" stoichiometry="1"/>
+          <speciesReference species="HRP1" metaid="_814161" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Hbarr2RP1" metaid="_947356"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_814173">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k14 </ci>
+              <ci> Hbarr2RP1 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_16" metaid="_814185" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Hbarr1RP1" metaid="_814197" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="barr1" metaid="_814209" stoichiometry="1"/>
+          <speciesReference species="HR" metaid="_814221" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Hbarr1RP1" metaid="_947368"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_814233">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k15 </ci>
+              <ci> Hbarr1RP1 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_17" metaid="_814245" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Hbarr2RP1" metaid="_814257" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="barr2" metaid="_814268" stoichiometry="1"/>
+          <speciesReference species="HR" metaid="_814280" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Hbarr2RP1" metaid="_947380"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_814292">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k16 </ci>
+              <ci> Hbarr2RP1 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_18" metaid="_814304" reversible="false">
+        <listOfReactants>
+          <speciesReference species="HR" metaid="_814316" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="HRP2" metaid="_814328" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="HR" metaid="_947393"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_814340">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k18 </ci>
+              <ci> GRK56 </ci>
+              <ci> HR </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_19" metaid="_814352" reversible="false">
+        <listOfReactants>
+          <speciesReference species="HRP2" metaid="_814364" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="HR" metaid="_814376" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="HRP2" metaid="_947405"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_814388">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k17 </ci>
+              <ci> HRP2 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_20" metaid="_814400" reversible="false">
+        <listOfReactants>
+          <speciesReference species="barr2" metaid="_814412" stoichiometry="1"/>
+          <speciesReference species="HR" metaid="_814424" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="HRbarr2" metaid="_814436" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="barr2" metaid="_947418"/>
+          <modifierSpeciesReference species="HR" metaid="_947430"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_814448">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k19 </ci>
+              <ci> barr2 </ci>
+              <ci> HR </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_21" metaid="_814460" reversible="false">
+        <listOfReactants>
+          <speciesReference species="HRbarr2" metaid="_814472" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="barr2" metaid="_814484" stoichiometry="1"/>
+          <speciesReference species="HR" metaid="_814496" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="HRbarr2" metaid="_947442"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_814508">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k23 </ci>
+              <ci> HRbarr2 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_22" metaid="_814520" reversible="false">
+        <listOfReactants>
+          <speciesReference species="barr2" metaid="_814532" stoichiometry="1"/>
+          <speciesReference species="HRP2" metaid="_814544" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Hbarr2RP2" metaid="_814556" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="barr2" metaid="_947454"/>
+          <modifierSpeciesReference species="HRP2" metaid="_947466"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_814568">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k20 </ci>
+              <ci> barr2 </ci>
+              <ci> HRP2 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_23" metaid="_814580" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Hbarr2RP2" metaid="_814592" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="barr2" metaid="_814604" stoichiometry="1"/>
+          <speciesReference species="HRP2" metaid="_814616" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Hbarr2RP2" metaid="_947478"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_814628">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k24 </ci>
+              <ci> Hbarr2RP2 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_24" metaid="_814640" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ERK" metaid="_814652" stoichiometry="1"/>
+          <speciesReference species="HRbarr2" metaid="_814664" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="bpERK" metaid="_814676" stoichiometry="1"/>
+          <speciesReference species="HRbarr2" metaid="_814688" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="ERK" metaid="_947491"/>
+          <modifierSpeciesReference species="HRbarr2" metaid="_947503"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_814700">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k21 </ci>
+              <ci> ERK </ci>
+              <ci> HRbarr2 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_25" metaid="_814712" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ERK" metaid="_814724" stoichiometry="1"/>
+          <speciesReference species="Hbarr2RP2" metaid="_814736" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="bpERK" metaid="_814748" stoichiometry="1"/>
+          <speciesReference species="Hbarr2RP2" metaid="_814760" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="ERK" metaid="_947515"/>
+          <modifierSpeciesReference species="Hbarr2RP2" metaid="_947527"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_814772">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k22 </ci>
+              <ci> ERK </ci>
+              <ci> Hbarr2RP2 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R_26" metaid="_814784" reversible="false">
+        <listOfReactants>
+          <speciesReference species="bpERK" metaid="_814796" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ERK" metaid="_814808" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="bpERK" metaid="_947539"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_814820">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k25 </ci>
+              <ci> bpERK </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

@@ -1,0 +1,129 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version3" level="2" metaid="_612794" version="3">
+  <model id="Goodwin1965_EnzymeControlProcess" name="Goodwin1965_EnzymeControlProcess" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>Oscillatory behavior in enzymatic control processes.</strong>
+                <br/>
+          Goodwin BC.      <em>Adv Enzyme Regul</em>
+          1965;3:425-38      <a href="http://www.ncbi.nlm.nih.gov/pubmed/5861813">5861813</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          The demonstration of negative feedback control processes operating at the molecular level in cells is one of the most significant developments in modern biology. The phenomena of feedback inhibition and feedback repression, whereby enzymatic activities are controlled at the level of the enzyme and the gene, respectively, provide a firm experimental basis for the construction of dynamic models which represent the fundamental regulatory activity of cells. The behavior of these and other molecular control circuits thus constitutes the basis of cell physiology, and in effect provides the physiologist with his elementary units of function. The purpose of this paper is to illustrate the type of periodic behavior which can arise in model systems incorporating the essential control features of enzymatic regulatory processes, and to discuss the significance of oscillatory motion in relation to the organization of cellular processes in time.      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://www.cellml.org/models/goodwin_1965_version02">        <strong>Goodwin BC. (1965) - version02</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>Lloyd, Catherine, May</strong>
+                <br/>
+          c.lloyd@aukland.ac.nz      <br/>
+          The University of Auckland      <br/>
+          The Bioengineering Institute      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL0911532520"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/5861813"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="first_order_rate_constant" name="first_order_rate_constant" metaid="_612806">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_612818" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="flux" name="flux" metaid="_612830">
+        <listOfUnits>
+          <unit scale="-9" metaid="_612842" kind="mole"/>
+          <unit exponent="-1" metaid="_612854" kind="litre"/>
+          <unit exponent="-1" metaid="_612866" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="nanomolar" name="nanomolar" metaid="_612879">
+        <listOfUnits>
+          <unit scale="-9" metaid="_612891" kind="mole"/>
+          <unit exponent="-1" metaid="_612903" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_nanomolar" name="per_nanomolar" metaid="_612915">
+        <listOfUnits>
+          <unit scale="-9" exponent="-1" metaid="_612927" kind="mole"/>
+          <unit metaid="_612939" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="Compartment" metaid="_366948" units="litre" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="Xi" constant="false" name="Xi" metaid="_366953" value="7" units="nanomolar"/>
+      <parameter id="ai" name="ai" metaid="_366955" value="72" units="flux"/>
+      <parameter id="bi" name="bi" metaid="_366957" value="2" units="flux"/>
+      <parameter id="Ai" name="Ai" metaid="_366959" value="36" units="dimensionless"/>
+      <parameter id="ki" name="ki" metaid="_366961" value="1" units="per_nanomolar"/>
+      <parameter id="Yi" constant="false" name="Yi" metaid="_366963" value="-10" units="nanomolar"/>
+      <parameter id="beta_i" name="beta_i" metaid="_366965" value="0" units="flux"/>
+      <parameter id="alpha_i" name="alpha_i" metaid="_366967" value="1" units="first_order_rate_constant"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_366950" variable="Xi">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <divide/>
+              <ci> ai </ci>
+              <apply>
+                <plus/>
+                <ci> Ai </ci>
+                <apply>
+                  <times/>
+                  <ci> ki </ci>
+                  <ci> Yi </ci>
+                </apply>
+              </apply>
+            </apply>
+            <ci> bi </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_366952" variable="Yi">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> alpha_i </ci>
+              <ci> Xi </ci>
+            </apply>
+            <ci> beta_i </ci>
+          </apply>
+        </math>
+      </rateRule>
+    </listOfRules>
+  </model>
+</sbml>

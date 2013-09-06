@@ -1,0 +1,295 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version3" level="2" metaid="_547500" version="3">
+  <model id="Guyton1972_RedCells_Viscosity" name="Guyton1972_RedCells_Viscosity" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>Circulation: overall regulation.</strong>
+                <br/>
+          Guyton AC, Coleman TG, Granger HJ.      <em>Annu Rev Physiol</em>
+          1972;34:13-46      <a href="http://www.ncbi.nlm.nih.gov/pubmed/4334846">4334846</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          No abstract Available      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://www.cellml.org/models/guyton_red_cells_and_viscosity_2008_version02">        <strong>Guyton AC, Coleman TG, Granger HJ. (2008) - version02</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>Terkildsen, Jonna,</strong>
+                <br/>
+          j.terkildsen@aukland.ac.nz      <br/>
+          The University of Auckland      <br/>
+          Auckland Bioengineering Institute      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL0910928451"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/4334846"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="substance" name="normalised" metaid="_547512">
+        <listOfUnits>
+          <unit metaid="_547524" kind="dimensionless"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="Compartment" metaid="_631794" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="VP" name="VP" metaid="_631919" value="3.00449" units="dimensionless"/>
+      <parameter id="HM" constant="false" name="HM" metaid="_631939" units="dimensionless"/>
+      <parameter id="HM1" constant="false" name="HM1" metaid="_631940" units="dimensionless"/>
+      <parameter id="VB" constant="false" name="VB" metaid="_631942" units="dimensionless"/>
+      <parameter id="VIE" constant="false" name="VIE" metaid="_631943" units="dimensionless"/>
+      <parameter id="VIM" constant="false" name="VIM" metaid="_631945" units="dimensionless"/>
+      <parameter id="VIB" constant="false" name="VIB" metaid="_631946" units="dimensionless"/>
+      <parameter id="HM7" constant="false" name="HM7" metaid="_631948" units="dimensionless"/>
+      <parameter id="PO2AM1" constant="false" name="PO2AM1" metaid="_631949" units="dimensionless"/>
+      <parameter id="HM3" constant="false" name="HM3" metaid="_631951" units="dimensionless"/>
+      <parameter id="HM4" constant="false" name="HM4" metaid="_631952" units="dimensionless"/>
+      <parameter id="HM5" constant="false" name="HM5" metaid="_631954" units="dimensionless"/>
+      <parameter id="RC1" constant="false" name="RC1" metaid="_631955" units="dimensionless"/>
+      <parameter id="RC2" constant="false" name="RC2" metaid="_631957" units="dimensionless"/>
+      <parameter id="VRC" constant="false" name="VRC" metaid="_631958" value="2.00439" units="dimensionless"/>
+      <parameter id="RCD" constant="false" name="RCD" metaid="_631960" units="dimensionless"/>
+      <parameter id="HMK" name="HMK" metaid="_631961" value="90" units="dimensionless"/>
+      <parameter id="HKM" name="HKM" metaid="_631963" value="0.53333" units="dimensionless"/>
+      <parameter id="PO2AMB" name="PO2AMB" metaid="_631964" value="150" units="dimensionless"/>
+      <parameter id="HM6" name="HM6" metaid="_631966" value="1850" units="dimensionless"/>
+      <parameter id="HM8" name="HM8" metaid="_631967" value="4.714E-8" units="dimensionless"/>
+      <parameter id="REK" name="REK" metaid="_631969" value="1" units="dimensionless"/>
+      <parameter id="RKC" name="RKC" metaid="_631970" value="5.8E-6" units="dimensionless"/>
+      <parameter id="TRRBC" name="TRRBC" metaid="_631972" value="0" units="dimensionless"/>
+      <parameter id="tu" name="ime_unit" metaid="_631973" value="1" units="time"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_631795" variable="VRC">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <ci> RCD </ci>
+            <ci> tu </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="_631796" variable="VB">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> VP </ci>
+            <ci> VRC </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_631798" variable="HM1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <ci> VRC </ci>
+            <ci> VB </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_631799" variable="HM">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <cn> 100 </cn>
+            <ci> HM1 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_631833" variable="VIE">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <ci> HM </ci>
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <ci> HMK </ci>
+                <ci> HM </ci>
+              </apply>
+              <ci> HKM </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_631834" variable="VIB">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> VIE </ci>
+            <cn> 1.5 </cn>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_631837" variable="VIM">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <cn> 0.3333 </cn>
+            <ci> VIB </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_631840" variable="PO2AM1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <cn> 80 </cn>
+              <apply>
+                <gt/>
+                <ci> PO2AMB </ci>
+                <cn> 80 </cn>
+              </apply>
+            </piece>
+            <otherwise>
+              <ci> PO2AMB </ci>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_631841" variable="HM3">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <apply>
+              <minus/>
+              <ci> PO2AM1 </ci>
+              <cn> 40 </cn>
+            </apply>
+            <ci> HM </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_631873" variable="HM4">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <ci> PO2AMB </ci>
+            <cn> 40 </cn>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_631874" variable="HM5">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <cn> 0 </cn>
+              <apply>
+                <lt/>
+                <apply>
+                  <plus/>
+                  <ci> HM3 </ci>
+                  <ci> HM4 </ci>
+                </apply>
+                <cn> 0 </cn>
+              </apply>
+            </piece>
+            <otherwise>
+              <apply>
+                <plus/>
+                <ci> HM3 </ci>
+                <ci> HM4 </ci>
+              </apply>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_631896" variable="HM7">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <ci> HM6 </ci>
+            <ci> HM5 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_631897" variable="RC1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <cn> 0 </cn>
+              <apply>
+                <lt/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> HM7 </ci>
+                    <ci> HM8 </ci>
+                    <ci> REK </ci>
+                  </apply>
+                  <cn type="e-notation"> 5 <sep/> -6 </cn>
+                </apply>
+                <cn> 0 </cn>
+              </apply>
+            </piece>
+            <otherwise>
+              <apply>
+                <plus/>
+                <apply>
+                  <times/>
+                  <ci> HM7 </ci>
+                  <ci> HM8 </ci>
+                  <ci> REK </ci>
+                </apply>
+                <cn type="e-notation"> 5 <sep/> -6 </cn>
+              </apply>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_631917" variable="RC2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> VRC </ci>
+            <ci> RKC </ci>
+            <ci> VIM </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_631918" variable="RCD">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <ci> RC1 </ci>
+              <ci> RC2 </ci>
+            </apply>
+            <ci> TRRBC </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+  </model>
+</sbml>

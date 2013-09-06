@@ -1,0 +1,177 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version3" level="2" metaid="_569321" version="3">
+  <model id="Guyton1972_MuscleBloodFlowControl" name="Guyton1972_MuscleBloodFlowControl" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>Circulation: overall regulation.</strong>
+                <br/>
+          Guyton AC, Coleman TG, Granger HJ.      <em>Annu Rev Physiol</em>
+          1972;34:13-46      <a href="http://www.ncbi.nlm.nih.gov/pubmed/4334846">4334846</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          No abstract available      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://www.cellml.org/models/guyton_muscle_blood_flow_control_2008_version02">        <strong>Guyton AC, Coleman TG, Granger HJ. (2008) - version02</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>Terkildsen, Jonna,</strong>
+                <br/>
+          j.terkildsen@aukland.ac.nz      <br/>
+          The University of Auckland      <br/>
+          Auckland Bioengineering Institute      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL0911202318"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/4334846"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="substance" name="normalised" metaid="_569333">
+        <listOfUnits>
+          <unit metaid="_569345" kind="dimensionless"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="Compartment" metaid="_324529" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="PMO" name="PMO" metaid="_324542" value="38.0666" units="dimensionless"/>
+      <parameter id="PDO" constant="false" name="PDO" metaid="_324544" units="dimensionless"/>
+      <parameter id="POE" constant="false" name="POE" metaid="_324546" units="dimensionless"/>
+      <parameter id="AMM1" constant="false" name="AMM1" metaid="_324548" units="dimensionless"/>
+      <parameter id="AMM1T" constant="false" name="AMM1T" metaid="_324550" value="1.00269" units="dimensionless"/>
+      <parameter id="POF" constant="false" name="POF" metaid="_324552" units="dimensionless"/>
+      <parameter id="AMM2" constant="false" name="AMM2" metaid="_324554" value="1.09071" units="dimensionless"/>
+      <parameter id="AMM" constant="false" name="AMM" metaid="_324556" units="dimensionless"/>
+      <parameter id="POM" name="POM" metaid="_324558" value="0.04" units="dimensionless"/>
+      <parameter id="A4K" name="A4K" metaid="_324560" value="0.1" units="dimensionless"/>
+      <parameter id="AMM4" name="AMM4" metaid="_324562" value="0.005" units="dimensionless"/>
+      <parameter id="POM2" name="POM2" metaid="_324564" value="2" units="dimensionless"/>
+      <parameter id="A4K2" name="A4K2" metaid="_324566" value="40000" units="dimensionless"/>
+      <parameter id="tu" name="time_unit" metaid="_324568" value="1" units="time"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_324530" variable="AMM1T">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <ci> POE </ci>
+              <ci> AMM1T </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> A4K </ci>
+              <ci> tu </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_324531" variable="AMM2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <ci> POF </ci>
+              <ci> AMM2 </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> A4K2 </ci>
+              <ci> tu </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="_324533" variable="PDO">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <ci> PMO </ci>
+            <cn> 38 </cn>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_324535" variable="POE">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <times/>
+              <ci> PDO </ci>
+              <ci> POM </ci>
+            </apply>
+            <cn> 1 </cn>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_324537" variable="AMM1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <ci> AMM4 </ci>
+              <apply>
+                <lt/>
+                <ci> AMM1T </ci>
+                <ci> AMM4 </ci>
+              </apply>
+            </piece>
+            <otherwise>
+              <ci> AMM1T </ci>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_324539" variable="POF">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <times/>
+              <ci> POM2 </ci>
+              <ci> PDO </ci>
+            </apply>
+            <cn> 1 </cn>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_324541" variable="AMM">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> AMM1 </ci>
+            <ci> AMM2 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+  </model>
+</sbml>

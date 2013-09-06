@@ -1,0 +1,2733 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="metaid_0000001" version="4">
+  <model id="Kiselyov2009_InsulinReceptorModel" name="Kiselyov2009_InsulinReceptorModel" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>Harmonic oscillator model of the insulin and IGF1 receptors' allosteric binding and activation.</strong>
+                <br/>
+          Kiselyov VV, Versteyhe S, Gauguin L, De Meyts P.      <em>Mol Syst Biol.</em>
+          2009;5:243.      <a href="http://www.ncbi.nlm.nih.gov/pubmed/19225456">19225456</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          The insulin and insulin-like growth factor 1 receptors activate overlapping signalling pathways that are critical for growth, metabolism, survival and longevity. Their mechanism of ligand binding and activation displays complex allosteric properties, which no mathematical model has been able to account for. Modelling these receptors' binding and activation in terms of interactions between the molecular components is problematical due to many unknown biochemical and structural details. Moreover, substantial combinatorial complexity originating from multivalent ligand binding further complicates the problem. On the basis of the available structural and biochemical information, we develop a physically plausible model of the receptor binding and activation, which is based on the concept of a harmonic oscillator. Modelling a network of interactions among all possible receptor intermediaries arising in the context of the model (35, for the insulin receptor) accurately reproduces for the first time all the kinetic properties of the receptor, and provides unique and robust estimates of the kinetic parameters. The harmonic oscillator model may be adaptable for many other dimeric/dimerizing receptor tyrosine kinases, cytokine receptors and G-protein-coupled receptors where ligand crosslinking occurs.      </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Ajmera</vCard:Family>
+                  <vCard:Given>Ishan</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>ajmera@ebi.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>EMBL-EBI</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Ajmera</vCard:Family>
+                  <vCard:Given>Ishan</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>ajmera@ebi.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>EMBL-EBI</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Ajmera</vCard:Family>
+                  <vCard:Given>Ishan</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>ajmera@ebi.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>EMBL-EBI</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2011-12-05T13:20:47Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2011-12-05T13:41:13Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2011-12-05T13:41:13Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2011-12-05T13:41:13Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1112050000"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/19225456"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfCompartments>
+      <compartment id="cell" name="cell" metaid="metaid_0000003" size="1"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="im" initialConcentration="0" name="monomeric insulin" metaid="metaid_0000012" boundaryCondition="true" compartment="cell"/>
+      <species id="id" initialConcentration="0" name="dimeric insulin " metaid="metaid_0000013" boundaryCondition="true" compartment="cell"/>
+      <species id="itot" initialConcentration="1E-12" name="total insulin" metaid="metaid_0000014" boundaryCondition="true" compartment="cell"/>
+      <species id="r0" initialAmount="1" name="r0" metaid="metaid_0000015" boundaryCondition="true" compartment="cell"/>
+      <species id="r1" initialAmount="0" name="r1" metaid="metaid_0000016" boundaryCondition="true" compartment="cell"/>
+      <species id="r2" initialAmount="0" name="r2" metaid="metaid_0000017" boundaryCondition="true" compartment="cell"/>
+      <species id="r3" initialAmount="0" name="r3" metaid="metaid_0000018" boundaryCondition="true" compartment="cell"/>
+      <species id="r4" initialAmount="0" name="r4" metaid="metaid_0000019" boundaryCondition="true" compartment="cell"/>
+      <species id="r1x2" initialAmount="0" name="r1x2" metaid="metaid_0000020" boundaryCondition="true" compartment="cell"/>
+      <species id="r14" initialAmount="0" name="r14" metaid="metaid_0000021" boundaryCondition="true" compartment="cell"/>
+      <species id="r13" initialAmount="0" name="r13" metaid="metaid_0000022" boundaryCondition="true" compartment="cell"/>
+      <species id="r23" initialAmount="0" name="r23" metaid="metaid_0000023" boundaryCondition="true" compartment="cell"/>
+      <species id="r24" initialAmount="0" name="r24" metaid="metaid_0000024" boundaryCondition="true" compartment="cell"/>
+      <species id="r3x4" initialAmount="0" name="r3x4" metaid="metaid_0000025" boundaryCondition="true" compartment="cell"/>
+      <species id="r1x23" initialAmount="0" name="r1x23" metaid="metaid_0000026" boundaryCondition="true" compartment="cell"/>
+      <species id="r1x24" initialAmount="0" name="r1x24" metaid="metaid_0000027" boundaryCondition="true" compartment="cell"/>
+      <species id="r13x4" initialAmount="0" name="r13x4" metaid="metaid_0000028" boundaryCondition="true" compartment="cell"/>
+      <species id="r23x4" initialAmount="0" name="r23x4" metaid="metaid_0000029" boundaryCondition="true" compartment="cell"/>
+      <species id="r1x24d" initialAmount="0" name="r1x24d" metaid="metaid_0000030" boundaryCondition="true" compartment="cell"/>
+      <species id="r2d3x4" initialAmount="0" name="r2d3x4" metaid="metaid_0000031" boundaryCondition="true" compartment="cell"/>
+      <species id="r1x234" initialAmount="0" name="r1x234" metaid="metaid_0000032" boundaryCondition="true" compartment="cell"/>
+      <species id="r123x4" initialAmount="0" name="r123x4" metaid="metaid_0000033" boundaryCondition="true" compartment="cell"/>
+      <species id="r0cyt" initialAmount="0" name="r0cyt" metaid="metaid_0000034" boundaryCondition="true" compartment="cell"/>
+      <species id="iend" initialAmount="0" name="iend" metaid="metaid_0000035" boundaryCondition="true" compartment="cell"/>
+      <species id="r1x2h" initialAmount="0" name="r1x2h" metaid="metaid_0000063" boundaryCondition="true" compartment="cell"/>
+      <species id="r1h" initialAmount="0" name="r1h" metaid="metaid_0000064" boundaryCondition="true" compartment="cell"/>
+      <species id="r2h" initialAmount="0" name="r2h" metaid="metaid_0000065" boundaryCondition="true" compartment="cell"/>
+      <species id="r1x2h3" initialAmount="0" name="r1x2h3" metaid="metaid_0000066" boundaryCondition="true" compartment="cell"/>
+      <species id="r1x2h4" initialAmount="0" name="r1x2h4" metaid="metaid_0000067" boundaryCondition="true" compartment="cell"/>
+      <species id="r1x2h4d" initialAmount="0" name="r1x2h4d" metaid="metaid_0000068" boundaryCondition="true" compartment="cell"/>
+      <species id="r1x2h34" initialAmount="0" name="r1x2h34" metaid="metaid_0000069" boundaryCondition="true" compartment="cell"/>
+      <species id="r1h4" initialAmount="0" name="r1h4" metaid="metaid_0000070" boundaryCondition="true" compartment="cell"/>
+      <species id="r2h4" initialAmount="0" name="r2h4" metaid="metaid_0000071" boundaryCondition="true" compartment="cell"/>
+      <species id="r2h3" initialAmount="0" name="r2h3" metaid="metaid_0000072" boundaryCondition="true" compartment="cell"/>
+      <species id="r1h3" initialAmount="0" name="r1h3" metaid="metaid_0000073" boundaryCondition="true" compartment="cell"/>
+      <species id="r1h3x4" initialAmount="0" name="r1h3x4" metaid="metaid_0000074" boundaryCondition="true" compartment="cell"/>
+      <species id="r2h3x4" initialAmount="0" name="r2h3x4" metaid="metaid_0000075" boundaryCondition="true" compartment="cell"/>
+      <species id="r1h23x4" initialAmount="0" name="r1h23x4" metaid="metaid_0000076" boundaryCondition="true" compartment="cell"/>
+      <species id="r12h3x4" initialAmount="0" name="r12h3x4" metaid="metaid_0000077" boundaryCondition="true" compartment="cell"/>
+      <species id="r2hd3x4" initialAmount="0" name="r2hd3x4" metaid="metaid_0000078" boundaryCondition="true" compartment="cell"/>
+      <species id="ihottot" initialConcentration="100" name="total hot insulin" metaid="metaid_0000101" compartment="cell"/>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="a1" name="a1" metaid="metaid_0000004" value="490000"/>
+      <parameter id="a2" name="a2" metaid="metaid_0000005" value="27900"/>
+      <parameter id="d1" name="d1" metaid="metaid_0000006" value="0.0031"/>
+      <parameter id="d2" name="d2" metaid="metaid_0000007" value="0.01"/>
+      <parameter id="kend" name="Endocytosis rate" metaid="metaid_0000008" value="12.1"/>
+      <parameter id="kexo" name="Exocytosis rate" metaid="metaid_0000009" value="8.3"/>
+      <parameter id="kcr" name="crosslinking constant" metaid="metaid_0000010" value="0.33"/>
+      <parameter id="KD" name="dissociation constant" metaid="metaid_0000011" value="7"/>
+      <parameter id="k8" name="k8" metaid="metaid_0000049" value="0"/>
+      <parameter id="k4" name="k4" metaid="metaid_0000051" value="0"/>
+    </listOfParameters>
+    <listOfRules>
+      <assignmentRule metaid="metaid_0000061" variable="id">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <apply>
+                <plus/>
+                <apply>
+                  <times/>
+                  <cn type="integer"> 4 </cn>
+                  <ci> itot </ci>
+                </apply>
+                <ci> KD </ci>
+              </apply>
+              <apply>
+                <power/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <power/>
+                    <ci> KD </ci>
+                    <cn type="integer"> 2 </cn>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <cn type="integer"> 8 </cn>
+                    <ci> itot </ci>
+                    <ci> KD </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <divide/>
+                  <cn> 1 </cn>
+                  <cn type="integer"> 2 </cn>
+                </apply>
+              </apply>
+            </apply>
+            <cn type="integer"> 8 </cn>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000060" variable="im">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <ci> itot </ci>
+            <apply>
+              <times/>
+              <cn type="integer"> 2 </cn>
+              <ci> id </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <rateRule metaid="metaid_0000036" variable="r0">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <apply>
+                <plus/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <plus/>
+                        <apply>
+                          <times/>
+                          <apply>
+                            <minus/>
+                            <ci> a1 </ci>
+                          </apply>
+                          <ci> r0 </ci>
+                          <ci> im </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> d1 </ci>
+                          <ci> r1 </ci>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> a2 </ci>
+                        <ci> r0 </ci>
+                        <ci> im </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> d2 </ci>
+                      <ci> r4 </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a1 </ci>
+                    <ci> r0 </ci>
+                    <ci> im </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> d1 </ci>
+                  <ci> r3 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> a2 </ci>
+                <ci> r0 </ci>
+                <ci> im </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> d2 </ci>
+              <ci> r2 </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> kexo </ci>
+              <ci> r0cyt </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000037" variable="r1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <apply>
+                <plus/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <plus/>
+                        <apply>
+                          <times/>
+                          <apply>
+                            <minus/>
+                            <ci> kcr </ci>
+                          </apply>
+                          <ci> r1 </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> d2 </ci>
+                          <ci> r1x2 </ci>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> a1 </ci>
+                        <ci> r1 </ci>
+                        <ci> im </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> d1 </ci>
+                      <ci> r13 </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a2 </ci>
+                    <ci> r1 </ci>
+                    <ci> im </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> d2 </ci>
+                  <ci> r14 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> d1 </ci>
+                <ci> r1 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> a1 </ci>
+              <ci> r0 </ci>
+              <ci> im </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000038" variable="r2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <apply>
+                <plus/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <plus/>
+                        <apply>
+                          <times/>
+                          <apply>
+                            <minus/>
+                            <ci> kcr </ci>
+                          </apply>
+                          <ci> r2 </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> d1 </ci>
+                          <ci> r1x2 </ci>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> a1 </ci>
+                        <ci> r2 </ci>
+                        <ci> im </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> d1 </ci>
+                      <ci> r23 </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a2 </ci>
+                    <ci> r2 </ci>
+                    <ci> im </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> d2 </ci>
+                  <ci> r24 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> d2 </ci>
+                <ci> r2 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> a2 </ci>
+              <ci> r0 </ci>
+              <ci> im </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000039" variable="r3">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <apply>
+                <plus/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <plus/>
+                        <apply>
+                          <times/>
+                          <apply>
+                            <minus/>
+                            <ci> kcr </ci>
+                          </apply>
+                          <ci> r3 </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> d2 </ci>
+                          <ci> r3x4 </ci>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> a1 </ci>
+                        <ci> r3 </ci>
+                        <ci> im </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> d1 </ci>
+                      <ci> r13 </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a2 </ci>
+                    <ci> r3 </ci>
+                    <ci> im </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> d2 </ci>
+                  <ci> r23 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> d1 </ci>
+                <ci> r3 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> a1 </ci>
+              <ci> r0 </ci>
+              <ci> im </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000041" variable="r4">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <apply>
+                <plus/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <plus/>
+                        <apply>
+                          <times/>
+                          <apply>
+                            <minus/>
+                            <ci> kcr </ci>
+                          </apply>
+                          <ci> r4 </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> d1 </ci>
+                          <ci> r3x4 </ci>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> a1 </ci>
+                        <ci> r4 </ci>
+                        <ci> im </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> d1 </ci>
+                      <ci> r14 </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a2 </ci>
+                    <ci> r4 </ci>
+                    <ci> im </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> d2 </ci>
+                  <ci> r24 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> d2 </ci>
+                <ci> r4 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> a2 </ci>
+              <ci> r0 </ci>
+              <ci> im </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000042" variable="r1x2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <minus/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <plus/>
+                      <apply>
+                        <minus/>
+                        <apply>
+                          <plus/>
+                          <apply>
+                            <minus/>
+                            <apply>
+                              <plus/>
+                              <apply>
+                                <times/>
+                                <apply>
+                                  <minus/>
+                                  <ci> d2 </ci>
+                                </apply>
+                                <ci> r1x2 </ci>
+                              </apply>
+                              <apply>
+                                <times/>
+                                <ci> kcr </ci>
+                                <ci> r1 </ci>
+                              </apply>
+                            </apply>
+                            <apply>
+                              <times/>
+                              <ci> a2 </ci>
+                              <ci> r1x2 </ci>
+                              <ci> id </ci>
+                            </apply>
+                          </apply>
+                          <apply>
+                            <times/>
+                            <ci> d2 </ci>
+                            <ci> r1x24d </ci>
+                          </apply>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> a2 </ci>
+                          <ci> r1x2 </ci>
+                          <ci> im </ci>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> d2 </ci>
+                        <ci> r1x24 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> a1 </ci>
+                      <ci> r1x2 </ci>
+                      <ci> im </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> d1 </ci>
+                    <ci> r1x23 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> d1 </ci>
+                  <ci> r1x2 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kcr </ci>
+                <ci> r2 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> kend </ci>
+              <ci> r1x2 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000043" variable="r14">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <apply>
+                <plus/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <plus/>
+                        <apply>
+                          <times/>
+                          <ci> d2 </ci>
+                          <ci> r14 </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> a2 </ci>
+                          <ci> r1 </ci>
+                          <ci> im </ci>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> kcr </ci>
+                        <ci> r14 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> d2 </ci>
+                      <ci> r1x24 </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> kcr </ci>
+                    <ci> r14 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> d1 </ci>
+                  <ci> r13x4 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> d1 </ci>
+                <ci> r14 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> a1 </ci>
+              <ci> r4 </ci>
+              <ci> im </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000044" variable="r13">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <apply>
+                <plus/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <plus/>
+                        <apply>
+                          <times/>
+                          <apply>
+                            <minus/>
+                            <ci> d1 </ci>
+                          </apply>
+                          <ci> r13 </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> a1 </ci>
+                          <ci> r1 </ci>
+                          <ci> im </ci>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> kcr </ci>
+                        <ci> r13 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> d2 </ci>
+                      <ci> r1x23 </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> kcr </ci>
+                    <ci> r13 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> d2 </ci>
+                  <ci> r13x4 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> d1 </ci>
+                <ci> r13 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> a1 </ci>
+              <ci> r3 </ci>
+              <ci> im </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000045" variable="r23">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <apply>
+                <plus/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <plus/>
+                        <apply>
+                          <times/>
+                          <apply>
+                            <minus/>
+                            <ci> d1 </ci>
+                          </apply>
+                          <ci> r23 </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> a1 </ci>
+                          <ci> r2 </ci>
+                          <ci> im </ci>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> kcr </ci>
+                        <ci> r23 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> d1 </ci>
+                      <ci> r1x23 </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> kcr </ci>
+                    <ci> r23 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> d2 </ci>
+                  <ci> r23x4 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> d2 </ci>
+                <ci> r23 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> a2 </ci>
+              <ci> r3 </ci>
+              <ci> im </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000046" variable="r24">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <apply>
+                <plus/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <plus/>
+                        <apply>
+                          <times/>
+                          <apply>
+                            <minus/>
+                            <ci> d2 </ci>
+                          </apply>
+                          <ci> r24 </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> a2 </ci>
+                          <ci> r2 </ci>
+                          <ci> im </ci>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> kcr </ci>
+                        <ci> r24 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> d1 </ci>
+                      <ci> r1x24 </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> kcr </ci>
+                    <ci> r24 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> d1 </ci>
+                  <ci> r23x4 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> d2 </ci>
+                <ci> r24 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> a2 </ci>
+              <ci> r4 </ci>
+              <ci> im </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000047" variable="r3x4">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <minus/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <plus/>
+                      <apply>
+                        <minus/>
+                        <apply>
+                          <plus/>
+                          <apply>
+                            <minus/>
+                            <apply>
+                              <plus/>
+                              <apply>
+                                <times/>
+                                <apply>
+                                  <minus/>
+                                  <ci> d2 </ci>
+                                </apply>
+                                <ci> r3x4 </ci>
+                              </apply>
+                              <apply>
+                                <times/>
+                                <ci> kcr </ci>
+                                <ci> r3 </ci>
+                              </apply>
+                            </apply>
+                            <apply>
+                              <times/>
+                              <ci> a1 </ci>
+                              <ci> r3x4 </ci>
+                              <ci> im </ci>
+                            </apply>
+                          </apply>
+                          <apply>
+                            <times/>
+                            <ci> d1 </ci>
+                            <ci> r13x4 </ci>
+                          </apply>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> a2 </ci>
+                          <ci> r3x4 </ci>
+                          <ci> id </ci>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> d2 </ci>
+                        <ci> r2d3x4 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> a2 </ci>
+                      <ci> r3x4 </ci>
+                      <ci> im </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> d2 </ci>
+                    <ci> r23x4 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> d1 </ci>
+                  <ci> r3x4 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kcr </ci>
+                <ci> r4 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> kend </ci>
+              <ci> r1x2 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000048" variable="r1x23">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <minus/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <plus/>
+                      <apply>
+                        <minus/>
+                        <apply>
+                          <plus/>
+                          <apply>
+                            <minus/>
+                            <apply>
+                              <minus/>
+                              <apply>
+                                <plus/>
+                                <apply>
+                                  <minus/>
+                                  <apply>
+                                    <plus/>
+                                    <apply>
+                                      <minus/>
+                                      <apply>
+                                        <plus/>
+                                        <apply>
+                                          <minus/>
+                                          <apply>
+                                            <plus/>
+                                            <apply>
+                                              <times/>
+                                              <apply>
+                                                <minus/>
+                                                <ci> d1 </ci>
+                                              </apply>
+                                              <ci> r1x23 </ci>
+                                            </apply>
+                                            <apply>
+                                              <times/>
+                                              <ci> a1 </ci>
+                                              <ci> r1x2 </ci>
+                                              <ci> im </ci>
+                                            </apply>
+                                          </apply>
+                                          <apply>
+                                            <times/>
+                                            <ci> a2 </ci>
+                                            <ci> r1x23 </ci>
+                                            <ci> im </ci>
+                                          </apply>
+                                        </apply>
+                                        <apply>
+                                          <times/>
+                                          <ci> d2 </ci>
+                                          <ci> r1x234 </ci>
+                                        </apply>
+                                      </apply>
+                                      <apply>
+                                        <times/>
+                                        <ci> d1 </ci>
+                                        <ci> r1x23 </ci>
+                                      </apply>
+                                    </apply>
+                                    <apply>
+                                      <times/>
+                                      <ci> kcr </ci>
+                                      <ci> r23 </ci>
+                                    </apply>
+                                  </apply>
+                                  <apply>
+                                    <times/>
+                                    <ci> d2 </ci>
+                                    <ci> r1x23 </ci>
+                                  </apply>
+                                </apply>
+                                <apply>
+                                  <times/>
+                                  <ci> kcr </ci>
+                                  <ci> r13 </ci>
+                                </apply>
+                              </apply>
+                              <apply>
+                                <times/>
+                                <ci> kend </ci>
+                                <ci> r1x23 </ci>
+                              </apply>
+                            </apply>
+                            <apply>
+                              <times/>
+                              <ci> d1 </ci>
+                              <ci> r1x23 </ci>
+                            </apply>
+                          </apply>
+                          <apply>
+                            <times/>
+                            <ci> a1 </ci>
+                            <ci> r1x2 </ci>
+                            <ci> im </ci>
+                          </apply>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> a2 </ci>
+                          <ci> r1x23 </ci>
+                          <ci> im </ci>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> d2 </ci>
+                        <ci> r1x234 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> d1 </ci>
+                      <ci> r1x23 </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> kcr </ci>
+                    <ci> r23 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> d2 </ci>
+                  <ci> r1x23 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kcr </ci>
+                <ci> r13 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> kend </ci>
+              <ci> r1x23 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000050" variable="r1x24">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <minus/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <plus/>
+                      <apply>
+                        <minus/>
+                        <apply>
+                          <plus/>
+                          <apply>
+                            <minus/>
+                            <apply>
+                              <plus/>
+                              <apply>
+                                <times/>
+                                <apply>
+                                  <minus/>
+                                  <ci> d2 </ci>
+                                </apply>
+                                <ci> r1x24 </ci>
+                              </apply>
+                              <apply>
+                                <times/>
+                                <ci> a2 </ci>
+                                <ci> r1x2 </ci>
+                                <ci> im </ci>
+                              </apply>
+                            </apply>
+                            <apply>
+                              <times/>
+                              <ci> a1 </ci>
+                              <ci> r1x24 </ci>
+                              <ci> im </ci>
+                            </apply>
+                          </apply>
+                          <apply>
+                            <times/>
+                            <ci> d1 </ci>
+                            <ci> r1x234 </ci>
+                          </apply>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> k4 </ci>
+                          <ci> r1x24 </ci>
+                          <ci> im </ci>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> k8 </ci>
+                        <ci> r1x24d </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> d1 </ci>
+                      <ci> r1x24 </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> kcr </ci>
+                    <ci> r24 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> d2 </ci>
+                  <ci> r1x24 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kcr </ci>
+                <ci> r14 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> kend </ci>
+              <ci> r1x24 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000052" variable="r13x4">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <minus/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <plus/>
+                      <apply>
+                        <minus/>
+                        <apply>
+                          <plus/>
+                          <apply>
+                            <times/>
+                            <apply>
+                              <minus/>
+                              <ci> d1 </ci>
+                            </apply>
+                            <ci> r13x4 </ci>
+                          </apply>
+                          <apply>
+                            <times/>
+                            <ci> a1 </ci>
+                            <ci> r3x4 </ci>
+                            <ci> im </ci>
+                          </apply>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> a2 </ci>
+                          <ci> r13x4 </ci>
+                          <ci> im </ci>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> d2 </ci>
+                        <ci> r123x4 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> d2 </ci>
+                      <ci> r13x4 </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> kcr </ci>
+                    <ci> r13 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> d1 </ci>
+                  <ci> r13x4 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kcr </ci>
+                <ci> r14 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> kend </ci>
+              <ci> r13x4 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000053" variable="r23x4">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <minus/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <plus/>
+                      <apply>
+                        <minus/>
+                        <apply>
+                          <plus/>
+                          <apply>
+                            <minus/>
+                            <apply>
+                              <plus/>
+                              <apply>
+                                <times/>
+                                <apply>
+                                  <minus/>
+                                  <ci> d2 </ci>
+                                </apply>
+                                <ci> r23x4 </ci>
+                              </apply>
+                              <apply>
+                                <times/>
+                                <ci> a2 </ci>
+                                <ci> r3x4 </ci>
+                                <ci> im </ci>
+                              </apply>
+                            </apply>
+                            <apply>
+                              <times/>
+                              <ci> a1 </ci>
+                              <ci> r23x4 </ci>
+                              <ci> im </ci>
+                            </apply>
+                          </apply>
+                          <apply>
+                            <times/>
+                            <ci> d1 </ci>
+                            <ci> r123x4 </ci>
+                          </apply>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> k4 </ci>
+                          <ci> r23x4 </ci>
+                          <ci> im </ci>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> k8 </ci>
+                        <ci> r2d3x4 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> d2 </ci>
+                      <ci> r23x4 </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> kcr </ci>
+                    <ci> r23 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> d1 </ci>
+                  <ci> r23x4 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kcr </ci>
+                <ci> r24 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> kend </ci>
+              <ci> r23x4 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000054" variable="r1x24d">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <minus/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <apply>
+                      <minus/>
+                      <ci> d2 </ci>
+                    </apply>
+                    <ci> r1x24d </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a2 </ci>
+                    <ci> r1x2 </ci>
+                    <ci> id </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k8 </ci>
+                  <ci> r1x24d </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k4 </ci>
+                <ci> r1x24 </ci>
+                <ci> im </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> kend </ci>
+              <ci> r1x24d </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000055" variable="r2d3x4">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <apply>
+                  <minus/>
+                  <ci> d2 </ci>
+                </apply>
+                <ci> r2d3x4 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> a2 </ci>
+                <ci> r3x4 </ci>
+                <ci> id </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k8 </ci>
+                <ci> r2d3x4 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k4 </ci>
+                <ci> r23x4 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k4 </ci>
+                <ci> r23x4 </ci>
+                <ci> im </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> kend </ci>
+              <ci> r2d3x4 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000056" variable="r1x234">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <minus/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <apply>
+                      <minus/>
+                      <ci> d2 </ci>
+                    </apply>
+                    <ci> r1x234 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a2 </ci>
+                    <ci> r1x23 </ci>
+                    <ci> im </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> d1 </ci>
+                  <ci> r1x234 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> a1 </ci>
+                <ci> r1x24 </ci>
+                <ci> im </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> kend </ci>
+              <ci> r1x234 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000057" variable="r123x4">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <minus/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <apply>
+                      <minus/>
+                      <ci> d2 </ci>
+                    </apply>
+                    <ci> r123x4 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a2 </ci>
+                    <ci> r13x4 </ci>
+                    <ci> im </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> d1 </ci>
+                  <ci> r123x4 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> a1 </ci>
+                <ci> r23x4 </ci>
+                <ci> im </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> kend </ci>
+              <ci> r123x4 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000080" variable="r0cyt">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <ci> kexo </ci>
+              </apply>
+              <ci> r0cyt </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> kend </ci>
+              <apply>
+                <plus/>
+                <ci> r1x2 </ci>
+                <ci> r3x4 </ci>
+                <ci> r1x23 </ci>
+                <ci> r1x24 </ci>
+                <ci> r13x4 </ci>
+                <ci> r23x4 </ci>
+                <ci> r1x24d </ci>
+                <ci> r2d3x4 </ci>
+                <ci> r1x234 </ci>
+                <ci> r123x4 </ci>
+                <ci> r1x2h </ci>
+                <ci> r1x2h3 </ci>
+                <ci> r1x2h4 </ci>
+                <ci> r1x2h4d </ci>
+                <ci> r1x2h34 </ci>
+                <ci> r1h3x4 </ci>
+                <ci> r2h3x4 </ci>
+                <ci> r1h23x4 </ci>
+                <ci> r12h3x4 </ci>
+                <ci> r2hd3x4 </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000081" variable="iend">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <ci> kexo </ci>
+              </apply>
+              <ci> iend </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> kend </ci>
+              <apply>
+                <plus/>
+                <ci> r1x2h </ci>
+                <ci> r1x2h3 </ci>
+                <ci> r1x2h4 </ci>
+                <ci> r1x2h4d </ci>
+                <ci> r1x2h34 </ci>
+                <ci> r1h3x4 </ci>
+                <ci> r2h3x4 </ci>
+                <ci> r1h23x4 </ci>
+                <ci> r12h3x4 </ci>
+                <ci> r2hd3x4 </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000093" variable="r1x2h">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <apply>
+                <plus/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <plus/>
+                        <apply>
+                          <minus/>
+                          <apply>
+                            <plus/>
+                            <apply>
+                              <minus/>
+                              <apply>
+                                <times/>
+                                <apply>
+                                  <minus/>
+                                  <ci> kend </ci>
+                                </apply>
+                                <ci> r1x2h </ci>
+                              </apply>
+                              <apply>
+                                <times/>
+                                <ci> a1 </ci>
+                                <ci> r1x2h </ci>
+                                <ci> im </ci>
+                              </apply>
+                            </apply>
+                            <apply>
+                              <times/>
+                              <ci> d1 </ci>
+                              <ci> r1x2h3 </ci>
+                            </apply>
+                          </apply>
+                          <apply>
+                            <times/>
+                            <ci> d1 </ci>
+                            <ci> r1x2h </ci>
+                          </apply>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> kcr </ci>
+                          <ci> r2h </ci>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> d2 </ci>
+                        <ci> r1x2h </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> kcr </ci>
+                      <ci> r1h </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a2 </ci>
+                    <ci> r1x2h </ci>
+                    <ci> id </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> d2 </ci>
+                  <ci> r1x2h4d </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> a2 </ci>
+                <ci> r1x2h </ci>
+                <ci> im </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> d2 </ci>
+              <ci> r1x2h4 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000079" variable="r1h">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <apply>
+                <plus/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <times/>
+                        <apply>
+                          <minus/>
+                          <ci> d1 </ci>
+                        </apply>
+                        <ci> r1h </ci>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> a2 </ci>
+                        <ci> r1h </ci>
+                        <ci> im </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> d2 </ci>
+                      <ci> r1h4 </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a1 </ci>
+                    <ci> r1h </ci>
+                    <ci> im </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> d1 </ci>
+                  <ci> r1h3 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kcr </ci>
+                <ci> r1h </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> d2 </ci>
+              <ci> r1x2h </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000082" variable="r2h">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <apply>
+                <plus/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <times/>
+                        <apply>
+                          <minus/>
+                          <ci> d2 </ci>
+                        </apply>
+                        <ci> r2h </ci>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> a2 </ci>
+                        <ci> r2h </ci>
+                        <ci> im </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> d2 </ci>
+                      <ci> r2h4 </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a1 </ci>
+                    <ci> r2h </ci>
+                    <ci> im </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> d1 </ci>
+                  <ci> r2h3 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kcr </ci>
+                <ci> r2h </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> d1 </ci>
+              <ci> r1x2h </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000094" variable="r1x2h3">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <apply>
+                <plus/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <plus/>
+                        <apply>
+                          <minus/>
+                          <apply>
+                            <times/>
+                            <apply>
+                              <minus/>
+                              <ci> kend </ci>
+                            </apply>
+                            <ci> r1x2h3 </ci>
+                          </apply>
+                          <apply>
+                            <times/>
+                            <ci> a2 </ci>
+                            <ci> r1x2h3 </ci>
+                            <ci> im </ci>
+                          </apply>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> d2 </ci>
+                          <ci> r1x2h34 </ci>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> d1 </ci>
+                        <ci> r1x2h3 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> kcr </ci>
+                      <ci> r2h3 </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> d2 </ci>
+                    <ci> r1x2h3 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> kcr </ci>
+                  <ci> r1h3 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> d1 </ci>
+                <ci> r1x2h3 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> a1 </ci>
+              <ci> r1x2h </ci>
+              <ci> im </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000083" variable="r1x2h4">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <apply>
+                <plus/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <times/>
+                        <apply>
+                          <minus/>
+                          <ci> d2 </ci>
+                        </apply>
+                        <ci> r2h </ci>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> a2 </ci>
+                        <ci> r2h </ci>
+                        <ci> im </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> d2 </ci>
+                      <ci> r2h4 </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a1 </ci>
+                    <ci> r2h </ci>
+                    <ci> im </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> d1 </ci>
+                  <ci> r2h3 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kcr </ci>
+                <ci> r2h </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> d1 </ci>
+              <ci> r1x2h </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000091" variable="r1x2h4d">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <apply>
+                <plus/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <apply>
+                      <minus/>
+                      <ci> kend </ci>
+                    </apply>
+                    <ci> r1x2h4d </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> d2 </ci>
+                    <ci> r1x2h4d </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> a2 </ci>
+                  <ci> r1x2h </ci>
+                  <ci> id </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k8 </ci>
+                <ci> r1x2h4d </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> k4 </ci>
+              <ci> r1x2h4 </ci>
+              <ci> im </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000092" variable="r1x2h34">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <apply>
+                <plus/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <apply>
+                      <minus/>
+                      <ci> kend </ci>
+                    </apply>
+                    <ci> r1x2h34 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> d2 </ci>
+                    <ci> r1x2h34 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> a2 </ci>
+                  <ci> r1x2h3 </ci>
+                  <ci> im </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> d1 </ci>
+                <ci> r1x2h34 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> a1 </ci>
+              <ci> r1x2h4 </ci>
+              <ci> im </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000084" variable="r1h4">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <apply>
+                <plus/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <times/>
+                        <apply>
+                          <minus/>
+                          <ci> d1 </ci>
+                        </apply>
+                        <ci> r1h4 </ci>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> kcr </ci>
+                        <ci> r1h4 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> d1 </ci>
+                      <ci> r1h3x4 </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> d2 </ci>
+                    <ci> r1h4 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> a2 </ci>
+                  <ci> r1h </ci>
+                  <ci> im </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kcr </ci>
+                <ci> r1h4 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> d2 </ci>
+              <ci> r1x2h4 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000087" variable="r2h4">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <apply>
+                <plus/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <times/>
+                        <apply>
+                          <minus/>
+                          <ci> d2 </ci>
+                        </apply>
+                        <ci> r2h4 </ci>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> kcr </ci>
+                        <ci> r2h4 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> d1 </ci>
+                      <ci> r2h3x4 </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> d2 </ci>
+                    <ci> r2h4 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> a2 </ci>
+                  <ci> r2h </ci>
+                  <ci> im </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kcr </ci>
+                <ci> r2h4 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> d1 </ci>
+              <ci> r1x2h4 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000086" variable="r2h3">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <apply>
+                <plus/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <times/>
+                        <apply>
+                          <minus/>
+                          <ci> d2 </ci>
+                        </apply>
+                        <ci> r2h3 </ci>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> kcr </ci>
+                        <ci> r2h3 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> d2 </ci>
+                      <ci> r2h3x4 </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> d1 </ci>
+                    <ci> r2h3 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> a1 </ci>
+                  <ci> r2h </ci>
+                  <ci> im </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kcr </ci>
+                <ci> r2h3 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> d1 </ci>
+              <ci> r1x2h3 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000085" variable="r1h3">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <apply>
+                <plus/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <times/>
+                        <apply>
+                          <minus/>
+                          <ci> d1 </ci>
+                        </apply>
+                        <ci> r1h3 </ci>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> kcr </ci>
+                        <ci> r1h3 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> d2 </ci>
+                      <ci> r1h3x4 </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> d1 </ci>
+                    <ci> r1h3 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> a1 </ci>
+                  <ci> r1h </ci>
+                  <ci> im </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kcr </ci>
+                <ci> r1h3 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> d2 </ci>
+              <ci> r1x2h3 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000095" variable="r1h3x4">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <apply>
+                <plus/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <minus/>
+                        <apply>
+                          <times/>
+                          <apply>
+                            <minus/>
+                            <ci> kend </ci>
+                          </apply>
+                          <ci> r1h3x4 </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> d1 </ci>
+                          <ci> r1h3x4 </ci>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> d1 </ci>
+                        <ci> r1h3x4 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> kcr </ci>
+                      <ci> r1h4 </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a2 </ci>
+                    <ci> r1h3x4 </ci>
+                    <ci> im </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> d2 </ci>
+                  <ci> r1h23x4 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> d2 </ci>
+                <ci> r1h3x4 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> kcr </ci>
+              <ci> r1h3 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000096" variable="r2h3x4">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <apply>
+                <plus/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <plus/>
+                        <apply>
+                          <minus/>
+                          <apply>
+                            <times/>
+                            <apply>
+                              <minus/>
+                              <ci> kend </ci>
+                            </apply>
+                            <ci> r2hd3x4 </ci>
+                          </apply>
+                          <apply>
+                            <times/>
+                            <cn> 2 </cn>
+                            <ci> d1 </ci>
+                            <ci> r2hd3x4 </ci>
+                          </apply>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> kcr </ci>
+                          <ci> r2h3 </ci>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> k4 </ci>
+                        <ci> r2hd3x4 </ci>
+                        <ci> im </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> k8 </ci>
+                      <ci> r2hd3x4 </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a1 </ci>
+                    <ci> r2hd3x4 </ci>
+                    <ci> im </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> d1 </ci>
+                  <ci> r12h3x4 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> d1 </ci>
+                <ci> r2hd3x4 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> kcr </ci>
+              <ci> r2h4 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000090" variable="r1h23x4">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <apply>
+                    <minus/>
+                    <ci> kend </ci>
+                  </apply>
+                  <ci> r1h23x4 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> d1 </ci>
+                  <ci> r1h23x4 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> d2 </ci>
+                <ci> r1h23x4 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> a2 </ci>
+              <ci> r1h3x4 </ci>
+              <ci> im </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000089" variable="r12h3x4">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <apply>
+                    <minus/>
+                    <ci> kend </ci>
+                  </apply>
+                  <ci> r12h3x4 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> d2 </ci>
+                  <ci> r12h3x4 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> d1 </ci>
+                <ci> r12h3x4 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> a1 </ci>
+              <ci> r2h3x4 </ci>
+              <ci> im </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000088" variable="r2hd3x4">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <apply>
+                    <minus/>
+                    <ci> kend </ci>
+                  </apply>
+                  <ci> r2hd3x4 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> d2 </ci>
+                  <ci> r2hd3x4 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k8 </ci>
+                <ci> r2hd3x4 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> k4 </ci>
+              <ci> r2h3x4 </ci>
+              <ci> im </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000097" variable="itot">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> iend </ci>
+            <ci> r1 </ci>
+            <ci> r2 </ci>
+            <ci> r3 </ci>
+            <ci> r4 </ci>
+            <apply>
+              <times/>
+              <cn type="integer"> 2 </cn>
+              <apply>
+                <plus/>
+                <ci> r13 </ci>
+                <ci> r14 </ci>
+                <ci> r23 </ci>
+                <ci> r24 </ci>
+              </apply>
+            </apply>
+            <ci> r1x2 </ci>
+            <ci> r3x4 </ci>
+            <apply>
+              <times/>
+              <cn type="integer"> 2 </cn>
+              <apply>
+                <plus/>
+                <ci> r1x23 </ci>
+                <ci> r1x24 </ci>
+                <ci> r13x4 </ci>
+                <ci> r23x4 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <cn type="integer"> 3 </cn>
+              <apply>
+                <plus/>
+                <ci> r1x234 </ci>
+                <ci> r123x4 </ci>
+                <ci> r2d3x4 </ci>
+                <ci> r1x24d </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000098" variable="ihottot">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> iend </ci>
+            <ci> r1x2h </ci>
+            <ci> r1h </ci>
+            <ci> r2h </ci>
+            <ci> r1x2h3 </ci>
+            <ci> r1x2h4 </ci>
+            <ci> r1x2h34 </ci>
+            <ci> r1h4 </ci>
+            <ci> r2h4 </ci>
+            <ci> r2h3 </ci>
+            <ci> r1h3 </ci>
+            <ci> r1h3x4 </ci>
+            <ci> r2h3x4 </ci>
+            <ci> r1h23x4 </ci>
+            <ci> r12h3x4 </ci>
+            <ci> r1x2h4d </ci>
+            <ci> r2hd3x4 </ci>
+          </apply>
+        </math>
+      </rateRule>
+    </listOfRules>
+  </model>
+</sbml>

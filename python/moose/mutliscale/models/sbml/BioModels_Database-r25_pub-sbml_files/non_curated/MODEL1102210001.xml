@@ -1,0 +1,3782 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="_000000" version="4">
+  <model id="Telesco2011_HER3ErbB3RTK_SignalingNetwork" name="Telesco2011_HER3-ErbB3-RTK_SignalingNetwork" metaid="_000001">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This model is from the article:      <br/>
+                <strong>A multiscale modeling approach to investigate molecular mechanisms of pseudokinase activation and drug resistance in the HER3/ErbB3 receptor tyrosine kinase signaling network.</strong>
+                <br/>
+          Telesco SE, Shih AJ, Jia F, Radhakrishnan R.      <em>Mol Biosyst.</em>
+          2011 Jun;7(6):2066-80.      <a href="http://www.ncbi.nlm.nih.gov/pubmed/21509365">21509365</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          Multiscale modeling provides a powerful and quantitative platform for investigating the complexity inherent in intracellular signaling pathways and rationalizing the effects of molecular perturbations on downstream signaling events and ultimately, on the cell phenotype. Here we describe the application of a multiscale modeling scheme to the HER3/ErbB3 receptor tyrosine kinase (RTK) signaling network, which regulates critical cellular processes including proliferation, migration and differentiation. The HER3 kinase is a topic of current interest and investigation, as it has been implicated in mechanisms of resistance to tyrosine kinase inhibition (TKI) of EGFR and HER2 in the treatment of many human malignancies. Moreover, the commonly regarded status of HER3 as a catalytically inactive 'pseudokinase' has recently been challenged by our previous study, which demonstrated robust residual kinase activity for HER3. Through our multiscale model, we investigate the most significant molecular interactions that contribute to potential mechanisms of HER3 activity and the physiological relevance of this activity to mechanisms of drug resistance in an ErbB-driven tumor cell in silico. The results of our molecular-scale simulations support the characterization of HER3 as a weakly active kinase that, in contrast to its fully-active ErbB family members, depends upon a unique hydrophobic interface to coordinate the alignment of specific catalytic residues required for its activity. Translating our molecular simulation results of the uniquely active behavior of the HER3 kinase into a physiologically relevant environment, our HER3 signaling model demonstrates that even a weak level of HER3 activity may be sufficient to induce AKT signaling and TKI resistance in the context of an ErbB signaling-dependent tumor cell, and therefore therapeutic targeting of HER3 may represent a superior treatment strategy for specific ErbB-driven cancers.      </p>
+            <p>      <b>Note:</b>
+                </p>
+            <p>This model is an extension of the model published by Schoeberl et al., 2009      <a href="http://www.ncbi.nlm.nih.gov/pubmed/19567914">[PMID:19567914]</a>
+                </p>
+        .    <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#_000001">
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1102210001"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/21509365"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="per_sec" metaid="metaid_0000071">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_123749" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_molec_sec" metaid="metaid_0000073">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_123761" multiplier="6.022E23" kind="mole"/>
+          <unit exponent="-1" metaid="_123773" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="molec" metaid="metaid_0000074">
+        <listOfUnits>
+          <unit metaid="_123785" multiplier="6.022E23" kind="mole"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="Vcell" metaid="metaid_0000075" size="1E-12"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="Her3" initialAmount="33000" hasOnlySubstanceUnits="true" metaid="metaid_0000076" substanceUnits="molec" compartment="Vcell"/>
+      <species id="Her3_Nrg" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000077" substanceUnits="molec" compartment="Vcell"/>
+      <species id="Nrg" initialAmount="50000000" hasOnlySubstanceUnits="true" metaid="metaid_0000078" substanceUnits="molec" compartment="Vcell"/>
+      <species id="Her3_2" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000082" substanceUnits="molec" compartment="Vcell"/>
+      <species id="Her3_2_Nrg" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000083" substanceUnits="molec" compartment="Vcell"/>
+      <species id="Her2" initialAmount="41000" hasOnlySubstanceUnits="true" metaid="metaid_0000084" substanceUnits="molec" compartment="Vcell"/>
+      <species id="pHer3_Nrg" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000085" substanceUnits="molec" compartment="Vcell"/>
+      <species id="pHer2" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000086" substanceUnits="molec" compartment="Vcell"/>
+      <species id="pHer3_2_Nrg" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000087" substanceUnits="molec" compartment="Vcell"/>
+      <species id="Egfr" initialAmount="178000" hasOnlySubstanceUnits="true" metaid="metaid_0000088" substanceUnits="molec" compartment="Vcell"/>
+      <species id="Her3_1_Nrg" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000089" substanceUnits="molec" compartment="Vcell"/>
+      <species id="pHer3_1_Nrg" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000090" substanceUnits="molec" compartment="Vcell"/>
+      <species id="pHer2_2" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000091" substanceUnits="molec" compartment="Vcell"/>
+      <species id="Her3_1" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000092" substanceUnits="molec" compartment="Vcell"/>
+      <species id="Her1_2" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000093" substanceUnits="molec" compartment="Vcell"/>
+      <species id="Her1_1" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000094" substanceUnits="molec" compartment="Vcell"/>
+      <species id="Her2_2" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000095" substanceUnits="molec" compartment="Vcell"/>
+      <species id="phtase" initialAmount="500000" hasOnlySubstanceUnits="true" metaid="metaid_0000096" substanceUnits="molec" compartment="Vcell"/>
+      <species id="pHer3_2_Nrg_phtase" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000097" substanceUnits="molec" compartment="Vcell"/>
+      <species id="pHer3_1_Nrg_phtase" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000098" substanceUnits="molec" compartment="Vcell"/>
+      <species id="pHer2_2_phtase" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000099" substanceUnits="molec" compartment="Vcell"/>
+      <species id="Pi3k" initialAmount="800000" hasOnlySubstanceUnits="true" metaid="metaid_0000100" substanceUnits="molec" compartment="Vcell"/>
+      <species id="pHer3_2_Nrg_Pi3k" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000101" substanceUnits="molec" compartment="Vcell"/>
+      <species id="pHer3_1_Nrg_Pi3k" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000102" substanceUnits="molec" compartment="Vcell"/>
+      <species id="pHer2_2_Pi3k" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000103" substanceUnits="molec" compartment="Vcell"/>
+      <species id="Pip2" initialAmount="700000" hasOnlySubstanceUnits="true" metaid="metaid_0000104" substanceUnits="molec" compartment="Vcell"/>
+      <species id="pHer3_2_Nrg_Pi3k_Pip2" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000105" substanceUnits="molec" compartment="Vcell"/>
+      <species id="pHer3_1_Nrg_Pi3k_Pip2" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000106" substanceUnits="molec" compartment="Vcell"/>
+      <species id="pHer2_2_Pi3k_Pip2" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000107" substanceUnits="molec" compartment="Vcell"/>
+      <species id="Pip3" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000108" substanceUnits="molec" compartment="Vcell"/>
+      <species id="Pten" initialAmount="350000" hasOnlySubstanceUnits="true" metaid="metaid_0000109" substanceUnits="molec" compartment="Vcell"/>
+      <species id="Pip3_Pten" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000110" substanceUnits="molec" compartment="Vcell"/>
+      <species id="Akt" initialAmount="900000" hasOnlySubstanceUnits="true" metaid="metaid_0000111" substanceUnits="molec" compartment="Vcell"/>
+      <species id="Pip3_Akt" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000112" substanceUnits="molec" compartment="Vcell"/>
+      <species id="Pdk1" initialAmount="9500000" hasOnlySubstanceUnits="true" metaid="metaid_0000113" substanceUnits="molec" compartment="Vcell"/>
+      <species id="Pip3_Akt_Pdk1" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000114" substanceUnits="molec" compartment="Vcell"/>
+      <species id="Pip3_Pdk1" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000115" substanceUnits="molec" compartment="Vcell"/>
+      <species id="pAkt" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000116" substanceUnits="molec" compartment="Vcell"/>
+      <species id="Pip3_pAkt" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000117" substanceUnits="molec" compartment="Vcell"/>
+      <species id="Pip3_pAkt_Pdk1" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000118" substanceUnits="molec" compartment="Vcell"/>
+      <species id="ppAkt" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000119" substanceUnits="molec" compartment="Vcell"/>
+      <species id="PP2A" initialAmount="4000" hasOnlySubstanceUnits="true" metaid="metaid_0000120" substanceUnits="molec" compartment="Vcell"/>
+      <species id="ppAkt_PP2A" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000121" substanceUnits="molec" compartment="Vcell"/>
+      <species id="pAkt_PP2A" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000122" substanceUnits="molec" compartment="Vcell"/>
+      <species id="PP2Aoff" initialAmount="64000" hasOnlySubstanceUnits="true" metaid="metaid_0000123" substanceUnits="molec" compartment="Vcell"/>
+      <species id="ppAkt_PP2Aoff" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000124" substanceUnits="molec" compartment="Vcell"/>
+      <species id="iHer3_Nrg" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000231" substanceUnits="molec" compartment="Vcell"/>
+      <species id="iHer3_1_Nrg" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000232" substanceUnits="molec" compartment="Vcell"/>
+      <species id="iNrg" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000233" substanceUnits="molec" compartment="Vcell"/>
+      <species id="iHer3" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000234" substanceUnits="molec" compartment="Vcell"/>
+      <species id="iHer3_2" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000235" substanceUnits="molec" compartment="Vcell"/>
+      <species id="iHer3_2_Nrg" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000236" substanceUnits="molec" compartment="Vcell"/>
+      <species id="iHer2" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000237" substanceUnits="molec" compartment="Vcell"/>
+      <species id="iEgfr" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000238" substanceUnits="molec" compartment="Vcell"/>
+      <species id="iHer3_1" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000239" substanceUnits="molec" compartment="Vcell"/>
+      <species id="iHer2_1" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000240" substanceUnits="molec" compartment="Vcell"/>
+      <species id="iEgfr_Egfr" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000241" substanceUnits="molec" compartment="Vcell"/>
+      <species id="iHer2_2" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000242" substanceUnits="molec" compartment="Vcell"/>
+      <species id="ipHer3_Nrg" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000243" substanceUnits="molec" compartment="Vcell"/>
+      <species id="ipHer2" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000244" substanceUnits="molec" compartment="Vcell"/>
+      <species id="ipHer3_2_Nrg" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000245" substanceUnits="molec" compartment="Vcell"/>
+      <species id="ipHer3_2_Nrg_phtase" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000246" substanceUnits="molec" compartment="Vcell"/>
+      <species id="ipHer3_2_Nrg_Pi3k" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000247" substanceUnits="molec" compartment="Vcell"/>
+      <species id="ipHer3_2_Nrg_Pi3k_Pip2" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000248" substanceUnits="molec" compartment="Vcell"/>
+      <species id="ipHer3_1_Nrg" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000249" substanceUnits="molec" compartment="Vcell"/>
+      <species id="ipHer3_1_Nrg_phtase" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000250" substanceUnits="molec" compartment="Vcell"/>
+      <species id="ipHer3_1_Nrg_Pi3k" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000251" substanceUnits="molec" compartment="Vcell"/>
+      <species id="ipHer3_1_Nrg_Pi3k_Pip2" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000252" substanceUnits="molec" compartment="Vcell"/>
+      <species id="ipHer2_2" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000253" substanceUnits="molec" compartment="Vcell"/>
+      <species id="ipHer2_2_phtase" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000254" substanceUnits="molec" compartment="Vcell"/>
+      <species id="ipHer2_2_Pi3k" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000255" substanceUnits="molec" compartment="Vcell"/>
+      <species id="ipHer2_2_Pi3k_Pip2" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000256" substanceUnits="molec" compartment="Vcell"/>
+      <species id="dNrg" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000257" substanceUnits="molec" compartment="Vcell"/>
+      <species id="dHer3_Nrg" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000258" substanceUnits="molec" compartment="Vcell"/>
+      <species id="dpHer3_Nrg" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000259" substanceUnits="molec" compartment="Vcell"/>
+      <species id="dpHer2" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000260" substanceUnits="molec" compartment="Vcell"/>
+      <species id="dHer3_2_Nrg" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000261" substanceUnits="molec" compartment="Vcell"/>
+      <species id="dpHer3_2_Nrg" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000262" substanceUnits="molec" compartment="Vcell"/>
+      <species id="dpHer3_2_Nrg_phtase" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000263" substanceUnits="molec" compartment="Vcell"/>
+      <species id="dpHer3_2_Nrg_Pi3k" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000264" substanceUnits="molec" compartment="Vcell"/>
+      <species id="dpHer3_2_Nrg_Pi3k_Pip2" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000265" substanceUnits="molec" compartment="Vcell"/>
+      <species id="dpHer2_2" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000266" substanceUnits="molec" compartment="Vcell"/>
+      <species id="dpHer2_2_phtase" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000267" substanceUnits="molec" compartment="Vcell"/>
+      <species id="dpHer2_2_Pi3k" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000268" substanceUnits="molec" compartment="Vcell"/>
+      <species id="dpHer2_2_Pi3k_Pip2" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000269" substanceUnits="molec" compartment="Vcell"/>
+      <species id="dHer3_1_Nrg" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000270" substanceUnits="molec" compartment="Vcell"/>
+      <species id="dpHer3_1_Nrg" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000271" substanceUnits="molec" compartment="Vcell"/>
+      <species id="dpHer3_1_Nrg_phtase" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000272" substanceUnits="molec" compartment="Vcell"/>
+      <species id="dpHer3_1_Nrg_Pi3k" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000273" substanceUnits="molec" compartment="Vcell"/>
+      <species id="dpHer3_1_Nrg_Pi3k_Pip2" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000274" substanceUnits="molec" compartment="Vcell"/>
+      <species id="Her3_3" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000338" substanceUnits="molec" compartment="Vcell"/>
+      <species id="Her3_3_Nrg" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000339" substanceUnits="molec" compartment="Vcell"/>
+      <species id="pHer3_3_Nrg" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000340" substanceUnits="molec" compartment="Vcell"/>
+      <species id="pHer3_3_Nrg_phtase" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000341" substanceUnits="molec" compartment="Vcell"/>
+      <species id="pHer3_3_Nrg_Pi3k" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000342" substanceUnits="molec" compartment="Vcell"/>
+      <species id="pHer3_3_Nrg_Pi3k_Pip2" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000343" substanceUnits="molec" compartment="Vcell"/>
+      <species id="iHer3_3_Nrg" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000344" substanceUnits="molec" compartment="Vcell"/>
+      <species id="ipHer3_3_Nrg" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000345" substanceUnits="molec" compartment="Vcell"/>
+      <species id="ipHer3_3_Nrg_phtase" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000346" substanceUnits="molec" compartment="Vcell"/>
+      <species id="ipHer3_3_Nrg_Pi3k" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000347" substanceUnits="molec" compartment="Vcell"/>
+      <species id="ipHer3_3_Nrg_Pi3k_Pip2" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000348" substanceUnits="molec" compartment="Vcell"/>
+      <species id="dHer3_3_Nrg" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000349" substanceUnits="molec" compartment="Vcell"/>
+      <species id="dpHer3_3_Nrg" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000350" substanceUnits="molec" compartment="Vcell"/>
+      <species id="dpHer3_3_Nrg_phtase" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000351" substanceUnits="molec" compartment="Vcell"/>
+      <species id="dpHer3_3_Nrg_Pi3k" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000352" substanceUnits="molec" compartment="Vcell"/>
+      <species id="dpHer3_3_Nrg_Pi3k_Pip2" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000353" substanceUnits="molec" compartment="Vcell"/>
+      <species id="lap_Egfr" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000380" substanceUnits="molec" compartment="Vcell"/>
+      <species id="lap_Her2" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000381" substanceUnits="molec" compartment="Vcell"/>
+      <species id="lap_Egfr_Egfr" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000382" substanceUnits="molec" compartment="Vcell"/>
+      <species id="lap_Egfr_Her2" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000383" substanceUnits="molec" compartment="Vcell"/>
+      <species id="lap_Egfr_Her3" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000384" substanceUnits="molec" compartment="Vcell"/>
+      <species id="lap_Her2_2" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000385" substanceUnits="molec" compartment="Vcell"/>
+      <species id="lap_Her2_3" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000386" substanceUnits="molec" compartment="Vcell"/>
+      <species id="lap_lap_Egfr_Egfr" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000387" substanceUnits="molec" compartment="Vcell"/>
+      <species id="lap_lap_Egfr_Her2" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000388" substanceUnits="molec" compartment="Vcell"/>
+      <species id="lap_lap_Her2_Her2" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000389" substanceUnits="molec" compartment="Vcell"/>
+      <species id="lap_Nrg_Her2_3" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000390" substanceUnits="molec" compartment="Vcell"/>
+      <species id="lap_Nrg_Her3_1" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000391" substanceUnits="molec" compartment="Vcell"/>
+      <species id="lap" initialAmount="0" hasOnlySubstanceUnits="true" metaid="metaid_0000393" substanceUnits="molec" compartment="Vcell"/>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="kf1" metaid="metaid_0000178" value="5E-11" units="per_molec_sec"/>
+      <parameter id="kr1" metaid="metaid_0000179" value="0.001" units="per_sec"/>
+      <parameter id="kf2" metaid="metaid_0000180" value="5E-11" units="per_molec_sec"/>
+      <parameter id="kr2" metaid="metaid_0000181" value="0.001" units="per_sec"/>
+      <parameter id="kf7" metaid="metaid_0000182" value="3E-6" units="per_molec_sec"/>
+      <parameter id="kr7" metaid="metaid_0000183" value="0.001" units="per_sec"/>
+      <parameter id="kf10" metaid="metaid_0000184" value="3E-8" units="per_molec_sec"/>
+      <parameter id="kf12" metaid="metaid_0000185" value="4.2E-9" units="per_molec_sec"/>
+      <parameter id="kr12" metaid="metaid_0000186" value="0.001" units="per_sec"/>
+      <parameter id="kf30" metaid="metaid_0000187" value="1" units="per_sec"/>
+      <parameter id="kf38" metaid="metaid_0000188" value="5E-6" units="per_molec_sec"/>
+      <parameter id="kr38" metaid="metaid_0000189" value="0.1" units="per_sec"/>
+      <parameter id="kf45" metaid="metaid_0000190" value="1" units="per_sec"/>
+      <parameter id="kf52" metaid="metaid_0000191" value="3E-6" units="per_molec_sec"/>
+      <parameter id="kr52" metaid="metaid_0000192" value="0.1" units="per_sec"/>
+      <parameter id="kf54" metaid="metaid_0000193" value="7.5E-7" units="per_molec_sec"/>
+      <parameter id="kr54" metaid="metaid_0000194" value="0.1" units="per_sec"/>
+      <parameter id="kf59" metaid="metaid_0000195" value="5E-6" units="per_molec_sec"/>
+      <parameter id="kr59" metaid="metaid_0000196" value="0.1" units="per_sec"/>
+      <parameter id="kf61" metaid="metaid_0000197" value="5E-7" units="per_molec_sec"/>
+      <parameter id="kr61" metaid="metaid_0000198" value="0.1" units="per_sec"/>
+      <parameter id="kf66" metaid="metaid_0000199" value="0.2" units="per_sec"/>
+      <parameter id="kf68" metaid="metaid_0000200" value="0.013" units="per_sec"/>
+      <parameter id="kf73" metaid="metaid_0000201" value="5E-6" units="per_molec_sec"/>
+      <parameter id="kr73" metaid="metaid_0000202" value="0.1" units="per_sec"/>
+      <parameter id="kf74" metaid="metaid_0000203" value="0.1" units="per_sec"/>
+      <parameter id="kf75" metaid="metaid_0000204" value="0.00026" units="per_molec_sec"/>
+      <parameter id="kr75" metaid="metaid_0000205" value="0.1" units="per_sec"/>
+      <parameter id="kf76" metaid="metaid_0000206" value="6.7E-5" units="per_molec_sec"/>
+      <parameter id="kr76" metaid="metaid_0000207" value="0.1" units="per_sec"/>
+      <parameter id="kf77" metaid="metaid_0000208" value="1" units="per_sec"/>
+      <parameter id="kf78" metaid="metaid_0000209" value="0.2" units="per_sec"/>
+      <parameter id="kf81" metaid="metaid_0000210" value="1" units="per_sec"/>
+      <parameter id="kf82" metaid="metaid_0000211" value="1.7E-6" units="per_molec_sec"/>
+      <parameter id="kr82" metaid="metaid_0000212" value="0.1" units="per_sec"/>
+      <parameter id="kf83" metaid="metaid_0000213" value="1.5" units="per_sec"/>
+      <parameter id="kf86" metaid="metaid_0000214" value="8.3E-9" units="per_molec_sec"/>
+      <parameter id="kr86" metaid="metaid_0000215" value="0.5" units="per_sec"/>
+      <parameter id="kf87" metaid="metaid_0000216" value="0.1" units="per_sec"/>
+      <parameter id="kf88" metaid="metaid_0000218" value="0.1" units="per_sec"/>
+      <parameter id="kr88" metaid="metaid_0000219" value="0.005" units="per_sec"/>
+      <parameter id="kf93" metaid="metaid_0000220" value="0.005" units="per_sec"/>
+      <parameter id="kr93" metaid="metaid_0000221" value="0.005" units="per_sec"/>
+      <parameter id="kf98" metaid="metaid_0000222" value="0.005" units="per_sec"/>
+      <parameter id="kr98" metaid="metaid_0000223" value="0.005" units="per_sec"/>
+      <parameter id="kf127" metaid="metaid_0000224" value="0.038" units="per_molec_sec"/>
+      <parameter id="kf185" metaid="metaid_0000225" value="0.002" units="per_sec"/>
+      <parameter id="kf187" metaid="metaid_0000226" value="0.002" units="per_sec"/>
+      <parameter id="kf192" metaid="metaid_0000227" value="0.002" units="per_sec"/>
+      <parameter id="kf201" metaid="metaid_0000228" value="0.002" units="per_sec"/>
+      <parameter id="kf30_weak" metaid="metaid_0000336" value="0.001" units="per_sec"/>
+      <parameter id="kf10_weak" metaid="metaid_0000337" value="3E-11" units="per_molec_sec"/>
+      <parameter id="kflap1" metaid="metaid_0000374" value="6.4E-12" units="per_molec_sec"/>
+      <parameter id="krlap1" metaid="metaid_0000375" value="3.83E-5" units="per_sec"/>
+      <parameter id="kflap2" metaid="metaid_0000376" value="1.5E-12" units="per_molec_sec"/>
+      <parameter id="krlap2" metaid="metaid_0000377" value="3.83E-5" units="per_sec"/>
+      <parameter id="kflap3" metaid="metaid_0000378" value="1.28E-11" units="per_molec_sec"/>
+      <parameter id="kflap4" metaid="metaid_0000379" value="3E-12" units="per_molec_sec"/>
+    </listOfParameters>
+    <listOfReactions>
+      <reaction id="R1" metaid="metaid_0000229">
+        <listOfReactants>
+          <speciesReference species="Nrg" metaid="_123797"/>
+          <speciesReference species="Her3" metaid="_123809"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Her3_Nrg" metaid="_123821"/>
+        </listOfProducts>
+        <kineticLaw metaid="_123833">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf1 </ci>
+                <ci> Nrg </ci>
+                <ci> Her3 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr1 </ci>
+                <ci> Her3_Nrg </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R2" metaid="metaid_0000129">
+        <listOfReactants>
+          <speciesReference species="Nrg" metaid="_123845"/>
+          <speciesReference species="Her3_2" metaid="_123857"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Her3_2_Nrg" metaid="_123869"/>
+        </listOfProducts>
+        <kineticLaw metaid="_123882">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf2 </ci>
+                <ci> Nrg </ci>
+                <ci> Her3_2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr2 </ci>
+                <ci> Her3_2_Nrg </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R7" metaid="metaid_0000130">
+        <listOfReactants>
+          <speciesReference species="Her3_Nrg" metaid="_123894"/>
+          <speciesReference species="Her2" metaid="_123906"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Her3_2_Nrg" metaid="_123918"/>
+        </listOfProducts>
+        <kineticLaw metaid="_123930">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf7 </ci>
+                <ci> Her3_Nrg </ci>
+                <ci> Her2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr7 </ci>
+                <ci> Her3_2_Nrg </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R8" metaid="metaid_0000131">
+        <listOfReactants>
+          <speciesReference species="pHer3_Nrg" metaid="_123942"/>
+          <speciesReference species="pHer2" metaid="_123955"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pHer3_2_Nrg" metaid="_123967"/>
+        </listOfProducts>
+        <kineticLaw metaid="_123979">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf7 </ci>
+                <ci> pHer3_Nrg </ci>
+                <ci> pHer2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr7 </ci>
+                <ci> pHer3_2_Nrg </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R9" metaid="metaid_0000132" reversible="false">
+        <listOfReactants>
+          <speciesReference species="pHer3_Nrg" metaid="_123991"/>
+          <speciesReference species="Her2" metaid="_124003"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pHer3_2_Nrg" metaid="_124015"/>
+        </listOfProducts>
+        <kineticLaw metaid="_124027">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf7 </ci>
+              <ci> pHer3_Nrg </ci>
+              <ci> Her2 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R10" metaid="metaid_0000133">
+        <listOfReactants>
+          <speciesReference species="Her3_Nrg" metaid="_124039"/>
+          <speciesReference species="Egfr" metaid="_124051"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Her3_1_Nrg" metaid="_124063"/>
+        </listOfProducts>
+        <kineticLaw metaid="_124075">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf10 </ci>
+                <ci> Her3_Nrg </ci>
+                <ci> Egfr </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr7 </ci>
+                <ci> Her3_1_Nrg </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R11" metaid="metaid_0000134">
+        <listOfReactants>
+          <speciesReference species="pHer3_Nrg" metaid="_124088"/>
+          <speciesReference species="Egfr" metaid="_124100"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pHer3_1_Nrg" metaid="_124112"/>
+        </listOfProducts>
+        <kineticLaw metaid="_124124">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf10 </ci>
+                <ci> pHer3_Nrg </ci>
+                <ci> Egfr </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr7 </ci>
+                <ci> pHer3_1_Nrg </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R12" metaid="metaid_0000135" reversible="false">
+        <listOfReactants>
+          <speciesReference species="pHer2" metaid="_124136"/>
+          <speciesReference species="Her2" metaid="_124148"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pHer2_2" metaid="_124160"/>
+        </listOfProducts>
+        <kineticLaw metaid="_124172">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf12 </ci>
+              <ci> pHer2 </ci>
+              <ci> Her2 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R13" metaid="metaid_0000136">
+        <listOfReactants>
+          <speciesReference species="pHer2" metaid="_124184" stoichiometry="2"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pHer2_2" metaid="_124197"/>
+        </listOfProducts>
+        <kineticLaw metaid="_124209">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf12 </ci>
+                <ci> pHer2 </ci>
+                <ci> pHer2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr12 </ci>
+                <ci> pHer2_2 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R25" metaid="metaid_0000137">
+        <listOfReactants>
+          <speciesReference species="Her3" metaid="_124221"/>
+          <speciesReference species="Her2" metaid="_124233"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Her3_2" metaid="_124245"/>
+        </listOfProducts>
+        <kineticLaw metaid="_124257">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf12 </ci>
+                <ci> Her3 </ci>
+                <ci> Her2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr12 </ci>
+                <ci> Her3_2 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R26" metaid="metaid_0000138">
+        <listOfReactants>
+          <speciesReference species="Her3" metaid="_124269"/>
+          <speciesReference species="Egfr" metaid="_124281"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Her3_1" metaid="_124293"/>
+        </listOfProducts>
+        <kineticLaw metaid="_124305">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf12 </ci>
+                <ci> Her3 </ci>
+                <ci> Egfr </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr12 </ci>
+                <ci> Her3_1 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R27" metaid="metaid_0000139">
+        <listOfReactants>
+          <speciesReference species="Egfr" metaid="_124318"/>
+          <speciesReference species="Her2" metaid="_124330"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Her1_2" metaid="_124342"/>
+        </listOfProducts>
+        <kineticLaw metaid="_124355">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf12 </ci>
+                <ci> Egfr </ci>
+                <ci> Her2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr12 </ci>
+                <ci> Her1_2 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R28" metaid="metaid_0000140">
+        <listOfReactants>
+          <speciesReference species="Egfr" metaid="_124367" stoichiometry="2"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Her1_1" metaid="_124380"/>
+        </listOfProducts>
+        <kineticLaw metaid="_124392">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf12 </ci>
+                <ci> Egfr </ci>
+                <ci> Egfr </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr12 </ci>
+                <ci> Her1_1 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R29" metaid="metaid_0000141">
+        <listOfReactants>
+          <speciesReference species="Her2" metaid="_124404" stoichiometry="2"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Her2_2" metaid="_124416"/>
+        </listOfProducts>
+        <kineticLaw metaid="_124428">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf12 </ci>
+                <ci> Her2 </ci>
+                <ci> Her2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr12 </ci>
+                <ci> Her2_2 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R30" metaid="metaid_0000142" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Her3_2_Nrg" metaid="_124440"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pHer3_2_Nrg" metaid="_124452"/>
+        </listOfProducts>
+        <kineticLaw metaid="_124464">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf30 </ci>
+              <ci> Her3_2_Nrg </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R31" metaid="metaid_0000143" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Her3_1_Nrg" metaid="_124476"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pHer3_1_Nrg" metaid="_124488"/>
+        </listOfProducts>
+        <kineticLaw metaid="_124500">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf30 </ci>
+              <ci> Her3_1_Nrg </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R36" metaid="metaid_0000145" reversible="false">
+        <listOfReactants>
+          <speciesReference species="pHer3_Nrg" metaid="_124512"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Her3" metaid="_124524"/>
+          <speciesReference species="Nrg" metaid="_124536"/>
+        </listOfProducts>
+        <kineticLaw metaid="_124548">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kr1 </ci>
+              <ci> pHer3_Nrg </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R38" metaid="metaid_0000146">
+        <listOfReactants>
+          <speciesReference species="pHer3_2_Nrg" metaid="_124560"/>
+          <speciesReference species="phtase" metaid="_124572"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pHer3_2_Nrg_phtase" metaid="_124584"/>
+        </listOfProducts>
+        <kineticLaw metaid="_124596">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf38 </ci>
+                <ci> pHer3_2_Nrg </ci>
+                <ci> phtase </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr38 </ci>
+                <ci> pHer3_2_Nrg_phtase </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R39" metaid="metaid_0000147">
+        <listOfReactants>
+          <speciesReference species="pHer3_1_Nrg" metaid="_124608"/>
+          <speciesReference species="phtase" metaid="_124620"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pHer3_1_Nrg_phtase" metaid="_124632"/>
+        </listOfProducts>
+        <kineticLaw metaid="_124644">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf38 </ci>
+                <ci> pHer3_1_Nrg </ci>
+                <ci> phtase </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr38 </ci>
+                <ci> pHer3_1_Nrg_phtase </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R44" metaid="metaid_0000148">
+        <listOfReactants>
+          <speciesReference species="pHer2_2" metaid="_124656"/>
+          <speciesReference species="phtase" metaid="_124668"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pHer2_2_phtase" metaid="_124680"/>
+        </listOfProducts>
+        <kineticLaw metaid="_124692">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf38 </ci>
+                <ci> pHer2_2 </ci>
+                <ci> phtase </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr38 </ci>
+                <ci> pHer2_2_phtase </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R45" metaid="metaid_0000149" reversible="false">
+        <listOfReactants>
+          <speciesReference species="pHer3_2_Nrg_phtase" metaid="_124704"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Her3_2_Nrg" metaid="_124716"/>
+          <speciesReference species="phtase" metaid="_124729"/>
+        </listOfProducts>
+        <kineticLaw metaid="_124741">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf45 </ci>
+              <ci> pHer3_2_Nrg_phtase </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R46" metaid="metaid_0000150" reversible="false">
+        <listOfReactants>
+          <speciesReference species="pHer3_1_Nrg_phtase" metaid="_124753"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Her3_1_Nrg" metaid="_124765"/>
+          <speciesReference species="phtase" metaid="_124777"/>
+        </listOfProducts>
+        <kineticLaw metaid="_124789">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf45 </ci>
+              <ci> pHer3_1_Nrg_phtase </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R51" metaid="metaid_0000151" reversible="false">
+        <listOfReactants>
+          <speciesReference species="pHer2_2_phtase" metaid="_124801"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Her2_2" metaid="_124813"/>
+          <speciesReference species="phtase" metaid="_124825"/>
+        </listOfProducts>
+        <kineticLaw metaid="_124837">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf45 </ci>
+              <ci> pHer2_2_phtase </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R52" metaid="metaid_0000152">
+        <listOfReactants>
+          <speciesReference species="pHer3_2_Nrg" metaid="_124849"/>
+          <speciesReference species="Pi3k" metaid="_124861"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pHer3_2_Nrg_Pi3k" metaid="_124873"/>
+        </listOfProducts>
+        <kineticLaw metaid="_124885">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf52 </ci>
+                <ci> pHer3_2_Nrg </ci>
+                <ci> Pi3k </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr52 </ci>
+                <ci> pHer3_2_Nrg_Pi3k </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R53" metaid="metaid_0000153">
+        <listOfReactants>
+          <speciesReference species="pHer3_1_Nrg" metaid="_124897"/>
+          <speciesReference species="Pi3k" metaid="_124909"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pHer3_1_Nrg_Pi3k" metaid="_124921"/>
+        </listOfProducts>
+        <kineticLaw metaid="_124933">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf52 </ci>
+                <ci> pHer3_1_Nrg </ci>
+                <ci> Pi3k </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr52 </ci>
+                <ci> pHer3_1_Nrg_Pi3k </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R54" metaid="metaid_0000154">
+        <listOfReactants>
+          <speciesReference species="pHer2_2" metaid="_124945"/>
+          <speciesReference species="Pi3k" metaid="_124957"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pHer2_2_Pi3k" metaid="_124969"/>
+        </listOfProducts>
+        <kineticLaw metaid="_124981">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf54 </ci>
+                <ci> pHer2_2 </ci>
+                <ci> Pi3k </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr54 </ci>
+                <ci> pHer2_2_Pi3k </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R59" metaid="metaid_0000155">
+        <listOfReactants>
+          <speciesReference species="pHer3_2_Nrg_Pi3k" metaid="_124993"/>
+          <speciesReference species="Pip2" metaid="_125005"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pHer3_2_Nrg_Pi3k_Pip2" metaid="_125017"/>
+        </listOfProducts>
+        <kineticLaw metaid="_125030">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf59 </ci>
+                <ci> pHer3_2_Nrg_Pi3k </ci>
+                <ci> Pip2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr59 </ci>
+                <ci> pHer3_2_Nrg_Pi3k_Pip2 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R60" metaid="metaid_0000156">
+        <listOfReactants>
+          <speciesReference species="pHer3_1_Nrg_Pi3k" metaid="_125042"/>
+          <speciesReference species="Pip2" metaid="_125055"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pHer3_1_Nrg_Pi3k_Pip2" metaid="_125067"/>
+        </listOfProducts>
+        <kineticLaw metaid="_125079">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf59 </ci>
+                <ci> pHer3_1_Nrg_Pi3k </ci>
+                <ci> Pip2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr59 </ci>
+                <ci> pHer3_1_Nrg_Pi3k_Pip2 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R61" metaid="metaid_0000157">
+        <listOfReactants>
+          <speciesReference species="pHer2_2_Pi3k" metaid="_125091"/>
+          <speciesReference species="Pip2" metaid="_125103"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pHer2_2_Pi3k_Pip2" metaid="_125115"/>
+        </listOfProducts>
+        <kineticLaw metaid="_125127">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf61 </ci>
+                <ci> pHer2_2_Pi3k </ci>
+                <ci> Pip2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr61 </ci>
+                <ci> pHer2_2_Pi3k_Pip2 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R66" metaid="metaid_0000158" reversible="false">
+        <listOfReactants>
+          <speciesReference species="pHer3_2_Nrg_Pi3k_Pip2" metaid="_125139"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pHer3_2_Nrg_Pi3k" metaid="_125151"/>
+          <speciesReference species="Pip3" metaid="_125163"/>
+        </listOfProducts>
+        <kineticLaw metaid="_125175">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf66 </ci>
+              <ci> pHer3_2_Nrg_Pi3k_Pip2 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R67" metaid="metaid_0000159" reversible="false">
+        <listOfReactants>
+          <speciesReference species="pHer3_1_Nrg_Pi3k_Pip2" metaid="_125187"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pHer3_1_Nrg_Pi3k" metaid="_125199"/>
+          <speciesReference species="Pip3" metaid="_125211"/>
+        </listOfProducts>
+        <kineticLaw metaid="_125223">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf66 </ci>
+              <ci> pHer3_1_Nrg_Pi3k_Pip2 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R68" metaid="metaid_0000160" reversible="false">
+        <listOfReactants>
+          <speciesReference species="pHer2_2_Pi3k_Pip2" metaid="_125235"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pHer2_2_Pi3k" metaid="_125247"/>
+          <speciesReference species="Pip3" metaid="_125259"/>
+        </listOfProducts>
+        <kineticLaw metaid="_125271">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf68 </ci>
+              <ci> pHer2_2_Pi3k_Pip2 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R73" metaid="metaid_0000161">
+        <listOfReactants>
+          <speciesReference species="Pip3" metaid="_125283"/>
+          <speciesReference species="Pten" metaid="_125295"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Pip3_Pten" metaid="_125307"/>
+        </listOfProducts>
+        <kineticLaw metaid="_125319">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf73 </ci>
+                <ci> Pip3 </ci>
+                <ci> Pten </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr73 </ci>
+                <ci> Pip3_Pten </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R74" metaid="metaid_0000162" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Pip3_Pten" metaid="_125332"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Pip2" metaid="_125344"/>
+          <speciesReference species="Pten" metaid="_125357"/>
+        </listOfProducts>
+        <kineticLaw metaid="_125369">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf74 </ci>
+              <ci> Pip3_Pten </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R75" metaid="metaid_0000163">
+        <listOfReactants>
+          <speciesReference species="Pip3" metaid="_125381"/>
+          <speciesReference species="Akt" metaid="_125393"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Pip3_Akt" metaid="_125405"/>
+        </listOfProducts>
+        <kineticLaw metaid="_125417">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf75 </ci>
+                <ci> Pip3 </ci>
+                <ci> Akt </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr75 </ci>
+                <ci> Pip3_Akt </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R76" metaid="metaid_0000164">
+        <listOfReactants>
+          <speciesReference species="Pip3_Akt" metaid="_125429"/>
+          <speciesReference species="Pdk1" metaid="_125441"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Pip3_Akt_Pdk1" metaid="_125453"/>
+        </listOfProducts>
+        <kineticLaw metaid="_125465">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf76 </ci>
+                <ci> Pip3_Akt </ci>
+                <ci> Pdk1 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr76 </ci>
+                <ci> Pip3_Akt_Pdk1 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R77" metaid="metaid_0000165" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Pip3_Akt_Pdk1" metaid="_125477"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Pip3_Pdk1" metaid="_125489"/>
+          <speciesReference species="pAkt" metaid="_125501"/>
+        </listOfProducts>
+        <kineticLaw metaid="_125513">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf77 </ci>
+              <ci> Pip3_Akt_Pdk1 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R78" metaid="metaid_0000166" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Pip3_Pdk1" metaid="_125525"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Pip3" metaid="_125537"/>
+          <speciesReference species="Pdk1" metaid="_125549"/>
+        </listOfProducts>
+        <kineticLaw metaid="_125561">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf78 </ci>
+              <ci> Pip3_Pdk1 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R79" metaid="metaid_0000167">
+        <listOfReactants>
+          <speciesReference species="Pip3" metaid="_125573"/>
+          <speciesReference species="pAkt" metaid="_125585"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Pip3_pAkt" metaid="_125597"/>
+        </listOfProducts>
+        <kineticLaw metaid="_125609">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf75 </ci>
+                <ci> Pip3 </ci>
+                <ci> pAkt </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr75 </ci>
+                <ci> Pip3_pAkt </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R80" metaid="metaid_0000168">
+        <listOfReactants>
+          <speciesReference species="Pip3_pAkt" metaid="_125621"/>
+          <speciesReference species="Pdk1" metaid="_125633"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Pip3_pAkt_Pdk1" metaid="_125645"/>
+        </listOfProducts>
+        <kineticLaw metaid="_125657">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf76 </ci>
+                <ci> Pip3_pAkt </ci>
+                <ci> Pdk1 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr76 </ci>
+                <ci> Pip3_pAkt_Pdk1 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R81" metaid="metaid_0000169" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Pip3_pAkt_Pdk1" metaid="_125669"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Pip3_Pdk1" metaid="_125681"/>
+          <speciesReference species="ppAkt" metaid="_125693"/>
+        </listOfProducts>
+        <kineticLaw metaid="_125705">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf81 </ci>
+              <ci> Pip3_pAkt_Pdk1 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R82" metaid="metaid_0000170">
+        <listOfReactants>
+          <speciesReference species="ppAkt" metaid="_125717"/>
+          <speciesReference species="PP2A" metaid="_125730"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ppAkt_PP2A" metaid="_125742"/>
+        </listOfProducts>
+        <kineticLaw metaid="_125754">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf82 </ci>
+                <ci> ppAkt </ci>
+                <ci> PP2A </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr82 </ci>
+                <ci> ppAkt_PP2A </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R83" metaid="metaid_0000171" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ppAkt_PP2A" metaid="_125766"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pAkt" metaid="_125778"/>
+          <speciesReference species="PP2A" metaid="_125791"/>
+        </listOfProducts>
+        <kineticLaw metaid="_125803">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf83 </ci>
+              <ci> ppAkt_PP2A </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R84" metaid="metaid_0000172">
+        <listOfReactants>
+          <speciesReference species="pAkt" metaid="_125815"/>
+          <speciesReference species="PP2A" metaid="_125827"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pAkt_PP2A" metaid="_125839"/>
+        </listOfProducts>
+        <kineticLaw metaid="_125851">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf82 </ci>
+                <ci> pAkt </ci>
+                <ci> PP2A </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr82 </ci>
+                <ci> pAkt_PP2A </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R85" metaid="metaid_0000173" reversible="false">
+        <listOfReactants>
+          <speciesReference species="pAkt_PP2A" metaid="_125863"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Akt" metaid="_125875"/>
+          <speciesReference species="PP2A" metaid="_125887"/>
+        </listOfProducts>
+        <kineticLaw metaid="_125899">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf83 </ci>
+              <ci> pAkt_PP2A </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R86" metaid="metaid_0000174">
+        <listOfReactants>
+          <speciesReference species="ppAkt" metaid="_125911"/>
+          <speciesReference species="PP2Aoff" metaid="_125924"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ppAkt_PP2Aoff" metaid="_125936"/>
+        </listOfProducts>
+        <kineticLaw metaid="_125948">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf86 </ci>
+                <ci> ppAkt </ci>
+                <ci> PP2Aoff </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr86 </ci>
+                <ci> ppAkt_PP2Aoff </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R87" metaid="metaid_0000175" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ppAkt_PP2Aoff" metaid="_125960"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ppAkt" metaid="_125972"/>
+          <speciesReference species="PP2A" metaid="_125984"/>
+        </listOfProducts>
+        <kineticLaw metaid="_125996">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf87 </ci>
+              <ci> ppAkt_PP2Aoff </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R88" metaid="metaid_0000275">
+        <listOfReactants>
+          <speciesReference species="Her3_Nrg" metaid="_126008"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="iHer3_Nrg" metaid="_126020"/>
+        </listOfProducts>
+        <kineticLaw metaid="_126032">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf88 </ci>
+                <ci> Her3_Nrg </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr88 </ci>
+                <ci> iHer3_Nrg </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R89" metaid="metaid_0000276">
+        <listOfReactants>
+          <speciesReference species="pHer3_Nrg" metaid="_126044"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ipHer3_Nrg" metaid="_126056"/>
+        </listOfProducts>
+        <kineticLaw metaid="_126068">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf88 </ci>
+                <ci> pHer3_Nrg </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr88 </ci>
+                <ci> ipHer3_Nrg </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R90" metaid="metaid_0000277">
+        <listOfReactants>
+          <speciesReference species="pHer2" metaid="_126081"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ipHer2" metaid="_126093"/>
+        </listOfProducts>
+        <kineticLaw metaid="_126105">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf88 </ci>
+                <ci> pHer2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr88 </ci>
+                <ci> ipHer2 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R93" metaid="metaid_0000278">
+        <listOfReactants>
+          <speciesReference species="Her3_2_Nrg" metaid="_126117"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="iHer3_2_Nrg" metaid="_126129"/>
+        </listOfProducts>
+        <kineticLaw metaid="_126141">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf93 </ci>
+                <ci> Her3_2_Nrg </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr93 </ci>
+                <ci> iHer3_2_Nrg </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R94" metaid="metaid_0000279">
+        <listOfReactants>
+          <speciesReference species="pHer3_2_Nrg" metaid="_126153"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ipHer3_2_Nrg" metaid="_126166"/>
+        </listOfProducts>
+        <kineticLaw metaid="_126178">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf93 </ci>
+                <ci> pHer3_2_Nrg </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr93 </ci>
+                <ci> ipHer3_2_Nrg </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R95" metaid="metaid_0000280">
+        <listOfReactants>
+          <speciesReference species="pHer3_2_Nrg_phtase" metaid="_126190"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ipHer3_2_Nrg_phtase" metaid="_126202"/>
+        </listOfProducts>
+        <kineticLaw metaid="_126214">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf93 </ci>
+                <ci> pHer3_2_Nrg_phtase </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr93 </ci>
+                <ci> ipHer3_2_Nrg_phtase </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R96" metaid="metaid_0000281">
+        <listOfReactants>
+          <speciesReference species="pHer3_2_Nrg_Pi3k" metaid="_126226"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ipHer3_2_Nrg_Pi3k" metaid="_126239"/>
+        </listOfProducts>
+        <kineticLaw metaid="_126251">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf93 </ci>
+                <ci> pHer3_2_Nrg_Pi3k </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr93 </ci>
+                <ci> ipHer3_2_Nrg_Pi3k </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R97" metaid="metaid_0000282">
+        <listOfReactants>
+          <speciesReference species="pHer3_2_Nrg_Pi3k_Pip2" metaid="_126263"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ipHer3_2_Nrg_Pi3k_Pip2" metaid="_126275"/>
+        </listOfProducts>
+        <kineticLaw metaid="_126287">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf93 </ci>
+                <ci> pHer3_2_Nrg_Pi3k_Pip2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr93 </ci>
+                <ci> ipHer3_2_Nrg_Pi3k_Pip2 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R98" metaid="metaid_0000283">
+        <listOfReactants>
+          <speciesReference species="Her3_1_Nrg" metaid="_126299"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="iHer3_1_Nrg" metaid="_126311"/>
+        </listOfProducts>
+        <kineticLaw metaid="_126323">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf98 </ci>
+                <ci> Her3_1_Nrg </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr98 </ci>
+                <ci> iHer3_1_Nrg </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R99" metaid="metaid_0000284">
+        <listOfReactants>
+          <speciesReference species="pHer3_1_Nrg" metaid="_126335"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ipHer3_1_Nrg" metaid="_126347"/>
+        </listOfProducts>
+        <kineticLaw metaid="_126359">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf98 </ci>
+                <ci> pHer3_1_Nrg </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr98 </ci>
+                <ci> ipHer3_1_Nrg </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R100" metaid="metaid_0000285">
+        <listOfReactants>
+          <speciesReference species="pHer3_1_Nrg_phtase" metaid="_126371"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ipHer3_1_Nrg_phtase" metaid="_126383"/>
+        </listOfProducts>
+        <kineticLaw metaid="_126395">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf98 </ci>
+                <ci> pHer3_1_Nrg_phtase </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr98 </ci>
+                <ci> ipHer3_1_Nrg_phtase </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R101" metaid="metaid_0000286">
+        <listOfReactants>
+          <speciesReference species="pHer3_1_Nrg_Pi3k" metaid="_126407"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ipHer3_1_Nrg_Pi3k" metaid="_126419"/>
+        </listOfProducts>
+        <kineticLaw metaid="_126431">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf98 </ci>
+                <ci> pHer3_1_Nrg_Pi3k </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr98 </ci>
+                <ci> ipHer3_1_Nrg_Pi3k </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R102" metaid="metaid_0000287">
+        <listOfReactants>
+          <speciesReference species="pHer3_1_Nrg_Pi3k_Pip2" metaid="_126443"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ipHer3_1_Nrg_Pi3k_Pip2" metaid="_126455"/>
+        </listOfProducts>
+        <kineticLaw metaid="_126467">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf98 </ci>
+                <ci> pHer3_1_Nrg_Pi3k_Pip2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr98 </ci>
+                <ci> ipHer3_1_Nrg_Pi3k_Pip2 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R103" metaid="metaid_0000288">
+        <listOfReactants>
+          <speciesReference species="pHer2_2" metaid="_126479"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ipHer2_2" metaid="_126491"/>
+        </listOfProducts>
+        <kineticLaw metaid="_126503">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf93 </ci>
+                <ci> pHer2_2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr93 </ci>
+                <ci> ipHer2_2 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R104" metaid="metaid_0000289">
+        <listOfReactants>
+          <speciesReference species="pHer2_2_phtase" metaid="_126515"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ipHer2_2_phtase" metaid="_126527"/>
+        </listOfProducts>
+        <kineticLaw metaid="_126540">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf93 </ci>
+                <ci> pHer2_2_phtase </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr93 </ci>
+                <ci> ipHer2_2_phtase </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R105" metaid="metaid_0000290">
+        <listOfReactants>
+          <speciesReference species="pHer2_2_Pi3k" metaid="_126552"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ipHer2_2_Pi3k" metaid="_126565"/>
+        </listOfProducts>
+        <kineticLaw metaid="_126577">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf93 </ci>
+                <ci> pHer2_2_Pi3k </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr93 </ci>
+                <ci> ipHer2_2_Pi3k </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R106" metaid="metaid_0000291">
+        <listOfReactants>
+          <speciesReference species="pHer2_2_Pi3k_Pip2" metaid="_126589"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ipHer2_2_Pi3k_Pip2" metaid="_126601"/>
+        </listOfProducts>
+        <kineticLaw metaid="_126613">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf93 </ci>
+                <ci> pHer2_2_Pi3k_Pip2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr93 </ci>
+                <ci> ipHer2_2_Pi3k_Pip2 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R127" metaid="metaid_0000292">
+        <listOfReactants>
+          <speciesReference species="iNrg" metaid="_126625"/>
+          <speciesReference species="iHer3" metaid="_126637"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="iHer3_Nrg" metaid="_126649"/>
+        </listOfProducts>
+        <kineticLaw metaid="_126662">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf127 </ci>
+                <ci> iNrg </ci>
+                <ci> iHer3 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr1 </ci>
+                <ci> iHer3_Nrg </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R128" metaid="metaid_0000293">
+        <listOfReactants>
+          <speciesReference species="iNrg" metaid="_126675"/>
+          <speciesReference species="iHer3_2" metaid="_126687"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="iHer3_2_Nrg" metaid="_126699"/>
+        </listOfProducts>
+        <kineticLaw metaid="_126711">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf127 </ci>
+                <ci> iNrg </ci>
+                <ci> iHer3_2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr1 </ci>
+                <ci> iHer3_2_Nrg </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R133" metaid="metaid_0000294">
+        <listOfReactants>
+          <speciesReference species="iHer3_Nrg" metaid="_126724"/>
+          <speciesReference species="iHer2" metaid="_126737"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="iHer3_2_Nrg" metaid="_126749"/>
+        </listOfProducts>
+        <kineticLaw metaid="_126761">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf7 </ci>
+                <ci> iHer3_Nrg </ci>
+                <ci> iHer2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr7 </ci>
+                <ci> iHer3_2_Nrg </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R134" metaid="metaid_0000295">
+        <listOfReactants>
+          <speciesReference species="ipHer3_Nrg" metaid="_126773"/>
+          <speciesReference species="ipHer2" metaid="_126786"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ipHer3_2_Nrg" metaid="_126798"/>
+        </listOfProducts>
+        <kineticLaw metaid="_126810">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf7 </ci>
+                <ci> ipHer3_Nrg </ci>
+                <ci> ipHer2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr7 </ci>
+                <ci> ipHer3_2_Nrg </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R135" metaid="metaid_0000296" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ipHer3_Nrg" metaid="_126822"/>
+          <speciesReference species="iHer2" metaid="_126834"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ipHer3_2_Nrg" metaid="_126846"/>
+        </listOfProducts>
+        <kineticLaw metaid="_126858">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf7 </ci>
+              <ci> ipHer3_Nrg </ci>
+              <ci> iHer2 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R136" metaid="metaid_0000297">
+        <listOfReactants>
+          <speciesReference species="iHer3_Nrg" metaid="_126870"/>
+          <speciesReference species="iEgfr" metaid="_126882"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="iHer3_1_Nrg" metaid="_126894"/>
+        </listOfProducts>
+        <kineticLaw metaid="_126906">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf10 </ci>
+                <ci> iHer3_Nrg </ci>
+                <ci> iEgfr </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr7 </ci>
+                <ci> iHer3_1_Nrg </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R137" metaid="metaid_0000298">
+        <listOfReactants>
+          <speciesReference species="ipHer3_Nrg" metaid="_126918"/>
+          <speciesReference species="iEgfr" metaid="_126930"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ipHer3_1_Nrg" metaid="_126942"/>
+        </listOfProducts>
+        <kineticLaw metaid="_126954">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf10 </ci>
+                <ci> ipHer3_Nrg </ci>
+                <ci> iEgfr </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr7 </ci>
+                <ci> ipHer3_1_Nrg </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R138" metaid="metaid_0000299" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ipHer2" metaid="_126966"/>
+          <speciesReference species="iHer2" metaid="_126978"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ipHer2_2" metaid="_126990"/>
+        </listOfProducts>
+        <kineticLaw metaid="_127002">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf12 </ci>
+              <ci> ipHer2 </ci>
+              <ci> iHer2 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R139" metaid="metaid_0000300">
+        <listOfReactants>
+          <speciesReference species="ipHer2" metaid="_127015" stoichiometry="2"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ipHer2_2" metaid="_127027"/>
+        </listOfProducts>
+        <kineticLaw metaid="_127040">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf12 </ci>
+                <ci> ipHer2 </ci>
+                <ci> ipHer2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr12 </ci>
+                <ci> ipHer2_2 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R151" metaid="metaid_0000301">
+        <listOfReactants>
+          <speciesReference species="iHer3" metaid="_127052"/>
+          <speciesReference species="iHer2" metaid="_127064"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="iHer3_2" metaid="_127077"/>
+        </listOfProducts>
+        <kineticLaw metaid="_127089">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf12 </ci>
+                <ci> iHer3 </ci>
+                <ci> iHer2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr12 </ci>
+                <ci> iHer3_2 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R152" metaid="metaid_0000302">
+        <listOfReactants>
+          <speciesReference species="iHer3" metaid="_127101"/>
+          <speciesReference species="iEgfr" metaid="_127113"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="iHer3_1" metaid="_127125"/>
+        </listOfProducts>
+        <kineticLaw metaid="_127137">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf12 </ci>
+                <ci> iHer3 </ci>
+                <ci> iEgfr </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr12 </ci>
+                <ci> iHer3_1 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R153" metaid="metaid_0000303">
+        <listOfReactants>
+          <speciesReference species="iHer2" metaid="_127149"/>
+          <speciesReference species="iEgfr" metaid="_127161"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="iHer2_1" metaid="_127173"/>
+        </listOfProducts>
+        <kineticLaw metaid="_127185">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf12 </ci>
+                <ci> iHer2 </ci>
+                <ci> iEgfr </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr12 </ci>
+                <ci> iHer2_1 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R154" metaid="metaid_0000304">
+        <listOfReactants>
+          <speciesReference species="iEgfr" metaid="_127197" stoichiometry="2"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="iEgfr_Egfr" metaid="_127209"/>
+        </listOfProducts>
+        <kineticLaw metaid="_127221">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf12 </ci>
+                <ci> iEgfr </ci>
+                <ci> iEgfr </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr12 </ci>
+                <ci> iEgfr_Egfr </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R155" metaid="metaid_0000305">
+        <listOfReactants>
+          <speciesReference species="iHer2" metaid="_127233" stoichiometry="2"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="iHer2_2" metaid="_127245"/>
+        </listOfProducts>
+        <kineticLaw metaid="_127257">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf12 </ci>
+                <ci> iHer2 </ci>
+                <ci> iHer2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr12 </ci>
+                <ci> iHer2_2 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R156" metaid="metaid_0000306" reversible="false">
+        <listOfReactants>
+          <speciesReference species="iHer3_2_Nrg" metaid="_127269"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ipHer3_2_Nrg" metaid="_127281"/>
+        </listOfProducts>
+        <kineticLaw metaid="_127293">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf30 </ci>
+              <ci> iHer3_2_Nrg </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R157" metaid="metaid_0000307" reversible="false">
+        <listOfReactants>
+          <speciesReference species="iHer3_1_Nrg" metaid="_127305"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ipHer3_1_Nrg" metaid="_127317"/>
+        </listOfProducts>
+        <kineticLaw metaid="_127330">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf30 </ci>
+              <ci> iHer3_1_Nrg </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R162" metaid="metaid_0000308" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ipHer3_Nrg" metaid="_127342"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="iHer3" metaid="_127354"/>
+          <speciesReference species="iNrg" metaid="_127366"/>
+        </listOfProducts>
+        <kineticLaw metaid="_127378">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kr1 </ci>
+              <ci> ipHer3_Nrg </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R164" metaid="metaid_0000309">
+        <listOfReactants>
+          <speciesReference species="ipHer3_2_Nrg" metaid="_127390"/>
+          <speciesReference species="phtase" metaid="_127402"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ipHer3_2_Nrg_phtase" metaid="_127414"/>
+        </listOfProducts>
+        <kineticLaw metaid="_127426">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf38 </ci>
+                <ci> ipHer3_2_Nrg </ci>
+                <ci> phtase </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr38 </ci>
+                <ci> ipHer3_2_Nrg_phtase </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R165" metaid="metaid_0000310">
+        <listOfReactants>
+          <speciesReference species="ipHer3_1_Nrg" metaid="_127438"/>
+          <speciesReference species="phtase" metaid="_127450"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ipHer3_1_Nrg_phtase" metaid="_127462"/>
+        </listOfProducts>
+        <kineticLaw metaid="_127474">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf38 </ci>
+                <ci> ipHer3_1_Nrg </ci>
+                <ci> phtase </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr38 </ci>
+                <ci> ipHer3_1_Nrg_phtase </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R166" metaid="metaid_0000311">
+        <listOfReactants>
+          <speciesReference species="ipHer2_2" metaid="_127486"/>
+          <speciesReference species="phtase" metaid="_127498"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ipHer2_2_phtase" metaid="_127510"/>
+        </listOfProducts>
+        <kineticLaw metaid="_127522">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf38 </ci>
+                <ci> ipHer2_2 </ci>
+                <ci> phtase </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr38 </ci>
+                <ci> ipHer2_2_phtase </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R171" metaid="metaid_0000312" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ipHer3_2_Nrg_phtase" metaid="_127534"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="iHer3_2_Nrg" metaid="_127546"/>
+          <speciesReference species="phtase" metaid="_127558"/>
+        </listOfProducts>
+        <kineticLaw metaid="_127570">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf45 </ci>
+              <ci> ipHer3_2_Nrg_phtase </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R172" metaid="metaid_0000313" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ipHer3_1_Nrg_phtase" metaid="_127582"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="iHer3_1_Nrg" metaid="_127594"/>
+          <speciesReference species="phtase" metaid="_127606"/>
+        </listOfProducts>
+        <kineticLaw metaid="_127618">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf45 </ci>
+              <ci> ipHer3_1_Nrg_phtase </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R173" metaid="metaid_0000314" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ipHer2_2_phtase" metaid="_127630"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="iHer2_2" metaid="_127642"/>
+          <speciesReference species="phtase" metaid="_127654"/>
+        </listOfProducts>
+        <kineticLaw metaid="_127666">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf45 </ci>
+              <ci> ipHer2_2_phtase </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R178" metaid="metaid_0000315">
+        <listOfReactants>
+          <speciesReference species="ipHer3_2_Nrg" metaid="_127678"/>
+          <speciesReference species="Pi3k" metaid="_127690"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ipHer3_2_Nrg_Pi3k" metaid="_127702"/>
+        </listOfProducts>
+        <kineticLaw metaid="_127715">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf52 </ci>
+                <ci> ipHer3_2_Nrg </ci>
+                <ci> Pi3k </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr52 </ci>
+                <ci> ipHer3_2_Nrg_Pi3k </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R179" metaid="metaid_0000316">
+        <listOfReactants>
+          <speciesReference species="ipHer3_1_Nrg" metaid="_127727"/>
+          <speciesReference species="Pi3k" metaid="_127739"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ipHer3_1_Nrg_Pi3k" metaid="_127751"/>
+        </listOfProducts>
+        <kineticLaw metaid="_127763">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf52 </ci>
+                <ci> ipHer3_1_Nrg </ci>
+                <ci> Pi3k </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr52 </ci>
+                <ci> ipHer3_1_Nrg_Pi3k </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R180" metaid="metaid_0000317">
+        <listOfReactants>
+          <speciesReference species="ipHer2_2" metaid="_127775"/>
+          <speciesReference species="Pi3k" metaid="_127787"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ipHer2_2_Pi3k" metaid="_127799"/>
+        </listOfProducts>
+        <kineticLaw metaid="_127811">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf54 </ci>
+                <ci> ipHer2_2 </ci>
+                <ci> Pi3k </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr54 </ci>
+                <ci> ipHer2_2_Pi3k </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R185" metaid="metaid_0000318" reversible="false">
+        <listOfReactants>
+          <speciesReference species="iNrg" metaid="_127823"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="dNrg" metaid="_127835"/>
+        </listOfProducts>
+        <kineticLaw metaid="_127847">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf185 </ci>
+              <ci> iNrg </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R187" metaid="metaid_0000319" reversible="false">
+        <listOfReactants>
+          <speciesReference species="iHer3_Nrg" metaid="_127859"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="dHer3_Nrg" metaid="_127872"/>
+        </listOfProducts>
+        <kineticLaw metaid="_127884">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf187 </ci>
+              <ci> iHer3_Nrg </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R189" metaid="metaid_0000320" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ipHer3_Nrg" metaid="_127896"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="dpHer3_Nrg" metaid="_127908"/>
+        </listOfProducts>
+        <kineticLaw metaid="_127921">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf187 </ci>
+              <ci> ipHer3_Nrg </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R191" metaid="metaid_0000321" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ipHer2" metaid="_127933"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="dpHer2" metaid="_127945"/>
+        </listOfProducts>
+        <kineticLaw metaid="_127958">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf187 </ci>
+              <ci> ipHer2 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R192" metaid="metaid_0000322" reversible="false">
+        <listOfReactants>
+          <speciesReference species="iHer3_2_Nrg" metaid="_127970"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="dHer3_2_Nrg" metaid="_127982"/>
+        </listOfProducts>
+        <kineticLaw metaid="_127995">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf192 </ci>
+              <ci> iHer3_2_Nrg </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R193" metaid="metaid_0000323" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ipHer3_2_Nrg" metaid="_128007"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="dpHer3_2_Nrg" metaid="_128019"/>
+        </listOfProducts>
+        <kineticLaw metaid="_128031">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf192 </ci>
+              <ci> ipHer3_2_Nrg </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R194" metaid="metaid_0000324" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ipHer3_2_Nrg_phtase" metaid="_128043"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="dpHer3_2_Nrg_phtase" metaid="_128056"/>
+        </listOfProducts>
+        <kineticLaw metaid="_128069">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf192 </ci>
+              <ci> ipHer3_2_Nrg_phtase </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R195" metaid="metaid_0000325" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ipHer3_2_Nrg_Pi3k" metaid="_128081"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="dpHer3_2_Nrg_Pi3k" metaid="_128093"/>
+        </listOfProducts>
+        <kineticLaw metaid="_128105">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf192 </ci>
+              <ci> ipHer3_2_Nrg_Pi3k </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R196" metaid="metaid_0000326" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ipHer3_2_Nrg_Pi3k_Pip2" metaid="_128118"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="dpHer3_2_Nrg_Pi3k_Pip2" metaid="_128130"/>
+        </listOfProducts>
+        <kineticLaw metaid="_128142">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf192 </ci>
+              <ci> ipHer3_2_Nrg_Pi3k_Pip2 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R197" metaid="metaid_0000327" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ipHer2_2" metaid="_128154"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="dpHer2_2" metaid="_128166"/>
+        </listOfProducts>
+        <kineticLaw metaid="_128178">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf192 </ci>
+              <ci> ipHer2_2 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R198" metaid="metaid_0000328" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ipHer2_2_phtase" metaid="_128190"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="dpHer2_2_phtase" metaid="_128202"/>
+        </listOfProducts>
+        <kineticLaw metaid="_128214">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf192 </ci>
+              <ci> ipHer2_2_phtase </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R199" metaid="metaid_0000329" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ipHer2_2_Pi3k" metaid="_128226"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="dpHer2_2_Pi3k" metaid="_128238"/>
+        </listOfProducts>
+        <kineticLaw metaid="_128250">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf192 </ci>
+              <ci> ipHer2_2_Pi3k </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R200" metaid="metaid_0000330" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ipHer2_2_Pi3k_Pip2" metaid="_128262"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="dpHer2_2_Pi3k_Pip2" metaid="_128274"/>
+        </listOfProducts>
+        <kineticLaw metaid="_128286">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf192 </ci>
+              <ci> ipHer2_2_Pi3k_Pip2 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R201" metaid="metaid_0000331" reversible="false">
+        <listOfReactants>
+          <speciesReference species="iHer3_1_Nrg" metaid="_128299"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="dHer3_1_Nrg" metaid="_128311"/>
+        </listOfProducts>
+        <kineticLaw metaid="_128323">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf201 </ci>
+              <ci> iHer3_1_Nrg </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R202" metaid="metaid_0000332" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ipHer3_1_Nrg" metaid="_128336"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="dpHer3_1_Nrg" metaid="_128348"/>
+        </listOfProducts>
+        <kineticLaw metaid="_128360">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf201 </ci>
+              <ci> ipHer3_1_Nrg </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R203" metaid="metaid_0000333" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ipHer3_1_Nrg_phtase" metaid="_128372"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="dpHer3_1_Nrg_phtase" metaid="_128384"/>
+        </listOfProducts>
+        <kineticLaw metaid="_128396">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf201 </ci>
+              <ci> ipHer3_1_Nrg_phtase </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R204" metaid="metaid_0000334" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ipHer3_1_Nrg_Pi3k" metaid="_128408"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="dpHer3_1_Nrg_Pi3k" metaid="_128420"/>
+        </listOfProducts>
+        <kineticLaw metaid="_128432">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf201 </ci>
+              <ci> ipHer3_1_Nrg_Pi3k </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R205" metaid="metaid_0000335" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ipHer3_1_Nrg_Pi3k_Pip2" metaid="_128444"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="dpHer3_1_Nrg_Pi3k_Pip2" metaid="_128456"/>
+        </listOfProducts>
+        <kineticLaw metaid="_128468">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf201 </ci>
+              <ci> ipHer3_1_Nrg_Pi3k_Pip2 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R206" metaid="metaid_0000354">
+        <listOfReactants>
+          <speciesReference species="Her3" metaid="_128480" stoichiometry="2"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Her3_3" metaid="_128493"/>
+        </listOfProducts>
+        <kineticLaw metaid="_128506">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf12 </ci>
+                <ci> Her3 </ci>
+                <ci> Her3 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr12 </ci>
+                <ci> Her3_3 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R207" metaid="metaid_0000355">
+        <listOfReactants>
+          <speciesReference species="Her3_3" metaid="_128518"/>
+          <speciesReference species="Nrg" metaid="_128530"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Her3_3_Nrg" metaid="_128542"/>
+        </listOfProducts>
+        <kineticLaw metaid="_128554">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf1 </ci>
+                <ci> Nrg </ci>
+                <ci> Her3_3 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr1 </ci>
+                <ci> Her3_3_Nrg </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R208" metaid="metaid_0000356">
+        <listOfReactants>
+          <speciesReference species="Her3_Nrg" metaid="_128566"/>
+          <speciesReference species="Her3" metaid="_128579"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Her3_3_Nrg" metaid="_128591"/>
+        </listOfProducts>
+        <kineticLaw metaid="_128603">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf7 </ci>
+                <ci> Her3_Nrg </ci>
+                <ci> Her3 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr7 </ci>
+                <ci> Her3_3_Nrg </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R209" metaid="metaid_0000357" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Her3_3_Nrg" metaid="_128615"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pHer3_3_Nrg" metaid="_128628"/>
+        </listOfProducts>
+        <kineticLaw metaid="_128641">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf30_weak </ci>
+              <ci> Her3_3_Nrg </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R210" metaid="metaid_0000358">
+        <listOfReactants>
+          <speciesReference species="pHer3_3_Nrg" metaid="_128654"/>
+          <speciesReference species="phtase" metaid="_128668"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pHer3_3_Nrg_phtase" metaid="_128681"/>
+        </listOfProducts>
+        <kineticLaw metaid="_128694">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf38 </ci>
+                <ci> pHer3_3_Nrg </ci>
+                <ci> phtase </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr38 </ci>
+                <ci> pHer3_3_Nrg_phtase </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R211" metaid="metaid_0000359" reversible="false">
+        <listOfReactants>
+          <speciesReference species="pHer3_3_Nrg_phtase" metaid="_128707"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Her3_3_Nrg" metaid="_128721"/>
+          <speciesReference species="phtase" metaid="_128734"/>
+        </listOfProducts>
+        <kineticLaw metaid="_128747">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf45 </ci>
+              <ci> pHer3_3_Nrg_phtase </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R212" metaid="metaid_0000360">
+        <listOfReactants>
+          <speciesReference species="pHer3_3_Nrg" metaid="_128761"/>
+          <speciesReference species="Pi3k" metaid="_128774"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pHer3_3_Nrg_Pi3k" metaid="_128786"/>
+        </listOfProducts>
+        <kineticLaw metaid="_128798">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf52 </ci>
+                <ci> pHer3_3_Nrg </ci>
+                <ci> Pi3k </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr52 </ci>
+                <ci> pHer3_3_Nrg_Pi3k </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R213" metaid="metaid_0000361">
+        <listOfReactants>
+          <speciesReference species="pHer3_3_Nrg_Pi3k" metaid="_128810"/>
+          <speciesReference species="Pip2" metaid="_128823"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pHer3_3_Nrg_Pi3k_Pip2" metaid="_128836"/>
+        </listOfProducts>
+        <kineticLaw metaid="_128848">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf59 </ci>
+                <ci> pHer3_3_Nrg_Pi3k </ci>
+                <ci> Pip2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr59 </ci>
+                <ci> pHer3_3_Nrg_Pi3k_Pip2 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R214" metaid="metaid_0000362" reversible="false">
+        <listOfReactants>
+          <speciesReference species="pHer3_3_Nrg_Pi3k_Pip2" metaid="_128860"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pHer3_3_Nrg_Pi3k" metaid="_128872"/>
+          <speciesReference species="Pip3" metaid="_128884"/>
+        </listOfProducts>
+        <kineticLaw metaid="_128896">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf66 </ci>
+              <ci> pHer3_3_Nrg_Pi3k_Pip2 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R215" metaid="metaid_0000363">
+        <listOfReactants>
+          <speciesReference species="pHer3_Nrg" metaid="_128908"/>
+          <speciesReference species="Her3" metaid="_128920"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pHer3_3_Nrg" metaid="_128932"/>
+        </listOfProducts>
+        <kineticLaw metaid="_128944">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf10_weak </ci>
+                <ci> pHer3_Nrg </ci>
+                <ci> Her3 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr7 </ci>
+                <ci> pHer3_3_Nrg </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R216" metaid="metaid_0000364">
+        <listOfReactants>
+          <speciesReference species="Her3_3_Nrg" metaid="_128957"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="iHer3_3_Nrg" metaid="_128969"/>
+        </listOfProducts>
+        <kineticLaw metaid="_128981">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf93 </ci>
+                <ci> Her3_3_Nrg </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr93 </ci>
+                <ci> iHer3_3_Nrg </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R217" metaid="metaid_0000365">
+        <listOfReactants>
+          <speciesReference species="pHer3_3_Nrg" metaid="_128993"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ipHer3_3_Nrg" metaid="_129005"/>
+        </listOfProducts>
+        <kineticLaw metaid="_129017">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf93 </ci>
+                <ci> pHer3_3_Nrg </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr93 </ci>
+                <ci> ipHer3_3_Nrg </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R218" metaid="metaid_0000366">
+        <listOfReactants>
+          <speciesReference species="pHer3_3_Nrg_phtase" metaid="_129029"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ipHer3_3_Nrg_phtase" metaid="_129041"/>
+        </listOfProducts>
+        <kineticLaw metaid="_129053">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf93 </ci>
+                <ci> pHer3_3_Nrg_phtase </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr93 </ci>
+                <ci> ipHer3_3_Nrg_phtase </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R219" metaid="metaid_0000367">
+        <listOfReactants>
+          <speciesReference species="pHer3_3_Nrg_Pi3k" metaid="_129065"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ipHer3_3_Nrg_Pi3k" metaid="_129077"/>
+        </listOfProducts>
+        <kineticLaw metaid="_129089">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf93 </ci>
+                <ci> pHer3_3_Nrg_Pi3k </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr93 </ci>
+                <ci> ipHer3_3_Nrg_Pi3k </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R220" metaid="metaid_0000368">
+        <listOfReactants>
+          <speciesReference species="pHer3_3_Nrg_Pi3k_Pip2" metaid="_129101"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ipHer3_3_Nrg_Pi3k_Pip2" metaid="_129113"/>
+        </listOfProducts>
+        <kineticLaw metaid="_129125">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf93 </ci>
+                <ci> pHer3_3_Nrg_Pi3k_Pip2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr93 </ci>
+                <ci> ipHer3_3_Nrg_Pi3k_Pip2 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R221" metaid="metaid_0000369" reversible="false">
+        <listOfReactants>
+          <speciesReference species="iHer3_3_Nrg" metaid="_129137"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="dHer3_3_Nrg" metaid="_129149"/>
+        </listOfProducts>
+        <kineticLaw metaid="_129162">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf192 </ci>
+              <ci> iHer3_3_Nrg </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R222" metaid="metaid_0000370" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ipHer3_3_Nrg" metaid="_129174"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="dpHer3_3_Nrg" metaid="_129186"/>
+        </listOfProducts>
+        <kineticLaw metaid="_129198">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf192 </ci>
+              <ci> ipHer3_3_Nrg </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R223" metaid="metaid_0000371" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ipHer3_3_Nrg_phtase" metaid="_129210"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="dpHer3_3_Nrg_phtase" metaid="_129223"/>
+        </listOfProducts>
+        <kineticLaw metaid="_129235">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf192 </ci>
+              <ci> ipHer3_3_Nrg_phtase </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R224" metaid="metaid_0000372" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ipHer3_3_Nrg_Pi3k" metaid="_129247"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="dpHer3_3_Nrg_Pi3k" metaid="_129260"/>
+        </listOfProducts>
+        <kineticLaw metaid="_129272">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf192 </ci>
+              <ci> ipHer3_3_Nrg_Pi3k </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R225" metaid="metaid_0000373" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ipHer3_3_Nrg_Pi3k_Pip2" metaid="_129284"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="dpHer3_3_Nrg_Pi3k_Pip2" metaid="_129296"/>
+        </listOfProducts>
+        <kineticLaw metaid="_129308">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kf192 </ci>
+              <ci> ipHer3_3_Nrg_Pi3k_Pip2 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R226" metaid="metaid_0000392">
+        <listOfReactants>
+          <speciesReference species="Egfr" metaid="_129320"/>
+          <speciesReference species="lap" metaid="_129332"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="lap_Egfr" metaid="_129345"/>
+        </listOfProducts>
+        <kineticLaw metaid="_129357">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kflap1 </ci>
+                <ci> lap </ci>
+                <ci> Egfr </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> krlap1 </ci>
+                <ci> lap_Egfr </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R227" metaid="metaid_0000394">
+        <listOfReactants>
+          <speciesReference species="Her2" metaid="_129369"/>
+          <speciesReference species="lap" metaid="_129381"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="lap_Her2" metaid="_129394"/>
+        </listOfProducts>
+        <kineticLaw metaid="_129406">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kflap2 </ci>
+                <ci> lap </ci>
+                <ci> Her2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> krlap2 </ci>
+                <ci> lap_Her2 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R228" metaid="metaid_0000395">
+        <listOfReactants>
+          <speciesReference species="Her1_1" metaid="_129418"/>
+          <speciesReference species="lap" metaid="_129430"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="lap_Egfr_Egfr" metaid="_129442"/>
+        </listOfProducts>
+        <kineticLaw metaid="_129454">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kflap3 </ci>
+                <ci> lap </ci>
+                <ci> Her1_1 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> krlap1 </ci>
+                <ci> lap_Egfr_Egfr </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R229" metaid="metaid_0000396">
+        <listOfReactants>
+          <speciesReference species="Her1_2" metaid="_129467"/>
+          <speciesReference species="lap" metaid="_129479"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="lap_Egfr_Her2" metaid="_129491"/>
+        </listOfProducts>
+        <kineticLaw metaid="_129503">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kflap3 </ci>
+                <ci> lap </ci>
+                <ci> Her1_2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> krlap1 </ci>
+                <ci> lap_Egfr_Her2 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R230" metaid="metaid_0000397">
+        <listOfReactants>
+          <speciesReference species="Her3_1" metaid="_129516"/>
+          <speciesReference species="lap" metaid="_129528"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="lap_Egfr_Her3" metaid="_129540"/>
+        </listOfProducts>
+        <kineticLaw metaid="_129552">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kflap1 </ci>
+                <ci> lap </ci>
+                <ci> Her3_1 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> krlap1 </ci>
+                <ci> lap_Egfr_Her3 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R231" metaid="metaid_0000398">
+        <listOfReactants>
+          <speciesReference species="Her2_2" metaid="_129564"/>
+          <speciesReference species="lap" metaid="_129576"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="lap_Her2_2" metaid="_129588"/>
+        </listOfProducts>
+        <kineticLaw metaid="_129601">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kflap4 </ci>
+                <ci> lap </ci>
+                <ci> Her2_2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> krlap2 </ci>
+                <ci> lap_Her2_2 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R232" metaid="metaid_0000399">
+        <listOfReactants>
+          <speciesReference species="Her3_2" metaid="_129613"/>
+          <speciesReference species="lap" metaid="_129625"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="lap_Her2_3" metaid="_129637"/>
+        </listOfProducts>
+        <kineticLaw metaid="_129649">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kflap2 </ci>
+                <ci> lap </ci>
+                <ci> Her3_2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> krlap2 </ci>
+                <ci> lap_Her2_3 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R233" metaid="metaid_0000400">
+        <listOfReactants>
+          <speciesReference species="lap" metaid="_129661"/>
+          <speciesReference species="lap_Egfr_Egfr" metaid="_129674"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="lap_lap_Egfr_Egfr" metaid="_129686"/>
+        </listOfProducts>
+        <kineticLaw metaid="_129698">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kflap1 </ci>
+                <ci> lap </ci>
+                <ci> lap_Egfr_Egfr </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> krlap1 </ci>
+                <ci> lap_lap_Egfr_Egfr </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R234" metaid="metaid_0000401">
+        <listOfReactants>
+          <speciesReference species="lap_Egfr_Her2" metaid="_129710"/>
+          <speciesReference species="lap" metaid="_129722"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="lap_lap_Egfr_Her2" metaid="_129734"/>
+        </listOfProducts>
+        <kineticLaw metaid="_129746">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kflap1 </ci>
+                <ci> lap </ci>
+                <ci> lap_Egfr_Her2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> krlap1 </ci>
+                <ci> lap_lap_Egfr_Her2 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R235" metaid="metaid_0000402">
+        <listOfReactants>
+          <speciesReference species="lap" metaid="_129758"/>
+          <speciesReference species="lap_Her2_2" metaid="_129770"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="lap_lap_Her2_Her2" metaid="_129782"/>
+        </listOfProducts>
+        <kineticLaw metaid="_129794">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kflap2 </ci>
+                <ci> lap </ci>
+                <ci> lap_Her2_2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> krlap2 </ci>
+                <ci> lap_lap_Her2_Her2 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R236" metaid="metaid_0000403">
+        <listOfReactants>
+          <speciesReference species="Her3_2_Nrg" metaid="_129806"/>
+          <speciesReference species="lap" metaid="_129818"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="lap_Nrg_Her2_3" metaid="_129830"/>
+        </listOfProducts>
+        <kineticLaw metaid="_129842">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kflap2 </ci>
+                <ci> lap </ci>
+                <ci> Her3_2_Nrg </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> krlap2 </ci>
+                <ci> lap_Nrg_Her2_3 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R237" metaid="metaid_0000404">
+        <listOfReactants>
+          <speciesReference species="Her3_1_Nrg" metaid="_129854"/>
+          <speciesReference species="lap" metaid="_129866"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="lap_Nrg_Her3_1" metaid="_129878"/>
+        </listOfProducts>
+        <kineticLaw metaid="_129890">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kflap1 </ci>
+                <ci> lap </ci>
+                <ci> Her3_1_Nrg </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> krlap1 </ci>
+                <ci> lap_Nrg_Her3_1 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R238" metaid="metaid_0000405">
+        <listOfReactants>
+          <speciesReference species="lap_Egfr" metaid="_129902"/>
+          <speciesReference species="Egfr" metaid="_129914"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="lap_Egfr_Egfr" metaid="_129926"/>
+        </listOfProducts>
+        <kineticLaw metaid="_129938">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf12 </ci>
+                <ci> lap_Egfr </ci>
+                <ci> Egfr </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr12 </ci>
+                <ci> lap_Egfr_Egfr </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R239" metaid="metaid_0000406">
+        <listOfReactants>
+          <speciesReference species="Her2" metaid="_129950"/>
+          <speciesReference species="lap_Egfr" metaid="_129962"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="lap_Egfr_Her2" metaid="_129975"/>
+        </listOfProducts>
+        <kineticLaw metaid="_129987">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf12 </ci>
+                <ci> lap_Egfr </ci>
+                <ci> Her2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr12 </ci>
+                <ci> lap_Egfr_Her2 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R240" metaid="metaid_0000407">
+        <listOfReactants>
+          <speciesReference species="Her3" metaid="_129999"/>
+          <speciesReference species="lap_Egfr" metaid="_130011"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="lap_Egfr_Her3" metaid="_130023"/>
+        </listOfProducts>
+        <kineticLaw metaid="_130035">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf12 </ci>
+                <ci> lap_Egfr </ci>
+                <ci> Her3 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr12 </ci>
+                <ci> lap_Egfr_Her3 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R241" metaid="metaid_0000408">
+        <listOfReactants>
+          <speciesReference species="Egfr" metaid="_130047"/>
+          <speciesReference species="lap_Her2" metaid="_130059"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="lap_Egfr_Her2" metaid="_130072"/>
+        </listOfProducts>
+        <kineticLaw metaid="_130084">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf12 </ci>
+                <ci> lap_Her2 </ci>
+                <ci> Egfr </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr12 </ci>
+                <ci> lap_Egfr_Her2 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R242" metaid="metaid_0000409">
+        <listOfReactants>
+          <speciesReference species="Her3" metaid="_130096"/>
+          <speciesReference species="lap_Her2" metaid="_130108"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="lap_Her2_3" metaid="_130120"/>
+        </listOfProducts>
+        <kineticLaw metaid="_130132">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf12 </ci>
+                <ci> lap_Her2 </ci>
+                <ci> Her3 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr12 </ci>
+                <ci> lap_Her2_3 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R243" metaid="metaid_0000410">
+        <listOfReactants>
+          <speciesReference species="lap_Egfr" metaid="_130144" stoichiometry="2"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="lap_lap_Egfr_Egfr" metaid="_130156"/>
+        </listOfProducts>
+        <kineticLaw metaid="_130168">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf12 </ci>
+                <ci> lap_Egfr </ci>
+                <ci> lap_Egfr </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr12 </ci>
+                <ci> lap_lap_Egfr_Egfr </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R244" metaid="metaid_0000411">
+        <listOfReactants>
+          <speciesReference species="lap_Egfr" metaid="_130180"/>
+          <speciesReference species="lap_Her2" metaid="_130192"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="lap_lap_Egfr_Her2" metaid="_130204"/>
+        </listOfProducts>
+        <kineticLaw metaid="_130216">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf12 </ci>
+                <ci> lap_Egfr </ci>
+                <ci> lap_Her2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr12 </ci>
+                <ci> lap_lap_Egfr_Her2 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R245" metaid="metaid_0000412">
+        <listOfReactants>
+          <speciesReference species="lap_Her2" metaid="_130228" stoichiometry="2"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="lap_lap_Her2_Her2" metaid="_130240"/>
+        </listOfProducts>
+        <kineticLaw metaid="_130252">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf12 </ci>
+                <ci> lap_Her2 </ci>
+                <ci> lap_Her2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr12 </ci>
+                <ci> lap_lap_Her2_Her2 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R246" metaid="metaid_0000413">
+        <listOfReactants>
+          <speciesReference species="lap_Her2" metaid="_130264"/>
+          <speciesReference species="Her3_Nrg" metaid="_130276"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="lap_Nrg_Her2_3" metaid="_130288"/>
+        </listOfProducts>
+        <kineticLaw metaid="_130300">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf7 </ci>
+                <ci> lap_Her2 </ci>
+                <ci> Her3_Nrg </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr7 </ci>
+                <ci> lap_Nrg_Her2_3 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R247" metaid="metaid_0000414">
+        <listOfReactants>
+          <speciesReference species="lap_Egfr" metaid="_130312"/>
+          <speciesReference species="Her3_Nrg" metaid="_130324"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="lap_Nrg_Her3_1" metaid="_130336"/>
+        </listOfProducts>
+        <kineticLaw metaid="_130348">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf10 </ci>
+                <ci> lap_Egfr </ci>
+                <ci> Her3_Nrg </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr7 </ci>
+                <ci> lap_Nrg_Her3_1 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R248" metaid="metaid_0000415">
+        <listOfReactants>
+          <speciesReference species="Nrg" metaid="_130360"/>
+          <speciesReference species="lap_Her2_3" metaid="_130372"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="lap_Nrg_Her2_3" metaid="_130384"/>
+        </listOfProducts>
+        <kineticLaw metaid="_130396">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf2 </ci>
+                <ci> lap_Her2_3 </ci>
+                <ci> Nrg </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr1 </ci>
+                <ci> lap_Nrg_Her2_3 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

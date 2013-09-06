@@ -1,0 +1,445 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="_505968" version="4">
+  <model id="Piedrafita2010_MR_System" name="Piedrafita2010_MR_System" metaid="_906275">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This is the self maintaining metabolism model described in the article:      <br/>
+                <strong>A Simple Self-Maintaining Metabolic System: Robustness, Autocatalysis, Bistability.</strong>
+                <br/>
+          Piedrafita G,  Montero F,  Morán F,  Cárdenas ML,  Cornish-Bowden A,      <em>PLoS Computational Biology</em>
+          2010, 6(8):e1000872. doi:      <a href="http://dx.doi.org/10.1371/journal.pcbi.1000872">10.1371/journal.pcbi.1000872</a>
+                <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          A living organism must not only organize itself from within; it must also maintain its organization in the face of changes in its environment and degradation of its components. We show here that a simple (M,R)-system consisting of three interlocking catalytic cycles, with every catalyst produced by the system itself, can both establish a non-trivial steady state and maintain this despite continuous loss of the catalysts by irreversible degradation. As long as at least one catalyst is present at a sufficient concentration in the initial state, the others can be produced and maintained. The system shows bistability, because if the amount of catalyst in the initial state is insufficient to reach the non-trivial steady state the system collapses to a trivial steady state in which all fluxes are zero. It is also robust, because if one catalyst is catastrophically lost when the system is in steady state it can recreate the same state. There are three elementary flux modes, but none of them is an enzyme-maintaining mode, the entire network being necessary to maintain the two catalysts      </p>
+            <p>As this is a theoretical model and no units are given in the article, the standard units (mol, seconds and litre) are used for the parameters. k8 and k11 are set equal to k4.</p>
+            <p>Originally created by libAntimony v1.4 (using libSBML 3.4.1)</p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#_906275">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Endler</vCard:Family>
+                  <vCard:Given>Lukas</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>lukas@ebi.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>EMBL-EBI</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-08-09T16:31:52Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2012-04-20T22:14:00Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1008090000"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/BIOMD0000000257"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/20700491"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+          <bqbiol:isVersionOf>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0008152"/>
+            </rdf:Bag>
+          </bqbiol:isVersionOf>
+          <bqbiol:occursIn>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/taxonomy/131567"/>
+            </rdf:Bag>
+          </bqbiol:occursIn>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="substance" name="mole" metaid="_505980">
+        <listOfUnits>
+          <unit metaid="_505993" kind="mole"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time" name="sec" metaid="_506005">
+        <listOfUnits>
+          <unit metaid="_506017" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="volume" name="litre" metaid="_506029">
+        <listOfUnits>
+          <unit metaid="_506041" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_time" name="per_time" metaid="_506053">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_506065" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_time_per_M" name="per_time_per_M" metaid="_506077">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_506089" kind="mole"/>
+          <unit exponent="-1" metaid="_506101" kind="second"/>
+          <unit metaid="_506113" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="env" name="environment" metaid="_906279" sboTerm="SBO:0000290" size="1"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="S" initialConcentration="4" metaid="_906281" boundaryCondition="true" sboTerm="SBO:0000240" compartment="env"/>
+      <species id="U" initialConcentration="1" metaid="_906282" boundaryCondition="true" sboTerm="SBO:0000240" compartment="env"/>
+      <species id="T" initialConcentration="2" metaid="_906283" boundaryCondition="true" sboTerm="SBO:0000240" compartment="env"/>
+      <species id="STU" initialConcentration="5" metaid="_906284" sboTerm="SBO:0000240" compartment="env"/>
+      <species id="STUS" initialConcentration="0" metaid="_906287" sboTerm="SBO:0000240" compartment="env"/>
+      <species id="STUST" initialConcentration="0" metaid="_906288" sboTerm="SBO:0000240" compartment="env"/>
+      <species id="STUSU" initialConcentration="0" metaid="_906289" sboTerm="SBO:0000240" compartment="env"/>
+      <species id="SU" initialConcentration="0" metaid="_906292" sboTerm="SBO:0000240" compartment="env"/>
+      <species id="ST" initialConcentration="0" metaid="_906293" sboTerm="SBO:0000240" compartment="env"/>
+      <species id="SUST" initialConcentration="0" metaid="_906294" sboTerm="SBO:0000240" compartment="env"/>
+      <species id="SUSTU" initialConcentration="0" metaid="_906297" sboTerm="SBO:0000240" compartment="env"/>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="k1" metaid="_906330" value="10" sboTerm="SBO:0000339" units="per_time_per_M"/>
+      <parameter id="k1r" metaid="_906331" value="10" sboTerm="SBO:0000038" units="per_time"/>
+      <parameter id="k2" metaid="_906334" value="10" sboTerm="SBO:0000339" units="per_time_per_M"/>
+      <parameter id="k2r" metaid="_906335" value="10" sboTerm="SBO:0000038" units="per_time"/>
+      <parameter id="k3" metaid="_906336" value="2" sboTerm="SBO:0000035" units="per_time"/>
+      <parameter id="k3r" metaid="_906339" value="1" sboTerm="SBO:0000039" units="per_time_per_M"/>
+      <parameter id="k4" metaid="_906340" value="0.3" sboTerm="SBO:0000035" units="per_time"/>
+      <parameter id="k5" metaid="_906341" value="1" sboTerm="SBO:0000339" units="per_time_per_M"/>
+      <parameter id="k5r" metaid="_906344" value="1" sboTerm="SBO:0000038" units="per_time"/>
+      <parameter id="k6" metaid="_906345" value="1" sboTerm="SBO:0000339" units="per_time_per_M"/>
+      <parameter id="k6r" metaid="_906346" value="1" sboTerm="SBO:0000038" units="per_time"/>
+      <parameter id="k7" metaid="_906349" value="0.1" sboTerm="SBO:0000035" units="per_time"/>
+      <parameter id="k7r" metaid="_906350" value="0.1" sboTerm="SBO:0000039" units="per_time_per_M"/>
+      <parameter id="k8" constant="false" metaid="_906351" sboTerm="SBO:0000035" units="per_time"/>
+      <parameter id="k9" metaid="_906354" value="0.1" sboTerm="SBO:0000339" units="per_time_per_M"/>
+      <parameter id="k9r" metaid="_906355" value="0.05" sboTerm="SBO:0000038" units="per_time"/>
+      <parameter id="k10" metaid="_906356" value="0.05" sboTerm="SBO:0000035" units="per_time"/>
+      <parameter id="k10r" metaid="_906357" value="0.05" sboTerm="SBO:0000039" units="per_time_per_M"/>
+      <parameter id="k11" constant="false" metaid="_906358" sboTerm="SBO:0000035" units="per_time"/>
+    </listOfParameters>
+    <listOfRules>
+      <assignmentRule metaid="_906325" variable="k8">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <ci> k4 </ci>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_906326" variable="k11">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <ci> k4 </ci>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+    <listOfReactions>
+      <reaction id="reaction1" metaid="_906299" sboTerm="SBO:0000210">
+        <listOfReactants>
+          <speciesReference species="S" metaid="_506125"/>
+          <speciesReference species="STU" metaid="_506137"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="STUS" metaid="_506150"/>
+        </listOfProducts>
+        <kineticLaw metaid="_506162">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> env </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k1 </ci>
+                  <ci> S </ci>
+                  <ci> STU </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k1r </ci>
+                  <ci> STUS </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction2" metaid="_906300" sboTerm="SBO:0000210">
+        <listOfReactants>
+          <speciesReference species="T" metaid="_506174"/>
+          <speciesReference species="STUS" metaid="_506186"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="STUST" metaid="_506198"/>
+        </listOfProducts>
+        <kineticLaw metaid="_506211">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> env </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k2 </ci>
+                  <ci> T </ci>
+                  <ci> STUS </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k2r </ci>
+                  <ci> STUST </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction3" metaid="_906301" sboTerm="SBO:0000178">
+        <listOfReactants>
+          <speciesReference species="STUST" metaid="_506223"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ST" metaid="_506235"/>
+          <speciesReference species="STU" metaid="_506247"/>
+        </listOfProducts>
+        <kineticLaw metaid="_506259">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> env </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k3 </ci>
+                  <ci> STUST </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k3r </ci>
+                  <ci> ST </ci>
+                  <ci> STU </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction4" metaid="_906302" reversible="false" sboTerm="SBO:0000179">
+        <listOfReactants>
+          <speciesReference species="STU" metaid="_506271"/>
+        </listOfReactants>
+        <kineticLaw metaid="_506283">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> env </ci>
+              <ci> k4 </ci>
+              <ci> STU </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction5" metaid="_906303" sboTerm="SBO:0000210">
+        <listOfReactants>
+          <speciesReference species="SU" metaid="_506295"/>
+          <speciesReference species="ST" metaid="_506307"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="SUST" metaid="_506319"/>
+        </listOfProducts>
+        <kineticLaw metaid="_506331">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> env </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k5 </ci>
+                  <ci> ST </ci>
+                  <ci> SU </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k5r </ci>
+                  <ci> SUST </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction6" metaid="_906304" sboTerm="SBO:0000210">
+        <listOfReactants>
+          <speciesReference species="U" metaid="_506343"/>
+          <speciesReference species="SUST" metaid="_506356"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="SUSTU" metaid="_506368"/>
+        </listOfProducts>
+        <kineticLaw metaid="_506380">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> env </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k6 </ci>
+                  <ci> U </ci>
+                  <ci> SUST </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k6r </ci>
+                  <ci> SUSTU </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction7" metaid="_906305" sboTerm="SBO:0000178">
+        <listOfReactants>
+          <speciesReference species="SUSTU" metaid="_506392"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="STU" metaid="_506404"/>
+          <speciesReference species="SU" metaid="_506416"/>
+        </listOfProducts>
+        <kineticLaw metaid="_506428">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> env </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k7 </ci>
+                  <ci> SUSTU </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k7r </ci>
+                  <ci> STU </ci>
+                  <ci> SU </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction8" metaid="_906306" reversible="false" sboTerm="SBO:0000179">
+        <listOfReactants>
+          <speciesReference species="SU" metaid="_506440"/>
+        </listOfReactants>
+        <kineticLaw metaid="_506452">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> env </ci>
+              <ci> k8 </ci>
+              <ci> SU </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction9" metaid="_906309" sboTerm="SBO:0000210">
+        <listOfReactants>
+          <speciesReference species="U" metaid="_506464"/>
+          <speciesReference species="STUS" metaid="_506477"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="STUSU" metaid="_506489"/>
+        </listOfProducts>
+        <kineticLaw metaid="_506501">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> env </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k9 </ci>
+                  <ci> U </ci>
+                  <ci> STUS </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k9r </ci>
+                  <ci> STUSU </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction10" metaid="_906310" sboTerm="SBO:0000178">
+        <listOfReactants>
+          <speciesReference species="STUSU" metaid="_506513"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="STU" metaid="_506525"/>
+          <speciesReference species="SU" metaid="_506537"/>
+        </listOfProducts>
+        <kineticLaw metaid="_506549">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> env </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k10 </ci>
+                  <ci> STUSU </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k10r </ci>
+                  <ci> STU </ci>
+                  <ci> SU </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction11" metaid="_906311" reversible="false" sboTerm="SBO:0000179">
+        <listOfReactants>
+          <speciesReference species="ST" metaid="_506561"/>
+        </listOfReactants>
+        <kineticLaw metaid="_506573">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> env </ci>
+              <ci> k11 </ci>
+              <ci> ST </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

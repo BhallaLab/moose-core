@@ -1,0 +1,341 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="_667613" version="4">
+  <model id="Heldt2002_OrthostaticStress_heart" name="Heldt2002_OrthostaticStress_heart" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>Computational modeling of cardiovascular response to orthostatic stress.</strong>
+                <br/>
+          Heldt T, Shim EB, Kamm RD, Mark RG.      <em>J Appl Physiol</em>
+          2002 Mar;92(3):1239-54      <a href="http://www.ncbi.nlm.nih.gov/pubmed/11842064">11842064</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          The objective of this study is to develop a model of the cardiovascular system
+capable of simulating the short-term (&lt; or = 5 min) transient and steady-state
+hemodynamic responses to head-up tilt and lower body negative pressure. The
+model consists of a closed-loop lumped-parameter representation of the
+circulation connected to set-point models of the arterial and cardiopulmonary
+baroreflexes. Model parameters are largely based on literature values. Model
+verification was performed by comparing the simulation output under baseline
+conditions and at different levels of orthostatic stress to sets of
+population-averaged hemodynamic data reported in the literature. On the basis of
+experimental evidence, we adjusted some model parameters to simulate
+experimental data. Orthostatic stress simulations are not statistically
+different from experimental data (two-sided test of significance with Bonferroni
+adjustment for multiple comparisons). Transient response characteristics of
+heart rate to tilt also compare well with reported data. A case study is
+presented on how the model is intended to be used in the future to investigate
+the effects of post-spaceflight orthostatic intolerance.      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://models.cellml.org/exposure/ff8be5f140e68612284488cf9879eb5f">        <strong>Heldt T, Shim EB, Kamm RD, Mark RG. (2002) - version=1.0</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>Catherine Lloyd</strong>
+                <br/>
+          c.lloyd@auckland.ac.nz      <br/>
+          The University of Auckland      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:51:05Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:51:05Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:51:05Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:51:05Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1006230103"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/11842064"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="elastance" name="elastance" metaid="_667625">
+        <listOfUnits>
+          <unit metaid="_667637" multiplier="133.322" kind="pascal"/>
+          <unit scale="-3" exponent="-1" metaid="_667649" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="s" name="s" metaid="_667661">
+        <listOfUnits>
+          <unit metaid="_667674" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="Hz" name="Hz" metaid="_667686">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_667698" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="ratepm" name="ratepm" metaid="_667710">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_667722" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_s" name="per_s" metaid="_667734">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_667746" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time" name="time" metaid="_667758">
+        <listOfUnits>
+          <unit metaid="_667771" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="COMpartment" metaid="_265074" units="litre" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="time_Environment" name="time" metaid="_265087"/>
+      <parameter id="HR" name="HR" metaid="_265088" value="70"/>
+      <parameter id="hrf" constant="false" name="hrf" metaid="_265091"/>
+      <parameter id="PRint" name="PRint" metaid="_265092" value="0.00012"/>
+      <parameter id="beattime" constant="false" name="beattime" metaid="_265095"/>
+      <parameter id="Esys" name="Esys" metaid="_265096" value="5.6"/>
+      <parameter id="Edia" name="Edia" metaid="_265099" value="0.19"/>
+      <parameter id="TsK" name="TsK" metaid="_265100" value="0.35"/>
+      <parameter id="Ts" constant="false" name="Ts" metaid="_265103"/>
+      <parameter id="E_LV" constant="false" name="E_LV" metaid="_265104"/>
+      <parameter id="dummy" constant="false" name="dummy" metaid="_265107" value="10"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_265077" variable="dummy">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> dummy </ci>
+            <apply>
+              <minus/>
+              <cn> 3 </cn>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="_265078" variable="hrf">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <ci> HR </ci>
+            <cn> 60 </cn>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_265081" variable="beattime">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <minus/>
+              <ci> time_Environment </ci>
+              <apply>
+                <times/>
+                <apply>
+                  <floor/>
+                  <apply>
+                    <divide/>
+                    <ci> time_Environment </ci>
+                    <ci> hrf </ci>
+                  </apply>
+                </apply>
+                <ci> hrf </ci>
+              </apply>
+            </apply>
+            <ci> PRint </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_265082" variable="Ts">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> TsK </ci>
+            <apply>
+              <root/>
+              <degree>
+                <cn type="integer"> 2 </cn>
+              </degree>
+              <apply>
+                <times/>
+                <cn> 1 </cn>
+                <ci> hrf </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_265085" variable="E_LV">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <apply>
+                <plus/>
+                <ci> Edia </ci>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <apply>
+                      <minus/>
+                      <ci> Esys </ci>
+                      <ci> Edia </ci>
+                    </apply>
+                    <apply>
+                      <minus/>
+                      <cn> 1 </cn>
+                      <apply>
+                        <cos/>
+                        <apply>
+                          <divide/>
+                          <apply>
+                            <times/>
+                            <pi/>
+                            <ci> beattime </ci>
+                          </apply>
+                          <ci> Ts </ci>
+                        </apply>
+                      </apply>
+                    </apply>
+                  </apply>
+                  <cn> 2 </cn>
+                </apply>
+              </apply>
+              <apply>
+                <and/>
+                <apply>
+                  <geq/>
+                  <ci> beattime </ci>
+                  <cn> 0 </cn>
+                </apply>
+                <apply>
+                  <leq/>
+                  <ci> beattime </ci>
+                  <ci> Ts </ci>
+                </apply>
+              </apply>
+            </piece>
+            <piece>
+              <apply>
+                <plus/>
+                <ci> Edia </ci>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <apply>
+                      <minus/>
+                      <ci> Esys </ci>
+                      <ci> Edia </ci>
+                    </apply>
+                    <apply>
+                      <plus/>
+                      <cn> 1 </cn>
+                      <apply>
+                        <cos/>
+                        <apply>
+                          <divide/>
+                          <apply>
+                            <times/>
+                            <cn> 2 </cn>
+                            <pi/>
+                            <apply>
+                              <minus/>
+                              <ci> beattime </ci>
+                              <ci> Ts </ci>
+                            </apply>
+                          </apply>
+                          <ci> Ts </ci>
+                        </apply>
+                      </apply>
+                    </apply>
+                  </apply>
+                  <cn> 2 </cn>
+                </apply>
+              </apply>
+              <apply>
+                <and/>
+                <apply>
+                  <lt/>
+                  <ci> beattime </ci>
+                  <apply>
+                    <times/>
+                    <cn> 1.5 </cn>
+                    <ci> Ts </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <geq/>
+                  <ci> beattime </ci>
+                  <ci> Ts </ci>
+                </apply>
+              </apply>
+            </piece>
+            <otherwise>
+              <ci> Edia </ci>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+  </model>
+</sbml>

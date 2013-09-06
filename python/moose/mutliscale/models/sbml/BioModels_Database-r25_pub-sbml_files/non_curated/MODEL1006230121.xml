@@ -1,0 +1,2230 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2" level="2" metaid="_750172" version="1">
+  <model id="Tran2009_CaDynamicsSERCA_Cardiac" name="Tran2009_CaDynamicsSERCA_Cardiac" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>A thermodynamic model of the cardiac sarcoplasmic/endoplasmic Ca(2+) (SERCA)
+pump.</strong>
+                <br/>
+          Tran K, Smith NP, Loiselle DS, Crampin EJ.      <em>Biophys J</em>
+          2009 Mar 4;96(5):2029-42      <a href="http://www.ncbi.nlm.nih.gov/pubmed/19254563">19254563</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          We present a biophysically based kinetic model of the cardiac SERCA pump that
+consolidates a range of experimental data into a consistent and
+thermodynamically constrained framework. The SERCA model consists of a number of
+sub-states with partial reactions that are sensitive to Ca(2+) and pH, and to
+the metabolites MgATP, MgADP, and Pi. Optimization of model parameters to fit
+experimental data favors a fully cooperative Ca(2+)-binding mechanism and
+predicts a Ca(2+)/H(+) counter-transport stoichiometry of 2. Moreover, the order
+of binding of the partial reactions, particularly the binding of MgATP, proves
+to be a strong determinant of the ability of the model to fit the data. A
+thermodynamic investigation of the model indicates that the binding of MgATP has
+a large inhibitory effect on the maximal reverse rate of the pump. The model is
+suitable for integrating into whole-cell models of cardiac electrophysiology and
+Ca(2+) dynamics to simulate the effects on the cell of compromised metabolism
+arising in ischemia and hypoxia.      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://models.cellml.org/exposure/cc1db86dfd7838194138b224f586bfb4">        <strong>Tran K, Smith NP, Loiselle DS, Crampin EJ. (2009) - version=1.0</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>Kenneth Tran</strong>
+                <br/>
+          k.tran@auckland.ac.nz      <br/>
+          The University of Auckland      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Tran</vCard:Family>
+                  <vCard:Given>Kenneth</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>k.tran@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>The University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Tran</vCard:Family>
+                  <vCard:Given>Kenneth</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>k.tran@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>The University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Tran</vCard:Family>
+                  <vCard:Given>Kenneth</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>k.tran@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>The University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-23T17:03:06Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-23T17:03:06Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-23T17:03:06Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-23T17:03:06Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1006230121"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/19254563"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="unit_normalised_force_millisecond2_per_micrometre" name="unit_normalised_force_millisecond2_per_micrometre" metaid="_750184">
+        <listOfUnits>
+          <unit scale="-3" exponent="2" metaid="_750197" kind="second"/>
+          <unit scale="-6" exponent="-1" metaid="_750209" kind="metre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="unit_normalised_force_millisecond" name="unit_normalised_force_millisecond" metaid="_750221">
+        <listOfUnits>
+          <unit scale="-3" metaid="_750233" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="unit_normalised_force_millisecond_per_micrometre" name="unit_normalised_force_millisecond_per_micrometre" metaid="_750245">
+        <listOfUnits>
+          <unit scale="-3" metaid="_750257" kind="second"/>
+          <unit scale="-6" exponent="-1" metaid="_750269" kind="metre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="unit_normalised_force_per_micrometre" name="unit_normalised_force_per_micrometre" metaid="_750281">
+        <listOfUnits>
+          <unit scale="-6" exponent="-1" metaid="_750294" kind="metre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="micrometre" name="micrometre" metaid="_750306">
+        <listOfUnits>
+          <unit scale="-6" metaid="_750318" kind="metre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_micrometre" name="per_micrometre" metaid="_750330">
+        <listOfUnits>
+          <unit scale="-6" exponent="-1" metaid="_750342" kind="metre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="micrometre_per_millisecond" name="micrometre_per_millisecond" metaid="_750354">
+        <listOfUnits>
+          <unit scale="-6" metaid="_750366" kind="metre"/>
+          <unit scale="-3" exponent="-1" metaid="_750378" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="millisecond_per_micrometre" name="millisecond_per_micrometre" metaid="_750390">
+        <listOfUnits>
+          <unit scale="-3" metaid="_750402" kind="second"/>
+          <unit scale="-6" exponent="-1" metaid="_750414" kind="metre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="millisecond" name="millisecond" metaid="_750426">
+        <listOfUnits>
+          <unit scale="-3" metaid="_750438" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="millisecond2_per_micrometre" name="millisecond2_per_micrometre" metaid="_750450">
+        <listOfUnits>
+          <unit scale="-3" exponent="2" metaid="_750462" kind="second"/>
+          <unit scale="-6" exponent="-1" metaid="_750474" kind="metre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="micromolar" name="micromolar" metaid="_750486">
+        <listOfUnits>
+          <unit scale="-6" metaid="_750498" kind="mole"/>
+          <unit exponent="-1" metaid="_750511" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="micromolar2" name="micromolar2" metaid="_750523">
+        <listOfUnits>
+          <unit scale="-6" exponent="2" metaid="_750535" kind="mole"/>
+          <unit exponent="-2" metaid="_750547" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="micromolar_per_millisecond" name="micromolar_per_millisecond" metaid="_750559">
+        <listOfUnits>
+          <unit scale="-6" metaid="_750571" kind="mole"/>
+          <unit exponent="-1" metaid="_750583" kind="litre"/>
+          <unit scale="-3" exponent="-1" metaid="_750595" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="first_order_rate_constant" name="first_order_rate_constant" metaid="_750608">
+        <listOfUnits>
+          <unit scale="-3" exponent="-1" metaid="_750620" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="second_order_rate_constant" name="second_order_rate_constant" metaid="_750632">
+        <listOfUnits>
+          <unit scale="-6" exponent="-1" metaid="_750644" kind="mole"/>
+          <unit metaid="_750656" kind="litre"/>
+          <unit scale="-3" exponent="-1" metaid="_750668" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="millinewton_per_millimetre2" name="millinewton_per_millimetre2" metaid="_750680">
+        <listOfUnits>
+          <unit scale="-3" metaid="_750692" kind="newton"/>
+          <unit scale="-3" exponent="-2" metaid="_750704" kind="metre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="millinewton_micrometre_per_millimetre2" name="millinewton_micrometre_per_millimetre2" metaid="_750716">
+        <listOfUnits>
+          <unit scale="-3" metaid="_750728" kind="newton"/>
+          <unit exponent="-1" metaid="_750740" kind="metre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="millinewton_micrometre_per_millimetre2_per_millisecond" name="millinewton_micrometre_per_millimetre2_per_millisecond" metaid="_750753">
+        <listOfUnits>
+          <unit scale="-3" metaid="_750765" kind="newton"/>
+          <unit exponent="-1" metaid="_750778" kind="metre"/>
+          <unit scale="-3" exponent="-1" metaid="_750791" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time" name="time" metaid="_750803">
+        <listOfUnits>
+          <unit scale="-3" metaid="_750815" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="COMpartment" metaid="_981410" units="litre" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="time_environment" name="time" metaid="_981625" units="millisecond"/>
+      <parameter id="SOVFThick" constant="false" name="SOVFThick" metaid="_981626" units="dimensionless"/>
+      <parameter id="SOVFThin" constant="false" name="SOVFThin" metaid="_981629" units="dimensionless"/>
+      <parameter id="sovr_ze" constant="false" name="sovr_ze" metaid="_981632" units="micrometre"/>
+      <parameter id="sovr_cle" constant="false" name="sovr_cle" metaid="_981635" units="micrometre"/>
+      <parameter id="len_sovr" constant="false" name="len_sovr" metaid="_981638" units="micrometre"/>
+      <parameter id="TRPNCaL" constant="false" name="TRPNCaL" metaid="_981641" value="0.0147730085063734" units="dimensionless"/>
+      <parameter id="TRPNCaH" constant="false" name="TRPNCaH" metaid="_981644" value="0.13066096561522" units="dimensionless"/>
+      <parameter id="dTRPNCaL" constant="false" name="dTRPNCaL" metaid="_981647" units="first_order_rate_constant"/>
+      <parameter id="dTRPNCaH" constant="false" name="dTRPNCaH" metaid="_981650" units="first_order_rate_constant"/>
+      <parameter id="kn_pT" constant="false" name="kn_pT" metaid="_981653" units="first_order_rate_constant"/>
+      <parameter id="kp_nT" constant="false" name="kp_nT" metaid="_981656" units="first_order_rate_constant"/>
+      <parameter id="H" constant="false" name="H" metaid="_981659" units="micromolar"/>
+      <parameter id="H_cons" constant="false" name="H_cons" metaid="_981662" units="micromolar"/>
+      <parameter id="konT" constant="false" name="konT" metaid="_981665" units="second_order_rate_constant"/>
+      <parameter id="koffLT" constant="false" name="koffLT" metaid="_981668" units="first_order_rate_constant"/>
+      <parameter id="koffHT" constant="false" name="koffHT" metaid="_981671" units="first_order_rate_constant"/>
+      <parameter id="Qkon" name="Qkon" metaid="_981674" value="1.5" units="dimensionless"/>
+      <parameter id="Qkoff" name="Qkoff" metaid="_981677" value="1.3" units="dimensionless"/>
+      <parameter id="Qkn_p" name="Qkn_p" metaid="_981680" value="1.6" units="dimensionless"/>
+      <parameter id="Qkp_n" name="Qkp_n" metaid="_981683" value="1.6" units="dimensionless"/>
+      <parameter id="kon" name="kon" metaid="_981686" value="0.05" units="second_order_rate_constant"/>
+      <parameter id="koffL" name="koffL" metaid="_981689" value="0.25" units="first_order_rate_constant"/>
+      <parameter id="koffH" name="koffH" metaid="_981692" value="0.025" units="first_order_rate_constant"/>
+      <parameter id="perm50" name="perm50" metaid="_981695" value="0.5" units="dimensionless"/>
+      <parameter id="nperm" name="nperm" metaid="_981698" value="15" units="dimensionless"/>
+      <parameter id="kn_p" name="kn_p" metaid="_981701" value="0.5" units="first_order_rate_constant"/>
+      <parameter id="kp_n" name="kp_n" metaid="_981704" value="0.05" units="first_order_rate_constant"/>
+      <parameter id="koffmod" name="koffmod" metaid="_981707" value="1" units="dimensionless"/>
+      <parameter id="Tropreg" constant="false" name="Tropreg" metaid="_981710" units="dimensionless"/>
+      <parameter id="permtot" constant="false" name="permtot" metaid="_981713" units="dimensionless"/>
+      <parameter id="inprmt" constant="false" name="inprmt" metaid="_981716" units="dimensionless"/>
+      <parameter id="pH" name="pH" metaid="_981719" value="7.15" units="dimensionless"/>
+      <parameter id="m" name="m" metaid="_981722" value="1" units="dimensionless"/>
+      <parameter id="kdHCa" name="kdHCa" metaid="_981725" value="0.02" units="micromolar"/>
+      <parameter id="fappT" constant="false" name="fappT" metaid="_981728" units="first_order_rate_constant"/>
+      <parameter id="gappT" constant="false" name="gappT" metaid="_981731" units="first_order_rate_constant"/>
+      <parameter id="hfT" constant="false" name="hfT" metaid="_981734" units="first_order_rate_constant"/>
+      <parameter id="hbT" constant="false" name="hbT" metaid="_981737" units="first_order_rate_constant"/>
+      <parameter id="gxbT" constant="false" name="gxbT" metaid="_981740" units="first_order_rate_constant"/>
+      <parameter id="fapp" name="fapp" metaid="_981743" value="0.5" units="first_order_rate_constant"/>
+      <parameter id="gapp" name="gapp" metaid="_981746" value="0.07" units="first_order_rate_constant"/>
+      <parameter id="hf" name="hf" metaid="_981749" value="2" units="first_order_rate_constant"/>
+      <parameter id="hb" name="hb" metaid="_981752" value="0.4" units="first_order_rate_constant"/>
+      <parameter id="gxb" name="gxb" metaid="_981755" value="0.07" units="first_order_rate_constant"/>
+      <parameter id="gslmod" name="gslmod" metaid="_981758" value="6" units="dimensionless"/>
+      <parameter id="hfmd" constant="false" name="hfmd" metaid="_981761" units="dimensionless"/>
+      <parameter id="hbmd" constant="false" name="hbmd" metaid="_981764" units="dimensionless"/>
+      <parameter id="hfmdc" name="hfmdc" metaid="_981767" value="5" units="dimensionless"/>
+      <parameter id="hbmdc" name="hbmdc" metaid="_981770" value="0" units="dimensionless"/>
+      <parameter id="sigmap" name="sigmap" metaid="_981773" value="8" units="dimensionless"/>
+      <parameter id="sigman" name="sigman" metaid="_981776" value="1" units="dimensionless"/>
+      <parameter id="xbmodsp" name="xbmodsp" metaid="_981779" value="0.2" units="dimensionless"/>
+      <parameter id="Qfapp" name="Qfapp" metaid="_981782" value="6.25" units="dimensionless"/>
+      <parameter id="Qgapp" name="Qgapp" metaid="_981785" value="2.5" units="dimensionless"/>
+      <parameter id="Qhf" name="Qhf" metaid="_981788" value="6.25" units="dimensionless"/>
+      <parameter id="Qhb" name="Qhb" metaid="_981791" value="6.25" units="dimensionless"/>
+      <parameter id="Qgxb" name="Qgxb" metaid="_981794" value="6.25" units="dimensionless"/>
+      <parameter id="gxbmd" constant="false" name="gxbmd" metaid="_981797" units="dimensionless"/>
+      <parameter id="gapslmd" constant="false" name="gapslmd" metaid="_981800" units="dimensionless"/>
+      <parameter id="XBpostr" constant="false" name="XBpostr" metaid="_981803" value="1.81017564383744E-6" units="dimensionless"/>
+      <parameter id="XBprer" constant="false" name="XBprer" metaid="_981806" value="3.0494964880038E-7" units="dimensionless"/>
+      <parameter id="dXBpostr" constant="false" name="dXBpostr" metaid="_981809" units="first_order_rate_constant"/>
+      <parameter id="dXBprer" constant="false" name="dXBprer" metaid="_981812" units="first_order_rate_constant"/>
+      <parameter id="alpha1_plus" constant="false" name="alpha1_plus" metaid="_981815" units="first_order_rate_constant"/>
+      <parameter id="alpha2_plus" constant="false" name="alpha2_plus" metaid="_981818" units="first_order_rate_constant"/>
+      <parameter id="alpha3_plus" constant="false" name="alpha3_plus" metaid="_981821" units="first_order_rate_constant"/>
+      <parameter id="alpha1_minus" constant="false" name="alpha1_minus" metaid="_981824" units="first_order_rate_constant"/>
+      <parameter id="alpha2_minus" constant="false" name="alpha2_minus" metaid="_981827" units="first_order_rate_constant"/>
+      <parameter id="alpha3_minus" constant="false" name="alpha3_minus" metaid="_981830" units="first_order_rate_constant"/>
+      <parameter id="kMgATP" name="kMgATP" metaid="_981833" value="1.54E10" units="micromolar2"/>
+      <parameter id="kdADP" name="kdADP" metaid="_981836" value="4" units="micromolar"/>
+      <parameter id="xPi_cons" name="xPi_cons" metaid="_981839" value="2000" units="micromolar"/>
+      <parameter id="MgATP_cons" name="MgATP_cons" metaid="_981842" value="5000" units="micromolar"/>
+      <parameter id="fxbT" constant="false" name="fxbT" metaid="_981845" units="first_order_rate_constant"/>
+      <parameter id="N_NoXB" constant="false" name="N_NoXB" metaid="_981848" value="0.999999959256274" units="dimensionless"/>
+      <parameter id="P_NoXB" constant="false" name="P_NoXB" metaid="_981851" value="4.07437173988636E-8" units="dimensionless"/>
+      <parameter id="P" constant="false" name="P" metaid="_981854" value="0.999997834540066" units="dimensionless"/>
+      <parameter id="N" constant="false" name="N" metaid="_981857" units="dimensionless"/>
+      <parameter id="MgADP_cons" name="MgADP_cons" metaid="_981860" value="36" units="micromolar"/>
+      <parameter id="xPi" name="xPi" metaid="_981863" value="2000" units="micromolar"/>
+      <parameter id="MgATP" name="MgATP" metaid="_981866" value="5000" units="micromolar"/>
+      <parameter id="MgADP" name="MgADP" metaid="_981869" value="36.3" units="micromolar"/>
+      <parameter id="xXBpostr" constant="false" name="xXBpostr" metaid="_981872" value="0.00700005394873882" units="micrometre"/>
+      <parameter id="xXBprer" constant="false" name="xXBprer" metaid="_981875" value="3.41212828972468E-8" units="micrometre"/>
+      <parameter id="dxXBpostr" constant="false" name="dxXBpostr" metaid="_981878" units="micrometre_per_millisecond"/>
+      <parameter id="dxXBprer" constant="false" name="dxXBprer" metaid="_981881" units="micrometre_per_millisecond"/>
+      <parameter id="xPsi" name="xPsi" metaid="_981884" value="2" units="dimensionless"/>
+      <parameter id="dutyprer" constant="false" name="dutyprer" metaid="_981887" units="dimensionless"/>
+      <parameter id="dutypostr" constant="false" name="dutypostr" metaid="_981890" units="dimensionless"/>
+      <parameter id="SSXBpostr" constant="false" name="SSXBpostr" metaid="_981893" units="dimensionless"/>
+      <parameter id="SSXBprer" constant="false" name="SSXBprer" metaid="_981896" units="dimensionless"/>
+      <parameter id="dSL" constant="false" name="dSL" metaid="_981899" units="micrometre_per_millisecond"/>
+      <parameter id="SL" constant="false" name="SL" metaid="_981902" value="2.2" units="micrometre"/>
+      <parameter id="kxb_normalised_active_and_passive_force" name="kxb" metaid="_981905" value="120" units="millinewton_per_millimetre2"/>
+      <parameter id="Fnordv" constant="false" name="Fnordv" metaid="_981908" units="millinewton_micrometre_per_millimetre2"/>
+      <parameter id="force" constant="false" name="force" metaid="_981911" units="millinewton_micrometre_per_millimetre2"/>
+      <parameter id="active" constant="false" name="active" metaid="_981914"/>
+      <parameter id="ppforce" constant="false" name="ppforce" metaid="_981917"/>
+      <parameter id="ppforce_t" constant="false" name="ppforce_t" metaid="_981920"/>
+      <parameter id="ppforce_c" constant="false" name="ppforce_c" metaid="_981923"/>
+      <parameter id="preload" constant="false" name="preload" metaid="_981926"/>
+      <parameter id="afterload" constant="false" name="afterload" metaid="_981929"/>
+      <parameter id="intf" constant="false" name="intf" metaid="_981932" value="-4.5113452510363E-6" units="unit_normalised_force_millisecond"/>
+      <parameter id="SL_c" name="SL_c" metaid="_981935" value="2.25" units="micrometre"/>
+      <parameter id="SLrest" name="SLrest" metaid="_981938" value="1.85" units="micrometre"/>
+      <parameter id="SLset" name="SLset" metaid="_981941" value="1.9" units="micrometre"/>
+      <parameter id="PCon_t" name="PCon_t" metaid="_981944" value="0.002"/>
+      <parameter id="PExp_t" name="PExp_t" metaid="_981947" value="10" units="per_micrometre"/>
+      <parameter id="PCon_c" name="PCon_c" metaid="_981948" value="0.02"/>
+      <parameter id="PExp_c" name="PExp_c" metaid="_981951" value="70" units="per_micrometre"/>
+      <parameter id="KSE" name="KSE" metaid="_981952" value="1" units="unit_normalised_force_per_micrometre"/>
+      <parameter id="fxb" constant="false" name="fxb" metaid="_981953" units="first_order_rate_constant"/>
+      <parameter id="SEon" name="SEon" metaid="_981956" value="1" units="dimensionless"/>
+      <parameter id="FrSBXB" constant="false" name="FrSBXB" metaid="_981959" units="dimensionless"/>
+      <parameter id="dFrSBXB" constant="false" name="dFrSBXB" metaid="_981962" units="first_order_rate_constant"/>
+      <parameter id="dsovr_ze" constant="false" name="dsovr_ze" metaid="_981963" units="micrometre_per_millisecond"/>
+      <parameter id="dsovr_cle" constant="false" name="dsovr_cle" metaid="_981964" units="micrometre_per_millisecond"/>
+      <parameter id="dlen_sovr" constant="false" name="dlen_sovr" metaid="_981965" units="micrometre_per_millisecond"/>
+      <parameter id="dSOVFThick" constant="false" name="dSOVFThick" metaid="_981966" units="first_order_rate_constant"/>
+      <parameter id="dSOVFThin" constant="false" name="dSOVFThin" metaid="_981967" units="first_order_rate_constant"/>
+      <parameter id="kxb_calculation_of_micromolar_per_millisecondes_of_Ca_for_apparent_Ca_binding" name="kxb" metaid="_981968" value="120" units="millinewton_per_millimetre2"/>
+      <parameter id="dforce" constant="false" name="dforce" metaid="_981971" units="millinewton_micrometre_per_millimetre2_per_millisecond"/>
+      <parameter id="Trop_conc" name="Trop_conc" metaid="_981974" value="70" units="micromolar"/>
+      <parameter id="TropTot" constant="false" name="TropTot" metaid="_981977" units="micromolar"/>
+      <parameter id="dTropTot" constant="false" name="dTropTot" metaid="_981980" units="micromolar_per_millisecond"/>
+      <parameter id="Cai" name="Cai" metaid="_981983" value="200" units="micromolar"/>
+      <parameter id="len_thin" name="len_thin" metaid="_981986" value="1.2" units="micrometre"/>
+      <parameter id="len_thick" name="len_thick" metaid="_981989" value="1.65" units="micrometre"/>
+      <parameter id="len_hbare" name="len_hbare" metaid="_981992" value="0.1" units="micrometre"/>
+      <parameter id="TmpC" name="TmpC" metaid="_981995" value="22" units="celsius"/>
+      <parameter id="x_0" name="x_0" metaid="_981998" value="0.007" units="micrometre"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_981413" variable="TRPNCaL">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <ci> dTRPNCaL </ci>
+        </math>
+      </rateRule>
+      <rateRule metaid="_981414" variable="TRPNCaH">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <ci> dTRPNCaH </ci>
+        </math>
+      </rateRule>
+      <rateRule metaid="_981415" variable="N_NoXB">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> kp_nT </ci>
+              <ci> P_NoXB </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> kn_pT </ci>
+              <ci> N_NoXB </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_981416" variable="P_NoXB">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> kn_pT </ci>
+              <ci> N_NoXB </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> kp_nT </ci>
+              <ci> P_NoXB </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_981419" variable="P">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> kn_pT </ci>
+              <ci> N </ci>
+            </apply>
+            <apply>
+              <times/>
+              <apply>
+                <plus/>
+                <ci> kp_nT </ci>
+                <ci> alpha1_plus </ci>
+              </apply>
+              <ci> P </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_981422" variable="XBprer">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <ci> dXBprer </ci>
+        </math>
+      </rateRule>
+      <rateRule metaid="_981425" variable="XBpostr">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <ci> dXBpostr </ci>
+        </math>
+      </rateRule>
+      <rateRule metaid="_981428" variable="xXBprer">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <ci> dxXBprer </ci>
+        </math>
+      </rateRule>
+      <rateRule metaid="_981431" variable="xXBpostr">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <ci> dxXBpostr </ci>
+        </math>
+      </rateRule>
+      <rateRule metaid="_981434" variable="SL">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <ci> dSL </ci>
+        </math>
+      </rateRule>
+      <rateRule metaid="_981437" variable="intf">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <ci> preload </ci>
+              <ci> afterload </ci>
+            </apply>
+            <apply>
+              <plus/>
+              <ci> ppforce </ci>
+              <ci> active </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="_981440" variable="sovr_ze">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <apply>
+                <divide/>
+                <ci> len_thick </ci>
+                <cn> 2 </cn>
+              </apply>
+              <apply>
+                <lt/>
+                <apply>
+                  <divide/>
+                  <ci> len_thick </ci>
+                  <cn> 2 </cn>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> SL </ci>
+                  <cn> 2 </cn>
+                </apply>
+              </apply>
+            </piece>
+            <otherwise>
+              <apply>
+                <divide/>
+                <ci> SL </ci>
+                <cn> 2 </cn>
+              </apply>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981443" variable="sovr_cle">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <apply>
+                <minus/>
+                <apply>
+                  <divide/>
+                  <ci> SL </ci>
+                  <cn> 2 </cn>
+                </apply>
+                <apply>
+                  <minus/>
+                  <ci> SL </ci>
+                  <ci> len_thin </ci>
+                </apply>
+              </apply>
+              <apply>
+                <gt/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <divide/>
+                    <ci> SL </ci>
+                    <cn> 2 </cn>
+                  </apply>
+                  <apply>
+                    <minus/>
+                    <ci> SL </ci>
+                    <ci> len_thin </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> len_hbare </ci>
+                  <cn> 2 </cn>
+                </apply>
+              </apply>
+            </piece>
+            <otherwise>
+              <apply>
+                <divide/>
+                <ci> len_hbare </ci>
+                <cn> 2 </cn>
+              </apply>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981446" variable="len_sovr">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <ci> sovr_ze </ci>
+            <ci> sovr_cle </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981449" variable="SOVFThick">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <times/>
+              <ci> len_sovr </ci>
+              <cn> 2 </cn>
+            </apply>
+            <apply>
+              <minus/>
+              <ci> len_thick </ci>
+              <ci> len_hbare </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981452" variable="SOVFThin">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <ci> len_sovr </ci>
+            <ci> len_thin </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981455" variable="konT">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <apply>
+              <divide/>
+              <apply>
+                <plus/>
+                <apply>
+                  <power/>
+                  <ci> kdHCa </ci>
+                  <ci> m </ci>
+                </apply>
+                <apply>
+                  <power/>
+                  <ci> H_cons </ci>
+                  <ci> m </ci>
+                </apply>
+              </apply>
+              <apply>
+                <plus/>
+                <apply>
+                  <power/>
+                  <ci> kdHCa </ci>
+                  <ci> m </ci>
+                </apply>
+                <apply>
+                  <power/>
+                  <ci> H </ci>
+                  <ci> m </ci>
+                </apply>
+              </apply>
+            </apply>
+            <ci> kon </ci>
+            <apply>
+              <power/>
+              <ci> Qkon </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <minus/>
+                  <ci> TmpC </ci>
+                  <cn> 37 </cn>
+                </apply>
+                <cn> 10 </cn>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981458" variable="H">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <cn> 10 </cn>
+            <apply>
+              <power/>
+              <cn> 10 </cn>
+              <apply>
+                <minus/>
+                <ci> pH </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981461" variable="H_cons">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <cn> 10 </cn>
+            <apply>
+              <power/>
+              <cn> 10 </cn>
+              <cn> -7.15 </cn>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981464" variable="koffLT">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> koffL </ci>
+            <ci> koffmod </ci>
+            <apply>
+              <power/>
+              <ci> Qkoff </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <minus/>
+                  <ci> TmpC </ci>
+                  <cn> 37 </cn>
+                </apply>
+                <cn> 10 </cn>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981467" variable="koffHT">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> koffH </ci>
+            <ci> koffmod </ci>
+            <apply>
+              <power/>
+              <ci> Qkoff </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <minus/>
+                  <ci> TmpC </ci>
+                  <cn> 37 </cn>
+                </apply>
+                <cn> 10 </cn>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981470" variable="kn_pT">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> kn_p </ci>
+            <ci> permtot </ci>
+            <apply>
+              <power/>
+              <ci> Qkn_p </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <minus/>
+                  <ci> TmpC </ci>
+                  <cn> 37 </cn>
+                </apply>
+                <cn> 10 </cn>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981473" variable="kp_nT">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> kp_n </ci>
+            <ci> inprmt </ci>
+            <apply>
+              <power/>
+              <ci> Qkp_n </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <minus/>
+                  <ci> TmpC </ci>
+                  <cn> 37 </cn>
+                </apply>
+                <cn> 10 </cn>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981476" variable="permtot">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <root/>
+            <degree>
+              <cn type="integer"> 2 </cn>
+            </degree>
+            <apply>
+              <abs/>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn> 1 </cn>
+                  <apply>
+                    <power/>
+                    <apply>
+                      <divide/>
+                      <ci> perm50 </ci>
+                      <ci> Tropreg </ci>
+                    </apply>
+                    <ci> nperm </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981479" variable="inprmt">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <ci> permtot </ci>
+              </apply>
+              <apply>
+                <lt/>
+                <apply>
+                  <divide/>
+                  <cn> 1 </cn>
+                  <ci> permtot </ci>
+                </apply>
+                <cn> 100 </cn>
+              </apply>
+            </piece>
+            <otherwise>
+              <cn> 100 </cn>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981482" variable="dTRPNCaL">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> konT </ci>
+              <ci> Cai </ci>
+              <apply>
+                <minus/>
+                <cn> 1 </cn>
+                <ci> TRPNCaL </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> koffLT </ci>
+              <ci> TRPNCaL </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981485" variable="dTRPNCaH">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> konT </ci>
+              <ci> Cai </ci>
+              <apply>
+                <minus/>
+                <cn> 1 </cn>
+                <ci> TRPNCaH </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> koffHT </ci>
+              <ci> TRPNCaH </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981488" variable="Tropreg">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <cn> 1 </cn>
+                <ci> SOVFThin </ci>
+              </apply>
+              <ci> TRPNCaL </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> SOVFThin </ci>
+              <ci> TRPNCaH </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981491" variable="fappT">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> fapp </ci>
+            <ci> xbmodsp </ci>
+            <apply>
+              <power/>
+              <ci> Qfapp </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <minus/>
+                  <ci> TmpC </ci>
+                  <cn> 37 </cn>
+                </apply>
+                <cn> 10 </cn>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981494" variable="gapslmd">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <cn> 1 </cn>
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <cn> 1 </cn>
+                <ci> SOVFThick </ci>
+              </apply>
+              <ci> gslmod </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981497" variable="gappT">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> gapp </ci>
+            <ci> gapslmd </ci>
+            <ci> xbmodsp </ci>
+            <apply>
+              <power/>
+              <ci> Qgapp </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <minus/>
+                  <ci> TmpC </ci>
+                  <cn> 37 </cn>
+                </apply>
+                <cn> 10 </cn>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981500" variable="hfmd">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <exp/>
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <minus/>
+                  <ci> xXBprer </ci>
+                </apply>
+                <apply>
+                  <abs/>
+                  <ci> xXBprer </ci>
+                </apply>
+              </apply>
+              <ci> hfmdc </ci>
+              <apply>
+                <power/>
+                <apply>
+                  <divide/>
+                  <ci> xXBprer </ci>
+                  <ci> x_0 </ci>
+                </apply>
+                <cn> 2 </cn>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981503" variable="hbmd">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <exp/>
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <minus/>
+                  <ci> xXBpostr </ci>
+                  <ci> x_0 </ci>
+                </apply>
+                <apply>
+                  <abs/>
+                  <apply>
+                    <minus/>
+                    <ci> xXBpostr </ci>
+                    <ci> x_0 </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <ci> hbmdc </ci>
+              <apply>
+                <power/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <minus/>
+                    <ci> xXBpostr </ci>
+                    <ci> x_0 </ci>
+                  </apply>
+                  <ci> x_0 </ci>
+                </apply>
+                <cn> 2 </cn>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981506" variable="hfT">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> hf </ci>
+            <ci> hfmd </ci>
+            <ci> xbmodsp </ci>
+            <apply>
+              <power/>
+              <ci> Qhf </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <minus/>
+                  <ci> TmpC </ci>
+                  <cn> 37 </cn>
+                </apply>
+                <cn> 10 </cn>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981509" variable="hbT">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> hb </ci>
+            <ci> hbmd </ci>
+            <ci> xbmodsp </ci>
+            <apply>
+              <power/>
+              <ci> Qhb </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <minus/>
+                  <ci> TmpC </ci>
+                  <cn> 37 </cn>
+                </apply>
+                <cn> 10 </cn>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981512" variable="gxbmd">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <apply>
+                <exp/>
+                <apply>
+                  <times/>
+                  <ci> sigmap </ci>
+                  <apply>
+                    <power/>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <minus/>
+                        <ci> x_0 </ci>
+                        <ci> xXBpostr </ci>
+                      </apply>
+                      <ci> x_0 </ci>
+                    </apply>
+                    <cn> 2 </cn>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <lt/>
+                <ci> xXBpostr </ci>
+                <ci> x_0 </ci>
+              </apply>
+            </piece>
+            <otherwise>
+              <apply>
+                <exp/>
+                <apply>
+                  <times/>
+                  <ci> sigman </ci>
+                  <apply>
+                    <power/>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <minus/>
+                        <ci> xXBpostr </ci>
+                        <ci> x_0 </ci>
+                      </apply>
+                      <ci> x_0 </ci>
+                    </apply>
+                    <cn> 2 </cn>
+                  </apply>
+                </apply>
+              </apply>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981515" variable="gxbT">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> gxb </ci>
+            <ci> gxbmd </ci>
+            <ci> xbmodsp </ci>
+            <apply>
+              <power/>
+              <ci> Qgxb </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <minus/>
+                  <ci> TmpC </ci>
+                  <cn> 37 </cn>
+                </apply>
+                <cn> 10 </cn>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981518" variable="N">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <cn> 1 </cn>
+            <apply>
+              <plus/>
+              <ci> P </ci>
+              <ci> XBprer </ci>
+              <ci> XBpostr </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981521" variable="dXBprer">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> alpha1_plus </ci>
+                <ci> P </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> alpha2_minus </ci>
+                <ci> XBpostr </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <apply>
+                <plus/>
+                <ci> alpha1_minus </ci>
+                <ci> alpha2_plus </ci>
+              </apply>
+              <ci> XBprer </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981524" variable="dXBpostr">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> alpha3_minus </ci>
+                <ci> P </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> alpha2_plus </ci>
+                <ci> XBprer </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <apply>
+                <plus/>
+                <ci> alpha2_minus </ci>
+                <ci> alpha3_plus </ci>
+              </apply>
+              <ci> XBpostr </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981527" variable="alpha1_plus">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <ci> fappT </ci>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981530" variable="alpha2_plus">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <ci> hfT </ci>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981533" variable="alpha3_plus">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> MgATP </ci>
+            <apply>
+              <divide/>
+              <ci> gxbT </ci>
+              <ci> MgATP_cons </ci>
+            </apply>
+            <apply>
+              <divide/>
+              <apply>
+                <plus/>
+                <ci> kdADP </ci>
+                <ci> MgADP_cons </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <ci> kdADP </ci>
+                <ci> MgADP </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981536" variable="alpha1_minus">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> xPi </ci>
+            <apply>
+              <divide/>
+              <ci> gappT </ci>
+              <ci> xPi_cons </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981539" variable="alpha2_minus">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> H </ci>
+            <apply>
+              <divide/>
+              <ci> hbT </ci>
+              <ci> H_cons </ci>
+            </apply>
+            <apply>
+              <divide/>
+              <apply>
+                <plus/>
+                <ci> kdADP </ci>
+                <ci> MgADP_cons </ci>
+              </apply>
+              <ci> MgADP_cons </ci>
+            </apply>
+            <apply>
+              <divide/>
+              <ci> MgADP </ci>
+              <apply>
+                <plus/>
+                <ci> kdADP </ci>
+                <ci> MgADP </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981542" variable="alpha3_minus">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <ci> fxbT </ci>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981545" variable="fxbT">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <times/>
+              <ci> kdADP </ci>
+              <ci> fappT </ci>
+              <ci> hfT </ci>
+              <apply>
+                <divide/>
+                <ci> gxbT </ci>
+                <ci> MgATP_cons </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <ci> gappT </ci>
+                <ci> xPi_cons </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <ci> hbT </ci>
+                <ci> H_cons </ci>
+              </apply>
+              <ci> kMgATP </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981548" variable="dSL">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <cn> 0 </cn>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981551" variable="dxXBprer">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <divide/>
+              <ci> dSL </ci>
+              <cn> 2 </cn>
+            </apply>
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <ci> xPsi </ci>
+                <ci> dutyprer </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> alpha1_plus </ci>
+                    <ci> xXBprer </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> alpha2_minus </ci>
+                  <apply>
+                    <minus/>
+                    <ci> xXBpostr </ci>
+                    <apply>
+                      <plus/>
+                      <ci> x_0 </ci>
+                      <ci> xXBprer </ci>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981554" variable="dxXBpostr">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <divide/>
+              <ci> dSL </ci>
+              <cn> 2 </cn>
+            </apply>
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <ci> xPsi </ci>
+                <ci> dutypostr </ci>
+              </apply>
+              <ci> alpha2_plus </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <plus/>
+                  <ci> xXBprer </ci>
+                  <ci> x_0 </ci>
+                </apply>
+                <ci> xXBpostr </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981557" variable="dutyprer">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> alpha3_minus </ci>
+                <ci> alpha2_minus </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> alpha3_plus </ci>
+                <ci> alpha1_plus </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> alpha2_minus </ci>
+                <ci> alpha1_plus </ci>
+              </apply>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> alpha1_plus </ci>
+                <ci> alpha2_plus </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> alpha3_minus </ci>
+                <ci> alpha1_minus </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> alpha3_minus </ci>
+                <ci> alpha2_plus </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> alpha3_minus </ci>
+                <ci> alpha2_minus </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> alpha3_plus </ci>
+                <ci> alpha1_plus </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> alpha2_minus </ci>
+                <ci> alpha1_plus </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> alpha2_plus </ci>
+                <ci> alpha3_plus </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> alpha3_minus </ci>
+                <ci> alpha1_minus </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> alpha3_plus </ci>
+                <ci> alpha1_minus </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981560" variable="dutypostr">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> alpha1_plus </ci>
+                <ci> alpha2_plus </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> alpha3_minus </ci>
+                <ci> alpha1_minus </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> alpha3_minus </ci>
+                <ci> alpha2_plus </ci>
+              </apply>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> alpha1_plus </ci>
+                <ci> alpha2_plus </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> alpha3_minus </ci>
+                <ci> alpha1_minus </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> alpha3_minus </ci>
+                <ci> alpha2_plus </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> alpha3_minus </ci>
+                <ci> alpha2_minus </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> alpha3_plus </ci>
+                <ci> alpha1_plus </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> alpha2_minus </ci>
+                <ci> alpha1_plus </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> alpha2_plus </ci>
+                <ci> alpha3_plus </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> alpha3_minus </ci>
+                <ci> alpha1_minus </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> alpha3_plus </ci>
+                <ci> alpha1_minus </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981563" variable="fxb">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <times/>
+              <ci> kdADP </ci>
+              <ci> fapp </ci>
+              <ci> hf </ci>
+              <apply>
+                <divide/>
+                <ci> gxb </ci>
+                <ci> MgATP_cons </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <ci> gapp </ci>
+                <ci> xPi_cons </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <ci> hb </ci>
+                <ci> H_cons </ci>
+              </apply>
+              <ci> kMgATP </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981566" variable="SSXBprer">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> fxb </ci>
+                <ci> hb </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> gxb </ci>
+                <ci> fapp </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> hbT </ci>
+                <ci> fapp </ci>
+              </apply>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> hf </ci>
+                <ci> gxb </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> hb </ci>
+                <ci> gapp </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> gxb </ci>
+                <ci> gapp </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> fxb </ci>
+                <ci> hb </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> gxb </ci>
+                <ci> fapp </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> hb </ci>
+                <ci> fapp </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> fxb </ci>
+                <ci> gapp </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> fapp </ci>
+                <ci> hf </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> fxb </ci>
+                <ci> hb </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981569" variable="SSXBpostr">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> fapp </ci>
+                <ci> hf </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> fxb </ci>
+                <ci> gapp </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> fxb </ci>
+                <ci> hb </ci>
+              </apply>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> hf </ci>
+                <ci> gxb </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> hb </ci>
+                <ci> gapp </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> gxb </ci>
+                <ci> gapp </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> fxb </ci>
+                <ci> hb </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> gxb </ci>
+                <ci> fapp </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> hb </ci>
+                <ci> fapp </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> fxb </ci>
+                <ci> gapp </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> fapp </ci>
+                <ci> hf </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> fxb </ci>
+                <ci> hb </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981572" variable="Fnordv">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> kxb_normalised_active_and_passive_force </ci>
+            <ci> x_0 </ci>
+            <ci> SSXBpostr </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981575" variable="force">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> kxb_normalised_active_and_passive_force </ci>
+            <ci> SOVFThick </ci>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> xXBpostr </ci>
+                <ci> XBpostr </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> xXBprer </ci>
+                <ci> XBprer </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981578" variable="active">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <times/>
+              <cn> 1 </cn>
+              <ci> force </ci>
+            </apply>
+            <ci> Fnordv </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981581" variable="ppforce_t">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <apply>
+              <divide/>
+              <apply>
+                <minus/>
+                <ci> SL </ci>
+                <ci> SLrest </ci>
+              </apply>
+              <apply>
+                <abs/>
+                <apply>
+                  <minus/>
+                  <ci> SL </ci>
+                  <ci> SLrest </ci>
+                </apply>
+              </apply>
+            </apply>
+            <ci> PCon_t </ci>
+            <apply>
+              <minus/>
+              <apply>
+                <exp/>
+                <apply>
+                  <times/>
+                  <ci> PExp_t </ci>
+                  <apply>
+                    <abs/>
+                    <apply>
+                      <minus/>
+                      <ci> SL </ci>
+                      <ci> SLrest </ci>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+              <cn> 1 </cn>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981584" variable="ppforce_c">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <apply>
+                <times/>
+                <ci> PCon_c </ci>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <exp/>
+                    <apply>
+                      <times/>
+                      <ci> PExp_c </ci>
+                      <apply>
+                        <abs/>
+                        <apply>
+                          <minus/>
+                          <ci> SL </ci>
+                          <ci> SL_c </ci>
+                        </apply>
+                      </apply>
+                    </apply>
+                  </apply>
+                  <cn> 1 </cn>
+                </apply>
+              </apply>
+              <apply>
+                <gt/>
+                <ci> SL </ci>
+                <ci> SL_c </ci>
+              </apply>
+            </piece>
+            <otherwise>
+              <cn> 0 </cn>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981587" variable="ppforce">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> ppforce_t </ci>
+            <ci> ppforce_c </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981590" variable="preload">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <apply>
+              <divide/>
+              <apply>
+                <abs/>
+                <apply>
+                  <minus/>
+                  <ci> SLset </ci>
+                  <ci> SLrest </ci>
+                </apply>
+              </apply>
+              <apply>
+                <minus/>
+                <ci> SLset </ci>
+                <ci> SLrest </ci>
+              </apply>
+            </apply>
+            <ci> PCon_t </ci>
+            <apply>
+              <minus/>
+              <apply>
+                <exp/>
+                <apply>
+                  <times/>
+                  <ci> PExp_t </ci>
+                  <apply>
+                    <abs/>
+                    <apply>
+                      <minus/>
+                      <ci> SLset </ci>
+                      <ci> SLrest </ci>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+              <cn> 1 </cn>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981593" variable="afterload">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <apply>
+                <times/>
+                <ci> KSE </ci>
+                <apply>
+                  <minus/>
+                  <ci> SLset </ci>
+                  <ci> SL </ci>
+                </apply>
+              </apply>
+              <apply>
+                <eq/>
+                <ci> SEon </ci>
+                <cn> 1 </cn>
+              </apply>
+            </piece>
+            <otherwise>
+              <cn> 0 </cn>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981596" variable="FrSBXB">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <plus/>
+              <ci> XBpostr </ci>
+              <ci> XBprer </ci>
+            </apply>
+            <apply>
+              <plus/>
+              <ci> SSXBpostr </ci>
+              <ci> SSXBprer </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981599" variable="dFrSBXB">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <plus/>
+              <ci> dXBpostr </ci>
+              <ci> dXBprer </ci>
+            </apply>
+            <apply>
+              <plus/>
+              <ci> SSXBpostr </ci>
+              <ci> SSXBprer </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981602" variable="dsovr_ze">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <apply>
+                <times/>
+                <apply>
+                  <minus/>
+                  <cn> 0.5 </cn>
+                </apply>
+                <ci> dSL </ci>
+              </apply>
+              <apply>
+                <lt/>
+                <ci> SL </ci>
+                <ci> len_thick </ci>
+              </apply>
+            </piece>
+            <otherwise>
+              <cn> 0 </cn>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981605" variable="dsovr_cle">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <apply>
+                <times/>
+                <apply>
+                  <minus/>
+                  <cn> 0.5 </cn>
+                </apply>
+                <ci> dSL </ci>
+              </apply>
+              <apply>
+                <gt/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <cn> 2 </cn>
+                    <ci> len_thin </ci>
+                  </apply>
+                  <ci> SL </ci>
+                </apply>
+                <ci> len_hbare </ci>
+              </apply>
+            </piece>
+            <otherwise>
+              <cn> 0 </cn>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981608" variable="dlen_sovr">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <ci> dsovr_ze </ci>
+            <ci> dsovr_cle </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981611" variable="dSOVFThin">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <ci> dlen_sovr </ci>
+            <ci> len_thin </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981614" variable="dSOVFThick">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <times/>
+              <cn> 2 </cn>
+              <ci> dlen_sovr </ci>
+            </apply>
+            <apply>
+              <minus/>
+              <ci> len_thick </ci>
+              <ci> len_hbare </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981617" variable="TropTot">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> Trop_conc </ci>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <apply>
+                  <minus/>
+                  <cn> 1 </cn>
+                  <ci> SOVFThin </ci>
+                </apply>
+                <ci> TRPNCaL </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> SOVFThin </ci>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> FrSBXB </ci>
+                    <ci> TRPNCaH </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <apply>
+                      <minus/>
+                      <cn> 1 </cn>
+                      <ci> FrSBXB </ci>
+                    </apply>
+                    <ci> TRPNCaL </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981620" variable="dTropTot">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> Trop_conc </ci>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <apply>
+                  <minus/>
+                  <ci> dSOVFThin </ci>
+                </apply>
+                <ci> TRPNCaL </ci>
+              </apply>
+              <apply>
+                <times/>
+                <apply>
+                  <minus/>
+                  <cn> 1 </cn>
+                  <ci> SOVFThin </ci>
+                </apply>
+                <ci> dTRPNCaL </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> dSOVFThin </ci>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> FrSBXB </ci>
+                    <ci> TRPNCaH </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <apply>
+                      <minus/>
+                      <cn> 1 </cn>
+                      <ci> FrSBXB </ci>
+                    </apply>
+                    <ci> TRPNCaL </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> SOVFThin </ci>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <ci> dFrSBXB </ci>
+                      <ci> TRPNCaH </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> FrSBXB </ci>
+                      <ci> dTRPNCaH </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <apply>
+                        <minus/>
+                        <cn> 1 </cn>
+                        <ci> FrSBXB </ci>
+                      </apply>
+                      <ci> dTRPNCaL </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> dFrSBXB </ci>
+                    <ci> TRPNCaL </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_981623" variable="dforce">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <times/>
+              <ci> kxb_calculation_of_micromolar_per_millisecondes_of_Ca_for_apparent_Ca_binding </ci>
+              <ci> dSOVFThick </ci>
+              <apply>
+                <plus/>
+                <apply>
+                  <times/>
+                  <ci> xXBpostr </ci>
+                  <ci> XBpostr </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> xXBprer </ci>
+                  <ci> XBprer </ci>
+                </apply>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> kxb_calculation_of_micromolar_per_millisecondes_of_Ca_for_apparent_Ca_binding </ci>
+              <ci> SOVFThick </ci>
+              <apply>
+                <plus/>
+                <apply>
+                  <times/>
+                  <ci> dxXBpostr </ci>
+                  <ci> XBpostr </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> xXBpostr </ci>
+                  <ci> dXBpostr </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> dxXBprer </ci>
+                  <ci> XBprer </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> xXBprer </ci>
+                  <ci> dXBprer </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+  </model>
+</sbml>

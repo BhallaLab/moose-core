@@ -1,0 +1,465 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="metaid_0000001" version="4">
+  <model id="Gall1999_CalciumBursting_BetaCellModel_B" name="Gall1999_CalciumBursting_BetaCellModel_B" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>Effect of Na/Ca exchange on plateau fraction and [Ca]i in models for bursting in pancreatic beta-cells.</strong>
+                <br/>
+          Gall D, Susa I.      <em>Biophys J.</em>
+          1999 Jul;77(1):45-53.      <a href="http://www.ncbi.nlm.nih.gov/pubmed/10388739">10388739</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          In the presence of an insulinotropic glucose concentration, beta-cells, in intact pancreatic islets, exhibit periodic bursting electrical activity consisting of an alternation of active and silent phases. The fraction of time spent in the active phase over a period is called the plateau fraction and is correlated with the rate of insulin release. However, the mechanisms that regulate the plateau fraction remain unclear. In this paper we investigate the possible role of the plasma membrane Na+/Ca2+ exchange of the beta-cell in controlling the plateau fraction. We have extended different single-cell models to incorporate this Ca2+-activated electrogenic Ca2+ transporter. We find that the Na+/Ca2+ exchange can provide a physiological mechanism to increase the plateau fraction as the glucose concentration is raised. In addition, we show theoretically that the Na+/Ca2+ exchanger is a key regulator of the cytoplasmic calcium concentration in clusters of heterogeneous cells with gap-junctional electrical coupling.      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://models.cellml.org/exposure/bc0d80f7e1ccb2c288119f6e8fdfbc20/gall_susa_1999_b.cellml/view">        <strong>Gall and Susa(1999)_Model B</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>Catherine Lloyd</strong>
+                <br/>
+          c.lloyd@aukland.ac.nz      <br/>
+          The University of Auckland      <br/>
+          The Bioengineering Institute      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/).      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@aukland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>The University of Auckland,The Bioengineering Institute</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@aukland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>The University of Auckland,The Bioengineering Institute</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@aukland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>The University of Auckland,The Bioengineering Institute</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2012-01-07T18:17:45Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2012-01-07T18:20:20Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2012-01-07T18:20:20Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2012-01-07T18:20:20Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1201070001"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/10388739"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfCompartments>
+      <compartment id="COMpartment" metaid="_259437" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="time_environment" name="time" metaid="_259460"/>
+      <parameter id="V_membrane" constant="false" name="V" metaid="_259461" value="-76"/>
+      <parameter id="Cm" name="Cm" metaid="_259462" value="5310"/>
+      <parameter id="i_K" constant="false" name="i_K" metaid="_259463"/>
+      <parameter id="V_K" name="V_K" metaid="_259464" value="-75"/>
+      <parameter id="g_K" name="g_K" metaid="_259466" value="2700"/>
+      <parameter id="n" constant="false" name="n" metaid="_259467" value="0.1"/>
+      <parameter id="n_infinity" constant="false" name="n_infinity" metaid="_259468"/>
+      <parameter id="lamda" name="lamda" metaid="_259470" value="1"/>
+      <parameter id="tau_n" name="tau_n" metaid="_259471" value="20"/>
+      <parameter id="V_n" name="V_n" metaid="_259472" value="-16"/>
+      <parameter id="S_n" name="S_n" metaid="_259474" value="5.6"/>
+      <parameter id="V_rapidly_activating_K_current_n_gate" name="V" metaid="_259475"/>
+      <parameter id="time_rapidly_activating_K_current_n_gate" name="time" metaid="_259476"/>
+      <parameter id="i_Ca" constant="false" name="i_Ca" metaid="_259478"/>
+      <parameter id="V_Ca" name="V_Ca" metaid="_259479" value="25"/>
+      <parameter id="g_Ca" name="g_Ca" metaid="_259480" value="1000"/>
+      <parameter id="m_infinity" constant="false" name="m_infinity" metaid="_259482" units="dimensionless"/>
+      <parameter id="V_m" name="V_m" metaid="_259483" value="-20"/>
+      <parameter id="S_m" name="S_m" metaid="_259484" value="12"/>
+      <parameter id="V_calcium_current_m_gate" name="V" metaid="_259486"/>
+      <parameter id="time_calcium_current_m_gate" name="time" metaid="_259487"/>
+      <parameter id="i_slow" constant="false" name="i_slow" metaid="_259488"/>
+      <parameter id="g_s" name="g_s" metaid="_259490" value="200"/>
+      <parameter id="s" constant="false" name="s" metaid="_259491" value="0.1"/>
+      <parameter id="s_infinity" constant="false" name="s_infinity" metaid="_259492"/>
+      <parameter id="tau_s" name="tau_s" metaid="_259494" value="12000"/>
+      <parameter id="V_s" name="V_s" metaid="_259495" value="-52"/>
+      <parameter id="S_s" name="S_s" metaid="_259496" value="10"/>
+      <parameter id="R_s" name="R_s" metaid="_259498" value="0.58"/>
+      <parameter id="S_V_R_s" constant="false" name="S_V_R_s" metaid="_259499"/>
+      <parameter id="V_slow_K_current_s_gate" name="V" metaid="_259500"/>
+      <parameter id="time_slow_K_current_s_gate" name="time" metaid="_259502"/>
+      <parameter id="i_Na_Ca" constant="false" name="i_Na_Ca" metaid="_259503"/>
+      <parameter id="g_Na_Ca" name="g_Na_Ca" metaid="_259504" value="350"/>
+      <parameter id="K_1_2" name="K_1_2" metaid="_259506" value="1.5"/>
+      <parameter id="V_Na_Ca" constant="false" name="V_Na_Ca" metaid="_259507"/>
+      <parameter id="RT_F" name="RT_F" metaid="_259508" value="26.54"/>
+      <parameter id="nH" name="nH" metaid="_259510" value="5"/>
+      <parameter id="Ca_i" constant="false" name="Ca_i" metaid="_259511" value="0.52"/>
+      <parameter id="Ca_o" name="Ca_o" metaid="_259512" value="2600"/>
+      <parameter id="Na_i" name="Na_i" metaid="_259514" value="10"/>
+      <parameter id="Na_o" name="Na_o" metaid="_259515" value="140"/>
+      <parameter id="Ca_ret" constant="false" name="Ca_ret" metaid="_259516" value="0.7"/>
+      <parameter id="f" name="f" metaid="_259518" value="0.02"/>
+      <parameter id="k_Ca" name="k_Ca" metaid="_259519" value="0.64"/>
+      <parameter id="k_rel" name="k_rel" metaid="_259520" value="0.0006"/>
+      <parameter id="k_pump" name="k_pump" metaid="_259522" value="0.2"/>
+      <parameter id="alpha" name="alpha" metaid="_259523" value="6E-5"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_259441" variable="V_membrane">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <apply>
+                <plus/>
+                <ci> i_K </ci>
+                <ci> i_Ca </ci>
+                <ci> i_slow </ci>
+                <ci> i_Na_Ca </ci>
+              </apply>
+            </apply>
+            <ci> Cm </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_259442" variable="n">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> lamda </ci>
+            <apply>
+              <divide/>
+              <apply>
+                <minus/>
+                <ci> n_infinity </ci>
+                <ci> n </ci>
+              </apply>
+              <ci> tau_n </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_259443" variable="s">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <ci> S_V_R_s </ci>
+              <ci> s </ci>
+            </apply>
+            <ci> tau_s </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_259445" variable="Ca_i">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> f </ci>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <apply>
+                      <minus/>
+                      <ci> alpha </ci>
+                    </apply>
+                    <apply>
+                      <minus/>
+                      <ci> i_Ca </ci>
+                      <apply>
+                        <times/>
+                        <cn> 2 </cn>
+                        <ci> i_Na_Ca </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> k_Ca </ci>
+                    <ci> Ca_i </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k_rel </ci>
+                <apply>
+                  <minus/>
+                  <ci> Ca_ret </ci>
+                  <ci> Ca_i </ci>
+                </apply>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> k_pump </ci>
+              <ci> Ca_i </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_259446" variable="Ca_ret">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <ci> k_rel </ci>
+              </apply>
+              <apply>
+                <minus/>
+                <ci> Ca_ret </ci>
+                <ci> Ca_i </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> k_pump </ci>
+              <ci> Ca_i </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="_259447" variable="i_K">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> g_K </ci>
+            <ci> n </ci>
+            <apply>
+              <minus/>
+              <ci> V_membrane </ci>
+              <ci> V_K </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_259448" variable="n_infinity">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn> 1 </cn>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <exp/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <minus/>
+                    <ci> V_n </ci>
+                    <ci> V_rapidly_activating_K_current_n_gate </ci>
+                  </apply>
+                  <ci> S_n </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_259450" variable="i_Ca">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> g_Ca </ci>
+            <ci> m_infinity </ci>
+            <apply>
+              <minus/>
+              <ci> V_membrane </ci>
+              <ci> V_Ca </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_259451" variable="m_infinity">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn> 1 </cn>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <exp/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <minus/>
+                    <ci> V_m </ci>
+                    <ci> V_calcium_current_m_gate </ci>
+                  </apply>
+                  <ci> S_m </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_259452" variable="i_slow">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> g_s </ci>
+            <ci> s </ci>
+            <apply>
+              <minus/>
+              <ci> V_membrane </ci>
+              <ci> V_K </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_259454" variable="S_V_R_s">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> s_infinity </ci>
+            <ci> R_s </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_259455" variable="s_infinity">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn> 1 </cn>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <exp/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <minus/>
+                    <ci> V_s </ci>
+                    <ci> V_slow_K_current_s_gate </ci>
+                  </apply>
+                  <ci> S_s </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_259456" variable="i_Na_Ca">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> g_Na_Ca </ci>
+            <apply>
+              <divide/>
+              <apply>
+                <power/>
+                <ci> Ca_i </ci>
+                <ci> nH </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <apply>
+                  <power/>
+                  <ci> K_1_2 </ci>
+                  <ci> nH </ci>
+                </apply>
+                <apply>
+                  <power/>
+                  <ci> Ca_i </ci>
+                  <ci> nH </ci>
+                </apply>
+              </apply>
+            </apply>
+            <apply>
+              <minus/>
+              <ci> V_membrane </ci>
+              <ci> V_Na_Ca </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_259458" variable="V_Na_Ca">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> RT_F </ci>
+            <cn> 3 </cn>
+            <apply>
+              <ln/>
+              <apply>
+                <minus/>
+                <apply>
+                  <divide/>
+                  <ci> Na_o </ci>
+                  <ci> Na_i </ci>
+                </apply>
+                <apply>
+                  <ln/>
+                  <apply>
+                    <divide/>
+                    <ci> Ca_o </ci>
+                    <ci> Ca_i </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+  </model>
+</sbml>

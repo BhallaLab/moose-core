@@ -1,0 +1,680 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="_681664" version="4">
+  <model id="Waugh2006_WoundHealing_Diabetic_ModelA" name="Waugh2006_WoundHealing_Diabetic_ModelA" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>Modeling the effects of treating diabetic wounds with engineered skin
+substitutes.</strong>
+                <br/>
+          Waugh HV, Sherratt JA.      <em>Wound Repair Regen</em>
+          2007 Jul-Aug;15(4):556-65      <a href="http://www.ncbi.nlm.nih.gov/pubmed/17650100">17650100</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          In this paper, a novel mathematical model of wound healing in both normal and
+diabetic cases is presented, focusing upon the effects of adding two currently
+available commercial engineered skin substitute therapies to the wound
+(Apligraf) and Dermagraft). Our work extends a previously developed model, which
+considers inflammatory and repair macrophage dynamics in normal and diabetic
+wound healing. Here, we extend the model to include equations for
+platelet-derived growth factor concentration, fibroblast density, collagen
+density, and hyaluronan concentration. This enables us to examine the variation
+of these components in both normal and diabetic wound healing cases, and to
+model the treatment protocols of these therapies. Within the context of our
+model, we find that the key component to successful healing in diabetic wounds
+is hyaluronan and that the therapies work by increasing the amount of hyaluronan
+available in the wound environment. The time-to-healing results correlate with
+those observed in clinical trials and the model goes some way to establishing an
+understanding of why diabetic wounds do not heal, and how these treatments
+affect the diabetic wound environment to promote wound closure.      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://models.cellml.org/exposure/cac0806739b31f9022645098c1e0c1dc">        <strong>Waugh HV, Sherratt JA. (2007) - version=1.0</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>Catherine Lloyd</strong>
+                <br/>
+          c.lloyd@auckland.ac.nz      <br/>
+          The University of Auckland      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:52:35Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:52:35Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:52:35Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:52:35Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1006230106"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/17650100"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="day" name="day" metaid="_681676">
+        <listOfUnits>
+          <unit metaid="_681688" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="pg_per_mm3" name="pg_per_mm3" metaid="_681700">
+        <listOfUnits>
+          <unit scale="-12" metaid="_681712" kind="gram"/>
+          <unit scale="-3" exponent="-3" metaid="_681724" kind="metre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="microg_per_mm3" name="microg_per_mm3" metaid="_681736">
+        <listOfUnits>
+          <unit scale="-6" metaid="_681748" kind="gram"/>
+          <unit scale="-3" exponent="-3" metaid="_681761" kind="metre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="cells_per_mm3" name="cells_per_mm3" metaid="_681773">
+        <listOfUnits>
+          <unit scale="-3" exponent="-3" metaid="_681785" kind="metre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="cells_per_mm3_per_day" name="cells_per_mm3_per_day" metaid="_681797">
+        <listOfUnits>
+          <unit scale="-3" exponent="-3" metaid="_681809" kind="metre"/>
+          <unit exponent="-1" metaid="_681821" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="cells_per_pg_per_day" name="cells_per_pg_per_day" metaid="_681833">
+        <listOfUnits>
+          <unit scale="-12" exponent="-1" metaid="_681845" kind="gram"/>
+          <unit exponent="-1" metaid="_681857" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mm3_per_cells" name="mm3_per_cells" metaid="_681869">
+        <listOfUnits>
+          <unit scale="-3" exponent="3" metaid="_681881" kind="metre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mm3_per_cells_per_day" name="mm3_per_cells_per_day" metaid="_681893">
+        <listOfUnits>
+          <unit scale="-3" exponent="3" metaid="_681905" kind="metre"/>
+          <unit exponent="-1" metaid="_681917" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mm3_per_microg" name="mm3_per_microg" metaid="_681929">
+        <listOfUnits>
+          <unit scale="-3" exponent="3" metaid="_681941" kind="metre"/>
+          <unit scale="-6" exponent="-1" metaid="_681953" kind="gram"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="pg_per_cells_per_day" name="pg_per_cells_per_day" metaid="_681965">
+        <listOfUnits>
+          <unit scale="-12" metaid="_681977" kind="gram"/>
+          <unit exponent="-1" metaid="_681989" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="microg_per_cells_per_day" name="microg_per_cells_per_day" metaid="_682001">
+        <listOfUnits>
+          <unit scale="-6" metaid="_682013" kind="gram"/>
+          <unit exponent="-1" metaid="_682025" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mm3_cells_per_pg2_day" name="mm3_cells_per_pg2_day" metaid="_682037">
+        <listOfUnits>
+          <unit scale="-3" exponent="3" metaid="_682049" kind="metre"/>
+          <unit scale="-12" exponent="-2" metaid="_682061" kind="gram"/>
+          <unit exponent="-1" metaid="_682073" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mm6_cells_per_pg3_day" name="mm6_cells_per_pg3_day" metaid="_682085">
+        <listOfUnits>
+          <unit scale="-3" exponent="6" metaid="_682097" kind="metre"/>
+          <unit scale="-12" exponent="-3" metaid="_682109" kind="gram"/>
+          <unit exponent="-1" metaid="_682121" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mm9_per_pg3" name="mm9_per_pg3" metaid="_682133">
+        <listOfUnits>
+          <unit scale="-3" exponent="9" metaid="_682145" kind="metre"/>
+          <unit scale="-12" exponent="-3" metaid="_682157" kind="gram"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mm6_per_pg2" name="mm6_per_pg2" metaid="_682169">
+        <listOfUnits>
+          <unit scale="-3" exponent="6" metaid="_682181" kind="metre"/>
+          <unit scale="-12" exponent="-2" metaid="_682193" kind="gram"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mm3_per_pg" name="mm3_per_pg" metaid="_682205">
+        <listOfUnits>
+          <unit scale="-3" exponent="3" metaid="_682217" kind="metre"/>
+          <unit scale="-12" exponent="-1" metaid="_682229" kind="gram"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mm9_per_microg3" name="mm9_per_microg3" metaid="_682241">
+        <listOfUnits>
+          <unit scale="-3" exponent="9" metaid="_682253" kind="metre"/>
+          <unit scale="-6" exponent="-3" metaid="_682265" kind="gram"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mm6_per_microg2" name="mm6_per_microg2" metaid="_682277">
+        <listOfUnits>
+          <unit scale="-3" exponent="6" metaid="_682289" kind="metre"/>
+          <unit scale="-6" exponent="-2" metaid="_682302" kind="gram"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_day" name="per_day" metaid="_682314">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_682326" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time" name="time" metaid="_682338">
+        <listOfUnits>
+          <unit metaid="_682350" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="COMpartment" metaid="_353703" units="litre" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="time_environment" name="time" metaid="_353738" units="day"/>
+      <parameter id="phi_I" constant="false" name="phi_I" metaid="_353741" value="200" units="cells_per_mm3"/>
+      <parameter id="phi_R" constant="false" name="phi_R" metaid="_353744" value="200" units="cells_per_mm3"/>
+      <parameter id="T" constant="false" name="T" metaid="_353747" value="6" units="pg_per_mm3"/>
+      <parameter id="P" constant="false" name="P" metaid="_353750" value="2" units="pg_per_mm3"/>
+      <parameter id="F" constant="false" name="F" metaid="_353753" value="50" units="cells_per_mm3"/>
+      <parameter id="C" constant="false" name="C" metaid="_353756" value="10" units="microg_per_mm3"/>
+      <parameter id="H" constant="false" name="H" metaid="_353759" value="0.01" units="microg_per_mm3"/>
+      <parameter id="K_T" constant="false" name="K_T" metaid="_353762" units="cells_per_mm3_per_day"/>
+      <parameter id="tau1_K_T" name="tau1" metaid="_353765" value="-2.47" units="mm6_cells_per_pg3_day"/>
+      <parameter id="tau2_K_T" name="tau2" metaid="_353768" value="21.94" units="mm3_cells_per_pg2_day"/>
+      <parameter id="tau3_K_T" name="tau3" metaid="_353771" value="6.41" units="cells_per_pg_per_day"/>
+      <parameter id="tau4_K_T" name="tau4" metaid="_353774" value="1.75" units="cells_per_mm3_per_day"/>
+      <parameter id="M_P" constant="false" name="M_P" metaid="_353777" units="cells_per_mm3_per_day"/>
+      <parameter id="tau1_M_P" name="tau1" metaid="_353780" value="15.333" units="mm6_cells_per_pg3_day"/>
+      <parameter id="tau2_M_P" name="tau2" metaid="_353783" value="-167.21" units="mm3_cells_per_pg2_day"/>
+      <parameter id="tau3_M_P" name="tau3" metaid="_353786" value="452.38" units="cells_per_pg_per_day"/>
+      <parameter id="tau4_M_P" name="tau4" metaid="_353789" value="2.6593" units="cells_per_mm3_per_day"/>
+      <parameter id="f_T" constant="false" name="f_T" metaid="_353792" units="dimensionless"/>
+      <parameter id="tau1_f_T" name="tau1" metaid="_353795" value="0.0092" units="mm9_per_pg3"/>
+      <parameter id="tau2_f_T" name="tau2" metaid="_353798" value="-0.1552" units="mm6_per_pg2"/>
+      <parameter id="tau3_f_T" name="tau3" metaid="_353801" value="0.6279" units="mm3_per_pg"/>
+      <parameter id="tau4_f_T" name="tau4" metaid="_353804" value="0.2527" units="dimensionless"/>
+      <parameter id="g_C" constant="false" name="g_C" metaid="_353807" units="dimensionless"/>
+      <parameter id="tau1_g_C" name="tau1" metaid="_353810" value="-4.33E-10" units="mm9_per_microg3"/>
+      <parameter id="tau2_g_C" name="tau2" metaid="_353813" value="9E-7" units="mm6_per_microg2"/>
+      <parameter id="tau3_g_C" name="tau3" metaid="_353816" value="-0.00055" units="mm3_per_microg"/>
+      <parameter id="tau4_g_C" name="tau4" metaid="_353819" value="0.13" units="dimensionless"/>
+      <parameter id="alpha" constant="false" name="alpha" metaid="_353822" units="dimensionless"/>
+      <parameter id="k1" name="k1" metaid="_353825" value="0.05" units="dimensionless"/>
+      <parameter id="k2" name="k2" metaid="_353828" value="0.693" units="per_day"/>
+      <parameter id="k3" name="k3" metaid="_353831" value="0.002" units="mm3_per_cells"/>
+      <parameter id="k4" name="k4" metaid="_353834" value="0.07" units="pg_per_cells_per_day"/>
+      <parameter id="k5" name="k5" metaid="_353837" value="0.0025" units="mm3_per_cells"/>
+      <parameter id="k6" name="k6" metaid="_353840" value="0.0004" units="mm3_per_microg"/>
+      <parameter id="k7" name="k7" metaid="_353843" value="0.004" units="pg_per_cells_per_day"/>
+      <parameter id="k8" name="k8" metaid="_353846" value="0.015" units="pg_per_cells_per_day"/>
+      <parameter id="k9" name="k9" metaid="_353849" value="0.0015" units="pg_per_cells_per_day"/>
+      <parameter id="k10" name="k10" metaid="_353852" value="0.924" units="per_day"/>
+      <parameter id="k11" name="k11" metaid="_353855" value="20" units="microg_per_cells_per_day"/>
+      <parameter id="k12" name="k12" metaid="_353858" value="0.01" units="microg_per_cells_per_day"/>
+      <parameter id="d1" name="d1" metaid="_353861" value="0.2" units="per_day"/>
+      <parameter id="d2" name="d2" metaid="_353864" value="9.1" units="per_day"/>
+      <parameter id="d3" name="d3" metaid="_353867" value="4" units="per_day"/>
+      <parameter id="d4" name="d4" metaid="_353870" value="1" units="per_day"/>
+      <parameter id="d5" name="d5" metaid="_353873" value="1.5E-5" units="mm3_per_cells_per_day"/>
+      <parameter id="d6" name="d6" metaid="_353876" value="0.7" units="per_day"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_353706" variable="phi_I">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> alpha </ci>
+                <ci> K_T </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> k2 </ci>
+                <ci> phi_I </ci>
+                <apply>
+                  <minus/>
+                  <cn> 1 </cn>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <ci> k3 </ci>
+                      <apply>
+                        <plus/>
+                        <ci> phi_I </ci>
+                        <ci> phi_R </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> k5 </ci>
+                      <ci> F </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> k6 </ci>
+                      <ci> C </ci>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> d1 </ci>
+              <ci> phi_I </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_353707" variable="phi_R">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <apply>
+                  <minus/>
+                  <cn> 1 </cn>
+                  <ci> alpha </ci>
+                </apply>
+                <ci> K_T </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> k2 </ci>
+                <ci> phi_R </ci>
+                <apply>
+                  <minus/>
+                  <cn> 1 </cn>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <ci> k3 </ci>
+                      <apply>
+                        <plus/>
+                        <ci> phi_I </ci>
+                        <ci> phi_R </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> k5 </ci>
+                      <ci> F </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> k6 </ci>
+                      <ci> C </ci>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> d1 </ci>
+              <ci> phi_R </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_353709" variable="T">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> k4 </ci>
+                <ci> phi_I </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k7 </ci>
+                <ci> F </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> d2 </ci>
+              <ci> T </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_353712" variable="P">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> k8 </ci>
+                <apply>
+                  <plus/>
+                  <ci> phi_I </ci>
+                  <ci> phi_R </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k9 </ci>
+                <ci> F </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> d3 </ci>
+              <ci> P </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_353715" variable="F">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <ci> M_P </ci>
+              <apply>
+                <times/>
+                <ci> k10 </ci>
+                <ci> F </ci>
+                <apply>
+                  <minus/>
+                  <cn> 1 </cn>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <ci> k3 </ci>
+                      <apply>
+                        <plus/>
+                        <ci> phi_I </ci>
+                        <ci> phi_R </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> k5 </ci>
+                      <ci> F </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> k6 </ci>
+                      <ci> C </ci>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> d4 </ci>
+              <ci> F </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_353718" variable="C">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> k11 </ci>
+              <ci> F </ci>
+              <ci> f_T </ci>
+              <ci> g_C </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> d5 </ci>
+              <ci> F </ci>
+              <ci> C </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_353721" variable="H">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> k12 </ci>
+              <ci> F </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> d6 </ci>
+              <ci> H </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="_353724" variable="K_T">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <times/>
+              <ci> tau1_K_T </ci>
+              <apply>
+                <power/>
+                <ci> T </ci>
+                <cn> 3 </cn>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> tau2_K_T </ci>
+              <apply>
+                <power/>
+                <ci> T </ci>
+                <cn> 2 </cn>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> tau3_K_T </ci>
+              <ci> T </ci>
+            </apply>
+            <ci> tau4_K_T </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_353727" variable="M_P">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <times/>
+              <ci> tau1_M_P </ci>
+              <apply>
+                <power/>
+                <ci> P </ci>
+                <cn> 3 </cn>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> tau2_M_P </ci>
+              <apply>
+                <power/>
+                <ci> P </ci>
+                <cn> 2 </cn>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> tau3_M_P </ci>
+              <ci> P </ci>
+            </apply>
+            <ci> tau4_M_P </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_353730" variable="f_T">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <times/>
+              <ci> tau1_f_T </ci>
+              <apply>
+                <power/>
+                <ci> T </ci>
+                <cn> 3 </cn>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> tau2_f_T </ci>
+              <apply>
+                <power/>
+                <ci> T </ci>
+                <cn> 2 </cn>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> tau3_f_T </ci>
+              <ci> T </ci>
+            </apply>
+            <ci> tau4_f_T </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_353733" variable="g_C">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <times/>
+              <ci> tau1_g_C </ci>
+              <apply>
+                <power/>
+                <ci> C </ci>
+                <cn> 3 </cn>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> tau2_g_C </ci>
+              <apply>
+                <power/>
+                <ci> C </ci>
+                <cn> 2 </cn>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> tau3_g_C </ci>
+              <ci> C </ci>
+            </apply>
+            <ci> tau4_g_C </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_353736" variable="alpha">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <cn> 0.197 </cn>
+                <apply>
+                  <log/>
+                  <logbase>
+                    <cn type="integer"> 10 </cn>
+                  </logbase>
+                  <ci> H </ci>
+                </apply>
+              </apply>
+            </apply>
+            <cn> 0.4407 </cn>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+  </model>
+</sbml>

@@ -1,0 +1,182 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" level="2" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dc="http://purl.org/dc/elements/1.1/" version="4">
+  <model id="MODEL1008240001" name="Smallbone2009 - FBA model-Geometric Perspective" metaid="meta_toy_model">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This model is from the article:      <br/>
+                <strong>Flux balance analysis: a geometric perspective.</strong>
+                <br/>
+          Smallbone K, Simeonidis E.      <em>J Theor Biol.</em>
+          2009 May 21;258(2):315-5      <a href="http://www.ncbi.nlm.nih.gov/pubmed/19490860">19490860</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          Advances in the field of bioinformatics have led to reconstruction of genome-scale networks for a number of key organisms. The application of physicochemical constraints to these stoichiometric networks allows researchers, through methods such as flux balance analysis, to highlight key sets of reactions necessary to achieve particular objectives. The key benefits of constraint-based analysis lie in the minimal knowledge required to infer systemic properties. However, network degeneracy leads to a large number of flux distributions that satisfy any objective; moreover, these distributions may be dominated by biologically irrelevant internal cycles. By examining the geometry underlying the problem, we define two methods for finding a unique solution within the space of all possible flux distributions; such a solution contains no internal cycles, and is representative of the space as a whole. The first method draws on typical geometric knowledge, but cannot be applied to large networks because of the high computational complexity of the problem. Thus a second method, an iteration of linear programs which scales easily to the genome scale, is defined. The algorithm is run on four recent genome-scale models, and unique flux solutions are found. The algorithm set out here will allow researchers in flux balance analysis to exchange typical solutions to their models in a reproducible format. Moreover, having found a single solution, statistical analyses such as correlations may be performed.      </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#meta_toy_model">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Smallbone</vCard:Family>
+                  <vCard:Given>Kieran</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>kieran.smallbone@manchester.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Manchester</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2008-10-20T00:00:00Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2013-06-13T11:00:38Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/19490860"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1105180000"/>
+            </rdf:Bag>
+          </bqmodel:is>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="substance">
+        <listOfUnits>
+          <unit kind="dimensionless"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time">
+        <listOfUnits>
+          <unit kind="dimensionless"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="volume">
+        <listOfUnits>
+          <unit kind="dimensionless"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="cell" name="cell" metaid="meta_cell" sboTerm="SBO:0000290" size="1">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#meta_cell">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0005622"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </compartment>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="A" name="A" sboTerm="SBO:0000247" compartment="cell"/>
+      <species id="B" name="B" sboTerm="SBO:0000247" compartment="cell"/>
+    </listOfSpecies>
+    <listOfReactions>
+      <reaction id="v1" name="v1" sboTerm="SBO:0000185">
+        <listOfProducts>
+          <speciesReference species="A"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <ci> FLUX_VALUE </ci>
+          </math>
+                  <listOfParameters>
+            <parameter id="LOWER_BOUND" value="0" units="dimensionless"/>
+            <parameter id="UPPER_BOUND" value="1" units="dimensionless"/>
+            <parameter id="OBJECTIVE_COEFFICIENT" value="0" units="dimensionless"/>
+            <parameter id="FLUX_VALUE" value="1" units="dimensionless"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v2" name="v2" sboTerm="SBO:0000176">
+        <listOfReactants>
+          <speciesReference species="A"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="B"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <ci> FLUX_VALUE </ci>
+          </math>
+                  <listOfParameters>
+            <parameter id="LOWER_BOUND" value="-INF" units="dimensionless"/>
+            <parameter id="UPPER_BOUND" value="INF" units="dimensionless"/>
+            <parameter id="OBJECTIVE_COEFFICIENT" value="0" units="dimensionless"/>
+            <parameter id="FLUX_VALUE" value="0.333333333333333" units="dimensionless"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v3" name="v3" sboTerm="SBO:0000176">
+        <listOfReactants>
+          <speciesReference species="A"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="B"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <ci> FLUX_VALUE </ci>
+          </math>
+                  <listOfParameters>
+            <parameter id="LOWER_BOUND" value="-INF" units="dimensionless"/>
+            <parameter id="UPPER_BOUND" value="INF" units="dimensionless"/>
+            <parameter id="OBJECTIVE_COEFFICIENT" value="0" units="dimensionless"/>
+            <parameter id="FLUX_VALUE" value="0.333333333333333" units="dimensionless"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v4" name="v4" sboTerm="SBO:0000176">
+        <listOfReactants>
+          <speciesReference species="A"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="B"/>
+        </listOfProducts>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <ci> FLUX_VALUE </ci>
+          </math>
+                  <listOfParameters>
+            <parameter id="LOWER_BOUND" value="-INF" units="dimensionless"/>
+            <parameter id="UPPER_BOUND" value="INF" units="dimensionless"/>
+            <parameter id="OBJECTIVE_COEFFICIENT" value="0" units="dimensionless"/>
+            <parameter id="FLUX_VALUE" value="0.333333333333333" units="dimensionless"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v5" name="v5" sboTerm="SBO:0000185">
+        <listOfReactants>
+          <speciesReference species="B"/>
+        </listOfReactants>
+        <kineticLaw>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <ci> FLUX_VALUE </ci>
+          </math>
+                  <listOfParameters>
+            <parameter id="LOWER_BOUND" value="0" units="dimensionless"/>
+            <parameter id="UPPER_BOUND" value="INF" units="dimensionless"/>
+            <parameter id="OBJECTIVE_COEFFICIENT" value="1" units="dimensionless"/>
+            <parameter id="FLUX_VALUE" value="1" units="dimensionless"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

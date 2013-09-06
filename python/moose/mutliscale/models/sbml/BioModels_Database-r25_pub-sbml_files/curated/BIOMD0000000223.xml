@@ -1,0 +1,3968 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="metaid_0000001" version="4">
+  <model id="InsEGFdiam_2008_10_03_debugged" name="Borisov2009_EGF_Insulin_Crosstalk" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>described in:      <b>Systems-level interactions between insulin-EGF networks amplify mitogenic signaling.</b>
+                <br/>
+          Borisov N, Aksamitiene E, Kiyatkin A, Legewie S, Berkhout J, Maiwald T, Kaimachnikov NP, Timmer J, Hoek JB, Kholodenko BN.;      <em>Mol Syst Biol.</em>
+          2009;5:256. Epub 2009 Apr 7. PMID:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/19357636">19357636</a>
+          ; doi:      <a href="http://dx.doi.org/10.1038/msb.2009.19">10.1038/msb.2009.19</a>
+                <br/>
+                <b>Abstract:</b>
+                <br/>
+          Crosstalk mechanisms have not been studied as thoroughly as individual signaling pathways. We exploit experimental and computational approaches to reveal how a concordant interplay between the insulin and epidermal growth factor (EGF) signaling networks can potentiate mitogenic signaling. In HEK293 cells, insulin is a poor activator of the Ras/ERK (extracellular signal-regulated kinase) cascade, yet it enhances ERK activation by low EGF doses. We find that major crosstalk mechanisms that amplify ERK signaling are localized upstream of Ras and at the Ras/Raf level. Computational modeling unveils how critical network nodes, the adaptor proteins GAB1 and insulin receptor substrate (IRS), Src kinase, and phosphatase SHP2, convert insulin-induced increase in the phosphatidylinositol-3,4,5-triphosphate (PIP(3)) concentration into enhanced Ras/ERK activity. The model predicts and experiments confirm that insulin-induced amplification of mitogenic signaling is abolished by disrupting PIP(3)-mediated positive feedback via GAB1 and IRS. We demonstrate that GAB1 behaves as a non-linear amplifier of mitogenic responses and insulin endows EGF signaling with robustness to GAB1 suppression. Our results show the feasibility of using computational models to identify key target combinations and predict complex cellular responses to a mixture of external cues.      </p>
+            <p>An extracellular compartment with 34 times the volume of the cell was added and the association rate as well as the dissociation constants for Insulin and EGF binding were altered (k      <sub>on</sub>
+          '=34*k      <sub>on</sub>
+          , K      <sub>D</sub>
+          '=K      <sub>D</sub>
+          /34). This was done to allow using the concentrations for those species given in the article and retaining the same dynamics and Ligand depletion as in the matlab file the SBML file was exported from.      </p>
+            <p>SBML model exported from PottersWheel on 2008-10-14 16:26:44.</p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          For more information see the      <a href="http://www.ebi.ac.uk/biomodels/legal.html" target="_blank">terms of use</a>
+          .      <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Endler</vCard:Family>
+                  <vCard:Given>Lukas</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>lukas@ebi.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>EMBL-EBI</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Borisov</vCard:Family>
+                  <vCard:Given>Nikolay</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>nikolay.borisov@jefferson.edu</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>Department of Pathology, Anatomy and Cell Biology, Thomas Jefferson University</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2009-07-09T11:00:31Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2012-03-09T11:44:02Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL6194251662"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/BIOMD0000000223"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/19357636"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+          <bqbiol:occursIn>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/taxonomy/9606"/>
+            </rdf:Bag>
+          </bqbiol:occursIn>
+          <bqbiol:hasVersion>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/kegg.pathway/hsa04012"/>
+              <rdf:li rdf:resource="http://identifiers.org/kegg.pathway/hsa04910"/>
+            </rdf:Bag>
+          </bqbiol:hasVersion>
+          <bqbiol:hasVersion>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/reactome/REACT_9417"/>
+              <rdf:li rdf:resource="http://identifiers.org/reactome/REACT_498"/>
+            </rdf:Bag>
+          </bqbiol:hasVersion>
+          <bqbiol:isVersionOf>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0045840"/>
+            </rdf:Bag>
+          </bqbiol:isVersionOf>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="substance" name="nanomole" metaid="metaid_0000393">
+        <listOfUnits>
+          <unit scale="-9" metaid="_886604" kind="mole"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time" name="seconds" metaid="metaid_0000394">
+        <listOfUnits>
+          <unit metaid="_886616" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="nM" name="nM" metaid="metaid_0000395">
+        <listOfUnits>
+          <unit scale="-9" metaid="_886628" kind="mole"/>
+          <unit exponent="-1" metaid="_886640" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_nM" name="per_nM" metaid="metaid_0001395">
+        <listOfUnits>
+          <unit scale="-9" exponent="-1" metaid="_886652" kind="mole"/>
+          <unit metaid="_886664" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_sec" name="per second" metaid="metaid_0000396">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_886676" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="nM_per_s" name="nM per sec" metaid="metaid_0000397">
+        <listOfUnits>
+          <unit scale="-9" metaid="_886689" kind="mole"/>
+          <unit exponent="-1" metaid="_886701" kind="litre"/>
+          <unit exponent="-1" metaid="_886713" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_nMs" name="per nM per s" metaid="metaid_0000398">
+        <listOfUnits>
+          <unit metaid="_886725" kind="litre"/>
+          <unit scale="-9" exponent="-1" metaid="_886737" kind="mole"/>
+          <unit exponent="-1" metaid="_886750" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="cell" name="cell" metaid="metaid_0000165" size="1">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000165">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0005623"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </compartment>
+      <compartment id="extra" name="extracellular space" metaid="metaid_0000166" size="34"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="EGF" initialConcentration="1" metaid="metaid_0000167" compartment="extra">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000167">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P01133"/>
+                  <rdf:li rdf:resource="http://identifiers.org/reactome/REACT_9610"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="I" initialConcentration="0" metaid="metaid_0000168" compartment="extra">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000168">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P01308"/>
+                  <rdf:li rdf:resource="http://identifiers.org/reactome/REACT_5828"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="RE" initialConcentration="0" metaid="metaid_0000169" compartment="cell">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000169">
+              <bqbiol:hasPart>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P00533"/>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P01133"/>
+                </rdf:Bag>
+              </bqbiol:hasPart>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="Rd" initialConcentration="0" metaid="metaid_0000170" compartment="cell">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000170">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P01133"/>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P00533"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="Rp" initialConcentration="0" metaid="metaid_0000171" compartment="cell">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000171">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P01133"/>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P00533"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="GS" initialConcentration="200" metaid="metaid_0000172" compartment="cell"/>
+      <species id="Rp_GS" initialConcentration="0" metaid="metaid_0000173" compartment="cell">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000173">
+              <bqbiol:hasPart>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P00533"/>
+                </rdf:Bag>
+              </bqbiol:hasPart>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="Shc" initialConcentration="270" metaid="metaid_0000174" compartment="cell"/>
+      <species id="Rp_Shc" initialConcentration="0" metaid="metaid_0000175" compartment="cell">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000175">
+              <bqbiol:hasPart>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P00533"/>
+                </rdf:Bag>
+              </bqbiol:hasPart>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="Rp_pShc" initialConcentration="0" metaid="metaid_0000176" compartment="cell"/>
+      <species id="pShc" initialConcentration="0" metaid="metaid_0000177" compartment="cell"/>
+      <species id="Rp_pShc_GS" initialConcentration="0" metaid="metaid_0000178" compartment="cell"/>
+      <species id="PI3K" initialConcentration="200" metaid="metaid_0000179" compartment="cell"/>
+      <species id="Rp_PI3K" initialConcentration="0" metaid="metaid_0000180" compartment="cell"/>
+      <species id="RasGAP" initialConcentration="50" metaid="metaid_0000181" compartment="cell"/>
+      <species id="Rp_RasGAP" initialConcentration="0" metaid="metaid_0000182" compartment="cell"/>
+      <species id="IRL" initialConcentration="0" metaid="metaid_0000183" compartment="cell"/>
+      <species id="IRp" initialConcentration="0" metaid="metaid_0000184" compartment="cell"/>
+      <species id="IRp_PI3K" initialConcentration="0" metaid="metaid_0000185" compartment="cell"/>
+      <species id="IRp_RasGAP" initialConcentration="0" metaid="metaid_0000186" compartment="cell"/>
+      <species id="IRS" initialConcentration="300" metaid="metaid_0000187" compartment="cell"/>
+      <species id="IRp_IRS" initialConcentration="0" metaid="metaid_0000188" compartment="cell"/>
+      <species id="IRp_IRSp" initialConcentration="0" metaid="metaid_0000189" compartment="cell"/>
+      <species id="IRSp" initialConcentration="0" metaid="metaid_0000190" compartment="cell"/>
+      <species id="iSrc" initialConcentration="518" metaid="metaid_0000191" compartment="cell"/>
+      <species id="mIRS" initialConcentration="0" metaid="metaid_0000192" compartment="cell"/>
+      <species id="mIRSp" initialConcentration="0" metaid="metaid_0000193" compartment="cell"/>
+      <species id="mIRSp_GS" initialConcentration="0" metaid="metaid_0000194" compartment="cell"/>
+      <species id="mIRSp_PI3K" initialConcentration="0" metaid="metaid_0000195" compartment="cell"/>
+      <species id="SHP2" initialConcentration="300" metaid="metaid_0000196" compartment="cell"/>
+      <species id="mIRSp_SHP2" initialConcentration="0" metaid="metaid_0000197" compartment="cell"/>
+      <species id="GAB" initialConcentration="225" metaid="metaid_0000198" compartment="cell"/>
+      <species id="mGAB" initialConcentration="0" metaid="metaid_0000199" compartment="cell"/>
+      <species id="mGABp" initialConcentration="0" metaid="metaid_0000200" compartment="cell"/>
+      <species id="mGABp_GS" initialConcentration="0" metaid="metaid_0000201" compartment="cell"/>
+      <species id="mGABp_PI3K" initialConcentration="0" metaid="metaid_0000202" compartment="cell"/>
+      <species id="mGABp_SHP2" initialConcentration="0" metaid="metaid_0000203" compartment="cell"/>
+      <species id="mGABp_pSHP2" initialConcentration="0" metaid="metaid_0000204" compartment="cell"/>
+      <species id="PIP3" initialConcentration="0" metaid="metaid_0000205" compartment="cell"/>
+      <species id="dRas" initialConcentration="150" metaid="metaid_0000206" compartment="cell"/>
+      <species id="Raf" initialConcentration="100" metaid="metaid_0000207" compartment="cell"/>
+      <species id="aRaf" initialConcentration="0" metaid="metaid_0000208" compartment="cell"/>
+      <species id="Mek" initialConcentration="200" metaid="metaid_0000209" compartment="cell"/>
+      <species id="Erk" initialConcentration="400" metaid="metaid_0000210" compartment="cell"/>
+      <species id="pErk" initialConcentration="0" metaid="metaid_0000211" compartment="cell"/>
+      <species id="PDK1" initialConcentration="100" metaid="metaid_0000212" compartment="cell"/>
+      <species id="Akt" initialConcentration="100" metaid="metaid_0000213" compartment="cell"/>
+      <species id="pAkt" initialConcentration="0" metaid="metaid_0000214" compartment="cell"/>
+      <species id="mTOR" initialConcentration="100" metaid="metaid_0000215" compartment="cell"/>
+      <species id="Null" initialConcentration="0" metaid="metaid_0000216" compartment="cell"/>
+      <species id="aaRaf" initialConcentration="0" metaid="metaid_0000217" compartment="cell"/>
+      <species id="PKA" initialConcentration="100" metaid="metaid_0000218" compartment="cell"/>
+      <species id="pShc_GS" initialConcentration="0" metaid="metaid_0000219" compartment="cell"/>
+      <species id="ppMek" initialConcentration="0" metaid="metaid_0000220" compartment="cell"/>
+      <species id="mGABp_pSHP2_GS" initialConcentration="0" metaid="metaid_0000221" compartment="cell"/>
+      <species id="R" initialConcentration="100" metaid="metaid_0000222" compartment="cell"/>
+      <species id="ppErk" initialConcentration="0" metaid="metaid_0000223" compartment="cell"/>
+      <species id="IR" initialConcentration="150" metaid="metaid_0000224" compartment="cell"/>
+      <species id="mPDK1" initialConcentration="0" metaid="metaid_0000225" compartment="cell"/>
+      <species id="tRas" initialConcentration="0" metaid="metaid_0000226" compartment="cell"/>
+      <species id="tRas_PI3K" initialConcentration="0" metaid="metaid_0000227" compartment="cell"/>
+      <species id="ppAkt" initialConcentration="0" metaid="metaid_0000228" compartment="cell"/>
+      <species id="mGABp_RasGAP" initialConcentration="0" metaid="metaid_0000229" compartment="cell"/>
+      <species id="amTOR" initialConcentration="0" metaid="metaid_0000230" compartment="cell"/>
+      <species id="iGS" initialConcentration="0" metaid="metaid_0000231" compartment="cell"/>
+      <species id="imGAB" initialConcentration="0" metaid="metaid_0000232" compartment="cell"/>
+      <species id="imIRS" initialConcentration="0" metaid="metaid_0000233" compartment="cell"/>
+      <species id="aSrc" initialConcentration="0" metaid="metaid_0000234" compartment="cell"/>
+      <species id="Ri" initialConcentration="0" metaid="metaid_0000235" compartment="cell"/>
+      <species id="IRi" initialConcentration="0" metaid="metaid_0000236" compartment="cell"/>
+      <species id="iPX" initialConcentration="200" metaid="metaid_0000237" compartment="cell"/>
+      <species id="aPX" initialConcentration="0" metaid="metaid_0000238" compartment="cell"/>
+      <species id="aPX_GS" initialConcentration="0" metaid="metaid_0000239" compartment="cell"/>
+      <species id="IRSp_PI3K" initialConcentration="0" metaid="metaid_0000240" compartment="cell"/>
+      <species id="IRSp_GS" initialConcentration="0" metaid="metaid_0000241" compartment="cell"/>
+      <species id="IRSp_SHP2" initialConcentration="0" metaid="metaid_0000242" compartment="cell"/>
+      <species id="GABp" initialConcentration="0" metaid="metaid_0000243" compartment="cell"/>
+      <species id="GABp_PI3K" initialConcentration="0" metaid="metaid_0000244" compartment="cell"/>
+      <species id="GABp_GS" initialConcentration="0" metaid="metaid_0000245" compartment="cell"/>
+      <species id="GABp_RasGAP" initialConcentration="0" metaid="metaid_0000246" compartment="cell"/>
+      <species id="GABp_SHP2" initialConcentration="0" metaid="metaid_0000247" compartment="cell"/>
+      <species id="GABp_pSHP2" initialConcentration="0" metaid="metaid_0000248" compartment="cell"/>
+      <species id="GABp_pSHP2_GS" initialConcentration="0" metaid="metaid_0000249" compartment="cell"/>
+      <species id="imGABp" initialConcentration="0" metaid="metaid_0000250" compartment="cell"/>
+      <species id="bRasGAP" initialConcentration="1E-5" metaid="metaid_0000251" compartment="cell"/>
+      <species id="phosphorylated_Akt" metaid="metaid_0000252" compartment="cell"/>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="EGF_tot" constant="false" metaid="metaid_0000003" value="3.4" units="nM"/>
+      <parameter id="k1" metaid="metaid_0000004" value="0.068" units="per_nMs"/>
+      <parameter id="Kd1" metaid="metaid_0000005" value="0.58824" units="nM"/>
+      <parameter id="k2" metaid="metaid_0000006" value="0.033" units="per_nMs"/>
+      <parameter id="Kd2" metaid="metaid_0000007" value="15" units="nM"/>
+      <parameter id="k3" metaid="metaid_0000008" value="0.4" units="per_sec"/>
+      <parameter id="k4" metaid="metaid_0000009" value="0.000666" units="per_nMs"/>
+      <parameter id="Kd4" metaid="metaid_0000010" value="10" units="nM"/>
+      <parameter id="Kd5" metaid="metaid_0000011" value="10" units="nM"/>
+      <parameter id="k5" metaid="metaid_0000012" value="0.0133" units="per_nMs"/>
+      <parameter id="k6" metaid="metaid_0000013" value="0.333" units="per_sec"/>
+      <parameter id="k7" metaid="metaid_0000014" value="0.000666" units="per_nMs"/>
+      <parameter id="Kd7" metaid="metaid_0000015" value="400" units="nM"/>
+      <parameter id="V8" metaid="metaid_0000016" value="200" units="nM_per_s"/>
+      <parameter id="Km8" metaid="metaid_0000017" value="100" units="nM"/>
+      <parameter id="Kd9" metaid="metaid_0000018" value="10" units="nM"/>
+      <parameter id="k9" metaid="metaid_0000019" value="0.00666" units="per_nMs"/>
+      <parameter id="Kd10" metaid="metaid_0000020" value="400" units="nM"/>
+      <parameter id="k10" metaid="metaid_0000021" value="0.0004" units="per_nMs"/>
+      <parameter id="k11" constant="false" metaid="metaid_0000022" value="0" units="per_nMs"/>
+      <parameter id="k12" metaid="metaid_0000023" value="0.00933" units="per_nMs"/>
+      <parameter id="Kd12" metaid="metaid_0000024" value="12.45" units="nM"/>
+      <parameter id="k13" metaid="metaid_0000025" value="6.66E-6" units="per_nMs"/>
+      <parameter id="Kd13" metaid="metaid_0000026" value="200" units="nM"/>
+      <parameter id="k17" metaid="metaid_0000027" value="0.000185" units="per_sec"/>
+      <parameter id="k24" metaid="metaid_0000028" value="0.011322" units="per_nMs"/>
+      <parameter id="Kd24" metaid="metaid_0000029" value="0.029412" units="nM"/>
+      <parameter id="k25" metaid="metaid_0000030" value="1.66" units="per_sec"/>
+      <parameter id="k26" metaid="metaid_0000031" value="0.00933" units="per_nMs"/>
+      <parameter id="Kd26" metaid="metaid_0000032" value="124.5" units="nM"/>
+      <parameter id="k27" metaid="metaid_0000033" value="6.66E-8" units="per_nMs"/>
+      <parameter id="Kd27" metaid="metaid_0000034" value="2000000" units="nM"/>
+      <parameter id="k28" metaid="metaid_0000035" value="0.1066" units="per_nMs"/>
+      <parameter id="Kd28" metaid="metaid_0000036" value="3.75" units="nM"/>
+      <parameter id="k29" metaid="metaid_0000037" value="0.66" units="per_sec"/>
+      <parameter id="k30" metaid="metaid_0000038" value="0.0066" units="per_nMs"/>
+      <parameter id="Kd30" metaid="metaid_0000039" value="10" units="nM"/>
+      <parameter id="V31" metaid="metaid_0000040" value="333" units="nM_per_s"/>
+      <parameter id="Km31" metaid="metaid_0000041" value="143.3" units="nM"/>
+      <parameter id="kcat40" metaid="metaid_0000042" value="6.6" units="per_sec"/>
+      <parameter id="Km40" metaid="metaid_0000043" value="110" units="nM"/>
+      <parameter id="alpha40" metaid="metaid_0000044" value="0.00025" units="dimensionless"/>
+      <parameter id="V41" metaid="metaid_0000045" value="6.66" units="nM_per_s"/>
+      <parameter id="Km41" metaid="metaid_0000046" value="50" units="nM"/>
+      <parameter id="k42" metaid="metaid_0000047" value="0.00666" units="per_nMs"/>
+      <parameter id="Kd42" metaid="metaid_0000048" value="10" units="nM"/>
+      <parameter id="kcat43" metaid="metaid_0000049" value="33.3" units="per_sec"/>
+      <parameter id="Km43" metaid="metaid_0000050" value="150" units="nM"/>
+      <parameter id="alpha43" metaid="metaid_0000051" value="0.05" units="dimensionless"/>
+      <parameter id="Kd45" metaid="metaid_0000052" value="100000" units="nM"/>
+      <parameter id="k45" metaid="metaid_0000053" value="0.000666" units="per_nMs"/>
+      <parameter id="k46" metaid="metaid_0000054" value="0.00666" units="per_nMs"/>
+      <parameter id="Kd46" metaid="metaid_0000055" value="1" units="nM"/>
+      <parameter id="k47" metaid="metaid_0000056" value="0.000666" units="per_nMs"/>
+      <parameter id="Kd47" metaid="metaid_0000057" value="1000" units="nM"/>
+      <parameter id="k48" metaid="metaid_0000058" value="0.666" units="per_sec"/>
+      <parameter id="k49" metaid="metaid_0000059" value="0.000666" units="per_nMs"/>
+      <parameter id="Kd49" metaid="metaid_0000060" value="1" units="nM"/>
+      <parameter id="kcat50" metaid="metaid_0000061" value="3333" units="per_sec"/>
+      <parameter id="alpha50" metaid="metaid_0000062" value="0.0001" units="dimensionless"/>
+      <parameter id="Km50" metaid="metaid_0000063" value="150" units="nM"/>
+      <parameter id="V51" metaid="metaid_0000064" value="333" units="nM_per_s"/>
+      <parameter id="Km51" metaid="metaid_0000065" value="130" units="nM"/>
+      <parameter id="k52" metaid="metaid_0000066" value="0.002" units="per_nMs"/>
+      <parameter id="Kd52" metaid="metaid_0000067" value="1" units="nM"/>
+      <parameter id="k53" metaid="metaid_0000068" value="0.0133" units="per_nMs"/>
+      <parameter id="Kd53" metaid="metaid_0000069" value="2.5" units="nM"/>
+      <parameter id="k54" metaid="metaid_0000070" value="1E-5" units="per_nMs"/>
+      <parameter id="Kd54" metaid="metaid_0000071" value="66666" units="nM"/>
+      <parameter id="k55" metaid="metaid_0000072" value="0.000666" units="per_nMs"/>
+      <parameter id="Kd55" metaid="metaid_0000073" value="100" units="nM"/>
+      <parameter id="k56" metaid="metaid_0000074" value="0.666" units="per_sec"/>
+      <parameter id="kcat57" metaid="metaid_0000075" value="0.133" units="per_sec"/>
+      <parameter id="Km57" metaid="metaid_0000076" value="150" units="nM"/>
+      <parameter id="V58" metaid="metaid_0000077" value="2" units="nM_per_s"/>
+      <parameter id="Km58" metaid="metaid_0000078" value="130" units="nM"/>
+      <parameter id="k59" metaid="metaid_0000079" value="0.01" units="per_nMs"/>
+      <parameter id="Kd59" metaid="metaid_0000080" value="20" units="nM"/>
+      <parameter id="k60" metaid="metaid_0000081" value="4.66" units="per_sec"/>
+      <parameter id="k61" metaid="metaid_0000082" value="3.33" units="per_sec"/>
+      <parameter id="kcat62" metaid="metaid_0000083" value="5.33" units="per_sec"/>
+      <parameter id="Km62" metaid="metaid_0000084" value="50" units="nM"/>
+      <parameter id="kcat63" metaid="metaid_0000085" value="20000" units="per_sec"/>
+      <parameter id="Km63" metaid="metaid_0000086" value="50" units="nM"/>
+      <parameter id="k64" metaid="metaid_0000087" value="0" units="per_nMs"/>
+      <parameter id="k_64" metaid="metaid_0000088" value="2.5" units="per_sec"/>
+      <parameter id="kcat65" metaid="metaid_0000089" value="0.1" units="per_sec"/>
+      <parameter id="Km65" metaid="metaid_0000090" value="400" units="nM"/>
+      <parameter id="kcat66" metaid="metaid_0000091" value="3.33" units="per_sec"/>
+      <parameter id="Km66" metaid="metaid_0000092" value="10" units="nM"/>
+      <parameter id="kcat67" metaid="metaid_0000093" value="0.666" units="per_sec"/>
+      <parameter id="Km67" metaid="metaid_0000094" value="10000" units="nM"/>
+      <parameter id="alpha67" metaid="metaid_0000095" value="1E-6" units="per_nMs"/>
+      <parameter id="beta67" metaid="metaid_0000096" value="2" units="dimensionless"/>
+      <parameter id="kcat68" metaid="metaid_0000097" value="0.133" units="per_sec"/>
+      <parameter id="Km68" metaid="metaid_0000098" value="50" units="nM"/>
+      <parameter id="V69" metaid="metaid_0000099" value="16.6" units="nM_per_s"/>
+      <parameter id="Km69" metaid="metaid_0000100" value="675.299" units="nM"/>
+      <parameter id="kcat70" metaid="metaid_0000101" value="0.333" units="per_sec"/>
+      <parameter id="Km70" metaid="metaid_0000102" value="500" units="nM"/>
+      <parameter id="kcat71" metaid="metaid_0000103" value="0.666" units="per_sec"/>
+      <parameter id="Km71" metaid="metaid_0000104" value="500" units="nM"/>
+      <parameter id="V72" metaid="metaid_0000105" value="33.3" units="nM_per_s"/>
+      <parameter id="Km72" metaid="metaid_0000106" value="500" units="nM"/>
+      <parameter id="V73" metaid="metaid_0000107" value="23.33" units="nM_per_s"/>
+      <parameter id="Km73" metaid="metaid_0000108" value="500" units="nM"/>
+      <parameter id="k74" metaid="metaid_0000109" value="0.00666" units="per_nMs"/>
+      <parameter id="Kd74" metaid="metaid_0000110" value="100" units="nM"/>
+      <parameter id="kcat75" metaid="metaid_0000111" value="4.66" units="per_sec"/>
+      <parameter id="Km75" metaid="metaid_0000112" value="500" units="nM"/>
+      <parameter id="V76" metaid="metaid_0000113" value="16.66" units="nM_per_s"/>
+      <parameter id="Km76" metaid="metaid_0000114" value="1" units="nM"/>
+      <parameter id="kcat77" metaid="metaid_0000115" value="0.666" units="per_sec"/>
+      <parameter id="alpha77" metaid="metaid_0000116" value="0.5" units="dimensionless"/>
+      <parameter id="Km77" metaid="metaid_0000117" value="100" units="nM"/>
+      <parameter id="k_77" metaid="metaid_0000118" value="0.666" units="per_sec"/>
+      <parameter id="kcat78" metaid="metaid_0000119" value="0.666" units="per_sec"/>
+      <parameter id="Km78" metaid="metaid_0000120" value="100" units="nM"/>
+      <parameter id="k_78" metaid="metaid_0000121" value="0.666" units="per_sec"/>
+      <parameter id="kcat79" metaid="metaid_0000122" value="0.0466" units="per_sec"/>
+      <parameter id="Km79" metaid="metaid_0000123" value="5000" units="nM"/>
+      <parameter id="k_79" metaid="metaid_0000124" value="6.66E-5" units="per_sec"/>
+      <parameter id="kcat80" metaid="metaid_0000125" value="0.04" units="per_sec"/>
+      <parameter id="Km80" metaid="metaid_0000126" value="700" units="nM"/>
+      <parameter id="k_80" metaid="metaid_0000127" value="6.66E-5" units="per_sec"/>
+      <parameter id="kcat81" metaid="metaid_0000128" value="0.166" units="per_sec"/>
+      <parameter id="Km81" metaid="metaid_0000129" value="300" units="nM"/>
+      <parameter id="k_81" metaid="metaid_0000130" value="6.66E-5" units="per_sec"/>
+      <parameter id="V_82" metaid="metaid_0000131" value="133" units="nM_per_s"/>
+      <parameter id="Km82" metaid="metaid_0000132" value="50" units="nM"/>
+      <parameter id="k83" metaid="metaid_0000133" value="0.0166" units="per_sec"/>
+      <parameter id="V_84" metaid="metaid_0000134" value="333" units="nM_per_s"/>
+      <parameter id="Km84" metaid="metaid_0000135" value="266" units="nM"/>
+      <parameter id="k85" metaid="metaid_0000136" value="0.0166" units="per_sec"/>
+      <parameter id="k111" metaid="metaid_0000137" value="0.0133" units="per_nMs"/>
+      <parameter id="k118" metaid="metaid_0000138" value="0.001" units="per_sec"/>
+      <parameter id="k_1" constant="false" metaid="metaid_0000139" units="per_sec"/>
+      <parameter id="k_2" constant="false" metaid="metaid_0000140" units="per_sec"/>
+      <parameter id="k_4" constant="false" metaid="metaid_0000141" units="per_sec"/>
+      <parameter id="k_5" constant="false" metaid="metaid_0000142" units="per_sec"/>
+      <parameter id="k_7" constant="false" metaid="metaid_0000143" units="per_sec"/>
+      <parameter id="k_9" constant="false" metaid="metaid_0000144" units="per_sec"/>
+      <parameter id="k_10" constant="false" metaid="metaid_0000145" units="per_sec"/>
+      <parameter id="k_11" constant="false" metaid="metaid_0000146" units="per_sec"/>
+      <parameter id="k_12" constant="false" metaid="metaid_0000147" units="per_sec"/>
+      <parameter id="k_13" constant="false" metaid="metaid_0000148" units="per_sec"/>
+      <parameter id="k_24" constant="false" metaid="metaid_0000149" units="per_sec"/>
+      <parameter id="k_26" constant="false" metaid="metaid_0000150" units="per_sec"/>
+      <parameter id="k_27" constant="false" metaid="metaid_0000151" units="per_sec"/>
+      <parameter id="k_28" constant="false" metaid="metaid_0000152" units="per_sec"/>
+      <parameter id="k_30" constant="false" metaid="metaid_0000153" units="per_sec"/>
+      <parameter id="k_42" constant="false" metaid="metaid_0000154" units="per_sec"/>
+      <parameter id="k_45" constant="false" metaid="metaid_0000155" units="per_sec"/>
+      <parameter id="k_46" constant="false" metaid="metaid_0000156" units="per_sec"/>
+      <parameter id="k_47" constant="false" metaid="metaid_0000157" units="per_sec"/>
+      <parameter id="k_49" constant="false" metaid="metaid_0000158" units="per_sec"/>
+      <parameter id="k_52" constant="false" metaid="metaid_0000159" units="per_sec"/>
+      <parameter id="k_53" constant="false" metaid="metaid_0000160" units="per_sec"/>
+      <parameter id="k_54" constant="false" metaid="metaid_0000161" units="per_sec"/>
+      <parameter id="k_55" constant="false" metaid="metaid_0000162" units="per_sec"/>
+      <parameter id="k_59" constant="false" metaid="metaid_0000163" units="per_sec"/>
+      <parameter id="k_74" constant="false" metaid="metaid_0000164" units="per_sec"/>
+    </listOfParameters>
+    <listOfRules>
+      <assignmentRule metaid="metaid_0000253" variable="phosphorylated_Akt">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> pAkt </ci>
+            <ci> ppAkt </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000254" variable="EGF_tot">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> EGF </ci>
+            <apply>
+              <times/>
+              <apply>
+                <plus/>
+                <ci> RE </ci>
+                <apply>
+                  <times/>
+                  <cn type="integer"> 2 </cn>
+                  <apply>
+                    <plus/>
+                    <ci> Rd </ci>
+                    <ci> Rp </ci>
+                    <ci> Ri </ci>
+                    <ci> Rp_GS </ci>
+                    <ci> Rp_Shc </ci>
+                    <ci> Rp_pShc </ci>
+                    <ci> Rp_pShc_GS </ci>
+                    <ci> Rp_PI3K </ci>
+                    <ci> Rp_RasGAP </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <divide/>
+                <ci> cell </ci>
+                <ci> extra </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000255" variable="k_1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> Kd1 </ci>
+            <ci> k1 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000256" variable="k_2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> Kd2 </ci>
+            <ci> k2 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000257" variable="k_4">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> Kd4 </ci>
+            <ci> k4 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000258" variable="k_5">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> Kd5 </ci>
+            <ci> k5 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000259" variable="k_7">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> Kd7 </ci>
+            <ci> k7 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000260" variable="k_9">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> Kd9 </ci>
+            <ci> k9 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000261" variable="k_10">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> Kd10 </ci>
+            <ci> k10 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000262" variable="k_11">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <ci> k_9 </ci>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000263" variable="k11">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <ci> k9 </ci>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000264" variable="k_12">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> Kd12 </ci>
+            <ci> k12 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000265" variable="k_13">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> Kd13 </ci>
+            <ci> k13 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000266" variable="k_24">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> Kd24 </ci>
+            <ci> k24 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000267" variable="k_26">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> Kd26 </ci>
+            <ci> k26 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000268" variable="k_27">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> Kd27 </ci>
+            <ci> k27 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000269" variable="k_28">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> Kd28 </ci>
+            <ci> k28 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000270" variable="k_30">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> Kd30 </ci>
+            <ci> k30 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000271" variable="k_42">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> Kd42 </ci>
+            <ci> k42 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000272" variable="k_45">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> k45 </ci>
+            <ci> Kd45 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000273" variable="k_46">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> Kd46 </ci>
+            <ci> k46 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000274" variable="k_47">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> Kd47 </ci>
+            <ci> k47 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000275" variable="k_49">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> Kd49 </ci>
+            <ci> k49 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000276" variable="k_52">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> k52 </ci>
+            <ci> Kd52 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000277" variable="k_53">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> Kd53 </ci>
+            <ci> k53 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000278" variable="k_54">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> Kd54 </ci>
+            <ci> k54 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000279" variable="k_55">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> Kd55 </ci>
+            <ci> k55 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000280" variable="k_59">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> Kd59 </ci>
+            <ci> k59 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000281" variable="k_74">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> k74 </ci>
+            <ci> Kd74 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+    <listOfReactions>
+      <reaction id="reaction_1" metaid="metaid_0000282">
+        <listOfReactants>
+          <speciesReference species="R" metaid="_886762"/>
+          <speciesReference species="EGF" metaid="_886774"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="RE" metaid="_886786"/>
+        </listOfProducts>
+        <kineticLaw metaid="_886798">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k1 </ci>
+                  <ci> R </ci>
+                  <ci> EGF </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_1 </ci>
+                  <ci> RE </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_2" metaid="metaid_0000283">
+        <listOfReactants>
+          <speciesReference species="RE" metaid="_886811" stoichiometry="2"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Rd" metaid="_886823"/>
+        </listOfProducts>
+        <kineticLaw metaid="_886835">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k2 </ci>
+                  <ci> RE </ci>
+                  <ci> RE </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_2 </ci>
+                  <ci> Rd </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_3" metaid="metaid_0000284" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Rd" metaid="_886847"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Rp" metaid="_886859"/>
+        </listOfProducts>
+        <kineticLaw metaid="_886871">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> Rd </ci>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_4" metaid="metaid_0000285">
+        <listOfReactants>
+          <speciesReference species="Rp" metaid="_886883"/>
+          <speciesReference species="GS" metaid="_886895"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Rp_GS" metaid="_886907"/>
+        </listOfProducts>
+        <kineticLaw metaid="_886919">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k4 </ci>
+                  <ci> Rp </ci>
+                  <ci> GS </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_4 </ci>
+                  <ci> Rp_GS </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_5" metaid="metaid_0000286">
+        <listOfReactants>
+          <speciesReference species="Rp" metaid="_886931"/>
+          <speciesReference species="Shc" metaid="_886943"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Rp_Shc" metaid="_886955"/>
+        </listOfProducts>
+        <kineticLaw metaid="_886968">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k5 </ci>
+                  <ci> Rp </ci>
+                  <ci> Shc </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_5 </ci>
+                  <ci> Rp_Shc </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_6" metaid="metaid_0000287" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Rp_Shc" metaid="_886980"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Rp_pShc" metaid="_886992"/>
+        </listOfProducts>
+        <kineticLaw metaid="_887004">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k6 </ci>
+              <ci> Rp_Shc </ci>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_7" metaid="metaid_0000288">
+        <listOfReactants>
+          <speciesReference species="Rp_pShc" metaid="_887016"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Rp" metaid="_887028"/>
+          <speciesReference species="pShc" metaid="_887040"/>
+        </listOfProducts>
+        <kineticLaw metaid="_887052">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k_7 </ci>
+                  <ci> Rp_pShc </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k7 </ci>
+                  <ci> Rp </ci>
+                  <ci> pShc </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_8" metaid="metaid_0000289" reversible="false">
+        <listOfReactants>
+          <speciesReference species="pShc" metaid="_887064"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Shc" metaid="_887076"/>
+        </listOfProducts>
+        <kineticLaw metaid="_887088">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> V8 </ci>
+                  <ci> pShc </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km8 </ci>
+                  <ci> pShc </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_9" metaid="metaid_0000290">
+        <listOfReactants>
+          <speciesReference species="GS" metaid="_887100"/>
+          <speciesReference species="Rp_pShc" metaid="_887112"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Rp_pShc_GS" metaid="_887124"/>
+        </listOfProducts>
+        <kineticLaw metaid="_887136">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k9 </ci>
+                  <ci> Rp_pShc </ci>
+                  <ci> GS </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_9 </ci>
+                  <ci> Rp_pShc_GS </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_10" metaid="metaid_0000291">
+        <listOfReactants>
+          <speciesReference species="Rp_pShc_GS" metaid="_887148"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Rp" metaid="_887161"/>
+          <speciesReference species="pShc_GS" metaid="_887173"/>
+        </listOfProducts>
+        <kineticLaw metaid="_887185">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k_10 </ci>
+                  <ci> Rp_pShc_GS </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k10 </ci>
+                  <ci> Rp </ci>
+                  <ci> pShc_GS </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_11" metaid="metaid_0000292">
+        <listOfReactants>
+          <speciesReference species="pShc_GS" metaid="_887197"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="GS" metaid="_887209"/>
+          <speciesReference species="pShc" metaid="_887221"/>
+        </listOfProducts>
+        <kineticLaw metaid="_887233">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k_11 </ci>
+                  <ci> pShc_GS </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k11 </ci>
+                  <ci> pShc </ci>
+                  <ci> GS </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_12" metaid="metaid_0000293">
+        <listOfReactants>
+          <speciesReference species="Rp" metaid="_887245"/>
+          <speciesReference species="PI3K" metaid="_887257"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Rp_PI3K" metaid="_887269"/>
+        </listOfProducts>
+        <kineticLaw metaid="_887281">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k12 </ci>
+                  <ci> Rp </ci>
+                  <ci> PI3K </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_12 </ci>
+                  <ci> Rp_PI3K </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_13" metaid="metaid_0000294">
+        <listOfReactants>
+          <speciesReference species="Rp" metaid="_887293"/>
+          <speciesReference species="RasGAP" metaid="_887305"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Rp_RasGAP" metaid="_887317"/>
+        </listOfProducts>
+        <kineticLaw metaid="_887329">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k13 </ci>
+                  <ci> Rp </ci>
+                  <ci> RasGAP </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_13 </ci>
+                  <ci> Rp_RasGAP </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_17" metaid="metaid_0000295" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Rp" metaid="_887341"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Null" metaid="_887353"/>
+        </listOfProducts>
+        <kineticLaw metaid="_887365">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k17 </ci>
+              <ci> Rp </ci>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_18" metaid="metaid_0000296" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Rp_GS" metaid="_887377"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="GS" metaid="_887389"/>
+        </listOfProducts>
+        <kineticLaw metaid="_887401">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k17 </ci>
+              <ci> Rp_GS </ci>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_19" metaid="metaid_0000297" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Rp_Shc" metaid="_887413"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Shc" metaid="_887425"/>
+        </listOfProducts>
+        <kineticLaw metaid="_887437">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k17 </ci>
+              <ci> Rp_Shc </ci>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_20" metaid="metaid_0000298" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Rp_pShc" metaid="_887450"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pShc" metaid="_887462"/>
+        </listOfProducts>
+        <kineticLaw metaid="_887474">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k17 </ci>
+              <ci> Rp_pShc </ci>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_21" metaid="metaid_0000299" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Rp_pShc_GS" metaid="_887486"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pShc_GS" metaid="_887499"/>
+        </listOfProducts>
+        <kineticLaw metaid="_887511">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k17 </ci>
+              <ci> Rp_pShc_GS </ci>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_22" metaid="metaid_0000300" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Rp_PI3K" metaid="_887523"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PI3K" metaid="_887535"/>
+        </listOfProducts>
+        <kineticLaw metaid="_887547">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k17 </ci>
+              <ci> Rp_PI3K </ci>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_23" metaid="metaid_0000301" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Rp_RasGAP" metaid="_887559"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="RasGAP" metaid="_887571"/>
+        </listOfProducts>
+        <kineticLaw metaid="_887583">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k17 </ci>
+              <ci> Rp_RasGAP </ci>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_24" metaid="metaid_0000302">
+        <listOfReactants>
+          <speciesReference species="I" metaid="_887595"/>
+          <speciesReference species="IR" metaid="_887608"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IRL" metaid="_887620"/>
+        </listOfProducts>
+        <kineticLaw metaid="_887632">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k24 </ci>
+                  <ci> IR </ci>
+                  <ci> I </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_24 </ci>
+                  <ci> IRL </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_25" metaid="metaid_0000303" reversible="false">
+        <listOfReactants>
+          <speciesReference species="IRL" metaid="_887644"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IRp" metaid="_887656"/>
+        </listOfProducts>
+        <kineticLaw metaid="_887668">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k25 </ci>
+              <ci> IRL </ci>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_26" metaid="metaid_0000304">
+        <listOfReactants>
+          <speciesReference species="PI3K" metaid="_887680"/>
+          <speciesReference species="IRp" metaid="_887692"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IRp_PI3K" metaid="_887704"/>
+        </listOfProducts>
+        <kineticLaw metaid="_887717">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k26 </ci>
+                  <ci> IRp </ci>
+                  <ci> PI3K </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_26 </ci>
+                  <ci> IRp_PI3K </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_27" metaid="metaid_0000305">
+        <listOfReactants>
+          <speciesReference species="RasGAP" metaid="_887729"/>
+          <speciesReference species="IRp" metaid="_887741"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IRp_RasGAP" metaid="_887753"/>
+        </listOfProducts>
+        <kineticLaw metaid="_887765">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k27 </ci>
+                  <ci> IRp </ci>
+                  <ci> RasGAP </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_27 </ci>
+                  <ci> IRp_RasGAP </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_28" metaid="metaid_0000306">
+        <listOfReactants>
+          <speciesReference species="IRp" metaid="_887777"/>
+          <speciesReference species="IRS" metaid="_887789"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IRp_IRS" metaid="_887801"/>
+        </listOfProducts>
+        <kineticLaw metaid="_887813">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k28 </ci>
+                  <ci> IRp </ci>
+                  <ci> IRS </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_28 </ci>
+                  <ci> IRp_IRS </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_29" metaid="metaid_0000307" reversible="false">
+        <listOfReactants>
+          <speciesReference species="IRp_IRS" metaid="_887825"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IRp_IRSp" metaid="_887837"/>
+        </listOfProducts>
+        <kineticLaw metaid="_887849">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k29 </ci>
+              <ci> IRp_IRS </ci>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_30" metaid="metaid_0000308">
+        <listOfReactants>
+          <speciesReference species="IRp_IRSp" metaid="_887861"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IRp" metaid="_887873"/>
+          <speciesReference species="IRSp" metaid="_887885"/>
+        </listOfProducts>
+        <kineticLaw metaid="_887897">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k_30 </ci>
+                  <ci> IRp_IRSp </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k30 </ci>
+                  <ci> IRp </ci>
+                  <ci> IRSp </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_31" metaid="metaid_0000309" reversible="false">
+        <listOfReactants>
+          <speciesReference species="IRSp" metaid="_887909"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IRS" metaid="_887921"/>
+        </listOfProducts>
+        <kineticLaw metaid="_887933">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> V31 </ci>
+                  <ci> IRSp </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km31 </ci>
+                  <ci> IRSp </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_34" metaid="metaid_0000310" reversible="false">
+        <listOfReactants>
+          <speciesReference species="IRp" metaid="_887945"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Null" metaid="_887957"/>
+        </listOfProducts>
+        <kineticLaw metaid="_887969">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k17 </ci>
+              <ci> IRp </ci>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_35" metaid="metaid_0000311" reversible="false">
+        <listOfReactants>
+          <speciesReference species="IRp_PI3K" metaid="_887981"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PI3K" metaid="_887993"/>
+        </listOfProducts>
+        <kineticLaw metaid="_888005">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k17 </ci>
+              <ci> IRp_PI3K </ci>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_36" metaid="metaid_0000312" reversible="false">
+        <listOfReactants>
+          <speciesReference species="IRp_RasGAP" metaid="_888017"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="RasGAP" metaid="_888029"/>
+        </listOfProducts>
+        <kineticLaw metaid="_888041">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k17 </ci>
+              <ci> IRp_RasGAP </ci>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_37" metaid="metaid_0000313" reversible="false">
+        <listOfReactants>
+          <speciesReference species="IRp_IRS" metaid="_888053"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IRS" metaid="_888065"/>
+        </listOfProducts>
+        <kineticLaw metaid="_888077">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k17 </ci>
+              <ci> IRp_IRS </ci>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_38" metaid="metaid_0000314" reversible="false">
+        <listOfReactants>
+          <speciesReference species="IRp_IRSp" metaid="_888090"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IRSp" metaid="_888102"/>
+        </listOfProducts>
+        <kineticLaw metaid="_888114">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k17 </ci>
+              <ci> IRp_IRSp </ci>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_40" metaid="metaid_0000315" reversible="false">
+        <listOfReactants>
+          <speciesReference species="iSrc" metaid="_888126"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="aSrc" metaid="_888138"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Rp" metaid="_888150"/>
+          <modifierSpeciesReference species="IRp" metaid="_888162"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_888174">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> kcat40 </ci>
+                  <ci> iSrc </ci>
+                  <apply>
+                    <plus/>
+                    <ci> Rp </ci>
+                    <apply>
+                      <times/>
+                      <ci> alpha40 </ci>
+                      <ci> IRp </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km40 </ci>
+                  <ci> iSrc </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_41" metaid="metaid_0000316" reversible="false">
+        <listOfReactants>
+          <speciesReference species="aSrc" metaid="_888186"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="iSrc" metaid="_888198"/>
+        </listOfProducts>
+        <kineticLaw metaid="_888210">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> V41 </ci>
+                  <ci> aSrc </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km41 </ci>
+                  <ci> aSrc </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_42" metaid="metaid_0000317">
+        <listOfReactants>
+          <speciesReference species="IRS" metaid="_888222"/>
+          <speciesReference species="PIP3" metaid="_888234"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="mIRS" metaid="_888246"/>
+        </listOfProducts>
+        <kineticLaw metaid="_888258">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k42 </ci>
+                  <ci> IRS </ci>
+                  <ci> PIP3 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_42 </ci>
+                  <ci> mIRS </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_43" metaid="metaid_0000318" reversible="false">
+        <listOfReactants>
+          <speciesReference species="mIRS" metaid="_888271"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="mIRSp" metaid="_888283"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Rp" metaid="_888295"/>
+          <modifierSpeciesReference species="IRp" metaid="_888307"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_888319">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> kcat43 </ci>
+                  <ci> mIRS </ci>
+                  <apply>
+                    <plus/>
+                    <ci> IRp </ci>
+                    <apply>
+                      <times/>
+                      <ci> alpha43 </ci>
+                      <ci> Rp </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km43 </ci>
+                  <ci> mIRS </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_44" metaid="metaid_0000319" reversible="false">
+        <listOfReactants>
+          <speciesReference species="mIRSp" metaid="_888331"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="mIRS" metaid="_888343"/>
+        </listOfProducts>
+        <kineticLaw metaid="_888355">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> V31 </ci>
+                  <ci> mIRSp </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km31 </ci>
+                  <ci> mIRSp </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_45" metaid="metaid_0000320">
+        <listOfReactants>
+          <speciesReference species="GS" metaid="_888367"/>
+          <speciesReference species="mIRSp" metaid="_888379"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="mIRSp_GS" metaid="_888391"/>
+        </listOfProducts>
+        <kineticLaw metaid="_888403">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k45 </ci>
+                  <ci> mIRSp </ci>
+                  <ci> GS </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_45 </ci>
+                  <ci> mIRSp_GS </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_46" metaid="metaid_0000321">
+        <listOfReactants>
+          <speciesReference species="PI3K" metaid="_888415"/>
+          <speciesReference species="mIRSp" metaid="_888427"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="mIRSp_PI3K" metaid="_888439"/>
+        </listOfProducts>
+        <kineticLaw metaid="_888451">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k46 </ci>
+                  <ci> mIRSp </ci>
+                  <ci> PI3K </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_46 </ci>
+                  <ci> mIRSp_PI3K </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_47" metaid="metaid_0000322">
+        <listOfReactants>
+          <speciesReference species="mIRSp" metaid="_888463"/>
+          <speciesReference species="SHP2" metaid="_888475"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="mIRSp_SHP2" metaid="_888487"/>
+        </listOfProducts>
+        <kineticLaw metaid="_888499">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k47 </ci>
+                  <ci> mIRSp </ci>
+                  <ci> SHP2 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_47 </ci>
+                  <ci> mIRSp_SHP2 </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_48" metaid="metaid_0000323" reversible="false">
+        <listOfReactants>
+          <speciesReference species="mIRSp_SHP2" metaid="_888511"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="mIRS" metaid="_888523"/>
+          <speciesReference species="SHP2" metaid="_888535"/>
+        </listOfProducts>
+        <kineticLaw metaid="_888547">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k48 </ci>
+              <ci> mIRSp_SHP2 </ci>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_49" metaid="metaid_0000324">
+        <listOfReactants>
+          <speciesReference species="GAB" metaid="_888559"/>
+          <speciesReference species="PIP3" metaid="_888571"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="mGAB" metaid="_888583"/>
+        </listOfProducts>
+        <kineticLaw metaid="_888595">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k49 </ci>
+                  <ci> GAB </ci>
+                  <ci> PIP3 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_49 </ci>
+                  <ci> mGAB </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_50" metaid="metaid_0000325" reversible="false">
+        <listOfReactants>
+          <speciesReference species="mGAB" metaid="_888607"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="mGABp" metaid="_888619"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Rp" metaid="_888631"/>
+          <modifierSpeciesReference species="aSrc" metaid="_888643"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_888655">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> kcat50 </ci>
+                  <ci> mGAB </ci>
+                  <apply>
+                    <plus/>
+                    <ci> Rp </ci>
+                    <apply>
+                      <times/>
+                      <ci> alpha50 </ci>
+                      <ci> aSrc </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km50 </ci>
+                  <ci> mGAB </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_51" metaid="metaid_0000326" reversible="false">
+        <listOfReactants>
+          <speciesReference species="mGABp" metaid="_888667"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="mGAB" metaid="_888679"/>
+        </listOfProducts>
+        <kineticLaw metaid="_888691">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> V51 </ci>
+                  <ci> mGABp </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km51 </ci>
+                  <ci> mGABp </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_52" metaid="metaid_0000327">
+        <listOfReactants>
+          <speciesReference species="GS" metaid="_888703"/>
+          <speciesReference species="mGABp" metaid="_888715"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="mGABp_GS" metaid="_888727"/>
+        </listOfProducts>
+        <kineticLaw metaid="_888739">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k52 </ci>
+                  <ci> mGABp </ci>
+                  <ci> GS </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_52 </ci>
+                  <ci> mGABp_GS </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_53" metaid="metaid_0000328">
+        <listOfReactants>
+          <speciesReference species="PI3K" metaid="_888751"/>
+          <speciesReference species="mGABp" metaid="_888763"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="mGABp_PI3K" metaid="_888775"/>
+        </listOfProducts>
+        <kineticLaw metaid="_888787">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k53 </ci>
+                  <ci> mGABp </ci>
+                  <ci> PI3K </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_53 </ci>
+                  <ci> mGABp_PI3K </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_54" metaid="metaid_0000329">
+        <listOfReactants>
+          <speciesReference species="RasGAP" metaid="_888799"/>
+          <speciesReference species="mGABp" metaid="_888811"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="mGABp_RasGAP" metaid="_888823"/>
+        </listOfProducts>
+        <kineticLaw metaid="_888835">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k54 </ci>
+                  <ci> mGABp </ci>
+                  <ci> RasGAP </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_54 </ci>
+                  <ci> mGABp_RasGAP </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_55" metaid="metaid_0000330">
+        <listOfReactants>
+          <speciesReference species="SHP2" metaid="_888847"/>
+          <speciesReference species="mGABp" metaid="_888859"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="mGABp_SHP2" metaid="_888872"/>
+        </listOfProducts>
+        <kineticLaw metaid="_888884">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k55 </ci>
+                  <ci> mGABp </ci>
+                  <ci> SHP2 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_55 </ci>
+                  <ci> mGABp_SHP2 </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_56" metaid="metaid_0000331" reversible="false">
+        <listOfReactants>
+          <speciesReference species="mGABp_SHP2" metaid="_888896"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="SHP2" metaid="_888908"/>
+          <speciesReference species="mGAB" metaid="_888920"/>
+        </listOfProducts>
+        <kineticLaw metaid="_888932">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k56 </ci>
+              <ci> mGABp_SHP2 </ci>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_57" metaid="metaid_0000332" reversible="false">
+        <listOfReactants>
+          <speciesReference species="mGABp_SHP2" metaid="_888944"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="mGABp_pSHP2" metaid="_888956"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Rp" metaid="_888968"/>
+          <modifierSpeciesReference species="aSrc" metaid="_888980"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_888992">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> kcat57 </ci>
+                  <ci> mGABp_SHP2 </ci>
+                  <apply>
+                    <plus/>
+                    <ci> Rp </ci>
+                    <ci> aSrc </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km57 </ci>
+                  <ci> mGABp_SHP2 </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_58" metaid="metaid_0000333" reversible="false">
+        <listOfReactants>
+          <speciesReference species="mGABp_pSHP2" metaid="_889004"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="mGABp_SHP2" metaid="_889016"/>
+        </listOfProducts>
+        <kineticLaw metaid="_889028">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> V58 </ci>
+                  <ci> mGABp_pSHP2 </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km58 </ci>
+                  <ci> mGABp_pSHP2 </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_59" metaid="metaid_0000334">
+        <listOfReactants>
+          <speciesReference species="GS" metaid="_889040"/>
+          <speciesReference species="mGABp_pSHP2" metaid="_889052"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="mGABp_pSHP2_GS" metaid="_889064"/>
+        </listOfProducts>
+        <kineticLaw metaid="_889076">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k59 </ci>
+                  <ci> mGABp_pSHP2 </ci>
+                  <ci> GS </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_59 </ci>
+                  <ci> mGABp_pSHP2_GS </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_60" metaid="metaid_0000335" reversible="false">
+        <listOfProducts>
+          <speciesReference species="PIP3" metaid="_889088"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Rp_PI3K" metaid="_889100"/>
+          <modifierSpeciesReference species="IRp_PI3K" metaid="_889112"/>
+          <modifierSpeciesReference species="mIRSp_PI3K" metaid="_889124"/>
+          <modifierSpeciesReference species="mGABp_PI3K" metaid="_889136"/>
+          <modifierSpeciesReference species="tRas_PI3K" metaid="_889148"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_889160">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k60 </ci>
+              <apply>
+                <plus/>
+                <ci> Rp_PI3K </ci>
+                <ci> IRp_PI3K </ci>
+                <ci> mIRSp_PI3K </ci>
+                <ci> mGABp_PI3K </ci>
+                <ci> tRas_PI3K </ci>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_61" metaid="metaid_0000336" reversible="false">
+        <listOfReactants>
+          <speciesReference species="PIP3" metaid="_889172"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Null" metaid="_889184"/>
+        </listOfProducts>
+        <kineticLaw metaid="_889196">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k61 </ci>
+              <ci> PIP3 </ci>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_62" metaid="metaid_0000337" reversible="false">
+        <listOfReactants>
+          <speciesReference species="dRas" metaid="_889208"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="tRas" metaid="_889220"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Rp_GS" metaid="_889232"/>
+          <modifierSpeciesReference species="Rp_pShc_GS" metaid="_889244"/>
+          <modifierSpeciesReference species="mIRSp_GS" metaid="_889256"/>
+          <modifierSpeciesReference species="mGABp_GS" metaid="_889268"/>
+          <modifierSpeciesReference species="mGABp_pSHP2_GS" metaid="_889280"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_889292">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> kcat62 </ci>
+                  <ci> dRas </ci>
+                  <apply>
+                    <plus/>
+                    <ci> Rp_GS </ci>
+                    <ci> Rp_pShc_GS </ci>
+                    <ci> mIRSp_GS </ci>
+                    <ci> mGABp_GS </ci>
+                    <ci> mGABp_pSHP2_GS </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km62 </ci>
+                  <ci> dRas </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_63" metaid="metaid_0000338" reversible="false">
+        <listOfReactants>
+          <speciesReference species="tRas" metaid="_889304"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="dRas" metaid="_889316"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Rp_RasGAP" metaid="_889328"/>
+          <modifierSpeciesReference species="IRp_RasGAP" metaid="_889340"/>
+          <modifierSpeciesReference species="mGABp_RasGAP" metaid="_889352"/>
+          <modifierSpeciesReference species="bRasGAP" metaid="_889364"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_889376">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> kcat63 </ci>
+                  <ci> tRas </ci>
+                  <apply>
+                    <plus/>
+                    <ci> bRasGAP </ci>
+                    <ci> mGABp_RasGAP </ci>
+                    <ci> Rp_RasGAP </ci>
+                    <ci> IRp_RasGAP </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km63 </ci>
+                  <ci> tRas </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_64" metaid="metaid_0000339" reversible="false">
+        <listOfReactants>
+          <speciesReference species="PI3K" metaid="_889388"/>
+          <speciesReference species="tRas" metaid="_889400"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="tRas_PI3K" metaid="_889412"/>
+        </listOfProducts>
+        <kineticLaw metaid="_889424">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k64 </ci>
+                  <ci> tRas </ci>
+                  <ci> PI3K </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_64 </ci>
+                  <ci> tRas_PI3K </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_65" metaid="metaid_0000340" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Raf" metaid="_889436"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="aRaf" metaid="_889448"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="tRas" metaid="_889460"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_889472">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> kcat65 </ci>
+                  <ci> tRas </ci>
+                  <ci> Raf </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km65 </ci>
+                  <ci> Raf </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_66" metaid="metaid_0000341" reversible="false">
+        <listOfReactants>
+          <speciesReference species="aRaf" metaid="_889484"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="aaRaf" metaid="_889496"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="aSrc" metaid="_889508"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_889520">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> kcat66 </ci>
+                  <ci> aSrc </ci>
+                  <ci> aRaf </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km66 </ci>
+                  <ci> aRaf </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_67" metaid="metaid_0000342" reversible="false">
+        <listOfReactants>
+          <speciesReference species="aaRaf" metaid="_889532"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Raf" metaid="_889544"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="pAkt" metaid="_889556"/>
+          <modifierSpeciesReference species="PKA" metaid="_889568"/>
+          <modifierSpeciesReference species="ppAkt" metaid="_889580"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_889592">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <plus/>
+                <apply>
+                  <times/>
+                  <ci> kcat67 </ci>
+                  <ci> aaRaf </ci>
+                  <apply>
+                    <divide/>
+                    <ci> PKA </ci>
+                    <apply>
+                      <plus/>
+                      <ci> Km67 </ci>
+                      <ci> aaRaf </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> alpha67 </ci>
+                  <ci> aaRaf </ci>
+                  <apply>
+                    <plus/>
+                    <ci> pAkt </ci>
+                    <apply>
+                      <times/>
+                      <ci> beta67 </ci>
+                      <ci> ppAkt </ci>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_68" metaid="metaid_0000343" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Mek" metaid="_889604"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ppMek" metaid="_889616"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="aaRaf" metaid="_889628"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_889640">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> kcat68 </ci>
+                  <ci> aaRaf </ci>
+                  <ci> Mek </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km68 </ci>
+                  <ci> Mek </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_69" metaid="metaid_0000344" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ppMek" metaid="_889652"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Mek" metaid="_889664"/>
+        </listOfProducts>
+        <kineticLaw metaid="_889676">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> V69 </ci>
+                  <ci> ppMek </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km69 </ci>
+                  <ci> ppMek </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_70" metaid="metaid_0000345" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Erk" metaid="_889688"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pErk" metaid="_889700"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="ppMek" metaid="_889712"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_889724">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> kcat70 </ci>
+                  <ci> Erk </ci>
+                  <ci> ppMek </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km70 </ci>
+                  <ci> Erk </ci>
+                  <apply>
+                    <times/>
+                    <ci> pErk </ci>
+                    <apply>
+                      <divide/>
+                      <ci> Km70 </ci>
+                      <ci> Km71 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_71" metaid="metaid_0000346" reversible="false">
+        <listOfReactants>
+          <speciesReference species="pErk" metaid="_889736"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ppErk" metaid="_889749"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Erk" metaid="_889761"/>
+          <modifierSpeciesReference species="ppMek" metaid="_889773"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_889785">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> kcat71 </ci>
+                  <ci> pErk </ci>
+                  <ci> ppMek </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km71 </ci>
+                  <ci> pErk </ci>
+                  <apply>
+                    <times/>
+                    <ci> Erk </ci>
+                    <apply>
+                      <divide/>
+                      <ci> Km71 </ci>
+                      <ci> Km70 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_72" metaid="metaid_0000347" reversible="false">
+        <listOfReactants>
+          <speciesReference species="ppErk" metaid="_889797"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pErk" metaid="_889809"/>
+        </listOfProducts>
+        <kineticLaw metaid="_889821">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> V72 </ci>
+                  <ci> ppErk </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km72 </ci>
+                  <ci> ppErk </ci>
+                  <apply>
+                    <times/>
+                    <ci> pErk </ci>
+                    <apply>
+                      <divide/>
+                      <ci> Km72 </ci>
+                      <ci> Km73 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_73" metaid="metaid_0000348" reversible="false">
+        <listOfReactants>
+          <speciesReference species="pErk" metaid="_889833"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Erk" metaid="_889845"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="ppErk" metaid="_889857"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_889868">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> V73 </ci>
+                  <ci> pErk </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km73 </ci>
+                  <ci> pErk </ci>
+                  <apply>
+                    <times/>
+                    <ci> ppErk </ci>
+                    <apply>
+                      <divide/>
+                      <ci> Km73 </ci>
+                      <ci> Km72 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_74" metaid="metaid_0000349">
+        <listOfReactants>
+          <speciesReference species="PIP3" metaid="_889880"/>
+          <speciesReference species="PDK1" metaid="_889892"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="mPDK1" metaid="_889904"/>
+        </listOfProducts>
+        <kineticLaw metaid="_889916">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k74 </ci>
+                  <ci> PDK1 </ci>
+                  <ci> PIP3 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_74 </ci>
+                  <ci> mPDK1 </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_75" metaid="metaid_0000350" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Akt" metaid="_889928"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pAkt" metaid="_889941"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="mPDK1" metaid="_889953"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_889965">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> kcat75 </ci>
+                  <ci> mPDK1 </ci>
+                  <ci> Akt </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km75 </ci>
+                  <ci> Akt </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_76" metaid="metaid_0000351" reversible="false">
+        <listOfReactants>
+          <speciesReference species="pAkt" metaid="_889977"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Akt" metaid="_889989"/>
+        </listOfProducts>
+        <kineticLaw metaid="_890001">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> V76 </ci>
+                  <ci> pAkt </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km76 </ci>
+                  <ci> pAkt </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_77" metaid="metaid_0000352">
+        <listOfReactants>
+          <speciesReference species="mTOR" metaid="_890013"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="amTOR" metaid="_890025"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="pAkt" metaid="_890037"/>
+          <modifierSpeciesReference species="ppAkt" metaid="_890049"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_890061">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> kcat77 </ci>
+                  <ci> mTOR </ci>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <plus/>
+                      <apply>
+                        <times/>
+                        <ci> alpha77 </ci>
+                        <ci> pAkt </ci>
+                      </apply>
+                      <ci> ppAkt </ci>
+                    </apply>
+                    <apply>
+                      <plus/>
+                      <ci> Km77 </ci>
+                      <ci> mTOR </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_77 </ci>
+                  <ci> amTOR </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_78" metaid="metaid_0000353">
+        <listOfReactants>
+          <speciesReference species="pAkt" metaid="_890073"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="ppAkt" metaid="_890085"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="amTOR" metaid="_890097"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_890109">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> kcat78 </ci>
+                  <ci> amTOR </ci>
+                  <apply>
+                    <divide/>
+                    <ci> pAkt </ci>
+                    <apply>
+                      <plus/>
+                      <ci> Km78 </ci>
+                      <ci> pAkt </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_78 </ci>
+                  <ci> ppAkt </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_79" metaid="metaid_0000354">
+        <listOfReactants>
+          <speciesReference species="GS" metaid="_890121"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="iGS" metaid="_890133"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="ppErk" metaid="_890145"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_890157">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> kcat79 </ci>
+                  <ci> ppErk </ci>
+                  <apply>
+                    <divide/>
+                    <ci> GS </ci>
+                    <apply>
+                      <plus/>
+                      <ci> Km79 </ci>
+                      <ci> GS </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_79 </ci>
+                  <ci> iGS </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_80" metaid="metaid_0000355">
+        <listOfReactants>
+          <speciesReference species="mGAB" metaid="_890169"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="imGAB" metaid="_890181"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="ppErk" metaid="_890193"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_890205">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> kcat80 </ci>
+                  <ci> mGAB </ci>
+                  <apply>
+                    <divide/>
+                    <ci> ppErk </ci>
+                    <apply>
+                      <plus/>
+                      <ci> Km80 </ci>
+                      <ci> mGAB </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_80 </ci>
+                  <ci> imGAB </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_81" metaid="metaid_0000356">
+        <listOfReactants>
+          <speciesReference species="mIRS" metaid="_890217"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="imIRS" metaid="_890229"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="amTOR" metaid="_890241"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_890253">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> kcat81 </ci>
+                  <ci> mIRS </ci>
+                  <apply>
+                    <divide/>
+                    <ci> amTOR </ci>
+                    <apply>
+                      <plus/>
+                      <ci> Km81 </ci>
+                      <ci> mIRS </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_81 </ci>
+                  <ci> imIRS </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_82" metaid="metaid_0000357" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Rp" metaid="_890265"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Ri" metaid="_890277"/>
+        </listOfProducts>
+        <kineticLaw metaid="_890289">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> V_82 </ci>
+                  <ci> Rp </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km82 </ci>
+                  <ci> Rp </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_83" metaid="metaid_0000358" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Ri" metaid="_890301"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Rd" metaid="_890313"/>
+        </listOfProducts>
+        <kineticLaw metaid="_890325">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k83 </ci>
+              <ci> Ri </ci>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_84" metaid="metaid_0000359" reversible="false">
+        <listOfReactants>
+          <speciesReference species="IRp" metaid="_890337"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IRi" metaid="_890349"/>
+        </listOfProducts>
+        <kineticLaw metaid="_890361">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> V_84 </ci>
+                  <ci> IRp </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km84 </ci>
+                  <ci> IRp </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_85" metaid="metaid_0000360" reversible="false">
+        <listOfReactants>
+          <speciesReference species="IRi" metaid="_890373"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IRL" metaid="_890385"/>
+        </listOfProducts>
+        <kineticLaw metaid="_890397">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k85 </ci>
+              <ci> IRi </ci>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_88" metaid="metaid_0000363">
+        <listOfReactants>
+          <speciesReference species="mIRSp" metaid="_890409"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IRSp" metaid="_890421"/>
+          <speciesReference species="PIP3" metaid="_890433"/>
+        </listOfProducts>
+        <kineticLaw metaid="_890445">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k_42 </ci>
+                  <ci> mIRSp </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k42 </ci>
+                  <ci> PIP3 </ci>
+                  <ci> IRSp </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_89" metaid="metaid_0000364">
+        <listOfReactants>
+          <speciesReference species="mIRSp_PI3K" metaid="_890457"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PIP3" metaid="_890469"/>
+          <speciesReference species="IRSp_PI3K" metaid="_890481"/>
+        </listOfProducts>
+        <kineticLaw metaid="_890493">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k_42 </ci>
+                  <ci> mIRSp_PI3K </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k42 </ci>
+                  <ci> PIP3 </ci>
+                  <ci> IRSp_PI3K </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_90" metaid="metaid_0000365">
+        <listOfReactants>
+          <speciesReference species="mIRSp_GS" metaid="_890505"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PIP3" metaid="_890517"/>
+          <speciesReference species="IRSp_GS" metaid="_890529"/>
+        </listOfProducts>
+        <kineticLaw metaid="_890541">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k_42 </ci>
+                  <ci> mIRSp_GS </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k42 </ci>
+                  <ci> PIP3 </ci>
+                  <ci> IRSp_GS </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_91" metaid="metaid_0000366">
+        <listOfReactants>
+          <speciesReference species="mIRSp_SHP2" metaid="_890553"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PIP3" metaid="_890565"/>
+          <speciesReference species="IRSp_SHP2" metaid="_890577"/>
+        </listOfProducts>
+        <kineticLaw metaid="_890589">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k_42 </ci>
+                  <ci> mIRSp_SHP2 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k42 </ci>
+                  <ci> PIP3 </ci>
+                  <ci> IRSp_SHP2 </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_92" metaid="metaid_0000367">
+        <listOfReactants>
+          <speciesReference species="mGABp" metaid="_890601"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PIP3" metaid="_890613"/>
+          <speciesReference species="GABp" metaid="_890625"/>
+        </listOfProducts>
+        <kineticLaw metaid="_890637">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k_42 </ci>
+                  <ci> mGABp </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k42 </ci>
+                  <ci> PIP3 </ci>
+                  <ci> GABp </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_93" metaid="metaid_0000368">
+        <listOfReactants>
+          <speciesReference species="mGABp_PI3K" metaid="_890649"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PIP3" metaid="_890661"/>
+          <speciesReference species="GABp_PI3K" metaid="_890673"/>
+        </listOfProducts>
+        <kineticLaw metaid="_890685">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k_42 </ci>
+                  <ci> mGABp_PI3K </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k42 </ci>
+                  <ci> PIP3 </ci>
+                  <ci> GABp_PI3K </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_94" metaid="metaid_0000369">
+        <listOfReactants>
+          <speciesReference species="mGABp_GS" metaid="_890697"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PIP3" metaid="_890709"/>
+          <speciesReference species="GABp_GS" metaid="_890722"/>
+        </listOfProducts>
+        <kineticLaw metaid="_890734">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k_42 </ci>
+                  <ci> mGABp_GS </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k42 </ci>
+                  <ci> PIP3 </ci>
+                  <ci> GABp_GS </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_95" metaid="metaid_0000370">
+        <listOfReactants>
+          <speciesReference species="mGABp_RasGAP" metaid="_890746"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PIP3" metaid="_890758"/>
+          <speciesReference species="GABp_RasGAP" metaid="_890770"/>
+        </listOfProducts>
+        <kineticLaw metaid="_890782">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k_42 </ci>
+                  <ci> mGABp_RasGAP </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k49 </ci>
+                  <ci> PIP3 </ci>
+                  <ci> GABp_RasGAP </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_96" metaid="metaid_0000371">
+        <listOfReactants>
+          <speciesReference species="mGABp_SHP2" metaid="_890794"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PIP3" metaid="_890807"/>
+          <speciesReference species="GABp_SHP2" metaid="_890818"/>
+        </listOfProducts>
+        <kineticLaw metaid="_890830">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k_42 </ci>
+                  <ci> mGABp_SHP2 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k42 </ci>
+                  <ci> PIP3 </ci>
+                  <ci> GABp_SHP2 </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_97" metaid="metaid_0000372">
+        <listOfReactants>
+          <speciesReference species="mGABp_pSHP2" metaid="_890842"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PIP3" metaid="_890854"/>
+          <speciesReference species="GABp_pSHP2" metaid="_890866"/>
+        </listOfProducts>
+        <kineticLaw metaid="_890878">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k_42 </ci>
+                  <ci> mGABp_pSHP2 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k42 </ci>
+                  <ci> PIP3 </ci>
+                  <ci> GABp_pSHP2 </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_98" metaid="metaid_0000373">
+        <listOfReactants>
+          <speciesReference species="mGABp_pSHP2_GS" metaid="_890890"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PIP3" metaid="_890902"/>
+          <speciesReference species="GABp_pSHP2_GS" metaid="_890914"/>
+        </listOfProducts>
+        <kineticLaw metaid="_890926">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k_42 </ci>
+                  <ci> mGABp_pSHP2_GS </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k42 </ci>
+                  <ci> PIP3 </ci>
+                  <ci> GABp_pSHP2_GS </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_99" metaid="metaid_0000374" reversible="false">
+        <listOfReactants>
+          <speciesReference species="IRSp_PI3K" metaid="_890938"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PI3K" metaid="_890950"/>
+          <speciesReference species="IRS" metaid="_890962"/>
+        </listOfProducts>
+        <kineticLaw metaid="_890974">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> V31 </ci>
+                  <ci> IRSp_PI3K </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km31 </ci>
+                  <ci> IRSp_PI3K </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_100" metaid="metaid_0000375" reversible="false">
+        <listOfReactants>
+          <speciesReference species="IRSp_GS" metaid="_890986"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="GS" metaid="_890998"/>
+          <speciesReference species="IRS" metaid="_891010"/>
+        </listOfProducts>
+        <kineticLaw metaid="_891022">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> V31 </ci>
+                  <ci> IRSp_GS </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km31 </ci>
+                  <ci> IRSp_GS </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_101" metaid="metaid_0000376" reversible="false">
+        <listOfReactants>
+          <speciesReference species="IRSp_SHP2" metaid="_891034"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IRS" metaid="_891046"/>
+          <speciesReference species="SHP2" metaid="_891058"/>
+        </listOfProducts>
+        <kineticLaw metaid="_891070">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k48 </ci>
+              <ci> IRSp_SHP2 </ci>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_102" metaid="metaid_0000377" reversible="false">
+        <listOfReactants>
+          <speciesReference species="mGABp_pSHP2" metaid="_891082"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="SHP2" metaid="_891094"/>
+          <speciesReference species="mGAB" metaid="_891106"/>
+        </listOfProducts>
+        <kineticLaw metaid="_891118">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k56 </ci>
+              <ci> mGABp_pSHP2 </ci>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_103" metaid="metaid_0000378" reversible="false">
+        <listOfReactants>
+          <speciesReference species="mGABp_pSHP2_GS" metaid="_891130"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="GS" metaid="_891142"/>
+          <speciesReference species="SHP2" metaid="_891154"/>
+          <speciesReference species="mGAB" metaid="_891166"/>
+        </listOfProducts>
+        <kineticLaw metaid="_891178">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k56 </ci>
+              <ci> mGABp_pSHP2_GS </ci>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_104" metaid="metaid_0000379" reversible="false">
+        <listOfReactants>
+          <speciesReference species="GABp" metaid="_891190"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="GAB" metaid="_891202"/>
+        </listOfProducts>
+        <kineticLaw metaid="_891214">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> V51 </ci>
+                  <ci> GABp </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km51 </ci>
+                  <ci> GABp </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_105" metaid="metaid_0000380" reversible="false">
+        <listOfReactants>
+          <speciesReference species="GABp_PI3K" metaid="_891226"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PI3K" metaid="_891238"/>
+          <speciesReference species="GAB" metaid="_891250"/>
+        </listOfProducts>
+        <kineticLaw metaid="_891262">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> V51 </ci>
+                  <ci> GABp_PI3K </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km51 </ci>
+                  <ci> GABp_PI3K </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_106" metaid="metaid_0000381" reversible="false">
+        <listOfReactants>
+          <speciesReference species="GABp_GS" metaid="_891274"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="GS" metaid="_891286"/>
+          <speciesReference species="GAB" metaid="_891298"/>
+        </listOfProducts>
+        <kineticLaw metaid="_891310">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> V51 </ci>
+                  <ci> GABp_GS </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km51 </ci>
+                  <ci> GABp_GS </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_107" metaid="metaid_0000382" reversible="false">
+        <listOfReactants>
+          <speciesReference species="GABp_RasGAP" metaid="_891322"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="RasGAP" metaid="_891334"/>
+          <speciesReference species="GAB" metaid="_891346"/>
+        </listOfProducts>
+        <kineticLaw metaid="_891358">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> V51 </ci>
+                  <ci> GABp_RasGAP </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km51 </ci>
+                  <ci> GABp_RasGAP </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_108" metaid="metaid_0000383" reversible="false">
+        <listOfReactants>
+          <speciesReference species="GABp_SHP2" metaid="_891370"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="SHP2" metaid="_891382"/>
+          <speciesReference species="GAB" metaid="_891394"/>
+        </listOfProducts>
+        <kineticLaw metaid="_891406">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k56 </ci>
+              <ci> GABp_SHP2 </ci>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_109" metaid="metaid_0000384" reversible="false">
+        <listOfReactants>
+          <speciesReference species="GABp_pSHP2" metaid="_891418"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="SHP2" metaid="_891430"/>
+          <speciesReference species="GAB" metaid="_891442"/>
+        </listOfProducts>
+        <kineticLaw metaid="_891454">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k56 </ci>
+              <ci> GABp_pSHP2 </ci>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_110" metaid="metaid_0000385" reversible="false">
+        <listOfReactants>
+          <speciesReference species="GABp_pSHP2_GS" metaid="_891466"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="GS" metaid="_891478"/>
+          <speciesReference species="SHP2" metaid="_891490"/>
+          <speciesReference species="GAB" metaid="_891502"/>
+        </listOfProducts>
+        <kineticLaw metaid="_891514">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k56 </ci>
+              <ci> GABp_pSHP2_GS </ci>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_111" metaid="metaid_0000386" reversible="false">
+        <listOfReactants>
+          <speciesReference species="mGABp_RasGAP" metaid="_891526"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="RasGAP" metaid="_891538"/>
+          <speciesReference species="mGAB" metaid="_891551"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="mIRSp_SHP2" metaid="_891563"/>
+          <modifierSpeciesReference species="mGABp_SHP2" metaid="_891575"/>
+          <modifierSpeciesReference species="mGABp_pSHP2" metaid="_891587"/>
+          <modifierSpeciesReference species="mGABp_pSHP2_GS" metaid="_891599"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_891611">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k111 </ci>
+              <apply>
+                <plus/>
+                <ci> mGABp_SHP2 </ci>
+                <ci> mGABp_pSHP2 </ci>
+                <ci> mGABp_pSHP2_GS </ci>
+                <ci> mIRSp_SHP2 </ci>
+              </apply>
+              <ci> mGABp_RasGAP </ci>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_112" metaid="metaid_0000387" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Rp_RasGAP" metaid="_891623"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Rp" metaid="_891635"/>
+          <speciesReference species="RasGAP" metaid="_891647"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="mGABp_SHP2" metaid="_891659"/>
+          <modifierSpeciesReference species="mGABp_pSHP2" metaid="_891671"/>
+          <modifierSpeciesReference species="mGABp_pSHP2_GS" metaid="_891683"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_891695">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k111 </ci>
+              <apply>
+                <plus/>
+                <ci> mGABp_SHP2 </ci>
+                <ci> mGABp_pSHP2 </ci>
+                <ci> mGABp_pSHP2_GS </ci>
+              </apply>
+              <ci> Rp_RasGAP </ci>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_113" metaid="metaid_0000388" reversible="false">
+        <listOfReactants>
+          <speciesReference species="IRp_RasGAP" metaid="_891707"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="RasGAP" metaid="_891719"/>
+          <speciesReference species="IRp" metaid="_891731"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="mGABp_SHP2" metaid="_891743"/>
+          <modifierSpeciesReference species="mGABp_pSHP2" metaid="_891755"/>
+          <modifierSpeciesReference species="mGABp_pSHP2_GS" metaid="_891767"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_891779">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k111 </ci>
+              <apply>
+                <plus/>
+                <ci> mGABp_SHP2 </ci>
+                <ci> mGABp_pSHP2 </ci>
+                <ci> mGABp_pSHP2_GS </ci>
+              </apply>
+              <ci> IRp_RasGAP </ci>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_114" metaid="metaid_0000389" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Rp_RasGAP" metaid="_891791"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Rp" metaid="_891803"/>
+          <speciesReference species="RasGAP" metaid="_891815"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="mIRSp_SHP2" metaid="_891827"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_891839">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k111 </ci>
+              <ci> mIRSp_SHP2 </ci>
+              <ci> Rp_RasGAP </ci>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_115" metaid="metaid_0000390" reversible="false">
+        <listOfReactants>
+          <speciesReference species="IRp_RasGAP" metaid="_891851"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="RasGAP" metaid="_891863"/>
+          <speciesReference species="IRp" metaid="_891875"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="mIRSp_SHP2" metaid="_891887"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_891899">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k111 </ci>
+              <ci> mIRSp_SHP2 </ci>
+              <ci> IRp_RasGAP </ci>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_117" metaid="metaid_0000391">
+        <listOfReactants>
+          <speciesReference species="mGABp" metaid="_891911"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="imGABp" metaid="_891924"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="ppErk" metaid="_891936"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_891948">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <cn> 2 </cn>
+                    <ci> kcat80 </ci>
+                    <ci> mGABp </ci>
+                    <ci> ppErk </ci>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <ci> Km80 </ci>
+                    <ci> mGABp </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_80 </ci>
+                  <ci> imGABp </ci>
+                </apply>
+              </apply>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_118" metaid="metaid_0000392" reversible="false">
+        <listOfReactants>
+          <speciesReference species="imGABp" metaid="_891960"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="imGAB" metaid="_891972"/>
+        </listOfProducts>
+        <kineticLaw metaid="_891985">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k118 </ci>
+              <ci> imGABp </ci>
+              <ci> cell </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

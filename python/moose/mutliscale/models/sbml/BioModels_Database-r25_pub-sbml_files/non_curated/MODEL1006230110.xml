@@ -1,0 +1,381 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="_697800" version="4">
+  <model id="Phillips2008_AscendingArousalSystem_Baseline" name="Phillips2008_AscendingArousalSystem_Baseline" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>Sleep deprivation in a quantitative physiologically based model of the ascending
+arousal system.</strong>
+                <br/>
+          Phillips AJ, Robinson PA.      <em>J Theor Biol</em>
+          2008 Dec 21;255(4):413-23      <a href="http://www.ncbi.nlm.nih.gov/pubmed/18805427">18805427</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          A physiologically based quantitative model of the human ascending arousal system
+is used to study sleep deprivation after being calibrated on a small set of
+experimentally based criteria. The model includes the sleep-wake switch of
+mutual inhibition between nuclei which use monoaminergic neuromodulators, and
+the ventrolateral preoptic area. The system is driven by the circadian rhythm
+and sleep homeostasis. We use a small number of experimentally derived criteria
+to calibrate the model for sleep deprivation, then investigate model predictions
+for other experiments, demonstrating the scope of application. Calibration gives
+an improved parameter set, in which the form of the homeostatic drive is better
+constrained, and its weighting relative to the circadian drive is increased.
+Within the newly constrained parameter ranges, the model predicts repayment of
+sleep debt consistent with experiment in both quantity and distribution,
+asymptoting to a maximum repayment for very long deprivations. Recovery is found
+to depend on circadian phase, and the model predicts that it is most efficient
+to recover during normal sleeping phases of the circadian cycle, in terms of the
+amount of recovery sleep required. The form of the homeostatic drive suggests
+that periods of wake during recovery from sleep deprivation are phases of
+relative recovery, in the sense that the homeostatic drive continues to converge
+toward baseline levels. This undermines the concept of sleep debt, and is in
+agreement with experimentally restricted recovery protocols. Finally, we compare
+our model to the two-process model, and demonstrate the power of physiologically
+based modeling by correctly predicting sleep latency times following deprivation
+from experimental data.      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://models.cellml.org/exposure/f63101a18254a2e75986ecf14bb8e2c6">        <strong>Phillips AJ, Robinson PA. (2008) - version=1.0</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>Catherine Lloyd</strong>
+                <br/>
+          c.lloyd@auckland.ac.nz      <br/>
+          The University of Auckland      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:54:18Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:54:18Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:54:18Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:54:18Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1006230110"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/18805427"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="mV" name="mV" metaid="_697812">
+        <listOfUnits>
+          <unit scale="-3" metaid="_697824" kind="volt"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mV_second" name="mV_second" metaid="_697836">
+        <listOfUnits>
+          <unit scale="-3" metaid="_697848" kind="volt"/>
+          <unit metaid="_697860" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mV_per_second" name="mV_per_second" metaid="_697872">
+        <listOfUnits>
+          <unit scale="-3" metaid="_697884" kind="volt"/>
+          <unit exponent="-1" metaid="_697896" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mV_per_nM" name="mV_per_nM" metaid="_697909">
+        <listOfUnits>
+          <unit scale="-3" metaid="_697921" kind="volt"/>
+          <unit scale="-9" exponent="-1" metaid="_697933" kind="mole"/>
+          <unit metaid="_697945" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_second" name="per_second" metaid="_697957">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_697969" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="hour" name="hour" metaid="_697981">
+        <listOfUnits>
+          <unit metaid="_697993" multiplier="3600" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_hour" name="per_hour" metaid="_698005">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_698018" multiplier="3600" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="nM" name="nM" metaid="_698030">
+        <listOfUnits>
+          <unit scale="-9" metaid="_698042" kind="mole"/>
+          <unit exponent="-1" metaid="_698055" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="nM_second" name="nM_second" metaid="_698067">
+        <listOfUnits>
+          <unit scale="-9" metaid="_698079" kind="mole"/>
+          <unit exponent="-1" metaid="_698091" kind="litre"/>
+          <unit metaid="_698103" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time" name="time" metaid="_698115">
+        <listOfUnits>
+          <unit metaid="_698127" multiplier="3600" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="COMpartment" metaid="_457531" units="litre" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="Qv" constant="false" name="Qv" metaid="_457568"/>
+      <parameter id="Vv" constant="false" name="Vv" metaid="_457569" value="-6"/>
+      <parameter id="tau_v" name="tau_v" metaid="_457570" value="10"/>
+      <parameter id="v_vm" name="v_vm" metaid="_457571" value="-1.9"/>
+      <parameter id="Qm" constant="false" name="Qm" metaid="_457573"/>
+      <parameter id="Vm" constant="false" name="Vm" metaid="_457574" value="0"/>
+      <parameter id="tau_m" name="tau_m" metaid="_457575" value="10"/>
+      <parameter id="v_mv" name="v_mv" metaid="_457576" value="-1.9"/>
+      <parameter id="A" name="A" metaid="_457578" value="1"/>
+      <parameter id="H" constant="false" name="H" metaid="_457579" value="15"/>
+      <parameter id="chi" name="chi" metaid="_457580" value="11"/>
+      <parameter id="mu" name="mu" metaid="_457581" value="3.6"/>
+      <parameter id="D" constant="false" name="D" metaid="_457583"/>
+      <parameter id="C" constant="false" name="C" metaid="_457584"/>
+      <parameter id="c0" name="c0" metaid="_457585" value="1"/>
+      <parameter id="omega" constant="false" name="omega" metaid="_457586"/>
+      <parameter id="alpha" name="alpha" metaid="_457587" value="16"/>
+      <parameter id="v_vc" name="v_vc" metaid="_457589" value="-3.2"/>
+      <parameter id="v_vh" name="v_vh" metaid="_457590" value="0.19"/>
+      <parameter id="Qmax" name="Qmax" metaid="_457591" value="100"/>
+      <parameter id="theta" name="theta" metaid="_457592" value="10"/>
+      <parameter id="sigma" name="sigma" metaid="_457594" value="3"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_457535" variable="Vv">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <apply>
+                <plus/>
+                <apply>
+                  <times/>
+                  <ci> v_vm </ci>
+                  <ci> Qm </ci>
+                </apply>
+                <ci> D </ci>
+              </apply>
+              <ci> Vv </ci>
+            </apply>
+            <apply>
+              <divide/>
+              <ci> tau_v </ci>
+              <cn> 3600 </cn>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_457536" variable="Vm">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <apply>
+                <plus/>
+                <ci> A </ci>
+                <apply>
+                  <times/>
+                  <ci> v_mv </ci>
+                  <ci> Qv </ci>
+                </apply>
+              </apply>
+              <ci> Vm </ci>
+            </apply>
+            <apply>
+              <divide/>
+              <ci> tau_m </ci>
+              <cn> 3600 </cn>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_457556" variable="H">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> mu </ci>
+                <ci> Qm </ci>
+              </apply>
+              <ci> H </ci>
+            </apply>
+            <ci> chi </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="_457558" variable="Qv">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <ci> Qmax </ci>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <exp/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <minus/>
+                      <ci> Vv </ci>
+                      <ci> theta </ci>
+                    </apply>
+                  </apply>
+                  <ci> sigma </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_457559" variable="Qm">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <ci> Qmax </ci>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <exp/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <minus/>
+                      <ci> Vm </ci>
+                      <ci> theta </ci>
+                    </apply>
+                  </apply>
+                  <ci> sigma </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_457560" variable="D">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <times/>
+              <ci> v_vc </ci>
+              <ci> C </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> v_vh </ci>
+              <ci> H </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_457562" variable="C">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> c0 </ci>
+            <apply>
+              <cos/>
+              <apply>
+                <times/>
+                <ci> omega </ci>
+                <apply>
+                  <minus/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <ci> alpha </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_457564" variable="omega">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <times/>
+              <cn> 2 </cn>
+              <pi/>
+            </apply>
+            <cn> 24 </cn>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+  </model>
+</sbml>
