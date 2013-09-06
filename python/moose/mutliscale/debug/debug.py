@@ -1,5 +1,16 @@
+#!/usr/bin/env python
+
+# Filename       : debug.py
+# Created on     : Fri 06 Sep 2013 03:25:01 PM IST
+# Author         : Dilawar Singh
+# Email          : dilawars@ncbs.res.in
+#
+# Description    :
+# 
 # This file defines function which can be used to print in colors. Very useful
 # in debugging and printing on console.
+#
+# Logs           :
 
 HEADER = '\033[95m'
 OKBLUE = '\033[94m'
