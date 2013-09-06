@@ -12,7 +12,8 @@
 
 import sys
 import debug.debug as debug
-from IPython import embed
+import xml.get_elements as xml 
+
 try:
     from lxml import etree
     debug.printDebug("DEBUG", "running with lxml.etree")
@@ -57,7 +58,8 @@ def buildMooseObjects(dictOfXMLElements) :
     if nmlXml :
       nmlModel = moose.Neutral('/nmlModel')
       # get the morphology of neuron 
-      namespace = 'http://www.neuroml.org/schema/neuroml2'
-      neuromlPathFind = etree.ETXPath("//{"+namespace+"}neuroml")
-      print neuromlPathFind(nmlXml)
-
+      #neuromlPathFind = etree.ETXPath("//{"+namespace+"}neuroml")
+      #print neuromlPathFind(nmlXml)
+      cellElem = xml.getElementIgnoreNM(nmlXml, "cell")
+      print cellElem
+      print xml.getElementNM(nmlXml, ["neuroml"])
