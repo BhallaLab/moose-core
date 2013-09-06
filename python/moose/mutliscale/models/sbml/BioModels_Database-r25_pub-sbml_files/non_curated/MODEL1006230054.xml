@@ -1,0 +1,410 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="_447581" version="4">
+  <model id="Lockwood2006_PKPD_AlzheimersDisease" name="Lockwood2006_PKPD_AlzheimersDisease" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>Application of clinical trial simulation to compare proof-of-concept study
+designs for drugs with a slow onset of effect; an example in Alzheimer's
+disease.</strong>
+                <br/>
+          Lockwood P, Ewy W, Hermann D, Holford N.      <em>Pharm Res</em>
+          2006 Sep;23(9):2050-9      <a href="http://www.ncbi.nlm.nih.gov/pubmed/16906456">16906456</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          OBJECTIVE: Clinical trial simulation (CTS) was used to select a robust design to
+test the hypothesis that a new treatment was effective for Alzheimer's disease
+(AD). Typically, a parallel group, placebo controlled, 12-week trial in 200-400
+AD patients would be used to establish drug effect relative to placebo (i.e.,
+Ho: Drug Effect = 0). We evaluated if a crossover design would allow smaller and
+shorter duration trials. MATERIALS AND METHODS: A family of plausible drug and
+disease models describing the time course of the AD assessment scale (ADAS-Cog)
+was developed based on Phase I data and literature reports of other treatments
+for AD. The models included pharmacokinetic, pharmacodynamic, disease
+progression, and placebo components. Eight alternative trial designs were
+explored via simulation. One hundred replicates of each combination of drug and
+disease model and trial design were simulated. A 'positive trial' reflecting
+drug activity was declared considering both a dose trend test (p &lt; 0.05) and
+pair-wise comparisons to placebo (p &lt; 0.025). RESULTS: A 4 x 4 Latin Square
+design was predicted to have at least 80% power to detect activity across a
+range of drug and disease models. The trial design was subsequently implemented
+and the trial was completed. Based on the results of the actual trial, a
+conclusive decision about further development was taken. The crossover design
+provided enhanced power over a parallel group design due to the lower residual
+variability. CONCLUSION: CTS aided the decision to use a more efficient proof of
+concept trial design, leading to savings of up to US 4 M dollars in direct costs
+and a firm decision 8-12 months earlier than a 12-week parallel group trial.      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://models.cellml.org/exposure/60366c003dba765e53609eaca35027fd">        <strong>Lockwood P, Ewy W, Hermann D, Holford N. (2006) - version=1.0</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>James Lawson</strong>
+                <br/>
+          j.lawson@auckland.ac.nz      <br/>
+          The University of Auckland      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lawson</vCard:Family>
+                  <vCard:Given>James</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>j.lawson@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>Auckland Bioengineering Institute</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lawson</vCard:Family>
+                  <vCard:Given>James</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>j.lawson@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>Auckland Bioengineering Institute</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lawson</vCard:Family>
+                  <vCard:Given>James</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>j.lawson@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>Auckland Bioengineering Institute</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:17:54Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:17:54Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:17:54Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:17:54Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1006230054"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/16906456"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="mg" name="mg" metaid="_447593">
+        <listOfUnits>
+          <unit scale="-3" metaid="_447605" kind="gram"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="units_ml_per_ng" name="units_ml_per_ng" metaid="_447617">
+        <listOfUnits>
+          <unit scale="-3" metaid="_447629" kind="litre"/>
+          <unit scale="-9" exponent="-1" metaid="_447641" kind="gram"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="ng_per_ml" name="ng_per_ml" metaid="_447653">
+        <listOfUnits>
+          <unit scale="-9" metaid="_447665" kind="gram"/>
+          <unit scale="-3" exponent="-1" metaid="_447677" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mg_per_litre" name="mg_per_litre" metaid="_447689">
+        <listOfUnits>
+          <unit scale="-3" metaid="_447701" kind="gram"/>
+          <unit exponent="-1" metaid="_447713" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="litre_per_day" name="litre_per_day" metaid="_447725">
+        <listOfUnits>
+          <unit metaid="_447737" kind="litre"/>
+          <unit exponent="-1" metaid="_447749" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="day" name="day" metaid="_447761">
+        <listOfUnits>
+          <unit metaid="_447773" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_day" name="per_day" metaid="_447785">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_447797" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="units_per_day" name="units_per_day" metaid="_447809">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_447821" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="year" name="year" metaid="_447833">
+        <listOfUnits>
+          <unit metaid="_447845" multiplier="31536000" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_year" name="per_year" metaid="_447858">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_447870" multiplier="31536000" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time" name="time" metaid="_447882">
+        <listOfUnits>
+          <unit metaid="_447894" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="COMpartment" metaid="_273157" units="litre" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="time_environment" name="time" metaid="_273187" units="day"/>
+      <parameter id="S" constant="false" name="S" metaid="_273188"/>
+      <parameter id="S0" name="S0" metaid="_273191" value="30"/>
+      <parameter id="alpha" name="alpha" metaid="_273194" value="0.0164" units="units_per_day"/>
+      <parameter id="epsilon" name="epsilon" metaid="_273197" value="0"/>
+      <parameter id="ADAS_Cog_p" constant="false" name="ADAS_Cog_p" metaid="_273200"/>
+      <parameter id="beta_P" name="beta_P" metaid="_273202" value="-3"/>
+      <parameter id="Keq_p" constant="false" name="Keq_p" metaid="_273205" units="per_day"/>
+      <parameter id="Kel_p" constant="false" name="Kel_p" metaid="_273208" units="per_day"/>
+      <parameter id="t_half_el_p" name="t_half_el_p" metaid="_273211" value="7" units="day"/>
+      <parameter id="t_half_eq_p" name="t_half_eq_p" metaid="_273214" value="6" units="day"/>
+      <parameter id="CL" constant="false" name="CL" metaid="_273217" units="litre_per_day"/>
+      <parameter id="smk" name="smk" metaid="_273219" value="1" units="dimensionless"/>
+      <parameter id="age" name="age" metaid="_273222" value="40" units="year"/>
+      <parameter id="Sv" constant="false" name="Sv" metaid="_273225" units="dimensionless"/>
+      <parameter id="PD_CeA" constant="false" name="PD_CeA" metaid="_273227"/>
+      <parameter id="beta_a" name="beta_a" metaid="_273230" value="-0.047" units="units_ml_per_ng"/>
+      <parameter id="CeA" name="CeA" metaid="_273233" value="25" units="ng_per_ml"/>
+      <parameter id="CC" constant="false" name="CC" metaid="_273235" value="0" units="mg_per_litre"/>
+      <parameter id="PC" constant="false" name="PC" metaid="_273238" value="0" units="mg_per_litre"/>
+      <parameter id="Vc" name="Vc" metaid="_273241" value="172" units="litre"/>
+      <parameter id="Vp" name="Vp" metaid="_273243" value="222" units="litre"/>
+      <parameter id="A_in" constant="false" name="A_in" metaid="_273246" value="25" units="mg"/>
+      <parameter id="k_ab" name="k_ab" metaid="_273249" value="115.44" units="per_day"/>
+      <parameter id="CL_ic" name="CL_ic" metaid="_273252" value="763.2" units="litre_per_day"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_273161" variable="CC">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k_ab </ci>
+                <ci> A_in </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <apply>
+                  <times/>
+                  <ci> CL </ci>
+                  <ci> CC </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> CL_ic </ci>
+                  <apply>
+                    <minus/>
+                    <ci> CC </ci>
+                    <ci> PC </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+            <ci> Vc </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_273162" variable="PC">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <times/>
+              <ci> CL_ic </ci>
+              <apply>
+                <minus/>
+                <ci> CC </ci>
+                <ci> PC </ci>
+              </apply>
+            </apply>
+            <ci> Vp </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_273164" variable="A_in">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <apply>
+              <minus/>
+              <cn> 115.44 </cn>
+            </apply>
+            <ci> A_in </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="_273167" variable="ADAS_Cog_p">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> beta_P </ci>
+                <ci> Keq_p </ci>
+              </apply>
+              <apply>
+                <minus/>
+                <ci> Keq_p </ci>
+                <ci> Kel_p </ci>
+              </apply>
+            </apply>
+            <apply>
+              <minus/>
+              <apply>
+                <exp/>
+                <apply>
+                  <times/>
+                  <apply>
+                    <minus/>
+                    <ci> Kel_p </ci>
+                  </apply>
+                  <ci> time_environment </ci>
+                </apply>
+              </apply>
+              <apply>
+                <exp/>
+                <apply>
+                  <times/>
+                  <apply>
+                    <minus/>
+                    <ci> Keq_p </ci>
+                  </apply>
+                  <ci> time_environment </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_273170" variable="Keq_p">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <ln/>
+              <cn> 2 </cn>
+            </apply>
+            <ci> t_half_eq_p </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_273173" variable="Kel_p">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <ln/>
+              <cn> 2 </cn>
+            </apply>
+            <ci> t_half_el_p </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_273176" variable="CL">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <cn> 2268 </cn>
+            <apply>
+              <exp/>
+              <apply>
+                <times/>
+                <apply>
+                  <minus/>
+                  <cn> 0.0135 </cn>
+                </apply>
+                <apply>
+                  <minus/>
+                  <ci> age </ci>
+                  <cn> 40 </cn>
+                </apply>
+              </apply>
+            </apply>
+            <ci> smk </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_273179" variable="Sv">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <exp/>
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <cn> 0.00145 </cn>
+              </apply>
+              <ci> time_environment </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_273182" variable="PD_CeA">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> beta_a </ci>
+            <ci> CeA </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_273185" variable="S">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> S0 </ci>
+            <apply>
+              <times/>
+              <ci> alpha </ci>
+              <ci> time_environment </ci>
+            </apply>
+            <ci> ADAS_Cog_p </ci>
+            <ci> PD_CeA </ci>
+            <ci> epsilon </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+  </model>
+</sbml>

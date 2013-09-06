@@ -1,0 +1,637 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2" level="2" metaid="_100994" version="1">
+  <model name="DiVentura2011_Min_System_E_coli" metaid="_070435">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This is an SBML version with MesoRD annotations of the model described in:      <br/>
+                <b>Self-organized partitioning of dynamically localized proteins in bacterial cell division.</b>
+                <br/>
+          Barbara Di Ventura and Victor Sourjik.      <em>Molecular Systems Biology</em>
+          7:457 Jan 2011 doi:      <a href="http://dx.doi.org/10.1038/msb.2010.111">10.1038/msb.2010.111</a>
+                </p>
+            <p>Abstract:      <br/>
+          How cells manage to get equal distribution of their structures and molecules at cell division is a crucial issue in biology. In principle, a feedback mechanism could always ensure equality by measuring and correcting the distribution in the progeny. However, an elegant alternative could be a mechanism relying on self-organization, with the interplay between system properties and cell geometry leading to the emergence of equal partitioning. The problem is exemplified by the bacterial Min system that defines the division site by oscillating from pole to pole. Unequal partitioning of Min proteins at division could negatively impact system performance and cell growth because of loss of Min oscillations and imprecise mid-cell determination. In this study, we combine live cell and computational analyses to show that known properties of the Min system together with the gradual reduction of protein exchange through the constricting septum are sufficient to explain the observed highly precise spontaneous protein partitioning. Our findings reveal a novel and effective mechanism of protein partitioning in dividing cells and emphasize the importance of self-organization in basic cellular processes.      </p>
+            <p>This version of the model was downloaded from the MSB webpage (      <a href="http://www.nature.com/msb/journal/v7/n1/datafiles/msb2010111-df5a.xml">http://www.nature.com/msb/journal/v7/n1/datafiles/msb2010111-df5a.xml</a>
+          ). It contains information necessary for simulation encoded in annotations specific to the tool MesoRD (      <a href="http://mesord.sourceforge.net/">http://mesord.sourceforge.net/</a>
+          ).      </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#_070435">
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1101180000"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/21206490"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="um" metaid="_101006">
+        <listOfUnits>
+          <unit scale="-6" metaid="_101018" kind="metre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="pMps" metaid="_101030">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_101043" kind="mole"/>
+          <unit metaid="_101055" kind="litre"/>
+          <unit exponent="-1" metaid="_101068" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="cm2ps" metaid="_101081">
+        <listOfUnits>
+          <unit scale="-2" exponent="2" metaid="_101093" kind="metre"/>
+          <unit exponent="-1" metaid="_101106" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="ps" metaid="_101118">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_101130" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="umps" metaid="_101142">
+        <listOfUnits>
+          <unit scale="-6" metaid="_101155" kind="metre"/>
+          <unit exponent="-1" metaid="_101167" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="septum_left" metaid="_070437" units="litre">
+        <annotation xmlns:MesoRD="http://www.icm.uu.se">
+<MesoRD:difference>
+        <MesoRD:translation MesoRD:units="um" MesoRD:x="0.0" MesoRD:y="-0.015" MesoRD:z="0">
+          <MesoRD:cylinder MesoRD:height="0.03" MesoRD:radius="0.47" MesoRD:units="um"/>
+        </MesoRD:translation>
+        <MesoRD:translation MesoRD:units="um" MesoRD:x="0.0" MesoRD:y="-0.015" MesoRD:z="0">
+          <MesoRD:cylinder MesoRD:height="0.03" MesoRD:radius="0.30" MesoRD:units="um"/>
+        </MesoRD:translation>
+      </MesoRD:difference>
+                                                    </annotation>
+      </compartment>
+      <compartment id="septum_right" metaid="_070492" units="litre">
+        <annotation xmlns:MesoRD="http://www.icm.uu.se">
+<MesoRD:difference>
+        <MesoRD:translation MesoRD:units="um" MesoRD:x="0.0" MesoRD:y="0.015" MesoRD:z="0">
+          <MesoRD:cylinder MesoRD:height="0.03" MesoRD:radius="0.47" MesoRD:units="um"/>
+        </MesoRD:translation>
+        <MesoRD:translation MesoRD:units="um" MesoRD:x="0.0" MesoRD:y="0.015" MesoRD:z="0">
+          <MesoRD:cylinder MesoRD:height="0.03" MesoRD:radius="0.30" MesoRD:units="um"/>
+        </MesoRD:translation>
+      </MesoRD:difference>
+                                                    </annotation>
+      </compartment>
+      <compartment id="cytosole" metaid="_070513" units="litre">
+        <annotation xmlns:MesoRD="http://www.icm.uu.se">
+<MesoRD:difference>
+        <MesoRD:union>
+          <MesoRD:union>
+            <MesoRD:translation MesoRD:units="um" MesoRD:x="0.0" MesoRD:y="-1.3" MesoRD:z="0">
+              <MesoRD:cylinder MesoRD:height="2" MesoRD:radius="0.5" MesoRD:units="um"/>
+            </MesoRD:translation>
+            <MesoRD:translation MesoRD:units="um" MesoRD:x="0.0" MesoRD:y="-0.3" MesoRD:z="0">
+              <MesoRD:sphere MesoRD:radius="0.5" MesoRD:units="um"/>
+            </MesoRD:translation>
+            <MesoRD:translation MesoRD:units="um" MesoRD:x="0.0" MesoRD:y="-2.3" MesoRD:z="0">
+              <MesoRD:sphere MesoRD:radius="0.5" MesoRD:units="um"/>
+            </MesoRD:translation>
+          </MesoRD:union>
+          <MesoRD:union>
+            <MesoRD:translation MesoRD:units="um" MesoRD:x="0.0" MesoRD:y="1.3" MesoRD:z="0">
+              <MesoRD:cylinder MesoRD:height="2" MesoRD:radius="0.5" MesoRD:units="um"/>
+            </MesoRD:translation>
+            <MesoRD:translation MesoRD:units="um" MesoRD:x="0.0" MesoRD:y="0.3" MesoRD:z="0">
+              <MesoRD:sphere MesoRD:radius="0.5" MesoRD:units="um"/>
+            </MesoRD:translation>
+            <MesoRD:translation MesoRD:units="um" MesoRD:x="0.0" MesoRD:y="2.3" MesoRD:z="0">
+              <MesoRD:sphere MesoRD:radius="0.5" MesoRD:units="um"/>
+            </MesoRD:translation>
+          </MesoRD:union>
+        </MesoRD:union>
+        <MesoRD:union>
+          <MesoRD:compartment MesoRD:id="septum_left"/>
+          <MesoRD:compartment MesoRD:id="septum_right"/>
+        </MesoRD:union>
+      </MesoRD:difference>
+                                                    </annotation>
+      </compartment>
+      <compartment id="membrane" metaid="_070534" units="litre">
+        <annotation xmlns:MesoRD="http://www.icm.uu.se">
+<MesoRD:difference>
+        <MesoRD:union>
+          <MesoRD:union>
+            <MesoRD:translation MesoRD:units="um" MesoRD:x="0.0" MesoRD:y="-1.3" MesoRD:z="0">
+              <MesoRD:cylinder MesoRD:height="2" MesoRD:radius="0.55" MesoRD:units="um"/>
+            </MesoRD:translation>
+            <MesoRD:translation MesoRD:units="um" MesoRD:x="0.0" MesoRD:y="-0.3" MesoRD:z="0">
+              <MesoRD:sphere MesoRD:radius="0.55" MesoRD:units="um"/>
+            </MesoRD:translation>
+            <MesoRD:translation MesoRD:units="um" MesoRD:x="0.0" MesoRD:y="-2.3" MesoRD:z="0">
+              <MesoRD:sphere MesoRD:radius="0.55" MesoRD:units="um"/>
+            </MesoRD:translation>
+          </MesoRD:union>
+          <MesoRD:union>
+            <MesoRD:translation MesoRD:units="um" MesoRD:x="0.0" MesoRD:y="1.3" MesoRD:z="0">
+              <MesoRD:cylinder MesoRD:height="2" MesoRD:radius="0.55" MesoRD:units="um"/>
+            </MesoRD:translation>
+            <MesoRD:translation MesoRD:units="um" MesoRD:x="0.0" MesoRD:y="0.3" MesoRD:z="0">
+              <MesoRD:sphere MesoRD:radius="0.55" MesoRD:units="um"/>
+            </MesoRD:translation>
+            <MesoRD:translation MesoRD:units="um" MesoRD:x="0.0" MesoRD:y="2.3" MesoRD:z="0">
+              <MesoRD:sphere MesoRD:radius="0.55" MesoRD:units="um"/>
+            </MesoRD:translation>
+          </MesoRD:union>
+        </MesoRD:union>
+        <MesoRD:union>
+          <MesoRD:compartment MesoRD:id="septum_left"/>
+          <MesoRD:compartment MesoRD:id="septum_right"/>
+          <MesoRD:compartment MesoRD:id="cytosole"/>
+        </MesoRD:union>
+      </MesoRD:difference>
+                                                    </annotation>
+      </compartment>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="D_ADP1" initialConcentration="8.18E-7" name="D_ADP_II" metaid="_070556" substanceUnits="mole" compartment="cytosole">
+        <annotation xmlns:MesoRD="http://www.icm.uu.se">
+<MesoRD:diffusion MesoRD:compartment="cytosole" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="membrane" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_left" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_right" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+                                                    </annotation>
+      </species>
+      <species id="D_ATP1" initialConcentration="8.18E-7" name="D_ATP_II" metaid="_070572" substanceUnits="mole" compartment="cytosole">
+        <annotation xmlns:MesoRD="http://www.icm.uu.se">
+<MesoRD:diffusion MesoRD:compartment="cytosole" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="membrane" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_left" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_right" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+                                                    </annotation>
+      </species>
+      <species id="E1" initialConcentration="4.25E-7" name="E_II" metaid="_070588" substanceUnits="mole" compartment="cytosole">
+        <annotation xmlns:MesoRD="http://www.icm.uu.se">
+<MesoRD:diffusion MesoRD:compartment="cytosole" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="membrane" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_left" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_right" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+                                                    </annotation>
+      </species>
+      <species id="D1" initialAmount="0" hasOnlySubstanceUnits="true" name="D_II" metaid="_070604" substanceUnits="item" compartment="cytosole">
+        <annotation xmlns:MesoRD="http://www.icm.uu.se">
+<MesoRD:diffusion MesoRD:compartment="cytosole" MesoRD:rate="0.0" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="membrane" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_left" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_right" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+                                                    </annotation>
+      </species>
+      <species id="DE1" initialAmount="0" hasOnlySubstanceUnits="true" name="DE_II" metaid="_070619" substanceUnits="item" compartment="cytosole">
+        <annotation xmlns:MesoRD="http://www.icm.uu.se">
+<MesoRD:diffusion MesoRD:compartment="cytosole" MesoRD:rate="0.0" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="membrane" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_left" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_right" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+                                                    </annotation>
+      </species>
+      <species id="D_ADP2" initialConcentration="8.18E-7" name="D_ADP_II" metaid="_070635" substanceUnits="mole" compartment="membrane">
+        <annotation xmlns:MesoRD="http://www.icm.uu.se">
+<MesoRD:diffusion MesoRD:compartment="cytosole" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="membrane" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_left" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_right" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+                                                    </annotation>
+      </species>
+      <species id="D_ATP2" initialConcentration="8.18E-7" name="D_ATP_II" metaid="_070651" substanceUnits="mole" compartment="membrane">
+        <annotation xmlns:MesoRD="http://www.icm.uu.se">
+<MesoRD:diffusion MesoRD:compartment="cytosole" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="membrane" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_left" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_right" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+                                                    </annotation>
+      </species>
+      <species id="E2" initialConcentration="4.25E-7" name="E_II" metaid="_070667" substanceUnits="mole" compartment="membrane">
+        <annotation xmlns:MesoRD="http://www.icm.uu.se">
+<MesoRD:diffusion MesoRD:compartment="cytosole" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="membrane" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_left" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_right" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+                                                    </annotation>
+      </species>
+      <species id="D2" initialAmount="0" hasOnlySubstanceUnits="true" name="D_II" metaid="_070683" substanceUnits="item" compartment="membrane">
+        <annotation xmlns:MesoRD="http://www.icm.uu.se">
+<MesoRD:diffusion MesoRD:compartment="cytosole" MesoRD:rate="0.01e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="membrane" MesoRD:rate="0.01e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_left" MesoRD:rate="0.01e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_right" MesoRD:rate="0.01e-8" MesoRD:units="cm2ps"/>
+                                                    </annotation>
+      </species>
+      <species id="DE2" initialAmount="0" hasOnlySubstanceUnits="true" name="DE_II" metaid="_070699" substanceUnits="item" compartment="membrane">
+        <annotation xmlns:MesoRD="http://www.icm.uu.se">
+<MesoRD:diffusion MesoRD:compartment="cytosole" MesoRD:rate="0.01e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="membrane" MesoRD:rate="0.01e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_left" MesoRD:rate="0.01e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_right" MesoRD:rate="0.01e-8" MesoRD:units="cm2ps"/>
+                                                    </annotation>
+      </species>
+      <species id="D_ADP3" initialConcentration="8.18E-7" name="D_ADP_II" metaid="_070714" substanceUnits="mole" compartment="septum_left">
+        <annotation xmlns:MesoRD="http://www.icm.uu.se">
+<MesoRD:diffusion MesoRD:compartment="cytosole" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="membrane" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_left" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_right" MesoRD:rate="0" MesoRD:units="cm2ps"/>
+                                                    </annotation>
+      </species>
+      <species id="D_ATP3" initialConcentration="8.18E-7" name="D_ATP_II" metaid="_070730" substanceUnits="mole" compartment="septum_left">
+        <annotation xmlns:MesoRD="http://www.icm.uu.se">
+<MesoRD:diffusion MesoRD:compartment="cytosole" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="membrane" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_left" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_right" MesoRD:rate="0" MesoRD:units="cm2ps"/>
+                                                    </annotation>
+      </species>
+      <species id="E3" initialConcentration="4.25E-7" name="E_II" metaid="_070746" substanceUnits="mole" compartment="septum_left">
+        <annotation xmlns:MesoRD="http://www.icm.uu.se">
+<MesoRD:diffusion MesoRD:compartment="cytosole" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="membrane" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_left" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_right" MesoRD:rate="0" MesoRD:units="cm2ps"/>
+                                                    </annotation>
+      </species>
+      <species id="D3" initialAmount="0" hasOnlySubstanceUnits="true" name="D_II" metaid="_070762" substanceUnits="item" compartment="septum_left">
+        <annotation xmlns:MesoRD="http://www.icm.uu.se">
+<MesoRD:diffusion MesoRD:compartment="cytosole" MesoRD:rate="0.01e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="membrane" MesoRD:rate="0.01e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_left" MesoRD:rate="0.01e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_right" MesoRD:rate="0" MesoRD:units="cm2ps"/>
+                                                    </annotation>
+      </species>
+      <species id="DE3" initialAmount="0" hasOnlySubstanceUnits="true" name="DE_II" metaid="_070777" substanceUnits="item" compartment="septum_left">
+        <annotation xmlns:MesoRD="http://www.icm.uu.se">
+<MesoRD:diffusion MesoRD:compartment="cytosole" MesoRD:rate="0.01e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="membrane" MesoRD:rate="0.01e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_left" MesoRD:rate="0.01e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_right" MesoRD:rate="0" MesoRD:units="cm2ps"/>
+                                                    </annotation>
+      </species>
+      <species id="D_ADP4" initialConcentration="8.18E-7" name="D_ADP_II" metaid="_070793" substanceUnits="mole" compartment="septum_right">
+        <annotation xmlns:MesoRD="http://www.icm.uu.se">
+<MesoRD:diffusion MesoRD:compartment="cytosole" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="membrane" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_left" MesoRD:rate="0" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_right" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+                                                    </annotation>
+      </species>
+      <species id="D_ATP4" initialConcentration="8.18E-7" name="D_ATP_II" metaid="_070809" substanceUnits="mole" compartment="septum_right">
+        <annotation xmlns:MesoRD="http://www.icm.uu.se">
+<MesoRD:diffusion MesoRD:compartment="cytosole" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="membrane" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_left" MesoRD:rate="0" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_right" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+                                                    </annotation>
+      </species>
+      <species id="E4" initialConcentration="4.25E-7" name="E_II" metaid="_070825" substanceUnits="mole" compartment="septum_right">
+        <annotation xmlns:MesoRD="http://www.icm.uu.se">
+<MesoRD:diffusion MesoRD:compartment="cytosole" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="membrane" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_left" MesoRD:rate="0" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_right" MesoRD:rate="2.5e-8" MesoRD:units="cm2ps"/>
+                                                    </annotation>
+      </species>
+      <species id="D4" initialAmount="0" hasOnlySubstanceUnits="true" name="D_II" metaid="_070841" substanceUnits="item" compartment="septum_right">
+        <annotation xmlns:MesoRD="http://www.icm.uu.se">
+<MesoRD:diffusion MesoRD:compartment="cytosole" MesoRD:rate="0.01e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="membrane" MesoRD:rate="0.01e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_left" MesoRD:rate="0" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_right" MesoRD:rate="0.01e-8" MesoRD:units="cm2ps"/>
+                                                    </annotation>
+      </species>
+      <species id="DE4" initialAmount="0" hasOnlySubstanceUnits="true" name="DE_II" metaid="_070857" substanceUnits="item" compartment="septum_right">
+        <annotation xmlns:MesoRD="http://www.icm.uu.se">
+<MesoRD:diffusion MesoRD:compartment="cytosole" MesoRD:rate="0.01e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="membrane" MesoRD:rate="0.01e-8" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_left" MesoRD:rate="0" MesoRD:units="cm2ps"/>
+      <MesoRD:diffusion MesoRD:compartment="septum_right" MesoRD:rate="0.01e-8" MesoRD:units="cm2ps"/>
+                                                    </annotation>
+      </species>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="sigma_d" metaid="_070927" value="0.0125" units="umps"/>
+      <parameter id="sigma_dD" metaid="_070928" value="9000000" units="pMps"/>
+      <parameter id="sigma_de" metaid="_070929" value="0.7" units="ps"/>
+      <parameter id="sigma_E" metaid="_070930" value="55800000" units="pMps"/>
+      <parameter id="sigma_D_ADP_ATP" metaid="_070933" value="0.5" units="ps"/>
+    </listOfParameters>
+    <listOfReactions>
+      <reaction id="Reaction1_1" metaid="_070873" reversible="false">
+        <listOfReactants>
+          <speciesReference species="D_ATP2" metaid="_101179"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="D2" metaid="_101191"/>
+        </listOfProducts>
+        <kineticLaw metaid="_101203">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <ci> sigma_d </ci>
+                <ci> size_subVolume </ci>
+              </apply>
+              <ci> D_ATP2 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Reaction1_2" metaid="_070874" reversible="false">
+        <listOfReactants>
+          <speciesReference species="D_ATP3" metaid="_101215"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="D3" metaid="_101227"/>
+        </listOfProducts>
+        <kineticLaw metaid="_101240">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <ci> sigma_d </ci>
+                <ci> size_subVolume </ci>
+              </apply>
+              <ci> D_ATP3 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Reaction1_3" metaid="_070875" reversible="false">
+        <listOfReactants>
+          <speciesReference species="D_ATP4" metaid="_101252"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="D4" metaid="_101264"/>
+        </listOfProducts>
+        <kineticLaw metaid="_101277">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <ci> sigma_d </ci>
+                <ci> size_subVolume </ci>
+              </apply>
+              <ci> D_ATP4 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Reaction2_1" metaid="_070876" reversible="false">
+        <listOfReactants>
+          <speciesReference species="D_ATP2" metaid="_101289"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="D2" metaid="_101301"/>
+        </listOfProducts>
+        <kineticLaw metaid="_101313">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> sigma_dD </ci>
+              <ci> D2 </ci>
+              <ci> D_ATP2 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Reaction2_2" metaid="_070877" reversible="false">
+        <listOfReactants>
+          <speciesReference species="D_ATP3" metaid="_101325"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="D3" metaid="_101338"/>
+        </listOfProducts>
+        <kineticLaw metaid="_101351">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> sigma_dD </ci>
+              <ci> D3 </ci>
+              <ci> D_ATP3 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Reaction2_3" metaid="_070880" reversible="false">
+        <listOfReactants>
+          <speciesReference species="D_ATP4" metaid="_101363"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="D4" metaid="_101375"/>
+        </listOfProducts>
+        <kineticLaw metaid="_101387">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> sigma_dD </ci>
+              <ci> D4 </ci>
+              <ci> D_ATP4 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Reaction3_1" metaid="_070883" reversible="false">
+        <listOfReactants>
+          <speciesReference species="D2" metaid="_101399"/>
+          <speciesReference species="E2" metaid="_101411"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="DE2" metaid="_101423"/>
+        </listOfProducts>
+        <kineticLaw metaid="_101435">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> sigma_E </ci>
+              <ci> E2 </ci>
+              <ci> D2 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Reaction3_2" metaid="_070886" reversible="false">
+        <listOfReactants>
+          <speciesReference species="D3" metaid="_101448"/>
+          <speciesReference species="E3" metaid="_101460"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="DE3" metaid="_101472"/>
+        </listOfProducts>
+        <kineticLaw metaid="_101484">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> sigma_E </ci>
+              <ci> E3 </ci>
+              <ci> D3 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Reaction3_3" metaid="_070889" reversible="false">
+        <listOfReactants>
+          <speciesReference species="D4" metaid="_101496"/>
+          <speciesReference species="E4" metaid="_101508"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="DE4" metaid="_101520"/>
+        </listOfProducts>
+        <kineticLaw metaid="_101532">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> sigma_E </ci>
+              <ci> E4 </ci>
+              <ci> D4 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Reaction4_1" metaid="_070892" reversible="false">
+        <listOfReactants>
+          <speciesReference species="DE2" metaid="_101544"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="D_ADP2" metaid="_101556"/>
+          <speciesReference species="E2" metaid="_101568"/>
+        </listOfProducts>
+        <kineticLaw metaid="_101580">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> sigma_de </ci>
+              <ci> DE2 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Reaction4_2" metaid="_070895" reversible="false">
+        <listOfReactants>
+          <speciesReference species="DE3" metaid="_101592"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="D_ADP3" metaid="_101605"/>
+          <speciesReference species="E3" metaid="_101617"/>
+        </listOfProducts>
+        <kineticLaw metaid="_101629">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> sigma_de </ci>
+              <ci> DE3 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Reaction4_3" metaid="_070898" reversible="false">
+        <listOfReactants>
+          <speciesReference species="DE4" metaid="_101641"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="D_ADP4" metaid="_101653"/>
+          <speciesReference species="E4" metaid="_101665"/>
+        </listOfProducts>
+        <kineticLaw metaid="_101677">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> sigma_de </ci>
+              <ci> DE4 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Reaction5_1" metaid="_070901" reversible="false">
+        <listOfReactants>
+          <speciesReference species="D_ADP1" metaid="_101689"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="D_ATP1" metaid="_101702"/>
+        </listOfProducts>
+        <kineticLaw metaid="_101714">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> sigma_D_ADP_ATP </ci>
+              <ci> D_ADP1 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Reaction5_2" metaid="_070904" reversible="false">
+        <listOfReactants>
+          <speciesReference species="D_ADP2" metaid="_101726"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="D_ATP2" metaid="_101738"/>
+        </listOfProducts>
+        <kineticLaw metaid="_101750">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> sigma_D_ADP_ATP </ci>
+              <ci> D_ADP2 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Reaction5_3" metaid="_070907" reversible="false">
+        <listOfReactants>
+          <speciesReference species="D_ADP3" metaid="_101763"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="D_ATP3" metaid="_101775"/>
+        </listOfProducts>
+        <kineticLaw metaid="_101787">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> sigma_D_ADP_ATP </ci>
+              <ci> D_ADP3 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Reaction5_4" metaid="_070910" reversible="false">
+        <listOfReactants>
+          <speciesReference species="D_ADP4" metaid="_101799"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="D_ATP4" metaid="_101811"/>
+        </listOfProducts>
+        <kineticLaw metaid="_101823">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> sigma_D_ADP_ATP </ci>
+              <ci> D_ADP4 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

@@ -1,0 +1,313 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="_933745" version="4">
+  <model id="Morris1981_MuscleFibre_Voltage_reduced" name="Morris1981_MuscleFibre_Voltage_reduced" metaid="_823994">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This is the      <strong>reduced</strong>
+          model of the voltage oscillations in barnacle muscle fibers, generally known as the Morris-Lecar model (eg.      <a href="http://en.wikipedia.org/wiki/Morris%E2%80%93Lecar_model">wikipedia</a>
+          ), described in the article:      <br/>
+                <strong>Voltage oscillations in the barnacle giant muscle fiber.</strong>
+                <br/>
+          Morris C, Lecar H. Biophys J. 1981 Jul;35(1):193-213. PubmedID:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/7260316">7260316</a>
+          ; DOI:      <a href="http://dx.doi.org/10.1016/S0006-3495(81)84782-0">10.1016/S0006-3495(81)84782-0</a>
+                <br/>
+          Abstract:      <br/>
+          Barnacle muscle fibers subjected to constant current stimulation produce a variety of types of oscillatory behavior when the internal medium contains the Ca++ chelator EGTA. Oscillations are abolished if Ca++ is removed from the external medium, or if the K+ conductance is blocked. Available voltage-clamp data indicate that the cell's active conductance systems are exceptionally simple. Given the complexity of barnacle fiber voltage behavior, this seems paradoxical. This paper presents an analysis of the possible modes of behavior available to a system of two noninactivating conductance mechanisms, and indicates a good correspondence to the types of behavior exhibited by barnacle fiber. The differential equations of a simple equivalent circuit for the fiber are dealt with by means of some of the mathematical techniques of nonlinear mechanics. General features of the system are (a) a propensity to produce damped or sustained oscillations over a rather broad parameter range, and (b) considerable latitude in the shape of the oscillatory potentials. It is concluded that for cells subject to changeable parameters (either from cell to cell or with time during cellular activity), a system dominated by two noninactivating conductances can exhibit varied oscillatory and bistable behavior.      </p>
+            <p>The model consists of the differential equations (9) and (2) given on pages 205 and 196 of the article. There seems to be a typo in the figure caption of figure 9. Using V2 = 15 instead of -15 allows to reproduce the results.</p>
+            <p>Originally created by libAntimony v1.4 (using libSBML 3.4.1)</p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#_823994">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Le Novère</vCard:Family>
+                  <vCard:Given>Nicolas</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>lenov@ebi.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>EMBL-EBI</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Endler</vCard:Family>
+                  <vCard:Given>Lukas</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>lukas@ebi.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>EMBL-EBI</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-11-24T02:13:46Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2012-05-16T14:45:42Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1011240000"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/BIOMD0000000280"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/7260316"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+          <bqbiol:occursIn>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/taxonomy/6678"/>
+            </rdf:Bag>
+          </bqbiol:occursIn>
+          <bqbiol:isVersionOf>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0042391"/>
+            </rdf:Bag>
+          </bqbiol:isVersionOf>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="time" name="ms" metaid="_933757">
+        <listOfUnits>
+          <unit scale="-3" metaid="_933769" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_ms" name="per ms" metaid="_933781">
+        <listOfUnits>
+          <unit scale="-3" exponent="-1" metaid="_933794" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mV" name="mV" metaid="_933806">
+        <listOfUnits>
+          <unit scale="-3" metaid="_933818" kind="volt"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mS_per_cm2" name="mS_per_cm2" metaid="_933830">
+        <listOfUnits>
+          <unit scale="-3" metaid="_933842" kind="siemens"/>
+          <unit scale="-2" exponent="-2" metaid="_933854" kind="metre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="uA_per_cm2" name="microA_per_cm2" metaid="_933866">
+        <listOfUnits>
+          <unit scale="-6" metaid="_933878" kind="ampere"/>
+          <unit scale="-2" exponent="-2" metaid="_933890" kind="metre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="uF_per_cm2" name="microF per cm2" metaid="_933902">
+        <listOfUnits>
+          <unit scale="-6" metaid="_933914" kind="farad"/>
+          <unit scale="-2" exponent="-2" metaid="_933926" kind="metre"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="musclefiber" metaid="_823996" size="1">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_823996">
+              <bqmodel:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.fma/FMA:30316"/>
+                </rdf:Bag>
+              </bqmodel:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </compartment>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="Minf" constant="false" metaid="_824008" units="dimensionless"/>
+      <parameter id="V" constant="false" metaid="_824010" value="-50" sboTerm="SBO:0000259" units="mV"/>
+      <parameter id="V1" metaid="_824012" value="10" sboTerm="SBO:0000259" units="mV"/>
+      <parameter id="V2" metaid="_824014" value="15" sboTerm="SBO:0000259" units="mV"/>
+      <parameter id="Ninf" constant="false" metaid="_824016" units="dimensionless"/>
+      <parameter id="V3" metaid="_824018" value="-1" sboTerm="SBO:0000259" units="mV"/>
+      <parameter id="V4" metaid="_824020" value="14.5" sboTerm="SBO:0000259" units="mV"/>
+      <parameter id="lambdaN" constant="false" metaid="_824022" units="per_ms"/>
+      <parameter id="lambdaN_bar" metaid="_824024" value="0.066666666667" units="per_ms"/>
+      <parameter id="Iapp" metaid="_824026" value="300" units="uA_per_cm2"/>
+      <parameter id="gL" metaid="_824028" value="2" sboTerm="SBO:0000257" units="mS_per_cm2"/>
+      <parameter id="VL" metaid="_824030" value="-50" sboTerm="SBO:0000259" units="mV"/>
+      <parameter id="gCa" metaid="_824032" value="4" sboTerm="SBO:0000257" units="mS_per_cm2"/>
+      <parameter id="VCa" metaid="_824034" value="100" sboTerm="SBO:0000259" units="mV"/>
+      <parameter id="gK" metaid="_824036" value="8" sboTerm="SBO:0000257" units="mS_per_cm2"/>
+      <parameter id="N" constant="false" metaid="_824038" units="dimensionless"/>
+      <parameter id="VK" metaid="_824040" value="-70" sboTerm="SBO:0000259" units="mV"/>
+      <parameter id="C" metaid="_824042" value="20" sboTerm="SBO:0000258" units="uF_per_cm2"/>
+    </listOfParameters>
+    <listOfInitialAssignments>
+      <initialAssignment symbol="N" metaid="_933938">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <plus/>
+              <cn type="integer"> 1 </cn>
+              <apply>
+                <tanh/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <minus/>
+                    <ci> V </ci>
+                    <ci> V3 </ci>
+                  </apply>
+                  <ci> V4 </ci>
+                </apply>
+              </apply>
+            </apply>
+            <cn type="integer"> 2 </cn>
+          </apply>
+        </math>
+      </initialAssignment>
+    </listOfInitialAssignments>
+    <listOfRules>
+      <assignmentRule metaid="_823999" variable="Minf">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <plus/>
+              <cn type="integer"> 1 </cn>
+              <apply>
+                <tanh/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <minus/>
+                    <ci> V </ci>
+                    <ci> V1 </ci>
+                  </apply>
+                  <ci> V2 </ci>
+                </apply>
+              </apply>
+            </apply>
+            <cn type="integer"> 2 </cn>
+          </apply>
+        </math>
+      </assignmentRule>
+      <rateRule metaid="_824000" variable="V">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <apply>
+                <minus/>
+                <apply>
+                  <minus/>
+                  <ci> Iapp </ci>
+                  <apply>
+                    <times/>
+                    <ci> gL </ci>
+                    <apply>
+                      <minus/>
+                      <ci> V </ci>
+                      <ci> VL </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> gCa </ci>
+                  <ci> Minf </ci>
+                  <apply>
+                    <minus/>
+                    <ci> V </ci>
+                    <ci> VCa </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> gK </ci>
+                <ci> N </ci>
+                <apply>
+                  <minus/>
+                  <ci> V </ci>
+                  <ci> VK </ci>
+                </apply>
+              </apply>
+            </apply>
+            <ci> C </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="_824002" variable="Ninf">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <plus/>
+              <cn type="integer"> 1 </cn>
+              <apply>
+                <tanh/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <minus/>
+                    <ci> V </ci>
+                    <ci> V3 </ci>
+                  </apply>
+                  <ci> V4 </ci>
+                </apply>
+              </apply>
+            </apply>
+            <cn type="integer"> 2 </cn>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_824004" variable="lambdaN">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> lambdaN_bar </ci>
+            <apply>
+              <cosh/>
+              <apply>
+                <divide/>
+                <apply>
+                  <minus/>
+                  <ci> V </ci>
+                  <ci> V3 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <cn type="integer"> 2 </cn>
+                  <ci> V4 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <rateRule metaid="_824006" variable="N">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> lambdaN </ci>
+            <apply>
+              <minus/>
+              <ci> Ninf </ci>
+              <ci> N </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+    </listOfRules>
+  </model>
+</sbml>

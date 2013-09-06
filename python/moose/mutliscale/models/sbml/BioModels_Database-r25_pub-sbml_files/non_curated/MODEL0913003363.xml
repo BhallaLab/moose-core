@@ -1,0 +1,654 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version3" level="2" metaid="_704711" version="3">
+  <model id="Cui2006_CalciumHomeostasis" name="Cui2006_CalciumHomeostasis" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>Mathematical modeling of calcium homeostasis in yeast cells.</strong>
+                <br/>
+          Cui J, Kaandorp JA.      <em>Cell Calcium</em>
+          2006 Apr;39(4):337-48      <a href="http://www.ncbi.nlm.nih.gov/pubmed/16445978">16445978</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          In this study, based on currently available experimental observations on protein
+level, we constructed a mathematical model to describe calcium homeostasis in
+normally growing yeast cells (Saccharomyces cerevisiae). Simulation results show
+that tightly controlled low cytosolic calcium ion level can be a natural result
+under the general mechanism of gene expression feedback control. The calmodulin
+(a sensor protein) behavior in our model cell agrees well with relevant
+observations in real cells. Moreover, our model can qualitatively reproduce the
+experimentally observed response curve of real yeast cell responding to
+step-like disturbance in extracellular calcium ion concentration. Further
+investigations show that the feedback control mechanism in our model is as
+robust as it is in real cells.      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://www.cellml.org/models/cui_kaandorp_2006_version03">        <strong>Cui J, Kaandorp JA. (2006) - version03</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>Lloyd, Catherine, May</strong>
+                <br/>
+          c.lloyd@aukland.ac.nz      <br/>
+          The University of Auckland      <br/>
+          The Bioengineering Institute      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL0913003363"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/16445978"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="micromolar" name="micromolar" metaid="_704723">
+        <listOfUnits>
+          <unit scale="-6" metaid="_704735" kind="mole"/>
+          <unit exponent="-1" metaid="_704747" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="minute" name="minute" metaid="_704759">
+        <listOfUnits>
+          <unit metaid="_704771" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="flux" name="flux" metaid="_704783">
+        <listOfUnits>
+          <unit scale="-6" metaid="_704796" kind="mole"/>
+          <unit exponent="-1" metaid="_704808" kind="litre"/>
+          <unit exponent="-1" metaid="_704820" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="first_order_rate_constant" name="first_order_rate_constant" metaid="_704833">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_704845" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="second_order_rate_constant" name="second_order_rate_constant" metaid="_704857">
+        <listOfUnits>
+          <unit scale="-6" exponent="-1" metaid="_704869" kind="mole"/>
+          <unit metaid="_704881" kind="litre"/>
+          <unit exponent="-1" metaid="_704893" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="fourth_order_rate_constant" name="fourth_order_rate_constant" metaid="_704906">
+        <listOfUnits>
+          <unit scale="-6" exponent="-3" metaid="_704918" kind="mole"/>
+          <unit exponent="3" metaid="_704930" kind="litre"/>
+          <unit exponent="-1" metaid="_704942" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time" name="time" metaid="_704954">
+        <listOfUnits>
+          <unit metaid="_704966" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="Compartment" metaid="_222643" units="litre" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="m" constant="false" name="m" metaid="_222661" value="0" units="micromolar"/>
+      <parameter id="kM_plus" name="kM_plus" metaid="_222662" value="500" units="fourth_order_rate_constant"/>
+      <parameter id="kM_minus" name="kM_minus" metaid="_222664" value="100" units="first_order_rate_constant"/>
+      <parameter id="CaMtotal" name="CaMtotal" metaid="_222665" value="25" units="micromolar"/>
+      <parameter id="dmdt" constant="false" name="dmdt" metaid="_222667" units="flux"/>
+      <parameter id="z" constant="false" name="z" metaid="_222668" value="1E-8" units="micromolar"/>
+      <parameter id="kN_plus" name="kN_plus" metaid="_222670" value="5" units="second_order_rate_constant"/>
+      <parameter id="kN_minus" name="kN_minus" metaid="_222671" value="5" units="first_order_rate_constant"/>
+      <parameter id="CaNtotal" name="CaNtotal" metaid="_222673" value="25" units="micromolar"/>
+      <parameter id="dzdt" constant="false" name="dzdt" metaid="_222674" units="flux"/>
+      <parameter id="h" constant="false" name="h" metaid="_222676" value="0" units="dimensionless"/>
+      <parameter id="d" name="d" metaid="_222677" value="0.4" units="first_order_rate_constant"/>
+      <parameter id="f" name="f" metaid="_222679" value="0.1" units="first_order_rate_constant"/>
+      <parameter id="phi" constant="false" name="phi" metaid="_222680" units="dimensionless"/>
+      <parameter id="psi" constant="false" name="psi" metaid="_222682" units="dimensionless"/>
+      <parameter id="x" constant="false" name="x" metaid="_222683" value="0" units="micromolar"/>
+      <parameter id="Vx" name="Vx" metaid="_222685" value="1000" units="flux"/>
+      <parameter id="Kx" name="Kx" metaid="_222686" value="500" units="micromolar"/>
+      <parameter id="V1" name="V1" metaid="_222688" value="30000" units="flux"/>
+      <parameter id="K1" name="K1" metaid="_222689" value="4.3" units="micromolar"/>
+      <parameter id="V2" name="V2" metaid="_222691" value="100" units="flux"/>
+      <parameter id="K2" name="K2" metaid="_222692" value="0.1" units="micromolar"/>
+      <parameter id="V3" name="V3" metaid="_222694" value="10000" units="flux"/>
+      <parameter id="K3" name="K3" metaid="_222695" value="100" units="micromolar"/>
+      <parameter id="kc" name="kc" metaid="_222697" value="10" units="dimensionless"/>
+      <parameter id="alpha" name="alpha" metaid="_222698" value="0.006" units="first_order_rate_constant"/>
+      <parameter id="Caex" name="Caex" metaid="_222700" value="1" units="micromolar"/>
+      <parameter id="dxdt" constant="false" name="dxdt" metaid="_222701" units="flux"/>
+      <parameter id="L0" constant="false" name="L0" metaid="_222703" units="dimensionless"/>
+      <parameter id="N" name="N" metaid="_222704" value="13" units="dimensionless"/>
+      <parameter id="lamda" name="lamda" metaid="_222706" value="5" units="dimensionless"/>
+      <parameter id="y" constant="false" name="y" metaid="_222707" units="dimensionless"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_222645" variable="m">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <cn> 1 </cn>
+              <ci> kM_plus </ci>
+              <apply>
+                <minus/>
+                <ci> CaMtotal </ci>
+                <ci> m </ci>
+              </apply>
+              <apply>
+                <power/>
+                <ci> x </ci>
+                <cn> 3 </cn>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> kM_minus </ci>
+              <ci> m </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_222646" variable="z">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> kN_plus </ci>
+              <apply>
+                <minus/>
+                <ci> CaNtotal </ci>
+                <ci> z </ci>
+              </apply>
+              <ci> m </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> kN_minus </ci>
+              <ci> z </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_222648" variable="h">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> d </ci>
+              <ci> phi </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <ci> z </ci>
+              </apply>
+              <apply>
+                <minus/>
+                <cn> 1 </cn>
+                <ci> h </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> f </ci>
+              <apply>
+                <minus/>
+                <cn> 1 </cn>
+                <apply>
+                  <times/>
+                  <ci> phi </ci>
+                  <apply>
+                    <divide/>
+                    <cn> 1 </cn>
+                    <ci> z </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <ci> h </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_222649" variable="x">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> Vx </ci>
+                <ci> Caex </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <ci> Kx </ci>
+                <ci> Caex </ci>
+              </apply>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> h </ci>
+                <ci> psi </ci>
+                <apply>
+                  <divide/>
+                  <cn> 1 </cn>
+                  <ci> z </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> V1 </ci>
+                    <ci> x </ci>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <ci> K1 </ci>
+                    <ci> x </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> h </ci>
+                <ci> psi </ci>
+                <apply>
+                  <divide/>
+                  <cn> 1 </cn>
+                  <ci> z </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> V2 </ci>
+                    <ci> x </ci>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <ci> K2 </ci>
+                    <ci> x </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <apply>
+                  <divide/>
+                  <cn> 1 </cn>
+                  <apply>
+                    <plus/>
+                    <cn> 1 </cn>
+                    <apply>
+                      <times/>
+                      <ci> kc </ci>
+                      <ci> z </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> V3 </ci>
+                    <ci> x </ci>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <ci> K3 </ci>
+                    <ci> x </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> alpha </ci>
+                <ci> x </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="_222651" variable="dmdt">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <cn> 1 </cn>
+              <ci> kM_plus </ci>
+              <apply>
+                <minus/>
+                <ci> CaMtotal </ci>
+                <ci> m </ci>
+              </apply>
+              <apply>
+                <power/>
+                <ci> x </ci>
+                <cn> 3 </cn>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> kM_minus </ci>
+              <ci> m </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_222652" variable="dzdt">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> kN_plus </ci>
+              <apply>
+                <minus/>
+                <ci> CaNtotal </ci>
+                <ci> z </ci>
+              </apply>
+              <ci> m </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> kN_minus </ci>
+              <ci> z </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_222654" variable="phi">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn> 1 </cn>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> L0 </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <power/>
+                      <apply>
+                        <times/>
+                        <ci> lamda </ci>
+                        <ci> y </ci>
+                      </apply>
+                      <apply>
+                        <plus/>
+                        <ci> N </ci>
+                        <cn> 1 </cn>
+                      </apply>
+                    </apply>
+                    <cn> 1 </cn>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> lamda </ci>
+                      <ci> y </ci>
+                    </apply>
+                    <cn> 1 </cn>
+                  </apply>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <minus/>
+                      <ci> y </ci>
+                      <cn> 1 </cn>
+                    </apply>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <power/>
+                        <ci> y </ci>
+                        <apply>
+                          <plus/>
+                          <ci> N </ci>
+                          <cn> 1 </cn>
+                        </apply>
+                      </apply>
+                      <cn> 1 </cn>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_222655" variable="psi">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <ci> L0 </ci>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <power/>
+                    <ci> y </ci>
+                    <apply>
+                      <plus/>
+                      <ci> N </ci>
+                      <cn> 1 </cn>
+                    </apply>
+                  </apply>
+                  <cn> 1 </cn>
+                </apply>
+                <apply>
+                  <minus/>
+                  <ci> y </ci>
+                  <cn> 1 </cn>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> L0 </ci>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <power/>
+                      <apply>
+                        <times/>
+                        <ci> lamda </ci>
+                        <ci> y </ci>
+                      </apply>
+                      <apply>
+                        <plus/>
+                        <ci> N </ci>
+                        <cn> 1 </cn>
+                      </apply>
+                    </apply>
+                    <cn> 1 </cn>
+                  </apply>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> lamda </ci>
+                      <ci> y </ci>
+                    </apply>
+                    <cn> 1 </cn>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_222657" variable="dxdt">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> Vx </ci>
+                <ci> Caex </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <ci> Kx </ci>
+                <ci> Caex </ci>
+              </apply>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> h </ci>
+                <ci> psi </ci>
+                <apply>
+                  <divide/>
+                  <cn> 1 </cn>
+                  <ci> z </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> V1 </ci>
+                    <ci> x </ci>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <ci> K1 </ci>
+                    <ci> x </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> h </ci>
+                <ci> psi </ci>
+                <apply>
+                  <divide/>
+                  <cn> 1 </cn>
+                  <ci> z </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> V2 </ci>
+                    <ci> x </ci>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <ci> K2 </ci>
+                    <ci> x </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <apply>
+                  <divide/>
+                  <cn> 1 </cn>
+                  <apply>
+                    <plus/>
+                    <cn> 1 </cn>
+                    <apply>
+                      <times/>
+                      <ci> kc </ci>
+                      <ci> z </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> V3 </ci>
+                    <ci> x </ci>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <ci> K3 </ci>
+                    <ci> x </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> alpha </ci>
+                <ci> x </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_222658" variable="L0">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <power/>
+            <cn> 10 </cn>
+            <apply>
+              <minus/>
+              <apply>
+                <divide/>
+                <ci> N </ci>
+                <cn> 2 </cn>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_222660" variable="y">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn> 1 </cn>
+            <ci> z </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+  </model>
+</sbml>

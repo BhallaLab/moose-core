@@ -1,0 +1,359 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="_531059" version="4">
+  <model id="Perelson1993_HIVinfection_CD4Tcells_ModelC" name="Perelson1993_HIVinfection_CD4Tcells_ModelC" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>Dynamics of HIV infection of CD4+ T cells.</strong>
+                <br/>
+          Perelson AS, Kirschner DE, De Boer R.      <em>Math Biosci</em>
+          1993 Mar;114(1):81-125      <a href="http://www.ncbi.nlm.nih.gov/pubmed/8096155">8096155</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          We examine a model for the interaction of HIV with CD4+ T cells that considers
+four populations: uninfected T cells, latently infected T cells, actively
+infected T cells, and free virus. Using this model we show that many of the
+puzzling quantitative features of HIV infection can be explained simply. We also
+consider effects of AZT on viral growth and T-cell population dynamics. The
+model exhibits two steady states, an uninfected state in which no virus is
+present and an endemically infected state, in which virus and infected T cells
+are present. We show that if N, the number of infectious virions produced per
+actively infected T cell, is less a critical value, Ncrit, then the uninfected
+state is the only steady state in the nonnegative orthant, and this state is
+stable. For N > Ncrit, the uninfected state is unstable, and the endemically
+infected state can be either stable, or unstable and surrounded by a stable
+limit cycle. Using numerical bifurcation techniques we map out the parameter
+regimes of these various behaviors. oscillatory behavior seems to lie outside
+the region of biologically realistic parameter values. When the endemically
+infected state is stable, it is characterized by a reduced number of T cells
+compared with the uninfected state. Thus T-cell depletion occurs through the
+establishment of a new steady state. The dynamics of the establishment of this
+new steady state are examined both numerically and via the quasi-steady-state
+approximation. We develop approximations for the dynamics at early times in
+which the free virus rapidly binds to T cells, during an intermediate time scale
+in which the virus grows exponentially, and a third time scale on which viral
+growth slows and the endemically infected steady state is approached. Using the
+quasi-steady-state approximation the model can be simplified to two ordinary
+differential equations the summarize much of the dynamical behavior. We compute
+the level of T cells in the endemically infected state and show how that level
+varies with the parameters in the model. The model predicts that different viral
+strains, characterized by generating differing numbers of infective virions
+within infected T cells, can cause different amounts of T-cell depletion and
+generate depletion at different rates. Two versions of the model are studied. In
+one the source of T cells from precursors is constant, whereas in the other the
+source of T cells decreases with viral load, mimicking the infection and killing
+of T-cell precursors.(ABSTRACT TRUNCATED AT 400 WORDS)      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://models.cellml.org/exposure/b69ca9baf6ee39a1b2f33c4568589ab5">        <strong>Perelson AS, Kirschner DE, De Boer R. (1993) - version=1.0</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>Ethan Choi</strong>
+                <br/>
+          mcho099@aucklanduni.ac.nz      <br/>
+          The University of Auckland      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Choi</vCard:Family>
+                  <vCard:Given>Ethan</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>mcho099@aucklanduni.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>The University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Choi</vCard:Family>
+                  <vCard:Given>Ethan</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>mcho099@aucklanduni.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>The University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Choi</vCard:Family>
+                  <vCard:Given>Ethan</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>mcho099@aucklanduni.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>The University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:33:25Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:33:25Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:33:25Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:33:25Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1006230075"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/8096155"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="day" name="day" metaid="_531071">
+        <listOfUnits>
+          <unit metaid="_531083" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_day" name="per_day" metaid="_531095">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_531107" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mm3" name="mm3" metaid="_531119">
+        <listOfUnits>
+          <unit scale="-3" exponent="3" metaid="_531131" kind="metre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_mm3" name="per_mm3" metaid="_531143">
+        <listOfUnits>
+          <unit scale="-3" exponent="-3" metaid="_531155" kind="metre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_day_mm3" name="per_day_mm3" metaid="_531167">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_531179" multiplier="86400" kind="second"/>
+          <unit scale="-3" exponent="-3" metaid="_531191" kind="metre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mm3_per_day" name="mm3_per_day" metaid="_531204">
+        <listOfUnits>
+          <unit scale="-3" exponent="3" metaid="_531216" kind="metre"/>
+          <unit exponent="-1" metaid="_531229" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time" name="time" metaid="_531241">
+        <listOfUnits>
+          <unit metaid="_531253" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="COMpartment" metaid="_204294" units="litre" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="s" name="s" metaid="_204308" value="10"/>
+      <parameter id="r" name="r" metaid="_204310" value="0.03"/>
+      <parameter id="T_max" name="T_max" metaid="_204311" value="1500"/>
+      <parameter id="mu_T" name="mu_T" metaid="_204312" value="0.02"/>
+      <parameter id="theta" name="theta" metaid="_204314" value="1"/>
+      <parameter id="s_V" constant="false" name="s_V" metaid="_204315"/>
+      <parameter id="T" constant="false" name="T" metaid="_204316" value="1000"/>
+      <parameter id="k_1" name="k_1" metaid="_204318" value="2.4E-5"/>
+      <parameter id="T_1" constant="false" name="T_1" metaid="_204319" value="0"/>
+      <parameter id="k_2" name="k_2" metaid="_204320" value="0.003"/>
+      <parameter id="mu_b" name="mu_b" metaid="_204322" value="0.24"/>
+      <parameter id="T_2" constant="false" name="T_2" metaid="_204323" value="0"/>
+      <parameter id="mu_V" name="mu_V" metaid="_204324" value="2.4"/>
+      <parameter id="V" constant="false" name="V" metaid="_204326" value="0.001"/>
+      <parameter id="T_tot" constant="false" name="T_tot" metaid="_204327"/>
+      <parameter id="tau" name="tau" metaid="_204328" value="1096"/>
+      <parameter id="N_initial" name="N_initial" metaid="_204330" value="1400"/>
+      <parameter id="N_AZT" name="N_AZT" metaid="_204331" value="1050"/>
+      <parameter id="N" constant="false" name="N" metaid="_204332"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_204298" variable="T">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <minus/>
+                <ci> s_V </ci>
+                <apply>
+                  <times/>
+                  <ci> mu_T </ci>
+                  <ci> T </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> r </ci>
+                <ci> T </ci>
+                <apply>
+                  <minus/>
+                  <cn> 1 </cn>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <plus/>
+                      <ci> T </ci>
+                      <ci> T_1 </ci>
+                      <ci> T_2 </ci>
+                    </apply>
+                    <ci> T_max </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> k_1 </ci>
+              <ci> V </ci>
+              <ci> T </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_204300" variable="T_1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k_1 </ci>
+                <ci> V </ci>
+                <ci> T </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> mu_T </ci>
+                <ci> T_1 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> k_2 </ci>
+              <ci> T_1 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_204301" variable="T_2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> k_2 </ci>
+              <ci> T_1 </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> mu_b </ci>
+              <ci> T_2 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_204302" variable="V">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> N </ci>
+                <ci> mu_b </ci>
+                <ci> T_2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k_1 </ci>
+                <ci> V </ci>
+                <ci> T </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> mu_V </ci>
+              <ci> V </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="_204304" variable="s_V">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <times/>
+              <ci> theta </ci>
+              <ci> s </ci>
+            </apply>
+            <apply>
+              <plus/>
+              <ci> theta </ci>
+              <ci> V </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_204305" variable="T_tot">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> T </ci>
+            <ci> T_1 </ci>
+            <ci> T_2 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_204306" variable="N">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <ci> N_initial </ci>
+              <apply>
+                <lt/>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                <ci> tau </ci>
+              </apply>
+            </piece>
+            <piece>
+              <ci> N_AZT </ci>
+              <apply>
+                <geq/>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                <ci> tau </ci>
+              </apply>
+            </piece>
+          </piecewise>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+  </model>
+</sbml>

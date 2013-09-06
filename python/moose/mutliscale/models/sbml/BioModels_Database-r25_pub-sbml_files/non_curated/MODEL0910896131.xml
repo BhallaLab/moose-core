@@ -1,0 +1,126 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version3" level="2" metaid="_543097" version="3">
+  <model id="Guyton1972_StressRelaxation" name="Guyton1972_StressRelaxation" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>Circulation: overall regulation.</strong>
+                <br/>
+          Guyton AC, Coleman TG, Granger HJ.      <em>Annu Rev Physiol</em>
+          1972;34:13-46      <a href="http://www.ncbi.nlm.nih.gov/pubmed/4334846">4334846</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          No abstract available      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://www.cellml.org/models/guyton_stress_relaxation_2008_version02">        <strong>Guyton AC, Coleman TG, Granger HJ. (2008) - version02</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>Terkildsen, Jonna,</strong>
+                <br/>
+          j.terkildsen@aukland.ac.nz      <br/>
+          The University of Auckland      <br/>
+          Auckland Bioengineering Institute      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL0910896131"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/4334846"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="substance" name="normalised" metaid="_543109">
+        <listOfUnits>
+          <unit metaid="_543121" kind="dimensionless"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="Compartment" metaid="_155077" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="VVE" name="VVE" metaid="_155082" value="0.743224" units="dimensionless"/>
+      <parameter id="VV7" constant="false" name="VV7" metaid="_155085" value="0.00366525" units="dimensionless"/>
+      <parameter id="VV6" constant="false" name="VV6" metaid="_155088" value="0.0101913" units="dimensionless"/>
+      <parameter id="SR" name="SR" metaid="_155091" value="1" units="dimensionless"/>
+      <parameter id="SR2" name="SR2" metaid="_155094" value="1" units="dimensionless"/>
+      <parameter id="SRK" name="SRK" metaid="_155097" value="5" units="dimensionless"/>
+      <parameter id="SRK2" name="SRK2" metaid="_155100" value="10000" units="dimensionless"/>
+      <parameter id="tu" name="time_unit" metaid="_155103" value="1" units="time"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_155079" variable="VV7">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <apply>
+                  <minus/>
+                  <ci> VVE </ci>
+                  <cn> 0.74 </cn>
+                </apply>
+                <ci> SR </ci>
+              </apply>
+              <ci> VV7 </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> SRK </ci>
+              <ci> tu </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_155081" variable="VV6">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <apply>
+                  <minus/>
+                  <ci> VVE </ci>
+                  <cn> 0.74 </cn>
+                </apply>
+                <ci> SR2 </ci>
+              </apply>
+              <ci> VV6 </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> SRK2 </ci>
+              <ci> tu </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+    </listOfRules>
+  </model>
+</sbml>

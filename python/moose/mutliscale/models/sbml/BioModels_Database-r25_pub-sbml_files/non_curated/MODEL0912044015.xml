@@ -1,0 +1,947 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version3" level="2" metaid="_630388" version="3">
+  <model id="Faville2008_UPdepolarization" name="Faville2008_UPdepolarization" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>A biophysically based mathematical model of unitary potential activity in
+interstitial cells of Cajal.</strong>
+                <br/>
+          Faville RA, Pullan AJ, Sanders KM, Smith NP.      <em>Biophys J</em>
+          2008 Jul;95(1):88-104      <a href="http://www.ncbi.nlm.nih.gov/pubmed/18339738">18339738</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          Unitary potential (UP) depolarizations are the basic intracellular events
+responsible for pacemaker activity in interstitial cells of Cajal (ICCs), and
+are generated at intracellular sites termed "pacemaker units". In this study, we
+present a mathematical model of the transmembrane ion flows and intracellular
+Ca(2+) dynamics from a single ICC pacemaker unit acting at near-resting membrane
+potential. This model quantitatively formalizes the framework of a novel ICC
+pacemaking mechanism that has recently been proposed. Model simulations produce
+spontaneously rhythmic UP depolarizations with an amplitude of approximately 3
+mV at a frequency of 0.05 Hz. The model predicts that the main inward currents,
+carried by a Ca(2+)-inhibited nonselective cation conductance, are activated by
+depletion of sub-plasma-membrane [Ca(2+)] caused by sarcoendoplasmic reticulum
+calcium ATPase Ca(2+) sequestration. Furthermore, pacemaker activity predicted
+by our model persists under simulated voltage clamp and is independent of
+[IP(3)] oscillations. The model presented here provides a basis to
+quantitatively analyze UP depolarizations and the biophysical mechanisms
+underlying their production.      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://www.cellml.org/models/faville_pullan_sanders_smith_2008_version02">        <strong>Faville RA, Pullan AJ, Sanders KM, Smith NP. (2008) - version02</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>Lloyd, Catherine, May</strong>
+                <br/>
+          c.lloyd@aukland.ac.nz      <br/>
+          The University of Auckland      <br/>
+          The Bioengineering Institute      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL0912044015"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/18339738"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="millivolt" name="millivolt" metaid="_630400">
+        <listOfUnits>
+          <unit scale="-3" metaid="_630412" kind="volt"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="micromolar" name="micromolar" metaid="_630424">
+        <listOfUnits>
+          <unit scale="-6" metaid="_630436" kind="mole"/>
+          <unit exponent="-1" metaid="_630449" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_micromolar" name="per_micromolar" metaid="_630461">
+        <listOfUnits>
+          <unit scale="-6" exponent="-1" metaid="_630473" kind="mole"/>
+          <unit metaid="_630485" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_micromolar2" name="per_micromolar2" metaid="_630497">
+        <listOfUnits>
+          <unit scale="-6" exponent="-2" metaid="_630509" kind="mole"/>
+          <unit exponent="2" metaid="_630521" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="picofarad" name="picofarad" metaid="_630533">
+        <listOfUnits>
+          <unit scale="-12" metaid="_630545" kind="farad"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="picosiemens" name="picosiemens" metaid="_630557">
+        <listOfUnits>
+          <unit scale="-12" metaid="_630569" kind="siemens"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="picoampere" name="picoampere" metaid="_630581">
+        <listOfUnits>
+          <unit scale="-12" metaid="_630593" kind="ampere"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="femtoampere" name="femtoampere" metaid="_630605">
+        <listOfUnits>
+          <unit scale="-15" metaid="_630617" kind="ampere"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="micromolar_coulomb" name="micromolar_coulomb" metaid="_630629">
+        <listOfUnits>
+          <unit scale="-6" metaid="_630641" kind="mole"/>
+          <unit exponent="-1" metaid="_630653" kind="litre"/>
+          <unit exponent="-1" metaid="_630665" kind="coulomb"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="femtocoulomb_per_zeptomole" name="femtocoulomb_per_zeptomole" metaid="_630677">
+        <listOfUnits>
+          <unit scale="-15" metaid="_630689" kind="coulomb"/>
+          <unit scale="-21" exponent="-1" metaid="_630701" kind="mole"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="attojoule_per_zeptomole_kelvin" name="attojoule_per_zeptomole_kelvin" metaid="_630713">
+        <listOfUnits>
+          <unit scale="-18" metaid="_630726" kind="joule"/>
+          <unit scale="-21" exponent="-1" metaid="_630739" kind="mole"/>
+          <unit exponent="-1" metaid="_630751" kind="kelvin"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="first_order_rate_constant" name="first_order_rate_constant" metaid="_630763">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_630775" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_second_squared" name="per_second_squared" metaid="_630787">
+        <listOfUnits>
+          <unit exponent="-2" metaid="_630799" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="flux" name="flux" metaid="_630811">
+        <listOfUnits>
+          <unit scale="-6" metaid="_630823" kind="mole"/>
+          <unit exponent="-1" metaid="_630835" kind="litre"/>
+          <unit exponent="-1" metaid="_630847" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="Compartment" metaid="_014554" units="litre" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="Vm" constant="false" name="Vm" metaid="_014624" value="-70.1" units="millivolt"/>
+      <parameter id="I_iCa" constant="false" name="I_iCa" metaid="_014627" units="picoampere"/>
+      <parameter id="I_iNa" constant="false" name="I_iNa" metaid="_014629" units="picoampere"/>
+      <parameter id="Cm" name="Cm" metaid="_014631" value="20" units="picofarad"/>
+      <parameter id="I_Ca" constant="false" name="I_Ca" metaid="_014633" units="picoampere"/>
+      <parameter id="gCa" name="gCa" metaid="_014635" value="0.01" units="picosiemens"/>
+      <parameter id="ECa" constant="false" name="ECa" metaid="_014637" units="millivolt"/>
+      <parameter id="I_NSCC_Ca" constant="false" name="I_NSCC_Ca" metaid="_014639" units="picoampere"/>
+      <parameter id="gNSCC_Ca_" name="gNSCC_Ca_" metaid="_014641" value="0.12" units="picosiemens"/>
+      <parameter id="gNSCC_Ca" constant="false" name="gNSCC_Ca" metaid="_014643" units="picosiemens"/>
+      <parameter id="I_NSCC_Na" constant="false" name="I_NSCC_Na" metaid="_014645" units="picoampere"/>
+      <parameter id="gNSCC_Na_" name="gNSCC_Na_" metaid="_014647" value="220" units="picosiemens"/>
+      <parameter id="gNSCC_Na" constant="false" name="gNSCC_Na" metaid="_014649" units="picosiemens"/>
+      <parameter id="I_PM" constant="false" name="I_PM" metaid="_014651" units="picoampere"/>
+      <parameter id="gPM" name="gPM" metaid="_014653" value="420" units="femtoampere"/>
+      <parameter id="KPM" name="KPM" metaid="_014655" value="1" units="micromolar"/>
+      <parameter id="I_Na" constant="false" name="I_Na" metaid="_014657" units="picoampere"/>
+      <parameter id="gNa" name="gNa" metaid="_014659" value="15000" units="femtoampere"/>
+      <parameter id="KNa" name="KNa" metaid="_014661" value="10000" units="micromolar"/>
+      <parameter id="hNa" name="hNa" metaid="_014663" value="4" units="dimensionless"/>
+      <parameter id="JSERCA" constant="false" name="JSERCA" metaid="_014665" units="flux"/>
+      <parameter id="VSERCA" name="VSERCA" metaid="_014667" value="100000" units="first_order_rate_constant"/>
+      <parameter id="A2" name="A2" metaid="_014669" value="0.0006" units="dimensionless"/>
+      <parameter id="A4" name="A4" metaid="_014671" value="3.57" units="per_micromolar"/>
+      <parameter id="A5" name="A5" metaid="_014673" value="2.7E-5" units="per_micromolar"/>
+      <parameter id="A6" name="A6" metaid="_014675" value="2.31E-5" units="per_micromolar2"/>
+      <parameter id="JMCU" constant="false" name="JMCU" metaid="_014677" units="flux"/>
+      <parameter id="VMCU" name="VMCU" metaid="_014679" value="800" units="flux"/>
+      <parameter id="KMCU" name="KMCU" metaid="_014681" value="10" units="micromolar"/>
+      <parameter id="epsilon_INH" constant="false" name="epsilon_INH" metaid="_014683" units="dimensionless"/>
+      <parameter id="KINH" name="KINH" metaid="_014685" value="10" units="micromolar"/>
+      <parameter id="hINH" name="hINH" metaid="_014687" value="4" units="dimensionless"/>
+      <parameter id="JNCX" constant="false" name="JNCX" metaid="_014689" units="flux"/>
+      <parameter id="VNCX" name="VNCX" metaid="_014691" value="0.5" units="flux"/>
+      <parameter id="KNCX" name="KNCX" metaid="_014693" value="0.3" units="micromolar"/>
+      <parameter id="JS1S2" constant="false" name="JS1S2" metaid="_014695" units="flux"/>
+      <parameter id="mu_S1S2" name="mu_S1S2" metaid="_014697" value="0.04" units="first_order_rate_constant"/>
+      <parameter id="JIPR" constant="false" name="JIPR" metaid="_014699" units="flux"/>
+      <parameter id="kIPR" name="kIPR" metaid="_014701" value="2000" units="first_order_rate_constant"/>
+      <parameter id="k_1" name="k_1" metaid="_014703" value="6.4" units="flux"/>
+      <parameter id="k1" name="k1" metaid="_014705" value="0" units="first_order_rate_constant"/>
+      <parameter id="k2" name="k2" metaid="_014707" value="4" units="first_order_rate_constant"/>
+      <parameter id="r2" name="r2" metaid="_014709" value="200" units="first_order_rate_constant"/>
+      <parameter id="r_2" name="r_2" metaid="_014711" value="0" units="flux"/>
+      <parameter id="r4" name="r4" metaid="_014713" value="750" units="first_order_rate_constant"/>
+      <parameter id="R1" name="R1" metaid="_014715" value="36" units="micromolar"/>
+      <parameter id="R3" name="R3" metaid="_014717" value="300" units="micromolar"/>
+      <parameter id="phi1" constant="false" name="phi1" metaid="_014719" units="first_order_rate_constant"/>
+      <parameter id="phi_1" constant="false" name="phi_1" metaid="_014722" units="flux"/>
+      <parameter id="phi2" constant="false" name="phi2" metaid="_014724" units="first_order_rate_constant"/>
+      <parameter id="phi3" constant="false" name="phi3" metaid="_014726" value="0.306" units="first_order_rate_constant"/>
+      <parameter id="H" constant="false" name="H" metaid="_014729" value="0.787" units="dimensionless"/>
+      <parameter id="g_beta" name="g_beta" metaid="_014731" value="300" units="first_order_rate_constant"/>
+      <parameter id="h_beta" name="h_beta" metaid="_014733" value="2" units="dimensionless"/>
+      <parameter id="g_alpha" name="g_alpha" metaid="_014735" value="0.02" units="per_second_squared"/>
+      <parameter id="K_beta" name="K_beta" metaid="_014737" value="2" units="micromolar"/>
+      <parameter id="alpha_phi3" constant="false" name="alpha_phi3" metaid="_014739" units="per_second_squared"/>
+      <parameter id="beta_phi3" constant="false" name="beta_phi3" metaid="_014741" units="first_order_rate_constant"/>
+      <parameter id="CS1" constant="false" name="CS1" metaid="_014743" value="0.12" units="micromolar"/>
+      <parameter id="lambda_MT_S1" constant="false" name="lambda_MT_S1" metaid="_014745" units="dimensionless"/>
+      <parameter id="lambda_ER_S1" constant="false" name="lambda_ER_S1" metaid="_014748" units="dimensionless"/>
+      <parameter id="CS2" constant="false" name="CS2" metaid="_014750" value="0.023" units="micromolar"/>
+      <parameter id="lambda_MT_S2" constant="false" name="lambda_MT_S2" metaid="_014752" units="dimensionless"/>
+      <parameter id="lambda_ER_S2" constant="false" name="lambda_ER_S2" metaid="_014754" units="dimensionless"/>
+      <parameter id="lambda_S1_S2" constant="false" name="lambda_S1_S2" metaid="_014756" units="dimensionless"/>
+      <parameter id="CER" constant="false" name="CER" metaid="_014759" value="203" units="micromolar"/>
+      <parameter id="CMT" constant="false" name="CMT" metaid="_014761" value="0.22" units="micromolar"/>
+      <parameter id="fm" constant="false" name="fm" metaid="_014764" units="dimensionless"/>
+      <parameter id="Km" name="Km" metaid="_014766" value="0.01" units="micromolar"/>
+      <parameter id="Bm" name="Bm" metaid="_014769" value="100" units="micromolar"/>
+      <parameter id="NS1" constant="false" name="NS1" metaid="_014771" value="10100" units="micromolar"/>
+      <parameter id="R" name="R" metaid="_014774" value="0.008314" units="attojoule_per_zeptomole_kelvin"/>
+      <parameter id="F" name="F" metaid="_014776" value="0.09649" units="femtocoulomb_per_zeptomole"/>
+      <parameter id="T" name="T" metaid="_014779" value="310.16" units="kelvin"/>
+      <parameter id="CO" name="CO" metaid="_014782" value="1800" units="micromolar"/>
+      <parameter id="P" name="P" metaid="_014785" value="1" units="micromolar"/>
+      <parameter id="delta_s" name="delta_s" metaid="_014788" value="26" units="micromolar_coulomb"/>
+      <parameter id="gamma_S1" name="gamma_S1" metaid="_014791" value="100" units="dimensionless"/>
+      <parameter id="gamma_S2" name="gamma_S2" metaid="_014794" value="1" units="dimensionless"/>
+      <parameter id="gamma_MT" name="gamma_MT" metaid="_014797" value="200" units="dimensionless"/>
+      <parameter id="gamma_ER" name="gamma_ER" metaid="_014800" value="20" units="dimensionless"/>
+      <parameter id="KNSCC" name="KNSCC" metaid="_014803" value="0.12" units="micromolar"/>
+      <parameter id="ENSCC" name="ENSCC" metaid="_014806" value="0" units="millivolt"/>
+      <parameter id="hNSCC" name="hNSCC" metaid="_014809" value="3" units="dimensionless"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_014555" variable="Vm">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <divide/>
+              <apply>
+                <plus/>
+                <ci> I_iCa </ci>
+                <ci> I_iNa </ci>
+              </apply>
+              <ci> Cm </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_014556" variable="H">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> phi3 </ci>
+              <apply>
+                <minus/>
+                <cn> 1 </cn>
+                <ci> H </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> P </ci>
+                  <ci> phi1 </ci>
+                  <ci> phi2 </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> P </ci>
+                    <ci> phi1 </ci>
+                  </apply>
+                  <ci> phi_1 </ci>
+                </apply>
+              </apply>
+              <ci> H </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_014559" variable="phi3">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <ci> alpha_phi3 </ci>
+            <apply>
+              <times/>
+              <ci> beta_phi3 </ci>
+              <ci> phi3 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_014561" variable="CS1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <ci> JS1S2 </ci>
+              <apply>
+                <times/>
+                <ci> lambda_MT_S1 </ci>
+                <ci> JNCX </ci>
+              </apply>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <apply>
+                  <divide/>
+                  <ci> delta_s </ci>
+                  <cn> 2 </cn>
+                </apply>
+                <ci> I_iCa </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> lambda_ER_S1 </ci>
+                <ci> JSERCA </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_014563" variable="CS2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> lambda_ER_S2 </ci>
+              <ci> JIPR </ci>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> lambda_S1_S2 </ci>
+                <ci> JS1S2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> lambda_MT_S2 </ci>
+                <ci> JMCU </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_014565" variable="CER">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <ci> JSERCA </ci>
+            <ci> JIPR </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_014567" variable="CMT">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> fm </ci>
+            <apply>
+              <minus/>
+              <ci> JMCU </ci>
+              <ci> JNCX </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_014569" variable="NS1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <apply>
+              <minus/>
+              <apply>
+                <divide/>
+                <ci> delta_s </ci>
+                <cn> 1 </cn>
+              </apply>
+            </apply>
+            <ci> I_iNa </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="_014571" variable="I_iCa">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> I_Ca </ci>
+            <ci> I_NSCC_Ca </ci>
+            <ci> I_PM </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_014573" variable="I_iNa">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> I_NSCC_Na </ci>
+            <ci> I_Na </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_014575" variable="ECa">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> R </ci>
+                <ci> T </ci>
+              </apply>
+              <apply>
+                <times/>
+                <cn> 2 </cn>
+                <ci> F </ci>
+              </apply>
+            </apply>
+            <apply>
+              <ln/>
+              <apply>
+                <divide/>
+                <ci> CO </ci>
+                <ci> CS1 </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_014577" variable="I_Ca">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> gCa </ci>
+            <apply>
+              <minus/>
+              <ci> Vm </ci>
+              <ci> ECa </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_014579" variable="gNSCC_Ca">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> gNSCC_Ca_ </ci>
+            <apply>
+              <divide/>
+              <apply>
+                <power/>
+                <ci> KNSCC </ci>
+                <ci> hNSCC </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <apply>
+                  <power/>
+                  <ci> KNSCC </ci>
+                  <ci> hNSCC </ci>
+                </apply>
+                <apply>
+                  <power/>
+                  <ci> CS1 </ci>
+                  <ci> hNSCC </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_014581" variable="I_NSCC_Ca">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> gNSCC_Ca </ci>
+            <apply>
+              <minus/>
+              <ci> Vm </ci>
+              <ci> ENSCC </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_014583" variable="gNSCC_Na">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> gNSCC_Na_ </ci>
+            <apply>
+              <divide/>
+              <apply>
+                <power/>
+                <ci> KNSCC </ci>
+                <ci> hNSCC </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <apply>
+                  <power/>
+                  <ci> KNSCC </ci>
+                  <ci> hNSCC </ci>
+                </apply>
+                <apply>
+                  <power/>
+                  <ci> CS1 </ci>
+                  <ci> hNSCC </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_014585" variable="I_NSCC_Na">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> gNSCC_Na </ci>
+            <apply>
+              <minus/>
+              <ci> Vm </ci>
+              <ci> ENSCC </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_014587" variable="I_PM">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> gPM </ci>
+            <apply>
+              <divide/>
+              <apply>
+                <power/>
+                <ci> CS1 </ci>
+                <cn> 2 </cn>
+              </apply>
+              <apply>
+                <plus/>
+                <apply>
+                  <power/>
+                  <ci> KPM </ci>
+                  <cn> 2 </cn>
+                </apply>
+                <apply>
+                  <power/>
+                  <ci> CS1 </ci>
+                  <cn> 2 </cn>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_014589" variable="I_Na">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> gNa </ci>
+            <apply>
+              <divide/>
+              <apply>
+                <power/>
+                <ci> NS1 </ci>
+                <ci> hNa </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <apply>
+                  <power/>
+                  <ci> KNa </ci>
+                  <ci> hNa </ci>
+                </apply>
+                <apply>
+                  <power/>
+                  <ci> NS1 </ci>
+                  <ci> hNa </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_014591" variable="JSERCA">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <times/>
+              <ci> VSERCA </ci>
+              <apply>
+                <minus/>
+                <ci> CS1 </ci>
+                <apply>
+                  <times/>
+                  <ci> A2 </ci>
+                  <ci> CER </ci>
+                </apply>
+              </apply>
+            </apply>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <times/>
+                <ci> A4 </ci>
+                <ci> CS1 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> A5 </ci>
+                <ci> CER </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> A6 </ci>
+                <ci> CS1 </ci>
+                <ci> CER </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_014593" variable="JMCU">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> VMCU </ci>
+            <apply>
+              <divide/>
+              <apply>
+                <power/>
+                <ci> CS2 </ci>
+                <cn> 2 </cn>
+              </apply>
+              <apply>
+                <plus/>
+                <apply>
+                  <power/>
+                  <ci> KMCU </ci>
+                  <cn> 2 </cn>
+                </apply>
+                <apply>
+                  <power/>
+                  <ci> CS2 </ci>
+                  <cn> 2 </cn>
+                </apply>
+              </apply>
+            </apply>
+            <ci> epsilon_INH </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_014595" variable="epsilon_INH">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <power/>
+              <ci> KINH </ci>
+              <ci> hINH </ci>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <power/>
+                <ci> KINH </ci>
+                <ci> hINH </ci>
+              </apply>
+              <apply>
+                <power/>
+                <ci> CMT </ci>
+                <ci> hINH </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_014597" variable="JNCX">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> VNCX </ci>
+            <apply>
+              <divide/>
+              <ci> CMT </ci>
+              <apply>
+                <plus/>
+                <ci> CMT </ci>
+                <ci> KNCX </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_014599" variable="JS1S2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> mu_S1S2 </ci>
+            <apply>
+              <minus/>
+              <ci> CS2 </ci>
+              <ci> CS1 </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_014601" variable="JIPR">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> kIPR </ci>
+            <apply>
+              <power/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> P </ci>
+                  <ci> phi1 </ci>
+                  <ci> H </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> P </ci>
+                    <ci> phi1 </ci>
+                  </apply>
+                  <ci> phi_1 </ci>
+                </apply>
+              </apply>
+              <cn> 4 </cn>
+            </apply>
+            <apply>
+              <minus/>
+              <ci> CER </ci>
+              <ci> CS2 </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_014603" variable="phi1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> R1 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> r2 </ci>
+                <ci> CS2 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <plus/>
+              <ci> R1 </ci>
+              <ci> CS2 </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_014605" variable="phi_1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <times/>
+              <apply>
+                <plus/>
+                <ci> k_1 </ci>
+                <ci> r_2 </ci>
+              </apply>
+              <ci> R3 </ci>
+            </apply>
+            <apply>
+              <plus/>
+              <ci> R3 </ci>
+              <ci> CS2 </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_014607" variable="phi2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> R3 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> r4 </ci>
+                <ci> CS2 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <plus/>
+              <ci> R3 </ci>
+              <ci> CS2 </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_014609" variable="alpha_phi3">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <ci> g_alpha </ci>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_014611" variable="beta_phi3">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> g_beta </ci>
+            <apply>
+              <divide/>
+              <apply>
+                <power/>
+                <ci> CS2 </ci>
+                <ci> h_beta </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <apply>
+                  <power/>
+                  <ci> K_beta </ci>
+                  <ci> h_beta </ci>
+                </apply>
+                <apply>
+                  <power/>
+                  <ci> CS2 </ci>
+                  <ci> h_beta </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_014613" variable="lambda_MT_S1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <ci> gamma_MT </ci>
+            <ci> gamma_S1 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_014615" variable="lambda_ER_S1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <ci> gamma_ER </ci>
+            <ci> gamma_S1 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_014617" variable="lambda_MT_S2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <ci> gamma_MT </ci>
+            <ci> gamma_S2 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_014619" variable="lambda_ER_S2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <ci> gamma_ER </ci>
+            <ci> gamma_S2 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_014621" variable="lambda_S1_S2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <ci> gamma_S1 </ci>
+            <ci> gamma_S2 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_014623" variable="fm">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn> 1 </cn>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Km </ci>
+                  <ci> Bm </ci>
+                </apply>
+                <apply>
+                  <power/>
+                  <apply>
+                    <plus/>
+                    <ci> Km </ci>
+                    <ci> CMT </ci>
+                  </apply>
+                  <cn> 2 </cn>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+  </model>
+</sbml>

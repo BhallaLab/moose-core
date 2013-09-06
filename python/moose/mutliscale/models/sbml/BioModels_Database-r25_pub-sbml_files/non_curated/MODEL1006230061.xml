@@ -1,0 +1,530 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="_479781" version="4">
+  <model id="Wodarz2003_ImmunologicalMemory" name="Wodarz2003_ImmunologicalMemory" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>Evolution of immunological memory and the regulation of competition between
+pathogens.</strong>
+                <br/>
+          Wodarz D.      <em>Curr Biol</em>
+          2003 Sep 16;13(18):1648-52      <a href="http://www.ncbi.nlm.nih.gov/pubmed/13678598">13678598</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          Memory is a central characteristic of immune responses. It is defined as an
+elevated number of specific immune cells that remain after resolution of
+infection and can protect the host against reinfection. The evolution of
+immunological memory is subject to debate. The advantages of memory discussed so
+far include protection from reinfection, control of chronic infection, and the
+transfer of immune function to the next generation. Mathematical models are used
+to identify a new force that can drive the evolution of immunological memory:
+the duration of memory can regulate the degree of competition between different
+pathogens. While a long duration of memory provides lasting protection against
+reinfection, it may also allow an inferior pathogen species to persist. This can
+be detrimental for the host if the inferior pathogen is more virulent. On the
+other hand, a shorter duration of memory ensures that an inferior pathogen
+species is excluded. This can be beneficial for the host if the inferior
+pathogen is more virulent. Thus, while in the absence of pathogen diversity
+memory is always expected to evolve to a long duration, under specific
+circumstances, memory can evolve toward shorter durations in the presence of
+pathogen diversity.      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://models.cellml.org/exposure/0fbec879c60f5a3005da0ea829e1ff3e">        <strong>Wodarz D. (2003) - version=1.0</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>Catherine Lloyd</strong>
+                <br/>
+          c.lloyd@auckland.ac.nz      <br/>
+          The University of Auckland      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:23:00Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:23:00Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:23:00Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:23:00Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1006230061"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/13678598"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="day" name="day" metaid="_479793">
+        <listOfUnits>
+          <unit metaid="_479805" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="first_order_rate_constant" name="first_order_rate_constant" metaid="_479817">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_479829" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time" name="time" metaid="_479842">
+        <listOfUnits>
+          <unit metaid="_479854" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="COMpartment" metaid="_579368" units="litre" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="S" constant="false" name="S" metaid="_579505" value="100"/>
+      <parameter id="r" name="r" metaid="_579506" value="0.5"/>
+      <parameter id="epsilon" name="epsilon" metaid="_579507" value="0.1"/>
+      <parameter id="H" constant="false" name="H" metaid="_579508"/>
+      <parameter id="P" constant="false" name="P" metaid="_579509"/>
+      <parameter id="I_1" constant="false" name="I_1" metaid="_579510" value="0"/>
+      <parameter id="I_2" constant="false" name="I_2" metaid="_579511" value="0"/>
+      <parameter id="I_12" constant="false" name="I_12" metaid="_579512" value="0"/>
+      <parameter id="I_21" constant="false" name="I_21" metaid="_579513" value="0"/>
+      <parameter id="R_1" constant="false" name="R_1" metaid="_579514" value="0"/>
+      <parameter id="R_2" constant="false" name="R_2" metaid="_579515" value="0"/>
+      <parameter id="R_12" constant="false" name="R_12" metaid="_579516" value="0"/>
+      <parameter id="P_1" constant="false" name="P_1" metaid="_579517" value="1"/>
+      <parameter id="k_1" name="k_1" metaid="_579518" value="1"/>
+      <parameter id="log_P1" constant="false" name="log_P1" metaid="_579519"/>
+      <parameter id="P_2" constant="false" name="P_2" metaid="_579520" value="1"/>
+      <parameter id="k_2" name="k_2" metaid="_579521" value="1"/>
+      <parameter id="log_P2" constant="false" name="log_P2" metaid="_579522"/>
+      <parameter id="G" constant="false" name="G" metaid="_579524"/>
+      <parameter id="g" name="g" metaid="_579525" value="0.01"/>
+      <parameter id="beta_1" name="beta_1" metaid="_579526" value="1"/>
+      <parameter id="alpha_1" name="alpha_1" metaid="_579527" value="0.1"/>
+      <parameter id="beta_2" name="beta_2" metaid="_579529" value="1"/>
+      <parameter id="alpha_2" name="alpha_2" metaid="_579530" value="0.1"/>
+      <parameter id="a_1" name="a_1" metaid="_579531" value="0.03"/>
+      <parameter id="a_2" name="a_2" metaid="_579532" value="1"/>
+      <parameter id="d" name="d" metaid="_579533" value="0.01"/>
+      <parameter id="u" name="u" metaid="_579534" value="0.5"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_579372" variable="S">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <apply>
+                <minus/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <times/>
+                      <ci> r </ci>
+                      <ci> H </ci>
+                    </apply>
+                    <apply>
+                      <plus/>
+                      <apply>
+                        <times/>
+                        <ci> epsilon </ci>
+                        <ci> H </ci>
+                      </apply>
+                      <cn> 1 </cn>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> d </ci>
+                    <ci> S </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> beta_1 </ci>
+                  <ci> S </ci>
+                  <ci> P_1 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> beta_2 </ci>
+                <ci> S </ci>
+                <ci> P_2 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> g </ci>
+              <apply>
+                <plus/>
+                <ci> R_1 </ci>
+                <ci> R_2 </ci>
+                <ci> R_12 </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_579374" variable="I_1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> beta_1 </ci>
+                <ci> S </ci>
+                <ci> P_1 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> a_1 </ci>
+                <ci> I_1 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> alpha_1 </ci>
+              <ci> I_1 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_579375" variable="I_2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> beta_2 </ci>
+                <ci> S </ci>
+                <ci> P_2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> a_2 </ci>
+                <ci> I_2 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> alpha_2 </ci>
+              <ci> I_2 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_579376" variable="I_12">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> beta_2 </ci>
+                <ci> R_1 </ci>
+                <ci> P_2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> a_2 </ci>
+                <ci> I_12 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> alpha_2 </ci>
+              <ci> I_12 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_579486" variable="I_21">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> beta_1 </ci>
+                <ci> R_2 </ci>
+                <ci> P_1 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> a_1 </ci>
+                <ci> I_21 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> alpha_1 </ci>
+              <ci> I_21 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_579487" variable="R_1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <minus/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> alpha_1 </ci>
+                  <ci> I_1 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> d </ci>
+                  <ci> R_1 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> g </ci>
+                <ci> R_1 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> beta_2 </ci>
+              <ci> R_1 </ci>
+              <ci> P_2 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_579488" variable="R_2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <minus/>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> alpha_2 </ci>
+                  <ci> I_2 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> d </ci>
+                  <ci> R_2 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> g </ci>
+                <ci> R_2 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> beta_1 </ci>
+              <ci> R_2 </ci>
+              <ci> P_1 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_579490" variable="R_12">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <minus/>
+              <apply>
+                <plus/>
+                <apply>
+                  <times/>
+                  <ci> alpha_2 </ci>
+                  <ci> I_12 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> alpha_1 </ci>
+                  <ci> I_21 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> d </ci>
+                <ci> R_12 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> g </ci>
+              <ci> R_12 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_579494" variable="P_1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> k_1 </ci>
+              <apply>
+                <plus/>
+                <ci> I_1 </ci>
+                <ci> I_21 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> u </ci>
+              <ci> P_1 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_579495" variable="P_2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> k_2 </ci>
+              <apply>
+                <plus/>
+                <ci> I_2 </ci>
+                <ci> I_12 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> u </ci>
+              <ci> P_2 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="_579497" variable="P">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> P_1 </ci>
+            <ci> P_2 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_579499" variable="H">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> S </ci>
+            <ci> I_1 </ci>
+            <ci> R_1 </ci>
+            <ci> I_2 </ci>
+            <ci> R_2 </ci>
+            <ci> I_12 </ci>
+            <ci> I_21 </ci>
+            <ci> R_12 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_579501" variable="log_P1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <log/>
+            <logbase>
+              <cn type="integer"> 10 </cn>
+            </logbase>
+            <ci> P_1 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_579502" variable="log_P2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <log/>
+            <logbase>
+              <cn type="integer"> 10 </cn>
+            </logbase>
+            <ci> P_2 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_579503" variable="G">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn> 1 </cn>
+            <ci> g </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+  </model>
+</sbml>

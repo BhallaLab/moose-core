@@ -1,0 +1,203 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="c78a70a4_9e56_4e36_bfe9_de9a8f46a3e4" version="4">
+  <model id="MODEL1304190001" name="Mufudza2012 - Estrogen effect on the dynamics of breast cancer" metaid="_8e6328be_e732_41e6_bc3a_2826999d5633">
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#_8e6328be_e732_41e6_bc3a_2826999d5633">
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1304190001"/>
+            </rdf:Bag>
+          </bqmodel:is>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfCompartments>
+      <compartment id="Tissue" name="Tissue" metaid="d528d871_259c_4c13_8fa0_5a5262abfa63" size="1"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="H" initialConcentration="1" name="normal cells" metaid="_47501e42_fc5b_4824_bec1_d47054df2d09" compartment="Tissue"/>
+      <species id="T" initialConcentration="1E-5" name="Tumour cells" metaid="d2e6f626_9682_4f4f_8fe0_796ddb584257" compartment="Tissue"/>
+      <species id="I" initialConcentration="1.379310345" name="Immune cells" metaid="_6f36199f_3ac9_49fe_a90b_65ff640188a3" compartment="Tissue"/>
+      <species id="E" initialConcentration="2" name="17-beta estradiol" metaid="_390354d0_84ba_49f7_8986_62d1f6ebfe3a" compartment="Tissue"/>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="alpha1" name="alpha1" metaid="_144c6ee3_0261_43e0_99c7_66deee40ba3e" value="0.7"/>
+      <parameter id="alpha2" name="alpha2" metaid="_44aaacf5_5972_4f72_ad56_8004cc9bc927" value="0.98"/>
+      <parameter id="beta1" name="beta1" metaid="_60718d39_ee84_45ba_b7d9_d70d707be8ac" value="0.3"/>
+      <parameter id="beta2" name="beta2" metaid="a1bd84e0_e82b_4f89_ac34_677e79ccba4c" value="0.4"/>
+      <parameter id="delta1" name="delta1" metaid="_8dea6179_6c1d_4f6f_bd18_543d851be580" value="1"/>
+      <parameter id="gamma2" name="gamma2" metaid="_0e7a9d39_8099_49b0_b785_e6a387a52a22" value="0.9"/>
+      <parameter id="s" name="s" metaid="b1c66219_664d_421a_ac82_6525dd764e72" value="0.4"/>
+      <parameter id="rho" name="rho" metaid="b4ad9ad0_7642_4b4e_b993_4061f4a68cfd" value="0.2"/>
+      <parameter id="omega" name="omega" metaid="_160a1723_6379_40f0_b5b3_ab2e8b033ada" value="0.3"/>
+      <parameter id="mu" name="mu" metaid="e539af36_4dbe_4f3c_8228_7b7d0df06dbc" value="0.29"/>
+      <parameter id="alpha3" name="alpha3" metaid="_301ea56f_5b26_4e66_ba20_01c3426faeab" value="1"/>
+      <parameter id="gamma3" name="gamma3" metaid="b9e4625d_080b_402d_a2d2_2fdfbfe5bdae" value="0.085"/>
+      <parameter id="sigma1" name="sigma1" metaid="_6d54c01d_e61d_45d8_8b6f_84ad693531d4" value="1.2"/>
+      <parameter id="sigma2" name="sigma2" metaid="_4190f52d_341b_4aa6_be2e_232f43c0f05a" value="0.94"/>
+      <parameter id="sigma3" name="sigma3" metaid="_042f9395_45cf_4f3c_b42b_bd96416ca0fa" value="0.3"/>
+      <parameter id="v" name="v" metaid="_5c5bb06e_84e7_4fb8_9ae0_74fed1e7131e" value="0.4"/>
+      <parameter id="theta" name="theta" metaid="_7b81f7f3_c4bb_4919_bf08_2995322e91e8" value="0.8"/>
+      <parameter id="pi" name="pi" metaid="_2e568c51_d2a6_4690_a613_7e2a88d08cf9" value="0.3"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_6b97b91e_695a_4d51_b9ae_1d4fbb131c9e" variable="H">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> H </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <minus/>
+                  <ci> alpha1 </ci>
+                  <apply>
+                    <times/>
+                    <ci> beta1 </ci>
+                    <ci> H </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> delta1 </ci>
+                  <ci> T </ci>
+                </apply>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <apply>
+                <times/>
+                <ci> sigma1 </ci>
+                <ci> H </ci>
+              </apply>
+              <ci> E </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_7fe88c39_1183_4239_8789_bc9906f0a3ef" variable="T">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> T </ci>
+                <apply>
+                  <minus/>
+                  <ci> alpha3 </ci>
+                  <apply>
+                    <times/>
+                    <ci> beta2 </ci>
+                    <ci> T </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <apply>
+                  <times/>
+                  <ci> gamma2 </ci>
+                  <ci> I </ci>
+                </apply>
+                <ci> T </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <apply>
+                <times/>
+                <ci> sigma2 </ci>
+                <ci> H </ci>
+              </apply>
+              <ci> E </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_8458a453_1cc2_48f7_a02e_f020ed308bab" variable="I">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <minus/>
+              <apply>
+                <minus/>
+                <apply>
+                  <plus/>
+                  <ci> s </ci>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <times/>
+                      <apply>
+                        <times/>
+                        <ci> rho </ci>
+                        <ci> I </ci>
+                      </apply>
+                      <ci> T </ci>
+                    </apply>
+                    <apply>
+                      <plus/>
+                      <ci> omega </ci>
+                      <ci> T </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <apply>
+                    <times/>
+                    <ci> gamma3 </ci>
+                    <ci> I </ci>
+                  </apply>
+                  <ci> T </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> mu </ci>
+                <ci> I </ci>
+              </apply>
+            </apply>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <apply>
+                  <times/>
+                  <ci> sigma3 </ci>
+                  <ci> I </ci>
+                </apply>
+                <ci> E </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <ci> v </ci>
+                <ci> E </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="b6bc5ae9_2fb4_4f12_8efe_e6a40b8b5f34" variable="E">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <pi/>
+            <apply>
+              <times/>
+              <ci> theta </ci>
+              <ci> E </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+    </listOfRules>
+  </model>
+</sbml>

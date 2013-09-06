@@ -1,0 +1,2165 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="_6d196cb6_8cd9_4ace_b454_49803ca564ed" version="4">
+  <model id="MODEL1305010000" name="Chavez2009 - a core regulatory network of OCT4 in human embryonic stem cells" metaid="_4c98d7c3_f97a_4da5_9d02_16c01b3f6cd6">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <div class="dc:title">Chavez2009 - a core regulatory network of OCT4 in human embryonic stem cells</div>
+            <div class="dc:description">      <p>A core OCT4-regulated network has been identified as a test case, to analyase stem cell characteristics and cellular differentiation.</p>
+                </div>
+            <div class="dc:bibliographicCitation">      <p>This model is described in the article:</p>
+                <div class="bibo:title">        <a href="http://identifiers.org/pubmed/19604364" title="Access to this publication">In silico identification of a core regulatory network of OCT4 in human embryonic stem cells using an integrated approach.</a>
+                    </div>
+                <div class="bibo:authorList">Chavez L, Bais AS, Vingron M, Lehrach H, Adjaye J, Herwig R</div>
+                <div class="bibo:Journal">BMC Genomics, 2009, 10:314</div>
+                <p>Abstract:</p>
+                <div class="bibo:abstract">        <p>BACKGROUND: The transcription factor OCT4 is highly expressed in pluripotent embryonic stem cells which are derived from the inner cell mass of mammalian blastocysts. Pluripotency and self renewal are controlled by a transcription regulatory network governed by the transcription factors OCT4, SOX2 and NANOG. Recent studies on reprogramming somatic cells to induced pluripotent stem cells highlight OCT4 as a key regulator of pluripotency.</p>
+                    <p>RESULTS: We have carried out an integrated analysis of high-throughput data (ChIP-on-chip and RNAi experiments along with promoter sequence analysis of putative target genes) and identified a core OCT4 regulatory network in human embryonic stem cells consisting of 33 target genes. Enrichment analysis with these target genes revealed that this integrative analysis increases the functional information content by factors of 1.3 - 4.7 compared to the individual studies. In order to identify potential regulatory co-factors of OCT4, we performed a de novo motif analysis. In addition to known validated OCT4 motifs we obtained binding sites similar to motifs recognized by further regulators of pluripotency and development; e.g. the heterodimer of the transcription factors C-MYC and MAX, a prerequisite for C-MYC transcriptional activity that leads to cell growth and proliferation.</p>
+                    <p>CONCLUSION: Our analysis shows how heterogeneous functional information can be integrated in order to reconstruct gene regulatory networks. As a test case we identified a core OCT4-regulated network that is important for the analysis of stem cell characteristics and cellular differentiation. Functional information is largely enriched using different experimental results. The de novo motif discovery identified well-known regulators closely connected to the OCT4 network as well as potential new regulators of pluripotency and differentiation. These results provide the basis for further targeted functional studies.</p>
+                    </div>
+                </div>
+            <div class="dc:publisher">      <p>This model is hosted on        <a href="http://www.ebi.ac.uk/biomodels/">BioModels Database</a>
+            and identified
+by:        <a href="http://identifiers.org/biomodels.db/MODEL1305010000">MODEL1305010000</a>
+            .        </p>
+                <p>To cite BioModels Database, please use:        <a href="http://identifiers.org/pubmed/20587024" title="Latest BioModels Database publication">BioModels Database: An enhanced, curated and annotated resource
+for published quantitative kinetic models</a>
+            .        </p>
+                </div>
+            <div class="dc:license">      <p>To the extent possible under law, all copyright and related or
+neighbouring rights to this encoded model have been dedicated to the public
+domain worldwide. Please refer to        <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Access to: CC0 1.0 Universal (CC0 1.0), Public Domain Dedication">CC0 Public Domain
+Dedication</a>
+            for more information.        </p>
+                </div>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#_4c98d7c3_f97a_4da5_9d02_16c01b3f6cd6">
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1305010000"/>
+            </rdf:Bag>
+          </bqmodel:is>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfCompartments>
+      <compartment id="Compartment__Reactome_356" name="cell" metaid="_52312296_bdd6_4ee2_a29c_0b705d65b183"/>
+      <compartment id="Compartment__Reactome_354" name="intracellular" metaid="_96953ee3_8f6f_4455_8eec_b4979a4b77e3"/>
+      <compartment id="Compartment__Reactome_352" name="nucleus" metaid="_76a74a1c_0bdc_4ad0_a34f_fe7cce47ee77"/>
+      <compartment id="Compartment__Reactome_13231" name="nuclear membrane" metaid="a9119128_7528_4a3d_ade2_a73fa5730994"/>
+      <compartment id="Compartment__Reactome_13230" name="nuclear pore" metaid="e1c538d0_0928_482a_be4b_5af727c68602"/>
+      <compartment id="Compartment__Reactome_7660" name="nucleoplasm" metaid="_0f9396ee_c080_4bdc_ae4d_d6b766bae69c"/>
+      <compartment id="Compartment__Reactome_459" name="cytoplasm" metaid="d1baa56f_86ff_4098_91a2_37c5e63cf0b9"/>
+      <compartment id="Compartment__Reactome_70101" name="cytosol" metaid="_0ee2c124_efcb_4876_9a9b_7db7791d5ba5"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="Enzyme__RNAPolymerase" initialConcentration="100" constant="true" name="RNAPolymerase" metaid="_1683136e_f814_436d_ab9c_8d6160bd2e8b" boundaryCondition="true" compartment="Compartment__Reactome_7660"/>
+      <species id="Enzyme__Spliceosome" initialConcentration="1" name="Spliceosome" metaid="_334f89f6_7fdb_4aa2_912d_e105f1db0ac1" compartment="Compartment__Reactome_7660"/>
+      <species id="Gene__BAMBI" initialConcentration="1" name="BAMBI" metaid="_52ed0a08_5e6e_488a_9f03_4e7ee0b70681" compartment="Compartment__Reactome_7660"/>
+      <species id="Gene__C9orf97" initialConcentration="1" name="C9orf97" metaid="_06c1b4f5_4f0a_4ad8_afcc_2737563a9505" compartment="Compartment__Reactome_7660"/>
+      <species id="Gene__CDX2" initialConcentration="1" name="CDX2" metaid="e8d31361_7a59_4828_b084_1d07be93cef8" compartment="Compartment__Reactome_7660"/>
+      <species id="Gene__DKK1" initialConcentration="1" name="DKK1" metaid="_9e383dbe_aa7a_4f87_8b30_ac56c7514368" compartment="Compartment__Reactome_7660"/>
+      <species id="Gene__EOMES" initialConcentration="1" name="EOMES" metaid="_8d636c25_5613_41db_9a4b_d18d4d0d1557" compartment="Compartment__Reactome_7660"/>
+      <species id="Gene__EPHA1" initialConcentration="1" name="EPHA1" metaid="_1811f057_cddc_4b5b_b478_f7f4aabedaef" compartment="Compartment__Reactome_7660"/>
+      <species id="Gene__EXOSC9" initialConcentration="1" name="EXOSC9" metaid="_9b0630ef_5346_4ad1_a749_3c54a6bf0512" compartment="Compartment__Reactome_7660"/>
+      <species id="Gene__FGF2" initialConcentration="1" name="FGF2" metaid="d3a93920_5d15_4b27_bd97_c4ca09269f4a" compartment="Compartment__Reactome_7660"/>
+      <species id="Gene__FOXD3" initialConcentration="1" name="FOXD3" metaid="df7dca7e_8fbe_4072_9e85_b18a5b30e07d" compartment="Compartment__Reactome_7660"/>
+      <species id="Gene__FRAT2" initialConcentration="1" name="FRAT2" metaid="_5ae076b6_7edc_4d71_bf97_5c15a14790fe" compartment="Compartment__Reactome_7660"/>
+      <species id="Gene__GAP43" initialConcentration="1" name="GAP43" metaid="f177d6b6_6256_446e_8530_b661dbb0796a" compartment="Compartment__Reactome_7660"/>
+      <species id="Gene__GATA6" initialConcentration="1" name="GATA6" metaid="ce5fd603_02c8_4d25_b9ae_2c811e65d49e" compartment="Compartment__Reactome_7660"/>
+      <species id="Gene__GNG10" initialConcentration="1" name="GNG10" metaid="cbabf801_bd3d_4610_8a02_b8ac35a107df" compartment="Compartment__Reactome_7660"/>
+      <species id="Gene__GSC" initialConcentration="1" name="GSC" metaid="_97a28f05_91c2_4956_a3e3_c93dcb499b3c" compartment="Compartment__Reactome_7660"/>
+      <species id="Gene__KDR" initialConcentration="1" name="KDR" metaid="f33611d9_91c6_49b0_90d4_f652e87c9e53" compartment="Compartment__Reactome_7660"/>
+      <species id="Gene__LEFTY2" initialConcentration="1" name="LEFTY2" metaid="_7943f612_e5c1_45b1_be17_3f63a16c6683" compartment="Compartment__Reactome_7660"/>
+      <species id="Gene__MAGED2" initialConcentration="1" name="MAGED2" metaid="efd2a53f_1326_4faf_8856_9b25daae6570" compartment="Compartment__Reactome_7660"/>
+      <species id="Gene__NAALAD2" initialConcentration="1" name="NAALAD2" metaid="daff32b0_96c6_4831_a156_e3e530946e6c" compartment="Compartment__Reactome_7660"/>
+      <species id="Gene__NANOG" initialConcentration="1" name="NANOG" metaid="_544ab74e_21e0_4438_87c0_a12ab9b3dc8d" compartment="Compartment__Reactome_7660"/>
+      <species id="Gene__ORC1L" initialConcentration="1" name="ORC1L" metaid="a30eb696_54e2_4356_87b3_24b1963bc7e4" compartment="Compartment__Reactome_7660"/>
+      <species id="Gene__PAX6" initialConcentration="1" name="PAX6" metaid="f85af18f_9e8d_4700_b859_c353e8e0d423" compartment="Compartment__Reactome_7660"/>
+      <species id="Gene__PHF17" initialConcentration="1" name="PHF17" metaid="_55635dc9_6894_4a1c_9367_96cf7fe1fe5d" compartment="Compartment__Reactome_7660"/>
+      <species id="Gene__PIP5K1C" initialConcentration="1" name="PIP5K1C" metaid="_53869571_18f3_4519_86a4_28e22e7d3d34" compartment="Compartment__Reactome_7660"/>
+      <species id="Gene__POU5F1" initialConcentration="1" name="POU5F1" metaid="e38eb199_ccbb_4796_acfa_3981bd92444b" compartment="Compartment__Reactome_7660"/>
+      <species id="Gene__RAB5A" initialConcentration="1" name="RAB5A" metaid="d73645f4_89f0_44d4_86b9_730af502d609" compartment="Compartment__Reactome_7660"/>
+      <species id="Gene__SFRP2" initialConcentration="1" name="SFRP2" metaid="_9fb5c150_9835_4abc_9524_c277039c2b5f" compartment="Compartment__Reactome_7660"/>
+      <species id="Gene__SOX2" initialConcentration="1" name="SOX2" metaid="_6f42b131_29ca_4982_a269_168624a41067" compartment="Compartment__Reactome_7660"/>
+      <species id="Gene__SSBP2" initialConcentration="1" name="SSBP2" metaid="_7ee937f7_2348_4cc6_b9da_a1342f8c391f" compartment="Compartment__Reactome_7660"/>
+      <species id="Gene__TCF4" initialConcentration="1" name="TCF4" metaid="_1b17df3c_33ba_480a_99d2_6d24b586f84a" compartment="Compartment__Reactome_7660"/>
+      <species id="Gene__TDGF1" initialConcentration="1" name="TDGF1" metaid="e81c415c_db31_49d4_8b8b_e4a98bee8d13" compartment="Compartment__Reactome_7660"/>
+      <species id="Gene__TGIF2" initialConcentration="1" name="TGIF2" metaid="_15e100f4_d478_495c_b918_112aeae8e970" compartment="Compartment__Reactome_7660"/>
+      <species id="Gene__TNC" initialConcentration="1" name="TNC" metaid="af47fa8e_2681_458c_9587_44ccd4cb7c39" compartment="Compartment__Reactome_7660"/>
+      <species id="Gene__TSC22D1" initialConcentration="1" name="TSC22D1" metaid="f4e30f6b_a723_476b_8d96_0b5436bfbb9f" compartment="Compartment__Reactome_7660"/>
+      <species id="Protein__BAMBI" initialConcentration="1" name="BAMBI" metaid="_9f5580f5_c144_4860_9a00_b3b01fb1063b" compartment="Compartment__Reactome_7660"/>
+      <species id="Protein__C9orf97" initialConcentration="1" name="C9orf97" metaid="_8bb3be82_27f9_4002_8171_13df17e3d3b6" compartment="Compartment__Reactome_7660"/>
+      <species id="Protein__CDX2" initialConcentration="1" name="CDX2" metaid="a432e0bb_e767_4f90_b7f2_9d0af2c63cf0" compartment="Compartment__Reactome_7660"/>
+      <species id="Protein__DKK1" initialConcentration="1" name="DKK1" metaid="_2c39ccc7_fbda_4135_8371_2d210820a8b5" compartment="Compartment__Reactome_7660"/>
+      <species id="Protein__EOMES" initialConcentration="1" name="EOMES" metaid="facdf2ec_2578_44e1_8193_673f89b6b655" compartment="Compartment__Reactome_7660"/>
+      <species id="Protein__EPHA1" initialConcentration="1" name="EPHA1" metaid="b9a7a396_3456_40ff_9b7c_db2f47121b5e" compartment="Compartment__Reactome_7660"/>
+      <species id="Protein__EXOSC9" initialConcentration="1" name="EXOSC9" metaid="_6efc03d2_a05c_4f58_a1e7_d5e8e1df1d7e" compartment="Compartment__Reactome_7660"/>
+      <species id="Protein__FGF2" initialConcentration="1" name="FGF2" metaid="b21c193b_1c40_43a4_b929_d8a96f56d4a0" compartment="Compartment__Reactome_7660"/>
+      <species id="Protein__FOXD3" initialConcentration="1" name="FOXD3" metaid="ae43872f_2fe9_4e47_af9d_2a482f93607c" compartment="Compartment__Reactome_7660"/>
+      <species id="Protein__FRAT2" initialConcentration="1" name="FRAT2" metaid="_3ee8be44_16ea_4ecd_94fb_143fb7c2136d" compartment="Compartment__Reactome_7660"/>
+      <species id="Protein__GAP43" initialConcentration="1" name="GAP43" metaid="_866b4a8a_d3b9_4da2_b309_16ca5904fddc" compartment="Compartment__Reactome_7660"/>
+      <species id="Protein__GATA6" initialConcentration="1" name="GATA6" metaid="_927fce30_7056_4692_9676_87bb88da7c56" compartment="Compartment__Reactome_7660"/>
+      <species id="Protein__GNG10" initialConcentration="1" name="GNG10" metaid="_25543ec9_9abe_4596_9b08_f1244781d874" compartment="Compartment__Reactome_7660"/>
+      <species id="Protein__GSC" initialConcentration="1" name="GSC" metaid="d1af0483_3730_410b_996a_7369d18df516" compartment="Compartment__Reactome_7660"/>
+      <species id="Protein__KDR" initialConcentration="1" name="KDR" metaid="b276da06_31df_42ca_86e9_f9965c7dcfd9" compartment="Compartment__Reactome_7660"/>
+      <species id="Protein__LEFTY2" initialConcentration="1" name="LEFTY2" metaid="_6470c108_25d7_498c_ae8b_0e64fe585cb5" compartment="Compartment__Reactome_7660"/>
+      <species id="Protein__MAGED2" initialConcentration="1" name="MAGED2" metaid="_106c3293_4cad_4e30_bdb4_90b248a987a2" compartment="Compartment__Reactome_7660"/>
+      <species id="Protein__NAALAD2" initialConcentration="1" name="NAALAD2" metaid="_31b9e7ac_029b_4089_aa1a_279651d46fd5" compartment="Compartment__Reactome_7660"/>
+      <species id="Protein__NANOG" initialConcentration="1" name="NANOG" metaid="a59c95e4_2e51_41a8_b70e_93d269ffb09d" compartment="Compartment__Reactome_7660"/>
+      <species id="Protein__ORC1L" initialConcentration="1" name="ORC1L" metaid="_731f933d_a78e_4b11_a86a_a0022eb5e4b4" compartment="Compartment__Reactome_7660"/>
+      <species id="Protein__PAX6" initialConcentration="1" name="PAX6" metaid="dab84c71_a000_442b_b843_6c9ffcc3bcac" compartment="Compartment__Reactome_7660"/>
+      <species id="Protein__PHF17" initialConcentration="1" name="PHF17" metaid="_8ee2e612_66a1_4d5b_bc3f_ce83b9eba3b7" compartment="Compartment__Reactome_7660"/>
+      <species id="Protein__PIP5K1C" initialConcentration="1" name="PIP5K1C" metaid="_50f057c6_0f91_4d98_bd32_4b3852cf7c12" compartment="Compartment__Reactome_7660"/>
+      <species id="Protein__POU5F1" initialConcentration="100" constant="true" name="POU5F1" metaid="_70780413_9594_474b_862d_689aa155c7da" boundaryCondition="true" compartment="Compartment__Reactome_7660"/>
+      <species id="Protein__RAB5A" initialConcentration="1" name="RAB5A" metaid="dcf92c04_f054_4a38_beef_dccd0408c192" compartment="Compartment__Reactome_7660"/>
+      <species id="Protein__SFRP2" initialConcentration="1" name="SFRP2" metaid="_0654a4e2_bb65_41e5_a648_16f30b432cd3" compartment="Compartment__Reactome_7660"/>
+      <species id="Protein__SOX2" initialConcentration="1" name="SOX2" metaid="_07f8edc7_bc94_4a28_b842_47b11e7c264f" compartment="Compartment__Reactome_7660"/>
+      <species id="Protein__SSBP2" initialConcentration="1" name="SSBP2" metaid="_27db7097_5892_4173_a2cb_9a5bd8242149" compartment="Compartment__Reactome_7660"/>
+      <species id="Protein__TCF4" initialConcentration="1" name="TCF4" metaid="_53b9b236_515e_4e70_a407_382c8204b5f2" compartment="Compartment__Reactome_7660"/>
+      <species id="Protein__TDGF1" initialConcentration="1" name="TDGF1" metaid="_7f072af0_34e6_44f5_b7c2_39155df5f61a" compartment="Compartment__Reactome_7660"/>
+      <species id="Protein__TGIF2" initialConcentration="1" name="TGIF2" metaid="_7ac183f9_f658_410e_b53a_26dedff6c19d" compartment="Compartment__Reactome_7660"/>
+      <species id="Protein__TNC" initialConcentration="1" name="TNC" metaid="_6bc49d67_6d41_410e_adfa_f114a85e7024" compartment="Compartment__Reactome_7660"/>
+      <species id="Protein__TSC22D1" initialConcentration="1" name="TSC22D1" metaid="_00a8b85c_866b_4c9d_bc29_2be6f8e0ac2a" compartment="Compartment__Reactome_7660"/>
+      <species id="Enzyme__Proteasome" initialConcentration="100" constant="true" name="Proteasome" metaid="fea5b569_c687_4150_8646_444b4d4e44f0" boundaryCondition="true" compartment="Compartment__Reactome_70101"/>
+      <species id="Enzyme__RNase" initialConcentration="1" name="RNase" metaid="ff06a283_46f9_458c_98b8_9c8a1a40d0bc" compartment="Compartment__Reactome_70101"/>
+      <species id="Enzyme__Ribosome" initialConcentration="1" name="Ribosome" metaid="e5b2eeff_a941_4832_906a_cd080cba546e" compartment="Compartment__Reactome_70101"/>
+    </listOfSpecies>
+    <listOfReactions>
+      <reaction id="Enzyme__RNAPolymerase_0" name="RNAPolymerase" metaid="_42f0e2b0_2a15_428f_a652_8fb09545f676" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Protein__NAALAD2" metaid="e258973f_e8f4_4b9e_907e_43f50a0a71db"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Protein__NANOG" metaid="_079a5bef_f1e6_432c_ab90_adce9ce59c22"/>
+          <modifierSpeciesReference species="Protein__POU5F1" metaid="c13b8607_cc32_4b72_aaf7_b6873f7f2a0d"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase" metaid="_1ddaa52b_0f53_4431_a7cf_b46f7e26ff26"/>
+          <modifierSpeciesReference species="Protein__NANOG"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_765c8ac1_28f7_4510_a3f7_81adeb5e01a9">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_echino1_k </ci>
+              <ci> Protein__NANOG </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 1 </cn>
+                  <apply>
+                    <times/>
+                    <cn> 1 </cn>
+                    <ci> Protein__POU5F1 </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <ci> Enzyme__RNAPolymerase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_echino1_k" metaid="_5d2b4703_1ba3_4cd6_b501_0121f8ed2c05" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__RNAPolymerase_1" name="RNAPolymerase" metaid="e481f1e1_08d5_4a4c_bc5c_be482be62e58" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Protein__BAMBI" metaid="_69179ca3_e71f_4052_b487_c7feff618afd"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Protein__NANOG" metaid="_8883e4cf_5b87_418e_97d6_5334b4a5bd1b"/>
+          <modifierSpeciesReference species="Protein__SOX2" metaid="_19e3ccbc_0436_4788_9cbe_16e50f773017"/>
+          <modifierSpeciesReference species="Protein__POU5F1" metaid="efd63fe1_bab2_44bf_82f7_050318eb767c"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase" metaid="a35b3637_1276_403d_98ee_f1f143bb2b51"/>
+          <modifierSpeciesReference species="Protein__NANOG"/>
+          <modifierSpeciesReference species="Protein__SOX2"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_270c7c0b_7331_45d2_872c_e2ec180d384f">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_echino1_k </ci>
+              <ci> Protein__NANOG </ci>
+              <ci> Protein__SOX2 </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 1 </cn>
+                  <apply>
+                    <times/>
+                    <cn> 1 </cn>
+                    <ci> Protein__POU5F1 </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <ci> Enzyme__RNAPolymerase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_echino1_k" metaid="c77f4f4e_4226_4512_a061_5554a040a0ea" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__RNAPolymerase_2" name="RNAPolymerase" metaid="_1890b7d4_867b_4675_afbe_dacd30cbe6b1" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Protein__TDGF1" metaid="_16bb301a_09bf_42de_bdc9_8845d76e8b97"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Protein__NANOG" metaid="a6495a71_5f68_4224_b6f2_02b36f03781f"/>
+          <modifierSpeciesReference species="Protein__POU5F1" metaid="_99c37a74_1421_4d7c_b6c3_dfcc95a559cc"/>
+          <modifierSpeciesReference species="Protein__SOX2" metaid="_275c188c_6abf_4183_a4fe_0583039a0f1d"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase" metaid="a663a735_30c0_4e1e_b8a8_3f7669bd7b24"/>
+          <modifierSpeciesReference species="Protein__NANOG"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Protein__SOX2"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_3930b0c6_2aba_4d9f_9029_58564522fe7f">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_echino1_k </ci>
+              <ci> Protein__NANOG </ci>
+              <ci> Protein__POU5F1 </ci>
+              <ci> Protein__SOX2 </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 1 </cn>
+                  <cn> 1 </cn>
+                </apply>
+              </apply>
+              <ci> Enzyme__RNAPolymerase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_echino1_k" metaid="_3f946473_60a3_4d69_8db3_4a921c36f661" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__RNAPolymerase_3" name="RNAPolymerase" metaid="_7f6d8462_8ad9_45d6_b0dc_5d00fb35a70e" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Protein__GSC" metaid="_2b2aeaa4_ed16_4756_b4ff_89cfb24c4643"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Protein__NANOG" metaid="dff79710_43ba_4e61_a172_d8d88567efa7"/>
+          <modifierSpeciesReference species="Protein__POU5F1" metaid="_99fbc731_53cf_4fd4_8011_9f3571c7af31"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase" metaid="_0d0a1769_7ca5_4184_aeab_238d1d40b59d"/>
+          <modifierSpeciesReference species="Protein__NANOG"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase"/>
+        </listOfModifiers>
+        <kineticLaw metaid="ed3aeaaf_eff5_4f79_96b1_8075a034306e">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_echino1_k </ci>
+              <ci> Protein__NANOG </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 1 </cn>
+                  <apply>
+                    <times/>
+                    <cn> 1 </cn>
+                    <ci> Protein__POU5F1 </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <ci> Enzyme__RNAPolymerase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_echino1_k" metaid="e05e5e84_57cb_4a41_80ae_ecf6c9b4c817" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__RNAPolymerase_4" name="RNAPolymerase" metaid="e51fdc9b_7fc5_4d46_8998_963dfb06b398" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Protein__MAGED2" metaid="_9c72055f_1f41_4dc3_abcb_2fb0577c8b75"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Protein__NANOG" metaid="f51ba1f4_bf46_4292_a991_46e85fe820be"/>
+          <modifierSpeciesReference species="Protein__POU5F1" metaid="_544208d9_e77e_41fe_a4dd_315164ae072c"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase" metaid="_31f1344c_da63_40d6_889f_903f78fd78ce"/>
+          <modifierSpeciesReference species="Protein__NANOG"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_3cbf76ce_abd2_48d5_aa7d_36ec5e2ca814">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_echino1_k </ci>
+              <ci> Protein__NANOG </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 1 </cn>
+                  <apply>
+                    <times/>
+                    <cn> 1 </cn>
+                    <ci> Protein__POU5F1 </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <ci> Enzyme__RNAPolymerase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_echino1_k" metaid="_441398bd_17c3_4074_96a5_7092065a849f" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__RNAPolymerase_5" name="RNAPolymerase" metaid="_970eb603_778e_405b_99fe_1c497a9498e3" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Protein__FRAT2" metaid="_2ac3c195_4a0f_4957_9a49_c8ad3800191b"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Protein__NANOG" metaid="_1b6bcdf7_7f76_4fb4_b8ed_fbb36001a876"/>
+          <modifierSpeciesReference species="Protein__POU5F1" metaid="e5057252_793a_49f4_8b2c_ef7c7fc78d72"/>
+          <modifierSpeciesReference species="Protein__SOX2" metaid="_96fdd4f1_a045_4495_92b4_39b9b0386ed9"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase" metaid="_2918725a_a0d6_4b51_a342_8d7dcea8265a"/>
+          <modifierSpeciesReference species="Protein__NANOG"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Protein__SOX2"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_67b52a46_c971_4c16_a0ee_b71ae59459ec">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_echino1_k </ci>
+              <ci> Protein__NANOG </ci>
+              <ci> Protein__POU5F1 </ci>
+              <ci> Protein__SOX2 </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 1 </cn>
+                  <cn> 1 </cn>
+                </apply>
+              </apply>
+              <ci> Enzyme__RNAPolymerase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_echino1_k" metaid="b1c004cd_c39f_47c8_95fd_426b31fec941" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__RNAPolymerase_6" name="RNAPolymerase" metaid="_4e41d46d_8d63_4b9c_b4b8_45a0f71cc5d8" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Protein__KDR" metaid="_971e498d_7dd3_4fe6_aa49_05297e514c36"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Protein__NANOG" metaid="a7f51af7_0ad2_4c7a_8649_4cb1d03a1891"/>
+          <modifierSpeciesReference species="Protein__POU5F1" metaid="_66a51e07_b937_439f_ace4_da36f5e523ea"/>
+          <modifierSpeciesReference species="Protein__SOX2" metaid="_45983165_410b_422a_b8cc_ae0b5acade31"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase" metaid="_68205950_3766_46c4_877d_bef4ac516ce0"/>
+          <modifierSpeciesReference species="Protein__NANOG"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Protein__SOX2"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_04af6b5c_0387_4d39_8d49_083124999a95">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_echino1_k </ci>
+              <ci> Protein__NANOG </ci>
+              <ci> Protein__POU5F1 </ci>
+              <ci> Protein__SOX2 </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 1 </cn>
+                  <cn> 1 </cn>
+                </apply>
+              </apply>
+              <ci> Enzyme__RNAPolymerase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_echino1_k" metaid="bd71ec6f_7d2f_421c_af8d_005a1e4e21d2" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__RNAPolymerase_7" name="RNAPolymerase" metaid="a370f2d1_e48d_4c92_82e0_36c0b6f849d6" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Protein__TGIF2" metaid="a436b50f_5158_4365_b66f_d121b216afb1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Protein__SOX2" metaid="_3e236d9f_2307_4b01_8925_c53131cf5165"/>
+          <modifierSpeciesReference species="Protein__POU5F1" metaid="_512cb8e1_a0fe_485e_9899_047bd65c70a0"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase" metaid="_91c19d23_3ba8_43dd_8741_1efe731c8d4d"/>
+          <modifierSpeciesReference species="Protein__SOX2"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase"/>
+        </listOfModifiers>
+        <kineticLaw metaid="f9466796_86d6_4cae_842c_100d3e2e4555">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_echino1_k </ci>
+              <ci> Protein__SOX2 </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 1 </cn>
+                  <apply>
+                    <times/>
+                    <cn> 1 </cn>
+                    <ci> Protein__POU5F1 </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <ci> Enzyme__RNAPolymerase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_echino1_k" metaid="_10426cf3_c05e_4dc7_8ee0_7b561add6ef5" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__RNAPolymerase_8" name="RNAPolymerase" metaid="_798a26ab_9f94_47d2_b262_2ef84597ef9f" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Protein__GAP43" metaid="_4636d771_1e49_4f7c_9113_d2c75d10cd5e"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Protein__POU5F1" metaid="_30241301_5fe1_4618_8880_e33e0ad48571"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase" metaid="_679ca941_a4b1_457a_8c5b_e535de665e0a"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_42fc9022_3d35_41f0_a1cf_47b0ca1dce6a">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_echino1_k </ci>
+              <ci> Protein__POU5F1 </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 1 </cn>
+                  <cn> 1 </cn>
+                </apply>
+              </apply>
+              <ci> Enzyme__RNAPolymerase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_echino1_k" metaid="_0e132ced_6e54_42ba_9379_c7faf265a0b0" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__RNAPolymerase_9" name="RNAPolymerase" metaid="e6169a9c_127e_4c16_b503_56d4dd60bb25" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Protein__POU5F1" metaid="f76bb911_6a9f_45d0_8171_e1b0b93c4ca2"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Protein__NANOG" metaid="eb36fd74_855a_4559_8c08_65fc298f2d6e"/>
+          <modifierSpeciesReference species="Protein__POU5F1" metaid="dcf4d80f_925a_4d95_82cb_ef58a2ff94ea"/>
+          <modifierSpeciesReference species="Protein__SOX2" metaid="ef44cb44_60be_4c7a_9454_2578ed297971"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase" metaid="c1bc99e5_d76a_4822_bba9_f00e1abcf5ef"/>
+          <modifierSpeciesReference species="Protein__NANOG"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Protein__SOX2"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_5faa3453_7516_425f_8ecb_734045f1662e">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_echino1_k </ci>
+              <ci> Protein__NANOG </ci>
+              <ci> Protein__POU5F1 </ci>
+              <ci> Protein__SOX2 </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 1 </cn>
+                  <cn> 1 </cn>
+                </apply>
+              </apply>
+              <ci> Enzyme__RNAPolymerase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_echino1_k" metaid="_33868b6f_f5b0_440c_8f94_bbf13f1ab906" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__RNAPolymerase_10" name="RNAPolymerase" metaid="_340999e3_28a8_4d84_933a_6cf43ed66cac" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Protein__GNG10" metaid="_209621bf_34b6_410d_9968_6efec86c7b8e"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Protein__NANOG" metaid="_06af34da_dad1_4678_a39f_d67859d0a4b6"/>
+          <modifierSpeciesReference species="Protein__SOX2" metaid="ff65251e_99f8_4981_8009_37ccfb78fe4f"/>
+          <modifierSpeciesReference species="Protein__POU5F1" metaid="_5948e38b_131f_47ef_b517_e6fa8c7eb056"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase" metaid="_65861e80_9027_4c43_a8ad_764b9bd05c3a"/>
+          <modifierSpeciesReference species="Protein__NANOG"/>
+          <modifierSpeciesReference species="Protein__SOX2"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_0e679a9f_8844_4561_9c59_7b2208ad1d50">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_echino1_k </ci>
+              <ci> Protein__NANOG </ci>
+              <ci> Protein__SOX2 </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 1 </cn>
+                  <apply>
+                    <times/>
+                    <cn> 1 </cn>
+                    <ci> Protein__POU5F1 </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <ci> Enzyme__RNAPolymerase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_echino1_k" metaid="c58e9b21_3ae2_4470_b7d9_d552f16496a0" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__RNAPolymerase_11" name="RNAPolymerase" metaid="decfefcd_dab6_4cbc_8997_8d6e1a66372b" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Protein__ORC1L" metaid="_577d7922_97bf_4a66_a4e5_0bd408b5163c"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Protein__NANOG" metaid="a3e9e63c_4438_4a12_8f17_340ac93c5d47"/>
+          <modifierSpeciesReference species="Protein__POU5F1" metaid="ccd7423c_1e28_44de_b9d8_2a5689e2dde1"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase" metaid="_7e82e452_95bb_4cfd_b855_b00219df2ffd"/>
+          <modifierSpeciesReference species="Protein__NANOG"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase"/>
+        </listOfModifiers>
+        <kineticLaw metaid="ad570358_4747_4849_adbc_9e29a32056c9">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_echino1_k </ci>
+              <ci> Protein__NANOG </ci>
+              <ci> Protein__POU5F1 </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 1 </cn>
+                  <cn> 1 </cn>
+                </apply>
+              </apply>
+              <ci> Enzyme__RNAPolymerase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_echino1_k" metaid="_965e799e_3e28_419c_8473_1f284b0ee163" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__RNAPolymerase_12" name="RNAPolymerase" metaid="_4ecd16db_15fc_48a7_be55_9019d34dcbce" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Protein__EXOSC9" metaid="_9d8534da_b74a_4efa_bbba_14ed635ed2a5"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Protein__POU5F1" metaid="_858afde5_85c0_4984_beab_e7dd2a5a3d2d"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase" metaid="d1d70c67_9176_4149_a4b4_dc1a698f7ec1"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_828d1a55_4935_4cf6_ae5e_a38a5aa958b0">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_echino1_k </ci>
+              <ci> Protein__POU5F1 </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 1 </cn>
+                  <cn> 1 </cn>
+                </apply>
+              </apply>
+              <ci> Enzyme__RNAPolymerase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_echino1_k" metaid="_48d05180_4eed_4e6c_83c7_35a3017f9346" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__RNAPolymerase_13" name="RNAPolymerase" metaid="_1871f695_27f2_4236_b0b8_2e094cd1562c" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Protein__LEFTY2" metaid="_3a925b88_9730_484a_8d7e_3dbac34bd55c"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Protein__NANOG" metaid="_564dc8ef_9e7d_4743_95c0_1e2fc485d688"/>
+          <modifierSpeciesReference species="Protein__POU5F1" metaid="ea50e3a0_6eee_4311_8901_d016d8a7f36f"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase" metaid="_8f8aa218_febc_477c_8574_f0fe319e5c1f"/>
+          <modifierSpeciesReference species="Protein__NANOG"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_34dcd1bb_2d76_4271_bfb2_d560eaa6dd27">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_echino1_k </ci>
+              <ci> Protein__NANOG </ci>
+              <ci> Protein__POU5F1 </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 1 </cn>
+                  <cn> 1 </cn>
+                </apply>
+              </apply>
+              <ci> Enzyme__RNAPolymerase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_echino1_k" metaid="_930c005d_7e36_4c22_b616_f3b82387dae9" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__RNAPolymerase_14" name="RNAPolymerase" metaid="f35acbb1_e6bb_435d_a266_130f9d68818f" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Protein__SFRP2" metaid="_1992c0dc_2beb_41a3_83c3_b88389e92f1a"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Protein__NANOG" metaid="bce5c3d6_176f_49ca_ac35_bef2739be7d6"/>
+          <modifierSpeciesReference species="Protein__POU5F1" metaid="_7ac81cb8_da24_44c9_8d47_9d310f0cf874"/>
+          <modifierSpeciesReference species="Protein__SOX2" metaid="d93fb65d_2d6d_41af_a344_3202435e65d4"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase" metaid="c1c7b936_53af_4f84_9a2e_6b227e67d60f"/>
+          <modifierSpeciesReference species="Protein__NANOG"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Protein__SOX2"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_9988398c_75e0_4261_a529_7537d1056d78">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_echino1_k </ci>
+              <ci> Protein__NANOG </ci>
+              <ci> Protein__POU5F1 </ci>
+              <ci> Protein__SOX2 </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 1 </cn>
+                  <cn> 1 </cn>
+                </apply>
+              </apply>
+              <ci> Enzyme__RNAPolymerase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_echino1_k" metaid="c07dd65a_3d02_401b_8271_ee301e0ce3e8" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__RNAPolymerase_15" name="RNAPolymerase" metaid="_1fda8321_1fa3_4b11_9421_93c87c20d7ac" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Protein__C9orf97" metaid="_5b4f2583_fd60_40ba_9411_52a0afe30162"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Protein__POU5F1" metaid="a0c77e88_5f51_413d_aa05_9ff082ba14d4"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase" metaid="bb5f38fe_0115_4660_b962_19c13dc4b280"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase"/>
+        </listOfModifiers>
+        <kineticLaw metaid="b9d184cd_9db1_43b7_8d32_2d8705c98314">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_echino1_k </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 1 </cn>
+                  <apply>
+                    <times/>
+                    <cn> 1 </cn>
+                    <ci> Protein__POU5F1 </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <ci> Enzyme__RNAPolymerase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_echino1_k" metaid="fe8a16af_02f1_44f7_a2fe_c56fe921168b" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__RNAPolymerase_16" name="RNAPolymerase" metaid="_5825bae2_1c22_4c02_a533_f427672a7857" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Protein__PHF17" metaid="_8ed5a27c_d3bd_4be1_9270_f5df956ebb10"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Protein__NANOG" metaid="_2ff5d945_c065_4468_a49c_fd3dc396a68e"/>
+          <modifierSpeciesReference species="Protein__POU5F1" metaid="_2f9ac90e_ac5b_4d48_9258_d716e7b4969e"/>
+          <modifierSpeciesReference species="Protein__SOX2" metaid="_8f571f20_a308_4f86_96f3_a1dba3110bcb"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase" metaid="_35dbdb5e_4b00_4e58_b518_872e46336994"/>
+          <modifierSpeciesReference species="Protein__NANOG"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Protein__SOX2"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase"/>
+        </listOfModifiers>
+        <kineticLaw metaid="f03344d7_5d34_42c7_9bc0_6d2230cd04fd">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_echino1_k </ci>
+              <ci> Protein__NANOG </ci>
+              <ci> Protein__POU5F1 </ci>
+              <ci> Protein__SOX2 </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 1 </cn>
+                  <cn> 1 </cn>
+                </apply>
+              </apply>
+              <ci> Enzyme__RNAPolymerase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_echino1_k" metaid="_101a178c_980b_4a57_8eb7_56a18d148873" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__RNAPolymerase_17" name="RNAPolymerase" metaid="b541aaa8_2aa2_42f7_b5a6_d08c7cd938d8" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Protein__EPHA1" metaid="_679fbe82_49c9_42b4_96d7_b4c5e5c738f1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Protein__NANOG" metaid="_6325b714_15ec_417a_a73b_fb4444ccc01d"/>
+          <modifierSpeciesReference species="Protein__POU5F1" metaid="fe5957bb_b287_4e6a_91c2_32e726978f44"/>
+          <modifierSpeciesReference species="Protein__SOX2" metaid="b79c0a6e_51f7_4b9d_a37b_e88fa092216f"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase" metaid="cd7b8651_6a0c_46e4_bc4b_313310fa6c6d"/>
+          <modifierSpeciesReference species="Protein__NANOG"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Protein__SOX2"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase"/>
+        </listOfModifiers>
+        <kineticLaw metaid="c33713ba_5f76_491a_9527_00cb4fd52360">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_echino1_k </ci>
+              <ci> Protein__NANOG </ci>
+              <ci> Protein__POU5F1 </ci>
+              <ci> Protein__SOX2 </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 1 </cn>
+                  <cn> 1 </cn>
+                </apply>
+              </apply>
+              <ci> Enzyme__RNAPolymerase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_echino1_k" metaid="_537a01af_15c1_48b6_948b_49c1d260f635" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__RNAPolymerase_18" name="RNAPolymerase" metaid="a52e2f73_02a8_423c_9f87_2f8aca38efe9" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Protein__SOX2" metaid="fb7f4ddf_35c3_421b_bbae_d3dff1d6f0c3"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Protein__NANOG" metaid="_9b2d6013_68c3_4b86_b450_f525741b98b0"/>
+          <modifierSpeciesReference species="Protein__POU5F1" metaid="a50531a0_1809_4a73_bad6_7b102b42acff"/>
+          <modifierSpeciesReference species="Protein__SOX2" metaid="_4a5ebce1_adce_4c69_af80_a10170b300a5"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase" metaid="_558b100c_5258_4b8e_a1eb_a58007ef7d5e"/>
+          <modifierSpeciesReference species="Protein__NANOG"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Protein__SOX2"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_50edb209_83af_4fd3_82c6_bcdea854ac63">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_echino1_k </ci>
+              <ci> Protein__NANOG </ci>
+              <ci> Protein__POU5F1 </ci>
+              <ci> Protein__SOX2 </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 1 </cn>
+                  <cn> 1 </cn>
+                </apply>
+              </apply>
+              <ci> Enzyme__RNAPolymerase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_echino1_k" metaid="_82fb5739_4689_4e6d_8ef2_5a3c2313c4d5" value="100"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__RNAPolymerase_19" name="RNAPolymerase" metaid="_9d4b176a_da4b_4cb4_8fa5_e2d077c30ed3" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Protein__FOXD3" metaid="a60ce62b_02e5_4a07_93e5_427e893a0c1d"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Protein__NANOG" metaid="_98b41773_91fa_4850_8edb_1bf9299025ed"/>
+          <modifierSpeciesReference species="Protein__POU5F1" metaid="_6a452615_0b86_41ca_a1a0_9d04774ec73f"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase" metaid="ca6f7dd3_486c_4c2c_855f_3c4e5a05dc30"/>
+          <modifierSpeciesReference species="Protein__NANOG"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_99f52450_64d4_41cd_a984_c6ee9c53294f">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_echino1_k </ci>
+              <ci> Protein__NANOG </ci>
+              <ci> Protein__POU5F1 </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 1 </cn>
+                  <cn> 1 </cn>
+                </apply>
+              </apply>
+              <ci> Enzyme__RNAPolymerase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_echino1_k" metaid="_218fe751_c9a9_407c_9e51_5ea836b7762f" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__RNAPolymerase_20" name="RNAPolymerase" metaid="_73ac03c6_577d_41ae_9d2a_ed5544f7f5e4" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Protein__GATA6" metaid="f419213c_452f_4624_950f_57bb8e4f9b4f"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Protein__NANOG" metaid="_316b9e54_306d_48ec_8839_e6deae6a9b7a"/>
+          <modifierSpeciesReference species="Protein__SOX2" metaid="_527f6ba7_d307_4140_948e_e8899be47cdd"/>
+          <modifierSpeciesReference species="Protein__POU5F1" metaid="_7ddaedfd_5eaa_4285_8368_b11bcd90c9e7"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase" metaid="_718e90f9_c659_4ef2_8dc8_2f683057adde"/>
+          <modifierSpeciesReference species="Protein__NANOG"/>
+          <modifierSpeciesReference species="Protein__SOX2"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase"/>
+        </listOfModifiers>
+        <kineticLaw metaid="bb41f654_7390_4a72_b89d_fab4a61e4185">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_echino1_k </ci>
+              <ci> Protein__NANOG </ci>
+              <ci> Protein__SOX2 </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 1 </cn>
+                  <apply>
+                    <times/>
+                    <cn> 1 </cn>
+                    <ci> Protein__POU5F1 </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <ci> Enzyme__RNAPolymerase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_echino1_k" metaid="a7dbb09f_84bb_48da_97c6_13d1b611277d" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__RNAPolymerase_21" name="RNAPolymerase" metaid="a94c174e_0f0f_4cac_836d_4acc9fa71948" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Protein__PIP5K1C" metaid="_2c01b40f_0fb5_4de5_b809_c01961eca197"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Protein__SOX2" metaid="c1710fd8_7e80_4141_a656_3e4139bd96ea"/>
+          <modifierSpeciesReference species="Protein__POU5F1" metaid="_850527f9_0804_4572_bed0_9a8a387c7eaa"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase" metaid="_22608f85_ebc5_4d61_852d_10eb97e8ad79"/>
+          <modifierSpeciesReference species="Protein__SOX2"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase"/>
+        </listOfModifiers>
+        <kineticLaw metaid="cbe3f3bf_202a_458c_8fb4_21deedab4281">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_echino1_k </ci>
+              <ci> Protein__SOX2 </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 1 </cn>
+                  <apply>
+                    <times/>
+                    <cn> 1 </cn>
+                    <ci> Protein__POU5F1 </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <ci> Enzyme__RNAPolymerase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_echino1_k" metaid="_30924e21_15be_43df_a151_f861166ad4cb" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__RNAPolymerase_22" name="RNAPolymerase" metaid="e6a50735_2449_448f_bec1_28119f595cd8" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Protein__TCF4" metaid="_071d7ee9_271b_41de_b69f_3a9fcf4f2c2e"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Protein__POU5F1" metaid="_8f93c912_312a_4cc2_8379_d479e7aba6ce"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase" metaid="e5aa41b6_e863_41c6_a94a_0d38328c148a"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase"/>
+        </listOfModifiers>
+        <kineticLaw metaid="d3b8c521_3a1e_4cbd_a908_08c73bfecb46">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_echino1_k </ci>
+              <ci> Protein__POU5F1 </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 1 </cn>
+                  <cn> 1 </cn>
+                </apply>
+              </apply>
+              <ci> Enzyme__RNAPolymerase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_echino1_k" metaid="ca22589b_b98a_4d09_8d7b_ea1300b1dee7" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__RNAPolymerase_23" name="RNAPolymerase" metaid="f4ecacdf_7930_4424_b929_bd391e5c16a1" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Protein__NANOG" metaid="_499b1509_cc38_404f_9552_2b210c61125a"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Protein__NANOG" metaid="_70608e95_405f_4d3b_80dd_e4451d1e838b"/>
+          <modifierSpeciesReference species="Protein__POU5F1" metaid="b1b06a14_e6bb_46a6_8fd8_2ac188debd64"/>
+          <modifierSpeciesReference species="Protein__SOX2" metaid="f7e6eee3_653c_48a9_abfd_74a8bd43c0fb"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase" metaid="bfdb871a_dec9_4ca5_8645_37e35d48158b"/>
+          <modifierSpeciesReference species="Protein__NANOG"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Protein__SOX2"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_79c61335_0bd6_4ea6_a6a0_921ed50360d5">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_echino1_k </ci>
+              <ci> Protein__NANOG </ci>
+              <ci> Protein__POU5F1 </ci>
+              <ci> Protein__SOX2 </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 1 </cn>
+                  <cn> 1 </cn>
+                </apply>
+              </apply>
+              <ci> Enzyme__RNAPolymerase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_echino1_k" metaid="_1a196e16_ba21_4f2e_9a7c_ee33ffab8e71" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__RNAPolymerase_24" name="RNAPolymerase" metaid="bee3a66a_8655_4a78_9649_b395ec5340a3" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Protein__SSBP2" metaid="_30930a57_452a_4d72_b222_ae7fbfa34936"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Protein__POU5F1" metaid="b868311f_14f8_4e71_8efc_61b5b0edf8ae"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase" metaid="f3e7c0e5_df85_4775_8ba5_7b358b0ae4cc"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_41b25132_c836_45a2_9ac3_22b33ac10c33">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_echino1_k </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 1 </cn>
+                  <apply>
+                    <times/>
+                    <cn> 1 </cn>
+                    <ci> Protein__POU5F1 </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <ci> Enzyme__RNAPolymerase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_echino1_k" metaid="cf1e9fbd_50ff_4a7a_90ab_706e73557602" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__RNAPolymerase_25" name="RNAPolymerase" metaid="_8c37c8cb_072a_45a7_adc8_c35f80520879" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Protein__TSC22D1" metaid="cd685e42_4b9e_4e3b_b300_8712e994a8ce"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Protein__NANOG" metaid="_623dab72_0b49_4407_b423_50d6d2cad14c"/>
+          <modifierSpeciesReference species="Protein__SOX2" metaid="a19e9bd1_a371_4708_a55a_275047c1f1ef"/>
+          <modifierSpeciesReference species="Protein__POU5F1" metaid="_3ce21808_431f_49fe_8336_4f61c290deba"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase" metaid="_842ce5c1_3008_4c28_bd63_716c9bc815b9"/>
+          <modifierSpeciesReference species="Protein__NANOG"/>
+          <modifierSpeciesReference species="Protein__SOX2"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_4bd4b290_7751_4055_b869_77a84fb4d37a">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_echino1_k </ci>
+              <ci> Protein__NANOG </ci>
+              <ci> Protein__SOX2 </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 1 </cn>
+                  <apply>
+                    <times/>
+                    <cn> 1 </cn>
+                    <ci> Protein__POU5F1 </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <ci> Enzyme__RNAPolymerase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_echino1_k" metaid="_1b80e52b_1eaf_46b0_9164_8a93a46400bd" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__RNAPolymerase_26" name="RNAPolymerase" metaid="_16f2977b_3c80_4d90_a418_6deaf5ef5253" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Protein__PAX6" metaid="_6ad28a53_7eff_4a17_a9fe_3cd97905a17a"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Protein__NANOG" metaid="fc216642_9c8d_4665_b166_59c18dc337ad"/>
+          <modifierSpeciesReference species="Protein__SOX2" metaid="adc48f3a_ce53_4a96_b707_c26f4e44264c"/>
+          <modifierSpeciesReference species="Protein__POU5F1" metaid="_7820c4c1_ac8f_420f_9f87_822fb003a0ea"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase" metaid="_3b7c0723_86b0_42e1_be3d_f5e3201c9c8f"/>
+          <modifierSpeciesReference species="Protein__NANOG"/>
+          <modifierSpeciesReference species="Protein__SOX2"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase"/>
+        </listOfModifiers>
+        <kineticLaw metaid="d037b39c_547b_4527_bf94_62634d9c9eab">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_echino1_k </ci>
+              <ci> Protein__NANOG </ci>
+              <ci> Protein__SOX2 </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 1 </cn>
+                  <apply>
+                    <times/>
+                    <cn> 1 </cn>
+                    <ci> Protein__POU5F1 </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <ci> Enzyme__RNAPolymerase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_echino1_k" metaid="a1600dce_4be5_49a7_b5ad_c6908a2a3c1a" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__RNAPolymerase_27" name="RNAPolymerase" metaid="cfae6a10_dd21_4614_81e2_2693258f7aea" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Protein__TNC" metaid="fdcca3c7_0c40_40c2_a308_ac8db951c5ba"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Protein__NANOG" metaid="ae4807b0_45cf_4e83_9397_7c6789306be0"/>
+          <modifierSpeciesReference species="Protein__SOX2" metaid="_23c40de1_d025_4bde_8c20_f66ebe236231"/>
+          <modifierSpeciesReference species="Protein__POU5F1" metaid="c90a1934_2504_4e2e_9f45_0bd29d7419bd"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase" metaid="f795fe35_334e_40fb_828c_7cb6b1d82cfe"/>
+          <modifierSpeciesReference species="Protein__NANOG"/>
+          <modifierSpeciesReference species="Protein__SOX2"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_0fb03ea9_8afb_4e63_9a8b_66aeb7d1c2c1">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_echino1_k </ci>
+              <ci> Protein__NANOG </ci>
+              <ci> Protein__SOX2 </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 1 </cn>
+                  <apply>
+                    <times/>
+                    <cn> 1 </cn>
+                    <ci> Protein__POU5F1 </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <ci> Enzyme__RNAPolymerase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_echino1_k" metaid="f0e476e5_fc4a_458d_afa0_ff54cedbf1e9" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__RNAPolymerase_28" name="RNAPolymerase" metaid="_2b770e9b_c3fd_4e26_a77a_cb9f360ed6fe" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Protein__RAB5A" metaid="f66006b2_0d63_4e7f_a705_cc8464832e6b"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Protein__NANOG" metaid="dff52f55_61b6_4d74_a000_42fd43c0b871"/>
+          <modifierSpeciesReference species="Protein__POU5F1" metaid="_42e9a03a_4f0c_4fe4_b98b_11707fa54c25"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase" metaid="_57a98c99_fc8e_43a1_b799_fccb9d5da7cf"/>
+          <modifierSpeciesReference species="Protein__NANOG"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_9c346ed4_59e4_4b36_a86a_f5f6aa2d0013">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_echino1_k </ci>
+              <ci> Protein__NANOG </ci>
+              <ci> Protein__POU5F1 </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 1 </cn>
+                  <cn> 1 </cn>
+                </apply>
+              </apply>
+              <ci> Enzyme__RNAPolymerase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_echino1_k" metaid="a7bf21c7_f264_4d53_bd1a_a03704209dff" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__RNAPolymerase_29" name="RNAPolymerase" metaid="f94b4821_ffc7_47ca_8596_0d140c9e7530" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Protein__CDX2" metaid="ddf04548_01cd_44a4_a047_f48842ad216c"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Protein__NANOG" metaid="b922b59c_b535_4152_ac7b_c9be74783b47"/>
+          <modifierSpeciesReference species="Protein__POU5F1" metaid="b89f6b2b_a523_429c_8a75_95d2061dcb76"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase" metaid="_2fc59eab_6f83_4a49_890e_75812973a98a"/>
+          <modifierSpeciesReference species="Protein__NANOG"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase"/>
+        </listOfModifiers>
+        <kineticLaw metaid="a7ddeda5_7a5d_41ad_a9dc_e2b577adf2e2">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_echino1_k </ci>
+              <ci> Protein__NANOG </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 1 </cn>
+                  <apply>
+                    <times/>
+                    <cn> 1 </cn>
+                    <ci> Protein__POU5F1 </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <ci> Enzyme__RNAPolymerase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_echino1_k" metaid="_9ad9667c_17e8_4526_b318_809a6cf6f187" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__RNAPolymerase_30" name="RNAPolymerase" metaid="_66a7fc2b_514d_48e2_bcf7_2606b27ba92d" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Protein__EOMES" metaid="_23e9da41_8222_4f10_96bc_2e6de12cdd70"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Protein__NANOG" metaid="f7d3d63f_5448_4cf2_b101_25f34be88592"/>
+          <modifierSpeciesReference species="Protein__SOX2" metaid="_4ca4a0af_4e50_4e4c_98b3_e76b22b4d094"/>
+          <modifierSpeciesReference species="Protein__POU5F1" metaid="_91b4cda6_2e2e_416a_8576_9615a0cca0b0"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase" metaid="_584ec1e9_2921_4a32_a6b4_5fbc73e7a2ee"/>
+          <modifierSpeciesReference species="Protein__NANOG"/>
+          <modifierSpeciesReference species="Protein__SOX2"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_3cd0cc09_544d_4fbe_920b_49a0c6ec9fe3">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_echino1_k </ci>
+              <ci> Protein__NANOG </ci>
+              <ci> Protein__SOX2 </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 1 </cn>
+                  <apply>
+                    <times/>
+                    <cn> 1 </cn>
+                    <ci> Protein__POU5F1 </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <ci> Enzyme__RNAPolymerase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_echino1_k" metaid="_7fc3d5d1_9774_459b_aeee_becb81f17cee" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__RNAPolymerase_31" name="RNAPolymerase" metaid="d5f47ca6_f4c0_4bca_86c5_7d4591e9a5f6" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Protein__FGF2" metaid="_7622c0fb_5d4c_413c_b391_63f773ae735d"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Protein__NANOG" metaid="_1db6982b_3985_4b96_ada6_af8086cc44fd"/>
+          <modifierSpeciesReference species="Protein__POU5F1" metaid="_65ad31fb_7d1a_4618_8548_9bbf5fa065f8"/>
+          <modifierSpeciesReference species="Protein__SOX2" metaid="_63a22d53_af0d_4dc1_a3e5_d37428e06394"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase" metaid="_5284f943_5de3_4d55_94c3_023ee417ad99"/>
+          <modifierSpeciesReference species="Protein__NANOG"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Protein__SOX2"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_818e3db2_1a2c_4d8c_9f02_2874bd29df91">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_echino1_k </ci>
+              <ci> Protein__NANOG </ci>
+              <ci> Protein__POU5F1 </ci>
+              <ci> Protein__SOX2 </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 1 </cn>
+                  <cn> 1 </cn>
+                </apply>
+              </apply>
+              <ci> Enzyme__RNAPolymerase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_echino1_k" metaid="cc45a69d_dd6e_4966_bbf0_d3083f6430a5" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__RNAPolymerase_32" name="RNAPolymerase" metaid="eb6497e4_4f03_4285_877c_1191c1a10a5b" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Protein__DKK1" metaid="cad8e68d_9436_4fd7_b96a_dd1a0dfeb5ed"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Protein__NANOG" metaid="f7c51fec_4340_4b0d_9281_a9e898201a64"/>
+          <modifierSpeciesReference species="Protein__POU5F1" metaid="_5f9e67d4_855b_420a_acf1_1f1020b9866c"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase" metaid="c26b73ce_379a_4177_8183_b120161721d0"/>
+          <modifierSpeciesReference species="Protein__NANOG"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Enzyme__RNAPolymerase"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_4ed4ff9a_89f5_419a_a348_e76d71e20cb3">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_echino1_k </ci>
+              <ci> Protein__NANOG </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn type="integer"> 1 </cn>
+                  <apply>
+                    <times/>
+                    <cn> 1 </cn>
+                    <ci> Protein__POU5F1 </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <ci> Enzyme__RNAPolymerase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_echino1_k" metaid="b0fa2368_ac7e_4d26_9ee3_720275e10065" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__Proteasome_0" name="Proteasome" metaid="_05a7a297_33f0_4955_a7da_6f1e467eecf7" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein__TCF4" metaid="b7cde4e2_08b0_40d1_b7b6_b77c885340bc"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Enzyme__Proteasome" metaid="f1547caf_b54c_4b8e_b984_083bf76338ba"/>
+          <modifierSpeciesReference species="Protein__TCF4"/>
+          <modifierSpeciesReference species="Enzyme__Proteasome"/>
+        </listOfModifiers>
+        <kineticLaw metaid="af98de9a_8eb9_489b_85f9_b1cdf9d0dd59">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_massi_k </ci>
+              <ci> Protein__TCF4 </ci>
+              <ci> Enzyme__Proteasome </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_massi_k" metaid="_28e082f3_2ff2_4cc2_a01b_80a5b75be51f" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__Proteasome_1" name="Proteasome" metaid="_3059f881_ed6f_4b8a_8684_4562d9c2707e" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein__BAMBI" metaid="_323c3277_d527_4247_9b40_083b9551787c"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Enzyme__Proteasome" metaid="d78cbf84_2e5d_4e5c_8803_b97325d5aaf8"/>
+          <modifierSpeciesReference species="Protein__BAMBI"/>
+          <modifierSpeciesReference species="Enzyme__Proteasome"/>
+        </listOfModifiers>
+        <kineticLaw metaid="dd516ff1_953d_4101_8cee_994672eeec1b">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_massi_k </ci>
+              <ci> Protein__BAMBI </ci>
+              <ci> Enzyme__Proteasome </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_massi_k" metaid="_32099a38_58f8_4606_9782_d4b0a084e554" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__Proteasome_2" name="Proteasome" metaid="_66342c8c_6f86_4024_8256_0a258f481c5e" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein__RAB5A" metaid="d5c29eaa_b9f9_457d_8eb5_a5b8ccd2e2a7"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Enzyme__Proteasome" metaid="_58e9047f_048f_459c_9e15_b91f5ec72442"/>
+          <modifierSpeciesReference species="Protein__RAB5A"/>
+          <modifierSpeciesReference species="Enzyme__Proteasome"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_82ce7624_9cb4_4c06_8848_47cdc71e10a0">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_massi_k </ci>
+              <ci> Protein__RAB5A </ci>
+              <ci> Enzyme__Proteasome </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_massi_k" metaid="_9ac795ad_7e7f_460e_8b1e_d860fe91a238" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__Proteasome_3" name="Proteasome" metaid="_4707fdda_2672_4e31_b223_c00cf8c8abe6" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein__GNG10" metaid="a13b0548_9395_41d4_bdf8_257c9fd21afa"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Enzyme__Proteasome" metaid="_0e6c937a_511d_4f1a_a977_72448df7fa75"/>
+          <modifierSpeciesReference species="Protein__GNG10"/>
+          <modifierSpeciesReference species="Enzyme__Proteasome"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_651c372d_39a3_41d6_a063_44991bdaa4b2">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_massi_k </ci>
+              <ci> Protein__GNG10 </ci>
+              <ci> Enzyme__Proteasome </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_massi_k" metaid="d994abcf_63aa_4424_9f54_48b701caff09" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__Proteasome_4" name="Proteasome" metaid="_584e5e12_0e79_404c_a7ab_f85b85e17e6e" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein__FGF2" metaid="_848ae2c5_7002_4dc9_86a2_800f6ae0bb27"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Enzyme__Proteasome" metaid="e36dbfe3_d2be_422b_943a_d43475d60833"/>
+          <modifierSpeciesReference species="Protein__FGF2"/>
+          <modifierSpeciesReference species="Enzyme__Proteasome"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_780c8e38_2173_4be8_84de_5d3f05c1c07b">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_massi_k </ci>
+              <ci> Protein__FGF2 </ci>
+              <ci> Enzyme__Proteasome </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_massi_k" metaid="e3fca001_86cb_416d_b46e_a6845a31c13d" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__Proteasome_5" name="Proteasome" metaid="dd8d5d35_6167_4e40_9cc9_114d23c464b6" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein__TDGF1" metaid="aa14207c_b7a6_41a1_802d_7742457e054e"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Enzyme__Proteasome" metaid="da0c8afa_dec0_4e78_84c6_a2ccb5d48b16"/>
+          <modifierSpeciesReference species="Protein__TDGF1"/>
+          <modifierSpeciesReference species="Enzyme__Proteasome"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_9e36b785_a245_4ecc_90d4_6caf8ad51785">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_massi_k </ci>
+              <ci> Protein__TDGF1 </ci>
+              <ci> Enzyme__Proteasome </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_massi_k" metaid="_77df6447_0578_45c9_8917_dd2ef4da2d75" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__Proteasome_6" name="Proteasome" metaid="_1b2acb29_0996_43c8_9e34_b6a16ad35923" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein__PIP5K1C" metaid="b3b76c1f_526d_4cd6_9ebc_1436a985959a"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Enzyme__Proteasome" metaid="_6af002fe_cb9b_431c_a2c9_2f1e8ca0037f"/>
+          <modifierSpeciesReference species="Protein__PIP5K1C"/>
+          <modifierSpeciesReference species="Enzyme__Proteasome"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_5f5b7cd8_c286_4163_a748_6e60c4563060">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_massi_k </ci>
+              <ci> Protein__PIP5K1C </ci>
+              <ci> Enzyme__Proteasome </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_massi_k" metaid="c3aa461b_2456_4bf6_8ead_32dce42df863" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__Proteasome_7" name="Proteasome" metaid="_9e86f524_c500_4b02_8b16_87baf2a73784" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein__CDX2" metaid="_0da51117_34d6_4489_be5b_9f75e23502b6"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Enzyme__Proteasome" metaid="f73cb740_3112_433e_a7a6_3dfc12ab2dcb"/>
+          <modifierSpeciesReference species="Protein__CDX2"/>
+          <modifierSpeciesReference species="Enzyme__Proteasome"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_9ec7a406_dbcb_473a_b8af_2e5b4e338a80">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_massi_k </ci>
+              <ci> Protein__CDX2 </ci>
+              <ci> Enzyme__Proteasome </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_massi_k" metaid="_8cc1c04a_35eb_48db_bb94_74de64230967" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__Proteasome_8" name="Proteasome" metaid="bf3dbc7b_0bd7_44ac_8e7f_b43705290cc4" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein__SFRP2" metaid="_90c439d7_b468_45f3_85ff_fbcc7bb05a62"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Enzyme__Proteasome" metaid="_390a3977_6753_427f_99be_9a65b2197424"/>
+          <modifierSpeciesReference species="Protein__SFRP2"/>
+          <modifierSpeciesReference species="Enzyme__Proteasome"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_584190a1_63a7_4fca_a3ad_cb22e25cb4c1">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_massi_k </ci>
+              <ci> Protein__SFRP2 </ci>
+              <ci> Enzyme__Proteasome </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_massi_k" metaid="_3b5f9ea7_81d9_466b_8355_0a89fb6c5432" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__Proteasome_9" name="Proteasome" metaid="d96aef49_7302_4aaf_981d_86da727e9703" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein__FOXD3" metaid="a3d9add1_d352_4a5a_ab2c_94909c9394b6"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Enzyme__Proteasome" metaid="_45798550_83e1_4650_8c90_64fbefcae1e5"/>
+          <modifierSpeciesReference species="Protein__FOXD3"/>
+          <modifierSpeciesReference species="Enzyme__Proteasome"/>
+        </listOfModifiers>
+        <kineticLaw metaid="f46d5d50_5c4b_4029_849d_4d5e59173e1e">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_massi_k </ci>
+              <ci> Protein__FOXD3 </ci>
+              <ci> Enzyme__Proteasome </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_massi_k" metaid="feb27a7a_c22c_440e_ba91_785443ad001c" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__Proteasome_10" name="Proteasome" metaid="_33fb2790_4625_46e4_aa23_67056981a5e6" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein__KDR" metaid="_81b9c23d_35ab_4c60_81c2_c72da457dc07"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Enzyme__Proteasome" metaid="_99fca02a_2548_4716_87b2_9bc9cc489ff3"/>
+          <modifierSpeciesReference species="Protein__KDR"/>
+          <modifierSpeciesReference species="Enzyme__Proteasome"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_61feffd5_a325_45fb_95f5_dc2168c51feb">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_massi_k </ci>
+              <ci> Protein__KDR </ci>
+              <ci> Enzyme__Proteasome </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_massi_k" metaid="_317cdb10_f82c_47a5_9be6_d72af9a1e252" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__Proteasome_11" name="Proteasome" metaid="a0685be4_bc3e_479d_8ec9_adfab270e5b7" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein__TSC22D1" metaid="_8bb61de0_47e0_46ac_bcea_d58fb84919ad"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Enzyme__Proteasome" metaid="_9468245a_d370_4d88_9f9d_95c82ee99ee4"/>
+          <modifierSpeciesReference species="Protein__TSC22D1"/>
+          <modifierSpeciesReference species="Enzyme__Proteasome"/>
+        </listOfModifiers>
+        <kineticLaw metaid="feb9e7a6_7ad3_4430_96f6_fca7c109569c">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_massi_k </ci>
+              <ci> Protein__TSC22D1 </ci>
+              <ci> Enzyme__Proteasome </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_massi_k" metaid="_8faf159b_dc54_40a0_8ab3_4861201de500" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__Proteasome_12" name="Proteasome" metaid="_30a108b8_836f_480e_99cd_99b96a675fa8" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein__SOX2" metaid="_707ee99e_418b_41f3_888a_ca5f39166209"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Enzyme__Proteasome" metaid="_3c8fd6d7_9cd0_48a8_b21f_ff89e523addd"/>
+          <modifierSpeciesReference species="Protein__SOX2"/>
+          <modifierSpeciesReference species="Enzyme__Proteasome"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_51478b1d_6a23_499d_8461_d6be3812ce5b">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_massi_k </ci>
+              <ci> Protein__SOX2 </ci>
+              <ci> Enzyme__Proteasome </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_massi_k" metaid="e5b761ad_b225_489a_beca_b7eededb7492" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__Proteasome_13" name="Proteasome" metaid="_0e5d3955_3a9f_4966_8665_afa978ec188e" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein__GAP43" metaid="ab53d5a2_a64c_4e40_96b4_4effe14bd662"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Enzyme__Proteasome" metaid="_3beb82a6_5aa2_48d6_9558_6b17688fc39b"/>
+          <modifierSpeciesReference species="Protein__GAP43"/>
+          <modifierSpeciesReference species="Enzyme__Proteasome"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_27eed741_5bbc_4304_8559_aa49f6a1a1ac">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_massi_k </ci>
+              <ci> Protein__GAP43 </ci>
+              <ci> Enzyme__Proteasome </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_massi_k" metaid="a19e549d_bdff_4c5c_9cbd_16e211da713e" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__Proteasome_14" name="Proteasome" metaid="_502d84b2_9c37_4472_b17d_3fb81d1a750e" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein__PHF17" metaid="ff775116_b154_47c5_8cc8_9117784e57da"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Enzyme__Proteasome" metaid="d78fff4c_4752_428a_bb15_b6aebebd9739"/>
+          <modifierSpeciesReference species="Protein__PHF17"/>
+          <modifierSpeciesReference species="Enzyme__Proteasome"/>
+        </listOfModifiers>
+        <kineticLaw metaid="b45e7454_c994_4961_adf6_862529a30113">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_massi_k </ci>
+              <ci> Protein__PHF17 </ci>
+              <ci> Enzyme__Proteasome </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_massi_k" metaid="_946602b1_b636_488e_b8f3_87c4ffa14924" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__Proteasome_15" name="Proteasome" metaid="da719a18_bc83_4165_9854_52d6d1a00fe5" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein__POU5F1" metaid="_74955a50_7130_405a_be3f_05e6a1bcf7c4"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Enzyme__Proteasome" metaid="d938ff50_ae22_4a54_a8d3_1f1edcdd9a51"/>
+          <modifierSpeciesReference species="Protein__POU5F1"/>
+          <modifierSpeciesReference species="Enzyme__Proteasome"/>
+        </listOfModifiers>
+        <kineticLaw metaid="fe81b08c_1299_4a0b_8b6a_c97a6e0bee38">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_massi_k </ci>
+              <ci> Protein__POU5F1 </ci>
+              <ci> Enzyme__Proteasome </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_massi_k" metaid="c535fafc_9aed_4d05_b4bf_498ad89d786f" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__Proteasome_16" name="Proteasome" metaid="_7b06ecbc_c6e8_4e4a_a30a_13c82e9265aa" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein__TNC" metaid="_273085e4_bd7c_41a1_b0bf_1fb7af60a260"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Enzyme__Proteasome" metaid="_8b3efcb6_119b_4615_a0b7_23bd0cd4d7a3"/>
+          <modifierSpeciesReference species="Protein__TNC"/>
+          <modifierSpeciesReference species="Enzyme__Proteasome"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_68f5bd99_a6b6_4933_b764_a00a3ad98a9d">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_massi_k </ci>
+              <ci> Protein__TNC </ci>
+              <ci> Enzyme__Proteasome </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_massi_k" metaid="_5b98a675_7d84_4fb4_8b5a_68efd2432031" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__Proteasome_17" name="Proteasome" metaid="_44015f7a_dc99_4342_bd2a_6e02df8a783f" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein__EPHA1" metaid="e68313e2_b236_46c8_bfae_71e177e58ae4"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Enzyme__Proteasome" metaid="_1a042069_3832_425c_aef8_f829aa21bb2c"/>
+          <modifierSpeciesReference species="Protein__EPHA1"/>
+          <modifierSpeciesReference species="Enzyme__Proteasome"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_5cf75687_841f_4c22_b975_8555f38cf0fa">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_massi_k </ci>
+              <ci> Protein__EPHA1 </ci>
+              <ci> Enzyme__Proteasome </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_massi_k" metaid="_9848393c_1492_4c89_9116_e41c98e8bc4b" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__Proteasome_18" name="Proteasome" metaid="f162d177_5c7e_465a_9f80_f082fc75815d" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein__C9orf97" metaid="_81066c06_48bd_47da_bab6_a3594beb9697"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Enzyme__Proteasome" metaid="a667a4c5_48c2_4306_b199_d8b684fb4109"/>
+          <modifierSpeciesReference species="Protein__C9orf97"/>
+          <modifierSpeciesReference species="Enzyme__Proteasome"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_8fb5fdb5_2cb7_460c_959f_01bba6c23a19">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_massi_k </ci>
+              <ci> Protein__C9orf97 </ci>
+              <ci> Enzyme__Proteasome </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_massi_k" metaid="_5e4e5379_c27b_4e93_9606_55669e38562a" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__Proteasome_19" name="Proteasome" metaid="dd79df95_3ae3_44fa_a32d_bff54fa00d55" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein__DKK1" metaid="_9ea4086d_5880_4f9b_ba04_11d7d9d3dfcd"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Enzyme__Proteasome" metaid="d4078499_018b_498b_bc04_2294b335bd5d"/>
+          <modifierSpeciesReference species="Protein__DKK1"/>
+          <modifierSpeciesReference species="Enzyme__Proteasome"/>
+        </listOfModifiers>
+        <kineticLaw metaid="d5ff7a71_2970_4c1a_8568_d566051986d9">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_massi_k </ci>
+              <ci> Protein__DKK1 </ci>
+              <ci> Enzyme__Proteasome </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_massi_k" metaid="ba7d990f_a600_4af6_9adb_99bac7e95327" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__Proteasome_20" name="Proteasome" metaid="_54be6e80_33f0_422c_a161_99692709f942" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein__MAGED2" metaid="_14ce310a_2656_4ad7_aab7_ab72886c3253"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Enzyme__Proteasome" metaid="_63d3c511_4eda_40c5_bcb9_8c6f60e2953c"/>
+          <modifierSpeciesReference species="Protein__MAGED2"/>
+          <modifierSpeciesReference species="Enzyme__Proteasome"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_6b2766e9_cbeb_482e_93ae_b49fcf7f4257">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_massi_k </ci>
+              <ci> Protein__MAGED2 </ci>
+              <ci> Enzyme__Proteasome </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_massi_k" metaid="_875ad1b4_931a_45df_83c3_fa2aadc1bbbd" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__Proteasome_21" name="Proteasome" metaid="ca7c37e5_1867_4639_aa0f_eba24e147f47" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein__ORC1L" metaid="bb7c40bf_3577_4c54_bb89_067a4ff673a0"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Enzyme__Proteasome" metaid="e899f6b7_ca93_4ff1_a74f_848627fcc6bd"/>
+          <modifierSpeciesReference species="Protein__ORC1L"/>
+          <modifierSpeciesReference species="Enzyme__Proteasome"/>
+        </listOfModifiers>
+        <kineticLaw metaid="ba7f93f2_44a8_4f98_9b04_c2e095100267">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_massi_k </ci>
+              <ci> Protein__ORC1L </ci>
+              <ci> Enzyme__Proteasome </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_massi_k" metaid="bbb923ff_a414_4d13_a00c_9974faadae81" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__Proteasome_22" name="Proteasome" metaid="_5c2d144a_f226_427e_af48_2de32ef592b4" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein__NAALAD2" metaid="_1966d561_7866_4d89_bc83_b6d8736d8e45"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Enzyme__Proteasome" metaid="af28f24b_64a7_4ed0_bdce_5f282512225f"/>
+          <modifierSpeciesReference species="Protein__NAALAD2"/>
+          <modifierSpeciesReference species="Enzyme__Proteasome"/>
+        </listOfModifiers>
+        <kineticLaw metaid="e3273d4e_6f9e_4fbf_8485_3a3ecad99f06">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_massi_k </ci>
+              <ci> Protein__NAALAD2 </ci>
+              <ci> Enzyme__Proteasome </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_massi_k" metaid="fe665df8_c195_4eee_a974_e81caf9c23ce" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__Proteasome_23" name="Proteasome" metaid="_58716ab2_c390_41d0_b9fe_6e34fcf7fe60" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein__SSBP2" metaid="_9ae54f7a_3046_4755_952a_41c0c54be52a"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Enzyme__Proteasome" metaid="acdc0140_ddf9_421c_a26b_f72c008d9c38"/>
+          <modifierSpeciesReference species="Protein__SSBP2"/>
+          <modifierSpeciesReference species="Enzyme__Proteasome"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_5f802599_c58f_49da_8545_913ba1b3f4ed">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_massi_k </ci>
+              <ci> Protein__SSBP2 </ci>
+              <ci> Enzyme__Proteasome </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_massi_k" metaid="aca8124e_a4d4_46ca_940f_36adc8f14b5a" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__Proteasome_24" name="Proteasome" metaid="_25e9861f_785c_48d1_839b_9cdfc5ad49f4" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein__LEFTY2" metaid="f015fa59_e25d_4f99_a69d_c655067f1da2"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Enzyme__Proteasome" metaid="ce0fe732_2bb7_496a_afc2_2bef1a53fc90"/>
+          <modifierSpeciesReference species="Protein__LEFTY2"/>
+          <modifierSpeciesReference species="Enzyme__Proteasome"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_8a36933d_5a6f_4824_8819_d34b0cd87f6a">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_massi_k </ci>
+              <ci> Protein__LEFTY2 </ci>
+              <ci> Enzyme__Proteasome </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_massi_k" metaid="dc96b9e7_1741_49f0_8387_bf626350c0cd" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__Proteasome_25" name="Proteasome" metaid="afb0003a_cd6e_4415_a5ac_f33b5d73347c" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein__GSC" metaid="_1c108bfe_781b_45db_bb49_5016dad2e104"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Enzyme__Proteasome" metaid="_5ce51929_9fa9_40b6_b237_37962deeeff9"/>
+          <modifierSpeciesReference species="Protein__GSC"/>
+          <modifierSpeciesReference species="Enzyme__Proteasome"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_0bb512fa_c55a_41f9_998a_2131134e4338">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_massi_k </ci>
+              <ci> Protein__GSC </ci>
+              <ci> Enzyme__Proteasome </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_massi_k" metaid="ffeb4aab_996e_4d92_86d8_2463b39e9471" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__Proteasome_26" name="Proteasome" metaid="eab5a76c_c4ac_496c_b9ee_7ccf99e30575" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein__FRAT2" metaid="_6a8f2f9b_7158_47c1_b606_cf2e01dca64d"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Enzyme__Proteasome" metaid="_2bdc6c99_fd01_4c7f_aa52_67fb8fa6d3c7"/>
+          <modifierSpeciesReference species="Protein__FRAT2"/>
+          <modifierSpeciesReference species="Enzyme__Proteasome"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_8dcc15dd_469a_47b6_9bb1_8f63540bf8f7">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_massi_k </ci>
+              <ci> Protein__FRAT2 </ci>
+              <ci> Enzyme__Proteasome </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_massi_k" metaid="d0551355_7a4e_43ec_aab7_b3dd6b14ad4f" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__Proteasome_27" name="Proteasome" metaid="ebc9e60f_011c_415b_a673_255acede309e" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein__TGIF2" metaid="_99e7766c_b0e6_4b49_aba3_3011cfb8c9ce"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Enzyme__Proteasome" metaid="_40979b64_4dbe_41fc_b129_b44c4270d866"/>
+          <modifierSpeciesReference species="Protein__TGIF2"/>
+          <modifierSpeciesReference species="Enzyme__Proteasome"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_3462ac4a_9258_4921_9397_5639977e7dbc">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_massi_k </ci>
+              <ci> Protein__TGIF2 </ci>
+              <ci> Enzyme__Proteasome </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_massi_k" metaid="_94c2229c_9308_4300_8606_c5776f9af004" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__Proteasome_28" name="Proteasome" metaid="b75a5051_c456_4034_aed1_73e6fb704ae1" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein__PAX6" metaid="_218ab2c1_4bb3_4a23_a735_6891d86142bc"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Enzyme__Proteasome" metaid="_79c2826e_212c_40d8_93fe_50a959c35630"/>
+          <modifierSpeciesReference species="Protein__PAX6"/>
+          <modifierSpeciesReference species="Enzyme__Proteasome"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_6addd203_e150_4dc3_a9f1_592d731ece2f">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_massi_k </ci>
+              <ci> Protein__PAX6 </ci>
+              <ci> Enzyme__Proteasome </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_massi_k" metaid="_740bdb4b_8d2b_49e9_b154_f99302681c64" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__Proteasome_29" name="Proteasome" metaid="_79c80428_2986_4dd5_ac25_ecccb6561fbc" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein__EOMES" metaid="_06ecd9e2_1af8_4b5d_bb98_ecfc3d81357f"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Enzyme__Proteasome" metaid="_4332a1c6_8e6c_4679_b5f5_fd90e9175d40"/>
+          <modifierSpeciesReference species="Protein__EOMES"/>
+          <modifierSpeciesReference species="Enzyme__Proteasome"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_1ef54a93_0a6d_45ff_9dba_bb4dfb41ca13">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_massi_k </ci>
+              <ci> Protein__EOMES </ci>
+              <ci> Enzyme__Proteasome </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_massi_k" metaid="_696194e6_ce58_4704_9ce9_8ab8e8e95531" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__Proteasome_30" name="Proteasome" metaid="_02c02e4d_980a_4732_bbb2_1c36bfca1ca9" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein__NANOG" metaid="_1877c8dc_cf9a_4b55_b4c2_b338a7831835"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Enzyme__Proteasome" metaid="c3bbaf28_880c_4dbe_8925_14bf3dd4935e"/>
+          <modifierSpeciesReference species="Protein__NANOG"/>
+          <modifierSpeciesReference species="Enzyme__Proteasome"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_9ba68d42_04e5_460c_b4a1_c18f553c54ee">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_massi_k </ci>
+              <ci> Protein__NANOG </ci>
+              <ci> Enzyme__Proteasome </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_massi_k" metaid="_41ab204b_f4b6_4593_a449_d8db0b71d38a" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__Proteasome_31" name="Proteasome" metaid="_55ee79e9_e379_45c3_942b_ba7f710afebc" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein__GATA6" metaid="_56df092e_3611_41a0_9cf6_29ce63a390f4"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Enzyme__Proteasome" metaid="_88e47688_534e_4fc1_8ea4_6671c57abcee"/>
+          <modifierSpeciesReference species="Protein__GATA6"/>
+          <modifierSpeciesReference species="Enzyme__Proteasome"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_79a1974e_1184_4d58_b749_1dbec9a79de1">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_massi_k </ci>
+              <ci> Protein__GATA6 </ci>
+              <ci> Enzyme__Proteasome </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_massi_k" metaid="c9a67ac4_a34b_4b81_8193_a1ec3d085aa5" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Enzyme__Proteasome_32" name="Proteasome" metaid="_9b8c033d_18fa_4b2e_aa37_c5e5f2f88355" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Protein__EXOSC9" metaid="_6b58368a_9fb4_429e_891c_6a61ed09fff8"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Enzyme__Proteasome" metaid="e53a9e4a_a16c_4a25_b5f7_b0975c9f76cb"/>
+          <modifierSpeciesReference species="Protein__EXOSC9"/>
+          <modifierSpeciesReference species="Enzyme__Proteasome"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_2f567d39_f71f_4940_9b57_ef97a657db4d">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> P_massi_k </ci>
+              <ci> Protein__EXOSC9 </ci>
+              <ci> Enzyme__Proteasome </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="P_massi_k" metaid="_1926b8c4_a7fd_40ea_8315_aab0714c4bfd" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

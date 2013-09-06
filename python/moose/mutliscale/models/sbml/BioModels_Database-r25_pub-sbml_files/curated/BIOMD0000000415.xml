@@ -1,0 +1,484 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="_678643" version="4">
+  <model id="Model_1" name="Mellor2012_LipooxygenasePathway" metaid="COPASI1">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This model is from the article:      <br/>
+                <strong>Reduction of off-flavor generation in soybean homogenates: a mathematical model.</strong>
+                <br/>
+          Mellor N , Bligh F , Chandler I , Hodgman C      <em>J. Food Sci.</em>
+          2010 Sep; 75(7): R131-8; PMID:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/2153556">2153556</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          The generation of off-flavors in soybean homogenates such as n-hexanal via the lipoxygenase (LOX) pathway can be a problem in the processed food industry. Previous studies have examined the effect of using soybean varieties missing one or more of the 3 LOX isozymes on n-hexanal generation. A dynamic mathematical model of the soybean LOX pathway using ordinary differential equations was constructed using parameters estimated from existing data with the aim of predicting how n-hexanal generation could be reduced. Time-course simulations of LOX-null beans were run and compared with experimental results. Model L(2), L(3), and L(12) beans were within the range relative to the wild type found experimentally, with L(13) and L(23) beans close to the experimental range. Model L(1) beans produced much more n-hexanal relative to the wild type than those in experiments. Sensitivity analysis indicates that reducing the estimated K(m) parameter for LOX isozyme 3 (L-3) would improve the fit between model predictions and experimental results found in the literature. The model also predicts that increasing L-3 or reducing L-2 levels within beans may reduce n-hexanal generation. PRACTICAL APPLICATION: This work describes the use of mathematics to attempt to quantify the enzyme-catalyzed conversions of compounds in soybean homogenates into undesirable flavors, primarily from the compound n-hexanal. The effect of different soybean genotypes and enzyme kinetic constants was also studied, leading to recommendations on which combinations might minimize off-flavor levels and what further work might be carried out to substantiate these conclusions.      </p>
+            </body>
+      
+    </notes>
+    <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+        <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+          <rdf:Description rdf:about="#COPASI1">
+            <dcterms:created>
+              <rdf:Description>
+                <dcterms:W3CDTF>2012-03-16T14:18:00Z</dcterms:W3CDTF>
+              </rdf:Description>
+            </dcterms:created>
+          </rdf:Description>
+        </rdf:RDF>
+      </COPASI>
+                                  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#COPASI1">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Chelliah</vCard:Family>
+                  <vCard:Given>Vijayalakshmi</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>viji@ebi.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>EMBL-EBI</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Mellor</vCard:Family>
+                  <vCard:Given>Nathan</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>sbxnm2@nottingham.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>CPIB, The University of Nottingham</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2012-04-10T13:24:24Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2012-06-10T13:51:05Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1203230000"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/BIOMD0000000415"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/21535565"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+          <bqbiol:isVersionOf>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0019372"/>
+            </rdf:Bag>
+          </bqbiol:isVersionOf>
+          <bqbiol:occursIn>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/taxonomy/3847"/>
+            </rdf:Bag>
+          </bqbiol:occursIn>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfFunctionDefinitions>
+      <functionDefinition id="function_1" name="Henri-Michaelis-Menten (irreversible)" metaid="_662805">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <lambda>
+            <bvar>
+              <ci> substrate </ci>
+            </bvar>
+            <bvar>
+              <ci> Km </ci>
+            </bvar>
+            <bvar>
+              <ci> V </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> V </ci>
+                <ci> substrate </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <ci> Km </ci>
+                <ci> substrate </ci>
+              </apply>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+    </listOfFunctionDefinitions>
+    <listOfUnitDefinitions>
+      <unitDefinition id="volume" name="volume" metaid="_678655">
+        <listOfUnits>
+          <unit scale="-3" metaid="_678667" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time" name="time" metaid="_678679">
+        <listOfUnits>
+          <unit metaid="_678691" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="substance" name="substance" metaid="_678703">
+        <listOfUnits>
+          <unit scale="-3" metaid="_678715" kind="mole"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="compartment_1" name="compartment" metaid="_662761" sboTerm="SBO:0000290" size="1000">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_662761">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0005623"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </compartment>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="species_1" initialConcentration="6.69999967735732E-5" name="LA" metaid="_662763" sboTerm="SBO:0000247" compartment="compartment_1">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_662763">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:17351"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="species_7" initialConcentration="0" name="13HOD-S(Z,E)" metaid="_662764" sboTerm="SBO:0000247" compartment="compartment_1">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_662764">
+              <bqbiol:hasVersion>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:35923"/>
+                </rdf:Bag>
+              </bqbiol:hasVersion>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="species_8" initialConcentration="0" name="13HOD-R(Z,E)" metaid="_662765" sboTerm="SBO:0000247" compartment="compartment_1">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_662765">
+              <bqbiol:hasVersion>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:35923"/>
+                </rdf:Bag>
+              </bqbiol:hasVersion>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="species_9" initialConcentration="0" name="13HOD-S(E,E)" metaid="_662767" sboTerm="SBO:0000247" compartment="compartment_1">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_662767">
+              <bqbiol:hasVersion>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:35923"/>
+                </rdf:Bag>
+              </bqbiol:hasVersion>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="species_10" initialConcentration="0" name="13HOD-R(E,E)" metaid="_662768" sboTerm="SBO:0000247" compartment="compartment_1">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_662768">
+              <bqbiol:hasVersion>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:35923"/>
+                </rdf:Bag>
+              </bqbiol:hasVersion>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="species_11" initialConcentration="0" name="9HOD-S(Z,E)" metaid="_662769" sboTerm="SBO:0000247" compartment="compartment_1">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_662769">
+              <bqbiol:hasVersion>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:35923"/>
+                </rdf:Bag>
+              </bqbiol:hasVersion>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="species_12" initialConcentration="0" name="9HOD-R(Z,E)" metaid="_662770" sboTerm="SBO:0000247" compartment="compartment_1">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_662770">
+              <bqbiol:hasVersion>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:35923"/>
+                </rdf:Bag>
+              </bqbiol:hasVersion>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="species_13" initialConcentration="0" name="9HOD-S(E,E)" metaid="_662772" sboTerm="SBO:0000247" compartment="compartment_1">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_662772">
+              <bqbiol:hasVersion>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:35923"/>
+                </rdf:Bag>
+              </bqbiol:hasVersion>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="species_14" initialConcentration="0" name="9HOD-R(E,E)" metaid="_662773" sboTerm="SBO:0000247" compartment="compartment_1">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_662773">
+              <bqbiol:hasVersion>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:35923"/>
+                </rdf:Bag>
+              </bqbiol:hasVersion>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="species_15" initialConcentration="0" name="nHexanal" metaid="_662774" sboTerm="SBO:0000247" compartment="compartment_1">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_662774">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/pubchem.compound/6184"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="parameter_1" name="Km(L1)" metaid="_662806" value="0.49"/>
+      <parameter id="parameter_2" name="Vm(L1)" metaid="_662807" value="0.00825"/>
+      <parameter id="parameter_3" name="Km(L2)" metaid="_662808" value="0.49"/>
+      <parameter id="parameter_4" name="Vm(L2)" metaid="_662810" value="0.039"/>
+      <parameter id="parameter_5" name="Km(L3)" metaid="_662811" value="0.49"/>
+      <parameter id="parameter_6" name="Vm(L3)" metaid="_662812" value="0.00255"/>
+      <parameter id="parameter_7" name="Km(HPL)" metaid="_662813" value="0.05"/>
+      <parameter id="parameter_8" name="Vm(HPL-SZE)" metaid="_662815" value="0.285"/>
+      <parameter id="parameter_9" constant="false" name="Vm(HPL-RZE)" metaid="_662816" value="0.038475"/>
+    </listOfParameters>
+    <listOfRules>
+      <assignmentRule metaid="_662803" variable="parameter_9">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <cn> 0.135 </cn>
+            <ci> parameter_8 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+    <listOfReactions>
+      <reaction id="reaction_1" name="LOX1" metaid="COPASI2" reversible="false">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI2">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2012-03-16T14:36:22Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                              <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI2">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0050665"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="species_1" metaid="_678727"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_7" metaid="_678739" stoichiometry="0.574"/>
+          <speciesReference species="species_8" metaid="_678751" stoichiometry="0.144"/>
+          <speciesReference species="species_9" metaid="_678763" stoichiometry="0.05"/>
+          <speciesReference species="species_10" metaid="_678776" stoichiometry="0.012"/>
+          <speciesReference species="species_11" metaid="_678788" stoichiometry="0.162"/>
+          <speciesReference species="species_12" metaid="_678800" stoichiometry="0.04"/>
+          <speciesReference species="species_13" metaid="_678812" stoichiometry="0.014"/>
+          <speciesReference species="species_14" metaid="_678824" stoichiometry="0.004"/>
+        </listOfProducts>
+        <kineticLaw metaid="_678837">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment_1 </ci>
+              <apply>
+                <ci> function_1 </ci>
+                <ci> species_1 </ci>
+                <ci> parameter_1 </ci>
+                <ci> parameter_2 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_2" name="LOX2" metaid="_662792" reversible="false">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_662792">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0050665"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="species_1" metaid="_678849"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_7" metaid="_678861" stoichiometry="0.751"/>
+          <speciesReference species="species_8" metaid="_678873" stoichiometry="0.023"/>
+          <speciesReference species="species_9" metaid="_678886" stoichiometry="0.025"/>
+          <speciesReference species="species_10" metaid="_678898" stoichiometry="0.015"/>
+          <speciesReference species="species_11" metaid="_678910" stoichiometry="0.127"/>
+          <speciesReference species="species_12" metaid="_678922" stoichiometry="0.026"/>
+          <speciesReference species="species_13" metaid="_678934" stoichiometry="0.018"/>
+          <speciesReference species="species_14" metaid="_678946" stoichiometry="0.016"/>
+        </listOfProducts>
+        <kineticLaw metaid="_678958">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment_1 </ci>
+              <apply>
+                <ci> function_1 </ci>
+                <ci> species_1 </ci>
+                <ci> parameter_3 </ci>
+                <ci> parameter_4 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_3" name="LOX3" metaid="_662793" reversible="false">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_662793">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0050665"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="species_1" metaid="_678970"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_7" metaid="_678982" stoichiometry="0.068"/>
+          <speciesReference species="species_8" metaid="_678994" stoichiometry="0.059"/>
+          <speciesReference species="species_9" metaid="_679006" stoichiometry="0.136"/>
+          <speciesReference species="species_10" metaid="_679018" stoichiometry="0.107"/>
+          <speciesReference species="species_11" metaid="_679030" stoichiometry="0.218"/>
+          <speciesReference species="species_12" metaid="_679042" stoichiometry="0.218"/>
+          <speciesReference species="species_13" metaid="_679054" stoichiometry="0.098"/>
+          <speciesReference species="species_14" metaid="_679066" stoichiometry="0.097"/>
+        </listOfProducts>
+        <kineticLaw metaid="_679078">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment_1 </ci>
+              <apply>
+                <ci> function_1 </ci>
+                <ci> species_1 </ci>
+                <ci> parameter_5 </ci>
+                <ci> parameter_6 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_4" name="HPL" metaid="_662795" reversible="false">
+        <listOfReactants>
+          <speciesReference species="species_7" metaid="_679091"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_15" metaid="_679103"/>
+        </listOfProducts>
+        <kineticLaw metaid="_679115">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment_1 </ci>
+              <apply>
+                <ci> function_1 </ci>
+                <ci> species_7 </ci>
+                <ci> parameter_7 </ci>
+                <ci> parameter_8 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_5" name="HPL(RZE)" metaid="_662796" reversible="false">
+        <listOfReactants>
+          <speciesReference species="species_8" metaid="_679127"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_15" metaid="_679139"/>
+        </listOfProducts>
+        <kineticLaw metaid="_679151">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment_1 </ci>
+              <apply>
+                <ci> function_1 </ci>
+                <ci> species_8 </ci>
+                <ci> parameter_7 </ci>
+                <ci> parameter_9 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

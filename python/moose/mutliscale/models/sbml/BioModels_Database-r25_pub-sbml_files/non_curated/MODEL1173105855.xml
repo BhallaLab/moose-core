@@ -1,0 +1,290 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version3" level="2" metaid="_168024" version="3">
+  <model id="Gilbert2008_ElectrochemicalBiosensor" name="Gilbert2008_ElectrochemicalBiosensor" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>A Case Study in Model-driven Synthetic Biology</strong>
+                <br/>
+          David Gilbert, Monika Heiner, Susan Rosser, Rachael Fulton, Xu Gu and Maciej Trybilo      <em>IFIP International Federation for Information Processing</em>
+          2008; Volume 268:163-175      <a href="http://dx.doi.org/10.1007/978-0-387-09655-1_15">doi:10.1007/978-0-387-09655-1_15</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          We report on a case study in synthetic biology, demonstrating the model-driven design of a self-powering electrochemical biosensor. An essential result of the design process is a general template of a biosensor, which can be instantiated to be adapted to specific pollutants. This template represents a gene expression network extended by metabolic activity. We illustrate the model-based analysis of this template using qualitative, stochastic and continuous Petri nets and related analysis techniques, contributing to a reliable and robust design.      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://www.cellml.org/models/gilbert_heiner_rosser_fulton_gu_trybilo_2007_version01">        <strong>David Gilbert, Monika Heiner, Susan Rosser, Rachael Fulton, Xu Gu and Maciej Trybilo. (2007) - version01</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>Cooling, Mike</strong>
+                <br/>
+          m.cooling@aukland.ac.nz      <br/>
+          The University of Auckland      <br/>
+          The Bioengineering Institute      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models. It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/doi/10.1007/978-0-387-09655-1_15"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1173105855"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/doi/10.1007/978-0-387-09655-1_15"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="per_second" name="per_second" metaid="_168038">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_168050" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="uM" name="uM" metaid="_168062">
+        <listOfUnits>
+          <unit scale="-6" metaid="_168074" kind="mole"/>
+          <unit exponent="-1" metaid="_168086" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="uM_per_second" name="uM_per_second" metaid="_168098">
+        <listOfUnits>
+          <unit scale="-6" metaid="_168110" kind="mole"/>
+          <unit exponent="-1" metaid="_168122" kind="litre"/>
+          <unit exponent="-1" metaid="_168135" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_uM_per_second" name="per_uM_per_second" metaid="_168147">
+        <listOfUnits>
+          <unit scale="-6" exponent="-1" metaid="_168159" kind="mole"/>
+          <unit metaid="_168171" kind="litre"/>
+          <unit exponent="-1" metaid="_168184" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="COMpartment" metaid="_381675" units="litre" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="time_temporalExistence" name="time" metaid="_381695" units="second"/>
+      <parameter id="alphaTF" name="alphaTF" metaid="_381696" value="0.05" units="uM_per_second"/>
+      <parameter id="JTF_Device_TFgenerator" constant="false" name="JTF" metaid="_381697" units="uM_per_second"/>
+      <parameter id="Jgain_TF" constant="false" name="Jgain_TF" metaid="_381698" units="uM_per_second"/>
+      <parameter id="Jgain_TFS" constant="false" name="Jgain_TFS" metaid="_381699" units="uM_per_second"/>
+      <parameter id="TFS" constant="false" name="TFS" metaid="_381700" value="0" units="uM"/>
+      <parameter id="TF" constant="false" name="TF" metaid="_381701" value="8.6207" units="uM"/>
+      <parameter id="s" name="s" metaid="_381703" value="5" units="uM"/>
+      <parameter id="betaTFS" name="betaTFS" metaid="_381704" value="1000000" units="per_uM_per_second"/>
+      <parameter id="kd" name="kd" metaid="_381705" value="4000000" units="per_second"/>
+      <parameter id="deltaTFS" name="deltaTFS" metaid="_381706" value="0.0003851" units="per_second"/>
+      <parameter id="deltaTF" name="deltaTF" metaid="_381708" value="0.0058" units="per_second"/>
+      <parameter id="Jassociation" constant="false" name="Jassociation" metaid="_381709" units="uM_per_second"/>
+      <parameter id="gammaPhzMS" name="gammaPhzMS" metaid="_381710" value="5" units="uM"/>
+      <parameter id="betaPhzMS" name="betaPhzMS" metaid="_381711" value="0.1" units="uM_per_second"/>
+      <parameter id="JPhzMS" constant="false" name="JPhzMS" metaid="_381713" units="uM_per_second"/>
+      <parameter id="gammaTF" name="gammaTF" metaid="_381714" value="4" units="uM"/>
+      <parameter id="betaTF" name="betaTF" metaid="_381715" value="0.07" units="uM_per_second"/>
+      <parameter id="feedbackOn" name="feedbackOn" metaid="_381716" value="1" units="dimensionless"/>
+      <parameter id="JTF_Device_PhzMSgenerator" constant="false" name="JTF" metaid="_381718" units="uM_per_second"/>
+      <parameter id="Jgain_PhzMS" constant="false" name="Jgain_PhzMS" metaid="_381719" units="uM_per_second"/>
+      <parameter id="Jgain_PYO" constant="false" name="Jgain_PYO" metaid="_381720" units="uM_per_second"/>
+      <parameter id="PhzMS" constant="false" name="PhzMS" metaid="_381721" value="0" units="uM"/>
+      <parameter id="PYO" constant="false" name="PYO" metaid="_381723" value="0" units="uM"/>
+      <parameter id="deltaPhzMS" name="deltaPhzMS" metaid="_381724" value="8.0225E-6" units="per_second"/>
+      <parameter id="alphaPYO" name="alphaPYO" metaid="_381725" value="1.3" units="per_second"/>
+      <parameter id="deltaPYO" name="deltaPYO" metaid="_381726" value="0.58" units="per_second"/>
+      <parameter id="JPYOformation" constant="false" name="JPYOformation" metaid="_381728" units="uM_per_second"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_381679" variable="TF">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <minus/>
+                <ci> Jassociation </ci>
+              </apply>
+              <ci> Jgain_TF </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> deltaTF </ci>
+              <ci> TF </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_381680" variable="TFS">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <ci> Jassociation </ci>
+              <apply>
+                <times/>
+                <ci> deltaTFS </ci>
+                <ci> TFS </ci>
+              </apply>
+            </apply>
+            <ci> Jgain_TFS </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_381681" variable="PhzMS">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <ci> Jgain_PhzMS </ci>
+            <apply>
+              <times/>
+              <ci> deltaPhzMS </ci>
+              <ci> PhzMS </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_381682" variable="PYO">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <ci> Jgain_PYO </ci>
+              <apply>
+                <times/>
+                <ci> deltaPYO </ci>
+                <ci> PYO </ci>
+              </apply>
+            </apply>
+            <ci> JPYOformation </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="_381683" variable="JTF_Device_TFgenerator">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <ci> alphaTF </ci>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_381684" variable="Jgain_TFS">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <cn> 0 </cn>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_381686" variable="Jgain_TF">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> JTF_Device_TFgenerator </ci>
+            <ci> JTF_Device_PhzMSgenerator </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_381687" variable="Jassociation">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> betaTFS </ci>
+              <ci> s </ci>
+              <ci> TF </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> kd </ci>
+              <ci> TFS </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_381688" variable="JTF_Device_PhzMSgenerator">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> betaTF </ci>
+                  <ci> TFS </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> gammaTF </ci>
+                  <ci> TFS </ci>
+                </apply>
+              </apply>
+              <apply>
+                <neq/>
+                <ci> feedbackOn </ci>
+                <cn> 0 </cn>
+              </apply>
+            </piece>
+            <otherwise>
+              <cn> 0 </cn>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_381689" variable="JPhzMS">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <times/>
+              <ci> betaPhzMS </ci>
+              <ci> TFS </ci>
+            </apply>
+            <apply>
+              <plus/>
+              <ci> gammaPhzMS </ci>
+              <ci> TFS </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_381691" variable="Jgain_PYO">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <cn> 0 </cn>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_381692" variable="Jgain_PhzMS">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <ci> JPhzMS </ci>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_381693" variable="JPYOformation">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> alphaPYO </ci>
+            <ci> PhzMS </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+  </model>
+</sbml>

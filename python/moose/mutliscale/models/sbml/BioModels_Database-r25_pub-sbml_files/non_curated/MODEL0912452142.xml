@@ -1,0 +1,317 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version3" level="2" metaid="_676061" version="3">
+  <model id="Egli2004_ProlactinRhythmicSecretion" name="Egli2004_ProlactinRhythmicSecretion" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>Rhythmic secretion of prolactin in rats: action of oxytocin coordinated by
+vasoactive intestinal polypeptide of suprachiasmatic nucleus origin.</strong>
+                <br/>
+          Egli M, Bertram R, Sellix MT, Freeman ME.      <em>Endocrinology</em>
+          2004 Jul;145(7):3386-94      <a href="http://www.ncbi.nlm.nih.gov/pubmed/15033917">15033917</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          Prolactin (PRL) is secreted from lactotrophs of the anterior pituitary gland of
+rats in a unique pattern in response to uterine cervical stimulation (CS) during
+mating. Surges of PRL secretion occur in response to relief from hypothalamic
+dopaminergic inhibition and stimulation by hypothalamic releasing neurohormones.
+In this study, we characterized the role of oxytocin (OT) in this system and the
+involvement of vasoactive intestinal polypeptide (VIP) from the suprachiasmatic
+nucleus (SCN) in controlling OT and PRL secretion of CS rats. The effect of OT
+on PRL secretion was demonstrated in cultured lactotrophs showing simultaneous
+enhanced secretion rate and increased intracellular Ca(2+). Neurosecretory OT
+cells of the hypothalamic paraventricular nucleus that express VIP receptors
+were identified by using immunocytochemical techniques in combination with the
+retrogradely transported neuronal tracer Fluoro-Gold (iv injected). OT
+measurements of serial blood samples obtained from ovariectomized (OVX) CS rats
+displayed a prominent increase at the time of the afternoon PRL peak. The
+injection of VIP antisense oligonucleotides into the SCN abolished the afternoon
+increase of OT and PRL in CS-OVX animals. These findings suggest that VIP from
+the SCN contributes to the regulation of OT and PRL secretion in CS rats. We
+propose that in CS rats the regulatory mechanism(s) for PRL secretion comprise
+coordinated action of neuroendocrine dopaminergic and OT cells, both governed by
+the daily rhythm of VIP-ergic output from the SCN. This hypothesis is
+illustrated with a mathematical model.      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://www.cellml.org/models/egli_bertram_sellix_freeman_2004_version02">        <strong>Egli M, Bertram R, Sellix MT, Freeman ME. (2004) - version02</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>Lloyd, Catherine, May</strong>
+                <br/>
+          c.lloyd@aukland.ac.nz      <br/>
+          The University of Auckland      <br/>
+          The Bioengineering Institute      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL0912452142"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/15033917"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="hour" name="hour" metaid="_676073">
+        <listOfUnits>
+          <unit metaid="_676085" multiplier="3600" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="first_order_rate_constant" name="first_order_rate_constant" metaid="_676097">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_676109" multiplier="3600" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="nanog_ml" name="nanog_ml" metaid="_676121">
+        <listOfUnits>
+          <unit scale="-9" metaid="_676133" kind="gram"/>
+          <unit scale="-3" exponent="-1" metaid="_676145" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="picog_ml" name="picog_ml" metaid="_676157">
+        <listOfUnits>
+          <unit scale="-12" metaid="_676169" kind="gram"/>
+          <unit scale="-3" exponent="-1" metaid="_676181" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="nanog_ml_hr" name="nanog_ml_hr" metaid="_676193">
+        <listOfUnits>
+          <unit scale="-9" metaid="_676205" kind="gram"/>
+          <unit scale="-3" exponent="-1" metaid="_676217" kind="litre"/>
+          <unit exponent="-1" metaid="_676229" multiplier="3600" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="picog_ml_hr" name="picog_ml_hr" metaid="_676241">
+        <listOfUnits>
+          <unit scale="-12" metaid="_676253" kind="gram"/>
+          <unit scale="-3" exponent="-1" metaid="_676265" kind="litre"/>
+          <unit exponent="-1" metaid="_676277" multiplier="3600" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time" name="time" metaid="_676289">
+        <listOfUnits>
+          <unit metaid="_676301" multiplier="3600" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="Compartment" metaid="_756081" units="litre" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="PRL" constant="false" name="PRL" metaid="_756100" value="20" units="nanog_ml"/>
+      <parameter id="kD" name="kD" metaid="_756102" value="300" units="nanog_ml"/>
+      <parameter id="kO" name="kO" metaid="_756105" value="9" units="picog_ml"/>
+      <parameter id="rP" name="rP" metaid="_756108" value="300000" units="nanog_ml_hr"/>
+      <parameter id="qP" name="qP" metaid="_756111" value="0.5" units="first_order_rate_constant"/>
+      <parameter id="DA" constant="false" name="DA" metaid="_756114" value="20000" units="nanog_ml"/>
+      <parameter id="vD" constant="false" name="vD" metaid="_756117" units="nanog_ml_hr"/>
+      <parameter id="vDbar" name="vDbar" metaid="_756121" value="10000" units="nanog_ml_hr"/>
+      <parameter id="DA_infinity" name="DA_infinity" metaid="_756122" value="20000" units="nanog_ml"/>
+      <parameter id="qD" name="qD" metaid="_756125" value="0.2" units="first_order_rate_constant"/>
+      <parameter id="OT" constant="false" name="OT" metaid="_756128" value="25" units="picog_ml"/>
+      <parameter id="kx" name="kx" metaid="_756131" value="50" units="picog_ml"/>
+      <parameter id="vO" constant="false" name="vO" metaid="_756134" units="picog_ml_hr"/>
+      <parameter id="vObar" name="vObar" metaid="_756137" value="500" units="picog_ml_hr"/>
+      <parameter id="rO" name="rO" metaid="_756140" value="1100" units="picog_ml_hr"/>
+      <parameter id="qO" name="qO" metaid="_756143" value="1" units="first_order_rate_constant"/>
+      <parameter id="x" constant="false" name="x" metaid="_756146" units="picog_ml"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_756083" variable="PRL">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> rP </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <ci> kD </ci>
+                  <ci> DA </ci>
+                </apply>
+              </apply>
+              <apply>
+                <power/>
+                <apply>
+                  <divide/>
+                  <ci> OT </ci>
+                  <apply>
+                    <plus/>
+                    <ci> kO </ci>
+                    <ci> OT </ci>
+                  </apply>
+                </apply>
+                <cn> 2 </cn>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> qP </ci>
+              <ci> PRL </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_756085" variable="DA">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> qD </ci>
+              <apply>
+                <minus/>
+                <ci> DA_infinity </ci>
+                <ci> DA </ci>
+              </apply>
+            </apply>
+            <ci> vD </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_756090" variable="OT">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> rO </ci>
+              <apply>
+                <divide/>
+                <ci> x </ci>
+                <apply>
+                  <plus/>
+                  <ci> kx </ci>
+                  <ci> x </ci>
+                </apply>
+              </apply>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> qO </ci>
+                <ci> OT </ci>
+              </apply>
+              <ci> vO </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="_756093" variable="vD">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <ci> vDbar </ci>
+              <apply>
+                <and/>
+                <apply>
+                  <geq/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <cn> 2 </cn>
+                </apply>
+                <apply>
+                  <leq/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <cn> 4 </cn>
+                </apply>
+              </apply>
+            </piece>
+            <otherwise>
+              <cn> 0 </cn>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_756096" variable="vO">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <ci> vObar </ci>
+              <apply>
+                <and/>
+                <apply>
+                  <geq/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <cn> 2 </cn>
+                </apply>
+                <apply>
+                  <leq/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <cn> 4 </cn>
+                </apply>
+              </apply>
+            </piece>
+            <otherwise>
+              <cn> 0 </cn>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_756099" variable="x">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <cn> 51 </cn>
+              <apply>
+                <and/>
+                <apply>
+                  <geq/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <cn> 2 </cn>
+                </apply>
+                <apply>
+                  <leq/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <cn> 4 </cn>
+                </apply>
+              </apply>
+            </piece>
+            <piece>
+              <cn> 51 </cn>
+              <apply>
+                <and/>
+                <apply>
+                  <geq/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <cn> 16 </cn>
+                </apply>
+                <apply>
+                  <leq/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <cn> 18 </cn>
+                </apply>
+              </apply>
+            </piece>
+            <otherwise>
+              <cn> 1 </cn>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+  </model>
+</sbml>

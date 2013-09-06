@@ -1,0 +1,484 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="_475713" version="4">
+  <model id="Liu1999_PulsatileSecretion" name="Liu1999_PulsatileSecretion" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>A dynamical model for the pubsatile secretion of the hypothalamo-pituitary-adrenal axis.</strong>
+                <br/>
+          Yi-wei Liu, Zhi-Hong Hu, Jian-Hua Peng and Bing-Zheng Liu      <em>Mathematical and Computer Modelling</em>
+          Volume 29, Issue 4, February 1999, Pages 103-110      <a href="http://dx.doi.org/10.1016/S0006-3495(61)86902-6">10.1016/S0006-3495(61)86902-6</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          We propose a dynamical model for the pulsatile secretion of the hypothalamo-pituitary-adrenal axis. This model takes into account both the binding of hormone with proteins in the plasma and tissues and mutual interactions of the hormones in the system. The deductions from this model are in good agreement with experiment results.      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://models.cellml.org/exposure/2a8203a1d4bdddd26426ffb10ec63e6d">        <strong>CellMLdetails</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>Catherine Lloyd</strong>
+                <br/>
+          c.lloyd@auckland.ac.nz      <br/>
+          The University of Auckland      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:22:29Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2011-06-23T13:14:55Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2011-06-23T13:14:55Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2011-06-23T13:14:55Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1006230060"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/7772725"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="minute" name="minute" metaid="_475725">
+        <listOfUnits>
+          <unit metaid="_475737" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="microg_l" name="microg_l" metaid="_475750">
+        <listOfUnits>
+          <unit scale="-6" metaid="_475762" kind="gram"/>
+          <unit exponent="-1" metaid="_475774" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_microg_l" name="per_microg_l" metaid="_475786">
+        <listOfUnits>
+          <unit scale="-6" exponent="-1" metaid="_475798" kind="gram"/>
+          <unit metaid="_475810" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_microg_l2" name="per_microg_l2" metaid="_475822">
+        <listOfUnits>
+          <unit scale="-6" exponent="-2" metaid="_475834" kind="gram"/>
+          <unit exponent="2" metaid="_475846" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="flux" name="flux" metaid="_475858">
+        <listOfUnits>
+          <unit scale="-6" metaid="_475870" kind="gram"/>
+          <unit exponent="-1" metaid="_475882" kind="litre"/>
+          <unit exponent="-1" metaid="_475894" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="first_order_rate_constant" name="first_order_rate_constant" metaid="_475906">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_475918" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="second_order_rate_constant" name="second_order_rate_constant" metaid="_475930">
+        <listOfUnits>
+          <unit scale="-6" exponent="-1" metaid="_475942" kind="gram"/>
+          <unit metaid="_475954" kind="litre"/>
+          <unit exponent="-1" metaid="_475967" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time" name="time" metaid="_475980">
+        <listOfUnits>
+          <unit metaid="_475992" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="COMpartment" metaid="_547714" units="litre" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="x1" constant="false" name="x1" metaid="_547729" value="0.01067"/>
+      <parameter id="x2" constant="false" name="x2" metaid="_547731" value="0.04665"/>
+      <parameter id="x3" constant="false" name="x3" metaid="_547732" value="6.51"/>
+      <parameter id="x4" constant="false" name="x4" metaid="_547733" value="60.61"/>
+      <parameter id="x5" constant="false" name="x5" metaid="_547734" value="12.61"/>
+      <parameter id="a1" name="a1" metaid="_547735" value="1.7E-5"/>
+      <parameter id="a2" name="a2" metaid="_547737" value="0.0023"/>
+      <parameter id="a3" name="a3" metaid="_547738" value="0.6"/>
+      <parameter id="a4" name="a4" metaid="_547739" value="45"/>
+      <parameter id="a5" name="a5" metaid="_547740" value="36"/>
+      <parameter id="a6" name="a6" metaid="_547741" value="216"/>
+      <parameter id="a7" name="a7" metaid="_547743" value="0.28"/>
+      <parameter id="a8" name="a8" metaid="_547744" value="0.36"/>
+      <parameter id="a9" name="a9" metaid="_547745" value="0.0003"/>
+      <parameter id="a10" name="a10" metaid="_547746" value="0.18"/>
+      <parameter id="a11" name="a11" metaid="_547747" value="150"/>
+      <parameter id="a12" name="a12" metaid="_547749" value="18"/>
+      <parameter id="a13" name="a13" metaid="_547750" value="460"/>
+      <parameter id="a14" name="a14" metaid="_547751" value="0.46"/>
+      <parameter id="a15" name="a15" metaid="_547752" value="0.1"/>
+      <parameter id="a16" name="a16" metaid="_547753" value="0.04"/>
+      <parameter id="a17" name="a17" metaid="_547755" value="150"/>
+      <parameter id="a18" name="a18" metaid="_547756" value="3800"/>
+      <parameter id="a19" name="a19" metaid="_547757" value="57"/>
+      <parameter id="a20" name="a20" metaid="_547758" value="2600"/>
+      <parameter id="a21" name="a21" metaid="_547759" value="200"/>
+      <parameter id="a22" name="a22" metaid="_547761" value="9400"/>
+      <parameter id="a23" name="a23" metaid="_547762" value="10"/>
+      <parameter id="a24" name="a24" metaid="_547763" value="320"/>
+      <parameter id="a25" name="a25" metaid="_547764" value="0.04"/>
+      <parameter id="a26" name="a26" metaid="_547765" value="0.00097"/>
+      <parameter id="a27" name="a27" metaid="_547767" value="0.57"/>
+      <parameter id="a28" name="a28" metaid="_547768" value="0.0017"/>
+      <parameter id="lambda_1" name="lambda_1" metaid="_547769" value="0.059"/>
+      <parameter id="lambda_2" name="lambda_2" metaid="_547770" value="0.028"/>
+      <parameter id="lambda_3_" constant="false" name="lambda_3_" metaid="_547771"/>
+      <parameter id="lambda_4_" constant="false" name="lambda_4_" metaid="_547773"/>
+      <parameter id="lambda_5_" constant="false" name="lambda_5_" metaid="_547774"/>
+      <parameter id="lambda_3" name="lambda_3" metaid="_547775" value="0.0986"/>
+      <parameter id="lambda_4" name="lambda_4" metaid="_547776" value="0.024"/>
+      <parameter id="lambda_5" name="lambda_5" metaid="_547777" value="3E-5"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_547718" variable="x1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <ci> a1 </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <plus/>
+                  <ci> a2 </ci>
+                  <apply>
+                    <times/>
+                    <ci> a3 </ci>
+                    <ci> x1 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a4 </ci>
+                    <apply>
+                      <power/>
+                      <ci> x1 </ci>
+                      <cn> 2 </cn>
+                    </apply>
+                  </apply>
+                </apply>
+                <apply>
+                  <plus/>
+                  <cn> 1 </cn>
+                  <apply>
+                    <times/>
+                    <ci> a5 </ci>
+                    <ci> x1 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a6 </ci>
+                    <apply>
+                      <power/>
+                      <ci> x1 </ci>
+                      <cn> 2 </cn>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a7 </ci>
+                    <ci> x3 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a8 </ci>
+                    <apply>
+                      <power/>
+                      <ci> x3 </ci>
+                      <cn> 2 </cn>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> lambda_1 </ci>
+              <ci> x1 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_547719" variable="x2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <divide/>
+              <apply>
+                <plus/>
+                <ci> a9 </ci>
+                <apply>
+                  <times/>
+                  <ci> a10 </ci>
+                  <ci> x1 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> a11 </ci>
+                  <apply>
+                    <power/>
+                    <ci> x1 </ci>
+                    <cn> 2 </cn>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <plus/>
+                <cn> 1 </cn>
+                <apply>
+                  <times/>
+                  <ci> a12 </ci>
+                  <ci> x1 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> a13 </ci>
+                  <apply>
+                    <power/>
+                    <ci> x1 </ci>
+                    <cn> 2 </cn>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> a14 </ci>
+                  <ci> x3 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> a15 </ci>
+                  <apply>
+                    <power/>
+                    <ci> x3 </ci>
+                    <cn> 2 </cn>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> lambda_2 </ci>
+              <ci> x2 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_547720" variable="x3">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <ci> a16 </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> a17 </ci>
+                    <ci> x1 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a18 </ci>
+                    <apply>
+                      <power/>
+                      <ci> x1 </ci>
+                      <cn> 2 </cn>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a19 </ci>
+                    <ci> x2 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a20 </ci>
+                    <apply>
+                      <power/>
+                      <ci> x2 </ci>
+                      <cn> 2 </cn>
+                    </apply>
+                  </apply>
+                </apply>
+                <apply>
+                  <plus/>
+                  <cn> 1 </cn>
+                  <apply>
+                    <times/>
+                    <ci> a21 </ci>
+                    <ci> x1 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a22 </ci>
+                    <apply>
+                      <power/>
+                      <ci> x1 </ci>
+                      <cn> 2 </cn>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a23 </ci>
+                    <ci> x2 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> a24 </ci>
+                    <apply>
+                      <power/>
+                      <ci> x2 </ci>
+                      <cn> 2 </cn>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> a25 </ci>
+                <ci> x4 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> a26 </ci>
+                <ci> x5 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> lambda_3_ </ci>
+              <ci> x3 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_547721" variable="x4">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> a27 </ci>
+              <ci> x3 </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> lambda_4_ </ci>
+              <ci> x4 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_547722" variable="x5">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> a28 </ci>
+              <ci> x3 </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> lambda_5_ </ci>
+              <ci> x5 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="_547723" variable="lambda_3_">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> lambda_3 </ci>
+            <ci> a27 </ci>
+            <ci> a28 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_547725" variable="lambda_4_">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> lambda_4 </ci>
+            <ci> a25 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_547726" variable="lambda_5_">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> lambda_5 </ci>
+            <ci> a26 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+  </model>
+</sbml>

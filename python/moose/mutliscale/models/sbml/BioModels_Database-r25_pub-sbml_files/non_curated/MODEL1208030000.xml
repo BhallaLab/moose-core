@@ -1,0 +1,444 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2" level="2" metaid="e3e4e32f_6edd_4a49_9fdc_30dee1df92a9" version="1">
+  <model id="MODEL1208030000" name="Mandlik2013 - Synthetic circuit of IPC synthase in Leishmania" metaid="f4402b27_01e6_42ef_aa65_c2c8aba257b5">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <div class="dc:title">Mandlik2012 - Synthetic circuit of IPC synthase in Leishmania</div>
+            <div class="dc:description">      <p>A genetic circuit for the targeted enzyme inositol phosphorylceramide (IPC) synthase belonging to the protozoan parasite        <em>Leishmania</em>
+            is constructed by Mandlik        <em>et al.</em>
+            (2013).        </p>
+                </div>
+            <div class="dc:bibliographicCitation">      <p>This model is described in the article:</p>
+                <div class="bibo:title">        <a href="http://identifiers.org/doi/10.1007/s12154-012-0089-7" title="Access to this publication">Synthetic circuit of inositol phosphorylceramide synthase in Leishmania: a chemical biology approach</a>
+                    </div>
+                <div class="bibo:authorList">Mandlik V., Limbachiya D., Shinde S., Mol M, S., Singh, S.</div>
+                <div class="bibo:Journal">J Chem Biol. January 2013</div>
+                <p>Abstract:</p>
+                <div class="bibo:abstract">        <p>Building circuits and studying their behavior in cells is a major goal of systems and synthetic biology. Synthetic biology enables the precise control of cellular states for systems studies, the discovery of novel parts, control strategies, and interactions for the design of robust synthetic systems. To the best of our knowledge, there are no literature reports for the synthetic circuit construction for protozoan parasites. This paper describes the construction of genetic circuit for the targeted enzyme inositol phosphorylceramide synthase belonging to the protozoan parasite Leishmania. To explore the dynamic nature of the circuit designed, simulation was done followed by circuit validation by qualitative and quantitative approaches. The genetic circuit designed for inositol phosphorylceramide synthase (Biomodels Database—MODEL1208030000) shows responsiveness, oscillatory and bistable behavior, together with intrinsic robustness.</p>
+                    </div>
+                </div>
+            <div class="dc:publisher">      <p>This model is hosted on        <a href="http://www.ebi.ac.uk/biomodels/">BioModels Database</a>
+            and identified by:        <a href="http://identifiers.org/biomodels.db/MODEL1208030000">MODEL1208030000</a>
+            .        </p>
+                <p>To cite BioModels Database, please use:        <a href="http://identifiers.org/pubmed/20587024" title="Latest BioModels Database publication">BioModels Database: An enhanced, curated and annotated resource
+for published quantitative kinetic models</a>
+            .        </p>
+                </div>
+            <div class="dc:license">      <p>To the extent possible under law, all copyright and related or
+neighbouring rights to this encoded model have been dedicated to the public
+domain worldwide. Please refer to        <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Access to: CC0 1.0 Universal (CC0 1.0), Public Domain Dedication">CC0 Public Domain
+Dedication</a>
+            for more information.        </p>
+                </div>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#f4402b27_01e6_42ef_aa65_c2c8aba257b5">
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1208030000"/>
+            </rdf:Bag>
+          </bqmodel:is>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfCompartments>
+      <compartment id="DefaultCompartment" constant="true" name="DefaultCompartment" metaid="c6c42cc1_f20a_4490_8939_ad6089669bc5" size="1"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="IPCS1protein" initialConcentration="0.05" constant="false" hasOnlySubstanceUnits="false" name="IPCS1protein" metaid="_5ce9958c_7253_4a42_9f5b_750ad7db44df" boundaryCondition="false" compartment="DefaultCompartment"/>
+      <species id="IPCS2protein" initialConcentration="0.05" constant="false" hasOnlySubstanceUnits="false" name="IPCS2protein" metaid="aba9ec88_6b58_4d9c_8e21_9fcff35af724" boundaryCondition="false" compartment="DefaultCompartment"/>
+      <species id="IPCS_1" initialConcentration="10" constant="false" hasOnlySubstanceUnits="false" name="IPCS_1" metaid="_9b80c905_7cff_413f_b9d9_fefd6ea6cf6b" boundaryCondition="true" compartment="DefaultCompartment"/>
+      <species id="IPCS_2" initialConcentration="10" constant="false" hasOnlySubstanceUnits="false" name="IPCS_2" metaid="_30d5696b_610c_4375_adef_2e0dc77d0170" boundaryCondition="true" compartment="DefaultCompartment"/>
+      <species id="TetrRepressor" initialConcentration="0.1" constant="false" hasOnlySubstanceUnits="false" name="TetrRepressor" metaid="_7494e007_feb5_430d_b96a_95fa2e8a5165" boundaryCondition="false" compartment="DefaultCompartment"/>
+      <species id="Tetrgene" initialConcentration="10" constant="false" hasOnlySubstanceUnits="false" name="Tetrgene" metaid="_5b719fbf_c691_4ad3_9121_9bfede5293e9" boundaryCondition="true" compartment="DefaultCompartment"/>
+      <species id="lacI" initialConcentration="10" constant="false" hasOnlySubstanceUnits="false" name="lacI" metaid="b59328aa_92e9_4ac3_80b7_2ec9f6c55544" boundaryCondition="false" compartment="DefaultCompartment"/>
+      <species id="lactoserepressor" initialConcentration="0.05" constant="false" hasOnlySubstanceUnits="false" name="lactoserepressor" metaid="_060a0568_6bb1_4c5e_8a94_4bcbcb7f21b9" boundaryCondition="false" compartment="DefaultCompartment"/>
+      <species id="lamdar" initialConcentration="10" constant="false" hasOnlySubstanceUnits="false" name="lamdar" metaid="fe8f2789_fc47_4490_80ab_49da5a14e0d4" boundaryCondition="true" compartment="DefaultCompartment"/>
+      <species id="lamdarepressor" initialConcentration="0.05" constant="false" hasOnlySubstanceUnits="false" name="lamdarepressor" metaid="b1dc3e20_bcd8_41df_a5a8_cc49d545463f" boundaryCondition="false" compartment="DefaultCompartment"/>
+      <species id="rp1" initialConcentration="10" constant="false" hasOnlySubstanceUnits="false" name="rp1" metaid="_08527b85_79b2_4765_a0db_ebd89e3ce454" boundaryCondition="true" compartment="DefaultCompartment"/>
+      <species id="rp2" initialConcentration="10" constant="false" hasOnlySubstanceUnits="false" name="rp2" metaid="e6ff89d8_e28f_4135_928c_64b88760fde3" boundaryCondition="true" compartment="DefaultCompartment"/>
+      <species id="rp3" initialConcentration="10" constant="false" hasOnlySubstanceUnits="false" name="rp3" metaid="d8019063_a7ad_4cf0_a6c8_67385cd9aafa" boundaryCondition="true" compartment="DefaultCompartment"/>
+      <species id="rp4" initialConcentration="10" constant="false" hasOnlySubstanceUnits="false" name="rp4" metaid="b38bae8b_e054_4fa3_80a1_8173b38aac34" boundaryCondition="true" compartment="DefaultCompartment"/>
+      <species id="rp5" initialConcentration="10" constant="false" hasOnlySubstanceUnits="false" name="rp5" metaid="_42608761_0c23_4921_8d80_dfcaebb019be" boundaryCondition="true" compartment="DefaultCompartment"/>
+      <species id="rs1" initialConcentration="10" constant="false" hasOnlySubstanceUnits="false" name="rs1" metaid="d4fb6620_3c23_4cc6_b429_bdefafc89a6e" boundaryCondition="true" compartment="DefaultCompartment"/>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="rp1_strength" constant="true" name="rp1_strength" metaid="_16439aed_971f_4376_8bb3_8d2100115302" value="5"/>
+      <parameter id="rp2_strength" constant="true" name="rp2_strength" metaid="_188c3ef5_8d26_4675_a877_0b0a61bf6df4" value="5"/>
+      <parameter id="rp3_strength" constant="true" name="rp3_strength" metaid="d4c33d6b_e823_407e_b017_ee3f88759a8d" value="5"/>
+      <parameter id="rp4_strength" constant="true" name="rp4_strength" metaid="_186c0d4c_711e_4da7_a9f5_63be0cf71828" value="5"/>
+      <parameter id="rp5_strength" constant="true" name="rp5_strength" metaid="_1329bba9_1897_46ff_888d_3257e0c1be2c" value="5"/>
+      <parameter id="TetrRepressor_degradation_rate" constant="true" name="TetrRepressor_degradation_rate" metaid="_2500e3a0_a779_450e_8d37_95d9e394a082" value="0.5"/>
+      <parameter id="IPCS1protein_degradation_rate" constant="true" name="IPCS1protein_degradation_rate" metaid="_8da2d5e8_76b5_40f5_b131_6110d0e88aef" value="0.1"/>
+      <parameter id="tr1_Kd" constant="true" name="tr1_Kd" metaid="_372d415e_0554_43cf_8f1c_05be49f10021" value="1"/>
+      <parameter id="tr1_h" constant="true" name="tr1_h" metaid="b61049c4_9399_4122_9089_948ceb574e98" value="2"/>
+      <parameter id="tr2_Kd" constant="true" name="tr2_Kd" metaid="_56fe9c2b_806d_41a6_a957_f69008515442" value="1"/>
+      <parameter id="tr2_h" constant="true" name="tr2_h" metaid="e7b0822a_9084_4e81_8abb_ebe3b3135dff" value="2"/>
+      <parameter id="tr3_Kd" constant="true" name="tr3_Kd" metaid="_69250b18_dfb2_4878_b15e_9a72003df1e6" value="1"/>
+      <parameter id="tr3_h" constant="true" name="tr3_h" metaid="_758bbf34_404e_4091_9196_eae8a9c47966" value="2"/>
+      <parameter id="tr4_Kd" constant="true" name="tr4_Kd" metaid="_40c4ee1f_bc61_4370_9ffd_caa6b8115d41" value="1"/>
+      <parameter id="tr4_h" constant="true" name="tr4_h" metaid="_7c0bf963_dcbc_47e3_8b97_bbb66660f10c" value="2"/>
+      <parameter id="tr5_Kd" constant="true" name="tr5_Kd" metaid="_765ecc7a_b761_40c2_a445_37ee7415dab4" value="1"/>
+      <parameter id="tr5_h" constant="true" name="tr5_h" metaid="c668627d_023b_48d6_9b48_a6fd5ea36654" value="2"/>
+      <parameter id="tr6_Kd" constant="true" name="tr6_Kd" metaid="fbde5c68_b3ee_46b3_95f7_485de2552e68" value="1"/>
+      <parameter id="tr6_h" constant="true" name="tr6_h" metaid="_6524517c_72fb_4ab0_9644_d7a6b363ef6d" value="2"/>
+      <parameter id="pp1_translation_rate" constant="true" name="pp1_translation_rate" metaid="_94af61c7_c338_4a9e_8a78_2cad103a1c15" value="1"/>
+      <parameter id="pp2_translation_rate" constant="true" name="pp2_translation_rate" metaid="_5148c2d8_16f3_4f81_be26_d6c48502e829" value="1"/>
+      <parameter id="pp3_translation_rate" constant="true" name="pp3_translation_rate" metaid="_0418b519_a8fb_48cc_bec9_d3eed060e98b" value="1"/>
+      <parameter id="pp4_translation_rate" constant="true" name="pp4_translation_rate" metaid="_9a825844_4a6c_4998_860b_4d50d975951b" value="1"/>
+      <parameter id="pp5_translation_rate" constant="true" name="pp5_translation_rate" metaid="_6d06e537_4db0_4b4e_84fb_735d15711fb6" value="1"/>
+      <parameter id="IPCS2protein_degradation_rate" constant="true" name="IPCS2protein_degradation_rate" metaid="_150f1285_f04a_47f4_a32e_6f243a3f2e5c" value="0.1"/>
+      <parameter id="lamdarepressor_degradation_rate" constant="true" name="lamdarepressor_degradation_rate" metaid="_8e43db20_9ca1_455d_803f_de6f456eb9b4" value="0.1"/>
+      <parameter id="lactoserepressor_degradation_rate" constant="true" name="lactoserepressor_degradation_rate" metaid="_7a1f305a_6a70_4d7c_a2eb_ccc99c2e6506" value="0.1"/>
+    </listOfParameters>
+    <listOfRules>
+      <assignmentRule metaid="_4de4908b_1cc3_40cc_ae12_0345c9204b95" variable="rp1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn> 1 </cn>
+            <apply>
+              <plus/>
+              <cn type="integer"> 1 </cn>
+              <apply>
+                <power/>
+                <apply>
+                  <divide/>
+                  <ci> IPCS2protein </ci>
+                  <ci> tr2_Kd </ci>
+                </apply>
+                <ci> tr2_h </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_8c1b17e1_53eb_481a_9f19_470ff1b2f752" variable="rp2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn> 1 </cn>
+            <apply>
+              <plus/>
+              <cn type="integer"> 1 </cn>
+              <apply>
+                <power/>
+                <apply>
+                  <divide/>
+                  <ci> IPCS1protein </ci>
+                  <ci> tr1_Kd </ci>
+                </apply>
+                <ci> tr1_h </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="c319fd25_34e5_4286_8a69_74db73f04e0b" variable="rp3">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn> 1 </cn>
+            <apply>
+              <plus/>
+              <cn type="integer"> 1 </cn>
+              <apply>
+                <power/>
+                <apply>
+                  <divide/>
+                  <ci> lamdarepressor </ci>
+                  <ci> tr5_Kd </ci>
+                </apply>
+                <ci> tr5_h </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="a761ed7e_d149_4f74_9cd1_0deb228456c0" variable="rp4">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn> 1 </cn>
+            <apply>
+              <plus/>
+              <cn type="integer"> 1 </cn>
+              <apply>
+                <power/>
+                <apply>
+                  <divide/>
+                  <ci> lactoserepressor </ci>
+                  <ci> tr3_Kd </ci>
+                </apply>
+                <ci> tr3_h </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_0d585f91_72d3_4a44_b6ba_adf3687055e4" variable="rp5">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn> 1 </cn>
+            <apply>
+              <plus/>
+              <cn type="integer"> 1 </cn>
+              <apply>
+                <power/>
+                <apply>
+                  <divide/>
+                  <ci> TetrRepressor </ci>
+                  <ci> tr4_Kd </ci>
+                </apply>
+                <ci> tr4_h </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="fd389368_81d5_44f8_babb_cf2354f5ed68" variable="Tetrgene">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> rp4_strength </ci>
+            <ci> rp4 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="fb8c176c_6b38_404b_aaab_f04b09bbb6b5" variable="rs1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn> 1 </cn>
+            <apply>
+              <plus/>
+              <cn type="integer"> 1 </cn>
+              <apply>
+                <power/>
+                <apply>
+                  <divide/>
+                  <ci> lactoserepressor </ci>
+                  <ci> tr6_Kd </ci>
+                </apply>
+                <ci> tr6_h </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="cc5422dd_3be7_4997_bfa2_ce85e1d24c5b" variable="IPCS_1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> rp1_strength </ci>
+            <ci> rp1 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="b341a794_837b_431f_b81b_811cc2e29967" variable="IPCS_2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> rp2_strength </ci>
+            <ci> rp2 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_3e093a47_45d9_45e8_9e1b_ccfe1928bdd2" variable="lamdar">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> rp5_strength </ci>
+            <ci> rp5 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+    <listOfReactions>
+      <reaction id="pp1_v1" name="pp1_v1" metaid="_8d0ff48e_1824_4928_908a_a0c4e4377b67" reversible="false" fast="false">
+        <listOfProducts>
+          <speciesReference species="IPCS1protein" metaid="_5f149dd2_3f42_4d82_97b4_f0a336ba5ffc" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="IPCS_1" metaid="_19c3b947_01b3_433f_9341_cd46d68cf6b6"/>
+          <modifierSpeciesReference species="IPCS_1"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_8ea6d95e_7505_4299_b3bd_a4bcc01ca6ec">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> pp1_translation_rate </ci>
+              <ci> rp1_strength </ci>
+              <ci> IPCS_1 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="pp1_v2" name="pp1_v2" metaid="afae68eb_3161_4c67_98d0_17f45184bb9b" reversible="false" fast="false">
+        <listOfReactants>
+          <speciesReference species="IPCS1protein" metaid="_7e7aa6bd_6d0d_4a42_88ae_79b8796c74f8" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="IPCS1protein"/>
+        </listOfModifiers>
+        <kineticLaw metaid="fce9ab4b_db5e_4661_be31_49d3d5a0ed70">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> IPCS1protein_degradation_rate </ci>
+              <ci> IPCS1protein </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="pp2_v1" name="pp2_v1" metaid="f3aeb401_6fdf_4afb_8c29_8b35fa3ae7d8" reversible="false" fast="false">
+        <listOfProducts>
+          <speciesReference species="IPCS2protein" metaid="_88175f7f_882d_4d51_8db1_d304058bf6c5" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="IPCS_2" metaid="_8b6d4616_a90c_4a55_9119_33136c4b7e18"/>
+          <modifierSpeciesReference species="IPCS_2"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_3dd53e38_a125_487f_8874_c7e7915d88e7">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> pp2_translation_rate </ci>
+              <ci> rp2_strength </ci>
+              <ci> IPCS_2 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="pp2_v2" name="pp2_v2" metaid="_89b90a57_8cd0_4fb0_8bd0_646bbe1c5336" reversible="false" fast="false">
+        <listOfReactants>
+          <speciesReference species="IPCS2protein" metaid="_264e4335_8a73_44af_a892_2f636da3fa86" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="IPCS2protein"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_963b961c_4c5d_47a6_be49_42a02c491217">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> IPCS2protein_degradation_rate </ci>
+              <ci> IPCS2protein </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="pp3_v1" name="pp3_v1" metaid="a761bab9_4f6d_47f0_b116_836b53e79003" reversible="false" fast="false">
+        <listOfProducts>
+          <speciesReference species="lactoserepressor" metaid="_4aa9232e_ffb7_44a5_9fb2_fa32406042c2" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="lacI" metaid="_9f3723e5_edff_4111_baf8_2d78a7212845"/>
+          <modifierSpeciesReference species="lacI"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_86f5f9cb_a065_4dd3_8c1c_3a0991ac92ad">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> pp3_translation_rate </ci>
+              <ci> rp3_strength </ci>
+              <ci> lacI </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="pp3_v2" name="pp3_v2" metaid="fced2178_c39c_4848_bebc_f56e606c3d8e" reversible="false" fast="false">
+        <listOfReactants>
+          <speciesReference species="lactoserepressor" metaid="_7c66b5f1_ebc4_4179_831f_3353237985b0" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="lactoserepressor"/>
+        </listOfModifiers>
+        <kineticLaw metaid="b5486ea0_953f_4bf5_ac07_cb3469f332f8">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> lactoserepressor_degradation_rate </ci>
+              <ci> lactoserepressor </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="pp4_v1" name="pp4_v1" metaid="_4170967d_26e0_4677_8036_611ad76a30be" reversible="false" fast="false">
+        <listOfProducts>
+          <speciesReference species="TetrRepressor" metaid="_1865d131_7a4e_4c96_97c7_3f1d463ff509" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Tetrgene" metaid="_2b003082_9beb_4f44_8c38_aba5db59a6bf"/>
+          <modifierSpeciesReference species="Tetrgene"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_7954c861_965f_4747_abea_d7ba531954ca">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> pp4_translation_rate </ci>
+              <cn> 1 </cn>
+              <ci> Tetrgene </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="pp4_v2" name="pp4_v2" metaid="dd14632a_4023_4640_959f_11a1c8e77432" reversible="false" fast="false">
+        <listOfReactants>
+          <speciesReference species="TetrRepressor" metaid="_7543f41d_60b2_4173_9bc8_37c3425c3e0e" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="TetrRepressor"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_061be82d_7792_442a_92d7_2cd262bea119">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> TetrRepressor_degradation_rate </ci>
+              <ci> TetrRepressor </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="pp5_v1" name="pp5_v1" metaid="_6af4fc83_243c_4036_ae7d_9a0db5aa5b90" reversible="false" fast="false">
+        <listOfProducts>
+          <speciesReference species="lamdarepressor" metaid="_1bd5861e_d8d4_40f9_9540_42fc607d7b96" stoichiometry="1"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="lamdar" metaid="_1f2346c4_b4cd_42a3_adf9_cd8d2ae1ddfa"/>
+          <modifierSpeciesReference species="lamdar"/>
+        </listOfModifiers>
+        <kineticLaw metaid="a0affeed_24eb_40e9_ac40_28682135359b">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> pp5_translation_rate </ci>
+              <cn> 1 </cn>
+              <ci> lamdar </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="pp5_v2" name="pp5_v2" metaid="_3ff39a3c_fba7_4d4a_a5aa_7d3affdb4c89" reversible="false" fast="false">
+        <listOfReactants>
+          <speciesReference species="lamdarepressor" metaid="a92ce1dc_eeeb_4de4_9e00_0044ae2d88d5" stoichiometry="1"/>
+        </listOfReactants>
+        <listOfModifiers>
+          <modifierSpeciesReference species="lamdarepressor"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_797b2ffb_9563_4f8e_a8e4_2cec524fc593">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> lamdarepressor_degradation_rate </ci>
+              <ci> lamdarepressor </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

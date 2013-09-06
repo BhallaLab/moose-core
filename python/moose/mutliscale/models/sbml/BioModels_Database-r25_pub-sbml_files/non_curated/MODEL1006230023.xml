@@ -1,0 +1,355 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="_314651" version="4">
+  <model id="Koivumaki2009_SERCAATPase_Standalone" name="Koivumaki2009_SERCAATPase_Standalone" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>Modelling sarcoplasmic reticulum calcium ATPase and its regulation in cardiac
+myocytes.</strong>
+                <br/>
+          Koivumaki JT, Takalo J, Korhonen T, Tavi P, Weckstrom M.      <em>Philos Transact A Math Phys Eng Sci</em>
+          2009 Jun 13;367(1896):2181-202      <a href="http://www.ncbi.nlm.nih.gov/pubmed/19414452">19414452</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          When developing large-scale mathematical models of physiology, some reduction in
+complexity is necessarily required to maintain computational efficiency. A prime
+example of such an intricate cell is the cardiac myocyte. For the predictive
+power of the cardiomyocyte models, it is vital to accurately describe the
+calcium transport mechanisms, since they essentially link the electrical
+activation to contractility. The removal of calcium from the cytoplasm takes
+place mainly by the Na(+)/Ca(2+) exchanger, and the sarcoplasmic reticulum
+Ca(2+) ATPase (SERCA). In the present study, we review the properties of SERCA,
+its frequency-dependent and beta-adrenergic regulation, and the approaches of
+mathematical modelling that have been used to investigate its function.
+Furthermore, we present novel theoretical considerations that might prove useful
+for the elucidation of the role of SERCA in cardiac function, achieving a
+reduction in model complexity, but at the same time retaining the central
+aspects of its function. Our results indicate that to faithfully predict the
+physiological properties of SERCA, we should take into account the
+calcium-buffering effect and reversible function of the pump. This
+'uncomplicated' modelling approach could be useful to other similar transport
+mechanisms as well.      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://models.cellml.org/exposure/3d5593ef7cb34144d2dbb9d617094026">        <strong>Koivumaki JT, Takalo J, Korhonen T, Tavi P, Weckstrom M. (2009) - version=1.0</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>Geoffrey Nunns</strong>
+                <br/>
+          gnunns1@jhu.edu      <br/>
+          The University of Auckland      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Nunns</vCard:Family>
+                  <vCard:Given>Geoffrey</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>gnunns1@jhu.edu</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>Auckland Bioengineering Institute, The Auckland University</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Nunns</vCard:Family>
+                  <vCard:Given>Geoffrey</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>gnunns1@jhu.edu</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>Auckland Bioengineering Institute, The Auckland University</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Nunns</vCard:Family>
+                  <vCard:Given>Geoffrey</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>gnunns1@jhu.edu</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>Auckland Bioengineering Institute, The Auckland University</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T12:33:25Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T12:33:25Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T12:33:25Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T12:33:25Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1006230023"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/19414452"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="uM" name="uM" metaid="_314663">
+        <listOfUnits>
+          <unit scale="-6" metaid="_314675" kind="mole"/>
+          <unit exponent="-1" metaid="_314687" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_uM2" name="per_uM2" metaid="_314699">
+        <listOfUnits>
+          <unit scale="-6" exponent="-2" metaid="_314711" kind="mole"/>
+          <unit exponent="2" metaid="_314723" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="msec" name="msec" metaid="_314735">
+        <listOfUnits>
+          <unit scale="-3" metaid="_314747" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_msec" name="per_msec" metaid="_314759">
+        <listOfUnits>
+          <unit scale="-3" exponent="-1" metaid="_314771" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="uM_per_msec" name="uM_per_msec" metaid="_314783">
+        <listOfUnits>
+          <unit scale="-6" metaid="_314795" kind="mole"/>
+          <unit exponent="-1" metaid="_314807" kind="litre"/>
+          <unit scale="-3" exponent="-1" metaid="_314819" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_msec_per_uM2" name="per_msec_per_uM2" metaid="_314831">
+        <listOfUnits>
+          <unit scale="-3" exponent="-1" metaid="_314844" kind="second"/>
+          <unit scale="-6" exponent="-2" metaid="_314856" kind="mole"/>
+          <unit exponent="2" metaid="_314868" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time" name="time" metaid="_314880">
+        <listOfUnits>
+          <unit scale="-3" metaid="_314892" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="COMpartment" metaid="_604936" units="litre" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="Ca_cyt" name="Ca_cyt" metaid="_604961" value="0.25"/>
+      <parameter id="Ca_NSR" name="Ca_NSR" metaid="_604962" value="760"/>
+      <parameter id="CaMKII_reg" name="CaMKII_reg" metaid="_604965" value="0"/>
+      <parameter id="SERCA_TOT" name="SERCA_TOT" metaid="_604968" value="47"/>
+      <parameter id="PSR" name="PSR" metaid="_604971" value="1"/>
+      <parameter id="Kmf_PLBKO" name="Kmf_PLBKO" metaid="_604974" value="0.15"/>
+      <parameter id="Kmf_PLB" name="Kmf_PLB" metaid="_604977" value="0.15"/>
+      <parameter id="Kmr_PLBKO" name="Kmr_PLBKO" metaid="_604980" value="2500"/>
+      <parameter id="Kmr_PLB" name="Kmr_PLB" metaid="_604983" value="1110"/>
+      <parameter id="EC_50_fwd" constant="false" name="EC_50_fwd" metaid="_604986"/>
+      <parameter id="EC_50_rev" constant="false" name="EC_50_rev" metaid="_604989"/>
+      <parameter id="k_cyt_serca" constant="false" name="k_cyt_serca" metaid="_604992"/>
+      <parameter id="k_serca_cyt" constant="false" name="k_serca_cyt" metaid="_604995"/>
+      <parameter id="k_serca_sr" constant="false" name="k_serca_sr" metaid="_604996"/>
+      <parameter id="k_sr_serca" constant="false" name="k_sr_serca" metaid="_604999"/>
+      <parameter id="br_cyt_serca" constant="false" name="br_cyt_serca" metaid="_605002"/>
+      <parameter id="br_serca_sr" name="br_serca_sr" metaid="_605003" value="0.00625"/>
+      <parameter id="J_cyt_serca" constant="false" name="J_cyt_serca" metaid="_605006"/>
+      <parameter id="J_serca_sr" constant="false" name="J_serca_sr" metaid="_605007"/>
+      <parameter id="Ca_serca" constant="false" name="Ca_serca" metaid="_605010" value="12"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_604940" variable="Ca_serca">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <ci> J_cyt_serca </ci>
+            <ci> J_serca_sr </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="_604941" variable="EC_50_fwd">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <apply>
+              <plus/>
+              <ci> Kmf_PLBKO </ci>
+              <apply>
+                <times/>
+                <ci> Kmf_PLB </ci>
+                <ci> PSR </ci>
+              </apply>
+            </apply>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <times/>
+                <cn> 0.27 </cn>
+                <ci> CaMKII_reg </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_604944" variable="EC_50_rev">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <ci> Kmr_PLBKO </ci>
+            <apply>
+              <times/>
+              <ci> Kmr_PLB </ci>
+              <ci> PSR </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_604945" variable="br_cyt_serca">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <cn> 1000 </cn>
+            <ci> br_serca_sr </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_604948" variable="k_cyt_serca">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> br_cyt_serca </ci>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <times/>
+                <cn> 0.7 </cn>
+                <ci> CaMKII_reg </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_604951" variable="k_serca_cyt">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <apply>
+              <power/>
+              <ci> EC_50_fwd </ci>
+              <cn> 2 </cn>
+            </apply>
+            <ci> br_cyt_serca </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_604952" variable="k_serca_sr">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> br_serca_sr </ci>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <times/>
+                <cn> 0.7 </cn>
+                <ci> CaMKII_reg </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_604955" variable="k_sr_serca">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <ci> br_serca_sr </ci>
+            <apply>
+              <power/>
+              <ci> EC_50_rev </ci>
+              <cn> 2 </cn>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_604958" variable="J_cyt_serca">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> k_cyt_serca </ci>
+              <apply>
+                <power/>
+                <ci> Ca_cyt </ci>
+                <cn> 2 </cn>
+              </apply>
+              <apply>
+                <minus/>
+                <ci> SERCA_TOT </ci>
+                <ci> Ca_serca </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> k_serca_cyt </ci>
+              <ci> Ca_serca </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_604959" variable="J_serca_sr">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> k_serca_sr </ci>
+              <ci> Ca_serca </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> k_sr_serca </ci>
+              <apply>
+                <power/>
+                <ci> Ca_NSR </ci>
+                <cn> 2 </cn>
+              </apply>
+              <apply>
+                <minus/>
+                <ci> SERCA_TOT </ci>
+                <ci> Ca_serca </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+  </model>
+</sbml>

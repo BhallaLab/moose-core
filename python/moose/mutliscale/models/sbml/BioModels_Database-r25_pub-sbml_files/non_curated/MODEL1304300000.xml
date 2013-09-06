@@ -1,0 +1,326 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" level="2" metaid="c610de8c_bd8e_4292_b4f4_51ffa093c5d4" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dc="http://purl.org/dc/elements/1.1/" version="4">
+  <model id="MODEL1304300000" name="Hofmeyr1996 - metabolic control analysis" metaid="meta_hofmeyr96">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <div class="dc:title">Hofmeyr1996 - metabolic control analysis</div>
+            <div class="dc:description">      <p>Understanding of genetic mechanisms would not be possible by studying the properties of individual components. To better understand the system as a whole, it is necessary to study the interaction between components and their response to each other. This paper describes a strategy for the experimental control analysis called co-response analysis.</p>
+                </div>
+            <div class="dc:bibliographicCitation">      <p>This model is described in the article:</p>
+                <div class="bibo:title">        <a href="http://identifiers.org/pubmed/8944170" title="Access to this publication">Co-response analysis: a new experimental strategy for metabolic control analysis</a>
+                    </div>
+                <div class="bibo:authorList">Hofmeyr JH, Cornish-Bowden A</div>
+                <div class="bibo:Journal">Journal of Theoretical Biology [1996, 182(3):371-380]</div>
+                <p>Abstract:</p>
+                <div class="bibo:abstract">        <p>The formulation of the standard summation and connectivity relationships as a statement that the matrix of all the elasticities in a system is the inverse of the matrix of all the control coefficients is completely general, provided that only control coefficients for independent fluxes and concentrations are considered, and that the elasticity matrix is written to take account of the stoichiometry of the pathway and the implied dependences between concentrations. This generally implies that co-response analysis is also general, i.e. that all of the elasticities and all of the control coefficients in any system, regardless of branching, feedback effects, moiety conservation or other complications, can be determined by comparing the effects of perturbations of the enzyme activities on the steady-state fluxes and concentrations of the pathway. The approach requires no quantitative information about the magnitudes of the effects on the individual enzyme activities, and consequently no enzymes need to be studied in isolation from the pathway.</p>
+                    </div>
+                </div>
+            <div class="dc:publisher">      <p>This model is hosted on        <a href="http://www.ebi.ac.uk/biomodels/">BioModels Database</a>
+            and identified
+by:        <a href="http://identifiers.org/biomodels.db/MODEL1304300000">MODEL1304300000</a>
+            .        </p>
+                <p>To cite BioModels Database, please use:        <a href="http://identifiers.org/pubmed/20587024" title="Latest BioModels Database publication">BioModels Database: An enhanced, curated and annotated resource
+for published quantitative kinetic models</a>
+            .        </p>
+                </div>
+            <div class="dc:license">      <p>To the extent possible under law, all copyright and related or
+neighbouring rights to this encoded model have been dedicated to the public
+domain worldwide. Please refer to        <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Access to: CC0 1.0 Universal (CC0 1.0), Public Domain Dedication">CC0 Public Domain
+Dedication</a>
+            for more information.        </p>
+                </div>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#meta_hofmeyr96">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Smallbone</vCard:Family>
+                  <vCard:Given>Kieran</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>kieran.smallbone@manchester.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Manchester</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2011-11-29T00:00:00Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2013-04-30T13:53:39Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/8944170"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1304300000"/>
+            </rdf:Bag>
+          </bqmodel:is>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="substance" metaid="_69b423a2_d0a6_4fe1_b57b_a12c20b08977">
+        <listOfUnits>
+          <unit metaid="_0d859b4d_3ffe_420c_8840_63a693c244cf" kind="dimensionless"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time" metaid="_655df281_539c_469e_ba13_5d60bad85bf3">
+        <listOfUnits>
+          <unit metaid="_3898b140_e0e0_4986_9568_e9918d3bcd5e" kind="dimensionless"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="volume" metaid="_25257b43_efaf_4b42_9ab4_1b5577f1ba19">
+        <listOfUnits>
+          <unit metaid="_70c7ceb5_ec96_43bc_9be8_d6db8d568d24" kind="dimensionless"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="cell" name="cell" metaid="metaid_cell" sboTerm="SBO:0000290" size="1">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_cell">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0005623"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </compartment>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="s1" initialConcentration="0" name="s1" metaid="fef41a8d_7555_48f8_9531_65d65c7b4574" sboTerm="SBO:0000247" compartment="cell"/>
+      <species id="s2" initialConcentration="2.5" name="s2" metaid="_263de26f_eedd_44b5_b5de_8a068d0853a7" sboTerm="SBO:0000247" compartment="cell"/>
+      <species id="s3" initialConcentration="2.5" name="s3" metaid="cde5f915_101b_4f03_915c_9d235f1306be" sboTerm="SBO:0000247" compartment="cell"/>
+      <species id="x0" initialConcentration="10" constant="true" name="x0" metaid="_9a527d96_82e9_4629_b58b_471e41d771ca" boundaryCondition="true" sboTerm="SBO:0000247" compartment="cell"/>
+      <species id="x4" initialConcentration="0" constant="true" name="x4" metaid="_76c59007_0594_41bc_b67e_e80ecfe9f7c0" boundaryCondition="true" sboTerm="SBO:0000247" compartment="cell"/>
+      <species id="x5" initialConcentration="0" constant="true" name="x5" metaid="f4e486d6_56c5_451c_a9f5_2f44a3c40d8f" boundaryCondition="true" sboTerm="SBO:0000247" compartment="cell"/>
+      <species id="x6" initialConcentration="1" constant="true" name="x6" metaid="c207ea28_8b06_40da_821c_4f64bb88c0b5" boundaryCondition="true" sboTerm="SBO:0000247" compartment="cell"/>
+      <species id="x7" initialConcentration="1" constant="true" name="x7" metaid="cfd9ca2f_6f78_42dd_b23f_7ca06c24ad87" boundaryCondition="true" sboTerm="SBO:0000247" compartment="cell"/>
+    </listOfSpecies>
+    <listOfReactions>
+      <reaction id="v1" name="v1" metaid="_9524b9d9_765f_4e32_a6b1_db07732a4057" sboTerm="SBO:0000176">
+        <listOfReactants>
+          <speciesReference species="x0" metaid="e1fced69_5f78_4991_a780_9d56421854a3"/>
+          <speciesReference species="s2" metaid="_739d11a3_efb9_468e_9157_00255c16d2c0"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="s1" metaid="_143cb7f5_cff4_4d02_846a_c560f0aeea6e"/>
+          <speciesReference species="s3" metaid="_0dea9bbe_22f9_4370_bb88_6350d2c13b29"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="x0"/>
+          <modifierSpeciesReference species="s2"/>
+          <modifierSpeciesReference species="s1"/>
+          <modifierSpeciesReference species="s3"/>
+        </listOfModifiers>
+        <kineticLaw metaid="d9f31b63_c3b3_4af4_8d25_7fcf0c5029dd" sboTerm="SBO:0000430">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> e1 </ci>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> p1 </ci>
+                    <ci> x0 </ci>
+                    <ci> s2 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> s1 </ci>
+                    <ci> s3 </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <plus/>
+                <cn type="integer"> 1 </cn>
+                <ci> x0 </ci>
+                <ci> s2 </ci>
+                <ci> s1 </ci>
+                <ci> s3 </ci>
+                <apply>
+                  <times/>
+                  <ci> x0 </ci>
+                  <ci> s2 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> s1 </ci>
+                  <ci> s3 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="e1" metaid="c54ed7ba_18c5_431e_819a_ad6ccf9b3da5" value="1" units="dimensionless"/>
+            <parameter id="p1" metaid="d688e4bc_3718_443d_9bc4_67dde504f72c" value="10" units="dimensionless"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v2" name="v2" metaid="f63b3487_5b62_4215_a75b_cec4c52cb8f1" sboTerm="SBO:0000176">
+        <listOfReactants>
+          <speciesReference species="x6" metaid="_787661d8_427c_40d2_8c26_7c50346e304f"/>
+          <speciesReference species="s3" metaid="c4ee912b_0486_438e_9c0f_8281db8ac85d"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="x7" metaid="_2f4f65f5_99c9_4fb3_8b99_2f36f61c5b3f"/>
+          <speciesReference species="s2" metaid="_9a1261d9_8c29_4a12_b0b9_a47f04aad232"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="x6"/>
+          <modifierSpeciesReference species="s3"/>
+          <modifierSpeciesReference species="x7"/>
+          <modifierSpeciesReference species="s2"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_5df90905_c5fe_4433_9d2f_370d461b2f79" sboTerm="SBO:0000430">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> e2 </ci>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> p2 </ci>
+                    <ci> x6 </ci>
+                    <ci> s3 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> x7 </ci>
+                    <ci> s2 </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <plus/>
+                <cn type="integer"> 1 </cn>
+                <ci> s3 </ci>
+                <ci> s2 </ci>
+                <ci> x6 </ci>
+                <ci> x7 </ci>
+                <apply>
+                  <times/>
+                  <ci> s3 </ci>
+                  <ci> x6 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> s2 </ci>
+                  <ci> x7 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="e2" metaid="de464b59_ca0d_471c_8c0f_bce32e5d6968" value="1" units="dimensionless"/>
+            <parameter id="p2" metaid="_70fa85df_740f_465c_9e08_7907803eeb09" value="10" units="dimensionless"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v3" name="v3" metaid="_4510d8ed_268f_4123_a4d7_9ee927765f40" sboTerm="SBO:0000176">
+        <listOfReactants>
+          <speciesReference species="s1" metaid="e2de9015_4008_41b0_b096_989ede97291e"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="x4" metaid="_63e7e69d_3e59_43bb_a3a2_57a1ea3e488b"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="s1"/>
+          <modifierSpeciesReference species="x4"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_920ac7bd_2296_4872_85bc_c25de0ae9d55" sboTerm="SBO:0000430">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> e3 </ci>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> p3 </ci>
+                    <ci> s1 </ci>
+                  </apply>
+                  <ci> x4 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <plus/>
+                <cn type="integer"> 1 </cn>
+                <ci> s1 </ci>
+                <ci> x4 </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="e3" metaid="_764f411e_2d47_4942_b3ee_4ccbff7321de" value="1" units="dimensionless"/>
+            <parameter id="p3" metaid="f599c6bd_f70d_4f23_94b7_d1a40a961949" value="50" units="dimensionless"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v4" name="v4" metaid="ebe840e0_a41d_40ac_9876_8d1988b24029" sboTerm="SBO:0000176">
+        <listOfReactants>
+          <speciesReference species="s1" metaid="a77ba07f_6989_4afa_8021_a16621802f2d"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="x5" metaid="_80d306a8_62e1_4d0e_9ca9_9c562ccadebe"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="s1"/>
+          <modifierSpeciesReference species="x5"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_870d0775_5783_4e69_a6d9_7689183dfe60" sboTerm="SBO:0000430">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> e4 </ci>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> p4 </ci>
+                    <ci> s1 </ci>
+                  </apply>
+                  <ci> x5 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <plus/>
+                <cn type="integer"> 1 </cn>
+                <ci> s1 </ci>
+                <ci> x5 </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="e4" metaid="_0292edeb_bbbe_41ef_8538_4c953207f0ba" value="1" units="dimensionless"/>
+            <parameter id="p4" metaid="_4602a07b_f550_49b5_b8f8_76b20d7026a0" value="10" units="dimensionless"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

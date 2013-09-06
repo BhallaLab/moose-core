@@ -1,0 +1,530 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="_726914" version="4">
+  <model id="Tran2009_CardiacActiveForceGeneration" name="Tran2009_CardiacActiveForceGeneration" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>A metabolite-sensitive, thermodynamically constrained model of cardiac
+cross-bridge cycling: implications for force development during ischemia.</strong>
+                <br/>
+          Tran K, Smith NP, Loiselle DS, Crampin EJ.      <em>Biophys J</em>
+          2010 Jan 20;98(2):267-76      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20338848">20338848</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          We present a metabolically regulated model of cardiac active force generation
+with which we investigate the effects of ischemia on maximum force production.
+Our model, based on a model of cross-bridge kinetics that was developed by
+others, reproduces many of the observed effects of MgATP, MgADP, Pi, and H(+) on
+force development while retaining the force/length/Ca(2+) properties of the
+original model. We introduce three new parameters to account for the competitive
+binding of H(+) to the Ca(2+) binding site on troponin C and the binding of
+MgADP within the cross-bridge cycle. These parameters, along with the Pi and
+H(+) regulatory steps within the cross-bridge cycle, were constrained using data
+from the literature and validated using a range of metabolic and sinusoidal
+length perturbation protocols. The placement of the MgADP binding step between
+two strongly-bound and force-generating states leads to the emergence of an
+unexpected effect on the force-MgADP curve, where the trend of the relationship
+(positive or negative) depends on the concentrations of the other metabolites
+and [H(+)]. The model is used to investigate the sensitivity of maximum force
+production to changes in metabolite concentrations during the development of
+ischemia. Copyright  2010 Biophysical Society. Published by Elsevier Inc. All
+rights reserved.      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://models.cellml.org/exposure/cc1db86dfd7838194138b224f586bfb4">        <strong>Tran K, Smith NP, Loiselle DS, Crampin EJ. (2009) - version=1.0</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>Catherine Lloyd</strong>
+                <br/>
+          c.lloyd@auckland.ac.nz      <br/>
+          The University of Auckland      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:57:32Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:57:32Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:57:32Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:57:32Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1006230116"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/20338848"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="first_order_rate_constant" name="first_order_rate_constant" metaid="_726926">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_726938" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_second_squared" name="per_second_squared" metaid="_726950">
+        <listOfUnits>
+          <unit exponent="-2" metaid="_726962" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="millimolar" name="millimolar" metaid="_726974">
+        <listOfUnits>
+          <unit scale="-3" metaid="_726986" kind="mole"/>
+          <unit exponent="-1" metaid="_726999" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="flux" name="flux" metaid="_727011">
+        <listOfUnits>
+          <unit scale="-3" metaid="_727023" kind="mole"/>
+          <unit exponent="-1" metaid="_727035" kind="litre"/>
+          <unit exponent="-1" metaid="_727047" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="millimolar_squared" name="millimolar_squared" metaid="_727059">
+        <listOfUnits>
+          <unit scale="-3" exponent="2" metaid="_727071" kind="mole"/>
+          <unit exponent="-2" metaid="_727083" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="second_order_rate_constant" name="second_order_rate_constant" metaid="_727095">
+        <listOfUnits>
+          <unit scale="-3" exponent="-1" metaid="_727107" kind="mole"/>
+          <unit metaid="_727119" kind="litre"/>
+          <unit exponent="-1" metaid="_727131" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="COMpartment" metaid="_651559" units="litre" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="k_p1" name="k_p1" metaid="_651591" value="25900"/>
+      <parameter id="k_p2" name="k_p2" metaid="_651592" value="2540"/>
+      <parameter id="k_p3" name="k_p3" metaid="_651593" value="20.5"/>
+      <parameter id="k_m1" name="k_m1" metaid="_651594" value="16"/>
+      <parameter id="k_m2" name="k_m2" metaid="_651595" value="67200"/>
+      <parameter id="k_m3" name="k_m3" metaid="_651598" value="149"/>
+      <parameter id="kdcai" name="kdcai" metaid="_651599" value="0.9"/>
+      <parameter id="kdcasr" name="kdcasr" metaid="_651600" value="2.24"/>
+      <parameter id="kdh1" name="kdh1" metaid="_651603" value="1.09E-5"/>
+      <parameter id="kdhi" name="kdhi" metaid="_651604" value="0.00354"/>
+      <parameter id="kdhsr" name="kdhsr" metaid="_651605" value="1.05E-8"/>
+      <parameter id="kdh" name="kdh" metaid="_651606" value="7.24E-5"/>
+      <parameter id="n" name="n" metaid="_651609" value="2"/>
+      <parameter id="Ca_i" name="Ca_i" metaid="_651610" value="0.00015"/>
+      <parameter id="Ca_sr" constant="false" name="Ca_sr" metaid="_651611" value="0"/>
+      <parameter id="H_i" name="H_i" metaid="_651614" value="0.0001"/>
+      <parameter id="ATP" name="ATP" metaid="_651615" value="5"/>
+      <parameter id="ADP" name="ADP" metaid="_651616" value="0.0363"/>
+      <parameter id="P_i" name="P_i" metaid="_651619" value="1"/>
+      <parameter id="T_Cai" constant="false" name="T_Cai" metaid="_651620"/>
+      <parameter id="T_Casr" constant="false" name="T_Casr" metaid="_651621"/>
+      <parameter id="T_H1" constant="false" name="T_H1" metaid="_651624"/>
+      <parameter id="T_Hi" constant="false" name="T_Hi" metaid="_651625"/>
+      <parameter id="T_Hsr" constant="false" name="T_Hsr" metaid="_651626"/>
+      <parameter id="T_H" constant="false" name="T_H" metaid="_651629"/>
+      <parameter id="a_p1" constant="false" name="a_p1" metaid="_651630"/>
+      <parameter id="a_p2" constant="false" name="a_p2" metaid="_651631"/>
+      <parameter id="a_p3" constant="false" name="a_p3" metaid="_651634"/>
+      <parameter id="a_m1" constant="false" name="a_m1" metaid="_651635"/>
+      <parameter id="a_m2" constant="false" name="a_m2" metaid="_651636"/>
+      <parameter id="a_m3" constant="false" name="a_m3" metaid="_651639"/>
+      <parameter id="s1" constant="false" name="s1" metaid="_651640"/>
+      <parameter id="s2" constant="false" name="s2" metaid="_651641"/>
+      <parameter id="s3" constant="false" name="s3" metaid="_651644"/>
+      <parameter id="v_cycle" constant="false" name="v_cycle" metaid="_651645"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_651563" variable="Ca_sr">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <cn> 1 </cn>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="_651564" variable="T_Cai">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <ci> Ca_i </ci>
+            <ci> kdcai </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_651565" variable="T_Casr">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <ci> Ca_sr </ci>
+            <ci> kdcasr </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_651568" variable="T_H1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <ci> H_i </ci>
+            <ci> kdh1 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_651569" variable="T_Hi">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <power/>
+              <ci> H_i </ci>
+              <ci> n </ci>
+            </apply>
+            <ci> kdhi </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_651570" variable="T_Hsr">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <power/>
+              <ci> H_i </ci>
+              <ci> n </ci>
+            </apply>
+            <ci> kdhsr </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_651571" variable="T_H">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <ci> H_i </ci>
+            <ci> kdh </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_651574" variable="a_p1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> k_p1 </ci>
+            <ci> ATP </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_651575" variable="a_p2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <times/>
+              <ci> k_p2 </ci>
+              <apply>
+                <power/>
+                <ci> T_Cai </ci>
+                <cn> 2 </cn>
+              </apply>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <power/>
+                <ci> T_Cai </ci>
+                <cn> 2 </cn>
+              </apply>
+              <apply>
+                <times/>
+                <apply>
+                  <power/>
+                  <ci> T_Cai </ci>
+                  <cn> 2 </cn>
+                </apply>
+                <ci> T_Hi </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> T_Hi </ci>
+                <apply>
+                  <plus/>
+                  <cn> 1 </cn>
+                  <ci> T_H1 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_651576" variable="a_p3">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <times/>
+              <ci> k_p3 </ci>
+              <ci> T_Hsr </ci>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <apply>
+                  <power/>
+                  <ci> T_Casr </ci>
+                  <cn> 2 </cn>
+                </apply>
+                <ci> T_H </ci>
+              </apply>
+              <ci> T_H </ci>
+              <apply>
+                <times/>
+                <ci> T_Hsr </ci>
+                <apply>
+                  <plus/>
+                  <cn> 1 </cn>
+                  <ci> T_H </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_651579" variable="a_m1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <times/>
+              <ci> k_m1 </ci>
+              <ci> T_Hi </ci>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <power/>
+                <ci> T_Cai </ci>
+                <cn> 2 </cn>
+              </apply>
+              <apply>
+                <times/>
+                <apply>
+                  <power/>
+                  <ci> T_Cai </ci>
+                  <cn> 2 </cn>
+                </apply>
+                <ci> T_Hi </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> T_Hi </ci>
+                <apply>
+                  <plus/>
+                  <cn> 1 </cn>
+                  <ci> T_H1 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_651580" variable="a_m2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <times/>
+              <ci> k_m2 </ci>
+              <ci> ADP </ci>
+              <apply>
+                <power/>
+                <ci> T_Casr </ci>
+                <cn> 2 </cn>
+              </apply>
+              <ci> T_H </ci>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <apply>
+                  <power/>
+                  <ci> T_Casr </ci>
+                  <cn> 2 </cn>
+                </apply>
+                <ci> T_H </ci>
+              </apply>
+              <ci> T_H </ci>
+              <apply>
+                <times/>
+                <ci> T_Hsr </ci>
+                <apply>
+                  <plus/>
+                  <cn> 1 </cn>
+                  <ci> T_H </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_651581" variable="a_m3">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> k_m3 </ci>
+            <ci> P_i </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_651584" variable="s1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <times/>
+              <ci> a_p2 </ci>
+              <ci> a_p3 </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> a_m1 </ci>
+              <ci> a_p3 </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> a_m1 </ci>
+              <ci> a_m2 </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_651585" variable="s2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <times/>
+              <ci> a_p1 </ci>
+              <ci> a_p3 </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> a_m2 </ci>
+              <ci> a_p1 </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> a_m2 </ci>
+              <ci> a_m3 </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_651586" variable="s3">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <times/>
+              <ci> a_p1 </ci>
+              <ci> a_p2 </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> a_m3 </ci>
+              <ci> a_m1 </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> a_m3 </ci>
+              <ci> a_p2 </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_651589" variable="v_cycle">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> a_p1 </ci>
+                <ci> a_p2 </ci>
+                <ci> a_p3 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> a_m1 </ci>
+                <ci> a_m2 </ci>
+                <ci> a_m3 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <plus/>
+              <ci> s1 </ci>
+              <ci> s2 </ci>
+              <ci> s3 </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+  </model>
+</sbml>

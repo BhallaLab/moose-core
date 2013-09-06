@@ -1,0 +1,964 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="_160208" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="4">
+  <model id="kuwahara2010" name="Kuwahara2010_Fimbriation_Switch_37C" metaid="_517737">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This the detailed model for 37°C from the article:      <br/>
+                <strong>Temperature Control of Fimbriation Circuit Switch in Uropathogenic        <em>Escherichia coli</em>
+            : Quantitative Analysis via Automated Model Abstraction.        </strong>
+                <br/>
+          Hiroyuki Kuwahara, Chris J. Myers and Michael S. Samoilov      <em>PLoS Comput Biol.</em>
+          2010 6(3): e1000723.   
+      doi:      <a href="http://dx.doi.org/10.1371/journal.pcbi.1000723">10.1371/journal.pcbi.1000723</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          Uropathogenic Escherichia coli (UPEC) represent the predominant cause of urinary tract infections (UTIs). A key UPEC molecular virulence mechanism is type 1 fimbriae, whose expression is controlled by the orientation of an invertible chromosomal DNA element—the fim switch. Temperature has been shown to act as a major regulator of fim switching behavior and is overall an important indicator as well as functional feature of many urologic diseases, including UPEC host-pathogen interaction dynamics. Given this panoptic physiological role of temperature during UTI progression and notable empirical challenges to its direct in vivo studies, in silico modeling of corresponding biochemical and biophysical mechanisms essential to UPEC pathogenicity may significantly aid our understanding of the underlying disease processes. However, rigorous computational analysis of biological systems, such as fim switch temperature control circuit, has hereto presented a notoriously demanding problem due to both the substantial complexity of the gene regulatory networks involved as well as their often characteristically discrete and stochastic dynamics. To address these issues, we have developed an approach that enables automated multiscale abstraction of biological system descriptions based on reaction kinetics. Implemented as a computational tool, this method has allowed us to efficiently analyze the modular organization and behavior of the E. coli fimbriation switch circuit at different temperature settings, thus facilitating new insights into this mode of UPEC molecular virulence regulation. In particular, our results suggest that, with respect to its role in shutting down fimbriae expression, the primary function of FimB recombinase may be to effect a controlled down-regulation (rather than increase) of the ON-to-OFF fim switching rate via temperature-dependent suppression of competing dynamics mediated by recombinase FimE. Our computational analysis further implies that this down-regulation mechanism could be particularly significant inside the host environment, thus potentially contributing further understanding toward the development of novel therapeutic approaches to UPEC-caused UTIs.      </p>
+            <p>This model is parametrized for 37°C. Some parameters and initial conditions are temperature dependent and have to be changed to simulate other conditions as listed in table 4 (doi:      <a href="http://dx.doi.org/10.1371/journal.pcbi.1000723.t004">10.1371/journal.pcbi.1000723.t004</a>
+          ), table 5(doi:      <a href="http://dx.doi.org/10.1371/journal.pcbi.1000723.t005">10.1371/journal.pcbi.1000723.t005</a>
+          ) and 6(doi:      <a href="http://dx.doi.org/10.1371/journal.pcbi.1000723.t006">10.1371/journal.pcbi.1000723.t006</a>
+          ) and supplement S1 (doi:      <a href="http://dx.doi.org/10.1371/journal.pcbi.1000723.t004">10.1371/journal.pcbi.1000723.s001</a>
+          )  of the publication.      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#_517737">
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1004010001"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/20361050"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfCompartments>
+      <compartment id="default" metaid="_517739" size="1"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="FimE" initialConcentration="31" name="FimE" metaid="_517740" compartment="default"/>
+      <species id="FimB" initialConcentration="100" name="FimB" metaid="_517741" compartment="default"/>
+      <species id="Lrp" initialConcentration="5" name="Lrp" metaid="_517742" compartment="default"/>
+      <species id="IHF" initialConcentration="10" name="IHF" metaid="_517744" compartment="default"/>
+      <species id="HNS" initialConcentration="20000" name="HNS" metaid="_517745" compartment="default"/>
+      <species id="RNAP" initialConcentration="30" name="RNAP" metaid="_517746" compartment="default"/>
+      <species id="switch" initialConcentration="0" name="switch" metaid="_517747" compartment="default"/>
+      <species id="PfimE" initialConcentration="1" name="PfimE" metaid="_517749" compartment="default"/>
+      <species id="PfimB" initialConcentration="1" name="PfimB" metaid="_517750" compartment="default"/>
+      <species id="s4" initialConcentration="0" name="s4" metaid="_517751" compartment="default"/>
+      <species id="PfimB_RNAP" initialConcentration="0" name="PfimB_RNAP" metaid="_517752" compartment="default"/>
+      <species id="PfimE_HNS" initialConcentration="0" name="PfimE_HNS" metaid="_517754" compartment="default"/>
+      <species id="Prom" initialConcentration="1" name="Prom" metaid="_517755" compartment="default"/>
+      <species id="s6" initialConcentration="0" name="s6" metaid="_517756" compartment="default"/>
+      <species id="s25" initialConcentration="0" name="s25" metaid="_517757" compartment="default"/>
+      <species id="s22" initialConcentration="0" name="s22" metaid="_517759" compartment="default"/>
+      <species id="s21" initialConcentration="0" name="s21" metaid="_517760" compartment="default"/>
+      <species id="s23" initialConcentration="0" name="s23" metaid="_517761" compartment="default"/>
+      <species id="s19" initialConcentration="0" name="s19" metaid="_517762" compartment="default"/>
+      <species id="s8" initialConcentration="0" name="s8" metaid="_517764" compartment="default"/>
+      <species id="PfimE_RNAP" initialConcentration="0" name="PfimE_RNAP" metaid="_517765" compartment="default"/>
+      <species id="PfimB_HNS" initialConcentration="0" name="PfimB_HNS" metaid="_517766" compartment="default"/>
+      <species id="s17" initialConcentration="0" name="s17" metaid="_517767" compartment="default"/>
+      <species id="s20" initialConcentration="0" name="s20" metaid="_517769" compartment="default"/>
+      <species id="s7" initialConcentration="0" name="s7" metaid="_517770" compartment="default"/>
+      <species id="s5" initialConcentration="0" name="s5" metaid="_517771" compartment="default"/>
+      <species id="s2" initialConcentration="0" name="s2" metaid="_517772" compartment="default"/>
+      <species id="s26" initialConcentration="0" name="s26" metaid="_517774" compartment="default"/>
+      <species id="s3" initialConcentration="0" name="s3" metaid="_517775" compartment="default"/>
+      <species id="s18" initialConcentration="0" name="s18" metaid="_517776" compartment="default"/>
+      <species id="s24" initialConcentration="0" name="s24" metaid="_517777" compartment="default"/>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="PfimE_total" metaid="_517841" value="1"/>
+      <parameter id="kf_r_PfimE_RNAP" metaid="_517843" value="0.333333333"/>
+      <parameter id="kr_r_PfimE_RNAP" metaid="_517844" value="10"/>
+      <parameter id="kf_r_PfimE_HNS" metaid="_517845" value="0.005524862"/>
+      <parameter id="kr_r_PfimE_HNS" metaid="_517846" value="10"/>
+      <parameter id="k_Prod_FimE" metaid="_517848" value="0.666666667"/>
+      <parameter id="k_Deg_FimE" metaid="_517849" value="0.001625"/>
+      <parameter id="PfimB_total" metaid="_517850" value="1"/>
+      <parameter id="k_Prod_FimB" metaid="_517851" value="0.666666667"/>
+      <parameter id="kf_r_PfimB_RNAP" metaid="_517853" value="0.333333333"/>
+      <parameter id="kr_r_PfimB_RNAP" metaid="_517854" value="10"/>
+      <parameter id="kf_r_PfimB_HNS" metaid="_517855" value="0.001"/>
+      <parameter id="kr_r_PfimB_HNS" metaid="_517856" value="10"/>
+      <parameter id="k_Deg_FimB" metaid="_517858" value="0.001625"/>
+      <parameter id="Prom_total" metaid="_517859" value="1"/>
+      <parameter id="k_prod3" metaid="_517860" value="6.53E-8"/>
+      <parameter id="k_prod4" metaid="_517861" value="6.5E-7"/>
+      <parameter id="k_prod5" metaid="_517863" value="0.0003"/>
+      <parameter id="k_prod6" metaid="_517864" value="8E-5"/>
+      <parameter id="k_prod7" metaid="_517865" value="3.7E-6"/>
+      <parameter id="k_prod8" metaid="_517867" value="7.5E-7"/>
+      <parameter id="kf_r2" metaid="_517868" value="1.41884"/>
+      <parameter id="kf_r3" metaid="_517869" value="0.0155555"/>
+      <parameter id="kf_r4" metaid="_517870" value="0.0155555"/>
+      <parameter id="kf_r5" metaid="_517872" value="0.00122395"/>
+      <parameter id="kf_r6" metaid="_517873" value="0.000558342"/>
+      <parameter id="kf_r7" metaid="_517874" value="0.00122395"/>
+      <parameter id="kf_r8" metaid="_517875" value="0.000558342"/>
+      <parameter id="kf_r17" metaid="_517877" value="0.0109635"/>
+      <parameter id="kf_r18" metaid="_517878" value="0.0109635"/>
+      <parameter id="kf_r19" metaid="_517879" value="0.000862637"/>
+      <parameter id="kf_r20" metaid="_517880" value="0.000393519"/>
+      <parameter id="kf_r21" metaid="_517882" value="0.000862637"/>
+      <parameter id="kf_r22" metaid="_517883" value="0.000393519"/>
+      <parameter id="kf_r23" metaid="_517884" value="0.0786826"/>
+      <parameter id="kf_r24" metaid="_517885" value="0.0358936"/>
+      <parameter id="kf_r25" metaid="_517887" value="0.111638"/>
+      <parameter id="kf_r26" metaid="_517888" value="0.0509273"/>
+      <parameter id="kr_r2" metaid="_517889" value="1"/>
+      <parameter id="kr_r3" metaid="_517890" value="1"/>
+      <parameter id="kr_r4" metaid="_517892" value="1"/>
+      <parameter id="kr_r5" metaid="_517893" value="1"/>
+      <parameter id="kr_r6" metaid="_517894" value="1"/>
+      <parameter id="kr_r7" metaid="_517895" value="1"/>
+      <parameter id="kr_r8" metaid="_517897" value="1"/>
+      <parameter id="kr_r17" metaid="_517898" value="1"/>
+      <parameter id="kr_r18" metaid="_517899" value="1"/>
+      <parameter id="kr_r19" metaid="_517900" value="1"/>
+      <parameter id="kr_r20" metaid="_517902" value="1"/>
+      <parameter id="kr_r21" metaid="_517903" value="1"/>
+      <parameter id="kr_r22" metaid="_517904" value="1"/>
+      <parameter id="kr_r23" metaid="_517905" value="1"/>
+      <parameter id="kr_r24" metaid="_517907" value="1"/>
+      <parameter id="kr_r25" metaid="_517908" value="1"/>
+      <parameter id="kr_r26" metaid="_517909" value="1"/>
+    </listOfParameters>
+    <listOfReactions>
+      <reaction id="r19" name="r19" metaid="_517778">
+        <listOfReactants>
+          <speciesReference species="FimE" metaid="_160220"/>
+          <speciesReference species="Lrp" metaid="_160232" stoichiometry="2"/>
+          <speciesReference species="Prom" metaid="_160244"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="s19" metaid="_160256"/>
+        </listOfProducts>
+        <kineticLaw metaid="_160268">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf_r19 </ci>
+                <apply>
+                  <power/>
+                  <ci> Lrp </ci>
+                  <cn> 2 </cn>
+                </apply>
+                <ci> Prom </ci>
+                <ci> FimE </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr_r19 </ci>
+                <ci> s19 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="r8" name="r8" metaid="_517779">
+        <listOfReactants>
+          <speciesReference species="IHF" metaid="_160280"/>
+          <speciesReference species="Lrp" metaid="_160292" stoichiometry="3"/>
+          <speciesReference species="Prom" metaid="_160304"/>
+          <speciesReference species="FimB" metaid="_160316"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="s8" metaid="_160328"/>
+        </listOfProducts>
+        <kineticLaw metaid="_160340">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf_r8 </ci>
+                <ci> FimB </ci>
+                <apply>
+                  <power/>
+                  <ci> Lrp </ci>
+                  <cn> 3 </cn>
+                </apply>
+                <ci> IHF </ci>
+                <ci> Prom </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr_r8 </ci>
+                <ci> s8 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="prod6" name="prod6" metaid="_517781" reversible="false">
+        <listOfReactants>
+          <speciesReference species="s6" metaid="_160352"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="switch" metaid="_160364"/>
+          <speciesReference species="s6" metaid="_160376"/>
+        </listOfProducts>
+        <kineticLaw metaid="_160388">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k_prod6 </ci>
+              <ci> s6 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="r22" name="r22" metaid="_517782">
+        <listOfReactants>
+          <speciesReference species="Lrp" metaid="_160401" stoichiometry="3"/>
+          <speciesReference species="Prom" metaid="_160413"/>
+          <speciesReference species="FimB" metaid="_160425"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="s22" metaid="_160437"/>
+        </listOfProducts>
+        <kineticLaw metaid="_160449">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf_r22 </ci>
+                <apply>
+                  <power/>
+                  <ci> Lrp </ci>
+                  <cn> 3 </cn>
+                </apply>
+                <ci> Prom </ci>
+                <ci> FimB </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr_r22 </ci>
+                <ci> s22 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="prod5" name="prod5" metaid="_517783" reversible="false">
+        <listOfReactants>
+          <speciesReference species="s5" metaid="_160461"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="s5" metaid="_160473"/>
+          <speciesReference species="switch" metaid="_160485"/>
+        </listOfProducts>
+        <kineticLaw metaid="_160497">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k_prod5 </ci>
+              <ci> s5 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="r26" name="r26" metaid="_517784">
+        <listOfReactants>
+          <speciesReference species="IHF" metaid="_160509"/>
+          <speciesReference species="Lrp" metaid="_160521" stoichiometry="3"/>
+          <speciesReference species="Prom" metaid="_160533"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="s26" metaid="_160545"/>
+        </listOfProducts>
+        <kineticLaw metaid="_160557">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf_r26 </ci>
+                <apply>
+                  <power/>
+                  <ci> Lrp </ci>
+                  <cn> 3 </cn>
+                </apply>
+                <ci> IHF </ci>
+                <ci> Prom </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr_r26 </ci>
+                <ci> s26 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="r17" name="r17" metaid="_517786">
+        <listOfReactants>
+          <speciesReference species="FimE" metaid="_160569"/>
+          <speciesReference species="Prom" metaid="_160582"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="s17" metaid="_160594"/>
+        </listOfProducts>
+        <kineticLaw metaid="_160607">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf_r17 </ci>
+                <ci> FimE </ci>
+                <ci> Prom </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr_r17 </ci>
+                <ci> s17 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="r2" name="r2" metaid="_517787">
+        <listOfReactants>
+          <speciesReference species="IHF" metaid="_160619"/>
+          <speciesReference species="Prom" metaid="_160632"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="s2" metaid="_160644"/>
+        </listOfProducts>
+        <kineticLaw metaid="_160656">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf_r2 </ci>
+                <ci> IHF </ci>
+                <ci> Prom </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr_r2 </ci>
+                <ci> s2 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="r4" name="r4" metaid="_517788">
+        <listOfReactants>
+          <speciesReference species="IHF" metaid="_160668"/>
+          <speciesReference species="Prom" metaid="_160680"/>
+          <speciesReference species="FimB" metaid="_160692"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="s4" metaid="_160704"/>
+        </listOfProducts>
+        <kineticLaw metaid="_160716">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf_r4 </ci>
+                <ci> IHF </ci>
+                <ci> FimB </ci>
+                <ci> Prom </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr_r4 </ci>
+                <ci> s4 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="r7" name="r7" metaid="_517789">
+        <listOfReactants>
+          <speciesReference species="Lrp" metaid="_160728" stoichiometry="2"/>
+          <speciesReference species="IHF" metaid="_160741"/>
+          <speciesReference species="Prom" metaid="_160753"/>
+          <speciesReference species="FimB" metaid="_160765"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="s7" metaid="_160777"/>
+        </listOfProducts>
+        <kineticLaw metaid="_160789">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf_r7 </ci>
+                <ci> Prom </ci>
+                <ci> IHF </ci>
+                <apply>
+                  <power/>
+                  <ci> Lrp </ci>
+                  <cn> 2 </cn>
+                </apply>
+                <ci> FimB </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr_r7 </ci>
+                <ci> s7 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="r23" name="r23" metaid="_517791">
+        <listOfReactants>
+          <speciesReference species="Lrp" metaid="_160801" stoichiometry="2"/>
+          <speciesReference species="Prom" metaid="_160813"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="s23" metaid="_160826"/>
+        </listOfProducts>
+        <kineticLaw metaid="_160838">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf_r23 </ci>
+                <apply>
+                  <power/>
+                  <ci> Lrp </ci>
+                  <cn> 2 </cn>
+                </apply>
+                <ci> Prom </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr_r23 </ci>
+                <ci> s23 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="prod4" name="prod4" metaid="_517792" reversible="false">
+        <listOfReactants>
+          <speciesReference species="s4" metaid="_160850"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="s4" metaid="_160862"/>
+          <speciesReference species="switch" metaid="_160874"/>
+        </listOfProducts>
+        <kineticLaw metaid="_160886">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k_prod4 </ci>
+              <ci> s4 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="r24" name="r24" metaid="_517793">
+        <listOfReactants>
+          <speciesReference species="Lrp" metaid="_160898" stoichiometry="3"/>
+          <speciesReference species="Prom" metaid="_160910"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="s24" metaid="_160922"/>
+        </listOfProducts>
+        <kineticLaw metaid="_160934">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf_r24 </ci>
+                <apply>
+                  <power/>
+                  <ci> Lrp </ci>
+                  <cn> 3 </cn>
+                </apply>
+                <ci> Prom </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr_r24 </ci>
+                <ci> s24 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="r3" name="r3" metaid="_517794">
+        <listOfReactants>
+          <speciesReference species="FimE" metaid="_160946"/>
+          <speciesReference species="IHF" metaid="_160958"/>
+          <speciesReference species="Prom" metaid="_160970"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="s3" metaid="_160982"/>
+        </listOfProducts>
+        <kineticLaw metaid="_160994">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf_r3 </ci>
+                <ci> FimE </ci>
+                <ci> IHF </ci>
+                <ci> Prom </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr_r3 </ci>
+                <ci> s3 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="r25" name="r25" metaid="_517796">
+        <listOfReactants>
+          <speciesReference species="IHF" metaid="_161006"/>
+          <speciesReference species="Lrp" metaid="_161018" stoichiometry="2"/>
+          <speciesReference species="Prom" metaid="_161031"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="s25" metaid="_161043"/>
+        </listOfProducts>
+        <kineticLaw metaid="_161056">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf_r25 </ci>
+                <apply>
+                  <power/>
+                  <ci> Lrp </ci>
+                  <cn> 2 </cn>
+                </apply>
+                <ci> Prom </ci>
+                <ci> IHF </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr_r25 </ci>
+                <ci> s25 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="r18" name="r18" metaid="_517797">
+        <listOfReactants>
+          <speciesReference species="Prom" metaid="_161068"/>
+          <speciesReference species="FimB" metaid="_161080"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="s18" metaid="_161092"/>
+        </listOfProducts>
+        <kineticLaw metaid="_161104">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf_r18 </ci>
+                <ci> FimB </ci>
+                <ci> Prom </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr_r18 </ci>
+                <ci> s18 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="prod3" name="prod3" metaid="_517798" reversible="false">
+        <listOfReactants>
+          <speciesReference species="s3" metaid="_161116"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="switch" metaid="_161129"/>
+          <speciesReference species="s3" metaid="_161141"/>
+        </listOfProducts>
+        <kineticLaw metaid="_161153">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k_prod3 </ci>
+              <ci> s3 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="prod8" name="prod8" metaid="_517799" reversible="false">
+        <listOfReactants>
+          <speciesReference species="s8" metaid="_161165"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="s8" metaid="_161177"/>
+          <speciesReference species="switch" metaid="_161189"/>
+        </listOfProducts>
+        <kineticLaw metaid="_161201">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k_prod8 </ci>
+              <ci> s8 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="r5" name="r5" metaid="_517801">
+        <listOfReactants>
+          <speciesReference species="FimE" metaid="_161213"/>
+          <speciesReference species="Lrp" metaid="_161225" stoichiometry="2"/>
+          <speciesReference species="IHF" metaid="_161237"/>
+          <speciesReference species="Prom" metaid="_161249"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="s5" metaid="_161261"/>
+        </listOfProducts>
+        <kineticLaw metaid="_161273">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf_r5 </ci>
+                <ci> IHF </ci>
+                <ci> FimE </ci>
+                <apply>
+                  <power/>
+                  <ci> Lrp </ci>
+                  <cn> 2 </cn>
+                </apply>
+                <ci> Prom </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr_r5 </ci>
+                <ci> s5 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="prod7" name="prod7" metaid="_517802" reversible="false">
+        <listOfReactants>
+          <speciesReference species="s7" metaid="_161285"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="s7" metaid="_161298"/>
+          <speciesReference species="switch" metaid="_161310"/>
+        </listOfProducts>
+        <kineticLaw metaid="_161322">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k_prod7 </ci>
+              <ci> s7 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="r21" name="r21" metaid="_517803">
+        <listOfReactants>
+          <speciesReference species="Lrp" metaid="_161334" stoichiometry="2"/>
+          <speciesReference species="Prom" metaid="_161346"/>
+          <speciesReference species="FimB" metaid="_161358"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="s21" metaid="_161370"/>
+        </listOfProducts>
+        <kineticLaw metaid="_161382">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf_r21 </ci>
+                <apply>
+                  <power/>
+                  <ci> Lrp </ci>
+                  <cn> 2 </cn>
+                </apply>
+                <ci> FimB </ci>
+                <ci> Prom </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr_r21 </ci>
+                <ci> s21 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="r20" name="r20" metaid="_517804">
+        <listOfReactants>
+          <speciesReference species="FimE" metaid="_161394"/>
+          <speciesReference species="Lrp" metaid="_161406" stoichiometry="3"/>
+          <speciesReference species="Prom" metaid="_161419"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="s20" metaid="_161431"/>
+        </listOfProducts>
+        <kineticLaw metaid="_161444">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf_r20 </ci>
+                <ci> FimE </ci>
+                <apply>
+                  <power/>
+                  <ci> Lrp </ci>
+                  <cn> 3 </cn>
+                </apply>
+                <ci> Prom </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr_r20 </ci>
+                <ci> s20 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="r6" name="r6" metaid="_517806">
+        <listOfReactants>
+          <speciesReference species="FimE" metaid="_161457"/>
+          <speciesReference species="Lrp" metaid="_161469" stoichiometry="3"/>
+          <speciesReference species="IHF" metaid="_161481"/>
+          <speciesReference species="Prom" metaid="_161493"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="s6" metaid="_161505"/>
+        </listOfProducts>
+        <kineticLaw metaid="_161517">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf_r6 </ci>
+                <ci> IHF </ci>
+                <ci> FimE </ci>
+                <ci> Prom </ci>
+                <apply>
+                  <power/>
+                  <ci> Lrp </ci>
+                  <cn> 3 </cn>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr_r6 </ci>
+                <ci> s6 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Deg_FimB" name="Deg_FimB" metaid="_517807" reversible="false">
+        <listOfReactants>
+          <speciesReference species="FimB" metaid="_161529"/>
+        </listOfReactants>
+        <kineticLaw metaid="_161541">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k_Deg_FimB </ci>
+              <ci> FimB </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="r_PfimB_HNS" name="r_PfimB_HNS" metaid="_517808">
+        <listOfReactants>
+          <speciesReference species="PfimB" metaid="_161553"/>
+          <speciesReference species="HNS" metaid="_161565"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PfimB_HNS" metaid="_161577"/>
+        </listOfProducts>
+        <kineticLaw metaid="_161589">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf_r_PfimB_HNS </ci>
+                <ci> PfimB </ci>
+                <ci> HNS </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr_r_PfimB_HNS </ci>
+                <ci> PfimB_HNS </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Prod_FimB" name="Prod_FimB" metaid="_517809" reversible="false">
+        <listOfReactants>
+          <speciesReference species="PfimB_RNAP" metaid="_161601"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="FimB" metaid="_161613"/>
+          <speciesReference species="PfimB_RNAP" metaid="_161625"/>
+        </listOfProducts>
+        <kineticLaw metaid="_161637">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k_Prod_FimB </ci>
+              <ci> PfimB_RNAP </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="r_PfimE_HNS" name="r_PfimE_HNS" metaid="_517811">
+        <listOfReactants>
+          <speciesReference species="PfimE" metaid="_161649"/>
+          <speciesReference species="HNS" metaid="_161661"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PfimE_HNS" metaid="_161673"/>
+        </listOfProducts>
+        <kineticLaw metaid="_161685">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf_r_PfimE_HNS </ci>
+                <ci> PfimE </ci>
+                <ci> HNS </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr_r_PfimE_HNS </ci>
+                <ci> PfimE_HNS </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="r_PfimE_RNAP" name="r_PfimE_RNAP" metaid="_517812">
+        <listOfReactants>
+          <speciesReference species="RNAP" metaid="_161697"/>
+          <speciesReference species="PfimE" metaid="_161710"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PfimE_RNAP" metaid="_161722"/>
+        </listOfProducts>
+        <kineticLaw metaid="_161734">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf_r_PfimE_RNAP </ci>
+                <ci> PfimE </ci>
+                <ci> RNAP </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr_r_PfimE_RNAP </ci>
+                <ci> PfimE_RNAP </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Deg_FimE" name="Deg_FimE" metaid="_517813" reversible="false">
+        <listOfReactants>
+          <speciesReference species="FimE" metaid="_161746"/>
+        </listOfReactants>
+        <kineticLaw metaid="_161758">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k_Deg_FimE </ci>
+              <ci> FimE </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="r_PfimB_RNAP" name="r_PfimB_RNAP" metaid="_517814">
+        <listOfReactants>
+          <speciesReference species="RNAP" metaid="_161770"/>
+          <speciesReference species="PfimB" metaid="_161782"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PfimB_RNAP" metaid="_161794"/>
+        </listOfProducts>
+        <kineticLaw metaid="_161806">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf_r_PfimB_RNAP </ci>
+                <ci> PfimB </ci>
+                <ci> RNAP </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kr_r_PfimB_RNAP </ci>
+                <ci> PfimB_RNAP </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Prod_FimE" name="Prod_FimE" metaid="_517816" reversible="false">
+        <listOfReactants>
+          <speciesReference species="PfimE_RNAP" metaid="_161818"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="FimE" metaid="_161830"/>
+          <speciesReference species="PfimE_RNAP" metaid="_161842"/>
+        </listOfProducts>
+        <kineticLaw metaid="_161854">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k_Prod_FimE </ci>
+              <ci> PfimE_RNAP </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

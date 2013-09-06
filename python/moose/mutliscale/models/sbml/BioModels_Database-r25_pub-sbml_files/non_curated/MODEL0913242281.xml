@@ -1,0 +1,749 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version3" level="2" metaid="_725094" version="3">
+  <model id="Ciliberto2003_CyclinECdk2Timer" name="Ciliberto2003_CyclinECdk2Timer" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>A kinetic model of the cyclin E/Cdk2 developmental timer in Xenopus laevis
+embryos.</strong>
+                <br/>
+          Ciliberto A, Petrus MJ, Tyson JJ, Sible JC.      <em>Biophys Chem</em>
+          2003 Jul 1;104(3):573-89      <a href="http://www.ncbi.nlm.nih.gov/pubmed/12914904">12914904</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          Early cell cycles of Xenopus laevis embryos are characterized by rapid
+oscillations in the activity of two cyclin-dependent kinases. Cdk1 activity
+peaks at mitosis, driven by periodic degradation of cyclins A and B. In
+contrast, Cdk2 activity oscillates twice per cell cycle, despite a constant
+level of its partner, cyclin E. Cyclin E degrades at a fixed time after
+fertilization, normally corresponding to the midblastula transition. Based on
+published data and new experiments, we constructed a mathematical model in
+which: (1) oscillations in Cdk2 activity depend upon changes in phosphorylation,
+(2) Cdk2 participates in a negative feedback loop with the inhibitory kinase
+Wee1; (3) cyclin E is cooperatively removed from the oscillatory system; and (4)
+removed cyclin E is degraded by a pathway activated by cyclin E/Cdk2 itself. The
+model's predictions about embryos injected with Xic1, a stoichiometric inhibitor
+of cyclin E/Cdk2, were experimentally validated.      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://www.cellml.org/models/ciliberto_petrus_tyson_sible_2003_version03">        <strong>Ciliberto A, Petrus MJ, Tyson JJ, Sible JC. (2003) - version03</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>Lloyd, Catherine, May</strong>
+                <br/>
+          c.lloyd@aukland.ac.nz      <br/>
+          The University of Auckland      <br/>
+          The Bioengineering Institute      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL0913242281"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/12914904"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="minute" name="minute" metaid="_725106">
+        <listOfUnits>
+          <unit metaid="_725118" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="first_order_rate_constant" name="first_order_rate_constant" metaid="_725130">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_725142" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time" name="time" metaid="_725154">
+        <listOfUnits>
+          <unit metaid="_725166" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="Compartment" metaid="_214915" units="litre" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="Cdk2_CycE" constant="false" name="Cdk2_CycE" metaid="_214936" value="0.06" units="dimensionless"/>
+      <parameter id="PCdk2_CycE" constant="false" name="PCdk2_CycE" metaid="_214937" value="0.94" units="dimensionless"/>
+      <parameter id="Wee1_a" constant="false" name="Wee1_a" metaid="_214938" value="1.02" units="dimensionless"/>
+      <parameter id="Jwact" name="Jwact" metaid="_214939" value="0.01" units="dimensionless"/>
+      <parameter id="Jwinact" name="Jwinact" metaid="_214940" value="0.01" units="dimensionless"/>
+      <parameter id="Wee1_total" name="Wee1_total" metaid="_214941" value="8" units="dimensionless"/>
+      <parameter id="kwact" name="kwact" metaid="_214942" value="0.75" units="first_order_rate_constant"/>
+      <parameter id="kwinact" name="kwinact" metaid="_214943" value="1.5" units="first_order_rate_constant"/>
+      <parameter id="Kin_a" constant="false" name="Kin_a" metaid="_214950" value="0.6" units="dimensionless"/>
+      <parameter id="Jiact" name="Jiact" metaid="_214951" value="0.01" units="dimensionless"/>
+      <parameter id="Jiinact" name="Jiinact" metaid="_214953" value="0.01" units="dimensionless"/>
+      <parameter id="kiact" name="kiact" metaid="_214954" value="0.15" units="first_order_rate_constant"/>
+      <parameter id="kiinact" name="kiinact" metaid="_214955" value="0.6" units="first_order_rate_constant"/>
+      <parameter id="Cdk2_CycErem" constant="false" name="Cdk2_CycErem" metaid="_214956" value="0" units="dimensionless"/>
+      <parameter id="PCdk2_CycErem" constant="false" name="PCdk2_CycErem" metaid="_214957" value="0" units="dimensionless"/>
+      <parameter id="Deg_a" constant="false" name="Deg_a" metaid="_214958" value="0" units="dimensionless"/>
+      <parameter id="Heav" constant="false" name="Heav" metaid="_214959" units="dimensionless"/>
+      <parameter id="kdact" name="kdact" metaid="_214960" value="0.023" units="first_order_rate_constant"/>
+      <parameter id="theta" name="theta" metaid="_214961" value="0.3" units="dimensionless"/>
+      <parameter id="x" constant="false" name="x" metaid="_214962" units="dimensionless"/>
+      <parameter id="Xic" constant="false" name="Xic" metaid="_214963" value="3" units="dimensionless"/>
+      <parameter id="Xic_Cdk2_CycE" constant="false" name="Xic_Cdk2_CycE" metaid="_214964" value="0" units="dimensionless"/>
+      <parameter id="Xic_PCdk2_CycE" constant="false" name="Xic_PCdk2_CycE" metaid="_214965" value="0" units="dimensionless"/>
+      <parameter id="Xic_Cdk2_CycErem" constant="false" name="Xic_Cdk2_CycErem" metaid="_214966" value="0" units="dimensionless"/>
+      <parameter id="Xic_PCdk2_CycErem" constant="false" name="Xic_PCdk2_CycErem" metaid="_214967" value="0" units="dimensionless"/>
+      <parameter id="Xicrem" constant="false" name="Xicrem" metaid="_214968" value="0" units="dimensionless"/>
+      <parameter id="Cyc_total" constant="false" name="Cyc_total" metaid="_214969" units="dimensionless"/>
+      <parameter id="Xic_total" constant="false" name="Xic_total" metaid="_214970" units="dimensionless"/>
+      <parameter id="kwee" name="kwee" metaid="_214971" value="1.5" units="first_order_rate_constant"/>
+      <parameter id="k25A" name="k25A" metaid="_214972" value="0.1" units="first_order_rate_constant"/>
+      <parameter id="kon" name="kon" metaid="_214973" value="0.02" units="first_order_rate_constant"/>
+      <parameter id="koff" name="koff" metaid="_214974" value="0.0001" units="first_order_rate_constant"/>
+      <parameter id="kassoc" name="kassoc" metaid="_214975" value="0.1" units="first_order_rate_constant"/>
+      <parameter id="kdissoc" name="kdissoc" metaid="_214976" value="0.001" units="first_order_rate_constant"/>
+      <parameter id="kedeg" name="kedeg" metaid="_214977" value="0.017" units="first_order_rate_constant"/>
+      <parameter id="kxdeg" name="kxdeg" metaid="_214978" value="0.01" units="first_order_rate_constant"/>
+      <parameter id="phi" constant="false" name="phi" metaid="_214979" units="dimensionless"/>
+      <parameter id="Deg" name="Deg" metaid="_214980" value="0" units="dimensionless"/>
+      <parameter id="epsilon" name="epsilon" metaid="_214981" value="0.001"/>
+      <parameter id="pool" constant="false" name="pool" metaid="_214982" units="dimensionless"/>
+      <parameter id="n" name="n" metaid="_214983" value="4" units="dimensionless"/>
+      <parameter id="L" name="L" metaid="_214984" value="0.4" units="dimensionless"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_214917" variable="Cdk2_CycE">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> k25A </ci>
+                <ci> PCdk2_CycE </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> koff </ci>
+                <ci> Cdk2_CycErem </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kdissoc </ci>
+                <ci> Xic_Cdk2_CycE </ci>
+              </apply>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> kwee </ci>
+                <ci> Wee1_a </ci>
+                <ci> Cdk2_CycE </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kon </ci>
+                <ci> phi </ci>
+                <ci> Cdk2_CycE </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kassoc </ci>
+                <ci> Xic </ci>
+                <ci> Cdk2_CycE </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_214918" variable="PCdk2_CycE">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> kwee </ci>
+                <ci> Wee1_a </ci>
+                <ci> Cdk2_CycE </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> koff </ci>
+                <ci> PCdk2_CycErem </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kdissoc </ci>
+                <ci> Xic_PCdk2_CycE </ci>
+              </apply>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> k25A </ci>
+                <ci> PCdk2_CycE </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kon </ci>
+                <ci> phi </ci>
+                <ci> PCdk2_CycE </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kassoc </ci>
+                <ci> Xic </ci>
+                <ci> PCdk2_CycE </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_214919" variable="Wee1_a">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> kwact </ci>
+                <apply>
+                  <minus/>
+                  <ci> Wee1_total </ci>
+                  <ci> Wee1_a </ci>
+                </apply>
+              </apply>
+              <apply>
+                <minus/>
+                <apply>
+                  <plus/>
+                  <ci> Jwact </ci>
+                  <ci> Wee1_total </ci>
+                </apply>
+                <ci> Wee1_a </ci>
+              </apply>
+            </apply>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> kwinact </ci>
+                <ci> Kin_a </ci>
+                <ci> Wee1_a </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <ci> Jwinact </ci>
+                <ci> Wee1_a </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_214920" variable="Kin_a">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> kiact </ci>
+                <apply>
+                  <minus/>
+                  <cn> 1 </cn>
+                  <ci> Kin_a </ci>
+                </apply>
+              </apply>
+              <apply>
+                <minus/>
+                <apply>
+                  <plus/>
+                  <ci> Jiact </ci>
+                  <cn> 1 </cn>
+                </apply>
+                <ci> Kin_a </ci>
+              </apply>
+            </apply>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> kiinact </ci>
+                <ci> Cdk2_CycE </ci>
+                <ci> Kin_a </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <ci> Jiinact </ci>
+                <ci> Kin_a </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_214921" variable="Cdk2_CycErem">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> kon </ci>
+                <ci> phi </ci>
+                <ci> Cdk2_CycE </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kxdeg </ci>
+                <ci> Xic_Cdk2_CycErem </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kdissoc </ci>
+                <ci> Xic_Cdk2_CycErem </ci>
+              </apply>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> koff </ci>
+                <ci> Cdk2_CycErem </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kedeg </ci>
+                <ci> Deg_a </ci>
+                <ci> Cdk2_CycErem </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kassoc </ci>
+                <ci> Xic </ci>
+                <ci> Cdk2_CycErem </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_214922" variable="PCdk2_CycErem">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> kon </ci>
+                <ci> phi </ci>
+                <ci> PCdk2_CycE </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kxdeg </ci>
+                <ci> Xic_PCdk2_CycErem </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kdissoc </ci>
+                <ci> Xic_PCdk2_CycErem </ci>
+              </apply>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> koff </ci>
+                <ci> PCdk2_CycErem </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kedeg </ci>
+                <ci> Deg_a </ci>
+                <ci> PCdk2_CycErem </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kassoc </ci>
+                <ci> Xic </ci>
+                <ci> PCdk2_CycErem </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_214923" variable="Deg_a">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> kdact </ci>
+            <ci> Heav </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_214924" variable="Xic">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> kdissoc </ci>
+              <apply>
+                <plus/>
+                <ci> Xic_Cdk2_CycE </ci>
+                <ci> Xic_PCdk2_CycE </ci>
+                <ci> Xic_Cdk2_CycErem </ci>
+                <ci> Xic_PCdk2_CycErem </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> kassoc </ci>
+              <ci> Xic </ci>
+              <apply>
+                <plus/>
+                <ci> Cdk2_CycE </ci>
+                <ci> PCdk2_CycE </ci>
+                <ci> Cdk2_CycErem </ci>
+                <ci> PCdk2_CycErem </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_214925" variable="Xic_Cdk2_CycE">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> kassoc </ci>
+                <ci> Xic </ci>
+                <ci> Cdk2_CycE </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> koff </ci>
+                <ci> Xic_Cdk2_CycErem </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k25A </ci>
+                <ci> Xic_PCdk2_CycE </ci>
+              </apply>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> kdissoc </ci>
+                <ci> Xic_Cdk2_CycE </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kon </ci>
+                <ci> phi </ci>
+                <ci> Xic_Cdk2_CycE </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kwee </ci>
+                <ci> Wee1_a </ci>
+                <ci> Xic_Cdk2_CycE </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_214926" variable="Xic_PCdk2_CycE">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> kassoc </ci>
+                <ci> Xic </ci>
+                <ci> PCdk2_CycE </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> koff </ci>
+                <ci> Xic_PCdk2_CycErem </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kwee </ci>
+                <ci> Wee1_a </ci>
+                <ci> Xic_Cdk2_CycE </ci>
+              </apply>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> kdissoc </ci>
+                <ci> Xic_PCdk2_CycE </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kon </ci>
+                <ci> phi </ci>
+                <ci> Xic_PCdk2_CycE </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k25A </ci>
+                <ci> Xic_PCdk2_CycE </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_214927" variable="Xic_Cdk2_CycErem">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> kassoc </ci>
+                <ci> Xic </ci>
+                <ci> Cdk2_CycErem </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kon </ci>
+                <ci> phi </ci>
+                <ci> Xic_Cdk2_CycE </ci>
+              </apply>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> kdissoc </ci>
+                <ci> Xic_Cdk2_CycErem </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> koff </ci>
+                <ci> Xic_Cdk2_CycErem </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kedeg </ci>
+                <ci> Deg_a </ci>
+                <ci> Xic_Cdk2_CycErem </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kxdeg </ci>
+                <ci> Xic_Cdk2_CycErem </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_214928" variable="Xic_PCdk2_CycErem">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> kassoc </ci>
+                <ci> Xic </ci>
+                <ci> PCdk2_CycErem </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kon </ci>
+                <ci> phi </ci>
+                <ci> Xic_PCdk2_CycE </ci>
+              </apply>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> kdissoc </ci>
+                <ci> Xic_PCdk2_CycErem </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> koff </ci>
+                <ci> Xic_PCdk2_CycErem </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kedeg </ci>
+                <ci> Deg </ci>
+                <ci> Xic_PCdk2_CycErem </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kxdeg </ci>
+                <ci> Xic_PCdk2_CycErem </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_214929" variable="Xicrem">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> kedeg </ci>
+                <ci> Deg_a </ci>
+                <ci> Xic_Cdk2_CycErem </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kedeg </ci>
+                <ci> Deg_a </ci>
+                <ci> Xic_PCdk2_CycErem </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> kxdeg </ci>
+              <ci> Xicrem </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="_214930" variable="x">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <ci> Cdk2_CycErem </ci>
+            <ci> theta </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_214931" variable="Heav">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <cn> 0 </cn>
+              <apply>
+                <lt/>
+                <ci> x </ci>
+                <cn> 0 </cn>
+              </apply>
+            </piece>
+            <otherwise>
+              <cn> 1 </cn>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_214932" variable="Cyc_total">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> Xic_PCdk2_CycE </ci>
+            <ci> Xic_Cdk2_CycE </ci>
+            <ci> Xic_PCdk2_CycErem </ci>
+            <ci> Xic_Cdk2_CycErem </ci>
+            <ci> PCdk2_CycErem </ci>
+            <ci> Cdk2_CycErem </ci>
+            <ci> Cdk2_CycE </ci>
+            <ci> PCdk2_CycE </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_214933" variable="Xic_total">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <plus/>
+              <ci> Xic </ci>
+              <ci> Xic_PCdk2_CycE </ci>
+              <ci> Xic_Cdk2_CycE </ci>
+              <ci> Xic_PCdk2_CycErem </ci>
+              <ci> Xic_Cdk2_CycErem </ci>
+              <ci> Xicrem </ci>
+            </apply>
+            <cn> 3 </cn>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_214934" variable="phi">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <plus/>
+              <ci> epsilon </ci>
+              <apply>
+                <power/>
+                <ci> pool </ci>
+                <ci> n </ci>
+              </apply>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <power/>
+                <ci> L </ci>
+                <ci> n </ci>
+              </apply>
+              <apply>
+                <power/>
+                <ci> pool </ci>
+                <ci> n </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_214935" variable="pool">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> Cdk2_CycErem </ci>
+            <ci> PCdk2_CycErem </ci>
+            <ci> Xic_Cdk2_CycErem </ci>
+            <ci> Xic_PCdk2_CycErem </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+  </model>
+</sbml>

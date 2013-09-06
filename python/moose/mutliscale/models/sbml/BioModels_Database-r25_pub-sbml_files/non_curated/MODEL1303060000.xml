@@ -1,0 +1,369 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="_9ecda007_b133_48d9_933c_d56893cae2aa" version="4">
+  <model id="MODEL1303060000" name="Ray2013 - Meiotic initiation in S. cerevisiae" metaid="_9994b48a_84b6_42bf_babc_170b5019d3ee">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <div class="dc:title">Ray2013 - Meiotic initiation in S. cerevisiae</div>
+            <div class="dc:description">      <p>A mathematical representation of early meiotic events, particularly feedback mechanisms at the system level and phosphorylation of signalling molecules for regulating protein activities, is described here</p>
+                </div>
+            <div class="dc:bibliographicCitation">      <p>This model is described in the article:</p>
+                <div class="bibo:title">        <a href="http://identifiers.org/pubmed/23631506" title="Access to this publication">Dynamic modeling of yeast meiotic initiation.</a>
+                    </div>
+                <div class="bibo:authorList">Ray D, Su Y, Ye P.</div>
+                <div class="bibo:Journal">BMC Syst Biol. 2013 May 1;7:37</div>
+                <p>Abstract:</p>
+                <div class="bibo:abstract">        <p>          <b>BACKGROUND:</b>
+              Meiosis is the sexual reproduction process common to eukaryotes. The diploid yeast Saccharomyces cerevisiae undergoes meiosis in sporulation medium to form four haploid spores. Initiation of the process is tightly controlled by intricate networks of positive and negative feedback loops. Intriguingly, expression of early meiotic proteins occurs within a narrow time window. Further, sporulation efficiency is strikingly different for yeast strains with distinct mutations or genetic backgrounds. To investigate signal transduction pathways that regulate transient protein expression and sporulation efficiency, we develop a mathematical model using ordinary differential equations. The model describes early meiotic events, particularly feedback mechanisms at the system level and phosphorylation of signaling molecules for regulating protein activities.          </p>
+                    <p>          <b>RESULTS:</b>
+              The mathematical model is capable of simulating the orderly and transient dynamics of meiotic proteins including Ime1, the master regulator of meiotic initiation, and Ime2, a kinase encoded by an early gene. The model is validated by quantitative sporulation phenotypes of single-gene knockouts. Thus, we can use the model to make novel predictions on the cooperation between proteins in the signaling pathway. Virtual perturbations on feedback loops suggest that both positive and negative feedback loops are required to terminate expression of early meiotic proteins. Bifurcation analyses on feedback loops indicate that multiple feedback loops are coordinated to modulate sporulation efficiency. In particular, positive auto-regulation of Ime2 produces a bistable system with a normal meiotic state and a more efficient meiotic state.          </p>
+                    <p>          <b>CONCLUSIONS:</b>
+              By systematically scanning through feedback loops in the mathematical model, we demonstrate that, in yeast, the decisions to terminate protein expression and to sporulate at different efficiencies stem from feedback signals toward the master regulator Ime1 and the early meiotic protein Ime2. We argue that the architecture of meiotic initiation pathway generates a robust mechanism that assures a rapid and complete transition into meiosis. This type of systems-level regulation is a commonly used mechanism controlling developmental programs in yeast and other organisms. Our mathematical model uncovers key regulations that can be manipulated to enhance sporulation efficiency, an important first step in the development of new strategies for producing gametes with high quality and quantity.          </p>
+                    </div>
+                </div>
+            <div class="dc:publisher">      <p>This model is hosted on        <a href="http://www.ebi.ac.uk/biomodels/">BioModels Database</a>
+            and identified
+by:        <a href="http://identifiers.org/biomodels.db/MODEL1303060000">MODEL1303060000</a>
+            .        </p>
+                <p>To cite BioModels Database, please use:        <a href="http://identifiers.org/pubmed/20587024" title="Latest BioModels Database publication">BioModels Database: An enhanced, curated and annotated resource
+for published quantitative kinetic models</a>
+            .        </p>
+                </div>
+            <div class="dc:license">      <p>To the extent possible under law, all copyright and related or
+neighbouring rights to this encoded model have been dedicated to the public
+domain worldwide. Please refer to        <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Access to: CC0 1.0 Universal (CC0 1.0), Public Domain Dedication">CC0 Public Domain
+Dedication</a>
+            for more information.        </p>
+                </div>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#_9994b48a_84b6_42bf_babc_170b5019d3ee">
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1303060000"/>
+            </rdf:Bag>
+          </bqmodel:is>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfCompartments>
+      <compartment id="V" name="C" metaid="_87dcbf6b_e5a4_4b68_9d42_83839067557b" size="1"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="Rim11" initialConcentration="0" charge="0" name="Rim11" metaid="e785bac9_b647_492f_a40a_f7f7407633e9" compartment="V"/>
+      <species id="pUme6" initialConcentration="0" charge="0" name="pUme6" metaid="b32d5a92_3036_4117_bb1c_e423140939a9" compartment="V"/>
+      <species id="pSok2" initialConcentration="1" charge="0" name="pSok2" metaid="_7965eb62_36f0_4774_9fb0_431bbd482336" compartment="V"/>
+      <species id="Ime1" initialConcentration="0" charge="0" name="Ime1" metaid="a5777a0b_28c2_488e_97bb_ea7c56017ed0" compartment="V"/>
+      <species id="pIme1" initialConcentration="0" charge="0" name="pIme1" metaid="_9e5ad220_7027_4cf2_ad6b_43cdb824d1ea" compartment="V"/>
+      <species id="Ime2" initialConcentration="0" charge="0" name="Ime2" metaid="fb7a0034_2a76_4ed3_8a59_ad338f5b9aa6" compartment="V"/>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="sime1" metaid="d73515a1_ed47_49f6_a7fd_b9478a23a245" value="10"/>
+      <parameter id="sime2" metaid="_172e5824_f3e1_478b_bd74_4e2165f032ca" value="10"/>
+      <parameter id="sprimeime2" metaid="_06ddd887_257b_45cf_920d_196cb166d1dd" value="3"/>
+      <parameter id="dime1" metaid="ce794ce7_edc3_4973_b5a5_6c50ffb8716e" value="1"/>
+      <parameter id="dprimeime1" metaid="_0eca19b2_3e33_488d_8312_0ebb0d0a7b43" value="1"/>
+      <parameter id="dpime1" metaid="c1b1ab2c_5390_41d0_8eaf_a64c5e02dc0a" value="1"/>
+      <parameter id="dime2" metaid="_0e2ce631_e458_430e_a954_19e1ad6c3393" value="8"/>
+      <parameter id="prim11" metaid="b45b76b0_f384_4f91_bac0_249360587232" value="0.01"/>
+      <parameter id="urim11" metaid="f86588ab_61f2_470b_95ec_b3397a58b565" value="0.1"/>
+      <parameter id="pume6" metaid="e8dfc3ab_7e69_4f66_90cc_4af655296d7b" value="0.3"/>
+      <parameter id="uume6" metaid="c46f418e_2bd2_4065_b031_7bc3c5cfaac1" value="0.01"/>
+      <parameter id="psok2" metaid="_29b17581_b7b9_483f_8c4e_2c1f176af2a1" value="0.7"/>
+      <parameter id="usok2" metaid="_8dabdeae_4e53_473f_8840_b07b32c208fe" value="1"/>
+      <parameter id="pime1" metaid="c4d46ad8_dfd5_48a9_b7df_9ddbc0ee919b" value="2"/>
+      <parameter id="csok2" metaid="ef42ebf6_4770_4ec9_9b6b_aad67ab44854" value="0.05"/>
+      <parameter id="cime1" metaid="_07a0e70d_2393_4dea_a15a_bb9f219c9dc3" value="0.01"/>
+      <parameter id="c1" metaid="f053a2f4_9b44_4a05_92f2_0562faaf1482" value="0.01"/>
+      <parameter id="c2" metaid="_5674e986_632e_4cbf_bf2d_2f652d9e3533" value="1.4"/>
+      <parameter id="c3" metaid="_1d8faca9_d59d_458c_a54e_1b08ba57e093" value="2"/>
+    </listOfParameters>
+    <listOfReactions>
+      <reaction id="rim11_1" metaid="_7fb135b3_5a8b_493d_8ca1_c3e877b4b6fa" reversible="true">
+        <listOfProducts>
+          <speciesReference species="Rim11" metaid="_33aaca3d_3281_4c6b_8297_0f084d5aa94c"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Rim11"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_27d53cf6_a567_4ea5_8622_ff5b54ce18f1">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> V </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> urim11 </ci>
+                  <apply>
+                    <minus/>
+                    <cn> 1 </cn>
+                    <ci> Rim11 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> prim11 </ci>
+                  <ci> Rim11 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="pume6_1" metaid="_844bdf69_d103_43c1_910b_15e4d8a613ae" reversible="true">
+        <listOfProducts>
+          <speciesReference species="pUme6" metaid="_2ab55787_549a_43b2_8386_3e89109d8b37"/>
+          <speciesReference species="Rim11" metaid="d2438908_9446_4cea_a18e_becd427dabac"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="pUme6"/>
+          <modifierSpeciesReference species="Rim11"/>
+        </listOfModifiers>
+        <kineticLaw metaid="fb12a13c_904a_4675_aeba_6c025db07ae8">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> V </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <apply>
+                    <minus/>
+                    <cn> 1 </cn>
+                    <ci> pUme6 </ci>
+                  </apply>
+                  <ci> pume6 </ci>
+                  <ci> Rim11 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> uume6 </ci>
+                  <ci> pUme6 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="sok2_1" metaid="dae5ea07_3e0b_4aaa_8e94_45df4b6aacba" reversible="true">
+        <listOfProducts>
+          <speciesReference species="pSok2" metaid="d4e983f8_8dde_430e_836f_a296a39a5502"/>
+          <speciesReference species="Ime1" metaid="e4bf2e30_557d_45f0_81f5_6fbd7ba713a2"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Ime1"/>
+          <modifierSpeciesReference species="pSok2"/>
+        </listOfModifiers>
+        <kineticLaw metaid="ed3a4b85_cb68_427f_bab6_38ef4993e0bc">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> V </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <apply>
+                    <divide/>
+                    <ci> csok2 </ci>
+                    <apply>
+                      <plus/>
+                      <ci> csok2 </ci>
+                      <ci> Ime1 </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <minus/>
+                    <cn> 1 </cn>
+                    <ci> pSok2 </ci>
+                  </apply>
+                  <ci> psok2 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> usok2 </ci>
+                  <ci> pSok2 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="ime1_1" metaid="_79126ccf_9853_4cb1_a690_64bfa40232f0" reversible="false">
+        <listOfProducts>
+          <speciesReference species="Ime1" metaid="_3759cef2_20a8_4d4f_8818_ca500f2565b0"/>
+          <speciesReference species="pSok2" metaid="_543c236c_1d88_4b95_bc83_bc9323a7596f"/>
+          <speciesReference species="Rim11" metaid="_08034d35_d4ad_462b_9562_490a5b025f22"/>
+          <speciesReference species="Ime2" metaid="_83084543_10c3_4eca_a1e1_1fdf13fe248b"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="pSok2"/>
+          <modifierSpeciesReference species="Ime1"/>
+          <modifierSpeciesReference species="Rim11"/>
+          <modifierSpeciesReference species="Ime2"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_88dca1c8_052a_4b50_8ce8_502c088b6e10">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> V </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <apply>
+                    <divide/>
+                    <ci> cime1 </ci>
+                    <apply>
+                      <plus/>
+                      <ci> cime1 </ci>
+                      <ci> pSok2 </ci>
+                    </apply>
+                  </apply>
+                  <ci> sime1 </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> pime1 </ci>
+                    <ci> Ime1 </ci>
+                    <ci> Rim11 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> dime1 </ci>
+                    <ci> Ime1 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> dprimeime1 </ci>
+                    <ci> Ime2 </ci>
+                    <apply>
+                      <divide/>
+                      <ci> Ime1 </ci>
+                      <apply>
+                        <plus/>
+                        <ci> c1 </ci>
+                        <ci> Ime1 </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="pime1_1" metaid="_3813318b_7cd3_4b62_84a7_0da9e7e9f5c7" reversible="false">
+        <listOfProducts>
+          <speciesReference species="pIme1" metaid="_187d7a2f_77b8_4d66_ab88_d67bc88d33d5"/>
+          <speciesReference species="Ime1" metaid="_0a2b1a88_c56e_4356_85b5_42d4aabce051"/>
+          <speciesReference species="Rim11" metaid="_7b08b1c5_a7de_4ba6_b054_f6deb42d1ecd"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Ime1"/>
+          <modifierSpeciesReference species="Rim11"/>
+          <modifierSpeciesReference species="pIme1"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_826ec893_2390_47d0_a377_5a455cb3a2a0">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> V </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> pime1 </ci>
+                  <ci> Ime1 </ci>
+                  <ci> Rim11 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> dpime1 </ci>
+                  <ci> pIme1 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="ime2_1" metaid="_1a119aed_9ec0_455b_86ce_96397f36cb38" reversible="true">
+        <listOfProducts>
+          <speciesReference species="Ime2" metaid="f45b4b8a_3962_4073_a841_dc593ecc5b66"/>
+          <speciesReference species="pUme6" metaid="_5cb4d259_0645_4e50_bdaa_245998599528"/>
+          <speciesReference species="pIme1" metaid="d60cb69f_5e57_49c8_910d_b2b8a58c6673"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="pUme6"/>
+          <modifierSpeciesReference species="pIme1"/>
+          <modifierSpeciesReference species="Ime2"/>
+        </listOfModifiers>
+        <kineticLaw metaid="b05b6932_6288_43fa_b5c5_8000686a4402">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> V </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> sime2 </ci>
+                    <ci> pUme6 </ci>
+                    <ci> pIme1 </ci>
+                  </apply>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <times/>
+                      <ci> sprimeime2 </ci>
+                      <apply>
+                        <power/>
+                        <ci> Ime2 </ci>
+                        <cn> 5 </cn>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <plus/>
+                      <apply>
+                        <power/>
+                        <ci> c2 </ci>
+                        <cn> 5 </cn>
+                      </apply>
+                      <apply>
+                        <power/>
+                        <ci> Ime2 </ci>
+                        <cn> 5 </cn>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> dime2 </ci>
+                    <ci> Ime2 </ci>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <ci> c3 </ci>
+                    <ci> Ime2 </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

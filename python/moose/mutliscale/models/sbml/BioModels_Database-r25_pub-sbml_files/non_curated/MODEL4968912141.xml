@@ -1,0 +1,280 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2" level="2" metaid="_099508" version="1">
+  <model id="testid" name="Phillips2003_RasGTPase" metaid="_458384">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+    Ras is an important regulator of cell growth in all eukaryotic cells. The model represent hydrolysis of active Ras-bound GTP to give inactive Ras-bound GDP catalyzed by GTPase activating proteins i.e NF1. The inactive Ras-bound GDP turns signalling off.    <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation xmlns:celldesigner="http://www.sbml.org/2001/ns/celldesigner" xmlns:doqcs="http://www.doqcs.ncbs.res.in" xmlns:jd="http://www.sys-bio.org/sbml">
+<doqcs:timestamp>Wed Oct 18 16:39:27 2006</doqcs:timestamp>
+  <doqcs:accesstype>pathway</doqcs:accesstype>
+  <doqcs:transcriber>Sharat J. Vayttaden and Pragati Jain, NCBS</doqcs:transcriber>
+  <doqcs:developer>Robert A. Phillips, Jackie L. Hunter, John F. Eccleston, and Martin R. Webb</doqcs:developer>
+  <doqcs:species>General Mammalian</doqcs:species>
+  <doqcs:tissue>E.coli Expression system</doqcs:tissue>
+  <doqcs:cellcompartment>Cytosol,</doqcs:cellcompartment>
+  <doqcs:methodology>Qualitative</doqcs:methodology>
+  <doqcs:model_implementation>Exact GENESIS implementation</doqcs:model_implementation>
+  <doqcs:model_validation>Approximates original data </doqcs:model_validation>
+                                                              <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#_458384">
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL4968912141"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/12667087"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="vol_secINV" metaid="_099520">
+        <listOfUnits>
+          <unit metaid="_099532" kind="litre"/>
+          <unit exponent="-1" metaid="_099545" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="vol_uMINVsecINV" metaid="_099557">
+        <listOfUnits>
+          <unit exponent="2" metaid="_099569" kind="litre"/>
+          <unit scale="-6" exponent="-1" metaid="_099581" kind="mole"/>
+          <unit exponent="-1" metaid="_099593" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="substance" metaid="_099605">
+        <listOfUnits>
+          <unit scale="-6" metaid="_099617" kind="mole"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="default_compartment" metaid="_458387" size="1E-18"/>
+      <compartment id="geometry" metaid="_458388" size="5.236E-13"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="Pi" initialConcentration="0" metaid="_458406" compartment="geometry"/>
+      <species id="RasGTP" initialConcentration="1" metaid="_458426" compartment="geometry"/>
+      <species id="RasGTP_minus_NF1" initialConcentration="0" metaid="_458446" compartment="geometry"/>
+      <species id="RasGTP_minus_NF1_star_" initialConcentration="0" metaid="_458466" compartment="geometry"/>
+      <species id="RasGDP_minus_NF1_Pi" initialConcentration="0" metaid="_458486" compartment="geometry"/>
+      <species id="RasGDP_NF1" initialConcentration="0" metaid="_458506" compartment="geometry"/>
+      <species id="RasGDP" initialConcentration="0" metaid="_458526" compartment="geometry"/>
+      <species id="NF1" initialConcentration="9.99936338171632" metaid="_458546" compartment="geometry"/>
+    </listOfSpecies>
+    <listOfReactions>
+      <reaction id="GTP_hydrolysis_sbo_1_sbc_" metaid="_458566">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+        First step in hydrolysis of GTP bound to Ras complexed with NF1 - a mammalian GAP Kf = 19.5 /sec Kb = 0.22 /sec Table 3, Phillips RA et al 2003 Biochemistry 3956-3965</body>
+          
+        </notes>
+        <listOfReactants>
+          <speciesReference species="RasGTP_minus_NF1_star_" metaid="_099629"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="RasGDP_minus_NF1_Pi" metaid="_099642"/>
+        </listOfProducts>
+        <kineticLaw metaid="_099654">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          kf*RasGTP_minus_NF1_star_-kb*RasGDP_minus_NF1_Pi</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf </ci>
+                <ci> RasGTP_minus_NF1_star_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kb </ci>
+                <ci> RasGDP_minus_NF1_Pi </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="kf" metaid="_099666" value="1.02102E-11" units="vol_secINV"/>
+            <parameter id="kb" metaid="_099678" value="1.15192E-13" units="vol_secINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="GTP_hydrolysis_sbo_2_sbc_" metaid="_458586">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+        Second step in hydrolysis of GTP bound to Ras is complexed with NF1 - a mammalian GAP Kf = 40 /sec Kb = 108 /M/sec = 1.08e-04 /uM/sec Phillips RA et al 2003 Biochemistry 3956-3965</body>
+          
+        </notes>
+        <listOfReactants>
+          <speciesReference species="RasGDP_minus_NF1_Pi" metaid="_099690"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Pi" metaid="_099702"/>
+          <speciesReference species="RasGDP_NF1" metaid="_099714"/>
+        </listOfProducts>
+        <kineticLaw metaid="_099726">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          kf*RasGDP_minus_NF1_Pi-kb*Pi*RasGDP_NF1</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf </ci>
+                <ci> RasGDP_minus_NF1_Pi </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kb </ci>
+                <ci> Pi </ci>
+                <ci> RasGDP_NF1 </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="kf" metaid="_099738" value="2.0944E-11" units="vol_secINV"/>
+            <parameter id="kb" metaid="_099750" value="5.654816288352E-17" units="vol_uMINVsecINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Ras_activation" metaid="_458606">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+        Activation of Ras by GAP (i.e NF1) Kf = 418 /sec Kb = 5.5 /sec Table 3, Phillips RA et al 2003 Biochemistry 3956-3965</body>
+          
+        </notes>
+        <listOfReactants>
+          <speciesReference species="RasGTP_minus_NF1" metaid="_099762"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="RasGTP_minus_NF1_star_" metaid="_099774"/>
+        </listOfProducts>
+        <kineticLaw metaid="_099786">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          kf*RasGTP_minus_NF1-kb*RasGTP_minus_NF1_star_</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf </ci>
+                <ci> RasGTP_minus_NF1 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kb </ci>
+                <ci> RasGTP_minus_NF1_star_ </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="kf" metaid="_099798" value="2.188648E-10" units="vol_secINV"/>
+            <parameter id="kb" metaid="_099810" value="2.8798E-12" units="vol_secINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="GAP_dissociation" metaid="_458626">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+        Dissociation of NF1 from Ras.GDP NF1 is a mammalian GAP Kf = 46.5 /sec Kb = 1.2 /sec/uM Table 3, Phillips RA et al 2003 Biochemistry 3956-3965</body>
+          
+        </notes>
+        <listOfReactants>
+          <speciesReference species="RasGDP_NF1" metaid="_099822"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="RasGDP" metaid="_099834"/>
+          <speciesReference species="NF1" metaid="_099846"/>
+        </listOfProducts>
+        <kineticLaw metaid="_099858">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          kf*RasGDP_NF1-kb*RasGDP*NF1</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf </ci>
+                <ci> RasGDP_NF1 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kb </ci>
+                <ci> RasGDP </ci>
+                <ci> NF1 </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="kf" metaid="_099870" value="2.43474E-11" units="vol_secINV"/>
+            <parameter id="kb" metaid="_099882" value="6.283184040672E-13" units="vol_uMINVsecINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="NF1_binding" metaid="_458646">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+        Binding of NF1 to Ras.GTP NF1 is a mammalian GAP Kd = 5.3 uM Table 3, Phillips RA et al 2003 Biochemistry 3956-3965</body>
+          
+        </notes>
+        <listOfReactants>
+          <speciesReference species="RasGTP" metaid="_099894"/>
+          <speciesReference species="NF1" metaid="_099906"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="RasGTP_minus_NF1" metaid="_099918"/>
+        </listOfProducts>
+        <kineticLaw metaid="_099930">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          kf*RasGTP*NF1-kb*RasGTP_minus_NF1</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf </ci>
+                <ci> RasGTP </ci>
+                <ci> NF1 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kb </ci>
+                <ci> RasGTP_minus_NF1 </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="kf" metaid="_099942" value="6.283184040672E-13" units="vol_uMINVsecINV"/>
+            <parameter id="kb" metaid="_099954" value="3.330096E-12" units="vol_secINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

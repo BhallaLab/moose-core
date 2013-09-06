@@ -1,0 +1,877 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="_676582" version="4">
+  <model id="Koivumaki2009_SERCAATPase_long" name="Koivumaki2009_SERCAATPase_long" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>Modelling sarcoplasmic reticulum calcium ATPase and its regulation in cardiac
+myocytes.</strong>
+                <br/>
+          Koivumaki JT, Takalo J, Korhonen T, Tavi P, Weckstrom M.      <em>Philos Transact A Math Phys Eng Sci</em>
+          2009 Jun 13;367(1896):2181-202      <a href="http://www.ncbi.nlm.nih.gov/pubmed/19414452">19414452</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          When developing large-scale mathematical models of physiology, some reduction in
+complexity is necessarily required to maintain computational efficiency. A prime
+example of such an intricate cell is the cardiac myocyte. For the predictive
+power of the cardiomyocyte models, it is vital to accurately describe the
+calcium transport mechanisms, since they essentially link the electrical
+activation to contractility. The removal of calcium from the cytoplasm takes
+place mainly by the Na(+)/Ca(2+) exchanger, and the sarcoplasmic reticulum
+Ca(2+) ATPase (SERCA). In the present study, we review the properties of SERCA,
+its frequency-dependent and beta-adrenergic regulation, and the approaches of
+mathematical modelling that have been used to investigate its function.
+Furthermore, we present novel theoretical considerations that might prove useful
+for the elucidation of the role of SERCA in cardiac function, achieving a
+reduction in model complexity, but at the same time retaining the central
+aspects of its function. Our results indicate that to faithfully predict the
+physiological properties of SERCA, we should take into account the
+calcium-buffering effect and reversible function of the pump. This
+'uncomplicated' modelling approach could be useful to other similar transport
+mechanisms as well.      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://models.cellml.org/exposure/3d5593ef7cb34144d2dbb9d617094026">        <strong>Koivumaki JT, Takalo J, Korhonen T, Tavi P, Weckstrom M. (2009) - version=1.0</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>Geoffrey Nunns</strong>
+                <br/>
+          gnunns1@jhu.edu      <br/>
+          The University of Auckland      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Nunns</vCard:Family>
+                  <vCard:Given>Geoffrey</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>gnunns1@jhu.edu</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>Auckland Bioengineering Institute, The Auckland University</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Nunns</vCard:Family>
+                  <vCard:Given>Geoffrey</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>gnunns1@jhu.edu</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>Auckland Bioengineering Institute, The Auckland University</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Nunns</vCard:Family>
+                  <vCard:Given>Geoffrey</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>gnunns1@jhu.edu</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>Auckland Bioengineering Institute, The Auckland University</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:52:11Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:52:11Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:52:11Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:52:11Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1006230105"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/19414452"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="msec" name="msec" metaid="_676594">
+        <listOfUnits>
+          <unit scale="-3" metaid="_676606" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_msec" name="per_msec" metaid="_676618">
+        <listOfUnits>
+          <unit scale="-3" exponent="-1" metaid="_676630" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="uM" name="uM" metaid="_676642">
+        <listOfUnits>
+          <unit scale="-6" metaid="_676654" kind="mole"/>
+          <unit exponent="-1" metaid="_676666" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_uM2" name="per_uM2" metaid="_676678">
+        <listOfUnits>
+          <unit scale="-6" exponent="-2" metaid="_676690" kind="mole"/>
+          <unit exponent="2" metaid="_676702" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="cm2" name="cm2" metaid="_676714">
+        <listOfUnits>
+          <unit scale="-2" exponent="2" metaid="_676727" kind="metre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="uL" name="uL" metaid="_676739">
+        <listOfUnits>
+          <unit scale="-6" metaid="_676751" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mV" name="mV" metaid="_676763">
+        <listOfUnits>
+          <unit scale="-3" metaid="_676775" kind="volt"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="uM_per_msec" name="uM_per_msec" metaid="_676787">
+        <listOfUnits>
+          <unit scale="-6" metaid="_676799" kind="mole"/>
+          <unit exponent="-1" metaid="_676811" kind="litre"/>
+          <unit scale="-3" exponent="-1" metaid="_676823" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_uM_per_msec" name="per_uM_per_msec" metaid="_676836">
+        <listOfUnits>
+          <unit scale="-6" exponent="-1" metaid="_676848" kind="mole"/>
+          <unit metaid="_676860" kind="litre"/>
+          <unit scale="-3" exponent="-1" metaid="_676872" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_uM2_per_msec" name="per_uM2_per_msec" metaid="_676884">
+        <listOfUnits>
+          <unit scale="-6" exponent="-2" metaid="_676896" kind="mole"/>
+          <unit exponent="2" metaid="_676908" kind="litre"/>
+          <unit scale="-3" exponent="-1" metaid="_676920" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="uF_per_cm2" name="uF_per_cm2" metaid="_676932">
+        <listOfUnits>
+          <unit scale="-6" metaid="_676944" kind="farad"/>
+          <unit scale="-2" exponent="-2" metaid="_676956" kind="metre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="C_per_mmole" name="C_per_mmole" metaid="_676968">
+        <listOfUnits>
+          <unit metaid="_676981" kind="coulomb"/>
+          <unit scale="-3" exponent="-1" metaid="_676993" kind="mole"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="J_per_K_per_mol" name="J_per_K_per_mol" metaid="_677005">
+        <listOfUnits>
+          <unit metaid="_677018" kind="joule"/>
+          <unit exponent="-1" metaid="_677030" kind="kelvin"/>
+          <unit exponent="-1" metaid="_677042" kind="mole"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="uA_per_uF" name="uA_per_uF" metaid="_677054">
+        <listOfUnits>
+          <unit scale="-6" metaid="_677066" kind="ampere"/>
+          <unit scale="-6" exponent="-1" metaid="_677079" kind="farad"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time" name="time" metaid="_677091">
+        <listOfUnits>
+          <unit scale="-3" metaid="_677103" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="COMpartment" metaid="_329547" units="litre" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="t_modulo" constant="false" name="t_modulo" metaid="_329578"/>
+      <parameter id="Acap" name="Acap" metaid="_329580" value="0.0001534"/>
+      <parameter id="V_myo" name="V_myo" metaid="_329581" value="2.584E-5"/>
+      <parameter id="C_m" name="C_m" metaid="_329582" value="1"/>
+      <parameter id="F" name="F" metaid="_329584" value="96.5"/>
+      <parameter id="T" name="T" metaid="_329585" value="298"/>
+      <parameter id="R" name="R" metaid="_329586" value="8.314"/>
+      <parameter id="CaM_tot" name="CaM_tot" metaid="_329588" value="24"/>
+      <parameter id="Km_CaM" name="Km_CaM" metaid="_329589" value="2.38"/>
+      <parameter id="Ca_o" name="Ca_o" metaid="_329590" value="1000"/>
+      <parameter id="Na_o" name="Na_o" metaid="_329592" value="140000"/>
+      <parameter id="Ca_NSR" name="Ca_NSR" metaid="_329593" value="760"/>
+      <parameter id="J_leak" name="J_leak" metaid="_329594" value="0.0003"/>
+      <parameter id="V" constant="false" name="V" metaid="_329596"/>
+      <parameter id="t1" name="t1" metaid="_329597" value="0.5"/>
+      <parameter id="t2" name="t2" metaid="_329598" value="200"/>
+      <parameter id="p" name="p" metaid="_329600" value="2"/>
+      <parameter id="A" name="A" metaid="_329601" value="135"/>
+      <parameter id="A1" name="A1" metaid="_329602" value="110"/>
+      <parameter id="rest" name="rest" metaid="_329604" value="-90"/>
+      <parameter id="Ca_input" constant="false" name="Ca_input" metaid="_329605"/>
+      <parameter id="tcalcium" constant="false" name="tcalcium" metaid="_329606"/>
+      <parameter id="Ca_tau1" name="Ca_tau1" metaid="_329608" value="1.5"/>
+      <parameter id="Ca_tau2" name="Ca_tau2" metaid="_329609" value="7.5"/>
+      <parameter id="Ca_pow" name="Ca_pow" metaid="_329610" value="2"/>
+      <parameter id="Ca_amp" name="Ca_amp" metaid="_329612" value="10"/>
+      <parameter id="INaCa" constant="false" name="INaCa" metaid="_329613"/>
+      <parameter id="Na_i" name="Na_i" metaid="_329614" value="10000"/>
+      <parameter id="KmNa" name="KmNa" metaid="_329616" value="87500"/>
+      <parameter id="KmCa" name="KmCa" metaid="_329617" value="1380"/>
+      <parameter id="ksat" name="ksat" metaid="_329618" value="0.1"/>
+      <parameter id="eta" name="eta" metaid="_329620" value="0.35"/>
+      <parameter id="kNaCa" name="kNaCa" metaid="_329621" value="950"/>
+      <parameter id="SERCA_TOT" name="SERCA_TOT" metaid="_329622" value="20"/>
+      <parameter id="CaMKII_reg" name="CaMKII_reg" metaid="_329624" value="0.1"/>
+      <parameter id="PKA_reg" name="PKA_reg" metaid="_329625" value="0.1"/>
+      <parameter id="PSR" name="PSR" metaid="_329626" value="1"/>
+      <parameter id="Kmf_PLBKO" name="Kmf_PLBKO" metaid="_329628" value="0.15"/>
+      <parameter id="Kmf_PLB" name="Kmf_PLB" metaid="_329629" value="0.15"/>
+      <parameter id="Kmr_PLBKO" name="Kmr_PLBKO" metaid="_329630" value="2500"/>
+      <parameter id="Kmr_PLB" name="Kmr_PLB" metaid="_329632" value="1110"/>
+      <parameter id="PLB_tot" name="PLB_tot" metaid="_329633" value="1"/>
+      <parameter id="kplb_pos" name="kplb_pos" metaid="_329634" value="1"/>
+      <parameter id="kplb_neg" name="kplb_neg" metaid="_329636" value="6.8"/>
+      <parameter id="EC_50_fwd" constant="false" name="EC_50_fwd" metaid="_329637"/>
+      <parameter id="EC_50_rev" constant="false" name="EC_50_rev" metaid="_329638"/>
+      <parameter id="k_cyt_serca" constant="false" name="k_cyt_serca" metaid="_329640"/>
+      <parameter id="k_serca_cyt" constant="false" name="k_serca_cyt" metaid="_329641"/>
+      <parameter id="k_serca_sr" constant="false" name="k_serca_sr" metaid="_329642"/>
+      <parameter id="k_sr_serca" constant="false" name="k_sr_serca" metaid="_329644"/>
+      <parameter id="br_cyt_serca" constant="false" name="br_cyt_serca" metaid="_329645"/>
+      <parameter id="br_serca_sr" name="br_serca_sr" metaid="_329646" value="0.00625"/>
+      <parameter id="J_up" constant="false" name="J_up" metaid="_329648"/>
+      <parameter id="J_cyt_serca" constant="false" name="J_cyt_serca" metaid="_329649"/>
+      <parameter id="J_serca_sr" constant="false" name="J_serca_sr" metaid="_329650"/>
+      <parameter id="LTRPN_tot" name="LTRPN_tot" metaid="_329652" value="70"/>
+      <parameter id="kltrpn_pos" name="kltrpn_pos" metaid="_329653" value="0.1"/>
+      <parameter id="kltrpn_neg" name="kltrpn_neg" metaid="_329654" value="0.06"/>
+      <parameter id="J_LTRPN" constant="false" name="J_LTRPN" metaid="_329656"/>
+      <parameter id="B_i" constant="false" name="B_i" metaid="_329657"/>
+      <parameter id="Ca_cyt" constant="false" name="Ca_cyt" metaid="_329658" value="0.1"/>
+      <parameter id="LTRPN" constant="false" name="LTRPN" metaid="_329660" value="11"/>
+      <parameter id="PLB_dephosph" constant="false" name="PLB_dephosph" metaid="_329661" value="0.1"/>
+      <parameter id="Ca_serca" constant="false" name="Ca_serca" metaid="_329662" value="5"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_329550" variable="Ca_cyt">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> B_i </ci>
+            <apply>
+              <minus/>
+              <apply>
+                <plus/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <times/>
+                      <ci> INaCa </ci>
+                      <ci> Acap </ci>
+                      <ci> C_m </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <cn> 2 </cn>
+                      <ci> V_myo </ci>
+                      <ci> F </ci>
+                    </apply>
+                  </apply>
+                  <ci> J_cyt_serca </ci>
+                </apply>
+                <ci> J_leak </ci>
+                <ci> Ca_input </ci>
+              </apply>
+              <ci> J_LTRPN </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_329551" variable="LTRPN">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> kltrpn_pos </ci>
+              <ci> Ca_cyt </ci>
+              <apply>
+                <minus/>
+                <ci> LTRPN_tot </ci>
+                <ci> LTRPN </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> kltrpn_neg </ci>
+              <ci> LTRPN </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_329552" variable="PLB_dephosph">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> kplb_pos </ci>
+              <apply>
+                <minus/>
+                <ci> PLB_tot </ci>
+                <ci> PLB_dephosph </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> kplb_neg </ci>
+              <apply>
+                <power/>
+                <apply>
+                  <plus/>
+                  <ci> CaMKII_reg </ci>
+                  <ci> PKA_reg </ci>
+                </apply>
+                <cn> 2 </cn>
+              </apply>
+              <ci> PLB_dephosph </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_329554" variable="Ca_serca">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <ci> J_cyt_serca </ci>
+            <ci> J_serca_sr </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="_329555" variable="t_modulo">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+            <apply>
+              <times/>
+              <apply>
+                <floor/>
+                <apply>
+                  <divide/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <cn> 1000 </cn>
+                </apply>
+              </apply>
+              <cn> 1000 </cn>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_329556" variable="V">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> rest </ci>
+            <apply>
+              <times/>
+              <ci> A </ci>
+              <apply>
+                <power/>
+                <apply>
+                  <minus/>
+                  <cn> 1 </cn>
+                  <apply>
+                    <exp/>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <minus/>
+                        <ci> t_modulo </ci>
+                      </apply>
+                      <ci> t1 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> p </ci>
+              </apply>
+              <apply>
+                <exp/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <minus/>
+                    <ci> t_modulo </ci>
+                  </apply>
+                  <ci> t2 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <minus/>
+                <cn> 1 </cn>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <power/>
+                    <ci> t_modulo </ci>
+                    <cn> 10 </cn>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <power/>
+                      <ci> A1 </ci>
+                      <cn> 10 </cn>
+                    </apply>
+                    <apply>
+                      <power/>
+                      <ci> t_modulo </ci>
+                      <cn> 10 </cn>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_329558" variable="tcalcium">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <cn> 0 </cn>
+              <apply>
+                <leq/>
+                <apply>
+                  <minus/>
+                  <ci> t_modulo </ci>
+                  <cn> 1.2 </cn>
+                </apply>
+                <cn> 0 </cn>
+              </apply>
+            </piece>
+            <otherwise>
+              <apply>
+                <minus/>
+                <ci> t_modulo </ci>
+                <cn> 1.2 </cn>
+              </apply>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_329559" variable="Ca_input">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> Ca_amp </ci>
+            <apply>
+              <power/>
+              <apply>
+                <minus/>
+                <cn> 1 </cn>
+                <apply>
+                  <exp/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <minus/>
+                      <ci> tcalcium </ci>
+                    </apply>
+                    <ci> Ca_tau1 </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <ci> Ca_pow </ci>
+            </apply>
+            <apply>
+              <exp/>
+              <apply>
+                <divide/>
+                <apply>
+                  <minus/>
+                  <ci> tcalcium </ci>
+                </apply>
+                <ci> Ca_tau2 </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_329560" variable="INaCa">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <apply>
+              <divide/>
+              <ci> kNaCa </ci>
+              <apply>
+                <times/>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <power/>
+                    <ci> KmNa </ci>
+                    <cn> 3 </cn>
+                  </apply>
+                  <apply>
+                    <power/>
+                    <ci> Na_o </ci>
+                    <cn> 3 </cn>
+                  </apply>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> KmCa </ci>
+                  <ci> Ca_o </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <cn> 1 </cn>
+                  <apply>
+                    <times/>
+                    <ci> ksat </ci>
+                    <apply>
+                      <exp/>
+                      <apply>
+                        <divide/>
+                        <apply>
+                          <times/>
+                          <apply>
+                            <minus/>
+                            <ci> eta </ci>
+                            <cn> 1 </cn>
+                          </apply>
+                          <ci> V </ci>
+                          <ci> F </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> R </ci>
+                          <ci> T </ci>
+                        </apply>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <apply>
+                  <exp/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <times/>
+                      <ci> eta </ci>
+                      <ci> V </ci>
+                      <ci> F </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> R </ci>
+                      <ci> T </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <apply>
+                  <power/>
+                  <ci> Na_i </ci>
+                  <cn> 3 </cn>
+                </apply>
+                <ci> Ca_o </ci>
+              </apply>
+              <apply>
+                <times/>
+                <apply>
+                  <exp/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <times/>
+                      <apply>
+                        <minus/>
+                        <ci> eta </ci>
+                        <cn> 1 </cn>
+                      </apply>
+                      <ci> V </ci>
+                      <ci> F </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> R </ci>
+                      <ci> T </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <apply>
+                  <power/>
+                  <ci> Na_o </ci>
+                  <cn> 3 </cn>
+                </apply>
+                <ci> Ca_cyt </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_329562" variable="EC_50_fwd">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <apply>
+              <plus/>
+              <ci> Kmf_PLBKO </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Kmf_PLB </ci>
+                  <ci> PSR </ci>
+                  <ci> PLB_dephosph </ci>
+                </apply>
+                <cn> 1 </cn>
+              </apply>
+            </apply>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <times/>
+                <cn> 0.27 </cn>
+                <ci> CaMKII_reg </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_329563" variable="EC_50_rev">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <ci> Kmr_PLBKO </ci>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> Kmr_PLB </ci>
+                <ci> PSR </ci>
+                <ci> PLB_dephosph </ci>
+              </apply>
+              <cn> 1 </cn>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_329564" variable="br_cyt_serca">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <cn> 1000 </cn>
+            <ci> br_serca_sr </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_329566" variable="k_cyt_serca">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> br_cyt_serca </ci>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <times/>
+                <cn> 0.7 </cn>
+                <ci> CaMKII_reg </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_329567" variable="k_serca_cyt">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <apply>
+              <power/>
+              <ci> EC_50_fwd </ci>
+              <cn> 2 </cn>
+            </apply>
+            <ci> br_cyt_serca </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_329568" variable="k_serca_sr">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> br_serca_sr </ci>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <times/>
+                <cn> 0.7 </cn>
+                <ci> CaMKII_reg </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_329570" variable="k_sr_serca">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <ci> br_serca_sr </ci>
+            <apply>
+              <power/>
+              <ci> EC_50_rev </ci>
+              <cn> 2 </cn>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_329571" variable="J_cyt_serca">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> k_cyt_serca </ci>
+              <apply>
+                <power/>
+                <ci> Ca_cyt </ci>
+                <cn> 2 </cn>
+              </apply>
+              <apply>
+                <minus/>
+                <ci> SERCA_TOT </ci>
+                <ci> Ca_serca </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> k_serca_cyt </ci>
+              <ci> Ca_serca </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_329572" variable="J_serca_sr">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> k_serca_sr </ci>
+              <ci> Ca_serca </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> k_sr_serca </ci>
+              <apply>
+                <power/>
+                <ci> Ca_NSR </ci>
+                <cn> 2 </cn>
+              </apply>
+              <apply>
+                <minus/>
+                <ci> SERCA_TOT </ci>
+                <ci> Ca_serca </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_329574" variable="J_up">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <ci> J_cyt_serca </ci>
+            <ci> J_serca_sr </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_329575" variable="B_i">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <power/>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> CaM_tot </ci>
+                  <ci> Km_CaM </ci>
+                </apply>
+                <apply>
+                  <power/>
+                  <apply>
+                    <plus/>
+                    <ci> Km_CaM </ci>
+                    <ci> Ca_cyt </ci>
+                  </apply>
+                  <cn> 2 </cn>
+                </apply>
+              </apply>
+            </apply>
+            <apply>
+              <minus/>
+              <cn> 1 </cn>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_329576" variable="J_LTRPN">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> kltrpn_pos </ci>
+              <ci> Ca_cyt </ci>
+              <apply>
+                <minus/>
+                <ci> LTRPN_tot </ci>
+                <ci> LTRPN </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> kltrpn_neg </ci>
+              <ci> LTRPN </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+  </model>
+</sbml>

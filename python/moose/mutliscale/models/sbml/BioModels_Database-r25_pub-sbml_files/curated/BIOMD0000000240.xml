@@ -1,0 +1,809 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="metaid_0000001" version="4">
+  <model id="Veening2008_DegU_Regulation" name="Veening2008_DegU_Regulation" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>Transient heterogeneity in extracellular protease production by Bacillus subtilis.</strong>
+                <br/>
+          Veening JW, Igoshin OA, Eijlander RT, Nijland R, Hamoen LW, Kuipers OP      <em>Mol. Syst. Biol.</em>
+          2008 ; Volume: 4 : 184      <a href="http://www.ncbi.nlm.nih.gov/pubmed/18414485">18414485</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          The most sophisticated survival strategy Bacillus subtilis employs is the differentiation of a subpopulation of cells into highly resistant endospores. To examine the expression patterns of non-sporulating cells within heterogeneous populations, we used buoyant density centrifugation to separate vegetative cells from endospore-containing cells and compared the transcriptome profiles of both subpopulations. This demonstrated the differential expression of various regulons. Subsequent single-cell analyses using promoter-gfp fusions confirmed our microarray results. Surprisingly, only part of the vegetative subpopulation highly and transiently expresses genes encoding the extracellular proteases Bpr (bacillopeptidase) and AprE (subtilisin), both of which are under the control of the DegU transcriptional regulator. As these proteases and their degradation products freely diffuse within the liquid growth medium, all cells within the clonal population are expected to benefit from their activities, suggesting that B. subtilis employs cooperative or even altruistic behavior. To unravel the mechanisms by which protease production heterogeneity within the non-sporulating subpopulation is established, we performed a series of genetic experiments combined with mathematical modeling. Simulations with our model yield valuable insights into how population heterogeneity may arise by the relatively long and variable response times within the DegU autoactivating pathway.      </p>
+            <br/>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models. It is copyright (c) 2005-2009 The BioModels Team.      <br/>
+          For more information see the      <a href="http://www.ebi.ac.uk/biomodels/legal.html" target="_blank">terms of use</a>
+          .      <br/>
+          To cite BioModels Database, please use      <a href="http://www.pubmedcentral.nih.gov/articlerender.fcgi?tool=pubmed&amp;pubmedid=16381960" target="_blank">Le Novère N., Bornstein B., Broicher A., Courtot M., Donizelli M., Dharuri H., Li L., Sauro H., Schilstra M., Shapiro B., Snoep J.L., Hucka M. (2006) BioModels Database: A Free, Centralized Database of Curated, Published, Quantitative Kinetic Models of Biochemical and Cellular Systems Nucleic Acids Res., 34: D689-D691.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Chelliah</vCard:Family>
+                  <vCard:Given>Vijayalakshmi</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>viji@ebi.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>EMBL-EBI</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Veening</vCard:Family>
+                  <vCard:Given>Jan-Willem</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>j.w.veening@rug.nl</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>Molecular Genetics Group, University of Groningen, Haren, The Netherlands.</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>A Igoshin</vCard:Family>
+                  <vCard:Given>Oleg</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>igoshin@rice.edu</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>Department of Bioengineering, Rice University, Houston, TX, USA</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2008-12-02T16:57:44Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2012-03-09T11:18:51Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL8237240421"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/BIOMD0000000240"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/18414485"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+          <bqbiol:hasVersion>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/taxonomy/1423"/>
+            </rdf:Bag>
+          </bqbiol:hasVersion>
+          <bqbiol:occursIn>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/taxonomy/10160"/>
+            </rdf:Bag>
+          </bqbiol:occursIn>
+          <bqbiol:isVersionOf>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0035635"/>
+            </rdf:Bag>
+          </bqbiol:isVersionOf>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="volume" name="femtolitre" metaid="metaid_0000003">
+        <listOfUnits>
+          <unit scale="-15" metaid="_720196" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="substance" name="molecules" metaid="metaid_0000046">
+        <listOfUnits>
+          <unit metaid="_720208" kind="item"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="univ" metaid="_770430" sboTerm="SBO:0000290" size="1">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_770430">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0005623"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </compartment>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="AprE" initialAmount="0" metaid="_770431" sboTerm="SBO:0000245" compartment="univ">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_770431">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P04189"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="DegU" initialAmount="10" metaid="_770432" sboTerm="SBO:0000245" compartment="univ">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_770432">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P13800"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="DegUP" initialAmount="0" metaid="_770434" sboTerm="SBO:0000245" compartment="univ">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_770434">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P13800"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="Dim" initialAmount="0" metaid="_770436" sboTerm="SBO:0000420" compartment="univ">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_770436">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0042803"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="mAprE" initialAmount="0" metaid="_770438" sboTerm="SBO:0000278" compartment="univ">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_770438">
+              <bqbiol:encodes>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P04189"/>
+                </rdf:Bag>
+              </bqbiol:encodes>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="mDegU" initialAmount="0" metaid="_770440" sboTerm="SBO:0000278" compartment="univ">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_770440">
+              <bqbiol:encodes>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P13800"/>
+                </rdf:Bag>
+              </bqbiol:encodes>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="Imax" metaid="_770470" value="0.048" sboTerm="SBO:0000186"/>
+      <parameter id="Io" metaid="_770472" value="0.004" sboTerm="SBO:0000186"/>
+      <parameter id="Irmax" metaid="_770474" value="0.4" sboTerm="SBO:0000186"/>
+      <parameter id="Iro" metaid="_770476" value="0.02" sboTerm="SBO:0000186"/>
+      <parameter id="K" metaid="_770478" value="7" sboTerm="SBO:0000281"/>
+      <parameter id="Kdim" metaid="_770480" value="12" sboTerm="SBO:0000281"/>
+      <parameter id="Kr" metaid="_770482" value="7" sboTerm="SBO:0000282"/>
+      <parameter id="Kr1" metaid="_770484" value="7" sboTerm="SBO:0000282"/>
+      <parameter id="R" metaid="_770486" value="7"/>
+      <parameter id="V" metaid="_770488" value="1"/>
+      <parameter id="ka" metaid="_770490" value="0.025" sboTerm="SBO:0000341"/>
+      <parameter id="kd" metaid="_770492" value="0.1" sboTerm="SBO:0000282"/>
+      <parameter id="kdeg" metaid="_770494" value="0.0004" sboTerm="SBO:0000009"/>
+      <parameter id="kdegA" metaid="_770496" value="0.0001" sboTerm="SBO:0000009"/>
+      <parameter id="kdegm" metaid="_770498" value="0.01" sboTerm="SBO:0000009"/>
+      <parameter id="kdephos" constant="false" metaid="_770500" sboTerm="SBO:0000009"/>
+      <parameter id="kphos" constant="false" metaid="_770502" sboTerm="SBO:0000009"/>
+      <parameter id="ksyn" metaid="_770504" value="0.04" sboTerm="SBO:0000009"/>
+      <parameter id="ksyn1" metaid="_770506" value="0.04" sboTerm="SBO:0000009"/>
+      <parameter id="p" metaid="_770508" value="0.15"/>
+      <parameter id="q" metaid="_770510" value="0.004"/>
+      <parameter id="ratio" name="kphosratiokdephos" metaid="metaid_0000047" value="0.026666667"/>
+      <parameter id="DegU_Total" constant="false" name="DegU_Total" metaid="metaid_0000050"/>
+    </listOfParameters>
+    <listOfRules>
+      <assignmentRule metaid="metaid_0000048" variable="kphos">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> ratio </ci>
+            <ci> p </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000049" variable="kdephos">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <ci> q </ci>
+            <ci> ratio </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000051" variable="DegU_Total">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> DegU </ci>
+            <ci> DegUP </ci>
+            <apply>
+              <times/>
+              <cn type="integer"> 2 </cn>
+              <ci> Dim </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+    <listOfReactions>
+      <reaction id="AprEdeg" metaid="_770442" reversible="false" sboTerm="SBO:0000179">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_770442">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0030163"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="AprE" metaid="_720220"/>
+        </listOfReactants>
+        <kineticLaw metaid="_720232">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kdeg </ci>
+              <ci> AprE </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="AprEsyn" metaid="_770444" reversible="false" sboTerm="SBO:0000184">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_770444">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0006412"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfProducts>
+          <speciesReference species="AprE" metaid="_720244"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="mAprE" metaid="_720257"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_720269">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> ksyn </ci>
+              <ci> mAprE </ci>
+              <ci> univ </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="DimerAss" metaid="_770446" reversible="false" sboTerm="SBO:0000412">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_770446">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0042803"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="DegUP" metaid="_720281" stoichiometry="2"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Dim" metaid="_720293"/>
+        </listOfProducts>
+        <kineticLaw metaid="_720305">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> ka </ci>
+              <apply>
+                <power/>
+                <ci> DegUP </ci>
+                <cn type="integer"> 2 </cn>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="DimerDis" metaid="_770448" reversible="false" sboTerm="SBO:0000180">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_770448">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0043241"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="Dim" metaid="_720317"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="DegUP" metaid="_720329" stoichiometry="2"/>
+        </listOfProducts>
+        <kineticLaw metaid="_720341">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kd </ci>
+              <ci> Dim </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="degradation1" metaid="_770450" reversible="false" sboTerm="SBO:0000179">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_770450">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0030163"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="DegU" metaid="_720353"/>
+        </listOfReactants>
+        <kineticLaw metaid="_720365">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kdeg </ci>
+              <ci> DegU </ci>
+              <ci> univ </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="degradation2" metaid="_770452" reversible="false" sboTerm="SBO:0000179">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_770452">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0030163"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="DegUP" metaid="_720377"/>
+        </listOfReactants>
+        <kineticLaw metaid="_720389">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kdeg </ci>
+              <ci> DegUP </ci>
+              <ci> univ </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="degradation3" metaid="_770454" reversible="false" sboTerm="SBO:0000179">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_770454">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0030163"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="Dim" metaid="_720401"/>
+        </listOfReactants>
+        <kineticLaw metaid="_720413">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kdeg </ci>
+              <ci> Dim </ci>
+              <ci> univ </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="degradationmRNA" metaid="_770456" reversible="false" sboTerm="SBO:0000179">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_770456">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0006402"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="mDegU" metaid="_720425"/>
+        </listOfReactants>
+        <kineticLaw metaid="_720437">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kdegm </ci>
+              <ci> mDegU </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="dephosphorylation" metaid="_770458" reversible="false" sboTerm="SBO:0000330">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_770458">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0006470"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="DegUP" metaid="_720449"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="DegU" metaid="_720461"/>
+        </listOfProducts>
+        <kineticLaw metaid="_720473">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kdephos </ci>
+              <ci> DegUP </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="mRNAAprEdeg" metaid="_770460" reversible="false" sboTerm="SBO:0000179">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_770460">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0006402"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="mAprE" metaid="_720485"/>
+        </listOfReactants>
+        <kineticLaw metaid="_720497">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kdegm </ci>
+              <ci> mAprE </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="mRNAAprEsyn" metaid="_770462" reversible="false" sboTerm="SBO:0000183">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_770462">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0009299"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfProducts>
+          <speciesReference species="mAprE" metaid="_720509"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Dim" metaid="_720522"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_720534">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <ci> Kr1 </ci>
+                <apply>
+                  <plus/>
+                  <ci> R </ci>
+                  <ci> Kr1 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <plus/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> Iro </ci>
+                    <apply>
+                      <plus/>
+                      <apply>
+                        <divide/>
+                        <apply>
+                          <times/>
+                          <ci> Dim </ci>
+                          <ci> univ </ci>
+                        </apply>
+                        <ci> Kdim </ci>
+                      </apply>
+                      <cn> 1 </cn>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <cn> 1 </cn>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <times/>
+                        <ci> Dim </ci>
+                        <ci> univ </ci>
+                      </apply>
+                      <ci> Kdim </ci>
+                    </apply>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <power/>
+                        <apply>
+                          <times/>
+                          <ci> Dim </ci>
+                          <ci> univ </ci>
+                        </apply>
+                        <cn> 2 </cn>
+                      </apply>
+                      <apply>
+                        <power/>
+                        <ci> Kdim </ci>
+                        <cn> 2 </cn>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <divide/>
+                      <ci> R </ci>
+                      <ci> Kr </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> Irmax </ci>
+                    <apply>
+                      <power/>
+                      <apply>
+                        <times/>
+                        <ci> Dim </ci>
+                        <ci> univ </ci>
+                      </apply>
+                      <cn> 2 </cn>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <apply>
+                      <power/>
+                      <ci> Kdim </ci>
+                      <cn> 2 </cn>
+                    </apply>
+                    <apply>
+                      <plus/>
+                      <cn> 1 </cn>
+                      <apply>
+                        <divide/>
+                        <apply>
+                          <times/>
+                          <ci> Dim </ci>
+                          <ci> univ </ci>
+                        </apply>
+                        <ci> Kdim </ci>
+                      </apply>
+                      <apply>
+                        <divide/>
+                        <apply>
+                          <power/>
+                          <apply>
+                            <times/>
+                            <ci> Dim </ci>
+                            <ci> univ </ci>
+                          </apply>
+                          <cn> 2 </cn>
+                        </apply>
+                        <apply>
+                          <power/>
+                          <ci> Kdim </ci>
+                          <cn> 2 </cn>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <divide/>
+                        <ci> R </ci>
+                        <ci> Kr </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="phosphorylation" metaid="_770464" reversible="false" sboTerm="SBO:0000216">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_770464">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0006468"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="DegU" metaid="_720546"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="DegUP" metaid="_720558"/>
+        </listOfProducts>
+        <kineticLaw metaid="_720570">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kphos </ci>
+              <ci> DegU </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="synthesisDegU" metaid="_770466" reversible="false" sboTerm="SBO:0000184">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_770466">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0006412"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfProducts>
+          <speciesReference species="DegU" metaid="_720582"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="mDegU" metaid="_720594"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_720606">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> ksyn1 </ci>
+              <ci> mDegU </ci>
+              <ci> univ </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="synthesismRNA" metaid="_770468" reversible="false" sboTerm="SBO:0000183">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#_770468">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0006412"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfProducts>
+          <speciesReference species="mDegU" metaid="_720618"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Dim" metaid="_720630"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_720642">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Io </ci>
+                  <ci> K </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> Dim </ci>
+                    <ci> univ </ci>
+                  </apply>
+                  <ci> K </ci>
+                </apply>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Imax </ci>
+                  <ci> Dim </ci>
+                  <ci> univ </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <times/>
+                    <ci> Dim </ci>
+                    <ci> univ </ci>
+                  </apply>
+                  <ci> K </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>
