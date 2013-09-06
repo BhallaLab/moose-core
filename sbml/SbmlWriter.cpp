@@ -245,118 +245,170 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	    } //itrp
 	  vector< Id > Compt_ReacEnz = LookupField< string, vector< Id > >::get(*itr, "neighbours", "remeshReacs" );
 	  for (vector <Id> :: iterator itrRE= Compt_ReacEnz.begin();itrRE != Compt_ReacEnz.end();itrRE++)
-	    {string clean_reacname = cleanNameId(*itrRE,index);
+	    { string clean_reacname = cleanNameId(*itrRE,index);
 	      string re_enClass = Field<string> :: get(ObjId(*itrRE),"className");
-	      Reaction* reaction;
-	      reaction = cremodel_->createReaction(); 
-	      reaction->setId( clean_reacname);
 	      string pathRE = Field<string> :: get(ObjId(*itrRE),"path");
 	      Id annotaIdRE( pathRE+"/info");
 	      string noteClassRE = Field<string> :: get(ObjId(annotaIdRE),"className");
+	      Reaction* reaction;
+	      reaction = cremodel_->createReaction(); 
 	      string notesRE;
 	      if (noteClassRE =="Annotator")
-		{
-		  string notesRE = Field <string> :: get(ObjId(annotaIdRE),"notes");
-		  if (notesRE != "")
-		    {  
-		      string cleanNotesRE = nameString1(notesRE);
-		      string notesStringRE = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+
-			cleanNotesRE + "\n\t </body>";
-		      reaction->setNotes(notesStringRE);
-		    }
-		}
+		notesRE = Field <string> :: get(ObjId(annotaIdRE),"notes");
+	      
+	      if (notesRE != ""){
+		string cleanNotesRE = nameString1(notesRE);
+		string notesStringRE = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+
+		  cleanNotesRE + "\n\t </body>";
+		reaction->setNotes(notesStringRE);
+	      }
+
+
 	      KineticLaw* kl;
 	      /* Reaction */
-	      if (re_enClass == "ZReac")
-		{ 
-		  double Kf = Field<double>::get(ObjId(*itrRE),"kf");
-		  double Kb = Field<double>::get(ObjId(*itrRE),"kb");
-		  if (Kb == 0.0)
-		    reaction->setReversible( false );
-		  else
-		    reaction->setReversible( true );
-		  
-		  /* Reaction's Reactant are Written */
-		  ostringstream rate_law,kfparm,kbparm;
-		  double rct_order = 0.0;
-		  kfparm << clean_reacname << "_" << "Kf";
-		  rate_law << kfparm.str();
-		  /* This function print out reactants and update rate_law string */
-		  getSubPrd(reaction,"sub","",*itrRE,index,rate_law,rct_order,true);
-		  double prd_order =0.0;
-		  kbparm << clean_reacname << "_" << "Kb";
-		  
-		  /* This function print out product and update rate_law string  if kb != 0 */
-		  if ( Kb != 0.0 )
-		    {rate_law << "-" << kbparm.str();
-		      getSubPrd(reaction,"prd","",*itrRE,index,rate_law,prd_order,true);
-		    }
-		  else
-		    getSubPrd(reaction,"prd","",*itrRE,index,rate_law,prd_order,false);
-		  
-		  kl = reaction->createKineticLaw();
-		  kl->setFormula( rate_law.str() );
-		  
-		  double rvalue,pvalue;
-		  rvalue = Kf;
-		  
-		  string unit=parmUnit( rct_order-1 );
-		  printParameters( kl,kfparm.str(),rvalue,unit ); 
-		  if ( Kb != 0.0 )
-		    {
-		      pvalue = Kb;
-		      string unit=parmUnit( prd_order-1 );
-		      printParameters( kl,kbparm.str(),pvalue,unit ); 
-		    }
-		}//re_enclass
+	      if (re_enClass == "ZReac"){
+		reaction->setId( clean_reacname);
+		double Kf = Field<double>::get(ObjId(*itrRE),"kf");
+		double Kb = Field<double>::get(ObjId(*itrRE),"kb");
+
+		if (Kb == 0.0)
+		  reaction->setReversible( false );
+		else
+		  reaction->setReversible( true );
+		
+		/* Reaction's Reactant are Written */
+		ostringstream rate_law,kfparm,kbparm;
+		double rct_order = 0.0;
+		kfparm << clean_reacname << "_" << "Kf";
+		rate_law << kfparm.str();
+
+		/* This function print out reactants and update rate_law string */
+		getSubPrd(reaction,"sub","",*itrRE,index,rate_law,rct_order,true,re_enClass);
+		double prd_order =0.0;
+		kbparm << clean_reacname << "_" << "Kb";
+		
+		/* This function print out product and update rate_law string  if kb != 0 */
+		if ( Kb != 0.0 ){
+		  rate_law << "-" << kbparm.str();
+		  getSubPrd(reaction,"prd","",*itrRE,index,rate_law,prd_order,true,re_enClass);
+		}
+		else
+		  getSubPrd(reaction,"prd","",*itrRE,index,rate_law,prd_order,false,re_enClass);
+		
+		kl = reaction->createKineticLaw();
+		kl->setFormula( rate_law.str() );
+		
+		double rvalue,pvalue;
+		rvalue = Kf;
+		
+		string unit=parmUnit( rct_order-1 );
+		printParameters( kl,kfparm.str(),rvalue,unit ); 
+		if ( Kb != 0.0 ){
+		  pvalue = Kb;
+		  string unit=parmUnit( prd_order-1 );
+		  printParameters( kl,kbparm.str(),pvalue,unit ); 
+		}
+	      }//re_enclass
 	      /*     Reaction End */
 	      
 	      /* Enzyme Start */
 	      else if(re_enClass == "ZEnz")
-		{ string enzname = Field<string> :: get(ObjId(*itrRE),"name");
+		{ // Complex Formation S+E -> SE*;
+		  reaction->setId( clean_reacname);
+
+		  string enzname = Field<string> :: get(ObjId(*itrRE),"name");
+		  ostringstream enzid;
+		  enzid << (*itrRE) <<"_"<<index;
+		  enzname = nameString(enzname);
+		  ostringstream Objid;
+		  Objid << (*itrRE) <<"_"<<index <<"_";
+		  string enzName = enzname + "_" + Objid.str() + "_";
+		  enzName = idBeginWith( enzName );
+
+		  string enzAnno = "<body xmlns:moose=\"http://www.moose.ncbs.res.in\">\n\t\t";
+		  enzAnno += "<moose:EnzymaticReaction> \n";
+		  
 		  double k1 = Field<double>::get(ObjId(*itrRE),"k1");
 		  double k2 = Field<double>::get(ObjId(*itrRE),"k2");
-		  double k3 = Field<double>::get(ObjId(*itrRE),"k3");
+		  
 		  ostringstream rate_law;
 		  double rct_order = 0.0,prd_order=0.0;
 		  rate_law << "k1";
-		  getSubPrd(reaction,"toEnz","sub",*itrRE,index,rate_law,rct_order,true);
-		  getSubPrd(reaction,"sub","",*itrRE,index,rate_law,rct_order,true);
-		  
+		  getSubPrd(reaction,"toEnz","sub",*itrRE,index,rate_law,rct_order,true,re_enClass);
+		  for(unsigned int i =0;i<nameList_.size();i++)
+		    enzAnno += "<moose:enzyme> "+nameList_[i]+" </moose:enzyme>\n";
+
+		  getSubPrd(reaction,"sub","",*itrRE,index,rate_law,rct_order,true,re_enClass);
+		  for (unsigned int i =0;i<nameList_.size();i++)
+		    enzAnno += "<moose:substrates> "+nameList_[i]+" </moose:substrates>\n";
+
 		  /* product */
 		  rate_law << "-" << "k2";
-		  getSubPrd(reaction,"cplxDest","prd",*itrRE,index,rate_law,prd_order,true);
+		  getSubPrd(reaction,"cplxDest","prd",*itrRE,index,rate_law,prd_order,true,re_enClass);
+		  for(unsigned int i =0;i<nameList_.size();i++)
+		    enzAnno += "<moose:product> "+nameList_[i]+" </moose:product>\n";
+		  enzAnno += "<moose:groupName>"+enzName+"</moose:groupName>\n";
+		  enzAnno += "<moose:stage>1</moose:stage> \n";
+		  enzAnno += "</moose:EnzymaticReaction> \n";
+		  enzAnno += "</body>";
+
+		  XMLNode* xnode =XMLNode::convertStringToXMLNode( enzAnno );
+		  reaction->setAnnotation( xnode );	
+
 		  kl = reaction->createKineticLaw();
 		  kl->setFormula( rate_law.str() );
 		  string unit=parmUnit( rct_order-1 );
 		  printParameters( kl,"k1",k1,unit ); 
 		  string punit=parmUnit( prd_order-1 );
 		  printParameters( kl,"k2",k2,punit ); 
-		  ostringstream enzid;
-		  enzid << (*itrRE) <<"_"<<index;
-		  enzname = nameString(enzname);
-		  ostringstream Objid;
-		  Objid << (*itrRE) <<"_"<<index <<"_"<<"Product_formation_";
-		  string enzName = enzname + "_" + Objid.str() + "_";
-		  //changeName( enzname,Objid.str());
-		  enzName = idBeginWith( enzName );
-		  Reaction* reaction;
-		  reaction = cremodel_->createReaction();
-		  reaction->setId( enzName );
+
+		  /* 2 Stage SE* -> E+P  */
+
+		  Objid << "Product_formation_";
+		  string enzName1 = enzname + "_" + Objid.str() + "_";
+		  enzName1 = idBeginWith( enzName1 );
+		  //Reaction* reaction;
+		  reaction = cremodel_->createReaction(); 
+		  reaction->setId( enzName1 );
+		  if (notesRE != ""){
+		    string cleanNotesRE = nameString1(notesRE);
+		    string notesStringRE = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+
+		      cleanNotesRE + "\n\t </body>";
+		    reaction->setNotes(notesStringRE);
+		  }
 		  reaction->setReversible( false );
+		  double k3 = Field<double>::get(ObjId(*itrRE),"k3");
 		  double erct_order = 0.0,eprd_order = 0.0;
 		  ostringstream enzrate_law;
 		  enzrate_law << "k3";
-		  getSubPrd(reaction,"cplxDest","sub",*itrRE,index,enzrate_law,erct_order,true);
-		  getSubPrd(reaction,"toEnz","prd",*itrRE,index,enzrate_law,eprd_order,false);
-		  getSubPrd(reaction,"prd","",*itrRE,index,enzrate_law,eprd_order,false);
+		  
+		  string enzAnno2 = "<body xmlns:moose=\"http://www.moose.ncbs.res.in\">\n\t\t";
+		  enzAnno2 += "<moose:EnzymaticReaction> \n";
+		  
+		  getSubPrd(reaction,"cplxDest","sub",*itrRE,index,enzrate_law,erct_order,true,re_enClass);
+		  for(unsigned int i =0;i<nameList_.size();i++)
+		    enzAnno2 += "<moose:complex> "+nameList_[i]+" </moose:complex>\n";
+		  getSubPrd(reaction,"toEnz","prd",*itrRE,index,enzrate_law,eprd_order,false,re_enClass);
+		  for(unsigned int i =0;i<nameList_.size();i++)
+		    enzAnno2 += "<moose:Enzyme> "+nameList_[i]+" </moose:Enzyme>\n";
+		  getSubPrd(reaction,"prd","",*itrRE,index,enzrate_law,eprd_order,false,re_enClass);
+		  for(unsigned int i =0;i<nameList_.size();i++)
+		    enzAnno2 += "<moose:product> "+nameList_[i]+" </moose:product>\n";
+		  		  enzAnno += "<moose:groupName>"+enzName+"</moose:groupName>\n";
+		  enzAnno2 += "<moose:stage>2</moose:stage> \n";
+		  enzAnno2 += "</moose:EnzymaticReaction> \n";
+		  enzAnno2 += "</body>";
+		  XMLNode* xnode2 =XMLNode::convertStringToXMLNode( enzAnno2 );
+		  reaction->setAnnotation( xnode2 );	
+
 		  kl = reaction->createKineticLaw();
 		  kl->setFormula( enzrate_law.str() );
 		  printParameters( kl,"k3",k3,"per_second" );
+		  
 		}// else 
 	      
 	      else if(re_enClass == "ZMMenz")
-		{ 
+		{ reaction->setId( clean_reacname); 
 		  double Km = Field<double>::get(ObjId(*itrRE),"numKm");
 		  double kcat = Field<double>::get(ObjId(*itrRE),"kcat");
 		  reaction->setReversible( false );
@@ -364,14 +416,14 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		  ostringstream rate_law,sRate_law,fRate_law;
 		  double rct_order = 0.0,prd_order=0.0;
 		  
-		  getSubPrd(reaction,"sub","",*itrRE,index,rate_law,rct_order,true);
+		  getSubPrd(reaction,"sub","",*itrRE,index,rate_law,rct_order,true,re_enClass);
 		  sRate_law << rate_law.str();
 		  
 		  /* Modifier */
-		  getSubPrd(reaction,"enzDest","",*itrRE,index,rate_law,rct_order,true);
+		  getSubPrd(reaction,"enzDest","",*itrRE,index,rate_law,rct_order,true,re_enClass);
 		  
 		  /* product */
-		  getSubPrd(reaction,"prd","",*itrRE,index,rate_law,prd_order,false);
+		  getSubPrd(reaction,"prd","",*itrRE,index,rate_law,prd_order,false,re_enClass);
 		  
 		  kl = reaction->createKineticLaw();
 		  
@@ -434,9 +486,9 @@ string SbmlWriter::cleanNameId(Id itrid,int  index)
   string clean_nameid = idBeginWith(objname_id);
   return clean_nameid ;
 }
-void SbmlWriter::getSubPrd(Reaction* rec,string type,string enztype,Id itrRE, int index,ostringstream& rate_law,double &rct_order,bool w)
+void SbmlWriter::getSubPrd(Reaction* rec,string type,string enztype,Id itrRE, int index,ostringstream& rate_law,double &rct_order,bool w,string re_enClass)
 {
- 
+  nameList_.clear();
   SpeciesReference* spr;
   ModifierSpeciesReference * mspr;
   vector < Id > rct = LookupField <string,vector < Id> >::get(itrRE, "neighbours",type);
@@ -462,6 +514,9 @@ void SbmlWriter::getSubPrd(Reaction* rec,string type,string enztype,Id itrRE, in
 	  mspr = rec->createModifier();
 	  mspr->setSpecies(clean_name);
 	}
+      /* Updating list of object for annotation for Enzymetic reaction */
+      if (re_enClass =="ZEnz")
+	nameList_.push_back(clean_name);
 
       /* Rate law is also updated in rate_law string */
       if (w)
@@ -474,7 +529,8 @@ void SbmlWriter::getSubPrd(Reaction* rec,string type,string enztype,Id itrRE, in
 	}
     } //rRct
   //return rctprdUniq ;
-  
+  //for(vector< string >::iterator itr = nameList_.begin(); itr != nameList_.end();itr++ )
+    //cout "\t \t\n %%"<< itr;
 }
 
 void SbmlWriter::getModifier(ModifierSpeciesReference* mspr,vector < Id> mod, int index,ostringstream& rate_law,double &rct_order,bool w)
