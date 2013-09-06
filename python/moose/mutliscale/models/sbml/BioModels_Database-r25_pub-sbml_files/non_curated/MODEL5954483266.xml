@@ -1,0 +1,240 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="metaid_0000001" version="4">
+  <model name="Koster1988_Histone_Expression" metaid="_846214">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This  model is described in the article:      <br/>
+                <strong>Kinetics of histone gene expression during early development of Xenopus laevis.</strong>
+                <br/>
+          Koster JG, Destrée OH and Westerhoff HV.      <em>J Theor Biol.</em>
+          1988 Nov 21;135(2):139-67. PMID:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/3267765">3267765</a>
+                <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          Using literature data for transcriptional and translational rate constants, gene copy numbers, DNA concentrations, and stability constants, we have calculated the expected concentrations of histones and histone mRNA during embryogenesis of Xenopus laevis. The results led us to conclude that: (i) for X. laevis the gene copy number of the histone genes is too low to ensure the synthesis of sufficient histones during very early development, inheritance from the oocyte of either histone protein or histone mRNA (but not necessarily both) is necessary; (ii) from the known storage of histones in the oocyte and the rates of histone synthesis determined by Adamson and Woodland (1977), there would be sufficient histones to structure the newly synthesized DNA up to gastrulation but not thereafter (these empirical rates of histone synthesis may be underestimates); (iii) on the other hand, the amount of H3 mRNA recently observed during early embryogenesis (Koster, 1987, Koster et al., 1988) could direct a higher and sufficient synthesis of H3 protein, also after gastrulation. We present a quantitative model that accounts both for the observed H3 mRNA concentration as a function of time during embryogenesis and for the synthesis of sufficient histones to structure the DNA throughout early embryogenesis. The model suggests that X. laevis exhibits a major (i.e. some 14-fold) reduction in transcription of histone genes approximately 11 hours after fertilization. This reduction could be due to a decrease in the number of transcribed histone genes, a decreased rate constant of transcription with continued transcription of all the histone genes, and/or a reduction in the time during the cell cycle in which histone mRNA synthesis takes place. Alternatively, the histone mRNA stability might decrease approximately 16-fold 11 hours after fertilization.      </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models. It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#_846214">
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL5954483266"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/3267765"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfCompartments>
+      <compartment id="cell" name="cell" metaid="_846215" size="1"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="DNA" name="H3_DNA" metaid="_846235" boundaryCondition="true" compartment="cell"/>
+      <species id="RNA" initialConcentration="570000000" name="H3_RNA" metaid="_846218" compartment="cell"/>
+      <species id="Prot" initialConcentration="1.33E12" name="H3_Protein" metaid="_846220" compartment="cell"/>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="kRs" constant="false" metaid="_846234"/>
+      <parameter id="kRd" name="kRd" metaid="_846237" value="0.231"/>
+      <parameter id="kPs" name="kPs" metaid="_846238" value="343"/>
+      <parameter id="kPd" name="kPd" metaid="_846239" value="0.0077"/>
+      <parameter id="mProt" name="mProt" metaid="_846241" value="15300"/>
+      <parameter id="mDNA" name="mDNA" metaid="_846242" value="3.15E-12"/>
+      <parameter id="wfr" name="wfr" metaid="_846243" value="0.236"/>
+      <parameter id="nA" name="nA" metaid="_846245" value="6.02E23"/>
+      <parameter id="ktranscriptionattenuation" name="ktranscriptionattenuation" metaid="_846246" value="14"/>
+      <parameter id="coef" name="coef" metaid="_846247" value="3.6"/>
+      <parameter id="nfac" name="nfac" metaid="metaid_0000023" value="1"/>
+      <parameter id="ng" name="ng" metaid="metaid_0000024" value="50">
+        <notes>
+          <p xmlns="http://www.w3.org/1999/xhtml">
+        number of His genes</p>
+          
+        </notes>
+</parameter>
+    </listOfParameters>
+    <listOfRules>
+      <assignmentRule metaid="_846231" variable="kRs">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <cn type="integer"> 540 </cn>
+              <apply>
+                <lt/>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                <cn> 11.35 </cn>
+              </apply>
+            </piece>
+            <otherwise>
+              <apply>
+                <divide/>
+                <cn type="integer"> 540 </cn>
+                <ci> ktranscriptionattenuation </ci>
+              </apply>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_846232" variable="DNA">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <cn type="integer"> 2 </cn>
+              <apply>
+                <lt/>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                <cn> 0.917 </cn>
+              </apply>
+            </piece>
+            <otherwise>
+              <piecewise>
+                <piece>
+                  <apply>
+                    <power/>
+                    <cn> 42.71828 </cn>
+                    <apply>
+                      <times/>
+                      <cn> 1.188 </cn>
+                      <apply>
+                        <minus/>
+                        <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                        <cn> 1.5 </cn>
+                      </apply>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <or/>
+                    <apply>
+                      <eq/>
+                      <ci> nfac </ci>
+                      <cn type="integer"> 0 </cn>
+                    </apply>
+                    <apply>
+                      <lt/>
+                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                      <cn> 8.1 </cn>
+                    </apply>
+                  </apply>
+                </piece>
+                <otherwise>
+                  <apply>
+                    <times/>
+                    <cn type="integer"> 1000 </cn>
+                    <apply>
+                      <plus/>
+                      <cn> 10.1 </cn>
+                      <apply>
+                        <times/>
+                        <cn> 12.1 </cn>
+                        <apply>
+                          <minus/>
+                          <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                          <cn> 8.1 </cn>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <divide/>
+                        <apply>
+                          <times/>
+                          <cn> 4.02 </cn>
+                          <apply>
+                            <power/>
+                            <apply>
+                              <minus/>
+                              <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                              <cn> 8.1 </cn>
+                            </apply>
+                            <ci> coef </ci>
+                          </apply>
+                        </apply>
+                        <cn type="integer"> 100000 </cn>
+                      </apply>
+                    </apply>
+                  </apply>
+                </otherwise>
+              </piecewise>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+    <listOfReactions>
+      <reaction id="v1" name="v1" metaid="_846222">
+        <listOfProducts>
+          <speciesReference species="RNA" metaid="_489337"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="DNA" metaid="_489350"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_489362">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> DNA </ci>
+              <ci> kRs </ci>
+              <ci> ng </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v2" name="v2" metaid="_846223">
+        <listOfReactants>
+          <speciesReference species="RNA" metaid="_489374"/>
+        </listOfReactants>
+        <kineticLaw metaid="_489386">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kRd </ci>
+              <ci> RNA </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v3" name="v3" metaid="_846225">
+        <listOfProducts>
+          <speciesReference species="Prot" metaid="_489398"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="RNA" metaid="_489411"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_489424">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kPs </ci>
+              <ci> RNA </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="v4" name="v4" metaid="_846226">
+        <listOfReactants>
+          <speciesReference species="Prot" metaid="_489437"/>
+        </listOfReactants>
+        <kineticLaw metaid="_489450">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kPd </ci>
+              <ci> Prot </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

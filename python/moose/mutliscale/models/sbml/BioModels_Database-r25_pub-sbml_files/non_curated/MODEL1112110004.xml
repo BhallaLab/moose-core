@@ -1,0 +1,363 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="metaid_0000001" version="4">
+  <model id="Silber2007_IntravenousGlucose_IntegratedGlucoseInsulinModel" name="Silber2007_IntravenousGlucose_IntegratedGlucoseInsulinModel" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>An integrated model for glucose and insulin regulation in healthy volunteers and type 2 diabetic patients following intravenous glucose provocations.</strong>
+                <br/>
+          Silber HE, Jauslin PM, Frey N, Gieschke R, Simonsson US, Karlsson MO.      <em>J Clin Pharmacol.</em>
+          2007 Sep;47(9):1159-71.      <a href="http://www.ncbi.nlm.nih.gov/pubmed/17766701">17766701</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          An integrated model for the regulation of glucose and insulin concentrations following intravenous glucose provocations in healthy volunteers and type 2 diabetic patients was developed. Data from 72 individuals were included. Total glucose, labeled glucose, and insulin concentrations were determined. Simultaneous analysis of all data by nonlinear mixed effect modeling was performed in NONMEM. Integrated models for glucose, labeled glucose, and insulin were developed. Control mechanisms for regulation of glucose production, insulin secretion, and glucose uptake were incorporated. Physiologically relevant differences between healthy volunteers and patients were identified in the regulation of glucose production, elimination rate of glucose, and secretion of insulin. The model was able to describe the insulin and glucose profiles well and also showed a good ability to simulate data. The features of the present model are likely to be of interest for analysis of data collected in antidiabetic drug development and for optimization of study design.      </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1112110004"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/17766701"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfCompartments>
+      <compartment id="compartment1" name="compartment1" metaid="metaid_0000003" size="1"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="Gp" name="Gp" metaid="metaid_0000026" compartment="compartment1"/>
+      <species id="GE1" name="GE1" metaid="metaid_0000027" compartment="compartment1"/>
+      <species id="GE2" name="GE2" metaid="metaid_0000028" compartment="compartment1"/>
+      <species id="Gc" name="Gc" metaid="metaid_0000029" compartment="compartment1"/>
+      <species id="I" name="I" metaid="metaid_0000030" compartment="compartment1"/>
+      <species id="IE" name="IE" metaid="metaid_0000031" compartment="compartment1"/>
+      <species id="IFPS" name="IFPS" metaid="metaid_0000032" compartment="compartment1"/>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="Q" name="Q" metaid="metaid_0000004" value="0.442"/>
+      <parameter id="Vg" name="Vg" metaid="metaid_0000005" value="9.33"/>
+      <parameter id="Vp" name="Vp" metaid="metaid_0000006" value="8.56"/>
+      <parameter id="Gss" name="Gss" metaid="metaid_0000007" value="0.891"/>
+      <parameter id="CLG" name="CLG" metaid="metaid_0000008" value="0.0894"/>
+      <parameter id="CLGI" name="CLGI" metaid="metaid_0000009" value="0.00829"/>
+      <parameter id="KGE1" name="KGE1" metaid="metaid_0000010" value="0.0573"/>
+      <parameter id="KGE2" name="KGE2" metaid="metaid_0000011" value="0.0289"/>
+      <parameter id="GPRG" name="GPRG" metaid="metaid_0000012" value="-2.79"/>
+      <parameter id="CLI" name="CLI" metaid="metaid_0000013" value="1.22"/>
+      <parameter id="VI" name="VI" metaid="metaid_0000014" value="6.09"/>
+      <parameter id="Iss" name="Iss" metaid="metaid_0000015" value="0.93"/>
+      <parameter id="KIE" name="KIE" metaid="metaid_0000016" value="0.0213"/>
+      <parameter id="FPS" name="FPS" metaid="metaid_0000017" value="704"/>
+      <parameter id="IPRG" name="IPRG" metaid="metaid_0000018" value="1.42"/>
+      <parameter id="KIS" name="KIS" metaid="metaid_0000019" value="0.384"/>
+      <parameter id="GPROD0" constant="false" name="GPROD0" metaid="metaid_0000020"/>
+      <parameter id="GCM1" constant="false" name="GCM1" metaid="metaid_0000021"/>
+      <parameter id="GPROD" constant="false" name="GPROD" metaid="metaid_0000022"/>
+      <parameter id="ISEC0" constant="false" name="ISEC0" metaid="metaid_0000023"/>
+      <parameter id="GCM2" constant="false" name="GCM2" metaid="metaid_0000024"/>
+      <parameter id="ISEC" constant="false" name="ISEC" metaid="metaid_0000025"/>
+    </listOfParameters>
+    <listOfInitialAssignments>
+      <initialAssignment symbol="Gp" metaid="metaid_0000046">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> Gss </ci>
+            <ci> Vp </ci>
+          </apply>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="GE1" metaid="metaid_0000047">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <ci> Gss </ci>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="GE2" metaid="metaid_0000048">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <ci> Gss </ci>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="Gc" metaid="metaid_0000049">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> Gss </ci>
+            <ci> Vg </ci>
+          </apply>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="I" metaid="metaid_0000050">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> Iss </ci>
+            <ci> VI </ci>
+          </apply>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="IE" metaid="metaid_0000051">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <ci> Iss </ci>
+        </math>
+      </initialAssignment>
+      <initialAssignment symbol="IFPS" metaid="metaid_0000052">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <ci> FPS </ci>
+        </math>
+      </initialAssignment>
+    </listOfInitialAssignments>
+    <listOfRules>
+      <rateRule metaid="metaid_0000033" variable="Gp">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <ci> Q </ci>
+                <ci> Vg </ci>
+              </apply>
+              <ci> Gc </ci>
+            </apply>
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <ci> Q </ci>
+                <ci> Vp </ci>
+              </apply>
+              <ci> Gp </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000034" variable="GE1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> KGE1 </ci>
+              <apply>
+                <divide/>
+                <ci> Gc </ci>
+                <ci> Vg </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> KGE1 </ci>
+              <ci> GE1 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000035" variable="GE2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> KGE2 </ci>
+              <apply>
+                <divide/>
+                <ci> Gc </ci>
+                <ci> Vg </ci>
+              </apply>
+            </apply>
+            <ci> KGE2 </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000036" variable="Gc">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <ci> GPROD </ci>
+              <apply>
+                <times/>
+                <apply>
+                  <divide/>
+                  <ci> Q </ci>
+                  <ci> Vp </ci>
+                </apply>
+                <ci> Gp </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <apply>
+                <plus/>
+                <apply>
+                  <divide/>
+                  <ci> CLG </ci>
+                  <ci> Vg </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <apply>
+                    <divide/>
+                    <ci> CLGI </ci>
+                    <ci> Vg </ci>
+                  </apply>
+                  <ci> IE </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> Q </ci>
+                  <ci> Vg </ci>
+                </apply>
+              </apply>
+              <ci> Gc </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000037" variable="I">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <ci> ISEC </ci>
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <ci> CLI </ci>
+                <ci> VI </ci>
+              </apply>
+              <ci> I </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000038" variable="IE">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> KIE </ci>
+              <apply>
+                <divide/>
+                <ci> I </ci>
+                <ci> VI </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> KIE </ci>
+              <ci> IE </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="metaid_0000039" variable="IFPS">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <apply>
+              <minus/>
+              <ci> KIS </ci>
+            </apply>
+            <ci> IFPS </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="metaid_0000040" variable="GPROD0">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> Gss </ci>
+            <apply>
+              <plus/>
+              <ci> CLG </ci>
+              <ci> CLGI </ci>
+              <ci> Iss </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000041" variable="GCM1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <power/>
+            <apply>
+              <divide/>
+              <ci> GE1 </ci>
+              <ci> Gss </ci>
+            </apply>
+            <ci> GPRG </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000042" variable="GPROD">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> GPROD0 </ci>
+            <ci> GCM1 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000043" variable="ISEC0">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> Iss </ci>
+            <ci> CLI </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000044" variable="GCM2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <power/>
+            <apply>
+              <divide/>
+              <ci> GE2 </ci>
+              <ci> Gss </ci>
+            </apply>
+            <ci> IPRG </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="metaid_0000045" variable="ISEC">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <times/>
+              <ci> ISEC0 </ci>
+              <ci> GCM2 </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> KIS </ci>
+              <ci> IFPS </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+  </model>
+</sbml>

@@ -1,0 +1,699 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version3" level="2" metaid="_944782" version="3">
+  <model id="Schneider2006_CardiacContractionModel" name="Schneider2006_CardiacContractionModel" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>Mechanism of the Frank-Starling law--a simulation study with a novel cardiac muscle contraction model that includes titin and troponin I.</strong>
+                <br/>
+          Schneider NS, Shimayoshi T, Amano A, Matsuda T.      <em>J Mol Cell Cardiol.</em>
+          2006;41(3):522-36.      <a href="http://www.ncbi.nlm.nih.gov/pubmed/16860336">16860336</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          A stretch-induced increase of active tension is one of the most important properties of the heart, known as the Frank-Starling law. Although a variation of myofilament Ca(2+) sensitivity with sarcomere length (SL) change was found to be involved, the underlying molecular mechanisms are not fully clarified. Some recent experimental studies indicate that a reduction of the lattice spacing between thin and thick filaments, through the increase of passive tension caused by the sarcomeric protein titin with an increase in SL within the physiological range, promotes formation of force-generating crossbridges (Xbs). However, the mechanism by which the Xb concentration determines the degree of cooperativity for a given SL has so far evaded experimental elucidation. In this simulation study, a novel, rather simple molecular-based cardiac contraction model, appropriate for integration into a ventricular cell model, was designed, being the first model to introduce experimental data on titin-based radial tension to account for the SL-dependent modulation of the interfilament lattice spacing and to include a conformational change of troponin I (TnI). Simulation results for the isometric twitch contraction time course, the length-tension and the force-[Ca(2+)] relationships are comparable to experimental data. A complete potential Frank-Starling mechanism was analyzed by this simulation study. The SL-dependent modulation of the myosin binding rate through titin's passive tension determines the Xb concentration which then alters the degree of positive cooperativity affecting the rate of the TnI conformation change and causing the Hill coefficient to be SL-dependent.      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://www.cellml.org/models/schneider_shimayoshi_amano_matsuda_2006_version01">        <strong>schneider, shimayoshi, amano, matsuda. (2006) - version01</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>Nunns, Geoffrey, Rogan</strong>
+                <br/>
+          gnunns1@jhem.jhu.edu      <br/>
+          The University of Auckland      <br/>
+          Auckland Bioengineering Institute      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL7907879432"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/16860336"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="millisecond" name="millisecond" metaid="_944794">
+        <listOfUnits>
+          <unit scale="-3" metaid="_944806" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mM" name="mM" metaid="_944818">
+        <listOfUnits>
+          <unit scale="-3" metaid="_944830" kind="mole"/>
+          <unit exponent="-1" metaid="_944842" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mM_per_msec" name="mM_per_msec" metaid="_944854">
+        <listOfUnits>
+          <unit scale="-3" metaid="_944866" kind="mole"/>
+          <unit exponent="-1" metaid="_944879" kind="litre"/>
+          <unit scale="-3" exponent="-1" metaid="_944892" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_msec" name="per_msec" metaid="_944904">
+        <listOfUnits>
+          <unit scale="-3" exponent="-1" metaid="_944916" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_mM_per_msec" name="per_mM_per_msec" metaid="_944928">
+        <listOfUnits>
+          <unit scale="-3" exponent="-1" metaid="_944940" kind="mole"/>
+          <unit metaid="_944952" kind="litre"/>
+          <unit scale="-3" exponent="-1" metaid="_944965" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mN_per_mm2" name="mN_per_mm2" metaid="_944978">
+        <listOfUnits>
+          <unit scale="-3" metaid="_944990" kind="newton"/>
+          <unit scale="-3" exponent="-2" metaid="_945002" kind="metre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mmeter" name="mmeter" metaid="_945015">
+        <listOfUnits>
+          <unit scale="-3" metaid="_945027" kind="metre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mN_per_mm2_per_mM" name="mN_per_mm2_per_mM" metaid="_945039">
+        <listOfUnits>
+          <unit scale="-3" metaid="_945051" kind="newton"/>
+          <unit scale="-3" exponent="-2" metaid="_945063" kind="metre"/>
+          <unit scale="-3" exponent="-1" metaid="_945075" kind="mole"/>
+          <unit metaid="_945087" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time" name="time" metaid="_945099">
+        <listOfUnits>
+          <unit scale="-3" metaid="_945111" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="Compartment" metaid="_372073" units="litre" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="A_iso" name="A_iso" metaid="_372138" value="9000" units="mN_per_mm2_per_mM"/>
+      <parameter id="k_off" name="k_off" metaid="_372141" value="0.2" units="per_msec"/>
+      <parameter id="k_on" name="k_on" metaid="_372143" value="17.3" units="per_mM_per_msec"/>
+      <parameter id="k_onI" name="k_onI" metaid="_372145" value="0.2" units="per_msec"/>
+      <parameter id="k_offi" name="k_offi" metaid="_372147" value="0.075" units="per_msec"/>
+      <parameter id="k_OFF" name="k_OFF" metaid="_372149" value="-0.32" units="dimensionless"/>
+      <parameter id="k_xboff" name="k_xboff" metaid="_372151" value="-1.37" units="dimensionless"/>
+      <parameter id="k_tmoff" name="k_tmoff" metaid="_372153" value="0.067" units="per_msec"/>
+      <parameter id="k_tmonc" name="k_tmonc" metaid="_372155" value="0.014" units="per_msec"/>
+      <parameter id="k_tmRU" name="k_tmRU" metaid="_372157" value="10" units="dimensionless"/>
+      <parameter id="k_tmxb" name="k_tmxb" metaid="_372159" value="-1.86" units="dimensionless"/>
+      <parameter id="k_12" name="k_12" metaid="_372161" value="2" units="per_mM_per_msec"/>
+      <parameter id="k_minus12" name="k_minus12" metaid="_372163" value="0.6" units="per_msec"/>
+      <parameter id="k_Titin_parameters" name="k_Titin" metaid="_372165" value="0.2" units="dimensionless"/>
+      <parameter id="k_3c" name="k_3c" metaid="_372167" value="0.025" units="per_msec"/>
+      <parameter id="k_3f" name="k_3f" metaid="_372169" value="50" units="dimensionless"/>
+      <parameter id="k_3xb" name="k_3xb" metaid="_372171" value="-1.23" units="dimensionless"/>
+      <parameter id="k_minus3" name="k_minus3" metaid="_372173" value="0.008" units="per_msec"/>
+      <parameter id="k_4" name="k_4" metaid="_372175" value="0.077" units="per_msec"/>
+      <parameter id="k_minus4" name="k_minus4" metaid="_372177" value="0.001" units="per_msec"/>
+      <parameter id="k_5" name="k_5" metaid="_372179" value="0.03723" units="per_msec"/>
+      <parameter id="F_b" constant="false" name="F_b" metaid="_372181" units="mN_per_mm2"/>
+      <parameter id="Q_CaB" constant="false" name="Q_CaB" metaid="_372183" units="mM_per_msec"/>
+      <parameter id="Q_TCaA" constant="false" name="Q_TCaA" metaid="_372185" units="mM_per_msec"/>
+      <parameter id="k_offI" constant="false" name="k_offI" metaid="_372187" units="per_msec"/>
+      <parameter id="Q_TMA" constant="false" name="Q_TMA" metaid="_372189" units="mM_per_msec"/>
+      <parameter id="k_tmon" constant="false" name="k_tmon" metaid="_372191" units="per_msec"/>
+      <parameter id="Q_MB" constant="false" name="Q_MB" metaid="_372193" units="mM_per_msec"/>
+      <parameter id="KTitin" constant="false" name="KTitin" metaid="_372195" units="dimensionless"/>
+      <parameter id="f_titinNormal" constant="false" name="f_titinNormal" metaid="_372197" units="dimensionless"/>
+      <parameter id="f_titinDamaged" constant="false" name="f_titinDamaged" metaid="_372199" units="dimensionless"/>
+      <parameter id="k_Titin_KTitin" name="k_Titin" metaid="_372201" units="dimensionless"/>
+      <parameter id="L_KTitin" name="L" metaid="_372203" units="mmeter"/>
+      <parameter id="L_0_KTitin" name="L_0" metaid="_372205" units="mmeter"/>
+      <parameter id="Q_Fgen" constant="false" name="Q_Fgen" metaid="_372207" units="mM_per_msec"/>
+      <parameter id="k_3" constant="false" name="k_3" metaid="_372209" units="per_msec"/>
+      <parameter id="Q_PiR" constant="false" name="Q_PiR" metaid="_372211" units="mM_per_msec"/>
+      <parameter id="Q_ADPR" constant="false" name="Q_ADPR" metaid="_372213" units="mM_per_msec"/>
+      <parameter id="RUTCa_off" constant="false" name="RUTCa_off" metaid="_372215" value="0" units="mM"/>
+      <parameter id="RUTCa_on" constant="false" name="RUTCa_on" metaid="_372217" value="0" units="mM"/>
+      <parameter id="RUTM_on" constant="false" name="RUTM_on" metaid="_372219" value="0" units="mM"/>
+      <parameter id="RUAMADPPi" constant="false" name="RUAMADPPi" metaid="_372221" value="0" units="mM"/>
+      <parameter id="RUA_MADPPi" constant="false" name="RUA_MADPPi" metaid="_372223" value="0" units="mM"/>
+      <parameter id="RUA_MADP" constant="false" name="RUA_MADP" metaid="_372225" value="0" units="mM"/>
+      <parameter id="Ca" constant="false" name="Ca" metaid="_372227" value="0.01" units="mM"/>
+      <parameter id="RUNA" constant="false" name="RUNA" metaid="_372229" units="mM"/>
+      <parameter id="RUA" constant="false" name="RUA" metaid="_372231" units="mM"/>
+      <parameter id="RUTM_on_eff" constant="false" name="RUTM_on_eff" metaid="_372233" units="mM"/>
+      <parameter id="RUTCa_on_eff" constant="false" name="RUTCa_on_eff" metaid="_372235" units="mM"/>
+      <parameter id="RU_total" name="RU_total" metaid="_372237" value="0.0726" units="mM"/>
+      <parameter id="MADPPi" name="MADPPi" metaid="_372239" value="0.1375" units="mM"/>
+      <parameter id="alpha" constant="false" name="alpha" metaid="_372241" units="dimensionless"/>
+      <parameter id="L_alpha" name="L" metaid="_372243" units="mmeter"/>
+      <parameter id="L_0_alpha" name="L_0" metaid="_372245" units="mmeter"/>
+      <parameter id="L_length" constant="false" name="L" metaid="_372247" units="mmeter"/>
+      <parameter id="L_0_length" name="L_0" metaid="_372249" value="0.001" units="mmeter"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_372075" variable="RUTCa_off">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <ci> Q_CaB </ci>
+            <ci> Q_TCaA </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_372076" variable="RUTCa_on">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <ci> Q_TCaA </ci>
+            <ci> Q_TMA </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_372078" variable="RUTM_on">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <ci> Q_TMA </ci>
+              <ci> Q_MB </ci>
+            </apply>
+            <ci> Q_ADPR </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_372081" variable="RUAMADPPi">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <ci> Q_MB </ci>
+            <ci> Q_Fgen </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_372083" variable="RUA_MADPPi">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <ci> Q_Fgen </ci>
+            <ci> Q_PiR </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_372085" variable="RUA_MADP">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <ci> Q_PiR </ci>
+            <ci> Q_ADPR </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_372087" variable="Ca">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <ci> Q_CaB </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="_372089" variable="F_b">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> A_iso </ci>
+            <apply>
+              <plus/>
+              <ci> RUA_MADPPi </ci>
+              <ci> RUA_MADP </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_372091" variable="Q_CaB">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> k_on </ci>
+              <ci> RUNA </ci>
+              <ci> Ca </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> k_off </ci>
+              <ci> RUTCa_off </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_372093" variable="Q_TCaA">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> k_onI </ci>
+              <ci> RUTCa_off </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> k_offI </ci>
+              <ci> RUTCa_on </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_372095" variable="k_offI">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> k_offi </ci>
+            <apply>
+              <power/>
+              <apply>
+                <plus/>
+                <cn> 1 </cn>
+                <apply>
+                  <times/>
+                  <ci> k_OFF </ci>
+                  <apply>
+                    <divide/>
+                    <ci> RUA </ci>
+                    <ci> RU_total </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <cn> 2 </cn>
+            </apply>
+            <apply>
+              <power/>
+              <apply>
+                <plus/>
+                <cn> 1 </cn>
+                <apply>
+                  <times/>
+                  <ci> k_xboff </ci>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <plus/>
+                      <ci> RUA_MADPPi </ci>
+                      <ci> RUA_MADP </ci>
+                    </apply>
+                    <ci> RU_total </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <cn> 4.4 </cn>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_372097" variable="Q_TMA">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> k_tmon </ci>
+              <ci> RUTCa_on </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> k_tmoff </ci>
+              <ci> RUTM_on </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_372099" variable="k_tmon">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> k_tmonc </ci>
+            <apply>
+              <divide/>
+              <ci> RUTCa_on </ci>
+              <ci> RU_total </ci>
+            </apply>
+            <apply>
+              <power/>
+              <apply>
+                <plus/>
+                <cn> 1 </cn>
+                <apply>
+                  <times/>
+                  <ci> k_tmRU </ci>
+                  <apply>
+                    <divide/>
+                    <ci> RUTM_on </ci>
+                    <ci> RU_total </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <cn> 2 </cn>
+            </apply>
+            <apply>
+              <power/>
+              <apply>
+                <plus/>
+                <cn> 1 </cn>
+                <apply>
+                  <times/>
+                  <ci> k_tmxb </ci>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <plus/>
+                      <ci> RUA_MADPPi </ci>
+                      <ci> RUA_MADP </ci>
+                    </apply>
+                    <ci> RU_total </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <cn> 2 </cn>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_372101" variable="Q_MB">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> k_12 </ci>
+              <ci> KTitin </ci>
+              <ci> MADPPi </ci>
+              <ci> RUTM_on_eff </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> k_minus12 </ci>
+              <ci> RUAMADPPi </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_372103" variable="f_titinNormal">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> k_Titin_KTitin </ci>
+            <apply>
+              <divide/>
+              <cn> 9.9663 </cn>
+              <apply>
+                <plus/>
+                <cn> 1 </cn>
+                <apply>
+                  <exp/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <plus/>
+                      <apply>
+                        <divide/>
+                        <ci> L_KTitin </ci>
+                        <ci> L_0_KTitin </ci>
+                      </apply>
+                      <cn> 1.0639 </cn>
+                    </apply>
+                    <cn> 0.0696 </cn>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_372105" variable="f_titinDamaged">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> k_Titin_KTitin </ci>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <apply>
+                  <minus/>
+                  <cn> 31 </cn>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> L_KTitin </ci>
+                  <ci> L_0_KTitin </ci>
+                </apply>
+              </apply>
+              <cn> 40 </cn>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_372107" variable="KTitin">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <ci> f_titinNormal </ci>
+              <apply>
+                <leq/>
+                <ci> L_KTitin </ci>
+                <cn> 1.1 </cn>
+              </apply>
+            </piece>
+            <otherwise>
+              <ci> f_titinDamaged </ci>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_372109" variable="Q_Fgen">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> k_3 </ci>
+              <ci> RUAMADPPi </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> k_minus3 </ci>
+              <ci> RUA_MADPPi </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_372111" variable="k_3">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> k_3c </ci>
+            <apply>
+              <power/>
+              <apply>
+                <plus/>
+                <cn> 1 </cn>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> k_3f </ci>
+                    <apply>
+                      <plus/>
+                      <ci> RUTCa_on_eff </ci>
+                      <ci> RUTM_on_eff </ci>
+                      <ci> RUAMADPPi </ci>
+                    </apply>
+                  </apply>
+                  <ci> RU_total </ci>
+                </apply>
+              </apply>
+              <cn> 2 </cn>
+            </apply>
+            <apply>
+              <power/>
+              <apply>
+                <plus/>
+                <cn> 1 </cn>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> k_3xb </ci>
+                    <apply>
+                      <plus/>
+                      <ci> RUA_MADPPi </ci>
+                      <ci> RUA_MADP </ci>
+                    </apply>
+                  </apply>
+                  <ci> RU_total </ci>
+                </apply>
+              </apply>
+              <cn> 2 </cn>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_372122" variable="Q_PiR">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> k_4 </ci>
+              <ci> RUA_MADPPi </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> k_minus4 </ci>
+              <ci> RUA_MADP </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_372125" variable="Q_ADPR">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> k_5 </ci>
+            <ci> RUA_MADP </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_372127" variable="RUNA">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <ci> RU_total </ci>
+            <apply>
+              <plus/>
+              <ci> RUTCa_off </ci>
+              <ci> RUTCa_on </ci>
+              <ci> RUTM_on </ci>
+              <ci> RUAMADPPi </ci>
+              <ci> RUA_MADPPi </ci>
+              <ci> RUA_MADP </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_372129" variable="RUA">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> RUTCa_on </ci>
+            <ci> RUTM_on </ci>
+            <ci> RUAMADPPi </ci>
+            <ci> RUA_MADPPi </ci>
+            <ci> RUA_MADP </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_372131" variable="RUTM_on_eff">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> alpha </ci>
+            <ci> RUTM_on </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_372133" variable="RUTCa_on_eff">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> alpha </ci>
+            <ci> RUTCa_on </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_372135" variable="alpha">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <cn> 1.5 </cn>
+                  <apply>
+                    <divide/>
+                    <ci> L_alpha </ci>
+                    <ci> L_0_alpha </ci>
+                  </apply>
+                </apply>
+                <cn> 0.5 </cn>
+              </apply>
+              <apply>
+                <lt/>
+                <ci> L_alpha </ci>
+                <cn> 1 </cn>
+              </apply>
+            </piece>
+            <piece>
+              <cn> 1 </cn>
+              <apply>
+                <and/>
+                <apply>
+                  <leq/>
+                  <cn> 1 </cn>
+                  <ci> L_alpha </ci>
+                </apply>
+                <apply>
+                  <lt/>
+                  <ci> L_alpha </ci>
+                  <cn> 1.1 </cn>
+                </apply>
+              </apply>
+            </piece>
+            <otherwise>
+              <apply>
+                <plus/>
+                <apply>
+                  <times/>
+                  <apply>
+                    <minus/>
+                    <cn> 1.6 </cn>
+                  </apply>
+                  <apply>
+                    <divide/>
+                    <ci> L_alpha </ci>
+                    <ci> L_0_alpha </ci>
+                  </apply>
+                </apply>
+                <cn> 2.76 </cn>
+              </apply>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_372137" variable="L_length">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <ci> L_0_length </ci>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+  </model>
+</sbml>

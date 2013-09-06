@@ -1,0 +1,231 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version3" level="2" metaid="_146114" version="3">
+  <model id="Bingzheng1990_GlucocorticoidsSecretion" name="Bingzheng1990_GlucocorticoidsSecretion" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>A mathematical model of the regulation system of the secretion of glucocorticoids</strong>
+                <br/>
+          Liu Bingzheng, Zhao Zhenye and Chen Liansong      <em>Journal of Biological Physics</em>
+          1990 17(4):221-233      <a href="http://dx.doi.org/10.1007/BF00386598">doi:10.1007/BF00386598</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          We propose a mathematical model for the regulation system of the secretion of glucocorticoids and determined the coefficients in the system of ordinary differential equations. Some results are calculated which agree with the experimental results.      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://www.cellml.org/models/bingzheng_zhenye_liansong_1990_version01">        <strong>Liu Bingzheng, Zhao Zhenye and Chen Liansong, (1990) - version01</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>Lloyd, Catherine, May</strong>
+                <br/>
+          c.lloyd@aukland.ac.nz      <br/>
+          The University of Auckland      <br/>
+          The Bioengineering Institute      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/doi/10.1007/BF00386598"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1172200168"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/doi/10.1007/BF00386598"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="ng_ml" name="ng_ml" metaid="_146126">
+        <listOfUnits>
+          <unit scale="-9" metaid="_146138" kind="gram"/>
+          <unit scale="-3" exponent="-1" metaid="_146150" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="pg_ml" name="pg_ml" metaid="_146162">
+        <listOfUnits>
+          <unit scale="-12" metaid="_146175" kind="gram"/>
+          <unit scale="-3" exponent="-1" metaid="_146187" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="microg_dl" name="microg_dl" metaid="_146199">
+        <listOfUnits>
+          <unit scale="-6" metaid="_146211" kind="gram"/>
+          <unit scale="-1" exponent="-1" metaid="_146223" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="dl_microg" name="dl_microg" metaid="_146235">
+        <listOfUnits>
+          <unit scale="-1" metaid="_146247" kind="litre"/>
+          <unit scale="-6" exponent="-1" metaid="_146259" kind="gram"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="minute" name="minute" metaid="_146271">
+        <listOfUnits>
+          <unit metaid="_146283" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="first_order_rate_constant" name="first_order_rate_constant" metaid="_146295">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_146307" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="ng_ml_min" name="ng_ml_min" metaid="_146319">
+        <listOfUnits>
+          <unit scale="-9" metaid="_146332" kind="gram"/>
+          <unit scale="-3" exponent="-1" metaid="_146345" kind="litre"/>
+          <unit exponent="-1" metaid="_146357" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="pg_ml_min" name="pg_ml_min" metaid="_146369">
+        <listOfUnits>
+          <unit scale="-12" metaid="_146381" kind="gram"/>
+          <unit scale="-3" exponent="-1" metaid="_146393" kind="litre"/>
+          <unit exponent="-1" metaid="_146405" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="microg_dl_min" name="microg_dl_min" metaid="_146417">
+        <listOfUnits>
+          <unit scale="-6" metaid="_146429" kind="gram"/>
+          <unit scale="-1" exponent="-1" metaid="_146441" kind="litre"/>
+          <unit exponent="-1" metaid="_146453" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mg_min" name="mg_min" metaid="_146465">
+        <listOfUnits>
+          <unit scale="-3" metaid="_146477" kind="gram"/>
+          <unit exponent="-1" metaid="_146489" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time" name="time" metaid="_146501">
+        <listOfUnits>
+          <unit metaid="_146513" multiplier="60" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="COMpartment" metaid="_366382" units="litre" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="X1" constant="false" name="X1" metaid="_366394" value="10" units="ng_ml"/>
+      <parameter id="a0" name="a0" metaid="_366396" value="0.0014" units="ng_ml_min"/>
+      <parameter id="a1" name="a1" metaid="_366397" value="0.000517" units="ng_ml_min"/>
+      <parameter id="a2" name="a2" metaid="_366398" value="0.0164" units="dl_microg"/>
+      <parameter id="b1" name="b1" metaid="_366399" value="0.0598" units="first_order_rate_constant"/>
+      <parameter id="X2" constant="false" name="X2" metaid="_366400" value="0" units="pg_ml"/>
+      <parameter id="a3" name="a3" metaid="_366402" value="1.38"/>
+      <parameter id="a4" name="a4" metaid="_366403" value="0.6"/>
+      <parameter id="a5" name="a5" metaid="_366404" value="0.00498" units="dl_microg"/>
+      <parameter id="b2" name="b2" metaid="_366405" value="0.053" units="first_order_rate_constant"/>
+      <parameter id="X3" constant="false" name="X3" metaid="_366406" value="0" units="microg_dl"/>
+      <parameter id="a6" name="a6" metaid="_366408" value="0.0084"/>
+      <parameter id="a7" name="a7" metaid="_366409" value="0.0081"/>
+      <parameter id="b3" name="b3" metaid="_366410" value="0.0138" units="first_order_rate_constant"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_366388" variable="X1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <ci> a0 </ci>
+              <apply>
+                <divide/>
+                <ci> a1 </ci>
+                <apply>
+                  <plus/>
+                  <cn> 1 </cn>
+                  <apply>
+                    <times/>
+                    <ci> a2 </ci>
+                    <ci> X3 </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> b1 </ci>
+              <ci> X1 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_366390" variable="X2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <divide/>
+              <apply>
+                <plus/>
+                <ci> a3 </ci>
+                <apply>
+                  <times/>
+                  <ci> a4 </ci>
+                  <ci> X1 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <plus/>
+                <cn> 1 </cn>
+                <apply>
+                  <times/>
+                  <ci> a5 </ci>
+                  <ci> X3 </ci>
+                </apply>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> b2 </ci>
+              <ci> X2 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_366391" variable="X3">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <ci> a6 </ci>
+              <apply>
+                <times/>
+                <ci> a7 </ci>
+                <ci> X2 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> b3 </ci>
+              <ci> X3 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+    </listOfRules>
+  </model>
+</sbml>

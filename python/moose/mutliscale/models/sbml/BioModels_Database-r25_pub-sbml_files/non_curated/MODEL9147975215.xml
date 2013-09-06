@@ -1,0 +1,1138 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2" level="2" metaid="_501627" version="1">
+  <model id="testid" name="Asthagiri2001_MAPK_Asthagiri_adapt_fb" metaid="_650397">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+    This is a complex model to examine mechanisms that govern MAPK pathway dynamics in Chinese hamster ovary (CHO) cell lines, particularly the role of adapter targeted negative feedback mechanism in generating complete signal adaptation. This model simulates the results as per the figure 7A of the paper by &lt;a href = "http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&amp;db=pubmed&amp;dopt=Abstract&amp;list_uids=11312698 ">Asthagiri AR and Lauffenburger DA. Biotechnol Prog. 17(2):227-39&lt;/a>.    <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation xmlns:doqcs="http://www.doqcs.ncbs.res.in">
+<doqcs:timestamp>Wed Nov  8 10:34:54 2006</doqcs:timestamp>
+  <doqcs:accesstype>pathway</doqcs:accesstype>
+  <doqcs:transcriber> Pradeep Kumar S, NCBS</doqcs:transcriber>
+  <doqcs:developer> Anand R. Asthagiri and Douglas A. Lauffenburger</doqcs:developer>
+  <doqcs:species> Chinese hamster (Cricetulus griseus); mammalian</doqcs:species>
+  <doqcs:tissue> Ovary - CHO cell line</doqcs:tissue>
+  <doqcs:cellcompartment> Surface, cytosol</doqcs:cellcompartment>
+  <doqcs:methodology>Quantitative match to experiments, Qualitative</doqcs:methodology>
+  <doqcs:model_implementation> Mathematically equivalent</doqcs:model_implementation>
+  <doqcs:model_validation> Replicates orginal data, Approximates</doqcs:model_validation>
+                                                              <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#_650397">
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL9147975215"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/11312698"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="vol_secINV" metaid="_501639">
+        <listOfUnits>
+          <unit metaid="_501651" kind="litre"/>
+          <unit exponent="-1" metaid="_501663" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="vol_uMINVsecINV" metaid="_501676">
+        <listOfUnits>
+          <unit exponent="2" metaid="_501688" kind="litre"/>
+          <unit scale="-6" exponent="-1" metaid="_501700" kind="mole"/>
+          <unit exponent="-1" metaid="_501712" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="substance" metaid="_501724">
+        <listOfUnits>
+          <unit scale="-6" metaid="_501736" kind="mole"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="default_compartment" metaid="_650401" size="1E-18"/>
+      <compartment id="geometry" metaid="_650414" size="3.9E-13"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="R" initialConcentration="0.427350427350427" metaid="_650434" compartment="geometry"/>
+      <species id="C" initialConcentration="0" metaid="_650454" compartment="geometry"/>
+      <species id="C_star_" initialConcentration="0" metaid="_650474" compartment="geometry"/>
+      <species id="C2" initialConcentration="0" metaid="_650494" compartment="geometry"/>
+      <species id="A1" initialConcentration="0.0427350427350427" metaid="_650514" compartment="geometry"/>
+      <species id="A2" initialConcentration="0.0427350427350427" metaid="_650534" compartment="geometry"/>
+      <species id="C_star_A1" initialConcentration="0" metaid="_650554" compartment="geometry"/>
+      <species id="A1A2" initialConcentration="0" metaid="_650574" compartment="geometry"/>
+      <species id="E0_star_" initialConcentration="0" metaid="_650594" compartment="geometry"/>
+      <species id="E0_star__slash_E1_activ_slash_E1_activ_cplx" initialConcentration="0" metaid="_650614" compartment="geometry"/>
+      <species id="E1" initialConcentration="0.0427350427350427" metaid="_650634" compartment="geometry"/>
+      <species id="E1_star_" initialConcentration="0" metaid="_650654" compartment="geometry"/>
+      <species id="E1_star__slash_E2_activ_slash_E2_activ_cplx" initialConcentration="0" metaid="_650674" compartment="geometry"/>
+      <species id="P1" initialConcentration="0.0213675213675214" metaid="_650694" compartment="geometry"/>
+      <species id="P1_slash_E1_star__deactiv_slash_E1_star__deactiv_cplx" initialConcentration="0" metaid="_650714" compartment="geometry"/>
+      <species id="E2" initialConcentration="0.0427350427350427" metaid="_650734" compartment="geometry"/>
+      <species id="E2_star_" initialConcentration="0" metaid="_650754" compartment="geometry"/>
+      <species id="E2_star__slash_E3_activ_slash_E3_activ_cplx" initialConcentration="0" metaid="_650774" compartment="geometry"/>
+      <species id="P2" initialConcentration="0.0213675213675214" metaid="_650794" compartment="geometry"/>
+      <species id="P2_slash_E2_star__deactiv_slash_E2_star__deactiv_cplx" initialConcentration="0" metaid="_650814" compartment="geometry"/>
+      <species id="E3" initialConcentration="0.0427350427350427" metaid="_650834" compartment="geometry"/>
+      <species id="E3_star_" initialConcentration="0" metaid="_650854" compartment="geometry"/>
+      <species id="E3_star__slash_E4_activ_slash_E4_activ_cplx" initialConcentration="0" metaid="_650874" compartment="geometry"/>
+      <species id="P3" initialConcentration="0.0213675213675214" metaid="_650894" compartment="geometry"/>
+      <species id="P3_slash_E3_star__deactiv_slash_E3_star__deactiv_cplx" initialConcentration="0" metaid="_650914" compartment="geometry"/>
+      <species id="E4" initialConcentration="0.0427350427350427" metaid="_650934" compartment="geometry"/>
+      <species id="E4_star_" initialConcentration="0" metaid="_650954" compartment="geometry"/>
+      <species id="E4_star__slash_E5_activ_slash_E5_activ_cplx" initialConcentration="0" metaid="_650974" compartment="geometry"/>
+      <species id="E4_star__slash_E4_star__adpt_fb_slash_E4_star__adpt_fb_cplx" initialConcentration="0" metaid="_650994" compartment="geometry"/>
+      <species id="P4" initialConcentration="0.0213675213675214" metaid="_651014" compartment="geometry"/>
+      <species id="P4_slash_E4_star__deactiv_slash_E4_star__deactiv_cplx" initialConcentration="0" metaid="_651034" compartment="geometry"/>
+      <species id="E5" initialConcentration="0.0427350427350427" metaid="_651054" compartment="geometry"/>
+      <species id="P5" initialConcentration="0.0213675213675214" metaid="_651074" compartment="geometry"/>
+      <species id="P5_slash_E5_star__deactiv_slash_E5_star__deactiv_cplx" initialConcentration="0" metaid="_651094" compartment="geometry"/>
+      <species id="E5_star_" initialConcentration="0" metaid="_651114" compartment="geometry"/>
+      <species id="A2_minus_" initialConcentration="0" metaid="_651134" compartment="geometry"/>
+      <species id="L" initialConcentration="0.03" constant="true" metaid="_651154" boundaryCondition="true" compartment="geometry">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+        L CoInit = buffered at 0.03 uM from Asthagiri, A.R and Lauffenburger, D.A Biotechnol. Prog. 2001, 17, 227-239.</body>
+          
+        </notes>
+</species>
+    </listOfSpecies>
+    <listOfReactions>
+      <reaction id="L_minus_bind_minus_R" metaid="_651174">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+        Kf = 10^7/M-1 min-1 and Kr is 0.3 min-1 from Asthagiri, A.R and Lauffenburger, D.A Biotechnol. Prog. 2001, 227-239.</body>
+          
+        </notes>
+        <listOfReactants>
+          <speciesReference species="L" metaid="_501748"/>
+          <speciesReference species="R" metaid="_501760"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="C" metaid="_501773"/>
+        </listOfProducts>
+        <kineticLaw metaid="_501786">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          kf*L*R-kb*C</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf </ci>
+                <ci> L </ci>
+                <ci> R </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kb </ci>
+                <ci> C </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="kf" metaid="_105554" value="6.49743822E-14" units="vol_uMINVsecINV"/>
+            <parameter id="kb" metaid="_105556" value="1.95E-15" units="vol_secINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="C_minus_dimer" metaid="_651194">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+        Kc is 6*10^7 M-1 min-1 and Ku is 60 min-1 from Asthagiri, A.R and Lauffenburger, D.A Biotechnol. Prog. 2001, 227-239.</body>
+          
+        </notes>
+        <listOfReactants>
+          <speciesReference species="C" metaid="_501798" stoichiometry="2"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="C2" metaid="_501810"/>
+        </listOfProducts>
+        <kineticLaw metaid="_501822">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          kf*C^2-kb*C2</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf </ci>
+                <apply>
+                  <power/>
+                  <ci> C </ci>
+                  <cn type="integer"> 2 </cn>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kb </ci>
+                <ci> C2 </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="kf" metaid="_105557" value="3.8999961E-13" units="vol_uMINVsecINV"/>
+            <parameter id="kb" metaid="_105559" value="3.9E-13" units="vol_secINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="C2_minus_phos" metaid="_651214">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+        Kc+ is 50min-1 and Kc- is 5min-1 from Asthagiri and 2001.</body>
+          
+        </notes>
+        <listOfReactants>
+          <speciesReference species="C2" metaid="_501834"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="C_star_" metaid="_501846"/>
+        </listOfProducts>
+        <kineticLaw metaid="_501858">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          kf*C2-kb*C_star_</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf </ci>
+                <ci> C2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kb </ci>
+                <ci> C_star_ </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="kf" metaid="_105560" value="3.2487E-13" units="vol_secINV"/>
+            <parameter id="kb" metaid="_105562" value="3.2487E-14" units="vol_secINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="C_star__minus_bind_minus_A1" metaid="_651234">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+        Kf1 is 3*10^8 M-1 min-1 and Kr1 is 0.5/sec from Asthagiri and 2001</body>
+          
+        </notes>
+        <listOfReactants>
+          <speciesReference species="C_star_" metaid="_501870"/>
+          <speciesReference species="A1" metaid="_501882"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="C_star_A1" metaid="_501894"/>
+        </listOfProducts>
+        <kineticLaw metaid="_501906">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          kf*C_star_*A1-kb*C_star_A1</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf </ci>
+                <ci> C_star_ </ci>
+                <ci> A1 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kb </ci>
+                <ci> C_star_A1 </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="kf" metaid="_105563" value="1.95004368E-12" units="vol_uMINVsecINV"/>
+            <parameter id="kb" metaid="_105565" value="1.950039E-13" units="vol_secINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="C_star_A1_minus_bind_minus_A2" metaid="_651254">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+        kf2 and kr2 are 3*10^8 M-1 min-1 and 0.5/sec from Asthagiri and Lauffenburger 20001.</body>
+          
+        </notes>
+        <listOfReactants>
+          <speciesReference species="C_star_A1" metaid="_501918"/>
+          <speciesReference species="A2" metaid="_501930"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="E0_star_" metaid="_501943"/>
+        </listOfProducts>
+        <kineticLaw metaid="_501956">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          kf*C_star_A1*A2-kb*E0_star_</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf </ci>
+                <ci> C_star_A1 </ci>
+                <ci> A2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kb </ci>
+                <ci> E0_star_ </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="kf" metaid="_105566" value="1.95004368E-12" units="vol_uMINVsecINV"/>
+            <parameter id="kb" metaid="_105568" value="1.950039E-13" units="vol_secINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="A1_minus_bind_minus_A2" metaid="_651274">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+        Kc12 and Kd12 are 3*10^8 M-1 min-1 and 0.5/sec from Asthagiri and 2001.</body>
+          
+        </notes>
+        <listOfReactants>
+          <speciesReference species="A2" metaid="_501968"/>
+          <speciesReference species="A1" metaid="_501980"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="A1A2" metaid="_501992"/>
+        </listOfProducts>
+        <kineticLaw metaid="_502005">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          kf*A2*A1-kb*A1A2</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf </ci>
+                <ci> A2 </ci>
+                <ci> A1 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kb </ci>
+                <ci> A1A2 </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="kf" metaid="_105569" value="1.95004368E-12" units="vol_uMINVsecINV"/>
+            <parameter id="kb" metaid="_105571" value="1.950039E-13" units="vol_secINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="C_star__minus_bind_minus_A1A2" metaid="_651294">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+        Kf12 and Kr12 are 3*10^8 M-1 min-1 and 0.5/sec from Asthagiri and 2001.</body>
+          
+        </notes>
+        <listOfReactants>
+          <speciesReference species="A1A2" metaid="_502017"/>
+          <speciesReference species="C_star_" metaid="_502029"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="E0_star_" metaid="_502041"/>
+        </listOfProducts>
+        <kineticLaw metaid="_502053">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          kf*A1A2*C_star_-kb*E0_star_</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> kf </ci>
+                <ci> A1A2 </ci>
+                <ci> C_star_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> kb </ci>
+                <ci> E0_star_ </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="kf" metaid="_105572" value="1.95004368E-12" units="vol_uMINVsecINV"/>
+            <parameter id="kb" metaid="_105574" value="1.950039E-13" units="vol_secINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="E0_star__slash_E1_activ_1" metaid="_651314">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+        k1+ =6*10^8 M-1 min-1, k1- =30 min-1, kcat,1 =6 min-1 and km caluculated to 0.06 from Asthagiri and 2001.</body>
+          
+        </notes>
+        <listOfReactants>
+          <speciesReference species="E1" metaid="_502066"/>
+          <speciesReference species="E0_star_" metaid="_502078"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="E0_star__slash_E1_activ_slash_E1_activ_cplx" metaid="_502090"/>
+        </listOfProducts>
+        <kineticLaw metaid="_502102">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          k1*E1*E0_star_-k2*E0_star__slash_E1_activ_slash_E1_activ_cplx</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> E1 </ci>
+                <ci> E0_star_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> E0_star__slash_E1_activ_slash_E1_activ_cplx </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" metaid="_105575" value="3.8999961E-12" units="vol_uMINVsecINV"/>
+            <parameter id="k2" metaid="_105577" value="1.95E-13" units="vol_secINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="E0_star__slash_E1_activ_2" metaid="_651334" reversible="false">
+        <listOfReactants>
+          <speciesReference species="E0_star__slash_E1_activ_slash_E1_activ_cplx" metaid="_502114"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="E1_star_" metaid="_502126"/>
+          <speciesReference species="E0_star_" metaid="_502138"/>
+        </listOfProducts>
+        <kineticLaw metaid="_502150">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          k3*E0_star__slash_E1_activ_slash_E1_activ_cplx</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> E0_star__slash_E1_activ_slash_E1_activ_cplx </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k3" metaid="_105578" value="3.9E-14" units="vol_secINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="E1_star__slash_E2_activ_1" metaid="_651354">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+        k2+ =6*10^8 M-1 min-1, k2- =30 min-1, kcat,2 =6 min-1 from Asthagire and 2001</body>
+          
+        </notes>
+        <listOfReactants>
+          <speciesReference species="E2" metaid="_502162"/>
+          <speciesReference species="E1_star_" metaid="_502174"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="E1_star__slash_E2_activ_slash_E2_activ_cplx" metaid="_502186"/>
+        </listOfProducts>
+        <kineticLaw metaid="_502198">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          k1*E2*E1_star_-k2*E1_star__slash_E2_activ_slash_E2_activ_cplx</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> E2 </ci>
+                <ci> E1_star_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> E1_star__slash_E2_activ_slash_E2_activ_cplx </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" metaid="_105579" value="3.8999961E-12" units="vol_uMINVsecINV"/>
+            <parameter id="k2" metaid="_105581" value="1.95E-13" units="vol_secINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="E1_star__slash_E2_activ_2" metaid="_651374" reversible="false">
+        <listOfReactants>
+          <speciesReference species="E1_star__slash_E2_activ_slash_E2_activ_cplx" metaid="_502210"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="E2_star_" metaid="_502222"/>
+          <speciesReference species="E1_star_" metaid="_502235"/>
+        </listOfProducts>
+        <kineticLaw metaid="_502247">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          k3*E1_star__slash_E2_activ_slash_E2_activ_cplx</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> E1_star__slash_E2_activ_slash_E2_activ_cplx </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k3" metaid="_105582" value="3.9E-14" units="vol_secINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="P1_slash_E1_star__deactiv_1" metaid="_651394">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+        kp1+ =6*10^8 M-1 min-1, kp1- =30 min-1, kpcat,1 =6 min-1 form Asthagiri and 2001.</body>
+          
+        </notes>
+        <listOfReactants>
+          <speciesReference species="E1_star_" metaid="_502259"/>
+          <speciesReference species="P1" metaid="_502271"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="P1_slash_E1_star__deactiv_slash_E1_star__deactiv_cplx" metaid="_502283"/>
+        </listOfProducts>
+        <kineticLaw metaid="_502295">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          k1*E1_star_*P1-k2*P1_slash_E1_star__deactiv_slash_E1_star__deactiv_cplx</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> E1_star_ </ci>
+                <ci> P1 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> P1_slash_E1_star__deactiv_slash_E1_star__deactiv_cplx </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" metaid="_105583" value="3.8999961E-12" units="vol_uMINVsecINV"/>
+            <parameter id="k2" metaid="_105585" value="1.95E-13" units="vol_secINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="P1_slash_E1_star__deactiv_2" metaid="_651414" reversible="false">
+        <listOfReactants>
+          <speciesReference species="P1_slash_E1_star__deactiv_slash_E1_star__deactiv_cplx" metaid="_502307"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="E1" metaid="_502319"/>
+          <speciesReference species="P1" metaid="_502331"/>
+        </listOfProducts>
+        <kineticLaw metaid="_502344">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          k3*P1_slash_E1_star__deactiv_slash_E1_star__deactiv_cplx</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> P1_slash_E1_star__deactiv_slash_E1_star__deactiv_cplx </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k3" metaid="_105586" value="3.9E-14" units="vol_secINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="E2_star__slash_E3_activ_1" metaid="_651434">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+        k3+ =6*10^8 M-1 min-1, k3- =30 min-1, kcat,3 =6 min-1 from Asthagiri and 2001.</body>
+          
+        </notes>
+        <listOfReactants>
+          <speciesReference species="E3" metaid="_502356"/>
+          <speciesReference species="E2_star_" metaid="_502368"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="E2_star__slash_E3_activ_slash_E3_activ_cplx" metaid="_502381"/>
+        </listOfProducts>
+        <kineticLaw metaid="_502393">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          k1*E3*E2_star_-k2*E2_star__slash_E3_activ_slash_E3_activ_cplx</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> E3 </ci>
+                <ci> E2_star_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> E2_star__slash_E3_activ_slash_E3_activ_cplx </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" metaid="_105587" value="3.8999961E-12" units="vol_uMINVsecINV"/>
+            <parameter id="k2" metaid="_105589" value="1.95E-13" units="vol_secINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="E2_star__slash_E3_activ_2" metaid="_651454" reversible="false">
+        <listOfReactants>
+          <speciesReference species="E2_star__slash_E3_activ_slash_E3_activ_cplx" metaid="_502405"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="E3_star_" metaid="_502417"/>
+          <speciesReference species="E2_star_" metaid="_502429"/>
+        </listOfProducts>
+        <kineticLaw metaid="_502442">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          k3*E2_star__slash_E3_activ_slash_E3_activ_cplx</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> E2_star__slash_E3_activ_slash_E3_activ_cplx </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k3" metaid="_105590" value="3.9E-14" units="vol_secINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="P2_slash_E2_star__deactiv_1" metaid="_651474">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+        kp2+ =6*10^8 M-1 min-1, kp2- = 30 min-1, kpcat,2 = 6 min-1 from Asthagiri and 2001.</body>
+          
+        </notes>
+        <listOfReactants>
+          <speciesReference species="E2_star_" metaid="_502454"/>
+          <speciesReference species="P2" metaid="_502466"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="P2_slash_E2_star__deactiv_slash_E2_star__deactiv_cplx" metaid="_502478"/>
+        </listOfProducts>
+        <kineticLaw metaid="_502490">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          k1*E2_star_*P2-k2*P2_slash_E2_star__deactiv_slash_E2_star__deactiv_cplx</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> E2_star_ </ci>
+                <ci> P2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> P2_slash_E2_star__deactiv_slash_E2_star__deactiv_cplx </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" metaid="_105591" value="3.8999961E-12" units="vol_uMINVsecINV"/>
+            <parameter id="k2" metaid="_105593" value="1.95E-13" units="vol_secINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="P2_slash_E2_star__deactiv_2" metaid="_651494" reversible="false">
+        <listOfReactants>
+          <speciesReference species="P2_slash_E2_star__deactiv_slash_E2_star__deactiv_cplx" metaid="_502502"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="E2" metaid="_502514"/>
+          <speciesReference species="P2" metaid="_502526"/>
+        </listOfProducts>
+        <kineticLaw metaid="_502538">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          k3*P2_slash_E2_star__deactiv_slash_E2_star__deactiv_cplx</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> P2_slash_E2_star__deactiv_slash_E2_star__deactiv_cplx </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k3" metaid="_105594" value="3.9E-14" units="vol_secINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="E3_star__slash_E4_activ_1" metaid="_651514">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+        k4+ = 6*10^8 M-1 min-1, k4- =30 min-1, kcat,4 =6 min-1 from Asthagiri and 2001.</body>
+          
+        </notes>
+        <listOfReactants>
+          <speciesReference species="E4" metaid="_502551"/>
+          <speciesReference species="E3_star_" metaid="_502563"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="E3_star__slash_E4_activ_slash_E4_activ_cplx" metaid="_502575"/>
+        </listOfProducts>
+        <kineticLaw metaid="_502587">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          k1*E4*E3_star_-k2*E3_star__slash_E4_activ_slash_E4_activ_cplx</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> E4 </ci>
+                <ci> E3_star_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> E3_star__slash_E4_activ_slash_E4_activ_cplx </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" metaid="_105595" value="3.8999961E-12" units="vol_uMINVsecINV"/>
+            <parameter id="k2" metaid="_105597" value="1.95E-13" units="vol_secINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="E3_star__slash_E4_activ_2" metaid="_651534" reversible="false">
+        <listOfReactants>
+          <speciesReference species="E3_star__slash_E4_activ_slash_E4_activ_cplx" metaid="_502599"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="E4_star_" metaid="_502612"/>
+          <speciesReference species="E3_star_" metaid="_502624"/>
+        </listOfProducts>
+        <kineticLaw metaid="_502636">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          k3*E3_star__slash_E4_activ_slash_E4_activ_cplx</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> E3_star__slash_E4_activ_slash_E4_activ_cplx </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k3" metaid="_105598" value="3.9E-14" units="vol_secINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="P3_slash_E3_star__deactiv_1" metaid="_651554">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+        kp3+ =6*10^8 M-1 min-1, kp3- =30 min-1, kpcat,3 =6 min-1 from Asthagiri and 2001.</body>
+          
+        </notes>
+        <listOfReactants>
+          <speciesReference species="E3_star_" metaid="_502648"/>
+          <speciesReference species="P3" metaid="_502660"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="P3_slash_E3_star__deactiv_slash_E3_star__deactiv_cplx" metaid="_502672"/>
+        </listOfProducts>
+        <kineticLaw metaid="_502684">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          k1*E3_star_*P3-k2*P3_slash_E3_star__deactiv_slash_E3_star__deactiv_cplx</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> E3_star_ </ci>
+                <ci> P3 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> P3_slash_E3_star__deactiv_slash_E3_star__deactiv_cplx </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" metaid="_105599" value="3.8999961E-12" units="vol_uMINVsecINV"/>
+            <parameter id="k2" metaid="_105601" value="1.95E-13" units="vol_secINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="P3_slash_E3_star__deactiv_2" metaid="_651574" reversible="false">
+        <listOfReactants>
+          <speciesReference species="P3_slash_E3_star__deactiv_slash_E3_star__deactiv_cplx" metaid="_502696"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="E3" metaid="_502708"/>
+          <speciesReference species="P3" metaid="_502720"/>
+        </listOfProducts>
+        <kineticLaw metaid="_502732">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          k3*P3_slash_E3_star__deactiv_slash_E3_star__deactiv_cplx</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> P3_slash_E3_star__deactiv_slash_E3_star__deactiv_cplx </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k3" metaid="_105602" value="3.9E-14" units="vol_secINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="E4_star__slash_E5_activ_1" metaid="_651594">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+        k5+ =6*10^8 M-1 min-1, k5- =30 min-1, kcat,5 =6 min-1 from Asthagiri and 2001.</body>
+          
+        </notes>
+        <listOfReactants>
+          <speciesReference species="E5" metaid="_502744"/>
+          <speciesReference species="E4_star_" metaid="_502756"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="E4_star__slash_E5_activ_slash_E5_activ_cplx" metaid="_502768"/>
+        </listOfProducts>
+        <kineticLaw metaid="_502780">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          k1*E5*E4_star_-k2*E4_star__slash_E5_activ_slash_E5_activ_cplx</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> E5 </ci>
+                <ci> E4_star_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> E4_star__slash_E5_activ_slash_E5_activ_cplx </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" metaid="_105603" value="3.8999961E-12" units="vol_uMINVsecINV"/>
+            <parameter id="k2" metaid="_105605" value="1.95E-13" units="vol_secINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="E4_star__slash_E5_activ_2" metaid="_651614" reversible="false">
+        <listOfReactants>
+          <speciesReference species="E4_star__slash_E5_activ_slash_E5_activ_cplx" metaid="_502792"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="E5_star_" metaid="_502804"/>
+          <speciesReference species="E4_star_" metaid="_502817"/>
+        </listOfProducts>
+        <kineticLaw metaid="_502829">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          k3*E4_star__slash_E5_activ_slash_E5_activ_cplx</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> E4_star__slash_E5_activ_slash_E5_activ_cplx </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k3" metaid="_105606" value="3.9E-14" units="vol_secINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="E4_star__slash_E4_star__adpt_fb_1" metaid="_651634">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+        Implementation of adapter feedback induces adaptation of not only the target signal e0* but also signals downstream of the target. k5+ =6*10^8 M-1 min-1, k5- =30 min-1, kcat,5 =6 min-1 from Asthagiri and Lauffenburger 2001.</body>
+          
+        </notes>
+        <listOfReactants>
+          <speciesReference species="E0_star_" metaid="_502841"/>
+          <speciesReference species="E4_star_" metaid="_502853"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="E4_star__slash_E4_star__adpt_fb_slash_E4_star__adpt_fb_cplx" metaid="_502865"/>
+        </listOfProducts>
+        <kineticLaw metaid="_502877">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          k1*E0_star_*E4_star_-k2*E4_star__slash_E4_star__adpt_fb_slash_E4_star__adpt_fb_cplx</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> E0_star_ </ci>
+                <ci> E4_star_ </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> E4_star__slash_E4_star__adpt_fb_slash_E4_star__adpt_fb_cplx </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" metaid="_105607" value="3.8999961E-12" units="vol_uMINVsecINV"/>
+            <parameter id="k2" metaid="_105609" value="1.95E-13" units="vol_secINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="E4_star__slash_E4_star__adpt_fb_2" metaid="_651654" reversible="false">
+        <listOfReactants>
+          <speciesReference species="E4_star__slash_E4_star__adpt_fb_slash_E4_star__adpt_fb_cplx" metaid="_502889"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="A2_minus_" metaid="_502901"/>
+          <speciesReference species="E4_star_" metaid="_502913"/>
+        </listOfProducts>
+        <kineticLaw metaid="_502925">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          k3*E4_star__slash_E4_star__adpt_fb_slash_E4_star__adpt_fb_cplx</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> E4_star__slash_E4_star__adpt_fb_slash_E4_star__adpt_fb_cplx </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k3" metaid="_105610" value="3.9E-14" units="vol_secINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="P4_slash_E4_star__deactiv_1" metaid="_651674">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+        kp4+ = 6*10^8 M-1 min-1, kp4- =30 min-1, kpcat,4 =6 min-1 from Asthagiri and 2001.</body>
+          
+        </notes>
+        <listOfReactants>
+          <speciesReference species="E4_star_" metaid="_502937"/>
+          <speciesReference species="P4" metaid="_502949"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="P4_slash_E4_star__deactiv_slash_E4_star__deactiv_cplx" metaid="_502962"/>
+        </listOfProducts>
+        <kineticLaw metaid="_502975">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          k1*E4_star_*P4-k2*P4_slash_E4_star__deactiv_slash_E4_star__deactiv_cplx</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> E4_star_ </ci>
+                <ci> P4 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> P4_slash_E4_star__deactiv_slash_E4_star__deactiv_cplx </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" metaid="_105611" value="3.8999961E-12" units="vol_uMINVsecINV"/>
+            <parameter id="k2" metaid="_105613" value="1.95E-13" units="vol_secINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="P4_slash_E4_star__deactiv_2" metaid="_651694" reversible="false">
+        <listOfReactants>
+          <speciesReference species="P4_slash_E4_star__deactiv_slash_E4_star__deactiv_cplx" metaid="_502988"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="E4" metaid="_503001"/>
+          <speciesReference species="P4" metaid="_503014"/>
+        </listOfProducts>
+        <kineticLaw metaid="_503027">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          k3*P4_slash_E4_star__deactiv_slash_E4_star__deactiv_cplx</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> P4_slash_E4_star__deactiv_slash_E4_star__deactiv_cplx </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k3" metaid="_105614" value="3.9E-14" units="vol_secINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="P5_slash_E5_star__deactiv_1" metaid="_651714">
+        <notes>
+          <body xmlns="http://www.w3.org/1999/xhtml">
+        kp5+ = 6*10^8 M-1 min-1, kp5- = 30 min-1, kpcat,5 = 6 min-1 from Asthagiri and 2001.</body>
+          
+        </notes>
+        <listOfReactants>
+          <speciesReference species="E5_star_" metaid="_503040"/>
+          <speciesReference species="P5" metaid="_503053"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="P5_slash_E5_star__deactiv_slash_E5_star__deactiv_cplx" metaid="_503066"/>
+        </listOfProducts>
+        <kineticLaw metaid="_503078">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          k1*E5_star_*P5-k2*P5_slash_E5_star__deactiv_slash_E5_star__deactiv_cplx</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> E5_star_ </ci>
+                <ci> P5 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> P5_slash_E5_star__deactiv_slash_E5_star__deactiv_cplx </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" metaid="_105615" value="3.8999961E-12" units="vol_uMINVsecINV"/>
+            <parameter id="k2" metaid="_105617" value="1.95E-13" units="vol_secINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="P5_slash_E5_star__deactiv_2" metaid="_651734" reversible="false">
+        <listOfReactants>
+          <speciesReference species="P5_slash_E5_star__deactiv_slash_E5_star__deactiv_cplx" metaid="_503090"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="E5" metaid="_503102"/>
+          <speciesReference species="P5" metaid="_503114"/>
+        </listOfProducts>
+        <kineticLaw metaid="_503126">
+          <notes>
+            <body xmlns="http://www.w3.org/1999/xhtml">
+          k3*P5_slash_E5_star__deactiv_slash_E5_star__deactiv_cplx</body>
+            
+          </notes>
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k3 </ci>
+              <ci> P5_slash_E5_star__deactiv_slash_E5_star__deactiv_cplx </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k3" metaid="_105618" value="3.9E-14" units="vol_secINV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

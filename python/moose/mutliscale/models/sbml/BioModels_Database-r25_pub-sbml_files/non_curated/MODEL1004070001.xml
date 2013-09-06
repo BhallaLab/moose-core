@@ -1,0 +1,967 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" level="2" metaid="_178785" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dc="http://purl.org/dc/elements/1.1/" version="4">
+  <model id="vaseghi" name="Vaseghi1999_Pentose_PP_yeast" metaid="metaid_vaseghi">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>Model as described in:      <br/>
+                <strong>In vivo dynamics of the pentose phosphate pathway in Saccharomyces cerevisiae</strong>
+                <br/>
+          Vaseghi S, Baumeister A, Rizzi M, Reuss M.      <em>Metab Eng.</em>
+          1999 Apr;1(2):128-40.
+	  PMID:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/10935926">10935926</a>
+          , doi:      <a href="http://dx.doi.org/10.1006/mben.1998.0110">10.1006/mben.1998.0110</a>
+          ;      <br/>
+          Abstract:      <br/>
+          The in vivo dynamics of the pentose phosphate pathway has been studied with transient experiments in continuous culture of Saccharomyces cerevisiae. Rapid sampling was performed with a special sampling device after disturbing the steady state with a pulse of glucose. The time span of observation was 120 s after the pulse. During this short time period the dynamic effect of protein biosynthesis can be neglected. The metabolites of interest (glucose 6-phosphate, NADP, NADPH, 6-phosphogluconate, and MgATP2-) we determined with enzymatic assays and HPLC. The experimental observations were then used for the identification of kinetic rate equations and parameters under in vivo conditions. In accordance with results from in vitro studies the in vivo diagnosis supports an ordered Bi-Bi mechanism with noncompetitive inhibition by MgATP2- for the enzyme glucose-6-phosphate dehydrogenase. In the case of 6-phosphogluconate dehydrogenase an ordered Bi-Ter mechanism with a competitive inhibition by MgATP2- has been found. Because the MgATP2- concentration decreases abruptly after the pulse of glucose the inhibitory effect vanishes and the flux through the pentose phosphate pathway increases. This regulation phenomenon guarantees the balance of fluxes through glycolysis and pentose phosphate pathway during the dynamic time period.      </p>
+            <p>Typographical errors found and corrected from the original manuscript:</p>
+            <ul>      <li>rMax given for 6GPDH and 6PGDH are reversed (by solving their defining equations)</li>
+                <li>Eq (52) should read C_NADPH(t) = 0.16 + ... (from Fig. 2)</li>
+                </ul>
+            <p>While the model is identical to the one described in the article, it cannot reproduce all time courses displayed in the article. The time courses for S7P and X5P differ from fig 5 and some of the reaction rates show slightly different dynamics than in fig 7.</p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not.
+          .      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_vaseghi">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Smallbone</vCard:Family>
+                  <vCard:Given>Kieran</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>kieran.smallbone@manchester.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Manchester</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Kent</vCard:Family>
+                  <vCard:Given>Edward</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>edward.kent@postgrad.manchester.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Manchester</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Summersgill</vCard:Family>
+                  <vCard:Given>Holly</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>holly.summersgill@postgrad.manchester.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Manchester</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Stanford</vCard:Family>
+                  <vCard:Given>Natalie</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>natalie.stanford@student.manchester.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Manchester</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Smallbone</vCard:Family>
+                  <vCard:Given>Kieran</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>kieran.smallbone@manchester.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Manchester</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Kent</vCard:Family>
+                  <vCard:Given>Edward</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>edward.kent@postgrad.manchester.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Manchester</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Summersgill</vCard:Family>
+                  <vCard:Given>Holly</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>holly.summersgill@postgrad.manchester.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Manchester</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Stanford</vCard:Family>
+                  <vCard:Given>Natalie</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>natalie.stanford@student.manchester.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Manchester</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Smallbone</vCard:Family>
+                  <vCard:Given>Kieran</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>kieran.smallbone@manchester.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Manchester</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Kent</vCard:Family>
+                  <vCard:Given>Edward</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>edward.kent@postgrad.manchester.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Manchester</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Summersgill</vCard:Family>
+                  <vCard:Given>Holly</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>holly.summersgill@postgrad.manchester.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Manchester</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Stanford</vCard:Family>
+                  <vCard:Given>Natalie</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>natalie.stanford@student.manchester.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Manchester</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2009-04-09T00:00:00Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2012-02-03T11:10:46Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2012-02-03T11:10:46Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2012-02-03T11:10:46Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2012-02-03T11:10:46Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqbiol:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/taxonomy/4932"/>
+            </rdf:Bag>
+          </bqbiol:is>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1004070001"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/10935926"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="substance" name="millimole" metaid="_178797">
+        <listOfUnits>
+          <unit scale="-3" metaid="_178809" kind="mole"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_sec" name="per second" metaid="_178821">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_178833" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mM" name="mM" metaid="_178846">
+        <listOfUnits>
+          <unit scale="-3" metaid="_178858" kind="mole"/>
+          <unit exponent="-1" metaid="_178870" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mM_per_sec" name="mM per second" metaid="_178882">
+        <listOfUnits>
+          <unit scale="-3" metaid="_178895" kind="mole"/>
+          <unit exponent="-1" metaid="_178907" kind="litre"/>
+          <unit exponent="-1" metaid="_178919" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="CV" name="intracellular" metaid="metaid_CV" size="1">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_CV">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0005576"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </compartment>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="C_G6P" initialConcentration="0.9" name="glucose 6-phosphate" metaid="metaid_C_G6P" boundaryCondition="true" compartment="CV">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_C_G6P">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:14314"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="C_6PG" initialConcentration="0.25" name="6-phosphogluconate" metaid="metaid_C_6PG" compartment="CV">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_C_6PG">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:16863"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="C_Ru5P" initialConcentration="0.033" name="ribulose 5-phosphate" metaid="metaid_C_Ru5P" compartment="CV">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_C_Ru5P">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:17363"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="C_X5P" initialConcentration="0.041" name="xylulose 5-phosphate" metaid="metaid_C_X5P" compartment="CV">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_C_X5P">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:16332"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="C_F6P" initialConcentration="0.17" constant="true" name="fructose 6-phosphate" metaid="metaid_C_F6P" boundaryCondition="true" compartment="CV">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_C_F6P">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:15946"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="C_E4P" initialConcentration="0.029" name="erythrose 4-phosphate" metaid="metaid_C_E4P" compartment="CV">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_C_E4P">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:48153"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="C_GAP" initialConcentration="0.064" constant="true" name="glyceraldehyde 3-phosphate" metaid="metaid_C_GAP" boundaryCondition="true" compartment="CV">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_C_GAP">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:17138"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="C_R5P" initialConcentration="0.118" name="ribose 5-phosphate" metaid="metaid_C_R5P" compartment="CV">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_C_R5P">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:17797"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="C_S7P" initialConcentration="0.082" name="sedoheptulose 7-phosphate" metaid="metaid_C_S7P" compartment="CV">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_C_S7P">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:15721"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="C_PRPP" initialConcentration="0" constant="true" name="phosphoribosylpyrophosphate" metaid="metaid_C_PRPP" boundaryCondition="true" compartment="CV">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_C_PRPP">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:17111"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="C_PHE" initialConcentration="0" constant="true" name="phenylalanine" metaid="metaid_C_PHE" boundaryCondition="true" compartment="CV">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_C_PHE">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:28044"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="C_TYR" initialConcentration="0" constant="true" name="tyrosine" metaid="metaid_C_TYR" boundaryCondition="true" compartment="CV">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_C_TYR">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:18186"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="C_TRP" initialConcentration="0" constant="true" name="tryptophan" metaid="metaid_C_TRP" boundaryCondition="true" compartment="CV">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_C_TRP">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:27897"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="C_NADP" initialConcentration="0.17" name="NADP+" metaid="metaid_C_NADP" boundaryCondition="true" compartment="CV">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_C_NADP">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:18009"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="C_NADPH" initialConcentration="0.16" name="NADPH" metaid="metaid_C_NADPH" boundaryCondition="true" compartment="CV">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_C_NADPH">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:16474"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="C_MgATP" initialConcentration="2.3" name="MgATP" metaid="metaid_C_MgATP" boundaryCondition="true" compartment="CV">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_C_MgATP">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:30617"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="mu" name="specific growth rate" metaid="_424189" value="2.77778E-5" units="per_sec"/>
+    </listOfParameters>
+    <listOfRules>
+      <assignmentRule metaid="_424184" variable="C_NADPH">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <cn> 0.16 </cn>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <cn> 0.516 </cn>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> t </csymbol>
+              </apply>
+              <apply>
+                <plus/>
+                <cn> 25.39 </cn>
+                <apply>
+                  <times/>
+                  <cn> 0.37 </cn>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> t </csymbol>
+                </apply>
+                <apply>
+                  <times/>
+                  <cn> 0.5 </cn>
+                  <apply>
+                    <power/>
+                    <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> t </csymbol>
+                    <cn type="integer"> 2 </cn>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_424185" variable="C_NADP">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <cn> 0.17 </cn>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <cn> 1.48 </cn>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> t </csymbol>
+              </apply>
+              <apply>
+                <plus/>
+                <cn> 9.71 </cn>
+                <apply>
+                  <times/>
+                  <cn> 16.1 </cn>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> t </csymbol>
+                </apply>
+                <apply>
+                  <times/>
+                  <cn> 0.48 </cn>
+                  <apply>
+                    <power/>
+                    <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> t </csymbol>
+                    <cn type="integer"> 2 </cn>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_424186" variable="C_MgATP">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <cn> 2.3 </cn>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <cn> 29.83 </cn>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> t </csymbol>
+              </apply>
+              <apply>
+                <plus/>
+                <cn> 29.77 </cn>
+                <apply>
+                  <times/>
+                  <cn> 13.42 </cn>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> t </csymbol>
+                </apply>
+                <apply>
+                  <times/>
+                  <cn> 0.05 </cn>
+                  <apply>
+                    <power/>
+                    <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> t </csymbol>
+                    <cn type="integer"> 2 </cn>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_424187" variable="C_G6P">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <cn> 0.9 </cn>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <cn> 44.1 </cn>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> t </csymbol>
+              </apply>
+              <apply>
+                <plus/>
+                <cn type="integer"> 48 </cn>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> t </csymbol>
+                <apply>
+                  <times/>
+                  <cn> 0.45 </cn>
+                  <apply>
+                    <power/>
+                    <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> t </csymbol>
+                    <cn type="integer"> 2 </cn>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+    <listOfReactions>
+      <reaction id="rG6PDH" name="G6PDH" metaid="_424122" reversible="false">
+        <listOfReactants>
+          <speciesReference species="C_G6P" metaid="_178931"/>
+          <speciesReference species="C_NADP" metaid="_178943"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="C_6PG" metaid="_178955"/>
+          <speciesReference species="C_NADPH" metaid="_178967"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="C_MgATP" metaid="_178979"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_178991">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> CV </ci>
+                <ci> rMax_G6PDH </ci>
+                <ci> C_NADP </ci>
+              </apply>
+              <apply>
+                <times/>
+                <apply>
+                  <plus/>
+                  <ci> C_NADP </ci>
+                  <apply>
+                    <times/>
+                    <ci> K_NADP_1 </ci>
+                    <apply>
+                      <plus/>
+                      <apply>
+                        <divide/>
+                        <ci> C_NADPH </ci>
+                        <ci> Ki_NADPH_1 </ci>
+                      </apply>
+                      <cn type="integer"> 1 </cn>
+                    </apply>
+                  </apply>
+                </apply>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <divide/>
+                    <ci> C_MgATP </ci>
+                    <ci> Ki_MgATP_1 </ci>
+                  </apply>
+                  <cn type="integer"> 1 </cn>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="rMax_G6PDH" metaid="_424157" value="0.654" units="mM_per_sec"/>
+            <parameter id="K_NADP_1" metaid="_424158" value="0.116" units="mM"/>
+            <parameter id="Ki_MgATP_1" metaid="_424159" value="0.33" units="mM"/>
+            <parameter id="Ki_NADPH_1" metaid="_424160" value="1.702" units="mM"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="r6PGDH" name="6PGDH" metaid="_424123" reversible="false">
+        <listOfReactants>
+          <speciesReference species="C_6PG" metaid="_179003"/>
+          <speciesReference species="C_NADP" metaid="_179015"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="C_NADPH" metaid="_179027"/>
+          <speciesReference species="C_Ru5P" metaid="_179040"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="C_MgATP" metaid="_179052"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_179064">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> CV </ci>
+                <ci> rMax_6PGDH </ci>
+                <ci> C_NADP </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <ci> C_NADP </ci>
+                <apply>
+                  <times/>
+                  <ci> K_NADP_2 </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <divide/>
+                      <ci> C_NADPH </ci>
+                      <ci> Ki_NADPH_2 </ci>
+                    </apply>
+                    <cn type="integer"> 1 </cn>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <divide/>
+                      <ci> C_MgATP </ci>
+                      <ci> Ki_MgATP_2 </ci>
+                    </apply>
+                    <cn type="integer"> 1 </cn>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="rMax_6PGDH" metaid="_424161" value="44.19" units="mM_per_sec"/>
+            <parameter id="K_NADP_2" metaid="_424162" value="1.848" units="mM"/>
+            <parameter id="Ki_MgATP_2" metaid="_424163" value="0.109" units="mM"/>
+            <parameter id="Ki_NADPH_2" metaid="_424166" value="0.055" units="mM"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="rR5PI" name="R5PI" metaid="_424124" reversible="false">
+        <listOfReactants>
+          <speciesReference species="C_Ru5P" metaid="_179076"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="C_R5P" metaid="_179088"/>
+        </listOfProducts>
+        <kineticLaw metaid="_179100">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> CV </ci>
+              <ci> rMax_R5PI </ci>
+              <ci> C_Ru5P </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="rMax_R5PI" metaid="_424167" value="0.57" units="mM_per_sec"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="rTKL1" name="TKL1" metaid="_424125" reversible="false">
+        <listOfReactants>
+          <speciesReference species="C_R5P" metaid="_179112"/>
+          <speciesReference species="C_X5P" metaid="_179124"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="C_GAP" metaid="_179136"/>
+          <speciesReference species="C_S7P" metaid="_179148"/>
+        </listOfProducts>
+        <kineticLaw metaid="_179160">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> CV </ci>
+              <ci> rMax_TKL1 </ci>
+              <ci> C_R5P </ci>
+              <ci> C_X5P </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="rMax_TKL1" metaid="_424169" value="3.24" units="mM_per_sec"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="rRU5PE" name="Ru5PE" metaid="_424128" reversible="false">
+        <listOfReactants>
+          <speciesReference species="C_Ru5P" metaid="_179172"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="C_X5P" metaid="_179184"/>
+        </listOfProducts>
+        <kineticLaw metaid="_179196">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> CV </ci>
+              <ci> rMax_RU5PE </ci>
+              <ci> C_Ru5P </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="rMax_RU5PE" metaid="_424170" value="0.85" units="mM_per_sec"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="rTKL2" name="TKL2" metaid="_424129" reversible="false">
+        <listOfReactants>
+          <speciesReference species="C_E4P" metaid="_179208"/>
+          <speciesReference species="C_X5P" metaid="_179220"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="C_F6P" metaid="_179232"/>
+          <speciesReference species="C_GAP" metaid="_179244"/>
+        </listOfProducts>
+        <kineticLaw metaid="_179256">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> CV </ci>
+              <ci> rMax_TKL2 </ci>
+              <ci> C_E4P </ci>
+              <ci> C_X5P </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="rMax_TKL2" metaid="_424172" value="10.5" units="mM_per_sec"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="rPKDA" name="PKDHA" metaid="_424132" reversible="false">
+        <listOfReactants>
+          <speciesReference species="C_E4P" metaid="_179268"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="C_PHE" metaid="_179280"/>
+          <speciesReference species="C_TRP" metaid="_179292"/>
+          <speciesReference species="C_TYR" metaid="_179304"/>
+        </listOfProducts>
+        <kineticLaw metaid="_179316">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> CV </ci>
+                <ci> rMax_PKDA </ci>
+                <ci> C_E4P </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <ci> C_E4P </ci>
+                <ci> Km_PKDA </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="Km_PKDA" metaid="_424173" value="0.009" units="mM"/>
+            <parameter id="rMax_PKDA" metaid="_424174" value="0.004" units="mM_per_sec"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="rPPK" name="RPPK" metaid="_424135" reversible="false">
+        <listOfReactants>
+          <speciesReference species="C_R5P" metaid="_179328"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="C_PRPP" metaid="_179340"/>
+        </listOfProducts>
+        <kineticLaw metaid="_179352">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> CV </ci>
+                <ci> rMax_PPK </ci>
+                <ci> C_R5P </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <ci> C_R5P </ci>
+                <ci> Km_PPK </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="Km_PPK" metaid="_424175" value="0.009" units="mM"/>
+            <parameter id="rMax_PPK" metaid="_424176" value="0.003" units="mM_per_sec"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="rTAL" name="TAL" metaid="_424138" reversible="false">
+        <listOfReactants>
+          <speciesReference species="C_GAP" metaid="_179364"/>
+          <speciesReference species="C_S7P" metaid="_179376"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="C_E4P" metaid="_179388"/>
+          <speciesReference species="C_F6P" metaid="_179400"/>
+        </listOfProducts>
+        <kineticLaw metaid="_179412">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> CV </ci>
+              <ci> rMax_TAL </ci>
+              <ci> C_GAP </ci>
+              <ci> C_S7P </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="rMax_TAL" metaid="_424178" value="3" units="mM_per_sec"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_1" name="u6PG" metaid="_424141" reversible="false">
+        <listOfReactants>
+          <speciesReference species="C_6PG" metaid="_179424"/>
+        </listOfReactants>
+        <kineticLaw metaid="_179436">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> CV </ci>
+              <ci> mu </ci>
+              <ci> C_6PG </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_2" name="uRu5P" metaid="_424144" reversible="false">
+        <listOfReactants>
+          <speciesReference species="C_Ru5P" metaid="_179448"/>
+        </listOfReactants>
+        <kineticLaw metaid="_179460">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> CV </ci>
+              <ci> mu </ci>
+              <ci> C_Ru5P </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_3" name="uR5P" metaid="_424147" reversible="false">
+        <listOfReactants>
+          <speciesReference species="C_R5P" metaid="_179472"/>
+        </listOfReactants>
+        <kineticLaw metaid="_179484">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> CV </ci>
+              <ci> mu </ci>
+              <ci> C_R5P </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_4" name="uX5P" metaid="_424150" reversible="false">
+        <listOfReactants>
+          <speciesReference species="C_X5P" metaid="_179496"/>
+        </listOfReactants>
+        <kineticLaw metaid="_179508">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> CV </ci>
+              <ci> mu </ci>
+              <ci> C_X5P </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_5" name="uS7P" metaid="_424153" reversible="false">
+        <listOfReactants>
+          <speciesReference species="C_S7P" metaid="_179520"/>
+        </listOfReactants>
+        <kineticLaw metaid="_179532">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> CV </ci>
+              <ci> mu </ci>
+              <ci> C_S7P </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_6" name="uE4P" metaid="_424156" reversible="false">
+        <listOfReactants>
+          <speciesReference species="C_E4P" metaid="_179544"/>
+        </listOfReactants>
+        <kineticLaw metaid="_179556">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> CV </ci>
+              <ci> mu </ci>
+              <ci> C_E4P </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

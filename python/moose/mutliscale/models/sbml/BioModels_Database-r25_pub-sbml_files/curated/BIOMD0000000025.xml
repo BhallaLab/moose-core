@@ -1,0 +1,432 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="metaid_0000001" version="4">
+  <model id="Smolen2002" name="Smolen2002_CircClock" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This model originates from BioModels Database: A Database of Annotated Published Models. It is copyright (c) 2005-2010 The BioModels Team.      <br/>
+          For more information see the      <a href="http://www.ebi.ac.uk/biomodels/legal.html" target="_blank">terms of use</a>
+          .      <br/>
+          To cite BioModels Database, please use      <a href="http://www.pubmedcentral.nih.gov/articlerender.fcgi?tool=pubmed&amp;pubmedid=16381960" target="_blank">Le Novère N., Bornstein B., Broicher A., Courtot M., Donizelli M., Dharuri H., Li L., Sauro H., Schilstra M., Shapiro B., Snoep J.L., Hucka M. (2006) BioModels Database: A Free, Centralized Database of Curated, Published, Quantitative Kinetic Models of Biochemical and Cellular Systems Nucleic Acids Res., 34: D689-D691.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Le Novère</vCard:Family>
+                  <vCard:Given>Nicolas</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>lenov@ebi.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>EMBL-EBI</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2005-06-29T11:01:49Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2012-05-15T21:41:34Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL6618294363"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/BIOMD0000000025"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/12414672"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+          <bqbiol:occursIn>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/taxonomy/7227"/>
+            </rdf:Bag>
+          </bqbiol:occursIn>
+          <bqbiol:isVersionOf>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0007623"/>
+            </rdf:Bag>
+          </bqbiol:isVersionOf>
+          <bqbiol:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/kegg.pathway/dme04710"/>
+            </rdf:Bag>
+          </bqbiol:is>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="time" name="hour (new default)" metaid="metaid_0000017">
+        <listOfUnits>
+          <unit metaid="_999678" multiplier="3600" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="substance" name="nanomole (new default)" metaid="metaid_0000018">
+        <listOfUnits>
+          <unit scale="-9" metaid="_999690" kind="mole"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="nM" name="nM" metaid="_999702">
+        <listOfUnits>
+          <unit scale="-9" metaid="_999714" kind="mole"/>
+          <unit exponent="-1" metaid="_999726" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="nM_per_hr" name="nM_per_hr" metaid="_999738">
+        <listOfUnits>
+          <unit scale="-9" metaid="_999750" kind="mole"/>
+          <unit exponent="-1" metaid="_999762" kind="litre"/>
+          <unit exponent="-1" metaid="_999774" multiplier="3600" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_hr" name="per_hr" metaid="_999786">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_999798" multiplier="3600" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="CELL" metaid="metaid_0000005" size="1E-15">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000005">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0005623"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </compartment>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="EmptySet" initialConcentration="0" constant="true" metaid="metaid_0000007" boundaryCondition="true" compartment="CELL"/>
+      <species id="Per" initialConcentration="5E-16" metaid="metaid_0000008" compartment="CELL">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000008">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P07663"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="dClk" initialConcentration="1E-16" metaid="metaid_0000009" compartment="CELL">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000009">
+              <bqbiol:hasPart>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P07663"/>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/O61735"/>
+                </rdf:Bag>
+              </bqbiol:hasPart>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="dClkF" initialConcentration="0" name="free dClk" metaid="metaid_0000010" compartment="CELL">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000010">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/O61735"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="dClkF_tau1" constant="false" name="dClkF_tau1" metaid="_509013" units="nM">
+        <notes>
+          <p xmlns="http://www.w3.org/1999/xhtml">
+        free dClk at time t-tau1</p>
+          
+        </notes>
+</parameter>
+      <parameter id="dClkF_tau2" constant="false" name="dClkF_tau2" metaid="_509014" units="nM">
+        <notes>
+          <p xmlns="http://www.w3.org/1999/xhtml">
+        free dClk at time t-tau2</p>
+          
+        </notes>
+</parameter>
+      <parameter id="tau1" name="tau1" metaid="_509016" value="10" units="time"/>
+      <parameter id="tau2" name="tau2" metaid="_509017" value="10" units="time"/>
+      <parameter id="Vsp" name="Vsp" metaid="_509018" value="0.5" units="nM_per_hr"/>
+      <parameter id="K1" name="K1" metaid="_509020" value="0.3" units="nM"/>
+      <parameter id="Vsc" name="Vsc" metaid="_509021" value="0.25" units="nM_per_hr"/>
+      <parameter id="K2" name="K2" metaid="_509022" value="0.1" units="nM"/>
+      <parameter id="kdc" name="kdc" metaid="_509024" value="0.5" units="per_hr"/>
+      <parameter id="kdp" name="kdp" metaid="_509025" value="0.5" units="per_hr"/>
+    </listOfParameters>
+    <listOfRules>
+      <assignmentRule metaid="_509008" variable="dClkF">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <cn> 0 </cn>
+              <apply>
+                <lt/>
+                <apply>
+                  <minus/>
+                  <ci> dClk </ci>
+                  <ci> Per </ci>
+                </apply>
+                <cn> 0 </cn>
+              </apply>
+            </piece>
+            <otherwise>
+              <apply>
+                <minus/>
+                <ci> dClk </ci>
+                <ci> Per </ci>
+              </apply>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_509010" variable="dClkF_tau1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <cn> 0 </cn>
+              <apply>
+                <lt/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/delay"> delay </csymbol>
+                    <ci> dClk </ci>
+                    <ci> tau1 </ci>
+                  </apply>
+                  <apply>
+                    <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/delay"> delay </csymbol>
+                    <ci> Per </ci>
+                    <ci> tau1 </ci>
+                  </apply>
+                </apply>
+                <cn> 0 </cn>
+              </apply>
+            </piece>
+            <otherwise>
+              <apply>
+                <minus/>
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/delay"> delay </csymbol>
+                  <ci> dClk </ci>
+                  <ci> tau1 </ci>
+                </apply>
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/delay"> delay </csymbol>
+                  <ci> Per </ci>
+                  <ci> tau1 </ci>
+                </apply>
+              </apply>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_509011" variable="dClkF_tau2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <cn> 0 </cn>
+              <apply>
+                <lt/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/delay"> delay </csymbol>
+                    <ci> dClk </ci>
+                    <ci> tau2 </ci>
+                  </apply>
+                  <apply>
+                    <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/delay"> delay </csymbol>
+                    <ci> Per </ci>
+                    <ci> tau2 </ci>
+                  </apply>
+                </apply>
+                <cn> 0 </cn>
+              </apply>
+            </piece>
+            <otherwise>
+              <apply>
+                <minus/>
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/delay"> delay </csymbol>
+                  <ci> dClk </ci>
+                  <ci> tau2 </ci>
+                </apply>
+                <apply>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/delay"> delay </csymbol>
+                  <ci> Per </ci>
+                  <ci> tau2 </ci>
+                </apply>
+              </apply>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+    <listOfReactions>
+      <reaction id="rPer" name="Per production" metaid="metaid_0000011" reversible="false">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000011">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0006412"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="EmptySet" metaid="_999810"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Per" metaid="_999822"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="dClkF" metaid="_999834"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_999846">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> Vsp </ci>
+              <apply>
+                <divide/>
+                <ci> dClkF_tau1 </ci>
+                <apply>
+                  <plus/>
+                  <ci> K1 </ci>
+                  <ci> dClkF_tau1 </ci>
+                </apply>
+              </apply>
+              <ci> CELL </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="rdClk" name="dClk production" metaid="metaid_0000012" reversible="false">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000012">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0006412"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="EmptySet" metaid="_999858"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="dClk" metaid="_999870"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="dClkF" metaid="_999882"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_999894">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> CELL </ci>
+              <ci> Vsc </ci>
+              <apply>
+                <divide/>
+                <ci> K2 </ci>
+                <apply>
+                  <plus/>
+                  <ci> K2 </ci>
+                  <ci> dClkF_tau2 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="rPerD" name="Per degradation" metaid="metaid_0000013" reversible="false">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000013">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0030163"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="Per" metaid="_999906"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="EmptySet" metaid="_999918"/>
+        </listOfProducts>
+        <kineticLaw metaid="_999930">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kdc </ci>
+              <ci> Per </ci>
+              <ci> CELL </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="rdClkD" name="dClk degradation" metaid="metaid_0000014" reversible="false">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000014">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0030163"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="dClk" metaid="_999942"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="EmptySet" metaid="_999954"/>
+        </listOfProducts>
+        <kineticLaw metaid="_999966">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kdp </ci>
+              <ci> dClk </ci>
+              <ci> CELL </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

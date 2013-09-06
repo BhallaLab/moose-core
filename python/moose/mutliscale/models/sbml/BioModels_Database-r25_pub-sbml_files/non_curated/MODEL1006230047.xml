@@ -1,0 +1,291 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="_420493" version="4">
+  <model id="Revilla2003_HIV1therapy" name="Revilla2003_HIV1therapy" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>Fighting a virus with a virus: a dynamic model for HIV-1 therapy.</strong>
+                <br/>
+          Revilla T, Garcia-Ramos G.      <em>Math Biosci</em>
+          2003 Oct;185(2):191-203      <a href="http://www.ncbi.nlm.nih.gov/pubmed/12941536">12941536</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          A mathematical model examined a potential therapy for controlling viral
+infections using genetically modified viruses. The control of the infection is
+an indirect effect of the selective elimination by an engineered virus of
+infected cells that are the source of the pathogens. Therefore, this engineered
+virus could greatly compensate for a dysfunctional immune system compromised by
+AIDS. In vitro studies using engineered viruses have been shown to decrease the
+HIV-1 load about 1000-fold. However, the efficacy of this potential treatment
+for reducing the viral load in AIDS patients is unknown. The present model
+studied the interactions among the HIV-1 virus, its main host cell (activated
+CD4+ T cells), and a therapeutic engineered virus in an in vivo context; and it
+examined the conditions for controlling the pathogen. This model predicted a
+significant drop in the HIV-1 load, but the treatment does not eradicate HIV. A
+basic estimation using a currently engineered virus indicated an HIV-1 load
+reduction of 92% and a recovery of host cells to 17% of their normal level.
+Greater success (98% HIV reduction, 44% host cells recovery) is expected as more
+competent engineered viruses are designed. These results suggest that therapy
+using viruses could be an alternative to extend the survival of AIDS patients.      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://models.cellml.org/exposure/b4e4b1aa771e20da41f05df763013186">        <strong>Revilla T, Garcia-Ramos G. (2003) - version=1.0</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>Catherine Lloyd</strong>
+                <br/>
+          c.lloyd@auckland.ac.nz      <br/>
+          The University of Auckland      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:13:26Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:13:26Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:13:26Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:13:26Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1006230047"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/12941536"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="day" name="day" metaid="_420505">
+        <listOfUnits>
+          <unit metaid="_420517" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="first_order_rate_constant" name="first_order_rate_constant" metaid="_420529">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_420541" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mm3" name="mm3" metaid="_420553">
+        <listOfUnits>
+          <unit scale="-3" exponent="3" metaid="_420565" kind="metre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_mm3" name="per_mm3" metaid="_420577">
+        <listOfUnits>
+          <unit scale="-3" exponent="-3" metaid="_420589" kind="metre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="cell_per_mm3_day" name="cell_per_mm3_day" metaid="_420601">
+        <listOfUnits>
+          <unit scale="-3" exponent="-3" metaid="_420613" kind="metre"/>
+          <unit exponent="-1" metaid="_420625" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="vir_per_cell_day" name="vir_per_cell_day" metaid="_420637">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_420649" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mm3_per_vir_day" name="mm3_per_vir_day" metaid="_420661">
+        <listOfUnits>
+          <unit scale="-3" exponent="3" metaid="_420673" kind="metre"/>
+          <unit exponent="-1" metaid="_420685" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time" name="time" metaid="_420697">
+        <listOfUnits>
+          <unit metaid="_420709" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="COMpartment" metaid="_005840" units="litre" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="time_environment" name="time" metaid="_005850" units="day"/>
+      <parameter id="x" constant="false" name="x" metaid="_005851" value="3"/>
+      <parameter id="lamda" name="lamda" metaid="_005852" value="2" units="cell_per_mm3_day"/>
+      <parameter id="d" name="d" metaid="_005853" value="0.01" units="first_order_rate_constant"/>
+      <parameter id="y" constant="false" name="y" metaid="_005854" value="6"/>
+      <parameter id="a" name="a" metaid="_005855" value="0.33" units="first_order_rate_constant"/>
+      <parameter id="z" constant="false" name="z" metaid="_005856" value="0"/>
+      <parameter id="b" name="b" metaid="_005857" value="2" units="first_order_rate_constant"/>
+      <parameter id="v" constant="false" name="v" metaid="_005858" value="149"/>
+      <parameter id="k" name="k" metaid="_005859" value="50" units="vir_per_cell_day"/>
+      <parameter id="u" name="u" metaid="_005860" value="2" units="first_order_rate_constant"/>
+      <parameter id="w" constant="false" name="w" metaid="_005861" value="1"/>
+      <parameter id="c" name="c" metaid="_005862" value="2000" units="vir_per_cell_day"/>
+      <parameter id="q" name="q" metaid="_005864" value="2" units="first_order_rate_constant"/>
+      <parameter id="alpha" name="alpha" metaid="_005865" value="0.004" units="mm3_per_vir_day"/>
+      <parameter id="beta" name="beta" metaid="_005866" value="0.004" units="mm3_per_vir_day"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_005844" variable="x">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <cn> 1 </cn>
+              <ci> lamda </ci>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> d </ci>
+                <ci> x </ci>
+              </apply>
+              <apply>
+                <times/>
+                <cn> 1 </cn>
+                <ci> beta </ci>
+                <ci> x </ci>
+                <ci> v </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_005845" variable="y">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <cn> 1 </cn>
+              <ci> beta </ci>
+              <ci> x </ci>
+              <ci> v </ci>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> a </ci>
+                <ci> y </ci>
+              </apply>
+              <apply>
+                <times/>
+                <cn> 1 </cn>
+                <ci> alpha </ci>
+                <ci> w </ci>
+                <ci> y </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_005846" variable="z">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <cn> 1 </cn>
+              <ci> alpha </ci>
+              <ci> w </ci>
+              <ci> y </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> b </ci>
+              <ci> z </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_005847" variable="v">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> k </ci>
+              <ci> y </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> u </ci>
+              <ci> v </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_005848" variable="w">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> c </ci>
+              <ci> z </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> q </ci>
+              <ci> w </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+    </listOfRules>
+  </model>
+</sbml>

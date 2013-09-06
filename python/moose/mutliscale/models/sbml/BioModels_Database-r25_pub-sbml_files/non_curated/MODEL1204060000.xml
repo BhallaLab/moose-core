@@ -1,0 +1,692 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" xmlns:html="http://www.w3.org/1999/xhtml" level="2" metaid="_389149" version="4">
+  <model id="Kubota2012_InsulinAction_AKTpathway" name="Kubota2012_InsulinAction_AKTpathway" metaid="_389161">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This model is from the article:      <br/>
+                <strong>Temporal Coding of Insulin Action through Multiplexing of the AKT Pathway.</strong>
+                <br/>
+          Kubota H, Noguchi R, Toyoshima Y, Ozaki Y, Uda S, Watanabe K, Ogawa W, Kuroda S.      <em>Mol Cell.</em>
+          2012 Jun 29;46(6):820-32.      <a href="http://www.ncbi.nlm.nih.gov/pubmed/22633957">22633957</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          One of the unique characteristics of cellular signaling pathways is that a common signaling pathway can selectively regulate multiple cellular functions of a hormone; however, this selective downstream control through a common signaling pathway is poorly understood. Here we show that the insulin-dependent AKT pathway uses temporal patterns multiplexing for selective regulation of downstream molecules. Pulse and sustained insulin stimulations were simultaneously encoded into transient and sustained AKT phosphorylation, respectively. The downstream molecules, including ribosomal protein S6 kinase (S6K), glucose-6-phosphatase (G6Pase), and glycogen synthase kinase-3β (GSK3β) selectively decoded transient, sustained, and both transient and sustained AKT phosphorylation, respectively. Selective downstream decoding is mediated by the molecules' network structures and kinetics. Our results demonstrate that the AKT pathway can multiplex distinct patterns of blood insulin, such as pulse-like additional and sustained-like basal secretions, and the downstream molecules selectively decode secretion patterns of insulin.      </p>
+            <br/>
+            <p>      <b>Note:</b>
+          Created by The MathWorks, Inc. SimBiology tool, Version 3.3      </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#_389161">
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1204060000"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/22633957"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfCompartments>
+      <compartment id="Insulin_signaling" name="Insulin_signaling" metaid="_389173" size="1"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="proIR_complex" initialAmount="46.22225" name="proIR_complex" metaid="_389185" compartment="Insulin_signaling"/>
+      <species id="IR_complex" initialAmount="46.22225" name="IR_complex" metaid="_389197" compartment="Insulin_signaling"/>
+      <species id="p2IR_complex" initialAmount="0" name="p2IR_complex" metaid="_389209" compartment="Insulin_signaling"/>
+      <species id="p1p2IR_complex" initialAmount="0" name="p1p2IR_complex" metaid="_389221" compartment="Insulin_signaling"/>
+      <species id="p1IR_complex" initialAmount="0" name="p1IR_complex" metaid="_389233" compartment="Insulin_signaling"/>
+      <species id="pAKT" initialAmount="0" name="pAKT" metaid="_389245" compartment="Insulin_signaling"/>
+      <species id="AKT" initialAmount="4.33812" name="AKT" metaid="_389257" compartment="Insulin_signaling"/>
+      <species id="pGSK3b" initialAmount="0" name="pGSK3b" metaid="_389269" compartment="Insulin_signaling"/>
+      <species id="GSK3b" initialAmount="10.56415" name="GSK3b" metaid="_389281" compartment="Insulin_signaling"/>
+      <species id="pmTOR" initialAmount="0" name="pmTOR" metaid="_389293" compartment="Insulin_signaling"/>
+      <species id="mTOR" initialAmount="0.09592" name="mTOR" metaid="_389305" compartment="Insulin_signaling"/>
+      <species id="pS6K" initialAmount="0" name="pS6K" metaid="_389317" compartment="Insulin_signaling"/>
+      <species id="S6K" initialAmount="2.77699" name="S6K" metaid="_389329" compartment="Insulin_signaling"/>
+      <species id="pX" initialAmount="0" name="pX" metaid="_389341" compartment="Insulin_signaling"/>
+      <species id="X" initialAmount="14.99133" name="X" metaid="_389353" compartment="Insulin_signaling"/>
+      <species id="pFOX01" initialAmount="0" name="pFOX01" metaid="_389365" compartment="Insulin_signaling"/>
+      <species id="FOX01" initialAmount="0.43571" name="FOX01" metaid="_389377" compartment="Insulin_signaling"/>
+      <species id="G6Pase" initialAmount="38.54029" name="G6Pase" metaid="_389389" compartment="Insulin_signaling"/>
+      <species id="phi_2" initialAmount="0" name="phi_2" metaid="_389401" compartment="Insulin_signaling"/>
+      <species id="phi_3" initialAmount="0" name="phi_3" metaid="_389413" compartment="Insulin_signaling"/>
+      <species id="insulin" initialAmount="1" name="insulin" metaid="_389425" compartment="Insulin_signaling"/>
+      <species id="phi_1" initialAmount="0" name="phi_1" metaid="_389437" compartment="Insulin_signaling"/>
+      <species id="phi_4" initialAmount="0" name="phi_4" metaid="_389449" compartment="Insulin_signaling"/>
+    </listOfSpecies>
+    <listOfReactions>
+      <reaction id="IR_complex_synthesis" name="IR_complex_synthesis" metaid="_389461" fast="false">
+        <listOfReactants>
+          <speciesReference species="proIR_complex" metaid="_389474"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IR_complex" metaid="_389487"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="proIR_complex" metaid="_323887"/>
+          <modifierSpeciesReference species="IR_complex" metaid="_323900"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_389500">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> proIR_complex </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> IR_complex </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_389513" value="0.0478"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="insulin_IR_complex" name="insulin+IR_complex" metaid="_389526" fast="false">
+        <listOfReactants>
+          <speciesReference species="IR_complex" metaid="_389539"/>
+          <speciesReference species="insulin" metaid="_389552"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="p1IR_complex" metaid="_389565"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="IR_complex" metaid="_323912"/>
+          <modifierSpeciesReference species="insulin" metaid="_323925"/>
+          <modifierSpeciesReference species="p1IR_complex" metaid="_323937"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_389578">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> IR_complex </ci>
+                <ci> insulin </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> p1IR_complex </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_389591" value="7.78161"/>
+            <parameter id="k2" name="k2" metaid="_389604" value="1.61148"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="p1IR_complex_degradation" name="p1IR_complex_degradation" metaid="_389617" reversible="false" fast="false">
+        <listOfReactants>
+          <speciesReference species="p1IR_complex" metaid="_389630"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="phi_1" metaid="_389643"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="p1IR_complex" metaid="_323949"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_389656">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k1 </ci>
+              <ci> p1IR_complex </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_389669" value="0.00792"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="p1IR_complex_phosphorylation" name="p1IR_complex_phosphorylation" metaid="_389682" reversible="false" fast="false">
+        <listOfReactants>
+          <speciesReference species="p1IR_complex" metaid="_389695"/>
+          <speciesReference species="pmTOR" metaid="_389707"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="p1p2IR_complex" metaid="_389720"/>
+          <speciesReference species="pmTOR" metaid="_389732"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="p1IR_complex" metaid="_323961"/>
+          <modifierSpeciesReference species="pmTOR" metaid="_323973"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_389744">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k1 </ci>
+              <ci> p1IR_complex </ci>
+              <ci> pmTOR </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_389757" value="4E-5"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="p1p2IR_complex_dephosphorylation" name="p1p2IR_complex_dephosphorylation" metaid="_389769" reversible="false" fast="false">
+        <listOfReactants>
+          <speciesReference species="p1p2IR_complex" metaid="_389781"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="p1IR_complex" metaid="_389793"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="p1p2IR_complex" metaid="_323986"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_389805">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k1 </ci>
+              <ci> p1p2IR_complex </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_389817" value="0.28443"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="p1p2IR_complex_degradation" name="p1p2IR_complex_degradation" metaid="_389829" reversible="false" fast="false">
+        <listOfReactants>
+          <speciesReference species="p1p2IR_complex" metaid="_389841"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="phi_3" metaid="_389853"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="p1p2IR_complex" metaid="_323999"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_389865">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k1 </ci>
+              <ci> p1p2IR_complex </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_389877" value="0.0949"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="p2IR_complex_dephosphorylation" name="p2IR_complex_dephosphorylation" metaid="_389889" reversible="false" fast="false">
+        <listOfReactants>
+          <speciesReference species="p2IR_complex" metaid="_389901"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IR_complex" metaid="_389913"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="p2IR_complex" metaid="_324012"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_389925">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k1 </ci>
+              <ci> p2IR_complex </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_389937" value="1E-5"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="IR_complex_phosphorylation" name="IR_complex_phosphorylation" metaid="_389949" reversible="false" fast="false">
+        <listOfReactants>
+          <speciesReference species="IR_complex" metaid="_389961"/>
+          <speciesReference species="pmTOR" metaid="_389973"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="p2IR_complex" metaid="_389985"/>
+          <speciesReference species="pmTOR" metaid="_389997"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="IR_complex" metaid="_324025"/>
+          <modifierSpeciesReference species="pmTOR" metaid="_324038"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_390009">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k1 </ci>
+              <ci> IR_complex </ci>
+              <ci> pmTOR </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_390021" value="9.93311"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="p2IR_complex_degradation" name="p2IR_complex_degradation" metaid="_390033" reversible="false" fast="false">
+        <listOfReactants>
+          <speciesReference species="p2IR_complex" metaid="_390045"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="phi_2" metaid="_390057"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="p2IR_complex" metaid="_324051"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_390069">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k1 </ci>
+              <ci> p2IR_complex </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_390081" value="1E-5"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="insulin_p2IR_complex" name="insulin+p2IR_complex" metaid="_390093" fast="false">
+        <listOfReactants>
+          <speciesReference species="insulin" metaid="_390105"/>
+          <speciesReference species="p2IR_complex" metaid="_390117"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="p1p2IR_complex" metaid="_390129"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="insulin" metaid="_324064"/>
+          <modifierSpeciesReference species="p2IR_complex" metaid="_324078"/>
+          <modifierSpeciesReference species="p1p2IR_complex" metaid="_324091"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_390141">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> insulin </ci>
+                <ci> p2IR_complex </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k2 </ci>
+                <ci> p1p2IR_complex </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_390153" value="0.36303"/>
+            <parameter id="k2" name="k2" metaid="_390165" value="0.40813"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="AKT_phosphorylation" name="AKT_phosphorylation" metaid="_390177" reversible="false" fast="false">
+        <listOfReactants>
+          <speciesReference species="p1IR_complex" metaid="_390189"/>
+          <speciesReference species="AKT" metaid="_390201"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="p1IR_complex" metaid="_390213"/>
+          <speciesReference species="pAKT" metaid="_390225"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="p1IR_complex" metaid="_324104"/>
+          <modifierSpeciesReference species="AKT" metaid="_324117"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_390237">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k1 </ci>
+              <ci> p1IR_complex </ci>
+              <ci> AKT </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_390249" value="0.0092"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="pAKT_dephosphorylation" name="pAKT_dephosphorylation" metaid="_390261" reversible="false" fast="false">
+        <listOfReactants>
+          <speciesReference species="pAKT" metaid="_390273"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="AKT" metaid="_390285"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="pAKT" metaid="_324130"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_390297">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k1 </ci>
+              <ci> pAKT </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_390309" value="7.70619"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="mTOR_phosphorylation" name="mTOR_phosphorylation" metaid="_390321" reversible="false" fast="false">
+        <listOfReactants>
+          <speciesReference species="mTOR" metaid="_390333"/>
+          <speciesReference species="pAKT" metaid="_390345"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pmTOR" metaid="_390357"/>
+          <speciesReference species="pAKT" metaid="_390369"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="mTOR" metaid="_324143"/>
+          <modifierSpeciesReference species="pAKT" metaid="_324157"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_390381">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k1 </ci>
+              <ci> mTOR </ci>
+              <ci> pAKT </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_390393" value="0.41968"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="pmTOR_dephosphorylation" name="pmTOR_dephosphorylation" metaid="_390405" reversible="false" fast="false">
+        <listOfReactants>
+          <speciesReference species="pmTOR" metaid="_390417"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="mTOR" metaid="_390429"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="pmTOR" metaid="_324170"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_390441">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k1 </ci>
+              <ci> pmTOR </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_390453" value="0.12433"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="X_phosphorylation" name="X_phosphorylation" metaid="_390465" reversible="false" fast="false">
+        <listOfReactants>
+          <speciesReference species="pmTOR" metaid="_390477"/>
+          <speciesReference species="X" metaid="_390489"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pmTOR" metaid="_390501"/>
+          <speciesReference species="pX" metaid="_390513"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="pmTOR" metaid="_324183"/>
+          <modifierSpeciesReference species="X" metaid="_324196"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_390525">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k1 </ci>
+              <ci> pmTOR </ci>
+              <ci> X </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_390537" value="0.00105"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="S6K_phosphorylation" name="S6K_phosphorylation" metaid="_390549" reversible="false" fast="false">
+        <listOfReactants>
+          <speciesReference species="pmTOR" metaid="_390561"/>
+          <speciesReference species="S6K" metaid="_390573"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pmTOR" metaid="_390585"/>
+          <speciesReference species="pS6K" metaid="_390597"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="pmTOR" metaid="_324209"/>
+          <modifierSpeciesReference species="S6K" metaid="_324222"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_390609">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k1 </ci>
+              <ci> pmTOR </ci>
+              <ci> S6K </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_390621" value="0.00752"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="pS6K_dephosphorylation" name="pS6K_dephosphorylation" metaid="_390633" reversible="false" fast="false">
+        <listOfReactants>
+          <speciesReference species="pX" metaid="_390645"/>
+          <speciesReference species="pS6K" metaid="_390657"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pX" metaid="_390669"/>
+          <speciesReference species="S6K" metaid="_390681"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="pX" metaid="_324234"/>
+          <modifierSpeciesReference species="pS6K" metaid="_324247"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_390693">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k1 </ci>
+              <ci> pX </ci>
+              <ci> pS6K </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_390705" value="1.95498"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="pX_dephosphorylation" name="pX_dephosphorylation" metaid="_390717" reversible="false" fast="false">
+        <listOfReactants>
+          <speciesReference species="pX" metaid="_390729"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="X" metaid="_390741"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="pX" metaid="_324259"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_390753">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k1 </ci>
+              <ci> pX </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_390765" value="0.00146"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="GSK3b_phosphorylation" name="GSK3b_phosphorylation" metaid="_390777" reversible="false" fast="false">
+        <listOfReactants>
+          <speciesReference species="pAKT" metaid="_390789"/>
+          <speciesReference species="GSK3b" metaid="_390801"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pAKT" metaid="_390813"/>
+          <speciesReference species="pGSK3b" metaid="_390824"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="pAKT" metaid="_324271"/>
+          <modifierSpeciesReference species="GSK3b" metaid="_324283"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_390836">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k1 </ci>
+              <ci> pAKT </ci>
+              <ci> GSK3b </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_390848" value="2.97538"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="pGSK3b_dephosphorylation" name="pGSK3b_dephosphorylation" metaid="_390860" reversible="false" fast="false">
+        <listOfReactants>
+          <speciesReference species="pGSK3b" metaid="_390872"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="GSK3b" metaid="_390884"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="pGSK3b" metaid="_324295"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_390896">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k1 </ci>
+              <ci> pGSK3b </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_390908" value="0.9246"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="FOX01_phosphorylation" name="FOX01_phosphorylation" metaid="_390920" reversible="false" fast="false">
+        <listOfReactants>
+          <speciesReference species="pAKT" metaid="_390932"/>
+          <speciesReference species="FOX01" metaid="_390944"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="pAKT" metaid="_390956"/>
+          <speciesReference species="pFOX01" metaid="_390968"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="pAKT" metaid="_324307"/>
+          <modifierSpeciesReference species="FOX01" metaid="_324319"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_390980">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k1 </ci>
+              <ci> pAKT </ci>
+              <ci> FOX01 </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_390992" value="4.59698"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="pFOX01_dephosphorylation" name="pFOX01_dephosphorylation" metaid="_391004" reversible="false" fast="false">
+        <listOfReactants>
+          <speciesReference species="pFOX01" metaid="_391016"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="FOX01" metaid="_391028"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="pFOX01" metaid="_324331"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_391040">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k1 </ci>
+              <ci> pFOX01 </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_391052" value="0.15172"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="G6Pase_degradation" name="G6Pase_degradation" metaid="_391064" reversible="false" fast="false">
+        <listOfReactants>
+          <speciesReference species="G6Pase" metaid="_391076"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="phi_4" metaid="_391088"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="G6Pase" metaid="_324343"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_391100">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k1 </ci>
+              <ci> G6Pase </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_391112" value="0.05496"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="G6Pase_synthesis" name="G6Pase_synthesis" metaid="_391124" reversible="false" fast="false">
+        <listOfReactants>
+          <speciesReference species="FOX01" metaid="_391136"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="FOX01" metaid="_391148"/>
+          <speciesReference species="G6Pase" metaid="_391160"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="FOX01" metaid="_324355"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_391172">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k1 </ci>
+              <ci> FOX01 </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_391184" value="4.86146"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

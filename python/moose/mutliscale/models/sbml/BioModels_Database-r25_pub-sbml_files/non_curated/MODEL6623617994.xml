@@ -1,0 +1,2528 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2" level="2" metaid="_710037" version="1">
+  <model id="Lambeth" name="Lambeth2002_Glycogenolysis" metaid="_213140">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#_213140">
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL6623617994"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/12220081"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfCompartments>
+      <compartment id="uVol" metaid="_213157" size="1"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="adp" initialAmount="1.3E-5" metaid="_213177" compartment="uVol"/>
+      <species id="NADH" initialAmount="5E-7" metaid="_213197" compartment="uVol"/>
+      <species id="atp" initialAmount="0.0082" metaid="_213217" compartment="uVol"/>
+      <species id="PCr" initialAmount="0.03467" metaid="_213237" compartment="uVol"/>
+      <species id="G1P" initialAmount="5E-5" metaid="_213257" compartment="uVol"/>
+      <species id="P" initialAmount="0.0041" metaid="_213277" compartment="uVol"/>
+      <species id="G6P" initialAmount="0.00075" metaid="_213297" compartment="uVol"/>
+      <species id="F6P" initialAmount="0.0002" metaid="_213317" compartment="uVol"/>
+      <species id="FDP" initialAmount="7E-5" metaid="_213337" compartment="uVol"/>
+      <species id="DHAP" initialAmount="7E-5" metaid="_213357" compartment="uVol"/>
+      <species id="GAP" initialAmount="3E-5" metaid="_213377" compartment="uVol"/>
+      <species id="DPG" initialAmount="6.5E-5" metaid="_213397" compartment="uVol"/>
+      <species id="P3G" initialAmount="5E-5" metaid="_213417" compartment="uVol"/>
+      <species id="P2G" initialAmount="5E-6" metaid="_213437" compartment="uVol"/>
+      <species id="LAC" initialAmount="0.0013" metaid="_213457" compartment="uVol"/>
+      <species id="Cr" initialAmount="0.00533" metaid="_213477" compartment="uVol"/>
+      <species id="amp" initialAmount="2E-8" metaid="_213497" compartment="uVol"/>
+      <species id="PEP" initialAmount="1E-5" metaid="_213517" compartment="uVol"/>
+      <species id="PYR" initialAmount="0.000144" metaid="_213537" compartment="uVol"/>
+      <species id="NAD" initialAmount="0.0005" metaid="_213557" compartment="uVol"/>
+      <species id="Gly" initialAmount="0.112" metaid="_213577" boundaryCondition="true" compartment="uVol"/>
+      <species id="LACo" initialAmount="0" metaid="_213597" boundaryCondition="true" compartment="uVol"/>
+    </listOfSpecies>
+    <listOfReactions>
+      <reaction id="vgp" metaid="_213617">
+        <listOfReactants>
+          <speciesReference species="P" metaid="_710049"/>
+          <speciesReference species="Gly" metaid="_710061"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="G1P" metaid="_710073"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="amp" metaid="_710085"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_710097">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> fracA_1 </ci>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <times/>
+                        <ci> Vfgly_1 </ci>
+                        <ci> P </ci>
+                        <ci> Gly </ci>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> KgpAigly_1 </ci>
+                        <ci> KgpApi_1 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <plus/>
+                      <cn type="integer"> 1 </cn>
+                      <apply>
+                        <divide/>
+                        <ci> Gly </ci>
+                        <ci> KgpAglyf_1 </ci>
+                      </apply>
+                      <apply>
+                        <divide/>
+                        <ci> P </ci>
+                        <ci> KgpApi_1 </ci>
+                      </apply>
+                      <apply>
+                        <divide/>
+                        <apply>
+                          <times/>
+                          <ci> Gly </ci>
+                          <ci> P </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> KgpAglyf_1 </ci>
+                          <ci> KgpAipi_1 </ci>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <divide/>
+                        <ci> Gly </ci>
+                        <ci> KgpAglyb_1 </ci>
+                      </apply>
+                      <apply>
+                        <divide/>
+                        <ci> G1P </ci>
+                        <ci> KgpAg1p_1 </ci>
+                      </apply>
+                      <apply>
+                        <divide/>
+                        <apply>
+                          <times/>
+                          <ci> Gly </ci>
+                          <ci> G1P </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> KgpAig1p_1 </ci>
+                          <ci> KgpAglyb_1 </ci>
+                        </apply>
+                      </apply>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <times/>
+                        <apply>
+                          <divide/>
+                          <apply>
+                            <times/>
+                            <ci> Vfgly_1 </ci>
+                            <ci> KgpAglyb_1 </ci>
+                            <ci> KgpAig1p_1 </ci>
+                          </apply>
+                          <apply>
+                            <times/>
+                            <ci> KgpAigly_1 </ci>
+                            <ci> KgpApi_1 </ci>
+                            <cn> 0.31 </cn>
+                          </apply>
+                        </apply>
+                        <ci> G1P </ci>
+                        <ci> Gly </ci>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> KgpAglyb_1 </ci>
+                        <ci> KgpAig1p_1 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <plus/>
+                      <cn type="integer"> 1 </cn>
+                      <apply>
+                        <divide/>
+                        <ci> Gly </ci>
+                        <ci> KgpAglyf_1 </ci>
+                      </apply>
+                      <apply>
+                        <divide/>
+                        <ci> P </ci>
+                        <ci> KgpApi_1 </ci>
+                      </apply>
+                      <apply>
+                        <divide/>
+                        <apply>
+                          <times/>
+                          <ci> Gly </ci>
+                          <ci> P </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> KgpAglyf_1 </ci>
+                          <ci> KgpAipi_1 </ci>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <divide/>
+                        <ci> Gly </ci>
+                        <ci> KgpAglyb_1 </ci>
+                      </apply>
+                      <apply>
+                        <divide/>
+                        <ci> G1P </ci>
+                        <ci> KgpAg1p_1 </ci>
+                      </apply>
+                      <apply>
+                        <divide/>
+                        <apply>
+                          <times/>
+                          <ci> Gly </ci>
+                          <ci> G1P </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> KgpAig1p_1 </ci>
+                          <ci> KgpAglyb_1 </ci>
+                        </apply>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> fracB_1 </ci>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <times/>
+                      <apply>
+                        <divide/>
+                        <apply>
+                          <divide/>
+                          <apply>
+                            <power/>
+                            <ci> amp </ci>
+                            <ci> nH_1 </ci>
+                          </apply>
+                          <apply>
+                            <times/>
+                            <apply>
+                              <power/>
+                              <ci> Kgpamp_1 </ci>
+                              <ci> nH_1 </ci>
+                            </apply>
+                            <cn> 0.02 </cn>
+                          </apply>
+                        </apply>
+                        <apply>
+                          <plus/>
+                          <cn type="integer"> 1 </cn>
+                          <apply>
+                            <divide/>
+                            <apply>
+                              <power/>
+                              <ci> amp </ci>
+                              <ci> nH_1 </ci>
+                            </apply>
+                            <apply>
+                              <times/>
+                              <apply>
+                                <power/>
+                                <ci> Kgpamp_1 </ci>
+                                <ci> nH_1 </ci>
+                              </apply>
+                              <cn> 0.02 </cn>
+                            </apply>
+                          </apply>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <divide/>
+                        <apply>
+                          <times/>
+                          <ci> Vfgly_1 </ci>
+                          <ci> P </ci>
+                          <ci> Gly </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> KgpBiglyf_1 </ci>
+                          <ci> KgpBpi_1 </ci>
+                        </apply>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <plus/>
+                      <cn type="integer"> 1 </cn>
+                      <apply>
+                        <divide/>
+                        <ci> Gly </ci>
+                        <ci> KgpBipi_1 </ci>
+                      </apply>
+                      <apply>
+                        <divide/>
+                        <ci> P </ci>
+                        <ci> KgpBiglyf_1 </ci>
+                      </apply>
+                      <apply>
+                        <divide/>
+                        <ci> Gly </ci>
+                        <ci> KgpBiglyb_1 </ci>
+                      </apply>
+                      <apply>
+                        <divide/>
+                        <ci> G1P </ci>
+                        <ci> KgpBig1p_1 </ci>
+                      </apply>
+                      <apply>
+                        <divide/>
+                        <apply>
+                          <times/>
+                          <ci> Gly </ci>
+                          <ci> P </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> KgpBiglyf_1 </ci>
+                          <ci> KgpBpi_1 </ci>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <divide/>
+                        <apply>
+                          <times/>
+                          <ci> Gly </ci>
+                          <ci> G1P </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> KgpBg1p_1 </ci>
+                          <ci> KgpBiglyb_1 </ci>
+                        </apply>
+                      </apply>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <times/>
+                      <apply>
+                        <divide/>
+                        <apply>
+                          <divide/>
+                          <apply>
+                            <power/>
+                            <ci> amp </ci>
+                            <ci> nH_1 </ci>
+                          </apply>
+                          <apply>
+                            <times/>
+                            <apply>
+                              <power/>
+                              <ci> Kgpamp_1 </ci>
+                              <ci> nH_1 </ci>
+                            </apply>
+                            <cn> 0.02 </cn>
+                          </apply>
+                        </apply>
+                        <apply>
+                          <plus/>
+                          <cn type="integer"> 1 </cn>
+                          <apply>
+                            <divide/>
+                            <apply>
+                              <power/>
+                              <ci> amp </ci>
+                              <ci> nH_1 </ci>
+                            </apply>
+                            <apply>
+                              <times/>
+                              <apply>
+                                <power/>
+                                <ci> Kgpamp_1 </ci>
+                                <ci> nH_1 </ci>
+                              </apply>
+                              <cn> 0.02 </cn>
+                            </apply>
+                          </apply>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <divide/>
+                        <apply>
+                          <times/>
+                          <apply>
+                            <divide/>
+                            <apply>
+                              <times/>
+                              <ci> Vfgly_1 </ci>
+                              <ci> KgpBg1p_1 </ci>
+                              <ci> KgpBiglyb_1 </ci>
+                            </apply>
+                            <apply>
+                              <times/>
+                              <ci> KgpBiglyf_1 </ci>
+                              <ci> KgpBpi_1 </ci>
+                              <cn> 0.31 </cn>
+                            </apply>
+                          </apply>
+                          <ci> G1P </ci>
+                          <ci> Gly </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> KgpBg1p_1 </ci>
+                          <ci> KgpBiglyb_1 </ci>
+                        </apply>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <plus/>
+                      <cn type="integer"> 1 </cn>
+                      <apply>
+                        <divide/>
+                        <ci> Gly </ci>
+                        <ci> KgpBipi_1 </ci>
+                      </apply>
+                      <apply>
+                        <divide/>
+                        <ci> P </ci>
+                        <ci> KgpBiglyf_1 </ci>
+                      </apply>
+                      <apply>
+                        <divide/>
+                        <ci> Gly </ci>
+                        <ci> KgpBiglyb_1 </ci>
+                      </apply>
+                      <apply>
+                        <divide/>
+                        <ci> G1P </ci>
+                        <ci> KgpBig1p_1 </ci>
+                      </apply>
+                      <apply>
+                        <divide/>
+                        <apply>
+                          <times/>
+                          <ci> Gly </ci>
+                          <ci> P </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> KgpBiglyf_1 </ci>
+                          <ci> KgpBpi_1 </ci>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <divide/>
+                        <apply>
+                          <times/>
+                          <ci> Gly </ci>
+                          <ci> G1P </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> KgpBg1p_1 </ci>
+                          <ci> KgpBiglyb_1 </ci>
+                        </apply>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="fracA_1" metaid="_719409" value="0.4"/>
+            <parameter id="Vfgly_1" metaid="_719412" value="0.05"/>
+            <parameter id="KgpAigly_1" metaid="_719413" value="0.002"/>
+            <parameter id="KgpApi_1" metaid="_719415" value="0.004"/>
+            <parameter id="KgpAglyf_1" metaid="_719416" value="0.0017"/>
+            <parameter id="KgpAipi_1" metaid="_719418" value="0.0047"/>
+            <parameter id="KgpAglyb_1" metaid="_719419" value="0.00015"/>
+            <parameter id="KgpAg1p_1" metaid="_719421" value="0.0027"/>
+            <parameter id="KgpAig1p_1" metaid="_719422" value="0.0101"/>
+            <parameter id="fracB_1" metaid="_719424" value="0.6"/>
+            <parameter id="nH_1" metaid="_719425" value="1.75"/>
+            <parameter id="Kgpamp_1" metaid="_719427" value="9.7E-5"/>
+            <parameter id="KgpBiglyf_1" metaid="_719428" value="0.015"/>
+            <parameter id="KgpBpi_1" metaid="_719430" value="0.0002"/>
+            <parameter id="KgpBipi_1" metaid="_719431" value="0.0046"/>
+            <parameter id="KgpBiglyb_1" metaid="_719433" value="0.0044"/>
+            <parameter id="KgpBig1p_1" metaid="_719434" value="0.0074"/>
+            <parameter id="KgpBg1p_1" metaid="_719436" value="0.0015"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="vpglm" metaid="_213637">
+        <listOfReactants>
+          <speciesReference species="G1P" metaid="_710109"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="G6P" metaid="_710121"/>
+        </listOfProducts>
+        <kineticLaw metaid="_710133">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <divide/>
+              <apply>
+                <minus/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> Vfpglm_2 </ci>
+                    <ci> G1P </ci>
+                  </apply>
+                  <ci> Kpglmg1p_2 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <times/>
+                        <ci> Vfpglm_2 </ci>
+                        <ci> Kpglmg6p_2 </ci>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> Kpglmg1p_2 </ci>
+                        <cn> 16.62 </cn>
+                      </apply>
+                    </apply>
+                    <ci> G6P </ci>
+                  </apply>
+                  <ci> Kpglmg6p_2 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <plus/>
+                <cn type="integer"> 1 </cn>
+                <apply>
+                  <divide/>
+                  <ci> G1P </ci>
+                  <ci> Kpglmg1p_2 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> G6P </ci>
+                  <ci> Kpglmg6p_2 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="Vfpglm_2" metaid="_719437" value="0.48"/>
+            <parameter id="Kpglmg1p_2" metaid="_719438" value="6.3E-5"/>
+            <parameter id="Kpglmg6p_2" metaid="_719441" value="3E-5"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="vpgi" metaid="_213657">
+        <listOfReactants>
+          <speciesReference species="G6P" metaid="_710145"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="F6P" metaid="_710157"/>
+        </listOfProducts>
+        <kineticLaw metaid="_710169">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <divide/>
+              <apply>
+                <minus/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <times/>
+                        <ci> Vbpgi_3 </ci>
+                        <ci> Kpgig6p_3 </ci>
+                      </apply>
+                      <ci> Kpgif6p_3 </ci>
+                    </apply>
+                    <cn> 0.45 </cn>
+                    <ci> G6P </ci>
+                  </apply>
+                  <ci> Kpgig6p_3 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> Vbpgi_3 </ci>
+                    <ci> F6P </ci>
+                  </apply>
+                  <ci> Kpgif6p_3 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <plus/>
+                <cn type="integer"> 1 </cn>
+                <apply>
+                  <divide/>
+                  <ci> F6P </ci>
+                  <ci> Kpgif6p_3 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> G6P </ci>
+                  <ci> Kpgig6p_3 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="Vbpgi_3" metaid="_719442" value="0.88"/>
+            <parameter id="Kpgig6p_3" metaid="_719443" value="0.00048"/>
+            <parameter id="Kpgif6p_3" metaid="_719446" value="0.000119"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="vpfk" metaid="_213677">
+        <listOfReactants>
+          <speciesReference species="atp" metaid="_710181"/>
+          <speciesReference species="F6P" metaid="_710193"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="adp" metaid="_710205"/>
+          <speciesReference species="FDP" metaid="_710218"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="amp" metaid="_710231"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_710243">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Vfpfk_4 </ci>
+                  <ci> atp </ci>
+                  <ci> F6P </ci>
+                  <apply>
+                    <plus/>
+                    <cn type="integer"> 1 </cn>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <times/>
+                        <ci> Kpfkatp_4 </ci>
+                        <ci> Kpfkf6p_4 </ci>
+                        <ci> Lo_4 </ci>
+                        <apply>
+                          <power/>
+                          <apply>
+                            <plus/>
+                            <cn type="integer"> 1 </cn>
+                            <apply>
+                              <divide/>
+                              <apply>
+                                <times/>
+                                <ci> en_4 </ci>
+                                <ci> amp </ci>
+                              </apply>
+                              <ci> Kpfkamp_4 </ci>
+                            </apply>
+                          </apply>
+                          <cn type="integer"> 4 </cn>
+                        </apply>
+                        <apply>
+                          <power/>
+                          <apply>
+                            <plus/>
+                            <cn type="integer"> 1 </cn>
+                            <apply>
+                              <divide/>
+                              <ci> atp </ci>
+                              <ci> Kpfkiatp_4 </ci>
+                            </apply>
+                          </apply>
+                          <cn type="integer"> 4 </cn>
+                        </apply>
+                        <apply>
+                          <power/>
+                          <apply>
+                            <plus/>
+                            <apply>
+                              <times/>
+                              <apply>
+                                <plus/>
+                                <cn type="integer"> 1 </cn>
+                                <apply>
+                                  <divide/>
+                                  <ci> atp </ci>
+                                  <ci> KpfkatpT_4 </ci>
+                                </apply>
+                              </apply>
+                              <apply>
+                                <plus/>
+                                <cn type="integer"> 1 </cn>
+                                <apply>
+                                  <divide/>
+                                  <ci> F6P </ci>
+                                  <ci> Kpfkf6pT_4 </ci>
+                                </apply>
+                              </apply>
+                            </apply>
+                            <apply>
+                              <divide/>
+                              <ci> FDP </ci>
+                              <ci> KpfkfdpT_4 </ci>
+                            </apply>
+                            <apply>
+                              <divide/>
+                              <apply>
+                                <times/>
+                                <ci> adp </ci>
+                                <apply>
+                                  <plus/>
+                                  <cn type="integer"> 1 </cn>
+                                  <apply>
+                                    <divide/>
+                                    <ci> FDP </ci>
+                                    <ci> KpfkfdpT_4 </ci>
+                                  </apply>
+                                </apply>
+                              </apply>
+                              <ci> KpfkadpT_4 </ci>
+                            </apply>
+                          </apply>
+                          <cn type="integer"> 3 </cn>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> KpfkatpT_4 </ci>
+                        <ci> Kpfkf6pT_4 </ci>
+                        <apply>
+                          <power/>
+                          <apply>
+                            <plus/>
+                            <cn type="integer"> 1 </cn>
+                            <apply>
+                              <divide/>
+                              <ci> amp </ci>
+                              <ci> Kpfkamp_4 </ci>
+                            </apply>
+                          </apply>
+                          <cn type="integer"> 4 </cn>
+                        </apply>
+                        <apply>
+                          <power/>
+                          <apply>
+                            <plus/>
+                            <cn type="integer"> 1 </cn>
+                            <apply>
+                              <divide/>
+                              <apply>
+                                <times/>
+                                <ci> dn_4 </ci>
+                                <ci> atp </ci>
+                              </apply>
+                              <ci> Kpfkiatp_4 </ci>
+                            </apply>
+                          </apply>
+                          <cn type="integer"> 4 </cn>
+                        </apply>
+                        <apply>
+                          <power/>
+                          <apply>
+                            <plus/>
+                            <apply>
+                              <times/>
+                              <apply>
+                                <plus/>
+                                <cn type="integer"> 1 </cn>
+                                <apply>
+                                  <divide/>
+                                  <ci> atp </ci>
+                                  <ci> Kpfkatp_4 </ci>
+                                </apply>
+                              </apply>
+                              <apply>
+                                <plus/>
+                                <cn type="integer"> 1 </cn>
+                                <apply>
+                                  <divide/>
+                                  <ci> F6P </ci>
+                                  <ci> Kpfkf6p_4 </ci>
+                                </apply>
+                              </apply>
+                            </apply>
+                            <apply>
+                              <divide/>
+                              <ci> FDP </ci>
+                              <ci> Kpfkfdp_4 </ci>
+                            </apply>
+                            <apply>
+                              <divide/>
+                              <apply>
+                                <times/>
+                                <ci> adp </ci>
+                                <apply>
+                                  <plus/>
+                                  <cn type="integer"> 1 </cn>
+                                  <apply>
+                                    <divide/>
+                                    <ci> FDP </ci>
+                                    <ci> Kpfkfdp_4 </ci>
+                                  </apply>
+                                </apply>
+                              </apply>
+                              <ci> Kpfkadp_4 </ci>
+                            </apply>
+                          </apply>
+                          <cn type="integer"> 3 </cn>
+                        </apply>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> Kpfkatp_4 </ci>
+                  <ci> Kpfkf6p_4 </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <apply>
+                        <plus/>
+                        <cn type="integer"> 1 </cn>
+                        <apply>
+                          <divide/>
+                          <ci> atp </ci>
+                          <ci> Kpfkatp_4 </ci>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <plus/>
+                        <cn type="integer"> 1 </cn>
+                        <apply>
+                          <divide/>
+                          <ci> F6P </ci>
+                          <ci> Kpfkf6p_4 </ci>
+                        </apply>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <divide/>
+                      <ci> FDP </ci>
+                      <ci> Kpfkfdp_4 </ci>
+                    </apply>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <times/>
+                        <ci> adp </ci>
+                        <apply>
+                          <plus/>
+                          <cn type="integer"> 1 </cn>
+                          <apply>
+                            <divide/>
+                            <ci> FDP </ci>
+                            <ci> Kpfkfdp_4 </ci>
+                          </apply>
+                        </apply>
+                      </apply>
+                      <ci> Kpfkadp_4 </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <cn type="integer"> 1 </cn>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <times/>
+                        <ci> Lo_4 </ci>
+                        <apply>
+                          <power/>
+                          <apply>
+                            <plus/>
+                            <cn type="integer"> 1 </cn>
+                            <apply>
+                              <divide/>
+                              <apply>
+                                <times/>
+                                <ci> en_4 </ci>
+                                <ci> amp </ci>
+                              </apply>
+                              <ci> Kpfkamp_4 </ci>
+                            </apply>
+                          </apply>
+                          <cn type="integer"> 4 </cn>
+                        </apply>
+                        <apply>
+                          <power/>
+                          <apply>
+                            <plus/>
+                            <cn type="integer"> 1 </cn>
+                            <apply>
+                              <divide/>
+                              <ci> atp </ci>
+                              <ci> Kpfkiatp_4 </ci>
+                            </apply>
+                          </apply>
+                          <cn type="integer"> 4 </cn>
+                        </apply>
+                        <apply>
+                          <power/>
+                          <apply>
+                            <plus/>
+                            <apply>
+                              <times/>
+                              <apply>
+                                <plus/>
+                                <cn type="integer"> 1 </cn>
+                                <apply>
+                                  <divide/>
+                                  <ci> atp </ci>
+                                  <ci> KpfkatpT_4 </ci>
+                                </apply>
+                              </apply>
+                              <apply>
+                                <plus/>
+                                <cn type="integer"> 1 </cn>
+                                <apply>
+                                  <divide/>
+                                  <ci> F6P </ci>
+                                  <ci> Kpfkf6pT_4 </ci>
+                                </apply>
+                              </apply>
+                            </apply>
+                            <apply>
+                              <divide/>
+                              <ci> FDP </ci>
+                              <ci> KpfkfdpT_4 </ci>
+                            </apply>
+                            <apply>
+                              <divide/>
+                              <apply>
+                                <times/>
+                                <ci> adp </ci>
+                                <apply>
+                                  <plus/>
+                                  <cn type="integer"> 1 </cn>
+                                  <apply>
+                                    <divide/>
+                                    <ci> FDP </ci>
+                                    <ci> KpfkfdpT_4 </ci>
+                                  </apply>
+                                </apply>
+                              </apply>
+                              <ci> KpfkadpT_4 </ci>
+                            </apply>
+                          </apply>
+                          <cn type="integer"> 4 </cn>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <apply>
+                          <power/>
+                          <apply>
+                            <plus/>
+                            <cn type="integer"> 1 </cn>
+                            <apply>
+                              <divide/>
+                              <ci> amp </ci>
+                              <ci> Kpfkamp_4 </ci>
+                            </apply>
+                          </apply>
+                          <cn type="integer"> 4 </cn>
+                        </apply>
+                        <apply>
+                          <power/>
+                          <apply>
+                            <plus/>
+                            <cn type="integer"> 1 </cn>
+                            <apply>
+                              <divide/>
+                              <apply>
+                                <times/>
+                                <ci> dn_4 </ci>
+                                <ci> atp </ci>
+                              </apply>
+                              <ci> Kpfkiatp_4 </ci>
+                            </apply>
+                          </apply>
+                          <cn type="integer"> 4 </cn>
+                        </apply>
+                        <apply>
+                          <power/>
+                          <apply>
+                            <plus/>
+                            <apply>
+                              <times/>
+                              <apply>
+                                <plus/>
+                                <cn type="integer"> 1 </cn>
+                                <apply>
+                                  <divide/>
+                                  <ci> atp </ci>
+                                  <ci> Kpfkatp_4 </ci>
+                                </apply>
+                              </apply>
+                              <apply>
+                                <plus/>
+                                <cn type="integer"> 1 </cn>
+                                <apply>
+                                  <divide/>
+                                  <ci> F6P </ci>
+                                  <ci> Kpfkf6p_4 </ci>
+                                </apply>
+                              </apply>
+                            </apply>
+                            <apply>
+                              <divide/>
+                              <ci> FDP </ci>
+                              <ci> Kpfkfdp_4 </ci>
+                            </apply>
+                            <apply>
+                              <divide/>
+                              <apply>
+                                <times/>
+                                <ci> adp </ci>
+                                <apply>
+                                  <plus/>
+                                  <cn type="integer"> 1 </cn>
+                                  <apply>
+                                    <divide/>
+                                    <ci> FDP </ci>
+                                    <ci> Kpfkfdp_4 </ci>
+                                  </apply>
+                                </apply>
+                              </apply>
+                              <ci> Kpfkadp_4 </ci>
+                            </apply>
+                          </apply>
+                          <cn type="integer"> 4 </cn>
+                        </apply>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <cn> 0.00411743 </cn>
+                  <ci> Vfpfk_4 </ci>
+                  <ci> adp </ci>
+                  <ci> FDP </ci>
+                  <apply>
+                    <plus/>
+                    <cn type="integer"> 1 </cn>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <times/>
+                        <ci> Kpfkatp_4 </ci>
+                        <ci> Kpfkf6p_4 </ci>
+                        <ci> Lo_4 </ci>
+                        <apply>
+                          <power/>
+                          <apply>
+                            <plus/>
+                            <cn type="integer"> 1 </cn>
+                            <apply>
+                              <divide/>
+                              <apply>
+                                <times/>
+                                <ci> en_4 </ci>
+                                <ci> amp </ci>
+                              </apply>
+                              <ci> Kpfkamp_4 </ci>
+                            </apply>
+                          </apply>
+                          <cn type="integer"> 4 </cn>
+                        </apply>
+                        <apply>
+                          <power/>
+                          <apply>
+                            <plus/>
+                            <cn type="integer"> 1 </cn>
+                            <apply>
+                              <divide/>
+                              <ci> atp </ci>
+                              <ci> Kpfkiatp_4 </ci>
+                            </apply>
+                          </apply>
+                          <cn type="integer"> 4 </cn>
+                        </apply>
+                        <apply>
+                          <power/>
+                          <apply>
+                            <plus/>
+                            <apply>
+                              <times/>
+                              <apply>
+                                <plus/>
+                                <cn type="integer"> 1 </cn>
+                                <apply>
+                                  <divide/>
+                                  <ci> atp </ci>
+                                  <ci> KpfkatpT_4 </ci>
+                                </apply>
+                              </apply>
+                              <apply>
+                                <plus/>
+                                <cn type="integer"> 1 </cn>
+                                <apply>
+                                  <divide/>
+                                  <ci> F6P </ci>
+                                  <ci> Kpfkf6pT_4 </ci>
+                                </apply>
+                              </apply>
+                            </apply>
+                            <apply>
+                              <divide/>
+                              <ci> FDP </ci>
+                              <ci> KpfkfdpT_4 </ci>
+                            </apply>
+                            <apply>
+                              <divide/>
+                              <apply>
+                                <times/>
+                                <ci> adp </ci>
+                                <apply>
+                                  <plus/>
+                                  <cn type="integer"> 1 </cn>
+                                  <apply>
+                                    <divide/>
+                                    <ci> FDP </ci>
+                                    <ci> KpfkfdpT_4 </ci>
+                                  </apply>
+                                </apply>
+                              </apply>
+                              <ci> KpfkadpT_4 </ci>
+                            </apply>
+                          </apply>
+                          <cn type="integer"> 3 </cn>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> KpfkatpT_4 </ci>
+                        <ci> Kpfkf6pT_4 </ci>
+                        <apply>
+                          <power/>
+                          <apply>
+                            <plus/>
+                            <cn type="integer"> 1 </cn>
+                            <apply>
+                              <divide/>
+                              <ci> amp </ci>
+                              <ci> Kpfkamp_4 </ci>
+                            </apply>
+                          </apply>
+                          <cn type="integer"> 4 </cn>
+                        </apply>
+                        <apply>
+                          <power/>
+                          <apply>
+                            <plus/>
+                            <cn type="integer"> 1 </cn>
+                            <apply>
+                              <divide/>
+                              <apply>
+                                <times/>
+                                <ci> dn_4 </ci>
+                                <ci> atp </ci>
+                              </apply>
+                              <ci> Kpfkiatp_4 </ci>
+                            </apply>
+                          </apply>
+                          <cn type="integer"> 4 </cn>
+                        </apply>
+                        <apply>
+                          <power/>
+                          <apply>
+                            <plus/>
+                            <apply>
+                              <times/>
+                              <apply>
+                                <plus/>
+                                <cn type="integer"> 1 </cn>
+                                <apply>
+                                  <divide/>
+                                  <ci> atp </ci>
+                                  <ci> Kpfkatp_4 </ci>
+                                </apply>
+                              </apply>
+                              <apply>
+                                <plus/>
+                                <cn type="integer"> 1 </cn>
+                                <apply>
+                                  <divide/>
+                                  <ci> F6P </ci>
+                                  <ci> Kpfkf6p_4 </ci>
+                                </apply>
+                              </apply>
+                            </apply>
+                            <apply>
+                              <divide/>
+                              <ci> FDP </ci>
+                              <ci> Kpfkfdp_4 </ci>
+                            </apply>
+                            <apply>
+                              <divide/>
+                              <apply>
+                                <times/>
+                                <ci> adp </ci>
+                                <apply>
+                                  <plus/>
+                                  <cn type="integer"> 1 </cn>
+                                  <apply>
+                                    <divide/>
+                                    <ci> FDP </ci>
+                                    <ci> Kpfkfdp_4 </ci>
+                                  </apply>
+                                </apply>
+                              </apply>
+                              <ci> Kpfkadp_4 </ci>
+                            </apply>
+                          </apply>
+                          <cn type="integer"> 3 </cn>
+                        </apply>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> Kpfkatp_4 </ci>
+                  <ci> Kpfkf6p_4 </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <apply>
+                        <plus/>
+                        <cn type="integer"> 1 </cn>
+                        <apply>
+                          <divide/>
+                          <ci> atp </ci>
+                          <ci> Kpfkatp_4 </ci>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <plus/>
+                        <cn type="integer"> 1 </cn>
+                        <apply>
+                          <divide/>
+                          <ci> F6P </ci>
+                          <ci> Kpfkf6p_4 </ci>
+                        </apply>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <divide/>
+                      <ci> FDP </ci>
+                      <ci> Kpfkfdp_4 </ci>
+                    </apply>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <times/>
+                        <ci> adp </ci>
+                        <apply>
+                          <plus/>
+                          <cn type="integer"> 1 </cn>
+                          <apply>
+                            <divide/>
+                            <ci> FDP </ci>
+                            <ci> Kpfkfdp_4 </ci>
+                          </apply>
+                        </apply>
+                      </apply>
+                      <ci> Kpfkadp_4 </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <cn type="integer"> 1 </cn>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <times/>
+                        <ci> Lo_4 </ci>
+                        <apply>
+                          <power/>
+                          <apply>
+                            <plus/>
+                            <cn type="integer"> 1 </cn>
+                            <apply>
+                              <divide/>
+                              <apply>
+                                <times/>
+                                <ci> en_4 </ci>
+                                <ci> amp </ci>
+                              </apply>
+                              <ci> Kpfkamp_4 </ci>
+                            </apply>
+                          </apply>
+                          <cn type="integer"> 4 </cn>
+                        </apply>
+                        <apply>
+                          <power/>
+                          <apply>
+                            <plus/>
+                            <cn type="integer"> 1 </cn>
+                            <apply>
+                              <divide/>
+                              <ci> atp </ci>
+                              <ci> Kpfkiatp_4 </ci>
+                            </apply>
+                          </apply>
+                          <cn type="integer"> 4 </cn>
+                        </apply>
+                        <apply>
+                          <power/>
+                          <apply>
+                            <plus/>
+                            <apply>
+                              <times/>
+                              <apply>
+                                <plus/>
+                                <cn type="integer"> 1 </cn>
+                                <apply>
+                                  <divide/>
+                                  <ci> atp </ci>
+                                  <ci> KpfkatpT_4 </ci>
+                                </apply>
+                              </apply>
+                              <apply>
+                                <plus/>
+                                <cn type="integer"> 1 </cn>
+                                <apply>
+                                  <divide/>
+                                  <ci> F6P </ci>
+                                  <ci> Kpfkf6pT_4 </ci>
+                                </apply>
+                              </apply>
+                            </apply>
+                            <apply>
+                              <divide/>
+                              <ci> FDP </ci>
+                              <ci> KpfkfdpT_4 </ci>
+                            </apply>
+                            <apply>
+                              <divide/>
+                              <apply>
+                                <times/>
+                                <ci> adp </ci>
+                                <apply>
+                                  <plus/>
+                                  <cn type="integer"> 1 </cn>
+                                  <apply>
+                                    <divide/>
+                                    <ci> FDP </ci>
+                                    <ci> KpfkfdpT_4 </ci>
+                                  </apply>
+                                </apply>
+                              </apply>
+                              <ci> KpfkadpT_4 </ci>
+                            </apply>
+                          </apply>
+                          <cn type="integer"> 4 </cn>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <apply>
+                          <power/>
+                          <apply>
+                            <plus/>
+                            <cn type="integer"> 1 </cn>
+                            <apply>
+                              <divide/>
+                              <ci> amp </ci>
+                              <ci> Kpfkamp_4 </ci>
+                            </apply>
+                          </apply>
+                          <cn type="integer"> 4 </cn>
+                        </apply>
+                        <apply>
+                          <power/>
+                          <apply>
+                            <plus/>
+                            <cn type="integer"> 1 </cn>
+                            <apply>
+                              <divide/>
+                              <apply>
+                                <times/>
+                                <ci> dn_4 </ci>
+                                <ci> atp </ci>
+                              </apply>
+                              <ci> Kpfkiatp_4 </ci>
+                            </apply>
+                          </apply>
+                          <cn type="integer"> 4 </cn>
+                        </apply>
+                        <apply>
+                          <power/>
+                          <apply>
+                            <plus/>
+                            <apply>
+                              <times/>
+                              <apply>
+                                <plus/>
+                                <cn type="integer"> 1 </cn>
+                                <apply>
+                                  <divide/>
+                                  <ci> atp </ci>
+                                  <ci> Kpfkatp_4 </ci>
+                                </apply>
+                              </apply>
+                              <apply>
+                                <plus/>
+                                <cn type="integer"> 1 </cn>
+                                <apply>
+                                  <divide/>
+                                  <ci> F6P </ci>
+                                  <ci> Kpfkf6p_4 </ci>
+                                </apply>
+                              </apply>
+                            </apply>
+                            <apply>
+                              <divide/>
+                              <ci> FDP </ci>
+                              <ci> Kpfkfdp_4 </ci>
+                            </apply>
+                            <apply>
+                              <divide/>
+                              <apply>
+                                <times/>
+                                <ci> adp </ci>
+                                <apply>
+                                  <plus/>
+                                  <cn type="integer"> 1 </cn>
+                                  <apply>
+                                    <divide/>
+                                    <ci> FDP </ci>
+                                    <ci> Kpfkfdp_4 </ci>
+                                  </apply>
+                                </apply>
+                              </apply>
+                              <ci> Kpfkadp_4 </ci>
+                            </apply>
+                          </apply>
+                          <cn type="integer"> 4 </cn>
+                        </apply>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="Vfpfk_4" metaid="_719447" value="0.056"/>
+            <parameter id="Kpfkatp_4" metaid="_719448" value="8E-5"/>
+            <parameter id="Kpfkf6p_4" metaid="_719451" value="0.00018"/>
+            <parameter id="Lo_4" metaid="_719452" value="13"/>
+            <parameter id="en_4" metaid="_719454" value="0.01"/>
+            <parameter id="Kpfkamp_4" metaid="_719455" value="6E-5"/>
+            <parameter id="Kpfkiatp_4" metaid="_719457" value="0.00087"/>
+            <parameter id="KpfkatpT_4" metaid="_719458" value="0.00025"/>
+            <parameter id="Kpfkf6pT_4" metaid="_719460" value="0.02"/>
+            <parameter id="KpfkfdpT_4" metaid="_719461" value="0.0042"/>
+            <parameter id="KpfkadpT_4" metaid="_719463" value="0.00271"/>
+            <parameter id="dn_4" metaid="_719464" value="0.01"/>
+            <parameter id="Kpfkfdp_4" metaid="_719466" value="0.0042"/>
+            <parameter id="Kpfkadp_4" metaid="_719467" value="0.00271"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="vald" metaid="_213697">
+        <listOfReactants>
+          <speciesReference species="FDP" metaid="_710255"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="DHAP" metaid="_710267"/>
+          <speciesReference species="GAP" metaid="_710279"/>
+        </listOfProducts>
+        <kineticLaw metaid="_710291">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <divide/>
+              <apply>
+                <minus/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> Vfald_5 </ci>
+                    <ci> FDP </ci>
+                  </apply>
+                  <ci> Kaldfdp_5 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <times/>
+                        <ci> Vfald_5 </ci>
+                        <ci> Kaldgap_5 </ci>
+                        <ci> Kalddhap_5 </ci>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> Kaldfdp_5 </ci>
+                        <cn type="e-notation"> 9.5 <sep/> -5 </cn>
+                      </apply>
+                    </apply>
+                    <ci> DHAP </ci>
+                    <ci> GAP </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> Kaldgap_5 </ci>
+                    <ci> Kalddhap_5 </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <plus/>
+                <cn type="integer"> 1 </cn>
+                <apply>
+                  <divide/>
+                  <ci> FDP </ci>
+                  <ci> Kaldfdp_5 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> GAP </ci>
+                  <ci> Kaldgap_5 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> DHAP </ci>
+                  <ci> Kalddhap_5 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="Vfald_5" metaid="_719468" value="0.104"/>
+            <parameter id="Kaldfdp_5" metaid="_719471" value="0.0005"/>
+            <parameter id="Kaldgap_5" metaid="_719472" value="0.001"/>
+            <parameter id="Kalddhap_5" metaid="_719474" value="0.002"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="vtpi" metaid="_213717">
+        <listOfReactants>
+          <speciesReference species="GAP" metaid="_710303"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="DHAP" metaid="_710315"/>
+        </listOfProducts>
+        <kineticLaw metaid="_710327">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <divide/>
+              <apply>
+                <minus/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> Vftpi_6 </ci>
+                    <ci> GAP </ci>
+                  </apply>
+                  <ci> Ktpigap_6 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <times/>
+                        <ci> Vftpi_6 </ci>
+                        <ci> Ktpidhap_6 </ci>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> Ktpigap_6 </ci>
+                        <cn> 19.2 </cn>
+                      </apply>
+                    </apply>
+                    <ci> DHAP </ci>
+                  </apply>
+                  <ci> Ktpidhap_6 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <plus/>
+                <cn type="integer"> 1 </cn>
+                <apply>
+                  <divide/>
+                  <ci> GAP </ci>
+                  <ci> Ktpigap_6 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> DHAP </ci>
+                  <ci> Ktpidhap_6 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="Vftpi_6" metaid="_719475" value="12"/>
+            <parameter id="Ktpigap_6" metaid="_719476" value="0.00032"/>
+            <parameter id="Ktpidhap_6" metaid="_719479" value="0.00061"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="vgapdh" metaid="_213737">
+        <listOfReactants>
+          <speciesReference species="P" metaid="_710339"/>
+          <speciesReference species="GAP" metaid="_710351"/>
+          <speciesReference species="NAD" metaid="_710363"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="NADH" metaid="_710375"/>
+          <speciesReference species="DPG" metaid="_710387"/>
+        </listOfProducts>
+        <kineticLaw metaid="_710399">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <divide/>
+              <apply>
+                <plus/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <cn> -11.236 </cn>
+                    <ci> Vfgad_7 </ci>
+                    <ci> DPG </ci>
+                    <ci> NADH </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> Kgapdhgap_7 </ci>
+                    <ci> Kgapdhnad_7 </ci>
+                    <ci> Kgapdhpi_7 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> Vfgad_7 </ci>
+                    <ci> GAP </ci>
+                    <ci> NAD </ci>
+                    <ci> P </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> Kgapdhgap_7 </ci>
+                    <ci> Kgapdhnad_7 </ci>
+                    <ci> Kgapdhpi_7 </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <plus/>
+                <cn type="integer"> 1 </cn>
+                <apply>
+                  <divide/>
+                  <ci> DPG </ci>
+                  <ci> Kgapdh13dpg_7 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> GAP </ci>
+                  <ci> Kgapdhgap_7 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> NAD </ci>
+                  <ci> Kgapdhnad_7 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> GAP </ci>
+                    <ci> NAD </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> Kgapdhgap_7 </ci>
+                    <ci> Kgapdhnad_7 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> NADH </ci>
+                  <ci> Kgapdhnadh_7 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> DPG </ci>
+                    <ci> NADH </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> Kgapdh13dpg_7 </ci>
+                    <ci> Kgapdhnadh_7 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> P </ci>
+                  <ci> Kgapdhpi_7 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> GAP </ci>
+                    <ci> NAD </ci>
+                    <ci> P </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> Kgapdhgap_7 </ci>
+                    <ci> Kgapdhnad_7 </ci>
+                    <ci> Kgapdhpi_7 </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="Vfgad_7" metaid="_719480" value="1.65"/>
+            <parameter id="Kgapdhgap_7" metaid="_719481" value="2.5E-6"/>
+            <parameter id="Kgapdhnad_7" metaid="_719484" value="9E-5"/>
+            <parameter id="Kgapdhpi_7" metaid="_719485" value="0.00029"/>
+            <parameter id="Kgapdh13dpg_7" metaid="_719487" value="8E-7"/>
+            <parameter id="Kgapdhnadh_7" metaid="_719488" value="3.3E-6"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="vpgk" metaid="_213757">
+        <listOfReactants>
+          <speciesReference species="adp" metaid="_710411"/>
+          <speciesReference species="DPG" metaid="_710423"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="atp" metaid="_710435"/>
+          <speciesReference species="P3G" metaid="_710447"/>
+        </listOfProducts>
+        <kineticLaw metaid="_710459">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <divide/>
+              <apply>
+                <minus/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <cn type="integer"> 57109 </cn>
+                    <ci> Vbpgk_8 </ci>
+                    <ci> adp </ci>
+                    <ci> DPG </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> Kpgk3pg_8 </ci>
+                    <ci> Kpgkatp_8 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> Vbpgk_8 </ci>
+                    <ci> atp </ci>
+                    <ci> P3G </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> Kpgk3pg_8 </ci>
+                    <ci> Kpgkatp_8 </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <plus/>
+                <cn type="integer"> 1 </cn>
+                <apply>
+                  <divide/>
+                  <ci> adp </ci>
+                  <ci> Kpgkadp_8 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> atp </ci>
+                  <ci> Kpgkatp_8 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> DPG </ci>
+                  <ci> Kpgk13dpg_8 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> adp </ci>
+                    <ci> DPG </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> Kpgk13dpg_8 </ci>
+                    <ci> Kpgkadp_8 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> P3G </ci>
+                  <ci> Kpgk3pg_8 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> atp </ci>
+                    <ci> P3G </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> Kpgk3pg_8 </ci>
+                    <ci> Kpgkatp_8 </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="Vbpgk_8" metaid="_719489" value="1.12"/>
+            <parameter id="Kpgk3pg_8" metaid="_719492" value="0.0012"/>
+            <parameter id="Kpgkatp_8" metaid="_719493" value="0.00035"/>
+            <parameter id="Kpgkadp_8" metaid="_719495" value="8.3E-5"/>
+            <parameter id="Kpgk13dpg_8" metaid="_719496" value="1.9E-6"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="vpgm" metaid="_213777">
+        <listOfReactants>
+          <speciesReference species="P3G" metaid="_710471"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="P2G" metaid="_710483"/>
+        </listOfProducts>
+        <kineticLaw metaid="_710495">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <divide/>
+              <apply>
+                <minus/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> Vfpgm_9 </ci>
+                    <ci> P3G </ci>
+                  </apply>
+                  <ci> Kpgm3pg_9 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <times/>
+                        <ci> Vfpgm_9 </ci>
+                        <ci> Kpgm2pg_9 </ci>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> Kpgm3pg_9 </ci>
+                        <cn> 0.18 </cn>
+                      </apply>
+                    </apply>
+                    <ci> P2G </ci>
+                  </apply>
+                  <ci> Kpgm2pg_9 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <plus/>
+                <cn type="integer"> 1 </cn>
+                <apply>
+                  <divide/>
+                  <ci> P3G </ci>
+                  <ci> Kpgm3pg_9 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> P2G </ci>
+                  <ci> Kpgm2pg_9 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="Vfpgm_9" metaid="_719497" value="1.12"/>
+            <parameter id="Kpgm3pg_9" metaid="_719500" value="0.0002"/>
+            <parameter id="Kpgm2pg_9" metaid="_719501" value="1.4E-5"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="ven" metaid="_213797">
+        <listOfReactants>
+          <speciesReference species="P2G" metaid="_710507"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PEP" metaid="_710519"/>
+        </listOfProducts>
+        <kineticLaw metaid="_710531">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <divide/>
+              <apply>
+                <minus/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> Vfen_10 </ci>
+                    <ci> P2G </ci>
+                  </apply>
+                  <ci> Ken2pg_10 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <times/>
+                        <ci> Vfen_10 </ci>
+                        <ci> Kenpep_10 </ci>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> Ken2pg_10 </ci>
+                        <cn> 0.49 </cn>
+                      </apply>
+                    </apply>
+                    <ci> PEP </ci>
+                  </apply>
+                  <ci> Kenpep_10 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <plus/>
+                <cn type="integer"> 1 </cn>
+                <apply>
+                  <divide/>
+                  <ci> P2G </ci>
+                  <ci> Ken2pg_10 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> PEP </ci>
+                  <ci> Kenpep_10 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="Vfen_10" metaid="_719502" value="0.192"/>
+            <parameter id="Ken2pg_10" metaid="_719505" value="0.0001"/>
+            <parameter id="Kenpep_10" metaid="_719506" value="0.00037"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="vpk" metaid="_213817">
+        <listOfReactants>
+          <speciesReference species="adp" metaid="_710543"/>
+          <speciesReference species="PEP" metaid="_710555"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="atp" metaid="_710567"/>
+          <speciesReference species="PYR" metaid="_710579"/>
+        </listOfProducts>
+        <kineticLaw metaid="_710591">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <divide/>
+              <apply>
+                <minus/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> Vfpk_11 </ci>
+                    <ci> PEP </ci>
+                    <ci> adp </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> Kpkpep_11 </ci>
+                    <ci> Kpkadp_11 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <times/>
+                        <ci> Vfpk_11 </ci>
+                        <ci> Kpkpyr_11 </ci>
+                        <ci> Kpkatp_11 </ci>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> Kpkpep_11 </ci>
+                        <ci> Kpkadp_11 </ci>
+                        <cn type="integer"> 10304 </cn>
+                      </apply>
+                    </apply>
+                    <ci> PYR </ci>
+                    <ci> atp </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> Kpkpyr_11 </ci>
+                    <ci> Kpkatp_11 </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <plus/>
+                <cn type="integer"> 1 </cn>
+                <apply>
+                  <divide/>
+                  <ci> PEP </ci>
+                  <ci> Kpkpep_11 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> adp </ci>
+                  <ci> Kpkadp_11 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> PEP </ci>
+                    <ci> adp </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> Kpkpep_11 </ci>
+                    <ci> Kpkadp_11 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> atp </ci>
+                  <ci> Kpkatp_11 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> PYR </ci>
+                  <ci> Kpkpyr_11 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> PYR </ci>
+                    <ci> atp </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> Kpkpyr_11 </ci>
+                    <ci> Kpkatp_11 </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="Vfpk_11" metaid="_719507" value="1.44"/>
+            <parameter id="Kpkpep_11" metaid="_719510" value="8E-5"/>
+            <parameter id="Kpkadp_11" metaid="_719511" value="0.0003"/>
+            <parameter id="Kpkpyr_11" metaid="_719513" value="0.00705"/>
+            <parameter id="Kpkatp_11" metaid="_719514" value="0.00113"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="vldh" metaid="_213837">
+        <listOfReactants>
+          <speciesReference species="NADH" metaid="_710603"/>
+          <speciesReference species="PYR" metaid="_710616"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="LAC" metaid="_710628"/>
+          <speciesReference species="NAD" metaid="_710640"/>
+        </listOfProducts>
+        <kineticLaw metaid="_710652">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <divide/>
+              <apply>
+                <minus/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> Vfldh_12 </ci>
+                    <ci> PYR </ci>
+                    <ci> NADH </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> Kldhpyr_12 </ci>
+                    <ci> Kldhnadh_12 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <times/>
+                        <ci> Vfldh_12 </ci>
+                        <ci> Kldhlac_12 </ci>
+                        <ci> Kldhnad_12 </ci>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> Kldhpyr_12 </ci>
+                        <ci> Kldhnadh_12 </ci>
+                        <cn type="integer"> 16198 </cn>
+                      </apply>
+                    </apply>
+                    <ci> LAC </ci>
+                    <ci> NAD </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> Kldhlac_12 </ci>
+                    <ci> Kldhnad_12 </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <plus/>
+                <cn type="integer"> 1 </cn>
+                <apply>
+                  <divide/>
+                  <ci> PYR </ci>
+                  <ci> Kldhpyr_12 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> NADH </ci>
+                  <ci> Kldhnadh_12 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> PYR </ci>
+                    <ci> NADH </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> Kldhpyr_12 </ci>
+                    <ci> Kldhnadh_12 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> LAC </ci>
+                  <ci> Kldhlac_12 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> NAD </ci>
+                  <ci> Kldhnad_12 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> LAC </ci>
+                    <ci> NAD </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> Kldhlac_12 </ci>
+                    <ci> Kldhnad_12 </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="Vfldh_12" metaid="_719515" value="1.92"/>
+            <parameter id="Kldhpyr_12" metaid="_719518" value="0.000335"/>
+            <parameter id="Kldhnadh_12" metaid="_719519" value="2.167E-6"/>
+            <parameter id="Kldhlac_12" metaid="_719521" value="0.01717"/>
+            <parameter id="Kldhnad_12" metaid="_719522" value="0.000849"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="vck" metaid="_213857">
+        <listOfReactants>
+          <speciesReference species="atp" metaid="_710664"/>
+          <speciesReference species="Cr" metaid="_710676"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="adp" metaid="_710689"/>
+          <speciesReference species="PCr" metaid="_710701"/>
+        </listOfProducts>
+        <kineticLaw metaid="_710713">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <divide/>
+              <apply>
+                <minus/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> VrevCK_13 </ci>
+                    <ci> atp </ci>
+                    <ci> Cr </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> Kckiatp_13 </ci>
+                    <ci> Kckcr_13 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <times/>
+                        <ci> VrevCK_13 </ci>
+                        <ci> KeqCK_13 </ci>
+                      </apply>
+                      <apply>
+                        <divide/>
+                        <apply>
+                          <times/>
+                          <ci> Kckiatp_13 </ci>
+                          <ci> Kckcr_13 </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> Kckiadp_13 </ci>
+                          <ci> KckPCr_13 </ci>
+                        </apply>
+                      </apply>
+                    </apply>
+                    <ci> adp </ci>
+                    <ci> PCr </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> Kckiadp_13 </ci>
+                    <ci> KckPCr_13 </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <plus/>
+                <cn type="integer"> 1 </cn>
+                <apply>
+                  <divide/>
+                  <ci> adp </ci>
+                  <ci> Kckiadp_13 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> PCr </ci>
+                  <ci> KckiPCr_13 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> PCr </ci>
+                    <ci> adp </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> Kckiadp_13 </ci>
+                    <ci> KckPCr_13 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> atp </ci>
+                  <ci> Kckiatp_13 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> Cr </ci>
+                    <ci> atp </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> Kckcr_13 </ci>
+                    <ci> Kckiatp_13 </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="VrevCK_13" metaid="_719523" value="0.5"/>
+            <parameter id="Kckiatp_13" metaid="_719526" value="0.0035"/>
+            <parameter id="Kckcr_13" metaid="_719527" value="0.0038"/>
+            <parameter id="KeqCK_13" metaid="_719529" value="233"/>
+            <parameter id="Kckiadp_13" metaid="_719530" value="0.000135"/>
+            <parameter id="KckPCr_13" metaid="_719532" value="0.00111"/>
+            <parameter id="KckiPCr_13" metaid="_719533" value="0.0039"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="vadk" metaid="_213877">
+        <listOfReactants>
+          <speciesReference species="atp" metaid="_710725"/>
+          <speciesReference species="amp" metaid="_710737"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="adp" metaid="_710749" stoichiometry="2"/>
+        </listOfProducts>
+        <kineticLaw metaid="_710761">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <divide/>
+              <apply>
+                <minus/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> Vfadk_14 </ci>
+                    <ci> atp </ci>
+                    <ci> amp </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> Kadkatp_14 </ci>
+                    <ci> Kadkamp_14 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <times/>
+                      <ci> Vfadk_14 </ci>
+                      <apply>
+                        <power/>
+                        <ci> Kadkadp_14 </ci>
+                        <cn type="integer"> 2 </cn>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Kadkamp_14 </ci>
+                      <ci> Kadkatp_14 </ci>
+                      <cn> 2.21 </cn>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <power/>
+                    <apply>
+                      <divide/>
+                      <ci> adp </ci>
+                      <ci> Kadkadp_14 </ci>
+                    </apply>
+                    <cn type="integer"> 2 </cn>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <plus/>
+                <cn type="integer"> 1 </cn>
+                <apply>
+                  <divide/>
+                  <ci> atp </ci>
+                  <ci> Kadkatp_14 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> amp </ci>
+                  <ci> Kadkamp_14 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> atp </ci>
+                    <ci> amp </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> Kadkatp_14 </ci>
+                    <ci> Kadkamp_14 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <cn type="integer"> 2 </cn>
+                    <ci> adp </ci>
+                  </apply>
+                  <ci> Kadkadp_14 </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <power/>
+                    <ci> adp </ci>
+                    <cn type="integer"> 2 </cn>
+                  </apply>
+                  <apply>
+                    <power/>
+                    <ci> Kadkadp_14 </ci>
+                    <cn type="integer"> 2 </cn>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="Vfadk_14" metaid="_719534" value="0.88"/>
+            <parameter id="Kadkatp_14" metaid="_719537" value="0.00027"/>
+            <parameter id="Kadkamp_14" metaid="_719538" value="0.00032"/>
+            <parameter id="Kadkadp_14" metaid="_719540" value="0.00035"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="vatpase" metaid="_213897">
+        <listOfReactants>
+          <speciesReference species="atp" metaid="_710773"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="adp" metaid="_710785"/>
+          <speciesReference species="P" metaid="_710797"/>
+        </listOfProducts>
+        <kineticLaw metaid="_710809">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k_15 </ci>
+              <ci> atp </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k_15" metaid="_719541" value="0.075"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="vfout" metaid="_213917">
+        <listOfReactants>
+          <speciesReference species="LAC" metaid="_710821"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="LACo" metaid="_710833"/>
+        </listOfProducts>
+        <kineticLaw metaid="_710846">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> kout_16 </ci>
+              <ci> LAC </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="kout_16" metaid="_719542" value="0.2"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

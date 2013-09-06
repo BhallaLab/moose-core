@@ -1,0 +1,2990 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="metaid_0000001" version="4">
+  <model id="Model_1" name="Troein2011_ClockCircuit_OstreococcusTauri" metaid="Troein2011_ClockCircuit_OstreococcusTauri">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This model is from the article:      <br/>
+                <strong>Multiple light inputs to a simple clock circuit allow complex biological rhythms</strong>
+                <br/>
+          Troein C, Corellou F, Dixon LE, van Ooijen G, O'Neill JS, Bouget FY, Millar AJ.      <em>Plant J.</em>
+          2011 Apr;66(2):375-85.      <a href="http://www.ncbi.nlm.nih.gov/pubmed/21219507">21219507</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          Circadian clocks are biological timekeepers that allow living cells to time their activity in anticipation of predictable environmental changes. Detailed understanding of the circadian network of higher plants, such as Arabidopsis thaliana, is hampered by the high number of partially redundant genes. However, the picoeukaryotic alga Ostreococcus tauri, which was recently shown to possess a small number of non-redundant clock genes, presents an attractive alternative target for detailed modelling of circadian clocks in the green lineage. Based on extensive time-series data from in vivo reporter gene assays, we developed a model of the Ostreococcus clock as a feedback loop between the genes TOC1 and CCA1. The model reproduces the dynamics of the transcriptional and translational reporters over a range of photoperiods. Surprisingly, the model is also able to predict the transient behaviour of the clock when the light conditions are altered. Despite the apparent simplicity of the clock circuit, it displays considerable complexity in its response to changing light conditions. Systematic screening of the effects of altered day length revealed a complex relationship between phase and photoperiod, which is also captured by the model. The complex light response is shown to stem from circadian gating of light-dependent mechanisms. This study provides insights into the contributions of light inputs to the Ostreococcus clock. The model suggests that a high number of light-dependent reactions are important for flexible timing in a circadian clock with only one feedback loop.      </p>
+            <p>      <b>Note: Two-gene model of the Ostreococcus circadian clock</b>
+                </p>
+            <p dir="ltr">This is a model of the circadian clock of Ostreococcus tauri, with a negative feedback loop between TOC1 and CCA1 (a.k.a. LHY) and multiple light inputs. It was used and described in Troein et al., Plant Journal (2011).</p>
+            <p dir="ltr">The model incorporates luciferase reporters, and in this SBML model the four different versions of the model for transcriptional and translational reporter lines (pTOC1::LUC, pCCA1::LUC, TOC1-LUC and CCA1-LUC) are all accessible by setting one of the rep_X parameters to 1 and the others to 0. You can also set all four to 0 to only simulate the non-reporter core of the system.</p>
+            <p dir="ltr">Input to the system should be provided by modifying the "light" function. An implementation of LD 12:12 is provided as an example, but the model was also used with more complicated light regimes that vary between data sets and are not convenient to express directly in SBML.</p>
+            <p dir="ltr">The functions "ox_cca1" and "ox_toc1" can be altered to add overexpression of CCA1 and TOC1. Setting either to      <span style="font-style:italic">x</span>
+          gives additional, constitutive transcription at      <span style="font-style:italic">x</span>
+          times the maximal (and typically not realizable) transcription rate of the native gene. The overexpression mutant fits in Figure 7 of Troein et al. (2011) used ox_cca1 = 0.115 and oc_toc1 = 0.0584, respectively.      </p>
+            <p dir="ltr">The functions "copies_toc1" and "copies_cca1" are normally 1 but can be lowered to simulate knockdown experiments. The functions "transcription", "translation" and "proteasome" can be modified to simulate the effects of altering the overall rate of transcription, translation and protein degradation.</p>
+            <p dir="ltr">The parameters were fitted specifically to data from transgenic reporter lines TOC8, pTOC3, LHY7 and pLHY7 (Corellou et al., Plant Cell 2009). Parameters that begin with "effcopies" describe the effective number of copies of CCA1 or TOC1 in the respective translational fusion lines, with anything above 1 due to the fusion proteins.</p>
+            <p dir="ltr">For the model fitting, the initial values were fitted to the data in the various time courses. The initial values given here correspond to the limit cycle of the system in LD 12:12. The system converges to the limit cycle in just a few days under most light conditions, so these initial values are biologically meaningful.</p>
+            <p dir="ltr">The species cca1luc_c and cca1luc_n have been merged into cca1luc (which corresponds to the observable luminescence signal), because Copasi refused to run the system otherwise. For TOC1-LUC, the predicted output signal is the sum of toc1luc_1 and toc1luc_2.</p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          For more information see the      <a href="http://www.ebi.ac.uk/biomodels/legal.html" target="_blank">terms of use</a>
+          .      <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#Troein2011_ClockCircuit_OstreococcusTauri">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Millar</vCard:Family>
+                  <vCard:Given>Andrew J</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>andrew.millar@ed.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>nstitute of Molecular Plant Sciences, University of Edinburgh</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Chelliah</vCard:Family>
+                  <vCard:Given>Vijayalakshmi</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>viji@ebi.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>EMBL-EBI</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Carl</vCard:Family>
+                  <vCard:Given>Troein</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>carl.troein@ed.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>Institute of Molecular Plant Sciences, University of Edinburgh</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2011-08-09T16:20:30Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2011-08-30T12:39:23Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1107230000"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/BIOMD0000000350"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/21219507"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+          <bqbiol:occursIn>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/taxonomy/70448"/>
+            </rdf:Bag>
+          </bqbiol:occursIn>
+          <bqbiol:isVersionOf>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/kegg.pathway/map04710"/>
+              <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0007623"/>
+            </rdf:Bag>
+          </bqbiol:isVersionOf>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfFunctionDefinitions>
+      <functionDefinition id="LD1212" name="LD1212" metaid="COPASI53">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI53">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T14:21:03Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                              </annotation>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <lambda>
+            <bvar>
+              <ci> tod </ci>
+            </bvar>
+            <apply>
+              <ceiling/>
+              <apply>
+                <divide/>
+                <apply>
+                  <sin/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <times/>
+                      <pi/>
+                      <ci> tod </ci>
+                    </apply>
+                    <cn> 12 </cn>
+                  </apply>
+                </apply>
+                <cn> 2 </cn>
+              </apply>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="function_2" name="Light accumulator decrease" metaid="metaid_0000069">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <lambda>
+            <bvar>
+              <ci> acc_rate </ci>
+            </bvar>
+            <bvar>
+              <ci> acc </ci>
+            </bvar>
+            <apply>
+              <times/>
+              <ci> acc_rate </ci>
+              <ci> acc </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="light" name="light" metaid="COPASI54">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI54">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T14:58:29Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                              </annotation>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <lambda>
+            <bvar>
+              <ci> tod </ci>
+            </bvar>
+            <apply>
+              <ci> LD1212 </ci>
+              <ci> tod </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="transcription" name="transcription" metaid="metaid_0000070">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <lambda>
+            <bvar>
+              <ci> t </ci>
+            </bvar>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <times/>
+                <cn> 0 </cn>
+                <ci> t </ci>
+              </apply>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="ox_toc1" name="ox_toc1" metaid="COPASI55">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI55">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T14:31:03Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                              </annotation>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <lambda>
+            <bvar>
+              <ci> t </ci>
+            </bvar>
+            <apply>
+              <times/>
+              <cn> 0 </cn>
+              <ci> t </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="copies_toc1" name="copies_toc1" metaid="COPASI56">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI56">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T14:30:53Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                              </annotation>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <lambda>
+            <bvar>
+              <ci> t </ci>
+            </bvar>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <times/>
+                <cn> 0 </cn>
+                <ci> t </ci>
+              </apply>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="copies_cca1" name="copies_cca1" metaid="COPASI57">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI57">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T14:30:50Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                              </annotation>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <lambda>
+            <bvar>
+              <ci> t </ci>
+            </bvar>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <times/>
+                <cn> 0 </cn>
+                <ci> t </ci>
+              </apply>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="ox_cca1" name="ox_cca1" metaid="COPASI58">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI58">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T14:31:02Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                              </annotation>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <lambda>
+            <bvar>
+              <ci> t </ci>
+            </bvar>
+            <apply>
+              <times/>
+              <cn> 0 </cn>
+              <ci> t </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="translation" name="translation" metaid="COPASI59">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI59">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T18:14:42Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                              </annotation>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <lambda>
+            <bvar>
+              <ci> t </ci>
+            </bvar>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <times/>
+                <cn> 0 </cn>
+                <ci> t </ci>
+              </apply>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="proteasome" name="proteasome" metaid="metaid_0000071">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <lambda>
+            <bvar>
+              <ci> t </ci>
+            </bvar>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <times/>
+                <cn> 0 </cn>
+                <ci> t </ci>
+              </apply>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="Translation" name="Translation" metaid="COPASI60">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI60">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T18:14:40Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                              </annotation>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <lambda>
+            <bvar>
+              <ci> t </ci>
+            </bvar>
+            <bvar>
+              <ci> T </ci>
+            </bvar>
+            <bvar>
+              <ci> mrna </ci>
+            </bvar>
+            <apply>
+              <times/>
+              <apply>
+                <ci> translation </ci>
+                <ci> t </ci>
+              </apply>
+              <ci> T </ci>
+              <ci> mrna </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="function_4" name="Light-dependent protein decay" metaid="metaid_0000072">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <lambda>
+            <bvar>
+              <ci> t </ci>
+            </bvar>
+            <bvar>
+              <ci> D_l </ci>
+            </bvar>
+            <bvar>
+              <ci> D_d </ci>
+            </bvar>
+            <bvar>
+              <ci> level </ci>
+            </bvar>
+            <apply>
+              <times/>
+              <apply>
+                <ci> proteasome </ci>
+                <ci> t </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <apply>
+                  <times/>
+                  <apply>
+                    <ci> light </ci>
+                    <ci> t </ci>
+                  </apply>
+                  <ci> D_l </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <apply>
+                    <minus/>
+                    <cn> 1 </cn>
+                    <apply>
+                      <ci> light </ci>
+                      <ci> t </ci>
+                    </apply>
+                  </apply>
+                  <ci> D_d </ci>
+                </apply>
+              </apply>
+              <ci> level </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="function_5" name="Light-dependent transport" metaid="metaid_0000073">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <lambda>
+            <bvar>
+              <ci> t </ci>
+            </bvar>
+            <bvar>
+              <ci> Di_l </ci>
+            </bvar>
+            <bvar>
+              <ci> Di_d </ci>
+            </bvar>
+            <bvar>
+              <ci> level </ci>
+            </bvar>
+            <apply>
+              <times/>
+              <apply>
+                <plus/>
+                <apply>
+                  <times/>
+                  <apply>
+                    <ci> light </ci>
+                    <ci> t </ci>
+                  </apply>
+                  <ci> Di_l </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <apply>
+                    <minus/>
+                    <cn> 1 </cn>
+                    <apply>
+                      <ci> light </ci>
+                      <ci> t </ci>
+                    </apply>
+                  </apply>
+                  <ci> Di_d </ci>
+                </apply>
+              </apply>
+              <ci> level </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="function_7" name="LUC transcription for pTOC1" metaid="COPASI61">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI61">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T18:05:12Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                              </annotation>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <lambda>
+            <bvar>
+              <ci> t </ci>
+            </bvar>
+            <bvar>
+              <ci> R_toc1_acc </ci>
+            </bvar>
+            <bvar>
+              <ci> acc </ci>
+            </bvar>
+            <bvar>
+              <ci> R_toc1_cca1 </ci>
+            </bvar>
+            <bvar>
+              <ci> cca1_n </ci>
+            </bvar>
+            <bvar>
+              <ci> H_toc1_cca1 </ci>
+            </bvar>
+            <bvar>
+              <ci> rep_pTOC1 </ci>
+            </bvar>
+            <bvar>
+              <ci> L_toc1 </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> rep_pTOC1 </ci>
+                <apply>
+                  <ci> transcription </ci>
+                  <ci> t </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> L_toc1 </ci>
+                  <apply>
+                    <times/>
+                    <ci> R_toc1_acc </ci>
+                    <ci> acc </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <plus/>
+                <cn> 1 </cn>
+                <ci> L_toc1 </ci>
+                <apply>
+                  <times/>
+                  <ci> R_toc1_acc </ci>
+                  <ci> acc </ci>
+                </apply>
+                <apply>
+                  <power/>
+                  <apply>
+                    <times/>
+                    <ci> R_toc1_cca1 </ci>
+                    <ci> cca1_n </ci>
+                  </apply>
+                  <ci> H_toc1_cca1 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="function_8" name="TOC1-LUC transcription" metaid="COPASI62">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI62">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T17:27:48Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                              </annotation>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <lambda>
+            <bvar>
+              <ci> t </ci>
+            </bvar>
+            <bvar>
+              <ci> R_toc1_acc </ci>
+            </bvar>
+            <bvar>
+              <ci> acc </ci>
+            </bvar>
+            <bvar>
+              <ci> R_toc1_cca1 </ci>
+            </bvar>
+            <bvar>
+              <ci> cca1_n </ci>
+            </bvar>
+            <bvar>
+              <ci> H_toc1_cca1 </ci>
+            </bvar>
+            <bvar>
+              <ci> rep_TOC1 </ci>
+            </bvar>
+            <bvar>
+              <ci> L_toc1 </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> rep_TOC1 </ci>
+                <apply>
+                  <ci> transcription </ci>
+                  <ci> t </ci>
+                </apply>
+                <apply>
+                  <ci> copies_toc1 </ci>
+                  <ci> t </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> L_toc1 </ci>
+                  <apply>
+                    <times/>
+                    <ci> R_toc1_acc </ci>
+                    <ci> acc </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <plus/>
+                <cn> 1 </cn>
+                <ci> L_toc1 </ci>
+                <apply>
+                  <times/>
+                  <ci> R_toc1_acc </ci>
+                  <ci> acc </ci>
+                </apply>
+                <apply>
+                  <power/>
+                  <apply>
+                    <times/>
+                    <ci> R_toc1_cca1 </ci>
+                    <ci> cca1_n </ci>
+                  </apply>
+                  <ci> H_toc1_cca1 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="function_9" name="LUC transcription for pCCA1" metaid="COPASI63">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI63">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T18:04:25Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                              </annotation>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <lambda>
+            <bvar>
+              <ci> t </ci>
+            </bvar>
+            <bvar>
+              <ci> toc1_2 </ci>
+            </bvar>
+            <bvar>
+              <ci> R_cca1_toc1_2_l </ci>
+            </bvar>
+            <bvar>
+              <ci> R_cca1_toc1_2_d </ci>
+            </bvar>
+            <bvar>
+              <ci> H_cca1_toc1 </ci>
+            </bvar>
+            <bvar>
+              <ci> rep_pCCA1 </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> rep_pCCA1 </ci>
+                <apply>
+                  <ci> transcription </ci>
+                  <ci> t </ci>
+                </apply>
+                <apply>
+                  <power/>
+                  <apply>
+                    <times/>
+                    <ci> toc1_2 </ci>
+                    <apply>
+                      <plus/>
+                      <apply>
+                        <times/>
+                        <apply>
+                          <ci> light </ci>
+                          <ci> t </ci>
+                        </apply>
+                        <ci> R_cca1_toc1_2_l </ci>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <apply>
+                          <minus/>
+                          <cn> 1 </cn>
+                          <apply>
+                            <ci> light </ci>
+                            <ci> t </ci>
+                          </apply>
+                        </apply>
+                        <ci> R_cca1_toc1_2_d </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                  <ci> H_cca1_toc1 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <plus/>
+                <apply>
+                  <power/>
+                  <apply>
+                    <times/>
+                    <ci> toc1_2 </ci>
+                    <apply>
+                      <plus/>
+                      <apply>
+                        <times/>
+                        <apply>
+                          <ci> light </ci>
+                          <ci> t </ci>
+                        </apply>
+                        <ci> R_cca1_toc1_2_l </ci>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <apply>
+                          <minus/>
+                          <cn> 1 </cn>
+                          <apply>
+                            <ci> light </ci>
+                            <ci> t </ci>
+                          </apply>
+                        </apply>
+                        <ci> R_cca1_toc1_2_d </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                  <ci> H_cca1_toc1 </ci>
+                </apply>
+                <cn> 1 </cn>
+              </apply>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="function_10" name="CCA1-LUC transcription" metaid="COPASI64">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI64">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T14:22:48Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                              </annotation>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <lambda>
+            <bvar>
+              <ci> t </ci>
+            </bvar>
+            <bvar>
+              <ci> toc1_2 </ci>
+            </bvar>
+            <bvar>
+              <ci> R_cca1_toc1_2_l </ci>
+            </bvar>
+            <bvar>
+              <ci> R_cca1_toc1_2_d </ci>
+            </bvar>
+            <bvar>
+              <ci> H_cca1_toc1 </ci>
+            </bvar>
+            <bvar>
+              <ci> rep_CCA1 </ci>
+            </bvar>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> rep_CCA1 </ci>
+                <apply>
+                  <ci> transcription </ci>
+                  <ci> t </ci>
+                </apply>
+                <apply>
+                  <ci> copies_cca1 </ci>
+                  <ci> t </ci>
+                </apply>
+                <apply>
+                  <power/>
+                  <apply>
+                    <times/>
+                    <ci> toc1_2 </ci>
+                    <apply>
+                      <plus/>
+                      <apply>
+                        <times/>
+                        <apply>
+                          <ci> light </ci>
+                          <ci> t </ci>
+                        </apply>
+                        <ci> R_cca1_toc1_2_l </ci>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <apply>
+                          <minus/>
+                          <cn> 1 </cn>
+                          <apply>
+                            <ci> light </ci>
+                            <ci> t </ci>
+                          </apply>
+                        </apply>
+                        <ci> R_cca1_toc1_2_d </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                  <ci> H_cca1_toc1 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <plus/>
+                <apply>
+                  <power/>
+                  <apply>
+                    <times/>
+                    <ci> toc1_2 </ci>
+                    <apply>
+                      <plus/>
+                      <apply>
+                        <times/>
+                        <apply>
+                          <ci> light </ci>
+                          <ci> t </ci>
+                        </apply>
+                        <ci> R_cca1_toc1_2_l </ci>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <apply>
+                          <minus/>
+                          <cn> 1 </cn>
+                          <apply>
+                            <ci> light </ci>
+                            <ci> t </ci>
+                          </apply>
+                        </apply>
+                        <ci> R_cca1_toc1_2_d </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                  <ci> H_cca1_toc1 </ci>
+                </apply>
+                <cn> 1 </cn>
+              </apply>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="tf_output" name="tf_output" metaid="COPASI65">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI65">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T14:29:56Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+              <dcterms:modified>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2000-01-01T00:00:00Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:modified>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                              </annotation>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <lambda>
+            <bvar>
+              <ci> reporter </ci>
+            </bvar>
+            <bvar>
+              <ci> effcopies </ci>
+            </bvar>
+            <bvar>
+              <ci> tf </ci>
+            </bvar>
+            <apply>
+              <times/>
+              <apply>
+                <plus/>
+                <cn> 1 </cn>
+                <apply>
+                  <times/>
+                  <ci> reporter </ci>
+                  <apply>
+                    <minus/>
+                    <ci> effcopies </ci>
+                    <cn> 1 </cn>
+                  </apply>
+                </apply>
+              </apply>
+              <ci> tf </ci>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="function_1" name="Light accumulator increase" metaid="metaid_0000074">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <lambda>
+            <bvar>
+              <ci> acc_rate </ci>
+            </bvar>
+            <bvar>
+              <ci> t </ci>
+            </bvar>
+            <apply>
+              <times/>
+              <ci> acc_rate </ci>
+              <apply>
+                <ci> light </ci>
+                <ci> t </ci>
+              </apply>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="function_3" name="TOC1 transcription" metaid="COPASI66">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI66">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T17:28:54Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                              </annotation>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <lambda>
+            <bvar>
+              <ci> R_toc1_acc </ci>
+            </bvar>
+            <bvar>
+              <ci> acc </ci>
+            </bvar>
+            <bvar>
+              <ci> R_toc1_cca1 </ci>
+            </bvar>
+            <bvar>
+              <ci> H_toc1_cca1 </ci>
+            </bvar>
+            <bvar>
+              <ci> cca1_n </ci>
+            </bvar>
+            <bvar>
+              <ci> t </ci>
+            </bvar>
+            <bvar>
+              <ci> L_toc1 </ci>
+            </bvar>
+            <bvar>
+              <ci> rep_CCA1 </ci>
+            </bvar>
+            <bvar>
+              <ci> effcopies_cca1_LHY7 </ci>
+            </bvar>
+            <apply>
+              <times/>
+              <apply>
+                <ci> transcription </ci>
+                <ci> t </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <apply>
+                  <ci> ox_toc1 </ci>
+                  <ci> t </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <apply>
+                      <ci> copies_toc1 </ci>
+                      <ci> t </ci>
+                    </apply>
+                    <apply>
+                      <plus/>
+                      <ci> L_toc1 </ci>
+                      <apply>
+                        <times/>
+                        <ci> R_toc1_acc </ci>
+                        <ci> acc </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <cn> 1 </cn>
+                    <ci> L_toc1 </ci>
+                    <apply>
+                      <times/>
+                      <ci> R_toc1_acc </ci>
+                      <ci> acc </ci>
+                    </apply>
+                    <apply>
+                      <power/>
+                      <apply>
+                        <times/>
+                        <ci> R_toc1_cca1 </ci>
+                        <apply>
+                          <ci> tf_output </ci>
+                          <ci> rep_CCA1 </ci>
+                          <ci> effcopies_cca1_LHY7 </ci>
+                          <ci> cca1_n </ci>
+                        </apply>
+                      </apply>
+                      <ci> H_toc1_cca1 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+      <functionDefinition id="function_6" name="CCA1 transcription" metaid="COPASI67">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI67">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T14:30:23Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                              </annotation>
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <lambda>
+            <bvar>
+              <ci> t </ci>
+            </bvar>
+            <bvar>
+              <ci> toc1_2 </ci>
+            </bvar>
+            <bvar>
+              <ci> R_cca1_toc1_2_l </ci>
+            </bvar>
+            <bvar>
+              <ci> R_cca1_toc1_2_d </ci>
+            </bvar>
+            <bvar>
+              <ci> H_cca1_toc1 </ci>
+            </bvar>
+            <bvar>
+              <ci> rep_TOC1 </ci>
+            </bvar>
+            <bvar>
+              <ci> effcopies_toc1_TOC8 </ci>
+            </bvar>
+            <apply>
+              <times/>
+              <apply>
+                <ci> transcription </ci>
+                <ci> t </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <apply>
+                  <ci> ox_cca1 </ci>
+                  <ci> t </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <apply>
+                      <ci> copies_cca1 </ci>
+                      <ci> t </ci>
+                    </apply>
+                    <apply>
+                      <power/>
+                      <apply>
+                        <times/>
+                        <apply>
+                          <ci> tf_output </ci>
+                          <ci> rep_TOC1 </ci>
+                          <ci> effcopies_toc1_TOC8 </ci>
+                          <ci> toc1_2 </ci>
+                        </apply>
+                        <apply>
+                          <plus/>
+                          <apply>
+                            <times/>
+                            <apply>
+                              <ci> light </ci>
+                              <ci> t </ci>
+                            </apply>
+                            <ci> R_cca1_toc1_2_l </ci>
+                          </apply>
+                          <apply>
+                            <times/>
+                            <apply>
+                              <minus/>
+                              <cn> 1 </cn>
+                              <apply>
+                                <ci> light </ci>
+                                <ci> t </ci>
+                              </apply>
+                            </apply>
+                            <ci> R_cca1_toc1_2_d </ci>
+                          </apply>
+                        </apply>
+                      </apply>
+                      <ci> H_cca1_toc1 </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <power/>
+                      <apply>
+                        <times/>
+                        <apply>
+                          <ci> tf_output </ci>
+                          <ci> rep_TOC1 </ci>
+                          <ci> effcopies_toc1_TOC8 </ci>
+                          <ci> toc1_2 </ci>
+                        </apply>
+                        <apply>
+                          <plus/>
+                          <apply>
+                            <times/>
+                            <apply>
+                              <ci> light </ci>
+                              <ci> t </ci>
+                            </apply>
+                            <ci> R_cca1_toc1_2_l </ci>
+                          </apply>
+                          <apply>
+                            <times/>
+                            <apply>
+                              <minus/>
+                              <cn> 1 </cn>
+                              <apply>
+                                <ci> light </ci>
+                                <ci> t </ci>
+                              </apply>
+                            </apply>
+                            <ci> R_cca1_toc1_2_d </ci>
+                          </apply>
+                        </apply>
+                      </apply>
+                      <ci> H_cca1_toc1 </ci>
+                    </apply>
+                    <cn> 1 </cn>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </lambda>
+        </math>
+      </functionDefinition>
+    </listOfFunctionDefinitions>
+    <listOfUnitDefinitions>
+      <unitDefinition id="time" metaid="metaid_0000075">
+        <listOfUnits>
+          <unit metaid="_439508" multiplier="3600" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="substance" metaid="metaid_0000076">
+        <listOfUnits>
+          <unit scale="-9" metaid="_439520" kind="mole"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="compartment" name="compartment" metaid="COPASI2" sboTerm="SBO:0000290" size="1">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI2">
+              <bqmodel:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0005623"/>
+                </rdf:Bag>
+              </bqmodel:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </compartment>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="acc" initialConcentration="0.272067372878265" name="acc" metaid="COPASI3" sboTerm="SBO:0000236" compartment="compartment">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI3">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2000-01-01T00:00:00Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                              </annotation>
+      </species>
+      <species id="toc1_mrna" initialConcentration="0.0385665277682963" name="toc1_mrna" metaid="COPASI4" sboTerm="SBO:0000278" compartment="compartment">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:CopasiMT="http://www.copasi.org/RDF/MiriamTerms#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI4">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T14:53:26Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+              <CopasiMT:isHomologTo rdf:resource="urn:miriam:uniprot:O81713"/>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI4">
+              <bqbiol:isHomologTo>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:33699"/>
+                </rdf:Bag>
+              </bqbiol:isHomologTo>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="toc1_1" initialConcentration="0.206521274112594" name="toc1_1" metaid="COPASI5" sboTerm="SBO:0000252" compartment="compartment">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI5">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T14:53:13Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI5">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/Q9LKL2"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="toc1_2" initialConcentration="0.312711901675853" name="toc1_2" metaid="COPASI6" sboTerm="SBO:0000252" compartment="compartment">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI6">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T14:53:15Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI6">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/Q9LKL2"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="cca1_mrna" initialConcentration="0.104555645465821" name="cca1_mrna" metaid="COPASI7" sboTerm="SBO:0000278" compartment="compartment">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI7">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T14:27:49Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI7">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:33699"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="cca1_c" initialConcentration="0.051315426489096" name="cca1_c" metaid="COPASI8" sboTerm="SBO:0000252" compartment="compartment">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI8">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T14:19:16Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI8">
+              <bqbiol:isHomologTo>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P92973"/>
+                </rdf:Bag>
+              </bqbiol:isHomologTo>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="cca1_n" initialConcentration="3.07283764226433" name="cca1_n" metaid="COPASI9" sboTerm="SBO:0000252" compartment="compartment">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI9">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T14:53:05Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI9">
+              <bqbiol:isHomologTo>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P92973"/>
+                </rdf:Bag>
+              </bqbiol:isHomologTo>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="toc1luc_mrna" initialConcentration="0" name="toc1luc_mrna" metaid="COPASI10" sboTerm="SBO:0000278" compartment="compartment">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI10">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T14:52:33Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI10">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:33699"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="toc1luc_1" initialConcentration="0" name="toc1luc_1" metaid="COPASI11" sboTerm="SBO:0000252" compartment="compartment">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI11">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T14:53:15Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI11">
+              <bqbiol:hasPart>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/Q9LKL2"/>
+                </rdf:Bag>
+              </bqbiol:hasPart>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="toc1luc_2" initialConcentration="0" name="toc1luc_2" metaid="COPASI12" sboTerm="SBO:0000252" compartment="compartment">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI12">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T14:53:19Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI12">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/Q9LKL2"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="cca1luc_mrna" initialConcentration="0" name="cca1luc_mrna" metaid="COPASI13" sboTerm="SBO:0000278" compartment="compartment">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI13">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T14:52:52Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI13">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:33699"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="cca1luc" initialConcentration="0" name="cca1luc" metaid="COPASI14" sboTerm="SBO:0000252" compartment="compartment">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI14">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T14:19:25Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI14">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P92973"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="luc_mrna" initialConcentration="0" name="luc_mrna" metaid="COPASI15" sboTerm="SBO:0000278" compartment="compartment">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI15">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T14:53:12Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI15">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:33699"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="luc" initialConcentration="0" name="luc" metaid="COPASI16" sboTerm="SBO:0000247" compartment="compartment">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI16">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T14:53:08Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI16">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:25078"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="toc1luc" constant="false" name="toc1luc" metaid="metaid_0200077" value="0"/>
+      <parameter id="D_luc" name="D_luc" metaid="metaid_0000077" value="0.182881217463259" sboTerm="SBO:0000349"/>
+      <parameter id="D_mrna_luc" name="D_mrna_luc" metaid="metaid_0000078" value="1" sboTerm="SBO:0000356"/>
+      <parameter id="acc_rate" name="acc_rate" metaid="COPASI17" value="0.0820132250303287" sboTerm="SBO:0000009">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI17">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T14:20:14Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                              </annotation>
+      </parameter>
+      <parameter id="R_toc1_cca1" name="R_toc1_cca1" metaid="metaid_0000079" value="1.08706126858966" sboTerm="SBO:0000009"/>
+      <parameter id="H_toc1_cca1" name="H_toc1_cca1" metaid="COPASI18" value="2.07807738692343" sboTerm="SBO:0000009">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI18">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T18:18:41Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                              </annotation>
+      </parameter>
+      <parameter id="L_toc1" name="L_toc1" metaid="metaid_0000080" value="0.0001" sboTerm="SBO:0000153"/>
+      <parameter id="R_toc1_acc" name="R_toc1_acc" metaid="metaid_0000081" value="0.231107032949407" sboTerm="SBO:0000153"/>
+      <parameter id="D_mrna_toc1" name="D_mrna_toc1" metaid="metaid_0000082" value="0.29213049778373" sboTerm="SBO:0000356"/>
+      <parameter id="T_toc1" name="T_toc1" metaid="COPASI19" value="0.769970172977886" sboTerm="SBO:0000153">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI19">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T14:20:31Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                              </annotation>
+      </parameter>
+      <parameter id="Di_toc1_12_l" name="Di_toc1_12_l" metaid="metaid_0000083" value="0.136490583368648" sboTerm="SBO:0000153"/>
+      <parameter id="Di_toc1_12_d" name="Di_toc1_12_d" metaid="metaid_0000084" value="0.326619492089715" sboTerm="SBO:0000153"/>
+      <parameter id="D_toc1_2_l" name="D_toc1_2_l" metaid="metaid_0000085" value="0.461550559180802" sboTerm="SBO:0000356"/>
+      <parameter id="D_toc1_2_d" name="D_toc1_2_d" metaid="metaid_0000086" value="0.356613920551118" sboTerm="SBO:0000356"/>
+      <parameter id="H_cca1_toc1" name="H_cca1_toc1" metaid="metaid_0000087" value="2.5007062880634" sboTerm="SBO:0000153"/>
+      <parameter id="R_cca1_toc1_2_l" name="R_cca1_toc1_2_l" metaid="COPASI20" value="3.27520292103832" sboTerm="SBO:0000153">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI20">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T15:03:45Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                              </annotation>
+      </parameter>
+      <parameter id="R_cca1_toc1_2_d" name="R_cca1_toc1_2_d" metaid="metaid_0000088" value="1.38563901682266" sboTerm="SBO:0000153"/>
+      <parameter id="D_mrna_cca1" name="D_mrna_cca1" metaid="COPASI21" value="1.33082080954527" sboTerm="SBO:0000356">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI21">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T14:38:01Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                              </annotation>
+      </parameter>
+      <parameter id="T_cca1" name="T_cca1" metaid="metaid_0000089" value="4.90486610428652" sboTerm="SBO:0000153"/>
+      <parameter id="Di_cca1_cn" name="Di_cca1_cn" metaid="COPASI22" value="10" sboTerm="SBO:0000009">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI22">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T14:20:18Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                              </annotation>
+      </parameter>
+      <parameter id="D_cca1_l" name="D_cca1_l" metaid="metaid_0000090" value="0.424177877449438" sboTerm="SBO:0000356"/>
+      <parameter id="D_cca1_d" name="D_cca1_d" metaid="metaid_0000091" value="0.269380178154091" sboTerm="SBO:0000356"/>
+      <parameter id="effcopies_cca1_LHY7" name="effcopies_cca1_LHY7" metaid="COPASI23" value="1.13965755508623" sboTerm="SBO:0000009">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI23">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T14:37:50Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                              </annotation>
+      </parameter>
+      <parameter id="effcopies_toc1_TOC8" name="effcopies_toc1_TOC8" metaid="COPASI24" value="1" sboTerm="SBO:0000009">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI24">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T14:37:55Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                              </annotation>
+      </parameter>
+      <parameter id="parameter_1" name="T_luc" metaid="metaid_0000092" value="1" sboTerm="SBO:0000009"/>
+      <parameter id="parameter_2" name="rep_TOC1" metaid="COPASI25" value="0" sboTerm="SBO:0000009">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI25">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T15:03:35Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                              </annotation>
+      </parameter>
+      <parameter id="parameter_3" name="rep_pTOC1" metaid="COPASI26" value="0" sboTerm="SBO:0000009">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI26">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T14:53:48Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                              </annotation>
+      </parameter>
+      <parameter id="parameter_4" name="rep_CCA1" metaid="COPASI27" value="0" sboTerm="SBO:0000009">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI27">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T14:37:48Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                              </annotation>
+      </parameter>
+      <parameter id="parameter_5" name="rep_pCCA1" metaid="COPASI28" value="0" sboTerm="SBO:0000009">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI28">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T14:53:49Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                              </annotation>
+      </parameter>
+    </listOfParameters>
+    <listOfRules>
+      <assignmentRule metaid="metaid_0000102" variable="toc1luc">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> toc1luc_1 </ci>
+            <ci> toc1luc_2 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+    <listOfReactions>
+      <reaction id="reaction_1" name="Light accumulator increase" metaid="metaid_0000093" reversible="false" sboTerm="SBO:0000393">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000093">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0009058"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfProducts>
+          <speciesReference species="acc" metaid="_439533"/>
+        </listOfProducts>
+        <kineticLaw metaid="_439545">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <ci> function_1 </ci>
+                <ci> acc_rate </ci>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_2" name="Light accumulator decrease" metaid="metaid_0000094" reversible="false" sboTerm="SBO:0000179">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000094">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0009056"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="acc" metaid="_439557"/>
+        </listOfReactants>
+        <kineticLaw metaid="_439569">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <ci> function_2 </ci>
+                <ci> acc_rate </ci>
+                <ci> acc </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_3" name="TOC1 transcription" metaid="COPASI29" reversible="false" sboTerm="SBO:0000183">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI29">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T17:31:40Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI29">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0006351"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfProducts>
+          <speciesReference species="toc1_mrna" metaid="_439581"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="acc" metaid="_439593"/>
+          <modifierSpeciesReference species="cca1_n" metaid="_439605"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_439617">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <ci> function_3 </ci>
+                <ci> R_toc1_acc </ci>
+                <ci> acc </ci>
+                <ci> R_toc1_cca1 </ci>
+                <ci> H_toc1_cca1 </ci>
+                <ci> cca1_n </ci>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                <ci> L_toc1 </ci>
+                <ci> parameter_4 </ci>
+                <ci> effcopies_cca1_LHY7 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_4" name="TOC1 degradation" metaid="COPASI30" reversible="false" sboTerm="SBO:0000179">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI30">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T17:30:20Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI30">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0009056"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="toc1_2" metaid="_439629"/>
+        </listOfReactants>
+        <kineticLaw metaid="_439641">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <ci> function_4 </ci>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                <ci> D_toc1_2_l </ci>
+                <ci> D_toc1_2_d </ci>
+                <ci> toc1_2 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_5" name="TOC1 translation" metaid="metaid_0000095" reversible="false" sboTerm="SBO:0000184">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000095">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0006412"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfProducts>
+          <speciesReference species="toc1_1" metaid="_439653"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="toc1_mrna" metaid="_439665"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_439677">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <ci> Translation </ci>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                <ci> T_toc1 </ci>
+                <ci> toc1_mrna </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_6" name="TOC1 conversion" metaid="COPASI31" reversible="false" sboTerm="SBO:0000182">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI31">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T17:30:19Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI31">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.psi-mod/MOD:00000"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="toc1_1" metaid="_439689"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="toc1_2" metaid="_439701"/>
+        </listOfProducts>
+        <kineticLaw metaid="_439713">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <ci> function_5 </ci>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                <ci> Di_toc1_12_l </ci>
+                <ci> Di_toc1_12_d </ci>
+                <ci> toc1_1 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_7" name="TOC1 mRNA degradation" metaid="COPASI32" reversible="false" sboTerm="SBO:0000179">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI32">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T18:15:26Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI32">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0009056"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="toc1_mrna" metaid="_439725"/>
+        </listOfReactants>
+        <kineticLaw metaid="_439737">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> D_mrna_toc1 </ci>
+              <ci> toc1_mrna </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_8" name="CCA1 transcription" metaid="COPASI33" reversible="false" sboTerm="SBO:0000183">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI33">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T17:31:29Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI33">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0006351"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfProducts>
+          <speciesReference species="cca1_mrna" metaid="_439749"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="toc1_2" metaid="_439761"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_439773">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <ci> function_6 </ci>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                <ci> toc1_2 </ci>
+                <ci> R_cca1_toc1_2_l </ci>
+                <ci> R_cca1_toc1_2_d </ci>
+                <ci> H_cca1_toc1 </ci>
+                <ci> parameter_2 </ci>
+                <ci> effcopies_toc1_TOC8 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_9" name="CCA1 mRNA degradation" metaid="COPASI34" reversible="false" sboTerm="SBO:0000179">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI34">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T17:30:10Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI34">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0009056"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="cca1_mrna" metaid="_439785"/>
+        </listOfReactants>
+        <kineticLaw metaid="_439797">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> D_mrna_cca1 </ci>
+              <ci> cca1_mrna </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_10" name="CCA1 translation" metaid="metaid_0000096" reversible="false" sboTerm="SBO:0000184">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000096">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0006412"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfProducts>
+          <speciesReference species="cca1_c" metaid="_439809"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="cca1_mrna" metaid="_439821"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_439833">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <ci> Translation </ci>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                <ci> T_cca1 </ci>
+                <ci> cca1_mrna </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_11" name="CCA1 nuclear transport" metaid="COPASI35" reversible="false" sboTerm="SBO:0000185">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI35">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T18:27:53Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI35">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0051169"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="cca1_c" metaid="_439845"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="cca1_n" metaid="_439857"/>
+        </listOfProducts>
+        <kineticLaw metaid="_439869">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> Di_cca1_cn </ci>
+              <ci> cca1_c </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_12" name="CCA1 degradation, cytosol" metaid="COPASI36" reversible="false" sboTerm="SBO:0000179">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI36">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T14:28:08Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI36">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0009056"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="cca1_c" metaid="_439881"/>
+        </listOfReactants>
+        <kineticLaw metaid="_439893">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <ci> function_4 </ci>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                <ci> D_cca1_l </ci>
+                <ci> D_cca1_d </ci>
+                <ci> cca1_c </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_13" name="CCA1 degradation, nucleus" metaid="COPASI37" reversible="false" sboTerm="SBO:0000179">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI37">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T18:15:53Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI37">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0009056"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="cca1_n" metaid="_439905"/>
+        </listOfReactants>
+        <kineticLaw metaid="_439917">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <ci> function_4 </ci>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                <ci> D_cca1_l </ci>
+                <ci> D_cca1_d </ci>
+                <ci> cca1_n </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_14" name="LUC transcription, pTOC1" metaid="COPASI38" reversible="false" sboTerm="SBO:0000183">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI38">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T17:30:16Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI38">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0006351"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfProducts>
+          <speciesReference species="luc_mrna" metaid="_439929"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="acc" metaid="_439941"/>
+          <modifierSpeciesReference species="cca1_n" metaid="_439953"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_439965">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <ci> function_7 </ci>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                <ci> R_toc1_acc </ci>
+                <ci> acc </ci>
+                <ci> R_toc1_cca1 </ci>
+                <ci> cca1_n </ci>
+                <ci> H_toc1_cca1 </ci>
+                <ci> parameter_3 </ci>
+                <ci> L_toc1 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_15" name="LUC mRNA degradation" metaid="metaid_0000097" reversible="false" sboTerm="SBO:0000179">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000097">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0009056"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="luc_mrna" metaid="_439977"/>
+        </listOfReactants>
+        <kineticLaw metaid="_439989">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> D_mrna_luc </ci>
+              <ci> luc_mrna </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_16" name="LUC translation" metaid="metaid_0000098" reversible="false" sboTerm="SBO:0000184">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000098">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0006412"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfProducts>
+          <speciesReference species="luc" metaid="_440001"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="luc_mrna" metaid="_440013"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_440026">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <ci> Translation </ci>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                <ci> parameter_1 </ci>
+                <ci> luc_mrna </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_17" name="LUC decay" metaid="COPASI39" reversible="false" sboTerm="SBO:0000179">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI39">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T17:30:12Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI39">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0030163"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="luc" metaid="_440038"/>
+        </listOfReactants>
+        <kineticLaw metaid="_440050">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> D_luc </ci>
+              <ci> luc </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_18" name="TOC1-LUC transcription" metaid="COPASI40" reversible="false" sboTerm="SBO:0000183">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI40">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T17:30:57Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI40">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0006351"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfProducts>
+          <speciesReference species="toc1luc_mrna" metaid="_440062"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="acc" metaid="_440075"/>
+          <modifierSpeciesReference species="cca1_n" metaid="_440087"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_440099">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <ci> function_8 </ci>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                <ci> R_toc1_acc </ci>
+                <ci> acc </ci>
+                <ci> R_toc1_cca1 </ci>
+                <ci> cca1_n </ci>
+                <ci> H_toc1_cca1 </ci>
+                <ci> parameter_2 </ci>
+                <ci> L_toc1 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_19" name="TOC1-LUC mRNA degradation" metaid="COPASI41" reversible="false" sboTerm="SBO:0000179">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI41">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T17:30:52Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI41">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0009056"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="toc1luc_mrna" metaid="_440111"/>
+        </listOfReactants>
+        <kineticLaw metaid="_440123">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> D_mrna_toc1 </ci>
+              <ci> toc1luc_mrna </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_20" name="TOC1-LUC translation" metaid="COPASI42" reversible="false" sboTerm="SBO:0000184">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI42">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T17:29:17Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI42">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0006412"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfProducts>
+          <speciesReference species="toc1luc_1" metaid="_440135"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="toc1luc_mrna" metaid="_440147"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_440159">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <ci> Translation </ci>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                <ci> T_toc1 </ci>
+                <ci> toc1luc_mrna </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_21" name="TOC1-LUC conversion" metaid="COPASI43" reversible="false" sboTerm="SBO:0000182">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI43">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T17:30:36Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI43">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.psi-mod/MOD:00000"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="toc1luc_1" metaid="_440171"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="toc1luc_2" metaid="_440183"/>
+        </listOfProducts>
+        <kineticLaw metaid="_440195">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <ci> function_5 </ci>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                <ci> Di_toc1_12_l </ci>
+                <ci> Di_toc1_12_d </ci>
+                <ci> toc1luc_1 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_22" name="TOC1-LUC degradation" metaid="COPASI44" reversible="false" sboTerm="SBO:0000179">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI44">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T17:30:42Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI44">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0009056"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="toc1luc_2" metaid="_440207"/>
+        </listOfReactants>
+        <kineticLaw metaid="_440219">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <ci> function_4 </ci>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                <ci> D_toc1_2_l </ci>
+                <ci> D_toc1_2_d </ci>
+                <ci> toc1luc_2 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_23" name="TOC1-LUC(1) deactivation" metaid="COPASI45" reversible="false" sboTerm="SBO:0000176">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI45">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T17:29:21Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI45">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0030163"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="toc1luc_1" metaid="_440231"/>
+        </listOfReactants>
+        <kineticLaw metaid="_440243">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> D_luc </ci>
+              <ci> toc1luc_1 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_24" name="TOC1-LUC(2) deactivation" metaid="COPASI46" reversible="false" sboTerm="SBO:0000176">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI46">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T17:30:31Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI46">
+              <bqbiol:hasVersion>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0030163"/>
+                </rdf:Bag>
+              </bqbiol:hasVersion>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="toc1luc_2" metaid="_440255"/>
+        </listOfReactants>
+        <kineticLaw metaid="_440267">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> D_luc </ci>
+              <ci> toc1luc_2 </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_25" name="LUC transcription, pCCA1" metaid="COPASI47" reversible="false" sboTerm="SBO:0000183">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI47">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T17:30:15Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI47">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0006351"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfProducts>
+          <speciesReference species="luc_mrna" metaid="_440279"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="toc1_2" metaid="_440291"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_440303">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <ci> function_9 </ci>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                <ci> toc1_2 </ci>
+                <ci> R_cca1_toc1_2_l </ci>
+                <ci> R_cca1_toc1_2_d </ci>
+                <ci> H_cca1_toc1 </ci>
+                <ci> parameter_5 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_26" name="CCA1-LUC transcription" metaid="COPASI48" reversible="false" sboTerm="SBO:0000183">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI48">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T14:28:14Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI48">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0006351"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfProducts>
+          <speciesReference species="cca1luc_mrna" metaid="_440315"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="toc1_2" metaid="_440327"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_440339">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <ci> function_10 </ci>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                <ci> toc1_2 </ci>
+                <ci> R_cca1_toc1_2_l </ci>
+                <ci> R_cca1_toc1_2_d </ci>
+                <ci> H_cca1_toc1 </ci>
+                <ci> parameter_4 </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_27" name="CCA1-LUC mRNA degradation" metaid="COPASI49" reversible="false" sboTerm="SBO:0000179">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI49">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T17:29:50Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI49">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0009056"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="cca1luc_mrna" metaid="_440351"/>
+        </listOfReactants>
+        <kineticLaw metaid="_440363">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> D_mrna_cca1 </ci>
+              <ci> cca1luc_mrna </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_28" name="CCA1-LUC translation" metaid="COPASI50" reversible="false" sboTerm="SBO:0000184">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI50">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T17:30:04Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI50">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0006412"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfProducts>
+          <speciesReference species="cca1luc" metaid="_440375"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="cca1luc_mrna" metaid="_440387"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_440399">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <ci> Translation </ci>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                <ci> T_cca1 </ci>
+                <ci> cca1luc_mrna </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_30" name="CCA1-LUC degradation" metaid="COPASI51" reversible="false" sboTerm="SBO:0000179">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI51">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T17:29:39Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI51">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0009056"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="cca1luc" metaid="_440411"/>
+        </listOfReactants>
+        <kineticLaw metaid="_440423">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <ci> function_4 </ci>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                <ci> D_cca1_l </ci>
+                <ci> D_cca1_d </ci>
+                <ci> cca1luc </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_32" name="CCA1-LUC deactivation" metaid="COPASI52" reversible="false" sboTerm="SBO:0000176">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+          <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+            <rdf:Description rdf:about="#COPASI52">
+              <dcterms:created>
+                <rdf:Description>
+                  <dcterms:W3CDTF>2011-01-07T17:29:26Z</dcterms:W3CDTF>
+                </rdf:Description>
+              </dcterms:created>
+            </rdf:Description>
+          </rdf:RDF>
+        </COPASI>
+                                                            <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#COPASI52">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0030163"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="cca1luc" metaid="_440435"/>
+        </listOfReactants>
+        <kineticLaw metaid="_440447">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> D_luc </ci>
+              <ci> cca1luc </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

@@ -1,0 +1,453 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version3" level="2" metaid="_929752" version="3">
+  <model id="Soboleva2005_ProlactinRegulation" name="Sobaleva2005_ProlactinRegulation" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>Mathematical modelling of prolactin-receptor interaction and the corollary for prolactin receptor gene expression in skin</strong>
+                <br/>
+          Soboleva TK, Vetharaniam I, Nixon AJ, Montenegro R, Pearson AJ, Sneyd J.      <em>J Theor Biol.</em>
+          (2005) 234(2); 289-98      <a href="http://www.ncbi.nlm.nih.gov/pubmed/15757685">15757685</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          A mathematical model of prolactin regulating its own receptors was developed, and compared with experimental data on a qualitative level. The model incorporates the kinetics of prolactin-receptor interactions and subsequent signalling by prolactin-receptor dimers to regulate the production of receptor mRNA and hence the receptor population. The model relates changes in plasma prolactin concentration to prolactin receptor (PRLR) gene expression, and can be used for predictive purposes. The cell signalling that leads to the activation of target genes, and the mechanisms for regulation of transcription, were treated empirically in the model. The model's parameters were adjusted so that model simulations agreed with experimentally observed responses to administration of prolactin in sheep. In particular, the model correctly predicts insensitivity of receptor mRNA regulation to a series of subcutaneous injections of prolactin, versus sensitivity to prolonged infusion of prolactin. In the latter case, response was an acute down-regulation followed by a prolonged up-regulation of mRNA, with the magnitude of the up-regulation increasing with the duration of infusion period. The model demonstrates the feasibility of predicting the in vivo response of prolactin target genes to external manipulation of plasma prolactin, and could provide a useful tool for identifying optimal prolactin treatments for desirable outcomes.      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://www.cellml.org/models/soboleva_vetharaniam_nixon_montenegro_pearson_sneyd_2005_version01">        <strong>soboleva, vetharaniam, nixon, montenegro, pearson, sneyd, 2005, version01</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>Lloyd, Catherine, May</strong>
+                <br/>
+          c.lloyd(at)auckland.ac.nz      <br/>
+          The University of Auckland      <br/>
+          Auckland Bioengineering Institute      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL7896869925"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/15757685"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="day" name="day" metaid="_929764">
+        <listOfUnits>
+          <unit metaid="_929776" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="nanomole" name="nanomole" metaid="_929788">
+        <listOfUnits>
+          <unit scale="-9" metaid="_929801" kind="mole"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="nanomolar" name="nanomolar" metaid="_929813">
+        <listOfUnits>
+          <unit scale="-9" metaid="_929825" kind="mole"/>
+          <unit exponent="-1" metaid="_929837" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="first_order_rate_constant" name="first_order_rate_constant" metaid="_929849">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_929861" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="flux" name="flux" metaid="_929873">
+        <listOfUnits>
+          <unit scale="-9" metaid="_929885" kind="mole"/>
+          <unit exponent="-1" metaid="_929897" kind="litre"/>
+          <unit exponent="-1" metaid="_929909" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_nanomolar_day" name="per_nanomolar_day" metaid="_929921">
+        <listOfUnits>
+          <unit scale="-9" exponent="-1" metaid="_929933" kind="mole"/>
+          <unit metaid="_929945" kind="litre"/>
+          <unit exponent="-1" metaid="_929957" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="nanomolar_day2" name="nanomolar_day2" metaid="_929970">
+        <listOfUnits>
+          <unit scale="-9" metaid="_929982" kind="mole"/>
+          <unit exponent="-1" metaid="_929994" kind="litre"/>
+          <unit exponent="-2" metaid="_930006" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time" name="time" metaid="_930018">
+        <listOfUnits>
+          <unit metaid="_930030" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="Compartment" metaid="_438639" units="litre" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="R" constant="false" name="R" metaid="_438658" value="1" units="nanomolar"/>
+      <parameter id="delta_R" name="delta_R" metaid="_438659" value="1.905" units="first_order_rate_constant"/>
+      <parameter id="U" constant="false" name="U" metaid="_438661" value="1" units="nanomolar"/>
+      <parameter id="delta_U" name="delta_U" metaid="_438663" value="7.5" units="first_order_rate_constant"/>
+      <parameter id="B1" constant="false" name="B1" metaid="_438665" value="1" units="nanomolar"/>
+      <parameter id="delta_b1" name="delta_b1" metaid="_438667" value="7.5" units="first_order_rate_constant"/>
+      <parameter id="B2" constant="false" name="B2" metaid="_438669" value="1" units="nanomolar"/>
+      <parameter id="delta_b2" name="delta_b2" metaid="_438671" value="50" units="first_order_rate_constant"/>
+      <parameter id="P" constant="false" name="P" metaid="_438673" units="nanomolar"/>
+      <parameter id="PE" name="PE" metaid="_438675" value="20.55" units="nanomolar"/>
+      <parameter id="q" constant="false" name="q" metaid="_438677" units="dimensionless"/>
+      <parameter id="G" name="G" metaid="_438679" value="35.6" units="first_order_rate_constant"/>
+      <parameter id="ti" name="ti" metaid="_438681" value="1" units="day"/>
+      <parameter id="T" name="T" metaid="_438683" value="9" units="day"/>
+      <parameter id="f1" constant="false" name="f1" metaid="_438685" units="flux"/>
+      <parameter id="a" name="a" metaid="_438687" value="358000" units="flux"/>
+      <parameter id="a0" name="a0" metaid="_438689" value="23300" units="flux"/>
+      <parameter id="b" name="b" metaid="_438691" value="100" units="nanomolar"/>
+      <parameter id="b0" name="b0" metaid="_438693" value="263" units="nanomolar"/>
+      <parameter id="x" constant="false" name="x" metaid="_438695" value="1" units="flux"/>
+      <parameter id="P1" name="P1" metaid="_438697" value="20" units="nanomolar"/>
+      <parameter id="s" name="s" metaid="_438699" value="371000" units="nanomolar_day2"/>
+      <parameter id="delta_x" name="delta_x" metaid="_438701" value="0.207" units="first_order_rate_constant"/>
+      <parameter id="f2" constant="false" name="f2" metaid="_438703" units="flux"/>
+      <parameter id="kappa" name="kappa" metaid="_438705" value="240000" units="flux"/>
+      <parameter id="kappa0" name="kappa0" metaid="_438707" value="6550" units="nanomolar"/>
+      <parameter id="alpha0" name="alpha0" metaid="_438709" value="4.15" units="per_nanomolar_day"/>
+      <parameter id="alpha1" name="alpha1" metaid="_438711" value="3.02" units="per_nanomolar_day"/>
+      <parameter id="d01" name="d01" metaid="_438713" value="13" units="first_order_rate_constant"/>
+      <parameter id="d12" name="d12" metaid="_438715" value="4720" units="first_order_rate_constant"/>
+      <parameter id="P0" name="P0" metaid="_438717" value="0.25" units="nanomolar"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_438641" variable="R">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <ci> f1 </ci>
+            <apply>
+              <times/>
+              <ci> delta_R </ci>
+              <ci> R </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_438643" variable="U">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <ci> f2 </ci>
+              <apply>
+                <times/>
+                <ci> d01 </ci>
+                <ci> B1 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> d12 </ci>
+                <ci> B2 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> delta_U </ci>
+                <ci> U </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> alpha0 </ci>
+                <ci> P </ci>
+                <ci> U </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> alpha1 </ci>
+                <ci> B1 </ci>
+                <ci> U </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_438645" variable="B1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> alpha0 </ci>
+                <ci> P </ci>
+                <ci> U </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> d12 </ci>
+                <ci> B2 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> d01 </ci>
+                <ci> B1 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> delta_b1 </ci>
+                <ci> B1 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> alpha1 </ci>
+                <ci> B1 </ci>
+                <ci> U </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_438647" variable="B2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> alpha1 </ci>
+              <ci> B1 </ci>
+              <ci> U </ci>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> d12 </ci>
+                <ci> B2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> delta_b2 </ci>
+                <ci> B2 </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_438649" variable="x">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> s </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <minus/>
+                  <ci> P </ci>
+                  <ci> P0 </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> P </ci>
+                  <ci> P1 </ci>
+                </apply>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> delta_x </ci>
+              <ci> x </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="_438651" variable="P">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> P0 </ci>
+            <apply>
+              <times/>
+              <ci> PE </ci>
+              <ci> q </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_438653" variable="q">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <cn> 0 </cn>
+              <apply>
+                <lt/>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                <ci> ti </ci>
+              </apply>
+            </piece>
+            <piece>
+              <apply>
+                <minus/>
+                <cn> 1 </cn>
+                <apply>
+                  <exp/>
+                  <apply>
+                    <times/>
+                    <apply>
+                      <minus/>
+                      <ci> G </ci>
+                    </apply>
+                    <apply>
+                      <minus/>
+                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                      <ci> ti </ci>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <and/>
+                <apply>
+                  <lt/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <apply>
+                    <plus/>
+                    <ci> T </ci>
+                    <ci> ti </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <geq/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <ci> ti </ci>
+                </apply>
+              </apply>
+            </piece>
+            <otherwise>
+              <apply>
+                <times/>
+                <apply>
+                  <exp/>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> G </ci>
+                      <ci> T </ci>
+                    </apply>
+                    <cn> 1 </cn>
+                  </apply>
+                </apply>
+                <apply>
+                  <exp/>
+                  <apply>
+                    <times/>
+                    <ci> G </ci>
+                    <apply>
+                      <minus/>
+                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                      <ci> ti </ci>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_438655" variable="f1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <times/>
+              <ci> a0 </ci>
+              <apply>
+                <minus/>
+                <cn> 1 </cn>
+                <apply>
+                  <divide/>
+                  <ci> B2 </ci>
+                  <apply>
+                    <plus/>
+                    <ci> b </ci>
+                    <ci> B2 </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> x </ci>
+                <apply>
+                  <minus/>
+                  <cn> 1 </cn>
+                  <apply>
+                    <exp/>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <minus/>
+                        <ci> x </ci>
+                      </apply>
+                      <ci> a </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> B2 </ci>
+              </apply>
+              <apply>
+                <plus/>
+                <ci> b0 </ci>
+                <ci> B2 </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_438657" variable="f2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <times/>
+              <ci> kappa </ci>
+              <ci> R </ci>
+            </apply>
+            <apply>
+              <plus/>
+              <ci> kappa0 </ci>
+              <ci> R </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+  </model>
+</sbml>

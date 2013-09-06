@@ -1,0 +1,537 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2" level="2" metaid="metaid_0000001" version="1">
+  <model id="Model_1" name="Thomsen1989_AdenylateCyclase" metaid="metaid_0000002">
+    <notes>
+      <html xmlns="http://www.w3.org/1999/xhtml">
+        <head>      <meta content="1" name="qrichtext"/>
+                </head>
+            <body style="font-size:13pt;font-family:Helvetica">      <p>This model reproduces figure 5 and figure 4(B)of the paper, with Kinh represented by [G-GTP]. We arbitrarily chosed to set the initial concentration of D to 31 micorMolar based on legend of figure 4. [R] was not given anywhere in the paper and was chosen to calibrate the sigmoid response to an increased [GTP]. THe figure 5 in the model was successfully simulated on COPASI 4.0 ,the figure 4(B) was sucessfully simulated on both COPASI and SBML_odeSolver.</p>
+                <p>There are two curves for Kinh in the absence and presence of NaCl in the figure obtained from simulations of the model using parameters of set C and set D.Here in the model the initial value given is from set D.The parameters in set C :k7=0.5, k10=1.0,k5=0.1,the others are the same with set D.</p>
+                </body>
+            </html>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>He</vCard:Family>
+                  <vCard:Given>Enuo</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>enuo.he@wolfson.ox.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Oxford</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2006-09-27T10:07:57Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2012-04-20T19:09:08Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1173806337"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/BIOMD0000000080"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/2574993"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+          <bqbiol:isVersionOf>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0031684"/>
+              <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0007194"/>
+            </rdf:Bag>
+          </bqbiol:isVersionOf>
+          <bqbiol:occursIn>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/taxonomy/9606"/>
+            </rdf:Bag>
+          </bqbiol:occursIn>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfCompartments>
+      <compartment id="cell" name="cell" metaid="metaid_0000003" size="1">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000003">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0005623"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </compartment>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="D" initialConcentration="3.1E-5" name="D" metaid="metaid_0000004" compartment="cell">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000004">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:35569"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="DR" initialConcentration="0" name="DR" metaid="metaid_0000005" compartment="cell">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000005">
+              <bqbiol:hasPart>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:35569"/>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P08913"/>
+                </rdf:Bag>
+              </bqbiol:hasPart>
+              <bqbiol:hasPart>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:35569"/>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P18089"/>
+                </rdf:Bag>
+              </bqbiol:hasPart>
+              <bqbiol:hasPart>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:35569"/>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P18825"/>
+                </rdf:Bag>
+              </bqbiol:hasPart>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="DRG_GDP" initialConcentration="0" name="DRG_GDP" metaid="metaid_0000006" compartment="cell">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000006">
+              <bqbiol:hasPart>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:35569"/>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:17552"/>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P08913"/>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0005834"/>
+                </rdf:Bag>
+              </bqbiol:hasPart>
+              <bqbiol:hasPart>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:35569"/>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:17552"/>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P18089"/>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0005834"/>
+                </rdf:Bag>
+              </bqbiol:hasPart>
+              <bqbiol:hasPart>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:35569"/>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:17552"/>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P18825"/>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0005834"/>
+                </rdf:Bag>
+              </bqbiol:hasPart>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="G_GDP" initialConcentration="1E-6" name="G_GDP" metaid="metaid_0000007" compartment="cell">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000007">
+              <bqbiol:hasPart>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:17552"/>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0005834"/>
+                </rdf:Bag>
+              </bqbiol:hasPart>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="DRG" initialConcentration="0" name="DRG" metaid="metaid_0000008" compartment="cell">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000008">
+              <bqbiol:hasPart>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:35569"/>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P08913"/>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0005834"/>
+                </rdf:Bag>
+              </bqbiol:hasPart>
+              <bqbiol:hasPart>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:35569"/>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P18089"/>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0005834"/>
+                </rdf:Bag>
+              </bqbiol:hasPart>
+              <bqbiol:hasPart>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:35569"/>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P18825"/>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0005834"/>
+                </rdf:Bag>
+              </bqbiol:hasPart>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="GDP" initialConcentration="0" name="GDP" metaid="metaid_0000009" compartment="cell">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000009">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:17552"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="DRG_GTP" initialConcentration="0" name="DRG_GTP" metaid="metaid_0000010" compartment="cell">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000010">
+              <bqbiol:hasPart>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:35569"/>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:15996"/>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P08913"/>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0005834"/>
+                </rdf:Bag>
+              </bqbiol:hasPart>
+              <bqbiol:hasPart>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:35569"/>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:15996"/>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P18089"/>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0005834"/>
+                </rdf:Bag>
+              </bqbiol:hasPart>
+              <bqbiol:hasPart>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:35569"/>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:15996"/>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P18825"/>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0005834"/>
+                </rdf:Bag>
+              </bqbiol:hasPart>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="GTP" initialConcentration="1E-5" name="GTP" metaid="metaid_0000011" compartment="cell">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000011">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:15996"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="G_GTP" initialConcentration="0" name="G_GTP" metaid="metaid_0000012" compartment="cell">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000012">
+              <bqbiol:hasPart>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.chebi/CHEBI:15996"/>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0005834"/>
+                </rdf:Bag>
+              </bqbiol:hasPart>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="R" initialConcentration="1E-10" name="R" metaid="metaid_0000013" compartment="cell">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000013">
+              <bqbiol:hasVersion>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P08913"/>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P18089"/>
+                  <rdf:li rdf:resource="http://identifiers.org/uniprot/P18825"/>
+                </rdf:Bag>
+              </bqbiol:hasVersion>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+    </listOfSpecies>
+    <listOfReactions>
+      <reaction id="Reaction_1" name="Forming DR" metaid="metaid_0000014">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000014">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0031690"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="D" metaid="_030205"/>
+          <speciesReference species="R" metaid="_030217"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="DR" metaid="_030229"/>
+        </listOfProducts>
+        <kineticLaw metaid="_030241">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k1 </ci>
+                  <ci> D </ci>
+                  <ci> R </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k7 </ci>
+                  <ci> DR </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" metaid="_030253" value="5000000"/>
+            <parameter id="k7" metaid="_030265" value="10"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Reaction_2" name="DR Binding with G_GDP produce DRG_GDP" metaid="metaid_0000015">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000015">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0001664"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="DR" metaid="_030277"/>
+          <speciesReference species="G_GDP" metaid="_030289"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="DRG_GDP" metaid="_030302"/>
+        </listOfProducts>
+        <kineticLaw metaid="_030314">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k2 </ci>
+                  <ci> DR </ci>
+                  <ci> G_GDP </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k8 </ci>
+                  <ci> DRG_GDP </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k2" metaid="_030326" value="100000000"/>
+            <parameter id="k8" metaid="_030338" value="0.1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Reaction_3" name="GDP Releasing" metaid="metaid_0000016">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000016">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0043241"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="DRG_GDP" metaid="_030350"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="GDP" metaid="_030362"/>
+          <speciesReference species="DRG" metaid="_030374"/>
+        </listOfProducts>
+        <kineticLaw metaid="_030386">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k3 </ci>
+                  <ci> DRG_GDP </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k9 </ci>
+                  <ci> GDP </ci>
+                  <ci> DRG </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k3" metaid="_030398" value="5"/>
+            <parameter id="k9" metaid="_030410" value="100000"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Reaction_4" name="GTP binding with DRG" metaid="metaid_0000017">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000017">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0005525"/>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0032403"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="DRG" metaid="_030422"/>
+          <speciesReference species="GTP" metaid="_030434"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="DRG_GTP" metaid="_030446"/>
+        </listOfProducts>
+        <kineticLaw metaid="_030458">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k4 </ci>
+                  <ci> DRG </ci>
+                  <ci> GTP </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k10 </ci>
+                  <ci> DRG_GTP </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k4" metaid="_030470" value="5000000"/>
+            <parameter id="k10" metaid="_030482" value="55"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Reaction_5" name="G protein activation" metaid="metaid_0000018" reversible="false">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000018">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0043241"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="DRG_GTP" metaid="_030494"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="G_GTP" metaid="_030506"/>
+          <speciesReference species="DR" metaid="_030518"/>
+        </listOfProducts>
+        <kineticLaw metaid="_030530">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <ci> k5 </ci>
+              <ci> DRG_GTP </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k5" metaid="_030542" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Reaction_6" name="Hydrolysis of GTP to GDP" metaid="metaid_0000019" reversible="false">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_0000019">
+              <bqbiol:isVersionOf>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0003924"/>
+                </rdf:Bag>
+              </bqbiol:isVersionOf>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+              <listOfReactants>
+          <speciesReference species="G_GTP" metaid="_030554"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="G_GDP" metaid="_030566"/>
+        </listOfProducts>
+        <kineticLaw metaid="_030578">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> cell </ci>
+              <ci> k6 </ci>
+              <ci> G_GTP </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k6" metaid="_030590" value="2"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

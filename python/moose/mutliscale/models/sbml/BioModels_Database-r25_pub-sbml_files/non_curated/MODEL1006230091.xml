@@ -1,0 +1,600 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="_611381" version="4">
+  <model id="Reed2004_MethionineCycle" name="Reed2004_MethionineCycle" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>A mathematical model of the methionine cycle.</strong>
+                <br/>
+          Reed MC, Nijhout HF, Sparks R, Ulrich CM.      <em>J Theor Biol</em>
+          2004 Jan 7;226(1):33-43      <a href="http://www.ncbi.nlm.nih.gov/pubmed/14637052">14637052</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          Building on the work of Martinov et al. (2000), a mathematical model is
+developed for the methionine cycle. A large amount of information is available
+about the enzymes that catalyse individual reaction steps in the cycle, from
+methionine to S-adenosylmethionine to S-adenosylhomocysteine to homocysteine,
+and the removal of mass from the cycle by the conversion of homocysteine to
+cystathionine. Nevertheless, the behavior of the cycle is very complicated since
+many substrates alter the activities of the enzymes in the reactions that
+produce them, and some can also alter the activities of other enzymes in the
+cycle. The model consists of four differential equations, based on known
+reaction kinetics, that can be solved to give the time course of the
+concentrations of the four main substrates in the cycle under various
+circumstances. We show that the behavior of the model in response to genetic
+abnormalities and dietary deficiencies is similar to the changes seen in a wide
+variety of experimental studies. We conduct computational "experiments" that
+give understanding of the regulatory behavior of the methionine cycle under
+normal conditions and the behavior in the presence of genetic variation and
+dietary deficiencies.      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://models.cellml.org/exposure/b0a3d0dbb029b6cbd2a193014b779a82">        <strong>Reed MC, Nijhout HF, Sparks R, Ulrich CM. (2004) - version=1.0</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>Catherine Lloyd</strong>
+                <br/>
+          c.lloyd@auckland.ac.nz      <br/>
+          The University of Auckland      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:45:18Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:45:18Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:45:18Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:45:18Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1006230091"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/14637052"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="micromolar" name="micromolar" metaid="_611393">
+        <listOfUnits>
+          <unit scale="-6" metaid="_611405" kind="mole"/>
+          <unit exponent="-1" metaid="_611417" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_micromolar" name="per_micromolar" metaid="_611430">
+        <listOfUnits>
+          <unit scale="-6" exponent="-1" metaid="_611442" kind="mole"/>
+          <unit metaid="_611454" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="hour" name="hour" metaid="_611466">
+        <listOfUnits>
+          <unit metaid="_611478" multiplier="3600" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="flux" name="flux" metaid="_611491">
+        <listOfUnits>
+          <unit scale="-6" metaid="_611503" kind="mole"/>
+          <unit exponent="-1" metaid="_611515" kind="litre"/>
+          <unit exponent="-1" metaid="_611527" multiplier="3600" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="first_order_rate_constant" name="first_order_rate_constant" metaid="_611539">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_611551" multiplier="3600" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="second_order_rate_constant" name="second_order_rate_constant" metaid="_611564">
+        <listOfUnits>
+          <unit scale="-6" exponent="-1" metaid="_611576" kind="mole"/>
+          <unit metaid="_611588" kind="litre"/>
+          <unit exponent="-1" metaid="_611600" multiplier="3600" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time" name="time" metaid="_611612">
+        <listOfUnits>
+          <unit metaid="_611624" multiplier="3600" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="COMpartment" metaid="_917012" units="litre" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="Metin" constant="false" name="Metin" metaid="_917033"/>
+      <parameter id="Met" constant="false" name="Met" metaid="_917034" value="53.5"/>
+      <parameter id="AdoMet" constant="false" name="AdoMet" metaid="_917036" value="137.6"/>
+      <parameter id="AdoHcy" constant="false" name="AdoHcy" metaid="_917037" value="13.2"/>
+      <parameter id="Hcy" constant="false" name="Hcy" metaid="_917038" value="0.88"/>
+      <parameter id="V_MATI" constant="false" name="V_MATI" metaid="_917039"/>
+      <parameter id="V_MATImax" name="V_MATImax" metaid="_917040" value="561"/>
+      <parameter id="Km_MATI" name="Km_MATI" metaid="_917042" value="41"/>
+      <parameter id="Ki_MATI" name="Ki_MATI" metaid="_917043" value="50"/>
+      <parameter id="V_MATIII" constant="false" name="V_MATIII" metaid="_917044"/>
+      <parameter id="V_MATIIImax" name="V_MATIIImax" metaid="_917045" value="22870"/>
+      <parameter id="Km1_MATIII" constant="false" name="Km1_MATIII" metaid="_917046"/>
+      <parameter id="Km2_MATIII" name="Km2_MATIII" metaid="_917047" value="21.1"/>
+      <parameter id="V_GNMT" constant="false" name="V_GNMT" metaid="_917048"/>
+      <parameter id="V_GNMTmax" name="V_GNMTmax" metaid="_917049" value="10600"/>
+      <parameter id="Km_GNMT" name="Km_GNMT" metaid="_917050" value="4500"/>
+      <parameter id="Ki_GNMT" name="Ki_GNMT" metaid="_917051" value="20"/>
+      <parameter id="V_METH" constant="false" name="V_METH" metaid="_917053"/>
+      <parameter id="V_METHmax" name="V_METHmax" metaid="_917054" value="4521"/>
+      <parameter id="Km1_METH" constant="false" name="Km1_METH" metaid="_917055"/>
+      <parameter id="Km2_METH_A" name="Km2_METH_A" metaid="_917056" value="10"/>
+      <parameter id="V_MS" constant="false" name="V_MS" metaid="_917057"/>
+      <parameter id="five_mTHF" name="five_mTHF" metaid="_917059" value="5.2"/>
+      <parameter id="V_MSmax" name="V_MSmax" metaid="_917060" value="500"/>
+      <parameter id="Kd_MS" name="Kd_MS" metaid="_917061" value="1"/>
+      <parameter id="Km_Hcy_MS" name="Km_Hcy_MS" metaid="_917062" value="0.1"/>
+      <parameter id="Km_five_mTHF_MS" name="Km_five_mTHF_MS" metaid="_917063" value="25"/>
+      <parameter id="V_AH" constant="false" name="V_AH" metaid="_917064"/>
+      <parameter id="alpha1" name="alpha1" metaid="_917065" value="100"/>
+      <parameter id="alpha2" name="alpha2" metaid="_917066" value="10"/>
+      <parameter id="V_CBS" constant="false" name="V_CBS" metaid="_917067"/>
+      <parameter id="beta1" name="beta1" metaid="_917068" value="1.7"/>
+      <parameter id="beta2" name="beta2" metaid="_917070" value="30"/>
+      <parameter id="V_BHMT" constant="false" name="V_BHMT" metaid="_917071"/>
+      <parameter id="V_BHMTmax" name="V_BHMTmax" metaid="_917072" value="2500"/>
+      <parameter id="Km_BHMT" name="Km_BHMT" metaid="_917073" value="12"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_917015" variable="Met">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <ci> V_MS </ci>
+              <ci> V_BHMT </ci>
+              <ci> Metin </ci>
+            </apply>
+            <apply>
+              <plus/>
+              <ci> V_MATI </ci>
+              <ci> V_MATIII </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_917016" variable="AdoMet">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <ci> V_MATI </ci>
+              <ci> V_MATIII </ci>
+            </apply>
+            <apply>
+              <plus/>
+              <ci> V_METH </ci>
+              <ci> V_GNMT </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_917017" variable="AdoHcy">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <ci> V_METH </ci>
+              <ci> V_GNMT </ci>
+            </apply>
+            <ci> V_AH </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_917018" variable="Hcy">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <ci> V_AH </ci>
+            <apply>
+              <plus/>
+              <ci> V_CBS </ci>
+              <ci> V_MS </ci>
+              <ci> V_BHMT </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="_917019" variable="Metin">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <cn> 200 </cn>
+              <apply>
+                <or/>
+                <apply>
+                  <lt/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <cn> 2 </cn>
+                </apply>
+                <apply>
+                  <geq/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <cn> 8 </cn>
+                </apply>
+              </apply>
+            </piece>
+            <piece>
+              <cn> 300 </cn>
+              <apply>
+                <and/>
+                <apply>
+                  <geq/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <cn> 2 </cn>
+                </apply>
+                <apply>
+                  <lt/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <cn> 5 </cn>
+                </apply>
+              </apply>
+            </piece>
+            <piece>
+              <cn> 100 </cn>
+              <apply>
+                <and/>
+                <apply>
+                  <geq/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <cn> 5 </cn>
+                </apply>
+                <apply>
+                  <lt/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <cn> 8 </cn>
+                </apply>
+              </apply>
+            </piece>
+            <otherwise>
+              <cn> 200 </cn>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_917021" variable="V_MATI">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <ci> V_MATImax </ci>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <times/>
+                <apply>
+                  <divide/>
+                  <ci> Km_MATI </ci>
+                  <ci> Met </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <cn> 1 </cn>
+                  <apply>
+                    <divide/>
+                    <ci> AdoMet </ci>
+                    <ci> Ki_MATI </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_917022" variable="V_MATIII">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <ci> V_MATIIImax </ci>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Km1_MATIII </ci>
+                  <ci> Km2_MATIII </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <power/>
+                    <ci> Met </ci>
+                    <cn> 2 </cn>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> Met </ci>
+                    <ci> Km2_MATIII </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_917023" variable="Km1_MATIII">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn> 20000 </cn>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <times/>
+                <cn> 5.7 </cn>
+                <apply>
+                  <power/>
+                  <apply>
+                    <divide/>
+                    <ci> AdoMet </ci>
+                    <apply>
+                      <plus/>
+                      <ci> AdoMet </ci>
+                      <cn> 600 </cn>
+                    </apply>
+                  </apply>
+                  <cn> 2 </cn>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_917024" variable="V_GNMT">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <times/>
+              <apply>
+                <divide/>
+                <ci> V_GNMTmax </ci>
+                <apply>
+                  <plus/>
+                  <cn> 1 </cn>
+                  <apply>
+                    <power/>
+                    <apply>
+                      <divide/>
+                      <ci> Km_GNMT </ci>
+                      <ci> AdoMet </ci>
+                    </apply>
+                    <cn> 2.3 </cn>
+                  </apply>
+                </apply>
+              </apply>
+              <cn> 1 </cn>
+            </apply>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <divide/>
+                <ci> AdoHcy </ci>
+                <ci> Ki_GNMT </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_917025" variable="V_METH">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <ci> V_METHmax </ci>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <divide/>
+                <ci> Km1_METH </ci>
+                <ci> AdoMet </ci>
+              </apply>
+              <ci> Km2_METH_A </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Km2_METH_A </ci>
+                  <ci> Km1_METH </ci>
+                </apply>
+                <ci> AdoMet </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_917027" variable="Km1_METH">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <cn> 1 </cn>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <divide/>
+                <ci> AdoHcy </ci>
+                <cn> 4 </cn>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_917028" variable="V_MS">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <times/>
+              <ci> V_MSmax </ci>
+              <ci> five_mTHF </ci>
+              <ci> Hcy </ci>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> Kd_MS </ci>
+                <ci> Km_Hcy_MS </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> Km_Hcy_MS </ci>
+                <ci> five_mTHF </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> Km_five_mTHF_MS </ci>
+                <ci> Hcy </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> five_mTHF </ci>
+                <ci> Hcy </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_917029" variable="V_AH">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> alpha1 </ci>
+            <apply>
+              <minus/>
+              <ci> AdoHcy </ci>
+              <apply>
+                <times/>
+                <ci> alpha2 </ci>
+                <ci> Hcy </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_917030" variable="V_CBS">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> beta1 </ci>
+                <apply>
+                  <plus/>
+                  <ci> AdoMet </ci>
+                  <ci> AdoHcy </ci>
+                </apply>
+              </apply>
+              <ci> beta2 </ci>
+            </apply>
+            <ci> Hcy </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_917031" variable="V_BHMT">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <cn> 0.7 </cn>
+                <apply>
+                  <times/>
+                  <cn> 0.025 </cn>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <plus/>
+                      <ci> AdoMet </ci>
+                      <ci> AdoHcy </ci>
+                    </apply>
+                    <cn> 150 </cn>
+                  </apply>
+                </apply>
+              </apply>
+              <ci> V_BHMTmax </ci>
+              <ci> Hcy </ci>
+            </apply>
+            <apply>
+              <plus/>
+              <ci> Km_BHMT </ci>
+              <ci> Hcy </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+  </model>
+</sbml>

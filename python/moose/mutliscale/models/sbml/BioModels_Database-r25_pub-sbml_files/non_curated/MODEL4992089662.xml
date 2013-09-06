@@ -1,0 +1,2793 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="_106182" version="4">
+  <model id="banaji" name="Banaji2005_Brain_Cell_Metabolism" metaid="metaid_banaji">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This is a part of the model described in:      <br/>
+                <b>A physiological model of cerebral blood flow control</b>
+                <br/>
+          Murad Banaji, Ilias Tachtsidis, David Delpy, Stephen Baigent,      <i>Mathematical biosciences</i>
+          2005 194:125-173; PMID:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/15854674">15854674</a>
+          , doi:      <a href="http://dx.doi.org/10.1016/j.mbs.2004.10.005">10.1016/j.mbs.2004.10.005</a>
+                <br/>
+          Abstract:      <br/>
+          The construction of a computational model of the human brain circulation is described. We combine an existing model of the biophysics of the circulatory system, a basic model of brain metabolic biochemistry, and a model of the functioning of vascular smooth muscle (VSM) into a single model. This represents a first attempt to understand how the numerous different feedback pathways by which cerebral blood flow is controlled interact with each other. The present work comprises the following: Descriptions of the physiology underlying the model; general comments on the processes by which this physiology is translated into mathematics; comments on parameter setting; and some simulation results. The simulations presented are preliminary, but show qualitative agreement between model behaviour and experimental results.      </p>
+            <p>The model represents the intracellular component of the model, and is translated from the implementation available with the      <a href="http://braincirc.sourceforge.net/">braincirc</a>
+          package.      </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not.
+          .      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_banaji">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Smallbone</vCard:Family>
+                  <vCard:Given>Kieran</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>kieran.smallbone@manchester.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Manchester</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Banaji</vCard:Family>
+                  <vCard:Given>Murad</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>m.banaji@ucl.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Essex</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Smallbone</vCard:Family>
+                  <vCard:Given>Kieran</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>kieran.smallbone@manchester.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Manchester</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Banaji</vCard:Family>
+                  <vCard:Given>Murad</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>m.banaji@ucl.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Essex</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Smallbone</vCard:Family>
+                  <vCard:Given>Kieran</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>kieran.smallbone@manchester.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Manchester</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Banaji</vCard:Family>
+                  <vCard:Given>Murad</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>m.banaji@ucl.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Essex</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2008-12-05T00:00:00Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2012-02-03T11:12:16Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2012-02-03T11:12:16Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2012-02-03T11:12:16Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2012-02-03T11:12:16Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqbiol:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/taxonomy/9606"/>
+            </rdf:Bag>
+          </bqbiol:is>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL4992089662"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/15854674"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="substance" metaid="_106194">
+        <listOfUnits>
+          <unit scale="-3" metaid="_106206" kind="mole"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="l_mM_cubed_per_s" name="litre millimolar cubed per second" metaid="_106218">
+        <listOfUnits>
+          <unit scale="-3" exponent="3" metaid="_106230" kind="mole"/>
+          <unit scale="1" exponent="-2" metaid="_106242" kind="litre"/>
+          <unit scale="1" exponent="-1" metaid="_106254" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="l_per_mM_squared_per_s" name="litre per millimolar squared per second" metaid="_106266">
+        <listOfUnits>
+          <unit scale="-3" exponent="-2" metaid="_106278" kind="mole"/>
+          <unit scale="1" exponent="3" metaid="_106290" kind="litre"/>
+          <unit scale="1" exponent="-1" metaid="_106302" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="l_per_s" name="litre per second" metaid="_106314">
+        <listOfUnits>
+          <unit scale="1" metaid="_106326" kind="litre"/>
+          <unit scale="1" exponent="-1" metaid="_106338" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mM" name="millimolar" metaid="_106350">
+        <listOfUnits>
+          <unit scale="-3" metaid="_106362" kind="mole"/>
+          <unit scale="1" exponent="-1" metaid="_106374" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mM_per_s" name="millimolar per second" metaid="_106386">
+        <listOfUnits>
+          <unit scale="-3" metaid="_106399" kind="mole"/>
+          <unit scale="1" exponent="-1" metaid="_106411" kind="litre"/>
+          <unit scale="1" exponent="-1" metaid="_106423" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mM_squared" name="millimolar squared" metaid="_106435">
+        <listOfUnits>
+          <unit scale="-3" exponent="2" metaid="_106447" kind="mole"/>
+          <unit scale="1" exponent="-2" metaid="_106459" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mmol_per_s" name="millimole per second" metaid="_106471">
+        <listOfUnits>
+          <unit scale="-3" metaid="_106483" kind="mole"/>
+          <unit scale="1" exponent="-1" metaid="_106495" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mV" name="millivolt" metaid="_106507">
+        <listOfUnits>
+          <unit scale="-3" metaid="_106519" kind="volt"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_mM_per_s" name="per millimolar per second" metaid="_106531">
+        <listOfUnits>
+          <unit scale="-3" exponent="-1" metaid="_106543" kind="mole"/>
+          <unit scale="1" metaid="_106555" kind="litre"/>
+          <unit scale="1" exponent="-1" metaid="_106568" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_mM_squared_per_s" name="per millimolar squared per second" metaid="_106580">
+        <listOfUnits>
+          <unit scale="-3" exponent="-2" metaid="_106592" kind="mole"/>
+          <unit scale="1" exponent="2" metaid="_106604" kind="litre"/>
+          <unit scale="1" exponent="-1" metaid="_106616" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_mV" name="per millivolt" metaid="_106628">
+        <listOfUnits>
+          <unit scale="-3" exponent="-1" metaid="_106641" kind="volt"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_s" name="per second" metaid="_106653">
+        <listOfUnits>
+          <unit scale="1" exponent="-1" metaid="_106665" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="Vol_exm" name="cytoplasm" metaid="metaid_Vol_exm" size="0.72">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_Vol_exm">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0005737"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </compartment>
+      <compartment id="Vol_ecs" name="extracellular" metaid="metaid_Vol_ecs" size="0.2">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_Vol_ecs">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0005576"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </compartment>
+      <compartment id="Vol_inm" name="mitochondrial matrix" metaid="metaid_Vol_inm" size="0.08">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid_Vol_inm">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0005759"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </compartment>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="_Ad" initialConcentration="1E-5" name="adenosine" metaid="metaid__Ad" sboTerm="SBO:0000247" compartment="Vol_exm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__Ad">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:16335"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_eAd" initialConcentration="1E-5" name="adenosine" metaid="metaid__eAd" boundaryCondition="true" sboTerm="SBO:0000247" compartment="Vol_ecs">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__eAd">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:16335"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_ADP" initialConcentration="0.35" name="ADP" metaid="metaid__ADP" sboTerm="SBO:0000247" compartment="Vol_exm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__ADP">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:16761"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_mADP" initialConcentration="0.82677165354331" name="ADP" metaid="metaid__mADP" sboTerm="SBO:0000247" compartment="Vol_inm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__mADP">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:16761"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_AKG" initialConcentration="0.1" name="alpha-ketoglutarate" metaid="metaid__AKG" sboTerm="SBO:0000247" compartment="Vol_inm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__AKG">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:16810"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_AMP" initialConcentration="0.11366534740545" name="AMP" metaid="metaid__AMP" sboTerm="SBO:0000247" compartment="Vol_exm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__AMP">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:16027"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_ATP" initialConcentration="3" name="ATP" metaid="metaid__ATP" sboTerm="SBO:0000247" compartment="Vol_exm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__ATP">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:15422"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_mATP" initialConcentration="14.1732283464567" name="ATP" metaid="metaid__mATP" sboTerm="SBO:0000247" compartment="Vol_inm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__mATP">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:15422"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_mBiC" initialConcentration="90.9883299405421" name="bicarbonate ion" metaid="metaid__mBiC" sboTerm="SBO:0000247" compartment="Vol_inm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__mBiC">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:17544"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_BiC" initialConcentration="19.0460292836137" name="bicarbonate ion" metaid="metaid__BiC" sboTerm="SBO:0000247" compartment="Vol_exm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__BiC">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:17544"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_eBiC" initialConcentration="25.0599030317216" name="bicarbonate ion" metaid="metaid__eBiC" boundaryCondition="true" sboTerm="SBO:0000247" compartment="Vol_ecs">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__eBiC">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:17544"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_mCO2" initialConcentration="2.4624" name="carbon dioxide" metaid="metaid__mCO2" sboTerm="SBO:0000247" compartment="Vol_inm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__mCO2">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:16526"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_CO2" initialConcentration="2.052" name="carbon dioxide" metaid="metaid__CO2" sboTerm="SBO:0000247" compartment="Vol_exm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__CO2">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:16526"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_eCO2" initialConcentration="1.7838252" name="carbon dioxide" metaid="metaid__eCO2" boundaryCondition="true" sboTerm="SBO:0000247" compartment="Vol_ecs">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__eCO2">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:16526"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_Cr" initialConcentration="3.9" name="creatine" metaid="metaid__Cr" sboTerm="SBO:0000247" compartment="Vol_exm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__Cr">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:16919"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_mFAD" initialConcentration="0.1" name="FAD" metaid="metaid__mFAD" sboTerm="SBO:0000247" compartment="Vol_inm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__mFAD">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:16238"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_mFADH" initialConcentration="1.22" name="FADH2" metaid="metaid__mFADH" sboTerm="SBO:0000247" compartment="Vol_inm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__mFADH">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:17877"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_gluc" initialConcentration="1.4" name="glucose" metaid="metaid__gluc" sboTerm="SBO:0000247" compartment="Vol_exm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__gluc">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:17234"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_egluc" initialConcentration="2.08792" name="glucose" metaid="metaid__egluc" boundaryCondition="true" sboTerm="SBO:0000247" compartment="Vol_ecs">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__egluc">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:17234"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_Hy" initialConcentration="8.511380382E-5" name="hydrogen ion" metaid="metaid__Hy" sboTerm="SBO:0000247" compartment="Vol_exm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__Hy">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:15378"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_mHy" initialConcentration="2.13796209E-5" name="hydrogen ion" metaid="metaid__mHy" sboTerm="SBO:0000247" compartment="Vol_inm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__mHy">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:15378"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_eHy" initialConcentration="5.623413252E-5" name="hydrogen ion" metaid="metaid__eHy" boundaryCondition="true" sboTerm="SBO:0000247" compartment="Vol_ecs">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__eHy">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:15378"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_Phos" initialConcentration="1.5" name="inorganic phosphate" metaid="metaid__Phos" sboTerm="SBO:0000247" compartment="Vol_exm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__Phos">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:43474"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_mPhos" initialConcentration="3.2" name="inorganic phosphate" metaid="metaid__mPhos" sboTerm="SBO:0000247" compartment="Vol_inm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__mPhos">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:43474"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_L0" initialConcentration="2" name="lactate" metaid="metaid__L0" sboTerm="SBO:0000247" compartment="Vol_exm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__L0">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:24996"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_eL0" initialConcentration="1.902" name="lactate" metaid="metaid__eL0" boundaryCondition="true" sboTerm="SBO:0000247" compartment="Vol_ecs">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__eL0">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:24996"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_lac" initialConcentration="0.0012335333887" name="lactic acid" metaid="metaid__lac" sboTerm="SBO:0000247" compartment="Vol_exm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__lac">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:28358"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_eL" initialConcentration="0.00077505304385" name="lactic acid" metaid="metaid__eL" boundaryCondition="true" sboTerm="SBO:0000247" compartment="Vol_ecs">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__eL">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:28358"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_NAD" initialConcentration="0.2970297029703" name="NAD" metaid="metaid__NAD" sboTerm="SBO:0000247" compartment="Vol_exm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__NAD">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:15846"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_mNAD" initialConcentration="9.09090909090909" name="NAD" metaid="metaid__mNAD" sboTerm="SBO:0000247" compartment="Vol_inm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__mNAD">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:15846"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_NADH" initialConcentration="0.0029702970297" name="NADH" metaid="metaid__NADH" sboTerm="SBO:0000247" compartment="Vol_exm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__NADH">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:16908"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_mNADH" initialConcentration="0.90909090909091" name="NADH" metaid="metaid__mNADH" sboTerm="SBO:0000247" compartment="Vol_inm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__mNADH">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:16908"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_Ox" initialConcentration="0.54" name="oxaloacetate" metaid="metaid__Ox" sboTerm="SBO:0000247" compartment="Vol_inm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__Ox">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:16452"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_mO2" initialConcentration="0.02275" name="oxygen" metaid="metaid__mO2" sboTerm="SBO:0000247" compartment="Vol_inm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__mO2">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:15379"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_O2" initialConcentration="0.0455" name="oxygen" metaid="metaid__O2" sboTerm="SBO:0000247" compartment="Vol_exm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__O2">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:15379"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_eO2" initialConcentration="0.05" name="oxygen" metaid="metaid__eO2" boundaryCondition="true" sboTerm="SBO:0000247" compartment="Vol_ecs">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__eO2">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:15379"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_PCr" initialConcentration="5.85" name="phosphocreatine" metaid="metaid__PCr" sboTerm="SBO:0000247" compartment="Vol_exm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__PCr">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:17287"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_eK" initialConcentration="2.8" name="potassium ion" metaid="metaid__eK" boundaryCondition="true" sboTerm="SBO:0000247" compartment="Vol_ecs">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__eK">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:29103"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_K" initialConcentration="180" name="potassium ion" metaid="metaid__K" sboTerm="SBO:0000247" compartment="Vol_exm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__K">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:29103"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_Py0" initialConcentration="0.12" name="pyruvate" metaid="metaid__Py0" sboTerm="SBO:0000247" compartment="Vol_exm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__Py0">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:15361"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_mPy0" initialConcentration="0.38218288373136" name="pyruvate" metaid="metaid__mPy0" sboTerm="SBO:0000247" compartment="Vol_inm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__mPy0">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:15361"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_ePy0" initialConcentration="0.12" name="pyruvate" metaid="metaid__ePy0" boundaryCondition="true" sboTerm="SBO:0000247" compartment="Vol_ecs">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__ePy0">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:15361"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="PbufH" initialConcentration="2" name="sites on cellular proteins bound to protons" metaid="_106677" sboTerm="SBO:0000252" compartment="Vol_exm"/>
+      <species id="Pbuf" initialConcentration="10" name="sites on cellular proteins capable of binding protons" metaid="_106689" sboTerm="SBO:0000252" compartment="Vol_exm"/>
+      <species id="_Na" initialConcentration="15" name="sodium ion" metaid="metaid__Na" sboTerm="SBO:0000247" compartment="Vol_exm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__Na">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:29101"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_eNa" initialConcentration="138" name="sodium ion" metaid="metaid__eNa" boundaryCondition="true" sboTerm="SBO:0000247" compartment="Vol_ecs">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__eNa">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:29101"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+      <species id="_suc" initialConcentration="0.1" name="succinate" metaid="metaid__suc" sboTerm="SBO:0000247" compartment="Vol_inm">
+        <annotation>
+          <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+            <rdf:Description rdf:about="#metaid__suc">
+              <bqbiol:is>
+                <rdf:Bag>
+                  <rdf:li rdf:resource="http://identifiers.org/chebi/CHEBI:15741"/>
+                </rdf:Bag>
+              </bqbiol:is>
+            </rdf:Description>
+          </rdf:RDF>
+        </annotation>
+      </species>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="_AMPn" metaid="_106701" value="0.11366534740545" units="mM"/>
+      <parameter id="_ATPn" metaid="_106714" value="3" units="mM"/>
+      <parameter id="C_elec" metaid="_106726" value="26.73" units="mV"/>
+      <parameter id="Inh_glucN" metaid="_106738" value="3" units="dimensionless"/>
+      <parameter id="PD_mit" constant="false" metaid="_106750" units="mV"/>
+      <parameter id="PD_mitn" metaid="_106762" value="150" units="mV"/>
+      <parameter id="pH_mc_diff" metaid="_106774" value="0.6" units="dimensionless"/>
+      <parameter id="PMF" constant="false" metaid="_106786" units="mV"/>
+      <parameter id="Vmax_glucN" constant="false" metaid="_106798" units="mM_per_s"/>
+      <parameter id="Vmax_glucNn" metaid="_106810" value="0.12973000591182" units="mM_per_s"/>
+    </listOfParameters>
+    <listOfRules>
+      <assignmentRule metaid="_106822" variable="PD_mit">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <apply>
+              <divide/>
+              <ci> PD_mitn </ci>
+              <ci> pH_mc_diff </ci>
+            </apply>
+            <apply>
+              <log/>
+              <logbase>
+                <cn type="integer"> 10 </cn>
+              </logbase>
+              <apply>
+                <divide/>
+                <ci> _Hy </ci>
+                <ci> _mHy </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_106834" variable="PMF">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> PD_mit </ci>
+            <apply>
+              <times/>
+              <ci> C_elec </ci>
+              <apply>
+                <ln/>
+                <apply>
+                  <divide/>
+                  <ci> _Hy </ci>
+                  <ci> _mHy </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_106846" variable="Vmax_glucN">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <times/>
+              <ci> Vmax_glucNn </ci>
+              <apply>
+                <plus/>
+                <ci> Inh_glucN </ci>
+                <cn type="integer"> 1 </cn>
+              </apply>
+            </apply>
+            <apply>
+              <plus/>
+              <cn type="integer"> 1 </cn>
+              <apply>
+                <times/>
+                <ci> Inh_glucN </ci>
+                <apply>
+                  <divide/>
+                  <ci> _ATP </ci>
+                  <ci> _ATPn </ci>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> _AMPn </ci>
+                  <ci> _AMP </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+    <listOfReactions>
+      <reaction id="glycol" name="glycolysis in one step" metaid="_106858" sboTerm="SBO:0000176">
+        <listOfReactants>
+          <speciesReference species="_gluc" metaid="_106870"/>
+          <speciesReference species="_NAD" metaid="_106882" stoichiometry="2"/>
+          <speciesReference species="_ADP" metaid="_106894" stoichiometry="2"/>
+          <speciesReference species="_Phos" metaid="_106906" stoichiometry="2"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_NADH" metaid="_106918" stoichiometry="2"/>
+          <speciesReference species="_Py0" metaid="_106930" stoichiometry="2"/>
+          <speciesReference species="_Hy" metaid="_106942" stoichiometry="4"/>
+          <speciesReference species="_ATP" metaid="_106954" stoichiometry="2"/>
+        </listOfProducts>
+        <kineticLaw metaid="_106966">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> Vol_exm </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Vmax_glucN </ci>
+                  <ci> _gluc </ci>
+                  <apply>
+                    <power/>
+                    <ci> _NAD </ci>
+                    <cn type="integer"> 2 </cn>
+                  </apply>
+                  <apply>
+                    <power/>
+                    <ci> _ADP </ci>
+                    <cn type="integer"> 2 </cn>
+                  </apply>
+                  <apply>
+                    <power/>
+                    <ci> _Phos </ci>
+                    <cn type="integer"> 2 </cn>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <apply>
+                    <plus/>
+                    <ci> Km_glucNgl </ci>
+                    <ci> _gluc </ci>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <power/>
+                      <ci> Km_glucNN </ci>
+                      <cn type="integer"> 2 </cn>
+                    </apply>
+                    <apply>
+                      <power/>
+                      <ci> _NAD </ci>
+                      <cn type="integer"> 2 </cn>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <power/>
+                      <ci> Km_glucNA </ci>
+                      <cn type="integer"> 2 </cn>
+                    </apply>
+                    <apply>
+                      <power/>
+                      <ci> _ADP </ci>
+                      <cn type="integer"> 2 </cn>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <power/>
+                      <ci> Km_glucNP </ci>
+                      <cn type="integer"> 2 </cn>
+                    </apply>
+                    <apply>
+                      <power/>
+                      <ci> _Phos </ci>
+                      <cn type="integer"> 2 </cn>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="Km_glucNA" metaid="_106978" value="0.07" units="mM"/>
+            <parameter id="Km_glucNN" metaid="_106990" value="1" units="mM"/>
+            <parameter id="Km_glucNP" metaid="_107002" value="0.3" units="mM"/>
+            <parameter id="Km_glucNgl" metaid="_107014" value="0.05" units="mM"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Krebs1" name="PDH reaction plus first stages of the TCA cycle" metaid="_107026" sboTerm="SBO:0000176">
+        <listOfReactants>
+          <speciesReference species="_mPy0" metaid="_107038"/>
+          <speciesReference species="_Ox" metaid="_107050"/>
+          <speciesReference species="_mNAD" metaid="_107062" stoichiometry="2"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_AKG" metaid="_107074"/>
+          <speciesReference species="_mCO2" metaid="_107086" stoichiometry="2"/>
+          <speciesReference species="_mNADH" metaid="_107099" stoichiometry="2"/>
+          <speciesReference species="_mHy" metaid="_107111"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="_mADP" metaid="_107123"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_107135">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> Vol_inm </ci>
+              <ci> Vmax_PyN </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <times/>
+                        <apply>
+                          <divide/>
+                          <ci> _mPy0 </ci>
+                          <apply>
+                            <plus/>
+                            <ci> _mPy0 </ci>
+                            <ci> Km_PyNP </ci>
+                          </apply>
+                        </apply>
+                        <ci> _Ox </ci>
+                      </apply>
+                      <apply>
+                        <plus/>
+                        <ci> _Ox </ci>
+                        <ci> Km_PyNO </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <plus/>
+                      <cn type="integer"> 1 </cn>
+                      <apply>
+                        <divide/>
+                        <ci> Ka_PyNA </ci>
+                        <ci> _mADP </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <power/>
+                    <ci> _mNAD </ci>
+                    <cn type="integer"> 2 </cn>
+                  </apply>
+                </apply>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <power/>
+                    <ci> _mNAD </ci>
+                    <cn type="integer"> 2 </cn>
+                  </apply>
+                  <apply>
+                    <power/>
+                    <ci> Km_PyNN </ci>
+                    <cn type="integer"> 2 </cn>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="Ka_PyNA" metaid="_107147" value="0.062" units="mM"/>
+            <parameter id="Km_PyNN" metaid="_107159" value="0.90909090909091" units="mM"/>
+            <parameter id="Km_PyNO" metaid="_107171" value="0.00064" units="mM"/>
+            <parameter id="Km_PyNP" metaid="_107183" value="0.03821828837314" units="mM"/>
+            <parameter id="Vmax_PyN" metaid="_107195" value="0.19657949068328" units="mM_per_s"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Krebs2" name="middle stages of the TCA cycle" metaid="_107207" sboTerm="SBO:0000176">
+        <listOfReactants>
+          <speciesReference species="_AKG" metaid="_107219"/>
+          <speciesReference species="_mNAD" metaid="_107231"/>
+          <speciesReference species="_mADP" metaid="_107243"/>
+          <speciesReference species="_mPhos" metaid="_107255"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_mCO2" metaid="_107267"/>
+          <speciesReference species="_suc" metaid="_107279"/>
+          <speciesReference species="_mNADH" metaid="_107291"/>
+          <speciesReference species="_mHy" metaid="_107303"/>
+          <speciesReference species="_mATP" metaid="_107315"/>
+        </listOfProducts>
+        <kineticLaw metaid="_107327">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> Vol_inm </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Vmax_AKGN </ci>
+                  <ci> _AKG </ci>
+                  <ci> _mNAD </ci>
+                  <ci> _mADP </ci>
+                  <ci> _mPhos </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <apply>
+                    <plus/>
+                    <ci> Km_AKGNA </ci>
+                    <ci> _AKG </ci>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <ci> Km_AKGNN </ci>
+                    <ci> _mNAD </ci>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <ci> Km_AKGNAD </ci>
+                    <ci> _mADP </ci>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <ci> Km_AKGNP </ci>
+                    <ci> _mPhos </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="Km_AKGNA" metaid="_107339" value="0.3" units="mM"/>
+            <parameter id="Km_AKGNAD" metaid="_107351" value="0.08267716535433" units="mM"/>
+            <parameter id="Km_AKGNN" metaid="_107363" value="27.2727272727273" units="mM"/>
+            <parameter id="Km_AKGNP" metaid="_107375" value="0.64" units="mM"/>
+            <parameter id="Vmax_AKGN" metaid="_107387" value="3.4721544" units="mM_per_s"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Krebs3" name="final stages of the TCA cycle" metaid="_107399" sboTerm="SBO:0000176">
+        <listOfReactants>
+          <speciesReference species="_suc" metaid="_107411"/>
+          <speciesReference species="_mNAD" metaid="_107423"/>
+          <speciesReference species="_mFAD" metaid="_107435"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_Ox" metaid="_107447"/>
+          <speciesReference species="_mNADH" metaid="_107459"/>
+          <speciesReference species="_mHy" metaid="_107472"/>
+          <speciesReference species="_mFADH" metaid="_107484"/>
+        </listOfProducts>
+        <kineticLaw metaid="_107496">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> Vol_inm </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Vmax_sucN </ci>
+                  <ci> _suc </ci>
+                  <ci> _mNAD </ci>
+                  <ci> _mFAD </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <apply>
+                    <plus/>
+                    <ci> Km_sucNs </ci>
+                    <ci> _suc </ci>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <ci> Km_sucNN </ci>
+                    <ci> _mNAD </ci>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <ci> Km_sucNF </ci>
+                    <ci> _mFAD </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="Km_sucNF" metaid="_107508" value="0.1" units="mM"/>
+            <parameter id="Km_sucNN" metaid="_107520" value="0.45454545454546" units="mM"/>
+            <parameter id="Km_sucNs" metaid="_107533" value="0.3" units="mM"/>
+            <parameter id="Vmax_sucN" metaid="_107545" value="1.3809705" units="mM_per_s"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Noxy" name="oxidation of NADH" metaid="_107557" sboTerm="SBO:0000176">
+        <listOfReactants>
+          <speciesReference species="_mNADH" metaid="_107569" stoichiometry="2"/>
+          <speciesReference species="_mO2" metaid="_107581"/>
+          <speciesReference species="_mHy" metaid="_107593" stoichiometry="22"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_mNAD" metaid="_107606" stoichiometry="2"/>
+          <speciesReference species="_Hy" metaid="_107618" stoichiometry="20"/>
+        </listOfProducts>
+        <kineticLaw metaid="_107630">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> Vmax_NQ </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <times/>
+                      <apply>
+                        <divide/>
+                        <apply>
+                          <divide/>
+                          <ci> _mNADH </ci>
+                          <ci> _mNAD </ci>
+                        </apply>
+                        <apply>
+                          <plus/>
+                          <apply>
+                            <divide/>
+                            <ci> _mNADH </ci>
+                            <ci> _mNAD </ci>
+                          </apply>
+                          <ci> Km_NQN </ci>
+                        </apply>
+                      </apply>
+                      <ci> _mO2 </ci>
+                    </apply>
+                    <apply>
+                      <plus/>
+                      <ci> _mO2 </ci>
+                      <ci> Km_NQO </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <divide/>
+                    <ci> _mHy </ci>
+                    <ci> _Hy </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <divide/>
+                    <ci> _mHy </ci>
+                    <ci> _Hy </ci>
+                  </apply>
+                  <ci> Km_NQH </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="Km_NQH" metaid="_107643" value="0.25118864315096" units="dimensionless"/>
+            <parameter id="Km_NQN" metaid="_107655" value="0.2" units="dimensionless"/>
+            <parameter id="Km_NQO" metaid="_107667" value="0.05" units="mM"/>
+            <parameter id="Vmax_NQ" metaid="_107679" value="0.63086721428571" units="mmol_per_s"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Foxy" name="oxidation of FADH2" metaid="_107691" sboTerm="SBO:0000176">
+        <listOfReactants>
+          <speciesReference species="_mFADH" metaid="_107703" stoichiometry="2"/>
+          <speciesReference species="_mO2" metaid="_107715"/>
+          <speciesReference species="_mHy" metaid="_107727" stoichiometry="16"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_mFAD" metaid="_107739" stoichiometry="2"/>
+          <speciesReference species="_Hy" metaid="_107751" stoichiometry="16"/>
+        </listOfProducts>
+        <kineticLaw metaid="_107763">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> Vmax_FQ </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <times/>
+                      <apply>
+                        <divide/>
+                        <apply>
+                          <divide/>
+                          <ci> _mFADH </ci>
+                          <ci> _mFAD </ci>
+                        </apply>
+                        <apply>
+                          <plus/>
+                          <apply>
+                            <divide/>
+                            <ci> _mFADH </ci>
+                            <ci> _mFAD </ci>
+                          </apply>
+                          <ci> Km_FQF </ci>
+                        </apply>
+                      </apply>
+                      <ci> _mO2 </ci>
+                    </apply>
+                    <apply>
+                      <plus/>
+                      <ci> _mO2 </ci>
+                      <ci> Km_FQO </ci>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <divide/>
+                    <ci> _mHy </ci>
+                    <ci> _Hy </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <divide/>
+                    <ci> _mHy </ci>
+                    <ci> _Hy </ci>
+                  </apply>
+                  <ci> Km_FQH </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="Km_FQF" metaid="_107776" value="24.4" units="dimensionless"/>
+            <parameter id="Km_FQH" metaid="_107788" value="0.25118864315096" units="dimensionless"/>
+            <parameter id="Km_FQO" metaid="_107800" value="0.0011375" units="mM"/>
+            <parameter id="Vmax_FQ" metaid="_107812" value="0.041429115" units="mmol_per_s"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Hyleak" name="proton leak" metaid="_107825" sboTerm="SBO:0000185">
+        <listOfReactants>
+          <speciesReference species="_Hy" metaid="_107837"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_mHy" metaid="_107849"/>
+        </listOfProducts>
+        <kineticLaw metaid="_107861">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k1_lk </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <exp/>
+                  <apply>
+                    <times/>
+                    <ci> k2_lk </ci>
+                    <ci> PMF </ci>
+                  </apply>
+                </apply>
+                <cn type="integer"> 1 </cn>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1_lk" metaid="_107873" value="6.278528285E-5" units="mmol_per_s"/>
+            <parameter id="k2_lk" metaid="_107885" value="0.038" units="per_mV"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Cortoxphos" name="oxidative phosphorylation" metaid="_107897" sboTerm="SBO:0000176">
+        <listOfReactants>
+          <speciesReference species="_mADP" metaid="_107909"/>
+          <speciesReference species="_mPhos" metaid="_107921"/>
+          <speciesReference species="_Hy" metaid="_107933" stoichiometry="3"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_mATP" metaid="_107945"/>
+          <speciesReference species="_mHy" metaid="_107957" stoichiometry="3"/>
+        </listOfProducts>
+        <kineticLaw metaid="_107970">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> VmaxC_oxp </ci>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <apply>
+                        <plus/>
+                        <apply>
+                          <times/>
+                          <cn type="integer"> 100 </cn>
+                          <ci> p_a_C </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> p_c1_C </ci>
+                          <apply>
+                            <exp/>
+                            <apply>
+                              <times/>
+                              <cn type="integer"> 3 </cn>
+                              <cn> 0.0374 </cn>
+                              <cn type="integer"> 50 </cn>
+                            </apply>
+                          </apply>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <divide/>
+                        <apply>
+                          <divide/>
+                          <apply>
+                            <times/>
+                            <ci> K_F1 </ci>
+                            <ci> _mATP </ci>
+                          </apply>
+                          <ci> _mADP </ci>
+                        </apply>
+                        <ci> _mPhos </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <apply>
+                        <exp/>
+                        <apply>
+                          <times/>
+                          <cn type="integer"> 3 </cn>
+                          <cn> 0.0374 </cn>
+                          <ci> PMF </ci>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <plus/>
+                        <ci> p_a_C </ci>
+                        <apply>
+                          <times/>
+                          <ci> p_c2_C </ci>
+                          <apply>
+                            <divide/>
+                            <apply>
+                              <divide/>
+                              <apply>
+                                <times/>
+                                <ci> K_F1 </ci>
+                                <ci> _mATP </ci>
+                              </apply>
+                              <ci> _mADP </ci>
+                            </apply>
+                            <ci> _mPhos </ci>
+                          </apply>
+                        </apply>
+                      </apply>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <apply>
+                        <plus/>
+                        <cn type="integer"> 1 </cn>
+                        <apply>
+                          <times/>
+                          <ci> p_1_C </ci>
+                          <apply>
+                            <divide/>
+                            <apply>
+                              <divide/>
+                              <apply>
+                                <times/>
+                                <ci> K_F1 </ci>
+                                <ci> _mATP </ci>
+                              </apply>
+                              <ci> _mADP </ci>
+                            </apply>
+                            <ci> _mPhos </ci>
+                          </apply>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <exp/>
+                        <apply>
+                          <times/>
+                          <cn type="integer"> 3 </cn>
+                          <cn> 0.0374 </cn>
+                          <cn type="integer"> 50 </cn>
+                        </apply>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <apply>
+                        <plus/>
+                        <ci> p_2_C </ci>
+                        <apply>
+                          <times/>
+                          <ci> p_3_C </ci>
+                          <apply>
+                            <divide/>
+                            <apply>
+                              <divide/>
+                              <apply>
+                                <times/>
+                                <ci> K_F1 </ci>
+                                <ci> _mATP </ci>
+                              </apply>
+                              <ci> _mADP </ci>
+                            </apply>
+                            <ci> _mPhos </ci>
+                          </apply>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <exp/>
+                        <apply>
+                          <times/>
+                          <cn type="integer"> 3 </cn>
+                          <cn> 0.0374 </cn>
+                          <ci> PMF </ci>
+                        </apply>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+              <cn type="integer"> 1000 </cn>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="K_F1" metaid="_107982" value="1710000" units="dimensionless"/>
+            <parameter id="VmaxC_oxp" metaid="_107994" value="-34.9815865155365" units="mM"/>
+            <parameter id="p_1_C" metaid="_108006" value="1.346E-8" units="dimensionless"/>
+            <parameter id="p_2_C" metaid="_108018" value="7.739E-7" units="dimensionless"/>
+            <parameter id="p_3_C" metaid="_108030" value="6.65E-15" units="dimensionless"/>
+            <parameter id="p_a_C" metaid="_108042" value="1.656E-5" units="per_s"/>
+            <parameter id="p_c1_C" metaid="_108054" value="9.651E-14" units="per_s"/>
+            <parameter id="p_c2_C" metaid="_108066" value="4.585E-14" units="per_s"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="CO2toHm" name="production and dissociation of carbonic acid" metaid="_108078" sboTerm="SBO:0000176">
+        <listOfReactants>
+          <speciesReference species="_mCO2" metaid="_108090"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_mHy" metaid="_108102"/>
+          <speciesReference species="_mBiC" metaid="_108114"/>
+        </listOfProducts>
+        <kineticLaw metaid="_108126">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> Vol_inm </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k_CHm </ci>
+                  <ci> _mCO2 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_nCHm </ci>
+                  <ci> _mHy </ci>
+                  <ci> _mBiC </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k_CHm" metaid="_108138" value="0.02699531802578" units="per_s"/>
+            <parameter id="k_nCHm" metaid="_108150" value="34.1712886402221" units="per_mM_per_s"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="PytoL" name="lactate to pyruvate interconversion" metaid="_108162" sboTerm="SBO:0000176">
+        <listOfReactants>
+          <speciesReference species="_Py0" metaid="_108174"/>
+          <speciesReference species="_NADH" metaid="_108186"/>
+          <speciesReference species="_Hy" metaid="_108198"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_L0" metaid="_108210"/>
+          <speciesReference species="_NAD" metaid="_108222"/>
+        </listOfProducts>
+        <kineticLaw metaid="_108234">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> Vol_exm </ci>
+              <ci> Vmax_PyL </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <divide/>
+                  <cn type="integer"> 1 </cn>
+                  <apply>
+                    <plus/>
+                    <cn type="integer"> 1 </cn>
+                    <apply>
+                      <divide/>
+                      <ci> Km_PyLPy </ci>
+                      <ci> _Py0 </ci>
+                    </apply>
+                    <apply>
+                      <divide/>
+                      <ci> Km_PyLNH </ci>
+                      <ci> _NADH </ci>
+                    </apply>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <divide/>
+                        <ci> Km_PyLPN </ci>
+                        <ci> _Py0 </ci>
+                      </apply>
+                      <ci> _NADH </ci>
+                    </apply>
+                    <apply>
+                      <divide/>
+                      <ci> Km_PyLH </ci>
+                      <ci> _Hy </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <apply>
+                  <divide/>
+                  <ci> VR_PyL </ci>
+                  <apply>
+                    <plus/>
+                    <cn type="integer"> 1 </cn>
+                    <apply>
+                      <divide/>
+                      <ci> Km_PyLL </ci>
+                      <ci> _L0 </ci>
+                    </apply>
+                    <apply>
+                      <divide/>
+                      <ci> Km_PyLN </ci>
+                      <ci> _NAD </ci>
+                    </apply>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <divide/>
+                        <ci> Km_PyLLN </ci>
+                        <ci> _L0 </ci>
+                      </apply>
+                      <ci> _NAD </ci>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="Km_PyLH" metaid="_108246" value="0.00017022760764" units="mM"/>
+            <parameter id="Km_PyLL" metaid="_108258" value="2" units="mM"/>
+            <parameter id="Km_PyLLN" metaid="_108270" value="0.24" units="mM_squared"/>
+            <parameter id="Km_PyLN" metaid="_108282" value="0.03" units="mM"/>
+            <parameter id="Km_PyLNH" metaid="_108294" value="0.0062" units="mM"/>
+            <parameter id="Km_PyLPN" metaid="_108306" value="3.4E-5" units="mM_squared"/>
+            <parameter id="Km_PyLPy" metaid="_108318" value="0.034" units="mM"/>
+            <parameter id="VR_PyL" metaid="_108330" value="0.43536879122666" units="dimensionless"/>
+            <parameter id="Vmax_PyL" metaid="_108342" value="0.05586005108025" units="mM_per_s"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="PCrtoATP" name="PCr to ATP interconversion" metaid="_108354" sboTerm="SBO:0000176">
+        <listOfReactants>
+          <speciesReference species="_PCr" metaid="_108366"/>
+          <speciesReference species="_ADP" metaid="_108379"/>
+          <speciesReference species="_Hy" metaid="_108391"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_Cr" metaid="_108403"/>
+          <speciesReference species="_ATP" metaid="_108416"/>
+        </listOfProducts>
+        <kineticLaw metaid="_108428">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> Vol_exm </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k_PCrATP </ci>
+                  <ci> _PCr </ci>
+                  <ci> _ADP </ci>
+                  <ci> _Hy </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_nPCrATP </ci>
+                  <ci> _Cr </ci>
+                  <ci> _ATP </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k_PCrATP" metaid="_108440" value="1.69258214789161" units="per_mM_squared_per_s"/>
+            <parameter id="k_nPCrATP" metaid="_108452" value="2.521086835E-5" units="per_mM_per_s"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="ATPuse" name="non-pumping ATP use" metaid="_108464" sboTerm="SBO:0000176">
+        <listOfReactants>
+          <speciesReference species="_ATP" metaid="_108476"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_ADP" metaid="_108488"/>
+          <speciesReference species="_Phos" metaid="_108501"/>
+        </listOfProducts>
+        <kineticLaw metaid="_108513">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> Vol_exm </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Vmax_ATPuse </ci>
+                  <ci> _ATP </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km_ATPuse </ci>
+                  <ci> _ATP </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="Km_ATPuse" metaid="_108525" value="0.3" units="mM"/>
+            <parameter id="Vmax_ATPuse" metaid="_108537" value="0.14897283194444" units="mM_per_s"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="aden1" name="adenlyate kinase reaction" metaid="_108549" sboTerm="SBO:0000176">
+        <listOfReactants>
+          <speciesReference species="_ADP" metaid="_108561" stoichiometry="2"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_ATP" metaid="_108574"/>
+          <speciesReference species="_AMP" metaid="_108586"/>
+        </listOfProducts>
+        <kineticLaw metaid="_108598">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> Vol_exm </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k_ADPATP </ci>
+                  <apply>
+                    <power/>
+                    <ci> _ADP </ci>
+                    <cn type="integer"> 2 </cn>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_nADPATP </ci>
+                  <ci> _ATP </ci>
+                  <ci> _AMP </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k_ADPATP" metaid="_108610" value="1055" units="per_mM_per_s"/>
+            <parameter id="k_nADPATP" metaid="_108622" value="379" units="per_mM_per_s"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="aden2" name="AMP degradation" metaid="_108634" sboTerm="SBO:0000176">
+        <listOfReactants>
+          <speciesReference species="_AMP" metaid="_108646"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_Ad" metaid="_108658"/>
+        </listOfProducts>
+        <kineticLaw metaid="_108670">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> Vol_exm </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k_AMPAd </ci>
+                  <ci> _AMP </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_nAMPAd </ci>
+                  <ci> _Ad </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k_AMPAd" metaid="_108682" value="1.2195206724773E-6" units="per_s"/>
+            <parameter id="k_nAMPAd" metaid="_108694" value="0.01386172409053" units="per_s"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="lactic" name="lactic acid dissociation" metaid="_108706" sboTerm="SBO:0000176">
+        <listOfReactants>
+          <speciesReference species="_lac" metaid="_108718"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_L0" metaid="_108730"/>
+          <speciesReference species="_Hy" metaid="_108742"/>
+        </listOfProducts>
+        <kineticLaw metaid="_108754">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> Vol_exm </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k_LH </ci>
+                  <ci> _lac </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_nLH </ci>
+                  <ci> _L0 </ci>
+                  <ci> _Hy </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k_LH" metaid="_108766" value="2.30906644658719E4" units="per_s"/>
+            <parameter id="k_nLH" metaid="_108778" value="1.67323655549796E5" units="per_mM_per_s"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="CO2toH1" name="production and dissociation of carbonic acid" metaid="_108790" sboTerm="SBO:0000176">
+        <listOfReactants>
+          <speciesReference species="_CO2" metaid="_108802"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_Hy" metaid="_108814"/>
+          <speciesReference species="_BiC" metaid="_108826"/>
+        </listOfProducts>
+        <kineticLaw metaid="_108838">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> Vol_exm </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k_CHi </ci>
+                  <ci> _CO2 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_nCHi </ci>
+                  <ci> _Hy </ci>
+                  <ci> _BiC </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k_CHi" metaid="_108850" value="0.19554109357403" units="per_s"/>
+            <parameter id="k_nCHi" metaid="_108863" value="247.520371612693" units="per_mM_per_s"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="genbuf" name="general buffer reaction" metaid="_108875" sboTerm="SBO:0000176">
+        <listOfReactants>
+          <speciesReference species="PbufH" metaid="_108887"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Pbuf" metaid="_108899"/>
+          <speciesReference species="_Hy" metaid="_108911"/>
+        </listOfProducts>
+        <kineticLaw metaid="_108923">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> Vol_exm </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k_Pbuf </ci>
+                  <ci> PbufH </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_nPbuf </ci>
+                  <ci> Pbuf </ci>
+                  <ci> _Hy </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k_Pbuf" metaid="_108935" value="0.28881132523331" units="per_s"/>
+            <parameter id="k_nPbuf" metaid="_108947" value="678.647439710924" units="per_mM_per_s"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="elactic" name="lactic acid dissociation" metaid="_108959" sboTerm="SBO:0000176">
+        <listOfReactants>
+          <speciesReference species="_eL" metaid="_108972"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_eL0" metaid="_108984"/>
+          <speciesReference species="_eHy" metaid="_108996"/>
+        </listOfProducts>
+        <kineticLaw metaid="_109008">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> Vol_ecs </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k_LH </ci>
+                  <ci> _eL </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_nLH </ci>
+                  <ci> _eL0 </ci>
+                  <ci> _eHy </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k_LH" metaid="_109020" value="2.30906644658719E4" units="per_s"/>
+            <parameter id="k_nLH" metaid="_109032" value="1.67323655549796E5" units="per_mM_per_s"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="CO2toHe" name="production and dissociation of carbonic acid" metaid="_109044" sboTerm="SBO:0000176">
+        <listOfReactants>
+          <speciesReference species="_eCO2" metaid="_109056"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_eHy" metaid="_109068"/>
+          <speciesReference species="_eBiC" metaid="_109080"/>
+        </listOfProducts>
+        <kineticLaw metaid="_109092">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> Vol_ecs </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k_CHe </ci>
+                  <ci> _eCO2 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_nCHe </ci>
+                  <ci> _eHy </ci>
+                  <ci> _eBiC </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k_CHe" metaid="_109104" value="0.05882600137155" units="per_s"/>
+            <parameter id="k_nCHe" metaid="_109117" value="74.4632928753754" units="per_mM_per_s"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="MAshuttle" name="malate-aspartate shuttle" metaid="_109129" sboTerm="SBO:0000185">
+        <listOfReactants>
+          <speciesReference species="_NADH" metaid="_109141"/>
+          <speciesReference species="_Hy" metaid="_109153"/>
+          <speciesReference species="_mNAD" metaid="_109165"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_mNADH" metaid="_109178"/>
+          <speciesReference species="_mHy" metaid="_109190"/>
+          <speciesReference species="_NAD" metaid="_109202"/>
+        </listOfProducts>
+        <kineticLaw metaid="_109214">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k_MAshut </ci>
+                <ci> _NADH </ci>
+                <ci> _Hy </ci>
+                <ci> _mNAD </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k_nMAshut </ci>
+                <ci> _mNADH </ci>
+                <ci> _mHy </ci>
+                <ci> _NAD </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k_MAshut" metaid="_109226" value="10000" units="l_per_mM_squared_per_s"/>
+            <parameter id="k_nMAshut" metaid="_109238" value="1000" units="l_per_mM_squared_per_s"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="pyrshuttle" name="pyruvate transport" metaid="_109250" sboTerm="SBO:0000185">
+        <listOfReactants>
+          <speciesReference species="_Py0" metaid="_109262"/>
+          <speciesReference species="_Hy" metaid="_109274"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_mPy0" metaid="_109286"/>
+          <speciesReference species="_mHy" metaid="_109298"/>
+        </listOfProducts>
+        <kineticLaw metaid="_109310">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> Vmax_Pyshut </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> _Py0 </ci>
+                    <ci> _Hy </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> _mPy0 </ci>
+                    <ci> _mHy </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <apply>
+                      <plus/>
+                      <apply>
+                        <times/>
+                        <ci> _Py0 </ci>
+                        <ci> _Hy </ci>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> K_Pyshut </ci>
+                        <apply>
+                          <plus/>
+                          <cn type="integer"> 1 </cn>
+                          <ci> p_Pyshut </ci>
+                        </apply>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <plus/>
+                      <apply>
+                        <times/>
+                        <ci> _mPy0 </ci>
+                        <ci> _mHy </ci>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> K_Pyshut </ci>
+                        <apply>
+                          <plus/>
+                          <cn type="integer"> 1 </cn>
+                          <ci> p_Pyshut </ci>
+                        </apply>
+                      </apply>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <apply>
+                      <power/>
+                      <ci> K_Pyshut </ci>
+                      <cn type="integer"> 2 </cn>
+                    </apply>
+                    <apply>
+                      <power/>
+                      <ci> p_Pyshut </ci>
+                      <cn type="integer"> 2 </cn>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="K_Pyshut" metaid="_109322" value="1.372460087E-5" units="mM_squared"/>
+            <parameter id="Vmax_Pyshut" metaid="_109334" value="5.3997401390841E-6" units="l_mM_cubed_per_s"/>
+            <parameter id="p_Pyshut" metaid="_109346" value="0.5" units="dimensionless"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="Phosshuttle" name="phosphate transport" metaid="_109358" sboTerm="SBO:0000185">
+        <listOfReactants>
+          <speciesReference species="_Phos" metaid="_109370"/>
+          <speciesReference species="_Hy" metaid="_109382"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_mPhos" metaid="_109394"/>
+          <speciesReference species="_mHy" metaid="_109406"/>
+        </listOfProducts>
+        <kineticLaw metaid="_109418">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> Vmax_Phosshut </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> _Phos </ci>
+                    <ci> _Hy </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> _mPhos </ci>
+                    <ci> _mHy </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <apply>
+                      <plus/>
+                      <apply>
+                        <times/>
+                        <ci> _Phos </ci>
+                        <ci> _Hy </ci>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> K_Phosshut </ci>
+                        <apply>
+                          <plus/>
+                          <cn type="integer"> 1 </cn>
+                          <ci> p_Phosshut </ci>
+                        </apply>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <plus/>
+                      <apply>
+                        <times/>
+                        <ci> _mPhos </ci>
+                        <ci> _mHy </ci>
+                      </apply>
+                      <apply>
+                        <times/>
+                        <ci> K_Phosshut </ci>
+                        <apply>
+                          <plus/>
+                          <cn type="integer"> 1 </cn>
+                          <ci> p_Phosshut </ci>
+                        </apply>
+                      </apply>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <apply>
+                      <power/>
+                      <ci> K_Phosshut </ci>
+                      <cn type="integer"> 2 </cn>
+                    </apply>
+                    <apply>
+                      <power/>
+                      <ci> p_Phosshut </ci>
+                      <cn type="integer"> 2 </cn>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="K_Phosshut" metaid="_109430" value="0.00047876514649" units="mM_squared"/>
+            <parameter id="Vmax_Phosshut" metaid="_109442" value="0.00186561232274" units="l_mM_cubed_per_s"/>
+            <parameter id="p_Phosshut" metaid="_109454" value="0.5" units="dimensionless"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="ATPshuttle1" name="ATP-ADP antiport" metaid="_109467" sboTerm="SBO:0000185">
+        <listOfReactants>
+          <speciesReference species="_ADP" metaid="_109479"/>
+          <speciesReference species="_mATP" metaid="_109492"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_ATP" metaid="_109504"/>
+          <speciesReference species="_mADP" metaid="_109516"/>
+        </listOfProducts>
+        <kineticLaw metaid="_109528">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> Vmax_ANT </ci>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <minus/>
+                      <cn type="integer"> 1 </cn>
+                      <apply>
+                        <divide/>
+                        <apply>
+                          <times/>
+                          <ci> k1_ANT </ci>
+                          <ci> _ATP </ci>
+                          <ci> _mADP </ci>
+                        </apply>
+                        <apply>
+                          <times/>
+                          <ci> _ADP </ci>
+                          <ci> _mATP </ci>
+                        </apply>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <plus/>
+                      <cn type="integer"> 1 </cn>
+                      <apply>
+                        <divide/>
+                        <apply>
+                          <times/>
+                          <ci> k2_ANT </ci>
+                          <apply>
+                            <exp/>
+                            <apply>
+                              <divide/>
+                              <apply>
+                                <times/>
+                                <cn> -0.5 </cn>
+                                <ci> PD_mit </ci>
+                              </apply>
+                              <cn> 26.73 </cn>
+                            </apply>
+                          </apply>
+                          <ci> _ATP </ci>
+                        </apply>
+                        <ci> _ADP </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <cn type="integer"> 1 </cn>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <times/>
+                        <ci> k3_ANT </ci>
+                        <ci> _mADP </ci>
+                      </apply>
+                      <ci> _mATP </ci>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+              <cn type="integer"> 1000 </cn>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="Vmax_ANT" metaid="_109541" value="493.779692845496" units="mM_per_s"/>
+            <parameter id="k1_ANT" metaid="_109554" value="0.8" units="dimensionless"/>
+            <parameter id="k2_ANT" metaid="_109567" value="0.1111" units="dimensionless"/>
+            <parameter id="k3_ANT" metaid="_109580" value="7.2" units="dimensionless"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="O2shuttle" name="oxygen diffusion" metaid="_109593" sboTerm="SBO:0000185">
+        <listOfReactants>
+          <speciesReference species="_O2" metaid="_109606"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_mO2" metaid="_109619"/>
+        </listOfProducts>
+        <kineticLaw metaid="_109632">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k_O2shut </ci>
+              <apply>
+                <minus/>
+                <ci> _O2 </ci>
+                <ci> _mO2 </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k_O2shut" metaid="_109644" value="1.73434285714286" units="l_per_s"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="CO2shuttle" name="CO2 diffusion" metaid="_109656" sboTerm="SBO:0000185">
+        <listOfReactants>
+          <speciesReference species="_CO2" metaid="_109668"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_mCO2" metaid="_109680"/>
+        </listOfProducts>
+        <kineticLaw metaid="_109692">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k_CO2shut </ci>
+              <apply>
+                <minus/>
+                <ci> _CO2 </ci>
+                <ci> _mCO2 </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k_CO2shut" metaid="_109704" value="0.09614108187134" units="l_per_s"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="BiCshuttle" name="bicarbonate transport" metaid="_109716" sboTerm="SBO:0000185">
+        <listOfReactants>
+          <speciesReference species="_BiC" metaid="_109728"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_mBiC" metaid="_109740"/>
+        </listOfProducts>
+        <kineticLaw metaid="_109752">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k_BiCshut </ci>
+                <ci> _BiC </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k_nBiCshut </ci>
+                <ci> _mBiC </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k_BiCshut" metaid="_109764" value="7.865980171E-5" units="l_per_s"/>
+            <parameter id="k_nBiCshut" metaid="_109776" value="1.646537405E-5" units="l_per_s"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="potpump" name="active sodium potassium exchange" metaid="_109788" sboTerm="SBO:0000185">
+        <listOfReactants>
+          <speciesReference species="_ATP" metaid="_109800"/>
+          <speciesReference species="_eK" metaid="_109812" stoichiometry="2"/>
+          <speciesReference species="_Na" metaid="_109824" stoichiometry="3"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_ADP" metaid="_109837"/>
+          <speciesReference species="_Phos" metaid="_109849"/>
+          <speciesReference species="_K" metaid="_109861" stoichiometry="2"/>
+          <speciesReference species="_eNa" metaid="_109873" stoichiometry="3"/>
+        </listOfProducts>
+        <kineticLaw metaid="_109885">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> Vmax_KATP </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <times/>
+                      <apply>
+                        <divide/>
+                        <ci> _ATP </ci>
+                        <apply>
+                          <plus/>
+                          <ci> Km_KATPA </ci>
+                          <ci> _ATP </ci>
+                        </apply>
+                      </apply>
+                      <apply>
+                        <divide/>
+                        <ci> _eK </ci>
+                        <ci> _K </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <plus/>
+                      <ci> Km_KATPK </ci>
+                      <apply>
+                        <divide/>
+                        <ci> _eK </ci>
+                        <ci> _K </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <divide/>
+                    <ci> _Na </ci>
+                    <ci> _eNa </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> Km_KATPNa </ci>
+                  <apply>
+                    <divide/>
+                    <ci> _Na </ci>
+                    <ci> _eNa </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="Km_KATPA" metaid="_109897" value="1.4" units="mM"/>
+            <parameter id="Km_KATPK" metaid="_109909" value="0.01088888888889" units="dimensionless"/>
+            <parameter id="Km_KATPNa" metaid="_109921" value="0.21739130434783" units="dimensionless"/>
+            <parameter id="Vmax_KATP" metaid="_109934" value="0.7293709852" units="mmol_per_s"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="ECdiffgluc" name="glucose transport" metaid="_109946" sboTerm="SBO:0000185">
+        <listOfReactants>
+          <speciesReference species="_egluc" metaid="_109958"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_gluc" metaid="_109970"/>
+        </listOfProducts>
+        <kineticLaw metaid="_109982">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k_ecgluc </ci>
+              <apply>
+                <minus/>
+                <ci> _egluc </ci>
+                <ci> _gluc </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k_ecgluc" metaid="_109994" value="0.00982672403768" units="l_per_s"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="ECdiffO" name="oxygen diffusion" metaid="_110007" sboTerm="SBO:0000185">
+        <listOfReactants>
+          <speciesReference species="_eO2" metaid="_110019"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_O2" metaid="_110031"/>
+        </listOfProducts>
+        <kineticLaw metaid="_110043">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k_ecOO </ci>
+              <apply>
+                <minus/>
+                <ci> _eO2 </ci>
+                <ci> _O2 </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k_ecOO" metaid="_110055" value="8.76806666666666" units="l_per_s"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="ECdiffCO2" name="CO2 diffusion" metaid="_110067" sboTerm="SBO:0000185">
+        <listOfReactants>
+          <speciesReference species="_eCO2" metaid="_110079"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_CO2" metaid="_110091"/>
+        </listOfProducts>
+        <kineticLaw metaid="_110103">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k_ecCC </ci>
+              <apply>
+                <minus/>
+                <ci> _eCO2 </ci>
+                <ci> _CO2 </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k_ecCC" metaid="_110115" value="0.14712903673276" units="l_per_s"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="ECdiffPy0" name="pyruvate diffusion" metaid="_110127" sboTerm="SBO:0000185">
+        <listOfReactants>
+          <speciesReference species="_ePy0" metaid="_110139"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_Py0" metaid="_110151"/>
+        </listOfProducts>
+        <kineticLaw metaid="_110163">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k_ecPy0 </ci>
+              <apply>
+                <minus/>
+                <ci> _ePy0 </ci>
+                <ci> _Py0 </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k_ecPy0" metaid="_110175" value="108.4926021746" units="l_per_s"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="ECdiffAd" name="adenosine diffusion" metaid="_110187" sboTerm="SBO:0000185">
+        <listOfReactants>
+          <speciesReference species="_eAd" metaid="_110199"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_Ad" metaid="_110211"/>
+        </listOfProducts>
+        <kineticLaw metaid="_110223">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k_ecAd </ci>
+              <apply>
+                <minus/>
+                <ci> _eAd </ci>
+                <ci> _Ad </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k_ecAd" metaid="_110235" value="0.00180821003624" units="l_per_s"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="ECdiffK" name="potassium diffusion" metaid="_110247" sboTerm="SBO:0000185">
+        <listOfReactants>
+          <speciesReference species="_eK" metaid="_110259"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_K" metaid="_110272"/>
+        </listOfProducts>
+        <kineticLaw metaid="_110284">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k_ecKK </ci>
+              <apply>
+                <minus/>
+                <ci> _eK </ci>
+                <ci> _K </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k_ecKK" metaid="_110296" value="0.00110055857788" units="l_per_s"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="ECdiffNa" name="sodium diffusion" metaid="_110308" sboTerm="SBO:0000185">
+        <listOfReactants>
+          <speciesReference species="_eNa" metaid="_110320"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_Na" metaid="_110332"/>
+        </listOfProducts>
+        <kineticLaw metaid="_110344">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k_ecNa </ci>
+              <apply>
+                <minus/>
+                <ci> _eNa </ci>
+                <ci> _Na </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k_ecNa" metaid="_110356" value="0.0023782802439" units="l_per_s"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="ECdiffL0H" name="lactate transport" metaid="_110368" sboTerm="SBO:0000185">
+        <listOfReactants>
+          <speciesReference species="_eL0" metaid="_110380"/>
+          <speciesReference species="_eHy" metaid="_110392"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_L0" metaid="_110404"/>
+          <speciesReference species="_Hy" metaid="_110416"/>
+        </listOfProducts>
+        <kineticLaw metaid="_110428">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <ci> Vmax_ecL0H </ci>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> _eL0 </ci>
+                    <ci> _eHy </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> _L0 </ci>
+                    <ci> _Hy </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <ci> _eL0 </ci>
+                      <ci> _eHy </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> K_ecL0H </ci>
+                      <apply>
+                        <plus/>
+                        <cn type="integer"> 1 </cn>
+                        <ci> p_ecL0H </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <ci> _L0 </ci>
+                      <ci> _Hy </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> K_ecL0H </ci>
+                      <apply>
+                        <plus/>
+                        <cn type="integer"> 1 </cn>
+                        <ci> p_ecL0H </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <apply>
+                    <power/>
+                    <ci> K_ecL0H </ci>
+                    <cn type="integer"> 2 </cn>
+                  </apply>
+                  <apply>
+                    <power/>
+                    <ci> p_ecL0H </ci>
+                    <cn type="integer"> 2 </cn>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="K_ecL0H" metaid="_110440" value="0.00011490363516" units="mM_squared"/>
+            <parameter id="Vmax_ecL0H" metaid="_110452" value="5.10346312866496E-7" units="l_mM_cubed_per_s"/>
+            <parameter id="p_ecL0H" metaid="_110464" value="0.5" units="dimensionless"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="ECdiffL" name="lactic acid diffusion" metaid="_110477" sboTerm="SBO:0000185">
+        <listOfReactants>
+          <speciesReference species="_eL" metaid="_110489"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="_lac" metaid="_110501"/>
+        </listOfProducts>
+        <kineticLaw metaid="_110513">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> k_ecL </ci>
+              <apply>
+                <minus/>
+                <ci> _eL </ci>
+                <ci> _lac </ci>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k_ecL" metaid="_110525" value="0.0401243" units="l_per_s"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

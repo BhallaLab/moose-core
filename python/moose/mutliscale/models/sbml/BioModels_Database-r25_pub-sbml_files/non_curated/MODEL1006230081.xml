@@ -1,0 +1,558 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="_560556" version="4">
+  <model id="Nelson1995_HIV1therapy_DIVadministraion_ModelA" name="Nelson1995_HIV1therapy_DIVadministraion_ModelA" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>Modeling defective interfering virus therapy for AIDS: conditions for DIV
+survival.</strong>
+                <br/>
+          Nelson GW, Perelson AS.      <em>Math Biosci</em>
+          1995 Feb;125(2):127-53      <a href="http://www.ncbi.nlm.nih.gov/pubmed/7881191">7881191</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          The administration of a genetically engineered defective interfering virus (DIV)
+that interferes with HIV-1 replication has been proposed as a therapy for HIV-1
+infection and AIDS. The proposed interfering virus, which is designed to
+superinfect HIV-1 infected cells, carries ribozymes that cleave conserved
+regions in HIV-1 RNA that code for the viral envelope protein. Thus DIV
+infection of HIV-1 infected cells should reduce or eliminate viral production by
+these cells. The success of this therapeutic strategy will depend both on the
+intercellular interaction of DIV and HIV-1, and on the overall dynamics of virus
+and T cells in the body. To study these dynamical issues, we have constructed a
+mathematical model of the interaction of HIV-1, DIV, and CD4+ cells in vivo. The
+results of both mathematical analysis and numerical simulation indicate that
+survival of the engineered DIV purely on a peripheral blood HIV-1 infection is
+unlikely. However, analytical results indicate that DIV might well survive on
+HIV-1 infected CD4+ cells in lymphoid organs such as lymph nodes and spleen, or
+on other HIV-1 infected cells in these organs.      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://models.cellml.org/exposure/dc5fe6b870f5a70af02de308a254cbc0">        <strong>Nelson GW, Perelson AS. (1995) - version=1.0</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>Ethan Choi</strong>
+                <br/>
+          mcho099@aucklanduni.ac.nz      <br/>
+          The University of Auckland      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Choi</vCard:Family>
+                  <vCard:Given>Ethan</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>mcho099@aucklanduni.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>The University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Choi</vCard:Family>
+                  <vCard:Given>Ethan</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>mcho099@aucklanduni.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>The University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Choi</vCard:Family>
+                  <vCard:Given>Ethan</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>mcho099@aucklanduni.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>The University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:38:40Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:38:40Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:38:40Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:38:40Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1006230081"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/7881191"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="day" name="day" metaid="_560568">
+        <listOfUnits>
+          <unit metaid="_560580" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_day" name="per_day" metaid="_560592">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_560604" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="micro_L" name="micro_L" metaid="_560617">
+        <listOfUnits>
+          <unit scale="-6" metaid="_560629" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_micro_L" name="per_micro_L" metaid="_560641">
+        <listOfUnits>
+          <unit scale="-6" exponent="-1" metaid="_560653" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="micro_L_per_day" name="micro_L_per_day" metaid="_560665">
+        <listOfUnits>
+          <unit scale="-6" metaid="_560677" kind="litre"/>
+          <unit exponent="-1" metaid="_560689" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_micro_L_day" name="per_micro_L_day" metaid="_560701">
+        <listOfUnits>
+          <unit scale="-6" exponent="-1" metaid="_560713" kind="litre"/>
+          <unit exponent="-1" metaid="_560725" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time" name="time" metaid="_560737">
+        <listOfUnits>
+          <unit metaid="_560749" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="COMpartment" metaid="_518866" units="litre" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="mu_T" name="mu_T" metaid="_518891" value="0.02"/>
+      <parameter id="r" name="r" metaid="_518892" value="0.03"/>
+      <parameter id="T_max" name="T_max" metaid="_518894" value="1500"/>
+      <parameter id="s_0" name="s_0" metaid="_518895" value="10"/>
+      <parameter id="theta" name="theta" metaid="_518896" value="1"/>
+      <parameter id="s_V" constant="false" name="s_V" metaid="_518898"/>
+      <parameter id="T" constant="false" name="T" metaid="_518899" value="1000"/>
+      <parameter id="k_2" name="k_2" metaid="_518900" value="0.017"/>
+      <parameter id="T_1" constant="false" name="T_1" metaid="_518902" value="0"/>
+      <parameter id="k_1D" name="k_1D" metaid="_518903" value="2.4E-6"/>
+      <parameter id="mu_b" name="mu_b" metaid="_518904" value="0.24"/>
+      <parameter id="T_2" constant="false" name="T_2" metaid="_518906" value="0"/>
+      <parameter id="k_s" name="k_s" metaid="_518907" value="0.24"/>
+      <parameter id="mu_bD" name="mu_bD" metaid="_518908" value="0.17"/>
+      <parameter id="T_D2" constant="false" name="T_D2" metaid="_518910" value="0"/>
+      <parameter id="mu_TD" name="mu_TD" metaid="_518911" value="0.02"/>
+      <parameter id="T_D1" constant="false" name="T_D1" metaid="_518912" value="0"/>
+      <parameter id="mu_D" name="mu_D" metaid="_518914" value="2.4"/>
+      <parameter id="N_D_t" constant="false" name="N_D_t" metaid="_518915"/>
+      <parameter id="pi_D_t" constant="false" name="pi_D_t" metaid="_518916"/>
+      <parameter id="D" constant="false" name="D" metaid="_518918" value="0"/>
+      <parameter id="k_1" name="k_1" metaid="_518919" value="2.4E-5"/>
+      <parameter id="mu_V" name="mu_V" metaid="_518920" value="2.4"/>
+      <parameter id="N_2_t" constant="false" name="N_2_t" metaid="_518922"/>
+      <parameter id="V" constant="false" name="V" metaid="_518923" value="0.001"/>
+      <parameter id="k_1_" name="k_1_" metaid="_518924" value="2.4E-6"/>
+      <parameter id="N_t_" constant="false" name="N_t_" metaid="_518926"/>
+      <parameter id="pi_t_" constant="false" name="pi_t_" metaid="_518927"/>
+      <parameter id="V_" constant="false" name="V_" metaid="_518928" value="0"/>
+      <parameter id="N_0" name="N_0" metaid="_518930" value="300"/>
+      <parameter id="gamma" name="gamma" metaid="_518931" value="25"/>
+      <parameter id="t_c" name="t_c" metaid="_518932" value="7305"/>
+      <parameter id="N_t" constant="false" name="N_t" metaid="_518934"/>
+      <parameter id="T_tot" constant="false" name="T_tot" metaid="_518935"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_518869" variable="T">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <minus/>
+              <apply>
+                <plus/>
+                <apply>
+                  <minus/>
+                  <ci> s_V </ci>
+                  <apply>
+                    <times/>
+                    <ci> mu_T </ci>
+                    <ci> T </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> r </ci>
+                  <ci> T </ci>
+                  <apply>
+                    <minus/>
+                    <cn> 1 </cn>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <plus/>
+                        <ci> T </ci>
+                        <ci> T_1 </ci>
+                      </apply>
+                      <ci> T_max </ci>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k_1 </ci>
+                <ci> V </ci>
+                <ci> T </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> k_1_ </ci>
+              <ci> V_ </ci>
+              <ci> T </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_518870" variable="T_1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <minus/>
+              <apply>
+                <plus/>
+                <apply>
+                  <times/>
+                  <ci> k_1 </ci>
+                  <ci> V </ci>
+                  <ci> T </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k_1_ </ci>
+                  <ci> V_ </ci>
+                  <ci> T </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> mu_T </ci>
+                <ci> T_1 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> k_2 </ci>
+              <ci> T_1 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_518872" variable="T_2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k_2 </ci>
+                <ci> T_1 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k_1D </ci>
+                <ci> D </ci>
+                <ci> T_2 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> mu_b </ci>
+              <ci> T_2 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_518873" variable="T_D2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k_1D </ci>
+                <ci> D </ci>
+                <ci> T_2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k_s </ci>
+                <ci> T_D2 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> mu_bD </ci>
+              <ci> T_D2 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_518874" variable="T_D1">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> k_s </ci>
+              <ci> T_D2 </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> mu_TD </ci>
+              <ci> T_D1 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_518876" variable="D">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> N_D_t </ci>
+                <ci> mu_bD </ci>
+                <ci> T_D2 </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> pi_D_t </ci>
+                <ci> T_D1 </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> mu_D </ci>
+              <ci> D </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_518877" variable="V">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <minus/>
+              <apply>
+                <plus/>
+                <apply>
+                  <times/>
+                  <ci> N_t </ci>
+                  <ci> mu_b </ci>
+                  <ci> T_2 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> N_2_t </ci>
+                  <ci> mu_bD </ci>
+                  <ci> T_D2 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k_1 </ci>
+                <ci> V </ci>
+                <ci> T </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> mu_V </ci>
+              <ci> V </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_518878" variable="V_">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <minus/>
+              <apply>
+                <plus/>
+                <apply>
+                  <times/>
+                  <ci> N_t_ </ci>
+                  <ci> mu_bD </ci>
+                  <ci> T_D2 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> pi_t_ </ci>
+                  <ci> T_D1 </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> mu_V </ci>
+                <ci> V_ </ci>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> k_1_ </ci>
+              <ci> T </ci>
+              <ci> V_ </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="_518880" variable="s_V">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <times/>
+              <ci> s_0 </ci>
+              <ci> theta </ci>
+            </apply>
+            <apply>
+              <plus/>
+              <ci> theta </ci>
+              <ci> V </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_518881" variable="N_D_t">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <cn> 0.2 </cn>
+            <ci> N_t </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_518882" variable="pi_D_t">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <cn> 0.3 </cn>
+            <ci> mu_b </ci>
+            <ci> N_t </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_518884" variable="N_2_t">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <cn> 0.6 </cn>
+            <ci> N_t </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_518885" variable="N_t_">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <cn> 0.2 </cn>
+            <ci> N_t </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_518886" variable="pi_t_">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <cn> 0.1 </cn>
+            <ci> mu_b </ci>
+            <ci> N_t </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_518888" variable="N_t">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> N_0 </ci>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <times/>
+                <ci> gamma </ci>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <power/>
+                    <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                    <cn> 2 </cn>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <power/>
+                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                      <cn> 2 </cn>
+                    </apply>
+                    <apply>
+                      <power/>
+                      <ci> t_c </ci>
+                      <cn> 2 </cn>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_518889" variable="T_tot">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> T </ci>
+            <ci> T_1 </ci>
+            <ci> T_2 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+  </model>
+</sbml>

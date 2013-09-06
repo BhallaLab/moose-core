@@ -1,0 +1,1251 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="metaid_0000001" version="4">
+  <model id="Farhy2009_GlucagonCounterRegulationModel" name="Farhy2009_GlucagonCounterRegulationModel" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>Pancreatic network control of glucagon secretion and counterregulation.</strong>
+                <br/>
+          Farhy LS, McCall AL.      <em>Methods Enzymol.</em>
+          2009;467:547-81.      <a href="http://www.ncbi.nlm.nih.gov/pubmed/19897107">19897107</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          Glucagon counterregulation (GCR) is a key protection against hypoglycemia compromised in insulinopenic diabetes by an unknown mechanism. In this work, we present an interdisciplinary approach to the analysis of the GCR control mechanisms. Our results indicate that a pancreatic network which unifies a few explicit interactions between the major islet peptides and blood glucose (BG) can replicate the normal GCR axis and explain its impairment in diabetes. A key and novel component of this network is an alpha-cell auto-feedback, which drives glucagon pulsatility and mediates triggering of pulsatile GCR by hypoglycemia via a switch-off of the beta-cell suppression of the alpha-cells. We have performed simulations based on our models of the endocrine pancreas which explain the in vivo GCR response to hypoglycemia of the normal pancreas and the enhancement of defective pulsatile GCR in beta-cell deficiency by switch-off of intrapancreatic alpha-cell suppressing signals. The models also predicted that reduced insulin secretion decreases and delays the GCR. In conclusion, based on experimental data we have developed and validated a model of the normal GCR control mechanisms and their dysregulation in insulin deficient diabetes. One advantage of this construct is that all model components are clinically measurable, thereby permitting its transfer, validation, and application to the study of the GCR abnormalities of the human endocrine pancreas in vivo.      </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1112110002"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/19897107"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfCompartments>
+      <compartment id="body" name="body" metaid="_047991" size="1"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="GL" initialConcentration="50" name="GL" metaid="COPASI2" boundaryCondition="true" compartment="body"/>
+      <species id="INS" initialConcentration="50" name="INS" metaid="COPASI3" boundaryCondition="true" compartment="body"/>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="kGl" name="kGl" metaid="COPASI4" value="22"/>
+      <parameter id="kINS" name="kINS" metaid="COPASI5" value="14"/>
+      <parameter id="rGl" name="rGl" metaid="_048003" value="42570"/>
+      <parameter id="rGlbasal" name="rGlbasal" metaid="_048015" value="2128"/>
+      <parameter id="rINS" name="rINS" metaid="_048027" value="80000"/>
+      <parameter id="rINSbasal" name="rINSbasal" metaid="_048039" value="270"/>
+      <parameter id="tGl" name="tGl" metaid="COPASI6" value="85"/>
+      <parameter id="tBG" name="tBG" metaid="COPASI7" value="50"/>
+      <parameter id="tBG2" name="tBG2" metaid="_048051" value="400"/>
+      <parameter id="tINS" name="tINS" metaid="COPASI8" value="20"/>
+      <parameter id="nGl" name="nGl" metaid="_048063" value="5"/>
+      <parameter id="nBG" name="nBG" metaid="_048075" value="5"/>
+      <parameter id="nBG2" name="nBG2" metaid="_048087" value="3"/>
+      <parameter id="DGL" name="DGL" metaid="_048099" value="7.2"/>
+      <parameter id="BG" constant="false" name="BG" metaid="COPASI9" value="600"/>
+      <parameter id="pulse" constant="false" name="pulse" metaid="COPASI10" value="10"/>
+      <parameter id="step" constant="false" name="step" metaid="COPASI11" value="110"/>
+      <parameter id="parameter_1" name="bg" metaid="COPASI12" value="600"/>
+      <parameter id="parameter_2" constant="false" name="bg'" metaid="COPASI13" value="600"/>
+      <parameter id="parameter_3" constant="false" name="pluse2" metaid="COPASI14" value="0"/>
+      <parameter id="parameter_4" constant="false" name="pluse1" metaid="COPASI15" value="10"/>
+    </listOfParameters>
+    <listOfRules>
+      <assignmentRule metaid="_048111" variable="BG">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <ci> parameter_1 </ci>
+              <apply>
+                <lt/>
+                <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                <cn> 1 </cn>
+              </apply>
+            </piece>
+            <otherwise>
+              <ci> parameter_2 </ci>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_048123" variable="pulse">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <cn> 10 </cn>
+              <apply>
+                <and/>
+                <apply>
+                  <geq/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <cn> 0 </cn>
+                </apply>
+                <apply>
+                  <leq/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <cn> 0.02 </cn>
+                </apply>
+              </apply>
+            </piece>
+            <otherwise>
+              <piecewise>
+                <piece>
+                  <cn> 10 </cn>
+                  <apply>
+                    <and/>
+                    <apply>
+                      <geq/>
+                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                      <cn> 0.11 </cn>
+                    </apply>
+                    <apply>
+                      <leq/>
+                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                      <cn> 0.13 </cn>
+                    </apply>
+                  </apply>
+                </piece>
+                <otherwise>
+                  <piecewise>
+                    <piece>
+                      <cn> 10 </cn>
+                      <apply>
+                        <and/>
+                        <apply>
+                          <geq/>
+                          <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                          <cn> 0.22 </cn>
+                        </apply>
+                        <apply>
+                          <leq/>
+                          <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                          <cn> 0.24 </cn>
+                        </apply>
+                      </apply>
+                    </piece>
+                    <otherwise>
+                      <piecewise>
+                        <piece>
+                          <cn> 10 </cn>
+                          <apply>
+                            <and/>
+                            <apply>
+                              <geq/>
+                              <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                              <cn> 0.33 </cn>
+                            </apply>
+                            <apply>
+                              <leq/>
+                              <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                              <cn> 0.35 </cn>
+                            </apply>
+                          </apply>
+                        </piece>
+                        <otherwise>
+                          <piecewise>
+                            <piece>
+                              <cn> 10 </cn>
+                              <apply>
+                                <and/>
+                                <apply>
+                                  <geq/>
+                                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                  <cn> 0.44 </cn>
+                                </apply>
+                                <apply>
+                                  <leq/>
+                                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                  <cn> 0.46 </cn>
+                                </apply>
+                              </apply>
+                            </piece>
+                            <otherwise>
+                              <piecewise>
+                                <piece>
+                                  <cn> 10 </cn>
+                                  <apply>
+                                    <and/>
+                                    <apply>
+                                      <geq/>
+                                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                      <cn> 0.55 </cn>
+                                    </apply>
+                                    <apply>
+                                      <leq/>
+                                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                      <cn> 0.57 </cn>
+                                    </apply>
+                                  </apply>
+                                </piece>
+                                <otherwise>
+                                  <piecewise>
+                                    <piece>
+                                      <cn> 10 </cn>
+                                      <apply>
+                                        <and/>
+                                        <apply>
+                                          <geq/>
+                                          <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                          <cn> 0.66 </cn>
+                                        </apply>
+                                        <apply>
+                                          <leq/>
+                                          <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                          <cn> 0.68 </cn>
+                                        </apply>
+                                      </apply>
+                                    </piece>
+                                    <otherwise>
+                                      <piecewise>
+                                        <piece>
+                                          <cn> 10 </cn>
+                                          <apply>
+                                            <and/>
+                                            <apply>
+                                              <geq/>
+                                              <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                              <cn> 0.77 </cn>
+                                            </apply>
+                                            <apply>
+                                              <leq/>
+                                              <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                              <cn> 0.79 </cn>
+                                            </apply>
+                                          </apply>
+                                        </piece>
+                                        <otherwise>
+                                          <piecewise>
+                                            <piece>
+                                              <cn> 10 </cn>
+                                              <apply>
+                                                <and/>
+                                                <apply>
+                                                  <geq/>
+                                                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                  <cn> 0.88 </cn>
+                                                </apply>
+                                                <apply>
+                                                  <leq/>
+                                                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                  <cn> 0.9 </cn>
+                                                </apply>
+                                              </apply>
+                                            </piece>
+                                            <otherwise>
+                                              <piecewise>
+                                                <piece>
+                                                  <cn> 10 </cn>
+                                                  <apply>
+                                                    <and/>
+                                                    <apply>
+                                                      <geq/>
+                                                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                      <cn> 0.99 </cn>
+                                                    </apply>
+                                                    <apply>
+                                                      <leq/>
+                                                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                      <cn> 1.01 </cn>
+                                                    </apply>
+                                                  </apply>
+                                                </piece>
+                                                <otherwise>
+                                                  <piecewise>
+                                                    <piece>
+                                                      <cn> 10 </cn>
+                                                      <apply>
+                                                        <and/>
+                                                        <apply>
+                                                          <geq/>
+                                                          <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                          <cn> 1.1 </cn>
+                                                        </apply>
+                                                        <apply>
+                                                          <leq/>
+                                                          <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                          <cn> 1.12 </cn>
+                                                        </apply>
+                                                      </apply>
+                                                    </piece>
+                                                    <otherwise>
+                                                      <piecewise>
+                                                        <piece>
+                                                          <cn> 10 </cn>
+                                                          <apply>
+                                                            <and/>
+                                                            <apply>
+                                                              <geq/>
+                                                              <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                              <cn> 1.21 </cn>
+                                                            </apply>
+                                                            <apply>
+                                                              <leq/>
+                                                              <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                              <cn> 1.23 </cn>
+                                                            </apply>
+                                                          </apply>
+                                                        </piece>
+                                                        <otherwise>
+                                                          <piecewise>
+                                                            <piece>
+                                                              <cn> 10 </cn>
+                                                              <apply>
+                                                                <and/>
+                                                                <apply>
+                                                                  <geq/>
+                                                                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                  <cn> 1.32 </cn>
+                                                                </apply>
+                                                                <apply>
+                                                                  <leq/>
+                                                                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                  <cn> 1.34 </cn>
+                                                                </apply>
+                                                              </apply>
+                                                            </piece>
+                                                            <otherwise>
+                                                              <piecewise>
+                                                                <piece>
+                                                                  <cn> 10 </cn>
+                                                                  <apply>
+                                                                    <and/>
+                                                                    <apply>
+                                                                      <geq/>
+                                                                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                      <cn> 1.43 </cn>
+                                                                    </apply>
+                                                                    <apply>
+                                                                      <leq/>
+                                                                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                      <cn> 1.45 </cn>
+                                                                    </apply>
+                                                                  </apply>
+                                                                </piece>
+                                                                <otherwise>
+                                                                  <piecewise>
+                                                                    <piece>
+                                                                      <cn> 10 </cn>
+                                                                      <apply>
+                                                                        <and/>
+                                                                        <apply>
+                                                                          <geq/>
+                                                                          <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                          <cn> 1.54 </cn>
+                                                                        </apply>
+                                                                        <apply>
+                                                                          <leq/>
+                                                                          <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                          <cn> 1.56 </cn>
+                                                                        </apply>
+                                                                      </apply>
+                                                                    </piece>
+                                                                    <otherwise>
+                                                                      <piecewise>
+                                                                        <piece>
+                                                                          <cn> 10 </cn>
+                                                                          <apply>
+                                                                            <and/>
+                                                                            <apply>
+                                                                              <geq/>
+                                                                              <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                              <cn> 1.65 </cn>
+                                                                            </apply>
+                                                                            <apply>
+                                                                              <leq/>
+                                                                              <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                              <cn> 1.67 </cn>
+                                                                            </apply>
+                                                                          </apply>
+                                                                        </piece>
+                                                                        <otherwise>
+                                                                          <piecewise>
+                                                                            <piece>
+                                                                              <cn> 10 </cn>
+                                                                              <apply>
+                                                                                <and/>
+                                                                                <apply>
+                                                                                  <geq/>
+                                                                                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                                  <cn> 1.76 </cn>
+                                                                                </apply>
+                                                                                <apply>
+                                                                                  <leq/>
+                                                                                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                                  <cn> 1.78 </cn>
+                                                                                </apply>
+                                                                              </apply>
+                                                                            </piece>
+                                                                            <otherwise>
+                                                                              <piecewise>
+                                                                                <piece>
+                                                                                  <cn> 10 </cn>
+                                                                                  <apply>
+                                                                                    <and/>
+                                                                                    <apply>
+                                                                                      <geq/>
+                                                                                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                                      <cn> 1.87 </cn>
+                                                                                    </apply>
+                                                                                    <apply>
+                                                                                      <leq/>
+                                                                                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                                      <cn> 1.89 </cn>
+                                                                                    </apply>
+                                                                                  </apply>
+                                                                                </piece>
+                                                                                <otherwise>
+                                                                                  <piecewise>
+                                                                                    <piece>
+                                                                                      <cn> 10 </cn>
+                                                                                      <apply>
+                                                                                        <and/>
+                                                                                        <apply>
+                                                                                          <geq/>
+                                                                                          <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                                          <cn> 1.98 </cn>
+                                                                                        </apply>
+                                                                                        <apply>
+                                                                                          <leq/>
+                                                                                          <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                                          <cn> 2 </cn>
+                                                                                        </apply>
+                                                                                      </apply>
+                                                                                    </piece>
+                                                                                    <otherwise>
+                                                                                      <piecewise>
+                                                                                        <piece>
+                                                                                          <cn> 10 </cn>
+                                                                                          <apply>
+                                                                                            <and/>
+                                                                                            <apply>
+                                                                                              <geq/>
+                                                                                              <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                                              <cn> 2.09 </cn>
+                                                                                            </apply>
+                                                                                            <apply>
+                                                                                              <leq/>
+                                                                                              <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                                              <cn> 2.11 </cn>
+                                                                                            </apply>
+                                                                                          </apply>
+                                                                                        </piece>
+                                                                                        <otherwise>
+                                                                                          <piecewise>
+                                                                                            <piece>
+                                                                                              <cn> 10 </cn>
+                                                                                              <apply>
+                                                                                                <and/>
+                                                                                                <apply>
+                                                                                                  <geq/>
+                                                                                                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                                                  <cn> 2.2 </cn>
+                                                                                                </apply>
+                                                                                                <apply>
+                                                                                                  <leq/>
+                                                                                                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                                                  <cn> 2.22 </cn>
+                                                                                                </apply>
+                                                                                              </apply>
+                                                                                            </piece>
+                                                                                            <otherwise>
+                                                                                              <piecewise>
+                                                                                                <piece>
+                                                                                                  <cn> 10 </cn>
+                                                                                                  <apply>
+                                                                                                    <and/>
+                                                                                                    <apply>
+                                                                                                      <geq/>
+                                                                                                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                                                      <cn> 2.31 </cn>
+                                                                                                    </apply>
+                                                                                                    <apply>
+                                                                                                      <leq/>
+                                                                                                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                                                      <cn> 2.33 </cn>
+                                                                                                    </apply>
+                                                                                                  </apply>
+                                                                                                </piece>
+                                                                                                <otherwise>
+                                                                                                  <piecewise>
+                                                                                                    <piece>
+                                                                                                      <cn> 10 </cn>
+                                                                                                      <apply>
+                                                                                                        <and/>
+                                                                                                        <apply>
+                                                                                                          <geq/>
+                                                                                                          <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                                                          <cn> 2.43 </cn>
+                                                                                                        </apply>
+                                                                                                        <apply>
+                                                                                                          <leq/>
+                                                                                                          <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                                                          <cn> 2.45 </cn>
+                                                                                                        </apply>
+                                                                                                      </apply>
+                                                                                                    </piece>
+                                                                                                    <otherwise>
+                                                                                                      <piecewise>
+                                                                                                        <piece>
+                                                                                                          <cn> 10 </cn>
+                                                                                                          <apply>
+                                                                                                            <and/>
+                                                                                                            <apply>
+                                                                                                              <geq/>
+                                                                                                              <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                                                              <cn> 2.54 </cn>
+                                                                                                            </apply>
+                                                                                                            <apply>
+                                                                                                              <leq/>
+                                                                                                              <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                                                              <cn> 2.56 </cn>
+                                                                                                            </apply>
+                                                                                                          </apply>
+                                                                                                        </piece>
+                                                                                                        <otherwise>
+                                                                                                          <piecewise>
+                                                                                                            <piece>
+                                                                                                              <cn> 10 </cn>
+                                                                                                              <apply>
+                                                                                                                <and/>
+                                                                                                                <apply>
+                                                                                                                  <geq/>
+                                                                                                                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                                                                  <cn> 2.65 </cn>
+                                                                                                                </apply>
+                                                                                                                <apply>
+                                                                                                                  <leq/>
+                                                                                                                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                                                                  <cn> 2.67 </cn>
+                                                                                                                </apply>
+                                                                                                              </apply>
+                                                                                                            </piece>
+                                                                                                            <otherwise>
+                                                                                                              <piecewise>
+                                                                                                                <piece>
+                                                                                                                  <cn> 10 </cn>
+                                                                                                                  <apply>
+                                                                                                                    <and/>
+                                                                                                                    <apply>
+                                                                                                                      <geq/>
+                                                                                                                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                                                                      <cn> 2.76 </cn>
+                                                                                                                    </apply>
+                                                                                                                    <apply>
+                                                                                                                      <leq/>
+                                                                                                                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                                                                      <cn> 2.78 </cn>
+                                                                                                                    </apply>
+                                                                                                                  </apply>
+                                                                                                                </piece>
+                                                                                                                <otherwise>
+                                                                                                                  <piecewise>
+                                                                                                                    <piece>
+                                                                                                                      <cn> 10 </cn>
+                                                                                                                      <apply>
+                                                                                                                        <and/>
+                                                                                                                        <apply>
+                                                                                                                          <geq/>
+                                                                                                                          <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                                                                          <cn> 2.87 </cn>
+                                                                                                                        </apply>
+                                                                                                                        <apply>
+                                                                                                                          <leq/>
+                                                                                                                          <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                                                                          <cn> 2.89 </cn>
+                                                                                                                        </apply>
+                                                                                                                      </apply>
+                                                                                                                    </piece>
+                                                                                                                    <otherwise>
+                                                                                                                      <piecewise>
+                                                                                                                        <piece>
+                                                                                                                          <cn> 10 </cn>
+                                                                                                                          <apply>
+                                                                                                                            <and/>
+                                                                                                                            <apply>
+                                                                                                                              <geq/>
+                                                                                                                              <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                                                                              <cn> 2.98 </cn>
+                                                                                                                            </apply>
+                                                                                                                            <apply>
+                                                                                                                              <leq/>
+                                                                                                                              <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                                                                              <cn> 3 </cn>
+                                                                                                                            </apply>
+                                                                                                                          </apply>
+                                                                                                                        </piece>
+                                                                                                                        <otherwise>
+                                                                                                                          <piecewise>
+                                                                                                                            <piece>
+                                                                                                                              <cn> 10 </cn>
+                                                                                                                              <apply>
+                                                                                                                                <and/>
+                                                                                                                                <apply>
+                                                                                                                                  <geq/>
+                                                                                                                                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                                                                                  <cn> 3.09 </cn>
+                                                                                                                                </apply>
+                                                                                                                                <apply>
+                                                                                                                                  <leq/>
+                                                                                                                                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                                                                                  <cn> 3.11 </cn>
+                                                                                                                                </apply>
+                                                                                                                              </apply>
+                                                                                                                            </piece>
+                                                                                                                            <otherwise>
+                                                                                                                              <piecewise>
+                                                                                                                                <piece>
+                                                                                                                                  <cn> 10 </cn>
+                                                                                                                                  <apply>
+                                                                                                                                    <and/>
+                                                                                                                                    <apply>
+                                                                                                                                      <geq/>
+                                                                                                                                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                                                                                      <cn> 3.2 </cn>
+                                                                                                                                    </apply>
+                                                                                                                                    <apply>
+                                                                                                                                      <leq/>
+                                                                                                                                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                                                                                      <cn> 3.22 </cn>
+                                                                                                                                    </apply>
+                                                                                                                                  </apply>
+                                                                                                                                </piece>
+                                                                                                                                <otherwise>
+                                                                                                                                  <piecewise>
+                                                                                                                                    <piece>
+                                                                                                                                      <cn> 10 </cn>
+                                                                                                                                      <apply>
+                                                                                                                                        <and/>
+                                                                                                                                        <apply>
+                                                                                                                                          <geq/>
+                                                                                                                                          <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                                                                                          <cn> 3.31 </cn>
+                                                                                                                                        </apply>
+                                                                                                                                        <apply>
+                                                                                                                                          <leq/>
+                                                                                                                                          <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                                                                                          <cn> 3.33 </cn>
+                                                                                                                                        </apply>
+                                                                                                                                      </apply>
+                                                                                                                                    </piece>
+                                                                                                                                    <otherwise>
+                                                                                                                                      <piecewise>
+                                                                                                                                        <piece>
+                                                                                                                                          <cn> 10 </cn>
+                                                                                                                                          <apply>
+                                                                                                                                            <and/>
+                                                                                                                                            <apply>
+                                                                                                                                              <geq/>
+                                                                                                                                              <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                                                                                              <cn> 3.43 </cn>
+                                                                                                                                            </apply>
+                                                                                                                                            <apply>
+                                                                                                                                              <leq/>
+                                                                                                                                              <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                                                                                              <cn> 3.45 </cn>
+                                                                                                                                            </apply>
+                                                                                                                                          </apply>
+                                                                                                                                        </piece>
+                                                                                                                                        <otherwise>
+                                                                                                                                          <cn> 0 </cn>
+                                                                                                                                        </otherwise>
+                                                                                                                                      </piecewise>
+                                                                                                                                    </otherwise>
+                                                                                                                                  </piecewise>
+                                                                                                                                </otherwise>
+                                                                                                                              </piecewise>
+                                                                                                                            </otherwise>
+                                                                                                                          </piecewise>
+                                                                                                                        </otherwise>
+                                                                                                                      </piecewise>
+                                                                                                                    </otherwise>
+                                                                                                                  </piecewise>
+                                                                                                                </otherwise>
+                                                                                                              </piecewise>
+                                                                                                            </otherwise>
+                                                                                                          </piecewise>
+                                                                                                        </otherwise>
+                                                                                                      </piecewise>
+                                                                                                    </otherwise>
+                                                                                                  </piecewise>
+                                                                                                </otherwise>
+                                                                                              </piecewise>
+                                                                                            </otherwise>
+                                                                                          </piecewise>
+                                                                                        </otherwise>
+                                                                                      </piecewise>
+                                                                                    </otherwise>
+                                                                                  </piecewise>
+                                                                                </otherwise>
+                                                                              </piecewise>
+                                                                            </otherwise>
+                                                                          </piecewise>
+                                                                        </otherwise>
+                                                                      </piecewise>
+                                                                    </otherwise>
+                                                                  </piecewise>
+                                                                </otherwise>
+                                                              </piecewise>
+                                                            </otherwise>
+                                                          </piecewise>
+                                                        </otherwise>
+                                                      </piecewise>
+                                                    </otherwise>
+                                                  </piecewise>
+                                                </otherwise>
+                                              </piecewise>
+                                            </otherwise>
+                                          </piecewise>
+                                        </otherwise>
+                                      </piecewise>
+                                    </otherwise>
+                                  </piecewise>
+                                </otherwise>
+                              </piecewise>
+                            </otherwise>
+                          </piecewise>
+                        </otherwise>
+                      </piecewise>
+                    </otherwise>
+                  </piecewise>
+                </otherwise>
+              </piecewise>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_048135" variable="step">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <cn> 110 </cn>
+              <apply>
+                <and/>
+                <apply>
+                  <leq/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <cn> 1 </cn>
+                </apply>
+                <apply>
+                  <geq/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <cn> 0 </cn>
+                </apply>
+              </apply>
+            </piece>
+            <otherwise>
+              <piecewise>
+                <piece>
+                  <cn> 60 </cn>
+                  <apply>
+                    <and/>
+                    <apply>
+                      <leq/>
+                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                      <cn> 2 </cn>
+                    </apply>
+                    <apply>
+                      <gt/>
+                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                      <cn> 1 </cn>
+                    </apply>
+                  </apply>
+                </piece>
+                <otherwise>
+                  <piecewise>
+                    <piece>
+                      <cn> 45 </cn>
+                      <apply>
+                        <and/>
+                        <apply>
+                          <leq/>
+                          <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                          <cn> 3 </cn>
+                        </apply>
+                        <apply>
+                          <gt/>
+                          <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                          <cn> 2 </cn>
+                        </apply>
+                      </apply>
+                    </piece>
+                    <otherwise>
+                      <cn> 42 </cn>
+                    </otherwise>
+                  </piecewise>
+                </otherwise>
+              </piecewise>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_048147" variable="parameter_3">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <cn> 10 </cn>
+              <apply>
+                <and/>
+                <apply>
+                  <geq/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <cn> 3.54 </cn>
+                </apply>
+                <apply>
+                  <leq/>
+                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                  <cn> 3.56 </cn>
+                </apply>
+              </apply>
+            </piece>
+            <otherwise>
+              <piecewise>
+                <piece>
+                  <cn> 10 </cn>
+                  <apply>
+                    <and/>
+                    <apply>
+                      <geq/>
+                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                      <cn> 3.65 </cn>
+                    </apply>
+                    <apply>
+                      <leq/>
+                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                      <cn> 3.67 </cn>
+                    </apply>
+                  </apply>
+                </piece>
+                <otherwise>
+                  <piecewise>
+                    <piece>
+                      <cn> 10 </cn>
+                      <apply>
+                        <and/>
+                        <apply>
+                          <geq/>
+                          <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                          <cn> 3.76 </cn>
+                        </apply>
+                        <apply>
+                          <leq/>
+                          <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                          <cn> 3.78 </cn>
+                        </apply>
+                      </apply>
+                    </piece>
+                    <otherwise>
+                      <piecewise>
+                        <piece>
+                          <cn> 10 </cn>
+                          <apply>
+                            <and/>
+                            <apply>
+                              <geq/>
+                              <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                              <cn> 3.87 </cn>
+                            </apply>
+                            <apply>
+                              <leq/>
+                              <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                              <cn> 3.89 </cn>
+                            </apply>
+                          </apply>
+                        </piece>
+                        <otherwise>
+                          <piecewise>
+                            <piece>
+                              <cn> 10 </cn>
+                              <apply>
+                                <and/>
+                                <apply>
+                                  <geq/>
+                                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                  <cn> 3.98 </cn>
+                                </apply>
+                                <apply>
+                                  <leq/>
+                                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                  <cn> 4 </cn>
+                                </apply>
+                              </apply>
+                            </piece>
+                            <otherwise>
+                              <piecewise>
+                                <piece>
+                                  <cn> 10 </cn>
+                                  <apply>
+                                    <and/>
+                                    <apply>
+                                      <geq/>
+                                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                      <cn> 4.09 </cn>
+                                    </apply>
+                                    <apply>
+                                      <leq/>
+                                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                      <cn> 4.11 </cn>
+                                    </apply>
+                                  </apply>
+                                </piece>
+                                <otherwise>
+                                  <piecewise>
+                                    <piece>
+                                      <cn> 10 </cn>
+                                      <apply>
+                                        <and/>
+                                        <apply>
+                                          <geq/>
+                                          <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                          <cn> 4.2 </cn>
+                                        </apply>
+                                        <apply>
+                                          <leq/>
+                                          <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                          <cn> 4.22 </cn>
+                                        </apply>
+                                      </apply>
+                                    </piece>
+                                    <otherwise>
+                                      <piecewise>
+                                        <piece>
+                                          <cn> 10 </cn>
+                                          <apply>
+                                            <and/>
+                                            <apply>
+                                              <geq/>
+                                              <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                              <cn> 4.31 </cn>
+                                            </apply>
+                                            <apply>
+                                              <leq/>
+                                              <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                              <cn> 4.33 </cn>
+                                            </apply>
+                                          </apply>
+                                        </piece>
+                                        <otherwise>
+                                          <piecewise>
+                                            <piece>
+                                              <cn> 10 </cn>
+                                              <apply>
+                                                <and/>
+                                                <apply>
+                                                  <geq/>
+                                                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                  <cn> 4.43 </cn>
+                                                </apply>
+                                                <apply>
+                                                  <leq/>
+                                                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                  <cn> 4.45 </cn>
+                                                </apply>
+                                              </apply>
+                                            </piece>
+                                            <otherwise>
+                                              <piecewise>
+                                                <piece>
+                                                  <cn> 10 </cn>
+                                                  <apply>
+                                                    <and/>
+                                                    <apply>
+                                                      <geq/>
+                                                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                      <cn> 4.54 </cn>
+                                                    </apply>
+                                                    <apply>
+                                                      <leq/>
+                                                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                      <cn> 4.56 </cn>
+                                                    </apply>
+                                                  </apply>
+                                                </piece>
+                                                <otherwise>
+                                                  <piecewise>
+                                                    <piece>
+                                                      <cn> 10 </cn>
+                                                      <apply>
+                                                        <and/>
+                                                        <apply>
+                                                          <geq/>
+                                                          <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                          <cn> 4.65 </cn>
+                                                        </apply>
+                                                        <apply>
+                                                          <leq/>
+                                                          <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                          <cn> 4.67 </cn>
+                                                        </apply>
+                                                      </apply>
+                                                    </piece>
+                                                    <otherwise>
+                                                      <piecewise>
+                                                        <piece>
+                                                          <cn> 10 </cn>
+                                                          <apply>
+                                                            <and/>
+                                                            <apply>
+                                                              <geq/>
+                                                              <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                              <cn> 4.76 </cn>
+                                                            </apply>
+                                                            <apply>
+                                                              <leq/>
+                                                              <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                              <cn> 4.78 </cn>
+                                                            </apply>
+                                                          </apply>
+                                                        </piece>
+                                                        <otherwise>
+                                                          <piecewise>
+                                                            <piece>
+                                                              <cn> 10 </cn>
+                                                              <apply>
+                                                                <and/>
+                                                                <apply>
+                                                                  <geq/>
+                                                                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                  <cn> 4.87 </cn>
+                                                                </apply>
+                                                                <apply>
+                                                                  <leq/>
+                                                                  <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                  <cn> 4.89 </cn>
+                                                                </apply>
+                                                              </apply>
+                                                            </piece>
+                                                            <otherwise>
+                                                              <piecewise>
+                                                                <piece>
+                                                                  <cn> 10 </cn>
+                                                                  <apply>
+                                                                    <and/>
+                                                                    <apply>
+                                                                      <geq/>
+                                                                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                      <cn> 4.98 </cn>
+                                                                    </apply>
+                                                                    <apply>
+                                                                      <leq/>
+                                                                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                                                                      <cn> 5 </cn>
+                                                                    </apply>
+                                                                  </apply>
+                                                                </piece>
+                                                                <otherwise>
+                                                                  <cn> 0 </cn>
+                                                                </otherwise>
+                                                              </piecewise>
+                                                            </otherwise>
+                                                          </piecewise>
+                                                        </otherwise>
+                                                      </piecewise>
+                                                    </otherwise>
+                                                  </piecewise>
+                                                </otherwise>
+                                              </piecewise>
+                                            </otherwise>
+                                          </piecewise>
+                                        </otherwise>
+                                      </piecewise>
+                                    </otherwise>
+                                  </piecewise>
+                                </otherwise>
+                              </piecewise>
+                            </otherwise>
+                          </piecewise>
+                        </otherwise>
+                      </piecewise>
+                    </otherwise>
+                  </piecewise>
+                </otherwise>
+              </piecewise>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_048159" variable="parameter_4">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> pulse </ci>
+            <ci> parameter_3 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <rateRule metaid="_048171" variable="GL">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <ci> kGl </ci>
+              </apply>
+              <ci> GL </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> rGlbasal </ci>
+              <apply>
+                <divide/>
+                <ci> tINS </ci>
+                <apply>
+                  <plus/>
+                  <ci> tINS </ci>
+                  <ci> INS </ci>
+                </apply>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> rGl </ci>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn> 1 </cn>
+                  <apply>
+                    <power/>
+                    <apply>
+                      <divide/>
+                      <ci> BG </ci>
+                      <ci> tBG </ci>
+                    </apply>
+                    <ci> nBG </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <divide/>
+                <cn> 1 </cn>
+                <apply>
+                  <plus/>
+                  <cn> 1 </cn>
+                  <apply>
+                    <power/>
+                    <apply>
+                      <divide/>
+                      <apply>
+                        <times/>
+                        <ci> GL </ci>
+                        <apply>
+                          <minus/>
+                          <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                          <ci> DGL </ci>
+                        </apply>
+                      </apply>
+                      <ci> tGl </ci>
+                    </apply>
+                    <ci> nGl </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <divide/>
+                <ci> tINS </ci>
+                <apply>
+                  <plus/>
+                  <ci> tINS </ci>
+                  <ci> INS </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_048183" variable="INS">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <ci> kINS </ci>
+              </apply>
+              <ci> INS </ci>
+            </apply>
+            <apply>
+              <times/>
+              <apply>
+                <plus/>
+                <apply>
+                  <times/>
+                  <ci> rINS </ci>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <power/>
+                      <apply>
+                        <divide/>
+                        <ci> BG </ci>
+                        <ci> tBG2 </ci>
+                      </apply>
+                      <ci> nBG2 </ci>
+                    </apply>
+                    <apply>
+                      <plus/>
+                      <cn> 1 </cn>
+                      <apply>
+                        <power/>
+                        <apply>
+                          <divide/>
+                          <ci> BG </ci>
+                          <ci> tBG2 </ci>
+                        </apply>
+                        <ci> nBG2 </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> rINSbasal </ci>
+              </apply>
+              <ci> parameter_4 </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_048195" variable="parameter_2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <cn> 3 </cn>
+              </apply>
+              <ci> parameter_2 </ci>
+            </apply>
+            <apply>
+              <times/>
+              <cn> 3 </cn>
+              <ci> step </ci>
+            </apply>
+            <cn> 330 </cn>
+          </apply>
+        </math>
+      </rateRule>
+    </listOfRules>
+  </model>
+</sbml>

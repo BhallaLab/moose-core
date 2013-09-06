@@ -1,0 +1,365 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="_253384" version="4">
+  <model id="Waugh2006_WoundHealingMacrophageDynamics_Diabetic_ModelC" name="Waugh2006_WoundHealingMacrophageDynamics_Diabetic_ModelC" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>Macrophage dynamics in diabetic wound dealing.</strong>
+                <br/>
+          Waugh HV, Sherratt JA.      <em>Bull Math Biol</em>
+          2006 Jan;68(1):197-207      <a href="http://www.ncbi.nlm.nih.gov/pubmed/16794927">16794927</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          Wound healing in diabetes is a complex process, characterised by a chronic
+inflammation phase. The exact mechanism by which this occurs is not fully
+understood, and whilst several treatments for healing diabetic wounds exist,
+very little research has been conducted towards the causes of the extended
+inflammation phase. We describe a mathematical model which offers a possible
+explanation for diabetic wound healing in terms of the distribution of
+macrophage phenotypes being altered in the diabetic patient compared to normal
+wound repair. As a consequence of this, we put forward a suggestion for
+treatment based on rectifying the macrophage phenotype imbalance.      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://models.cellml.org/exposure/5f5e46fb3a5d3c2e85c81bef880f91d1">        <strong>Waugh HV, Sherratt JA. (2006) - version=1.0</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>Catherine Lloyd</strong>
+                <br/>
+          c.lloyd@auckland.ac.nz      <br/>
+          The University of Auckland      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T12:10:18Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T12:10:18Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T12:10:18Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T12:10:18Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1006230011"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/16794927"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="day" name="day" metaid="_253396">
+        <listOfUnits>
+          <unit metaid="_253408" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="cells_per_mm3" name="cells_per_mm3" metaid="_253420">
+        <listOfUnits>
+          <unit scale="-3" exponent="-3" metaid="_253433" kind="metre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="cells_per_mm3_day" name="cells_per_mm3_day" metaid="_253445">
+        <listOfUnits>
+          <unit scale="-3" exponent="-3" metaid="_253458" kind="metre"/>
+          <unit exponent="-1" metaid="_253470" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="cells_per_pg_day" name="cells_per_pg_day" metaid="_253482">
+        <listOfUnits>
+          <unit scale="-12" exponent="-1" metaid="_253494" kind="gram"/>
+          <unit exponent="-1" metaid="_253506" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mm3_cells_per_pg2_day" name="mm3_cells_per_pg2_day" metaid="_253518">
+        <listOfUnits>
+          <unit scale="-3" exponent="3" metaid="_253530" kind="metre"/>
+          <unit scale="-12" exponent="-2" metaid="_253542" kind="gram"/>
+          <unit exponent="-1" metaid="_253554" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="mm6_cells_per_pg3_day" name="mm6_cells_per_pg3_day" metaid="_253566">
+        <listOfUnits>
+          <unit scale="-3" exponent="6" metaid="_253578" kind="metre"/>
+          <unit scale="-12" exponent="-3" metaid="_253590" kind="gram"/>
+          <unit exponent="-1" metaid="_253603" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_cells_per_mm3" name="per_cells_per_mm3" metaid="_253615">
+        <listOfUnits>
+          <unit scale="-3" exponent="3" metaid="_253627" kind="metre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="pg_per_cells" name="pg_per_cells" metaid="_253639">
+        <listOfUnits>
+          <unit scale="-12" metaid="_253651" kind="gram"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="pg_per_mm3" name="pg_per_mm3" metaid="_253663">
+        <listOfUnits>
+          <unit scale="-12" metaid="_253675" kind="gram"/>
+          <unit scale="-3" exponent="-3" metaid="_253687" kind="metre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="first_order_rate_constant" name="first_order_rate_constant" metaid="_253700">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_253713" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="second_order_rate_constant" name="second_order_rate_constant" metaid="_253725">
+        <listOfUnits>
+          <unit scale="-12" metaid="_253737" kind="gram"/>
+          <unit exponent="-1" metaid="_253749" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time" name="time" metaid="_253761">
+        <listOfUnits>
+          <unit metaid="_253773" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="COMpartment" metaid="_217822" units="litre" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="time_environment" name="time" metaid="_217839" units="day"/>
+      <parameter id="phi_I" constant="false" name="phi_I" metaid="_217840" value="200" units="cells_per_mm3"/>
+      <parameter id="total_macrophages" constant="false" name="total_macrophages" metaid="_217843" units="cells_per_mm3"/>
+      <parameter id="phi_R" constant="false" name="phi_R" metaid="_217844" value="200" units="cells_per_mm3"/>
+      <parameter id="T" constant="false" name="T" metaid="_217847" value="6" units="pg_per_mm3"/>
+      <parameter id="K_T" constant="false" name="K_T" metaid="_217848"/>
+      <parameter id="tau1" name="tau1" metaid="_217851" value="-2.47" units="mm6_cells_per_pg3_day"/>
+      <parameter id="tau2" name="tau2" metaid="_217852" value="21.94" units="mm3_cells_per_pg2_day"/>
+      <parameter id="tau3" name="tau3" metaid="_217855" value="6.41" units="cells_per_pg_day"/>
+      <parameter id="tau4" name="tau4" metaid="_217856" value="1.75" units="cells_per_mm3_day"/>
+      <parameter id="alpha" constant="false" name="alpha" metaid="_217859" units="dimensionless"/>
+      <parameter id="k1" name="k1" metaid="_217860" value="0.05" units="dimensionless"/>
+      <parameter id="k2" name="k2" metaid="_217863" value="0.693" units="first_order_rate_constant"/>
+      <parameter id="k3" name="k3" metaid="_217864" value="0.002" units="per_cells_per_mm3"/>
+      <parameter id="k4" name="k4" metaid="_217867" value="0.07" units="second_order_rate_constant"/>
+      <parameter id="d1" name="d1" metaid="_217868" value="0.2" units="first_order_rate_constant"/>
+      <parameter id="d2" name="d2" metaid="_217871" value="9.1" units="first_order_rate_constant"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_217826" variable="phi_I">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <ci> alpha </ci>
+                <ci> K_T </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> k2 </ci>
+                <ci> phi_I </ci>
+                <apply>
+                  <minus/>
+                  <cn> 1 </cn>
+                  <apply>
+                    <times/>
+                    <ci> k3 </ci>
+                    <apply>
+                      <plus/>
+                      <ci> phi_I </ci>
+                      <ci> phi_R </ci>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> d1 </ci>
+              <ci> phi_I </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_217829" variable="phi_R">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <plus/>
+              <apply>
+                <times/>
+                <apply>
+                  <minus/>
+                  <cn> 1 </cn>
+                  <ci> alpha </ci>
+                </apply>
+                <ci> K_T </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k1 </ci>
+                <ci> k2 </ci>
+                <ci> phi_R </ci>
+                <apply>
+                  <minus/>
+                  <cn> 1 </cn>
+                  <apply>
+                    <times/>
+                    <ci> k3 </ci>
+                    <apply>
+                      <plus/>
+                      <ci> phi_I </ci>
+                      <ci> phi_R </ci>
+                    </apply>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> d1 </ci>
+              <ci> phi_R </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_217830" variable="T">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <times/>
+              <ci> k4 </ci>
+              <ci> phi_I </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> d2 </ci>
+              <ci> T </ci>
+            </apply>
+          </apply>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="_217833" variable="total_macrophages">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <ci> phi_R </ci>
+            <ci> phi_I </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_217834" variable="K_T">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <times/>
+              <ci> tau1 </ci>
+              <apply>
+                <power/>
+                <ci> T </ci>
+                <cn> 3 </cn>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> tau2 </ci>
+              <apply>
+                <power/>
+                <ci> T </ci>
+                <cn> 2 </cn>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <ci> tau3 </ci>
+              <ci> T </ci>
+            </apply>
+            <ci> tau4 </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_217837" variable="alpha">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <cn> 0.8 </cn>
+              <apply>
+                <and/>
+                <apply>
+                  <geq/>
+                  <ci> time_environment </ci>
+                  <cn> 0 </cn>
+                </apply>
+                <apply>
+                  <leq/>
+                  <ci> time_environment </ci>
+                  <cn> 10 </cn>
+                </apply>
+              </apply>
+            </piece>
+            <otherwise>
+              <cn> 0.2 </cn>
+            </otherwise>
+          </piecewise>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+  </model>
+</sbml>

@@ -1,0 +1,1843 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="_301211" version="4">
+  <model id="MODEL1204280028" name="Sarma2012 - Interaction topologies of MAPK cascade (M4_K2_USEQ_short_duration_signal)" metaid="COPASI1">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <div class="dc:title">Sarma2012 - Interaction topologies of MAPK cascade (M4_K2_USEQ_short_duration_signal)</div>
+            <div class="dc:description">      <p>The paper presents the various interaction topologies between the kinases and phosphatases of MAPK cascade. They are represented as M1, M2, M3 and M4. The kinases of the cascades are MKKK, MKK and MK, and Phos1, Phos2 and Phos3 are phosphatases of the system. All three kinases in a M1 type network have specific phosphatases Phos1, Phos2 and Phos3 for the dephosphorylation process. In a M2 type system, kinases MKKK and MKK are dephosphorylated by Phos1 and MK is dephosphorylated by Phos2. The architecture of system like M3 is such that MKKK gets dephosphorylated by Phos1, whereas Phos2 dephosphorylates both MKK and MK. Finally, the MAPK cascade exhibiting more complex design of interaction such as M4 is such that MKKK and MKK are dephosphorylated by Phos1 whereas MKK and MK are dephosphorylated by Phos2. In addition, as it is plausible that the kinases can sequester their respective phosphatases by binding to them, this is considered in the design of the systems (PSEQ-sequestrated system; USEQ-Unsequestrated system). The robustness of different interaction designs of the systems is checked, considering both MichaelisMenten type kinetics (K1) and elementary mass action kinetics (K2). In the living systems, the MAPK cascade transmit both short and long duration signals where short duration signals trigger proliferation and long duration signals trigger cell differentiation. These signal variants are considered to interpret the systems behaviour. It is also tested how the robustness and signal response behaviour of K2 models are affected when K2 assumes quasi steady state (QSS). The combinations of the above variants resulted in 40 models (MODEL1204280001-40). All these 40 models are available from        <a href="http://www.ebi.ac.uk/biomodels">BioModels Database</a>
+            .        </p>
+                <p>Models that correspond to type M4 with mass-action kinetics K2, in four condition 1) USEQ [        <a href="http://www.ebi.ac.uk/biomodels/MODEL1204280020">MODEL1204280020</a>
+            - M4_K2_USEQ], 2) PSEQ [        <a href="http://www.ebi.ac.uk/biomodels/MODEL1204280024">MODEL1204280024</a>
+            - M4_K2_PSEQ], 3) QSS_USEQ [        <a href="http://www.ebi.ac.uk/biomodels/MODEL1204280036">MODEL1204280036</a>
+            - M4_K2_QSS_USEQ] and 4) QSS_PSEQ [        <a href="http://www.ebi.ac.uk/biomodels/MODEL1204280040">MODEL1204280040</a>
+            - M4_K2_QSS_PSEQ] are available from the curated branch. The remaining 36 models can be accessed from the non-curated branch.        </p>
+                <p>This model [        <a href="http://www.ebi.ac.uk/biomodels/MODEL1204280028">MODEL1204280028</a>
+            - M4_K2_USEQ_short_duration_signal] correspond to type M4 with mass action kinetics K2, in short_duration_signal and USEQ (Unsequestrated ) condition. This model can accessed from the non-curated branch of        <a href="http://www.ebi.ac.uk/biomodels">BioModels Database</a>
+            .        </p>
+                </div>
+            <div class="dc:bibliographicCitation">      <p>This model is described in the article:</p>
+                <div class="bibo:title">        <a href="http://identifiers.org/pubmed/22748295" title="Access to this publication">Different designs of kinase-phosphatase interactions and phosphatase sequestration shapes the robustness and signal flow in the MAPK cascade.</a>
+                    </div>
+                <div class="bibo:authorList">Sarma U, Ghosh I.</div>
+                <div class="bibo:Journal">BMC Syst Biol. 2012 Jul 2;6(1):82.</div>
+                <p>Abstract:</p>
+                <div class="bibo:abstract">        <p>ABSTRACT:
+
+BACKGROUND: The three layer mitogen activated protein kinase (MAPK) signaling cascade exhibits different designs of interactions between its kinases and phosphatases. While the sequential interactions between the three kinases of the cascade are tightly preserved, the phosphatases of the cascade, such as MKP3 and PP2A, exhibit relatively diverse interactions with their substrate kinases. Additionally, the kinases of the MAPK cascade can also sequester their phosphatases. Thus, each topologically distinct interaction design of kinases and phosphatases could exhibit unique signal processing characteristics, and the presence of phosphatase sequestration may lead to further fine tuning of the propagated signal.
+RESULTS:
+
+We have built four models of the MAPK cascade, each model with identical kinase-kinase interactions but unique kinases-phosphatases interactions. Our simulations unravelled that MAPK cascade's robustness to external perturbations is a function of nature of interaction between its kinases and phosphatases. The cascade's output robustness was enhanced when phosphatases were sequestrated by their target kinases. We uncovered a novel implicit/hidden negative feedback loop from the phosphatase MKP3 to its upstream kinase Raf-1, in a cascade resembling the B cell MAPK cascade. Notably, strength of the feedback loop was reciprocal to the strength of phosphatases' sequestration and stronger sequestration abolished the feedback loop completely. An experimental method to verify the presence of the feedback loop is also proposed. We further showed, when the models were activated by transient signal, memory (total time taken by the cascade output to reach its unstimulated level after removal of signal) of a cascade was determined by the specific designs of interaction among its kinases and phosphatases.
+CONCLUSIONS:
+
+Differences in interaction designs among the kinases and phosphatases can differentially shape the robustness and signal response behaviour of the MAPK cascade and phosphatase sequestration dramatically enhances the robustness to perturbations in each of the cascade. An implicit negative feedback loop was uncovered from our analysis and we found that strength of the negative feedback loop is reciprocally related to the strength of phosphatase sequestration. Duration of output phosphorylation in response to a transient signal was also found to be determined by the individual cascade's kinase-phosphatase interaction design.</p>
+                    </div>
+                </div>
+            <div class="dc:publisher">      <p>This model is hosted on        <a href="http://www.ebi.ac.uk/biomodels">BioModels Database</a>
+            and identified by:        <a href="http://www.ebi.ac.uk/biomodels/MODEL1204280028">MODEL1204280028</a>
+            .        </p>
+                <p>To cite BioModels Database, please use: BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. PMID:        <a href="http://identifiers.org/pubmed/20587024">20587024</a>
+            .        </p>
+                </div>
+            <div class="dc:license">      <p>To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to [CC0 Public Domain Dedication>http://creativecommons.org/publicdomain/zero/1.0/] for more information.</p>
+                </div>
+            </body>
+      
+    </notes>
+    <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+        <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+          <rdf:Description rdf:about="#COPASI1">
+            <dcterms:created>
+              <rdf:Description>
+                <dcterms:W3CDTF>2011-12-13T09:37:45Z</dcterms:W3CDTF>
+              </rdf:Description>
+            </dcterms:created>
+          </rdf:Description>
+        </rdf:RDF>
+      </COPASI>
+                                                    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#COPASI1">
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1204280028"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/22748295"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="volume" name="volume" metaid="_038802">
+        <listOfUnits>
+          <unit scale="-3" metaid="_038814" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="substance" name="substance" metaid="_038826">
+        <listOfUnits>
+          <unit scale="-9" metaid="_038838" kind="mole"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="compartment_1" name="compartment" metaid="_038850" size="1"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="species_1" initialConcentration="1200" name="MK" metaid="COPASI2" compartment="compartment_1">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI2">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T10:32:07Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+      </species>
+      <species id="species_2" initialConcentration="0" name="MKK-PP" metaid="COPASI3" compartment="compartment_1">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI3">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T10:32:11Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+      </species>
+      <species id="species_3" initialConcentration="0" name="MK_MKK-PP" metaid="COPASI4" compartment="compartment_1">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI4">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T10:32:03Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+      </species>
+      <species id="species_4" initialConcentration="0" name="MK-P" metaid="COPASI5" compartment="compartment_1">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI5">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T10:31:42Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+      </species>
+      <species id="species_5" initialConcentration="0" name="MK-P_MKK-PP" metaid="COPASI6" compartment="compartment_1">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI6">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T10:32:06Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+      </species>
+      <species id="species_6" initialConcentration="0" name="MK-PP" metaid="COPASI7" compartment="compartment_1">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI7">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T10:32:04Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+      </species>
+      <species id="species_7" initialConcentration="1200" name="MKK" metaid="COPASI8" compartment="compartment_1">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI8">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T10:31:55Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+      </species>
+      <species id="species_8" initialConcentration="0" name="MKKK-P" metaid="COPASI9" compartment="compartment_1">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI9">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T10:32:13Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+      </species>
+      <species id="species_9" initialConcentration="0" name="MKK_MKKK-P" metaid="COPASI10" compartment="compartment_1">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI10">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T10:32:12Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+      </species>
+      <species id="species_10" initialConcentration="0" name="MKK-P" metaid="COPASI11" compartment="compartment_1">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI11">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T10:32:10Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+      </species>
+      <species id="species_11" initialConcentration="0" name="MKK-P_MKKK-P" metaid="COPASI12" compartment="compartment_1">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI12">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T10:32:11Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+      </species>
+      <species id="species_12" initialConcentration="0" name="MKK-PP_P2" metaid="COPASI13" compartment="compartment_1">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI13">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T10:32:12Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+      </species>
+      <species id="species_13" initialConcentration="200" name="P2" metaid="COPASI14" compartment="compartment_1">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI14">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T10:32:15Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+      </species>
+      <species id="species_14" initialConcentration="0" name="MKK-P_P2" metaid="COPASI15" compartment="compartment_1">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI15">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T10:48:51Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+      </species>
+      <species id="species_15" initialConcentration="0" name="MKK_P2" metaid="COPASI16" compartment="compartment_1">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI16">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T10:48:57Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+      </species>
+      <species id="species_16" initialConcentration="300" name="MKKK" metaid="COPASI17" compartment="compartment_1">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI17">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T14:19:45Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+      </species>
+      <species id="species_17" initialConcentration="0" name="MKKK_Sig" metaid="COPASI18" compartment="compartment_1">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI18">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T14:19:48Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+      </species>
+      <species id="species_18" initialConcentration="10" name="Sig" metaid="COPASI19" compartment="compartment_1">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI19">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T11:21:29Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+      </species>
+      <species id="species_19" initialConcentration="0" name="MKKK-P_P1" metaid="COPASI20" compartment="compartment_1">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI20">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T14:19:47Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+      </species>
+      <species id="species_20" initialConcentration="100" name="P1" metaid="COPASI21" compartment="compartment_1">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI21">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T11:47:33Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+      </species>
+      <species id="species_21" initialConcentration="0" name="MK-PP_P2" metaid="COPASI22" compartment="compartment_1">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI22">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T14:19:19Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+      </species>
+      <species id="species_22" initialConcentration="0" name="MK-P_P2" metaid="COPASI23" compartment="compartment_1">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI23">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T14:19:10Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+      </species>
+      <species id="species_23" initialConcentration="0" name="MK_P2" metaid="COPASI24" compartment="compartment_1">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI24">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T14:19:25Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+      </species>
+      <species id="species_24" initialConcentration="0" name="MKK-PP_P1" metaid="COPASI25" compartment="compartment_1">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI25">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T15:09:53Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+      </species>
+      <species id="species_25" initialConcentration="0" name="MKK-P_P1" metaid="COPASI26" compartment="compartment_1">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI26">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T15:09:52Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+      </species>
+      <species id="species_26" initialConcentration="0" name="MKK_P1" metaid="COPASI27" compartment="compartment_1">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI27">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T15:09:55Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+      </species>
+      <species id="species_27" initialConcentration="0" name="MKKK_P1" metaid="_038862" compartment="compartment_1"/>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="parameter_1" name="quantity_1" metaid="COPASI28" value="0">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI28">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T11:19:52Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+      </parameter>
+    </listOfParameters>
+    <listOfReactions>
+      <reaction id="reaction_1" name="15" metaid="COPASI30">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI30">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T09:37:55Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+              <listOfReactants>
+          <speciesReference species="species_1" metaid="_038874"/>
+          <speciesReference species="species_2" metaid="_039113"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_3" metaid="_039126"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="species_1" metaid="_988851"/>
+          <modifierSpeciesReference species="species_2" metaid="_988863"/>
+          <modifierSpeciesReference species="species_3" metaid="_988875"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_039138">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment_1 </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k1 </ci>
+                  <ci> species_1 </ci>
+                  <ci> species_2 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k2 </ci>
+                  <ci> species_3 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_039150" value="0.02"/>
+            <parameter id="k2" name="k2" metaid="_039161" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_2" name="16" metaid="COPASI31" reversible="false">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI31">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T09:41:32Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+              <listOfReactants>
+          <speciesReference species="species_3" metaid="_039174"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_4" metaid="_039186"/>
+          <speciesReference species="species_2" metaid="_039198"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="species_3" metaid="_988887"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_039209">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment_1 </ci>
+              <ci> k1 </ci>
+              <ci> species_3 </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_039222" value="0.01"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_3" name="17" metaid="COPASI32">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI32">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T09:42:25Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+              <listOfReactants>
+          <speciesReference species="species_4" metaid="_039234"/>
+          <speciesReference species="species_2" metaid="_039246"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_5" metaid="_039258"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="species_4" metaid="_988899"/>
+          <modifierSpeciesReference species="species_2" metaid="_988911"/>
+          <modifierSpeciesReference species="species_5" metaid="_988923"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_039270">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment_1 </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k1 </ci>
+                  <ci> species_4 </ci>
+                  <ci> species_2 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k2 </ci>
+                  <ci> species_5 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_039282" value="0.032"/>
+            <parameter id="k2" name="k2" metaid="_039294" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_4" name="18" metaid="COPASI33" reversible="false">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI33">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T09:44:04Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+              <listOfReactants>
+          <speciesReference species="species_5" metaid="_039305"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_6" metaid="_039317"/>
+          <speciesReference species="species_2" metaid="_039330"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="species_5" metaid="_988935"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_039342">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment_1 </ci>
+              <ci> k1 </ci>
+              <ci> species_5 </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_039354" value="15"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_5" name="19" metaid="COPASI34">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI34">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T09:44:59Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+              <listOfReactants>
+          <speciesReference species="species_6" metaid="_039365"/>
+          <speciesReference species="species_13" metaid="_039378"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_21" metaid="_039389"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="species_6" metaid="_988947"/>
+          <modifierSpeciesReference species="species_13" metaid="_988959"/>
+          <modifierSpeciesReference species="species_21" metaid="_988971"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_039402">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment_1 </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k1 </ci>
+                  <ci> species_6 </ci>
+                  <ci> species_13 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k2 </ci>
+                  <ci> species_21 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_039413" value="0.045"/>
+            <parameter id="k2" name="k2" metaid="_039659" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_6" name="20" metaid="COPASI35" reversible="false">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI35">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T09:46:46Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+              <listOfReactants>
+          <speciesReference species="species_21" metaid="_039671"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_4" metaid="_039684"/>
+          <speciesReference species="species_13" metaid="_039696"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="species_21" metaid="_988983"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_039708">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment_1 </ci>
+              <ci> k1 </ci>
+              <ci> species_21 </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_039720" value="0.092"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_7" name="21" metaid="COPASI36">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI36">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T09:47:34Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+              <listOfReactants>
+          <speciesReference species="species_4" metaid="_039732"/>
+          <speciesReference species="species_13" metaid="_039745"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_22" metaid="_039757"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="species_4" metaid="_988995"/>
+          <modifierSpeciesReference species="species_13" metaid="_989007"/>
+          <modifierSpeciesReference species="species_22" metaid="_989019"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_039770">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment_1 </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k1 </ci>
+                  <ci> species_4 </ci>
+                  <ci> species_13 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k2 </ci>
+                  <ci> species_22 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_039782" value="0.01"/>
+            <parameter id="k2" name="k2" metaid="_039794" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_8" name="22" metaid="COPASI37" reversible="false">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI37">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T10:06:43Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+              <listOfReactants>
+          <speciesReference species="species_22" metaid="_039806"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_1" metaid="_039818"/>
+          <speciesReference species="species_13" metaid="_039830"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="species_22" metaid="_989031"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_039841">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment_1 </ci>
+              <ci> k1 </ci>
+              <ci> species_22 </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_039854" value="0.086"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_9" name="23" metaid="COPASI38">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI38">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T10:07:26Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+              <listOfReactants>
+          <speciesReference species="species_23" metaid="_039866"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_1" metaid="_039878"/>
+          <speciesReference species="species_13" metaid="_039890"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="species_23" metaid="_989043"/>
+          <modifierSpeciesReference species="species_1" metaid="_989055"/>
+          <modifierSpeciesReference species="species_13" metaid="_989067"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_039902">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment_1 </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k1 </ci>
+                  <ci> species_23 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k2 </ci>
+                  <ci> species_1 </ci>
+                  <ci> species_13 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_039914" value="0"/>
+            <parameter id="k2" name="k2" metaid="_039925" value="0"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_10" name="6" metaid="COPASI39">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI39">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T10:15:22Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+              <listOfReactants>
+          <speciesReference species="species_7" metaid="_039938"/>
+          <speciesReference species="species_8" metaid="_039949"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_9" metaid="_039961"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="species_7" metaid="_989079"/>
+          <modifierSpeciesReference species="species_8" metaid="_989091"/>
+          <modifierSpeciesReference species="species_9" metaid="_989103"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_040199">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment_1 </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k1 </ci>
+                  <ci> species_7 </ci>
+                  <ci> species_8 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k2 </ci>
+                  <ci> species_9 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_040212" value="0.02"/>
+            <parameter id="k2" name="k2" metaid="_040223" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_11" name="7" metaid="COPASI40" reversible="false">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI40">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T10:20:51Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+              <listOfReactants>
+          <speciesReference species="species_9" metaid="_040236"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_10" metaid="_040248"/>
+          <speciesReference species="species_8" metaid="_040260"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="species_9" metaid="_989115"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_040272">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment_1 </ci>
+              <ci> k1 </ci>
+              <ci> species_9 </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_040284" value="0.01"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_12" name="8" metaid="COPASI41">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI41">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T10:21:32Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+              <listOfReactants>
+          <speciesReference species="species_10" metaid="_040296"/>
+          <speciesReference species="species_8" metaid="_040307"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_11" metaid="_040320"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="species_10" metaid="_989127"/>
+          <modifierSpeciesReference species="species_8" metaid="_989139"/>
+          <modifierSpeciesReference species="species_11" metaid="_989151"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_040331">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment_1 </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k1 </ci>
+                  <ci> species_10 </ci>
+                  <ci> species_8 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k2 </ci>
+                  <ci> species_11 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_040343" value="0.032"/>
+            <parameter id="k2" name="k2" metaid="_040356" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_13" name="9" metaid="COPASI42" reversible="false">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI42">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T10:22:21Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+              <listOfReactants>
+          <speciesReference species="species_11" metaid="_040368"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_2" metaid="_040379"/>
+          <speciesReference species="species_8" metaid="_040392"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="species_11" metaid="_989163"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_040404">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment_1 </ci>
+              <ci> k1 </ci>
+              <ci> species_11 </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_040416" value="15"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_14" name="10_P2" metaid="COPASI43">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI43">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T10:23:11Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+              <listOfReactants>
+          <speciesReference species="species_2" metaid="_040427"/>
+          <speciesReference species="species_13" metaid="_040440"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_12" metaid="_040451"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="species_2" metaid="_989175"/>
+          <modifierSpeciesReference species="species_13" metaid="_989188"/>
+          <modifierSpeciesReference species="species_12" metaid="_989200"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_040463">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment_1 </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k1 </ci>
+                  <ci> species_2 </ci>
+                  <ci> species_13 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k2 </ci>
+                  <ci> species_12 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_040475" value="0.045"/>
+            <parameter id="k2" name="k2" metaid="_040721" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_15" name="11_P2" metaid="COPASI44" reversible="false">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI44">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T10:39:25Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+              <listOfReactants>
+          <speciesReference species="species_12" metaid="_040734"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_10" metaid="_040745"/>
+          <speciesReference species="species_13" metaid="_040758"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="species_12" metaid="_989212"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_040770">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment_1 </ci>
+              <ci> k1 </ci>
+              <ci> species_12 </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_040782" value="0.092"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_16" name="12_P2" metaid="COPASI45">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI45">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T10:41:56Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+              <listOfReactants>
+          <speciesReference species="species_10" metaid="_040794"/>
+          <speciesReference species="species_13" metaid="_040807"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_14" metaid="_040818"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="species_10" metaid="_989224"/>
+          <modifierSpeciesReference species="species_13" metaid="_989236"/>
+          <modifierSpeciesReference species="species_14" metaid="_989248"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_040831">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment_1 </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k1 </ci>
+                  <ci> species_10 </ci>
+                  <ci> species_13 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k2 </ci>
+                  <ci> species_14 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_040842" value="0.01"/>
+            <parameter id="k2" name="k2" metaid="_040891" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_17" name="13_P2" metaid="COPASI46" reversible="false">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI46">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T10:42:53Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+              <listOfReactants>
+          <speciesReference species="species_14" metaid="_040902"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_7" metaid="_040915"/>
+          <speciesReference species="species_13" metaid="_040927"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="species_14" metaid="_989260"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_040938">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment_1 </ci>
+              <ci> k1 </ci>
+              <ci> species_14 </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_040950" value="0.086"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_18" name="14_P2" metaid="COPASI47">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI47">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T10:43:23Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+              <listOfReactants>
+          <speciesReference species="species_15" metaid="_040963"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_7" metaid="_040975"/>
+          <speciesReference species="species_13" metaid="_040987"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="species_15" metaid="_989272"/>
+          <modifierSpeciesReference species="species_7" metaid="_989284"/>
+          <modifierSpeciesReference species="species_13" metaid="_989296"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_040999">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment_1 </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k1 </ci>
+                  <ci> species_15 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k2 </ci>
+                  <ci> species_7 </ci>
+                  <ci> species_13 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_041012" value="0"/>
+            <parameter id="k2" name="k2" metaid="_041023" value="0"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_19" name="1" metaid="COPASI48">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI48">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T11:11:58Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+              <listOfReactants>
+          <speciesReference species="species_16" metaid="_041035"/>
+          <speciesReference species="species_18" metaid="_041047"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_17" metaid="_041059"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="species_16" metaid="_989308"/>
+          <modifierSpeciesReference species="species_18" metaid="_989320"/>
+          <modifierSpeciesReference species="species_17" metaid="_989332"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_041071">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment_1 </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k1 </ci>
+                  <ci> species_16 </ci>
+                  <ci> species_18 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k2 </ci>
+                  <ci> species_17 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_041300" value="0.02"/>
+            <parameter id="k2" name="k2" metaid="_041313" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_20" name="2" metaid="COPASI49" reversible="false">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI49">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T11:12:30Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+              <listOfReactants>
+          <speciesReference species="species_17" metaid="_041324"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_8" metaid="_041336"/>
+          <speciesReference species="species_18" metaid="_041348"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="species_17" metaid="_989344"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_041360">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment_1 </ci>
+              <ci> k1 </ci>
+              <ci> species_17 </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_041373" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_21" name="3" metaid="COPASI50">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI50">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T11:13:03Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+              <listOfReactants>
+          <speciesReference species="species_8" metaid="_041384"/>
+          <speciesReference species="species_20" metaid="_041397"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_19" metaid="_041408"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="species_8" metaid="_989356"/>
+          <modifierSpeciesReference species="species_20" metaid="_989368"/>
+          <modifierSpeciesReference species="species_19" metaid="_989380"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_041420">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment_1 </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k1 </ci>
+                  <ci> species_8 </ci>
+                  <ci> species_20 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k2 </ci>
+                  <ci> species_19 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_041432" value="0.02"/>
+            <parameter id="k2" name="k2" metaid="_041444" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_22" name="4" metaid="COPASI51" reversible="false">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI51">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T11:13:44Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+              <listOfReactants>
+          <speciesReference species="species_19" metaid="_041456"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_16" metaid="_041592"/>
+          <speciesReference species="species_20" metaid="_041604"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="species_19" metaid="_989392"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_041617">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment_1 </ci>
+              <ci> k1 </ci>
+              <ci> species_19 </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_041629" value="0.086"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_23" name="10_P1" metaid="COPASI52">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI52">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T14:26:47Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+              <listOfReactants>
+          <speciesReference species="species_2" metaid="_041640"/>
+          <speciesReference species="species_20" metaid="_041653"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_24" metaid="_041664"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="species_2" metaid="_989404"/>
+          <modifierSpeciesReference species="species_20" metaid="_989416"/>
+          <modifierSpeciesReference species="species_24" metaid="_989428"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_041677">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment_1 </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k1 </ci>
+                  <ci> species_2 </ci>
+                  <ci> species_20 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k2 </ci>
+                  <ci> species_24 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_041688" value="0.045"/>
+            <parameter id="k2" name="k2" metaid="_041701" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_25" name="11_P1" metaid="COPASI53" reversible="false">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI53">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T14:27:46Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+              <listOfReactants>
+          <speciesReference species="species_24" metaid="_041712"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_10" metaid="_041725"/>
+          <speciesReference species="species_20" metaid="_041736"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="species_24" metaid="_989440"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_041749">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment_1 </ci>
+              <ci> k1 </ci>
+              <ci> species_24 </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_041760" value="0.092"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_26" name="12_P1" metaid="COPASI54">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI54">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T14:28:34Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+              <listOfReactants>
+          <speciesReference species="species_10" metaid="_041888"/>
+          <speciesReference species="species_20" metaid="_041900"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_25" metaid="_041913"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="species_10" metaid="_989452"/>
+          <modifierSpeciesReference species="species_20" metaid="_989464"/>
+          <modifierSpeciesReference species="species_25" metaid="_989477"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_041924">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment_1 </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k1 </ci>
+                  <ci> species_10 </ci>
+                  <ci> species_20 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k2 </ci>
+                  <ci> species_25 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_041936" value="0.01"/>
+            <parameter id="k2" name="k2" metaid="_041948" value="1"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_27" name="13_P1" metaid="COPASI55" reversible="false">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI55">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T14:30:07Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+              <listOfReactants>
+          <speciesReference species="species_25" metaid="_041960"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_7" metaid="_041972"/>
+          <speciesReference species="species_20" metaid="_041984"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="species_25" metaid="_989489"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_041996">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment_1 </ci>
+              <ci> k1 </ci>
+              <ci> species_25 </ci>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_042008" value="0.086"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_28" name="14_P1" metaid="COPASI56">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI56">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T14:30:46Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+              <listOfReactants>
+          <speciesReference species="species_26" metaid="_042020"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_7" metaid="_042032"/>
+          <speciesReference species="species_20" metaid="_042044"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="species_26" metaid="_989501"/>
+          <modifierSpeciesReference species="species_7" metaid="_989513"/>
+          <modifierSpeciesReference species="species_20" metaid="_989525"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_042176">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment_1 </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k1 </ci>
+                  <ci> species_26 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k2 </ci>
+                  <ci> species_7 </ci>
+                  <ci> species_20 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_042188" value="0"/>
+            <parameter id="k2" name="k2" metaid="_042200" value="0"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+      <reaction id="reaction_24" name="5" metaid="COPASI57">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI57">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-23T13:34:37Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+              <listOfReactants>
+          <speciesReference species="species_27" metaid="_042212"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="species_16" metaid="_042225"/>
+          <speciesReference species="species_20" metaid="_042237"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="species_27" metaid="_989537"/>
+          <modifierSpeciesReference species="species_16" metaid="_989550"/>
+          <modifierSpeciesReference species="species_20" metaid="_989562"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_042248">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment_1 </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k1 </ci>
+                  <ci> species_27 </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k2 </ci>
+                  <ci> species_16 </ci>
+                  <ci> species_20 </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+                  <listOfParameters>
+            <parameter id="k1" name="k1" metaid="_042261" value="0"/>
+            <parameter id="k2" name="k2" metaid="_042273" value="0"/>
+          </listOfParameters>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+    <listOfEvents>
+      <event id="event_1" name="1" metaid="COPASI29">
+        <annotation>
+<COPASI xmlns="http://www.copasi.org/static/sbml">
+            <rdf:RDF xmlns:dcterms="http://purl.org/dc/terms/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+              <rdf:Description rdf:about="#COPASI29">
+                <dcterms:created>
+                  <rdf:Description>
+                    <dcterms:W3CDTF>2011-12-13T11:19:56Z</dcterms:W3CDTF>
+                  </rdf:Description>
+                </dcterms:created>
+              </rdf:Description>
+            </rdf:RDF>
+          </COPASI>
+                                                        </annotation>
+              <trigger metaid="_042285">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <geq/>
+              <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+              <cn> 600 </cn>
+            </apply>
+          </math>
+        </trigger>
+        <listOfEventAssignments>
+          <eventAssignment metaid="_042296" variable="species_18">
+            <math xmlns="http://www.w3.org/1998/Math/MathML">            
+              <cn> 0 </cn>
+            </math>
+          </eventAssignment>
+          <eventAssignment metaid="_042308" variable="species_17">
+            <math xmlns="http://www.w3.org/1998/Math/MathML">            
+              <cn> 0 </cn>
+            </math>
+          </eventAssignment>
+        </listOfEventAssignments>
+      </event>
+    </listOfEvents>
+  </model>
+</sbml>

@@ -1,0 +1,2170 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2" level="2" metaid="metaid_0000001" version="1">
+  <model id="model01" name="Bungay2006_Plasma" metaid="_512416">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This model is from the article:      <br/>
+                <strong>Modelling thrombin generation in human ovarian follicular fluid</strong>
+                <br/>
+          Bungay Sharene D., Gentry Patricia A., Gentry Rodney D.      <em>Bulletin of Mathematical Biology</em>
+          Volume 68, Issue 8, 12 July 2006, Pages 2283-302      <a href="http://www.ncbi.nlm.nih.gov/pubmed/16838084">16838084</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          A mathematical model is constructed to study thrombin production in human ovarian follicular fluid. The model results show that the amount of thrombin that can be produced in ovarian follicular fluid is much lower than that in blood plasma, failing to reach the level required for fibrin formation, and thereby supporting the hypothesis that in follicular fluid thrombin functions to initiate cellular activities via intracellular signalling receptors. It is also concluded that the absence of the amplification pathway to thrombin production in follicular fluid is a major factor in restricting the amount of thrombin that can be produced. Titration of the initial concentrations of the various reactants in the model lead to predictions for the amount of tissue factor and phospholipid that is required to maintain thrombin production in the follicle, as well as to the conclusion that tissue factor pathway inhibitor has little effect on the time that thrombin generation is sustained. Numerical experiments to determine the effect of factor V, which is at a much reduced level in follicular fluid compared to plasma, and thrombomodulin, illustrate the importance for further experimental work to determine values for several parameters that have yet to be reported in the literature.      </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#_512416">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Schubert</vCard:Family>
+                  <vCard:Given>Michael</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>schubert@ebi.ac.uk</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>EBI</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2011-05-12T12:58:49Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2012-04-20T21:55:14Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1105090001"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/BIOMD0000000332"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/16838084"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+          <bqbiol:isVersionOf>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/obo.go/GO:0007596"/>
+            </rdf:Bag>
+          </bqbiol:isVersionOf>
+          <bqbiol:occursIn>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/taxonomy/2759"/>
+            </rdf:Bag>
+          </bqbiol:occursIn>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="substance" name="nano mole" metaid="metaid_0000254">
+        <listOfUnits>
+          <unit scale="-9" metaid="_908914" kind="mole"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="compartment" name="Cell" metaid="metaid_0000114" size="1"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="II_f" initialConcentration="1400" name="II_f" metaid="metaid_0000115" compartment="compartment"/>
+      <species id="II_l" initialConcentration="0" name="II_l" metaid="metaid_0000116" compartment="compartment"/>
+      <species id="mIIa_f" initialConcentration="0" name="mIIa_f" metaid="metaid_0000117" compartment="compartment"/>
+      <species id="mIIa_l" initialConcentration="0" name="mIIa_l" metaid="metaid_0000118" compartment="compartment"/>
+      <species id="V_f" initialConcentration="20" name="V_f" metaid="metaid_0000119" compartment="compartment"/>
+      <species id="V_l" initialConcentration="0" name="V_l" metaid="metaid_0000120" compartment="compartment"/>
+      <species id="Va_f" initialConcentration="0" name="Va_f" metaid="metaid_0000121" compartment="compartment"/>
+      <species id="Va_l" initialConcentration="0" name="Va_l" metaid="metaid_0000122" compartment="compartment"/>
+      <species id="VII_f" initialConcentration="10" name="VII_f" metaid="metaid_0000123" compartment="compartment"/>
+      <species id="VII_l" initialConcentration="0" name="VII_l" metaid="metaid_0000124" compartment="compartment"/>
+      <species id="VIIa_f" initialConcentration="0.1" name="VIIa_f" metaid="metaid_0000125" compartment="compartment"/>
+      <species id="VIIa_l" initialConcentration="0" name="VIIa_l" metaid="metaid_0000126" compartment="compartment"/>
+      <species id="VIII_f" initialConcentration="0.7" name="VIII_f" metaid="metaid_0000127" compartment="compartment"/>
+      <species id="VIII_l" initialConcentration="0" name="VIII_l" metaid="metaid_0000128" compartment="compartment"/>
+      <species id="VIIIa_f" initialConcentration="0" name="VIIIa_f" metaid="metaid_0000129" compartment="compartment"/>
+      <species id="VIIIa_l" initialConcentration="0" name="VIIIa_l" metaid="metaid_0000130" compartment="compartment"/>
+      <species id="IX_f" initialConcentration="90" name="IX_f" metaid="metaid_0000131" compartment="compartment"/>
+      <species id="IX_l" initialConcentration="0" name="IX_l" metaid="metaid_0000132" compartment="compartment"/>
+      <species id="IXa_f" initialConcentration="0" name="IXa_f" metaid="metaid_0000133" compartment="compartment"/>
+      <species id="IXa_l" initialConcentration="0" name="IXa_l" metaid="metaid_0000134" compartment="compartment"/>
+      <species id="X_f" initialConcentration="170" name="X_f" metaid="metaid_0000135" compartment="compartment"/>
+      <species id="X_l" initialConcentration="0" name="X_l" metaid="metaid_0000136" compartment="compartment"/>
+      <species id="Xa_f" initialConcentration="0" name="Xa_f" metaid="metaid_0000137" compartment="compartment"/>
+      <species id="Xa_l" initialConcentration="0" name="Xa_l" metaid="metaid_0000138" compartment="compartment"/>
+      <species id="APC_f" initialConcentration="0" name="APC_f" metaid="metaid_0000139" compartment="compartment"/>
+      <species id="APC_l" initialConcentration="0" name="APC_l" metaid="metaid_0000140" compartment="compartment"/>
+      <species id="PS_f" initialConcentration="300" name="PS_f" metaid="metaid_0000141" compartment="compartment"/>
+      <species id="PS_l" initialConcentration="0" name="PS_l" metaid="metaid_0000142" compartment="compartment"/>
+      <species id="VIIIai_f" initialConcentration="0" name="VIIIai_f" metaid="metaid_0000143" compartment="compartment"/>
+      <species id="VIIIai_l" initialConcentration="0" name="VIIIai_l" metaid="metaid_0000144" compartment="compartment"/>
+      <species id="Vai_f" initialConcentration="0" name="Vai_f" metaid="metaid_0000145" compartment="compartment"/>
+      <species id="Vai_l" initialConcentration="0" name="Vai_l" metaid="metaid_0000146" compartment="compartment"/>
+      <species id="PC_f" initialConcentration="60" name="PC_f" metaid="metaid_0000147" compartment="compartment"/>
+      <species id="PC_l" initialConcentration="0" name="PC_l" metaid="metaid_0000148" compartment="compartment"/>
+      <species id="TF_l" initialConcentration="0.005" name="TF_l" metaid="metaid_0000149" compartment="compartment"/>
+      <species id="TF_VIIa_l" initialConcentration="0" name="TF_VIIa_l" metaid="metaid_0000150" compartment="compartment"/>
+      <species id="TF_VII_l" initialConcentration="0" name="TF_VII_l" metaid="metaid_0000151" compartment="compartment"/>
+      <species id="TF_VIIa_IX_l" initialConcentration="0" name="TF_VIIa_IX_l" metaid="metaid_0000152" compartment="compartment"/>
+      <species id="TF_VIIa_IXa_l" initialConcentration="0" name="TF_VIIa_IXa_l" metaid="metaid_0000153" compartment="compartment"/>
+      <species id="TF_VIIa_X_l" initialConcentration="0" name="TF_VIIa_X_l" metaid="metaid_0000154" compartment="compartment"/>
+      <species id="TF_VIIa_Xa_l" initialConcentration="0" name="TF_VIIa_Xa_l" metaid="metaid_0000155" compartment="compartment"/>
+      <species id="TF_VII_Xa_l" initialConcentration="0" name="TF_VII_Xa_l" metaid="metaid_0000156" compartment="compartment"/>
+      <species id="IXa_VIIIa_l" initialConcentration="0" name="IXa_VIIIa_l" metaid="metaid_0000157" compartment="compartment"/>
+      <species id="Xa_Va_l" initialConcentration="0" name="Xa_Va_l" metaid="metaid_0000158" compartment="compartment"/>
+      <species id="IXa_VIIIa_X_l" initialConcentration="0" name="IXa_VIIIa_X_l" metaid="metaid_0000159" compartment="compartment"/>
+      <species id="V_Xa_l" initialConcentration="0" name="V_Xa_l" metaid="metaid_0000160" compartment="compartment"/>
+      <species id="VIII_Xa_l" initialConcentration="0" name="VIII_Xa_l" metaid="metaid_0000161" compartment="compartment"/>
+      <species id="IIa_f" initialConcentration="0" name="IIa_f" metaid="metaid_0000162" compartment="compartment"/>
+      <species id="V_IIa_l" initialConcentration="0" name="V_IIa_l" metaid="metaid_0000163" compartment="compartment"/>
+      <species id="VIII_IIa_l" initialConcentration="0" name="VIII_IIa_l" metaid="metaid_0000164" compartment="compartment"/>
+      <species id="Xa_Va_II_l" initialConcentration="0" name="Xa_Va_II_l" metaid="metaid_0000165" compartment="compartment"/>
+      <species id="Xa_Va_mIIa_l" initialConcentration="0" name="Xa_Va_mIIa_l" metaid="metaid_0000166" compartment="compartment"/>
+      <species id="XI_f" initialConcentration="30" name="XI_f" metaid="metaid_0000167" compartment="compartment"/>
+      <species id="XI_IIa_l" initialConcentration="0" name="XI_IIa_l" metaid="metaid_0000168" compartment="compartment"/>
+      <species id="XIa_l" initialConcentration="0" name="XIa_l" metaid="metaid_0000169" compartment="compartment"/>
+      <species id="APC_PS_l" initialConcentration="0" name="APC_PS_l" metaid="metaid_0000170" compartment="compartment"/>
+      <species id="APC_PS_VIIIa_l" initialConcentration="0" name="APC_PS_VIIIa_l" metaid="metaid_0000171" compartment="compartment"/>
+      <species id="TFPI_f" initialConcentration="2.5" name="TFPI_f" metaid="metaid_0000172" compartment="compartment"/>
+      <species id="AT_f" initialConcentration="3400" name="AT_f" metaid="metaid_0000173" compartment="compartment"/>
+      <species id="IIa_AT_f" initialConcentration="0" name="IIa_AT_f" metaid="metaid_0000174" compartment="compartment"/>
+      <species id="TFPI_Xa_l" initialConcentration="0" name="TFPI_Xa_l" metaid="metaid_0000175" compartment="compartment"/>
+      <species id="TFPI_Xa_TF_VIIa_l" initialConcentration="0" name="TFPI_Xa_TF_VIIa_l" metaid="metaid_0000176" compartment="compartment"/>
+      <species id="APC_PS_Va_l" initialConcentration="0" name="APC_PS_Va_l" metaid="metaid_0000177" compartment="compartment"/>
+      <species id="IXa_AT_f" initialConcentration="0" name="IXa_AT_f" metaid="metaid_0000178" compartment="compartment"/>
+      <species id="Xa_AT_f" initialConcentration="0" name="Xa_AT_f" metaid="metaid_0000179" compartment="compartment"/>
+      <species id="VII_Xa_l" initialConcentration="0" name="VII_Xa_l" metaid="metaid_0000180" compartment="compartment"/>
+      <species id="V_mIIa_l" initialConcentration="0" name="V_mIIa_l" metaid="metaid_0000181" compartment="compartment"/>
+      <species id="VIII_mIIa_l" initialConcentration="0" name="VIII_mIIa_l" metaid="metaid_0000182" compartment="compartment"/>
+      <species id="TM_l" initialConcentration="1" name="TM_l" metaid="metaid_0000183" compartment="compartment"/>
+      <species id="IIa_TM_l" initialConcentration="0" name="IIa_TM_l" metaid="metaid_0000184" compartment="compartment"/>
+      <species id="IIa_TM_PC_l" initialConcentration="0" name="IIa_TM_PC_l" metaid="metaid_0000185" compartment="compartment"/>
+      <species id="mIIa_AT_l" initialConcentration="0" name="mIIa_AT_l" metaid="metaid_0000186" compartment="compartment"/>
+      <species id="XIa_IX_l" initialConcentration="0" name="XIa_IX_l" metaid="metaid_0000187" compartment="compartment"/>
+      <species id="LIPID" initialConcentration="170000" name="LIPID" metaid="metaid_0000004" compartment="compartment"/>
+      <species id="alpha2M_l" initialConcentration="2600" name="alpha2M_l" metaid="metaid_0000255" compartment="compartment"/>
+      <species id="alpha2M_IIa_l" initialConcentration="0" name="alpha2M_IIa_l" metaid="metaid_0000256" compartment="compartment"/>
+      <species id="alpha2M_Xa_l" initialConcentration="0" name="alpha2M_Xa_l" metaid="metaid_0000257" compartment="compartment"/>
+      <species id="AT_XIa_l" initialConcentration="0" name="AT_XIa_l" metaid="metaid_0000265" compartment="compartment"/>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="konII" metaid="metaid_0000003" value="0.0043"/>
+      <parameter id="nva" metaid="metaid_0000005" value="100"/>
+      <parameter id="koffII" metaid="metaid_0000006" value="1"/>
+      <parameter id="konmIIa" metaid="metaid_0000007" value="0.05"/>
+      <parameter id="koffmIIa" metaid="metaid_0000008" value="0.475"/>
+      <parameter id="konV" metaid="metaid_0000009" value="0.05"/>
+      <parameter id="koffV" metaid="metaid_0000010" value="0.145"/>
+      <parameter id="konVa" metaid="metaid_0000011" value="0.057"/>
+      <parameter id="koffVa" metaid="metaid_0000012" value="0.17"/>
+      <parameter id="konVII" metaid="metaid_0000013" value="0.05"/>
+      <parameter id="koffVII" metaid="metaid_0000014" value="0.66"/>
+      <parameter id="konVIIa" metaid="metaid_0000015" value="0.05"/>
+      <parameter id="koffVIIa" metaid="metaid_0000016" value="0.227"/>
+      <parameter id="konVIII" metaid="metaid_0000017" value="0.05"/>
+      <parameter id="koffVIII" metaid="metaid_0000018" value="0.1"/>
+      <parameter id="konVIIIa" metaid="metaid_0000019" value="0.05"/>
+      <parameter id="koffVIIIa" metaid="metaid_0000020" value="0.335"/>
+      <parameter id="konIX" metaid="metaid_0000021" value="0.05"/>
+      <parameter id="koffIX" metaid="metaid_0000022" value="0.115"/>
+      <parameter id="konIXa" metaid="metaid_0000023" value="0.05"/>
+      <parameter id="koffIXa" metaid="metaid_0000024" value="0.115"/>
+      <parameter id="konX" metaid="metaid_0000025" value="0.01"/>
+      <parameter id="koffX" metaid="metaid_0000026" value="1.9"/>
+      <parameter id="konXa" metaid="metaid_0000027" value="0.029"/>
+      <parameter id="koffXa" metaid="metaid_0000028" value="3.3"/>
+      <parameter id="konAPC" metaid="metaid_0000029" value="0.05"/>
+      <parameter id="koffAPC" metaid="metaid_0000030" value="3.5"/>
+      <parameter id="konPS" metaid="metaid_0000031" value="0.05"/>
+      <parameter id="koffPS" metaid="metaid_0000032" value="0.2"/>
+      <parameter id="konVIIIai" metaid="metaid_0000033" value="0.05"/>
+      <parameter id="koffVIIIai" metaid="metaid_0000034" value="0.335"/>
+      <parameter id="konVai" metaid="metaid_0000035" value="0.057"/>
+      <parameter id="koffVai" metaid="metaid_0000036" value="0.17"/>
+      <parameter id="konPC" metaid="metaid_0000037" value="0.05"/>
+      <parameter id="koffPC" metaid="metaid_0000038" value="11.5"/>
+      <parameter id="k1" metaid="metaid_0000039" value="0.5"/>
+      <parameter id="k2" metaid="metaid_0000040" value="0.005"/>
+      <parameter id="k3" metaid="metaid_0000041" value="0.005"/>
+      <parameter id="k4" metaid="metaid_0000042" value="0.005"/>
+      <parameter id="k5" metaid="metaid_0000043" value="0.01"/>
+      <parameter id="k6" metaid="metaid_0000044" value="2.09"/>
+      <parameter id="k7" metaid="metaid_0000045" value="0.34"/>
+      <parameter id="k8" metaid="metaid_0000046" value="0.1"/>
+      <parameter id="k9" metaid="metaid_0000047" value="32.5"/>
+      <parameter id="k10" metaid="metaid_0000048" value="1.5"/>
+      <parameter id="k11" metaid="metaid_0000050" value="0.05"/>
+      <parameter id="k12" metaid="metaid_0000051" value="44.8"/>
+      <parameter id="k13" metaid="metaid_0000052" value="15.2"/>
+      <parameter id="k14" metaid="metaid_0000053" value="0.1"/>
+      <parameter id="k15" metaid="metaid_0000054" value="0.2"/>
+      <parameter id="k16" metaid="metaid_0000055" value="1"/>
+      <parameter id="k17" metaid="metaid_0000056" value="1"/>
+      <parameter id="k18" metaid="metaid_0000057" value="0.1"/>
+      <parameter id="k19" metaid="metaid_0000058" value="10.7"/>
+      <parameter id="k20" metaid="metaid_0000059" value="8.3"/>
+      <parameter id="k21" metaid="metaid_0000060" value="0.1"/>
+      <parameter id="k22" metaid="metaid_0000061" value="1"/>
+      <parameter id="k23" metaid="metaid_0000062" value="0.043"/>
+      <parameter id="k24" metaid="metaid_0000063" value="0.1"/>
+      <parameter id="k25" metaid="metaid_0000064" value="2.1"/>
+      <parameter id="k26" metaid="metaid_0000065" value="0.023"/>
+      <parameter id="k27" metaid="metaid_0000066" value="0.1"/>
+      <parameter id="k28" metaid="metaid_0000067" value="6.94"/>
+      <parameter id="k29" metaid="metaid_0000068" value="0.23"/>
+      <parameter id="k30" metaid="metaid_0000069" value="0.1"/>
+      <parameter id="k31" metaid="metaid_0000070" value="13.8"/>
+      <parameter id="k32" metaid="metaid_0000071" value="0.9"/>
+      <parameter id="k33" metaid="metaid_0000072" value="0.1"/>
+      <parameter id="k34" metaid="metaid_0000073" value="100"/>
+      <parameter id="k35" metaid="metaid_0000074" value="0.1"/>
+      <parameter id="k36" metaid="metaid_0000075" value="66"/>
+      <parameter id="k37" metaid="metaid_0000076" value="13"/>
+      <parameter id="k38" metaid="metaid_0000077" value="15"/>
+      <parameter id="k39" metaid="metaid_0000078" value="0.05"/>
+      <parameter id="k40" metaid="metaid_0000079" value="44.8"/>
+      <parameter id="k41" metaid="metaid_0000080" value="15.2"/>
+      <parameter id="k42" metaid="metaid_0000081" value="0.1"/>
+      <parameter id="k43" metaid="metaid_0000082" value="10"/>
+      <parameter id="k44" metaid="metaid_0000083" value="1.43"/>
+      <parameter id="k45" metaid="metaid_0000084" value="0.1"/>
+      <parameter id="k46" metaid="metaid_0000085" value="1.6"/>
+      <parameter id="k47" metaid="metaid_0000086" value="0.4"/>
+      <parameter id="k48" metaid="metaid_0000087" value="0.1"/>
+      <parameter id="k49" metaid="metaid_0000088" value="1.6"/>
+      <parameter id="k50" metaid="metaid_0000089" value="0.4"/>
+      <parameter id="k51" metaid="metaid_0000090" value="0.016"/>
+      <parameter id="k52" metaid="metaid_0000091" value="0.00033"/>
+      <parameter id="k53" metaid="metaid_0000092" value="0.01"/>
+      <parameter id="k54" metaid="metaid_0000093" value="0.0011"/>
+      <parameter id="k55" metaid="metaid_0000094" value="4.9E-7"/>
+      <parameter id="k56" metaid="metaid_0000095" value="2.3E-6"/>
+      <parameter id="k57" metaid="metaid_0000096" value="6.83E-6"/>
+      <parameter id="k58" metaid="metaid_0000097" value="0.1"/>
+      <parameter id="k59" metaid="metaid_0000098" value="6.94"/>
+      <parameter id="k60" metaid="metaid_0000099" value="1.035"/>
+      <parameter id="k61" metaid="metaid_0000100" value="0.1"/>
+      <parameter id="k62" metaid="metaid_0000101" value="13.8"/>
+      <parameter id="k63" metaid="metaid_0000102" value="0.9"/>
+      <parameter id="k64" metaid="metaid_0000103" value="1"/>
+      <parameter id="k65" metaid="metaid_0000104" value="0.5"/>
+      <parameter id="k66" metaid="metaid_0000105" value="0.1"/>
+      <parameter id="k67" metaid="metaid_0000106" value="6.4"/>
+      <parameter id="k68" metaid="metaid_0000107" value="3.6"/>
+      <parameter id="k69" metaid="metaid_0000108" value="6.83E-6"/>
+      <parameter id="k70" metaid="metaid_0000109" value="0.1"/>
+      <parameter id="k71" metaid="metaid_0000110" value="0.5"/>
+      <parameter id="k72" metaid="metaid_0000111" value="0.01"/>
+      <parameter id="k73" metaid="metaid_0000112" value="1.417"/>
+      <parameter id="k74" metaid="metaid_0000113" value="0.183"/>
+      <parameter id="k75" metaid="metaid_0000049" value="1"/>
+      <parameter id="k76" metaid="metaid_0000258" value="2.3E-6"/>
+      <parameter id="k77" metaid="metaid_0000259" value="2.5E-6"/>
+      <parameter id="k78" metaid="metaid_0000260" value="1.4E-6"/>
+    </listOfParameters>
+    <listOfReactions>
+      <reaction id="LB1" name="Factor II lipid binding" metaid="metaid_0000188" reversible="false">
+        <listOfReactants>
+          <speciesReference species="II_f" metaid="_908926"/>
+          <speciesReference species="LIPID" metaid="_908938" stoichiometry="100"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="II_l" metaid="_908951"/>
+        </listOfProducts>
+        <kineticLaw metaid="_908963">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> konII </ci>
+                    <ci> II_f </ci>
+                    <ci> LIPID </ci>
+                  </apply>
+                  <ci> nva </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> koffII </ci>
+                  <ci> II_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="LB2" name="Factor mIIa lipid binding" metaid="metaid_0000189" reversible="false">
+        <listOfReactants>
+          <speciesReference species="mIIa_f" metaid="_908975"/>
+          <speciesReference species="LIPID" metaid="_908987" stoichiometry="100"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="mIIa_l" metaid="_908999"/>
+        </listOfProducts>
+        <kineticLaw metaid="_909011">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> konmIIa </ci>
+                    <ci> mIIa_f </ci>
+                    <ci> LIPID </ci>
+                  </apply>
+                  <ci> nva </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> koffmIIa </ci>
+                  <ci> mIIa_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="LB3" name="Factor V lipid binding" metaid="metaid_0000190" reversible="false">
+        <listOfReactants>
+          <speciesReference species="V_f" metaid="_909023"/>
+          <speciesReference species="LIPID" metaid="_909035" stoichiometry="100"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="V_l" metaid="_909047"/>
+        </listOfProducts>
+        <kineticLaw metaid="_909059">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> konV </ci>
+                    <ci> V_f </ci>
+                    <ci> LIPID </ci>
+                  </apply>
+                  <ci> nva </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> koffV </ci>
+                  <ci> V_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="LB4" name="Factor Va lipid binding" metaid="metaid_0000191" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Va_f" metaid="_909071"/>
+          <speciesReference species="LIPID" metaid="_909083" stoichiometry="100"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Va_l" metaid="_909095"/>
+        </listOfProducts>
+        <kineticLaw metaid="_909107">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> konVa </ci>
+                    <ci> Va_f </ci>
+                    <ci> LIPID </ci>
+                  </apply>
+                  <ci> nva </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> koffVa </ci>
+                  <ci> Va_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="LB5" name="Factor VII lipid binding" metaid="metaid_0000192" reversible="false">
+        <listOfReactants>
+          <speciesReference species="VII_f" metaid="_909119"/>
+          <speciesReference species="LIPID" metaid="_909131" stoichiometry="100"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="VII_l" metaid="_909144"/>
+        </listOfProducts>
+        <kineticLaw metaid="_909156">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> konVII </ci>
+                    <ci> VII_f </ci>
+                    <ci> LIPID </ci>
+                  </apply>
+                  <ci> nva </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> koffVII </ci>
+                  <ci> VII_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="LB6" name="Factor VIIa lipid binding" metaid="metaid_0000193" reversible="false">
+        <listOfReactants>
+          <speciesReference species="VIIa_f" metaid="_909168"/>
+          <speciesReference species="LIPID" metaid="_909180" stoichiometry="100"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="VIIa_l" metaid="_909193"/>
+        </listOfProducts>
+        <kineticLaw metaid="_909205">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> konVIIa </ci>
+                    <ci> VIIa_f </ci>
+                    <ci> LIPID </ci>
+                  </apply>
+                  <ci> nva </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> koffVIIa </ci>
+                  <ci> VIIa_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="LB7" name="Factor VIII lipid binding" metaid="metaid_0000194" reversible="false">
+        <listOfReactants>
+          <speciesReference species="VIII_f" metaid="_909217"/>
+          <speciesReference species="LIPID" metaid="_909229" stoichiometry="100"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="VIII_l" metaid="_909241"/>
+        </listOfProducts>
+        <kineticLaw metaid="_909253">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> konVIII </ci>
+                    <ci> VIII_f </ci>
+                    <ci> LIPID </ci>
+                  </apply>
+                  <ci> nva </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> koffVIII </ci>
+                  <ci> VIII_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="LB8" name="Factor VIIIa lipid binding" metaid="metaid_0000195" reversible="false">
+        <listOfReactants>
+          <speciesReference species="VIIIa_f" metaid="_909265"/>
+          <speciesReference species="LIPID" metaid="_909277" stoichiometry="100"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="VIIIa_l" metaid="_909289"/>
+        </listOfProducts>
+        <kineticLaw metaid="_909301">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> konVIIIa </ci>
+                    <ci> VIIIa_f </ci>
+                    <ci> LIPID </ci>
+                  </apply>
+                  <ci> nva </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> koffVIIIa </ci>
+                  <ci> VIIIa_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="LB9" name="Factor IX lipid binding" metaid="metaid_0000196" reversible="false">
+        <listOfReactants>
+          <speciesReference species="IX_f" metaid="_909313"/>
+          <speciesReference species="LIPID" metaid="_909325" stoichiometry="100"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IX_l" metaid="_909337"/>
+        </listOfProducts>
+        <kineticLaw metaid="_909349">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> konIX </ci>
+                    <ci> IX_f </ci>
+                    <ci> LIPID </ci>
+                  </apply>
+                  <ci> nva </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> koffIX </ci>
+                  <ci> IX_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="LB10" name="Factor IXa lipid binding" metaid="metaid_0000197" reversible="false">
+        <listOfReactants>
+          <speciesReference species="IXa_f" metaid="_909361"/>
+          <speciesReference species="LIPID" metaid="_909373" stoichiometry="100"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IXa_l" metaid="_909385"/>
+        </listOfProducts>
+        <kineticLaw metaid="_909397">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> konIXa </ci>
+                    <ci> IXa_f </ci>
+                    <ci> LIPID </ci>
+                  </apply>
+                  <ci> nva </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> koffIXa </ci>
+                  <ci> IXa_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="LB11" name="Factor X lipid binding" metaid="metaid_0000198" reversible="false">
+        <listOfReactants>
+          <speciesReference species="X_f" metaid="_909409"/>
+          <speciesReference species="LIPID" metaid="_909422" stoichiometry="100"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="X_l" metaid="_909434"/>
+        </listOfProducts>
+        <kineticLaw metaid="_909446">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> konX </ci>
+                    <ci> X_f </ci>
+                    <ci> LIPID </ci>
+                  </apply>
+                  <ci> nva </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> koffX </ci>
+                  <ci> X_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="LB12" name="Factor Xa lipid binding" metaid="metaid_0000199" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Xa_f" metaid="_909458"/>
+          <speciesReference species="LIPID" metaid="_909470" stoichiometry="100"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Xa_l" metaid="_909482"/>
+        </listOfProducts>
+        <kineticLaw metaid="_909494">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> konXa </ci>
+                  <ci> Xa_f </ci>
+                  <ci> LIPID </ci>
+                </apply>
+                <ci> nva </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> koffXa </ci>
+                <ci> Xa_l </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="LB13" name="APC lipid binding" metaid="metaid_0000200" reversible="false">
+        <listOfReactants>
+          <speciesReference species="APC_f" metaid="_909506"/>
+          <speciesReference species="LIPID" metaid="_909518" stoichiometry="100"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="APC_l" metaid="_909530"/>
+        </listOfProducts>
+        <kineticLaw metaid="_909542">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> konAPC </ci>
+                    <ci> APC_f </ci>
+                    <ci> LIPID </ci>
+                  </apply>
+                  <ci> nva </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> koffAPC </ci>
+                  <ci> APC_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="LB14" name="PS lipid binding" metaid="metaid_0000201" reversible="false">
+        <listOfReactants>
+          <speciesReference species="PS_f" metaid="_909554"/>
+          <speciesReference species="LIPID" metaid="_909566" stoichiometry="100"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PS_l" metaid="_909578"/>
+        </listOfProducts>
+        <kineticLaw metaid="_909590">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> konPS </ci>
+                    <ci> PS_f </ci>
+                    <ci> LIPID </ci>
+                  </apply>
+                  <ci> nva </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> koffPS </ci>
+                  <ci> PS_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="LB15" name="Factor VIIIai lipid binding" metaid="metaid_0000202" reversible="false">
+        <listOfReactants>
+          <speciesReference species="VIIIai_f" metaid="_909603"/>
+          <speciesReference species="LIPID" metaid="_909615" stoichiometry="100"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="VIIIai_l" metaid="_909627"/>
+        </listOfProducts>
+        <kineticLaw metaid="_909639">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> konVIIIai </ci>
+                    <ci> VIIIai_f </ci>
+                    <ci> LIPID </ci>
+                  </apply>
+                  <ci> nva </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> koffVIIIai </ci>
+                  <ci> VIIIai_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="LB16" name="Factor Vai lipid binding" metaid="metaid_0000203" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Vai_f" metaid="_909652"/>
+          <speciesReference species="LIPID" metaid="_909664" stoichiometry="100"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Vai_l" metaid="_909676"/>
+        </listOfProducts>
+        <kineticLaw metaid="_909688">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> konVai </ci>
+                    <ci> Vai_f </ci>
+                    <ci> LIPID </ci>
+                  </apply>
+                  <ci> nva </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> koffVai </ci>
+                  <ci> Vai_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="LB17" name="PC lipid binding" metaid="metaid_0000204" reversible="false">
+        <listOfReactants>
+          <speciesReference species="PC_f" metaid="_909701"/>
+          <speciesReference species="LIPID" metaid="_909713" stoichiometry="100"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="PC_l" metaid="_909725"/>
+        </listOfProducts>
+        <kineticLaw metaid="_909737">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> konPC </ci>
+                    <ci> PC_f </ci>
+                    <ci> LIPID </ci>
+                  </apply>
+                  <ci> nva </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> koffPC </ci>
+                  <ci> PC_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R1" name="TF_VIIa binding" metaid="metaid_0000205" reversible="false">
+        <listOfReactants>
+          <speciesReference species="VIIa_l" metaid="_909749"/>
+          <speciesReference species="TF_l" metaid="_909762"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="TF_VIIa_l" metaid="_909775"/>
+        </listOfProducts>
+        <kineticLaw metaid="_909787">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k1 </ci>
+                  <ci> TF_l </ci>
+                  <ci> VIIa_l </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k2 </ci>
+                  <ci> TF_VIIa_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R2" name="TF_VII binding" metaid="metaid_0000206" reversible="false">
+        <listOfReactants>
+          <speciesReference species="VII_l" metaid="_909799"/>
+          <speciesReference species="TF_l" metaid="_909811"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="TF_VII_l" metaid="_909823"/>
+        </listOfProducts>
+        <kineticLaw metaid="_909835">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k3 </ci>
+                  <ci> TF_l </ci>
+                  <ci> VII_l </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k4 </ci>
+                  <ci> TF_VII_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R3" name="IX_TF_VIIa binding" metaid="metaid_0000207" reversible="false">
+        <listOfReactants>
+          <speciesReference species="IX_l" metaid="_909848"/>
+          <speciesReference species="TF_VIIa_l" metaid="_909860"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="TF_VIIa_IX_l" metaid="_909872"/>
+        </listOfProducts>
+        <kineticLaw metaid="_909884">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k5 </ci>
+                  <ci> TF_VIIa_l </ci>
+                  <ci> IX_l </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k6 </ci>
+                  <ci> TF_VIIa_IX_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R3b" name="Factor IX activation" metaid="metaid_0000208" reversible="false">
+        <listOfReactants>
+          <speciesReference species="TF_VIIa_IX_l" metaid="_909897"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="TF_VIIa_l" metaid="_909909"/>
+          <speciesReference species="IXa_l" metaid="_909921"/>
+        </listOfProducts>
+        <kineticLaw metaid="_909933">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k7 </ci>
+              <ci> TF_VIIa_IX_l </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R4" name="X_TF_VIIa complex formation" metaid="metaid_0000209" reversible="false">
+        <listOfReactants>
+          <speciesReference species="X_l" metaid="_909945"/>
+          <speciesReference species="TF_VIIa_l" metaid="_909958"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="TF_VIIa_X_l" metaid="_909970"/>
+        </listOfProducts>
+        <kineticLaw metaid="_909982">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k8 </ci>
+                  <ci> TF_VIIa_l </ci>
+                  <ci> X_l </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k9 </ci>
+                  <ci> TF_VIIa_X_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R4b" name="Factor X activation" metaid="metaid_0000210" reversible="false">
+        <listOfReactants>
+          <speciesReference species="TF_VIIa_X_l" metaid="_909994"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="TF_VIIa_Xa_l" metaid="_910006"/>
+        </listOfProducts>
+        <kineticLaw metaid="_910018">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k10 </ci>
+              <ci> TF_VIIa_X_l </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R4c" name="Factor Xa release" metaid="metaid_0000211" reversible="false">
+        <listOfReactants>
+          <speciesReference species="TF_VIIa_Xa_l" metaid="_910030"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Xa_l" metaid="_910042"/>
+          <speciesReference species="TF_VIIa_l" metaid="_910054"/>
+        </listOfProducts>
+        <kineticLaw metaid="_910066">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k75 </ci>
+              <ci> TF_VIIa_Xa_l </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R5" name="Xa_TF_VII binding" metaid="metaid_0000212" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Xa_l" metaid="_910078"/>
+          <speciesReference species="TF_VII_l" metaid="_910090"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="TF_VII_Xa_l" metaid="_910102"/>
+        </listOfProducts>
+        <kineticLaw metaid="_910114">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k11 </ci>
+                  <ci> TF_VII_l </ci>
+                  <ci> Xa_l </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k12 </ci>
+                  <ci> TF_VII_Xa_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R5b" name="TF_VII activation" metaid="metaid_0000213" reversible="false">
+        <listOfReactants>
+          <speciesReference species="TF_VII_Xa_l" metaid="_910126"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Xa_l" metaid="_910138"/>
+          <speciesReference species="TF_VIIa_l" metaid="_910150"/>
+        </listOfProducts>
+        <kineticLaw metaid="_910162">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k13 </ci>
+              <ci> TF_VII_Xa_l </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R6" name="VIIIa_IXa binding" metaid="metaid_0000214" reversible="false">
+        <listOfReactants>
+          <speciesReference species="VIIIa_l" metaid="_910174"/>
+          <speciesReference species="IXa_l" metaid="_910186"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IXa_VIIIa_l" metaid="_910198"/>
+        </listOfProducts>
+        <kineticLaw metaid="_910210">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k14 </ci>
+                  <ci> IXa_l </ci>
+                  <ci> VIIIa_l </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k15 </ci>
+                  <ci> IXa_VIIIa_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R7" name="Va_Xa binding" metaid="metaid_0000215" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Va_l" metaid="_910222"/>
+          <speciesReference species="Xa_l" metaid="_910234"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Xa_Va_l" metaid="_910246"/>
+        </listOfProducts>
+        <kineticLaw metaid="_910259">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k16 </ci>
+                  <ci> Xa_l </ci>
+                  <ci> Va_l </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k17 </ci>
+                  <ci> Xa_Va_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R8" name="X_IXa_VIIIa complex formation" metaid="metaid_0000216" reversible="false">
+        <listOfReactants>
+          <speciesReference species="X_l" metaid="_910272"/>
+          <speciesReference species="IXa_VIIIa_l" metaid="_910284"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IXa_VIIIa_X_l" metaid="_910297"/>
+        </listOfProducts>
+        <kineticLaw metaid="_910310">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k18 </ci>
+                  <ci> IXa_VIIIa_l </ci>
+                  <ci> X_l </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k19 </ci>
+                  <ci> IXa_VIIIa_X_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R8b" name="Factor X activation" metaid="metaid_0000217" reversible="false">
+        <listOfReactants>
+          <speciesReference species="IXa_VIIIa_X_l" metaid="_910322"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Xa_l" metaid="_910334"/>
+          <speciesReference species="IXa_VIIIa_l" metaid="_910346"/>
+        </listOfProducts>
+        <kineticLaw metaid="_910359">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k20 </ci>
+              <ci> IXa_VIIIa_X_l </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R9" name="V_Xa binding" metaid="metaid_0000218" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Xa_l" metaid="_910371"/>
+          <speciesReference species="V_l" metaid="_910383"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="V_Xa_l" metaid="_910395"/>
+        </listOfProducts>
+        <kineticLaw metaid="_910407">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k21 </ci>
+                  <ci> V_l </ci>
+                  <ci> Xa_l </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k22 </ci>
+                  <ci> V_Xa_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R9b" name="Factor V activation" metaid="metaid_0000219" reversible="false">
+        <listOfReactants>
+          <speciesReference species="V_Xa_l" metaid="_910419"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Xa_l" metaid="_910431"/>
+          <speciesReference species="Va_l" metaid="_910443"/>
+        </listOfProducts>
+        <kineticLaw metaid="_910455">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k23 </ci>
+              <ci> V_Xa_l </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R10" name="Xa_VIII binding" metaid="metaid_0000220" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Xa_l" metaid="_910467"/>
+          <speciesReference species="VIII_l" metaid="_910479"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="VIII_Xa_l" metaid="_910491"/>
+        </listOfProducts>
+        <kineticLaw metaid="_910503">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <minus/>
+              <apply>
+                <times/>
+                <ci> k24 </ci>
+                <ci> VIII_l </ci>
+                <ci> Xa_l </ci>
+              </apply>
+              <apply>
+                <times/>
+                <ci> k25 </ci>
+                <ci> VIII_Xa_l </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R10b" name="Factor VIII activation" metaid="metaid_0000221" reversible="false">
+        <listOfReactants>
+          <speciesReference species="VIII_Xa_l" metaid="_910515"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Xa_l" metaid="_910527"/>
+          <speciesReference species="VIIIa_l" metaid="_910539"/>
+        </listOfProducts>
+        <kineticLaw metaid="_910552">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k26 </ci>
+              <ci> VIII_Xa_l </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R11" metaid="metaid_0000222" reversible="false">
+        <listOfReactants>
+          <speciesReference species="IIa_f" metaid="_910564"/>
+          <speciesReference species="V_l" metaid="_910576"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="V_IIa_l" metaid="_910588"/>
+        </listOfProducts>
+        <kineticLaw metaid="_910600">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k27 </ci>
+                  <ci> V_l </ci>
+                  <ci> IIa_f </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k28 </ci>
+                  <ci> V_IIa_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R11b" metaid="metaid_0000223" reversible="false">
+        <listOfReactants>
+          <speciesReference species="V_IIa_l" metaid="_910612"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IIa_f" metaid="_910624"/>
+          <speciesReference species="Va_l" metaid="_910636"/>
+        </listOfProducts>
+        <kineticLaw metaid="_910648">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k29 </ci>
+              <ci> V_IIa_l </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R12" metaid="metaid_0000224" reversible="false">
+        <listOfReactants>
+          <speciesReference species="IIa_f" metaid="_910660"/>
+          <speciesReference species="VIII_l" metaid="_910673"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="VIII_IIa_l" metaid="_910685"/>
+        </listOfProducts>
+        <kineticLaw metaid="_910697">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k30 </ci>
+                  <ci> VIII_l </ci>
+                  <ci> IIa_f </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k31 </ci>
+                  <ci> VIII_IIa_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R12b" metaid="metaid_0000225" reversible="false">
+        <listOfReactants>
+          <speciesReference species="VIII_IIa_l" metaid="_910709"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IIa_f" metaid="_910722"/>
+          <speciesReference species="VIIIa_l" metaid="_910734"/>
+        </listOfProducts>
+        <kineticLaw metaid="_910746">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k32 </ci>
+              <ci> VIII_IIa_l </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R13" metaid="metaid_0000226" reversible="false">
+        <listOfReactants>
+          <speciesReference species="II_l" metaid="_910758"/>
+          <speciesReference species="Xa_Va_l" metaid="_910770"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Xa_Va_II_l" metaid="_910783"/>
+        </listOfProducts>
+        <kineticLaw metaid="_910795">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k33 </ci>
+                  <ci> Xa_Va_l </ci>
+                  <ci> II_l </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k34 </ci>
+                  <ci> Xa_Va_II_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R14" metaid="metaid_0000227" reversible="false">
+        <listOfReactants>
+          <speciesReference species="mIIa_l" metaid="_910807"/>
+          <speciesReference species="Xa_Va_l" metaid="_910819"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Xa_Va_mIIa_l" metaid="_910831"/>
+        </listOfProducts>
+        <kineticLaw metaid="_910843">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k35 </ci>
+                  <ci> Xa_Va_l </ci>
+                  <ci> mIIa_l </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k36 </ci>
+                  <ci> Xa_Va_mIIa_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R15" metaid="metaid_0000228" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Xa_Va_II_l" metaid="_910855"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Xa_Va_mIIa_l" metaid="_910867"/>
+        </listOfProducts>
+        <kineticLaw metaid="_910879">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k37 </ci>
+              <ci> Xa_Va_II_l </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R15b" metaid="metaid_0000229" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Xa_Va_mIIa_l" metaid="_910891"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IIa_f" metaid="_910903"/>
+          <speciesReference species="Xa_Va_l" metaid="_910915"/>
+          <speciesReference species="LIPID" metaid="_910927" stoichiometry="100"/>
+        </listOfProducts>
+        <kineticLaw metaid="_910939">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k38 </ci>
+              <ci> Xa_Va_mIIa_l </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R16" metaid="metaid_0000230" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Xa_l" metaid="_910951"/>
+          <speciesReference species="VII_l" metaid="_910963"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="VII_Xa_l" metaid="_910975"/>
+        </listOfProducts>
+        <kineticLaw metaid="_910987">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k39 </ci>
+                  <ci> VII_l </ci>
+                  <ci> Xa_l </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k40 </ci>
+                  <ci> VII_Xa_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R16b" metaid="metaid_0000231" reversible="false">
+        <listOfReactants>
+          <speciesReference species="VII_Xa_l" metaid="_910999"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Xa_l" metaid="_911011"/>
+          <speciesReference species="VIIa_l" metaid="_911023"/>
+        </listOfProducts>
+        <kineticLaw metaid="_911035">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k41 </ci>
+              <ci> VII_Xa_l </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R17" metaid="metaid_0000232" reversible="false">
+        <listOfReactants>
+          <speciesReference species="IIa_f" metaid="_911047"/>
+          <speciesReference species="XI_f" metaid="_911059"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="XI_IIa_l" metaid="_911071"/>
+        </listOfProducts>
+        <kineticLaw metaid="_911083">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k42 </ci>
+                  <ci> XI_f </ci>
+                  <ci> IIa_f </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k43 </ci>
+                  <ci> XI_IIa_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R17b" metaid="metaid_0000233" reversible="false">
+        <listOfReactants>
+          <speciesReference species="XI_IIa_l" metaid="_911095"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IIa_f" metaid="_911107"/>
+          <speciesReference species="XIa_l" metaid="_911119"/>
+        </listOfProducts>
+        <kineticLaw metaid="_911131">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k44 </ci>
+              <ci> XI_IIa_l </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R18" metaid="metaid_0000234" reversible="false">
+        <listOfReactants>
+          <speciesReference species="VIIIa_l" metaid="_911143"/>
+          <speciesReference species="APC_PS_l" metaid="_911156"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="APC_PS_VIIIa_l" metaid="_911168"/>
+        </listOfProducts>
+        <kineticLaw metaid="_911180">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k45 </ci>
+                  <ci> APC_PS_l </ci>
+                  <ci> VIIIa_l </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k46 </ci>
+                  <ci> APC_PS_VIIIa_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R18b" metaid="metaid_0000235" reversible="false">
+        <listOfReactants>
+          <speciesReference species="APC_PS_VIIIa_l" metaid="_911192"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="VIIIai_l" metaid="_911204"/>
+          <speciesReference species="APC_PS_l" metaid="_911216"/>
+        </listOfProducts>
+        <kineticLaw metaid="_911228">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k47 </ci>
+              <ci> APC_PS_VIIIa_l </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R19" metaid="metaid_0000236" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Va_l" metaid="_911240"/>
+          <speciesReference species="APC_PS_l" metaid="_911252"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="APC_PS_Va_l" metaid="_911264"/>
+        </listOfProducts>
+        <kineticLaw metaid="_911277">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k48 </ci>
+                  <ci> APC_PS_l </ci>
+                  <ci> Va_l </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k49 </ci>
+                  <ci> APC_PS_Va_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R19b" metaid="metaid_0000237" reversible="false">
+        <listOfReactants>
+          <speciesReference species="APC_PS_Va_l" metaid="_911289"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Vai_l" metaid="_911301"/>
+          <speciesReference species="APC_PS_l" metaid="_911314"/>
+        </listOfProducts>
+        <kineticLaw metaid="_911326">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k50 </ci>
+              <ci> APC_PS_Va_l </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R20" metaid="metaid_0000238" reversible="false">
+        <listOfReactants>
+          <speciesReference species="Xa_f" metaid="_911338"/>
+          <speciesReference species="TFPI_f" metaid="_911350"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="TFPI_Xa_l" metaid="_911363"/>
+        </listOfProducts>
+        <kineticLaw metaid="_911375">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k51 </ci>
+                  <ci> TFPI_f </ci>
+                  <ci> Xa_f </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k52 </ci>
+                  <ci> TFPI_Xa_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R21" metaid="metaid_0000239" reversible="false">
+        <listOfReactants>
+          <speciesReference species="TF_VIIa_l" metaid="_911387"/>
+          <speciesReference species="TFPI_Xa_l" metaid="_911399"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="TFPI_Xa_TF_VIIa_l" metaid="_911411"/>
+        </listOfProducts>
+        <kineticLaw metaid="_911423">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k53 </ci>
+                  <ci> TFPI_Xa_l </ci>
+                  <ci> TF_VIIa_l </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k54 </ci>
+                  <ci> TFPI_Xa_TF_VIIa_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R22" metaid="metaid_0000240" reversible="false">
+        <listOfReactants>
+          <speciesReference species="AT_f" metaid="_911435"/>
+          <speciesReference species="IXa_f" metaid="_911447"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IXa_AT_f" metaid="_911459"/>
+        </listOfProducts>
+        <kineticLaw metaid="_911471">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k55 </ci>
+              <ci> IXa_f </ci>
+              <ci> AT_f </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R23" metaid="metaid_0000241" reversible="false">
+        <listOfReactants>
+          <speciesReference species="AT_f" metaid="_911483"/>
+          <speciesReference species="Xa_f" metaid="_911495"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Xa_AT_f" metaid="_911507"/>
+        </listOfProducts>
+        <kineticLaw metaid="_911519">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k56 </ci>
+              <ci> Xa_f </ci>
+              <ci> AT_f </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R24" metaid="metaid_0000242" reversible="false">
+        <listOfReactants>
+          <speciesReference species="AT_f" metaid="_911531"/>
+          <speciesReference species="IIa_f" metaid="_911543"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IIa_AT_f" metaid="_911555"/>
+        </listOfProducts>
+        <kineticLaw metaid="_911568">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k57 </ci>
+              <ci> IIa_f </ci>
+              <ci> AT_f </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R25" metaid="metaid_0000243" reversible="false">
+        <listOfReactants>
+          <speciesReference species="mIIa_l" metaid="_911580"/>
+          <speciesReference species="V_l" metaid="_911592"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="V_mIIa_l" metaid="_911604"/>
+        </listOfProducts>
+        <kineticLaw metaid="_911616">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k58 </ci>
+                  <ci> V_l </ci>
+                  <ci> mIIa_l </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k59 </ci>
+                  <ci> V_mIIa_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R25b" metaid="metaid_0000244" reversible="false">
+        <listOfReactants>
+          <speciesReference species="V_mIIa_l" metaid="_911628"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="mIIa_l" metaid="_911640"/>
+          <speciesReference species="Va_l" metaid="_911652"/>
+        </listOfProducts>
+        <kineticLaw metaid="_911664">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k60 </ci>
+              <ci> V_mIIa_l </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R26" metaid="metaid_0000245" reversible="false">
+        <listOfReactants>
+          <speciesReference species="mIIa_l" metaid="_911677"/>
+          <speciesReference species="VIII_l" metaid="_911689"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="VIII_mIIa_l" metaid="_911701"/>
+        </listOfProducts>
+        <kineticLaw metaid="_911713">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k61 </ci>
+                  <ci> VIII_l </ci>
+                  <ci> mIIa_l </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k62 </ci>
+                  <ci> VIII_mIIa_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R26b" metaid="metaid_0000246" reversible="false">
+        <listOfReactants>
+          <speciesReference species="VIII_mIIa_l" metaid="_911725"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="mIIa_l" metaid="_911737"/>
+          <speciesReference species="VIIIa_l" metaid="_911749"/>
+        </listOfProducts>
+        <kineticLaw metaid="_911761">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k63 </ci>
+              <ci> VIII_mIIa_l </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R27" metaid="metaid_0000247" reversible="false">
+        <listOfReactants>
+          <speciesReference species="TM_l" metaid="_911773"/>
+          <speciesReference species="IIa_f" metaid="_911786"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IIa_TM_l" metaid="_911798"/>
+        </listOfProducts>
+        <kineticLaw metaid="_911810">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k64 </ci>
+                  <ci> IIa_f </ci>
+                  <ci> TM_l </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k65 </ci>
+                  <ci> IIa_TM_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R28" metaid="metaid_0000248" reversible="false">
+        <listOfReactants>
+          <speciesReference species="PC_l" metaid="_911823"/>
+          <speciesReference species="IIa_TM_l" metaid="_911835"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IIa_TM_PC_l" metaid="_911847"/>
+        </listOfProducts>
+        <kineticLaw metaid="_911860">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k66 </ci>
+                  <ci> IIa_TM_l </ci>
+                  <ci> PC_l </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k67 </ci>
+                  <ci> IIa_TM_PC_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R28b" metaid="metaid_0000249" reversible="false">
+        <listOfReactants>
+          <speciesReference species="IIa_TM_PC_l" metaid="_911872"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="APC_l" metaid="_911884"/>
+          <speciesReference species="IIa_TM_l" metaid="_911896"/>
+        </listOfProducts>
+        <kineticLaw metaid="_911908">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k68 </ci>
+              <ci> IIa_TM_PC_l </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R29" metaid="metaid_0000250" reversible="false">
+        <listOfReactants>
+          <speciesReference species="AT_f" metaid="_911920"/>
+          <speciesReference species="mIIa_f" metaid="_911932"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="mIIa_AT_l" metaid="_911944"/>
+        </listOfProducts>
+        <kineticLaw metaid="_911956">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k69 </ci>
+              <ci> mIIa_f </ci>
+              <ci> AT_f </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R30" metaid="metaid_0000251" reversible="false">
+        <listOfReactants>
+          <speciesReference species="PS_l" metaid="_911969"/>
+          <speciesReference species="APC_l" metaid="_911982"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="APC_PS_l" metaid="_911994"/>
+        </listOfProducts>
+        <kineticLaw metaid="_912006">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k70 </ci>
+                  <ci> APC_l </ci>
+                  <ci> PS_l </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k71 </ci>
+                  <ci> APC_PS_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R31" metaid="metaid_0000252" reversible="false">
+        <listOfReactants>
+          <speciesReference species="IX_l" metaid="_912018"/>
+          <speciesReference species="XIa_l" metaid="_912030"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="XIa_IX_l" metaid="_912042"/>
+        </listOfProducts>
+        <kineticLaw metaid="_912054">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <times/>
+                  <ci> k72 </ci>
+                  <ci> XIa_l </ci>
+                  <ci> IX_l </ci>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> k73 </ci>
+                  <ci> XIa_IX_l </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R31b" metaid="metaid_0000253" reversible="false">
+        <listOfReactants>
+          <speciesReference species="XIa_IX_l" metaid="_912066"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="IXa_l" metaid="_912078"/>
+          <speciesReference species="XIa_l" metaid="_912090"/>
+        </listOfProducts>
+        <kineticLaw metaid="_912102">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k74 </ci>
+              <ci> XIa_IX_l </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R32" name="R32" metaid="metaid_0000261" reversible="false">
+        <listOfReactants>
+          <speciesReference species="AT_f" metaid="_912114"/>
+          <speciesReference species="XIa_l" metaid="_912126"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="AT_XIa_l" metaid="_912139"/>
+        </listOfProducts>
+        <kineticLaw metaid="_912151">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k76 </ci>
+              <ci> AT_f </ci>
+              <ci> XIa_l </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R33" name="R33" metaid="metaid_0000262" reversible="false">
+        <listOfReactants>
+          <speciesReference species="alpha2M_l" metaid="_912163"/>
+          <speciesReference species="IIa_f" metaid="_912175"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="alpha2M_IIa_l" metaid="_912187"/>
+        </listOfProducts>
+        <kineticLaw metaid="_912199">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k77 </ci>
+              <ci> alpha2M_l </ci>
+              <ci> IIa_f </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="R34" name="R34" metaid="metaid_0000263" reversible="false">
+        <listOfReactants>
+          <speciesReference species="alpha2M_l" metaid="_912211"/>
+          <speciesReference species="Xa_f" metaid="_912223"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="alpha2M_Xa_l" metaid="_912235"/>
+        </listOfProducts>
+        <kineticLaw metaid="_912247">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <times/>
+              <ci> compartment </ci>
+              <ci> k78 </ci>
+              <ci> alpha2M_l </ci>
+              <ci> Xa_f </ci>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>

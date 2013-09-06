@@ -1,0 +1,720 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="_410970" version="4">
+  <model id="Schlosser2000_GlucoseInsulinFeedback_BetaCells" name="Schlosser2000_GlucoseInsulinFeedback_BetaCells" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>Modeling insulin kinetics: responses to a single oral glucose administration or
+ambulatory-fed conditions.</strong>
+                <br/>
+          Lenbury Y, Ruktamatakul S, Amornsamarnkul S.      <em>Biosystems</em>
+          2001 Jan;59(1):15-25      <a href="http://www.ncbi.nlm.nih.gov/pubmed/11226623">11226623</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          This paper presents a nonlinear mathematical model of the glucose-insulin
+feedback system, which has been extended to incorporate the beta-cells' function
+on maintaining and regulating plasma insulin level in man. Initially, a
+gastrointestinal absorption term for glucose is utilized to effect the glucose
+absorption by the intestine and the subsequent release of glucose into the
+bloodstream, taking place at a given initial rate and falling off exponentially
+with time. An analysis of the model is carried out by the singular perturbation
+technique in order to derive boundary conditions on the system parameters which
+identify, in particular, the existence of limit cycles in our model system
+consistent with the oscillatory patterns often observed in clinical data. We
+then utilize a sinusoidal term to incorporate the temporal absorption of glucose
+in order to study the responses in the patients under ambulatory-fed conditions.
+A numerical investigation is carried out in this case to construct a bifurcation
+diagram to identify the ranges of parametric values for which chaotic behavior
+can be expected, leading to interesting biological interpretations.      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://models.cellml.org/exposure/5f6f06b289ac55fabfd2e47d5c25119c">        <strong>Lenbury Y, Ruktamatakul S, Amornsamarnkul S. (2000) - version=1.0</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>Catherine Lloyd</strong>
+                <br/>
+          c.lloyd@auckland.ac.nz      <br/>
+          The University of Auckland      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Lloyd</vCard:Family>
+                  <vCard:Given>Catherine</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>c.lloyd@auckland.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:11:07Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:11:07Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:11:07Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:11:07Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1006230045"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/11035997"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="day" name="day" metaid="_410982">
+        <listOfUnits>
+          <unit metaid="_410994" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="U_L" name="U_L" metaid="_411006">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_411018" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="U_L_day" name="U_L_day" metaid="_411030">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_411042" kind="litre"/>
+          <unit exponent="-1" metaid="_411054" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="day2" name="day2" metaid="_411067">
+        <listOfUnits>
+          <unit exponent="2" metaid="_411080" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="ng_L" name="ng_L" metaid="_411092">
+        <listOfUnits>
+          <unit scale="-9" metaid="_411105" kind="gram"/>
+          <unit exponent="-1" metaid="_411116" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="ng_L_day" name="ng_L_day" metaid="_411129">
+        <listOfUnits>
+          <unit scale="-9" metaid="_411143" kind="gram"/>
+          <unit exponent="-1" metaid="_411155" kind="litre"/>
+          <unit exponent="-1" metaid="_411167" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="nmol_L_day" name="nmol_L_day" metaid="_411179">
+        <listOfUnits>
+          <unit scale="-9" metaid="_411191" kind="mole"/>
+          <unit exponent="-1" metaid="_411204" kind="litre"/>
+          <unit exponent="-1" metaid="_411216" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="ng_ml" name="ng_ml" metaid="_411228">
+        <listOfUnits>
+          <unit scale="-9" metaid="_411240" kind="gram"/>
+          <unit scale="-3" exponent="-1" metaid="_411252" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="nmol_L" name="nmol_L" metaid="_411264">
+        <listOfUnits>
+          <unit scale="-9" metaid="_411277" kind="mole"/>
+          <unit exponent="-1" metaid="_411290" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="pmol_ml" name="pmol_ml" metaid="_411302">
+        <listOfUnits>
+          <unit scale="-12" metaid="_411314" kind="mole"/>
+          <unit scale="-3" exponent="-1" metaid="_411326" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="L_ng" name="L_ng" metaid="_411338">
+        <listOfUnits>
+          <unit metaid="_411350" kind="litre"/>
+          <unit scale="-9" exponent="-1" metaid="_411362" kind="gram"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="L_nmol" name="L_nmol" metaid="_411374">
+        <listOfUnits>
+          <unit metaid="_411386" kind="litre"/>
+          <unit scale="-9" exponent="-1" metaid="_411398" kind="mole"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="L_ng2" name="L_ng2" metaid="_411410">
+        <listOfUnits>
+          <unit exponent="2" metaid="_411422" kind="litre"/>
+          <unit scale="-9" exponent="-2" metaid="_411434" kind="gram"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="microg" name="microg" metaid="_411446">
+        <listOfUnits>
+          <unit scale="-6" metaid="_411458" kind="gram"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="microg_l" name="microg_l" metaid="_411470">
+        <listOfUnits>
+          <unit scale="-6" metaid="_411482" kind="gram"/>
+          <unit exponent="-1" metaid="_411494" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="microg_day" name="microg_day" metaid="_411507">
+        <listOfUnits>
+          <unit scale="-6" metaid="_411519" kind="gram"/>
+          <unit exponent="-1" metaid="_411531" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="microg_l_day" name="microg_l_day" metaid="_411544">
+        <listOfUnits>
+          <unit scale="-6" metaid="_411556" kind="gram"/>
+          <unit exponent="-1" metaid="_411568" kind="litre"/>
+          <unit exponent="-1" metaid="_411580" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="first_order_rate_constant" name="first_order_rate_constant" metaid="_411592">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_411604" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="time" name="time" metaid="_411616">
+        <listOfUnits>
+          <unit metaid="_411628" multiplier="86400" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="COMpartment" metaid="_865460" units="litre" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="rel_LH_E2_P4_RP_LH" constant="false" name="rel_LH_E2_P4_RP_LH" metaid="_865494" units="microg_day"/>
+      <parameter id="RP_LH" constant="false" name="RP_LH" metaid="_865496" value="467" units="microg"/>
+      <parameter id="syn_LH_E2_P4" constant="false" name="syn_LH_E2_P4" metaid="_865498" units="microg_day"/>
+      <parameter id="V0_LH" name="V0_LH" metaid="_865500" value="1400" units="microg_day"/>
+      <parameter id="V1_LH" name="V1_LH" metaid="_865502" value="95900" units="microg_day"/>
+      <parameter id="h" name="h" metaid="_865504" value="8" units="dimensionless"/>
+      <parameter id="Km_LH" name="Km_LH" metaid="_865506" value="360" units="ng_L"/>
+      <parameter id="Ki_LHP" name="Ki_LHP" metaid="_865508" value="26" units="nmol_L"/>
+      <parameter id="kLH_rel" name="kLH_rel" metaid="_865510" value="3" units="first_order_rate_constant"/>
+      <parameter id="CLH_P" name="CLH_P" metaid="_865512" value="0.024" units="L_nmol"/>
+      <parameter id="CLH_E" name="CLH_E" metaid="_865514" value="0.008" units="L_ng"/>
+      <parameter id="LH" constant="false" name="LH" metaid="_865516" value="40" units="microg_l"/>
+      <parameter id="v_dis_LH" name="v_dis" metaid="_865518" value="2.5" units="litre"/>
+      <parameter id="clear_LH" constant="false" name="clear_LH" metaid="_865520" units="microg_l_day"/>
+      <parameter id="kLH_cl" name="kLH_cl" metaid="_865522" value="14" units="first_order_rate_constant"/>
+      <parameter id="rel_FSH_E2_P4_RP_FSH" constant="false" name="rel_FSH_E2_P4_RP_FSH" metaid="_865524" units="microg_day"/>
+      <parameter id="RP_FSH" constant="false" name="RP_FSH" metaid="_865526" value="0" units="microg"/>
+      <parameter id="syn_FSH_Ih" constant="false" name="syn_FSH_Ih" metaid="_865528" units="microg_day"/>
+      <parameter id="V_FSH" name="V_FSH" metaid="_865530" value="4400" units="microg_day"/>
+      <parameter id="Ki_FSH_Ih" name="Ki_FSH_Ih" metaid="_865532" value="1176.5" units="U_L"/>
+      <parameter id="kFSH_rel" name="kFSH_rel" metaid="_865534" value="45" units="first_order_rate_constant"/>
+      <parameter id="CFSH_P" name="CFSH_P" metaid="_865536" value="3" units="L_nmol"/>
+      <parameter id="CFSH_E" name="CFSH_E" metaid="_865538" value="0.005" units="L_ng2"/>
+      <parameter id="FSH" constant="false" name="FSH" metaid="_865540" value="150" units="microg_l"/>
+      <parameter id="v_dis_FSH" name="v_dis" metaid="_865542" value="2.5" units="litre"/>
+      <parameter id="clear_FSH" constant="false" name="clear_FSH" metaid="_865544" units="microg_l_day"/>
+      <parameter id="kFSH_cl" name="kFSH_cl" metaid="_865546" value="8.21" units="first_order_rate_constant"/>
+      <parameter id="E2" constant="false" name="E2" metaid="_865548" units="ng_L"/>
+      <parameter id="E2_dE" constant="false" name="E2_dE" metaid="_865550" units="ng_L"/>
+      <parameter id="dE" name="dE" metaid="_865552" value="0.42" units="day"/>
+      <parameter id="P4" constant="false" name="P4" metaid="_865554" units="nmol_L"/>
+      <parameter id="P4_dP" constant="false" name="P4_dP" metaid="_865556" units="nmol_L"/>
+      <parameter id="dP" name="dP" metaid="_865558" value="2.9" units="day"/>
+      <parameter id="Ih" constant="false" name="Ih" metaid="_865560" units="U_L"/>
+      <parameter id="Ih_dIh" constant="false" name="Ih_dIh" metaid="_865562" units="U_L"/>
+      <parameter id="dIh" name="dIh" metaid="_865564" value="2" units="day"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_865463" variable="RP_LH">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <ci> syn_LH_E2_P4 </ci>
+            <ci> rel_LH_E2_P4_RP_LH </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_865464" variable="LH">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <divide/>
+              <ci> rel_LH_E2_P4_RP_LH </ci>
+              <ci> v_dis_LH </ci>
+            </apply>
+            <ci> clear_LH </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_865466" variable="RP_FSH">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <ci> syn_FSH_Ih </ci>
+            <ci> rel_FSH_E2_P4_RP_FSH </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_865468" variable="FSH">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <apply>
+              <divide/>
+              <ci> rel_FSH_E2_P4_RP_FSH </ci>
+              <ci> v_dis_FSH </ci>
+            </apply>
+            <ci> clear_FSH </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="_865470" variable="clear_LH">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> kLH_cl </ci>
+            <ci> LH </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_865472" variable="rel_FSH_E2_P4_RP_FSH">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <times/>
+              <ci> kFSH_rel </ci>
+              <apply>
+                <plus/>
+                <cn> 1 </cn>
+                <apply>
+                  <times/>
+                  <ci> CFSH_P </ci>
+                  <ci> P4 </ci>
+                </apply>
+              </apply>
+              <ci> RP_FSH </ci>
+            </apply>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <times/>
+                <ci> CFSH_E </ci>
+                <apply>
+                  <power/>
+                  <ci> E2 </ci>
+                  <cn> 2 </cn>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_865474" variable="clear_FSH">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> kFSH_cl </ci>
+            <ci> FSH </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_865476" variable="E2">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <cn> 300 </cn>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <cn> 240 </cn>
+                  <apply>
+                    <power/>
+                    <apply>
+                      <plus/>
+                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                      <cn> 1 </cn>
+                    </apply>
+                    <cn> 2 </cn>
+                  </apply>
+                </apply>
+                <apply>
+                  <plus/>
+                  <cn> 3 </cn>
+                  <apply>
+                    <power/>
+                    <apply>
+                      <plus/>
+                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                      <cn> 1 </cn>
+                    </apply>
+                    <cn> 2 </cn>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <cn> 90 </cn>
+              <apply>
+                <exp/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <power/>
+                      <apply>
+                        <minus/>
+                        <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                        <cn> 8 </cn>
+                      </apply>
+                      <cn> 2 </cn>
+                    </apply>
+                    <cn> 10 </cn>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_865478" variable="E2_dE">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <cn> 300 </cn>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <cn> 240 </cn>
+                  <apply>
+                    <power/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <plus/>
+                        <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                        <cn> 1 </cn>
+                      </apply>
+                      <ci> dE </ci>
+                    </apply>
+                    <cn> 2 </cn>
+                  </apply>
+                </apply>
+                <apply>
+                  <plus/>
+                  <cn> 3 </cn>
+                  <apply>
+                    <power/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <plus/>
+                        <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                        <cn> 1 </cn>
+                      </apply>
+                      <ci> dE </ci>
+                    </apply>
+                    <cn> 2 </cn>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+            <apply>
+              <times/>
+              <cn> 90 </cn>
+              <apply>
+                <exp/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <power/>
+                      <apply>
+                        <minus/>
+                        <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                        <apply>
+                          <plus/>
+                          <ci> dE </ci>
+                          <cn> 8 </cn>
+                        </apply>
+                      </apply>
+                      <cn> 2 </cn>
+                    </apply>
+                    <cn> 10 </cn>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_865480" variable="P4">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <cn> 52 </cn>
+            <apply>
+              <exp/>
+              <apply>
+                <minus/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <power/>
+                    <apply>
+                      <minus/>
+                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                      <cn> 7 </cn>
+                    </apply>
+                    <cn> 2 </cn>
+                  </apply>
+                  <cn> 18 </cn>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_865482" variable="rel_LH_E2_P4_RP_LH">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <times/>
+              <ci> kLH_rel </ci>
+              <apply>
+                <plus/>
+                <cn> 1 </cn>
+                <apply>
+                  <times/>
+                  <ci> CLH_P </ci>
+                  <ci> P4 </ci>
+                </apply>
+              </apply>
+              <ci> RP_LH </ci>
+            </apply>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <times/>
+                <ci> CLH_E </ci>
+                <ci> E2 </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_865484" variable="P4_dP">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <cn> 52 </cn>
+            <apply>
+              <exp/>
+              <apply>
+                <minus/>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <power/>
+                    <apply>
+                      <minus/>
+                      <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                      <apply>
+                        <plus/>
+                        <ci> dP </ci>
+                        <cn> 7 </cn>
+                      </apply>
+                    </apply>
+                    <cn> 2 </cn>
+                  </apply>
+                  <cn> 18 </cn>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_865486" variable="syn_LH_E2_P4">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <plus/>
+              <ci> V0_LH </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> V1_LH </ci>
+                  <apply>
+                    <power/>
+                    <ci> E2_dE </ci>
+                    <ci> h </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <power/>
+                    <ci> Km_LH </ci>
+                    <ci> h </ci>
+                  </apply>
+                  <apply>
+                    <power/>
+                    <ci> E2_dE </ci>
+                    <ci> h </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <divide/>
+                <ci> P4_dP </ci>
+                <ci> Ki_LHP </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_865488" variable="Ih">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <cn> 300 </cn>
+            <apply>
+              <times/>
+              <cn> 1330 </cn>
+              <apply>
+                <exp/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <power/>
+                      <apply>
+                        <minus/>
+                        <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                        <cn> 7 </cn>
+                      </apply>
+                      <cn> 2 </cn>
+                    </apply>
+                    <cn> 19 </cn>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_865490" variable="Ih_dIh">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <cn> 300 </cn>
+            <apply>
+              <times/>
+              <cn> 1330 </cn>
+              <apply>
+                <exp/>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <divide/>
+                    <apply>
+                      <power/>
+                      <apply>
+                        <minus/>
+                        <csymbol encoding="text" definitionURL="http://www.sbml.org/sbml/symbols/time"> time </csymbol>
+                        <apply>
+                          <plus/>
+                          <cn> 7 </cn>
+                          <ci> dIh </ci>
+                        </apply>
+                      </apply>
+                      <cn> 2 </cn>
+                    </apply>
+                    <cn> 19 </cn>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_865492" variable="syn_FSH_Ih">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <ci> V_FSH </ci>
+            <apply>
+              <plus/>
+              <cn> 1 </cn>
+              <apply>
+                <divide/>
+                <ci> Ih_dIh </ci>
+                <ci> Ki_FSH_Ih </ci>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+  </model>
+</sbml>

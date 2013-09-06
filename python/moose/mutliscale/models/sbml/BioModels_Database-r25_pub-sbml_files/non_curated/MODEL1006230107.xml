@@ -1,0 +1,368 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="_686733" version="4">
+  <model id="Sneyd1995_CalciumWave_IP3diffusion" name="Sneyd1995_CalciumWave_IP3diffusion" metaid="metaid_0000002">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This a model from the article:      <br/>
+                <strong>Intercellular calcium waves mediated by diffusion of inositol trisphosphate: a
+two-dimensional model.</strong>
+                <br/>
+          Sneyd J, Wetton BT, Charles AC, Sanderson MJ.      <em>Am J Physiol</em>
+          1995 Jun;268(6 Pt 1):C1537-45      <a href="http://www.ncbi.nlm.nih.gov/pubmed/7611375">7611375</a>
+          ,      <br/>
+                <strong>Abstract:</strong>
+                <br/>
+          In response to mechanical stimulation of a single cell, airway epithelial cells
+in culture exhibit a wave of increased intracellular free Ca2+ concentration
+that spreads from cell to cell over a limited distance through the culture. We
+present a detailed analysis of the intercellular wave in a two-dimensional sheet
+of cells. The model is based on the hypothesis that the wave is the result of
+diffusion of inositol trisphosphate (IP3) from the stimulated cell. The
+two-dimensional model agrees well with experimental data and makes the following
+quantitative predictions: as the distance from the stimulated cells increases,
+1) the intercellular delay increases exponentially, 2) the intracellular wave
+speed decreases exponentially, and 3) the arrival time increases exponentially.
+Furthermore, 4) a proportion of the cells at the periphery of the response will
+exhibit waves of decreased amplitude, 5) the intercellular membrane permeability
+to IP3 must be approximately 2 microns/s or greater, and 6) the ratio of the
+maximum concentration of IP3 in the stimulated cell to the Km of the IP3
+receptor (with respect to IP3) must be approximately 300 or greater. These
+predictions constitute a rigorous test of the hypothesis that the intercellular
+Ca2+ waves are mediated by IP3 diffusion.      </p>
+            <p>This model was taken from the      <a href="http://www.cellml.org/models">CellML repository</a>
+          and automatically converted to SBML.      <br/>
+          The original model was:      <a href="http://models.cellml.org/exposure/88053fd5c8867b72ee23c1702097e377">        <strong>Sneyd J, Wetton BT, Charles AC, Sanderson MJ. (1995) - version=1.0</strong>
+                    </a>
+                <br/>
+          The original CellML model was created by:      <br/>
+                <strong>Wei Liu</strong>
+                <br/>
+          wliu052@aucklanduni.ac.nz      <br/>
+          The University of Auckland      <br/>
+                </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#metaid_0000002">
+          <dc:creator>
+            <rdf:Bag>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Liu</vCard:Family>
+                  <vCard:Given>Wei</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>wliu052@aucklanduni.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>The University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Liu</vCard:Family>
+                  <vCard:Given>Wei</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>wliu052@aucklanduni.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>The University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+              <rdf:li rdf:parseType="Resource">
+                <vCard:N rdf:parseType="Resource">
+                  <vCard:Family>Liu</vCard:Family>
+                  <vCard:Given>Wei</vCard:Given>
+                </vCard:N>
+                <vCard:EMAIL>wliu052@aucklanduni.ac.nz</vCard:EMAIL>
+                <vCard:ORG rdf:parseType="Resource">
+                  <vCard:Orgname>The University of Auckland</vCard:Orgname>
+                </vCard:ORG>
+              </rdf:li>
+            </rdf:Bag>
+          </dc:creator>
+          <dcterms:created rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:52:57Z</dcterms:W3CDTF>
+          </dcterms:created>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:52:57Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:52:57Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <dcterms:modified rdf:parseType="Resource">
+            <dcterms:W3CDTF>2010-06-25T13:52:57Z</dcterms:W3CDTF>
+          </dcterms:modified>
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1006230107"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/7611375"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfUnitDefinitions>
+      <unitDefinition id="micromolar" name="micromolar" metaid="_686745">
+        <listOfUnits>
+          <unit scale="-6" metaid="_686757" kind="mole"/>
+          <unit exponent="-1" metaid="_686769" kind="litre"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="flux" name="flux" metaid="_686781">
+        <listOfUnits>
+          <unit scale="-6" metaid="_686793" kind="mole"/>
+          <unit exponent="-1" metaid="_686805" kind="litre"/>
+          <unit exponent="-1" metaid="_686817" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_second" name="per_second" metaid="_686829">
+        <listOfUnits>
+          <unit exponent="-1" metaid="_686841" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="per_sec_square" name="per_sec_square" metaid="_686853">
+        <listOfUnits>
+          <unit exponent="-2" metaid="_686865" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="micromolar_per_second" name="micromolar_per_second" metaid="_686877">
+        <listOfUnits>
+          <unit scale="-6" metaid="_686889" kind="mole"/>
+          <unit exponent="-1" metaid="_686901" kind="litre"/>
+          <unit exponent="-1" metaid="_686913" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+      <unitDefinition id="micromolar_square_per_second" name="micromolar_square_per_second" metaid="_686925">
+        <listOfUnits>
+          <unit scale="-6" exponent="2" metaid="_686937" kind="mole"/>
+          <unit exponent="-2" metaid="_686949" kind="litre"/>
+          <unit exponent="-1" metaid="_686961" kind="second"/>
+        </listOfUnits>
+      </unitDefinition>
+    </listOfUnitDefinitions>
+    <listOfCompartments>
+      <compartment id="COMpartment" metaid="_375975" units="litre" size="1"/>
+    </listOfCompartments>
+    <listOfParameters>
+      <parameter id="time_enviroment" name="time" metaid="_375988"/>
+      <parameter id="P" constant="false" name="P" metaid="_375989" value="0"/>
+      <parameter id="V_p" name="V_p" metaid="_375990" value="0.08"/>
+      <parameter id="k_p" name="k_p" metaid="_375991" value="1"/>
+      <parameter id="IPR_3_flux" name="IPR_3_flux" metaid="_375993" value="0.72"/>
+      <parameter id="c" constant="false" name="c" metaid="_375994" value="0.3"/>
+      <parameter id="J_flux" constant="false" name="J_flux" metaid="_375995"/>
+      <parameter id="k_flux" name="k_flux" metaid="_375996" value="3"/>
+      <parameter id="b" name="b" metaid="_375998" value="0.11"/>
+      <parameter id="k_1" name="k_1" metaid="_375999" value="0.7"/>
+      <parameter id="J_pump" constant="false" name="J_pump" metaid="_376000"/>
+      <parameter id="gamma" name="gamma" metaid="_376001" value="1"/>
+      <parameter id="k_gamma" name="k_gamma" metaid="_376003" value="0.27"/>
+      <parameter id="J_leak" constant="false" name="J_leak" metaid="_376004"/>
+      <parameter id="beta" name="beta" metaid="_376005" value="0.15"/>
+      <parameter id="mu" constant="false" name="mu" metaid="_376006"/>
+      <parameter id="k_mu" name="k_mu" metaid="_376008" value="0.01"/>
+      <parameter id="h" constant="false" name="h" metaid="_376009" value="1"/>
+      <parameter id="k_2" name="k_2" metaid="_376010" value="0.7"/>
+      <parameter id="tau_h" name="tau_h" metaid="_376011" value="0.2"/>
+    </listOfParameters>
+    <listOfRules>
+      <rateRule metaid="_375979" variable="P">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <piecewise>
+            <piece>
+              <apply>
+                <minus/>
+                <ci> IPR_3_flux </ci>
+                <apply>
+                  <divide/>
+                  <apply>
+                    <times/>
+                    <ci> V_p </ci>
+                    <ci> P </ci>
+                    <ci> k_p </ci>
+                  </apply>
+                  <apply>
+                    <plus/>
+                    <ci> k_p </ci>
+                    <ci> P </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <leq/>
+                <ci> time_enviroment </ci>
+                <cn> 15 </cn>
+              </apply>
+            </piece>
+            <otherwise>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <apply>
+                    <minus/>
+                    <ci> V_p </ci>
+                  </apply>
+                  <ci> P </ci>
+                  <ci> k_p </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> k_p </ci>
+                  <ci> P </ci>
+                </apply>
+              </apply>
+            </otherwise>
+          </piecewise>
+        </math>
+      </rateRule>
+      <rateRule metaid="_375980" variable="c">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <plus/>
+            <apply>
+              <minus/>
+              <ci> J_flux </ci>
+              <ci> J_pump </ci>
+            </apply>
+            <ci> J_leak </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <rateRule metaid="_375981" variable="h">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <minus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <power/>
+                  <ci> k_2 </ci>
+                  <cn> 2 </cn>
+                </apply>
+                <apply>
+                  <plus/>
+                  <apply>
+                    <power/>
+                    <ci> k_2 </ci>
+                    <cn> 2 </cn>
+                  </apply>
+                  <apply>
+                    <power/>
+                    <ci> c </ci>
+                    <cn> 2 </cn>
+                  </apply>
+                </apply>
+              </apply>
+              <ci> h </ci>
+            </apply>
+            <ci> tau_h </ci>
+          </apply>
+        </math>
+      </rateRule>
+      <assignmentRule metaid="_375982" variable="J_flux">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> k_flux </ci>
+            <ci> mu </ci>
+            <ci> h </ci>
+            <apply>
+              <plus/>
+              <ci> b </ci>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <apply>
+                    <minus/>
+                    <cn> 1 </cn>
+                    <ci> b </ci>
+                  </apply>
+                  <ci> c </ci>
+                </apply>
+                <apply>
+                  <plus/>
+                  <ci> k_1 </ci>
+                  <ci> c </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_375984" variable="J_pump">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <times/>
+              <ci> gamma </ci>
+              <apply>
+                <power/>
+                <ci> c </ci>
+                <cn> 2 </cn>
+              </apply>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <power/>
+                <ci> k_gamma </ci>
+                <cn> 2 </cn>
+              </apply>
+              <apply>
+                <power/>
+                <ci> c </ci>
+                <cn> 2 </cn>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_375985" variable="J_leak">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <ci> beta </ci>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_375986" variable="mu">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <power/>
+              <ci> P </ci>
+              <cn> 3 </cn>
+            </apply>
+            <apply>
+              <plus/>
+              <apply>
+                <power/>
+                <ci> k_mu </ci>
+                <cn> 3 </cn>
+              </apply>
+              <apply>
+                <power/>
+                <ci> P </ci>
+                <cn> 3 </cn>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+  </model>
+</sbml>

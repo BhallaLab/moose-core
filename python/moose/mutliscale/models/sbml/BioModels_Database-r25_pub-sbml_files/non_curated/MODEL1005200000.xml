@@ -1,0 +1,3267 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<sbml xmlns="http://www.sbml.org/sbml/level2/version4" level="2" metaid="_190441" version="4">
+  <model name="Twycross2010_Auxin_Transport" metaid="_131759">
+    <notes>
+      <body xmlns="http://www.w3.org/1999/xhtml">
+        <p>This is a model with 20 cells - 20 cytplasms and 21 apoplasts - as described in the article:      <br/>
+                <b>Stochastic and deterministic multiscale models for systems biology: an auxin-transport case study.</b>
+                <br/>
+          by Twycross J, Band LR, Bennett MJ, King JR, Krasnogor N.      <em>BMC Syst Biol.</em>
+          2010 Mar 26;4:34. PubmedID:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20346112">20346112</a>
+          ; DOI:      <a href="http://dx.doi.org/10.1186/1752-0509-4-34">10.1186/1752-0509-4-34</a>
+                <br/>
+                <b>Abstract:</b>
+                <br/>
+          Background:      <br/>
+          Stochastic and asymptotic methods are powerful tools in developing multiscale systems biology models; however, little has been done in this context to compare the efficacy of these methods. The majority of current systems biology modelling research, including that of auxin transport, uses numerical simulations to study the behaviour of large systems of deterministic ordinary differential equations, with little consideration of alternative modelling frameworks.      <br/>
+          Results:      <br/>
+          In this case study, we solve an auxin-transport model using analytical methods, deterministic numerical simulations and stochastic numerical simulations. Although the three approaches in general predict the same behaviour, the approaches provide different information that we use to gain distinct insights into the modelled biological system. We show in particular that the analytical approach readily provides straightforward mathematical expressions for the concentrations and transport speeds, while the stochastic simulations naturally provide information on the variability of the system.      <br/>
+          Conclusions:      <br/>
+          Our study provides a constructive comparison which highlights the advantages and disadvantages of each of the considered modelling approaches. This will prove helpful to researchers when weighing up which modelling approach to select. In addition, the paper goes some way to bridging the gap between these approaches, which in the future we hope will lead to integrative hybrid models.      </p>
+            <p>This model originates from BioModels Database: A Database of Annotated Published Models (http://www.ebi.ac.uk/biomodels/). It is copyright (c) 2005-2011 The BioModels.net Team.      <br/>
+          To the extent possible under law, all copyright and related or neighbouring rights to this encoded model have been dedicated to the public domain worldwide. Please refer to      <a href="http://creativecommons.org/publicdomain/zero/1.0/" title="Creative Commons CC0">CC0 Public Domain Dedication</a>
+          for more information.      </p>
+            <p>In summary, you are entitled to use this encoded model in absolutely any manner you deem suitable, verbatim, or with modification, alone or embedded it in a larger context, redistribute it, commercially or not, in a restricted way or not..      <br/>
+                <br/>
+          To cite BioModels Database, please use:      <a href="http://www.ncbi.nlm.nih.gov/pubmed/20587024" target="_blank">Li C, Donizelli M, Rodriguez N, Dharuri H, Endler L, Chelliah V, Li L, He E, Henry A, Stefan MI, Snoep JL, Hucka M, Le Novère N, Laibe C (2010) BioModels Database: An enhanced, curated and annotated resource for published quantitative kinetic models. BMC Syst Biol., 4:92.</a>
+                </p>
+            </body>
+      
+    </notes>
+    <annotation>
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:bqmodel="http://biomodels.net/model-qualifiers/" xmlns:vCard="http://www.w3.org/2001/vcard-rdf/3.0#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:bqbiol="http://biomodels.net/biology-qualifiers/">
+        <rdf:Description rdf:about="#_131759">
+          <bqmodel:is>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/biomodels.db/MODEL1005200000"/>
+            </rdf:Bag>
+          </bqmodel:is>
+          <bqmodel:isDescribedBy>
+            <rdf:Bag>
+              <rdf:li rdf:resource="http://identifiers.org/pubmed/20346112"/>
+            </rdf:Bag>
+          </bqmodel:isDescribedBy>
+        </rdf:Description>
+      </rdf:RDF>
+    </annotation>
+      <listOfCompartments>
+      <compartment id="compartment" name="compartment" metaid="_131762" size="1"/>
+    </listOfCompartments>
+    <listOfSpecies>
+      <species id="ext" initialConcentration="0" constant="true" name="ext" metaid="_131763" boundaryCondition="true" compartment="compartment"/>
+      <species id="S" initialConcentration="1" name="S" metaid="_131764" compartment="compartment"/>
+      <species id="a0" initialConcentration="0" name="a0" metaid="_131765" compartment="compartment"/>
+      <species id="c1" initialConcentration="0" name="c1" metaid="_131766" compartment="compartment"/>
+      <species id="a1" initialConcentration="0" name="a1" metaid="_131769" compartment="compartment"/>
+      <species id="c2" initialConcentration="0" name="c2" metaid="_131772" compartment="compartment"/>
+      <species id="a2" initialConcentration="0" name="a2" metaid="_131773" compartment="compartment"/>
+      <species id="c3" initialConcentration="0" name="c3" metaid="_131776" compartment="compartment"/>
+      <species id="a3" initialConcentration="0" name="a3" metaid="_131779" compartment="compartment"/>
+      <species id="c4" initialConcentration="0" name="c4" metaid="_131782" compartment="compartment"/>
+      <species id="a4" initialConcentration="0" name="a4" metaid="_131785" compartment="compartment"/>
+      <species id="c5" initialConcentration="0" name="c5" metaid="_131788" compartment="compartment"/>
+      <species id="a5" initialConcentration="0" name="a5" metaid="_131791" compartment="compartment"/>
+      <species id="c6" initialConcentration="0" name="c6" metaid="_131794" compartment="compartment"/>
+      <species id="a6" initialConcentration="0" name="a6" metaid="_131797" compartment="compartment"/>
+      <species id="c7" initialConcentration="0" name="c7" metaid="_131800" compartment="compartment"/>
+      <species id="a7" initialConcentration="0" name="a7" metaid="_131803" compartment="compartment"/>
+      <species id="c8" initialConcentration="0" name="c8" metaid="_131806" compartment="compartment"/>
+      <species id="a8" initialConcentration="0" name="a8" metaid="_131809" compartment="compartment"/>
+      <species id="c9" initialConcentration="0" name="c9" metaid="_131812" compartment="compartment"/>
+      <species id="a9" initialConcentration="0" name="a9" metaid="_131815" compartment="compartment"/>
+      <species id="c10" initialConcentration="0" name="c10" metaid="_131818" compartment="compartment"/>
+      <species id="a10" initialConcentration="0" name="a10" metaid="_131821" compartment="compartment"/>
+      <species id="c11" initialConcentration="0" name="c11" metaid="_131824" compartment="compartment"/>
+      <species id="a11" initialConcentration="0" name="a11" metaid="_131827" compartment="compartment"/>
+      <species id="c12" initialConcentration="0" name="c12" metaid="_131830" compartment="compartment"/>
+      <species id="a12" initialConcentration="0" name="a12" metaid="_131833" compartment="compartment"/>
+      <species id="c13" initialConcentration="0" name="c13" metaid="_131836" compartment="compartment"/>
+      <species id="a13" initialConcentration="0" name="a13" metaid="_131839" compartment="compartment"/>
+      <species id="c14" initialConcentration="0" name="c14" metaid="_131842" compartment="compartment"/>
+      <species id="a14" initialConcentration="0" name="a14" metaid="_131845" compartment="compartment"/>
+      <species id="c15" initialConcentration="0" name="c15" metaid="_131848" compartment="compartment"/>
+      <species id="a15" initialConcentration="0" name="a15" metaid="_131851" compartment="compartment"/>
+      <species id="c16" initialConcentration="0" name="c16" metaid="_131854" compartment="compartment"/>
+      <species id="a16" initialConcentration="0" name="a16" metaid="_131857" compartment="compartment"/>
+      <species id="c17" initialConcentration="0" name="c17" metaid="_131860" compartment="compartment"/>
+      <species id="a17" initialConcentration="0" name="a17" metaid="_131863" compartment="compartment"/>
+      <species id="c18" initialConcentration="0" name="c18" metaid="_131866" compartment="compartment"/>
+      <species id="a18" initialConcentration="0" name="a18" metaid="_131869" compartment="compartment"/>
+      <species id="c19" initialConcentration="0" name="c19" metaid="_131872" compartment="compartment"/>
+      <species id="a19" initialConcentration="0" name="a19" metaid="_131875" compartment="compartment"/>
+      <species id="c20" initialConcentration="0" name="c20" metaid="_131878" compartment="compartment"/>
+      <species id="a20" initialConcentration="0" name="a20" metaid="_131881" compartment="compartment"/>
+      <species id="Fvar" initialConcentration="0" name="Fvar" metaid="_131884" compartment="compartment"/>
+      <species id="Aprotc" name="Aprotc" metaid="_131887" boundaryCondition="true" compartment="compartment"/>
+      <species id="Aprota" name="Aprota" metaid="_131890" boundaryCondition="true" compartment="compartment"/>
+      <species id="Aaniona" name="Aaniona" metaid="_131893" boundaryCondition="true" compartment="compartment"/>
+      <species id="Aanionc" name="Aanionc" metaid="_131896" boundaryCondition="true" compartment="compartment"/>
+      <species id="Bc" name="Bc" metaid="_131899" boundaryCondition="true" compartment="compartment"/>
+      <species id="Ba" name="Ba" metaid="_131902" boundaryCondition="true" compartment="compartment"/>
+    </listOfSpecies>
+    <listOfParameters>
+      <parameter id="lcyt" name="lcyt" metaid="_132079" value="0.0001"/>
+      <parameter id="w" name="w" metaid="_132080" value="1E-5"/>
+      <parameter id="L" name="L" metaid="_132083" value="0.002"/>
+      <parameter id="Ls" name="Ls" metaid="_132086" value="0.002"/>
+      <parameter id="lambda" name="lambda" metaid="_132089" value="5E-7"/>
+      <parameter id="Pdiff" name="Pdiff" metaid="_132092" value="5.6E-7"/>
+      <parameter id="PPin" name="PPin" metaid="_132095" value="3.3E-6"/>
+      <parameter id="Dvar" name="Dvar" metaid="_132098" value="6.7E-10"/>
+      <parameter id="pHc" name="pHc" metaid="_132101" value="7.2"/>
+      <parameter id="pHa" name="pHa" metaid="_132104" value="5.3"/>
+      <parameter id="pK" name="pK" metaid="_132107" value="4.8"/>
+      <parameter id="V" name="V" metaid="_132110" value="-0.12"/>
+      <parameter id="T" name="T" metaid="_132113" value="295.15"/>
+      <parameter id="F" name="F" metaid="_132116" value="9.64853399E4"/>
+      <parameter id="R" name="R" metaid="_132119" value="8.314472"/>
+      <parameter id="subval" constant="false" name="subval" metaid="_132122"/>
+    </listOfParameters>
+    <listOfRules>
+      <assignmentRule metaid="_132064" variable="Aprotc">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn type="integer"> 1 </cn>
+            <apply>
+              <plus/>
+              <cn type="integer"> 1 </cn>
+              <apply>
+                <power/>
+                <cn type="integer"> 10 </cn>
+                <apply>
+                  <minus/>
+                  <ci> pHc </ci>
+                  <ci> pK </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_132065" variable="Aprota">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <cn type="integer"> 1 </cn>
+            <apply>
+              <plus/>
+              <cn type="integer"> 1 </cn>
+              <apply>
+                <power/>
+                <cn type="integer"> 10 </cn>
+                <apply>
+                  <minus/>
+                  <ci> pHa </ci>
+                  <ci> pK </ci>
+                </apply>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_132068" variable="Aaniona">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <cn type="integer"> 1 </cn>
+            <ci> Aprota </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_132071" variable="Aanionc">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <minus/>
+            <cn type="integer"> 1 </cn>
+            <ci> Aprotc </ci>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_132072" variable="subval">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <divide/>
+            <apply>
+              <times/>
+              <apply>
+                <minus/>
+                <ci> F </ci>
+              </apply>
+              <ci> V </ci>
+            </apply>
+            <apply>
+              <times/>
+              <ci> R </ci>
+              <ci> T </ci>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_132073" variable="Bc">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> Aanionc </ci>
+            <apply>
+              <divide/>
+              <apply>
+                <minus/>
+                <ci> subval </ci>
+              </apply>
+              <apply>
+                <minus/>
+                <apply>
+                  <power/>
+                  <cn> 2.71828 </cn>
+                  <apply>
+                    <minus/>
+                    <ci> subval </ci>
+                  </apply>
+                </apply>
+                <cn type="integer"> 1 </cn>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+      <assignmentRule metaid="_132076" variable="Ba">
+        <math xmlns="http://www.w3.org/1998/Math/MathML">        
+          <apply>
+            <times/>
+            <ci> Aaniona </ci>
+            <apply>
+              <divide/>
+              <ci> subval </ci>
+              <apply>
+                <minus/>
+                <apply>
+                  <power/>
+                  <cn> 2.71828 </cn>
+                  <ci> subval </ci>
+                </apply>
+                <cn type="integer"> 1 </cn>
+              </apply>
+            </apply>
+          </apply>
+        </math>
+      </assignmentRule>
+    </listOfRules>
+    <listOfReactions>
+      <reaction id="_1" name="v1" metaid="_131904">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_190453"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="S" metaid="_190465"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="a0" metaid="_190477"/>
+          <modifierSpeciesReference species="S" metaid="_190489"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_190501">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <cn type="integer"> 2 </cn>
+                <ci> Dvar </ci>
+                <apply>
+                  <minus/>
+                  <ci> a0 </ci>
+                  <ci> S </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> Ls </ci>
+                <apply>
+                  <plus/>
+                  <ci> Ls </ci>
+                  <ci> lambda </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_2" name="v2" metaid="_131907">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_190513"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="a0" metaid="_190525"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="S" metaid="_190537"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_190549"/>
+          <modifierSpeciesReference species="c1" metaid="_190561"/>
+          <modifierSpeciesReference species="Aprota" metaid="_190573"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_190585">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <cn type="integer"> 2 </cn>
+                  <ci> Dvar </ci>
+                  <apply>
+                    <minus/>
+                    <ci> S </ci>
+                    <ci> a0 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> lambda </ci>
+                  <apply>
+                    <plus/>
+                    <ci> Ls </ci>
+                    <ci> lambda </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <apply>
+                  <divide/>
+                  <ci> Pdiff </ci>
+                  <ci> lambda </ci>
+                </apply>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> Aprotc </ci>
+                    <ci> c1 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> Aprota </ci>
+                    <ci> a0 </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_3" name="v3" metaid="_131910">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_190597"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="c1" metaid="_190609"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Aprota" metaid="_190621"/>
+          <modifierSpeciesReference species="a0" metaid="_190633"/>
+          <modifierSpeciesReference species="a1" metaid="_190645"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_190657"/>
+          <modifierSpeciesReference species="Ba" metaid="_190669"/>
+          <modifierSpeciesReference species="Bc" metaid="_190681"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_190693">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Aprota </ci>
+                      <apply>
+                        <plus/>
+                        <ci> a0 </ci>
+                        <ci> a1 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> 2 </cn>
+                      <ci> Aprotc </ci>
+                      <ci> c1 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Ba </ci>
+                      <ci> a1 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c1 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_4" name="v4" metaid="_131913">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_190705"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="a1" metaid="_190717"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Ba" metaid="_190729"/>
+          <modifierSpeciesReference species="Bc" metaid="_190741"/>
+          <modifierSpeciesReference species="c1" metaid="_190753"/>
+          <modifierSpeciesReference species="Aprota" metaid="_190765"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_190777"/>
+          <modifierSpeciesReference species="c2" metaid="_190789"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_190801">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <times/>
+                        <ci> Ba </ci>
+                        <ci> a1 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c1 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> -2 </cn>
+                      <ci> Aprota </ci>
+                      <ci> a1 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Aprotc </ci>
+                      <apply>
+                        <plus/>
+                        <ci> c1 </ci>
+                        <ci> c2 </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_5" name="v5" metaid="_131916">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_190813"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="c2" metaid="_190825"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Aprota" metaid="_190837"/>
+          <modifierSpeciesReference species="a1" metaid="_190849"/>
+          <modifierSpeciesReference species="a2" metaid="_190861"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_190873"/>
+          <modifierSpeciesReference species="Ba" metaid="_190885"/>
+          <modifierSpeciesReference species="Bc" metaid="_190897"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_190909">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Aprota </ci>
+                      <apply>
+                        <plus/>
+                        <ci> a1 </ci>
+                        <ci> a2 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> 2 </cn>
+                      <ci> Aprotc </ci>
+                      <ci> c2 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Ba </ci>
+                      <ci> a2 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c2 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_6" name="v6" metaid="_131919">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_190921"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="a2" metaid="_190933"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Ba" metaid="_190945"/>
+          <modifierSpeciesReference species="Bc" metaid="_190957"/>
+          <modifierSpeciesReference species="c2" metaid="_190969"/>
+          <modifierSpeciesReference species="Aprota" metaid="_190981"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_190994"/>
+          <modifierSpeciesReference species="c3" metaid="_191006"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_191018">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <times/>
+                        <ci> Ba </ci>
+                        <ci> a2 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c2 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> -2 </cn>
+                      <ci> Aprota </ci>
+                      <ci> a2 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Aprotc </ci>
+                      <apply>
+                        <plus/>
+                        <ci> c2 </ci>
+                        <ci> c3 </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_7" name="v7" metaid="_131922">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_191030"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="c3" metaid="_191042"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Aprota" metaid="_191054"/>
+          <modifierSpeciesReference species="a2" metaid="_191066"/>
+          <modifierSpeciesReference species="a3" metaid="_191078"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_191090"/>
+          <modifierSpeciesReference species="Ba" metaid="_191102"/>
+          <modifierSpeciesReference species="Bc" metaid="_191114"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_191126">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Aprota </ci>
+                      <apply>
+                        <plus/>
+                        <ci> a2 </ci>
+                        <ci> a3 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> 2 </cn>
+                      <ci> Aprotc </ci>
+                      <ci> c3 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Ba </ci>
+                      <ci> a3 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c3 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_8" name="v8" metaid="_131925">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_191138"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="a3" metaid="_191150"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Ba" metaid="_191162"/>
+          <modifierSpeciesReference species="Bc" metaid="_191174"/>
+          <modifierSpeciesReference species="c3" metaid="_191186"/>
+          <modifierSpeciesReference species="Aprota" metaid="_191198"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_191211"/>
+          <modifierSpeciesReference species="c4" metaid="_191223"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_191236">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <times/>
+                        <ci> Ba </ci>
+                        <ci> a3 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c3 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> -2 </cn>
+                      <ci> Aprota </ci>
+                      <ci> a3 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Aprotc </ci>
+                      <apply>
+                        <plus/>
+                        <ci> c3 </ci>
+                        <ci> c4 </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_9" name="v9" metaid="_131928">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_191248"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="c4" metaid="_191260"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Aprota" metaid="_191272"/>
+          <modifierSpeciesReference species="a3" metaid="_191284"/>
+          <modifierSpeciesReference species="a4" metaid="_191296"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_191308"/>
+          <modifierSpeciesReference species="Ba" metaid="_191320"/>
+          <modifierSpeciesReference species="Bc" metaid="_191332"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_191344">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Aprota </ci>
+                      <apply>
+                        <plus/>
+                        <ci> a3 </ci>
+                        <ci> a4 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> 2 </cn>
+                      <ci> Aprotc </ci>
+                      <ci> c4 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Ba </ci>
+                      <ci> a4 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c4 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_10" name="v10" metaid="_131931">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_191356"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="a4" metaid="_191368"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Ba" metaid="_191380"/>
+          <modifierSpeciesReference species="Bc" metaid="_191392"/>
+          <modifierSpeciesReference species="c4" metaid="_191404"/>
+          <modifierSpeciesReference species="Aprota" metaid="_191416"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_191428"/>
+          <modifierSpeciesReference species="c5" metaid="_191440"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_191452">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <times/>
+                        <ci> Ba </ci>
+                        <ci> a4 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c4 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> -2 </cn>
+                      <ci> Aprota </ci>
+                      <ci> a4 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Aprotc </ci>
+                      <apply>
+                        <plus/>
+                        <ci> c4 </ci>
+                        <ci> c5 </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_11" name="v11" metaid="_131934">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_191464"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="c5" metaid="_191477"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Aprota" metaid="_191489"/>
+          <modifierSpeciesReference species="a4" metaid="_191501"/>
+          <modifierSpeciesReference species="a5" metaid="_191513"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_191525"/>
+          <modifierSpeciesReference species="Ba" metaid="_191537"/>
+          <modifierSpeciesReference species="Bc" metaid="_191549"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_191561">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Aprota </ci>
+                      <apply>
+                        <plus/>
+                        <ci> a4 </ci>
+                        <ci> a5 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> 2 </cn>
+                      <ci> Aprotc </ci>
+                      <ci> c5 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Ba </ci>
+                      <ci> a5 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c5 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_12" name="v12" metaid="_131937">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_191573"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="a5" metaid="_191585"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Ba" metaid="_191597"/>
+          <modifierSpeciesReference species="Bc" metaid="_191610"/>
+          <modifierSpeciesReference species="c5" metaid="_191622"/>
+          <modifierSpeciesReference species="Aprota" metaid="_191635"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_191647"/>
+          <modifierSpeciesReference species="c6" metaid="_191659"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_191672">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <times/>
+                        <ci> Ba </ci>
+                        <ci> a5 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c5 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> -2 </cn>
+                      <ci> Aprota </ci>
+                      <ci> a5 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Aprotc </ci>
+                      <apply>
+                        <plus/>
+                        <ci> c5 </ci>
+                        <ci> c6 </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_13" name="v13" metaid="_131940">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_191684"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="c6" metaid="_191696"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Aprota" metaid="_191708"/>
+          <modifierSpeciesReference species="a5" metaid="_191720"/>
+          <modifierSpeciesReference species="a6" metaid="_191732"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_191744"/>
+          <modifierSpeciesReference species="Ba" metaid="_191757"/>
+          <modifierSpeciesReference species="Bc" metaid="_191769"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_191781">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Aprota </ci>
+                      <apply>
+                        <plus/>
+                        <ci> a5 </ci>
+                        <ci> a6 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> 2 </cn>
+                      <ci> Aprotc </ci>
+                      <ci> c6 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Ba </ci>
+                      <ci> a6 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c6 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_14" name="v14" metaid="_131943">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_191793"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="a6" metaid="_191805"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Ba" metaid="_191817"/>
+          <modifierSpeciesReference species="Bc" metaid="_191829"/>
+          <modifierSpeciesReference species="c6" metaid="_191841"/>
+          <modifierSpeciesReference species="Aprota" metaid="_191853"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_191865"/>
+          <modifierSpeciesReference species="c7" metaid="_191877"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_191889">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <times/>
+                        <ci> Ba </ci>
+                        <ci> a6 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c6 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> -2 </cn>
+                      <ci> Aprota </ci>
+                      <ci> a6 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Aprotc </ci>
+                      <apply>
+                        <plus/>
+                        <ci> c6 </ci>
+                        <ci> c7 </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_15" name="v15" metaid="_131946">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_191901"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="c7" metaid="_191913"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Aprota" metaid="_191925"/>
+          <modifierSpeciesReference species="a6" metaid="_191937"/>
+          <modifierSpeciesReference species="a7" metaid="_191949"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_191961"/>
+          <modifierSpeciesReference species="Ba" metaid="_191973"/>
+          <modifierSpeciesReference species="Bc" metaid="_191985"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_191997">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Aprota </ci>
+                      <apply>
+                        <plus/>
+                        <ci> a6 </ci>
+                        <ci> a7 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> 2 </cn>
+                      <ci> Aprotc </ci>
+                      <ci> c7 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Ba </ci>
+                      <ci> a7 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c7 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_16" name="v16" metaid="_131949">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_192009"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="a7" metaid="_192021"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Ba" metaid="_192033"/>
+          <modifierSpeciesReference species="Bc" metaid="_192045"/>
+          <modifierSpeciesReference species="c7" metaid="_192057"/>
+          <modifierSpeciesReference species="Aprota" metaid="_192069"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_192081"/>
+          <modifierSpeciesReference species="c8" metaid="_192093"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_192105">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <times/>
+                        <ci> Ba </ci>
+                        <ci> a7 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c7 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> -2 </cn>
+                      <ci> Aprota </ci>
+                      <ci> a7 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Aprotc </ci>
+                      <apply>
+                        <plus/>
+                        <ci> c7 </ci>
+                        <ci> c8 </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_17" name="v17" metaid="_131952">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_192117"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="c8" metaid="_192129"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Aprota" metaid="_192141"/>
+          <modifierSpeciesReference species="a7" metaid="_192153"/>
+          <modifierSpeciesReference species="a8" metaid="_192165"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_192178"/>
+          <modifierSpeciesReference species="Ba" metaid="_192190"/>
+          <modifierSpeciesReference species="Bc" metaid="_192202"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_192214">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Aprota </ci>
+                      <apply>
+                        <plus/>
+                        <ci> a7 </ci>
+                        <ci> a8 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> 2 </cn>
+                      <ci> Aprotc </ci>
+                      <ci> c8 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Ba </ci>
+                      <ci> a8 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c8 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_18" name="v18" metaid="_131955">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_192226"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="a8" metaid="_192238"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Ba" metaid="_192250"/>
+          <modifierSpeciesReference species="Bc" metaid="_192262"/>
+          <modifierSpeciesReference species="c8" metaid="_192274"/>
+          <modifierSpeciesReference species="Aprota" metaid="_192286"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_192298"/>
+          <modifierSpeciesReference species="c9" metaid="_192310"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_192322">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <times/>
+                        <ci> Ba </ci>
+                        <ci> a8 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c8 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> -2 </cn>
+                      <ci> Aprota </ci>
+                      <ci> a8 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Aprotc </ci>
+                      <apply>
+                        <plus/>
+                        <ci> c8 </ci>
+                        <ci> c9 </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_19" name="v19" metaid="_131958">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_192334"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="c9" metaid="_192346"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Aprota" metaid="_192358"/>
+          <modifierSpeciesReference species="a8" metaid="_192370"/>
+          <modifierSpeciesReference species="a9" metaid="_192382"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_192394"/>
+          <modifierSpeciesReference species="Ba" metaid="_192406"/>
+          <modifierSpeciesReference species="Bc" metaid="_192418"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_192431">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Aprota </ci>
+                      <apply>
+                        <plus/>
+                        <ci> a8 </ci>
+                        <ci> a9 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> 2 </cn>
+                      <ci> Aprotc </ci>
+                      <ci> c9 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Ba </ci>
+                      <ci> a9 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c9 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_20" name="v20" metaid="_131961">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_192443"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="a9" metaid="_192455"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Ba" metaid="_192467"/>
+          <modifierSpeciesReference species="Bc" metaid="_192479"/>
+          <modifierSpeciesReference species="c9" metaid="_192492"/>
+          <modifierSpeciesReference species="Aprota" metaid="_192504"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_192516"/>
+          <modifierSpeciesReference species="c10" metaid="_192528"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_192540">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <times/>
+                        <ci> Ba </ci>
+                        <ci> a9 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c9 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> -2 </cn>
+                      <ci> Aprota </ci>
+                      <ci> a9 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Aprotc </ci>
+                      <apply>
+                        <plus/>
+                        <ci> c10 </ci>
+                        <ci> c9 </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_21" name="v21" metaid="_131964">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_192552"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="c10" metaid="_192564"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Aprota" metaid="_192576"/>
+          <modifierSpeciesReference species="a10" metaid="_192589"/>
+          <modifierSpeciesReference species="a9" metaid="_192601"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_192614"/>
+          <modifierSpeciesReference species="Ba" metaid="_192626"/>
+          <modifierSpeciesReference species="Bc" metaid="_192638"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_192650">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Aprota </ci>
+                      <apply>
+                        <plus/>
+                        <ci> a10 </ci>
+                        <ci> a9 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> 2 </cn>
+                      <ci> Aprotc </ci>
+                      <ci> c10 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Ba </ci>
+                      <ci> a10 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c10 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_22" name="v22" metaid="_131967">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_192662"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="a10" metaid="_192675"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Ba" metaid="_192687"/>
+          <modifierSpeciesReference species="Bc" metaid="_192699"/>
+          <modifierSpeciesReference species="c10" metaid="_192711"/>
+          <modifierSpeciesReference species="Aprota" metaid="_192723"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_192735"/>
+          <modifierSpeciesReference species="c11" metaid="_192747"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_192759">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <times/>
+                        <ci> Ba </ci>
+                        <ci> a10 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c10 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> -2 </cn>
+                      <ci> Aprota </ci>
+                      <ci> a10 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Aprotc </ci>
+                      <apply>
+                        <plus/>
+                        <ci> c10 </ci>
+                        <ci> c11 </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_23" name="v23" metaid="_131970">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_192771"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="c11" metaid="_192783"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Aprota" metaid="_192795"/>
+          <modifierSpeciesReference species="a10" metaid="_192807"/>
+          <modifierSpeciesReference species="a11" metaid="_192819"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_192831"/>
+          <modifierSpeciesReference species="Ba" metaid="_192844"/>
+          <modifierSpeciesReference species="Bc" metaid="_192856"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_192868">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Aprota </ci>
+                      <apply>
+                        <plus/>
+                        <ci> a10 </ci>
+                        <ci> a11 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> 2 </cn>
+                      <ci> Aprotc </ci>
+                      <ci> c11 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Ba </ci>
+                      <ci> a11 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c11 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_24" name="v24" metaid="_131973">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_192880"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="a11" metaid="_192892"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Ba" metaid="_192904"/>
+          <modifierSpeciesReference species="Bc" metaid="_192916"/>
+          <modifierSpeciesReference species="c11" metaid="_192928"/>
+          <modifierSpeciesReference species="Aprota" metaid="_192940"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_192952"/>
+          <modifierSpeciesReference species="c12" metaid="_192964"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_192976">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <times/>
+                        <ci> Ba </ci>
+                        <ci> a11 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c11 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> -2 </cn>
+                      <ci> Aprota </ci>
+                      <ci> a11 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Aprotc </ci>
+                      <apply>
+                        <plus/>
+                        <ci> c11 </ci>
+                        <ci> c12 </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_25" name="v25" metaid="_131976">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_192989"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="c12" metaid="_193002"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Aprota" metaid="_193015"/>
+          <modifierSpeciesReference species="a11" metaid="_193028"/>
+          <modifierSpeciesReference species="a12" metaid="_193041"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_193054"/>
+          <modifierSpeciesReference species="Ba" metaid="_193067"/>
+          <modifierSpeciesReference species="Bc" metaid="_193080"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_193093">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Aprota </ci>
+                      <apply>
+                        <plus/>
+                        <ci> a11 </ci>
+                        <ci> a12 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> 2 </cn>
+                      <ci> Aprotc </ci>
+                      <ci> c12 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Ba </ci>
+                      <ci> a12 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c12 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_26" name="v26" metaid="_131979">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_193105"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="a12" metaid="_193117"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Ba" metaid="_193129"/>
+          <modifierSpeciesReference species="Bc" metaid="_193141"/>
+          <modifierSpeciesReference species="c12" metaid="_193153"/>
+          <modifierSpeciesReference species="Aprota" metaid="_193165"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_193177"/>
+          <modifierSpeciesReference species="c13" metaid="_193189"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_193201">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <times/>
+                        <ci> Ba </ci>
+                        <ci> a12 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c12 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> -2 </cn>
+                      <ci> Aprota </ci>
+                      <ci> a12 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Aprotc </ci>
+                      <apply>
+                        <plus/>
+                        <ci> c12 </ci>
+                        <ci> c13 </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_27" name="v27" metaid="_131982">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_193213"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="c13" metaid="_193225"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Aprota" metaid="_193237"/>
+          <modifierSpeciesReference species="a12" metaid="_193249"/>
+          <modifierSpeciesReference species="a13" metaid="_193261"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_193273"/>
+          <modifierSpeciesReference species="Ba" metaid="_193285"/>
+          <modifierSpeciesReference species="Bc" metaid="_193298"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_193310">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Aprota </ci>
+                      <apply>
+                        <plus/>
+                        <ci> a12 </ci>
+                        <ci> a13 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> 2 </cn>
+                      <ci> Aprotc </ci>
+                      <ci> c13 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Ba </ci>
+                      <ci> a13 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c13 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_28" name="v28" metaid="_131985">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_193322"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="a13" metaid="_193334"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Ba" metaid="_193346"/>
+          <modifierSpeciesReference species="Bc" metaid="_193358"/>
+          <modifierSpeciesReference species="c13" metaid="_193370"/>
+          <modifierSpeciesReference species="Aprota" metaid="_193382"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_193394"/>
+          <modifierSpeciesReference species="c14" metaid="_193406"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_193418">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <times/>
+                        <ci> Ba </ci>
+                        <ci> a13 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c13 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> -2 </cn>
+                      <ci> Aprota </ci>
+                      <ci> a13 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Aprotc </ci>
+                      <apply>
+                        <plus/>
+                        <ci> c13 </ci>
+                        <ci> c14 </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_29" name="v29" metaid="_131988">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_193430"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="c14" metaid="_193442"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Aprota" metaid="_193455"/>
+          <modifierSpeciesReference species="a13" metaid="_193467"/>
+          <modifierSpeciesReference species="a14" metaid="_193479"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_193491"/>
+          <modifierSpeciesReference species="Ba" metaid="_193503"/>
+          <modifierSpeciesReference species="Bc" metaid="_193515"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_193527">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Aprota </ci>
+                      <apply>
+                        <plus/>
+                        <ci> a13 </ci>
+                        <ci> a14 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> 2 </cn>
+                      <ci> Aprotc </ci>
+                      <ci> c14 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Ba </ci>
+                      <ci> a14 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c14 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_30" name="v30" metaid="_131991">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_193540"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="a14" metaid="_193552"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Ba" metaid="_193564"/>
+          <modifierSpeciesReference species="Bc" metaid="_193576"/>
+          <modifierSpeciesReference species="c14" metaid="_193588"/>
+          <modifierSpeciesReference species="Aprota" metaid="_193600"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_193612"/>
+          <modifierSpeciesReference species="c15" metaid="_193624"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_193636">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <times/>
+                        <ci> Ba </ci>
+                        <ci> a14 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c14 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> -2 </cn>
+                      <ci> Aprota </ci>
+                      <ci> a14 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Aprotc </ci>
+                      <apply>
+                        <plus/>
+                        <ci> c14 </ci>
+                        <ci> c15 </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_31" name="v31" metaid="_131994">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_193648"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="c15" metaid="_193660"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Aprota" metaid="_193672"/>
+          <modifierSpeciesReference species="a14" metaid="_193684"/>
+          <modifierSpeciesReference species="a15" metaid="_193696"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_193708"/>
+          <modifierSpeciesReference species="Ba" metaid="_193720"/>
+          <modifierSpeciesReference species="Bc" metaid="_193732"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_193744">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Aprota </ci>
+                      <apply>
+                        <plus/>
+                        <ci> a14 </ci>
+                        <ci> a15 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> 2 </cn>
+                      <ci> Aprotc </ci>
+                      <ci> c15 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Ba </ci>
+                      <ci> a15 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c15 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_32" name="v32" metaid="_131997">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_193756"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="a15" metaid="_193768"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Ba" metaid="_193780"/>
+          <modifierSpeciesReference species="Bc" metaid="_193793"/>
+          <modifierSpeciesReference species="c15" metaid="_193805"/>
+          <modifierSpeciesReference species="Aprota" metaid="_193817"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_193829"/>
+          <modifierSpeciesReference species="c16" metaid="_193841"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_193853">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <times/>
+                        <ci> Ba </ci>
+                        <ci> a15 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c15 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> -2 </cn>
+                      <ci> Aprota </ci>
+                      <ci> a15 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Aprotc </ci>
+                      <apply>
+                        <plus/>
+                        <ci> c15 </ci>
+                        <ci> c16 </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_33" name="v33" metaid="_132000">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_193865"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="c16" metaid="_193877"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Aprota" metaid="_193889"/>
+          <modifierSpeciesReference species="a15" metaid="_193901"/>
+          <modifierSpeciesReference species="a16" metaid="_193913"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_193925"/>
+          <modifierSpeciesReference species="Ba" metaid="_193937"/>
+          <modifierSpeciesReference species="Bc" metaid="_193949"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_193961">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Aprota </ci>
+                      <apply>
+                        <plus/>
+                        <ci> a15 </ci>
+                        <ci> a16 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> 2 </cn>
+                      <ci> Aprotc </ci>
+                      <ci> c16 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Ba </ci>
+                      <ci> a16 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c16 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_34" name="v34" metaid="_132003">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_193973"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="a16" metaid="_193985"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Ba" metaid="_193997"/>
+          <modifierSpeciesReference species="Bc" metaid="_194009"/>
+          <modifierSpeciesReference species="c16" metaid="_194022"/>
+          <modifierSpeciesReference species="Aprota" metaid="_194034"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_194046"/>
+          <modifierSpeciesReference species="c17" metaid="_194058"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_194070">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <times/>
+                        <ci> Ba </ci>
+                        <ci> a16 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c16 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> -2 </cn>
+                      <ci> Aprota </ci>
+                      <ci> a16 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Aprotc </ci>
+                      <apply>
+                        <plus/>
+                        <ci> c16 </ci>
+                        <ci> c17 </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_35" name="v35" metaid="_132006">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_194082"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="c17" metaid="_194094"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Aprota" metaid="_194106"/>
+          <modifierSpeciesReference species="a16" metaid="_194118"/>
+          <modifierSpeciesReference species="a17" metaid="_194130"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_194142"/>
+          <modifierSpeciesReference species="Ba" metaid="_194155"/>
+          <modifierSpeciesReference species="Bc" metaid="_194167"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_194179">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Aprota </ci>
+                      <apply>
+                        <plus/>
+                        <ci> a16 </ci>
+                        <ci> a17 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> 2 </cn>
+                      <ci> Aprotc </ci>
+                      <ci> c17 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Ba </ci>
+                      <ci> a17 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c17 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_36" name="v36" metaid="_132009">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_194191"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="a17" metaid="_194203"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Ba" metaid="_194215"/>
+          <modifierSpeciesReference species="Bc" metaid="_194227"/>
+          <modifierSpeciesReference species="c17" metaid="_194239"/>
+          <modifierSpeciesReference species="Aprota" metaid="_194251"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_194263"/>
+          <modifierSpeciesReference species="c18" metaid="_194275"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_194287">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <times/>
+                        <ci> Ba </ci>
+                        <ci> a17 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c17 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> -2 </cn>
+                      <ci> Aprota </ci>
+                      <ci> a17 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Aprotc </ci>
+                      <apply>
+                        <plus/>
+                        <ci> c17 </ci>
+                        <ci> c18 </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_37" name="v37" metaid="_132012">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_194299"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="c18" metaid="_194311"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Aprota" metaid="_194324"/>
+          <modifierSpeciesReference species="a17" metaid="_194336"/>
+          <modifierSpeciesReference species="a18" metaid="_194349"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_194362"/>
+          <modifierSpeciesReference species="Ba" metaid="_194374"/>
+          <modifierSpeciesReference species="Bc" metaid="_194386"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_194398">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Aprota </ci>
+                      <apply>
+                        <plus/>
+                        <ci> a17 </ci>
+                        <ci> a18 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> 2 </cn>
+                      <ci> Aprotc </ci>
+                      <ci> c18 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Ba </ci>
+                      <ci> a18 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c18 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_38" name="v38" metaid="_132015">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_194410"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="a18" metaid="_194422"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Ba" metaid="_194434"/>
+          <modifierSpeciesReference species="Bc" metaid="_194446"/>
+          <modifierSpeciesReference species="c18" metaid="_194458"/>
+          <modifierSpeciesReference species="Aprota" metaid="_194470"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_194482"/>
+          <modifierSpeciesReference species="c19" metaid="_194494"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_194506">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <times/>
+                        <ci> Ba </ci>
+                        <ci> a18 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c18 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> -2 </cn>
+                      <ci> Aprota </ci>
+                      <ci> a18 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Aprotc </ci>
+                      <apply>
+                        <plus/>
+                        <ci> c18 </ci>
+                        <ci> c19 </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_39" name="v39" metaid="_132018">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_194518"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="c19" metaid="_194530"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Aprota" metaid="_194542"/>
+          <modifierSpeciesReference species="a18" metaid="_194554"/>
+          <modifierSpeciesReference species="a19" metaid="_194567"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_194579"/>
+          <modifierSpeciesReference species="Ba" metaid="_194591"/>
+          <modifierSpeciesReference species="Bc" metaid="_194603"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_194615">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Aprota </ci>
+                      <apply>
+                        <plus/>
+                        <ci> a18 </ci>
+                        <ci> a19 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> 2 </cn>
+                      <ci> Aprotc </ci>
+                      <ci> c19 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Ba </ci>
+                      <ci> a19 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c19 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_40" name="v40" metaid="_132021">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_194627"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="a19" metaid="_194639"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Ba" metaid="_194651"/>
+          <modifierSpeciesReference species="Bc" metaid="_194663"/>
+          <modifierSpeciesReference species="c19" metaid="_194675"/>
+          <modifierSpeciesReference species="Aprota" metaid="_194687"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_194699"/>
+          <modifierSpeciesReference species="c20" metaid="_194711"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_194723">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <minus/>
+                      <apply>
+                        <times/>
+                        <ci> Ba </ci>
+                        <ci> a19 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c19 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <plus/>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> -2 </cn>
+                      <ci> Aprota </ci>
+                      <ci> a19 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Aprotc </ci>
+                      <apply>
+                        <plus/>
+                        <ci> c19 </ci>
+                        <ci> c20 </ci>
+                      </apply>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lambda </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_41" name="v41" metaid="_132024">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_194735"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="c20" metaid="_194747"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Aprota" metaid="_194759"/>
+          <modifierSpeciesReference species="a19" metaid="_194771"/>
+          <modifierSpeciesReference species="a20" metaid="_194783"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_194796"/>
+          <modifierSpeciesReference species="Ba" metaid="_194808"/>
+          <modifierSpeciesReference species="Bc" metaid="_194820"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_194832">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> Pdiff </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Aprota </ci>
+                      <apply>
+                        <plus/>
+                        <ci> a19 </ci>
+                        <ci> a20 </ci>
+                      </apply>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <cn type="integer"> 2 </cn>
+                      <ci> Aprotc </ci>
+                      <ci> c20 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <ci> PPin </ci>
+                  <apply>
+                    <minus/>
+                    <apply>
+                      <times/>
+                      <ci> Ba </ci>
+                      <ci> a20 </ci>
+                    </apply>
+                    <apply>
+                      <times/>
+                      <ci> Bc </ci>
+                      <ci> c20 </ci>
+                    </apply>
+                  </apply>
+                </apply>
+                <ci> lcyt </ci>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_42" name="v42" metaid="_132027">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_194844"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="a20" metaid="_194856"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="Fvar" metaid="_194868"/>
+          <modifierSpeciesReference species="Aprotc" metaid="_194881"/>
+          <modifierSpeciesReference species="c20" metaid="_194893"/>
+          <modifierSpeciesReference species="Aprota" metaid="_194905"/>
+          <modifierSpeciesReference species="Bc" metaid="_194917"/>
+          <modifierSpeciesReference species="Ba" metaid="_194929"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_194941">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <plus/>
+              <apply>
+                <divide/>
+                <apply>
+                  <times/>
+                  <cn type="integer"> 2 </cn>
+                  <ci> Dvar </ci>
+                  <apply>
+                    <minus/>
+                    <ci> Fvar </ci>
+                    <ci> a20 </ci>
+                  </apply>
+                </apply>
+                <apply>
+                  <times/>
+                  <ci> lambda </ci>
+                  <apply>
+                    <plus/>
+                    <ci> Ls </ci>
+                    <ci> lambda </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <apply>
+                  <divide/>
+                  <ci> Pdiff </ci>
+                  <ci> lambda </ci>
+                </apply>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> Aprotc </ci>
+                    <ci> c20 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> Aprota </ci>
+                    <ci> a20 </ci>
+                  </apply>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <apply>
+                  <divide/>
+                  <ci> PPin </ci>
+                  <ci> lambda </ci>
+                </apply>
+                <apply>
+                  <minus/>
+                  <apply>
+                    <times/>
+                    <ci> Bc </ci>
+                    <ci> c20 </ci>
+                  </apply>
+                  <apply>
+                    <times/>
+                    <ci> Ba </ci>
+                    <ci> a20 </ci>
+                  </apply>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+      <reaction id="_43" name="v43" metaid="_132030">
+        <listOfReactants>
+          <speciesReference species="ext" metaid="_194953"/>
+        </listOfReactants>
+        <listOfProducts>
+          <speciesReference species="Fvar" metaid="_194965"/>
+        </listOfProducts>
+        <listOfModifiers>
+          <modifierSpeciesReference species="a20" metaid="_194977"/>
+          <modifierSpeciesReference species="Fvar" metaid="_194989"/>
+        </listOfModifiers>
+        <kineticLaw metaid="_195001">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">          
+            <apply>
+              <divide/>
+              <apply>
+                <times/>
+                <cn type="integer"> 2 </cn>
+                <ci> Dvar </ci>
+                <apply>
+                  <minus/>
+                  <ci> a20 </ci>
+                  <ci> Fvar </ci>
+                </apply>
+              </apply>
+              <apply>
+                <times/>
+                <ci> Ls </ci>
+                <apply>
+                  <plus/>
+                  <ci> Ls </ci>
+                  <ci> lambda </ci>
+                </apply>
+              </apply>
+            </apply>
+          </math>
+        </kineticLaw>
+      </reaction>
+    </listOfReactions>
+  </model>
+</sbml>
