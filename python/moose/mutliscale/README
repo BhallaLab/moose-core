@@ -1,0 +1,14 @@
+Author: Dilawar Singh, dilawars@ncbs.res.in, dilawars@iitb.ac.in
+Fri 06 Sep 2013 01:39:33 PM IST
+
+
+  This folder contains work on multiscale-modelling of neurons.
+
+  Ref : Mutliscale interactions between chemical and electric signaling in LTP
+  induction, LTP reversal and dendritic excitability, Bhalla U
+
+
+Dependency :
+
+  elementTree (Python)
+
