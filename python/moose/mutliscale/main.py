@@ -1,5 +1,15 @@
 #!/usr/bin/env python2.7
 
+# Filename       : main.py
+# Created on     : Fri 06 Sep 2013 08:20:50 PM IST
+# Author         : Dilawar Singh
+# Email          : dilawars@ncbs.res.in
+#
+# Description    : Entry point if this application is to be run in stand-alone
+#   mode.
+#
+# Logs           :
+
 import os
 import sys
 import argparse
