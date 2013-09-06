@@ -12,20 +12,52 @@
 
 import sys
 import debug.debug as debug
+from IPython import embed
+try:
+    from lxml import etree
+    debug.printDebug("DEBUG", "running with lxml.etree")
+except ImportError:
+    try:
+        # Python 2.5
+        import xml.etree.cElementTree as etree
+        debug.printDebug("DEBUG", "running with cElementTree")
+    except ImportError:
+        try:
+            # Python 2.5
+            import xml.etree.ElementTree as etree
+            debug.printDebug("DEBUG", "running with ElementTree")
+        except ImportError:
+            try:
+              # normal cElementTree install
+              import cElementTree as etree
+              debug.printDebug("DEBUG", "running with cElementTree")
+            except ImportError:
+                try:
+                    # normal ElementTree install
+                    import elementtree.ElementTree as etree
+                    debug.printDebug("DEBUG", "running with ElementTree")
+                except ImportError:
+                    debug.prefix("FATAL", "Failed to import ElementTree")
+                    os._exit(1)
+
 
 sys.path.append("../../../python/")
 import moose 
 
-# Let's build a primary model of given neuron. We'll populate it after building
-# models of each XML model given in XML file.
+# This is a primray model of a given neuron.
 # TODO : This is left here to draw attention of programmar.
 model = moose.Neutral('/model')
 
-def buildMooseObjects(listOfXMLElements) :
+def buildMooseObjects(dictOfXMLElements) :
     """
     Given parsed XML of one or mode models, build moose storehouse.
     """
-    assert(len(listOfXMLElements) > 0)
-    nmlModel = moose.Neutral('/nmlModel')
-
+    assert(len(dictOfXMLElements) > 0)
+    nmlXml = dictOfXMLElements['nml']
+    if nmlXml :
+      nmlModel = moose.Neutral('/nmlModel')
+      # get the morphology of neuron 
+      namespace = 'http://www.neuroml.org/schema/neuroml2'
+      neuromlPathFind = etree.ETXPath("//{"+namespace+"}neuroml")
+      print neuromlPathFind(nmlXml)
 
