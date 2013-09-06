@@ -5,6 +5,7 @@ import sys
 import argparse
 import debug.debug as debug
 import parser.parser as parser
+import core.moose_builder as moose_builder
 
 def pathsAreOk(paths) :
   ''' Verify if path exists and are valid. '''
@@ -37,7 +38,10 @@ if __name__ == "__main__" :
   if args.nml or args.sbml : 
     if pathsAreOk(args) :
       debug.printDebug("INFO", "Started parsing XML models")
-      parser.parseModels(args)
+      etreeList = parser.parseModels(args)
+
+      # Build the storehouse so that moose can simulate it.
+      moose_builder.buildMooseObjects(etreeList)
     else :
       debug.printDebug("FATAL", "One or more model file does not exists.")
       sys.exit()
