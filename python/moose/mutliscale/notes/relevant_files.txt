@@ -1,5 +1,0 @@
-Upi's scripts are kept in this folder
-
-  buildQ/Demos/snippets/cubeMeshSigNeur.py
-  buildQ/Demos/snippets/multiComptSigNeur.py 
-
