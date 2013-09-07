@@ -52,17 +52,19 @@ def parseModels(models) :
 
         with open(models.nml, "r") as nmlFile :
             nmlText = nmlFile.read()
+            elemDict['nml'] = models.nml
         try :
             rootElementOfNml = etree.fromstring(nmlText, nmlParser)
         except :
             debug.printDebug("WARN" 
               , "Validation with schema {0} failed. CONTINUING...".format(schemaFile))
             rootElementOfNml = etree.parse(models.nml)
-            elemDict['nml'] = rootElementOfNml
+            elemDict['nmlXml'] = rootElementOfNml
 
     if models.sbml :
         # TODO : parse it in the same way as we are parsing neuroML
         rootElementOfSbml = etree.parse(models.sbml)
-        elemDict['sbml'] = rootElementOfSbml
+        elemDict['sbmlXml'] = rootElementOfSbml
+        elemDict['sbml'] = models.sbml
     return elemDict
 

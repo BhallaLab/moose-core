@@ -13,6 +13,7 @@
 import sys
 import debug.debug as debug
 import xml.get_elements as xml 
+import core.neuroml_to_moose as nml2moose
 
 try:
     from lxml import etree
@@ -46,7 +47,6 @@ sys.path.append("../../../python/")
 import moose 
 
 # This is a primray model of a given neuron.
-# TODO : This is left here to draw attention of programmar.
 model = moose.Neutral('/model')
 
 def buildMooseObjects(dictOfXMLElements) :
@@ -54,8 +54,10 @@ def buildMooseObjects(dictOfXMLElements) :
     Given parsed XML of one or mode models, build moose storehouse.
     """
     assert(len(dictOfXMLElements) > 0)
-    nmlXml = dictOfXMLElements['nml']
-    if nmlXml :
+    nmlF = dictOfXMLElements['nml']
+    if nmlF :
+      objNmlReader = nml2moose.NML2Reader()
+      objNmlReader.read(nmlF)
       nmlModel = moose.Neutral('/nmlModel')
       # get the morphology of neuron 
       #neuromlPathFind = etree.ETXPath("//{"+namespace+"}neuroml")
@@ -63,3 +65,4 @@ def buildMooseObjects(dictOfXMLElements) :
       cellElem = xml.getElementIgnoreNM(nmlXml, "cell")
       print cellElem
       print xml.getElementNM(nmlXml, ["neuroml"])
+
