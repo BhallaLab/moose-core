@@ -51,44 +51,48 @@ in NeuroMLCoreDimensions.xml) to SI
 """
 import numpy as np
 import debug.debug as debug
+import logging 
 import re
+
+logger = logging.getLogger('multiscale')
+
 try:
-    from lxml import etree
-    debug.printDebug("DEBUG", "running with lxml.etree")
+    import xml.etree.cElementTree as etree
+    logger.info("Running with cElementTree")
 except ImportError:
     try:
         # Python 2.5
-        import xml.etree.cElementTree as etree
-        debug.printDebug("DEBUG", "running with cElementTree")
+        import xml.etree as etree
+        logger.info("Running with cElementTree")
     except ImportError:
         try:
             # Python 2.5
             import xml.etree.ElementTree as etree
-            debug.printDebug("DEBUG", "running with ElementTree")
+            logger.info("Running with ElementTree")
         except ImportError:
             try:
               # normal cElementTree install
               import cElementTree as etree
-              debug.printDebug("DEBUG", "running with cElementTree")
+              logger.info("Running with cElementTree")
             except ImportError:
                 try:
                     # normal ElementTree install
                     import elementtree.ElementTree as etree
-                    debug.printDebug("DEBUG", "running with ElementTree")
+                    logger.info("Running with ElementTree")
                 except ImportError:
-                    debug.prefix("FATAL", "Failed to import ElementTree")
+                    logger.info("Failed to import ElementTree")
                     os._exit(1)
 
 
 
-unitXml = 'xml/NeuroMLCoreDimensions.xml'
+unitXml = 'moose_xml/NeuroMLCoreDimensions.xml'
 
 import os 
 import sys
 if os.path.exists(unitXml) :
     unitsdoc = etree.parse(unitXml)
 else:
-    debug.printDebug("FATAL", "File {0} not found.".format(unitXml))
+    logger.error("File {0} is not found".format(unitXml))
     sys.exit(0)
     
 

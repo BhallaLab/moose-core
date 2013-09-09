@@ -846,7 +846,8 @@ class IncludeType(GeneratedsSuper):
             return True
         else:
             return False
-    def export(self, outfile, level, namespace_='', name_='IncludeType', namespacedef_='', pretty_print=True):
+    def export(self, outfile, level, namespace_='', name_='IncludeType'
+        , namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
         else:
@@ -9309,15 +9310,18 @@ class GateHHRatesTau(Base):
             return True
         else:
             return False
-    def export(self, outfile, level, namespace_='', name_='GateHHRatesTau', namespacedef_='', pretty_print=True):
+    def export(self, outfile, level, namespace_='', name_='GateHHRatesTau'
+        , namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
         else:
             eol_ = ''
         showIndent(outfile, level, pretty_print)
-        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        outfile.write('<%s%s%s' % (namespace_, name_
+          , namespacedef_ and ' ' + namespacedef_ or '', ))
         already_processed = set()
-        self.exportAttributes(outfile, level, already_processed, namespace_, name_='GateHHRatesTau')
+        self.exportAttributes(outfile, level, already_processed, namespace_
+            , name_='GateHHRatesTau')
         if self.hasContent_():
             outfile.write('>%s' % (eol_, ))
             self.exportChildren(outfile, level + 1, namespace_, name_, pretty_print=pretty_print)

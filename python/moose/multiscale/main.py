@@ -14,6 +14,7 @@ import os
 import sys
 import argparse
 import debug.debug as debug
+import logging
 import parser.parser as parser
 import core.moose_builder as moose_builder
 
@@ -32,6 +33,8 @@ def pathsAreOk(paths) :
   return True
 
 
+logger = logging.getLogger('multiscale')
+
 if __name__ == "__main__" :
   # This section build the command line parser
   argParser = argparse.ArgumentParser(description= 'Mutiscale modelling of neurons')
@@ -47,6 +50,7 @@ if __name__ == "__main__" :
   # There must be at least one model present
   if args.nml or args.sbml : 
     if pathsAreOk(args) :
+      logger.info("Started parsing XML models")
       debug.printDebug("INFO", "Started parsing XML models")
       etreeList = parser.parseModels(args)
 

@@ -1,8 +1,10 @@
 # This file contains functions to parse neuroML and sbml.
 
 import debug.debug as debug 
+import logging 
 import os
 
+logger = logging.getLogger('multiscale')
 try:
     from lxml import etree
     debug.printDebug("DEBUG", "running with lxml.etree")
@@ -34,16 +36,28 @@ except ImportError:
 def parseModels(models) :
 
     """
-    Parse given xml models. We can get either one or two models; one described in
+    Parses given xml models. We can pass either one or two models; one described in
     neuroML and the other in sbml. 
+    
+    Notes: Document is properly. See 
 
+      http://www.biomedcentral.com/1752-0509/7/88/abstract
+
+    sent by Aditya Girla. It a online composition tool for SBML. In its
+    references, some other tools are mentioned.
+
+    Args :
+
+    Raises :
+
+    Return 
     return a list of elementTree of given models.
 
     """
     elemDict = dict()
     if models.nml :
         # Get the schema 
-        schemaFile = "./xml/NeuroML_v2beta1.xsd"
+        schemaFile = "./moose_xml/NeuroML_v2beta1.xsd"
         with open(schemaFile, "r") as f :
             nmlSchemaTxt = etree.XML(f.read())
 
@@ -56,8 +70,8 @@ def parseModels(models) :
         try :
             rootElementOfNml = etree.fromstring(nmlText, nmlParser)
         except :
-            debug.printDebug("WARN" 
-              , "Validation with schema {0} failed. CONTINUING...".format(schemaFile))
+            logger.warn("Validation with schema {0} failed. Continuing \
+                nonetheless.".format(schemaFile))
             rootElementOfNml = etree.parse(models.nml)
             elemDict['nmlXml'] = rootElementOfNml
 

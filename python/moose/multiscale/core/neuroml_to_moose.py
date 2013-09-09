@@ -1,6 +1,4 @@
-# reader.py --- 
-# 
-# Filename: reader.py
+# Filename: neuroml_to_moose.py
 # Description: 
 # Author: 
 # Maintainer: 
@@ -188,7 +186,7 @@ class NML2Reader(object):
         for segid, comp in id_to_comp.items():
             segment = id_to_segment[segid]
             try:
-                parent = id_to_segment[str(segment.parent.segment)]
+                parent = id_to_segment[segment.parent.segment]
             except AttributeError:
                 parent = None
             self.moose_to_nml[comp] = segment
@@ -217,7 +215,7 @@ class NML2Reader(object):
                 moose.connect(comp, src, pcomp, dst)
         sg_to_segments = {}        
         for sg in morphology.segmentGroup:
-            sg_to_segments[sg.id] = [id_to_segment[str(m.segment)] for m in sg.member]
+            sg_to_segments[sg.id] = [id_to_segment[(m.segment)] for m in sg.member]
         self._cell_to_sg[nmlcell] = sg_to_segments
         return id_to_comp, id_to_segment, sg_to_segments
             
@@ -229,7 +227,8 @@ class NML2Reader(object):
             print 'Warning: %s in %s has no biophysical properties' % (nmlcell.id, self.filename)
             return
         self.importMembraneProperties(nmlcell, moosecell, bp.membraneProperties)
-        self.importIntracellularProperties(nmlcell, moosecell, bp.intracellularProperties)
+        self.importIntracellularProperties(nmlcell, moosecell
+            , bp.intracellularProperties)
 
     def importMembraneProperties(self, nmlcell, moosecell, mp):
         """Create the membrane properties from nmlcell in moosecell"""
@@ -271,7 +270,8 @@ class NML2Reader(object):
                     proto_pool = innerReader.proto_pools[species.concentrationModel]
                     break
         if not proto_pool:
-            raise Exception('No prototype pool for %s referred to by %s' % (species.concentrationModel, species.id))
+            raise Exception('No prototype pool for %s referred to by %s' 
+                % (species.concentrationModel, species.id))
         pool_id = moose.copy(proto_pool, comp, species.id)
         pool = moose.element(pool_id)
         pool.B = pool.B / (np.pi * compartment.length * (0.5 * compartment.diameter + pool.thickness) * (0.5 * compartment.diameter - pool.thickness))        
@@ -293,7 +293,7 @@ class NML2Reader(object):
             try:
                 ionChannel = self.id_to_ionChannel[chdens.ionChannel]
             except KeyError:
-                print 'No channel with id', chdens.ionChannel
+                print('No channel with id {0}'.format(chdens.ionChannel))
                 continue
             if ionChannel.type_ == 'ionChannelPassive':
                 for seg in segments:
@@ -316,7 +316,8 @@ class NML2Reader(object):
                     proto_chan = innerReader.proto_chans[chdens.ionChannel]
                     break
         if not proto_chan:
-            raise Exception('No prototype channel for %s referred to by %s' % (chdens.ionChannel, chdens.id))
+            raise Exception('No prototype channel for %s referred to by %s' 
+                % (chdens.ionChannel, chdens.id))
         chid = moose.copy(proto_chan, comp, chdens.id)
         chan = moose.element(chid)
         chan.Gbar = sarea(comp) * condDensity
@@ -416,4 +417,3 @@ class NML2Reader(object):
         self.moose_to_nml[ca] = concModel
         logger.debug('Created moose element: %s for nml conc %s' % (ca.path, concModel.id))
         
-# reader.py ends here
