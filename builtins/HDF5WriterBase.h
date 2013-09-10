@@ -42,6 +42,7 @@ class HDF5WriterBase
     void setMode(unsigned int mode);
     unsigned int getMode() const;
     virtual void flush();
+    void close();
     
     static const Cinfo* initCinfo();
     

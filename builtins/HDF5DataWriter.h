@@ -51,6 +51,7 @@ class HDF5DataWriter: public HDF5WriterBase
     static const Cinfo* initCinfo();
   protected:
     unsigned int flushLimit_;
+    // Maps the paths of data sources to vectors storing the data locally
     map <string, vector <double> > datamap_;
     hid_t get_dataset(string path);
     hid_t create_dataset(hid_t parent, string name);

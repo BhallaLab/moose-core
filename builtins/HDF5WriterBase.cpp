@@ -30,12 +30,15 @@
 
 #ifdef USE_HDF5
 
+#include <fstream>
+
 #include "hdf5.h"
 
 #include "header.h"
 
 #include "HDF5WriterBase.h"
 
+using namespace std;
                 
 const Cinfo* HDF5WriterBase::initCinfo()
 {
@@ -63,13 +66,18 @@ const Cinfo* HDF5WriterBase::initCinfo()
       "flush",
       "Write all buffer contents to file and clear the buffers.",
       new OpFunc0 < HDF5WriterBase > ( &HDF5WriterBase::flush ));
+  static DestFinfo close(
+      "close",
+      "Close the underlying file. This is a safety measure so that file is not in an invalid state even if a crash happens at exit.",
+      new OpFunc0< HDF5WriterBase > ( & HDF5WriterBase::close ));
       
 
   static Finfo * finfos[] = {
     &fileName,
     &isOpen,
     &mode,
-    &flush
+    &flush,
+    &close,
   };
   static string doc[] = {
     "Name", "HDF5WriterBase",
@@ -104,6 +112,7 @@ HDF5WriterBase::~HDF5WriterBase()
     if (filehandle_ < 0){
         return;
     }
+    flush();
     herr_t err = H5Fclose(filehandle_);
     filehandle_ = -1;
     if (err < 0){
@@ -118,14 +127,14 @@ void HDF5WriterBase::setFilename(string filename)
         return;
     }
      
-    // If file is open, close it before changing filename
-    if (filehandle_ >= 0){
-        status = H5Fclose(filehandle_);
-        if (status < 0){
-            cerr << "Error: failed to close HDF5 file handle for " << filename_ << ". Error code: " << status << endl;
-        }
-    }
-    filehandle_ = -1;
+    // // If file is open, close it before changing filename
+    // if (filehandle_ >= 0){
+    //     status = H5Fclose(filehandle_);
+    //     if (status < 0){
+    //         cerr << "Error: failed to close HDF5 file handle for " << filename_ << ". Error code: " << status << endl;
+    //     }
+    // }
+    // filehandle_ = -1;
     filename_ = filename;
     // status = openFile(filename);
 }
@@ -155,10 +164,19 @@ herr_t HDF5WriterBase::openFile()
     hid_t fapl_id = H5Pcreate(H5P_FILE_ACCESS);
     // Ensure that all open objects are closed before the file is closed    
     H5Pset_fclose_degree(fapl_id, H5F_CLOSE_STRONG);
-    if (openmode_ == H5F_ACC_EXCL || openmode_ == H5F_ACC_TRUNC){
+    ifstream infile(filename_.c_str());
+    bool fexists = infile.good();
+    infile.close();
+    if (!fexists || openmode_ == H5F_ACC_TRUNC){
         filehandle_ = H5Fcreate(filename_.c_str(), openmode_, H5P_DEFAULT, fapl_id);
-    } else {
+    } else if (openmode_ == H5F_ACC_RDWR) {
         filehandle_ = H5Fopen(filename_.c_str(), openmode_, fapl_id);
+    } else {
+        cerr << "Error: File \"" << filename_ << "\" already exists. Specify mode=" << H5F_ACC_RDWR
+             << " for appending to it, mode=" << H5F_ACC_TRUNC
+             << " for overwriting it. mode=" << H5F_ACC_EXCL
+             << " requires the file does not exist." << endl;
+        return -1;
     }
     if (filehandle_ < 0){
         cerr << "Error: Could not open file for writing: " << filename_ << endl;
@@ -183,6 +201,18 @@ unsigned HDF5WriterBase::getMode() const
 void HDF5WriterBase::flush()
 {
     cout << "Warning: HDF5WriterBase:: flush() should never be called. Subclasses should reimplement this." << endl;// do nothing
+}
+
+void HDF5WriterBase::close()
+{
+    if (filehandle_ < 0){
+        return;
+    }
+    herr_t err = H5Fclose(filehandle_);
+    filehandle_ = -1;
+    if (err < 0){
+        cerr << "Error: Error occurred when closing file. Error code: " << err << endl;
+    }    
 }
 
 #endif // USE_HDF5
