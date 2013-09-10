@@ -2,7 +2,7 @@
 # 
 # Filename: reader.py
 # Description: 
-# Author: 
+# Author: Subhasis Ray
 # Maintainer: 
 # Created: Wed Jul 24 15:55:54 2013 (+0530)
 # Version: 
@@ -68,16 +68,32 @@ logstream.setFormatter(logging.Formatter('%s(asctime)s %(name)s %(filename)s %(f
 logger = logging.getLogger('nml2_reader')
 logger.addHandler(logstream)
 
+
+# Utility functions
+
 def sarea(comp):
-    """Calculate the surface area of compartment from length and
-    diameter"""
+    """
+    Return the surface area of compartment from length and
+    diameter.
+
+    Parameters
+    ----------
+    comp : Compartment instance.
+
+    Returns
+    -------
+    s : float
+        surface area of `comp`. 
+    
+    """
     if comp.length > 0:
         return comp.length * comp.diameter * np.pi
     else:
         return comp.diameter * comp.diameter * np.pi
 
 def xarea(comp):
-    """Calculate the cross sectional area from diameter of the
+    """
+    Return the cross sectional area from diameter of the
     compartment. How to do it for spherical compartment?"""
     return comp.diameter * comp.diameter * np.pi / 4.0
 
