@@ -18,13 +18,15 @@
 
 # Commentary: 
 # 
-# 
-# 
+# This is the primary moose module. It wraps _moose.so and adds some
+# utility functions.
 # 
 
 # Change log:
 # 
-# 
+# Mon Sep 9 22:56:35 IST 2013 - Renamed some function parameters and
+# updated docstrings to consistently follow numpy docstring
+# convention.
 # 
 
 # Code:
@@ -78,13 +80,19 @@ def pwe():
     return pwe_
     
 def le(el=None):
-    """List elements. 
+    """List elements under `el` or current element if no argument
+    specified.
     
     Parameters
     ----------
-    el: str/melement/ematrix/None
-    The element or the path under which to look. If `None`, children
-    of current working element are displayed.
+    el : str/melement/ematrix/None
+        The element or the path under which to look. If `None`, children
+         of current working element are displayed.
+
+    Returns
+    -------
+    None
+
     """
     if el is None:
         el = getCwe()[0]
@@ -103,8 +111,20 @@ ce = setCwe # ce is a GENESIS shorthand for change element.
 def syncDataHandler(target):
     """Synchronize data handlers for target.
 
-    Parameter:
-    target -- target element or path or ematrix.
+    Parameters
+    ----------
+    target : melement/ematrix/str
+        Target element or ematrix or path string.
+
+    Raises
+    ------
+    NotImplementedError
+        The call to the underlying C++ function does not work.
+
+    Notes
+    -----
+    This function is defined for completeness, but currently it does not work.
+
     """
     raise NotImplementedError('The implementation is not working for IntFire - goes to invalid objects. \
 First fix that issue with SynBase or something in that line.')
@@ -114,35 +134,40 @@ First fix that issue with SynBase or something in that line.')
         target = ematrix(target)
         _moose.syncDataHandler(target)
 
-def showfield(elem, field='*', showtype=False):
-    """Show the fields of the element, their data types and values in
-    human readable format. Convenience function for GENESIS users.
+def showfield(el, field='*', showtype=False):
+    """Show the fields of the element `el`, their data types and
+    values in human readable format. Convenience function for GENESIS
+    users.
 
-    Parameters:
+    Parameters
+    ----------
+    el : melement/str
+        Element or path of an existing element.
 
-    elem: str/melement instance
-    Element or path of an existing element.
+    field : str
+        Field to be displayed. If '*' (default), all fields are displayed.
 
-    field: str
-    Field to be displayed. If '*', all fields are displayed.
+    showtype : bool
+        If True show the data type of each field. False by default.
 
-    showtype: bool
-    If True show the data type of each field.
+    Returns
+    -------
+    None
 
     """
-    if isinstance(elem, str):
-        if not exists(elem):
+    if isinstance(el, str):
+        if not exists(el):
             raise ValueError('no such element')
-        elem = element(elem)
+        el = element(el)
     if field == '*':        
-        value_field_dict = getFieldDict(elem.className, 'valueFinfo')
+        value_field_dict = getFieldDict(el.className, 'valueFinfo')
         max_type_len = max([len(dtype) for dtype in list(value_field_dict.values())])
         max_field_len = max([len(dtype) for dtype in list(value_field_dict.keys())])
-        print '\n[', elem.path, ']'
+        print '\n[', el.path, ']'
         for key, dtype in list(value_field_dict.items()):
             if dtype == 'bad' or key == 'this' or key == 'dummy' or key == 'me' or dtype.startswith('vector') or 'ObjId' in dtype:
                 continue
-            value = elem.getField(key)
+            value = el.getField(key)
             if showtype:
                 typestr = dtype.ljust(max_type_len + 4)
                 # The following hack is for handling both Python 2 and
@@ -152,43 +177,62 @@ def showfield(elem, field='*', showtype=False):
             print key.ljust(max_field_len + 4), '=', value
     else:
         try:
-            print field, '=', elem.getField(field)
+            print field, '=', el.getField(field)
         except AttributeError:
             pass # Genesis silently ignores non existent fields
 
-def showfields(element, showtype=False):
-    """Convenience function. Should be deprecated if nobody uses it."""
+def showfields(el, showtype=False):
+    """Convenience function. Should be deprecated if nobody uses it.
+
+    """
     warnings.warn('Deprecated. Use showfield(element, field="*", showtype=True) instead.', DeprecationWarning)
-    showfield(element, field='*', showtype=showtype)
-    
+    showfield(el, field='*', showtype=showtype)
+
+# Predefined field types and their human readable names    
 finfotypes = [('valueFinfo', 'value field') , 
               ('srcFinfo', 'source message field'),
               ('destFinfo', 'destination message field'),
               ('sharedFinfo', 'shared message field'),
               ('lookupFinfo', 'lookup field')]
 
-# 2012-01-11 19:20:39 (+0530) Subha: checked for compatibility with dh_branch
-# 2012-09-27 19:26:30 (+0530) Subha: updated for compatibility with buildQ branch
-def listmsg(pymoose_object):
+def listmsg(el):
     """Return a list containing the incoming and outgoing messages of
-    the given object."""
-    obj = pymoose_object
+    `el`.
+
+    Parameters
+    ----------
+    el : melement/ematrix/str
+        MOOSE object or path of the object to look into.
+
+    Returns
+    -------
+    msg : list
+        List of Msg objects corresponding to incoming and outgoing 
+        connections of `el`.
+
+    """
+    obj = element(el)
     ret = []
-    if type(pymoose_object) is type(""):
-        obj = _moose.Neutral(pymoose_object)
     for msg in obj.inMsg:
         ret.append(msg)
     for msg in obj.outMsg:
         ret.append(msg)
     return ret
 
-# 2012-01-11 19:20:39 (+0530) Subha: checked for compatibility with dh_branch
-# 2012-09-27 19:26:30 (+0530) Subha: updated for compatibility with buildQ branch
-def showmsg(pymoose_object):
-    """Prints the incoming and outgoing messages of the given object."""
-    obj = pymoose_object
-    if type(pymoose_object) is type(""):
-        obj = _moose.Neutral(pymoose_object)
+def showmsg(el):
+    """Print the incoming and outgoing messages of `el`.
+
+    Parameters
+    ----------
+    el : melement/ematrix/str
+        Object whose messages are to be displayed.
+
+    Returns
+    -------
+    None
+
+    """
+    obj = element(el)
     print 'INCOMING:'
     for msg in obj.msgIn:
         print msg.e2.path, msg.destFieldsOnE2, '<---', msg.e1.path, msg.srcFieldsOnE1
@@ -197,11 +241,28 @@ def showmsg(pymoose_object):
         print msg.e1.path, msg.srcFieldsOnE1, '--->', msg.e2.path, msg.destFieldsOnE2
 
 def getfielddoc(tokens, indent=''):
-    """Get the documentation for field specified by
-    tokens.
+    """Return the documentation for field specified by `tokens`.
+    
+    Parameters
+    ----------
+    tokens : (className, fieldName) str
+        A sequence whose first element is a MOOSE class name and second 
+        is the field name.
+              
+    indent : str
+        indentation (default: empty string) prepended to builtin 
+        documentation string.
 
-    tokens should be a two element list/tuple where first element is a
-    MOOSE class name and second is the field name.
+    Returns
+    -------
+    docstring : str
+        string of the form 
+        `{indent}{className}.{fieldName}: {datatype} - {finfoType}\n{Description}\n`
+
+    Raises
+    ------
+    NameError 
+        If the specified fieldName is not present in the specified class.
     """
     assert(len(tokens) > 1)
     for ftype, rtype in finfotypes:
@@ -219,9 +280,28 @@ def getfielddoc(tokens, indent=''):
                     
     
 def getmoosedoc(tokens):
-    """Retrieve MOOSE builtin documentation for tokens.
+    """Return MOOSE builtin documentation.
+  
+    Parameters
+    ----------
+    tokens : (className, [fieldName])
+        tuple containing one or two strings specifying class name
+        and field name (optional) to get documentation for.
+
+    Returns
+    -------
+    docstring : str        
+        Documentation string for class `className`.`fieldName` if both
+        are specified, for the class `className` if fieldName is not
+        specified. In the latter case, the fields and their data types
+        and finfo types are listed.
+
+    Raises
+    ------
+    NameError
+        If class or field does not exist.
     
-    tokens is a list or tuple containing: (classname, [fieldname])"""
+    """
     indent = '    '
     docstring = cStringIO.StringIO()
     if not tokens:
@@ -259,23 +339,30 @@ def doc(arg, paged=False):
     
     Parameters
     ----------
-    arg: str or moose class or instance of melement or instance of ematrix
+    arg : str/class/melement/ematrix
+        A a string specifying a moose class name and a field name
+        separated by a dot. e.g., 'Neutral.name'. Prepending `moose.`
+        is allowed. Thus moose.doc('moose.Neutral.name') is equivalent
+        to the above.    
+        It can also be string specifying just a moose class name or a
+        moose class or a moose object (instance of melement or ematrix
+        or there subclasses). In that case, the builtin documentation
+        for the corresponding moose class is displayed.
 
-    argument can be a string specifying a moose class name and a field
-    name separated by a dot. e.g., 'Neutral.name'. Prepending `moose.`
-    is allowed. Thus moose.doc('moose.Neutral.name') is equivalent to
-    the above.
-    
-    argument can also be string specifying just a moose class name or
-    a moose class or a moose object (instance of melement or ematrix
-    or there subclasses). In that case, the builtin documentation for
-    the corresponding moose class is displayed.
+    paged: bool    
+        Whether to display the docs via builtin pager or print and
+        exit. If not specified, it defaults to False and
+        moose.doc(xyz) will print help on xyz and return control to
+        command line.
 
-    paged: bool
-    
-    Whether to display the docs via builtin pager or print and
-    exit. If not specified, it defaults to False and moose.doc(xyz)
-    will print help on xyz and return control to command line.
+    Returns
+    -------
+    None
+
+    Raises
+    ------
+    NameError
+        If class or field does not exist.
 
     """
     # There is no way to dynamically access the MOOSE docs using
