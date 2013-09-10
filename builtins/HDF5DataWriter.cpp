@@ -56,7 +56,7 @@ static DestFinfo *recvDataBuf() {
 }
 
 static SrcFinfo0 * clear(){
-    static SrcFinfo0 clear("clear",
+    static SrcFinfo0 clear("clearOut",
                            "Send request to clear a Table vector.");
     return &clear;
 }
@@ -210,52 +210,51 @@ hid_t HDF5DataWriter::get_dataset(string path)
     if (filehandle_ < 0){
         return -1;
     }
-    herr_t status;
+    herr_t status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
     // Create the groups corresponding to this path We are not
     // taking care of Table object containing Table
     // objects. That's an unusual possibility.
     vector<string> path_tokens;
     tokenize(path, "/", path_tokens);
     hid_t prev_id = filehandle_;
+    hid_t id = -1;
     for ( unsigned int ii = 0; ii < path_tokens.size()-1; ++ii ){
-        // First try to open existing group
-        hid_t id = H5Gcreate2(prev_id, path_tokens[ii].c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-        if (id < 0){
-            // If that fails, try to create a group
+        // check if object exists
+        htri_t exists = H5Lexists(prev_id, path_tokens[ii].c_str(), H5P_DEFAULT);
+        if (exists > 0){
+            // try to open existing group
             id = H5Gopen2(prev_id, path_tokens[ii].c_str(), H5P_DEFAULT);
-            if (id < 0){
-                // Failed to craete a group also, print the
-                // offending path (for debugging; the error is
-                // perhaps at the level of hdf5 or file system).
-                cerr << "Error: failed to open/create group: ";
-                for (unsigned int jj = 0; jj <= ii; ++jj){
-                    cerr << "/" << path_tokens[jj];
-                }
-                cerr << endl;
-                prev_id = -1;
-                break;
-            } else if (prev_id != filehandle_){
-                // Successfully created new group, close the old group
-                status = H5Gclose(prev_id);
-				assert( status >= 0 );
-                prev_id = id;
+        } else if (exists == 0) {
+            // If that fails, try to create a group
+            id = H5Gcreate2(prev_id, path_tokens[ii].c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        } 
+        if ((exists < 0) || (id < 0)){
+            // Failed to open/create a group, print the
+            // offending path (for debugging; the error is
+            // perhaps at the level of hdf5 or file system).
+            cerr << "Error: failed to open/create group: ";
+            for (unsigned int jj = 0; jj <= ii; ++jj){
+                cerr << "/" << path_tokens[jj];
             }
-        } else if (prev_id != filehandle_){
-            // Successfully opened new group, close the old group
+            cerr << endl;
+            prev_id = -1;            
+        }
+        if (prev_id >= 0  && prev_id != filehandle_){
+            // Successfully opened/created new group, close the old group
             status = H5Gclose(prev_id);
-			assert( status >= 0 );
+            assert( status >= 0 );
         }
         prev_id = id;
     }
-    if (prev_id < 0){
-        nodemap_[path] = prev_id;
-        return prev_id;
-    }
-    // first try to create, then try to open dataset
     string name = path_tokens[path_tokens.size()-1];
-    hid_t dataset_id = create_dataset(prev_id, name);
-    if (dataset_id < 0){
+    htri_t exists = H5Lexists(prev_id, name.c_str(), H5P_DEFAULT);
+    hid_t dataset_id = -1;
+    if (exists > 0){
         dataset_id = H5Dopen2(prev_id, name.c_str(), H5P_DEFAULT);
+    } else if (exists == 0){
+        dataset_id = create_dataset(prev_id, name);
+    } else {
+        cerr << "Error: H5Lexists returned " << exists << " for path \"" << path << "\"" << endl;
     }
     return dataset_id;
 }
