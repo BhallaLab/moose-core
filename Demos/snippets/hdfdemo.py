@@ -31,14 +31,17 @@ h.mode = 2 # Truncate existing file
 moose.connect(h, 'requestData', t, 'get_vec')
 moose.connect(h, 'requestData', t1, 'get_vec')
 h.filename = 'output.h5'
+h.chunkSize = 10000
+h.compressor = 'zlib'
+h.compression = 7
 # We allow simple attributes of type string, double and long on the
 # root node. This allows for file-level metadata/annotation.
 h.sattr['note'] = 'This is a test.'
 h.fattr['a float attribute'] = 3.141592
 h.iattr['an int attribute'] = 86400
-moose.setClock(0, 0.1)
-moose.setClock(1, 0.1)
-moose.setClock(2, 10)
+moose.setClock(0, 1e-5)
+moose.setClock(1, 1e-5)
+moose.setClock(2, 1.0)
 moose.useClock(0, '/c', 'init')
 moose.useClock(1, '/##[TYPE!=HDF5DataWriter]', 'process')
 moose.useClock(2, '/##[TYPE=HDF5DataWriter]', 'process')
