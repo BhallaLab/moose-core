@@ -171,6 +171,7 @@ void HDF5DataWriter::process(const Eref & e, ProcPtr p)
     if (filehandle_ < 0){
         return;
     }
+    cout << "HDF5DataWriter::process: currentTime=" << p->currTime << endl;
     requestData()->send(e, p->threadIndexInGroup, recvDataBuf()->getFid());
     for (map<string, vector < double > >:: iterator data_it = datamap_.begin(); data_it != datamap_.end(); ++data_it){        
         string path = data_it->first;
@@ -332,7 +333,19 @@ void HDF5DataWriter::recvData(const Eref&e, const Qinfo* q, PrepackedBuffer pb)
     const double * end = start + vec_size;
     // append only the new data. old_size is guaranteed to be 0 on
     // write and the table vecs will also be cleared.
-    datamap_[path].insert(datamap_[path].end(), start, end);        
+    datamap_[path].insert(datamap_[path].end(), start, end);
+
+// #ifndef NDEBUG
+//     // debug leftover entries coming from table
+//     cout << "HDF5DataWriter::recvData: vec_size=" << vec_size << endl;
+//     cout << "HDF5DataWriter::recvData: dataSize=" << pb.dataSize() << endl;
+//     cout << "HDF5DataWriter::recvData: numEntries=" << pb.numEntries()  << endl;
+//     cout << "HDF5DataWriter::recvData: size=" << pb.size() << endl;
+//     cout << "HDF5DataWriter::recvData: data()" << endl;
+//     for (int ii = 0; ii <= vec_size; ++ii){
+//         cout << ii << "\t" << pb.data()[ii] << endl;
+//     }
+// #endif
 }
         
 #endif // USE_HDF5

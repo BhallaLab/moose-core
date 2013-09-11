@@ -35,6 +35,8 @@ t1 = moose.Table('/data2/Im')
 t2 = moose.Table('/data2/currentTime')
 moose.connect(t, 'requestData', c, 'get_Vm')
 moose.connect(t1, 'requestData', c, 'get_Im')
+# This is a bad example : the currentTime recorded gets messed up at
+# the ticks of the slowest clock.
 moose.connect(t2, 'requestData', moose.element('/clock'), 'get_currentTime')
 h = moose.HDF5DataWriter('h')
 h.mode = 2 # Truncate existing file
