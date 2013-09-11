@@ -51,10 +51,12 @@ const Cinfo* HDF5WriterBase::initCinfo()
       "Name of the file associated with this HDF5 writer object.",
       &HDF5WriterBase::setFilename,
       &HDF5WriterBase::getFilename);
+  
   static ReadOnlyValueFinfo < HDF5WriterBase, bool > isOpen(
       "isOpen",
       "True if this object has an open file handle.",
       &HDF5WriterBase::isOpen);
+
   static ValueFinfo <HDF5WriterBase, unsigned int > mode(
       "mode",
       "Depending on mode, if file already exists, if mode=1, data will be"
@@ -62,10 +64,30 @@ const Cinfo* HDF5WriterBase::initCinfo()
       " mode=4, no writing will happen.",
       &HDF5WriterBase::setMode,
       &HDF5WriterBase::getMode);
+
+  static LookupValueFinfo< HDF5WriterBase, string, string  > sattr(
+      "sattr",
+      "String attributes. The key is attribute name, value is attribute value (string).",
+      &HDF5WriterBase::setSAttr,
+      &HDF5WriterBase::getSAttr);
+  
+  static LookupValueFinfo< HDF5WriterBase, string, double > fattr(
+      "fattr",
+      "Float attributes. The key is attribute name, value is attribute value (double).",
+      &HDF5WriterBase::setFAttr,
+      &HDF5WriterBase::getFAttr);
+  
+  static LookupValueFinfo< HDF5WriterBase, string, long > iattr(
+      "iattr",
+      "Integer attributes. The key is attribute name, value is attribute value (long).",
+      &HDF5WriterBase::setIAttr,
+      &HDF5WriterBase::getIAttr);
+  
   static DestFinfo flush(
       "flush",
       "Write all buffer contents to file and clear the buffers.",
       new OpFunc0 < HDF5WriterBase > ( &HDF5WriterBase::flush ));
+
   static DestFinfo close(
       "close",
       "Close the underlying file. This is a safety measure so that file is not in an invalid state even if a crash happens at exit.",
@@ -76,6 +98,9 @@ const Cinfo* HDF5WriterBase::initCinfo()
     &fileName,
     &isOpen,
     &mode,
+    &sattr,
+    &fattr,
+    &iattr,
     &flush,
     &close,
   };
@@ -122,7 +147,6 @@ HDF5WriterBase::~HDF5WriterBase()
 
 void HDF5WriterBase::setFilename(string filename)
 {
-    herr_t status;
     if (filename_ == filename){
         return;
     }
@@ -208,12 +232,64 @@ void HDF5WriterBase::close()
     if (filehandle_ < 0){
         return;
     }
+    // First write all attributes of root node.
+    writeRootAttr<string>(filehandle_, sattr_);
+    writeRootAttr<double>(filehandle_, fattr_);
+    writeRootAttr<long>(filehandle_, iattr_);    
     herr_t err = H5Fclose(filehandle_);
     filehandle_ = -1;
     if (err < 0){
-        cerr << "Error: Error occurred when closing file. Error code: " << err << endl;
-    }    
+        cerr << "Error: closing file. Status code=" << err << endl;
+    }
 }
+
+void HDF5WriterBase::setSAttr(string name, string value)
+{
+    sattr_[name] = value;
+}
+
+void HDF5WriterBase::setFAttr(string name, double value)
+{
+    fattr_[name] = value;
+}
+
+void HDF5WriterBase::setIAttr(string name, long value)
+{
+    iattr_[name] = value;
+}
+
+string HDF5WriterBase::getSAttr(string name) const
+{
+    map <string, string>::const_iterator ii = sattr_.find(name);
+    if (ii != sattr_.end()){
+        return ii->second;
+    }
+    cerr << "Error: no attribute named " << name << endl;
+    return "";
+}
+
+double HDF5WriterBase::getFAttr(string name) const
+{
+    map <string, double>::const_iterator ii = fattr_.find(name);
+    if (ii != fattr_.end()){
+        return ii->second;
+    }
+    cerr << "Error: no attribute named " << name << endl;
+    return 0.0;
+}
+
+long HDF5WriterBase::getIAttr(string name) const
+{
+    map <string, long>::const_iterator ii = iattr_.find(name);
+    if (ii != iattr_.end()){
+        return ii->second;
+    }
+    cerr << "Error: no attribute named " << name << endl;
+    return 0.0;
+}
+
+
+
 
 #endif // USE_HDF5
 // 

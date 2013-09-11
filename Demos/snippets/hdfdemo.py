@@ -31,6 +31,11 @@ h.mode = 2 # Truncate existing file
 moose.connect(h, 'requestData', t, 'get_vec')
 moose.connect(h, 'requestData', t1, 'get_vec')
 h.filename = 'output.h5'
+# We allow simple attributes of type string, double and long on the
+# root node. This allows for file-level metadata/annotation.
+h.sattr['note'] = 'This is a test.'
+h.fattr['a float attribute'] = 3.141592
+h.iattr['an int attribute'] = 86400
 moose.setClock(0, 0.1)
 moose.setClock(1, 0.1)
 moose.setClock(2, 10)
@@ -40,6 +45,7 @@ moose.useClock(2, '/##[TYPE=HDF5DataWriter]', 'process')
 moose.reinit()
 c.inject = 0.1
 moose.start(30.0)
+h.close()
 print 'Finished simulation. Data was saved in', h.filename
 # print numpy.array(t.vec)
 # moose.start(0.5)
