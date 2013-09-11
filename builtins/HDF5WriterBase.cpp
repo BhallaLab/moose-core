@@ -30,6 +30,8 @@
 
 #ifdef USE_HDF5
 
+#include <algorithm>
+#include <string>
 #include <fstream>
 
 #include "hdf5.h"
@@ -65,6 +67,24 @@ const Cinfo* HDF5WriterBase::initCinfo()
       &HDF5WriterBase::setMode,
       &HDF5WriterBase::getMode);
 
+  static ValueFinfo< HDF5WriterBase, unsigned int> chunkSize(
+      "chunkSize",
+      "Chunksize for writing array data. Defaults to 100.",
+      &HDF5WriterBase::setChunkSize,
+      &HDF5WriterBase::getChunkSize);
+
+  static ValueFinfo< HDF5WriterBase, string> compressor(
+      "compressor",
+      "Compression type for array data. zlib and szip are supported. Defaults to zlib.",
+      &HDF5WriterBase::setCompressor,
+      &HDF5WriterBase::getCompressor);
+  
+  static ValueFinfo< HDF5WriterBase, unsigned int> compression(
+      "compression",
+      "Compression level for array data. Defaults to 6.",
+      &HDF5WriterBase::setCompression,
+      &HDF5WriterBase::getCompression);
+
   static LookupValueFinfo< HDF5WriterBase, string, string  > sattr(
       "sattr",
       "String attributes. The key is attribute name, value is attribute value (string).",
@@ -98,6 +118,9 @@ const Cinfo* HDF5WriterBase::initCinfo()
     &fileName,
     &isOpen,
     &mode,
+    &chunkSize,
+    &compressor,
+    &compression,
     &sattr,
     &fattr,
     &iattr,
@@ -124,10 +147,16 @@ const Cinfo* HDF5WriterBase::initCinfo()
   return &hdf5Cinfo;                
 }
 
+const hssize_t HDF5WriterBase::CHUNK_SIZE = 1024; // default chunk size
+
+
 HDF5WriterBase::HDF5WriterBase():
         filehandle_(-1),
         filename_("moose_output.h5"),
-        openmode_(H5F_ACC_EXCL)
+        openmode_(H5F_ACC_EXCL),
+        chunkSize_(CHUNK_SIZE),
+        compressor_("zlib"),
+        compression_(6)
 {
 }
 
@@ -220,6 +249,39 @@ unsigned HDF5WriterBase::getMode() const
 {
     return openmode_;
 }
+
+void HDF5WriterBase::setChunkSize(unsigned int size)
+{
+    chunkSize_ = size;
+}
+
+unsigned int HDF5WriterBase::getChunkSize() const
+{
+    return chunkSize_;
+}
+
+void HDF5WriterBase::setCompressor(string name)
+{
+    compressor_ = name;
+    std::transform(compressor_.begin(), compressor_.end(), compressor_.begin(), ::tolower);
+}
+
+string HDF5WriterBase::getCompressor() const
+{
+    return compressor_;
+}
+
+void HDF5WriterBase::setCompression(unsigned int level)
+{
+    compression_ = level;
+}
+
+unsigned int HDF5WriterBase::getCompression() const
+{
+    return compression_;
+}
+
+        
 // Subclasses should reimplement this for flushing data content to
 // file.
 void HDF5WriterBase::flush()

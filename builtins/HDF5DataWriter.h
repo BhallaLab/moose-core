@@ -38,7 +38,6 @@
 class HDF5DataWriter: public HDF5WriterBase
 {
   public:
-    static const hssize_t CHUNK_SIZE;
     HDF5DataWriter();
     virtual ~HDF5DataWriter();
     void setFlushLimit(unsigned int limit);
