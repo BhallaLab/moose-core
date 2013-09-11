@@ -35,6 +35,7 @@
 class HDF5WriterBase
 {
   public:
+    static const hssize_t CHUNK_SIZE;
     HDF5WriterBase();
     virtual ~HDF5WriterBase();
     void setFilename(string filename);
@@ -42,6 +43,12 @@ class HDF5WriterBase
     bool isOpen() const;
     void setMode(unsigned int mode);
     unsigned int getMode() const;
+    void setChunkSize(unsigned int);
+    unsigned int getChunkSize() const;
+    void setCompressor(string compressor);
+    string getCompressor() const;
+    void setCompression(unsigned int level);
+    unsigned int getCompression() const;
     void setSAttr(string name, string value);
     void setFAttr(string name, double value);
     void setIAttr(string name, long value);
@@ -69,6 +76,10 @@ class HDF5WriterBase
     map<string, string> sattr_;
     map<string, double> fattr_;
     map<string, long> iattr_;
+    // These are for compressing data
+    unsigned int chunkSize_;
+    string compressor_; // can be zlib or szip
+    unsigned int compression_;
 };
 
 template <typename A>

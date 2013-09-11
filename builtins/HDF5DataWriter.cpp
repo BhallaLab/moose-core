@@ -37,8 +37,6 @@
 
 #include "HDF5DataWriter.h"
 
-const hssize_t HDF5DataWriter::CHUNK_SIZE = 1024; // default chunk size
-
 static SrcFinfo1< FuncId > *requestData() {
 	static SrcFinfo1< FuncId > requestData(
 			"requestData",
@@ -171,7 +169,7 @@ void HDF5DataWriter::process(const Eref & e, ProcPtr p)
     if (filehandle_ < 0){
         return;
     }
-    cout << "HDF5DataWriter::process: currentTime=" << p->currTime << endl;
+    // cout << "HDF5DataWriter::process: currentTime=" << p->currTime << endl;
     requestData()->send(e, p->threadIndexInGroup, recvDataBuf()->getFid());
     for (map<string, vector < double > >:: iterator data_it = datamap_.begin(); data_it != datamap_.end(); ++data_it){        
         string path = data_it->first;
@@ -187,7 +185,7 @@ void HDF5DataWriter::process(const Eref & e, ProcPtr p)
         }
         data_it->second.clear();
     }    
-    clear()->send(e, p->threadIndexInGroup);
+    // clear()->send(e, p->threadIndexInGroup);
 }
 
 void HDF5DataWriter::reinit(const Eref & e, ProcPtr p)
@@ -268,10 +266,17 @@ hid_t HDF5DataWriter::create_dataset(hid_t parent_id, string name)
     herr_t status;
     hsize_t dims[1] = {0};
     hsize_t maxdims[] = {H5S_UNLIMITED};
-    hsize_t chunk_dims[] = {CHUNK_SIZE}; // 1 K
+    hsize_t chunk_dims[] = {chunkSize_};
     hid_t chunk_params = H5Pcreate(H5P_DATASET_CREATE);
     status = H5Pset_chunk(chunk_params, 1, chunk_dims);
-	assert( status >= 0 );
+    assert( status >= 0 );
+    if (compressor_ == "zlib"){
+        status = H5Pset_deflate(chunk_params, compression_);
+    } else if (compressor_ == "szip"){
+        // this needs more study
+        unsigned sz_opt_mask = H5_SZIP_NN_OPTION_MASK;
+        status = H5Pset_szip(chunk_params, sz_opt_mask, HDF5WriterBase::CHUNK_SIZE);
+    }
     hid_t dataspace = H5Screate_simple(1, dims, maxdims);            
     hid_t dataset_id = H5Dcreate2(parent_id, name.c_str(), H5T_NATIVE_DOUBLE, dataspace, H5P_DEFAULT, chunk_params, H5P_DEFAULT);
     return dataset_id;
@@ -334,7 +339,7 @@ void HDF5DataWriter::recvData(const Eref&e, const Qinfo* q, PrepackedBuffer pb)
     // append only the new data. old_size is guaranteed to be 0 on
     // write and the table vecs will also be cleared.
     datamap_[path].insert(datamap_[path].end(), start, end);
-
+    SetGet0::set(q->src(), "clearVec");
 // #ifndef NDEBUG
 //     // debug leftover entries coming from table
 //     cout << "HDF5DataWriter::recvData: vec_size=" << vec_size << endl;
