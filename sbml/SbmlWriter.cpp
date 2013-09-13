@@ -80,7 +80,7 @@ int SbmlWriter::write( string filepath,string target )
   	bool SBMLok = false;
 	createModel( filename,sbmlDoc,target ); 
   	SBMLok  = validateModel( &sbmlDoc );
-	
+
 	if ( SBMLok ) 
 		writeModel( &sbmlDoc, filepath );
     	//delete sbmlDoc;
@@ -98,7 +98,14 @@ int SbmlWriter::write( string filepath,string target )
 
 /** Create an SBML model in the SBML Level 2 version 4 specification **/
 void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
-{ cremodel_ = sbmlDoc.createModel();
+{ 
+  XMLNamespaces  xmlns;
+  xmlns.add("http://www.sbml.org/sbml/level2/version4");
+  xmlns.add("http://www.moose.ncbs.res.in","moose");
+  xmlns.add("http://www.w3.org/1999/xhtml","xhtml");
+  sbmlDoc.setNamespaces(&xmlns);
+
+  cremodel_ = sbmlDoc.createModel();
   cremodel_->setId(filename);
 
   UnitDefinition *ud1 = cremodel_->createUnitDefinition();
@@ -190,8 +197,8 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		    { string notes = Field <string> :: get(ObjId(annotaId),"notes");
 		      if (notes != "")
 			{ string cleanNotes = nameString1(notes);
-			  string notesString = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+
-			  cleanNotes + "\n\t </body>";
+			  string notesString = "<xhtml:body>\n \t \t <xhtml:p>"+
+			  cleanNotes + "</xhtml:p>\n\t </xhtml:body>";
 			  sp->setNotes(notesString);
 			}
 		    }
@@ -258,16 +265,18 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	      
 	      if (notesRE != ""){
 		string cleanNotesRE = nameString1(notesRE);
-		string notesStringRE = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+
-		  cleanNotesRE + "\n\t </body>";
+		 string notesStringRE = "<xhtml:body>\n \t \t <xhtml:p>"+
+			  cleanNotesRE + "</xhtml:p>\n\t </xhtml:body>";
 		reaction->setNotes(notesStringRE);
 	      }
-
+	      string objname = Field<string> :: get(ObjId(*itrRE),"name");
+	      objname = nameString(objname);
 
 	      KineticLaw* kl;
 	      /* Reaction */
 	      if (re_enClass == "ZReac"){
 		reaction->setId( clean_reacname);
+		reaction->setName( objname);
 		double Kf = Field<double>::get(ObjId(*itrRE),"kf");
 		double Kb = Field<double>::get(ObjId(*itrRE),"kb");
 
@@ -315,19 +324,17 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	      else if(re_enClass == "ZEnz")
 		{ // Complex Formation S+E -> SE*;
 		  reaction->setId( clean_reacname);
-
+		  reaction->setName( objname);
 		  string enzname = Field<string> :: get(ObjId(*itrRE),"name");
 		  ostringstream enzid;
 		  enzid << (*itrRE) <<"_"<<index;
 		  enzname = nameString(enzname);
 		  ostringstream Objid;
 		  Objid << (*itrRE) <<"_"<<index <<"_";
-		  string enzName = enzname + "_" + Objid.str() + "_";
+		  string enzName = enzname + "_" + Objid.str();
 		  enzName = idBeginWith( enzName );
+		  string enzAnno = "<moose:EnzymaticReaction>";
 
-		  string enzAnno = "<body xmlns:moose=\"http://www.moose.ncbs.res.in\">\n\t\t";
-		  enzAnno += "<moose:EnzymaticReaction> \n";
-		  
 		  double k1 = Field<double>::get(ObjId(*itrRE),"k1");
 		  double k2 = Field<double>::get(ObjId(*itrRE),"k2");
 		  
@@ -336,23 +343,22 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		  rate_law << "k1";
 		  getSubPrd(reaction,"toEnz","sub",*itrRE,index,rate_law,rct_order,true,re_enClass);
 		  for(unsigned int i =0;i<nameList_.size();i++)
-		    enzAnno += "<moose:enzyme> "+nameList_[i]+" </moose:enzyme>\n";
+		    enzAnno += "<moose:enzyme>"+nameList_[i]+"</moose:enzyme>\n";
 
 		  getSubPrd(reaction,"sub","",*itrRE,index,rate_law,rct_order,true,re_enClass);
 		  for (unsigned int i =0;i<nameList_.size();i++)
-		    enzAnno += "<moose:substrates> "+nameList_[i]+" </moose:substrates>\n";
+		    enzAnno += "<moose:substrates>"+nameList_[i]+"</moose:substrates>\n";
 
 		  /* product */
 		  rate_law << "-" << "k2";
 		  getSubPrd(reaction,"cplxDest","prd",*itrRE,index,rate_law,prd_order,true,re_enClass);
 		  for(unsigned int i =0;i<nameList_.size();i++)
-		    enzAnno += "<moose:product> "+nameList_[i]+" </moose:product>\n";
+		    enzAnno += "<moose:product>"+nameList_[i]+"</moose:product>\n";
 		  enzAnno += "<moose:groupName>"+enzName+"</moose:groupName>\n";
 		  enzAnno += "<moose:stage>1</moose:stage> \n";
-		  enzAnno += "</moose:EnzymaticReaction> \n";
-		  enzAnno += "</body>";
+		  enzAnno += "</moose:EnzymaticReaction>";
 
-		  XMLNode* xnode =XMLNode::convertStringToXMLNode( enzAnno );
+		  XMLNode* xnode =XMLNode::convertStringToXMLNode( enzAnno ,&xmlns);
 		  reaction->setAnnotation( xnode );	
 
 		  kl = reaction->createKineticLaw();
@@ -364,16 +370,17 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 
 		  /* 2 Stage SE* -> E+P  */
 
-		  Objid << "Product_formation_";
+		  Objid << "Product_formation";
 		  string enzName1 = enzname + "_" + Objid.str() + "_";
 		  enzName1 = idBeginWith( enzName1 );
 		  //Reaction* reaction;
 		  reaction = cremodel_->createReaction(); 
 		  reaction->setId( enzName1 );
+		  reaction->setName( objname);
 		  if (notesRE != ""){
 		    string cleanNotesRE = nameString1(notesRE);
-		    string notesStringRE = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+
-		      cleanNotesRE + "\n\t </body>";
+		     string notesStringRE = "<xhtml:body>\n \t \t <xhtml:p>"+
+			  cleanNotesRE + "</xhtml:p>\n\t </xhtml:body>";
 		    reaction->setNotes(notesStringRE);
 		  }
 		  reaction->setReversible( false );
@@ -381,24 +388,23 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		  double erct_order = 0.0,eprd_order = 0.0;
 		  ostringstream enzrate_law;
 		  enzrate_law << "k3";
-		  
-		  string enzAnno2 = "<body xmlns:moose=\"http://www.moose.ncbs.res.in\">\n\t\t";
-		  enzAnno2 += "<moose:EnzymaticReaction> \n";
+		  string enzAnno2 = "<moose:EnzymaticReaction>";
 		  
 		  getSubPrd(reaction,"cplxDest","sub",*itrRE,index,enzrate_law,erct_order,true,re_enClass);
 		  for(unsigned int i =0;i<nameList_.size();i++)
-		    enzAnno2 += "<moose:complex> "+nameList_[i]+" </moose:complex>\n";
+		    enzAnno2 += "<moose:complex>"+nameList_[i]+"</moose:complex>\n";
 		  getSubPrd(reaction,"toEnz","prd",*itrRE,index,enzrate_law,eprd_order,false,re_enClass);
 		  for(unsigned int i =0;i<nameList_.size();i++)
-		    enzAnno2 += "<moose:Enzyme> "+nameList_[i]+" </moose:Enzyme>\n";
+		    enzAnno2 += "<moose:enzyme>"+nameList_[i]+"</moose:enzyme>\n";
 		  getSubPrd(reaction,"prd","",*itrRE,index,enzrate_law,eprd_order,false,re_enClass);
 		  for(unsigned int i =0;i<nameList_.size();i++)
-		    enzAnno2 += "<moose:product> "+nameList_[i]+" </moose:product>\n";
-		  		  enzAnno += "<moose:groupName>"+enzName+"</moose:groupName>\n";
+		    enzAnno2 += "<moose:product>"+nameList_[i]+"</moose:product>\n";
+
+		  enzAnno2 += "<moose:groupName>"+enzName+"</moose:groupName>\n";
 		  enzAnno2 += "<moose:stage>2</moose:stage> \n";
-		  enzAnno2 += "</moose:EnzymaticReaction> \n";
-		  enzAnno2 += "</body>";
-		  XMLNode* xnode2 =XMLNode::convertStringToXMLNode( enzAnno2 );
+		  
+		  enzAnno2 += "</moose:EnzymaticReaction>";
+		  XMLNode* xnode2 =XMLNode::convertStringToXMLNode( enzAnno2 ,&xmlns);
 		  reaction->setAnnotation( xnode2 );	
 
 		  kl = reaction->createKineticLaw();
@@ -408,7 +414,8 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		}// else 
 	      
 	      else if(re_enClass == "ZMMenz")
-		{ reaction->setId( clean_reacname); 
+		{ reaction->setId( clean_reacname);
+		  reaction->setName( objname);
 		  double Km = Field<double>::get(ObjId(*itrRE),"numKm");
 		  double kcat = Field<double>::get(ObjId(*itrRE),"kcat");
 		  reaction->setReversible( false );
@@ -433,7 +440,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		  } 
 		  fRate_law << "kcat" << rate_law.str() << "/" << "(" << "Km" << " +" << s << ")"<<endl;
 		  kl->setFormula( fRate_law.str() );
-		  kl->setNotes("<body xmlns=\"http://www.w3.org/1999/xhtml\">\n\t\t" + fRate_law.str() + "\t </body>");
+		  kl->setNotes("<xhtml:body>\n\t\t<xhtml:p>" + fRate_law.str() + "</xhtml:p>\n\t </xhtml:body>");
 		  printParameters( kl,"Km",Km,"substance" ); 
 		  string kcatUnit = parmUnit( 0 );
 		  printParameters( kl,"kcat",kcat,kcatUnit );
