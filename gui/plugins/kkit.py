@@ -351,7 +351,7 @@ class  KineticsWidget(EditorWidgetBase):
             #src = self.mooseId_GObj[inn]
             if isinstance(out,tuple):
                 if len(out[0])== 0:
-                    print inn.class_ + ':' +inn[0].name+ " doesn't output message"
+                    print inn.className + ':' +inn[0].name+ " doesn't output message"
                 else:
                     src = self.mooseId_GObj[inn]
                     for items in (items for items in out[0] ):
@@ -359,7 +359,7 @@ class  KineticsWidget(EditorWidgetBase):
                         
                         self.lineCord(src,des,items,itemignoreZooming)
                 if len(out[1]) == 0:
-                    print inn.class_ + ':' +inn[0].name+ " doesn't output message"
+                    print inn.className + ':' +inn[0].name+ " doesn't output message"
                 else:
                     for items in (items for items in out[1] ):
                         des = self.mooseId_GObj[element(items[0]).getId()]

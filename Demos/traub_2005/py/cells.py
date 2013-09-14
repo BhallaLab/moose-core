@@ -252,10 +252,10 @@ class CellBase(moose.Neuron):
                         if moose.exists(chpath):
                             found = True
                             channel = moose.element(chpath)
-                            if channel.class_ == 'HHChannel':
+                            if channel.className == 'HHChannel':
                                 row['e_'+chtype] = channel.Ek
                                 row['gbar_'+chtype] = channel.Gbar                        
-                            elif channel.class_ == 'CaConc':
+                            elif channel.className == 'CaConc':
                                 row['tau_cad'] = channel.tau
                                 row['beta_cad'] = channel.B
                             break

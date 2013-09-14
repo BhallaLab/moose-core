@@ -896,10 +896,10 @@ class PlotView(PlotBase):
         classElementDict = defaultdict(list)        
         for epath in elements:
             el = moose.element(epath)
-            classElementDict[el.class_].append(el)
+            classElementDict[el.className].append(el)
         refinedList = []
         elementFieldList = []
-        for class_, elist in classElementDict.items():
+        for className, elist in classElementDict.items():
             if field in elist[0].getFieldNames('valueFinfo'):
                 refinedList +=elist
                 elementFieldList += [(el, field) for el in elist]
@@ -1001,7 +1001,7 @@ class PlotSelectionWidget(QtGui.QScrollArea):
         for ii, entry in enumerate(elementlist):
             el = moose.element(entry)
             plottableFields = []
-            for field, dtype in  moose.getFieldDict(el.class_, 'valueFinfo').items():
+            for field, dtype in  moose.getFieldDict(el.className, 'valueFinfo').items():
                 if dtype == 'double':
                     plottableFields.append(field)
             if len(plottableFields) == 0:
