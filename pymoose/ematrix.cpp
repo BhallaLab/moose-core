@@ -152,7 +152,7 @@ extern "C" {
                  "\nField access to ematrices are vectorized. For example, ematrix.name returns a"
                  "\ntuple containing the names of all the single-elements in this"
                  "\nematrix. There are a few special fields that are unique for ematrix and are not"
-                 "\nvectorized. These are `path`, `value`, `shape` and `class_`."
+                 "\nvectorized. These are `path`, `value`, `shape` and `className`."
                  "\nThere are two ways an ematrix can be initialized, (1) create a new array"
                  "\nelement or (2) create a reference to an existing object."
                  "\n"
@@ -242,7 +242,7 @@ extern "C" {
             return moose_Id_getValue(id);
         } else if (attribute == "shape"){
             return moose_Id_getShape(id);
-        } else if (attribute == "class_" || attribute == "className"){
+        } else if (attribute == "className"){
             // !NOTE: Subha: 2012-08-20 19:52:21 (+0530) - the second
             // !check is to catch a strange bug where the field passed
             // !to moose_Id_getattro is 'class' in stead of

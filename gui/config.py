@@ -52,6 +52,7 @@ import os
 import sys
 import tempfile
 import logging
+import errno
 from PyQt4.Qt import Qt
 from PyQt4 import QtGui, QtCore
 

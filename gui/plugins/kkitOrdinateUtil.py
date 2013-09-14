@@ -161,17 +161,17 @@ def autoCoordinates(meshEntry,srcdesConnection):
             G.add_node(reaObj.path)
         
     for inn,out in srcdesConnection.items():
-        if (inn.class_ =='ZombieReac'): arrowcolor = 'green'
-        elif(inn.class_=='ZombieEnz'): arrowcolor = 'red'
+        if (inn.className =='ZombieReac'): arrowcolor = 'green'
+        elif(inn.className =='ZombieEnz'): arrowcolor = 'red'
         else: arrowcolor = 'blue'
         if isinstance(out,tuple):
             if len(out[0])== 0:
-                print inn.class_ + ':' +inn[0].name + "  doesn't have input message"
+                print inn.className + ':' +inn[0].name + "  doesn't have input message"
             else:
                 for items in (items for items in out[0] ):
                     G.add_edge(element(items[0]).getField('path'),inn[0].path)
             if len(out[1]) == 0:
-                print inn.class_ + ':' + inn[0].name + "doesn't have output mssg"
+                print inn.className + ':' + inn[0].name + "doesn't have output mssg"
             else:
                 for items in (items for items in out[1] ):
                     G.add_edge(inn[0].path,element(items[0]).getField('path'))
