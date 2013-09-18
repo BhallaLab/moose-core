@@ -71,9 +71,9 @@ def calcArrow(srcdes_list,itemignoreZooming,iconScale):
     destIntersects, lineDestPoint = calcLineRectIntersection(desRect, tmpLine)
 
     if not srcIntersects:
-        print 'Source does not intersect line. Arrow points:', lineSrcPoint, src.mobj[0].name, src.mobj[0].class_
+        print 'Source does not intersect line. Arrow points:', lineSrcPoint, src.mobj[0].name, src.mobj[0].className
     if not destIntersects:
-        print 'Dest does not intersect line. Arrow points:', lineDestPoint,  des.mobj[0].name, des.mobj[0].class_
+        print 'Dest does not intersect line. Arrow points:', lineDestPoint,  des.mobj[0].name, des.mobj[0].className
 
     '''src and des are connected with line co-ordinates
        Arrow head is drawned if the distance between src and des line is >8 just for clean appeareance
