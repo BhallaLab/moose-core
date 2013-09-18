@@ -64,7 +64,7 @@ class PoolItem(KineticsDisplayItem):
         self.gobj.setPen(QtGui.QPen(QtGui.QBrush(textcolor)))
         self.gobj.setBrush(QtGui.QBrush(textcolor))
 
-	if self.mobj.class_ != "StimulusTable":
+	if self.mobj.className != "StimulusTable":
 	        self.bg.setBrush(QtGui.QBrush(bgcolor))
 
     def refresh(self,scale):

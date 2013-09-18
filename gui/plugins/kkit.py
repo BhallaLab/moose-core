@@ -223,7 +223,7 @@ class  KineticsWidget(EditorWidgetBase):
         for cmpt,memb in self.meshEntry.items():
             for enzObj in find_index(memb,'enzyme'):
                 enzinfo = enzObj.path+'/info'
-                if enzObj.class_ == 'ZEnz':
+                if enzObj.className == 'ZEnz':
                     enzItem = EnzItem(enzObj,self.qGraCompt[cmpt])
                 else:
                     enzItem = MMEnzItem(enzObj,self.qGraCompt[cmpt])
