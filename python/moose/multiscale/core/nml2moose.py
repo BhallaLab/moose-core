@@ -18,43 +18,19 @@ from IPython import embed
 
 logger = logging.getLogger('multiscale')
 
-try:
-    from lxml import etree
-    logger.info("Running with lxml.etree")
-except ImportError:
-    try:
-        # Python 2.5
-        import xml.etree.cElementTree as etree
-        logger.info("Running with cElementTree")
-    except ImportError:
-        try:
-            # Python 2.5
-            import xml.etree.ElementTree as etree
-            logger.info("Running with xml.etree.ElementTree")
-        except ImportError:
-            try:
-              # normal cElementTree install
-              import cElementTree as etree
-              logger.info("Running with cElementTree")
-            except ImportError:
-                try:
-                    # normal ElementTree install
-                    import elementtree.ElementTree as etree
-                    logger.info("Running with elementtree.ElementTree")
-                except ImportError:
-                    logger.error("Failed to import ElementTree in usual places")
-                    os._exit(1)
-
+from lxml import etree
+from lxml import objectify 
 
 # class to read NML2
 import moose 
 import moose_xml.get_elements as _xml
+
 class NML2Reader(object) :
 
   def __init__(self):
     self.lunit = 1e-6 # micron is the default lenght unit 
-    self.xmlDoc = None
-    self.nmlDoc = None # NML2 Document
+    self.xmlObj = None
+    self.nmlObj = None # NML2 Document
     self.nmlToMoose = dict() # NeuroML object to moose object
     self.includes = dict()   # Included files in nml
     self.lib = moose.Neutral('/library')
@@ -62,10 +38,18 @@ class NML2Reader(object) :
 
   def read(self, nmlFilePath) :
     logger.info("Parsing NML2 file.")
-    self.nmlDoc = etree.parse(nmlFilePath)
-    if self.nmlDoc :
-      includesElem =  _xml.getElementNM(self.nmlDoc, ["neuroml", "include"])
+    self.nmlObj = objectify.parse(nmlFilePath)
+    if self.nmlObj :
+      self.nmlObjRoot = self.nmlObj.getroot()
+      objPath = objectify.ObjectPath(".include")
+      includesElem = objPath(self.nmlObj.getroot())
       self.importIncludes(nmlFilePath, includesElem)
+      # Import ion channels 
+      self.importIonChannels()
+      # Add concentration models
+      self.createConcentrationModels()
+      # and build moose now 
+      self.buildMoose()
     else :
       logger.error("Could not parse {0}".format(nmlFilePath))
       sys.exit(0)
@@ -81,7 +65,30 @@ class NML2Reader(object) :
       # We should be able to find at least one path 
       for tryP in paths :
         if os.path.exists(tryP) :
-          logger.info("Parse the include path and append it to XML")
+          logger.info("Parse the include path {0} and append it to XML".format(tryP))
+          self.appendIncludeToDoc(tryP)
           # parse it and append to self.doc 
         else : pass 
 
+  def appendIncludeToDoc(self, includedXMLPath) :
+    """
+    Store all included files in a dictionary. When parsing the main XML model,
+    we should search the included file to find the models.
+
+    """
+    includePathObj = objectify.parse(includedXMLPath)
+    assert os.path.exists(includedXMLPath)
+    includeElemObj = objectify.parse(includedXMLPath)
+    self.includes[includedXMLPath] = includeElemObj
+  
+  def createConcentrationModels(self) :
+    logger.info("Create concentration models.")
+
+    
+
+  def buildMoose(self) :
+    """
+    Now build moose.
+    """
+    logger.info("Build moose now.")
+    

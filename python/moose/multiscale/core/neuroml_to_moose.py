@@ -61,6 +61,7 @@ from units import SI
 import hhfit
 import logging
 import debug.debug as debug
+from IPython import embed
 
 loglevel = logging.DEBUG
 logstream = logging.StreamHandler()
@@ -137,13 +138,16 @@ class NML2Reader(object):
         self._cell_to_sg = {} # nml cell to dict - the dict maps segment groups to segments
         
     def read(self, filename):
-        self.doc = nml.parse(filename)
+        self.doc = nml.parse(filename, True)
         self.filename = filename
         self.importIncludes(self.doc)
         self.importIonChannels(self.doc)
         self.importConcentrationModels(self.doc)
         for cell in self.doc.cell:
             self.createCellPrototype(cell)
+        # TODO: Is there any other element left in the document.
+        debug.printDebug("TODO"
+            , "Check for other elements other than cell in self.doc.",)
 
 
     def createCellPrototype(self, cell, symmetric=False):
@@ -259,8 +263,10 @@ class NML2Reader(object):
                 self.copySpecies(species, comp)
 
     def copySpecies(self, species, compartment):
-        """Copy the prototype pool `species` to compartment. Currently only
-        decaying pool of Ca2+ supported"""
+        """
+        Copy the prototype pool `species` to compartment. Currently only
+        decaying pool of Ca2+ supported
+        """
         proto_pool = None
         if species.concentrationModel in self.proto_pools:
             proto_pool = self.proto_pools[species.concentrationModel]
@@ -270,13 +276,19 @@ class NML2Reader(object):
                     proto_pool = innerReader.proto_pools[species.concentrationModel]
                     break
         if not proto_pool:
-            raise Exception('No prototype pool for %s referred to by %s' 
-                % (species.concentrationModel, species.id))
-        pool_id = moose.copy(proto_pool, comp, species.id)
-        pool = moose.element(pool_id)
-        pool.B = pool.B / (np.pi * compartment.length * (0.5 * compartment.diameter + pool.thickness) * (0.5 * compartment.diameter - pool.thickness))        
-        return pool
-        
+           # TODO : Dilawar, Re-enable raise Exception once testing is over.
+           logger.warn("No prototype pool for %s referred to by %s" %
+               (species.concentrationModel, species.id))
+           # raise Exception('No prototype pool for %s referred to by %s' 
+           #     % (species.concentrationModel, species.id))
+        else :
+          pool_id = moose.copy(proto_pool, compartment, species.id)
+          pool = moose.element(pool_id)
+          pool.B = pool.B / (np.pi * compartment.length 
+              * (0.5 * compartment.diameter + pool.thickness) 
+              * (0.5 * compartment.diameter - pool.thickness))        
+          return pool
+          
     def importAxialResistance(self, nmlcell, intracellularProperties):
         sg_to_segments = self._cell_to_sg[nmlcell]
         for r in intracellularProperties.resistivity:

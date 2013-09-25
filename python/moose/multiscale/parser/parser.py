@@ -57,28 +57,10 @@ def parseModels(models) :
     elemDict = dict()
     if models.nml :
         # Get the schema 
-        schemaFile = "./moose_xml/NeuroML_v2beta1.xsd"
-        with open(schemaFile, "r") as f :
-            nmlSchemaTxt = etree.XML(f.read())
-
-        nmlSchema = etree.XMLSchema(nmlSchemaTxt)
-        nmlParser = etree.XMLParser(schema = nmlSchema)
-
         with open(models.nml, "r") as nmlFile :
-            nmlText = nmlFile.read()
             elemDict['nml'] = models.nml
-        try :
-            rootElementOfNml = etree.fromstring(nmlText, nmlParser)
-        except :
-            logger.warn("Validation with schema {0} failed. Continuing \
-                nonetheless.".format(schemaFile))
-            rootElementOfNml = etree.parse(models.nml)
-            elemDict['nmlXml'] = rootElementOfNml
-
+        
     if models.sbml :
-        # TODO : parse it in the same way as we are parsing neuroML
-        rootElementOfSbml = etree.parse(models.sbml)
-        elemDict['sbmlXml'] = rootElementOfSbml
         elemDict['sbml'] = models.sbml
     return elemDict
 

@@ -13,8 +13,9 @@
 import sys
 import debug.debug as debug
 import moose_xml.get_elements as xml 
-#import core.neuroml_to_moose as nml2moose
-import core.nml2moose as nml2moose
+
+import core.neuroml_to_moose as nml2moose
+#import core.nml2moose as nml2moose
 
 try:
     from lxml import etree
