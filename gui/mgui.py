@@ -71,7 +71,8 @@ __author__ = 'Subhasis Ray'
 # moved to a separate property file perhaps
 subtype_plugin_map = {
     'genesis/kkit': 'kkit',
-    'cspace/': 'kkit'
+    'cspace/': 'kkit',
+    'xml/sbml': 'kkit'
 }
 
     
@@ -669,7 +670,8 @@ class MWindow(QtGui.QMainWindow):
                 if '/' in modelName:
                     raise mexception.ElementNameError('Model name cannot contain `/`')
                 ret = loadFile(str(fileName), '/model/%s' % (modelName), merge=False)
-                #print '11111'
+                self.objectEditSlot('/',False)
+
                 # Harsha: if subtype is None, in case of cspace then pluginLookup = /cspace/None 
                 #     which will not call kkit plugin so cleaning to /cspace 
                 pluginLookup = '%s/%s' % (ret['modeltype'], ret['subtype'])
@@ -680,8 +682,7 @@ class MWindow(QtGui.QMainWindow):
                 print 'Loaded model', ret['model'].path
                 self.setPlugin(pluginName, ret['model'].path)
                 #Harsha: This will clear out object editor's objectpath and make it invisible
-                self.objectEditSlot('/',False)
-
+        
     def newModelDialogSlot(self):
         #Harsha: Create a new dialog widget for model building
         newModelDialog = DialogWidget()

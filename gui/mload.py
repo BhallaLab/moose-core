@@ -87,19 +87,23 @@ def loadFile(filename, target, merge=True):
     pwe = moose.getCwe()
     if modeltype == 'genesis':
         if subtype == 'kkit' or subtype == 'prototype':
-            model = moose.loadModel(filename, target)            
+            model = moose.loadModel(filename, target)
         else:
             print 'Only kkit and prototype files can be loaded.'
     elif modeltype == 'cspace':
-            model = moose.loadModel(filename, target)        
-    elif modeltype == 'xml' and subtype == 'neuroml':
-        popdict, projdict = neuroml.loadNeuroML_L123(filename)
+            model = moose.loadModel(filename, target)
+    elif modeltype == 'xml':
+        if subtype == 'neuroml':
+            popdict, projdict = neuroml.loadNeuroML_L123(filename)
         # Circus to get the container of populations from loaded neuroml
-        for popinfo in popdict.values():
-            for cell in popinfo[1].values():
-                model = cell.parent
+            for popinfo in popdict.values():
+                for cell in popinfo[1].values():
+                    model = cell.parent
+                    break
                 break
-            break
+        elif subtype == "sbml":
+            model = moose.readSBML(filename,target)
+
     else:
         raise FileLoadError('Do not know how to handle this filetype: %s' % (filename))
     moose.setCwe(pwe) # The MOOSE loadModel changes the current working element to newly loaded model. We revert that behaviour
