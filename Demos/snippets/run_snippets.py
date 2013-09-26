@@ -63,7 +63,8 @@ import sys
 from subprocess import call
 
 os.environ['NUMPTHREADS'] = '1'
-os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + ':../../python'
+sys.path.append('../../python')
+#os.environ['PYTHONPATH'] = os.environ['PYTHONPATH'] + ':../../python'
 
 thisfile = os.path.abspath(__file__)
 
