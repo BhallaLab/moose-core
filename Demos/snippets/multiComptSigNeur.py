@@ -36,6 +36,7 @@
 
 import sys
 sys.path.append('../../python')
+
 import os
 os.environ['NUMPTHREADS'] = '1'
 import math
@@ -354,7 +355,7 @@ def printMolVecs( title ):
     #print 'sRnInit=', sR.nInit, ', pR=', pR.nInit
     print 'sRconcInit=', sR.concInit, ', pR=', pR.concInit
 
-    #print 'nCaSize=', nCa.size, ', sCa=', sCa.size, ', sR=', sR.n, ', pR=', pR.n
+    #print 'nCaSize=', nCa.volume, ', sCa=', sCa.volume, ', sR=', sR.n, ', pR=', pR.n
     """    
 
 def makeChemInCubeMesh():
@@ -390,13 +391,13 @@ def makeChemInCubeMesh():
 
     createChemModel( neuroMesh, spineMesh, psdMesh )
     dendCa = moose.element( '/model/chem/neuroMesh/Ca' )
-    assert dendCa.size == dendSide * dendSide * dendSide
+    assert dendCa.volume == dendSide * dendSide * dendSide
     spineCa = moose.element( '/model/chem/spineMesh/Ca' )
-    assert spineCa.size == spineSide * spineSide * spineSide
+    assert spineCa.volume == spineSide * spineSide * spineSide
     psdGluR = moose.element( '/model/chem/psdMesh/psdGluR' )
-    assert psdGluR.size == psdSide * psdSide * psdSide
+    assert psdGluR.volume == psdSide * psdSide * psdSide
     dendKinaseEnzCplx = moose.element( '/model/chem/neuroMesh/Ca.kinase/enz/cplx' )
-    assert dendKinaseEnzCplx.size == dendSide * dendSide * dendSide
+    assert dendKinaseEnzCplx.volume == dendSide * dendSide * dendSide
 
 def makeSolvers( elecDt ):
         # Put in the solvers, see how they fare.
@@ -428,7 +429,7 @@ def makeCubeMultiscale():
     moose.connect( diffReac, 'sub', headCa, 'reac' )
     moose.connect( diffReac, 'prd', dendCa, 'reac' )
     diffReac.Kf = 1 
-    diffReac.Kb = headCa.size / dendCa.size
+    diffReac.Kb = headCa.volume / dendCa.volume
 
     # set up adaptors
     headCa = moose.element( '/model/chem/spineMesh/Ca' )
