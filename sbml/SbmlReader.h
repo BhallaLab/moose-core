@@ -39,7 +39,7 @@ class SbmlReader
 	public:
 		SbmlReader() {errorFlag_ = false;}
 		~SbmlReader() {;}
-		int read(string filename,string location);
+		Id read(string filename,string location);
 		map< string, Id> createCompartment(string location);
 		map< string, Id> createMolecule(map<string,Id>&);
 		void  createReaction(map<string,Id> &);
@@ -51,6 +51,7 @@ class SbmlReader
 		SBMLDocument* document_;
 		SBMLReader reader_;
 		map< string, Id >elmtMolMap_;
+		Id baseId;
 		double transformUnits( double msize,UnitDefinition * ud,string type,bool hasonlySubUnit );
 		void getRules();
 		void printMembers( const ASTNode* p,vector <string> & ruleMembers );
@@ -58,9 +59,10 @@ class SbmlReader
 		void getKLaw( KineticLaw * klaw,bool rev,vector< double > & rate );
 		void pushParmstoVector( const ASTNode* p,vector <string> & parameters );
 		void getParameters( const ASTNode* node,vector <string> & parameters );
-		void setupMMEnzymeReaction( Reaction * reac,string id ,map<string,Id> &);
+		void setupMMEnzymeReaction( Reaction * reac,string id ,string name,map<string,Id> &);
 		string getAnnotation( Reaction* reaction,map<string,EnzymeInfo> & );
-		void setupEnzymaticReaction( const EnzymeInfo & einfo,string name,map< string, Id > & );
+		void setupEnzymaticReaction( const EnzymeInfo & einfo,string name,map< string, Id > & ,string name1);
+		void findModelParent( Id cwe, const string& path,Id& parentId, string& modelName );
 #endif
 		
 };

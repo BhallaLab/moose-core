@@ -197,8 +197,8 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		    { string notes = Field <string> :: get(ObjId(annotaId),"notes");
 		      if (notes != "")
 			{ string cleanNotes = nameString1(notes);
-			  string notesString = "<xhtml:body>\n \t \t <xhtml:p>"+
-			  cleanNotes + "</xhtml:p>\n\t </xhtml:body>";
+			  string notesString = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+
+			    cleanNotes + "\n\t </body>"; 
 			  sp->setNotes(notesString);
 			}
 		    }
@@ -265,8 +265,8 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 	      
 	      if (notesRE != ""){
 		string cleanNotesRE = nameString1(notesRE);
-		 string notesStringRE = "<xhtml:body>\n \t \t <xhtml:p>"+
-			  cleanNotesRE + "</xhtml:p>\n\t </xhtml:body>";
+		string notesStringRE = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+
+		  cleanNotesRE + "\n\t </body>"; 
 		reaction->setNotes(notesStringRE);
 	      }
 	      string objname = Field<string> :: get(ObjId(*itrRE),"name");
@@ -329,6 +329,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		  ostringstream enzid;
 		  enzid << (*itrRE) <<"_"<<index;
 		  enzname = nameString(enzname);
+		  string enzNameAnno = enzname;
 		  ostringstream Objid;
 		  Objid << (*itrRE) <<"_"<<index <<"_";
 		  string enzName = enzname + "_" + Objid.str();
@@ -343,7 +344,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		  rate_law << "k1";
 		  getSubPrd(reaction,"toEnz","sub",*itrRE,index,rate_law,rct_order,true,re_enClass);
 		  for(unsigned int i =0;i<nameList_.size();i++)
-		    enzAnno += "<moose:enzyme>"+nameList_[i]+"</moose:enzyme>\n";
+		      enzAnno += "<moose:enzyme>"+nameList_[i]+"</moose:enzyme>\n";
 
 		  getSubPrd(reaction,"sub","",*itrRE,index,rate_law,rct_order,true,re_enClass);
 		  for (unsigned int i =0;i<nameList_.size();i++)
@@ -367,7 +368,6 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		  printParameters( kl,"k1",k1,unit ); 
 		  string punit=parmUnit( prd_order-1 );
 		  printParameters( kl,"k2",k2,punit ); 
-
 		  /* 2 Stage SE* -> E+P  */
 
 		  Objid << "Product_formation";
@@ -379,8 +379,8 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		  reaction->setName( objname);
 		  if (notesRE != ""){
 		    string cleanNotesRE = nameString1(notesRE);
-		     string notesStringRE = "<xhtml:body>\n \t \t <xhtml:p>"+
-			  cleanNotesRE + "</xhtml:p>\n\t </xhtml:body>";
+		    string notesStringRE = "<body xmlns=\"http://www.w3.org/1999/xhtml\">\n \t \t"+
+		      cleanNotesRE + "\n\t </body>"; 
 		    reaction->setNotes(notesStringRE);
 		  }
 		  reaction->setReversible( false );
@@ -389,7 +389,6 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		  ostringstream enzrate_law;
 		  enzrate_law << "k3";
 		  string enzAnno2 = "<moose:EnzymaticReaction>";
-		  
 		  getSubPrd(reaction,"cplxDest","sub",*itrRE,index,enzrate_law,erct_order,true,re_enClass);
 		  for(unsigned int i =0;i<nameList_.size();i++)
 		    enzAnno2 += "<moose:complex>"+nameList_[i]+"</moose:complex>\n";
@@ -440,7 +439,7 @@ void SbmlWriter::createModel(string filename,SBMLDocument& sbmlDoc,string path)
 		  } 
 		  fRate_law << "kcat" << rate_law.str() << "/" << "(" << "Km" << " +" << s << ")"<<endl;
 		  kl->setFormula( fRate_law.str() );
-		  kl->setNotes("<xhtml:body>\n\t\t<xhtml:p>" + fRate_law.str() + "</xhtml:p>\n\t </xhtml:body>");
+		  kl->setNotes("<body xmlns=\"http://www.w3.org/1999/xhtml\">\n\t\t" + fRate_law.str() + "\n\t </body>");
 		  printParameters( kl,"Km",Km,"substance" ); 
 		  string kcatUnit = parmUnit( 0 );
 		  printParameters( kl,"kcat",kcat,kcatUnit );
@@ -486,7 +485,7 @@ string SbmlWriter::cleanNameId(Id itrid,int  index)
       objname_id = objname_id_n;
     }
   else if (objclass == "ZEnz")
-    { string objname_id_n = objname_id + "_Complex_formation_";
+    { string objname_id_n = objname_id + "Complex_formation_";
 	//changeName(objname_id,"Complex_formation" );
       objname_id = objname_id_n;
     }
@@ -503,6 +502,8 @@ void SbmlWriter::getSubPrd(Reaction* rec,string type,string enztype,Id itrRE, in
   rctprdUniq.insert(rct.begin(),rct.end());
   for (std::set < Id> :: iterator rRctPrd = rctprdUniq.begin();rRctPrd!=rctprdUniq.end();rRctPrd++)
     { double stoch = count( rct.begin(),rct.end(),*rRctPrd );
+      string objname = Field<string> :: get(ObjId(*rRctPrd),"name");
+      string cleanObjname = nameString(objname);
       string clean_name = cleanNameId(*rRctPrd,index);
       if (type == "sub" or (type == "toEnz" and enztype == "sub" ) or (type == "cplxDest" and enztype == "sub")) 
 	{
@@ -537,7 +538,7 @@ void SbmlWriter::getSubPrd(Reaction* rec,string type,string enztype,Id itrRE, in
     } //rRct
   //return rctprdUniq ;
   //for(vector< string >::iterator itr = nameList_.begin(); itr != nameList_.end();itr++ )
-    //cout "\t \t\n %%"<< itr;
+  //  cout <<"\t \t\n %%"<< *itr;
 }
 
 void SbmlWriter::getModifier(ModifierSpeciesReference* mspr,vector < Id> mod, int index,ostringstream& rate_law,double &rct_order,bool w)
@@ -606,6 +607,12 @@ string SbmlWriter::nameString( string str )
 	  str.replace( i,1,str1 );
 	  len += str1.length()-1;
 	  break;
+	case '\'':
+	  str1 = "_prime_";
+	  str.replace( i,1,str1 );
+	  len += str1.length()-1;
+	  break;
+
 	case '+':
 	  str1 = "_plus_";
 	  str.replace( i,1,str1 );
