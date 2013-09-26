@@ -1329,12 +1329,29 @@ extern "C" {
 
     PyObject * moose_readSBML(PyObject * dummy, PyObject * args)
     {
-        char * fname = NULL, * modelpath = NULL;
-        if(!PyArg_ParseTuple(args, "ss:moose_readSBML", &fname, &modelpath)){
-            return NULL;
-        }        
-        int ret = SHELLPTR->doReadSBML(string(fname), string(modelpath));
-        return Py_BuildValue("i", ret);
+      char * fname = NULL, * modelpath = NULL, * solverclass = NULL;
+      cout << "Solver needs to be added in readSBML";
+      //if(!PyArg_ParseTuple(args, "ss|s:moose_loadModel", &fname, &modelpath, &solverclass)){
+      if(!PyArg_ParseTuple(args, "ss:moose_readSBML", &fname, &modelpath)){
+	return NULL;
+      }
+      //Id ret = SHELLPTR->doReadSBML(string(fname), string(modelpath));
+      //return Py_BuildValue("i", ret);
+      _Id * model = (_Id*)PyObject_New(_Id, &IdType);
+      model->id_ = SHELLPTR->doReadSBML(string(fname), string(modelpath));
+      /*if (!solverclass){
+	model->id_ = SHELLPTR->doReadSBML(string(fname), string(modelpath));
+      } else {
+	model->id_ = SHELLPTR->doReadSBML(string(fname), string(modelpath), string(solverclass));
+      }
+      */
+      if (model->id_ == Id()){
+	Py_XDECREF(model);
+	PyErr_SetString(PyExc_IOError, "could not load model");
+	return NULL;
+      }
+      PyObject * ret = reinterpret_cast<PyObject*>(model);
+      return ret;
     }
 
     PyDoc_STRVAR(moose_loadModel_documentation,
@@ -1359,6 +1376,7 @@ extern "C" {
     PyObject * moose_loadModel(PyObject * dummy, PyObject * args)
     {
         char * fname = NULL, * modelpath = NULL, * solverclass = NULL;
+
         if(!PyArg_ParseTuple(args, "ss|s:moose_loadModel", &fname, &modelpath, &solverclass)){
             return NULL;
         }

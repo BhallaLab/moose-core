@@ -208,9 +208,9 @@ class Shell
 		 */
 		 int doWriteSBML( const string& fname, const string& modelpath,
 		 	bool qFlag = 0 );
-		 int doReadSBML( const string& fname, const string& modelpath,
+		 Id doReadSBML( const string& fname, const string& modelpath,
 		 	bool qFlag = 0 );
-
+		 
 		/**
  		 * This function synchronizes fieldDimension on the DataHandler 
 		 * across nodes. Used after function calls that might alter the
