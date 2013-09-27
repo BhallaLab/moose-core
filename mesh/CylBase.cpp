@@ -404,6 +404,8 @@ double CylBase::nearest( double x, double y, double z,
 		index = numDivs_ - 1;
 	} else { // Inside length of cylinder, now is it inside radius?
 		index = k * numDivs_;
+		if ( index >= numDivs_ )
+			index = numDivs_ - 1;
 		// double ri = r0_ + (index + 0.5) * rSlope_;
 		if ( ret > r )
 			ret = -ret;
