@@ -159,15 +159,15 @@ def makeNeuroMeshModel():
 		syn.delay = i * 1.0e-3
 
 	neuroCompt = moose.NeuroMesh( '/model/neuroMesh' )
-	print 'neuroMeshvolume = ', neuroCompt.mesh[0].volume
+	#print 'neuroMeshvolume = ', neuroCompt.mesh[0].volume
 	neuroCompt.separateSpines = 1
 	neuroCompt.diffLength = diffLength
 	neuroCompt.geometryPolicy = 'cylinder'
 	spineCompt = moose.SpineMesh( '/model/spineMesh' )
-	print 'spineMeshvolume = ', spineCompt.mesh[0].volume
+	#print 'spineMeshvolume = ', spineCompt.mesh[0].volume
 	moose.connect( neuroCompt, 'spineListOut', spineCompt, 'spineList', 'OneToOne' )
 	psdCompt = moose.PsdMesh( '/model/psdMesh' )
-	print 'psdMeshvolume = ', psdCompt.mesh[0].volume
+	#print 'psdMeshvolume = ', psdCompt.mesh[0].volume
 	moose.connect( neuroCompt, 'psdListOut', psdCompt, 'psdList', 'OneToOne' )
 	loadChem( neuroCompt, spineCompt, psdCompt )
 
@@ -202,7 +202,8 @@ def makeNeuroMeshModel():
 
 	#print 'Assigning the cell model'
 	# Now to set up the model.
-	neuroCompt.cell = elec
+	#neuroCompt.cell = elec
+	neuroCompt.cellPortion( elec, '/model/elec/lat_14_#,/model/elec/spine_neck#,/model/elec/spine_head#' )
 	"""
 	ns = neuroCompt.numSegments
 	#assert( ns == 11 ) # dend, 5x (shaft+head)
@@ -242,11 +243,10 @@ def makeNeuroMeshModel():
 	#print "psd: nv=", pmksolve.numLocalVoxels, ", nav=", pmksolve.numAllVoxels, pmksolve.numVarPools, pmksolve.numAllPools
 	ndc = neuroCompt.numDiffCompts
 	#print 'numDiffCompts = ', ndc
-	assert( ndc == 145 )
+	assert( ndc == 13 )
 	ndc = neuroCompt.mesh.num
 	#print 'NeuroMeshNum = ', ndc
-	assert( ndc == 145 )
-
+	assert( ndc == 13 )
 	sdc = spineCompt.mesh.num
 	#print 'SpineMeshNum = ', sdc
 	assert( sdc == 13 )
@@ -353,7 +353,6 @@ def makeChemPlots():
 
 	addPlot( '/model/chem/neuroMesh/DEND/Ca_CaM[0]', 'get_conc', 'dCaCaM0' )
 	addPlot( '/model/chem/neuroMesh/DEND/Ca_CaM[' + str( midSpineVoxel ) + ']', 'get_conc', 'dendMidCaCaM' )
-	addPlot( '/model/chem/neuroMesh/DEND/Ca_CaM[144]', 'get_conc', 'dCaCaM144' )
 	addPlot( '/model/chem/neuroMesh/DEND/Ca_CaM[144]', 'get_conc', 'dCaCaM144' )
 
 def testNeuroMeshMultiscale():

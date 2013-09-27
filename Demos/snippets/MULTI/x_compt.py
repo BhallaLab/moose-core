@@ -1,13 +1,17 @@
-# minimal.py --- 
+# x_compt.py --- 
 # Upi Bhalla, NCBS Bangalore 2013.
 #
 # Commentary: 
 # 
-# Testing system for loading in arbirary multiscale models based on
+# Testing system for loading in arbitrary multiscale models based on
 # model definition files.
-# This version has a minimal model with Ca in all 3 compartments,
+# This version examines cross-compartment reactions. It is based on 
+# minimal.py. It uses a minimal model with Ca in all 3 compartments,
 # and a binding reaction of Ca to CaM (just one step) in SPINE and PSD.
 # Incoming Ca from synaptic events comes to the PSD.
+# The CaMKII binds CaM in the spine, and the product goes reversibly 
+# to the PSD. Just to be sure, another reaction involving foo, bar and zod
+# is also set up to go to and from the PSD.
 # 
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -97,7 +101,7 @@ def loadChem( neuroCompt, spineCompt, psdCompt ):
 	# So we'll have to resize the volumes of the current compartments to the
 	# new ones.
 
-	modelId = moose.loadModel( 'minimal.g', '/model', 'ee' )
+	modelId = moose.loadModel( 'x_compt.g', '/model', 'ee' )
 	chem = moose.element( '/model/model' )
 	chem.name = 'chem'
 	oldN = moose.element( '/model/chem/compartment_1' )
@@ -272,6 +276,8 @@ def makeChemPlots():
     addPlot( '/model/chem/spineMesh/SPINE/CaM[6]', 'get_conc', 'sCaM6' )
     addPlot( '/model/chem/spineMesh/SPINE/CaM[12]', 'get_conc', 'sCaM12' )
 
+    addPlot( '/model/chem/spineMesh/SPINE/CaMKII[6]', 'get_conc', 'sCaMKII6' )
+
     addPlot( '/model/chem/psdMesh/PSD/Ca_CaM[0]', 'get_conc', 'pCaCaM0' )
     addPlot( '/model/chem/psdMesh/PSD/Ca_CaM[6]', 'get_conc', 'pCaCaM6' )
     addPlot( '/model/chem/psdMesh/PSD/Ca_CaM[12]', 'get_conc', 'pCaCaM12' )
@@ -279,12 +285,18 @@ def makeChemPlots():
     addPlot( '/model/chem/spineMesh/SPINE/Ca_CaM[0]', 'get_conc', 'sCaCaM0' )
     addPlot( '/model/chem/spineMesh/SPINE/Ca_CaM[6]', 'get_conc', 'sCaCaM6' )
     addPlot( '/model/chem/spineMesh/SPINE/Ca_CaM[12]', 'get_conc', 'sCaCaM12' )
+    addPlot( '/model/chem/psdMesh/PSD/Ca_CaM_CaMKII[6]', 'get_conc', 'pCaCaMCaMKII6' )
+
+    addPlot( '/model/chem/psdMesh/PSD/zod[6]', 'get_conc', 'zod6' )
+
+    addPlot( '/model/chem/spineMesh/SPINE/foo[6]', 'get_conc', 'foo6' )
+    addPlot( '/model/chem/spineMesh/SPINE/bar[6]', 'get_conc', 'bar6' )
 
 def testNeuroMeshMultiscale():
 	elecDt = 50e-6
 	chemDt = 1e-4
 	plotDt = 5e-4
-	plotName = 'min.plot'
+	plotName = 'x_compt.plot'
 
 	makeNeuroMeshModel()
 	"""
