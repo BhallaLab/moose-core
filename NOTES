@@ -23084,7 +23084,7 @@ Steps:
 * Use higher (more physiological) values of DiffConst: 
 	Raised Ca to 1e-10 and others to 1e-11
 * find the longest ChemDt that works:	1e-4
-- Incorporate chem system in specified portion of model.
+* Incorporate chem system in specified portion of model.
 - Incorporate fractional X-section
 - Use non-adaptive RungeKutta for these really tiny timesteps.
 
@@ -23106,4 +23106,92 @@ compartments. Check for contiguity. Later may have to handle non-contigs.
 3 Sep 2013
 Added in a unit test in testMesh.cpp for setting a portion of a cell. Select
 a subset of dendrites and a subset of spines upon those dendrites. Seems
-to work.
+to work. Checkin 4743.
+
+Next: test fractional model in a python snippet.
+==========================================================================
+4 Sep 2013.
+Subha has fixed the 2-arg object functions. This lets me move ahead with
+subset.py. Now it croaks in NeuroMesh.cpp:757. The meshBackMap points to
+values from 13 to 1 inclusive, so the 13 is out of range. Should be 12 to 0.
+Unclear why.
+==========================================================================
+5 Sep 2013.
+Looking at NeuroNode::filterSpines.
+Tracked down to a bug in CylBase::nearest, in which we sometimes get a
+fractional position of 1. This case fails because this results in a
+mesh index equal to numDivs_, which causes the problems seen.
+Fixed. Now runs past this point and dies with a segv.
+==========================================================================
+6 Sep 2013.
+Segv was actually just an assertion failure on the # of compartments.
+Now it loads and runs the subset correctly, or at least matching with the
+outcome of running the whole model.
+
+At this point there is a reasonably functional system. I could probably use it
+to replicate old multiscale models and start on new ones. Some priorities:
+
+- Work back through the existing MULTI snippets to incorporate current
+	set of features and cleanup. 
+		- Needed for XML development.
+- Build replicant of old multiscale model in Neural Networks.
+		- Needed for validation. Useful for XML development.
+- Coordinate XML development
+		- Needed for meeting and future publication of models.
+- Incorporate func object into solver
+		- Needed for SBML compatibility
+		- Desirable for MOOSE capability
+- Incorporate RK4 as a numerical method for these short dts.
+		- Probably gives a signficant speed boost for real models.
+- Split up the ksover into spatial and local parts. 
+		- Needed to improve diffusion numerics
+- Implement spatial solver with G-J elimination for implicit calculations
+	Do a special version for spines, another for neurons, and another
+	for the cubic mesh.
+		- Needed to improve diffusion numerics. Depends on above.
+- Figure out how to do the spatial solver with GSSA
+		- Needed for spines particularly, for stochastic calculations.
+- Clean up the old GSSA solver code.
+		- Get it to work properly
+		- Get it to work with the spatial solver
+- Rebuild interface to SMOLDYN
+		- Enable access to another whole class of models.
+
+
+==========================================================================
+22 sep 2013.
+Working through the old MULTI models. Mostly there but loadMulti.py
+is not giving sensible values for conc for psd CaMKII and others.
+
+==========================================================================
+23 Sep 203.
+Implemented x_compt.py, x_compt.g: These seem to work fine. So some other
+issue afflicts transport of CaMKII to psd.
+
+Tried psd_merged31.g, which moves the NMDAR to the SPINE compartment in case
+this was confusing the solver setup. No change. No CaMKII in psd though
+substrates are both nonzero. Now to look at rates. 
+Rates OK.
+Tried to make a dummy reaction in psd_merged31b.g. As with the other situation,
+it has the reaction in the psd and the reagents in the spine. It too has the 
+same problem.
+Moved the reaction to the spine. psd_merged31c.g. 
+Now it correctly consumes the substrates, but does not generate the required 
+product.
+
+Tried removing the NMDAR substrate substrate to tr0. In psd_merged31d.g
+Set an initial conc of PSD term
+Now the psd term is visible but is just a flat line. Not being consumed.
+
+Let's see if I can replicate this with an extra reaction in the 
+x_compt.g. Made a change in x_compt.g to add foo + bar <----> zod.
+tried running, but the knwledge on track.
+
+==========================================================================
+26 Sep.
+I have no idea what I was trying to say before I went to sleep there, but
+the fixed version of x_compt.g runs and gives reasonable outcomes of the 
+cross-compartment reaction (foo bar and zod). So the problem doesn't seem 
+to be with the numerics. Back to work on the loadMulti.py.
+
+==========================================================================
