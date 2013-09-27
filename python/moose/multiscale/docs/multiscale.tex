@@ -1,1 +1,35 @@
 \section{Introduction}
+
+    We should specify following in XML.
+
+    \begin{enumerate}
+    
+      \item Morphology of cell. Cell is divided into chemical and electrical
+        \textbf{domains}.
+      
+      \item Domains are more complicated than compartments. They can be a piece
+        of volume when cell is considered as it is. These 3-D domains are useful
+        in describing local-chemical properties. Domains can also be ``surface''
+        enclosing a part of equivalent circuit of the cell. 
+
+      \item A cell is thus divided into domains. When the cell is divided into
+        small volumes which are like containers having special localised
+        chemistry going on, we call these domains \texttt{chemical domains}.
+        When an electrical model of cell is divided into smaller circuits
+        enclosed in a surface, we call these sufaces \textbf{electrical domain}.
+        A chemical domain need not have one-to-one mapping to electrical domain
+        i.e. we need not partition the electrical model of cell according to the volume
+        partition of cell. 
+
+      \item A change occurring in chemical domain can influence the electrical
+        properties of some electrical domain and vice verse. Therefore, we need
+        to specify a mapping between chemical domain and electrical domains.
+        This mapping can be bi-directional. Such mapping can be seen as a
+        bipartite graph where electrical domains are on the right hand side and
+        chemical domains are on the other \footnote{We assume that a change in
+          chemical domain does not affect the other chemical domain}. (Note: We
+          can store the mapping as a graph in graphml format. Graphml format is
+        XML based and networkx library can read it easily.)
+    
+    \end{enumerate}
+   
