@@ -6,9 +6,9 @@
 # Maintainer: 
 # Created: Mon Oct 15 15:03:09 2012 (+0530)
 # Version: 
-# Last-Updated: Wed Jul 10 10:01:20 2013 (+0530)
+# Last-Updated: Thu Jul 18 18:36:07 2013 (+0530)
 #           By: subha
-#     Update #: 282
+#     Update #: 299
 # URL: 
 # Keywords: 
 # Compatibility: 
@@ -72,19 +72,29 @@ def setup_current_step_model(model_container,
     """
     cell_class = eval('cells.%s' % (celltype))
     cell = cell_class('%s/%s' % (model_container.path, celltype))
+    print '111111', cell.path
     pulsegen = moose.PulseGen('%s/pulse' % (model_container.path))
+    print '121221211', pulsegen.path
     pulsegen.count = len(pulsearray)
+    print '7777777', pulsegen.count, pulsegen.id_
     for ii in range(len(pulsearray)):
+        print '999999', pulsegen.id_, pulsegen.count
+        print '-', pulsegen.delay[ii]
         pulsegen.delay[ii] = pulsearray[ii][0]
         pulsegen.width[ii] = pulsearray[ii][1]
         pulsegen.level[ii] = pulsearray[ii][2]
+        print '8888888', ii, pulsegen.delay[ii]
     moose.connect(pulsegen, 'outputOut', cell.soma, 'injectMsg')
+    print '22222'
     presyn_vm = moose.Table('%s/presynVm' % (data_container.path))
+    print '33333'
     soma_vm =  moose.Table('%s/somaVm' % (data_container.path))
+    print '44444'
     moose.connect(presyn_vm, 'requestData', cell.presynaptic, 'get_Vm')
     moose.connect(soma_vm, 'requestData', cell.soma, 'get_Vm')
     pulse_table = moose.Table('%s/injectCurrent' % (data_container.path))
     moose.connect(pulse_table, 'requestData', pulsegen, 'get_output')
+    print '55555'
     return {'cell': cell,
             'stimulus': pulsegen,
             'presynVm': presyn_vm,
@@ -159,6 +169,7 @@ class SingleCellCurrentStepTest(unittest.TestCase):
         for ii in range(self.pulsegen.count):
             config.logger.info('pulse[%d]: delay=%g, width=%g, level=%g' % (ii, self.pulsegen.delay[ii], self.pulsegen.width[ii], self.pulsegen.level[ii]))
         config.logger.info('Start reinit')
+        self.schedule(self.simdt, self.plotdt, self.solver)
         moose.reinit()
         config.logger.info('Finished reinit')
         ts = datetime.now()
@@ -190,6 +201,7 @@ class SingleCellCurrentStepTest(unittest.TestCase):
         the same in NEURON simulation if possible."""
         pylab.subplot(211)
         pylab.title('Soma Vm')
+        self.tseries = np.linspace(0, self.simtime, len(self.somaVmTab.vec))
         pylab.plot(self.tseries*1e3, self.somaVmTab.vec * 1e3,
                    label='Vm (mV) - moose')
         pylab.plot(self.tseries*1e3, self.injectionTab.vec * 1e9,
