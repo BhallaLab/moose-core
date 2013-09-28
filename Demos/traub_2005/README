@@ -37,3 +37,18 @@ described in detail in the readme of the NEURON model).
 
   The test_{celltype} files have step current injection test for each
   celltype.
+
+* Using single cell models
+  The single cell classes can be used to create new copies of the
+  prototype cell. The signature is:
+
+  cellclass(targetpath)
+
+  for example, to create a DeepBasket cell with path '/model/db', you
+  will call:
+
+  db = DeepBasket('/model/db')
+
+  Look at cell_test_utils.py:setup_current_step_model function to see
+  how a single step current injection is setup for any specified cell
+  class.
