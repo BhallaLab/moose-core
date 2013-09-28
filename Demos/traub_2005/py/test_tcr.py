@@ -64,7 +64,7 @@ class TestTCR(SingleCellCurrentStepTest):
         SingleCellCurrentStepTest.setUp(self)
 
     # def testVmSeriesPlot(self):
-    #     self.runsim(simtime, self.pulse_array)
+    #     self.runsim(simtime, pulsearray=self.pulse_array)
     #     self.plot_vm()
 
     def testVClamp(self):
