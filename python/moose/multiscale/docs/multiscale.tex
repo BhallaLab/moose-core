@@ -1,35 +1,142 @@
-\section{Introduction}
+%\section{Introduction}
+%
+%    \begin{enumerate}
+%    
+%      \item Morphology of cell. Cell is divided into chemical and electrical
+%        \textbf{domains}.
+%      
+%      \item Domains are more complicated than compartments. They can be a piece
+%        of volume when cell is considered as it is. These 3-D domains are useful
+%        in describing local-chemical properties. Domains can also be ``surface''
+%        enclosing a part of equivalent circuit of the cell. 
+%
+%      \item A cell is thus divided into domains. When the cell is divided into
+%        small volumes which are like containers having special localised
+%        chemistry going on, we call these domains \texttt{chemical domains}.
+%        When an electrical model of cell is divided into smaller circuits
+%        enclosed in a surface, we call these sufaces \textbf{electrical domain}.
+%        A chemical domain need not have one-to-one mapping to electrical domain
+%        i.e. we need not partition the electrical model of cell according to the volume
+%        partition of cell. 
+%
+%      \item A change occurring in chemical domain can influence the electrical
+%        properties of some electrical domain and vice verse. Therefore, we need
+%        to specify a mapping between chemical domain and electrical domains.
+%        This mapping can be bi-directional. Such mapping can be seen as a
+%        bipartite graph where electrical domains are on the right hand side and
+%        chemical domains are on the other \footnote{We assume that a change in
+%          chemical domain does not affect the other chemical domain}. (Note: We
+%          can store the mapping as a graph in graphml format. Graphml format is
+%        XML based and networkx library can read it easily.)
+%    
+%
+%    \end{enumerate}
+%   
+%    \section{Morphology} 
 
-    We should specify following in XML.
 
-    \begin{enumerate}
-    
-      \item Morphology of cell. Cell is divided into chemical and electrical
-        \textbf{domains}.
-      
-      \item Domains are more complicated than compartments. They can be a piece
-        of volume when cell is considered as it is. These 3-D domains are useful
-        in describing local-chemical properties. Domains can also be ``surface''
-        enclosing a part of equivalent circuit of the cell. 
 
-      \item A cell is thus divided into domains. When the cell is divided into
-        small volumes which are like containers having special localised
-        chemistry going on, we call these domains \texttt{chemical domains}.
-        When an electrical model of cell is divided into smaller circuits
-        enclosed in a surface, we call these sufaces \textbf{electrical domain}.
-        A chemical domain need not have one-to-one mapping to electrical domain
-        i.e. we need not partition the electrical model of cell according to the volume
-        partition of cell. 
+\section{Domains}
 
-      \item A change occurring in chemical domain can influence the electrical
-        properties of some electrical domain and vice verse. Therefore, we need
-        to specify a mapping between chemical domain and electrical domains.
-        This mapping can be bi-directional. Such mapping can be seen as a
-        bipartite graph where electrical domains are on the right hand side and
-        chemical domains are on the other \footnote{We assume that a change in
-          chemical domain does not affect the other chemical domain}. (Note: We
-          can store the mapping as a graph in graphml format. Graphml format is
-        XML based and networkx library can read it easily.)
-    
-    \end{enumerate}
-   
+A \textbf{domain} is a division of cell. A cell is made up of domains. A cell
+also has its equivalent circuit model. A \textbf{chemical domain} is a section
+of cell defined for the purpose of describing chemical phenomenon in that
+particular domain. An \textbf{electrical domain} on the other hand describes the
+electrical circuit representation of the section of the cell. A chemical
+domain always has a equivalent electrical model or electrical domain. 
+
+
+\subsection{Representation of domains}
+
+Chemical domains are named \texttt{cd\_<number>} and electrical domain are named
+\texttt{ed\_<number>}. Each cell is divided into two or more chemical domains and
+equivalent circuit of the cell is divided into two or more electrical domains.
+
+\paragraph{Synaptic activity in chemical domain}
+
+ A chemical domain if it contains synaptic activity, should have an optional
+ attribute i.e. \texttt{synaptic\_site = ``yes''}. How would $[ligand]$ change
+ with synaptic-activity? A model for such an activity should be embedded in
+ xml. 
+
+ 
+\begin{verbatim}
+
+<cell id=``1`` ... >
+    <morphology>
+       <domains>
+          <domain id=``cd_1'' synaptic_site=``no''>
+            <species>list of species </species>
+            <reaction id=``reactionA''>
+              <reactants> .. </reactants>
+              <products> .. </products>
+              <rate_coeff> 20 </rate_coeff>
+            </reaction>
+            <reaction>
+            .
+            </reaction>
+          </domain>
+          <domain id=``cd_2'' synaptic_site=``yes''>
+            <!-- specify chemical domain here with information about synaptic site-->
+          </domain>
+          
+          <!-- Electrical domains here -->
+          <domain id=”ed_1” …>
+            <circuit> 
+               <!-- spice type netlist or matrix representation or graph -->
+               <input> list of points which are input to this domain. </input>
+               <output> list of points which are output of this circuit. </output> 
+            </circuit>
+            <coordinates>
+               <!-- coordinates of cell body which this circuit is an equivalent 
+                 representation. Does it map over to some chemical domain? -->
+            </coordinates>
+          </domain>
+       </domains>
+
+       <mapping> 
+         <!-- see section 1.2 for mapping between the domains -->
+       </mapping>
+   </morphology>
+</cell>
+\end{verbatim}
+
+\subsection{Mapping between chemical and electrical domain}
+
+Any change in chemical composition of a chemical domain (Say \texttt{cd\_1}) can
+change the electrical properties of an electrical domain (Say \texttt{ed\_3})
+and vice versa. A user-defined mapping should be provided in xml 
+\footnote{\url{http://graphml.graphdrawing.org/}}.
+
+
+Such a mapping can be represented by a graph in xml format (graphml). Node of
+this graph is the name of the domains; we can also attach various data about
+species on the nodes. An edge between two domain e.g.  $\text{cd\_1}
+\rightarrow \text{ed\_3}$ describe a model that captures the relationship
+between the change caused in \texttt{dd\_1} by changes in \texttt{cd\_3}. The
+equations or model for computing changes are attached on the edge. 
+
+\begin{verbatim}
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns"  
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns
+    http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+ <graph id=”g_1" edgedefault="directed">
+   <node id="cd_1"/>
+   <node id="ed_3"/>
+   <edge id="e1" source="cd_1" target="ed_3">
+         <data key=”d1”>.. put equation or model here .. </data>
+          ….
+     </edge>
+ </graph>
+</graphml>
+\end{verbatim}
+
+python-networkx has good support for graphml format. We can attach python
+objects to edges and nodes. For instance a functor which computes how variation
+in $I_{ca}$ changes $[Ca]$ can be attached to the edge. Graphs are great for
+non-planner relationships and great many algorithms already exits to analyse
+topology.
+
+
+
