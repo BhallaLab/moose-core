@@ -38,11 +38,13 @@
 
 \section{Domains}
 
-A \textbf{domain} is a division of cell. A cell is made up of domains. A cell
-also has its equivalent circuit model. A \textbf{chemical domain} is a section
-of cell defined for the purpose of describing chemical phenomenon in that
-particular domain. An \textbf{electrical domain} on the other hand describes the
-electrical circuit representation of the section of the cell. A chemical
+A \textbf{domain} is like a compartment of the cell. A cell is made up of
+domains. A cell also has a electrical circuit model. A \textbf{chemical domain}
+is a compartment of cell with a well-defined chemical model. It may be possible
+to classify these domains according to the type of chemical reactions are taking
+place in them. We can describe each class in XML and use their instances with
+co-ordinates. An \textbf{electrical domain} on the other hand describes the
+electrical circuit representation of a compartment of the cell.  A chemical
 domain always has a equivalent electrical model or electrical domain. 
 
 
@@ -105,16 +107,24 @@ equivalent circuit of the cell is divided into two or more electrical domains.
 
 Any change in chemical composition of a chemical domain (Say \texttt{cd\_1}) can
 change the electrical properties of an electrical domain (Say \texttt{ed\_3})
-and vice versa. A user-defined mapping should be provided in xml 
+and vice versa. A user-defined mapping has to be provided in the model.
 \footnote{\url{http://graphml.graphdrawing.org/}}.
 
 
-Such a mapping can be represented by a graph in xml format (graphml). Node of
-this graph is the name of the domains; we can also attach various data about
-species on the nodes. An edge between two domain e.g.  $\text{cd\_1}
+Such a mapping can be encoded by a graph (graphml). In this graph, node is the
+domain (electrical or chemical) and we can also attach various data about
+species on nodes. An edge between two nodes (domains) e.g.  $\text{cd\_1}
 \rightarrow \text{ed\_3}$ describe a model that captures the relationship
-between the change caused in \texttt{dd\_1} by changes in \texttt{cd\_3}. The
-equations or model for computing changes are attached on the edge. 
+between the changes caused in \texttt{dd\_1} by the changes in \texttt{cd\_3}.
+The equations or model (could be in XML) for computing changes are attached on
+the edge. 
+
+\paragraph{Moving borders of compartment}
+
+    If the borders of the compartment are to move, we need to think of standard
+    geometries which can be thought of ``enclosing'' the variable boundary
+    compartment.
+
 
 \begin{verbatim}
 <graphml xmlns="http://graphml.graphdrawing.org/xmlns"  
@@ -132,11 +142,18 @@ equations or model for computing changes are attached on the edge.
 </graphml>
 \end{verbatim}
 
-python-networkx has good support for graphml format. We can attach python
-objects to edges and nodes. For instance a functor which computes how variation
-in $I_{ca}$ changes $[Ca]$ can be attached to the edge. Graphs are great for
-non-planner relationships and great many algorithms already exits to analyse
-topology.
+The library python-networkx has good support for graphml format. We can attach
+python objects to edges and nodes. For instance a functor which computes how
+variation in $I_{ca}$ changes $[Ca]$ can be attached to the edge. Graphs are
+great for non-planner relationships and great many algorithms already exits to
+analyse topology.
+
+
+\section{Adaptors}
+
+Adaptors has to be employed if there is unit-conversion problem. We recommend to
+stick to the standard units, thus making the XML unit agnostic.
+
 
 
 
