@@ -105,54 +105,62 @@ equivalent circuit of the cell is divided into two or more electrical domains.
 
 \subsection{Mapping between chemical and electrical domain}
 
-Any change in chemical composition of a chemical domain (Say \texttt{cd\_1}) can
-change the electrical properties of an electrical domain (Say \texttt{ed\_3})
-and vice versa. A user-defined mapping has to be provided in the model.
-\footnote{\url{http://graphml.graphdrawing.org/}}.
-
-
-Such a mapping can be encoded by a graph (graphml). In this graph, node is the
-domain (electrical or chemical) and we can also attach various data about
-species on nodes. An edge between two nodes (domains) e.g.  $\text{cd\_1}
-\rightarrow \text{ed\_3}$ describe a model that captures the relationship
-between the changes caused in \texttt{dd\_1} by the changes in \texttt{cd\_3}.
-The equations or model (could be in XML) for computing changes are attached on
-the edge. 
-
 \paragraph{Moving borders of compartment}
 
     If the borders of the compartment are to move, we need to think of standard
-    geometries which can be thought of ``enclosing'' the variable boundary
-    compartment.
+    geometries which can be thought of ``enclosing'' the compartment.
+
+Any change in chemical composition of a chemical domain (Say \texttt{cd\_1}) can
+change the electrical properties of an electrical domain (Say \texttt{ed\_3})
+(and vice versa?). A user-defined mapping has to be provided in the model.
+\footnote{\url{http://graphml.graphdrawing.org/}}.
+
+
+Such a mapping can be encoded by a graph by the application. XML based graph
+representation such as \textbf{graphml} are available and can be used by
+application to serialize the graph. Directly writing the mapping in graphml
+format will be less user-friendly than having a more readable XML element to
+describe such mapping.
+
+How the change in one domain changes properties of other domain are to be
+described by \texttt{<mapping>} element. It looks like the following:
 
 
 \begin{verbatim}
-<graphml xmlns="http://graphml.graphdrawing.org/xmlns"  
-   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns
-    http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
- <graph id=”g_1" edgedefault="directed">
-   <node id="cd_1"/>
-   <node id="ed_3"/>
-   <edge id="e1" source="cd_1" target="ed_3">
-         <data key=”d1”>.. put equation or model here .. </data>
-          ….
-     </edge>
- </graph>
-</graphml>
+<mapping id=``integer'' from=``cd_1'' to=``ed_3''>
+    <relation from=``cd_1'' to=``ed_3''>
+        <lhs> concCa </lhs>
+        <rhs> some_XML_equation_describing_relation_between_[Ca]_and_Ica </rhs>
+    </relation>
+</mapping>
 \end{verbatim}
 
-The library python-networkx has good support for graphml format. We can attach
-python objects to edges and nodes. For instance a functor which computes how
-variation in $I_{ca}$ changes $[Ca]$ can be attached to the edge. Graphs are
-great for non-planner relationships and great many algorithms already exits to
-analyse topology.
+\paragraph{rhs} Element rhs should be generic enough to describe mathematical
+relations. How about using latex math syntax? Some work is needed to parse and
+build an equation out of it but it should be straightforward. 
+
+
+The library python-networkx has good support for graphml format. Each relation
+is represented by an edge between two nodes (nodes). We can attach python
+objects to edges and nodes. For instance a functor which computes how variation
+in $I_{ca}$ changes $[Ca]$ can be attached to the edge. Graphs are great for
+non-planner relationships and great many algorithms already exits to analyse
+topology.
 
 
 \section{Adaptors}
 
-Adaptors has to be employed if there is unit-conversion problem. We recommend to
-stick to the standard units, thus making the XML unit agnostic.
+Adaptors has to be employed if there is unit-conversion problem. We recommend
+that one should stick to the standard units making XML representation unit
+agnostic. Writing adaptor needs reference documentation of \textbf{pymoose}.
+
+\section{An example of a neuron}
+
+Let say we have a simple neuron. It has two dendrites connected to soma and one
+axon. Each dendrite and axon has 2 chemical domains. 
+
+
+\input{../models/neuron_with_domain.xml}
 
 
 
