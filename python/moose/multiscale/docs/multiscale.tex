@@ -127,7 +127,7 @@ described by \texttt{<mapping>} element. It looks like the following:
 
 
 \begin{verbatim}
-<mapping id=``integer'' from=``cd_1'' to=``ed_3''>
+<mapping id=``1'' from=``cd_1'' to=``ed_3''>
     <relation from=``cd_1'' to=``ed_3''>
         <lhs> concCa </lhs>
         <rhs> some_XML_equation_describing_relation_between_[Ca]_and_Ica </rhs>
@@ -135,9 +135,9 @@ described by \texttt{<mapping>} element. It looks like the following:
 </mapping>
 \end{verbatim}
 
-\paragraph{rhs} Element rhs should be generic enough to describe mathematical
-relations. How about using latex math syntax? Some work is needed to parse and
-build an equation out of it but it should be straightforward. 
+\paragraph{Format of rhs} Element rhs should be generic enough to describe
+mathematical relations. How about using latex math syntax? Some work is needed
+to parse and build an equation out of it but it should be straightforward. 
 
 
 The library python-networkx has good support for graphml format. Each relation
@@ -161,7 +161,4 @@ axon. Each dendrite and axon has 2 chemical domains.
 
 
 \input{../models/neuron_with_domain.xml}
-
-
-
 
