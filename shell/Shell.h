@@ -208,7 +208,7 @@ class Shell
 		 */
 		 int doWriteSBML( const string& fname, const string& modelpath,
 		 	bool qFlag = 0 );
-		 Id doReadSBML( const string& fname, const string& modelpath, const string& solverclass,
+		 Id doReadSBML( const string& fname, const string& modelpath, const string& solverclass="",
 		 	bool qFlag = 0 );
 		 
 		/**
