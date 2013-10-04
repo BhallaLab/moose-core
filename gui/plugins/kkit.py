@@ -72,6 +72,26 @@ class KkitEditorView(MooseEditorView):
             action = QtGui.QAction(moose.element('/classes/'+slist).name, self.insertMenu)
             self._toolBars.append(action)
         '''
+        self.fileinsertMenu = QtGui.QMenu('&File')
+        if not hasattr(self,'SaveModelAction'):
+            self.saveModelAction = QtGui.QAction('SaveToSBMLFile', self)
+            self.saveModelAction.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+S", None, QtGui.QApplication.UnicodeUTF8))
+            self.connect(self.saveModelAction, QtCore.SIGNAL('triggered()'), self.SaveModelDialogSlot)
+            self.fileinsertMenu.addAction(self.saveModelAction)
+        self._menus.append(self.fileinsertMenu)
+
+    def SaveModelDialogSlot(self):
+        type_sbml = 'SBML'
+        filters = {'SBML(*.xml)': type_sbml}
+        filename,filter_ = QtGui.QFileDialog.getSaveFileNameAndFilter(None,'Save File','',';;'.join(filters))
+
+        if str(filename).rfind('.') != -1:
+            filename = filename[:str(filename).rfind('.')]
+        if str(filter_).rfind('.') != -1:
+            extension = filter_[str(filter_).rfind('.'):len(filter_)-1]
+        filename = filename+extension
+        if filters[str(filter_)] == 'SBML':
+            moose.writeSBML(str(filename),self.plugin.modelRoot)
     def getToolPanes(self):
         return super(KkitEditorView, self).getToolPanes()
 
@@ -101,7 +121,7 @@ class  KineticsWidget(EditorWidgetBase):
         self.sceneContainer.setSceneRect(self.sceneContainer.itemsBoundingRect())
         self.sceneContainer.setBackgroundBrush(QtGui.QColor(230,220,219,120))
 
-        self.insertMenu = QtGui.QMenu('&Insert')
+	self.insertMenu = QtGui.QMenu('&Insert')
         self._menus.append(self.insertMenu)
         self.insertMapper = QtCore.QSignalMapper(self)
 
@@ -110,7 +130,7 @@ class  KineticsWidget(EditorWidgetBase):
 
         for action in actions:
             self.insertMenu.addAction(action)        
-
+    
     def getToolBars(self):
         if not hasattr(self, '_insertToolBar'):
             self._insertToolBar = QtGui.QToolBar('Insert')

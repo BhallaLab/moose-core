@@ -784,12 +784,12 @@ int Shell::doWriteSBML( const string& fname, const string& modelpath,
 /**
  * read given SBML model to moose. Returns success value.
  */
-Id Shell::doReadSBML( const string& fname, const string& modelpath,
+Id Shell::doReadSBML( const string& fname, const string& modelpath, const string& solverclass,
 	bool qFlag )
 {
 #ifdef USE_SBML
 	SbmlReader sr;
-	return sr.read( fname, modelpath );
+	return sr.read( fname, modelpath,solverclass);
 #else
     cerr << "Shell::ReadSBML: This copy of MOOSE has not been compiled with SBML reading support.\n";
     return Id();
