@@ -40,7 +40,7 @@ map< string,double> :: iterator pvm_iter;
       -- Func pool and its math calculation need to be added.
  */
 /* read a model into MOOSE  */
-Id SbmlReader::read( string filename,string location )
+Id SbmlReader::read( string filename,string location, string solverClass)
 { 
   FILE * fp = fopen( filename.c_str(), "r" );
   if ( fp == NULL){
@@ -79,32 +79,36 @@ Id SbmlReader::read( string filename,string location )
       
       if ( !errorFlag_ )
 	createReaction( molcomptMap );
-      cout << "$###@ " << errorFlag_;
       if ( errorFlag_ )
 	{ 
-	  
+	  return baseId;
+	}
+      else
+	{
+	  SimManager* sm = reinterpret_cast< SimManager* >(baseId.eref().data());
+	  sm->setSimDt(1);
+	  sm->setRunTime(100);
+	  sm->setPlotDt(1);
+	  Qinfo q;
+	  if (solverClass.empty())
+	    sm->build(baseId.eref(),&q, "rk5");
+	  else
+	    sm->build(baseId.eref(),&q,solverClass);
+	  Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
+	  s->doReinit();
+	  s->doSetClock(4,0.01);
+	  s->doSetClock(5,0.01);
+	  s->doSetClock(8,0.1);
+	  s->doSetClock(7,0);
+	  string poolpath = baseId.path() + "/##[ISA=Pool]";
+	  string reacpath = baseId.path() + "/##[ISA!=Pool]";
+	  s->doUseClock( reacpath, "process", 4 );
+	  s->doUseClock( poolpath, "process", 5 );
 	  return baseId;
 	}
     }
-  SimManager* sm = reinterpret_cast< SimManager* >(baseId.eref().data());
-  sm->setSimDt(0.01);
-  sm->setRunTime(100);
-  sm->setPlotDt(1);
-  Qinfo q;
-  
-  sm->build(baseId.eref(),&q, "rk5");
-  Shell* s = reinterpret_cast< Shell* >( Id().eref().data() );
-  s->doReinit();
-  s->doSetClock(4,0.01);
-  s->doSetClock(5,0.01);
-  s->doSetClock(8,0.1);
-  s->doSetClock(7,0);
-  string poolpath = baseId.path() + "/##[ISA=Pool]";
-  string reacpath = baseId.path() + "/##[ISA!=Pool]";
-  s->doUseClock( reacpath, "process", 4 );
-  s->doUseClock( poolpath, "process", 5 );
-  
-  return baseId;
+  else
+    return baseId;
 }
 
 /* Pulling COMPARTMENT  */
@@ -124,6 +128,11 @@ map< string,Id > SbmlReader::createCompartment( string location)
   double msize = 0.0, size = 0.0;	
   ::Compartment* compt;
   unsigned int num_compts = model_->getNumCompartments();
+  if (num_compts == 0)
+    { errorFlag_ = "TRUE";
+      return comptIdMap;
+	
+    }
   string modelName;
   Id parentId;
 
@@ -189,6 +198,11 @@ map< string,Id > SbmlReader::createMolecule( map< string,Id > &comptIdMap)
   vector< int > dims( 1, 1 );
   map< string, Id >molcomptMap;
   int num_species = model_->getNumSpecies();
+  if (num_species == 0)
+    { baseId = Id();
+      errorFlag_ = "TRUE";
+      return molcomptMap;
+    }
   for ( int sindex = 0; sindex < num_species; sindex++ )
     {
       Species* spe = model_->getSpecies(sindex);

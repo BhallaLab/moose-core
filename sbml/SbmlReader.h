@@ -39,7 +39,7 @@ class SbmlReader
 	public:
 		SbmlReader() {errorFlag_ = false;}
 		~SbmlReader() {;}
-		Id read(string filename,string location);
+		Id read(string filename,string location,string solverClass);
 		map< string, Id> createCompartment(string location);
 		map< string, Id> createMolecule(map<string,Id>&);
 		void  createReaction(map<string,Id> &);
