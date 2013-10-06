@@ -1,0 +1,2 @@
+A file to flag to neuroConstruct that these mod files should be regenerated when a new simulation is generated.
+May be due to option being changed in GUI making these mods out of date.

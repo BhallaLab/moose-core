@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<comment>This is a summary of the simulation parameters to assist reviewing of saved simulations in neuroConstruct.</comment>
+<entry key="Simulation temp">6.3</entry>
+<entry key="Duration">100.0</entry>
+<entry key="Unit system">GENESIS Physiological Units</entry>
+<entry key="neuroConstruct random seed">553573698</entry>
+<entry key="Sim Config">Default Simulation Configuration (PurkinjeCellGroup, SimpleCellGroup, NetConn_SimpleCellGroup_PurkinjeCellGroup, SampleIClamp, PurkinjeCellGroup_v, SimpleCellGroup_v)</entry>
+<entry key="Net connections">NetConn_SimpleCellGroup_PurkinjeCellGroup (1)  </entry>
+<entry key="Parallel configuration">Local machine, serial mode with 1 host, 1 processor
+</entry>
+<entry key="Populations">SimpleCellGroup (SimpleCell_t): 1; PurkinjeCellGroup (PurkinjeCell_t): 1</entry>
+<entry key="Morph summary PurkinjeCell_t">Segs:44_Secs:44_IntDivs:44</entry>
+<entry key="Global Cm">1.0E-8</entry>
+<entry key="neuroConstruct version">1.7.0</entry>
+<entry key="Morph summary SimpleCell_t">Segs:6_Secs:6_IntDivs:6</entry>
+<entry key="dt">0.02</entry>
+<entry key="Global Rm">3.33333344E8</entry>
+<entry key="Stimulation: 0">RandomSpikeTrain: [rate: 0.05, synaptic input: DoubExpSyn] on PurkinjeCellGroup</entry>
+<entry key="Cell Mechanisms on PurkinjeCell_t">[DoubExpSyn on: [soma_group], SingleSyn1 on: [soma_group]]</entry>
+<entry key="Cell Mechanisms on SimpleCell_t">[SingleSyn1 on: [axon_group]]</entry>
+<entry key="Simulator">LEMSalpha</entry>
+<entry key="Net Conn: 0">NetConn_SimpleCellGroup_PurkinjeCellGroup: SimpleCellGroup -&gt; PurkinjeCellGroup (SingleSyn1 [thresh: -20.0, delay: 5, weight: 1]), Completely Random, Gen Src-&gt;Tgt, 1 per Src, max: MAX per Tgt, Pre: axons soma Post: dends soma, Max: MAX, min: 0.0, dim: r (num attempts: 100), APSpeed: 3.4028235E38</entry>
+<entry key="Global Ra">300.0</entry>
+</properties>

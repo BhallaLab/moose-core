@@ -79,6 +79,27 @@
 
             <biophysics units="Physiological Units">
 
+                <bio:mechanism name="KConductance" type="Channel Mechanism">
+                    <bio:parameter name="gmax" value="36.0">
+                        <bio:group>all</bio:group>
+                    </bio:parameter>
+                </bio:mechanism>
+
+                <bio:mechanism name="LeakConductance" type="Channel Mechanism" passive_conductance="true">
+                    <bio:parameter name="e" value="-59.4">
+                        <bio:group>all</bio:group>
+                    </bio:parameter>
+                    <bio:parameter name="gmax" value="0.3">
+                        <bio:group>all</bio:group>
+                    </bio:parameter>
+                </bio:mechanism>
+
+                <bio:mechanism name="SimpleCellMembrane" type="Channel Mechanism">
+                    <bio:parameter name="gmax" value="36.0">
+                        <bio:group>all</bio:group>
+                    </bio:parameter>
+                </bio:mechanism>
+
                 <bio:spec_capacitance>
                     <bio:parameter value="1.0">
                         <bio:group>all</bio:group>
@@ -95,7 +116,29 @@
                     <bio:parameter value="-60.0">
                         <bio:group>all</bio:group>
                     </bio:parameter>
-                </bio:init_memb_potential></biophysics>
+                </bio:init_memb_potential>
+
+                <bio:ion_props name="ka">
+                    <bio:parameter name="e" value="55.0">
+                        <bio:group>axon_group</bio:group>
+                    </bio:parameter>
+                </bio:ion_props>
+            
+
+                <bio:ion_props name="na">
+                    <bio:parameter name="e" value="55.0">
+                        <bio:group>soma_group</bio:group>
+                    </bio:parameter>
+                
+                    <bio:parameter name="e" value="55.0">
+                        <bio:group>dendrite_group</bio:group>
+                    </bio:parameter>
+                
+                    <bio:parameter name="e" value="55.0">
+                        <bio:group>axon_group</bio:group>
+                    </bio:parameter>
+                </bio:ion_props>
+            </biophysics>
 
             <connectivity>
                 <net:potential_syn_loc synapse_type="SingleSyn1" synapse_direction="pre">
