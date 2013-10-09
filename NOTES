@@ -23195,3 +23195,205 @@ cross-compartment reaction (foo bar and zod). So the problem doesn't seem
 to be with the numerics. Back to work on the loadMulti.py.
 
 ==========================================================================
+27 Sep 2013
+Checkin 4771.
+Now trying to put the x_compt.g into the loadMulti.py script. Adapted it into
+a temporary one called foo.py. The x_compt.g becomes x_compt2.g with the
+Ca buffered.
+This shows up a bug with handling buffered molecules.
+Needs more time to fix. For now I'm retreating to using an input molecule
+that is buffered. Let's see if the thing handles that.
+It wasn't happy with the various Ca's having a zero diffusion const.
+I think there may be a problem with the solver handling buffering!
+
+Puzzles: 
+	- the buffered molecule CaInput is present at 2x its proper conc.
+	- The initConc of PSD_Ca is also 2x proper conc, but rapidly 
+		decays. Doesn't seem to handle the reaction that connects the
+		CaInput to it.
+	- The initConc of DEND_Ca is 4e-6. Again all wrong.
+
+Things to try: 
+	- If I 10x the CaInput reaction, will the steady state conc of 
+		PSD_Ca go up too?
+	Ans: Now it is 1.425e-5. Was 4.902e-6. So the CaInput reac is doing
+		something reasonable after all. Now to deal with initConcs.
+
+==========================================================================
+7 Oct 2013
+InitConcs are messed up becuase the kkit reader has assigned the compts to
+a different set among (kinetics, compartment_1, compartment_2) than I had 
+expected. Need to be able to identify relevant compt systematically. One
+option is to assign these in order of increasing volume. Not perfect, but this
+is a transitional feature used while I stick with kkit.g files.
+
+Implemented this, including a little unit test to be sure that the routine for
+sorting the volumes did the right thing. Clears unit tests.
+Sundry tests later in the foo.py file. 
+Spine and PSD Ca look more reasonable. So does the PSD_Ca_CaMKII.
+
+Now go back and fix up loadMulti.py
+
+Tried it. Some things are better but still
+- No formation of PSD_CaM_CaMKII
+- Something wrong with psd_bar, which has a huge conc of 13.3 uM and no
+decline.
+
+		Genesis				MOOSE
+spine/foo: 	CoInit: 0.185 uM		1e-2 uM.
+psd/bar: 	CoInit: 0.66667.		13.333 uM
+I should just print out the vols that foo and bar imagine they have.
+It is:
+bar,foo vols =  9.81747704247e-21 9.81747704247e-20
+
+Initial vols of compartments don't seem to be right either.
+old NSP vols =  1e-20 1e-18 9e-20
+The recompile was supposed to have fixed the ordering here. Odd.
+
+Next: Print out vols of a few other pools esp CaM_CaMKII.
+
+==========================================================================
+8 Oct 2013
+
+Fixed further bits of compartment naming and association with volumes.
+Now spine/foo and psd/bar are OK. Rates are negligible though. Odd.
+Check out some other initConcs.
+		MOOSE			GENESIS
+spine/CaM
+spine/NMDAR6	4.444 uM		4.444 uM.
+
+		Genesis				MOOSE
+spine/foo: 	CoInit: 0.185 uM		1e-2 uM.
+psd/bar: 	CoInit: 0.66667.		13.333 uM
+
+		MOOSE			GENESIS
+tr0.Kf		0.009			0.1/sec
+tr0.Kb		0.001			0.1/sec
+tr0.kf		0.009			0.1/sec
+tr0.kb		0.0025			0.1/sec
+
+Also the NMDAR_transloc rates are wrong:
+		MOOSE			GENESIS
+	transloc1	transloc2	transloc1	transloc2
+Kf	4860.0		0.486		6		0.0006
+Kb	1e-8		1e-8		1e-6		1e-6
+kf	0.00822		8.22e-7		1		0.0001
+kb	1e-8		1e-8		1e-6		1e-6
+
+Looks to me like there is an extra vol order in the conversion.
+
+The kkit reader loads in the original kf and kb (lower case) but the
+conversion to conc units is bad:
+transloc_1 4860.0 1e-08 0.996323317876 1e-06
+transloc_2 0.486 1e-08 9.96323317876e-05 1e-06
+
+Then it subsequently uses the bad conversions.
+
+Vols at this point are: 
+old NSP vols =  1e-18 9e-20 1e-20
+
+After filling in the vols become
+
+bar,foo vols =  9.81747704247e-21 9.81747704247e-20
+
+
+So let's see if we can derive the transloc1 rates just after loading.
+Kf = 1 * 6e23 * 9e-20 * 9e-20/1e-20 * 0.001 = 486.
+Kf = kf * NA  * vSpine * vSpine/vPSD * mMoles/moles
+
+Almost there, but a factor of 10 off.
+
+OK, I think I've spotted the problem. The reac takes all the substrate vols
+and then divides by its own compartment volume to get the scaling factor.
+Here it seems that everything is loaded into compartment /kinetics, which is
+the biggest compartment.
+
+==========================================================================
+09 Oct 2013
+Checking what went wrong:
+             Kf    Kb       kf          kb
+transloc_1 4860.0 1e-08 0.996323317876 1e-06
+
+So scale would be spine * spine / dend = 9e-20 * 9e-20 / 1e-18 = 8.1e-21
+or something like this for the numKf.
+For a kf of 1 this translates to Kf = 6e23*8.1e-21 = 4860 /molar/sec
+But this isn't what we have above, we have it in millimolar. Hm.
+Ah, it is OK. We're doing all calculations in cubic metres so it will come out
+in millimolar.
+
+For kb of 1e-6 we have	Kf = kf * psd / Dend = 1e-6 * 1e-20 / 1e-18 = 1e-8
+which I understand.
+
+OK, so on to the cure. Options:
+	- Use volume of compartment of first substrate
+	- Assign reac to a compartment and use its own compt volume.
+
+To do option 2 will mean that at some point we need to look up first substrate
+	and assign a compartment message. 
+	Or we could traverse the tree and see which group it fits under.
+	Not worth this much effort for a legacy conversion.
+
+Looked at the code base. The function convertConcToNumRateUsingMesh is used
+41 times. A bit unpleasant to change the arguments.
+Its cousin, convertConcToNumRateUsingVol is not used at all.
+Its cousin, convertConcToNumRateInTwoCompts is not used at all.
+
+Put in fix. Now:
+old NSP vols =  1e-18 9e-20 1e-20
+transloc_1 54000.0 1e-06 0.996323317876 1e-06
+Let's see, Kf = NA * spine * spine / spine = 9e-20 * 6e23 = 54000. Good.
+Importantly, the Kf rate is now consistent even after the compartments
+are shifted around. The numKf (kf) also seems to be sensible.
+
+But tr0 rates don't seem to be scaled correctly. They are all at 0.1.
+There should be a volume term in here.
+Specifically, if kf and kb are the reference rates at 0.1, then nSub = nPrd.
+Given that vSub = 9 vPrd, then concSub = 1/9 concPrd.
+Further, if the reac is in the substrate compt, then Kf = 0.1 Thus Kb = 0.1/9 
+More work on the conversions...
+
+But, after all this, the actual reactions on foo and on CaM_CaMKII still don't
+happen.
+
+Further fix to conversions. Now:
+Right after loading:
+old NSP vols =  1e-18 9e-20 1e-20
+transloc_1 54000.0 1.11111111111e-07 0.996323317876 1e-06
+transloc_2 5.4 1.11111111111e-07 9.96323317876e-05 1e-06
+tr0 rates =  0.1 0.0111111111111 0.1 0.1
+
+After applying to spine vols:
+transloc_1 54000.0 1.11111111111e-07 0.913361938316 1.11111111111e-06
+transloc_2 5.4 1.11111111111e-07 9.13361938316e-05 1.11111111111e-06
+bar,foo vols =  9.81747704247e-21 9.81747704247e-20
+tr0 rates =  0.1 0.0111111111111 0.1 0.0277777777778
+
+Here transloc still seems OK. For tr0, the rate conversion to 
+Kf, Kb seems Ok, but what is happening to kb?
+
+Before checkin I want to fix the unt tests, which don't fail but emit many
+warnings.
+
+==========================================================================
+10 Oct 2013.
+Looked at the warnings. They typically come from reacs which have not had
+their messaging set up but are having rates assigned. Which is a totally normal
+way to use them. Would be cleaner if I didn't do any conversions until the just
+in time. Later. For now commented out stuff. Clears unit tests.
+Regression tests have an annoying printf debug for volume. Removed.
+Regression test also fail in rtTestMultiCompartmentReaction.
+
+Working through it. The compartment signatures of the coupled compartments
+are wrong. This may well be the problem that affected the full multiscale
+model tests.
+
+This first shows up in rtTestMultiCompartment.cpp:296 where
+we test the compartment signature for reaction R3.
+Problem may be in GslStoichSetup.cpp:261 where we are adding
+the compartments to the signature. 
+
+Actually it just turned out to be an ordering issue. Now clears the 
+config part of the regression test, but continues to fail (as earlier) on
+the quantitative comparison of the plot trace.
+For now, check this in.
+==========================================================================

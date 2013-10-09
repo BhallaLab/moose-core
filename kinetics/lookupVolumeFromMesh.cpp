@@ -122,6 +122,12 @@ unsigned int getReactantVols( const Eref& reac, const SrcFinfo* pools,
  * isn't according to convention. For example, if there is a single 
  * substrate and the home compartment is elsewhere, you will get very odd
  * Kf:kf values.
+ * 9 Oct 2013: This is now changed to use the volume of the first 
+ * substrate. Note that if the conversion is for products, then the
+ * routine has to look up the substrate list to get the first substrate.
+ * Reason is that the home compartment was often wrong in ReadKkit.
+ * Unfortunately this may yet cause problems with SBML. I don't know what
+ * conventions they use for cross-compartment reactions.
  */
 
 double convertConcToNumRateUsingMesh( const Eref& e, const SrcFinfo* pools, 
@@ -131,29 +137,35 @@ double convertConcToNumRateUsingMesh( const Eref& e, const SrcFinfo* pools,
 	// unsigned int smallest = getReactantVols( e, pools, vols );
 	double conv = 1.0;
 	getReactantVols( e, pools, vols );
+	if ( vols.size() == 0 ) { // Should this be an assertion?
+		// cout << "Warning: convertConcToNumRateUsingMesh: zero reactants on " << e.id().path() << endl;
+		return 1.0;
+	}
 	for ( unsigned int i = 0; i < vols.size(); ++i ) {
 		conv *= vols[i] * NA;
 	}
 	if ( !doPartialConversion ) {
+		if ( pools->getName() == "toSub" ) {
+			conv /= vols[0] * NA;
+		} else {
+			const Finfo* f = e.element()->cinfo()->findFinfo( "toSub" );
+			assert( f );
+			const SrcFinfo* toSub = dynamic_cast< const SrcFinfo* >( f );
+			assert( toSub );
+			vector< double > subVols;
+			getReactantVols( e, toSub, subVols );
+			assert( subVols.size() > 0 );
+			conv /= subVols[0] * NA;
+		}
+		/*
 		Id compt = getCompt( e.id() );
 		if ( compt != Id() ) {
 			Id mesh( compt.value() + 1 );
 			double meshVol = Field< double >::get( mesh, "volume" );
-			/*
-			ChemCompt* cc = 
-					reinterpret_cast< ChemCompt* >( compt.eref().data() ):
-			meshVol = cc->getMeshEntryVolume( 0 );
-			*/
 			conv /= meshVol * NA;
 		}
+		*/
 	}
-	/*
-	for ( unsigned int i = 0; i < vols.size(); ++i ) {
-		if ( doPartialConversion || i != 0 ) {
-			conv *= vols[i] * NA;
-		}
-	}
-	*/
 	return conv;
 }
 
