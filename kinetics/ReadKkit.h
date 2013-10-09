@@ -10,6 +10,21 @@
 #ifndef _READ_KKIT_H
 #define _READ_KKIT_H
 
+/**
+ * Loads in a kkit.g model.
+ * It makes a separate compartment for each distinct volume
+ * it finds in the system. The largest volume gets set to /model/kinetics.
+ * The next volume is in /model/compartment_1.
+ * The next volume is in /model/compartment_2.
+ * And so on.
+ * Has two options for handling compartments and solvers.
+ * By default, it puts the entire reaction system on /kinetics and makes
+ * just one solver.
+ * If the moveOntoCompartments_ flag is set it will put each model entity
+ * onto the appropriate compartment. It will create separate solvers for
+ * each compartment.
+ *
+ */
 class ReadKkit
 {
 	public: 
